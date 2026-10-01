@@ -61,6 +61,9 @@ msgstr "الرجاء تحميل ملف تصدير التكوينات المخص�
 msgid "alert.credential_action_failed"
 msgstr "فشل الإجراء."
 
+msgid "alert.custom_end_date_past"
+msgstr "يجب أن يكون تاريخ الانتهاء المخصص في المستقبل."
+
 msgid "alert.custom_end_date_required"
 msgstr "يرجى تحديد تاريخ انتهاء مخصص."
 
@@ -97,8 +100,17 @@ msgstr "يرجى تحميل ملف تصدير خدمات صالح (.env أو .zi
 msgid "antibot.reason.sentence"
 msgstr "تم تقديم تحدي مكافحة الروبوتات (%(provider)s)"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "تخصيصات مخزون الشهادات"
+
+msgid "aria.label.certificate_public_details"
+msgstr "التفاصيل العامة للشهادة"
+
 msgid "aria.label.clear_search"
 msgstr "مسح البحث"
+
+msgid "aria.label.clone_item"
+msgstr "استنساخ %(name)s"
 
 msgid "aria.label.close"
 msgstr "إغلاق"
@@ -111,6 +123,9 @@ msgstr "حدد ملف تصدير التكوينات المخصصة أو أفلت
 
 msgid "aria.label.copy"
 msgstr "نسخ السجلات"
+
+msgid "aria.label.detach_from_service"
+msgstr "فصل %(name)s عن %(service)s"
 
 msgid "aria.label.download_log"
 msgstr "تنزيل ملف السجل هذا"
@@ -148,6 +163,9 @@ msgstr "عرض الطوابع الزمنية بالتوقيت المحلي"
 msgid "aria.label.next_issue"
 msgstr "الخطأ أو التحذير التالي"
 
+msgid "aria.label.open_user_menu"
+msgstr "فتح قائمة المستخدم"
+
 msgid "aria.label.passkey_name"
 msgstr "اسم مفتاح المرور"
 
@@ -159,6 +177,9 @@ msgstr "الخطأ أو التحذير السابق"
 
 msgid "aria.label.raw_configuration"
 msgstr "التكوين الخام"
+
+msgid "aria.label.remove_this_server"
+msgstr "إزالة هذا الخادم"
 
 msgid "aria.label.remove_value"
 msgstr "حذف القيمة"
@@ -178,8 +199,23 @@ msgstr "اختر ملفًا"
 msgid "aria.label.select_page"
 msgstr "اختر صفحة"
 
+msgid "aria.label.select_template"
+msgstr "اختر القالب %(name)s"
+
 msgid "aria.label.services_dropzone"
 msgstr "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا"
+
+msgid "aria.label.show_details"
+msgstr "عرض تفاصيل %(name)s"
+
+msgid "aria.label.toggle_item"
+msgstr "تبديل %(name)s"
+
+msgid "aria.label.toggle_section"
+msgstr "تبديل قسم %(name)s"
+
+msgid "aria.label.toggle_theme"
+msgstr "تبديل الوضع الداكن"
 
 msgid "aria.label.toggle_wrap"
 msgstr "تبديل التفاف الأسطر"
@@ -244,6 +280,15 @@ msgstr "تعذر حظر %(ip)s: %(error)s"
 msgid "bans.flash.ban_success"
 msgstr "تم حظر %(ip)s بنجاح."
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "يجب أن يكون تاريخ انتهاء الحظر المخصص لـ %(ip)s في المستقبل"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "وضع تحديد الحظر غير صالح."
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "معامل الحظر غير صالح في /bans/ban."
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "مدة حظر مخصصة غير صالحة لـ %(ip)s"
 
@@ -253,11 +298,44 @@ msgstr "تاريخ انتهاء حظر مخصص غير صالح لـ %(ip)s"
 msgid "bans.flash.invalid_duration"
 msgstr "مدة حظر غير صالحة: %(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "وضع تحديد المدة غير صالح."
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "مصدر الحظر المُصفّى غير صالح."
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "مصدر المدة المُصفّى غير صالح."
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "مصدر رفع الحظر المُصفّى غير صالح."
+
 msgid "bans.flash.invalid_ip"
 msgstr "عنوان IP غير صالح: %(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "معامل عناوين IP غير صالح في /bans/unban."
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "وضع تحديد رفع الحظر غير صالح."
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "معامل التحديثات غير صالح في /bans/update_duration."
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "تاريخ انتهاء الحظر المخصص مفقود لـ %(ip)s"
+
+msgid "bans.flash.no_bans"
+msgstr "لا يوجد حظر."
+
+msgid "bans.flash.no_matching_bans"
+msgstr "لا يوجد حظر مطابق."
+
+msgid "bans.flash.no_matching_reports"
+msgstr "لا يوجد تقارير مطابقة."
+
+msgid "bans.flash.no_updates"
+msgstr "لا توجد تحديثات."
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "تعذر جلب عمليات الحظر من Redis، راجع السجلات لمزيد من المعلومات."
@@ -448,11 +526,14 @@ msgstr "تأكيد"
 msgid "button.convert_configs"
 msgstr "تحويل الإعدادات"
 
-msgid "button.convert_configs_to"
-msgstr "التحويل إلى %(state)s"
-
 msgid "button.convert_services"
 msgstr "تحويل الخدمات"
+
+msgid "button.convert_to_draft"
+msgstr "تحويل إلى مسودة"
+
+msgid "button.convert_to_online"
+msgstr "تحويل إلى متصل"
 
 msgid "button.copy"
 msgstr "نسخ"
@@ -549,6 +630,9 @@ msgstr "استيراد التكوينات المخصصة"
 
 msgid "button.import_services"
 msgstr "استيراد الخدمات"
+
+msgid "button.import_template"
+msgstr "استيراد قالب"
 
 msgid "button.local_time"
 msgstr "التوقيت المحلي"
@@ -727,6 +811,39 @@ msgstr "إنهاء الجلسات الأخرى"
 msgid "button.wrap"
 msgstr "التفاف"
 
+msgid "cache.flash.api_unavailable"
+msgstr "API غير متاح: %(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "لم يتم العثور على ملف الذاكرة المؤقتة %(file_name)s من المهمة %(job_name)s والإضافة %(plugin_id)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "لم يتم العثور على ملف الذاكرة المؤقتة %(file_name)s من المهمة %(job_name)s والإضافة %(plugin_id)s والخدمة %(service)s"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "تم حذف %(deleted_count)s ملفًا مع %(len)s أخطاء: %(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "خطأ في حذف ملفات ذاكرة التخزين المؤقت: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "خطأ في جلب ملف ذاكرة التخزين المؤقت: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "خطأ في جلب ملفات ذاكرة التخزين المؤقت: %(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "معامل ملفات ذاكرة التخزين المؤقت غير صالح"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "لم يتم تحديد أي ملفات ذاكرة مؤقتة"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "تم حذف ملف الذاكرة المؤقتة %(deleted_count)s بنجاح"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "تم حذف %(deleted_count)s من ملفات الذاكرة المؤقتة بنجاح"
+
 msgid "cache.kpi_files"
 msgstr "الملفات"
 
@@ -840,6 +957,117 @@ msgstr "يجب ألا يتجاوز الملف 1 ميجابايت."
 
 msgid "certificates.fingerprint"
 msgstr "بصمة SHA-256"
+
+msgid "certificates.flash.certificate_action_failed"
+msgstr "فشل إجراء الشهادة: %(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "تم حذف الشهادة بنجاح"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "تمت إضافة تخصيص مخزون الشهادة بنجاح"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "تمت إزالة تخصيص مخزون الشهادة بنجاح"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "تم تحديث بيانات الشهادة الوصفية بنجاح"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "الشهادة والاسم مطلوبان"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "اسم الشهادة مطلوب"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "تم تجديد الشهادة بنجاح"
+
+msgid "certificates.flash.certificate_required"
+msgstr "الشهادة مطلوبة"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "الشهادة والخدمة مطلوبتان"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "يتجاوز تحميل الشهادة حد الطلب البالغ 2 ميبيبايت"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "تم فحص %(total_due)s شهادة مستحقة للتجديد"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "تعذّر ربط الشهادة: %(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "تعذّر إنشاء الشهادة: %(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "تعذّر فصل الشهادة: %(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "تعذّر تنزيل الشهادة: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "تعذّر جلب الشهادات: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "تعذّر جلب الخدمات لتخصيصات الشهادة: %(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "تعذّرت جدولة إصدار Let's Encrypt: %(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "تعذّر تحديث الشهادة: %(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "تعذّر تحميل الشهادة: %(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "تم تحميل الشهادة المخصصة بنجاح"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "المفاتيح الخاصة المشفّرة غير مدعومة."
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "إجراء الشهادة غير صالح"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "جزء الشهادة غير صالح"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "ملف الشهادة ليس شهادة PEM صالحة."
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "مصدر الشهادة غير صالح"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "ملف المفتاح الخاص ليس مفتاحًا خاصًا PEM صالحًا."
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "تمت جدولة إصدار Let's Encrypt"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "الاسم والاسم الشائع (common name) مطلوبان"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "مطلوب شهادة PEM ومفتاح خاص"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "حدد خدمة واحدة على الأقل لإصدار Let's Encrypt"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "تم إنشاء شهادة موقعة ذاتيًا"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "لا يمكن أن تحتوي الشهادة على أكثر من 100 اسم بديل للموضوع"
+
+msgid "certificates.flash.too_many_services"
+msgstr "لا يمكن ربط الشهادة بأكثر من 100 خدمة"
+
+msgid "certificates.flash.validity_range"
+msgstr "يجب أن تكون مدة الصلاحية بين 1 و825 يومًا"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "يجب أن تكون مدة الصلاحية عددًا صحيحًا من الأيام"
 
 msgid "certificates.issuer"
 msgstr "الجهة المصدرة"
@@ -1053,6 +1281,168 @@ msgstr "عرض المزيد من %(count)s"
 
 msgid "compose.unavailable"
 msgstr "لا يمكن تحميل قائمة الإضافات، لذلك لا يمكن تحرير هذه الصفحة بأمان. أعد التحميل بعد تلقي رد من API."
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "جميع التكوينات المخصصة المحددة غير موجودة أو ليست تكوينات UI/API أو تم تحويلها بالفعل."
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "جميع التكوينات المخصصة المحددة غير موجودة أو ليست تكوينات UI/API."
+
+msgid "configs.flash.config_already_exists"
+msgstr "التكوين %(config_type)s/%(config_name)s موجود بالفعل"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "التكوين %(config_type)s/%(config_name)s للخدمة %(service)s موجود بالفعل"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "التكوين %(clone)s غير موجود."
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "التكوين %(config_type)s/%(name)s غير موجود."
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "التكوين %(config_type)s/%(name)s للخدمة %(service)s غير موجود."
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "التكوين %(config_type)s/%(name)s ليس تكوينًا مخصصًا من واجهة المستخدم/API ولا يمكن تعديله."
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "التكوين %(config_type)s/%(name)s للخدمة %(service)s ليس تكوينًا مخصصًا من واجهة المستخدم/API ولا يمكن تعديله."
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "تم التحويل إلى تكوينات «مسودة»: %(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "تم التحويل إلى تكوينات «متصلة»: %(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "تعذّر جلب التكوينات المخصصة من API: %(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "تم إنشاء التكوين المخصص %(config_type)s/%(config_name)s"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "تم إنشاء التكوين المخصص %(config_type)s/%(config_name)s للخدمة %(service)s"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "التكوين المخصص %(non_convertible_config)s مسودة بالفعل ولن يتم تحويله."
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "التكوين المخصص %(non_convertible_config)s متصل بالفعل ولن يتم تحويله."
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "تعذّر العثور على التكوين المخصص %(missing_config)s."
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "التكوين المخصص %(non_editable_config)s ليس تكوين UI/API مخصصًا ولن يتم تحويله."
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "التكوين المخصص %(skipped_config)s ليس تكوين UI/API مخصصًا ولن يتم حذفه."
+
+msgid "configs.flash.deleted_config_one"
+msgstr "تم حذف التكوين: %(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "تم حذف التكوينات: %(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "حدث خطأ أثناء حذف التكوينات المخصصة: %(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "حدث خطأ أثناء حفظ التكوينات المخصصة: %(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "فشل استيراد التكوين المخصص: %(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "فشل استيراد التكوينات المخصصة: %(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "خطأ في الاستيراد: %(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "تم استيراد التكوين المخصص: %(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "تم استيراد التكوينات المخصصة: %(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "معامل التكوينات غير صالح في /configs/convert."
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "معامل التكوينات غير صالح في /configs/delete."
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "معامل التكوينات غير صالح في /configs/export."
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "ترميز الملف غير صالح. يرجى تحميل ملف JSON بترميز UTF-8."
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "معامل الاسم غير صالح في /configs/new."
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "معامل النوع غير صالح في /configs/new."
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "معامل التكوينات مفقود في /configs/convert."
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "معامل التكوينات مفقود في /configs/delete."
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "معامل convert_to مفقود في /configs/convert."
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "معامل الاسم مفقود في /configs/new."
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "معامل الخدمة مفقود في /configs/new."
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "معامل النوع مفقود في /configs/new."
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "معامل القيمة مفقود في /configs/new."
+
+msgid "configs.flash.no_configs_selected"
+msgstr "لم يتم تحديد أي تكوينات."
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "لا توجد تكوينات مخصصة للتصدير."
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "لم يتم تحميل ملف تكوينات مخصصة."
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "لم يتم العثور على تكوينات مخصصة في ملف الاستيراد."
+
+msgid "configs.flash.no_values_changed"
+msgstr "لم يتم تغيير أي قيم."
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "تمت الكتابة فوق التكوين المخصص: %(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "تمت الكتابة فوق التكوينات المخصصة: %(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "لا يُسمح بإعادة تسمية التكوين المخصص المستند إلى القالب."
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "تم حفظ التكوين المخصص %(new_type)s/%(new_name)s"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "تم حفظ التكوين المخصص %(new_type)s/%(new_name)s للخدمة %(service)s"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "الخدمة %(new_service)s غير موجودة."
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "تم تخطي التكوين المخصص: %(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "تم تخطي التكوينات المخصصة: %(names)s"
 
 msgid "configs.subtitle"
 msgstr "مقتطفات تكوين NGINX المخصصة لخدماتك — أنشئ وقم بتحرير وإدارة تجاوزات HTTP و ModSecurity ومستوى التدفق."
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "غير متاح"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "معرّف التنبيه"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "تحميل الأدلة الكاملة"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "بدأ"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "توقف"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "مُدرج في قائمة السماح بواسطة CrowdSec"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "تعليق"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "تُدار بواسطة Console"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "لم يتم العثور على أي قوائم سماح على هذا المحرك."
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "أضف عناوين IP أو شبكات CIDR الموثوقة."
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "حرّر القوائم التي تديرها Console في CrowdSec Console."
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "أنشئ القائمة مرة واحدة، أو استخدم قائمة موجودة تُدار محليًا."
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "وثائق قوائم السماح في CrowdSec"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "ينتهي هذا المثال بعد 24 ساعة. احذف --expiration للحصول على إدخال لا تنتهي صلاحيته. يتم دعم IPv4 وIPv6."
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "افحص القائمة وتواريخ انتهاء صلاحيتها."
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "يمكنك هنا استعراض قوائم السماح والتحقق من عناوين IP. لإضافة الإدخالات أو إزالتها، استخدم cscli على محرك CrowdSec."
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "بعد أي تغيير، حدّث قوائم السماح وحقّق في عنوان IP مرة أخرى. تسمح إزالة الاستثناء بقرارات CrowdSec المستقبلية؛ ولا تنشئ حظرًا. تظل عمليات الحظر المحلية في BunkerWeb وأنواع الحماية الأخرى منفصلة."
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "أزل الاستثناء عندما لا تعود هناك حاجة إليه."
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "كيفية إدارة عناوين IP والشبكات الموثوقة"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "يتطلب CrowdSec 1.7 أو أحدث. شغّل هذه الأوامر على المضيف أو داخل الحاوية التي تشغّل واجهة API المحلية (LAPI) للمحرك المحدد، مع إمكانية الوصول إلى إعدادات CrowdSec وقاعدة بياناته. استبدل اسم القائمة وعنوان IP والشبكة المستخدمة كمثال بقيمك الخاصة."
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "عناوين IP والشبكات الموثوقة للمحرك المحدد. تنطبق هذه الاستثناءات على جميع الخدمات وbouncer المتصلة به."
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "هذا استثناء على مستوى المحرك بأكمله. ما زال بإمكان عمليات الحظر المحلية في BunkerWeb أو أنواع الحماية الأخرى أو القرارات المخزنة مؤقتًا حظر عنوان IP هذا."
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "تُدار محليًا"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "أبدًا"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "لا توجد إدخالات نشطة."
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "لا يتطابق عنوان IP هذا مع أي قائمة سماح في CrowdSec."
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "صفحات قوائم السماح"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "تحديث قوائم السماح"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "قوائم السماح في CrowdSec"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "حالة قائمة السماح غير متاحة."
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "السجل الملتقط"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "تصف بيانات التقرير الملتقطة ما تمت ملاحظته وقت الطلب؛ ولا تثبت الحالة الحالية للقرار."
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "آخر ملاحظة لـ AppSec"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "مُعدّ"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "متصل"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "خطأ في الاتصال"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "تصفية الاتصالات حسب اسم المضيف أو الخدمة"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "جميع الخدمات"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "اتصال CrowdSec"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "آخر مزامنة ناجحة"
 
 msgid "crowdsec.connection.local_api"
-msgstr "Local API"
+msgstr "واجهة API المحلية"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "الإدارة"
 
 msgid "crowdsec.connection.mode"
-msgstr "Mode"
+msgstr "الوضع"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "لم يتم العثور على اتصال CrowdSec صالح للاستخدام. تحقق من أخطاء المثيل وإعدادات الملحق."
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "للقراءة فقط"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "اختر اتصال CrowdSec أولًا."
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "ينطبق الاتصال المحدد على القرارات وقوائم السماح والتحقيق في عناوين IP أدناه."
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "الاتصال المحدد"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "مزامنة القرارات"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "محدّث"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "لم تتم المزامنة بعد"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "قديم"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "الحالة الحالية"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "قد تتغير الحالة الحالية بعد هذه الملاحظة."
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "المدة"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "تنتهي الصلاحية"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "معرّف القرار"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "المصدر"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "السيناريو"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "النطاق"
 
 msgid "crowdsec.decision.target"
-msgstr "Target"
+msgstr "الهدف"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "النوع"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "عرض %(start)s–%(end)s من %(total)s"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "هذه هي الحالة الحالية المقروءة مباشرة من محرك CrowdSec المحدد."
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "لا توجد قرارات نشطة تطابق عوامل التصفية هذه."
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "صفحات القرارات"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "القرارات النشطة"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "فشل طلب CrowdSec."
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "أدلة تنبيهات CrowdSec المتاحة"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "قرارات CrowdSec الحالية"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "يتم فحص قرارات CrowdSec الحالية جنبًا إلى جنب مع عمليات الحظر المحلية والتقارير الملتقطة."
 
 msgid "crowdsec.investigation.ip"
-msgstr "IP address"
+msgstr "عنوان IP"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "عمليات الحظر المحلية الحالية في BunkerWeb"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "لا تتوفر أي أدلة على التنبيهات."
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "لم يتم العثور على أي حظر محلي حالي."
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "لم يتم العثور على أي قرار حالي في CrowdSec."
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "لم يتم العثور على أي تقرير ملتقط حديث."
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "تقارير BunkerWeb الأخيرة"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "التحقيق في %(ip)s"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "تحقيق"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "الأدلة التي تم العثور عليها لعنوان IP هذا"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "%(total)s نشط"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "أدلة تنبيهات CrowdSec"
 
 msgid "crowdsec.investigation.summary_available"
-msgstr "%(total)s available"
+msgstr "%(total)s متاح"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "عمليات الحظر المحلية في BunkerWeb"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "%(total)s ملتقط"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "قرارات CrowdSec"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "يشمل هذا اتصال CrowdSec المحدد وعمليات الحظر الخاصة بـ BunkerWeb. لا يتم فحص أنواع الحماية الأخرى هنا، والأدلة التي تعذّرت قراءتها لا تثبت أن عنوان IP هذا مسموح به."
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "لم يتم العثور على شيء"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "تقارير BunkerWeb"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "تعذّرت القراءة"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "التحقيق في عنوان IP"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "عرض %(shown)s من %(total)s نتيجة (حد المصدر: %(limit)s)."
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "غير متاح: %(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "تنتهي الصلاحية"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "السبب"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "الخدمة"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "التالي"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "لوحظ %(time)s"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "السابق"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "طلب محظور"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "سياسة الفشل في CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "تحديث الحالة"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "إزالة"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "أفهم ذلك وأريد إزالة هذا القرار."
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "تزيل هذه العملية القرار من محرك CrowdSec المشترك وتؤثر على كل bouncer متصل. ما زال بإمكان القرارات المخزنة مؤقتًا أو نطاق آخر أو عمليات الحظر المحلية أو AppSec حظر الهدف."
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "هل تريد إزالة %(scope)s %(value)s (%(type)s)، السيناريو %(scenario)s، المصدر %(origin)s، من %(source)s (%(engine)s)؟"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "إزالة القرار"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "تمت الإزالة عند مصدر CrowdSec. حالة الانتشار: %(status)s (%(mode)s، الفاصل %(interval)s). القرارات المطابقة المتبقية: %(remaining)s. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر."
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "إزالة قرار CrowdSec"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "وقت الالتقاط"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "وقت التقرير"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "القرارات الملتقطة"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "تقرير أمني"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "معرّف التقرير"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "الهدف المطابق"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "البيانات الوصفية للقرار"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "مكتمل"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "غير مكتمل"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "بيانات لقطة CrowdSec الوصفية غير متاحة لهذا التقرير الأقدم."
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "لم تكن بعض البيانات الوصفية للقرار الملتقطة متاحة وقت الطلب."
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "السبب"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "المعالجة الملتقطة"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "نطاق الخدمة الملتقط"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "الخدمة"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "المصدر الملتقط"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "افحص كل محرك CrowdSec مُعدّ وحقّق في عنوان IP اعتمادًا على الأدلة الحالية والملتقطة."
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "مشغّل CrowdSec"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "غير معروف"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "فشلت مهمة واحدة أو أكثر في آخر تشغيل لها."
@@ -2416,17 +2806,128 @@ msgstr "آخر %(days)s يومًا"
 msgid "dashboard.window.title"
 msgstr "نطاق لوحة المعلومات"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "تم تحديد كل %(count)s %(entity)s المطابقة."
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "تم تحديد جميع %(count)s عمليات حظر المطابقة."
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "تحديد كل %(count)s %(entity)s المطابقة"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "تحديد جميع %(count)s عمليات حظر المطابقة"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "تم تحديد %(count)s حظر في هذه الصفحة."
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "تم تحديد جميع %(count)s عمليات حظر في هذه الصفحة."
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "تم تحديد جميع %(count)s ملفات ذاكرة مؤقتة المطابقة."
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "تحديد جميع %(count)s ملفات ذاكرة مؤقتة المطابقة"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "تم تحديد %(count)s ملف ذاكرة مؤقتة في هذه الصفحة."
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "تم تحديد جميع %(count)s ملفات ذاكرة مؤقتة في هذه الصفحة."
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "تم تحديد جميع %(count)s تكوينات مخصصة المطابقة."
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "تحديد جميع %(count)s تكوينات مخصصة المطابقة"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "تم تحديد %(count)s تكوين مخصص في هذه الصفحة."
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "تم تحديد جميع %(count)s تكوينات مخصصة في هذه الصفحة."
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "تم تحديد جميع %(count)s مثيلات المطابقة."
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "تحديد جميع %(count)s مثيلات المطابقة"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "تم تحديد %(count)s مثيل في هذه الصفحة."
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "تم تحديد جميع %(count)s مثيلات في هذه الصفحة."
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "تم تحديد جميع %(count)s عناصر المطابقة."
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "تحديد جميع %(count)s عناصر المطابقة"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "تم تحديد %(count)s عنصر في هذه الصفحة."
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "تم تحديد جميع %(count)s عناصر في هذه الصفحة."
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "تم تحديد جميع %(count)s مهام المطابقة."
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "تحديد جميع %(count)s مهام المطابقة"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "تم تحديد %(count)s مهمة في هذه الصفحة."
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "تم تحديد جميع %(count)s مهام في هذه الصفحة."
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "تم تحديد جميع %(count)s إضافات المطابقة."
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "تحديد جميع %(count)s إضافات المطابقة"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "تم تحديد %(count)s إضافة في هذه الصفحة."
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "تم تحديد جميع %(count)s إضافات في هذه الصفحة."
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "تم تحديد جميع %(count)s تقارير المطابقة."
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "تحديد جميع %(count)s تقارير المطابقة"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "تم تحديد %(count)s تقرير في هذه الصفحة."
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "تم تحديد جميع %(count)s تقارير في هذه الصفحة."
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "تم تحديد جميع %(count)s خدمات المطابقة."
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "تحديد جميع %(count)s خدمات المطابقة"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "تم تحديد %(count)s خدمة في هذه الصفحة."
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "تم تحديد جميع %(count)s خدمات في هذه الصفحة."
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "تم تحديد جميع %(count)s قوالب المطابقة."
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "تحديد جميع %(count)s قوالب المطابقة"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "تم تحديد %(count)s قالب في هذه الصفحة."
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "تم تحديد جميع %(count)s قوالب في هذه الصفحة."
 
 msgid "datatable.bulk_select_clear"
 msgstr "مسح التحديد"
-
-msgid "datatable.bulk_select_page"
-msgstr "تم تحديد كل %(count)s %(entity)s في هذه الصفحة."
 
 msgid "datatable.info_bans"
 msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s حظر"
@@ -2569,6 +3070,9 @@ msgstr "جاري المعالجة..."
 msgid "datatable.search"
 msgstr "بحث:"
 
+msgid "datatable.select_row"
+msgstr "تحديد الصف"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "لم يتم تحديد أي حظر"
 
@@ -2659,11 +3163,50 @@ msgstr "تم تحديد 1 قالب"
 msgid "datatable.select_rows_templates_plural"
 msgstr "تم تحديد %d قوالب"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s محدد"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "تم تحديد %(count)s تكوين مخصص"
 
-msgid "datatable.selected_list_empty"
-msgstr "لا يوجد %(entity)s محدد."
+msgid "datatable.selected_list.configs.count_other"
+msgstr "تم تحديد %(count)s تكوينات مخصصة"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "لم يتم تحديد أي تكوين مخصص."
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "تم تحديد %(count)s عنصر"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "تم تحديد %(count)s عناصر"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "لم يتم تحديد أي عنصر."
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "تم تحديد %(count)s إضافة"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "تم تحديد %(count)s إضافات"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "لم يتم تحديد أي إضافة."
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "تم تحديد %(count)s خدمة"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "تم تحديد %(count)s خدمات"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "لم يتم تحديد أي خدمة."
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "تم تحديد %(count)s قالب"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "تم تحديد %(count)s قوالب"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "لم يتم تحديد أي قالب."
 
 msgid "datatable.zero_records_bans"
 msgstr "لم يتم العثور على حظر مطابق"
@@ -2794,11 +3337,41 @@ msgstr "راجع صفحة المهام للحصول على التفاصيل."
 msgid "flash.configuration_pending_instance"
 msgstr "التهيئة لم تُطبَّق بعد — في انتظار تشغيل نسخة."
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "مطلوب طلب CORS أو AJAX"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "تعذّر جلب الإعدادات العامة من API."
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "تعذّر جلب مجموعات الموارد: %(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "قاعدة البيانات في وضع القراءة فقط"
+
+msgid "flash.description_too_long"
+msgstr "لا يمكن أن يتجاوز الوصف 4000 حرف"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "ليس لديك صلاحية الكتابة"
+
 msgid "flash.easter_egg"
 msgstr "إذا قرأت هذا، فهذا يعني أنك فضولي"
 
 msgid "flash.error"
 msgstr "خطأ"
+
+msgid "flash.error_fetching_instances"
+msgstr "خطأ في جلب المثيلات"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "حدث خطأ أثناء حفظ التكوينات المخصصة: %(e)s"
+
+msgid "flash.import_warning"
+msgstr "تحذير الاستيراد: %(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "معامل convert_to غير صالح."
 
 msgid "flash.last_configuration_change_failed"
 msgstr "تعذّر تطبيق آخر تغيير في الإعدادات."
@@ -2806,11 +3379,20 @@ msgstr "تعذّر تطبيق آخر تغيير في الإعدادات."
 msgid "flash.message"
 msgstr "معلومة"
 
+msgid "flash.plugin_not_found"
+msgstr "الإضافة غير موجودة"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "لديك خدمات أكثر مما يسمح به ترخيص PRO الخاص بك. قم بترقية ترخيصك أو حوّل بعض الخدمات إلى وضع المسودة لإلغاء قفل ترخيص PRO."
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "سيحاول المُجدوِل تطبيق التغييرات."
+
+msgid "flash.service_does_not_exist"
+msgstr "الخدمة %(service)s غير موجودة."
 
 msgid "flash.time.just_now"
 msgstr "الآن"
@@ -2845,6 +3427,9 @@ msgstr "استبدال تكوينات UI/API المخصصة الحالية"
 msgid "form.checkbox.remember_me"
 msgstr "تذكرني"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "استبدال القالب الذي يحمل نفس المعرّف إن وُجد"
+
 msgid "form.help.ban_specific_service"
 msgstr "سيطبق الحظر فقط على هذه الخدمة المحددة."
 
@@ -2862,6 +3447,9 @@ msgstr "إذا تم تحديده، لن تنتهي صلاحية الحظر أب�
 
 msgid "form.help.photo_extensions"
 msgstr "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB."
+
+msgid "form.help.secret_stored"
+msgstr "توجد قيمة مخزَّنة ولا تُعرض. اترك الحقل كما هو للاحتفاظ بها، أو اكتب قيمة جديدة لاستبدالها، أو امسح الحقل لإزالتها."
 
 msgid "form.label.2fa_code"
 msgstr "رمز 2FA"
@@ -3031,6 +3619,9 @@ msgstr "اسم الخادم"
 msgid "form.label.service_name"
 msgstr "اسم الخدمة"
 
+msgid "form.label.template_file"
+msgstr "ملف القالب"
+
 msgid "form.label.template_id"
 msgstr "معرف القالب"
 
@@ -3130,6 +3721,438 @@ msgstr "يجب أن تحتوي كلمة المرور على حرف خاص واح
 msgid "form.validation.password_uppercase"
 msgstr "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل."
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "المسار المراد استخدامه لسجلات وصول NGINX (مسار ملف، أو syslog:server=host[:port][,param=value]، أو memory:name:size؛ اضبطه على off للتعطيل)."
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "مسار سجل الوصول"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "منفذ الاستماع (عبر TLS) الخاص بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "رقم منفذ API عبر HTTPS"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "منفذ الاستماع الخاص بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "رقم منفذ API"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "الاستماع عبر HTTP لواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "استماع API عبر HTTP"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "الاستماع عبر HTTPS (SSL/TLS) لواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "استماع API عبر HTTPS"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "عنوان IP للاستماع الخاص بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "عنوان IP للاستماع الخاص بـ API"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "اسم الخادم (المضيف الافتراضي) الخاص بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "اسم خادم API"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "رمز اختياري لمصادقة استدعاءات API. إذا ضُبط، يجب أن يرسله المجدول (وأي عميل آخر) عبر ترويسة Authorization. ملاحظة: يجب ضبطه في بيئتَي BunkerWeb والمجدول كليهما."
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "رمز الوصول إلى API"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "قائمة عناوين IP/الشبكات المسموح لها بالاتصال بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb. (الصيغة: ip/netmask أو ipv6/netmask، مفصولة بمسافة)"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "عناوين IP المسموح لها بالوصول إلى API"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "تفعيل تكامل Docker Autoconf."
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "وضع Autoconf"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "قائمة مثيلات BunkerWeb مفصولة بمسافات (الصيغة: fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "مثيلات BunkerWeb"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "حجم مخزن cachestore الداخلي (ipc)."
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "حجم ذاكرة Cachestore (ipc)"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "حجم مخزن cachestore الداخلي (locks)."
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "حجم ذاكرة Cachestore (locks)"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "حجم مخزن cachestore الداخلي."
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "حجم ذاكرة Cachestore"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "حجم مخزن cachestore الداخلي (miss)."
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "حجم ذاكرة Cachestore (miss)"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "مهلة قراءة نص طلب العميل."
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "مهلة نص الطلب"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "مهلة قراءة ترويسة طلب العميل."
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "مهلة ترويسة الطلب"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "ما يحدث عندما يتغير ملف .conf المُسقَط منذ آخر إسقاط مسجَّل أو كان غائبًا عنه. تُتجاهل الملفات المطابقة لصف قاعدة البيانات الحالي؛ وبدون سجل إسقاط قابل للقراءة، لا يُبلَّغ عن أي انحراف. يسجّل الخيار 'overwrite' كل انحراف مكتشَف ويعيد كتابة الملف من قاعدة البيانات، أو يحذفه إن لم يوجد صف نشط يحل محله. لا يكتب الخيار 'refuse' من قاعدة البيانات شيئًا هناك حتى يُحل الانحراف، ويسجّل خطأ، ويترك تغيير التكوين المخصص المعلَّق غير مؤكَّد ليُعاد المحاولة عليه."
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "سياسة انحراف التكوينات المخصصة"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "عدد الخانات في ذاكرة LRU المشتركة لكل عملية معالجة الخاصة بـ datastore (يستخدمها internalstore والذواكر المؤقتة المحلية للإضافات لكل عملية معالجة). يقبل عددًا صحيحًا بسيطًا أو اختصار `k`/`m` (مثل `1k`، `10k`، `1m`)."
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "حجم LRU الخاص بـ Datastore"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "حجم مخزن datastore الداخلي."
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "حجم ذاكرة Datastore"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "عناوين مُحلّلات DNS المراد استخدامها."
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "مُحلّلات DNS"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "المسار المراد استخدامه لسجلات أخطاء NGINX (مسار ملف، أو stderr، أو syslog:server=host[:port][,param=value]، أو memory:size)."
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "مسار سجل الأخطاء"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "رقم منفذ HTTPS الذي يرتبط به BunkerWeb. اتركه فارغًا لتعطيل الاستماع عبر HTTPS."
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "منفذ HTTPS"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "رقم منفذ HTTP الذي يرتبط به BunkerWeb. اتركه فارغًا لتعطيل الاستماع عبر HTTP."
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "منفذ HTTP"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "حجم مخزن internalstore الداخلي."
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "حجم ذاكرة Internalstore"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "استخدام داخلي: يُضبط على yes عندما تكون الخدمة في وضع المسودة."
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "مسودة للاستخدام الداخلي"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "استخدام داخلي: يُضبط على yes عند تحميل BunkerWeb."
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "تحميل للاستخدام الداخلي"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "الوقت المحلي (بتوقيت المجدول، HH:MM، بنظام 24 ساعة) الذي تعمل فيه المهام اليومية المجدولة؛ تعمل المهام الأسبوعية أيضًا في هذا الوقت، في JOBS_WEEKLY_DAY."
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "الوقت اليومي للمهام"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "يوم الأسبوع الذي تعمل فيه المهام الأسبوعية المجدولة، في JOBS_DAILY_TIME."
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "اليوم الأسبوعي للمهام"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "مهلة اتصالات العميل بنمط keep-alive."
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "مهلة keepalive"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "الاحتفاظ بالإعداد عند إعادة التشغيل. اضبطه على 'yes' لمنع إعادة ضبط الإعداد عند إعادة التشغيل."
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "الاحتفاظ بالإعداد عند إعادة التشغيل"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "تفعيل تكامل Kubernetes."
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "وضع Kubernetes"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "تفعيل الاستماع بدون SSL (تمرير مباشر - passthrough)."
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "الاستماع لـ stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "منفذ الاستماع بدون SSL (تمرير مباشر). اتركه فارغًا لتعطيل استماع stream بدون SSL."
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "منفذ الاستماع لـ stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "منفذ الاستماع عبر SSL (تمرير مباشر). اتركه فارغًا لتعطيل استماع stream عبر SSL."
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "منفذ الاستماع لـ stream عبر ssl"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "الصيغة المراد استخدامها لسجلات الوصول."
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "صيغة سجل الوصول"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "المستوى المراد استخدامه لسجلات الأخطاء."
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "مستوى السجلات"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "تفعيل تعدد المواقع."
+
+msgid "general.settings.MULTISITE.label"
+msgstr "تعدد المواقع"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "المكان الذي يبحث فيه NGINX عن الإعدادات."
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "بادئة NGINX"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور access لهذا الموقع (قبول/تحكم الطلب). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "ترتيب الإضافات (access)"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور header لهذا الموقع (تصفية ترويسات الاستجابة). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "ترتيب الإضافات (header)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور init (إقلاع المحرك، يعمل مرة واحدة). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "ترتيب الإضافات (init)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور init_worker (إقلاع لكل عملية معالجة). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "ترتيب الإضافات (init_worker)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "معرّفات الإضافات، مفصولة بفواصل أو مسافات، المراد تشغيلها أثناء طور init_workers."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "ترتيب الإضافات (init_workers)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور log لهذا الموقع (معالجة سجل HTTP بعد الاستجابة). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "ترتيب الإضافات (log)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور log_default لهذا الموقع (معالجة سجل المضيف الافتراضي الافتراضي). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "ترتيب الإضافات (log_default)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور log_stream لهذا الموقع (معالجة سجل stream). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "ترتيب الإضافات (log_stream)"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور preread لهذا الموقع (فحوصات TCP preread قبل التوكيل). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "ترتيب الإضافات (preread)"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور set لهذا الموقع (إعداد المتغيرات قبل rewrite/access). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "ترتيب الإضافات (set)"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور ssl_certificate لهذا الموقع (اختيار/إصدار شهادة TLS). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "ترتيب الإضافات (ssl_certificate)"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "الإضافات التي يجب أن تعمل أولًا أثناء طور timer (المؤقتات في الخلفية). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "ترتيب الإضافات (timer)"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "يحدد الاستجابة للتهديدات: \"detect\" للمراقبة والتسجيل فقط، أو \"block\" لمنع الوصول وتسجيل الحوادث."
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "وضع الأمان"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "مهلة إرسال الاستجابة إلى العميل."
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "مهلة الإرسال"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "قائمة المضيفات الافتراضية التي يخدمها BunkerWeb. (مفصولة بمسافة)"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "اسم الخادم"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "القيمة الخاصة بتوجيه server_names_hash_bucket_size."
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "حجم دلو تجزئة أسماء الخوادم"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "نوع الخادم: http أو stream."
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "نوع الخادم"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "حجم المخزن الداخلي الذي يحتفظ بمعرّفات جلسات الارتباط (cookie) المُبطَلة."
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "حجم ذاكرة إبطال الجلسات"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "تفعيل تكامل Docker Swarm."
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "وضع Swarm"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "مستوى السجلات الخاص بالمؤقتات."
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "مستوى سجلات المؤقتات"
+
+msgid "general.settings.USE_API.help"
+msgstr "تفعيل واجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+
+msgid "general.settings.USE_API.label"
+msgstr "تفعيل API"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "تفعيل الاتصال عبر IPv6."
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "استخدام IPv6"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "الاستماع عبر TCP (stream)."
+
+msgid "general.settings.USE_TCP.label"
+msgstr "الاستماع لـ TCP"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "قوالب الإعداد المراد تطبيقها، مفصولة بمسافات، وستُجاوز القيم الافتراضية لإعدادات محددة. تُطبَّق القوالب بالترتيب ويُجاوز القالب اللاحق القالب السابق؛ والقيمة المضبوطة على الخدمة تُجاوز القالب."
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "استخدام قالب"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "الاستماع عبر UDP (stream)."
+
+msgid "general.settings.USE_UDP.label"
+msgstr "الاستماع لـ UDP"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "حجم lua_shared_dict الخاص بعمليات معالجة التهيئة"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "حجم ذاكرة Workerlock للتهيئة"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "الحد الأقصى لعدد الاتصالات لكل عملية معالجة."
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "الاتصالات لكل عملية معالجة"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "عدد عمليات المعالجة."
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "عمليات المعالجة"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "الحد الأقصى لعدد الملفات المفتوحة لعمليات المعالجة."
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "الملفات المفتوحة لكل عملية معالجة"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "مهلة الإيقاف السلس لعمليات المعالجة. بعد هذه المهلة، تُنهى عمليات المعالجة القديمة قسرًا أثناء إعادة التحميل لمنع نمو استهلاك الذاكرة."
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "مهلة إيقاف عمليات المعالجة"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "جارٍ التحقق من مفتاح الترخيص للترقية."
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "لم يتم حفظ الإعدادات العامة: تم رفض كل قيمة تم تغييرها."
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "لم يتم تعديل الإعدادات العامة لأنه لم تتغير أي قيمة."
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "تم حفظ الإعدادات العامة، ولكن تم رفض %(refused_count)s من القيم."
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "تم حفظ الإعدادات العامة بنجاح."
+
+msgid "home.flash.error_fetching_services"
+msgstr "خطأ في جلب الخدمات: %(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "عرض جميع %(count)s الإعدادات"
 
@@ -3156,6 +4179,75 @@ msgstr "ثابت"
 
 msgid "instances.down"
 msgstr "متوقف"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "تعذّر إنشاء المثيل: %(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "تعذّر جلب المثيلات من API."
+
+msgid "instances.flash.could_not_found_one"
+msgstr "تعذر العثور على المثيل المحدد أو أنه ليس مثيل UI/API."
+
+msgid "instances.flash.could_not_found_other"
+msgstr "تعذر العثور على جميع المثيلات المحددة أو أنها ليست مثيلات UI/API."
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "تعذر حذف المثيل: %(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "تعذر حذف المثيلات: %(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "اسم المضيف %(hostname)s مستخدم بالفعل."
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "تم إنشاء المثيل %(value)s بنجاح."
+
+msgid "instances.flash.instance_deleted"
+msgstr "تم حذف المثيل %(instance)s بنجاح."
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "المثيل %(instance)s غير موجود."
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "المثيل %(instance)s لا يحتوي على طريقة إعادة تحميل."
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "المثيل %(instance)s لا يحتوي على طريقة إيقاف."
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "المثيل %(non_deletable_instance)s ليس مثيل UI/API ولن يتم حذفه."
+
+msgid "instances.flash.instance_reloaded"
+msgstr "تم إعادة تحميل المثيل %(instance)s بنجاح."
+
+msgid "instances.flash.instance_stopped"
+msgstr "تم إيقاف المثيل %(instance)s بنجاح."
+
+msgid "instances.flash.instances_deleted"
+msgstr "تم حذف المثيلات %(instance)s بنجاح."
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "معامل اسم مضيف المثيل مفقود في /instances/new."
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "معامل اسم المثيل مفقود في /instances/new."
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "معلمة المثيلات مفقودة في /instances/delete."
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "معلمة المثيلات مفقودة في /instances/ping."
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "معلمة المثيلات مفقودة في /instances/reload."
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "معلمة المثيلات مفقودة في /instances/stop."
+
+msgid "instances.flash.no_instance_selected"
+msgstr "لم يتم تحديد أي مثيل."
 
 msgid "instances.loading"
 msgstr "جاري التحميل"
@@ -3193,6 +4285,24 @@ msgstr "تاريخ البدء"
 msgid "job.history.success"
 msgstr "نجاح"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "خطأ في جلب المهام: %(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "معامل المهام غير صالح في /jobs/run."
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "ستُشغَّل إضافات المهمة في الخلفية بواسطة المجدول."
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "ستُشغَّل إضافات المهام في الخلفية بواسطة المجدول."
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "معامل المهام مفقود في /jobs/run."
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "لم يتم تحديد أي مهام."
+
 msgid "jobs.subtitle"
 msgstr "المهام المجدولة والمهام لمرة واحدة التي يتم تشغيلها بواسطة جدولة BunkerWeb — تتبع حالتها وقم بتشغيلها عند الطلب."
 
@@ -3213,6 +4323,15 @@ msgstr "مقفل (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "الإعدادات المقفلة مميزة"
+
+msgid "legend.raw_setting_drafts"
+msgstr "في بداية أي إعداد، اضغط على # لتبديل حالة المسودة أو على Backspace لتفعيله. احفظ للتطبيق. تحتفظ المسودات بقيمها بينما تُطبَّق القيم الموروثة أو الافتراضية."
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "افتح الشهادات للفحص"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt: الشهادة اليتيمة <strong>%(cert_name)s</strong> تشير إلى حساب ACME مفقود <code>%(account)s</code>. التجديدات محظورة حتى يتم إصلاح حالة المزوّد. <a href=\"%(certificates_url)s\">%(link_text)s</a>."
 
 msgid "link.back_to_login"
 msgstr "العودة إلى تسجيل الدخول"
@@ -3253,6 +4372,12 @@ msgstr "استخدم رمز المصادقة"
 msgid "link.use_recovery_code"
 msgstr "استخدم رمز الاسترداد"
 
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "تعذّر تسجيل دخولك، يرجى المحاولة مرة أخرى"
+
+msgid "login.flash.invalid_username_password"
+msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
+
 msgid "login.notice_password_changed"
 msgstr "تم تغيير كلمة المرور الخاصة بك. سجّل الدخول باستخدام كلمة المرور الجديدة."
 
@@ -3288,6 +4413,12 @@ msgstr "توسيع"
 
 msgid "logs.filter_levels"
 msgstr "المستويات"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "مسار الملف غير صالح"
+
+msgid "logs.flash.no_such_file"
+msgstr "لا يوجد ملف كهذا"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,6 +4504,27 @@ msgstr "أطول"
 msgid "logs.trimmed_notice"
 msgstr "--- تم إزالة %(count)s سطر من السجلات القديمة لتحسين الأداء ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "اتصال قاعدة البيانات في وضع القراءة فقط: لا يمكن إجراء أي تعديلات."
+
+msgid "main.flash.failover_configuration_error"
+msgstr "تعذّر تطبيق آخر التغييرات لأنها تُنشئ خطأ في تكوين NGINX، يرجى مراجعة سجلات BunkerWeb لمزيد من المعلومات. عادت التهيئة إلى آخر نسخة عاملة."
+
+msgid "main.flash.failover_message"
+msgstr "رسالة التعطل الاحتياطي:"
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "تم فرض إعادة تحميل الحالة"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "لديك عدد من الخدمات أكبر مما يسمح به ترخيصك الاحترافي. قم بترقية ترخيصك أو انقل بعض الخدمات إلى وضع المسودة لإلغاء قفل ترخيصك الاحترافي."
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "تم تطبيق آخر التغييرات بنجاح."
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "المصادقة الثنائية مفعّلة ولكن لا توجد رموز استرداد متاحة، يرجى تحديثها:"
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "اسحب وأفلت أرشيف الإضافة الخاص بك هنا أو انقر لتحديد الملفات."
 
@@ -3389,11 +4541,20 @@ msgstr[3] "هل أنت متأكد أنك تريد حذف ملفات الذاكر
 msgstr[4] "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟"
 msgstr[5] "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "هل أنت متأكد أنك تريد تحويل التكوين المخصص المحدد إلى «مسودة»؟"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "هل أنت متأكد أنك تريد تحويل التكوين المخصص المحدد إلى «متصل»؟"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "هل تريد بالتأكيد تحويل التكوينات المخصصة المحددة؟"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "هل أنت متأكد أنك تريد تحويل الإعدادات المخصصة المحددة إلى %(state)s؟"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "هل أنت متأكد أنك تريد تحويل التكوينات المخصصة المحددة إلى «مسودة»؟"
+
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "هل أنت متأكد أنك تريد تحويل التكوينات المخصصة المحددة إلى «متصلة»؟"
 
 #. plural pair; 6 form(s) for ar, singular in slot 1
 msgid "modal.body.confirm_configs_deletion_alert"
@@ -3421,11 +4582,33 @@ msgstr[3] "هل أنت متأكد أنك تريد حذف الإضافات الم
 msgstr[4] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
 msgstr[5] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "هل أنت متأكد من أنك تريد تحويل الخدمة المحددة إلى مسودة؟"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "هل أنت متأكد من أنك تريد تحويل الخدمة المحددة إلى متصلة؟"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "هل تريد بالتأكيد تغيير الوضع المعلن لهذه الخدمة؟"
 
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "هل أنت متأكد من أنك تريد تحويل الخدمات المحددة إلى مسودات؟"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "هل أنت متأكد من أنك تريد تحويل الخدمات المحددة إلى متصلة؟"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "هل أنت متأكد أنك تريد حذف القالب %(name)s؟"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "هل أنت متأكد أنك تريد حذف القوالب المحددة؟"
+msgstr[1] "هل أنت متأكد أنك تريد حذف القالب المحدد؟"
+msgstr[2] "هل أنت متأكد أنك تريد حذف القوالب المحددة؟"
+msgstr[3] "هل أنت متأكد أنك تريد حذف القوالب المحددة؟"
+msgstr[4] "هل أنت متأكد أنك تريد حذف القوالب المحددة؟"
+msgstr[5] "هل أنت متأكد أنك تريد حذف القوالب المحددة؟"
 
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "هل أنت متأكد أنك تريد حذف المثيل المحدد؟"
@@ -3491,6 +4674,12 @@ msgstr "قم بسحب وإسقاط ملف تصدير الخدمات هنا أو 
 msgid "modal.body.import_services_warning"
 msgstr "سيؤدي استيراد الخدمات إلى إنشاء خدمات UI جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة. كما يُقبل أرشيف .zip مُصدَّر مع التكوينات المخصصة."
 
+msgid "modal.body.import_template_help"
+msgstr "حزمة قالب مُصدَّرة من BunkerWeb ‏(.json)، أو أرشيف (.zip، .tar.gz، .tar.xz) يحتوي على مجلد قالب واحد يضم ملف template.json وإعداداته. بحد أقصى 1 ميبيبايت."
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "استبدال قالب يغيّر كل خدمة تستخدمه عند التوليد التالي للإعدادات. لا يُستبدل أبدًا القالب الذي تملكه إضافة أو الذي يُدار خارج واجهة الويب."
+
 msgid "modal.body.instance_creation_alert"
 msgstr "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و`API_LISTEN_HTTPS` و`API_HTTPS_PORT` و`API_SERVER_NAME` لتكوين المثيل."
 
@@ -3505,6 +4694,9 @@ msgstr "يتم عرض رموز الاسترداد هذه مرة واحدة فق�
 
 msgid "modal.body.reset_template_alert"
 msgstr "هل أنت متأكد أنك تريد إعادة تعيين إعدادات القالب الحالية والتكوينات المخصصة؟"
+
+msgid "modal.body.service_deletion_confirmation"
+msgstr "هل أنت متأكد أنك تريد حذف الخدمة المحددة؟"
 
 msgid "modal.body.services_conversion_confirmation"
 msgstr "هل أنت متأكد أنك تريد تحويل الخدمات المحددة؟"
@@ -3603,6 +4795,9 @@ msgstr "استيراد التكوينات المخصصة"
 msgid "modal.title.import_services"
 msgstr "استيراد الخدمات"
 
+msgid "modal.title.import_template"
+msgstr "استيراد قالب"
+
 msgid "modal.title.job_history"
 msgstr "آخر 10 عمليات تنفيذ للمهام"
 
@@ -3638,6 +4833,21 @@ msgstr "سهل"
 
 msgid "mode.raw"
 msgstr "خام"
+
+msgid "navbar.aria.close_navigation"
+msgstr "إغلاق التنقل"
+
+msgid "navbar.aria.help"
+msgstr "مساعدة"
+
+msgid "navbar.aria.news"
+msgstr "الأخبار"
+
+msgid "navbar.aria.notifications"
+msgstr "الإشعارات"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "تبديل التنقل"
 
 msgid "navbar.button.upgrade_to_pro"
 msgstr "الترقية إلى PRO"
@@ -3789,6 +4999,9 @@ msgstr "مشترك بالفعل"
 msgid "notice.dismiss_mfa"
 msgstr "لا تذكرني مرة أخرى"
 
+msgid "notice.enable_mfa"
+msgstr "يُرجى تفعيل المصادقة الثنائية لتأمين حسابك <a href=\"%(url)s\">من هنا</a>"
+
 msgid "onboarding.dismiss"
 msgstr "تجاهل"
 
@@ -3842,6 +5055,39 @@ msgstr "سجّل خدمتك الأولى"
 
 msgid "onboarding.item.workflow"
 msgstr "إرفاق سير عمل أمني"
+
+msgid "onboarding.item_hint.first_block"
+msgstr "تظهر التقارير هنا بمجرد أن يحظر BunkerWeb طلبًا — أرسل طلبًا ضارًا ثم تحقق لاحقًا."
+
+msgid "onboarding.item_hint.https"
+msgstr "أضف شهادة أو أنشئها هنا كي تُقدَّم خدمتك عبر HTTPS."
+
+msgid "onboarding.item_hint.install"
+msgstr "أضف مثيلًا هنا، ثم احفظ إعدادك الأول لإدراجه تحت الإدارة."
+
+msgid "onboarding.item_hint.mfa"
+msgstr "افتح ملفك الشخصي من هذه القائمة، ثم فعّل المصادقة الثنائية."
+
+msgid "onboarding.item_hint.pro"
+msgstr "أدخل مفتاح ترخيص PRO هنا لفتح إضافات PRO والدعم."
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "يعرض كل صف هنا عميلًا محظورًا، والسبب، وموعد انتهاء الحظر."
+
+msgid "onboarding.item_hint.read_home"
+msgstr "تعرض لوحة التحكم هذه المثيلات العاملة والخدمات المُقدَّمة والحركة الأخيرة بلمحة واحدة."
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "تظهر هنا السجلات الحيّة من كل مثيل، ويمكن تصفيتها حسب المثيل والخطورة."
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "افتح تقريرًا هنا لمعرفة أي فحص أمني أوقفه، ولماذا."
+
+msgid "onboarding.item_hint.service"
+msgstr "أنشئ خدمة هنا لإخبار BunkerWeb بالتطبيق الذي يجب حمايته."
+
+msgid "onboarding.item_hint.workflow"
+msgstr "أنشئ سير عمل هنا لربط الفحوصات والاستجابات في قاعدة واحدة."
 
 msgid "onboarding.not_saved"
 msgstr "تعذّر الحفظ."
@@ -3906,6 +5152,9 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "واجهة المستخدم"
 
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "تعذّرت قراءة إصدار BunkerWeb ‏(%(current)s)، لذا لا يمكن التحقق من توافق %(id)s؛ لم يُثبَّت شيء"
+
 msgid "plugins.catalog.incompatible"
 msgstr "هذا الإصدار لا يعلن عن توافق مع BunkerWeb؛ الإصدار الحالي هو %(current)s"
 
@@ -3924,8 +5173,32 @@ msgstr "معرفة المزيد"
 msgid "plugins.catalog.release"
 msgstr "قراءة من الإصدار %(tag)s"
 
+msgid "plugins.catalog.remove"
+msgstr "إزالة"
+
 msgid "plugins.catalog.stale"
 msgstr "تعذّر تحديث الكتالوج مؤخرًا، لذا يظل التثبيت معطلاً حتى يصبح محدثًا مرة أخرى."
+
+msgid "plugins.catalog.state_installed"
+msgstr "مثبّت (الإصدار %(version)s)"
+
+msgid "plugins.catalog.state_managed"
+msgstr "مثبتة خارج الكتالوج؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "مثبتة خارج الكتالوج كإضافة أساسية؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "مثبتة خارج الكتالوج كإضافة خارجية؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "مثبتة خارج الكتالوج كإضافة PRO؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "مثبتة خارج الكتالوج كإضافة واجهة مستخدم؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه"
+
+msgid "plugins.catalog.state_update"
+msgstr "يتوفر تحديث: الإصدار %(installed)s مثبّت، والإصدار %(version)s مُدرج في الكتالوج"
 
 msgid "plugins.catalog.tab"
 msgstr "متاح"
@@ -3933,8 +5206,188 @@ msgstr "متاح"
 msgid "plugins.catalog.trust_notice"
 msgstr "تُقرأ عناصر المجتمع من المستودعات التي تنشرها منظمة BunkerWeb على GitHub، عبر TLS، ويُتحقق مما تم تثبيته مقابل ما تم إدراجه — لكن لا شيء هنا موقّع تشفيريًا. الإضافة المثبتة تُشغّل شيفرة بكامل صلاحيات BunkerWeb."
 
+msgid "plugins.catalog.update"
+msgstr "تحديث"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "سيستبدل هذا الإضافة المثبّتة %(name)s ‏(%(id)s، الإصدار %(installed)s) بالإصدار %(version)s من الكتالوج. تُستبدل حتى لو كانت قد رُفعت يدويًا بدلًا من تثبيتها من الكتالوج."
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "لا يُحذف أي إعداد بهذا التحديث."
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "لا يمكن حاليًا سرد الإعدادات التي سيحذفها هذا التحديث، لذا التحديث معطّل حتى التحديث التالي للكتالوج."
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "لم يعد الإصدار %(version)s يُعرّف هذه الإعدادات. تُحذف مع كل قيمة مضبوطة لها في الإعدادات العامة والخدمات والقوالب:"
+
+msgid "plugins.catalog.update_title"
+msgstr "تحديث إضافة مجتمعية"
+
 msgid "plugins.catalog.version"
 msgstr "الإصدار %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "تعذّرت قراءة إصدار BunkerWeb قيد التشغيل (%(current)s)، لذا لا يمكن التحقق من توافق هذا الإصدار"
+
+msgid "plugins.flash.already_at_version"
+msgstr "الإضافة %(plugin_id)s في الإصدار %(version)s بالفعل"
+
+msgid "plugins.flash.already_installed"
+msgstr "إضافة بالمعرف %(plugin_id)s مثبتة بالفعل"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "لم يعد أرشيف %(tag)s مطابقًا لما أدرجه الكتالوج. لم يتم تثبيت أي شيء لـ %(plugin_id)s."
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "تغيّر إدخال الكتالوج الخاص بـ %(plugin_id)s منذ تأكيد التحديث؛ راجع التحديث مرة أخرى"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "إدخال الكتالوج المخزّن مؤقتًا لـ %(plugin_id)s أقدم من التحديثات؛ انتظر التحديث التالي"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s، تحقق من السجلات لمزيد من التفاصيل"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "كتالوج المجتمع معطّل"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "تعذّر حذف الإضافة %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "تعذّر حذف الإضافة %(plugin)s في قاعدة البيانات: %(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "تعذّر تنزيل %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "تعذر تثبيت %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "تعذر تثبيت %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "تعذر تحديث %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "تعذر تحديث %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "تعذّر تحديث الإضافة %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "تعذّر تحديث الإضافة %(plugin)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "تعذّر تحديث إضافات واجهة المستخدم عبر API: %(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "تم حذف الإضافة %(plugin)s بنجاح"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "ملف plugin.json يفتقد واحدًا أو أكثر من المفاتيح التالية: %(value)s (%(value2)s)"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "ملف plugin.json في %(file)s غير صالح (%(msg)s: السطر %(lineno)s العمود %(colno)s (المحرف %(pos)s)) (%(value)s)"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "لم يكتمل تثبيت %(plugin_id)s: %(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "تم تثبيت الإضافة %(plugin_id)s بنجاح"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "الملف ليس أرشيف إضافة صالحًا (.zip أو .tar.gz أو .tar.xz)."
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "معرف الإضافة غير صالح، (يجب أن يكون بين 4 و64 حرفًا، أحرف وأرقام وشرطات سفلية وشرطات فقط)"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "اسم الإضافة غير صالح لـ %(temp_folder_name)s. (يمكن أن يحتوي فقط على أرقام وأحرف وشرطات سفلية وشرطات (بحد أدنى 4 أحرف وبحد أقصى 64))"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "الإضافة %(plugin_id)s تُدار خارج الكتالوج ولا يمكن تحديثها منه"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "الإضافة %(plugin_id)s إضافة أساسية تُدار خارج الكتالوج ولا يمكن تحديثها منه"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "الإضافة %(plugin_id)s إضافة خارجية تُدار خارج الكتالوج ولا يمكن تحديثها منه"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "الإضافة %(plugin_id)s إضافة PRO تُدار خارج الكتالوج ولا يمكن تحديثها منه"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "الإضافة %(plugin_id)s إضافة واجهة مستخدم تُدار خارج الكتالوج ولا يمكن تحديثها منه"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "معامل csrf_token مفقود في /plugins."
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "معامل id مفقود في /plugins/catalog/install."
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "معامل id أو version مفقود في /plugins/catalog/update."
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "معامل plugin أو enabled مفقود في /plugins/enable."
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "معامل plugins مفقود في /plugins/delete."
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "لا توجد بيانات إضافة لتحميلها"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "الإضافة %(plugin_id)s غير مثبتة؛ ثبّتها من الكتالوج بدلاً من ذلك"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "%(file)s ليس إضافة صالحة (ملف plugin.json مفقود) (%(value)s)"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "يرجى تحميل إضافات جديدة لإعادة تحميل الإضافات"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "الإضافة %(plugin)s موجودة بالفعل"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "تم تعطيل الإضافة %(plugin)s بنجاح."
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "تم تفعيل الإضافة %(plugin)s بنجاح."
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "إدارة الإضافات مقتصرة على المسؤولين"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "إضافة باسم %(folder_name)s موجودة بالفعل"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "الإضافة بالمعرف %(plugin)s غير موجودة"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "خطأ في تحميل الإضافة (%(value)s): %(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "تم تحميل الإضافات بنجاح: %(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "تم تحميل الإضافات بنجاح"
+
+msgid "plugins.flash.refused_download"
+msgstr "تم رفض تنزيل %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "تم رفض تثبيت %(plugin_id)s: %(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "تم رفض تحديث %(plugin_id)s: %(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "لم يكتمل تحديث %(plugin_id)s: %(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "تم تحديث الإضافة %(plugin_id)s إلى الإصدار %(version)s"
 
 msgid "plugins.marketplace.active"
 msgstr "نشط"
@@ -4008,6 +5461,36 @@ msgstr "تاريخ انتهاء صلاحية Pro"
 msgid "pro.expiration_date.unknown"
 msgstr "تاريخ انتهاء صلاحية غير معروف"
 
+msgid "pro.flash.checking_license_key"
+msgstr "جارٍ التحقق من مفتاح الترخيص."
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "تمت جدولة تحديث إجباري لإضافات PRO."
+
+msgid "pro.flash.invalid_license_key"
+msgstr "مفتاح الترخيص غير صالح"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "لم يتم تحديث مفتاح ترخيص PRO: تم رفض القيمة."
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "مفتاح الترخيص مطابق للمفتاح الحالي."
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "تم تحديث مفتاح ترخيص PRO بنجاح."
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "معامل مفتاح الترخيص مفقود في /pro/key."
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "تمت جدولة فحص جديد لإضافات PRO."
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "سيحاول المُجدوِل تطبيق التغييرات وتنزيل إضافات PRO."
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "ستعيد واجهة الويب تحميل إضافات PRO الخاصة بها قريبًا."
+
 msgid "pro.force_check.description"
 msgstr "فرض فحص جديد لإضافات PRO. سيؤدي هذا إلى تنزيل جديد للإضافات إذا كانت هناك إصدارات جديدة متاحة."
 
@@ -4044,8 +5527,17 @@ msgstr "منتهي الصلاحية"
 msgid "pro.status.free_version"
 msgstr "الإصدار المجاني"
 
+msgid "pro.status.invalid"
+msgstr "مفتاح غير صالح"
+
+msgid "pro.status.invalid_key"
+msgstr "رفض خادم التراخيص مفتاح الترخيص المخزَّن. تحقق منه، أو أزله من الإعدادات العامة ← Pro."
+
 msgid "pro.status.overlapped"
 msgstr "متجاوز"
+
+msgid "pro.status.pending_key"
+msgstr "لم يُتحقق من مفتاح الترخيص بعد. يتحقق منه المجدول (Scheduler) بعد حفظه بوقت قصير."
 
 msgid "pro.status.pro_version"
 msgstr "إصدار PRO"
@@ -4061,6 +5553,15 @@ msgstr "الحالة"
 
 msgid "pro.title"
 msgstr "ترخيص Pro"
+
+msgid "pro.trial.cta"
+msgstr "ابدأ التجربة المجانية"
+
+msgid "pro.trial.description"
+msgstr "جرّب <span class=\"text-primary\">BunkerWeb PRO</span> مجانًا لمدة <strong>30 يومًا</strong>."
+
+msgid "pro.trial.title"
+msgstr "تجربة مجانية"
 
 msgid "profile.2fa.disable_title"
 msgstr "تعطيل 2FA"
@@ -4103,6 +5604,132 @@ msgstr "تحديث رموز الاسترداد"
 
 msgid "profile.card.title.sessions"
 msgstr "الجلسات"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "تعذّر حذف مفتاح المرور: %(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "تعذّر تعطيل المصادقة الثنائية: %(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "تعذّر تفعيل المصادقة الثنائية: %(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "تعذّر تحديث رموز الاسترداد: %(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "تعذّر إعادة تسمية مفتاح المرور: %(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "تعذّر إبطال الجلسات الأخرى: %(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "تعذّر تحديث المستخدم %(value)s: %(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "تعذّر إنهاء الجلسات الأخرى: %(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "كلمة المرور الحالية غير صحيحة."
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "البريد الإلكتروني طويل جدًا. يجب أن يكون أقل من 256 حرفًا."
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "معامل كلمة المرور الحالية مفقود في /profile/edit."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "معامل كلمة المرور الحالية مفقود في /profile/totp-refresh."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "معامل كلمة المرور الحالية مفقود في /profile/totp-disable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "معامل كلمة المرور الحالية مفقود في /profile/totp-enable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "معامل كلمة المرور الحالية مفقود في /profile/wipe-other-sessions."
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "معامل البريد الإلكتروني مفقود في /profile/edit."
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "معامل تأكيد كلمة المرور الجديدة مفقود في /profile/edit."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "معاملات مفقودة في /profile/webauthn/delete."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "معاملات مفقودة في /profile/webauthn/rename."
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "معامل رمز totp مفقود في /profile/totp-enable."
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "كلمة المرور الجديدة ليست قوية بما يكفي. يجب أن تحتوي على 8 أحرف على الأقل، بما في ذلك حرف كبير واحد على الأقل، وحرف صغير واحد، ورقم واحد، وحرف خاص واحد (#@?!$%^&*-)."
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "كلمة المرور الجديدة مطابقة لكلمة المرور الحالية."
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "كلمة المرور الجديدة طويلة جدًا. يجب ألا تتجاوز %(MAX_PASSWORD_BYTES)s بايت (الحد الأقصى لـ bcrypt)؛ الأحرف المُنقّطة أو الرموز التعبيرية تُحسب كعدة بايتات لكل منها."
+
+msgid "profile.flash.no_fields_updated"
+msgstr "لم يتم تحديث أي حقول."
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "تم إنهاء الجلسات الأخرى بنجاح."
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "تم حذف مفتاح المرور بنجاح."
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "تم تسجيل مفتاح المرور بنجاح."
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "تم إعادة تسمية مفتاح المرور بنجاح."
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "لا يمكن أن يكون اسم مفتاح المرور فارغًا."
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "تم تغيير كلمة المرور الخاصة بك، ولكن تعذّر إبطال جلساتك الأخرى. استخدم \"إنهاء الجلسات الأخرى\" أدناه وتحقق من قائمة الجلسات النشطة."
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "كلمتا المرور غير متطابقتين مع كلمة المرور المؤكدة."
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "تم تحديث الملف الشخصي بنجاح."
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "تم تحديث رموز الاسترداد بنجاح. لم تعد الرموز القديمة صالحة."
+
+msgid "profile.flash.theme_invalid"
+msgstr "السمة غير صالحة."
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "رمز totp غير صالح."
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "المصادقة الثنائية مفعّلة بالفعل."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "تم تعطيل المصادقة الثنائية بنجاح."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "تم تفعيل المصادقة الثنائية بنجاح."
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "المصادقة الثنائية غير مفعّلة."
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "انتهت صلاحية تسجيل المصادقة الثنائية. أعد تحميل الصفحة وامسح رمز QR الجديد."
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "اسم المستخدم والبريد الإلكتروني مطابقان للقيم الحالية."
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "اسم المستخدم طويل جدًا. يجب أن يكون أقل من 256 حرفًا."
 
 msgid "profile.help.photo_extensions"
 msgstr "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB."
@@ -4188,6 +5815,39 @@ msgstr "نطاق زمني"
 msgid "range_picker.custom"
 msgstr "مخصص"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "لا يمكن تحويل الإعداد %(setting)s إلى مسودة."
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "لم يتم إرسال الإعداد المسودة %(setting)s."
+
+msgid "raw_drafts.draft_not_present"
+msgstr "الإعداد المسودة %(setting)s غير موجود في محرر RAW."
+
+msgid "raw_drafts.edits_discarded"
+msgstr "تظل الإعدادات المسودة دون تغيير؛ فعّلها أو عدّلها في الوضع الخام (Raw)."
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "لا يمكن تحويل الإعداد العام %(setting)s إلى مسودة خدمة."
+
+msgid "raw_drafts.locked_by_method"
+msgstr "لا يمكن للإعداد %(setting)s تغيير حالة المسودة لأنه تتم إدارته بواسطة الطريقة %(method)s."
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "تُقبل البيانات الوصفية لمسودة الإعداد في الوضع الخام (raw) فقط."
+
+msgid "raw_drafts.missing_metadata"
+msgstr "البيانات الوصفية %(field)s مفقودة."
+
+msgid "raw_drafts.present_not_posted"
+msgstr "لم يتم إرسال الإعداد الحالي %(setting)s."
+
+msgid "raw_drafts.present_not_valid"
+msgstr "الإعداد الحالي %(setting)s غير صالح."
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "الإعداد %(setting)s غير صالح."
+
 msgid "redirects.all"
 msgstr "الكل"
 
@@ -4241,6 +5901,69 @@ msgstr "إعادة التوجيه هي قاعدة مسماة تقوم بإرفا
 
 msgid "redirects.empty_title"
 msgstr "لا توجد عمليات إعادة توجيه حتى الآن"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "المسار المصدر غير صالح: لا يمكن أن يحتوي على مسافات أو فواصل منقوطة أو أقواس معقوفة."
+
+msgid "redirects.err.invalid_to_url"
+msgstr "يجب أن يكون الهدف رابط http:// أو https:// كاملًا."
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "مطلوب خدمة واحدة على الأقل"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "تعذّر ربط إعادة التوجيه: %(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "تعذر إنشاء إعادة التوجيه: %(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "تعذّر حذف إعادة التوجيه: %(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "تعذّر فصل إعادة التوجيه: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "تعذّر جلب عمليات إعادة التوجيه: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "تعذّر جلب الخدمات لتخصيصات إعادة التوجيه: %(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "تعذر تحديث إعادة التوجيه: %(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "اسم إعادة التوجيه مطلوب"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "تم إرفاق إعادة التوجيه. الخدمات: %(len)s"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "تم إنشاء إعادة التوجيه %(value)s بنجاح"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "تم حذف إعادة التوجيه بنجاح"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "تم فصل إعادة التوجيه بنجاح"
+
+msgid "redirects.flash.redirect_required"
+msgstr "إعادة التوجيه مطلوبة"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "إعادة التوجيه والخدمة مطلوبتان"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "تم تحديث إعادة التوجيه بنجاح"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "يجب أن يكون رمز الحالة أحد %(value)s"
+
+msgid "redirects.flash.target_required"
+msgstr "هدف إعادة التوجيه مطلوب"
+
+msgid "redirects.flash.too_many_services"
+msgstr "لا يمكن ربط إعادة توجيه بأكثر من %(value)s خدمة"
 
 msgid "redirects.from_path"
 msgstr "إعادة التوجيه من"
@@ -4327,16 +6050,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "الطلبات المحظورة مع مرور الوقت"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "فحص AppSec"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "سياسة الفشل في AppSec"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "قرار واجهة API المحلية"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "التفاصيل التقنية"
 
 msgid "reports.security_incident"
 msgstr "حادث أمني"
@@ -4497,6 +6220,63 @@ msgstr "إدخالات"
 msgid "resource_groups.expand_all"
 msgstr "توسيع الكل"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "يجب أن يحتوي الاسم المستعار على 1 إلى 64 حرفًا أو رقمًا أو شرطة سفلية أو شرطة"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "هذا الاسم المستعار محجوز بواسطة BunkerWeb"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "تعذّر نسخ مجموعة الموارد: %(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "تعذّر حذف مجموعة الموارد: %(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "تعذّر تصدير مجموعات الموارد: %(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "تعذّر حفظ مجموعة الموارد: %(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "يجب أن تكون إدخالات الموارد قائمة"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "إدخالات الموارد ليست بتنسيق JSON صالح"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "الإدخال %(index)s يحتوي على تعليق طويل جدًا"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "الإدخال %(index)s غير صالح"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "الإدخال %(index)s يحتوي على نوع غير صالح"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "الإدخال %(index)s يحتوي على قيمة غير صالحة"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "تم نسخ مجموعة الموارد إلى @%(alias)s"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "تم إنشاء مجموعة الموارد @%(alias)s بنجاح"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "تم حذف مجموعة الموارد بنجاح"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "مجموعة الموارد مطلوبة"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "تم تحديث مجموعة الموارد بنجاح"
+
+msgid "resource_groups.flash.source_required"
+msgstr "مجموعة الموارد المصدر مطلوبة"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "لا يمكن أن تحتوي مجموعة الموارد على أكثر من %(value)s إدخال"
+
 msgid "resource_groups.global_configuration"
 msgstr "التكوين العالمي"
 
@@ -4512,6 +6292,24 @@ msgstr "تقتصر عمليات استيراد TXT/CSV على 256 KiB."
 msgid "resource_groups.kind"
 msgstr "النوع"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "الدولة"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "DNS العكسي"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "وكيل المستخدم"
+
 msgid "resource_groups.kinds"
 msgstr "أنواع"
 
@@ -4521,8 +6319,35 @@ msgstr "جاري التحميل..."
 msgid "resource_groups.max_entries"
 msgstr "لا يمكن لمجموعة الموارد أن تحتوي على أكثر من %(max)s إدخال."
 
-msgid "resource_groups.meta_line"
-msgstr "%(kinds)s أنواع · %(values)s قيم · %(usages)s استخدامات"
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s أنواع"
+msgstr[1] "%(count)s نوع"
+msgstr[2] "%(count)s أنواع"
+msgstr[3] "%(count)s أنواع"
+msgstr[4] "%(count)s أنواع"
+msgstr[5] "%(count)s أنواع"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s استخدامات"
+msgstr[1] "%(count)s استخدام"
+msgstr[2] "%(count)s استخدامات"
+msgstr[3] "%(count)s استخدامات"
+msgstr[4] "%(count)s استخدامات"
+msgstr[5] "%(count)s استخدامات"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s قيم"
+msgstr[1] "%(count)s قيمة"
+msgstr[2] "%(count)s قيم"
+msgstr[3] "%(count)s قيم"
+msgstr[4] "%(count)s قيم"
+msgstr[5] "%(count)s قيم"
 
 msgid "resource_groups.new"
 msgstr "مجموعة جديدة"
@@ -4541,6 +6366,16 @@ msgstr "لا توجد مراجع"
 
 msgid "resource_groups.readonly"
 msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص ومصدر مجموعات الموارد، ولكن لا يمكن تعديلها."
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s مراجع"
+msgstr[1] "%(count)s مرجع"
+msgstr[2] "%(count)s مراجع"
+msgstr[3] "%(count)s مراجع"
+msgstr[4] "%(count)s مراجع"
+msgstr[5] "%(count)s مراجع"
 
 msgid "resource_groups.references_error"
 msgstr "تعذر تحميل المراجع"
@@ -4704,6 +6539,9 @@ msgstr "إعادة التحميل مطلوبة"
 msgid "searchpane.scope"
 msgstr "النطاق"
 
+msgid "searchpane.search_title"
+msgstr "بحث: {name}"
+
 msgid "searchpane.security_mode"
 msgstr "وضع الأمان"
 
@@ -4794,14 +6632,35 @@ msgstr "وضع الخدمة"
 msgid "service.resources.attach"
 msgstr "ربط"
 
+msgid "service.resources.confirm_detach"
+msgstr "فصل هذا المورد عن %(service)s؟"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "فصل هذه الشهادة عن %(service)s؟"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "فصل إعادة التوجيه هذه عن %(service)s؟"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "فصل هذا القالب عن %(service)s؟"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "فصل هذا الخادم الخلفي عن %(service)s؟"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "فصل مسار العمل هذا عن %(service)s؟"
+
 msgid "service.resources.conflict.inline"
 msgstr "الـ %(service)s بالفعل يقدم الخدمة %(path)s من خلال إعداداته الخاصة %(family)s. قم بإلغاء هذه الإعدادات لـ %(path)s، أو استخدم مسارًا مختلفًا."
 
 msgid "service.resources.conflict.primary"
 msgstr "\"%(name)s\" هو الشهادة الرئيسية لهذه الخدمة وسوف يتم تخفيضها دون تحذير إضافي. الشهادة الرئيسية هي التي يتم نشرها بالفعل."
 
-msgid "service.resources.conflict.resource"
-msgstr "الـ %(service)s بالفعل يقدم الخدمة %(path)s من خلال \"%(kind)s\" %(name)s. قم بإلغاء \"%(name)s\"، أو أعطِ إحداهما مسارًا مختلفًا."
+msgid "service.resources.conflict.resource_redirect"
+msgstr "تخدم %(service)s بالفعل المسار %(path)s عبر إعادة التوجيه “%(name)s”. افصل “%(name)s”، أو أعطِ إحداهما مسارًا مختلفًا."
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "تخدم %(service)s بالفعل المسار %(path)s عبر الخادم الخلفي “%(name)s”. افصل “%(name)s”، أو أعطِ إحداهما مسارًا مختلفًا."
 
 msgid "service.resources.conflict.stream"
 msgstr "خدمة التدفق تقوم بتوجيه كل اتصال إلى خلفية واحدة، والـ %(service)s يستخدم بالفعل \"%(name)s\" الخلفية. قم بإلغاء ربطه أولاً."
@@ -4892,6 +6751,222 @@ msgstr "غير متوفر"
 
 msgid "services.draft"
 msgstr "خدمات مسودة"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "جميع الخدمات المحددة غير موجودة أو ليست خدمات UI/API أو تم تحويلها بالفعل."
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "جميع الخدمات المحددة غير موجودة أو ليست خدمات UI/API."
+
+msgid "services.flash.configuration_created"
+msgstr "تم إنشاء التكوين للخدمة %(service)s."
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "تم إنشاء التكوين للخدمة %(service)s، ولكن تم رفض %(refused_count)s من القيم."
+
+msgid "services.flash.configuration_saved"
+msgstr "تم حفظ التكوين للخدمة %(service)s."
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "تم حفظ التكوين للخدمة %(service)s، ولكن تم رفض %(refused_count)s من القيم."
+
+msgid "services.flash.converted_services_draft"
+msgstr "تم التحويل إلى خدمات «مسودة»: %(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "تم التحويل إلى خدمات «متصلة»: %(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "تعذر جلب الشهادات المرتبطة بهذه الخدمة."
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "تعذر جلب عمليات إعادة التوجيه المرتبطة بهذه الخدمة."
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "تعذر جلب الخوادم الخلفية المرتبطة بهذه الخدمة."
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "تعذر جلب مسارات العمل المرتبطة بهذه الخدمة."
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "تعذّر جلب التكوينات المخصصة من API."
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "تعذّر جلب التكوينات المخصصة من API."
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "تعذّر جلب الخدمة من API."
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "تعذّر جلب الخدمة %(service)s من API."
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "تعذّر جلب الخدمة %(clone)s للاستنساخ."
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "تعذّر جلب الخدمات من API."
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "تعذّر جلب تكوين الخدمات."
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "تعذّر جلب القوالب من API."
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "لم يتم حفظ التكوينات المخصصة لأن إعادة التسمية رُفضت."
+
+msgid "services.flash.default_server_reserved"
+msgstr "%(default_server_id)s هو الخادم الافتراضي المحجوز: يستجيب للطلبات التي لا تطابق أي خدمة مُهيّأة (أسماء مضيف غير معروفة، الوصول عبر عنوان IP مباشر)، لذلك لا يمكن إنشاؤه أو إعادة تسميته أو حذفه."
+
+msgid "services.flash.default_server_type_refused"
+msgstr "لا يمكن ضبط SERVER_TYPE على الخدمة المحجوزة %(default_server_id)s: فهي لا تملك كتلة خادم خاصة بها لتبديلها. النصف الخاص بـ HTTP هو كتلة الخادم الافتراضي نفسها، والنصف الخاص بالتدفق هو إعداد DEFAULT_SERVER_STREAM_PORTS."
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "ليس لديك صلاحية تغيير وضع الخدمة"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "فشل حذف خدمة autoconf المسودة %(service_id)s: %(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "فشل استيراد الخدمة: %(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "فشل استيراد الخدمات: %(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "تم استيراد الخدمة: %(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "تم استيراد الخدمات: %(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "ترميز غير صالح لملف configs_export.json داخل الأرشيف."
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "ترميز غير صالح لملف services_export.env داخل الأرشيف."
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "ترميز الملف غير صالح. يرجى تحميل ملف بترميز UTF-8."
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "معامل الوضع غير صالح."
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "معامل convert_to مفقود في /services/convert."
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "معامل الوضع مفقود في /services/%(service)s/mode."
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "معامل الخدمات مفقود في /services/convert."
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "معامل الخدمات مفقود في /services/delete."
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "لم يتم العثور على خدمات أو تكوينات مخصصة في ملف الاستيراد."
+
+msgid "services.flash.no_services_export"
+msgstr "لا توجد خدمات للتصدير."
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "لم يتم تحميل ملف خدمات."
+
+msgid "services.flash.no_services_selected"
+msgstr "لم يتم تحديد أي خدمات."
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "لا تنطبق هذه الإضافة على الخادم الافتراضي"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "رفض استخراج الأرشيف: الحجم غير المضغوط يتجاوز حد الأمان."
+
+msgid "services.flash.resource_attach_failed"
+msgstr "تعذّر الإرفاق: %(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "لا يمكن الإرفاق: %(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "أُرفق المورد بالخدمة %(service)s."
+
+msgid "services.flash.resource_detach_failed"
+msgstr "تعذّر الفصل: %(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "لا يمكن الفصل: %(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "فُصل المورد عن الخدمة %(service)s."
+
+msgid "services.flash.resource_unknown_family"
+msgstr "نوع مورد غير معروف."
+
+msgid "services.flash.server_name_missing"
+msgstr "لم تُنشأ الخدمة لأن اسم الخادم لم يُقدَّم."
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "الخدمة %(non_convertible_service)s مسودة بالفعل ولن يتم تحويلها."
+
+msgid "services.flash.service_already_exists"
+msgstr "الخدمة %(service)s موجودة بالفعل."
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "الخدمة %(non_convertible_service)s متصلة بالفعل ولن يتم تحويلها."
+
+msgid "services.flash.service_deleted"
+msgstr "تم حذف الخدمة: %(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "لم يتم تعديل الخدمة %(service)s لأنه لم يتم تغيير أي قيم."
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "لم يتم تعديل الخدمة %(service)s لأنه لم يتم تغيير أي قيم أو تكوينات مخصصة."
+
+msgid "services.flash.service_not_found"
+msgstr "الخدمة غير موجودة"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "لم يتم حفظ الخدمة %(service)s: تم رفض كل قيمة تم تغييرها."
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "الخدمة %(non_editable_service)s ليست خدمة UI/API ولن يتم تحويلها."
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "تم الآن تعريف الخدمة %(service)s على أنها «إعادة توجيه فقط»."
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "تم الآن تعريف الخدمة %(service)s على أنها «قياسية»."
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "الخدمة %(non_deletable_service)s ليست خدمة UI/API ولن يتم حذفها."
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "الخدمة %(non_deletable_service)s خدمة autoconf متصلة (حوّلها إلى مسودة أولًا) ولن يتم حذفها."
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "الخدمة %(non_deletable_service)s هي الخادم الافتراضي المحجوز الذي يرد على الطلبات التي لا تطابق أي خدمة، ولن يتم حذفها."
+
+msgid "services.flash.services_deleted"
+msgstr "تم حذف الخدمات: %(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "تم تخطي الخدمة الموجودة: %(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "تم تخطي الخدمات الموجودة: %(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "لا يمكن تحرير التكوين المخصص للقالب %(key)s لأنه تم إنشاؤه عبر طريقة %(value)s."
+
+msgid "services.flash.template_not_found"
+msgstr "القالب غير موجود"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "يجب أن يحتوي الأرشيف الذي تم تحميله على services_export.env و/أو configs_export.json."
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "الملف الذي تم تحميله ليس أرشيف zip صالحًا."
 
 msgid "services.online"
 msgstr "متصل"
@@ -5310,6 +7385,45 @@ msgstr "تم التحميل من %(name)s · عدد الأحرف: %(count)s"
 msgid "setup.file.read_error"
 msgstr "خطأ في قراءة الملف"
 
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "البريد الإلكتروني للمسؤول طويل جدًا. يجب أن يكون أقل من 256 حرفًا."
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "كلمة مرور المسؤول ليست قوية بما يكفي. يجب أن تحتوي على 8 أحرف على الأقل، بما في ذلك حرف كبير واحد على الأقل، وحرف صغير واحد، ورقم واحد، وحرف خاص واحد (#@?!$%^&*-)."
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "كلمة مرور المسؤول طويلة جدًا. يجب ألا تتجاوز %(MAX_PASSWORD_BYTES)s بايت (الحد الأقصى لـ bcrypt)؛ الأحرف المُنقّطة أو الرموز التعبيرية تُحسب كعدة بايتات لكل منها."
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "تم إنشاء مستخدم المسؤول بنجاح"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "اسم مستخدم المسؤول طويل جدًا. يجب أن يكون أقل من 256 حرفًا."
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "تعذّر إنشاء مستخدم المسؤول: %(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "تعذّر إنشاء الخدمة الجديدة: %(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "تعذّر تحرير الخدمة الجديدة: %(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "اسم المضيف %(value)s قيد الاستخدام بالفعل."
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "اسم المضيف غير صالح."
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "معامل واحد على الأقل من التالية مفقود: %(value)s."
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "كلمتا المرور غير متطابقتين."
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "عند استخدام شهادة SSL مخصصة، يجب تعيين كل من الشهادة والمفتاح."
+
 msgid "setup.status.admin_user_exists"
 msgstr "يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية."
 
@@ -5466,6 +7580,12 @@ msgstr "قيد انتهاء الصلاحية"
 msgid "status.failed"
 msgstr "فشل"
 
+msgid "status.failover"
+msgstr "التبديل التلقائي عند الفشل"
+
+msgid "status.inactive"
+msgstr "غير نشط"
+
 msgid "status.invalid_json_payload"
 msgstr "حمولة JSON غير صالحة."
 
@@ -5603,6 +7723,9 @@ msgstr "مجهول"
 
 msgid "status.up"
 msgstr "قيد التشغيل"
+
+msgid "status.uploaded"
+msgstr "مرفوع"
 
 msgid "status.yes"
 msgstr "نعم"
@@ -5853,6 +7976,9 @@ msgstr "إنشاء قالب"
 msgid "template.editor.heading_edit"
 msgstr "تعديل القالب %(id)s"
 
+msgid "template.editor.heading_view"
+msgstr "عرض القالب %(id)s"
+
 msgid "template.editor.label_config_data"
 msgstr "البيانات"
 
@@ -5938,7 +8064,10 @@ msgid "template.editor.multivalue_add"
 msgstr "إضافة قيمة"
 
 msgid "template.editor.multivalue_helper"
-msgstr "قيمة واحدة لكل سطر.%(separatorNote)s"
+msgstr "قيمة واحدة في كل سطر."
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "قيمة واحدة في كل سطر. سيتم ربطها بالفاصل \"%(separator)s\"."
 
 msgid "template.editor.panel_overview"
 msgstr "نظرة عامة"
@@ -6101,6 +8230,9 @@ msgstr "قاعدة البيانات حاليًا للقراءة فقط. لا ي�
 
 msgid "template.editor.readonly_method"
 msgstr "تم إنشاء هذا القالب بواسطة عملية %(method)s ولا يمكن تعديله من واجهة المستخدم."
+
+msgid "template.editor.readonly_method_plugin"
+msgstr "أُنشئ هذا القالب بواسطة الإضافة %(plugin)s ولا يمكن تعديله من واجهة الويب."
 
 msgid "template.editor.readonly_title"
 msgstr "للقراءة فقط"
@@ -6276,6 +8408,9 @@ msgstr "نوع التكوين مطلوب عند تحديد تكوين."
 msgid "template.editor.validation_configs_unique"
 msgstr "يجب أن يكون كل اسم تكوين فريدًا."
 
+msgid "template.editor.validation_id_invalid"
+msgstr "لا يجوز أن يحتوي معرّف القالب إلا على أحرف وأرقام ونقاط وشرطات وشرطات سفلية، ويجب أن يبدأ بحرف أو رقم."
+
 msgid "template.editor.validation_id_required"
 msgstr "معرف القالب مطلوب."
 
@@ -6288,6 +8423,36 @@ msgstr "يجب أن يكون كل مفتاح إعداد فريدًا."
 msgid "template.none"
 msgstr "لا يوجد قالب"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "تكوينات مخصصة أُضيفت"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "تكوينات مخصصة تغيّرت"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "تكوينات مخصصة أُزيلت"
+
+msgid "templates.catalog.diff.name"
+msgstr "الاسم: %(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "إعدادات أُضيفت"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "إعدادات تغيّرت"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "إعدادات أُزيلت"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "خطوات أُضيفت"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "خطوات تغيّرت"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "خطوات أُزيلت"
+
 msgid "templates.catalog.heading"
 msgstr "القوالب المتاحة"
 
@@ -6297,8 +8462,89 @@ msgstr "القالب طبقة: إضافة واحد إلى خدمة تستخدم 
 msgid "templates.catalog.no_compat_notice"
 msgstr "لا يعلن هذا الكتالوج عن توافق مع BunkerWeb. يُرفض القالب عند التثبيت إذا كان يسمي إعدادًا لا يملكه BunkerWeb هذا."
 
+msgid "templates.catalog.state_installed"
+msgstr "مثبّت، مطابق للكتالوج"
+
+msgid "templates.catalog.state_managed"
+msgstr "مثبّت ويديره %(owner)s: لا يغيّره الكتالوج"
+
+msgid "templates.catalog.state_update"
+msgstr "مثبّت، إصدار الكتالوج مختلف"
+
 msgid "templates.catalog.subheading"
 msgstr "قوالب خدمة منسّقة تنشرها منظمة BunkerWeb."
+
+msgid "templates.catalog.update_changed"
+msgstr "تغيّر القالب %(template)s أو الكتالوج منذ المعاينة. أعد تحميل الصفحة وراجع التغييرات مجددًا."
+
+msgid "templates.catalog.update_confirm"
+msgstr "استبدال القالب %(id)s بإصداره من إصدار الكتالوج %(tag)s. تنطبق هذه التغييرات على القالب:"
+
+msgid "templates.catalog.update_failed"
+msgstr "تعذّر تحديث القالب."
+
+msgid "templates.catalog.update_managed"
+msgstr "القالب %(template)s يديره %(owner)s: لا يغيّره الكتالوج"
+
+msgid "templates.catalog.update_no_services"
+msgstr "لا توجد خدمة تستخدم هذا القالب بعد."
+
+msgid "templates.catalog.update_not_installed"
+msgstr "القالب %(template)s غير مثبّت: ثبّته بدلًا من ذلك"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "يمكن التحقق من التغييرات بعد التحديث التالي للكتالوج."
+
+msgid "templates.catalog.update_services"
+msgstr "تستخدم هذه الخدمات هذا القالب. عند التوليد التالي لإعداداتها، يأخذ كل إعداد لم تضبطه هي نفسها القيمة الجديدة:"
+
+msgid "templates.catalog.update_title"
+msgstr "تحديث قالب مجتمعي"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "القالب %(template)s مطابق للكتالوج بالفعل"
+
+msgid "templates.flash.catalog_updated"
+msgstr "حُدِّث القالب %(template)s من الكتالوج."
+
+msgid "templates.flash.error_deleting_template"
+msgstr "خطأ في حذف القالب %(template_id)s: %(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "تعذّر تصدير القالب %(template)s: %(error)s"
+
+msgid "templates.flash.imported"
+msgstr "استُورد القالب %(template)s."
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "لم يتم تحديد أي قوالب للحذف."
+
+msgid "templates.flash.replaced"
+msgstr "استُبدل القالب %(template)s."
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "القوالب المحذوفة: %(success_count)s."
+
+msgid "templates.flash.template_created_successfully"
+msgstr "تم إنشاء القالب %(template_id)s بنجاح."
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "تم حذف القالب %(template_id)s بنجاح."
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "تم تثبيت القالب %(template_id)s من الكتالوج."
+
+msgid "templates.flash.template_not_found"
+msgstr "القالب %(clone_id)s غير موجود."
+
+msgid "templates.flash.template_not_found_2"
+msgstr "القالب غير موجود."
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "تم تحديث القالب %(template_id)s بنجاح."
+
+msgid "templates.flash.user_is_read_only"
+msgstr "المستخدم للقراءة فقط"
 
 msgid "templates.gallery.delete_selected"
 msgstr "حذف المحدد"
@@ -6314,6 +8560,24 @@ msgstr "تحديد"
 
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
+
+msgid "templates.import.admin_only"
+msgstr "استيراد القوالب مقتصر على المسؤولين"
+
+msgid "templates.import.failed"
+msgstr "تعذّر استيراد القالب."
+
+msgid "templates.import.no_file"
+msgstr "اختر ملفًا للاستيراد."
+
+msgid "templates.import.refused"
+msgstr "لم يُستورد القالب: %(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "لم يتم استيراد القالب: حجم الملف أكبر من 1 ميغابايت"
+
+msgid "templates.import.unreadable"
+msgstr "لم يتم استيراد القالب: تعذرت قراءة الملف"
 
 msgid "templates.name.api"
 msgstr "API"
@@ -6450,6 +8714,9 @@ msgstr "اضبط METRICS_COLLECT_TIMINGS على yes لقياس مدة كل إض�
 msgid "timings.disabled_title"
 msgstr "توقيتات الإضافات معطلة"
 
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "خطأ في جلب توقيتات الإضافة: %(message)s"
+
 msgid "timings.max"
 msgstr "الحد الأقصى"
 
@@ -6552,11 +8819,23 @@ msgstr "هل يجب طلب شهادة Let's Encrypt تلقائيًا."
 msgid "tooltip.badge.redirect_candidate"
 msgstr "لا تحتوي هذه الخدمة على أي شيء سوى إعادة توجيه، لذا يمكن إعلانها كخدمة إعادة توجيه فقط — مما سيخرجها من عدد خدمات PRO فور تفعيل تلك الفوترة."
 
+msgid "tooltip.button.attach_redirect"
+msgstr "ربط %(name)s بخدمة"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "ربط %(name)s بخدمة"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "ربط %(name)s بخدمة"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "العودة إلى تحميل الملف"
 
 msgid "tooltip.button.ban_ip"
 msgstr "حظر عنوان الـIP هذا"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "نسخ %(name)s"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "تحويل التكوين %(name)s إلى مسودة"
@@ -6570,6 +8849,9 @@ msgstr "تحويل الخدمة %(name)s إلى مسودة"
 msgid "tooltip.button.convert_service_to_online"
 msgstr "تحويل الخدمة %(name)s إلى متصل"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "حذف الشهادة"
+
 msgid "tooltip.button.delete_config"
 msgstr "حذف التكوين المخصص %(name)s"
 
@@ -6582,11 +8864,32 @@ msgstr "حذف المثيل %(hostname)s"
 msgid "tooltip.button.delete_plugin"
 msgstr "حذف الإضافة %(name)s"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "حذف %(name)s"
+
 msgid "tooltip.button.delete_service"
 msgstr "حذف الخدمة %(name)s"
 
 msgid "tooltip.button.delete_template"
 msgstr "حذف القالب %(name)s"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "حذف %(name)s"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "حذف %(name)s"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "تحرير %(name)s"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "تحرير %(name)s"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "تحرير اسم ووصف %(name)s"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "تحرير قواعد %(name)s"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "إصدار رمز تسجيل لـ %(hostname)s"
@@ -6693,6 +8996,9 @@ msgstr "يجب أن تتطابق كلمة مرور التأكيد مع كلمة 
 msgid "tooltip.copied"
 msgstr "تم النسخ!"
 
+msgid "tooltip.copy_failed"
+msgstr "فشل النسخ"
+
 msgid "tooltip.copy_https_only"
 msgstr "ميزة النسخ متاحة فقط عبر HTTPS."
 
@@ -6713,6 +9019,9 @@ msgstr "القيمة تختلف عن القيمة الافتراضية للقا�
 
 msgid "tooltip.disabled_by_method"
 msgstr "معطل: مُدار عبر الطريقة '%(method)s'."
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "معطّل: تُدار بواسطة إضافة %(plugin)s."
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "معطل: قاعدة البيانات في وضع القراءة فقط."
@@ -6833,6 +9142,9 @@ msgstr "تصدير التكوين المخصص %(name)s"
 
 msgid "tooltip.link.export_service"
 msgstr "تصدير تكوين الخدمة %(service)s"
+
+msgid "tooltip.link.export_template"
+msgstr "تصدير القالب %(template)s"
 
 msgid "tooltip.link.manage_activation"
 msgstr "إدارة تفعيل %(name)s في الإعدادات العامة"
@@ -7305,6 +9617,21 @@ msgstr "التأخير بالثواني بين محاولات إعادة واج�
 msgid "totp.cant_access"
 msgstr "هل لا يمكنك الوصول إلى رمز المصادقة الخاص بك؟"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "قاعدة البيانات للقراءة فقط، رمز الاسترداد الذي استخدمته يبقى صالحًا."
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "حدث خطأ أثناء استخدام رمز الاسترداد."
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "لم يتم توفير رمز في /totp."
+
+msgid "totp.flash.token_invalid"
+msgstr "الرمز غير صالح."
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "لقد استخدمت أحد رموز الاسترداد الخاصة بك. تبقى لديك %(len)s."
+
 msgid "totp.or_use_security_key"
 msgstr "أو استخدم مفتاح الأمان"
 
@@ -7370,6 +9697,78 @@ msgstr "الواجهة الخلفية هي مجموعة مُسمَّاة من ا
 
 msgid "upstreams.empty_title"
 msgstr "لا توجد واجهات خلفية بعد"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "مطلوب خادم واحد على الأقل"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "مطلوب خدمة واحدة على الأقل"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "تعذّر ربط الواجهة الخلفية: %(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "تعذّر إنشاء الواجهة الخلفية: %(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "تعذّر حذف الواجهة الخلفية: %(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "تعذّر فصل الواجهة الخلفية: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "تعذّر جلب الخدمات لتخصيصات الواجهة الخلفية: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "تعذّر جلب الواجهات الخلفية: %(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "تعذّر تحديث الواجهة الخلفية: %(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "يجب أن يكون عدد keepalive رقمًا صحيحًا موجبًا"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "يجب أن يبدأ مسار الوكيل العكسي بـ /"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "يجب أن تكون الطريقة إحدى %(value)s"
+
+msgid "upstreams.flash.name_required"
+msgstr "اسم الواجهة الخلفية مطلوب"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "يجب أن يكون البروتوكول أحد %(value)s"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "لا يمكن أن تحتوي الواجهة الخلفية على أكثر من %(value)s خادم"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "لا يمكن ربط واجهة خلفية بأكثر من %(value)s خدمة"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "تم إرفاق الـ upstream. الخدمات: %(len)s"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "تم إنشاء الواجهة الخلفية %(value)s بنجاح"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "تم حذف الواجهة الخلفية بنجاح"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "تم فصل الواجهة الخلفية بنجاح"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "الواجهة الخلفية مطلوبة"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "الواجهة الخلفية والخدمة مطلوبتان"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "تم تحديث الواجهة الخلفية بنجاح"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "يجب أن يكون وزن %(host)s وأقصى عدد من الفشل أرقامًا صحيحة"
 
 msgid "upstreams.keepalive"
 msgstr "الحفاظ على الاتصال"
@@ -7454,6 +9853,15 @@ msgstr "%(count)s من الخدمات مخفية: لا يمكن ربط مجمو�
 
 msgid "upstreams.truncated"
 msgstr "تُعرض أول 500 مجموعة خوادم خلفية فقط. ضيّق القائمة عبر API للحصول على النتيجة الكاملة."
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "تعذّر الاتصال بـ redis"
+
+msgid "utils.flash.invalid_request"
+msgstr "طلب غير صالح"
+
+msgid "utils.flash.missing_form"
+msgstr "%(key)s مفقود في النموذج"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "أدخل كلمة مرورك الحالية لإضافة مفتاح مرور."
@@ -7550,6 +9958,27 @@ msgstr "الخدمات المُمكَّنة"
 
 msgid "web_cache.error"
 msgstr "خطأ"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "خطأ في جلب مقاييس ذاكرة التخزين المؤقت للويب: %(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "خطأ في جلب حالة ذاكرة التخزين المؤقت للويب: %(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "خطأ في تفريغ ذاكرة التخزين المؤقت للويب: %(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "تم تفريغ ذاكرة التخزين المؤقت للويب (جميع الإدخالات)"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "تم تفريغ ذاكرة التخزين المؤقت للويب لـ %(url)s"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "مطلوب رابط URL للتفريغ حسب الرابط"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "تم مسح ذاكرة الويب المؤقتة. النسخ التي مُسحت: %(value)s، الفاشلة: %(value2)s، المتعذر الوصول إليها والمتخطاة: %(value3)s (لم يُضف شيء إلى قائمة الانتظار)."
 
 msgid "web_cache.hit_rate"
 msgstr "معدل النجاح"
@@ -7686,6 +10115,9 @@ msgstr "القاعدة %(n)s من %(total)s، تغيير الموضع"
 msgid "workflows.aria.collapse"
 msgstr "طي"
 
+msgid "workflows.aria.collapseRule"
+msgstr "طي القاعدة %(n)s"
+
 msgid "workflows.aria.combinator"
 msgstr "تغيير عامل الربط، الحالي"
 
@@ -7704,6 +10136,9 @@ msgstr "اسحب لإعادة الترتيب"
 msgid "workflows.aria.expand"
 msgstr "توسيع"
 
+msgid "workflows.aria.expandRule"
+msgstr "توسيع القاعدة %(n)s"
+
 msgid "workflows.aria.groupKind"
 msgstr "نوع المجموعة"
 
@@ -7713,11 +10148,20 @@ msgstr "أضف قاعدة في الموضع %(n)s"
 msgid "workflows.aria.more"
 msgstr "المزيد"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "إجراءات إضافية للقاعدة %(n)s"
+
 msgid "workflows.aria.moveDown"
 msgstr "نقل لأسفل — يعمل لاحقًا"
 
 msgid "workflows.aria.moveRule"
 msgstr "نقل القاعدة"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "نقل القاعدة %(n)s لأسفل"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "نقل القاعدة %(n)s لأعلى"
 
 msgid "workflows.aria.moveUp"
 msgstr "نقل لأعلى — يعمل مبكرًا"
@@ -7754,6 +10198,9 @@ msgstr "عدد الطلبات"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "مجموعة الموارد"
+
+msgid "workflows.aria.ruleCard"
+msgstr "القاعدة %(n)s من %(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "مشاكل التحقق من القاعدة %(count)s"
@@ -7917,6 +10364,9 @@ msgstr "تعمل مسارات العمل بترتيب الإرفاق، وتعم�
 msgid "workflows.entry_title"
 msgstr "كل طلب إلى خدمة مرفقة"
 
+msgid "workflows.err.load"
+msgstr "تعذّرت قراءة القواعد المخزَّنة. الحفظ معطّل حتى لا تُستبدل؛ أعد تحميل الصفحة."
+
 msgid "workflows.err.save"
 msgstr "تعذر الحفظ"
 
@@ -7949,6 +10399,69 @@ msgstr "يتابع الطلب إلى سير العمل المرفق التالي
 
 msgid "workflows.exit_title"
 msgstr "لم تتطابق أي قاعدة"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "تعذّر ربط سير العمل: %(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "تعذّر نسخ سير العمل: %(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "تعذّر إنشاء سير العمل: %(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "تعذّر حذف سير العمل: %(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "تعذّر فصل سير العمل: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "تعذّر جلب الخدمات لتخصيصات سير العمل: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "تعذّر جلب سير العمل: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "تعذّر جلب سير العمل: %(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "تعذّر تحديث سير العمل: %(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "اسم سير العمل مطلوب"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "تعذّرت قراءة قائمة الخدمات؛ أعد فتح الصفحة وحاول مرة أخرى"
+
+msgid "workflows.flash.too_many_services"
+msgstr "لا يمكن ربط سير عمل بأكثر من %(value)s خدمة"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "تم نسخ سير العمل باسم %(name)s"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "تم إنشاء سير العمل %(value)s بنجاح"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "تم حذف سير العمل بنجاح"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "تم فصل سير العمل بنجاح"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "سير العمل والاسم الجديد مطلوبان"
+
+msgid "workflows.flash.workflow_required"
+msgstr "سير العمل مطلوب"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "سير العمل والخدمة مطلوبان"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "تم تحديث خدمات سير العمل (%(len)s مرفقة)"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "تم تحديث سير العمل بنجاح"
 
 msgid "workflows.gate.and"
 msgstr "وفقط بعد أن يرسل عنوان IP نفسه للعميل أكثر من"
@@ -8058,8 +10571,14 @@ msgstr "، يتوقف التقييم هنا ولا يتم الوصول إلى أ
 msgid "workflows.rules"
 msgstr "القواعد"
 
-msgid "workflows.say.actionChanged"
-msgstr "تغير الإجراء إلى %(type)s. وما زال الإجراء الوحيد وما زال ينهي التقييم."
+msgid "workflows.say.actionChangedBlock"
+msgstr "تم تغيير الإجراء إلى حظر. لا يزال الإجراء الوحيد، وما زال يوقف التقييم."
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "تم تغيير الإجراء إلى اختبار تحقق. لا يزال الإجراء الوحيد، وما زال يوقف التقييم."
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "تم تغيير الإجراء إلى إعادة توجيه. لا يزال الإجراء الوحيد، وما زال يوقف التقييم."
 
 msgid "workflows.say.added"
 msgstr "أُضيفت القاعدة في الموضع %(n)s، وهو الأخير، لذلك تُفحص كل القواعد أعلاها أولًا."
@@ -8086,13 +10605,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "أُزيلت القيمة الأخيرة؛ لا يمكن حفظ هذا الشرط حتى يحتوي على قيمة."
 
 msgid "workflows.say.moved"
-msgstr "نُقلت %(name)s إلى الموضع %(to)s من %(total)s%(how)s. وهي تعمل الآن %(where)s."
+msgstr "نُقلت %(name)s إلى الموضع %(to)s من %(total)s."
+
+msgid "workflows.say.movedDrag"
+msgstr "سُحبت %(name)s إلى الموضع %(to)s من %(total)s."
+
+msgid "workflows.say.movedKeyboard"
+msgstr "نُقلت %(name)s باستخدام لوحة المفاتيح إلى الموضع %(to)s من %(total)s."
 
 msgid "workflows.say.predicateCap"
 msgstr "تحتوي هذه القاعدة بالفعل على الحد الأقصى، وهو %(max)s شرطًا."
-
-msgid "workflows.say.ruleAbove"
-msgstr "القاعدة أعلاه"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "عُطّلت %(name)s؛ يتم تجاوزها بالكامل وترى القواعد أسفلها هذه الطلبات الآن."
@@ -8101,13 +10623,16 @@ msgid "workflows.say.ruleEnabled"
 msgstr "مُكّنت %(name)s؛ يجري تقييمها مجددًا في الموضع %(n)s."
 
 msgid "workflows.say.runsAfter"
-msgstr "بعد %(name)s"
+msgstr "تعمل الآن بعد %(name)s."
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "تعمل الآن بعد القاعدة أعلاه."
 
 msgid "workflows.say.runsFirst"
-msgstr "أولًا"
+msgstr "تعمل الآن أولًا."
 
 msgid "workflows.say.runsLast"
-msgstr "أخيرًا"
+msgstr "تعمل الآن أخيرًا."
 
 msgid "workflows.say.saved"
 msgstr "حُفظت القواعد ودُفعت إلى الخدمات المرفقة."
@@ -8116,13 +10641,7 @@ msgid "workflows.say.theRule"
 msgstr "القاعدة"
 
 msgid "workflows.say.valuesDropped"
-msgstr "تغير الشرط إلى %(type)s؛ تعذر نقل القيم البالغ عددها %(count)s."
-
-msgid "workflows.say.via.drag"
-msgstr "بالسحب"
-
-msgid "workflows.say.via.keyboard"
-msgstr "بلوحة المفاتيح"
+msgstr "تغيّر الشرط. القيم التي تعذر نقلها: %(count)s."
 
 msgid "workflows.say.viewCanvas"
 msgstr "عرض اللوحة. تُنفذ القواعد من اليسار إلى اليمين؛ ويُعتمد أول تطابق."
@@ -8242,7 +10761,16 @@ msgid "workflows.test.out_draft"
 msgstr "هذه الخدمة مسودة؛ لم يُجمّع لها سير عمل بعد."
 
 msgid "workflows.test.out_match"
-msgstr "تطابق %(workflow)s · %(rule)s ونفّذ %(action)s على الطلب."
+msgstr "تطابقت %(workflow)s · %(rule)s."
+
+msgid "workflows.test.out_match_block"
+msgstr "تطابقت %(workflow)s · %(rule)s وتم حظر الطلب."
+
+msgid "workflows.test.out_match_challenge"
+msgstr "تطابقت %(workflow)s · %(rule)s وتم تحدي الطلب."
+
+msgid "workflows.test.out_match_redirect"
+msgstr "تطابقت %(workflow)s · %(rule)s وتمت إعادة توجيه الطلب."
 
 msgid "workflows.test.out_no_match"
 msgstr "لم تتطابق أي قاعدة. يتابع الطلب إلى بقية حزمة الأمان."
@@ -8320,7 +10848,7 @@ msgid "workflows.tree.empty"
 msgstr "مجموعة فارغة؛ أضف شرطًا، فلا يمكن حفظها هكذا."
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "لا تحتوي أي مجموعة على إدخالات من نوع %(kind)s"
+msgstr "لا تحتوي أي مجموعة موارد على إدخالات من هذا النوع."
 
 msgid "workflows.tree.noneMeta"
 msgstr "يتطابق عندما لا يكون أي منها صحيحًا"

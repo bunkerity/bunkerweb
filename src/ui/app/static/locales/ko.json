@@ -3,15 +3,15 @@
     "build_with": "제작 도구",
     "gnu_license": "GNU Affero 일반 공중 사용 허가서 v3.0",
     "license_title": "라이선스",
-    "socials": "소셜 미디어",
-    "tagline": "단순함 속에 담긴 강력한 보안",
-    "title": "BunkerWeb 정보",
     "social": {
       "discord": "디스코드",
       "instagram": "인스타그램",
       "linkedin": "링크드인",
       "reddit": "레딧"
     },
+    "socials": "소셜 미디어",
+    "tagline": "단순함 속에 담긴 강력한 보안",
+    "title": "BunkerWeb 정보",
     "version": "버전: {{version}}"
   },
   "accordion": {
@@ -24,6 +24,7 @@
   },
   "alert": {
     "configs_import_invalid_file": "유효한 사용자 지정 구성 파일(.json)을 업로드하십시오.",
+    "custom_end_date_past": "사용자 지정 종료 날짜는 미래여야 합니다.",
     "custom_end_date_required": "사용자 지정 종료 날짜를 선택해 주세요.",
     "important": "중요",
     "no_changes_detected": "감지된 변경 사항이 없습니다.",
@@ -34,12 +35,13 @@
     "plugin_file_too_large": "플러그인 아카이브가 50 MB 제한을 초과합니다.",
     "plugin_upload_failed": "플러그인 아카이브를 업로드하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
     "services_import_invalid_file": "유효한 서비스 내보내기 파일(.env 또는 .zip)을 업로드하세요.",
-    "credential_action_failed": "작업이 실패했습니다.",
-    "enroll_failed": "등록 코드를 발급할 수 없습니다."
+    "enroll_failed": "등록 코드를 발급할 수 없습니다.",
+    "credential_action_failed": "작업이 실패했습니다."
   },
   "aria": {
     "label": {
       "clear_search": "검색 지우기",
+      "clone_item": "{{name}} 복제",
       "close": "닫기",
       "collapse_multiline": "여러 줄 항목 접기",
       "configs_dropzone": "사용자 지정 설정 내보내기 파일을 선택하거나 여기에 놓으세요",
@@ -51,6 +53,7 @@
       "level_filter": "수준별 로그 줄 필터링",
       "local_time": "타임스탬프를 현지 시간으로 표시",
       "next_issue": "다음 오류 또는 경고",
+      "open_user_menu": "사용자 메뉴 열기",
       "passkey_name": "패스키 이름",
       "plugins_dropzone": "플러그인 압축 파일을 선택하거나 여기에 놓으세요",
       "prev_issue": "이전 오류 또는 경고",
@@ -61,6 +64,10 @@
       "select_file": "파일 선택",
       "select_page": "페이지 선택",
       "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요",
+      "show_details": "{{name}} 세부 정보 표시",
+      "toggle_item": "{{name}} 전환",
+      "toggle_section": "{{name}} 섹션 전환",
+      "toggle_theme": "다크 모드 전환",
       "toggle_wrap": "줄 바꿈 전환",
       "user_avatar": "사용자 아바타",
       "view_selected_items": "선택된 항목 보기",
@@ -70,7 +77,12 @@
       "github_stars": "GitHub 스타: {{count}}",
       "github_watchers": "GitHub Watch 사용자: {{count}}",
       "secret_value": "비밀 값",
-      "value_hidden": "{{name}}(숨김)"
+      "value_hidden": "{{name}}(숨김)",
+      "certificate_public_details": "인증서 공개 세부정보",
+      "certificate_inventory_assignments": "인증서 인벤토리 할당",
+      "detach_from_service": "{{service}}에서 {{name}} 연결 해제",
+      "remove_this_server": "이 서버 제거",
+      "select_template": "{{name}} 템플릿 선택"
     }
   },
   "badge": {
@@ -116,6 +128,7 @@
     "flash": {
       "ban_failed": "{{ip}} 차단에 실패했습니다: {{error}}",
       "ban_success": "{{ip}}을(를) 차단했습니다.",
+      "custom_end_date_in_past": "{{ip}}의 사용자 지정 차단 종료 날짜는 미래여야 합니다",
       "invalid_custom_duration": "{{ip}}의 사용자 지정 차단 기간이 잘못되었습니다",
       "invalid_custom_end_date": "{{ip}}의 사용자 지정 차단 종료일이 잘못되었습니다",
       "invalid_duration": "잘못된 차단 기간: {{duration}}",
@@ -126,7 +139,20 @@
       "unban_failed": "{{ip}} 차단 해제에 실패했습니다: {{error}}",
       "unban_success": "{{ip}}의 차단을 해제했습니다.",
       "update_duration_failed": "{{ip}}의 차단 기간 업데이트에 실패했습니다: {{error}}",
-      "update_duration_success": "{{ip}}의 차단 기간을 업데이트했습니다."
+      "update_duration_success": "{{ip}}의 차단 기간을 업데이트했습니다.",
+      "no_matching_bans": "일치하는 차단 항목이 없습니다.",
+      "invalid_duration_selection_mode": "잘못된 기간 선택 모드입니다.",
+      "invalid_updates_parameter_bans_update_duration": "/bans/update_duration의 updates 매개변수가 잘못되었습니다.",
+      "no_updates": "업데이트가 없습니다.",
+      "invalid_filtered_duration_source": "잘못된 필터링된 기간 소스입니다.",
+      "invalid_unban_selection_mode": "잘못된 차단 해제 선택 모드입니다.",
+      "invalid_ips_parameter_bans_unban": "/bans/unban의 ips 매개변수가 잘못되었습니다.",
+      "no_bans": "차단 항목이 없습니다.",
+      "invalid_filtered_unban_source": "잘못된 필터링된 차단 해제 소스입니다.",
+      "no_matching_reports": "일치하는 보고서가 없습니다.",
+      "invalid_ban_selection_mode": "잘못된 차단 선택 모드입니다.",
+      "invalid_bans_parameter_bans_ban": "/bans/ban의 bans 매개변수가 잘못되었습니다.",
+      "invalid_filtered_ban_source": "잘못된 필터링된 차단 소스입니다."
     }
   },
   "breadcrumb": {
@@ -138,8 +164,8 @@
     "timings": "처리 시간",
     "configs": "설정",
     "extra_pages": "추가 페이지",
-    "global_settings": "전역 설정",
     "global_config": "전역 구성",
+    "global_settings": "전역 설정",
     "home": "홈",
     "instances": "인스턴스",
     "jobs": "작업",
@@ -169,6 +195,7 @@
     "add_plugins": "플러그인 추가",
     "auto_refresh": "자동 새로고침",
     "ban": "차단",
+    "ban_all_filtered": "일치하는 모든 보고서 차단",
     "ban_selected": "선택 항목 차단",
     "cache": "캐시",
     "cancel": "취소",
@@ -177,7 +204,8 @@
     "clone": "복제",
     "columns": "열",
     "convert_configs": "설정 전환",
-    "convert_configs_to": "{{state}}(으)로 전환",
+    "convert_to_draft": "초안으로 변환",
+    "convert_to_online": "온라인으로 변환",
     "convert_services": "서비스 전환",
     "copy": "복사",
     "copy_codes": "코드 복사",
@@ -197,6 +225,7 @@
     "export_csv": "CSV",
     "export_excel": "Excel",
     "fetch_global": "전역 설정 가져오기",
+    "filtered_actions": "필터링된 작업",
     "filters_suffix": " 필터",
     "follow": "추적",
     "force_check": "강제 확인",
@@ -207,6 +236,7 @@
     "history": "기록",
     "import_configs": "사용자 지정 설정 가져오기",
     "import_services": "서비스 가져오기",
+    "import_template": "템플릿 가져오기",
     "login": "로그인",
     "multiple_add": "추가",
     "multiple_hide": "숨기기",
@@ -248,19 +278,17 @@
     "submit": "제출",
     "subscribe": "구독",
     "unban": "차단 해제",
+    "unban_all_filtered": "일치하는 모든 차단 해제",
     "update_duration": "차단 기간 업데이트",
+    "update_duration_all_filtered": "일치하는 모든 차단 기간 변경",
     "update_key": "키 업데이트",
     "upload_photo": "새 사진 업로드",
+    "verify": "확인",
     "view_details": "상세 보기",
     "view_raw_data": "원본 데이터 보기",
     "wipe_other_sessions": "다른 세션 로그아웃",
-    "ban_all_filtered": "일치하는 모든 보고서 차단",
-    "filtered_actions": "필터링된 작업",
-    "unban_all_filtered": "일치하는 모든 차단 해제",
-    "update_duration_all_filtered": "일치하는 모든 차단 기간 변경",
     "use_template": "템플릿 사용",
     "edit": "편집",
-    "verify": "확인",
     "view": "보기",
     "rename": "이름 변경",
     "add_passkey": "패스키 추가",
@@ -279,10 +307,103 @@
     "kpi_files": "파일",
     "kpi_per_service": "서비스별",
     "subtitle": "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다.",
-    "title": "캐시 파일"
+    "title": "캐시 파일",
+    "flash": {
+      "error_deleting_cache_files": "캐시 파일 삭제 중 오류 발생: {{message}}",
+      "successfully_deleted_cache_file": "캐시 파일 {{deleted_count}}개를 삭제했습니다",
+      "successfully_deleted_cache_files": "캐시 파일 {{deleted_count}}개를 삭제했습니다",
+      "deleted_files_errors": "{{deleted_count}}개 파일 삭제됨, {{len}}개 오류 발생: {{value}}",
+      "api_unavailable": "API를 사용할 수 없습니다: {{message}}",
+      "error_fetching_cache_file": "캐시 파일을 가져오는 중 오류 발생: {{message}}",
+      "cache_file_job_plugin_not_found": "작업 {{job_name}}, 플러그인 {{plugin_id}}의 캐시 파일 {{file_name}}을(를) 찾을 수 없습니다",
+      "cache_file_job_plugin_not_found_service": "작업 {{job_name}}, 플러그인 {{plugin_id}}, 서비스 {{service}}의 캐시 파일 {{file_name}}을(를) 찾을 수 없습니다",
+      "error_fetching_cache_files": "캐시 파일을 가져오는 중 오류 발생: {{message}}",
+      "invalid_cache_files_parameter": "잘못된 캐시 파일 매개변수",
+      "no_cache_files_selected": "선택된 캐시 파일이 없습니다"
+    }
+  },
+  "compose": {
+    "always_on": "항상 켜짐",
+    "count": "{{on}} 활성화됨 · {{total}} 사용 가능 · {{locked}} 잠김",
+    "entries": "{{count}} 설정됨",
+    "filter": {
+      "all": "전체",
+      "changed": "변경됨",
+      "on": "켜짐"
+    },
+    "locked": "여기에서는 제어 불가",
+    "provenance": {
+      "api": "API를 통해 관리됨",
+      "attachment": "첨부 파일",
+      "clone": "복제",
+      "default": "기본",
+      "edited": "여기 수정",
+      "global": "전역에서",
+      "managed": "{{method}}에 의해 설정",
+      "template": "템플릿에서 생성됨"
+    },
+    "set_value": "값을 설정하세요…",
+    "show_more": "{{count}} 더 보기",
+    "unavailable": "플러그인 목록을 로드할 수 없으므로 이 페이지를 안전하게 수정할 수 없습니다. API에 답변하면 다시 로드하세요."
   },
   "configs": {
-    "subtitle": "서비스용 사용자 지정 NGINX 구성 조각 — HTTP, ModSecurity 및 스트림 수준 오버라이드를 생성, 편집 및 관리합니다."
+    "subtitle": "서비스용 사용자 지정 NGINX 구성 조각 — HTTP, ModSecurity 및 스트림 수준 오버라이드를 생성, 편집 및 관리합니다.",
+    "flash": {
+      "no_custom_configurations_found_import_file": "가져오기 파일에서 사용자 지정 설정을 찾을 수 없습니다.",
+      "import_error": "가져오기 오류: {{error}}",
+      "invalid_file_encoding_please_upload_utf": "잘못된 파일 인코딩입니다. UTF-8 JSON 파일을 업로드하세요.",
+      "no_custom_configurations_file_uploaded": "사용자 지정 설정 파일이 업로드되지 않았습니다.",
+      "no_custom_configurations_export": "내보낼 사용자 지정 설정이 없습니다.",
+      "could_not_fetch_custom_configurations_api": "API에서 사용자 지정 설정을 가져오지 못했습니다: {{fetch_err}}",
+      "invalid_configs_parameter_configs_export": "/configs/export의 configs 매개변수가 잘못되었습니다.",
+      "saved_custom_configuration": "사용자 지정 설정 {{new_type}}/{{new_name}}을(를) 저장했습니다",
+      "saved_custom_configuration_service": "서비스 {{service}}의 사용자 지정 설정 {{new_type}}/{{new_name}}을(를) 저장했습니다",
+      "no_values_changed": "변경된 값이 없습니다.",
+      "renaming_template_based_custom_config_not": "템플릿 기반 사용자 지정 설정의 이름 변경은 허용되지 않습니다.",
+      "invalid_name_parameter_configs_new": "/configs/new의 name 매개변수가 잘못되었습니다.",
+      "invalid_type_parameter_configs_new": "/configs/new의 type 매개변수가 잘못되었습니다.",
+      "service_does_not_exist": "서비스 {{new_service}}이(가) 존재하지 않습니다.",
+      "config_not_ui_api_custom_config": "설정 {{config_type}}/{{name}}은(는) UI/API 사용자 지정 설정이 아니므로 편집할 수 없습니다.",
+      "config_not_ui_api_custom_config_service": "서비스 {{service}}의 설정 {{config_type}}/{{name}}은(는) UI/API 사용자 지정 설정이 아니므로 편집할 수 없습니다.",
+      "config_does_not_exist_2": "설정 {{config_type}}/{{name}}이(가) 존재하지 않습니다.",
+      "config_does_not_exist_2_service": "서비스 {{service}}의 설정 {{config_type}}/{{name}}이(가) 존재하지 않습니다.",
+      "config_does_not_exist": "설정 {{clone}}이(가) 존재하지 않습니다.",
+      "created_custom_configuration": "사용자 지정 설정 {{config_type}}/{{config_name}}을(를) 생성했습니다",
+      "created_custom_configuration_service": "서비스 {{service}}의 사용자 지정 설정 {{config_type}}/{{config_name}}을(를) 생성했습니다",
+      "error_occurred_while_saving_custom_configs": "사용자 지정 설정 저장 중 오류가 발생했습니다: {{error_msg}}",
+      "config_already_exists": "설정 {{config_type}}/{{config_name}}이(가) 이미 존재합니다",
+      "config_already_exists_service": "서비스 {{service}}의 설정 {{config_type}}/{{config_name}}이(가) 이미 존재합니다",
+      "deleted_config_one": "설정 삭제됨: {{names}}",
+      "deleted_config_other": "설정 삭제됨: {{names}}",
+      "all_selected_custom_configs_could_not_2": "선택한 모든 사용자 지정 설정을 찾을 수 없거나 UI/API 사용자 지정 설정이 아닙니다.",
+      "custom_config_not_ui_api_custom_2": "사용자 지정 설정 {{skipped_config}}은(는) UI/API 사용자 지정 설정이 아니므로 삭제되지 않습니다.",
+      "error_occurred_while_deleting_custom_configs": "사용자 지정 설정 삭제 중 오류가 발생했습니다: {{e}}",
+      "invalid_configs_parameter_configs_delete": "/configs/delete의 configs 매개변수가 잘못되었습니다.",
+      "no_configs_selected": "선택된 설정이 없습니다.",
+      "converted_configs_online": "\"온라인\" 설정으로 변환됨: {{names}}",
+      "converted_configs_draft": "\"초안\" 설정으로 변환됨: {{names}}",
+      "all_selected_custom_configs_could_not": "선택한 모든 사용자 지정 설정을 찾을 수 없거나, UI/API 사용자 지정 설정이 아니거나, 이미 변환되었습니다.",
+      "custom_config_could_not_found": "사용자 지정 설정 {{missing_config}}을(를) 찾을 수 없습니다.",
+      "custom_config_already_online_will_not": "사용자 지정 설정 {{non_convertible_config}}은(는) 이미 온라인 설정이므로 변환되지 않습니다.",
+      "custom_config_already_draft_will_not": "사용자 지정 설정 {{non_convertible_config}}은(는) 이미 초안 설정이므로 변환되지 않습니다.",
+      "custom_config_not_ui_api_custom": "사용자 지정 설정 {{non_editable_config}}은(는) UI/API 사용자 지정 설정이 아니므로 변환되지 않습니다.",
+      "invalid_configs_parameter_configs_convert": "/configs/convert의 configs 매개변수가 잘못되었습니다.",
+      "failed_import_custom_configuration_one": "사용자 지정 설정 가져오기에 실패했습니다: {{names}}",
+      "failed_import_custom_configuration_other": "사용자 지정 설정 가져오기에 실패했습니다: {{names}}",
+      "skipped_custom_configuration_one": "사용자 지정 설정을 건너뛰었습니다: {{names}}",
+      "skipped_custom_configuration_other": "사용자 지정 설정을 건너뛰었습니다: {{names}}",
+      "overwrote_custom_configuration_one": "사용자 지정 설정을 덮어썼습니다: {{names}}",
+      "overwrote_custom_configuration_other": "사용자 지정 설정을 덮어썼습니다: {{names}}",
+      "imported_custom_configuration_one": "사용자 지정 설정을 가져왔습니다: {{names}}",
+      "imported_custom_configuration_other": "사용자 지정 설정을 가져왔습니다: {{names}}",
+      "missing_value_parameter_configs_new": "/configs/new의 value 매개변수가 없습니다.",
+      "missing_name_parameter_configs_new": "/configs/new의 name 매개변수가 없습니다.",
+      "missing_type_parameter_configs_new": "/configs/new의 type 매개변수가 없습니다.",
+      "missing_service_parameter_configs_new": "/configs/new의 service 매개변수가 없습니다.",
+      "missing_configs_parameter_configs_delete": "/configs/delete의 configs 매개변수가 없습니다.",
+      "missing_convert_parameter_configs_convert": "/configs/convert의 convert_to 매개변수가 없습니다.",
+      "missing_configs_parameter_configs_convert": "/configs/convert의 configs 매개변수가 없습니다."
+    }
   },
   "country": {
     "AD": "안도라",
@@ -549,6 +670,9 @@
       "blocked_unique_ips": {
         "title": "차단된 고유 IP"
       },
+      "certificates": {
+        "title": "인증서"
+      },
       "hide": "이 카드 숨기기",
       "instances": {
         "status": "{{up}} 실행 중 / {{down}} 중지 / {{loading}} 로딩 중",
@@ -575,18 +699,15 @@
         "status": "{{online}} 온라인 / {{draft}} 초안",
         "title": "서비스"
       },
+      "top_reasons": {
+        "title": "주요 보고서 사유"
+      },
       "total_requests": {
         "title": "전체 요청"
-      },
-      "certificates": {
-        "title": "인증서"
       },
       "upstreams": {
         "planned": "곧 출시 예정",
         "title": "업스트림"
-      },
-      "top_reasons": {
-        "title": "주요 보고서 사유"
       }
     },
     "chart": {
@@ -607,13 +728,13 @@
         "http_404": "404 찾을 수 없음",
         "http_429": "429 요청 속도 제한됨"
       },
-      "top_blocked_ips": {
-        "most_blocked": "최다 차단 IP",
-        "title": "최다 차단 IP Top 10"
-      },
       "timeseries": {
         "series": "차단됨",
         "title": "시간별 차단 요청(선택 범위)"
+      },
+      "top_blocked_ips": {
+        "most_blocked": "최다 차단 IP",
+        "title": "최다 차단 IP Top 10"
       }
     },
     "map": {
@@ -621,19 +742,6 @@
       "hover_info": "국가 위에 마우스를 올리세요",
       "legend": "범례",
       "no_data": "데이터 없음"
-    },
-    "window": {
-      "last_days": "지난 {{days}}일",
-      "title": "대시보드 창"
-    },
-    "tile": {
-      "bans_active": "활성 차단",
-      "jobs": "예약 작업",
-      "trend": "차단 요청 추세"
-    },
-    "welcome": {
-      "title": "다시 오신 것을 환영합니다, {{user}}",
-      "greeting": "다시 오신 것을 환영합니다,"
     },
     "mini": {
       "across_countries": "{{count}} 국가를 통해",
@@ -649,6 +757,19 @@
       "trend_vs_prev": "이전과 비교",
       "vs_prev": "이전과 비교"
     },
+    "tile": {
+      "bans_active": "활성 차단",
+      "jobs": "예약 작업",
+      "trend": "차단 요청 추세"
+    },
+    "welcome": {
+      "title": "다시 오신 것을 환영합니다, {{user}}",
+      "greeting": "다시 오신 것을 환영합니다,"
+    },
+    "window": {
+      "last_days": "지난 {{days}}일",
+      "title": "대시보드 창"
+    },
     "panel": {
       "timeseries_sub": "선택 범위",
       "top_ips_sub": "요청 수 기준",
@@ -659,10 +780,70 @@
     }
   },
   "datatable": {
-    "bulk_select_all_filtered": "일치하는 {{entity}} {{count}}개 모두 선택",
-    "bulk_select_all_done": "일치하는 {{entity}} {{count}}개가 모두 선택되었습니다.",
+    "bulk_select": {
+      "bans": {
+        "page_one": "이 페이지의 차단 항목 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 차단 항목 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 차단 항목 {{count}}개 모두 선택",
+        "all_done": "일치하는 차단 항목 {{count}}개가 모두 선택되었습니다."
+      },
+      "cache": {
+        "page_one": "이 페이지의 캐시 파일 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 캐시 파일 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 캐시 파일 {{count}}개 모두 선택",
+        "all_done": "일치하는 캐시 파일 {{count}}개가 모두 선택되었습니다."
+      },
+      "configs": {
+        "page_one": "이 페이지의 사용자 정의 설정 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 사용자 정의 설정 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 사용자 정의 설정 {{count}}개 모두 선택",
+        "all_done": "일치하는 사용자 정의 설정 {{count}}개가 모두 선택되었습니다."
+      },
+      "instances": {
+        "page_one": "이 페이지의 인스턴스 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 인스턴스 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 인스턴스 {{count}}개 모두 선택",
+        "all_done": "일치하는 인스턴스 {{count}}개가 모두 선택되었습니다."
+      },
+      "items": {
+        "page_one": "이 페이지의 항목 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 항목 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 항목 {{count}}개 모두 선택",
+        "all_done": "일치하는 항목 {{count}}개가 모두 선택되었습니다."
+      },
+      "jobs": {
+        "page_one": "이 페이지의 작업 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 작업 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 작업 {{count}}개 모두 선택",
+        "all_done": "일치하는 작업 {{count}}개가 모두 선택되었습니다."
+      },
+      "plugins": {
+        "page_one": "이 페이지의 플러그인 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 플러그인 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 플러그인 {{count}}개 모두 선택",
+        "all_done": "일치하는 플러그인 {{count}}개가 모두 선택되었습니다."
+      },
+      "reports": {
+        "page_one": "이 페이지의 보고서 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 보고서 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 보고서 {{count}}개 모두 선택",
+        "all_done": "일치하는 보고서 {{count}}개가 모두 선택되었습니다."
+      },
+      "services": {
+        "page_one": "이 페이지의 서비스 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 서비스 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 서비스 {{count}}개 모두 선택",
+        "all_done": "일치하는 서비스 {{count}}개가 모두 선택되었습니다."
+      },
+      "templates": {
+        "page_one": "이 페이지의 템플릿 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 템플릿 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 템플릿 {{count}}개 모두 선택",
+        "all_done": "일치하는 템플릿 {{count}}개가 모두 선택되었습니다."
+      }
+    },
     "bulk_select_clear": "선택 지우기",
-    "bulk_select_page": "이 페이지의 {{entity}} {{count}}개가 모두 선택되었습니다.",
+    "select_row": "행 선택",
     "info_bans": "{{total}}개의 차단 항목 중 {{start}}~{{end}} 표시 중",
     "info_cache": "{{total}}개의 캐시 파일 중 {{start}}~{{end}} 표시 중",
     "info_configs": "{{total}}개의 사용자 정의 설정 중 {{start}}~{{end}} 표시 중",
@@ -742,8 +923,33 @@
     "select_rows_templates_0": "선택된 템플릿 없음",
     "select_rows_templates_1": "1개의 템플릿 선택됨",
     "select_rows_templates_plural": "%d개의 템플릿 선택됨",
-    "selected_list_count": "{{count}} {{entity}} 선택됨",
-    "selected_list_empty": "{{entity}} 선택되지 않음.",
+    "selected_list": {
+      "configs": {
+        "count_one": "사용자 정의 설정 {{count}}개 선택됨",
+        "count_other": "사용자 정의 설정 {{count}}개 선택됨",
+        "empty": "선택된 사용자 정의 설정 없음."
+      },
+      "items": {
+        "count_one": "항목 {{count}}개 선택됨",
+        "count_other": "항목 {{count}}개 선택됨",
+        "empty": "선택된 항목 없음."
+      },
+      "plugins": {
+        "count_one": "플러그인 {{count}}개 선택됨",
+        "count_other": "플러그인 {{count}}개 선택됨",
+        "empty": "선택된 플러그인 없음."
+      },
+      "services": {
+        "count_one": "서비스 {{count}}개 선택됨",
+        "count_other": "서비스 {{count}}개 선택됨",
+        "empty": "선택된 서비스 없음."
+      },
+      "templates": {
+        "count_one": "템플릿 {{count}}개 선택됨",
+        "count_other": "템플릿 {{count}}개 선택됨",
+        "empty": "선택된 템플릿 없음."
+      }
+    },
     "zero_records_bans": "일치하는 차단 항목이 없습니다.",
     "zero_records_cache": "일치하는 캐시 파일이 없습니다.",
     "zero_records_configs": "일치하는 설정이 없습니다.",
@@ -802,9 +1008,10 @@
   },
   "flash": {
     "check_jobs_for_details": "자세한 내용은 작업 페이지를 확인하세요.",
-    "last_configuration_change_failed": "마지막 구성 변경 사항을 적용할 수 없었습니다.",
+    "configuration_pending_instance": "구성이 아직 적용되지 않음 — 인스턴스 기동 대기 중.",
     "easter_egg": "이 글을 보고 계신다면 호기심이 많으시군요!",
     "error": "오류",
+    "last_configuration_change_failed": "마지막 구성 변경 사항을 적용할 수 없었습니다.",
     "message": "정보",
     "pro": "BunkerWeb PRO",
     "pro_services_exceeded": "PRO 라이선스에서 허용하는 것보다 많은 서비스가 있습니다. 라이선스를 업그레이드하거나 일부 서비스를 초안(Draft) 모드로 전환하여 PRO 라이선스를 활성화하세요.",
@@ -812,7 +1019,19 @@
       "just_now": "방금 전"
     },
     "warning": "경고",
-    "configuration_pending_instance": "구성이 아직 적용되지 않음 — 인스턴스 기동 대기 중."
+    "do_not_have_write_permission": "쓰기 권한이 없습니다",
+    "database_read_only_mode": "데이터베이스가 읽기 전용 모드입니다",
+    "error_occurred_while_saving_custom_configs": "사용자 지정 설정 저장 중 오류가 발생했습니다: {{e}}",
+    "service_does_not_exist": "서비스 {{service}}이(가) 존재하지 않습니다.",
+    "invalid_convert_parameter": "잘못된 convert_to 매개변수입니다.",
+    "import_warning": "가져오기 경고: {{error}}",
+    "could_not_fetch_global_settings_api": "API에서 전역 설정을 가져오지 못했습니다.",
+    "plugin_not_found": "플러그인을 찾을 수 없습니다",
+    "scheduler_will_attempt_apply_changes": "스케줄러가 변경 사항 적용을 시도합니다.",
+    "could_not_fetch_resource_groups": "리소스 그룹을 가져오지 못했습니다: {{message}}",
+    "error_fetching_instances": "인스턴스를 가져오는 중 오류 발생",
+    "description_too_long": "설명은 4000자를 초과할 수 없습니다",
+    "cors_or_ajax_request_required": "CORS 또는 AJAX 요청이 필요합니다"
   },
   "footer": {
     "blog": "블로그",
@@ -826,7 +1045,8 @@
     "checkbox": {
       "include_attached_configs": "첨부된 사용자 지정 설정 포함",
       "overwrite_existing_configs": "기존 UI/API 사용자 지정 설정 덮어쓰기",
-      "remember_me": "로그인 상태 유지"
+      "remember_me": "로그인 상태 유지",
+      "replace_existing_template": "동일한 id의 템플릿이 있으면 교체"
     },
     "help": {
       "ban_specific_service": "차단은 이 특정 서비스에만 적용됩니다.",
@@ -834,7 +1054,8 @@
       "hostname_special_chars": "프로토콜/포트 지정에는 '/'와 ':'만 허용됩니다.",
       "multivalue_separator": "값은 다음으로 구분됩니다:",
       "permanent_ban": "체크하면 수동으로 제거하기 전까지 차단이 만료되지 않습니다.",
-      "photo_extensions": "JPG, GIF, PNG 파일만 허용됩니다. 최대 크기: 800KB."
+      "photo_extensions": "JPG, GIF, PNG 파일만 허용됩니다. 최대 크기: 800KB.",
+      "secret_stored": "값이 저장되어 있으며 표시되지 않습니다. 유지하려면 필드를 그대로 두고, 교체하려면 새 값을 입력하고, 제거하려면 필드를 지우세요."
     },
     "label": {
       "2fa_code": "2단계 인증 코드",
@@ -889,6 +1110,7 @@
       "secret_token": "비밀 토큰",
       "server_name": "서버 이름",
       "service_name": "서비스 이름",
+      "template_file": "템플릿 파일",
       "template_id": "템플릿 ID",
       "theme": "테마",
       "type": "유형",
@@ -906,9 +1128,9 @@
       "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
       "zerossl_api_max_time": "ZeroSSL API 최대 시간",
       "passkey_name": "패스키 이름",
+      "enrollment_code": "등록 코드",
       "enroll_oneliner_docker": "Docker",
-      "enroll_oneliner_linux": "Linux",
-      "enrollment_code": "등록 코드"
+      "enroll_oneliner_linux": "Linux"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
@@ -936,11 +1158,6 @@
     "view_all_settings": "모든 {{count}} 설정 보기"
   },
   "instance": {
-    "type": {
-      "container": "컨테이너",
-      "pod": "포드(Pod)",
-      "static": "정적"
-    },
     "enrollment": {
       "enrolled": "등록됨",
       "pending": "등록 대기 중",
@@ -948,6 +1165,11 @@
     },
     "tls": {
       "pinned": "TLS 고정됨"
+    },
+    "type": {
+      "container": "컨테이너",
+      "pod": "포드(Pod)",
+      "static": "정적"
     }
   },
   "instances": {
@@ -955,7 +1177,32 @@
     "loading": "로딩 중",
     "subtitle": "이 UI에 연결된 BunkerWeb 인스턴스를 관리합니다: 생성, 핑, 다시 로드, 중지 또는 제거합니다.",
     "total": "총 인스턴스 수",
-    "up": "실행 중"
+    "up": "실행 중",
+    "flash": {
+      "instances_deleted": "다음 인스턴스들이 성공적으로 삭제되었습니다: {{instance}}.",
+      "instance_reloaded": "인스턴스 {{instance}}이(가) 성공적으로 다시 로드되었습니다.",
+      "instance_stopped": "인스턴스 {{instance}}이(가) 성공적으로 중지되었습니다.",
+      "instance_deleted": "인스턴스 {{instance}}이(가) 성공적으로 삭제되었습니다.",
+      "instance_does_not_have_reload_method": "인스턴스 {{instance}}에는 재로드 메서드가 없습니다.",
+      "instance_does_not_have_stop_method": "인스턴스 {{instance}}에는 중지 메서드가 없습니다.",
+      "instance_does_not_exist": "인스턴스 {{instance}}이(가) 존재하지 않습니다.",
+      "couldn_t_delete_instance": "인스턴스를 삭제할 수 없습니다: {{message}}",
+      "couldn_t_delete_instances": "인스턴스를 삭제할 수 없습니다: {{message}}",
+      "could_not_found_one": "선택한 인스턴스를 찾을 수 없거나 UI/API 인스턴스가 아닙니다.",
+      "could_not_found_other": "선택한 인스턴스를 모두 찾을 수 없거나 UI/API 인스턴스가 아닙니다.",
+      "instance_not_ui_api_instance_will": "인스턴스 {{non_deletable_instance}}은(는) UI/API 인스턴스가 아니므로 삭제되지 않습니다.",
+      "no_instance_selected": "선택된 인스턴스가 없습니다.",
+      "instance_created_successfully": "인스턴스 {{value}}을(를) 성공적으로 생성했습니다.",
+      "could_not_fetch_instances_api": "API에서 인스턴스를 가져오지 못했습니다.",
+      "missing_instances_parameter_instances_ping": "/instances/ping의 instances 매개변수가 없습니다.",
+      "missing_instances_parameter_instances_reload": "/instances/reload의 instances 매개변수가 없습니다.",
+      "missing_instances_parameter_instances_stop": "/instances/stop의 instances 매개변수가 없습니다.",
+      "missing_instances_parameter_instances_delete": "/instances/delete의 instances 매개변수가 없습니다.",
+      "missing_instance_name_parameter_instances_new": "/instances/new의 instance name 매개변수가 없습니다.",
+      "missing_instance_hostname_parameter_instances_new": "/instances/new의 instance hostname 매개변수가 없습니다.",
+      "hostname_already_in_use": "호스트명 {{hostname}}은(는) 이미 사용 중입니다.",
+      "could_not_create_instance": "인스턴스를 생성하지 못했습니다: {{message}}"
+    }
   },
   "interval": {
     "day": "매일",
@@ -978,11 +1225,20 @@
       "failed_last_run": "마지막 실행 실패",
       "reload_required": "다시 로드 필요",
       "total": "총 작업 수"
+    },
+    "flash": {
+      "job_plugins_will_run_background_by": "작업의 플러그인은 스케줄러가 백그라운드에서 실행합니다.",
+      "jobs_plugins_will_run_background_by": "플러그인 작업은 스케줄러가 백그라운드에서 실행합니다.",
+      "invalid_jobs_parameter_jobs_run": "/jobs/run의 jobs 매개변수가 잘못되었습니다.",
+      "no_jobs_selected": "선택된 작업이 없습니다.",
+      "error_fetching_jobs": "작업을 가져오는 중 오류 발생: {{message}}",
+      "missing_jobs_parameter_jobs_run": "/jobs/run의 jobs 매개변수가 없습니다."
     }
   },
   "legend": {
     "locked_settings_annotation": "잠금됨 ({{method}})",
-    "locked_settings_hint": "잠금된 설정은 강조 표시됩니다"
+    "locked_settings_hint": "잠금된 설정은 강조 표시됩니다",
+    "raw_setting_drafts": "설정 줄의 시작에서 #을 눌러 초안을 전환하거나 Backspace를 눌러 활성화하세요. 저장하면 적용됩니다. 초안은 값을 유지하며 상속된 값이나 기본값이 적용됩니다."
   },
   "link": {
     "back_to_login": "로그인으로 돌아가기",
@@ -1000,17 +1256,33 @@
     "get_support": "지원 받기"
   },
   "login": {
-    "title": "로그인",
-    "subtitle": "BunkerWeb 계정에 로그인",
-    "or_use_password": "또는 비밀번호 사용",
     "notice_password_changed": "비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요.",
     "notice_session_expired": "변경 사항이 저장되기 전에 세션이 종료되어 아무것도 변경되지 않았습니다. 로그인한 후 다시 시도하세요.",
-    "notice_session_timeout": "세션이 시간 제한에 도달하여 로그아웃되었습니다. 계속하려면 로그인하세요."
+    "notice_session_timeout": "세션이 시간 제한에 도달하여 로그아웃되었습니다. 계속하려면 로그인하세요.",
+    "or_use_password": "또는 비밀번호 사용",
+    "subtitle": "BunkerWeb 계정에 로그인",
+    "title": "로그인",
+    "flash": {
+      "invalid_username_password": "잘못된 사용자 이름 또는 비밀번호입니다",
+      "couldn_t_log_please_try_again": "로그인하지 못했습니다. 다시 시도해 주세요"
+    }
   },
   "logs": {
+    "all_sources": "모든 소스(실시간)",
     "annotation_error": "오류",
     "annotation_warning": "경고",
+    "collapse": "접기",
+    "expand": "펼치기",
     "filter_levels": "수준",
+    "grep_placeholder": "grep…",
+    "level_all": "모든 로그",
+    "level_errors_only": "오류만",
+    "level_security_only": "보안만",
+    "live_title": "실시간 로그",
+    "pause": "일시 정지",
+    "resume": "재개",
+    "tailing_sources": "추적 중 · 소스 {{count}}개",
+    "taller": "더 높게",
     "letsencrypt_logs": "Let's Encrypt 로그",
     "main_logs": "기본 로그",
     "new_lines_sr": "{{count}}개의 새 로그 줄",
@@ -1030,18 +1302,10 @@
     "showing_some": "{{total}}개 중 {{shown}}개 표시",
     "select_file_prompt": "로그 파일 선택하여 내용을 보기",
     "trimmed_notice": "--- 성능을 위해 {{count}}개의 오래된 로그 라인을 제거했습니다 ---",
-    "all_sources": "모든 소스(실시간)",
-    "collapse": "접기",
-    "expand": "펼치기",
-    "grep_placeholder": "grep…",
-    "level_all": "모든 로그",
-    "level_errors_only": "오류만",
-    "level_security_only": "보안만",
-    "live_title": "실시간 로그",
-    "pause": "일시 정지",
-    "resume": "재개",
-    "tailing_sources": "추적 중 · 소스 {{count}}개",
-    "taller": "더 높게"
+    "flash": {
+      "no_such_file": "해당 파일이 없습니다",
+      "invalid_file_path": "잘못된 파일 경로입니다"
+    }
   },
   "modal": {
     "body": {
@@ -1049,7 +1313,14 @@
       "confirm_cache_deletion_alert": "선택한 캐시 파일을 삭제하시겠습니까?",
       "confirm_cache_deletion_alert_plural": "선택한 캐시 파일들을 삭제하시겠습니까?",
       "confirm_configs_conversion": "선택한 사용자 정의 설정을 전환하시겠습니까?",
-      "confirm_configs_conversion_to": "선택한 사용자 정의 설정을 {{state}}(으)로 전환하시겠습니까?",
+      "confirm_service_conversion_online": "선택한 서비스를 온라인으로 변환하시겠습니까?",
+      "confirm_service_conversion_draft": "선택한 서비스를 초안으로 변환하시겠습니까?",
+      "confirm_services_conversion_online": "선택한 서비스를 온라인으로 변환하시겠습니까?",
+      "confirm_services_conversion_draft": "선택한 서비스를 초안으로 변환하시겠습니까?",
+      "confirm_config_conversion_online": "선택한 사용자 지정 설정을 온라인으로 전환하시겠습니까?",
+      "confirm_config_conversion_draft": "선택한 사용자 지정 설정을 초안으로 전환하시겠습니까?",
+      "confirm_configs_conversion_online": "선택한 사용자 지정 설정을 온라인으로 전환하시겠습니까?",
+      "confirm_configs_conversion_draft": "선택한 사용자 지정 설정을 초안으로 전환하시겠습니까?",
       "confirm_configs_deletion_alert": "선택한 사용자 정의 설정을 삭제하시겠습니까?",
       "confirm_configs_deletion_alert_plural": "선택한 사용자 정의 설정들을 삭제하시겠습니까?",
       "confirm_conversion_confirmation": "선택한 서비스를 전환하시겠습니까?",
@@ -1057,6 +1328,8 @@
       "confirm_plugin_deletion": "선택한 플러그인을 삭제하시겠습니까?",
       "confirm_plugin_deletion_plural": "선택한 플러그인들을 삭제하시겠습니까?",
       "confirm_template_deletion": "템플릿 {{name}}을(를) 삭제하시겠습니까?",
+      "confirm_templates_deletion_alert": "선택한 템플릿을 삭제하시겠습니까?",
+      "confirm_templates_deletion_alert_plural": "선택한 템플릿들을 삭제하시겠습니까?",
       "confirmation_instance_deletion": "선택한 인스턴스를 삭제하시겠습니까?",
       "delete_confirmation_alert": "선택한 인스턴스를 삭제하시겠습니까?",
       "delete_confirmation_alert_plural": "선택한 인스턴스들을 삭제하시겠습니까?",
@@ -1075,6 +1348,8 @@
       "import_configs_warning": "scheduler, autoconf 또는 templates에서 만든 사용자 지정 설정은 항상 보존됩니다. UI/API 설정만 덮어쓸 수 있습니다.",
       "import_services_dropzone": "서비스 내보내기 파일을 이곳에 드래그 앤 드롭하거나 클릭하여 선택하세요.",
       "import_services_warning": "서비스를 가져오면 내보내기 파일에서 새 UI 서비스가 생성됩니다. 기존 서비스는 건너뜁니다. 사용자 지정 설정과 함께 내보낸 .zip 아카이브도 지원됩니다.",
+      "import_template_help": "BunkerWeb에서 내보낸 템플릿 패키지(.json) 또는 template.json과 구성이 포함된 템플릿 폴더 하나를 담은 아카이브(.zip, .tar.gz, .tar.xz)입니다. 최대 1MiB.",
+      "import_template_replace_warning": "템플릿을 교체하면 다음 구성 생성 시 이를 사용하는 모든 서비스가 변경됩니다. 플러그인이 소유하거나 웹 UI 외부에서 관리되는 템플릿은 절대 교체되지 않습니다.",
       "instance_creation_alert": "포트나 서버 이름을 입력할 필요가 없습니다. 인스턴스 설정에는 `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, `API_SERVER_NAME`의 값이 사용됩니다.",
       "next_step_in_case_of_issue": "문제가 발생할 경우, 수동으로 안전하지 않은 인증서를 수락할 수 있습니다:",
       "recovery_codes_save_alert": "이 복구 코드를 안전한 장소(비밀번호 관리자 등)에 저장하세요. 인증 기기를 분실했을 때 계정에 접근하는 데 필요합니다.",
@@ -1082,15 +1357,16 @@
       "reset_template_alert": "현재 템플릿 설정과 사용자 정의 설정을 초기화하시겠습니까?",
       "services_conversion_confirmation": "선택한 서비스를 전환하시겠습니까?",
       "services_deletion_confirmation": "선택한 서비스를 삭제하시겠습니까?",
+      "ban_filtered_confirmation": "일치하는 보고서 {{count}}개의 IP를 모두 차단하시겠습니까? 중복 대상은 한 번만 적용됩니다.",
       "unban_confirmation_alert": "선택한 IP 주소의 차단을 해제하시겠습니까?",
       "unban_confirmation_alert_plural": "선택한 IP 주소들의 차단을 해제하시겠습니까?",
-      "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:",
-      "ban_filtered_confirmation": "일치하는 보고서 {{count}}개의 IP를 모두 차단하시겠습니까? 중복 대상은 한 번만 적용됩니다.",
       "unban_filtered_confirmation": "일치하는 차단 {{count}}개를 모두 해제하시겠습니까?",
+      "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:",
       "update_filtered_duration_alert": "일치하는 차단 {{count}}개의 새 기간을 선택하세요:",
-      "enroll_description": "이 변수들로 인스턴스를 시작하세요. 부팅 시 코드를 한 번 사용하고 고유한 자격 증명을 받습니다.",
       "enroll_shown_once": "이 코드는 한 번만 표시됩니다. 지금 복사하세요 — 다시 표시할 수 없습니다.",
-      "confirm_service_mode_conversion": "이 서비스의 선언된 모드를 변경하시겠습니까?"
+      "enroll_description": "이 변수들로 인스턴스를 시작하세요. 부팅 시 코드를 한 번 사용하고 고유한 자격 증명을 받습니다.",
+      "confirm_service_mode_conversion": "이 서비스의 선언된 모드를 변경하시겠습니까?",
+      "service_deletion_confirmation": "선택한 서비스를 삭제하시겠습니까?"
     },
     "button": {
       "fetch_global_settings_confirm": "전역 설정 적용",
@@ -1119,6 +1395,7 @@
       "full_url": "전체 URL",
       "import_configs": "사용자 지정 설정 가져오기",
       "import_services": "서비스 가져오기",
+      "import_template": "템플릿 가져오기",
       "job_history": "최근 10회 작업 실행 기록",
       "job_history_count": "최근 {{count}}회 작업 실행 기록",
       "multiselect_selected": "선택된 항목",
@@ -1133,8 +1410,8 @@
   },
   "mode": {
     "advanced": "고급",
-    "easy": "간편",
     "compose": "작성",
+    "easy": "간편",
     "raw": "원본(Raw)"
   },
   "navbar": {
@@ -1147,7 +1424,14 @@
     "link": {
       "documentation": "문서"
     },
-    "version": "버전"
+    "version": "버전",
+    "aria": {
+      "toggle_navigation": "탐색 전환",
+      "close_navigation": "탐색 닫기",
+      "help": "도움말",
+      "notifications": "알림",
+      "news": "뉴스"
+    }
   },
   "navigation": {
     "about": "정보",
@@ -1175,25 +1459,25 @@
     "plugins": "플러그인",
     "plugins_pages": "플러그인 페이지",
     "pro": "Pro",
+    "redirects": "리디렉션",
     "reports": "보고서",
     "services": "서비스",
     "support": "지원",
     "templates": "템플릿",
+    "upstreams": "업스트림",
+    "workflows": "워크플로우",
     "overview": "개요",
     "configure": "구성",
     "operate": "운영",
     "system": "시스템",
     "edition_community": "커뮤니티",
-    "redirects": "리디렉션",
-    "upstreams": "업스트림",
-    "workflows": "워크플로우",
     "edition_pro": "Pro",
     "crowdsec": "CrowdSec"
   },
   "news": {
     "image_alt": "소식 이미지",
-    "slide": "슬라이드",
-    "posted_on": "게시일:"
+    "posted_on": "게시일:",
+    "slide": "슬라이드"
   },
   "newsletter": {
     "legal_agreement": "뉴스레터 구독을 원하며, 다음 사항을 읽고 동의합니다:",
@@ -1201,7 +1485,51 @@
   },
   "notice": {
     "already_subscribed": "이미 구독 중입니다",
-    "dismiss_mfa": "다시 알리지 않기"
+    "dismiss_mfa": "다시 알리지 않기",
+    "enable_mfa": "계정을 보호하려면 <a href=\"{{url}}\">여기</a>에서 2단계 인증을 활성화하세요"
+  },
+  "onboarding": {
+    "dismiss": "닫기",
+    "error": "안내를 불러오지 못했습니다.",
+    "hint": {
+      "bans": "차단 목록에는 BunkerWeb이 현재 거부 중인 클라이언트가 표시됩니다. 각 행에 사유와 만료 시점이 표시됩니다.",
+      "home": "이 대시보드에서 현재 정상 상태인 인스턴스, 제공 중인 서비스, BunkerWeb이 처리한 트래픽을 확인할 수 있습니다.",
+      "logs": "모든 인스턴스의 실시간 로그이며 인스턴스와 심각도로 필터링할 수 있습니다.",
+      "reports": "차단된 모든 요청이 여기에 기록됩니다. 항목을 열면 어떤 보안 검사가 왜 차단했는지 확인할 수 있습니다.",
+      "title": "빠른 둘러보기"
+    },
+    "item": {
+      "first_block": "BunkerWeb의 요청 차단 동작 확인하기",
+      "https": "HTTPS 설정하기",
+      "install": "한 대 이상의 호스트에 BunkerWeb 설치",
+      "mfa": "MFA 활성화",
+      "pro": "BunkerWeb PRO 활성화",
+      "read_bans": "차단된 대상과 해제 시점 확인하기",
+      "read_home": "대시보드에서 현재 상태 확인하기",
+      "read_logs": "모든 인스턴스의 실시간 로그 보기",
+      "read_reports": "요청이 차단된 이유 확인하기",
+      "service": "첫 서비스 등록",
+      "workflow": "보안 워크플로 연결하기"
+    },
+    "item_hint": {
+      "first_block": "BunkerWeb이 요청을 차단하면 보고서가 여기에 나타납니다 — 잘못된 요청을 보내고 다시 확인해 보세요.",
+      "https": "서비스가 HTTPS로 제공되도록 여기에서 인증서를 추가하거나 생성하세요.",
+      "install": "여기에서 인스턴스를 추가한 다음 첫 구성을 저장하여 관리 대상으로 만드세요.",
+      "mfa": "이 메뉴에서 프로필을 열고 2단계 인증을 켜세요.",
+      "pro": "PRO 플러그인과 지원을 잠금 해제하려면 여기에서 PRO 라이선스 키를 입력하세요.",
+      "read_bans": "여기의 각 행은 차단된 클라이언트, 이유, 차단이 만료되는 시점을 보여줍니다.",
+      "read_home": "이 대시보드는 실행 중인 인스턴스, 제공 중인 서비스, 최근 트래픽을 한눈에 보여줍니다.",
+      "read_logs": "모든 인스턴스의 실시간 로그가 여기에 표시되며 인스턴스와 심각도로 필터링할 수 있습니다.",
+      "read_reports": "여기에서 보고서를 열어 어떤 보안 검사가 이를 막았는지, 그리고 그 이유를 확인하세요.",
+      "service": "여기에서 서비스를 생성하여 BunkerWeb에게 보호할 애플리케이션을 알려 주세요.",
+      "workflow": "여기에서 워크플로를 구성하여 검사와 대응을 하나의 규칙으로 연결하세요."
+    },
+    "not_saved": "저장하지 못했습니다.",
+    "pro_tips": "PRO 팁",
+    "restart": "안내 다시 시작",
+    "restart_help": "시작 단계를 상단 바에 다시 표시합니다.",
+    "subtitle": "몇 단계만 거치면 BunkerWeb이 서비스를 보호하기 시작합니다.",
+    "title": "시작하기"
   },
   "pagination": {
     "page": "페이지"
@@ -1231,10 +1559,60 @@
     }
   },
   "plugins": {
-    "multivalue": {
-      "more_value": "더 보기",
-      "more_values": "더 많은 값",
-      "show_less": "덜 표시"
+    "flash": {
+      "invalid_archive": "파일이 유효한 플러그인 아카이브(.zip, .tar.gz 또는 .tar.xz)가 아닙니다.",
+      "invalid_plugin_id_must_between_4": "잘못된 플러그인 ID입니다 (4~64자, 문자·숫자·밑줄·하이픈만 사용 가능)",
+      "couldn_t_install_catalogue": "{{plugin_id}}을(를) 설치하지 못했습니다: {{message}}",
+      "couldn_t_install_catalogue_2": "{{plugin_id}}을(를) 설치하지 못했습니다: {{e}}",
+      "install_did_not_complete": "{{plugin_id}} 설치가 완료되지 않았습니다: {{detail}}",
+      "refused_install": "{{plugin_id}} 설치가 거부되었습니다: {{problem}}",
+      "couldn_t_update_catalogue": "{{plugin_id}}을(를) 업데이트하지 못했습니다: {{message}}",
+      "couldn_t_update_catalogue_2": "{{plugin_id}}을(를) 업데이트하지 못했습니다: {{e}}",
+      "update_did_not_complete": "{{plugin_id}} 업데이트가 완료되지 않았습니다: {{detail}}",
+      "refused_update": "{{plugin_id}} 업데이트가 거부되었습니다: {{problem}}",
+      "archive_no_longer_matches_what_catalogue": "{{tag}} 아카이브가 더 이상 카탈로그에 나열된 것과 일치하지 않습니다. {{plugin_id}}에 대해 아무것도 설치되지 않았습니다.",
+      "couldn_t_download": "{{plugin_id}}을(를) 다운로드하지 못했습니다: {{e}}",
+      "refused_download": "{{plugin_id}} 다운로드가 거부되었습니다: {{e}}",
+      "plugin_management_restricted_administrators": "플러그인 관리는 관리자만 가능합니다",
+      "community_catalogue_disabled": "커뮤니티 카탈로그가 비활성화되어 있습니다",
+      "no_plugin_data_upload": "업로드할 플러그인 데이터가 없습니다",
+      "couldn_t_update_ui_plugins_via": "API를 통해 UI 플러그인을 업데이트하지 못했습니다: {{e}}",
+      "plugins_uploaded_successfully_2": "플러그인을 성공적으로 업로드했습니다",
+      "plugin_upload_error": "플러그인 업로드 오류 ({{value}}): {{value2}}",
+      "plugins_uploaded_successfully": "플러그인을 성공적으로 업로드했습니다: {{value}}",
+      "plugin_already_exists": "플러그인 {{plugin}}이(가) 이미 존재합니다",
+      "plugin_named_already_exists": "이름이 {{folder_name}}인 플러그인이 이미 존재합니다",
+      "file_plugin_json_missing_one_more": "plugin.json 파일에 다음 키 중 하나 이상이 없습니다: {{value}} ({{value2}})",
+      "file_plugin_json_not_valid_line": "{{file}}의 plugin.json 파일이 유효하지 않습니다 ({{msg}}: {{lineno}}행 {{colno}}열 (문자 {{pos}})) ({{value}})",
+      "not_valid_plugin_plugin_json_file": "{{file}}은(는) 유효한 플러그인이 아닙니다 (plugin.json 파일 없음) ({{value}})",
+      "invalid_plugin_name_can_only_contain": "{{temp_folder_name}}의 플러그인 이름이 잘못되었습니다. (숫자, 문자, 밑줄, 하이픈만 포함 가능, 최소 4자 최대 64자)",
+      "check_logs_more_details": "{{message}}, 자세한 내용은 로그를 확인하세요",
+      "please_upload_new_plugins_reload_plugins": "플러그인을 다시 로드하려면 새 플러그인을 업로드하세요",
+      "couldn_t_update_plugin_2": "플러그인 {{plugin}}을(를) 업데이트하지 못했습니다: {{e}}",
+      "couldn_t_update_plugin": "플러그인 {{plugin}}을(를) 업데이트하지 못했습니다: {{message}}",
+      "couldn_t_delete_plugin": "플러그인 {{plugin}}을(를) 삭제하지 못했습니다: {{message}}",
+      "deleted_plugin_successfully": "플러그인 {{plugin}}을(를) 성공적으로 삭제했습니다",
+      "plugin_enabled": "플러그인 {{plugin}}이(가) 성공적으로 활성화되었습니다.",
+      "plugin_disabled": "플러그인 {{plugin}}이(가) 성공적으로 비활성화되었습니다.",
+      "missing_id_version_parameter_plugins_catalog": "/plugins/catalog/update의 id 또는 version 매개변수가 없습니다.",
+      "missing_id_parameter_plugins_catalog_install": "/plugins/catalog/install의 id 매개변수가 없습니다.",
+      "missing_csrf_token_parameter_plugins": "/plugins의 csrf_token 매개변수가 없습니다.",
+      "missing_plugin_enabled_parameter_plugins_enable": "/plugins/enable의 plugin 또는 enabled 매개변수가 없습니다.",
+      "missing_plugins_parameter_plugins_delete": "/plugins/delete의 plugins 매개변수가 없습니다.",
+      "plugin_not_found": "id가 {{plugin}}인 플러그인을 찾을 수 없습니다",
+      "couldn_t_delete_plugin_in_database": "데이터베이스에서 플러그인 {{plugin}}을(를) 삭제하지 못했습니다: {{message}}",
+      "already_installed": "id가 {{plugin_id}}인 플러그인이 이미 설치되어 있습니다",
+      "installed_successfully": "플러그인 {{plugin_id}}을(를) 성공적으로 설치했습니다",
+      "catalogue_entry_changed": "{{plugin_id}}의 카탈로그 항목이 업데이트가 확인된 이후 변경되었습니다. 업데이트를 다시 검토하세요",
+      "catalogue_entry_predates_updates": "{{plugin_id}}의 캐시된 카탈로그 항목이 업데이트보다 오래되었습니다. 다음 새로고침을 기다리세요",
+      "not_installed_install_from_catalogue": "플러그인 {{plugin_id}}이(가) 설치되어 있지 않습니다. 카탈로그에서 설치하세요",
+      "managed_outside_catalogue": "플러그인 {{plugin_id}}은(는) 카탈로그 외부에서 관리되므로 카탈로그에서 업데이트할 수 없습니다",
+      "managed_outside_catalogue_core": "플러그인 {{plugin_id}}은(는) 카탈로그 외부에서 관리되는 core 플러그인이므로 카탈로그에서 업데이트할 수 없습니다",
+      "managed_outside_catalogue_external": "플러그인 {{plugin_id}}은(는) 카탈로그 외부에서 관리되는 외부 플러그인이므로 카탈로그에서 업데이트할 수 없습니다",
+      "managed_outside_catalogue_pro": "플러그인 {{plugin_id}}은(는) 카탈로그 외부에서 관리되는 pro 플러그인이므로 카탈로그에서 업데이트할 수 없습니다",
+      "managed_outside_catalogue_ui": "플러그인 {{plugin_id}}은(는) 카탈로그 외부에서 관리되는 ui 플러그인이므로 카탈로그에서 업데이트할 수 없습니다",
+      "already_at_version": "플러그인 {{plugin_id}}은(는) 이미 버전 {{version}}입니다",
+      "updated_to_version": "플러그인 {{plugin_id}}이(가) 버전 {{version}}(으)로 업데이트되었습니다"
     },
     "marketplace": {
       "active": "활성",
@@ -1249,6 +1627,11 @@
       "tab_disabled": "비활성화됨",
       "tab_enabled": "활성화됨"
     },
+    "multivalue": {
+      "more_value": "더 보기",
+      "more_values": "더 많은 값",
+      "show_less": "덜 표시"
+    },
     "catalog": {
       "tab": "사용 가능",
       "install": "설치",
@@ -1259,7 +1642,25 @@
       "stale": "카탈로그가 최근에 새로고침되지 않아 다시 최신 상태가 될 때까지 설치가 비활성화됩니다.",
       "trust_notice": "커뮤니티 항목은 BunkerWeb 조직이 GitHub에 게시한 저장소에서 TLS를 통해 읽어오며, 설치되는 내용은 목록과 대조하여 확인됩니다 — 다만 여기에는 암호학적으로 서명된 것이 없습니다. 설치된 플러그인은 BunkerWeb의 모든 권한으로 코드를 실행합니다.",
       "incompatible_declared": "이 릴리스는 BunkerWeb {{supported}}을(를) 지원합니다. 현재 버전은 {{current}}입니다",
-      "release": "릴리스 {{tag}}에서 읽기"
+      "version_unknown": "실행 중인 BunkerWeb 버전({{current}})을 읽을 수 없어 이 릴리스의 호환성을 확인할 수 없습니다",
+      "release": "릴리스 {{tag}}에서 읽기",
+      "state_installed": "설치됨(버전 {{version}})",
+      "state_update": "업데이트 가능: 버전 {{installed}}이(가) 설치되어 있으며, 카탈로그에는 {{version}}이(가) 있습니다",
+      "state_managed": "카탈로그 외부에 설치됨. 설치한 곳에서 업데이트하거나 제거하세요",
+      "state_managed_core": "카탈로그 외부에서 core 플러그인으로 설치됨. 설치한 곳에서 업데이트하거나 제거하세요",
+      "state_managed_external": "카탈로그 외부에서 외부 플러그인으로 설치됨. 설치한 곳에서 업데이트하거나 제거하세요",
+      "state_managed_pro": "카탈로그 외부에서 pro 플러그인으로 설치됨. 설치한 곳에서 업데이트하거나 제거하세요",
+      "state_managed_ui": "카탈로그 외부에서 ui 플러그인으로 설치됨. 설치한 곳에서 업데이트하거나 제거하세요",
+      "update": "업데이트",
+      "remove": "제거",
+      "update_title": "커뮤니티 플러그인 업데이트",
+      "update_confirm": "이 작업은 설치된 플러그인 {{name}}({{id}}, 버전 {{installed}})을(를) 카탈로그의 버전 {{version}}(으)로 교체합니다. 카탈로그에서 설치하지 않고 수동으로 업로드했더라도 교체됩니다.",
+      "update_removed_settings": "버전 {{version}}은(는) 더 이상 이 설정을 선언하지 않습니다. 전역 설정, 서비스, 템플릿에 설정된 모든 값과 함께 삭제됩니다:",
+      "update_no_removed_settings": "이 업데이트로 제거되는 설정은 없습니다.",
+      "update_preview_unknown": "이 업데이트로 제거될 설정을 지금은 나열할 수 없으므로 다음 카탈로그 새로고침까지 업데이트가 비활성화됩니다.",
+      "flash": {
+        "version_unreadable": "BunkerWeb 버전({{current}})을 읽을 수 없어 {{id}}의 호환성을 확인할 수 없습니다. 아무것도 설치되지 않았습니다"
+      }
     }
   },
   "pro": {
@@ -1302,13 +1703,33 @@
       "draft_services_count": "{{draft_services}}개의 초안 서비스",
       "expired": "만료됨",
       "free_version": "무료 버전",
+      "invalid": "잘못된 키",
+      "invalid_key": "라이선스 서버가 저장된 라이선스 키를 거부했습니다. 확인하거나 전역 설정 → Pro에서 제거하세요.",
       "overlapped": "한도 초과",
+      "pending_key": "라이선스 키가 아직 확인되지 않았습니다. 저장 후 곧 스케줄러가 확인합니다.",
       "pro_version": "PRO 버전",
       "services_count": "{{online_services}}개 온라인 서비스 / {{pro_services}}개 PRO 서비스",
       "suspended": "일시 정지됨",
       "title": "상태"
     },
-    "title": "Pro 라이선스"
+    "title": "Pro 라이선스",
+    "flash": {
+      "web_ui_will_reload_pro_plugins": "웹 UI가 곧 PRO 플러그인을 다시 로드합니다.",
+      "forced_update_pro_plugins_has_scheduled": "PRO 플러그인의 강제 업데이트가 예약되었습니다.",
+      "new_check_pro_plugins_has_scheduled": "PRO 플러그인에 대한 새 확인이 예약되었습니다.",
+      "checking_license_key": "라이선스 키를 확인하는 중입니다.",
+      "scheduler_will_attempt_apply_changes_download": "스케줄러가 변경 사항 적용 및 PRO 플러그인 다운로드를 시도합니다.",
+      "license_key_same_current_one": "라이선스 키가 현재 키와 동일합니다.",
+      "invalid_license_key": "잘못된 라이선스 키입니다",
+      "missing_license_key_parameter_pro_key": "/pro/key의 license key 매개변수가 없습니다.",
+      "license_key_updated_successfully": "PRO 라이선스 키를 성공적으로 업데이트했습니다.",
+      "license_key_not_updated_refused": "PRO 라이선스 키가 업데이트되지 않았습니다: 값이 거부되었습니다."
+    },
+    "trial": {
+      "title": "무료 체험",
+      "description": "<span class=\"text-primary\">BunkerWeb PRO</span>를 <strong>30일</strong>간 무료로 체험해 보세요.",
+      "cta": "무료 체험 시작"
+    }
   },
   "profile": {
     "2fa": {
@@ -1370,6 +1791,50 @@
       "profile": "프로필",
       "security": "보안",
       "sessions": "세션"
+    },
+    "flash": {
+      "passkey_has_successfully_deleted": "패스키가 성공적으로 삭제되었습니다.",
+      "couldn_t_delete_passkey": "패스키를 삭제하지 못했습니다: {{message}}",
+      "current_password_incorrect": "현재 비밀번호가 올바르지 않습니다.",
+      "passkey_has_successfully_renamed": "패스키 이름이 성공적으로 변경되었습니다.",
+      "couldn_t_rename_passkey": "패스키 이름을 변경하지 못했습니다: {{message}}",
+      "passkey_name_cannot_empty": "패스키 이름은 비워 둘 수 없습니다.",
+      "passkey_has_successfully_registered": "패스키가 성공적으로 등록되었습니다.",
+      "other_sessions_have_successfully_wiped": "다른 세션이 성공적으로 삭제되었습니다.",
+      "couldn_t_wipe_other_sessions": "다른 세션을 삭제하지 못했습니다: {{message}}",
+      "couldn_t_revoke_other_sessions": "다른 세션을 취소하지 못했습니다: {{err}}",
+      "password_changed_but_other_sessions_could": "비밀번호는 변경되었지만 다른 세션은 취소하지 못했습니다. 아래의 \"다른 세션 삭제\"를 사용하고 활성 세션 목록을 확인하세요.",
+      "profile_has_successfully_updated": "프로필이 성공적으로 업데이트되었습니다.",
+      "couldn_t_update_user": "{{value}} 사용자를 업데이트하지 못했습니다: {{message}}",
+      "no_fields_updated": "업데이트된 필드가 없습니다.",
+      "theme_invalid": "테마가 잘못되었습니다.",
+      "new_password_same_current_one": "새 비밀번호가 현재 비밀번호와 동일합니다.",
+      "new_password_too_long_must_not": "새 비밀번호가 너무 깁니다. {{MAX_PASSWORD_BYTES}}바이트(bcrypt의 하드 제한)를 초과할 수 없습니다. 억양 문자나 이모지는 각각 여러 바이트로 계산됩니다.",
+      "new_password_not_strong_enough_must": "새 비밀번호가 충분히 강력하지 않습니다. 최소 8자 이상이어야 하며, 대문자 1개, 소문자 1개, 숫자 1개, 특수문자(#@?!$%^&*-) 1개를 포함해야 합니다.",
+      "passwords_do_not_match_confirm_password": "비밀번호가 비밀번호 확인과 일치하지 않습니다.",
+      "username_email_are_same_current_ones": "사용자 이름과 이메일이 현재 값과 동일합니다.",
+      "username_too_long_must_less_than": "사용자 이름이 너무 깁니다. 256자 미만이어야 합니다.",
+      "email_too_long_must_less_than": "이메일이 너무 깁니다. 256자 미만이어야 합니다.",
+      "two_factor_authentication_has_successfully_enabled": "2단계 인증이 성공적으로 활성화되었습니다.",
+      "couldn_t_enable_two_factor_authentication": "2단계 인증을 활성화하지 못했습니다: {{message}}",
+      "totp_token_invalid": "TOTP 토큰이 잘못되었습니다.",
+      "two_factor_enrolment_expired_reload_page": "2단계 인증 등록이 만료되었습니다. 페이지를 새로고침하고 새 QR 코드를 스캔하세요.",
+      "two_factor_authentication_already_enabled": "2단계 인증이 이미 활성화되어 있습니다.",
+      "two_factor_authentication_has_successfully_disabled": "2단계 인증이 성공적으로 비활성화되었습니다.",
+      "couldn_t_disable_two_factor_authentication": "2단계 인증을 비활성화하지 못했습니다: {{message}}",
+      "two_factor_authentication_not_enabled": "2단계 인증이 활성화되어 있지 않습니다.",
+      "recovery_codes_have_successfully_refreshed_old": "복구 코드가 성공적으로 새로고침되었습니다. 이전 코드는 더 이상 유효하지 않습니다.",
+      "couldn_t_refresh_recovery_codes": "복구 코드를 새로고침하지 못했습니다: {{message}}",
+      "missing_parameters_profile_webauthn_delete": "/profile/webauthn/delete의 매개변수가 없습니다.",
+      "missing_parameters_profile_webauthn_rename": "/profile/webauthn/rename의 매개변수가 없습니다.",
+      "missing_current_password_parameter_profile_wipe": "/profile/wipe-other-sessions의 current password 매개변수가 없습니다.",
+      "missing_new_password_confirm_parameter_profile": "/profile/edit의 new password confirm 매개변수가 없습니다.",
+      "missing_current_password_parameter_profile_edit": "/profile/edit의 current password 매개변수가 없습니다.",
+      "missing_email_parameter_profile_edit": "/profile/edit의 email 매개변수가 없습니다.",
+      "missing_totp_token_parameter_profile_totp": "/profile/totp-enable의 totp token 매개변수가 없습니다.",
+      "missing_current_password_parameter_profile_totp_3": "/profile/totp-enable의 current password 매개변수가 없습니다.",
+      "missing_current_password_parameter_profile_totp_2": "/profile/totp-disable의 current password 매개변수가 없습니다.",
+      "missing_current_password_parameter_profile_totp": "/profile/totp-refresh의 current password 매개변수가 없습니다."
     }
   },
   "range_picker": {
@@ -1379,6 +1844,636 @@
     "7d": "지난 1주일",
     "aria_label": "시간 범위",
     "custom": "사용자 정의"
+  },
+  "certificates": {
+    "acme_help": "기존 설정이 Let's Encrypt를 활성화하고 구성하는 서비스 중에서 선택합니다. 이 작업은 해당 설정을 예약하는 것만입니다. 인증서 세부 정보 및 도전 인증 자격 증명은 여기에 입력되지 않습니다.",
+    "active": "활성 인증서",
+    "algorithm": "알고리즘",
+    "all": "전체",
+    "assignment_notice": "할당은 중앙 재고를 구성합니다. TLS 배포는 각 서비스의 인증서 설정에 의해 제어됩니다.",
+    "assignments": "인증서 할당",
+    "assignments_help": "이 할당은 실시간 TLS 설정을 변경하지 않습니다.",
+    "attach": "할당",
+    "attach_all": "이 인증서는 모든 사용 가능한 서비스에 이미 연결되어 있습니다.",
+    "attach_copy": "중앙 재고의 서비스에 \"{{name}}\"을 할당합니다.",
+    "browse_certificate": "인증서 보기",
+    "browse_key": "개인 키 보기",
+    "common_name": "공통 이름",
+    "confirm": "확인",
+    "confirm_action": "인증서 작업 확인",
+    "confirm_delete": "\"{{name}}\" 삭제? 이 작업을 취소할 수 없습니다.",
+    "confirm_generic": "이 인증서 작업 확인?",
+    "confirm_renew": "\"{{name}}\" 갱신?",
+    "confirm_renew_due": "모든 인증서를 확인하고 현재 만료된 인증서를 갱신?",
+    "create": "인증서 생성",
+    "download_chain": "체인 다운로드",
+    "download_leaf": "리프 다운로드",
+    "edit_help": "이 작업은 인증서 목록의 메타데이터만 변경하며, 인증서 내용이나 실제 TLS 설정은 변경하지 않습니다.",
+    "edit_metadata": "인증서 메타데이터 편집",
+    "empty": "인증서 없음",
+    "empty_help": "자체 서명 인증서를 생성하고, ACME 발급 일정을 예약하거나, 기존 PEM 인증서와 키를 업로드합니다.",
+    "expired_help": "주의가 필요",
+    "expires": "만료됨",
+    "expiring_help": "30일 이내",
+    "file_extensions": "다음 파일 확장자를 사용하세요: {{extensions}}.",
+    "file_select": "PEM 파일을 선택합니다.",
+    "flash": {
+      "encrypted_private_key": "암호화된 개인 키는 지원되지 않습니다.",
+      "invalid_certificate_pem": "인증서 파일이 유효한 PEM 인증서가 아닙니다.",
+      "invalid_private_key_pem": "개인 키 파일이 유효한 PEM 개인 키가 아닙니다.",
+      "could_not_download_certificate": "인증서를 다운로드하지 못했습니다: {{message}}",
+      "certificate_action_failed": "인증서 작업에 실패했습니다: {{message}}",
+      "certificate_deleted_successfully": "인증서를 성공적으로 삭제했습니다",
+      "could_not_detach_certificate": "인증서를 연결 해제하지 못했습니다: {{message}}",
+      "certificate_inventory_assignment_removed_successfully": "인증서 인벤토리 할당을 성공적으로 제거했습니다",
+      "certificate_service_are_required": "인증서와 서비스는 필수입니다",
+      "certificate_inventory_assignment_added_successfully": "인증서 인벤토리 할당을 성공적으로 추가했습니다",
+      "custom_certificate_uploaded_successfully": "사용자 지정 인증서를 성공적으로 업로드했습니다",
+      "certificate_upload_exceeds_2_mib_request": "인증서 업로드가 2 MiB 요청 제한을 초과합니다",
+      "certificate_metadata_updated_successfully": "인증서 메타데이터를 성공적으로 업데이트했습니다",
+      "could_not_fetch_services_certificate_assignments": "인증서 할당을 위한 서비스를 가져오지 못했습니다: {{message}}",
+      "could_not_fetch_certificates": "인증서를 가져오지 못했습니다: {{message}}",
+      "invalid_certificate_part": "잘못된 인증서 부분입니다",
+      "too_many_services": "인증서는 100개를 초과하는 서비스에 연결할 수 없습니다",
+      "too_many_sans": "인증서에는 100개를 초과하는 주체 대체 이름을 포함할 수 없습니다",
+      "validity_whole_number": "유효 기간은 정수 일수여야 합니다",
+      "validity_range": "유효 기간은 1일에서 825일 사이여야 합니다",
+      "invalid_certificate_source": "잘못된 인증서 소스입니다",
+      "select_service_letsencrypt": "Let's Encrypt 발급을 위해 하나 이상의 서비스를 선택하세요",
+      "name_common_name_are_required": "이름과 커먼 네임(common name)이 필요합니다",
+      "letsencrypt_issuance_scheduled": "Let's Encrypt 발급이 예약되었습니다",
+      "selfsigned_certificate_created": "자체 서명 인증서를 생성했습니다",
+      "could_not_schedule_letsencrypt": "Let's Encrypt 발급을 예약하지 못했습니다: {{message}}",
+      "could_not_create_certificate": "인증서를 생성하지 못했습니다: {{message}}",
+      "certificate_name_are_required": "인증서와 이름이 필요합니다",
+      "could_not_update_certificate": "인증서를 업데이트하지 못했습니다: {{message}}",
+      "pem_certificate_private_key_required": "PEM 인증서와 개인 키가 필요합니다",
+      "certificate_name_required": "인증서 이름이 필요합니다",
+      "could_not_upload_certificate": "인증서를 업로드하지 못했습니다: {{message}}",
+      "could_not_attach_certificate": "인증서를 연결하지 못했습니다: {{message}}",
+      "checked_certificates_due_renewal": "갱신이 필요한 인증서 {{total_due}}개를 확인했습니다",
+      "certificate_required": "인증서가 필요합니다",
+      "certificate_renewed_successfully": "인증서를 성공적으로 갱신했습니다",
+      "invalid_certificate_action": "잘못된 인증서 작업입니다"
+    },
+    "file_selected": "{{name}} ({{size}} KiB)",
+    "file_size_limit": "파일 크기는 1 MiB를 초과할 수 없습니다.",
+    "fingerprint": "SHA-256 지문",
+    "issuer": "발급 기관",
+    "issuers": "주요 발급 기관",
+    "key_drop": "해당하는 개인 키를 여기에 드롭합니다",
+    "key_limit": "최대 1 MiB. 저장 시 암호화되며 다운로드할 수 없습니다.",
+    "last_error": "마지막 오류",
+    "make_primary": "이 서비스에 대한 주요 재고 할당으로 표시",
+    "managed": "관리되는 인증서",
+    "new_selfsigned": "새 자체 서명 인증서",
+    "no_issuers": "발급 기관 정보 없음",
+    "none_due": "갱신 대상 인증서 없음",
+    "orphan_account": "계정",
+    "orphan_badge": "ACME 계정 누락",
+    "orphan_help": "이 갱신 기록은 더 이상 존재하지 않는 ACME 계정을 참조합니다. 제공업체 상태가 복구될 때까지 갱신은 차단됩니다.",
+    "orphan_server": "ACME 서버",
+    "orphan_title": "ACME 계정 누락",
+    "pem_certificate": "PEM 인증서 또는 체인",
+    "pem_drop": "해당하는 공개 PEM 인증서 또는 체인을 여기에 드롭합니다",
+    "pem_limit": "최대 1 MiB",
+    "pem_private_key": "PEM 개인 키",
+    "primary": "주요 할당",
+    "primary_help": "선택된 서비스에 대한 주요 재고 할당으로 표시",
+    "readonly": "데이터베이스는 읽기 전용입니다. 인증서를 검사하고 다운로드할 수 있지만 변경할 수 없습니다.",
+    "renew_due": "검토/갱신 예정",
+    "sans": "주체 대체 이름",
+    "save_metadata": "메타데이터 저장",
+    "schedule": "발급 예약",
+    "schedule_acme": "ACME 발급 예약",
+    "search": "이름, 일반 이름, SAN, 발급 기관 또는 지문을 검색하세요…",
+    "serial": "시리얼 번호",
+    "services": "서비스",
+    "services_help": "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다.",
+    "showing_count": "인증서 {{visible}}개 / {{total}}개 표시",
+    "source": {
+      "customcert": "사용자 정의",
+      "letsencrypt": "Let's Encrypt",
+      "selfsigned": "자체 서명"
+    },
+    "source_label": "출처",
+    "status": {
+      "expired": "만료",
+      "expiring_soon": "곧 만료",
+      "not_yet_valid": "아직 유효하지 않음",
+      "revoked": "폐기됨",
+      "valid": "유효"
+    },
+    "subtitle": "중앙 재고에서 인증서 발급, 업로드, 할당, 갱신, 검사",
+    "total": "전체",
+    "truncated": "첫 500개의 인증서만 표시됩니다. 완전한 결과를 위해 API를 통해 재고를 좁힙니다.",
+    "unassigned": "할당되지 않음",
+    "upcoming": "예정된 갱신",
+    "upcoming_help": "만료 또는 30일 갱신 기간 내",
+    "upload": "인증서 업로드",
+    "upload_custom": "사용자 지정 인증서 업로드",
+    "upload_invalid": "유효한 공개 인증서와 해당되는 개인 키를 선택합니다.",
+    "valid_days": "일 수",
+    "valid_from": "유효 시작일",
+    "valid_to": "유효 종료일"
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "요청 차단됨",
+        "captcha": "캡차 챌린지",
+        "challenge": "봇 탐지 챌린지"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (시나리오: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "failure_policy": "CrowdSec AppSec 실패 정책",
+        "lapi": "CrowdSec LAPI"
+      }
+    },
+    "alert": {
+      "id": "경고 ID",
+      "load": "전체 증거 불러오기",
+      "started": "시작됨",
+      "stopped": "중지됨"
+    },
+    "captured_history": "캡처된 기록",
+    "captured_history_help": "캡처된 보고서 데이터는 요청 시점에 관찰된 내용을 나타내며, 현재 결정 상태를 증명하지 않습니다.",
+    "connection": {
+      "appsec": "마지막 AppSec 관찰",
+      "connected": "연결됨",
+      "connection_error": "연결 오류",
+      "configured": "구성됨",
+      "global": "모든 서비스",
+      "label": "CrowdSec 연결",
+      "last_sync": "마지막 성공 동기화",
+      "local_api": "로컬 API",
+      "management": "관리",
+      "mode": "모드",
+      "none": "사용할 수 있는 CrowdSec 연결을 찾지 못했습니다. 인스턴스 오류와 플러그인 구성을 확인하세요.",
+      "read_only": "읽기 전용",
+      "required": "먼저 CrowdSec 연결을 선택하세요.",
+      "sync": "결정 동기화",
+      "sync_current": "최신 상태",
+      "sync_not_synchronized": "아직 동기화되지 않음",
+      "sync_stale": "오래됨",
+      "selected": "선택한 연결",
+      "scope_help": "선택한 연결은 아래의 결정, 허용 목록, IP 조사에 적용됩니다.",
+      "filter": "호스트 이름 또는 서비스로 연결 필터링"
+    },
+    "current_state": "현재 상태",
+    "current_state_help": "이 관찰 이후에 현재 상태가 변경될 수 있습니다.",
+    "decision": {
+      "duration": "기간",
+      "expires": "만료",
+      "id": "결정 ID",
+      "origin": "출처",
+      "scenario": "시나리오",
+      "scope": "범위",
+      "target": "대상",
+      "type": "유형"
+    },
+    "decisions": {
+      "count": "{{total}}개 중 {{start}}–{{end}}번째 표시",
+      "help": "선택한 CrowdSec 엔진에서 직접 읽은 현재 상태입니다.",
+      "none": "이 필터와 일치하는 활성 결정이 없습니다.",
+      "pagination": "결정 페이지",
+      "title": "활성 결정"
+    },
+    "error": {
+      "request": "CrowdSec 요청에 실패했습니다."
+    },
+    "investigation": {
+      "alerts": "사용 가능한 CrowdSec 경고 증거",
+      "current_decisions": "현재 CrowdSec 결정",
+      "help": "현재 CrowdSec 결정은 로컬 차단 및 캡처된 보고서와 함께 확인됩니다.",
+      "ip": "IP 주소",
+      "local_bans": "현재 BunkerWeb 로컬 차단",
+      "no_alerts": "사용 가능한 경고 증거가 없습니다.",
+      "no_bans": "현재 로컬 차단을 찾지 못했습니다.",
+      "no_decisions": "현재 CrowdSec 결정을 찾지 못했습니다.",
+      "no_reports": "최근에 캡처된 보고서를 찾지 못했습니다.",
+      "placeholder": "192.0.2.10",
+      "reports": "최근 BunkerWeb 보고서",
+      "result": "{{ip}} 조사",
+      "submit": "조사",
+      "title": "IP 조사",
+      "truncated": "{{total}}개 결과 중 {{shown}}개 표시 (소스 제한: {{limit}}).",
+      "unavailable": "사용할 수 없음: {{error}}",
+      "summary": "이 IP에 대해 발견된 증거",
+      "summary_help": "선택한 CrowdSec 연결과 BunkerWeb 자체 차단을 대상으로 합니다. 다른 보호 기능은 여기서 확인하지 않으며, 읽을 수 없었던 증거가 이 IP가 허용되었다는 증거는 아닙니다.",
+      "summary_decisions": "CrowdSec 결정",
+      "summary_bans": "BunkerWeb 로컬 차단",
+      "summary_alerts": "CrowdSec 경고 증거",
+      "summary_reports": "BunkerWeb 보고서",
+      "summary_active": "활성 {{total}}개",
+      "summary_available": "사용 가능 {{total}}개",
+      "summary_captured": "캡처됨 {{total}}개",
+      "summary_none": "발견된 항목 없음",
+      "summary_unreadable": "읽을 수 없음"
+    },
+    "local_ban": {
+      "expires": "만료",
+      "reason": "사유",
+      "service": "서비스"
+    },
+    "next": "다음",
+    "observed_at": "{{time}}에 관찰됨",
+    "previous": "이전",
+    "refresh": "상태 새로 고침",
+    "remove": {
+      "action": "제거",
+      "confirm": "내용을 이해했으며 이 결정을 제거하겠습니다.",
+      "impact": "공유 CrowdSec 엔진에서 결정을 제거하며, 연결된 모든 bouncer에 영향을 줍니다. 캐시된 결정, 다른 범위, 로컬 차단 또는 AppSec이 여전히 대상을 차단할 수 있습니다.",
+      "selection": "{{source}}({{engine}})에서 {{scope}} {{value}}({{type}}), 시나리오 {{scenario}}, 출처 {{origin}}을(를) 제거하시겠습니까?",
+      "submit": "결정 제거",
+      "success": "CrowdSec 소스에서 제거되었습니다. 전파 상태는 {{status}}입니다({{mode}}, 간격 {{interval}}). 남은 일치 결정: {{remaining}}. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다.",
+      "title": "CrowdSec 결정 제거"
+    },
+    "report": {
+      "captured": "캡처 시각",
+      "date": "보고서 시각",
+      "decisions": "캡처된 결정",
+      "entry": "보안 보고서",
+      "matched_target": "일치한 대상",
+      "metadata": "결정 메타데이터",
+      "metadata_complete": "완료",
+      "metadata_incomplete": "불완전",
+      "metadata_unavailable": "이 이전 보고서에는 CrowdSec 스냅샷 메타데이터가 없습니다.",
+      "metadata_warning": "요청 시점에 캡처된 일부 결정 메타데이터를 사용할 수 없었습니다.",
+      "reason": "사유",
+      "remediation": "캡처된 조치",
+      "scope": "캡처된 서비스 범위",
+      "service": "서비스",
+      "source": "캡처된 소스",
+      "identifier": "보고서 식별자"
+    },
+    "subtitle": "구성된 각 CrowdSec 엔진을 점검하고, 현재 증거와 캡처된 증거를 바탕으로 IP를 조사하세요.",
+    "title": "CrowdSec 운영자",
+    "unknown": "알 수 없음",
+    "allowlists": {
+      "title": "CrowdSec 허용 목록",
+      "help": "선택한 엔진에서 신뢰하는 IP와 네트워크입니다. 이 예외는 엔진에 연결된 모든 서비스와 bouncer에 적용됩니다.",
+      "refresh": "허용 목록 새로 고침",
+      "pages": "허용 목록 페이지",
+      "empty": "이 엔진에서 허용 목록을 찾을 수 없습니다.",
+      "console": "Console에서 관리됨",
+      "local": "로컬에서 관리됨",
+      "no_entries": "활성 항목이 없습니다.",
+      "never": "안 함",
+      "comment": "댓글",
+      "unknown": "허용 목록 상태를 확인할 수 없습니다.",
+      "not_allowed": "이 IP는 어떤 CrowdSec 허용 목록과도 일치하지 않습니다.",
+      "allowed": "CrowdSec 허용 목록에 등록됨",
+      "impact": "이 예외는 엔진 전체에 적용됩니다. BunkerWeb 로컬 차단, 다른 보호 기능 또는 캐시된 결정이 여전히 이 IP를 차단할 수 있습니다.",
+      "guide": {
+        "intro": "여기서 허용 목록을 탐색하고 IP를 확인할 수 있습니다. 항목을 추가하거나 제거하려면 CrowdSec 엔진에서 cscli를 사용하세요.",
+        "title": "신뢰하는 IP와 네트워크를 관리하는 방법",
+        "where": "CrowdSec 1.7 이상이 필요합니다. 선택한 엔진의 로컬 API(LAPI)를 실행하는 호스트 또는 컨테이너 내부에서, 해당 CrowdSec 구성과 데이터베이스에 접근할 수 있는 상태로 이 명령을 실행하세요. 예시 목록 이름, IP, 네트워크는 사용자의 값으로 바꾸세요.",
+        "create": "목록을 한 번 만들거나, 로컬에서 관리되는 기존 목록을 사용하세요.",
+        "add": "신뢰하는 IP 또는 CIDR 네트워크를 추가하세요.",
+        "expiration": "이 예시는 24시간 후에 만료됩니다. 만료되지 않는 항목을 만들려면 --expiration을 생략하세요. IPv4와 IPv6를 지원합니다.",
+        "inspect": "목록과 항목의 만료일을 확인하세요.",
+        "remove": "더 이상 필요하지 않은 예외는 제거하세요.",
+        "refresh": "변경한 후에는 허용 목록을 새로 고치고 해당 IP를 다시 조사하세요. 예외를 제거하면 이후의 CrowdSec 결정이 허용되며, 차단이 생성되지는 않습니다. BunkerWeb 로컬 차단과 다른 보호 기능은 별도로 유지됩니다.",
+        "console": "Console에서 관리하는 목록은 CrowdSec Console에서 편집하세요.",
+        "docs": "CrowdSec 허용 목록 문서"
+      }
+    }
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "안티봇 챌린지({{provider}})가 제공됨"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "이 인스턴스의 자격 증명을 취소하시겠습니까? 컨트롤 플레인이 더 이상 접근할 수 없게 됩니다.",
+    "rotate_credential": "이 인스턴스의 자격 증명을 교체하시겠습니까? 인스턴스에 접근할 수 없으면 실패합니다."
+  },
+  "general": {
+    "settings": {
+      "IS_LOADING": {
+        "label": "내부 사용: 로딩 중",
+        "help": "내부 사용: BW가 로딩 중일 때 yes로 설정합니다."
+      },
+      "NGINX_PREFIX": {
+        "label": "nginx 프리픽스",
+        "help": "nginx가 구성을 검색할 위치."
+      },
+      "HTTP_PORT": {
+        "label": "HTTP 포트",
+        "help": "bunkerweb이 바인딩하는 HTTP 포트 번호입니다. HTTP 수신 대기를 비활성화하려면 비워 두세요."
+      },
+      "HTTPS_PORT": {
+        "label": "HTTPS 포트",
+        "help": "bunkerweb이 바인딩하는 HTTPS 포트 번호입니다. HTTPS 수신 대기를 비활성화하려면 비워 두세요."
+      },
+      "MULTISITE": {
+        "label": "멀티사이트",
+        "help": "멀티사이트 활성화."
+      },
+      "SERVER_NAME": {
+        "label": "서버 이름",
+        "help": "bunkerweb이 제공하는 가상 호스트 목록입니다. (공백으로 구분)"
+      },
+      "WORKER_PROCESSES": {
+        "label": "워커 프로세스",
+        "help": "워커 프로세스 수."
+      },
+      "WORKER_RLIMIT_NOFILE": {
+        "label": "워커당 열린 파일 수",
+        "help": "워커 프로세스에 대해 열 수 있는 최대 파일 수."
+      },
+      "WORKER_CONNECTIONS": {
+        "label": "워커당 연결 수",
+        "help": "워커당 최대 연결 수."
+      },
+      "WORKER_SHUTDOWN_TIMEOUT": {
+        "label": "워커 종료 시간 초과",
+        "help": "워커 프로세스의 정상 종료를 위한 시간 초과입니다. 이 지연 시간 이후, 메모리 증가를 방지하기 위해 재로드 중에 이전 워커가 강제로 종료됩니다."
+      },
+      "DNS_RESOLVERS": {
+        "label": "DNS 리졸버",
+        "help": "사용할 리졸버의 DNS 주소."
+      },
+      "CLIENT_BODY_TIMEOUT": {
+        "label": "클라이언트 본문 시간 초과",
+        "help": "클라이언트 요청 본문을 읽기 위한 시간 초과."
+      },
+      "CLIENT_HEADER_TIMEOUT": {
+        "label": "클라이언트 헤더 시간 초과",
+        "help": "클라이언트 요청 헤더를 읽기 위한 시간 초과."
+      },
+      "KEEPALIVE_TIMEOUT": {
+        "label": "Keepalive 시간 초과",
+        "help": "keep-alive 클라이언트 연결에 대한 시간 초과."
+      },
+      "SEND_TIMEOUT": {
+        "label": "전송 시간 초과",
+        "help": "클라이언트에게 응답을 전송하기 위한 시간 초과."
+      },
+      "WORKERLOCK_MEMORY_SIZE": {
+        "label": "초기화 Workerlock 메모리 크기",
+        "help": "초기화 워커를 위한 lua_shared_dict의 크기"
+      },
+      "INTERNALSTORE_MEMORY_SIZE": {
+        "label": "Internalstore 메모리 크기",
+        "help": "내부 internalstore의 크기."
+      },
+      "DATASTORE_MEMORY_SIZE": {
+        "label": "Datastore 메모리 크기",
+        "help": "내부 datastore의 크기."
+      },
+      "DATASTORE_LRU_SIZE": {
+        "label": "Datastore LRU 크기",
+        "help": "워커별 공유 datastore LRU의 슬롯 수입니다(internalstore 및 플러그인의 워커 로컬 캐시에서 사용). 일반 정수 또는 `k`/`m` 축약형(예: `1k`, `10k`, `1m`)을 허용합니다."
+      },
+      "CACHESTORE_MEMORY_SIZE": {
+        "label": "Cachestore 메모리 크기",
+        "help": "내부 cachestore의 크기."
+      },
+      "CACHESTORE_IPC_MEMORY_SIZE": {
+        "label": "Cachestore IPC 메모리 크기",
+        "help": "내부 cachestore(ipc)의 크기."
+      },
+      "CACHESTORE_MISS_MEMORY_SIZE": {
+        "label": "Cachestore Miss 메모리 크기",
+        "help": "내부 cachestore(miss)의 크기."
+      },
+      "CACHESTORE_LOCKS_MEMORY_SIZE": {
+        "label": "Cachestore Locks 메모리 크기",
+        "help": "내부 cachestore(locks)의 크기."
+      },
+      "SESSIONS_REVOCATION_MEMORY_SIZE": {
+        "label": "세션 취소 메모리 크기",
+        "help": "취소된 쿠키 세션 식별자를 보관하는 내부 저장소의 크기."
+      },
+      "USE_API": {
+        "label": "API 활성화",
+        "help": "BunkerWeb 내부 API를 활성화합니다."
+      },
+      "API_HTTP_PORT": {
+        "label": "API 포트 번호",
+        "help": "BunkerWeb 내부 API의 수신 대기 포트 번호."
+      },
+      "API_HTTPS_PORT": {
+        "label": "API HTTPS 포트 번호",
+        "help": "BunkerWeb 내부 API의 수신 대기 포트 번호(TLS)."
+      },
+      "API_LISTEN_IP": {
+        "label": "API 수신 대기 IP 주소",
+        "help": "BunkerWeb 내부 API의 수신 대기 IP 주소."
+      },
+      "API_LISTEN_HTTP": {
+        "label": "API HTTP 수신 대기",
+        "help": "BunkerWeb 내부 API의 HTTP 수신 대기."
+      },
+      "API_LISTEN_HTTPS": {
+        "label": "API HTTPS 수신 대기",
+        "help": "BunkerWeb 내부 API의 HTTPS(SSL/TLS) 수신 대기."
+      },
+      "API_SERVER_NAME": {
+        "label": "API 서버 이름",
+        "help": "BunkerWeb 내부 API의 서버 이름(가상 호스트)."
+      },
+      "API_TOKEN": {
+        "label": "API 액세스 토큰",
+        "help": "API 호출을 인증하기 위한 선택적 토큰입니다. 설정된 경우 스케줄러(및 모든 클라이언트)는 이를 Authorization 헤더를 통해 전송해야 합니다. 참고: BunkerWeb과 스케줄러 환경 모두에 설정되어야 합니다."
+      },
+      "API_WHITELIST_IP": {
+        "label": "API 화이트리스트 IP",
+        "help": "BunkerWeb 내부 API에 접속할 수 있는 IP/네트워크 목록입니다. (형식: ip/netmask 또는 ipv6/netmask, 공백으로 구분)"
+      },
+      "AUTOCONF_MODE": {
+        "label": "Autoconf 모드",
+        "help": "Autoconf Docker 통합을 활성화합니다."
+      },
+      "SWARM_MODE": {
+        "label": "Swarm 모드",
+        "help": "Docker Swarm 통합을 활성화합니다."
+      },
+      "KUBERNETES_MODE": {
+        "label": "Kubernetes 모드",
+        "help": "Kubernetes 통합을 활성화합니다."
+      },
+      "SERVER_TYPE": {
+        "label": "서버 유형",
+        "help": "서버 유형: http 또는 stream."
+      },
+      "LISTEN_STREAM": {
+        "label": "Stream 수신 대기",
+        "help": "SSL이 아닌 수신 대기(패스스루)를 활성화합니다."
+      },
+      "LISTEN_STREAM_PORT": {
+        "label": "Stream 수신 대기 포트",
+        "help": "SSL이 아닌 수신 대기 포트(패스스루)입니다. 비 SSL stream 수신 대기를 비활성화하려면 비워 두세요."
+      },
+      "LISTEN_STREAM_PORT_SSL": {
+        "label": "Stream 수신 대기 포트 SSL",
+        "help": "SSL 수신 대기 포트(패스스루)입니다. SSL stream 수신 대기를 비활성화하려면 비워 두세요."
+      },
+      "USE_TCP": {
+        "label": "TCP 수신 대기",
+        "help": "TCP 수신 대기(stream)."
+      },
+      "USE_UDP": {
+        "label": "UDP 수신 대기",
+        "help": "UDP 수신 대기(stream)."
+      },
+      "USE_IPV6": {
+        "label": "IPv6 사용",
+        "help": "IPv6 연결을 활성화합니다."
+      },
+      "IS_DRAFT": {
+        "label": "내부 사용: 초안",
+        "help": "내부 사용: 서비스가 초안 모드일 때 yes로 설정합니다."
+      },
+      "KEEP_CONFIG_ON_RESTART": {
+        "label": "재시작 시 구성 유지",
+        "help": "재시작 시 구성을 유지합니다. 재시작 시 구성 재설정을 방지하려면 'yes'로 설정하세요."
+      },
+      "CUSTOM_CONFIGS_DRIFT": {
+        "label": "사용자 지정 구성 드리프트 정책",
+        "help": "마지막으로 기록된 프로젝션 이후 프로젝션된 .conf 파일이 변경되었거나 그 안에 없었을 때 발생하는 일입니다. 현재 데이터베이스 행과 일치하는 파일은 무시됩니다. 읽을 수 있는 프로젝션 기록이 없으면 드리프트가 보고되지 않습니다. 'overwrite'는 감지된 각 드리프트를 기록하고 데이터베이스에서 파일을 다시 작성하거나, 이를 대체할 활성 행이 없으면 삭제합니다. 'refuse'는 드리프트가 해결될 때까지 데이터베이스에서 그곳에 아무것도 쓰지 않고 오류를 기록하며, 대기 중인 사용자 지정 구성 변경을 확인되지 않은 상태로 두어 다시 시도되도록 합니다."
+      },
+      "TIMERS_LOG_LEVEL": {
+        "label": "타이머 로그 수준",
+        "help": "타이머에 대한 로그 수준."
+      },
+      "BUNKERWEB_INSTANCES": {
+        "label": "BunkerWeb 인스턴스",
+        "help": "공백으로 구분된 BunkerWeb 인스턴스 목록(형식: fqdn-또는-ip:5000 http://fqdn-또는-ip:5000)"
+      },
+      "USE_TEMPLATE": {
+        "label": "템플릿 사용",
+        "help": "적용할 구성 템플릿으로, 공백으로 구분되며 특정 설정의 기본값을 재정의합니다. 템플릿은 순서대로 적용되며 나중 템플릿이 이전 템플릿을 재정의합니다. 서비스에 설정된 값은 템플릿을 재정의합니다."
+      },
+      "SECURITY_MODE": {
+        "label": "보안 모드",
+        "help": "위협에 대한 대응을 정의합니다: 모니터링하고 기록하려면 \"detect\", 액세스를 차단하고 사건을 기록하려면 \"block\"."
+      },
+      "SERVER_NAMES_HASH_BUCKET_SIZE": {
+        "label": "서버 이름 해시 버킷 크기",
+        "help": "server_names_hash_bucket_size 지시어의 값."
+      },
+      "LOG_FORMAT": {
+        "label": "액세스 로그 형식",
+        "help": "액세스 로그에 사용할 형식."
+      },
+      "ACCESS_LOG": {
+        "label": "액세스 로그 경로",
+        "help": "NGINX 액세스 로그에 사용할 경로(파일 경로, syslog:server=host[:port][,param=value], 또는 memory:name:size; 비활성화하려면 off로 설정)."
+      },
+      "ERROR_LOG": {
+        "label": "오류 로그 경로",
+        "help": "NGINX 오류 로그에 사용할 경로(파일 경로, stderr, syslog:server=host[:port][,param=value], 또는 memory:size)."
+      },
+      "PLUGINS_ORDER_INIT": {
+        "label": "플러그인 순서 (init)",
+        "help": "init 단계(엔진 부트스트랩, 한 번 실행)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_INIT_WORKER": {
+        "label": "플러그인 순서 (init_worker)",
+        "help": "init_worker 단계(워커별 부트스트랩)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_SET": {
+        "label": "플러그인 순서 (set)",
+        "help": "이 사이트의 set 단계(rewrite/access 전 변수 설정)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_ACCESS": {
+        "label": "플러그인 순서 (access)",
+        "help": "이 사이트의 access 단계(요청 승인/제어)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_SSL_CERTIFICATE": {
+        "label": "플러그인 순서 (ssl_certificate)",
+        "help": "이 사이트의 ssl_certificate 단계(TLS 인증서 선택/발급)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_HEADER": {
+        "label": "플러그인 순서 (header)",
+        "help": "이 사이트의 header 단계(응답 헤더 필터링)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_LOG": {
+        "label": "플러그인 순서 (log)",
+        "help": "이 사이트의 log 단계(응답 후 HTTP 로그 처리)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_PREREAD": {
+        "label": "플러그인 순서 (preread)",
+        "help": "이 사이트의 preread 단계(프록시 전 TCP preread 검사)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_LOG_STREAM": {
+        "label": "플러그인 순서 (log_stream)",
+        "help": "이 사이트의 log_stream 단계(stream 로그 처리)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_LOG_DEFAULT": {
+        "label": "플러그인 순서 (log_default)",
+        "help": "이 사이트의 log_default 단계(기본 vhost 로그 처리)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_TIMER": {
+        "label": "플러그인 순서 (timer)",
+        "help": "timer 단계(백그라운드 타이머)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+      },
+      "PLUGINS_ORDER_INIT_WORKERS": {
+        "label": "플러그인 순서 (init_workers)",
+        "help": "init_workers 단계에서 실행할, 쉼표 또는 공백으로 구분된 플러그인 ID."
+      },
+      "LOG_LEVEL": {
+        "label": "로그 수준",
+        "help": "오류 로그에 사용할 수준."
+      },
+      "JOBS_DAILY_TIME": {
+        "label": "매일 작업 시간",
+        "help": "매일 예약된 작업이 실행되는 현지 시간(스케줄러 시간대, HH:MM, 24시간제)입니다. 주간 작업도 JOBS_WEEKLY_DAY에 이 시간에 실행됩니다."
+      },
+      "JOBS_WEEKLY_DAY": {
+        "label": "매주 작업 요일",
+        "help": "JOBS_DAILY_TIME에 매주 예약된 작업이 실행되는 요일."
+      }
+    }
+  },
+  "global_settings": {
+    "flash": {
+      "checking_license_key_upgrade": "업그레이드를 위해 라이선스 키를 확인하는 중입니다.",
+      "global_settings_not_saved_every_changed": "전역 설정이 저장되지 않았습니다: 변경된 모든 값이 거부되었습니다.",
+      "not_edited_no_values_changed": "변경된 값이 없어 전역 설정이 수정되지 않았습니다.",
+      "saved_but_values_refused": "전역 설정을 저장했지만 {{refused_count}}개 값이 거부되었습니다.",
+      "saved_successfully": "전역 설정을 성공적으로 저장했습니다."
+    }
+  },
+  "home": {
+    "flash": {
+      "error_fetching_services": "서비스를 가져오는 중 오류 발생: {{message}}"
+    }
+  },
+  "main": {
+    "flash": {
+      "forced_status_reloaded": "상태를 강제로 다시 로드했습니다",
+      "have_more_services_than_allowed_by": "프로 라이선스가 허용하는 것보다 많은 서비스를 보유하고 있습니다. 라이선스를 업그레이드하거나 일부 서비스를 초안 모드로 전환하여 프로 라이선스를 잠금 해제하세요.",
+      "last_changes_have_applied_successfully": "마지막 변경 사항이 성공적으로 적용되었습니다.",
+      "database_connection_read_only_mode_no": "데이터베이스 연결이 읽기 전용 모드입니다: 수정이 불가능합니다.",
+      "two_factor_no_recovery_codes": "2단계 인증이 활성화되어 있지만 사용 가능한 복구 코드가 없습니다. 새로고침하세요:",
+      "failover_configuration_error": "NGINX 구성 오류가 발생하여 마지막 변경 사항을 적용할 수 없습니다. 자세한 내용은 BunkerWeb 로그를 확인하세요. 구성이 마지막으로 작동하던 버전으로 되돌아갔습니다.",
+      "failover_message": "장애 조치 메시지:"
+    }
+  },
+  "letsencrypt": {
+    "flash": {
+      "orphan_certificate": "Let's Encrypt: 고아 인증서 <strong>{{cert_name}}</strong>이(가) 누락된 ACME 계정 <code>{{account}}</code>을(를) 참조합니다. 공급자 상태가 복구될 때까지 갱신이 차단됩니다. <a href=\"{{certificates_url}}\">{{link_text}}</a>.",
+      "open_certificates_to_inspect": "인증서를 열어 확인하기"
+    }
+  },
+  "raw_drafts": {
+    "edits_discarded": "초안 설정은 변경되지 않습니다. Raw 모드에서 활성화하거나 편집하세요.",
+    "metadata_raw_only": "설정 초안 메타데이터는 raw 모드에서만 허용됩니다.",
+    "missing_metadata": "{{field}} 메타데이터가 없습니다.",
+    "cannot_be_draft": "{{setting}} 설정은 초안으로 만들 수 없습니다.",
+    "draft_not_posted": "초안 설정 {{setting}}이(가) 전송되지 않았습니다.",
+    "setting_not_valid": "{{setting}} 설정이 올바르지 않습니다.",
+    "global_not_service_draft": "전역 설정 {{setting}}은(는) 서비스 초안으로 만들 수 없습니다.",
+    "draft_not_present": "초안 설정 {{setting}}이(가) RAW 편집기에 없습니다.",
+    "present_not_posted": "현재 설정 {{setting}}이(가) 전송되지 않았습니다.",
+    "present_not_valid": "현재 설정 {{setting}}이(가) 올바르지 않습니다.",
+    "locked_by_method": "{{setting}} 설정은 {{method}} 방식으로 관리되므로 초안 상태를 변경할 수 없습니다."
   },
   "reports": {
     "bad_behavior_activity_detected": "비정상 활동 감지",
@@ -1446,10 +2541,10 @@
       "unique_offenders": "상위 공격자"
     },
     "crowdsec": {
-      "source_lapi": "Local API decision",
-      "source_appsec": "AppSec inspection",
-      "source_failure_policy": "AppSec failure policy",
-      "technical_details": "Technical details"
+      "source_lapi": "로컬 API 결정",
+      "source_appsec": "AppSec 검사",
+      "source_failure_policy": "AppSec 실패 정책",
+      "technical_details": "기술 세부 정보"
     }
   },
   "scope": {
@@ -1474,6 +2569,7 @@
     "data": "데이터",
     "date": "날짜",
     "empty": "사용 가능한 검색창이 없습니다.",
+    "search_title": "검색: {name}",
     "end_date": "종료 날짜",
     "first_seen": "최초 감지",
     "future_30d": "30일 이후",
@@ -1524,6 +2620,80 @@
   },
   "services": {
     "draft": "초안 서비스",
+    "flash": {
+      "resource_attach_failed": "연결하지 못했습니다: {{error}}",
+      "resource_attach_refused": "연결할 수 없습니다: {{error}}",
+      "resource_attached": "리소스가 {{service}}에 연결되었습니다.",
+      "resource_detach_failed": "연결 해제하지 못했습니다: {{error}}",
+      "resource_detach_refused": "연결 해제할 수 없습니다: {{error}}",
+      "resource_detached": "리소스가 {{service}}에서 연결 해제되었습니다.",
+      "resource_unknown_family": "알 수 없는 리소스 유형입니다.",
+      "server_name_missing": "서버 이름이 제공되지 않아 서비스가 생성되지 않았습니다.",
+      "failed_import_service": "서비스 가져오기에 실패했습니다: {{names}}",
+      "failed_import_services": "서비스 가져오기에 실패했습니다: {{names}}",
+      "skipped_existing_service": "기존 서비스를 건너뛰었습니다: {{names}}",
+      "skipped_existing_services": "기존 서비스를 건너뛰었습니다: {{names}}",
+      "imported_service": "서비스를 가져왔습니다: {{names}}",
+      "imported_services": "서비스를 가져왔습니다: {{names}}",
+      "no_services_custom_configurations_found_import": "가져오기 파일에서 서비스 또는 사용자 지정 설정을 찾을 수 없습니다.",
+      "invalid_file_encoding_please_upload_utf": "잘못된 파일 인코딩입니다. UTF-8 파일을 업로드하세요.",
+      "uploaded_file_not_valid_zip_archive": "업로드된 파일이 유효한 zip 아카이브가 아닙니다.",
+      "invalid_encoding_configs_export_json_inside": "아카이브 내 configs_export.json의 인코딩이 잘못되었습니다.",
+      "invalid_encoding_services_export_env_inside": "아카이브 내 services_export.env의 인코딩이 잘못되었습니다.",
+      "refusing_extract_archive_uncompressed_size_exceeds": "아카이브 추출을 거부합니다: 압축 해제 크기가 안전 제한을 초과합니다.",
+      "uploaded_archive_must_contain_services_export": "업로드된 아카이브에는 services_export.env 및/또는 configs_export.json이 포함되어야 합니다.",
+      "no_services_file_uploaded": "서비스 파일이 업로드되지 않았습니다.",
+      "could_not_fetch_custom_configurations_api": "API에서 사용자 지정 설정을 가져오지 못했습니다.",
+      "no_services_export": "내보낼 서비스가 없습니다.",
+      "no_services_selected": "선택된 서비스가 없습니다.",
+      "could_not_fetch_custom_configs_api": "API에서 사용자 지정 설정을 가져오지 못했습니다.",
+      "service_not_found": "서비스를 찾을 수 없습니다",
+      "could_not_fetch_service_api": "API에서 서비스를 가져오지 못했습니다.",
+      "template_not_found": "템플릿을 찾을 수 없습니다",
+      "could_not_fetch_templates_api": "API에서 템플릿을 가져오지 못했습니다.",
+      "plugin_does_not_apply_default_server": "이 플러그인은 기본 서버에 적용되지 않습니다",
+      "could_not_fetch_attached_upstreams": "이 서비스에 연결된 업스트림을 가져올 수 없습니다.",
+      "could_not_fetch_attached_certificates": "이 서비스에 연결된 인증서를 가져올 수 없습니다.",
+      "could_not_fetch_attached_redirects": "이 서비스에 연결된 리디렉션을 가져올 수 없습니다.",
+      "could_not_fetch_attached_workflows": "이 서비스에 연결된 워크플로우를 가져올 수 없습니다.",
+      "could_not_fetch_service_api_2": "API에서 서비스 {{service}}을(를) 가져오지 못했습니다.",
+      "could_not_fetch_service_cloning": "복제를 위한 서비스 {{clone}}을(를) 가져오지 못했습니다.",
+      "could_not_fetch_services_configuration": "서비스 구성을 가져오지 못했습니다.",
+      "custom_configs_not_saved_because_rename": "이름 변경이 거부되어 사용자 지정 설정이 저장되지 않았습니다.",
+      "service_not_saved_every_changed_value": "변경된 모든 값이 거부되어 서비스 {{service}}이(가) 저장되지 않았습니다.",
+      "service_not_edited_because_no_values": "변경된 값이 없어 서비스 {{service}}을(를) 수정하지 않았습니다.",
+      "service_not_edited_because_no_values_or_configs": "변경된 값이나 사용자 지정 설정이 없어 서비스 {{service}}을(를) 수정하지 않았습니다.",
+      "template_custom_config_cannot_edited_because": "템플릿 사용자 지정 설정 {{key}}은(는) {{value}} 방식으로 생성되어 편집할 수 없습니다.",
+      "service_already_exists": "서비스 {{service}}이(가) 이미 존재합니다.",
+      "service_deleted": "서비스 삭제됨: {{services}}",
+      "services_deleted": "서비스 삭제됨: {{services}}",
+      "failed_delete_drafted_autoconf_service": "초안 자동 구성 서비스 {{service_id}} 삭제에 실패했습니다: {{message}}",
+      "all_selected_services_could_not_found_2": "선택한 모든 서비스를 찾을 수 없거나 UI/API 서비스가 아닙니다.",
+      "service_will_not_deleted": "서비스 {{non_deletable_service}}은(는) UI/API 서비스가 아니므로 삭제되지 않습니다.",
+      "service_will_not_deleted_reserved": "서비스 {{non_deletable_service}}은(는) 어떤 서비스에도 일치하지 않는 요청에 응답하는 예약된 기본 서버이므로 삭제되지 않습니다.",
+      "service_will_not_deleted_autoconf": "서비스 {{non_deletable_service}}은(는) 온라인 autoconf 서비스이므로(먼저 초안으로 전환하세요) 삭제되지 않습니다.",
+      "service_now_declared_standard": "서비스 {{service}}이(가) 이제 \"표준\"으로 선언되었습니다.",
+      "service_now_declared_redirect_only": "서비스 {{service}}이(가) 이제 \"리디렉션 전용\"으로 선언되었습니다.",
+      "invalid_mode_parameter": "잘못된 mode 매개변수입니다.",
+      "do_not_have_permission_change_service": "서비스 모드를 변경할 권한이 없습니다",
+      "converted_services_online": "\"온라인\" 서비스로 변환됨: {{names}}",
+      "converted_services_draft": "\"초안\" 서비스로 변환됨: {{names}}",
+      "all_selected_services_could_not_found": "선택한 모든 서비스를 찾을 수 없거나, UI/API 서비스가 아니거나, 이미 변환되었습니다.",
+      "service_already_online_will_not_converted": "서비스 {{non_convertible_service}}은(는) 이미 온라인 서비스이므로 변환되지 않습니다.",
+      "service_already_draft_will_not_converted": "서비스 {{non_convertible_service}}은(는) 이미 초안 서비스이므로 변환되지 않습니다.",
+      "service_not_ui_api_service_will": "서비스 {{non_editable_service}}은(는) UI/API 서비스가 아니므로 변환되지 않습니다.",
+      "could_not_fetch_services_api": "API에서 서비스를 가져오지 못했습니다.",
+      "missing_services_parameter_services_delete": "/services/delete의 services 매개변수가 없습니다.",
+      "missing_mode_parameter_services_mode": "/services/{{service}}/mode의 mode 매개변수가 없습니다.",
+      "missing_convert_parameter_services_convert": "/services/convert의 convert_to 매개변수가 없습니다.",
+      "missing_services_parameter_services_convert": "/services/convert의 services 매개변수가 없습니다.",
+      "default_server_reserved": "{{default_server_id}}은(는) 예약된 기본 서버로, 구성된 서비스와 일치하지 않는 요청(알 수 없는 호스트명, 원시 IP 접근)에 응답합니다. 따라서 생성, 이름 변경 또는 삭제할 수 없습니다.",
+      "configuration_created": "서비스 {{service}}의 구성이 생성되었습니다.",
+      "configuration_saved": "서비스 {{service}}의 구성이 저장되었습니다.",
+      "configuration_created_with_refusals": "서비스 {{service}}의 구성이 생성되었지만 {{refused_count}}개 값이 거부되었습니다.",
+      "configuration_saved_with_refusals": "서비스 {{service}}의 구성이 저장되었지만 {{refused_count}}개 값이 거부되었습니다.",
+      "default_server_type_refused": "SERVER_TYPE은 예약된 서비스 {{default_server_id}}에 설정할 수 없습니다. 전환할 자체 서버 블록이 없기 때문입니다. HTTP 부분은 기본 서버 블록 자체이며, stream 부분은 DEFAULT_SERVER_STREAM_PORTS 설정입니다."
+    },
     "online": "온라인",
     "subtitle": "BunkerWeb로 보호된 멀티 사이트 서비스를 관리합니다: 생성, 편집, 초안으로 변환 또는 삭제합니다.",
     "total": "전체 서비스",
@@ -1834,10 +3004,27 @@
       "content_entered": "입력한 문자 수: {{count}}",
       "loaded_from": "{{name}}에서 불러옴 · 문자 수: {{count}}",
       "read_error": "파일을 읽는 중 오류 발생"
+    },
+    "flash": {
+      "couldn_t_edit_new_service": "새 서비스를 편집하지 못했습니다: {{operation}}",
+      "couldn_t_create_new_service": "새 서비스를 생성하지 못했습니다: {{operation}}",
+      "when_using_custom_ssl_certificate_must": "사용자 지정 SSL 인증서를 사용할 때는 인증서와 키를 모두 설정해야 합니다.",
+      "hostname_not_valid": "호스트 이름이 잘못되었습니다.",
+      "hostname_already_use": "호스트 이름 {{value}}은(는) 이미 사용 중입니다.",
+      "admin_user_created_successfully": "관리자 사용자를 성공적으로 생성했습니다",
+      "couldn_t_create_admin_user": "관리자 사용자를 생성하지 못했습니다: {{message}}",
+      "admin_password_too_long_must_not": "관리자 비밀번호가 너무 깁니다. {{MAX_PASSWORD_BYTES}}바이트(bcrypt의 하드 제한)를 초과할 수 없습니다. 억양 문자나 이모지는 각각 여러 바이트로 계산됩니다.",
+      "admin_password_not_strong_enough_must": "관리자 비밀번호가 충분히 강력하지 않습니다. 최소 8자 이상이어야 하며, 대문자 1개, 소문자 1개, 숫자 1개, 특수문자(#@?!$%^&*-) 1개를 포함해야 합니다.",
+      "passwords_do_not_match": "비밀번호가 일치하지 않습니다.",
+      "admin_email_too_long_must_less": "관리자 이메일이 너무 깁니다. 256자 미만이어야 합니다.",
+      "admin_username_too_long_must_less": "관리자 사용자 이름이 너무 깁니다. 256자 미만이어야 합니다.",
+      "missing_either_one_following_parameters": "다음 매개변수 중 하나가 없습니다: {{value}}."
     }
   },
   "status": {
+    "active": "활성",
     "admin_user_exists": "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요.",
+    "all_valid": "모두 유효",
     "blog_connection_fail": "소식 업데이트를 위해 블로그에 연결할 수 없습니다.",
     "default_server": "기본 서버",
     "done": "완료됨",
@@ -1848,7 +3035,11 @@
     "error_loading_data": "데이터 로드 실패",
     "error_loading_template": "템플릿 데이터를 로드할 수 없습니다.",
     "error_saving_template": "템플릿 저장 중 오류가 발생했습니다.",
+    "expired": "만료",
+    "expiring": "만료 예정",
     "failed": "실패",
+    "failover": "장애 조치",
+    "inactive": "비활성",
     "invalid_json_payload": "잘못된 JSON 페이로드입니다.",
     "loading": "로딩 중...",
     "loading_bans": "차단 목록 로딩 중...",
@@ -1872,10 +3063,12 @@
     "no_item": "항목 없음",
     "no_notifications": "표시할 알림이 없습니다.",
     "no_search_results": "항목을 찾을 수 없습니다.",
+    "no_settings": "이 플러그인은 이 범위에 대한 설정이 없습니다.",
     "no_steps": "사용 가능한 단계 없음",
     "no_steps_description": "이 템플릿에는 구성할 수 있는 단계가 없습니다.",
     "not_applicable": "해당 없음",
     "online": "온라인",
+    "optional": "선택 사항",
     "partial": "일부 적용",
     "pending": "대기 중",
     "pinging_instances": "인스턴스에 핑을 보내는 중입니다. 잠시만 기다려 주세요...",
@@ -1894,18 +3087,13 @@
     "template_in_use_description": "현재 템플릿 외부에서의 변경은 허용되지 않습니다. 현재 템플릿을 사용하여 수정하거나 고급/원본 모드로 전환하세요.",
     "unique_server_name": "고유한 서버 이름",
     "up": "활성",
-    "active": "활성",
-    "all_valid": "모두 유효",
-    "expired": "만료",
-    "expiring": "만료 예정",
-    "no_settings": "이 플러그인은 이 범위에 대한 설정이 없습니다.",
     "yes": "예",
-    "optional": "선택 사항",
     "no_file_selected": "선택된 파일 없음",
     "no_url_available": "사용 가능한 URL 없음",
     "unknown": "알 수 없음",
     "deferred": "지연됨",
-    "deferred_tooltip": "지연됨 — 인스턴스 기동 대기 중: {{reason}}"
+    "deferred_tooltip": "지연됨 — 인스턴스 기동 대기 중: {{reason}}",
+    "uploaded": "업로드됨"
   },
   "step": {
     "next": "다음",
@@ -2009,6 +3197,7 @@
       "error_missing_endpoint": "제출 엔드포인트를 확인할 수 없습니다.",
       "heading_create": "템플릿 생성",
       "heading_edit": "템플릿 {{id}} 수정",
+      "heading_view": "템플릿 {{id}} 보기",
       "label_config_data": "데이터",
       "label_config_name": "이름",
       "label_config_order": "순서",
@@ -2035,7 +3224,8 @@
       "multiselect_placeholder": "옵션 선택",
       "multiselect_summary": "{{count}}개 선택됨",
       "multivalue_add": "값 추가",
-      "multivalue_helper": "한 줄에 하나의 값.{{separatorNote}}",
+      "multivalue_helper": "한 줄에 하나의 값.",
+      "multivalue_helper_joined": "한 줄에 하나의 값. \"{{separator}}\"(으)로 결합됩니다.",
       "panel_overview": "개요",
       "panel_overview_help": "주요 정보를 확인하고 각 섹션으로 이동합니다.",
       "placeholder_config_data": "데이터",
@@ -2090,6 +3280,7 @@
       "raw_validation_steps_required": "템플릿에는 최소 하나 이상의 단계가 포함되어야 합니다.",
       "readonly_db": "현재 데이터베이스가 읽기 전용 상태입니다. 템플릿을 수정할 수 없습니다.",
       "readonly_method": "이 템플릿은 {{method}} 프로세스를 통해 생성되었으며 UI에서 편집할 수 없습니다.",
+      "readonly_method_plugin": "이 템플릿은 {{plugin}} 플러그인에 의해 생성되었으며 UI에서 편집할 수 없습니다.",
       "readonly_title": "읽기 전용",
       "readonly_user": "읽기 전용 권한을 가지고 있습니다. 쓰기 권한은 관리자에게 문의하세요.",
       "select_config_placeholder": "설정 선택",
@@ -2148,6 +3339,7 @@
       "validation_config_type_multisite": "설정 유형은 멀티사이트 호환 유형 중 하나여야 합니다.",
       "validation_config_type_required": "설정이 정의된 경우 설정 유형은 필수입니다.",
       "validation_configs_unique": "각 설정 이름은 고유해야 합니다.",
+      "validation_id_invalid": "템플릿 ID는 문자, 숫자, 마침표, 하이픈, 밑줄만 포함할 수 있으며 문자 또는 숫자로 시작해야 합니다.",
       "validation_id_required": "템플릿 ID는 필수입니다.",
       "validation_setting_key": "각 세팅에는 키가 있어야 합니다.",
       "validation_settings_unique": "각 세팅 키는 고유해야 합니다.",
@@ -2157,7 +3349,6 @@
     "none": "템플릿 없음"
   },
   "templates": {
-    "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다.",
     "gallery": {
       "delete_selected": "선택 항목 삭제",
       "empty_message": "설정, 단계, 사용자 지정 구성을 묶어 재사용할 첫 템플릿을 만드세요.",
@@ -2172,6 +3363,7 @@
       "medium": "중간 보안",
       "ui": "웹 UI"
     },
+    "subtitle": "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다.",
     "tag": {
       "config": "사용자 지정 구성: {{name}}",
       "feature": "기본 제공 기능: {{name}}",
@@ -2182,7 +3374,56 @@
       "heading": "사용 가능한 템플릿",
       "subheading": "BunkerWeb 조직이 게시한 엄선된 서비스 템플릿입니다.",
       "layer_warning": "템플릿은 레이어입니다: 이미 템플릿을 사용 중인 서비스에 템플릿을 추가하면 실제 적용되는 구성이 변경됩니다.",
-      "no_compat_notice": "이 카탈로그는 BunkerWeb 호환성을 선언하지 않습니다. 이 BunkerWeb에 없는 설정을 지정하는 템플릿은 설치 시 거부됩니다."
+      "no_compat_notice": "이 카탈로그는 BunkerWeb 호환성을 선언하지 않습니다. 이 BunkerWeb에 없는 설정을 지정하는 템플릿은 설치 시 거부됩니다.",
+      "state_installed": "설치됨, 카탈로그와 동일",
+      "state_update": "설치됨, 카탈로그 버전이 다릅니다",
+      "state_managed": "{{owner}}이(가) 설치 및 관리함: 카탈로그가 이를 변경하지 않습니다",
+      "update_preview_unknown": "변경 사항은 다음 카탈로그 새로고침 이후에 확인할 수 있습니다.",
+      "update_title": "커뮤니티 템플릿 업데이트",
+      "update_confirm": "템플릿 {{id}}을(를) 카탈로그 릴리스 {{tag}}의 버전으로 교체합니다. 다음 변경 사항이 템플릿에 적용됩니다:",
+      "update_services": "이 서비스들은 이 템플릿을 사용합니다. 다음 구성 생성 시, 직접 설정하지 않은 모든 설정이 새 값을 갖게 됩니다:",
+      "update_no_services": "아직 이 템플릿을 사용하는 서비스가 없습니다.",
+      "update_failed": "템플릿을 업데이트할 수 없습니다.",
+      "update_not_installed": "템플릿 {{template}}이(가) 설치되어 있지 않습니다: 대신 설치하세요",
+      "update_managed": "템플릿 {{template}}은(는) {{owner}}이(가) 관리함: 카탈로그가 이를 변경하지 않습니다",
+      "update_up_to_date": "템플릿 {{template}}은(는) 이미 카탈로그와 일치합니다",
+      "update_changed": "템플릿 {{template}} 또는 카탈로그가 미리보기 이후 변경되었습니다. 페이지를 새로고침하고 변경 사항을 다시 검토하세요.",
+      "diff": {
+        "name": "이름: {{old}} → {{new}}",
+        "settings_added": "설정 추가됨",
+        "settings_changed": "설정 변경됨",
+        "settings_removed": "설정 제거됨",
+        "steps_added": "단계 추가됨",
+        "steps_changed": "단계 변경됨",
+        "steps_removed": "단계 제거됨",
+        "configs_added": "사용자 지정 구성 추가됨",
+        "configs_changed": "사용자 지정 구성 변경됨",
+        "configs_removed": "사용자 지정 구성 제거됨"
+      }
+    },
+    "flash": {
+      "catalog_updated": "템플릿 {{template}}이(가) 카탈로그에서 업데이트되었습니다.",
+      "export_failed": "템플릿 {{template}}을(를) 내보내지 못했습니다: {{error}}",
+      "imported": "템플릿 {{template}}이(가) 가져와졌습니다.",
+      "replaced": "템플릿 {{template}}이(가) 교체되었습니다.",
+      "template_deleted_successfully": "템플릿 {{template_id}}을(를) 성공적으로 삭제했습니다.",
+      "successfully_deleted_template": "삭제된 템플릿: {{success_count}}개.",
+      "no_templates_selected_deletion": "삭제할 템플릿이 선택되지 않았습니다.",
+      "template_updated_successfully": "템플릿 {{template_id}}을(를) 성공적으로 업데이트했습니다.",
+      "template_installed_catalogue": "템플릿 {{template_id}}을(를) 카탈로그에서 설치했습니다.",
+      "template_created_successfully": "템플릿 {{template_id}}을(를) 성공적으로 생성했습니다.",
+      "template_not_found_2": "템플릿을 찾을 수 없습니다.",
+      "template_not_found": "템플릿 {{clone_id}}을(를) 찾을 수 없습니다.",
+      "user_is_read_only": "사용자는 읽기 전용입니다",
+      "error_deleting_template": "템플릿 {{template_id}} 삭제 중 오류 발생: {{message}}"
+    },
+    "import": {
+      "admin_only": "템플릿 가져오기는 관리자만 가능합니다",
+      "failed": "템플릿을 가져올 수 없습니다.",
+      "no_file": "가져올 파일을 선택하세요.",
+      "refused": "템플릿을 가져오지 못했습니다: {{reason}}",
+      "too_large": "템플릿을 가져오지 못했습니다: 파일이 1 MiB보다 큽니다",
+      "unreadable": "템플릿을 가져오지 못했습니다: 파일을 읽을 수 없습니다"
     }
   },
   "theme": {
@@ -2272,8 +3513,20 @@
       "back_to_file_upload": "파일 업로드로 돌아가기",
       "switch_to_text_editor": "텍스트 편집기로 전환",
       "enroll_instance": "{{hostname}}에 대한 등록 코드 발급",
+      "rotate_credential": "{{hostname}}의 자격 증명 교체",
       "revoke_credential": "{{hostname}}의 자격 증명 취소",
-      "rotate_credential": "{{hostname}}의 자격 증명 교체"
+      "attach_redirect": "{{name}}을(를) 서비스에 연결",
+      "edit_redirect": "{{name}} 편집",
+      "delete_redirect": "{{name}} 삭제",
+      "attach_upstream": "{{name}}을(를) 서비스에 연결",
+      "edit_upstream": "{{name}} 편집",
+      "delete_upstream": "{{name}} 삭제",
+      "edit_workflow_rules": "{{name}}의 규칙 편집",
+      "edit_workflow_details": "{{name}}의 이름과 설명 편집",
+      "attach_workflow": "{{name}}을(를) 서비스에 연결",
+      "clone_workflow": "{{name}} 복제",
+      "delete_workflow": "{{name}} 삭제",
+      "delete_certificate": "인증서 삭제"
     },
     "cannot_delete_original_ban": "원본 차단 항목은 삭제할 수 없습니다.",
     "cannot_remove_disabled": "하나 이상의 설정이 비활성화되어 있어 제거할 수 없습니다.",
@@ -2292,6 +3545,7 @@
     },
     "confirm_password_match": "확인용 비밀번호는 위에서 입력한 비밀번호와 일치해야 합니다.",
     "copied": "복사됨!",
+    "copy_failed": "복사 실패",
     "copy_https_only": "복사 기능은 HTTPS를 통해서만 사용 가능합니다.",
     "custom_ssl_cert_data": "사용자 정의 SSL 인증서 데이터 (PEM 형식 또는 Base64 인코딩)입니다.",
     "custom_ssl_cert_path": "사용자 정의 SSL 인증서 파일 경로입니다.",
@@ -2299,6 +3553,7 @@
     "custom_ssl_key_path": "사용자 정의 SSL 비밀 키 파일 경로입니다.",
     "different_from_template": "값이 템플릿 기본값과 다릅니다",
     "disabled_by_method": "비활성화됨: '{{method}}' 방식으로 관리되고 있습니다.",
+    "disabled_by_plugin": "비활성화됨: {{plugin}} 플러그인에 의해 관리됩니다.",
     "disabled_db_readonly": "비활성화됨: 데이터베이스가 읽기 전용 모드입니다.",
     "disabled_draft": "비활성화됨: 서비스가 초안 모드입니다.",
     "disabled_readonly": "비활성화됨: 읽기 전용 모드가 활성화되어 있습니다.",
@@ -2335,13 +3590,14 @@
       "edit_template": "템플릿 {{template}} 수정",
       "export_config": "사용자 지정 설정 {{name}} 내보내기",
       "export_service": "서비스 {{service}} 설정 내보내기",
+      "export_template": "템플릿 {{template}} 내보내기",
       "view_config": "사용자 정의 설정 {{name}} 보기",
       "view_file": "{{filename}} 보기",
       "view_service": "서비스 {{service}} 보기",
-      "manage_activation": "전역 설정에서 {{name}} 활성화 관리",
       "view_template": "템플릿 {{template}} 보기",
-      "edit_default_server": "기본 서버 편집",
-      "view_default_server": "기본 서버 보기"
+      "manage_activation": "전역 설정에서 {{name}} 활성화 관리",
+      "view_default_server": "기본 서버 보기",
+      "edit_default_server": "기본 서버 편집"
     },
     "modal": {
       "title": {
@@ -2524,113 +3780,512 @@
     "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
     "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다.",
     "config_global_types_available": "이제 사용자 지정 설정에서 전역 유형을 선택할 수 있습니다.",
-    "enroll_disabled_by_method": "{{hostname}}은 해당 환경({{method}})에서 제공됩니다. 등록은 컨트롤 플레인이 소유한 인스턴스에만 적용됩니다",
     "instance_credential_age": "자격 증명 마지막 업데이트: {{updated}}",
+    "enroll_disabled_by_method": "{{hostname}}은 해당 환경({{method}})에서 제공됩니다. 등록은 컨트롤 플레인이 소유한 인스턴스에만 적용됩니다",
     "badge": {
       "redirect_candidate": "이 서비스에는 리디렉션 외에 아무것도 없으므로 리디렉션 전용으로 선언할 수 있습니다. 리디렉션 전용 과금이 적용되면 PRO 서비스 수에서 제외됩니다."
     }
   },
   "totp": {
     "cant_access": "인증 코드를 사용할 수 없으신가요?",
+    "or_use_security_key": "또는 보안 키 사용",
+    "prompt": "TOTP 코드를 입력해 주세요.",
     "signing_in": "BunkerWeb에 로그인",
     "subtitle": "인증 앱에서 코드를 입력하세요.",
-    "title": "이중 인증",
-    "prompt": "TOTP 코드를 입력해 주세요.",
     "subtitle_security_key": "보안 키로 본인임을 확인하세요.",
-    "or_use_security_key": "또는 보안 키 사용"
+    "title": "이중 인증",
+    "flash": {
+      "ve_used_one_recovery_codes_have": "복구 코드 중 하나를 사용했습니다. {{len}}개가 남았습니다.",
+      "error_occurred_while_using_recovery_code": "복구 코드 사용 중 오류가 발생했습니다.",
+      "database_read_only_recovery_code_used": "데이터베이스가 읽기 전용 모드이므로 사용한 복구 코드는 계속 유효합니다.",
+      "token_invalid": "토큰이 잘못되었습니다.",
+      "no_token_provided_totp": "/totp에 토큰이 제공되지 않았습니다."
+    }
   },
-  "certificates": {
-    "acme_help": "기존 설정이 Let's Encrypt를 활성화하고 구성하는 서비스 중에서 선택합니다. 이 작업은 해당 설정을 예약하는 것만입니다. 인증서 세부 정보 및 도전 인증 자격 증명은 여기에 입력되지 않습니다.",
-    "active": "활성 인증서",
-    "algorithm": "알고리즘",
+  "redirects": {
     "all": "전체",
-    "assignment_notice": "할당은 중앙 재고를 구성합니다. TLS 배포는 각 서비스의 인증서 설정에 의해 제어됩니다.",
-    "assignments": "인증서 할당",
-    "assignments_help": "이 할당은 실시간 TLS 설정을 변경하지 않습니다.",
-    "attach": "할당",
-    "attach_all": "이 인증서는 모든 사용 가능한 서비스에 이미 연결되어 있습니다.",
-    "attach_copy": "중앙 재고의 서비스에 \"{{name}}\"을 할당합니다.",
-    "browse_certificate": "인증서 보기",
-    "browse_key": "개인 키 보기",
-    "common_name": "공통 이름",
-    "confirm": "확인",
-    "confirm_action": "인증서 작업 확인",
-    "confirm_delete": "\"{{name}}\" 삭제? 이 작업을 취소할 수 없습니다.",
-    "confirm_generic": "이 인증서 작업 확인?",
-    "confirm_renew": "\"{{name}}\" 갱신?",
-    "confirm_renew_due": "모든 인증서를 확인하고 현재 만료된 인증서를 갱신?",
-    "create": "인증서 생성",
-    "download_chain": "체인 다운로드",
-    "download_leaf": "리프 다운로드",
-    "edit_help": "이 작업은 인증서 목록의 메타데이터만 변경하며, 인증서 내용이나 실제 TLS 설정은 변경하지 않습니다.",
-    "edit_metadata": "인증서 메타데이터 편집",
-    "empty": "인증서 없음",
-    "empty_help": "자체 서명 인증서를 생성하고, ACME 발급 일정을 예약하거나, 기존 PEM 인증서와 키를 업로드합니다.",
-    "expired_help": "주의가 필요",
-    "expires": "만료됨",
-    "expiring_help": "30일 이내",
-    "file_extensions": "다음 파일 확장자를 사용하세요: {{extensions}}.",
-    "file_select": "PEM 파일을 선택합니다.",
-    "file_selected": "{{name}} ({{size}} KiB)",
-    "file_size_limit": "파일 크기는 1 MiB를 초과할 수 없습니다.",
-    "fingerprint": "SHA-256 지문",
-    "issuer": "발급 기관",
-    "issuers": "주요 발급 기관",
-    "key_drop": "해당하는 개인 키를 여기에 드롭합니다",
-    "key_limit": "최대 1 MiB. 저장 시 암호화되며 다운로드할 수 없습니다.",
-    "last_error": "마지막 오류",
-    "make_primary": "이 서비스에 대한 주요 재고 할당으로 표시",
-    "managed": "관리되는 인증서",
-    "new_selfsigned": "새 자체 서명 인증서",
-    "no_issuers": "발급 기관 정보 없음",
-    "none_due": "갱신 대상 인증서 없음",
-    "orphan_account": "계정",
-    "orphan_badge": "ACME 계정 누락",
-    "orphan_help": "이 갱신 기록은 더 이상 존재하지 않는 ACME 계정을 참조합니다. 제공업체 상태가 복구될 때까지 갱신은 차단됩니다.",
-    "orphan_server": "ACME 서버",
-    "orphan_title": "ACME 계정 누락",
-    "pem_certificate": "PEM 인증서 또는 체인",
-    "pem_drop": "해당하는 공개 PEM 인증서 또는 체인을 여기에 드롭합니다",
-    "pem_limit": "최대 1 MiB",
-    "pem_private_key": "PEM 개인 키",
-    "primary": "주요 할당",
-    "primary_help": "선택된 서비스에 대한 주요 재고 할당으로 표시",
-    "readonly": "데이터베이스는 읽기 전용입니다. 인증서를 검사하고 다운로드할 수 있지만 변경할 수 없습니다.",
-    "renew_due": "검토/갱신 예정",
-    "sans": "주체 대체 이름",
-    "save_metadata": "메타데이터 저장",
-    "schedule": "발급 예약",
-    "schedule_acme": "ACME 발급 예약",
-    "search": "이름, 일반 이름, SAN, 발급 기관 또는 지문을 검색하세요…",
-    "serial": "시리얼 번호",
-    "services": "서비스",
-    "services_help": "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다.",
-    "showing_count": "인증서 {{visible}}개 / {{total}}개 표시",
-    "source": {
-      "customcert": "사용자 정의",
-      "letsencrypt": "Let's Encrypt",
-      "selfsigned": "자체 서명"
+    "append_badge": "+ URI",
+    "append_request_uri": "요청된 URI을 대상에 추가",
+    "attach": "연결",
+    "attach_copy": "{{name}} ({{from}} → {{to}})을 하나 이상의 서비스에 첨부",
+    "code": {
+      "301": "301 — 영구 리디렉션",
+      "302": "302 — 임시 리디렉션",
+      "303": "303 — 다른 위치 보기",
+      "307": "307 — 일시적인 리디렉션",
+      "308": "308 — 영구적인 리디렉션"
     },
-    "source_label": "출처",
-    "status": {
-      "expired": "만료",
-      "expiring_soon": "곧 만료",
-      "not_yet_valid": "아직 유효하지 않음",
-      "revoked": "폐기됨",
-      "valid": "유효"
+    "create": "리디렉션 생성",
+    "delete_confirm_title": "이 리디렉션을 삭제하시겠습니까?",
+    "delete_copy": "{{name}} 리디렉션을 삭제하시겠습니까?",
+    "delete_help": "서비스에 첨부된 리디렉션은 삭제할 수 없습니다. 먼저 분리하십시오.",
+    "edit": "리디렉션 편집",
+    "edit_shared": "이 리디렉션은 {{count}}개 서비스에 연결되어 있습니다: {{services}}. 저장하면 연결된 모든 서비스에 변경 사항이 적용됩니다.",
+    "empty_text": "리디렉션은 하나 이상의 서비스에 첨부하는 이름이 지정된 규칙입니다. REDIRECT_* 설정은 함께 작동합니다.",
+    "empty_title": "리디렉션 없음",
+    "err": {
+      "invalid_from_path": "원본 경로가 유효하지 않습니다: 공백, 세미콜론 또는 중괄호를 포함할 수 없습니다.",
+      "invalid_to_url": "대상은 완전한 http:// 또는 https:// URL이어야 합니다."
     },
-    "subtitle": "중앙 재고에서 인증서 발급, 업로드, 할당, 갱신, 검사",
-    "total": "전체",
-    "truncated": "첫 500개의 인증서만 표시됩니다. 완전한 결과를 위해 API를 통해 재고를 좁힙니다.",
-    "unassigned": "할당되지 않음",
-    "upcoming": "예정된 갱신",
-    "upcoming_help": "만료 또는 30일 갱신 기간 내",
-    "upload": "인증서 업로드",
-    "upload_custom": "사용자 지정 인증서 업로드",
-    "upload_invalid": "유효한 공개 인증서와 해당되는 개인 키를 선택합니다.",
-    "valid_days": "일 수",
-    "valid_from": "유효 시작일",
-    "valid_to": "유효 종료일"
+    "from_path": "~에서 리디렉션",
+    "from_path_help": "첨부된 서비스의 소스 경로, 예: /old.",
+    "new": "새 리디렉션",
+    "not_attached": "첨부되지 않음",
+    "readonly": "데이터베이스는 읽기 전용입니다. 리디렉션은 검사할 수 있지만 변경할 수 없습니다.",
+    "save": "리디렉션 저장",
+    "search": "이름, 소스 경로 또는 대상 검색...",
+    "services_help": "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 나중에 리디렉션을 추가할 수 있습니다.",
+    "status_code": "상태 코드",
+    "to_url": "리디렉션 대상",
+    "truncated": "첫 500개의 리디렉션만 표시됩니다. 전체 결과를 위해 API를 사용하여 목록을 좁힙니다.",
+    "flash": {
+      "could_not_detach_redirect": "리디렉션을 연결 해제하지 못했습니다: {{message}}",
+      "redirect_detached_successfully": "리디렉션을 성공적으로 연결 해제했습니다",
+      "redirect_service_are_required": "리디렉션과 서비스는 필수입니다",
+      "could_not_attach_redirect": "리디렉션을 연결하지 못했습니다: {{message}}",
+      "redirect_attached_service": "리디렉션이 연결되었습니다. 서비스: {{len}}개",
+      "could_not_delete_redirect": "리디렉션을 삭제하지 못했습니다: {{message}}",
+      "redirect_deleted_successfully": "리디렉션을 성공적으로 삭제했습니다",
+      "redirect_required": "리디렉션은 필수입니다",
+      "redirect_updated_successfully": "리디렉션을 성공적으로 업데이트했습니다",
+      "redirect_created_successfully": "리디렉션 {{value}}을(를) 성공적으로 생성했습니다",
+      "could_not_fetch_services_redirect_assignments": "리디렉션 할당을 위한 서비스를 가져오지 못했습니다: {{message}}",
+      "could_not_fetch_redirects": "리디렉션을 가져오지 못했습니다: {{message}}",
+      "could_not_create": "리디렉션을 생성할 수 없습니다: {{message}}",
+      "could_not_update": "리디렉션을 업데이트할 수 없습니다: {{message}}",
+      "too_many_services": "리디렉션은 {{value}}개를 초과하는 서비스에 연결할 수 없습니다",
+      "name_required": "리디렉션 이름은 필수입니다",
+      "target_required": "리디렉션 대상은 필수입니다",
+      "status_code_must_be_one_of": "상태 코드는 {{value}} 중 하나여야 합니다",
+      "at_least_one_service_required": "최소 하나의 서비스가 필요합니다"
+    }
+  },
+  "upstreams": {
+    "add_server": "서버 추가",
+    "all": "전체",
+    "attach": "연결",
+    "attach_copy": "{{name}} ({{servers}})를 하나 이상의 서비스에 추가합니다.",
+    "backend_ssl": "서버와 TLS로 통신합니다(https:// / grpcs://).",
+    "balancing": {
+      "ip_hash": "IP 해시 — 동일한 클라이언트, 동일한 백엔드",
+      "least_conn": "최소 연결",
+      "round_robin": "순환 (기본값)"
+    },
+    "create": "업스트림 생성",
+    "delete_confirm_title": "이 업스트림 삭제?",
+    "delete_copy": "{{name}} 업스트림 삭제?",
+    "delete_help": "서비스에 연결된 업스트림은 삭제할 수 없습니다. 먼저 분리하십시오.",
+    "edit": "업스트림 편집",
+    "edit_shared": "이 업스트림은 {{count}}개 서비스에 연결되어 있습니다: {{services}}. 저장하면 연결된 모든 서비스에 변경 사항이 적용됩니다.",
+    "empty_text": "업스트림은 역방향 프록시 경로에서 하나 이상의 서비스에 연결되는 백엔드의 이름이 지정된 풀입니다. REVERSE_PROXY_HOST 설정은 함께 작동합니다.",
+    "empty_title": "업스트림이 아직 없음",
+    "keepalive": "지속 연결",
+    "keepalive_help": "각 워커당 유지되는 유휴 연결 수. HTTP 및 gRPC만 적용 가능; 비활성화하려면 비워둡니다.",
+    "match_path": "역방향 프록시 경로",
+    "match_path_help": "선택된 서비스가 이 풀로 프록시하는 위치. 스트림 풀의 경우 전체 서비스를 사용합니다.",
+    "method": "로드 밸런싱",
+    "name_help": "알파벳, 숫자, 하이픈, 밑줄만 사용 가능. 점은 사용 불가하며, 풀 이름이 실제 호스트를 가리지 못합니다.",
+    "new": "새로운 업스트림",
+    "not_attached": "연결되지 않음",
+    "protocol": "프로토콜",
+    "protocol_help": "HTTP 및 gRPC 풀은 경로에 연결되어 있습니다. 스트림 풀은 전체 TCP/UDP 서비스를 사용합니다.",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "스트림 (TCP/UDP)"
+    },
+    "readonly": "데이터베이스는 읽기 전용입니다. 업스트림은 확인할 수 있지만 변경할 수 없습니다.",
+    "role": {
+      "backup": "백업",
+      "down": "비활성",
+      "primary": "주"
+    },
+    "save": "업스트림 저장",
+    "search": "이름, 설명 또는 서버 검색...",
+    "server_fail_timeout": "실패 시간 초과",
+    "server_host": "서버",
+    "server_max_fails": "최대 실패 횟수",
+    "server_role": "역할",
+    "server_weight": "가중치",
+    "servers": "서버",
+    "services_help": "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 업스트림은 나중에 연결할 수 있습니다.",
+    "services_hidden": "{{count}}개 서비스 숨김: {{protocol}} 업스트림은 프로토콜이 일치하는 서비스에만 연결할 수 있습니다.",
+    "truncated": "첫 500개의 업스트림만 표시됩니다. 완전한 결과를 얻기 위해 API을 사용하여 목록을 좁힙니다.",
+    "flash": {
+      "could_not_detach_upstream": "업스트림을 연결 해제하지 못했습니다: {{message}}",
+      "upstream_detached_successfully": "업스트림을 성공적으로 연결 해제했습니다",
+      "upstream_service_are_required": "업스트림과 서비스는 필수입니다",
+      "could_not_attach_upstream": "업스트림을 연결하지 못했습니다: {{message}}",
+      "upstream_attached_service": "업스트림이 연결되었습니다. 서비스: {{len}}개",
+      "could_not_delete_upstream": "업스트림을 삭제하지 못했습니다: {{message}}",
+      "upstream_deleted_successfully": "업스트림을 성공적으로 삭제했습니다",
+      "upstream_required": "업스트림은 필수입니다",
+      "could_not_update_upstream": "업스트림을 업데이트하지 못했습니다: {{message}}",
+      "upstream_updated_successfully": "업스트림을 성공적으로 업데이트했습니다",
+      "could_not_create_upstream": "업스트림을 생성하지 못했습니다: {{message}}",
+      "upstream_created_successfully": "업스트림 {{value}}을(를) 성공적으로 생성했습니다",
+      "could_not_fetch_services_upstream_assignments": "업스트림 할당을 위한 서비스를 가져오지 못했습니다: {{message}}",
+      "could_not_fetch_upstreams": "업스트림을 가져오지 못했습니다: {{message}}",
+      "weight_max_fails_whole_numbers": "{{host}}의 weight와 max fails는 정수여야 합니다",
+      "at_least_one_server_required": "최소 하나의 서버가 필요합니다",
+      "too_many_servers": "업스트림은 {{value}}개를 초과하는 서버를 가질 수 없습니다",
+      "too_many_services": "업스트림은 {{value}}개를 초과하는 서비스에 연결할 수 없습니다",
+      "match_path_must_start_with_slash": "리버스 프록시 경로는 /로 시작해야 합니다",
+      "name_required": "업스트림 이름은 필수입니다",
+      "protocol_must_be_one_of": "프로토콜은 {{value}} 중 하나여야 합니다",
+      "method_must_be_one_of": "메서드는 {{value}} 중 하나여야 합니다",
+      "keepalive_must_be_positive_whole_number": "keepalive 수는 양의 정수여야 합니다",
+      "at_least_one_service_required": "최소 하나의 서비스가 필요합니다"
+    }
+  },
+  "workflows": {
+    "act_block": "차단",
+    "act_challenge": "챌린지",
+    "act_code": "상태 코드",
+    "act_denyDefault": "인스턴스의 거부 상태 코드",
+    "act_denyShort": "거부 상태 코드",
+    "act_provider": "안티봇 제공자",
+    "act_redirect": "리디렉션",
+    "act_status": "거부 상태 코드",
+    "act_terminal": "규칙마다 하나의 작업만 실행하며 평가가 종료됩니다. 규칙에서 참/거짓 경로로 분기하지 않습니다.",
+    "act_url": "대상 URL",
+    "action": "그 후",
+    "add_rule": "규칙 추가",
+    "all": "전체",
+    "aria": {
+      "collapse": "접기",
+      "combinator": "조합 연산자 변경, 현재",
+      "conditionType": "조건 유형",
+      "denyStatus": "거부 상태 코드",
+      "drag": "드래그하여 순서 변경",
+      "expand": "펼치기",
+      "groupKind": "그룹 유형",
+      "more": "더 보기",
+      "moveDown": "아래로 이동 — 나중에 실행",
+      "moveRule": "규칙 이동",
+      "moveUp": "위로 이동 — 먼저 실행",
+      "provider": "안티봇 제공자",
+      "redirectStatus": "리디렉션 상태 코드",
+      "removeCondition": "조건 제거",
+      "removeThreshold": "임계값 제거",
+      "removeThresholdLong": "요청률 임계값 제거",
+      "removeValue": "값 제거",
+      "requestCount": "요청 수",
+      "resourceGroup": "리소스 그룹",
+      "ruleName": "규칙 {{n}} 이름",
+      "terminalAction": "종료 작업",
+      "uriMatch": "URI 일치 모드",
+      "uriValue": "URI 값",
+      "window": "시간 범위(초)",
+      "insertAt": "{{n}} 위치에 규칙 추가",
+      "openRule": "{{n}} 규칙 열기",
+      "ruleErrors": "이 규칙에 유효성 검사 문제 {{count}}개",
+      "changePosition": "규칙 {{n}} / {{total}}, 위치 변경",
+      "newValue": "새 값",
+      "positionMove": "위치 {{n}} / {{total}} — 클릭하여 이동",
+      "crowdsecField": "CrowdSec 사실",
+      "collapseRule": "규칙 {{n}} 접기",
+      "expandRule": "규칙 {{n}} 펼치기",
+      "moveRuleUp": "규칙 {{n}} 위로 이동",
+      "moveRuleDown": "규칙 {{n}} 아래로 이동",
+      "moreActionsForRule": "규칙 {{n}}에 대한 추가 작업",
+      "ruleCard": "규칙 {{n}}/{{total}} — {{name}}"
+    },
+    "attach": "서비스에 연결",
+    "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
+    "attached_notice": "저장하면 이 규칙이 연결된 서비스 {{count}}개에 적용됩니다.",
+    "canvas": {
+      "title": "규칙 순서",
+      "auxList": "상단에서 하단으로. 첫 번째로 일치하는 규칙이 적용됩니다.",
+      "auxCanvas": "왼쪽에서 오른쪽으로. 첫 번째로 일치하는 규칙이 적용됩니다.",
+      "entry_title": "모든 요청",
+      "entry_sub": "규칙은 왼쪽에서 오른쪽으로 실행됩니다.",
+      "exit_title": "일치하는 규칙 없음",
+      "exit_sub": "다음 연결된 워크플로우로 진행합니다.",
+      "insert": "여기 규칙 추가",
+      "open": "규칙 열기",
+      "close": "닫기",
+      "gateTip": "일치 게이트, 동작이 아닌: 임계값 아래에서는 규칙이 일치하지 않고 다음 규칙이 평가됩니다.",
+      "drawerSub": "{{total}}의 {{n}} 위치에서 실행",
+      "stopTail": ", 평가가 여기서 중단됨 — 이후 규칙이 도달하지 않습니다.",
+      "skipped": "비활성화됨 — 완전히 건너뛰어, 마치 체인에 없는 것처럼 동작합니다.",
+      "emptyTitle": "규칙이 아직 없습니다",
+      "emptyBody": "규칙이 없는 워크플로우는 아무런 변화를 주지 않습니다 — 모든 요청이 바로 다음 연결된 워크플로우로 진행됩니다.",
+      "emptyCta": "첫 번째 규칙 추가",
+      "hint": "순서를 재정렬하려면 노드를 드래그 · 보드를 드래그하여 이동 · 포커스된 노드에서 Alt + ← / → 사용",
+      "hintReadonly": "읽기 전용 — 확대/축소하여 둘러보며, 순서는 변경할 수 없습니다",
+      "dropHint": "우선순위 설정하려면 드롭 — 규칙의 체인에서의 위치만이 의미를 가집니다",
+      "zoomIn": "확대",
+      "zoomOut": "축소",
+      "fit": "보기 맞춤"
+    },
+    "capacity": "규칙 {{count}}/{{maxRules}}개 · 가장 큰 규칙은 조건식 {{worst}}/{{maxPredicates}}개 사용 · 이 워크플로의 정규식 {{regexes}}개",
+    "clone": "워크플로우 복제",
+    "clone_help": "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다.",
+    "clone_name": "복제 이름",
+    "confirm": {
+      "deleteRule": "이 규칙을 삭제하시겠습니까? 아래의 모든 규칙이 한 칸씩 위로 이동합니다."
+    },
+    "copySuffix": " (사본)",
+    "delete": "워크플로우 삭제",
+    "delete_confirm": "이 워크플로우와 모든 규칙이 영구적으로 삭제됩니다.",
+    "empty_text": "워크플로우는 서비스에 연결한 규칙의 순서대로 정렬된 목록입니다: 조건 트리, 선택적 속도 임계값, 그리고 하나의 동작 — 도전, 차단 또는 리디렉션.",
+    "empty_title": "워크플로우는 아직 없습니다",
+    "entry_sub": "워크플로는 연결 순서대로 실행되고, 이 워크플로의 규칙은 위에서 아래로 실행됩니다.",
+    "entry_title": "연결된 서비스로 보내는 모든 요청",
+    "err": {
+      "load": "저장된 규칙을 읽을 수 없습니다. 덮어쓰지 않도록 저장이 비활성화되었습니다; 페이지를 새로고침하세요.",
+      "save": "저장할 수 없음",
+      "saveUnreachable": "저장 엔드포인트에 연결할 수 없음",
+      "validate": "검증할 수 없음",
+      "validateUnreachable": "검증 엔드포인트에 연결할 수 없음"
+    },
+    "errors": {
+      "body": "아무것도 적용되지 않았습니다. 실행 중인 정책은 변경되지 않았습니다.",
+      "count": "문제 {{count}}개로 인해 저장할 수 없습니다.",
+      "rule": "규칙 {{n}}",
+      "ruleNamed": "규칙 {{n}} — {{name}}",
+      "whole": "이 워크플로"
+    },
+    "exit_sub": "요청은 다음 연결된 워크플로로 이동한 뒤 나머지 보안 스택으로 계속 진행됩니다.",
+    "exit_title": "일치하는 규칙 없음",
+    "gate": {
+      "and": "또한 동일한 클라이언트 IP의 요청 수가 다음보다 많을 때만",
+      "chip": "일치 게이트",
+      "help": "클라이언트 IP별로 계산합니다. 임계값 미만에서는 이 규칙이 전혀 일치하지 않고 평가가 다음 규칙으로 이어집니다. 이 규칙 자체는 요청률을 제한하지 않습니다."
+    },
+    "legend": {
+      "fall": "일치하지 않으면 다음 규칙으로 이동",
+      "gate": "요청률 임계값은 일치를 제어하며 작업이 아님",
+      "move": "드래그하거나 화살표를 사용하거나 Alt + ↑ / ↓를 눌러 순서 변경",
+      "stop": "일치하면 하나의 작업을 실행하고 중지",
+      "moveCanvas": "드래그하거나, 번호 표시를 사용하거나, Alt + ← / →를 눌러 순서를 재정렬"
+    },
+    "link": {
+      "noMatch": "일치하지 않음",
+      "entry": "모든 요청"
+    },
+    "menu": {
+      "bottom": "마지막에 실행",
+      "delete": "규칙 삭제",
+      "disable": "규칙 비활성화",
+      "duplicate": "아래에 복제",
+      "enable": "규칙 활성화",
+      "top": "첫 번째로 실행",
+      "moveTo": "{{n}}번 위치로 이동",
+      "staysAt": "{{n}}번 위치 유지"
+    },
+    "move": {
+      "first": "첫 번째로 실행",
+      "last": "마지막에 실행"
+    },
+    "new": "새 워크플로우",
+    "no_rules": "규칙은 아직 없습니다. 이 정책을 만들기 시작하려면 하나를 추가하세요.",
+    "not_attached": "연결되지 않음",
+    "not_attached_notice": "이 워크플로는 어떤 서비스에도 연결되지 않아 아직 어디에서도 규칙이 적용되지 않습니다.",
+    "not_validated": "아직 검증되지 않음",
+    "order_help": "규칙은 순서대로 평가되며 처음 일치한 규칙이 적용됩니다. 요청률 임계값이 있는 규칙은 임계값을 초과한 뒤에만 일치하므로, 아래쪽 규칙이 임계값 미만의 트래픽을 처리할 수 있습니다.",
+    "readonly": "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다.",
+    "rule": {
+      "disabled": "비활성화됨",
+      "if": "조건",
+      "namePlaceholder": "규칙 이름",
+      "noun": "규칙",
+      "onMatch": "일치하는 경우",
+      "skipped": "비활성화됨 — 목록에 없는 것처럼 완전히 건너뜁니다.",
+      "stopTail": ", 여기서 평가가 중지되어 아래 규칙에는 도달하지 않습니다."
+    },
+    "rules": "규칙",
+    "say": {
+      "actionChangedBlock": "작업이 차단으로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다.",
+      "actionChangedChallenge": "작업이 챌린지로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다.",
+      "actionChangedRedirect": "작업이 리디렉션으로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다.",
+      "added": "규칙이 마지막인 {{n}}번 위치에 추가되었습니다. 따라서 위의 모든 규칙을 먼저 확인합니다.",
+      "deleted": "규칙이 삭제되었습니다. 규칙 {{count}}개가 남았습니다.",
+      "duplicated": "사본이 {{n}}번 위치에 삽입되었습니다. 위의 원본이 활성화된 동안에는 절대 일치할 수 없습니다.",
+      "gateAdded": "일치 조건에 요청률 임계값이 추가되었습니다. 임계값 미만에서는 규칙이 일치하지 않고 평가가 계속됩니다.",
+      "jumped": "{{where}}: {{message}}",
+      "lastValueRemoved": "마지막 값이 제거되었습니다. 값을 하나 추가하기 전에는 이 조건을 저장할 수 없습니다.",
+      "moved": "{{name}}이(가) {{total}}개 중 {{to}}번 위치로 이동했습니다.",
+      "movedDrag": "{{name}}을(를) 드래그하여 {{total}}개 중 {{to}}번 위치로 이동했습니다.",
+      "movedKeyboard": "{{name}}을(를) 키보드로 {{total}}개 중 {{to}}번 위치로 이동했습니다.",
+      "predicateCap": "이 규칙에는 이미 최대 개수인 {{max}}개의 조건이 있습니다.",
+      "ruleDisabled": "{{name}}이(가) 비활성화되어 완전히 건너뛰며, 이제 아래 규칙이 해당 요청을 처리합니다.",
+      "ruleEnabled": "{{name}}이(가) 활성화되어 {{n}}번 위치에서 다시 평가됩니다.",
+      "runsAfter": "이제 {{name}} 다음에 실행됩니다.",
+      "runsAfterAbove": "이제 위 규칙 다음에 실행됩니다.",
+      "runsFirst": "이제 첫 번째로 실행됩니다.",
+      "runsLast": "이제 마지막으로 실행됩니다.",
+      "saved": "규칙을 저장하고 연결된 서비스에 배포했습니다.",
+      "theRule": "해당 규칙",
+      "valuesDropped": "조건이 변경되었습니다. 옮기지 못한 값: {{count}}개.",
+      "inserted": "{{total}}의 {{n}} 위치에 규칙 추가됨. 이전에 있는 모든 규칙을 먼저 확인합니다.",
+      "inspecting": "{{total}}의 {{n}} 규칙 편집 — {{name}}.",
+      "viewCanvas": "캔버스 뷰. 규칙은 왼쪽에서 오른쪽으로 실행되며, 첫 번째로 일치하는 규칙이 적용됩니다.",
+      "viewList": "목록 뷰. 규칙은 위에서 아래로 실행되며, 첫 번째로 일치하는 규칙이 적용됩니다."
+    },
+    "search": "이름 또는 설명을 검색하세요...",
+    "test": {
+      "asn": "ASN",
+      "asn_help": "ASN 조회 실패를 시뮬레이션하려면 비워 두세요.",
+      "asn_invalid": "ASN은 숫자여야 합니다",
+      "assume_not_whitelisted": "클라이언트가 허용 목록에 없다고 가정합니다.",
+      "assume_rate_counter": "요청 번호 {{request_number}}은(는) 측정값이 아니라 입력값입니다.",
+      "assume_regex_budget": "인스턴스의 정규식 예산이 소진되지 않았다고 가정합니다.",
+      "assumptions": "가정",
+      "country": "국가",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec가 허용함",
+      "crowdsec_help": "워크플로가 실행되기 전에 CrowdSec가 이 요청에 대해 결정한 내용입니다. CrowdSec가 한 번도 평가하지 않은 요청은 불리한 근거가 전혀 없는 요청과 같지 않습니다. 전자는 CrowdSec 조건을 미결정 상태로 남기고, 후자는 이를 거짓으로 만듭니다.",
+      "crowdsec_remediated": "CrowdSec가 처리함",
+      "crowdsec_remediation": "처리 방식",
+      "crowdsec_source": "판정 소스",
+      "crowdsec_unavailable": "CrowdSec가 이 요청을 평가하지 않음",
+      "detail_challenge": "챌린지가 처리를 맡고 나머지 보안 스택도 계속 실행됩니다.",
+      "detail_detect": "이 서비스는 탐지 모드이므로 실제로 아무 작업도 적용되지 않습니다.",
+      "detail_status": "클라이언트에 표시되는 상태: {{status}}.",
+      "failed": "테스트를 실행할 수 없음",
+      "geo": "GeoIP 조회",
+      "geo_help": "사용할 수 없으면 국가 및 ASN 규칙이 '알 수 없음'이 되어 절대 일치할 수 없습니다.",
+      "geo_local": "로컬/사설 주소",
+      "geo_resolved": "확인됨",
+      "geo_unavailable": "데이터베이스를 사용할 수 없음",
+      "intro": "인스턴스와 동일한 방식으로 서비스에 연결된 모든 워크플로를 순서대로 평가합니다.",
+      "invalid": "테스트하기 전에 위 문제를 해결하세요.",
+      "ip": "클라이언트 IP",
+      "method": "메서드",
+      "number": "요청 번호",
+      "number_help": "시간 범위 내 이 클라이언트의 N번째 요청입니다. 측정값이 아니라 사용자가 제공하는 가정입니다.",
+      "open": "요청 테스트",
+      "other_matched": "여기서 일치",
+      "other_no_match": "일치하는 규칙 없음",
+      "other_unreached": "도달하지 않음",
+      "other_workflows": "이 서비스의 다른 워크플로",
+      "out_draft": "이 서비스는 초안이므로 아직 워크플로가 컴파일되지 않았습니다.",
+      "out_match": "{{workflow}} · {{rule}}이(가) 일치했습니다.",
+      "out_match_block": "{{workflow}} · {{rule}}이(가) 일치하여 요청을 차단했습니다.",
+      "out_match_redirect": "{{workflow}} · {{rule}}이(가) 일치하여 요청을 리디렉션했습니다.",
+      "out_match_challenge": "{{workflow}} · {{rule}}이(가) 일치하여 요청에 챌린지를 적용했습니다.",
+      "out_no_match": "일치하는 규칙이 없습니다. 요청은 나머지 보안 스택으로 계속 진행됩니다.",
+      "out_not_attached": "이 워크플로는 어떤 서비스에도 연결되지 않아 평가할 규칙 체인이 없습니다.",
+      "out_whitelisted": "허용 목록에 있음 — 전체 워크플로를 건너뛰고 어떤 규칙도 평가하지 않습니다.",
+      "run": "테스트 실행",
+      "service": "서비스",
+      "title": "요청 테스트",
+      "unreachable": "테스트 엔드포인트에 연결할 수 없음",
+      "uri": "URI 경로",
+      "uri_help": "경로만 입력합니다. $uri에는 쿼리 문자열이 포함되지 않습니다.",
+      "v_gate": "조건 일치 · {{count}}개 중 {{n}}에서 게이트 닫힘",
+      "v_match": "일치",
+      "v_unknown": "알 수 없음",
+      "v_unknown_help": "이 규칙에 필요한 정보를 확인할 수 없어 절대 일치할 수 없습니다.",
+      "whitelisted": "이 클라이언트는 허용 목록에 있음"
+    },
+    "threshold": "속도 기준 이상",
+    "threshold_count": "요청",
+    "threshold_window": "(초)",
+    "tree": {
+      "addCondition": "조건",
+      "addGroup": "그룹",
+      "all": "모두",
+      "allMeta": "조건 {{count}}개 — 모두 참이어야 함",
+      "and": "그리고",
+      "any": "하나 이상",
+      "anyMeta": "조건 {{count}}개 — 하나 이상 참이어야 함",
+      "empty": "빈 그룹입니다. 조건을 추가해야 저장할 수 있습니다.",
+      "noGroupHolds": "이 종류의 항목을 포함하는 리소스 그룹이 없습니다.",
+      "noneMeta": "어느 조건도 참이 아닐 때 일치",
+      "not": "어느 것도 아님",
+      "or": "또는",
+      "removeGroup": "그룹 제거"
+    },
+    "truncated": "총 500개의 워크플로우만 표시됩니다. 완전한 결과를 위해 API를 사용하여 목록을 좁히세요.",
+    "untitled": "이름 없는 규칙",
+    "value": {
+      "add": "값"
+    },
+    "values": {
+      "fewer": "간단히 표시",
+      "more": "+{{n}}개 더 보기"
+    },
+    "verb": {
+      "asn": "다음과 같음",
+      "country": "다음과 같음",
+      "group": "그룹에 속함",
+      "ip": "다음에 포함됨",
+      "isIn": "다음에 포함됨",
+      "isOneOf": "다음 중 하나임",
+      "method": "다음과 같음",
+      "uri": "다음과 일치"
+    },
+    "view": {
+      "canvas": "캔버스",
+      "list": "목록"
+    },
+    "action_help": {
+      "block": "요청 거부",
+      "challenge": "사람인지 확인",
+      "redirect": "다른 위치로 전송"
+    },
+    "condition": {
+      "crowdsec": "CrowdSec 판정",
+      "ip": "IP / CIDR",
+      "method": "HTTP 메서드",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "정확히 일치",
+      "prefix": "다음으로 시작",
+      "regex": "정규식과 일치"
+    },
+    "reason": {
+      "sentence": "보안 워크플로 {{workflow}}: {{action}}"
+    },
+    "crowdsec_field": {
+      "remediation": "처리 방식이",
+      "source": "소스가"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "차단",
+      "captcha": "캡차",
+      "lapi": "로컬 API"
+    },
+    "flash": {
+      "could_not_detach_workflow": "워크플로우를 연결 해제하지 못했습니다: {{message}}",
+      "workflow_detached_successfully": "워크플로우를 성공적으로 연결 해제했습니다",
+      "workflow_service_are_required": "워크플로우와 서비스는 필수입니다",
+      "could_not_attach_workflow": "워크플로우를 연결하지 못했습니다: {{message}}",
+      "workflow_services_updated_attached": "워크플로우 서비스가 업데이트되었습니다 ({{len}}개 연결됨)",
+      "could_not_delete_workflow": "워크플로우를 삭제하지 못했습니다: {{message}}",
+      "workflow_deleted_successfully": "워크플로우를 성공적으로 삭제했습니다",
+      "workflow_required": "워크플로우는 필수입니다",
+      "could_not_clone_workflow": "워크플로우를 복제하지 못했습니다: {{message}}",
+      "workflow_cloned": "워크플로우가 {{name}}(으)로 복제되었습니다",
+      "workflow_new_name_are_required": "워크플로우와 새 이름은 필수입니다",
+      "could_not_update_workflow": "워크플로우를 업데이트하지 못했습니다: {{message}}",
+      "workflow_updated_successfully": "워크플로우를 성공적으로 업데이트했습니다",
+      "could_not_create_workflow": "워크플로우를 생성하지 못했습니다: {{message}}",
+      "workflow_created_successfully": "워크플로우 {{value}}을(를) 성공적으로 생성했습니다",
+      "could_not_fetch_workflow": "워크플로우를 가져오지 못했습니다: {{message}}",
+      "could_not_fetch_services_workflow_assignments": "워크플로우 할당을 위한 서비스를 가져오지 못했습니다: {{message}}",
+      "could_not_fetch_workflows": "워크플로우를 가져오지 못했습니다: {{message}}",
+      "too_many_services": "워크플로우는 {{value}}개를 초과하는 서비스에 연결할 수 없습니다",
+      "name_required": "워크플로우 이름은 필수입니다",
+      "service_list_not_read_reopen_page": "서비스 목록을 읽을 수 없습니다. 페이지를 다시 열고 다시 시도하세요"
+    }
+  },
+  "request_path": {
+    "client": "클라이언트",
+    "source": "{{phase}} 단계의 플러그인 실행 순서, {{setting}}에서 — 표시 순서, 요청별 추적은 아닙니다.",
+    "terminal": {
+      "inline": "백엔드",
+      "none": "제공되는 항목 없음",
+      "pool": "업스트림 풀",
+      "root": "로컬 파일"
+    },
+    "title": "요청 경로",
+    "unordered": "{{phase}} 단계에서 위치가 지정되지 않았습니다. 정렬된 플러그인 다음에 알파벳순으로 실행됩니다."
   },
   "resource_groups": {
     "add_entry": "항목 추가",
@@ -2658,16 +4313,31 @@
     "import_file": "TXT/CSV",
     "import_size": "TXT/CSV 가져오기는 256 KiB로 제한됩니다.",
     "kind": "종류",
+    "kind_label": {
+      "ip": "IP",
+      "country": "국가",
+      "asn": "ASN",
+      "rdns": "역방향 DNS",
+      "user_agent": "사용자 에이전트",
+      "uri": "URI"
+    },
     "kinds": "종류",
     "loading_references": "참조 로딩 중...",
     "max_entries": "리소스 그룹에는 {{max}}개를 초과하는 항목을 포함할 수 없습니다.",
-    "meta_line": "유형 {{kinds}}개 · 값 {{values}}개 · 사용 {{usages}}회",
+    "meta_kinds": "{{count}}개 종류",
+    "meta_kinds_plural": "{{count}}개 종류",
+    "meta_usages": "{{count}}개 사용",
+    "meta_usages_plural": "{{count}}개 사용",
+    "meta_values": "{{count}}개 값",
+    "meta_values_plural": "{{count}}개 값",
     "new": "새 그룹",
     "new_alias": "새 별칭",
     "no_entries": "항목 없음",
     "no_entries_help": "개별적으로 항목을 추가하거나 아래 대량 가져오기 기능을 사용하십시오.",
     "no_references": "참조 없음",
     "readonly": "데이터베이스는 읽기 전용입니다. 리소스 그룹은 검사하고 내보낼 수 있지만 변경할 수 없습니다.",
+    "reference_count": "{{count}}개 참조",
+    "reference_count_plural": "{{count}}개 참조",
     "references_error": "참조 로드 실패",
     "save": "그룹 저장",
     "search": "별칭, 설명, 종류 또는 값을 검색하십시오...",
@@ -2676,7 +4346,28 @@
     "template_configuration": "템플릿 {{template}}",
     "usage": "사용 현황",
     "value": "값",
-    "values": "값"
+    "values": "값",
+    "flash": {
+      "could_not_export_resource_groups": "리소스 그룹을 내보내지 못했습니다: {{message}}",
+      "could_not_delete_resource_group": "리소스 그룹을 삭제하지 못했습니다: {{message}}",
+      "resource_group_deleted_successfully": "리소스 그룹을 성공적으로 삭제했습니다",
+      "resource_group_required": "리소스 그룹은 필수입니다",
+      "could_not_clone_resource_group": "리소스 그룹을 복제하지 못했습니다: {{message}}",
+      "resource_group_cloned": "리소스 그룹이 @{{alias}}(으)로 복제되었습니다",
+      "could_not_save_resource_group": "리소스 그룹을 저장하지 못했습니다: {{message}}",
+      "resource_group_created_successfully": "리소스 그룹 @{{alias}}을(를) 성공적으로 생성했습니다",
+      "resource_group_updated_successfully": "리소스 그룹을 성공적으로 업데이트했습니다",
+      "alias_invalid_chars": "별칭은 1~64자의 문자, 숫자, 밑줄 또는 하이픈으로 구성되어야 합니다",
+      "alias_reserved": "이 별칭은 BunkerWeb에서 예약되어 있습니다",
+      "entries_not_valid_json": "리소스 항목이 유효한 JSON이 아닙니다",
+      "entries_not_a_list": "리소스 항목은 목록이어야 합니다",
+      "too_many_entries": "리소스 그룹은 {{value}}개를 초과하는 항목을 포함할 수 없습니다",
+      "entry_invalid": "항목 {{index}}이(가) 잘못되었습니다",
+      "entry_invalid_kind": "항목 {{index}}의 종류가 잘못되었습니다",
+      "entry_invalid_value": "항목 {{index}}의 값이 잘못되었습니다",
+      "entry_comment_too_long": "항목 {{index}}의 주석이 너무 깁니다",
+      "source_required": "원본 리소스 그룹은 필수입니다"
+    }
   },
   "validation": {
     "default_field_name": "이 필드",
@@ -2733,440 +4424,41 @@
     "service": "서비스",
     "services": "서비스 활성화 현황",
     "status": "인스턴스별 저장 공간",
-    "subtitle": "역방향 프록시 캐시 상태, 집계된 히트율 메트릭 및 즉시 삭제 제어."
-  },
-  "compose": {
-    "always_on": "항상 켜짐",
-    "count": "{{on}} 활성화됨 · {{total}} 사용 가능 · {{locked}} 잠김",
-    "entries": "{{count}} 설정됨",
-    "filter": {
-      "all": "전체",
-      "changed": "변경됨",
-      "on": "켜짐"
-    },
-    "locked": "여기에서는 제어 불가",
-    "provenance": {
-      "api": "API를 통해 관리됨",
-      "attachment": "첨부 파일",
-      "clone": "복제",
-      "default": "기본",
-      "edited": "여기 수정",
-      "global": "전역에서",
-      "managed": "{{method}}에 의해 설정",
-      "template": "템플릿에서 생성됨"
-    },
-    "set_value": "값을 설정하세요…",
-    "show_more": "{{count}} 더 보기",
-    "unavailable": "플러그인 목록을 로드할 수 없으므로 이 페이지를 안전하게 수정할 수 없습니다. API에 답변하면 다시 로드하세요."
-  },
-  "redirects": {
-    "all": "전체",
-    "append_badge": "+ URI",
-    "append_request_uri": "요청된 URI을 대상에 추가",
-    "attach": "연결",
-    "attach_copy": "{{name}} ({{from}} → {{to}})을 하나 이상의 서비스에 첨부",
-    "code": {
-      "301": "301 — 영구 리디렉션",
-      "302": "302 — 임시 리디렉션",
-      "303": "303 — 다른 위치 보기",
-      "307": "307 — 일시적인 리디렉션",
-      "308": "308 — 영구적인 리디렉션"
-    },
-    "create": "리디렉션 생성",
-    "delete_confirm_title": "이 리디렉션을 삭제하시겠습니까?",
-    "delete_copy": "{{name}} 리디렉션을 삭제하시겠습니까?",
-    "delete_help": "서비스에 첨부된 리디렉션은 삭제할 수 없습니다. 먼저 분리하십시오.",
-    "edit": "리디렉션 편집",
-    "edit_shared": "이 리디렉션은 {{count}}개 서비스에 연결되어 있습니다: {{services}}. 저장하면 연결된 모든 서비스에 변경 사항이 적용됩니다.",
-    "empty_text": "리디렉션은 하나 이상의 서비스에 첨부하는 이름이 지정된 규칙입니다. REDIRECT_* 설정은 함께 작동합니다.",
-    "empty_title": "리디렉션 없음",
-    "from_path": "~에서 리디렉션",
-    "from_path_help": "첨부된 서비스의 소스 경로, 예: /old.",
-    "new": "새 리디렉션",
-    "not_attached": "첨부되지 않음",
-    "readonly": "데이터베이스는 읽기 전용입니다. 리디렉션은 검사할 수 있지만 변경할 수 없습니다.",
-    "save": "리디렉션 저장",
-    "search": "이름, 소스 경로 또는 대상 검색...",
-    "services_help": "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 나중에 리디렉션을 추가할 수 있습니다.",
-    "status_code": "상태 코드",
-    "to_url": "리디렉션 대상",
-    "truncated": "첫 500개의 리디렉션만 표시됩니다. 전체 결과를 위해 API를 사용하여 목록을 좁힙니다."
-  },
-  "upstreams": {
-    "add_server": "서버 추가",
-    "all": "전체",
-    "attach": "연결",
-    "attach_copy": "{{name}} ({{servers}})를 하나 이상의 서비스에 추가합니다.",
-    "backend_ssl": "서버와 TLS로 통신합니다(https:// / grpcs://).",
-    "balancing": {
-      "ip_hash": "IP 해시 — 동일한 클라이언트, 동일한 백엔드",
-      "least_conn": "최소 연결",
-      "round_robin": "순환 (기본값)"
-    },
-    "create": "업스트림 생성",
-    "delete_confirm_title": "이 업스트림 삭제?",
-    "delete_copy": "{{name}} 업스트림 삭제?",
-    "delete_help": "서비스에 연결된 업스트림은 삭제할 수 없습니다. 먼저 분리하십시오.",
-    "edit": "업스트림 편집",
-    "edit_shared": "이 업스트림은 {{count}}개 서비스에 연결되어 있습니다: {{services}}. 저장하면 연결된 모든 서비스에 변경 사항이 적용됩니다.",
-    "empty_text": "업스트림은 역방향 프록시 경로에서 하나 이상의 서비스에 연결되는 백엔드의 이름이 지정된 풀입니다. REVERSE_PROXY_HOST 설정은 함께 작동합니다.",
-    "empty_title": "업스트림이 아직 없음",
-    "keepalive": "지속 연결",
-    "keepalive_help": "각 워커당 유지되는 유휴 연결 수. HTTP 및 gRPC만 적용 가능; 비활성화하려면 비워둡니다.",
-    "match_path": "역방향 프록시 경로",
-    "match_path_help": "선택된 서비스가 이 풀로 프록시하는 위치. 스트림 풀의 경우 전체 서비스를 사용합니다.",
-    "method": "로드 밸런싱",
-    "name_help": "알파벳, 숫자, 하이픈, 밑줄만 사용 가능. 점은 사용 불가하며, 풀 이름이 실제 호스트를 가리지 못합니다.",
-    "new": "새로운 업스트림",
-    "not_attached": "연결되지 않음",
-    "protocol": "프로토콜",
-    "protocol_help": "HTTP 및 gRPC 풀은 경로에 연결되어 있습니다. 스트림 풀은 전체 TCP/UDP 서비스를 사용합니다.",
-    "protocols": {
-      "grpc": "gRPC",
-      "http": "HTTP",
-      "stream": "스트림 (TCP/UDP)"
-    },
-    "readonly": "데이터베이스는 읽기 전용입니다. 업스트림은 확인할 수 있지만 변경할 수 없습니다.",
-    "role": {
-      "backup": "백업",
-      "down": "비활성",
-      "primary": "주"
-    },
-    "save": "업스트림 저장",
-    "search": "이름, 설명 또는 서버 검색...",
-    "server_fail_timeout": "실패 시간 초과",
-    "server_host": "서버",
-    "server_max_fails": "최대 실패 횟수",
-    "server_role": "역할",
-    "server_weight": "가중치",
-    "servers": "서버",
-    "services_help": "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 업스트림은 나중에 연결할 수 있습니다.",
-    "services_hidden": "{{count}}개 서비스 숨김: {{protocol}} 업스트림은 프로토콜이 일치하는 서비스에만 연결할 수 있습니다.",
-    "truncated": "첫 500개의 업스트림만 표시됩니다. 완전한 결과를 얻기 위해 API을 사용하여 목록을 좁힙니다."
-  },
-  "workflows": {
-    "act_block": "차단",
-    "act_challenge": "챌린지",
-    "act_code": "상태 코드",
-    "act_denyDefault": "인스턴스의 거부 상태 코드",
-    "act_denyShort": "거부 상태 코드",
-    "act_provider": "안티봇 제공자",
-    "act_redirect": "리디렉션",
-    "act_status": "거부 상태 코드",
-    "act_terminal": "규칙마다 하나의 작업만 실행하며 평가가 종료됩니다. 규칙에서 참/거짓 경로로 분기하지 않습니다.",
-    "act_url": "대상 URL",
-    "action": "그 후",
-    "add_rule": "규칙 추가",
-    "all": "전체",
-    "aria": {
-      "collapse": "접기",
-      "combinator": "조합 연산자 변경, 현재",
-      "conditionType": "조건 유형",
-      "denyStatus": "거부 상태 코드",
-      "drag": "드래그하여 순서 변경",
-      "expand": "펼치기",
-      "groupKind": "그룹 유형",
-      "insertAt": "{{n}} 위치에 규칙 추가",
-      "more": "더 보기",
-      "moveDown": "아래로 이동 — 나중에 실행",
-      "moveRule": "규칙 이동",
-      "moveUp": "위로 이동 — 먼저 실행",
-      "openRule": "{{n}} 규칙 열기",
-      "provider": "안티봇 제공자",
-      "redirectStatus": "리디렉션 상태 코드",
-      "removeCondition": "조건 제거",
-      "removeThreshold": "임계값 제거",
-      "removeThresholdLong": "요청률 임계값 제거",
-      "removeValue": "값 제거",
-      "requestCount": "요청 수",
-      "resourceGroup": "리소스 그룹",
-      "ruleErrors": "이 규칙에 유효성 검사 문제 {{count}}개",
-      "ruleName": "규칙 {{n}} 이름",
-      "terminalAction": "종료 작업",
-      "uriMatch": "URI 일치 모드",
-      "uriValue": "URI 값",
-      "window": "시간 범위(초)",
-      "changePosition": "규칙 {{n}} / {{total}}, 위치 변경",
-      "newValue": "새 값",
-      "positionMove": "위치 {{n}} / {{total}} — 클릭하여 이동",
-      "crowdsecField": "CrowdSec 사실"
-    },
-    "attach": "서비스에 연결",
-    "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
-    "attached_notice": "저장하면 이 규칙이 연결된 서비스 {{count}}개에 적용됩니다.",
-    "canvas": {
-      "auxCanvas": "왼쪽에서 오른쪽으로. 첫 번째로 일치하는 규칙이 적용됩니다.",
-      "auxList": "상단에서 하단으로. 첫 번째로 일치하는 규칙이 적용됩니다.",
-      "close": "닫기",
-      "drawerSub": "{{total}}의 {{n}} 위치에서 실행",
-      "dropHint": "우선순위 설정하려면 드롭 — 규칙의 체인에서의 위치만이 의미를 가집니다",
-      "emptyBody": "규칙이 없는 워크플로우는 아무런 변화를 주지 않습니다 — 모든 요청이 바로 다음 연결된 워크플로우로 진행됩니다.",
-      "emptyCta": "첫 번째 규칙 추가",
-      "emptyTitle": "규칙이 아직 없습니다",
-      "entry_sub": "규칙은 왼쪽에서 오른쪽으로 실행됩니다.",
-      "entry_title": "모든 요청",
-      "exit_sub": "다음 연결된 워크플로우로 진행합니다.",
-      "exit_title": "일치하는 규칙 없음",
-      "fit": "보기 맞춤",
-      "gateTip": "일치 게이트, 동작이 아닌: 임계값 아래에서는 규칙이 일치하지 않고 다음 규칙이 평가됩니다.",
-      "hint": "순서를 재정렬하려면 노드를 드래그 · 보드를 드래그하여 이동 · 포커스된 노드에서 Alt + ← / → 사용",
-      "hintReadonly": "읽기 전용 — 확대/축소하여 둘러보며, 순서는 변경할 수 없습니다",
-      "insert": "여기 규칙 추가",
-      "open": "규칙 열기",
-      "skipped": "비활성화됨 — 완전히 건너뛰어, 마치 체인에 없는 것처럼 동작합니다.",
-      "stopTail": ", 평가가 여기서 중단됨 — 이후 규칙이 도달하지 않습니다.",
-      "title": "규칙 순서",
-      "zoomIn": "확대",
-      "zoomOut": "축소"
-    },
-    "capacity": "규칙 {{count}}/{{maxRules}}개 · 가장 큰 규칙은 조건식 {{worst}}/{{maxPredicates}}개 사용 · 이 워크플로의 정규식 {{regexes}}개",
-    "clone": "워크플로우 복제",
-    "clone_help": "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다.",
-    "clone_name": "복제 이름",
-    "confirm": {
-      "deleteRule": "이 규칙을 삭제하시겠습니까? 아래의 모든 규칙이 한 칸씩 위로 이동합니다."
-    },
-    "copySuffix": " (사본)",
-    "delete": "워크플로우 삭제",
-    "delete_confirm": "이 워크플로우와 모든 규칙이 영구적으로 삭제됩니다.",
-    "empty_text": "워크플로우는 서비스에 연결한 규칙의 순서대로 정렬된 목록입니다: 조건 트리, 선택적 속도 임계값, 그리고 하나의 동작 — 도전, 차단 또는 리디렉션.",
-    "empty_title": "워크플로우는 아직 없습니다",
-    "entry_sub": "워크플로는 연결 순서대로 실행되고, 이 워크플로의 규칙은 위에서 아래로 실행됩니다.",
-    "entry_title": "연결된 서비스로 보내는 모든 요청",
-    "err": {
-      "save": "저장할 수 없음",
-      "saveUnreachable": "저장 엔드포인트에 연결할 수 없음",
-      "validate": "검증할 수 없음",
-      "validateUnreachable": "검증 엔드포인트에 연결할 수 없음"
-    },
-    "errors": {
-      "body": "아무것도 적용되지 않았습니다. 실행 중인 정책은 변경되지 않았습니다.",
-      "count": "문제 {{count}}개로 인해 저장할 수 없습니다.",
-      "rule": "규칙 {{n}}",
-      "ruleNamed": "규칙 {{n}} — {{name}}",
-      "whole": "이 워크플로"
-    },
-    "exit_sub": "요청은 다음 연결된 워크플로로 이동한 뒤 나머지 보안 스택으로 계속 진행됩니다.",
-    "exit_title": "일치하는 규칙 없음",
-    "gate": {
-      "and": "또한 동일한 클라이언트 IP의 요청 수가 다음보다 많을 때만",
-      "chip": "일치 게이트",
-      "help": "클라이언트 IP별로 계산합니다. 임계값 미만에서는 이 규칙이 전혀 일치하지 않고 평가가 다음 규칙으로 이어집니다. 이 규칙 자체는 요청률을 제한하지 않습니다."
-    },
-    "legend": {
-      "fall": "일치하지 않으면 다음 규칙으로 이동",
-      "gate": "요청률 임계값은 일치를 제어하며 작업이 아님",
-      "move": "드래그하거나 화살표를 사용하거나 Alt + ↑ / ↓를 눌러 순서 변경",
-      "moveCanvas": "드래그하거나, 번호 표시를 사용하거나, Alt + ← / →를 눌러 순서를 재정렬",
-      "stop": "일치하면 하나의 작업을 실행하고 중지"
-    },
-    "link": {
-      "entry": "모든 요청",
-      "noMatch": "일치하지 않음"
-    },
-    "menu": {
-      "bottom": "마지막에 실행",
-      "delete": "규칙 삭제",
-      "disable": "규칙 비활성화",
-      "duplicate": "아래에 복제",
-      "enable": "규칙 활성화",
-      "top": "첫 번째로 실행",
-      "moveTo": "{{n}}번 위치로 이동",
-      "staysAt": "{{n}}번 위치 유지"
-    },
-    "move": {
-      "first": "첫 번째로 실행",
-      "last": "마지막에 실행"
-    },
-    "new": "새 워크플로우",
-    "no_rules": "규칙은 아직 없습니다. 이 정책을 만들기 시작하려면 하나를 추가하세요.",
-    "not_attached": "연결되지 않음",
-    "not_attached_notice": "이 워크플로는 어떤 서비스에도 연결되지 않아 아직 어디에서도 규칙이 적용되지 않습니다.",
-    "not_validated": "아직 검증되지 않음",
-    "order_help": "규칙은 순서대로 평가되며 처음 일치한 규칙이 적용됩니다. 요청률 임계값이 있는 규칙은 임계값을 초과한 뒤에만 일치하므로, 아래쪽 규칙이 임계값 미만의 트래픽을 처리할 수 있습니다.",
-    "readonly": "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다.",
-    "rule": {
-      "disabled": "비활성화됨",
-      "if": "조건",
-      "namePlaceholder": "규칙 이름",
-      "noun": "규칙",
-      "onMatch": "일치하는 경우",
-      "skipped": "비활성화됨 — 목록에 없는 것처럼 완전히 건너뜁니다.",
-      "stopTail": ", 여기서 평가가 중지되어 아래 규칙에는 도달하지 않습니다."
-    },
-    "rules": "규칙",
-    "say": {
-      "actionChanged": "작업이 {{type}}(으)로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다.",
-      "added": "규칙이 마지막인 {{n}}번 위치에 추가되었습니다. 따라서 위의 모든 규칙을 먼저 확인합니다.",
-      "deleted": "규칙이 삭제되었습니다. 규칙 {{count}}개가 남았습니다.",
-      "duplicated": "사본이 {{n}}번 위치에 삽입되었습니다. 위의 원본이 활성화된 동안에는 절대 일치할 수 없습니다.",
-      "gateAdded": "일치 조건에 요청률 임계값이 추가되었습니다. 임계값 미만에서는 규칙이 일치하지 않고 평가가 계속됩니다.",
-      "inserted": "{{total}}의 {{n}} 위치에 규칙 추가됨. 이전에 있는 모든 규칙을 먼저 확인합니다.",
-      "inspecting": "{{total}}의 {{n}} 규칙 편집 — {{name}}.",
-      "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "마지막 값이 제거되었습니다. 값을 하나 추가하기 전에는 이 조건을 저장할 수 없습니다.",
-      "moved": "{{name}}이(가) {{total}}개 중 {{to}}번 위치로 이동했습니다{{how}}. 이제 {{where}} 실행됩니다.",
-      "predicateCap": "이 규칙에는 이미 최대 개수인 {{max}}개의 조건이 있습니다.",
-      "ruleAbove": "위 규칙",
-      "ruleDisabled": "{{name}}이(가) 비활성화되어 완전히 건너뛰며, 이제 아래 규칙이 해당 요청을 처리합니다.",
-      "ruleEnabled": "{{name}}이(가) 활성화되어 {{n}}번 위치에서 다시 평가됩니다.",
-      "runsAfter": "{{name}} 다음",
-      "runsFirst": "첫 번째",
-      "runsLast": "마지막",
-      "saved": "규칙을 저장하고 연결된 서비스에 배포했습니다.",
-      "theRule": "해당 규칙",
-      "valuesDropped": "조건이 {{type}}(으)로 변경되었습니다. 기존 값 {{count}}개는 이전할 수 없습니다.",
-      "via": {
-        "drag": "드래그로",
-        "keyboard": "키보드로"
-      },
-      "viewCanvas": "캔버스 뷰. 규칙은 왼쪽에서 오른쪽으로 실행되며, 첫 번째로 일치하는 규칙이 적용됩니다.",
-      "viewList": "목록 뷰. 규칙은 위에서 아래로 실행되며, 첫 번째로 일치하는 규칙이 적용됩니다."
-    },
-    "search": "이름 또는 설명을 검색하세요...",
-    "test": {
-      "asn": "ASN",
-      "asn_help": "ASN 조회 실패를 시뮬레이션하려면 비워 두세요.",
-      "asn_invalid": "ASN은 숫자여야 합니다",
-      "assume_not_whitelisted": "클라이언트가 허용 목록에 없다고 가정합니다.",
-      "assume_rate_counter": "요청 번호 {{request_number}}은(는) 측정값이 아니라 입력값입니다.",
-      "assume_regex_budget": "인스턴스의 정규식 예산이 소진되지 않았다고 가정합니다.",
-      "assumptions": "가정",
-      "country": "국가",
-      "detail_challenge": "챌린지가 처리를 맡고 나머지 보안 스택도 계속 실행됩니다.",
-      "detail_detect": "이 서비스는 탐지 모드이므로 실제로 아무 작업도 적용되지 않습니다.",
-      "detail_status": "클라이언트에 표시되는 상태: {{status}}.",
-      "failed": "테스트를 실행할 수 없음",
-      "geo": "GeoIP 조회",
-      "geo_help": "사용할 수 없으면 국가 및 ASN 규칙이 '알 수 없음'이 되어 절대 일치할 수 없습니다.",
-      "geo_local": "로컬/사설 주소",
-      "geo_resolved": "확인됨",
-      "geo_unavailable": "데이터베이스를 사용할 수 없음",
-      "intro": "인스턴스와 동일한 방식으로 서비스에 연결된 모든 워크플로를 순서대로 평가합니다.",
-      "invalid": "테스트하기 전에 위 문제를 해결하세요.",
-      "ip": "클라이언트 IP",
-      "method": "메서드",
-      "number": "요청 번호",
-      "number_help": "시간 범위 내 이 클라이언트의 N번째 요청입니다. 측정값이 아니라 사용자가 제공하는 가정입니다.",
-      "open": "요청 테스트",
-      "other_matched": "여기서 일치",
-      "other_no_match": "일치하는 규칙 없음",
-      "other_unreached": "도달하지 않음",
-      "other_workflows": "이 서비스의 다른 워크플로",
-      "out_draft": "이 서비스는 초안이므로 아직 워크플로가 컴파일되지 않았습니다.",
-      "out_match": "일치한 항목: {{workflow}} · {{rule}}. 요청에 적용된 작업: {{action}}.",
-      "out_no_match": "일치하는 규칙이 없습니다. 요청은 나머지 보안 스택으로 계속 진행됩니다.",
-      "out_not_attached": "이 워크플로는 어떤 서비스에도 연결되지 않아 평가할 규칙 체인이 없습니다.",
-      "out_whitelisted": "허용 목록에 있음 — 전체 워크플로를 건너뛰고 어떤 규칙도 평가하지 않습니다.",
-      "run": "테스트 실행",
-      "service": "서비스",
-      "title": "요청 테스트",
-      "unreachable": "테스트 엔드포인트에 연결할 수 없음",
-      "uri": "URI 경로",
-      "uri_help": "경로만 입력합니다. $uri에는 쿼리 문자열이 포함되지 않습니다.",
-      "v_gate": "조건 일치 · {{count}}개 중 {{n}}에서 게이트 닫힘",
-      "v_match": "일치",
-      "v_unknown": "알 수 없음",
-      "v_unknown_help": "이 규칙에 필요한 정보를 확인할 수 없어 절대 일치할 수 없습니다.",
-      "whitelisted": "이 클라이언트는 허용 목록에 있음",
-      "crowdsec": "CrowdSec",
-      "crowdsec_allowed": "CrowdSec가 허용함",
-      "crowdsec_help": "워크플로가 실행되기 전에 CrowdSec가 이 요청에 대해 결정한 내용입니다. CrowdSec가 한 번도 평가하지 않은 요청은 불리한 근거가 전혀 없는 요청과 같지 않습니다. 전자는 CrowdSec 조건을 미결정 상태로 남기고, 후자는 이를 거짓으로 만듭니다.",
-      "crowdsec_remediated": "CrowdSec가 처리함",
-      "crowdsec_remediation": "처리 방식",
-      "crowdsec_source": "판정 소스",
-      "crowdsec_unavailable": "CrowdSec가 이 요청을 평가하지 않음"
-    },
-    "threshold": "속도 기준 이상",
-    "threshold_count": "요청",
-    "threshold_window": "(초)",
-    "tree": {
-      "addCondition": "조건",
-      "addGroup": "그룹",
-      "all": "모두",
-      "allMeta": "조건 {{count}}개 — 모두 참이어야 함",
-      "and": "그리고",
-      "any": "하나 이상",
-      "anyMeta": "조건 {{count}}개 — 하나 이상 참이어야 함",
-      "empty": "빈 그룹입니다. 조건을 추가해야 저장할 수 있습니다.",
-      "noGroupHolds": "어떤 그룹에도 {{kind}} 항목이 없음",
-      "noneMeta": "어느 조건도 참이 아닐 때 일치",
-      "not": "어느 것도 아님",
-      "or": "또는",
-      "removeGroup": "그룹 제거"
-    },
-    "truncated": "총 500개의 워크플로우만 표시됩니다. 완전한 결과를 위해 API를 사용하여 목록을 좁히세요.",
-    "untitled": "이름 없는 규칙",
-    "value": {
-      "add": "값"
-    },
-    "values": {
-      "fewer": "간단히 표시",
-      "more": "+{{n}}개 더 보기"
-    },
-    "verb": {
-      "asn": "다음과 같음",
-      "country": "다음과 같음",
-      "group": "그룹에 속함",
-      "ip": "다음에 포함됨",
-      "isIn": "다음에 포함됨",
-      "isOneOf": "다음 중 하나임",
-      "method": "다음과 같음",
-      "uri": "다음과 일치"
-    },
-    "view": {
-      "canvas": "캔버스",
-      "list": "목록"
-    },
-    "action_help": {
-      "block": "요청 거부",
-      "challenge": "사람인지 확인",
-      "redirect": "다른 위치로 전송"
-    },
-    "condition": {
-      "ip": "IP / CIDR",
-      "method": "HTTP 메서드",
-      "uri": "URI",
-      "crowdsec": "CrowdSec 판정"
-    },
-    "uri_match": {
-      "exact": "정확히 일치",
-      "prefix": "다음으로 시작",
-      "regex": "정규식과 일치"
-    },
-    "crowdsec_field": {
-      "remediation": "처리 방식이",
-      "source": "소스가"
-    },
-    "crowdsec_value": {
-      "appsec": "AppSec",
-      "ban": "차단",
-      "captcha": "캡차",
-      "lapi": "로컬 API"
-    },
-    "reason": {
-      "sentence": "보안 워크플로 {{workflow}}: {{action}}"
+    "subtitle": "역방향 프록시 캐시 상태, 집계된 히트율 메트릭 및 즉시 삭제 제어.",
+    "flash": {
+      "error_purging_web_cache": "웹 캐시 제거 중 오류 발생: {{message}}",
+      "web_cache_purged_instance_failed_unreachable": "웹 캐시를 비웠습니다. 비운 인스턴스: {{value}}개, 실패: {{value2}}개, 연결할 수 없어 건너뜀: {{value3}}개(대기열에 추가된 항목 없음).",
+      "url_required_purge_by_url": "URL별로 제거하려면 URL이 필요합니다",
+      "error_fetching_web_cache_metrics": "웹 캐시 지표를 가져오는 중 오류 발생: {{message}}",
+      "error_fetching_web_cache_status": "웹 캐시 상태를 가져오는 중 오류 발생: {{message}}",
+      "purged_for_url": "{{url}}에 대한 웹 캐시를 제거했습니다",
+      "purged_all_entries": "웹 캐시를 제거했습니다 (모든 항목)"
     }
   },
-  "request_path": {
-    "client": "클라이언트",
-    "source": "{{phase}} 단계의 플러그인 실행 순서, {{setting}}에서 — 표시 순서, 요청별 추적은 아닙니다.",
-    "terminal": {
-      "inline": "백엔드",
-      "none": "제공되는 항목 없음",
-      "pool": "업스트림 풀",
-      "root": "로컬 파일"
-    },
-    "title": "요청 경로",
-    "unordered": "{{phase}} 단계에서 위치가 지정되지 않았습니다. 정렬된 플러그인 다음에 알파벳순으로 실행됩니다."
-  },
   "service": {
+    "default_server": {
+      "certificate": {
+        "action": "인증서 재정의 편집",
+        "help": "알려지지 않은 호스트 이름에 제시되는 인증서입니다. 사용자 지정 인증서 플러그인의 전역 설정이며, 구성된 서비스를 포함하면 거부됩니다.",
+        "title": "기본 서버 인증서"
+      },
+      "explainer": "구성된 서비스와 일치하지 않는 요청에 응답합니다: 알려지지 않은 호스트 이름, 직접 IP 접근. 여기서 인증서, TLS, 헤더 및 오류 페이지를 구성하세요.",
+      "name": "기본 서버",
+      "single_site": "MULTISITE가 yes로 설정되면 기본 서버를 구성할 수 있게 됩니다. 단일 사이트 모드에서는 내장된 동작을 유지하며 구성된 서비스와 일치하지 않는 요청에 응답합니다."
+    },
+    "mode": {
+      "help": "리디렉션 전용 서비스는 리디렉션만 수행합니다. 리버스 프록시도, 파일 제공도, 사용자 지정 NGINX 스니페도, 템플릿도, 연결된 업스트림이나 워크플로도 없습니다. 그 외 모든 면에서는 완전한 서비스로 남습니다. 이 선언은 명시적이며 리디렉션 설정으로부터 추론되지 않습니다. 리디렉션 전용 과금이 적용되면 PRO 서비스 할당량에서 제외됩니다.",
+      "redirect_only": "리디렉션 전용",
+      "standard": "표준",
+      "title": "서비스 모드"
+    },
     "resources": {
       "attach": "연결",
       "conflict": {
         "inline": "{{service}}은 자체 {{family}} 설정으로 {{path}}을 제공합니다. {{path}}에 대한 설정을 지우거나 다른 경로를 사용하십시오.",
         "primary": "“{{name}}”는 현재 이 서비스의 주요 인증서이며, 추가 경고 없이 강등됩니다. 주요 인증서는 실제로 배포된 것입니다.",
-        "resource": "{{service}}은 {{kind}}의 “{{name}}”를 통해 {{path}}을 제공합니다. “{{name}}”를 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오.",
+        "resource_redirect": "{{service}}은(는) 이미 리디렉션 “{{name}}”을(를) 통해 {{path}}을(를) 제공합니다. “{{name}}”을(를) 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오.",
+        "resource_upstream": "{{service}}은(는) 이미 업스트림 “{{name}}”을(를) 통해 {{path}}을(를) 제공합니다. “{{name}}”을(를) 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오.",
         "stream": "스트림 서비스는 모든 연결을 단일 백엔드로 프록시하며, {{service}} 서비스는 이미 업스트림 “{{name}}”를 사용합니다. 먼저 분리하세요.",
         "stream_inline": "{{service}} 서비스에는 REVERSE_PROXY_HOST로 설정된 자체 백엔드가 있습니다. 업스트림이 대신 처리하도록 해당 설정을 지우세요."
       },
@@ -3200,54 +4492,14 @@
       },
       "title": "연결된 자원",
       "unavailable": "사용 불가능",
-      "nothing_available": "연결할 수 있는 항목이 없습니다."
-    },
-    "default_server": {
-      "certificate": {
-        "action": "인증서 재정의 편집",
-        "help": "알려지지 않은 호스트 이름에 제시되는 인증서입니다. 사용자 지정 인증서 플러그인의 전역 설정이며, 구성된 서비스를 포함하면 거부됩니다.",
-        "title": "기본 서버 인증서"
-      },
-      "explainer": "구성된 서비스와 일치하지 않는 요청에 응답합니다: 알려지지 않은 호스트 이름, 직접 IP 접근. 여기서 인증서, TLS, 헤더 및 오류 페이지를 구성하세요.",
-      "name": "기본 서버",
-      "single_site": "MULTISITE가 yes로 설정되면 기본 서버를 구성할 수 있게 됩니다. 단일 사이트 모드에서는 내장된 동작을 유지하며 구성된 서비스와 일치하지 않는 요청에 응답합니다."
-    },
-    "mode": {
-      "help": "리디렉션 전용 서비스는 리디렉션만 수행합니다. 리버스 프록시도, 파일 제공도, 사용자 지정 NGINX 스니페도, 템플릿도, 연결된 업스트림이나 워크플로도 없습니다. 그 외 모든 면에서는 완전한 서비스로 남습니다. 이 선언은 명시적이며 리디렉션 설정으로부터 추론되지 않습니다. 리디렉션 전용 과금이 적용되면 PRO 서비스 할당량에서 제외됩니다.",
-      "redirect_only": "리디렉션 전용",
-      "standard": "표준",
-      "title": "서비스 모드"
+      "nothing_available": "연결할 수 있는 항목이 없습니다.",
+      "confirm_detach": "{{service}}에서 이 리소스를 분리하시겠습니까?",
+      "confirm_detach_certificate": "{{service}}에서 이 인증서를 분리하시겠습니까?",
+      "confirm_detach_redirect": "{{service}}에서 이 리디렉션을 분리하시겠습니까?",
+      "confirm_detach_upstream": "{{service}}에서 이 업스트림을 분리하시겠습니까?",
+      "confirm_detach_workflow": "{{service}}에서 이 워크플로우를 분리하시겠습니까?",
+      "confirm_detach_template": "{{service}}에서 이 템플릿을 분리하시겠습니까?"
     }
-  },
-  "onboarding": {
-    "dismiss": "닫기",
-    "error": "안내를 불러오지 못했습니다.",
-    "hint": {
-      "bans": "차단 목록에는 BunkerWeb이 현재 거부 중인 클라이언트가 표시됩니다. 각 행에 사유와 만료 시점이 표시됩니다.",
-      "home": "이 대시보드에서 현재 정상 상태인 인스턴스, 제공 중인 서비스, BunkerWeb이 처리한 트래픽을 확인할 수 있습니다.",
-      "logs": "모든 인스턴스의 실시간 로그이며 인스턴스와 심각도로 필터링할 수 있습니다.",
-      "reports": "차단된 모든 요청이 여기에 기록됩니다. 항목을 열면 어떤 보안 검사가 왜 차단했는지 확인할 수 있습니다.",
-      "title": "빠른 둘러보기"
-    },
-    "item": {
-      "first_block": "BunkerWeb의 요청 차단 동작 확인하기",
-      "https": "HTTPS 설정하기",
-      "install": "한 대 이상의 호스트에 BunkerWeb 설치",
-      "mfa": "MFA 활성화",
-      "pro": "BunkerWeb PRO 활성화",
-      "read_bans": "차단된 대상과 해제 시점 확인하기",
-      "read_home": "대시보드에서 현재 상태 확인하기",
-      "read_logs": "모든 인스턴스의 실시간 로그 보기",
-      "read_reports": "요청이 차단된 이유 확인하기",
-      "service": "첫 서비스 등록",
-      "workflow": "보안 워크플로 연결하기"
-    },
-    "not_saved": "저장하지 못했습니다.",
-    "pro_tips": "PRO 팁",
-    "restart": "안내 다시 시작",
-    "restart_help": "시작 단계를 상단 바에 다시 표시합니다.",
-    "subtitle": "몇 단계만 거치면 BunkerWeb이 서비스를 보호하기 시작합니다.",
-    "title": "시작하기"
   },
   "timings": {
     "subtitle": "각 요청 단계에서 플러그인별 소요 시간을 모든 인스턴스에서 실시간으로 읽어 통합합니다.",
@@ -3269,7 +4521,10 @@
     "disabled_title": "플러그인 시간 측정이 꺼져 있음",
     "disabled_help": "각 플러그인의 시간을 측정하려면 METRICS_COLLECT_TIMINGS를 yes로 설정하세요. 전체 요청 시간은 어느 경우든 수집됩니다.",
     "unreachable_title": "처리 시간을 보고한 인스턴스가 없음",
-    "unreachable_help": "처리 시간은 인스턴스 자체에서 읽으므로 응답한 인스턴스가 없거나 아직 요청을 처리한 인스턴스가 없습니다."
+    "unreachable_help": "처리 시간은 인스턴스 자체에서 읽으므로 응답한 인스턴스가 없거나 아직 요청을 처리한 인스턴스가 없습니다.",
+    "flash": {
+      "error_fetching_plugin_timings": "플러그인 타이밍을 가져오는 중 오류 발생: {{message}}"
+    }
   },
   "whatsnew": {
     "missing_action": "GitHub에서 변경 로그 열기",
@@ -3281,178 +4536,11 @@
     },
     "subtitle": "이 설치본에 포함된 변경 로그에서 가져온 모든 BunkerWeb 릴리스입니다. 최신 순으로 표시됩니다."
   },
-  "antibot": {
-    "reason": {
-      "sentence": "안티봇 챌린지({{provider}})가 제공됨"
-    }
-  },
-  "confirm": {
-    "revoke_credential": "이 인스턴스의 자격 증명을 취소하시겠습니까? 컨트롤 플레인이 더 이상 접근할 수 없게 됩니다.",
-    "rotate_credential": "이 인스턴스의 자격 증명을 교체하시겠습니까? 인스턴스에 접근할 수 없으면 실패합니다."
-  },
-  "crowdsec": {
-    "reason": {
-      "action": {
-        "ban": "요청 차단됨",
-        "captcha": "캡차 챌린지",
-        "challenge": "봇 탐지 챌린지"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (시나리오: {{scenario}})",
-      "source": {
-        "appsec": "CrowdSec AppSec",
-        "failure_policy": "CrowdSec AppSec failure policy",
-        "lapi": "CrowdSec LAPI"
-      }
-    },
-    "alert": {
-      "id": "Alert ID",
-      "load": "Load full evidence",
-      "started": "Started",
-      "stopped": "Stopped"
-    },
-    "captured_history": "Captured history",
-    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
-    "connection": {
-      "appsec": "Last AppSec observation",
-      "connected": "Connected",
-      "connection_error": "Connection error",
-      "configured": "Configured",
-      "global": "all services",
-      "label": "CrowdSec connection",
-      "last_sync": "Last successful sync",
-      "local_api": "Local API",
-      "management": "Management",
-      "mode": "Mode",
-      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
-      "read_only": "Read only",
-      "required": "Choose a CrowdSec connection first.",
-      "sync": "Decision sync",
-      "sync_current": "Up to date",
-      "sync_not_synchronized": "Not synchronized yet",
-      "sync_stale": "Stale",
-      "selected": "Selected connection",
-      "scope_help": "The selected connection applies to decisions, allowlists and IP investigation below.",
-      "filter": "Filter connections by hostname or service"
-    },
-    "current_state": "Current state",
-    "current_state_help": "Current state may change after this observation.",
-    "decision": {
-      "duration": "Duration",
-      "expires": "Expires",
-      "id": "Decision ID",
-      "origin": "Origin",
-      "scenario": "Scenario",
-      "scope": "Scope",
-      "target": "Target",
-      "type": "Type"
-    },
-    "decisions": {
-      "count": "Showing {{start}}–{{end}} of {{total}}",
-      "help": "This is current state read directly from the selected CrowdSec engine.",
-      "none": "No active decisions match these filters.",
-      "pagination": "Decision pages",
-      "title": "Active decisions"
-    },
-    "error": {
-      "request": "The CrowdSec request failed."
-    },
-    "investigation": {
-      "alerts": "Available CrowdSec alert evidence",
-      "current_decisions": "Current CrowdSec decisions",
-      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
-      "ip": "IP address",
-      "local_bans": "Current local BunkerWeb bans",
-      "no_alerts": "No alert evidence is available.",
-      "no_bans": "No current local ban was found.",
-      "no_decisions": "No current CrowdSec decision was found.",
-      "no_reports": "No recent captured report was found.",
-      "placeholder": "192.0.2.10",
-      "reports": "Recent BunkerWeb reports",
-      "result": "Investigation for {{ip}}",
-      "submit": "Investigate",
-      "title": "Investigate an IP",
-      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
-      "unavailable": "Unavailable: {{error}}",
-      "summary": "Evidence found for this IP",
-      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
-      "summary_decisions": "CrowdSec decisions",
-      "summary_bans": "Local BunkerWeb bans",
-      "summary_alerts": "CrowdSec alert evidence",
-      "summary_reports": "BunkerWeb reports",
-      "summary_active": "{{total}} active",
-      "summary_available": "{{total}} available",
-      "summary_captured": "{{total}} captured",
-      "summary_none": "None found",
-      "summary_unreadable": "Could not be read"
-    },
-    "local_ban": {
-      "expires": "Expires",
-      "reason": "Reason",
-      "service": "Service"
-    },
-    "next": "Next",
-    "observed_at": "Observed {{time}}",
-    "previous": "Previous",
-    "refresh": "Refresh status",
-    "remove": {
-      "action": "Remove",
-      "confirm": "I understand and want to remove this decision.",
-      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
-      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
-      "submit": "Remove decision",
-      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). Matching decisions remaining: {{remaining}}. Local bans or AppSec may still block.",
-      "title": "Remove CrowdSec decision"
-    },
-    "report": {
-      "captured": "Captured at",
-      "date": "Report time",
-      "decisions": "Captured decisions",
-      "entry": "Security report",
-      "matched_target": "Matched target",
-      "metadata": "Decision metadata",
-      "metadata_complete": "Complete",
-      "metadata_incomplete": "Incomplete",
-      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
-      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
-      "reason": "Reason",
-      "remediation": "Captured remediation",
-      "scope": "Captured service scope",
-      "service": "Service",
-      "source": "Captured source",
-      "identifier": "Report identifier"
-    },
-    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
-    "title": "CrowdSec operator",
-    "unknown": "Unknown",
-    "allowlists": {
-      "title": "CrowdSec allowlists",
-      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
-      "refresh": "Refresh allowlists",
-      "pages": "Allowlist pages",
-      "empty": "No allowlists were found on this engine.",
-      "console": "Console managed",
-      "local": "Locally managed",
-      "no_entries": "No active entries.",
-      "never": "Never",
-      "comment": "Comment",
-      "unknown": "Allowlist status is unavailable.",
-      "not_allowed": "This IP does not match a CrowdSec allowlist.",
-      "allowed": "Allowlisted by CrowdSec",
-      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
-      "guide": {
-        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
-        "title": "How to manage trusted IPs and networks",
-        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
-        "create": "Create a list once, or use an existing locally managed list.",
-        "add": "Add trusted IPs or CIDR networks.",
-        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
-        "inspect": "Inspect the list and its expiry dates.",
-        "remove": "Remove an exception when it is no longer needed.",
-        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
-        "console": "Edit Console-managed lists in the CrowdSec Console.",
-        "docs": "CrowdSec allowlist documentation"
-      }
+  "utils": {
+    "flash": {
+      "couldn_t_connect_redis": "redis에 연결하지 못했습니다",
+      "missing_form": "양식에 {{key}}이(가) 없습니다",
+      "invalid_request": "잘못된 요청입니다"
     }
   }
 }

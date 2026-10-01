@@ -61,6 +61,9 @@ msgstr "Пожалуйста, загрузите действительный ф
 msgid "alert.credential_action_failed"
 msgstr "Действие не выполнено."
 
+msgid "alert.custom_end_date_past"
+msgstr "Пользовательская дата окончания должна быть в будущем."
+
 msgid "alert.custom_end_date_required"
 msgstr "Пожалуйста, выберите пользовательскую дату окончания."
 
@@ -97,8 +100,17 @@ msgstr "Загрузите корректный файл экспорта сер
 msgid "antibot.reason.sentence"
 msgstr "Антибот-проверка (%(provider)s) выполнена"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "Назначения в реестре сертификатов"
+
+msgid "aria.label.certificate_public_details"
+msgstr "Открытые сведения о сертификате"
+
 msgid "aria.label.clear_search"
 msgstr "Очистить поиск"
+
+msgid "aria.label.clone_item"
+msgstr "Клонировать %(name)s"
 
 msgid "aria.label.close"
 msgstr "Закрыть"
@@ -111,6 +123,9 @@ msgstr "Выберите файл экспорта пользовательск�
 
 msgid "aria.label.copy"
 msgstr "Копировать журналы"
+
+msgid "aria.label.detach_from_service"
+msgstr "Открепить %(name)s от %(service)s"
 
 msgid "aria.label.download_log"
 msgstr "Скачать этот файл журнала"
@@ -148,6 +163,9 @@ msgstr "Показывать временные метки в местном в�
 msgid "aria.label.next_issue"
 msgstr "Следующая ошибка или предупреждение"
 
+msgid "aria.label.open_user_menu"
+msgstr "Открыть меню пользователя"
+
 msgid "aria.label.passkey_name"
 msgstr "Имя ключа доступа"
 
@@ -159,6 +177,9 @@ msgstr "Предыдущая ошибка или предупреждение"
 
 msgid "aria.label.raw_configuration"
 msgstr "Необработанная конфигурация"
+
+msgid "aria.label.remove_this_server"
+msgstr "Удалить этот сервер"
 
 msgid "aria.label.remove_value"
 msgstr "Удалить значение"
@@ -178,8 +199,23 @@ msgstr "Выбрать файл"
 msgid "aria.label.select_page"
 msgstr "Выбрать страницу"
 
+msgid "aria.label.select_template"
+msgstr "Выбрать шаблон %(name)s"
+
 msgid "aria.label.services_dropzone"
 msgstr "Выберите файл экспорта служб или перетащите его сюда"
+
+msgid "aria.label.show_details"
+msgstr "Показать сведения: %(name)s"
+
+msgid "aria.label.toggle_item"
+msgstr "Переключить %(name)s"
+
+msgid "aria.label.toggle_section"
+msgstr "Переключить раздел %(name)s"
+
+msgid "aria.label.toggle_theme"
+msgstr "Переключить тёмную тему"
 
 msgid "aria.label.toggle_wrap"
 msgstr "Переключить перенос строк"
@@ -244,6 +280,15 @@ msgstr "Не удалось заблокировать %(ip)s: %(error)s"
 msgid "bans.flash.ban_success"
 msgstr "%(ip)s успешно заблокирован."
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "Пользовательская дата окончания блокировки для %(ip)s должна быть в будущем"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "Неверный режим выбора банов."
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "Неверный параметр bans в /bans/ban."
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "Неверный пользовательский срок блокировки для %(ip)s"
 
@@ -253,11 +298,44 @@ msgstr "Неверная пользовательская дата оконча�
 msgid "bans.flash.invalid_duration"
 msgstr "Неверный срок блокировки: %(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "Неверный режим выбора длительности."
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "Неверный отфильтрованный источник бана."
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "Неверный отфильтрованный источник длительности."
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "Неверный отфильтрованный источник разбана."
+
 msgid "bans.flash.invalid_ip"
 msgstr "Неверный IP-адрес: %(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "Неверный параметр ips в /bans/unban."
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "Неверный режим выбора разбана."
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "Неверный параметр updates в /bans/update_duration."
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "Отсутствует пользовательская дата окончания блокировки для %(ip)s"
+
+msgid "bans.flash.no_bans"
+msgstr "Нет банов."
+
+msgid "bans.flash.no_matching_bans"
+msgstr "Нет подходящих банов."
+
+msgid "bans.flash.no_matching_reports"
+msgstr "Нет подходящих отчётов."
+
+msgid "bans.flash.no_updates"
+msgstr "Нет обновлений."
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "Не удалось получить блокировки из Redis, подробности см. в журналах."
@@ -448,11 +526,14 @@ msgstr "Подтвердить"
 msgid "button.convert_configs"
 msgstr "Преобразовать конфиги"
 
-msgid "button.convert_configs_to"
-msgstr "Преобразовать в %(state)s"
-
 msgid "button.convert_services"
 msgstr "Конвертировать сервисы"
+
+msgid "button.convert_to_draft"
+msgstr "Преобразовать в черновик"
+
+msgid "button.convert_to_online"
+msgstr "Преобразовать в онлайн"
 
 msgid "button.copy"
 msgstr "Копировать"
@@ -549,6 +630,9 @@ msgstr "Импорт пользовательских конфигураций"
 
 msgid "button.import_services"
 msgstr "Импорт служб"
+
+msgid "button.import_template"
+msgstr "Импортировать шаблон"
 
 msgid "button.local_time"
 msgstr "Местное время"
@@ -727,6 +811,39 @@ msgstr "Завершить другие сеансы"
 msgid "button.wrap"
 msgstr "Перенос"
 
+msgid "cache.flash.api_unavailable"
+msgstr "API недоступен: %(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "Файл кэша %(file_name)s задачи %(job_name)s, плагин %(plugin_id)s не найден"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "Файл кэша %(file_name)s задачи %(job_name)s, плагин %(plugin_id)s, сервис %(service)s не найден"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "Удалено файлов: %(deleted_count)s, ошибок: %(len)s: %(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "Ошибка при удалении файлов кэша: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "Ошибка при получении файла кэша: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "Ошибка при получении файлов кэша: %(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "Неверный параметр файлов кэша"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "Файлы кэша не выбраны"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "Успешно удален файл кэша: %(deleted_count)s"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "Успешно удалено файлов кэша: %(deleted_count)s"
+
 msgid "cache.kpi_files"
 msgstr "Файлы"
 
@@ -840,6 +957,117 @@ msgstr "Файл не должен превышать 1 MiB."
 
 msgid "certificates.fingerprint"
 msgstr "Отпечаток SHA-256"
+
+msgid "certificates.flash.certificate_action_failed"
+msgstr "Действие с сертификатом не выполнено: %(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "Сертификат успешно удалён"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "Назначение в реестре сертификатов успешно добавлено"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "Назначение в реестре сертификатов успешно удалено"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "Метаданные сертификата успешно обновлены"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "Сертификат и имя обязательны"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "Имя сертификата обязательно"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "Сертификат успешно продлён"
+
+msgid "certificates.flash.certificate_required"
+msgstr "Сертификат обязателен"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "Сертификат и сервис обязательны"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "Загружаемый сертификат превышает лимит запроса 2 МиБ"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "Проверено %(total_due)s сертификатов, требующих продления"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "Не удалось прикрепить сертификат: %(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "Не удалось создать сертификат: %(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "Не удалось открепить сертификат: %(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "Не удалось скачать сертификат: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "Не удалось получить сертификаты: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "Не удалось получить сервисы для назначений сертификата: %(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "Не удалось запланировать выпуск Let's Encrypt: %(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "Не удалось обновить сертификат: %(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "Не удалось загрузить сертификат: %(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "Пользовательский сертификат успешно загружен"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "Зашифрованные приватные ключи не поддерживаются."
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "Недопустимое действие с сертификатом"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "Неверная часть сертификата"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "Файл сертификата не является допустимым сертификатом PEM."
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "Недопустимый источник сертификата"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "Файл приватного ключа не является допустимым приватным ключом PEM."
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "Выпуск Let's Encrypt запланирован"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "Имя и общее имя (common name) обязательны"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "Требуются сертификат PEM и приватный ключ"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "Выберите хотя бы один сервис для выпуска Let's Encrypt"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "Самоподписанный сертификат создан"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "Сертификат не может содержать более 100 альтернативных имён субъекта"
+
+msgid "certificates.flash.too_many_services"
+msgstr "Сертификат не может быть привязан к более чем 100 сервисам"
+
+msgid "certificates.flash.validity_range"
+msgstr "Срок действия должен быть от 1 до 825 дней"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "Срок действия должен быть целым числом дней"
 
 msgid "certificates.issuer"
 msgstr "Эмитент"
@@ -1053,6 +1281,168 @@ msgstr "Показать ещё (%(count)s)"
 
 msgid "compose.unavailable"
 msgstr "Список плагинов не удалось загрузить, поэтому эту страницу нельзя безопасно редактировать. Обновите после ответа API."
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "Все выбранные пользовательские конфигурации не найдены, не являются конфигурациями UI/API или уже преобразованы."
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "Все выбранные пользовательские конфигурации не найдены или не являются конфигурациями UI/API."
+
+msgid "configs.flash.config_already_exists"
+msgstr "Конфигурация %(config_type)s/%(config_name)s уже существует"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "Конфигурация %(config_type)s/%(config_name)s для сервиса %(service)s уже существует"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "Конфигурация %(clone)s не существует."
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "Конфигурация %(config_type)s/%(name)s не существует."
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "Конфигурация %(config_type)s/%(name)s для сервиса %(service)s не существует."
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "Конфигурация %(config_type)s/%(name)s не является пользовательской конфигурацией UI/API и не может быть изменена."
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "Конфигурация %(config_type)s/%(name)s для сервиса %(service)s не является пользовательской конфигурацией UI/API и не может быть изменена."
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "Преобразовано в конфигурации «черновик»: %(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "Преобразовано в конфигурации «online»: %(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "Не удалось получить пользовательские конфигурации из API: %(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "Создана пользовательская конфигурация %(config_type)s/%(config_name)s"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "Создана пользовательская конфигурация %(config_type)s/%(config_name)s для сервиса %(service)s"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "Пользовательская конфигурация %(non_convertible_config)s уже является черновиком конфигурации и не будет преобразована."
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "Пользовательская конфигурация %(non_convertible_config)s уже является конфигурацией online и не будет преобразована."
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "Пользовательская конфигурация %(missing_config)s не найдена."
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "Пользовательская конфигурация %(non_editable_config)s не является пользовательской конфигурацией UI/API и не будет преобразована."
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "Пользовательская конфигурация %(skipped_config)s не является пользовательской конфигурацией UI/API и не будет удалена."
+
+msgid "configs.flash.deleted_config_one"
+msgstr "Удалена конфигурация: %(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "Удалены конфигурации: %(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "Произошла ошибка при удалении пользовательских конфигураций: %(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "Произошла ошибка при сохранении пользовательских конфигураций: %(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "Не удалось импортировать пользовательскую конфигурацию: %(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "Не удалось импортировать пользовательские конфигурации: %(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "Ошибка импорта: %(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "Импортирована пользовательская конфигурация: %(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "Импортированы пользовательские конфигурации: %(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "Неверный параметр configs в /configs/convert."
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "Неверный параметр configs в /configs/delete."
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "Неверный параметр configs в /configs/export."
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Неверная кодировка файла. Загрузите файл JSON в кодировке UTF-8."
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "Неверный параметр name в /configs/new."
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "Неверный параметр type в /configs/new."
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "Отсутствует параметр configs в /configs/convert."
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "Отсутствует параметр configs в /configs/delete."
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "Отсутствует параметр convert_to в /configs/convert."
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "Отсутствует параметр name в /configs/new."
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "Отсутствует параметр service в /configs/new."
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "Отсутствует параметр type в /configs/new."
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "Отсутствует параметр value в /configs/new."
+
+msgid "configs.flash.no_configs_selected"
+msgstr "Конфигурации не выбраны."
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "Нет пользовательских конфигураций для экспорта."
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "Файл пользовательских конфигураций не загружен."
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "В файле импорта не найдены пользовательские конфигурации."
+
+msgid "configs.flash.no_values_changed"
+msgstr "Значения не были изменены."
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "Перезаписана пользовательская конфигурация: %(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "Перезаписаны пользовательские конфигурации: %(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "Переименование пользовательской конфигурации на основе шаблона не разрешено."
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "Сохранена пользовательская конфигурация %(new_type)s/%(new_name)s"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "Сохранена пользовательская конфигурация %(new_type)s/%(new_name)s для сервиса %(service)s"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "Сервис %(new_service)s не существует."
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "Пропущена пользовательская конфигурация: %(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "Пропущены пользовательские конфигурации: %(names)s"
 
 msgid "configs.subtitle"
 msgstr "Пользовательские фрагменты конфигурации NGINX для ваших сервисов — создавайте, редактируйте и управляйте HTTP, ModSecurity и переопределениями на уровне потока."
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "Н/Д"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "ID оповещения"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "Загрузить все свидетельства"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "Начато"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "Остановлено"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "В списке разрешённых CrowdSec"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "Комментарий"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "Управляется через Console"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "На этом движке не найдено ни одного списка разрешённых."
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "Добавьте доверенные IP-адреса или сети CIDR."
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "Списки, управляемые через Console, редактируйте в CrowdSec Console."
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "Создайте список один раз или используйте существующий локально управляемый список."
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "Документация по спискам разрешённых CrowdSec"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "Этот пример истекает через 24 часа. Опустите --expiration для записи без срока действия. Поддерживаются IPv4 и IPv6."
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "Проверьте список и сроки действия его записей."
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "Здесь можно просматривать списки разрешённых и проверять IP-адреса. Чтобы добавить или удалить записи, используйте cscli на движке CrowdSec."
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "После изменения обновите списки разрешённых и повторно исследуйте IP-адрес. Удаление исключения допускает будущие решения CrowdSec, но не создаёт бан. Локальные баны BunkerWeb и другие средства защиты остаются отдельными."
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "Удалите исключение, когда оно больше не нужно."
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "Как управлять доверенными IP-адресами и сетями"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "Требуется CrowdSec 1.7 или новее. Выполните эти команды на хосте или внутри контейнера, в котором работает локальный API (LAPI) выбранного движка, с доступом к его конфигурации и базе данных CrowdSec. Замените пример имени списка, IP-адреса и сети своими."
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "Доверенные IP-адреса и сети для выбранного движка. Эти исключения действуют для всех его подключённых сервисов и bouncer."
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "Это исключение действует на весь движок. Локальные баны BunkerWeb, другие средства защиты или кэшированные решения по-прежнему могут блокировать этот IP-адрес."
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "Управляется локально"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "Никогда"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "Нет активных записей."
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "Этот IP-адрес не совпадает ни с одним списком разрешённых CrowdSec."
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "Страницы списков разрешённых"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "Обновить списки разрешённых"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "Списки разрешённых CrowdSec"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "Статус списка разрешённых недоступен."
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "Записанная история"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "Записанные данные отчёта описывают то, что наблюдалось в момент запроса; они не доказывают текущее состояние решения."
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "Последнее наблюдение AppSec"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "Настроено"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "Подключено"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "Ошибка подключения"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "Фильтровать подключения по имени хоста или сервису"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "все сервисы"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "Подключение CrowdSec"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "Последняя успешная синхронизация"
 
 msgid "crowdsec.connection.local_api"
-msgstr "Local API"
+msgstr "Локальный API"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "Управление"
 
 msgid "crowdsec.connection.mode"
-msgstr "Mode"
+msgstr "Режим"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "Не найдено ни одного пригодного подключения CrowdSec. Проверьте ошибки экземпляров и конфигурацию плагина."
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "Только чтение"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "Сначала выберите подключение CrowdSec."
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "Выбранное подключение применяется к решениям, спискам разрешённых и исследованию IP-адресов ниже."
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "Выбранное подключение"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "Синхронизация решений"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "Актуально"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "Ещё не синхронизировано"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "Устарело"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "Текущее состояние"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "Текущее состояние может измениться после этого наблюдения."
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "Длительность"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "Истекает"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "ID решения"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "Происхождение"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "Сценарий"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "Область действия"
 
 msgid "crowdsec.decision.target"
-msgstr "Target"
+msgstr "Цель"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "Тип"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "Показано %(start)s–%(end)s из %(total)s"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "Это текущее состояние, считанное напрямую с выбранного движка CrowdSec."
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "Ни одно активное решение не соответствует этим фильтрам."
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "Страницы решений"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "Активные решения"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "Запрос к CrowdSec не выполнен."
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "Доступные свидетельства оповещений CrowdSec"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "Текущие решения CrowdSec"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "Текущие решения CrowdSec проверяются вместе с локальными банами и записанными отчётами."
 
 msgid "crowdsec.investigation.ip"
-msgstr "IP address"
+msgstr "IP-адрес"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "Текущие локальные баны BunkerWeb"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "Свидетельства оповещений недоступны."
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "Текущий локальный бан не найден."
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "Текущее решение CrowdSec не найдено."
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "Недавний записанный отчёт не найден."
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "Недавние отчёты BunkerWeb"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "Исследование для %(ip)s"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "Исследовать"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "Свидетельства, найденные для этого IP-адреса"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "Активных: %(total)s"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "Свидетельства оповещений CrowdSec"
 
 msgid "crowdsec.investigation.summary_available"
-msgstr "%(total)s available"
+msgstr "Доступно: %(total)s"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "Локальные баны BunkerWeb"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "Записано: %(total)s"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "Решения CrowdSec"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "Это охватывает выбранное подключение CrowdSec и собственные баны BunkerWeb. Другие средства защиты здесь не проверяются, а свидетельства, которые не удалось прочитать, не доказывают, что этот IP-адрес разрешён."
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "Ничего не найдено"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "Отчёты BunkerWeb"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "Не удалось прочитать"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "Исследовать IP-адрес"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "Показано %(shown)s из %(total)s результатов (лимит источника: %(limit)s)."
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "Недоступно: %(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "Истекает"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "Причина"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "Сервис"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "Далее"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "Наблюдалось %(time)s"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "Назад"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "запрос заблокирован"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "Политика при сбое CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "Обновить статус"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "Удалить"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "Я понимаю и хочу удалить это решение."
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "Это удалит решение на общем движке CrowdSec и затронет каждый подключённый bouncer. Кэшированные решения, другой диапазон, локальные баны или AppSec по-прежнему могут блокировать цель."
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "Удалить %(scope)s %(value)s (%(type)s), сценарий %(scenario)s, происхождение %(origin)s, из %(source)s (%(engine)s)?"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "Удалить решение"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "Удалено в источнике CrowdSec. Распространение: %(status)s (%(mode)s, интервал %(interval)s). Оставшиеся подходящие решения: %(remaining)s. Локальные баны или AppSec по-прежнему могут блокировать."
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "Удалить решение CrowdSec"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "Записано"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "Время отчёта"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "Записанные решения"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "Отчёт безопасности"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "Идентификатор отчёта"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "Совпавшая цель"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "Метаданные решения"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "Полные"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "Неполные"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "Метаданные снимка CrowdSec недоступны для этого более старого отчёта."
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "Часть записанных метаданных решения была недоступна в момент запроса."
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "Причина"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "Записанная мера реагирования"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "Записанная область сервиса"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "Сервис"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "Записанный источник"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "Проверьте каждый настроенный движок CrowdSec и исследуйте IP-адрес по текущим и записанным свидетельствам."
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "Оператор CrowdSec"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "Неизвестно"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "Одна или несколько задач завершились с ошибкой при последнем запуске."
@@ -2416,17 +2806,128 @@ msgstr "Последние %(days)s дней"
 msgid "dashboard.window.title"
 msgstr "Окно дашборда"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "Все %(count)s совпадающих %(entity)s выбраны."
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "Выбраны все совпадающие баны: %(count)s."
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "Выбрать все %(count)s совпадающих %(entity)s"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "Выбрать все совпадающие баны: %(count)s"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "На этой странице выбран %(count)s бан."
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "На этой странице выбраны все баны: %(count)s."
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "Выбраны все совпадающие файлы кэша: %(count)s."
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "Выбрать все совпадающие файлы кэша: %(count)s"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "На этой странице выбран %(count)s файл кэша."
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "На этой странице выбраны все файлы кэша: %(count)s."
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "Выбраны все совпадающие пользовательские конфигурации: %(count)s."
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "Выбрать все совпадающие пользовательские конфигурации: %(count)s"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "На этой странице выбрана %(count)s пользовательская конфигурация."
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "На этой странице выбраны все пользовательские конфигурации: %(count)s."
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "Выбраны все совпадающие экземпляры: %(count)s."
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "Выбрать все совпадающие экземпляры: %(count)s"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "На этой странице выбран %(count)s экземпляр."
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "На этой странице выбраны все экземпляры: %(count)s."
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "Выбраны все совпадающие элементы: %(count)s."
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "Выбрать все совпадающие элементы: %(count)s"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "На этой странице выбран %(count)s элемент."
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "На этой странице выбраны все элементы: %(count)s."
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "Выбраны все совпадающие задачи: %(count)s."
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "Выбрать все совпадающие задачи: %(count)s"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "На этой странице выбрана %(count)s задача."
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "На этой странице выбраны все задачи: %(count)s."
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "Выбраны все совпадающие плагины: %(count)s."
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "Выбрать все совпадающие плагины: %(count)s"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "На этой странице выбран %(count)s плагин."
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "На этой странице выбраны все плагины: %(count)s."
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "Выбраны все совпадающие отчеты: %(count)s."
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "Выбрать все совпадающие отчеты: %(count)s"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "На этой странице выбран %(count)s отчет."
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "На этой странице выбраны все отчеты: %(count)s."
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "Выбраны все совпадающие сервисы: %(count)s."
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "Выбрать все совпадающие сервисы: %(count)s"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "На этой странице выбран %(count)s сервис."
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "На этой странице выбраны все сервисы: %(count)s."
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "Выбраны все совпадающие шаблоны: %(count)s."
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "Выбрать все совпадающие шаблоны: %(count)s"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "На этой странице выбран %(count)s шаблон."
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "На этой странице выбраны все шаблоны: %(count)s."
 
 msgid "datatable.bulk_select_clear"
 msgstr "Очистить выбор"
-
-msgid "datatable.bulk_select_page"
-msgstr "Все %(count)s %(entity)s на этой странице выбраны."
 
 msgid "datatable.info_bans"
 msgstr "Показано с %(start)s по %(end)s из %(total)s банов"
@@ -2569,6 +3070,9 @@ msgstr "Обработка..."
 msgid "datatable.search"
 msgstr "Поиск:"
 
+msgid "datatable.select_row"
+msgstr "Выбрать строку"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "Баны не выбраны"
 
@@ -2659,11 +3163,50 @@ msgstr "Выбран 1 шаблон"
 msgid "datatable.select_rows_templates_plural"
 msgstr "Выбрано %d шаблонов"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s выбрано"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "Выбрана %(count)s пользовательская конфигурация"
 
-msgid "datatable.selected_list_empty"
-msgstr "%(entity)s не выбрано."
+msgid "datatable.selected_list.configs.count_other"
+msgstr "Выбранные пользовательские конфигурации: %(count)s"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "Не выбрано ни одной пользовательской конфигурации."
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "Выбран %(count)s элемент"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "Выбранные элементы: %(count)s"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "Не выбрано ни одного элемента."
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "Выбран %(count)s плагин"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "Выбранные плагины: %(count)s"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "Не выбрано ни одного плагина."
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "Выбран %(count)s сервис"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "Выбранные сервисы: %(count)s"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "Не выбрано ни одного сервиса."
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "Выбран %(count)s шаблон"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "Выбранные шаблоны: %(count)s"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "Не выбрано ни одного шаблона."
 
 msgid "datatable.zero_records_bans"
 msgstr "Совпадающих банов не найдено"
@@ -2794,11 +3337,41 @@ msgstr "Подробности см. на странице «Задачи»."
 msgid "flash.configuration_pending_instance"
 msgstr "Конфигурация ещё не применена — ожидание запуска экземпляра."
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "Требуется запрос CORS или AJAX"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "Не удалось получить глобальные настройки из API."
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "Не удалось получить группы ресурсов: %(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "База данных находится в режиме только для чтения"
+
+msgid "flash.description_too_long"
+msgstr "Описание не может превышать 4000 символов"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "У вас нет прав на запись"
+
 msgid "flash.easter_egg"
 msgstr "Если вы это читаете, значит, вы любопытны"
 
 msgid "flash.error"
 msgstr "Ошибка"
+
+msgid "flash.error_fetching_instances"
+msgstr "Ошибка при получении экземпляров"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "Произошла ошибка при сохранении пользовательских конфигураций: %(e)s"
+
+msgid "flash.import_warning"
+msgstr "Предупреждение при импорте: %(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "Неверный параметр convert_to."
 
 msgid "flash.last_configuration_change_failed"
 msgstr "Не удалось применить последнее изменение конфигурации."
@@ -2806,11 +3379,20 @@ msgstr "Не удалось применить последнее изменен
 msgid "flash.message"
 msgstr "Информация"
 
+msgid "flash.plugin_not_found"
+msgstr "Плагин не найден"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "У вас больше сервисов, чем позволяет ваша лицензия PRO. Обновите лицензию или переведите некоторые сервисы в режим Черновика, чтобы разблокировать лицензию PRO."
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "Планировщик попытается применить изменения."
+
+msgid "flash.service_does_not_exist"
+msgstr "Сервис %(service)s не существует."
 
 msgid "flash.time.just_now"
 msgstr "только что"
@@ -2845,6 +3427,9 @@ msgstr "Перезаписать существующие пользовател
 msgid "form.checkbox.remember_me"
 msgstr "Запомнить меня"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "Заменить шаблон с таким же id, если он существует"
+
 msgid "form.help.ban_specific_service"
 msgstr "Бан будет применяться только к этому конкретному сервису."
 
@@ -2862,6 +3447,9 @@ msgstr "Если отмечено, бан будет действовать бе
 
 msgid "form.help.photo_extensions"
 msgstr "Разрешены JPG, GIF или PNG. Максимальный размер: 800КБ."
+
+msgid "form.help.secret_stored"
+msgstr "Значение сохранено и не отображается. Оставьте поле как есть, чтобы сохранить его, введите новое значение, чтобы заменить его, или очистите поле, чтобы удалить его."
 
 msgid "form.label.2fa_code"
 msgstr "Код 2FA"
@@ -3031,6 +3619,9 @@ msgstr "Имя сервера"
 msgid "form.label.service_name"
 msgstr "Имя сервиса"
 
+msgid "form.label.template_file"
+msgstr "Файл шаблона"
+
 msgid "form.label.template_id"
 msgstr "ID Шаблона"
 
@@ -3130,6 +3721,438 @@ msgstr "Пароль должен содержать не менее 1 спец�
 msgid "form.validation.password_uppercase"
 msgstr "Пароль должен содержать не менее 1 заглавной буквы."
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "Путь для журналов доступа NGINX (путь к файлу, syslog:server=host[:port][,param=value] или memory:name:size; установите off, чтобы отключить)."
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "Путь к журналу доступа"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "Номер порта прослушивания (TLS) для внутреннего API BunkerWeb."
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "Номер порта HTTPS API"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "Номер порта прослушивания для внутреннего API BunkerWeb."
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "Номер порта API"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "Прослушивание HTTP для внутреннего API BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "Прослушивание HTTP API"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "Прослушивание HTTPS (SSL/TLS) для внутреннего API BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "Прослушивание HTTPS API"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "IP-адрес прослушивания для внутреннего API BunkerWeb."
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "IP-адрес прослушивания API"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "Имя сервера (виртуальный хост) для внутреннего API BunkerWeb."
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "Имя сервера API"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "Необязательный токен для аутентификации вызовов API. Если он задан, планировщик (и любой клиент) должен отправлять его через заголовок Authorization. Примечание: должен быть задан как в BunkerWeb, так и в окружении планировщика."
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "Токен доступа API"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "Список IP/сетей, которым разрешено обращаться к внутреннему API BunkerWeb. (формат: ip/маска или ipv6/маска, через пробел)"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "Белый список IP API"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "Включить интеграцию Autoconf Docker."
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "Режим Autoconf"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "Список экземпляров BunkerWeb, разделённых пробелами (формат: fqdn-или-ip:5000 http://fqdn-или-ip:5000)"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "Экземпляры BunkerWeb"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "Размер внутреннего cachestore (ipc)."
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "Размер памяти cachestore ipc"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "Размер внутреннего cachestore (locks)."
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "Размер памяти cachestore locks"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "Размер внутреннего cachestore."
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "Размер памяти cachestore"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "Размер внутреннего cachestore (miss)."
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "Размер памяти cachestore miss"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "Таймаут чтения тела запроса клиента."
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "Таймаут тела запроса клиента"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "Таймаут чтения заголовка запроса клиента."
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "Таймаут заголовка запроса клиента"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "Что происходит, когда спроецированный файл .conf изменился с момента последней зафиксированной проекции или отсутствовал в ней. Файлы, совпадающие с текущей строкой базы данных, игнорируются; без читаемой истории проекций дрейф не регистрируется. 'overwrite' регистрирует каждый обнаруженный дрейф и перезаписывает файл данными из базы, либо удаляет его, если ни одна активная строка его не заменяет. 'refuse' ничего не записывает туда из базы данных, пока дрейф не будет устранён, регистрирует ошибку и оставляет ожидающее изменение пользовательской конфигурации неподтверждённым, чтобы оно повторялось."
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "Политика дрейфа пользовательских конфигураций"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "Количество слотов для общего LRU datastore на рабочий процесс (используется internalstore и локальными кэшами плагинов на уровне рабочего процесса). Принимает целое число или сокращение `k`/`m` (например, `1k`, `10k`, `1m`)."
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "Размер LRU datastore"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "Размер внутреннего datastore."
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "Размер памяти datastore"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "Адреса DNS-резолверов для использования."
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "DNS-резолверы"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "Путь для журналов ошибок NGINX (путь к файлу, stderr, syslog:server=host[:port][,param=value] или memory:size)."
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "Путь к журналу ошибок"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "Номер порта HTTPS, к которому привязывается bunkerweb. Оставьте пустым, чтобы отключить прослушивание HTTPS."
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "Порт HTTPS"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "Номер порта HTTP, к которому привязывается bunkerweb. Оставьте пустым, чтобы отключить прослушивание HTTP."
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "Порт HTTP"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "Размер внутреннего internalstore."
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "Размер памяти internalstore"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "Внутреннее использование: установите yes, когда сервис находится в режиме черновика."
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "внутреннее использование: черновик"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "Внутреннее использование: установите yes, когда BW загружается."
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "внутреннее использование: загрузка"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "Местное время (часовой пояс планировщика, ЧЧ:ММ, 24 ч), в которое выполняются ежедневные запланированные задания; еженедельные задания также выполняются в это время, в день JOBS_WEEKLY_DAY."
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "Время ежедневных заданий"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "День недели, в который выполняются еженедельные запланированные задания, во время JOBS_DAILY_TIME."
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "День еженедельных заданий"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "Таймаут для постоянных (keep-alive) соединений клиента."
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "Таймаут keepalive"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "Сохранять конфигурацию при перезапуске. Установите 'yes', чтобы предотвратить сброс конфигурации при перезапуске."
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "Сохранять конфигурацию при перезапуске"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "Включить интеграцию Kubernetes."
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "Режим Kubernetes"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "Включить прослушивание без SSL (passthrough)."
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "Прослушивание stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "Порт прослушивания без SSL (passthrough). Оставьте пустым, чтобы отключить прослушивание stream без SSL."
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "Порт прослушивания stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "Порт прослушивания SSL (passthrough). Оставьте пустым, чтобы отключить прослушивание stream SSL."
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "Порт прослушивания stream ssl"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "Формат, используемый для журналов доступа."
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "Формат журнала доступа"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "Уровень, используемый для журналов ошибок."
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "Уровень журналирования"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "Активация нескольких сайтов."
+
+msgid "general.settings.MULTISITE.label"
+msgstr "Мультисайт"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "Где nginx будет искать конфигурации."
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "Префикс nginx"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе access для этого сайта (допуск/контроль запроса). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "Порядок плагинов (access)"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе header для этого сайта (фильтрация заголовков ответа). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "Порядок плагинов (header)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе init (запуск движка, выполняется один раз). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "Порядок плагинов (init)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе init_worker (запуск на уровне рабочего процесса). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "Порядок плагинов (init_worker)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "Идентификаторы плагинов, разделённые запятой или пробелом, запускаемые на этапе init_workers."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "Порядок плагинов (init_workers)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе log для этого сайта (обработка журнала HTTP после ответа). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "Порядок плагинов (log)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе log_default для этого сайта (обработка журнала виртуального хоста по умолчанию). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "Порядок плагинов (log_default)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе log_stream для этого сайта (обработка журнала stream). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "Порядок плагинов (log_stream)"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе preread для этого сайта (проверки TCP preread перед проксированием). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "Порядок плагинов (preread)"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе set для этого сайта (настройка переменных перед rewrite/access). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "Порядок плагинов (set)"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе ssl_certificate для этого сайта (выбор/выдача TLS-сертификата). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "Порядок плагинов (ssl_certificate)"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "Плагины, которые должны запускаться первыми на этапе timer (фоновые таймеры). Разделяйте идентификаторы пробелами; остальные плагины всё равно запускаются позже в обычном порядке."
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "Порядок плагинов (timer)"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "Определяет реакцию на угрозы: \"detect\" для отслеживания и регистрации или \"block\" для блокировки доступа и регистрации инцидентов."
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "Режим безопасности"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "Таймаут передачи ответа клиенту."
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "Таймаут отправки"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "Список виртуальных хостов, обслуживаемых bunkerweb. (через пробел)"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "Имя сервера"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "Значение для директивы server_names_hash_bucket_size."
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "Размер корзины хеша имён серверов"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "Тип сервера: http или stream."
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "Тип сервера"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "Размер внутреннего хранилища для отозванных идентификаторов сессий cookie."
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "Размер памяти отзыва сессий"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "Включить интеграцию Docker Swarm."
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "Режим Swarm"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "Уровень журналирования для таймеров."
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "Уровень журналирования таймеров"
+
+msgid "general.settings.USE_API.help"
+msgstr "Активировать внутренний API BunkerWeb."
+
+msgid "general.settings.USE_API.label"
+msgstr "Активировать API"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "Включить поддержку IPv6."
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "Использовать IPv6"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "Прослушивание TCP (stream)."
+
+msgid "general.settings.USE_TCP.label"
+msgstr "Прослушивание TCP"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "Шаблоны конфигурации для применения, разделённые пробелами, которые переопределят значения по умолчанию для определённых настроек. Шаблоны применяются по порядку, и более поздний переопределяет более ранний; значение, заданное на сервисе, переопределяет шаблон."
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "Использовать шаблон"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "Прослушивание UDP (stream)."
+
+msgid "general.settings.USE_UDP.label"
+msgstr "Прослушивание UDP"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "Размер lua_shared_dict для рабочих процессов инициализации"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "Размер памяти Workerlock инициализации"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "Максимальное число соединений на рабочий процесс."
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "Соединения на рабочий процесс"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "Число рабочих процессов."
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "Рабочие процессы"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "Максимальное число открытых файлов для рабочих процессов."
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "Открытые файлы на рабочий процесс"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "Таймаут для плавного завершения рабочих процессов. По истечении этой задержки старые рабочие процессы принудительно завершаются во время перезагрузки, чтобы предотвратить рост потребления памяти."
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "Таймаут завершения рабочего процесса"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "Проверка лицензионного ключа для обновления."
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "Глобальные настройки не сохранены: каждое изменённое значение было отклонено."
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "Глобальные настройки не изменены, так как ни одно значение не было изменено."
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "Глобальные настройки сохранены, но %(refused_count)s значений было отклонено."
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "Глобальные настройки успешно сохранены."
+
+msgid "home.flash.error_fetching_services"
+msgstr "Ошибка при получении сервисов: %(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "Просмотреть все %(count)s настроек"
 
@@ -3156,6 +4179,75 @@ msgstr "Статический"
 
 msgid "instances.down"
 msgstr "Не в сети"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "Не удалось создать экземпляр: %(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "Не удалось получить экземпляры из API."
+
+msgid "instances.flash.could_not_found_one"
+msgstr "Выбранный экземпляр не найден или не является экземпляром UI/API."
+
+msgid "instances.flash.could_not_found_other"
+msgstr "Все выбранные экземпляры не найдены или не являются экземплярами UI/API."
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "Не удалось удалить экземпляр: %(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "Не удалось удалить экземпляры: %(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "Имя хоста %(hostname)s уже используется."
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "Экземпляр %(value)s успешно создан."
+
+msgid "instances.flash.instance_deleted"
+msgstr "Экземпляр %(instance)s успешно удалён."
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "Экземпляр %(instance)s не существует."
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "У экземпляра %(instance)s нет метода перезагрузки."
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "У экземпляра %(instance)s нет метода остановки."
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "Экземпляр %(non_deletable_instance)s не является экземпляром UI/API и не будет удалён."
+
+msgid "instances.flash.instance_reloaded"
+msgstr "Экземпляр %(instance)s успешно перезагружен."
+
+msgid "instances.flash.instance_stopped"
+msgstr "Экземпляр %(instance)s успешно остановлен."
+
+msgid "instances.flash.instances_deleted"
+msgstr "Экземпляры %(instance)s успешно удалены."
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "Отсутствует параметр instance hostname в /instances/new."
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "Отсутствует параметр instance name в /instances/new."
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "Отсутствует параметр instances в /instances/delete."
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "Отсутствует параметр instances в /instances/ping."
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "Отсутствует параметр instances в /instances/reload."
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "Отсутствует параметр instances в /instances/stop."
+
+msgid "instances.flash.no_instance_selected"
+msgstr "Экземпляр не выбран."
 
 msgid "instances.loading"
 msgstr "Загрузка"
@@ -3193,6 +4285,24 @@ msgstr "Дата начала"
 msgid "job.history.success"
 msgstr "Успех"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "Ошибка при получении задач: %(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "Неверный параметр jobs в /jobs/run."
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "Плагины задачи будут выполнены планировщиком в фоновом режиме."
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "Задачи плагинов будут выполнены планировщиком в фоновом режиме."
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "Отсутствует параметр jobs в /jobs/run."
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "Задачи не выбраны."
+
 msgid "jobs.subtitle"
 msgstr "Запланированные и разовые задачи, выполняемые планировщиком BunkerWeb — отслеживайте их статус и запускайте по требованию."
 
@@ -3213,6 +4323,15 @@ msgstr "Заблокировано (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "Заблокированные параметры выделены"
+
+msgid "legend.raw_setting_drafts"
+msgstr "В начале параметра нажмите #, чтобы переключить черновик, или Backspace, чтобы активировать его. Сохраните для применения. Черновики сохраняют свои значения, а действуют унаследованные значения или значения по умолчанию."
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "Откройте раздел «Сертификаты», чтобы просмотреть"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt: осиротевший сертификат <strong>%(cert_name)s</strong> ссылается на отсутствующую учётную запись ACME <code>%(account)s</code>. Продления заблокированы до восстановления состояния провайдера. <a href=\"%(certificates_url)s\">%(link_text)s</a>."
 
 msgid "link.back_to_login"
 msgstr "Назад ко входу"
@@ -3253,6 +4372,12 @@ msgstr "Используйте код аутентификатора"
 msgid "link.use_recovery_code"
 msgstr "Используйте код восстановления"
 
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "Не удалось выполнить вход, попробуйте ещё раз"
+
+msgid "login.flash.invalid_username_password"
+msgstr "Неверное имя пользователя или пароль"
+
 msgid "login.notice_password_changed"
 msgstr "Ваш пароль изменён. Войдите с новым паролем."
 
@@ -3288,6 +4413,12 @@ msgstr "Развернуть"
 
 msgid "logs.filter_levels"
 msgstr "Уровни"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "Неверный путь к файлу"
+
+msgid "logs.flash.no_such_file"
+msgstr "Такого файла не существует"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,6 +4504,27 @@ msgstr "Выше"
 msgid "logs.trimmed_notice"
 msgstr "--- %(count)s старых строк лога были удалены для повышения производительности ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "Соединение с базой данных находится в режиме только для чтения: изменения невозможны."
+
+msgid "main.flash.failover_configuration_error"
+msgstr "Последние изменения не удалось применить, так как они создают ошибку конфигурации NGINX. Проверьте журналы BunkerWeb для получения дополнительной информации. Конфигурация вернулась к последней рабочей версии."
+
+msgid "main.flash.failover_message"
+msgstr "Сообщение об отказе:"
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "Принудительно выполнена перезагрузка статуса"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "У вас больше сервисов, чем разрешено вашей pro-лицензией. Обновите лицензию или переведите некоторые сервисы в режим черновика, чтобы разблокировать pro-лицензию."
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "Последние изменения успешно применены."
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "Двухфакторная аутентификация включена, но коды восстановления недоступны, обновите их:"
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Перетащите архив плагина сюда или нажмите, чтобы выбрать файлы."
 
@@ -3386,11 +4538,20 @@ msgstr[0] "Вы уверены, что хотите удалить выбран�
 msgstr[1] "Вы уверены, что хотите удалить выбранные файлы кэша?"
 msgstr[2] "Вы уверены, что хотите удалить выбранные файлы кэша?"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "Вы уверены, что хотите преобразовать выбранную пользовательскую конфигурацию в черновик?"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "Вы уверены, что хотите преобразовать выбранную пользовательскую конфигурацию в online?"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "Преобразовать выбранные пользовательские конфигурации?"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в %(state)s?"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в черновик?"
+
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в online?"
 
 #. plural pair; 3 form(s) for ru, singular in slot 0
 msgid "modal.body.confirm_configs_deletion_alert"
@@ -3412,11 +4573,30 @@ msgstr[0] "Вы уверены, что хотите удалить выбран�
 msgstr[1] "Вы уверены, что хотите удалить выбранные плагины?"
 msgstr[2] "Вы уверены, что хотите удалить выбранные плагины?"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "Вы уверены, что хотите перевести выбранный сервис в черновик?"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "Вы уверены, что хотите перевести выбранный сервис в состояние «В сети»?"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "Вы действительно хотите изменить объявленный режим этого сервиса?"
 
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "Вы уверены, что хотите перевести выбранные сервисы в черновики?"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "Вы уверены, что хотите перевести выбранные сервисы в состояние «В сети»?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Вы уверены, что хотите удалить шаблон %(name)s?"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "Вы уверены, что хотите удалить выбранный шаблон?"
+msgstr[1] "Вы уверены, что хотите удалить выбранные шаблоны?"
+msgstr[2] "Вы уверены, что хотите удалить выбранные шаблоны?"
 
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "Вы уверены, что хотите удалить выбранный экземпляр?"
@@ -3479,6 +4659,12 @@ msgstr "Перетащите файл экспорта служб сюда ил�
 msgid "modal.body.import_services_warning"
 msgstr "Импорт служб создаст новые службы пользовательского интерфейса из файла экспорта. Существующие службы пропускаются."
 
+msgid "modal.body.import_template_help"
+msgstr "Пакет шаблона, экспортированный из BunkerWeb (.json), или архив (.zip, .tar.gz, .tar.xz), содержащий одну папку шаблона с её template.json и конфигурациями. Не более 1 МиБ."
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "Замена шаблона изменяет каждый сервис, который его использует, при следующей генерации конфигурации. Шаблоны, принадлежащие плагину или управляемые вне веб-интерфейса, никогда не заменяются."
+
 msgid "modal.body.instance_creation_alert"
 msgstr "Вам не нужно указывать порт или имя сервера; для конфигурации экземпляра будут использованы значения `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` и `API_SERVER_NAME`."
 
@@ -3493,6 +4679,9 @@ msgstr "Эти коды восстановления показываются т
 
 msgid "modal.body.reset_template_alert"
 msgstr "Вы уверены, что хотите сбросить текущие настройки шаблона и пользовательские конфигурации?"
+
+msgid "modal.body.service_deletion_confirmation"
+msgstr "Вы уверены, что хотите удалить выбранный сервис?"
 
 msgid "modal.body.services_conversion_confirmation"
 msgstr "Вы уверены, что хотите конвертировать выбранные сервисы?"
@@ -3588,6 +4777,9 @@ msgstr "Импорт пользовательских конфигураций"
 msgid "modal.title.import_services"
 msgstr "Импорт служб"
 
+msgid "modal.title.import_template"
+msgstr "Импорт шаблона"
+
 msgid "modal.title.job_history"
 msgstr "Последние 10 выполнений задачи"
 
@@ -3623,6 +4815,21 @@ msgstr "Простой"
 
 msgid "mode.raw"
 msgstr "Исходный"
+
+msgid "navbar.aria.close_navigation"
+msgstr "Закрыть навигацию"
+
+msgid "navbar.aria.help"
+msgstr "Справка"
+
+msgid "navbar.aria.news"
+msgstr "Новости"
+
+msgid "navbar.aria.notifications"
+msgstr "Уведомления"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "Переключить навигацию"
 
 msgid "navbar.button.upgrade_to_pro"
 msgstr "Обновить до PRO"
@@ -3774,6 +4981,9 @@ msgstr "Уже подписаны"
 msgid "notice.dismiss_mfa"
 msgstr "Больше не напоминать"
 
+msgid "notice.enable_mfa"
+msgstr "Включите двухфакторную аутентификацию, чтобы защитить свой аккаунт <a href=\"%(url)s\">здесь</a>"
+
 msgid "onboarding.dismiss"
 msgstr "Скрыть"
 
@@ -3827,6 +5037,39 @@ msgstr "Зарегистрируйте первую службу"
 
 msgid "onboarding.item.workflow"
 msgstr "Привязать workflow безопасности"
+
+msgid "onboarding.item_hint.first_block"
+msgstr "Отчёты появляются здесь, как только BunkerWeb заблокирует запрос — отправьте вредоносный запрос и проверьте снова."
+
+msgid "onboarding.item_hint.https"
+msgstr "Добавьте или сгенерируйте здесь сертификат, чтобы ваш сервис обслуживался по HTTPS."
+
+msgid "onboarding.item_hint.install"
+msgstr "Добавьте здесь экземпляр, затем сохраните первую конфигурацию, чтобы взять его под управление."
+
+msgid "onboarding.item_hint.mfa"
+msgstr "Откройте свой профиль из этого меню, затем включите двухфакторную аутентификацию."
+
+msgid "onboarding.item_hint.pro"
+msgstr "Введите здесь свой лицензионный ключ PRO, чтобы разблокировать плагины PRO и поддержку."
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "Каждая строка здесь показывает заблокированного клиента, причину и когда блокировка истекает."
+
+msgid "onboarding.item_hint.read_home"
+msgstr "Эта панель показывает активные экземпляры, обслуживаемые сервисы и недавний трафик с первого взгляда."
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "Здесь отображаются журналы в реальном времени со всех экземпляров, с фильтрацией по экземпляру и уровню важности."
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "Откройте здесь отчёт, чтобы увидеть, какая проверка безопасности его остановила и почему."
+
+msgid "onboarding.item_hint.service"
+msgstr "Создайте здесь сервис, чтобы указать BunkerWeb, какое приложение защищать."
+
+msgid "onboarding.item_hint.workflow"
+msgstr "Постройте здесь workflow, чтобы объединить проверки и реакции в одно правило."
 
 msgid "onboarding.not_saved"
 msgstr "Не удалось сохранить."
@@ -3891,6 +5134,9 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "Не удалось прочитать версию BunkerWeb (%(current)s), поэтому совместимость %(id)s невозможно проверить; ничего не было установлено"
+
 msgid "plugins.catalog.incompatible"
 msgstr "Этот релиз не заявляет о совместимости с BunkerWeb; текущая версия — %(current)s"
 
@@ -3909,8 +5155,32 @@ msgstr "Узнать больше"
 msgid "plugins.catalog.release"
 msgstr "Читать из релиза %(tag)s"
 
+msgid "plugins.catalog.remove"
+msgstr "Удалить"
+
 msgid "plugins.catalog.stale"
 msgstr "Каталог давно не обновлялся, поэтому установка отключена, пока он снова не станет актуальным."
+
+msgid "plugins.catalog.state_installed"
+msgstr "Установлен (версия %(version)s)"
+
+msgid "plugins.catalog.state_managed"
+msgstr "Установлен вне каталога; обновите или удалите его там, откуда он был установлен"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "Установлен вне каталога как плагин core; обновите или удалите его там, откуда он был установлен"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "Установлен вне каталога как внешний плагин; обновите или удалите его там, откуда он был установлен"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "Установлен вне каталога как плагин pro; обновите или удалите его там, откуда он был установлен"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "Установлен вне каталога как плагин ui; обновите или удалите его там, откуда он был установлен"
+
+msgid "plugins.catalog.state_update"
+msgstr "Доступно обновление: установлена версия %(installed)s, в каталоге — %(version)s"
 
 msgid "plugins.catalog.tab"
 msgstr "Доступно"
@@ -3918,8 +5188,188 @@ msgstr "Доступно"
 msgid "plugins.catalog.trust_notice"
 msgstr "Элементы сообщества считываются из репозиториев, которые организация BunkerWeb публикует на GitHub, по TLS, и то, что устанавливается, сверяется со списком — но ничто здесь не подписано криптографически. Установленный плагин выполняет код со всеми привилегиями BunkerWeb."
 
+msgid "plugins.catalog.update"
+msgstr "Обновить"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "Это заменит установленный плагин %(name)s (%(id)s, версия %(installed)s) версией %(version)s из каталога. Он будет заменён, даже если был загружен вручную, а не установлен из каталога."
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "Это обновление не удаляет ни одной настройки."
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "Настройки, которые удалит это обновление, сейчас невозможно вывести, поэтому обновление отключено до следующего обновления каталога."
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "Версия %(version)s больше не объявляет эти настройки. Они будут удалены вместе со всеми значениями, заданными для них в глобальных настройках, сервисах и шаблонах:"
+
+msgid "plugins.catalog.update_title"
+msgstr "Обновление плагина сообщества"
+
 msgid "plugins.catalog.version"
 msgstr "Версия %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "Не удалось прочитать запущенную версию BunkerWeb (%(current)s), поэтому совместимость этого выпуска невозможно проверить"
+
+msgid "plugins.flash.already_at_version"
+msgstr "Плагин %(plugin_id)s уже имеет версию %(version)s"
+
+msgid "plugins.flash.already_installed"
+msgstr "Плагин с id %(plugin_id)s уже установлен"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "Архив %(tag)s больше не соответствует тому, что указано в каталоге. Для %(plugin_id)s ничего не было установлено."
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "Запись каталога для %(plugin_id)s изменилась с момента подтверждения обновления; проверьте обновление ещё раз"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "Кэшированная запись каталога для %(plugin_id)s старше обновлений; дождитесь следующего обновления"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s, проверьте журналы для получения подробностей"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "Каталог сообщества отключён"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "Не удалось удалить плагин %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "Не удалось удалить плагин %(plugin)s в базе данных: %(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "Не удалось скачать %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "Не удалось установить %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "Не удалось установить %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "Не удалось обновить %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "Не удалось обновить %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "Не удалось обновить плагин %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "Не удалось обновить плагин %(plugin)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "Не удалось обновить плагины UI через API: %(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "Плагин %(plugin)s успешно удалён"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "В файле plugin.json отсутствует один или несколько из следующих ключей: %(value)s (%(value2)s)"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "Файл plugin.json в %(file)s недействителен (%(msg)s: строка %(lineno)s столбец %(colno)s (символ %(pos)s)) (%(value)s)"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "Установка %(plugin_id)s не завершена: %(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "Плагин %(plugin_id)s успешно установлен"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "Файл не является допустимым архивом плагина (.zip, .tar.gz или .tar.xz)."
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "Неверный идентификатор плагина (должен содержать от 4 до 64 символов, только буквы, цифры, подчёркивания и дефисы)"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "Неверное имя плагина для %(temp_folder_name)s. (Может содержать только цифры, буквы, подчёркивания и дефисы (мин. 4 символа, макс. 64))"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "Плагин %(plugin_id)s управляется вне каталога и не может быть обновлен из него"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "Плагин %(plugin_id)s является плагином core, управляемым вне каталога, и не может быть обновлен из него"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "Плагин %(plugin_id)s является внешним плагином, управляемым вне каталога, и не может быть обновлен из него"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "Плагин %(plugin_id)s является плагином pro, управляемым вне каталога, и не может быть обновлен из него"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "Плагин %(plugin_id)s является плагином ui, управляемым вне каталога, и не может быть обновлен из него"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "Отсутствует параметр csrf_token в /plugins."
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "Отсутствует параметр id в /plugins/catalog/install."
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "Отсутствует параметр id или version в /plugins/catalog/update."
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "Отсутствует параметр plugin или enabled в /plugins/enable."
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "Отсутствует параметр plugins в /plugins/delete."
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "Нет данных плагина для загрузки"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "Плагин %(plugin_id)s не установлен; установите его из каталога"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "%(file)s не является допустимым плагином (отсутствует файл plugin.json) (%(value)s)"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "Загрузите новые плагины, чтобы перезагрузить плагины"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "Плагин %(plugin)s уже существует"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "Плагин %(plugin)s успешно отключён."
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "Плагин %(plugin)s успешно включён."
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "Управление плагинами доступно только администраторам"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "Плагин с именем %(folder_name)s уже существует"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "Плагин с id %(plugin)s не найден"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "Ошибка загрузки плагина (%(value)s): %(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "Плагины успешно загружены: %(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "Плагины успешно загружены"
+
+msgid "plugins.flash.refused_download"
+msgstr "Отказано в загрузке %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "Отказано в установке %(plugin_id)s: %(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "Отказано в обновлении %(plugin_id)s: %(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "Обновление %(plugin_id)s не завершено: %(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "Плагин %(plugin_id)s обновлён до версии %(version)s"
 
 msgid "plugins.marketplace.active"
 msgstr "Активно"
@@ -3993,6 +5443,36 @@ msgstr "Дата истечения Pro"
 msgid "pro.expiration_date.unknown"
 msgstr "Неизвестная дата истечения"
 
+msgid "pro.flash.checking_license_key"
+msgstr "Проверка лицензионного ключа."
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "Запланировано принудительное обновление PRO-плагинов."
+
+msgid "pro.flash.invalid_license_key"
+msgstr "Неверный лицензионный ключ"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "Лицензионный ключ PRO не обновлён: значение было отклонено."
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "Лицензионный ключ совпадает с текущим."
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "Лицензионный ключ PRO успешно обновлён."
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "Отсутствует параметр license key в /pro/key."
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "Запланирована новая проверка PRO-плагинов."
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "Планировщик попытается применить изменения и скачать PRO-плагины."
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "Веб-интерфейс скоро перезагрузит свои PRO-плагины."
+
 msgid "pro.force_check.description"
 msgstr "Принудительно проверить плагины PRO. При наличии новых версий плагины будут загружены заново."
 
@@ -4029,8 +5509,17 @@ msgstr "ИСТЕК"
 msgid "pro.status.free_version"
 msgstr "БЕСПЛАТНАЯ версия"
 
+msgid "pro.status.invalid"
+msgstr "НЕДЕЙСТВИТЕЛЬНЫЙ КЛЮЧ"
+
+msgid "pro.status.invalid_key"
+msgstr "Сервер лицензий отклонил сохранённый лицензионный ключ. Проверьте его или удалите в Глобальных настройках → Pro."
+
 msgid "pro.status.overlapped"
 msgstr "ПРЕВЫШЕНО"
+
+msgid "pro.status.pending_key"
+msgstr "Лицензионный ключ ещё не проверен. Планировщик проверит его вскоре после сохранения."
 
 msgid "pro.status.pro_version"
 msgstr "PRO версия"
@@ -4046,6 +5535,15 @@ msgstr "Статус"
 
 msgid "pro.title"
 msgstr "Лицензия Pro"
+
+msgid "pro.trial.cta"
+msgstr "Начать бесплатную пробную версию"
+
+msgid "pro.trial.description"
+msgstr "Попробуйте <span class=\"text-primary\">BunkerWeb PRO</span> бесплатно в течение <strong>30 дней</strong>."
+
+msgid "pro.trial.title"
+msgstr "Бесплатная пробная версия"
 
 msgid "profile.2fa.disable_title"
 msgstr "Отключить 2FA"
@@ -4088,6 +5586,132 @@ msgstr "Обновить коды восстановления"
 
 msgid "profile.card.title.sessions"
 msgstr "Сессии"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "Не удалось удалить ключ доступа: %(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "Не удалось отключить двухфакторную аутентификацию: %(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "Не удалось включить двухфакторную аутентификацию: %(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "Не удалось обновить коды восстановления: %(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "Не удалось переименовать ключ доступа: %(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "Не удалось отозвать другие сессии: %(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "Не удалось обновить пользователя %(value)s: %(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "Не удалось удалить другие сессии: %(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "Текущий пароль неверен."
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "Адрес электронной почты слишком длинный. Он должен содержать менее 256 символов."
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "Отсутствует параметр current password в /profile/edit."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "Отсутствует параметр current password в /profile/totp-refresh."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "Отсутствует параметр current password в /profile/totp-disable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "Отсутствует параметр current password в /profile/totp-enable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "Отсутствует параметр current password в /profile/wipe-other-sessions."
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "Отсутствует параметр email в /profile/edit."
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "Отсутствует параметр new password confirm в /profile/edit."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "Отсутствуют параметры в /profile/webauthn/delete."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "Отсутствуют параметры в /profile/webauthn/rename."
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "Отсутствует параметр totp token в /profile/totp-enable."
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "Новый пароль недостаточно надёжен. Он должен содержать не менее 8 символов, включая как минимум 1 заглавную букву, 1 строчную букву, 1 цифру и 1 специальный символ (#@?!$%^&*-)."
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "Новый пароль совпадает с текущим."
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "Новый пароль слишком длинный. Он не должен превышать %(MAX_PASSWORD_BYTES)s байт (жёсткий предел bcrypt); символы с диакритикой или эмодзи занимают несколько байт каждый."
+
+msgid "profile.flash.no_fields_updated"
+msgstr "Ни одно поле не было обновлено."
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "Другие сессии успешно удалены."
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "Ключ доступа успешно удалён."
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "Ключ доступа успешно зарегистрирован."
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "Ключ доступа успешно переименован."
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "Имя ключа доступа не может быть пустым."
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "Ваш пароль изменён, но не удалось отозвать другие сессии. Используйте кнопку «Удалить другие сессии» ниже и проверьте список активных сессий."
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "Пароли не совпадают с подтверждением пароля."
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "Профиль успешно обновлён."
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "Коды восстановления успешно обновлены. Старые коды больше недействительны."
+
+msgid "profile.flash.theme_invalid"
+msgstr "Тема недействительна."
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "Токен TOTP недействителен."
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "Двухфакторная аутентификация уже включена."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "Двухфакторная аутентификация успешно отключена."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "Двухфакторная аутентификация успешно включена."
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "Двухфакторная аутентификация не включена."
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "Регистрация двухфакторной аутентификации истекла. Обновите страницу и отсканируйте новый QR-код."
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "Имя пользователя и адрес электронной почты совпадают с текущими."
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "Имя пользователя слишком длинное. Оно должно содержать менее 256 символов."
 
 msgid "profile.help.photo_extensions"
 msgstr "Разрешены JPG, GIF или PNG. Максимальный размер: 800КБ."
@@ -4173,6 +5797,39 @@ msgstr "Диапазон времени"
 msgid "range_picker.custom"
 msgstr "Пользовательский"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "Настройку %(setting)s нельзя сделать черновиком."
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "Черновая настройка %(setting)s не была отправлена."
+
+msgid "raw_drafts.draft_not_present"
+msgstr "Черновая настройка %(setting)s отсутствует в редакторе RAW."
+
+msgid "raw_drafts.edits_discarded"
+msgstr "Черновые настройки остаются без изменений; активируйте или редактируйте их в режиме Raw."
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "Глобальную настройку %(setting)s нельзя сделать черновиком сервиса."
+
+msgid "raw_drafts.locked_by_method"
+msgstr "Настройка %(setting)s не может изменить состояние черновика, так как управляется методом %(method)s."
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "Метаданные черновика настройки принимаются только в режиме raw."
+
+msgid "raw_drafts.missing_metadata"
+msgstr "Отсутствуют метаданные %(field)s."
+
+msgid "raw_drafts.present_not_posted"
+msgstr "Активная настройка %(setting)s не была отправлена."
+
+msgid "raw_drafts.present_not_valid"
+msgstr "Активная настройка %(setting)s недопустима."
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "Настройка %(setting)s недопустима."
+
 msgid "redirects.all"
 msgstr "Все"
 
@@ -4226,6 +5883,69 @@ msgstr "Перенаправление — это имя правила, кот�
 
 msgid "redirects.empty_title"
 msgstr "Перенаправлений пока нет"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "Путь источника недействителен: он не может содержать пробелы, точки с запятой или фигурные скобки."
+
+msgid "redirects.err.invalid_to_url"
+msgstr "Цель должна быть полным URL-адресом http:// или https://."
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "Требуется как минимум один сервис"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "Не удалось прикрепить перенаправление: %(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "Не удалось создать перенаправление: %(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "Не удалось удалить перенаправление: %(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "Не удалось открепить перенаправление: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "Не удалось получить перенаправления: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "Не удалось получить сервисы для назначений перенаправления: %(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "Не удалось обновить перенаправление: %(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "Имя перенаправления обязательно"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "Перенаправление подключено. Сервисов: %(len)s"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "Перенаправление %(value)s успешно создано"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "Перенаправление успешно удалено"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "Перенаправление успешно откреплено"
+
+msgid "redirects.flash.redirect_required"
+msgstr "Перенаправление обязательно"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "Перенаправление и сервис обязательны"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "Перенаправление успешно обновлено"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "Код состояния должен быть одним из %(value)s"
+
+msgid "redirects.flash.target_required"
+msgstr "Целевой адрес перенаправления обязателен"
+
+msgid "redirects.flash.too_many_services"
+msgstr "Перенаправление не может быть прикреплено более чем к %(value)s сервисам"
 
 msgid "redirects.from_path"
 msgstr "Перенаправить от"
@@ -4312,16 +6032,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "Заблокированные запросы с течением времени"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "Проверка AppSec"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "Политика при сбое AppSec"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "Решение локального API"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "Технические сведения"
 
 msgid "reports.security_incident"
 msgstr "Инцидент безопасности"
@@ -4482,6 +6202,63 @@ msgstr "Записи"
 msgid "resource_groups.expand_all"
 msgstr "Развернуть все"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "Псевдоним должен содержать от 1 до 64 букв, цифр, подчёркиваний или дефисов"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "Этот псевдоним зарезервирован BunkerWeb"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "Не удалось клонировать группу ресурсов: %(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "Не удалось удалить группу ресурсов: %(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "Не удалось экспортировать группы ресурсов: %(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "Не удалось сохранить группу ресурсов: %(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "Записи ресурсов должны быть списком"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "Записи ресурсов не являются допустимым JSON"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "У записи %(index)s слишком длинный комментарий"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "Запись %(index)s недействительна"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "У записи %(index)s недопустимый тип"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "У записи %(index)s недопустимое значение"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "Группа ресурсов клонирована как @%(alias)s"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "Группа ресурсов @%(alias)s успешно создана"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "Группа ресурсов успешно удалена"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "Группа ресурсов обязательна"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "Группа ресурсов успешно обновлена"
+
+msgid "resource_groups.flash.source_required"
+msgstr "Исходная группа ресурсов обязательна"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "Группа ресурсов не может содержать более %(value)s записей"
+
 msgid "resource_groups.global_configuration"
 msgstr "Глобальная конфигурация"
 
@@ -4497,6 +6274,24 @@ msgstr "Импорт TXT/CSV ограничен 256 KiB."
 msgid "resource_groups.kind"
 msgstr "Тип"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "Страна"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "Обратный DNS"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "Пользовательский агент"
+
 msgid "resource_groups.kinds"
 msgstr "Типы"
 
@@ -4506,8 +6301,26 @@ msgstr "Загрузка ссылок..."
 msgid "resource_groups.max_entries"
 msgstr "Группа ресурсов не может содержать более %(max)s записей."
 
-msgid "resource_groups.meta_line"
-msgstr "Типы: %(kinds)s · значения: %(values)s · использования: %(usages)s"
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s тип"
+msgstr[1] "%(count)s типов"
+msgstr[2] "%(count)s типов"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s использование"
+msgstr[1] "%(count)s использований"
+msgstr[2] "%(count)s использований"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s значение"
+msgstr[1] "%(count)s значений"
+msgstr[2] "%(count)s значений"
 
 msgid "resource_groups.new"
 msgstr "Новая группа"
@@ -4526,6 +6339,13 @@ msgstr "Нет ссылок"
 
 msgid "resource_groups.readonly"
 msgstr "База данных только для чтения. Группы ресурсов можно просматривать и экспортировать, но не изменять."
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s ссылка"
+msgstr[1] "%(count)s ссылок"
+msgstr[2] "%(count)s ссылок"
 
 msgid "resource_groups.references_error"
 msgstr "Не удалось загрузить ссылки"
@@ -4689,6 +6509,9 @@ msgstr "Требуется перезагрузка"
 msgid "searchpane.scope"
 msgstr "Область"
 
+msgid "searchpane.search_title"
+msgstr "Поиск: {name}"
+
 msgid "searchpane.security_mode"
 msgstr "Режим безопасности"
 
@@ -4779,14 +6602,35 @@ msgstr "Режим сервиса"
 msgid "service.resources.attach"
 msgstr "Прикрепить"
 
+msgid "service.resources.confirm_detach"
+msgstr "Открепить этот ресурс от %(service)s?"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "Открепить этот сертификат от %(service)s?"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "Открепить это перенаправление от %(service)s?"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "Открепить этот шаблон от %(service)s?"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "Открепить этот апстрим от %(service)s?"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "Открепить этот рабочий процесс от %(service)s?"
+
 msgid "service.resources.conflict.inline"
 msgstr "%(service)s уже обслуживает %(path)s через свои собственные настройки %(family)s. Очистите эти настройки для %(path)s или используйте другой путь."
 
 msgid "service.resources.conflict.primary"
 msgstr "«%(name)s» в настоящее время является основным сертификатом для этого сервиса и будет понижен без дальнейших предупреждений. Основной — это тот, который фактически развернут."
 
-msgid "service.resources.conflict.resource"
-msgstr "%(service)s уже обслуживает %(path)s через ресурс %(kind)s «%(name)s». Открепите «%(name)s» или назначьте одному из ресурсов другой путь."
+msgid "service.resources.conflict.resource_redirect"
+msgstr "%(service)s уже обслуживает %(path)s через перенаправление «%(name)s». Открепите «%(name)s» или назначьте одному из них другой путь."
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "%(service)s уже обслуживает %(path)s через апстрим «%(name)s». Открепите «%(name)s» или назначьте одному из них другой путь."
 
 msgid "service.resources.conflict.stream"
 msgstr "Потоковый сервис проксирует каждое соединение на один бэкенд, а %(service)s уже использует апстрим «%(name)s». Сначала открепите его."
@@ -4877,6 +6721,222 @@ msgstr "Недоступно"
 
 msgid "services.draft"
 msgstr "Черновики сервисов"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "Все выбранные сервисы не найдены, не являются сервисами UI/API или уже преобразованы."
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "Все выбранные сервисы не найдены или не являются сервисами UI/API."
+
+msgid "services.flash.configuration_created"
+msgstr "Конфигурация сервиса %(service)s создана."
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "Конфигурация сервиса %(service)s создана, но %(refused_count)s значений было отклонено."
+
+msgid "services.flash.configuration_saved"
+msgstr "Конфигурация сервиса %(service)s сохранена."
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "Конфигурация сервиса %(service)s сохранена, но %(refused_count)s значений было отклонено."
+
+msgid "services.flash.converted_services_draft"
+msgstr "Преобразовано в сервисы «черновик»: %(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "Преобразовано в сервисы «online»: %(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "Не удалось получить привязанные сертификаты этого сервиса."
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "Не удалось получить привязанные перенаправления этого сервиса."
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "Не удалось получить привязанные апстримы этого сервиса."
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "Не удалось получить привязанные рабочие процессы этого сервиса."
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "Не удалось получить пользовательские конфигурации из API."
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "Не удалось получить пользовательские конфигурации из API."
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "Не удалось получить сервис из API."
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "Не удалось получить сервис %(service)s из API."
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "Не удалось получить сервис %(clone)s для клонирования."
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "Не удалось получить сервисы из API."
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "Не удалось получить конфигурацию сервисов."
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "Не удалось получить шаблоны из API."
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "Пользовательские конфигурации не сохранены, так как переименование было отклонено."
+
+msgid "services.flash.default_server_reserved"
+msgstr "%(default_server_id)s — это зарезервированный сервер по умолчанию: он отвечает на запросы, не соответствующие ни одному настроенному сервису (неизвестные имена хостов, доступ по IP), поэтому его нельзя создать, переименовать или удалить."
+
+msgid "services.flash.default_server_type_refused"
+msgstr "SERVER_TYPE нельзя задать для зарезервированного сервиса %(default_server_id)s: у него нет собственного серверного блока для переключения. Его HTTP-часть — это сам блок сервера по умолчанию, а его stream-часть — настройка DEFAULT_SERVER_STREAM_PORTS."
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "У вас нет прав на изменение режима сервиса"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "Не удалось удалить черновик сервиса autoconf %(service_id)s: %(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "Не удалось импортировать сервис: %(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "Не удалось импортировать сервисы: %(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "Импортирован сервис: %(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "Импортированы сервисы: %(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "Неверная кодировка файла configs_export.json внутри архива."
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "Неверная кодировка файла services_export.env внутри архива."
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Неверная кодировка файла. Загрузите файл в кодировке UTF-8."
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "Неверный параметр mode."
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "Отсутствует параметр convert_to в /services/convert."
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "Отсутствует параметр mode в /services/%(service)s/mode."
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "Отсутствует параметр services в /services/convert."
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "Отсутствует параметр services в /services/delete."
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "В файле импорта не найдены сервисы или пользовательские конфигурации."
+
+msgid "services.flash.no_services_export"
+msgstr "Нет сервисов для экспорта."
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "Файл сервисов не загружен."
+
+msgid "services.flash.no_services_selected"
+msgstr "Сервисы не выбраны."
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "Этот плагин не применяется к серверу по умолчанию"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "Отказ в извлечении архива: несжатый размер превышает предел безопасности."
+
+msgid "services.flash.resource_attach_failed"
+msgstr "Не удалось прикрепить: %(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "Невозможно прикрепить: %(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "Ресурс прикреплён к %(service)s."
+
+msgid "services.flash.resource_detach_failed"
+msgstr "Не удалось открепить: %(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "Невозможно открепить: %(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "Ресурс откреплён от %(service)s."
+
+msgid "services.flash.resource_unknown_family"
+msgstr "Неизвестный тип ресурса."
+
+msgid "services.flash.server_name_missing"
+msgstr "Сервис не был создан, так как не было указано имя сервера."
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "Сервис %(non_convertible_service)s уже является черновиком сервиса и не будет преобразован."
+
+msgid "services.flash.service_already_exists"
+msgstr "Сервис %(service)s уже существует."
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "Сервис %(non_convertible_service)s уже является сервисом online и не будет преобразован."
+
+msgid "services.flash.service_deleted"
+msgstr "Удалён сервис: %(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "Сервис %(service)s не был изменен, так как значения не менялись."
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "Сервис %(service)s не был изменен, так как ни значения, ни пользовательские конфигурации не менялись."
+
+msgid "services.flash.service_not_found"
+msgstr "Сервис не найден"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "Сервис %(service)s не сохранён: каждое изменённое значение было отклонено."
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "Сервис %(non_editable_service)s не является сервисом UI/API и не будет преобразован."
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "Сервис %(service)s теперь объявлен как «только перенаправление»."
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "Сервис %(service)s теперь объявлен как «стандартный»."
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "Сервис %(non_deletable_service)s не является сервисом UI/API и не будет удален."
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "Сервис %(non_deletable_service)s является сервисом autoconf в статусе online (сначала преобразуйте его в черновик) и не будет удален."
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "Сервис %(non_deletable_service)s является зарезервированным сервером по умолчанию, который отвечает на запросы, не соответствующие ни одному сервису, и не будет удален."
+
+msgid "services.flash.services_deleted"
+msgstr "Удалены сервисы: %(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "Пропущен существующий сервис: %(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "Пропущены существующие сервисы: %(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "Пользовательская конфигурация шаблона %(key)s не может быть изменена, так как она создана методом %(value)s."
+
+msgid "services.flash.template_not_found"
+msgstr "Шаблон не найден"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "Загруженный архив должен содержать services_export.env и/или configs_export.json."
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "Загруженный файл не является допустимым zip-архивом."
 
 msgid "services.online"
 msgstr "В сети"
@@ -5295,6 +7355,45 @@ msgstr "Загружено из %(name)s · символов: %(count)s"
 msgid "setup.file.read_error"
 msgstr "Ошибка чтения файла"
 
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "Адрес электронной почты администратора слишком длинный. Он должен содержать менее 256 символов."
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "Пароль администратора недостаточно надёжен. Он должен содержать не менее 8 символов, включая как минимум 1 заглавную букву, 1 строчную букву, 1 цифру и 1 специальный символ (#@?!$%^&*-)."
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "Пароль администратора слишком длинный. Он не должен превышать %(MAX_PASSWORD_BYTES)s байт (жёсткий предел bcrypt); символы с диакритикой или эмодзи занимают несколько байт каждый."
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "Пользователь администратора успешно создан"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "Имя пользователя администратора слишком длинное. Оно должно содержать менее 256 символов."
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "Не удалось создать пользователя администратора: %(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "Не удалось создать новый сервис: %(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "Не удалось изменить новый сервис: %(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "Имя хоста %(value)s уже используется."
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "Имя хоста недействительно."
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "Отсутствует один из следующих параметров: %(value)s."
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "Пароли не совпадают."
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "При использовании пользовательского SSL-сертификата необходимо указать как сертификат, так и ключ."
+
 msgid "setup.status.admin_user_exists"
 msgstr "Пользователь администратора уже существует. Пожалуйста, перейдите к следующему шагу."
 
@@ -5451,6 +7550,12 @@ msgstr "Истекает"
 msgid "status.failed"
 msgstr "Неудачно"
 
+msgid "status.failover"
+msgstr "Аварийное переключение"
+
+msgid "status.inactive"
+msgstr "Неактивен"
+
 msgid "status.invalid_json_payload"
 msgstr "Неверный формат JSON."
 
@@ -5588,6 +7693,9 @@ msgstr "Неизвестно"
 
 msgid "status.up"
 msgstr "В сети"
+
+msgid "status.uploaded"
+msgstr "Загружено"
 
 msgid "status.yes"
 msgstr "Да"
@@ -5838,6 +7946,9 @@ msgstr "Создать шаблон"
 msgid "template.editor.heading_edit"
 msgstr "Редактировать шаблон %(id)s"
 
+msgid "template.editor.heading_view"
+msgstr "Просмотр шаблона %(id)s"
+
 msgid "template.editor.label_config_data"
 msgstr "Данные"
 
@@ -5923,7 +8034,10 @@ msgid "template.editor.multivalue_add"
 msgstr "Добавить значение"
 
 msgid "template.editor.multivalue_helper"
-msgstr "Одно значение в строке.%(separatorNote)s"
+msgstr "Одно значение в строке."
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "Одно значение в строке. Будет объединено с помощью «%(separator)s»."
 
 msgid "template.editor.panel_overview"
 msgstr "Обзор"
@@ -6086,6 +8200,9 @@ msgstr "База данных в настоящее время находитс�
 
 msgid "template.editor.readonly_method"
 msgstr "Этот шаблон был создан процессом %(method)s и не может быть отредактирован через пользовательский интерфейс."
+
+msgid "template.editor.readonly_method_plugin"
+msgstr "Этот шаблон создан плагином %(plugin)s и не может быть отредактирован из интерфейса."
 
 msgid "template.editor.readonly_title"
 msgstr "Только для чтения"
@@ -6261,6 +8378,9 @@ msgstr "Тип конфигурации обязателен, если опре�
 msgid "template.editor.validation_configs_unique"
 msgstr "Каждое имя конфигурации должно быть уникальным."
 
+msgid "template.editor.validation_id_invalid"
+msgstr "ID шаблона может содержать только буквы, цифры, точки, дефисы и подчёркивания и должен начинаться с буквы или цифры."
+
 msgid "template.editor.validation_id_required"
 msgstr "Требуется ID шаблона."
 
@@ -6273,6 +8393,36 @@ msgstr "Каждый ключ настройки должен быть уник�
 msgid "template.none"
 msgstr "Нет шаблона"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "Добавлены пользовательские конфигурации"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "Изменены пользовательские конфигурации"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "Удалены пользовательские конфигурации"
+
+msgid "templates.catalog.diff.name"
+msgstr "Имя: %(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "Добавлены настройки"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "Изменены настройки"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "Удалены настройки"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "Добавлены шаги"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "Изменены шаги"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "Удалены шаги"
+
 msgid "templates.catalog.heading"
 msgstr "Доступные шаблоны"
 
@@ -6282,8 +8432,89 @@ msgstr "Шаблон — это слой: добавление его к слу�
 msgid "templates.catalog.no_compat_notice"
 msgstr "Этот каталог не заявляет о совместимости с BunkerWeb. Шаблон отклоняется при установке, если он указывает настройку, которой нет в этом BunkerWeb."
 
+msgid "templates.catalog.state_installed"
+msgstr "Установлен, совпадает с каталогом"
+
+msgid "templates.catalog.state_managed"
+msgstr "Установлен и управляется %(owner)s: каталог его не изменяет"
+
+msgid "templates.catalog.state_update"
+msgstr "Установлен, версия в каталоге отличается"
+
 msgid "templates.catalog.subheading"
 msgstr "Отобранные шаблоны служб, опубликованные организацией BunkerWeb."
+
+msgid "templates.catalog.update_changed"
+msgstr "Шаблон %(template)s или каталог изменился с момента предпросмотра. Перезагрузите страницу и снова проверьте изменения."
+
+msgid "templates.catalog.update_confirm"
+msgstr "Заменить шаблон %(id)s его версией из релиза каталога %(tag)s. Эти изменения относятся к шаблону:"
+
+msgid "templates.catalog.update_failed"
+msgstr "Не удалось обновить шаблон."
+
+msgid "templates.catalog.update_managed"
+msgstr "Шаблон %(template)s управляется %(owner)s: каталог его не изменяет"
+
+msgid "templates.catalog.update_no_services"
+msgstr "Ни один сервис ещё не использует этот шаблон."
+
+msgid "templates.catalog.update_not_installed"
+msgstr "Шаблон %(template)s не установлен: установите его вместо этого"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "Изменения можно будет проверить после следующего обновления каталога."
+
+msgid "templates.catalog.update_services"
+msgstr "Эти сервисы используют этот шаблон. При следующей генерации конфигурации каждая настройка, которую они не задали сами, примет новое значение:"
+
+msgid "templates.catalog.update_title"
+msgstr "Обновление шаблона сообщества"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "Шаблон %(template)s уже соответствует каталогу"
+
+msgid "templates.flash.catalog_updated"
+msgstr "Шаблон %(template)s обновлён из каталога."
+
+msgid "templates.flash.error_deleting_template"
+msgstr "Ошибка при удалении шаблона %(template_id)s: %(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "Не удалось экспортировать шаблон %(template)s: %(error)s"
+
+msgid "templates.flash.imported"
+msgstr "Шаблон %(template)s импортирован."
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "Не выбраны шаблоны для удаления."
+
+msgid "templates.flash.replaced"
+msgstr "Шаблон %(template)s заменён."
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "Удалено шаблонов: %(success_count)s."
+
+msgid "templates.flash.template_created_successfully"
+msgstr "Шаблон %(template_id)s успешно создан."
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "Шаблон %(template_id)s успешно удалён."
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "Шаблон %(template_id)s установлен из каталога."
+
+msgid "templates.flash.template_not_found"
+msgstr "Шаблон %(clone_id)s не найден."
+
+msgid "templates.flash.template_not_found_2"
+msgstr "Шаблон не найден."
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "Шаблон %(template_id)s успешно обновлён."
+
+msgid "templates.flash.user_is_read_only"
+msgstr "Пользователь доступен только для чтения"
 
 msgid "templates.gallery.delete_selected"
 msgstr "Удалить выбранное"
@@ -6299,6 +8530,24 @@ msgstr "Выбрать"
 
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
+
+msgid "templates.import.admin_only"
+msgstr "Импорт шаблонов доступен только администраторам"
+
+msgid "templates.import.failed"
+msgstr "Не удалось импортировать шаблон."
+
+msgid "templates.import.no_file"
+msgstr "Выберите файл для импорта."
+
+msgid "templates.import.refused"
+msgstr "Шаблон не был импортирован: %(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "Шаблон не был импортирован: размер файла превышает 1 МиБ"
+
+msgid "templates.import.unreadable"
+msgstr "Шаблон не был импортирован: не удалось прочитать файл"
 
 msgid "templates.name.api"
 msgstr "API"
@@ -6435,6 +8684,9 @@ msgstr "Установите METRICS_COLLECT_TIMINGS в yes, чтобы изме
 msgid "timings.disabled_title"
 msgstr "Измерение времени плагинов отключено"
 
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "Ошибка при получении времени выполнения плагинов: %(message)s"
+
 msgid "timings.max"
 msgstr "Максимум"
 
@@ -6537,11 +8789,23 @@ msgstr "Автоматически запрашивать сертификат L
 msgid "tooltip.badge.redirect_candidate"
 msgstr "Этот сервис содержит только перенаправление, поэтому его можно объявить «только перенаправление» — это исключит его из количества сервисов PRO, как только заработает эта тарификация."
 
+msgid "tooltip.button.attach_redirect"
+msgstr "Прикрепить %(name)s к сервису"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "Прикрепить %(name)s к сервису"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "Прикрепить %(name)s к сервису"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Вернуться к загрузке файла"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Забанить этот IP-адрес"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "Клонировать %(name)s"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "Преобразовать конфигурацию %(name)s в черновик"
@@ -6555,6 +8819,9 @@ msgstr "Конвертировать сервис %(name)s в черновик"
 msgid "tooltip.button.convert_service_to_online"
 msgstr "Конвертировать сервис %(name)s в онлайн"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "Удалить сертификат"
+
 msgid "tooltip.button.delete_config"
 msgstr "Удалить кастомную конфигурацию %(name)s"
 
@@ -6567,11 +8834,32 @@ msgstr "Удалить экземпляр %(hostname)s"
 msgid "tooltip.button.delete_plugin"
 msgstr "Удалить плагин %(name)s"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "Удалить %(name)s"
+
 msgid "tooltip.button.delete_service"
 msgstr "Удалить сервис %(name)s"
 
 msgid "tooltip.button.delete_template"
 msgstr "Удалить Шаблон %(name)s"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "Удалить %(name)s"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "Удалить %(name)s"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "Редактировать %(name)s"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "Редактировать %(name)s"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "Редактировать название и описание %(name)s"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "Редактировать правила %(name)s"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "Выпустить код регистрации для %(hostname)s"
@@ -6678,6 +8966,9 @@ msgstr "Пароль подтверждения должен совпадать 
 msgid "tooltip.copied"
 msgstr "Скопировано!"
 
+msgid "tooltip.copy_failed"
+msgstr "Не удалось скопировать"
+
 msgid "tooltip.copy_https_only"
 msgstr "Функция копирования доступна только через HTTPS."
 
@@ -6698,6 +8989,9 @@ msgstr "Значение отличается от значения по умо�
 
 msgid "tooltip.disabled_by_method"
 msgstr "Отключено: Управляется методом '%(method)s'."
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "Отключено: управляется плагином %(plugin)s."
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "Отключено: База данных находится в режиме только для чтения."
@@ -6818,6 +9112,9 @@ msgstr "Экспортировать пользовательскую конфи
 
 msgid "tooltip.link.export_service"
 msgstr "Экспортировать конфигурацию сервиса %(service)s"
+
+msgid "tooltip.link.export_template"
+msgstr "Экспорт шаблона %(template)s"
 
 msgid "tooltip.link.manage_activation"
 msgstr "Управление активацией %(name)s в глобальных настройках"
@@ -7290,6 +9587,21 @@ msgstr "Задержка в секундах между повторами API Z
 msgid "totp.cant_access"
 msgstr "Не можете получить доступ к своему аутентификатору?"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "База данных находится в режиме только для чтения, использованный код восстановления остаётся действительным."
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "Произошла ошибка при использовании кода восстановления."
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "Не указан токен в /totp."
+
+msgid "totp.flash.token_invalid"
+msgstr "Токен недействителен."
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "Использован один из кодов восстановления. Осталось: %(len)s."
+
 msgid "totp.or_use_security_key"
 msgstr "или используйте ключ безопасности"
 
@@ -7355,6 +9667,78 @@ msgstr "Upstream — это именованный пул бэкендов, к �
 
 msgid "upstreams.empty_title"
 msgstr "Апстримов пока нет"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "Требуется как минимум один сервер"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "Требуется как минимум один сервис"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "Не удалось прикрепить апстрим: %(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "Не удалось создать апстрим: %(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "Не удалось удалить апстрим: %(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "Не удалось открепить апстрим: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "Не удалось получить сервисы для назначений апстрима: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "Не удалось получить апстримы: %(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "Не удалось обновить апстрим: %(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "Число keepalive должно быть положительным целым числом"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "Путь reverse proxy должен начинаться с /"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "Метод должен быть одним из %(value)s"
+
+msgid "upstreams.flash.name_required"
+msgstr "Имя апстрима обязательно"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "Протокол должен быть одним из %(value)s"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "Апстрим не может иметь более %(value)s серверов"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "Апстрим не может быть прикреплён более чем к %(value)s сервисам"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "Upstream подключён. Сервисов: %(len)s"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "Апстрим %(value)s успешно создан"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "Апстрим успешно удалён"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "Апстрим успешно откреплён"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "Апстрим обязателен"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "Апстрим и сервис обязательны"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "Апстрим успешно обновлён"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "Вес и max fails для %(host)s должны быть целыми числами"
 
 msgid "upstreams.keepalive"
 msgstr "Поддержание соединения"
@@ -7439,6 +9823,15 @@ msgstr "Скрыто сервисов: %(count)s. Апстрим %(protocol)s м
 
 msgid "upstreams.truncated"
 msgstr "Отображаются только первые 500 апстримов. Чтобы получить полный результат, сузьте список через API."
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "Не удалось подключиться к redis"
+
+msgid "utils.flash.invalid_request"
+msgstr "Неверный запрос"
+
+msgid "utils.flash.missing_form"
+msgstr "Отсутствует %(key)s в форме"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "Введите текущий пароль, чтобы добавить ключ доступа."
@@ -7535,6 +9928,27 @@ msgstr "Включенные службы"
 
 msgid "web_cache.error"
 msgstr "Ошибка"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "Ошибка при получении метрик веб-кэша: %(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "Ошибка при получении статуса веб-кэша: %(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "Ошибка при очистке веб-кэша: %(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "Веб-кэш очищен (все записи)"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "Веб-кэш очищен для %(url)s"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "URL-адрес обязателен для очистки по URL"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "Веб-кэш очищен. Очищено экземпляров: %(value)s, с ошибкой: %(value2)s, недоступно и пропущено: %(value3)s (ничего не поставлено в очередь)."
 
 msgid "web_cache.hit_rate"
 msgstr "Процент попадания"
@@ -7671,6 +10085,9 @@ msgstr "Правило %(n)s из %(total)s, изменить позицию"
 msgid "workflows.aria.collapse"
 msgstr "Свернуть"
 
+msgid "workflows.aria.collapseRule"
+msgstr "Свернуть правило %(n)s"
+
 msgid "workflows.aria.combinator"
 msgstr "Изменить логическую связку, сейчас"
 
@@ -7689,6 +10106,9 @@ msgstr "Перетащите для изменения порядка"
 msgid "workflows.aria.expand"
 msgstr "Развернуть"
 
+msgid "workflows.aria.expandRule"
+msgstr "Развернуть правило %(n)s"
+
 msgid "workflows.aria.groupKind"
 msgstr "Тип группы"
 
@@ -7698,11 +10118,20 @@ msgstr "Добавить правило в позицию %(n)s"
 msgid "workflows.aria.more"
 msgstr "Ещё"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "Дополнительные действия для правила %(n)s"
+
 msgid "workflows.aria.moveDown"
 msgstr "Переместить вниз — выполняется позже"
 
 msgid "workflows.aria.moveRule"
 msgstr "Переместить правило"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "Переместить правило %(n)s вниз"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "Переместить правило %(n)s вверх"
 
 msgid "workflows.aria.moveUp"
 msgstr "Переместить вверх — выполняется раньше"
@@ -7739,6 +10168,9 @@ msgstr "Количество запросов"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "Группа ресурсов"
+
+msgid "workflows.aria.ruleCard"
+msgstr "Правило %(n)s из %(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "Проблем валидации в этом правиле: %(count)s"
@@ -7902,6 +10334,9 @@ msgstr "Процессы выполняются в порядке привязк
 msgid "workflows.entry_title"
 msgstr "Каждый запрос к привязанной службе"
 
+msgid "workflows.err.load"
+msgstr "Не удалось прочитать сохранённые правила. Сохранение отключено, чтобы их не перезаписать; перезагрузите страницу."
+
 msgid "workflows.err.save"
 msgstr "Не удалось сохранить"
 
@@ -7934,6 +10369,69 @@ msgstr "Запрос перейдёт к следующему привязанн
 
 msgid "workflows.exit_title"
 msgstr "Ни одно правило не совпало"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "Не удалось прикрепить рабочий процесс: %(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "Не удалось клонировать рабочий процесс: %(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "Не удалось создать рабочий процесс: %(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "Не удалось удалить рабочий процесс: %(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "Не удалось открепить рабочий процесс: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "Не удалось получить сервисы для назначений рабочего процесса: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "Не удалось получить рабочий процесс: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "Не удалось получить рабочие процессы: %(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "Не удалось обновить рабочий процесс: %(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "Имя рабочего процесса обязательно"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "Не удалось прочитать список сервисов; откройте страницу заново и повторите попытку"
+
+msgid "workflows.flash.too_many_services"
+msgstr "Рабочий процесс не может быть прикреплён более чем к %(value)s сервисам"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "Рабочий процесс клонирован как %(name)s"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "Рабочий процесс %(value)s успешно создан"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "Рабочий процесс успешно удалён"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "Рабочий процесс успешно откреплён"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "Рабочий процесс и новое имя обязательны"
+
+msgid "workflows.flash.workflow_required"
+msgstr "Рабочий процесс обязателен"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "Рабочий процесс и сервис обязательны"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "Обновлены сервисы рабочего процесса (%(len)s прикреплено)"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "Рабочий процесс успешно обновлён"
 
 msgid "workflows.gate.and"
 msgstr "и только после того, как один и тот же IP клиента отправит больше"
@@ -8043,8 +10541,14 @@ msgstr ", проверка завершается здесь — правила 
 msgid "workflows.rules"
 msgstr "Правила"
 
-msgid "workflows.say.actionChanged"
-msgstr "Действие изменено на %(type)s. Оно по-прежнему единственное и завершает проверку."
+msgid "workflows.say.actionChangedBlock"
+msgstr "Действие изменено на блокировку. Оно по-прежнему единственное и завершает проверку."
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "Действие изменено на проверку (challenge). Оно по-прежнему единственное и завершает проверку."
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "Действие изменено на перенаправление. Оно по-прежнему единственное и завершает проверку."
 
 msgid "workflows.say.added"
 msgstr "Правило добавлено на позицию %(n)s — последнюю, поэтому сначала проверяются все правила выше."
@@ -8071,13 +10575,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "Последнее значение удалено — это условие нельзя сохранить, пока не будет добавлено значение."
 
 msgid "workflows.say.moved"
-msgstr "%(name)s перемещено на позицию %(to)s из %(total)s%(how)s. Теперь оно выполняется %(where)s."
+msgstr "%(name)s перемещено на позицию %(to)s из %(total)s."
+
+msgid "workflows.say.movedDrag"
+msgstr "%(name)s перетащено на позицию %(to)s из %(total)s."
+
+msgid "workflows.say.movedKeyboard"
+msgstr "%(name)s перемещено с клавиатуры на позицию %(to)s из %(total)s."
 
 msgid "workflows.say.predicateCap"
 msgstr "Это правило уже содержит максимально допустимые %(max)s условий."
-
-msgid "workflows.say.ruleAbove"
-msgstr "правило выше"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "%(name)s отключено — оно полностью пропускается, и запросы теперь видят правила ниже."
@@ -8086,13 +10593,16 @@ msgid "workflows.say.ruleEnabled"
 msgstr "%(name)s включено — оно снова проверяется на позиции %(n)s."
 
 msgid "workflows.say.runsAfter"
-msgstr "после %(name)s"
+msgstr "Теперь оно выполняется после %(name)s."
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "Теперь оно выполняется после правила выше."
 
 msgid "workflows.say.runsFirst"
-msgstr "первым"
+msgstr "Теперь оно выполняется первым."
 
 msgid "workflows.say.runsLast"
-msgstr "последним"
+msgstr "Теперь оно выполняется последним."
 
 msgid "workflows.say.saved"
 msgstr "Правила сохранены и отправлены привязанным службам."
@@ -8101,13 +10611,7 @@ msgid "workflows.say.theRule"
 msgstr "Правило"
 
 msgid "workflows.say.valuesDropped"
-msgstr "Условие изменено на %(type)s — его прежние значения (%(count)s) нельзя перенести."
-
-msgid "workflows.say.via.drag"
-msgstr "перетаскиванием"
-
-msgid "workflows.say.via.keyboard"
-msgstr "с клавиатуры"
+msgstr "Условие изменено. Значения, которые не удалось перенести: %(count)s."
 
 msgid "workflows.say.viewCanvas"
 msgstr "Вид канвы. Правила выполняются слева направо; первое совпадение побеждает."
@@ -8227,7 +10731,16 @@ msgid "workflows.test.out_draft"
 msgstr "Эта служба является черновиком — процесс для неё ещё не скомпилирован."
 
 msgid "workflows.test.out_match"
-msgstr "Сработали %(workflow)s · %(rule)s, действие над запросом: %(action)s."
+msgstr "%(workflow)s · %(rule)s сработало."
+
+msgid "workflows.test.out_match_block"
+msgstr "%(workflow)s · %(rule)s сработало и заблокировало запрос."
+
+msgid "workflows.test.out_match_challenge"
+msgstr "%(workflow)s · %(rule)s сработало и потребовало проверку запроса."
+
+msgid "workflows.test.out_match_redirect"
+msgstr "%(workflow)s · %(rule)s сработало и перенаправило запрос."
 
 msgid "workflows.test.out_no_match"
 msgstr "Ни одно правило не сработало. Запрос переходит к остальной части стека безопасности."
@@ -8305,7 +10818,7 @@ msgid "workflows.tree.empty"
 msgstr "Пустая группа — добавьте условие, иначе её нельзя сохранить."
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "ни одна группа не содержит записи типа %(kind)s"
+msgstr "Ни одна группа ресурсов не содержит записей этого типа."
 
 msgid "workflows.tree.noneMeta"
 msgstr "срабатывает, когда ни одно из условий не истинно"

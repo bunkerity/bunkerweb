@@ -9,12 +9,13 @@ matters is that the generated half never drifts from the hand-edited half.
 import sys
 from json import loads
 from pathlib import Path
-from re import findall
+from re import escape as re_escape, findall, search as re_search
 
 import pytest
 from babel import Locale
 from babel.messages.mofile import read_mo
 from babel.messages.pofile import read_po
+from babel.support import Translations
 
 REPO = Path(__file__).resolve().parents[3]
 LOCALES = REPO / "src" / "ui" / "app" / "static" / "locales"
@@ -95,6 +96,26 @@ def test_the_two_codes_that_name_a_different_language_are_mapped():
     assert ui_language("zh_Hant") == "tw"
 
 
+def test_filipino_is_mapped_to_the_locale_babel_normalizes_it_to():
+    """`tl` isn't a wrong-language code the way `br`/`tw` are, but `Locale.parse("tl")`
+    normalizes to `fil_PH` in CLDR — so unmapped, Flask-Babel resolves the catalog directory as
+    `fil_PH` while `json_to_po.py` (unmapped) would write it to `tl`, and the Filipino UI falls
+    back to English for every string, silently."""
+    assert babel_locale("tl") == "fil_PH"
+    assert str(Locale.parse(babel_locale("tl"))) == "fil_PH"
+    assert ui_language("fil_PH") == "tl"
+
+
+@pytest.mark.parametrize("code", CODES)
+def test_every_ui_code_loads_a_non_empty_translations_catalog(code):
+    """The exact lookup Flask-Babel performs at runtime (`Locale.parse` the mapped locale, then
+    load `messages.mo` from the directory named after it) — not just that a `.mo` file exists
+    somewhere, but that gettext finds it under the identifier Babel will actually ask for."""
+    translations = Translations.load(str(TRANSLATIONS), [Locale.parse(babel_locale(code))], domain="messages")
+
+    assert translations._catalog, f"{code}: {babel_locale(code)} loaded an empty (Null) catalog"
+
+
 # --------------------------------------------------------------------------------------
 # The catalogs exist, compile, and match the JSON
 # --------------------------------------------------------------------------------------
@@ -135,8 +156,13 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
         ("modal.body.confirm_cache_deletion_alert", "modal.body.confirm_cache_deletion_alert_plural"),
         ("modal.body.confirm_configs_deletion_alert", "modal.body.confirm_configs_deletion_alert_plural"),
         ("modal.body.confirm_plugin_deletion", "modal.body.confirm_plugin_deletion_plural"),
+        ("modal.body.confirm_templates_deletion_alert", "modal.body.confirm_templates_deletion_alert_plural"),
         ("modal.body.delete_confirmation_alert", "modal.body.delete_confirmation_alert_plural"),
         ("modal.body.unban_confirmation_alert", "modal.body.unban_confirmation_alert_plural"),
+        ("resource_groups.meta_kinds", "resource_groups.meta_kinds_plural"),
+        ("resource_groups.meta_usages", "resource_groups.meta_usages_plural"),
+        ("resource_groups.meta_values", "resource_groups.meta_values_plural"),
+        ("resource_groups.reference_count", "resource_groups.reference_count_plural"),
     }
     # A deliberate tripwire, not a fact about gettext: the number only moves when someone adds or
     # removes keys, and it forces them to look at what they added. Was 2433, then 2471 (the 32
@@ -154,8 +180,24 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # settings page, its two action labels and confirm button, and the confirmation modal.
     # CS-2's original 2,786 count included 141 CrowdSec messages. The final 2,779 removes eight
     # unused report/connection keys and adds one distinct failure-policy source label.
+    # I18N-FINAL's 3,019 adds the wave-23 fix lanes' 108 new UI keys, the 138 `general.settings.*`
+    # keys (label+help for the 69 newly-exposed global settings), and folds one new plural pair
+    # (`modal.body.confirm_templates_deletion_alert`) plus three new `resource_groups.meta_*`
+    # pairs and `resource_groups.reference_count` into the pair set above (10 pairs, was 5).
     # STAGING A SUBSET OF THOSE MEANS RECOMPUTING THIS.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 2779
+    # 3,422 adds the FIX-QA5 lanes' 403 keys: every flash / handle_error / TO_FLASH message routed
+    # through translated() (page-scoped `*.flash.*` and the shared `flash.*`), tab titles, aria
+    # labels, and `tooltip.disabled_by_plugin`. 3,475 adds FIX-QA6's 53: the keys 35 translated()
+    # calls named without a catalog entry, the navbar and row-action aria labels, and the
+    # services delete modal.
+    # 3,486 adds `legend.raw_setting_drafts`, the RAW editor's setting-draft hint (port of dev f8b314a93).
+    # 3,497 adds the 11 `raw_drafts.*` flash/validation messages of the port (English only until I18N-SYNC).
+    # 3,511 adds FIX-Q8-UI's 15 keys (aria/menu/convert/modal/searchpane/delete-flash) and drops
+    # `services.flash.deleted_service`, translated by I18N-T9.
+    # 3,610 (+99 net) is FIX-SMOKE-UI and FIX-I18N-NOUNS: whole-sentence `_one`/`_other` and per-noun keys
+    # (bulk-select banners, plugin/instance/config/service flashes, workflow announcements) replacing
+    # the interpolated-word keys they retired.
+    assert len(_catalog("en")) == len(english) - len(pairs) == 3610
 
 
 @pytest.mark.parametrize("code", CODES)
@@ -197,8 +239,12 @@ def test_breadcrumb_and_navigation_copy_stays_in_step(code):
 
 @pytest.mark.parametrize("code", CODES)
 def test_translations_do_not_fake_plural_morphology_with_parenthetical_suffixes(code):
+    """A marker mid-word (`selection/issuance`) is ordinary prose, not a pseudo-plural suffix — the
+    lookahead requires the marker not be followed by another word character, same as every
+    parenthetical marker here already is by construction (the `)` itself isn't a word char)."""
     for key, value in _json_keys(code).items():
-        assert not any(marker in value for marker in PSEUDO_PLURAL_MARKERS), f"{code}/{key}: {value!r}"
+        for marker in PSEUDO_PLURAL_MARKERS:
+            assert not re_search(rf"{re_escape(marker)}(?!\w)", value), f"{code}/{key}: {value!r} (marker {marker!r})"
 
 
 @pytest.mark.parametrize("code", CODES)

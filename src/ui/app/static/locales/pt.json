@@ -3,15 +3,15 @@
     "build_with": "Construído Com",
     "gnu_license": "Licença Pública Geral Affero GNU v3.0",
     "license_title": "Licença",
-    "socials": "Redes Sociais",
-    "tagline": "Proteção Poderosa, Simplificada",
-    "title": "Acerca do BunkerWeb",
     "social": {
       "discord": "Discord",
       "instagram": "Instagram",
       "linkedin": "LinkedIn",
       "reddit": "Reddit"
     },
+    "socials": "Redes Sociais",
+    "tagline": "Proteção Poderosa, Simplificada",
+    "title": "Acerca do BunkerWeb",
     "version": "Versão: {{version}}"
   },
   "accordion": {
@@ -24,6 +24,7 @@
   },
   "alert": {
     "configs_import_invalid_file": "Por favor, carregue um ficheiro de exportação de configuração personalizado válido (.json).",
+    "custom_end_date_past": "A data de fim personalizada tem de ser futura.",
     "custom_end_date_required": "Por favor, selecione uma data final personalizada.",
     "important": "Importante",
     "no_changes_detected": "Nenhuma alteração detetada.",
@@ -34,12 +35,13 @@
     "plugin_file_too_large": "O ficheiro do plugin excede o limite de 50 MB.",
     "plugin_upload_failed": "Ocorreu um erro ao carregar o ficheiro do plugin. Tente novamente.",
     "services_import_invalid_file": "Carregue um ficheiro de exportação de serviços válido (.env ou .zip).",
-    "credential_action_failed": "A ação falhou.",
-    "enroll_failed": "Não foi possível emitir um código de registo."
+    "enroll_failed": "Não foi possível emitir um código de registo.",
+    "credential_action_failed": "A ação falhou."
   },
   "aria": {
     "label": {
       "clear_search": "Limpar pesquisa",
+      "clone_item": "Clonar {{name}}",
       "close": "Fechar",
       "collapse_multiline": "Recolher entradas multilinha",
       "configs_dropzone": "Selecione um ficheiro de exportação de configurações personalizadas ou solte-o aqui",
@@ -51,6 +53,7 @@
       "level_filter": "Filtrar linhas de registo por nível",
       "local_time": "Mostrar marcas temporais na hora local",
       "next_issue": "Próximo erro ou aviso",
+      "open_user_menu": "Abrir o menu do utilizador",
       "passkey_name": "Nome da chave de acesso",
       "plugins_dropzone": "Selecione os ficheiros de plugins ou solte-os aqui",
       "prev_issue": "Erro ou aviso anterior",
@@ -61,6 +64,10 @@
       "select_file": "Selecionar ficheiro",
       "select_page": "Selecionar página",
       "services_dropzone": "Selecione um ficheiro de exportação de serviços ou solte-o aqui",
+      "show_details": "Mostrar detalhes de {{name}}",
+      "toggle_item": "Alternar {{name}}",
+      "toggle_section": "Alternar a secção {{name}}",
+      "toggle_theme": "Alternar o modo escuro",
       "toggle_wrap": "Alternar quebra de linha",
       "user_avatar": "Avatar do utilizador",
       "view_selected_items": "Ver itens selecionados",
@@ -70,7 +77,12 @@
       "github_stars": "Estrelas no GitHub: {{count}}",
       "github_watchers": "Observadores no GitHub: {{count}}",
       "secret_value": "Valor secreto",
-      "value_hidden": "{{name}} (oculto)"
+      "value_hidden": "{{name}} (oculto)",
+      "certificate_public_details": "Detalhes públicos do certificado",
+      "certificate_inventory_assignments": "Atribuições do inventário de certificados",
+      "detach_from_service": "Desanexar {{name}} de {{service}}",
+      "remove_this_server": "Remover este servidor",
+      "select_template": "Selecionar modelo {{name}}"
     }
   },
   "badge": {
@@ -116,6 +128,7 @@
     "flash": {
       "ban_failed": "Falha ao banir {{ip}}: {{error}}",
       "ban_success": "{{ip}} banido com sucesso.",
+      "custom_end_date_in_past": "A data de fim de banimento personalizada para {{ip}} tem de ser futura",
       "invalid_custom_duration": "Duração de banimento personalizada inválida para {{ip}}",
       "invalid_custom_end_date": "Data de fim de banimento personalizada inválida para {{ip}}",
       "invalid_duration": "Duração de banimento inválida: {{duration}}",
@@ -126,7 +139,20 @@
       "unban_failed": "Falha ao remover o banimento de {{ip}}: {{error}}",
       "unban_success": "Banimento de {{ip}} removido com sucesso.",
       "update_duration_failed": "Falha ao atualizar a duração do banimento de {{ip}}: {{error}}",
-      "update_duration_success": "Duração do banimento de {{ip}} atualizada com sucesso."
+      "update_duration_success": "Duração do banimento de {{ip}} atualizada com sucesso.",
+      "no_matching_bans": "Nenhum banimento correspondente.",
+      "invalid_duration_selection_mode": "Modo de seleção de duração inválido.",
+      "invalid_updates_parameter_bans_update_duration": "Parâmetro updates inválido em /bans/update_duration.",
+      "no_updates": "Sem atualizações.",
+      "invalid_filtered_duration_source": "Origem de duração filtrada inválida.",
+      "invalid_unban_selection_mode": "Modo de seleção de remoção de banimento inválido.",
+      "invalid_ips_parameter_bans_unban": "Parâmetro ips inválido em /bans/unban.",
+      "no_bans": "Sem banimentos.",
+      "invalid_filtered_unban_source": "Origem de remoção de banimento filtrada inválida.",
+      "no_matching_reports": "Nenhum relatório correspondente.",
+      "invalid_ban_selection_mode": "Modo de seleção de banimentos inválido.",
+      "invalid_bans_parameter_bans_ban": "Parâmetro bans inválido em /bans/ban.",
+      "invalid_filtered_ban_source": "Origem de banimento filtrada inválida."
     }
   },
   "breadcrumb": {
@@ -138,8 +164,8 @@
     "timings": "Tempos de execução",
     "configs": "Configurações",
     "extra_pages": "Páginas adicionais",
-    "global_settings": "Configurações globais",
     "global_config": "Configuração global",
+    "global_settings": "Configurações globais",
     "home": "Início",
     "instances": "Instâncias",
     "jobs": "Tarefas",
@@ -169,6 +195,7 @@
     "add_plugins": "Adicionar Plugins",
     "auto_refresh": "Atualização Automática",
     "ban": "Bloquear",
+    "ban_all_filtered": "Banir todos os relatórios correspondentes",
     "ban_selected": "Bloquear selecionados",
     "cache": "Cache",
     "cancel": "Cancelar",
@@ -177,7 +204,8 @@
     "clone": "Clonar",
     "columns": "Colunas",
     "convert_configs": "Converter Configs",
-    "convert_configs_to": "Converter para {{state}}",
+    "convert_to_draft": "Converter em rascunho",
+    "convert_to_online": "Converter em online",
     "convert_services": "Converter Serviços",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
@@ -197,6 +225,7 @@
     "export_csv": "CSV",
     "export_excel": "Excel",
     "fetch_global": "Obter configurações globais",
+    "filtered_actions": "Ações filtradas",
     "filters_suffix": " Filtros",
     "follow": "Seguir",
     "force_check": "Forçar verificação",
@@ -207,6 +236,7 @@
     "history": "Histórico",
     "import_configs": "Importar configurações personalizadas",
     "import_services": "Importar serviços",
+    "import_template": "Importar modelo",
     "login": "Iniciar sessão",
     "multiple_add": "ADICIONAR",
     "multiple_hide": "OCULTAR",
@@ -248,19 +278,17 @@
     "submit": "Enviar",
     "subscribe": "Subscrever",
     "unban": "Desbloquear",
+    "unban_all_filtered": "Remover todos os bloqueios correspondentes",
     "update_duration": "Atualizar Duração do Bloqueio",
+    "update_duration_all_filtered": "Atualizar a duração de todos os bloqueios correspondentes",
     "update_key": "Atualizar Chave",
     "upload_photo": "Carregar nova foto",
+    "verify": "Verificar",
     "view_details": "Ver Detalhes",
     "view_raw_data": "Ver Dados Brutos",
     "wipe_other_sessions": "Terminar as outras sessões",
-    "ban_all_filtered": "Banir todos os relatórios correspondentes",
-    "filtered_actions": "Ações filtradas",
-    "unban_all_filtered": "Remover todos os bloqueios correspondentes",
-    "update_duration_all_filtered": "Atualizar a duração de todos os bloqueios correspondentes",
     "use_template": "Utilizar modelo",
     "edit": "Editar",
-    "verify": "Verificar",
     "view": "Ver",
     "rename": "Renomear",
     "add_passkey": "Adicionar uma chave de acesso",
@@ -279,10 +307,103 @@
     "kpi_files": "Ficheiros",
     "kpi_per_service": "Por serviço",
     "subtitle": "Ficheiros de cache gerados por tarefas agendadas (listas de bloqueio, bases de dados GeoIP e muito mais) — inspecione, descarregue ou elimine-os por serviço e plugin.",
-    "title": "Ficheiros em cache"
+    "title": "Ficheiros em cache",
+    "flash": {
+      "error_deleting_cache_files": "Erro ao eliminar os ficheiros de cache: {{message}}",
+      "successfully_deleted_cache_file": "{{deleted_count}} ficheiro de cache eliminado com sucesso",
+      "successfully_deleted_cache_files": "{{deleted_count}} ficheiros de cache eliminados com sucesso",
+      "deleted_files_errors": "{{deleted_count}} ficheiros eliminados com {{len}} erros: {{value}}",
+      "api_unavailable": "API indisponível: {{message}}",
+      "error_fetching_cache_file": "Erro ao obter o ficheiro de cache: {{message}}",
+      "cache_file_job_plugin_not_found": "Ficheiro de cache {{file_name}} da tarefa {{job_name}}, plugin {{plugin_id}} não encontrado",
+      "cache_file_job_plugin_not_found_service": "Ficheiro de cache {{file_name}} da tarefa {{job_name}}, plugin {{plugin_id}}, serviço {{service}} não encontrado",
+      "error_fetching_cache_files": "Erro ao obter os ficheiros de cache: {{message}}",
+      "invalid_cache_files_parameter": "Parâmetro de ficheiros de cache inválido",
+      "no_cache_files_selected": "Nenhum ficheiro de cache selecionado"
+    }
+  },
+  "compose": {
+    "always_on": "Ativado sempre",
+    "count": "{{on}} ativo · {{total}} disponível · {{locked}} bloqueado",
+    "entries": "{{count}} configurado",
+    "filter": {
+      "all": "Todos",
+      "changed": "Alterado",
+      "on": "Ativado"
+    },
+    "locked": "Sem controlo aqui",
+    "provenance": {
+      "api": "Gerido via API",
+      "attachment": "Do anexo",
+      "clone": "Clonado",
+      "default": "Padrão",
+      "edited": "Editado aqui",
+      "global": "Do global",
+      "managed": "Definido por {{method}}",
+      "template": "Do modelo"
+    },
+    "set_value": "Definir um valor…",
+    "show_more": "Mostrar mais {{count}}",
+    "unavailable": "A lista de plugins não pôde ser carregada, por isso esta página não pode ser editada com segurança. Recarregue após receber as respostas API."
   },
   "configs": {
-    "subtitle": "Trechos de configuração NGINX personalizados para os seus serviços — crie, edite e faça a gestão das sobreposições de HTTP, ModSecurity e nível de stream."
+    "subtitle": "Trechos de configuração NGINX personalizados para os seus serviços — crie, edite e faça a gestão das sobreposições de HTTP, ModSecurity e nível de stream.",
+    "flash": {
+      "no_custom_configurations_found_import_file": "Não foram encontradas configurações personalizadas no ficheiro de importação.",
+      "import_error": "Erro de importação: {{error}}",
+      "invalid_file_encoding_please_upload_utf": "Codificação de ficheiro inválida. Carregue um ficheiro JSON em UTF-8.",
+      "no_custom_configurations_file_uploaded": "Nenhum ficheiro de configurações personalizadas carregado.",
+      "no_custom_configurations_export": "Nenhuma configuração personalizada para exportar.",
+      "could_not_fetch_custom_configurations_api": "Não foi possível obter as configurações personalizadas a partir da API: {{fetch_err}}",
+      "invalid_configs_parameter_configs_export": "Parâmetro configs inválido em /configs/export.",
+      "saved_custom_configuration": "Configuração personalizada {{new_type}}/{{new_name}} guardada",
+      "saved_custom_configuration_service": "Configuração personalizada {{new_type}}/{{new_name}} guardada para o serviço {{service}}",
+      "no_values_changed": "Nenhum valor foi alterado.",
+      "renaming_template_based_custom_config_not": "Não é permitido renomear uma configuração personalizada baseada num modelo.",
+      "invalid_name_parameter_configs_new": "Parâmetro name inválido em /configs/new.",
+      "invalid_type_parameter_configs_new": "Parâmetro type inválido em /configs/new.",
+      "service_does_not_exist": "O serviço {{new_service}} não existe.",
+      "config_not_ui_api_custom_config": "A configuração {{config_type}}/{{name}} não é uma configuração personalizada de UI/API e não pode ser editada.",
+      "config_not_ui_api_custom_config_service": "A configuração {{config_type}}/{{name}} do serviço {{service}} não é uma configuração personalizada de UI/API e não pode ser editada.",
+      "config_does_not_exist_2": "A configuração {{config_type}}/{{name}} não existe.",
+      "config_does_not_exist_2_service": "A configuração {{config_type}}/{{name}} do serviço {{service}} não existe.",
+      "config_does_not_exist": "A configuração {{clone}} não existe.",
+      "created_custom_configuration": "Configuração personalizada {{config_type}}/{{config_name}} criada",
+      "created_custom_configuration_service": "Configuração personalizada {{config_type}}/{{config_name}} criada para o serviço {{service}}",
+      "error_occurred_while_saving_custom_configs": "Ocorreu um erro ao guardar as configurações personalizadas: {{error_msg}}",
+      "config_already_exists": "A configuração {{config_type}}/{{config_name}} já existe",
+      "config_already_exists_service": "A configuração {{config_type}}/{{config_name}} do serviço {{service}} já existe",
+      "deleted_config_one": "Configuração eliminada: {{names}}",
+      "deleted_config_other": "Configurações eliminadas: {{names}}",
+      "all_selected_custom_configs_could_not_2": "Todas as configurações personalizadas selecionadas não foram encontradas ou não são configurações personalizadas de UI/API.",
+      "custom_config_not_ui_api_custom_2": "A configuração personalizada {{skipped_config}} não é uma configuração personalizada de UI/API e não será eliminada.",
+      "error_occurred_while_deleting_custom_configs": "Ocorreu um erro ao eliminar as configurações personalizadas: {{e}}",
+      "invalid_configs_parameter_configs_delete": "Parâmetro configs inválido em /configs/delete.",
+      "no_configs_selected": "Nenhuma configuração selecionada.",
+      "converted_configs_online": "Convertidas em configurações \"online\": {{names}}",
+      "converted_configs_draft": "Convertidas em configurações \"rascunho\": {{names}}",
+      "all_selected_custom_configs_could_not": "Todas as configurações personalizadas selecionadas não foram encontradas, não são configurações personalizadas de UI/API ou já foram convertidas.",
+      "custom_config_could_not_found": "A configuração personalizada {{missing_config}} não foi encontrada.",
+      "custom_config_already_online_will_not": "A configuração personalizada {{non_convertible_config}} já é uma configuração online e não será convertida.",
+      "custom_config_already_draft_will_not": "A configuração personalizada {{non_convertible_config}} já é uma configuração em rascunho e não será convertida.",
+      "custom_config_not_ui_api_custom": "A configuração personalizada {{non_editable_config}} não é uma configuração personalizada de UI/API e não será convertida.",
+      "invalid_configs_parameter_configs_convert": "Parâmetro configs inválido em /configs/convert.",
+      "failed_import_custom_configuration_one": "Falha ao importar a configuração personalizada: {{names}}",
+      "failed_import_custom_configuration_other": "Falha ao importar as configurações personalizadas: {{names}}",
+      "skipped_custom_configuration_one": "Configuração personalizada ignorada: {{names}}",
+      "skipped_custom_configuration_other": "Configurações personalizadas ignoradas: {{names}}",
+      "overwrote_custom_configuration_one": "Configuração personalizada substituída: {{names}}",
+      "overwrote_custom_configuration_other": "Configurações personalizadas substituídas: {{names}}",
+      "imported_custom_configuration_one": "Configuração personalizada importada: {{names}}",
+      "imported_custom_configuration_other": "Configurações personalizadas importadas: {{names}}",
+      "missing_value_parameter_configs_new": "Parâmetro value em falta em /configs/new.",
+      "missing_name_parameter_configs_new": "Parâmetro name em falta em /configs/new.",
+      "missing_type_parameter_configs_new": "Parâmetro type em falta em /configs/new.",
+      "missing_service_parameter_configs_new": "Parâmetro service em falta em /configs/new.",
+      "missing_configs_parameter_configs_delete": "Parâmetro configs em falta em /configs/delete.",
+      "missing_convert_parameter_configs_convert": "Parâmetro convert_to em falta em /configs/convert.",
+      "missing_configs_parameter_configs_convert": "Parâmetro configs em falta em /configs/convert."
+    }
   },
   "country": {
     "AD": "Andorra",
@@ -549,6 +670,9 @@
       "blocked_unique_ips": {
         "title": "IPs Únicos Bloqueados"
       },
+      "certificates": {
+        "title": "Certificados"
+      },
       "hide": "Ocultar este cartão",
       "instances": {
         "status": "{{up}} ativas / {{down}} inativas / {{loading}} a carregar",
@@ -575,18 +699,15 @@
         "status": "{{online}} online / {{draft}} rascunho",
         "title": "Serviços"
       },
+      "top_reasons": {
+        "title": "Principais motivos dos relatórios"
+      },
       "total_requests": {
         "title": "Total de pedidos"
-      },
-      "certificates": {
-        "title": "Certificados"
       },
       "upstreams": {
         "planned": "Em breve",
         "title": "Servidores upstream"
-      },
-      "top_reasons": {
-        "title": "Principais motivos dos relatórios"
       }
     },
     "chart": {
@@ -607,13 +728,13 @@
         "http_404": "404 Não encontrado",
         "http_429": "429 Limite de taxa excedido"
       },
-      "top_blocked_ips": {
-        "most_blocked": "IP mais bloqueado",
-        "title": "Top 10 IPs Bloqueados"
-      },
       "timeseries": {
         "series": "Bloqueados",
         "title": "Pedidos bloqueados ao longo do tempo (intervalo selecionado)"
+      },
+      "top_blocked_ips": {
+        "most_blocked": "IP mais bloqueado",
+        "title": "Top 10 IPs Bloqueados"
       }
     },
     "map": {
@@ -621,19 +742,6 @@
       "hover_info": "Passe o mouse sobre um país",
       "legend": "Legenda",
       "no_data": "Sem dados"
-    },
-    "window": {
-      "last_days": "Últimos {{days}} dias",
-      "title": "Janela do painel"
-    },
-    "tile": {
-      "bans_active": "Bloqueios ativos",
-      "jobs": "Tarefas agendadas",
-      "trend": "Tendência dos pedidos bloqueados"
-    },
-    "welcome": {
-      "title": "Bem-vindo de volta, {{user}}",
-      "greeting": "Bem-vindo de volta,"
     },
     "mini": {
       "across_countries": "em vários países {{count}}",
@@ -649,6 +757,19 @@
       "trend_vs_prev": "vs anterior",
       "vs_prev": "vs anterior"
     },
+    "tile": {
+      "bans_active": "Bloqueios ativos",
+      "jobs": "Tarefas agendadas",
+      "trend": "Tendência dos pedidos bloqueados"
+    },
+    "welcome": {
+      "title": "Bem-vindo de volta, {{user}}",
+      "greeting": "Bem-vindo de volta,"
+    },
+    "window": {
+      "last_days": "Últimos {{days}} dias",
+      "title": "Janela do painel"
+    },
     "panel": {
       "timeseries_sub": "Intervalo selecionado",
       "top_ips_sub": "Por número de pedidos",
@@ -659,10 +780,70 @@
     }
   },
   "datatable": {
-    "bulk_select_all_filtered": "Selecionar todos os {{count}} {{entity}} correspondentes",
-    "bulk_select_all_done": "Todos os {{count}} {{entity}} correspondentes estão selecionados.",
+    "bulk_select": {
+      "bans": {
+        "page_one": "{{count}} banimento nesta página está selecionado.",
+        "page_other": "Todos os {{count}} banimentos nesta página estão selecionados.",
+        "all_filtered": "Selecionar todos os {{count}} banimentos correspondentes",
+        "all_done": "Todos os {{count}} banimentos correspondentes estão selecionados."
+      },
+      "cache": {
+        "page_one": "{{count}} ficheiro de cache nesta página está selecionado.",
+        "page_other": "Todos os {{count}} ficheiros de cache nesta página estão selecionados.",
+        "all_filtered": "Selecionar todos os {{count}} ficheiros de cache correspondentes",
+        "all_done": "Todos os {{count}} ficheiros de cache correspondentes estão selecionados."
+      },
+      "configs": {
+        "page_one": "{{count}} configuração personalizada nesta página está selecionada.",
+        "page_other": "Todas as {{count}} configurações personalizadas nesta página estão selecionadas.",
+        "all_filtered": "Selecionar todas as {{count}} configurações personalizadas correspondentes",
+        "all_done": "Todas as {{count}} configurações personalizadas correspondentes estão selecionadas."
+      },
+      "instances": {
+        "page_one": "{{count}} instância nesta página está selecionada.",
+        "page_other": "Todas as {{count}} instâncias nesta página estão selecionadas.",
+        "all_filtered": "Selecionar todas as {{count}} instâncias correspondentes",
+        "all_done": "Todas as {{count}} instâncias correspondentes estão selecionadas."
+      },
+      "items": {
+        "page_one": "{{count}} item nesta página está selecionado.",
+        "page_other": "Todos os {{count}} itens nesta página estão selecionados.",
+        "all_filtered": "Selecionar todos os {{count}} itens correspondentes",
+        "all_done": "Todos os {{count}} itens correspondentes estão selecionados."
+      },
+      "jobs": {
+        "page_one": "{{count}} tarefa nesta página está selecionada.",
+        "page_other": "Todas as {{count}} tarefas nesta página estão selecionadas.",
+        "all_filtered": "Selecionar todas as {{count}} tarefas correspondentes",
+        "all_done": "Todas as {{count}} tarefas correspondentes estão selecionadas."
+      },
+      "plugins": {
+        "page_one": "{{count}} plugin nesta página está selecionado.",
+        "page_other": "Todos os {{count}} plugins nesta página estão selecionados.",
+        "all_filtered": "Selecionar todos os {{count}} plugins correspondentes",
+        "all_done": "Todos os {{count}} plugins correspondentes estão selecionados."
+      },
+      "reports": {
+        "page_one": "{{count}} relatório nesta página está selecionado.",
+        "page_other": "Todos os {{count}} relatórios nesta página estão selecionados.",
+        "all_filtered": "Selecionar todos os {{count}} relatórios correspondentes",
+        "all_done": "Todos os {{count}} relatórios correspondentes estão selecionados."
+      },
+      "services": {
+        "page_one": "{{count}} serviço nesta página está selecionado.",
+        "page_other": "Todos os {{count}} serviços nesta página estão selecionados.",
+        "all_filtered": "Selecionar todos os {{count}} serviços correspondentes",
+        "all_done": "Todos os {{count}} serviços correspondentes estão selecionados."
+      },
+      "templates": {
+        "page_one": "{{count}} modelo nesta página está selecionado.",
+        "page_other": "Todos os {{count}} modelos nesta página estão selecionados.",
+        "all_filtered": "Selecionar todos os {{count}} modelos correspondentes",
+        "all_done": "Todos os {{count}} modelos correspondentes estão selecionados."
+      }
+    },
     "bulk_select_clear": "Limpar seleção",
-    "bulk_select_page": "Todos os {{count}} {{entity}} desta página estão selecionados.",
+    "select_row": "Selecionar linha",
     "info_bans": "A mostrar de {{start}} a {{end}} de {{total}} Bloqueios",
     "info_cache": "A mostrar de {{start}} a {{end}} de {{total}} Ficheiros de Cache",
     "info_configs": "A mostrar de {{start}} a {{end}} de {{total}} Configurações Personalizadas",
@@ -742,8 +923,33 @@
     "select_rows_templates_0": "Nenhum modelo selecionado",
     "select_rows_templates_1": "1 modelo selecionado",
     "select_rows_templates_plural": "%d modelos selecionados",
-    "selected_list_count": "{{count}} {{entity}} selecionados",
-    "selected_list_empty": "Nenhuma {{entity}} selecionada.",
+    "selected_list": {
+      "configs": {
+        "count_one": "{{count}} configuração personalizada selecionada",
+        "count_other": "{{count}} configurações personalizadas selecionadas",
+        "empty": "Nenhuma configuração personalizada selecionada."
+      },
+      "items": {
+        "count_one": "{{count}} item selecionado",
+        "count_other": "{{count}} itens selecionados",
+        "empty": "Nenhum item selecionado."
+      },
+      "plugins": {
+        "count_one": "{{count}} plugin selecionado",
+        "count_other": "{{count}} plugins selecionados",
+        "empty": "Nenhum plugin selecionado."
+      },
+      "services": {
+        "count_one": "{{count}} serviço selecionado",
+        "count_other": "{{count}} serviços selecionados",
+        "empty": "Nenhum serviço selecionado."
+      },
+      "templates": {
+        "count_one": "{{count}} modelo selecionado",
+        "count_other": "{{count}} modelos selecionados",
+        "empty": "Nenhum modelo selecionado."
+      }
+    },
     "zero_records_bans": "Nenhum Bloqueio correspondente encontrado",
     "zero_records_cache": "Nenhum Ficheiro de Cache correspondente encontrado",
     "zero_records_configs": "Nenhuma Configuração Personalizada correspondente encontrada",
@@ -802,9 +1008,10 @@
   },
   "flash": {
     "check_jobs_for_details": "Consulte a página Tarefas para mais detalhes.",
-    "last_configuration_change_failed": "Não foi possível aplicar a sua última alteração de configuração.",
+    "configuration_pending_instance": "Configuração ainda não aplicada — a aguardar que uma instância arranque.",
     "easter_egg": "Se você está lendo isto, significa que você é curioso",
     "error": "Erro",
+    "last_configuration_change_failed": "Não foi possível aplicar a sua última alteração de configuração.",
     "message": "Informação",
     "pro": "BunkerWeb PRO",
     "pro_services_exceeded": "Tem mais serviços do que os permitidos pela sua licença PRO. Atualize a licença ou mova alguns serviços para o modo de rascunho para desbloquear a licença PRO.",
@@ -812,7 +1019,19 @@
       "just_now": "agora mesmo"
     },
     "warning": "Aviso",
-    "configuration_pending_instance": "Configuração ainda não aplicada — a aguardar que uma instância arranque."
+    "do_not_have_write_permission": "Não tem a permissão de escrita",
+    "database_read_only_mode": "A base de dados está em modo só de leitura",
+    "error_occurred_while_saving_custom_configs": "Ocorreu um erro ao guardar as configurações personalizadas: {{e}}",
+    "service_does_not_exist": "O serviço {{service}} não existe.",
+    "invalid_convert_parameter": "Parâmetro convert_to inválido.",
+    "import_warning": "Aviso de importação: {{error}}",
+    "could_not_fetch_global_settings_api": "Não foi possível obter as definições globais a partir da API.",
+    "plugin_not_found": "Plugin não encontrado",
+    "scheduler_will_attempt_apply_changes": "O Scheduler tentará aplicar as alterações.",
+    "could_not_fetch_resource_groups": "Não foi possível obter os grupos de recursos: {{message}}",
+    "error_fetching_instances": "Erro ao obter as instâncias",
+    "description_too_long": "A descrição não pode exceder 4000 carateres",
+    "cors_or_ajax_request_required": "É necessário um pedido CORS ou AJAX"
   },
   "footer": {
     "blog": "Blog",
@@ -826,7 +1045,8 @@
     "checkbox": {
       "include_attached_configs": "Incluir configurações personalizadas anexadas",
       "overwrite_existing_configs": "Sobrescrever configurações personalizadas UI/API existentes",
-      "remember_me": "Lembrar-me"
+      "remember_me": "Lembrar-me",
+      "replace_existing_template": "Substituir o modelo com o mesmo id, caso exista"
     },
     "help": {
       "ban_specific_service": "O bloqueio será aplicado apenas a este serviço específico.",
@@ -834,7 +1054,8 @@
       "hostname_special_chars": "Apenas `/` e `:` são permitidos para especificação de protocolo/porta.",
       "multivalue_separator": "Valores são separados por:",
       "permanent_ban": "Se marcado, o bloqueio nunca expirará até ser removido manualmente",
-      "photo_extensions": "Permitido JPG, GIF ou PNG. Tamanho máximo: 800KB."
+      "photo_extensions": "Permitido JPG, GIF ou PNG. Tamanho máximo: 800KB.",
+      "secret_stored": "Um valor está guardado e não é apresentado. Mantenha o campo como está para o conservar, escreva um novo valor para o substituir, ou limpe o campo para o remover."
     },
     "label": {
       "2fa_code": "Código 2FA",
@@ -889,6 +1110,7 @@
       "secret_token": "Token Secreto",
       "server_name": "Nome do Servidor",
       "service_name": "Nome do Serviço",
+      "template_file": "Ficheiro do modelo",
       "template_id": "ID do Modelo",
       "theme": "Tema",
       "type": "Tipo",
@@ -906,9 +1128,9 @@
       "zerossl_api_connect_timeout": "Tempo Limite de Ligação da API ZeroSSL",
       "zerossl_api_max_time": "Tempo Máximo da API ZeroSSL",
       "passkey_name": "Nome da chave de acesso",
+      "enrollment_code": "Código de registo",
       "enroll_oneliner_docker": "Docker",
-      "enroll_oneliner_linux": "Linux",
-      "enrollment_code": "Código de registo"
+      "enroll_oneliner_linux": "Linux"
     },
     "placeholder": {
       "2fa_code": "Introduza o código",
@@ -936,11 +1158,6 @@
     "view_all_settings": "Ver todas as {{count}} configurações"
   },
   "instance": {
-    "type": {
-      "container": "Contêiner",
-      "pod": "Pod",
-      "static": "Estático"
-    },
     "enrollment": {
       "enrolled": "Registada",
       "pending": "Registo pendente",
@@ -948,6 +1165,11 @@
     },
     "tls": {
       "pinned": "TLS fixado"
+    },
+    "type": {
+      "container": "Contêiner",
+      "pod": "Pod",
+      "static": "Estático"
     }
   },
   "instances": {
@@ -955,7 +1177,32 @@
     "loading": "A carregar",
     "subtitle": "Faça a gestão das instâncias do BunkerWeb ligadas a esta interface: crie-as, teste a conectividade, recarregue-as, pare-as ou elimine-as.",
     "total": "Número total de instâncias",
-    "up": "Ativo"
+    "up": "Ativo",
+    "flash": {
+      "instances_deleted": "As instâncias {{instance}} foram eliminadas com sucesso.",
+      "instance_reloaded": "A instância {{instance}} foi recarregada com sucesso.",
+      "instance_stopped": "A instância {{instance}} foi parada com sucesso.",
+      "instance_deleted": "A instância {{instance}} foi eliminada com sucesso.",
+      "instance_does_not_have_reload_method": "A instância {{instance}} não tem um método de recarregamento.",
+      "instance_does_not_have_stop_method": "A instância {{instance}} não tem um método de paragem.",
+      "instance_does_not_exist": "A instância {{instance}} não existe.",
+      "couldn_t_delete_instance": "Não foi possível eliminar a instância: {{message}}",
+      "couldn_t_delete_instances": "Não foi possível eliminar as instâncias: {{message}}",
+      "could_not_found_one": "A instância selecionada não foi encontrada ou não é uma instância de UI/API.",
+      "could_not_found_other": "Todas as instâncias selecionadas não foram encontradas ou não são instâncias de UI/API.",
+      "instance_not_ui_api_instance_will": "A instância {{non_deletable_instance}} não é uma instância de UI/API e não será eliminada.",
+      "no_instance_selected": "Nenhuma instância selecionada.",
+      "instance_created_successfully": "Instância {{value}} criada com sucesso.",
+      "could_not_fetch_instances_api": "Não foi possível obter as instâncias a partir da API.",
+      "missing_instances_parameter_instances_ping": "Parâmetro instances em falta em /instances/ping.",
+      "missing_instances_parameter_instances_reload": "Parâmetro instances em falta em /instances/reload.",
+      "missing_instances_parameter_instances_stop": "Parâmetro instances em falta em /instances/stop.",
+      "missing_instances_parameter_instances_delete": "Parâmetro instances em falta em /instances/delete.",
+      "missing_instance_name_parameter_instances_new": "Parâmetro instance name em falta em /instances/new.",
+      "missing_instance_hostname_parameter_instances_new": "Parâmetro instance hostname em falta em /instances/new.",
+      "hostname_already_in_use": "O nome de anfitrião {{hostname}} já está em uso.",
+      "could_not_create_instance": "Não foi possível criar a instância: {{message}}"
+    }
   },
   "interval": {
     "day": "Diário",
@@ -978,11 +1225,20 @@
       "failed_last_run": "Falhou na última execução",
       "reload_required": "É necessário recarregar",
       "total": "Número total de tarefas"
+    },
+    "flash": {
+      "job_plugins_will_run_background_by": "Os plugins da tarefa serão executados em segundo plano pelo Scheduler.",
+      "jobs_plugins_will_run_background_by": "Os plugins das tarefas serão executados em segundo plano pelo Scheduler.",
+      "invalid_jobs_parameter_jobs_run": "Parâmetro jobs inválido em /jobs/run.",
+      "no_jobs_selected": "Nenhuma tarefa selecionada.",
+      "error_fetching_jobs": "Erro ao obter as tarefas: {{message}}",
+      "missing_jobs_parameter_jobs_run": "Parâmetro jobs em falta em /jobs/run."
     }
   },
   "legend": {
     "locked_settings_annotation": "Bloqueado ({{method}})",
-    "locked_settings_hint": "Configurações bloqueadas estão destacadas"
+    "locked_settings_hint": "Configurações bloqueadas estão destacadas",
+    "raw_setting_drafts": "No início de uma definição, prima # para alternar o rascunho ou Retrocesso para a ativar. Guarde para aplicar. Os rascunhos mantêm os seus valores enquanto os valores herdados ou predefinidos entram em vigor."
   },
   "link": {
     "back_to_login": "Voltar ao Login",
@@ -1000,17 +1256,33 @@
     "get_support": "Obter suporte"
   },
   "login": {
-    "title": "Iniciar Sessão",
-    "subtitle": "Iniciar sessão na sua conta do BunkerWeb",
-    "or_use_password": "ou utilize a sua palavra-passe",
     "notice_password_changed": "A sua palavra-passe foi alterada. Inicie sessão com a nova palavra-passe.",
     "notice_session_expired": "A sua sessão terminou antes de a alteração poder ser guardada, pelo que nada foi alterado. Inicie sessão e tente novamente.",
-    "notice_session_timeout": "A sua sessão foi terminada por ter atingido o limite de tempo. Inicie sessão para continuar."
+    "notice_session_timeout": "A sua sessão foi terminada por ter atingido o limite de tempo. Inicie sessão para continuar.",
+    "or_use_password": "ou utilize a sua palavra-passe",
+    "subtitle": "Iniciar sessão na sua conta do BunkerWeb",
+    "title": "Iniciar Sessão",
+    "flash": {
+      "invalid_username_password": "Nome de utilizador ou palavra-passe inválidos",
+      "couldn_t_log_please_try_again": "Não foi possível iniciar sessão, tente novamente"
+    }
   },
   "logs": {
+    "all_sources": "Todas as fontes (em direto)",
     "annotation_error": "Erro",
     "annotation_warning": "Aviso",
+    "collapse": "Recolher",
+    "expand": "Expandir",
     "filter_levels": "Níveis",
+    "grep_placeholder": "grep…",
+    "level_all": "Todos os registos",
+    "level_errors_only": "Apenas erros",
+    "level_security_only": "Apenas segurança",
+    "live_title": "Registos em direto",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "tailing_sources": "A acompanhar · {{count}} fontes",
+    "taller": "Mais alto",
     "letsencrypt_logs": "Registos do Let's Encrypt",
     "main_logs": "Registos principais",
     "new_lines_sr": "{{count}} novas linhas de registo",
@@ -1030,18 +1302,10 @@
     "showing_some": "a mostrar {{shown}} de {{total}}",
     "select_file_prompt": "Selecione um ficheiro de registo para visualizar o seu conteúdo",
     "trimmed_notice": "--- {{count}} linhas de log mais antigas foram removidas por desempenho ---",
-    "all_sources": "Todas as fontes (em direto)",
-    "collapse": "Recolher",
-    "expand": "Expandir",
-    "grep_placeholder": "grep…",
-    "level_all": "Todos os registos",
-    "level_errors_only": "Apenas erros",
-    "level_security_only": "Apenas segurança",
-    "live_title": "Registos em direto",
-    "pause": "Pausar",
-    "resume": "Retomar",
-    "tailing_sources": "A acompanhar · {{count}} fontes",
-    "taller": "Mais alto"
+    "flash": {
+      "no_such_file": "Ficheiro inexistente",
+      "invalid_file_path": "Caminho de ficheiro inválido"
+    }
   },
   "modal": {
     "body": {
@@ -1049,7 +1313,14 @@
       "confirm_cache_deletion_alert": "Tem a certeza de que pretende eliminar o ficheiro de cache selecionado?",
       "confirm_cache_deletion_alert_plural": "Tem a certeza de que pretende eliminar os ficheiros de cache selecionados?",
       "confirm_configs_conversion": "Tem a certeza de que pretende converter as configurações personalizadas selecionadas?",
-      "confirm_configs_conversion_to": "Tem a certeza de que quer converter as configurações personalizadas selecionadas para {{state}}?",
+      "confirm_service_conversion_online": "Tem a certeza de que pretende converter o serviço selecionado em online?",
+      "confirm_service_conversion_draft": "Tem a certeza de que pretende converter o serviço selecionado em rascunho?",
+      "confirm_services_conversion_online": "Tem a certeza de que pretende converter os serviços selecionados em online?",
+      "confirm_services_conversion_draft": "Tem a certeza de que pretende converter os serviços selecionados em rascunho?",
+      "confirm_config_conversion_online": "Tem a certeza de que pretende converter a configuração personalizada selecionada em online?",
+      "confirm_config_conversion_draft": "Tem a certeza de que pretende converter a configuração personalizada selecionada em rascunho?",
+      "confirm_configs_conversion_online": "Tem a certeza de que pretende converter as configurações personalizadas selecionadas em online?",
+      "confirm_configs_conversion_draft": "Tem a certeza de que pretende converter as configurações personalizadas selecionadas em rascunho?",
       "confirm_configs_deletion_alert": "Tem a certeza de que pretende eliminar a configuração personalizada selecionada?",
       "confirm_configs_deletion_alert_plural": "Tem a certeza de que pretende eliminar as configurações personalizadas selecionadas?",
       "confirm_conversion_confirmation": "Tem a certeza de que pretende converter os serviços selecionados?",
@@ -1057,6 +1328,8 @@
       "confirm_plugin_deletion": "Tem a certeza de que pretende eliminar o plugin selecionado?",
       "confirm_plugin_deletion_plural": "Tem a certeza de que pretende eliminar os plugins selecionados?",
       "confirm_template_deletion": "Tem a certeza de que deseja eliminar o modelo {{name}}?",
+      "confirm_templates_deletion_alert": "Tem a certeza de que pretende eliminar o modelo selecionado?",
+      "confirm_templates_deletion_alert_plural": "Tem a certeza de que pretende eliminar os modelos selecionados?",
       "confirmation_instance_deletion": "Tem a certeza de que pretende eliminar a instância selecionada?",
       "delete_confirmation_alert": "Tem a certeza de que pretende eliminar a instância selecionada?",
       "delete_confirmation_alert_plural": "Tem a certeza de que pretende eliminar as instâncias selecionadas?",
@@ -1075,6 +1348,8 @@
       "import_configs_warning": "As configurações personalizadas criadas pelo scheduler, autoconf ou templates são sempre preservadas. Somente configurações UI/API podem ser sobrescritas.",
       "import_services_dropzone": "Arraste e solte aqui o ficheiro de exportação de serviços ou clique para selecionar um ficheiro.",
       "import_services_warning": "A importação criará novos serviços da interface a partir do ficheiro exportado. Os serviços existentes serão ignorados. Também é aceite um ficheiro .zip exportado com configurações personalizadas.",
+      "import_template_help": "Um pacote de modelo exportado do BunkerWeb (.json), ou um arquivo (.zip, .tar.gz, .tar.xz) contendo uma pasta de modelo com o seu template.json e configurações. 1 MiB no máximo.",
+      "import_template_replace_warning": "Substituir um modelo altera todos os serviços que o utilizam na próxima geração de configuração. Modelos pertencentes a um plugin ou geridos fora da interface Web nunca são substituídos.",
       "instance_creation_alert": "Não é necessário indicar a porta nem o nome do servidor; os valores de `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` e `API_SERVER_NAME` serão utilizados para configurar a instância.",
       "next_step_in_case_of_issue": "Se encontrar problemas, você pode aceitar manualmente o certificado não seguro:",
       "recovery_codes_save_alert": "Guarde estes códigos de recuperação num local seguro, como um gestor de palavras-passe ou um cofre. Pode utilizá-los para aceder à sua conta caso perca o dispositivo de autenticação.",
@@ -1082,15 +1357,16 @@
       "reset_template_alert": "Tem a certeza de que pretende repor as configurações do modelo atual e as configurações personalizadas?",
       "services_conversion_confirmation": "Tem a certeza de que pretende converter os serviços selecionados?",
       "services_deletion_confirmation": "Tem a certeza de que pretende eliminar os serviços selecionados?",
+      "ban_filtered_confirmation": "Banir os IPs de todos os {{count}} relatórios correspondentes? Os alvos duplicados serão aplicados uma única vez.",
       "unban_confirmation_alert": "Tem a certeza de que pretende remover o bloqueio do endereço IP selecionado?",
       "unban_confirmation_alert_plural": "Tem a certeza de que pretende remover o bloqueio dos endereços IP selecionados?",
-      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:",
-      "ban_filtered_confirmation": "Banir os IPs de todos os {{count}} relatórios correspondentes? Os alvos duplicados serão aplicados uma única vez.",
       "unban_filtered_confirmation": "Tem a certeza de que pretende remover todos os {{count}} bloqueios correspondentes?",
+      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:",
       "update_filtered_duration_alert": "Selecione uma nova duração para todos os {{count}} bloqueios correspondentes:",
-      "enroll_description": "Inicie a instância com estas variáveis. Utiliza o código uma única vez no arranque e recebe a sua própria credencial.",
       "enroll_shown_once": "Este código só é mostrado uma vez. Copie-o agora — não poderá ser mostrado novamente.",
-      "confirm_service_mode_conversion": "Tem a certeza de que pretende alterar o modo declarado deste serviço?"
+      "enroll_description": "Inicie a instância com estas variáveis. Utiliza o código uma única vez no arranque e recebe a sua própria credencial.",
+      "confirm_service_mode_conversion": "Tem a certeza de que pretende alterar o modo declarado deste serviço?",
+      "service_deletion_confirmation": "Tem a certeza de que deseja eliminar o serviço selecionado?"
     },
     "button": {
       "fetch_global_settings_confirm": "Aplicar configurações globais",
@@ -1119,6 +1395,7 @@
       "full_url": "URL Completa",
       "import_configs": "Importar configurações personalizadas",
       "import_services": "Importar serviços",
+      "import_template": "Importar um modelo",
       "job_history": "Últimas 10 Execuções de Tarefas",
       "job_history_count": "Últimas {{count}} execuções da Tarefa",
       "multiselect_selected": "Itens selecionados",
@@ -1133,8 +1410,8 @@
   },
   "mode": {
     "advanced": "Avançado",
-    "easy": "Fácil",
     "compose": "Compor",
+    "easy": "Fácil",
     "raw": "Bruto"
   },
   "navbar": {
@@ -1147,7 +1424,14 @@
     "link": {
       "documentation": "Documentação"
     },
-    "version": "Versão"
+    "version": "Versão",
+    "aria": {
+      "toggle_navigation": "Alternar navegação",
+      "close_navigation": "Fechar navegação",
+      "help": "Ajuda",
+      "notifications": "Notificações",
+      "news": "Novidades"
+    }
   },
   "navigation": {
     "about": "Sobre",
@@ -1175,25 +1459,25 @@
     "plugins": "Extensões",
     "plugins_pages": "Páginas de plugins",
     "pro": "Pro",
+    "redirects": "Redirecionamentos",
     "reports": "Relatórios",
     "services": "Serviços",
     "support": "Suporte",
     "templates": "Modelos",
+    "upstreams": "Servidores upstream",
+    "workflows": "Fluxos de trabalho",
     "overview": "Visão geral",
     "configure": "Configurar",
     "operate": "Operar",
     "system": "Sistema",
     "edition_community": "Comunidade",
-    "redirects": "Redirecionamentos",
-    "upstreams": "Servidores upstream",
-    "workflows": "Fluxos de trabalho",
     "edition_pro": "Pro",
     "crowdsec": "CrowdSec"
   },
   "news": {
     "image_alt": "Imagem da notícia",
-    "slide": "Deslizar",
-    "posted_on": "Publicado em"
+    "posted_on": "Publicado em",
+    "slide": "Deslizar"
   },
   "newsletter": {
     "legal_agreement": "Quero subscrever a newsletter e li e concordo com a:",
@@ -1201,7 +1485,51 @@
   },
   "notice": {
     "already_subscribed": "Já subscrito",
-    "dismiss_mfa": "Não me lembrar novamente"
+    "dismiss_mfa": "Não me lembrar novamente",
+    "enable_mfa": "Ative a autenticação de dois fatores para proteger a sua conta <a href=\"{{url}}\">aqui</a>"
+  },
+  "onboarding": {
+    "dismiss": "Dispensar",
+    "error": "Não foi possível carregar o percurso.",
+    "hint": {
+      "bans": "Aqui estão os clientes que o BunkerWeb está a recusar. Cada linha mostra o motivo e quando o bloqueio expira.",
+      "home": "Este painel mostra o estado atual: instâncias ativas, serviços protegidos e tráfego tratado pelo BunkerWeb.",
+      "logs": "Registos em direto de cada instância, filtráveis por instância e gravidade.",
+      "reports": "Todos os pedidos bloqueados aparecem aqui. Abra um para ver que verificação de segurança o travou, e porquê.",
+      "title": "Visita rápida"
+    },
+    "item": {
+      "first_block": "Ver o BunkerWeb bloquear algo",
+      "https": "Pôr o HTTPS a funcionar",
+      "install": "Instalar o BunkerWeb num ou mais hosts",
+      "mfa": "Ativar MFA",
+      "pro": "Ativar o BunkerWeb PRO",
+      "read_bans": "Ver quem está banido, e até quando",
+      "read_home": "Ler no painel o que está a funcionar corretamente neste momento",
+      "read_logs": "Acompanhar os registos em direto em todas as instâncias",
+      "read_reports": "Perceber porque um pedido foi bloqueado",
+      "service": "Registe o seu primeiro serviço",
+      "workflow": "Associar um fluxo de segurança"
+    },
+    "item_hint": {
+      "first_block": "Os relatórios chegam aqui assim que o BunkerWeb bloqueia um pedido — envie um pedido malicioso e volte a verificar.",
+      "https": "Adicione ou gere um certificado aqui para que o seu serviço seja servido por HTTPS.",
+      "install": "Adicione uma instância aqui e depois guarde a sua primeira configuração para a colocar sob gestão.",
+      "mfa": "Abra o seu perfil a partir deste menu e depois ative a autenticação de dois fatores.",
+      "pro": "Introduza aqui a sua chave de licença PRO para desbloquear os plugins PRO e o suporte.",
+      "read_bans": "Cada linha aqui mostra um cliente banido, o motivo e quando o banimento expira.",
+      "read_home": "Este painel mostra, num relance, as instâncias ativas, os serviços servidos e o tráfego recente.",
+      "read_logs": "Os registos em direto de cada instância aparecem aqui, filtráveis por instância e gravidade.",
+      "read_reports": "Abra um relatório aqui para ver qual verificação de segurança o travou, e porquê.",
+      "service": "Crie um serviço aqui para indicar ao BunkerWeb qual aplicação proteger.",
+      "workflow": "Crie um workflow aqui para encadear verificações e respostas numa única regra."
+    },
+    "not_saved": "Não foi possível guardar.",
+    "pro_tips": "Dicas de PRO",
+    "restart": "Reiniciar o percurso",
+    "restart_help": "Mostrar novamente os passos iniciais na barra superior.",
+    "subtitle": "Alguns passos para o BunkerWeb proteger os seus serviços.",
+    "title": "Primeiros passos"
   },
   "pagination": {
     "page": "Página"
@@ -1224,17 +1552,67 @@
     },
     "type": {
       "all": "Todos",
-      "core": "Core",
+      "core": "Núcleo",
       "external": "Externo",
       "pro": "Pro",
       "ui": "UI"
     }
   },
   "plugins": {
-    "multivalue": {
-      "more_value": "mais valor",
-      "more_values": "mais valores",
-      "show_less": "Mostrar menos"
+    "flash": {
+      "invalid_archive": "O ficheiro não é um arquivo de plugin válido (.zip, .tar.gz ou .tar.xz).",
+      "invalid_plugin_id_must_between_4": "Id de plugin inválido (deve ter entre 4 e 64 carateres, apenas letras, números, sublinhados e hífenes)",
+      "couldn_t_install_catalogue": "Não foi possível instalar {{plugin_id}}: {{message}}",
+      "couldn_t_install_catalogue_2": "Não foi possível instalar {{plugin_id}}: {{e}}",
+      "install_did_not_complete": "A instalação de {{plugin_id}} não foi concluída: {{detail}}",
+      "refused_install": "Instalação de {{plugin_id}} recusada: {{problem}}",
+      "couldn_t_update_catalogue": "Não foi possível atualizar {{plugin_id}}: {{message}}",
+      "couldn_t_update_catalogue_2": "Não foi possível atualizar {{plugin_id}}: {{e}}",
+      "update_did_not_complete": "A atualização de {{plugin_id}} não foi concluída: {{detail}}",
+      "refused_update": "Atualização de {{plugin_id}} recusada: {{problem}}",
+      "archive_no_longer_matches_what_catalogue": "O ficheiro {{tag}} já não corresponde ao que o catálogo indicava. Nada foi instalado para {{plugin_id}}.",
+      "couldn_t_download": "Não foi possível transferir {{plugin_id}}: {{e}}",
+      "refused_download": "Recusada a transferência de {{plugin_id}}: {{e}}",
+      "plugin_management_restricted_administrators": "A gestão de plugins está restrita a administradores",
+      "community_catalogue_disabled": "O catálogo da comunidade está desativado",
+      "no_plugin_data_upload": "Nenhum dado de plugin para carregar",
+      "couldn_t_update_ui_plugins_via": "Não foi possível atualizar os plugins de UI através da API: {{e}}",
+      "plugins_uploaded_successfully_2": "Plugins carregados com sucesso",
+      "plugin_upload_error": "Erro ao carregar o plugin ({{value}}): {{value2}}",
+      "plugins_uploaded_successfully": "Plugins carregados com sucesso: {{value}}",
+      "plugin_already_exists": "O plugin {{plugin}} já existe",
+      "plugin_named_already_exists": "Já existe um plugin com o nome {{folder_name}}",
+      "file_plugin_json_missing_one_more": "Ao ficheiro plugin.json falta uma ou mais das seguintes chaves: {{value}} ({{value2}})",
+      "file_plugin_json_not_valid_line": "O ficheiro plugin.json em {{file}} não é válido ({{msg}}: linha {{lineno}} coluna {{colno}} (carácter {{pos}})) ({{value}})",
+      "not_valid_plugin_plugin_json_file": "{{file}} não é um plugin válido (o ficheiro plugin.json está em falta) ({{value}})",
+      "invalid_plugin_name_can_only_contain": "Nome de plugin inválido para {{temp_folder_name}}. (Só pode conter números, letras, sublinhados e hífenes (mín. 4 carateres e máx. 64))",
+      "check_logs_more_details": "{{message}}, consulte os registos para mais detalhes",
+      "please_upload_new_plugins_reload_plugins": "Carregue novos plugins para recarregar os plugins",
+      "couldn_t_update_plugin_2": "Não foi possível atualizar o plugin {{plugin}}: {{e}}",
+      "couldn_t_update_plugin": "Não foi possível atualizar o plugin {{plugin}}: {{message}}",
+      "couldn_t_delete_plugin": "Não foi possível eliminar o plugin {{plugin}}: {{message}}",
+      "deleted_plugin_successfully": "Plugin {{plugin}} eliminado com sucesso",
+      "plugin_enabled": "O plugin {{plugin}} foi ativado com sucesso.",
+      "plugin_disabled": "O plugin {{plugin}} foi desativado com sucesso.",
+      "missing_id_version_parameter_plugins_catalog": "Parâmetro id ou version em falta em /plugins/catalog/update.",
+      "missing_id_parameter_plugins_catalog_install": "Parâmetro id em falta em /plugins/catalog/install.",
+      "missing_csrf_token_parameter_plugins": "Parâmetro csrf_token em falta em /plugins.",
+      "missing_plugin_enabled_parameter_plugins_enable": "Parâmetro plugin ou enabled em falta em /plugins/enable.",
+      "missing_plugins_parameter_plugins_delete": "Parâmetro plugins em falta em /plugins/delete.",
+      "plugin_not_found": "Plugin com o id {{plugin}} não encontrado",
+      "couldn_t_delete_plugin_in_database": "Não foi possível eliminar o plugin {{plugin}} na base de dados: {{message}}",
+      "already_installed": "Já existe um plugin instalado com o id {{plugin_id}}",
+      "installed_successfully": "Plugin {{plugin_id}} instalado com sucesso",
+      "catalogue_entry_changed": "A entrada do catálogo para {{plugin_id}} mudou desde que a atualização foi confirmada; reveja novamente a atualização",
+      "catalogue_entry_predates_updates": "A entrada do catálogo em cache para {{plugin_id}} é anterior às atualizações; aguarde a próxima atualização",
+      "not_installed_install_from_catalogue": "O plugin {{plugin_id}} não está instalado; instale-o a partir do catálogo",
+      "managed_outside_catalogue": "O plugin {{plugin_id}} é gerido fora do catálogo e não pode ser atualizado a partir dele",
+      "managed_outside_catalogue_core": "O plugin {{plugin_id}} é um plugin core gerido fora do catálogo e não pode ser atualizado a partir dele",
+      "managed_outside_catalogue_external": "O plugin {{plugin_id}} é um plugin externo gerido fora do catálogo e não pode ser atualizado a partir dele",
+      "managed_outside_catalogue_pro": "O plugin {{plugin_id}} é um plugin pro gerido fora do catálogo e não pode ser atualizado a partir dele",
+      "managed_outside_catalogue_ui": "O plugin {{plugin_id}} é um plugin ui gerido fora do catálogo e não pode ser atualizado a partir dele",
+      "already_at_version": "O plugin {{plugin_id}} já está na versão {{version}}",
+      "updated_to_version": "Plugin {{plugin_id}} atualizado para a versão {{version}}"
     },
     "marketplace": {
       "active": "Ativo",
@@ -1249,6 +1627,11 @@
       "tab_disabled": "Desativado",
       "tab_enabled": "Ativado"
     },
+    "multivalue": {
+      "more_value": "mais valor",
+      "more_values": "mais valores",
+      "show_less": "Mostrar menos"
+    },
     "catalog": {
       "tab": "Disponível",
       "install": "Instalar",
@@ -1259,7 +1642,25 @@
       "stale": "O catálogo não foi atualizado recentemente, pelo que a instalação está desativada até voltar a estar atualizado.",
       "trust_notice": "Os elementos da comunidade são lidos a partir dos repositórios que a organização BunkerWeb publica no GitHub, através de TLS, e o que é instalado é verificado em relação ao que constava na lista — mas nada aqui está assinado criptograficamente. Uma extensão instalada executa código com todos os privilégios do BunkerWeb.",
       "incompatible_declared": "Esta versão suporta o BunkerWeb {{supported}}; esta é a {{current}}",
-      "release": "Ler a partir da versão {{tag}}"
+      "version_unknown": "Não foi possível ler a versão do BunkerWeb em execução ({{current}}), pelo que a compatibilidade desta versão não pode ser verificada",
+      "release": "Ler a partir da versão {{tag}}",
+      "state_installed": "Instalado (versão {{version}})",
+      "state_update": "Atualização disponível: a versão {{installed}} está instalada, {{version}} está listada",
+      "state_managed": "Instalado fora do catálogo; atualize-o ou remova-o a partir do local onde foi instalado",
+      "state_managed_core": "Instalado fora do catálogo como plugin core; atualize-o ou remova-o a partir do local onde foi instalado",
+      "state_managed_external": "Instalado fora do catálogo como plugin externo; atualize-o ou remova-o a partir do local onde foi instalado",
+      "state_managed_pro": "Instalado fora do catálogo como plugin pro; atualize-o ou remova-o a partir do local onde foi instalado",
+      "state_managed_ui": "Instalado fora do catálogo como plugin ui; atualize-o ou remova-o a partir do local onde foi instalado",
+      "update": "Atualizar",
+      "remove": "Remover",
+      "update_title": "Atualizar um plugin da comunidade",
+      "update_confirm": "Isto substitui o plugin instalado {{name}} ({{id}}, versão {{installed}}) pela versão {{version}} do catálogo. É substituído mesmo que tenha sido carregado manualmente em vez de instalado a partir do catálogo.",
+      "update_removed_settings": "A versão {{version}} deixou de declarar estas configurações. São eliminadas, juntamente com cada valor definido para elas nas configurações globais, nos serviços e nos modelos:",
+      "update_no_removed_settings": "Nenhuma configuração é removida por esta atualização.",
+      "update_preview_unknown": "As configurações que esta atualização removeria não podem ser listadas neste momento, pelo que a atualização está desativada até à próxima atualização do catálogo.",
+      "flash": {
+        "version_unreadable": "Não foi possível ler a versão do BunkerWeb ({{current}}), pelo que a compatibilidade de {{id}} não pode ser verificada; nada foi instalado"
+      }
     }
   },
   "pro": {
@@ -1302,13 +1703,33 @@
       "draft_services_count": "Serviços em rascunho: {{draft_services}}",
       "expired": "EXPIRADO",
       "free_version": "Versão GRATUITA",
+      "invalid": "CHAVE INVÁLIDA",
+      "invalid_key": "O servidor de licenças rejeitou a chave de licença guardada. Verifique-a, ou remova-a em Configurações globais → Pro.",
       "overlapped": "SOBREPOSTO",
+      "pending_key": "A chave de licença ainda não foi verificada. O Scheduler verifica-a pouco depois de ser guardada.",
       "pro_version": "Versão PRO",
       "services_count": "Serviços online: {{online_services}} / serviços PRO: {{pro_services}}",
       "suspended": "SUSPENSO",
       "title": "Estado"
     },
-    "title": "Licença Pro"
+    "title": "Licença Pro",
+    "flash": {
+      "web_ui_will_reload_pro_plugins": "A interface web irá recarregar em breve os seus plugins PRO.",
+      "forced_update_pro_plugins_has_scheduled": "Foi agendada uma atualização forçada dos plugins PRO.",
+      "new_check_pro_plugins_has_scheduled": "Foi agendada uma nova verificação dos plugins PRO.",
+      "checking_license_key": "A verificar a chave de licença.",
+      "scheduler_will_attempt_apply_changes_download": "O Scheduler tentará aplicar as alterações e transferir os plugins PRO.",
+      "license_key_same_current_one": "A chave de licença é igual à atual.",
+      "invalid_license_key": "Chave de licença inválida",
+      "missing_license_key_parameter_pro_key": "Parâmetro de chave de licença em falta em /pro/key.",
+      "license_key_updated_successfully": "A chave de licença PRO foi atualizada com sucesso.",
+      "license_key_not_updated_refused": "A chave de licença PRO não foi atualizada: o valor foi recusado."
+    },
+    "trial": {
+      "title": "Teste gratuito",
+      "description": "Experimente o <span class=\"text-primary\">BunkerWeb PRO</span> gratuitamente durante <strong>30 dias</strong>.",
+      "cta": "Iniciar teste gratuito"
+    }
   },
   "profile": {
     "2fa": {
@@ -1370,6 +1791,50 @@
       "profile": "Perfil",
       "security": "Segurança",
       "sessions": "Sessões"
+    },
+    "flash": {
+      "passkey_has_successfully_deleted": "A chave de acesso foi eliminada com sucesso.",
+      "couldn_t_delete_passkey": "Não foi possível eliminar a chave de acesso: {{message}}",
+      "current_password_incorrect": "A palavra-passe atual está incorreta.",
+      "passkey_has_successfully_renamed": "A chave de acesso foi renomeada com sucesso.",
+      "couldn_t_rename_passkey": "Não foi possível renomear a chave de acesso: {{message}}",
+      "passkey_name_cannot_empty": "O nome da chave de acesso não pode estar vazio.",
+      "passkey_has_successfully_registered": "A chave de acesso foi registada com sucesso.",
+      "other_sessions_have_successfully_wiped": "As outras sessões foram apagadas com sucesso.",
+      "couldn_t_wipe_other_sessions": "Não foi possível apagar as outras sessões: {{message}}",
+      "couldn_t_revoke_other_sessions": "Não foi possível revogar as outras sessões: {{err}}",
+      "password_changed_but_other_sessions_could": "A sua palavra-passe foi alterada, mas não foi possível revogar as outras sessões. Utilize \"Terminar as outras sessões\" abaixo e verifique a lista de sessões ativas.",
+      "profile_has_successfully_updated": "O perfil foi atualizado com sucesso.",
+      "couldn_t_update_user": "Não foi possível atualizar o utilizador {{value}}: {{message}}",
+      "no_fields_updated": "Nenhum campo foi atualizado.",
+      "theme_invalid": "O tema é inválido.",
+      "new_password_same_current_one": "A nova palavra-passe é igual à atual.",
+      "new_password_too_long_must_not": "A nova palavra-passe é demasiado longa. Não deve exceder {{MAX_PASSWORD_BYTES}} bytes (limite rígido do bcrypt); carateres acentuados ou emojis contam como vários bytes cada.",
+      "new_password_not_strong_enough_must": "A nova palavra-passe não é suficientemente forte. Deve conter pelo menos 8 carateres, incluindo pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 carácter especial (#@?!$%^&*-).",
+      "passwords_do_not_match_confirm_password": "As palavras-passe não correspondem à confirmação da palavra-passe.",
+      "username_email_are_same_current_ones": "O nome de utilizador e o e-mail são iguais aos atuais.",
+      "username_too_long_must_less_than": "O nome de utilizador é demasiado longo. Deve ter menos de 256 carateres.",
+      "email_too_long_must_less_than": "O e-mail é demasiado longo. Deve ter menos de 256 carateres.",
+      "two_factor_authentication_has_successfully_enabled": "A autenticação de dois fatores foi ativada com sucesso.",
+      "couldn_t_enable_two_factor_authentication": "Não foi possível ativar a autenticação de dois fatores: {{message}}",
+      "totp_token_invalid": "O token TOTP é inválido.",
+      "two_factor_enrolment_expired_reload_page": "O registo de autenticação de dois fatores expirou. Recarregue a página e digitalize o novo código QR.",
+      "two_factor_authentication_already_enabled": "A autenticação de dois fatores já está ativada.",
+      "two_factor_authentication_has_successfully_disabled": "A autenticação de dois fatores foi desativada com sucesso.",
+      "couldn_t_disable_two_factor_authentication": "Não foi possível desativar a autenticação de dois fatores: {{message}}",
+      "two_factor_authentication_not_enabled": "A autenticação de dois fatores não está ativada.",
+      "recovery_codes_have_successfully_refreshed_old": "Os códigos de recuperação foram atualizados com sucesso. Os antigos deixaram de ser válidos.",
+      "couldn_t_refresh_recovery_codes": "Não foi possível atualizar os códigos de recuperação: {{message}}",
+      "missing_parameters_profile_webauthn_delete": "Parâmetros em falta em /profile/webauthn/delete.",
+      "missing_parameters_profile_webauthn_rename": "Parâmetros em falta em /profile/webauthn/rename.",
+      "missing_current_password_parameter_profile_wipe": "Parâmetro current password em falta em /profile/wipe-other-sessions.",
+      "missing_new_password_confirm_parameter_profile": "Parâmetro new password confirm em falta em /profile/edit.",
+      "missing_current_password_parameter_profile_edit": "Parâmetro current password em falta em /profile/edit.",
+      "missing_email_parameter_profile_edit": "Parâmetro email em falta em /profile/edit.",
+      "missing_totp_token_parameter_profile_totp": "Parâmetro totp token em falta em /profile/totp-enable.",
+      "missing_current_password_parameter_profile_totp_3": "Parâmetro current password em falta em /profile/totp-enable.",
+      "missing_current_password_parameter_profile_totp_2": "Parâmetro current password em falta em /profile/totp-disable.",
+      "missing_current_password_parameter_profile_totp": "Parâmetro current password em falta em /profile/totp-refresh."
     }
   },
   "range_picker": {
@@ -1446,10 +1911,10 @@
       "unique_offenders": "Principais infratores"
     },
     "crowdsec": {
-      "source_lapi": "Local API decision",
-      "source_appsec": "AppSec inspection",
-      "source_failure_policy": "AppSec failure policy",
-      "technical_details": "Technical details"
+      "source_lapi": "Decisão da API local",
+      "source_appsec": "Inspeção do AppSec",
+      "source_failure_policy": "Política de falha do AppSec",
+      "technical_details": "Detalhes técnicos"
     }
   },
   "scope": {
@@ -1474,6 +1939,7 @@
     "data": "Dados",
     "date": "Data",
     "empty": "Nenhum painel de pesquisa disponível",
+    "search_title": "Pesquisar: {name}",
     "end_date": "Data Final",
     "first_seen": "Visto pela Primeira Vez",
     "future_30d": "Mais de 30 dias",
@@ -1524,6 +1990,80 @@
   },
   "services": {
     "draft": "Serviços em rascunho",
+    "flash": {
+      "resource_attach_failed": "Não foi possível associar: {{error}}",
+      "resource_attach_refused": "Não é possível associar: {{error}}",
+      "resource_attached": "Recurso associado a {{service}}.",
+      "resource_detach_failed": "Não foi possível desassociar: {{error}}",
+      "resource_detach_refused": "Não é possível desassociar: {{error}}",
+      "resource_detached": "Recurso desassociado de {{service}}.",
+      "resource_unknown_family": "Tipo de recurso desconhecido.",
+      "server_name_missing": "O serviço não foi criado porque o nome do servidor não foi fornecido.",
+      "failed_import_service": "Falha ao importar o serviço: {{names}}",
+      "failed_import_services": "Falha ao importar os serviços: {{names}}",
+      "skipped_existing_service": "Serviço existente ignorado: {{names}}",
+      "skipped_existing_services": "Serviços existentes ignorados: {{names}}",
+      "imported_service": "Serviço importado: {{names}}",
+      "imported_services": "Serviços importados: {{names}}",
+      "no_services_custom_configurations_found_import": "Não foram encontrados serviços ou configurações personalizadas no ficheiro de importação.",
+      "invalid_file_encoding_please_upload_utf": "Codificação de ficheiro inválida. Carregue um ficheiro em UTF-8.",
+      "uploaded_file_not_valid_zip_archive": "O ficheiro carregado não é um arquivo zip válido.",
+      "invalid_encoding_configs_export_json_inside": "Codificação inválida para configs_export.json dentro do ficheiro.",
+      "invalid_encoding_services_export_env_inside": "Codificação inválida para services_export.env dentro do ficheiro.",
+      "refusing_extract_archive_uncompressed_size_exceeds": "Extração do ficheiro recusada: o tamanho descomprimido excede o limite de segurança.",
+      "uploaded_archive_must_contain_services_export": "O ficheiro carregado deve conter services_export.env e/ou configs_export.json.",
+      "no_services_file_uploaded": "Nenhum ficheiro de serviços carregado.",
+      "could_not_fetch_custom_configurations_api": "Não foi possível obter as configurações personalizadas a partir da API.",
+      "no_services_export": "Nenhum serviço para exportar.",
+      "no_services_selected": "Nenhum serviço selecionado.",
+      "could_not_fetch_custom_configs_api": "Não foi possível obter as configurações personalizadas a partir da API.",
+      "service_not_found": "Serviço não encontrado",
+      "could_not_fetch_service_api": "Não foi possível obter o serviço a partir da API.",
+      "template_not_found": "Modelo não encontrado",
+      "could_not_fetch_templates_api": "Não foi possível obter os modelos a partir da API.",
+      "plugin_does_not_apply_default_server": "Este plugin não se aplica ao servidor predefinido",
+      "could_not_fetch_attached_upstreams": "Não foi possível obter os servidores upstream anexados a este serviço.",
+      "could_not_fetch_attached_certificates": "Não foi possível obter os certificados anexados a este serviço.",
+      "could_not_fetch_attached_redirects": "Não foi possível obter os redirecionamentos anexados a este serviço.",
+      "could_not_fetch_attached_workflows": "Não foi possível obter os fluxos de trabalho anexados a este serviço.",
+      "could_not_fetch_service_api_2": "Não foi possível obter o serviço {{service}} a partir da API.",
+      "could_not_fetch_service_cloning": "Não foi possível obter o serviço {{clone}} para clonagem.",
+      "could_not_fetch_services_configuration": "Não foi possível obter a configuração dos serviços.",
+      "custom_configs_not_saved_because_rename": "As configurações personalizadas não foram guardadas porque a mudança de nome foi recusada.",
+      "service_not_saved_every_changed_value": "O serviço {{service}} não foi guardado: todos os valores alterados foram recusados.",
+      "service_not_edited_because_no_values": "O serviço {{service}} não foi editado porque nenhum valor foi alterado.",
+      "service_not_edited_because_no_values_or_configs": "O serviço {{service}} não foi editado porque nenhum valor nem configuração personalizada foi alterado.",
+      "template_custom_config_cannot_edited_because": "A configuração personalizada do modelo {{key}} não pode ser editada porque foi criada através do método {{value}}.",
+      "service_already_exists": "O serviço {{service}} já existe.",
+      "service_deleted": "Serviço eliminado: {{services}}",
+      "services_deleted": "Serviços eliminados: {{services}}",
+      "failed_delete_drafted_autoconf_service": "Falha ao eliminar o serviço autoconf em rascunho {{service_id}}: {{message}}",
+      "all_selected_services_could_not_found_2": "Todos os serviços selecionados não foram encontrados ou não são serviços de UI/API.",
+      "service_will_not_deleted": "O serviço {{non_deletable_service}} não é um serviço de UI/API e não será eliminado.",
+      "service_will_not_deleted_reserved": "O serviço {{non_deletable_service}} é o servidor predefinido reservado, que responde aos pedidos que não correspondem a nenhum serviço, e não será eliminado.",
+      "service_will_not_deleted_autoconf": "O serviço {{non_deletable_service}} é um serviço autoconf online (converta-o primeiro em rascunho) e não será eliminado.",
+      "service_now_declared_standard": "O serviço {{service}} está agora declarado como \"padrão\".",
+      "service_now_declared_redirect_only": "O serviço {{service}} está agora declarado como \"apenas redirecionamento\".",
+      "invalid_mode_parameter": "Parâmetro mode inválido.",
+      "do_not_have_permission_change_service": "Não tem permissão para alterar o modo de um serviço",
+      "converted_services_online": "Convertidos em serviços \"online\": {{names}}",
+      "converted_services_draft": "Convertidos em serviços \"rascunho\": {{names}}",
+      "all_selected_services_could_not_found": "Todos os serviços selecionados não foram encontrados, não são serviços de UI/API ou já foram convertidos.",
+      "service_already_online_will_not_converted": "O serviço {{non_convertible_service}} já é um serviço online e não será convertido.",
+      "service_already_draft_will_not_converted": "O serviço {{non_convertible_service}} já é um serviço em rascunho e não será convertido.",
+      "service_not_ui_api_service_will": "O serviço {{non_editable_service}} não é um serviço de UI/API e não será convertido.",
+      "could_not_fetch_services_api": "Não foi possível obter os serviços a partir da API.",
+      "missing_services_parameter_services_delete": "Parâmetro services em falta em /services/delete.",
+      "missing_mode_parameter_services_mode": "Parâmetro mode em falta em /services/{{service}}/mode.",
+      "missing_convert_parameter_services_convert": "Parâmetro convert_to em falta em /services/convert.",
+      "missing_services_parameter_services_convert": "Parâmetro services em falta em /services/convert.",
+      "default_server_reserved": "{{default_server_id}} é o servidor predefinido reservado: responde a pedidos que não correspondem a nenhum serviço configurado (nomes de anfitrião desconhecidos, acesso por IP direto), por isso não pode ser criado, renomeado ou eliminado.",
+      "configuration_created": "A configuração do serviço {{service}} foi criada.",
+      "configuration_saved": "A configuração do serviço {{service}} foi guardada.",
+      "configuration_created_with_refusals": "A configuração do serviço {{service}} foi criada, mas {{refused_count}} valores foram recusados.",
+      "configuration_saved_with_refusals": "A configuração do serviço {{service}} foi guardada, mas {{refused_count}} valores foram recusados.",
+      "default_server_type_refused": "O SERVER_TYPE não pode ser definido no serviço reservado {{default_server_id}}: não tem um bloco de servidor próprio para alternar. A sua parte HTTP é o próprio bloco de servidor predefinido, e a sua parte stream é a definição DEFAULT_SERVER_STREAM_PORTS."
+    },
     "online": "Online",
     "subtitle": "Gerir os serviços multi-site protegidos pelo BunkerWeb: crie, edite, converta para rascunho ou elimine-os.",
     "total": "Serviços totais",
@@ -1605,8 +2145,8 @@
         "title": "Ordem de decisão",
         "description": "Por predefinição, todos os pedidos percorrem estas quatro verificações por esta ordem, e a primeira que decidir, decide. Uma correspondência na lista branca termina imediatamente o percurso: o pedido é permitido e as três verificações seguintes nunca são executadas. A ordem em si é configurável por serviço, através de PLUGINS_ORDER_ACCESS e PLUGINS_ORDER_PREREAD.",
         "current": "página atual",
-        "on": "On",
-        "off": "Off"
+        "on": "Ativado",
+        "off": "Desativado"
       },
       "stage": {
         "whitelist": "Lista branca",
@@ -1673,7 +2213,7 @@
       "rules": {
         "title": "Regras compostas",
         "description": "Uma regra só corresponde quando todos os seus termos correspondem. As regras são verificadas juntamente com as listas acima, e um cliente que corresponda a qualquer uma delas corresponde a esta fase. Os valores podem ser um grupo de recursos, escrito @nome.",
-        "rule": "Rule",
+        "rule": "Regra",
         "add_term": "Adicionar um termo",
         "remove_term": "Remover este termo",
         "negate": "NOT",
@@ -1691,7 +2231,7 @@
     },
     "modsecurity": {
       "engine": {
-        "title": "Engine",
+        "title": "Motor",
         "description": "Se o ModSecurity está ou não carregado, e o que faz perante uma correspondência de regra."
       },
       "crs": {
@@ -1834,10 +2374,27 @@
       "content_entered": "Carateres introduzidos: {{count}}",
       "loaded_from": "Carregado a partir de {{name}} · carateres: {{count}}",
       "read_error": "Erro ao ler o ficheiro"
+    },
+    "flash": {
+      "couldn_t_edit_new_service": "Não foi possível editar o novo serviço: {{operation}}",
+      "couldn_t_create_new_service": "Não foi possível criar o novo serviço: {{operation}}",
+      "when_using_custom_ssl_certificate_must": "Ao utilizar um certificado SSL personalizado, deve definir tanto o certificado como a chave.",
+      "hostname_not_valid": "O nome do host não é válido.",
+      "hostname_already_use": "O nome do host {{value}} já está em uso.",
+      "admin_user_created_successfully": "O utilizador administrador foi criado com sucesso",
+      "couldn_t_create_admin_user": "Não foi possível criar o utilizador administrador: {{message}}",
+      "admin_password_too_long_must_not": "A palavra-passe de administrador é demasiado longa. Não deve exceder {{MAX_PASSWORD_BYTES}} bytes (limite rígido do bcrypt); carateres acentuados ou emojis contam como vários bytes cada.",
+      "admin_password_not_strong_enough_must": "A palavra-passe de administrador não é suficientemente forte. Deve conter pelo menos 8 carateres, incluindo pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 carácter especial (#@?!$%^&*-).",
+      "passwords_do_not_match": "As palavras-passe não coincidem.",
+      "admin_email_too_long_must_less": "O e-mail do administrador é demasiado longo. Deve ter menos de 256 carateres.",
+      "admin_username_too_long_must_less": "O nome de utilizador administrador é demasiado longo. Deve ter menos de 256 carateres.",
+      "missing_either_one_following_parameters": "Falta um dos seguintes parâmetros: {{value}}."
     }
   },
   "status": {
+    "active": "Ativo",
     "admin_user_exists": "Já existe um utilizador administrador. Avance para o passo seguinte.",
+    "all_valid": "Todos válidos",
     "blog_connection_fail": "Não foi possível conectar ao blog para notícias.",
     "default_server": "servidor padrão",
     "done": "Completado",
@@ -1848,7 +2405,11 @@
     "error_loading_data": "Não foi possível carregar os dados",
     "error_loading_template": "Não foi possível carregar os dados do modelo.",
     "error_saving_template": "Ocorreu um erro ao guardar o modelo.",
+    "expired": "Vencido",
+    "expiring": "A expirar",
     "failed": "Falhou",
+    "failover": "Failover",
+    "inactive": "Inativo",
     "invalid_json_payload": "Payload JSON inválido.",
     "loading": "A carregar...",
     "loading_bans": "A carregar bloqueios...",
@@ -1872,10 +2433,12 @@
     "no_item": "Nenhum Item",
     "no_notifications": "Nenhuma notificação para mostrar.",
     "no_search_results": "Nenhum item encontrado.",
+    "no_settings": "Este plugin não tem definições para este âmbito.",
     "no_steps": "Nenhum Passo Disponível",
     "no_steps_description": "Este modelo não tem passos para configurar.",
-    "not_applicable": "N/A",
+    "not_applicable": "N/D",
     "online": "Online",
+    "optional": "Opcional",
     "partial": "Parcial",
     "pending": "Em espera",
     "pinging_instances": "A testar a conectividade das instâncias, aguarde...",
@@ -1894,18 +2457,13 @@
     "template_in_use_description": "Não são permitidas alterações fora do modelo atual. Por favor, faça as alterações utilizando o modelo atual ou mude para o modo Avançado/Bruto.",
     "unique_server_name": "Nome do Servidor Único",
     "up": "Ativo",
-    "active": "Ativo",
-    "all_valid": "Todos válidos",
-    "expired": "Vencido",
-    "expiring": "A expirar",
-    "no_settings": "Este plugin não tem definições para este âmbito.",
     "yes": "Sim",
-    "optional": "Opcional",
     "no_file_selected": "Nenhum ficheiro selecionado",
     "no_url_available": "Nenhum URL disponível",
     "unknown": "Desconhecido",
     "deferred": "Diferido",
-    "deferred_tooltip": "Diferido — a aguardar que uma instância arranque: {{reason}}"
+    "deferred_tooltip": "Diferido — a aguardar que uma instância arranque: {{reason}}",
+    "uploaded": "Carregado"
   },
   "step": {
     "next": "Próximo",
@@ -2009,6 +2567,7 @@
       "error_missing_endpoint": "Não foi possível determinar o ponto de extremidade de submissão.",
       "heading_create": "Criar modelo",
       "heading_edit": "Editar modelo {{id}}",
+      "heading_view": "Ver modelo {{id}}",
       "label_config_data": "Dados",
       "label_config_name": "Nome",
       "label_config_order": "Ordem",
@@ -2035,7 +2594,8 @@
       "multiselect_placeholder": "Selecionar opções",
       "multiselect_summary": "Itens selecionados: {{count}}",
       "multivalue_add": "Adicionar valor",
-      "multivalue_helper": "Um valor por linha.{{separatorNote}}",
+      "multivalue_helper": "Um valor por linha.",
+      "multivalue_helper_joined": "Um valor por linha. Será unido com «{{separator}}».",
       "panel_overview": "Visão geral",
       "panel_overview_help": "Acompanhe informações importantes e navegue entre as secções.",
       "placeholder_config_data": "Dados",
@@ -2090,6 +2650,7 @@
       "raw_validation_steps_required": "Um modelo deve conter pelo menos um passo.",
       "readonly_db": "A base de dados está atualmente em modo só de leitura. Os modelos não podem ser alterados.",
       "readonly_method": "Este modelo foi criado pelo processo {{method}} e não pode ser editado a partir da interface do utilizador.",
+      "readonly_method_plugin": "Este modelo foi criado pelo plugin {{plugin}} e não pode ser editado a partir da interface Web.",
       "readonly_title": "Só de leitura",
       "readonly_user": "Tem permissões apenas de leitura. Contacte um administrador para solicitar acesso de escrita.",
       "select_config_placeholder": "Selecione uma configuração",
@@ -2148,6 +2709,7 @@
       "validation_config_type_multisite": "O tipo de configuração deve ser um dos tipos compatíveis com multisite.",
       "validation_config_type_required": "O tipo de configuração é obrigatório quando uma configuração é definida.",
       "validation_configs_unique": "Cada nome de configuração deve ser único.",
+      "validation_id_invalid": "O ID do modelo só pode conter letras, dígitos, pontos, hífenes e sublinhados, e tem de começar com uma letra ou um dígito.",
       "validation_id_required": "O ID do modelo é obrigatório.",
       "validation_setting_key": "Cada definição deve ter uma chave.",
       "validation_settings_unique": "Cada chave de definição deve ser única.",
@@ -2157,7 +2719,6 @@
     "none": "Sem Modelo"
   },
   "templates": {
-    "subtitle": "Modelos de configuração reutilizáveis para os seus serviços — agrupe as configurações, os passos e as configurações personalizadas, e depois crie, clone ou elimine-os.",
     "gallery": {
       "delete_selected": "Eliminar selecionados",
       "empty_message": "Crie o primeiro modelo para agrupar definições, passos e configurações personalizadas para reutilização.",
@@ -2172,6 +2733,7 @@
       "medium": "Segurança média",
       "ui": "Interface Web"
     },
+    "subtitle": "Modelos de configuração reutilizáveis para os seus serviços — agrupe as configurações, os passos e as configurações personalizadas, e depois crie, clone ou elimine-os.",
     "tag": {
       "config": "Configuração personalizada: {{name}}",
       "feature": "Funcionalidade integrada: {{name}}",
@@ -2182,13 +2744,62 @@
       "heading": "Modelos disponíveis",
       "subheading": "Modelos de serviço selecionados publicados pela organização BunkerWeb.",
       "layer_warning": "Um modelo é uma camada: adicionar um a um serviço que já usa modelos altera a sua configuração efetiva.",
-      "no_compat_notice": "Este catálogo não declara compatibilidade com o BunkerWeb. Um modelo é recusado no momento da instalação se indicar uma definição que este BunkerWeb não possui."
+      "no_compat_notice": "Este catálogo não declara compatibilidade com o BunkerWeb. Um modelo é recusado no momento da instalação se indicar uma definição que este BunkerWeb não possui.",
+      "state_installed": "Instalado, igual ao catálogo",
+      "state_update": "Instalado, a versão do catálogo difere",
+      "state_managed": "Instalado e gerido por {{owner}}: o catálogo não o altera",
+      "update_preview_unknown": "As alterações poderão ser verificadas após a próxima atualização do catálogo.",
+      "update_title": "Atualizar um modelo da comunidade",
+      "update_confirm": "Substituir o modelo {{id}} pela sua versão da versão {{tag}} do catálogo. Estas alterações aplicam-se ao modelo:",
+      "update_services": "Estes serviços utilizam este modelo. Na sua próxima geração de configuração, cada configuração que não tenham definido eles próprios assume o novo valor:",
+      "update_no_services": "Nenhum serviço utiliza ainda este modelo.",
+      "update_failed": "Não foi possível atualizar o modelo.",
+      "update_not_installed": "O modelo {{template}} não está instalado: instale-o em vez disso",
+      "update_managed": "O modelo {{template}} é gerido por {{owner}}: o catálogo não o altera",
+      "update_up_to_date": "O modelo {{template}} já corresponde ao catálogo",
+      "update_changed": "O modelo {{template}} ou o catálogo mudaram desde a pré-visualização. Recarregue a página e reveja as alterações novamente.",
+      "diff": {
+        "name": "Nome: {{old}} → {{new}}",
+        "settings_added": "Configurações adicionadas",
+        "settings_changed": "Configurações alteradas",
+        "settings_removed": "Configurações removidas",
+        "steps_added": "Passos adicionados",
+        "steps_changed": "Passos alterados",
+        "steps_removed": "Passos removidos",
+        "configs_added": "Configurações personalizadas adicionadas",
+        "configs_changed": "Configurações personalizadas alteradas",
+        "configs_removed": "Configurações personalizadas removidas"
+      }
+    },
+    "flash": {
+      "catalog_updated": "Modelo {{template}} atualizado a partir do catálogo.",
+      "export_failed": "Não foi possível exportar o modelo {{template}}: {{error}}",
+      "imported": "Modelo {{template}} importado.",
+      "replaced": "Modelo {{template}} substituído.",
+      "template_deleted_successfully": "Modelo {{template_id}} eliminado com sucesso.",
+      "successfully_deleted_template": "Modelos eliminados: {{success_count}}.",
+      "no_templates_selected_deletion": "Nenhum modelo selecionado para eliminação.",
+      "template_updated_successfully": "Modelo {{template_id}} atualizado com sucesso.",
+      "template_installed_catalogue": "Modelo {{template_id}} instalado a partir do catálogo.",
+      "template_created_successfully": "Modelo {{template_id}} criado com sucesso.",
+      "template_not_found_2": "Modelo não encontrado.",
+      "template_not_found": "Modelo {{clone_id}} não encontrado.",
+      "user_is_read_only": "O utilizador é só de leitura",
+      "error_deleting_template": "Erro ao eliminar o modelo {{template_id}}: {{message}}"
+    },
+    "import": {
+      "admin_only": "A importação de modelos está reservada a administradores",
+      "failed": "Não foi possível importar o modelo.",
+      "no_file": "Escolha um ficheiro para importar.",
+      "refused": "O modelo não foi importado: {{reason}}",
+      "too_large": "O modelo não foi importado: o ficheiro é maior do que 1 MiB",
+      "unreadable": "O modelo não foi importado: não foi possível ler o ficheiro"
     }
   },
   "theme": {
     "dark": "Escuro",
     "light": "Claro",
-    "system": "System"
+    "system": "Sistema"
   },
   "threatmap": {
     "exit_fullscreen": "Sair do ecrã inteiro",
@@ -2272,8 +2883,20 @@
       "back_to_file_upload": "Voltar ao carregamento do ficheiro",
       "switch_to_text_editor": "Mudar para o editor de texto",
       "enroll_instance": "Emitir um código de registo para {{hostname}}",
+      "rotate_credential": "Rodar a credencial de {{hostname}}",
       "revoke_credential": "Revogar a credencial de {{hostname}}",
-      "rotate_credential": "Rodar a credencial de {{hostname}}"
+      "attach_redirect": "Anexar {{name}} a um serviço",
+      "edit_redirect": "Editar {{name}}",
+      "delete_redirect": "Eliminar {{name}}",
+      "attach_upstream": "Anexar {{name}} a um serviço",
+      "edit_upstream": "Editar {{name}}",
+      "delete_upstream": "Eliminar {{name}}",
+      "edit_workflow_rules": "Editar as regras de {{name}}",
+      "edit_workflow_details": "Editar o nome e a descrição de {{name}}",
+      "attach_workflow": "Anexar {{name}} a um serviço",
+      "clone_workflow": "Clonar {{name}}",
+      "delete_workflow": "Eliminar {{name}}",
+      "delete_certificate": "Eliminar certificado"
     },
     "cannot_delete_original_ban": "Não é possível eliminar a entrada de bloqueio original.",
     "cannot_remove_disabled": "Não é possível remover porque uma ou mais configurações estão desabilitadas.",
@@ -2292,6 +2915,7 @@
     },
     "confirm_password_match": "A palavra-passe de confirmação deve corresponder à palavra-passe introduzida acima.",
     "copied": "Copiado!",
+    "copy_failed": "Falha ao copiar",
     "copy_https_only": "A funcionalidade de cópia só está disponível através de HTTPS.",
     "custom_ssl_cert_data": "Os dados do certificado SSL personalizado (formato PEM ou codificado em Base64).",
     "custom_ssl_cert_path": "Caminho para o ficheiro do certificado SSL personalizado.",
@@ -2299,6 +2923,7 @@
     "custom_ssl_key_path": "Caminho para o ficheiro da chave privada SSL personalizada.",
     "different_from_template": "O valor difere do padrão do modelo",
     "disabled_by_method": "Desativado: gerido através do método '{{method}}'.",
+    "disabled_by_plugin": "Desativado: gerido pelo plugin {{plugin}}.",
     "disabled_db_readonly": "Desativado: a base de dados está em modo só de leitura.",
     "disabled_draft": "Desativado: o serviço está em modo Rascunho.",
     "disabled_readonly": "Desativado: o modo só de leitura está ativo.",
@@ -2335,13 +2960,14 @@
       "edit_template": "Editar Modelo {{template}}",
       "export_config": "Exportar configuração personalizada {{name}}",
       "export_service": "Exportar Configuração do Serviço {{service}}",
+      "export_template": "Exportar modelo {{template}}",
       "view_config": "Ver Configuração Personalizada {{name}}",
       "view_file": "Ver {{filename}}",
       "view_service": "Ver Serviço {{service}}",
-      "manage_activation": "Gerir a ativação de {{name}} nas definições globais",
       "view_template": "Ver Modelo {{template}}",
-      "edit_default_server": "Editar o servidor predefinido",
-      "view_default_server": "Ver o servidor predefinido"
+      "manage_activation": "Gerir a ativação de {{name}} nas definições globais",
+      "view_default_server": "Ver o servidor predefinido",
+      "edit_default_server": "Editar o servidor predefinido"
     },
     "modal": {
       "title": {
@@ -2524,20 +3150,27 @@
     "zerossl_api_connect_timeout": "Tempo limite de ligação em segundos para chamadas da API ZeroSSL.",
     "zerossl_api_max_time": "Tempo total máximo em segundos para cada pedido da API ZeroSSL.",
     "config_global_types_available": "Agora pode selecionar tipos globais para a sua configuração personalizada.",
-    "enroll_disabled_by_method": "{{hostname}} é proveniente do seu ambiente ({{method}}); o registo aplica-se apenas a instâncias detidas pelo plano de controlo",
     "instance_credential_age": "Credencial atualizada pela última vez: {{updated}}",
+    "enroll_disabled_by_method": "{{hostname}} é proveniente do seu ambiente ({{method}}); o registo aplica-se apenas a instâncias detidas pelo plano de controlo",
     "badge": {
       "redirect_candidate": "Este serviço não contém nada além de um redirecionamento, pelo que pode ser declarado como apenas redirecionamento — o que o retirará da contagem de serviços PRO assim que essa facturação estiver activa."
     }
   },
   "totp": {
     "cant_access": "Não consegue aceder ao seu código de autenticação?",
+    "or_use_security_key": "ou utilize a sua chave de segurança",
+    "prompt": "Introduza o seu código TOTP.",
     "signing_in": "Iniciar sessão em BunkerWeb",
     "subtitle": "Introduza o código da sua aplicação de autenticação.",
-    "title": "Autenticação de dois fatores",
-    "prompt": "Introduza o seu código TOTP.",
     "subtitle_security_key": "Confirme a sua identidade com a chave de segurança.",
-    "or_use_security_key": "ou utilize a sua chave de segurança"
+    "title": "Autenticação de dois fatores",
+    "flash": {
+      "ve_used_one_recovery_codes_have": "Utilizou um dos seus códigos de recuperação. Tem {{len}} restantes.",
+      "error_occurred_while_using_recovery_code": "Ocorreu um erro ao utilizar o código de recuperação.",
+      "database_read_only_recovery_code_used": "A base de dados é só de leitura, o código de recuperação que utilizou continua válido.",
+      "token_invalid": "O token é inválido.",
+      "no_token_provided_totp": "Nenhum token fornecido em /totp."
+    }
   },
   "certificates": {
     "acme_help": "Selecionar os serviços cujas configurações existentes já habilitam e configuram o Let's Encrypt. Esta ação apenas agenda essa configuração; os detalhes do certificado e as credenciais de desafio não são introduzidos aqui.",
@@ -2571,6 +3204,45 @@
     "expiring_help": "30 dias ou menos",
     "file_extensions": "Utilize uma destas extensões de ficheiro: {{extensions}}.",
     "file_select": "Selecione um ficheiro PEM.",
+    "flash": {
+      "encrypted_private_key": "Chaves privadas cifradas não são suportadas.",
+      "invalid_certificate_pem": "O ficheiro de certificado não é um certificado PEM válido.",
+      "invalid_private_key_pem": "O ficheiro de chave privada não é uma chave privada PEM válida.",
+      "could_not_download_certificate": "Não foi possível transferir o certificado: {{message}}",
+      "certificate_action_failed": "Falha na ação sobre o certificado: {{message}}",
+      "certificate_deleted_successfully": "Certificado eliminado com sucesso",
+      "could_not_detach_certificate": "Não foi possível desanexar o certificado: {{message}}",
+      "certificate_inventory_assignment_removed_successfully": "Atribuição do inventário de certificados removida com sucesso",
+      "certificate_service_are_required": "O certificado e o serviço são obrigatórios",
+      "certificate_inventory_assignment_added_successfully": "Atribuição do inventário de certificados adicionada com sucesso",
+      "custom_certificate_uploaded_successfully": "Certificado personalizado carregado com sucesso",
+      "certificate_upload_exceeds_2_mib_request": "O carregamento do certificado excede o limite de pedido de 2 MiB",
+      "certificate_metadata_updated_successfully": "Metadados do certificado atualizados com sucesso",
+      "could_not_fetch_services_certificate_assignments": "Não foi possível obter os serviços para as atribuições de certificados: {{message}}",
+      "could_not_fetch_certificates": "Não foi possível obter os certificados: {{message}}",
+      "invalid_certificate_part": "Parte do certificado inválida",
+      "too_many_services": "Um certificado não pode estar anexado a mais de 100 serviços",
+      "too_many_sans": "Um certificado não pode conter mais de 100 nomes alternativos do sujeito",
+      "validity_whole_number": "A validade deve ser um número inteiro de dias",
+      "validity_range": "A validade deve estar entre 1 e 825 dias",
+      "invalid_certificate_source": "Origem de certificado inválida",
+      "select_service_letsencrypt": "Selecione pelo menos um serviço para a emissão Let's Encrypt",
+      "name_common_name_are_required": "O nome e o nome comum são obrigatórios",
+      "letsencrypt_issuance_scheduled": "Emissão Let's Encrypt agendada",
+      "selfsigned_certificate_created": "Certificado autoassinado criado",
+      "could_not_schedule_letsencrypt": "Não foi possível agendar a emissão Let's Encrypt: {{message}}",
+      "could_not_create_certificate": "Não foi possível criar o certificado: {{message}}",
+      "certificate_name_are_required": "O certificado e o nome são obrigatórios",
+      "could_not_update_certificate": "Não foi possível atualizar o certificado: {{message}}",
+      "pem_certificate_private_key_required": "É necessário um certificado PEM e uma chave privada",
+      "certificate_name_required": "O nome do certificado é obrigatório",
+      "could_not_upload_certificate": "Não foi possível carregar o certificado: {{message}}",
+      "could_not_attach_certificate": "Não foi possível anexar o certificado: {{message}}",
+      "checked_certificates_due_renewal": "Verificados {{total_due}} certificados a renovar",
+      "certificate_required": "O certificado é obrigatório",
+      "certificate_renewed_successfully": "Certificado renovado com sucesso",
+      "invalid_certificate_action": "Ação de certificado inválida"
+    },
     "file_selected": "{{name}} ({{size}} KiB)",
     "file_size_limit": "O ficheiro não pode exceder 1 MiB.",
     "fingerprint": "Impressão SHA-256",
@@ -2632,6 +3304,491 @@
     "valid_from": "A partir de",
     "valid_to": "Até"
   },
+  "redirects": {
+    "all": "Todos",
+    "append_badge": "+ URI",
+    "append_request_uri": "Adicionar o URI solicitado ao alvo",
+    "attach": "Anexar",
+    "attach_copy": "Anexar {{name}} ({{from}} → {{to}}) a um ou mais serviços.",
+    "code": {
+      "301": "301 — Movido permanentemente",
+      "302": "302 — Encontrado",
+      "303": "303 — Ver outro",
+      "307": "307 — Redirecionamento temporário",
+      "308": "308 — Redirecionamento permanente"
+    },
+    "create": "Criar redirecionamento",
+    "delete_confirm_title": "Eliminar este redirecionamento?",
+    "delete_copy": "Eliminar o redirecionamento {{name}}?",
+    "delete_help": "Um redirecionamento ainda anexado a um serviço não pode ser eliminado. Desanexe-o primeiro.",
+    "edit": "Editar redirecionamento",
+    "edit_shared": "Este redirecionamento está associado aos seguintes serviços ({{count}}): {{services}}. Guardá-lo aplicará as alterações a todos.",
+    "empty_text": "Um redirecionamento é uma regra nomeada que anexa a um ou mais serviços. As definições inline REDIRECT_* continuam a funcionar em conjunto com ela.",
+    "empty_title": "Nenhum redirecionamento ainda",
+    "err": {
+      "invalid_from_path": "O caminho de origem não é válido: não pode conter espaços, ponto e vírgula ou chavetas.",
+      "invalid_to_url": "O destino tem de ser um URL completo http:// ou https://."
+    },
+    "from_path": "Redirecionar de",
+    "from_path_help": "Caminho de origem nos serviços anexados, por exemplo /old.",
+    "new": "Novo redirecionamento",
+    "not_attached": "Não anexado",
+    "readonly": "A base de dados é só de leitura. Os redirecionamentos podem ser inspecionados, mas não podem ser alterados.",
+    "save": "Guardar redirecionamento",
+    "search": "Pesquisar por nome, caminho da fonte ou destino...",
+    "services_help": "Use Ctrl ou Command para selecionar vários serviços. Pode anexar uma redireção mais tarde.",
+    "status_code": "Código de estado",
+    "to_url": "Redirecionar para",
+    "truncated": "Apenas os primeiros 500 redireções são exibidos. Refine a lista com API para obter o resultado completo.",
+    "flash": {
+      "could_not_detach_redirect": "Não foi possível desanexar o redirecionamento: {{message}}",
+      "redirect_detached_successfully": "Redirecionamento desanexado com sucesso",
+      "redirect_service_are_required": "O redirecionamento e o serviço são obrigatórios",
+      "could_not_attach_redirect": "Não foi possível anexar o redirecionamento: {{message}}",
+      "redirect_attached_service": "Redirecionamento associado. Serviços: {{len}}",
+      "could_not_delete_redirect": "Não foi possível eliminar o redirecionamento: {{message}}",
+      "redirect_deleted_successfully": "Redirecionamento eliminado com sucesso",
+      "redirect_required": "O redirecionamento é obrigatório",
+      "redirect_updated_successfully": "Redirecionamento atualizado com sucesso",
+      "redirect_created_successfully": "Redirecionamento {{value}} criado com sucesso",
+      "could_not_fetch_services_redirect_assignments": "Não foi possível obter os serviços para as atribuições de redirecionamentos: {{message}}",
+      "could_not_fetch_redirects": "Não foi possível obter os redirecionamentos: {{message}}",
+      "could_not_create": "Não foi possível criar o redirecionamento: {{message}}",
+      "could_not_update": "Não foi possível atualizar o redirecionamento: {{message}}",
+      "too_many_services": "Um redirecionamento não pode ser anexado a mais de {{value}} serviços",
+      "name_required": "O nome do redirecionamento é obrigatório",
+      "target_required": "O destino do redirecionamento é obrigatório",
+      "status_code_must_be_one_of": "O código de estado deve ser um dos seguintes: {{value}}",
+      "at_least_one_service_required": "É necessário pelo menos um serviço"
+    }
+  },
+  "upstreams": {
+    "add_server": "Adicionar servidor",
+    "all": "Todos",
+    "attach": "Anexar",
+    "attach_copy": "Anexar {{name}} ({{servers}}) a um ou mais serviços.",
+    "backend_ssl": "Comunicar com os servidores através de TLS (https:// / grpcs://)",
+    "balancing": {
+      "ip_hash": "Hash IP — mesmo cliente, mesmo backend",
+      "least_conn": "Menos conexões",
+      "round_robin": "Round robin (padrão)"
+    },
+    "create": "Criar upstream",
+    "delete_confirm_title": "Eliminar este upstream?",
+    "delete_copy": "Eliminar o upstream {{name}}?",
+    "delete_help": "Um upstream ainda anexado a um serviço não pode ser eliminado. Desanexe-o primeiro.",
+    "edit": "Editar upstream",
+    "edit_shared": "Este upstream está associado aos seguintes serviços ({{count}}): {{services}}. Guardá-lo aplicará as alterações a todos.",
+    "empty_text": "Um upstream é um conjunto nomeado de backends que pode ser associado a um ou mais serviços numa rota de proxy reverso. As configurações REVERSE_PROXY_HOST funcionam em paralelo.",
+    "empty_title": "Ainda não existem upstreams",
+    "keepalive": "Manter conexão",
+    "keepalive_help": "Ligações inativas mantidas por cada worker. Apenas HTTP e gRPC; deixe em branco para desativar.",
+    "match_path": "Rota de proxy reverso",
+    "match_path_help": "O caminho pelo qual os serviços selecionados encaminham tráfego para este pool. Ignorado num pool de stream, que abrange todo o serviço.",
+    "method": "Balanceamento de carga",
+    "name_help": "Apenas letras, números, hífens e caracteres de sublinhado. Os pontos são rejeitados, pelo que um nome de pool nunca será confundido com um host real.",
+    "new": "Novo upstream",
+    "not_attached": "Não está associado",
+    "protocol": "Protocolo",
+    "protocol_help": "Os pools HTTP e gRPC estão associados a um caminho; um pool de stream assume todo o serviço TCP/UDP.",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "Stream (TCP/UDP)"
+    },
+    "readonly": "A base de dados é só de leitura. Os upstreams podem ser inspecionados, mas não podem ser alterados.",
+    "role": {
+      "backup": "Reserva",
+      "down": "Inativo",
+      "primary": "Primário"
+    },
+    "save": "Guardar upstream",
+    "search": "Pesquisar nome, descrição ou servidor...",
+    "server_fail_timeout": "Tempo limite de falha",
+    "server_host": "Servidor",
+    "server_max_fails": "Máximo de falhas",
+    "server_role": "Papel",
+    "server_weight": "Peso",
+    "servers": "Servidores",
+    "services_help": "Use Ctrl ou Command para selecionar vários serviços. Um upstream pode ser associado posteriormente.",
+    "services_hidden": "Serviços ocultos: {{count}}. Um upstream {{protocol}} só pode ser associado a um serviço compatível.",
+    "truncated": "Apenas os primeiros 500 upstream são exibidos. Refine a lista através do API para obter o resultado completo.",
+    "flash": {
+      "could_not_detach_upstream": "Não foi possível desanexar o upstream: {{message}}",
+      "upstream_detached_successfully": "Upstream desanexado com sucesso",
+      "upstream_service_are_required": "O upstream e o serviço são obrigatórios",
+      "could_not_attach_upstream": "Não foi possível anexar o upstream: {{message}}",
+      "upstream_attached_service": "Upstream associado. Serviços: {{len}}",
+      "could_not_delete_upstream": "Não foi possível eliminar o upstream: {{message}}",
+      "upstream_deleted_successfully": "Upstream eliminado com sucesso",
+      "upstream_required": "O upstream é obrigatório",
+      "could_not_update_upstream": "Não foi possível atualizar o upstream: {{message}}",
+      "upstream_updated_successfully": "Upstream atualizado com sucesso",
+      "could_not_create_upstream": "Não foi possível criar o upstream: {{message}}",
+      "upstream_created_successfully": "Upstream {{value}} criado com sucesso",
+      "could_not_fetch_services_upstream_assignments": "Não foi possível obter os serviços para as atribuições de upstreams: {{message}}",
+      "could_not_fetch_upstreams": "Não foi possível obter os upstreams: {{message}}",
+      "weight_max_fails_whole_numbers": "O peso e o max_fails de {{host}} devem ser números inteiros",
+      "at_least_one_server_required": "É necessário pelo menos um servidor",
+      "too_many_servers": "Um upstream não pode ter mais de {{value}} servidores",
+      "too_many_services": "Um upstream não pode ser anexado a mais de {{value}} serviços",
+      "match_path_must_start_with_slash": "O caminho do proxy inverso deve começar por /",
+      "name_required": "O nome do upstream é obrigatório",
+      "protocol_must_be_one_of": "O protocolo deve ser um dos seguintes: {{value}}",
+      "method_must_be_one_of": "O método deve ser um dos seguintes: {{value}}",
+      "keepalive_must_be_positive_whole_number": "O número de keepalive deve ser um número inteiro positivo",
+      "at_least_one_service_required": "É necessário pelo menos um serviço"
+    }
+  },
+  "workflows": {
+    "act_block": "Bloquear",
+    "act_challenge": "Desafio",
+    "act_code": "Estado",
+    "act_denyDefault": "O estado de recusa da instância",
+    "act_denyShort": "estado de recusa",
+    "act_provider": "Fornecedor Antibot",
+    "act_redirect": "Redirecionar",
+    "act_status": "Estado de recusa",
+    "act_terminal": "Uma ação por regra, que termina a avaliação: uma regra não tem uma saída verdadeira/falsa.",
+    "act_url": "URL de destino",
+    "action": "Então",
+    "add_rule": "Adicionar regra",
+    "all": "Todos",
+    "aria": {
+      "collapse": "Recolher",
+      "combinator": "Alterar combinador, atualmente",
+      "conditionType": "Tipo de condição",
+      "denyStatus": "Estado de recusa",
+      "drag": "Arrastar para reordenar",
+      "expand": "Expandir",
+      "groupKind": "Tipo de grupo",
+      "more": "Mais",
+      "moveDown": "Mover para baixo: executa mais tarde",
+      "moveRule": "Mover regra",
+      "moveUp": "Mover para cima: executa mais cedo",
+      "provider": "Fornecedor Antibot",
+      "redirectStatus": "Estado do redirecionamento",
+      "removeCondition": "Remover condição",
+      "removeThreshold": "Remover limiar",
+      "removeThresholdLong": "Remover limiar de frequência",
+      "removeValue": "Remover valor",
+      "requestCount": "Número de pedidos",
+      "resourceGroup": "Grupo de recursos",
+      "ruleName": "Nome da regra {{n}}",
+      "terminalAction": "Ação terminal",
+      "uriMatch": "Modo de correspondência do URI",
+      "uriValue": "Valor do URI",
+      "window": "Janela em segundos",
+      "insertAt": "Adicionar uma regra na posição {{n}}",
+      "openRule": "Abrir a regra {{n}}",
+      "ruleErrors": "Problemas de validação na regra {{count}}",
+      "changePosition": "Regra {{n}} de {{total}}, alterar posição",
+      "newValue": "Novo valor",
+      "positionMove": "Posição {{n}} de {{total}} — clique para mover",
+      "crowdsecField": "Facto CrowdSec",
+      "collapseRule": "Colapsar a regra {{n}}",
+      "expandRule": "Expandir a regra {{n}}",
+      "moveRuleUp": "Mover a regra {{n}} para cima",
+      "moveRuleDown": "Mover a regra {{n}} para baixo",
+      "moreActionsForRule": "Mais ações para a regra {{n}}",
+      "ruleCard": "Regra {{n}} de {{total}} — {{name}}"
+    },
+    "attach": "Anexar a serviços",
+    "attach_help": "As regras são apenas aplicadas aos serviços aos quais o fluxo de trabalho está anexado.",
+    "attached_notice": "Ao guardar, estas regras são aplicadas aos serviços associados ({{count}}).",
+    "canvas": {
+      "title": "Ordem das regras",
+      "auxList": "De cima para baixo. A primeira correspondência vence.",
+      "auxCanvas": "Da esquerda para a direita. A primeira correspondência vence.",
+      "entry_title": "Cada pedido",
+      "entry_sub": "As regras são executadas da esquerda para a direita.",
+      "exit_title": "Nenhuma regra correspondeu",
+      "exit_sub": "Continua para o próximo fluxo de trabalho anexado.",
+      "insert": "Adicionar uma regra aqui",
+      "open": "Abrir a regra",
+      "close": "Fechar",
+      "gateTip": "Um critério de correspondência, não uma ação: abaixo do limite, a regra não corresponde e a próxima é avaliada.",
+      "drawerSub": "Executa na posição {{n}} de {{total}}",
+      "stopTail": ", a avaliação pára aqui — nenhuma regra é alcançada.",
+      "skipped": "Desativado — ignorado completamente, como se não estivesse na cadeia.",
+      "emptyTitle": "Nenhuma regra ainda",
+      "emptyBody": "Um fluxo de trabalho sem regras não altera nada — cada pedido passa diretamente para o fluxo de trabalho associado seguinte.",
+      "emptyCta": "Adicionar a primeira regra",
+      "hint": "Arraste um nó para reorganizar · arraste o quadro para navegar · Alt + ← / → num nó focado",
+      "hintReadonly": "Apenas leitura — navegue pelo quadro para o examinar; a ordem não pode ser alterada",
+      "dropHint": "Arraste para definir a prioridade: a posição da regra na cadeia determina a prioridade",
+      "zoomIn": "Ampliar",
+      "zoomOut": "Reduzir",
+      "fit": "Ajustar à visualização"
+    },
+    "capacity": "Regras: {{count}}/{{maxRules}} · máximo de predicados por regra: {{worst}}/{{maxPredicates}} · expressões regulares: {{regexes}}",
+    "clone": "Clonar fluxo de trabalho",
+    "clone_help": "As regras são copiadas; os anexos aos serviços não.",
+    "clone_name": "Nome da cópia",
+    "confirm": {
+      "deleteRule": "Eliminar esta regra? Todas as regras abaixo sobem uma posição."
+    },
+    "copySuffix": " (cópia)",
+    "delete": "Eliminar fluxo de trabalho",
+    "delete_confirm": "Este fluxo de trabalho e todas as suas regras serão eliminados permanentemente.",
+    "empty_text": "Um fluxo de trabalho é uma lista ordenada de regras que anexamos a serviços: uma árvore de condições, um limite de taxa opcional e uma ação — desafio, bloqueio ou redirecionamento.",
+    "empty_title": "Nenhum fluxo de trabalho ainda",
+    "entry_sub": "Os fluxos de trabalho são executados pela ordem de associação; as regras deste são executadas de cima para baixo.",
+    "entry_title": "Cada pedido a um serviço associado",
+    "err": {
+      "load": "As regras guardadas não puderam ser lidas. A gravação está desativada para que não sejam substituídas; recarregue a página.",
+      "save": "Não foi possível guardar",
+      "saveUnreachable": "Não foi possível contactar o endpoint de gravação",
+      "validate": "Não foi possível validar",
+      "validateUnreachable": "Não foi possível contactar o endpoint de validação"
+    },
+    "errors": {
+      "body": "Nada é aplicado; a política em execução permanece inalterada.",
+      "count": "Problemas que impedem guardar: {{count}}.",
+      "rule": "Regra {{n}}",
+      "ruleNamed": "Regra {{n}}: {{name}}",
+      "whole": "Este fluxo de trabalho"
+    },
+    "exit_sub": "O pedido continua para o fluxo de trabalho associado seguinte e depois para o restante conjunto de segurança.",
+    "exit_title": "Nenhuma regra correspondeu",
+    "gate": {
+      "and": "e apenas depois de o mesmo IP de cliente ter efetuado mais de",
+      "chip": "limiar de correspondência",
+      "help": "Contado por IP de cliente. Abaixo do limiar, esta regra não corresponde e a avaliação prossegue para a seguinte; por si só, nunca limita a frequência."
+    },
+    "legend": {
+      "fall": "Sem correspondência, passa para a regra seguinte",
+      "gate": "Um limiar de frequência condiciona a correspondência; não é uma ação",
+      "move": "Arraste, utilize as setas ou prima Alt + ↑ / ↓ para reordenar",
+      "stop": "Uma correspondência executa uma ação e termina",
+      "moveCanvas": "Arraste, use a etiqueta numerada ou pressione Alt + ← / → para reorganizar"
+    },
+    "link": {
+      "noMatch": "sem correspondência",
+      "entry": "cada pedido"
+    },
+    "menu": {
+      "bottom": "Executar em último",
+      "delete": "Eliminar regra",
+      "disable": "Desativar regra",
+      "duplicate": "Duplicar abaixo",
+      "enable": "Ativar regra",
+      "top": "Executar primeiro",
+      "moveTo": "Mover para a posição {{n}}",
+      "staysAt": "Permanece na posição {{n}}"
+    },
+    "move": {
+      "first": "Executar primeiro",
+      "last": "Executar em último"
+    },
+    "new": "Novo fluxo de trabalho",
+    "no_rules": "Nenhuma regra ainda. Adicione uma para começar a construir esta política.",
+    "not_attached": "Não anexado",
+    "not_attached_notice": "Este fluxo de trabalho não está associado a nenhum serviço, pelo que as suas regras ainda não são aplicadas em lado nenhum.",
+    "not_validated": "Ainda não validado",
+    "order_help": "As regras são avaliadas em ordem e a primeira que corresponde vence. Uma regra com um limite de taxa só corresponde quando o limite é excedido, por isso uma regra inferior pode capturar o tráfego abaixo dela.",
+    "readonly": "A base de dados é só de leitura. Os fluxos de trabalho podem ser inspecionados, mas não podem ser alterados.",
+    "rule": {
+      "disabled": "Desativada",
+      "if": "Se",
+      "namePlaceholder": "Nome da regra",
+      "noun": "Regra",
+      "onMatch": "Se corresponder",
+      "skipped": "Desativada: é totalmente ignorada, como se não estivesse na lista.",
+      "stopTail": ", a avaliação termina aqui; nenhuma regra abaixo é alcançada."
+    },
+    "rules": "Regras",
+    "say": {
+      "actionChangedBlock": "A ação foi alterada para bloquear. Continua a ser a única ação e continua a terminar a avaliação.",
+      "actionChangedChallenge": "A ação foi alterada para desafio. Continua a ser a única ação e continua a terminar a avaliação.",
+      "actionChangedRedirect": "A ação foi alterada para redirecionar. Continua a ser a única ação e continua a terminar a avaliação.",
+      "added": "Regra adicionada na posição {{n}}, em último; todas as regras acima são verificadas primeiro.",
+      "deleted": "Regra eliminada. Regras restantes: {{count}}.",
+      "duplicated": "Cópia inserida na posição {{n}}. Nunca pode corresponder enquanto a original acima estiver ativa.",
+      "gateAdded": "Limiar de frequência adicionado à correspondência. Abaixo dele, a regra não corresponde e a avaliação continua.",
+      "jumped": "{{where}}: {{message}}",
+      "lastValueRemoved": "Último valor removido: esta condição não pode ser guardada até conter um valor.",
+      "moved": "{{name}} movida para a posição {{to}} de {{total}}.",
+      "movedDrag": "{{name}} arrastada para a posição {{to}} de {{total}}.",
+      "movedKeyboard": "{{name}} movida com o teclado para a posição {{to}} de {{total}}.",
+      "predicateCap": "Esta regra já contém o máximo de {{max}} condições.",
+      "ruleDisabled": "{{name}} desativada: é totalmente ignorada e as regras abaixo passam a receber estes pedidos.",
+      "ruleEnabled": "{{name}} ativada: volta a ser avaliada na posição {{n}}.",
+      "runsAfter": "depois de {{name}}",
+      "runsAfterAbove": "Agora é executada depois da regra acima.",
+      "runsFirst": "primeiro",
+      "runsLast": "em último",
+      "saved": "Regras guardadas e enviadas para os serviços associados.",
+      "theRule": "A regra",
+      "valuesDropped": "Condição alterada. Valores que não puderam ser mantidos: {{count}}.",
+      "inserted": "Regra adicionada na posição {{n}} de {{total}}. Todas as regras anteriores são verificadas primeiro.",
+      "inspecting": "Editar a regra {{n}} de {{total}} — {{name}}.",
+      "viewCanvas": "Visualização do quadro. As regras são executadas da esquerda para a direita; a primeira correspondência vence.",
+      "viewList": "Visualização da lista. As regras são executadas de cima para baixo; a primeira correspondência vence."
+    },
+    "search": "Pesquisar nome ou descrição...",
+    "test": {
+      "asn": "ASN",
+      "asn_help": "Deixe vazio para simular uma consulta ASN sem êxito.",
+      "asn_invalid": "O ASN tem de ser um número",
+      "assume_not_whitelisted": "Pressupõe que o cliente não está na lista de permissões.",
+      "assume_rate_counter": "O número do pedido {{request_number}} é um valor introduzido, não uma medição.",
+      "assume_regex_budget": "Pressupõe que o limite de expressões regulares da instância não está esgotado.",
+      "assumptions": "Pressupostos",
+      "country": "País",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "O CrowdSec permitiu-o",
+      "crowdsec_help": "O que o CrowdSec decidiu sobre este pedido antes da execução dos workflows. Um pedido que o CrowdSec nunca avaliou não é o mesmo que um sem nada contra ele: o primeiro deixa uma condição do CrowdSec indeterminada, o segundo torna-a falsa.",
+      "crowdsec_remediated": "O CrowdSec remediou-o",
+      "crowdsec_remediation": "Remediação",
+      "crowdsec_source": "Origem do veredicto",
+      "crowdsec_unavailable": "O CrowdSec não avaliou este pedido",
+      "detail_challenge": "O desafio assume o controlo; o restante conjunto de segurança continua a ser executado.",
+      "detail_detect": "Este serviço está no modo de deteção, pelo que nada é efetivamente aplicado.",
+      "detail_status": "O cliente recebe {{status}}.",
+      "failed": "Não foi possível executar o teste",
+      "geo": "Consulta GeoIP",
+      "geo_help": "Quando a pesquisa GeoIP está indisponível, as regras de país e ASN passam a ser DESCONHECIDAS, pelo que nunca podem corresponder.",
+      "geo_local": "Endereço local / privado",
+      "geo_resolved": "Resolvido",
+      "geo_unavailable": "Base de dados indisponível",
+      "intro": "Avalia, por ordem, cada fluxo de trabalho associado ao serviço, exatamente como a instância faria.",
+      "invalid": "Corrija os problemas acima antes de testar.",
+      "ip": "IP do cliente",
+      "method": "Método",
+      "number": "Número do pedido",
+      "number_help": "O enésimo pedido deste cliente na janela. Um pressuposto fornecido por si, não uma medição.",
+      "open": "Testar um pedido",
+      "other_matched": "correspondeu aqui",
+      "other_no_match": "nenhuma regra correspondeu",
+      "other_unreached": "não alcançado",
+      "other_workflows": "Outros fluxos de trabalho deste serviço",
+      "out_draft": "Este serviço é um rascunho: ainda não foi compilado nenhum fluxo de trabalho para ele.",
+      "out_match": "{{workflow}} · {{rule}} correspondeu.",
+      "out_match_block": "{{workflow}} · {{rule}} correspondeu e bloqueou o pedido.",
+      "out_match_redirect": "{{workflow}} · {{rule}} correspondeu e redirecionou o pedido.",
+      "out_match_challenge": "{{workflow}} · {{rule}} correspondeu e submeteu o pedido a um desafio.",
+      "out_no_match": "Nenhuma regra correspondeu. O pedido continua para o restante conjunto de segurança.",
+      "out_not_attached": "Este fluxo de trabalho não está associado a nenhum serviço, pelo que não existe uma sequência de regras para avaliar.",
+      "out_whitelisted": "Na lista de permissões: todo o fluxo de trabalho é ignorado e nenhuma regra é avaliada.",
+      "run": "Executar teste",
+      "service": "Serviço",
+      "title": "Testar um pedido",
+      "unreachable": "Não foi possível contactar o endpoint de teste",
+      "uri": "Caminho URI",
+      "uri_help": "Apenas o caminho: $uri nunca contém uma cadeia de consulta.",
+      "v_gate": "as condições correspondem · limiar fechado em {{n}} de {{count}}",
+      "v_match": "CORRESPONDEU",
+      "v_unknown": "DESCONHECIDO",
+      "v_unknown_help": "Não foi possível determinar um dado necessário a esta regra, pelo que nunca pode corresponder.",
+      "whitelisted": "Este cliente está na lista de permissões"
+    },
+    "threshold": "Apenas acima de uma taxa",
+    "threshold_count": "Pedidos",
+    "threshold_window": "Por (segundos)",
+    "tree": {
+      "addCondition": "Condição",
+      "addGroup": "Grupo",
+      "all": "Todas",
+      "allMeta": "Condições: {{count}}; todas têm de ser verdadeiras",
+      "and": "e",
+      "any": "Qualquer uma",
+      "anyMeta": "Condições: {{count}}; pelo menos uma tem de ser verdadeira",
+      "empty": "Grupo vazio: adicione uma condição; não pode ser guardado assim.",
+      "noGroupHolds": "Nenhum grupo de recursos contém entradas deste tipo.",
+      "noneMeta": "corresponde quando nenhuma destas é verdadeira",
+      "not": "Nenhuma",
+      "or": "ou",
+      "removeGroup": "Remover grupo"
+    },
+    "truncated": "Apenas os primeiros 500 fluxos de trabalho são apresentados. Refine a lista através da API para obter o resultado completo.",
+    "untitled": "Regra sem título",
+    "value": {
+      "add": "Valor"
+    },
+    "values": {
+      "fewer": "Mostrar menos",
+      "more": "+{{n}} adicionais"
+    },
+    "verb": {
+      "asn": "é",
+      "country": "é",
+      "group": "está no grupo",
+      "ip": "está em",
+      "isIn": "está em",
+      "isOneOf": "é um de",
+      "method": "é",
+      "uri": "corresponde a"
+    },
+    "view": {
+      "canvas": "Quadro",
+      "list": "Lista"
+    },
+    "action_help": {
+      "block": "Negar o pedido",
+      "challenge": "Demonstrar que é humano",
+      "redirect": "Enviá-lo para outro destino"
+    },
+    "condition": {
+      "crowdsec": "Veredicto CrowdSec",
+      "ip": "IP / CIDR",
+      "method": "Método HTTP",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "é exatamente",
+      "prefix": "começa por",
+      "regex": "corresponde à expressão regular"
+    },
+    "reason": {
+      "sentence": "Workflow de segurança {{workflow}}: {{action}}"
+    },
+    "crowdsec_field": {
+      "remediation": "a remediação é",
+      "source": "a origem é"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "bloqueio",
+      "captcha": "captcha",
+      "lapi": "API local"
+    },
+    "flash": {
+      "could_not_detach_workflow": "Não foi possível desanexar o fluxo de trabalho: {{message}}",
+      "workflow_detached_successfully": "Fluxo de trabalho desanexado com sucesso",
+      "workflow_service_are_required": "O fluxo de trabalho e o serviço são obrigatórios",
+      "could_not_attach_workflow": "Não foi possível anexar o fluxo de trabalho: {{message}}",
+      "workflow_services_updated_attached": "Serviços do workflow atualizados (associados: {{len}})",
+      "could_not_delete_workflow": "Não foi possível eliminar o fluxo de trabalho: {{message}}",
+      "workflow_deleted_successfully": "Fluxo de trabalho eliminado com sucesso",
+      "workflow_required": "O fluxo de trabalho é obrigatório",
+      "could_not_clone_workflow": "Não foi possível clonar o fluxo de trabalho: {{message}}",
+      "workflow_cloned": "Fluxo de trabalho clonado como {{name}}",
+      "workflow_new_name_are_required": "O fluxo de trabalho e o novo nome são obrigatórios",
+      "could_not_update_workflow": "Não foi possível atualizar o fluxo de trabalho: {{message}}",
+      "workflow_updated_successfully": "Fluxo de trabalho atualizado com sucesso",
+      "could_not_create_workflow": "Não foi possível criar o fluxo de trabalho: {{message}}",
+      "workflow_created_successfully": "Fluxo de trabalho {{value}} criado com sucesso",
+      "could_not_fetch_workflow": "Não foi possível obter o fluxo de trabalho: {{message}}",
+      "could_not_fetch_services_workflow_assignments": "Não foi possível obter os serviços para as atribuições de fluxos de trabalho: {{message}}",
+      "could_not_fetch_workflows": "Não foi possível obter os fluxos de trabalho: {{message}}",
+      "too_many_services": "Um fluxo de trabalho não pode ser anexado a mais de {{value}} serviços",
+      "name_required": "O nome do fluxo de trabalho é obrigatório",
+      "service_list_not_read_reopen_page": "Não foi possível ler a lista de serviços; reabra a página e tente novamente"
+    }
+  },
+  "request_path": {
+    "client": "Cliente",
+    "source": "Ordem de execução do plugin para a fase {{phase}}, a partir de {{setting}} — uma ordem de apresentação, não um rastreio por pedido.",
+    "terminal": {
+      "inline": "Servidor de origem",
+      "none": "Nenhum serviço ativo",
+      "pool": "Pool upstream",
+      "root": "Ficheiros locais"
+    },
+    "title": "Caminho do pedido",
+    "unordered": "Não existe uma posição declarada na fase {{phase}}; executa-se após os plugins ordenados, em ordem alfabética."
+  },
   "resource_groups": {
     "add_entry": "Adicionar entrada",
     "add_to_setting": "Adicionar grupo de recursos…",
@@ -2658,16 +3815,31 @@
     "import_file": "TXT/CSV",
     "import_size": "As importações TXT/CSV são limitadas a 256 KiB.",
     "kind": "Tipo",
+    "kind_label": {
+      "ip": "IP",
+      "country": "País",
+      "asn": "ASN",
+      "rdns": "DNS inverso",
+      "user_agent": "Agente do utilizador",
+      "uri": "URI"
+    },
     "kinds": "Tipos",
     "loading_references": "A carregar referências...",
     "max_entries": "Um grupo de recursos não pode conter mais de {{max}} entradas.",
-    "meta_line": "{{kinds}} tipos · {{values}} valores · {{usages}} utilizações",
+    "meta_kinds": "{{count}} tipo",
+    "meta_kinds_plural": "{{count}} tipos",
+    "meta_usages": "{{count}} utilização",
+    "meta_usages_plural": "{{count}} utilizações",
+    "meta_values": "{{count}} valor",
+    "meta_values_plural": "{{count}} valores",
     "new": "Novo grupo",
     "new_alias": "Novo alias",
     "no_entries": "Sem entradas",
     "no_entries_help": "Adicione entradas individualmente ou use o importador em massa abaixo.",
     "no_references": "Sem referências",
     "readonly": "A base de dados é só de leitura. Os grupos de recursos podem ser inspecionados e exportados, mas não podem ser alterados.",
+    "reference_count": "{{count}} referência",
+    "reference_count_plural": "{{count}} referências",
     "references_error": "Não foi possível carregar referências",
     "save": "Guardar grupo",
     "search": "Pesquisar aliases, descrições, tipos ou valores…",
@@ -2676,7 +3848,28 @@
     "template_configuration": "Modelo {{template}}",
     "usage": "Utilização",
     "value": "Valor",
-    "values": "Valores"
+    "values": "Valores",
+    "flash": {
+      "could_not_export_resource_groups": "Não foi possível exportar os grupos de recursos: {{message}}",
+      "could_not_delete_resource_group": "Não foi possível eliminar o grupo de recursos: {{message}}",
+      "resource_group_deleted_successfully": "Grupo de recursos eliminado com sucesso",
+      "resource_group_required": "O grupo de recursos é obrigatório",
+      "could_not_clone_resource_group": "Não foi possível clonar o grupo de recursos: {{message}}",
+      "resource_group_cloned": "Grupo de recursos clonado como @{{alias}}",
+      "could_not_save_resource_group": "Não foi possível guardar o grupo de recursos: {{message}}",
+      "resource_group_created_successfully": "Grupo de recursos @{{alias}} criado com sucesso",
+      "resource_group_updated_successfully": "Grupo de recursos atualizado com sucesso",
+      "alias_invalid_chars": "O alias deve conter entre 1 e 64 letras, dígitos, sublinhados ou hífenes",
+      "alias_reserved": "Este alias está reservado pelo BunkerWeb",
+      "entries_not_valid_json": "As entradas de recursos não são um JSON válido",
+      "entries_not_a_list": "As entradas de recursos devem ser uma lista",
+      "too_many_entries": "Um grupo de recursos não pode conter mais de {{value}} entradas",
+      "entry_invalid": "A entrada {{index}} é inválida",
+      "entry_invalid_kind": "A entrada {{index}} tem um tipo inválido",
+      "entry_invalid_value": "A entrada {{index}} tem um valor inválido",
+      "entry_comment_too_long": "A entrada {{index}} tem um comentário demasiado longo",
+      "source_required": "O grupo de recursos de origem é obrigatório"
+    }
   },
   "validation": {
     "default_field_name": "Este campo",
@@ -2733,440 +3926,41 @@
     "service": "Serviço",
     "services": "Ativar serviço",
     "status": "Armazenamento de instância",
-    "subtitle": "Estado da cache de reverse-proxy, métricas de taxa de sucesso agregadas e controis de limpeza imediata."
-  },
-  "compose": {
-    "always_on": "Ativado sempre",
-    "count": "{{on}} ativo · {{total}} disponível · {{locked}} bloqueado",
-    "entries": "{{count}} configurado",
-    "filter": {
-      "all": "Todos",
-      "changed": "Alterado",
-      "on": "Ativado"
-    },
-    "locked": "Sem controlo aqui",
-    "provenance": {
-      "api": "Gerido via API",
-      "attachment": "Do anexo",
-      "clone": "Clonado",
-      "default": "Padrão",
-      "edited": "Editado aqui",
-      "global": "Do global",
-      "managed": "Definido por {{method}}",
-      "template": "Do modelo"
-    },
-    "set_value": "Definir um valor…",
-    "show_more": "Mostrar mais {{count}}",
-    "unavailable": "A lista de plugins não pôde ser carregada, por isso esta página não pode ser editada com segurança. Recarregue após receber as respostas API."
-  },
-  "redirects": {
-    "all": "Todos",
-    "append_badge": "+ URI",
-    "append_request_uri": "Adicionar o URI solicitado ao alvo",
-    "attach": "Anexar",
-    "attach_copy": "Anexar {{name}} ({{from}} → {{to}}) a um ou mais serviços.",
-    "code": {
-      "301": "301 — Movido permanentemente",
-      "302": "302 — Encontrado",
-      "303": "303 — Ver outro",
-      "307": "307 — Redirecionamento temporário",
-      "308": "308 — Redirecionamento permanente"
-    },
-    "create": "Criar redirecionamento",
-    "delete_confirm_title": "Eliminar este redirecionamento?",
-    "delete_copy": "Eliminar o redirecionamento {{name}}?",
-    "delete_help": "Um redirecionamento ainda anexado a um serviço não pode ser eliminado. Desanexe-o primeiro.",
-    "edit": "Editar redirecionamento",
-    "edit_shared": "Este redirecionamento está associado aos seguintes serviços ({{count}}): {{services}}. Guardá-lo aplicará as alterações a todos.",
-    "empty_text": "Um redirecionamento é uma regra nomeada que anexa a um ou mais serviços. As definições inline REDIRECT_* continuam a funcionar em conjunto com ela.",
-    "empty_title": "Nenhum redirecionamento ainda",
-    "from_path": "Redirecionar de",
-    "from_path_help": "Caminho de origem nos serviços anexados, por exemplo /old.",
-    "new": "Novo redirecionamento",
-    "not_attached": "Não anexado",
-    "readonly": "A base de dados é só de leitura. Os redirecionamentos podem ser inspecionados, mas não podem ser alterados.",
-    "save": "Guardar redirecionamento",
-    "search": "Pesquisar por nome, caminho da fonte ou destino...",
-    "services_help": "Use Ctrl ou Command para selecionar vários serviços. Pode anexar uma redireção mais tarde.",
-    "status_code": "Código de estado",
-    "to_url": "Redirecionar para",
-    "truncated": "Apenas os primeiros 500 redireções são exibidos. Refine a lista com API para obter o resultado completo."
-  },
-  "upstreams": {
-    "add_server": "Adicionar servidor",
-    "all": "Todos",
-    "attach": "Anexar",
-    "attach_copy": "Anexar {{name}} ({{servers}}) a um ou mais serviços.",
-    "backend_ssl": "Comunicar com os servidores através de TLS (https:// / grpcs://)",
-    "balancing": {
-      "ip_hash": "Hash IP — mesmo cliente, mesmo backend",
-      "least_conn": "Menos conexões",
-      "round_robin": "Round robin (padrão)"
-    },
-    "create": "Criar upstream",
-    "delete_confirm_title": "Eliminar este upstream?",
-    "delete_copy": "Eliminar o upstream {{name}}?",
-    "delete_help": "Um upstream ainda anexado a um serviço não pode ser eliminado. Desanexe-o primeiro.",
-    "edit": "Editar upstream",
-    "edit_shared": "Este upstream está associado aos seguintes serviços ({{count}}): {{services}}. Guardá-lo aplicará as alterações a todos.",
-    "empty_text": "Um upstream é um conjunto nomeado de backends que pode ser associado a um ou mais serviços numa rota de proxy reverso. As configurações REVERSE_PROXY_HOST funcionam em paralelo.",
-    "empty_title": "Ainda não existem upstreams",
-    "keepalive": "Manter conexão",
-    "keepalive_help": "Ligações inativas mantidas por cada worker. Apenas HTTP e gRPC; deixe em branco para desativar.",
-    "match_path": "Rota de proxy reverso",
-    "match_path_help": "O caminho pelo qual os serviços selecionados encaminham tráfego para este pool. Ignorado num pool de stream, que abrange todo o serviço.",
-    "method": "Balanceamento de carga",
-    "name_help": "Apenas letras, números, hífens e caracteres de sublinhado. Os pontos são rejeitados, pelo que um nome de pool nunca será confundido com um host real.",
-    "new": "Novo upstream",
-    "not_attached": "Não está associado",
-    "protocol": "Protocolo",
-    "protocol_help": "Os pools HTTP e gRPC estão associados a um caminho; um pool de stream assume todo o serviço TCP/UDP.",
-    "protocols": {
-      "grpc": "gRPC",
-      "http": "HTTP",
-      "stream": "Stream (TCP/UDP)"
-    },
-    "readonly": "A base de dados é só de leitura. Os upstreams podem ser inspecionados, mas não podem ser alterados.",
-    "role": {
-      "backup": "Reserva",
-      "down": "Inativo",
-      "primary": "Primário"
-    },
-    "save": "Guardar upstream",
-    "search": "Pesquisar nome, descrição ou servidor...",
-    "server_fail_timeout": "Tempo limite de falha",
-    "server_host": "Servidor",
-    "server_max_fails": "Máximo de falhas",
-    "server_role": "Papel",
-    "server_weight": "Peso",
-    "servers": "Servidores",
-    "services_help": "Use Ctrl ou Command para selecionar vários serviços. Um upstream pode ser associado posteriormente.",
-    "services_hidden": "Serviços ocultos: {{count}}. Um upstream {{protocol}} só pode ser associado a um serviço compatível.",
-    "truncated": "Apenas os primeiros 500 upstream são exibidos. Refine a lista através do API para obter o resultado completo."
-  },
-  "workflows": {
-    "act_block": "Bloquear",
-    "act_challenge": "Desafio",
-    "act_code": "Estado",
-    "act_denyDefault": "O estado de recusa da instância",
-    "act_denyShort": "estado de recusa",
-    "act_provider": "Fornecedor Antibot",
-    "act_redirect": "Redirecionar",
-    "act_status": "Estado de recusa",
-    "act_terminal": "Uma ação por regra, que termina a avaliação: uma regra não tem uma saída verdadeira/falsa.",
-    "act_url": "URL de destino",
-    "action": "Então",
-    "add_rule": "Adicionar regra",
-    "all": "Todos",
-    "aria": {
-      "collapse": "Recolher",
-      "combinator": "Alterar combinador, atualmente",
-      "conditionType": "Tipo de condição",
-      "denyStatus": "Estado de recusa",
-      "drag": "Arrastar para reordenar",
-      "expand": "Expandir",
-      "groupKind": "Tipo de grupo",
-      "insertAt": "Adicionar uma regra na posição {{n}}",
-      "more": "Mais",
-      "moveDown": "Mover para baixo: executa mais tarde",
-      "moveRule": "Mover regra",
-      "moveUp": "Mover para cima: executa mais cedo",
-      "openRule": "Abrir a regra {{n}}",
-      "provider": "Fornecedor Antibot",
-      "redirectStatus": "Estado do redirecionamento",
-      "removeCondition": "Remover condição",
-      "removeThreshold": "Remover limiar",
-      "removeThresholdLong": "Remover limiar de frequência",
-      "removeValue": "Remover valor",
-      "requestCount": "Número de pedidos",
-      "resourceGroup": "Grupo de recursos",
-      "ruleErrors": "Problemas de validação na regra {{count}}",
-      "ruleName": "Nome da regra {{n}}",
-      "terminalAction": "Ação terminal",
-      "uriMatch": "Modo de correspondência do URI",
-      "uriValue": "Valor do URI",
-      "window": "Janela em segundos",
-      "changePosition": "Regra {{n}} de {{total}}, alterar posição",
-      "newValue": "Novo valor",
-      "positionMove": "Posição {{n}} de {{total}} — clique para mover",
-      "crowdsecField": "Facto CrowdSec"
-    },
-    "attach": "Anexar a serviços",
-    "attach_help": "As regras são apenas aplicadas aos serviços aos quais o fluxo de trabalho está anexado.",
-    "attached_notice": "Ao guardar, estas regras são aplicadas aos serviços associados ({{count}}).",
-    "canvas": {
-      "auxCanvas": "Da esquerda para a direita. A primeira correspondência vence.",
-      "auxList": "De cima para baixo. A primeira correspondência vence.",
-      "close": "Fechar",
-      "drawerSub": "Executa na posição {{n}} de {{total}}",
-      "dropHint": "Arraste para definir a prioridade: a posição da regra na cadeia determina a prioridade",
-      "emptyBody": "Um fluxo de trabalho sem regras não altera nada — cada pedido passa diretamente para o fluxo de trabalho associado seguinte.",
-      "emptyCta": "Adicionar a primeira regra",
-      "emptyTitle": "Nenhuma regra ainda",
-      "entry_sub": "As regras são executadas da esquerda para a direita.",
-      "entry_title": "Cada pedido",
-      "exit_sub": "Continua para o próximo fluxo de trabalho anexado.",
-      "exit_title": "Nenhuma regra correspondeu",
-      "fit": "Ajustar à visualização",
-      "gateTip": "Um critério de correspondência, não uma ação: abaixo do limite, a regra não corresponde e a próxima é avaliada.",
-      "hint": "Arraste um nó para reorganizar · arraste o quadro para navegar · Alt + ← / → num nó focado",
-      "hintReadonly": "Apenas leitura — navegue pelo quadro para o examinar; a ordem não pode ser alterada",
-      "insert": "Adicionar uma regra aqui",
-      "open": "Abrir a regra",
-      "skipped": "Desativado — ignorado completamente, como se não estivesse na cadeia.",
-      "stopTail": ", a avaliação pára aqui — nenhuma regra é alcançada.",
-      "title": "Ordem das regras",
-      "zoomIn": "Ampliar",
-      "zoomOut": "Reduzir"
-    },
-    "capacity": "Regras: {{count}}/{{maxRules}} · máximo de predicados por regra: {{worst}}/{{maxPredicates}} · expressões regulares: {{regexes}}",
-    "clone": "Clonar fluxo de trabalho",
-    "clone_help": "As regras são copiadas; os anexos aos serviços não.",
-    "clone_name": "Nome da cópia",
-    "confirm": {
-      "deleteRule": "Eliminar esta regra? Todas as regras abaixo sobem uma posição."
-    },
-    "copySuffix": " (cópia)",
-    "delete": "Eliminar fluxo de trabalho",
-    "delete_confirm": "Este fluxo de trabalho e todas as suas regras serão eliminados permanentemente.",
-    "empty_text": "Um fluxo de trabalho é uma lista ordenada de regras que anexamos a serviços: uma árvore de condições, um limite de taxa opcional e uma ação — desafio, bloqueio ou redirecionamento.",
-    "empty_title": "Nenhum fluxo de trabalho ainda",
-    "entry_sub": "Os fluxos de trabalho são executados pela ordem de associação; as regras deste são executadas de cima para baixo.",
-    "entry_title": "Cada pedido a um serviço associado",
-    "err": {
-      "save": "Não foi possível guardar",
-      "saveUnreachable": "Não foi possível contactar o endpoint de gravação",
-      "validate": "Não foi possível validar",
-      "validateUnreachable": "Não foi possível contactar o endpoint de validação"
-    },
-    "errors": {
-      "body": "Nada é aplicado; a política em execução permanece inalterada.",
-      "count": "Problemas que impedem guardar: {{count}}.",
-      "rule": "Regra {{n}}",
-      "ruleNamed": "Regra {{n}}: {{name}}",
-      "whole": "Este fluxo de trabalho"
-    },
-    "exit_sub": "O pedido continua para o fluxo de trabalho associado seguinte e depois para o restante conjunto de segurança.",
-    "exit_title": "Nenhuma regra correspondeu",
-    "gate": {
-      "and": "e apenas depois de o mesmo IP de cliente ter efetuado mais de",
-      "chip": "limiar de correspondência",
-      "help": "Contado por IP de cliente. Abaixo do limiar, esta regra não corresponde e a avaliação prossegue para a seguinte; por si só, nunca limita a frequência."
-    },
-    "legend": {
-      "fall": "Sem correspondência, passa para a regra seguinte",
-      "gate": "Um limiar de frequência condiciona a correspondência; não é uma ação",
-      "move": "Arraste, utilize as setas ou prima Alt + ↑ / ↓ para reordenar",
-      "moveCanvas": "Arraste, use a etiqueta numerada ou pressione Alt + ← / → para reorganizar",
-      "stop": "Uma correspondência executa uma ação e termina"
-    },
-    "link": {
-      "entry": "cada pedido",
-      "noMatch": "sem correspondência"
-    },
-    "menu": {
-      "bottom": "Executar em último",
-      "delete": "Eliminar regra",
-      "disable": "Desativar regra",
-      "duplicate": "Duplicar abaixo",
-      "enable": "Ativar regra",
-      "top": "Executar primeiro",
-      "moveTo": "Mover para a posição {{n}}",
-      "staysAt": "Permanece na posição {{n}}"
-    },
-    "move": {
-      "first": "Executar primeiro",
-      "last": "Executar em último"
-    },
-    "new": "Novo fluxo de trabalho",
-    "no_rules": "Nenhuma regra ainda. Adicione uma para começar a construir esta política.",
-    "not_attached": "Não anexado",
-    "not_attached_notice": "Este fluxo de trabalho não está associado a nenhum serviço, pelo que as suas regras ainda não são aplicadas em lado nenhum.",
-    "not_validated": "Ainda não validado",
-    "order_help": "As regras são avaliadas em ordem e a primeira que corresponde vence. Uma regra com um limite de taxa só corresponde quando o limite é excedido, por isso uma regra inferior pode capturar o tráfego abaixo dela.",
-    "readonly": "A base de dados é só de leitura. Os fluxos de trabalho podem ser inspecionados, mas não podem ser alterados.",
-    "rule": {
-      "disabled": "Desativada",
-      "if": "Se",
-      "namePlaceholder": "Nome da regra",
-      "noun": "Regra",
-      "onMatch": "Se corresponder",
-      "skipped": "Desativada: é totalmente ignorada, como se não estivesse na lista.",
-      "stopTail": ", a avaliação termina aqui; nenhuma regra abaixo é alcançada."
-    },
-    "rules": "Regras",
-    "say": {
-      "actionChanged": "A ação foi alterada para {{type}}. Continua a ser a única ação e continua a terminar a avaliação.",
-      "added": "Regra adicionada na posição {{n}}, em último; todas as regras acima são verificadas primeiro.",
-      "deleted": "Regra eliminada. Regras restantes: {{count}}.",
-      "duplicated": "Cópia inserida na posição {{n}}. Nunca pode corresponder enquanto a original acima estiver ativa.",
-      "gateAdded": "Limiar de frequência adicionado à correspondência. Abaixo dele, a regra não corresponde e a avaliação continua.",
-      "inserted": "Regra adicionada na posição {{n}} de {{total}}. Todas as regras anteriores são verificadas primeiro.",
-      "inspecting": "Editar a regra {{n}} de {{total}} — {{name}}.",
-      "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Último valor removido: esta condição não pode ser guardada até conter um valor.",
-      "moved": "{{name}} movida para a posição {{to}} de {{total}}{{how}}. Agora é executada {{where}}.",
-      "predicateCap": "Esta regra já contém o máximo de {{max}} condições.",
-      "ruleAbove": "a regra acima",
-      "ruleDisabled": "{{name}} desativada: é totalmente ignorada e as regras abaixo passam a receber estes pedidos.",
-      "ruleEnabled": "{{name}} ativada: volta a ser avaliada na posição {{n}}.",
-      "runsAfter": "depois de {{name}}",
-      "runsFirst": "primeiro",
-      "runsLast": "em último",
-      "saved": "Regras guardadas e enviadas para os serviços associados.",
-      "theRule": "A regra",
-      "valuesDropped": "A condição foi alterada para {{type}}. Valores que não puderam ser mantidos: {{count}}.",
-      "via": {
-        "drag": "por arrastamento",
-        "keyboard": "pelo teclado"
-      },
-      "viewCanvas": "Visualização do quadro. As regras são executadas da esquerda para a direita; a primeira correspondência vence.",
-      "viewList": "Visualização da lista. As regras são executadas de cima para baixo; a primeira correspondência vence."
-    },
-    "search": "Pesquisar nome ou descrição...",
-    "test": {
-      "asn": "ASN",
-      "asn_help": "Deixe vazio para simular uma consulta ASN sem êxito.",
-      "asn_invalid": "O ASN tem de ser um número",
-      "assume_not_whitelisted": "Pressupõe que o cliente não está na lista de permissões.",
-      "assume_rate_counter": "O número do pedido {{request_number}} é um valor introduzido, não uma medição.",
-      "assume_regex_budget": "Pressupõe que o limite de expressões regulares da instância não está esgotado.",
-      "assumptions": "Pressupostos",
-      "country": "País",
-      "detail_challenge": "O desafio assume o controlo; o restante conjunto de segurança continua a ser executado.",
-      "detail_detect": "Este serviço está no modo de deteção, pelo que nada é efetivamente aplicado.",
-      "detail_status": "O cliente recebe {{status}}.",
-      "failed": "Não foi possível executar o teste",
-      "geo": "Consulta GeoIP",
-      "geo_help": "Quando a pesquisa GeoIP está indisponível, as regras de país e ASN passam a ser DESCONHECIDAS, pelo que nunca podem corresponder.",
-      "geo_local": "Endereço local / privado",
-      "geo_resolved": "Resolvido",
-      "geo_unavailable": "Base de dados indisponível",
-      "intro": "Avalia, por ordem, cada fluxo de trabalho associado ao serviço, exatamente como a instância faria.",
-      "invalid": "Corrija os problemas acima antes de testar.",
-      "ip": "IP do cliente",
-      "method": "Método",
-      "number": "Número do pedido",
-      "number_help": "O enésimo pedido deste cliente na janela. Um pressuposto fornecido por si, não uma medição.",
-      "open": "Testar um pedido",
-      "other_matched": "correspondeu aqui",
-      "other_no_match": "nenhuma regra correspondeu",
-      "other_unreached": "não alcançado",
-      "other_workflows": "Outros fluxos de trabalho deste serviço",
-      "out_draft": "Este serviço é um rascunho: ainda não foi compilado nenhum fluxo de trabalho para ele.",
-      "out_match": "{{workflow}} · {{rule}} correspondeu — ação: {{action}}.",
-      "out_no_match": "Nenhuma regra correspondeu. O pedido continua para o restante conjunto de segurança.",
-      "out_not_attached": "Este fluxo de trabalho não está associado a nenhum serviço, pelo que não existe uma sequência de regras para avaliar.",
-      "out_whitelisted": "Na lista de permissões: todo o fluxo de trabalho é ignorado e nenhuma regra é avaliada.",
-      "run": "Executar teste",
-      "service": "Serviço",
-      "title": "Testar um pedido",
-      "unreachable": "Não foi possível contactar o endpoint de teste",
-      "uri": "Caminho URI",
-      "uri_help": "Apenas o caminho: $uri nunca contém uma cadeia de consulta.",
-      "v_gate": "as condições correspondem · limiar fechado em {{n}} de {{count}}",
-      "v_match": "CORRESPONDEU",
-      "v_unknown": "DESCONHECIDO",
-      "v_unknown_help": "Não foi possível determinar um dado necessário a esta regra, pelo que nunca pode corresponder.",
-      "whitelisted": "Este cliente está na lista de permissões",
-      "crowdsec": "CrowdSec",
-      "crowdsec_allowed": "O CrowdSec permitiu-o",
-      "crowdsec_help": "O que o CrowdSec decidiu sobre este pedido antes da execução dos workflows. Um pedido que o CrowdSec nunca avaliou não é o mesmo que um sem nada contra ele: o primeiro deixa uma condição do CrowdSec indeterminada, o segundo torna-a falsa.",
-      "crowdsec_remediated": "O CrowdSec remediou-o",
-      "crowdsec_remediation": "Remediação",
-      "crowdsec_source": "Origem do veredicto",
-      "crowdsec_unavailable": "O CrowdSec não avaliou este pedido"
-    },
-    "threshold": "Apenas acima de uma taxa",
-    "threshold_count": "Pedidos",
-    "threshold_window": "Por (segundos)",
-    "tree": {
-      "addCondition": "Condição",
-      "addGroup": "Grupo",
-      "all": "Todas",
-      "allMeta": "Condições: {{count}}; todas têm de ser verdadeiras",
-      "and": "e",
-      "any": "Qualquer uma",
-      "anyMeta": "Condições: {{count}}; pelo menos uma tem de ser verdadeira",
-      "empty": "Grupo vazio: adicione uma condição; não pode ser guardado assim.",
-      "noGroupHolds": "nenhum grupo contém entradas {{kind}}",
-      "noneMeta": "corresponde quando nenhuma destas é verdadeira",
-      "not": "Nenhuma",
-      "or": "ou",
-      "removeGroup": "Remover grupo"
-    },
-    "truncated": "Apenas os primeiros 500 fluxos de trabalho são apresentados. Refine a lista através da API para obter o resultado completo.",
-    "untitled": "Regra sem título",
-    "value": {
-      "add": "Valor"
-    },
-    "values": {
-      "fewer": "Mostrar menos",
-      "more": "+{{n}} adicionais"
-    },
-    "verb": {
-      "asn": "é",
-      "country": "é",
-      "group": "está no grupo",
-      "ip": "está em",
-      "isIn": "está em",
-      "isOneOf": "é um de",
-      "method": "é",
-      "uri": "corresponde a"
-    },
-    "view": {
-      "canvas": "Quadro",
-      "list": "Lista"
-    },
-    "action_help": {
-      "block": "Negar o pedido",
-      "challenge": "Demonstrar que é humano",
-      "redirect": "Enviá-lo para outro destino"
-    },
-    "condition": {
-      "ip": "IP / CIDR",
-      "method": "Método HTTP",
-      "uri": "URI",
-      "crowdsec": "Veredicto CrowdSec"
-    },
-    "uri_match": {
-      "exact": "é exatamente",
-      "prefix": "começa por",
-      "regex": "corresponde à expressão regular"
-    },
-    "crowdsec_field": {
-      "remediation": "a remediação é",
-      "source": "a origem é"
-    },
-    "crowdsec_value": {
-      "appsec": "AppSec",
-      "ban": "bloqueio",
-      "captcha": "captcha",
-      "lapi": "API local"
-    },
-    "reason": {
-      "sentence": "Workflow de segurança {{workflow}}: {{action}}"
+    "subtitle": "Estado da cache de reverse-proxy, métricas de taxa de sucesso agregadas e controis de limpeza imediata.",
+    "flash": {
+      "error_purging_web_cache": "Erro ao purgar a cache web: {{message}}",
+      "web_cache_purged_instance_failed_unreachable": "Cache web limpa. Instâncias limpas: {{value}}, com falha: {{value2}}, inacessíveis e ignoradas: {{value3}} (nada foi colocado em fila).",
+      "url_required_purge_by_url": "É necessário um URL para purgar por URL",
+      "error_fetching_web_cache_metrics": "Erro ao obter as métricas da cache web: {{message}}",
+      "error_fetching_web_cache_status": "Erro ao obter o estado da cache web: {{message}}",
+      "purged_for_url": "Cache web purgada para {{url}}",
+      "purged_all_entries": "Cache web purgada (todas as entradas)"
     }
   },
-  "request_path": {
-    "client": "Cliente",
-    "source": "Ordem de execução do plugin para a fase {{phase}}, a partir de {{setting}} — uma ordem de apresentação, não um rastreio por pedido.",
-    "terminal": {
-      "inline": "Servidor de origem",
-      "none": "Nenhum serviço ativo",
-      "pool": "Pool upstream",
-      "root": "Ficheiros locais"
-    },
-    "title": "Caminho do pedido",
-    "unordered": "Não existe uma posição declarada na fase {{phase}}; executa-se após os plugins ordenados, em ordem alfabética."
-  },
   "service": {
+    "default_server": {
+      "certificate": {
+        "action": "Editar o certificado de substituição",
+        "help": "O certificado apresentado para um nome de anfitrião desconhecido. É uma definição global do plugin de certificado personalizado e é rejeitado se cobrir um serviço configurado.",
+        "title": "Certificado do servidor predefinido"
+      },
+      "explainer": "Responde a pedidos que não correspondem a nenhum serviço configurado: nomes de anfitrião desconhecidos, acesso por IP direto. Configure aqui o seu certificado, TLS, cabeçalhos e páginas de erro.",
+      "name": "Servidor predefinido",
+      "single_site": "O servidor predefinido torna-se configurável quando MULTISITE está definido como yes; em modo de site único mantém o seu comportamento incorporado e responde a pedidos que não correspondem a nenhum serviço configurado."
+    },
+    "mode": {
+      "help": "Um serviço de apenas redirecionamento limita-se a redirecionar: sem proxy inverso, sem servir ficheiros, sem fragmento NGINX personalizado, sem modelo e sem upstream ou fluxo de trabalho associado. Em tudo o resto continua a ser um serviço completo. A declaração é explícita e nunca é deduzida das definições de redirecionamento. Deixará de contar para a sua quota de serviços PRO assim que a facturação de apenas redirecionamento estiver activa.",
+      "redirect_only": "Apenas redirecionamento",
+      "standard": "Padrão",
+      "title": "Modo do serviço"
+    },
     "resources": {
       "attach": "Anexar",
       "conflict": {
         "inline": "O {{service}} já serve o {{path}} através das suas próprias definições {{family}}. Limpe estas definições para o {{path}}, ou use um caminho diferente.",
         "primary": "O “{{name}}” é atualmente o certificado principal para este serviço e será desativado sem aviso prévio. O principal é aquele que está realmente implementado.",
-        "resource": "O {{service}} já serve o {{path}} através do “{{kind}}” {{name}}. Desanexe o “{{name}}”, ou atribua um caminho diferente a um deles.",
+        "resource_redirect": "O {{service}} já serve o {{path}} através do redirecionamento “{{name}}”. Desanexe o “{{name}}”, ou atribua um caminho diferente a um deles.",
+        "resource_upstream": "O {{service}} já serve o {{path}} através do servidor upstream “{{name}}”. Desanexe o “{{name}}”, ou atribua um caminho diferente a um deles.",
         "stream": "Um serviço de stream proxy todas as conexões para um único backend, e o {{service}} já utiliza o upstream “{{name}}”. Desanexe-o primeiro.",
         "stream_inline": "O {{service}} já tem o seu próprio backend no REVERSE_PROXY_HOST. Limpe esta definição para permitir que o upstream assuma o controlo."
       },
@@ -3182,7 +3976,7 @@
       "none": "Nenhum anexado",
       "primary": "Certificado principal",
       "template": {
-        "add": "Add",
+        "add": "Adicionar",
         "add_label": "Modelo a adicionar como camada",
         "adding": "Guardar aplica {{names}}. Muitas definições podem mudar ao mesmo tempo.",
         "move_down": "Mover este modelo para mais tarde",
@@ -3200,54 +3994,14 @@
       },
       "title": "Recursos anexados",
       "unavailable": "Indisponível",
-      "nothing_available": "Não há nada disponível para associar."
-    },
-    "default_server": {
-      "certificate": {
-        "action": "Editar o certificado de substituição",
-        "help": "O certificado apresentado para um nome de anfitrião desconhecido. É uma definição global do plugin de certificado personalizado e é rejeitado se cobrir um serviço configurado.",
-        "title": "Certificado do servidor predefinido"
-      },
-      "explainer": "Responde a pedidos que não correspondem a nenhum serviço configurado: nomes de anfitrião desconhecidos, acesso por IP direto. Configure aqui o seu certificado, TLS, cabeçalhos e páginas de erro.",
-      "name": "Servidor predefinido",
-      "single_site": "O servidor predefinido torna-se configurável quando MULTISITE está definido como yes; em modo de site único mantém o seu comportamento incorporado e responde a pedidos que não correspondem a nenhum serviço configurado."
-    },
-    "mode": {
-      "help": "Um serviço de apenas redirecionamento limita-se a redirecionar: sem proxy inverso, sem servir ficheiros, sem fragmento NGINX personalizado, sem modelo e sem upstream ou fluxo de trabalho associado. Em tudo o resto continua a ser um serviço completo. A declaração é explícita e nunca é deduzida das definições de redirecionamento. Deixará de contar para a sua quota de serviços PRO assim que a facturação de apenas redirecionamento estiver activa.",
-      "redirect_only": "Apenas redirecionamento",
-      "standard": "Padrão",
-      "title": "Modo do serviço"
+      "nothing_available": "Não há nada disponível para associar.",
+      "confirm_detach": "Desanexar este recurso de {{service}}?",
+      "confirm_detach_certificate": "Desanexar este certificado de {{service}}?",
+      "confirm_detach_redirect": "Desanexar este redirecionamento de {{service}}?",
+      "confirm_detach_upstream": "Desanexar este servidor upstream de {{service}}?",
+      "confirm_detach_workflow": "Desanexar este fluxo de trabalho de {{service}}?",
+      "confirm_detach_template": "Desanexar este modelo de {{service}}?"
     }
-  },
-  "onboarding": {
-    "dismiss": "Dispensar",
-    "error": "Não foi possível carregar o percurso.",
-    "hint": {
-      "bans": "Aqui estão os clientes que o BunkerWeb está a recusar. Cada linha mostra o motivo e quando o bloqueio expira.",
-      "home": "Este painel mostra o estado atual: instâncias ativas, serviços protegidos e tráfego tratado pelo BunkerWeb.",
-      "logs": "Registos em direto de cada instância, filtráveis por instância e gravidade.",
-      "reports": "Todos os pedidos bloqueados aparecem aqui. Abra um para ver que verificação de segurança o travou, e porquê.",
-      "title": "Visita rápida"
-    },
-    "item": {
-      "first_block": "Ver o BunkerWeb bloquear algo",
-      "https": "Pôr o HTTPS a funcionar",
-      "install": "Instalar o BunkerWeb num ou mais hosts",
-      "mfa": "Ativar MFA",
-      "pro": "Ativar o BunkerWeb PRO",
-      "read_bans": "Ver quem está banido, e até quando",
-      "read_home": "Ler no painel o que está a funcionar corretamente neste momento",
-      "read_logs": "Acompanhar os registos em direto em todas as instâncias",
-      "read_reports": "Perceber porque um pedido foi bloqueado",
-      "service": "Registe o seu primeiro serviço",
-      "workflow": "Associar um fluxo de segurança"
-    },
-    "not_saved": "Não foi possível guardar.",
-    "pro_tips": "Dicas de PRO",
-    "restart": "Reiniciar o percurso",
-    "restart_help": "Mostrar novamente os passos iniciais na barra superior.",
-    "subtitle": "Alguns passos para o BunkerWeb proteger os seus serviços.",
-    "title": "Primeiros passos"
   },
   "timings": {
     "subtitle": "Tempo que cada plugin demora em cada fase do pedido, lido em tempo real de todas as instâncias e agregado.",
@@ -3269,7 +4023,10 @@
     "disabled_title": "Os tempos dos plugins estão desativados",
     "disabled_help": "Defina METRICS_COLLECT_TIMINGS como yes para medir o tempo de cada plugin. A duração total do pedido é recolhida de qualquer forma.",
     "unreachable_title": "Nenhuma instância reportou tempos",
-    "unreachable_help": "Os tempos são lidos das próprias instâncias, pelo que nenhuma respondeu — ou nenhuma processou ainda um pedido."
+    "unreachable_help": "Os tempos são lidos das próprias instâncias, pelo que nenhuma respondeu — ou nenhuma processou ainda um pedido.",
+    "flash": {
+      "error_fetching_plugin_timings": "Erro ao obter os tempos de execução dos plugins: {{message}}"
+    }
   },
   "whatsnew": {
     "missing_action": "Abrir o registo de alterações no GitHub",
@@ -3280,15 +4037,6 @@
       "title": "Novidades"
     },
     "subtitle": "Todas as versões do BunkerWeb, a mais recente primeiro, diretamente do registo de alterações incluído nesta instalação."
-  },
-  "antibot": {
-    "reason": {
-      "sentence": "Desafio antibot ({{provider}}) apresentado"
-    }
-  },
-  "confirm": {
-    "revoke_credential": "Revogar a credencial desta instância? O plano de controlo deixará de conseguir contactá-la.",
-    "rotate_credential": "Rodar a credencial desta instância? Falha se a instância estiver inacessível."
   },
   "crowdsec": {
     "reason": {
@@ -3301,158 +4049,498 @@
       "sentence_scenario": "{{source}}: {{action}} (cenário: {{scenario}})",
       "source": {
         "appsec": "CrowdSec AppSec",
-        "failure_policy": "CrowdSec AppSec failure policy",
+        "failure_policy": "Política de falha do CrowdSec AppSec",
         "lapi": "CrowdSec LAPI"
       }
     },
     "alert": {
-      "id": "Alert ID",
-      "load": "Load full evidence",
-      "started": "Started",
-      "stopped": "Stopped"
+      "id": "ID do alerta",
+      "load": "Carregar todas as evidências",
+      "started": "Iniciado",
+      "stopped": "Parado"
     },
-    "captured_history": "Captured history",
-    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+    "captured_history": "Histórico capturado",
+    "captured_history_help": "Os dados de relatório capturados descrevem o que foi observado no momento do pedido; não provam o estado atual da decisão.",
     "connection": {
-      "appsec": "Last AppSec observation",
-      "connected": "Connected",
-      "connection_error": "Connection error",
-      "configured": "Configured",
-      "global": "all services",
-      "label": "CrowdSec connection",
-      "last_sync": "Last successful sync",
-      "local_api": "Local API",
-      "management": "Management",
-      "mode": "Mode",
-      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
-      "read_only": "Read only",
-      "required": "Choose a CrowdSec connection first.",
-      "sync": "Decision sync",
-      "sync_current": "Up to date",
-      "sync_not_synchronized": "Not synchronized yet",
-      "sync_stale": "Stale",
-      "selected": "Selected connection",
-      "scope_help": "The selected connection applies to decisions, allowlists and IP investigation below.",
-      "filter": "Filter connections by hostname or service"
+      "appsec": "Última observação do AppSec",
+      "connected": "Ligado",
+      "connection_error": "Erro de ligação",
+      "configured": "Configurado",
+      "global": "todos os serviços",
+      "label": "Ligação CrowdSec",
+      "last_sync": "Última sincronização bem-sucedida",
+      "local_api": "API local",
+      "management": "Gestão",
+      "mode": "Modo",
+      "none": "Não foi encontrada nenhuma ligação CrowdSec utilizável. Verifique os erros da instância e a configuração do plugin.",
+      "read_only": "Só de leitura",
+      "required": "Escolha primeiro uma ligação CrowdSec.",
+      "sync": "Sincronização de decisões",
+      "sync_current": "Atualizado",
+      "sync_not_synchronized": "Ainda não sincronizado",
+      "sync_stale": "Desatualizado",
+      "selected": "Ligação selecionada",
+      "scope_help": "A ligação selecionada aplica-se às decisões, às listas de permissões e à investigação de IPs abaixo.",
+      "filter": "Filtrar ligações por nome de anfitrião ou serviço"
     },
-    "current_state": "Current state",
-    "current_state_help": "Current state may change after this observation.",
+    "current_state": "Estado atual",
+    "current_state_help": "O estado atual pode mudar após esta observação.",
     "decision": {
-      "duration": "Duration",
-      "expires": "Expires",
-      "id": "Decision ID",
-      "origin": "Origin",
-      "scenario": "Scenario",
-      "scope": "Scope",
-      "target": "Target",
-      "type": "Type"
+      "duration": "Duração",
+      "expires": "Expira",
+      "id": "ID da decisão",
+      "origin": "Origem",
+      "scenario": "Cenário",
+      "scope": "Âmbito",
+      "target": "Alvo",
+      "type": "Tipo"
     },
     "decisions": {
-      "count": "Showing {{start}}–{{end}} of {{total}}",
-      "help": "This is current state read directly from the selected CrowdSec engine.",
-      "none": "No active decisions match these filters.",
-      "pagination": "Decision pages",
-      "title": "Active decisions"
+      "count": "A mostrar {{start}}–{{end}} de {{total}}",
+      "help": "Este é o estado atual, lido diretamente do motor CrowdSec selecionado.",
+      "none": "Nenhuma decisão ativa corresponde a estes filtros.",
+      "pagination": "Páginas de decisões",
+      "title": "Decisões ativas"
     },
     "error": {
-      "request": "The CrowdSec request failed."
+      "request": "O pedido ao CrowdSec falhou."
     },
     "investigation": {
-      "alerts": "Available CrowdSec alert evidence",
-      "current_decisions": "Current CrowdSec decisions",
-      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
-      "ip": "IP address",
-      "local_bans": "Current local BunkerWeb bans",
-      "no_alerts": "No alert evidence is available.",
-      "no_bans": "No current local ban was found.",
-      "no_decisions": "No current CrowdSec decision was found.",
-      "no_reports": "No recent captured report was found.",
+      "alerts": "Evidências de alertas do CrowdSec disponíveis",
+      "current_decisions": "Decisões atuais do CrowdSec",
+      "help": "As decisões atuais do CrowdSec são verificadas em conjunto com os banimentos locais e os relatórios capturados.",
+      "ip": "Endereço IP",
+      "local_bans": "Banimentos locais atuais do BunkerWeb",
+      "no_alerts": "Não há evidências de alertas disponíveis.",
+      "no_bans": "Não foi encontrado nenhum banimento local atual.",
+      "no_decisions": "Não foi encontrada nenhuma decisão atual do CrowdSec.",
+      "no_reports": "Não foi encontrado nenhum relatório capturado recente.",
       "placeholder": "192.0.2.10",
-      "reports": "Recent BunkerWeb reports",
-      "result": "Investigation for {{ip}}",
-      "submit": "Investigate",
-      "title": "Investigate an IP",
-      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
-      "unavailable": "Unavailable: {{error}}",
-      "summary": "Evidence found for this IP",
-      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
-      "summary_decisions": "CrowdSec decisions",
-      "summary_bans": "Local BunkerWeb bans",
-      "summary_alerts": "CrowdSec alert evidence",
-      "summary_reports": "BunkerWeb reports",
-      "summary_active": "{{total}} active",
-      "summary_available": "{{total}} available",
-      "summary_captured": "{{total}} captured",
-      "summary_none": "None found",
-      "summary_unreadable": "Could not be read"
+      "reports": "Relatórios recentes do BunkerWeb",
+      "result": "Investigação de {{ip}}",
+      "submit": "Investigar",
+      "title": "Investigar um IP",
+      "truncated": "A mostrar {{shown}} de {{total}} resultados (limite da origem: {{limit}}).",
+      "unavailable": "Indisponível: {{error}}",
+      "summary": "Evidências encontradas para este IP",
+      "summary_help": "Isto abrange a ligação CrowdSec selecionada e os banimentos do próprio BunkerWeb. As outras proteções não são verificadas aqui, e evidências que não puderam ser lidas não provam que este IP é permitido.",
+      "summary_decisions": "Decisões do CrowdSec",
+      "summary_bans": "Banimentos locais do BunkerWeb",
+      "summary_alerts": "Evidências de alertas do CrowdSec",
+      "summary_reports": "Relatórios do BunkerWeb",
+      "summary_active": "{{total}} ativas",
+      "summary_available": "{{total}} disponíveis",
+      "summary_captured": "{{total}} capturados",
+      "summary_none": "Nada encontrado",
+      "summary_unreadable": "Não foi possível ler"
     },
     "local_ban": {
-      "expires": "Expires",
-      "reason": "Reason",
-      "service": "Service"
+      "expires": "Expira",
+      "reason": "Motivo",
+      "service": "Serviço"
     },
-    "next": "Next",
-    "observed_at": "Observed {{time}}",
-    "previous": "Previous",
-    "refresh": "Refresh status",
+    "next": "Seguinte",
+    "observed_at": "Observado {{time}}",
+    "previous": "Anterior",
+    "refresh": "Atualizar estado",
     "remove": {
-      "action": "Remove",
-      "confirm": "I understand and want to remove this decision.",
-      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
-      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
-      "submit": "Remove decision",
-      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). Matching decisions remaining: {{remaining}}. Local bans or AppSec may still block.",
-      "title": "Remove CrowdSec decision"
+      "action": "Remover",
+      "confirm": "Compreendo e quero remover esta decisão.",
+      "impact": "Isto remove a decisão no motor CrowdSec partilhado e afeta todos os bouncers ligados. Decisões em cache, outro intervalo, banimentos locais ou o AppSec ainda podem bloquear o alvo.",
+      "selection": "Remover {{scope}} {{value}} ({{type}}), cenário {{scenario}}, origem {{origin}}, de {{source}} ({{engine}})?",
+      "submit": "Remover decisão",
+      "success": "Removida na origem do CrowdSec. A propagação está {{status}} ({{mode}}, intervalo {{interval}}). Decisões correspondentes restantes: {{remaining}}. Banimentos locais ou o AppSec ainda podem bloquear.",
+      "title": "Remover decisão do CrowdSec"
     },
     "report": {
-      "captured": "Captured at",
-      "date": "Report time",
-      "decisions": "Captured decisions",
-      "entry": "Security report",
-      "matched_target": "Matched target",
-      "metadata": "Decision metadata",
-      "metadata_complete": "Complete",
-      "metadata_incomplete": "Incomplete",
-      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
-      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
-      "reason": "Reason",
-      "remediation": "Captured remediation",
-      "scope": "Captured service scope",
-      "service": "Service",
-      "source": "Captured source",
-      "identifier": "Report identifier"
+      "captured": "Capturado em",
+      "date": "Hora do relatório",
+      "decisions": "Decisões capturadas",
+      "entry": "Relatório de segurança",
+      "matched_target": "Alvo correspondente",
+      "metadata": "Metadados da decisão",
+      "metadata_complete": "Completo",
+      "metadata_incomplete": "Incompleto",
+      "metadata_unavailable": "Os metadados do instantâneo do CrowdSec não estão disponíveis para este relatório mais antigo.",
+      "metadata_warning": "Alguns metadados de decisão capturados não estavam disponíveis no momento do pedido.",
+      "reason": "Motivo",
+      "remediation": "Remediação capturada",
+      "scope": "Âmbito de serviço capturado",
+      "service": "Serviço",
+      "source": "Origem capturada",
+      "identifier": "Identificador do relatório"
     },
-    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
-    "title": "CrowdSec operator",
-    "unknown": "Unknown",
+    "subtitle": "Inspecione cada motor CrowdSec configurado e investigue um IP a partir das evidências atuais e capturadas.",
+    "title": "Operador do CrowdSec",
+    "unknown": "Desconhecido",
     "allowlists": {
-      "title": "CrowdSec allowlists",
-      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
-      "refresh": "Refresh allowlists",
-      "pages": "Allowlist pages",
-      "empty": "No allowlists were found on this engine.",
-      "console": "Console managed",
-      "local": "Locally managed",
-      "no_entries": "No active entries.",
-      "never": "Never",
-      "comment": "Comment",
-      "unknown": "Allowlist status is unavailable.",
-      "not_allowed": "This IP does not match a CrowdSec allowlist.",
-      "allowed": "Allowlisted by CrowdSec",
-      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
+      "title": "Listas de permissões do CrowdSec",
+      "help": "IPs e redes confiáveis para o motor selecionado. Estas exceções aplicam-se a todos os seus serviços e bouncers ligados.",
+      "refresh": "Atualizar listas de permissões",
+      "pages": "Páginas de listas de permissões",
+      "empty": "Nenhuma lista de permissões foi encontrada neste motor.",
+      "console": "Gerida pela Console",
+      "local": "Gerida localmente",
+      "no_entries": "Sem entradas ativas.",
+      "never": "Nunca",
+      "comment": "Comentário",
+      "unknown": "O estado da lista de permissões não está disponível.",
+      "not_allowed": "Este IP não corresponde a nenhuma lista de permissões do CrowdSec.",
+      "allowed": "Na lista de permissões pelo CrowdSec",
+      "impact": "Esta é uma exceção para todo o motor. Os banimentos locais do BunkerWeb, outras proteções ou decisões em cache ainda podem bloquear este IP.",
       "guide": {
-        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
-        "title": "How to manage trusted IPs and networks",
-        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
-        "create": "Create a list once, or use an existing locally managed list.",
-        "add": "Add trusted IPs or CIDR networks.",
-        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
-        "inspect": "Inspect the list and its expiry dates.",
-        "remove": "Remove an exception when it is no longer needed.",
-        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
-        "console": "Edit Console-managed lists in the CrowdSec Console.",
-        "docs": "CrowdSec allowlist documentation"
+        "intro": "Aqui pode consultar as listas de permissões e verificar IPs. Para adicionar ou remover entradas, use o cscli no motor CrowdSec.",
+        "title": "Como gerir IPs e redes confiáveis",
+        "where": "Requer CrowdSec 1.7 ou posterior. Execute estes comandos no anfitrião ou dentro do contentor que executa a API local (LAPI) do motor selecionado, com acesso à respetiva configuração e base de dados do CrowdSec. Substitua o nome da lista, o IP e a rede de exemplo pelos seus.",
+        "create": "Crie uma lista uma única vez ou use uma lista existente gerenciada localmente.",
+        "add": "Adicione IPs ou redes CIDR confiáveis.",
+        "expiration": "Este exemplo expira após 24 horas. Omita --expiration para uma entrada que não expira. IPv4 e IPv6 são suportados.",
+        "inspect": "Inspecione a lista e as suas datas de expiração.",
+        "remove": "Remova uma exceção quando já não for necessária.",
+        "refresh": "Após uma alteração, atualize as listas de permissões e investigue novamente o IP. Remover uma exceção permite futuras decisões do CrowdSec; não cria um banimento. Os banimentos locais do BunkerWeb e as outras proteções permanecem separados.",
+        "console": "Edite as listas gerenciadas pelo Console no CrowdSec Console.",
+        "docs": "Documentação das listas de permissões do CrowdSec"
       }
     }
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "Desafio antibot ({{provider}}) apresentado"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "Revogar a credencial desta instância? O plano de controlo deixará de conseguir contactá-la.",
+    "rotate_credential": "Rodar a credencial desta instância? Falha se a instância estiver inacessível."
+  },
+  "general": {
+    "settings": {
+      "IS_LOADING": {
+        "label": "uso interno carregamento",
+        "help": "Uso interno: definir como yes quando o BW está a carregar."
+      },
+      "NGINX_PREFIX": {
+        "label": "prefixo nginx",
+        "help": "Onde o nginx procurará as configurações."
+      },
+      "HTTP_PORT": {
+        "label": "Porta HTTP",
+        "help": "Número da porta HTTP à qual o bunkerweb se liga. Deixe vazio para desativar a escuta HTTP."
+      },
+      "HTTPS_PORT": {
+        "label": "Porta HTTPS",
+        "help": "Número da porta HTTPS à qual o bunkerweb se liga. Deixe vazio para desativar a escuta HTTPS."
+      },
+      "MULTISITE": {
+        "label": "Multisite",
+        "help": "Ativação multisite."
+      },
+      "SERVER_NAME": {
+        "label": "Nome do servidor",
+        "help": "Lista dos hosts virtuais servidos pelo bunkerweb. (separados por espaços)"
+      },
+      "WORKER_PROCESSES": {
+        "label": "Processos worker",
+        "help": "Número de processos worker."
+      },
+      "WORKER_RLIMIT_NOFILE": {
+        "label": "Ficheiros abertos por worker",
+        "help": "Número máximo de ficheiros abertos para os processos worker."
+      },
+      "WORKER_CONNECTIONS": {
+        "label": "Ligações por worker",
+        "help": "Número máximo de ligações por worker."
+      },
+      "WORKER_SHUTDOWN_TIMEOUT": {
+        "label": "Tempo limite de encerramento do worker",
+        "help": "Tempo limite para um encerramento gradual dos processos worker. Após este atraso, os workers antigos são terminados à força durante um reload para evitar o crescimento de memória."
+      },
+      "DNS_RESOLVERS": {
+        "label": "Resolvedores DNS",
+        "help": "Endereços DNS dos resolvedores a utilizar."
+      },
+      "CLIENT_BODY_TIMEOUT": {
+        "label": "Tempo limite do corpo do cliente",
+        "help": "Tempo limite para a leitura do corpo do pedido do cliente."
+      },
+      "CLIENT_HEADER_TIMEOUT": {
+        "label": "Tempo limite do cabeçalho do cliente",
+        "help": "Tempo limite para a leitura do cabeçalho do pedido do cliente."
+      },
+      "KEEPALIVE_TIMEOUT": {
+        "label": "Tempo limite keepalive",
+        "help": "Tempo limite para as ligações de cliente keep-alive."
+      },
+      "SEND_TIMEOUT": {
+        "label": "Tempo limite de envio",
+        "help": "Tempo limite para a transmissão de uma resposta ao cliente."
+      },
+      "WORKERLOCK_MEMORY_SIZE": {
+        "label": "Tamanho de memória do Workerlock de inicialização",
+        "help": "Tamanho do lua_shared_dict para os workers de inicialização"
+      },
+      "INTERNALSTORE_MEMORY_SIZE": {
+        "label": "Tamanho de memória da internalstore",
+        "help": "Tamanho da internalstore interna."
+      },
+      "DATASTORE_MEMORY_SIZE": {
+        "label": "Tamanho de memória do datastore",
+        "help": "Tamanho do datastore interno."
+      },
+      "DATASTORE_LRU_SIZE": {
+        "label": "Tamanho do LRU do datastore",
+        "help": "Número de slots para o LRU partilhado do datastore por worker (utilizado pelo internalstore e pelas caches locais de plugins por worker). Aceita um inteiro simples ou uma abreviatura `k`/`m` (ex.: `1k`, `10k`, `1m`)."
+      },
+      "CACHESTORE_MEMORY_SIZE": {
+        "label": "Tamanho de memória da cachestore",
+        "help": "Tamanho da cachestore interna."
+      },
+      "CACHESTORE_IPC_MEMORY_SIZE": {
+        "label": "Tamanho de memória da cachestore ipc",
+        "help": "Tamanho da cachestore interna (ipc)."
+      },
+      "CACHESTORE_MISS_MEMORY_SIZE": {
+        "label": "Tamanho de memória da cachestore miss",
+        "help": "Tamanho da cachestore interna (miss)."
+      },
+      "CACHESTORE_LOCKS_MEMORY_SIZE": {
+        "label": "Tamanho de memória da cachestore locks",
+        "help": "Tamanho da cachestore interna (locks)."
+      },
+      "SESSIONS_REVOCATION_MEMORY_SIZE": {
+        "label": "Tamanho de memória de revogação de sessões",
+        "help": "Tamanho do armazém interno que contém os identificadores de sessão de cookie revogados."
+      },
+      "USE_API": {
+        "label": "Ativar API",
+        "help": "Ativar a API interna do BunkerWeb."
+      },
+      "API_HTTP_PORT": {
+        "label": "Número da porta da API",
+        "help": "Número da porta de escuta para a API interna do BunkerWeb."
+      },
+      "API_HTTPS_PORT": {
+        "label": "Número da porta HTTPS da API",
+        "help": "Número da porta de escuta (TLS) para a API interna do BunkerWeb."
+      },
+      "API_LISTEN_IP": {
+        "label": "IP de escuta da API",
+        "help": "Endereço IP de escuta para a API interna do BunkerWeb."
+      },
+      "API_LISTEN_HTTP": {
+        "label": "Escuta HTTP da API",
+        "help": "Escuta HTTP para a API interna do BunkerWeb."
+      },
+      "API_LISTEN_HTTPS": {
+        "label": "Escuta HTTPS da API",
+        "help": "Escuta HTTPS (SSL/TLS) para a API interna do BunkerWeb."
+      },
+      "API_SERVER_NAME": {
+        "label": "Nome do servidor da API",
+        "help": "Nome do servidor (host virtual) para a API interna do BunkerWeb."
+      },
+      "API_TOKEN": {
+        "label": "Token de acesso à API",
+        "help": "Token opcional para autenticar chamadas à API. Se definido, o scheduler (e qualquer cliente) tem de o enviar através do cabeçalho Authorization. Nota: tem de ser definido tanto nos ambientes do BunkerWeb como do scheduler."
+      },
+      "API_WHITELIST_IP": {
+        "label": "IP na lista branca da API",
+        "help": "Lista de IP/rede autorizados a contactar a API interna do BunkerWeb. (formato: ip/máscara ou ipv6/máscara, separados por espaços)"
+      },
+      "AUTOCONF_MODE": {
+        "label": "Modo Autoconf",
+        "help": "Ativar a integração com o Docker Autoconf."
+      },
+      "SWARM_MODE": {
+        "label": "Modo Swarm",
+        "help": "Ativar a integração com o Docker Swarm."
+      },
+      "KUBERNETES_MODE": {
+        "label": "Modo Kubernetes",
+        "help": "Ativar a integração com o Kubernetes."
+      },
+      "SERVER_TYPE": {
+        "label": "Tipo de servidor",
+        "help": "Tipo de servidor: http ou stream."
+      },
+      "LISTEN_STREAM": {
+        "label": "Escuta stream",
+        "help": "Ativar a escuta não-ssl (passthrough)."
+      },
+      "LISTEN_STREAM_PORT": {
+        "label": "Porta de escuta stream",
+        "help": "Porta de escuta para não-ssl (passthrough). Deixe vazio para desativar a escuta stream não-SSL."
+      },
+      "LISTEN_STREAM_PORT_SSL": {
+        "label": "Porta de escuta stream ssl",
+        "help": "Porta de escuta para ssl (passthrough). Deixe vazio para desativar a escuta stream SSL."
+      },
+      "USE_TCP": {
+        "label": "Escutar TCP",
+        "help": "Escuta TCP (stream)."
+      },
+      "USE_UDP": {
+        "label": "Escutar UDP",
+        "help": "Escuta UDP (stream)."
+      },
+      "USE_IPV6": {
+        "label": "Utilizar IPv6",
+        "help": "Ativar a conetividade IPv6."
+      },
+      "IS_DRAFT": {
+        "label": "uso interno rascunho",
+        "help": "Uso interno: definir como yes quando o serviço está em modo rascunho."
+      },
+      "KEEP_CONFIG_ON_RESTART": {
+        "label": "Manter config ao reiniciar",
+        "help": "Manter a configuração ao reiniciar. Defina como 'yes' para evitar a reposição da configuração ao reiniciar."
+      },
+      "CUSTOM_CONFIGS_DRIFT": {
+        "label": "Política de desvio de configs personalizadas",
+        "help": "O que acontece quando um ficheiro .conf projetado muda desde a última projeção registada ou estava ausente dela. Os ficheiros que correspondem à linha atual da base de dados são ignorados; sem histórico de projeção legível, não é reportado qualquer desvio. 'overwrite' regista cada desvio detetado e reescreve o ficheiro a partir da base de dados, ou elimina-o se nenhuma linha ativa o substituir. 'refuse' deixa de escrever ali a partir da base de dados até o desvio ser resolvido, regista um erro e deixa a alteração de configuração personalizada pendente por confirmar para que seja repetida."
+      },
+      "TIMERS_LOG_LEVEL": {
+        "label": "Nível de registo dos temporizadores",
+        "help": "Nível de registo para os temporizadores."
+      },
+      "BUNKERWEB_INSTANCES": {
+        "label": "Instâncias do BunkerWeb",
+        "help": "Lista de instâncias do BunkerWeb separadas por espaços (formato: fqdn-ou-ip:5000 http://fqdn-ou-ip:5000)"
+      },
+      "USE_TEMPLATE": {
+        "label": "Utilizar modelo",
+        "help": "Modelos de configuração a aplicar, separados por espaços, que substituirão os valores predefinidos de configurações específicas. Os modelos aplicam-se por ordem e um mais recente substitui um anterior; um valor definido no serviço substitui o modelo."
+      },
+      "SECURITY_MODE": {
+        "label": "Modo de segurança",
+        "help": "Define a resposta a ameaças: \"detect\" para monitorizar e registar, ou \"block\" para impedir o acesso e registar incidentes."
+      },
+      "SERVER_NAMES_HASH_BUCKET_SIZE": {
+        "label": "Tamanho do bucket de hash dos nomes de servidor",
+        "help": "Valor para a diretiva server_names_hash_bucket_size."
+      },
+      "LOG_FORMAT": {
+        "label": "Formato do registo de acesso",
+        "help": "O formato a utilizar para os registos de acesso."
+      },
+      "ACCESS_LOG": {
+        "label": "Caminho do registo de acesso",
+        "help": "Caminho a utilizar para os registos de acesso do NGINX (caminho de ficheiro, syslog:server=host[:port][,param=value], ou memory:name:size; defina como off para desativar)."
+      },
+      "ERROR_LOG": {
+        "label": "Caminho do registo de erros",
+        "help": "Caminho a utilizar para os registos de erro do NGINX (caminho de ficheiro, stderr, syslog:server=host[:port][,param=value], ou memory:size)."
+      },
+      "PLUGINS_ORDER_INIT": {
+        "label": "Ordem dos plugins (init)",
+        "help": "Plugins que devem ser executados primeiro durante a fase init (arranque do motor, executa uma vez). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_INIT_WORKER": {
+        "label": "Ordem dos plugins (init_worker)",
+        "help": "Plugins que devem ser executados primeiro durante a fase init_worker (arranque por worker). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_SET": {
+        "label": "Ordem dos plugins (set)",
+        "help": "Plugins que devem ser executados primeiro durante a fase set para este site (configuração de variáveis antes de rewrite/access). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_ACCESS": {
+        "label": "Ordem dos plugins (access)",
+        "help": "Plugins que devem ser executados primeiro durante a fase access para este site (admissão/controlo de pedidos). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_SSL_CERTIFICATE": {
+        "label": "Ordem dos plugins (ssl_certificate)",
+        "help": "Plugins que devem ser executados primeiro durante a fase ssl_certificate para este site (seleção/emissão do certificado TLS). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_HEADER": {
+        "label": "Ordem dos plugins (header)",
+        "help": "Plugins que devem ser executados primeiro durante a fase header para este site (filtragem de cabeçalhos de resposta). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_LOG": {
+        "label": "Ordem dos plugins (log)",
+        "help": "Plugins que devem ser executados primeiro durante a fase log para este site (processamento de registos HTTP após a resposta). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_PREREAD": {
+        "label": "Ordem dos plugins (preread)",
+        "help": "Plugins que devem ser executados primeiro durante a fase preread para este site (verificações TCP preread antes do proxying). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_LOG_STREAM": {
+        "label": "Ordem dos plugins (log_stream)",
+        "help": "Plugins que devem ser executados primeiro durante a fase log_stream para este site (processamento de registos stream). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_LOG_DEFAULT": {
+        "label": "Ordem dos plugins (log_default)",
+        "help": "Plugins que devem ser executados primeiro durante a fase log_default para este site (processamento de registos do vhost predefinido). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_TIMER": {
+        "label": "Ordem dos plugins (timer)",
+        "help": "Plugins que devem ser executados primeiro durante a fase timer (temporizadores em segundo plano). Separe os IDs com espaços; os restantes plugins são executados de qualquer forma depois, na sua ordem normal."
+      },
+      "PLUGINS_ORDER_INIT_WORKERS": {
+        "label": "Ordem dos plugins (init_workers)",
+        "help": "IDs de plugins separados por vírgulas ou espaços a executar durante a fase init_workers."
+      },
+      "LOG_LEVEL": {
+        "label": "Nível de registo",
+        "help": "O nível a utilizar para os registos de erro."
+      },
+      "JOBS_DAILY_TIME": {
+        "label": "Hora diária das tarefas",
+        "help": "Hora local (fuso horário do scheduler, HH:MM, 24h) a que as tarefas diárias agendadas são executadas; as tarefas semanais também são executadas a esta hora, em JOBS_WEEKLY_DAY."
+      },
+      "JOBS_WEEKLY_DAY": {
+        "label": "Dia semanal das tarefas",
+        "help": "Dia da semana em que as tarefas semanais agendadas são executadas, à hora JOBS_DAILY_TIME."
+      }
+    }
+  },
+  "global_settings": {
+    "flash": {
+      "checking_license_key_upgrade": "A verificar a chave de licença para atualização.",
+      "global_settings_not_saved_every_changed": "As configurações globais não foram guardadas: todos os valores alterados foram recusados.",
+      "not_edited_no_values_changed": "As configurações globais não foram editadas porque nenhum valor foi alterado.",
+      "saved_but_values_refused": "Configurações globais guardadas, mas {{refused_count}} valores foram recusados.",
+      "saved_successfully": "Configurações globais guardadas com sucesso."
+    }
+  },
+  "home": {
+    "flash": {
+      "error_fetching_services": "Erro ao obter os serviços: {{message}}"
+    }
+  },
+  "utils": {
+    "flash": {
+      "couldn_t_connect_redis": "Não foi possível ligar ao Redis",
+      "missing_form": "{{key}} em falta no formulário",
+      "invalid_request": "Pedido inválido"
+    }
+  },
+  "main": {
+    "flash": {
+      "forced_status_reloaded": "Estado forçado a ser recarregado",
+      "have_more_services_than_allowed_by": "Tem mais serviços do que os permitidos pela sua licença pro. Atualize a sua licença ou passe alguns serviços para o modo rascunho para desbloquear a sua licença pro.",
+      "last_changes_have_applied_successfully": "As últimas alterações foram aplicadas com sucesso.",
+      "database_connection_read_only_mode_no": "A ligação à base de dados está em modo só de leitura: não são possíveis alterações.",
+      "two_factor_no_recovery_codes": "A autenticação de dois fatores está ativada mas não existem códigos de recuperação disponíveis, atualize-os:",
+      "failover_configuration_error": "As últimas alterações não puderam ser aplicadas porque criam um erro de configuração no NGINX; consulte os registos do BunkerWeb para mais informações. A configuração voltou à última versão funcional.",
+      "failover_message": "Mensagem de failover:"
+    }
+  },
+  "letsencrypt": {
+    "flash": {
+      "orphan_certificate": "Let's Encrypt: o certificado órfão <strong>{{cert_name}}</strong> faz referência a uma conta ACME em falta <code>{{account}}</code>. As renovações estão bloqueadas até o estado do fornecedor ser reparado. <a href=\"{{certificates_url}}\">{{link_text}}</a>.",
+      "open_certificates_to_inspect": "Abrir Certificados para inspecionar"
+    }
+  },
+  "raw_drafts": {
+    "edits_discarded": "As definições em rascunho mantêm-se inalteradas; ative-as ou edite-as no modo Raw.",
+    "metadata_raw_only": "Os metadados de rascunho de uma definição só são aceites no modo raw.",
+    "missing_metadata": "Falta o metadado {{field}}.",
+    "cannot_be_draft": "A definição {{setting}} não pode ser convertida em rascunho.",
+    "draft_not_posted": "A definição em rascunho {{setting}} não foi enviada.",
+    "setting_not_valid": "A definição {{setting}} não é válida.",
+    "global_not_service_draft": "A definição global {{setting}} não pode ser convertida em rascunho de serviço.",
+    "draft_not_present": "A definição em rascunho {{setting}} não está presente no editor RAW.",
+    "present_not_posted": "A definição presente {{setting}} não foi enviada.",
+    "present_not_valid": "A definição presente {{setting}} não é válida.",
+    "locked_by_method": "A definição {{setting}} não pode alterar o estado de rascunho porque é gerida pelo método {{method}}."
   }
 }

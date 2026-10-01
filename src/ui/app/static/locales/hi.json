@@ -24,6 +24,7 @@
   },
   "alert": {
     "configs_import_invalid_file": "कृपया एक वैध कस्टम कॉन्फ़िगरेशन निर्यात फ़ाइल (.json) अपलोड करें।",
+    "custom_end_date_past": "कस्टम समाप्ति तिथि भविष्य में होनी चाहिए।",
     "custom_end_date_required": "कृपया एक कस्टम अंतिम तिथि चुनें।",
     "important": "महत्वपूर्ण",
     "no_changes_detected": "कोई परिवर्तन नहीं पाया गया।",
@@ -40,6 +41,7 @@
   "aria": {
     "label": {
       "clear_search": "खोज साफ़ करें",
+      "clone_item": "{{name}} क्लोन करें",
       "close": "बंद करें",
       "collapse_multiline": "बहु-पंक्ति प्रविष्टियाँ संक्षिप्त करें",
       "configs_dropzone": "कस्टम कॉन्फ़िगरेशन एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
@@ -51,6 +53,7 @@
       "level_filter": "लॉग पंक्तियों को स्तर के अनुसार फ़िल्टर करें",
       "local_time": "टाइमस्टैम्प स्थानीय समय में दिखाएँ",
       "next_issue": "अगली त्रुटि या चेतावनी",
+      "open_user_menu": "उपयोगकर्ता मेनू खोलें",
       "passkey_name": "पासकी का नाम",
       "plugins_dropzone": "प्लगइन आर्काइव चुनें या उन्हें यहाँ ड्रॉप करें",
       "prev_issue": "पिछली त्रुटि या चेतावनी",
@@ -61,6 +64,10 @@
       "select_file": "फ़ाइल चुनें",
       "select_page": "पृष्ठ चुनें",
       "services_dropzone": "सेवाओं की एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें",
+      "show_details": "{{name}} का विवरण दिखाएँ",
+      "toggle_item": "{{name}} टॉगल करें",
+      "toggle_section": "{{name}} अनुभाग टॉगल करें",
+      "toggle_theme": "डार्क मोड टॉगल करें",
       "toggle_wrap": "लाइन रैपिंग टॉगल करें",
       "user_avatar": "उपयोगकर्ता अवतार",
       "view_selected_items": "चुने गए आइटम देखें",
@@ -70,7 +77,12 @@
       "github_stars": "GitHub स्टार: {{count}}",
       "github_watchers": "GitHub वॉचर: {{count}}",
       "secret_value": "गुप्त मान",
-      "value_hidden": "{{name}} (छिपा हुआ)"
+      "value_hidden": "{{name}} (छिपा हुआ)",
+      "certificate_public_details": "प्रमाणपत्र की सार्वजनिक जानकारी",
+      "certificate_inventory_assignments": "प्रमाणपत्र सूची असाइनमेंट",
+      "detach_from_service": "{{name}} को {{service}} से अलग करें",
+      "remove_this_server": "इस सर्वर को हटाएं",
+      "select_template": "टेम्पलेट {{name}} चुनें"
     }
   },
   "badge": {
@@ -116,6 +128,7 @@
     "flash": {
       "ban_failed": "{{ip}} को प्रतिबंधित करने में विफल: {{error}}",
       "ban_success": "{{ip}} को सफलतापूर्वक प्रतिबंधित किया गया।",
+      "custom_end_date_in_past": "{{ip}} के लिए कस्टम बैन समाप्ति तिथि भविष्य में होनी चाहिए",
       "invalid_custom_duration": "{{ip}} के लिए अमान्य कस्टम प्रतिबंध अवधि",
       "invalid_custom_end_date": "{{ip}} के लिए अमान्य कस्टम प्रतिबंध समाप्ति तिथि",
       "invalid_duration": "अमान्य प्रतिबंध अवधि: {{duration}}",
@@ -126,7 +139,20 @@
       "unban_failed": "{{ip}} से प्रतिबंध हटाने में विफल: {{error}}",
       "unban_success": "{{ip}} से प्रतिबंध सफलतापूर्वक हटा दिया गया।",
       "update_duration_failed": "{{ip}} के लिए प्रतिबंध अवधि अपडेट करने में विफल: {{error}}",
-      "update_duration_success": "{{ip}} के लिए प्रतिबंध अवधि सफलतापूर्वक अपडेट की गई।"
+      "update_duration_success": "{{ip}} के लिए प्रतिबंध अवधि सफलतापूर्वक अपडेट की गई।",
+      "no_matching_bans": "कोई मेल खाता प्रतिबंध नहीं।",
+      "invalid_duration_selection_mode": "अवधि चयन मोड अमान्य है।",
+      "invalid_updates_parameter_bans_update_duration": "/bans/update_duration पर updates पैरामीटर अमान्य है।",
+      "no_updates": "कोई अपडेट नहीं।",
+      "invalid_filtered_duration_source": "फ़िल्टर की गई अवधि स्रोत अमान्य है।",
+      "invalid_unban_selection_mode": "प्रतिबंध-मुक्ति चयन मोड अमान्य है।",
+      "invalid_ips_parameter_bans_unban": "/bans/unban पर ips पैरामीटर अमान्य है।",
+      "no_bans": "कोई प्रतिबंध नहीं।",
+      "invalid_filtered_unban_source": "फ़िल्टर किया गया प्रतिबंध-मुक्ति स्रोत अमान्य है।",
+      "no_matching_reports": "कोई मेल खाती रिपोर्ट नहीं।",
+      "invalid_ban_selection_mode": "प्रतिबंध चयन मोड अमान्य है।",
+      "invalid_bans_parameter_bans_ban": "/bans/ban पर bans पैरामीटर अमान्य है।",
+      "invalid_filtered_ban_source": "फ़िल्टर किया गया प्रतिबंध स्रोत अमान्य है।"
     }
   },
   "breadcrumb": {
@@ -177,7 +203,8 @@
     "clone": "क्लोन करें",
     "columns": "कॉलम",
     "convert_configs": "कॉन्फ़िग रूपांतरित करें",
-    "convert_configs_to": "{{state}} में रूपांतरित करें",
+    "convert_to_draft": "ड्राफ़्ट में बदलें",
+    "convert_to_online": "ऑनलाइन में बदलें",
     "convert_services": "सेवाएं बदलें",
     "copy": "कॉपी करें",
     "copy_codes": "कोड कॉपी करें",
@@ -207,6 +234,7 @@
     "history": "इतिहास",
     "import_configs": "कस्टम कॉन्फ़िगरेशन आयात करें",
     "import_services": "सेवाएं आयात करें",
+    "import_template": "टेम्पलेट आयात करें",
     "login": "लॉगिन करें",
     "multiple_add": "जोड़ें",
     "multiple_hide": "छिपाएं",
@@ -279,10 +307,79 @@
     "kpi_files": "फ़ाइलें",
     "kpi_per_service": "प्रति सेवा",
     "subtitle": "अनुसूचित कार्यों द्वारा उत्पन्न कैश फ़ाइलें (ब्लॉकलिस्ट, GeoIP डेटाबेस, और अन्य) — प्रति सेवा और प्लगइन के लिए जांचें, डाउनलोड करें, या हटाएं।",
-    "title": "कैश फ़ाइलें"
+    "title": "कैश फ़ाइलें",
+    "flash": {
+      "error_deleting_cache_files": "कैश फ़ाइलें हटाने में त्रुटि: {{message}}",
+      "successfully_deleted_cache_file": "{{deleted_count}} कैश फ़ाइल सफलतापूर्वक हटाई गई",
+      "successfully_deleted_cache_files": "{{deleted_count}} कैश फ़ाइलें सफलतापूर्वक हटाई गईं",
+      "deleted_files_errors": "{{deleted_count}} फ़ाइलें हटाई गईं, {{len}} त्रुटियों के साथ: {{value}}",
+      "api_unavailable": "API अनुपलब्ध: {{message}}",
+      "error_fetching_cache_file": "कैश फ़ाइल प्राप्त करने में त्रुटि: {{message}}",
+      "cache_file_job_plugin_not_found": "कैश फ़ाइल {{file_name}} (कार्य {{job_name}}, प्लगइन {{plugin_id}}) नहीं मिली",
+      "cache_file_job_plugin_not_found_service": "कैश फ़ाइल {{file_name}} (कार्य {{job_name}}, प्लगइन {{plugin_id}}, सेवा {{service}}) नहीं मिली",
+      "error_fetching_cache_files": "कैश फ़ाइलें प्राप्त करने में त्रुटि: {{message}}",
+      "invalid_cache_files_parameter": "कैश फ़ाइलें पैरामीटर अमान्य है",
+      "no_cache_files_selected": "कोई कैश फ़ाइल चयनित नहीं"
+    }
   },
   "configs": {
-    "subtitle": "अपने सेवाओं के लिए कस्टम NGINX कॉन्फ़िगरेशन स्निपेट — बनाएँ, संपादित करें, और प्रबंधित करें HTTP, ModSecurity, और स्ट्रीम-स्तरीय ओवरराइड।"
+    "subtitle": "अपने सेवाओं के लिए कस्टम NGINX कॉन्फ़िगरेशन स्निपेट — बनाएँ, संपादित करें, और प्रबंधित करें HTTP, ModSecurity, और स्ट्रीम-स्तरीय ओवरराइड।",
+    "flash": {
+      "no_custom_configurations_found_import_file": "आयात फ़ाइल में कोई कस्टम कॉन्फ़िगरेशन नहीं मिला।",
+      "import_error": "आयात त्रुटि: {{error}}",
+      "invalid_file_encoding_please_upload_utf": "फ़ाइल एन्कोडिंग अमान्य है। कृपया एक UTF-8 JSON फ़ाइल अपलोड करें।",
+      "no_custom_configurations_file_uploaded": "कोई कस्टम कॉन्फ़िगरेशन फ़ाइल अपलोड नहीं की गई।",
+      "no_custom_configurations_export": "निर्यात के लिए कोई कस्टम कॉन्फ़िगरेशन नहीं।",
+      "could_not_fetch_custom_configurations_api": "API से कस्टम कॉन्फ़िगरेशन प्राप्त नहीं किए जा सके: {{fetch_err}}",
+      "invalid_configs_parameter_configs_export": "/configs/export पर configs पैरामीटर अमान्य है।",
+      "saved_custom_configuration": "कस्टम कॉन्फ़िगरेशन {{new_type}}/{{new_name}} सहेजा गया",
+      "saved_custom_configuration_service": "सेवा {{service}} के लिए कस्टम कॉन्फ़िगरेशन {{new_type}}/{{new_name}} सहेजा गया",
+      "no_values_changed": "कोई मान परिवर्तित नहीं किए गए।",
+      "renaming_template_based_custom_config_not": "टेम्पलेट-आधारित कस्टम कॉन्फ़िगरेशन का नाम बदलने की अनुमति नहीं है।",
+      "invalid_name_parameter_configs_new": "/configs/new पर name पैरामीटर अमान्य है।",
+      "invalid_type_parameter_configs_new": "/configs/new पर type पैरामीटर अमान्य है।",
+      "service_does_not_exist": "सेवा {{new_service}} मौजूद नहीं है।",
+      "config_not_ui_api_custom_config": "कॉन्फ़िग {{config_type}}/{{name}} UI/API की कस्टम कॉन्फ़िग नहीं है और उसे संपादित नहीं किया जा सकता।",
+      "config_not_ui_api_custom_config_service": "सेवा {{service}} की कॉन्फ़िग {{config_type}}/{{name}} UI/API की कस्टम कॉन्फ़िग नहीं है और उसे संपादित नहीं किया जा सकता।",
+      "config_does_not_exist_2": "कॉन्फ़िग {{config_type}}/{{name}} मौजूद नहीं है।",
+      "config_does_not_exist_2_service": "सेवा {{service}} की कॉन्फ़िग {{config_type}}/{{name}} मौजूद नहीं है।",
+      "config_does_not_exist": "कॉन्फ़िगरेशन {{clone}} मौजूद नहीं है।",
+      "created_custom_configuration": "कस्टम कॉन्फ़िगरेशन {{config_type}}/{{config_name}} बनाया गया",
+      "created_custom_configuration_service": "सेवा {{service}} के लिए कस्टम कॉन्फ़िगरेशन {{config_type}}/{{config_name}} बनाया गया",
+      "error_occurred_while_saving_custom_configs": "कस्टम कॉन्फ़िगरेशन सहेजते समय त्रुटि हुई: {{error_msg}}",
+      "config_already_exists": "कॉन्फ़िग {{config_type}}/{{config_name}} पहले से मौजूद है",
+      "config_already_exists_service": "सेवा {{service}} की कॉन्फ़िग {{config_type}}/{{config_name}} पहले से मौजूद है",
+      "deleted_config_one": "कॉन्फ़िग हटाई गई: {{names}}",
+      "deleted_config_other": "कॉन्फ़िग हटाई गईं: {{names}}",
+      "all_selected_custom_configs_could_not_2": "सभी चयनित कस्टम कॉन्फ़िगरेशन नहीं मिल सके या UI/API कस्टम कॉन्फ़िगरेशन नहीं हैं।",
+      "custom_config_not_ui_api_custom_2": "कस्टम कॉन्फ़िगरेशन {{skipped_config}} एक UI/API कस्टम कॉन्फ़िगरेशन नहीं है और इसे हटाया नहीं जाएगा।",
+      "error_occurred_while_deleting_custom_configs": "कस्टम कॉन्फ़िगरेशन हटाते समय त्रुटि हुई: {{e}}",
+      "invalid_configs_parameter_configs_delete": "/configs/delete पर configs पैरामीटर अमान्य है।",
+      "no_configs_selected": "कोई कॉन्फ़िगरेशन चयनित नहीं।",
+      "converted_configs_online": "\"ऑनलाइन\" कॉन्फ़िग में बदली गईं: {{names}}",
+      "converted_configs_draft": "\"ड्राफ्ट\" कॉन्फ़िग में बदली गईं: {{names}}",
+      "all_selected_custom_configs_could_not": "सभी चयनित कस्टम कॉन्फ़िगरेशन नहीं मिल सके, UI/API कस्टम कॉन्फ़िगरेशन नहीं हैं, या पहले ही परिवर्तित हो चुके हैं।",
+      "custom_config_could_not_found": "कस्टम कॉन्फ़िगरेशन {{missing_config}} नहीं मिल सका।",
+      "custom_config_already_online_will_not": "कस्टम कॉन्फ़िग {{non_convertible_config}} पहले से ऑनलाइन कॉन्फ़िग है और उसे नहीं बदला जाएगा।",
+      "custom_config_already_draft_will_not": "कस्टम कॉन्फ़िग {{non_convertible_config}} पहले से ड्राफ्ट कॉन्फ़िग है और उसे नहीं बदला जाएगा।",
+      "custom_config_not_ui_api_custom": "कस्टम कॉन्फ़िगरेशन {{non_editable_config}} एक UI/API कस्टम कॉन्फ़िगरेशन नहीं है और इसे परिवर्तित नहीं किया जाएगा।",
+      "invalid_configs_parameter_configs_convert": "/configs/convert पर configs पैरामीटर अमान्य है।",
+      "failed_import_custom_configuration_one": "कस्टम कॉन्फ़िगरेशन आयात करने में विफल: {{names}}",
+      "failed_import_custom_configuration_other": "कस्टम कॉन्फ़िगरेशन आयात करने में विफल: {{names}}",
+      "skipped_custom_configuration_one": "कस्टम कॉन्फ़िगरेशन छोड़ा गया: {{names}}",
+      "skipped_custom_configuration_other": "कस्टम कॉन्फ़िगरेशन छोड़े गए: {{names}}",
+      "overwrote_custom_configuration_one": "कस्टम कॉन्फ़िगरेशन ओवरराइट किया गया: {{names}}",
+      "overwrote_custom_configuration_other": "कस्टम कॉन्फ़िगरेशन ओवरराइट किए गए: {{names}}",
+      "imported_custom_configuration_one": "कस्टम कॉन्फ़िगरेशन आयात किया गया: {{names}}",
+      "imported_custom_configuration_other": "कस्टम कॉन्फ़िगरेशन आयात किए गए: {{names}}",
+      "missing_value_parameter_configs_new": "/configs/new पर value पैरामीटर अनुपस्थित है।",
+      "missing_name_parameter_configs_new": "/configs/new पर name पैरामीटर अनुपस्थित है।",
+      "missing_type_parameter_configs_new": "/configs/new पर type पैरामीटर अनुपस्थित है।",
+      "missing_service_parameter_configs_new": "/configs/new पर service पैरामीटर अनुपस्थित है।",
+      "missing_configs_parameter_configs_delete": "/configs/delete पर configs पैरामीटर अनुपस्थित है।",
+      "missing_convert_parameter_configs_convert": "/configs/convert पर convert_to पैरामीटर अनुपस्थित है।",
+      "missing_configs_parameter_configs_convert": "/configs/convert पर configs पैरामीटर अनुपस्थित है।"
+    }
   },
   "country": {
     "AD": "अंडोरा",
@@ -659,10 +756,70 @@
     }
   },
   "datatable": {
-    "bulk_select_all_filtered": "मिलान करने वाले सभी {{count}} {{entity}} चुनें",
-    "bulk_select_all_done": "मिलान करने वाले सभी {{count}} {{entity}} चुने गए हैं।",
+    "bulk_select": {
+      "bans": {
+        "page_one": "इस पेज पर {{count}} प्रतिबंध चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} प्रतिबंध चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} प्रतिबंध चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} प्रतिबंध चयनित हैं।"
+      },
+      "cache": {
+        "page_one": "इस पेज पर {{count}} कैश फ़ाइल चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} कैश फ़ाइलें चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} कैश फ़ाइलें चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} कैश फ़ाइलें चयनित हैं।"
+      },
+      "configs": {
+        "page_one": "इस पेज पर {{count}} कस्टम कॉन्फ़िगरेशन चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} कस्टम कॉन्फ़िगरेशन चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} कस्टम कॉन्फ़िगरेशन चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} कस्टम कॉन्फ़िगरेशन चयनित हैं।"
+      },
+      "instances": {
+        "page_one": "इस पेज पर {{count}} इंस्टेंस चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} इंस्टेंस चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} इंस्टेंस चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} इंस्टेंस चयनित हैं।"
+      },
+      "items": {
+        "page_one": "इस पेज पर {{count}} आइटम चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} आइटम चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} आइटम चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} आइटम चयनित हैं।"
+      },
+      "jobs": {
+        "page_one": "इस पेज पर {{count}} कार्य चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} कार्य चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} कार्य चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} कार्य चयनित हैं।"
+      },
+      "plugins": {
+        "page_one": "इस पेज पर {{count}} प्लगइन चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} प्लगइन्स चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} प्लगइन्स चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} प्लगइन्स चयनित हैं।"
+      },
+      "reports": {
+        "page_one": "इस पेज पर {{count}} रिपोर्ट चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} रिपोर्ट चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} रिपोर्ट चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} रिपोर्ट चयनित हैं।"
+      },
+      "services": {
+        "page_one": "इस पेज पर {{count}} सेवा चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} सेवाएं चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} सेवाएं चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} सेवाएं चयनित हैं।"
+      },
+      "templates": {
+        "page_one": "इस पेज पर {{count}} टेम्पलेट चयनित है।",
+        "page_other": "इस पेज पर सभी {{count}} टेम्पलेट्स चयनित हैं।",
+        "all_filtered": "मिलान करने वाले सभी {{count}} टेम्पलेट्स चुनें",
+        "all_done": "मिलान करने वाले सभी {{count}} टेम्पलेट्स चयनित हैं।"
+      }
+    },
     "bulk_select_clear": "चयन साफ़ करें",
-    "bulk_select_page": "इस पेज पर सभी {{count}} {{entity}} चुने गए हैं।",
+    "select_row": "पंक्ति चुनें",
     "info_bans": "दिखा रहा है {{start}} से {{end}} तक {{total}} प्रतिबंधों में से",
     "info_cache": "दिखा रहा है {{start}} से {{end}} तक {{total}} कैश फ़ाइलों में से",
     "info_configs": "दिखा रहा है {{start}} से {{end}} तक {{total}} कस्टम कॉन्फ़िगरेशन में से",
@@ -742,8 +899,33 @@
     "select_rows_templates_0": "कोई टेम्प्लेट चयनित नहीं",
     "select_rows_templates_1": "1 टेम्प्लेट चयनित",
     "select_rows_templates_plural": "%d टेम्प्लेट चयनित",
-    "selected_list_count": "{{count}} {{entity}} चयनित",
-    "selected_list_empty": "कोई {{entity}} चयनित नहीं।",
+    "selected_list": {
+      "configs": {
+        "count_one": "{{count}} कस्टम कॉन्फ़िगरेशन चयनित",
+        "count_other": "{{count}} कस्टम कॉन्फ़िगरेशन चयनित",
+        "empty": "कोई कस्टम कॉन्फ़िगरेशन चयनित नहीं।"
+      },
+      "items": {
+        "count_one": "{{count}} आइटम चयनित",
+        "count_other": "{{count}} आइटम चयनित",
+        "empty": "कोई आइटम चयनित नहीं।"
+      },
+      "plugins": {
+        "count_one": "{{count}} प्लगइन चयनित",
+        "count_other": "{{count}} प्लगइन्स चयनित",
+        "empty": "कोई प्लगइन चयनित नहीं।"
+      },
+      "services": {
+        "count_one": "{{count}} सेवा चयनित",
+        "count_other": "{{count}} सेवाएं चयनित",
+        "empty": "कोई सेवा चयनित नहीं।"
+      },
+      "templates": {
+        "count_one": "{{count}} टेम्पलेट चयनित",
+        "count_other": "{{count}} टेम्पलेट्स चयनित",
+        "empty": "कोई टेम्पलेट चयनित नहीं।"
+      }
+    },
     "zero_records_bans": "कोई मेल खाने वाला प्रतिबंध नहीं मिला",
     "zero_records_cache": "कोई मेल खाने वाली कैश फ़ाइल नहीं मिली",
     "zero_records_configs": "कोई मेल खाने वाली कस्टम कॉन्फ़िगरेशन नहीं मिली",
@@ -812,6 +994,19 @@
       "just_now": "अभी"
     },
     "warning": "चेतावनी",
+    "do_not_have_write_permission": "आपके पास लेखन अनुमति नहीं है",
+    "database_read_only_mode": "डेटाबेस रीड-ओनली मोड में है",
+    "error_occurred_while_saving_custom_configs": "कस्टम कॉन्फ़िगरेशन सहेजते समय त्रुटि हुई: {{e}}",
+    "service_does_not_exist": "सेवा {{service}} मौजूद नहीं है।",
+    "invalid_convert_parameter": "convert_to पैरामीटर अमान्य है।",
+    "import_warning": "आयात चेतावनी: {{error}}",
+    "could_not_fetch_global_settings_api": "API से वैश्विक सेटिंग्स प्राप्त नहीं की जा सकीं।",
+    "plugin_not_found": "प्लगइन नहीं मिला",
+    "scheduler_will_attempt_apply_changes": "शेड्यूलर परिवर्तनों को लागू करने का प्रयास करेगा।",
+    "could_not_fetch_resource_groups": "संसाधन समूह प्राप्त नहीं किए जा सके: {{message}}",
+    "error_fetching_instances": "इंस्टेंस प्राप्त करने में त्रुटि",
+    "description_too_long": "विवरण 4000 वर्णों से अधिक नहीं हो सकता",
+    "cors_or_ajax_request_required": "CORS या AJAX अनुरोध आवश्यक है",
     "configuration_pending_instance": "कॉन्फ़िगरेशन अभी लागू नहीं हुआ — किसी इंस्टेंस के चालू होने की प्रतीक्षा है।"
   },
   "footer": {
@@ -826,7 +1021,8 @@
     "checkbox": {
       "include_attached_configs": "संलग्न कस्टम कॉन्फ़िगरेशन शामिल करें",
       "overwrite_existing_configs": "मौजूदा UI/API कस्टम कॉन्फ़िगरेशन ओवरराइट करें",
-      "remember_me": "मुझे याद रखें"
+      "remember_me": "मुझे याद रखें",
+      "replace_existing_template": "यदि समान id वाला टेम्पलेट मौजूद हो तो उसे बदल दें"
     },
     "help": {
       "ban_specific_service": "प्रतिबंध केवल इस विशिष्ट सेवा पर लागू होगा।",
@@ -834,7 +1030,8 @@
       "hostname_special_chars": "प्रोटोकॉल/पोर्ट विनिर्देश के लिए केवल `/` और `:` की अनुमति है।",
       "multivalue_separator": "मानों को इसके द्वारा अलग किया जाता है:",
       "permanent_ban": "यदि चयनित है, तो प्रतिबंध मैन्युअल रूप से हटाए जाने तक कभी समाप्त नहीं होगा",
-      "photo_extensions": "JPG, GIF, या PNG की अनुमति है। अधिकतम आकार: 800KB।"
+      "photo_extensions": "JPG, GIF, या PNG की अनुमति है। अधिकतम आकार: 800KB।",
+      "secret_stored": "एक मान संग्रहीत है और दिखाया नहीं जाता। इसे बनाए रखने के लिए फ़ील्ड को जैसा है वैसा छोड़ दें, इसे बदलने के लिए नया मान लिखें, या इसे हटाने के लिए फ़ील्ड खाली कर दें।"
     },
     "label": {
       "2fa_code": "2FA कोड",
@@ -889,6 +1086,7 @@
       "secret_token": "गुप्त टोकन",
       "server_name": "सर्वर का नाम",
       "service_name": "सेवा का नाम",
+      "template_file": "टेम्पलेट फ़ाइल",
       "template_id": "टेम्पलेट आईडी",
       "theme": "थीम",
       "type": "प्रकार",
@@ -955,7 +1153,32 @@
     "loading": "लोड हो रहा है",
     "subtitle": "इस UI से जुड़े BunkerWeb इंस्टेंस का प्रबंधन करें: उन्हें बनाएँ, पिंग करें, रीलोड करें, रोकें, या हटाएं।",
     "total": "कुल इंस्टेंस",
-    "up": "चालू"
+    "up": "चालू",
+    "flash": {
+      "instances_deleted": "इंस्टेंस {{instance}} सफलतापूर्वक हटा दिए गए।",
+      "instance_reloaded": "इंस्टेंस {{instance}} सफलतापूर्वक फिर से लोड किया गया।",
+      "instance_stopped": "इंस्टेंस {{instance}} सफलतापूर्वक रोका गया।",
+      "instance_deleted": "इंस्टेंस {{instance}} सफलतापूर्वक हटा दिया गया।",
+      "instance_does_not_have_reload_method": "इंस्टेंस {{instance}} में रीलोड विधि नहीं है।",
+      "instance_does_not_have_stop_method": "इंस्टेंस {{instance}} में स्टॉप विधि नहीं है।",
+      "instance_does_not_exist": "इंस्टेंस {{instance}} मौजूद नहीं है।",
+      "couldn_t_delete_instance": "इंस्टेंस हटाया नहीं जा सका: {{message}}",
+      "couldn_t_delete_instances": "इंस्टेंस हटाए नहीं जा सके: {{message}}",
+      "could_not_found_one": "चयनित इंस्टेंस नहीं मिला या वह UI/API इंस्टेंस नहीं है।",
+      "could_not_found_other": "चयनित सभी इंस्टेंस नहीं मिले या वे UI/API इंस्टेंस नहीं हैं।",
+      "instance_not_ui_api_instance_will": "इंस्टेंस {{non_deletable_instance}} एक UI/API इंस्टेंस नहीं है और इसे हटाया नहीं जाएगा।",
+      "no_instance_selected": "कोई इंस्टेंस चयनित नहीं।",
+      "instance_created_successfully": "इंस्टेंस {{value}} सफलतापूर्वक बनाया गया।",
+      "could_not_fetch_instances_api": "API से इंस्टेंस प्राप्त नहीं किए जा सके।",
+      "missing_instances_parameter_instances_ping": "/instances/ping पर instances पैरामीटर गायब है।",
+      "missing_instances_parameter_instances_reload": "/instances/reload पर instances पैरामीटर गायब है।",
+      "missing_instances_parameter_instances_stop": "/instances/stop पर instances पैरामीटर गायब है।",
+      "missing_instances_parameter_instances_delete": "/instances/delete पर instances पैरामीटर गायब है।",
+      "missing_instance_name_parameter_instances_new": "/instances/new पर instance name पैरामीटर अनुपस्थित है।",
+      "missing_instance_hostname_parameter_instances_new": "/instances/new पर instance hostname पैरामीटर अनुपस्थित है।",
+      "hostname_already_in_use": "होस्टनाम {{hostname}} पहले से उपयोग में है।",
+      "could_not_create_instance": "इंस्टेंस नहीं बनाया जा सका: {{message}}"
+    }
   },
   "interval": {
     "day": "दैनिक",
@@ -978,11 +1201,20 @@
       "failed_last_run": "अंतिम रन विफल",
       "reload_required": "रीलोड की आवश्यकता है",
       "total": "कुल कार्य"
+    },
+    "flash": {
+      "job_plugins_will_run_background_by": "कार्य के प्लगइन शेड्यूलर द्वारा पृष्ठभूमि में चलाए जाएंगे।",
+      "jobs_plugins_will_run_background_by": "कार्यों के प्लगइन शेड्यूलर द्वारा पृष्ठभूमि में चलाए जाएंगे।",
+      "invalid_jobs_parameter_jobs_run": "/jobs/run पर jobs पैरामीटर अमान्य है।",
+      "no_jobs_selected": "कोई कार्य चयनित नहीं।",
+      "error_fetching_jobs": "कार्य प्राप्त करने में त्रुटि: {{message}}",
+      "missing_jobs_parameter_jobs_run": "/jobs/run पर jobs पैरामीटर अनुपस्थित है।"
     }
   },
   "legend": {
     "locked_settings_annotation": "लॉक किया गया ({{method}})",
-    "locked_settings_hint": "लॉक की गई सेटिंग्स हाइलाइट की गई हैं"
+    "locked_settings_hint": "लॉक की गई सेटिंग्स हाइलाइट की गई हैं",
+    "raw_setting_drafts": "किसी सेटिंग की शुरुआत में ड्राफ़्ट टॉगल करने के लिए # दबाएँ या उसे सक्रिय करने के लिए Backspace दबाएँ। लागू करने के लिए सहेजें। ड्राफ़्ट अपने मान बनाए रखते हैं, जबकि विरासत में मिले या डिफ़ॉल्ट मान लागू होते हैं।"
   },
   "link": {
     "back_to_login": "लॉगिन पर वापस जाएं",
@@ -1001,6 +1233,10 @@
   },
   "login": {
     "title": "लॉग इन करें",
+    "flash": {
+      "invalid_username_password": "उपयोगकर्ता नाम या पासवर्ड अमान्य है",
+      "couldn_t_log_please_try_again": "आपको लॉग इन नहीं किया जा सका, कृपया पुनः प्रयास करें"
+    },
     "subtitle": "अपने BunkerWeb खाते में साइन इन करें",
     "or_use_password": "या अपना पासवर्ड उपयोग करें",
     "notice_password_changed": "आपका पासवर्ड बदल दिया गया है। नए पासवर्ड से लॉग इन करें।",
@@ -1030,6 +1266,10 @@
     "showing_some": "{{total}} में से {{shown}} दिखा रहे हैं",
     "select_file_prompt": "एक लॉग फ़ाइल का चयन करें ताकि उसकी सामग्री देखी जा सके",
     "trimmed_notice": "--- प्रदर्शन के लिए {{count}} पुरानी लॉग लाइनें हटा दी गईं ---",
+    "flash": {
+      "no_such_file": "ऐसी कोई फ़ाइल नहीं",
+      "invalid_file_path": "फ़ाइल पथ अमान्य है"
+    },
     "all_sources": "सभी स्रोत (लाइव)",
     "collapse": "समेटें",
     "expand": "फैलाएँ",
@@ -1049,7 +1289,14 @@
       "confirm_cache_deletion_alert": "क्या आप वाकई चयनित कैश फ़ाइल हटाना चाहते हैं?",
       "confirm_cache_deletion_alert_plural": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
       "confirm_configs_conversion": "क्या आप चयनित कस्टम कॉन्फ़िगरेशन बदलना चाहते हैं?",
-      "confirm_configs_conversion_to": "क्या आप सुनिश्चित हैं कि चयनित कस्टम कॉन्फ़िगरेशन को {{state}} में रूपांतरित करना चाहते हैं?",
+      "confirm_service_conversion_online": "क्या आप वाकई चयनित सेवा को ऑनलाइन में बदलना चाहते हैं?",
+      "confirm_service_conversion_draft": "क्या आप वाकई चयनित सेवा को ड्राफ़्ट में बदलना चाहते हैं?",
+      "confirm_services_conversion_online": "क्या आप वाकई चयनित सेवाओं को ऑनलाइन में बदलना चाहते हैं?",
+      "confirm_services_conversion_draft": "क्या आप वाकई चयनित सेवाओं को ड्राफ़्ट में बदलना चाहते हैं?",
+      "confirm_config_conversion_online": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन को \"ऑनलाइन\" में बदलना चाहते हैं?",
+      "confirm_config_conversion_draft": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन को \"ड्राफ्ट\" में बदलना चाहते हैं?",
+      "confirm_configs_conversion_online": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन को \"ऑनलाइन\" में बदलना चाहते हैं?",
+      "confirm_configs_conversion_draft": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन को \"ड्राफ्ट\" में बदलना चाहते हैं?",
       "confirm_configs_deletion_alert": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_configs_deletion_alert_plural": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_conversion_confirmation": "क्या आप वाकई चयनित सेवाओं को कनवर्ट करना चाहते हैं?",
@@ -1057,6 +1304,8 @@
       "confirm_plugin_deletion": "क्या आप वाकई चयनित प्लगइन हटाना चाहते हैं?",
       "confirm_plugin_deletion_plural": "क्या आप वाकई चयनित प्लगइन्स हटाना चाहते हैं?",
       "confirm_template_deletion": "क्या आप वाकई टेम्पलेट {{name}} को हटाना चाहते हैं?",
+      "confirm_templates_deletion_alert": "क्या आप वाकई चयनित टेम्पलेट को हटाना चाहते हैं?",
+      "confirm_templates_deletion_alert_plural": "क्या आप वाकई चयनित टेम्पलेट्स को हटाना चाहते हैं?",
       "confirmation_instance_deletion": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
       "delete_confirmation_alert": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
       "delete_confirmation_alert_plural": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
@@ -1075,6 +1324,8 @@
       "import_configs_warning": "scheduler, autoconf, या templates द्वारा बनाए गए कस्टम कॉन्फ़िगरेशन हमेशा सुरक्षित रखे जाते हैं। केवल UI/API कॉन्फ़िगरेशन ओवरराइट किए जा सकते हैं।",
       "import_services_dropzone": "अपनी सेवाओं की निर्यात फ़ाइल को यहाँ खींचें और छोड़ें (Drag and drop) या फ़ाइल चुनने के लिए क्लिक करें।",
       "import_services_warning": "सेवाएँ आयात करने पर निर्यात फ़ाइल से नई UI सेवाएँ बनेंगी। मौजूदा सेवाएँ छोड़ दी जाएँगी। कस्टम कॉन्फ़िगरेशन के साथ निर्यात किया गया .zip आर्काइव भी स्वीकार किया जाता है।",
+      "import_template_help": "BunkerWeb से निर्यात किया गया एक टेम्पलेट पैकेज (.json), या एक संग्रह (.zip, .tar.gz, .tar.xz) जिसमें एक टेम्पलेट फ़ोल्डर हो, उसकी template.json और configs सहित। अधिकतम 1 MiB।",
+      "import_template_replace_warning": "किसी टेम्पलेट को बदलने से अगली कॉन्फ़िगरेशन जनरेशन पर उसका उपयोग करने वाली हर सेवा बदल जाती है। किसी प्लगइन के स्वामित्व वाले या वेब UI के बाहर प्रबंधित टेम्पलेट कभी नहीं बदले जाते।",
       "instance_creation_alert": "आपको पोर्ट या सर्वर नाम प्रदान करने की आवश्यकता नहीं है; इंस्टेंस कॉन्फ़िगरेशन के लिए `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` और `API_SERVER_NAME` के मानों का उपयोग किया जाएगा।",
       "next_step_in_case_of_issue": "यदि आपको समस्याएँ आती हैं, तो आप मैन्युअल रूप से असुरक्षित प्रमाणपत्र स्वीकार कर सकते हैं:",
       "recovery_codes_save_alert": "कृपया इन पुनर्प्राप्ति कोड को सुरक्षित स्थान (जैसे पासवर्ड मैनेजर या बंकर) पर सहेजें। यदि आप अपना प्रमाणीकरण उपकरण खो देते हैं तो आप इनका उपयोग अपने खाते तक पहुँचने के लिए कर सकते हैं।",
@@ -1090,7 +1341,8 @@
       "update_filtered_duration_alert": "सभी {{count}} मेल खाते प्रतिबंधों के लिए नई अवधि चुनें:",
       "enroll_description": "इंस्टेंस को इन वेरिएबल के साथ शुरू करें। यह बूट के समय कोड का एक बार उपयोग करता है और अपना स्वयं का क्रेडेंशियल प्राप्त करता है।",
       "enroll_shown_once": "यह कोड केवल एक बार दिखाया जाता है। इसे अभी कॉपी कर लें — इसे फिर से नहीं दिखाया जा सकेगा।",
-      "confirm_service_mode_conversion": "क्या आप वाकई इस सेवा का घोषित मोड बदलना चाहते हैं?"
+      "confirm_service_mode_conversion": "क्या आप वाकई इस सेवा का घोषित मोड बदलना चाहते हैं?",
+      "service_deletion_confirmation": "क्या आप वाकई चयनित सेवा को हटाना चाहते हैं?"
     },
     "button": {
       "fetch_global_settings_confirm": "ग्लोबल सेटिंग्स लागू करें",
@@ -1119,6 +1371,7 @@
       "full_url": "पूर्ण URL",
       "import_configs": "कस्टम कॉन्फ़िगरेशन आयात करें",
       "import_services": "सेवाएं आयात करें",
+      "import_template": "टेम्पलेट आयात करें",
       "job_history": "पिछले 10 कार्य निष्पादन",
       "job_history_count": "कार्य {{count}} निष्पादन",
       "multiselect_selected": "चुने गए आइटम",
@@ -1147,7 +1400,14 @@
     "link": {
       "documentation": "दस्तावेज़ीकरण"
     },
-    "version": "संस्करण"
+    "version": "संस्करण",
+    "aria": {
+      "toggle_navigation": "नेविगेशन टॉगल करें",
+      "close_navigation": "नेविगेशन बंद करें",
+      "help": "सहायता",
+      "notifications": "सूचनाएं",
+      "news": "समाचार"
+    }
   },
   "navigation": {
     "about": "बारे में",
@@ -1201,7 +1461,8 @@
   },
   "notice": {
     "already_subscribed": "पहले से सदस्यता ली गई है",
-    "dismiss_mfa": "मुझे फिर याद न दिलाएँ"
+    "dismiss_mfa": "मुझे फिर याद न दिलाएँ",
+    "enable_mfa": "कृपया अपने खाते को सुरक्षित करने के लिए दो-चरणीय प्रमाणीकरण सक्षम करें <a href=\"{{url}}\">यहाँ</a>"
   },
   "pagination": {
     "page": "पृष्ठ"
@@ -1231,6 +1492,61 @@
     }
   },
   "plugins": {
+    "flash": {
+      "invalid_archive": "फ़ाइल एक वैध प्लगइन संग्रह (.zip, .tar.gz या .tar.xz) नहीं है।",
+      "invalid_plugin_id_must_between_4": "अमान्य प्लगइन आईडी, (4 से 64 वर्णों के बीच होनी चाहिए, केवल अक्षर, संख्याएँ, अंडरस्कोर और हाइफ़न)",
+      "couldn_t_install_catalogue": "{{plugin_id}} इंस्टॉल नहीं हो सका: {{message}}",
+      "couldn_t_install_catalogue_2": "{{plugin_id}} इंस्टॉल नहीं हो सका: {{e}}",
+      "install_did_not_complete": "{{plugin_id}} की इंस्टॉलेशन पूरी नहीं हुई: {{detail}}",
+      "refused_install": "{{plugin_id}} की इंस्टॉलेशन अस्वीकार कर दी गई: {{problem}}",
+      "couldn_t_update_catalogue": "{{plugin_id}} अपडेट नहीं हो सका: {{message}}",
+      "couldn_t_update_catalogue_2": "{{plugin_id}} अपडेट नहीं हो सका: {{e}}",
+      "update_did_not_complete": "{{plugin_id}} का अपडेट पूरा नहीं हुआ: {{detail}}",
+      "refused_update": "{{plugin_id}} का अपडेट अस्वीकार कर दिया गया: {{problem}}",
+      "archive_no_longer_matches_what_catalogue": "{{tag}} आर्काइव अब कैटलॉग द्वारा सूचीबद्ध से मेल नहीं खाता। {{plugin_id}} के लिए कुछ भी इंस्टॉल नहीं किया गया।",
+      "couldn_t_download": "{{plugin_id}} डाउनलोड नहीं किया जा सका: {{e}}",
+      "refused_download": "{{plugin_id}} डाउनलोड करने से इनकार किया गया: {{e}}",
+      "plugin_management_restricted_administrators": "प्लगइन प्रबंधन केवल प्रशासकों तक सीमित है",
+      "community_catalogue_disabled": "सामुदायिक कैटलॉग अक्षम है",
+      "no_plugin_data_upload": "अपलोड करने के लिए कोई प्लगइन डेटा नहीं",
+      "couldn_t_update_ui_plugins_via": "API के माध्यम से ui प्लगइन अपडेट नहीं किए जा सके: {{e}}",
+      "plugins_uploaded_successfully_2": "प्लगइन सफलतापूर्वक अपलोड किए गए",
+      "plugin_upload_error": "प्लगइन अपलोड त्रुटि ({{value}}): {{value2}}",
+      "plugins_uploaded_successfully": "प्लगइन सफलतापूर्वक अपलोड किए गए: {{value}}",
+      "plugin_already_exists": "प्लगइन {{plugin}} पहले से मौजूद है",
+      "plugin_named_already_exists": "{{folder_name}} नाम का प्लगइन पहले से मौजूद है",
+      "file_plugin_json_missing_one_more": "फ़ाइल plugin.json में निम्नलिखित में से एक या अधिक कुंजियाँ अनुपस्थित हैं: {{value}} ({{value2}})",
+      "file_plugin_json_not_valid_line": "{{file}} में फ़ाइल plugin.json मान्य नहीं है ({{msg}}: पंक्ति {{lineno}} स्तंभ {{colno}} (वर्ण {{pos}})) ({{value}})",
+      "not_valid_plugin_plugin_json_file": "{{file}} एक मान्य प्लगइन नहीं है (plugin.json फ़ाइल अनुपस्थित है) ({{value}})",
+      "invalid_plugin_name_can_only_contain": "{{temp_folder_name}} के लिए अमान्य प्लगइन नाम। (केवल संख्याएँ, अक्षर, अंडरस्कोर और हाइफ़न हो सकते हैं (न्यूनतम 4 और अधिकतम 64 वर्ण))",
+      "check_logs_more_details": "{{message}}, अधिक जानकारी के लिए लॉग देखें",
+      "please_upload_new_plugins_reload_plugins": "प्लगइन पुनः लोड करने के लिए कृपया नए प्लगइन अपलोड करें",
+      "couldn_t_update_plugin_2": "प्लगइन {{plugin}} अपडेट नहीं किया जा सका: {{e}}",
+      "couldn_t_update_plugin": "प्लगइन {{plugin}} अपडेट नहीं किया जा सका: {{message}}",
+      "couldn_t_delete_plugin": "प्लगइन {{plugin}} हटाया नहीं जा सका: {{message}}",
+      "deleted_plugin_successfully": "प्लगइन {{plugin}} सफलतापूर्वक हटाया गया",
+      "plugin_enabled": "प्लगइन {{plugin}} सफलतापूर्वक सक्रिय किया गया।",
+      "plugin_disabled": "प्लगइन {{plugin}} सफलतापूर्वक निष्क्रिय किया गया।",
+      "missing_id_version_parameter_plugins_catalog": "/plugins/catalog/update पर id या version पैरामीटर अनुपस्थित है।",
+      "missing_id_parameter_plugins_catalog_install": "/plugins/catalog/install पर id पैरामीटर अनुपस्थित है।",
+      "missing_csrf_token_parameter_plugins": "/plugins पर csrf_token पैरामीटर अनुपस्थित है।",
+      "missing_plugin_enabled_parameter_plugins_enable": "/plugins/enable पर plugin या enabled पैरामीटर अनुपस्थित है।",
+      "missing_plugins_parameter_plugins_delete": "/plugins/delete पर plugins पैरामीटर अनुपस्थित है।",
+      "plugin_not_found": "आईडी {{plugin}} वाला प्लगइन नहीं मिला",
+      "couldn_t_delete_plugin_in_database": "डेटाबेस में प्लगइन {{plugin}} हटाया नहीं जा सका: {{message}}",
+      "already_installed": "आईडी {{plugin_id}} वाला प्लगइन पहले से इंस्टॉल है",
+      "installed_successfully": "प्लगइन {{plugin_id}} सफलतापूर्वक इंस्टॉल किया गया",
+      "catalogue_entry_changed": "अपडेट की पुष्टि होने के बाद से {{plugin_id}} की कैटलॉग प्रविष्टि बदल गई है; अपडेट की फिर से समीक्षा करें",
+      "catalogue_entry_predates_updates": "{{plugin_id}} की कैश्ड कैटलॉग प्रविष्टि अपडेट से पुरानी है; अगले रीफ्रेश की प्रतीक्षा करें",
+      "not_installed_install_from_catalogue": "प्लगइन {{plugin_id}} इंस्टॉल नहीं है; इसके बजाय इसे कैटलॉग से इंस्टॉल करें",
+      "managed_outside_catalogue": "प्लगइन {{plugin_id}} कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता",
+      "managed_outside_catalogue_core": "प्लगइन {{plugin_id}} एक कोर प्लगइन है जो कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता",
+      "managed_outside_catalogue_external": "प्लगइन {{plugin_id}} एक बाहरी प्लगइन है जो कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता",
+      "managed_outside_catalogue_pro": "प्लगइन {{plugin_id}} एक PRO प्लगइन है जो कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता",
+      "managed_outside_catalogue_ui": "प्लगइन {{plugin_id}} एक UI प्लगइन है जो कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता",
+      "already_at_version": "प्लगइन {{plugin_id}} पहले से ही संस्करण {{version}} पर है",
+      "updated_to_version": "प्लगइन {{plugin_id}} संस्करण {{version}} में अपडेट किया गया"
+    },
     "multivalue": {
       "more_value": "अधिक मूल्य",
       "more_values": "अधिक मूल्य",
@@ -1259,7 +1575,25 @@
       "stale": "कैटलॉग हाल ही में रीफ्रेश नहीं हो सका, इसलिए जब तक यह फिर से अद्यतित नहीं हो जाता, इंस्टॉल करना अक्षम है।",
       "trust_notice": "कम्युनिटी आइटम उन रिपॉजिटरी से पढ़े जाते हैं जिन्हें BunkerWeb संगठन GitHub पर, TLS के माध्यम से प्रकाशित करता है, और जो इंस्टॉल किया गया है उसकी जांच सूचीबद्ध की गई चीज़ों से की जाती है — लेकिन यहां कुछ भी क्रिप्टोग्राफिक रूप से हस्ताक्षरित नहीं है। एक इंस्टॉल किया गया प्लगइन पूर्ण BunkerWeb अनुमतियों के साथ कोड चलाता है।",
       "incompatible_declared": "यह रिलीज़ BunkerWeb {{supported}} का समर्थन करती है; वर्तमान संस्करण {{current}} है",
-      "release": "रिलीज़ {{tag}} से पढ़ें"
+      "version_unknown": "चल रहा BunkerWeb संस्करण ({{current}}) नहीं पढ़ा जा सका, इसलिए इस रिलीज़ की संगतता जाँची नहीं जा सकती",
+      "release": "रिलीज़ {{tag}} से पढ़ें",
+      "state_installed": "इंस्टॉल किया गया (संस्करण {{version}})",
+      "state_update": "अपडेट उपलब्ध है: संस्करण {{installed}} इंस्टॉल है, कैटलॉग में {{version}} सूचीबद्ध है",
+      "state_managed": "कैटलॉग के बाहर इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ",
+      "state_managed_core": "कैटलॉग के बाहर कोर प्लगइन के रूप में इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ",
+      "state_managed_external": "कैटलॉग के बाहर बाहरी प्लगइन के रूप में इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ",
+      "state_managed_pro": "कैटलॉग के बाहर PRO प्लगइन के रूप में इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ",
+      "state_managed_ui": "कैटलॉग के बाहर UI प्लगइन के रूप में इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ",
+      "update": "अपडेट करें",
+      "remove": "हटाएँ",
+      "update_title": "एक सामुदायिक प्लगइन अपडेट करें",
+      "update_confirm": "यह इंस्टॉल किए गए प्लगइन {{name}} ({{id}}, संस्करण {{installed}}) को कैटलॉग के संस्करण {{version}} से बदल देगा। भले ही इसे कैटलॉग से इंस्टॉल करने के बजाय हाथ से अपलोड किया गया हो, यह बदल दिया जाता है।",
+      "update_removed_settings": "संस्करण {{version}} अब इन सेटिंग्स की घोषणा नहीं करता। इन्हें वैश्विक सेटिंग्स, सेवाओं और टेम्पलेट्स में इनके लिए सेट हर मान सहित हटा दिया जाता है:",
+      "update_no_removed_settings": "इस अपडेट से कोई सेटिंग नहीं हटाई जाती।",
+      "update_preview_unknown": "इस अपडेट से हटाई जाने वाली सेटिंग्स अभी सूचीबद्ध नहीं की जा सकतीं, इसलिए अगले कैटलॉग रीफ़्रेश तक अपडेट करना अक्षम है।",
+      "flash": {
+        "version_unreadable": "BunkerWeb का संस्करण ({{current}}) नहीं पढ़ा जा सका, इसलिए {{id}} की संगतता जाँची नहीं जा सकी; कुछ भी इंस्टॉल नहीं हुआ"
+      }
     }
   },
   "pro": {
@@ -1302,13 +1636,33 @@
       "draft_services_count": "ड्राफ्ट सेवाएँ: {{draft_services}}",
       "expired": "समय सीमा समाप्त",
       "free_version": "मुफ़्त संस्करण",
+      "invalid": "अमान्य कुंजी",
+      "invalid_key": "लाइसेंस सर्वर ने संग्रहीत लाइसेंस कुंजी को अस्वीकार कर दिया। इसे जाँचें, या इसे वैश्विक सेटिंग्स ← Pro में हटा दें।",
       "overlapped": "अतिव्यापी",
+      "pending_key": "लाइसेंस कुंजी अभी तक जाँची नहीं गई है। सहेजे जाने के तुरंत बाद शेड्यूलर इसे जाँचता है।",
       "pro_version": "प्रो संस्करण",
       "services_count": "ऑनलाइन सेवाएँ: {{online_services}} / PRO सेवाएँ: {{pro_services}}",
       "suspended": "निलंबित",
       "title": "स्थिति"
     },
-    "title": "Pro लाइसेंस"
+    "title": "Pro लाइसेंस",
+    "flash": {
+      "web_ui_will_reload_pro_plugins": "वेब UI शीघ्र ही अपने PRO प्लगइन को पुनः लोड करेगा।",
+      "forced_update_pro_plugins_has_scheduled": "PRO प्लगइन का जबरन अपडेट शेड्यूल किया गया है।",
+      "new_check_pro_plugins_has_scheduled": "PRO प्लगइन के लिए नई जांच शेड्यूल की गई है।",
+      "checking_license_key": "लाइसेंस कुंजी की जांच की जा रही है।",
+      "scheduler_will_attempt_apply_changes_download": "शेड्यूलर परिवर्तनों को लागू करने और PRO प्लगइन डाउनलोड करने का प्रयास करेगा।",
+      "license_key_same_current_one": "लाइसेंस कुंजी वर्तमान कुंजी के समान है।",
+      "invalid_license_key": "लाइसेंस कुंजी अमान्य है",
+      "missing_license_key_parameter_pro_key": "/pro/key पर license key पैरामीटर अनुपस्थित है।",
+      "license_key_updated_successfully": "PRO लाइसेंस कुंजी सफलतापूर्वक अपडेट की गई।",
+      "license_key_not_updated_refused": "PRO लाइसेंस कुंजी अपडेट नहीं की गई: मान अस्वीकृत कर दिया गया।"
+    },
+    "trial": {
+      "title": "नि:शुल्क परीक्षण",
+      "description": "<span class=\"text-primary\">BunkerWeb PRO</span> को <strong>30 दिनों</strong> तक मुफ़्त आज़माएं।",
+      "cta": "नि:शुल्क परीक्षण शुरू करें"
+    }
   },
   "profile": {
     "2fa": {
@@ -1370,6 +1724,50 @@
       "profile": "प्रोफ़ाइल",
       "security": "सुरक्षा",
       "sessions": "सत्र"
+    },
+    "flash": {
+      "passkey_has_successfully_deleted": "पासकी सफलतापूर्वक हटा दी गई है।",
+      "couldn_t_delete_passkey": "पासकी हटाई नहीं जा सकी: {{message}}",
+      "current_password_incorrect": "वर्तमान पासवर्ड गलत है।",
+      "passkey_has_successfully_renamed": "पासकी का नाम सफलतापूर्वक बदल दिया गया है।",
+      "couldn_t_rename_passkey": "पासकी का नाम नहीं बदला जा सका: {{message}}",
+      "passkey_name_cannot_empty": "पासकी का नाम खाली नहीं हो सकता।",
+      "passkey_has_successfully_registered": "पासकी सफलतापूर्वक पंजीकृत की गई है।",
+      "other_sessions_have_successfully_wiped": "अन्य सत्र सफलतापूर्वक समाप्त कर दिए गए हैं।",
+      "couldn_t_wipe_other_sessions": "अन्य सत्र समाप्त नहीं किए जा सके: {{message}}",
+      "couldn_t_revoke_other_sessions": "अन्य सत्र निरस्त नहीं किए जा सके: {{err}}",
+      "password_changed_but_other_sessions_could": "आपका पासवर्ड बदल दिया गया, लेकिन आपके अन्य सत्र निरस्त नहीं किए जा सके। नीचे \"अन्य सत्र समाप्त करें\" का उपयोग करें और सक्रिय सत्रों की सूची जांचें।",
+      "profile_has_successfully_updated": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई है।",
+      "couldn_t_update_user": "{{value}} उपयोगकर्ता अपडेट नहीं किया जा सका: {{message}}",
+      "no_fields_updated": "कोई फ़ील्ड अपडेट नहीं की गई।",
+      "theme_invalid": "थीम अमान्य है।",
+      "new_password_same_current_one": "नया पासवर्ड वर्तमान पासवर्ड के समान है।",
+      "new_password_too_long_must_not": "नया पासवर्ड बहुत लंबा है। इसे {{MAX_PASSWORD_BYTES}} बाइट्स (bcrypt की सख्त सीमा) से अधिक नहीं होना चाहिए; उच्चारण-चिह्न या इमोजी वर्ण प्रत्येक कई बाइट्स के बराबर गिने जाते हैं।",
+      "new_password_not_strong_enough_must": "नया पासवर्ड पर्याप्त मजबूत नहीं है। इसमें कम से कम 8 वर्ण होने चाहिए, जिनमें कम से कम 1 बड़ा अक्षर, 1 छोटा अक्षर, 1 अंक और 1 विशेष वर्ण (#@?!$%^&*-) शामिल हों।",
+      "passwords_do_not_match_confirm_password": "पासवर्ड पुष्टिकरण पासवर्ड से मेल नहीं खाते।",
+      "username_email_are_same_current_ones": "उपयोगकर्ता नाम और ईमेल वर्तमान के समान हैं।",
+      "username_too_long_must_less_than": "उपयोगकर्ता नाम बहुत लंबा है। इसे 256 वर्णों से कम होना चाहिए।",
+      "email_too_long_must_less_than": "ईमेल बहुत लंबा है। इसे 256 वर्णों से कम होना चाहिए।",
+      "two_factor_authentication_has_successfully_enabled": "दो-कारक प्रमाणीकरण सफलतापूर्वक सक्षम कर दिया गया है।",
+      "couldn_t_enable_two_factor_authentication": "दो-कारक प्रमाणीकरण सक्षम नहीं किया जा सका: {{message}}",
+      "totp_token_invalid": "totp टोकन अमान्य है।",
+      "two_factor_enrolment_expired_reload_page": "दो-कारक नामांकन समाप्त हो गया। पृष्ठ पुनः लोड करें और नया QR कोड स्कैन करें।",
+      "two_factor_authentication_already_enabled": "दो-कारक प्रमाणीकरण पहले से सक्षम है।",
+      "two_factor_authentication_has_successfully_disabled": "दो-कारक प्रमाणीकरण सफलतापूर्वक अक्षम कर दिया गया है।",
+      "couldn_t_disable_two_factor_authentication": "दो-कारक प्रमाणीकरण अक्षम नहीं किया जा सका: {{message}}",
+      "two_factor_authentication_not_enabled": "दो-कारक प्रमाणीकरण सक्षम नहीं है।",
+      "recovery_codes_have_successfully_refreshed_old": "पुनर्प्राप्ति कोड सफलतापूर्वक ताज़ा किए गए हैं। पुराने कोड अब मान्य नहीं हैं।",
+      "couldn_t_refresh_recovery_codes": "पुनर्प्राप्ति कोड ताज़ा नहीं किए जा सके: {{message}}",
+      "missing_parameters_profile_webauthn_delete": "/profile/webauthn/delete पर पैरामीटर अनुपस्थित हैं।",
+      "missing_parameters_profile_webauthn_rename": "/profile/webauthn/rename पर पैरामीटर अनुपस्थित हैं।",
+      "missing_current_password_parameter_profile_wipe": "/profile/wipe-other-sessions पर current password पैरामीटर अनुपस्थित है।",
+      "missing_new_password_confirm_parameter_profile": "/profile/edit पर new password confirm पैरामीटर अनुपस्थित है।",
+      "missing_current_password_parameter_profile_edit": "/profile/edit पर current password पैरामीटर अनुपस्थित है।",
+      "missing_email_parameter_profile_edit": "/profile/edit पर email पैरामीटर अनुपस्थित है।",
+      "missing_totp_token_parameter_profile_totp": "/profile/totp-enable पर totp token पैरामीटर अनुपस्थित है।",
+      "missing_current_password_parameter_profile_totp_3": "/profile/totp-enable पर current password पैरामीटर अनुपस्थित है।",
+      "missing_current_password_parameter_profile_totp_2": "/profile/totp-disable पर current password पैरामीटर अनुपस्थित है।",
+      "missing_current_password_parameter_profile_totp": "/profile/totp-refresh पर current password पैरामीटर अनुपस्थित है।"
     }
   },
   "range_picker": {
@@ -1446,10 +1844,10 @@
       "unique_offenders": "शीर्ष हमलावर"
     },
     "crowdsec": {
-      "source_lapi": "Local API decision",
-      "source_appsec": "AppSec inspection",
-      "source_failure_policy": "AppSec failure policy",
-      "technical_details": "Technical details"
+      "source_lapi": "स्थानीय API निर्णय",
+      "source_appsec": "AppSec निरीक्षण",
+      "source_failure_policy": "AppSec विफलता नीति",
+      "technical_details": "तकनीकी विवरण"
     }
   },
   "scope": {
@@ -1474,6 +1872,7 @@
     "data": "डेटा",
     "date": "दिनांक",
     "empty": "कोई खोज पैन उपलब्ध नहीं",
+    "search_title": "खोजें: {name}",
     "end_date": "अंतिम तिथि",
     "first_seen": "पहली बार देखा गया",
     "future_30d": "30 दिनों से अधिक दूर",
@@ -1524,6 +1923,80 @@
   },
   "services": {
     "draft": "ड्राफ्ट सेवाएं",
+    "flash": {
+      "resource_attach_failed": "जोड़ा नहीं जा सका: {{error}}",
+      "resource_attach_refused": "जोड़ा नहीं जा सकता: {{error}}",
+      "resource_attached": "संसाधन को {{service}} से जोड़ दिया गया।",
+      "resource_detach_failed": "अलग नहीं किया जा सका: {{error}}",
+      "resource_detach_refused": "अलग नहीं किया जा सकता: {{error}}",
+      "resource_detached": "संसाधन को {{service}} से अलग कर दिया गया।",
+      "resource_unknown_family": "अज्ञात संसाधन प्रकार।",
+      "server_name_missing": "सेवा नहीं बनाई गई क्योंकि सर्वर का नाम नहीं दिया गया था।",
+      "failed_import_service": "सेवा आयात करने में विफल: {{names}}",
+      "failed_import_services": "सेवाएं आयात करने में विफल: {{names}}",
+      "skipped_existing_service": "मौजूदा सेवा छोड़ी गई: {{names}}",
+      "skipped_existing_services": "मौजूदा सेवाएं छोड़ी गईं: {{names}}",
+      "imported_service": "सेवा आयात की गई: {{names}}",
+      "imported_services": "सेवाएं आयात की गईं: {{names}}",
+      "no_services_custom_configurations_found_import": "आयात फ़ाइल में कोई सेवाएँ या कस्टम कॉन्फ़िगरेशन नहीं मिले।",
+      "invalid_file_encoding_please_upload_utf": "फ़ाइल एन्कोडिंग अमान्य है। कृपया एक UTF-8 फ़ाइल अपलोड करें।",
+      "uploaded_file_not_valid_zip_archive": "अपलोड की गई फ़ाइल मान्य zip आर्काइव नहीं है।",
+      "invalid_encoding_configs_export_json_inside": "आर्काइव के अंदर configs_export.json के लिए एन्कोडिंग अमान्य है।",
+      "invalid_encoding_services_export_env_inside": "आर्काइव के अंदर services_export.env के लिए एन्कोडिंग अमान्य है।",
+      "refusing_extract_archive_uncompressed_size_exceeds": "आर्काइव निकालने से इनकार: असंपीड़ित आकार सुरक्षा सीमा से अधिक है।",
+      "uploaded_archive_must_contain_services_export": "अपलोड किए गए आर्काइव में services_export.env और/या configs_export.json होना चाहिए।",
+      "no_services_file_uploaded": "कोई सेवा फ़ाइल अपलोड नहीं की गई।",
+      "could_not_fetch_custom_configurations_api": "API से कस्टम कॉन्फ़िगरेशन प्राप्त नहीं किए जा सके।",
+      "no_services_export": "निर्यात के लिए कोई सेवाएँ नहीं।",
+      "no_services_selected": "कोई सेवाएँ चयनित नहीं।",
+      "could_not_fetch_custom_configs_api": "API से कस्टम कॉन्फ़िगरेशन प्राप्त नहीं किए जा सके।",
+      "service_not_found": "सेवा नहीं मिली",
+      "could_not_fetch_service_api": "API से सेवा प्राप्त नहीं की जा सकी।",
+      "template_not_found": "टेम्पलेट नहीं मिला",
+      "could_not_fetch_templates_api": "API से टेम्पलेट प्राप्त नहीं किए जा सके।",
+      "plugin_does_not_apply_default_server": "यह प्लगइन डिफ़ॉल्ट सर्वर पर लागू नहीं होता",
+      "could_not_fetch_attached_upstreams": "इस सेवा से जुड़े अपस्ट्रीम प्राप्त नहीं किए जा सके।",
+      "could_not_fetch_attached_certificates": "इस सेवा से जुड़े प्रमाणपत्र प्राप्त नहीं किए जा सके।",
+      "could_not_fetch_attached_redirects": "इस सेवा से जुड़े रीडायरेक्ट्स प्राप्त नहीं किए जा सके।",
+      "could_not_fetch_attached_workflows": "इस सेवा से जुड़े कार्यप्रवाह प्राप्त नहीं किए जा सके।",
+      "could_not_fetch_service_api_2": "API से सेवा {{service}} प्राप्त नहीं की जा सकी।",
+      "could_not_fetch_service_cloning": "क्लोनिंग के लिए सेवा {{clone}} प्राप्त नहीं की जा सकी।",
+      "could_not_fetch_services_configuration": "सेवाओं का कॉन्फ़िगरेशन प्राप्त नहीं किया जा सका।",
+      "custom_configs_not_saved_because_rename": "कस्टम कॉन्फ़िगरेशन सहेजे नहीं गए क्योंकि नाम बदलना अस्वीकृत कर दिया गया।",
+      "service_not_saved_every_changed_value": "सेवा {{service}} सहेजी नहीं गई: प्रत्येक बदला हुआ मान अस्वीकार कर दिया गया।",
+      "service_not_edited_because_no_values": "सेवा {{service}} संपादित नहीं की गई क्योंकि कोई मान नहीं बदला गया।",
+      "service_not_edited_because_no_values_or_configs": "सेवा {{service}} संपादित नहीं की गई क्योंकि कोई मान या कस्टम कॉन्फ़िग नहीं बदली गई।",
+      "template_custom_config_cannot_edited_because": "टेम्पलेट कस्टम कॉन्फ़िगरेशन {{key}} संपादित नहीं किया जा सकता क्योंकि यह {{value}} विधि से बनाया गया था।",
+      "service_already_exists": "सेवा {{service}} पहले से मौजूद है।",
+      "service_deleted": "सेवा हटाई गई: {{services}}",
+      "services_deleted": "सेवाएँ हटाई गईं: {{services}}",
+      "failed_delete_drafted_autoconf_service": "ड्राफ़्ट autoconf सेवा {{service_id}} हटाने में विफल: {{message}}",
+      "all_selected_services_could_not_found_2": "सभी चयनित सेवाएँ नहीं मिल सकीं या UI/API सेवाएँ नहीं हैं।",
+      "service_will_not_deleted": "सेवा {{non_deletable_service}} UI/API सेवा नहीं है और उसे हटाया नहीं जाएगा।",
+      "service_will_not_deleted_reserved": "सेवा {{non_deletable_service}} आरक्षित डिफ़ॉल्ट सर्वर है, जो किसी भी सेवा से मेल न खाने वाले अनुरोधों का उत्तर देता है, और उसे हटाया नहीं जाएगा।",
+      "service_will_not_deleted_autoconf": "सेवा {{non_deletable_service}} एक ऑनलाइन autoconf सेवा है (पहले उसे ड्राफ्ट में बदलें) और उसे हटाया नहीं जाएगा।",
+      "service_now_declared_standard": "सेवा {{service}} को अब \"स्टैंडर्ड\" घोषित किया गया है।",
+      "service_now_declared_redirect_only": "सेवा {{service}} को अब \"केवल रीडायरेक्ट\" घोषित किया गया है।",
+      "invalid_mode_parameter": "mode पैरामीटर अमान्य है।",
+      "do_not_have_permission_change_service": "आपके पास सेवा का मोड बदलने की अनुमति नहीं है",
+      "converted_services_online": "\"ऑनलाइन\" सेवाओं में बदली गईं: {{names}}",
+      "converted_services_draft": "\"ड्राफ्ट\" सेवाओं में बदली गईं: {{names}}",
+      "all_selected_services_could_not_found": "सभी चयनित सेवाएँ नहीं मिल सकीं, UI/API सेवाएँ नहीं हैं, या पहले ही परिवर्तित हो चुकी हैं।",
+      "service_already_online_will_not_converted": "सेवा {{non_convertible_service}} पहले से ऑनलाइन सेवा है और उसे नहीं बदला जाएगा।",
+      "service_already_draft_will_not_converted": "सेवा {{non_convertible_service}} पहले से ड्राफ्ट सेवा है और उसे नहीं बदला जाएगा।",
+      "service_not_ui_api_service_will": "सेवा {{non_editable_service}} एक UI/API सेवा नहीं है और इसे परिवर्तित नहीं किया जाएगा।",
+      "could_not_fetch_services_api": "API से सेवाएँ प्राप्त नहीं की जा सकीं।",
+      "missing_services_parameter_services_delete": "/services/delete पर services पैरामीटर अनुपस्थित है।",
+      "missing_mode_parameter_services_mode": "/services/{{service}}/mode पर mode पैरामीटर अनुपस्थित है।",
+      "missing_convert_parameter_services_convert": "/services/convert पर convert_to पैरामीटर अनुपस्थित है।",
+      "missing_services_parameter_services_convert": "/services/convert पर services पैरामीटर अनुपस्थित है।",
+      "default_server_reserved": "{{default_server_id}} आरक्षित डिफ़ॉल्ट सर्वर है: यह उन अनुरोधों का जवाब देता है जो किसी भी कॉन्फ़िगर की गई सेवा से मेल नहीं खाते (अज्ञात होस्टनाम, प्रत्यक्ष IP एक्सेस), इसलिए इसे बनाया, नाम बदला या हटाया नहीं जा सकता।",
+      "configuration_created": "सेवा {{service}} के लिए कॉन्फ़िगरेशन बनाया गया।",
+      "configuration_saved": "सेवा {{service}} के लिए कॉन्फ़िगरेशन सहेजा गया।",
+      "configuration_created_with_refusals": "सेवा {{service}} के लिए कॉन्फ़िगरेशन बनाया गया, लेकिन {{refused_count}} मान अस्वीकार कर दिए गए।",
+      "configuration_saved_with_refusals": "सेवा {{service}} के लिए कॉन्फ़िगरेशन सहेजा गया, लेकिन {{refused_count}} मान अस्वीकार कर दिए गए।",
+      "default_server_type_refused": "SERVER_TYPE आरक्षित सेवा {{default_server_id}} पर सेट नहीं किया जा सकता: इसका अपना कोई सर्वर ब्लॉक नहीं है जिसे बदला जा सके। इसका HTTP भाग स्वयं डिफ़ॉल्ट सर्वर ब्लॉक है, और इसका स्ट्रीम भाग DEFAULT_SERVER_STREAM_PORTS सेटिंग है।"
+    },
     "online": "ऑनलाइन",
     "subtitle": "BunkerWeb द्वारा संरक्षित मल्टीसाइट सेवाओं का प्रबंधन करें: उन्हें बनाएं, संपादित करें, ड्राफ्ट में बदलें, या हटाएं।",
     "total": "कुल सेवाएं",
@@ -1834,6 +2307,21 @@
       "content_entered": "दर्ज अक्षर: {{count}}",
       "loaded_from": "{{name}} से लोड किया गया · अक्षर: {{count}}",
       "read_error": "फ़ाइल पढ़ने में त्रुटि"
+    },
+    "flash": {
+      "couldn_t_edit_new_service": "नई सेवा संपादित नहीं की जा सकी: {{operation}}",
+      "couldn_t_create_new_service": "नई सेवा नहीं बनाई जा सकी: {{operation}}",
+      "when_using_custom_ssl_certificate_must": "कस्टम SSL प्रमाणपत्र का उपयोग करते समय, आपको प्रमाणपत्र और कुंजी दोनों सेट करने होंगे।",
+      "hostname_not_valid": "होस्टनाम मान्य नहीं है।",
+      "hostname_already_use": "होस्टनाम {{value}} पहले से उपयोग में है।",
+      "admin_user_created_successfully": "व्यवस्थापक उपयोगकर्ता सफलतापूर्वक बनाया गया",
+      "couldn_t_create_admin_user": "व्यवस्थापक उपयोगकर्ता नहीं बनाया जा सका: {{message}}",
+      "admin_password_too_long_must_not": "व्यवस्थापक पासवर्ड बहुत लंबा है। इसे {{MAX_PASSWORD_BYTES}} बाइट्स (bcrypt की सख्त सीमा) से अधिक नहीं होना चाहिए; उच्चारण-चिह्न या इमोजी वर्ण प्रत्येक कई बाइट्स के बराबर गिने जाते हैं।",
+      "admin_password_not_strong_enough_must": "व्यवस्थापक पासवर्ड पर्याप्त मजबूत नहीं है। इसमें कम से कम 8 वर्ण होने चाहिए, जिनमें कम से कम 1 बड़ा अक्षर, 1 छोटा अक्षर, 1 अंक और 1 विशेष वर्ण (#@?!$%^&*-) शामिल हों।",
+      "passwords_do_not_match": "पासवर्ड मेल नहीं खाते।",
+      "admin_email_too_long_must_less": "व्यवस्थापक ईमेल बहुत लंबा है। इसे 256 वर्णों से कम होना चाहिए।",
+      "admin_username_too_long_must_less": "व्यवस्थापक उपयोगकर्ता नाम बहुत लंबा है। इसे 256 वर्णों से कम होना चाहिए।",
+      "missing_either_one_following_parameters": "निम्नलिखित में से कोई एक पैरामीटर अनुपस्थित है: {{value}}।"
     }
   },
   "status": {
@@ -1849,6 +2337,8 @@
     "error_loading_template": "टेम्प्लेट डेटा लोड करने में असमर्थ।",
     "error_saving_template": "टेम्प्लेट सहेजते समय एक त्रुटि हुई।",
     "failed": "विफल",
+    "failover": "फेलओवर",
+    "inactive": "निष्क्रिय",
     "invalid_json_payload": "अमान्य JSON पेलोड।",
     "loading": "लोड हो रहा है...",
     "loading_bans": "प्रतिबंध लोड हो रहे हैं...",
@@ -1905,7 +2395,8 @@
     "no_url_available": "कोई URL उपलब्ध नहीं",
     "unknown": "अज्ञात",
     "deferred": "स्थगित",
-    "deferred_tooltip": "स्थगित — किसी इंस्टेंस के चालू होने की प्रतीक्षा है: {{reason}}"
+    "deferred_tooltip": "स्थगित — किसी इंस्टेंस के चालू होने की प्रतीक्षा है: {{reason}}",
+    "uploaded": "अपलोड किया गया"
   },
   "step": {
     "next": "अगला",
@@ -2009,6 +2500,7 @@
       "error_missing_endpoint": "सबमिशन एंडपॉइंट निर्धारित करने में असमर्थ।",
       "heading_create": "टेम्पलेट बनाएं",
       "heading_edit": "टेम्पलेट संपादित करें {{id}}",
+      "heading_view": "टेम्पलेट {{id}} देखें",
       "label_config_data": "डेटा",
       "label_config_name": "नाम",
       "label_config_order": "आदेश",
@@ -2035,7 +2527,8 @@
       "multiselect_placeholder": "विकल्प चुनें",
       "multiselect_summary": "{{count}} चयनित",
       "multivalue_add": "मान जोड़ें",
-      "multivalue_helper": "प्रति पंक्ति एक मान।{{separatorNote}}",
+      "multivalue_helper": "प्रति पंक्ति एक मान।",
+      "multivalue_helper_joined": "प्रति पंक्ति एक मान। इन्हें \"{{separator}}\" से जोड़ा जाएगा।",
       "panel_overview": "अवलोकन",
       "panel_overview_help": "मुख्य जानकारी ट्रैक करें और अनुभागों के बीच नेविगेट करें।",
       "placeholder_config_data": "डेटा",
@@ -2090,6 +2583,7 @@
       "raw_validation_steps_required": "एक टेम्पलेट में कम से कम एक चरण होना चाहिए।",
       "readonly_db": "डेटाबेस वर्तमान में केवल-पढ़ने के लिए है। टेम्पलेट नहीं बदले जा सकते।",
       "readonly_method": "यह टेम्पलेट {{method}} प्रक्रिया द्वारा बनाया गया था और इसे UI से संपादित नहीं किया जा सकता है।",
+      "readonly_method_plugin": "यह टेम्पलेट {{plugin}} प्लगइन द्वारा बनाया गया था और इसे UI से संपादित नहीं किया जा सकता।",
       "readonly_title": "केवल-पढ़ने के लिए",
       "readonly_user": "आपके पास केवल-पढ़ने की अनुमति है। लिखने की पहुंच का अनुरोध करने के लिए एक व्यवस्थापक से संपर्क करें।",
       "select_config_placeholder": "एक कॉन्फ़िगरेशन चुनें",
@@ -2148,6 +2642,7 @@
       "validation_config_type_multisite": "कॉन्फ़िगरेशन प्रकार मल्टीसाइट-संगत प्रकारों में से एक होना चाहिए।",
       "validation_config_type_required": "कॉन्फ़िगरेशन परिभाषित होने पर कॉन्फ़िगरेशन प्रकार आवश्यक है।",
       "validation_configs_unique": "प्रत्येक कॉन्फ़िगरेशन नाम अद्वितीय होना चाहिए।",
+      "validation_id_invalid": "टेम्पलेट ID में केवल अक्षर, अंक, बिंदु, हाइफ़न और अंडरस्कोर हो सकते हैं, और इसकी शुरुआत किसी अक्षर या अंक से होनी चाहिए।",
       "validation_id_required": "टेम्पलेट आईडी आवश्यक है।",
       "validation_setting_key": "प्रत्येक सेटिंग में एक कुंजी होनी चाहिए।",
       "validation_settings_unique": "प्रत्येक सेटिंग कुंजी अद्वितीय होनी चाहिए।",
@@ -2182,7 +2677,56 @@
       "heading": "उपलब्ध टेम्पलेट",
       "subheading": "BunkerWeb संगठन द्वारा प्रकाशित चुनी हुई सेवा टेम्पलेट।",
       "layer_warning": "एक टेम्पलेट एक लेयर है: पहले से टेम्पलेट का उपयोग कर रही सेवा में एक जोड़ने से उसका प्रभावी कॉन्फ़िगरेशन बदल जाता है।",
-      "no_compat_notice": "यह कैटलॉग किसी BunkerWeb संगतता की घोषणा नहीं करता। यदि कोई टेम्पलेट ऐसी सेटिंग बताता है जो इस BunkerWeb के पास नहीं है, तो इंस्टॉल के समय उसे अस्वीकार कर दिया जाता है।"
+      "no_compat_notice": "यह कैटलॉग किसी BunkerWeb संगतता की घोषणा नहीं करता। यदि कोई टेम्पलेट ऐसी सेटिंग बताता है जो इस BunkerWeb के पास नहीं है, तो इंस्टॉल के समय उसे अस्वीकार कर दिया जाता है।",
+      "state_installed": "इंस्टॉल किया गया, कैटलॉग जैसा ही",
+      "state_update": "इंस्टॉल किया गया, कैटलॉग संस्करण अलग है",
+      "state_managed": "इंस्टॉल किया गया और {{owner}} द्वारा प्रबंधित: कैटलॉग इसे नहीं बदलता",
+      "update_preview_unknown": "अगले कैटलॉग रीफ़्रेश के बाद परिवर्तन जाँचे जा सकते हैं।",
+      "update_title": "एक सामुदायिक टेम्पलेट अपडेट करें",
+      "update_confirm": "टेम्पलेट {{id}} को कैटलॉग रिलीज़ {{tag}} के संस्करण से बदलें। ये परिवर्तन टेम्पलेट पर लागू होते हैं:",
+      "update_services": "ये सेवाएँ इस टेम्पलेट का उपयोग करती हैं। इनके अगले कॉन्फ़िगरेशन जनरेशन पर, हर वह सेटिंग जो इन्होंने स्वयं सेट नहीं की, नया मान ले लेती है:",
+      "update_no_services": "अभी तक कोई सेवा इस टेम्पलेट का उपयोग नहीं करती।",
+      "update_failed": "टेम्पलेट अपडेट नहीं किया जा सका।",
+      "update_not_installed": "टेम्पलेट {{template}} इंस्टॉल नहीं है: इसके बजाय इसे इंस्टॉल करें",
+      "update_managed": "टेम्पलेट {{template}} {{owner}} द्वारा प्रबंधित है: कैटलॉग इसे नहीं बदलता",
+      "update_up_to_date": "टेम्पलेट {{template}} पहले से ही कैटलॉग से मेल खाता है",
+      "update_changed": "पूर्वावलोकन के बाद से टेम्पलेट {{template}} या कैटलॉग बदल गया है। पृष्ठ को फिर से लोड करें और परिवर्तनों की फिर से समीक्षा करें।",
+      "diff": {
+        "name": "नाम: {{old}} → {{new}}",
+        "settings_added": "सेटिंग्स जोड़ी गईं",
+        "settings_changed": "सेटिंग्स बदली गईं",
+        "settings_removed": "सेटिंग्स हटाई गईं",
+        "steps_added": "चरण जोड़े गए",
+        "steps_changed": "चरण बदले गए",
+        "steps_removed": "चरण हटाए गए",
+        "configs_added": "कस्टम कॉन्फ़िगरेशन जोड़े गए",
+        "configs_changed": "कस्टम कॉन्फ़िगरेशन बदले गए",
+        "configs_removed": "कस्टम कॉन्फ़िगरेशन हटाए गए"
+      }
+    },
+    "flash": {
+      "catalog_updated": "टेम्पलेट {{template}} कैटलॉग से अपडेट कर दिया गया।",
+      "export_failed": "टेम्पलेट {{template}} निर्यात नहीं किया जा सका: {{error}}",
+      "imported": "टेम्पलेट {{template}} आयात कर दिया गया।",
+      "replaced": "टेम्पलेट {{template}} बदल दिया गया।",
+      "template_deleted_successfully": "टेम्पलेट {{template_id}} सफलतापूर्वक हटाया गया।",
+      "successfully_deleted_template": "हटाए गए टेम्पलेट: {{success_count}}।",
+      "no_templates_selected_deletion": "हटाने के लिए कोई टेम्पलेट चयनित नहीं।",
+      "template_updated_successfully": "टेम्पलेट {{template_id}} सफलतापूर्वक अपडेट किया गया।",
+      "template_installed_catalogue": "टेम्पलेट {{template_id}} कैटलॉग से इंस्टॉल किया गया।",
+      "template_created_successfully": "टेम्पलेट {{template_id}} सफलतापूर्वक बनाया गया।",
+      "template_not_found_2": "टेम्पलेट नहीं मिला।",
+      "template_not_found": "टेम्पलेट {{clone_id}} नहीं मिला।",
+      "user_is_read_only": "उपयोगकर्ता केवल-पढ़ने के लिए है",
+      "error_deleting_template": "टेम्पलेट {{template_id}} हटाने में त्रुटि: {{message}}"
+    },
+    "import": {
+      "admin_only": "टेम्पलेट आयात करना केवल प्रशासकों तक सीमित है",
+      "failed": "टेम्पलेट आयात नहीं किया जा सका।",
+      "no_file": "आयात करने के लिए एक फ़ाइल चुनें।",
+      "refused": "टेम्पलेट आयात नहीं हुआ: {{reason}}",
+      "too_large": "टेम्पलेट आयात नहीं हुआ: फ़ाइल 1 MiB से बड़ी है",
+      "unreadable": "टेम्पलेट आयात नहीं हुआ: फ़ाइल पढ़ी नहीं जा सकी"
     }
   },
   "theme": {
@@ -2273,7 +2817,19 @@
       "switch_to_text_editor": "टेक्स्ट एडिटर पर जाएँ",
       "enroll_instance": "{{hostname}} के लिए नामांकन कोड जारी करें",
       "revoke_credential": "{{hostname}} का क्रेडेंशियल रद्द करें",
-      "rotate_credential": "{{hostname}} का क्रेडेंशियल घुमाएं"
+      "rotate_credential": "{{hostname}} का क्रेडेंशियल घुमाएं",
+      "attach_redirect": "{{name}} को किसी सेवा से संलग्न करें",
+      "edit_redirect": "{{name}} संपादित करें",
+      "delete_redirect": "{{name}} हटाएं",
+      "attach_upstream": "{{name}} को किसी सेवा से संलग्न करें",
+      "edit_upstream": "{{name}} संपादित करें",
+      "delete_upstream": "{{name}} हटाएं",
+      "edit_workflow_rules": "{{name}} के नियम संपादित करें",
+      "edit_workflow_details": "{{name}} का नाम और विवरण संपादित करें",
+      "attach_workflow": "{{name}} को किसी सेवा से संलग्न करें",
+      "clone_workflow": "{{name}} की प्रतिलिपि बनाएं",
+      "delete_workflow": "{{name}} हटाएं",
+      "delete_certificate": "प्रमाणपत्र हटाएं"
     },
     "cannot_delete_original_ban": "मूल प्रतिबंध प्रविष्टि को हटाया नहीं जा सकता।",
     "cannot_remove_disabled": "हटाया नहीं जा सकता क्योंकि एक या अधिक सेटिंग्स अक्षम हैं।",
@@ -2292,6 +2848,7 @@
     },
     "confirm_password_match": "पुष्टि पासवर्ड ऊपर दर्ज किए गए पासवर्ड से मेल खाना चाहिए।",
     "copied": "कॉपी किया गया!",
+    "copy_failed": "कॉपी विफल",
     "copy_https_only": "कॉपी सुविधा केवल HTTPS पर उपलब्ध है।",
     "custom_ssl_cert_data": "कस्टम SSL प्रमाणपत्र डेटा (PEM प्रारूप या Base64 एन्कोडेड)।",
     "custom_ssl_cert_path": "कस्टम SSL प्रमाणपत्र फ़ाइल का पथ।",
@@ -2299,6 +2856,7 @@
     "custom_ssl_key_path": "कस्टम SSL निजी कुंजी फ़ाइल का पथ।",
     "different_from_template": "मान टेम्पलेट डिफ़ॉल्ट से भिन्न है",
     "disabled_by_method": "अक्षम: विधि '{{method}}' के माध्यम से प्रबंधित।",
+    "disabled_by_plugin": "अक्षम: {{plugin}} प्लगइन द्वारा प्रबंधित।",
     "disabled_db_readonly": "अक्षम: डेटाबेस रीड-ओनली मोड में है।",
     "disabled_draft": "अक्षम: सेवा ड्राफ्ट मोड में है।",
     "disabled_readonly": "अक्षम: रीड-ओनली मोड सक्रिय है।",
@@ -2335,6 +2893,7 @@
       "edit_template": "टेम्पलेट {{template}} संपादित करें",
       "export_config": "कस्टम कॉन्फ़िगरेशन {{name}} निर्यात करें",
       "export_service": "सेवा {{service}} कॉन्फ़िगरेशन निर्यात करें",
+      "export_template": "टेम्पलेट {{template}} निर्यात करें",
       "view_config": "कस्टम कॉन्फ़िगरेशन {{name}} देखें",
       "view_file": "देखें {{filename}}",
       "view_service": "सेवा {{service}} देखें",
@@ -2535,6 +3094,13 @@
     "signing_in": "BunkerWeb में लॉग इन करना",
     "subtitle": "अपने प्रमाणीकरण ऐप से कोड दर्ज करें।",
     "title": "दो-कारक",
+    "flash": {
+      "ve_used_one_recovery_codes_have": "आपने अपने पुनर्प्राप्ति कोड में से एक का उपयोग किया है। आपके पास {{len}} शेष हैं।",
+      "error_occurred_while_using_recovery_code": "पुनर्प्राप्ति कोड का उपयोग करते समय त्रुटि हुई।",
+      "database_read_only_recovery_code_used": "डेटाबेस केवल-पढ़ने के लिए है, आपके द्वारा उपयोग किया गया पुनर्प्राप्ति कोड वैध बना रहेगा।",
+      "token_invalid": "टोकन अमान्य है।",
+      "no_token_provided_totp": "/totp पर कोई टोकन प्रदान नहीं किया गया।"
+    },
     "prompt": "कृपया अपना TOTP कोड दर्ज करें।",
     "subtitle_security_key": "अपनी सुरक्षा कुंजी से अपनी पहचान की पुष्टि करें।",
     "or_use_security_key": "या अपनी सुरक्षा कुंजी का उपयोग करें"
@@ -2571,6 +3137,45 @@
     "expiring_help": "30 दिन या उससे कम",
     "file_extensions": "निम्नलिखित फ़ाइल एक्सटेंशन में से एक का उपयोग करें: {{extensions}}.",
     "file_select": "एक PEM फ़ाइल चुनें।",
+    "flash": {
+      "encrypted_private_key": "एन्क्रिप्टेड निजी कुंजियाँ समर्थित नहीं हैं।",
+      "invalid_certificate_pem": "प्रमाणपत्र फ़ाइल एक वैध PEM प्रमाणपत्र नहीं है।",
+      "invalid_private_key_pem": "निजी कुंजी फ़ाइल एक वैध PEM निजी कुंजी नहीं है।",
+      "could_not_download_certificate": "प्रमाणपत्र डाउनलोड नहीं किया जा सका: {{message}}",
+      "certificate_action_failed": "प्रमाणपत्र क्रिया विफल: {{message}}",
+      "certificate_deleted_successfully": "प्रमाणपत्र सफलतापूर्वक हटा दिया गया",
+      "could_not_detach_certificate": "प्रमाणपत्र अलग नहीं किया जा सका: {{message}}",
+      "certificate_inventory_assignment_removed_successfully": "प्रमाणपत्र सूची असाइनमेंट सफलतापूर्वक हटाया गया",
+      "certificate_service_are_required": "प्रमाणपत्र और सेवा दोनों आवश्यक हैं",
+      "certificate_inventory_assignment_added_successfully": "प्रमाणपत्र सूची असाइनमेंट सफलतापूर्वक जोड़ा गया",
+      "custom_certificate_uploaded_successfully": "कस्टम प्रमाणपत्र सफलतापूर्वक अपलोड किया गया",
+      "certificate_upload_exceeds_2_mib_request": "प्रमाणपत्र अपलोड 2 MiB अनुरोध सीमा से अधिक है",
+      "certificate_metadata_updated_successfully": "प्रमाणपत्र मेटाडेटा सफलतापूर्वक अपडेट किया गया",
+      "could_not_fetch_services_certificate_assignments": "प्रमाणपत्र असाइनमेंट के लिए सेवाएँ प्राप्त नहीं की जा सकीं: {{message}}",
+      "could_not_fetch_certificates": "प्रमाणपत्र प्राप्त नहीं किए जा सके: {{message}}",
+      "invalid_certificate_part": "प्रमाणपत्र भाग अमान्य है",
+      "too_many_services": "एक प्रमाणपत्र 100 से अधिक सेवाओं से संलग्न नहीं किया जा सकता",
+      "too_many_sans": "एक प्रमाणपत्र में 100 से अधिक वैकल्पिक विषय नाम (subject alternative names) नहीं हो सकते",
+      "validity_whole_number": "वैधता दिनों की एक पूर्ण संख्या होनी चाहिए",
+      "validity_range": "वैधता 1 से 825 दिनों के बीच होनी चाहिए",
+      "invalid_certificate_source": "अमान्य प्रमाणपत्र स्रोत",
+      "select_service_letsencrypt": "Let's Encrypt जारी करने के लिए कम से कम एक सेवा चुनें",
+      "name_common_name_are_required": "नाम और कॉमन नेम (common name) आवश्यक हैं",
+      "letsencrypt_issuance_scheduled": "Let's Encrypt जारी करना निर्धारित किया गया",
+      "selfsigned_certificate_created": "स्व-हस्ताक्षरित प्रमाणपत्र बनाया गया",
+      "could_not_schedule_letsencrypt": "Let's Encrypt जारी करना निर्धारित नहीं किया जा सका: {{message}}",
+      "could_not_create_certificate": "प्रमाणपत्र नहीं बनाया जा सका: {{message}}",
+      "certificate_name_are_required": "प्रमाणपत्र और नाम आवश्यक हैं",
+      "could_not_update_certificate": "प्रमाणपत्र अपडेट नहीं किया जा सका: {{message}}",
+      "pem_certificate_private_key_required": "एक PEM प्रमाणपत्र और निजी कुंजी आवश्यक है",
+      "certificate_name_required": "प्रमाणपत्र का नाम आवश्यक है",
+      "could_not_upload_certificate": "प्रमाणपत्र अपलोड नहीं किया जा सका: {{message}}",
+      "could_not_attach_certificate": "प्रमाणपत्र संलग्न नहीं किया जा सका: {{message}}",
+      "checked_certificates_due_renewal": "नवीनीकरण हेतु देय {{total_due}} प्रमाणपत्रों की जांच की गई",
+      "certificate_required": "प्रमाणपत्र आवश्यक है",
+      "certificate_renewed_successfully": "प्रमाणपत्र सफलतापूर्वक नवीनीकृत किया गया",
+      "invalid_certificate_action": "अमान्य प्रमाणपत्र क्रिया"
+    },
     "file_selected": "{{name}} ({{size}} KiB)",
     "file_size_limit": "फ़ाइल 1 MiB से अधिक नहीं होनी चाहिए।",
     "fingerprint": "SHA-256 फिंगरप्रिंट",
@@ -2658,16 +3263,31 @@
     "import_file": "TXT/CSV",
     "import_size": "TXT/CSV आयात 256 KiB तक सीमित हैं।",
     "kind": "प्रकार",
+    "kind_label": {
+      "ip": "IP",
+      "country": "देश",
+      "asn": "ASN",
+      "rdns": "रिवर्स DNS",
+      "user_agent": "यूज़र एजेंट",
+      "uri": "URI"
+    },
     "kinds": "प्रकारों",
     "loading_references": "संदर्भ लोड हो रहे हैं...",
     "max_entries": "एक संसाधन समूह में अधिकतम {{max}} प्रविष्टियाँ हो सकती हैं।",
-    "meta_line": "{{kinds}} प्रकार · {{values}} मान · {{usages}} उपयोग",
+    "meta_kinds": "{{count}} प्रकार",
+    "meta_kinds_plural": "{{count}} प्रकार",
+    "meta_usages": "{{count}} उपयोग",
+    "meta_usages_plural": "{{count}} उपयोग",
+    "meta_values": "{{count}} मान",
+    "meta_values_plural": "{{count}} मान",
     "new": "नया समूह",
     "new_alias": "नया एलियास",
     "no_entries": "कोई प्रविष्टियाँ नहीं",
     "no_entries_help": "व्यक्तिगत रूप से प्रविष्टियाँ जोड़ें या नीचे दिए गए बल्क इम्पोर्टर का उपयोग करें।",
     "no_references": "कोई संदर्भ नहीं",
     "readonly": "डेटाबेस केवल पढ़ने के लिए है। संसाधन समूहों की जाँच और निर्यात किया जा सकता है, लेकिन उन्हें बदला नहीं जा सकता।",
+    "reference_count": "{{count}} संदर्भ",
+    "reference_count_plural": "{{count}} संदर्भ",
     "references_error": "संदर्भ लोड नहीं हो सके",
     "save": "समूह सहेजें",
     "search": "एलियास, विवरण, प्रकार या मान खोजें...",
@@ -2676,7 +3296,28 @@
     "template_configuration": "टेम्पलेट {{template}}",
     "usage": "उपयोग",
     "value": "मान",
-    "values": "मान"
+    "values": "मान",
+    "flash": {
+      "could_not_export_resource_groups": "संसाधन समूह निर्यात नहीं किए जा सके: {{message}}",
+      "could_not_delete_resource_group": "संसाधन समूह हटाया नहीं जा सका: {{message}}",
+      "resource_group_deleted_successfully": "संसाधन समूह सफलतापूर्वक हटाया गया",
+      "resource_group_required": "संसाधन समूह आवश्यक है",
+      "could_not_clone_resource_group": "संसाधन समूह की प्रतिलिपि नहीं बनाई जा सकी: {{message}}",
+      "resource_group_cloned": "संसाधन समूह @{{alias}} के रूप में क्लोन किया गया",
+      "could_not_save_resource_group": "संसाधन समूह सहेजा नहीं जा सका: {{message}}",
+      "resource_group_created_successfully": "संसाधन समूह @{{alias}} सफलतापूर्वक बनाया गया",
+      "resource_group_updated_successfully": "संसाधन समूह सफलतापूर्वक अपडेट किया गया",
+      "alias_invalid_chars": "उपनाम में 1 से 64 अक्षर, अंक, अंडरस्कोर, या हाइफ़न होने चाहिए",
+      "alias_reserved": "यह उपनाम BunkerWeb द्वारा आरक्षित है",
+      "entries_not_valid_json": "संसाधन प्रविष्टियाँ मान्य JSON नहीं हैं",
+      "entries_not_a_list": "संसाधन प्रविष्टियाँ एक सूची होनी चाहिए",
+      "too_many_entries": "संसाधन समूह में {{value}} से अधिक प्रविष्टियाँ नहीं हो सकतीं",
+      "entry_invalid": "प्रविष्टि {{index}} अमान्य है",
+      "entry_invalid_kind": "प्रविष्टि {{index}} का प्रकार अमान्य है",
+      "entry_invalid_value": "प्रविष्टि {{index}} का मान अमान्य है",
+      "entry_comment_too_long": "प्रविष्टि {{index}} की टिप्पणी बहुत लंबी है",
+      "source_required": "स्रोत संसाधन समूह आवश्यक है"
+    }
   },
   "validation": {
     "default_field_name": "यह फ़ील्ड",
@@ -2733,7 +3374,16 @@
     "service": "सेवा",
     "services": "सेवा को सक्षम करना",
     "status": "इंस्टेंस स्टोरेज",
-    "subtitle": "रिवर्स-प्रॉक्सी कैश स्थिति, एकत्रित हिट-दर मेट्रिक्स और तत्काल साफ़ करने के नियंत्रण।"
+    "subtitle": "रिवर्स-प्रॉक्सी कैश स्थिति, एकत्रित हिट-दर मेट्रिक्स और तत्काल साफ़ करने के नियंत्रण।",
+    "flash": {
+      "error_purging_web_cache": "वेब कैश साफ़ करने में त्रुटि: {{message}}",
+      "web_cache_purged_instance_failed_unreachable": "वेब कैश साफ़ किया गया। साफ़ किए गए इंस्टेंस: {{value}}, विफल: {{value2}}, अप्राप्य और छोड़े गए: {{value3}} (कुछ भी कतार में नहीं डाला गया)।",
+      "url_required_purge_by_url": "URL द्वारा साफ़ करने के लिए एक URL आवश्यक है",
+      "error_fetching_web_cache_metrics": "वेब कैश मेट्रिक्स प्राप्त करने में त्रुटि: {{message}}",
+      "error_fetching_web_cache_status": "वेब कैश स्थिति प्राप्त करने में त्रुटि: {{message}}",
+      "purged_for_url": "{{url}} के लिए वेब कैश साफ़ किया गया",
+      "purged_all_entries": "वेब कैश साफ़ किया गया (सभी प्रविष्टियाँ)"
+    }
   },
   "compose": {
     "always_on": "हमेशा चालू",
@@ -2780,6 +3430,10 @@
     "edit_shared": "यह रीडायरेक्ट {{count}} सेवाओं से जुड़ा है: {{services}}। सहेजने पर सभी सेवाओं में बदलाव लागू होगा।",
     "empty_text": "एक पुनर्निर्देशन एक नामित नियम है जिसे आप एक या अधिक सेवाओं से जोड़ते हैं। इनलाइन REDIRECT_* सेटिंग्स इसका साथ में काम करते रहते हैं।",
     "empty_title": "अभी कोई पुनर्निर्देशन नहीं",
+    "err": {
+      "invalid_from_path": "स्रोत पथ मान्य नहीं है: इसमें स्पेस, सेमीकोलन या ब्रेसेस नहीं हो सकते।",
+      "invalid_to_url": "लक्ष्य एक पूर्ण http:// या https:// URL होना चाहिए।"
+    },
     "from_path": "से",
     "from_path_help": "जोड़ी गई सेवाओं पर स्रोत पथ, उदाहरण के लिए /old.",
     "new": "नया पुनर्निर्देशन",
@@ -2790,7 +3444,28 @@
     "services_help": "Ctrl या Command का उपयोग करके कई सेवाओं का चयन करें। बाद में रीडायरेक्ट संलग्न किया जा सकता है।",
     "status_code": "स्थिति कोड",
     "to_url": "रीडायरेक्ट करें",
-    "truncated": "केवल पहले 500 रीडायरेक्ट प्रदर्शित किए जाते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।"
+    "truncated": "केवल पहले 500 रीडायरेक्ट प्रदर्शित किए जाते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।",
+    "flash": {
+      "could_not_detach_redirect": "रीडायरेक्ट अलग नहीं किया जा सका: {{message}}",
+      "redirect_detached_successfully": "रीडायरेक्ट सफलतापूर्वक अलग किया गया",
+      "redirect_service_are_required": "रीडायरेक्ट और सेवा दोनों आवश्यक हैं",
+      "could_not_attach_redirect": "रीडायरेक्ट संलग्न नहीं किया जा सका: {{message}}",
+      "redirect_attached_service": "रीडायरेक्ट जोड़ा गया। सेवाएँ: {{len}}",
+      "could_not_delete_redirect": "रीडायरेक्ट हटाया नहीं जा सका: {{message}}",
+      "redirect_deleted_successfully": "रीडायरेक्ट सफलतापूर्वक हटाया गया",
+      "redirect_required": "रीडायरेक्ट आवश्यक है",
+      "redirect_updated_successfully": "रीडायरेक्ट सफलतापूर्वक अपडेट किया गया",
+      "redirect_created_successfully": "रीडायरेक्ट {{value}} सफलतापूर्वक बनाया गया",
+      "could_not_fetch_services_redirect_assignments": "रीडायरेक्ट असाइनमेंट के लिए सेवाएँ प्राप्त नहीं की जा सकीं: {{message}}",
+      "could_not_fetch_redirects": "रीडायरेक्ट प्राप्त नहीं किए जा सके: {{message}}",
+      "could_not_create": "रीडायरेक्ट बनाया नहीं जा सका: {{message}}",
+      "could_not_update": "रीडायरेक्ट अपडेट नहीं किया जा सका: {{message}}",
+      "too_many_services": "एक रीडायरेक्ट {{value}} से अधिक सेवाओं से संलग्न नहीं हो सकता",
+      "name_required": "रीडायरेक्ट नाम आवश्यक है",
+      "target_required": "रीडायरेक्ट लक्ष्य आवश्यक है",
+      "status_code_must_be_one_of": "स्थिति कोड {{value}} में से एक होना चाहिए",
+      "at_least_one_service_required": "कम से कम एक सेवा आवश्यक है"
+    }
   },
   "upstreams": {
     "add_server": "सर्वर जोड़ें",
@@ -2842,7 +3517,33 @@
     "servers": "सर्वर",
     "services_help": "Ctrl या Command का उपयोग करके कई सेवाओं का चयन करें। एक अपस्ट्रीम बाद में संलग्न किया जा सकता है।",
     "services_hidden": "छिपी हुई सेवाएँ: {{count}}। {{protocol}} अपस्ट्रीम केवल मिलान वाली सेवा से संलग्न किया जा सकता है।",
-    "truncated": "केवल पहले 500 अपस्ट्रीम प्रदर्शित होते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।"
+    "truncated": "केवल पहले 500 अपस्ट्रीम प्रदर्शित होते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।",
+    "flash": {
+      "could_not_detach_upstream": "अपस्ट्रीम अलग नहीं किया जा सका: {{message}}",
+      "upstream_detached_successfully": "अपस्ट्रीम सफलतापूर्वक अलग किया गया",
+      "upstream_service_are_required": "अपस्ट्रीम और सेवा दोनों आवश्यक हैं",
+      "could_not_attach_upstream": "अपस्ट्रीम संलग्न नहीं किया जा सका: {{message}}",
+      "upstream_attached_service": "अपस्ट्रीम जोड़ा गया। सेवाएँ: {{len}}",
+      "could_not_delete_upstream": "अपस्ट्रीम हटाया नहीं जा सका: {{message}}",
+      "upstream_deleted_successfully": "अपस्ट्रीम सफलतापूर्वक हटाया गया",
+      "upstream_required": "अपस्ट्रीम आवश्यक है",
+      "could_not_update_upstream": "अपस्ट्रीम अपडेट नहीं किया जा सका: {{message}}",
+      "upstream_updated_successfully": "अपस्ट्रीम सफलतापूर्वक अपडेट किया गया",
+      "could_not_create_upstream": "अपस्ट्रीम नहीं बनाया जा सका: {{message}}",
+      "upstream_created_successfully": "अपस्ट्रीम {{value}} सफलतापूर्वक बनाया गया",
+      "could_not_fetch_services_upstream_assignments": "अपस्ट्रीम असाइनमेंट के लिए सेवाएँ प्राप्त नहीं की जा सकीं: {{message}}",
+      "could_not_fetch_upstreams": "अपस्ट्रीम प्राप्त नहीं किए जा सके: {{message}}",
+      "weight_max_fails_whole_numbers": "{{host}} का वजन और अधिकतम विफलताएँ पूर्ण संख्या होनी चाहिए",
+      "at_least_one_server_required": "कम से कम एक सर्वर आवश्यक है",
+      "too_many_servers": "अपस्ट्रीम में {{value}} से अधिक सर्वर नहीं हो सकते",
+      "too_many_services": "एक अपस्ट्रीम {{value}} से अधिक सेवाओं से संलग्न नहीं हो सकता",
+      "match_path_must_start_with_slash": "रिवर्स प्रॉक्सी पथ / से शुरू होना चाहिए",
+      "name_required": "अपस्ट्रीम नाम आवश्यक है",
+      "protocol_must_be_one_of": "प्रोटोकॉल {{value}} में से एक होना चाहिए",
+      "method_must_be_one_of": "विधि {{value}} में से एक होनी चाहिए",
+      "keepalive_must_be_positive_whole_number": "keepalive संख्या एक धनात्मक पूर्णांक होनी चाहिए",
+      "at_least_one_service_required": "कम से कम एक सेवा आवश्यक है"
+    }
   },
   "workflows": {
     "act_block": "ब्लॉक करें",
@@ -2889,7 +3590,13 @@
       "changePosition": "{{total}} में से नियम {{n}}, स्थिति बदलें",
       "newValue": "नया मान",
       "positionMove": "{{total}} में से स्थिति {{n}} — स्थानांतरित करने के लिए क्लिक करें",
-      "crowdsecField": "CrowdSec तथ्य"
+      "crowdsecField": "CrowdSec तथ्य",
+      "collapseRule": "नियम {{n}} संक्षिप्त करें",
+      "expandRule": "नियम {{n}} विस्तृत करें",
+      "moveRuleUp": "नियम {{n}} ऊपर ले जाएँ",
+      "moveRuleDown": "नियम {{n}} नीचे ले जाएँ",
+      "moreActionsForRule": "नियम {{n}} के लिए अधिक क्रियाएँ",
+      "ruleCard": "नियम {{n}} / {{total}} — {{name}}"
     },
     "attach": "सेवाओं से जोड़ें",
     "attach_help": "नियम केवल उन सेवाओं पर लागू होते हैं जिनसे वर्कफ़्लो जुड़ा हुआ है।",
@@ -2934,6 +3641,7 @@
     "entry_sub": "कार्यप्रवाह संलग्न क्रम में चलते हैं; इसके भीतर के नियम ऊपर से नीचे चलते हैं।",
     "entry_title": "संलग्न सेवा का हर अनुरोध",
     "err": {
+      "load": "संग्रहीत नियम नहीं पढ़े जा सके। इन्हें अधिलेखित होने से बचाने के लिए सहेजना अक्षम है; पृष्ठ को फिर से लोड करें।",
       "save": "सहेजा नहीं जा सका",
       "saveUnreachable": "सहेजने के एंडपॉइंट तक नहीं पहुँचा जा सका",
       "validate": "सत्यापित नहीं किया जा सका",
@@ -2996,7 +3704,9 @@
     },
     "rules": "नियम",
     "say": {
-      "actionChanged": "कार्रवाई {{type}} में बदल गई। यह अब भी एकमात्र कार्रवाई है और मूल्यांकन रोकती है।",
+      "actionChangedBlock": "कार्रवाई ब्लॉक में बदल गई। यह अब भी एकमात्र कार्रवाई है, और अब भी मूल्यांकन रोक देती है।",
+      "actionChangedChallenge": "कार्रवाई चुनौती में बदल गई। यह अब भी एकमात्र कार्रवाई है, और अब भी मूल्यांकन रोक देती है।",
+      "actionChangedRedirect": "कार्रवाई रीडायरेक्ट में बदल गई। यह अब भी एकमात्र कार्रवाई है, और अब भी मूल्यांकन रोक देती है।",
       "added": "नियम स्थान {{n}} पर, सबसे अंत में जोड़ा गया — इसलिए ऊपर के सभी नियम पहले जाँचे जाते हैं।",
       "deleted": "नियम हटा दिया गया। {{count}} नियम शेष हैं।",
       "duplicated": "प्रतिलिपि स्थान {{n}} पर डाली गई। ऊपर का मूल नियम सक्षम रहने तक यह कभी मेल नहीं खा सकती।",
@@ -3005,21 +3715,19 @@
       "inspecting": "{{total}} के {{n}} नियम संपादित करें — {{name}}।",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "अंतिम मान हटाया गया — कोई मान होने तक यह शर्त सहेजी नहीं जा सकती।",
-      "moved": "{{name}} को {{total}} में से स्थान {{to}} पर ले जाया गया{{how}}। अब यह {{where}} चलता है।",
+      "moved": "{{name}} को {{total}} में से स्थान {{to}} पर ले जाया गया।",
+      "movedDrag": "{{name}} को खींचकर {{total}} में से स्थान {{to}} पर रखा गया।",
+      "movedKeyboard": "{{name}} को कीबोर्ड से {{total}} में से स्थान {{to}} पर ले जाया गया।",
       "predicateCap": "इस नियम में पहले से अधिकतम {{max}} शर्तें हैं।",
-      "ruleAbove": "ऊपर वाले नियम",
       "ruleDisabled": "{{name}} अक्षम किया गया — इसे पूरी तरह छोड़ा जाता है और नीचे के नियम अब वे अनुरोध देखते हैं।",
       "ruleEnabled": "{{name}} सक्षम किया गया — इसका स्थान {{n}} पर फिर मूल्यांकन होता है।",
-      "runsAfter": "{{name}} के बाद",
-      "runsFirst": "सबसे पहले",
-      "runsLast": "सबसे अंत में",
+      "runsAfter": "यह अब {{name}} के बाद चलता है।",
+      "runsAfterAbove": "यह अब ऊपर वाले नियम के बाद चलता है।",
+      "runsFirst": "यह अब सबसे पहले चलता है।",
+      "runsLast": "यह अब सबसे अंत में चलता है।",
       "saved": "नियम सहेजकर संलग्न सेवाओं पर भेजे गए।",
       "theRule": "नियम",
-      "valuesDropped": "शर्त {{type}} में बदली — उसके {{count}} मान आगे नहीं ले जाए जा सके।",
-      "via": {
-        "drag": "खींचकर",
-        "keyboard": "कीबोर्ड से"
-      },
+      "valuesDropped": "शर्त बदल गई। जो मान आगे नहीं ले जाए जा सके: {{count}}।",
       "viewCanvas": "कैनवास दृश्य। नियम बाएं से दाएं चलते हैं; पहला मिलान जीतता है।",
       "viewList": "सूची दृश्य। नियम ऊपर से नीचे चलते हैं; पहला मिलान जीतता है।"
     },
@@ -3054,7 +3762,10 @@
       "other_unreached": "नहीं पहुँचा",
       "other_workflows": "इस सेवा के अन्य कार्यप्रवाह",
       "out_draft": "यह सेवा ड्राफ्ट है — इसके लिए अभी कोई कार्यप्रवाह संकलित नहीं हुआ।",
-      "out_match": "{{workflow}} · {{rule}} मेल खाया और अनुरोध पर {{action}} कार्रवाई की।",
+      "out_match": "{{workflow}} · {{rule}} मेल खाया।",
+      "out_match_block": "{{workflow}} · {{rule}} मेल खाया और अनुरोध को ब्लॉक कर दिया।",
+      "out_match_redirect": "{{workflow}} · {{rule}} मेल खाया और अनुरोध को रीडायरेक्ट कर दिया।",
+      "out_match_challenge": "{{workflow}} · {{rule}} मेल खाया और अनुरोध पर चुनौती लगा दी।",
       "out_no_match": "कोई नियम मेल नहीं खाया। अनुरोध शेष सुरक्षा स्टैक पर जारी रहेगा।",
       "out_not_attached": "यह कार्यप्रवाह किसी सेवा से संलग्न नहीं है, इसलिए मूल्यांकन के लिए कोई नियम-श्रृंखला नहीं है।",
       "out_whitelisted": "श्वेतसूचीबद्ध — पूरा कार्यप्रवाह छोड़ दिया जाता है और कोई नियम नहीं जाँचा जाता।",
@@ -3089,7 +3800,7 @@
       "any": "कोई भी",
       "anyMeta": "{{count}} शर्तें — कम से कम एक सही होनी चाहिए",
       "empty": "खाली समूह — कोई शर्त जोड़ें, इसे ऐसे सहेजा नहीं जा सकता।",
-      "noGroupHolds": "किसी समूह में {{kind}} प्रविष्टियाँ नहीं हैं",
+      "noGroupHolds": "किसी संसाधन समूह में इस प्रकार की प्रविष्टियाँ नहीं हैं।",
       "noneMeta": "इनमें से कोई सही न होने पर मेल खाता है",
       "not": "कोई नहीं",
       "or": "या",
@@ -3144,6 +3855,29 @@
       "captcha": "कैप्चा",
       "lapi": "लोकल API"
     },
+    "flash": {
+      "could_not_detach_workflow": "वर्कफ़्लो अलग नहीं किया जा सका: {{message}}",
+      "workflow_detached_successfully": "वर्कफ़्लो सफलतापूर्वक अलग किया गया",
+      "workflow_service_are_required": "वर्कफ़्लो और सेवा दोनों आवश्यक हैं",
+      "could_not_attach_workflow": "वर्कफ़्लो संलग्न नहीं किया जा सका: {{message}}",
+      "workflow_services_updated_attached": "वर्कफ़्लो सेवाएँ अपडेट की गईं ({{len}} संलग्न)",
+      "could_not_delete_workflow": "वर्कफ़्लो हटाया नहीं जा सका: {{message}}",
+      "workflow_deleted_successfully": "वर्कफ़्लो सफलतापूर्वक हटाया गया",
+      "workflow_required": "वर्कफ़्लो आवश्यक है",
+      "could_not_clone_workflow": "वर्कफ़्लो की प्रतिलिपि नहीं बनाई जा सकी: {{message}}",
+      "workflow_cloned": "वर्कफ़्लो {{name}} के रूप में क्लोन किया गया",
+      "workflow_new_name_are_required": "वर्कफ़्लो और नया नाम दोनों आवश्यक हैं",
+      "could_not_update_workflow": "वर्कफ़्लो अपडेट नहीं किया जा सका: {{message}}",
+      "workflow_updated_successfully": "वर्कफ़्लो सफलतापूर्वक अपडेट किया गया",
+      "could_not_create_workflow": "वर्कफ़्लो नहीं बनाया जा सका: {{message}}",
+      "workflow_created_successfully": "वर्कफ़्लो {{value}} सफलतापूर्वक बनाया गया",
+      "could_not_fetch_workflow": "वर्कफ़्लो प्राप्त नहीं किया जा सका: {{message}}",
+      "could_not_fetch_services_workflow_assignments": "वर्कफ़्लो असाइनमेंट के लिए सेवाएँ प्राप्त नहीं की जा सकीं: {{message}}",
+      "could_not_fetch_workflows": "वर्कफ़्लो प्राप्त नहीं किए जा सके: {{message}}",
+      "too_many_services": "एक वर्कफ़्लो {{value}} से अधिक सेवाओं से संलग्न नहीं हो सकता",
+      "name_required": "वर्कफ़्लो नाम आवश्यक है",
+      "service_list_not_read_reopen_page": "सेवा सूची नहीं पढ़ी जा सकी; पृष्ठ फिर से खोलें और पुनः प्रयास करें"
+    },
     "reason": {
       "sentence": "सुरक्षा वर्कफ़्लो {{workflow}}: {{action}}"
     }
@@ -3166,7 +3900,8 @@
       "conflict": {
         "inline": "{{service}} पहले से ही {{path}} को {{family}} सेटिंग्स के माध्यम से सेवा प्रदान कर रहा है। {{path}} के लिए इन सेटिंग्स को साफ़ करें, या एक अलग पथ का उपयोग करें।",
         "primary": "“{{name}}” अभी इस सेवा का प्राथमिक प्रमाणपत्र है और बिना अतिरिक्त चेतावनी के इसका प्राथमिक दर्जा हटा दिया जाएगा। वास्तव में डिप्लॉय किया गया प्रमाणपत्र ही प्राथमिक होता है।",
-        "resource": "{{service}} पहले से ही {{path}} को {{kind}} के \"{{name}}\" के माध्यम से सेवा प्रदान कर रहा है। \"{{name}}\" को अलग करें, या उन्हें एक अलग पथ दें।",
+        "resource_redirect": "{{service}} पहले से ही {{path}} को रीडायरेक्ट \"{{name}}\" के माध्यम से सेवा प्रदान कर रहा है। \"{{name}}\" को अलग करें, या उनमें से किसी एक को अलग पथ दें।",
+        "resource_upstream": "{{service}} पहले से ही {{path}} को अपस्ट्रीम \"{{name}}\" के माध्यम से सेवा प्रदान कर रहा है। \"{{name}}\" को अलग करें, या उनमें से किसी एक को अलग पथ दें।",
         "stream": "एक स्ट्रीम सेवा एक ही बैकएंड पर सभी कनेक्शन को प्रॉक्सी करती है, और {{service}} पहले से ही \"{{name}}\" का उपयोग कर रहा है। पहले इसे अलग करें।",
         "stream_inline": "{{service}} पहले से ही REVERSE_PROXY_HOST में अपना बैकएंड रखता है। उस सेटिंग को साफ़ करें ताकि अपस्ट्रीम नियंत्रण संभाल सके।"
       },
@@ -3200,7 +3935,13 @@
       },
       "title": "संलग्न संसाधन",
       "unavailable": "उपलब्ध नहीं",
-      "nothing_available": "संलग्न करने के लिए कुछ उपलब्ध नहीं है।"
+      "nothing_available": "संलग्न करने के लिए कुछ उपलब्ध नहीं है।",
+      "confirm_detach": "इस संसाधन को {{service}} से अलग करें?",
+      "confirm_detach_certificate": "इस प्रमाणपत्र को {{service}} से अलग करें?",
+      "confirm_detach_redirect": "इस रीडायरेक्ट को {{service}} से अलग करें?",
+      "confirm_detach_upstream": "इस अपस्ट्रीम को {{service}} से अलग करें?",
+      "confirm_detach_workflow": "इस कार्यप्रवाह को {{service}} से अलग करें?",
+      "confirm_detach_template": "इस टेम्पलेट को {{service}} से अलग करें?"
     },
     "default_server": {
       "certificate": {
@@ -3242,6 +3983,19 @@
       "service": "अपनी पहली सेवा पंजीकृत करें",
       "workflow": "एक सुरक्षा वर्कफ़्लो जोड़ें"
     },
+    "item_hint": {
+      "first_block": "जैसे ही BunkerWeb किसी अनुरोध को अवरुद्ध करेगा, रिपोर्ट यहाँ दिखाई देंगी — एक खराब अनुरोध भेजें और वापस जाँचें।",
+      "https": "अपनी सेवा को HTTPS पर परोसने के लिए यहाँ प्रमाणपत्र जोड़ें या जनरेट करें।",
+      "install": "यहाँ एक इंस्टेंस जोड़ें, फिर उसे प्रबंधन में लाने के लिए अपना पहला कॉन्फ़िगरेशन सहेजें।",
+      "mfa": "इस मेनू से अपनी प्रोफ़ाइल खोलें, फिर दो-चरणीय प्रमाणीकरण चालू करें।",
+      "pro": "PRO प्लगइन और सहायता अनलॉक करने के लिए यहाँ अपनी PRO लाइसेंस कुंजी दर्ज करें।",
+      "read_bans": "यहाँ हर पंक्ति एक प्रतिबंधित क्लाइंट, कारण, और बैन कब समाप्त होगा यह दिखाती है।",
+      "read_home": "यह डैशबोर्ड एक नज़र में सक्रिय इंस्टेंस, परोसी गई सेवाएँ और हाल का ट्रैफ़िक दिखाता है।",
+      "read_logs": "हर इंस्टेंस के लाइव लॉग यहाँ दिखते हैं, जिन्हें इंस्टेंस और गंभीरता के अनुसार फ़िल्टर किया जा सकता है।",
+      "read_reports": "यह देखने के लिए यहाँ एक रिपोर्ट खोलें कि किस सुरक्षा जाँच ने इसे रोका, और क्यों।",
+      "service": "BunkerWeb को यह बताने के लिए यहाँ एक सेवा बनाएँ कि किस एप्लिकेशन की सुरक्षा करनी है।",
+      "workflow": "जाँच और प्रतिक्रियाओं को एक नियम में जोड़ने के लिए यहाँ एक वर्कफ़्लो बनाएँ।"
+    },
     "not_saved": "सहेजा नहीं जा सका।",
     "pro_tips": "PRO युक्तियाँ",
     "restart": "गाइड फिर से शुरू करें",
@@ -3269,7 +4023,10 @@
     "disabled_title": "प्लगइन समय बंद है",
     "disabled_help": "हर प्लगइन का समय मापने के लिए METRICS_COLLECT_TIMINGS को yes पर सेट करें। पूरे अनुरोध की अवधि हर स्थिति में एकत्र होती है।",
     "unreachable_title": "किसी इंस्टेंस ने समय रिपोर्ट नहीं किया",
-    "unreachable_help": "समय इंस्टेंस से ही पढ़े जाते हैं, इसलिए किसी ने उत्तर नहीं दिया — या किसी ने अभी अनुरोध पूरा नहीं किया।"
+    "unreachable_help": "समय इंस्टेंस से ही पढ़े जाते हैं, इसलिए किसी ने उत्तर नहीं दिया — या किसी ने अभी अनुरोध पूरा नहीं किया।",
+    "flash": {
+      "error_fetching_plugin_timings": "प्लगइन टाइमिंग प्राप्त करने में त्रुटि: {{message}}"
+    }
   },
   "whatsnew": {
     "missing_action": "GitHub पर चेंजलॉग खोलें",
@@ -3290,6 +4047,337 @@
     "revoke_credential": "इस इंस्टेंस का क्रेडेंशियल रद्द करें? कंट्रोल प्लेन अब इसे एक्सेस नहीं कर पाएगा।",
     "rotate_credential": "इस इंस्टेंस का क्रेडेंशियल घुमाएं? यदि इंस्टेंस पहुँच योग्य नहीं है तो विफल हो जाता है।"
   },
+  "general": {
+    "settings": {
+      "IS_LOADING": {
+        "label": "आंतरिक उपयोग हेतु लोडिंग",
+        "help": "आंतरिक उपयोग: जब BW लोड हो रहा हो तो yes पर सेट करें।"
+      },
+      "NGINX_PREFIX": {
+        "label": "nginx प्रीफ़िक्स",
+        "help": "वह स्थान जहाँ nginx कॉन्फ़िगरेशन खोजेगा।"
+      },
+      "HTTP_PORT": {
+        "label": "HTTP पोर्ट",
+        "help": "HTTP पोर्ट संख्या जिससे bunkerweb बाइंड होता है। HTTP सुनना अक्षम करने के लिए खाली छोड़ें।"
+      },
+      "HTTPS_PORT": {
+        "label": "HTTPS पोर्ट",
+        "help": "HTTPS पोर्ट संख्या जिससे bunkerweb बाइंड होता है। HTTPS सुनना अक्षम करने के लिए खाली छोड़ें।"
+      },
+      "MULTISITE": {
+        "label": "मल्टीसाइट",
+        "help": "मल्टीसाइट सक्रियण।"
+      },
+      "SERVER_NAME": {
+        "label": "सर्वर का नाम",
+        "help": "bunkerweb द्वारा सेवित वर्चुअल होस्ट की सूची। (स्पेस से अलग किए गए)"
+      },
+      "WORKER_PROCESSES": {
+        "label": "वर्कर प्रोसेस",
+        "help": "वर्कर प्रोसेस की संख्या।"
+      },
+      "WORKER_RLIMIT_NOFILE": {
+        "label": "प्रति वर्कर खुली फ़ाइलें",
+        "help": "वर्कर प्रोसेस के लिए अधिकतम खुली फ़ाइलों की संख्या।"
+      },
+      "WORKER_CONNECTIONS": {
+        "label": "प्रति वर्कर कनेक्शन",
+        "help": "प्रति वर्कर अधिकतम कनेक्शन की संख्या।"
+      },
+      "WORKER_SHUTDOWN_TIMEOUT": {
+        "label": "वर्कर शटडाउन टाइमआउट",
+        "help": "वर्कर प्रोसेस के सुव्यवस्थित शटडाउन के लिए टाइमआउट। इस विलंब के बाद, मेमोरी वृद्धि रोकने के लिए रीलोड के दौरान पुराने वर्कर्स को ज़बरन समाप्त कर दिया जाता है।"
+      },
+      "DNS_RESOLVERS": {
+        "label": "DNS रिज़ॉल्वर",
+        "help": "उपयोग करने के लिए रिज़ॉल्वर के DNS पते।"
+      },
+      "CLIENT_BODY_TIMEOUT": {
+        "label": "क्लाइंट बॉडी टाइमआउट",
+        "help": "क्लाइंट अनुरोध बॉडी पढ़ने का टाइमआउट।"
+      },
+      "CLIENT_HEADER_TIMEOUT": {
+        "label": "क्लाइंट हेडर टाइमआउट",
+        "help": "क्लाइंट अनुरोध हेडर पढ़ने का टाइमआउट।"
+      },
+      "KEEPALIVE_TIMEOUT": {
+        "label": "कीपअलाइव टाइमआउट",
+        "help": "keep-alive क्लाइंट कनेक्शन के लिए टाइमआउट।"
+      },
+      "SEND_TIMEOUT": {
+        "label": "सेंड टाइमआउट",
+        "help": "क्लाइंट को प्रतिक्रिया भेजने का टाइमआउट।"
+      },
+      "WORKERLOCK_MEMORY_SIZE": {
+        "label": "इनिशियलाइज़ेशन Workerlock मेमोरी आकार",
+        "help": "इनिशियलाइज़ेशन वर्कर्स के lua_shared_dict का आकार"
+      },
+      "INTERNALSTORE_MEMORY_SIZE": {
+        "label": "Internalstore मेमोरी आकार",
+        "help": "आंतरिक internalstore का आकार।"
+      },
+      "DATASTORE_MEMORY_SIZE": {
+        "label": "Datastore मेमोरी आकार",
+        "help": "आंतरिक datastore का आकार।"
+      },
+      "DATASTORE_LRU_SIZE": {
+        "label": "Datastore LRU आकार",
+        "help": "साझा प्रति-वर्कर datastore LRU के लिए स्लॉट संख्या (इसका उपयोग internalstore और प्रति-वर्कर प्लगइन कैश करते हैं)। एक सादा पूर्णांक या `k`/`m` संक्षिप्त रूप स्वीकार करता है (जैसे `1k`, `10k`, `1m`)।"
+      },
+      "CACHESTORE_MEMORY_SIZE": {
+        "label": "Cachestore मेमोरी आकार",
+        "help": "आंतरिक cachestore का आकार।"
+      },
+      "CACHESTORE_IPC_MEMORY_SIZE": {
+        "label": "Cachestore ipc मेमोरी आकार",
+        "help": "आंतरिक cachestore (ipc) का आकार।"
+      },
+      "CACHESTORE_MISS_MEMORY_SIZE": {
+        "label": "Cachestore miss मेमोरी आकार",
+        "help": "आंतरिक cachestore (miss) का आकार।"
+      },
+      "CACHESTORE_LOCKS_MEMORY_SIZE": {
+        "label": "Cachestore locks मेमोरी आकार",
+        "help": "आंतरिक cachestore (locks) का आकार।"
+      },
+      "SESSIONS_REVOCATION_MEMORY_SIZE": {
+        "label": "सत्र निरसन मेमोरी आकार",
+        "help": "निरस्त कुकी सत्र पहचानकर्ताओं को रखने वाले आंतरिक स्टोर का आकार।"
+      },
+      "USE_API": {
+        "label": "API सक्रिय करें",
+        "help": "BunkerWeb की आंतरिक API सक्रिय करें।"
+      },
+      "API_HTTP_PORT": {
+        "label": "API पोर्ट संख्या",
+        "help": "BunkerWeb की आंतरिक API के लिए सुनने का पोर्ट संख्या।"
+      },
+      "API_HTTPS_PORT": {
+        "label": "API HTTPS पोर्ट संख्या",
+        "help": "BunkerWeb की आंतरिक API के लिए सुनने का पोर्ट संख्या (TLS)।"
+      },
+      "API_LISTEN_IP": {
+        "label": "API सुनने का IP",
+        "help": "BunkerWeb की आंतरिक API के लिए सुनने का IP पता।"
+      },
+      "API_LISTEN_HTTP": {
+        "label": "API सुनना HTTP",
+        "help": "BunkerWeb की आंतरिक API के लिए HTTP सुनना।"
+      },
+      "API_LISTEN_HTTPS": {
+        "label": "API सुनना HTTPS",
+        "help": "BunkerWeb की आंतरिक API के लिए HTTPS (SSL/TLS) सुनना।"
+      },
+      "API_SERVER_NAME": {
+        "label": "API सर्वर का नाम",
+        "help": "BunkerWeb की आंतरिक API के लिए सर्वर का नाम (वर्चुअल होस्ट)।"
+      },
+      "API_TOKEN": {
+        "label": "API एक्सेस टोकन",
+        "help": "API कॉल की प्रमाणिकता के लिए वैकल्पिक टोकन। यदि सेट है, तो शेड्यूलर (और किसी भी क्लाइंट) को इसे Authorization हेडर के माध्यम से भेजना होगा। नोट: इसे BunkerWeb और शेड्यूलर दोनों परिवेशों में सेट होना चाहिए।"
+      },
+      "API_WHITELIST_IP": {
+        "label": "API व्हाइटलिस्ट IP",
+        "help": "BunkerWeb की आंतरिक API से संपर्क करने की अनुमति वाले IP/नेटवर्क की सूची। (प्रारूप: ip/netmask या ipv6/netmask, स्पेस से अलग किए गए)"
+      },
+      "AUTOCONF_MODE": {
+        "label": "Autoconf मोड",
+        "help": "Docker Autoconf एकीकरण सक्षम करें।"
+      },
+      "SWARM_MODE": {
+        "label": "Swarm मोड",
+        "help": "Docker Swarm एकीकरण सक्षम करें।"
+      },
+      "KUBERNETES_MODE": {
+        "label": "Kubernetes मोड",
+        "help": "Kubernetes एकीकरण सक्षम करें।"
+      },
+      "SERVER_TYPE": {
+        "label": "सर्वर का प्रकार",
+        "help": "सर्वर का प्रकार: http या stream।"
+      },
+      "LISTEN_STREAM": {
+        "label": "स्ट्रीम सुनना",
+        "help": "non-ssl सुनना सक्षम करें (पासथ्रू)।"
+      },
+      "LISTEN_STREAM_PORT": {
+        "label": "स्ट्रीम सुनने का पोर्ट",
+        "help": "non-ssl के लिए सुनने का पोर्ट (पासथ्रू)। non-SSL स्ट्रीम सुनना अक्षम करने के लिए खाली छोड़ें।"
+      },
+      "LISTEN_STREAM_PORT_SSL": {
+        "label": "स्ट्रीम सुनने का पोर्ट ssl",
+        "help": "ssl के लिए सुनने का पोर्ट (पासथ्रू)। SSL स्ट्रीम सुनना अक्षम करने के लिए खाली छोड़ें।"
+      },
+      "USE_TCP": {
+        "label": "TCP सुनना",
+        "help": "TCP सुनना (stream)।"
+      },
+      "USE_UDP": {
+        "label": "UDP सुनना",
+        "help": "UDP सुनना (stream)।"
+      },
+      "USE_IPV6": {
+        "label": "IPv6 का उपयोग करें",
+        "help": "IPv6 कनेक्टिविटी सक्षम करें।"
+      },
+      "IS_DRAFT": {
+        "label": "आंतरिक उपयोग हेतु ड्राफ़्ट",
+        "help": "आंतरिक उपयोग: जब सेवा ड्राफ़्ट मोड में हो तो yes पर सेट करें।"
+      },
+      "KEEP_CONFIG_ON_RESTART": {
+        "label": "पुनरारंभ पर कॉन्फ़िगरेशन बनाए रखें",
+        "help": "पुनरारंभ पर कॉन्फ़िगरेशन बनाए रखें। पुनरारंभ पर कॉन्फ़िग रीसेट रोकने के लिए 'yes' सेट करें।"
+      },
+      "CUSTOM_CONFIGS_DRIFT": {
+        "label": "कस्टम कॉन्फ़िग ड्रिफ़्ट नीति",
+        "help": "जब कोई प्रोजेक्टेड .conf फ़ाइल पिछले दर्ज किए गए प्रोजेक्शन के बाद से बदल जाए या उसमें से अनुपस्थित हो, तो क्या होता है। डेटाबेस की वर्तमान पंक्ति से मेल खाने वाली फ़ाइलें अनदेखी की जाती हैं; पठनीय प्रोजेक्शन इतिहास के बिना, कोई ड्रिफ़्ट रिपोर्ट नहीं की जाती। 'overwrite' हर पहचाने गए ड्रिफ़्ट को लॉग करता है और डेटाबेस से फ़ाइल फिर से लिखता है, या यदि कोई सक्रिय पंक्ति इसकी जगह नहीं लेती तो इसे हटा देता है। 'refuse' ड्रिफ़्ट हल होने तक डेटाबेस से वहाँ कुछ नहीं लिखता, एक त्रुटि लॉग करता है, और लंबित कस्टम कॉन्फ़िग परिवर्तन को अस्वीकृत छोड़ देता है ताकि इसे फिर से प्रयास किया जाए।"
+      },
+      "TIMERS_LOG_LEVEL": {
+        "label": "टाइमर लॉग स्तर",
+        "help": "टाइमर के लिए लॉग स्तर।"
+      },
+      "BUNKERWEB_INSTANCES": {
+        "label": "BunkerWeb इंस्टेंस",
+        "help": "स्पेस से अलग किए गए BunkerWeb इंस्टेंस की सूची (प्रारूप: fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
+      },
+      "USE_TEMPLATE": {
+        "label": "टेम्पलेट का उपयोग करें",
+        "help": "लागू करने के लिए कॉन्फ़िग टेम्पलेट, स्पेस से अलग किए गए, जो विशिष्ट सेटिंग्स के डिफ़ॉल्ट मानों को ओवरराइड करेंगे। टेम्पलेट क्रम में लागू होते हैं और बाद वाला पहले वाले को ओवरराइड करता है; सेवा पर सेट किया गया मान टेम्पलेट को ओवरराइड करता है।"
+      },
+      "SECURITY_MODE": {
+        "label": "सुरक्षा मोड",
+        "help": "खतरों की प्रतिक्रिया को परिभाषित करता है: निगरानी और लॉग करने के लिए \"detect\", या पहुँच रोकने और घटनाएँ लॉग करने के लिए \"block\"।"
+      },
+      "SERVER_NAMES_HASH_BUCKET_SIZE": {
+        "label": "सर्वर नाम हैश बकेट आकार",
+        "help": "server_names_hash_bucket_size डायरेक्टिव के लिए मान।"
+      },
+      "LOG_FORMAT": {
+        "label": "एक्सेस लॉग प्रारूप",
+        "help": "एक्सेस लॉग के लिए उपयोग किया जाने वाला प्रारूप।"
+      },
+      "ACCESS_LOG": {
+        "label": "एक्सेस लॉग पथ",
+        "help": "NGINX एक्सेस लॉग के लिए उपयोग किया जाने वाला पथ (फ़ाइल पथ, syslog:server=host[:port][,param=value], या memory:name:size; अक्षम करने के लिए off सेट करें)।"
+      },
+      "ERROR_LOG": {
+        "label": "एरर लॉग पथ",
+        "help": "NGINX एरर लॉग के लिए उपयोग किया जाने वाला पथ (फ़ाइल पथ, stderr, syslog:server=host[:port][,param=value], या memory:size)।"
+      },
+      "PLUGINS_ORDER_INIT": {
+        "label": "प्लगइन क्रम (init)",
+        "help": "वे प्लगइन जिन्हें init चरण (इंजन बूटस्ट्रैप, केवल एक बार चलता है) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_INIT_WORKER": {
+        "label": "प्लगइन क्रम (init_worker)",
+        "help": "वे प्लगइन जिन्हें init_worker चरण (प्रति-वर्कर बूटस्ट्रैप) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_SET": {
+        "label": "प्लगइन क्रम (set)",
+        "help": "वे प्लगइन जिन्हें इस साइट के set चरण (rewrite/access से पहले वेरिएबल सेटअप) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_ACCESS": {
+        "label": "प्लगइन क्रम (access)",
+        "help": "वे प्लगइन जिन्हें इस साइट के access चरण (अनुरोध स्वीकृति/नियंत्रण) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_SSL_CERTIFICATE": {
+        "label": "प्लगइन क्रम (ssl_certificate)",
+        "help": "वे प्लगइन जिन्हें इस साइट के ssl_certificate चरण (TLS प्रमाणपत्र चयन/जारी करना) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_HEADER": {
+        "label": "प्लगइन क्रम (header)",
+        "help": "वे प्लगइन जिन्हें इस साइट के header चरण (प्रतिक्रिया हेडर फ़िल्टरिंग) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_LOG": {
+        "label": "प्लगइन क्रम (log)",
+        "help": "वे प्लगइन जिन्हें इस साइट के log चरण (प्रतिक्रिया के बाद HTTP लॉग प्रोसेसिंग) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_PREREAD": {
+        "label": "प्लगइन क्रम (preread)",
+        "help": "वे प्लगइन जिन्हें इस साइट के preread चरण (प्रॉक्सी से पहले TCP preread जाँच) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_LOG_STREAM": {
+        "label": "प्लगइन क्रम (log_stream)",
+        "help": "वे प्लगइन जिन्हें इस साइट के log_stream चरण (स्ट्रीम लॉग प्रोसेसिंग) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_LOG_DEFAULT": {
+        "label": "प्लगइन क्रम (log_default)",
+        "help": "वे प्लगइन जिन्हें इस साइट के log_default चरण (डिफ़ॉल्ट वर्चुअल होस्ट लॉग प्रोसेसिंग) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_TIMER": {
+        "label": "प्लगइन क्रम (timer)",
+        "help": "वे प्लगइन जिन्हें timer चरण (बैकग्राउंड टाइमर) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+      },
+      "PLUGINS_ORDER_INIT_WORKERS": {
+        "label": "प्लगइन क्रम (init_workers)",
+        "help": "init_workers चरण के दौरान चलाने के लिए कॉमा या स्पेस से अलग किए गए प्लगइन ID।"
+      },
+      "LOG_LEVEL": {
+        "label": "लॉग स्तर",
+        "help": "एरर लॉग के लिए उपयोग किया जाने वाला स्तर।"
+      },
+      "JOBS_DAILY_TIME": {
+        "label": "जॉब का दैनिक समय",
+        "help": "स्थानीय समय (शेड्यूलर TZ, HH:MM, 24 घंटे) जिस पर दैनिक शेड्यूल की गई जॉब चलती हैं; साप्ताहिक जॉब भी इसी समय पर, JOBS_WEEKLY_DAY पर चलती हैं।"
+      },
+      "JOBS_WEEKLY_DAY": {
+        "label": "जॉब का साप्ताहिक दिन",
+        "help": "सप्ताह का वह दिन जिस पर साप्ताहिक शेड्यूल की गई जॉब, JOBS_DAILY_TIME पर चलती हैं।"
+      }
+    }
+  },
+  "global_settings": {
+    "flash": {
+      "checking_license_key_upgrade": "अपग्रेड के लिए लाइसेंस कुंजी की जांच की जा रही है।",
+      "global_settings_not_saved_every_changed": "वैश्विक सेटिंग्स सहेजी नहीं गईं: प्रत्येक बदला हुआ मान अस्वीकार कर दिया गया।",
+      "not_edited_no_values_changed": "कोई मान परिवर्तित न होने के कारण वैश्विक सेटिंग्स संपादित नहीं की गईं।",
+      "saved_but_values_refused": "वैश्विक सेटिंग्स सहेजी गईं, लेकिन {{refused_count}} मान अस्वीकार कर दिए गए।",
+      "saved_successfully": "वैश्विक सेटिंग्स सफलतापूर्वक सहेजी गईं।"
+    }
+  },
+  "home": {
+    "flash": {
+      "error_fetching_services": "सेवाएँ प्राप्त करने में त्रुटि: {{message}}"
+    }
+  },
+  "utils": {
+    "flash": {
+      "couldn_t_connect_redis": "redis से कनेक्ट नहीं किया जा सका",
+      "missing_form": "फ़ॉर्म में {{key}} अनुपस्थित है",
+      "invalid_request": "अमान्य अनुरोध"
+    }
+  },
+  "main": {
+    "flash": {
+      "forced_status_reloaded": "स्थिति को जबरन पुनः लोड किया गया",
+      "have_more_services_than_allowed_by": "आपके पास आपके प्रो लाइसेंस द्वारा अनुमत सेवाओं से अधिक सेवाएँ हैं। अपना लाइसेंस अपग्रेड करें या अपने प्रो लाइसेंस को अनलॉक करने के लिए कुछ सेवाओं को ड्राफ़्ट मोड में ले जाएँ।",
+      "last_changes_have_applied_successfully": "पिछले परिवर्तन सफलतापूर्वक लागू कर दिए गए हैं।",
+      "database_connection_read_only_mode_no": "डेटाबेस कनेक्शन रीड-ओनली मोड में है: कोई संशोधन संभव नहीं।",
+      "two_factor_no_recovery_codes": "दो-कारक प्रमाणीकरण सक्षम है लेकिन कोई पुनर्प्राप्ति कोड उपलब्ध नहीं है, कृपया उन्हें ताज़ा करें:",
+      "failover_configuration_error": "पिछले परिवर्तन लागू नहीं किए जा सके क्योंकि इससे NGINX पर एक कॉन्फ़िगरेशन त्रुटि उत्पन्न होती है, कृपया अधिक जानकारी के लिए BunkerWeb के लॉग देखें। कॉन्फ़िगरेशन आखिरी काम करने वाली स्थिति में वापस चली गई।",
+      "failover_message": "फ़ेलओवर संदेश:"
+    }
+  },
+  "letsencrypt": {
+    "flash": {
+      "orphan_certificate": "Let's Encrypt: अनाथ प्रमाणपत्र <strong>{{cert_name}}</strong> एक अनुपलब्ध ACME खाते <code>{{account}}</code> का संदर्भ देता है। जब तक प्रदाता की स्थिति ठीक नहीं हो जाती, तब तक नवीनीकरण अवरुद्ध हैं। <a href=\"{{certificates_url}}\">{{link_text}}</a>।",
+      "open_certificates_to_inspect": "जांचने के लिए प्रमाणपत्र खोलें"
+    }
+  },
+  "raw_drafts": {
+    "edits_discarded": "ड्राफ़्ट सेटिंग्स अपरिवर्तित रहती हैं; उन्हें Raw मोड में सक्रिय या संपादित करें।",
+    "metadata_raw_only": "सेटिंग ड्राफ़्ट का मेटाडेटा केवल raw मोड में स्वीकार किया जाता है।",
+    "missing_metadata": "{{field}} मेटाडेटा अनुपस्थित है।",
+    "cannot_be_draft": "सेटिंग {{setting}} को ड्राफ़्ट नहीं बनाया जा सकता।",
+    "draft_not_posted": "ड्राफ़्ट सेटिंग {{setting}} पोस्ट नहीं की गई।",
+    "setting_not_valid": "सेटिंग {{setting}} मान्य नहीं है।",
+    "global_not_service_draft": "ग्लोबल सेटिंग {{setting}} को सर्विस ड्राफ़्ट नहीं बनाया जा सकता।",
+    "draft_not_present": "ड्राफ़्ट सेटिंग {{setting}} RAW एडिटर में मौजूद नहीं है।",
+    "present_not_posted": "मौजूदा सेटिंग {{setting}} पोस्ट नहीं की गई।",
+    "present_not_valid": "मौजूदा सेटिंग {{setting}} मान्य नहीं है।",
+    "locked_by_method": "सेटिंग {{setting}} ड्राफ़्ट स्थिति नहीं बदल सकती क्योंकि इसे {{method}} विधि द्वारा प्रबंधित किया जाता है।"
+  },
   "crowdsec": {
     "reason": {
       "action": {
@@ -3301,157 +4389,157 @@
       "sentence_scenario": "{{source}}: {{action}} (परिदृश्य: {{scenario}})",
       "source": {
         "appsec": "CrowdSec AppSec",
-        "failure_policy": "CrowdSec AppSec failure policy",
+        "failure_policy": "CrowdSec AppSec विफलता नीति",
         "lapi": "CrowdSec LAPI"
       }
     },
     "alert": {
-      "id": "Alert ID",
-      "load": "Load full evidence",
-      "started": "Started",
-      "stopped": "Stopped"
+      "id": "अलर्ट ID",
+      "load": "पूरे साक्ष्य लोड करें",
+      "started": "शुरू हुआ",
+      "stopped": "रुका"
     },
-    "captured_history": "Captured history",
-    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+    "captured_history": "कैप्चर किया गया इतिहास",
+    "captured_history_help": "कैप्चर किया गया रिपोर्ट डेटा बताता है कि अनुरोध के समय क्या देखा गया था; यह निर्णय की वर्तमान स्थिति को सिद्ध नहीं करता।",
     "connection": {
-      "appsec": "Last AppSec observation",
-      "connected": "Connected",
-      "connection_error": "Connection error",
-      "configured": "Configured",
-      "global": "all services",
-      "label": "CrowdSec connection",
-      "last_sync": "Last successful sync",
-      "local_api": "Local API",
-      "management": "Management",
-      "mode": "Mode",
-      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
-      "read_only": "Read only",
-      "required": "Choose a CrowdSec connection first.",
-      "sync": "Decision sync",
-      "sync_current": "Up to date",
-      "sync_not_synchronized": "Not synchronized yet",
-      "sync_stale": "Stale",
-      "selected": "Selected connection",
-      "scope_help": "The selected connection applies to decisions, allowlists and IP investigation below.",
-      "filter": "Filter connections by hostname or service"
+      "appsec": "AppSec का अंतिम अवलोकन",
+      "connected": "जुड़ा हुआ",
+      "connection_error": "कनेक्शन त्रुटि",
+      "configured": "कॉन्फ़िगर किया गया",
+      "global": "सभी सेवाएँ",
+      "label": "CrowdSec कनेक्शन",
+      "last_sync": "अंतिम सफल सिंक",
+      "local_api": "स्थानीय API",
+      "management": "प्रबंधन",
+      "mode": "मोड",
+      "none": "कोई उपयोग योग्य CrowdSec कनेक्शन नहीं मिला। इंस्टेंस की त्रुटियाँ और प्लगइन कॉन्फ़िगरेशन जाँचें।",
+      "read_only": "केवल पढ़ने के लिए",
+      "required": "पहले कोई CrowdSec कनेक्शन चुनें।",
+      "sync": "निर्णय सिंक",
+      "sync_current": "अद्यतन",
+      "sync_not_synchronized": "अभी तक सिंक नहीं हुआ",
+      "sync_stale": "पुराना",
+      "selected": "चयनित कनेक्शन",
+      "scope_help": "चयनित कनेक्शन नीचे दिए गए निर्णयों, अनुमति सूचियों और IP जाँच पर लागू होता है।",
+      "filter": "होस्टनाम या सेवा के आधार पर कनेक्शन फ़िल्टर करें"
     },
-    "current_state": "Current state",
-    "current_state_help": "Current state may change after this observation.",
+    "current_state": "वर्तमान स्थिति",
+    "current_state_help": "इस अवलोकन के बाद वर्तमान स्थिति बदल सकती है।",
     "decision": {
-      "duration": "Duration",
-      "expires": "Expires",
-      "id": "Decision ID",
-      "origin": "Origin",
-      "scenario": "Scenario",
-      "scope": "Scope",
-      "target": "Target",
-      "type": "Type"
+      "duration": "अवधि",
+      "expires": "समाप्ति",
+      "id": "निर्णय ID",
+      "origin": "मूल",
+      "scenario": "परिदृश्य",
+      "scope": "दायरा",
+      "target": "लक्ष्य",
+      "type": "प्रकार"
     },
     "decisions": {
-      "count": "Showing {{start}}–{{end}} of {{total}}",
-      "help": "This is current state read directly from the selected CrowdSec engine.",
-      "none": "No active decisions match these filters.",
-      "pagination": "Decision pages",
-      "title": "Active decisions"
+      "count": "{{total}} में से {{start}}–{{end}} दिखाए जा रहे हैं",
+      "help": "यह वर्तमान स्थिति है जो सीधे चयनित CrowdSec इंजन से पढ़ी गई है।",
+      "none": "इन फ़िल्टरों से कोई सक्रिय निर्णय मेल नहीं खाता।",
+      "pagination": "निर्णय पृष्ठ",
+      "title": "सक्रिय निर्णय"
     },
     "error": {
-      "request": "The CrowdSec request failed."
+      "request": "CrowdSec अनुरोध विफल हो गया।"
     },
     "investigation": {
-      "alerts": "Available CrowdSec alert evidence",
-      "current_decisions": "Current CrowdSec decisions",
-      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
-      "ip": "IP address",
-      "local_bans": "Current local BunkerWeb bans",
-      "no_alerts": "No alert evidence is available.",
-      "no_bans": "No current local ban was found.",
-      "no_decisions": "No current CrowdSec decision was found.",
-      "no_reports": "No recent captured report was found.",
+      "alerts": "उपलब्ध CrowdSec अलर्ट साक्ष्य",
+      "current_decisions": "वर्तमान CrowdSec निर्णय",
+      "help": "वर्तमान CrowdSec निर्णयों को स्थानीय प्रतिबंधों और कैप्चर की गई रिपोर्टों के साथ जाँचा जाता है।",
+      "ip": "IP पता",
+      "local_bans": "BunkerWeb के वर्तमान स्थानीय प्रतिबंध",
+      "no_alerts": "कोई अलर्ट साक्ष्य उपलब्ध नहीं है।",
+      "no_bans": "कोई वर्तमान स्थानीय प्रतिबंध नहीं मिला।",
+      "no_decisions": "कोई वर्तमान CrowdSec निर्णय नहीं मिला।",
+      "no_reports": "कोई हाल की कैप्चर की गई रिपोर्ट नहीं मिली।",
       "placeholder": "192.0.2.10",
-      "reports": "Recent BunkerWeb reports",
-      "result": "Investigation for {{ip}}",
-      "submit": "Investigate",
-      "title": "Investigate an IP",
-      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
-      "unavailable": "Unavailable: {{error}}",
-      "summary": "Evidence found for this IP",
-      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
-      "summary_decisions": "CrowdSec decisions",
-      "summary_bans": "Local BunkerWeb bans",
-      "summary_alerts": "CrowdSec alert evidence",
-      "summary_reports": "BunkerWeb reports",
-      "summary_active": "{{total}} active",
-      "summary_available": "{{total}} available",
-      "summary_captured": "{{total}} captured",
-      "summary_none": "None found",
-      "summary_unreadable": "Could not be read"
+      "reports": "BunkerWeb की हाल की रिपोर्टें",
+      "result": "{{ip}} की जाँच",
+      "submit": "जाँच करें",
+      "title": "किसी IP की जाँच करें",
+      "truncated": "{{total}} परिणामों में से {{shown}} दिखाए जा रहे हैं (स्रोत सीमा: {{limit}})।",
+      "unavailable": "उपलब्ध नहीं: {{error}}",
+      "summary": "इस IP के लिए मिले साक्ष्य",
+      "summary_help": "इसमें चयनित CrowdSec कनेक्शन और BunkerWeb के अपने प्रतिबंध शामिल हैं। अन्य सुरक्षाओं की यहाँ जाँच नहीं की जाती, और जो साक्ष्य पढ़े नहीं जा सके, वे इस बात का प्रमाण नहीं हैं कि यह IP अनुमत है।",
+      "summary_decisions": "CrowdSec निर्णय",
+      "summary_bans": "BunkerWeb के स्थानीय प्रतिबंध",
+      "summary_alerts": "CrowdSec अलर्ट साक्ष्य",
+      "summary_reports": "BunkerWeb रिपोर्टें",
+      "summary_active": "{{total}} सक्रिय",
+      "summary_available": "{{total}} उपलब्ध",
+      "summary_captured": "{{total}} कैप्चर किए गए",
+      "summary_none": "कुछ नहीं मिला",
+      "summary_unreadable": "पढ़ा नहीं जा सका"
     },
     "local_ban": {
-      "expires": "Expires",
-      "reason": "Reason",
-      "service": "Service"
+      "expires": "समाप्ति",
+      "reason": "कारण",
+      "service": "सेवा"
     },
-    "next": "Next",
-    "observed_at": "Observed {{time}}",
-    "previous": "Previous",
-    "refresh": "Refresh status",
+    "next": "अगला",
+    "observed_at": "{{time}} पर देखा गया",
+    "previous": "पिछला",
+    "refresh": "स्थिति रिफ़्रेश करें",
     "remove": {
-      "action": "Remove",
-      "confirm": "I understand and want to remove this decision.",
-      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
-      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
-      "submit": "Remove decision",
-      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). Matching decisions remaining: {{remaining}}. Local bans or AppSec may still block.",
-      "title": "Remove CrowdSec decision"
+      "action": "हटाएँ",
+      "confirm": "मैं समझता/समझती हूँ और इस निर्णय को हटाना चाहता/चाहती हूँ।",
+      "impact": "यह साझा CrowdSec इंजन पर निर्णय को हटा देता है और हर जुड़े हुए bouncer को प्रभावित करता है। कैश किए गए निर्णय, कोई अन्य रेंज, स्थानीय प्रतिबंध या AppSec अब भी लक्ष्य को ब्लॉक कर सकते हैं।",
+      "selection": "{{source}} ({{engine}}) से {{scope}} {{value}} ({{type}}), परिदृश्य {{scenario}}, मूल {{origin}} हटाएँ?",
+      "submit": "निर्णय हटाएँ",
+      "success": "CrowdSec स्रोत पर हटा दिया गया। प्रसार की स्थिति {{status}} है ({{mode}}, अंतराल {{interval}})। शेष मेल खाते निर्णय: {{remaining}}। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।",
+      "title": "CrowdSec निर्णय हटाएँ"
     },
     "report": {
-      "captured": "Captured at",
-      "date": "Report time",
-      "decisions": "Captured decisions",
-      "entry": "Security report",
-      "matched_target": "Matched target",
-      "metadata": "Decision metadata",
-      "metadata_complete": "Complete",
-      "metadata_incomplete": "Incomplete",
-      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
-      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
-      "reason": "Reason",
-      "remediation": "Captured remediation",
-      "scope": "Captured service scope",
-      "service": "Service",
-      "source": "Captured source",
-      "identifier": "Report identifier"
+      "captured": "कैप्चर का समय",
+      "date": "रिपोर्ट का समय",
+      "decisions": "कैप्चर किए गए निर्णय",
+      "entry": "सुरक्षा रिपोर्ट",
+      "matched_target": "मेल खाता लक्ष्य",
+      "metadata": "निर्णय मेटाडेटा",
+      "metadata_complete": "पूर्ण",
+      "metadata_incomplete": "अपूर्ण",
+      "metadata_unavailable": "इस पुरानी रिपोर्ट के लिए CrowdSec स्नैपशॉट मेटाडेटा उपलब्ध नहीं है।",
+      "metadata_warning": "अनुरोध के समय कैप्चर किए गए निर्णय का कुछ मेटाडेटा उपलब्ध नहीं था।",
+      "reason": "कारण",
+      "remediation": "कैप्चर किया गया निवारण",
+      "scope": "कैप्चर किया गया सेवा दायरा",
+      "service": "सेवा",
+      "source": "कैप्चर किया गया स्रोत",
+      "identifier": "रिपोर्ट पहचानकर्ता"
     },
-    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
-    "title": "CrowdSec operator",
-    "unknown": "Unknown",
+    "subtitle": "प्रत्येक कॉन्फ़िगर किए गए CrowdSec इंजन का निरीक्षण करें और वर्तमान तथा कैप्चर किए गए साक्ष्य से किसी IP की जाँच करें।",
+    "title": "CrowdSec ऑपरेटर",
+    "unknown": "अज्ञात",
     "allowlists": {
-      "title": "CrowdSec allowlists",
-      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
-      "refresh": "Refresh allowlists",
-      "pages": "Allowlist pages",
-      "empty": "No allowlists were found on this engine.",
-      "console": "Console managed",
-      "local": "Locally managed",
-      "no_entries": "No active entries.",
-      "never": "Never",
-      "comment": "Comment",
-      "unknown": "Allowlist status is unavailable.",
-      "not_allowed": "This IP does not match a CrowdSec allowlist.",
-      "allowed": "Allowlisted by CrowdSec",
-      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
+      "title": "CrowdSec अनुमति सूचियाँ",
+      "help": "चयनित इंजन के लिए विश्वसनीय IP और नेटवर्क। ये अपवाद उससे जुड़ी सभी सेवाओं और bouncer पर लागू होते हैं।",
+      "refresh": "अनुमति सूचियाँ रिफ़्रेश करें",
+      "pages": "अनुमति सूची पृष्ठ",
+      "empty": "इस इंजन पर कोई अनुमति सूची नहीं मिली।",
+      "console": "Console द्वारा प्रबंधित",
+      "local": "स्थानीय रूप से प्रबंधित",
+      "no_entries": "कोई सक्रिय प्रविष्टि नहीं।",
+      "never": "कभी नहीं",
+      "comment": "टिप्पणी",
+      "unknown": "अनुमति सूची की स्थिति उपलब्ध नहीं है।",
+      "not_allowed": "यह IP किसी भी CrowdSec अनुमति सूची से मेल नहीं खाता।",
+      "allowed": "CrowdSec द्वारा अनुमति सूची में",
+      "impact": "यह पूरे इंजन पर लागू होने वाला अपवाद है। BunkerWeb के स्थानीय प्रतिबंध, अन्य सुरक्षाएँ या कैश किए गए निर्णय अब भी इस IP को ब्लॉक कर सकते हैं।",
       "guide": {
-        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
-        "title": "How to manage trusted IPs and networks",
-        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
-        "create": "Create a list once, or use an existing locally managed list.",
-        "add": "Add trusted IPs or CIDR networks.",
-        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
-        "inspect": "Inspect the list and its expiry dates.",
-        "remove": "Remove an exception when it is no longer needed.",
-        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
-        "console": "Edit Console-managed lists in the CrowdSec Console.",
-        "docs": "CrowdSec allowlist documentation"
+        "intro": "यहाँ आप अनुमति सूचियाँ देख सकते हैं और IP जाँच सकते हैं। प्रविष्टियाँ जोड़ने या हटाने के लिए CrowdSec इंजन पर cscli का उपयोग करें।",
+        "title": "विश्वसनीय IP और नेटवर्क का प्रबंधन कैसे करें",
+        "where": "CrowdSec 1.7 या उसके बाद का संस्करण आवश्यक है। ये कमांड होस्ट पर, या चयनित इंजन का स्थानीय API (LAPI) चला रहे कंटेनर के अंदर चलाएँ, जहाँ उसके CrowdSec कॉन्फ़िगरेशन और डेटाबेस तक पहुँच हो। उदाहरण के सूची नाम, IP और नेटवर्क को अपने मानों से बदलें।",
+        "create": "सूची एक बार बनाएँ, या पहले से मौजूद स्थानीय रूप से प्रबंधित सूची का उपयोग करें।",
+        "add": "विश्वसनीय IP या CIDR नेटवर्क जोड़ें।",
+        "expiration": "यह उदाहरण 24 घंटे बाद समाप्त हो जाता है। जो प्रविष्टि समाप्त न हो, उसके लिए --expiration हटा दें। IPv4 और IPv6 समर्थित हैं।",
+        "inspect": "सूची और उसकी समाप्ति तिथियों का निरीक्षण करें।",
+        "remove": "जब अपवाद की आवश्यकता न रहे, तो उसे हटा दें।",
+        "refresh": "बदलाव के बाद अनुमति सूचियाँ रिफ़्रेश करें और IP की फिर से जाँच करें। अपवाद हटाने से CrowdSec के भविष्य के निर्णयों की अनुमति मिल जाती है; इससे प्रतिबंध नहीं बनता। BunkerWeb के स्थानीय प्रतिबंध और अन्य सुरक्षाएँ अलग बनी रहती हैं।",
+        "console": "Console द्वारा प्रबंधित सूचियों को CrowdSec Console में संपादित करें।",
+        "docs": "CrowdSec अनुमति सूची दस्तावेज़"
       }
     }
   }

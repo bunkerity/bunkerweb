@@ -61,6 +61,9 @@ msgstr "Lütfen geçerli özel yapılandırma dışı dosyasını (.json) yükle
 msgid "alert.credential_action_failed"
 msgstr "İşlem başarısız oldu."
 
+msgid "alert.custom_end_date_past"
+msgstr "Özel bitiş tarihi gelecekte olmalıdır."
+
 msgid "alert.custom_end_date_required"
 msgstr "Lütfen özel bir bitiş tarihi seçin."
 
@@ -97,8 +100,17 @@ msgstr "Geçerli bir hizmet dışa aktarma dosyası (.env veya .zip) yükleyin."
 msgid "antibot.reason.sentence"
 msgstr "Bot karşıtı doğrulama (%(provider)s) sunuldu"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "Sertifika envanteri atamaları"
+
+msgid "aria.label.certificate_public_details"
+msgstr "Sertifika genel bilgileri"
+
 msgid "aria.label.clear_search"
 msgstr "Aramayı temizle"
+
+msgid "aria.label.clone_item"
+msgstr "%(name)s öğesini kopyala"
 
 msgid "aria.label.close"
 msgstr "Kapat"
@@ -111,6 +123,9 @@ msgstr "Özel yapılandırma dışa aktarma dosyası seçin veya buraya bırakı
 
 msgid "aria.label.copy"
 msgstr "Günlükleri kopyala"
+
+msgid "aria.label.detach_from_service"
+msgstr "%(name)s öğesini %(service)s servisinden ayır"
 
 msgid "aria.label.download_log"
 msgstr "Bu günlük dosyasını indir"
@@ -148,6 +163,9 @@ msgstr "Zaman damgalarını yerel saatte göster"
 msgid "aria.label.next_issue"
 msgstr "Sonraki hata veya uyarı"
 
+msgid "aria.label.open_user_menu"
+msgstr "Kullanıcı menüsünü aç"
+
 msgid "aria.label.passkey_name"
 msgstr "Parola anahtarı adı"
 
@@ -159,6 +177,9 @@ msgstr "Önceki hata veya uyarı"
 
 msgid "aria.label.raw_configuration"
 msgstr "Ham yapılandırma"
+
+msgid "aria.label.remove_this_server"
+msgstr "Bu sunucuyu kaldır"
 
 msgid "aria.label.remove_value"
 msgstr "Değeri kaldır"
@@ -178,8 +199,23 @@ msgstr "Dosya seç"
 msgid "aria.label.select_page"
 msgstr "Sayfa seç"
 
+msgid "aria.label.select_template"
+msgstr "%(name)s şablonunu seç"
+
 msgid "aria.label.services_dropzone"
 msgstr "Hizmet dışa aktarma dosyası seçin veya buraya bırakın"
+
+msgid "aria.label.show_details"
+msgstr "%(name)s için ayrıntıları göster"
+
+msgid "aria.label.toggle_item"
+msgstr "%(name)s öğesini aç/kapat"
+
+msgid "aria.label.toggle_section"
+msgstr "%(name)s bölümünü aç/kapat"
+
+msgid "aria.label.toggle_theme"
+msgstr "Koyu modu aç/kapat"
 
 msgid "aria.label.toggle_wrap"
 msgstr "Satır kaydırmayı değiştir"
@@ -244,6 +280,15 @@ msgstr "%(ip)s yasaklanamadı: %(error)s"
 msgid "bans.flash.ban_success"
 msgstr "%(ip)s başarıyla yasaklandı."
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "%(ip)s için özel yasaklama bitiş tarihi gelecekte olmalıdır"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "Geçersiz yasaklama seçim modu."
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "/bans/ban üzerinde geçersiz bans parametresi."
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "%(ip)s için geçersiz özel yasak süresi"
 
@@ -253,11 +298,44 @@ msgstr "%(ip)s için geçersiz özel yasak bitiş tarihi"
 msgid "bans.flash.invalid_duration"
 msgstr "Geçersiz yasak süresi: %(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "Geçersiz süre seçim modu."
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "Geçersiz filtrelenmiş yasaklama kaynağı."
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "Geçersiz filtrelenmiş süre kaynağı."
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "Geçersiz filtrelenmiş yasak kaldırma kaynağı."
+
 msgid "bans.flash.invalid_ip"
 msgstr "Geçersiz IP adresi: %(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "/bans/unban üzerinde geçersiz ips parametresi."
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "Geçersiz yasak kaldırma seçim modu."
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "/bans/update_duration üzerinde geçersiz updates parametresi."
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "%(ip)s için özel yasak bitiş tarihi eksik"
+
+msgid "bans.flash.no_bans"
+msgstr "Yasaklama yok."
+
+msgid "bans.flash.no_matching_bans"
+msgstr "Eşleşen yasaklama yok."
+
+msgid "bans.flash.no_matching_reports"
+msgstr "Eşleşen rapor yok."
+
+msgid "bans.flash.no_updates"
+msgstr "Güncelleme yok."
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "Yasaklar Redis'ten alınamadı, daha fazla bilgi için günlüklere bakın."
@@ -448,11 +526,14 @@ msgstr "Onayla"
 msgid "button.convert_configs"
 msgstr "Yapılandırmaları dönüştür"
 
-msgid "button.convert_configs_to"
-msgstr "%(state)s durumuna dönüştür"
-
 msgid "button.convert_services"
 msgstr "Servisleri Dönüştür"
+
+msgid "button.convert_to_draft"
+msgstr "Taslağa dönüştür"
+
+msgid "button.convert_to_online"
+msgstr "Çevrimiçine dönüştür"
 
 msgid "button.copy"
 msgstr "Kopyala"
@@ -549,6 +630,9 @@ msgstr "Özel yapılandırmaları içe aktar"
 
 msgid "button.import_services"
 msgstr "Hizmetleri içe aktar"
+
+msgid "button.import_template"
+msgstr "Şablon içe aktar"
 
 msgid "button.local_time"
 msgstr "Yerel saat"
@@ -727,6 +811,39 @@ msgstr "Diğer Oturumları Sonlandır"
 msgid "button.wrap"
 msgstr "Kaydır"
 
+msgid "cache.flash.api_unavailable"
+msgstr "API kullanılamıyor: %(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "%(job_name)s işinin %(file_name)s önbellek dosyası, %(plugin_id)s eklentisi bulunamadı"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "%(job_name)s işinin %(file_name)s önbellek dosyası, %(plugin_id)s eklentisi, %(service)s servisi bulunamadı"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "%(deleted_count)s dosya silindi, %(len)s hata ile: %(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "Önbellek dosyaları silinirken hata oluştu: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "Önbellek dosyası alınırken hata oluştu: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "Önbellek dosyaları alınırken hata oluştu: %(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "Geçersiz önbellek dosyaları parametresi"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "Hiç önbellek dosyası seçilmedi"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "%(deleted_count)s önbellek dosyası başarıyla silindi"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "%(deleted_count)s önbellek dosyası başarıyla silindi"
+
 msgid "cache.kpi_files"
 msgstr "Dosyalar"
 
@@ -840,6 +957,117 @@ msgstr "Dosya 1 MiB'ı geçmemelidir."
 
 msgid "certificates.fingerprint"
 msgstr "SHA-256 parmak izi"
+
+msgid "certificates.flash.certificate_action_failed"
+msgstr "Sertifika işlemi başarısız oldu: %(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "Sertifika başarıyla silindi"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "Sertifika envanteri ataması başarıyla eklendi"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "Sertifika envanteri ataması başarıyla kaldırıldı"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "Sertifika meta verileri başarıyla güncellendi"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "Sertifika ve ad gereklidir"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "Sertifika adı gereklidir"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "Sertifika başarıyla yenilendi"
+
+msgid "certificates.flash.certificate_required"
+msgstr "Sertifika gereklidir"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "Sertifika ve servis gereklidir"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "Sertifika yüklemesi 2 MiB istek sınırını aşıyor"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "Yenileme süresi gelen %(total_due)s sertifika kontrol edildi"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "Sertifika bağlanamadı: %(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "Sertifika oluşturulamadı: %(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "Sertifika ayrılamadı: %(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "Sertifika indirilemedi: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "Sertifikalar alınamadı: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "Sertifika atamaları için servisler alınamadı: %(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "Let's Encrypt sertifika verimi planlanamadı: %(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "Sertifika güncellenemedi: %(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "Sertifika yüklenemedi: %(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "Özel sertifika başarıyla yüklendi"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "Şifrelenmiş özel anahtarlar desteklenmiyor."
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "Geçersiz sertifika işlemi"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "Geçersiz sertifika bölümü"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "Sertifika dosyası geçerli bir PEM sertifikası değil."
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "Geçersiz sertifika kaynağı"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "Özel anahtar dosyası geçerli bir PEM özel anahtarı değil."
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "Let's Encrypt sertifika verimi planlandı"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "Ad ve ortak ad (common name) gereklidir"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "Bir PEM sertifikası ve özel anahtar gereklidir"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "Let's Encrypt sertifikası vermek için en az bir servis seçin"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "Kendinden imzalı sertifika oluşturuldu"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "Bir sertifika 100'den fazla alternatif konu adı içeremez"
+
+msgid "certificates.flash.too_many_services"
+msgstr "Bir sertifika 100'den fazla servise bağlanamaz"
+
+msgid "certificates.flash.validity_range"
+msgstr "Geçerlilik süresi 1 ile 825 gün arasında olmalıdır"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "Geçerlilik süresi tam gün sayısı olmalıdır"
 
 msgid "certificates.issuer"
 msgstr "Düzenleyen"
@@ -1053,6 +1281,168 @@ msgstr "%(count)s tane daha göster"
 
 msgid "compose.unavailable"
 msgstr "Eklenti listesi yüklenemedi, bu nedenle bu sayfa güvenli bir şekilde düzenlenemez. API yanıtını bekleyin."
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "Seçilen tüm özel yapılandırmalar bulunamadı, UI/API özel yapılandırması değil veya zaten dönüştürüldü."
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "Seçilen tüm özel yapılandırmalar bulunamadı veya UI/API özel yapılandırması değil."
+
+msgid "configs.flash.config_already_exists"
+msgstr "%(config_type)s/%(config_name)s yapılandırması zaten mevcut"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "%(service)s servisi için %(config_type)s/%(config_name)s yapılandırması zaten mevcut"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "%(clone)s yapılandırması mevcut değil."
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "%(config_type)s/%(name)s yapılandırması mevcut değil."
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "%(service)s servisi için %(config_type)s/%(name)s yapılandırması mevcut değil."
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "%(config_type)s/%(name)s yapılandırması bir UI/API özel yapılandırması değildir ve düzenlenemez."
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "%(service)s servisi için %(config_type)s/%(name)s yapılandırması bir UI/API özel yapılandırması değildir ve düzenlenemez."
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "\"taslak\" yapılandırmalarına dönüştürüldü: %(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "\"online\" yapılandırmalarına dönüştürüldü: %(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "Özel yapılandırmalar API'den alınamadı: %(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "%(config_type)s/%(config_name)s özel yapılandırması oluşturuldu"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "%(service)s servisi için %(config_type)s/%(config_name)s özel yapılandırması oluşturuldu"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "%(non_convertible_config)s özel yapılandırması zaten bir taslak yapılandırmadır ve dönüştürülmeyecektir."
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "%(non_convertible_config)s özel yapılandırması zaten bir online yapılandırmadır ve dönüştürülmeyecektir."
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "%(missing_config)s özel yapılandırması bulunamadı."
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "%(non_editable_config)s özel yapılandırması bir UI/API özel yapılandırması değil ve dönüştürülmeyecektir."
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "%(skipped_config)s özel yapılandırması bir UI/API özel yapılandırması değil ve silinmeyecektir."
+
+msgid "configs.flash.deleted_config_one"
+msgstr "Yapılandırma silindi: %(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "Yapılandırmalar silindi: %(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "Özel yapılandırmalar silinirken bir hata oluştu: %(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "Özel yapılandırmalar kaydedilirken bir hata oluştu: %(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "Özel yapılandırma içe aktarılamadı: %(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "Özel yapılandırmalar içe aktarılamadı: %(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "İçe aktarma hatası: %(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "Özel yapılandırma içe aktarıldı: %(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "Özel yapılandırmalar içe aktarıldı: %(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "/configs/convert üzerinde geçersiz configs parametresi."
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "/configs/delete üzerinde geçersiz configs parametresi."
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "/configs/export üzerinde geçersiz configs parametresi."
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Geçersiz dosya kodlaması. Lütfen UTF-8 JSON dosyası yükleyin."
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "/configs/new üzerinde geçersiz name parametresi."
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "/configs/new üzerinde geçersiz type parametresi."
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "/configs/convert üzerinde configs parametresi eksik."
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "/configs/delete üzerinde configs parametresi eksik."
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "/configs/convert üzerinde convert_to parametresi eksik."
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "/configs/new üzerinde name parametresi eksik."
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "/configs/new üzerinde service parametresi eksik."
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "/configs/new üzerinde type parametresi eksik."
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "/configs/new üzerinde value parametresi eksik."
+
+msgid "configs.flash.no_configs_selected"
+msgstr "Hiç yapılandırma seçilmedi."
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "Dışa aktarılacak özel yapılandırma yok."
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "Özel yapılandırma dosyası yüklenmedi."
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "İçe aktarma dosyasında özel yapılandırma bulunamadı."
+
+msgid "configs.flash.no_values_changed"
+msgstr "Hiçbir değer değiştirilmedi."
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "Özel yapılandırmanın üzerine yazıldı: %(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "Özel yapılandırmaların üzerine yazıldı: %(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "Şablon tabanlı özel yapılandırmanın yeniden adlandırılmasına izin verilmiyor."
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "%(new_type)s/%(new_name)s özel yapılandırması kaydedildi"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "%(service)s servisi için %(new_type)s/%(new_name)s özel yapılandırması kaydedildi"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "%(new_service)s servisi mevcut değil."
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "Özel yapılandırma atlandı: %(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "Özel yapılandırmalar atlandı: %(names)s"
 
 msgid "configs.subtitle"
 msgstr "Hizmetleriniz için özel NGINX yapılandırma parçacıkları — HTTP, ModSecurity ve akış düzeyinde geçersiz kılmalar için oluşturun, düzenleyin ve yönetin."
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "N/A"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "Uyarı kimliği"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "Tüm kanıtları yükle"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "Başladı"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "Durdu"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "CrowdSec tarafından izin listesine alındı"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "Yorum"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "Console tarafından yönetiliyor"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "Bu motorda hiçbir izin listesi bulunamadı."
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "Güvenilir IP'leri veya CIDR ağlarını ekleyin."
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "Console tarafından yönetilen listeleri CrowdSec Console'da düzenleyin."
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "Bir listeyi yalnızca bir kez oluşturun veya mevcut, yerel olarak yönetilen bir liste kullanın."
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "CrowdSec izin listesi belgeleri"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "Bu örnek 24 saat sonra sona erer. Süresi dolmayan bir kayıt için --expiration parametresini kullanmayın. IPv4 ve IPv6 desteklenir."
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "Listeyi ve kayıtlarının son kullanma tarihlerini inceleyin."
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "Burada izin listelerine göz atabilir ve IP'leri kontrol edebilirsiniz. Kayıt eklemek veya kaldırmak için CrowdSec motorunda cscli kullanın."
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "Bir değişiklikten sonra izin listelerini yenileyin ve IP'yi yeniden inceleyin. Bir istisnayı kaldırmak gelecekteki CrowdSec kararlarına izin verir; yasak oluşturmaz. Yerel BunkerWeb yasakları ve diğer korumalar ayrı kalır."
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "Artık gerekmediğinde bir istisnayı kaldırın."
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "Güvenilir IP'ler ve ağlar nasıl yönetilir"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "CrowdSec 1.7 veya üstü gerekir. Bu komutları ana makinede veya seçili motorun Yerel API'sini (LAPI) çalıştıran kapsayıcının içinde, CrowdSec yapılandırmasına ve veritabanına erişimle çalıştırın. Örnek liste adını, IP'yi ve ağı kendi değerlerinizle değiştirin."
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "Seçili motor için güvenilir IP'ler ve ağlar. Bu istisnalar, motora bağlı tüm hizmetler ve bouncer'lar için geçerlidir."
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "Bu, motorun tamamı için geçerli bir istisnadır. Yerel BunkerWeb yasakları, diğer korumalar veya önbelleğe alınmış kararlar bu IP'yi yine de engelleyebilir."
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "Yerel olarak yönetiliyor"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "Asla"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "Etkin kayıt yok."
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "Bu IP, hiçbir CrowdSec izin listesiyle eşleşmiyor."
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "İzin listesi sayfaları"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "İzin listelerini yenile"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "CrowdSec izin listeleri"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "İzin listesi durumu kullanılamıyor."
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "Yakalanan geçmiş"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "Yakalanan rapor verileri, istek anında gözlemlenenleri açıklar; kararın mevcut durumunu kanıtlamaz."
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "Son AppSec gözlemi"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "Yapılandırıldı"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "Bağlı"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "Bağlantı hatası"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "Bağlantıları ana makine adına veya hizmete göre filtreleyin"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "tüm hizmetler"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "CrowdSec bağlantısı"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "Son başarılı eşitleme"
 
 msgid "crowdsec.connection.local_api"
-msgstr "Local API"
+msgstr "Yerel API"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "Yönetim"
 
 msgid "crowdsec.connection.mode"
-msgstr "Mode"
+msgstr "Mod"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "Kullanılabilir bir CrowdSec bağlantısı bulunamadı. Örnek hatalarını ve eklenti yapılandırmasını kontrol edin."
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "Salt okunur"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "Önce bir CrowdSec bağlantısı seçin."
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "Seçili bağlantı, aşağıdaki kararlar, izin listeleri ve IP incelemesi için geçerlidir."
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "Seçili bağlantı"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "Karar eşitleme"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "Güncel"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "Henüz eşitlenmedi"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "Eskimiş"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "Mevcut durum"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "Mevcut durum bu gözlemden sonra değişebilir."
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "Süre"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "Sona erer"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "Karar kimliği"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "Köken"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "Senaryo"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "Kapsam"
 
 msgid "crowdsec.decision.target"
-msgstr "Target"
+msgstr "Hedef"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "Tür"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "%(total)s kayıttan %(start)s–%(end)s gösteriliyor"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "Bu, doğrudan seçili CrowdSec motorundan okunan mevcut durumdur."
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "Bu filtrelerle eşleşen etkin karar yok."
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "Karar sayfaları"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "Etkin kararlar"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "CrowdSec isteği başarısız oldu."
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "Kullanılabilir CrowdSec uyarı kanıtları"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "Mevcut CrowdSec kararları"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "Mevcut CrowdSec kararları, yerel yasaklar ve yakalanan raporlarla birlikte kontrol edilir."
 
 msgid "crowdsec.investigation.ip"
-msgstr "IP address"
+msgstr "IP adresi"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "Mevcut yerel BunkerWeb yasakları"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "Kullanılabilir uyarı kanıtı yok."
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "Mevcut yerel yasak bulunamadı."
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "Mevcut CrowdSec kararı bulunamadı."
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "Yakın zamanda yakalanmış rapor bulunamadı."
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "Son BunkerWeb raporları"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "%(ip)s için inceleme"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "İncele"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "Bu IP için bulunan kanıtlar"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "%(total)s etkin"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "CrowdSec uyarı kanıtları"
 
 msgid "crowdsec.investigation.summary_available"
-msgstr "%(total)s available"
+msgstr "%(total)s kullanılabilir"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "Yerel BunkerWeb yasakları"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "%(total)s yakalandı"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "CrowdSec kararları"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "Bu, seçili CrowdSec bağlantısını ve BunkerWeb'in kendi yasaklarını kapsar. Diğer korumalar burada kontrol edilmez ve okunamayan kanıtlar bu IP'ye izin verildiğini kanıtlamaz."
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "Hiçbir şey bulunamadı"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "BunkerWeb raporları"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "Okunamadı"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "Bir IP'yi incele"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "%(total)s sonuçtan %(shown)s tanesi gösteriliyor (kaynak sınırı: %(limit)s)."
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "Kullanılamıyor: %(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "Sona erer"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "Neden"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "Hizmet"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "Sonraki"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "%(time)s zamanında gözlemlendi"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "Önceki"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "istek engellendi"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "CrowdSec AppSec hata politikası"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "Durumu yenile"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "Kaldır"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "Anlıyorum ve bu kararı kaldırmak istiyorum."
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "Bu işlem kararı paylaşılan CrowdSec motorundan kaldırır ve bağlı her bouncer'ı etkiler. Önbelleğe alınmış kararlar, başka bir aralık, yerel yasaklar veya AppSec hedefi yine de engelleyebilir."
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "%(scope)s %(value)s (%(type)s), senaryo %(scenario)s, köken %(origin)s, %(source)s (%(engine)s) kaynağından kaldırılsın mı?"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "Kararı kaldır"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "CrowdSec kaynağında kaldırıldı. Yayılım durumu: %(status)s (%(mode)s, aralık %(interval)s). Kalan eşleşen kararlar: %(remaining)s. Yerel yasaklar veya AppSec yine de engelleyebilir."
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "CrowdSec kararını kaldır"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "Yakalanma zamanı"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "Rapor zamanı"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "Yakalanan kararlar"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "Güvenlik raporu"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "Rapor tanımlayıcısı"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "Eşleşen hedef"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "Karar meta verileri"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "Tamamlandı"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "Eksik"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "CrowdSec anlık görüntü meta verileri bu eski rapor için kullanılamıyor."
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "Yakalanan bazı karar meta verileri istek anında kullanılamıyordu."
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "Neden"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "Yakalanan iyileştirme"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "Yakalanan hizmet kapsamı"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "Hizmet"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "Yakalanan kaynak"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "Yapılandırılmış her CrowdSec motorunu inceleyin ve bir IP'yi mevcut ve yakalanan kanıtlar üzerinden araştırın."
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "CrowdSec operatörü"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "Bilinmiyor"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "Bir veya daha fazla iş son çalıştırmasında başarısız oldu."
@@ -2416,17 +2806,128 @@ msgstr "Son %(days)s gün"
 msgid "dashboard.window.title"
 msgstr "Panel penceresi"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "Eşleşen %(count)s %(entity)s öğesinin tümü seçildi."
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "Eşleşen tüm %(count)s yasaklama seçildi."
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "Eşleşen %(count)s %(entity)s öğesinin tümünü seç"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "Eşleşen %(count)s yasaklama öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "Bu sayfadaki %(count)s yasaklama seçildi."
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "Bu sayfadaki tüm %(count)s yasaklama seçildi."
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "Eşleşen tüm %(count)s önbellek dosyası seçildi."
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "Eşleşen %(count)s önbellek dosyası öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "Bu sayfadaki %(count)s önbellek dosyası seçildi."
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "Bu sayfadaki tüm %(count)s önbellek dosyası seçildi."
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "Eşleşen tüm %(count)s özel yapılandırma seçildi."
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "Eşleşen %(count)s özel yapılandırma öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "Bu sayfadaki %(count)s özel yapılandırma seçildi."
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "Bu sayfadaki tüm %(count)s özel yapılandırma seçildi."
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "Eşleşen tüm %(count)s örnek seçildi."
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "Eşleşen %(count)s örnek öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "Bu sayfadaki %(count)s örnek seçildi."
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "Bu sayfadaki tüm %(count)s örnek seçildi."
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "Eşleşen tüm %(count)s öğe seçildi."
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "Eşleşen %(count)s öğe öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "Bu sayfadaki %(count)s öğe seçildi."
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "Bu sayfadaki tüm %(count)s öğe seçildi."
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "Eşleşen tüm %(count)s iş seçildi."
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "Eşleşen %(count)s iş öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "Bu sayfadaki %(count)s iş seçildi."
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "Bu sayfadaki tüm %(count)s iş seçildi."
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "Eşleşen tüm %(count)s eklenti seçildi."
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "Eşleşen %(count)s eklenti öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "Bu sayfadaki %(count)s eklenti seçildi."
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "Bu sayfadaki tüm %(count)s eklenti seçildi."
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "Eşleşen tüm %(count)s rapor seçildi."
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "Eşleşen %(count)s rapor öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "Bu sayfadaki %(count)s rapor seçildi."
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "Bu sayfadaki tüm %(count)s rapor seçildi."
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "Eşleşen tüm %(count)s servis seçildi."
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "Eşleşen %(count)s servis öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "Bu sayfadaki %(count)s servis seçildi."
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "Bu sayfadaki tüm %(count)s servis seçildi."
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "Eşleşen tüm %(count)s şablon seçildi."
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "Eşleşen %(count)s şablon öğesinin tümünü seç"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "Bu sayfadaki %(count)s şablon seçildi."
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "Bu sayfadaki tüm %(count)s şablon seçildi."
 
 msgid "datatable.bulk_select_clear"
 msgstr "Seçimi temizle"
-
-msgid "datatable.bulk_select_page"
-msgstr "Bu sayfadaki %(count)s %(entity)s öğesinin tümü seçildi."
 
 msgid "datatable.info_bans"
 msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s Yasaklama"
@@ -2569,6 +3070,9 @@ msgstr "İşleniyor..."
 msgid "datatable.search"
 msgstr "Ara:"
 
+msgid "datatable.select_row"
+msgstr "Satırı seç"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "Hiç Yasaklama seçilmedi"
 
@@ -2659,11 +3163,50 @@ msgstr "1 şablon seçildi"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d şablon seçildi"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s seçildi"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "%(count)s özel yapılandırma seçildi"
 
-msgid "datatable.selected_list_empty"
-msgstr "Seçilen %(entity)s yok."
+msgid "datatable.selected_list.configs.count_other"
+msgstr "%(count)s özel yapılandırma seçildi"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "Seçilen özel yapılandırma yok."
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "%(count)s öğe seçildi"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "%(count)s öğe seçildi"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "Seçilen öğe yok."
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "%(count)s eklenti seçildi"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "%(count)s eklenti seçildi"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "Seçilen eklenti yok."
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "%(count)s servis seçildi"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "%(count)s servis seçildi"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "Seçilen servis yok."
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "%(count)s şablon seçildi"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "%(count)s şablon seçildi"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "Seçilen şablon yok."
 
 msgid "datatable.zero_records_bans"
 msgstr "Eşleşen Yasaklama bulunamadı"
@@ -2794,11 +3337,41 @@ msgstr "Ayrıntılar için İşler sayfasını kontrol edin."
 msgid "flash.configuration_pending_instance"
 msgstr "Yapılandırma henüz uygulanmadı — bir örneğin başlaması bekleniyor."
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "CORS veya AJAX isteği gereklidir"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "Genel ayarlar API'den alınamadı."
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "Kaynak grupları alınamadı: %(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "Veritabanı salt okunur modda"
+
+msgid "flash.description_too_long"
+msgstr "Açıklama 4000 karakteri geçemez"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "Yazma izniniz yok"
+
 msgid "flash.easter_egg"
 msgstr "Bunu okuyorsan meraklısın demektir"
 
 msgid "flash.error"
 msgstr "Hata"
+
+msgid "flash.error_fetching_instances"
+msgstr "Örnekler alınırken hata oluştu"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "Özel yapılandırmalar kaydedilirken bir hata oluştu: %(e)s"
+
+msgid "flash.import_warning"
+msgstr "İçe aktarma uyarısı: %(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "Geçersiz convert_to parametresi."
 
 msgid "flash.last_configuration_change_failed"
 msgstr "Son yapılandırma değişikliğiniz uygulanamadı."
@@ -2806,11 +3379,20 @@ msgstr "Son yapılandırma değişikliğiniz uygulanamadı."
 msgid "flash.message"
 msgstr "Bilgi"
 
+msgid "flash.plugin_not_found"
+msgstr "Eklenti bulunamadı"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "PRO lisansınızın izin verdiğinden daha fazla servise sahipsiniz. Lisansınızı yükseltin veya PRO lisansınızı açmak için bazı servisleri Taslak moduna dönüştürün."
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "Zamanlayıcı değişiklikleri uygulamaya çalışacaktır."
+
+msgid "flash.service_does_not_exist"
+msgstr "%(service)s servisi mevcut değil."
 
 msgid "flash.time.just_now"
 msgstr "az önce"
@@ -2845,6 +3427,9 @@ msgstr "Mevcut UI/API özel yapılandırmalarının üzerine yaz"
 msgid "form.checkbox.remember_me"
 msgstr "Beni Hatırla"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "Varsa aynı id'ye sahip şablonun yerini al"
+
 msgid "form.help.ban_specific_service"
 msgstr "Yasaklama yalnızca bu servise uygulanacaktır."
 
@@ -2862,6 +3447,9 @@ msgstr "Seçiliyse, yasaklama manuel olarak kaldırılana kadar asla sona ermeye
 
 msgid "form.help.photo_extensions"
 msgstr "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
+
+msgid "form.help.secret_stored"
+msgstr "Bir değer kayıtlıdır ve gösterilmez. Korumak için alanı olduğu gibi bırakın, değiştirmek için yeni bir değer girin veya kaldırmak için alanı temizleyin."
 
 msgid "form.label.2fa_code"
 msgstr "2FA Kodu"
@@ -3031,6 +3619,9 @@ msgstr "Sunucu Adı"
 msgid "form.label.service_name"
 msgstr "Servis Adı"
 
+msgid "form.label.template_file"
+msgstr "Şablon Dosyası"
+
 msgid "form.label.template_id"
 msgstr "Şablon Kimliği"
 
@@ -3130,6 +3721,438 @@ msgstr "Şifre en az 1 özel karakter içermelidir."
 msgid "form.validation.password_uppercase"
 msgstr "Şifre en az 1 büyük harf içermelidir."
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "NGINX erişim günlükleri için kullanılacak yol (dosya yolu, syslog:server=host[:port][,param=value] veya memory:name:size; devre dışı bırakmak için off olarak ayarlayın)."
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "Erişim Günlüğü Yolu"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "BunkerWeb dahili API'si için dinleme port numarası (TLS)."
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "API HTTPS Port Numarası"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "BunkerWeb dahili API'si için dinleme port numarası."
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "API Port Numarası"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "BunkerWeb dahili API'si için HTTP dinleme."
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "API HTTP Dinleme"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "BunkerWeb dahili API'si için HTTPS (SSL/TLS) dinleme."
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "API HTTPS Dinleme"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "BunkerWeb dahili API'si için dinleme IP adresi."
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "API Dinleme IP Adresi"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "BunkerWeb dahili API'si için sunucu adı (sanal ana bilgisayar)."
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "API Sunucu Adı"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "API çağrılarını doğrulamak için isteğe bağlı belirteç (token). Ayarlanırsa, zamanlayıcı (ve herhangi bir istemci) bunu Authorization başlığı aracılığıyla göndermelidir. Not: hem BunkerWeb hem de zamanlayıcı ortamlarında ayarlanmalıdır."
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "API Erişim Belirteci"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "BunkerWeb dahili API'siyle iletişim kurmasına izin verilen IP/ağ listesi. (biçim: ip/ağ maskesi veya ipv6/ağ maskesi, boşlukla ayrılmış)"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "API Beyaz Liste IP"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "Autoconf Docker entegrasyonunu etkinleştir."
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "Autoconf Modu"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "Boşluklarla ayrılmış BunkerWeb örnekleri listesi (biçim: fqdn-veya-ip:5000 http://fqdn-veya-ip:5000)"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "BunkerWeb Örnekleri"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "Dahili cachestore boyutu (ipc)."
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "Cachestore IPC Bellek Boyutu"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "Dahili cachestore boyutu (locks)."
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "Cachestore Locks Bellek Boyutu"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "Dahili cachestore boyutu."
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "Cachestore Bellek Boyutu"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "Dahili cachestore boyutu (miss)."
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "Cachestore Miss Bellek Boyutu"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "İstemci istek gövdesini okuma zaman aşımı."
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "İstemci Gövdesi Zaman Aşımı"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "İstemci istek başlığını okuma zaman aşımı."
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "İstemci Başlığı Zaman Aşımı"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "Öngörülen bir .conf dosyası son kaydedilen öngörüden bu yana değiştiğinde veya onda yoksa ne olur. Geçerli veritabanı satırıyla eşleşen dosyalar yok sayılır; okunabilir öngörü geçmişi olmadan hiçbir sapma bildirilmez. 'overwrite', algılanan her sapmayı günlüğe kaydeder ve dosyayı veritabanından yeniden yazar veya onu değiştiren aktif bir satır yoksa siler. 'refuse', sapma çözülene kadar veritabanından oraya hiçbir şey yazmaz, bir hata günlüğe kaydeder ve bekleyen özel yapılandırma değişikliğini onaylanmamış bırakarak yeniden denenmesini sağlar."
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "Özel Yapılandırma Sapması Politikası"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "Paylaşılan, işçi başına datastore LRU için slot sayısı (internalstore ve eklenti işçi-yerel önbellekleri tarafından kullanılır). Düz bir tam sayı veya `k`/`m` kısayolunu kabul eder (örn. `1k`, `10k`, `1m`)."
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "Datastore LRU Boyutu"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "Dahili datastore boyutu."
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "Datastore Bellek Boyutu"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "Kullanılacak çözümleyicilerin DNS adresleri."
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "DNS Çözümleyicileri"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "NGINX hata günlükleri için kullanılacak yol (dosya yolu, stderr, syslog:server=host[:port][,param=value] veya memory:size)."
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "Hata Günlüğü Yolu"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "bunkerweb'in bağlandığı HTTPS port numarası. HTTPS dinlemeyi devre dışı bırakmak için boş bırakın."
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "HTTPS Portu"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "bunkerweb'in bağlandığı HTTP port numarası. HTTP dinlemeyi devre dışı bırakmak için boş bırakın."
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "HTTP Portu"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "Dahili internalstore boyutu."
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "Internalstore Bellek Boyutu"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "Dahili kullanım: hizmet taslak modundayken yes olarak ayarlayın."
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "dahili kullanım: taslak"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "Dahili kullanım: BW yüklenirken yes olarak ayarlayın."
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "dahili kullanım: yükleniyor"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "Günlük zamanlanmış işlerin çalıştığı yerel saat (zamanlayıcı saat dilimi, SS:DD, 24 saat); haftalık işler de JOBS_WEEKLY_DAY gününde bu saatte çalışır."
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "Günlük İşler Saati"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "Haftalık zamanlanmış işlerin JOBS_DAILY_TIME saatinde çalıştığı haftanın günü."
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "Haftalık İşler Günü"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "Keep-alive istemci bağlantıları için zaman aşımı."
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "Keepalive Zaman Aşımı"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "Yeniden başlatmada yapılandırmayı koru. Yeniden başlatmada yapılandırma sıfırlamasını önlemek için 'yes' olarak ayarlayın."
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "Yeniden Başlatmada Yapılandırmayı Koru"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "Kubernetes entegrasyonunu etkinleştir."
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "Kubernetes Modu"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "SSL olmayan dinlemeyi etkinleştir (passthrough)."
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "Stream Dinleme"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "SSL olmayan dinleme portu (passthrough). SSL olmayan stream dinlemeyi devre dışı bırakmak için boş bırakın."
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "Stream Dinleme Portu"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "SSL dinleme portu (passthrough). SSL stream dinlemeyi devre dışı bırakmak için boş bırakın."
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "Stream Dinleme Portu SSL"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "Erişim günlükleri için kullanılacak biçim."
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "Erişim Günlüğü Biçimi"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "Hata günlükleri için kullanılacak seviye."
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "Günlük Seviyesi"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "Çoklu site etkinleştirme."
+
+msgid "general.settings.MULTISITE.label"
+msgstr "Çoklu Site"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "nginx'in yapılandırmaları nerede arayacağı."
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "nginx Öneki"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "Bu site için access aşamasında (istek kabulü/kontrolü) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "Eklenti Sırası (access)"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "Bu site için header aşamasında (yanıt başlığı filtreleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "Eklenti Sırası (header)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "init aşamasında (motor önyüklemesi, bir kez çalışır) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "Eklenti Sırası (init)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "init_worker aşamasında (işçi başına önyükleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "Eklenti Sırası (init_worker)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "init_workers aşamasında çalıştırılacak, virgül veya boşlukla ayrılmış eklenti kimlikleri."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "Eklenti Sırası (init_workers)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "Bu site için log aşamasında (yanıt sonrası HTTP günlük işleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "Eklenti Sırası (log)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "Bu site için log_default aşamasında (varsayılan vhost günlük işleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "Eklenti Sırası (log_default)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "Bu site için log_stream aşamasında (stream günlük işleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "Eklenti Sırası (log_stream)"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "Bu site için preread aşamasında (proxy öncesi TCP preread kontrolleri) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "Eklenti Sırası (preread)"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "Bu site için set aşamasında (rewrite/access öncesi değişken kurulumu) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "Eklenti Sırası (set)"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "Bu site için ssl_certificate aşamasında (TLS sertifikası seçimi/verilmesi) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "Eklenti Sırası (ssl_certificate)"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "timer aşamasında (arka plan zamanlayıcıları) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "Eklenti Sırası (timer)"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "Tehditlere verilecek yanıtı tanımlar: izlemek ve günlüğe kaydetmek için \"detect\", erişimi engellemek ve olayları günlüğe kaydetmek için \"block\"."
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "Güvenlik Modu"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "İstemciye yanıt iletme zaman aşımı."
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "Gönderme Zaman Aşımı"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "bunkerweb tarafından sunulan sanal ana bilgisayarların listesi. (boşlukla ayrılmış)"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "Sunucu Adı"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "server_names_hash_bucket_size direktifi için değer."
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "Sunucu Adları Hash Kova Boyutu"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "Sunucu türü: http veya stream."
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "Sunucu Türü"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "İptal edilmiş çerez oturum kimliklerini tutan dahili deponun boyutu."
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "Oturum İptali Bellek Boyutu"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "Docker Swarm entegrasyonunu etkinleştir."
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "Swarm Modu"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "Zamanlayıcılar için günlük seviyesi."
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "Zamanlayıcı Günlük Seviyesi"
+
+msgid "general.settings.USE_API.help"
+msgstr "BunkerWeb dahili API'sini etkinleştir."
+
+msgid "general.settings.USE_API.label"
+msgstr "API'yi Etkinleştir"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "IPv6 bağlantısını etkinleştir."
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "IPv6 Kullan"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "TCP dinle (stream)."
+
+msgid "general.settings.USE_TCP.label"
+msgstr "TCP Dinle"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "Belirli ayarların varsayılan değerlerini geçersiz kılacak, boşluklarla ayrılmış uygulanacak yapılandırma şablonları. Şablonlar sırayla uygulanır ve sonraki, öncekini geçersiz kılar; hizmette ayarlanan bir değer şablonu geçersiz kılar."
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "Şablon Kullan"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "UDP dinle (stream)."
+
+msgid "general.settings.USE_UDP.label"
+msgstr "UDP Dinle"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "Başlatma işçileri için lua_shared_dict boyutu"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "Başlatma Workerlock Bellek Boyutu"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "İşçi başına maksimum bağlantı sayısı."
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "İşçi Başına Bağlantı"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "İşçi süreç sayısı."
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "İşçi Süreçleri"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "İşçi süreçleri için maksimum açık dosya sayısı."
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "İşçi Başına Açık Dosya"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "İşçi süreçlerinin düzgün kapatılması için zaman aşımı. Bu gecikmeden sonra, bellek artışını önlemek amacıyla eski işçiler yeniden yükleme sırasında zorla sonlandırılır."
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "İşçi Kapatma Zaman Aşımı"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "Yükseltme için lisans anahtarı kontrol ediliyor."
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "Genel ayarlar kaydedilmedi: değiştirilen her değer reddedildi."
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "Hiçbir değer değiştirilmediği için genel ayarlar düzenlenmedi."
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "Genel ayarlar kaydedildi, ancak %(refused_count)s değer reddedildi."
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "Genel ayarlar başarıyla kaydedildi."
+
+msgid "home.flash.error_fetching_services"
+msgstr "Servisler alınırken hata oluştu: %(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "Tüm %(count)s ayarları görüntüle"
 
@@ -3156,6 +4179,75 @@ msgstr "Statik"
 
 msgid "instances.down"
 msgstr "Kapalı"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "Örnek oluşturulamadı: %(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "Örnekler API'den alınamadı."
+
+msgid "instances.flash.could_not_found_one"
+msgstr "Seçilen örnek bulunamadı veya bir UI/API örneği değil."
+
+msgid "instances.flash.could_not_found_other"
+msgstr "Seçilen örneklerin hiçbiri bulunamadı veya UI/API örneği değil."
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "Örnek silinemedi: %(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "Örnekler silinemedi: %(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "%(hostname)s ana bilgisayar adı zaten kullanılıyor."
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "%(value)s örneği başarıyla oluşturuldu."
+
+msgid "instances.flash.instance_deleted"
+msgstr "%(instance)s örneği başarıyla silindi."
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "%(instance)s örneği mevcut değil."
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "%(instance)s örneğinin yeniden yükleme yöntemi yok."
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "%(instance)s örneğinin durdurma yöntemi yok."
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "%(non_deletable_instance)s örneği bir UI/API örneği değil ve silinmeyecektir."
+
+msgid "instances.flash.instance_reloaded"
+msgstr "%(instance)s örneği başarıyla yeniden yüklendi."
+
+msgid "instances.flash.instance_stopped"
+msgstr "%(instance)s örneği başarıyla durduruldu."
+
+msgid "instances.flash.instances_deleted"
+msgstr "Örnekler %(instance)s başarıyla silindi."
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "/instances/new üzerinde instance hostname parametresi eksik."
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "/instances/new üzerinde instance name parametresi eksik."
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "/instances/delete üzerinde instances parametresi eksik."
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "/instances/ping üzerinde instances parametresi eksik."
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "/instances/reload üzerinde instances parametresi eksik."
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "/instances/stop üzerinde instances parametresi eksik."
+
+msgid "instances.flash.no_instance_selected"
+msgstr "Hiçbir örnek seçilmedi."
 
 msgid "instances.loading"
 msgstr "Yükleniyor"
@@ -3193,6 +4285,24 @@ msgstr "Başlangıç Tarihi"
 msgid "job.history.success"
 msgstr "Başarılı"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "İşler alınırken hata oluştu: %(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "/jobs/run üzerinde geçersiz jobs parametresi."
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "İşin eklentileri zamanlayıcı tarafından arka planda çalıştırılacak."
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "Eklenti işleri zamanlayıcı tarafından arka planda çalıştırılacak."
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "/jobs/run üzerinde jobs parametresi eksik."
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "Hiç iş seçilmedi."
+
 msgid "jobs.subtitle"
 msgstr "BunkerWeb zamanlayıcısı tarafından çalıştırılan planlı ve tek seferlik görevler — durumlarını izleyin ve gerektiğinde çalıştırın."
 
@@ -3213,6 +4323,15 @@ msgstr "Kilitli (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "Kilitli ayarlar vurgulanıyor"
+
+msgid "legend.raw_setting_drafts"
+msgstr "Bir ayarın başında taslağı değiştirmek için # tuşuna, etkinleştirmek için Geri tuşuna basın. Uygulamak için kaydedin. Taslaklar değerlerini korurken devralınan veya varsayılan değerler geçerli olur."
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "İncelemek için Sertifikaları açın"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt: <strong>%(cert_name)s</strong> yetim sertifikası, eksik ACME hesabına <code>%(account)s</code> başvuruyor. Sağlayıcı durumu onarılana kadar yenilemeler engellenir. <a href=\"%(certificates_url)s\">%(link_text)s</a>."
 
 msgid "link.back_to_login"
 msgstr "Girişe Dön"
@@ -3253,6 +4372,12 @@ msgstr "Bir kimlik doğrulama kodu kullan"
 msgid "link.use_recovery_code"
 msgstr "Bir kurtarma kodu kullan"
 
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "Giriş yapılamadı, lütfen tekrar deneyin"
+
+msgid "login.flash.invalid_username_password"
+msgstr "Geçersiz kullanıcı adı veya parola"
+
 msgid "login.notice_password_changed"
 msgstr "Parolanız değiştirildi. Yeni parolanızla giriş yapın."
 
@@ -3288,6 +4413,12 @@ msgstr "Genişlet"
 
 msgid "logs.filter_levels"
 msgstr "Seviyeler"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "Geçersiz dosya yolu"
+
+msgid "logs.flash.no_such_file"
+msgstr "Böyle bir dosya yok"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,6 +4504,27 @@ msgstr "Daha yüksek"
 msgid "logs.trimmed_notice"
 msgstr "--- Performans için %(count)s eski günlük satırı kaldırıldı ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "Veritabanı bağlantısı salt okunur modda: değişiklik yapılamaz."
+
+msgid "main.flash.failover_configuration_error"
+msgstr "NGINX üzerinde bir yapılandırma hatası oluşturduğu için son değişiklikler uygulanamadı, lütfen daha fazla bilgi için BunkerWeb günlüklerini kontrol edin. Yapılandırma son çalışan sürüme geri döndü."
+
+msgid "main.flash.failover_message"
+msgstr "Yedekleme Mesajı:"
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "Durum yeniden yüklenmeye zorlandı"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "Pro lisansınızın izin verdiğinden daha fazla serviste var. Lisansınızı yükseltin veya pro lisansınızın kilidini açmak için bazı servisleri taslak moduna taşıyın."
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "Son değişiklikler başarıyla uygulandı."
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "İki faktörlü kimlik doğrulama etkin ancak kullanılabilir kurtarma kodu yok, lütfen bunları yenileyin:"
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın."
 
@@ -3384,11 +4536,20 @@ msgid "modal.body.confirm_cache_deletion_alert"
 msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
 msgstr[0] "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "Seçili özel yapılandırmayı taslak olarak dönüştürmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "Seçili özel yapılandırmayı online olarak dönüştürmek istediğinizden emin misiniz?"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "Seçili özel yapılandırmaları dönüştürmek istediğinizden emin misiniz?"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "Seçili özel yapılandırmaları %(state)s olarak dönüştürmek istediğinizden emin misiniz?"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "Seçili özel yapılandırmaları taslak olarak dönüştürmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "Seçili özel yapılandırmaları online olarak dönüştürmek istediğinizden emin misiniz?"
 
 #. plural pair; 1 form(s) for tr, singular in slot 0
 msgid "modal.body.confirm_configs_deletion_alert"
@@ -3406,11 +4567,28 @@ msgid "modal.body.confirm_plugin_deletion"
 msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Seçili eklentiyi silmek istediğinizden emin misiniz?"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "Seçili servisi taslağa dönüştürmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "Seçili servisi çevrimiçine dönüştürmek istediğinizden emin misiniz?"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "Bu hizmetin bildirilen modunu değiştirmek istediğinizden emin misiniz?"
 
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "Seçili servisleri taslağa dönüştürmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "Seçili servisleri çevrimiçine dönüştürmek istediğinizden emin misiniz?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "%(name)s şablonunu silmek istediğinizden emin misiniz?"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "Seçili şablonu silmek istediğinizden emin misiniz?"
 
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "Seçili örneği silmek istediğinizden emin misiniz?"
@@ -3471,6 +4649,12 @@ msgstr "Hizmet dışa aktarma dosyanızı buraya sürükleyip bırakın veya bir
 msgid "modal.body.import_services_warning"
 msgstr "Hizmetlerin içe aktarılması, dışa aktarma dosyasından yeni arayüz hizmetleri oluşturacaktır. Mevcut hizmetler atlanır."
 
+msgid "modal.body.import_template_help"
+msgstr "BunkerWeb'den dışa aktarılmış bir şablon paketi (.json) veya template.json ve yapılandırmalarıyla bir şablon klasörü içeren bir arşiv (.zip, .tar.gz, .tar.xz). En fazla 1 MiB."
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "Bir şablonu değiştirmek, bir sonraki yapılandırma oluşturmada onu kullanan her hizmeti değiştirir. Bir eklentiye ait olan veya web arayüzü dışında yönetilen şablonlar asla değiştirilmez."
+
 msgid "modal.body.instance_creation_alert"
 msgstr "Port veya sunucu adı belirtmenize gerek yoktur; örnek yapılandırması için `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` ve `API_SERVER_NAME` değerleri kullanılacaktır."
 
@@ -3485,6 +4669,9 @@ msgstr "Bu kurtarma kodları yalnızca bir kez gösterilir. Lütfen güvenli bir
 
 msgid "modal.body.reset_template_alert"
 msgstr "Mevcut şablon ayarlarını ve özel yapılandırmaları sıfırlamak istediğinizden emin misiniz?"
+
+msgid "modal.body.service_deletion_confirmation"
+msgstr "Seçili servisi silmek istediğinizden emin misiniz?"
 
 msgid "modal.body.services_conversion_confirmation"
 msgstr "Seçili servisleri dönüştürmek istediğinizden emin misiniz?"
@@ -3578,6 +4765,9 @@ msgstr "Özel yapılandırmaları içe aktar"
 msgid "modal.title.import_services"
 msgstr "Hizmetleri içe aktar"
 
+msgid "modal.title.import_template"
+msgstr "Şablon İçe Aktar"
+
 msgid "modal.title.job_history"
 msgstr "Son 10 İş Çalıştırması"
 
@@ -3613,6 +4803,21 @@ msgstr "Kolay"
 
 msgid "mode.raw"
 msgstr "Ham"
+
+msgid "navbar.aria.close_navigation"
+msgstr "Gezinmeyi kapat"
+
+msgid "navbar.aria.help"
+msgstr "Yardım"
+
+msgid "navbar.aria.news"
+msgstr "Haberler"
+
+msgid "navbar.aria.notifications"
+msgstr "Bildirimler"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "Gezinmeyi aç/kapat"
 
 msgid "navbar.button.upgrade_to_pro"
 msgstr "PRO'ya Yükselt"
@@ -3764,6 +4969,9 @@ msgstr "Zaten abone olundu"
 msgid "notice.dismiss_mfa"
 msgstr "Bir daha hatırlatma"
 
+msgid "notice.enable_mfa"
+msgstr "Hesabınızı güvence altına almak için iki faktörlü kimlik doğrulamayı <a href=\"%(url)s\">buradan</a> etkinleştirin"
+
 msgid "onboarding.dismiss"
 msgstr "Kapat"
 
@@ -3817,6 +5025,39 @@ msgstr "İlk hizmetinizi kaydedin"
 
 msgid "onboarding.item.workflow"
 msgstr "Bir güvenlik iş akışı ekle"
+
+msgid "onboarding.item_hint.first_block"
+msgstr "BunkerWeb bir isteği engellediğinde raporlar burada görünür — kötü bir istek gönderin ve tekrar kontrol edin."
+
+msgid "onboarding.item_hint.https"
+msgstr "Hizmetinizin HTTPS üzerinden sunulması için buradan bir sertifika ekleyin veya oluşturun."
+
+msgid "onboarding.item_hint.install"
+msgstr "Buradan bir örnek ekleyin, ardından onu yönetim altına almak için ilk yapılandırmanızı kaydedin."
+
+msgid "onboarding.item_hint.mfa"
+msgstr "Bu menüden profilinizi açın, ardından iki faktörlü kimlik doğrulamayı açın."
+
+msgid "onboarding.item_hint.pro"
+msgstr "PRO eklentilerinin ve desteğin kilidini açmak için PRO lisans anahtarınızı buraya girin."
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "Buradaki her satır yasaklanmış bir istemciyi, nedenini ve yasağın ne zaman sona ereceğini gösterir."
+
+msgid "onboarding.item_hint.read_home"
+msgstr "Bu pano, çalışan örnekleri, sunulan hizmetleri ve son trafiği bir bakışta gösterir."
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "Her örnekten canlı günlükler burada görünür, örneğe ve önem derecesine göre filtrelenebilir."
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "Hangi güvenlik kontrolünün onu durdurduğunu ve nedenini görmek için buradan bir raporu açın."
+
+msgid "onboarding.item_hint.service"
+msgstr "BunkerWeb'e hangi uygulamayı koruyacağını söylemek için buradan bir hizmet oluşturun."
+
+msgid "onboarding.item_hint.workflow"
+msgstr "Kontrolleri ve yanıtları tek bir kuralda zincirlemek için buradan bir workflow oluşturun."
 
 msgid "onboarding.not_saved"
 msgstr "Kaydedilemedi."
@@ -3881,6 +5122,9 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "BunkerWeb sürümü (%(current)s) okunamadı, bu nedenle %(id)s uyumluluğu kontrol edilemiyor; hiçbir şey yüklenmedi"
+
 msgid "plugins.catalog.incompatible"
 msgstr "Bu sürüm BunkerWeb uyumluluğu bildirmiyor; şu an %(current)s"
 
@@ -3899,8 +5143,32 @@ msgstr "Daha fazla bilgi"
 msgid "plugins.catalog.release"
 msgstr "%(tag)s sürümünden oku"
 
+msgid "plugins.catalog.remove"
+msgstr "Kaldır"
+
 msgid "plugins.catalog.stale"
 msgstr "Katalog yakın zamanda yenilenemedi, bu yüzden tekrar güncel olana kadar yükleme devre dışı."
+
+msgid "plugins.catalog.state_installed"
+msgstr "Yüklü (sürüm %(version)s)"
+
+msgid "plugins.catalog.state_managed"
+msgstr "Katalog dışında kurulu; kurulduğu yerden güncelleyin veya kaldırın"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "Katalog dışında bir core eklentisi olarak kurulu; kurulduğu yerden güncelleyin veya kaldırın"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "Katalog dışında harici bir eklenti olarak kurulu; kurulduğu yerden güncelleyin veya kaldırın"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "Katalog dışında bir pro eklentisi olarak kurulu; kurulduğu yerden güncelleyin veya kaldırın"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "Katalog dışında bir ui eklentisi olarak kurulu; kurulduğu yerden güncelleyin veya kaldırın"
+
+msgid "plugins.catalog.state_update"
+msgstr "Güncelleme mevcut: sürüm %(installed)s yüklü, listelenen sürüm %(version)s"
 
 msgid "plugins.catalog.tab"
 msgstr "Mevcut"
@@ -3908,8 +5176,188 @@ msgstr "Mevcut"
 msgid "plugins.catalog.trust_notice"
 msgstr "Topluluk öğeleri, BunkerWeb kuruluşunun GitHub'da yayımladığı depolardan TLS üzerinden okunur ve yüklenen şey listelenenle karşılaştırılarak kontrol edilir — ancak burada hiçbir şey kriptografik olarak imzalanmamıştır. Yüklenen bir eklenti, tüm BunkerWeb ayrıcalıklarıyla kod çalıştırır."
 
+msgid "plugins.catalog.update"
+msgstr "Güncelle"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "Bu, yüklü %(name)s eklentisini (%(id)s, sürüm %(installed)s) katalogdaki %(version)s sürümüyle değiştirir. Katalogdan değil elle yüklenmiş olsa bile değiştirilir."
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "Bu güncelleme hiçbir ayarı kaldırmaz."
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "Bu güncellemenin kaldıracağı ayarlar şu anda listelenemiyor, bu nedenle bir sonraki katalog yenilemesine kadar güncelleme devre dışı."
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "%(version)s sürümü artık bu ayarları bildirmiyor. Bunlar, genel ayarlarda, hizmetlerde ve şablonlarda onlar için ayarlanmış her değerle birlikte silinir:"
+
+msgid "plugins.catalog.update_title"
+msgstr "Topluluk Eklentisini Güncelle"
+
 msgid "plugins.catalog.version"
 msgstr "Sürüm %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "Çalışan BunkerWeb sürümü (%(current)s) okunamadı, bu nedenle bu sürümün uyumluluğu kontrol edilemiyor"
+
+msgid "plugins.flash.already_at_version"
+msgstr "%(plugin_id)s eklentisi zaten %(version)s sürümünde"
+
+msgid "plugins.flash.already_installed"
+msgstr "%(plugin_id)s kimliğine sahip bir eklenti zaten yüklü"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "%(tag)s arşivi artık katalogda listelenenle eşleşmiyor. %(plugin_id)s için hiçbir şey yüklenmedi."
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "%(plugin_id)s için katalog girişi güncelleme onaylandığından beri değişti; güncellemeyi tekrar gözden geçirin"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "%(plugin_id)s için önbelleğe alınmış katalog girişi güncellemelerden daha eski; bir sonraki yenilemeyi bekleyin"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s, daha fazla ayrıntı için günlükleri kontrol edin"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "Topluluk kataloğu devre dışı"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "%(plugin)s eklentisi silinemedi: %(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "%(plugin)s eklentisi veritabanında silinemedi: %(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "%(plugin_id)s indirilemedi: %(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "%(plugin_id)s yüklenemedi: %(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "%(plugin_id)s yüklenemedi: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "%(plugin_id)s güncellenemedi: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "%(plugin_id)s güncellenemedi: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "%(plugin)s eklentisi güncellenemedi: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "%(plugin)s eklentisi güncellenemedi: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "UI eklentileri API üzerinden güncellenemedi: %(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "%(plugin)s eklentisi başarıyla silindi"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "plugin.json dosyasında aşağıdaki anahtarlardan bir veya daha fazlası eksik: %(value)s (%(value2)s)"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "%(file)s içindeki plugin.json dosyası geçerli değil (%(msg)s: satır %(lineno)s sütun %(colno)s (karakter %(pos)s)) (%(value)s)"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "%(plugin_id)s kurulumu tamamlanamadı: %(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "%(plugin_id)s eklentisi başarıyla yüklendi"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "Dosya geçerli bir eklenti arşivi değil (.zip, .tar.gz veya .tar.xz)."
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "Geçersiz eklenti kimliği, (4 ile 64 karakter arasında olmalı, yalnızca harf, rakam, alt çizgi ve tire)"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "%(temp_folder_name)s için geçersiz eklenti adı. (Yalnızca rakam, harf, alt çizgi ve tire içerebilir (en az 4 en fazla 64 karakter))"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "%(plugin_id)s eklentisi katalog dışında yönetiliyor ve katalogdan güncellenemez"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "%(plugin_id)s eklentisi katalog dışında yönetilen bir core eklentisidir ve katalogdan güncellenemez"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "%(plugin_id)s eklentisi katalog dışında yönetilen harici bir eklentidir ve katalogdan güncellenemez"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "%(plugin_id)s eklentisi katalog dışında yönetilen bir pro eklentisidir ve katalogdan güncellenemez"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "%(plugin_id)s eklentisi katalog dışında yönetilen bir ui eklentisidir ve katalogdan güncellenemez"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "/plugins üzerinde csrf_token parametresi eksik."
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "/plugins/catalog/install üzerinde id parametresi eksik."
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "/plugins/catalog/update üzerinde id veya version parametresi eksik."
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "/plugins/enable üzerinde plugin veya enabled parametresi eksik."
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "/plugins/delete üzerinde plugins parametresi eksik."
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "Yüklenecek eklenti verisi yok"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "%(plugin_id)s eklentisi yüklü değil; bunun yerine katalogdan yükleyin"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "%(file)s geçerli bir eklenti değil (plugin.json dosyası eksik) (%(value)s)"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "Eklentileri yeniden yüklemek için lütfen yeni eklentiler yükleyin"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "%(plugin)s eklentisi zaten mevcut"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "%(plugin)s eklentisi başarıyla devre dışı bırakıldı."
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "%(plugin)s eklentisi başarıyla etkinleştirildi."
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "Eklenti yönetimi yöneticilerle sınırlıdır"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "%(folder_name)s adlı bir eklenti zaten mevcut"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "%(plugin)s kimliğine sahip eklenti bulunamadı"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "Eklenti yükleme hatası (%(value)s): %(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "Eklentiler başarıyla yüklendi: %(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "Eklentiler başarıyla yüklendi"
+
+msgid "plugins.flash.refused_download"
+msgstr "%(plugin_id)s indirme işlemi reddedildi: %(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "%(plugin_id)s kurulumu reddedildi: %(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "%(plugin_id)s güncellemesi reddedildi: %(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "%(plugin_id)s güncellemesi tamamlanamadı: %(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "%(plugin_id)s eklentisi %(version)s sürümüne güncellendi"
 
 msgid "plugins.marketplace.active"
 msgstr "Etkin"
@@ -3983,6 +5431,36 @@ msgstr "Pro Bitiş Tarihi"
 msgid "pro.expiration_date.unknown"
 msgstr "Bilinmeyen bitiş tarihi"
 
+msgid "pro.flash.checking_license_key"
+msgstr "Lisans anahtarı kontrol ediliyor."
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "PRO eklentilerinin zorunlu güncellemesi planlandı."
+
+msgid "pro.flash.invalid_license_key"
+msgstr "Geçersiz lisans anahtarı"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "PRO lisans anahtarı güncellenmedi: değer reddedildi."
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "Lisans anahtarı mevcut anahtarla aynı."
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "PRO lisans anahtarı başarıyla güncellendi."
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "/pro/key üzerinde license key parametresi eksik."
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "PRO eklentileri için yeni bir kontrol planlandı."
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "Zamanlayıcı değişiklikleri uygulamaya ve PRO eklentilerini indirmeye çalışacaktır."
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "Web arayüzü PRO eklentilerini kısa süre içinde yeniden yükleyecektir."
+
 msgid "pro.force_check.description"
 msgstr "PRO eklentilerini yeniden denetlemeye zorlar. Yeni sürümler varsa eklentiler yeniden indirilir."
 
@@ -4019,8 +5497,17 @@ msgstr "SÜRESİ DOLDU"
 msgid "pro.status.free_version"
 msgstr "ÜCRETSİZ Sürüm"
 
+msgid "pro.status.invalid"
+msgstr "GEÇERSİZ ANAHTAR"
+
+msgid "pro.status.invalid_key"
+msgstr "Lisans sunucusu kayıtlı lisans anahtarını reddetti. Kontrol edin veya Genel ayarlar → Pro'dan kaldırın."
+
 msgid "pro.status.overlapped"
 msgstr "AŞIM"
+
+msgid "pro.status.pending_key"
+msgstr "Lisans anahtarı henüz kontrol edilmedi. Zamanlayıcı, kaydedildikten kısa süre sonra kontrol eder."
 
 msgid "pro.status.pro_version"
 msgstr "PRO Sürüm"
@@ -4036,6 +5523,15 @@ msgstr "Durum"
 
 msgid "pro.title"
 msgstr "Pro lisansı"
+
+msgid "pro.trial.cta"
+msgstr "Ücretsiz Denemeyi Başlat"
+
+msgid "pro.trial.description"
+msgstr "<span class=\"text-primary\">BunkerWeb PRO</span>'yu <strong>30 gün</strong> boyunca ücretsiz deneyin."
+
+msgid "pro.trial.title"
+msgstr "Ücretsiz Deneme"
 
 msgid "profile.2fa.disable_title"
 msgstr "2FA'yı Devre Dışı Bırak"
@@ -4078,6 +5574,132 @@ msgstr "Kurtarma Kodlarını Yenile"
 
 msgid "profile.card.title.sessions"
 msgstr "Oturumlar"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "Geçiş anahtarı silinemedi: %(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "İki faktörlü kimlik doğrulama devre dışı bırakılamadı: %(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "İki faktörlü kimlik doğrulama etkinleştirilemedi: %(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "Kurtarma kodları yenilenemedi: %(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "Geçiş anahtarı yeniden adlandırılamadı: %(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "Diğer oturumlar iptal edilemedi: %(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "%(value)s kullanıcısı güncellenemedi: %(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "Diğer oturumlar temizlenemedi: %(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "Mevcut parola yanlış."
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "E-posta çok uzun. 256 karakterden az olmalıdır."
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "/profile/edit üzerinde current password parametresi eksik."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "/profile/totp-refresh üzerinde current password parametresi eksik."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "/profile/totp-disable üzerinde current password parametresi eksik."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "/profile/totp-enable üzerinde current password parametresi eksik."
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "/profile/wipe-other-sessions üzerinde current password parametresi eksik."
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "/profile/edit üzerinde email parametresi eksik."
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "/profile/edit üzerinde new password confirm parametresi eksik."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "/profile/webauthn/delete üzerinde parametreler eksik."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "/profile/webauthn/rename üzerinde parametreler eksik."
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "/profile/totp-enable üzerinde totp token parametresi eksik."
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "Yeni parola yeterince güçlü değil. En az 8 karakter içermeli, bunlardan en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter (#@?!$%^&*-) olmalı."
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "Yeni parola mevcut parolayla aynı."
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "Yeni parola çok uzun. %(MAX_PASSWORD_BYTES)s baytı (bcrypt'in kesin sınırı) aşmamalıdır; aksanlı veya emoji karakterler her biri birkaç bayt sayılır."
+
+msgid "profile.flash.no_fields_updated"
+msgstr "Hiçbir alan güncellenmedi."
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "Diğer oturumlar başarıyla temizlendi."
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "Geçiş anahtarı başarıyla silindi."
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "Geçiş anahtarı başarıyla kaydedildi."
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "Geçiş anahtarı başarıyla yeniden adlandırıldı."
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "Geçiş anahtarı adı boş olamaz."
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "Parolanız değiştirildi, ancak diğer oturumlarınız iptal edilemedi. Aşağıdaki \"Diğer oturumları temizle\" seçeneğini kullanın ve etkin oturumların listesini kontrol edin."
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "Parolalar, parola onayı ile eşleşmiyor."
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "Profil başarıyla güncellendi."
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "Kurtarma kodları başarıyla yenilendi. Eski kodlar artık geçerli değil."
+
+msgid "profile.flash.theme_invalid"
+msgstr "Tema geçersiz."
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "TOTP jetonu geçersiz."
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "İki faktörlü kimlik doğrulama zaten etkin."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "İki faktörlü kimlik doğrulama başarıyla devre dışı bırakıldı."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "İki faktörlü kimlik doğrulama başarıyla etkinleştirildi."
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "İki faktörlü kimlik doğrulama etkin değil."
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "İki faktörlü kayıt süresi doldu. Sayfayı yeniden yükleyin ve yeni QR kodunu tarayın."
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "Kullanıcı adı ve e-posta, mevcut olanlarla aynı."
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "Kullanıcı adı çok uzun. 256 karakterden az olmalıdır."
 
 msgid "profile.help.photo_extensions"
 msgstr "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
@@ -4163,6 +5785,39 @@ msgstr "Zaman aralığı"
 msgid "range_picker.custom"
 msgstr "Özel"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "%(setting)s ayarı taslak yapılamaz."
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "%(setting)s taslak ayarı gönderilmedi."
+
+msgid "raw_drafts.draft_not_present"
+msgstr "%(setting)s taslak ayarı RAW düzenleyicisinde bulunmuyor."
+
+msgid "raw_drafts.edits_discarded"
+msgstr "Taslak ayarlar değişmeden kalır; bunları Ham modda etkinleştirin veya düzenleyin."
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "%(setting)s genel ayarı hizmet taslağı yapılamaz."
+
+msgid "raw_drafts.locked_by_method"
+msgstr "%(setting)s ayarı, %(method)s yöntemiyle yönetildiği için taslak durumunu değiştiremez."
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "Ayar taslağı meta verileri yalnızca ham modda kabul edilir."
+
+msgid "raw_drafts.missing_metadata"
+msgstr "%(field)s meta verisi eksik."
+
+msgid "raw_drafts.present_not_posted"
+msgstr "Mevcut %(setting)s ayarı gönderilmedi."
+
+msgid "raw_drafts.present_not_valid"
+msgstr "Mevcut %(setting)s ayarı geçerli değil."
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "%(setting)s ayarı geçerli değil."
+
 msgid "redirects.all"
 msgstr "Tümü"
 
@@ -4216,6 +5871,69 @@ msgstr "Bir yönlendirme, bir veya daha fazla servise eklediğiniz adlandırılm
 
 msgid "redirects.empty_title"
 msgstr "Henüz yönlendirme yok"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "Kaynak yol geçersiz: boşluk, noktalı virgül veya süslü parantez içeremez."
+
+msgid "redirects.err.invalid_to_url"
+msgstr "Hedef, tam bir http:// veya https:// URL'si olmalıdır."
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "En az bir servis gereklidir"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "Yönlendirme eklenemedi: %(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "Yönlendirme oluşturulamadı: %(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "Yönlendirme silinemedi: %(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "Yönlendirme ayrılamadı: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "Yönlendirmeler alınamadı: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "Yönlendirme atamaları için servisler alınamadı: %(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "Yönlendirme güncellenemedi: %(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "Yönlendirme adı gereklidir"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "Yönlendirme eklendi. Hizmetler: %(len)s"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "%(value)s yönlendirmesi başarıyla oluşturuldu"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "Yönlendirme başarıyla silindi"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "Yönlendirme başarıyla ayrıldı"
+
+msgid "redirects.flash.redirect_required"
+msgstr "Yönlendirme gereklidir"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "Yönlendirme ve servis gereklidir"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "Yönlendirme başarıyla güncellendi"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "Durum kodu şunlardan biri olmalıdır: %(value)s"
+
+msgid "redirects.flash.target_required"
+msgstr "Yönlendirme hedefi gereklidir"
+
+msgid "redirects.flash.too_many_services"
+msgstr "Bir yönlendirme %(value)s servisten fazlasına eklenemez"
 
 msgid "redirects.from_path"
 msgstr "Yönlendir:"
@@ -4302,16 +6020,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "Zaman içinde engellenen istekler"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "AppSec denetimi"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "AppSec hata politikası"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "Yerel API kararı"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "Teknik ayrıntılar"
 
 msgid "reports.security_incident"
 msgstr "Güvenlik Olayı"
@@ -4472,6 +6190,63 @@ msgstr "Girdiler"
 msgid "resource_groups.expand_all"
 msgstr "Tümünü aç"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "Takma ad 1 ile 64 harf, rakam, alt çizgi veya tire içermelidir"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "Bu takma ad BunkerWeb tarafından ayrılmıştır"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "Kaynak grubu klonlanamadı: %(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "Kaynak grubu silinemedi: %(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "Kaynak grupları dışa aktarılamadı: %(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "Kaynak grubu kaydedilemedi: %(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "Kaynak girişleri bir liste olmalıdır"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "Kaynak girişleri geçerli JSON değil"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "Giriş %(index)s çok uzun bir yoruma sahip"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "Giriş %(index)s geçersiz"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "Giriş %(index)s geçersiz bir türe sahip"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "Giriş %(index)s geçersiz bir değere sahip"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "Kaynak grubu @%(alias)s olarak klonlandı"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "@%(alias)s kaynak grubu başarıyla oluşturuldu"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "Kaynak grubu başarıyla silindi"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "Kaynak grubu gereklidir"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "Kaynak grubu başarıyla güncellendi"
+
+msgid "resource_groups.flash.source_required"
+msgstr "Kaynak kaynak grubu gereklidir"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "Bir kaynak grubu %(value)s girişten fazlasını içeremez"
+
 msgid "resource_groups.global_configuration"
 msgstr "Global yapılandırma"
 
@@ -4487,6 +6262,24 @@ msgstr "TXT/CSV importları 256 KiB ile sınırlıdır."
 msgid "resource_groups.kind"
 msgstr "Tür"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "Ülke"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "Ters DNS"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "Kullanıcı aracısı"
+
 msgid "resource_groups.kinds"
 msgstr "Türler"
 
@@ -4496,8 +6289,20 @@ msgstr "Referanslar yükleniyor..."
 msgid "resource_groups.max_entries"
 msgstr "Bir kaynak grubu %(max)s girdiden fazla içermemelidir."
 
-msgid "resource_groups.meta_line"
-msgstr "%(kinds)s tür · %(values)s değer · %(usages)s kullanım"
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s tür"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s kullanım"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s değer"
 
 msgid "resource_groups.new"
 msgstr "Yeni grup"
@@ -4516,6 +6321,11 @@ msgstr "Referans yok"
 
 msgid "resource_groups.readonly"
 msgstr "Veritabanı salt okunurdur. Kaynak grupları incelenebilir ve dışa aktarılabilir, ancak değiştirilemez."
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s referans"
 
 msgid "resource_groups.references_error"
 msgstr "Referanslar yüklenemedi"
@@ -4679,6 +6489,9 @@ msgstr "Yeniden Yükleme Gerekli"
 msgid "searchpane.scope"
 msgstr "Kapsam"
 
+msgid "searchpane.search_title"
+msgstr "Ara: {name}"
+
 msgid "searchpane.security_mode"
 msgstr "Güvenlik Modu"
 
@@ -4769,14 +6582,35 @@ msgstr "Hizmet modu"
 msgid "service.resources.attach"
 msgstr "Bağla"
 
+msgid "service.resources.confirm_detach"
+msgstr "Bu kaynak %(service)s servisinden ayrılsın mı?"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "Bu sertifika %(service)s servisinden ayrılsın mı?"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "Bu yönlendirme %(service)s servisinden ayrılsın mı?"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "Bu şablon %(service)s servisinden ayrılsın mı?"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "Bu upstream %(service)s servisinden ayrılsın mı?"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "Bu iş akışı %(service)s servisinden ayrılsın mı?"
+
 msgid "service.resources.conflict.inline"
 msgstr "%(service)s, %(path)s'i kendi %(family)s ayarlarıyla zaten sunmaktadır. %(path)s için bu ayarları temizleyin veya farklı bir yol kullanın."
 
 msgid "service.resources.conflict.primary"
 msgstr "\"%(name)s\", şu anda bu servis için ana sertifikadır ve daha fazla uyarı olmadan düşürülecektir. Ana, aslında dağıtılan sertifikadır."
 
-msgid "service.resources.conflict.resource"
-msgstr "%(service)s, %(kind)s'in \"%(name)s\" aracılığıyla %(path)s'i zaten sunmaktadır. \"%(name)s\"'i ayırın veya onlardan birine farklı bir yol verin."
+msgid "service.resources.conflict.resource_redirect"
+msgstr "%(service)s, %(path)s yolunu zaten “%(name)s” yönlendirmesi üzerinden sunuyor. “%(name)s” bağlantısını ayırın veya birine farklı bir yol verin."
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "%(service)s, %(path)s yolunu zaten “%(name)s” upstream'i üzerinden sunuyor. “%(name)s” bağlantısını ayırın veya birine farklı bir yol verin."
 
 msgid "service.resources.conflict.stream"
 msgstr "Bir akış servisi, her bağlantıyı tek bir arka uçta yönlendirir ve %(service)s, zaten \"%(name)s\"'i kullanmaktadır. Önce onu ayırın."
@@ -4815,7 +6649,7 @@ msgid "service.resources.primary"
 msgstr "Ana sertifika"
 
 msgid "service.resources.template.add"
-msgstr "Add"
+msgstr "Ekle"
 
 msgid "service.resources.template.add_label"
 msgstr "Katman olarak eklenecek şablon"
@@ -4867,6 +6701,222 @@ msgstr "Kullanılamıyor"
 
 msgid "services.draft"
 msgstr "Taslak hizmetler"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "Seçilen tüm servisler bulunamadı, UI/API servisi değil veya zaten dönüştürüldü."
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "Seçilen tüm servisler bulunamadı veya UI/API servisi değil."
+
+msgid "services.flash.configuration_created"
+msgstr "%(service)s hizmetinin yapılandırması oluşturuldu."
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "%(service)s hizmetinin yapılandırması oluşturuldu, ancak %(refused_count)s değer reddedildi."
+
+msgid "services.flash.configuration_saved"
+msgstr "%(service)s hizmetinin yapılandırması kaydedildi."
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "%(service)s hizmetinin yapılandırması kaydedildi, ancak %(refused_count)s değer reddedildi."
+
+msgid "services.flash.converted_services_draft"
+msgstr "\"taslak\" servislerine dönüştürüldü: %(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "\"online\" servislerine dönüştürüldü: %(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "Bu servise bağlı sertifikalar alınamadı."
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "Bu servise bağlı yönlendirmeler alınamadı."
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "Bu servise bağlı upstream'ler alınamadı."
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "Bu servise bağlı iş akışları alınamadı."
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "Özel yapılandırmalar API'den alınamadı."
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "Özel yapılandırmalar API'den alınamadı."
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "Servis API'den alınamadı."
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "%(service)s servisi API'den alınamadı."
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "Klonlamak için %(clone)s servisi alınamadı."
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "Servisler API'den alınamadı."
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "Servis yapılandırması alınamadı."
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "Şablonlar API'den alınamadı."
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "Yeniden adlandırma reddedildiği için özel yapılandırmalar kaydedilmedi."
+
+msgid "services.flash.default_server_reserved"
+msgstr "%(default_server_id)s, yapılandırılmış hiçbir servise uymayan istekleri yanıtlayan (bilinmeyen ana bilgisayar adları, doğrudan IP erişimi) ayrılmış varsayılan servistir; bu nedenle oluşturulamaz, yeniden adlandırılamaz veya silinemez."
+
+msgid "services.flash.default_server_type_refused"
+msgstr "SERVER_TYPE, ayrılmış %(default_server_id)s servisinde ayarlanamaz: değiştirilecek kendi sunucu bloğu yoktur. HTTP yarısı varsayılan sunucu bloğunun kendisidir, stream yarısı ise DEFAULT_SERVER_STREAM_PORTS ayarıdır."
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "Bir servisin modunu değiştirme izniniz yok"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "Taslak autoconf servisi %(service_id)s silinemedi: %(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "Servis içe aktarılamadı: %(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "Servisler içe aktarılamadı: %(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "Servis içe aktarıldı: %(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "Servisler içe aktarıldı: %(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "Arşiv içindeki configs_export.json için geçersiz kodlama."
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "Arşiv içindeki services_export.env için geçersiz kodlama."
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Geçersiz dosya kodlaması. Lütfen UTF-8 dosyası yükleyin."
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "Geçersiz mode parametresi."
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "/services/convert üzerinde convert_to parametresi eksik."
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "/services/%(service)s/mode üzerinde mode parametresi eksik."
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "/services/convert üzerinde services parametresi eksik."
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "/services/delete üzerinde services parametresi eksik."
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "İçe aktarma dosyasında servis veya özel yapılandırma bulunamadı."
+
+msgid "services.flash.no_services_export"
+msgstr "Dışa aktarılacak servis yok."
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "Servis dosyası yüklenmedi."
+
+msgid "services.flash.no_services_selected"
+msgstr "Hiç servis seçilmedi."
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "Bu eklenti varsayılan sunucuya uygulanmaz"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "Arşiv çıkarma reddediliyor: sıkıştırılmamış boyut güvenlik sınırını aşıyor."
+
+msgid "services.flash.resource_attach_failed"
+msgstr "Bağlanamadı: %(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "Bağlanamıyor: %(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "Kaynak %(service)s'e bağlandı."
+
+msgid "services.flash.resource_detach_failed"
+msgstr "Ayrılamadı: %(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "Ayrılamıyor: %(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "Kaynak %(service)s'den ayrıldı."
+
+msgid "services.flash.resource_unknown_family"
+msgstr "Bilinmeyen kaynak türü."
+
+msgid "services.flash.server_name_missing"
+msgstr "Sunucu adı sağlanmadığı için hizmet oluşturulmadı."
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "%(non_convertible_service)s servisi zaten bir taslak servistir ve dönüştürülmeyecektir."
+
+msgid "services.flash.service_already_exists"
+msgstr "%(service)s servisi zaten mevcut."
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "%(non_convertible_service)s servisi zaten bir online servistir ve dönüştürülmeyecektir."
+
+msgid "services.flash.service_deleted"
+msgstr "Servis silindi: %(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "%(service)s servisi düzenlenmedi çünkü hiçbir değer değiştirilmedi."
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "%(service)s servisi düzenlenmedi çünkü hiçbir değer veya özel yapılandırma değiştirilmedi."
+
+msgid "services.flash.service_not_found"
+msgstr "Servis bulunamadı"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "%(service)s servisi kaydedilmedi: değiştirilen her değer reddedildi."
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "%(non_editable_service)s servisi bir UI/API servisi değil ve dönüştürülmeyecektir."
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "%(service)s servisi artık \"yalnızca yönlendirme\" olarak tanımlandı."
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "%(service)s servisi artık \"standart\" olarak tanımlandı."
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "%(non_deletable_service)s servisi bir UI/API servisi değildir ve silinmeyecektir."
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "%(non_deletable_service)s servisi online bir autoconf servisidir (önce taslağa dönüştürün) ve silinmeyecektir."
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "%(non_deletable_service)s servisi, hiçbir servisle eşleşmeyen isteklere yanıt veren ayrılmış varsayılan sunucudur ve silinmeyecektir."
+
+msgid "services.flash.services_deleted"
+msgstr "Servisler silindi: %(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "Mevcut servis atlandı: %(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "Mevcut servisler atlandı: %(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "Şablonun %(key)s özel yapılandırması düzenlenemez çünkü %(value)s yöntemiyle oluşturulmuştur."
+
+msgid "services.flash.template_not_found"
+msgstr "Şablon bulunamadı"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "Yüklenen arşiv services_export.env ve/veya configs_export.json içermelidir."
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "Yüklenen dosya geçerli bir zip arşivi değil."
 
 msgid "services.online"
 msgstr "Çevrimiçi"
@@ -4956,10 +7006,10 @@ msgid "settings.access_control.order.description"
 msgstr "Varsayılan olarak her istek bu dört kontrolden bu sırayla geçer ve karar veren ilk kontrol geçerli olur. Beyaz liste eşleşmesi süreci hemen sonlandırır: istek izin verilir ve sonraki üç kontrol asla çalışmaz. Sıranın kendisi PLUGINS_ORDER_ACCESS ve PLUGINS_ORDER_PREREAD ile servis başına yapılandırılabilir."
 
 msgid "settings.access_control.order.off"
-msgstr "Off"
+msgstr "Kapalı"
 
 msgid "settings.access_control.order.on"
-msgstr "On"
+msgstr "Açık"
 
 msgid "settings.access_control.order.title"
 msgstr "Karar sırası"
@@ -5004,7 +7054,7 @@ msgid "settings.access_control.rules.remove_term"
 msgstr "Bu terimi kaldır"
 
 msgid "settings.access_control.rules.rule"
-msgstr "Rule"
+msgstr "Kural"
 
 msgid "settings.access_control.rules.title"
 msgstr "Bileşik kurallar"
@@ -5217,7 +7267,7 @@ msgid "settings.modsecurity.engine.description"
 msgstr "ModSecurity'nin hiç yüklenip yüklenmediği ve bir kural eşleşmesinde ne yaptığı."
 
 msgid "settings.modsecurity.engine.title"
-msgstr "Engine"
+msgstr "Motor"
 
 msgid "settings.modsecurity.global_crs.description"
 msgstr "Core Rule Set'i servis başına bir kez yerine tüm örnek için bir kez yükler. Çok sayıda servisle yüklemesi daha hızlıdır, ancak bu açıkken servis kapsamlı modsec-crs yapılandırmaları reddedilir: bunun yerine global bir tane oluşturun ve bir Host kuralıyla kapsamını belirleyin."
@@ -5284,6 +7334,45 @@ msgstr "%(name)s kaynağından yüklendi · karakter: %(count)s"
 
 msgid "setup.file.read_error"
 msgstr "Dosya okunurken hata oluştu"
+
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "Yönetici e-postası çok uzun. 256 karakterden az olmalıdır."
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "Yönetici parolası yeterince güçlü değil. En az 8 karakter içermeli, bunlardan en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter (#@?!$%^&*-) olmalı."
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "Yönetici parolası çok uzun. %(MAX_PASSWORD_BYTES)s baytı (bcrypt'in kesin sınırı) aşmamalıdır; aksanlı veya emoji karakterler her biri birkaç bayt sayılır."
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "Yönetici kullanıcısı başarıyla oluşturuldu"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "Yönetici kullanıcı adı çok uzun. 256 karakterden az olmalıdır."
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "Yönetici kullanıcısı oluşturulamadı: %(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "Yeni servis oluşturulamadı: %(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "Yeni servis düzenlenemedi: %(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "%(value)s ana bilgisayar adı zaten kullanımda."
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "Ana bilgisayar adı geçerli değil."
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "Aşağıdaki parametrelerden biri eksik: %(value)s."
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "Parolalar eşleşmiyor."
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "Özel bir SSL sertifikası kullanırken hem sertifikayı hem de anahtarı ayarlamalısınız."
 
 msgid "setup.status.admin_user_exists"
 msgstr "Bir yönetici kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin."
@@ -5441,6 +7530,12 @@ msgstr "Sonlanıyor"
 msgid "status.failed"
 msgstr "Başarısız"
 
+msgid "status.failover"
+msgstr "Yük devretme"
+
+msgid "status.inactive"
+msgstr "Etkin Değil"
+
 msgid "status.invalid_json_payload"
 msgstr "Geçersiz JSON yükü."
 
@@ -5526,7 +7621,7 @@ msgid "status.no_url_available"
 msgstr "Kullanılabilir URL yok"
 
 msgid "status.not_applicable"
-msgstr "N/A"
+msgstr "Yok"
 
 msgid "status.online"
 msgstr "Çevrimiçi"
@@ -5578,6 +7673,9 @@ msgstr "Bilinmiyor"
 
 msgid "status.up"
 msgstr "Açık"
+
+msgid "status.uploaded"
+msgstr "Yüklendi"
 
 msgid "status.yes"
 msgstr "Evet"
@@ -5828,6 +7926,9 @@ msgstr "Şablon oluştur"
 msgid "template.editor.heading_edit"
 msgstr "%(id)s şablonunu düzenle"
 
+msgid "template.editor.heading_view"
+msgstr "%(id)s Şablonunu Görüntüle"
+
 msgid "template.editor.label_config_data"
 msgstr "Veri"
 
@@ -5913,7 +8014,10 @@ msgid "template.editor.multivalue_add"
 msgstr "Değer ekle"
 
 msgid "template.editor.multivalue_helper"
-msgstr "Satır başına bir değer.%(separatorNote)s"
+msgstr "Satır başına bir değer."
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "Satır başına bir değer. \"%(separator)s\" ile birleştirilecek."
 
 msgid "template.editor.panel_overview"
 msgstr "Genel Bakış"
@@ -6076,6 +8180,9 @@ msgstr "Veritabanı şu anda salt okunur moddadır. Şablonlar değiştirilemez.
 
 msgid "template.editor.readonly_method"
 msgstr "Bu şablon %(method)s süreci tarafından oluşturuldu ve kullanıcı arayüzünden düzenlenemez."
+
+msgid "template.editor.readonly_method_plugin"
+msgstr "Bu şablon %(plugin)s eklentisi tarafından oluşturuldu ve arayüzden düzenlenemez."
 
 msgid "template.editor.readonly_title"
 msgstr "Salt okunur"
@@ -6251,6 +8358,9 @@ msgstr "Bir yapılandırma tanımlandığında yapılandırma türü gereklidir.
 msgid "template.editor.validation_configs_unique"
 msgstr "Her yapılandırma adı benzersiz olmalıdır."
 
+msgid "template.editor.validation_id_invalid"
+msgstr "Şablon Kimliği yalnızca harf, rakam, nokta, tire ve alt çizgi içerebilir ve bir harf veya rakamla başlamalıdır."
+
 msgid "template.editor.validation_id_required"
 msgstr "Şablon kimliği gereklidir."
 
@@ -6263,6 +8373,36 @@ msgstr "Her ayar anahtarı benzersiz olmalıdır."
 msgid "template.none"
 msgstr "Şablon Yok"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "Özel yapılandırmalar eklendi"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "Özel yapılandırmalar değişti"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "Özel yapılandırmalar kaldırıldı"
+
+msgid "templates.catalog.diff.name"
+msgstr "Ad: %(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "Ayarlar eklendi"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "Ayarlar değişti"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "Ayarlar kaldırıldı"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "Adımlar eklendi"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "Adımlar değişti"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "Adımlar kaldırıldı"
+
 msgid "templates.catalog.heading"
 msgstr "Kullanılabilir şablonlar"
 
@@ -6272,8 +8412,89 @@ msgstr "Şablon bir katmandır: zaten şablon kullanan bir servise bir tane daha
 msgid "templates.catalog.no_compat_notice"
 msgstr "Bu katalog BunkerWeb uyumluluğu bildirmiyor. Bu BunkerWeb'de olmayan bir ayarı adlandıran bir şablon, yükleme sırasında reddedilir."
 
+msgid "templates.catalog.state_installed"
+msgstr "Yüklü, katalogla aynı"
+
+msgid "templates.catalog.state_managed"
+msgstr "%(owner)s tarafından yüklendi ve yönetiliyor: katalog onu değiştirmez"
+
+msgid "templates.catalog.state_update"
+msgstr "Yüklü, katalog sürümü farklı"
+
 msgid "templates.catalog.subheading"
 msgstr "BunkerWeb kuruluşu tarafından yayımlanan seçilmiş servis şablonları."
+
+msgid "templates.catalog.update_changed"
+msgstr "%(template)s şablonu veya katalog önizlemeden bu yana değişti. Sayfayı yeniden yükleyin ve değişiklikleri tekrar gözden geçirin."
+
+msgid "templates.catalog.update_confirm"
+msgstr "%(id)s şablonunu katalog sürümü %(tag)s ile değiştirin. Bu değişiklikler şablona uygulanır:"
+
+msgid "templates.catalog.update_failed"
+msgstr "Şablon güncellenemedi."
+
+msgid "templates.catalog.update_managed"
+msgstr "%(template)s şablonu %(owner)s tarafından yönetiliyor: katalog onu değiştirmez"
+
+msgid "templates.catalog.update_no_services"
+msgstr "Henüz hiçbir hizmet bu şablonu kullanmıyor."
+
+msgid "templates.catalog.update_not_installed"
+msgstr "%(template)s şablonu yüklü değil: bunun yerine yükleyin"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "Değişiklikler bir sonraki katalog yenilemesinden sonra kontrol edilebilir."
+
+msgid "templates.catalog.update_services"
+msgstr "Bu hizmetler bu şablonu kullanıyor. Bir sonraki yapılandırma oluşturmalarında, kendilerinin ayarlamadığı her ayar yeni değeri alır:"
+
+msgid "templates.catalog.update_title"
+msgstr "Topluluk Şablonunu Güncelle"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "%(template)s şablonu zaten katalogla eşleşiyor"
+
+msgid "templates.flash.catalog_updated"
+msgstr "%(template)s şablonu katalogdan güncellendi."
+
+msgid "templates.flash.error_deleting_template"
+msgstr "%(template_id)s şablonu silinirken hata oluştu: %(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "%(template)s şablonu dışa aktarılamadı: %(error)s"
+
+msgid "templates.flash.imported"
+msgstr "%(template)s şablonu içe aktarıldı."
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "Silmek için hiç şablon seçilmedi."
+
+msgid "templates.flash.replaced"
+msgstr "%(template)s şablonu değiştirildi."
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "Silinen şablonlar: %(success_count)s."
+
+msgid "templates.flash.template_created_successfully"
+msgstr "%(template_id)s şablonu başarıyla oluşturuldu."
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "%(template_id)s şablonu başarıyla silindi."
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "%(template_id)s şablonu katalogdan yüklendi."
+
+msgid "templates.flash.template_not_found"
+msgstr "%(clone_id)s şablonu bulunamadı."
+
+msgid "templates.flash.template_not_found_2"
+msgstr "Şablon bulunamadı."
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "%(template_id)s şablonu başarıyla güncellendi."
+
+msgid "templates.flash.user_is_read_only"
+msgstr "Kullanıcı salt okunur"
 
 msgid "templates.gallery.delete_selected"
 msgstr "Seçilenleri sil"
@@ -6289,6 +8510,24 @@ msgstr "Seç"
 
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
+
+msgid "templates.import.admin_only"
+msgstr "Şablon içe aktarma yöneticilerle sınırlıdır"
+
+msgid "templates.import.failed"
+msgstr "Şablon içe aktarılamadı."
+
+msgid "templates.import.no_file"
+msgstr "İçe aktarılacak bir dosya seçin."
+
+msgid "templates.import.refused"
+msgstr "Şablon içe aktarılmadı: %(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "Şablon içe aktarılmadı: dosya 1 MiB'den büyük"
+
+msgid "templates.import.unreadable"
+msgstr "Şablon içe aktarılmadı: dosya okunamadı"
 
 msgid "templates.name.api"
 msgstr "API"
@@ -6327,7 +8566,7 @@ msgid "theme.light"
 msgstr "Açık"
 
 msgid "theme.system"
-msgstr "System"
+msgstr "Sistem"
 
 msgid "threatmap.attacks_today"
 msgstr "Bugünkü saldırılar"
@@ -6424,6 +8663,9 @@ msgstr "Her eklentinin süresini ölçmek için METRICS_COLLECT_TIMINGS değerin
 
 msgid "timings.disabled_title"
 msgstr "Eklenti süreleri kapalı"
+
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "Eklenti zamanlamaları alınırken hata oluştu: %(message)s"
 
 msgid "timings.max"
 msgstr "En fazla"
@@ -6527,11 +8769,23 @@ msgstr "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği."
 msgid "tooltip.badge.redirect_candidate"
 msgstr "Bu hizmet bir yönlendirmeden başka bir şey içermiyor, bu yüzden yalnızca yönlendirme olarak bildirilebilir — bu, ilgili faturalandırma devreye girdiğinde onu PRO hizmet sayımından çıkaracaktır."
 
+msgid "tooltip.button.attach_redirect"
+msgstr "%(name)s'i bir servise bağla"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "%(name)s'i bir servise bağla"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "%(name)s'i bir servise bağla"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Dosya yüklemeye dön"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Bu IP adresini yasakla"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "%(name)s'i kopyala"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "%(name)s yapılandırmasını taslağa dönüştür"
@@ -6545,6 +8799,9 @@ msgstr "Servisi Taslağa Dönüştür: %(name)s"
 msgid "tooltip.button.convert_service_to_online"
 msgstr "Servisi Çevrimiçine Dönüştür: %(name)s"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "Sertifikayı sil"
+
 msgid "tooltip.button.delete_config"
 msgstr "Özel Yapılandırmayı Sil: %(name)s"
 
@@ -6557,11 +8814,32 @@ msgstr "Örneği Sil: %(hostname)s"
 msgid "tooltip.button.delete_plugin"
 msgstr "Eklentiyi Sil: %(name)s"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "%(name)s'i sil"
+
 msgid "tooltip.button.delete_service"
 msgstr "Servisi Sil: %(name)s"
 
 msgid "tooltip.button.delete_template"
 msgstr "Şablonu Sil: %(name)s"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "%(name)s'i sil"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "%(name)s'i sil"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "%(name)s'i düzenle"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "%(name)s'i düzenle"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "%(name)s'in adını ve açıklamasını düzenle"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "%(name)s kurallarını düzenle"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "%(hostname)s için kayıt kodu ver"
@@ -6668,6 +8946,9 @@ msgstr "Şifreler eşleşmelidir."
 msgid "tooltip.copied"
 msgstr "Kopyalandı!"
 
+msgid "tooltip.copy_failed"
+msgstr "Kopyalama başarısız"
+
 msgid "tooltip.copy_https_only"
 msgstr "Kopyalama özelliği yalnızca HTTPS üzerinden kullanılabilir."
 
@@ -6688,6 +8969,9 @@ msgstr "Değer, şablon varsayılanından farklı"
 
 msgid "tooltip.disabled_by_method"
 msgstr "Devre dışı: '%(method)s' yöntemiyle yönetiliyor."
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "Devre dışı: %(plugin)s eklentisi tarafından yönetiliyor."
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "Devre dışı: Veritabanı salt okunur modda."
@@ -6808,6 +9092,9 @@ msgstr "%(name)s özel yapılandırmasını dışa aktar"
 
 msgid "tooltip.link.export_service"
 msgstr "%(service)s Servis Yapılandırmasını Dışa Aktar"
+
+msgid "tooltip.link.export_template"
+msgstr "%(template)s Şablonunu Dışa Aktar"
 
 msgid "tooltip.link.manage_activation"
 msgstr "%(name)s'i küresel ayarlarda etkinleştir"
@@ -7280,6 +9567,21 @@ msgstr "ZeroSSL API yeniden denemeleri arasındaki saniye cinsinden gecikme."
 msgid "totp.cant_access"
 msgstr "Kimlik doğrulama kodunuza erişemiyor musunuz?"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "Veritabanı salt okunur, kullandığınız kurtarma kodu geçerli kalır."
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "Kurtarma kodu kullanılırken bir hata oluştu."
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "/totp üzerinde jeton sağlanmadı."
+
+msgid "totp.flash.token_invalid"
+msgstr "Jeton geçersiz."
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "Kurtarma kodlarınızdan birini kullandınız. %(len)s tane kaldı."
+
 msgid "totp.or_use_security_key"
 msgstr "veya güvenlik anahtarınızı kullanın"
 
@@ -7345,6 +9647,78 @@ msgstr "Upstream, reverse proxy yolunda bir veya daha fazla hizmete bağlanan ad
 
 msgid "upstreams.empty_title"
 msgstr "Henüz üst akış yok"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "En az bir sunucu gereklidir"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "En az bir servis gereklidir"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "Upstream eklenemedi: %(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "Upstream oluşturulamadı: %(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "Upstream silinemedi: %(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "Upstream ayrılamadı: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "Upstream atamaları için servisler alınamadı: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "Upstream'ler alınamadı: %(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "Upstream güncellenemedi: %(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "Keepalive sayısı pozitif bir tam sayı olmalıdır"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "Ters proxy yolu / ile başlamalıdır"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "Yöntem şunlardan biri olmalıdır: %(value)s"
+
+msgid "upstreams.flash.name_required"
+msgstr "Upstream adı gereklidir"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "Protokol şunlardan biri olmalıdır: %(value)s"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "Bir upstream %(value)s sunucudan fazlasına sahip olamaz"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "Bir upstream %(value)s servisten fazlasına eklenemez"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "Upstream eklendi. Hizmetler: %(len)s"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "%(value)s upstream'i başarıyla oluşturuldu"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "Upstream başarıyla silindi"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "Upstream başarıyla ayrıldı"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "Upstream gereklidir"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "Upstream ve servis gereklidir"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "Upstream başarıyla güncellendi"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "%(host)s için ağırlık ve max fails tam sayı olmalıdır"
 
 msgid "upstreams.keepalive"
 msgstr "Keepalive"
@@ -7429,6 +9803,15 @@ msgstr "Gizlenen hizmet sayısı: %(count)s. %(protocol)s upstream yalnızca eş
 
 msgid "upstreams.truncated"
 msgstr "Yalnızca ilk 500 upstream gösteriliyor. Tam sonuç için API üzerinden listeyi daraltın."
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "Redis'e bağlanılamadı"
+
+msgid "utils.flash.invalid_request"
+msgstr "Geçersiz istek"
+
+msgid "utils.flash.missing_form"
+msgstr "Formda %(key)s eksik"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "Parola anahtarı eklemek için mevcut parolanızı girin."
@@ -7525,6 +9908,27 @@ msgstr "Etkin hizmetler"
 
 msgid "web_cache.error"
 msgstr "Hata"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "Web önbellek metrikleri alınırken hata oluştu: %(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "Web önbellek durumu alınırken hata oluştu: %(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "Web önbellek temizlenirken hata oluştu: %(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "Web önbelleği temizlendi (tüm girişler)"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "%(url)s için web önbelleği temizlendi"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "URL'ye göre temizlemek için bir URL gereklidir"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "Web önbelleği temizlendi. Temizlenen örnekler: %(value)s, başarısız: %(value2)s, erişilemeyen ve atlanan: %(value3)s (hiçbir şey kuyruğa alınmadı)."
 
 msgid "web_cache.hit_rate"
 msgstr "İsabet oranı"
@@ -7661,6 +10065,9 @@ msgstr "Kural %(n)s / %(total)s, konumu değiştir"
 msgid "workflows.aria.collapse"
 msgstr "Daralt"
 
+msgid "workflows.aria.collapseRule"
+msgstr "%(n)s kuralını daralt"
+
 msgid "workflows.aria.combinator"
 msgstr "Birleştiriciyi değiştir, şu anda"
 
@@ -7679,6 +10086,9 @@ msgstr "Yeniden sıralamak için sürükle"
 msgid "workflows.aria.expand"
 msgstr "Genişlet"
 
+msgid "workflows.aria.expandRule"
+msgstr "%(n)s kuralını genişlet"
+
 msgid "workflows.aria.groupKind"
 msgstr "Grup türü"
 
@@ -7688,11 +10098,20 @@ msgstr "%(n)s konumuna bir kural ekle"
 msgid "workflows.aria.more"
 msgstr "Daha fazla"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "%(n)s kuralı için daha fazla eylem"
+
 msgid "workflows.aria.moveDown"
 msgstr "Aşağı taşı — daha sonra çalışır"
 
 msgid "workflows.aria.moveRule"
 msgstr "Kuralı taşı"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "%(n)s kuralını aşağı taşı"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "%(n)s kuralını yukarı taşı"
 
 msgid "workflows.aria.moveUp"
 msgstr "Yukarı taşı — daha önce çalışır"
@@ -7729,6 +10148,9 @@ msgstr "İstek sayısı"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "Kaynak grubu"
+
+msgid "workflows.aria.ruleCard"
+msgstr "Kural %(n)s / %(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "Bu kuraldaki doğrulama sorunu sayısı: %(count)s"
@@ -7892,6 +10314,9 @@ msgstr "İş akışları bağlanma sırasına göre, içlerindeki kurallar ise y
 msgid "workflows.entry_title"
 msgstr "Bağlı bir hizmete gelen her istek"
 
+msgid "workflows.err.load"
+msgstr "Kayıtlı kurallar okunamadı. Üzerine yazılmamaları için kaydetme devre dışı bırakıldı; sayfayı yeniden yükleyin."
+
 msgid "workflows.err.save"
 msgstr "Kaydedilemedi"
 
@@ -7924,6 +10349,69 @@ msgstr "İstek bir sonraki bağlı iş akışına, ardından güvenlik yığın�
 
 msgid "workflows.exit_title"
 msgstr "Hiçbir kural eşleşmedi"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "İş akışı eklenemedi: %(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "İş akışı klonlanamadı: %(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "İş akışı oluşturulamadı: %(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "İş akışı silinemedi: %(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "İş akışı ayrılamadı: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "İş akışı atamaları için servisler alınamadı: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "İş akışı alınamadı: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "İş akışları alınamadı: %(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "İş akışı güncellenemedi: %(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "İş akışı adı gereklidir"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "Servis listesi okunamadı; sayfayı yeniden açın ve tekrar deneyin"
+
+msgid "workflows.flash.too_many_services"
+msgstr "Bir iş akışı %(value)s servisten fazlasına eklenemez"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "İş akışı %(name)s olarak klonlandı"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "%(value)s iş akışı başarıyla oluşturuldu"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "İş akışı başarıyla silindi"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "İş akışı başarıyla ayrıldı"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "İş akışı ve yeni ad gereklidir"
+
+msgid "workflows.flash.workflow_required"
+msgstr "İş akışı gereklidir"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "İş akışı ve servis gereklidir"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "İş akışı servisleri güncellendi (%(len)s eklendi)"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "İş akışı başarıyla güncellendi"
 
 msgid "workflows.gate.and"
 msgstr "ve yalnızca aynı istemci IP'si şundan fazla istekte bulunduğunda"
@@ -8033,8 +10521,14 @@ msgstr ", değerlendirme burada durur; altındaki hiçbir kurala ulaşılmaz."
 msgid "workflows.rules"
 msgstr "Kurallar"
 
-msgid "workflows.say.actionChanged"
-msgstr "Eylem %(type)s olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder."
+msgid "workflows.say.actionChangedBlock"
+msgstr "Eylem engelleme olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder."
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "Eylem doğrulama (challenge) olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder."
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "Eylem yönlendirme olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder."
 
 msgid "workflows.say.added"
 msgstr "Kural %(n)s konumuna, en sona eklendi; bu nedenle üstündeki tüm kurallar önce denetlenir."
@@ -8061,13 +10555,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "Son değer kaldırıldı — bu koşul bir değer içermeden kaydedilemez."
 
 msgid "workflows.say.moved"
-msgstr "%(name)s, %(total)s konumdan %(to)s konumuna taşındı%(how)s. Artık %(where)s çalışır."
+msgstr "%(name)s, %(total)s konumdan %(to)s konumuna taşındı."
+
+msgid "workflows.say.movedDrag"
+msgstr "%(name)s, %(total)s konumdan %(to)s konumuna sürüklendi."
+
+msgid "workflows.say.movedKeyboard"
+msgstr "%(name)s, klavyeyle %(total)s konumdan %(to)s konumuna taşındı."
 
 msgid "workflows.say.predicateCap"
 msgstr "Bu kural zaten en fazla %(max)s koşul içeriyor."
-
-msgid "workflows.say.ruleAbove"
-msgstr "üstteki kural"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "%(name)s devre dışı bırakıldı — tamamen atlanır ve altındaki kurallar artık bu istekleri görür."
@@ -8076,13 +10573,16 @@ msgid "workflows.say.ruleEnabled"
 msgstr "%(name)s etkinleştirildi — %(n)s konumunda yeniden değerlendirilir."
 
 msgid "workflows.say.runsAfter"
-msgstr "%(name)s sonrasında"
+msgstr "Artık %(name)s sonrasında çalışır."
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "Artık üstteki kuraldan sonra çalışır."
 
 msgid "workflows.say.runsFirst"
-msgstr "ilk"
+msgstr "Artık ilk çalışır."
 
 msgid "workflows.say.runsLast"
-msgstr "son"
+msgstr "Artık son çalışır."
 
 msgid "workflows.say.saved"
 msgstr "Kurallar kaydedildi ve bağlı hizmetlere gönderildi."
@@ -8091,13 +10591,7 @@ msgid "workflows.say.theRule"
 msgstr "Kural"
 
 msgid "workflows.say.valuesDropped"
-msgstr "Koşul %(type)s olarak değiştirildi — içerdiği %(count)s değer aktarılamadı."
-
-msgid "workflows.say.via.drag"
-msgstr "sürükleyerek"
-
-msgid "workflows.say.via.keyboard"
-msgstr "klavyeyle"
+msgstr "Koşul değiştirildi. Aktarılamayan değerler: %(count)s."
 
 msgid "workflows.say.viewCanvas"
 msgstr "Canvas görünümü. Kurallar soldan sağa çalışır; ilk eşleşen kazanır."
@@ -8217,7 +10711,16 @@ msgid "workflows.test.out_draft"
 msgstr "Bu hizmet taslak durumunda — henüz onun için bir iş akışı derlenmedi."
 
 msgid "workflows.test.out_match"
-msgstr "%(workflow)s · %(rule)s eşleşti ve isteği %(action)s."
+msgstr "%(workflow)s · %(rule)s eşleşti."
+
+msgid "workflows.test.out_match_block"
+msgstr "%(workflow)s · %(rule)s eşleşti ve isteği engelledi."
+
+msgid "workflows.test.out_match_challenge"
+msgstr "%(workflow)s · %(rule)s eşleşti ve istek için doğrulama (challenge) uyguladı."
+
+msgid "workflows.test.out_match_redirect"
+msgstr "%(workflow)s · %(rule)s eşleşti ve isteği yönlendirdi."
 
 msgid "workflows.test.out_no_match"
 msgstr "Hiçbir kural eşleşmedi. İstek güvenlik yığınının geri kalanına devam eder."
@@ -8295,7 +10798,7 @@ msgid "workflows.tree.empty"
 msgstr "Boş grup — bir koşul ekleyin; bu hâliyle kaydedilemez."
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "hiçbir grup %(kind)s girdisi içermiyor"
+msgstr "Hiçbir kaynak grubu bu türde girdi içermiyor."
 
 msgid "workflows.tree.noneMeta"
 msgstr "bunların hiçbiri doğru olmadığında eşleşir"
@@ -8358,7 +10861,7 @@ msgid "workflows.verb.uri"
 msgstr "ile eşleşir"
 
 msgid "workflows.view.canvas"
-msgstr "Canvas"
+msgstr "Tuval"
 
 msgid "workflows.view.list"
 msgstr "Liste"

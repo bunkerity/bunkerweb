@@ -24,6 +24,7 @@
   },
   "alert": {
     "configs_import_invalid_file": "الرجاء تحميل ملف تصدير التكوينات المخصصة صالح (.json).",
+    "custom_end_date_past": "يجب أن يكون تاريخ الانتهاء المخصص في المستقبل.",
     "custom_end_date_required": "يرجى تحديد تاريخ انتهاء مخصص.",
     "important": "هام",
     "no_changes_detected": "لم يتم اكتشاف أي تغييرات.",
@@ -40,6 +41,7 @@
   "aria": {
     "label": {
       "clear_search": "مسح البحث",
+      "clone_item": "استنساخ {{name}}",
       "close": "إغلاق",
       "collapse_multiline": "طي الإدخالات متعددة الأسطر",
       "configs_dropzone": "حدد ملف تصدير التكوينات المخصصة أو أفلت واحدًا هنا",
@@ -51,6 +53,7 @@
       "level_filter": "تصفية أسطر السجل حسب المستوى",
       "local_time": "عرض الطوابع الزمنية بالتوقيت المحلي",
       "next_issue": "الخطأ أو التحذير التالي",
+      "open_user_menu": "فتح قائمة المستخدم",
       "passkey_name": "اسم مفتاح المرور",
       "plugins_dropzone": "حدّد أرشيفات الإضافات أو أفلتها هنا",
       "prev_issue": "الخطأ أو التحذير السابق",
@@ -61,6 +64,10 @@
       "select_file": "اختر ملفًا",
       "select_page": "اختر صفحة",
       "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا",
+      "show_details": "عرض تفاصيل {{name}}",
+      "toggle_item": "تبديل {{name}}",
+      "toggle_section": "تبديل قسم {{name}}",
+      "toggle_theme": "تبديل الوضع الداكن",
       "toggle_wrap": "تبديل التفاف الأسطر",
       "user_avatar": "صورة المستخدم",
       "view_selected_items": "عرض العناصر المحددة",
@@ -70,7 +77,12 @@
       "github_stars": "نجوم GitHub: {{count}}",
       "github_watchers": "مراقبو GitHub: {{count}}",
       "secret_value": "قيمة سرية",
-      "value_hidden": "{{name}} (مخفي)"
+      "value_hidden": "{{name}} (مخفي)",
+      "certificate_public_details": "التفاصيل العامة للشهادة",
+      "certificate_inventory_assignments": "تخصيصات مخزون الشهادات",
+      "detach_from_service": "فصل {{name}} عن {{service}}",
+      "remove_this_server": "إزالة هذا الخادم",
+      "select_template": "اختر القالب {{name}}"
     }
   },
   "badge": {
@@ -116,6 +128,7 @@
     "flash": {
       "ban_failed": "تعذر حظر {{ip}}: {{error}}",
       "ban_success": "تم حظر {{ip}} بنجاح.",
+      "custom_end_date_in_past": "يجب أن يكون تاريخ انتهاء الحظر المخصص لـ {{ip}} في المستقبل",
       "invalid_custom_duration": "مدة حظر مخصصة غير صالحة لـ {{ip}}",
       "invalid_custom_end_date": "تاريخ انتهاء حظر مخصص غير صالح لـ {{ip}}",
       "invalid_duration": "مدة حظر غير صالحة: {{duration}}",
@@ -126,7 +139,20 @@
       "unban_failed": "تعذر رفع الحظر عن {{ip}}: {{error}}",
       "unban_success": "تم رفع الحظر عن {{ip}} بنجاح.",
       "update_duration_failed": "تعذر تحديث مدة الحظر لـ {{ip}}: {{error}}",
-      "update_duration_success": "تم تحديث مدة الحظر لـ {{ip}} بنجاح."
+      "update_duration_success": "تم تحديث مدة الحظر لـ {{ip}} بنجاح.",
+      "no_matching_bans": "لا يوجد حظر مطابق.",
+      "invalid_duration_selection_mode": "وضع تحديد المدة غير صالح.",
+      "invalid_updates_parameter_bans_update_duration": "معامل التحديثات غير صالح في /bans/update_duration.",
+      "no_updates": "لا توجد تحديثات.",
+      "invalid_filtered_duration_source": "مصدر المدة المُصفّى غير صالح.",
+      "invalid_unban_selection_mode": "وضع تحديد رفع الحظر غير صالح.",
+      "invalid_ips_parameter_bans_unban": "معامل عناوين IP غير صالح في /bans/unban.",
+      "no_bans": "لا يوجد حظر.",
+      "invalid_filtered_unban_source": "مصدر رفع الحظر المُصفّى غير صالح.",
+      "no_matching_reports": "لا يوجد تقارير مطابقة.",
+      "invalid_ban_selection_mode": "وضع تحديد الحظر غير صالح.",
+      "invalid_bans_parameter_bans_ban": "معامل الحظر غير صالح في /bans/ban.",
+      "invalid_filtered_ban_source": "مصدر الحظر المُصفّى غير صالح."
     }
   },
   "breadcrumb": {
@@ -177,7 +203,8 @@
     "clone": "نسخ",
     "columns": "الأعمدة",
     "convert_configs": "تحويل الإعدادات",
-    "convert_configs_to": "التحويل إلى {{state}}",
+    "convert_to_draft": "تحويل إلى مسودة",
+    "convert_to_online": "تحويل إلى متصل",
     "convert_services": "تحويل الخدمات",
     "copy": "نسخ",
     "copy_codes": "نسخ الرموز",
@@ -207,6 +234,7 @@
     "history": "السجل",
     "import_configs": "استيراد التكوينات المخصصة",
     "import_services": "استيراد الخدمات",
+    "import_template": "استيراد قالب",
     "login": "تسجيل الدخول",
     "multiple_add": "إضافة",
     "multiple_hide": "إخفاء",
@@ -279,10 +307,79 @@
     "kpi_files": "الملفات",
     "kpi_per_service": "لكل خدمة",
     "subtitle": "ملفات التخزين المؤقت التي تم إنشاؤها بواسطة المهام المجدولة (قوائم الحظر وقواعد GeoIP وما إلى ذلك) — تفحصها أو قم بتنزيلها أو حذفها لكل خدمة وإضافة.",
-    "title": "ملفات الذاكرة المؤقتة"
+    "title": "ملفات الذاكرة المؤقتة",
+    "flash": {
+      "error_deleting_cache_files": "خطأ في حذف ملفات ذاكرة التخزين المؤقت: {{message}}",
+      "successfully_deleted_cache_file": "تم حذف ملف الذاكرة المؤقتة {{deleted_count}} بنجاح",
+      "successfully_deleted_cache_files": "تم حذف {{deleted_count}} من ملفات الذاكرة المؤقتة بنجاح",
+      "deleted_files_errors": "تم حذف {{deleted_count}} ملفًا مع {{len}} أخطاء: {{value}}",
+      "api_unavailable": "API غير متاح: {{message}}",
+      "error_fetching_cache_file": "خطأ في جلب ملف ذاكرة التخزين المؤقت: {{message}}",
+      "cache_file_job_plugin_not_found": "لم يتم العثور على ملف الذاكرة المؤقتة {{file_name}} من المهمة {{job_name}} والإضافة {{plugin_id}}",
+      "cache_file_job_plugin_not_found_service": "لم يتم العثور على ملف الذاكرة المؤقتة {{file_name}} من المهمة {{job_name}} والإضافة {{plugin_id}} والخدمة {{service}}",
+      "error_fetching_cache_files": "خطأ في جلب ملفات ذاكرة التخزين المؤقت: {{message}}",
+      "invalid_cache_files_parameter": "معامل ملفات ذاكرة التخزين المؤقت غير صالح",
+      "no_cache_files_selected": "لم يتم تحديد أي ملفات ذاكرة مؤقتة"
+    }
   },
   "configs": {
-    "subtitle": "مقتطفات تكوين NGINX المخصصة لخدماتك — أنشئ وقم بتحرير وإدارة تجاوزات HTTP و ModSecurity ومستوى التدفق."
+    "subtitle": "مقتطفات تكوين NGINX المخصصة لخدماتك — أنشئ وقم بتحرير وإدارة تجاوزات HTTP و ModSecurity ومستوى التدفق.",
+    "flash": {
+      "no_custom_configurations_found_import_file": "لم يتم العثور على تكوينات مخصصة في ملف الاستيراد.",
+      "import_error": "خطأ في الاستيراد: {{error}}",
+      "invalid_file_encoding_please_upload_utf": "ترميز الملف غير صالح. يرجى تحميل ملف JSON بترميز UTF-8.",
+      "no_custom_configurations_file_uploaded": "لم يتم تحميل ملف تكوينات مخصصة.",
+      "no_custom_configurations_export": "لا توجد تكوينات مخصصة للتصدير.",
+      "could_not_fetch_custom_configurations_api": "تعذّر جلب التكوينات المخصصة من API: {{fetch_err}}",
+      "invalid_configs_parameter_configs_export": "معامل التكوينات غير صالح في /configs/export.",
+      "saved_custom_configuration": "تم حفظ التكوين المخصص {{new_type}}/{{new_name}}",
+      "saved_custom_configuration_service": "تم حفظ التكوين المخصص {{new_type}}/{{new_name}} للخدمة {{service}}",
+      "no_values_changed": "لم يتم تغيير أي قيم.",
+      "renaming_template_based_custom_config_not": "لا يُسمح بإعادة تسمية التكوين المخصص المستند إلى القالب.",
+      "invalid_name_parameter_configs_new": "معامل الاسم غير صالح في /configs/new.",
+      "invalid_type_parameter_configs_new": "معامل النوع غير صالح في /configs/new.",
+      "service_does_not_exist": "الخدمة {{new_service}} غير موجودة.",
+      "config_not_ui_api_custom_config": "التكوين {{config_type}}/{{name}} ليس تكوينًا مخصصًا من واجهة المستخدم/API ولا يمكن تعديله.",
+      "config_not_ui_api_custom_config_service": "التكوين {{config_type}}/{{name}} للخدمة {{service}} ليس تكوينًا مخصصًا من واجهة المستخدم/API ولا يمكن تعديله.",
+      "config_does_not_exist_2": "التكوين {{config_type}}/{{name}} غير موجود.",
+      "config_does_not_exist_2_service": "التكوين {{config_type}}/{{name}} للخدمة {{service}} غير موجود.",
+      "config_does_not_exist": "التكوين {{clone}} غير موجود.",
+      "created_custom_configuration": "تم إنشاء التكوين المخصص {{config_type}}/{{config_name}}",
+      "created_custom_configuration_service": "تم إنشاء التكوين المخصص {{config_type}}/{{config_name}} للخدمة {{service}}",
+      "error_occurred_while_saving_custom_configs": "حدث خطأ أثناء حفظ التكوينات المخصصة: {{error_msg}}",
+      "config_already_exists": "التكوين {{config_type}}/{{config_name}} موجود بالفعل",
+      "config_already_exists_service": "التكوين {{config_type}}/{{config_name}} للخدمة {{service}} موجود بالفعل",
+      "deleted_config_one": "تم حذف التكوين: {{names}}",
+      "deleted_config_other": "تم حذف التكوينات: {{names}}",
+      "all_selected_custom_configs_could_not_2": "جميع التكوينات المخصصة المحددة غير موجودة أو ليست تكوينات UI/API.",
+      "custom_config_not_ui_api_custom_2": "التكوين المخصص {{skipped_config}} ليس تكوين UI/API مخصصًا ولن يتم حذفه.",
+      "error_occurred_while_deleting_custom_configs": "حدث خطأ أثناء حذف التكوينات المخصصة: {{e}}",
+      "invalid_configs_parameter_configs_delete": "معامل التكوينات غير صالح في /configs/delete.",
+      "no_configs_selected": "لم يتم تحديد أي تكوينات.",
+      "converted_configs_online": "تم التحويل إلى تكوينات «متصلة»: {{names}}",
+      "converted_configs_draft": "تم التحويل إلى تكوينات «مسودة»: {{names}}",
+      "all_selected_custom_configs_could_not": "جميع التكوينات المخصصة المحددة غير موجودة أو ليست تكوينات UI/API أو تم تحويلها بالفعل.",
+      "custom_config_could_not_found": "تعذّر العثور على التكوين المخصص {{missing_config}}.",
+      "custom_config_already_online_will_not": "التكوين المخصص {{non_convertible_config}} متصل بالفعل ولن يتم تحويله.",
+      "custom_config_already_draft_will_not": "التكوين المخصص {{non_convertible_config}} مسودة بالفعل ولن يتم تحويله.",
+      "custom_config_not_ui_api_custom": "التكوين المخصص {{non_editable_config}} ليس تكوين UI/API مخصصًا ولن يتم تحويله.",
+      "invalid_configs_parameter_configs_convert": "معامل التكوينات غير صالح في /configs/convert.",
+      "failed_import_custom_configuration_one": "فشل استيراد التكوين المخصص: {{names}}",
+      "failed_import_custom_configuration_other": "فشل استيراد التكوينات المخصصة: {{names}}",
+      "skipped_custom_configuration_one": "تم تخطي التكوين المخصص: {{names}}",
+      "skipped_custom_configuration_other": "تم تخطي التكوينات المخصصة: {{names}}",
+      "overwrote_custom_configuration_one": "تمت الكتابة فوق التكوين المخصص: {{names}}",
+      "overwrote_custom_configuration_other": "تمت الكتابة فوق التكوينات المخصصة: {{names}}",
+      "imported_custom_configuration_one": "تم استيراد التكوين المخصص: {{names}}",
+      "imported_custom_configuration_other": "تم استيراد التكوينات المخصصة: {{names}}",
+      "missing_value_parameter_configs_new": "معامل القيمة مفقود في /configs/new.",
+      "missing_name_parameter_configs_new": "معامل الاسم مفقود في /configs/new.",
+      "missing_type_parameter_configs_new": "معامل النوع مفقود في /configs/new.",
+      "missing_service_parameter_configs_new": "معامل الخدمة مفقود في /configs/new.",
+      "missing_configs_parameter_configs_delete": "معامل التكوينات مفقود في /configs/delete.",
+      "missing_convert_parameter_configs_convert": "معامل convert_to مفقود في /configs/convert.",
+      "missing_configs_parameter_configs_convert": "معامل التكوينات مفقود في /configs/convert."
+    }
   },
   "country": {
     "AD": "أندورا",
@@ -659,10 +756,70 @@
     }
   },
   "datatable": {
-    "bulk_select_all_filtered": "تحديد كل {{count}} {{entity}} المطابقة",
-    "bulk_select_all_done": "تم تحديد كل {{count}} {{entity}} المطابقة.",
+    "bulk_select": {
+      "bans": {
+        "page_one": "تم تحديد {{count}} حظر في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} عمليات حظر في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} عمليات حظر المطابقة",
+        "all_done": "تم تحديد جميع {{count}} عمليات حظر المطابقة."
+      },
+      "cache": {
+        "page_one": "تم تحديد {{count}} ملف ذاكرة مؤقتة في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} ملفات ذاكرة مؤقتة في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} ملفات ذاكرة مؤقتة المطابقة",
+        "all_done": "تم تحديد جميع {{count}} ملفات ذاكرة مؤقتة المطابقة."
+      },
+      "configs": {
+        "page_one": "تم تحديد {{count}} تكوين مخصص في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} تكوينات مخصصة في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} تكوينات مخصصة المطابقة",
+        "all_done": "تم تحديد جميع {{count}} تكوينات مخصصة المطابقة."
+      },
+      "instances": {
+        "page_one": "تم تحديد {{count}} مثيل في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} مثيلات في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} مثيلات المطابقة",
+        "all_done": "تم تحديد جميع {{count}} مثيلات المطابقة."
+      },
+      "items": {
+        "page_one": "تم تحديد {{count}} عنصر في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} عناصر في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} عناصر المطابقة",
+        "all_done": "تم تحديد جميع {{count}} عناصر المطابقة."
+      },
+      "jobs": {
+        "page_one": "تم تحديد {{count}} مهمة في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} مهام في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} مهام المطابقة",
+        "all_done": "تم تحديد جميع {{count}} مهام المطابقة."
+      },
+      "plugins": {
+        "page_one": "تم تحديد {{count}} إضافة في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} إضافات في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} إضافات المطابقة",
+        "all_done": "تم تحديد جميع {{count}} إضافات المطابقة."
+      },
+      "reports": {
+        "page_one": "تم تحديد {{count}} تقرير في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} تقارير في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} تقارير المطابقة",
+        "all_done": "تم تحديد جميع {{count}} تقارير المطابقة."
+      },
+      "services": {
+        "page_one": "تم تحديد {{count}} خدمة في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} خدمات في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} خدمات المطابقة",
+        "all_done": "تم تحديد جميع {{count}} خدمات المطابقة."
+      },
+      "templates": {
+        "page_one": "تم تحديد {{count}} قالب في هذه الصفحة.",
+        "page_other": "تم تحديد جميع {{count}} قوالب في هذه الصفحة.",
+        "all_filtered": "تحديد جميع {{count}} قوالب المطابقة",
+        "all_done": "تم تحديد جميع {{count}} قوالب المطابقة."
+      }
+    },
     "bulk_select_clear": "مسح التحديد",
-    "bulk_select_page": "تم تحديد كل {{count}} {{entity}} في هذه الصفحة.",
+    "select_row": "تحديد الصف",
     "info_bans": "عرض {{start}} إلى {{end}} من أصل {{total}} حظر",
     "info_cache": "عرض {{start}} إلى {{end}} من أصل {{total}} ملفات ذاكرة مؤقتة",
     "info_configs": "عرض {{start}} إلى {{end}} من أصل {{total}} تكوينات مخصصة",
@@ -742,8 +899,33 @@
     "select_rows_templates_0": "لم يتم تحديد أي قوالب",
     "select_rows_templates_1": "تم تحديد 1 قالب",
     "select_rows_templates_plural": "تم تحديد %d قوالب",
-    "selected_list_count": "{{count}} {{entity}} محدد",
-    "selected_list_empty": "لا يوجد {{entity}} محدد.",
+    "selected_list": {
+      "configs": {
+        "count_one": "تم تحديد {{count}} تكوين مخصص",
+        "count_other": "تم تحديد {{count}} تكوينات مخصصة",
+        "empty": "لم يتم تحديد أي تكوين مخصص."
+      },
+      "items": {
+        "count_one": "تم تحديد {{count}} عنصر",
+        "count_other": "تم تحديد {{count}} عناصر",
+        "empty": "لم يتم تحديد أي عنصر."
+      },
+      "plugins": {
+        "count_one": "تم تحديد {{count}} إضافة",
+        "count_other": "تم تحديد {{count}} إضافات",
+        "empty": "لم يتم تحديد أي إضافة."
+      },
+      "services": {
+        "count_one": "تم تحديد {{count}} خدمة",
+        "count_other": "تم تحديد {{count}} خدمات",
+        "empty": "لم يتم تحديد أي خدمة."
+      },
+      "templates": {
+        "count_one": "تم تحديد {{count}} قالب",
+        "count_other": "تم تحديد {{count}} قوالب",
+        "empty": "لم يتم تحديد أي قالب."
+      }
+    },
     "zero_records_bans": "لم يتم العثور على حظر مطابق",
     "zero_records_cache": "لم يتم العثور على ملفات ذاكرة مؤقتة مطابقة",
     "zero_records_configs": "لم يتم العثور على تكوينات مخصصة مطابقة",
@@ -812,6 +994,19 @@
       "just_now": "الآن"
     },
     "warning": "تحذير",
+    "do_not_have_write_permission": "ليس لديك صلاحية الكتابة",
+    "database_read_only_mode": "قاعدة البيانات في وضع القراءة فقط",
+    "error_occurred_while_saving_custom_configs": "حدث خطأ أثناء حفظ التكوينات المخصصة: {{e}}",
+    "service_does_not_exist": "الخدمة {{service}} غير موجودة.",
+    "invalid_convert_parameter": "معامل convert_to غير صالح.",
+    "import_warning": "تحذير الاستيراد: {{error}}",
+    "could_not_fetch_global_settings_api": "تعذّر جلب الإعدادات العامة من API.",
+    "plugin_not_found": "الإضافة غير موجودة",
+    "scheduler_will_attempt_apply_changes": "سيحاول المُجدوِل تطبيق التغييرات.",
+    "could_not_fetch_resource_groups": "تعذّر جلب مجموعات الموارد: {{message}}",
+    "error_fetching_instances": "خطأ في جلب المثيلات",
+    "description_too_long": "لا يمكن أن يتجاوز الوصف 4000 حرف",
+    "cors_or_ajax_request_required": "مطلوب طلب CORS أو AJAX",
     "configuration_pending_instance": "التهيئة لم تُطبَّق بعد — في انتظار تشغيل نسخة."
   },
   "footer": {
@@ -826,7 +1021,8 @@
     "checkbox": {
       "include_attached_configs": "تضمين التكوينات المخصصة المرفقة",
       "overwrite_existing_configs": "استبدال تكوينات UI/API المخصصة الحالية",
-      "remember_me": "تذكرني"
+      "remember_me": "تذكرني",
+      "replace_existing_template": "استبدال القالب الذي يحمل نفس المعرّف إن وُجد"
     },
     "help": {
       "ban_specific_service": "سيطبق الحظر فقط على هذه الخدمة المحددة.",
@@ -834,7 +1030,8 @@
       "hostname_special_chars": "يُسمح فقط بـ `/` و `:` لتحديد البروتوكول/المنفذ.",
       "multivalue_separator": "القيم مفصولة بـ:",
       "permanent_ban": "إذا تم تحديده، لن تنتهي صلاحية الحظر أبدًا حتى تتم إزالته يدويًا.",
-      "photo_extensions": "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB."
+      "photo_extensions": "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB.",
+      "secret_stored": "توجد قيمة مخزَّنة ولا تُعرض. اترك الحقل كما هو للاحتفاظ بها، أو اكتب قيمة جديدة لاستبدالها، أو امسح الحقل لإزالتها."
     },
     "label": {
       "2fa_code": "رمز 2FA",
@@ -889,6 +1086,7 @@
       "secret_token": "الرمز السري",
       "server_name": "اسم الخادم",
       "service_name": "اسم الخدمة",
+      "template_file": "ملف القالب",
       "template_id": "معرف القالب",
       "theme": "المظهر",
       "type": "النوع",
@@ -955,7 +1153,32 @@
     "loading": "جاري التحميل",
     "subtitle": "إدارة مثيلات BunkerWeb المتصلة بواجهة المستخدم هذه: أنشئ، وقم بالتحقق من الاتصال، وأعد التحميل، أو أوقفها أو احذفها.",
     "total": "إجمالي المثيلات",
-    "up": "قيد التشغيل"
+    "up": "قيد التشغيل",
+    "flash": {
+      "instances_deleted": "تم حذف المثيلات {{instance}} بنجاح.",
+      "instance_reloaded": "تم إعادة تحميل المثيل {{instance}} بنجاح.",
+      "instance_stopped": "تم إيقاف المثيل {{instance}} بنجاح.",
+      "instance_deleted": "تم حذف المثيل {{instance}} بنجاح.",
+      "instance_does_not_have_reload_method": "المثيل {{instance}} لا يحتوي على طريقة إعادة تحميل.",
+      "instance_does_not_have_stop_method": "المثيل {{instance}} لا يحتوي على طريقة إيقاف.",
+      "instance_does_not_exist": "المثيل {{instance}} غير موجود.",
+      "couldn_t_delete_instance": "تعذر حذف المثيل: {{message}}",
+      "couldn_t_delete_instances": "تعذر حذف المثيلات: {{message}}",
+      "could_not_found_one": "تعذر العثور على المثيل المحدد أو أنه ليس مثيل UI/API.",
+      "could_not_found_other": "تعذر العثور على جميع المثيلات المحددة أو أنها ليست مثيلات UI/API.",
+      "instance_not_ui_api_instance_will": "المثيل {{non_deletable_instance}} ليس مثيل UI/API ولن يتم حذفه.",
+      "no_instance_selected": "لم يتم تحديد أي مثيل.",
+      "instance_created_successfully": "تم إنشاء المثيل {{value}} بنجاح.",
+      "could_not_fetch_instances_api": "تعذّر جلب المثيلات من API.",
+      "missing_instances_parameter_instances_ping": "معلمة المثيلات مفقودة في /instances/ping.",
+      "missing_instances_parameter_instances_reload": "معلمة المثيلات مفقودة في /instances/reload.",
+      "missing_instances_parameter_instances_stop": "معلمة المثيلات مفقودة في /instances/stop.",
+      "missing_instances_parameter_instances_delete": "معلمة المثيلات مفقودة في /instances/delete.",
+      "missing_instance_name_parameter_instances_new": "معامل اسم المثيل مفقود في /instances/new.",
+      "missing_instance_hostname_parameter_instances_new": "معامل اسم مضيف المثيل مفقود في /instances/new.",
+      "hostname_already_in_use": "اسم المضيف {{hostname}} مستخدم بالفعل.",
+      "could_not_create_instance": "تعذّر إنشاء المثيل: {{message}}"
+    }
   },
   "interval": {
     "day": "يوميًا",
@@ -978,11 +1201,20 @@
       "failed_last_run": "فشل التشغيل الأخير",
       "reload_required": "إعادة التحميل مطلوبة",
       "total": "إجمالي المهام"
+    },
+    "flash": {
+      "job_plugins_will_run_background_by": "ستُشغَّل إضافات المهمة في الخلفية بواسطة المجدول.",
+      "jobs_plugins_will_run_background_by": "ستُشغَّل إضافات المهام في الخلفية بواسطة المجدول.",
+      "invalid_jobs_parameter_jobs_run": "معامل المهام غير صالح في /jobs/run.",
+      "no_jobs_selected": "لم يتم تحديد أي مهام.",
+      "error_fetching_jobs": "خطأ في جلب المهام: {{message}}",
+      "missing_jobs_parameter_jobs_run": "معامل المهام مفقود في /jobs/run."
     }
   },
   "legend": {
     "locked_settings_annotation": "مقفل ({{method}})",
-    "locked_settings_hint": "الإعدادات المقفلة مميزة"
+    "locked_settings_hint": "الإعدادات المقفلة مميزة",
+    "raw_setting_drafts": "في بداية أي إعداد، اضغط على # لتبديل حالة المسودة أو على Backspace لتفعيله. احفظ للتطبيق. تحتفظ المسودات بقيمها بينما تُطبَّق القيم الموروثة أو الافتراضية."
   },
   "link": {
     "back_to_login": "العودة إلى تسجيل الدخول",
@@ -1001,6 +1233,10 @@
   },
   "login": {
     "title": "تسجيل الدخول",
+    "flash": {
+      "invalid_username_password": "اسم المستخدم أو كلمة المرور غير صحيحة",
+      "couldn_t_log_please_try_again": "تعذّر تسجيل دخولك، يرجى المحاولة مرة أخرى"
+    },
     "subtitle": "تسجيل الدخول إلى حساب BunkerWeb الخاص بك",
     "or_use_password": "أو استخدم كلمة المرور",
     "notice_password_changed": "تم تغيير كلمة المرور الخاصة بك. سجّل الدخول باستخدام كلمة المرور الجديدة.",
@@ -1030,6 +1266,10 @@
     "showing_some": "عرض {{shown}} من {{total}}",
     "select_file_prompt": "حدد ملف السجل لعرض محتواه",
     "trimmed_notice": "--- تم إزالة {{count}} سطر من السجلات القديمة لتحسين الأداء ---",
+    "flash": {
+      "no_such_file": "لا يوجد ملف كهذا",
+      "invalid_file_path": "مسار الملف غير صالح"
+    },
     "all_sources": "كل المصادر (مباشر)",
     "collapse": "طي",
     "expand": "توسيع",
@@ -1049,7 +1289,14 @@
       "confirm_cache_deletion_alert": "هل أنت متأكد أنك تريد حذف ملف الذاكرة المؤقتة المحدد؟",
       "confirm_cache_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟",
       "confirm_configs_conversion": "هل تريد بالتأكيد تحويل التكوينات المخصصة المحددة؟",
-      "confirm_configs_conversion_to": "هل أنت متأكد أنك تريد تحويل الإعدادات المخصصة المحددة إلى {{state}}؟",
+      "confirm_service_conversion_online": "هل أنت متأكد من أنك تريد تحويل الخدمة المحددة إلى متصلة؟",
+      "confirm_service_conversion_draft": "هل أنت متأكد من أنك تريد تحويل الخدمة المحددة إلى مسودة؟",
+      "confirm_services_conversion_online": "هل أنت متأكد من أنك تريد تحويل الخدمات المحددة إلى متصلة؟",
+      "confirm_services_conversion_draft": "هل أنت متأكد من أنك تريد تحويل الخدمات المحددة إلى مسودات؟",
+      "confirm_config_conversion_online": "هل أنت متأكد أنك تريد تحويل التكوين المخصص المحدد إلى «متصل»؟",
+      "confirm_config_conversion_draft": "هل أنت متأكد أنك تريد تحويل التكوين المخصص المحدد إلى «مسودة»؟",
+      "confirm_configs_conversion_online": "هل أنت متأكد أنك تريد تحويل التكوينات المخصصة المحددة إلى «متصلة»؟",
+      "confirm_configs_conversion_draft": "هل أنت متأكد أنك تريد تحويل التكوينات المخصصة المحددة إلى «مسودة»؟",
       "confirm_configs_deletion_alert": "هل أنت متأكد أنك تريد حذف التكوين المخصص المحدد؟",
       "confirm_configs_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟",
       "confirm_conversion_confirmation": "هل أنت متأكد أنك تريد تحويل الخدمات المحددة؟",
@@ -1057,6 +1304,8 @@
       "confirm_plugin_deletion": "هل أنت متأكد أنك تريد حذف الإضافة المحددة؟",
       "confirm_plugin_deletion_plural": "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟",
       "confirm_template_deletion": "هل أنت متأكد أنك تريد حذف القالب {{name}}؟",
+      "confirm_templates_deletion_alert": "هل أنت متأكد أنك تريد حذف القالب المحدد؟",
+      "confirm_templates_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف القوالب المحددة؟",
       "confirmation_instance_deletion": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
       "delete_confirmation_alert": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
       "delete_confirmation_alert_plural": "هل أنت متأكد أنك تريد حذف المثيلات المحددة؟",
@@ -1075,6 +1324,8 @@
       "import_configs_warning": "يتم دائمًا الاحتفاظ بالتكوينات المخصصة التي أنشأها scheduler أو autoconf أو templates. يمكن فقط استبدال تكوينات UI/API.",
       "import_services_dropzone": "قم بسحب وإسقاط ملف تصدير الخدمات هنا أو انقر لتحديد ملف.",
       "import_services_warning": "سيؤدي استيراد الخدمات إلى إنشاء خدمات UI جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة. كما يُقبل أرشيف .zip مُصدَّر مع التكوينات المخصصة.",
+      "import_template_help": "حزمة قالب مُصدَّرة من BunkerWeb ‏(.json)، أو أرشيف (.zip، .tar.gz، .tar.xz) يحتوي على مجلد قالب واحد يضم ملف template.json وإعداداته. بحد أقصى 1 ميبيبايت.",
+      "import_template_replace_warning": "استبدال قالب يغيّر كل خدمة تستخدمه عند التوليد التالي للإعدادات. لا يُستبدل أبدًا القالب الذي تملكه إضافة أو الذي يُدار خارج واجهة الويب.",
       "instance_creation_alert": "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و`API_LISTEN_HTTPS` و`API_HTTPS_PORT` و`API_SERVER_NAME` لتكوين المثيل.",
       "next_step_in_case_of_issue": "إذا واجهت مشاكل، يمكنك قبول الشهادة غير الآمنة يدويًا:",
       "recovery_codes_save_alert": "يرجى حفظ رموز الاسترداد هذه في مكان آمن (مثل مدير كلمات المرور أو قبو). يمكنك استخدامها للوصول إلى حسابك إذا فقدت جهاز المصادقة الخاص بك.",
@@ -1090,7 +1341,8 @@
       "update_filtered_duration_alert": "حدد مدة جديدة لكل عمليات الحظر المطابقة وعددها {{count}}:",
       "enroll_description": "شغّل النسخة بهذه المتغيرات. تستخدم الرمز مرة واحدة عند الإقلاع وتحصل على بيانات اعتماد خاصة بها.",
       "enroll_shown_once": "يُعرض هذا الرمز مرة واحدة فقط. انسخه الآن — لن يمكن عرضه مرة أخرى.",
-      "confirm_service_mode_conversion": "هل تريد بالتأكيد تغيير الوضع المعلن لهذه الخدمة؟"
+      "confirm_service_mode_conversion": "هل تريد بالتأكيد تغيير الوضع المعلن لهذه الخدمة؟",
+      "service_deletion_confirmation": "هل أنت متأكد أنك تريد حذف الخدمة المحددة؟"
     },
     "button": {
       "fetch_global_settings_confirm": "تطبيق الإعدادات العامة",
@@ -1119,6 +1371,7 @@
       "full_url": "URL كامل",
       "import_configs": "استيراد التكوينات المخصصة",
       "import_services": "استيراد الخدمات",
+      "import_template": "استيراد قالب",
       "job_history": "آخر 10 عمليات تنفيذ للمهام",
       "job_history_count": "آخر {{count}} عمليات تنفيذ للمهمة",
       "multiselect_selected": "العناصر المحددة",
@@ -1147,7 +1400,14 @@
     "link": {
       "documentation": "التوثيق"
     },
-    "version": "الإصدار"
+    "version": "الإصدار",
+    "aria": {
+      "toggle_navigation": "تبديل التنقل",
+      "close_navigation": "إغلاق التنقل",
+      "help": "مساعدة",
+      "notifications": "الإشعارات",
+      "news": "الأخبار"
+    }
   },
   "navigation": {
     "about": "حول",
@@ -1201,7 +1461,8 @@
   },
   "notice": {
     "already_subscribed": "مشترك بالفعل",
-    "dismiss_mfa": "لا تذكرني مرة أخرى"
+    "dismiss_mfa": "لا تذكرني مرة أخرى",
+    "enable_mfa": "يُرجى تفعيل المصادقة الثنائية لتأمين حسابك <a href=\"{{url}}\">من هنا</a>"
   },
   "pagination": {
     "page": "صفحة"
@@ -1231,6 +1492,61 @@
     }
   },
   "plugins": {
+    "flash": {
+      "invalid_archive": "الملف ليس أرشيف إضافة صالحًا (.zip أو .tar.gz أو .tar.xz).",
+      "invalid_plugin_id_must_between_4": "معرف الإضافة غير صالح، (يجب أن يكون بين 4 و64 حرفًا، أحرف وأرقام وشرطات سفلية وشرطات فقط)",
+      "couldn_t_install_catalogue": "تعذر تثبيت {{plugin_id}}: {{message}}",
+      "couldn_t_install_catalogue_2": "تعذر تثبيت {{plugin_id}}: {{e}}",
+      "install_did_not_complete": "لم يكتمل تثبيت {{plugin_id}}: {{detail}}",
+      "refused_install": "تم رفض تثبيت {{plugin_id}}: {{problem}}",
+      "couldn_t_update_catalogue": "تعذر تحديث {{plugin_id}}: {{message}}",
+      "couldn_t_update_catalogue_2": "تعذر تحديث {{plugin_id}}: {{e}}",
+      "update_did_not_complete": "لم يكتمل تحديث {{plugin_id}}: {{detail}}",
+      "refused_update": "تم رفض تحديث {{plugin_id}}: {{problem}}",
+      "archive_no_longer_matches_what_catalogue": "لم يعد أرشيف {{tag}} مطابقًا لما أدرجه الكتالوج. لم يتم تثبيت أي شيء لـ {{plugin_id}}.",
+      "couldn_t_download": "تعذّر تنزيل {{plugin_id}}: {{e}}",
+      "refused_download": "تم رفض تنزيل {{plugin_id}}: {{e}}",
+      "plugin_management_restricted_administrators": "إدارة الإضافات مقتصرة على المسؤولين",
+      "community_catalogue_disabled": "كتالوج المجتمع معطّل",
+      "no_plugin_data_upload": "لا توجد بيانات إضافة لتحميلها",
+      "couldn_t_update_ui_plugins_via": "تعذّر تحديث إضافات واجهة المستخدم عبر API: {{e}}",
+      "plugins_uploaded_successfully_2": "تم تحميل الإضافات بنجاح",
+      "plugin_upload_error": "خطأ في تحميل الإضافة ({{value}}): {{value2}}",
+      "plugins_uploaded_successfully": "تم تحميل الإضافات بنجاح: {{value}}",
+      "plugin_already_exists": "الإضافة {{plugin}} موجودة بالفعل",
+      "plugin_named_already_exists": "إضافة باسم {{folder_name}} موجودة بالفعل",
+      "file_plugin_json_missing_one_more": "ملف plugin.json يفتقد واحدًا أو أكثر من المفاتيح التالية: {{value}} ({{value2}})",
+      "file_plugin_json_not_valid_line": "ملف plugin.json في {{file}} غير صالح ({{msg}}: السطر {{lineno}} العمود {{colno}} (المحرف {{pos}})) ({{value}})",
+      "not_valid_plugin_plugin_json_file": "{{file}} ليس إضافة صالحة (ملف plugin.json مفقود) ({{value}})",
+      "invalid_plugin_name_can_only_contain": "اسم الإضافة غير صالح لـ {{temp_folder_name}}. (يمكن أن يحتوي فقط على أرقام وأحرف وشرطات سفلية وشرطات (بحد أدنى 4 أحرف وبحد أقصى 64))",
+      "check_logs_more_details": "{{message}}، تحقق من السجلات لمزيد من التفاصيل",
+      "please_upload_new_plugins_reload_plugins": "يرجى تحميل إضافات جديدة لإعادة تحميل الإضافات",
+      "couldn_t_update_plugin_2": "تعذّر تحديث الإضافة {{plugin}}: {{e}}",
+      "couldn_t_update_plugin": "تعذّر تحديث الإضافة {{plugin}}: {{message}}",
+      "couldn_t_delete_plugin": "تعذّر حذف الإضافة {{plugin}}: {{message}}",
+      "deleted_plugin_successfully": "تم حذف الإضافة {{plugin}} بنجاح",
+      "plugin_enabled": "تم تفعيل الإضافة {{plugin}} بنجاح.",
+      "plugin_disabled": "تم تعطيل الإضافة {{plugin}} بنجاح.",
+      "missing_id_version_parameter_plugins_catalog": "معامل id أو version مفقود في /plugins/catalog/update.",
+      "missing_id_parameter_plugins_catalog_install": "معامل id مفقود في /plugins/catalog/install.",
+      "missing_csrf_token_parameter_plugins": "معامل csrf_token مفقود في /plugins.",
+      "missing_plugin_enabled_parameter_plugins_enable": "معامل plugin أو enabled مفقود في /plugins/enable.",
+      "missing_plugins_parameter_plugins_delete": "معامل plugins مفقود في /plugins/delete.",
+      "plugin_not_found": "الإضافة بالمعرف {{plugin}} غير موجودة",
+      "couldn_t_delete_plugin_in_database": "تعذّر حذف الإضافة {{plugin}} في قاعدة البيانات: {{message}}",
+      "already_installed": "إضافة بالمعرف {{plugin_id}} مثبتة بالفعل",
+      "installed_successfully": "تم تثبيت الإضافة {{plugin_id}} بنجاح",
+      "catalogue_entry_changed": "تغيّر إدخال الكتالوج الخاص بـ {{plugin_id}} منذ تأكيد التحديث؛ راجع التحديث مرة أخرى",
+      "catalogue_entry_predates_updates": "إدخال الكتالوج المخزّن مؤقتًا لـ {{plugin_id}} أقدم من التحديثات؛ انتظر التحديث التالي",
+      "not_installed_install_from_catalogue": "الإضافة {{plugin_id}} غير مثبتة؛ ثبّتها من الكتالوج بدلاً من ذلك",
+      "managed_outside_catalogue": "الإضافة {{plugin_id}} تُدار خارج الكتالوج ولا يمكن تحديثها منه",
+      "managed_outside_catalogue_core": "الإضافة {{plugin_id}} إضافة أساسية تُدار خارج الكتالوج ولا يمكن تحديثها منه",
+      "managed_outside_catalogue_external": "الإضافة {{plugin_id}} إضافة خارجية تُدار خارج الكتالوج ولا يمكن تحديثها منه",
+      "managed_outside_catalogue_pro": "الإضافة {{plugin_id}} إضافة PRO تُدار خارج الكتالوج ولا يمكن تحديثها منه",
+      "managed_outside_catalogue_ui": "الإضافة {{plugin_id}} إضافة واجهة مستخدم تُدار خارج الكتالوج ولا يمكن تحديثها منه",
+      "already_at_version": "الإضافة {{plugin_id}} في الإصدار {{version}} بالفعل",
+      "updated_to_version": "تم تحديث الإضافة {{plugin_id}} إلى الإصدار {{version}}"
+    },
     "multivalue": {
       "more_value": "قيمة أخرى",
       "more_values": "قيم أخرى",
@@ -1259,7 +1575,25 @@
       "stale": "تعذّر تحديث الكتالوج مؤخرًا، لذا يظل التثبيت معطلاً حتى يصبح محدثًا مرة أخرى.",
       "trust_notice": "تُقرأ عناصر المجتمع من المستودعات التي تنشرها منظمة BunkerWeb على GitHub، عبر TLS، ويُتحقق مما تم تثبيته مقابل ما تم إدراجه — لكن لا شيء هنا موقّع تشفيريًا. الإضافة المثبتة تُشغّل شيفرة بكامل صلاحيات BunkerWeb.",
       "incompatible_declared": "هذا الإصدار يدعم BunkerWeb {{supported}}؛ الإصدار الحالي هو {{current}}",
-      "release": "قراءة من الإصدار {{tag}}"
+      "version_unknown": "تعذّرت قراءة إصدار BunkerWeb قيد التشغيل ({{current}})، لذا لا يمكن التحقق من توافق هذا الإصدار",
+      "release": "قراءة من الإصدار {{tag}}",
+      "state_installed": "مثبّت (الإصدار {{version}})",
+      "state_update": "يتوفر تحديث: الإصدار {{installed}} مثبّت، والإصدار {{version}} مُدرج في الكتالوج",
+      "state_managed": "مثبتة خارج الكتالوج؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه",
+      "state_managed_core": "مثبتة خارج الكتالوج كإضافة أساسية؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه",
+      "state_managed_external": "مثبتة خارج الكتالوج كإضافة خارجية؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه",
+      "state_managed_pro": "مثبتة خارج الكتالوج كإضافة PRO؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه",
+      "state_managed_ui": "مثبتة خارج الكتالوج كإضافة واجهة مستخدم؛ حدّثها أو أزلها من المكان الذي ثُبِّتت منه",
+      "update": "تحديث",
+      "remove": "إزالة",
+      "update_title": "تحديث إضافة مجتمعية",
+      "update_confirm": "سيستبدل هذا الإضافة المثبّتة {{name}} ‏({{id}}، الإصدار {{installed}}) بالإصدار {{version}} من الكتالوج. تُستبدل حتى لو كانت قد رُفعت يدويًا بدلًا من تثبيتها من الكتالوج.",
+      "update_removed_settings": "لم يعد الإصدار {{version}} يُعرّف هذه الإعدادات. تُحذف مع كل قيمة مضبوطة لها في الإعدادات العامة والخدمات والقوالب:",
+      "update_no_removed_settings": "لا يُحذف أي إعداد بهذا التحديث.",
+      "update_preview_unknown": "لا يمكن حاليًا سرد الإعدادات التي سيحذفها هذا التحديث، لذا التحديث معطّل حتى التحديث التالي للكتالوج.",
+      "flash": {
+        "version_unreadable": "تعذّرت قراءة إصدار BunkerWeb ‏({{current}})، لذا لا يمكن التحقق من توافق {{id}}؛ لم يُثبَّت شيء"
+      }
     }
   },
   "pro": {
@@ -1302,13 +1636,33 @@
       "draft_services_count": "{{draft_services}} خدمة (خدمات) مسودة",
       "expired": "منتهي الصلاحية",
       "free_version": "الإصدار المجاني",
+      "invalid": "مفتاح غير صالح",
+      "invalid_key": "رفض خادم التراخيص مفتاح الترخيص المخزَّن. تحقق منه، أو أزله من الإعدادات العامة ← Pro.",
       "overlapped": "متجاوز",
+      "pending_key": "لم يُتحقق من مفتاح الترخيص بعد. يتحقق منه المجدول (Scheduler) بعد حفظه بوقت قصير.",
       "pro_version": "إصدار PRO",
       "services_count": "{{online_services}} خدمة (خدمات) متصلة / {{pro_services}} خدمة (خدمات) PRO",
       "suspended": "معلق",
       "title": "الحالة"
     },
-    "title": "ترخيص Pro"
+    "title": "ترخيص Pro",
+    "flash": {
+      "web_ui_will_reload_pro_plugins": "ستعيد واجهة الويب تحميل إضافات PRO الخاصة بها قريبًا.",
+      "forced_update_pro_plugins_has_scheduled": "تمت جدولة تحديث إجباري لإضافات PRO.",
+      "new_check_pro_plugins_has_scheduled": "تمت جدولة فحص جديد لإضافات PRO.",
+      "checking_license_key": "جارٍ التحقق من مفتاح الترخيص.",
+      "scheduler_will_attempt_apply_changes_download": "سيحاول المُجدوِل تطبيق التغييرات وتنزيل إضافات PRO.",
+      "license_key_same_current_one": "مفتاح الترخيص مطابق للمفتاح الحالي.",
+      "invalid_license_key": "مفتاح الترخيص غير صالح",
+      "missing_license_key_parameter_pro_key": "معامل مفتاح الترخيص مفقود في /pro/key.",
+      "license_key_updated_successfully": "تم تحديث مفتاح ترخيص PRO بنجاح.",
+      "license_key_not_updated_refused": "لم يتم تحديث مفتاح ترخيص PRO: تم رفض القيمة."
+    },
+    "trial": {
+      "title": "تجربة مجانية",
+      "description": "جرّب <span class=\"text-primary\">BunkerWeb PRO</span> مجانًا لمدة <strong>30 يومًا</strong>.",
+      "cta": "ابدأ التجربة المجانية"
+    }
   },
   "profile": {
     "2fa": {
@@ -1370,6 +1724,50 @@
       "profile": "الملف الشخصي",
       "security": "الأمان",
       "sessions": "الجلسات"
+    },
+    "flash": {
+      "passkey_has_successfully_deleted": "تم حذف مفتاح المرور بنجاح.",
+      "couldn_t_delete_passkey": "تعذّر حذف مفتاح المرور: {{message}}",
+      "current_password_incorrect": "كلمة المرور الحالية غير صحيحة.",
+      "passkey_has_successfully_renamed": "تم إعادة تسمية مفتاح المرور بنجاح.",
+      "couldn_t_rename_passkey": "تعذّر إعادة تسمية مفتاح المرور: {{message}}",
+      "passkey_name_cannot_empty": "لا يمكن أن يكون اسم مفتاح المرور فارغًا.",
+      "passkey_has_successfully_registered": "تم تسجيل مفتاح المرور بنجاح.",
+      "other_sessions_have_successfully_wiped": "تم إنهاء الجلسات الأخرى بنجاح.",
+      "couldn_t_wipe_other_sessions": "تعذّر إنهاء الجلسات الأخرى: {{message}}",
+      "couldn_t_revoke_other_sessions": "تعذّر إبطال الجلسات الأخرى: {{err}}",
+      "password_changed_but_other_sessions_could": "تم تغيير كلمة المرور الخاصة بك، ولكن تعذّر إبطال جلساتك الأخرى. استخدم \"إنهاء الجلسات الأخرى\" أدناه وتحقق من قائمة الجلسات النشطة.",
+      "profile_has_successfully_updated": "تم تحديث الملف الشخصي بنجاح.",
+      "couldn_t_update_user": "تعذّر تحديث المستخدم {{value}}: {{message}}",
+      "no_fields_updated": "لم يتم تحديث أي حقول.",
+      "theme_invalid": "السمة غير صالحة.",
+      "new_password_same_current_one": "كلمة المرور الجديدة مطابقة لكلمة المرور الحالية.",
+      "new_password_too_long_must_not": "كلمة المرور الجديدة طويلة جدًا. يجب ألا تتجاوز {{MAX_PASSWORD_BYTES}} بايت (الحد الأقصى لـ bcrypt)؛ الأحرف المُنقّطة أو الرموز التعبيرية تُحسب كعدة بايتات لكل منها.",
+      "new_password_not_strong_enough_must": "كلمة المرور الجديدة ليست قوية بما يكفي. يجب أن تحتوي على 8 أحرف على الأقل، بما في ذلك حرف كبير واحد على الأقل، وحرف صغير واحد، ورقم واحد، وحرف خاص واحد (#@?!$%^&*-).",
+      "passwords_do_not_match_confirm_password": "كلمتا المرور غير متطابقتين مع كلمة المرور المؤكدة.",
+      "username_email_are_same_current_ones": "اسم المستخدم والبريد الإلكتروني مطابقان للقيم الحالية.",
+      "username_too_long_must_less_than": "اسم المستخدم طويل جدًا. يجب أن يكون أقل من 256 حرفًا.",
+      "email_too_long_must_less_than": "البريد الإلكتروني طويل جدًا. يجب أن يكون أقل من 256 حرفًا.",
+      "two_factor_authentication_has_successfully_enabled": "تم تفعيل المصادقة الثنائية بنجاح.",
+      "couldn_t_enable_two_factor_authentication": "تعذّر تفعيل المصادقة الثنائية: {{message}}",
+      "totp_token_invalid": "رمز totp غير صالح.",
+      "two_factor_enrolment_expired_reload_page": "انتهت صلاحية تسجيل المصادقة الثنائية. أعد تحميل الصفحة وامسح رمز QR الجديد.",
+      "two_factor_authentication_already_enabled": "المصادقة الثنائية مفعّلة بالفعل.",
+      "two_factor_authentication_has_successfully_disabled": "تم تعطيل المصادقة الثنائية بنجاح.",
+      "couldn_t_disable_two_factor_authentication": "تعذّر تعطيل المصادقة الثنائية: {{message}}",
+      "two_factor_authentication_not_enabled": "المصادقة الثنائية غير مفعّلة.",
+      "recovery_codes_have_successfully_refreshed_old": "تم تحديث رموز الاسترداد بنجاح. لم تعد الرموز القديمة صالحة.",
+      "couldn_t_refresh_recovery_codes": "تعذّر تحديث رموز الاسترداد: {{message}}",
+      "missing_parameters_profile_webauthn_delete": "معاملات مفقودة في /profile/webauthn/delete.",
+      "missing_parameters_profile_webauthn_rename": "معاملات مفقودة في /profile/webauthn/rename.",
+      "missing_current_password_parameter_profile_wipe": "معامل كلمة المرور الحالية مفقود في /profile/wipe-other-sessions.",
+      "missing_new_password_confirm_parameter_profile": "معامل تأكيد كلمة المرور الجديدة مفقود في /profile/edit.",
+      "missing_current_password_parameter_profile_edit": "معامل كلمة المرور الحالية مفقود في /profile/edit.",
+      "missing_email_parameter_profile_edit": "معامل البريد الإلكتروني مفقود في /profile/edit.",
+      "missing_totp_token_parameter_profile_totp": "معامل رمز totp مفقود في /profile/totp-enable.",
+      "missing_current_password_parameter_profile_totp_3": "معامل كلمة المرور الحالية مفقود في /profile/totp-enable.",
+      "missing_current_password_parameter_profile_totp_2": "معامل كلمة المرور الحالية مفقود في /profile/totp-disable.",
+      "missing_current_password_parameter_profile_totp": "معامل كلمة المرور الحالية مفقود في /profile/totp-refresh."
     }
   },
   "range_picker": {
@@ -1446,10 +1844,10 @@
       "unique_offenders": "أبرز المهاجمين"
     },
     "crowdsec": {
-      "source_lapi": "Local API decision",
-      "source_appsec": "AppSec inspection",
-      "source_failure_policy": "AppSec failure policy",
-      "technical_details": "Technical details"
+      "source_lapi": "قرار واجهة API المحلية",
+      "source_appsec": "فحص AppSec",
+      "source_failure_policy": "سياسة الفشل في AppSec",
+      "technical_details": "التفاصيل التقنية"
     }
   },
   "scope": {
@@ -1474,6 +1872,7 @@
     "data": "البيانات",
     "date": "التاريخ",
     "empty": "لا توجد لوحات بحث متاحة",
+    "search_title": "بحث: {name}",
     "end_date": "تاريخ الانتهاء",
     "first_seen": "شوهد لأول مرة",
     "future_30d": "أكثر من 30 يومًا",
@@ -1524,6 +1923,80 @@
   },
   "services": {
     "draft": "خدمات مسودة",
+    "flash": {
+      "resource_attach_failed": "تعذّر الإرفاق: {{error}}",
+      "resource_attach_refused": "لا يمكن الإرفاق: {{error}}",
+      "resource_attached": "أُرفق المورد بالخدمة {{service}}.",
+      "resource_detach_failed": "تعذّر الفصل: {{error}}",
+      "resource_detach_refused": "لا يمكن الفصل: {{error}}",
+      "resource_detached": "فُصل المورد عن الخدمة {{service}}.",
+      "resource_unknown_family": "نوع مورد غير معروف.",
+      "server_name_missing": "لم تُنشأ الخدمة لأن اسم الخادم لم يُقدَّم.",
+      "failed_import_service": "فشل استيراد الخدمة: {{names}}",
+      "failed_import_services": "فشل استيراد الخدمات: {{names}}",
+      "skipped_existing_service": "تم تخطي الخدمة الموجودة: {{names}}",
+      "skipped_existing_services": "تم تخطي الخدمات الموجودة: {{names}}",
+      "imported_service": "تم استيراد الخدمة: {{names}}",
+      "imported_services": "تم استيراد الخدمات: {{names}}",
+      "no_services_custom_configurations_found_import": "لم يتم العثور على خدمات أو تكوينات مخصصة في ملف الاستيراد.",
+      "invalid_file_encoding_please_upload_utf": "ترميز الملف غير صالح. يرجى تحميل ملف بترميز UTF-8.",
+      "uploaded_file_not_valid_zip_archive": "الملف الذي تم تحميله ليس أرشيف zip صالحًا.",
+      "invalid_encoding_configs_export_json_inside": "ترميز غير صالح لملف configs_export.json داخل الأرشيف.",
+      "invalid_encoding_services_export_env_inside": "ترميز غير صالح لملف services_export.env داخل الأرشيف.",
+      "refusing_extract_archive_uncompressed_size_exceeds": "رفض استخراج الأرشيف: الحجم غير المضغوط يتجاوز حد الأمان.",
+      "uploaded_archive_must_contain_services_export": "يجب أن يحتوي الأرشيف الذي تم تحميله على services_export.env و/أو configs_export.json.",
+      "no_services_file_uploaded": "لم يتم تحميل ملف خدمات.",
+      "could_not_fetch_custom_configurations_api": "تعذّر جلب التكوينات المخصصة من API.",
+      "no_services_export": "لا توجد خدمات للتصدير.",
+      "no_services_selected": "لم يتم تحديد أي خدمات.",
+      "could_not_fetch_custom_configs_api": "تعذّر جلب التكوينات المخصصة من API.",
+      "service_not_found": "الخدمة غير موجودة",
+      "could_not_fetch_service_api": "تعذّر جلب الخدمة من API.",
+      "template_not_found": "القالب غير موجود",
+      "could_not_fetch_templates_api": "تعذّر جلب القوالب من API.",
+      "plugin_does_not_apply_default_server": "لا تنطبق هذه الإضافة على الخادم الافتراضي",
+      "could_not_fetch_attached_upstreams": "تعذر جلب الخوادم الخلفية المرتبطة بهذه الخدمة.",
+      "could_not_fetch_attached_certificates": "تعذر جلب الشهادات المرتبطة بهذه الخدمة.",
+      "could_not_fetch_attached_redirects": "تعذر جلب عمليات إعادة التوجيه المرتبطة بهذه الخدمة.",
+      "could_not_fetch_attached_workflows": "تعذر جلب مسارات العمل المرتبطة بهذه الخدمة.",
+      "could_not_fetch_service_api_2": "تعذّر جلب الخدمة {{service}} من API.",
+      "could_not_fetch_service_cloning": "تعذّر جلب الخدمة {{clone}} للاستنساخ.",
+      "could_not_fetch_services_configuration": "تعذّر جلب تكوين الخدمات.",
+      "custom_configs_not_saved_because_rename": "لم يتم حفظ التكوينات المخصصة لأن إعادة التسمية رُفضت.",
+      "service_not_saved_every_changed_value": "لم يتم حفظ الخدمة {{service}}: تم رفض كل قيمة تم تغييرها.",
+      "service_not_edited_because_no_values": "لم يتم تعديل الخدمة {{service}} لأنه لم يتم تغيير أي قيم.",
+      "service_not_edited_because_no_values_or_configs": "لم يتم تعديل الخدمة {{service}} لأنه لم يتم تغيير أي قيم أو تكوينات مخصصة.",
+      "template_custom_config_cannot_edited_because": "لا يمكن تحرير التكوين المخصص للقالب {{key}} لأنه تم إنشاؤه عبر طريقة {{value}}.",
+      "service_already_exists": "الخدمة {{service}} موجودة بالفعل.",
+      "service_deleted": "تم حذف الخدمة: {{services}}",
+      "services_deleted": "تم حذف الخدمات: {{services}}",
+      "failed_delete_drafted_autoconf_service": "فشل حذف خدمة autoconf المسودة {{service_id}}: {{message}}",
+      "all_selected_services_could_not_found_2": "جميع الخدمات المحددة غير موجودة أو ليست خدمات UI/API.",
+      "service_will_not_deleted": "الخدمة {{non_deletable_service}} ليست خدمة UI/API ولن يتم حذفها.",
+      "service_will_not_deleted_reserved": "الخدمة {{non_deletable_service}} هي الخادم الافتراضي المحجوز الذي يرد على الطلبات التي لا تطابق أي خدمة، ولن يتم حذفها.",
+      "service_will_not_deleted_autoconf": "الخدمة {{non_deletable_service}} خدمة autoconf متصلة (حوّلها إلى مسودة أولًا) ولن يتم حذفها.",
+      "service_now_declared_standard": "تم الآن تعريف الخدمة {{service}} على أنها «قياسية».",
+      "service_now_declared_redirect_only": "تم الآن تعريف الخدمة {{service}} على أنها «إعادة توجيه فقط».",
+      "invalid_mode_parameter": "معامل الوضع غير صالح.",
+      "do_not_have_permission_change_service": "ليس لديك صلاحية تغيير وضع الخدمة",
+      "converted_services_online": "تم التحويل إلى خدمات «متصلة»: {{names}}",
+      "converted_services_draft": "تم التحويل إلى خدمات «مسودة»: {{names}}",
+      "all_selected_services_could_not_found": "جميع الخدمات المحددة غير موجودة أو ليست خدمات UI/API أو تم تحويلها بالفعل.",
+      "service_already_online_will_not_converted": "الخدمة {{non_convertible_service}} متصلة بالفعل ولن يتم تحويلها.",
+      "service_already_draft_will_not_converted": "الخدمة {{non_convertible_service}} مسودة بالفعل ولن يتم تحويلها.",
+      "service_not_ui_api_service_will": "الخدمة {{non_editable_service}} ليست خدمة UI/API ولن يتم تحويلها.",
+      "could_not_fetch_services_api": "تعذّر جلب الخدمات من API.",
+      "missing_services_parameter_services_delete": "معامل الخدمات مفقود في /services/delete.",
+      "missing_mode_parameter_services_mode": "معامل الوضع مفقود في /services/{{service}}/mode.",
+      "missing_convert_parameter_services_convert": "معامل convert_to مفقود في /services/convert.",
+      "missing_services_parameter_services_convert": "معامل الخدمات مفقود في /services/convert.",
+      "default_server_reserved": "{{default_server_id}} هو الخادم الافتراضي المحجوز: يستجيب للطلبات التي لا تطابق أي خدمة مُهيّأة (أسماء مضيف غير معروفة، الوصول عبر عنوان IP مباشر)، لذلك لا يمكن إنشاؤه أو إعادة تسميته أو حذفه.",
+      "configuration_created": "تم إنشاء التكوين للخدمة {{service}}.",
+      "configuration_saved": "تم حفظ التكوين للخدمة {{service}}.",
+      "configuration_created_with_refusals": "تم إنشاء التكوين للخدمة {{service}}، ولكن تم رفض {{refused_count}} من القيم.",
+      "configuration_saved_with_refusals": "تم حفظ التكوين للخدمة {{service}}، ولكن تم رفض {{refused_count}} من القيم.",
+      "default_server_type_refused": "لا يمكن ضبط SERVER_TYPE على الخدمة المحجوزة {{default_server_id}}: فهي لا تملك كتلة خادم خاصة بها لتبديلها. النصف الخاص بـ HTTP هو كتلة الخادم الافتراضي نفسها، والنصف الخاص بالتدفق هو إعداد DEFAULT_SERVER_STREAM_PORTS."
+    },
     "online": "متصل",
     "subtitle": "إدارة الخدمات المتعددة المدعومة بـ BunkerWeb: إنشاء، تعديل، تحويل إلى مسودة، أو حذفها.",
     "total": "إجمالي الخدمات",
@@ -1834,6 +2307,21 @@
       "content_entered": "الأحرف المُدخلة: {{count}}",
       "loaded_from": "تم التحميل من {{name}} · عدد الأحرف: {{count}}",
       "read_error": "خطأ في قراءة الملف"
+    },
+    "flash": {
+      "couldn_t_edit_new_service": "تعذّر تحرير الخدمة الجديدة: {{operation}}",
+      "couldn_t_create_new_service": "تعذّر إنشاء الخدمة الجديدة: {{operation}}",
+      "when_using_custom_ssl_certificate_must": "عند استخدام شهادة SSL مخصصة، يجب تعيين كل من الشهادة والمفتاح.",
+      "hostname_not_valid": "اسم المضيف غير صالح.",
+      "hostname_already_use": "اسم المضيف {{value}} قيد الاستخدام بالفعل.",
+      "admin_user_created_successfully": "تم إنشاء مستخدم المسؤول بنجاح",
+      "couldn_t_create_admin_user": "تعذّر إنشاء مستخدم المسؤول: {{message}}",
+      "admin_password_too_long_must_not": "كلمة مرور المسؤول طويلة جدًا. يجب ألا تتجاوز {{MAX_PASSWORD_BYTES}} بايت (الحد الأقصى لـ bcrypt)؛ الأحرف المُنقّطة أو الرموز التعبيرية تُحسب كعدة بايتات لكل منها.",
+      "admin_password_not_strong_enough_must": "كلمة مرور المسؤول ليست قوية بما يكفي. يجب أن تحتوي على 8 أحرف على الأقل، بما في ذلك حرف كبير واحد على الأقل، وحرف صغير واحد، ورقم واحد، وحرف خاص واحد (#@?!$%^&*-).",
+      "passwords_do_not_match": "كلمتا المرور غير متطابقتين.",
+      "admin_email_too_long_must_less": "البريد الإلكتروني للمسؤول طويل جدًا. يجب أن يكون أقل من 256 حرفًا.",
+      "admin_username_too_long_must_less": "اسم مستخدم المسؤول طويل جدًا. يجب أن يكون أقل من 256 حرفًا.",
+      "missing_either_one_following_parameters": "معامل واحد على الأقل من التالية مفقود: {{value}}."
     }
   },
   "status": {
@@ -1849,6 +2337,8 @@
     "error_loading_template": "حدث خطأ أثناء تحميل القالب.",
     "error_saving_template": "حدث خطأ أثناء حفظ القالب.",
     "failed": "فشل",
+    "failover": "التبديل التلقائي عند الفشل",
+    "inactive": "غير نشط",
     "invalid_json_payload": "حمولة JSON غير صالحة.",
     "loading": "جار التحميل...",
     "loading_bans": "جار تحميل الحظر...",
@@ -1905,7 +2395,8 @@
     "no_url_available": "لا يتوفر URL",
     "unknown": "مجهول",
     "deferred": "مؤجَّل",
-    "deferred_tooltip": "مؤجَّل — في انتظار تشغيل نسخة: {{reason}}"
+    "deferred_tooltip": "مؤجَّل — في انتظار تشغيل نسخة: {{reason}}",
+    "uploaded": "مرفوع"
   },
   "step": {
     "next": "التالي",
@@ -2009,6 +2500,7 @@
       "error_missing_endpoint": "تعذر تحديد نقطة نهاية الإرسال.",
       "heading_create": "إنشاء قالب",
       "heading_edit": "تعديل القالب {{id}}",
+      "heading_view": "عرض القالب {{id}}",
       "label_config_data": "البيانات",
       "label_config_name": "الاسم",
       "label_config_order": "الترتيب",
@@ -2035,7 +2527,8 @@
       "multiselect_placeholder": "اختر الخيارات",
       "multiselect_summary": "تم اختيار {{count}}",
       "multivalue_add": "إضافة قيمة",
-      "multivalue_helper": "قيمة واحدة لكل سطر.{{separatorNote}}",
+      "multivalue_helper": "قيمة واحدة في كل سطر.",
+      "multivalue_helper_joined": "قيمة واحدة في كل سطر. سيتم ربطها بالفاصل \"{{separator}}\".",
       "panel_overview": "نظرة عامة",
       "panel_overview_help": "تتبع المعلومات الرئيسية وانتقل بين الأقسام.",
       "placeholder_config_data": "البيانات",
@@ -2090,6 +2583,7 @@
       "raw_validation_steps_required": "يجب أن يحتوي القالب على خطوة واحدة على الأقل.",
       "readonly_db": "قاعدة البيانات حاليًا للقراءة فقط. لا يمكن تغيير القوالب.",
       "readonly_method": "تم إنشاء هذا القالب بواسطة عملية {{method}} ولا يمكن تعديله من واجهة المستخدم.",
+      "readonly_method_plugin": "أُنشئ هذا القالب بواسطة الإضافة {{plugin}} ولا يمكن تعديله من واجهة الويب.",
       "readonly_title": "للقراءة فقط",
       "readonly_user": "لديك أذونات للقراءة فقط. اتصل بالمسؤول لطلب صلاحية الكتابة.",
       "select_config_placeholder": "اختر تكوينًا",
@@ -2148,6 +2642,7 @@
       "validation_config_type_multisite": "يجب أن يكون نوع التكوين أحد الأنواع المتوافقة مع المواقع المتعددة.",
       "validation_config_type_required": "نوع التكوين مطلوب عند تحديد تكوين.",
       "validation_configs_unique": "يجب أن يكون كل اسم تكوين فريدًا.",
+      "validation_id_invalid": "لا يجوز أن يحتوي معرّف القالب إلا على أحرف وأرقام ونقاط وشرطات وشرطات سفلية، ويجب أن يبدأ بحرف أو رقم.",
       "validation_id_required": "معرف القالب مطلوب.",
       "validation_setting_key": "يجب أن يكون لكل إعداد مفتاح.",
       "validation_settings_unique": "يجب أن يكون كل مفتاح إعداد فريدًا.",
@@ -2182,7 +2677,56 @@
       "heading": "القوالب المتاحة",
       "subheading": "قوالب خدمة منسّقة تنشرها منظمة BunkerWeb.",
       "layer_warning": "القالب طبقة: إضافة واحد إلى خدمة تستخدم بالفعل قوالب يغيّر تكوينها الفعلي.",
-      "no_compat_notice": "لا يعلن هذا الكتالوج عن توافق مع BunkerWeb. يُرفض القالب عند التثبيت إذا كان يسمي إعدادًا لا يملكه BunkerWeb هذا."
+      "no_compat_notice": "لا يعلن هذا الكتالوج عن توافق مع BunkerWeb. يُرفض القالب عند التثبيت إذا كان يسمي إعدادًا لا يملكه BunkerWeb هذا.",
+      "state_installed": "مثبّت، مطابق للكتالوج",
+      "state_update": "مثبّت، إصدار الكتالوج مختلف",
+      "state_managed": "مثبّت ويديره {{owner}}: لا يغيّره الكتالوج",
+      "update_preview_unknown": "يمكن التحقق من التغييرات بعد التحديث التالي للكتالوج.",
+      "update_title": "تحديث قالب مجتمعي",
+      "update_confirm": "استبدال القالب {{id}} بإصداره من إصدار الكتالوج {{tag}}. تنطبق هذه التغييرات على القالب:",
+      "update_services": "تستخدم هذه الخدمات هذا القالب. عند التوليد التالي لإعداداتها، يأخذ كل إعداد لم تضبطه هي نفسها القيمة الجديدة:",
+      "update_no_services": "لا توجد خدمة تستخدم هذا القالب بعد.",
+      "update_failed": "تعذّر تحديث القالب.",
+      "update_not_installed": "القالب {{template}} غير مثبّت: ثبّته بدلًا من ذلك",
+      "update_managed": "القالب {{template}} يديره {{owner}}: لا يغيّره الكتالوج",
+      "update_up_to_date": "القالب {{template}} مطابق للكتالوج بالفعل",
+      "update_changed": "تغيّر القالب {{template}} أو الكتالوج منذ المعاينة. أعد تحميل الصفحة وراجع التغييرات مجددًا.",
+      "diff": {
+        "name": "الاسم: {{old}} → {{new}}",
+        "settings_added": "إعدادات أُضيفت",
+        "settings_changed": "إعدادات تغيّرت",
+        "settings_removed": "إعدادات أُزيلت",
+        "steps_added": "خطوات أُضيفت",
+        "steps_changed": "خطوات تغيّرت",
+        "steps_removed": "خطوات أُزيلت",
+        "configs_added": "تكوينات مخصصة أُضيفت",
+        "configs_changed": "تكوينات مخصصة تغيّرت",
+        "configs_removed": "تكوينات مخصصة أُزيلت"
+      }
+    },
+    "flash": {
+      "catalog_updated": "حُدِّث القالب {{template}} من الكتالوج.",
+      "export_failed": "تعذّر تصدير القالب {{template}}: {{error}}",
+      "imported": "استُورد القالب {{template}}.",
+      "replaced": "استُبدل القالب {{template}}.",
+      "template_deleted_successfully": "تم حذف القالب {{template_id}} بنجاح.",
+      "successfully_deleted_template": "القوالب المحذوفة: {{success_count}}.",
+      "no_templates_selected_deletion": "لم يتم تحديد أي قوالب للحذف.",
+      "template_updated_successfully": "تم تحديث القالب {{template_id}} بنجاح.",
+      "template_installed_catalogue": "تم تثبيت القالب {{template_id}} من الكتالوج.",
+      "template_created_successfully": "تم إنشاء القالب {{template_id}} بنجاح.",
+      "template_not_found_2": "القالب غير موجود.",
+      "template_not_found": "القالب {{clone_id}} غير موجود.",
+      "user_is_read_only": "المستخدم للقراءة فقط",
+      "error_deleting_template": "خطأ في حذف القالب {{template_id}}: {{message}}"
+    },
+    "import": {
+      "admin_only": "استيراد القوالب مقتصر على المسؤولين",
+      "failed": "تعذّر استيراد القالب.",
+      "no_file": "اختر ملفًا للاستيراد.",
+      "refused": "لم يُستورد القالب: {{reason}}",
+      "too_large": "لم يتم استيراد القالب: حجم الملف أكبر من 1 ميغابايت",
+      "unreadable": "لم يتم استيراد القالب: تعذرت قراءة الملف"
     }
   },
   "theme": {
@@ -2273,7 +2817,19 @@
       "switch_to_text_editor": "التبديل إلى محرر النصوص",
       "enroll_instance": "إصدار رمز تسجيل لـ {{hostname}}",
       "revoke_credential": "إبطال بيانات اعتماد {{hostname}}",
-      "rotate_credential": "تدوير بيانات اعتماد {{hostname}}"
+      "rotate_credential": "تدوير بيانات اعتماد {{hostname}}",
+      "attach_redirect": "ربط {{name}} بخدمة",
+      "edit_redirect": "تحرير {{name}}",
+      "delete_redirect": "حذف {{name}}",
+      "attach_upstream": "ربط {{name}} بخدمة",
+      "edit_upstream": "تحرير {{name}}",
+      "delete_upstream": "حذف {{name}}",
+      "edit_workflow_rules": "تحرير قواعد {{name}}",
+      "edit_workflow_details": "تحرير اسم ووصف {{name}}",
+      "attach_workflow": "ربط {{name}} بخدمة",
+      "clone_workflow": "نسخ {{name}}",
+      "delete_workflow": "حذف {{name}}",
+      "delete_certificate": "حذف الشهادة"
     },
     "cannot_delete_original_ban": "لا يمكن حذف إدخال الحظر الأصلي.",
     "cannot_remove_disabled": "لا يمكن الإزالة لأن إعدادًا واحدًا أو أكثر معطل.",
@@ -2292,6 +2848,7 @@
     },
     "confirm_password_match": "يجب أن تتطابق كلمة مرور التأكيد مع كلمة المرور المدخلة أعلاه.",
     "copied": "تم النسخ!",
+    "copy_failed": "فشل النسخ",
     "copy_https_only": "ميزة النسخ متاحة فقط عبر HTTPS.",
     "custom_ssl_cert_data": "بيانات شهادة SSL المخصصة (تنسيق PEM أو Base64 المشفرة).",
     "custom_ssl_cert_path": "المسار إلى ملف شهادة SSL المخصصة.",
@@ -2299,6 +2856,7 @@
     "custom_ssl_key_path": "المسار إلى ملف مفتاح SSL الخاص المخصص.",
     "different_from_template": "القيمة تختلف عن القيمة الافتراضية للقالب",
     "disabled_by_method": "معطل: مُدار عبر الطريقة '{{method}}'.",
+    "disabled_by_plugin": "معطّل: تُدار بواسطة إضافة {{plugin}}.",
     "disabled_db_readonly": "معطل: قاعدة البيانات في وضع القراءة فقط.",
     "disabled_draft": "معطل: الخدمة في وضع المسودة.",
     "disabled_readonly": "معطل: وضع القراءة فقط نشط.",
@@ -2335,6 +2893,7 @@
       "edit_template": "تحرير القالب {{template}}",
       "export_config": "تصدير التكوين المخصص {{name}}",
       "export_service": "تصدير تكوين الخدمة {{service}}",
+      "export_template": "تصدير القالب {{template}}",
       "view_config": "عرض التكوين المخصص {{name}}",
       "view_file": "عرض {{filename}}",
       "view_service": "عرض الخدمة {{service}}",
@@ -2535,6 +3094,13 @@
     "signing_in": "تسجيل الدخول إلى BunkerWeb",
     "subtitle": "أدخل الرمز من تطبيق المصادقة الخاص بك.",
     "title": "مفتاح ثنائي",
+    "flash": {
+      "ve_used_one_recovery_codes_have": "لقد استخدمت أحد رموز الاسترداد الخاصة بك. تبقى لديك {{len}}.",
+      "error_occurred_while_using_recovery_code": "حدث خطأ أثناء استخدام رمز الاسترداد.",
+      "database_read_only_recovery_code_used": "قاعدة البيانات للقراءة فقط، رمز الاسترداد الذي استخدمته يبقى صالحًا.",
+      "token_invalid": "الرمز غير صالح.",
+      "no_token_provided_totp": "لم يتم توفير رمز في /totp."
+    },
     "prompt": "يرجى إدخال رمز TOTP الخاص بك.",
     "subtitle_security_key": "أكّد هويتك باستخدام مفتاح الأمان.",
     "or_use_security_key": "أو استخدم مفتاح الأمان"
@@ -2571,6 +3137,45 @@
     "expiring_help": "أقل من 30 يومًا",
     "file_extensions": "استخدم أحد هذه امتدادات الملف: {{extensions}}.",
     "file_select": "حدد ملف PEM.",
+    "flash": {
+      "encrypted_private_key": "المفاتيح الخاصة المشفّرة غير مدعومة.",
+      "invalid_certificate_pem": "ملف الشهادة ليس شهادة PEM صالحة.",
+      "invalid_private_key_pem": "ملف المفتاح الخاص ليس مفتاحًا خاصًا PEM صالحًا.",
+      "could_not_download_certificate": "تعذّر تنزيل الشهادة: {{message}}",
+      "certificate_action_failed": "فشل إجراء الشهادة: {{message}}",
+      "certificate_deleted_successfully": "تم حذف الشهادة بنجاح",
+      "could_not_detach_certificate": "تعذّر فصل الشهادة: {{message}}",
+      "certificate_inventory_assignment_removed_successfully": "تمت إزالة تخصيص مخزون الشهادة بنجاح",
+      "certificate_service_are_required": "الشهادة والخدمة مطلوبتان",
+      "certificate_inventory_assignment_added_successfully": "تمت إضافة تخصيص مخزون الشهادة بنجاح",
+      "custom_certificate_uploaded_successfully": "تم تحميل الشهادة المخصصة بنجاح",
+      "certificate_upload_exceeds_2_mib_request": "يتجاوز تحميل الشهادة حد الطلب البالغ 2 ميبيبايت",
+      "certificate_metadata_updated_successfully": "تم تحديث بيانات الشهادة الوصفية بنجاح",
+      "could_not_fetch_services_certificate_assignments": "تعذّر جلب الخدمات لتخصيصات الشهادة: {{message}}",
+      "could_not_fetch_certificates": "تعذّر جلب الشهادات: {{message}}",
+      "invalid_certificate_part": "جزء الشهادة غير صالح",
+      "too_many_services": "لا يمكن ربط الشهادة بأكثر من 100 خدمة",
+      "too_many_sans": "لا يمكن أن تحتوي الشهادة على أكثر من 100 اسم بديل للموضوع",
+      "validity_whole_number": "يجب أن تكون مدة الصلاحية عددًا صحيحًا من الأيام",
+      "validity_range": "يجب أن تكون مدة الصلاحية بين 1 و825 يومًا",
+      "invalid_certificate_source": "مصدر الشهادة غير صالح",
+      "select_service_letsencrypt": "حدد خدمة واحدة على الأقل لإصدار Let's Encrypt",
+      "name_common_name_are_required": "الاسم والاسم الشائع (common name) مطلوبان",
+      "letsencrypt_issuance_scheduled": "تمت جدولة إصدار Let's Encrypt",
+      "selfsigned_certificate_created": "تم إنشاء شهادة موقعة ذاتيًا",
+      "could_not_schedule_letsencrypt": "تعذّرت جدولة إصدار Let's Encrypt: {{message}}",
+      "could_not_create_certificate": "تعذّر إنشاء الشهادة: {{message}}",
+      "certificate_name_are_required": "الشهادة والاسم مطلوبان",
+      "could_not_update_certificate": "تعذّر تحديث الشهادة: {{message}}",
+      "pem_certificate_private_key_required": "مطلوب شهادة PEM ومفتاح خاص",
+      "certificate_name_required": "اسم الشهادة مطلوب",
+      "could_not_upload_certificate": "تعذّر تحميل الشهادة: {{message}}",
+      "could_not_attach_certificate": "تعذّر ربط الشهادة: {{message}}",
+      "checked_certificates_due_renewal": "تم فحص {{total_due}} شهادة مستحقة للتجديد",
+      "certificate_required": "الشهادة مطلوبة",
+      "certificate_renewed_successfully": "تم تجديد الشهادة بنجاح",
+      "invalid_certificate_action": "إجراء الشهادة غير صالح"
+    },
     "file_selected": "{{name}} ({{size}} كيلوبايت)",
     "file_size_limit": "يجب ألا يتجاوز الملف 1 ميجابايت.",
     "fingerprint": "بصمة SHA-256",
@@ -2658,16 +3263,31 @@
     "import_file": "TXT/CSV",
     "import_size": "تقتصر عمليات استيراد TXT/CSV على 256 KiB.",
     "kind": "النوع",
+    "kind_label": {
+      "ip": "IP",
+      "country": "الدولة",
+      "asn": "ASN",
+      "rdns": "DNS العكسي",
+      "user_agent": "وكيل المستخدم",
+      "uri": "URI"
+    },
     "kinds": "أنواع",
     "loading_references": "جاري التحميل...",
     "max_entries": "لا يمكن لمجموعة الموارد أن تحتوي على أكثر من {{max}} إدخال.",
-    "meta_line": "{{kinds}} أنواع · {{values}} قيم · {{usages}} استخدامات",
+    "meta_kinds": "{{count}} نوع",
+    "meta_kinds_plural": "{{count}} أنواع",
+    "meta_usages": "{{count}} استخدام",
+    "meta_usages_plural": "{{count}} استخدامات",
+    "meta_values": "{{count}} قيمة",
+    "meta_values_plural": "{{count}} قيم",
     "new": "مجموعة جديدة",
     "new_alias": "اسم مستعار جديد",
     "no_entries": "لا توجد إدخالات",
     "no_entries_help": "أضف الإدخالات بشكل فردي أو استخدم المستورد المجمع أدناه.",
     "no_references": "لا توجد مراجع",
     "readonly": "قاعدة البيانات للقراءة فقط. يمكن فحص ومصدر مجموعات الموارد، ولكن لا يمكن تعديلها.",
+    "reference_count": "{{count}} مرجع",
+    "reference_count_plural": "{{count}} مراجع",
     "references_error": "تعذر تحميل المراجع",
     "save": "حفظ المجموعة",
     "search": "ابحث عن أسماء مستعارة أو أوصاف أو أنواع أو قيم...",
@@ -2676,7 +3296,28 @@
     "template_configuration": "القالب {{template}}",
     "usage": "الاستخدام",
     "value": "القيمة",
-    "values": "القيم"
+    "values": "القيم",
+    "flash": {
+      "could_not_export_resource_groups": "تعذّر تصدير مجموعات الموارد: {{message}}",
+      "could_not_delete_resource_group": "تعذّر حذف مجموعة الموارد: {{message}}",
+      "resource_group_deleted_successfully": "تم حذف مجموعة الموارد بنجاح",
+      "resource_group_required": "مجموعة الموارد مطلوبة",
+      "could_not_clone_resource_group": "تعذّر نسخ مجموعة الموارد: {{message}}",
+      "resource_group_cloned": "تم نسخ مجموعة الموارد إلى @{{alias}}",
+      "could_not_save_resource_group": "تعذّر حفظ مجموعة الموارد: {{message}}",
+      "resource_group_created_successfully": "تم إنشاء مجموعة الموارد @{{alias}} بنجاح",
+      "resource_group_updated_successfully": "تم تحديث مجموعة الموارد بنجاح",
+      "alias_invalid_chars": "يجب أن يحتوي الاسم المستعار على 1 إلى 64 حرفًا أو رقمًا أو شرطة سفلية أو شرطة",
+      "alias_reserved": "هذا الاسم المستعار محجوز بواسطة BunkerWeb",
+      "entries_not_valid_json": "إدخالات الموارد ليست بتنسيق JSON صالح",
+      "entries_not_a_list": "يجب أن تكون إدخالات الموارد قائمة",
+      "too_many_entries": "لا يمكن أن تحتوي مجموعة الموارد على أكثر من {{value}} إدخال",
+      "entry_invalid": "الإدخال {{index}} غير صالح",
+      "entry_invalid_kind": "الإدخال {{index}} يحتوي على نوع غير صالح",
+      "entry_invalid_value": "الإدخال {{index}} يحتوي على قيمة غير صالحة",
+      "entry_comment_too_long": "الإدخال {{index}} يحتوي على تعليق طويل جدًا",
+      "source_required": "مجموعة الموارد المصدر مطلوبة"
+    }
   },
   "validation": {
     "default_field_name": "هذا الحقل",
@@ -2733,7 +3374,16 @@
     "service": "الخدمة",
     "services": "تمكين الخدمة",
     "status": "تخزين المثيل",
-    "subtitle": "حالة ذاكرة التخزين المؤقت لـ Reverse-proxy، مقاييس معدل الضربة الإجمالية والتحكم في المسح الفوري."
+    "subtitle": "حالة ذاكرة التخزين المؤقت لـ Reverse-proxy، مقاييس معدل الضربة الإجمالية والتحكم في المسح الفوري.",
+    "flash": {
+      "error_purging_web_cache": "خطأ في تفريغ ذاكرة التخزين المؤقت للويب: {{message}}",
+      "web_cache_purged_instance_failed_unreachable": "تم مسح ذاكرة الويب المؤقتة. النسخ التي مُسحت: {{value}}، الفاشلة: {{value2}}، المتعذر الوصول إليها والمتخطاة: {{value3}} (لم يُضف شيء إلى قائمة الانتظار).",
+      "url_required_purge_by_url": "مطلوب رابط URL للتفريغ حسب الرابط",
+      "error_fetching_web_cache_metrics": "خطأ في جلب مقاييس ذاكرة التخزين المؤقت للويب: {{message}}",
+      "error_fetching_web_cache_status": "خطأ في جلب حالة ذاكرة التخزين المؤقت للويب: {{message}}",
+      "purged_for_url": "تم تفريغ ذاكرة التخزين المؤقت للويب لـ {{url}}",
+      "purged_all_entries": "تم تفريغ ذاكرة التخزين المؤقت للويب (جميع الإدخالات)"
+    }
   },
   "compose": {
     "always_on": "دائمًا",
@@ -2780,6 +3430,10 @@
     "edit_shared": "إعادة التوجيه هذه مرتبطة بـ {{count}} من الخدمات: {{services}}. سيؤدي الحفظ إلى تغييرها جميعًا.",
     "empty_text": "إعادة التوجيه هي قاعدة مسماة تقوم بإرفاقها بخدمة واحدة أو أكثر. تظل إعدادات REDIRECT_* المضمنة قيد التشغيل جنبًا إلى جنب معها.",
     "empty_title": "لا توجد عمليات إعادة توجيه حتى الآن",
+    "err": {
+      "invalid_from_path": "المسار المصدر غير صالح: لا يمكن أن يحتوي على مسافات أو فواصل منقوطة أو أقواس معقوفة.",
+      "invalid_to_url": "يجب أن يكون الهدف رابط http:// أو https:// كاملًا."
+    },
     "from_path": "إعادة التوجيه من",
     "from_path_help": "مسار المصدر في الخدمات المرتبطة، على سبيل المثال /old.",
     "new": "إعادة توجيه جديدة",
@@ -2790,7 +3444,28 @@
     "services_help": "استخدم Ctrl أو Command لتحديد خدمات متعددة. يمكن إضافة إعادة التوجيه لاحقًا.",
     "status_code": "رمز الحالة",
     "to_url": "إعادة التوجيه إلى",
-    "truncated": "يتم عرض أول 500 إعادة توجيه فقط. ضيق القائمة باستخدام API للحصول على النتيجة الكاملة."
+    "truncated": "يتم عرض أول 500 إعادة توجيه فقط. ضيق القائمة باستخدام API للحصول على النتيجة الكاملة.",
+    "flash": {
+      "could_not_detach_redirect": "تعذّر فصل إعادة التوجيه: {{message}}",
+      "redirect_detached_successfully": "تم فصل إعادة التوجيه بنجاح",
+      "redirect_service_are_required": "إعادة التوجيه والخدمة مطلوبتان",
+      "could_not_attach_redirect": "تعذّر ربط إعادة التوجيه: {{message}}",
+      "redirect_attached_service": "تم إرفاق إعادة التوجيه. الخدمات: {{len}}",
+      "could_not_delete_redirect": "تعذّر حذف إعادة التوجيه: {{message}}",
+      "redirect_deleted_successfully": "تم حذف إعادة التوجيه بنجاح",
+      "redirect_required": "إعادة التوجيه مطلوبة",
+      "redirect_updated_successfully": "تم تحديث إعادة التوجيه بنجاح",
+      "redirect_created_successfully": "تم إنشاء إعادة التوجيه {{value}} بنجاح",
+      "could_not_fetch_services_redirect_assignments": "تعذّر جلب الخدمات لتخصيصات إعادة التوجيه: {{message}}",
+      "could_not_fetch_redirects": "تعذّر جلب عمليات إعادة التوجيه: {{message}}",
+      "could_not_create": "تعذر إنشاء إعادة التوجيه: {{message}}",
+      "could_not_update": "تعذر تحديث إعادة التوجيه: {{message}}",
+      "too_many_services": "لا يمكن ربط إعادة توجيه بأكثر من {{value}} خدمة",
+      "name_required": "اسم إعادة التوجيه مطلوب",
+      "target_required": "هدف إعادة التوجيه مطلوب",
+      "status_code_must_be_one_of": "يجب أن يكون رمز الحالة أحد {{value}}",
+      "at_least_one_service_required": "مطلوب خدمة واحدة على الأقل"
+    }
   },
   "upstreams": {
     "add_server": "أضف الخادم",
@@ -2842,7 +3517,33 @@
     "servers": "الخوادم",
     "services_help": "استخدم Ctrl أو Command لتحديد خدمات متعددة. يمكن توصيل الموجه لاحقًا.",
     "services_hidden": "{{count}} من الخدمات مخفية: لا يمكن ربط مجموعة {{protocol}} إلا بخدمة مطابقة.",
-    "truncated": "تُعرض أول 500 مجموعة خوادم خلفية فقط. ضيّق القائمة عبر API للحصول على النتيجة الكاملة."
+    "truncated": "تُعرض أول 500 مجموعة خوادم خلفية فقط. ضيّق القائمة عبر API للحصول على النتيجة الكاملة.",
+    "flash": {
+      "could_not_detach_upstream": "تعذّر فصل الواجهة الخلفية: {{message}}",
+      "upstream_detached_successfully": "تم فصل الواجهة الخلفية بنجاح",
+      "upstream_service_are_required": "الواجهة الخلفية والخدمة مطلوبتان",
+      "could_not_attach_upstream": "تعذّر ربط الواجهة الخلفية: {{message}}",
+      "upstream_attached_service": "تم إرفاق الـ upstream. الخدمات: {{len}}",
+      "could_not_delete_upstream": "تعذّر حذف الواجهة الخلفية: {{message}}",
+      "upstream_deleted_successfully": "تم حذف الواجهة الخلفية بنجاح",
+      "upstream_required": "الواجهة الخلفية مطلوبة",
+      "could_not_update_upstream": "تعذّر تحديث الواجهة الخلفية: {{message}}",
+      "upstream_updated_successfully": "تم تحديث الواجهة الخلفية بنجاح",
+      "could_not_create_upstream": "تعذّر إنشاء الواجهة الخلفية: {{message}}",
+      "upstream_created_successfully": "تم إنشاء الواجهة الخلفية {{value}} بنجاح",
+      "could_not_fetch_services_upstream_assignments": "تعذّر جلب الخدمات لتخصيصات الواجهة الخلفية: {{message}}",
+      "could_not_fetch_upstreams": "تعذّر جلب الواجهات الخلفية: {{message}}",
+      "weight_max_fails_whole_numbers": "يجب أن يكون وزن {{host}} وأقصى عدد من الفشل أرقامًا صحيحة",
+      "at_least_one_server_required": "مطلوب خادم واحد على الأقل",
+      "too_many_servers": "لا يمكن أن تحتوي الواجهة الخلفية على أكثر من {{value}} خادم",
+      "too_many_services": "لا يمكن ربط واجهة خلفية بأكثر من {{value}} خدمة",
+      "match_path_must_start_with_slash": "يجب أن يبدأ مسار الوكيل العكسي بـ /",
+      "name_required": "اسم الواجهة الخلفية مطلوب",
+      "protocol_must_be_one_of": "يجب أن يكون البروتوكول أحد {{value}}",
+      "method_must_be_one_of": "يجب أن تكون الطريقة إحدى {{value}}",
+      "keepalive_must_be_positive_whole_number": "يجب أن يكون عدد keepalive رقمًا صحيحًا موجبًا",
+      "at_least_one_service_required": "مطلوب خدمة واحدة على الأقل"
+    }
   },
   "workflows": {
     "act_block": "حظر",
@@ -2889,7 +3590,13 @@
       "changePosition": "القاعدة {{n}} من {{total}}، تغيير الموضع",
       "newValue": "قيمة جديدة",
       "positionMove": "الموضع {{n}} من {{total}} — انقر للنقل",
-      "crowdsecField": "معطى CrowdSec"
+      "crowdsecField": "معطى CrowdSec",
+      "collapseRule": "طي القاعدة {{n}}",
+      "expandRule": "توسيع القاعدة {{n}}",
+      "moveRuleUp": "نقل القاعدة {{n}} لأعلى",
+      "moveRuleDown": "نقل القاعدة {{n}} لأسفل",
+      "moreActionsForRule": "إجراءات إضافية للقاعدة {{n}}",
+      "ruleCard": "القاعدة {{n}} من {{total}} — {{name}}"
     },
     "attach": "إرفاق بالخدمات",
     "attach_help": "يتم تطبيق القواعد فقط على الخدمات التي تم إرفاق سير العمل بها.",
@@ -2934,6 +3641,7 @@
     "entry_sub": "تعمل مسارات العمل بترتيب الإرفاق، وتعمل القواعد داخل هذا المسار من أعلى إلى أسفل.",
     "entry_title": "كل طلب إلى خدمة مرفقة",
     "err": {
+      "load": "تعذّرت قراءة القواعد المخزَّنة. الحفظ معطّل حتى لا تُستبدل؛ أعد تحميل الصفحة.",
       "save": "تعذر الحفظ",
       "saveUnreachable": "تعذر الوصول إلى نقطة نهاية الحفظ",
       "validate": "تعذر التحقق",
@@ -2996,7 +3704,9 @@
     },
     "rules": "القواعد",
     "say": {
-      "actionChanged": "تغير الإجراء إلى {{type}}. وما زال الإجراء الوحيد وما زال ينهي التقييم.",
+      "actionChangedBlock": "تم تغيير الإجراء إلى حظر. لا يزال الإجراء الوحيد، وما زال يوقف التقييم.",
+      "actionChangedChallenge": "تم تغيير الإجراء إلى اختبار تحقق. لا يزال الإجراء الوحيد، وما زال يوقف التقييم.",
+      "actionChangedRedirect": "تم تغيير الإجراء إلى إعادة توجيه. لا يزال الإجراء الوحيد، وما زال يوقف التقييم.",
       "added": "أُضيفت القاعدة في الموضع {{n}}، وهو الأخير، لذلك تُفحص كل القواعد أعلاها أولًا.",
       "deleted": "حُذفت القاعدة. تبقت {{count}} قاعدة.",
       "duplicated": "أُدرجت النسخة في الموضع {{n}}. لا يمكن أن تتطابق ما دامت القاعدة الأصلية أعلاها مُمكّنة.",
@@ -3005,21 +3715,19 @@
       "inspecting": "تعديل القاعدة {{n}} من {{total}} — {{name}}.",
       "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "أُزيلت القيمة الأخيرة؛ لا يمكن حفظ هذا الشرط حتى يحتوي على قيمة.",
-      "moved": "نُقلت {{name}} إلى الموضع {{to}} من {{total}}{{how}}. وهي تعمل الآن {{where}}.",
+      "moved": "نُقلت {{name}} إلى الموضع {{to}} من {{total}}.",
+      "movedDrag": "سُحبت {{name}} إلى الموضع {{to}} من {{total}}.",
+      "movedKeyboard": "نُقلت {{name}} باستخدام لوحة المفاتيح إلى الموضع {{to}} من {{total}}.",
       "predicateCap": "تحتوي هذه القاعدة بالفعل على الحد الأقصى، وهو {{max}} شرطًا.",
-      "ruleAbove": "القاعدة أعلاه",
       "ruleDisabled": "عُطّلت {{name}}؛ يتم تجاوزها بالكامل وترى القواعد أسفلها هذه الطلبات الآن.",
       "ruleEnabled": "مُكّنت {{name}}؛ يجري تقييمها مجددًا في الموضع {{n}}.",
-      "runsAfter": "بعد {{name}}",
-      "runsFirst": "أولًا",
-      "runsLast": "أخيرًا",
+      "runsAfter": "تعمل الآن بعد {{name}}.",
+      "runsAfterAbove": "تعمل الآن بعد القاعدة أعلاه.",
+      "runsFirst": "تعمل الآن أولًا.",
+      "runsLast": "تعمل الآن أخيرًا.",
       "saved": "حُفظت القواعد ودُفعت إلى الخدمات المرفقة.",
       "theRule": "القاعدة",
-      "valuesDropped": "تغير الشرط إلى {{type}}؛ تعذر نقل القيم البالغ عددها {{count}}.",
-      "via": {
-        "drag": "بالسحب",
-        "keyboard": "بلوحة المفاتيح"
-      },
+      "valuesDropped": "تغيّر الشرط. القيم التي تعذر نقلها: {{count}}.",
       "viewCanvas": "عرض اللوحة. تُنفذ القواعد من اليسار إلى اليمين؛ ويُعتمد أول تطابق.",
       "viewList": "عرض القائمة. تُنفذ القواعد من الأعلى إلى الأسفل؛ ويُعتمد أول تطابق."
     },
@@ -3054,7 +3762,10 @@
       "other_unreached": "لم يتم الوصول إليه",
       "other_workflows": "مسارات العمل الأخرى في هذه الخدمة",
       "out_draft": "هذه الخدمة مسودة؛ لم يُجمّع لها سير عمل بعد.",
-      "out_match": "تطابق {{workflow}} · {{rule}} ونفّذ {{action}} على الطلب.",
+      "out_match": "تطابقت {{workflow}} · {{rule}}.",
+      "out_match_block": "تطابقت {{workflow}} · {{rule}} وتم حظر الطلب.",
+      "out_match_redirect": "تطابقت {{workflow}} · {{rule}} وتمت إعادة توجيه الطلب.",
+      "out_match_challenge": "تطابقت {{workflow}} · {{rule}} وتم تحدي الطلب.",
       "out_no_match": "لم تتطابق أي قاعدة. يتابع الطلب إلى بقية حزمة الأمان.",
       "out_not_attached": "سير العمل هذا غير مرفق بأي خدمة، لذلك لا توجد سلسلة قواعد لتقييمها.",
       "out_whitelisted": "في القائمة البيضاء؛ يتم تجاوز سير العمل كله ولا تُقيّم أي قاعدة.",
@@ -3089,7 +3800,7 @@
       "any": "أي من",
       "anyMeta": "{{count}} شرطًا — يجب أن يكون واحد منها على الأقل صحيحًا",
       "empty": "مجموعة فارغة؛ أضف شرطًا، فلا يمكن حفظها هكذا.",
-      "noGroupHolds": "لا تحتوي أي مجموعة على إدخالات من نوع {{kind}}",
+      "noGroupHolds": "لا تحتوي أي مجموعة موارد على إدخالات من هذا النوع.",
       "noneMeta": "يتطابق عندما لا يكون أي منها صحيحًا",
       "not": "لا شيء من",
       "or": "أو",
@@ -3144,6 +3855,29 @@
       "captcha": "كابتشا",
       "lapi": "API محلي"
     },
+    "flash": {
+      "could_not_detach_workflow": "تعذّر فصل سير العمل: {{message}}",
+      "workflow_detached_successfully": "تم فصل سير العمل بنجاح",
+      "workflow_service_are_required": "سير العمل والخدمة مطلوبان",
+      "could_not_attach_workflow": "تعذّر ربط سير العمل: {{message}}",
+      "workflow_services_updated_attached": "تم تحديث خدمات سير العمل ({{len}} مرفقة)",
+      "could_not_delete_workflow": "تعذّر حذف سير العمل: {{message}}",
+      "workflow_deleted_successfully": "تم حذف سير العمل بنجاح",
+      "workflow_required": "سير العمل مطلوب",
+      "could_not_clone_workflow": "تعذّر نسخ سير العمل: {{message}}",
+      "workflow_cloned": "تم نسخ سير العمل باسم {{name}}",
+      "workflow_new_name_are_required": "سير العمل والاسم الجديد مطلوبان",
+      "could_not_update_workflow": "تعذّر تحديث سير العمل: {{message}}",
+      "workflow_updated_successfully": "تم تحديث سير العمل بنجاح",
+      "could_not_create_workflow": "تعذّر إنشاء سير العمل: {{message}}",
+      "workflow_created_successfully": "تم إنشاء سير العمل {{value}} بنجاح",
+      "could_not_fetch_workflow": "تعذّر جلب سير العمل: {{message}}",
+      "could_not_fetch_services_workflow_assignments": "تعذّر جلب الخدمات لتخصيصات سير العمل: {{message}}",
+      "could_not_fetch_workflows": "تعذّر جلب سير العمل: {{message}}",
+      "too_many_services": "لا يمكن ربط سير عمل بأكثر من {{value}} خدمة",
+      "name_required": "اسم سير العمل مطلوب",
+      "service_list_not_read_reopen_page": "تعذّرت قراءة قائمة الخدمات؛ أعد فتح الصفحة وحاول مرة أخرى"
+    },
     "reason": {
       "sentence": "سير عمل الأمان {{workflow}}: {{action}}"
     }
@@ -3166,7 +3900,8 @@
       "conflict": {
         "inline": "الـ {{service}} بالفعل يقدم الخدمة {{path}} من خلال إعداداته الخاصة {{family}}. قم بإلغاء هذه الإعدادات لـ {{path}}، أو استخدم مسارًا مختلفًا.",
         "primary": "\"{{name}}\" هو الشهادة الرئيسية لهذه الخدمة وسوف يتم تخفيضها دون تحذير إضافي. الشهادة الرئيسية هي التي يتم نشرها بالفعل.",
-        "resource": "الـ {{service}} بالفعل يقدم الخدمة {{path}} من خلال \"{{kind}}\" {{name}}. قم بإلغاء \"{{name}}\"، أو أعطِ إحداهما مسارًا مختلفًا.",
+        "resource_redirect": "تخدم {{service}} بالفعل المسار {{path}} عبر إعادة التوجيه “{{name}}”. افصل “{{name}}”، أو أعطِ إحداهما مسارًا مختلفًا.",
+        "resource_upstream": "تخدم {{service}} بالفعل المسار {{path}} عبر الخادم الخلفي “{{name}}”. افصل “{{name}}”، أو أعطِ إحداهما مسارًا مختلفًا.",
         "stream": "خدمة التدفق تقوم بتوجيه كل اتصال إلى خلفية واحدة، والـ {{service}} يستخدم بالفعل \"{{name}}\" الخلفية. قم بإلغاء ربطه أولاً.",
         "stream_inline": "الـ {{service}} لديه بالفعل خلفية في REVERSE_PROXY_HOST. قم بإلغاء هذه الإعدادات للسماح للخلفية بالسيطرة."
       },
@@ -3200,7 +3935,13 @@
       },
       "title": "الموارد المرفقة",
       "unavailable": "غير متوفر",
-      "nothing_available": "لا يوجد شيء متاح للربط."
+      "nothing_available": "لا يوجد شيء متاح للربط.",
+      "confirm_detach": "فصل هذا المورد عن {{service}}؟",
+      "confirm_detach_certificate": "فصل هذه الشهادة عن {{service}}؟",
+      "confirm_detach_redirect": "فصل إعادة التوجيه هذه عن {{service}}؟",
+      "confirm_detach_upstream": "فصل هذا الخادم الخلفي عن {{service}}؟",
+      "confirm_detach_workflow": "فصل مسار العمل هذا عن {{service}}؟",
+      "confirm_detach_template": "فصل هذا القالب عن {{service}}؟"
     },
     "default_server": {
       "certificate": {
@@ -3242,6 +3983,19 @@
       "service": "سجّل خدمتك الأولى",
       "workflow": "إرفاق سير عمل أمني"
     },
+    "item_hint": {
+      "first_block": "تظهر التقارير هنا بمجرد أن يحظر BunkerWeb طلبًا — أرسل طلبًا ضارًا ثم تحقق لاحقًا.",
+      "https": "أضف شهادة أو أنشئها هنا كي تُقدَّم خدمتك عبر HTTPS.",
+      "install": "أضف مثيلًا هنا، ثم احفظ إعدادك الأول لإدراجه تحت الإدارة.",
+      "mfa": "افتح ملفك الشخصي من هذه القائمة، ثم فعّل المصادقة الثنائية.",
+      "pro": "أدخل مفتاح ترخيص PRO هنا لفتح إضافات PRO والدعم.",
+      "read_bans": "يعرض كل صف هنا عميلًا محظورًا، والسبب، وموعد انتهاء الحظر.",
+      "read_home": "تعرض لوحة التحكم هذه المثيلات العاملة والخدمات المُقدَّمة والحركة الأخيرة بلمحة واحدة.",
+      "read_logs": "تظهر هنا السجلات الحيّة من كل مثيل، ويمكن تصفيتها حسب المثيل والخطورة.",
+      "read_reports": "افتح تقريرًا هنا لمعرفة أي فحص أمني أوقفه، ولماذا.",
+      "service": "أنشئ خدمة هنا لإخبار BunkerWeb بالتطبيق الذي يجب حمايته.",
+      "workflow": "أنشئ سير عمل هنا لربط الفحوصات والاستجابات في قاعدة واحدة."
+    },
     "not_saved": "تعذّر الحفظ.",
     "pro_tips": "نصائح PRO",
     "restart": "إعادة تشغيل الجولة",
@@ -3269,7 +4023,10 @@
     "disabled_title": "توقيتات الإضافات معطلة",
     "disabled_help": "اضبط METRICS_COLLECT_TIMINGS على yes لقياس مدة كل إضافة. تُجمع مدة الطلب كاملة في كل الأحوال.",
     "unreachable_title": "لم يبلغ أي مثيل عن توقيتات",
-    "unreachable_help": "تُقرأ التوقيتات من المثيلات نفسها، لذلك لم يستجب أي منها — أو لم يعالج أي منها طلبًا بعد."
+    "unreachable_help": "تُقرأ التوقيتات من المثيلات نفسها، لذلك لم يستجب أي منها — أو لم يعالج أي منها طلبًا بعد.",
+    "flash": {
+      "error_fetching_plugin_timings": "خطأ في جلب توقيتات الإضافة: {{message}}"
+    }
   },
   "whatsnew": {
     "missing_action": "افتح سجل التغييرات على GitHub",
@@ -3290,6 +4047,337 @@
     "revoke_credential": "هل تريد إبطال بيانات اعتماد هذه النسخة؟ ستفقد لوحة التحكم القدرة على الوصول إليها.",
     "rotate_credential": "هل تريد تدوير بيانات اعتماد هذه النسخة؟ يفشل إذا كانت النسخة غير قابلة للوصول."
   },
+  "general": {
+    "settings": {
+      "IS_LOADING": {
+        "label": "تحميل للاستخدام الداخلي",
+        "help": "استخدام داخلي: يُضبط على yes عند تحميل BunkerWeb."
+      },
+      "NGINX_PREFIX": {
+        "label": "بادئة NGINX",
+        "help": "المكان الذي يبحث فيه NGINX عن الإعدادات."
+      },
+      "HTTP_PORT": {
+        "label": "منفذ HTTP",
+        "help": "رقم منفذ HTTP الذي يرتبط به BunkerWeb. اتركه فارغًا لتعطيل الاستماع عبر HTTP."
+      },
+      "HTTPS_PORT": {
+        "label": "منفذ HTTPS",
+        "help": "رقم منفذ HTTPS الذي يرتبط به BunkerWeb. اتركه فارغًا لتعطيل الاستماع عبر HTTPS."
+      },
+      "MULTISITE": {
+        "label": "تعدد المواقع",
+        "help": "تفعيل تعدد المواقع."
+      },
+      "SERVER_NAME": {
+        "label": "اسم الخادم",
+        "help": "قائمة المضيفات الافتراضية التي يخدمها BunkerWeb. (مفصولة بمسافة)"
+      },
+      "WORKER_PROCESSES": {
+        "label": "عمليات المعالجة",
+        "help": "عدد عمليات المعالجة."
+      },
+      "WORKER_RLIMIT_NOFILE": {
+        "label": "الملفات المفتوحة لكل عملية معالجة",
+        "help": "الحد الأقصى لعدد الملفات المفتوحة لعمليات المعالجة."
+      },
+      "WORKER_CONNECTIONS": {
+        "label": "الاتصالات لكل عملية معالجة",
+        "help": "الحد الأقصى لعدد الاتصالات لكل عملية معالجة."
+      },
+      "WORKER_SHUTDOWN_TIMEOUT": {
+        "label": "مهلة إيقاف عمليات المعالجة",
+        "help": "مهلة الإيقاف السلس لعمليات المعالجة. بعد هذه المهلة، تُنهى عمليات المعالجة القديمة قسرًا أثناء إعادة التحميل لمنع نمو استهلاك الذاكرة."
+      },
+      "DNS_RESOLVERS": {
+        "label": "مُحلّلات DNS",
+        "help": "عناوين مُحلّلات DNS المراد استخدامها."
+      },
+      "CLIENT_BODY_TIMEOUT": {
+        "label": "مهلة نص الطلب",
+        "help": "مهلة قراءة نص طلب العميل."
+      },
+      "CLIENT_HEADER_TIMEOUT": {
+        "label": "مهلة ترويسة الطلب",
+        "help": "مهلة قراءة ترويسة طلب العميل."
+      },
+      "KEEPALIVE_TIMEOUT": {
+        "label": "مهلة keepalive",
+        "help": "مهلة اتصالات العميل بنمط keep-alive."
+      },
+      "SEND_TIMEOUT": {
+        "label": "مهلة الإرسال",
+        "help": "مهلة إرسال الاستجابة إلى العميل."
+      },
+      "WORKERLOCK_MEMORY_SIZE": {
+        "label": "حجم ذاكرة Workerlock للتهيئة",
+        "help": "حجم lua_shared_dict الخاص بعمليات معالجة التهيئة"
+      },
+      "INTERNALSTORE_MEMORY_SIZE": {
+        "label": "حجم ذاكرة Internalstore",
+        "help": "حجم مخزن internalstore الداخلي."
+      },
+      "DATASTORE_MEMORY_SIZE": {
+        "label": "حجم ذاكرة Datastore",
+        "help": "حجم مخزن datastore الداخلي."
+      },
+      "DATASTORE_LRU_SIZE": {
+        "label": "حجم LRU الخاص بـ Datastore",
+        "help": "عدد الخانات في ذاكرة LRU المشتركة لكل عملية معالجة الخاصة بـ datastore (يستخدمها internalstore والذواكر المؤقتة المحلية للإضافات لكل عملية معالجة). يقبل عددًا صحيحًا بسيطًا أو اختصار `k`/`m` (مثل `1k`، `10k`، `1m`)."
+      },
+      "CACHESTORE_MEMORY_SIZE": {
+        "label": "حجم ذاكرة Cachestore",
+        "help": "حجم مخزن cachestore الداخلي."
+      },
+      "CACHESTORE_IPC_MEMORY_SIZE": {
+        "label": "حجم ذاكرة Cachestore (ipc)",
+        "help": "حجم مخزن cachestore الداخلي (ipc)."
+      },
+      "CACHESTORE_MISS_MEMORY_SIZE": {
+        "label": "حجم ذاكرة Cachestore (miss)",
+        "help": "حجم مخزن cachestore الداخلي (miss)."
+      },
+      "CACHESTORE_LOCKS_MEMORY_SIZE": {
+        "label": "حجم ذاكرة Cachestore (locks)",
+        "help": "حجم مخزن cachestore الداخلي (locks)."
+      },
+      "SESSIONS_REVOCATION_MEMORY_SIZE": {
+        "label": "حجم ذاكرة إبطال الجلسات",
+        "help": "حجم المخزن الداخلي الذي يحتفظ بمعرّفات جلسات الارتباط (cookie) المُبطَلة."
+      },
+      "USE_API": {
+        "label": "تفعيل API",
+        "help": "تفعيل واجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+      },
+      "API_HTTP_PORT": {
+        "label": "رقم منفذ API",
+        "help": "منفذ الاستماع الخاص بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+      },
+      "API_HTTPS_PORT": {
+        "label": "رقم منفذ API عبر HTTPS",
+        "help": "منفذ الاستماع (عبر TLS) الخاص بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+      },
+      "API_LISTEN_IP": {
+        "label": "عنوان IP للاستماع الخاص بـ API",
+        "help": "عنوان IP للاستماع الخاص بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+      },
+      "API_LISTEN_HTTP": {
+        "label": "استماع API عبر HTTP",
+        "help": "الاستماع عبر HTTP لواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+      },
+      "API_LISTEN_HTTPS": {
+        "label": "استماع API عبر HTTPS",
+        "help": "الاستماع عبر HTTPS (SSL/TLS) لواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+      },
+      "API_SERVER_NAME": {
+        "label": "اسم خادم API",
+        "help": "اسم الخادم (المضيف الافتراضي) الخاص بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb."
+      },
+      "API_TOKEN": {
+        "label": "رمز الوصول إلى API",
+        "help": "رمز اختياري لمصادقة استدعاءات API. إذا ضُبط، يجب أن يرسله المجدول (وأي عميل آخر) عبر ترويسة Authorization. ملاحظة: يجب ضبطه في بيئتَي BunkerWeb والمجدول كليهما."
+      },
+      "API_WHITELIST_IP": {
+        "label": "عناوين IP المسموح لها بالوصول إلى API",
+        "help": "قائمة عناوين IP/الشبكات المسموح لها بالاتصال بواجهة برمجة التطبيقات (API) الداخلية لـ BunkerWeb. (الصيغة: ip/netmask أو ipv6/netmask، مفصولة بمسافة)"
+      },
+      "AUTOCONF_MODE": {
+        "label": "وضع Autoconf",
+        "help": "تفعيل تكامل Docker Autoconf."
+      },
+      "SWARM_MODE": {
+        "label": "وضع Swarm",
+        "help": "تفعيل تكامل Docker Swarm."
+      },
+      "KUBERNETES_MODE": {
+        "label": "وضع Kubernetes",
+        "help": "تفعيل تكامل Kubernetes."
+      },
+      "SERVER_TYPE": {
+        "label": "نوع الخادم",
+        "help": "نوع الخادم: http أو stream."
+      },
+      "LISTEN_STREAM": {
+        "label": "الاستماع لـ stream",
+        "help": "تفعيل الاستماع بدون SSL (تمرير مباشر - passthrough)."
+      },
+      "LISTEN_STREAM_PORT": {
+        "label": "منفذ الاستماع لـ stream",
+        "help": "منفذ الاستماع بدون SSL (تمرير مباشر). اتركه فارغًا لتعطيل استماع stream بدون SSL."
+      },
+      "LISTEN_STREAM_PORT_SSL": {
+        "label": "منفذ الاستماع لـ stream عبر ssl",
+        "help": "منفذ الاستماع عبر SSL (تمرير مباشر). اتركه فارغًا لتعطيل استماع stream عبر SSL."
+      },
+      "USE_TCP": {
+        "label": "الاستماع لـ TCP",
+        "help": "الاستماع عبر TCP (stream)."
+      },
+      "USE_UDP": {
+        "label": "الاستماع لـ UDP",
+        "help": "الاستماع عبر UDP (stream)."
+      },
+      "USE_IPV6": {
+        "label": "استخدام IPv6",
+        "help": "تفعيل الاتصال عبر IPv6."
+      },
+      "IS_DRAFT": {
+        "label": "مسودة للاستخدام الداخلي",
+        "help": "استخدام داخلي: يُضبط على yes عندما تكون الخدمة في وضع المسودة."
+      },
+      "KEEP_CONFIG_ON_RESTART": {
+        "label": "الاحتفاظ بالإعداد عند إعادة التشغيل",
+        "help": "الاحتفاظ بالإعداد عند إعادة التشغيل. اضبطه على 'yes' لمنع إعادة ضبط الإعداد عند إعادة التشغيل."
+      },
+      "CUSTOM_CONFIGS_DRIFT": {
+        "label": "سياسة انحراف التكوينات المخصصة",
+        "help": "ما يحدث عندما يتغير ملف .conf المُسقَط منذ آخر إسقاط مسجَّل أو كان غائبًا عنه. تُتجاهل الملفات المطابقة لصف قاعدة البيانات الحالي؛ وبدون سجل إسقاط قابل للقراءة، لا يُبلَّغ عن أي انحراف. يسجّل الخيار 'overwrite' كل انحراف مكتشَف ويعيد كتابة الملف من قاعدة البيانات، أو يحذفه إن لم يوجد صف نشط يحل محله. لا يكتب الخيار 'refuse' من قاعدة البيانات شيئًا هناك حتى يُحل الانحراف، ويسجّل خطأ، ويترك تغيير التكوين المخصص المعلَّق غير مؤكَّد ليُعاد المحاولة عليه."
+      },
+      "TIMERS_LOG_LEVEL": {
+        "label": "مستوى سجلات المؤقتات",
+        "help": "مستوى السجلات الخاص بالمؤقتات."
+      },
+      "BUNKERWEB_INSTANCES": {
+        "label": "مثيلات BunkerWeb",
+        "help": "قائمة مثيلات BunkerWeb مفصولة بمسافات (الصيغة: fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
+      },
+      "USE_TEMPLATE": {
+        "label": "استخدام قالب",
+        "help": "قوالب الإعداد المراد تطبيقها، مفصولة بمسافات، وستُجاوز القيم الافتراضية لإعدادات محددة. تُطبَّق القوالب بالترتيب ويُجاوز القالب اللاحق القالب السابق؛ والقيمة المضبوطة على الخدمة تُجاوز القالب."
+      },
+      "SECURITY_MODE": {
+        "label": "وضع الأمان",
+        "help": "يحدد الاستجابة للتهديدات: \"detect\" للمراقبة والتسجيل فقط، أو \"block\" لمنع الوصول وتسجيل الحوادث."
+      },
+      "SERVER_NAMES_HASH_BUCKET_SIZE": {
+        "label": "حجم دلو تجزئة أسماء الخوادم",
+        "help": "القيمة الخاصة بتوجيه server_names_hash_bucket_size."
+      },
+      "LOG_FORMAT": {
+        "label": "صيغة سجل الوصول",
+        "help": "الصيغة المراد استخدامها لسجلات الوصول."
+      },
+      "ACCESS_LOG": {
+        "label": "مسار سجل الوصول",
+        "help": "المسار المراد استخدامه لسجلات وصول NGINX (مسار ملف، أو syslog:server=host[:port][,param=value]، أو memory:name:size؛ اضبطه على off للتعطيل)."
+      },
+      "ERROR_LOG": {
+        "label": "مسار سجل الأخطاء",
+        "help": "المسار المراد استخدامه لسجلات أخطاء NGINX (مسار ملف، أو stderr، أو syslog:server=host[:port][,param=value]، أو memory:size)."
+      },
+      "PLUGINS_ORDER_INIT": {
+        "label": "ترتيب الإضافات (init)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور init (إقلاع المحرك، يعمل مرة واحدة). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_INIT_WORKER": {
+        "label": "ترتيب الإضافات (init_worker)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور init_worker (إقلاع لكل عملية معالجة). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_SET": {
+        "label": "ترتيب الإضافات (set)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور set لهذا الموقع (إعداد المتغيرات قبل rewrite/access). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_ACCESS": {
+        "label": "ترتيب الإضافات (access)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور access لهذا الموقع (قبول/تحكم الطلب). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_SSL_CERTIFICATE": {
+        "label": "ترتيب الإضافات (ssl_certificate)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور ssl_certificate لهذا الموقع (اختيار/إصدار شهادة TLS). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_HEADER": {
+        "label": "ترتيب الإضافات (header)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور header لهذا الموقع (تصفية ترويسات الاستجابة). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_LOG": {
+        "label": "ترتيب الإضافات (log)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور log لهذا الموقع (معالجة سجل HTTP بعد الاستجابة). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_PREREAD": {
+        "label": "ترتيب الإضافات (preread)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور preread لهذا الموقع (فحوصات TCP preread قبل التوكيل). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_LOG_STREAM": {
+        "label": "ترتيب الإضافات (log_stream)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور log_stream لهذا الموقع (معالجة سجل stream). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_LOG_DEFAULT": {
+        "label": "ترتيب الإضافات (log_default)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور log_default لهذا الموقع (معالجة سجل المضيف الافتراضي الافتراضي). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_TIMER": {
+        "label": "ترتيب الإضافات (timer)",
+        "help": "الإضافات التي يجب أن تعمل أولًا أثناء طور timer (المؤقتات في الخلفية). افصل المعرّفات بمسافات؛ تعمل الإضافات المتبقية لاحقًا حسب ترتيبها الطبيعي."
+      },
+      "PLUGINS_ORDER_INIT_WORKERS": {
+        "label": "ترتيب الإضافات (init_workers)",
+        "help": "معرّفات الإضافات، مفصولة بفواصل أو مسافات، المراد تشغيلها أثناء طور init_workers."
+      },
+      "LOG_LEVEL": {
+        "label": "مستوى السجلات",
+        "help": "المستوى المراد استخدامه لسجلات الأخطاء."
+      },
+      "JOBS_DAILY_TIME": {
+        "label": "الوقت اليومي للمهام",
+        "help": "الوقت المحلي (بتوقيت المجدول، HH:MM، بنظام 24 ساعة) الذي تعمل فيه المهام اليومية المجدولة؛ تعمل المهام الأسبوعية أيضًا في هذا الوقت، في JOBS_WEEKLY_DAY."
+      },
+      "JOBS_WEEKLY_DAY": {
+        "label": "اليوم الأسبوعي للمهام",
+        "help": "يوم الأسبوع الذي تعمل فيه المهام الأسبوعية المجدولة، في JOBS_DAILY_TIME."
+      }
+    }
+  },
+  "global_settings": {
+    "flash": {
+      "checking_license_key_upgrade": "جارٍ التحقق من مفتاح الترخيص للترقية.",
+      "global_settings_not_saved_every_changed": "لم يتم حفظ الإعدادات العامة: تم رفض كل قيمة تم تغييرها.",
+      "not_edited_no_values_changed": "لم يتم تعديل الإعدادات العامة لأنه لم تتغير أي قيمة.",
+      "saved_but_values_refused": "تم حفظ الإعدادات العامة، ولكن تم رفض {{refused_count}} من القيم.",
+      "saved_successfully": "تم حفظ الإعدادات العامة بنجاح."
+    }
+  },
+  "home": {
+    "flash": {
+      "error_fetching_services": "خطأ في جلب الخدمات: {{message}}"
+    }
+  },
+  "utils": {
+    "flash": {
+      "couldn_t_connect_redis": "تعذّر الاتصال بـ redis",
+      "missing_form": "{{key}} مفقود في النموذج",
+      "invalid_request": "طلب غير صالح"
+    }
+  },
+  "main": {
+    "flash": {
+      "forced_status_reloaded": "تم فرض إعادة تحميل الحالة",
+      "have_more_services_than_allowed_by": "لديك عدد من الخدمات أكبر مما يسمح به ترخيصك الاحترافي. قم بترقية ترخيصك أو انقل بعض الخدمات إلى وضع المسودة لإلغاء قفل ترخيصك الاحترافي.",
+      "last_changes_have_applied_successfully": "تم تطبيق آخر التغييرات بنجاح.",
+      "database_connection_read_only_mode_no": "اتصال قاعدة البيانات في وضع القراءة فقط: لا يمكن إجراء أي تعديلات.",
+      "two_factor_no_recovery_codes": "المصادقة الثنائية مفعّلة ولكن لا توجد رموز استرداد متاحة، يرجى تحديثها:",
+      "failover_configuration_error": "تعذّر تطبيق آخر التغييرات لأنها تُنشئ خطأ في تكوين NGINX، يرجى مراجعة سجلات BunkerWeb لمزيد من المعلومات. عادت التهيئة إلى آخر نسخة عاملة.",
+      "failover_message": "رسالة التعطل الاحتياطي:"
+    }
+  },
+  "letsencrypt": {
+    "flash": {
+      "orphan_certificate": "Let's Encrypt: الشهادة اليتيمة <strong>{{cert_name}}</strong> تشير إلى حساب ACME مفقود <code>{{account}}</code>. التجديدات محظورة حتى يتم إصلاح حالة المزوّد. <a href=\"{{certificates_url}}\">{{link_text}}</a>.",
+      "open_certificates_to_inspect": "افتح الشهادات للفحص"
+    }
+  },
+  "raw_drafts": {
+    "edits_discarded": "تظل الإعدادات المسودة دون تغيير؛ فعّلها أو عدّلها في الوضع الخام (Raw).",
+    "metadata_raw_only": "تُقبل البيانات الوصفية لمسودة الإعداد في الوضع الخام (raw) فقط.",
+    "missing_metadata": "البيانات الوصفية {{field}} مفقودة.",
+    "cannot_be_draft": "لا يمكن تحويل الإعداد {{setting}} إلى مسودة.",
+    "draft_not_posted": "لم يتم إرسال الإعداد المسودة {{setting}}.",
+    "setting_not_valid": "الإعداد {{setting}} غير صالح.",
+    "global_not_service_draft": "لا يمكن تحويل الإعداد العام {{setting}} إلى مسودة خدمة.",
+    "draft_not_present": "الإعداد المسودة {{setting}} غير موجود في محرر RAW.",
+    "present_not_posted": "لم يتم إرسال الإعداد الحالي {{setting}}.",
+    "present_not_valid": "الإعداد الحالي {{setting}} غير صالح.",
+    "locked_by_method": "لا يمكن للإعداد {{setting}} تغيير حالة المسودة لأنه تتم إدارته بواسطة الطريقة {{method}}."
+  },
   "crowdsec": {
     "reason": {
       "action": {
@@ -3301,157 +4389,157 @@
       "sentence_scenario": "{{source}}: {{action}} (السيناريو: {{scenario}})",
       "source": {
         "appsec": "CrowdSec AppSec",
-        "failure_policy": "CrowdSec AppSec failure policy",
+        "failure_policy": "سياسة الفشل في CrowdSec AppSec",
         "lapi": "CrowdSec LAPI"
       }
     },
     "alert": {
-      "id": "Alert ID",
-      "load": "Load full evidence",
-      "started": "Started",
-      "stopped": "Stopped"
+      "id": "معرّف التنبيه",
+      "load": "تحميل الأدلة الكاملة",
+      "started": "بدأ",
+      "stopped": "توقف"
     },
-    "captured_history": "Captured history",
-    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
+    "captured_history": "السجل الملتقط",
+    "captured_history_help": "تصف بيانات التقرير الملتقطة ما تمت ملاحظته وقت الطلب؛ ولا تثبت الحالة الحالية للقرار.",
     "connection": {
-      "appsec": "Last AppSec observation",
-      "connected": "Connected",
-      "connection_error": "Connection error",
-      "configured": "Configured",
-      "global": "all services",
-      "label": "CrowdSec connection",
-      "last_sync": "Last successful sync",
-      "local_api": "Local API",
-      "management": "Management",
-      "mode": "Mode",
-      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
-      "read_only": "Read only",
-      "required": "Choose a CrowdSec connection first.",
-      "sync": "Decision sync",
-      "sync_current": "Up to date",
-      "sync_not_synchronized": "Not synchronized yet",
-      "sync_stale": "Stale",
-      "selected": "Selected connection",
-      "scope_help": "The selected connection applies to decisions, allowlists and IP investigation below.",
-      "filter": "Filter connections by hostname or service"
+      "appsec": "آخر ملاحظة لـ AppSec",
+      "connected": "متصل",
+      "connection_error": "خطأ في الاتصال",
+      "configured": "مُعدّ",
+      "global": "جميع الخدمات",
+      "label": "اتصال CrowdSec",
+      "last_sync": "آخر مزامنة ناجحة",
+      "local_api": "واجهة API المحلية",
+      "management": "الإدارة",
+      "mode": "الوضع",
+      "none": "لم يتم العثور على اتصال CrowdSec صالح للاستخدام. تحقق من أخطاء المثيل وإعدادات الملحق.",
+      "read_only": "للقراءة فقط",
+      "required": "اختر اتصال CrowdSec أولًا.",
+      "sync": "مزامنة القرارات",
+      "sync_current": "محدّث",
+      "sync_not_synchronized": "لم تتم المزامنة بعد",
+      "sync_stale": "قديم",
+      "selected": "الاتصال المحدد",
+      "scope_help": "ينطبق الاتصال المحدد على القرارات وقوائم السماح والتحقيق في عناوين IP أدناه.",
+      "filter": "تصفية الاتصالات حسب اسم المضيف أو الخدمة"
     },
-    "current_state": "Current state",
-    "current_state_help": "Current state may change after this observation.",
+    "current_state": "الحالة الحالية",
+    "current_state_help": "قد تتغير الحالة الحالية بعد هذه الملاحظة.",
     "decision": {
-      "duration": "Duration",
-      "expires": "Expires",
-      "id": "Decision ID",
-      "origin": "Origin",
-      "scenario": "Scenario",
-      "scope": "Scope",
-      "target": "Target",
-      "type": "Type"
+      "duration": "المدة",
+      "expires": "تنتهي الصلاحية",
+      "id": "معرّف القرار",
+      "origin": "المصدر",
+      "scenario": "السيناريو",
+      "scope": "النطاق",
+      "target": "الهدف",
+      "type": "النوع"
     },
     "decisions": {
-      "count": "Showing {{start}}–{{end}} of {{total}}",
-      "help": "This is current state read directly from the selected CrowdSec engine.",
-      "none": "No active decisions match these filters.",
-      "pagination": "Decision pages",
-      "title": "Active decisions"
+      "count": "عرض {{start}}–{{end}} من {{total}}",
+      "help": "هذه هي الحالة الحالية المقروءة مباشرة من محرك CrowdSec المحدد.",
+      "none": "لا توجد قرارات نشطة تطابق عوامل التصفية هذه.",
+      "pagination": "صفحات القرارات",
+      "title": "القرارات النشطة"
     },
     "error": {
-      "request": "The CrowdSec request failed."
+      "request": "فشل طلب CrowdSec."
     },
     "investigation": {
-      "alerts": "Available CrowdSec alert evidence",
-      "current_decisions": "Current CrowdSec decisions",
-      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
-      "ip": "IP address",
-      "local_bans": "Current local BunkerWeb bans",
-      "no_alerts": "No alert evidence is available.",
-      "no_bans": "No current local ban was found.",
-      "no_decisions": "No current CrowdSec decision was found.",
-      "no_reports": "No recent captured report was found.",
+      "alerts": "أدلة تنبيهات CrowdSec المتاحة",
+      "current_decisions": "قرارات CrowdSec الحالية",
+      "help": "يتم فحص قرارات CrowdSec الحالية جنبًا إلى جنب مع عمليات الحظر المحلية والتقارير الملتقطة.",
+      "ip": "عنوان IP",
+      "local_bans": "عمليات الحظر المحلية الحالية في BunkerWeb",
+      "no_alerts": "لا تتوفر أي أدلة على التنبيهات.",
+      "no_bans": "لم يتم العثور على أي حظر محلي حالي.",
+      "no_decisions": "لم يتم العثور على أي قرار حالي في CrowdSec.",
+      "no_reports": "لم يتم العثور على أي تقرير ملتقط حديث.",
       "placeholder": "192.0.2.10",
-      "reports": "Recent BunkerWeb reports",
-      "result": "Investigation for {{ip}}",
-      "submit": "Investigate",
-      "title": "Investigate an IP",
-      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
-      "unavailable": "Unavailable: {{error}}",
-      "summary": "Evidence found for this IP",
-      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
-      "summary_decisions": "CrowdSec decisions",
-      "summary_bans": "Local BunkerWeb bans",
-      "summary_alerts": "CrowdSec alert evidence",
-      "summary_reports": "BunkerWeb reports",
-      "summary_active": "{{total}} active",
-      "summary_available": "{{total}} available",
-      "summary_captured": "{{total}} captured",
-      "summary_none": "None found",
-      "summary_unreadable": "Could not be read"
+      "reports": "تقارير BunkerWeb الأخيرة",
+      "result": "التحقيق في {{ip}}",
+      "submit": "تحقيق",
+      "title": "التحقيق في عنوان IP",
+      "truncated": "عرض {{shown}} من {{total}} نتيجة (حد المصدر: {{limit}}).",
+      "unavailable": "غير متاح: {{error}}",
+      "summary": "الأدلة التي تم العثور عليها لعنوان IP هذا",
+      "summary_help": "يشمل هذا اتصال CrowdSec المحدد وعمليات الحظر الخاصة بـ BunkerWeb. لا يتم فحص أنواع الحماية الأخرى هنا، والأدلة التي تعذّرت قراءتها لا تثبت أن عنوان IP هذا مسموح به.",
+      "summary_decisions": "قرارات CrowdSec",
+      "summary_bans": "عمليات الحظر المحلية في BunkerWeb",
+      "summary_alerts": "أدلة تنبيهات CrowdSec",
+      "summary_reports": "تقارير BunkerWeb",
+      "summary_active": "{{total}} نشط",
+      "summary_available": "{{total}} متاح",
+      "summary_captured": "{{total}} ملتقط",
+      "summary_none": "لم يتم العثور على شيء",
+      "summary_unreadable": "تعذّرت القراءة"
     },
     "local_ban": {
-      "expires": "Expires",
-      "reason": "Reason",
-      "service": "Service"
+      "expires": "تنتهي الصلاحية",
+      "reason": "السبب",
+      "service": "الخدمة"
     },
-    "next": "Next",
-    "observed_at": "Observed {{time}}",
-    "previous": "Previous",
-    "refresh": "Refresh status",
+    "next": "التالي",
+    "observed_at": "لوحظ {{time}}",
+    "previous": "السابق",
+    "refresh": "تحديث الحالة",
     "remove": {
-      "action": "Remove",
-      "confirm": "I understand and want to remove this decision.",
-      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
-      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
-      "submit": "Remove decision",
-      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). Matching decisions remaining: {{remaining}}. Local bans or AppSec may still block.",
-      "title": "Remove CrowdSec decision"
+      "action": "إزالة",
+      "confirm": "أفهم ذلك وأريد إزالة هذا القرار.",
+      "impact": "تزيل هذه العملية القرار من محرك CrowdSec المشترك وتؤثر على كل bouncer متصل. ما زال بإمكان القرارات المخزنة مؤقتًا أو نطاق آخر أو عمليات الحظر المحلية أو AppSec حظر الهدف.",
+      "selection": "هل تريد إزالة {{scope}} {{value}} ({{type}})، السيناريو {{scenario}}، المصدر {{origin}}، من {{source}} ({{engine}})؟",
+      "submit": "إزالة القرار",
+      "success": "تمت الإزالة عند مصدر CrowdSec. حالة الانتشار: {{status}} ({{mode}}، الفاصل {{interval}}). القرارات المطابقة المتبقية: {{remaining}}. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر.",
+      "title": "إزالة قرار CrowdSec"
     },
     "report": {
-      "captured": "Captured at",
-      "date": "Report time",
-      "decisions": "Captured decisions",
-      "entry": "Security report",
-      "matched_target": "Matched target",
-      "metadata": "Decision metadata",
-      "metadata_complete": "Complete",
-      "metadata_incomplete": "Incomplete",
-      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
-      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
-      "reason": "Reason",
-      "remediation": "Captured remediation",
-      "scope": "Captured service scope",
-      "service": "Service",
-      "source": "Captured source",
-      "identifier": "Report identifier"
+      "captured": "وقت الالتقاط",
+      "date": "وقت التقرير",
+      "decisions": "القرارات الملتقطة",
+      "entry": "تقرير أمني",
+      "matched_target": "الهدف المطابق",
+      "metadata": "البيانات الوصفية للقرار",
+      "metadata_complete": "مكتمل",
+      "metadata_incomplete": "غير مكتمل",
+      "metadata_unavailable": "بيانات لقطة CrowdSec الوصفية غير متاحة لهذا التقرير الأقدم.",
+      "metadata_warning": "لم تكن بعض البيانات الوصفية للقرار الملتقطة متاحة وقت الطلب.",
+      "reason": "السبب",
+      "remediation": "المعالجة الملتقطة",
+      "scope": "نطاق الخدمة الملتقط",
+      "service": "الخدمة",
+      "source": "المصدر الملتقط",
+      "identifier": "معرّف التقرير"
     },
-    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
-    "title": "CrowdSec operator",
-    "unknown": "Unknown",
+    "subtitle": "افحص كل محرك CrowdSec مُعدّ وحقّق في عنوان IP اعتمادًا على الأدلة الحالية والملتقطة.",
+    "title": "مشغّل CrowdSec",
+    "unknown": "غير معروف",
     "allowlists": {
-      "title": "CrowdSec allowlists",
-      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
-      "refresh": "Refresh allowlists",
-      "pages": "Allowlist pages",
-      "empty": "No allowlists were found on this engine.",
-      "console": "Console managed",
-      "local": "Locally managed",
-      "no_entries": "No active entries.",
-      "never": "Never",
-      "comment": "Comment",
-      "unknown": "Allowlist status is unavailable.",
-      "not_allowed": "This IP does not match a CrowdSec allowlist.",
-      "allowed": "Allowlisted by CrowdSec",
-      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
+      "title": "قوائم السماح في CrowdSec",
+      "help": "عناوين IP والشبكات الموثوقة للمحرك المحدد. تنطبق هذه الاستثناءات على جميع الخدمات وbouncer المتصلة به.",
+      "refresh": "تحديث قوائم السماح",
+      "pages": "صفحات قوائم السماح",
+      "empty": "لم يتم العثور على أي قوائم سماح على هذا المحرك.",
+      "console": "تُدار بواسطة Console",
+      "local": "تُدار محليًا",
+      "no_entries": "لا توجد إدخالات نشطة.",
+      "never": "أبدًا",
+      "comment": "تعليق",
+      "unknown": "حالة قائمة السماح غير متاحة.",
+      "not_allowed": "لا يتطابق عنوان IP هذا مع أي قائمة سماح في CrowdSec.",
+      "allowed": "مُدرج في قائمة السماح بواسطة CrowdSec",
+      "impact": "هذا استثناء على مستوى المحرك بأكمله. ما زال بإمكان عمليات الحظر المحلية في BunkerWeb أو أنواع الحماية الأخرى أو القرارات المخزنة مؤقتًا حظر عنوان IP هذا.",
       "guide": {
-        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
-        "title": "How to manage trusted IPs and networks",
-        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
-        "create": "Create a list once, or use an existing locally managed list.",
-        "add": "Add trusted IPs or CIDR networks.",
-        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
-        "inspect": "Inspect the list and its expiry dates.",
-        "remove": "Remove an exception when it is no longer needed.",
-        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
-        "console": "Edit Console-managed lists in the CrowdSec Console.",
-        "docs": "CrowdSec allowlist documentation"
+        "intro": "يمكنك هنا استعراض قوائم السماح والتحقق من عناوين IP. لإضافة الإدخالات أو إزالتها، استخدم cscli على محرك CrowdSec.",
+        "title": "كيفية إدارة عناوين IP والشبكات الموثوقة",
+        "where": "يتطلب CrowdSec 1.7 أو أحدث. شغّل هذه الأوامر على المضيف أو داخل الحاوية التي تشغّل واجهة API المحلية (LAPI) للمحرك المحدد، مع إمكانية الوصول إلى إعدادات CrowdSec وقاعدة بياناته. استبدل اسم القائمة وعنوان IP والشبكة المستخدمة كمثال بقيمك الخاصة.",
+        "create": "أنشئ القائمة مرة واحدة، أو استخدم قائمة موجودة تُدار محليًا.",
+        "add": "أضف عناوين IP أو شبكات CIDR الموثوقة.",
+        "expiration": "ينتهي هذا المثال بعد 24 ساعة. احذف --expiration للحصول على إدخال لا تنتهي صلاحيته. يتم دعم IPv4 وIPv6.",
+        "inspect": "افحص القائمة وتواريخ انتهاء صلاحيتها.",
+        "remove": "أزل الاستثناء عندما لا تعود هناك حاجة إليه.",
+        "refresh": "بعد أي تغيير، حدّث قوائم السماح وحقّق في عنوان IP مرة أخرى. تسمح إزالة الاستثناء بقرارات CrowdSec المستقبلية؛ ولا تنشئ حظرًا. تظل عمليات الحظر المحلية في BunkerWeb وأنواع الحماية الأخرى منفصلة.",
+        "console": "حرّر القوائم التي تديرها Console في CrowdSec Console.",
+        "docs": "وثائق قوائم السماح في CrowdSec"
       }
     }
   }

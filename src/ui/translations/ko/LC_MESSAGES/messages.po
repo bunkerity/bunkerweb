@@ -61,6 +61,9 @@ msgstr "유효한 사용자 지정 구성 파일(.json)을 업로드하십시오
 msgid "alert.credential_action_failed"
 msgstr "작업이 실패했습니다."
 
+msgid "alert.custom_end_date_past"
+msgstr "사용자 지정 종료 날짜는 미래여야 합니다."
+
 msgid "alert.custom_end_date_required"
 msgstr "사용자 지정 종료 날짜를 선택해 주세요."
 
@@ -97,8 +100,17 @@ msgstr "유효한 서비스 내보내기 파일(.env 또는 .zip)을 업로드�
 msgid "antibot.reason.sentence"
 msgstr "안티봇 챌린지(%(provider)s)가 제공됨"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "인증서 인벤토리 할당"
+
+msgid "aria.label.certificate_public_details"
+msgstr "인증서 공개 세부정보"
+
 msgid "aria.label.clear_search"
 msgstr "검색 지우기"
+
+msgid "aria.label.clone_item"
+msgstr "%(name)s 복제"
 
 msgid "aria.label.close"
 msgstr "닫기"
@@ -111,6 +123,9 @@ msgstr "사용자 지정 설정 내보내기 파일을 선택하거나 여기에
 
 msgid "aria.label.copy"
 msgstr "로그 복사"
+
+msgid "aria.label.detach_from_service"
+msgstr "%(service)s에서 %(name)s 연결 해제"
 
 msgid "aria.label.download_log"
 msgstr "이 로그 파일 다운로드"
@@ -148,6 +163,9 @@ msgstr "타임스탬프를 현지 시간으로 표시"
 msgid "aria.label.next_issue"
 msgstr "다음 오류 또는 경고"
 
+msgid "aria.label.open_user_menu"
+msgstr "사용자 메뉴 열기"
+
 msgid "aria.label.passkey_name"
 msgstr "패스키 이름"
 
@@ -159,6 +177,9 @@ msgstr "이전 오류 또는 경고"
 
 msgid "aria.label.raw_configuration"
 msgstr "원시 설정"
+
+msgid "aria.label.remove_this_server"
+msgstr "이 서버 제거"
 
 msgid "aria.label.remove_value"
 msgstr "값 제거"
@@ -178,8 +199,23 @@ msgstr "파일 선택"
 msgid "aria.label.select_page"
 msgstr "페이지 선택"
 
+msgid "aria.label.select_template"
+msgstr "%(name)s 템플릿 선택"
+
 msgid "aria.label.services_dropzone"
 msgstr "서비스 내보내기 파일을 선택하거나 여기에 놓으세요"
+
+msgid "aria.label.show_details"
+msgstr "%(name)s 세부 정보 표시"
+
+msgid "aria.label.toggle_item"
+msgstr "%(name)s 전환"
+
+msgid "aria.label.toggle_section"
+msgstr "%(name)s 섹션 전환"
+
+msgid "aria.label.toggle_theme"
+msgstr "다크 모드 전환"
 
 msgid "aria.label.toggle_wrap"
 msgstr "줄 바꿈 전환"
@@ -244,6 +280,15 @@ msgstr "%(ip)s 차단에 실패했습니다: %(error)s"
 msgid "bans.flash.ban_success"
 msgstr "%(ip)s을(를) 차단했습니다."
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "%(ip)s의 사용자 지정 차단 종료 날짜는 미래여야 합니다"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "잘못된 차단 선택 모드입니다."
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "/bans/ban의 bans 매개변수가 잘못되었습니다."
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "%(ip)s의 사용자 지정 차단 기간이 잘못되었습니다"
 
@@ -253,11 +298,44 @@ msgstr "%(ip)s의 사용자 지정 차단 종료일이 잘못되었습니다"
 msgid "bans.flash.invalid_duration"
 msgstr "잘못된 차단 기간: %(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "잘못된 기간 선택 모드입니다."
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "잘못된 필터링된 차단 소스입니다."
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "잘못된 필터링된 기간 소스입니다."
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "잘못된 필터링된 차단 해제 소스입니다."
+
 msgid "bans.flash.invalid_ip"
 msgstr "잘못된 IP 주소: %(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "/bans/unban의 ips 매개변수가 잘못되었습니다."
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "잘못된 차단 해제 선택 모드입니다."
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "/bans/update_duration의 updates 매개변수가 잘못되었습니다."
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "%(ip)s의 사용자 지정 차단 종료일이 없습니다"
+
+msgid "bans.flash.no_bans"
+msgstr "차단 항목이 없습니다."
+
+msgid "bans.flash.no_matching_bans"
+msgstr "일치하는 차단 항목이 없습니다."
+
+msgid "bans.flash.no_matching_reports"
+msgstr "일치하는 보고서가 없습니다."
+
+msgid "bans.flash.no_updates"
+msgstr "업데이트가 없습니다."
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "Redis에서 차단 목록을 가져오지 못했습니다. 자세한 내용은 로그를 확인하세요."
@@ -448,11 +526,14 @@ msgstr "확인"
 msgid "button.convert_configs"
 msgstr "설정 전환"
 
-msgid "button.convert_configs_to"
-msgstr "%(state)s(으)로 전환"
-
 msgid "button.convert_services"
 msgstr "서비스 전환"
+
+msgid "button.convert_to_draft"
+msgstr "초안으로 변환"
+
+msgid "button.convert_to_online"
+msgstr "온라인으로 변환"
 
 msgid "button.copy"
 msgstr "복사"
@@ -549,6 +630,9 @@ msgstr "사용자 지정 설정 가져오기"
 
 msgid "button.import_services"
 msgstr "서비스 가져오기"
+
+msgid "button.import_template"
+msgstr "템플릿 가져오기"
 
 msgid "button.local_time"
 msgstr "현지 시간"
@@ -727,6 +811,39 @@ msgstr "다른 세션 로그아웃"
 msgid "button.wrap"
 msgstr "줄 바꿈"
 
+msgid "cache.flash.api_unavailable"
+msgstr "API를 사용할 수 없습니다: %(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "작업 %(job_name)s, 플러그인 %(plugin_id)s의 캐시 파일 %(file_name)s을(를) 찾을 수 없습니다"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "작업 %(job_name)s, 플러그인 %(plugin_id)s, 서비스 %(service)s의 캐시 파일 %(file_name)s을(를) 찾을 수 없습니다"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "%(deleted_count)s개 파일 삭제됨, %(len)s개 오류 발생: %(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "캐시 파일 삭제 중 오류 발생: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "캐시 파일을 가져오는 중 오류 발생: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "캐시 파일을 가져오는 중 오류 발생: %(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "잘못된 캐시 파일 매개변수"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "선택된 캐시 파일이 없습니다"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "캐시 파일 %(deleted_count)s개를 삭제했습니다"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "캐시 파일 %(deleted_count)s개를 삭제했습니다"
+
 msgid "cache.kpi_files"
 msgstr "파일"
 
@@ -840,6 +957,117 @@ msgstr "파일 크기는 1 MiB를 초과할 수 없습니다."
 
 msgid "certificates.fingerprint"
 msgstr "SHA-256 지문"
+
+msgid "certificates.flash.certificate_action_failed"
+msgstr "인증서 작업에 실패했습니다: %(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "인증서를 성공적으로 삭제했습니다"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "인증서 인벤토리 할당을 성공적으로 추가했습니다"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "인증서 인벤토리 할당을 성공적으로 제거했습니다"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "인증서 메타데이터를 성공적으로 업데이트했습니다"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "인증서와 이름이 필요합니다"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "인증서 이름이 필요합니다"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "인증서를 성공적으로 갱신했습니다"
+
+msgid "certificates.flash.certificate_required"
+msgstr "인증서가 필요합니다"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "인증서와 서비스는 필수입니다"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "인증서 업로드가 2 MiB 요청 제한을 초과합니다"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "갱신이 필요한 인증서 %(total_due)s개를 확인했습니다"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "인증서를 연결하지 못했습니다: %(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "인증서를 생성하지 못했습니다: %(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "인증서를 연결 해제하지 못했습니다: %(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "인증서를 다운로드하지 못했습니다: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "인증서를 가져오지 못했습니다: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "인증서 할당을 위한 서비스를 가져오지 못했습니다: %(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "Let's Encrypt 발급을 예약하지 못했습니다: %(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "인증서를 업데이트하지 못했습니다: %(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "인증서를 업로드하지 못했습니다: %(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "사용자 지정 인증서를 성공적으로 업로드했습니다"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "암호화된 개인 키는 지원되지 않습니다."
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "잘못된 인증서 작업입니다"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "잘못된 인증서 부분입니다"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "인증서 파일이 유효한 PEM 인증서가 아닙니다."
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "잘못된 인증서 소스입니다"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "개인 키 파일이 유효한 PEM 개인 키가 아닙니다."
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "Let's Encrypt 발급이 예약되었습니다"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "이름과 커먼 네임(common name)이 필요합니다"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "PEM 인증서와 개인 키가 필요합니다"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "Let's Encrypt 발급을 위해 하나 이상의 서비스를 선택하세요"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "자체 서명 인증서를 생성했습니다"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "인증서에는 100개를 초과하는 주체 대체 이름을 포함할 수 없습니다"
+
+msgid "certificates.flash.too_many_services"
+msgstr "인증서는 100개를 초과하는 서비스에 연결할 수 없습니다"
+
+msgid "certificates.flash.validity_range"
+msgstr "유효 기간은 1일에서 825일 사이여야 합니다"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "유효 기간은 정수 일수여야 합니다"
 
 msgid "certificates.issuer"
 msgstr "발급 기관"
@@ -1053,6 +1281,168 @@ msgstr "%(count)s 더 보기"
 
 msgid "compose.unavailable"
 msgstr "플러그인 목록을 로드할 수 없으므로 이 페이지를 안전하게 수정할 수 없습니다. API에 답변하면 다시 로드하세요."
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "선택한 모든 사용자 지정 설정을 찾을 수 없거나, UI/API 사용자 지정 설정이 아니거나, 이미 변환되었습니다."
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "선택한 모든 사용자 지정 설정을 찾을 수 없거나 UI/API 사용자 지정 설정이 아닙니다."
+
+msgid "configs.flash.config_already_exists"
+msgstr "설정 %(config_type)s/%(config_name)s이(가) 이미 존재합니다"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "서비스 %(service)s의 설정 %(config_type)s/%(config_name)s이(가) 이미 존재합니다"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "설정 %(clone)s이(가) 존재하지 않습니다."
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "설정 %(config_type)s/%(name)s이(가) 존재하지 않습니다."
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "서비스 %(service)s의 설정 %(config_type)s/%(name)s이(가) 존재하지 않습니다."
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "설정 %(config_type)s/%(name)s은(는) UI/API 사용자 지정 설정이 아니므로 편집할 수 없습니다."
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "서비스 %(service)s의 설정 %(config_type)s/%(name)s은(는) UI/API 사용자 지정 설정이 아니므로 편집할 수 없습니다."
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "\"초안\" 설정으로 변환됨: %(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "\"온라인\" 설정으로 변환됨: %(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "API에서 사용자 지정 설정을 가져오지 못했습니다: %(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "사용자 지정 설정 %(config_type)s/%(config_name)s을(를) 생성했습니다"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "서비스 %(service)s의 사용자 지정 설정 %(config_type)s/%(config_name)s을(를) 생성했습니다"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "사용자 지정 설정 %(non_convertible_config)s은(는) 이미 초안 설정이므로 변환되지 않습니다."
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "사용자 지정 설정 %(non_convertible_config)s은(는) 이미 온라인 설정이므로 변환되지 않습니다."
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "사용자 지정 설정 %(missing_config)s을(를) 찾을 수 없습니다."
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "사용자 지정 설정 %(non_editable_config)s은(는) UI/API 사용자 지정 설정이 아니므로 변환되지 않습니다."
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "사용자 지정 설정 %(skipped_config)s은(는) UI/API 사용자 지정 설정이 아니므로 삭제되지 않습니다."
+
+msgid "configs.flash.deleted_config_one"
+msgstr "설정 삭제됨: %(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "설정 삭제됨: %(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "사용자 지정 설정 삭제 중 오류가 발생했습니다: %(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "사용자 지정 설정 저장 중 오류가 발생했습니다: %(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "사용자 지정 설정 가져오기에 실패했습니다: %(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "사용자 지정 설정 가져오기에 실패했습니다: %(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "가져오기 오류: %(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "사용자 지정 설정을 가져왔습니다: %(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "사용자 지정 설정을 가져왔습니다: %(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "/configs/convert의 configs 매개변수가 잘못되었습니다."
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "/configs/delete의 configs 매개변수가 잘못되었습니다."
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "/configs/export의 configs 매개변수가 잘못되었습니다."
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "잘못된 파일 인코딩입니다. UTF-8 JSON 파일을 업로드하세요."
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "/configs/new의 name 매개변수가 잘못되었습니다."
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "/configs/new의 type 매개변수가 잘못되었습니다."
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "/configs/convert의 configs 매개변수가 없습니다."
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "/configs/delete의 configs 매개변수가 없습니다."
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "/configs/convert의 convert_to 매개변수가 없습니다."
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "/configs/new의 name 매개변수가 없습니다."
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "/configs/new의 service 매개변수가 없습니다."
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "/configs/new의 type 매개변수가 없습니다."
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "/configs/new의 value 매개변수가 없습니다."
+
+msgid "configs.flash.no_configs_selected"
+msgstr "선택된 설정이 없습니다."
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "내보낼 사용자 지정 설정이 없습니다."
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "사용자 지정 설정 파일이 업로드되지 않았습니다."
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "가져오기 파일에서 사용자 지정 설정을 찾을 수 없습니다."
+
+msgid "configs.flash.no_values_changed"
+msgstr "변경된 값이 없습니다."
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "사용자 지정 설정을 덮어썼습니다: %(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "사용자 지정 설정을 덮어썼습니다: %(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "템플릿 기반 사용자 지정 설정의 이름 변경은 허용되지 않습니다."
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "사용자 지정 설정 %(new_type)s/%(new_name)s을(를) 저장했습니다"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "서비스 %(service)s의 사용자 지정 설정 %(new_type)s/%(new_name)s을(를) 저장했습니다"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "서비스 %(new_service)s이(가) 존재하지 않습니다."
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "사용자 지정 설정을 건너뛰었습니다: %(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "사용자 지정 설정을 건너뛰었습니다: %(names)s"
 
 msgid "configs.subtitle"
 msgstr "서비스용 사용자 지정 NGINX 구성 조각 — HTTP, ModSecurity 및 스트림 수준 오버라이드를 생성, 편집 및 관리합니다."
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "해당 없음"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "경고 ID"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "전체 증거 불러오기"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "시작됨"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "중지됨"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "CrowdSec 허용 목록에 등록됨"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "댓글"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "Console에서 관리됨"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "이 엔진에서 허용 목록을 찾을 수 없습니다."
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "신뢰하는 IP 또는 CIDR 네트워크를 추가하세요."
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "Console에서 관리하는 목록은 CrowdSec Console에서 편집하세요."
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "목록을 한 번 만들거나, 로컬에서 관리되는 기존 목록을 사용하세요."
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "CrowdSec 허용 목록 문서"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "이 예시는 24시간 후에 만료됩니다. 만료되지 않는 항목을 만들려면 --expiration을 생략하세요. IPv4와 IPv6를 지원합니다."
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "목록과 항목의 만료일을 확인하세요."
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "여기서 허용 목록을 탐색하고 IP를 확인할 수 있습니다. 항목을 추가하거나 제거하려면 CrowdSec 엔진에서 cscli를 사용하세요."
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "변경한 후에는 허용 목록을 새로 고치고 해당 IP를 다시 조사하세요. 예외를 제거하면 이후의 CrowdSec 결정이 허용되며, 차단이 생성되지는 않습니다. BunkerWeb 로컬 차단과 다른 보호 기능은 별도로 유지됩니다."
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "더 이상 필요하지 않은 예외는 제거하세요."
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "신뢰하는 IP와 네트워크를 관리하는 방법"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "CrowdSec 1.7 이상이 필요합니다. 선택한 엔진의 로컬 API(LAPI)를 실행하는 호스트 또는 컨테이너 내부에서, 해당 CrowdSec 구성과 데이터베이스에 접근할 수 있는 상태로 이 명령을 실행하세요. 예시 목록 이름, IP, 네트워크는 사용자의 값으로 바꾸세요."
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "선택한 엔진에서 신뢰하는 IP와 네트워크입니다. 이 예외는 엔진에 연결된 모든 서비스와 bouncer에 적용됩니다."
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "이 예외는 엔진 전체에 적용됩니다. BunkerWeb 로컬 차단, 다른 보호 기능 또는 캐시된 결정이 여전히 이 IP를 차단할 수 있습니다."
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "로컬에서 관리됨"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "안 함"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "활성 항목이 없습니다."
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "이 IP는 어떤 CrowdSec 허용 목록과도 일치하지 않습니다."
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "허용 목록 페이지"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "허용 목록 새로 고침"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "CrowdSec 허용 목록"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "허용 목록 상태를 확인할 수 없습니다."
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "캡처된 기록"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "캡처된 보고서 데이터는 요청 시점에 관찰된 내용을 나타내며, 현재 결정 상태를 증명하지 않습니다."
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "마지막 AppSec 관찰"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "구성됨"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "연결됨"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "연결 오류"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "호스트 이름 또는 서비스로 연결 필터링"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "모든 서비스"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "CrowdSec 연결"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "마지막 성공 동기화"
 
 msgid "crowdsec.connection.local_api"
-msgstr "Local API"
+msgstr "로컬 API"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "관리"
 
 msgid "crowdsec.connection.mode"
-msgstr "Mode"
+msgstr "모드"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "사용할 수 있는 CrowdSec 연결을 찾지 못했습니다. 인스턴스 오류와 플러그인 구성을 확인하세요."
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "읽기 전용"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "먼저 CrowdSec 연결을 선택하세요."
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "선택한 연결은 아래의 결정, 허용 목록, IP 조사에 적용됩니다."
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "선택한 연결"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "결정 동기화"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "최신 상태"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "아직 동기화되지 않음"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "오래됨"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "현재 상태"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "이 관찰 이후에 현재 상태가 변경될 수 있습니다."
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "기간"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "만료"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "결정 ID"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "출처"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "시나리오"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "범위"
 
 msgid "crowdsec.decision.target"
-msgstr "Target"
+msgstr "대상"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "유형"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "%(total)s개 중 %(start)s–%(end)s번째 표시"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "선택한 CrowdSec 엔진에서 직접 읽은 현재 상태입니다."
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "이 필터와 일치하는 활성 결정이 없습니다."
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "결정 페이지"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "활성 결정"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "CrowdSec 요청에 실패했습니다."
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "사용 가능한 CrowdSec 경고 증거"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "현재 CrowdSec 결정"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "현재 CrowdSec 결정은 로컬 차단 및 캡처된 보고서와 함께 확인됩니다."
 
 msgid "crowdsec.investigation.ip"
-msgstr "IP address"
+msgstr "IP 주소"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "현재 BunkerWeb 로컬 차단"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "사용 가능한 경고 증거가 없습니다."
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "현재 로컬 차단을 찾지 못했습니다."
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "현재 CrowdSec 결정을 찾지 못했습니다."
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "최근에 캡처된 보고서를 찾지 못했습니다."
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "최근 BunkerWeb 보고서"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "%(ip)s 조사"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "조사"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "이 IP에 대해 발견된 증거"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "활성 %(total)s개"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "CrowdSec 경고 증거"
 
 msgid "crowdsec.investigation.summary_available"
-msgstr "%(total)s available"
+msgstr "사용 가능 %(total)s개"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "BunkerWeb 로컬 차단"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "캡처됨 %(total)s개"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "CrowdSec 결정"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "선택한 CrowdSec 연결과 BunkerWeb 자체 차단을 대상으로 합니다. 다른 보호 기능은 여기서 확인하지 않으며, 읽을 수 없었던 증거가 이 IP가 허용되었다는 증거는 아닙니다."
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "발견된 항목 없음"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "BunkerWeb 보고서"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "읽을 수 없음"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "IP 조사"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "%(total)s개 결과 중 %(shown)s개 표시 (소스 제한: %(limit)s)."
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "사용할 수 없음: %(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "만료"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "사유"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "서비스"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "다음"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "%(time)s에 관찰됨"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "이전"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "요청 차단됨"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "CrowdSec AppSec 실패 정책"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "상태 새로 고침"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "제거"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "내용을 이해했으며 이 결정을 제거하겠습니다."
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "공유 CrowdSec 엔진에서 결정을 제거하며, 연결된 모든 bouncer에 영향을 줍니다. 캐시된 결정, 다른 범위, 로컬 차단 또는 AppSec이 여전히 대상을 차단할 수 있습니다."
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "%(source)s(%(engine)s)에서 %(scope)s %(value)s(%(type)s), 시나리오 %(scenario)s, 출처 %(origin)s을(를) 제거하시겠습니까?"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "결정 제거"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "CrowdSec 소스에서 제거되었습니다. 전파 상태는 %(status)s입니다(%(mode)s, 간격 %(interval)s). 남은 일치 결정: %(remaining)s. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다."
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "CrowdSec 결정 제거"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "캡처 시각"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "보고서 시각"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "캡처된 결정"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "보안 보고서"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "보고서 식별자"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "일치한 대상"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "결정 메타데이터"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "완료"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "불완전"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "이 이전 보고서에는 CrowdSec 스냅샷 메타데이터가 없습니다."
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "요청 시점에 캡처된 일부 결정 메타데이터를 사용할 수 없었습니다."
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "사유"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "캡처된 조치"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "캡처된 서비스 범위"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "서비스"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "캡처된 소스"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "구성된 각 CrowdSec 엔진을 점검하고, 현재 증거와 캡처된 증거를 바탕으로 IP를 조사하세요."
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "CrowdSec 운영자"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "알 수 없음"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "하나 이상의 작업이 마지막 실행에서 실패했습니다."
@@ -2416,17 +2806,128 @@ msgstr "지난 %(days)s일"
 msgid "dashboard.window.title"
 msgstr "대시보드 창"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "일치하는 %(entity)s %(count)s개가 모두 선택되었습니다."
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "일치하는 차단 항목 %(count)s개가 모두 선택되었습니다."
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "일치하는 %(entity)s %(count)s개 모두 선택"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "일치하는 차단 항목 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "이 페이지의 차단 항목 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "이 페이지의 차단 항목 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "일치하는 캐시 파일 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "일치하는 캐시 파일 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "이 페이지의 캐시 파일 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "이 페이지의 캐시 파일 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "일치하는 사용자 정의 설정 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "일치하는 사용자 정의 설정 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "이 페이지의 사용자 정의 설정 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "이 페이지의 사용자 정의 설정 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "일치하는 인스턴스 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "일치하는 인스턴스 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "이 페이지의 인스턴스 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "이 페이지의 인스턴스 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "일치하는 항목 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "일치하는 항목 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "이 페이지의 항목 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "이 페이지의 항목 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "일치하는 작업 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "일치하는 작업 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "이 페이지의 작업 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "이 페이지의 작업 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "일치하는 플러그인 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "일치하는 플러그인 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "이 페이지의 플러그인 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "이 페이지의 플러그인 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "일치하는 보고서 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "일치하는 보고서 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "이 페이지의 보고서 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "이 페이지의 보고서 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "일치하는 서비스 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "일치하는 서비스 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "이 페이지의 서비스 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "이 페이지의 서비스 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "일치하는 템플릿 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "일치하는 템플릿 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "이 페이지의 템플릿 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "이 페이지의 템플릿 %(count)s개가 모두 선택되었습니다."
 
 msgid "datatable.bulk_select_clear"
 msgstr "선택 지우기"
-
-msgid "datatable.bulk_select_page"
-msgstr "이 페이지의 %(entity)s %(count)s개가 모두 선택되었습니다."
 
 msgid "datatable.info_bans"
 msgstr "%(total)s개의 차단 항목 중 %(start)s~%(end)s 표시 중"
@@ -2569,6 +3070,9 @@ msgstr "처리 중..."
 msgid "datatable.search"
 msgstr "검색:"
 
+msgid "datatable.select_row"
+msgstr "행 선택"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "선택된 차단 항목 없음"
 
@@ -2659,11 +3163,50 @@ msgstr "1개의 템플릿 선택됨"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d개의 템플릿 선택됨"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s 선택됨"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "사용자 정의 설정 %(count)s개 선택됨"
 
-msgid "datatable.selected_list_empty"
-msgstr "%(entity)s 선택되지 않음."
+msgid "datatable.selected_list.configs.count_other"
+msgstr "사용자 정의 설정 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "선택된 사용자 정의 설정 없음."
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "항목 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "항목 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "선택된 항목 없음."
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "플러그인 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "플러그인 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "선택된 플러그인 없음."
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "서비스 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "서비스 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "선택된 서비스 없음."
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "템플릿 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "템플릿 %(count)s개 선택됨"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "선택된 템플릿 없음."
 
 msgid "datatable.zero_records_bans"
 msgstr "일치하는 차단 항목이 없습니다."
@@ -2794,11 +3337,41 @@ msgstr "자세한 내용은 작업 페이지를 확인하세요."
 msgid "flash.configuration_pending_instance"
 msgstr "구성이 아직 적용되지 않음 — 인스턴스 기동 대기 중."
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "CORS 또는 AJAX 요청이 필요합니다"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "API에서 전역 설정을 가져오지 못했습니다."
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "리소스 그룹을 가져오지 못했습니다: %(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "데이터베이스가 읽기 전용 모드입니다"
+
+msgid "flash.description_too_long"
+msgstr "설명은 4000자를 초과할 수 없습니다"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "쓰기 권한이 없습니다"
+
 msgid "flash.easter_egg"
 msgstr "이 글을 보고 계신다면 호기심이 많으시군요!"
 
 msgid "flash.error"
 msgstr "오류"
+
+msgid "flash.error_fetching_instances"
+msgstr "인스턴스를 가져오는 중 오류 발생"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "사용자 지정 설정 저장 중 오류가 발생했습니다: %(e)s"
+
+msgid "flash.import_warning"
+msgstr "가져오기 경고: %(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "잘못된 convert_to 매개변수입니다."
 
 msgid "flash.last_configuration_change_failed"
 msgstr "마지막 구성 변경 사항을 적용할 수 없었습니다."
@@ -2806,11 +3379,20 @@ msgstr "마지막 구성 변경 사항을 적용할 수 없었습니다."
 msgid "flash.message"
 msgstr "정보"
 
+msgid "flash.plugin_not_found"
+msgstr "플러그인을 찾을 수 없습니다"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "PRO 라이선스에서 허용하는 것보다 많은 서비스가 있습니다. 라이선스를 업그레이드하거나 일부 서비스를 초안(Draft) 모드로 전환하여 PRO 라이선스를 활성화하세요."
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "스케줄러가 변경 사항 적용을 시도합니다."
+
+msgid "flash.service_does_not_exist"
+msgstr "서비스 %(service)s이(가) 존재하지 않습니다."
 
 msgid "flash.time.just_now"
 msgstr "방금 전"
@@ -2845,6 +3427,9 @@ msgstr "기존 UI/API 사용자 지정 설정 덮어쓰기"
 msgid "form.checkbox.remember_me"
 msgstr "로그인 상태 유지"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "동일한 id의 템플릿이 있으면 교체"
+
 msgid "form.help.ban_specific_service"
 msgstr "차단은 이 특정 서비스에만 적용됩니다."
 
@@ -2862,6 +3447,9 @@ msgstr "체크하면 수동으로 제거하기 전까지 차단이 만료되지 
 
 msgid "form.help.photo_extensions"
 msgstr "JPG, GIF, PNG 파일만 허용됩니다. 최대 크기: 800KB."
+
+msgid "form.help.secret_stored"
+msgstr "값이 저장되어 있으며 표시되지 않습니다. 유지하려면 필드를 그대로 두고, 교체하려면 새 값을 입력하고, 제거하려면 필드를 지우세요."
 
 msgid "form.label.2fa_code"
 msgstr "2단계 인증 코드"
@@ -3031,6 +3619,9 @@ msgstr "서버 이름"
 msgid "form.label.service_name"
 msgstr "서비스 이름"
 
+msgid "form.label.template_file"
+msgstr "템플릿 파일"
+
 msgid "form.label.template_id"
 msgstr "템플릿 ID"
 
@@ -3130,6 +3721,438 @@ msgstr "비밀번호에 특수 문자가 최소 1개 포함되어야 합니다."
 msgid "form.validation.password_uppercase"
 msgstr "비밀번호에 대문자가 최소 1개 포함되어야 합니다."
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "NGINX 액세스 로그에 사용할 경로(파일 경로, syslog:server=host[:port][,param=value], 또는 memory:name:size; 비활성화하려면 off로 설정)."
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "액세스 로그 경로"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "BunkerWeb 내부 API의 수신 대기 포트 번호(TLS)."
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "API HTTPS 포트 번호"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "BunkerWeb 내부 API의 수신 대기 포트 번호."
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "API 포트 번호"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "BunkerWeb 내부 API의 HTTP 수신 대기."
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "API HTTP 수신 대기"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "BunkerWeb 내부 API의 HTTPS(SSL/TLS) 수신 대기."
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "API HTTPS 수신 대기"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "BunkerWeb 내부 API의 수신 대기 IP 주소."
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "API 수신 대기 IP 주소"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "BunkerWeb 내부 API의 서버 이름(가상 호스트)."
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "API 서버 이름"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "API 호출을 인증하기 위한 선택적 토큰입니다. 설정된 경우 스케줄러(및 모든 클라이언트)는 이를 Authorization 헤더를 통해 전송해야 합니다. 참고: BunkerWeb과 스케줄러 환경 모두에 설정되어야 합니다."
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "API 액세스 토큰"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "BunkerWeb 내부 API에 접속할 수 있는 IP/네트워크 목록입니다. (형식: ip/netmask 또는 ipv6/netmask, 공백으로 구분)"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "API 화이트리스트 IP"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "Autoconf Docker 통합을 활성화합니다."
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "Autoconf 모드"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "공백으로 구분된 BunkerWeb 인스턴스 목록(형식: fqdn-또는-ip:5000 http://fqdn-또는-ip:5000)"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "BunkerWeb 인스턴스"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "내부 cachestore(ipc)의 크기."
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "Cachestore IPC 메모리 크기"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "내부 cachestore(locks)의 크기."
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "Cachestore Locks 메모리 크기"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "내부 cachestore의 크기."
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "Cachestore 메모리 크기"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "내부 cachestore(miss)의 크기."
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "Cachestore Miss 메모리 크기"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "클라이언트 요청 본문을 읽기 위한 시간 초과."
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "클라이언트 본문 시간 초과"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "클라이언트 요청 헤더를 읽기 위한 시간 초과."
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "클라이언트 헤더 시간 초과"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "마지막으로 기록된 프로젝션 이후 프로젝션된 .conf 파일이 변경되었거나 그 안에 없었을 때 발생하는 일입니다. 현재 데이터베이스 행과 일치하는 파일은 무시됩니다. 읽을 수 있는 프로젝션 기록이 없으면 드리프트가 보고되지 않습니다. 'overwrite'는 감지된 각 드리프트를 기록하고 데이터베이스에서 파일을 다시 작성하거나, 이를 대체할 활성 행이 없으면 삭제합니다. 'refuse'는 드리프트가 해결될 때까지 데이터베이스에서 그곳에 아무것도 쓰지 않고 오류를 기록하며, 대기 중인 사용자 지정 구성 변경을 확인되지 않은 상태로 두어 다시 시도되도록 합니다."
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "사용자 지정 구성 드리프트 정책"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "워커별 공유 datastore LRU의 슬롯 수입니다(internalstore 및 플러그인의 워커 로컬 캐시에서 사용). 일반 정수 또는 `k`/`m` 축약형(예: `1k`, `10k`, `1m`)을 허용합니다."
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "Datastore LRU 크기"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "내부 datastore의 크기."
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "Datastore 메모리 크기"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "사용할 리졸버의 DNS 주소."
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "DNS 리졸버"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "NGINX 오류 로그에 사용할 경로(파일 경로, stderr, syslog:server=host[:port][,param=value], 또는 memory:size)."
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "오류 로그 경로"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "bunkerweb이 바인딩하는 HTTPS 포트 번호입니다. HTTPS 수신 대기를 비활성화하려면 비워 두세요."
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "HTTPS 포트"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "bunkerweb이 바인딩하는 HTTP 포트 번호입니다. HTTP 수신 대기를 비활성화하려면 비워 두세요."
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "HTTP 포트"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "내부 internalstore의 크기."
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "Internalstore 메모리 크기"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "내부 사용: 서비스가 초안 모드일 때 yes로 설정합니다."
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "내부 사용: 초안"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "내부 사용: BW가 로딩 중일 때 yes로 설정합니다."
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "내부 사용: 로딩 중"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "매일 예약된 작업이 실행되는 현지 시간(스케줄러 시간대, HH:MM, 24시간제)입니다. 주간 작업도 JOBS_WEEKLY_DAY에 이 시간에 실행됩니다."
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "매일 작업 시간"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "JOBS_DAILY_TIME에 매주 예약된 작업이 실행되는 요일."
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "매주 작업 요일"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "keep-alive 클라이언트 연결에 대한 시간 초과."
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "Keepalive 시간 초과"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "재시작 시 구성을 유지합니다. 재시작 시 구성 재설정을 방지하려면 'yes'로 설정하세요."
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "재시작 시 구성 유지"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "Kubernetes 통합을 활성화합니다."
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "Kubernetes 모드"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "SSL이 아닌 수신 대기(패스스루)를 활성화합니다."
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "Stream 수신 대기"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "SSL이 아닌 수신 대기 포트(패스스루)입니다. 비 SSL stream 수신 대기를 비활성화하려면 비워 두세요."
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "Stream 수신 대기 포트"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "SSL 수신 대기 포트(패스스루)입니다. SSL stream 수신 대기를 비활성화하려면 비워 두세요."
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "Stream 수신 대기 포트 SSL"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "액세스 로그에 사용할 형식."
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "액세스 로그 형식"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "오류 로그에 사용할 수준."
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "로그 수준"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "멀티사이트 활성화."
+
+msgid "general.settings.MULTISITE.label"
+msgstr "멀티사이트"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "nginx가 구성을 검색할 위치."
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "nginx 프리픽스"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "이 사이트의 access 단계(요청 승인/제어)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "플러그인 순서 (access)"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "이 사이트의 header 단계(응답 헤더 필터링)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "플러그인 순서 (header)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "init 단계(엔진 부트스트랩, 한 번 실행)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "플러그인 순서 (init)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "init_worker 단계(워커별 부트스트랩)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "플러그인 순서 (init_worker)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "init_workers 단계에서 실행할, 쉼표 또는 공백으로 구분된 플러그인 ID."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "플러그인 순서 (init_workers)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "이 사이트의 log 단계(응답 후 HTTP 로그 처리)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "플러그인 순서 (log)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "이 사이트의 log_default 단계(기본 vhost 로그 처리)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "플러그인 순서 (log_default)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "이 사이트의 log_stream 단계(stream 로그 처리)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "플러그인 순서 (log_stream)"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "이 사이트의 preread 단계(프록시 전 TCP preread 검사)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "플러그인 순서 (preread)"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "이 사이트의 set 단계(rewrite/access 전 변수 설정)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "플러그인 순서 (set)"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "이 사이트의 ssl_certificate 단계(TLS 인증서 선택/발급)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "플러그인 순서 (ssl_certificate)"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "timer 단계(백그라운드 타이머)에서 먼저 실행되어야 하는 플러그인입니다. ID를 공백으로 구분하세요. 나머지 플러그인은 이후 정상적인 순서로 계속 실행됩니다."
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "플러그인 순서 (timer)"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "위협에 대한 대응을 정의합니다: 모니터링하고 기록하려면 \"detect\", 액세스를 차단하고 사건을 기록하려면 \"block\"."
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "보안 모드"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "클라이언트에게 응답을 전송하기 위한 시간 초과."
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "전송 시간 초과"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "bunkerweb이 제공하는 가상 호스트 목록입니다. (공백으로 구분)"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "서버 이름"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "server_names_hash_bucket_size 지시어의 값."
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "서버 이름 해시 버킷 크기"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "서버 유형: http 또는 stream."
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "서버 유형"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "취소된 쿠키 세션 식별자를 보관하는 내부 저장소의 크기."
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "세션 취소 메모리 크기"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "Docker Swarm 통합을 활성화합니다."
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "Swarm 모드"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "타이머에 대한 로그 수준."
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "타이머 로그 수준"
+
+msgid "general.settings.USE_API.help"
+msgstr "BunkerWeb 내부 API를 활성화합니다."
+
+msgid "general.settings.USE_API.label"
+msgstr "API 활성화"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "IPv6 연결을 활성화합니다."
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "IPv6 사용"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "TCP 수신 대기(stream)."
+
+msgid "general.settings.USE_TCP.label"
+msgstr "TCP 수신 대기"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "적용할 구성 템플릿으로, 공백으로 구분되며 특정 설정의 기본값을 재정의합니다. 템플릿은 순서대로 적용되며 나중 템플릿이 이전 템플릿을 재정의합니다. 서비스에 설정된 값은 템플릿을 재정의합니다."
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "템플릿 사용"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "UDP 수신 대기(stream)."
+
+msgid "general.settings.USE_UDP.label"
+msgstr "UDP 수신 대기"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "초기화 워커를 위한 lua_shared_dict의 크기"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "초기화 Workerlock 메모리 크기"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "워커당 최대 연결 수."
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "워커당 연결 수"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "워커 프로세스 수."
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "워커 프로세스"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "워커 프로세스에 대해 열 수 있는 최대 파일 수."
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "워커당 열린 파일 수"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "워커 프로세스의 정상 종료를 위한 시간 초과입니다. 이 지연 시간 이후, 메모리 증가를 방지하기 위해 재로드 중에 이전 워커가 강제로 종료됩니다."
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "워커 종료 시간 초과"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "업그레이드를 위해 라이선스 키를 확인하는 중입니다."
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "전역 설정이 저장되지 않았습니다: 변경된 모든 값이 거부되었습니다."
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "변경된 값이 없어 전역 설정이 수정되지 않았습니다."
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "전역 설정을 저장했지만 %(refused_count)s개 값이 거부되었습니다."
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "전역 설정을 성공적으로 저장했습니다."
+
+msgid "home.flash.error_fetching_services"
+msgstr "서비스를 가져오는 중 오류 발생: %(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "모든 %(count)s 설정 보기"
 
@@ -3156,6 +4179,75 @@ msgstr "정적"
 
 msgid "instances.down"
 msgstr "중지됨"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "인스턴스를 생성하지 못했습니다: %(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "API에서 인스턴스를 가져오지 못했습니다."
+
+msgid "instances.flash.could_not_found_one"
+msgstr "선택한 인스턴스를 찾을 수 없거나 UI/API 인스턴스가 아닙니다."
+
+msgid "instances.flash.could_not_found_other"
+msgstr "선택한 인스턴스를 모두 찾을 수 없거나 UI/API 인스턴스가 아닙니다."
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "인스턴스를 삭제할 수 없습니다: %(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "인스턴스를 삭제할 수 없습니다: %(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "호스트명 %(hostname)s은(는) 이미 사용 중입니다."
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "인스턴스 %(value)s을(를) 성공적으로 생성했습니다."
+
+msgid "instances.flash.instance_deleted"
+msgstr "인스턴스 %(instance)s이(가) 성공적으로 삭제되었습니다."
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "인스턴스 %(instance)s이(가) 존재하지 않습니다."
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "인스턴스 %(instance)s에는 재로드 메서드가 없습니다."
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "인스턴스 %(instance)s에는 중지 메서드가 없습니다."
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "인스턴스 %(non_deletable_instance)s은(는) UI/API 인스턴스가 아니므로 삭제되지 않습니다."
+
+msgid "instances.flash.instance_reloaded"
+msgstr "인스턴스 %(instance)s이(가) 성공적으로 다시 로드되었습니다."
+
+msgid "instances.flash.instance_stopped"
+msgstr "인스턴스 %(instance)s이(가) 성공적으로 중지되었습니다."
+
+msgid "instances.flash.instances_deleted"
+msgstr "다음 인스턴스들이 성공적으로 삭제되었습니다: %(instance)s."
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "/instances/new의 instance hostname 매개변수가 없습니다."
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "/instances/new의 instance name 매개변수가 없습니다."
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "/instances/delete의 instances 매개변수가 없습니다."
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "/instances/ping의 instances 매개변수가 없습니다."
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "/instances/reload의 instances 매개변수가 없습니다."
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "/instances/stop의 instances 매개변수가 없습니다."
+
+msgid "instances.flash.no_instance_selected"
+msgstr "선택된 인스턴스가 없습니다."
 
 msgid "instances.loading"
 msgstr "로딩 중"
@@ -3193,6 +4285,24 @@ msgstr "시작일"
 msgid "job.history.success"
 msgstr "성공"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "작업을 가져오는 중 오류 발생: %(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "/jobs/run의 jobs 매개변수가 잘못되었습니다."
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "작업의 플러그인은 스케줄러가 백그라운드에서 실행합니다."
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "플러그인 작업은 스케줄러가 백그라운드에서 실행합니다."
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "/jobs/run의 jobs 매개변수가 없습니다."
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "선택된 작업이 없습니다."
+
 msgid "jobs.subtitle"
 msgstr "BunkerWeb 스케줄러가 실행하는 예약 작업 및 일회성 작업 — 상태를 추적하고 필요할 때 실행합니다."
 
@@ -3213,6 +4323,15 @@ msgstr "잠금됨 (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "잠금된 설정은 강조 표시됩니다"
+
+msgid "legend.raw_setting_drafts"
+msgstr "설정 줄의 시작에서 #을 눌러 초안을 전환하거나 Backspace를 눌러 활성화하세요. 저장하면 적용됩니다. 초안은 값을 유지하며 상속된 값이나 기본값이 적용됩니다."
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "인증서를 열어 확인하기"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt: 고아 인증서 <strong>%(cert_name)s</strong>이(가) 누락된 ACME 계정 <code>%(account)s</code>을(를) 참조합니다. 공급자 상태가 복구될 때까지 갱신이 차단됩니다. <a href=\"%(certificates_url)s\">%(link_text)s</a>."
 
 msgid "link.back_to_login"
 msgstr "로그인으로 돌아가기"
@@ -3253,6 +4372,12 @@ msgstr "인증 코드 사용"
 msgid "link.use_recovery_code"
 msgstr "복구 코드 사용"
 
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "로그인하지 못했습니다. 다시 시도해 주세요"
+
+msgid "login.flash.invalid_username_password"
+msgstr "잘못된 사용자 이름 또는 비밀번호입니다"
+
 msgid "login.notice_password_changed"
 msgstr "비밀번호가 변경되었습니다. 새 비밀번호로 로그인하세요."
 
@@ -3288,6 +4413,12 @@ msgstr "펼치기"
 
 msgid "logs.filter_levels"
 msgstr "수준"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "잘못된 파일 경로입니다"
+
+msgid "logs.flash.no_such_file"
+msgstr "해당 파일이 없습니다"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,6 +4504,27 @@ msgstr "더 높게"
 msgid "logs.trimmed_notice"
 msgstr "--- 성능을 위해 %(count)s개의 오래된 로그 라인을 제거했습니다 ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "데이터베이스 연결이 읽기 전용 모드입니다: 수정이 불가능합니다."
+
+msgid "main.flash.failover_configuration_error"
+msgstr "NGINX 구성 오류가 발생하여 마지막 변경 사항을 적용할 수 없습니다. 자세한 내용은 BunkerWeb 로그를 확인하세요. 구성이 마지막으로 작동하던 버전으로 되돌아갔습니다."
+
+msgid "main.flash.failover_message"
+msgstr "장애 조치 메시지:"
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "상태를 강제로 다시 로드했습니다"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "프로 라이선스가 허용하는 것보다 많은 서비스를 보유하고 있습니다. 라이선스를 업그레이드하거나 일부 서비스를 초안 모드로 전환하여 프로 라이선스를 잠금 해제하세요."
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "마지막 변경 사항이 성공적으로 적용되었습니다."
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "2단계 인증이 활성화되어 있지만 사용 가능한 복구 코드가 없습니다. 새로고침하세요:"
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "플러그인 압축 파일을 여기에 드래그하거나 클릭하여 파일을 선택하세요."
 
@@ -3384,11 +4536,20 @@ msgid "modal.body.confirm_cache_deletion_alert"
 msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
 msgstr[0] "선택한 캐시 파일을 삭제하시겠습니까?"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "선택한 사용자 지정 설정을 초안으로 전환하시겠습니까?"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "선택한 사용자 지정 설정을 온라인으로 전환하시겠습니까?"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "선택한 사용자 정의 설정을 전환하시겠습니까?"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "선택한 사용자 정의 설정을 %(state)s(으)로 전환하시겠습니까?"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "선택한 사용자 지정 설정을 초안으로 전환하시겠습니까?"
+
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "선택한 사용자 지정 설정을 온라인으로 전환하시겠습니까?"
 
 #. plural pair; 1 form(s) for ko, singular in slot 0
 msgid "modal.body.confirm_configs_deletion_alert"
@@ -3406,11 +4567,28 @@ msgid "modal.body.confirm_plugin_deletion"
 msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "선택한 플러그인을 삭제하시겠습니까?"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "선택한 서비스를 초안으로 변환하시겠습니까?"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "선택한 서비스를 온라인으로 변환하시겠습니까?"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "이 서비스의 선언된 모드를 변경하시겠습니까?"
 
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "선택한 서비스를 초안으로 변환하시겠습니까?"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "선택한 서비스를 온라인으로 변환하시겠습니까?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "템플릿 %(name)s을(를) 삭제하시겠습니까?"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "선택한 템플릿을 삭제하시겠습니까?"
 
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "선택한 인스턴스를 삭제하시겠습니까?"
@@ -3471,6 +4649,12 @@ msgstr "서비스 내보내기 파일을 이곳에 드래그 앤 드롭하거나
 msgid "modal.body.import_services_warning"
 msgstr "서비스를 가져오면 내보내기 파일에서 새 UI 서비스가 생성됩니다. 기존 서비스는 건너뜁니다. 사용자 지정 설정과 함께 내보낸 .zip 아카이브도 지원됩니다."
 
+msgid "modal.body.import_template_help"
+msgstr "BunkerWeb에서 내보낸 템플릿 패키지(.json) 또는 template.json과 구성이 포함된 템플릿 폴더 하나를 담은 아카이브(.zip, .tar.gz, .tar.xz)입니다. 최대 1MiB."
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "템플릿을 교체하면 다음 구성 생성 시 이를 사용하는 모든 서비스가 변경됩니다. 플러그인이 소유하거나 웹 UI 외부에서 관리되는 템플릿은 절대 교체되지 않습니다."
+
 msgid "modal.body.instance_creation_alert"
 msgstr "포트나 서버 이름을 입력할 필요가 없습니다. 인스턴스 설정에는 `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, `API_SERVER_NAME`의 값이 사용됩니다."
 
@@ -3485,6 +4669,9 @@ msgstr "이 복구 코드는 한 번만 표시됩니다. 반드시 안전하게 
 
 msgid "modal.body.reset_template_alert"
 msgstr "현재 템플릿 설정과 사용자 정의 설정을 초기화하시겠습니까?"
+
+msgid "modal.body.service_deletion_confirmation"
+msgstr "선택한 서비스를 삭제하시겠습니까?"
 
 msgid "modal.body.services_conversion_confirmation"
 msgstr "선택한 서비스를 전환하시겠습니까?"
@@ -3578,6 +4765,9 @@ msgstr "사용자 지정 설정 가져오기"
 msgid "modal.title.import_services"
 msgstr "서비스 가져오기"
 
+msgid "modal.title.import_template"
+msgstr "템플릿 가져오기"
+
 msgid "modal.title.job_history"
 msgstr "최근 10회 작업 실행 기록"
 
@@ -3613,6 +4803,21 @@ msgstr "간편"
 
 msgid "mode.raw"
 msgstr "원본(Raw)"
+
+msgid "navbar.aria.close_navigation"
+msgstr "탐색 닫기"
+
+msgid "navbar.aria.help"
+msgstr "도움말"
+
+msgid "navbar.aria.news"
+msgstr "뉴스"
+
+msgid "navbar.aria.notifications"
+msgstr "알림"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "탐색 전환"
 
 msgid "navbar.button.upgrade_to_pro"
 msgstr "PRO로 업그레이드"
@@ -3764,6 +4969,9 @@ msgstr "이미 구독 중입니다"
 msgid "notice.dismiss_mfa"
 msgstr "다시 알리지 않기"
 
+msgid "notice.enable_mfa"
+msgstr "계정을 보호하려면 <a href=\"%(url)s\">여기</a>에서 2단계 인증을 활성화하세요"
+
 msgid "onboarding.dismiss"
 msgstr "닫기"
 
@@ -3817,6 +5025,39 @@ msgstr "첫 서비스 등록"
 
 msgid "onboarding.item.workflow"
 msgstr "보안 워크플로 연결하기"
+
+msgid "onboarding.item_hint.first_block"
+msgstr "BunkerWeb이 요청을 차단하면 보고서가 여기에 나타납니다 — 잘못된 요청을 보내고 다시 확인해 보세요."
+
+msgid "onboarding.item_hint.https"
+msgstr "서비스가 HTTPS로 제공되도록 여기에서 인증서를 추가하거나 생성하세요."
+
+msgid "onboarding.item_hint.install"
+msgstr "여기에서 인스턴스를 추가한 다음 첫 구성을 저장하여 관리 대상으로 만드세요."
+
+msgid "onboarding.item_hint.mfa"
+msgstr "이 메뉴에서 프로필을 열고 2단계 인증을 켜세요."
+
+msgid "onboarding.item_hint.pro"
+msgstr "PRO 플러그인과 지원을 잠금 해제하려면 여기에서 PRO 라이선스 키를 입력하세요."
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "여기의 각 행은 차단된 클라이언트, 이유, 차단이 만료되는 시점을 보여줍니다."
+
+msgid "onboarding.item_hint.read_home"
+msgstr "이 대시보드는 실행 중인 인스턴스, 제공 중인 서비스, 최근 트래픽을 한눈에 보여줍니다."
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "모든 인스턴스의 실시간 로그가 여기에 표시되며 인스턴스와 심각도로 필터링할 수 있습니다."
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "여기에서 보고서를 열어 어떤 보안 검사가 이를 막았는지, 그리고 그 이유를 확인하세요."
+
+msgid "onboarding.item_hint.service"
+msgstr "여기에서 서비스를 생성하여 BunkerWeb에게 보호할 애플리케이션을 알려 주세요."
+
+msgid "onboarding.item_hint.workflow"
+msgstr "여기에서 워크플로를 구성하여 검사와 대응을 하나의 규칙으로 연결하세요."
 
 msgid "onboarding.not_saved"
 msgstr "저장하지 못했습니다."
@@ -3881,6 +5122,9 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "BunkerWeb 버전(%(current)s)을 읽을 수 없어 %(id)s의 호환성을 확인할 수 없습니다. 아무것도 설치되지 않았습니다"
+
 msgid "plugins.catalog.incompatible"
 msgstr "이 릴리스는 BunkerWeb 호환성을 선언하지 않습니다. 현재 버전은 %(current)s입니다"
 
@@ -3899,8 +5143,32 @@ msgstr "더 알아보기"
 msgid "plugins.catalog.release"
 msgstr "릴리스 %(tag)s에서 읽기"
 
+msgid "plugins.catalog.remove"
+msgstr "제거"
+
 msgid "plugins.catalog.stale"
 msgstr "카탈로그가 최근에 새로고침되지 않아 다시 최신 상태가 될 때까지 설치가 비활성화됩니다."
+
+msgid "plugins.catalog.state_installed"
+msgstr "설치됨(버전 %(version)s)"
+
+msgid "plugins.catalog.state_managed"
+msgstr "카탈로그 외부에 설치됨. 설치한 곳에서 업데이트하거나 제거하세요"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "카탈로그 외부에서 core 플러그인으로 설치됨. 설치한 곳에서 업데이트하거나 제거하세요"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "카탈로그 외부에서 외부 플러그인으로 설치됨. 설치한 곳에서 업데이트하거나 제거하세요"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "카탈로그 외부에서 pro 플러그인으로 설치됨. 설치한 곳에서 업데이트하거나 제거하세요"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "카탈로그 외부에서 ui 플러그인으로 설치됨. 설치한 곳에서 업데이트하거나 제거하세요"
+
+msgid "plugins.catalog.state_update"
+msgstr "업데이트 가능: 버전 %(installed)s이(가) 설치되어 있으며, 카탈로그에는 %(version)s이(가) 있습니다"
 
 msgid "plugins.catalog.tab"
 msgstr "사용 가능"
@@ -3908,8 +5176,188 @@ msgstr "사용 가능"
 msgid "plugins.catalog.trust_notice"
 msgstr "커뮤니티 항목은 BunkerWeb 조직이 GitHub에 게시한 저장소에서 TLS를 통해 읽어오며, 설치되는 내용은 목록과 대조하여 확인됩니다 — 다만 여기에는 암호학적으로 서명된 것이 없습니다. 설치된 플러그인은 BunkerWeb의 모든 권한으로 코드를 실행합니다."
 
+msgid "plugins.catalog.update"
+msgstr "업데이트"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "이 작업은 설치된 플러그인 %(name)s(%(id)s, 버전 %(installed)s)을(를) 카탈로그의 버전 %(version)s(으)로 교체합니다. 카탈로그에서 설치하지 않고 수동으로 업로드했더라도 교체됩니다."
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "이 업데이트로 제거되는 설정은 없습니다."
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "이 업데이트로 제거될 설정을 지금은 나열할 수 없으므로 다음 카탈로그 새로고침까지 업데이트가 비활성화됩니다."
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "버전 %(version)s은(는) 더 이상 이 설정을 선언하지 않습니다. 전역 설정, 서비스, 템플릿에 설정된 모든 값과 함께 삭제됩니다:"
+
+msgid "plugins.catalog.update_title"
+msgstr "커뮤니티 플러그인 업데이트"
+
 msgid "plugins.catalog.version"
 msgstr "버전 %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "실행 중인 BunkerWeb 버전(%(current)s)을 읽을 수 없어 이 릴리스의 호환성을 확인할 수 없습니다"
+
+msgid "plugins.flash.already_at_version"
+msgstr "플러그인 %(plugin_id)s은(는) 이미 버전 %(version)s입니다"
+
+msgid "plugins.flash.already_installed"
+msgstr "id가 %(plugin_id)s인 플러그인이 이미 설치되어 있습니다"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "%(tag)s 아카이브가 더 이상 카탈로그에 나열된 것과 일치하지 않습니다. %(plugin_id)s에 대해 아무것도 설치되지 않았습니다."
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "%(plugin_id)s의 카탈로그 항목이 업데이트가 확인된 이후 변경되었습니다. 업데이트를 다시 검토하세요"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "%(plugin_id)s의 캐시된 카탈로그 항목이 업데이트보다 오래되었습니다. 다음 새로고침을 기다리세요"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s, 자세한 내용은 로그를 확인하세요"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "커뮤니티 카탈로그가 비활성화되어 있습니다"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "플러그인 %(plugin)s을(를) 삭제하지 못했습니다: %(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "데이터베이스에서 플러그인 %(plugin)s을(를) 삭제하지 못했습니다: %(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "%(plugin_id)s을(를) 다운로드하지 못했습니다: %(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "%(plugin_id)s을(를) 설치하지 못했습니다: %(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "%(plugin_id)s을(를) 설치하지 못했습니다: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "%(plugin_id)s을(를) 업데이트하지 못했습니다: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "%(plugin_id)s을(를) 업데이트하지 못했습니다: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "플러그인 %(plugin)s을(를) 업데이트하지 못했습니다: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "플러그인 %(plugin)s을(를) 업데이트하지 못했습니다: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "API를 통해 UI 플러그인을 업데이트하지 못했습니다: %(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "플러그인 %(plugin)s을(를) 성공적으로 삭제했습니다"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "plugin.json 파일에 다음 키 중 하나 이상이 없습니다: %(value)s (%(value2)s)"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "%(file)s의 plugin.json 파일이 유효하지 않습니다 (%(msg)s: %(lineno)s행 %(colno)s열 (문자 %(pos)s)) (%(value)s)"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "%(plugin_id)s 설치가 완료되지 않았습니다: %(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "플러그인 %(plugin_id)s을(를) 성공적으로 설치했습니다"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "파일이 유효한 플러그인 아카이브(.zip, .tar.gz 또는 .tar.xz)가 아닙니다."
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "잘못된 플러그인 ID입니다 (4~64자, 문자·숫자·밑줄·하이픈만 사용 가능)"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "%(temp_folder_name)s의 플러그인 이름이 잘못되었습니다. (숫자, 문자, 밑줄, 하이픈만 포함 가능, 최소 4자 최대 64자)"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "플러그인 %(plugin_id)s은(는) 카탈로그 외부에서 관리되므로 카탈로그에서 업데이트할 수 없습니다"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "플러그인 %(plugin_id)s은(는) 카탈로그 외부에서 관리되는 core 플러그인이므로 카탈로그에서 업데이트할 수 없습니다"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "플러그인 %(plugin_id)s은(는) 카탈로그 외부에서 관리되는 외부 플러그인이므로 카탈로그에서 업데이트할 수 없습니다"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "플러그인 %(plugin_id)s은(는) 카탈로그 외부에서 관리되는 pro 플러그인이므로 카탈로그에서 업데이트할 수 없습니다"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "플러그인 %(plugin_id)s은(는) 카탈로그 외부에서 관리되는 ui 플러그인이므로 카탈로그에서 업데이트할 수 없습니다"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "/plugins의 csrf_token 매개변수가 없습니다."
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "/plugins/catalog/install의 id 매개변수가 없습니다."
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "/plugins/catalog/update의 id 또는 version 매개변수가 없습니다."
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "/plugins/enable의 plugin 또는 enabled 매개변수가 없습니다."
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "/plugins/delete의 plugins 매개변수가 없습니다."
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "업로드할 플러그인 데이터가 없습니다"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "플러그인 %(plugin_id)s이(가) 설치되어 있지 않습니다. 카탈로그에서 설치하세요"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "%(file)s은(는) 유효한 플러그인이 아닙니다 (plugin.json 파일 없음) (%(value)s)"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "플러그인을 다시 로드하려면 새 플러그인을 업로드하세요"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "플러그인 %(plugin)s이(가) 이미 존재합니다"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "플러그인 %(plugin)s이(가) 성공적으로 비활성화되었습니다."
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "플러그인 %(plugin)s이(가) 성공적으로 활성화되었습니다."
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "플러그인 관리는 관리자만 가능합니다"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "이름이 %(folder_name)s인 플러그인이 이미 존재합니다"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "id가 %(plugin)s인 플러그인을 찾을 수 없습니다"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "플러그인 업로드 오류 (%(value)s): %(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "플러그인을 성공적으로 업로드했습니다: %(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "플러그인을 성공적으로 업로드했습니다"
+
+msgid "plugins.flash.refused_download"
+msgstr "%(plugin_id)s 다운로드가 거부되었습니다: %(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "%(plugin_id)s 설치가 거부되었습니다: %(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "%(plugin_id)s 업데이트가 거부되었습니다: %(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "%(plugin_id)s 업데이트가 완료되지 않았습니다: %(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "플러그인 %(plugin_id)s이(가) 버전 %(version)s(으)로 업데이트되었습니다"
 
 msgid "plugins.marketplace.active"
 msgstr "활성"
@@ -3983,6 +5431,36 @@ msgstr "Pro 만료일"
 msgid "pro.expiration_date.unknown"
 msgstr "만료일 알 수 없음"
 
+msgid "pro.flash.checking_license_key"
+msgstr "라이선스 키를 확인하는 중입니다."
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "PRO 플러그인의 강제 업데이트가 예약되었습니다."
+
+msgid "pro.flash.invalid_license_key"
+msgstr "잘못된 라이선스 키입니다"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "PRO 라이선스 키가 업데이트되지 않았습니다: 값이 거부되었습니다."
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "라이선스 키가 현재 키와 동일합니다."
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "PRO 라이선스 키를 성공적으로 업데이트했습니다."
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "/pro/key의 license key 매개변수가 없습니다."
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "PRO 플러그인에 대한 새 확인이 예약되었습니다."
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "스케줄러가 변경 사항 적용 및 PRO 플러그인 다운로드를 시도합니다."
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "웹 UI가 곧 PRO 플러그인을 다시 로드합니다."
+
 msgid "pro.force_check.description"
 msgstr "PRO 플러그인의 새 확인을 강제합니다. 새 버전이 있으면 플러그인을 다시 다운로드합니다."
 
@@ -4019,8 +5497,17 @@ msgstr "만료됨"
 msgid "pro.status.free_version"
 msgstr "무료 버전"
 
+msgid "pro.status.invalid"
+msgstr "잘못된 키"
+
+msgid "pro.status.invalid_key"
+msgstr "라이선스 서버가 저장된 라이선스 키를 거부했습니다. 확인하거나 전역 설정 → Pro에서 제거하세요."
+
 msgid "pro.status.overlapped"
 msgstr "한도 초과"
+
+msgid "pro.status.pending_key"
+msgstr "라이선스 키가 아직 확인되지 않았습니다. 저장 후 곧 스케줄러가 확인합니다."
 
 msgid "pro.status.pro_version"
 msgstr "PRO 버전"
@@ -4036,6 +5523,15 @@ msgstr "상태"
 
 msgid "pro.title"
 msgstr "Pro 라이선스"
+
+msgid "pro.trial.cta"
+msgstr "무료 체험 시작"
+
+msgid "pro.trial.description"
+msgstr "<span class=\"text-primary\">BunkerWeb PRO</span>를 <strong>30일</strong>간 무료로 체험해 보세요."
+
+msgid "pro.trial.title"
+msgstr "무료 체험"
 
 msgid "profile.2fa.disable_title"
 msgstr "2단계 인증 비활성화"
@@ -4078,6 +5574,132 @@ msgstr "복구 코드 갱신"
 
 msgid "profile.card.title.sessions"
 msgstr "세션"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "패스키를 삭제하지 못했습니다: %(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "2단계 인증을 비활성화하지 못했습니다: %(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "2단계 인증을 활성화하지 못했습니다: %(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "복구 코드를 새로고침하지 못했습니다: %(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "패스키 이름을 변경하지 못했습니다: %(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "다른 세션을 취소하지 못했습니다: %(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "%(value)s 사용자를 업데이트하지 못했습니다: %(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "다른 세션을 삭제하지 못했습니다: %(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "현재 비밀번호가 올바르지 않습니다."
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "이메일이 너무 깁니다. 256자 미만이어야 합니다."
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "/profile/edit의 current password 매개변수가 없습니다."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "/profile/totp-refresh의 current password 매개변수가 없습니다."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "/profile/totp-disable의 current password 매개변수가 없습니다."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "/profile/totp-enable의 current password 매개변수가 없습니다."
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "/profile/wipe-other-sessions의 current password 매개변수가 없습니다."
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "/profile/edit의 email 매개변수가 없습니다."
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "/profile/edit의 new password confirm 매개변수가 없습니다."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "/profile/webauthn/delete의 매개변수가 없습니다."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "/profile/webauthn/rename의 매개변수가 없습니다."
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "/profile/totp-enable의 totp token 매개변수가 없습니다."
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "새 비밀번호가 충분히 강력하지 않습니다. 최소 8자 이상이어야 하며, 대문자 1개, 소문자 1개, 숫자 1개, 특수문자(#@?!$%^&*-) 1개를 포함해야 합니다."
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "새 비밀번호가 현재 비밀번호와 동일합니다."
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "새 비밀번호가 너무 깁니다. %(MAX_PASSWORD_BYTES)s바이트(bcrypt의 하드 제한)를 초과할 수 없습니다. 억양 문자나 이모지는 각각 여러 바이트로 계산됩니다."
+
+msgid "profile.flash.no_fields_updated"
+msgstr "업데이트된 필드가 없습니다."
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "다른 세션이 성공적으로 삭제되었습니다."
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "패스키가 성공적으로 삭제되었습니다."
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "패스키가 성공적으로 등록되었습니다."
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "패스키 이름이 성공적으로 변경되었습니다."
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "패스키 이름은 비워 둘 수 없습니다."
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "비밀번호는 변경되었지만 다른 세션은 취소하지 못했습니다. 아래의 \"다른 세션 삭제\"를 사용하고 활성 세션 목록을 확인하세요."
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "비밀번호가 비밀번호 확인과 일치하지 않습니다."
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "프로필이 성공적으로 업데이트되었습니다."
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "복구 코드가 성공적으로 새로고침되었습니다. 이전 코드는 더 이상 유효하지 않습니다."
+
+msgid "profile.flash.theme_invalid"
+msgstr "테마가 잘못되었습니다."
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "TOTP 토큰이 잘못되었습니다."
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "2단계 인증이 이미 활성화되어 있습니다."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "2단계 인증이 성공적으로 비활성화되었습니다."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "2단계 인증이 성공적으로 활성화되었습니다."
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "2단계 인증이 활성화되어 있지 않습니다."
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "2단계 인증 등록이 만료되었습니다. 페이지를 새로고침하고 새 QR 코드를 스캔하세요."
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "사용자 이름과 이메일이 현재 값과 동일합니다."
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "사용자 이름이 너무 깁니다. 256자 미만이어야 합니다."
 
 msgid "profile.help.photo_extensions"
 msgstr "JPG, GIF, PNG 파일만 허용됩니다. 최대 크기: 800KB."
@@ -4163,6 +5785,39 @@ msgstr "시간 범위"
 msgid "range_picker.custom"
 msgstr "사용자 정의"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "%(setting)s 설정은 초안으로 만들 수 없습니다."
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "초안 설정 %(setting)s이(가) 전송되지 않았습니다."
+
+msgid "raw_drafts.draft_not_present"
+msgstr "초안 설정 %(setting)s이(가) RAW 편집기에 없습니다."
+
+msgid "raw_drafts.edits_discarded"
+msgstr "초안 설정은 변경되지 않습니다. Raw 모드에서 활성화하거나 편집하세요."
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "전역 설정 %(setting)s은(는) 서비스 초안으로 만들 수 없습니다."
+
+msgid "raw_drafts.locked_by_method"
+msgstr "%(setting)s 설정은 %(method)s 방식으로 관리되므로 초안 상태를 변경할 수 없습니다."
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "설정 초안 메타데이터는 raw 모드에서만 허용됩니다."
+
+msgid "raw_drafts.missing_metadata"
+msgstr "%(field)s 메타데이터가 없습니다."
+
+msgid "raw_drafts.present_not_posted"
+msgstr "현재 설정 %(setting)s이(가) 전송되지 않았습니다."
+
+msgid "raw_drafts.present_not_valid"
+msgstr "현재 설정 %(setting)s이(가) 올바르지 않습니다."
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "%(setting)s 설정이 올바르지 않습니다."
+
 msgid "redirects.all"
 msgstr "전체"
 
@@ -4216,6 +5871,69 @@ msgstr "리디렉션은 하나 이상의 서비스에 첨부하는 이름이 지
 
 msgid "redirects.empty_title"
 msgstr "리디렉션 없음"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "원본 경로가 유효하지 않습니다: 공백, 세미콜론 또는 중괄호를 포함할 수 없습니다."
+
+msgid "redirects.err.invalid_to_url"
+msgstr "대상은 완전한 http:// 또는 https:// URL이어야 합니다."
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "최소 하나의 서비스가 필요합니다"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "리디렉션을 연결하지 못했습니다: %(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "리디렉션을 생성할 수 없습니다: %(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "리디렉션을 삭제하지 못했습니다: %(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "리디렉션을 연결 해제하지 못했습니다: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "리디렉션을 가져오지 못했습니다: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "리디렉션 할당을 위한 서비스를 가져오지 못했습니다: %(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "리디렉션을 업데이트할 수 없습니다: %(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "리디렉션 이름은 필수입니다"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "리디렉션이 연결되었습니다. 서비스: %(len)s개"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "리디렉션 %(value)s을(를) 성공적으로 생성했습니다"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "리디렉션을 성공적으로 삭제했습니다"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "리디렉션을 성공적으로 연결 해제했습니다"
+
+msgid "redirects.flash.redirect_required"
+msgstr "리디렉션은 필수입니다"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "리디렉션과 서비스는 필수입니다"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "리디렉션을 성공적으로 업데이트했습니다"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "상태 코드는 %(value)s 중 하나여야 합니다"
+
+msgid "redirects.flash.target_required"
+msgstr "리디렉션 대상은 필수입니다"
+
+msgid "redirects.flash.too_many_services"
+msgstr "리디렉션은 %(value)s개를 초과하는 서비스에 연결할 수 없습니다"
 
 msgid "redirects.from_path"
 msgstr "~에서 리디렉션"
@@ -4302,16 +6020,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "시간에 따른 차단 요청 수"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "AppSec 검사"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "AppSec 실패 정책"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "로컬 API 결정"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "기술 세부 정보"
 
 msgid "reports.security_incident"
 msgstr "보안 사고"
@@ -4472,6 +6190,63 @@ msgstr "항목"
 msgid "resource_groups.expand_all"
 msgstr "모두 펼치기"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "별칭은 1~64자의 문자, 숫자, 밑줄 또는 하이픈으로 구성되어야 합니다"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "이 별칭은 BunkerWeb에서 예약되어 있습니다"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "리소스 그룹을 복제하지 못했습니다: %(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "리소스 그룹을 삭제하지 못했습니다: %(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "리소스 그룹을 내보내지 못했습니다: %(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "리소스 그룹을 저장하지 못했습니다: %(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "리소스 항목은 목록이어야 합니다"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "리소스 항목이 유효한 JSON이 아닙니다"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "항목 %(index)s의 주석이 너무 깁니다"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "항목 %(index)s이(가) 잘못되었습니다"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "항목 %(index)s의 종류가 잘못되었습니다"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "항목 %(index)s의 값이 잘못되었습니다"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "리소스 그룹이 @%(alias)s(으)로 복제되었습니다"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "리소스 그룹 @%(alias)s을(를) 성공적으로 생성했습니다"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "리소스 그룹을 성공적으로 삭제했습니다"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "리소스 그룹은 필수입니다"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "리소스 그룹을 성공적으로 업데이트했습니다"
+
+msgid "resource_groups.flash.source_required"
+msgstr "원본 리소스 그룹은 필수입니다"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "리소스 그룹은 %(value)s개를 초과하는 항목을 포함할 수 없습니다"
+
 msgid "resource_groups.global_configuration"
 msgstr "전역 설정"
 
@@ -4487,6 +6262,24 @@ msgstr "TXT/CSV 가져오기는 256 KiB로 제한됩니다."
 msgid "resource_groups.kind"
 msgstr "종류"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "국가"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "역방향 DNS"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "사용자 에이전트"
+
 msgid "resource_groups.kinds"
 msgstr "종류"
 
@@ -4496,8 +6289,20 @@ msgstr "참조 로딩 중..."
 msgid "resource_groups.max_entries"
 msgstr "리소스 그룹에는 %(max)s개를 초과하는 항목을 포함할 수 없습니다."
 
-msgid "resource_groups.meta_line"
-msgstr "유형 %(kinds)s개 · 값 %(values)s개 · 사용 %(usages)s회"
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s개 종류"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s개 사용"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s개 값"
 
 msgid "resource_groups.new"
 msgstr "새 그룹"
@@ -4516,6 +6321,11 @@ msgstr "참조 없음"
 
 msgid "resource_groups.readonly"
 msgstr "데이터베이스는 읽기 전용입니다. 리소스 그룹은 검사하고 내보낼 수 있지만 변경할 수 없습니다."
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s개 참조"
 
 msgid "resource_groups.references_error"
 msgstr "참조 로드 실패"
@@ -4679,6 +6489,9 @@ msgstr "재로드 필요"
 msgid "searchpane.scope"
 msgstr "범위"
 
+msgid "searchpane.search_title"
+msgstr "검색: {name}"
+
 msgid "searchpane.security_mode"
 msgstr "보안 모드"
 
@@ -4769,14 +6582,35 @@ msgstr "서비스 모드"
 msgid "service.resources.attach"
 msgstr "연결"
 
+msgid "service.resources.confirm_detach"
+msgstr "%(service)s에서 이 리소스를 분리하시겠습니까?"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "%(service)s에서 이 인증서를 분리하시겠습니까?"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "%(service)s에서 이 리디렉션을 분리하시겠습니까?"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "%(service)s에서 이 템플릿을 분리하시겠습니까?"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "%(service)s에서 이 업스트림을 분리하시겠습니까?"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "%(service)s에서 이 워크플로우를 분리하시겠습니까?"
+
 msgid "service.resources.conflict.inline"
 msgstr "%(service)s은 자체 %(family)s 설정으로 %(path)s을 제공합니다. %(path)s에 대한 설정을 지우거나 다른 경로를 사용하십시오."
 
 msgid "service.resources.conflict.primary"
 msgstr "“%(name)s”는 현재 이 서비스의 주요 인증서이며, 추가 경고 없이 강등됩니다. 주요 인증서는 실제로 배포된 것입니다."
 
-msgid "service.resources.conflict.resource"
-msgstr "%(service)s은 %(kind)s의 “%(name)s”를 통해 %(path)s을 제공합니다. “%(name)s”를 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오."
+msgid "service.resources.conflict.resource_redirect"
+msgstr "%(service)s은(는) 이미 리디렉션 “%(name)s”을(를) 통해 %(path)s을(를) 제공합니다. “%(name)s”을(를) 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오."
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "%(service)s은(는) 이미 업스트림 “%(name)s”을(를) 통해 %(path)s을(를) 제공합니다. “%(name)s”을(를) 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오."
 
 msgid "service.resources.conflict.stream"
 msgstr "스트림 서비스는 모든 연결을 단일 백엔드로 프록시하며, %(service)s 서비스는 이미 업스트림 “%(name)s”를 사용합니다. 먼저 분리하세요."
@@ -4867,6 +6701,222 @@ msgstr "사용 불가능"
 
 msgid "services.draft"
 msgstr "초안 서비스"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "선택한 모든 서비스를 찾을 수 없거나, UI/API 서비스가 아니거나, 이미 변환되었습니다."
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "선택한 모든 서비스를 찾을 수 없거나 UI/API 서비스가 아닙니다."
+
+msgid "services.flash.configuration_created"
+msgstr "서비스 %(service)s의 구성이 생성되었습니다."
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "서비스 %(service)s의 구성이 생성되었지만 %(refused_count)s개 값이 거부되었습니다."
+
+msgid "services.flash.configuration_saved"
+msgstr "서비스 %(service)s의 구성이 저장되었습니다."
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "서비스 %(service)s의 구성이 저장되었지만 %(refused_count)s개 값이 거부되었습니다."
+
+msgid "services.flash.converted_services_draft"
+msgstr "\"초안\" 서비스로 변환됨: %(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "\"온라인\" 서비스로 변환됨: %(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "이 서비스에 연결된 인증서를 가져올 수 없습니다."
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "이 서비스에 연결된 리디렉션을 가져올 수 없습니다."
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "이 서비스에 연결된 업스트림을 가져올 수 없습니다."
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "이 서비스에 연결된 워크플로우를 가져올 수 없습니다."
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "API에서 사용자 지정 설정을 가져오지 못했습니다."
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "API에서 사용자 지정 설정을 가져오지 못했습니다."
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "API에서 서비스를 가져오지 못했습니다."
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "API에서 서비스 %(service)s을(를) 가져오지 못했습니다."
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "복제를 위한 서비스 %(clone)s을(를) 가져오지 못했습니다."
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "API에서 서비스를 가져오지 못했습니다."
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "서비스 구성을 가져오지 못했습니다."
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "API에서 템플릿을 가져오지 못했습니다."
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "이름 변경이 거부되어 사용자 지정 설정이 저장되지 않았습니다."
+
+msgid "services.flash.default_server_reserved"
+msgstr "%(default_server_id)s은(는) 예약된 기본 서버로, 구성된 서비스와 일치하지 않는 요청(알 수 없는 호스트명, 원시 IP 접근)에 응답합니다. 따라서 생성, 이름 변경 또는 삭제할 수 없습니다."
+
+msgid "services.flash.default_server_type_refused"
+msgstr "SERVER_TYPE은 예약된 서비스 %(default_server_id)s에 설정할 수 없습니다. 전환할 자체 서버 블록이 없기 때문입니다. HTTP 부분은 기본 서버 블록 자체이며, stream 부분은 DEFAULT_SERVER_STREAM_PORTS 설정입니다."
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "서비스 모드를 변경할 권한이 없습니다"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "초안 자동 구성 서비스 %(service_id)s 삭제에 실패했습니다: %(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "서비스 가져오기에 실패했습니다: %(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "서비스 가져오기에 실패했습니다: %(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "서비스를 가져왔습니다: %(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "서비스를 가져왔습니다: %(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "아카이브 내 configs_export.json의 인코딩이 잘못되었습니다."
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "아카이브 내 services_export.env의 인코딩이 잘못되었습니다."
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "잘못된 파일 인코딩입니다. UTF-8 파일을 업로드하세요."
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "잘못된 mode 매개변수입니다."
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "/services/convert의 convert_to 매개변수가 없습니다."
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "/services/%(service)s/mode의 mode 매개변수가 없습니다."
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "/services/convert의 services 매개변수가 없습니다."
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "/services/delete의 services 매개변수가 없습니다."
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "가져오기 파일에서 서비스 또는 사용자 지정 설정을 찾을 수 없습니다."
+
+msgid "services.flash.no_services_export"
+msgstr "내보낼 서비스가 없습니다."
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "서비스 파일이 업로드되지 않았습니다."
+
+msgid "services.flash.no_services_selected"
+msgstr "선택된 서비스가 없습니다."
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "이 플러그인은 기본 서버에 적용되지 않습니다"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "아카이브 추출을 거부합니다: 압축 해제 크기가 안전 제한을 초과합니다."
+
+msgid "services.flash.resource_attach_failed"
+msgstr "연결하지 못했습니다: %(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "연결할 수 없습니다: %(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "리소스가 %(service)s에 연결되었습니다."
+
+msgid "services.flash.resource_detach_failed"
+msgstr "연결 해제하지 못했습니다: %(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "연결 해제할 수 없습니다: %(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "리소스가 %(service)s에서 연결 해제되었습니다."
+
+msgid "services.flash.resource_unknown_family"
+msgstr "알 수 없는 리소스 유형입니다."
+
+msgid "services.flash.server_name_missing"
+msgstr "서버 이름이 제공되지 않아 서비스가 생성되지 않았습니다."
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "서비스 %(non_convertible_service)s은(는) 이미 초안 서비스이므로 변환되지 않습니다."
+
+msgid "services.flash.service_already_exists"
+msgstr "서비스 %(service)s이(가) 이미 존재합니다."
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "서비스 %(non_convertible_service)s은(는) 이미 온라인 서비스이므로 변환되지 않습니다."
+
+msgid "services.flash.service_deleted"
+msgstr "서비스 삭제됨: %(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "변경된 값이 없어 서비스 %(service)s을(를) 수정하지 않았습니다."
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "변경된 값이나 사용자 지정 설정이 없어 서비스 %(service)s을(를) 수정하지 않았습니다."
+
+msgid "services.flash.service_not_found"
+msgstr "서비스를 찾을 수 없습니다"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "변경된 모든 값이 거부되어 서비스 %(service)s이(가) 저장되지 않았습니다."
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "서비스 %(non_editable_service)s은(는) UI/API 서비스가 아니므로 변환되지 않습니다."
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "서비스 %(service)s이(가) 이제 \"리디렉션 전용\"으로 선언되었습니다."
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "서비스 %(service)s이(가) 이제 \"표준\"으로 선언되었습니다."
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "서비스 %(non_deletable_service)s은(는) UI/API 서비스가 아니므로 삭제되지 않습니다."
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "서비스 %(non_deletable_service)s은(는) 온라인 autoconf 서비스이므로(먼저 초안으로 전환하세요) 삭제되지 않습니다."
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "서비스 %(non_deletable_service)s은(는) 어떤 서비스에도 일치하지 않는 요청에 응답하는 예약된 기본 서버이므로 삭제되지 않습니다."
+
+msgid "services.flash.services_deleted"
+msgstr "서비스 삭제됨: %(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "기존 서비스를 건너뛰었습니다: %(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "기존 서비스를 건너뛰었습니다: %(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "템플릿 사용자 지정 설정 %(key)s은(는) %(value)s 방식으로 생성되어 편집할 수 없습니다."
+
+msgid "services.flash.template_not_found"
+msgstr "템플릿을 찾을 수 없습니다"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "업로드된 아카이브에는 services_export.env 및/또는 configs_export.json이 포함되어야 합니다."
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "업로드된 파일이 유효한 zip 아카이브가 아닙니다."
 
 msgid "services.online"
 msgstr "온라인"
@@ -5285,6 +7335,45 @@ msgstr "%(name)s에서 불러옴 · 문자 수: %(count)s"
 msgid "setup.file.read_error"
 msgstr "파일을 읽는 중 오류 발생"
 
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "관리자 이메일이 너무 깁니다. 256자 미만이어야 합니다."
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "관리자 비밀번호가 충분히 강력하지 않습니다. 최소 8자 이상이어야 하며, 대문자 1개, 소문자 1개, 숫자 1개, 특수문자(#@?!$%^&*-) 1개를 포함해야 합니다."
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "관리자 비밀번호가 너무 깁니다. %(MAX_PASSWORD_BYTES)s바이트(bcrypt의 하드 제한)를 초과할 수 없습니다. 억양 문자나 이모지는 각각 여러 바이트로 계산됩니다."
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "관리자 사용자를 성공적으로 생성했습니다"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "관리자 사용자 이름이 너무 깁니다. 256자 미만이어야 합니다."
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "관리자 사용자를 생성하지 못했습니다: %(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "새 서비스를 생성하지 못했습니다: %(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "새 서비스를 편집하지 못했습니다: %(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "호스트 이름 %(value)s은(는) 이미 사용 중입니다."
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "호스트 이름이 잘못되었습니다."
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "다음 매개변수 중 하나가 없습니다: %(value)s."
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "비밀번호가 일치하지 않습니다."
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "사용자 지정 SSL 인증서를 사용할 때는 인증서와 키를 모두 설정해야 합니다."
+
 msgid "setup.status.admin_user_exists"
 msgstr "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요."
 
@@ -5441,6 +7530,12 @@ msgstr "만료 예정"
 msgid "status.failed"
 msgstr "실패"
 
+msgid "status.failover"
+msgstr "장애 조치"
+
+msgid "status.inactive"
+msgstr "비활성"
+
 msgid "status.invalid_json_payload"
 msgstr "잘못된 JSON 페이로드입니다."
 
@@ -5578,6 +7673,9 @@ msgstr "알 수 없음"
 
 msgid "status.up"
 msgstr "활성"
+
+msgid "status.uploaded"
+msgstr "업로드됨"
 
 msgid "status.yes"
 msgstr "예"
@@ -5828,6 +7926,9 @@ msgstr "템플릿 생성"
 msgid "template.editor.heading_edit"
 msgstr "템플릿 %(id)s 수정"
 
+msgid "template.editor.heading_view"
+msgstr "템플릿 %(id)s 보기"
+
 msgid "template.editor.label_config_data"
 msgstr "데이터"
 
@@ -5913,7 +8014,10 @@ msgid "template.editor.multivalue_add"
 msgstr "값 추가"
 
 msgid "template.editor.multivalue_helper"
-msgstr "한 줄에 하나의 값.%(separatorNote)s"
+msgstr "한 줄에 하나의 값."
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "한 줄에 하나의 값. \"%(separator)s\"(으)로 결합됩니다."
 
 msgid "template.editor.panel_overview"
 msgstr "개요"
@@ -6076,6 +8180,9 @@ msgstr "현재 데이터베이스가 읽기 전용 상태입니다. 템플릿을
 
 msgid "template.editor.readonly_method"
 msgstr "이 템플릿은 %(method)s 프로세스를 통해 생성되었으며 UI에서 편집할 수 없습니다."
+
+msgid "template.editor.readonly_method_plugin"
+msgstr "이 템플릿은 %(plugin)s 플러그인에 의해 생성되었으며 UI에서 편집할 수 없습니다."
 
 msgid "template.editor.readonly_title"
 msgstr "읽기 전용"
@@ -6251,6 +8358,9 @@ msgstr "설정이 정의된 경우 설정 유형은 필수입니다."
 msgid "template.editor.validation_configs_unique"
 msgstr "각 설정 이름은 고유해야 합니다."
 
+msgid "template.editor.validation_id_invalid"
+msgstr "템플릿 ID는 문자, 숫자, 마침표, 하이픈, 밑줄만 포함할 수 있으며 문자 또는 숫자로 시작해야 합니다."
+
 msgid "template.editor.validation_id_required"
 msgstr "템플릿 ID는 필수입니다."
 
@@ -6263,6 +8373,36 @@ msgstr "각 세팅 키는 고유해야 합니다."
 msgid "template.none"
 msgstr "템플릿 없음"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "사용자 지정 구성 추가됨"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "사용자 지정 구성 변경됨"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "사용자 지정 구성 제거됨"
+
+msgid "templates.catalog.diff.name"
+msgstr "이름: %(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "설정 추가됨"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "설정 변경됨"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "설정 제거됨"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "단계 추가됨"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "단계 변경됨"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "단계 제거됨"
+
 msgid "templates.catalog.heading"
 msgstr "사용 가능한 템플릿"
 
@@ -6272,8 +8412,89 @@ msgstr "템플릿은 레이어입니다: 이미 템플릿을 사용 중인 서�
 msgid "templates.catalog.no_compat_notice"
 msgstr "이 카탈로그는 BunkerWeb 호환성을 선언하지 않습니다. 이 BunkerWeb에 없는 설정을 지정하는 템플릿은 설치 시 거부됩니다."
 
+msgid "templates.catalog.state_installed"
+msgstr "설치됨, 카탈로그와 동일"
+
+msgid "templates.catalog.state_managed"
+msgstr "%(owner)s이(가) 설치 및 관리함: 카탈로그가 이를 변경하지 않습니다"
+
+msgid "templates.catalog.state_update"
+msgstr "설치됨, 카탈로그 버전이 다릅니다"
+
 msgid "templates.catalog.subheading"
 msgstr "BunkerWeb 조직이 게시한 엄선된 서비스 템플릿입니다."
+
+msgid "templates.catalog.update_changed"
+msgstr "템플릿 %(template)s 또는 카탈로그가 미리보기 이후 변경되었습니다. 페이지를 새로고침하고 변경 사항을 다시 검토하세요."
+
+msgid "templates.catalog.update_confirm"
+msgstr "템플릿 %(id)s을(를) 카탈로그 릴리스 %(tag)s의 버전으로 교체합니다. 다음 변경 사항이 템플릿에 적용됩니다:"
+
+msgid "templates.catalog.update_failed"
+msgstr "템플릿을 업데이트할 수 없습니다."
+
+msgid "templates.catalog.update_managed"
+msgstr "템플릿 %(template)s은(는) %(owner)s이(가) 관리함: 카탈로그가 이를 변경하지 않습니다"
+
+msgid "templates.catalog.update_no_services"
+msgstr "아직 이 템플릿을 사용하는 서비스가 없습니다."
+
+msgid "templates.catalog.update_not_installed"
+msgstr "템플릿 %(template)s이(가) 설치되어 있지 않습니다: 대신 설치하세요"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "변경 사항은 다음 카탈로그 새로고침 이후에 확인할 수 있습니다."
+
+msgid "templates.catalog.update_services"
+msgstr "이 서비스들은 이 템플릿을 사용합니다. 다음 구성 생성 시, 직접 설정하지 않은 모든 설정이 새 값을 갖게 됩니다:"
+
+msgid "templates.catalog.update_title"
+msgstr "커뮤니티 템플릿 업데이트"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "템플릿 %(template)s은(는) 이미 카탈로그와 일치합니다"
+
+msgid "templates.flash.catalog_updated"
+msgstr "템플릿 %(template)s이(가) 카탈로그에서 업데이트되었습니다."
+
+msgid "templates.flash.error_deleting_template"
+msgstr "템플릿 %(template_id)s 삭제 중 오류 발생: %(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "템플릿 %(template)s을(를) 내보내지 못했습니다: %(error)s"
+
+msgid "templates.flash.imported"
+msgstr "템플릿 %(template)s이(가) 가져와졌습니다."
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "삭제할 템플릿이 선택되지 않았습니다."
+
+msgid "templates.flash.replaced"
+msgstr "템플릿 %(template)s이(가) 교체되었습니다."
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "삭제된 템플릿: %(success_count)s개."
+
+msgid "templates.flash.template_created_successfully"
+msgstr "템플릿 %(template_id)s을(를) 성공적으로 생성했습니다."
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "템플릿 %(template_id)s을(를) 성공적으로 삭제했습니다."
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "템플릿 %(template_id)s을(를) 카탈로그에서 설치했습니다."
+
+msgid "templates.flash.template_not_found"
+msgstr "템플릿 %(clone_id)s을(를) 찾을 수 없습니다."
+
+msgid "templates.flash.template_not_found_2"
+msgstr "템플릿을 찾을 수 없습니다."
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "템플릿 %(template_id)s을(를) 성공적으로 업데이트했습니다."
+
+msgid "templates.flash.user_is_read_only"
+msgstr "사용자는 읽기 전용입니다"
 
 msgid "templates.gallery.delete_selected"
 msgstr "선택 항목 삭제"
@@ -6289,6 +8510,24 @@ msgstr "선택"
 
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
+
+msgid "templates.import.admin_only"
+msgstr "템플릿 가져오기는 관리자만 가능합니다"
+
+msgid "templates.import.failed"
+msgstr "템플릿을 가져올 수 없습니다."
+
+msgid "templates.import.no_file"
+msgstr "가져올 파일을 선택하세요."
+
+msgid "templates.import.refused"
+msgstr "템플릿을 가져오지 못했습니다: %(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "템플릿을 가져오지 못했습니다: 파일이 1 MiB보다 큽니다"
+
+msgid "templates.import.unreadable"
+msgstr "템플릿을 가져오지 못했습니다: 파일을 읽을 수 없습니다"
 
 msgid "templates.name.api"
 msgstr "API"
@@ -6425,6 +8664,9 @@ msgstr "각 플러그인의 시간을 측정하려면 METRICS_COLLECT_TIMINGS를
 msgid "timings.disabled_title"
 msgstr "플러그인 시간 측정이 꺼져 있음"
 
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "플러그인 타이밍을 가져오는 중 오류 발생: %(message)s"
+
 msgid "timings.max"
 msgstr "최대"
 
@@ -6527,11 +8769,23 @@ msgstr "Let's Encrypt 인증서를 자동으로 요청할지 여부입니다."
 msgid "tooltip.badge.redirect_candidate"
 msgstr "이 서비스에는 리디렉션 외에 아무것도 없으므로 리디렉션 전용으로 선언할 수 있습니다. 리디렉션 전용 과금이 적용되면 PRO 서비스 수에서 제외됩니다."
 
+msgid "tooltip.button.attach_redirect"
+msgstr "%(name)s을(를) 서비스에 연결"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "%(name)s을(를) 서비스에 연결"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "%(name)s을(를) 서비스에 연결"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "파일 업로드로 돌아가기"
 
 msgid "tooltip.button.ban_ip"
 msgstr "이 IP 주소 차단"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "%(name)s 복제"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "설정 %(name)s을(를) 초안으로 전환"
@@ -6545,6 +8799,9 @@ msgstr "서비스 %(name)s을(를) 초안으로 전환"
 msgid "tooltip.button.convert_service_to_online"
 msgstr "서비스 %(name)s을(를) 온라인으로 전환"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "인증서 삭제"
+
 msgid "tooltip.button.delete_config"
 msgstr "사용자 정의 설정 %(name)s 삭제"
 
@@ -6557,11 +8814,32 @@ msgstr "인스턴스 %(hostname)s 삭제"
 msgid "tooltip.button.delete_plugin"
 msgstr "플러그인 %(name)s 삭제"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "%(name)s 삭제"
+
 msgid "tooltip.button.delete_service"
 msgstr "서비스 %(name)s 삭제"
 
 msgid "tooltip.button.delete_template"
 msgstr "템플릿 %(name)s 삭제"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "%(name)s 삭제"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "%(name)s 삭제"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "%(name)s 편집"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "%(name)s 편집"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "%(name)s의 이름과 설명 편집"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "%(name)s의 규칙 편집"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "%(hostname)s에 대한 등록 코드 발급"
@@ -6668,6 +8946,9 @@ msgstr "확인용 비밀번호는 위에서 입력한 비밀번호와 일치해�
 msgid "tooltip.copied"
 msgstr "복사됨!"
 
+msgid "tooltip.copy_failed"
+msgstr "복사 실패"
+
 msgid "tooltip.copy_https_only"
 msgstr "복사 기능은 HTTPS를 통해서만 사용 가능합니다."
 
@@ -6688,6 +8969,9 @@ msgstr "값이 템플릿 기본값과 다릅니다"
 
 msgid "tooltip.disabled_by_method"
 msgstr "비활성화됨: '%(method)s' 방식으로 관리되고 있습니다."
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "비활성화됨: %(plugin)s 플러그인에 의해 관리됩니다."
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "비활성화됨: 데이터베이스가 읽기 전용 모드입니다."
@@ -6808,6 +9092,9 @@ msgstr "사용자 지정 설정 %(name)s 내보내기"
 
 msgid "tooltip.link.export_service"
 msgstr "서비스 %(service)s 설정 내보내기"
+
+msgid "tooltip.link.export_template"
+msgstr "템플릿 %(template)s 내보내기"
 
 msgid "tooltip.link.manage_activation"
 msgstr "전역 설정에서 %(name)s 활성화 관리"
@@ -7280,6 +9567,21 @@ msgstr "ZeroSSL API 재시도 간 지연 시간(초)입니다."
 msgid "totp.cant_access"
 msgstr "인증 코드를 사용할 수 없으신가요?"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "데이터베이스가 읽기 전용 모드이므로 사용한 복구 코드는 계속 유효합니다."
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "복구 코드 사용 중 오류가 발생했습니다."
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "/totp에 토큰이 제공되지 않았습니다."
+
+msgid "totp.flash.token_invalid"
+msgstr "토큰이 잘못되었습니다."
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "복구 코드 중 하나를 사용했습니다. %(len)s개가 남았습니다."
+
 msgid "totp.or_use_security_key"
 msgstr "또는 보안 키 사용"
 
@@ -7345,6 +9647,78 @@ msgstr "업스트림은 역방향 프록시 경로에서 하나 이상의 서비
 
 msgid "upstreams.empty_title"
 msgstr "업스트림이 아직 없음"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "최소 하나의 서버가 필요합니다"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "최소 하나의 서비스가 필요합니다"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "업스트림을 연결하지 못했습니다: %(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "업스트림을 생성하지 못했습니다: %(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "업스트림을 삭제하지 못했습니다: %(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "업스트림을 연결 해제하지 못했습니다: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "업스트림 할당을 위한 서비스를 가져오지 못했습니다: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "업스트림을 가져오지 못했습니다: %(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "업스트림을 업데이트하지 못했습니다: %(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "keepalive 수는 양의 정수여야 합니다"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "리버스 프록시 경로는 /로 시작해야 합니다"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "메서드는 %(value)s 중 하나여야 합니다"
+
+msgid "upstreams.flash.name_required"
+msgstr "업스트림 이름은 필수입니다"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "프로토콜은 %(value)s 중 하나여야 합니다"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "업스트림은 %(value)s개를 초과하는 서버를 가질 수 없습니다"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "업스트림은 %(value)s개를 초과하는 서비스에 연결할 수 없습니다"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "업스트림이 연결되었습니다. 서비스: %(len)s개"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "업스트림 %(value)s을(를) 성공적으로 생성했습니다"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "업스트림을 성공적으로 삭제했습니다"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "업스트림을 성공적으로 연결 해제했습니다"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "업스트림은 필수입니다"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "업스트림과 서비스는 필수입니다"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "업스트림을 성공적으로 업데이트했습니다"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "%(host)s의 weight와 max fails는 정수여야 합니다"
 
 msgid "upstreams.keepalive"
 msgstr "지속 연결"
@@ -7429,6 +9803,15 @@ msgstr "%(count)s개 서비스 숨김: %(protocol)s 업스트림은 프로토콜
 
 msgid "upstreams.truncated"
 msgstr "첫 500개의 업스트림만 표시됩니다. 완전한 결과를 얻기 위해 API을 사용하여 목록을 좁힙니다."
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "redis에 연결하지 못했습니다"
+
+msgid "utils.flash.invalid_request"
+msgstr "잘못된 요청입니다"
+
+msgid "utils.flash.missing_form"
+msgstr "양식에 %(key)s이(가) 없습니다"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "패스키를 추가하려면 현재 비밀번호를 입력하세요."
@@ -7525,6 +9908,27 @@ msgstr "활성화된 서비스"
 
 msgid "web_cache.error"
 msgstr "오류"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "웹 캐시 지표를 가져오는 중 오류 발생: %(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "웹 캐시 상태를 가져오는 중 오류 발생: %(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "웹 캐시 제거 중 오류 발생: %(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "웹 캐시를 제거했습니다 (모든 항목)"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "%(url)s에 대한 웹 캐시를 제거했습니다"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "URL별로 제거하려면 URL이 필요합니다"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "웹 캐시를 비웠습니다. 비운 인스턴스: %(value)s개, 실패: %(value2)s개, 연결할 수 없어 건너뜀: %(value3)s개(대기열에 추가된 항목 없음)."
 
 msgid "web_cache.hit_rate"
 msgstr "적중률"
@@ -7661,6 +10065,9 @@ msgstr "규칙 %(n)s / %(total)s, 위치 변경"
 msgid "workflows.aria.collapse"
 msgstr "접기"
 
+msgid "workflows.aria.collapseRule"
+msgstr "규칙 %(n)s 접기"
+
 msgid "workflows.aria.combinator"
 msgstr "조합 연산자 변경, 현재"
 
@@ -7679,6 +10086,9 @@ msgstr "드래그하여 순서 변경"
 msgid "workflows.aria.expand"
 msgstr "펼치기"
 
+msgid "workflows.aria.expandRule"
+msgstr "규칙 %(n)s 펼치기"
+
 msgid "workflows.aria.groupKind"
 msgstr "그룹 유형"
 
@@ -7688,11 +10098,20 @@ msgstr "%(n)s 위치에 규칙 추가"
 msgid "workflows.aria.more"
 msgstr "더 보기"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "규칙 %(n)s에 대한 추가 작업"
+
 msgid "workflows.aria.moveDown"
 msgstr "아래로 이동 — 나중에 실행"
 
 msgid "workflows.aria.moveRule"
 msgstr "규칙 이동"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "규칙 %(n)s 아래로 이동"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "규칙 %(n)s 위로 이동"
 
 msgid "workflows.aria.moveUp"
 msgstr "위로 이동 — 먼저 실행"
@@ -7729,6 +10148,9 @@ msgstr "요청 수"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "리소스 그룹"
+
+msgid "workflows.aria.ruleCard"
+msgstr "규칙 %(n)s/%(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "이 규칙에 유효성 검사 문제 %(count)s개"
@@ -7892,6 +10314,9 @@ msgstr "워크플로는 연결 순서대로 실행되고, 이 워크플로의 �
 msgid "workflows.entry_title"
 msgstr "연결된 서비스로 보내는 모든 요청"
 
+msgid "workflows.err.load"
+msgstr "저장된 규칙을 읽을 수 없습니다. 덮어쓰지 않도록 저장이 비활성화되었습니다; 페이지를 새로고침하세요."
+
 msgid "workflows.err.save"
 msgstr "저장할 수 없음"
 
@@ -7924,6 +10349,69 @@ msgstr "요청은 다음 연결된 워크플로로 이동한 뒤 나머지 보�
 
 msgid "workflows.exit_title"
 msgstr "일치하는 규칙 없음"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "워크플로우를 연결하지 못했습니다: %(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "워크플로우를 복제하지 못했습니다: %(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "워크플로우를 생성하지 못했습니다: %(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "워크플로우를 삭제하지 못했습니다: %(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "워크플로우를 연결 해제하지 못했습니다: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "워크플로우 할당을 위한 서비스를 가져오지 못했습니다: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "워크플로우를 가져오지 못했습니다: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "워크플로우를 가져오지 못했습니다: %(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "워크플로우를 업데이트하지 못했습니다: %(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "워크플로우 이름은 필수입니다"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "서비스 목록을 읽을 수 없습니다. 페이지를 다시 열고 다시 시도하세요"
+
+msgid "workflows.flash.too_many_services"
+msgstr "워크플로우는 %(value)s개를 초과하는 서비스에 연결할 수 없습니다"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "워크플로우가 %(name)s(으)로 복제되었습니다"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "워크플로우 %(value)s을(를) 성공적으로 생성했습니다"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "워크플로우를 성공적으로 삭제했습니다"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "워크플로우를 성공적으로 연결 해제했습니다"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "워크플로우와 새 이름은 필수입니다"
+
+msgid "workflows.flash.workflow_required"
+msgstr "워크플로우는 필수입니다"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "워크플로우와 서비스는 필수입니다"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "워크플로우 서비스가 업데이트되었습니다 (%(len)s개 연결됨)"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "워크플로우를 성공적으로 업데이트했습니다"
 
 msgid "workflows.gate.and"
 msgstr "또한 동일한 클라이언트 IP의 요청 수가 다음보다 많을 때만"
@@ -8033,8 +10521,14 @@ msgstr ", 여기서 평가가 중지되어 아래 규칙에는 도달하지 않�
 msgid "workflows.rules"
 msgstr "규칙"
 
-msgid "workflows.say.actionChanged"
-msgstr "작업이 %(type)s(으)로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다."
+msgid "workflows.say.actionChangedBlock"
+msgstr "작업이 차단으로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다."
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "작업이 챌린지로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다."
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "작업이 리디렉션으로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다."
 
 msgid "workflows.say.added"
 msgstr "규칙이 마지막인 %(n)s번 위치에 추가되었습니다. 따라서 위의 모든 규칙을 먼저 확인합니다."
@@ -8061,13 +10555,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "마지막 값이 제거되었습니다. 값을 하나 추가하기 전에는 이 조건을 저장할 수 없습니다."
 
 msgid "workflows.say.moved"
-msgstr "%(name)s이(가) %(total)s개 중 %(to)s번 위치로 이동했습니다%(how)s. 이제 %(where)s 실행됩니다."
+msgstr "%(name)s이(가) %(total)s개 중 %(to)s번 위치로 이동했습니다."
+
+msgid "workflows.say.movedDrag"
+msgstr "%(name)s을(를) 드래그하여 %(total)s개 중 %(to)s번 위치로 이동했습니다."
+
+msgid "workflows.say.movedKeyboard"
+msgstr "%(name)s을(를) 키보드로 %(total)s개 중 %(to)s번 위치로 이동했습니다."
 
 msgid "workflows.say.predicateCap"
 msgstr "이 규칙에는 이미 최대 개수인 %(max)s개의 조건이 있습니다."
-
-msgid "workflows.say.ruleAbove"
-msgstr "위 규칙"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "%(name)s이(가) 비활성화되어 완전히 건너뛰며, 이제 아래 규칙이 해당 요청을 처리합니다."
@@ -8076,13 +10573,16 @@ msgid "workflows.say.ruleEnabled"
 msgstr "%(name)s이(가) 활성화되어 %(n)s번 위치에서 다시 평가됩니다."
 
 msgid "workflows.say.runsAfter"
-msgstr "%(name)s 다음"
+msgstr "이제 %(name)s 다음에 실행됩니다."
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "이제 위 규칙 다음에 실행됩니다."
 
 msgid "workflows.say.runsFirst"
-msgstr "첫 번째"
+msgstr "이제 첫 번째로 실행됩니다."
 
 msgid "workflows.say.runsLast"
-msgstr "마지막"
+msgstr "이제 마지막으로 실행됩니다."
 
 msgid "workflows.say.saved"
 msgstr "규칙을 저장하고 연결된 서비스에 배포했습니다."
@@ -8091,13 +10591,7 @@ msgid "workflows.say.theRule"
 msgstr "해당 규칙"
 
 msgid "workflows.say.valuesDropped"
-msgstr "조건이 %(type)s(으)로 변경되었습니다. 기존 값 %(count)s개는 이전할 수 없습니다."
-
-msgid "workflows.say.via.drag"
-msgstr "드래그로"
-
-msgid "workflows.say.via.keyboard"
-msgstr "키보드로"
+msgstr "조건이 변경되었습니다. 옮기지 못한 값: %(count)s개."
 
 msgid "workflows.say.viewCanvas"
 msgstr "캔버스 뷰. 규칙은 왼쪽에서 오른쪽으로 실행되며, 첫 번째로 일치하는 규칙이 적용됩니다."
@@ -8217,7 +10711,16 @@ msgid "workflows.test.out_draft"
 msgstr "이 서비스는 초안이므로 아직 워크플로가 컴파일되지 않았습니다."
 
 msgid "workflows.test.out_match"
-msgstr "일치한 항목: %(workflow)s · %(rule)s. 요청에 적용된 작업: %(action)s."
+msgstr "%(workflow)s · %(rule)s이(가) 일치했습니다."
+
+msgid "workflows.test.out_match_block"
+msgstr "%(workflow)s · %(rule)s이(가) 일치하여 요청을 차단했습니다."
+
+msgid "workflows.test.out_match_challenge"
+msgstr "%(workflow)s · %(rule)s이(가) 일치하여 요청에 챌린지를 적용했습니다."
+
+msgid "workflows.test.out_match_redirect"
+msgstr "%(workflow)s · %(rule)s이(가) 일치하여 요청을 리디렉션했습니다."
 
 msgid "workflows.test.out_no_match"
 msgstr "일치하는 규칙이 없습니다. 요청은 나머지 보안 스택으로 계속 진행됩니다."
@@ -8295,7 +10798,7 @@ msgid "workflows.tree.empty"
 msgstr "빈 그룹입니다. 조건을 추가해야 저장할 수 있습니다."
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "어떤 그룹에도 %(kind)s 항목이 없음"
+msgstr "이 종류의 항목을 포함하는 리소스 그룹이 없습니다."
 
 msgid "workflows.tree.noneMeta"
 msgstr "어느 조건도 참이 아닐 때 일치"

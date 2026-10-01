@@ -61,6 +61,9 @@ msgstr "कृपया एक वैध कस्टम कॉन्फ़ि�
 msgid "alert.credential_action_failed"
 msgstr "कार्रवाई विफल हो गई।"
 
+msgid "alert.custom_end_date_past"
+msgstr "कस्टम समाप्ति तिथि भविष्य में होनी चाहिए।"
+
 msgid "alert.custom_end_date_required"
 msgstr "कृपया एक कस्टम अंतिम तिथि चुनें।"
 
@@ -97,8 +100,17 @@ msgstr "कृपया एक मान्य सेवा निर्या�
 msgid "antibot.reason.sentence"
 msgstr "एंटीबॉट चुनौती (%(provider)s) प्रस्तुत की गई"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "प्रमाणपत्र सूची असाइनमेंट"
+
+msgid "aria.label.certificate_public_details"
+msgstr "प्रमाणपत्र की सार्वजनिक जानकारी"
+
 msgid "aria.label.clear_search"
 msgstr "खोज साफ़ करें"
+
+msgid "aria.label.clone_item"
+msgstr "%(name)s क्लोन करें"
 
 msgid "aria.label.close"
 msgstr "बंद करें"
@@ -111,6 +123,9 @@ msgstr "कस्टम कॉन्फ़िगरेशन एक्सपो�
 
 msgid "aria.label.copy"
 msgstr "लॉग कॉपी करें"
+
+msgid "aria.label.detach_from_service"
+msgstr "%(name)s को %(service)s से अलग करें"
 
 msgid "aria.label.download_log"
 msgstr "यह लॉग फ़ाइल डाउनलोड करें"
@@ -148,6 +163,9 @@ msgstr "टाइमस्टैम्प स्थानीय समय मे
 msgid "aria.label.next_issue"
 msgstr "अगली त्रुटि या चेतावनी"
 
+msgid "aria.label.open_user_menu"
+msgstr "उपयोगकर्ता मेनू खोलें"
+
 msgid "aria.label.passkey_name"
 msgstr "पासकी का नाम"
 
@@ -159,6 +177,9 @@ msgstr "पिछली त्रुटि या चेतावनी"
 
 msgid "aria.label.raw_configuration"
 msgstr "रॉ कॉन्फ़िगरेशन"
+
+msgid "aria.label.remove_this_server"
+msgstr "इस सर्वर को हटाएं"
 
 msgid "aria.label.remove_value"
 msgstr "मूल्य हटाएं"
@@ -178,8 +199,23 @@ msgstr "फ़ाइल चुनें"
 msgid "aria.label.select_page"
 msgstr "पृष्ठ चुनें"
 
+msgid "aria.label.select_template"
+msgstr "टेम्पलेट %(name)s चुनें"
+
 msgid "aria.label.services_dropzone"
 msgstr "सेवाओं की एक्सपोर्ट फ़ाइल चुनें या उसे यहाँ ड्रॉप करें"
+
+msgid "aria.label.show_details"
+msgstr "%(name)s का विवरण दिखाएँ"
+
+msgid "aria.label.toggle_item"
+msgstr "%(name)s टॉगल करें"
+
+msgid "aria.label.toggle_section"
+msgstr "%(name)s अनुभाग टॉगल करें"
+
+msgid "aria.label.toggle_theme"
+msgstr "डार्क मोड टॉगल करें"
 
 msgid "aria.label.toggle_wrap"
 msgstr "लाइन रैपिंग टॉगल करें"
@@ -244,6 +280,15 @@ msgstr "%(ip)s को प्रतिबंधित करने में व�
 msgid "bans.flash.ban_success"
 msgstr "%(ip)s को सफलतापूर्वक प्रतिबंधित किया गया।"
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "%(ip)s के लिए कस्टम बैन समाप्ति तिथि भविष्य में होनी चाहिए"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "प्रतिबंध चयन मोड अमान्य है।"
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "/bans/ban पर bans पैरामीटर अमान्य है।"
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "%(ip)s के लिए अमान्य कस्टम प्रतिबंध अवधि"
 
@@ -253,11 +298,44 @@ msgstr "%(ip)s के लिए अमान्य कस्टम प्रत�
 msgid "bans.flash.invalid_duration"
 msgstr "अमान्य प्रतिबंध अवधि: %(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "अवधि चयन मोड अमान्य है।"
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "फ़िल्टर किया गया प्रतिबंध स्रोत अमान्य है।"
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "फ़िल्टर की गई अवधि स्रोत अमान्य है।"
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "फ़िल्टर किया गया प्रतिबंध-मुक्ति स्रोत अमान्य है।"
+
 msgid "bans.flash.invalid_ip"
 msgstr "अमान्य IP पता: %(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "/bans/unban पर ips पैरामीटर अमान्य है।"
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "प्रतिबंध-मुक्ति चयन मोड अमान्य है।"
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "/bans/update_duration पर updates पैरामीटर अमान्य है।"
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "%(ip)s के लिए कस्टम प्रतिबंध समाप्ति तिथि अनुपस्थित है"
+
+msgid "bans.flash.no_bans"
+msgstr "कोई प्रतिबंध नहीं।"
+
+msgid "bans.flash.no_matching_bans"
+msgstr "कोई मेल खाता प्रतिबंध नहीं।"
+
+msgid "bans.flash.no_matching_reports"
+msgstr "कोई मेल खाती रिपोर्ट नहीं।"
+
+msgid "bans.flash.no_updates"
+msgstr "कोई अपडेट नहीं।"
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "Redis से प्रतिबंध प्राप्त करने में विफल, अधिक जानकारी के लिए लॉग देखें।"
@@ -448,11 +526,14 @@ msgstr "पुष्टि करें"
 msgid "button.convert_configs"
 msgstr "कॉन्फ़िग रूपांतरित करें"
 
-msgid "button.convert_configs_to"
-msgstr "%(state)s में रूपांतरित करें"
-
 msgid "button.convert_services"
 msgstr "सेवाएं बदलें"
+
+msgid "button.convert_to_draft"
+msgstr "ड्राफ़्ट में बदलें"
+
+msgid "button.convert_to_online"
+msgstr "ऑनलाइन में बदलें"
 
 msgid "button.copy"
 msgstr "कॉपी करें"
@@ -549,6 +630,9 @@ msgstr "कस्टम कॉन्फ़िगरेशन आयात कर
 
 msgid "button.import_services"
 msgstr "सेवाएं आयात करें"
+
+msgid "button.import_template"
+msgstr "टेम्पलेट आयात करें"
 
 msgid "button.local_time"
 msgstr "स्थानीय समय"
@@ -727,6 +811,39 @@ msgstr "अन्य सत्र समाप्त करें"
 msgid "button.wrap"
 msgstr "रैप"
 
+msgid "cache.flash.api_unavailable"
+msgstr "API अनुपलब्ध: %(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "कैश फ़ाइल %(file_name)s (कार्य %(job_name)s, प्लगइन %(plugin_id)s) नहीं मिली"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "कैश फ़ाइल %(file_name)s (कार्य %(job_name)s, प्लगइन %(plugin_id)s, सेवा %(service)s) नहीं मिली"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "%(deleted_count)s फ़ाइलें हटाई गईं, %(len)s त्रुटियों के साथ: %(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "कैश फ़ाइलें हटाने में त्रुटि: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "कैश फ़ाइल प्राप्त करने में त्रुटि: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "कैश फ़ाइलें प्राप्त करने में त्रुटि: %(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "कैश फ़ाइलें पैरामीटर अमान्य है"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "कोई कैश फ़ाइल चयनित नहीं"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "%(deleted_count)s कैश फ़ाइल सफलतापूर्वक हटाई गई"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "%(deleted_count)s कैश फ़ाइलें सफलतापूर्वक हटाई गईं"
+
 msgid "cache.kpi_files"
 msgstr "फ़ाइलें"
 
@@ -840,6 +957,117 @@ msgstr "फ़ाइल 1 MiB से अधिक नहीं होनी च�
 
 msgid "certificates.fingerprint"
 msgstr "SHA-256 फिंगरप्रिंट"
+
+msgid "certificates.flash.certificate_action_failed"
+msgstr "प्रमाणपत्र क्रिया विफल: %(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "प्रमाणपत्र सफलतापूर्वक हटा दिया गया"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "प्रमाणपत्र सूची असाइनमेंट सफलतापूर्वक जोड़ा गया"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "प्रमाणपत्र सूची असाइनमेंट सफलतापूर्वक हटाया गया"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "प्रमाणपत्र मेटाडेटा सफलतापूर्वक अपडेट किया गया"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "प्रमाणपत्र और नाम आवश्यक हैं"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "प्रमाणपत्र का नाम आवश्यक है"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "प्रमाणपत्र सफलतापूर्वक नवीनीकृत किया गया"
+
+msgid "certificates.flash.certificate_required"
+msgstr "प्रमाणपत्र आवश्यक है"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "प्रमाणपत्र और सेवा दोनों आवश्यक हैं"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "प्रमाणपत्र अपलोड 2 MiB अनुरोध सीमा से अधिक है"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "नवीनीकरण हेतु देय %(total_due)s प्रमाणपत्रों की जांच की गई"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "प्रमाणपत्र संलग्न नहीं किया जा सका: %(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "प्रमाणपत्र नहीं बनाया जा सका: %(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "प्रमाणपत्र अलग नहीं किया जा सका: %(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "प्रमाणपत्र डाउनलोड नहीं किया जा सका: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "प्रमाणपत्र प्राप्त नहीं किए जा सके: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "प्रमाणपत्र असाइनमेंट के लिए सेवाएँ प्राप्त नहीं की जा सकीं: %(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "Let's Encrypt जारी करना निर्धारित नहीं किया जा सका: %(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "प्रमाणपत्र अपडेट नहीं किया जा सका: %(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "प्रमाणपत्र अपलोड नहीं किया जा सका: %(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "कस्टम प्रमाणपत्र सफलतापूर्वक अपलोड किया गया"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "एन्क्रिप्टेड निजी कुंजियाँ समर्थित नहीं हैं।"
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "अमान्य प्रमाणपत्र क्रिया"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "प्रमाणपत्र भाग अमान्य है"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "प्रमाणपत्र फ़ाइल एक वैध PEM प्रमाणपत्र नहीं है।"
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "अमान्य प्रमाणपत्र स्रोत"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "निजी कुंजी फ़ाइल एक वैध PEM निजी कुंजी नहीं है।"
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "Let's Encrypt जारी करना निर्धारित किया गया"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "नाम और कॉमन नेम (common name) आवश्यक हैं"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "एक PEM प्रमाणपत्र और निजी कुंजी आवश्यक है"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "Let's Encrypt जारी करने के लिए कम से कम एक सेवा चुनें"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "स्व-हस्ताक्षरित प्रमाणपत्र बनाया गया"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "एक प्रमाणपत्र में 100 से अधिक वैकल्पिक विषय नाम (subject alternative names) नहीं हो सकते"
+
+msgid "certificates.flash.too_many_services"
+msgstr "एक प्रमाणपत्र 100 से अधिक सेवाओं से संलग्न नहीं किया जा सकता"
+
+msgid "certificates.flash.validity_range"
+msgstr "वैधता 1 से 825 दिनों के बीच होनी चाहिए"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "वैधता दिनों की एक पूर्ण संख्या होनी चाहिए"
 
 msgid "certificates.issuer"
 msgstr "जारीकर्ता"
@@ -1053,6 +1281,168 @@ msgstr "%(count)s को अधिक दिखाएँ"
 
 msgid "compose.unavailable"
 msgstr "प्लगइन की सूची लोड नहीं हो पाई, इसलिए इस पृष्ठ को सुरक्षित रूप से संपादित नहीं किया जा सकता। API के उत्तर मिलने पर पुनः लोड करें।"
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "सभी चयनित कस्टम कॉन्फ़िगरेशन नहीं मिल सके, UI/API कस्टम कॉन्फ़िगरेशन नहीं हैं, या पहले ही परिवर्तित हो चुके हैं।"
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "सभी चयनित कस्टम कॉन्फ़िगरेशन नहीं मिल सके या UI/API कस्टम कॉन्फ़िगरेशन नहीं हैं।"
+
+msgid "configs.flash.config_already_exists"
+msgstr "कॉन्फ़िग %(config_type)s/%(config_name)s पहले से मौजूद है"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "सेवा %(service)s की कॉन्फ़िग %(config_type)s/%(config_name)s पहले से मौजूद है"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "कॉन्फ़िगरेशन %(clone)s मौजूद नहीं है।"
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "कॉन्फ़िग %(config_type)s/%(name)s मौजूद नहीं है।"
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "सेवा %(service)s की कॉन्फ़िग %(config_type)s/%(name)s मौजूद नहीं है।"
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "कॉन्फ़िग %(config_type)s/%(name)s UI/API की कस्टम कॉन्फ़िग नहीं है और उसे संपादित नहीं किया जा सकता।"
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "सेवा %(service)s की कॉन्फ़िग %(config_type)s/%(name)s UI/API की कस्टम कॉन्फ़िग नहीं है और उसे संपादित नहीं किया जा सकता।"
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "\"ड्राफ्ट\" कॉन्फ़िग में बदली गईं: %(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "\"ऑनलाइन\" कॉन्फ़िग में बदली गईं: %(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "API से कस्टम कॉन्फ़िगरेशन प्राप्त नहीं किए जा सके: %(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "कस्टम कॉन्फ़िगरेशन %(config_type)s/%(config_name)s बनाया गया"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "सेवा %(service)s के लिए कस्टम कॉन्फ़िगरेशन %(config_type)s/%(config_name)s बनाया गया"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "कस्टम कॉन्फ़िग %(non_convertible_config)s पहले से ड्राफ्ट कॉन्फ़िग है और उसे नहीं बदला जाएगा।"
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "कस्टम कॉन्फ़िग %(non_convertible_config)s पहले से ऑनलाइन कॉन्फ़िग है और उसे नहीं बदला जाएगा।"
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "कस्टम कॉन्फ़िगरेशन %(missing_config)s नहीं मिल सका।"
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "कस्टम कॉन्फ़िगरेशन %(non_editable_config)s एक UI/API कस्टम कॉन्फ़िगरेशन नहीं है और इसे परिवर्तित नहीं किया जाएगा।"
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "कस्टम कॉन्फ़िगरेशन %(skipped_config)s एक UI/API कस्टम कॉन्फ़िगरेशन नहीं है और इसे हटाया नहीं जाएगा।"
+
+msgid "configs.flash.deleted_config_one"
+msgstr "कॉन्फ़िग हटाई गई: %(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "कॉन्फ़िग हटाई गईं: %(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "कस्टम कॉन्फ़िगरेशन हटाते समय त्रुटि हुई: %(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "कस्टम कॉन्फ़िगरेशन सहेजते समय त्रुटि हुई: %(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "कस्टम कॉन्फ़िगरेशन आयात करने में विफल: %(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "कस्टम कॉन्फ़िगरेशन आयात करने में विफल: %(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "आयात त्रुटि: %(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "कस्टम कॉन्फ़िगरेशन आयात किया गया: %(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "कस्टम कॉन्फ़िगरेशन आयात किए गए: %(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "/configs/convert पर configs पैरामीटर अमान्य है।"
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "/configs/delete पर configs पैरामीटर अमान्य है।"
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "/configs/export पर configs पैरामीटर अमान्य है।"
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "फ़ाइल एन्कोडिंग अमान्य है। कृपया एक UTF-8 JSON फ़ाइल अपलोड करें।"
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "/configs/new पर name पैरामीटर अमान्य है।"
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "/configs/new पर type पैरामीटर अमान्य है।"
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "/configs/convert पर configs पैरामीटर अनुपस्थित है।"
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "/configs/delete पर configs पैरामीटर अनुपस्थित है।"
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "/configs/convert पर convert_to पैरामीटर अनुपस्थित है।"
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "/configs/new पर name पैरामीटर अनुपस्थित है।"
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "/configs/new पर service पैरामीटर अनुपस्थित है।"
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "/configs/new पर type पैरामीटर अनुपस्थित है।"
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "/configs/new पर value पैरामीटर अनुपस्थित है।"
+
+msgid "configs.flash.no_configs_selected"
+msgstr "कोई कॉन्फ़िगरेशन चयनित नहीं।"
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "निर्यात के लिए कोई कस्टम कॉन्फ़िगरेशन नहीं।"
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "कोई कस्टम कॉन्फ़िगरेशन फ़ाइल अपलोड नहीं की गई।"
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "आयात फ़ाइल में कोई कस्टम कॉन्फ़िगरेशन नहीं मिला।"
+
+msgid "configs.flash.no_values_changed"
+msgstr "कोई मान परिवर्तित नहीं किए गए।"
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "कस्टम कॉन्फ़िगरेशन ओवरराइट किया गया: %(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "कस्टम कॉन्फ़िगरेशन ओवरराइट किए गए: %(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "टेम्पलेट-आधारित कस्टम कॉन्फ़िगरेशन का नाम बदलने की अनुमति नहीं है।"
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "कस्टम कॉन्फ़िगरेशन %(new_type)s/%(new_name)s सहेजा गया"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "सेवा %(service)s के लिए कस्टम कॉन्फ़िगरेशन %(new_type)s/%(new_name)s सहेजा गया"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "सेवा %(new_service)s मौजूद नहीं है।"
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "कस्टम कॉन्फ़िगरेशन छोड़ा गया: %(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "कस्टम कॉन्फ़िगरेशन छोड़े गए: %(names)s"
 
 msgid "configs.subtitle"
 msgstr "अपने सेवाओं के लिए कस्टम NGINX कॉन्फ़िगरेशन स्निपेट — बनाएँ, संपादित करें, और प्रबंधित करें HTTP, ModSecurity, और स्ट्रीम-स्तरीय ओवरराइड।"
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "लागू नहीं"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "अलर्ट ID"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "पूरे साक्ष्य लोड करें"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "शुरू हुआ"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "रुका"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "CrowdSec द्वारा अनुमति सूची में"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "टिप्पणी"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "Console द्वारा प्रबंधित"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "इस इंजन पर कोई अनुमति सूची नहीं मिली।"
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "विश्वसनीय IP या CIDR नेटवर्क जोड़ें।"
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "Console द्वारा प्रबंधित सूचियों को CrowdSec Console में संपादित करें।"
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "सूची एक बार बनाएँ, या पहले से मौजूद स्थानीय रूप से प्रबंधित सूची का उपयोग करें।"
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "CrowdSec अनुमति सूची दस्तावेज़"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "यह उदाहरण 24 घंटे बाद समाप्त हो जाता है। जो प्रविष्टि समाप्त न हो, उसके लिए --expiration हटा दें। IPv4 और IPv6 समर्थित हैं।"
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "सूची और उसकी समाप्ति तिथियों का निरीक्षण करें।"
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "यहाँ आप अनुमति सूचियाँ देख सकते हैं और IP जाँच सकते हैं। प्रविष्टियाँ जोड़ने या हटाने के लिए CrowdSec इंजन पर cscli का उपयोग करें।"
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "बदलाव के बाद अनुमति सूचियाँ रिफ़्रेश करें और IP की फिर से जाँच करें। अपवाद हटाने से CrowdSec के भविष्य के निर्णयों की अनुमति मिल जाती है; इससे प्रतिबंध नहीं बनता। BunkerWeb के स्थानीय प्रतिबंध और अन्य सुरक्षाएँ अलग बनी रहती हैं।"
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "जब अपवाद की आवश्यकता न रहे, तो उसे हटा दें।"
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "विश्वसनीय IP और नेटवर्क का प्रबंधन कैसे करें"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "CrowdSec 1.7 या उसके बाद का संस्करण आवश्यक है। ये कमांड होस्ट पर, या चयनित इंजन का स्थानीय API (LAPI) चला रहे कंटेनर के अंदर चलाएँ, जहाँ उसके CrowdSec कॉन्फ़िगरेशन और डेटाबेस तक पहुँच हो। उदाहरण के सूची नाम, IP और नेटवर्क को अपने मानों से बदलें।"
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "चयनित इंजन के लिए विश्वसनीय IP और नेटवर्क। ये अपवाद उससे जुड़ी सभी सेवाओं और bouncer पर लागू होते हैं।"
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "यह पूरे इंजन पर लागू होने वाला अपवाद है। BunkerWeb के स्थानीय प्रतिबंध, अन्य सुरक्षाएँ या कैश किए गए निर्णय अब भी इस IP को ब्लॉक कर सकते हैं।"
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "स्थानीय रूप से प्रबंधित"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "कभी नहीं"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "कोई सक्रिय प्रविष्टि नहीं।"
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "यह IP किसी भी CrowdSec अनुमति सूची से मेल नहीं खाता।"
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "अनुमति सूची पृष्ठ"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "अनुमति सूचियाँ रिफ़्रेश करें"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "CrowdSec अनुमति सूचियाँ"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "अनुमति सूची की स्थिति उपलब्ध नहीं है।"
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "कैप्चर किया गया इतिहास"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "कैप्चर किया गया रिपोर्ट डेटा बताता है कि अनुरोध के समय क्या देखा गया था; यह निर्णय की वर्तमान स्थिति को सिद्ध नहीं करता।"
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "AppSec का अंतिम अवलोकन"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "कॉन्फ़िगर किया गया"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "जुड़ा हुआ"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "कनेक्शन त्रुटि"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "होस्टनाम या सेवा के आधार पर कनेक्शन फ़िल्टर करें"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "सभी सेवाएँ"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "CrowdSec कनेक्शन"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "अंतिम सफल सिंक"
 
 msgid "crowdsec.connection.local_api"
-msgstr "Local API"
+msgstr "स्थानीय API"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "प्रबंधन"
 
 msgid "crowdsec.connection.mode"
-msgstr "Mode"
+msgstr "मोड"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "कोई उपयोग योग्य CrowdSec कनेक्शन नहीं मिला। इंस्टेंस की त्रुटियाँ और प्लगइन कॉन्फ़िगरेशन जाँचें।"
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "केवल पढ़ने के लिए"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "पहले कोई CrowdSec कनेक्शन चुनें।"
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "चयनित कनेक्शन नीचे दिए गए निर्णयों, अनुमति सूचियों और IP जाँच पर लागू होता है।"
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "चयनित कनेक्शन"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "निर्णय सिंक"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "अद्यतन"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "अभी तक सिंक नहीं हुआ"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "पुराना"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "वर्तमान स्थिति"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "इस अवलोकन के बाद वर्तमान स्थिति बदल सकती है।"
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "अवधि"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "समाप्ति"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "निर्णय ID"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "मूल"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "परिदृश्य"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "दायरा"
 
 msgid "crowdsec.decision.target"
-msgstr "Target"
+msgstr "लक्ष्य"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "प्रकार"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "%(total)s में से %(start)s–%(end)s दिखाए जा रहे हैं"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "यह वर्तमान स्थिति है जो सीधे चयनित CrowdSec इंजन से पढ़ी गई है।"
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "इन फ़िल्टरों से कोई सक्रिय निर्णय मेल नहीं खाता।"
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "निर्णय पृष्ठ"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "सक्रिय निर्णय"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "CrowdSec अनुरोध विफल हो गया।"
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "उपलब्ध CrowdSec अलर्ट साक्ष्य"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "वर्तमान CrowdSec निर्णय"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "वर्तमान CrowdSec निर्णयों को स्थानीय प्रतिबंधों और कैप्चर की गई रिपोर्टों के साथ जाँचा जाता है।"
 
 msgid "crowdsec.investigation.ip"
-msgstr "IP address"
+msgstr "IP पता"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "BunkerWeb के वर्तमान स्थानीय प्रतिबंध"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "कोई अलर्ट साक्ष्य उपलब्ध नहीं है।"
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "कोई वर्तमान स्थानीय प्रतिबंध नहीं मिला।"
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "कोई वर्तमान CrowdSec निर्णय नहीं मिला।"
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "कोई हाल की कैप्चर की गई रिपोर्ट नहीं मिली।"
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "BunkerWeb की हाल की रिपोर्टें"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "%(ip)s की जाँच"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "जाँच करें"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "इस IP के लिए मिले साक्ष्य"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "%(total)s सक्रिय"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "CrowdSec अलर्ट साक्ष्य"
 
 msgid "crowdsec.investigation.summary_available"
-msgstr "%(total)s available"
+msgstr "%(total)s उपलब्ध"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "BunkerWeb के स्थानीय प्रतिबंध"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "%(total)s कैप्चर किए गए"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "CrowdSec निर्णय"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "इसमें चयनित CrowdSec कनेक्शन और BunkerWeb के अपने प्रतिबंध शामिल हैं। अन्य सुरक्षाओं की यहाँ जाँच नहीं की जाती, और जो साक्ष्य पढ़े नहीं जा सके, वे इस बात का प्रमाण नहीं हैं कि यह IP अनुमत है।"
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "कुछ नहीं मिला"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "BunkerWeb रिपोर्टें"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "पढ़ा नहीं जा सका"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "किसी IP की जाँच करें"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "%(total)s परिणामों में से %(shown)s दिखाए जा रहे हैं (स्रोत सीमा: %(limit)s)।"
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "उपलब्ध नहीं: %(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "समाप्ति"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "कारण"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "सेवा"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "अगला"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "%(time)s पर देखा गया"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "पिछला"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "अनुरोध अवरोधित"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "CrowdSec AppSec विफलता नीति"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "स्थिति रिफ़्रेश करें"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "हटाएँ"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "मैं समझता/समझती हूँ और इस निर्णय को हटाना चाहता/चाहती हूँ।"
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "यह साझा CrowdSec इंजन पर निर्णय को हटा देता है और हर जुड़े हुए bouncer को प्रभावित करता है। कैश किए गए निर्णय, कोई अन्य रेंज, स्थानीय प्रतिबंध या AppSec अब भी लक्ष्य को ब्लॉक कर सकते हैं।"
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "%(source)s (%(engine)s) से %(scope)s %(value)s (%(type)s), परिदृश्य %(scenario)s, मूल %(origin)s हटाएँ?"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "निर्णय हटाएँ"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "CrowdSec स्रोत पर हटा दिया गया। प्रसार की स्थिति %(status)s है (%(mode)s, अंतराल %(interval)s)। शेष मेल खाते निर्णय: %(remaining)s। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।"
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "CrowdSec निर्णय हटाएँ"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "कैप्चर का समय"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "रिपोर्ट का समय"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "कैप्चर किए गए निर्णय"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "सुरक्षा रिपोर्ट"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "रिपोर्ट पहचानकर्ता"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "मेल खाता लक्ष्य"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "निर्णय मेटाडेटा"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "पूर्ण"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "अपूर्ण"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "इस पुरानी रिपोर्ट के लिए CrowdSec स्नैपशॉट मेटाडेटा उपलब्ध नहीं है।"
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "अनुरोध के समय कैप्चर किए गए निर्णय का कुछ मेटाडेटा उपलब्ध नहीं था।"
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "कारण"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "कैप्चर किया गया निवारण"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "कैप्चर किया गया सेवा दायरा"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "सेवा"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "कैप्चर किया गया स्रोत"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "प्रत्येक कॉन्फ़िगर किए गए CrowdSec इंजन का निरीक्षण करें और वर्तमान तथा कैप्चर किए गए साक्ष्य से किसी IP की जाँच करें।"
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "CrowdSec ऑपरेटर"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "अज्ञात"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "एक या अधिक जॉब अपने पिछले रन में विफल रहे।"
@@ -2416,17 +2806,128 @@ msgstr "पिछले %(days)s दिन"
 msgid "dashboard.window.title"
 msgstr "डैशबोर्ड समयावधि"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "मिलान करने वाले सभी %(count)s %(entity)s चुने गए हैं।"
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "मिलान करने वाले सभी %(count)s प्रतिबंध चयनित हैं।"
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "मिलान करने वाले सभी %(count)s %(entity)s चुनें"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s प्रतिबंध चुनें"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "इस पेज पर %(count)s प्रतिबंध चयनित है।"
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "इस पेज पर सभी %(count)s प्रतिबंध चयनित हैं।"
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "मिलान करने वाले सभी %(count)s कैश फ़ाइलें चयनित हैं।"
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s कैश फ़ाइलें चुनें"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "इस पेज पर %(count)s कैश फ़ाइल चयनित है।"
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "इस पेज पर सभी %(count)s कैश फ़ाइलें चयनित हैं।"
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "मिलान करने वाले सभी %(count)s कस्टम कॉन्फ़िगरेशन चयनित हैं।"
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s कस्टम कॉन्फ़िगरेशन चुनें"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "इस पेज पर %(count)s कस्टम कॉन्फ़िगरेशन चयनित है।"
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "इस पेज पर सभी %(count)s कस्टम कॉन्फ़िगरेशन चयनित हैं।"
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "मिलान करने वाले सभी %(count)s इंस्टेंस चयनित हैं।"
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s इंस्टेंस चुनें"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "इस पेज पर %(count)s इंस्टेंस चयनित है।"
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "इस पेज पर सभी %(count)s इंस्टेंस चयनित हैं।"
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "मिलान करने वाले सभी %(count)s आइटम चयनित हैं।"
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s आइटम चुनें"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "इस पेज पर %(count)s आइटम चयनित है।"
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "इस पेज पर सभी %(count)s आइटम चयनित हैं।"
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "मिलान करने वाले सभी %(count)s कार्य चयनित हैं।"
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s कार्य चुनें"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "इस पेज पर %(count)s कार्य चयनित है।"
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "इस पेज पर सभी %(count)s कार्य चयनित हैं।"
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "मिलान करने वाले सभी %(count)s प्लगइन्स चयनित हैं।"
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s प्लगइन्स चुनें"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "इस पेज पर %(count)s प्लगइन चयनित है।"
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "इस पेज पर सभी %(count)s प्लगइन्स चयनित हैं।"
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "मिलान करने वाले सभी %(count)s रिपोर्ट चयनित हैं।"
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s रिपोर्ट चुनें"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "इस पेज पर %(count)s रिपोर्ट चयनित है।"
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "इस पेज पर सभी %(count)s रिपोर्ट चयनित हैं।"
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "मिलान करने वाले सभी %(count)s सेवाएं चयनित हैं।"
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s सेवाएं चुनें"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "इस पेज पर %(count)s सेवा चयनित है।"
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "इस पेज पर सभी %(count)s सेवाएं चयनित हैं।"
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "मिलान करने वाले सभी %(count)s टेम्पलेट्स चयनित हैं।"
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s टेम्पलेट्स चुनें"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "इस पेज पर %(count)s टेम्पलेट चयनित है।"
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "इस पेज पर सभी %(count)s टेम्पलेट्स चयनित हैं।"
 
 msgid "datatable.bulk_select_clear"
 msgstr "चयन साफ़ करें"
-
-msgid "datatable.bulk_select_page"
-msgstr "इस पेज पर सभी %(count)s %(entity)s चुने गए हैं।"
 
 msgid "datatable.info_bans"
 msgstr "दिखा रहा है %(start)s से %(end)s तक %(total)s प्रतिबंधों में से"
@@ -2569,6 +3070,9 @@ msgstr "संसाधित हो रहा है..."
 msgid "datatable.search"
 msgstr "खोजें:"
 
+msgid "datatable.select_row"
+msgstr "पंक्ति चुनें"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "कोई प्रतिबंध चयनित नहीं"
 
@@ -2659,11 +3163,50 @@ msgstr "1 टेम्प्लेट चयनित"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d टेम्प्लेट चयनित"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s चयनित"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "%(count)s कस्टम कॉन्फ़िगरेशन चयनित"
 
-msgid "datatable.selected_list_empty"
-msgstr "कोई %(entity)s चयनित नहीं।"
+msgid "datatable.selected_list.configs.count_other"
+msgstr "%(count)s कस्टम कॉन्फ़िगरेशन चयनित"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "कोई कस्टम कॉन्फ़िगरेशन चयनित नहीं।"
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "%(count)s आइटम चयनित"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "%(count)s आइटम चयनित"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "कोई आइटम चयनित नहीं।"
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "%(count)s प्लगइन चयनित"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "%(count)s प्लगइन्स चयनित"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "कोई प्लगइन चयनित नहीं।"
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "%(count)s सेवा चयनित"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "%(count)s सेवाएं चयनित"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "कोई सेवा चयनित नहीं।"
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "%(count)s टेम्पलेट चयनित"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "%(count)s टेम्पलेट्स चयनित"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "कोई टेम्पलेट चयनित नहीं।"
 
 msgid "datatable.zero_records_bans"
 msgstr "कोई मेल खाने वाला प्रतिबंध नहीं मिला"
@@ -2794,11 +3337,41 @@ msgstr "विवरण के लिए जॉब्स पेज देखे�
 msgid "flash.configuration_pending_instance"
 msgstr "कॉन्फ़िगरेशन अभी लागू नहीं हुआ — किसी इंस्टेंस के चालू होने की प्रतीक्षा है।"
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "CORS या AJAX अनुरोध आवश्यक है"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "API से वैश्विक सेटिंग्स प्राप्त नहीं की जा सकीं।"
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "संसाधन समूह प्राप्त नहीं किए जा सके: %(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "डेटाबेस रीड-ओनली मोड में है"
+
+msgid "flash.description_too_long"
+msgstr "विवरण 4000 वर्णों से अधिक नहीं हो सकता"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "आपके पास लेखन अनुमति नहीं है"
+
 msgid "flash.easter_egg"
 msgstr "यदि आप इसे पढ़ रहे हैं, तो इसका मतलब है कि आप जिज्ञासु हैं"
 
 msgid "flash.error"
 msgstr "त्रुटि"
+
+msgid "flash.error_fetching_instances"
+msgstr "इंस्टेंस प्राप्त करने में त्रुटि"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "कस्टम कॉन्फ़िगरेशन सहेजते समय त्रुटि हुई: %(e)s"
+
+msgid "flash.import_warning"
+msgstr "आयात चेतावनी: %(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "convert_to पैरामीटर अमान्य है।"
 
 msgid "flash.last_configuration_change_failed"
 msgstr "आपका अंतिम कॉन्फ़िगरेशन परिवर्तन लागू नहीं किया जा सका।"
@@ -2806,11 +3379,20 @@ msgstr "आपका अंतिम कॉन्फ़िगरेशन पर
 msgid "flash.message"
 msgstr "सूचना"
 
+msgid "flash.plugin_not_found"
+msgstr "प्लगइन नहीं मिला"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "आपके पास आपके PRO लाइसेंस द्वारा अनुमत से अधिक सेवाएं हैं। अपना लाइसेंस अपग्रेड करें या कुछ सेवाओं को ड्राफ्ट मोड में बदलकर अपना PRO लाइसेंस अनलॉक करें।"
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "शेड्यूलर परिवर्तनों को लागू करने का प्रयास करेगा।"
+
+msgid "flash.service_does_not_exist"
+msgstr "सेवा %(service)s मौजूद नहीं है।"
 
 msgid "flash.time.just_now"
 msgstr "अभी"
@@ -2845,6 +3427,9 @@ msgstr "मौजूदा UI/API कस्टम कॉन्फ़िगरे
 msgid "form.checkbox.remember_me"
 msgstr "मुझे याद रखें"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "यदि समान id वाला टेम्पलेट मौजूद हो तो उसे बदल दें"
+
 msgid "form.help.ban_specific_service"
 msgstr "प्रतिबंध केवल इस विशिष्ट सेवा पर लागू होगा।"
 
@@ -2862,6 +3447,9 @@ msgstr "यदि चयनित है, तो प्रतिबंध मै
 
 msgid "form.help.photo_extensions"
 msgstr "JPG, GIF, या PNG की अनुमति है। अधिकतम आकार: 800KB।"
+
+msgid "form.help.secret_stored"
+msgstr "एक मान संग्रहीत है और दिखाया नहीं जाता। इसे बनाए रखने के लिए फ़ील्ड को जैसा है वैसा छोड़ दें, इसे बदलने के लिए नया मान लिखें, या इसे हटाने के लिए फ़ील्ड खाली कर दें।"
 
 msgid "form.label.2fa_code"
 msgstr "2FA कोड"
@@ -3031,6 +3619,9 @@ msgstr "सर्वर का नाम"
 msgid "form.label.service_name"
 msgstr "सेवा का नाम"
 
+msgid "form.label.template_file"
+msgstr "टेम्पलेट फ़ाइल"
+
 msgid "form.label.template_id"
 msgstr "टेम्पलेट आईडी"
 
@@ -3130,6 +3721,438 @@ msgstr "पासवर्ड में कम से कम 1 विशेष �
 msgid "form.validation.password_uppercase"
 msgstr "पासवर्ड में कम से कम 1 बड़ा अक्षर होना चाहिए।"
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "NGINX एक्सेस लॉग के लिए उपयोग किया जाने वाला पथ (फ़ाइल पथ, syslog:server=host[:port][,param=value], या memory:name:size; अक्षम करने के लिए off सेट करें)।"
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "एक्सेस लॉग पथ"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "BunkerWeb की आंतरिक API के लिए सुनने का पोर्ट संख्या (TLS)।"
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "API HTTPS पोर्ट संख्या"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "BunkerWeb की आंतरिक API के लिए सुनने का पोर्ट संख्या।"
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "API पोर्ट संख्या"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "BunkerWeb की आंतरिक API के लिए HTTP सुनना।"
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "API सुनना HTTP"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "BunkerWeb की आंतरिक API के लिए HTTPS (SSL/TLS) सुनना।"
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "API सुनना HTTPS"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "BunkerWeb की आंतरिक API के लिए सुनने का IP पता।"
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "API सुनने का IP"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "BunkerWeb की आंतरिक API के लिए सर्वर का नाम (वर्चुअल होस्ट)।"
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "API सर्वर का नाम"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "API कॉल की प्रमाणिकता के लिए वैकल्पिक टोकन। यदि सेट है, तो शेड्यूलर (और किसी भी क्लाइंट) को इसे Authorization हेडर के माध्यम से भेजना होगा। नोट: इसे BunkerWeb और शेड्यूलर दोनों परिवेशों में सेट होना चाहिए।"
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "API एक्सेस टोकन"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "BunkerWeb की आंतरिक API से संपर्क करने की अनुमति वाले IP/नेटवर्क की सूची। (प्रारूप: ip/netmask या ipv6/netmask, स्पेस से अलग किए गए)"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "API व्हाइटलिस्ट IP"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "Docker Autoconf एकीकरण सक्षम करें।"
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "Autoconf मोड"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "स्पेस से अलग किए गए BunkerWeb इंस्टेंस की सूची (प्रारूप: fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "BunkerWeb इंस्टेंस"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "आंतरिक cachestore (ipc) का आकार।"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "Cachestore ipc मेमोरी आकार"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "आंतरिक cachestore (locks) का आकार।"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "Cachestore locks मेमोरी आकार"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "आंतरिक cachestore का आकार।"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "Cachestore मेमोरी आकार"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "आंतरिक cachestore (miss) का आकार।"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "Cachestore miss मेमोरी आकार"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "क्लाइंट अनुरोध बॉडी पढ़ने का टाइमआउट।"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "क्लाइंट बॉडी टाइमआउट"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "क्लाइंट अनुरोध हेडर पढ़ने का टाइमआउट।"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "क्लाइंट हेडर टाइमआउट"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "जब कोई प्रोजेक्टेड .conf फ़ाइल पिछले दर्ज किए गए प्रोजेक्शन के बाद से बदल जाए या उसमें से अनुपस्थित हो, तो क्या होता है। डेटाबेस की वर्तमान पंक्ति से मेल खाने वाली फ़ाइलें अनदेखी की जाती हैं; पठनीय प्रोजेक्शन इतिहास के बिना, कोई ड्रिफ़्ट रिपोर्ट नहीं की जाती। 'overwrite' हर पहचाने गए ड्रिफ़्ट को लॉग करता है और डेटाबेस से फ़ाइल फिर से लिखता है, या यदि कोई सक्रिय पंक्ति इसकी जगह नहीं लेती तो इसे हटा देता है। 'refuse' ड्रिफ़्ट हल होने तक डेटाबेस से वहाँ कुछ नहीं लिखता, एक त्रुटि लॉग करता है, और लंबित कस्टम कॉन्फ़िग परिवर्तन को अस्वीकृत छोड़ देता है ताकि इसे फिर से प्रयास किया जाए।"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "कस्टम कॉन्फ़िग ड्रिफ़्ट नीति"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "साझा प्रति-वर्कर datastore LRU के लिए स्लॉट संख्या (इसका उपयोग internalstore और प्रति-वर्कर प्लगइन कैश करते हैं)। एक सादा पूर्णांक या `k`/`m` संक्षिप्त रूप स्वीकार करता है (जैसे `1k`, `10k`, `1m`)।"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "Datastore LRU आकार"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "आंतरिक datastore का आकार।"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "Datastore मेमोरी आकार"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "उपयोग करने के लिए रिज़ॉल्वर के DNS पते।"
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "DNS रिज़ॉल्वर"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "NGINX एरर लॉग के लिए उपयोग किया जाने वाला पथ (फ़ाइल पथ, stderr, syslog:server=host[:port][,param=value], या memory:size)।"
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "एरर लॉग पथ"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "HTTPS पोर्ट संख्या जिससे bunkerweb बाइंड होता है। HTTPS सुनना अक्षम करने के लिए खाली छोड़ें।"
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "HTTPS पोर्ट"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "HTTP पोर्ट संख्या जिससे bunkerweb बाइंड होता है। HTTP सुनना अक्षम करने के लिए खाली छोड़ें।"
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "HTTP पोर्ट"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "आंतरिक internalstore का आकार।"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "Internalstore मेमोरी आकार"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "आंतरिक उपयोग: जब सेवा ड्राफ़्ट मोड में हो तो yes पर सेट करें।"
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "आंतरिक उपयोग हेतु ड्राफ़्ट"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "आंतरिक उपयोग: जब BW लोड हो रहा हो तो yes पर सेट करें।"
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "आंतरिक उपयोग हेतु लोडिंग"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "स्थानीय समय (शेड्यूलर TZ, HH:MM, 24 घंटे) जिस पर दैनिक शेड्यूल की गई जॉब चलती हैं; साप्ताहिक जॉब भी इसी समय पर, JOBS_WEEKLY_DAY पर चलती हैं।"
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "जॉब का दैनिक समय"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "सप्ताह का वह दिन जिस पर साप्ताहिक शेड्यूल की गई जॉब, JOBS_DAILY_TIME पर चलती हैं।"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "जॉब का साप्ताहिक दिन"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "keep-alive क्लाइंट कनेक्शन के लिए टाइमआउट।"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "कीपअलाइव टाइमआउट"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "पुनरारंभ पर कॉन्फ़िगरेशन बनाए रखें। पुनरारंभ पर कॉन्फ़िग रीसेट रोकने के लिए 'yes' सेट करें।"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "पुनरारंभ पर कॉन्फ़िगरेशन बनाए रखें"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "Kubernetes एकीकरण सक्षम करें।"
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "Kubernetes मोड"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "non-ssl सुनना सक्षम करें (पासथ्रू)।"
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "स्ट्रीम सुनना"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "non-ssl के लिए सुनने का पोर्ट (पासथ्रू)। non-SSL स्ट्रीम सुनना अक्षम करने के लिए खाली छोड़ें।"
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "स्ट्रीम सुनने का पोर्ट"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "ssl के लिए सुनने का पोर्ट (पासथ्रू)। SSL स्ट्रीम सुनना अक्षम करने के लिए खाली छोड़ें।"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "स्ट्रीम सुनने का पोर्ट ssl"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "एक्सेस लॉग के लिए उपयोग किया जाने वाला प्रारूप।"
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "एक्सेस लॉग प्रारूप"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "एरर लॉग के लिए उपयोग किया जाने वाला स्तर।"
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "लॉग स्तर"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "मल्टीसाइट सक्रियण।"
+
+msgid "general.settings.MULTISITE.label"
+msgstr "मल्टीसाइट"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "वह स्थान जहाँ nginx कॉन्फ़िगरेशन खोजेगा।"
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "nginx प्रीफ़िक्स"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "वे प्लगइन जिन्हें इस साइट के access चरण (अनुरोध स्वीकृति/नियंत्रण) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "प्लगइन क्रम (access)"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "वे प्लगइन जिन्हें इस साइट के header चरण (प्रतिक्रिया हेडर फ़िल्टरिंग) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "प्लगइन क्रम (header)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "वे प्लगइन जिन्हें init चरण (इंजन बूटस्ट्रैप, केवल एक बार चलता है) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "प्लगइन क्रम (init)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "वे प्लगइन जिन्हें init_worker चरण (प्रति-वर्कर बूटस्ट्रैप) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "प्लगइन क्रम (init_worker)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "init_workers चरण के दौरान चलाने के लिए कॉमा या स्पेस से अलग किए गए प्लगइन ID।"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "प्लगइन क्रम (init_workers)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "वे प्लगइन जिन्हें इस साइट के log चरण (प्रतिक्रिया के बाद HTTP लॉग प्रोसेसिंग) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "प्लगइन क्रम (log)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "वे प्लगइन जिन्हें इस साइट के log_default चरण (डिफ़ॉल्ट वर्चुअल होस्ट लॉग प्रोसेसिंग) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "प्लगइन क्रम (log_default)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "वे प्लगइन जिन्हें इस साइट के log_stream चरण (स्ट्रीम लॉग प्रोसेसिंग) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "प्लगइन क्रम (log_stream)"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "वे प्लगइन जिन्हें इस साइट के preread चरण (प्रॉक्सी से पहले TCP preread जाँच) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "प्लगइन क्रम (preread)"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "वे प्लगइन जिन्हें इस साइट के set चरण (rewrite/access से पहले वेरिएबल सेटअप) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "प्लगइन क्रम (set)"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "वे प्लगइन जिन्हें इस साइट के ssl_certificate चरण (TLS प्रमाणपत्र चयन/जारी करना) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "प्लगइन क्रम (ssl_certificate)"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "वे प्लगइन जिन्हें timer चरण (बैकग्राउंड टाइमर) के दौरान पहले चलना चाहिए। ID को स्पेस से अलग करें; शेष प्लगइन बाद में अपने सामान्य क्रम में चलते रहते हैं।"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "प्लगइन क्रम (timer)"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "खतरों की प्रतिक्रिया को परिभाषित करता है: निगरानी और लॉग करने के लिए \"detect\", या पहुँच रोकने और घटनाएँ लॉग करने के लिए \"block\"।"
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "सुरक्षा मोड"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "क्लाइंट को प्रतिक्रिया भेजने का टाइमआउट।"
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "सेंड टाइमआउट"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "bunkerweb द्वारा सेवित वर्चुअल होस्ट की सूची। (स्पेस से अलग किए गए)"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "सर्वर का नाम"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "server_names_hash_bucket_size डायरेक्टिव के लिए मान।"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "सर्वर नाम हैश बकेट आकार"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "सर्वर का प्रकार: http या stream।"
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "सर्वर का प्रकार"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "निरस्त कुकी सत्र पहचानकर्ताओं को रखने वाले आंतरिक स्टोर का आकार।"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "सत्र निरसन मेमोरी आकार"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "Docker Swarm एकीकरण सक्षम करें।"
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "Swarm मोड"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "टाइमर के लिए लॉग स्तर।"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "टाइमर लॉग स्तर"
+
+msgid "general.settings.USE_API.help"
+msgstr "BunkerWeb की आंतरिक API सक्रिय करें।"
+
+msgid "general.settings.USE_API.label"
+msgstr "API सक्रिय करें"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "IPv6 कनेक्टिविटी सक्षम करें।"
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "IPv6 का उपयोग करें"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "TCP सुनना (stream)।"
+
+msgid "general.settings.USE_TCP.label"
+msgstr "TCP सुनना"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "लागू करने के लिए कॉन्फ़िग टेम्पलेट, स्पेस से अलग किए गए, जो विशिष्ट सेटिंग्स के डिफ़ॉल्ट मानों को ओवरराइड करेंगे। टेम्पलेट क्रम में लागू होते हैं और बाद वाला पहले वाले को ओवरराइड करता है; सेवा पर सेट किया गया मान टेम्पलेट को ओवरराइड करता है।"
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "टेम्पलेट का उपयोग करें"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "UDP सुनना (stream)।"
+
+msgid "general.settings.USE_UDP.label"
+msgstr "UDP सुनना"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "इनिशियलाइज़ेशन वर्कर्स के lua_shared_dict का आकार"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "इनिशियलाइज़ेशन Workerlock मेमोरी आकार"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "प्रति वर्कर अधिकतम कनेक्शन की संख्या।"
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "प्रति वर्कर कनेक्शन"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "वर्कर प्रोसेस की संख्या।"
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "वर्कर प्रोसेस"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "वर्कर प्रोसेस के लिए अधिकतम खुली फ़ाइलों की संख्या।"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "प्रति वर्कर खुली फ़ाइलें"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "वर्कर प्रोसेस के सुव्यवस्थित शटडाउन के लिए टाइमआउट। इस विलंब के बाद, मेमोरी वृद्धि रोकने के लिए रीलोड के दौरान पुराने वर्कर्स को ज़बरन समाप्त कर दिया जाता है।"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "वर्कर शटडाउन टाइमआउट"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "अपग्रेड के लिए लाइसेंस कुंजी की जांच की जा रही है।"
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "वैश्विक सेटिंग्स सहेजी नहीं गईं: प्रत्येक बदला हुआ मान अस्वीकार कर दिया गया।"
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "कोई मान परिवर्तित न होने के कारण वैश्विक सेटिंग्स संपादित नहीं की गईं।"
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "वैश्विक सेटिंग्स सहेजी गईं, लेकिन %(refused_count)s मान अस्वीकार कर दिए गए।"
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "वैश्विक सेटिंग्स सफलतापूर्वक सहेजी गईं।"
+
+msgid "home.flash.error_fetching_services"
+msgstr "सेवाएँ प्राप्त करने में त्रुटि: %(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "सभी %(count)s सेटिंग्स देखें"
 
@@ -3156,6 +4179,75 @@ msgstr "स्थैतिक"
 
 msgid "instances.down"
 msgstr "बंद"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "इंस्टेंस नहीं बनाया जा सका: %(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "API से इंस्टेंस प्राप्त नहीं किए जा सके।"
+
+msgid "instances.flash.could_not_found_one"
+msgstr "चयनित इंस्टेंस नहीं मिला या वह UI/API इंस्टेंस नहीं है।"
+
+msgid "instances.flash.could_not_found_other"
+msgstr "चयनित सभी इंस्टेंस नहीं मिले या वे UI/API इंस्टेंस नहीं हैं।"
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "इंस्टेंस हटाया नहीं जा सका: %(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "इंस्टेंस हटाए नहीं जा सके: %(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "होस्टनाम %(hostname)s पहले से उपयोग में है।"
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "इंस्टेंस %(value)s सफलतापूर्वक बनाया गया।"
+
+msgid "instances.flash.instance_deleted"
+msgstr "इंस्टेंस %(instance)s सफलतापूर्वक हटा दिया गया।"
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "इंस्टेंस %(instance)s मौजूद नहीं है।"
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "इंस्टेंस %(instance)s में रीलोड विधि नहीं है।"
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "इंस्टेंस %(instance)s में स्टॉप विधि नहीं है।"
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "इंस्टेंस %(non_deletable_instance)s एक UI/API इंस्टेंस नहीं है और इसे हटाया नहीं जाएगा।"
+
+msgid "instances.flash.instance_reloaded"
+msgstr "इंस्टेंस %(instance)s सफलतापूर्वक फिर से लोड किया गया।"
+
+msgid "instances.flash.instance_stopped"
+msgstr "इंस्टेंस %(instance)s सफलतापूर्वक रोका गया।"
+
+msgid "instances.flash.instances_deleted"
+msgstr "इंस्टेंस %(instance)s सफलतापूर्वक हटा दिए गए।"
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "/instances/new पर instance hostname पैरामीटर अनुपस्थित है।"
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "/instances/new पर instance name पैरामीटर अनुपस्थित है।"
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "/instances/delete पर instances पैरामीटर गायब है।"
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "/instances/ping पर instances पैरामीटर गायब है।"
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "/instances/reload पर instances पैरामीटर गायब है।"
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "/instances/stop पर instances पैरामीटर गायब है।"
+
+msgid "instances.flash.no_instance_selected"
+msgstr "कोई इंस्टेंस चयनित नहीं।"
 
 msgid "instances.loading"
 msgstr "लोड हो रहा है"
@@ -3193,6 +4285,24 @@ msgstr "प्रारंभ तिथि"
 msgid "job.history.success"
 msgstr "सफलता"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "कार्य प्राप्त करने में त्रुटि: %(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "/jobs/run पर jobs पैरामीटर अमान्य है।"
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "कार्य के प्लगइन शेड्यूलर द्वारा पृष्ठभूमि में चलाए जाएंगे।"
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "कार्यों के प्लगइन शेड्यूलर द्वारा पृष्ठभूमि में चलाए जाएंगे।"
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "/jobs/run पर jobs पैरामीटर अनुपस्थित है।"
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "कोई कार्य चयनित नहीं।"
+
 msgid "jobs.subtitle"
 msgstr "BunkerWeb शेड्यूलर द्वारा चलाए जाने वाले अनुसूचित और एक-बार के कार्य — उनकी स्थिति को ट्रैक करें और आवश्यकतानुसार चलाएं।"
 
@@ -3213,6 +4323,15 @@ msgstr "लॉक किया गया (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "लॉक की गई सेटिंग्स हाइलाइट की गई हैं"
+
+msgid "legend.raw_setting_drafts"
+msgstr "किसी सेटिंग की शुरुआत में ड्राफ़्ट टॉगल करने के लिए # दबाएँ या उसे सक्रिय करने के लिए Backspace दबाएँ। लागू करने के लिए सहेजें। ड्राफ़्ट अपने मान बनाए रखते हैं, जबकि विरासत में मिले या डिफ़ॉल्ट मान लागू होते हैं।"
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "जांचने के लिए प्रमाणपत्र खोलें"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt: अनाथ प्रमाणपत्र <strong>%(cert_name)s</strong> एक अनुपलब्ध ACME खाते <code>%(account)s</code> का संदर्भ देता है। जब तक प्रदाता की स्थिति ठीक नहीं हो जाती, तब तक नवीनीकरण अवरुद्ध हैं। <a href=\"%(certificates_url)s\">%(link_text)s</a>।"
 
 msgid "link.back_to_login"
 msgstr "लॉगिन पर वापस जाएं"
@@ -3253,6 +4372,12 @@ msgstr "एक प्रमाणीकरण कोड का उपयोग �
 msgid "link.use_recovery_code"
 msgstr "एक रिकवरी कोड का उपयोग करें"
 
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "आपको लॉग इन नहीं किया जा सका, कृपया पुनः प्रयास करें"
+
+msgid "login.flash.invalid_username_password"
+msgstr "उपयोगकर्ता नाम या पासवर्ड अमान्य है"
+
 msgid "login.notice_password_changed"
 msgstr "आपका पासवर्ड बदल दिया गया है। नए पासवर्ड से लॉग इन करें।"
 
@@ -3288,6 +4413,12 @@ msgstr "फैलाएँ"
 
 msgid "logs.filter_levels"
 msgstr "स्तर"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "फ़ाइल पथ अमान्य है"
+
+msgid "logs.flash.no_such_file"
+msgstr "ऐसी कोई फ़ाइल नहीं"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,6 +4504,27 @@ msgstr "और ऊँचा"
 msgid "logs.trimmed_notice"
 msgstr "--- प्रदर्शन के लिए %(count)s पुरानी लॉग लाइनें हटा दी गईं ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "डेटाबेस कनेक्शन रीड-ओनली मोड में है: कोई संशोधन संभव नहीं।"
+
+msgid "main.flash.failover_configuration_error"
+msgstr "पिछले परिवर्तन लागू नहीं किए जा सके क्योंकि इससे NGINX पर एक कॉन्फ़िगरेशन त्रुटि उत्पन्न होती है, कृपया अधिक जानकारी के लिए BunkerWeb के लॉग देखें। कॉन्फ़िगरेशन आखिरी काम करने वाली स्थिति में वापस चली गई।"
+
+msgid "main.flash.failover_message"
+msgstr "फ़ेलओवर संदेश:"
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "स्थिति को जबरन पुनः लोड किया गया"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "आपके पास आपके प्रो लाइसेंस द्वारा अनुमत सेवाओं से अधिक सेवाएँ हैं। अपना लाइसेंस अपग्रेड करें या अपने प्रो लाइसेंस को अनलॉक करने के लिए कुछ सेवाओं को ड्राफ़्ट मोड में ले जाएँ।"
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "पिछले परिवर्तन सफलतापूर्वक लागू कर दिए गए हैं।"
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "दो-कारक प्रमाणीकरण सक्षम है लेकिन कोई पुनर्प्राप्ति कोड उपलब्ध नहीं है, कृपया उन्हें ताज़ा करें:"
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।"
 
@@ -3385,11 +4537,20 @@ msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
 msgstr[0] "क्या आप वाकई चयनित कैश फ़ाइल हटाना चाहते हैं?"
 msgstr[1] "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन को \"ड्राफ्ट\" में बदलना चाहते हैं?"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन को \"ऑनलाइन\" में बदलना चाहते हैं?"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "क्या आप चयनित कस्टम कॉन्फ़िगरेशन बदलना चाहते हैं?"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "क्या आप सुनिश्चित हैं कि चयनित कस्टम कॉन्फ़िगरेशन को %(state)s में रूपांतरित करना चाहते हैं?"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन को \"ड्राफ्ट\" में बदलना चाहते हैं?"
+
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन को \"ऑनलाइन\" में बदलना चाहते हैं?"
 
 #. plural pair; 2 form(s) for hi, singular in slot 0
 msgid "modal.body.confirm_configs_deletion_alert"
@@ -3409,11 +4570,29 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "क्या आप वाकई चयनित प्लगइन हटाना चाहते हैं?"
 msgstr[1] "क्या आप वाकई चयनित प्लगइन्स हटाना चाहते हैं?"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "क्या आप वाकई चयनित सेवा को ड्राफ़्ट में बदलना चाहते हैं?"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "क्या आप वाकई चयनित सेवा को ऑनलाइन में बदलना चाहते हैं?"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "क्या आप वाकई इस सेवा का घोषित मोड बदलना चाहते हैं?"
 
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "क्या आप वाकई चयनित सेवाओं को ड्राफ़्ट में बदलना चाहते हैं?"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "क्या आप वाकई चयनित सेवाओं को ऑनलाइन में बदलना चाहते हैं?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "क्या आप वाकई टेम्पलेट %(name)s को हटाना चाहते हैं?"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "क्या आप वाकई चयनित टेम्पलेट को हटाना चाहते हैं?"
+msgstr[1] "क्या आप वाकई चयनित टेम्पलेट्स को हटाना चाहते हैं?"
 
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?"
@@ -3475,6 +4654,12 @@ msgstr "अपनी सेवाओं की निर्यात फ़ा�
 msgid "modal.body.import_services_warning"
 msgstr "सेवाएँ आयात करने पर निर्यात फ़ाइल से नई UI सेवाएँ बनेंगी। मौजूदा सेवाएँ छोड़ दी जाएँगी। कस्टम कॉन्फ़िगरेशन के साथ निर्यात किया गया .zip आर्काइव भी स्वीकार किया जाता है।"
 
+msgid "modal.body.import_template_help"
+msgstr "BunkerWeb से निर्यात किया गया एक टेम्पलेट पैकेज (.json), या एक संग्रह (.zip, .tar.gz, .tar.xz) जिसमें एक टेम्पलेट फ़ोल्डर हो, उसकी template.json और configs सहित। अधिकतम 1 MiB।"
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "किसी टेम्पलेट को बदलने से अगली कॉन्फ़िगरेशन जनरेशन पर उसका उपयोग करने वाली हर सेवा बदल जाती है। किसी प्लगइन के स्वामित्व वाले या वेब UI के बाहर प्रबंधित टेम्पलेट कभी नहीं बदले जाते।"
+
 msgid "modal.body.instance_creation_alert"
 msgstr "आपको पोर्ट या सर्वर नाम प्रदान करने की आवश्यकता नहीं है; इंस्टेंस कॉन्फ़िगरेशन के लिए `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` और `API_SERVER_NAME` के मानों का उपयोग किया जाएगा।"
 
@@ -3489,6 +4674,9 @@ msgstr "ये पुनर्प्राप्ति कोड केवल �
 
 msgid "modal.body.reset_template_alert"
 msgstr "क्या आप वाकई वर्तमान टेम्पलेट सेटिंग्स और कस्टम कॉन्फ़िगरेशन रीसेट करना चाहते हैं?"
+
+msgid "modal.body.service_deletion_confirmation"
+msgstr "क्या आप वाकई चयनित सेवा को हटाना चाहते हैं?"
 
 msgid "modal.body.services_conversion_confirmation"
 msgstr "क्या आप वाकई चयनित सेवाओं को कनवर्ट करना चाहते हैं?"
@@ -3583,6 +4771,9 @@ msgstr "कस्टम कॉन्फ़िगरेशन आयात कर
 msgid "modal.title.import_services"
 msgstr "सेवाएं आयात करें"
 
+msgid "modal.title.import_template"
+msgstr "टेम्पलेट आयात करें"
+
 msgid "modal.title.job_history"
 msgstr "पिछले 10 कार्य निष्पादन"
 
@@ -3618,6 +4809,21 @@ msgstr "आसान"
 
 msgid "mode.raw"
 msgstr "रॉ"
+
+msgid "navbar.aria.close_navigation"
+msgstr "नेविगेशन बंद करें"
+
+msgid "navbar.aria.help"
+msgstr "सहायता"
+
+msgid "navbar.aria.news"
+msgstr "समाचार"
+
+msgid "navbar.aria.notifications"
+msgstr "सूचनाएं"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "नेविगेशन टॉगल करें"
 
 msgid "navbar.button.upgrade_to_pro"
 msgstr "प्रो में अपग्रेड करें"
@@ -3769,6 +4975,9 @@ msgstr "पहले से सदस्यता ली गई है"
 msgid "notice.dismiss_mfa"
 msgstr "मुझे फिर याद न दिलाएँ"
 
+msgid "notice.enable_mfa"
+msgstr "कृपया अपने खाते को सुरक्षित करने के लिए दो-चरणीय प्रमाणीकरण सक्षम करें <a href=\"%(url)s\">यहाँ</a>"
+
 msgid "onboarding.dismiss"
 msgstr "खारिज करें"
 
@@ -3822,6 +5031,39 @@ msgstr "अपनी पहली सेवा पंजीकृत करे�
 
 msgid "onboarding.item.workflow"
 msgstr "एक सुरक्षा वर्कफ़्लो जोड़ें"
+
+msgid "onboarding.item_hint.first_block"
+msgstr "जैसे ही BunkerWeb किसी अनुरोध को अवरुद्ध करेगा, रिपोर्ट यहाँ दिखाई देंगी — एक खराब अनुरोध भेजें और वापस जाँचें।"
+
+msgid "onboarding.item_hint.https"
+msgstr "अपनी सेवा को HTTPS पर परोसने के लिए यहाँ प्रमाणपत्र जोड़ें या जनरेट करें।"
+
+msgid "onboarding.item_hint.install"
+msgstr "यहाँ एक इंस्टेंस जोड़ें, फिर उसे प्रबंधन में लाने के लिए अपना पहला कॉन्फ़िगरेशन सहेजें।"
+
+msgid "onboarding.item_hint.mfa"
+msgstr "इस मेनू से अपनी प्रोफ़ाइल खोलें, फिर दो-चरणीय प्रमाणीकरण चालू करें।"
+
+msgid "onboarding.item_hint.pro"
+msgstr "PRO प्लगइन और सहायता अनलॉक करने के लिए यहाँ अपनी PRO लाइसेंस कुंजी दर्ज करें।"
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "यहाँ हर पंक्ति एक प्रतिबंधित क्लाइंट, कारण, और बैन कब समाप्त होगा यह दिखाती है।"
+
+msgid "onboarding.item_hint.read_home"
+msgstr "यह डैशबोर्ड एक नज़र में सक्रिय इंस्टेंस, परोसी गई सेवाएँ और हाल का ट्रैफ़िक दिखाता है।"
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "हर इंस्टेंस के लाइव लॉग यहाँ दिखते हैं, जिन्हें इंस्टेंस और गंभीरता के अनुसार फ़िल्टर किया जा सकता है।"
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "यह देखने के लिए यहाँ एक रिपोर्ट खोलें कि किस सुरक्षा जाँच ने इसे रोका, और क्यों।"
+
+msgid "onboarding.item_hint.service"
+msgstr "BunkerWeb को यह बताने के लिए यहाँ एक सेवा बनाएँ कि किस एप्लिकेशन की सुरक्षा करनी है।"
+
+msgid "onboarding.item_hint.workflow"
+msgstr "जाँच और प्रतिक्रियाओं को एक नियम में जोड़ने के लिए यहाँ एक वर्कफ़्लो बनाएँ।"
 
 msgid "onboarding.not_saved"
 msgstr "सहेजा नहीं जा सका।"
@@ -3886,6 +5128,9 @@ msgstr "प्रो"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "BunkerWeb का संस्करण (%(current)s) नहीं पढ़ा जा सका, इसलिए %(id)s की संगतता जाँची नहीं जा सकी; कुछ भी इंस्टॉल नहीं हुआ"
+
 msgid "plugins.catalog.incompatible"
 msgstr "यह रिलीज़ किसी BunkerWeb संगतता की घोषणा नहीं करती; वर्तमान संस्करण %(current)s है"
 
@@ -3904,8 +5149,32 @@ msgstr "अधिक जानें"
 msgid "plugins.catalog.release"
 msgstr "रिलीज़ %(tag)s से पढ़ें"
 
+msgid "plugins.catalog.remove"
+msgstr "हटाएँ"
+
 msgid "plugins.catalog.stale"
 msgstr "कैटलॉग हाल ही में रीफ्रेश नहीं हो सका, इसलिए जब तक यह फिर से अद्यतित नहीं हो जाता, इंस्टॉल करना अक्षम है।"
+
+msgid "plugins.catalog.state_installed"
+msgstr "इंस्टॉल किया गया (संस्करण %(version)s)"
+
+msgid "plugins.catalog.state_managed"
+msgstr "कैटलॉग के बाहर इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "कैटलॉग के बाहर कोर प्लगइन के रूप में इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "कैटलॉग के बाहर बाहरी प्लगइन के रूप में इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "कैटलॉग के बाहर PRO प्लगइन के रूप में इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "कैटलॉग के बाहर UI प्लगइन के रूप में इंस्टॉल है; जहाँ से इंस्टॉल किया गया था वहीं से इसे अपडेट या हटाएँ"
+
+msgid "plugins.catalog.state_update"
+msgstr "अपडेट उपलब्ध है: संस्करण %(installed)s इंस्टॉल है, कैटलॉग में %(version)s सूचीबद्ध है"
 
 msgid "plugins.catalog.tab"
 msgstr "उपलब्ध"
@@ -3913,8 +5182,188 @@ msgstr "उपलब्ध"
 msgid "plugins.catalog.trust_notice"
 msgstr "कम्युनिटी आइटम उन रिपॉजिटरी से पढ़े जाते हैं जिन्हें BunkerWeb संगठन GitHub पर, TLS के माध्यम से प्रकाशित करता है, और जो इंस्टॉल किया गया है उसकी जांच सूचीबद्ध की गई चीज़ों से की जाती है — लेकिन यहां कुछ भी क्रिप्टोग्राफिक रूप से हस्ताक्षरित नहीं है। एक इंस्टॉल किया गया प्लगइन पूर्ण BunkerWeb अनुमतियों के साथ कोड चलाता है।"
 
+msgid "plugins.catalog.update"
+msgstr "अपडेट करें"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "यह इंस्टॉल किए गए प्लगइन %(name)s (%(id)s, संस्करण %(installed)s) को कैटलॉग के संस्करण %(version)s से बदल देगा। भले ही इसे कैटलॉग से इंस्टॉल करने के बजाय हाथ से अपलोड किया गया हो, यह बदल दिया जाता है।"
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "इस अपडेट से कोई सेटिंग नहीं हटाई जाती।"
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "इस अपडेट से हटाई जाने वाली सेटिंग्स अभी सूचीबद्ध नहीं की जा सकतीं, इसलिए अगले कैटलॉग रीफ़्रेश तक अपडेट करना अक्षम है।"
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "संस्करण %(version)s अब इन सेटिंग्स की घोषणा नहीं करता। इन्हें वैश्विक सेटिंग्स, सेवाओं और टेम्पलेट्स में इनके लिए सेट हर मान सहित हटा दिया जाता है:"
+
+msgid "plugins.catalog.update_title"
+msgstr "एक सामुदायिक प्लगइन अपडेट करें"
+
 msgid "plugins.catalog.version"
 msgstr "संस्करण %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "चल रहा BunkerWeb संस्करण (%(current)s) नहीं पढ़ा जा सका, इसलिए इस रिलीज़ की संगतता जाँची नहीं जा सकती"
+
+msgid "plugins.flash.already_at_version"
+msgstr "प्लगइन %(plugin_id)s पहले से ही संस्करण %(version)s पर है"
+
+msgid "plugins.flash.already_installed"
+msgstr "आईडी %(plugin_id)s वाला प्लगइन पहले से इंस्टॉल है"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "%(tag)s आर्काइव अब कैटलॉग द्वारा सूचीबद्ध से मेल नहीं खाता। %(plugin_id)s के लिए कुछ भी इंस्टॉल नहीं किया गया।"
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "अपडेट की पुष्टि होने के बाद से %(plugin_id)s की कैटलॉग प्रविष्टि बदल गई है; अपडेट की फिर से समीक्षा करें"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "%(plugin_id)s की कैश्ड कैटलॉग प्रविष्टि अपडेट से पुरानी है; अगले रीफ्रेश की प्रतीक्षा करें"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s, अधिक जानकारी के लिए लॉग देखें"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "सामुदायिक कैटलॉग अक्षम है"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "प्लगइन %(plugin)s हटाया नहीं जा सका: %(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "डेटाबेस में प्लगइन %(plugin)s हटाया नहीं जा सका: %(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "%(plugin_id)s डाउनलोड नहीं किया जा सका: %(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "%(plugin_id)s इंस्टॉल नहीं हो सका: %(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "%(plugin_id)s इंस्टॉल नहीं हो सका: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "%(plugin_id)s अपडेट नहीं हो सका: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "%(plugin_id)s अपडेट नहीं हो सका: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "प्लगइन %(plugin)s अपडेट नहीं किया जा सका: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "प्लगइन %(plugin)s अपडेट नहीं किया जा सका: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "API के माध्यम से ui प्लगइन अपडेट नहीं किए जा सके: %(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "प्लगइन %(plugin)s सफलतापूर्वक हटाया गया"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "फ़ाइल plugin.json में निम्नलिखित में से एक या अधिक कुंजियाँ अनुपस्थित हैं: %(value)s (%(value2)s)"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "%(file)s में फ़ाइल plugin.json मान्य नहीं है (%(msg)s: पंक्ति %(lineno)s स्तंभ %(colno)s (वर्ण %(pos)s)) (%(value)s)"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "%(plugin_id)s की इंस्टॉलेशन पूरी नहीं हुई: %(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "प्लगइन %(plugin_id)s सफलतापूर्वक इंस्टॉल किया गया"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "फ़ाइल एक वैध प्लगइन संग्रह (.zip, .tar.gz या .tar.xz) नहीं है।"
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "अमान्य प्लगइन आईडी, (4 से 64 वर्णों के बीच होनी चाहिए, केवल अक्षर, संख्याएँ, अंडरस्कोर और हाइफ़न)"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "%(temp_folder_name)s के लिए अमान्य प्लगइन नाम। (केवल संख्याएँ, अक्षर, अंडरस्कोर और हाइफ़न हो सकते हैं (न्यूनतम 4 और अधिकतम 64 वर्ण))"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "प्लगइन %(plugin_id)s कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "प्लगइन %(plugin_id)s एक कोर प्लगइन है जो कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "प्लगइन %(plugin_id)s एक बाहरी प्लगइन है जो कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "प्लगइन %(plugin_id)s एक PRO प्लगइन है जो कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "प्लगइन %(plugin_id)s एक UI प्लगइन है जो कैटलॉग के बाहर प्रबंधित होता है और कैटलॉग से अपडेट नहीं किया जा सकता"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "/plugins पर csrf_token पैरामीटर अनुपस्थित है।"
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "/plugins/catalog/install पर id पैरामीटर अनुपस्थित है।"
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "/plugins/catalog/update पर id या version पैरामीटर अनुपस्थित है।"
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "/plugins/enable पर plugin या enabled पैरामीटर अनुपस्थित है।"
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "/plugins/delete पर plugins पैरामीटर अनुपस्थित है।"
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "अपलोड करने के लिए कोई प्लगइन डेटा नहीं"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "प्लगइन %(plugin_id)s इंस्टॉल नहीं है; इसके बजाय इसे कैटलॉग से इंस्टॉल करें"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "%(file)s एक मान्य प्लगइन नहीं है (plugin.json फ़ाइल अनुपस्थित है) (%(value)s)"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "प्लगइन पुनः लोड करने के लिए कृपया नए प्लगइन अपलोड करें"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "प्लगइन %(plugin)s पहले से मौजूद है"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "प्लगइन %(plugin)s सफलतापूर्वक निष्क्रिय किया गया।"
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "प्लगइन %(plugin)s सफलतापूर्वक सक्रिय किया गया।"
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "प्लगइन प्रबंधन केवल प्रशासकों तक सीमित है"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "%(folder_name)s नाम का प्लगइन पहले से मौजूद है"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "आईडी %(plugin)s वाला प्लगइन नहीं मिला"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "प्लगइन अपलोड त्रुटि (%(value)s): %(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "प्लगइन सफलतापूर्वक अपलोड किए गए: %(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "प्लगइन सफलतापूर्वक अपलोड किए गए"
+
+msgid "plugins.flash.refused_download"
+msgstr "%(plugin_id)s डाउनलोड करने से इनकार किया गया: %(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "%(plugin_id)s की इंस्टॉलेशन अस्वीकार कर दी गई: %(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "%(plugin_id)s का अपडेट अस्वीकार कर दिया गया: %(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "%(plugin_id)s का अपडेट पूरा नहीं हुआ: %(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "प्लगइन %(plugin_id)s संस्करण %(version)s में अपडेट किया गया"
 
 msgid "plugins.marketplace.active"
 msgstr "सक्रिय"
@@ -3988,6 +5437,36 @@ msgstr "प्रो समाप्ति तिथि"
 msgid "pro.expiration_date.unknown"
 msgstr "अज्ञात समाप्ति तिथि"
 
+msgid "pro.flash.checking_license_key"
+msgstr "लाइसेंस कुंजी की जांच की जा रही है।"
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "PRO प्लगइन का जबरन अपडेट शेड्यूल किया गया है।"
+
+msgid "pro.flash.invalid_license_key"
+msgstr "लाइसेंस कुंजी अमान्य है"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "PRO लाइसेंस कुंजी अपडेट नहीं की गई: मान अस्वीकृत कर दिया गया।"
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "लाइसेंस कुंजी वर्तमान कुंजी के समान है।"
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "PRO लाइसेंस कुंजी सफलतापूर्वक अपडेट की गई।"
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "/pro/key पर license key पैरामीटर अनुपस्थित है।"
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "PRO प्लगइन के लिए नई जांच शेड्यूल की गई है।"
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "शेड्यूलर परिवर्तनों को लागू करने और PRO प्लगइन डाउनलोड करने का प्रयास करेगा।"
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "वेब UI शीघ्र ही अपने PRO प्लगइन को पुनः लोड करेगा।"
+
 msgid "pro.force_check.description"
 msgstr "PRO प्लगइन की नई जाँच कराएँ। नए संस्करण उपलब्ध होने पर प्लगइन दोबारा डाउनलोड होंगे।"
 
@@ -4024,8 +5503,17 @@ msgstr "समय सीमा समाप्त"
 msgid "pro.status.free_version"
 msgstr "मुफ़्त संस्करण"
 
+msgid "pro.status.invalid"
+msgstr "अमान्य कुंजी"
+
+msgid "pro.status.invalid_key"
+msgstr "लाइसेंस सर्वर ने संग्रहीत लाइसेंस कुंजी को अस्वीकार कर दिया। इसे जाँचें, या इसे वैश्विक सेटिंग्स ← Pro में हटा दें।"
+
 msgid "pro.status.overlapped"
 msgstr "अतिव्यापी"
+
+msgid "pro.status.pending_key"
+msgstr "लाइसेंस कुंजी अभी तक जाँची नहीं गई है। सहेजे जाने के तुरंत बाद शेड्यूलर इसे जाँचता है।"
 
 msgid "pro.status.pro_version"
 msgstr "प्रो संस्करण"
@@ -4041,6 +5529,15 @@ msgstr "स्थिति"
 
 msgid "pro.title"
 msgstr "Pro लाइसेंस"
+
+msgid "pro.trial.cta"
+msgstr "नि:शुल्क परीक्षण शुरू करें"
+
+msgid "pro.trial.description"
+msgstr "<span class=\"text-primary\">BunkerWeb PRO</span> को <strong>30 दिनों</strong> तक मुफ़्त आज़माएं।"
+
+msgid "pro.trial.title"
+msgstr "नि:शुल्क परीक्षण"
 
 msgid "profile.2fa.disable_title"
 msgstr "2FA अक्षम करें"
@@ -4083,6 +5580,132 @@ msgstr "पुनर्प्राप्ति कोड ताज़ा कर
 
 msgid "profile.card.title.sessions"
 msgstr "सत्र"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "पासकी हटाई नहीं जा सकी: %(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "दो-कारक प्रमाणीकरण अक्षम नहीं किया जा सका: %(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "दो-कारक प्रमाणीकरण सक्षम नहीं किया जा सका: %(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "पुनर्प्राप्ति कोड ताज़ा नहीं किए जा सके: %(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "पासकी का नाम नहीं बदला जा सका: %(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "अन्य सत्र निरस्त नहीं किए जा सके: %(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "%(value)s उपयोगकर्ता अपडेट नहीं किया जा सका: %(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "अन्य सत्र समाप्त नहीं किए जा सके: %(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "वर्तमान पासवर्ड गलत है।"
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "ईमेल बहुत लंबा है। इसे 256 वर्णों से कम होना चाहिए।"
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "/profile/edit पर current password पैरामीटर अनुपस्थित है।"
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "/profile/totp-refresh पर current password पैरामीटर अनुपस्थित है।"
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "/profile/totp-disable पर current password पैरामीटर अनुपस्थित है।"
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "/profile/totp-enable पर current password पैरामीटर अनुपस्थित है।"
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "/profile/wipe-other-sessions पर current password पैरामीटर अनुपस्थित है।"
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "/profile/edit पर email पैरामीटर अनुपस्थित है।"
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "/profile/edit पर new password confirm पैरामीटर अनुपस्थित है।"
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "/profile/webauthn/delete पर पैरामीटर अनुपस्थित हैं।"
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "/profile/webauthn/rename पर पैरामीटर अनुपस्थित हैं।"
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "/profile/totp-enable पर totp token पैरामीटर अनुपस्थित है।"
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "नया पासवर्ड पर्याप्त मजबूत नहीं है। इसमें कम से कम 8 वर्ण होने चाहिए, जिनमें कम से कम 1 बड़ा अक्षर, 1 छोटा अक्षर, 1 अंक और 1 विशेष वर्ण (#@?!$%^&*-) शामिल हों।"
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "नया पासवर्ड वर्तमान पासवर्ड के समान है।"
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "नया पासवर्ड बहुत लंबा है। इसे %(MAX_PASSWORD_BYTES)s बाइट्स (bcrypt की सख्त सीमा) से अधिक नहीं होना चाहिए; उच्चारण-चिह्न या इमोजी वर्ण प्रत्येक कई बाइट्स के बराबर गिने जाते हैं।"
+
+msgid "profile.flash.no_fields_updated"
+msgstr "कोई फ़ील्ड अपडेट नहीं की गई।"
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "अन्य सत्र सफलतापूर्वक समाप्त कर दिए गए हैं।"
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "पासकी सफलतापूर्वक हटा दी गई है।"
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "पासकी सफलतापूर्वक पंजीकृत की गई है।"
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "पासकी का नाम सफलतापूर्वक बदल दिया गया है।"
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "पासकी का नाम खाली नहीं हो सकता।"
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "आपका पासवर्ड बदल दिया गया, लेकिन आपके अन्य सत्र निरस्त नहीं किए जा सके। नीचे \"अन्य सत्र समाप्त करें\" का उपयोग करें और सक्रिय सत्रों की सूची जांचें।"
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "पासवर्ड पुष्टिकरण पासवर्ड से मेल नहीं खाते।"
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई है।"
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "पुनर्प्राप्ति कोड सफलतापूर्वक ताज़ा किए गए हैं। पुराने कोड अब मान्य नहीं हैं।"
+
+msgid "profile.flash.theme_invalid"
+msgstr "थीम अमान्य है।"
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "totp टोकन अमान्य है।"
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "दो-कारक प्रमाणीकरण पहले से सक्षम है।"
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "दो-कारक प्रमाणीकरण सफलतापूर्वक अक्षम कर दिया गया है।"
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "दो-कारक प्रमाणीकरण सफलतापूर्वक सक्षम कर दिया गया है।"
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "दो-कारक प्रमाणीकरण सक्षम नहीं है।"
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "दो-कारक नामांकन समाप्त हो गया। पृष्ठ पुनः लोड करें और नया QR कोड स्कैन करें।"
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "उपयोगकर्ता नाम और ईमेल वर्तमान के समान हैं।"
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "उपयोगकर्ता नाम बहुत लंबा है। इसे 256 वर्णों से कम होना चाहिए।"
 
 msgid "profile.help.photo_extensions"
 msgstr "JPG, GIF, या PNG की अनुमति है। अधिकतम आकार: 800KB।"
@@ -4168,6 +5791,39 @@ msgstr "समय सीमा"
 msgid "range_picker.custom"
 msgstr "कस्टम"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "सेटिंग %(setting)s को ड्राफ़्ट नहीं बनाया जा सकता।"
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "ड्राफ़्ट सेटिंग %(setting)s पोस्ट नहीं की गई।"
+
+msgid "raw_drafts.draft_not_present"
+msgstr "ड्राफ़्ट सेटिंग %(setting)s RAW एडिटर में मौजूद नहीं है।"
+
+msgid "raw_drafts.edits_discarded"
+msgstr "ड्राफ़्ट सेटिंग्स अपरिवर्तित रहती हैं; उन्हें Raw मोड में सक्रिय या संपादित करें।"
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "ग्लोबल सेटिंग %(setting)s को सर्विस ड्राफ़्ट नहीं बनाया जा सकता।"
+
+msgid "raw_drafts.locked_by_method"
+msgstr "सेटिंग %(setting)s ड्राफ़्ट स्थिति नहीं बदल सकती क्योंकि इसे %(method)s विधि द्वारा प्रबंधित किया जाता है।"
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "सेटिंग ड्राफ़्ट का मेटाडेटा केवल raw मोड में स्वीकार किया जाता है।"
+
+msgid "raw_drafts.missing_metadata"
+msgstr "%(field)s मेटाडेटा अनुपस्थित है।"
+
+msgid "raw_drafts.present_not_posted"
+msgstr "मौजूदा सेटिंग %(setting)s पोस्ट नहीं की गई।"
+
+msgid "raw_drafts.present_not_valid"
+msgstr "मौजूदा सेटिंग %(setting)s मान्य नहीं है।"
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "सेटिंग %(setting)s मान्य नहीं है।"
+
 msgid "redirects.all"
 msgstr "सभी"
 
@@ -4221,6 +5877,69 @@ msgstr "एक पुनर्निर्देशन एक नामित �
 
 msgid "redirects.empty_title"
 msgstr "अभी कोई पुनर्निर्देशन नहीं"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "स्रोत पथ मान्य नहीं है: इसमें स्पेस, सेमीकोलन या ब्रेसेस नहीं हो सकते।"
+
+msgid "redirects.err.invalid_to_url"
+msgstr "लक्ष्य एक पूर्ण http:// या https:// URL होना चाहिए।"
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "कम से कम एक सेवा आवश्यक है"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "रीडायरेक्ट संलग्न नहीं किया जा सका: %(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "रीडायरेक्ट बनाया नहीं जा सका: %(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "रीडायरेक्ट हटाया नहीं जा सका: %(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "रीडायरेक्ट अलग नहीं किया जा सका: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "रीडायरेक्ट प्राप्त नहीं किए जा सके: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "रीडायरेक्ट असाइनमेंट के लिए सेवाएँ प्राप्त नहीं की जा सकीं: %(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "रीडायरेक्ट अपडेट नहीं किया जा सका: %(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "रीडायरेक्ट नाम आवश्यक है"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "रीडायरेक्ट जोड़ा गया। सेवाएँ: %(len)s"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "रीडायरेक्ट %(value)s सफलतापूर्वक बनाया गया"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "रीडायरेक्ट सफलतापूर्वक हटाया गया"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "रीडायरेक्ट सफलतापूर्वक अलग किया गया"
+
+msgid "redirects.flash.redirect_required"
+msgstr "रीडायरेक्ट आवश्यक है"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "रीडायरेक्ट और सेवा दोनों आवश्यक हैं"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "रीडायरेक्ट सफलतापूर्वक अपडेट किया गया"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "स्थिति कोड %(value)s में से एक होना चाहिए"
+
+msgid "redirects.flash.target_required"
+msgstr "रीडायरेक्ट लक्ष्य आवश्यक है"
+
+msgid "redirects.flash.too_many_services"
+msgstr "एक रीडायरेक्ट %(value)s से अधिक सेवाओं से संलग्न नहीं हो सकता"
 
 msgid "redirects.from_path"
 msgstr "से"
@@ -4307,16 +6026,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "समय के साथ अवरुद्ध अनुरोध"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "AppSec निरीक्षण"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "AppSec विफलता नीति"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "स्थानीय API निर्णय"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "तकनीकी विवरण"
 
 msgid "reports.security_incident"
 msgstr "सुरक्षा घटना"
@@ -4477,6 +6196,63 @@ msgstr "प्रविष्टियाँ"
 msgid "resource_groups.expand_all"
 msgstr "सभी को विस्तारित करें"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "उपनाम में 1 से 64 अक्षर, अंक, अंडरस्कोर, या हाइफ़न होने चाहिए"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "यह उपनाम BunkerWeb द्वारा आरक्षित है"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "संसाधन समूह की प्रतिलिपि नहीं बनाई जा सकी: %(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "संसाधन समूह हटाया नहीं जा सका: %(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "संसाधन समूह निर्यात नहीं किए जा सके: %(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "संसाधन समूह सहेजा नहीं जा सका: %(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "संसाधन प्रविष्टियाँ एक सूची होनी चाहिए"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "संसाधन प्रविष्टियाँ मान्य JSON नहीं हैं"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "प्रविष्टि %(index)s की टिप्पणी बहुत लंबी है"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "प्रविष्टि %(index)s अमान्य है"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "प्रविष्टि %(index)s का प्रकार अमान्य है"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "प्रविष्टि %(index)s का मान अमान्य है"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "संसाधन समूह @%(alias)s के रूप में क्लोन किया गया"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "संसाधन समूह @%(alias)s सफलतापूर्वक बनाया गया"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "संसाधन समूह सफलतापूर्वक हटाया गया"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "संसाधन समूह आवश्यक है"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "संसाधन समूह सफलतापूर्वक अपडेट किया गया"
+
+msgid "resource_groups.flash.source_required"
+msgstr "स्रोत संसाधन समूह आवश्यक है"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "संसाधन समूह में %(value)s से अधिक प्रविष्टियाँ नहीं हो सकतीं"
+
 msgid "resource_groups.global_configuration"
 msgstr "वैश्विक कॉन्फ़िगरेशन"
 
@@ -4492,6 +6268,24 @@ msgstr "TXT/CSV आयात 256 KiB तक सीमित हैं।"
 msgid "resource_groups.kind"
 msgstr "प्रकार"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "देश"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "रिवर्स DNS"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "यूज़र एजेंट"
+
 msgid "resource_groups.kinds"
 msgstr "प्रकारों"
 
@@ -4501,8 +6295,23 @@ msgstr "संदर्भ लोड हो रहे हैं..."
 msgid "resource_groups.max_entries"
 msgstr "एक संसाधन समूह में अधिकतम %(max)s प्रविष्टियाँ हो सकती हैं।"
 
-msgid "resource_groups.meta_line"
-msgstr "%(kinds)s प्रकार · %(values)s मान · %(usages)s उपयोग"
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s प्रकार"
+msgstr[1] "%(count)s प्रकार"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s उपयोग"
+msgstr[1] "%(count)s उपयोग"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s मान"
+msgstr[1] "%(count)s मान"
 
 msgid "resource_groups.new"
 msgstr "नया समूह"
@@ -4521,6 +6330,12 @@ msgstr "कोई संदर्भ नहीं"
 
 msgid "resource_groups.readonly"
 msgstr "डेटाबेस केवल पढ़ने के लिए है। संसाधन समूहों की जाँच और निर्यात किया जा सकता है, लेकिन उन्हें बदला नहीं जा सकता।"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s संदर्भ"
+msgstr[1] "%(count)s संदर्भ"
 
 msgid "resource_groups.references_error"
 msgstr "संदर्भ लोड नहीं हो सके"
@@ -4684,6 +6499,9 @@ msgstr "पुनः लोड आवश्यक"
 msgid "searchpane.scope"
 msgstr "दायरा"
 
+msgid "searchpane.search_title"
+msgstr "खोजें: {name}"
+
 msgid "searchpane.security_mode"
 msgstr "सुरक्षा मोड"
 
@@ -4774,14 +6592,35 @@ msgstr "सेवा मोड"
 msgid "service.resources.attach"
 msgstr "संलग्न करें"
 
+msgid "service.resources.confirm_detach"
+msgstr "इस संसाधन को %(service)s से अलग करें?"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "इस प्रमाणपत्र को %(service)s से अलग करें?"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "इस रीडायरेक्ट को %(service)s से अलग करें?"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "इस टेम्पलेट को %(service)s से अलग करें?"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "इस अपस्ट्रीम को %(service)s से अलग करें?"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "इस कार्यप्रवाह को %(service)s से अलग करें?"
+
 msgid "service.resources.conflict.inline"
 msgstr "%(service)s पहले से ही %(path)s को %(family)s सेटिंग्स के माध्यम से सेवा प्रदान कर रहा है। %(path)s के लिए इन सेटिंग्स को साफ़ करें, या एक अलग पथ का उपयोग करें।"
 
 msgid "service.resources.conflict.primary"
 msgstr "“%(name)s” अभी इस सेवा का प्राथमिक प्रमाणपत्र है और बिना अतिरिक्त चेतावनी के इसका प्राथमिक दर्जा हटा दिया जाएगा। वास्तव में डिप्लॉय किया गया प्रमाणपत्र ही प्राथमिक होता है।"
 
-msgid "service.resources.conflict.resource"
-msgstr "%(service)s पहले से ही %(path)s को %(kind)s के \"%(name)s\" के माध्यम से सेवा प्रदान कर रहा है। \"%(name)s\" को अलग करें, या उन्हें एक अलग पथ दें।"
+msgid "service.resources.conflict.resource_redirect"
+msgstr "%(service)s पहले से ही %(path)s को रीडायरेक्ट \"%(name)s\" के माध्यम से सेवा प्रदान कर रहा है। \"%(name)s\" को अलग करें, या उनमें से किसी एक को अलग पथ दें।"
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "%(service)s पहले से ही %(path)s को अपस्ट्रीम \"%(name)s\" के माध्यम से सेवा प्रदान कर रहा है। \"%(name)s\" को अलग करें, या उनमें से किसी एक को अलग पथ दें।"
 
 msgid "service.resources.conflict.stream"
 msgstr "एक स्ट्रीम सेवा एक ही बैकएंड पर सभी कनेक्शन को प्रॉक्सी करती है, और %(service)s पहले से ही \"%(name)s\" का उपयोग कर रहा है। पहले इसे अलग करें।"
@@ -4872,6 +6711,222 @@ msgstr "उपलब्ध नहीं"
 
 msgid "services.draft"
 msgstr "ड्राफ्ट सेवाएं"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "सभी चयनित सेवाएँ नहीं मिल सकीं, UI/API सेवाएँ नहीं हैं, या पहले ही परिवर्तित हो चुकी हैं।"
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "सभी चयनित सेवाएँ नहीं मिल सकीं या UI/API सेवाएँ नहीं हैं।"
+
+msgid "services.flash.configuration_created"
+msgstr "सेवा %(service)s के लिए कॉन्फ़िगरेशन बनाया गया।"
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "सेवा %(service)s के लिए कॉन्फ़िगरेशन बनाया गया, लेकिन %(refused_count)s मान अस्वीकार कर दिए गए।"
+
+msgid "services.flash.configuration_saved"
+msgstr "सेवा %(service)s के लिए कॉन्फ़िगरेशन सहेजा गया।"
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "सेवा %(service)s के लिए कॉन्फ़िगरेशन सहेजा गया, लेकिन %(refused_count)s मान अस्वीकार कर दिए गए।"
+
+msgid "services.flash.converted_services_draft"
+msgstr "\"ड्राफ्ट\" सेवाओं में बदली गईं: %(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "\"ऑनलाइन\" सेवाओं में बदली गईं: %(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "इस सेवा से जुड़े प्रमाणपत्र प्राप्त नहीं किए जा सके।"
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "इस सेवा से जुड़े रीडायरेक्ट्स प्राप्त नहीं किए जा सके।"
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "इस सेवा से जुड़े अपस्ट्रीम प्राप्त नहीं किए जा सके।"
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "इस सेवा से जुड़े कार्यप्रवाह प्राप्त नहीं किए जा सके।"
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "API से कस्टम कॉन्फ़िगरेशन प्राप्त नहीं किए जा सके।"
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "API से कस्टम कॉन्फ़िगरेशन प्राप्त नहीं किए जा सके।"
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "API से सेवा प्राप्त नहीं की जा सकी।"
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "API से सेवा %(service)s प्राप्त नहीं की जा सकी।"
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "क्लोनिंग के लिए सेवा %(clone)s प्राप्त नहीं की जा सकी।"
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "API से सेवाएँ प्राप्त नहीं की जा सकीं।"
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "सेवाओं का कॉन्फ़िगरेशन प्राप्त नहीं किया जा सका।"
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "API से टेम्पलेट प्राप्त नहीं किए जा सके।"
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "कस्टम कॉन्फ़िगरेशन सहेजे नहीं गए क्योंकि नाम बदलना अस्वीकृत कर दिया गया।"
+
+msgid "services.flash.default_server_reserved"
+msgstr "%(default_server_id)s आरक्षित डिफ़ॉल्ट सर्वर है: यह उन अनुरोधों का जवाब देता है जो किसी भी कॉन्फ़िगर की गई सेवा से मेल नहीं खाते (अज्ञात होस्टनाम, प्रत्यक्ष IP एक्सेस), इसलिए इसे बनाया, नाम बदला या हटाया नहीं जा सकता।"
+
+msgid "services.flash.default_server_type_refused"
+msgstr "SERVER_TYPE आरक्षित सेवा %(default_server_id)s पर सेट नहीं किया जा सकता: इसका अपना कोई सर्वर ब्लॉक नहीं है जिसे बदला जा सके। इसका HTTP भाग स्वयं डिफ़ॉल्ट सर्वर ब्लॉक है, और इसका स्ट्रीम भाग DEFAULT_SERVER_STREAM_PORTS सेटिंग है।"
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "आपके पास सेवा का मोड बदलने की अनुमति नहीं है"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "ड्राफ़्ट autoconf सेवा %(service_id)s हटाने में विफल: %(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "सेवा आयात करने में विफल: %(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "सेवाएं आयात करने में विफल: %(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "सेवा आयात की गई: %(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "सेवाएं आयात की गईं: %(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "आर्काइव के अंदर configs_export.json के लिए एन्कोडिंग अमान्य है।"
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "आर्काइव के अंदर services_export.env के लिए एन्कोडिंग अमान्य है।"
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "फ़ाइल एन्कोडिंग अमान्य है। कृपया एक UTF-8 फ़ाइल अपलोड करें।"
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "mode पैरामीटर अमान्य है।"
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "/services/convert पर convert_to पैरामीटर अनुपस्थित है।"
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "/services/%(service)s/mode पर mode पैरामीटर अनुपस्थित है।"
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "/services/convert पर services पैरामीटर अनुपस्थित है।"
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "/services/delete पर services पैरामीटर अनुपस्थित है।"
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "आयात फ़ाइल में कोई सेवाएँ या कस्टम कॉन्फ़िगरेशन नहीं मिले।"
+
+msgid "services.flash.no_services_export"
+msgstr "निर्यात के लिए कोई सेवाएँ नहीं।"
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "कोई सेवा फ़ाइल अपलोड नहीं की गई।"
+
+msgid "services.flash.no_services_selected"
+msgstr "कोई सेवाएँ चयनित नहीं।"
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "यह प्लगइन डिफ़ॉल्ट सर्वर पर लागू नहीं होता"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "आर्काइव निकालने से इनकार: असंपीड़ित आकार सुरक्षा सीमा से अधिक है।"
+
+msgid "services.flash.resource_attach_failed"
+msgstr "जोड़ा नहीं जा सका: %(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "जोड़ा नहीं जा सकता: %(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "संसाधन को %(service)s से जोड़ दिया गया।"
+
+msgid "services.flash.resource_detach_failed"
+msgstr "अलग नहीं किया जा सका: %(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "अलग नहीं किया जा सकता: %(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "संसाधन को %(service)s से अलग कर दिया गया।"
+
+msgid "services.flash.resource_unknown_family"
+msgstr "अज्ञात संसाधन प्रकार।"
+
+msgid "services.flash.server_name_missing"
+msgstr "सेवा नहीं बनाई गई क्योंकि सर्वर का नाम नहीं दिया गया था।"
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "सेवा %(non_convertible_service)s पहले से ड्राफ्ट सेवा है और उसे नहीं बदला जाएगा।"
+
+msgid "services.flash.service_already_exists"
+msgstr "सेवा %(service)s पहले से मौजूद है।"
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "सेवा %(non_convertible_service)s पहले से ऑनलाइन सेवा है और उसे नहीं बदला जाएगा।"
+
+msgid "services.flash.service_deleted"
+msgstr "सेवा हटाई गई: %(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "सेवा %(service)s संपादित नहीं की गई क्योंकि कोई मान नहीं बदला गया।"
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "सेवा %(service)s संपादित नहीं की गई क्योंकि कोई मान या कस्टम कॉन्फ़िग नहीं बदली गई।"
+
+msgid "services.flash.service_not_found"
+msgstr "सेवा नहीं मिली"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "सेवा %(service)s सहेजी नहीं गई: प्रत्येक बदला हुआ मान अस्वीकार कर दिया गया।"
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "सेवा %(non_editable_service)s एक UI/API सेवा नहीं है और इसे परिवर्तित नहीं किया जाएगा।"
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "सेवा %(service)s को अब \"केवल रीडायरेक्ट\" घोषित किया गया है।"
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "सेवा %(service)s को अब \"स्टैंडर्ड\" घोषित किया गया है।"
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "सेवा %(non_deletable_service)s UI/API सेवा नहीं है और उसे हटाया नहीं जाएगा।"
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "सेवा %(non_deletable_service)s एक ऑनलाइन autoconf सेवा है (पहले उसे ड्राफ्ट में बदलें) और उसे हटाया नहीं जाएगा।"
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "सेवा %(non_deletable_service)s आरक्षित डिफ़ॉल्ट सर्वर है, जो किसी भी सेवा से मेल न खाने वाले अनुरोधों का उत्तर देता है, और उसे हटाया नहीं जाएगा।"
+
+msgid "services.flash.services_deleted"
+msgstr "सेवाएँ हटाई गईं: %(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "मौजूदा सेवा छोड़ी गई: %(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "मौजूदा सेवाएं छोड़ी गईं: %(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "टेम्पलेट कस्टम कॉन्फ़िगरेशन %(key)s संपादित नहीं किया जा सकता क्योंकि यह %(value)s विधि से बनाया गया था।"
+
+msgid "services.flash.template_not_found"
+msgstr "टेम्पलेट नहीं मिला"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "अपलोड किए गए आर्काइव में services_export.env और/या configs_export.json होना चाहिए।"
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "अपलोड की गई फ़ाइल मान्य zip आर्काइव नहीं है।"
 
 msgid "services.online"
 msgstr "ऑनलाइन"
@@ -5290,6 +7345,45 @@ msgstr "%(name)s से लोड किया गया · अक्षर: %(c
 msgid "setup.file.read_error"
 msgstr "फ़ाइल पढ़ने में त्रुटि"
 
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "व्यवस्थापक ईमेल बहुत लंबा है। इसे 256 वर्णों से कम होना चाहिए।"
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "व्यवस्थापक पासवर्ड पर्याप्त मजबूत नहीं है। इसमें कम से कम 8 वर्ण होने चाहिए, जिनमें कम से कम 1 बड़ा अक्षर, 1 छोटा अक्षर, 1 अंक और 1 विशेष वर्ण (#@?!$%^&*-) शामिल हों।"
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "व्यवस्थापक पासवर्ड बहुत लंबा है। इसे %(MAX_PASSWORD_BYTES)s बाइट्स (bcrypt की सख्त सीमा) से अधिक नहीं होना चाहिए; उच्चारण-चिह्न या इमोजी वर्ण प्रत्येक कई बाइट्स के बराबर गिने जाते हैं।"
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "व्यवस्थापक उपयोगकर्ता सफलतापूर्वक बनाया गया"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "व्यवस्थापक उपयोगकर्ता नाम बहुत लंबा है। इसे 256 वर्णों से कम होना चाहिए।"
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "व्यवस्थापक उपयोगकर्ता नहीं बनाया जा सका: %(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "नई सेवा नहीं बनाई जा सकी: %(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "नई सेवा संपादित नहीं की जा सकी: %(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "होस्टनाम %(value)s पहले से उपयोग में है।"
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "होस्टनाम मान्य नहीं है।"
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "निम्नलिखित में से कोई एक पैरामीटर अनुपस्थित है: %(value)s।"
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "पासवर्ड मेल नहीं खाते।"
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "कस्टम SSL प्रमाणपत्र का उपयोग करते समय, आपको प्रमाणपत्र और कुंजी दोनों सेट करने होंगे।"
+
 msgid "setup.status.admin_user_exists"
 msgstr "एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।"
 
@@ -5446,6 +7540,12 @@ msgstr "जल्द समाप्त होने वाले"
 msgid "status.failed"
 msgstr "विफल"
 
+msgid "status.failover"
+msgstr "फेलओवर"
+
+msgid "status.inactive"
+msgstr "निष्क्रिय"
+
 msgid "status.invalid_json_payload"
 msgstr "अमान्य JSON पेलोड।"
 
@@ -5583,6 +7683,9 @@ msgstr "अज्ञात"
 
 msgid "status.up"
 msgstr "चालू"
+
+msgid "status.uploaded"
+msgstr "अपलोड किया गया"
 
 msgid "status.yes"
 msgstr "हाँ"
@@ -5833,6 +7936,9 @@ msgstr "टेम्पलेट बनाएं"
 msgid "template.editor.heading_edit"
 msgstr "टेम्पलेट संपादित करें %(id)s"
 
+msgid "template.editor.heading_view"
+msgstr "टेम्पलेट %(id)s देखें"
+
 msgid "template.editor.label_config_data"
 msgstr "डेटा"
 
@@ -5918,7 +8024,10 @@ msgid "template.editor.multivalue_add"
 msgstr "मान जोड़ें"
 
 msgid "template.editor.multivalue_helper"
-msgstr "प्रति पंक्ति एक मान।%(separatorNote)s"
+msgstr "प्रति पंक्ति एक मान।"
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "प्रति पंक्ति एक मान। इन्हें \"%(separator)s\" से जोड़ा जाएगा।"
 
 msgid "template.editor.panel_overview"
 msgstr "अवलोकन"
@@ -6081,6 +8190,9 @@ msgstr "डेटाबेस वर्तमान में केवल-प�
 
 msgid "template.editor.readonly_method"
 msgstr "यह टेम्पलेट %(method)s प्रक्रिया द्वारा बनाया गया था और इसे UI से संपादित नहीं किया जा सकता है।"
+
+msgid "template.editor.readonly_method_plugin"
+msgstr "यह टेम्पलेट %(plugin)s प्लगइन द्वारा बनाया गया था और इसे UI से संपादित नहीं किया जा सकता।"
 
 msgid "template.editor.readonly_title"
 msgstr "केवल-पढ़ने के लिए"
@@ -6256,6 +8368,9 @@ msgstr "कॉन्फ़िगरेशन परिभाषित होन�
 msgid "template.editor.validation_configs_unique"
 msgstr "प्रत्येक कॉन्फ़िगरेशन नाम अद्वितीय होना चाहिए।"
 
+msgid "template.editor.validation_id_invalid"
+msgstr "टेम्पलेट ID में केवल अक्षर, अंक, बिंदु, हाइफ़न और अंडरस्कोर हो सकते हैं, और इसकी शुरुआत किसी अक्षर या अंक से होनी चाहिए।"
+
 msgid "template.editor.validation_id_required"
 msgstr "टेम्पलेट आईडी आवश्यक है।"
 
@@ -6268,6 +8383,36 @@ msgstr "प्रत्येक सेटिंग कुंजी अद्व
 msgid "template.none"
 msgstr "कोई टेम्पलेट नहीं"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "कस्टम कॉन्फ़िगरेशन जोड़े गए"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "कस्टम कॉन्फ़िगरेशन बदले गए"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "कस्टम कॉन्फ़िगरेशन हटाए गए"
+
+msgid "templates.catalog.diff.name"
+msgstr "नाम: %(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "सेटिंग्स जोड़ी गईं"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "सेटिंग्स बदली गईं"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "सेटिंग्स हटाई गईं"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "चरण जोड़े गए"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "चरण बदले गए"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "चरण हटाए गए"
+
 msgid "templates.catalog.heading"
 msgstr "उपलब्ध टेम्पलेट"
 
@@ -6277,8 +8422,89 @@ msgstr "एक टेम्पलेट एक लेयर है: पहले
 msgid "templates.catalog.no_compat_notice"
 msgstr "यह कैटलॉग किसी BunkerWeb संगतता की घोषणा नहीं करता। यदि कोई टेम्पलेट ऐसी सेटिंग बताता है जो इस BunkerWeb के पास नहीं है, तो इंस्टॉल के समय उसे अस्वीकार कर दिया जाता है।"
 
+msgid "templates.catalog.state_installed"
+msgstr "इंस्टॉल किया गया, कैटलॉग जैसा ही"
+
+msgid "templates.catalog.state_managed"
+msgstr "इंस्टॉल किया गया और %(owner)s द्वारा प्रबंधित: कैटलॉग इसे नहीं बदलता"
+
+msgid "templates.catalog.state_update"
+msgstr "इंस्टॉल किया गया, कैटलॉग संस्करण अलग है"
+
 msgid "templates.catalog.subheading"
 msgstr "BunkerWeb संगठन द्वारा प्रकाशित चुनी हुई सेवा टेम्पलेट।"
+
+msgid "templates.catalog.update_changed"
+msgstr "पूर्वावलोकन के बाद से टेम्पलेट %(template)s या कैटलॉग बदल गया है। पृष्ठ को फिर से लोड करें और परिवर्तनों की फिर से समीक्षा करें।"
+
+msgid "templates.catalog.update_confirm"
+msgstr "टेम्पलेट %(id)s को कैटलॉग रिलीज़ %(tag)s के संस्करण से बदलें। ये परिवर्तन टेम्पलेट पर लागू होते हैं:"
+
+msgid "templates.catalog.update_failed"
+msgstr "टेम्पलेट अपडेट नहीं किया जा सका।"
+
+msgid "templates.catalog.update_managed"
+msgstr "टेम्पलेट %(template)s %(owner)s द्वारा प्रबंधित है: कैटलॉग इसे नहीं बदलता"
+
+msgid "templates.catalog.update_no_services"
+msgstr "अभी तक कोई सेवा इस टेम्पलेट का उपयोग नहीं करती।"
+
+msgid "templates.catalog.update_not_installed"
+msgstr "टेम्पलेट %(template)s इंस्टॉल नहीं है: इसके बजाय इसे इंस्टॉल करें"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "अगले कैटलॉग रीफ़्रेश के बाद परिवर्तन जाँचे जा सकते हैं।"
+
+msgid "templates.catalog.update_services"
+msgstr "ये सेवाएँ इस टेम्पलेट का उपयोग करती हैं। इनके अगले कॉन्फ़िगरेशन जनरेशन पर, हर वह सेटिंग जो इन्होंने स्वयं सेट नहीं की, नया मान ले लेती है:"
+
+msgid "templates.catalog.update_title"
+msgstr "एक सामुदायिक टेम्पलेट अपडेट करें"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "टेम्पलेट %(template)s पहले से ही कैटलॉग से मेल खाता है"
+
+msgid "templates.flash.catalog_updated"
+msgstr "टेम्पलेट %(template)s कैटलॉग से अपडेट कर दिया गया।"
+
+msgid "templates.flash.error_deleting_template"
+msgstr "टेम्पलेट %(template_id)s हटाने में त्रुटि: %(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "टेम्पलेट %(template)s निर्यात नहीं किया जा सका: %(error)s"
+
+msgid "templates.flash.imported"
+msgstr "टेम्पलेट %(template)s आयात कर दिया गया।"
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "हटाने के लिए कोई टेम्पलेट चयनित नहीं।"
+
+msgid "templates.flash.replaced"
+msgstr "टेम्पलेट %(template)s बदल दिया गया।"
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "हटाए गए टेम्पलेट: %(success_count)s।"
+
+msgid "templates.flash.template_created_successfully"
+msgstr "टेम्पलेट %(template_id)s सफलतापूर्वक बनाया गया।"
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "टेम्पलेट %(template_id)s सफलतापूर्वक हटाया गया।"
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "टेम्पलेट %(template_id)s कैटलॉग से इंस्टॉल किया गया।"
+
+msgid "templates.flash.template_not_found"
+msgstr "टेम्पलेट %(clone_id)s नहीं मिला।"
+
+msgid "templates.flash.template_not_found_2"
+msgstr "टेम्पलेट नहीं मिला।"
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "टेम्पलेट %(template_id)s सफलतापूर्वक अपडेट किया गया।"
+
+msgid "templates.flash.user_is_read_only"
+msgstr "उपयोगकर्ता केवल-पढ़ने के लिए है"
 
 msgid "templates.gallery.delete_selected"
 msgstr "चयनित हटाएँ"
@@ -6294,6 +8520,24 @@ msgstr "चुनें"
 
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
+
+msgid "templates.import.admin_only"
+msgstr "टेम्पलेट आयात करना केवल प्रशासकों तक सीमित है"
+
+msgid "templates.import.failed"
+msgstr "टेम्पलेट आयात नहीं किया जा सका।"
+
+msgid "templates.import.no_file"
+msgstr "आयात करने के लिए एक फ़ाइल चुनें।"
+
+msgid "templates.import.refused"
+msgstr "टेम्पलेट आयात नहीं हुआ: %(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "टेम्पलेट आयात नहीं हुआ: फ़ाइल 1 MiB से बड़ी है"
+
+msgid "templates.import.unreadable"
+msgstr "टेम्पलेट आयात नहीं हुआ: फ़ाइल पढ़ी नहीं जा सकी"
 
 msgid "templates.name.api"
 msgstr "API"
@@ -6430,6 +8674,9 @@ msgstr "हर प्लगइन का समय मापने के लि
 msgid "timings.disabled_title"
 msgstr "प्लगइन समय बंद है"
 
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "प्लगइन टाइमिंग प्राप्त करने में त्रुटि: %(message)s"
+
 msgid "timings.max"
 msgstr "अधिकतम"
 
@@ -6532,11 +8779,23 @@ msgstr "क्या स्वचालित रूप से Let's Encrypt प
 msgid "tooltip.badge.redirect_candidate"
 msgstr "इस सेवा में रीडायरेक्ट के अलावा कुछ नहीं है, इसलिए इसे केवल-रीडायरेक्ट घोषित किया जा सकता है — जो उस बिलिंग के लागू होते ही इसे PRO सेवा गणना से बाहर कर देगा।"
 
+msgid "tooltip.button.attach_redirect"
+msgstr "%(name)s को किसी सेवा से संलग्न करें"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "%(name)s को किसी सेवा से संलग्न करें"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "%(name)s को किसी सेवा से संलग्न करें"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "फ़ाइल अपलोड पर वापस जाएँ"
 
 msgid "tooltip.button.ban_ip"
 msgstr "इस IP पते को प्रतिबंधित करें"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "%(name)s की प्रतिलिपि बनाएं"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "कॉन्फ़िग %(name)s को ड्राफ्ट में बदलें"
@@ -6550,6 +8809,9 @@ msgstr "सेवा %(name)s को ड्राफ्ट में बदल�
 msgid "tooltip.button.convert_service_to_online"
 msgstr "सेवा %(name)s को ऑनलाइन में बदलें"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "प्रमाणपत्र हटाएं"
+
 msgid "tooltip.button.delete_config"
 msgstr "कस्टम कॉन्फ़िगरेशन %(name)s हटाएं"
 
@@ -6562,11 +8824,32 @@ msgstr "इंस्टेंस %(hostname)s हटाएं"
 msgid "tooltip.button.delete_plugin"
 msgstr "प्लगइन %(name)s हटाएं"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "%(name)s हटाएं"
+
 msgid "tooltip.button.delete_service"
 msgstr "सेवा %(name)s हटाएं"
 
 msgid "tooltip.button.delete_template"
 msgstr "टेम्पलेट %(name)s हटाएं"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "%(name)s हटाएं"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "%(name)s हटाएं"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "%(name)s संपादित करें"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "%(name)s संपादित करें"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "%(name)s का नाम और विवरण संपादित करें"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "%(name)s के नियम संपादित करें"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "%(hostname)s के लिए नामांकन कोड जारी करें"
@@ -6673,6 +8956,9 @@ msgstr "पुष्टि पासवर्ड ऊपर दर्ज कि�
 msgid "tooltip.copied"
 msgstr "कॉपी किया गया!"
 
+msgid "tooltip.copy_failed"
+msgstr "कॉपी विफल"
+
 msgid "tooltip.copy_https_only"
 msgstr "कॉपी सुविधा केवल HTTPS पर उपलब्ध है।"
 
@@ -6693,6 +8979,9 @@ msgstr "मान टेम्पलेट डिफ़ॉल्ट से भ�
 
 msgid "tooltip.disabled_by_method"
 msgstr "अक्षम: विधि '%(method)s' के माध्यम से प्रबंधित।"
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "अक्षम: %(plugin)s प्लगइन द्वारा प्रबंधित।"
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "अक्षम: डेटाबेस रीड-ओनली मोड में है।"
@@ -6813,6 +9102,9 @@ msgstr "कस्टम कॉन्फ़िगरेशन %(name)s निर�
 
 msgid "tooltip.link.export_service"
 msgstr "सेवा %(service)s कॉन्फ़िगरेशन निर्यात करें"
+
+msgid "tooltip.link.export_template"
+msgstr "टेम्पलेट %(template)s निर्यात करें"
 
 msgid "tooltip.link.manage_activation"
 msgstr "वैश्विक सेटिंग्स में %(name)s को सक्रिय करना प्रबंधित करें"
@@ -7285,6 +9577,21 @@ msgstr "ZeroSSL API पुनः प्रयासों के बीच स�
 msgid "totp.cant_access"
 msgstr "क्या आपको अपना प्रमाणीकरण कोड नहीं मिल रहा है?"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "डेटाबेस केवल-पढ़ने के लिए है, आपके द्वारा उपयोग किया गया पुनर्प्राप्ति कोड वैध बना रहेगा।"
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "पुनर्प्राप्ति कोड का उपयोग करते समय त्रुटि हुई।"
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "/totp पर कोई टोकन प्रदान नहीं किया गया।"
+
+msgid "totp.flash.token_invalid"
+msgstr "टोकन अमान्य है।"
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "आपने अपने पुनर्प्राप्ति कोड में से एक का उपयोग किया है। आपके पास %(len)s शेष हैं।"
+
 msgid "totp.or_use_security_key"
 msgstr "या अपनी सुरक्षा कुंजी का उपयोग करें"
 
@@ -7350,6 +9657,78 @@ msgstr "एक अपस्ट्रीम एक नामित बैकए�
 
 msgid "upstreams.empty_title"
 msgstr "अभी कोई अपस्ट्रीम नहीं"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "कम से कम एक सर्वर आवश्यक है"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "कम से कम एक सेवा आवश्यक है"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "अपस्ट्रीम संलग्न नहीं किया जा सका: %(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "अपस्ट्रीम नहीं बनाया जा सका: %(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "अपस्ट्रीम हटाया नहीं जा सका: %(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "अपस्ट्रीम अलग नहीं किया जा सका: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "अपस्ट्रीम असाइनमेंट के लिए सेवाएँ प्राप्त नहीं की जा सकीं: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "अपस्ट्रीम प्राप्त नहीं किए जा सके: %(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "अपस्ट्रीम अपडेट नहीं किया जा सका: %(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "keepalive संख्या एक धनात्मक पूर्णांक होनी चाहिए"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "रिवर्स प्रॉक्सी पथ / से शुरू होना चाहिए"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "विधि %(value)s में से एक होनी चाहिए"
+
+msgid "upstreams.flash.name_required"
+msgstr "अपस्ट्रीम नाम आवश्यक है"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "प्रोटोकॉल %(value)s में से एक होना चाहिए"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "अपस्ट्रीम में %(value)s से अधिक सर्वर नहीं हो सकते"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "एक अपस्ट्रीम %(value)s से अधिक सेवाओं से संलग्न नहीं हो सकता"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "अपस्ट्रीम जोड़ा गया। सेवाएँ: %(len)s"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "अपस्ट्रीम %(value)s सफलतापूर्वक बनाया गया"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "अपस्ट्रीम सफलतापूर्वक हटाया गया"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "अपस्ट्रीम सफलतापूर्वक अलग किया गया"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "अपस्ट्रीम आवश्यक है"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "अपस्ट्रीम और सेवा दोनों आवश्यक हैं"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "अपस्ट्रीम सफलतापूर्वक अपडेट किया गया"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "%(host)s का वजन और अधिकतम विफलताएँ पूर्ण संख्या होनी चाहिए"
 
 msgid "upstreams.keepalive"
 msgstr "Keepalive"
@@ -7434,6 +9813,15 @@ msgstr "छिपी हुई सेवाएँ: %(count)s। %(protocol)s अ
 
 msgid "upstreams.truncated"
 msgstr "केवल पहले 500 अपस्ट्रीम प्रदर्शित होते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।"
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "redis से कनेक्ट नहीं किया जा सका"
+
+msgid "utils.flash.invalid_request"
+msgstr "अमान्य अनुरोध"
+
+msgid "utils.flash.missing_form"
+msgstr "फ़ॉर्म में %(key)s अनुपस्थित है"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "पासकी जोड़ने के लिए अपना वर्तमान पासवर्ड दर्ज करें।"
@@ -7530,6 +9918,27 @@ msgstr "सक्षम सेवाएं"
 
 msgid "web_cache.error"
 msgstr "त्रुटि"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "वेब कैश मेट्रिक्स प्राप्त करने में त्रुटि: %(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "वेब कैश स्थिति प्राप्त करने में त्रुटि: %(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "वेब कैश साफ़ करने में त्रुटि: %(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "वेब कैश साफ़ किया गया (सभी प्रविष्टियाँ)"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "%(url)s के लिए वेब कैश साफ़ किया गया"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "URL द्वारा साफ़ करने के लिए एक URL आवश्यक है"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "वेब कैश साफ़ किया गया। साफ़ किए गए इंस्टेंस: %(value)s, विफल: %(value2)s, अप्राप्य और छोड़े गए: %(value3)s (कुछ भी कतार में नहीं डाला गया)।"
 
 msgid "web_cache.hit_rate"
 msgstr "हिट दर"
@@ -7666,6 +10075,9 @@ msgstr "%(total)s में से नियम %(n)s, स्थिति बद
 msgid "workflows.aria.collapse"
 msgstr "समेटें"
 
+msgid "workflows.aria.collapseRule"
+msgstr "नियम %(n)s संक्षिप्त करें"
+
 msgid "workflows.aria.combinator"
 msgstr "संयोजक बदलें, वर्तमान"
 
@@ -7684,6 +10096,9 @@ msgstr "क्रम बदलने के लिए खींचें"
 msgid "workflows.aria.expand"
 msgstr "फैलाएँ"
 
+msgid "workflows.aria.expandRule"
+msgstr "नियम %(n)s विस्तृत करें"
+
 msgid "workflows.aria.groupKind"
 msgstr "समूह का प्रकार"
 
@@ -7693,11 +10108,20 @@ msgstr "%(n)s पर नियम जोड़ें"
 msgid "workflows.aria.more"
 msgstr "और"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "नियम %(n)s के लिए अधिक क्रियाएँ"
+
 msgid "workflows.aria.moveDown"
 msgstr "नीचे ले जाएँ — बाद में चलेगा"
 
 msgid "workflows.aria.moveRule"
 msgstr "नियम ले जाएँ"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "नियम %(n)s नीचे ले जाएँ"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "नियम %(n)s ऊपर ले जाएँ"
 
 msgid "workflows.aria.moveUp"
 msgstr "ऊपर ले जाएँ — पहले चलेगा"
@@ -7734,6 +10158,9 @@ msgstr "अनुरोधों की संख्या"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "संसाधन समूह"
+
+msgid "workflows.aria.ruleCard"
+msgstr "नियम %(n)s / %(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "%(count)s नियम में सत्यापन समस्याएं"
@@ -7897,6 +10324,9 @@ msgstr "कार्यप्रवाह संलग्न क्रम मे
 msgid "workflows.entry_title"
 msgstr "संलग्न सेवा का हर अनुरोध"
 
+msgid "workflows.err.load"
+msgstr "संग्रहीत नियम नहीं पढ़े जा सके। इन्हें अधिलेखित होने से बचाने के लिए सहेजना अक्षम है; पृष्ठ को फिर से लोड करें।"
+
 msgid "workflows.err.save"
 msgstr "सहेजा नहीं जा सका"
 
@@ -7929,6 +10359,69 @@ msgstr "अनुरोध अगली संलग्न कार्यप्
 
 msgid "workflows.exit_title"
 msgstr "कोई नियम मेल नहीं खाया"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "वर्कफ़्लो संलग्न नहीं किया जा सका: %(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "वर्कफ़्लो की प्रतिलिपि नहीं बनाई जा सकी: %(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "वर्कफ़्लो नहीं बनाया जा सका: %(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "वर्कफ़्लो हटाया नहीं जा सका: %(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "वर्कफ़्लो अलग नहीं किया जा सका: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "वर्कफ़्लो असाइनमेंट के लिए सेवाएँ प्राप्त नहीं की जा सकीं: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "वर्कफ़्लो प्राप्त नहीं किया जा सका: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "वर्कफ़्लो प्राप्त नहीं किए जा सके: %(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "वर्कफ़्लो अपडेट नहीं किया जा सका: %(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "वर्कफ़्लो नाम आवश्यक है"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "सेवा सूची नहीं पढ़ी जा सकी; पृष्ठ फिर से खोलें और पुनः प्रयास करें"
+
+msgid "workflows.flash.too_many_services"
+msgstr "एक वर्कफ़्लो %(value)s से अधिक सेवाओं से संलग्न नहीं हो सकता"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "वर्कफ़्लो %(name)s के रूप में क्लोन किया गया"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "वर्कफ़्लो %(value)s सफलतापूर्वक बनाया गया"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "वर्कफ़्लो सफलतापूर्वक हटाया गया"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "वर्कफ़्लो सफलतापूर्वक अलग किया गया"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "वर्कफ़्लो और नया नाम दोनों आवश्यक हैं"
+
+msgid "workflows.flash.workflow_required"
+msgstr "वर्कफ़्लो आवश्यक है"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "वर्कफ़्लो और सेवा दोनों आवश्यक हैं"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "वर्कफ़्लो सेवाएँ अपडेट की गईं (%(len)s संलग्न)"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "वर्कफ़्लो सफलतापूर्वक अपडेट किया गया"
 
 msgid "workflows.gate.and"
 msgstr "और तभी जब उसी क्लाइंट IP ने इससे अधिक अनुरोध किए हों"
@@ -8038,8 +10531,14 @@ msgstr ", मूल्यांकन यहीं रुकता है — �
 msgid "workflows.rules"
 msgstr "नियम"
 
-msgid "workflows.say.actionChanged"
-msgstr "कार्रवाई %(type)s में बदल गई। यह अब भी एकमात्र कार्रवाई है और मूल्यांकन रोकती है।"
+msgid "workflows.say.actionChangedBlock"
+msgstr "कार्रवाई ब्लॉक में बदल गई। यह अब भी एकमात्र कार्रवाई है, और अब भी मूल्यांकन रोक देती है।"
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "कार्रवाई चुनौती में बदल गई। यह अब भी एकमात्र कार्रवाई है, और अब भी मूल्यांकन रोक देती है।"
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "कार्रवाई रीडायरेक्ट में बदल गई। यह अब भी एकमात्र कार्रवाई है, और अब भी मूल्यांकन रोक देती है।"
 
 msgid "workflows.say.added"
 msgstr "नियम स्थान %(n)s पर, सबसे अंत में जोड़ा गया — इसलिए ऊपर के सभी नियम पहले जाँचे जाते हैं।"
@@ -8066,13 +10565,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "अंतिम मान हटाया गया — कोई मान होने तक यह शर्त सहेजी नहीं जा सकती।"
 
 msgid "workflows.say.moved"
-msgstr "%(name)s को %(total)s में से स्थान %(to)s पर ले जाया गया%(how)s। अब यह %(where)s चलता है।"
+msgstr "%(name)s को %(total)s में से स्थान %(to)s पर ले जाया गया।"
+
+msgid "workflows.say.movedDrag"
+msgstr "%(name)s को खींचकर %(total)s में से स्थान %(to)s पर रखा गया।"
+
+msgid "workflows.say.movedKeyboard"
+msgstr "%(name)s को कीबोर्ड से %(total)s में से स्थान %(to)s पर ले जाया गया।"
 
 msgid "workflows.say.predicateCap"
 msgstr "इस नियम में पहले से अधिकतम %(max)s शर्तें हैं।"
-
-msgid "workflows.say.ruleAbove"
-msgstr "ऊपर वाले नियम"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "%(name)s अक्षम किया गया — इसे पूरी तरह छोड़ा जाता है और नीचे के नियम अब वे अनुरोध देखते हैं।"
@@ -8081,13 +10583,16 @@ msgid "workflows.say.ruleEnabled"
 msgstr "%(name)s सक्षम किया गया — इसका स्थान %(n)s पर फिर मूल्यांकन होता है।"
 
 msgid "workflows.say.runsAfter"
-msgstr "%(name)s के बाद"
+msgstr "यह अब %(name)s के बाद चलता है।"
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "यह अब ऊपर वाले नियम के बाद चलता है।"
 
 msgid "workflows.say.runsFirst"
-msgstr "सबसे पहले"
+msgstr "यह अब सबसे पहले चलता है।"
 
 msgid "workflows.say.runsLast"
-msgstr "सबसे अंत में"
+msgstr "यह अब सबसे अंत में चलता है।"
 
 msgid "workflows.say.saved"
 msgstr "नियम सहेजकर संलग्न सेवाओं पर भेजे गए।"
@@ -8096,13 +10601,7 @@ msgid "workflows.say.theRule"
 msgstr "नियम"
 
 msgid "workflows.say.valuesDropped"
-msgstr "शर्त %(type)s में बदली — उसके %(count)s मान आगे नहीं ले जाए जा सके।"
-
-msgid "workflows.say.via.drag"
-msgstr "खींचकर"
-
-msgid "workflows.say.via.keyboard"
-msgstr "कीबोर्ड से"
+msgstr "शर्त बदल गई। जो मान आगे नहीं ले जाए जा सके: %(count)s।"
 
 msgid "workflows.say.viewCanvas"
 msgstr "कैनवास दृश्य। नियम बाएं से दाएं चलते हैं; पहला मिलान जीतता है।"
@@ -8222,7 +10721,16 @@ msgid "workflows.test.out_draft"
 msgstr "यह सेवा ड्राफ्ट है — इसके लिए अभी कोई कार्यप्रवाह संकलित नहीं हुआ।"
 
 msgid "workflows.test.out_match"
-msgstr "%(workflow)s · %(rule)s मेल खाया और अनुरोध पर %(action)s कार्रवाई की।"
+msgstr "%(workflow)s · %(rule)s मेल खाया।"
+
+msgid "workflows.test.out_match_block"
+msgstr "%(workflow)s · %(rule)s मेल खाया और अनुरोध को ब्लॉक कर दिया।"
+
+msgid "workflows.test.out_match_challenge"
+msgstr "%(workflow)s · %(rule)s मेल खाया और अनुरोध पर चुनौती लगा दी।"
+
+msgid "workflows.test.out_match_redirect"
+msgstr "%(workflow)s · %(rule)s मेल खाया और अनुरोध को रीडायरेक्ट कर दिया।"
 
 msgid "workflows.test.out_no_match"
 msgstr "कोई नियम मेल नहीं खाया। अनुरोध शेष सुरक्षा स्टैक पर जारी रहेगा।"
@@ -8300,7 +10808,7 @@ msgid "workflows.tree.empty"
 msgstr "खाली समूह — कोई शर्त जोड़ें, इसे ऐसे सहेजा नहीं जा सकता।"
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "किसी समूह में %(kind)s प्रविष्टियाँ नहीं हैं"
+msgstr "किसी संसाधन समूह में इस प्रकार की प्रविष्टियाँ नहीं हैं।"
 
 msgid "workflows.tree.noneMeta"
 msgstr "इनमें से कोई सही न होने पर मेल खाता है"

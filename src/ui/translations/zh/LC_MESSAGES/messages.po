@@ -61,6 +61,9 @@ msgstr "请上传一个有效的自定义配置导出文件 (.json)。"
 msgid "alert.credential_action_failed"
 msgstr "操作失败。"
 
+msgid "alert.custom_end_date_past"
+msgstr "自定义结束日期必须在未来。"
+
 msgid "alert.custom_end_date_required"
 msgstr "请选择一个自定义结束日期。"
 
@@ -97,8 +100,17 @@ msgstr "请上传有效的服务导出文件（.env 或 .zip）。"
 msgid "antibot.reason.sentence"
 msgstr "已提供反机器人质询(%(provider)s)"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "证书清单分配"
+
+msgid "aria.label.certificate_public_details"
+msgstr "证书公开详情"
+
 msgid "aria.label.clear_search"
 msgstr "清除搜索"
+
+msgid "aria.label.clone_item"
+msgstr "克隆 %(name)s"
 
 msgid "aria.label.close"
 msgstr "关闭"
@@ -111,6 +123,9 @@ msgstr "选择自定义配置导出文件或将其拖放到此处"
 
 msgid "aria.label.copy"
 msgstr "复制日志"
+
+msgid "aria.label.detach_from_service"
+msgstr "将 %(name)s 从 %(service)s 取消附加"
 
 msgid "aria.label.download_log"
 msgstr "下载此日志文件"
@@ -148,6 +163,9 @@ msgstr "以本地时间显示时间戳"
 msgid "aria.label.next_issue"
 msgstr "下一个错误或警告"
 
+msgid "aria.label.open_user_menu"
+msgstr "打开用户菜单"
+
 msgid "aria.label.passkey_name"
 msgstr "通行密钥名称"
 
@@ -159,6 +177,9 @@ msgstr "上一个错误或警告"
 
 msgid "aria.label.raw_configuration"
 msgstr "原始配置"
+
+msgid "aria.label.remove_this_server"
+msgstr "移除此服务器"
 
 msgid "aria.label.remove_value"
 msgstr "删除值"
@@ -178,8 +199,23 @@ msgstr "选择文件"
 msgid "aria.label.select_page"
 msgstr "选择页面"
 
+msgid "aria.label.select_template"
+msgstr "选择模板 %(name)s"
+
 msgid "aria.label.services_dropzone"
 msgstr "选择服务导出文件或将其拖放到此处"
+
+msgid "aria.label.show_details"
+msgstr "显示 %(name)s 的详细信息"
+
+msgid "aria.label.toggle_item"
+msgstr "切换 %(name)s"
+
+msgid "aria.label.toggle_section"
+msgstr "切换 %(name)s 部分"
+
+msgid "aria.label.toggle_theme"
+msgstr "切换深色模式"
 
 msgid "aria.label.toggle_wrap"
 msgstr "切换自动换行"
@@ -244,6 +280,15 @@ msgstr "封禁 %(ip)s 失败：%(error)s"
 msgid "bans.flash.ban_success"
 msgstr "已成功封禁 %(ip)s。"
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "%(ip)s 的自定义封禁结束日期必须在未来"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "封禁选择模式无效。"
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "/bans/ban 上的 bans 参数无效。"
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "%(ip)s 的自定义封禁时长无效"
 
@@ -253,11 +298,44 @@ msgstr "%(ip)s 的自定义封禁结束日期无效"
 msgid "bans.flash.invalid_duration"
 msgstr "无效的封禁时长：%(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "时长选择模式无效。"
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "已筛选的封禁来源无效。"
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "已筛选的时长来源无效。"
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "已筛选的解封来源无效。"
+
 msgid "bans.flash.invalid_ip"
 msgstr "无效的 IP 地址：%(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "/bans/unban 上的 ips 参数无效。"
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "解封选择模式无效。"
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "/bans/update_duration 上的 updates 参数无效。"
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "缺少 %(ip)s 的自定义封禁结束日期"
+
+msgid "bans.flash.no_bans"
+msgstr "没有封禁。"
+
+msgid "bans.flash.no_matching_bans"
+msgstr "没有匹配的封禁。"
+
+msgid "bans.flash.no_matching_reports"
+msgstr "没有匹配的报告。"
+
+msgid "bans.flash.no_updates"
+msgstr "没有更新。"
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "无法从 Redis 获取封禁记录，详情请查看日志。"
@@ -448,11 +526,14 @@ msgstr "确认"
 msgid "button.convert_configs"
 msgstr "转换配置"
 
-msgid "button.convert_configs_to"
-msgstr "转换为 %(state)s"
-
 msgid "button.convert_services"
 msgstr "转换服务"
+
+msgid "button.convert_to_draft"
+msgstr "转换为草稿"
+
+msgid "button.convert_to_online"
+msgstr "转换为在线"
 
 msgid "button.copy"
 msgstr "复制"
@@ -549,6 +630,9 @@ msgstr "导入自定义配置"
 
 msgid "button.import_services"
 msgstr "导入服务"
+
+msgid "button.import_template"
+msgstr "导入模板"
 
 msgid "button.local_time"
 msgstr "本地时间"
@@ -727,6 +811,39 @@ msgstr "注销其他会话"
 msgid "button.wrap"
 msgstr "换行"
 
+msgid "cache.flash.api_unavailable"
+msgstr "API 不可用：%(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "未找到来自任务 %(job_name)s、插件 %(plugin_id)s 的缓存文件 %(file_name)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "未找到来自任务 %(job_name)s、插件 %(plugin_id)s、服务 %(service)s 的缓存文件 %(file_name)s"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "已删除 %(deleted_count)s 个文件，有 %(len)s 个错误：%(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "删除缓存文件时出错：%(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "获取缓存文件时出错：%(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "获取缓存文件时出错：%(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "缓存文件参数无效"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "未选择任何缓存文件"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "已成功删除 %(deleted_count)s 个缓存文件"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "已成功删除 %(deleted_count)s 个缓存文件"
+
 msgid "cache.kpi_files"
 msgstr "文件"
 
@@ -840,6 +957,117 @@ msgstr "该文件不得超过 1 MiB。"
 
 msgid "certificates.fingerprint"
 msgstr "SHA-256 指纹"
+
+msgid "certificates.flash.certificate_action_failed"
+msgstr "证书操作失败：%(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "证书已成功删除"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "证书清单分配已成功添加"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "证书清单分配已成功移除"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "证书元数据已成功更新"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "证书和名称为必填项"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "证书名称为必填项"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "证书续期成功"
+
+msgid "certificates.flash.certificate_required"
+msgstr "证书为必填项"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "证书和服务均为必填项"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "证书上传超过 2 MiB 的请求限制"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "已检查 %(total_due)s 个待续期的证书"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "无法附加证书：%(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "无法创建证书：%(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "无法取消附加证书：%(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "无法下载证书：%(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "无法获取证书：%(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "无法获取用于证书分配的服务：%(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "无法安排 Let's Encrypt 签发：%(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "无法更新证书：%(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "无法上传证书：%(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "自定义证书已成功上传"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "不支持加密的私钥。"
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "无效的证书操作"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "证书部分无效"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "证书文件不是有效的 PEM 证书。"
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "无效的证书来源"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "私钥文件不是有效的 PEM 私钥。"
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "已安排 Let's Encrypt 签发"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "名称和通用名称（common name）为必填项"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "需要 PEM 证书和私钥"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "请至少选择一个服务用于 Let's Encrypt 签发"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "已创建自签名证书"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "证书不能包含超过 100 个使用者备用名称"
+
+msgid "certificates.flash.too_many_services"
+msgstr "证书不能附加到超过 100 个服务"
+
+msgid "certificates.flash.validity_range"
+msgstr "有效期必须在 1 到 825 天之间"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "有效期必须为整数天"
 
 msgid "certificates.issuer"
 msgstr "颁发者"
@@ -1053,6 +1281,168 @@ msgstr "显示更多 %(count)s"
 
 msgid "compose.unavailable"
 msgstr "插件列表无法加载，因此此页面无法安全编辑。 等待 API 响应后重新加载。"
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "所有选定的自定义配置均无法找到、不是 UI/API 自定义配置，或已被转换。"
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "所有选定的自定义配置均无法找到，或不是 UI/API 自定义配置。"
+
+msgid "configs.flash.config_already_exists"
+msgstr "配置 %(config_type)s/%(config_name)s 已存在"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "服务 %(service)s 的配置 %(config_type)s/%(config_name)s 已存在"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "配置 %(clone)s 不存在。"
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "配置 %(config_type)s/%(name)s 不存在。"
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "服务 %(service)s 的配置 %(config_type)s/%(name)s 不存在。"
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "配置 %(config_type)s/%(name)s 不是 UI/API 自定义配置，无法编辑。"
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "服务 %(service)s 的配置 %(config_type)s/%(name)s 不是 UI/API 自定义配置，无法编辑。"
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "已转换为“草稿”配置：%(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "已转换为“在线”配置：%(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "无法从 API 获取自定义配置：%(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "已创建自定义配置 %(config_type)s/%(config_name)s"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "已为服务 %(service)s 创建自定义配置 %(config_type)s/%(config_name)s"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "自定义配置 %(non_convertible_config)s 已是草稿配置，不会被转换。"
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "自定义配置 %(non_convertible_config)s 已是在线配置，不会被转换。"
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "找不到自定义配置 %(missing_config)s。"
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "自定义配置 %(non_editable_config)s 不是 UI/API 自定义配置，将不会被转换。"
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "自定义配置 %(skipped_config)s 不是 UI/API 自定义配置，将不会被删除。"
+
+msgid "configs.flash.deleted_config_one"
+msgstr "已删除配置：%(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "已删除配置：%(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "删除自定义配置时发生错误：%(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "保存自定义配置时发生错误：%(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "导入自定义配置失败：%(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "导入自定义配置失败：%(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "导入错误：%(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "已导入自定义配置：%(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "已导入自定义配置：%(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "/configs/convert 上的 configs 参数无效。"
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "/configs/delete 上的 configs 参数无效。"
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "/configs/export 上的 configs 参数无效。"
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "文件编码无效。请上传 UTF-8 编码的 JSON 文件。"
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "/configs/new 上的 name 参数无效。"
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "/configs/new 上的 type 参数无效。"
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "/configs/convert 上缺少 configs 参数。"
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "/configs/delete 上缺少 configs 参数。"
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "/configs/convert 上缺少 convert_to 参数。"
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "/configs/new 上缺少 name 参数。"
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "/configs/new 上缺少 service 参数。"
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "/configs/new 上缺少 type 参数。"
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "/configs/new 上缺少 value 参数。"
+
+msgid "configs.flash.no_configs_selected"
+msgstr "未选择任何配置。"
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "没有可导出的自定义配置。"
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "未上传自定义配置文件。"
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "导入文件中未找到任何自定义配置。"
+
+msgid "configs.flash.no_values_changed"
+msgstr "没有值被更改。"
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "已覆盖自定义配置：%(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "已覆盖自定义配置：%(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "不允许重命名基于模板的自定义配置。"
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "已保存自定义配置 %(new_type)s/%(new_name)s"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "已为服务 %(service)s 保存自定义配置 %(new_type)s/%(new_name)s"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "服务 %(new_service)s 不存在。"
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "已跳过自定义配置：%(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "已跳过自定义配置：%(names)s"
 
 msgid "configs.subtitle"
 msgstr "面向您服务的自定义 NGINX 配置片段——创建、编辑并管理 HTTP、ModSecurity 和 stream 层级的覆盖配置。"
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "不适用"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "告警 ID"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "加载完整证据"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "开始时间"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "停止时间"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "已被 CrowdSec 加入允许列表"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "备注"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "由 Console 管理"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "在此引擎上未找到任何允许列表。"
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "添加受信任的 IP 或 CIDR 网络。"
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "请在 CrowdSec Console 中编辑由 Console 管理的列表。"
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "只需创建一次列表，或使用现有的本地管理列表。"
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "CrowdSec 允许列表文档"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "此示例在 24 小时后过期。如需条目永不过期，请省略 --expiration。支持 IPv4 和 IPv6。"
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "检查列表及其过期日期。"
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "您可以在此浏览允许列表并检查 IP。如需添加或移除条目，请在 CrowdSec 引擎上使用 cscli。"
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "更改后，请刷新允许列表并再次调查该 IP。移除例外会允许 CrowdSec 之后的决策；这不会创建封禁。BunkerWeb 本地封禁和其他防护保持独立。"
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "不再需要时，请移除该例外。"
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "如何管理受信任的 IP 和网络"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "需要 CrowdSec 1.7 或更高版本。请在主机上，或在运行所选引擎本地 API（LAPI）的容器内运行这些命令，并确保可访问其 CrowdSec 配置和数据库。请将示例中的列表名称、IP 和网络替换为您自己的。"
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "所选引擎的受信任 IP 和网络。这些例外适用于其所有已连接的服务和 bouncer。"
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "这是作用于整个引擎的例外。BunkerWeb 本地封禁、其他防护或已缓存的决策仍可能拦截此 IP。"
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "本地管理"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "从不"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "没有活动条目。"
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "此 IP 不匹配任何 CrowdSec 允许列表。"
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "允许列表页面"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "刷新允许列表"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "CrowdSec 允许列表"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "允许列表状态不可用。"
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "已捕获的历史"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "捕获的报告数据描述的是请求发生时观察到的情况；它不能证明决策的当前状态。"
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "最近一次 AppSec 观察"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "已配置"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "已连接"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "连接错误"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "按主机名或服务筛选连接"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "所有服务"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "CrowdSec 连接"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "上次成功同步"
 
 msgid "crowdsec.connection.local_api"
-msgstr "Local API"
+msgstr "本地 API"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "管理"
 
 msgid "crowdsec.connection.mode"
-msgstr "Mode"
+msgstr "模式"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "未找到可用的 CrowdSec 连接。请检查实例错误和插件配置。"
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "只读"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "请先选择 CrowdSec 连接。"
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "所选连接适用于下方的决策、允许列表和 IP 调查。"
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "所选连接"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "决策同步"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "已是最新"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "尚未同步"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "已过时"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "当前状态"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "当前状态可能在此次观察之后发生变化。"
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "持续时间"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "过期时间"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "决策 ID"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "来源"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "场景"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "范围"
 
 msgid "crowdsec.decision.target"
-msgstr "Target"
+msgstr "目标"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "类型"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "显示第 %(start)s–%(end)s 条，共 %(total)s 条"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "这是直接从所选 CrowdSec 引擎读取的当前状态。"
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "没有与这些筛选条件匹配的活动决策。"
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "决策页面"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "活动决策"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "CrowdSec 请求失败。"
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "可用的 CrowdSec 告警证据"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "当前 CrowdSec 决策"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "当前 CrowdSec 决策会与本地封禁和已捕获的报告一并检查。"
 
 msgid "crowdsec.investigation.ip"
-msgstr "IP address"
+msgstr "IP 地址"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "当前 BunkerWeb 本地封禁"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "没有可用的告警证据。"
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "未找到当前的本地封禁。"
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "未找到当前的 CrowdSec 决策。"
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "未找到近期捕获的报告。"
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "近期 BunkerWeb 报告"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "对 %(ip)s 的调查"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "调查"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "为此 IP 找到的证据"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "%(total)s 个活动"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "CrowdSec 告警证据"
 
 msgid "crowdsec.investigation.summary_available"
-msgstr "%(total)s available"
+msgstr "%(total)s 个可用"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "BunkerWeb 本地封禁"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "%(total)s 个已捕获"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "CrowdSec 决策"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "这涵盖所选的 CrowdSec 连接和 BunkerWeb 自身的封禁。此处不检查其他防护，且无法读取的证据并不能证明此 IP 是被允许的。"
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "未找到任何内容"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "BunkerWeb 报告"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "无法读取"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "调查 IP"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "显示 %(shown)s 条结果，共 %(total)s 条（来源限制：%(limit)s）。"
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "不可用：%(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "过期时间"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "原因"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "服务"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "下一页"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "观察于 %(time)s"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "上一页"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "请求已阻止"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "CrowdSec AppSec 故障策略"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "刷新状态"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "移除"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "我已了解，并希望移除此决策。"
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "这将在共享的 CrowdSec 引擎上移除该决策，并影响每个已连接的 bouncer。已缓存的决策、其他范围、本地封禁或 AppSec 仍可能拦截该目标。"
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "要从 %(source)s（%(engine)s）移除 %(scope)s %(value)s（%(type)s），场景 %(scenario)s，来源 %(origin)s 吗？"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "移除决策"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "已在 CrowdSec 源端移除。传播状态为 %(status)s（%(mode)s，间隔 %(interval)s）。剩余的匹配决策：%(remaining)s。本地封禁或 AppSec 仍可能拦截。"
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "移除 CrowdSec 决策"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "捕获时间"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "报告时间"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "已捕获的决策"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "安全报告"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "报告标识符"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "匹配的目标"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "决策元数据"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "完整"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "不完整"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "此较旧的报告没有可用的 CrowdSec 快照元数据。"
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "部分已捕获的决策元数据在请求发生时不可用。"
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "原因"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "已捕获的补救措施"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "已捕获的服务范围"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "服务"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "已捕获的来源"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "检查每个已配置的 CrowdSec 引擎，并根据当前和已捕获的证据调查某个 IP。"
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "CrowdSec 操作员"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "未知"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "一个或多个任务在最近一次运行中失败。"
@@ -2416,17 +2806,128 @@ msgstr "最近 %(days)s 天"
 msgid "dashboard.window.title"
 msgstr "仪表板窗口"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "所有 %(count)s 个匹配的 %(entity)s 均已选中。"
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "所有 %(count)s 个匹配的封禁均已选中。"
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "选择所有 %(count)s 个匹配的 %(entity)s"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的封禁"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "此页面上的 %(count)s 个封禁已选中。"
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "此页面上的所有 %(count)s 个封禁均已选中。"
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "所有 %(count)s 个匹配的缓存文件均已选中。"
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的缓存文件"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "此页面上的 %(count)s 个缓存文件已选中。"
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "此页面上的所有 %(count)s 个缓存文件均已选中。"
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "所有 %(count)s 个匹配的自定义配置均已选中。"
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的自定义配置"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "此页面上的 %(count)s 个自定义配置已选中。"
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "此页面上的所有 %(count)s 个自定义配置均已选中。"
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "所有 %(count)s 个匹配的实例均已选中。"
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的实例"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "此页面上的 %(count)s 个实例已选中。"
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "此页面上的所有 %(count)s 个实例均已选中。"
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "所有 %(count)s 个匹配的项目均已选中。"
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的项目"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "此页面上的 %(count)s 个项目已选中。"
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "此页面上的所有 %(count)s 个项目均已选中。"
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "所有 %(count)s 个匹配的任务均已选中。"
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的任务"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "此页面上的 %(count)s 个任务已选中。"
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "此页面上的所有 %(count)s 个任务均已选中。"
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "所有 %(count)s 个匹配的插件均已选中。"
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的插件"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "此页面上的 %(count)s 个插件已选中。"
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "此页面上的所有 %(count)s 个插件均已选中。"
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "所有 %(count)s 个匹配的报告均已选中。"
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的报告"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "此页面上的 %(count)s 个报告已选中。"
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "此页面上的所有 %(count)s 个报告均已选中。"
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "所有 %(count)s 个匹配的服务均已选中。"
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的服务"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "此页面上的 %(count)s 个服务已选中。"
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "此页面上的所有 %(count)s 个服务均已选中。"
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "所有 %(count)s 个匹配的模板均已选中。"
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "选择所有 %(count)s 个匹配的模板"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "此页面上的 %(count)s 个模板已选中。"
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "此页面上的所有 %(count)s 个模板均已选中。"
 
 msgid "datatable.bulk_select_clear"
 msgstr "清除选择"
-
-msgid "datatable.bulk_select_page"
-msgstr "此页面上的所有 %(count)s 个 %(entity)s 均已选中。"
 
 msgid "datatable.info_bans"
 msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 条封禁"
@@ -2569,6 +3070,9 @@ msgstr "处理中..."
 msgid "datatable.search"
 msgstr "搜索："
 
+msgid "datatable.select_row"
+msgstr "选择行"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "未选择封禁"
 
@@ -2659,11 +3163,50 @@ msgstr "选择了 1 个模板"
 msgid "datatable.select_rows_templates_plural"
 msgstr "选择了 %d 个模板"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s 已选中"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "已选中 %(count)s 个自定义配置"
 
-msgid "datatable.selected_list_empty"
-msgstr "未选中 %(entity)s。"
+msgid "datatable.selected_list.configs.count_other"
+msgstr "已选中 %(count)s 个自定义配置"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "未选中任何自定义配置。"
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "已选中 %(count)s 个项目"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "已选中 %(count)s 个项目"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "未选中任何项目。"
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "已选中 %(count)s 个插件"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "已选中 %(count)s 个插件"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "未选中任何插件。"
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "已选中 %(count)s 个服务"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "已选中 %(count)s 个服务"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "未选中任何服务。"
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "已选中 %(count)s 个模板"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "已选中 %(count)s 个模板"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "未选中任何模板。"
 
 msgid "datatable.zero_records_bans"
 msgstr "未找到匹配的封禁"
@@ -2794,11 +3337,41 @@ msgstr "请查看任务页面以获取详情。"
 msgid "flash.configuration_pending_instance"
 msgstr "配置尚未应用——正在等待实例启动。"
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "需要 CORS 或 AJAX 请求"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "无法从 API 获取全局设置。"
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "无法获取资源组：%(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "数据库处于只读模式"
+
+msgid "flash.description_too_long"
+msgstr "描述不能超过 4000 个字符"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "您没有写入权限"
+
 msgid "flash.easter_egg"
 msgstr "如果你读到了这条信息，说明你很好奇"
 
 msgid "flash.error"
 msgstr "错误"
+
+msgid "flash.error_fetching_instances"
+msgstr "获取实例时出错"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "保存自定义配置时发生错误：%(e)s"
+
+msgid "flash.import_warning"
+msgstr "导入警告：%(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "convert_to 参数无效。"
 
 msgid "flash.last_configuration_change_failed"
 msgstr "您上一次的配置更改未能应用。"
@@ -2806,11 +3379,20 @@ msgstr "您上一次的配置更改未能应用。"
 msgid "flash.message"
 msgstr "信息"
 
+msgid "flash.plugin_not_found"
+msgstr "未找到插件"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "您的服务数量超出了 PRO 许可证允许的范围。请升级许可证，或将部分服务转换为草稿模式以解锁您的 PRO 许可证。"
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "调度器将尝试应用这些更改。"
+
+msgid "flash.service_does_not_exist"
+msgstr "服务 %(service)s 不存在。"
 
 msgid "flash.time.just_now"
 msgstr "刚才"
@@ -2845,6 +3427,9 @@ msgstr "覆盖现有 UI/API 自定义配置"
 msgid "form.checkbox.remember_me"
 msgstr "记住我"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "如果存在相同 id 的模板则替换它"
+
 msgid "form.help.ban_specific_service"
 msgstr "封禁将仅适用于此特定服务。"
 
@@ -2862,6 +3447,9 @@ msgstr "如果选中，封禁将永久有效，直到手动移除为止。"
 
 msgid "form.help.photo_extensions"
 msgstr "允许的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+
+msgid "form.help.secret_stored"
+msgstr "已存储一个值，但不会显示。保持该字段不变即可保留它，输入新值可替换它，清空该字段可将其移除。"
 
 msgid "form.label.2fa_code"
 msgstr "2FA 代码"
@@ -3031,6 +3619,9 @@ msgstr "服务器名称"
 msgid "form.label.service_name"
 msgstr "服务名称"
 
+msgid "form.label.template_file"
+msgstr "模板文件"
+
 msgid "form.label.template_id"
 msgstr "模板 ID"
 
@@ -3130,6 +3721,438 @@ msgstr "密码必须至少包含 1 个特殊字符。"
 msgid "form.validation.password_uppercase"
 msgstr "密码必须至少包含 1 个大写字母。"
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "NGINX 访问日志所使用的路径（文件路径、syslog:server=host[:port][,param=value]，或 memory:name:size；设为 off 可禁用）。"
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "访问日志路径"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "BunkerWeb 内部 API 的监听端口号（TLS）。"
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "API HTTPS 端口号"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "BunkerWeb 内部 API 的监听端口号。"
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "API 端口号"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "BunkerWeb 内部 API 的 HTTP 监听。"
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "API 监听 HTTP"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "BunkerWeb 内部 API 的 HTTPS（SSL/TLS）监听。"
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "API 监听 HTTPS"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "BunkerWeb 内部 API 的监听 IP 地址。"
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "API 监听 IP"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "BunkerWeb 内部 API 的服务器名称（虚拟主机）。"
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "API 服务器名称"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "用于验证 API 调用的可选令牌。如已设置，调度器（以及任何客户端）必须通过 Authorization 请求头发送它。注意：必须在 BunkerWeb 和调度器两端的环境中都设置。"
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "API 访问令牌"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "允许联系 BunkerWeb 内部 API 的 IP/网段列表。（格式：ip/netmask 或 ipv6/netmask，以空格分隔）"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "API 白名单 IP"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "启用 Docker Autoconf 集成。"
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "Autoconf 模式"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "以空格分隔的 BunkerWeb 实例列表（格式：fqdn-or-ip:5000 http://fqdn-or-ip:5000）"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "BunkerWeb 实例"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "内部 cachestore（ipc）的大小。"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "Cachestore ipc 内存大小"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "内部 cachestore（locks）的大小。"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "Cachestore locks 内存大小"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "内部 cachestore 的大小。"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "Cachestore 内存大小"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "内部 cachestore（miss）的大小。"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "Cachestore miss 内存大小"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "读取客户端请求体的超时时间。"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "客户端请求体超时"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "读取客户端请求头的超时时间。"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "客户端请求头超时"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "当某个投影的 .conf 文件自上次记录的投影以来发生变化、或在其中缺失时会发生什么。与数据库当前行匹配的文件会被忽略；若没有可读的投影历史，则不会报告任何漂移。'overwrite' 会记录每一次检测到的漂移，并根据数据库重新写入该文件，若没有活动的行替代它，则将其删除。'refuse' 在漂移解决之前不会从数据库向该处写入任何内容，会记录一条错误，并使待处理的自定义配置更改保持未确认状态，以便重试。"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "自定义配置漂移策略"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "共享的每工作进程 datastore LRU 的槽位数（供 internalstore 及各插件的每工作进程本地缓存使用）。接受一个普通整数，或 `k`/`m` 简写（例如 `1k`、`10k`、`1m`）。"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "Datastore LRU 大小"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "内部 datastore 的大小。"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "Datastore 内存大小"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "要使用的解析器 DNS 地址。"
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "DNS 解析器"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "NGINX 错误日志所使用的路径（文件路径、stderr、syslog:server=host[:port][,param=value]，或 memory:size）。"
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "错误日志路径"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "bunkerweb 绑定的 HTTPS 端口号。留空以禁用 HTTPS 监听。"
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "HTTPS 端口"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "bunkerweb 绑定的 HTTP 端口号。留空以禁用 HTTP 监听。"
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "HTTP 端口"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "内部 internalstore 的大小。"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "Internalstore 内存大小"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "内部使用：服务处于草稿模式时设为 yes。"
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "内部使用：草稿"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "内部使用：BW 加载时设为 yes。"
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "内部使用：加载中"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "每日定时任务运行的本地时间（调度器时区，HH:MM，24 小时制）；每周任务也在此时间、JOBS_WEEKLY_DAY 当天运行。"
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "任务每日时间"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "每周定时任务运行的星期几，时间为 JOBS_DAILY_TIME。"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "任务每周日期"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "keep-alive 客户端连接的超时时间。"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "keepalive 超时"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "重启时保留配置。设为 'yes' 以防止重启时重置配置。"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "重启时保留配置"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "启用 Kubernetes 集成。"
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "Kubernetes 模式"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "启用非 SSL 监听（透传）。"
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "监听 stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "非 SSL 的监听端口（透传）。留空以禁用非 SSL stream 监听。"
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "stream 监听端口"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "SSL 的监听端口（透传）。留空以禁用 SSL stream 监听。"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "stream 监听端口（SSL）"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "访问日志所使用的格式。"
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "访问日志格式"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "错误日志使用的级别。"
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "日志级别"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "启用多站点。"
+
+msgid "general.settings.MULTISITE.label"
+msgstr "多站点"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "nginx 查找配置的位置。"
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "nginx 前缀"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "在此站点 access 阶段（请求准入/控制）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "插件顺序（access）"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "在此站点 header 阶段（响应头过滤）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "插件顺序（header）"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "在 init 阶段（引擎启动，仅运行一次）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "插件顺序（init）"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "在 init_worker 阶段（每个工作进程的启动）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "插件顺序（init_worker）"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "在 init_workers 阶段运行的插件 ID，以逗号或空格分隔。"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "插件顺序（init_workers）"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "在此站点 log 阶段（响应后的 HTTP 日志处理）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "插件顺序（log）"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "在此站点 log_default 阶段（默认虚拟主机日志处理）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "插件顺序（log_default）"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "在此站点 log_stream 阶段（stream 日志处理）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "插件顺序（log_stream）"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "在此站点 preread 阶段（代理前的 TCP preread 检查）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "插件顺序（preread）"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "在此站点 set 阶段（rewrite/access 之前的变量设置）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "插件顺序（set）"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "在此站点 ssl_certificate 阶段（TLS 证书选择/签发）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "插件顺序（ssl_certificate）"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "在 timer 阶段（后台定时器）应最先运行的插件。ID 以空格分隔；其余插件之后仍按其正常顺序运行。"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "插件顺序（timer）"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "定义对威胁的响应方式：\"detect\" 表示仅监控并记录，\"block\" 表示阻止访问并记录事件。"
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "安全模式"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "向客户端发送响应的超时时间。"
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "发送超时"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "bunkerweb 所服务的虚拟主机列表。（以空格分隔）"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "服务器名称"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "server_names_hash_bucket_size 指令的值。"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "服务器名称哈希桶大小"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "服务器类型：http 或 stream。"
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "服务器类型"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "保存已吊销 cookie 会话标识符的内部存储的大小。"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "会话吊销内存大小"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "启用 Docker Swarm 集成。"
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "Swarm 模式"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "定时器使用的日志级别。"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "定时器日志级别"
+
+msgid "general.settings.USE_API.help"
+msgstr "启用 BunkerWeb 内部 API。"
+
+msgid "general.settings.USE_API.label"
+msgstr "启用 API"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "启用 IPv6 连接。"
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "使用 IPv6"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "TCP 监听（stream）。"
+
+msgid "general.settings.USE_TCP.label"
+msgstr "监听 TCP"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "要应用的配置模板，以空格分隔，将覆盖特定设置的默认值。模板按顺序应用，后应用的会覆盖先应用的；在服务上设置的值会覆盖模板。"
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "使用模板"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "UDP 监听（stream）。"
+
+msgid "general.settings.USE_UDP.label"
+msgstr "监听 UDP"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "初始化工作进程 lua_shared_dict 的大小"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "初始化 Workerlock 内存大小"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "每个工作进程的最大连接数。"
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "每个工作进程的连接数"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "工作进程的数量。"
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "工作进程数"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "工作进程可打开文件的最大数量。"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "每个工作进程的打开文件数"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "工作进程优雅关闭的超时时间。超过此延迟后，为防止内存增长，重新加载期间会强制终止旧的工作进程。"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "工作进程关闭超时"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "正在检查许可证密钥以进行升级。"
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "全局设置未保存：每个更改的值均被拒绝。"
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "由于没有值发生更改，全局设置未被编辑。"
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "全局设置已保存，但有 %(refused_count)s 个值被拒绝。"
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "全局设置已成功保存。"
+
+msgid "home.flash.error_fetching_services"
+msgstr "获取服务时出错：%(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "查看所有 %(count)s 设置"
 
@@ -3156,6 +4179,75 @@ msgstr "静态"
 
 msgid "instances.down"
 msgstr "已停止"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "无法创建实例：%(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "无法从 API 获取实例。"
+
+msgid "instances.flash.could_not_found_one"
+msgstr "找不到所选实例，或它不是 UI/API 实例。"
+
+msgid "instances.flash.could_not_found_other"
+msgstr "找不到所选的全部实例，或它们不是 UI/API 实例。"
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "无法删除该实例：%(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "无法删除这些实例：%(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "主机名 %(hostname)s 已被使用。"
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "实例 %(value)s 已成功创建。"
+
+msgid "instances.flash.instance_deleted"
+msgstr "实例 %(instance)s 已成功删除。"
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "实例 %(instance)s 不存在。"
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "实例 %(instance)s 没有重新加载方法。"
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "实例 %(instance)s 没有停止方法。"
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "实例 %(non_deletable_instance)s 不是 UI/API 实例，将不会被删除。"
+
+msgid "instances.flash.instance_reloaded"
+msgstr "实例 %(instance)s 已成功重新加载。"
+
+msgid "instances.flash.instance_stopped"
+msgstr "实例 %(instance)s 已成功停止。"
+
+msgid "instances.flash.instances_deleted"
+msgstr "这些实例 %(instance)s 已成功删除。"
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "/instances/new 上缺少 instance hostname 参数。"
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "/instances/new 上缺少 instance name 参数。"
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "/instances/delete 缺少 instances 参数。"
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "/instances/ping 缺少 instances 参数。"
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "/instances/reload 缺少 instances 参数。"
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "/instances/stop 缺少 instances 参数。"
+
+msgid "instances.flash.no_instance_selected"
+msgstr "未选择任何实例。"
 
 msgid "instances.loading"
 msgstr "正在加载"
@@ -3193,6 +4285,24 @@ msgstr "开始日期"
 msgid "job.history.success"
 msgstr "成功"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "获取任务时出错：%(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "/jobs/run 上的 jobs 参数无效。"
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "任务的插件将由调度器在后台运行。"
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "任务的插件将由调度器在后台运行。"
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "/jobs/run 上缺少 jobs 参数。"
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "未选择任何任务。"
+
 msgid "jobs.subtitle"
 msgstr "由 BunkerWeb 调度器运行的计划任务和一次性任务 — 跟踪其状态并按需运行。"
 
@@ -3213,6 +4323,15 @@ msgstr "已锁定 (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "锁定的设置会突出显示"
+
+msgid "legend.raw_setting_drafts"
+msgstr "在设置行的开头按 # 切换草稿状态，或按退格键启用。保存后生效。草稿保留其值，同时使用继承值或默认值。"
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "打开证书以查看详情"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt：孤立证书 <strong>%(cert_name)s</strong> 引用了缺失的 ACME 账户 <code>%(account)s</code>。在提供方状态修复之前，续订将被阻止。<a href=\"%(certificates_url)s\">%(link_text)s</a>。"
 
 msgid "link.back_to_login"
 msgstr "返回登录"
@@ -3253,6 +4372,12 @@ msgstr "使用身份验证码"
 msgid "link.use_recovery_code"
 msgstr "使用恢复码"
 
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "无法为您登录，请重试"
+
+msgid "login.flash.invalid_username_password"
+msgstr "用户名或密码无效"
+
 msgid "login.notice_password_changed"
 msgstr "您的密码已更改。请使用新密码登录。"
 
@@ -3288,6 +4413,12 @@ msgstr "展开"
 
 msgid "logs.filter_levels"
 msgstr "级别"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "文件路径无效"
+
+msgid "logs.flash.no_such_file"
+msgstr "没有此文件"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,6 +4504,27 @@ msgstr "增高"
 msgid "logs.trimmed_notice"
 msgstr "--- 为提高性能，已删除 %(count)s 条较早的日志行 ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "数据库连接处于只读模式：无法进行任何修改。"
+
+msgid "main.flash.failover_configuration_error"
+msgstr "最近的更改无法应用，因为它会在 NGINX 上产生配置错误，请查看 BunkerWeb 的日志以获取更多信息。配置已回退到上一个可用版本。"
+
+msgid "main.flash.failover_message"
+msgstr "故障切换消息："
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "已强制重新加载状态"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "您的服务数量超过了专业版许可证所允许的数量。请升级您的许可证，或将部分服务移至草稿模式以解锁您的专业版许可证。"
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "最近的更改已成功应用。"
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "双重验证已启用，但没有可用的恢复代码，请刷新它们："
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "将您的插件存档拖放到此处或单击以选择文件。"
 
@@ -3384,11 +4536,20 @@ msgid "modal.body.confirm_cache_deletion_alert"
 msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
 msgstr[0] "您确定要删除选定的缓存文件吗？"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "您确定要将所选自定义配置转换为“草稿”吗？"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "您确定要将所选自定义配置转换为“在线”吗？"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "确定要转换所选的自定义配置吗？"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "确定将选定的自定义配置转换为 %(state)s 吗？"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "您确定要将所选自定义配置转换为“草稿”吗？"
+
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "您确定要将所选自定义配置转换为“在线”吗？"
 
 #. plural pair; 1 form(s) for zh, singular in slot 0
 msgid "modal.body.confirm_configs_deletion_alert"
@@ -3406,11 +4567,28 @@ msgid "modal.body.confirm_plugin_deletion"
 msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "您确定要删除选定的插件吗？"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "确定要将所选服务转换为草稿吗？"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "确定要将所选服务转换为在线吗？"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "确定要更改该服务声明的模式吗？"
 
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "确定要将所选服务转换为草稿吗？"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "确定要将所选服务转换为在线吗？"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "您确定要删除模板 %(name)s 吗？"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "确定要删除所选模板吗？"
 
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "您确定要删除选定的实例吗？"
@@ -3471,6 +4649,12 @@ msgstr "将您的服务导出文件拖放到此处，或单击以选择文件。
 msgid "modal.body.import_services_warning"
 msgstr "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。也支持包含自定义配置的 .zip 导出归档。"
 
+msgid "modal.body.import_template_help"
+msgstr "从 BunkerWeb 导出的模板包（.json），或包含一个模板文件夹（含其 template.json 和 configs）的压缩包（.zip、.tar.gz、.tar.xz）。最大 1 MiB。"
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "替换模板会在下一次配置生成时改变每一个使用它的服务。由插件所拥有或在 Web UI 之外管理的模板永远不会被替换。"
+
 msgid "modal.body.instance_creation_alert"
 msgstr "您不需要提供端口或服务器名称；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。"
 
@@ -3485,6 +4669,9 @@ msgstr "这些恢复代码仅显示一次。请确保将其安全保存。"
 
 msgid "modal.body.reset_template_alert"
 msgstr "您确定要重置当前模板设置和自定义配置吗？"
+
+msgid "modal.body.service_deletion_confirmation"
+msgstr "您确定要删除选定的服务吗？"
 
 msgid "modal.body.services_conversion_confirmation"
 msgstr "您确定要转换选定的服务吗？"
@@ -3578,6 +4765,9 @@ msgstr "导入自定义配置"
 msgid "modal.title.import_services"
 msgstr "导入服务"
 
+msgid "modal.title.import_template"
+msgstr "导入模板"
+
 msgid "modal.title.job_history"
 msgstr "最近 10 次任务执行"
 
@@ -3613,6 +4803,21 @@ msgstr "简单"
 
 msgid "mode.raw"
 msgstr "原始"
+
+msgid "navbar.aria.close_navigation"
+msgstr "关闭导航"
+
+msgid "navbar.aria.help"
+msgstr "帮助"
+
+msgid "navbar.aria.news"
+msgstr "新闻"
+
+msgid "navbar.aria.notifications"
+msgstr "通知"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "切换导航"
 
 msgid "navbar.button.upgrade_to_pro"
 msgstr "升级到 PRO"
@@ -3764,6 +4969,9 @@ msgstr "已订阅"
 msgid "notice.dismiss_mfa"
 msgstr "不再提醒我"
 
+msgid "notice.enable_mfa"
+msgstr "请启用双重身份验证以保护您的账户 <a href=\"%(url)s\">点击此处</a>"
+
 msgid "onboarding.dismiss"
 msgstr "忽略"
 
@@ -3817,6 +5025,39 @@ msgstr "注册首个服务"
 
 msgid "onboarding.item.workflow"
 msgstr "附加一个安全工作流"
+
+msgid "onboarding.item_hint.first_block"
+msgstr "一旦 BunkerWeb 拦截了某个请求，报告就会出现在这里 — 发送一个恶意请求，然后回来查看。"
+
+msgid "onboarding.item_hint.https"
+msgstr "在此添加或生成证书，以便通过 HTTPS 提供您的服务。"
+
+msgid "onboarding.item_hint.install"
+msgstr "在此添加一个实例，然后保存您的第一份配置以将其纳入管理。"
+
+msgid "onboarding.item_hint.mfa"
+msgstr "从此菜单打开您的个人资料，然后开启双重身份验证。"
+
+msgid "onboarding.item_hint.pro"
+msgstr "在此输入您的 PRO 许可证密钥，以解锁 PRO 插件和支持。"
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "这里每一行显示一个被封禁的客户端、原因以及封禁到期时间。"
+
+msgid "onboarding.item_hint.read_home"
+msgstr "此仪表盘可一目了然地显示正常运行的实例、已提供服务及最近的流量。"
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "每个实例的实时日志都会显示在这里，可按实例和严重程度筛选。"
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "在此打开一份报告，查看是哪项安全检查拦截了它，以及原因。"
+
+msgid "onboarding.item_hint.service"
+msgstr "在此创建一个服务，告诉 BunkerWeb 要保护哪个应用程序。"
+
+msgid "onboarding.item_hint.workflow"
+msgstr "在此构建一个工作流，将检查和响应串联成一条规则。"
 
 msgid "onboarding.not_saved"
 msgstr "无法保存。"
@@ -3881,6 +5122,9 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "无法读取 BunkerWeb 版本（%(current)s），因此无法检查 %(id)s 的兼容性；未安装任何内容"
+
 msgid "plugins.catalog.incompatible"
 msgstr "此版本未声明与 BunkerWeb 兼容;当前版本为 %(current)s"
 
@@ -3899,8 +5143,32 @@ msgstr "了解更多"
 msgid "plugins.catalog.release"
 msgstr "从发行版 %(tag)s 读取"
 
+msgid "plugins.catalog.remove"
+msgstr "移除"
+
 msgid "plugins.catalog.stale"
 msgstr "目录最近未能刷新,因此在恢复最新状态之前已禁用安装。"
+
+msgid "plugins.catalog.state_installed"
+msgstr "已安装（版本 %(version)s）"
+
+msgid "plugins.catalog.state_managed"
+msgstr "安装在目录之外；请在其安装来源处更新或移除"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "作为核心插件安装在目录之外；请在其安装来源处更新或移除"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "作为外部插件安装在目录之外；请在其安装来源处更新或移除"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "作为 PRO 插件安装在目录之外；请在其安装来源处更新或移除"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "作为 UI 插件安装在目录之外；请在其安装来源处更新或移除"
+
+msgid "plugins.catalog.state_update"
+msgstr "有可用更新：已安装版本 %(installed)s，目录中列出的版本为 %(version)s"
 
 msgid "plugins.catalog.tab"
 msgstr "可用"
@@ -3908,8 +5176,188 @@ msgstr "可用"
 msgid "plugins.catalog.trust_notice"
 msgstr "社区项目通过 TLS 从 BunkerWeb 组织在 GitHub 上发布的仓库中读取,安装的内容会与列出的内容进行核对——但这里的内容都没有经过加密签名。已安装的插件会以 BunkerWeb 的全部权限运行代码。"
 
+msgid "plugins.catalog.update"
+msgstr "更新"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "这将把已安装的插件 %(name)s（%(id)s，版本 %(installed)s）替换为目录中的版本 %(version)s。即使它是手动上传而非从目录安装的，也会被替换。"
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "此更新不会移除任何设置。"
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "目前无法列出此更新将移除的设置，因此更新已被禁用，直到下一次目录刷新为止。"
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "版本 %(version)s 不再声明这些设置。它们将被删除，连同全局设置、服务和模板中为它们设置的每个值："
+
+msgid "plugins.catalog.update_title"
+msgstr "更新社区插件"
+
 msgid "plugins.catalog.version"
 msgstr "版本 %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "无法读取正在运行的 BunkerWeb 版本（%(current)s），因此无法检查此版本的兼容性"
+
+msgid "plugins.flash.already_at_version"
+msgstr "插件 %(plugin_id)s 已经是版本 %(version)s"
+
+msgid "plugins.flash.already_installed"
+msgstr "ID 为 %(plugin_id)s 的插件已安装"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "%(tag)s 归档文件已与目录所列内容不一致。未为 %(plugin_id)s 安装任何内容。"
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "自更新确认以来，%(plugin_id)s 的目录条目已发生变化；请重新查看该更新"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "%(plugin_id)s 的缓存目录条目早于更新；请等待下一次刷新"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s，请查看日志了解更多详情"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "社区目录已禁用"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "无法删除插件 %(plugin)s：%(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "无法在数据库中删除插件 %(plugin)s：%(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "无法下载 %(plugin_id)s：%(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "无法安装 %(plugin_id)s：%(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "无法安装 %(plugin_id)s：%(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "无法更新 %(plugin_id)s：%(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "无法更新 %(plugin_id)s：%(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "无法更新插件 %(plugin)s：%(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "无法更新插件 %(plugin)s：%(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "无法通过 API 更新 ui 插件：%(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "插件 %(plugin)s 已成功删除"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "plugin.json 文件缺少以下一个或多个键：%(value)s（%(value2)s）"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "%(file)s 中的 plugin.json 文件无效（%(msg)s：第 %(lineno)s 行第 %(colno)s 列（字符 %(pos)s））（%(value)s）"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "%(plugin_id)s 的安装未完成：%(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "插件 %(plugin_id)s 已成功安装"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "该文件不是有效的插件压缩包（.zip、.tar.gz 或 .tar.xz）。"
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "插件 ID 无效（长度必须在 4 到 64 个字符之间，仅限字母、数字、下划线和连字符）"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "%(temp_folder_name)s 的插件名称无效。（只能包含数字、字母、下划线和连字符，最少 4 个字符，最多 64 个字符）"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "插件 %(plugin_id)s 在目录之外管理，无法从目录更新"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "插件 %(plugin_id)s 是在目录之外管理的核心插件，无法从目录更新"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "插件 %(plugin_id)s 是在目录之外管理的外部插件，无法从目录更新"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "插件 %(plugin_id)s 是在目录之外管理的 PRO 插件，无法从目录更新"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "插件 %(plugin_id)s 是在目录之外管理的 UI 插件，无法从目录更新"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "/plugins 上缺少 csrf_token 参数。"
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "/plugins/catalog/install 上缺少 id 参数。"
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "/plugins/catalog/update 上缺少 id 或 version 参数。"
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "/plugins/enable 上缺少 plugin 或 enabled 参数。"
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "/plugins/delete 上缺少 plugins 参数。"
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "没有可上传的插件数据"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "插件 %(plugin_id)s 尚未安装；请改从目录安装它"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "%(file)s 不是有效的插件（缺少 plugin.json 文件）（%(value)s）"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "请上传新插件以重新加载插件"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "插件 %(plugin)s 已存在"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "插件 %(plugin)s 已成功禁用。"
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "插件 %(plugin)s 已成功启用。"
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "插件管理仅限管理员使用"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "名为 %(folder_name)s 的插件已存在"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "未找到 ID 为 %(plugin)s 的插件"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "插件上传错误（%(value)s）：%(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "插件已成功上传：%(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "插件已成功上传"
+
+msgid "plugins.flash.refused_download"
+msgstr "拒绝下载 %(plugin_id)s：%(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "已拒绝安装 %(plugin_id)s：%(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "已拒绝更新 %(plugin_id)s：%(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "%(plugin_id)s 的更新未完成：%(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "插件 %(plugin_id)s 已更新到版本 %(version)s"
 
 msgid "plugins.marketplace.active"
 msgstr "已启用"
@@ -3983,6 +5431,36 @@ msgstr "Pro 到期日期"
 msgid "pro.expiration_date.unknown"
 msgstr "未知的到期日期"
 
+msgid "pro.flash.checking_license_key"
+msgstr "正在检查许可证密钥。"
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "已安排对 PRO 插件的强制更新。"
+
+msgid "pro.flash.invalid_license_key"
+msgstr "许可证密钥无效"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "PRO 许可证密钥未更新：该值被拒绝。"
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "许可证密钥与当前密钥相同。"
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "PRO 许可证密钥已成功更新。"
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "/pro/key 上缺少 license key 参数。"
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "已安排对 PRO 插件的新检查。"
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "调度器将尝试应用更改并下载 PRO 插件。"
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "Web UI 将很快重新加载其 PRO 插件。"
+
 msgid "pro.force_check.description"
 msgstr "强制重新检查 PRO 插件。如果有新版本，将重新下载插件。"
 
@@ -4019,8 +5497,17 @@ msgstr "已过期"
 msgid "pro.status.free_version"
 msgstr "免费版本"
 
+msgid "pro.status.invalid"
+msgstr "无效密钥"
+
+msgid "pro.status.invalid_key"
+msgstr "许可证服务器拒绝了已存储的许可证密钥。请检查它，或在全局设置 ← Pro 中将其移除。"
+
 msgid "pro.status.overlapped"
 msgstr "已超额"
+
+msgid "pro.status.pending_key"
+msgstr "许可证密钥尚未被检查。调度器会在其保存后不久检查它。"
 
 msgid "pro.status.pro_version"
 msgstr "PRO 版本"
@@ -4036,6 +5523,15 @@ msgstr "状态"
 
 msgid "pro.title"
 msgstr "Pro 许可证"
+
+msgid "pro.trial.cta"
+msgstr "开始免费试用"
+
+msgid "pro.trial.description"
+msgstr "免费试用 <span class=\"text-primary\">BunkerWeb PRO</span> <strong>30 天</strong>。"
+
+msgid "pro.trial.title"
+msgstr "免费试用"
 
 msgid "profile.2fa.disable_title"
 msgstr "禁用 2FA"
@@ -4078,6 +5574,132 @@ msgstr "刷新恢复代码"
 
 msgid "profile.card.title.sessions"
 msgstr "会话"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "无法删除通行密钥：%(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "无法禁用双重验证：%(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "无法启用双重验证：%(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "无法刷新恢复代码：%(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "无法重命名通行密钥：%(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "无法撤销其他会话：%(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "无法更新%(value)s用户：%(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "无法清除其他会话：%(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "当前密码不正确。"
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "电子邮件过长。必须少于 256 个字符。"
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "/profile/edit 上缺少 current password 参数。"
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "/profile/totp-refresh 上缺少 current password 参数。"
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "/profile/totp-disable 上缺少 current password 参数。"
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "/profile/totp-enable 上缺少 current password 参数。"
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "/profile/wipe-other-sessions 上缺少 current password 参数。"
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "/profile/edit 上缺少 email 参数。"
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "/profile/edit 上缺少 new password confirm 参数。"
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "/profile/webauthn/delete 上缺少参数。"
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "/profile/webauthn/rename 上缺少参数。"
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "/profile/totp-enable 上缺少 totp token 参数。"
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "新密码强度不够。密码必须至少包含 8 个字符，其中至少包含 1 个大写字母、1 个小写字母、1 个数字和 1 个特殊字符（#@?!$%^&*-）。"
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "新密码与当前密码相同。"
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "新密码过长。不得超过 %(MAX_PASSWORD_BYTES)s 字节（bcrypt 的硬性限制）；带重音符号或表情符号的字符每个都会计为多个字节。"
+
+msgid "profile.flash.no_fields_updated"
+msgstr "没有字段被更新。"
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "其他会话已成功清除。"
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "通行密钥已成功删除。"
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "通行密钥已成功注册。"
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "通行密钥已成功重命名。"
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "通行密钥名称不能为空。"
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "您的密码已更改，但无法撤销您的其他会话。请使用下方的“注销其他会话”并检查活动会话列表。"
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "密码与确认密码不匹配。"
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "个人资料已成功更新。"
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "恢复代码已成功刷新。旧的代码不再有效。"
+
+msgid "profile.flash.theme_invalid"
+msgstr "主题无效。"
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "totp 令牌无效。"
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "双重验证已启用。"
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "双重验证已成功禁用。"
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "双重验证已成功启用。"
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "双重验证未启用。"
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "双重验证注册已过期。请重新加载页面并扫描新的二维码。"
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "用户名和电子邮件与当前的相同。"
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "用户名过长。必须少于 256 个字符。"
 
 msgid "profile.help.photo_extensions"
 msgstr "允许的格式：JPG、GIF 或 PNG。最大大小：800KB。"
@@ -4163,6 +5785,39 @@ msgstr "时间范围"
 msgid "range_picker.custom"
 msgstr "自定义"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "设置 %(setting)s 无法设为草稿。"
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "草稿设置 %(setting)s 未被提交。"
+
+msgid "raw_drafts.draft_not_present"
+msgstr "草稿设置 %(setting)s 不在 RAW 编辑器中。"
+
+msgid "raw_drafts.edits_discarded"
+msgstr "草稿设置保持不变；请在 Raw 模式下激活或编辑它们。"
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "全局设置 %(setting)s 无法设为服务草稿。"
+
+msgid "raw_drafts.locked_by_method"
+msgstr "设置 %(setting)s 无法更改草稿状态，因为它由 %(method)s 方法管理。"
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "设置草稿元数据仅在 raw 模式下被接受。"
+
+msgid "raw_drafts.missing_metadata"
+msgstr "缺少 %(field)s 元数据。"
+
+msgid "raw_drafts.present_not_posted"
+msgstr "现有设置 %(setting)s 未被提交。"
+
+msgid "raw_drafts.present_not_valid"
+msgstr "现有设置 %(setting)s 无效。"
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "设置 %(setting)s 无效。"
+
 msgid "redirects.all"
 msgstr "全部"
 
@@ -4216,6 +5871,69 @@ msgstr "重定向是一种名称规则，您将其附加到一个或多个服务
 
 msgid "redirects.empty_title"
 msgstr "还没有重定向"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "来源路径无效：不能包含空格、分号或花括号。"
+
+msgid "redirects.err.invalid_to_url"
+msgstr "目标必须是完整的 http:// 或 https:// URL。"
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "至少需要一个服务"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "无法附加重定向：%(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "无法创建重定向：%(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "无法删除重定向：%(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "无法取消附加重定向：%(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "无法获取重定向：%(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "无法获取用于重定向分配的服务：%(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "无法更新重定向：%(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "重定向名称为必填项"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "重定向已关联。服务数：%(len)s"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "重定向 %(value)s 已成功创建"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "重定向已成功删除"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "重定向已成功取消附加"
+
+msgid "redirects.flash.redirect_required"
+msgstr "重定向为必填项"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "重定向和服务均为必填项"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "重定向已成功更新"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "状态码必须是 %(value)s 之一"
+
+msgid "redirects.flash.target_required"
+msgstr "重定向目标为必填项"
+
+msgid "redirects.flash.too_many_services"
+msgstr "重定向不能附加到超过 %(value)s 个服务"
 
 msgid "redirects.from_path"
 msgstr "从"
@@ -4302,16 +6020,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "拦截请求趋势"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "AppSec 检查"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "AppSec 故障策略"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "本地 API 决策"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "技术详情"
 
 msgid "reports.security_incident"
 msgstr "安全事件"
@@ -4472,6 +6190,63 @@ msgstr "条目"
 msgid "resource_groups.expand_all"
 msgstr "展开所有"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "别名必须包含 1 到 64 个字母、数字、下划线或短划线"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "此别名已被 BunkerWeb 保留"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "无法克隆资源组：%(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "无法删除资源组：%(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "无法导出资源组：%(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "无法保存资源组：%(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "资源条目必须是一个列表"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "资源条目不是有效的 JSON"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "条目 %(index)s 的备注过长"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "条目 %(index)s 无效"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "条目 %(index)s 的类型无效"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "条目 %(index)s 的值无效"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "资源组已克隆为 @%(alias)s"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "资源组 @%(alias)s 已成功创建"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "资源组已成功删除"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "资源组为必填项"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "资源组已成功更新"
+
+msgid "resource_groups.flash.source_required"
+msgstr "源资源组为必填项"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "资源组包含的条目不能超过 %(value)s 个"
+
 msgid "resource_groups.global_configuration"
 msgstr "全局配置"
 
@@ -4487,6 +6262,24 @@ msgstr "TXT/CSV 导入限制为 256 KiB。"
 msgid "resource_groups.kind"
 msgstr "类型"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "国家/地区"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "反向 DNS"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "User-Agent"
+
 msgid "resource_groups.kinds"
 msgstr "类型"
 
@@ -4496,8 +6289,20 @@ msgstr "正在加载引用..."
 msgid "resource_groups.max_entries"
 msgstr "一个资源组不能包含超过 %(max)s 条条目。"
 
-msgid "resource_groups.meta_line"
-msgstr "%(kinds)s 种类型 · %(values)s 个值 · %(usages)s 次使用"
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s 种类型"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s 次使用"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s 个值"
 
 msgid "resource_groups.new"
 msgstr "新建组"
@@ -4516,6 +6321,11 @@ msgstr "没有引用"
 
 msgid "resource_groups.readonly"
 msgstr "数据库只读。 可以查看和导出资源组，但不能修改。"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s 个引用"
 
 msgid "resource_groups.references_error"
 msgstr "无法加载引用"
@@ -4679,6 +6489,9 @@ msgstr "需要重新加载"
 msgid "searchpane.scope"
 msgstr "范围"
 
+msgid "searchpane.search_title"
+msgstr "搜索：{name}"
+
 msgid "searchpane.security_mode"
 msgstr "安全模式"
 
@@ -4769,14 +6582,35 @@ msgstr "服务模式"
 msgid "service.resources.attach"
 msgstr "附加"
 
+msgid "service.resources.confirm_detach"
+msgstr "是否将此资源从 %(service)s 分离？"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "是否将此证书从 %(service)s 分离？"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "是否将此重定向从 %(service)s 分离？"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "是否将此模板从 %(service)s 分离？"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "是否将此上游从 %(service)s 分离？"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "是否将此工作流程从 %(service)s 分离？"
+
 msgid "service.resources.conflict.inline"
 msgstr "%(service)s 已经通过自己的 %(family)s 设置为 %(path)s 提供服务。清除 %(path)s 的设置，或使用不同的路径。"
 
 msgid "service.resources.conflict.primary"
 msgstr "“%(name)s” 目前是此服务的首选证书，并且将不再使用，无需进一步警告。首选证书是指实际部署的证书。"
 
-msgid "service.resources.conflict.resource"
-msgstr "%(service)s 已经通过 %(kind)s 的“%(name)s”为 %(path)s 提供服务。分离“%(name)s”，或为它们指定不同的路径。"
+msgid "service.resources.conflict.resource_redirect"
+msgstr "%(service)s 已经通过重定向“%(name)s”为 %(path)s 提供服务。分离“%(name)s”，或为其中一个指定不同的路径。"
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "%(service)s 已经通过上游“%(name)s”为 %(path)s 提供服务。分离“%(name)s”，或为其中一个指定不同的路径。"
 
 msgid "service.resources.conflict.stream"
 msgstr "流式服务代理所有连接到一个后端，而 %(service)s 已经使用了上游“%(name)s”。首先分离它。"
@@ -4867,6 +6701,222 @@ msgstr "不可用"
 
 msgid "services.draft"
 msgstr "草稿服务"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "所有选定的服务均无法找到、不是 UI/API 服务，或已被转换。"
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "所有选定的服务均无法找到，或不是 UI/API 服务。"
+
+msgid "services.flash.configuration_created"
+msgstr "已创建服务 %(service)s 的配置。"
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "已创建服务 %(service)s 的配置，但有 %(refused_count)s 个值被拒绝。"
+
+msgid "services.flash.configuration_saved"
+msgstr "已保存服务 %(service)s 的配置。"
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "已保存服务 %(service)s 的配置，但有 %(refused_count)s 个值被拒绝。"
+
+msgid "services.flash.converted_services_draft"
+msgstr "已转换为“草稿”服务：%(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "已转换为“在线”服务：%(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "无法获取此服务已附加的证书。"
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "无法获取此服务已附加的重定向。"
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "无法获取此服务已附加的上游。"
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "无法获取此服务已附加的工作流程。"
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "无法从 API 获取自定义配置。"
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "无法从 API 获取自定义配置。"
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "无法从 API 获取服务。"
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "无法从 API 获取服务 %(service)s。"
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "无法获取用于克隆的服务 %(clone)s。"
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "无法从 API 获取服务。"
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "无法获取服务配置。"
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "无法从 API 获取模板。"
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "由于重命名被拒绝，自定义配置未保存。"
+
+msgid "services.flash.default_server_reserved"
+msgstr "%(default_server_id)s 是保留的默认服务器：它响应与任何已配置服务都不匹配的请求（未知主机名、直接 IP 访问），因此无法创建、重命名或删除。"
+
+msgid "services.flash.default_server_type_refused"
+msgstr "无法在保留服务 %(default_server_id)s 上设置 SERVER_TYPE：它没有自己的服务器块可供切换。它的 HTTP 部分就是默认服务器块本身，它的 stream 部分则是 DEFAULT_SERVER_STREAM_PORTS 设置。"
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "您没有更改服务模式的权限"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "删除草稿 autoconf 服务 %(service_id)s 失败：%(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "导入服务失败：%(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "导入服务失败：%(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "已导入服务：%(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "已导入服务：%(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "归档文件内 configs_export.json 的编码无效。"
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "归档文件内 services_export.env 的编码无效。"
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "文件编码无效。请上传 UTF-8 编码的文件。"
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "mode 参数无效。"
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "/services/convert 上缺少 convert_to 参数。"
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "/services/%(service)s/mode 上缺少 mode 参数。"
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "/services/convert 上缺少 services 参数。"
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "/services/delete 上缺少 services 参数。"
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "导入文件中未找到任何服务或自定义配置。"
+
+msgid "services.flash.no_services_export"
+msgstr "没有可导出的服务。"
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "未上传服务文件。"
+
+msgid "services.flash.no_services_selected"
+msgstr "未选择任何服务。"
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "此插件不适用于默认服务器"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "拒绝解压归档文件：解压后大小超过安全限制。"
+
+msgid "services.flash.resource_attach_failed"
+msgstr "无法附加：%(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "无法附加：%(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "资源已附加到 %(service)s。"
+
+msgid "services.flash.resource_detach_failed"
+msgstr "无法取消附加：%(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "无法取消附加：%(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "资源已从 %(service)s 取消附加。"
+
+msgid "services.flash.resource_unknown_family"
+msgstr "未知的资源类型。"
+
+msgid "services.flash.server_name_missing"
+msgstr "由于未提供服务器名称，服务未创建。"
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "服务 %(non_convertible_service)s 已是草稿服务，不会被转换。"
+
+msgid "services.flash.service_already_exists"
+msgstr "服务 %(service)s 已存在。"
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "服务 %(non_convertible_service)s 已是在线服务，不会被转换。"
+
+msgid "services.flash.service_deleted"
+msgstr "已删除服务：%(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "服务 %(service)s 未被编辑，因为没有更改任何值。"
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "服务 %(service)s 未被编辑，因为没有更改任何值或自定义配置。"
+
+msgid "services.flash.service_not_found"
+msgstr "未找到服务"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "服务 %(service)s 未保存：每个更改的值均被拒绝。"
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "服务 %(non_editable_service)s 不是 UI/API 服务，将不会被转换。"
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "服务 %(service)s 现已声明为“仅重定向”。"
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "服务 %(service)s 现已声明为“标准”。"
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "服务 %(non_deletable_service)s 不是 UI/API 服务，不会被删除。"
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "服务 %(non_deletable_service)s 是在线 autoconf 服务（请先将其转换为草稿），不会被删除。"
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "服务 %(non_deletable_service)s 是保留的默认服务器，用于响应不匹配任何服务的请求，不会被删除。"
+
+msgid "services.flash.services_deleted"
+msgstr "已删除服务：%(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "已跳过现有服务：%(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "已跳过现有服务：%(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "模板自定义配置 %(key)s 无法编辑，因为它是通过 %(value)s 方法创建的。"
+
+msgid "services.flash.template_not_found"
+msgstr "未找到模板"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "上传的归档文件必须包含 services_export.env 和/或 configs_export.json。"
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "上传的文件不是有效的 zip 归档文件。"
 
 msgid "services.online"
 msgstr "在线"
@@ -5285,6 +7335,45 @@ msgstr "已从 %(name)s 加载 · 字符数：%(count)s"
 msgid "setup.file.read_error"
 msgstr "读取文件时出错"
 
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "管理员电子邮件过长。必须少于 256 个字符。"
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "管理员密码强度不够。密码必须至少包含 8 个字符，其中至少包含 1 个大写字母、1 个小写字母、1 个数字和 1 个特殊字符（#@?!$%^&*-）。"
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "管理员密码过长。不得超过 %(MAX_PASSWORD_BYTES)s 字节（bcrypt 的硬性限制）；带重音符号或表情符号的字符每个都会计为多个字节。"
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "管理员用户已成功创建"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "管理员用户名过长。必须少于 256 个字符。"
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "无法创建管理员用户：%(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "无法创建新服务：%(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "无法编辑新服务：%(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "主机名 %(value)s 已被使用。"
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "主机名无效。"
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "缺少以下参数中的任意一个：%(value)s。"
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "密码不匹配。"
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "使用自定义 SSL 证书时，必须同时设置证书和密钥。"
+
 msgid "setup.status.admin_user_exists"
 msgstr "管理员用户已存在。请继续下一步。"
 
@@ -5441,6 +7530,12 @@ msgstr "即将到期"
 msgid "status.failed"
 msgstr "失败"
 
+msgid "status.failover"
+msgstr "故障转移"
+
+msgid "status.inactive"
+msgstr "未激活"
+
 msgid "status.invalid_json_payload"
 msgstr "无效的 JSON 负载。"
 
@@ -5578,6 +7673,9 @@ msgstr "未知"
 
 msgid "status.up"
 msgstr "运行中"
+
+msgid "status.uploaded"
+msgstr "已上传"
 
 msgid "status.yes"
 msgstr "是"
@@ -5828,6 +7926,9 @@ msgstr "创建模板"
 msgid "template.editor.heading_edit"
 msgstr "编辑模板 %(id)s"
 
+msgid "template.editor.heading_view"
+msgstr "查看模板 %(id)s"
+
 msgid "template.editor.label_config_data"
 msgstr "数据"
 
@@ -5913,7 +8014,10 @@ msgid "template.editor.multivalue_add"
 msgstr "添加值"
 
 msgid "template.editor.multivalue_helper"
-msgstr "每行一个值。%(separatorNote)s"
+msgstr "每行一个值。"
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "每行一个值。将以“%(separator)s”连接。"
 
 msgid "template.editor.panel_overview"
 msgstr "概览"
@@ -6076,6 +8180,9 @@ msgstr "数据库当前为只读。无法更改模板。"
 
 msgid "template.editor.readonly_method"
 msgstr "此模板由 %(method)s 流程创建，无法从 UI 编辑。"
+
+msgid "template.editor.readonly_method_plugin"
+msgstr "此模板由 %(plugin)s 插件创建，无法从 UI 中编辑。"
 
 msgid "template.editor.readonly_title"
 msgstr "只读"
@@ -6251,6 +8358,9 @@ msgstr "定义配置时必须指定类型。"
 msgid "template.editor.validation_configs_unique"
 msgstr "每个配置名称必须唯一。"
 
+msgid "template.editor.validation_id_invalid"
+msgstr "模板 ID 只能包含字母、数字、点、连字符和下划线，且必须以字母或数字开头。"
+
 msgid "template.editor.validation_id_required"
 msgstr "模板 ID 为必填项。"
 
@@ -6263,6 +8373,36 @@ msgstr "每个设置键必须唯一。"
 msgid "template.none"
 msgstr "无模板"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "已添加自定义配置"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "自定义配置已更改"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "已移除自定义配置"
+
+msgid "templates.catalog.diff.name"
+msgstr "名称：%(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "已添加设置"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "设置已更改"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "已移除设置"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "已添加步骤"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "步骤已更改"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "已移除步骤"
+
 msgid "templates.catalog.heading"
 msgstr "可用模板"
 
@@ -6272,8 +8412,89 @@ msgstr "模板是一种图层:将模板添加到已使用模板的服务会更�
 msgid "templates.catalog.no_compat_notice"
 msgstr "此目录未声明与 BunkerWeb 兼容。如果模板指定了此 BunkerWeb 不具备的设置,安装时将被拒绝。"
 
+msgid "templates.catalog.state_installed"
+msgstr "已安装，与目录一致"
+
+msgid "templates.catalog.state_managed"
+msgstr "已安装并由 %(owner)s 管理：目录不会更改它"
+
+msgid "templates.catalog.state_update"
+msgstr "已安装，目录版本不同"
+
 msgid "templates.catalog.subheading"
 msgstr "由 BunkerWeb 组织发布的精选服务模板。"
+
+msgid "templates.catalog.update_changed"
+msgstr "自预览以来，模板 %(template)s 或目录已发生更改。请重新加载页面并再次查看更改。"
+
+msgid "templates.catalog.update_confirm"
+msgstr "将模板 %(id)s 替换为目录发行版 %(tag)s 中的版本。以下更改将应用于该模板："
+
+msgid "templates.catalog.update_failed"
+msgstr "无法更新模板。"
+
+msgid "templates.catalog.update_managed"
+msgstr "模板 %(template)s 由 %(owner)s 管理：目录不会更改它"
+
+msgid "templates.catalog.update_no_services"
+msgstr "目前还没有服务在使用此模板。"
+
+msgid "templates.catalog.update_not_installed"
+msgstr "模板 %(template)s 尚未安装：请改为安装它"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "更改可在下一次目录刷新后查看。"
+
+msgid "templates.catalog.update_services"
+msgstr "以下服务使用此模板。在它们下一次配置生成时，凡是它们自己未设置的每一项设置都将采用新值："
+
+msgid "templates.catalog.update_title"
+msgstr "更新社区模板"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "模板 %(template)s 已与目录一致"
+
+msgid "templates.flash.catalog_updated"
+msgstr "模板 %(template)s 已从目录更新。"
+
+msgid "templates.flash.error_deleting_template"
+msgstr "删除模板 %(template_id)s 时出错：%(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "无法导出模板 %(template)s：%(error)s"
+
+msgid "templates.flash.imported"
+msgstr "模板 %(template)s 已导入。"
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "未选择要删除的模板。"
+
+msgid "templates.flash.replaced"
+msgstr "模板 %(template)s 已替换。"
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "已删除模板：%(success_count)s。"
+
+msgid "templates.flash.template_created_successfully"
+msgstr "模板 %(template_id)s 已成功创建。"
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "模板 %(template_id)s 已成功删除。"
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "模板 %(template_id)s 已从目录安装。"
+
+msgid "templates.flash.template_not_found"
+msgstr "未找到模板 %(clone_id)s。"
+
+msgid "templates.flash.template_not_found_2"
+msgstr "未找到模板。"
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "模板 %(template_id)s 已成功更新。"
+
+msgid "templates.flash.user_is_read_only"
+msgstr "用户为只读"
 
 msgid "templates.gallery.delete_selected"
 msgstr "删除所选项"
@@ -6289,6 +8510,24 @@ msgstr "选择"
 
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
+
+msgid "templates.import.admin_only"
+msgstr "导入模板仅限管理员操作"
+
+msgid "templates.import.failed"
+msgstr "无法导入模板。"
+
+msgid "templates.import.no_file"
+msgstr "请选择要导入的文件。"
+
+msgid "templates.import.refused"
+msgstr "模板未导入：%(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "未导入模板：文件大于 1 MiB"
+
+msgid "templates.import.unreadable"
+msgstr "未导入模板：无法读取该文件"
 
 msgid "templates.name.api"
 msgstr "API"
@@ -6425,6 +8664,9 @@ msgstr "将 METRICS_COLLECT_TIMINGS 设为 yes 以测量每个插件所需的时
 msgid "timings.disabled_title"
 msgstr "插件计时已关闭"
 
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "获取插件耗时时出错：%(message)s"
+
 msgid "timings.max"
 msgstr "最大"
 
@@ -6527,11 +8769,23 @@ msgstr "是否自动请求 Let's Encrypt 证书。"
 msgid "tooltip.badge.redirect_candidate"
 msgstr "该服务除重定向外别无其他，因此可声明为「仅重定向」——一旦该计费上线，它将不再计入 PRO 服务数量。"
 
+msgid "tooltip.button.attach_redirect"
+msgstr "将 %(name)s 附加到服务"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "将 %(name)s 附加到服务"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "将 %(name)s 附加到服务"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "返回文件上传"
 
 msgid "tooltip.button.ban_ip"
 msgstr "封禁此 IP 地址"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "克隆 %(name)s"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "将配置 %(name)s 转为草稿"
@@ -6545,6 +8799,9 @@ msgstr "将服务 %(name)s 转换为草稿"
 msgid "tooltip.button.convert_service_to_online"
 msgstr "将服务 %(name)s 转换为在线"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "删除证书"
+
 msgid "tooltip.button.delete_config"
 msgstr "删除自定义配置 %(name)s"
 
@@ -6557,11 +8814,32 @@ msgstr "删除实例 %(hostname)s"
 msgid "tooltip.button.delete_plugin"
 msgstr "删除插件 %(name)s"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "删除 %(name)s"
+
 msgid "tooltip.button.delete_service"
 msgstr "删除服务 %(name)s"
 
 msgid "tooltip.button.delete_template"
 msgstr "删除模板 %(name)s"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "删除 %(name)s"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "删除 %(name)s"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "编辑 %(name)s"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "编辑 %(name)s"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "编辑 %(name)s 的名称和描述"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "编辑 %(name)s 的规则"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "为 %(hostname)s 签发注册码"
@@ -6668,6 +8946,9 @@ msgstr "确认密码必须与上面输入的密码匹配。"
 msgid "tooltip.copied"
 msgstr "已复制！"
 
+msgid "tooltip.copy_failed"
+msgstr "复制失败"
+
 msgid "tooltip.copy_https_only"
 msgstr "复制功能仅在 HTTPS 下可用。"
 
@@ -6688,6 +8969,9 @@ msgstr "值与模板默认值不同"
 
 msgid "tooltip.disabled_by_method"
 msgstr "已禁用：通过方法 '%(method)s' 管理。"
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "已禁用：由 %(plugin)s 插件管理。"
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "已禁用：数据库处于只读模式。"
@@ -6808,6 +9092,9 @@ msgstr "导出自定义配置 %(name)s"
 
 msgid "tooltip.link.export_service"
 msgstr "导出服务 %(service)s 配置"
+
+msgid "tooltip.link.export_template"
+msgstr "导出模板 %(template)s"
 
 msgid "tooltip.link.manage_activation"
 msgstr "在全局设置中管理 %(name)s 的激活"
@@ -7280,6 +9567,21 @@ msgstr "ZeroSSL API 重试之间的延迟秒数。"
 msgid "totp.cant_access"
 msgstr "无法访问您的身份验证器？"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "数据库为只读，您使用的恢复代码仍然有效。"
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "使用恢复代码时发生错误。"
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "/totp 上未提供令牌。"
+
+msgid "totp.flash.token_invalid"
+msgstr "令牌无效。"
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "您已使用了一个恢复代码。您还剩 %(len)s 个。"
+
 msgid "totp.or_use_security_key"
 msgstr "或使用您的安全密钥"
 
@@ -7345,6 +9647,78 @@ msgstr "上游是一个名称的后端池，您将其连接到一个或多个服
 
 msgid "upstreams.empty_title"
 msgstr "尚无上游"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "至少需要一台服务器"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "至少需要一个服务"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "无法附加上游：%(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "无法创建上游：%(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "无法删除上游：%(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "无法取消附加上游：%(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "无法获取用于上游分配的服务：%(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "无法获取上游：%(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "无法更新上游：%(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "keepalive 数量必须是正整数"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "反向代理路径必须以 / 开头"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "方法必须是 %(value)s 之一"
+
+msgid "upstreams.flash.name_required"
+msgstr "上游名称为必填项"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "协议必须是 %(value)s 之一"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "上游包含的服务器不能超过 %(value)s 台"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "上游不能附加到超过 %(value)s 个服务"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "上游已关联。服务数：%(len)s"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "上游 %(value)s 已成功创建"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "上游已成功删除"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "上游已成功取消附加"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "上游为必填项"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "上游和服务均为必填项"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "上游已成功更新"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "%(host)s 的权重和最大失败次数必须是整数"
 
 msgid "upstreams.keepalive"
 msgstr "保持连接"
@@ -7429,6 +9803,15 @@ msgstr "已隐藏 %(count)s 个服务：%(protocol)s 上游只能关联协议匹
 
 msgid "upstreams.truncated"
 msgstr "仅显示前 500 个上游。通过 API 缩小列表以获得完整结果。"
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "无法连接到 redis"
+
+msgid "utils.flash.invalid_request"
+msgstr "无效请求"
+
+msgid "utils.flash.missing_form"
+msgstr "表单中缺少 %(key)s"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "请输入当前密码以添加通行密钥。"
@@ -7525,6 +9908,27 @@ msgstr "启用服务"
 
 msgid "web_cache.error"
 msgstr "错误"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "获取网页缓存指标时出错：%(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "获取网页缓存状态时出错：%(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "清除网页缓存时出错：%(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "已清除网页缓存（所有条目）"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "已清除 %(url)s 的网页缓存"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "按 URL 清除需要提供 URL"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "Web 缓存已清除。已清除实例：%(value)s，失败：%(value2)s，无法访问并已跳过：%(value3)s（未加入任何队列）。"
 
 msgid "web_cache.hit_rate"
 msgstr "命中率"
@@ -7661,6 +10065,9 @@ msgstr "规则 %(n)s / %(total)s，更改位置"
 msgid "workflows.aria.collapse"
 msgstr "折叠"
 
+msgid "workflows.aria.collapseRule"
+msgstr "折叠规则 %(n)s"
+
 msgid "workflows.aria.combinator"
 msgstr "更改组合方式，当前为"
 
@@ -7679,6 +10086,9 @@ msgstr "拖动以重新排序"
 msgid "workflows.aria.expand"
 msgstr "展开"
 
+msgid "workflows.aria.expandRule"
+msgstr "展开规则 %(n)s"
+
 msgid "workflows.aria.groupKind"
 msgstr "组类型"
 
@@ -7688,11 +10098,20 @@ msgstr "在 %(n)s 位置插入规则"
 msgid "workflows.aria.more"
 msgstr "更多"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "规则 %(n)s 的更多操作"
+
 msgid "workflows.aria.moveDown"
 msgstr "下移，稍后运行"
 
 msgid "workflows.aria.moveRule"
 msgstr "移动规则"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "将规则 %(n)s 下移"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "将规则 %(n)s 上移"
 
 msgid "workflows.aria.moveUp"
 msgstr "上移，提前运行"
@@ -7729,6 +10148,9 @@ msgstr "请求数"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "资源组"
+
+msgid "workflows.aria.ruleCard"
+msgstr "规则 %(n)s/%(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "此规则中有 %(count)s 个验证问题"
@@ -7892,6 +10314,9 @@ msgstr "工作流按关联顺序运行；其中的规则从上到下运行。"
 msgid "workflows.entry_title"
 msgstr "对已关联服务的每个请求"
 
+msgid "workflows.err.load"
+msgstr "无法读取已保存的规则。为避免覆盖它们，保存功能已禁用；请重新加载页面。"
+
 msgid "workflows.err.save"
 msgstr "无法保存"
 
@@ -7924,6 +10349,69 @@ msgstr "请求将继续进入下一个已关联工作流，然后进入安全栈
 
 msgid "workflows.exit_title"
 msgstr "没有规则匹配"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "无法附加工作流：%(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "无法克隆工作流：%(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "无法创建工作流：%(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "无法删除工作流：%(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "无法取消附加工作流：%(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "无法获取用于工作流分配的服务：%(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "无法获取工作流：%(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "无法获取工作流：%(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "无法更新工作流：%(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "工作流名称为必填项"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "无法读取服务列表；请重新打开页面并重试"
+
+msgid "workflows.flash.too_many_services"
+msgstr "工作流不能附加到超过 %(value)s 个服务"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "工作流已克隆为 %(name)s"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "工作流 %(value)s 已成功创建"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "工作流已成功删除"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "工作流已成功取消附加"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "工作流和新名称均为必填项"
+
+msgid "workflows.flash.workflow_required"
+msgstr "工作流为必填项"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "工作流和服务均为必填项"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "工作流服务已更新（已附加 %(len)s 个）"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "工作流已成功更新"
 
 msgid "workflows.gate.and"
 msgstr "并且仅当同一客户端 IP 的请求数超过"
@@ -8033,8 +10521,14 @@ msgstr "，评估在此停止，不会到达下方的规则。"
 msgid "workflows.rules"
 msgstr "规则"
 
-msgid "workflows.say.actionChanged"
-msgstr "操作已更改为 %(type)s。它仍是唯一操作，并仍会停止评估。"
+msgid "workflows.say.actionChangedBlock"
+msgstr "操作已更改为阻止。它仍然是唯一的操作，并且仍会停止评估。"
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "操作已更改为质询。它仍然是唯一的操作，并且仍会停止评估。"
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "操作已更改为重定向。它仍然是唯一的操作，并且仍会停止评估。"
 
 msgid "workflows.say.added"
 msgstr "规则已添加到第 %(n)s 位，即最后一位，因此会先检查其上方的所有规则。"
@@ -8061,13 +10555,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "最后一个值已删除；此条件必须包含一个值才能保存。"
 
 msgid "workflows.say.moved"
-msgstr "%(name)s 已移至第 %(to)s 位，共 %(total)s 位%(how)s。现在它在%(where)s运行。"
+msgstr "%(name)s 已移至第 %(to)s 位，共 %(total)s 位。"
+
+msgid "workflows.say.movedDrag"
+msgstr "%(name)s 已拖动至第 %(to)s 位，共 %(total)s 位。"
+
+msgid "workflows.say.movedKeyboard"
+msgstr "%(name)s 已通过键盘移至第 %(to)s 位，共 %(total)s 位。"
 
 msgid "workflows.say.predicateCap"
 msgstr "此规则已有 %(max)s 个条件，已达到上限。"
-
-msgid "workflows.say.ruleAbove"
-msgstr "上方规则"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "%(name)s 已禁用，将被完全跳过，下方规则现在会处理这些请求。"
@@ -8076,13 +10573,16 @@ msgid "workflows.say.ruleEnabled"
 msgstr "%(name)s 已启用，将再次在第 %(n)s 位接受评估。"
 
 msgid "workflows.say.runsAfter"
-msgstr "%(name)s 之后"
+msgstr "它现在在 %(name)s 之后运行。"
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "它现在在上方规则之后运行。"
 
 msgid "workflows.say.runsFirst"
-msgstr "最先"
+msgstr "它现在最先运行。"
 
 msgid "workflows.say.runsLast"
-msgstr "最后"
+msgstr "它现在最后运行。"
 
 msgid "workflows.say.saved"
 msgstr "规则已保存并推送到已关联服务。"
@@ -8091,13 +10591,7 @@ msgid "workflows.say.theRule"
 msgstr "该规则"
 
 msgid "workflows.say.valuesDropped"
-msgstr "条件已更改为 %(type)s；原有的 %(count)s 个值无法保留。"
-
-msgid "workflows.say.via.drag"
-msgstr "通过拖动"
-
-msgid "workflows.say.via.keyboard"
-msgstr "通过键盘"
+msgstr "条件已更改。无法保留的值：%(count)s 个。"
 
 msgid "workflows.say.viewCanvas"
 msgstr "画布视图。规则从左到右运行；第一个匹配的规则生效。"
@@ -8217,7 +10711,16 @@ msgid "workflows.test.out_draft"
 msgstr "此服务是草稿，尚未为其编译工作流。"
 
 msgid "workflows.test.out_match"
-msgstr "%(workflow)s · %(rule)s 已匹配，并对请求执行了%(action)s。"
+msgstr "%(workflow)s · %(rule)s 已匹配。"
+
+msgid "workflows.test.out_match_block"
+msgstr "%(workflow)s · %(rule)s 已匹配并阻止了该请求。"
+
+msgid "workflows.test.out_match_challenge"
+msgstr "%(workflow)s · %(rule)s 已匹配并对该请求发起了质询。"
+
+msgid "workflows.test.out_match_redirect"
+msgstr "%(workflow)s · %(rule)s 已匹配并重定向了该请求。"
 
 msgid "workflows.test.out_no_match"
 msgstr "没有规则匹配。请求将继续进入安全栈的其余部分。"
@@ -8295,7 +10798,7 @@ msgid "workflows.tree.empty"
 msgstr "空组；请添加条件，当前状态无法保存。"
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "没有组包含 %(kind)s 个条目"
+msgstr "没有资源组包含此类条目。"
 
 msgid "workflows.tree.noneMeta"
 msgstr "这些条件均不为真时匹配"

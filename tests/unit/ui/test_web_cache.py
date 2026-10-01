@@ -175,13 +175,13 @@ def test_purge_rejects_readonly(route_app):
 def test_purge_rejects_blank_url(route_app, monkeypatch):
     module, client, app = route_app
     flash = Mock()
-    monkeypatch.setattr(module, "flask_flash", flash)
+    monkeypatch.setattr(module, "flash", flash)
 
     with app.test_request_context("/web-cache/purge", method="POST", data={"scope": "url", "url": "   "}):
         response = module.web_cache_purge.__wrapped__()
 
     assert response.status_code == 302
-    flash.assert_called_once_with("A URL is required to purge by URL", "error")
+    flash.assert_called_once_with("A URL is required to purge by URL", "error", save=False)
     client.purge_web_cache.assert_not_called()
 
 
@@ -198,7 +198,7 @@ def test_purge_rejects_blank_url(route_app, monkeypatch):
 )
 def test_purge_forwards_payload(route_app, monkeypatch, form, expected):
     module, client, app = route_app
-    monkeypatch.setattr(module, "flask_flash", Mock())
+    monkeypatch.setattr(module, "flash", Mock())
 
     with app.test_request_context("/web-cache/purge", method="POST", data=form):
         response = module.web_cache_purge.__wrapped__()
@@ -211,13 +211,13 @@ def test_purge_flashes_api_error(route_app, monkeypatch):
     module, client, app = route_app
     client.purge_web_cache.side_effect = module.ApiUnavailableError("offline")
     flash = Mock()
-    monkeypatch.setattr(module, "flask_flash", flash)
+    monkeypatch.setattr(module, "flash", flash)
 
     with app.test_request_context("/web-cache/purge", method="POST", data={"scope": "all"}):
         response = module.web_cache_purge.__wrapped__()
 
     assert response.status_code == 302
-    flash.assert_called_once_with("Error purging web cache: offline", "error")
+    flash.assert_called_once_with("Error purging web cache: offline", "error", save=False)
 
 
 def test_partial_purge_flashes_preserved_and_skipped_counts(route_app, monkeypatch):
@@ -227,16 +227,34 @@ def test_partial_purge_flashes_preserved_and_skipped_counts(route_app, monkeypat
         "summary": {"succeeded": 2, "failed": 1, "skipped": 1},
     }
     flash = Mock()
-    monkeypatch.setattr(module, "flask_flash", flash)
+    monkeypatch.setattr(module, "flash", flash)
 
     with app.test_request_context("/web-cache/purge", method="POST", data={"scope": "all"}):
         response = module.web_cache_purge.__wrapped__()
 
     assert response.status_code == 302
     flash.assert_called_once_with(
-        "Web cache purged on 2 instance(s); 1 failed and 1 unreachable instance(s) were skipped (nothing was queued).",
+        "Web cache purged. Instances purged: 2, failed: 1, unreachable and skipped: 1 (nothing was queued).",
         "warning",
+        save=False,
     )
+
+
+def test_purge_success_uses_the_flash_wrapper_not_a_raw_success_category(route_app, monkeypatch):
+    """M24: `flask_flash(msg, "success")` produced a raw `flash.success` toast header -- there is
+    no such catalog key (`flash.html` looks up `flash.<category>`, and the only categories it has
+    are error/warning/message/pro). `flash()` (app/utils.py) is the wrapper that omits the
+    category for a "success" flash so Flask defaults it to "message", which the catalog does have."""
+    module, client, app = route_app
+    client.purge_web_cache.return_value = {"status": "success"}
+    flash = Mock()
+    monkeypatch.setattr(module, "flash", flash)
+
+    with app.test_request_context("/web-cache/purge", method="POST", data={"scope": "all"}):
+        response = module.web_cache_purge.__wrapped__()
+
+    assert response.status_code == 302
+    flash.assert_called_once_with("Web cache purged (all entries)")
 
 
 # --------------------------------------------------------------------------------------

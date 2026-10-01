@@ -3,15 +3,15 @@
     "build_with": "Şununla Geliştirildi",
     "gnu_license": "GNU Affero Genel Kamu Lisansı v3.0",
     "license_title": "Lisans",
-    "socials": "Sosyal Medya",
-    "tagline": "Güçlü Koruma, Basitlik",
-    "title": "BunkerWeb hakkında",
     "social": {
       "discord": "Discord",
       "instagram": "Instagram",
       "linkedin": "LinkedIn",
       "reddit": "Reddit"
     },
+    "socials": "Sosyal Medya",
+    "tagline": "Güçlü Koruma, Basitlik",
+    "title": "BunkerWeb hakkında",
     "version": "Versiyon: {{version}}"
   },
   "accordion": {
@@ -24,6 +24,7 @@
   },
   "alert": {
     "configs_import_invalid_file": "Lütfen geçerli özel yapılandırma dışı dosyasını (.json) yükleyin.",
+    "custom_end_date_past": "Özel bitiş tarihi gelecekte olmalıdır.",
     "custom_end_date_required": "Lütfen özel bir bitiş tarihi seçin.",
     "important": "Önemli",
     "no_changes_detected": "Değişiklik tespit edilmedi.",
@@ -34,12 +35,13 @@
     "plugin_file_too_large": "Eklenti arşivi 50 MB sınırını aşıyor.",
     "plugin_upload_failed": "Eklenti arşivi yüklenirken bir hata oluştu. Tekrar deneyin.",
     "services_import_invalid_file": "Geçerli bir hizmet dışa aktarma dosyası (.env veya .zip) yükleyin.",
-    "credential_action_failed": "İşlem başarısız oldu.",
-    "enroll_failed": "Kayıt kodu verilemedi."
+    "enroll_failed": "Kayıt kodu verilemedi.",
+    "credential_action_failed": "İşlem başarısız oldu."
   },
   "aria": {
     "label": {
       "clear_search": "Aramayı temizle",
+      "clone_item": "{{name}} öğesini kopyala",
       "close": "Kapat",
       "collapse_multiline": "Çok satırlı girdileri daralt",
       "configs_dropzone": "Özel yapılandırma dışa aktarma dosyası seçin veya buraya bırakın",
@@ -51,6 +53,7 @@
       "level_filter": "Günlük satırlarını seviyeye göre filtrele",
       "local_time": "Zaman damgalarını yerel saatte göster",
       "next_issue": "Sonraki hata veya uyarı",
+      "open_user_menu": "Kullanıcı menüsünü aç",
       "passkey_name": "Parola anahtarı adı",
       "plugins_dropzone": "Eklenti arşivlerini seçin veya buraya bırakın",
       "prev_issue": "Önceki hata veya uyarı",
@@ -61,6 +64,10 @@
       "select_file": "Dosya seç",
       "select_page": "Sayfa seç",
       "services_dropzone": "Hizmet dışa aktarma dosyası seçin veya buraya bırakın",
+      "show_details": "{{name}} için ayrıntıları göster",
+      "toggle_item": "{{name}} öğesini aç/kapat",
+      "toggle_section": "{{name}} bölümünü aç/kapat",
+      "toggle_theme": "Koyu modu aç/kapat",
       "toggle_wrap": "Satır kaydırmayı değiştir",
       "user_avatar": "Kullanıcı avatarı",
       "view_selected_items": "Seçilen öğeleri görüntüle",
@@ -70,7 +77,12 @@
       "github_stars": "GitHub yıldızları: {{count}}",
       "github_watchers": "GitHub izleyenleri: {{count}}",
       "secret_value": "Gizli değer",
-      "value_hidden": "{{name}} (gizli)"
+      "value_hidden": "{{name}} (gizli)",
+      "certificate_public_details": "Sertifika genel bilgileri",
+      "certificate_inventory_assignments": "Sertifika envanteri atamaları",
+      "detach_from_service": "{{name}} öğesini {{service}} servisinden ayır",
+      "remove_this_server": "Bu sunucuyu kaldır",
+      "select_template": "{{name}} şablonunu seç"
     }
   },
   "badge": {
@@ -116,6 +128,7 @@
     "flash": {
       "ban_failed": "{{ip}} yasaklanamadı: {{error}}",
       "ban_success": "{{ip}} başarıyla yasaklandı.",
+      "custom_end_date_in_past": "{{ip}} için özel yasaklama bitiş tarihi gelecekte olmalıdır",
       "invalid_custom_duration": "{{ip}} için geçersiz özel yasak süresi",
       "invalid_custom_end_date": "{{ip}} için geçersiz özel yasak bitiş tarihi",
       "invalid_duration": "Geçersiz yasak süresi: {{duration}}",
@@ -126,7 +139,20 @@
       "unban_failed": "{{ip}} yasağı kaldırılamadı: {{error}}",
       "unban_success": "{{ip}} yasağı başarıyla kaldırıldı.",
       "update_duration_failed": "{{ip}} için yasak süresi güncellenemedi: {{error}}",
-      "update_duration_success": "{{ip}} için yasak süresi başarıyla güncellendi."
+      "update_duration_success": "{{ip}} için yasak süresi başarıyla güncellendi.",
+      "no_matching_bans": "Eşleşen yasaklama yok.",
+      "invalid_duration_selection_mode": "Geçersiz süre seçim modu.",
+      "invalid_updates_parameter_bans_update_duration": "/bans/update_duration üzerinde geçersiz updates parametresi.",
+      "no_updates": "Güncelleme yok.",
+      "invalid_filtered_duration_source": "Geçersiz filtrelenmiş süre kaynağı.",
+      "invalid_unban_selection_mode": "Geçersiz yasak kaldırma seçim modu.",
+      "invalid_ips_parameter_bans_unban": "/bans/unban üzerinde geçersiz ips parametresi.",
+      "no_bans": "Yasaklama yok.",
+      "invalid_filtered_unban_source": "Geçersiz filtrelenmiş yasak kaldırma kaynağı.",
+      "no_matching_reports": "Eşleşen rapor yok.",
+      "invalid_ban_selection_mode": "Geçersiz yasaklama seçim modu.",
+      "invalid_bans_parameter_bans_ban": "/bans/ban üzerinde geçersiz bans parametresi.",
+      "invalid_filtered_ban_source": "Geçersiz filtrelenmiş yasaklama kaynağı."
     }
   },
   "breadcrumb": {
@@ -138,8 +164,8 @@
     "timings": "Süreler",
     "configs": "Yapılandırmalar",
     "extra_pages": "Ek sayfalar",
-    "global_settings": "Genel ayarlar",
     "global_config": "Genel yapılandırma",
+    "global_settings": "Genel ayarlar",
     "home": "Ana sayfa",
     "instances": "Örnekler",
     "jobs": "İşler",
@@ -169,6 +195,7 @@
     "add_plugins": "Eklenti Ekle",
     "auto_refresh": "Otomatik Yenile",
     "ban": "Yasakla",
+    "ban_all_filtered": "Eşleşen tüm raporları yasakla",
     "ban_selected": "Seçilenleri yasakla",
     "cache": "Önbellek",
     "cancel": "İptal",
@@ -177,7 +204,8 @@
     "clone": "Kopyala",
     "columns": "Sütunlar",
     "convert_configs": "Yapılandırmaları dönüştür",
-    "convert_configs_to": "{{state}} durumuna dönüştür",
+    "convert_to_draft": "Taslağa dönüştür",
+    "convert_to_online": "Çevrimiçine dönüştür",
     "convert_services": "Servisleri Dönüştür",
     "copy": "Kopyala",
     "copy_codes": "Kodları Kopyala",
@@ -197,6 +225,7 @@
     "export_csv": "CSV",
     "export_excel": "Excel",
     "fetch_global": "Genel ayarları getir",
+    "filtered_actions": "Filtrelenmiş eylemler",
     "filters_suffix": " Filtreler",
     "follow": "Takip Et",
     "force_check": "Zorla kontrol et",
@@ -207,6 +236,7 @@
     "history": "Geçmiş",
     "import_configs": "Özel yapılandırmaları içe aktar",
     "import_services": "Hizmetleri içe aktar",
+    "import_template": "Şablon içe aktar",
     "login": "Giriş Yap",
     "multiple_add": "EKLE",
     "multiple_hide": "GİZLE",
@@ -248,19 +278,17 @@
     "submit": "Gönder",
     "subscribe": "Abone Ol",
     "unban": "Yasağı Kaldır",
+    "unban_all_filtered": "Eşleşen tüm yasakları kaldır",
     "update_duration": "Yasaklama Süresini Güncelle",
+    "update_duration_all_filtered": "Eşleşen tüm yasakların süresini güncelle",
     "update_key": "Anahtarı Güncelle",
     "upload_photo": "Yeni Fotoğraf Yükle",
+    "verify": "Doğrula",
     "view_details": "Detayları Görüntüle",
     "view_raw_data": "Ham Veriyi Görüntüle",
     "wipe_other_sessions": "Diğer Oturumları Sonlandır",
-    "ban_all_filtered": "Eşleşen tüm raporları yasakla",
-    "filtered_actions": "Filtrelenmiş eylemler",
-    "unban_all_filtered": "Eşleşen tüm yasakları kaldır",
-    "update_duration_all_filtered": "Eşleşen tüm yasakların süresini güncelle",
     "use_template": "Şablon kullan",
     "edit": "Düzenle",
-    "verify": "Doğrula",
     "view": "Görüntüle",
     "rename": "Yeniden adlandır",
     "add_passkey": "Parola anahtarı ekle",
@@ -279,10 +307,103 @@
     "kpi_files": "Dosyalar",
     "kpi_per_service": "Hizmet başına",
     "subtitle": "Planlı işler tarafından oluşturulan önbellek dosyaları (blok listeleri, GeoIP veritabanları ve daha fazlası) — hizmet ve eklenti başına inceleyin, indirin veya silin.",
-    "title": "Önbellek dosyaları"
+    "title": "Önbellek dosyaları",
+    "flash": {
+      "error_deleting_cache_files": "Önbellek dosyaları silinirken hata oluştu: {{message}}",
+      "successfully_deleted_cache_file": "{{deleted_count}} önbellek dosyası başarıyla silindi",
+      "successfully_deleted_cache_files": "{{deleted_count}} önbellek dosyası başarıyla silindi",
+      "deleted_files_errors": "{{deleted_count}} dosya silindi, {{len}} hata ile: {{value}}",
+      "api_unavailable": "API kullanılamıyor: {{message}}",
+      "error_fetching_cache_file": "Önbellek dosyası alınırken hata oluştu: {{message}}",
+      "cache_file_job_plugin_not_found": "{{job_name}} işinin {{file_name}} önbellek dosyası, {{plugin_id}} eklentisi bulunamadı",
+      "cache_file_job_plugin_not_found_service": "{{job_name}} işinin {{file_name}} önbellek dosyası, {{plugin_id}} eklentisi, {{service}} servisi bulunamadı",
+      "error_fetching_cache_files": "Önbellek dosyaları alınırken hata oluştu: {{message}}",
+      "invalid_cache_files_parameter": "Geçersiz önbellek dosyaları parametresi",
+      "no_cache_files_selected": "Hiç önbellek dosyası seçilmedi"
+    }
+  },
+  "compose": {
+    "always_on": "Her zaman açık",
+    "count": "{{on}} etkin · {{total}} kullanılabilir · {{locked}} kilitli",
+    "entries": "{{count}} yapılandırılmış",
+    "filter": {
+      "all": "Tümü",
+      "changed": "Değişti",
+      "on": "Evet"
+    },
+    "locked": "Burada kontrol yok",
+    "provenance": {
+      "api": "API aracılığıyla yönetilir",
+      "attachment": "Ekli dosyadan",
+      "clone": "Kopyalandı",
+      "default": "Varsayılan",
+      "edited": "İşte düzenlendi",
+      "global": "Küresel",
+      "managed": "{{method}} tarafından ayarlandı",
+      "template": "Şablondan"
+    },
+    "set_value": "Bir değer belirle…",
+    "show_more": "{{count}} tane daha göster",
+    "unavailable": "Eklenti listesi yüklenemedi, bu nedenle bu sayfa güvenli bir şekilde düzenlenemez. API yanıtını bekleyin."
   },
   "configs": {
-    "subtitle": "Hizmetleriniz için özel NGINX yapılandırma parçacıkları — HTTP, ModSecurity ve akış düzeyinde geçersiz kılmalar için oluşturun, düzenleyin ve yönetin."
+    "subtitle": "Hizmetleriniz için özel NGINX yapılandırma parçacıkları — HTTP, ModSecurity ve akış düzeyinde geçersiz kılmalar için oluşturun, düzenleyin ve yönetin.",
+    "flash": {
+      "no_custom_configurations_found_import_file": "İçe aktarma dosyasında özel yapılandırma bulunamadı.",
+      "import_error": "İçe aktarma hatası: {{error}}",
+      "invalid_file_encoding_please_upload_utf": "Geçersiz dosya kodlaması. Lütfen UTF-8 JSON dosyası yükleyin.",
+      "no_custom_configurations_file_uploaded": "Özel yapılandırma dosyası yüklenmedi.",
+      "no_custom_configurations_export": "Dışa aktarılacak özel yapılandırma yok.",
+      "could_not_fetch_custom_configurations_api": "Özel yapılandırmalar API'den alınamadı: {{fetch_err}}",
+      "invalid_configs_parameter_configs_export": "/configs/export üzerinde geçersiz configs parametresi.",
+      "saved_custom_configuration": "{{new_type}}/{{new_name}} özel yapılandırması kaydedildi",
+      "saved_custom_configuration_service": "{{service}} servisi için {{new_type}}/{{new_name}} özel yapılandırması kaydedildi",
+      "no_values_changed": "Hiçbir değer değiştirilmedi.",
+      "renaming_template_based_custom_config_not": "Şablon tabanlı özel yapılandırmanın yeniden adlandırılmasına izin verilmiyor.",
+      "invalid_name_parameter_configs_new": "/configs/new üzerinde geçersiz name parametresi.",
+      "invalid_type_parameter_configs_new": "/configs/new üzerinde geçersiz type parametresi.",
+      "service_does_not_exist": "{{new_service}} servisi mevcut değil.",
+      "config_not_ui_api_custom_config": "{{config_type}}/{{name}} yapılandırması bir UI/API özel yapılandırması değildir ve düzenlenemez.",
+      "config_not_ui_api_custom_config_service": "{{service}} servisi için {{config_type}}/{{name}} yapılandırması bir UI/API özel yapılandırması değildir ve düzenlenemez.",
+      "config_does_not_exist_2": "{{config_type}}/{{name}} yapılandırması mevcut değil.",
+      "config_does_not_exist_2_service": "{{service}} servisi için {{config_type}}/{{name}} yapılandırması mevcut değil.",
+      "config_does_not_exist": "{{clone}} yapılandırması mevcut değil.",
+      "created_custom_configuration": "{{config_type}}/{{config_name}} özel yapılandırması oluşturuldu",
+      "created_custom_configuration_service": "{{service}} servisi için {{config_type}}/{{config_name}} özel yapılandırması oluşturuldu",
+      "error_occurred_while_saving_custom_configs": "Özel yapılandırmalar kaydedilirken bir hata oluştu: {{error_msg}}",
+      "config_already_exists": "{{config_type}}/{{config_name}} yapılandırması zaten mevcut",
+      "config_already_exists_service": "{{service}} servisi için {{config_type}}/{{config_name}} yapılandırması zaten mevcut",
+      "deleted_config_one": "Yapılandırma silindi: {{names}}",
+      "deleted_config_other": "Yapılandırmalar silindi: {{names}}",
+      "all_selected_custom_configs_could_not_2": "Seçilen tüm özel yapılandırmalar bulunamadı veya UI/API özel yapılandırması değil.",
+      "custom_config_not_ui_api_custom_2": "{{skipped_config}} özel yapılandırması bir UI/API özel yapılandırması değil ve silinmeyecektir.",
+      "error_occurred_while_deleting_custom_configs": "Özel yapılandırmalar silinirken bir hata oluştu: {{e}}",
+      "invalid_configs_parameter_configs_delete": "/configs/delete üzerinde geçersiz configs parametresi.",
+      "no_configs_selected": "Hiç yapılandırma seçilmedi.",
+      "converted_configs_online": "\"online\" yapılandırmalarına dönüştürüldü: {{names}}",
+      "converted_configs_draft": "\"taslak\" yapılandırmalarına dönüştürüldü: {{names}}",
+      "all_selected_custom_configs_could_not": "Seçilen tüm özel yapılandırmalar bulunamadı, UI/API özel yapılandırması değil veya zaten dönüştürüldü.",
+      "custom_config_could_not_found": "{{missing_config}} özel yapılandırması bulunamadı.",
+      "custom_config_already_online_will_not": "{{non_convertible_config}} özel yapılandırması zaten bir online yapılandırmadır ve dönüştürülmeyecektir.",
+      "custom_config_already_draft_will_not": "{{non_convertible_config}} özel yapılandırması zaten bir taslak yapılandırmadır ve dönüştürülmeyecektir.",
+      "custom_config_not_ui_api_custom": "{{non_editable_config}} özel yapılandırması bir UI/API özel yapılandırması değil ve dönüştürülmeyecektir.",
+      "invalid_configs_parameter_configs_convert": "/configs/convert üzerinde geçersiz configs parametresi.",
+      "failed_import_custom_configuration_one": "Özel yapılandırma içe aktarılamadı: {{names}}",
+      "failed_import_custom_configuration_other": "Özel yapılandırmalar içe aktarılamadı: {{names}}",
+      "skipped_custom_configuration_one": "Özel yapılandırma atlandı: {{names}}",
+      "skipped_custom_configuration_other": "Özel yapılandırmalar atlandı: {{names}}",
+      "overwrote_custom_configuration_one": "Özel yapılandırmanın üzerine yazıldı: {{names}}",
+      "overwrote_custom_configuration_other": "Özel yapılandırmaların üzerine yazıldı: {{names}}",
+      "imported_custom_configuration_one": "Özel yapılandırma içe aktarıldı: {{names}}",
+      "imported_custom_configuration_other": "Özel yapılandırmalar içe aktarıldı: {{names}}",
+      "missing_value_parameter_configs_new": "/configs/new üzerinde value parametresi eksik.",
+      "missing_name_parameter_configs_new": "/configs/new üzerinde name parametresi eksik.",
+      "missing_type_parameter_configs_new": "/configs/new üzerinde type parametresi eksik.",
+      "missing_service_parameter_configs_new": "/configs/new üzerinde service parametresi eksik.",
+      "missing_configs_parameter_configs_delete": "/configs/delete üzerinde configs parametresi eksik.",
+      "missing_convert_parameter_configs_convert": "/configs/convert üzerinde convert_to parametresi eksik.",
+      "missing_configs_parameter_configs_convert": "/configs/convert üzerinde configs parametresi eksik."
+    }
   },
   "country": {
     "AD": "Andorra",
@@ -549,6 +670,9 @@
       "blocked_unique_ips": {
         "title": "Engellenen Benzersiz IP'ler"
       },
+      "certificates": {
+        "title": "Sertifikalar"
+      },
       "hide": "Bu kartı gizle",
       "instances": {
         "status": "{{up}} aktif / {{down}} deaktif / {{loading}} yükleniyor",
@@ -575,18 +699,15 @@
         "status": "{{online}} çevrimiçi / {{draft}} taslak",
         "title": "Servisler"
       },
+      "top_reasons": {
+        "title": "En sık rapor nedenleri"
+      },
       "total_requests": {
         "title": "Toplam İstekler"
-      },
-      "certificates": {
-        "title": "Sertifikalar"
       },
       "upstreams": {
         "planned": "Yakında",
         "title": "Upstream sunucuları"
-      },
-      "top_reasons": {
-        "title": "En sık rapor nedenleri"
       }
     },
     "chart": {
@@ -607,13 +728,13 @@
         "http_404": "404 Bulunamadı",
         "http_429": "429 İstek hızı sınırlandı"
       },
-      "top_blocked_ips": {
-        "most_blocked": "En Çok Engellenen IP",
-        "title": "En Çok Engellenen 10 IP"
-      },
       "timeseries": {
         "series": "Engellendi",
         "title": "Zaman içinde engellenen istekler (seçili aralık)"
+      },
+      "top_blocked_ips": {
+        "most_blocked": "En Çok Engellenen IP",
+        "title": "En Çok Engellenen 10 IP"
       }
     },
     "map": {
@@ -621,19 +742,6 @@
       "hover_info": "Bir ülkenin üzerine gelin",
       "legend": "Açıklama",
       "no_data": "Veri yok"
-    },
-    "window": {
-      "last_days": "Son {{days}} gün",
-      "title": "Panel penceresi"
-    },
-    "tile": {
-      "bans_active": "Etkin yasaklar",
-      "jobs": "Zamanlanmış işler",
-      "trend": "Engellenen istek eğilimi"
-    },
-    "welcome": {
-      "title": "Tekrar hoş geldiniz, {{user}}",
-      "greeting": "Tekrar hoş geldiniz,"
     },
     "mini": {
       "across_countries": "{{count}} ülkede",
@@ -649,6 +757,19 @@
       "trend_vs_prev": "önceki ile karşılaştır",
       "vs_prev": "önceki ile karşılaştır"
     },
+    "tile": {
+      "bans_active": "Etkin yasaklar",
+      "jobs": "Zamanlanmış işler",
+      "trend": "Engellenen istek eğilimi"
+    },
+    "welcome": {
+      "title": "Tekrar hoş geldiniz, {{user}}",
+      "greeting": "Tekrar hoş geldiniz,"
+    },
+    "window": {
+      "last_days": "Son {{days}} gün",
+      "title": "Panel penceresi"
+    },
     "panel": {
       "timeseries_sub": "Seçili aralık",
       "top_ips_sub": "İstek sayısına göre",
@@ -659,10 +780,70 @@
     }
   },
   "datatable": {
-    "bulk_select_all_filtered": "Eşleşen {{count}} {{entity}} öğesinin tümünü seç",
-    "bulk_select_all_done": "Eşleşen {{count}} {{entity}} öğesinin tümü seçildi.",
+    "bulk_select": {
+      "bans": {
+        "page_one": "Bu sayfadaki {{count}} yasaklama seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} yasaklama seçildi.",
+        "all_filtered": "Eşleşen {{count}} yasaklama öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} yasaklama seçildi."
+      },
+      "cache": {
+        "page_one": "Bu sayfadaki {{count}} önbellek dosyası seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} önbellek dosyası seçildi.",
+        "all_filtered": "Eşleşen {{count}} önbellek dosyası öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} önbellek dosyası seçildi."
+      },
+      "configs": {
+        "page_one": "Bu sayfadaki {{count}} özel yapılandırma seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} özel yapılandırma seçildi.",
+        "all_filtered": "Eşleşen {{count}} özel yapılandırma öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} özel yapılandırma seçildi."
+      },
+      "instances": {
+        "page_one": "Bu sayfadaki {{count}} örnek seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} örnek seçildi.",
+        "all_filtered": "Eşleşen {{count}} örnek öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} örnek seçildi."
+      },
+      "items": {
+        "page_one": "Bu sayfadaki {{count}} öğe seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} öğe seçildi.",
+        "all_filtered": "Eşleşen {{count}} öğe öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} öğe seçildi."
+      },
+      "jobs": {
+        "page_one": "Bu sayfadaki {{count}} iş seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} iş seçildi.",
+        "all_filtered": "Eşleşen {{count}} iş öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} iş seçildi."
+      },
+      "plugins": {
+        "page_one": "Bu sayfadaki {{count}} eklenti seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} eklenti seçildi.",
+        "all_filtered": "Eşleşen {{count}} eklenti öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} eklenti seçildi."
+      },
+      "reports": {
+        "page_one": "Bu sayfadaki {{count}} rapor seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} rapor seçildi.",
+        "all_filtered": "Eşleşen {{count}} rapor öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} rapor seçildi."
+      },
+      "services": {
+        "page_one": "Bu sayfadaki {{count}} servis seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} servis seçildi.",
+        "all_filtered": "Eşleşen {{count}} servis öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} servis seçildi."
+      },
+      "templates": {
+        "page_one": "Bu sayfadaki {{count}} şablon seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} şablon seçildi.",
+        "all_filtered": "Eşleşen {{count}} şablon öğesinin tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} şablon seçildi."
+      }
+    },
     "bulk_select_clear": "Seçimi temizle",
-    "bulk_select_page": "Bu sayfadaki {{count}} {{entity}} öğesinin tümü seçildi.",
+    "select_row": "Satırı seç",
     "info_bans": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Yasaklama",
     "info_cache": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Önbellek Dosyası",
     "info_configs": "{{start}} ile {{end}} arası gösteriliyor, toplam {{total}} Özel Yapılandırma",
@@ -742,8 +923,33 @@
     "select_rows_templates_0": "Şablon seçilmedi",
     "select_rows_templates_1": "1 şablon seçildi",
     "select_rows_templates_plural": "%d şablon seçildi",
-    "selected_list_count": "{{count}} {{entity}} seçildi",
-    "selected_list_empty": "Seçilen {{entity}} yok.",
+    "selected_list": {
+      "configs": {
+        "count_one": "{{count}} özel yapılandırma seçildi",
+        "count_other": "{{count}} özel yapılandırma seçildi",
+        "empty": "Seçilen özel yapılandırma yok."
+      },
+      "items": {
+        "count_one": "{{count}} öğe seçildi",
+        "count_other": "{{count}} öğe seçildi",
+        "empty": "Seçilen öğe yok."
+      },
+      "plugins": {
+        "count_one": "{{count}} eklenti seçildi",
+        "count_other": "{{count}} eklenti seçildi",
+        "empty": "Seçilen eklenti yok."
+      },
+      "services": {
+        "count_one": "{{count}} servis seçildi",
+        "count_other": "{{count}} servis seçildi",
+        "empty": "Seçilen servis yok."
+      },
+      "templates": {
+        "count_one": "{{count}} şablon seçildi",
+        "count_other": "{{count}} şablon seçildi",
+        "empty": "Seçilen şablon yok."
+      }
+    },
     "zero_records_bans": "Eşleşen Yasaklama bulunamadı",
     "zero_records_cache": "Eşleşen Önbellek Dosyası bulunamadı",
     "zero_records_configs": "Eşleşen Özel Yapılandırma bulunamadı",
@@ -802,9 +1008,10 @@
   },
   "flash": {
     "check_jobs_for_details": "Ayrıntılar için İşler sayfasını kontrol edin.",
-    "last_configuration_change_failed": "Son yapılandırma değişikliğiniz uygulanamadı.",
+    "configuration_pending_instance": "Yapılandırma henüz uygulanmadı — bir örneğin başlaması bekleniyor.",
     "easter_egg": "Bunu okuyorsan meraklısın demektir",
     "error": "Hata",
+    "last_configuration_change_failed": "Son yapılandırma değişikliğiniz uygulanamadı.",
     "message": "Bilgi",
     "pro": "BunkerWeb PRO",
     "pro_services_exceeded": "PRO lisansınızın izin verdiğinden daha fazla servise sahipsiniz. Lisansınızı yükseltin veya PRO lisansınızı açmak için bazı servisleri Taslak moduna dönüştürün.",
@@ -812,7 +1019,19 @@
       "just_now": "az önce"
     },
     "warning": "Uyarı",
-    "configuration_pending_instance": "Yapılandırma henüz uygulanmadı — bir örneğin başlaması bekleniyor."
+    "do_not_have_write_permission": "Yazma izniniz yok",
+    "database_read_only_mode": "Veritabanı salt okunur modda",
+    "error_occurred_while_saving_custom_configs": "Özel yapılandırmalar kaydedilirken bir hata oluştu: {{e}}",
+    "service_does_not_exist": "{{service}} servisi mevcut değil.",
+    "invalid_convert_parameter": "Geçersiz convert_to parametresi.",
+    "import_warning": "İçe aktarma uyarısı: {{error}}",
+    "could_not_fetch_global_settings_api": "Genel ayarlar API'den alınamadı.",
+    "plugin_not_found": "Eklenti bulunamadı",
+    "scheduler_will_attempt_apply_changes": "Zamanlayıcı değişiklikleri uygulamaya çalışacaktır.",
+    "could_not_fetch_resource_groups": "Kaynak grupları alınamadı: {{message}}",
+    "error_fetching_instances": "Örnekler alınırken hata oluştu",
+    "description_too_long": "Açıklama 4000 karakteri geçemez",
+    "cors_or_ajax_request_required": "CORS veya AJAX isteği gereklidir"
   },
   "footer": {
     "blog": "Blog",
@@ -826,7 +1045,8 @@
     "checkbox": {
       "include_attached_configs": "Ekli özel yapılandırmaları dahil et",
       "overwrite_existing_configs": "Mevcut UI/API özel yapılandırmalarının üzerine yaz",
-      "remember_me": "Beni Hatırla"
+      "remember_me": "Beni Hatırla",
+      "replace_existing_template": "Varsa aynı id'ye sahip şablonun yerini al"
     },
     "help": {
       "ban_specific_service": "Yasaklama yalnızca bu servise uygulanacaktır.",
@@ -834,7 +1054,8 @@
       "hostname_special_chars": "Protokol/port belirtimi için yalnızca `/` ve `:` kullanılabilir.",
       "multivalue_separator": "Değerler şunlarla ayrılır:",
       "permanent_ban": "Seçiliyse, yasaklama manuel olarak kaldırılana kadar asla sona ermeyecek",
-      "photo_extensions": "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
+      "photo_extensions": "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB.",
+      "secret_stored": "Bir değer kayıtlıdır ve gösterilmez. Korumak için alanı olduğu gibi bırakın, değiştirmek için yeni bir değer girin veya kaldırmak için alanı temizleyin."
     },
     "label": {
       "2fa_code": "2FA Kodu",
@@ -889,6 +1110,7 @@
       "secret_token": "Gizli Belirteç",
       "server_name": "Sunucu Adı",
       "service_name": "Servis Adı",
+      "template_file": "Şablon Dosyası",
       "template_id": "Şablon Kimliği",
       "theme": "Tema",
       "type": "Tür",
@@ -906,9 +1128,9 @@
       "zerossl_api_connect_timeout": "ZeroSSL API Bağlantı Zaman Aşımı",
       "zerossl_api_max_time": "ZeroSSL API Azami Süre",
       "passkey_name": "Parola anahtarı adı",
+      "enrollment_code": "Kayıt kodu",
       "enroll_oneliner_docker": "Docker",
-      "enroll_oneliner_linux": "Linux",
-      "enrollment_code": "Kayıt kodu"
+      "enroll_oneliner_linux": "Linux"
     },
     "placeholder": {
       "2fa_code": "Kod girin",
@@ -936,11 +1158,6 @@
     "view_all_settings": "Tüm {{count}} ayarları görüntüle"
   },
   "instance": {
-    "type": {
-      "container": "Konteyner",
-      "pod": "Pod",
-      "static": "Statik"
-    },
     "enrollment": {
       "enrolled": "Kayıtlı",
       "pending": "Kayıt beklemede",
@@ -948,6 +1165,11 @@
     },
     "tls": {
       "pinned": "TLS sabitlendi"
+    },
+    "type": {
+      "container": "Konteyner",
+      "pod": "Pod",
+      "static": "Statik"
     }
   },
   "instances": {
@@ -955,7 +1177,32 @@
     "loading": "Yükleniyor",
     "subtitle": "Bu arayüzle bağlantılı BunkerWeb örneklerini yönetin: oluşturun, ping, yeniden yükleyin, durdurun veya kaldırın.",
     "total": "Toplam örnekler",
-    "up": "Açık"
+    "up": "Açık",
+    "flash": {
+      "instances_deleted": "Örnekler {{instance}} başarıyla silindi.",
+      "instance_reloaded": "{{instance}} örneği başarıyla yeniden yüklendi.",
+      "instance_stopped": "{{instance}} örneği başarıyla durduruldu.",
+      "instance_deleted": "{{instance}} örneği başarıyla silindi.",
+      "instance_does_not_have_reload_method": "{{instance}} örneğinin yeniden yükleme yöntemi yok.",
+      "instance_does_not_have_stop_method": "{{instance}} örneğinin durdurma yöntemi yok.",
+      "instance_does_not_exist": "{{instance}} örneği mevcut değil.",
+      "couldn_t_delete_instance": "Örnek silinemedi: {{message}}",
+      "couldn_t_delete_instances": "Örnekler silinemedi: {{message}}",
+      "could_not_found_one": "Seçilen örnek bulunamadı veya bir UI/API örneği değil.",
+      "could_not_found_other": "Seçilen örneklerin hiçbiri bulunamadı veya UI/API örneği değil.",
+      "instance_not_ui_api_instance_will": "{{non_deletable_instance}} örneği bir UI/API örneği değil ve silinmeyecektir.",
+      "no_instance_selected": "Hiçbir örnek seçilmedi.",
+      "instance_created_successfully": "{{value}} örneği başarıyla oluşturuldu.",
+      "could_not_fetch_instances_api": "Örnekler API'den alınamadı.",
+      "missing_instances_parameter_instances_ping": "/instances/ping üzerinde instances parametresi eksik.",
+      "missing_instances_parameter_instances_reload": "/instances/reload üzerinde instances parametresi eksik.",
+      "missing_instances_parameter_instances_stop": "/instances/stop üzerinde instances parametresi eksik.",
+      "missing_instances_parameter_instances_delete": "/instances/delete üzerinde instances parametresi eksik.",
+      "missing_instance_name_parameter_instances_new": "/instances/new üzerinde instance name parametresi eksik.",
+      "missing_instance_hostname_parameter_instances_new": "/instances/new üzerinde instance hostname parametresi eksik.",
+      "hostname_already_in_use": "{{hostname}} ana bilgisayar adı zaten kullanılıyor.",
+      "could_not_create_instance": "Örnek oluşturulamadı: {{message}}"
+    }
   },
   "interval": {
     "day": "Günlük",
@@ -978,11 +1225,20 @@
       "failed_last_run": "Son çalıştırma başarısız",
       "reload_required": "Yeniden yükleme gerekiyor",
       "total": "Toplam işler"
+    },
+    "flash": {
+      "job_plugins_will_run_background_by": "İşin eklentileri zamanlayıcı tarafından arka planda çalıştırılacak.",
+      "jobs_plugins_will_run_background_by": "Eklenti işleri zamanlayıcı tarafından arka planda çalıştırılacak.",
+      "invalid_jobs_parameter_jobs_run": "/jobs/run üzerinde geçersiz jobs parametresi.",
+      "no_jobs_selected": "Hiç iş seçilmedi.",
+      "error_fetching_jobs": "İşler alınırken hata oluştu: {{message}}",
+      "missing_jobs_parameter_jobs_run": "/jobs/run üzerinde jobs parametresi eksik."
     }
   },
   "legend": {
     "locked_settings_annotation": "Kilitli ({{method}})",
-    "locked_settings_hint": "Kilitli ayarlar vurgulanıyor"
+    "locked_settings_hint": "Kilitli ayarlar vurgulanıyor",
+    "raw_setting_drafts": "Bir ayarın başında taslağı değiştirmek için # tuşuna, etkinleştirmek için Geri tuşuna basın. Uygulamak için kaydedin. Taslaklar değerlerini korurken devralınan veya varsayılan değerler geçerli olur."
   },
   "link": {
     "back_to_login": "Girişe Dön",
@@ -1000,17 +1256,33 @@
     "get_support": "Destek alın"
   },
   "login": {
-    "title": "Giriş Yap",
-    "subtitle": "BunkerWeb hesabınıza giriş yapın",
-    "or_use_password": "veya şifrenizi kullanın",
     "notice_password_changed": "Parolanız değiştirildi. Yeni parolanızla giriş yapın.",
     "notice_session_expired": "Oturumunuz, değişikliğiniz kaydedilmeden önce sona erdi, bu nedenle hiçbir şey değişmedi. Giriş yapıp yeniden deneyin.",
-    "notice_session_timeout": "Oturumunuz süre sınırına ulaştığı için çıkış yapıldı. Devam etmek için giriş yapın."
+    "notice_session_timeout": "Oturumunuz süre sınırına ulaştığı için çıkış yapıldı. Devam etmek için giriş yapın.",
+    "or_use_password": "veya şifrenizi kullanın",
+    "subtitle": "BunkerWeb hesabınıza giriş yapın",
+    "title": "Giriş Yap",
+    "flash": {
+      "invalid_username_password": "Geçersiz kullanıcı adı veya parola",
+      "couldn_t_log_please_try_again": "Giriş yapılamadı, lütfen tekrar deneyin"
+    }
   },
   "logs": {
+    "all_sources": "Tüm kaynaklar (canlı)",
     "annotation_error": "Hata",
     "annotation_warning": "Uyarı",
+    "collapse": "Daralt",
+    "expand": "Genişlet",
     "filter_levels": "Seviyeler",
+    "grep_placeholder": "grep…",
+    "level_all": "Tüm günlükler",
+    "level_errors_only": "Yalnızca hatalar",
+    "level_security_only": "Yalnızca güvenlik",
+    "live_title": "Canlı günlükler",
+    "pause": "Duraklat",
+    "resume": "Sürdür",
+    "tailing_sources": "Takip ediliyor · {{count}} kaynak",
+    "taller": "Daha yüksek",
     "letsencrypt_logs": "Let's Encrypt Günlükleri",
     "main_logs": "Ana Günlükler",
     "new_lines_sr": "{{count}} yeni günlük satırı",
@@ -1030,18 +1302,10 @@
     "showing_some": "{{total}} içinden {{shown}} gösteriliyor",
     "select_file_prompt": "İçeriğini görüntülemek için bir günlük dosyasını seçin",
     "trimmed_notice": "--- Performans için {{count}} eski günlük satırı kaldırıldı ---",
-    "all_sources": "Tüm kaynaklar (canlı)",
-    "collapse": "Daralt",
-    "expand": "Genişlet",
-    "grep_placeholder": "grep…",
-    "level_all": "Tüm günlükler",
-    "level_errors_only": "Yalnızca hatalar",
-    "level_security_only": "Yalnızca güvenlik",
-    "live_title": "Canlı günlükler",
-    "pause": "Duraklat",
-    "resume": "Sürdür",
-    "tailing_sources": "Takip ediliyor · {{count}} kaynak",
-    "taller": "Daha yüksek"
+    "flash": {
+      "no_such_file": "Böyle bir dosya yok",
+      "invalid_file_path": "Geçersiz dosya yolu"
+    }
   },
   "modal": {
     "body": {
@@ -1049,7 +1313,14 @@
       "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
       "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
       "confirm_configs_conversion": "Seçili özel yapılandırmaları dönüştürmek istediğinizden emin misiniz?",
-      "confirm_configs_conversion_to": "Seçili özel yapılandırmaları {{state}} olarak dönüştürmek istediğinizden emin misiniz?",
+      "confirm_service_conversion_online": "Seçili servisi çevrimiçine dönüştürmek istediğinizden emin misiniz?",
+      "confirm_service_conversion_draft": "Seçili servisi taslağa dönüştürmek istediğinizden emin misiniz?",
+      "confirm_services_conversion_online": "Seçili servisleri çevrimiçine dönüştürmek istediğinizden emin misiniz?",
+      "confirm_services_conversion_draft": "Seçili servisleri taslağa dönüştürmek istediğinizden emin misiniz?",
+      "confirm_config_conversion_online": "Seçili özel yapılandırmayı online olarak dönüştürmek istediğinizden emin misiniz?",
+      "confirm_config_conversion_draft": "Seçili özel yapılandırmayı taslak olarak dönüştürmek istediğinizden emin misiniz?",
+      "confirm_configs_conversion_online": "Seçili özel yapılandırmaları online olarak dönüştürmek istediğinizden emin misiniz?",
+      "confirm_configs_conversion_draft": "Seçili özel yapılandırmaları taslak olarak dönüştürmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
       "confirm_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
@@ -1057,6 +1328,8 @@
       "confirm_plugin_deletion": "Seçili eklentiyi silmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion_plural": "Seçili eklentileri silmek istediğinizden emin misiniz?",
       "confirm_template_deletion": "{{name}} şablonunu silmek istediğinizden emin misiniz?",
+      "confirm_templates_deletion_alert": "Seçili şablonu silmek istediğinizden emin misiniz?",
+      "confirm_templates_deletion_alert_plural": "Seçili şablonları silmek istediğinizden emin misiniz?",
       "confirmation_instance_deletion": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert_plural": "Seçili örnekleri silmek istediğinizden emin misiniz?",
@@ -1075,6 +1348,8 @@
       "import_configs_warning": "scheduler, autoconf veya templates tarafından oluşturulan özel yapılandırmalar her zaman korunur. Yalnızca UI/API yapılandırmalarının üzerine yazılabilir.",
       "import_services_dropzone": "Hizmet dışa aktarma dosyanızı buraya sürükleyip bırakın veya bir dosya seçmek için tıklayın.",
       "import_services_warning": "Hizmetlerin içe aktarılması, dışa aktarma dosyasından yeni arayüz hizmetleri oluşturacaktır. Mevcut hizmetler atlanır.",
+      "import_template_help": "BunkerWeb'den dışa aktarılmış bir şablon paketi (.json) veya template.json ve yapılandırmalarıyla bir şablon klasörü içeren bir arşiv (.zip, .tar.gz, .tar.xz). En fazla 1 MiB.",
+      "import_template_replace_warning": "Bir şablonu değiştirmek, bir sonraki yapılandırma oluşturmada onu kullanan her hizmeti değiştirir. Bir eklentiye ait olan veya web arayüzü dışında yönetilen şablonlar asla değiştirilmez.",
       "instance_creation_alert": "Port veya sunucu adı belirtmenize gerek yoktur; örnek yapılandırması için `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` ve `API_SERVER_NAME` değerleri kullanılacaktır.",
       "next_step_in_case_of_issue": "Sorun yaşarsanız, güvensiz sertifikayı manuel olarak kabul edebilirsiniz:",
       "recovery_codes_save_alert": "Lütfen bu kurtarma kodlarını güvenli bir yerde (şifre yöneticisi veya kasa gibi) saklayın. Kimlik doğrulama cihazınızı kaybederseniz hesabınıza erişmek için kullanabilirsiniz.",
@@ -1082,15 +1357,16 @@
       "reset_template_alert": "Mevcut şablon ayarlarını ve özel yapılandırmaları sıfırlamak istediğinizden emin misiniz?",
       "services_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
       "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
+      "ban_filtered_confirmation": "Eşleşen {{count}} rapordaki IP'ler yasaklansın mı? Yinelenen hedefler yalnızca bir kez engellenir.",
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
       "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
-      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
-      "ban_filtered_confirmation": "Eşleşen {{count}} rapordaki IP'ler yasaklansın mı? Yinelenen hedefler yalnızca bir kez engellenir.",
       "unban_filtered_confirmation": "Eşleşen {{count}} yasağın tümünü kaldırmak istediğinizden emin misiniz?",
+      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
       "update_filtered_duration_alert": "Eşleşen {{count}} yasağın tümü için yeni süre seçin:",
-      "enroll_description": "Örneği bu değişkenlerle başlatın. Kodu önyüklemede bir kez kullanır ve kendi kimlik bilgisini alır.",
       "enroll_shown_once": "Bu kod yalnızca bir kez gösterilir. Şimdi kopyalayın — bir daha gösterilemez.",
-      "confirm_service_mode_conversion": "Bu hizmetin bildirilen modunu değiştirmek istediğinizden emin misiniz?"
+      "enroll_description": "Örneği bu değişkenlerle başlatın. Kodu önyüklemede bir kez kullanır ve kendi kimlik bilgisini alır.",
+      "confirm_service_mode_conversion": "Bu hizmetin bildirilen modunu değiştirmek istediğinizden emin misiniz?",
+      "service_deletion_confirmation": "Seçili servisi silmek istediğinizden emin misiniz?"
     },
     "button": {
       "fetch_global_settings_confirm": "Genel ayarları uygula",
@@ -1119,6 +1395,7 @@
       "full_url": "Tam URL",
       "import_configs": "Özel yapılandırmaları içe aktar",
       "import_services": "Hizmetleri içe aktar",
+      "import_template": "Şablon İçe Aktar",
       "job_history": "Son 10 İş Çalıştırması",
       "job_history_count": "İşin son {{count}} çalıştırması",
       "multiselect_selected": "Seçilen öğeler",
@@ -1133,8 +1410,8 @@
   },
   "mode": {
     "advanced": "Gelişmiş",
-    "easy": "Kolay",
     "compose": "Yaz",
+    "easy": "Kolay",
     "raw": "Ham"
   },
   "navbar": {
@@ -1147,7 +1424,14 @@
     "link": {
       "documentation": "Dokümantasyon"
     },
-    "version": "Versiyon"
+    "version": "Versiyon",
+    "aria": {
+      "toggle_navigation": "Gezinmeyi aç/kapat",
+      "close_navigation": "Gezinmeyi kapat",
+      "help": "Yardım",
+      "notifications": "Bildirimler",
+      "news": "Haberler"
+    }
   },
   "navigation": {
     "about": "Hakkında",
@@ -1175,25 +1459,25 @@
     "plugins": "Eklentiler",
     "plugins_pages": "Eklenti sayfaları",
     "pro": "Pro",
+    "redirects": "Yönlendirmeler",
     "reports": "Raporlar",
     "services": "Servisler",
     "support": "Destek",
     "templates": "Şablonlar",
+    "upstreams": "Upstream sunucuları",
+    "workflows": "İş akışları",
     "overview": "Genel bakış",
     "configure": "Yapılandır",
     "operate": "İşlet",
     "system": "Sistem",
     "edition_community": "Topluluk",
-    "redirects": "Yönlendirmeler",
-    "upstreams": "Upstream sunucuları",
-    "workflows": "İş akışları",
     "edition_pro": "Pro",
     "crowdsec": "CrowdSec"
   },
   "news": {
     "image_alt": "Haber görseli",
-    "slide": "Kaydırma",
-    "posted_on": "Yayınlanma tarihi"
+    "posted_on": "Yayınlanma tarihi",
+    "slide": "Kaydırma"
   },
   "newsletter": {
     "legal_agreement": "Bültene abone olmak istiyorum ve şunları okudum ve kabul ediyorum:",
@@ -1201,7 +1485,51 @@
   },
   "notice": {
     "already_subscribed": "Zaten abone olundu",
-    "dismiss_mfa": "Bir daha hatırlatma"
+    "dismiss_mfa": "Bir daha hatırlatma",
+    "enable_mfa": "Hesabınızı güvence altına almak için iki faktörlü kimlik doğrulamayı <a href=\"{{url}}\">buradan</a> etkinleştirin"
+  },
+  "onboarding": {
+    "dismiss": "Kapat",
+    "error": "Tanıtım turu yüklenemedi.",
+    "hint": {
+      "bans": "Yasaklar, BunkerWeb'in şu anda reddettiği istemcilerdir. Her satır nedeni ve ne zaman sona ereceğini gösterir.",
+      "home": "Bu panel mevcut durumu gösterir: çalışan örnekler, sunulan servisler ve BunkerWeb'in işlediği trafik.",
+      "logs": "Tüm örneklerden canlı günlükler; örneğe ve önem düzeyine göre filtrelenebilir.",
+      "reports": "Engellenen her istek burada görünür. Hangi güvenlik denetiminin neden engellediğini görmek için birini açın.",
+      "title": "Hızlı tur"
+    },
+    "item": {
+      "first_block": "BunkerWeb'in bir şeyi engellediğini gör",
+      "https": "HTTPS'i çalışır hale getir",
+      "install": "BunkerWeb'i 1+ ana makineye kurun",
+      "mfa": "MFA'yı etkinleştir",
+      "pro": "BunkerWeb PRO'yu etkinleştir",
+      "read_bans": "Kimin ne zamana kadar yasaklı olduğunu gör",
+      "read_home": "Panoyu oku: şu anda ne sağlıklı",
+      "read_logs": "Tüm örneklerdeki canlı günlükleri izle",
+      "read_reports": "Bir isteğin neden engellendiğini öğren",
+      "service": "İlk hizmetinizi kaydedin",
+      "workflow": "Bir güvenlik iş akışı ekle"
+    },
+    "item_hint": {
+      "first_block": "BunkerWeb bir isteği engellediğinde raporlar burada görünür — kötü bir istek gönderin ve tekrar kontrol edin.",
+      "https": "Hizmetinizin HTTPS üzerinden sunulması için buradan bir sertifika ekleyin veya oluşturun.",
+      "install": "Buradan bir örnek ekleyin, ardından onu yönetim altına almak için ilk yapılandırmanızı kaydedin.",
+      "mfa": "Bu menüden profilinizi açın, ardından iki faktörlü kimlik doğrulamayı açın.",
+      "pro": "PRO eklentilerinin ve desteğin kilidini açmak için PRO lisans anahtarınızı buraya girin.",
+      "read_bans": "Buradaki her satır yasaklanmış bir istemciyi, nedenini ve yasağın ne zaman sona ereceğini gösterir.",
+      "read_home": "Bu pano, çalışan örnekleri, sunulan hizmetleri ve son trafiği bir bakışta gösterir.",
+      "read_logs": "Her örnekten canlı günlükler burada görünür, örneğe ve önem derecesine göre filtrelenebilir.",
+      "read_reports": "Hangi güvenlik kontrolünün onu durdurduğunu ve nedenini görmek için buradan bir raporu açın.",
+      "service": "BunkerWeb'e hangi uygulamayı koruyacağını söylemek için buradan bir hizmet oluşturun.",
+      "workflow": "Kontrolleri ve yanıtları tek bir kuralda zincirlemek için buradan bir workflow oluşturun."
+    },
+    "not_saved": "Kaydedilemedi.",
+    "pro_tips": "PRO ipuçları",
+    "restart": "Turu yeniden başlat",
+    "restart_help": "Başlangıç adımlarını üst çubukta yeniden göster.",
+    "subtitle": "BunkerWeb'in hizmetlerinizi koruması için birkaç adım.",
+    "title": "Başlarken"
   },
   "pagination": {
     "page": "Sayfa"
@@ -1231,10 +1559,60 @@
     }
   },
   "plugins": {
-    "multivalue": {
-      "more_value": "daha fazla değer",
-      "more_values": "daha fazla değer",
-      "show_less": "Daha az göster"
+    "flash": {
+      "invalid_archive": "Dosya geçerli bir eklenti arşivi değil (.zip, .tar.gz veya .tar.xz).",
+      "invalid_plugin_id_must_between_4": "Geçersiz eklenti kimliği, (4 ile 64 karakter arasında olmalı, yalnızca harf, rakam, alt çizgi ve tire)",
+      "couldn_t_install_catalogue": "{{plugin_id}} yüklenemedi: {{message}}",
+      "couldn_t_install_catalogue_2": "{{plugin_id}} yüklenemedi: {{e}}",
+      "install_did_not_complete": "{{plugin_id}} kurulumu tamamlanamadı: {{detail}}",
+      "refused_install": "{{plugin_id}} kurulumu reddedildi: {{problem}}",
+      "couldn_t_update_catalogue": "{{plugin_id}} güncellenemedi: {{message}}",
+      "couldn_t_update_catalogue_2": "{{plugin_id}} güncellenemedi: {{e}}",
+      "update_did_not_complete": "{{plugin_id}} güncellemesi tamamlanamadı: {{detail}}",
+      "refused_update": "{{plugin_id}} güncellemesi reddedildi: {{problem}}",
+      "archive_no_longer_matches_what_catalogue": "{{tag}} arşivi artık katalogda listelenenle eşleşmiyor. {{plugin_id}} için hiçbir şey yüklenmedi.",
+      "couldn_t_download": "{{plugin_id}} indirilemedi: {{e}}",
+      "refused_download": "{{plugin_id}} indirme işlemi reddedildi: {{e}}",
+      "plugin_management_restricted_administrators": "Eklenti yönetimi yöneticilerle sınırlıdır",
+      "community_catalogue_disabled": "Topluluk kataloğu devre dışı",
+      "no_plugin_data_upload": "Yüklenecek eklenti verisi yok",
+      "couldn_t_update_ui_plugins_via": "UI eklentileri API üzerinden güncellenemedi: {{e}}",
+      "plugins_uploaded_successfully_2": "Eklentiler başarıyla yüklendi",
+      "plugin_upload_error": "Eklenti yükleme hatası ({{value}}): {{value2}}",
+      "plugins_uploaded_successfully": "Eklentiler başarıyla yüklendi: {{value}}",
+      "plugin_already_exists": "{{plugin}} eklentisi zaten mevcut",
+      "plugin_named_already_exists": "{{folder_name}} adlı bir eklenti zaten mevcut",
+      "file_plugin_json_missing_one_more": "plugin.json dosyasında aşağıdaki anahtarlardan bir veya daha fazlası eksik: {{value}} ({{value2}})",
+      "file_plugin_json_not_valid_line": "{{file}} içindeki plugin.json dosyası geçerli değil ({{msg}}: satır {{lineno}} sütun {{colno}} (karakter {{pos}})) ({{value}})",
+      "not_valid_plugin_plugin_json_file": "{{file}} geçerli bir eklenti değil (plugin.json dosyası eksik) ({{value}})",
+      "invalid_plugin_name_can_only_contain": "{{temp_folder_name}} için geçersiz eklenti adı. (Yalnızca rakam, harf, alt çizgi ve tire içerebilir (en az 4 en fazla 64 karakter))",
+      "check_logs_more_details": "{{message}}, daha fazla ayrıntı için günlükleri kontrol edin",
+      "please_upload_new_plugins_reload_plugins": "Eklentileri yeniden yüklemek için lütfen yeni eklentiler yükleyin",
+      "couldn_t_update_plugin_2": "{{plugin}} eklentisi güncellenemedi: {{e}}",
+      "couldn_t_update_plugin": "{{plugin}} eklentisi güncellenemedi: {{message}}",
+      "couldn_t_delete_plugin": "{{plugin}} eklentisi silinemedi: {{message}}",
+      "deleted_plugin_successfully": "{{plugin}} eklentisi başarıyla silindi",
+      "plugin_enabled": "{{plugin}} eklentisi başarıyla etkinleştirildi.",
+      "plugin_disabled": "{{plugin}} eklentisi başarıyla devre dışı bırakıldı.",
+      "missing_id_version_parameter_plugins_catalog": "/plugins/catalog/update üzerinde id veya version parametresi eksik.",
+      "missing_id_parameter_plugins_catalog_install": "/plugins/catalog/install üzerinde id parametresi eksik.",
+      "missing_csrf_token_parameter_plugins": "/plugins üzerinde csrf_token parametresi eksik.",
+      "missing_plugin_enabled_parameter_plugins_enable": "/plugins/enable üzerinde plugin veya enabled parametresi eksik.",
+      "missing_plugins_parameter_plugins_delete": "/plugins/delete üzerinde plugins parametresi eksik.",
+      "plugin_not_found": "{{plugin}} kimliğine sahip eklenti bulunamadı",
+      "couldn_t_delete_plugin_in_database": "{{plugin}} eklentisi veritabanında silinemedi: {{message}}",
+      "already_installed": "{{plugin_id}} kimliğine sahip bir eklenti zaten yüklü",
+      "installed_successfully": "{{plugin_id}} eklentisi başarıyla yüklendi",
+      "catalogue_entry_changed": "{{plugin_id}} için katalog girişi güncelleme onaylandığından beri değişti; güncellemeyi tekrar gözden geçirin",
+      "catalogue_entry_predates_updates": "{{plugin_id}} için önbelleğe alınmış katalog girişi güncellemelerden daha eski; bir sonraki yenilemeyi bekleyin",
+      "not_installed_install_from_catalogue": "{{plugin_id}} eklentisi yüklü değil; bunun yerine katalogdan yükleyin",
+      "managed_outside_catalogue": "{{plugin_id}} eklentisi katalog dışında yönetiliyor ve katalogdan güncellenemez",
+      "managed_outside_catalogue_core": "{{plugin_id}} eklentisi katalog dışında yönetilen bir core eklentisidir ve katalogdan güncellenemez",
+      "managed_outside_catalogue_external": "{{plugin_id}} eklentisi katalog dışında yönetilen harici bir eklentidir ve katalogdan güncellenemez",
+      "managed_outside_catalogue_pro": "{{plugin_id}} eklentisi katalog dışında yönetilen bir pro eklentisidir ve katalogdan güncellenemez",
+      "managed_outside_catalogue_ui": "{{plugin_id}} eklentisi katalog dışında yönetilen bir ui eklentisidir ve katalogdan güncellenemez",
+      "already_at_version": "{{plugin_id}} eklentisi zaten {{version}} sürümünde",
+      "updated_to_version": "{{plugin_id}} eklentisi {{version}} sürümüne güncellendi"
     },
     "marketplace": {
       "active": "Etkin",
@@ -1249,6 +1627,11 @@
       "tab_disabled": "Devre dışı",
       "tab_enabled": "Etkin"
     },
+    "multivalue": {
+      "more_value": "daha fazla değer",
+      "more_values": "daha fazla değer",
+      "show_less": "Daha az göster"
+    },
     "catalog": {
       "tab": "Mevcut",
       "install": "Yükle",
@@ -1259,7 +1642,25 @@
       "stale": "Katalog yakın zamanda yenilenemedi, bu yüzden tekrar güncel olana kadar yükleme devre dışı.",
       "trust_notice": "Topluluk öğeleri, BunkerWeb kuruluşunun GitHub'da yayımladığı depolardan TLS üzerinden okunur ve yüklenen şey listelenenle karşılaştırılarak kontrol edilir — ancak burada hiçbir şey kriptografik olarak imzalanmamıştır. Yüklenen bir eklenti, tüm BunkerWeb ayrıcalıklarıyla kod çalıştırır.",
       "incompatible_declared": "Bu sürüm BunkerWeb {{supported}} sürümünü destekliyor; şu an {{current}}",
-      "release": "{{tag}} sürümünden oku"
+      "version_unknown": "Çalışan BunkerWeb sürümü ({{current}}) okunamadı, bu nedenle bu sürümün uyumluluğu kontrol edilemiyor",
+      "release": "{{tag}} sürümünden oku",
+      "state_installed": "Yüklü (sürüm {{version}})",
+      "state_update": "Güncelleme mevcut: sürüm {{installed}} yüklü, listelenen sürüm {{version}}",
+      "state_managed": "Katalog dışında kurulu; kurulduğu yerden güncelleyin veya kaldırın",
+      "state_managed_core": "Katalog dışında bir core eklentisi olarak kurulu; kurulduğu yerden güncelleyin veya kaldırın",
+      "state_managed_external": "Katalog dışında harici bir eklenti olarak kurulu; kurulduğu yerden güncelleyin veya kaldırın",
+      "state_managed_pro": "Katalog dışında bir pro eklentisi olarak kurulu; kurulduğu yerden güncelleyin veya kaldırın",
+      "state_managed_ui": "Katalog dışında bir ui eklentisi olarak kurulu; kurulduğu yerden güncelleyin veya kaldırın",
+      "update": "Güncelle",
+      "remove": "Kaldır",
+      "update_title": "Topluluk Eklentisini Güncelle",
+      "update_confirm": "Bu, yüklü {{name}} eklentisini ({{id}}, sürüm {{installed}}) katalogdaki {{version}} sürümüyle değiştirir. Katalogdan değil elle yüklenmiş olsa bile değiştirilir.",
+      "update_removed_settings": "{{version}} sürümü artık bu ayarları bildirmiyor. Bunlar, genel ayarlarda, hizmetlerde ve şablonlarda onlar için ayarlanmış her değerle birlikte silinir:",
+      "update_no_removed_settings": "Bu güncelleme hiçbir ayarı kaldırmaz.",
+      "update_preview_unknown": "Bu güncellemenin kaldıracağı ayarlar şu anda listelenemiyor, bu nedenle bir sonraki katalog yenilemesine kadar güncelleme devre dışı.",
+      "flash": {
+        "version_unreadable": "BunkerWeb sürümü ({{current}}) okunamadı, bu nedenle {{id}} uyumluluğu kontrol edilemiyor; hiçbir şey yüklenmedi"
+      }
     }
   },
   "pro": {
@@ -1302,13 +1703,33 @@
       "draft_services_count": "{{draft_services}} Taslak servis",
       "expired": "SÜRESİ DOLDU",
       "free_version": "ÜCRETSİZ Sürüm",
+      "invalid": "GEÇERSİZ ANAHTAR",
+      "invalid_key": "Lisans sunucusu kayıtlı lisans anahtarını reddetti. Kontrol edin veya Genel ayarlar → Pro'dan kaldırın.",
       "overlapped": "AŞIM",
+      "pending_key": "Lisans anahtarı henüz kontrol edilmedi. Zamanlayıcı, kaydedildikten kısa süre sonra kontrol eder.",
       "pro_version": "PRO Sürüm",
       "services_count": "{{online_services}} Çevrimiçi Servis / {{pro_services}} PRO Servis",
       "suspended": "ASKIYA ALINDI",
       "title": "Durum"
     },
-    "title": "Pro lisansı"
+    "title": "Pro lisansı",
+    "flash": {
+      "web_ui_will_reload_pro_plugins": "Web arayüzü PRO eklentilerini kısa süre içinde yeniden yükleyecektir.",
+      "forced_update_pro_plugins_has_scheduled": "PRO eklentilerinin zorunlu güncellemesi planlandı.",
+      "new_check_pro_plugins_has_scheduled": "PRO eklentileri için yeni bir kontrol planlandı.",
+      "checking_license_key": "Lisans anahtarı kontrol ediliyor.",
+      "scheduler_will_attempt_apply_changes_download": "Zamanlayıcı değişiklikleri uygulamaya ve PRO eklentilerini indirmeye çalışacaktır.",
+      "license_key_same_current_one": "Lisans anahtarı mevcut anahtarla aynı.",
+      "invalid_license_key": "Geçersiz lisans anahtarı",
+      "missing_license_key_parameter_pro_key": "/pro/key üzerinde license key parametresi eksik.",
+      "license_key_updated_successfully": "PRO lisans anahtarı başarıyla güncellendi.",
+      "license_key_not_updated_refused": "PRO lisans anahtarı güncellenmedi: değer reddedildi."
+    },
+    "trial": {
+      "title": "Ücretsiz Deneme",
+      "description": "<span class=\"text-primary\">BunkerWeb PRO</span>'yu <strong>30 gün</strong> boyunca ücretsiz deneyin.",
+      "cta": "Ücretsiz Denemeyi Başlat"
+    }
   },
   "profile": {
     "2fa": {
@@ -1370,6 +1791,50 @@
       "profile": "Profil",
       "security": "Güvenlik",
       "sessions": "Oturumlar"
+    },
+    "flash": {
+      "passkey_has_successfully_deleted": "Geçiş anahtarı başarıyla silindi.",
+      "couldn_t_delete_passkey": "Geçiş anahtarı silinemedi: {{message}}",
+      "current_password_incorrect": "Mevcut parola yanlış.",
+      "passkey_has_successfully_renamed": "Geçiş anahtarı başarıyla yeniden adlandırıldı.",
+      "couldn_t_rename_passkey": "Geçiş anahtarı yeniden adlandırılamadı: {{message}}",
+      "passkey_name_cannot_empty": "Geçiş anahtarı adı boş olamaz.",
+      "passkey_has_successfully_registered": "Geçiş anahtarı başarıyla kaydedildi.",
+      "other_sessions_have_successfully_wiped": "Diğer oturumlar başarıyla temizlendi.",
+      "couldn_t_wipe_other_sessions": "Diğer oturumlar temizlenemedi: {{message}}",
+      "couldn_t_revoke_other_sessions": "Diğer oturumlar iptal edilemedi: {{err}}",
+      "password_changed_but_other_sessions_could": "Parolanız değiştirildi, ancak diğer oturumlarınız iptal edilemedi. Aşağıdaki \"Diğer oturumları temizle\" seçeneğini kullanın ve etkin oturumların listesini kontrol edin.",
+      "profile_has_successfully_updated": "Profil başarıyla güncellendi.",
+      "couldn_t_update_user": "{{value}} kullanıcısı güncellenemedi: {{message}}",
+      "no_fields_updated": "Hiçbir alan güncellenmedi.",
+      "theme_invalid": "Tema geçersiz.",
+      "new_password_same_current_one": "Yeni parola mevcut parolayla aynı.",
+      "new_password_too_long_must_not": "Yeni parola çok uzun. {{MAX_PASSWORD_BYTES}} baytı (bcrypt'in kesin sınırı) aşmamalıdır; aksanlı veya emoji karakterler her biri birkaç bayt sayılır.",
+      "new_password_not_strong_enough_must": "Yeni parola yeterince güçlü değil. En az 8 karakter içermeli, bunlardan en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter (#@?!$%^&*-) olmalı.",
+      "passwords_do_not_match_confirm_password": "Parolalar, parola onayı ile eşleşmiyor.",
+      "username_email_are_same_current_ones": "Kullanıcı adı ve e-posta, mevcut olanlarla aynı.",
+      "username_too_long_must_less_than": "Kullanıcı adı çok uzun. 256 karakterden az olmalıdır.",
+      "email_too_long_must_less_than": "E-posta çok uzun. 256 karakterden az olmalıdır.",
+      "two_factor_authentication_has_successfully_enabled": "İki faktörlü kimlik doğrulama başarıyla etkinleştirildi.",
+      "couldn_t_enable_two_factor_authentication": "İki faktörlü kimlik doğrulama etkinleştirilemedi: {{message}}",
+      "totp_token_invalid": "TOTP jetonu geçersiz.",
+      "two_factor_enrolment_expired_reload_page": "İki faktörlü kayıt süresi doldu. Sayfayı yeniden yükleyin ve yeni QR kodunu tarayın.",
+      "two_factor_authentication_already_enabled": "İki faktörlü kimlik doğrulama zaten etkin.",
+      "two_factor_authentication_has_successfully_disabled": "İki faktörlü kimlik doğrulama başarıyla devre dışı bırakıldı.",
+      "couldn_t_disable_two_factor_authentication": "İki faktörlü kimlik doğrulama devre dışı bırakılamadı: {{message}}",
+      "two_factor_authentication_not_enabled": "İki faktörlü kimlik doğrulama etkin değil.",
+      "recovery_codes_have_successfully_refreshed_old": "Kurtarma kodları başarıyla yenilendi. Eski kodlar artık geçerli değil.",
+      "couldn_t_refresh_recovery_codes": "Kurtarma kodları yenilenemedi: {{message}}",
+      "missing_parameters_profile_webauthn_delete": "/profile/webauthn/delete üzerinde parametreler eksik.",
+      "missing_parameters_profile_webauthn_rename": "/profile/webauthn/rename üzerinde parametreler eksik.",
+      "missing_current_password_parameter_profile_wipe": "/profile/wipe-other-sessions üzerinde current password parametresi eksik.",
+      "missing_new_password_confirm_parameter_profile": "/profile/edit üzerinde new password confirm parametresi eksik.",
+      "missing_current_password_parameter_profile_edit": "/profile/edit üzerinde current password parametresi eksik.",
+      "missing_email_parameter_profile_edit": "/profile/edit üzerinde email parametresi eksik.",
+      "missing_totp_token_parameter_profile_totp": "/profile/totp-enable üzerinde totp token parametresi eksik.",
+      "missing_current_password_parameter_profile_totp_3": "/profile/totp-enable üzerinde current password parametresi eksik.",
+      "missing_current_password_parameter_profile_totp_2": "/profile/totp-disable üzerinde current password parametresi eksik.",
+      "missing_current_password_parameter_profile_totp": "/profile/totp-refresh üzerinde current password parametresi eksik."
     }
   },
   "range_picker": {
@@ -1379,6 +1844,636 @@
     "7d": "Son hafta",
     "aria_label": "Zaman aralığı",
     "custom": "Özel"
+  },
+  "certificates": {
+    "acme_help": "Mevcut ayarlarınız zaten Let's Encrypt'i etkinleştiriyor ve yapılandırıyor olan hizmetleri seçin. Bu işlem yalnızca bu yapılandırmayı planlar; sertifika ayrıntıları ve meydan okuma kimlik bilgileri burada girilmez.",
+    "active": "Aktif sertifikalar",
+    "algorithm": "Algoritma",
+    "all": "Tümü",
+    "assignment_notice": "Atamalar, merkezi envanteri düzenler; TLS dağıtımı, her hizmetin sertifika ayarları tarafından kontrol edilir.",
+    "assignments": "Envanter atamaları",
+    "assignments_help": "Bu atamalar, canlı TLS ayarlarını değiştirmez.",
+    "attach": "Atayın",
+    "attach_all": "Bu sertifika, mevcut tüm hizmetlere zaten bağlıdır.",
+    "attach_copy": "Merkezi envanterdeki bir hizmete \"{{name}}\" atayın.",
+    "browse_certificate": "Sertifikayı görüntüle",
+    "browse_key": "Özel anahtarı görüntüle",
+    "common_name": "Ortak ad",
+    "confirm": "Onayla",
+    "confirm_action": "Sertifika eylemini onayla",
+    "confirm_delete": "\"{{name}}\"i sil? Bu geri alınamaz.",
+    "confirm_generic": "Bu sertifika eylemini onaylamak?",
+    "confirm_renew": "\"{{name}}\"i yenile?",
+    "confirm_renew_due": "Tüm sertifikalar kontrol edilsin ve yenileme zamanı gelenler yenilensin mi?",
+    "create": "Sertifika oluştur",
+    "download_chain": "Zinciri indirin",
+    "download_leaf": "Yaprağı indirin",
+    "edit_help": "Bu, yalnızca envanter meta verilerini değiştirir, sertifika malzemesini veya canlı TLS ayarlarını değiştirmez.",
+    "edit_metadata": "Sertifika meta verilerini düzenle",
+    "empty": "Sertifikalar yok",
+    "empty_help": "Kendinden imzalı bir sertifika oluşturun, ACME sertifika düzenleme işlemini planlayın veya mevcut bir PEM sertifikası ile anahtarını yükleyin.",
+    "expired_help": "Dikkat gerektirir",
+    "expires": "Son kullanma tarihi",
+    "expiring_help": "30 gün veya daha az",
+    "file_extensions": "Aşağıdaki dosya uzantılarından birini kullanın: {{extensions}}.",
+    "file_select": "Bir PEM dosyasını seçin.",
+    "flash": {
+      "encrypted_private_key": "Şifrelenmiş özel anahtarlar desteklenmiyor.",
+      "invalid_certificate_pem": "Sertifika dosyası geçerli bir PEM sertifikası değil.",
+      "invalid_private_key_pem": "Özel anahtar dosyası geçerli bir PEM özel anahtarı değil.",
+      "could_not_download_certificate": "Sertifika indirilemedi: {{message}}",
+      "certificate_action_failed": "Sertifika işlemi başarısız oldu: {{message}}",
+      "certificate_deleted_successfully": "Sertifika başarıyla silindi",
+      "could_not_detach_certificate": "Sertifika ayrılamadı: {{message}}",
+      "certificate_inventory_assignment_removed_successfully": "Sertifika envanteri ataması başarıyla kaldırıldı",
+      "certificate_service_are_required": "Sertifika ve servis gereklidir",
+      "certificate_inventory_assignment_added_successfully": "Sertifika envanteri ataması başarıyla eklendi",
+      "custom_certificate_uploaded_successfully": "Özel sertifika başarıyla yüklendi",
+      "certificate_upload_exceeds_2_mib_request": "Sertifika yüklemesi 2 MiB istek sınırını aşıyor",
+      "certificate_metadata_updated_successfully": "Sertifika meta verileri başarıyla güncellendi",
+      "could_not_fetch_services_certificate_assignments": "Sertifika atamaları için servisler alınamadı: {{message}}",
+      "could_not_fetch_certificates": "Sertifikalar alınamadı: {{message}}",
+      "invalid_certificate_part": "Geçersiz sertifika bölümü",
+      "too_many_services": "Bir sertifika 100'den fazla servise bağlanamaz",
+      "too_many_sans": "Bir sertifika 100'den fazla alternatif konu adı içeremez",
+      "validity_whole_number": "Geçerlilik süresi tam gün sayısı olmalıdır",
+      "validity_range": "Geçerlilik süresi 1 ile 825 gün arasında olmalıdır",
+      "invalid_certificate_source": "Geçersiz sertifika kaynağı",
+      "select_service_letsencrypt": "Let's Encrypt sertifikası vermek için en az bir servis seçin",
+      "name_common_name_are_required": "Ad ve ortak ad (common name) gereklidir",
+      "letsencrypt_issuance_scheduled": "Let's Encrypt sertifika verimi planlandı",
+      "selfsigned_certificate_created": "Kendinden imzalı sertifika oluşturuldu",
+      "could_not_schedule_letsencrypt": "Let's Encrypt sertifika verimi planlanamadı: {{message}}",
+      "could_not_create_certificate": "Sertifika oluşturulamadı: {{message}}",
+      "certificate_name_are_required": "Sertifika ve ad gereklidir",
+      "could_not_update_certificate": "Sertifika güncellenemedi: {{message}}",
+      "pem_certificate_private_key_required": "Bir PEM sertifikası ve özel anahtar gereklidir",
+      "certificate_name_required": "Sertifika adı gereklidir",
+      "could_not_upload_certificate": "Sertifika yüklenemedi: {{message}}",
+      "could_not_attach_certificate": "Sertifika bağlanamadı: {{message}}",
+      "checked_certificates_due_renewal": "Yenileme süresi gelen {{total_due}} sertifika kontrol edildi",
+      "certificate_required": "Sertifika gereklidir",
+      "certificate_renewed_successfully": "Sertifika başarıyla yenilendi",
+      "invalid_certificate_action": "Geçersiz sertifika işlemi"
+    },
+    "file_selected": "{{name}} ({{size}} KiB)",
+    "file_size_limit": "Dosya 1 MiB'ı geçmemelidir.",
+    "fingerprint": "SHA-256 parmak izi",
+    "issuer": "Düzenleyen",
+    "issuers": "En çok kullanılan düzenleyenler",
+    "key_drop": "İlgili özel anahtarı buraya bırakın",
+    "key_limit": "Maksimum 1 MiB; dinlenme halindeyken şifrelenmiş ve indirilemez",
+    "last_error": "Son hata",
+    "make_primary": "Bu hizmet için ana envanter atamasını işaretleyin",
+    "managed": "Yönetilen sertifikalar",
+    "new_selfsigned": "Yeni kend imzalanmış sertifika",
+    "no_issuers": "Düzenleyen verisi yok",
+    "none_due": "Yenileme zamanı gelen sertifika yok",
+    "orphan_account": "Hesap",
+    "orphan_badge": "ACME hesabı eksik",
+    "orphan_help": "Bu yenileme kaydı, artık mevcut olmayan bir ACME hesabını işaret etmektedir. Yenileme, sağlayıcının durumu onarılana kadar bloke kalır.",
+    "orphan_server": "ACME sunucusu",
+    "orphan_title": "ACME hesabı eksik",
+    "pem_certificate": "PEM sertifikası veya zincir",
+    "pem_drop": "Açık PEM sertifikasını veya zincirini buraya bırakın",
+    "pem_limit": "Maksimum 1 MiB",
+    "pem_private_key": "PEM özel anahtar",
+    "primary": "Ana atama",
+    "primary_help": "Seçilen hizmetler için ana envanter atamasını işaretleyin",
+    "readonly": "Veritabanı salt okunurdur. Sertifikalar incelenebilir ve indirilebilir, ancak değiştirilemez.",
+    "renew_due": "Kontrol/yenileyin",
+    "sans": "Konu alternatif adları",
+    "save_metadata": "Meta verileri kaydedin",
+    "schedule": "Yayınlamayı planlayın",
+    "schedule_acme": "ACME yayınlamayı planlayın",
+    "search": "Ad, ortak ad, SAN, işveren veya parmak izi ile arayın…",
+    "serial": "Seri numarası",
+    "services": "Servisler",
+    "services_help": "Ctrl veya Command kullanarak birden fazla hizmeti seçin.",
+    "showing_count": "{{visible}} tanesi görüntüleniyor, toplamda {{total}} tane",
+    "source": {
+      "customcert": "Özel",
+      "letsencrypt": "Let's Encrypt",
+      "selfsigned": "Kendinden imzalı"
+    },
+    "source_label": "Kaynak",
+    "status": {
+      "expired": "Geçerlilik süresi dolmuş",
+      "expiring_soon": "Yakında geçerlilik süresi dolacak",
+      "not_yet_valid": "Henüz geçerli değil",
+      "revoked": "İptal edilmiş",
+      "valid": "Geçerli"
+    },
+    "subtitle": "Merkezi envanterde sertifikaları oluştur, yükle, atayın, yenileyin ve inceleyin.",
+    "total": "Toplam",
+    "truncated": "Sadece ilk 500 sertifika görüntüleniyor. Tam sonucu almak için API üzerinden envanteri daraltın.",
+    "unassigned": "Atanmamış",
+    "upcoming": "Yaklaşan yenilemeler",
+    "upcoming_help": "Geçerlilik süresi dolmuş veya 30 günlük yenileme penceresi içinde",
+    "upload": "Sertifikayı yükle",
+    "upload_custom": "Özel sertifikayı yükle",
+    "upload_invalid": "Geçerli bir açık sertifika ve eşleşen özel anahtar seçin.",
+    "valid_days": "Gün cinsinden geçerlilik süresi",
+    "valid_from": "Şu tarihten itibaren geçerli",
+    "valid_to": "Şu tarihe kadar geçerli"
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "istek engellendi",
+        "captcha": "captcha doğrulaması",
+        "challenge": "bot tespiti doğrulaması"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (senaryo: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "failure_policy": "CrowdSec AppSec hata politikası",
+        "lapi": "CrowdSec LAPI"
+      }
+    },
+    "alert": {
+      "id": "Uyarı kimliği",
+      "load": "Tüm kanıtları yükle",
+      "started": "Başladı",
+      "stopped": "Durdu"
+    },
+    "captured_history": "Yakalanan geçmiş",
+    "captured_history_help": "Yakalanan rapor verileri, istek anında gözlemlenenleri açıklar; kararın mevcut durumunu kanıtlamaz.",
+    "connection": {
+      "appsec": "Son AppSec gözlemi",
+      "connected": "Bağlı",
+      "connection_error": "Bağlantı hatası",
+      "configured": "Yapılandırıldı",
+      "global": "tüm hizmetler",
+      "label": "CrowdSec bağlantısı",
+      "last_sync": "Son başarılı eşitleme",
+      "local_api": "Yerel API",
+      "management": "Yönetim",
+      "mode": "Mod",
+      "none": "Kullanılabilir bir CrowdSec bağlantısı bulunamadı. Örnek hatalarını ve eklenti yapılandırmasını kontrol edin.",
+      "read_only": "Salt okunur",
+      "required": "Önce bir CrowdSec bağlantısı seçin.",
+      "sync": "Karar eşitleme",
+      "sync_current": "Güncel",
+      "sync_not_synchronized": "Henüz eşitlenmedi",
+      "sync_stale": "Eskimiş",
+      "selected": "Seçili bağlantı",
+      "scope_help": "Seçili bağlantı, aşağıdaki kararlar, izin listeleri ve IP incelemesi için geçerlidir.",
+      "filter": "Bağlantıları ana makine adına veya hizmete göre filtreleyin"
+    },
+    "current_state": "Mevcut durum",
+    "current_state_help": "Mevcut durum bu gözlemden sonra değişebilir.",
+    "decision": {
+      "duration": "Süre",
+      "expires": "Sona erer",
+      "id": "Karar kimliği",
+      "origin": "Köken",
+      "scenario": "Senaryo",
+      "scope": "Kapsam",
+      "target": "Hedef",
+      "type": "Tür"
+    },
+    "decisions": {
+      "count": "{{total}} kayıttan {{start}}–{{end}} gösteriliyor",
+      "help": "Bu, doğrudan seçili CrowdSec motorundan okunan mevcut durumdur.",
+      "none": "Bu filtrelerle eşleşen etkin karar yok.",
+      "pagination": "Karar sayfaları",
+      "title": "Etkin kararlar"
+    },
+    "error": {
+      "request": "CrowdSec isteği başarısız oldu."
+    },
+    "investigation": {
+      "alerts": "Kullanılabilir CrowdSec uyarı kanıtları",
+      "current_decisions": "Mevcut CrowdSec kararları",
+      "help": "Mevcut CrowdSec kararları, yerel yasaklar ve yakalanan raporlarla birlikte kontrol edilir.",
+      "ip": "IP adresi",
+      "local_bans": "Mevcut yerel BunkerWeb yasakları",
+      "no_alerts": "Kullanılabilir uyarı kanıtı yok.",
+      "no_bans": "Mevcut yerel yasak bulunamadı.",
+      "no_decisions": "Mevcut CrowdSec kararı bulunamadı.",
+      "no_reports": "Yakın zamanda yakalanmış rapor bulunamadı.",
+      "placeholder": "192.0.2.10",
+      "reports": "Son BunkerWeb raporları",
+      "result": "{{ip}} için inceleme",
+      "submit": "İncele",
+      "title": "Bir IP'yi incele",
+      "truncated": "{{total}} sonuçtan {{shown}} tanesi gösteriliyor (kaynak sınırı: {{limit}}).",
+      "unavailable": "Kullanılamıyor: {{error}}",
+      "summary": "Bu IP için bulunan kanıtlar",
+      "summary_help": "Bu, seçili CrowdSec bağlantısını ve BunkerWeb'in kendi yasaklarını kapsar. Diğer korumalar burada kontrol edilmez ve okunamayan kanıtlar bu IP'ye izin verildiğini kanıtlamaz.",
+      "summary_decisions": "CrowdSec kararları",
+      "summary_bans": "Yerel BunkerWeb yasakları",
+      "summary_alerts": "CrowdSec uyarı kanıtları",
+      "summary_reports": "BunkerWeb raporları",
+      "summary_active": "{{total}} etkin",
+      "summary_available": "{{total}} kullanılabilir",
+      "summary_captured": "{{total}} yakalandı",
+      "summary_none": "Hiçbir şey bulunamadı",
+      "summary_unreadable": "Okunamadı"
+    },
+    "local_ban": {
+      "expires": "Sona erer",
+      "reason": "Neden",
+      "service": "Hizmet"
+    },
+    "next": "Sonraki",
+    "observed_at": "{{time}} zamanında gözlemlendi",
+    "previous": "Önceki",
+    "refresh": "Durumu yenile",
+    "remove": {
+      "action": "Kaldır",
+      "confirm": "Anlıyorum ve bu kararı kaldırmak istiyorum.",
+      "impact": "Bu işlem kararı paylaşılan CrowdSec motorundan kaldırır ve bağlı her bouncer'ı etkiler. Önbelleğe alınmış kararlar, başka bir aralık, yerel yasaklar veya AppSec hedefi yine de engelleyebilir.",
+      "selection": "{{scope}} {{value}} ({{type}}), senaryo {{scenario}}, köken {{origin}}, {{source}} ({{engine}}) kaynağından kaldırılsın mı?",
+      "submit": "Kararı kaldır",
+      "success": "CrowdSec kaynağında kaldırıldı. Yayılım durumu: {{status}} ({{mode}}, aralık {{interval}}). Kalan eşleşen kararlar: {{remaining}}. Yerel yasaklar veya AppSec yine de engelleyebilir.",
+      "title": "CrowdSec kararını kaldır"
+    },
+    "report": {
+      "captured": "Yakalanma zamanı",
+      "date": "Rapor zamanı",
+      "decisions": "Yakalanan kararlar",
+      "entry": "Güvenlik raporu",
+      "matched_target": "Eşleşen hedef",
+      "metadata": "Karar meta verileri",
+      "metadata_complete": "Tamamlandı",
+      "metadata_incomplete": "Eksik",
+      "metadata_unavailable": "CrowdSec anlık görüntü meta verileri bu eski rapor için kullanılamıyor.",
+      "metadata_warning": "Yakalanan bazı karar meta verileri istek anında kullanılamıyordu.",
+      "reason": "Neden",
+      "remediation": "Yakalanan iyileştirme",
+      "scope": "Yakalanan hizmet kapsamı",
+      "service": "Hizmet",
+      "source": "Yakalanan kaynak",
+      "identifier": "Rapor tanımlayıcısı"
+    },
+    "subtitle": "Yapılandırılmış her CrowdSec motorunu inceleyin ve bir IP'yi mevcut ve yakalanan kanıtlar üzerinden araştırın.",
+    "title": "CrowdSec operatörü",
+    "unknown": "Bilinmiyor",
+    "allowlists": {
+      "title": "CrowdSec izin listeleri",
+      "help": "Seçili motor için güvenilir IP'ler ve ağlar. Bu istisnalar, motora bağlı tüm hizmetler ve bouncer'lar için geçerlidir.",
+      "refresh": "İzin listelerini yenile",
+      "pages": "İzin listesi sayfaları",
+      "empty": "Bu motorda hiçbir izin listesi bulunamadı.",
+      "console": "Console tarafından yönetiliyor",
+      "local": "Yerel olarak yönetiliyor",
+      "no_entries": "Etkin kayıt yok.",
+      "never": "Asla",
+      "comment": "Yorum",
+      "unknown": "İzin listesi durumu kullanılamıyor.",
+      "not_allowed": "Bu IP, hiçbir CrowdSec izin listesiyle eşleşmiyor.",
+      "allowed": "CrowdSec tarafından izin listesine alındı",
+      "impact": "Bu, motorun tamamı için geçerli bir istisnadır. Yerel BunkerWeb yasakları, diğer korumalar veya önbelleğe alınmış kararlar bu IP'yi yine de engelleyebilir.",
+      "guide": {
+        "intro": "Burada izin listelerine göz atabilir ve IP'leri kontrol edebilirsiniz. Kayıt eklemek veya kaldırmak için CrowdSec motorunda cscli kullanın.",
+        "title": "Güvenilir IP'ler ve ağlar nasıl yönetilir",
+        "where": "CrowdSec 1.7 veya üstü gerekir. Bu komutları ana makinede veya seçili motorun Yerel API'sini (LAPI) çalıştıran kapsayıcının içinde, CrowdSec yapılandırmasına ve veritabanına erişimle çalıştırın. Örnek liste adını, IP'yi ve ağı kendi değerlerinizle değiştirin.",
+        "create": "Bir listeyi yalnızca bir kez oluşturun veya mevcut, yerel olarak yönetilen bir liste kullanın.",
+        "add": "Güvenilir IP'leri veya CIDR ağlarını ekleyin.",
+        "expiration": "Bu örnek 24 saat sonra sona erer. Süresi dolmayan bir kayıt için --expiration parametresini kullanmayın. IPv4 ve IPv6 desteklenir.",
+        "inspect": "Listeyi ve kayıtlarının son kullanma tarihlerini inceleyin.",
+        "remove": "Artık gerekmediğinde bir istisnayı kaldırın.",
+        "refresh": "Bir değişiklikten sonra izin listelerini yenileyin ve IP'yi yeniden inceleyin. Bir istisnayı kaldırmak gelecekteki CrowdSec kararlarına izin verir; yasak oluşturmaz. Yerel BunkerWeb yasakları ve diğer korumalar ayrı kalır.",
+        "console": "Console tarafından yönetilen listeleri CrowdSec Console'da düzenleyin.",
+        "docs": "CrowdSec izin listesi belgeleri"
+      }
+    }
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "Bot karşıtı doğrulama ({{provider}}) sunuldu"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "Bu örneğin kimlik bilgisi iptal edilsin mi? Kontrol düzlemi ona artık erişemeyecek.",
+    "rotate_credential": "Bu örneğin kimlik bilgisi döndürülsün mü? Örnek erişilemezse başarısız olur."
+  },
+  "general": {
+    "settings": {
+      "IS_LOADING": {
+        "label": "dahili kullanım: yükleniyor",
+        "help": "Dahili kullanım: BW yüklenirken yes olarak ayarlayın."
+      },
+      "NGINX_PREFIX": {
+        "label": "nginx Öneki",
+        "help": "nginx'in yapılandırmaları nerede arayacağı."
+      },
+      "HTTP_PORT": {
+        "label": "HTTP Portu",
+        "help": "bunkerweb'in bağlandığı HTTP port numarası. HTTP dinlemeyi devre dışı bırakmak için boş bırakın."
+      },
+      "HTTPS_PORT": {
+        "label": "HTTPS Portu",
+        "help": "bunkerweb'in bağlandığı HTTPS port numarası. HTTPS dinlemeyi devre dışı bırakmak için boş bırakın."
+      },
+      "MULTISITE": {
+        "label": "Çoklu Site",
+        "help": "Çoklu site etkinleştirme."
+      },
+      "SERVER_NAME": {
+        "label": "Sunucu Adı",
+        "help": "bunkerweb tarafından sunulan sanal ana bilgisayarların listesi. (boşlukla ayrılmış)"
+      },
+      "WORKER_PROCESSES": {
+        "label": "İşçi Süreçleri",
+        "help": "İşçi süreç sayısı."
+      },
+      "WORKER_RLIMIT_NOFILE": {
+        "label": "İşçi Başına Açık Dosya",
+        "help": "İşçi süreçleri için maksimum açık dosya sayısı."
+      },
+      "WORKER_CONNECTIONS": {
+        "label": "İşçi Başına Bağlantı",
+        "help": "İşçi başına maksimum bağlantı sayısı."
+      },
+      "WORKER_SHUTDOWN_TIMEOUT": {
+        "label": "İşçi Kapatma Zaman Aşımı",
+        "help": "İşçi süreçlerinin düzgün kapatılması için zaman aşımı. Bu gecikmeden sonra, bellek artışını önlemek amacıyla eski işçiler yeniden yükleme sırasında zorla sonlandırılır."
+      },
+      "DNS_RESOLVERS": {
+        "label": "DNS Çözümleyicileri",
+        "help": "Kullanılacak çözümleyicilerin DNS adresleri."
+      },
+      "CLIENT_BODY_TIMEOUT": {
+        "label": "İstemci Gövdesi Zaman Aşımı",
+        "help": "İstemci istek gövdesini okuma zaman aşımı."
+      },
+      "CLIENT_HEADER_TIMEOUT": {
+        "label": "İstemci Başlığı Zaman Aşımı",
+        "help": "İstemci istek başlığını okuma zaman aşımı."
+      },
+      "KEEPALIVE_TIMEOUT": {
+        "label": "Keepalive Zaman Aşımı",
+        "help": "Keep-alive istemci bağlantıları için zaman aşımı."
+      },
+      "SEND_TIMEOUT": {
+        "label": "Gönderme Zaman Aşımı",
+        "help": "İstemciye yanıt iletme zaman aşımı."
+      },
+      "WORKERLOCK_MEMORY_SIZE": {
+        "label": "Başlatma Workerlock Bellek Boyutu",
+        "help": "Başlatma işçileri için lua_shared_dict boyutu"
+      },
+      "INTERNALSTORE_MEMORY_SIZE": {
+        "label": "Internalstore Bellek Boyutu",
+        "help": "Dahili internalstore boyutu."
+      },
+      "DATASTORE_MEMORY_SIZE": {
+        "label": "Datastore Bellek Boyutu",
+        "help": "Dahili datastore boyutu."
+      },
+      "DATASTORE_LRU_SIZE": {
+        "label": "Datastore LRU Boyutu",
+        "help": "Paylaşılan, işçi başına datastore LRU için slot sayısı (internalstore ve eklenti işçi-yerel önbellekleri tarafından kullanılır). Düz bir tam sayı veya `k`/`m` kısayolunu kabul eder (örn. `1k`, `10k`, `1m`)."
+      },
+      "CACHESTORE_MEMORY_SIZE": {
+        "label": "Cachestore Bellek Boyutu",
+        "help": "Dahili cachestore boyutu."
+      },
+      "CACHESTORE_IPC_MEMORY_SIZE": {
+        "label": "Cachestore IPC Bellek Boyutu",
+        "help": "Dahili cachestore boyutu (ipc)."
+      },
+      "CACHESTORE_MISS_MEMORY_SIZE": {
+        "label": "Cachestore Miss Bellek Boyutu",
+        "help": "Dahili cachestore boyutu (miss)."
+      },
+      "CACHESTORE_LOCKS_MEMORY_SIZE": {
+        "label": "Cachestore Locks Bellek Boyutu",
+        "help": "Dahili cachestore boyutu (locks)."
+      },
+      "SESSIONS_REVOCATION_MEMORY_SIZE": {
+        "label": "Oturum İptali Bellek Boyutu",
+        "help": "İptal edilmiş çerez oturum kimliklerini tutan dahili deponun boyutu."
+      },
+      "USE_API": {
+        "label": "API'yi Etkinleştir",
+        "help": "BunkerWeb dahili API'sini etkinleştir."
+      },
+      "API_HTTP_PORT": {
+        "label": "API Port Numarası",
+        "help": "BunkerWeb dahili API'si için dinleme port numarası."
+      },
+      "API_HTTPS_PORT": {
+        "label": "API HTTPS Port Numarası",
+        "help": "BunkerWeb dahili API'si için dinleme port numarası (TLS)."
+      },
+      "API_LISTEN_IP": {
+        "label": "API Dinleme IP Adresi",
+        "help": "BunkerWeb dahili API'si için dinleme IP adresi."
+      },
+      "API_LISTEN_HTTP": {
+        "label": "API HTTP Dinleme",
+        "help": "BunkerWeb dahili API'si için HTTP dinleme."
+      },
+      "API_LISTEN_HTTPS": {
+        "label": "API HTTPS Dinleme",
+        "help": "BunkerWeb dahili API'si için HTTPS (SSL/TLS) dinleme."
+      },
+      "API_SERVER_NAME": {
+        "label": "API Sunucu Adı",
+        "help": "BunkerWeb dahili API'si için sunucu adı (sanal ana bilgisayar)."
+      },
+      "API_TOKEN": {
+        "label": "API Erişim Belirteci",
+        "help": "API çağrılarını doğrulamak için isteğe bağlı belirteç (token). Ayarlanırsa, zamanlayıcı (ve herhangi bir istemci) bunu Authorization başlığı aracılığıyla göndermelidir. Not: hem BunkerWeb hem de zamanlayıcı ortamlarında ayarlanmalıdır."
+      },
+      "API_WHITELIST_IP": {
+        "label": "API Beyaz Liste IP",
+        "help": "BunkerWeb dahili API'siyle iletişim kurmasına izin verilen IP/ağ listesi. (biçim: ip/ağ maskesi veya ipv6/ağ maskesi, boşlukla ayrılmış)"
+      },
+      "AUTOCONF_MODE": {
+        "label": "Autoconf Modu",
+        "help": "Autoconf Docker entegrasyonunu etkinleştir."
+      },
+      "SWARM_MODE": {
+        "label": "Swarm Modu",
+        "help": "Docker Swarm entegrasyonunu etkinleştir."
+      },
+      "KUBERNETES_MODE": {
+        "label": "Kubernetes Modu",
+        "help": "Kubernetes entegrasyonunu etkinleştir."
+      },
+      "SERVER_TYPE": {
+        "label": "Sunucu Türü",
+        "help": "Sunucu türü: http veya stream."
+      },
+      "LISTEN_STREAM": {
+        "label": "Stream Dinleme",
+        "help": "SSL olmayan dinlemeyi etkinleştir (passthrough)."
+      },
+      "LISTEN_STREAM_PORT": {
+        "label": "Stream Dinleme Portu",
+        "help": "SSL olmayan dinleme portu (passthrough). SSL olmayan stream dinlemeyi devre dışı bırakmak için boş bırakın."
+      },
+      "LISTEN_STREAM_PORT_SSL": {
+        "label": "Stream Dinleme Portu SSL",
+        "help": "SSL dinleme portu (passthrough). SSL stream dinlemeyi devre dışı bırakmak için boş bırakın."
+      },
+      "USE_TCP": {
+        "label": "TCP Dinle",
+        "help": "TCP dinle (stream)."
+      },
+      "USE_UDP": {
+        "label": "UDP Dinle",
+        "help": "UDP dinle (stream)."
+      },
+      "USE_IPV6": {
+        "label": "IPv6 Kullan",
+        "help": "IPv6 bağlantısını etkinleştir."
+      },
+      "IS_DRAFT": {
+        "label": "dahili kullanım: taslak",
+        "help": "Dahili kullanım: hizmet taslak modundayken yes olarak ayarlayın."
+      },
+      "KEEP_CONFIG_ON_RESTART": {
+        "label": "Yeniden Başlatmada Yapılandırmayı Koru",
+        "help": "Yeniden başlatmada yapılandırmayı koru. Yeniden başlatmada yapılandırma sıfırlamasını önlemek için 'yes' olarak ayarlayın."
+      },
+      "CUSTOM_CONFIGS_DRIFT": {
+        "label": "Özel Yapılandırma Sapması Politikası",
+        "help": "Öngörülen bir .conf dosyası son kaydedilen öngörüden bu yana değiştiğinde veya onda yoksa ne olur. Geçerli veritabanı satırıyla eşleşen dosyalar yok sayılır; okunabilir öngörü geçmişi olmadan hiçbir sapma bildirilmez. 'overwrite', algılanan her sapmayı günlüğe kaydeder ve dosyayı veritabanından yeniden yazar veya onu değiştiren aktif bir satır yoksa siler. 'refuse', sapma çözülene kadar veritabanından oraya hiçbir şey yazmaz, bir hata günlüğe kaydeder ve bekleyen özel yapılandırma değişikliğini onaylanmamış bırakarak yeniden denenmesini sağlar."
+      },
+      "TIMERS_LOG_LEVEL": {
+        "label": "Zamanlayıcı Günlük Seviyesi",
+        "help": "Zamanlayıcılar için günlük seviyesi."
+      },
+      "BUNKERWEB_INSTANCES": {
+        "label": "BunkerWeb Örnekleri",
+        "help": "Boşluklarla ayrılmış BunkerWeb örnekleri listesi (biçim: fqdn-veya-ip:5000 http://fqdn-veya-ip:5000)"
+      },
+      "USE_TEMPLATE": {
+        "label": "Şablon Kullan",
+        "help": "Belirli ayarların varsayılan değerlerini geçersiz kılacak, boşluklarla ayrılmış uygulanacak yapılandırma şablonları. Şablonlar sırayla uygulanır ve sonraki, öncekini geçersiz kılar; hizmette ayarlanan bir değer şablonu geçersiz kılar."
+      },
+      "SECURITY_MODE": {
+        "label": "Güvenlik Modu",
+        "help": "Tehditlere verilecek yanıtı tanımlar: izlemek ve günlüğe kaydetmek için \"detect\", erişimi engellemek ve olayları günlüğe kaydetmek için \"block\"."
+      },
+      "SERVER_NAMES_HASH_BUCKET_SIZE": {
+        "label": "Sunucu Adları Hash Kova Boyutu",
+        "help": "server_names_hash_bucket_size direktifi için değer."
+      },
+      "LOG_FORMAT": {
+        "label": "Erişim Günlüğü Biçimi",
+        "help": "Erişim günlükleri için kullanılacak biçim."
+      },
+      "ACCESS_LOG": {
+        "label": "Erişim Günlüğü Yolu",
+        "help": "NGINX erişim günlükleri için kullanılacak yol (dosya yolu, syslog:server=host[:port][,param=value] veya memory:name:size; devre dışı bırakmak için off olarak ayarlayın)."
+      },
+      "ERROR_LOG": {
+        "label": "Hata Günlüğü Yolu",
+        "help": "NGINX hata günlükleri için kullanılacak yol (dosya yolu, stderr, syslog:server=host[:port][,param=value] veya memory:size)."
+      },
+      "PLUGINS_ORDER_INIT": {
+        "label": "Eklenti Sırası (init)",
+        "help": "init aşamasında (motor önyüklemesi, bir kez çalışır) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_INIT_WORKER": {
+        "label": "Eklenti Sırası (init_worker)",
+        "help": "init_worker aşamasında (işçi başına önyükleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_SET": {
+        "label": "Eklenti Sırası (set)",
+        "help": "Bu site için set aşamasında (rewrite/access öncesi değişken kurulumu) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_ACCESS": {
+        "label": "Eklenti Sırası (access)",
+        "help": "Bu site için access aşamasında (istek kabulü/kontrolü) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_SSL_CERTIFICATE": {
+        "label": "Eklenti Sırası (ssl_certificate)",
+        "help": "Bu site için ssl_certificate aşamasında (TLS sertifikası seçimi/verilmesi) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_HEADER": {
+        "label": "Eklenti Sırası (header)",
+        "help": "Bu site için header aşamasında (yanıt başlığı filtreleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_LOG": {
+        "label": "Eklenti Sırası (log)",
+        "help": "Bu site için log aşamasında (yanıt sonrası HTTP günlük işleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_PREREAD": {
+        "label": "Eklenti Sırası (preread)",
+        "help": "Bu site için preread aşamasında (proxy öncesi TCP preread kontrolleri) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_LOG_STREAM": {
+        "label": "Eklenti Sırası (log_stream)",
+        "help": "Bu site için log_stream aşamasında (stream günlük işleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_LOG_DEFAULT": {
+        "label": "Eklenti Sırası (log_default)",
+        "help": "Bu site için log_default aşamasında (varsayılan vhost günlük işleme) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_TIMER": {
+        "label": "Eklenti Sırası (timer)",
+        "help": "timer aşamasında (arka plan zamanlayıcıları) ilk önce çalışması gereken eklentiler. Kimlikleri boşluklarla ayırın; kalan eklentiler yine de normal sıralarında sonra çalışır."
+      },
+      "PLUGINS_ORDER_INIT_WORKERS": {
+        "label": "Eklenti Sırası (init_workers)",
+        "help": "init_workers aşamasında çalıştırılacak, virgül veya boşlukla ayrılmış eklenti kimlikleri."
+      },
+      "LOG_LEVEL": {
+        "label": "Günlük Seviyesi",
+        "help": "Hata günlükleri için kullanılacak seviye."
+      },
+      "JOBS_DAILY_TIME": {
+        "label": "Günlük İşler Saati",
+        "help": "Günlük zamanlanmış işlerin çalıştığı yerel saat (zamanlayıcı saat dilimi, SS:DD, 24 saat); haftalık işler de JOBS_WEEKLY_DAY gününde bu saatte çalışır."
+      },
+      "JOBS_WEEKLY_DAY": {
+        "label": "Haftalık İşler Günü",
+        "help": "Haftalık zamanlanmış işlerin JOBS_DAILY_TIME saatinde çalıştığı haftanın günü."
+      }
+    }
+  },
+  "global_settings": {
+    "flash": {
+      "checking_license_key_upgrade": "Yükseltme için lisans anahtarı kontrol ediliyor.",
+      "global_settings_not_saved_every_changed": "Genel ayarlar kaydedilmedi: değiştirilen her değer reddedildi.",
+      "not_edited_no_values_changed": "Hiçbir değer değiştirilmediği için genel ayarlar düzenlenmedi.",
+      "saved_but_values_refused": "Genel ayarlar kaydedildi, ancak {{refused_count}} değer reddedildi.",
+      "saved_successfully": "Genel ayarlar başarıyla kaydedildi."
+    }
+  },
+  "home": {
+    "flash": {
+      "error_fetching_services": "Servisler alınırken hata oluştu: {{message}}"
+    }
+  },
+  "main": {
+    "flash": {
+      "forced_status_reloaded": "Durum yeniden yüklenmeye zorlandı",
+      "have_more_services_than_allowed_by": "Pro lisansınızın izin verdiğinden daha fazla serviste var. Lisansınızı yükseltin veya pro lisansınızın kilidini açmak için bazı servisleri taslak moduna taşıyın.",
+      "last_changes_have_applied_successfully": "Son değişiklikler başarıyla uygulandı.",
+      "database_connection_read_only_mode_no": "Veritabanı bağlantısı salt okunur modda: değişiklik yapılamaz.",
+      "two_factor_no_recovery_codes": "İki faktörlü kimlik doğrulama etkin ancak kullanılabilir kurtarma kodu yok, lütfen bunları yenileyin:",
+      "failover_configuration_error": "NGINX üzerinde bir yapılandırma hatası oluşturduğu için son değişiklikler uygulanamadı, lütfen daha fazla bilgi için BunkerWeb günlüklerini kontrol edin. Yapılandırma son çalışan sürüme geri döndü.",
+      "failover_message": "Yedekleme Mesajı:"
+    }
+  },
+  "letsencrypt": {
+    "flash": {
+      "orphan_certificate": "Let's Encrypt: <strong>{{cert_name}}</strong> yetim sertifikası, eksik ACME hesabına <code>{{account}}</code> başvuruyor. Sağlayıcı durumu onarılana kadar yenilemeler engellenir. <a href=\"{{certificates_url}}\">{{link_text}}</a>.",
+      "open_certificates_to_inspect": "İncelemek için Sertifikaları açın"
+    }
+  },
+  "raw_drafts": {
+    "edits_discarded": "Taslak ayarlar değişmeden kalır; bunları Ham modda etkinleştirin veya düzenleyin.",
+    "metadata_raw_only": "Ayar taslağı meta verileri yalnızca ham modda kabul edilir.",
+    "missing_metadata": "{{field}} meta verisi eksik.",
+    "cannot_be_draft": "{{setting}} ayarı taslak yapılamaz.",
+    "draft_not_posted": "{{setting}} taslak ayarı gönderilmedi.",
+    "setting_not_valid": "{{setting}} ayarı geçerli değil.",
+    "global_not_service_draft": "{{setting}} genel ayarı hizmet taslağı yapılamaz.",
+    "draft_not_present": "{{setting}} taslak ayarı RAW düzenleyicisinde bulunmuyor.",
+    "present_not_posted": "Mevcut {{setting}} ayarı gönderilmedi.",
+    "present_not_valid": "Mevcut {{setting}} ayarı geçerli değil.",
+    "locked_by_method": "{{setting}} ayarı, {{method}} yöntemiyle yönetildiği için taslak durumunu değiştiremez."
   },
   "reports": {
     "bad_behavior_activity_detected": "Kötü davranış aktivitesi tespit edildi",
@@ -1446,10 +2541,10 @@
       "unique_offenders": "En üstteki saldırganlar"
     },
     "crowdsec": {
-      "source_lapi": "Local API decision",
-      "source_appsec": "AppSec inspection",
-      "source_failure_policy": "AppSec failure policy",
-      "technical_details": "Technical details"
+      "source_lapi": "Yerel API kararı",
+      "source_appsec": "AppSec denetimi",
+      "source_failure_policy": "AppSec hata politikası",
+      "technical_details": "Teknik ayrıntılar"
     }
   },
   "scope": {
@@ -1474,6 +2569,7 @@
     "data": "Veri",
     "date": "Tarih",
     "empty": "Kullanılabilir arama paneli yok",
+    "search_title": "Ara: {name}",
     "end_date": "Bitiş Tarihi",
     "first_seen": "İlk Görülme",
     "future_30d": "30 günden fazla kaldı",
@@ -1524,6 +2620,80 @@
   },
   "services": {
     "draft": "Taslak hizmetler",
+    "flash": {
+      "resource_attach_failed": "Bağlanamadı: {{error}}",
+      "resource_attach_refused": "Bağlanamıyor: {{error}}",
+      "resource_attached": "Kaynak {{service}}'e bağlandı.",
+      "resource_detach_failed": "Ayrılamadı: {{error}}",
+      "resource_detach_refused": "Ayrılamıyor: {{error}}",
+      "resource_detached": "Kaynak {{service}}'den ayrıldı.",
+      "resource_unknown_family": "Bilinmeyen kaynak türü.",
+      "server_name_missing": "Sunucu adı sağlanmadığı için hizmet oluşturulmadı.",
+      "failed_import_service": "Servis içe aktarılamadı: {{names}}",
+      "failed_import_services": "Servisler içe aktarılamadı: {{names}}",
+      "skipped_existing_service": "Mevcut servis atlandı: {{names}}",
+      "skipped_existing_services": "Mevcut servisler atlandı: {{names}}",
+      "imported_service": "Servis içe aktarıldı: {{names}}",
+      "imported_services": "Servisler içe aktarıldı: {{names}}",
+      "no_services_custom_configurations_found_import": "İçe aktarma dosyasında servis veya özel yapılandırma bulunamadı.",
+      "invalid_file_encoding_please_upload_utf": "Geçersiz dosya kodlaması. Lütfen UTF-8 dosyası yükleyin.",
+      "uploaded_file_not_valid_zip_archive": "Yüklenen dosya geçerli bir zip arşivi değil.",
+      "invalid_encoding_configs_export_json_inside": "Arşiv içindeki configs_export.json için geçersiz kodlama.",
+      "invalid_encoding_services_export_env_inside": "Arşiv içindeki services_export.env için geçersiz kodlama.",
+      "refusing_extract_archive_uncompressed_size_exceeds": "Arşiv çıkarma reddediliyor: sıkıştırılmamış boyut güvenlik sınırını aşıyor.",
+      "uploaded_archive_must_contain_services_export": "Yüklenen arşiv services_export.env ve/veya configs_export.json içermelidir.",
+      "no_services_file_uploaded": "Servis dosyası yüklenmedi.",
+      "could_not_fetch_custom_configurations_api": "Özel yapılandırmalar API'den alınamadı.",
+      "no_services_export": "Dışa aktarılacak servis yok.",
+      "no_services_selected": "Hiç servis seçilmedi.",
+      "could_not_fetch_custom_configs_api": "Özel yapılandırmalar API'den alınamadı.",
+      "service_not_found": "Servis bulunamadı",
+      "could_not_fetch_service_api": "Servis API'den alınamadı.",
+      "template_not_found": "Şablon bulunamadı",
+      "could_not_fetch_templates_api": "Şablonlar API'den alınamadı.",
+      "plugin_does_not_apply_default_server": "Bu eklenti varsayılan sunucuya uygulanmaz",
+      "could_not_fetch_attached_upstreams": "Bu servise bağlı upstream'ler alınamadı.",
+      "could_not_fetch_attached_certificates": "Bu servise bağlı sertifikalar alınamadı.",
+      "could_not_fetch_attached_redirects": "Bu servise bağlı yönlendirmeler alınamadı.",
+      "could_not_fetch_attached_workflows": "Bu servise bağlı iş akışları alınamadı.",
+      "could_not_fetch_service_api_2": "{{service}} servisi API'den alınamadı.",
+      "could_not_fetch_service_cloning": "Klonlamak için {{clone}} servisi alınamadı.",
+      "could_not_fetch_services_configuration": "Servis yapılandırması alınamadı.",
+      "custom_configs_not_saved_because_rename": "Yeniden adlandırma reddedildiği için özel yapılandırmalar kaydedilmedi.",
+      "service_not_saved_every_changed_value": "{{service}} servisi kaydedilmedi: değiştirilen her değer reddedildi.",
+      "service_not_edited_because_no_values": "{{service}} servisi düzenlenmedi çünkü hiçbir değer değiştirilmedi.",
+      "service_not_edited_because_no_values_or_configs": "{{service}} servisi düzenlenmedi çünkü hiçbir değer veya özel yapılandırma değiştirilmedi.",
+      "template_custom_config_cannot_edited_because": "Şablonun {{key}} özel yapılandırması düzenlenemez çünkü {{value}} yöntemiyle oluşturulmuştur.",
+      "service_already_exists": "{{service}} servisi zaten mevcut.",
+      "service_deleted": "Servis silindi: {{services}}",
+      "services_deleted": "Servisler silindi: {{services}}",
+      "failed_delete_drafted_autoconf_service": "Taslak autoconf servisi {{service_id}} silinemedi: {{message}}",
+      "all_selected_services_could_not_found_2": "Seçilen tüm servisler bulunamadı veya UI/API servisi değil.",
+      "service_will_not_deleted": "{{non_deletable_service}} servisi bir UI/API servisi değildir ve silinmeyecektir.",
+      "service_will_not_deleted_reserved": "{{non_deletable_service}} servisi, hiçbir servisle eşleşmeyen isteklere yanıt veren ayrılmış varsayılan sunucudur ve silinmeyecektir.",
+      "service_will_not_deleted_autoconf": "{{non_deletable_service}} servisi online bir autoconf servisidir (önce taslağa dönüştürün) ve silinmeyecektir.",
+      "service_now_declared_standard": "{{service}} servisi artık \"standart\" olarak tanımlandı.",
+      "service_now_declared_redirect_only": "{{service}} servisi artık \"yalnızca yönlendirme\" olarak tanımlandı.",
+      "invalid_mode_parameter": "Geçersiz mode parametresi.",
+      "do_not_have_permission_change_service": "Bir servisin modunu değiştirme izniniz yok",
+      "converted_services_online": "\"online\" servislerine dönüştürüldü: {{names}}",
+      "converted_services_draft": "\"taslak\" servislerine dönüştürüldü: {{names}}",
+      "all_selected_services_could_not_found": "Seçilen tüm servisler bulunamadı, UI/API servisi değil veya zaten dönüştürüldü.",
+      "service_already_online_will_not_converted": "{{non_convertible_service}} servisi zaten bir online servistir ve dönüştürülmeyecektir.",
+      "service_already_draft_will_not_converted": "{{non_convertible_service}} servisi zaten bir taslak servistir ve dönüştürülmeyecektir.",
+      "service_not_ui_api_service_will": "{{non_editable_service}} servisi bir UI/API servisi değil ve dönüştürülmeyecektir.",
+      "could_not_fetch_services_api": "Servisler API'den alınamadı.",
+      "missing_services_parameter_services_delete": "/services/delete üzerinde services parametresi eksik.",
+      "missing_mode_parameter_services_mode": "/services/{{service}}/mode üzerinde mode parametresi eksik.",
+      "missing_convert_parameter_services_convert": "/services/convert üzerinde convert_to parametresi eksik.",
+      "missing_services_parameter_services_convert": "/services/convert üzerinde services parametresi eksik.",
+      "default_server_reserved": "{{default_server_id}}, yapılandırılmış hiçbir servise uymayan istekleri yanıtlayan (bilinmeyen ana bilgisayar adları, doğrudan IP erişimi) ayrılmış varsayılan servistir; bu nedenle oluşturulamaz, yeniden adlandırılamaz veya silinemez.",
+      "configuration_created": "{{service}} hizmetinin yapılandırması oluşturuldu.",
+      "configuration_saved": "{{service}} hizmetinin yapılandırması kaydedildi.",
+      "configuration_created_with_refusals": "{{service}} hizmetinin yapılandırması oluşturuldu, ancak {{refused_count}} değer reddedildi.",
+      "configuration_saved_with_refusals": "{{service}} hizmetinin yapılandırması kaydedildi, ancak {{refused_count}} değer reddedildi.",
+      "default_server_type_refused": "SERVER_TYPE, ayrılmış {{default_server_id}} servisinde ayarlanamaz: değiştirilecek kendi sunucu bloğu yoktur. HTTP yarısı varsayılan sunucu bloğunun kendisidir, stream yarısı ise DEFAULT_SERVER_STREAM_PORTS ayarıdır."
+    },
     "online": "Çevrimiçi",
     "subtitle": "BunkerWeb ile korunan çoklu site hizmetlerini yönetin: oluşturun, düzenleyin, taslağa dönüştürün veya silin.",
     "total": "Toplam hizmetler",
@@ -1605,8 +2775,8 @@
         "title": "Karar sırası",
         "description": "Varsayılan olarak her istek bu dört kontrolden bu sırayla geçer ve karar veren ilk kontrol geçerli olur. Beyaz liste eşleşmesi süreci hemen sonlandırır: istek izin verilir ve sonraki üç kontrol asla çalışmaz. Sıranın kendisi PLUGINS_ORDER_ACCESS ve PLUGINS_ORDER_PREREAD ile servis başına yapılandırılabilir.",
         "current": "geçerli sayfa",
-        "on": "On",
-        "off": "Off"
+        "on": "Açık",
+        "off": "Kapalı"
       },
       "stage": {
         "whitelist": "Beyaz liste",
@@ -1673,7 +2843,7 @@
       "rules": {
         "title": "Bileşik kurallar",
         "description": "Bir kural yalnızca terimlerinin her biri eşleştiğinde eşleşir. Kurallar yukarıdaki listelerle birlikte kontrol edilir ve bunlardan herhangi biriyle eşleşen bir istemci bu aşamayla eşleşir. Değerler @isim şeklinde yazılmış bir kaynak grubu olabilir.",
-        "rule": "Rule",
+        "rule": "Kural",
         "add_term": "Bir terim ekle",
         "remove_term": "Bu terimi kaldır",
         "negate": "NOT",
@@ -1691,7 +2861,7 @@
     },
     "modsecurity": {
       "engine": {
-        "title": "Engine",
+        "title": "Motor",
         "description": "ModSecurity'nin hiç yüklenip yüklenmediği ve bir kural eşleşmesinde ne yaptığı."
       },
       "crs": {
@@ -1834,10 +3004,27 @@
       "content_entered": "Girilen karakter: {{count}}",
       "loaded_from": "{{name}} kaynağından yüklendi · karakter: {{count}}",
       "read_error": "Dosya okunurken hata oluştu"
+    },
+    "flash": {
+      "couldn_t_edit_new_service": "Yeni servis düzenlenemedi: {{operation}}",
+      "couldn_t_create_new_service": "Yeni servis oluşturulamadı: {{operation}}",
+      "when_using_custom_ssl_certificate_must": "Özel bir SSL sertifikası kullanırken hem sertifikayı hem de anahtarı ayarlamalısınız.",
+      "hostname_not_valid": "Ana bilgisayar adı geçerli değil.",
+      "hostname_already_use": "{{value}} ana bilgisayar adı zaten kullanımda.",
+      "admin_user_created_successfully": "Yönetici kullanıcısı başarıyla oluşturuldu",
+      "couldn_t_create_admin_user": "Yönetici kullanıcısı oluşturulamadı: {{message}}",
+      "admin_password_too_long_must_not": "Yönetici parolası çok uzun. {{MAX_PASSWORD_BYTES}} baytı (bcrypt'in kesin sınırı) aşmamalıdır; aksanlı veya emoji karakterler her biri birkaç bayt sayılır.",
+      "admin_password_not_strong_enough_must": "Yönetici parolası yeterince güçlü değil. En az 8 karakter içermeli, bunlardan en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter (#@?!$%^&*-) olmalı.",
+      "passwords_do_not_match": "Parolalar eşleşmiyor.",
+      "admin_email_too_long_must_less": "Yönetici e-postası çok uzun. 256 karakterden az olmalıdır.",
+      "admin_username_too_long_must_less": "Yönetici kullanıcı adı çok uzun. 256 karakterden az olmalıdır.",
+      "missing_either_one_following_parameters": "Aşağıdaki parametrelerden biri eksik: {{value}}."
     }
   },
   "status": {
+    "active": "Aktif",
     "admin_user_exists": "Bir admin kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin.",
+    "all_valid": "Tüm geçerli",
     "blog_connection_fail": "Haber güncellemeleri için bloga bağlanılamadı.",
     "default_server": "varsayılan sunucu",
     "done": "Tamamlandı",
@@ -1848,7 +3035,11 @@
     "error_loading_data": "Veri yüklenemedi",
     "error_loading_template": "Şablon verileri yüklenemedi.",
     "error_saving_template": "Şablon kaydedilirken bir hata oluştu.",
+    "expired": "Geçerlilik süresi dolmuş",
+    "expiring": "Sonlanıyor",
     "failed": "Başarısız",
+    "failover": "Yük devretme",
+    "inactive": "Etkin Değil",
     "invalid_json_payload": "Geçersiz JSON yükü.",
     "loading": "Yükleniyor...",
     "loading_bans": "Yasaklamalar yükleniyor...",
@@ -1872,10 +3063,12 @@
     "no_item": "Öğe Yok",
     "no_notifications": "Gösterilecek bildirim yok.",
     "no_search_results": "Öğe bulunamadı.",
+    "no_settings": "Bu eklenti, bu kapsam için ayarlar içermiyor.",
     "no_steps": "Adım Yok",
     "no_steps_description": "Bu şablonda yapılandırılacak adım yok.",
-    "not_applicable": "N/A",
+    "not_applicable": "Yok",
     "online": "Çevrimiçi",
+    "optional": "İsteğe bağlı",
     "partial": "Kısmi",
     "pending": "Bekleyen",
     "pinging_instances": "Örneklere ping atılıyor, lütfen bekleyin...",
@@ -1894,18 +3087,13 @@
     "template_in_use_description": "Mevcut şablon dışında değişiklik yapılamaz. Lütfen değişiklikleri mevcut şablon üzerinden yapın veya Gelişmiş/Ham moda geçin.",
     "unique_server_name": "Benzersiz Sunucu Adı",
     "up": "Açık",
-    "active": "Aktif",
-    "all_valid": "Tüm geçerli",
-    "expired": "Geçerlilik süresi dolmuş",
-    "expiring": "Sonlanıyor",
-    "no_settings": "Bu eklenti, bu kapsam için ayarlar içermiyor.",
     "yes": "Evet",
-    "optional": "İsteğe bağlı",
     "no_file_selected": "Dosya seçilmedi",
     "no_url_available": "Kullanılabilir URL yok",
     "unknown": "Bilinmiyor",
     "deferred": "Ertelendi",
-    "deferred_tooltip": "Ertelendi — bir örneğin başlaması bekleniyor: {{reason}}"
+    "deferred_tooltip": "Ertelendi — bir örneğin başlaması bekleniyor: {{reason}}",
+    "uploaded": "Yüklendi"
   },
   "step": {
     "next": "İleri",
@@ -2009,6 +3197,7 @@
       "error_missing_endpoint": "Gönderim uç noktası belirlenemiyor.",
       "heading_create": "Şablon oluştur",
       "heading_edit": "{{id}} şablonunu düzenle",
+      "heading_view": "{{id}} Şablonunu Görüntüle",
       "label_config_data": "Veri",
       "label_config_name": "Ad",
       "label_config_order": "Sıra",
@@ -2035,7 +3224,8 @@
       "multiselect_placeholder": "Seçenekleri belirleyin",
       "multiselect_summary": "{{count}} seçildi",
       "multivalue_add": "Değer ekle",
-      "multivalue_helper": "Satır başına bir değer.{{separatorNote}}",
+      "multivalue_helper": "Satır başına bir değer.",
+      "multivalue_helper_joined": "Satır başına bir değer. \"{{separator}}\" ile birleştirilecek.",
       "panel_overview": "Genel Bakış",
       "panel_overview_help": "Önemli bilgileri takip edin ve bölümler arasında gezinin.",
       "placeholder_config_data": "Veri",
@@ -2090,6 +3280,7 @@
       "raw_validation_steps_required": "Bir şablon en az bir adım içermelidir.",
       "readonly_db": "Veritabanı şu anda salt okunur moddadır. Şablonlar değiştirilemez.",
       "readonly_method": "Bu şablon {{method}} süreci tarafından oluşturuldu ve kullanıcı arayüzünden düzenlenemez.",
+      "readonly_method_plugin": "Bu şablon {{plugin}} eklentisi tarafından oluşturuldu ve arayüzden düzenlenemez.",
       "readonly_title": "Salt okunur",
       "readonly_user": "Yalnızca okuma izniniz var. Yazma erişimi istemek için bir yöneticiyle iletişime geçin.",
       "select_config_placeholder": "Bir yapılandırma seçin",
@@ -2148,6 +3339,7 @@
       "validation_config_type_multisite": "Yapılandırma türü, çoklu site uyumlu türlerden biri olmalıdır.",
       "validation_config_type_required": "Bir yapılandırma tanımlandığında yapılandırma türü gereklidir.",
       "validation_configs_unique": "Her yapılandırma adı benzersiz olmalıdır.",
+      "validation_id_invalid": "Şablon Kimliği yalnızca harf, rakam, nokta, tire ve alt çizgi içerebilir ve bir harf veya rakamla başlamalıdır.",
       "validation_id_required": "Şablon kimliği gereklidir.",
       "validation_setting_key": "Her ayarın bir anahtarı olmalıdır.",
       "validation_settings_unique": "Her ayar anahtarı benzersiz olmalıdır.",
@@ -2157,7 +3349,6 @@
     "none": "Şablon Yok"
   },
   "templates": {
-    "subtitle": "Hizmetleriniz için yeniden kullanılabilir yapılandırma şablonları — ayarları, adımları ve özel yapılandırmaları bir araya getirin, ardından oluşturun, kopyalayın veya silin.",
     "gallery": {
       "delete_selected": "Seçilenleri sil",
       "empty_message": "Yeniden kullanmak üzere ayarları, adımları ve özel yapılandırmaları bir araya getiren ilk şablonunuzu oluşturun.",
@@ -2172,6 +3363,7 @@
       "medium": "Orta güvenlik",
       "ui": "Web arayüzü"
     },
+    "subtitle": "Hizmetleriniz için yeniden kullanılabilir yapılandırma şablonları — ayarları, adımları ve özel yapılandırmaları bir araya getirin, ardından oluşturun, kopyalayın veya silin.",
     "tag": {
       "config": "Özel yapılandırma: {{name}}",
       "feature": "Yerleşik özellik: {{name}}",
@@ -2182,13 +3374,62 @@
       "heading": "Kullanılabilir şablonlar",
       "subheading": "BunkerWeb kuruluşu tarafından yayımlanan seçilmiş servis şablonları.",
       "layer_warning": "Şablon bir katmandır: zaten şablon kullanan bir servise bir tane daha eklemek, geçerli yapılandırmasını değiştirir.",
-      "no_compat_notice": "Bu katalog BunkerWeb uyumluluğu bildirmiyor. Bu BunkerWeb'de olmayan bir ayarı adlandıran bir şablon, yükleme sırasında reddedilir."
+      "no_compat_notice": "Bu katalog BunkerWeb uyumluluğu bildirmiyor. Bu BunkerWeb'de olmayan bir ayarı adlandıran bir şablon, yükleme sırasında reddedilir.",
+      "state_installed": "Yüklü, katalogla aynı",
+      "state_update": "Yüklü, katalog sürümü farklı",
+      "state_managed": "{{owner}} tarafından yüklendi ve yönetiliyor: katalog onu değiştirmez",
+      "update_preview_unknown": "Değişiklikler bir sonraki katalog yenilemesinden sonra kontrol edilebilir.",
+      "update_title": "Topluluk Şablonunu Güncelle",
+      "update_confirm": "{{id}} şablonunu katalog sürümü {{tag}} ile değiştirin. Bu değişiklikler şablona uygulanır:",
+      "update_services": "Bu hizmetler bu şablonu kullanıyor. Bir sonraki yapılandırma oluşturmalarında, kendilerinin ayarlamadığı her ayar yeni değeri alır:",
+      "update_no_services": "Henüz hiçbir hizmet bu şablonu kullanmıyor.",
+      "update_failed": "Şablon güncellenemedi.",
+      "update_not_installed": "{{template}} şablonu yüklü değil: bunun yerine yükleyin",
+      "update_managed": "{{template}} şablonu {{owner}} tarafından yönetiliyor: katalog onu değiştirmez",
+      "update_up_to_date": "{{template}} şablonu zaten katalogla eşleşiyor",
+      "update_changed": "{{template}} şablonu veya katalog önizlemeden bu yana değişti. Sayfayı yeniden yükleyin ve değişiklikleri tekrar gözden geçirin.",
+      "diff": {
+        "name": "Ad: {{old}} → {{new}}",
+        "settings_added": "Ayarlar eklendi",
+        "settings_changed": "Ayarlar değişti",
+        "settings_removed": "Ayarlar kaldırıldı",
+        "steps_added": "Adımlar eklendi",
+        "steps_changed": "Adımlar değişti",
+        "steps_removed": "Adımlar kaldırıldı",
+        "configs_added": "Özel yapılandırmalar eklendi",
+        "configs_changed": "Özel yapılandırmalar değişti",
+        "configs_removed": "Özel yapılandırmalar kaldırıldı"
+      }
+    },
+    "flash": {
+      "catalog_updated": "{{template}} şablonu katalogdan güncellendi.",
+      "export_failed": "{{template}} şablonu dışa aktarılamadı: {{error}}",
+      "imported": "{{template}} şablonu içe aktarıldı.",
+      "replaced": "{{template}} şablonu değiştirildi.",
+      "template_deleted_successfully": "{{template_id}} şablonu başarıyla silindi.",
+      "successfully_deleted_template": "Silinen şablonlar: {{success_count}}.",
+      "no_templates_selected_deletion": "Silmek için hiç şablon seçilmedi.",
+      "template_updated_successfully": "{{template_id}} şablonu başarıyla güncellendi.",
+      "template_installed_catalogue": "{{template_id}} şablonu katalogdan yüklendi.",
+      "template_created_successfully": "{{template_id}} şablonu başarıyla oluşturuldu.",
+      "template_not_found_2": "Şablon bulunamadı.",
+      "template_not_found": "{{clone_id}} şablonu bulunamadı.",
+      "user_is_read_only": "Kullanıcı salt okunur",
+      "error_deleting_template": "{{template_id}} şablonu silinirken hata oluştu: {{message}}"
+    },
+    "import": {
+      "admin_only": "Şablon içe aktarma yöneticilerle sınırlıdır",
+      "failed": "Şablon içe aktarılamadı.",
+      "no_file": "İçe aktarılacak bir dosya seçin.",
+      "refused": "Şablon içe aktarılmadı: {{reason}}",
+      "too_large": "Şablon içe aktarılmadı: dosya 1 MiB'den büyük",
+      "unreadable": "Şablon içe aktarılmadı: dosya okunamadı"
     }
   },
   "theme": {
     "dark": "Koyu",
     "light": "Açık",
-    "system": "System"
+    "system": "Sistem"
   },
   "threatmap": {
     "exit_fullscreen": "Tam ekrandan çık",
@@ -2272,8 +3513,20 @@
       "back_to_file_upload": "Dosya yüklemeye dön",
       "switch_to_text_editor": "Metin düzenleyiciye geç",
       "enroll_instance": "{{hostname}} için kayıt kodu ver",
+      "rotate_credential": "{{hostname}} kimlik bilgisini döndür",
       "revoke_credential": "{{hostname}} kimlik bilgisini iptal et",
-      "rotate_credential": "{{hostname}} kimlik bilgisini döndür"
+      "attach_redirect": "{{name}}'i bir servise bağla",
+      "edit_redirect": "{{name}}'i düzenle",
+      "delete_redirect": "{{name}}'i sil",
+      "attach_upstream": "{{name}}'i bir servise bağla",
+      "edit_upstream": "{{name}}'i düzenle",
+      "delete_upstream": "{{name}}'i sil",
+      "edit_workflow_rules": "{{name}} kurallarını düzenle",
+      "edit_workflow_details": "{{name}}'in adını ve açıklamasını düzenle",
+      "attach_workflow": "{{name}}'i bir servise bağla",
+      "clone_workflow": "{{name}}'i kopyala",
+      "delete_workflow": "{{name}}'i sil",
+      "delete_certificate": "Sertifikayı sil"
     },
     "cannot_delete_original_ban": "Orijinal Yasaklama girdisi silinemez.",
     "cannot_remove_disabled": "Bir veya daha fazla ayar devre dışı olduğu için kaldırılamaz.",
@@ -2292,6 +3545,7 @@
     },
     "confirm_password_match": "Şifreler eşleşmelidir.",
     "copied": "Kopyalandı!",
+    "copy_failed": "Kopyalama başarısız",
     "copy_https_only": "Kopyalama özelliği yalnızca HTTPS üzerinden kullanılabilir.",
     "custom_ssl_cert_data": "Özel SSL sertifikası verisi (PEM formatında veya Base64 kodlu).",
     "custom_ssl_cert_path": "Özel SSL sertifika dosyasının yolu.",
@@ -2299,6 +3553,7 @@
     "custom_ssl_key_path": "Özel SSL özel anahtar dosyasının yolu.",
     "different_from_template": "Değer, şablon varsayılanından farklı",
     "disabled_by_method": "Devre dışı: '{{method}}' yöntemiyle yönetiliyor.",
+    "disabled_by_plugin": "Devre dışı: {{plugin}} eklentisi tarafından yönetiliyor.",
     "disabled_db_readonly": "Devre dışı: Veritabanı salt okunur modda.",
     "disabled_draft": "Devre dışı: Servis Taslak modunda.",
     "disabled_readonly": "Devre dışı: Salt okunur mod aktif.",
@@ -2335,13 +3590,14 @@
       "edit_template": "{{template}} Şablonunu Düzenle",
       "export_config": "{{name}} özel yapılandırmasını dışa aktar",
       "export_service": "{{service}} Servis Yapılandırmasını Dışa Aktar",
+      "export_template": "{{template}} Şablonunu Dışa Aktar",
       "view_config": "{{name}} Özel Yapılandırmasını Görüntüle",
       "view_file": "{{filename}} Görüntüle",
       "view_service": "{{service}} Servisini Görüntüle",
-      "manage_activation": "{{name}}'i küresel ayarlarda etkinleştir",
       "view_template": "{{template}} Şablonunu Görüntüle",
-      "edit_default_server": "Varsayılan sunucuyu düzenle",
-      "view_default_server": "Varsayılan sunucuyu görüntüle"
+      "manage_activation": "{{name}}'i küresel ayarlarda etkinleştir",
+      "view_default_server": "Varsayılan sunucuyu görüntüle",
+      "edit_default_server": "Varsayılan sunucuyu düzenle"
     },
     "modal": {
       "title": {
@@ -2524,113 +3780,512 @@
     "zerossl_api_connect_timeout": "ZeroSSL API çağrıları için saniye cinsinden bağlantı zaman aşımı.",
     "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre.",
     "config_global_types_available": "Artık özel yapılandırmanız için genel türleri seçebilirsiniz.",
-    "enroll_disabled_by_method": "{{hostname}} kendi ortamından ({{method}}) alınıyor; kayıt yalnızca kontrol düzleminin sahip olduğu örneklere uygulanır",
     "instance_credential_age": "Kimlik bilgisi son güncelleme: {{updated}}",
+    "enroll_disabled_by_method": "{{hostname}} kendi ortamından ({{method}}) alınıyor; kayıt yalnızca kontrol düzleminin sahip olduğu örneklere uygulanır",
     "badge": {
       "redirect_candidate": "Bu hizmet bir yönlendirmeden başka bir şey içermiyor, bu yüzden yalnızca yönlendirme olarak bildirilebilir — bu, ilgili faturalandırma devreye girdiğinde onu PRO hizmet sayımından çıkaracaktır."
     }
   },
   "totp": {
     "cant_access": "Kimlik doğrulama kodunuza erişemiyor musunuz?",
+    "or_use_security_key": "veya güvenlik anahtarınızı kullanın",
+    "prompt": "Lütfen TOTP kodunuzu girin.",
     "signing_in": "BunkerWeb'e giriş yap",
     "subtitle": "Kimlik doğrulama uygulamasından kodu girin.",
-    "title": "İki Faktörlü Kimlik Doğrulama",
-    "prompt": "Lütfen TOTP kodunuzu girin.",
     "subtitle_security_key": "Güvenlik anahtarınızla kimliğinizi doğrulayın.",
-    "or_use_security_key": "veya güvenlik anahtarınızı kullanın"
+    "title": "İki Faktörlü Kimlik Doğrulama",
+    "flash": {
+      "ve_used_one_recovery_codes_have": "Kurtarma kodlarınızdan birini kullandınız. {{len}} tane kaldı.",
+      "error_occurred_while_using_recovery_code": "Kurtarma kodu kullanılırken bir hata oluştu.",
+      "database_read_only_recovery_code_used": "Veritabanı salt okunur, kullandığınız kurtarma kodu geçerli kalır.",
+      "token_invalid": "Jeton geçersiz.",
+      "no_token_provided_totp": "/totp üzerinde jeton sağlanmadı."
+    }
   },
-  "certificates": {
-    "acme_help": "Mevcut ayarlarınız zaten Let's Encrypt'i etkinleştiriyor ve yapılandırıyor olan hizmetleri seçin. Bu işlem yalnızca bu yapılandırmayı planlar; sertifika ayrıntıları ve meydan okuma kimlik bilgileri burada girilmez.",
-    "active": "Aktif sertifikalar",
-    "algorithm": "Algoritma",
+  "redirects": {
     "all": "Tümü",
-    "assignment_notice": "Atamalar, merkezi envanteri düzenler; TLS dağıtımı, her hizmetin sertifika ayarları tarafından kontrol edilir.",
-    "assignments": "Envanter atamaları",
-    "assignments_help": "Bu atamalar, canlı TLS ayarlarını değiştirmez.",
-    "attach": "Atayın",
-    "attach_all": "Bu sertifika, mevcut tüm hizmetlere zaten bağlıdır.",
-    "attach_copy": "Merkezi envanterdeki bir hizmete \"{{name}}\" atayın.",
-    "browse_certificate": "Sertifikayı görüntüle",
-    "browse_key": "Özel anahtarı görüntüle",
-    "common_name": "Ortak ad",
-    "confirm": "Onayla",
-    "confirm_action": "Sertifika eylemini onayla",
-    "confirm_delete": "\"{{name}}\"i sil? Bu geri alınamaz.",
-    "confirm_generic": "Bu sertifika eylemini onaylamak?",
-    "confirm_renew": "\"{{name}}\"i yenile?",
-    "confirm_renew_due": "Tüm sertifikalar kontrol edilsin ve yenileme zamanı gelenler yenilensin mi?",
-    "create": "Sertifika oluştur",
-    "download_chain": "Zinciri indirin",
-    "download_leaf": "Yaprağı indirin",
-    "edit_help": "Bu, yalnızca envanter meta verilerini değiştirir, sertifika malzemesini veya canlı TLS ayarlarını değiştirmez.",
-    "edit_metadata": "Sertifika meta verilerini düzenle",
-    "empty": "Sertifikalar yok",
-    "empty_help": "Kendinden imzalı bir sertifika oluşturun, ACME sertifika düzenleme işlemini planlayın veya mevcut bir PEM sertifikası ile anahtarını yükleyin.",
-    "expired_help": "Dikkat gerektirir",
-    "expires": "Son kullanma tarihi",
-    "expiring_help": "30 gün veya daha az",
-    "file_extensions": "Aşağıdaki dosya uzantılarından birini kullanın: {{extensions}}.",
-    "file_select": "Bir PEM dosyasını seçin.",
-    "file_selected": "{{name}} ({{size}} KiB)",
-    "file_size_limit": "Dosya 1 MiB'ı geçmemelidir.",
-    "fingerprint": "SHA-256 parmak izi",
-    "issuer": "Düzenleyen",
-    "issuers": "En çok kullanılan düzenleyenler",
-    "key_drop": "İlgili özel anahtarı buraya bırakın",
-    "key_limit": "Maksimum 1 MiB; dinlenme halindeyken şifrelenmiş ve indirilemez",
-    "last_error": "Son hata",
-    "make_primary": "Bu hizmet için ana envanter atamasını işaretleyin",
-    "managed": "Yönetilen sertifikalar",
-    "new_selfsigned": "Yeni kend imzalanmış sertifika",
-    "no_issuers": "Düzenleyen verisi yok",
-    "none_due": "Yenileme zamanı gelen sertifika yok",
-    "orphan_account": "Hesap",
-    "orphan_badge": "ACME hesabı eksik",
-    "orphan_help": "Bu yenileme kaydı, artık mevcut olmayan bir ACME hesabını işaret etmektedir. Yenileme, sağlayıcının durumu onarılana kadar bloke kalır.",
-    "orphan_server": "ACME sunucusu",
-    "orphan_title": "ACME hesabı eksik",
-    "pem_certificate": "PEM sertifikası veya zincir",
-    "pem_drop": "Açık PEM sertifikasını veya zincirini buraya bırakın",
-    "pem_limit": "Maksimum 1 MiB",
-    "pem_private_key": "PEM özel anahtar",
-    "primary": "Ana atama",
-    "primary_help": "Seçilen hizmetler için ana envanter atamasını işaretleyin",
-    "readonly": "Veritabanı salt okunurdur. Sertifikalar incelenebilir ve indirilebilir, ancak değiştirilemez.",
-    "renew_due": "Kontrol/yenileyin",
-    "sans": "Konu alternatif adları",
-    "save_metadata": "Meta verileri kaydedin",
-    "schedule": "Yayınlamayı planlayın",
-    "schedule_acme": "ACME yayınlamayı planlayın",
-    "search": "Ad, ortak ad, SAN, işveren veya parmak izi ile arayın…",
-    "serial": "Seri numarası",
-    "services": "Servisler",
-    "services_help": "Ctrl veya Command kullanarak birden fazla hizmeti seçin.",
-    "showing_count": "{{visible}} tanesi görüntüleniyor, toplamda {{total}} tane",
-    "source": {
-      "customcert": "Özel",
-      "letsencrypt": "Let's Encrypt",
-      "selfsigned": "Kendinden imzalı"
+    "append_badge": "+ URI",
+    "append_request_uri": "İstenen URI'yi hedefe ekle",
+    "attach": "Bağla",
+    "attach_copy": "{{name}}'i ({{from}} → {{to}}) bir veya daha fazla servise ekle.",
+    "code": {
+      "301": "301 — Kalıcı olarak taşındı",
+      "302": "302 — Bulundu",
+      "303": "303 — Diğerleri",
+      "307": "307 — Geçici yönlendirme",
+      "308": "308 — Kalıcı yönlendirme"
     },
-    "source_label": "Kaynak",
-    "status": {
-      "expired": "Geçerlilik süresi dolmuş",
-      "expiring_soon": "Yakında geçerlilik süresi dolacak",
-      "not_yet_valid": "Henüz geçerli değil",
-      "revoked": "İptal edilmiş",
-      "valid": "Geçerli"
+    "create": "Yönlendirme oluştur",
+    "delete_confirm_title": "Bu yönlendirmeyi sil?",
+    "delete_copy": "{{name}} yönlendirmesini sil?",
+    "delete_help": "Bir servise bağlı olan bir yönlendirme silinemez. Önce ayırın.",
+    "edit": "Yönlendirmeyi düzenle",
+    "edit_shared": "Bu yönlendirme hizmetlere bağlıdır (sayı: {{count}}): {{services}}. Kaydetmek tümünü değiştirir.",
+    "empty_text": "Bir yönlendirme, bir veya daha fazla servise eklediğiniz adlandırılmış bir kuraldır. REDIRECT_* ayarları, bu ile birlikte çalışmaya devam eder.",
+    "empty_title": "Henüz yönlendirme yok",
+    "err": {
+      "invalid_from_path": "Kaynak yol geçersiz: boşluk, noktalı virgül veya süslü parantez içeremez.",
+      "invalid_to_url": "Hedef, tam bir http:// veya https:// URL'si olmalıdır."
     },
-    "subtitle": "Merkezi envanterde sertifikaları oluştur, yükle, atayın, yenileyin ve inceleyin.",
-    "total": "Toplam",
-    "truncated": "Sadece ilk 500 sertifika görüntüleniyor. Tam sonucu almak için API üzerinden envanteri daraltın.",
-    "unassigned": "Atanmamış",
-    "upcoming": "Yaklaşan yenilemeler",
-    "upcoming_help": "Geçerlilik süresi dolmuş veya 30 günlük yenileme penceresi içinde",
-    "upload": "Sertifikayı yükle",
-    "upload_custom": "Özel sertifikayı yükle",
-    "upload_invalid": "Geçerli bir açık sertifika ve eşleşen özel anahtar seçin.",
-    "valid_days": "Gün cinsinden geçerlilik süresi",
-    "valid_from": "Şu tarihten itibaren geçerli",
-    "valid_to": "Şu tarihe kadar geçerli"
+    "from_path": "Yönlendir:",
+    "from_path_help": "Bağlı servislerdeki kaynak yolu, örneğin /old.",
+    "new": "Yeni yönlendirme",
+    "not_attached": "Bağlı değil",
+    "readonly": "Veritabanı salt okunurdur. Yönlendirmeler incelenebilir, ancak değiştirilemez.",
+    "save": "Yönlendirmeyi kaydet",
+    "search": "Ad, kaynak yolu veya hedefi arayın...",
+    "services_help": "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Yönlendirme daha sonra bağlanabilir.",
+    "status_code": "Durum kodu",
+    "to_url": "Yönlendir",
+    "truncated": "Sadece ilk 500 yönlendirme görüntülenir. Tam sonucu görmek için API ile listeyi daraltın.",
+    "flash": {
+      "could_not_detach_redirect": "Yönlendirme ayrılamadı: {{message}}",
+      "redirect_detached_successfully": "Yönlendirme başarıyla ayrıldı",
+      "redirect_service_are_required": "Yönlendirme ve servis gereklidir",
+      "could_not_attach_redirect": "Yönlendirme eklenemedi: {{message}}",
+      "redirect_attached_service": "Yönlendirme eklendi. Hizmetler: {{len}}",
+      "could_not_delete_redirect": "Yönlendirme silinemedi: {{message}}",
+      "redirect_deleted_successfully": "Yönlendirme başarıyla silindi",
+      "redirect_required": "Yönlendirme gereklidir",
+      "redirect_updated_successfully": "Yönlendirme başarıyla güncellendi",
+      "redirect_created_successfully": "{{value}} yönlendirmesi başarıyla oluşturuldu",
+      "could_not_fetch_services_redirect_assignments": "Yönlendirme atamaları için servisler alınamadı: {{message}}",
+      "could_not_fetch_redirects": "Yönlendirmeler alınamadı: {{message}}",
+      "could_not_create": "Yönlendirme oluşturulamadı: {{message}}",
+      "could_not_update": "Yönlendirme güncellenemedi: {{message}}",
+      "too_many_services": "Bir yönlendirme {{value}} servisten fazlasına eklenemez",
+      "name_required": "Yönlendirme adı gereklidir",
+      "target_required": "Yönlendirme hedefi gereklidir",
+      "status_code_must_be_one_of": "Durum kodu şunlardan biri olmalıdır: {{value}}",
+      "at_least_one_service_required": "En az bir servis gereklidir"
+    }
+  },
+  "upstreams": {
+    "add_server": "Sunucu ekle",
+    "all": "Tümü",
+    "attach": "Bağla",
+    "attach_copy": "{{name}} ({{servers}}) upstream'ini bir veya daha fazla hizmete bağla.",
+    "backend_ssl": "TLS ile sunucularla (https:// / grpcs://) konuş",
+    "balancing": {
+      "ip_hash": "IP hash — aynı istemci, aynı arka uç",
+      "least_conn": "En az bağlantılar",
+      "round_robin": "Döngü (varsayılan)"
+    },
+    "create": "Üst akış oluştur",
+    "delete_confirm_title": "Bu üst akışı sil?",
+    "delete_copy": "{{name}} üst akışını sil?",
+    "delete_help": "Bir hizmete hala bağlı olan bir üst akış silinemez. Önce ayırın.",
+    "edit": "Üst akışı düzenle",
+    "edit_shared": "Bu upstream hizmetlere bağlıdır (sayı: {{count}}): {{services}}. Kaydetmek tümünü değiştirir.",
+    "empty_text": "Upstream, reverse proxy yolunda bir veya daha fazla hizmete bağlanan adlandırılmış bir backend havuzudur. REVERSE_PROXY_HOST ayarları bununla birlikte çalışmaya devam eder.",
+    "empty_title": "Henüz üst akış yok",
+    "keepalive": "Keepalive",
+    "keepalive_help": "Her işçi başına tutulan boş bağlantılar. Sadece HTTP ve gRPC; devre dışı bırakmak için boş bırakın.",
+    "match_path": "Ters yönlendirme yolu",
+    "match_path_help": "Seçilen hizmetlerin bu havuzdan yönlendirdiği yer. Bir akış havuzu için, tüm hizmet kullanılır.",
+    "method": "Yük dengeleme",
+    "name_help": "Sadece harfler, rakamlar, tireler ve alt çizgiler. Noktalar reddedildiğinden, bir havuz adı asla gerçek bir ana sunucuyu gölgede tutamaz.",
+    "new": "Yeni upstream",
+    "not_attached": "Bağlanmamış",
+    "protocol": "Protokol",
+    "protocol_help": "HTTP ve gRPC havuzları bir yola bağlıdır; bir akış havuzu, tüm TCP/UDP hizmetini devralır.",
+    "protocols": {
+      "grpc": "gRPC",
+      "http": "HTTP",
+      "stream": "Akış (TCP/UDP)"
+    },
+    "readonly": "Veritabanı salt okunurdur. Upstream havuzları incelenebilir ancak değiştirilemez.",
+    "role": {
+      "backup": "Yedek",
+      "down": "Kapalı",
+      "primary": "Ana"
+    },
+    "save": "Upstream'i kaydet",
+    "search": "Ad, açıklama veya sunucu'yu arayın...",
+    "server_fail_timeout": "Başarısızlık zaman aşımı",
+    "server_host": "Sunucu",
+    "server_max_fails": "Maksimum başarısızlıklar",
+    "server_role": "Rol",
+    "server_weight": "Ağırlık",
+    "servers": "Sunucular",
+    "services_help": "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Upstream daha sonra bağlanabilir.",
+    "services_hidden": "Gizlenen hizmet sayısı: {{count}}. {{protocol}} upstream yalnızca eşleşen bir hizmete bağlanabilir.",
+    "truncated": "Yalnızca ilk 500 upstream gösteriliyor. Tam sonuç için API üzerinden listeyi daraltın.",
+    "flash": {
+      "could_not_detach_upstream": "Upstream ayrılamadı: {{message}}",
+      "upstream_detached_successfully": "Upstream başarıyla ayrıldı",
+      "upstream_service_are_required": "Upstream ve servis gereklidir",
+      "could_not_attach_upstream": "Upstream eklenemedi: {{message}}",
+      "upstream_attached_service": "Upstream eklendi. Hizmetler: {{len}}",
+      "could_not_delete_upstream": "Upstream silinemedi: {{message}}",
+      "upstream_deleted_successfully": "Upstream başarıyla silindi",
+      "upstream_required": "Upstream gereklidir",
+      "could_not_update_upstream": "Upstream güncellenemedi: {{message}}",
+      "upstream_updated_successfully": "Upstream başarıyla güncellendi",
+      "could_not_create_upstream": "Upstream oluşturulamadı: {{message}}",
+      "upstream_created_successfully": "{{value}} upstream'i başarıyla oluşturuldu",
+      "could_not_fetch_services_upstream_assignments": "Upstream atamaları için servisler alınamadı: {{message}}",
+      "could_not_fetch_upstreams": "Upstream'ler alınamadı: {{message}}",
+      "weight_max_fails_whole_numbers": "{{host}} için ağırlık ve max fails tam sayı olmalıdır",
+      "at_least_one_server_required": "En az bir sunucu gereklidir",
+      "too_many_servers": "Bir upstream {{value}} sunucudan fazlasına sahip olamaz",
+      "too_many_services": "Bir upstream {{value}} servisten fazlasına eklenemez",
+      "match_path_must_start_with_slash": "Ters proxy yolu / ile başlamalıdır",
+      "name_required": "Upstream adı gereklidir",
+      "protocol_must_be_one_of": "Protokol şunlardan biri olmalıdır: {{value}}",
+      "method_must_be_one_of": "Yöntem şunlardan biri olmalıdır: {{value}}",
+      "keepalive_must_be_positive_whole_number": "Keepalive sayısı pozitif bir tam sayı olmalıdır",
+      "at_least_one_service_required": "En az bir servis gereklidir"
+    }
+  },
+  "workflows": {
+    "act_block": "Engelle",
+    "act_challenge": "Doğrulama",
+    "act_code": "Durum",
+    "act_denyDefault": "Örneğin reddetme durumu",
+    "act_denyShort": "reddetme durumu",
+    "act_provider": "Antibot sağlayıcısı",
+    "act_redirect": "Yönlendir",
+    "act_status": "Reddetme durumu",
+    "act_terminal": "Her kuralda tek bir eylem vardır ve bu eylem değerlendirmeyi sonlandırır; kuraldan doğru/yanlış yolu çıkmaz.",
+    "act_url": "Hedef URL",
+    "action": "Sonra",
+    "add_rule": "Kural ekle",
+    "all": "Tümü",
+    "aria": {
+      "collapse": "Daralt",
+      "combinator": "Birleştiriciyi değiştir, şu anda",
+      "conditionType": "Koşul türü",
+      "denyStatus": "Reddetme durumu",
+      "drag": "Yeniden sıralamak için sürükle",
+      "expand": "Genişlet",
+      "groupKind": "Grup türü",
+      "more": "Daha fazla",
+      "moveDown": "Aşağı taşı — daha sonra çalışır",
+      "moveRule": "Kuralı taşı",
+      "moveUp": "Yukarı taşı — daha önce çalışır",
+      "provider": "Antibot sağlayıcısı",
+      "redirectStatus": "Yönlendirme durumu",
+      "removeCondition": "Koşulu kaldır",
+      "removeThreshold": "Eşiği kaldır",
+      "removeThresholdLong": "Hız eşiğini kaldır",
+      "removeValue": "Değeri kaldır",
+      "requestCount": "İstek sayısı",
+      "resourceGroup": "Kaynak grubu",
+      "ruleName": "{{n}} numaralı kuralın adı",
+      "terminalAction": "Sonlandırıcı eylem",
+      "uriMatch": "URI eşleşme modu",
+      "uriValue": "URI değeri",
+      "window": "Saniye cinsinden pencere",
+      "insertAt": "{{n}} konumuna bir kural ekle",
+      "openRule": "{{n}} kuralını aç",
+      "ruleErrors": "Bu kuraldaki doğrulama sorunu sayısı: {{count}}",
+      "changePosition": "Kural {{n}} / {{total}}, konumu değiştir",
+      "newValue": "Yeni değer",
+      "positionMove": "Konum {{n}} / {{total}} — taşımak için tıklayın",
+      "crowdsecField": "CrowdSec verisi",
+      "collapseRule": "{{n}} kuralını daralt",
+      "expandRule": "{{n}} kuralını genişlet",
+      "moveRuleUp": "{{n}} kuralını yukarı taşı",
+      "moveRuleDown": "{{n}} kuralını aşağı taşı",
+      "moreActionsForRule": "{{n}} kuralı için daha fazla eylem",
+      "ruleCard": "Kural {{n}} / {{total}} — {{name}}"
+    },
+    "attach": "Hizmetlere ekle",
+    "attach_help": "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır.",
+    "attached_notice": "Kaydetme işlemi bu kuralları bağlı {{count}} hizmete uygular.",
+    "canvas": {
+      "title": "Kural sırası",
+      "auxList": "Üstten alta. İlk eşleşen kazanır.",
+      "auxCanvas": "Soldan sağa. İlk eşleşen kazanır.",
+      "entry_title": "Her istek",
+      "entry_sub": "Kurallar soldan sağa çalışır.",
+      "exit_title": "Hiçbir kural eşleşmedi",
+      "exit_sub": "Bir sonraki bağlı iş akışına devam eder.",
+      "insert": "Buraya bir kural ekle",
+      "open": "Kuralı aç",
+      "close": "Kapat",
+      "gateTip": "Bir eşleşme kapısı, bir eylem değil: eşik değerinin altında kural eşleşmez ve bir sonraki kural değerlendirilir.",
+      "drawerSub": "Çalışma sırası: {{n}} / {{total}}",
+      "stopTail": ", değerlendirme burada durur — bundan sonra hiçbir kurala ulaşılmaz.",
+      "skipped": "Devre dışı — zincirde olmadığı gibi tamamen atlanır.",
+      "emptyTitle": "Henüz hiçbir kural yok",
+      "emptyBody": "Kuralları olmayan bir iş akışı hiçbir şeyi değiştirmez — her istek doğrudan bir sonraki bağlı iş akışına geçer.",
+      "emptyCta": "İlk kuralı ekle",
+      "hint": "Sırayı yeniden düzenlemek için bir düğmeyi sürükle · pan yapmak için tahtayı sürükle · odaklanmış bir düğmede Alt + ← / →",
+      "hintReadonly": "Okunabilir — etrafı görmek için pan yap, sıranın değiştirilemeyeceği",
+      "dropHint": "Öncelik ayarlamak için bırak — bir kuralın zincirdeki yeri, anlamayabileceği tek şeydir",
+      "zoomIn": "Yakınlaştır",
+      "zoomOut": "Uzaklaştır",
+      "fit": "Görüneğe uygun"
+    },
+    "capacity": "{{maxRules}} kuraldan {{count}} tanesi · en büyük kural {{maxPredicates}} yüklemden {{worst}} tanesini kullanıyor · bu iş akışında {{regexes}} düzenli ifade var",
+    "clone": "İş akışını kopyala",
+    "clone_help": "Kurallar kopyalanır, hizmet bağlantıları kopyalanmaz.",
+    "clone_name": "Kopyanın adı",
+    "confirm": {
+      "deleteRule": "Bu kural silinsin mi? Altındaki tüm kurallar bir konum yukarı taşınır."
+    },
+    "copySuffix": " (kopya)",
+    "delete": "İş akışını sil",
+    "delete_confirm": "Bu iş akışı ve tüm kuralları kalıcı olarak silinir.",
+    "empty_text": "Bir iş akışı, hizmetlere eklediğiniz kuralların sıralı bir listesidir: bir koşul ağacı, isteğe bağlı bir hız eşiği ve bir eylem — meydan okuma, engelle veya yönlendirme.",
+    "empty_title": "Henüz hiç iş akışı yok",
+    "entry_sub": "İş akışları bağlanma sırasına göre, içlerindeki kurallar ise yukarıdan aşağıya çalışır.",
+    "entry_title": "Bağlı bir hizmete gelen her istek",
+    "err": {
+      "load": "Kayıtlı kurallar okunamadı. Üzerine yazılmamaları için kaydetme devre dışı bırakıldı; sayfayı yeniden yükleyin.",
+      "save": "Kaydedilemedi",
+      "saveUnreachable": "Kaydetme uç noktasına ulaşılamadı",
+      "validate": "Doğrulanamadı",
+      "validateUnreachable": "Doğrulama uç noktasına ulaşılamadı"
+    },
+    "errors": {
+      "body": "Hiçbir şey uygulanmaz; çalışan politika değişmeden kalır.",
+      "count": "{{count}} sorun kaydetmeyi engelliyor.",
+      "rule": "Kural {{n}}",
+      "ruleNamed": "Kural {{n}} — {{name}}",
+      "whole": "Bu iş akışı"
+    },
+    "exit_sub": "İstek bir sonraki bağlı iş akışına, ardından güvenlik yığınının geri kalanına devam eder.",
+    "exit_title": "Hiçbir kural eşleşmedi",
+    "gate": {
+      "and": "ve yalnızca aynı istemci IP'si şundan fazla istekte bulunduğunda",
+      "chip": "eşleşme eşiği",
+      "help": "Her istemci IP'si için ayrı sayılır. Eşiğin altında bu kural eşleşmez ve değerlendirme sonraki kuralla devam eder; tek başına hiçbir zaman hız sınırlaması yapmaz."
+    },
+    "legend": {
+      "fall": "Eşleşme yoksa sonraki kurala geçilir",
+      "gate": "Hız eşiği eşleşmeyi koşullandırır; bir eylem değildir",
+      "move": "Yeniden sıralamak için sürükleyin, okları kullanın veya Alt + ↑ / ↓ tuşlarına basın",
+      "stop": "Eşleşme tek bir eylem çalıştırır ve durur",
+      "moveCanvas": "Sırayı yeniden düzenlemek için sürükle, numaralı simgeyi kullan veya Alt + ← / →'yi bas"
+    },
+    "link": {
+      "noMatch": "eşleşme yok",
+      "entry": "her istek"
+    },
+    "menu": {
+      "bottom": "En son çalıştır",
+      "delete": "Kuralı sil",
+      "disable": "Kuralı devre dışı bırak",
+      "duplicate": "Altına çoğalt",
+      "enable": "Kuralı etkinleştir",
+      "top": "İlk çalıştır",
+      "moveTo": "{{n}}. konuma taşı",
+      "staysAt": "{{n}}. konumda kalır"
+    },
+    "move": {
+      "first": "İlk çalıştır",
+      "last": "En son çalıştır"
+    },
+    "new": "Yeni iş akışı",
+    "no_rules": "Henüz hiç kural yok. Bu politikayı oluşturmaya başlamak için bir tane ekleyin.",
+    "not_attached": "Bağlı değil",
+    "not_attached_notice": "Bu iş akışı hiçbir hizmete bağlı değil; bu nedenle kuralları henüz hiçbir yerde uygulanmıyor.",
+    "not_validated": "Henüz doğrulanmadı",
+    "order_help": "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir hız eşiğine sahip bir kural, eşik aşıldığında yalnızca bir kez eşleşir, bu nedenle daha düşük bir kural, eşiğinin altında trafiği yakalayabilir.",
+    "readonly": "Veritabanı salt okunurdur. İş akışları incelenebilir, ancak değiştirilemez.",
+    "rule": {
+      "disabled": "Devre dışı",
+      "if": "Eğer",
+      "namePlaceholder": "Kural adı",
+      "noun": "Kural",
+      "onMatch": "Eşleşirse",
+      "skipped": "Devre dışı — listede yokmuş gibi tamamen atlanır.",
+      "stopTail": ", değerlendirme burada durur; altındaki hiçbir kurala ulaşılmaz."
+    },
+    "rules": "Kurallar",
+    "say": {
+      "actionChangedBlock": "Eylem engelleme olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder.",
+      "actionChangedChallenge": "Eylem doğrulama (challenge) olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder.",
+      "actionChangedRedirect": "Eylem yönlendirme olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder.",
+      "added": "Kural {{n}} konumuna, en sona eklendi; bu nedenle üstündeki tüm kurallar önce denetlenir.",
+      "deleted": "Kural silindi. {{count}} kural kaldı.",
+      "duplicated": "Kopya {{n}} konumuna eklendi. Üstündeki özgün kural etkin olduğu sürece hiçbir zaman eşleşemez.",
+      "gateAdded": "Eşleşmeye hız eşiği eklendi. Eşiğin altında kural eşleşmez ve değerlendirme devam eder.",
+      "jumped": "{{where}}: {{message}}",
+      "lastValueRemoved": "Son değer kaldırıldı — bu koşul bir değer içermeden kaydedilemez.",
+      "moved": "{{name}}, {{total}} konumdan {{to}} konumuna taşındı.",
+      "movedDrag": "{{name}}, {{total}} konumdan {{to}} konumuna sürüklendi.",
+      "movedKeyboard": "{{name}}, klavyeyle {{total}} konumdan {{to}} konumuna taşındı.",
+      "predicateCap": "Bu kural zaten en fazla {{max}} koşul içeriyor.",
+      "ruleDisabled": "{{name}} devre dışı bırakıldı — tamamen atlanır ve altındaki kurallar artık bu istekleri görür.",
+      "ruleEnabled": "{{name}} etkinleştirildi — {{n}} konumunda yeniden değerlendirilir.",
+      "runsAfter": "Artık {{name}} sonrasında çalışır.",
+      "runsAfterAbove": "Artık üstteki kuraldan sonra çalışır.",
+      "runsFirst": "Artık ilk çalışır.",
+      "runsLast": "Artık son çalışır.",
+      "saved": "Kurallar kaydedildi ve bağlı hizmetlere gönderildi.",
+      "theRule": "Kural",
+      "valuesDropped": "Koşul değiştirildi. Aktarılamayan değerler: {{count}}.",
+      "inserted": "{{total}}'nun {{n}} konumuna bir kural eklendi. Bundan önceki tüm kurallar önce kontrol edilir.",
+      "inspecting": "{{total}}'nun {{n}} kuralını düzenle — {{name}}.",
+      "viewCanvas": "Canvas görünümü. Kurallar soldan sağa çalışır; ilk eşleşen kazanır.",
+      "viewList": "Liste görünümü. Kurallar üstten alta çalışır; ilk eşleşen kazanır."
+    },
+    "search": "Ad veya açıklama arayın...",
+    "test": {
+      "asn": "ASN",
+      "asn_help": "Başarısız bir ASN sorgusunu benzetmek için boş bırakın.",
+      "asn_invalid": "ASN bir sayı olmalıdır",
+      "assume_not_whitelisted": "İstemcinin izin listesinde olmadığını varsayar.",
+      "assume_rate_counter": "{{request_number}} istek numarası bir ölçüm değil, sizin girdinizdir.",
+      "assume_regex_budget": "Örneğin düzenli ifade bütçesinin tükenmediğini varsayar.",
+      "assumptions": "Varsayımlar",
+      "country": "Ülke",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec izin verdi",
+      "crowdsec_help": "İş akışları çalışmadan önce CrowdSec'in bu istek hakkında verdiği karar. CrowdSec'in hiç değerlendirmediği bir istek, aleyhinde hiçbir şey olmayan bir istekle aynı değildir: birincisi bir CrowdSec koşulunu belirsiz bırakır, ikincisi onu yanlış yapar.",
+      "crowdsec_remediated": "CrowdSec iyileştirdi",
+      "crowdsec_remediation": "İyileştirme",
+      "crowdsec_source": "Karar kaynağı",
+      "crowdsec_unavailable": "CrowdSec bu isteği değerlendirmedi",
+      "detail_challenge": "Doğrulama denetimi devralır; güvenlik yığınının geri kalanı çalışmaya devam eder.",
+      "detail_detect": "Bu hizmet algılama modunda olduğundan gerçekte hiçbir şey uygulanmaz.",
+      "detail_status": "İstemci {{status}} durumunu görür.",
+      "failed": "Test çalıştırılamadı",
+      "geo": "GeoIP sorgusu",
+      "geo_help": "Kullanılamaz durumu, ülke ve ASN kurallarını BİLİNMİYOR yapar; bu yüzden hiçbir zaman eşleşemezler.",
+      "geo_local": "Yerel / özel adres",
+      "geo_resolved": "Çözümlendi",
+      "geo_unavailable": "Veritabanı kullanılamıyor",
+      "intro": "Hizmete bağlı her iş akışını sırayla, örneğin yaptığı biçimde değerlendirir.",
+      "invalid": "Test etmeden önce yukarıdaki sorunları düzeltin.",
+      "ip": "İstemci IP'si",
+      "method": "Yöntem",
+      "number": "İstek numarası",
+      "number_help": "Bu istemcinin penceredeki N'inci isteği. Sizin sağladığınız bir varsayım, ölçüm değil.",
+      "open": "Bir isteği test et",
+      "other_matched": "burada eşleşti",
+      "other_no_match": "hiçbir kural eşleşmedi",
+      "other_unreached": "ulaşılmadı",
+      "other_workflows": "Bu hizmetteki diğer iş akışları",
+      "out_draft": "Bu hizmet taslak durumunda — henüz onun için bir iş akışı derlenmedi.",
+      "out_match": "{{workflow}} · {{rule}} eşleşti.",
+      "out_match_block": "{{workflow}} · {{rule}} eşleşti ve isteği engelledi.",
+      "out_match_redirect": "{{workflow}} · {{rule}} eşleşti ve isteği yönlendirdi.",
+      "out_match_challenge": "{{workflow}} · {{rule}} eşleşti ve istek için doğrulama (challenge) uyguladı.",
+      "out_no_match": "Hiçbir kural eşleşmedi. İstek güvenlik yığınının geri kalanına devam eder.",
+      "out_not_attached": "Bu iş akışı hiçbir hizmete bağlı değil; bu nedenle değerlendirilecek bir kural sırası yok.",
+      "out_whitelisted": "İzin listesinde — tüm iş akışı atlanır ve hiçbir kural değerlendirilmez.",
+      "run": "Testi çalıştır",
+      "service": "Hizmet",
+      "title": "Bir isteği test et",
+      "unreachable": "Test uç noktasına ulaşılamadı",
+      "uri": "URI yolu",
+      "uri_help": "Yalnızca yol — $uri hiçbir zaman sorgu dizesi içermez.",
+      "v_gate": "koşullar eşleşiyor · eşik {{count}} isteğin {{n}} tanesinde kapalı",
+      "v_match": "EŞLEŞTİ",
+      "v_unknown": "BİLİNMİYOR",
+      "v_unknown_help": "Bu kuralın gerektirdiği bir bilgi belirlenemedi; bu nedenle kural hiçbir zaman eşleşemez.",
+      "whitelisted": "Bu istemci izin listesinde"
+    },
+    "threshold": "Sadece bir hızın üzerinde",
+    "threshold_count": "İstekler",
+    "threshold_window": "saniye içinde",
+    "tree": {
+      "addCondition": "Koşul",
+      "addGroup": "Grup",
+      "all": "Tümü",
+      "allMeta": "{{count}} koşul — tümü doğru olmalıdır",
+      "and": "ve",
+      "any": "Herhangi biri",
+      "anyMeta": "{{count}} koşul — en az biri doğru olmalıdır",
+      "empty": "Boş grup — bir koşul ekleyin; bu hâliyle kaydedilemez.",
+      "noGroupHolds": "Hiçbir kaynak grubu bu türde girdi içermiyor.",
+      "noneMeta": "bunların hiçbiri doğru olmadığında eşleşir",
+      "not": "Hiçbiri",
+      "or": "veya",
+      "removeGroup": "Grubu kaldır"
+    },
+    "truncated": "Sadece ilk 500 iş akışı görüntülenir. Tam sonucu elde etmek için API'i kullanın.",
+    "untitled": "Adsız kural",
+    "value": {
+      "add": "Değer"
+    },
+    "values": {
+      "fewer": "Daha az göster",
+      "more": "+{{n}} daha"
+    },
+    "verb": {
+      "asn": "şudur",
+      "country": "şudur",
+      "group": "gruptadır",
+      "ip": "şunun içindedir",
+      "isIn": "şunun içindedir",
+      "isOneOf": "şunlardan biridir",
+      "method": "şudur",
+      "uri": "ile eşleşir"
+    },
+    "view": {
+      "canvas": "Tuval",
+      "list": "Liste"
+    },
+    "action_help": {
+      "block": "İsteği reddet",
+      "challenge": "İnsan olduğunu doğrula",
+      "redirect": "Başka bir yere gönder"
+    },
+    "condition": {
+      "crowdsec": "CrowdSec kararı",
+      "ip": "IP / CIDR",
+      "method": "HTTP yöntemi",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "tam olarak eşittir",
+      "prefix": "ile başlar",
+      "regex": "düzenli ifadeyle eşleşir"
+    },
+    "reason": {
+      "sentence": "Güvenlik iş akışı {{workflow}}: {{action}}"
+    },
+    "crowdsec_field": {
+      "remediation": "iyileştirme şu",
+      "source": "kaynak şu"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "yasaklama",
+      "captcha": "captcha",
+      "lapi": "yerel API"
+    },
+    "flash": {
+      "could_not_detach_workflow": "İş akışı ayrılamadı: {{message}}",
+      "workflow_detached_successfully": "İş akışı başarıyla ayrıldı",
+      "workflow_service_are_required": "İş akışı ve servis gereklidir",
+      "could_not_attach_workflow": "İş akışı eklenemedi: {{message}}",
+      "workflow_services_updated_attached": "İş akışı servisleri güncellendi ({{len}} eklendi)",
+      "could_not_delete_workflow": "İş akışı silinemedi: {{message}}",
+      "workflow_deleted_successfully": "İş akışı başarıyla silindi",
+      "workflow_required": "İş akışı gereklidir",
+      "could_not_clone_workflow": "İş akışı klonlanamadı: {{message}}",
+      "workflow_cloned": "İş akışı {{name}} olarak klonlandı",
+      "workflow_new_name_are_required": "İş akışı ve yeni ad gereklidir",
+      "could_not_update_workflow": "İş akışı güncellenemedi: {{message}}",
+      "workflow_updated_successfully": "İş akışı başarıyla güncellendi",
+      "could_not_create_workflow": "İş akışı oluşturulamadı: {{message}}",
+      "workflow_created_successfully": "{{value}} iş akışı başarıyla oluşturuldu",
+      "could_not_fetch_workflow": "İş akışı alınamadı: {{message}}",
+      "could_not_fetch_services_workflow_assignments": "İş akışı atamaları için servisler alınamadı: {{message}}",
+      "could_not_fetch_workflows": "İş akışları alınamadı: {{message}}",
+      "too_many_services": "Bir iş akışı {{value}} servisten fazlasına eklenemez",
+      "name_required": "İş akışı adı gereklidir",
+      "service_list_not_read_reopen_page": "Servis listesi okunamadı; sayfayı yeniden açın ve tekrar deneyin"
+    }
+  },
+  "request_path": {
+    "client": "İstemci",
+    "source": "{{phase}} aşaması için eklenti yürütme sırası, {{setting}}'den — bir görüntüleme sırası, isteğe bağlı bir izleme değil.",
+    "terminal": {
+      "inline": "Arka uç",
+      "none": "Hiçbir şey sunulmadı",
+      "pool": "Upstream havuzu",
+      "root": "Yerel dosyalar"
+    },
+    "title": "İstek yolu",
+    "unordered": "{{phase}} aşamasında ilan edilmemiş bir konum; sıralı eklentilerden sonra çalışır."
   },
   "resource_groups": {
     "add_entry": "Ekle",
@@ -2658,16 +4313,31 @@
     "import_file": "TXT/CSV",
     "import_size": "TXT/CSV importları 256 KiB ile sınırlıdır.",
     "kind": "Tür",
+    "kind_label": {
+      "ip": "IP",
+      "country": "Ülke",
+      "asn": "ASN",
+      "rdns": "Ters DNS",
+      "user_agent": "Kullanıcı aracısı",
+      "uri": "URI"
+    },
     "kinds": "Türler",
     "loading_references": "Referanslar yükleniyor...",
     "max_entries": "Bir kaynak grubu {{max}} girdiden fazla içermemelidir.",
-    "meta_line": "{{kinds}} tür · {{values}} değer · {{usages}} kullanım",
+    "meta_kinds": "{{count}} tür",
+    "meta_kinds_plural": "{{count}} tür",
+    "meta_usages": "{{count}} kullanım",
+    "meta_usages_plural": "{{count}} kullanım",
+    "meta_values": "{{count}} değer",
+    "meta_values_plural": "{{count}} değer",
     "new": "Yeni grup",
     "new_alias": "Yeni kısaltma",
     "no_entries": "Girdiler yok",
     "no_entries_help": "Girdileri tek tek ekleyin veya aşağıdaki toplu içe aktarma aracını kullanın.",
     "no_references": "Referans yok",
     "readonly": "Veritabanı salt okunurdur. Kaynak grupları incelenebilir ve dışa aktarılabilir, ancak değiştirilemez.",
+    "reference_count": "{{count}} referans",
+    "reference_count_plural": "{{count}} referans",
     "references_error": "Referanslar yüklenemedi",
     "save": "Grup kaydet",
     "search": "Kısaltmaları, açıklamaları, türleri veya değerleri arayın…",
@@ -2676,7 +4346,28 @@
     "template_configuration": "Şablon {{template}}",
     "usage": "Kullanım",
     "value": "Değer",
-    "values": "Değerler"
+    "values": "Değerler",
+    "flash": {
+      "could_not_export_resource_groups": "Kaynak grupları dışa aktarılamadı: {{message}}",
+      "could_not_delete_resource_group": "Kaynak grubu silinemedi: {{message}}",
+      "resource_group_deleted_successfully": "Kaynak grubu başarıyla silindi",
+      "resource_group_required": "Kaynak grubu gereklidir",
+      "could_not_clone_resource_group": "Kaynak grubu klonlanamadı: {{message}}",
+      "resource_group_cloned": "Kaynak grubu @{{alias}} olarak klonlandı",
+      "could_not_save_resource_group": "Kaynak grubu kaydedilemedi: {{message}}",
+      "resource_group_created_successfully": "@{{alias}} kaynak grubu başarıyla oluşturuldu",
+      "resource_group_updated_successfully": "Kaynak grubu başarıyla güncellendi",
+      "alias_invalid_chars": "Takma ad 1 ile 64 harf, rakam, alt çizgi veya tire içermelidir",
+      "alias_reserved": "Bu takma ad BunkerWeb tarafından ayrılmıştır",
+      "entries_not_valid_json": "Kaynak girişleri geçerli JSON değil",
+      "entries_not_a_list": "Kaynak girişleri bir liste olmalıdır",
+      "too_many_entries": "Bir kaynak grubu {{value}} girişten fazlasını içeremez",
+      "entry_invalid": "Giriş {{index}} geçersiz",
+      "entry_invalid_kind": "Giriş {{index}} geçersiz bir türe sahip",
+      "entry_invalid_value": "Giriş {{index}} geçersiz bir değere sahip",
+      "entry_comment_too_long": "Giriş {{index}} çok uzun bir yoruma sahip",
+      "source_required": "Kaynak kaynak grubu gereklidir"
+    }
   },
   "validation": {
     "default_field_name": "Bu alan",
@@ -2733,440 +4424,41 @@
     "service": "Servis",
     "services": "Hizmetin etkinleştirilmesi",
     "status": "Örnek depolama",
-    "subtitle": "Ters proxy önbelleği durumu, toplu olarak isabet oran metrikleri ve anında temizleme kontrolleri."
-  },
-  "compose": {
-    "always_on": "Her zaman açık",
-    "count": "{{on}} etkin · {{total}} kullanılabilir · {{locked}} kilitli",
-    "entries": "{{count}} yapılandırılmış",
-    "filter": {
-      "all": "Tümü",
-      "changed": "Değişti",
-      "on": "Evet"
-    },
-    "locked": "Burada kontrol yok",
-    "provenance": {
-      "api": "API aracılığıyla yönetilir",
-      "attachment": "Ekli dosyadan",
-      "clone": "Kopyalandı",
-      "default": "Varsayılan",
-      "edited": "İşte düzenlendi",
-      "global": "Küresel",
-      "managed": "{{method}} tarafından ayarlandı",
-      "template": "Şablondan"
-    },
-    "set_value": "Bir değer belirle…",
-    "show_more": "{{count}} tane daha göster",
-    "unavailable": "Eklenti listesi yüklenemedi, bu nedenle bu sayfa güvenli bir şekilde düzenlenemez. API yanıtını bekleyin."
-  },
-  "redirects": {
-    "all": "Tümü",
-    "append_badge": "+ URI",
-    "append_request_uri": "İstenen URI'yi hedefe ekle",
-    "attach": "Bağla",
-    "attach_copy": "{{name}}'i ({{from}} → {{to}}) bir veya daha fazla servise ekle.",
-    "code": {
-      "301": "301 — Kalıcı olarak taşındı",
-      "302": "302 — Bulundu",
-      "303": "303 — Diğerleri",
-      "307": "307 — Geçici yönlendirme",
-      "308": "308 — Kalıcı yönlendirme"
-    },
-    "create": "Yönlendirme oluştur",
-    "delete_confirm_title": "Bu yönlendirmeyi sil?",
-    "delete_copy": "{{name}} yönlendirmesini sil?",
-    "delete_help": "Bir servise bağlı olan bir yönlendirme silinemez. Önce ayırın.",
-    "edit": "Yönlendirmeyi düzenle",
-    "edit_shared": "Bu yönlendirme hizmetlere bağlıdır (sayı: {{count}}): {{services}}. Kaydetmek tümünü değiştirir.",
-    "empty_text": "Bir yönlendirme, bir veya daha fazla servise eklediğiniz adlandırılmış bir kuraldır. REDIRECT_* ayarları, bu ile birlikte çalışmaya devam eder.",
-    "empty_title": "Henüz yönlendirme yok",
-    "from_path": "Yönlendir:",
-    "from_path_help": "Bağlı servislerdeki kaynak yolu, örneğin /old.",
-    "new": "Yeni yönlendirme",
-    "not_attached": "Bağlı değil",
-    "readonly": "Veritabanı salt okunurdur. Yönlendirmeler incelenebilir, ancak değiştirilemez.",
-    "save": "Yönlendirmeyi kaydet",
-    "search": "Ad, kaynak yolu veya hedefi arayın...",
-    "services_help": "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Yönlendirme daha sonra bağlanabilir.",
-    "status_code": "Durum kodu",
-    "to_url": "Yönlendir",
-    "truncated": "Sadece ilk 500 yönlendirme görüntülenir. Tam sonucu görmek için API ile listeyi daraltın."
-  },
-  "upstreams": {
-    "add_server": "Sunucu ekle",
-    "all": "Tümü",
-    "attach": "Bağla",
-    "attach_copy": "{{name}} ({{servers}}) upstream'ini bir veya daha fazla hizmete bağla.",
-    "backend_ssl": "TLS ile sunucularla (https:// / grpcs://) konuş",
-    "balancing": {
-      "ip_hash": "IP hash — aynı istemci, aynı arka uç",
-      "least_conn": "En az bağlantılar",
-      "round_robin": "Döngü (varsayılan)"
-    },
-    "create": "Üst akış oluştur",
-    "delete_confirm_title": "Bu üst akışı sil?",
-    "delete_copy": "{{name}} üst akışını sil?",
-    "delete_help": "Bir hizmete hala bağlı olan bir üst akış silinemez. Önce ayırın.",
-    "edit": "Üst akışı düzenle",
-    "edit_shared": "Bu upstream hizmetlere bağlıdır (sayı: {{count}}): {{services}}. Kaydetmek tümünü değiştirir.",
-    "empty_text": "Upstream, reverse proxy yolunda bir veya daha fazla hizmete bağlanan adlandırılmış bir backend havuzudur. REVERSE_PROXY_HOST ayarları bununla birlikte çalışmaya devam eder.",
-    "empty_title": "Henüz üst akış yok",
-    "keepalive": "Keepalive",
-    "keepalive_help": "Her işçi başına tutulan boş bağlantılar. Sadece HTTP ve gRPC; devre dışı bırakmak için boş bırakın.",
-    "match_path": "Ters yönlendirme yolu",
-    "match_path_help": "Seçilen hizmetlerin bu havuzdan yönlendirdiği yer. Bir akış havuzu için, tüm hizmet kullanılır.",
-    "method": "Yük dengeleme",
-    "name_help": "Sadece harfler, rakamlar, tireler ve alt çizgiler. Noktalar reddedildiğinden, bir havuz adı asla gerçek bir ana sunucuyu gölgede tutamaz.",
-    "new": "Yeni upstream",
-    "not_attached": "Bağlanmamış",
-    "protocol": "Protokol",
-    "protocol_help": "HTTP ve gRPC havuzları bir yola bağlıdır; bir akış havuzu, tüm TCP/UDP hizmetini devralır.",
-    "protocols": {
-      "grpc": "gRPC",
-      "http": "HTTP",
-      "stream": "Akış (TCP/UDP)"
-    },
-    "readonly": "Veritabanı salt okunurdur. Upstream havuzları incelenebilir ancak değiştirilemez.",
-    "role": {
-      "backup": "Yedek",
-      "down": "Kapalı",
-      "primary": "Ana"
-    },
-    "save": "Upstream'i kaydet",
-    "search": "Ad, açıklama veya sunucu'yu arayın...",
-    "server_fail_timeout": "Başarısızlık zaman aşımı",
-    "server_host": "Sunucu",
-    "server_max_fails": "Maksimum başarısızlıklar",
-    "server_role": "Rol",
-    "server_weight": "Ağırlık",
-    "servers": "Sunucular",
-    "services_help": "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Upstream daha sonra bağlanabilir.",
-    "services_hidden": "Gizlenen hizmet sayısı: {{count}}. {{protocol}} upstream yalnızca eşleşen bir hizmete bağlanabilir.",
-    "truncated": "Yalnızca ilk 500 upstream gösteriliyor. Tam sonuç için API üzerinden listeyi daraltın."
-  },
-  "workflows": {
-    "act_block": "Engelle",
-    "act_challenge": "Doğrulama",
-    "act_code": "Durum",
-    "act_denyDefault": "Örneğin reddetme durumu",
-    "act_denyShort": "reddetme durumu",
-    "act_provider": "Antibot sağlayıcısı",
-    "act_redirect": "Yönlendir",
-    "act_status": "Reddetme durumu",
-    "act_terminal": "Her kuralda tek bir eylem vardır ve bu eylem değerlendirmeyi sonlandırır; kuraldan doğru/yanlış yolu çıkmaz.",
-    "act_url": "Hedef URL",
-    "action": "Sonra",
-    "add_rule": "Kural ekle",
-    "all": "Tümü",
-    "aria": {
-      "collapse": "Daralt",
-      "combinator": "Birleştiriciyi değiştir, şu anda",
-      "conditionType": "Koşul türü",
-      "denyStatus": "Reddetme durumu",
-      "drag": "Yeniden sıralamak için sürükle",
-      "expand": "Genişlet",
-      "groupKind": "Grup türü",
-      "insertAt": "{{n}} konumuna bir kural ekle",
-      "more": "Daha fazla",
-      "moveDown": "Aşağı taşı — daha sonra çalışır",
-      "moveRule": "Kuralı taşı",
-      "moveUp": "Yukarı taşı — daha önce çalışır",
-      "openRule": "{{n}} kuralını aç",
-      "provider": "Antibot sağlayıcısı",
-      "redirectStatus": "Yönlendirme durumu",
-      "removeCondition": "Koşulu kaldır",
-      "removeThreshold": "Eşiği kaldır",
-      "removeThresholdLong": "Hız eşiğini kaldır",
-      "removeValue": "Değeri kaldır",
-      "requestCount": "İstek sayısı",
-      "resourceGroup": "Kaynak grubu",
-      "ruleErrors": "Bu kuraldaki doğrulama sorunu sayısı: {{count}}",
-      "ruleName": "{{n}} numaralı kuralın adı",
-      "terminalAction": "Sonlandırıcı eylem",
-      "uriMatch": "URI eşleşme modu",
-      "uriValue": "URI değeri",
-      "window": "Saniye cinsinden pencere",
-      "changePosition": "Kural {{n}} / {{total}}, konumu değiştir",
-      "newValue": "Yeni değer",
-      "positionMove": "Konum {{n}} / {{total}} — taşımak için tıklayın",
-      "crowdsecField": "CrowdSec verisi"
-    },
-    "attach": "Hizmetlere ekle",
-    "attach_help": "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır.",
-    "attached_notice": "Kaydetme işlemi bu kuralları bağlı {{count}} hizmete uygular.",
-    "canvas": {
-      "auxCanvas": "Soldan sağa. İlk eşleşen kazanır.",
-      "auxList": "Üstten alta. İlk eşleşen kazanır.",
-      "close": "Kapat",
-      "drawerSub": "Çalışma sırası: {{n}} / {{total}}",
-      "dropHint": "Öncelik ayarlamak için bırak — bir kuralın zincirdeki yeri, anlamayabileceği tek şeydir",
-      "emptyBody": "Kuralları olmayan bir iş akışı hiçbir şeyi değiştirmez — her istek doğrudan bir sonraki bağlı iş akışına geçer.",
-      "emptyCta": "İlk kuralı ekle",
-      "emptyTitle": "Henüz hiçbir kural yok",
-      "entry_sub": "Kurallar soldan sağa çalışır.",
-      "entry_title": "Her istek",
-      "exit_sub": "Bir sonraki bağlı iş akışına devam eder.",
-      "exit_title": "Hiçbir kural eşleşmedi",
-      "fit": "Görüneğe uygun",
-      "gateTip": "Bir eşleşme kapısı, bir eylem değil: eşik değerinin altında kural eşleşmez ve bir sonraki kural değerlendirilir.",
-      "hint": "Sırayı yeniden düzenlemek için bir düğmeyi sürükle · pan yapmak için tahtayı sürükle · odaklanmış bir düğmede Alt + ← / →",
-      "hintReadonly": "Okunabilir — etrafı görmek için pan yap, sıranın değiştirilemeyeceği",
-      "insert": "Buraya bir kural ekle",
-      "open": "Kuralı aç",
-      "skipped": "Devre dışı — zincirde olmadığı gibi tamamen atlanır.",
-      "stopTail": ", değerlendirme burada durur — bundan sonra hiçbir kurala ulaşılmaz.",
-      "title": "Kural sırası",
-      "zoomIn": "Yakınlaştır",
-      "zoomOut": "Uzaklaştır"
-    },
-    "capacity": "{{maxRules}} kuraldan {{count}} tanesi · en büyük kural {{maxPredicates}} yüklemden {{worst}} tanesini kullanıyor · bu iş akışında {{regexes}} düzenli ifade var",
-    "clone": "İş akışını kopyala",
-    "clone_help": "Kurallar kopyalanır, hizmet bağlantıları kopyalanmaz.",
-    "clone_name": "Kopyanın adı",
-    "confirm": {
-      "deleteRule": "Bu kural silinsin mi? Altındaki tüm kurallar bir konum yukarı taşınır."
-    },
-    "copySuffix": " (kopya)",
-    "delete": "İş akışını sil",
-    "delete_confirm": "Bu iş akışı ve tüm kuralları kalıcı olarak silinir.",
-    "empty_text": "Bir iş akışı, hizmetlere eklediğiniz kuralların sıralı bir listesidir: bir koşul ağacı, isteğe bağlı bir hız eşiği ve bir eylem — meydan okuma, engelle veya yönlendirme.",
-    "empty_title": "Henüz hiç iş akışı yok",
-    "entry_sub": "İş akışları bağlanma sırasına göre, içlerindeki kurallar ise yukarıdan aşağıya çalışır.",
-    "entry_title": "Bağlı bir hizmete gelen her istek",
-    "err": {
-      "save": "Kaydedilemedi",
-      "saveUnreachable": "Kaydetme uç noktasına ulaşılamadı",
-      "validate": "Doğrulanamadı",
-      "validateUnreachable": "Doğrulama uç noktasına ulaşılamadı"
-    },
-    "errors": {
-      "body": "Hiçbir şey uygulanmaz; çalışan politika değişmeden kalır.",
-      "count": "{{count}} sorun kaydetmeyi engelliyor.",
-      "rule": "Kural {{n}}",
-      "ruleNamed": "Kural {{n}} — {{name}}",
-      "whole": "Bu iş akışı"
-    },
-    "exit_sub": "İstek bir sonraki bağlı iş akışına, ardından güvenlik yığınının geri kalanına devam eder.",
-    "exit_title": "Hiçbir kural eşleşmedi",
-    "gate": {
-      "and": "ve yalnızca aynı istemci IP'si şundan fazla istekte bulunduğunda",
-      "chip": "eşleşme eşiği",
-      "help": "Her istemci IP'si için ayrı sayılır. Eşiğin altında bu kural eşleşmez ve değerlendirme sonraki kuralla devam eder; tek başına hiçbir zaman hız sınırlaması yapmaz."
-    },
-    "legend": {
-      "fall": "Eşleşme yoksa sonraki kurala geçilir",
-      "gate": "Hız eşiği eşleşmeyi koşullandırır; bir eylem değildir",
-      "move": "Yeniden sıralamak için sürükleyin, okları kullanın veya Alt + ↑ / ↓ tuşlarına basın",
-      "moveCanvas": "Sırayı yeniden düzenlemek için sürükle, numaralı simgeyi kullan veya Alt + ← / →'yi bas",
-      "stop": "Eşleşme tek bir eylem çalıştırır ve durur"
-    },
-    "link": {
-      "entry": "her istek",
-      "noMatch": "eşleşme yok"
-    },
-    "menu": {
-      "bottom": "En son çalıştır",
-      "delete": "Kuralı sil",
-      "disable": "Kuralı devre dışı bırak",
-      "duplicate": "Altına çoğalt",
-      "enable": "Kuralı etkinleştir",
-      "top": "İlk çalıştır",
-      "moveTo": "{{n}}. konuma taşı",
-      "staysAt": "{{n}}. konumda kalır"
-    },
-    "move": {
-      "first": "İlk çalıştır",
-      "last": "En son çalıştır"
-    },
-    "new": "Yeni iş akışı",
-    "no_rules": "Henüz hiç kural yok. Bu politikayı oluşturmaya başlamak için bir tane ekleyin.",
-    "not_attached": "Bağlı değil",
-    "not_attached_notice": "Bu iş akışı hiçbir hizmete bağlı değil; bu nedenle kuralları henüz hiçbir yerde uygulanmıyor.",
-    "not_validated": "Henüz doğrulanmadı",
-    "order_help": "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir hız eşiğine sahip bir kural, eşik aşıldığında yalnızca bir kez eşleşir, bu nedenle daha düşük bir kural, eşiğinin altında trafiği yakalayabilir.",
-    "readonly": "Veritabanı salt okunurdur. İş akışları incelenebilir, ancak değiştirilemez.",
-    "rule": {
-      "disabled": "Devre dışı",
-      "if": "Eğer",
-      "namePlaceholder": "Kural adı",
-      "noun": "Kural",
-      "onMatch": "Eşleşirse",
-      "skipped": "Devre dışı — listede yokmuş gibi tamamen atlanır.",
-      "stopTail": ", değerlendirme burada durur; altındaki hiçbir kurala ulaşılmaz."
-    },
-    "rules": "Kurallar",
-    "say": {
-      "actionChanged": "Eylem {{type}} olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder.",
-      "added": "Kural {{n}} konumuna, en sona eklendi; bu nedenle üstündeki tüm kurallar önce denetlenir.",
-      "deleted": "Kural silindi. {{count}} kural kaldı.",
-      "duplicated": "Kopya {{n}} konumuna eklendi. Üstündeki özgün kural etkin olduğu sürece hiçbir zaman eşleşemez.",
-      "gateAdded": "Eşleşmeye hız eşiği eklendi. Eşiğin altında kural eşleşmez ve değerlendirme devam eder.",
-      "inserted": "{{total}}'nun {{n}} konumuna bir kural eklendi. Bundan önceki tüm kurallar önce kontrol edilir.",
-      "inspecting": "{{total}}'nun {{n}} kuralını düzenle — {{name}}.",
-      "jumped": "{{where}}: {{message}}",
-      "lastValueRemoved": "Son değer kaldırıldı — bu koşul bir değer içermeden kaydedilemez.",
-      "moved": "{{name}}, {{total}} konumdan {{to}} konumuna taşındı{{how}}. Artık {{where}} çalışır.",
-      "predicateCap": "Bu kural zaten en fazla {{max}} koşul içeriyor.",
-      "ruleAbove": "üstteki kural",
-      "ruleDisabled": "{{name}} devre dışı bırakıldı — tamamen atlanır ve altındaki kurallar artık bu istekleri görür.",
-      "ruleEnabled": "{{name}} etkinleştirildi — {{n}} konumunda yeniden değerlendirilir.",
-      "runsAfter": "{{name}} sonrasında",
-      "runsFirst": "ilk",
-      "runsLast": "son",
-      "saved": "Kurallar kaydedildi ve bağlı hizmetlere gönderildi.",
-      "theRule": "Kural",
-      "valuesDropped": "Koşul {{type}} olarak değiştirildi — içerdiği {{count}} değer aktarılamadı.",
-      "via": {
-        "drag": "sürükleyerek",
-        "keyboard": "klavyeyle"
-      },
-      "viewCanvas": "Canvas görünümü. Kurallar soldan sağa çalışır; ilk eşleşen kazanır.",
-      "viewList": "Liste görünümü. Kurallar üstten alta çalışır; ilk eşleşen kazanır."
-    },
-    "search": "Ad veya açıklama arayın...",
-    "test": {
-      "asn": "ASN",
-      "asn_help": "Başarısız bir ASN sorgusunu benzetmek için boş bırakın.",
-      "asn_invalid": "ASN bir sayı olmalıdır",
-      "assume_not_whitelisted": "İstemcinin izin listesinde olmadığını varsayar.",
-      "assume_rate_counter": "{{request_number}} istek numarası bir ölçüm değil, sizin girdinizdir.",
-      "assume_regex_budget": "Örneğin düzenli ifade bütçesinin tükenmediğini varsayar.",
-      "assumptions": "Varsayımlar",
-      "country": "Ülke",
-      "detail_challenge": "Doğrulama denetimi devralır; güvenlik yığınının geri kalanı çalışmaya devam eder.",
-      "detail_detect": "Bu hizmet algılama modunda olduğundan gerçekte hiçbir şey uygulanmaz.",
-      "detail_status": "İstemci {{status}} durumunu görür.",
-      "failed": "Test çalıştırılamadı",
-      "geo": "GeoIP sorgusu",
-      "geo_help": "Kullanılamaz durumu, ülke ve ASN kurallarını BİLİNMİYOR yapar; bu yüzden hiçbir zaman eşleşemezler.",
-      "geo_local": "Yerel / özel adres",
-      "geo_resolved": "Çözümlendi",
-      "geo_unavailable": "Veritabanı kullanılamıyor",
-      "intro": "Hizmete bağlı her iş akışını sırayla, örneğin yaptığı biçimde değerlendirir.",
-      "invalid": "Test etmeden önce yukarıdaki sorunları düzeltin.",
-      "ip": "İstemci IP'si",
-      "method": "Yöntem",
-      "number": "İstek numarası",
-      "number_help": "Bu istemcinin penceredeki N'inci isteği. Sizin sağladığınız bir varsayım, ölçüm değil.",
-      "open": "Bir isteği test et",
-      "other_matched": "burada eşleşti",
-      "other_no_match": "hiçbir kural eşleşmedi",
-      "other_unreached": "ulaşılmadı",
-      "other_workflows": "Bu hizmetteki diğer iş akışları",
-      "out_draft": "Bu hizmet taslak durumunda — henüz onun için bir iş akışı derlenmedi.",
-      "out_match": "{{workflow}} · {{rule}} eşleşti ve isteği {{action}}.",
-      "out_no_match": "Hiçbir kural eşleşmedi. İstek güvenlik yığınının geri kalanına devam eder.",
-      "out_not_attached": "Bu iş akışı hiçbir hizmete bağlı değil; bu nedenle değerlendirilecek bir kural sırası yok.",
-      "out_whitelisted": "İzin listesinde — tüm iş akışı atlanır ve hiçbir kural değerlendirilmez.",
-      "run": "Testi çalıştır",
-      "service": "Hizmet",
-      "title": "Bir isteği test et",
-      "unreachable": "Test uç noktasına ulaşılamadı",
-      "uri": "URI yolu",
-      "uri_help": "Yalnızca yol — $uri hiçbir zaman sorgu dizesi içermez.",
-      "v_gate": "koşullar eşleşiyor · eşik {{count}} isteğin {{n}} tanesinde kapalı",
-      "v_match": "EŞLEŞTİ",
-      "v_unknown": "BİLİNMİYOR",
-      "v_unknown_help": "Bu kuralın gerektirdiği bir bilgi belirlenemedi; bu nedenle kural hiçbir zaman eşleşemez.",
-      "whitelisted": "Bu istemci izin listesinde",
-      "crowdsec": "CrowdSec",
-      "crowdsec_allowed": "CrowdSec izin verdi",
-      "crowdsec_help": "İş akışları çalışmadan önce CrowdSec'in bu istek hakkında verdiği karar. CrowdSec'in hiç değerlendirmediği bir istek, aleyhinde hiçbir şey olmayan bir istekle aynı değildir: birincisi bir CrowdSec koşulunu belirsiz bırakır, ikincisi onu yanlış yapar.",
-      "crowdsec_remediated": "CrowdSec iyileştirdi",
-      "crowdsec_remediation": "İyileştirme",
-      "crowdsec_source": "Karar kaynağı",
-      "crowdsec_unavailable": "CrowdSec bu isteği değerlendirmedi"
-    },
-    "threshold": "Sadece bir hızın üzerinde",
-    "threshold_count": "İstekler",
-    "threshold_window": "saniye içinde",
-    "tree": {
-      "addCondition": "Koşul",
-      "addGroup": "Grup",
-      "all": "Tümü",
-      "allMeta": "{{count}} koşul — tümü doğru olmalıdır",
-      "and": "ve",
-      "any": "Herhangi biri",
-      "anyMeta": "{{count}} koşul — en az biri doğru olmalıdır",
-      "empty": "Boş grup — bir koşul ekleyin; bu hâliyle kaydedilemez.",
-      "noGroupHolds": "hiçbir grup {{kind}} girdisi içermiyor",
-      "noneMeta": "bunların hiçbiri doğru olmadığında eşleşir",
-      "not": "Hiçbiri",
-      "or": "veya",
-      "removeGroup": "Grubu kaldır"
-    },
-    "truncated": "Sadece ilk 500 iş akışı görüntülenir. Tam sonucu elde etmek için API'i kullanın.",
-    "untitled": "Adsız kural",
-    "value": {
-      "add": "Değer"
-    },
-    "values": {
-      "fewer": "Daha az göster",
-      "more": "+{{n}} daha"
-    },
-    "verb": {
-      "asn": "şudur",
-      "country": "şudur",
-      "group": "gruptadır",
-      "ip": "şunun içindedir",
-      "isIn": "şunun içindedir",
-      "isOneOf": "şunlardan biridir",
-      "method": "şudur",
-      "uri": "ile eşleşir"
-    },
-    "view": {
-      "canvas": "Canvas",
-      "list": "Liste"
-    },
-    "action_help": {
-      "block": "İsteği reddet",
-      "challenge": "İnsan olduğunu doğrula",
-      "redirect": "Başka bir yere gönder"
-    },
-    "condition": {
-      "ip": "IP / CIDR",
-      "method": "HTTP yöntemi",
-      "uri": "URI",
-      "crowdsec": "CrowdSec kararı"
-    },
-    "uri_match": {
-      "exact": "tam olarak eşittir",
-      "prefix": "ile başlar",
-      "regex": "düzenli ifadeyle eşleşir"
-    },
-    "crowdsec_field": {
-      "remediation": "iyileştirme şu",
-      "source": "kaynak şu"
-    },
-    "crowdsec_value": {
-      "appsec": "AppSec",
-      "ban": "yasaklama",
-      "captcha": "captcha",
-      "lapi": "yerel API"
-    },
-    "reason": {
-      "sentence": "Güvenlik iş akışı {{workflow}}: {{action}}"
+    "subtitle": "Ters proxy önbelleği durumu, toplu olarak isabet oran metrikleri ve anında temizleme kontrolleri.",
+    "flash": {
+      "error_purging_web_cache": "Web önbellek temizlenirken hata oluştu: {{message}}",
+      "web_cache_purged_instance_failed_unreachable": "Web önbelleği temizlendi. Temizlenen örnekler: {{value}}, başarısız: {{value2}}, erişilemeyen ve atlanan: {{value3}} (hiçbir şey kuyruğa alınmadı).",
+      "url_required_purge_by_url": "URL'ye göre temizlemek için bir URL gereklidir",
+      "error_fetching_web_cache_metrics": "Web önbellek metrikleri alınırken hata oluştu: {{message}}",
+      "error_fetching_web_cache_status": "Web önbellek durumu alınırken hata oluştu: {{message}}",
+      "purged_for_url": "{{url}} için web önbelleği temizlendi",
+      "purged_all_entries": "Web önbelleği temizlendi (tüm girişler)"
     }
   },
-  "request_path": {
-    "client": "İstemci",
-    "source": "{{phase}} aşaması için eklenti yürütme sırası, {{setting}}'den — bir görüntüleme sırası, isteğe bağlı bir izleme değil.",
-    "terminal": {
-      "inline": "Arka uç",
-      "none": "Hiçbir şey sunulmadı",
-      "pool": "Upstream havuzu",
-      "root": "Yerel dosyalar"
-    },
-    "title": "İstek yolu",
-    "unordered": "{{phase}} aşamasında ilan edilmemiş bir konum; sıralı eklentilerden sonra çalışır."
-  },
   "service": {
+    "default_server": {
+      "certificate": {
+        "action": "Sertifika geçersiz kılmasını düzenle",
+        "help": "Bilinmeyen bir ana bilgisayar adı için sunulan sertifika. Özel sertifika eklentisinin genel bir ayarıdır ve yapılandırılmış bir hizmeti kapsıyorsa reddedilir.",
+        "title": "Varsayılan sunucu sertifikası"
+      },
+      "explainer": "Yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar: bilinmeyen ana bilgisayar adları, doğrudan IP erişimi. Sertifikasını, TLS'sini, başlıklarını ve hata sayfalarını buradan yapılandırın.",
+      "name": "Varsayılan sunucu",
+      "single_site": "MULTISITE yes olarak ayarlandığında varsayılan sunucu yapılandırılabilir hâle gelir; tek site modunda yerleşik davranışını korur ve yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar."
+    },
+    "mode": {
+      "help": "Yalnızca yönlendirme modundaki bir hizmet sadece yönlendirme yapar: ters vekil yok, dosya sunumu yok, özel NGINX parçacığı yok, şablon yok, bağlı upstream veya iş akışı yok. Diğer her yerde tam bir hizmet olarak kalır. Bildirim açıktır ve asla yönlendirme ayarlarından çıkarsanmaz. Yalnızca yönlendirme faturalandırması devreye girdiğinde PRO hizmet kotanıza sayılmayı bırakacaktır.",
+      "redirect_only": "Yalnızca yönlendirme",
+      "standard": "Standart",
+      "title": "Hizmet modu"
+    },
     "resources": {
       "attach": "Bağla",
       "conflict": {
         "inline": "{{service}}, {{path}}'i kendi {{family}} ayarlarıyla zaten sunmaktadır. {{path}} için bu ayarları temizleyin veya farklı bir yol kullanın.",
         "primary": "\"{{name}}\", şu anda bu servis için ana sertifikadır ve daha fazla uyarı olmadan düşürülecektir. Ana, aslında dağıtılan sertifikadır.",
-        "resource": "{{service}}, {{kind}}'in \"{{name}}\" aracılığıyla {{path}}'i zaten sunmaktadır. \"{{name}}\"'i ayırın veya onlardan birine farklı bir yol verin.",
+        "resource_redirect": "{{service}}, {{path}} yolunu zaten “{{name}}” yönlendirmesi üzerinden sunuyor. “{{name}}” bağlantısını ayırın veya birine farklı bir yol verin.",
+        "resource_upstream": "{{service}}, {{path}} yolunu zaten “{{name}}” upstream'i üzerinden sunuyor. “{{name}}” bağlantısını ayırın veya birine farklı bir yol verin.",
         "stream": "Bir akış servisi, her bağlantıyı tek bir arka uçta yönlendirir ve {{service}}, zaten \"{{name}}\"'i kullanmaktadır. Önce onu ayırın.",
         "stream_inline": "{{service}}, REVERSE_PROXY_HOST içinde kendi backend'ine zaten sahip. Upstream'in kontrolü devralması için bu ayarı temizleyin."
       },
@@ -3182,7 +4474,7 @@
       "none": "Hiçbir şey bağlanmadı",
       "primary": "Ana sertifika",
       "template": {
-        "add": "Add",
+        "add": "Ekle",
         "add_label": "Katman olarak eklenecek şablon",
         "adding": "Kaydetmek {{names}} şablonunu uygular. Birçok ayar aynı anda değişebilir.",
         "move_down": "Bu şablonu daha sonraya taşı",
@@ -3200,54 +4492,14 @@
       },
       "title": "Bağlı kaynaklar",
       "unavailable": "Kullanılamıyor",
-      "nothing_available": "Bağlanabilecek kaynak yok."
-    },
-    "default_server": {
-      "certificate": {
-        "action": "Sertifika geçersiz kılmasını düzenle",
-        "help": "Bilinmeyen bir ana bilgisayar adı için sunulan sertifika. Özel sertifika eklentisinin genel bir ayarıdır ve yapılandırılmış bir hizmeti kapsıyorsa reddedilir.",
-        "title": "Varsayılan sunucu sertifikası"
-      },
-      "explainer": "Yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar: bilinmeyen ana bilgisayar adları, doğrudan IP erişimi. Sertifikasını, TLS'sini, başlıklarını ve hata sayfalarını buradan yapılandırın.",
-      "name": "Varsayılan sunucu",
-      "single_site": "MULTISITE yes olarak ayarlandığında varsayılan sunucu yapılandırılabilir hâle gelir; tek site modunda yerleşik davranışını korur ve yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar."
-    },
-    "mode": {
-      "help": "Yalnızca yönlendirme modundaki bir hizmet sadece yönlendirme yapar: ters vekil yok, dosya sunumu yok, özel NGINX parçacığı yok, şablon yok, bağlı upstream veya iş akışı yok. Diğer her yerde tam bir hizmet olarak kalır. Bildirim açıktır ve asla yönlendirme ayarlarından çıkarsanmaz. Yalnızca yönlendirme faturalandırması devreye girdiğinde PRO hizmet kotanıza sayılmayı bırakacaktır.",
-      "redirect_only": "Yalnızca yönlendirme",
-      "standard": "Standart",
-      "title": "Hizmet modu"
+      "nothing_available": "Bağlanabilecek kaynak yok.",
+      "confirm_detach": "Bu kaynak {{service}} servisinden ayrılsın mı?",
+      "confirm_detach_certificate": "Bu sertifika {{service}} servisinden ayrılsın mı?",
+      "confirm_detach_redirect": "Bu yönlendirme {{service}} servisinden ayrılsın mı?",
+      "confirm_detach_upstream": "Bu upstream {{service}} servisinden ayrılsın mı?",
+      "confirm_detach_workflow": "Bu iş akışı {{service}} servisinden ayrılsın mı?",
+      "confirm_detach_template": "Bu şablon {{service}} servisinden ayrılsın mı?"
     }
-  },
-  "onboarding": {
-    "dismiss": "Kapat",
-    "error": "Tanıtım turu yüklenemedi.",
-    "hint": {
-      "bans": "Yasaklar, BunkerWeb'in şu anda reddettiği istemcilerdir. Her satır nedeni ve ne zaman sona ereceğini gösterir.",
-      "home": "Bu panel mevcut durumu gösterir: çalışan örnekler, sunulan servisler ve BunkerWeb'in işlediği trafik.",
-      "logs": "Tüm örneklerden canlı günlükler; örneğe ve önem düzeyine göre filtrelenebilir.",
-      "reports": "Engellenen her istek burada görünür. Hangi güvenlik denetiminin neden engellediğini görmek için birini açın.",
-      "title": "Hızlı tur"
-    },
-    "item": {
-      "first_block": "BunkerWeb'in bir şeyi engellediğini gör",
-      "https": "HTTPS'i çalışır hale getir",
-      "install": "BunkerWeb'i 1+ ana makineye kurun",
-      "mfa": "MFA'yı etkinleştir",
-      "pro": "BunkerWeb PRO'yu etkinleştir",
-      "read_bans": "Kimin ne zamana kadar yasaklı olduğunu gör",
-      "read_home": "Panoyu oku: şu anda ne sağlıklı",
-      "read_logs": "Tüm örneklerdeki canlı günlükleri izle",
-      "read_reports": "Bir isteğin neden engellendiğini öğren",
-      "service": "İlk hizmetinizi kaydedin",
-      "workflow": "Bir güvenlik iş akışı ekle"
-    },
-    "not_saved": "Kaydedilemedi.",
-    "pro_tips": "PRO ipuçları",
-    "restart": "Turu yeniden başlat",
-    "restart_help": "Başlangıç adımlarını üst çubukta yeniden göster.",
-    "subtitle": "BunkerWeb'in hizmetlerinizi koruması için birkaç adım.",
-    "title": "Başlarken"
   },
   "timings": {
     "subtitle": "Her eklentinin her istek aşamasında harcadığı süre, tüm örneklerden canlı okunup birleştirilir.",
@@ -3269,7 +4521,10 @@
     "disabled_title": "Eklenti süreleri kapalı",
     "disabled_help": "Her eklentinin süresini ölçmek için METRICS_COLLECT_TIMINGS değerini yes yapın. İsteğin toplam süresi her durumda toplanır.",
     "unreachable_title": "Hiçbir örnek süre bildirmedi",
-    "unreachable_help": "Süreler örneklerin kendisinden okunur; dolayısıyla hiçbiri yanıt vermedi — ya da henüz hiçbiri bir istek sunmadı."
+    "unreachable_help": "Süreler örneklerin kendisinden okunur; dolayısıyla hiçbiri yanıt vermedi — ya da henüz hiçbiri bir istek sunmadı.",
+    "flash": {
+      "error_fetching_plugin_timings": "Eklenti zamanlamaları alınırken hata oluştu: {{message}}"
+    }
   },
   "whatsnew": {
     "missing_action": "Değişiklik günlüğünü GitHub'da aç",
@@ -3281,178 +4536,11 @@
     },
     "subtitle": "BunkerWeb'in tüm sürümleri, en yenisi başta olmak üzere, bu kurulumla gelen değişiklik günlüğünden."
   },
-  "antibot": {
-    "reason": {
-      "sentence": "Bot karşıtı doğrulama ({{provider}}) sunuldu"
-    }
-  },
-  "confirm": {
-    "revoke_credential": "Bu örneğin kimlik bilgisi iptal edilsin mi? Kontrol düzlemi ona artık erişemeyecek.",
-    "rotate_credential": "Bu örneğin kimlik bilgisi döndürülsün mü? Örnek erişilemezse başarısız olur."
-  },
-  "crowdsec": {
-    "reason": {
-      "action": {
-        "ban": "istek engellendi",
-        "captcha": "captcha doğrulaması",
-        "challenge": "bot tespiti doğrulaması"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (senaryo: {{scenario}})",
-      "source": {
-        "appsec": "CrowdSec AppSec",
-        "failure_policy": "CrowdSec AppSec failure policy",
-        "lapi": "CrowdSec LAPI"
-      }
-    },
-    "alert": {
-      "id": "Alert ID",
-      "load": "Load full evidence",
-      "started": "Started",
-      "stopped": "Stopped"
-    },
-    "captured_history": "Captured history",
-    "captured_history_help": "Captured report data describes what was observed at request time; it does not prove the current decision state.",
-    "connection": {
-      "appsec": "Last AppSec observation",
-      "connected": "Connected",
-      "connection_error": "Connection error",
-      "configured": "Configured",
-      "global": "all services",
-      "label": "CrowdSec connection",
-      "last_sync": "Last successful sync",
-      "local_api": "Local API",
-      "management": "Management",
-      "mode": "Mode",
-      "none": "No usable CrowdSec connection was found. Check the instance errors and plugin configuration.",
-      "read_only": "Read only",
-      "required": "Choose a CrowdSec connection first.",
-      "sync": "Decision sync",
-      "sync_current": "Up to date",
-      "sync_not_synchronized": "Not synchronized yet",
-      "sync_stale": "Stale",
-      "selected": "Selected connection",
-      "scope_help": "The selected connection applies to decisions, allowlists and IP investigation below.",
-      "filter": "Filter connections by hostname or service"
-    },
-    "current_state": "Current state",
-    "current_state_help": "Current state may change after this observation.",
-    "decision": {
-      "duration": "Duration",
-      "expires": "Expires",
-      "id": "Decision ID",
-      "origin": "Origin",
-      "scenario": "Scenario",
-      "scope": "Scope",
-      "target": "Target",
-      "type": "Type"
-    },
-    "decisions": {
-      "count": "Showing {{start}}–{{end}} of {{total}}",
-      "help": "This is current state read directly from the selected CrowdSec engine.",
-      "none": "No active decisions match these filters.",
-      "pagination": "Decision pages",
-      "title": "Active decisions"
-    },
-    "error": {
-      "request": "The CrowdSec request failed."
-    },
-    "investigation": {
-      "alerts": "Available CrowdSec alert evidence",
-      "current_decisions": "Current CrowdSec decisions",
-      "help": "Current CrowdSec decisions are checked alongside local bans and captured reports.",
-      "ip": "IP address",
-      "local_bans": "Current local BunkerWeb bans",
-      "no_alerts": "No alert evidence is available.",
-      "no_bans": "No current local ban was found.",
-      "no_decisions": "No current CrowdSec decision was found.",
-      "no_reports": "No recent captured report was found.",
-      "placeholder": "192.0.2.10",
-      "reports": "Recent BunkerWeb reports",
-      "result": "Investigation for {{ip}}",
-      "submit": "Investigate",
-      "title": "Investigate an IP",
-      "truncated": "Showing {{shown}} of {{total}} results (source limit: {{limit}}).",
-      "unavailable": "Unavailable: {{error}}",
-      "summary": "Evidence found for this IP",
-      "summary_help": "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted.",
-      "summary_decisions": "CrowdSec decisions",
-      "summary_bans": "Local BunkerWeb bans",
-      "summary_alerts": "CrowdSec alert evidence",
-      "summary_reports": "BunkerWeb reports",
-      "summary_active": "{{total}} active",
-      "summary_available": "{{total}} available",
-      "summary_captured": "{{total}} captured",
-      "summary_none": "None found",
-      "summary_unreadable": "Could not be read"
-    },
-    "local_ban": {
-      "expires": "Expires",
-      "reason": "Reason",
-      "service": "Service"
-    },
-    "next": "Next",
-    "observed_at": "Observed {{time}}",
-    "previous": "Previous",
-    "refresh": "Refresh status",
-    "remove": {
-      "action": "Remove",
-      "confirm": "I understand and want to remove this decision.",
-      "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
-      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
-      "submit": "Remove decision",
-      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). Matching decisions remaining: {{remaining}}. Local bans or AppSec may still block.",
-      "title": "Remove CrowdSec decision"
-    },
-    "report": {
-      "captured": "Captured at",
-      "date": "Report time",
-      "decisions": "Captured decisions",
-      "entry": "Security report",
-      "matched_target": "Matched target",
-      "metadata": "Decision metadata",
-      "metadata_complete": "Complete",
-      "metadata_incomplete": "Incomplete",
-      "metadata_unavailable": "CrowdSec snapshot metadata is unavailable for this older report.",
-      "metadata_warning": "Some captured decision metadata was unavailable at request time.",
-      "reason": "Reason",
-      "remediation": "Captured remediation",
-      "scope": "Captured service scope",
-      "service": "Service",
-      "source": "Captured source",
-      "identifier": "Report identifier"
-    },
-    "subtitle": "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence.",
-    "title": "CrowdSec operator",
-    "unknown": "Unknown",
-    "allowlists": {
-      "title": "CrowdSec allowlists",
-      "help": "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers.",
-      "refresh": "Refresh allowlists",
-      "pages": "Allowlist pages",
-      "empty": "No allowlists were found on this engine.",
-      "console": "Console managed",
-      "local": "Locally managed",
-      "no_entries": "No active entries.",
-      "never": "Never",
-      "comment": "Comment",
-      "unknown": "Allowlist status is unavailable.",
-      "not_allowed": "This IP does not match a CrowdSec allowlist.",
-      "allowed": "Allowlisted by CrowdSec",
-      "impact": "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP.",
-      "guide": {
-        "intro": "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine.",
-        "title": "How to manage trusted IPs and networks",
-        "where": "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own.",
-        "create": "Create a list once, or use an existing locally managed list.",
-        "add": "Add trusted IPs or CIDR networks.",
-        "expiration": "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported.",
-        "inspect": "Inspect the list and its expiry dates.",
-        "remove": "Remove an exception when it is no longer needed.",
-        "refresh": "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate.",
-        "console": "Edit Console-managed lists in the CrowdSec Console.",
-        "docs": "CrowdSec allowlist documentation"
-      }
+  "utils": {
+    "flash": {
+      "couldn_t_connect_redis": "Redis'e bağlanılamadı",
+      "missing_form": "Formda {{key}} eksik",
+      "invalid_request": "Geçersiz istek"
     }
   }
 }

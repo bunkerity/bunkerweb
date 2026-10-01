@@ -61,6 +61,9 @@ msgstr "Unggah file ekspor konfigurasi khusus yang valid (.json)."
 msgid "alert.credential_action_failed"
 msgstr "Tindakan gagal."
 
+msgid "alert.custom_end_date_past"
+msgstr "Tanggal akhir khusus harus berada di masa depan."
+
 msgid "alert.custom_end_date_required"
 msgstr "Silakan pilih tanggal akhir kustom."
 
@@ -97,8 +100,17 @@ msgstr "Unggah file ekspor layanan yang valid (.env atau .zip)."
 msgid "antibot.reason.sentence"
 msgstr "Tantangan antibot (%(provider)s) disajikan"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "Penetapan inventaris sertifikat"
+
+msgid "aria.label.certificate_public_details"
+msgstr "Detail publik sertifikat"
+
 msgid "aria.label.clear_search"
 msgstr "Bersihkan pencarian"
+
+msgid "aria.label.clone_item"
+msgstr "Klon %(name)s"
 
 msgid "aria.label.close"
 msgstr "Tutup"
@@ -111,6 +123,9 @@ msgstr "Pilih file ekspor konfigurasi kustom atau letakkan di sini"
 
 msgid "aria.label.copy"
 msgstr "Salin log"
+
+msgid "aria.label.detach_from_service"
+msgstr "Lepaskan %(name)s dari %(service)s"
 
 msgid "aria.label.download_log"
 msgstr "Unduh file log ini"
@@ -148,6 +163,9 @@ msgstr "Tampilkan timestamp dalam waktu lokal"
 msgid "aria.label.next_issue"
 msgstr "Kesalahan atau peringatan berikutnya"
 
+msgid "aria.label.open_user_menu"
+msgstr "Buka menu pengguna"
+
 msgid "aria.label.passkey_name"
 msgstr "Nama passkey"
 
@@ -159,6 +177,9 @@ msgstr "Kesalahan atau peringatan sebelumnya"
 
 msgid "aria.label.raw_configuration"
 msgstr "Konfigurasi mentah"
+
+msgid "aria.label.remove_this_server"
+msgstr "Hapus server ini"
 
 msgid "aria.label.remove_value"
 msgstr "Hapus nilai"
@@ -178,8 +199,23 @@ msgstr "Pilih File"
 msgid "aria.label.select_page"
 msgstr "Pilih Halaman"
 
+msgid "aria.label.select_template"
+msgstr "Pilih template %(name)s"
+
 msgid "aria.label.services_dropzone"
 msgstr "Pilih file ekspor layanan atau letakkan di sini"
+
+msgid "aria.label.show_details"
+msgstr "Tampilkan detail %(name)s"
+
+msgid "aria.label.toggle_item"
+msgstr "Alihkan %(name)s"
+
+msgid "aria.label.toggle_section"
+msgstr "Alihkan bagian %(name)s"
+
+msgid "aria.label.toggle_theme"
+msgstr "Alihkan mode gelap"
 
 msgid "aria.label.toggle_wrap"
 msgstr "Alihkan pelipatan baris"
@@ -244,6 +280,15 @@ msgstr "Gagal memblokir %(ip)s: %(error)s"
 msgid "bans.flash.ban_success"
 msgstr "%(ip)s berhasil diblokir."
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "Tanggal akhir pemblokiran khusus untuk %(ip)s harus berada di masa depan"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "Mode pemilihan larangan tidak valid."
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "Parameter bans tidak valid pada /bans/ban."
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "Durasi blokir khusus tidak valid untuk %(ip)s"
 
@@ -253,11 +298,44 @@ msgstr "Tanggal akhir blokir khusus tidak valid untuk %(ip)s"
 msgid "bans.flash.invalid_duration"
 msgstr "Durasi blokir tidak valid: %(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "Mode pemilihan durasi tidak valid."
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "Sumber larangan terfilter tidak valid."
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "Sumber durasi terfilter tidak valid."
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "Sumber pembatalan larangan terfilter tidak valid."
+
 msgid "bans.flash.invalid_ip"
 msgstr "Alamat IP tidak valid: %(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "Parameter ips tidak valid pada /bans/unban."
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "Mode pemilihan pembatalan larangan tidak valid."
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "Parameter updates tidak valid pada /bans/update_duration."
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "Tanggal akhir blokir khusus tidak ada untuk %(ip)s"
+
+msgid "bans.flash.no_bans"
+msgstr "Tidak ada larangan."
+
+msgid "bans.flash.no_matching_bans"
+msgstr "Tidak ada larangan yang cocok."
+
+msgid "bans.flash.no_matching_reports"
+msgstr "Tidak ada laporan yang cocok."
+
+msgid "bans.flash.no_updates"
+msgstr "Tidak ada pembaruan."
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "Gagal mengambil daftar blokir dari Redis, lihat log untuk informasi lebih lanjut."
@@ -448,11 +526,14 @@ msgstr "Konfirmasi"
 msgid "button.convert_configs"
 msgstr "Konversi Konfigurasi"
 
-msgid "button.convert_configs_to"
-msgstr "Konversi ke %(state)s"
-
 msgid "button.convert_services"
 msgstr "Konversi Layanan"
+
+msgid "button.convert_to_draft"
+msgstr "Ubah menjadi draf"
+
+msgid "button.convert_to_online"
+msgstr "Ubah menjadi online"
 
 msgid "button.copy"
 msgstr "Salin"
@@ -491,7 +572,7 @@ msgid "button.download"
 msgstr "Unduh"
 
 msgid "button.edit"
-msgstr "Edit"
+msgstr "Ubah"
 
 msgid "button.enable_totp"
 msgstr "Aktifkan TOTP"
@@ -549,6 +630,9 @@ msgstr "Impor konfigurasi kustom"
 
 msgid "button.import_services"
 msgstr "Impor layanan"
+
+msgid "button.import_template"
+msgstr "Impor template"
 
 msgid "button.local_time"
 msgstr "Waktu lokal"
@@ -727,6 +811,39 @@ msgstr "Hapus Sesi Lain"
 msgid "button.wrap"
 msgstr "Lipat"
 
+msgid "cache.flash.api_unavailable"
+msgstr "API tidak tersedia: %(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "File cache %(file_name)s dari pekerjaan %(job_name)s, plugin %(plugin_id)s tidak ditemukan"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "File cache %(file_name)s dari pekerjaan %(job_name)s, plugin %(plugin_id)s, layanan %(service)s tidak ditemukan"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "Menghapus %(deleted_count)s file dengan %(len)s kesalahan: %(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "Kesalahan saat menghapus file cache: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "Kesalahan saat mengambil file cache: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "Kesalahan saat mengambil file cache: %(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "Parameter file cache tidak valid"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "Tidak ada file cache dipilih"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "Berhasil menghapus %(deleted_count)s file cache"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "Berhasil menghapus %(deleted_count)s file cache"
+
 msgid "cache.kpi_files"
 msgstr "File"
 
@@ -841,6 +958,117 @@ msgstr "File tidak boleh melebihi 1 MiB."
 msgid "certificates.fingerprint"
 msgstr "Sidik jari SHA-256"
 
+msgid "certificates.flash.certificate_action_failed"
+msgstr "Tindakan sertifikat gagal: %(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "Sertifikat berhasil dihapus"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "Penetapan inventaris sertifikat berhasil ditambahkan"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "Penetapan inventaris sertifikat berhasil dihapus"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "Metadata sertifikat berhasil diperbarui"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "Sertifikat dan nama diperlukan"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "Nama sertifikat diperlukan"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "Sertifikat berhasil diperbarui"
+
+msgid "certificates.flash.certificate_required"
+msgstr "Sertifikat diperlukan"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "Sertifikat dan layanan diperlukan"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "Unggahan sertifikat melebihi batas permintaan 2 MiB"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "Memeriksa %(total_due)s sertifikat yang akan diperbarui"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "Tidak dapat melampirkan sertifikat: %(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "Tidak dapat membuat sertifikat: %(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "Tidak dapat melepaskan sertifikat: %(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "Tidak dapat mengunduh sertifikat: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "Tidak dapat mengambil sertifikat: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "Tidak dapat mengambil layanan untuk penetapan sertifikat: %(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "Tidak dapat menjadwalkan penerbitan Let's Encrypt: %(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "Tidak dapat memperbarui sertifikat: %(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "Tidak dapat mengunggah sertifikat: %(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "Sertifikat kustom berhasil diunggah"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "Kunci privat terenkripsi tidak didukung."
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "Tindakan sertifikat tidak valid"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "Bagian sertifikat tidak valid"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "File sertifikat bukan sertifikat PEM yang valid."
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "Sumber sertifikat tidak valid"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "File kunci privat bukan kunci privat PEM yang valid."
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "Penerbitan Let's Encrypt dijadwalkan"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "Nama dan nama umum (common name) diperlukan"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "Sertifikat PEM dan kunci privat diperlukan"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "Pilih setidaknya satu layanan untuk penerbitan Let's Encrypt"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "Sertifikat self-signed dibuat"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "Sertifikat tidak boleh berisi lebih dari 100 nama alternatif subjek"
+
+msgid "certificates.flash.too_many_services"
+msgstr "Sertifikat tidak dapat dilampirkan ke lebih dari 100 layanan"
+
+msgid "certificates.flash.validity_range"
+msgstr "Validitas harus antara 1 dan 825 hari"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "Validitas harus berupa bilangan bulat hari"
+
 msgid "certificates.issuer"
 msgstr "Penerbit"
 
@@ -944,7 +1172,7 @@ msgid "certificates.source.letsencrypt"
 msgstr "Let's Encrypt"
 
 msgid "certificates.source.selfsigned"
-msgstr "Self-signed"
+msgstr "Ditandatangani sendiri"
 
 msgid "certificates.source_label"
 msgstr "Sumber"
@@ -1031,7 +1259,7 @@ msgid "compose.provenance.clone"
 msgstr "Dikloning"
 
 msgid "compose.provenance.default"
-msgstr "Default"
+msgstr "Bawaan"
 
 msgid "compose.provenance.edited"
 msgstr "Diedit di sini"
@@ -1053,6 +1281,168 @@ msgstr "Tampilkan %(count)s lagi"
 
 msgid "compose.unavailable"
 msgstr "Daftar plugin tidak dapat dimuat, jadi halaman ini tidak dapat diedit dengan aman. Muat ulang setelah API merespons."
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "Semua konfigurasi kustom yang dipilih tidak dapat ditemukan, bukan konfigurasi kustom UI/API, atau sudah dikonversi."
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "Semua konfigurasi kustom yang dipilih tidak dapat ditemukan atau bukan konfigurasi kustom UI/API."
+
+msgid "configs.flash.config_already_exists"
+msgstr "Konfigurasi %(config_type)s/%(config_name)s sudah ada"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "Konfigurasi %(config_type)s/%(config_name)s untuk layanan %(service)s sudah ada"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "Konfigurasi %(clone)s tidak ada."
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "Konfigurasi %(config_type)s/%(name)s tidak ada."
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "Konfigurasi %(config_type)s/%(name)s untuk layanan %(service)s tidak ada."
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "Konfigurasi %(config_type)s/%(name)s bukan konfigurasi kustom UI/API dan tidak dapat diedit."
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "Konfigurasi %(config_type)s/%(name)s untuk layanan %(service)s bukan konfigurasi kustom UI/API dan tidak dapat diedit."
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "Dikonversi ke konfigurasi \"draf\": %(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "Dikonversi ke konfigurasi \"online\": %(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "Tidak dapat mengambil konfigurasi kustom dari API: %(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "Konfigurasi kustom %(config_type)s/%(config_name)s dibuat"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "Konfigurasi kustom %(config_type)s/%(config_name)s untuk layanan %(service)s dibuat"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "Konfigurasi kustom %(non_convertible_config)s sudah menjadi konfigurasi draf dan tidak akan dikonversi."
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "Konfigurasi kustom %(non_convertible_config)s sudah menjadi konfigurasi online dan tidak akan dikonversi."
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "Konfigurasi kustom %(missing_config)s tidak dapat ditemukan."
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "Konfigurasi kustom %(non_editable_config)s bukan konfigurasi kustom UI/API dan tidak akan dikonversi."
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "Konfigurasi kustom %(skipped_config)s bukan konfigurasi kustom UI/API dan tidak akan dihapus."
+
+msgid "configs.flash.deleted_config_one"
+msgstr "Konfigurasi dihapus: %(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "Konfigurasi dihapus: %(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "Terjadi kesalahan saat menghapus konfigurasi kustom: %(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "Terjadi kesalahan saat menyimpan konfigurasi kustom: %(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "Gagal mengimpor konfigurasi kustom: %(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "Gagal mengimpor konfigurasi kustom: %(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "Kesalahan impor: %(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "Konfigurasi kustom diimpor: %(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "Konfigurasi kustom diimpor: %(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "Parameter configs tidak valid pada /configs/convert."
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "Parameter configs tidak valid pada /configs/delete."
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "Parameter configs tidak valid pada /configs/export."
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Encoding file tidak valid. Silakan unggah file JSON UTF-8."
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "Parameter name tidak valid pada /configs/new."
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "Parameter type tidak valid pada /configs/new."
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "Parameter configs tidak ada pada /configs/convert."
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "Parameter configs tidak ada pada /configs/delete."
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "Parameter convert_to tidak ada pada /configs/convert."
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "Parameter name tidak ada pada /configs/new."
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "Parameter service tidak ada pada /configs/new."
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "Parameter type tidak ada pada /configs/new."
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "Parameter value tidak ada pada /configs/new."
+
+msgid "configs.flash.no_configs_selected"
+msgstr "Tidak ada konfigurasi dipilih."
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "Tidak ada konfigurasi kustom untuk diekspor."
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "Tidak ada file konfigurasi kustom yang diunggah."
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "Tidak ditemukan konfigurasi kustom dalam file impor."
+
+msgid "configs.flash.no_values_changed"
+msgstr "Tidak ada nilai yang diubah."
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "Konfigurasi kustom ditimpa: %(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "Konfigurasi kustom ditimpa: %(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "Mengganti nama konfigurasi kustom berbasis template tidak diizinkan."
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "Konfigurasi kustom %(new_type)s/%(new_name)s disimpan"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "Konfigurasi kustom %(new_type)s/%(new_name)s untuk layanan %(service)s disimpan"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "Layanan %(new_service)s tidak ada."
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "Konfigurasi kustom dilewati: %(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "Konfigurasi kustom dilewati: %(names)s"
 
 msgid "configs.subtitle"
 msgstr "Cuplikan konfigurasi NGINX khusus untuk layanan Anda — buat, edit, dan kelola override tingkat HTTP, ModSecurity, dan stream."
@@ -1145,7 +1535,7 @@ msgid "country.BM"
 msgstr "Bermuda"
 
 msgid "country.BN"
-msgstr "Brunei Darussalam"
+msgstr "Brunei"
 
 msgid "country.BO"
 msgstr "Bolivia"
@@ -1235,7 +1625,7 @@ msgid "country.DE"
 msgstr "Jerman"
 
 msgid "country.DJ"
-msgstr "Djibouti"
+msgstr "Jibuti"
 
 msgid "country.DK"
 msgstr "Denmark"
@@ -1268,7 +1658,7 @@ msgid "country.ES"
 msgstr "Spanyol"
 
 msgid "country.ET"
-msgstr "Ethiopia"
+msgstr "Etiopia"
 
 msgid "country.EU"
 msgstr "Eropa"
@@ -1349,7 +1739,7 @@ msgid "country.GY"
 msgstr "Guyana"
 
 msgid "country.HK"
-msgstr "Hong Kong"
+msgstr "Hong Kong DAK Tiongkok"
 
 msgid "country.HM"
 msgstr "Pulau Heard dan Kepulauan McDonald"
@@ -1502,7 +1892,7 @@ msgid "country.ML"
 msgstr "Mali"
 
 msgid "country.MM"
-msgstr "Myanmar"
+msgstr "Myanmar (Burma)"
 
 msgid "country.MN"
 msgstr "Mongolia"
@@ -1607,7 +1997,7 @@ msgid "country.PM"
 msgstr "Saint Pierre dan Miquelon"
 
 msgid "country.PN"
-msgstr "Pitcairn"
+msgstr "Kepulauan Pitcairn"
 
 msgid "country.PR"
 msgstr "Puerto Riko"
@@ -1703,7 +2093,7 @@ msgid "country.SY"
 msgstr "Suriah"
 
 msgid "country.SZ"
-msgstr "Eswatini"
+msgstr "eSwatini"
 
 msgid "country.TC"
 msgstr "Kepulauan Turks dan Caicos"
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "N/A"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "ID peringatan"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "Muat semua bukti"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "Dimulai"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "Dihentikan"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "Masuk allowlist oleh CrowdSec"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "Komentar"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "Dikelola Console"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "Tidak ada allowlist yang ditemukan di mesin ini."
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "Tambahkan IP atau jaringan CIDR tepercaya."
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "Edit daftar yang dikelola Console di CrowdSec Console."
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "Buat daftar satu kali, atau gunakan daftar yang sudah ada dan dikelola secara lokal."
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "Dokumentasi allowlist CrowdSec"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "Contoh ini kedaluwarsa setelah 24 jam. Hilangkan --expiration untuk entri yang tidak kedaluwarsa. IPv4 dan IPv6 didukung."
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "Periksa daftar beserta tanggal kedaluwarsanya."
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "Anda dapat menelusuri allowlist dan memeriksa IP di sini. Untuk menambah atau menghapus entri, gunakan cscli pada mesin CrowdSec."
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "Setelah perubahan, segarkan allowlist dan selidiki IP itu lagi. Menghapus pengecualian mengizinkan keputusan CrowdSec di masa mendatang; ini tidak membuat pemblokiran. Pemblokiran lokal BunkerWeb dan perlindungan lainnya tetap terpisah."
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "Hapus pengecualian jika sudah tidak diperlukan."
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "Cara mengelola IP dan jaringan tepercaya"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "Memerlukan CrowdSec 1.7 atau lebih baru. Jalankan perintah ini di host atau di dalam kontainer yang menjalankan Local API (LAPI) dari mesin yang dipilih, dengan akses ke konfigurasi dan basis data CrowdSec-nya. Ganti contoh nama daftar, IP, dan jaringan dengan milik Anda."
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "IP dan jaringan tepercaya untuk mesin yang dipilih. Pengecualian ini berlaku di seluruh layanan dan bouncer yang terhubung dengannya."
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "Ini adalah pengecualian untuk seluruh mesin. Pemblokiran lokal BunkerWeb, perlindungan lain, atau keputusan yang di-cache masih dapat memblokir IP ini."
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "Dikelola secara lokal"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "Tidak pernah"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "Tidak ada entri aktif."
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "IP ini tidak cocok dengan allowlist CrowdSec mana pun."
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "Halaman allowlist"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "Segarkan allowlist"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "Allowlist CrowdSec"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "Status allowlist tidak tersedia."
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "Riwayat yang ditangkap"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "Data laporan yang ditangkap menggambarkan apa yang teramati pada saat permintaan; data ini tidak membuktikan status keputusan saat ini."
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "Pengamatan AppSec terakhir"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "Dikonfigurasi"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "Terhubung"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "Kesalahan koneksi"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "Filter koneksi berdasarkan nama host atau layanan"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "semua layanan"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "Koneksi CrowdSec"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "Sinkronisasi berhasil terakhir"
 
 msgid "crowdsec.connection.local_api"
-msgstr "Local API"
+msgstr "API Lokal"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "Manajemen"
 
 msgid "crowdsec.connection.mode"
 msgstr "Mode"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "Tidak ditemukan koneksi CrowdSec yang dapat digunakan. Periksa error instans dan konfigurasi plugin."
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "Hanya baca"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "Pilih koneksi CrowdSec terlebih dahulu."
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "Koneksi yang dipilih berlaku untuk keputusan, allowlist, dan investigasi IP di bawah ini."
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "Koneksi yang dipilih"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "Sinkronisasi keputusan"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "Terbaru"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "Belum disinkronkan"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "Kedaluwarsa"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "Status saat ini"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "Status saat ini dapat berubah setelah pengamatan ini."
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "Durasi"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "Kedaluwarsa"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "ID keputusan"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "Asal"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "Skenario"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "Cakupan"
 
 msgid "crowdsec.decision.target"
 msgstr "Target"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "Tipe"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "Menampilkan %(start)s–%(end)s dari %(total)s"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "Ini adalah status saat ini yang dibaca langsung dari mesin CrowdSec yang dipilih."
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "Tidak ada keputusan aktif yang cocok dengan filter ini."
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "Halaman keputusan"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "Keputusan aktif"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "Permintaan CrowdSec gagal."
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "Bukti peringatan CrowdSec yang tersedia"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "Keputusan CrowdSec saat ini"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "Keputusan CrowdSec saat ini diperiksa bersama pemblokiran lokal dan laporan yang ditangkap."
 
 msgid "crowdsec.investigation.ip"
-msgstr "IP address"
+msgstr "Alamat IP"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "Pemblokiran lokal BunkerWeb saat ini"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "Tidak ada bukti peringatan yang tersedia."
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "Tidak ditemukan pemblokiran lokal saat ini."
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "Tidak ditemukan keputusan CrowdSec saat ini."
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "Tidak ditemukan laporan tertangkap yang baru."
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "Laporan BunkerWeb terbaru"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "Investigasi untuk %(ip)s"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "Selidiki"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "Bukti yang ditemukan untuk IP ini"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "%(total)s aktif"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "Bukti peringatan CrowdSec"
 
 msgid "crowdsec.investigation.summary_available"
-msgstr "%(total)s available"
+msgstr "%(total)s tersedia"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "Pemblokiran lokal BunkerWeb"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "%(total)s ditangkap"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "Keputusan CrowdSec"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "Ini mencakup koneksi CrowdSec yang dipilih dan pemblokiran BunkerWeb sendiri. Perlindungan lain tidak diperiksa di sini, dan bukti yang tidak dapat dibaca bukan bukti bahwa IP ini diizinkan."
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "Tidak ada yang ditemukan"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "Laporan BunkerWeb"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "Tidak dapat dibaca"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "Selidiki sebuah IP"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "Menampilkan %(shown)s dari %(total)s hasil (batas sumber: %(limit)s)."
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "Tidak tersedia: %(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "Kedaluwarsa"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "Alasan"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "Layanan"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "Berikutnya"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "Diamati %(time)s"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "Sebelumnya"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "permintaan diblokir"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "Kebijakan kegagalan CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "Segarkan status"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "Hapus"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "Saya mengerti dan ingin menghapus keputusan ini."
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "Ini menghapus keputusan di mesin CrowdSec bersama dan memengaruhi setiap bouncer yang terhubung. Keputusan yang di-cache, rentang lain, pemblokiran lokal, atau AppSec masih dapat memblokir target."
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "Hapus %(scope)s %(value)s (%(type)s), skenario %(scenario)s, asal %(origin)s, dari %(source)s (%(engine)s)?"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "Hapus keputusan"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "Dihapus di sumber CrowdSec. Propagasi %(status)s (%(mode)s, interval %(interval)s). Keputusan cocok yang tersisa: %(remaining)s. Pemblokiran lokal atau AppSec masih dapat memblokir."
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "Hapus keputusan CrowdSec"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "Ditangkap pada"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "Waktu laporan"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "Keputusan yang ditangkap"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "Laporan keamanan"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "Pengenal laporan"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "Target yang cocok"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "Metadata keputusan"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "Lengkap"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "Tidak lengkap"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "Metadata snapshot CrowdSec tidak tersedia untuk laporan lama ini."
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "Sebagian metadata keputusan yang ditangkap tidak tersedia pada saat permintaan."
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "Alasan"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "Remediasi yang ditangkap"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "Cakupan layanan yang ditangkap"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "Layanan"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "Sumber yang ditangkap"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "Periksa setiap mesin CrowdSec yang dikonfigurasi dan selidiki sebuah IP berdasarkan bukti saat ini dan yang ditangkap."
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "Operator CrowdSec"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "Tidak diketahui"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "Satu atau beberapa tugas gagal pada eksekusi terakhirnya."
@@ -2416,17 +2806,128 @@ msgstr "%(days)s hari terakhir"
 msgid "dashboard.window.title"
 msgstr "Rentang waktu dasbor"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "Semua %(count)s %(entity)s yang cocok dipilih."
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "Semua %(count)s larangan yang cocok dipilih."
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "Pilih semua %(count)s %(entity)s yang cocok"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "Pilih semua %(count)s larangan yang cocok"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "%(count)s larangan di halaman ini dipilih."
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "Semua %(count)s larangan di halaman ini dipilih."
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "Semua %(count)s file cache yang cocok dipilih."
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "Pilih semua %(count)s file cache yang cocok"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "%(count)s file cache di halaman ini dipilih."
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "Semua %(count)s file cache di halaman ini dipilih."
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "Semua %(count)s konfigurasi kustom yang cocok dipilih."
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "Pilih semua %(count)s konfigurasi kustom yang cocok"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "%(count)s konfigurasi kustom di halaman ini dipilih."
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "Semua %(count)s konfigurasi kustom di halaman ini dipilih."
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "Semua %(count)s instans yang cocok dipilih."
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "Pilih semua %(count)s instans yang cocok"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "%(count)s instans di halaman ini dipilih."
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "Semua %(count)s instans di halaman ini dipilih."
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "Semua %(count)s item yang cocok dipilih."
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "Pilih semua %(count)s item yang cocok"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "%(count)s item di halaman ini dipilih."
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "Semua %(count)s item di halaman ini dipilih."
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "Semua %(count)s pekerjaan yang cocok dipilih."
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "Pilih semua %(count)s pekerjaan yang cocok"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "%(count)s pekerjaan di halaman ini dipilih."
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "Semua %(count)s pekerjaan di halaman ini dipilih."
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "Semua %(count)s plugin yang cocok dipilih."
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "Pilih semua %(count)s plugin yang cocok"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "%(count)s plugin di halaman ini dipilih."
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "Semua %(count)s plugin di halaman ini dipilih."
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "Semua %(count)s laporan yang cocok dipilih."
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "Pilih semua %(count)s laporan yang cocok"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "%(count)s laporan di halaman ini dipilih."
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "Semua %(count)s laporan di halaman ini dipilih."
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "Semua %(count)s layanan yang cocok dipilih."
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "Pilih semua %(count)s layanan yang cocok"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "%(count)s layanan di halaman ini dipilih."
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "Semua %(count)s layanan di halaman ini dipilih."
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "Semua %(count)s template yang cocok dipilih."
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "Pilih semua %(count)s template yang cocok"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "%(count)s template di halaman ini dipilih."
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "Semua %(count)s template di halaman ini dipilih."
 
 msgid "datatable.bulk_select_clear"
 msgstr "Hapus pilihan"
-
-msgid "datatable.bulk_select_page"
-msgstr "Semua %(count)s %(entity)s di halaman ini dipilih."
 
 msgid "datatable.info_bans"
 msgstr "Menampilkan %(start)s hingga %(end)s dari %(total)s Larangan"
@@ -2569,6 +3070,9 @@ msgstr "Memproses..."
 msgid "datatable.search"
 msgstr "Cari:"
 
+msgid "datatable.select_row"
+msgstr "Pilih baris"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "Tidak ada Larangan dipilih"
 
@@ -2659,11 +3163,50 @@ msgstr "1 Template dipilih"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d Template dipilih"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s dipilih"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "%(count)s konfigurasi kustom dipilih"
 
-msgid "datatable.selected_list_empty"
-msgstr "Tidak ada %(entity)s yang dipilih."
+msgid "datatable.selected_list.configs.count_other"
+msgstr "%(count)s konfigurasi kustom dipilih"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "Tidak ada konfigurasi kustom yang dipilih."
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "%(count)s item dipilih"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "%(count)s item dipilih"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "Tidak ada item yang dipilih."
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "%(count)s plugin dipilih"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "%(count)s plugin dipilih"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "Tidak ada plugin yang dipilih."
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "%(count)s layanan dipilih"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "%(count)s layanan dipilih"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "Tidak ada layanan yang dipilih."
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "%(count)s template dipilih"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "%(count)s template dipilih"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "Tidak ada template yang dipilih."
 
 msgid "datatable.zero_records_bans"
 msgstr "Tidak ditemukan Larangan yang cocok"
@@ -2794,11 +3337,41 @@ msgstr "Periksa halaman Tugas untuk detailnya."
 msgid "flash.configuration_pending_instance"
 msgstr "Konfigurasi belum diterapkan — menunggu instans aktif."
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "Diperlukan permintaan CORS atau AJAX"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "Tidak dapat mengambil pengaturan global dari API."
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "Tidak dapat mengambil grup sumber daya: %(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "Database dalam mode baca-saja"
+
+msgid "flash.description_too_long"
+msgstr "Deskripsi tidak boleh melebihi 4000 karakter"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "Anda tidak memiliki izin tulis"
+
 msgid "flash.easter_egg"
 msgstr "Jika Anda membaca ini, berarti Anda penasaran"
 
 msgid "flash.error"
 msgstr "Kesalahan"
+
+msgid "flash.error_fetching_instances"
+msgstr "Kesalahan saat mengambil instans"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "Terjadi kesalahan saat menyimpan konfigurasi kustom: %(e)s"
+
+msgid "flash.import_warning"
+msgstr "Peringatan impor: %(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "Parameter convert_to tidak valid."
 
 msgid "flash.last_configuration_change_failed"
 msgstr "Perubahan konfigurasi terakhir Anda tidak dapat diterapkan."
@@ -2806,11 +3379,20 @@ msgstr "Perubahan konfigurasi terakhir Anda tidak dapat diterapkan."
 msgid "flash.message"
 msgstr "Info"
 
+msgid "flash.plugin_not_found"
+msgstr "Plugin tidak ditemukan"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "Anda memiliki lebih banyak layanan dari yang diizinkan lisensi pro Anda. Upgrade lisensi Anda atau pindahkan beberapa layanan ke mode draf untuk membuka lisensi pro Anda."
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "Scheduler akan mencoba menerapkan perubahan."
+
+msgid "flash.service_does_not_exist"
+msgstr "Layanan %(service)s tidak ada."
 
 msgid "flash.time.just_now"
 msgstr "baru saja"
@@ -2845,6 +3427,9 @@ msgstr "Timpa konfigurasi kustom UI/API yang ada"
 msgid "form.checkbox.remember_me"
 msgstr "Ingat Saya"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "Ganti template dengan id yang sama jika sudah ada"
+
 msgid "form.help.ban_specific_service"
 msgstr "Larangan hanya berlaku untuk layanan spesifik ini."
 
@@ -2863,6 +3448,9 @@ msgstr "Jika dicentang, larangan tidak akan pernah kedaluwarsa sampai dihapus se
 msgid "form.help.photo_extensions"
 msgstr "JPG, GIF, atau PNG diizinkan. Ukuran maks: 800KB."
 
+msgid "form.help.secret_stored"
+msgstr "Sebuah nilai tersimpan dan tidak ditampilkan. Biarkan bidang apa adanya untuk mempertahankannya, ketik nilai baru untuk menggantinya, atau kosongkan bidang untuk menghapusnya."
+
 msgid "form.label.2fa_code"
 msgstr "Kode 2FA"
 
@@ -2879,7 +3467,7 @@ msgid "form.label.admin_username"
 msgstr "Nama Pengguna Admin"
 
 msgid "form.label.auto_lets_encrypt"
-msgstr "Auto Let's Encrypt"
+msgstr "Let's Encrypt otomatis"
 
 msgid "form.label.ban_scope"
 msgstr "Cakupan Larangan"
@@ -3031,6 +3619,9 @@ msgstr "Nama Server"
 msgid "form.label.service_name"
 msgstr "Nama Layanan"
 
+msgid "form.label.template_file"
+msgstr "File Template"
+
 msgid "form.label.template_id"
 msgstr "ID Template"
 
@@ -3130,6 +3721,438 @@ msgstr "Kata sandi harus memiliki minimal 1 karakter khusus."
 msgid "form.validation.password_uppercase"
 msgstr "Kata sandi harus memiliki minimal 1 huruf kapital."
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "Jalur yang digunakan untuk log akses NGINX (jalur file, syslog:server=host[:port][,param=value], atau memory:name:size; atur ke off untuk menonaktifkan)."
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "Jalur Log Akses"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "Nomor port pendengar (TLS) untuk API internal BunkerWeb."
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "Nomor Port HTTPS API"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "Nomor port pendengar untuk API internal BunkerWeb."
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "Nomor Port API"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "Dengarkan HTTP untuk API internal BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "Dengarkan HTTP API"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "Dengarkan HTTPS (SSL/TLS) untuk API internal BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "Dengarkan HTTPS API"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "Alamat IP pendengar untuk API internal BunkerWeb."
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "Alamat IP Pendengar API"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "Nama server (virtual host) untuk API internal BunkerWeb."
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "Nama Server API"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "Token opsional untuk mengautentikasi panggilan API. Jika diatur, scheduler (dan klien mana pun) harus mengirimkannya melalui header Authorization. Catatan: harus diatur pada lingkungan BunkerWeb maupun scheduler."
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "Token Akses API"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "Daftar IP/jaringan yang diizinkan untuk menghubungi API internal BunkerWeb. (format: ip/netmask atau ipv6/netmask, dipisahkan spasi)"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "IP Daftar Putih API"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "Aktifkan integrasi Autoconf Docker."
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "Mode Autoconf"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "Daftar instans BunkerWeb dipisahkan spasi (format: fqdn-atau-ip:5000 http://fqdn-atau-ip:5000)"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "Instans BunkerWeb"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "Ukuran cachestore internal (ipc)."
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "Ukuran Memori Cachestore IPC"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "Ukuran cachestore internal (locks)."
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "Ukuran Memori Cachestore Locks"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "Ukuran cachestore internal."
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "Ukuran Memori Cachestore"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "Ukuran cachestore internal (miss)."
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "Ukuran Memori Cachestore Miss"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "Batas waktu untuk membaca isi permintaan klien."
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "Batas Waktu Isi Permintaan Klien"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "Batas waktu untuk membaca header permintaan klien."
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "Batas Waktu Header Permintaan Klien"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "Apa yang terjadi ketika file .conf yang diproyeksikan berubah sejak proyeksi terakhir yang tercatat atau tidak ada di dalamnya. File yang cocok dengan baris basis data saat ini diabaikan; tanpa riwayat proyeksi yang dapat dibaca, tidak ada drift yang dilaporkan. 'overwrite' mencatat setiap drift yang terdeteksi dan menulis ulang file dari basis data, atau menghapusnya jika tidak ada baris aktif yang menggantikannya. 'refuse' tidak menulis apa pun ke sana dari basis data hingga drift diselesaikan, mencatat kesalahan, dan membiarkan perubahan konfigurasi khusus yang tertunda tidak dikonfirmasi sehingga dicoba ulang."
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "Kebijakan Drift Konfigurasi Khusus"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "Jumlah slot untuk LRU datastore bersama per worker (digunakan oleh internalstore dan cache lokal worker plugin). Menerima bilangan bulat biasa atau singkatan `k`/`m` (mis., `1k`, `10k`, `1m`)."
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "Ukuran LRU Datastore"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "Ukuran datastore internal."
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "Ukuran Memori Datastore"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "Alamat DNS resolver yang akan digunakan."
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "Resolver DNS"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "Jalur yang digunakan untuk log kesalahan NGINX (jalur file, stderr, syslog:server=host[:port][,param=value], atau memory:size)."
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "Jalur Log Kesalahan"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "Nomor port HTTPS yang digunakan bunkerweb untuk terikat. Biarkan kosong untuk menonaktifkan pendengaran HTTPS."
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "Port HTTPS"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "Nomor port HTTP yang digunakan bunkerweb untuk terikat. Biarkan kosong untuk menonaktifkan pendengaran HTTP."
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "Port HTTP"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "Ukuran internalstore internal."
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "Ukuran Memori Internalstore"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "Penggunaan internal: atur ke yes ketika layanan berada dalam mode draf."
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "penggunaan internal draf"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "Penggunaan internal: atur ke yes ketika BW sedang memuat."
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "penggunaan internal memuat"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "Waktu lokal (zona waktu scheduler, JJ:MM, 24 jam) saat pekerjaan terjadwal harian berjalan; pekerjaan mingguan juga berjalan pada waktu ini, pada JOBS_WEEKLY_DAY."
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "Waktu Pekerjaan Harian"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "Hari dalam seminggu saat pekerjaan terjadwal mingguan berjalan, pada JOBS_DAILY_TIME."
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "Hari Pekerjaan Mingguan"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "Batas waktu untuk koneksi klien keep-alive."
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "Batas Waktu Keepalive"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "Pertahankan konfigurasi saat dimulai ulang. Atur ke 'yes' untuk mencegah reset konfigurasi saat dimulai ulang."
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "Pertahankan Konfigurasi Saat Dimulai Ulang"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "Aktifkan integrasi Kubernetes."
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "Mode Kubernetes"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "Aktifkan pendengaran non-ssl (passthrough)."
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "Dengarkan Stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "Port pendengaran non-ssl (passthrough). Biarkan kosong untuk menonaktifkan pendengaran stream non-SSL."
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "Port Dengarkan Stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "Port pendengaran ssl (passthrough). Biarkan kosong untuk menonaktifkan pendengaran stream SSL."
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "Port Dengarkan Stream Ssl"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "Format yang digunakan untuk log akses."
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "Format Log Akses"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "Level yang digunakan untuk log kesalahan."
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "Level Log"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "Aktivasi multisitus."
+
+msgid "general.settings.MULTISITE.label"
+msgstr "Multisitus"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "Tempat nginx akan mencari konfigurasi."
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "Prefiks nginx"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase access untuk situs ini (penerimaan/kontrol permintaan). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "Urutan Plugin (access)"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase header untuk situs ini (penyaringan header respons). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "Urutan Plugin (header)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase init (bootstrap mesin, berjalan sekali). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "Urutan Plugin (init)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase init_worker (bootstrap per worker). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "Urutan Plugin (init_worker)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "ID plugin dipisahkan koma atau spasi untuk dijalankan selama fase init_workers."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "Urutan Plugin (init_workers)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase log untuk situs ini (pemrosesan log HTTP setelah respons). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "Urutan Plugin (log)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase log_default untuk situs ini (pemrosesan log vhost default). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "Urutan Plugin (log_default)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase log_stream untuk situs ini (pemrosesan log stream). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "Urutan Plugin (log_stream)"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase preread untuk situs ini (pemeriksaan TCP preread sebelum proxy). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "Urutan Plugin (preread)"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase set untuk situs ini (penyiapan variabel sebelum rewrite/access). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "Urutan Plugin (set)"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase ssl_certificate untuk situs ini (pemilihan/penerbitan sertifikat TLS). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "Urutan Plugin (ssl_certificate)"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "Plugin yang harus berjalan lebih dulu selama fase timer (timer latar belakang). Pisahkan ID dengan spasi; plugin lainnya tetap berjalan setelahnya dalam urutan normalnya."
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "Urutan Plugin (timer)"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "Menentukan respons terhadap ancaman: \"detect\" untuk memantau dan mencatat, atau \"block\" untuk mencegah akses dan mencatat insiden."
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "Mode Keamanan"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "Batas waktu untuk mengirim respons ke klien."
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "Batas Waktu Kirim"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "Daftar virtual host yang dilayani oleh bunkerweb. (dipisahkan spasi)"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "Nama Server"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "Nilai untuk direktif server_names_hash_bucket_size."
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "Ukuran Bucket Hash Nama Server"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "Tipe server: http atau stream."
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "Tipe Server"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "Ukuran penyimpanan internal yang menampung ID sesi cookie yang dicabut."
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "Ukuran Memori Pencabutan Sesi"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "Aktifkan integrasi Docker Swarm."
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "Mode Swarm"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "Level log untuk timer."
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "Level Log Timer"
+
+msgid "general.settings.USE_API.help"
+msgstr "Aktifkan API internal BunkerWeb."
+
+msgid "general.settings.USE_API.label"
+msgstr "Aktifkan API"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "Aktifkan konektivitas IPv6."
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "Gunakan IPv6"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "Dengarkan TCP (stream)."
+
+msgid "general.settings.USE_TCP.label"
+msgstr "Dengarkan TCP"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "Template konfigurasi yang akan diterapkan, dipisahkan spasi, yang akan menggantikan nilai default pengaturan tertentu. Template diterapkan secara berurutan dan yang lebih baru menggantikan yang lebih awal; nilai yang diatur pada layanan menggantikan template."
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "Gunakan Template"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "Dengarkan UDP (stream)."
+
+msgid "general.settings.USE_UDP.label"
+msgstr "Dengarkan UDP"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "Ukuran lua_shared_dict untuk worker inisialisasi"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "Ukuran Memori Workerlock Inisialisasi"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "Jumlah koneksi maksimum per worker."
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "Koneksi per Worker"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "Jumlah proses worker."
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "Proses Worker"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "Jumlah maksimum file terbuka untuk proses worker."
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "File Terbuka per Worker"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "Batas waktu untuk penonaktifan proses worker secara halus. Setelah penundaan ini, worker lama dihentikan secara paksa selama reload untuk mencegah pertumbuhan memori."
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "Batas Waktu Penonaktifan Worker"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "Memeriksa kunci lisensi untuk peningkatan."
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "Pengaturan global tidak disimpan: setiap nilai yang diubah ditolak."
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "Pengaturan global tidak diedit karena tidak ada nilai yang diubah."
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "Pengaturan global disimpan, tetapi %(refused_count)s nilai ditolak."
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "Pengaturan global berhasil disimpan."
+
+msgid "home.flash.error_fetching_services"
+msgstr "Kesalahan saat mengambil layanan: %(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "Lihat semua %(count)s pengaturan"
 
@@ -3156,6 +4179,75 @@ msgstr "Statis"
 
 msgid "instances.down"
 msgstr "Nonaktif"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "Tidak dapat membuat instans: %(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "Tidak dapat mengambil instans dari API."
+
+msgid "instances.flash.could_not_found_one"
+msgstr "Instans yang dipilih tidak dapat ditemukan atau bukan instans UI/API."
+
+msgid "instances.flash.could_not_found_other"
+msgstr "Semua instans yang dipilih tidak dapat ditemukan atau bukan instans UI/API."
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "Tidak dapat menghapus instans: %(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "Tidak dapat menghapus instans: %(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "Hostname %(hostname)s sudah digunakan."
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "Instans %(value)s berhasil dibuat."
+
+msgid "instances.flash.instance_deleted"
+msgstr "Instans %(instance)s berhasil dihapus."
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "Instans %(instance)s tidak ada."
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "Instans %(instance)s tidak memiliki metode muat ulang."
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "Instans %(instance)s tidak memiliki metode penghentian."
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "Instans %(non_deletable_instance)s bukan instans UI/API dan tidak akan dihapus."
+
+msgid "instances.flash.instance_reloaded"
+msgstr "Instans %(instance)s berhasil dimuat ulang."
+
+msgid "instances.flash.instance_stopped"
+msgstr "Instans %(instance)s berhasil dihentikan."
+
+msgid "instances.flash.instances_deleted"
+msgstr "Instans-instans berikut berhasil dihapus: %(instance)s."
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "Parameter instance hostname tidak ada pada /instances/new."
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "Parameter instance name tidak ada pada /instances/new."
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "Parameter instances tidak ada pada /instances/delete."
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "Parameter instances tidak ada pada /instances/ping."
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "Parameter instances tidak ada pada /instances/reload."
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "Parameter instances tidak ada pada /instances/stop."
+
+msgid "instances.flash.no_instance_selected"
+msgstr "Tidak ada instans yang dipilih."
 
 msgid "instances.loading"
 msgstr "Memuat"
@@ -3193,6 +4285,24 @@ msgstr "Tanggal Mulai"
 msgid "job.history.success"
 msgstr "Berhasil"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "Kesalahan saat mengambil job: %(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "Parameter jobs tidak valid pada /jobs/run."
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "Plugin pekerjaan akan dijalankan di latar belakang oleh scheduler."
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "Pekerjaan plugin akan dijalankan di latar belakang oleh scheduler."
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "Parameter jobs tidak ada pada /jobs/run."
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "Tidak ada job dipilih."
+
 msgid "jobs.subtitle"
 msgstr "Tugas terjadwal dan sekali jalan yang dijalankan oleh scheduler BunkerWeb — pantau statusnya dan jalankan sesuai permintaan."
 
@@ -3213,6 +4323,15 @@ msgstr "Dikunci (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "Pengaturan yang dikunci disorot"
+
+msgid "legend.raw_setting_drafts"
+msgstr "Di awal sebuah pengaturan, tekan # untuk mengalihkan status draf atau Backspace untuk mengaktifkannya. Simpan untuk menerapkan. Draf mempertahankan nilainya sementara nilai warisan atau bawaan yang berlaku."
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "Buka Sertifikat untuk memeriksa"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt: sertifikat yatim <strong>%(cert_name)s</strong> mereferensikan akun ACME <code>%(account)s</code> yang hilang. Perpanjangan diblokir hingga status penyedia diperbaiki. <a href=\"%(certificates_url)s\">%(link_text)s</a>."
 
 msgid "link.back_to_login"
 msgstr "Kembali ke Halaman Masuk"
@@ -3245,13 +4364,19 @@ msgid "link.see_more"
 msgstr "Lihat Lebih Banyak"
 
 msgid "link.upgrade"
-msgstr "Upgrade?"
+msgstr "Tingkatkan?"
 
 msgid "link.use_authenticator_code"
 msgstr "Gunakan kode autentikator"
 
 msgid "link.use_recovery_code"
 msgstr "Gunakan kode pemulihan"
+
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "Tidak dapat masuk, silakan coba lagi"
+
+msgid "login.flash.invalid_username_password"
+msgstr "Nama pengguna atau kata sandi tidak valid"
 
 msgid "login.notice_password_changed"
 msgstr "Kata sandi Anda telah diubah. Masuk dengan kata sandi baru Anda."
@@ -3288,6 +4413,12 @@ msgstr "Perluas"
 
 msgid "logs.filter_levels"
 msgstr "Level"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "Jalur file tidak valid"
+
+msgid "logs.flash.no_such_file"
+msgstr "File tidak ditemukan"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,6 +4504,27 @@ msgstr "Lebih tinggi"
 msgid "logs.trimmed_notice"
 msgstr "--- %(count)s baris log yang lebih lama dihapus untuk kinerja ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "Koneksi database dalam mode baca-saja: tidak ada modifikasi yang memungkinkan."
+
+msgid "main.flash.failover_configuration_error"
+msgstr "Perubahan terakhir tidak dapat diterapkan karena menyebabkan kesalahan konfigurasi pada NGINX, silakan periksa log BunkerWeb untuk informasi lebih lanjut. Konfigurasi kembali ke versi terakhir yang berfungsi."
+
+msgid "main.flash.failover_message"
+msgstr "Pesan Failover:"
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "Memaksa status untuk dimuat ulang"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "Anda memiliki lebih banyak layanan daripada yang diizinkan oleh lisensi pro Anda. Tingkatkan lisensi Anda atau pindahkan beberapa layanan ke mode draf untuk membuka kunci lisensi pro Anda."
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "Perubahan terakhir berhasil diterapkan."
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "Autentikasi dua faktor diaktifkan tetapi tidak ada kode pemulihan yang tersedia, silakan segarkan kode tersebut:"
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Seret dan lepaskan arsip plugin Anda di sini atau klik untuk memilih file."
 
@@ -3385,11 +4537,20 @@ msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
 msgstr[0] "Apakah Anda yakin ingin menghapus file cache yang dipilih?"
 msgstr[1] "Apakah Anda yakin ingin menghapus file cache yang dipilih?"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "Apakah Anda yakin ingin mengkonversi konfigurasi kustom yang dipilih ke draf?"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "Apakah Anda yakin ingin mengkonversi konfigurasi kustom yang dipilih ke online?"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "Apakah Anda yakin ingin mengkonversi konfigurasi kustom yang dipilih?"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "Apakah Anda yakin ingin mengkonversi konfigurasi kustom yang dipilih ke %(state)s?"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "Apakah Anda yakin ingin mengkonversi konfigurasi kustom yang dipilih ke draf?"
+
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "Apakah Anda yakin ingin mengkonversi konfigurasi kustom yang dipilih ke online?"
 
 #. plural pair; 2 form(s) for id, singular in slot 0
 msgid "modal.body.confirm_configs_deletion_alert"
@@ -3409,11 +4570,29 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Apakah Anda yakin ingin menghapus plugin yang dipilih?"
 msgstr[1] "Apakah Anda yakin ingin menghapus plugin yang dipilih?"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "Apakah Anda yakin ingin mengubah layanan yang dipilih menjadi draf?"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "Apakah Anda yakin ingin mengubah layanan yang dipilih menjadi online?"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "Yakin ingin mengubah mode yang dideklarasikan untuk layanan ini?"
 
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "Apakah Anda yakin ingin mengubah layanan yang dipilih menjadi draf?"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "Apakah Anda yakin ingin mengubah layanan yang dipilih menjadi online?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Apakah Anda yakin ingin menghapus template %(name)s?"
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "Apakah Anda yakin ingin menghapus template yang dipilih?"
+msgstr[1] "Apakah Anda yakin ingin menghapus template yang dipilih?"
 
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "Apakah Anda yakin ingin menghapus instans yang dipilih?"
@@ -3475,6 +4654,12 @@ msgstr "Seret dan lepaskan file ekspor layanan Anda di sini atau klik untuk memi
 msgid "modal.body.import_services_warning"
 msgstr "Mengimpor layanan akan membuat layanan baru dari file ekspor. Layanan yang ada dilewati. Arsip .zip yang diekspor dengan konfigurasi kustom juga diterima."
 
+msgid "modal.body.import_template_help"
+msgstr "Paket template yang diekspor dari BunkerWeb (.json), atau arsip (.zip, .tar.gz, .tar.xz) yang berisi satu folder template dengan template.json dan konfigurasinya. Maksimal 1 MiB."
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "Mengganti template mengubah setiap layanan yang menggunakannya pada pembuatan konfigurasi berikutnya. Template yang dimiliki oleh plugin atau dikelola di luar UI web tidak pernah diganti."
+
 msgid "modal.body.instance_creation_alert"
 msgstr "Anda tidak perlu menyediakan port atau nama server; nilai `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, dan `API_SERVER_NAME` akan digunakan untuk konfigurasi instans."
 
@@ -3489,6 +4674,9 @@ msgstr "Kode pemulihan ini hanya ditampilkan sekali. Silakan pastikan Anda menyi
 
 msgid "modal.body.reset_template_alert"
 msgstr "Apakah Anda yakin ingin mengatur ulang pengaturan template saat ini dan konfigurasi kustom?"
+
+msgid "modal.body.service_deletion_confirmation"
+msgstr "Apakah Anda yakin ingin menghapus layanan yang dipilih?"
 
 msgid "modal.body.services_conversion_confirmation"
 msgstr "Apakah Anda yakin ingin mengonversi layanan yang dipilih?"
@@ -3560,7 +4748,7 @@ msgid "modal.title.delete_template"
 msgstr "Hapus template"
 
 msgid "modal.title.edit_template"
-msgstr "Edit template: %(name)s"
+msgstr "Ubah templat: %(name)s"
 
 msgid "modal.title.enroll_instance"
 msgstr "Daftarkan instans"
@@ -3582,6 +4770,9 @@ msgstr "Impor konfigurasi kustom"
 
 msgid "modal.title.import_services"
 msgstr "Impor layanan"
+
+msgid "modal.title.import_template"
+msgstr "Impor Template"
 
 msgid "modal.title.job_history"
 msgstr "10 Eksekusi Pekerjaan Terakhir"
@@ -3619,6 +4810,21 @@ msgstr "Mudah"
 msgid "mode.raw"
 msgstr "Mentah"
 
+msgid "navbar.aria.close_navigation"
+msgstr "Tutup navigasi"
+
+msgid "navbar.aria.help"
+msgstr "Bantuan"
+
+msgid "navbar.aria.news"
+msgstr "Berita"
+
+msgid "navbar.aria.notifications"
+msgstr "Notifikasi"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "Alihkan navigasi"
+
 msgid "navbar.button.upgrade_to_pro"
 msgstr "Upgrade ke PRO"
 
@@ -3653,7 +4859,7 @@ msgid "navigation.crowdsec"
 msgstr "CrowdSec"
 
 msgid "navigation.edition_community"
-msgstr "Community"
+msgstr "Komunitas"
 
 msgid "navigation.edition_pro"
 msgstr "Pro"
@@ -3769,6 +4975,9 @@ msgstr "Sudah berlangganan"
 msgid "notice.dismiss_mfa"
 msgstr "Jangan ingatkan saya lagi"
 
+msgid "notice.enable_mfa"
+msgstr "Silakan aktifkan autentikasi dua faktor untuk mengamankan akun Anda <a href=\"%(url)s\">di sini</a>"
+
 msgid "onboarding.dismiss"
 msgstr "Tutup"
 
@@ -3822,6 +5031,39 @@ msgstr "Daftarkan layanan pertama Anda"
 
 msgid "onboarding.item.workflow"
 msgstr "Lampirkan alur kerja keamanan"
+
+msgid "onboarding.item_hint.first_block"
+msgstr "Laporan muncul di sini setelah BunkerWeb memblokir permintaan — kirim permintaan yang buruk dan periksa kembali."
+
+msgid "onboarding.item_hint.https"
+msgstr "Tambahkan atau buat sertifikat di sini agar layanan Anda dilayani melalui HTTPS."
+
+msgid "onboarding.item_hint.install"
+msgstr "Tambahkan instans di sini, lalu simpan konfigurasi pertama Anda untuk membawanya di bawah pengelolaan."
+
+msgid "onboarding.item_hint.mfa"
+msgstr "Buka profil Anda dari menu ini, lalu aktifkan autentikasi dua faktor."
+
+msgid "onboarding.item_hint.pro"
+msgstr "Masukkan kunci lisensi PRO Anda di sini untuk membuka plugin PRO dan dukungan."
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "Setiap baris di sini menampilkan klien yang diblokir, alasannya, dan kapan pemblokiran berakhir."
+
+msgid "onboarding.item_hint.read_home"
+msgstr "Dasbor ini menampilkan instans yang aktif, layanan yang dilayani, dan lalu lintas terbaru sekilas."
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "Log langsung dari setiap instans muncul di sini, dapat difilter berdasarkan instans dan tingkat keparahan."
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "Buka laporan di sini untuk melihat pemeriksaan keamanan mana yang menghentikannya, dan alasannya."
+
+msgid "onboarding.item_hint.service"
+msgstr "Buat layanan di sini untuk memberi tahu BunkerWeb aplikasi mana yang akan dilindungi."
+
+msgid "onboarding.item_hint.workflow"
+msgstr "Bangun workflow di sini untuk merangkai pemeriksaan dan respons menjadi satu aturan."
 
 msgid "onboarding.not_saved"
 msgstr "Ini tidak dapat disimpan."
@@ -3886,6 +5128,9 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "Tidak dapat membaca versi BunkerWeb (%(current)s), sehingga kompatibilitas %(id)s tidak dapat diperiksa; tidak ada yang diinstal"
+
 msgid "plugins.catalog.incompatible"
 msgstr "Rilis ini tidak menyatakan kompatibilitas BunkerWeb; versi saat ini adalah %(current)s"
 
@@ -3904,8 +5149,32 @@ msgstr "Pelajari lebih lanjut"
 msgid "plugins.catalog.release"
 msgstr "Baca dari rilis %(tag)s"
 
+msgid "plugins.catalog.remove"
+msgstr "Hapus"
+
 msgid "plugins.catalog.stale"
 msgstr "Katalog tidak dapat disegarkan baru-baru ini, jadi instalasi dinonaktifkan hingga katalog kembali mutakhir."
+
+msgid "plugins.catalog.state_installed"
+msgstr "Terinstal (versi %(version)s)"
+
+msgid "plugins.catalog.state_managed"
+msgstr "Diinstal di luar katalog; perbarui atau hapus di tempat plugin ini diinstal"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "Diinstal di luar katalog sebagai plugin core; perbarui atau hapus di tempat plugin ini diinstal"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "Diinstal di luar katalog sebagai plugin eksternal; perbarui atau hapus di tempat plugin ini diinstal"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "Diinstal di luar katalog sebagai plugin pro; perbarui atau hapus di tempat plugin ini diinstal"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "Diinstal di luar katalog sebagai plugin ui; perbarui atau hapus di tempat plugin ini diinstal"
+
+msgid "plugins.catalog.state_update"
+msgstr "Pembaruan tersedia: versi %(installed)s terinstal, %(version)s tercantum"
 
 msgid "plugins.catalog.tab"
 msgstr "Tersedia"
@@ -3913,8 +5182,188 @@ msgstr "Tersedia"
 msgid "plugins.catalog.trust_notice"
 msgstr "Item komunitas dibaca dari repositori yang dipublikasikan organisasi BunkerWeb di GitHub, melalui TLS, dan yang diinstal diperiksa terhadap yang terdaftar — tetapi tidak ada yang ditandatangani secara kriptografis di sini. Plugin yang diinstal menjalankan kode dengan hak akses penuh BunkerWeb."
 
+msgid "plugins.catalog.update"
+msgstr "Perbarui"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "Ini akan mengganti plugin terinstal %(name)s (%(id)s, versi %(installed)s) dengan versi %(version)s dari katalog. Plugin akan diganti meskipun diunggah secara manual dan bukan diinstal dari katalog."
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "Tidak ada pengaturan yang dihapus oleh pembaruan ini."
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "Pengaturan yang akan dihapus oleh pembaruan ini belum dapat dicantumkan sekarang, sehingga pembaruan dinonaktifkan hingga penyegaran katalog berikutnya."
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "Versi %(version)s tidak lagi mendeklarasikan pengaturan ini. Pengaturan ini dihapus, bersama dengan setiap nilai yang diatur untuknya di pengaturan global, layanan, dan template:"
+
+msgid "plugins.catalog.update_title"
+msgstr "Perbarui Plugin Komunitas"
+
 msgid "plugins.catalog.version"
 msgstr "Versi %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "Versi BunkerWeb yang sedang berjalan (%(current)s) tidak dapat dibaca, sehingga kompatibilitas rilis ini tidak dapat diperiksa"
+
+msgid "plugins.flash.already_at_version"
+msgstr "Plugin %(plugin_id)s sudah pada versi %(version)s"
+
+msgid "plugins.flash.already_installed"
+msgstr "Plugin dengan id %(plugin_id)s sudah terinstal"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "Arsip %(tag)s tidak lagi cocok dengan yang tercantum di katalog. Tidak ada yang diinstal untuk %(plugin_id)s."
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "Entri katalog untuk %(plugin_id)s berubah sejak pembaruan dikonfirmasi; tinjau kembali pembaruan tersebut"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "Entri katalog yang di-cache untuk %(plugin_id)s lebih lama dari pembaruan; tunggu penyegaran berikutnya"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s, periksa log untuk detail lebih lanjut"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "Katalog komunitas dinonaktifkan"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "Tidak dapat menghapus plugin %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "Tidak dapat menghapus plugin %(plugin)s di database: %(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "Tidak dapat mengunduh %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "Tidak dapat menginstal %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "Tidak dapat menginstal %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "Tidak dapat memperbarui %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "Tidak dapat memperbarui %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "Tidak dapat memperbarui plugin %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "Tidak dapat memperbarui plugin %(plugin)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "Tidak dapat memperbarui plugin UI melalui API: %(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "Plugin %(plugin)s berhasil dihapus"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "File plugin.json tidak memiliki satu atau lebih kunci berikut: %(value)s (%(value2)s)"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "File plugin.json di %(file)s tidak valid (%(msg)s: baris %(lineno)s kolom %(colno)s (karakter %(pos)s)) (%(value)s)"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "Instalasi %(plugin_id)s tidak selesai: %(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "Plugin %(plugin_id)s berhasil diinstal"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "File bukan arsip plugin yang valid (.zip, .tar.gz, atau .tar.xz)."
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "ID plugin tidak valid, (harus antara 4 dan 64 karakter, hanya huruf, angka, garis bawah, dan tanda hubung)"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "Nama plugin tidak valid untuk %(temp_folder_name)s. (Hanya boleh berisi angka, huruf, garis bawah, dan tanda hubung (min 4 karakter dan maks 64))"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "Plugin %(plugin_id)s dikelola di luar katalog dan tidak dapat diperbarui dari katalog"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "Plugin %(plugin_id)s adalah plugin core yang dikelola di luar katalog dan tidak dapat diperbarui dari katalog"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "Plugin %(plugin_id)s adalah plugin eksternal yang dikelola di luar katalog dan tidak dapat diperbarui dari katalog"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "Plugin %(plugin_id)s adalah plugin pro yang dikelola di luar katalog dan tidak dapat diperbarui dari katalog"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "Plugin %(plugin_id)s adalah plugin ui yang dikelola di luar katalog dan tidak dapat diperbarui dari katalog"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "Parameter csrf_token tidak ada pada /plugins."
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "Parameter id tidak ada pada /plugins/catalog/install."
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "Parameter id atau version tidak ada pada /plugins/catalog/update."
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "Parameter plugin atau enabled tidak ada pada /plugins/enable."
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "Parameter plugins tidak ada pada /plugins/delete."
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "Tidak ada data plugin untuk diunggah"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "Plugin %(plugin_id)s tidak diinstal; instal dari katalog sebagai gantinya"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "%(file)s bukan plugin yang valid (file plugin.json tidak ada) (%(value)s)"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "Silakan unggah plugin baru untuk memuat ulang plugin"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "Plugin %(plugin)s sudah ada"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "Plugin %(plugin)s berhasil dinonaktifkan."
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "Plugin %(plugin)s berhasil diaktifkan."
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "Manajemen plugin dibatasi untuk administrator"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "Plugin dengan nama %(folder_name)s sudah ada"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "Plugin dengan id %(plugin)s tidak ditemukan"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "Kesalahan unggah plugin (%(value)s): %(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "Plugin berhasil diunggah: %(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "Plugin berhasil diunggah"
+
+msgid "plugins.flash.refused_download"
+msgstr "Menolak mengunduh %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "Instalasi %(plugin_id)s ditolak: %(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "Pembaruan %(plugin_id)s ditolak: %(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "Pembaruan %(plugin_id)s tidak selesai: %(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "Plugin %(plugin_id)s diperbarui ke versi %(version)s"
 
 msgid "plugins.marketplace.active"
 msgstr "Aktif"
@@ -3941,7 +5390,7 @@ msgid "plugins.marketplace.tab_all"
 msgstr "Semua"
 
 msgid "plugins.marketplace.tab_community"
-msgstr "Community"
+msgstr "Komunitas"
 
 msgid "plugins.marketplace.tab_disabled"
 msgstr "Dinonaktifkan"
@@ -3988,6 +5437,36 @@ msgstr "Tanggal Kedaluwarsa Pro"
 msgid "pro.expiration_date.unknown"
 msgstr "Tanggal kedaluwarsa tidak diketahui"
 
+msgid "pro.flash.checking_license_key"
+msgstr "Memeriksa kunci lisensi."
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "Pembaruan paksa plugin PRO telah dijadwalkan."
+
+msgid "pro.flash.invalid_license_key"
+msgstr "Kunci lisensi tidak valid"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "Kunci lisensi PRO tidak diperbarui: nilai ditolak."
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "Kunci lisensi sama dengan yang saat ini."
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "Kunci lisensi PRO berhasil diperbarui."
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "Parameter license key tidak ada pada /pro/key."
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "Pemeriksaan baru untuk plugin PRO telah dijadwalkan."
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "Scheduler akan mencoba menerapkan perubahan dan mengunduh plugin PRO."
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "Web UI akan segera memuat ulang plugin PRO-nya."
+
 msgid "pro.force_check.description"
 msgstr "Paksa pengecekan baru untuk plugin PRO. Ini akan memicu unduhan baru jika versi baru tersedia."
 
@@ -4024,8 +5503,17 @@ msgstr "KEDALUWARSA"
 msgid "pro.status.free_version"
 msgstr "Versi GRATIS"
 
+msgid "pro.status.invalid"
+msgstr "KUNCI TIDAK VALID"
+
+msgid "pro.status.invalid_key"
+msgstr "Server lisensi menolak kunci lisensi yang tersimpan. Periksa kunci tersebut, atau hapus di Pengaturan Global → Pro."
+
 msgid "pro.status.overlapped"
 msgstr "BERLEBIHAN"
+
+msgid "pro.status.pending_key"
+msgstr "Kunci lisensi belum diperiksa. Scheduler akan memeriksanya segera setelah disimpan."
 
 msgid "pro.status.pro_version"
 msgstr "Versi PRO"
@@ -4041,6 +5529,15 @@ msgstr "Status"
 
 msgid "pro.title"
 msgstr "Lisensi Pro"
+
+msgid "pro.trial.cta"
+msgstr "Mulai Uji Coba Gratis"
+
+msgid "pro.trial.description"
+msgstr "Coba <span class=\"text-primary\">BunkerWeb PRO</span> gratis selama <strong>30 hari</strong>."
+
+msgid "pro.trial.title"
+msgstr "Uji Coba Gratis"
 
 msgid "profile.2fa.disable_title"
 msgstr "Nonaktifkan 2FA"
@@ -4083,6 +5580,132 @@ msgstr "Perbarui Kode Pemulihan"
 
 msgid "profile.card.title.sessions"
 msgstr "Sesi"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "Tidak dapat menghapus passkey: %(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "Tidak dapat menonaktifkan autentikasi dua faktor: %(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "Tidak dapat mengaktifkan autentikasi dua faktor: %(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "Tidak dapat menyegarkan kode pemulihan: %(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "Tidak dapat mengganti nama passkey: %(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "Tidak dapat mencabut sesi lain: %(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "Tidak dapat memperbarui pengguna %(value)s: %(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "Tidak dapat menghapus sesi lain: %(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "Kata sandi saat ini salah."
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "Email terlalu panjang. Harus kurang dari 256 karakter."
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "Parameter current password tidak ada pada /profile/edit."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "Parameter current password tidak ada pada /profile/totp-refresh."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "Parameter current password tidak ada pada /profile/totp-disable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "Parameter current password tidak ada pada /profile/totp-enable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "Parameter current password tidak ada pada /profile/wipe-other-sessions."
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "Parameter email tidak ada pada /profile/edit."
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "Parameter new password confirm tidak ada pada /profile/edit."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "Parameter tidak ada pada /profile/webauthn/delete."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "Parameter tidak ada pada /profile/webauthn/rename."
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "Parameter totp token tidak ada pada /profile/totp-enable."
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "Kata sandi baru tidak cukup kuat. Harus berisi setidaknya 8 karakter, termasuk minimal 1 huruf besar, 1 huruf kecil, 1 angka, dan 1 karakter khusus (#@?!$%^&*-)."
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "Kata sandi baru sama dengan yang saat ini."
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "Kata sandi baru terlalu panjang. Tidak boleh melebihi %(MAX_PASSWORD_BYTES)s byte (batas keras bcrypt); karakter beraksen atau emoji dihitung beberapa byte masing-masing."
+
+msgid "profile.flash.no_fields_updated"
+msgstr "Tidak ada kolom yang diperbarui."
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "Sesi lain berhasil dihapus."
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "Passkey berhasil dihapus."
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "Passkey berhasil didaftarkan."
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "Passkey berhasil diganti namanya."
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "Nama passkey tidak boleh kosong."
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "Kata sandi Anda telah diubah, tetapi sesi lain Anda tidak dapat dicabut. Gunakan \"Hapus sesi lain\" di bawah ini dan periksa daftar sesi aktif."
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "Kata sandi tidak cocok dengan konfirmasi kata sandi."
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "Profil berhasil diperbarui."
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "Kode pemulihan berhasil disegarkan. Kode lama tidak berlaku lagi."
+
+msgid "profile.flash.theme_invalid"
+msgstr "Tema tidak valid."
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "Token TOTP tidak valid."
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "Autentikasi dua faktor sudah diaktifkan."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "Autentikasi dua faktor berhasil dinonaktifkan."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "Autentikasi dua faktor berhasil diaktifkan."
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "Autentikasi dua faktor tidak diaktifkan."
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "Pendaftaran dua faktor telah kedaluwarsa. Muat ulang halaman dan pindai kode QR baru."
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "Nama pengguna dan email sama dengan yang saat ini."
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "Nama pengguna terlalu panjang. Harus kurang dari 256 karakter."
 
 msgid "profile.help.photo_extensions"
 msgstr "JPG, GIF, atau PNG diizinkan. Ukuran maks: 800KB."
@@ -4168,6 +5791,39 @@ msgstr "Rentang waktu"
 msgid "range_picker.custom"
 msgstr "Kustom"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "Pengaturan %(setting)s tidak dapat dijadikan draf."
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "Pengaturan draf %(setting)s tidak dikirim."
+
+msgid "raw_drafts.draft_not_present"
+msgstr "Pengaturan draf %(setting)s tidak ada di editor RAW."
+
+msgid "raw_drafts.edits_discarded"
+msgstr "Pengaturan draf tetap tidak berubah; aktifkan atau edit di mode Raw."
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "Pengaturan global %(setting)s tidak dapat dijadikan draf layanan."
+
+msgid "raw_drafts.locked_by_method"
+msgstr "Pengaturan %(setting)s tidak dapat mengubah status draf karena dikelola oleh metode %(method)s."
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "Metadata draf pengaturan hanya diterima di mode raw."
+
+msgid "raw_drafts.missing_metadata"
+msgstr "Metadata %(field)s tidak ada."
+
+msgid "raw_drafts.present_not_posted"
+msgstr "Pengaturan aktif %(setting)s tidak dikirim."
+
+msgid "raw_drafts.present_not_valid"
+msgstr "Pengaturan aktif %(setting)s tidak valid."
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "Pengaturan %(setting)s tidak valid."
+
 msgid "redirects.all"
 msgstr "Semua"
 
@@ -4221,6 +5877,69 @@ msgstr "Pengalihan adalah aturan bernama yang Anda lampirkan ke satu atau bebera
 
 msgid "redirects.empty_title"
 msgstr "Belum ada pengalihan"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "Jalur sumber tidak valid: tidak boleh berisi spasi, titik koma, atau kurung kurawal."
+
+msgid "redirects.err.invalid_to_url"
+msgstr "Target harus berupa URL http:// atau https:// lengkap."
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "Setidaknya satu layanan diperlukan"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "Tidak dapat melampirkan pengalihan: %(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "Tidak dapat membuat pengalihan: %(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "Tidak dapat menghapus pengalihan: %(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "Tidak dapat melepaskan pengalihan: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "Tidak dapat mengambil pengalihan: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "Tidak dapat mengambil layanan untuk penetapan pengalihan: %(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "Tidak dapat memperbarui pengalihan: %(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "Nama pengalihan diperlukan"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "Pengalihan dilampirkan. Layanan: %(len)s"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "Pengalihan %(value)s berhasil dibuat"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "Pengalihan berhasil dihapus"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "Pengalihan berhasil dilepaskan"
+
+msgid "redirects.flash.redirect_required"
+msgstr "Pengalihan diperlukan"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "Pengalihan dan layanan diperlukan"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "Pengalihan berhasil diperbarui"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "Kode status harus salah satu dari %(value)s"
+
+msgid "redirects.flash.target_required"
+msgstr "Target pengalihan diperlukan"
+
+msgid "redirects.flash.too_many_services"
+msgstr "Pengalihan tidak dapat dilampirkan ke lebih dari %(value)s layanan"
 
 msgid "redirects.from_path"
 msgstr "Alihkan dari"
@@ -4307,16 +6026,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "Permintaan yang diblokir seiring waktu"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "Inspeksi AppSec"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "Kebijakan kegagalan AppSec"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "Keputusan API lokal"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "Detail teknis"
 
 msgid "reports.security_incident"
 msgstr "Insiden Keamanan"
@@ -4457,7 +6176,7 @@ msgid "resource_groups.delete_help"
 msgstr "Penghapusan diblokir selama sebuah pengaturan merujuk pada alias ini."
 
 msgid "resource_groups.editor_edit"
-msgstr "Edit @%(name)s"
+msgstr "Ubah @%(name)s"
 
 msgid "resource_groups.editor_new"
 msgstr "Grup sumber daya baru"
@@ -4477,6 +6196,63 @@ msgstr "Entri"
 msgid "resource_groups.expand_all"
 msgstr "Perluas semua"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "Alias harus berisi 1 hingga 64 huruf, angka, garis bawah, atau tanda hubung"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "Alias ini dicadangkan oleh BunkerWeb"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "Tidak dapat mengkloning grup sumber daya: %(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "Tidak dapat menghapus grup sumber daya: %(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "Tidak dapat mengekspor grup sumber daya: %(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "Tidak dapat menyimpan grup sumber daya: %(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "Entri sumber daya harus berupa daftar"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "Entri sumber daya bukan JSON yang valid"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "Entri %(index)s memiliki komentar yang terlalu panjang"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "Entri %(index)s tidak valid"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "Entri %(index)s memiliki jenis yang tidak valid"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "Entri %(index)s memiliki nilai yang tidak valid"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "Grup sumber daya dikloning sebagai @%(alias)s"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "Grup sumber daya @%(alias)s berhasil dibuat"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "Grup sumber daya berhasil dihapus"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "Grup sumber daya diperlukan"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "Grup sumber daya berhasil diperbarui"
+
+msgid "resource_groups.flash.source_required"
+msgstr "Grup sumber daya sumber diperlukan"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "Grup sumber daya tidak dapat berisi lebih dari %(value)s entri"
+
 msgid "resource_groups.global_configuration"
 msgstr "Konfigurasi global"
 
@@ -4492,6 +6268,24 @@ msgstr "Impor TXT/CSV dibatasi hingga 256 KiB."
 msgid "resource_groups.kind"
 msgstr "Jenis"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "Negara"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "DNS Terbalik"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "User agent"
+
 msgid "resource_groups.kinds"
 msgstr "Jenis"
 
@@ -4501,8 +6295,23 @@ msgstr "Memuat referensi..."
 msgid "resource_groups.max_entries"
 msgstr "Grup sumber daya tidak dapat memiliki lebih dari %(max)s entri."
 
-msgid "resource_groups.meta_line"
-msgstr "%(kinds)s jenis · %(values)s nilai · %(usages)s penggunaan"
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s jenis"
+msgstr[1] "%(count)s jenis"
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s penggunaan"
+msgstr[1] "%(count)s penggunaan"
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s nilai"
+msgstr[1] "%(count)s nilai"
 
 msgid "resource_groups.new"
 msgstr "Tambah grup"
@@ -4521,6 +6330,12 @@ msgstr "Tidak ada referensi"
 
 msgid "resource_groups.readonly"
 msgstr "Basis data bersifat baca-saja. Grup sumber daya dapat diperiksa dan diekspor, tetapi tidak dapat diubah."
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s referensi"
+msgstr[1] "%(count)s referensi"
 
 msgid "resource_groups.references_error"
 msgstr "Tidak dapat memuat referensi"
@@ -4568,7 +6383,7 @@ msgid "searchpane.active"
 msgstr "Aktif"
 
 msgid "searchpane.async"
-msgstr "Async"
+msgstr "Asinkron"
 
 msgid "searchpane.ban_scope"
 msgstr "Cakupan Larangan"
@@ -4684,6 +6499,9 @@ msgstr "Muat Ulang Diperlukan"
 msgid "searchpane.scope"
 msgstr "Cakupan"
 
+msgid "searchpane.search_title"
+msgstr "Cari: {name}"
+
 msgid "searchpane.security_mode"
 msgstr "Mode Keamanan"
 
@@ -4712,7 +6530,7 @@ msgid "searchpane.stream"
 msgstr "Dukungan Stream"
 
 msgid "searchpane.template"
-msgstr "Template"
+msgstr "Templat"
 
 msgid "searchpane.title_0"
 msgstr "Tidak Ada Filter Aktif"
@@ -4774,14 +6592,35 @@ msgstr "Mode layanan"
 msgid "service.resources.attach"
 msgstr "Lampirkan"
 
+msgid "service.resources.confirm_detach"
+msgstr "Lepaskan sumber daya ini dari %(service)s?"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "Lepaskan sertifikat ini dari %(service)s?"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "Lepaskan pengalihan ini dari %(service)s?"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "Lepaskan template ini dari %(service)s?"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "Lepaskan upstream ini dari %(service)s?"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "Lepaskan alur kerja ini dari %(service)s?"
+
 msgid "service.resources.conflict.inline"
 msgstr "%(service)s sudah melayani %(path)s melalui pengaturan %(family)s-nya sendiri. Hapus pengaturan tersebut untuk %(path)s, atau gunakan jalur yang berbeda."
 
 msgid "service.resources.conflict.primary"
 msgstr "“%(name)s” saat ini adalah sertifikat utama untuk layanan ini dan akan diturunkan tanpa peringatan lebih lanjut. Yang utama adalah yang benar-benar diterapkan."
 
-msgid "service.resources.conflict.resource"
-msgstr "%(service)s sudah melayani %(path)s melalui %(kind)s “%(name)s”. Lepaskan “%(name)s”, atau berikan salah satunya jalur yang berbeda."
+msgid "service.resources.conflict.resource_redirect"
+msgstr "%(service)s sudah melayani %(path)s melalui pengalihan “%(name)s”. Lepaskan “%(name)s”, atau berikan salah satunya jalur yang berbeda."
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "%(service)s sudah melayani %(path)s melalui upstream “%(name)s”. Lepaskan “%(name)s”, atau berikan salah satunya jalur yang berbeda."
 
 msgid "service.resources.conflict.stream"
 msgstr "Layanan stream mem-proxy setiap koneksi ke satu backend, dan %(service)s sudah menggunakan upstream “%(name)s”. Lepaskan terlebih dahulu."
@@ -4872,6 +6711,222 @@ msgstr "Tidak tersedia"
 
 msgid "services.draft"
 msgstr "Layanan draf"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "Semua layanan yang dipilih tidak dapat ditemukan, bukan layanan UI/API, atau sudah dikonversi."
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "Semua layanan yang dipilih tidak dapat ditemukan atau bukan layanan UI/API."
+
+msgid "services.flash.configuration_created"
+msgstr "Konfigurasi untuk layanan %(service)s berhasil dibuat."
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "Konfigurasi untuk layanan %(service)s dibuat, tetapi %(refused_count)s nilai ditolak."
+
+msgid "services.flash.configuration_saved"
+msgstr "Konfigurasi untuk layanan %(service)s berhasil disimpan."
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "Konfigurasi untuk layanan %(service)s disimpan, tetapi %(refused_count)s nilai ditolak."
+
+msgid "services.flash.converted_services_draft"
+msgstr "Dikonversi ke layanan \"draf\": %(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "Dikonversi ke layanan \"online\": %(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "Tidak dapat mengambil sertifikat yang terpasang pada layanan ini."
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "Tidak dapat mengambil pengalihan yang terpasang pada layanan ini."
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "Tidak dapat mengambil upstream yang terpasang pada layanan ini."
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "Tidak dapat mengambil alur kerja yang terpasang pada layanan ini."
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "Tidak dapat mengambil konfigurasi kustom dari API."
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "Tidak dapat mengambil konfigurasi kustom dari API."
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "Tidak dapat mengambil layanan dari API."
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "Tidak dapat mengambil layanan %(service)s dari API."
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "Tidak dapat mengambil layanan %(clone)s untuk kloning."
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "Tidak dapat mengambil layanan dari API."
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "Tidak dapat mengambil konfigurasi layanan."
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "Tidak dapat mengambil template dari API."
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "Konfigurasi kustom tidak disimpan karena penggantian nama ditolak."
+
+msgid "services.flash.default_server_reserved"
+msgstr "%(default_server_id)s adalah server default yang dicadangkan: server ini menjawab permintaan yang tidak cocok dengan layanan apa pun yang dikonfigurasi (hostname tidak diketahui, akses IP mentah), sehingga tidak dapat dibuat, diganti nama, atau dihapus."
+
+msgid "services.flash.default_server_type_refused"
+msgstr "SERVER_TYPE tidak dapat diatur pada layanan cadangan %(default_server_id)s: layanan ini tidak memiliki blok server sendiri untuk dialihkan. Bagian HTTP-nya adalah blok server default itu sendiri, dan bagian stream-nya adalah pengaturan DEFAULT_SERVER_STREAM_PORTS."
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "Anda tidak memiliki izin untuk mengubah mode layanan"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "Gagal menghapus layanan autoconf draf %(service_id)s: %(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "Gagal mengimpor layanan: %(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "Gagal mengimpor layanan: %(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "Layanan diimpor: %(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "Layanan diimpor: %(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "Encoding tidak valid untuk configs_export.json di dalam arsip."
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "Encoding tidak valid untuk services_export.env di dalam arsip."
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Encoding file tidak valid. Silakan unggah file UTF-8."
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "Parameter mode tidak valid."
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "Parameter convert_to tidak ada pada /services/convert."
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "Parameter mode tidak ada pada /services/%(service)s/mode."
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "Parameter services tidak ada pada /services/convert."
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "Parameter services tidak ada pada /services/delete."
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "Tidak ditemukan layanan atau konfigurasi kustom dalam file impor."
+
+msgid "services.flash.no_services_export"
+msgstr "Tidak ada layanan untuk diekspor."
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "Tidak ada file layanan yang diunggah."
+
+msgid "services.flash.no_services_selected"
+msgstr "Tidak ada layanan dipilih."
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "Plugin ini tidak berlaku untuk server default"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "Menolak mengekstrak arsip: ukuran tidak terkompresi melebihi batas keamanan."
+
+msgid "services.flash.resource_attach_failed"
+msgstr "Tidak dapat melampirkan: %(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "Tidak bisa melampirkan: %(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "Sumber daya dilampirkan ke %(service)s."
+
+msgid "services.flash.resource_detach_failed"
+msgstr "Tidak dapat melepaskan: %(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "Tidak bisa melepaskan: %(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "Sumber daya dilepaskan dari %(service)s."
+
+msgid "services.flash.resource_unknown_family"
+msgstr "Tipe sumber daya tidak dikenal."
+
+msgid "services.flash.server_name_missing"
+msgstr "Layanan tidak dibuat karena nama server tidak disediakan."
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "Layanan %(non_convertible_service)s sudah menjadi layanan draf dan tidak akan dikonversi."
+
+msgid "services.flash.service_already_exists"
+msgstr "Layanan %(service)s sudah ada."
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "Layanan %(non_convertible_service)s sudah menjadi layanan online dan tidak akan dikonversi."
+
+msgid "services.flash.service_deleted"
+msgstr "Layanan dihapus: %(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "Layanan %(service)s tidak diedit karena tidak ada nilai yang diubah."
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "Layanan %(service)s tidak diedit karena tidak ada nilai atau konfigurasi kustom yang diubah."
+
+msgid "services.flash.service_not_found"
+msgstr "Layanan tidak ditemukan"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "Layanan %(service)s tidak disimpan: setiap nilai yang diubah ditolak."
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "Layanan %(non_editable_service)s bukan layanan UI/API dan tidak akan dikonversi."
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "Layanan %(service)s sekarang dinyatakan sebagai \"hanya pengalihan\"."
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "Layanan %(service)s sekarang dinyatakan sebagai \"standar\"."
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "Layanan %(non_deletable_service)s bukan layanan UI/API dan tidak akan dihapus."
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "Layanan %(non_deletable_service)s adalah layanan autoconf online (konversi ke draf terlebih dahulu) dan tidak akan dihapus."
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "Layanan %(non_deletable_service)s adalah server default yang dicadangkan, yang menjawab permintaan yang tidak cocok dengan layanan mana pun, dan tidak akan dihapus."
+
+msgid "services.flash.services_deleted"
+msgstr "Layanan dihapus: %(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "Layanan yang sudah ada dilewati: %(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "Layanan yang sudah ada dilewati: %(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "Konfigurasi kustom template %(key)s tidak dapat diedit karena dibuat melalui metode %(value)s."
+
+msgid "services.flash.template_not_found"
+msgstr "Template tidak ditemukan"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "Arsip yang diunggah harus berisi services_export.env dan/atau configs_export.json."
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "File yang diunggah bukan arsip zip yang valid."
 
 msgid "services.online"
 msgstr "Online"
@@ -5018,16 +7073,16 @@ msgid "settings.access_control.rules.value"
 msgstr "Nilai, atau @grup"
 
 msgid "settings.access_control.stage.blacklist"
-msgstr "Blacklist"
+msgstr "Daftar hitam"
 
 msgid "settings.access_control.stage.country"
 msgstr "Negara"
 
 msgid "settings.access_control.stage.greylist"
-msgstr "Greylist"
+msgstr "Daftar abu-abu"
 
 msgid "settings.access_control.stage.whitelist"
-msgstr "Whitelist"
+msgstr "Daftar putih"
 
 msgid "settings.access_control.unplaced.description"
 msgstr "Dinyatakan oleh plugin tetapi belum diberi tempat di halaman ini. Tetap tersimpan secara normal."
@@ -5290,6 +7345,45 @@ msgstr "Dimuat dari %(name)s · karakter: %(count)s"
 msgid "setup.file.read_error"
 msgstr "Kesalahan membaca file"
 
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "Email admin terlalu panjang. Harus kurang dari 256 karakter."
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "Kata sandi admin tidak cukup kuat. Harus berisi setidaknya 8 karakter, termasuk minimal 1 huruf besar, 1 huruf kecil, 1 angka, dan 1 karakter khusus (#@?!$%^&*-)."
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "Kata sandi admin terlalu panjang. Tidak boleh melebihi %(MAX_PASSWORD_BYTES)s byte (batas keras bcrypt); karakter beraksen atau emoji dihitung beberapa byte masing-masing."
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "Pengguna admin berhasil dibuat"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "Nama pengguna admin terlalu panjang. Harus kurang dari 256 karakter."
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "Tidak dapat membuat pengguna admin: %(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "Tidak dapat membuat layanan baru: %(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "Tidak dapat mengedit layanan baru: %(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "Hostname %(value)s sudah digunakan."
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "Hostname tidak valid."
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "Salah satu dari parameter berikut tidak ada: %(value)s."
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "Kata sandi tidak cocok."
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "Saat menggunakan sertifikat SSL kustom, Anda harus mengatur sertifikat dan kunci."
+
 msgid "setup.status.admin_user_exists"
 msgstr "Pengguna admin sudah ada. Silakan lanjutkan ke langkah berikutnya."
 
@@ -5446,6 +7540,12 @@ msgstr "Akan kedaluwarsa"
 msgid "status.failed"
 msgstr "Gagal"
 
+msgid "status.failover"
+msgstr "Failover"
+
+msgid "status.inactive"
+msgstr "Tidak Aktif"
+
 msgid "status.invalid_json_payload"
 msgstr "Payload JSON tidak valid."
 
@@ -5584,6 +7684,9 @@ msgstr "Tidak diketahui"
 msgid "status.up"
 msgstr "Aktif"
 
+msgid "status.uploaded"
+msgstr "Diunggah"
+
 msgid "status.yes"
 msgstr "Ya"
 
@@ -5624,7 +7727,7 @@ msgid "table.header.active"
 msgstr "Aktif"
 
 msgid "table.header.async"
-msgstr "Async"
+msgstr "Asinkron"
 
 msgid "table.header.bytes_received"
 msgstr "Byte diterima"
@@ -5750,7 +7853,7 @@ msgid "table.header.stream"
 msgstr "Stream"
 
 msgid "table.header.template"
-msgstr "Template"
+msgstr "Templat"
 
 msgid "table.header.templates"
 msgstr "Template"
@@ -5831,7 +7934,10 @@ msgid "template.editor.heading_create"
 msgstr "Buat template"
 
 msgid "template.editor.heading_edit"
-msgstr "Edit template %(id)s"
+msgstr "Ubah templat %(id)s"
+
+msgid "template.editor.heading_view"
+msgstr "Lihat Template %(id)s"
 
 msgid "template.editor.label_config_data"
 msgstr "Data"
@@ -5918,7 +8024,10 @@ msgid "template.editor.multivalue_add"
 msgstr "Tambahkan nilai"
 
 msgid "template.editor.multivalue_helper"
-msgstr "Satu nilai per baris.%(separatorNote)s"
+msgstr "Satu nilai per baris."
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "Satu nilai per baris. Akan digabungkan dengan \"%(separator)s\"."
 
 msgid "template.editor.panel_overview"
 msgstr "Ringkasan"
@@ -6082,6 +8191,9 @@ msgstr "Database saat ini hanya-baca. Template tidak dapat diubah."
 msgid "template.editor.readonly_method"
 msgstr "Template ini dibuat oleh proses %(method)s dan tidak dapat diedit dari UI."
 
+msgid "template.editor.readonly_method_plugin"
+msgstr "Template ini dibuat oleh plugin %(plugin)s dan tidak dapat diedit dari UI."
+
 msgid "template.editor.readonly_title"
 msgstr "Hanya-baca"
 
@@ -6131,7 +8243,7 @@ msgid "template.editor.setting_selector_count_with_used"
 msgstr "%(available)s tersedia, %(used)s sudah ditambahkan"
 
 msgid "template.editor.setting_selector_default"
-msgstr "Default"
+msgstr "Bawaan"
 
 msgid "template.editor.setting_selector_docs"
 msgstr "Lihat dokumentasi"
@@ -6256,6 +8368,9 @@ msgstr "Tipe konfigurasi diperlukan saat konfigurasi didefinisikan."
 msgid "template.editor.validation_configs_unique"
 msgstr "Setiap nama konfigurasi harus unik."
 
+msgid "template.editor.validation_id_invalid"
+msgstr "ID Template hanya boleh berisi huruf, angka, titik, tanda hubung, dan garis bawah, serta harus dimulai dengan huruf atau angka."
+
 msgid "template.editor.validation_id_required"
 msgstr "ID Template diperlukan."
 
@@ -6268,6 +8383,36 @@ msgstr "Setiap kunci pengaturan harus unik."
 msgid "template.none"
 msgstr "Tanpa Template"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "Konfigurasi kustom ditambahkan"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "Konfigurasi kustom diubah"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "Konfigurasi kustom dihapus"
+
+msgid "templates.catalog.diff.name"
+msgstr "Nama: %(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "Pengaturan ditambahkan"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "Pengaturan diubah"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "Pengaturan dihapus"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "Langkah ditambahkan"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "Langkah diubah"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "Langkah dihapus"
+
 msgid "templates.catalog.heading"
 msgstr "Templat yang tersedia"
 
@@ -6277,8 +8422,89 @@ msgstr "Templat adalah lapisan: menambahkan satu ke layanan yang sudah menggunak
 msgid "templates.catalog.no_compat_notice"
 msgstr "Katalog ini tidak menyatakan kompatibilitas BunkerWeb. Templat ditolak saat instalasi jika menyebutkan pengaturan yang tidak dimiliki BunkerWeb ini."
 
+msgid "templates.catalog.state_installed"
+msgstr "Terinstal, sama dengan katalog"
+
+msgid "templates.catalog.state_managed"
+msgstr "Terinstal dan dikelola oleh %(owner)s: katalog tidak mengubahnya"
+
+msgid "templates.catalog.state_update"
+msgstr "Terinstal, versi katalog berbeda"
+
 msgid "templates.catalog.subheading"
 msgstr "Templat layanan terkurasi yang dipublikasikan oleh organisasi BunkerWeb."
+
+msgid "templates.catalog.update_changed"
+msgstr "Template %(template)s atau katalog berubah sejak pratinjau. Muat ulang halaman dan tinjau kembali perubahannya."
+
+msgid "templates.catalog.update_confirm"
+msgstr "Ganti template %(id)s dengan versinya dari rilis katalog %(tag)s. Perubahan ini berlaku pada template:"
+
+msgid "templates.catalog.update_failed"
+msgstr "Template tidak dapat diperbarui."
+
+msgid "templates.catalog.update_managed"
+msgstr "Template %(template)s dikelola oleh %(owner)s: katalog tidak mengubahnya"
+
+msgid "templates.catalog.update_no_services"
+msgstr "Belum ada layanan yang menggunakan template ini."
+
+msgid "templates.catalog.update_not_installed"
+msgstr "Template %(template)s tidak terinstal: instal saja sebagai gantinya"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "Perubahan dapat diperiksa setelah penyegaran katalog berikutnya."
+
+msgid "templates.catalog.update_services"
+msgstr "Layanan-layanan ini menggunakan template ini. Pada pembuatan konfigurasi berikutnya, setiap pengaturan yang tidak mereka atur sendiri akan mengambil nilai baru:"
+
+msgid "templates.catalog.update_title"
+msgstr "Perbarui Template Komunitas"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "Template %(template)s sudah sesuai dengan katalog"
+
+msgid "templates.flash.catalog_updated"
+msgstr "Template %(template)s diperbarui dari katalog."
+
+msgid "templates.flash.error_deleting_template"
+msgstr "Kesalahan saat menghapus template %(template_id)s: %(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "Tidak dapat mengekspor template %(template)s: %(error)s"
+
+msgid "templates.flash.imported"
+msgstr "Template %(template)s diimpor."
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "Tidak ada template dipilih untuk dihapus."
+
+msgid "templates.flash.replaced"
+msgstr "Template %(template)s diganti."
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "Templat dihapus: %(success_count)s."
+
+msgid "templates.flash.template_created_successfully"
+msgstr "Template %(template_id)s berhasil dibuat."
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "Template %(template_id)s berhasil dihapus."
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "Template %(template_id)s diinstal dari katalog."
+
+msgid "templates.flash.template_not_found"
+msgstr "Template %(clone_id)s tidak ditemukan."
+
+msgid "templates.flash.template_not_found_2"
+msgstr "Template tidak ditemukan."
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "Template %(template_id)s berhasil diperbarui."
+
+msgid "templates.flash.user_is_read_only"
+msgstr "Pengguna bersifat baca-saja"
 
 msgid "templates.gallery.delete_selected"
 msgstr "Hapus yang dipilih"
@@ -6295,6 +8521,24 @@ msgstr "Pilih"
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
 
+msgid "templates.import.admin_only"
+msgstr "Impor template dibatasi hanya untuk administrator"
+
+msgid "templates.import.failed"
+msgstr "Template tidak dapat diimpor."
+
+msgid "templates.import.no_file"
+msgstr "Pilih file untuk diimpor."
+
+msgid "templates.import.refused"
+msgstr "Template tidak diimpor: %(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "Template tidak diimpor: file lebih besar dari 1 MiB"
+
+msgid "templates.import.unreadable"
+msgstr "Template tidak diimpor: file tidak dapat dibaca"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -6308,7 +8552,7 @@ msgid "templates.name.medium"
 msgstr "Keamanan sedang"
 
 msgid "templates.name.ui"
-msgstr "Web UI"
+msgstr "UI Web"
 
 msgid "templates.subtitle"
 msgstr "Templat konfigurasi yang dapat digunakan kembali untuk layanan Anda — kelompokkan pengaturan, langkah, dan konfigurasi kustom, lalu buat, klon, atau hapus."
@@ -6430,6 +8674,9 @@ msgstr "Atur METRICS_COLLECT_TIMINGS ke yes untuk mengukur berapa lama setiap pl
 msgid "timings.disabled_title"
 msgstr "Waktu plugin dinonaktifkan"
 
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "Kesalahan saat mengambil waktu plugin: %(message)s"
+
 msgid "timings.max"
 msgstr "Maks"
 
@@ -6532,11 +8779,23 @@ msgstr "Apakah akan secara otomatis meminta sertifikat Let's Encrypt."
 msgid "tooltip.badge.redirect_candidate"
 msgstr "Layanan ini tidak memuat apa pun selain pengalihan, jadi dapat dideklarasikan sebagai hanya pengalihan — yang akan mengeluarkannya dari hitungan layanan PRO begitu penagihan tersebut aktif."
 
+msgid "tooltip.button.attach_redirect"
+msgstr "Lampirkan %(name)s ke layanan"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "Lampirkan %(name)s ke layanan"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "Lampirkan %(name)s ke layanan"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Kembali ke unggah file"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Larang alamat IP ini"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "Klon %(name)s"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "Konversi Konfigurasi %(name)s ke Draf"
@@ -6550,6 +8809,9 @@ msgstr "Konversi Layanan %(name)s ke Draf"
 msgid "tooltip.button.convert_service_to_online"
 msgstr "Konversi Layanan %(name)s ke Aktif"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "Hapus sertifikat"
+
 msgid "tooltip.button.delete_config"
 msgstr "Hapus Konfigurasi Kustom %(name)s"
 
@@ -6562,11 +8824,32 @@ msgstr "Hapus Instans %(hostname)s"
 msgid "tooltip.button.delete_plugin"
 msgstr "Hapus Plugin %(name)s"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "Hapus %(name)s"
+
 msgid "tooltip.button.delete_service"
 msgstr "Hapus Layanan %(name)s"
 
 msgid "tooltip.button.delete_template"
 msgstr "Hapus Template %(name)s"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "Hapus %(name)s"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "Hapus %(name)s"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "Ubah %(name)s"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "Ubah %(name)s"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "Edit nama dan deskripsi %(name)s"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "Edit aturan %(name)s"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "Terbitkan kode pendaftaran untuk %(hostname)s"
@@ -6673,6 +8956,9 @@ msgstr "Konfirmasi kata sandi harus cocok dengan kata sandi yang dimasukkan di a
 msgid "tooltip.copied"
 msgstr "Disalin!"
 
+msgid "tooltip.copy_failed"
+msgstr "Penyalinan gagal"
+
 msgid "tooltip.copy_https_only"
 msgstr "Fitur penyalinan hanya tersedia melalui HTTPS."
 
@@ -6693,6 +8979,9 @@ msgstr "Nilai berbeda dari default template"
 
 msgid "tooltip.disabled_by_method"
 msgstr "Dinonaktifkan: Dikelola via metode '%(method)s'."
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "Dinonaktifkan: Dikelola oleh plugin %(plugin)s."
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "Dinonaktifkan: Database dalam mode hanya-baca."
@@ -6806,13 +9095,16 @@ msgid "tooltip.link.edit_service"
 msgstr "Edit Layanan %(service)s"
 
 msgid "tooltip.link.edit_template"
-msgstr "Edit Template %(template)s"
+msgstr "Ubah Templat %(template)s"
 
 msgid "tooltip.link.export_config"
 msgstr "Ekspor Konfigurasi Kustom %(name)s"
 
 msgid "tooltip.link.export_service"
 msgstr "Ekspor Konfigurasi Layanan %(service)s"
+
+msgid "tooltip.link.export_template"
+msgstr "Ekspor Template %(template)s"
 
 msgid "tooltip.link.manage_activation"
 msgstr "Kelola aktivasi %(name)s di pengaturan global"
@@ -7285,6 +9577,21 @@ msgstr "Penundaan dalam detik antara percobaan ulang API ZeroSSL."
 msgid "totp.cant_access"
 msgstr "Tidak dapat mengakses autentikator Anda?"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "Database dalam mode baca-saja, kode pemulihan yang Anda gunakan tetap berlaku."
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "Terjadi kesalahan saat menggunakan kode pemulihan."
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "Tidak ada token yang diberikan pada /totp."
+
+msgid "totp.flash.token_invalid"
+msgstr "Token tidak valid."
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "Anda telah menggunakan salah satu kode pemulihan Anda. Tersisa %(len)s."
+
 msgid "totp.or_use_security_key"
 msgstr "atau gunakan kunci keamanan Anda"
 
@@ -7340,7 +9647,7 @@ msgid "upstreams.delete_help"
 msgstr "Upstream yang masih terlampir ke layanan tidak dapat dihapus. Lepaskan terlebih dahulu."
 
 msgid "upstreams.edit"
-msgstr "Edit upstream"
+msgstr "Ubah upstream"
 
 msgid "upstreams.edit_shared"
 msgstr "Upstream ini terlampir ke layanan berikut (%(count)s): %(services)s. Menyimpan akan mengubah semuanya."
@@ -7350,6 +9657,78 @@ msgstr "Upstream adalah kumpulan backend bernama yang Anda lampirkan ke satu ata
 
 msgid "upstreams.empty_title"
 msgstr "Belum ada upstream"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "Setidaknya satu server diperlukan"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "Setidaknya satu layanan diperlukan"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "Tidak dapat melampirkan upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "Tidak dapat membuat upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "Tidak dapat menghapus upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "Tidak dapat melepaskan upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "Tidak dapat mengambil layanan untuk penetapan upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "Tidak dapat mengambil upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "Tidak dapat memperbarui upstream: %(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "Jumlah keepalive harus berupa bilangan bulat positif"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "Jalur reverse proxy harus dimulai dengan /"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "Metode harus salah satu dari %(value)s"
+
+msgid "upstreams.flash.name_required"
+msgstr "Nama upstream diperlukan"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "Protokol harus salah satu dari %(value)s"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "Upstream tidak dapat memiliki lebih dari %(value)s server"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "Upstream tidak dapat dilampirkan ke lebih dari %(value)s layanan"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "Upstream dilampirkan. Layanan: %(len)s"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "Upstream %(value)s berhasil dibuat"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "Upstream berhasil dihapus"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "Upstream berhasil dilepaskan"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "Upstream diperlukan"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "Upstream dan layanan diperlukan"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "Upstream berhasil diperbarui"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "Bobot dan max fails dari %(host)s harus berupa bilangan bulat"
 
 msgid "upstreams.keepalive"
 msgstr "Keepalive"
@@ -7364,7 +9743,7 @@ msgid "upstreams.match_path_help"
 msgstr "Lokasi yang layanan terpilih proxy ke kumpulan ini. Diabaikan untuk kumpulan stream, yang mengambil seluruh layanan."
 
 msgid "upstreams.method"
-msgstr "Load balancing"
+msgstr "Penyeimbangan beban"
 
 msgid "upstreams.name_help"
 msgstr "Hanya huruf, angka, tanda hubung, dan garis bawah. Titik ditolak agar nama kumpulan tidak pernah menyamar sebagai host asli."
@@ -7434,6 +9813,15 @@ msgstr "Layanan tersembunyi: %(count)s. Upstream %(protocol)s hanya dapat dilamp
 
 msgid "upstreams.truncated"
 msgstr "Hanya 500 upstream pertama yang ditampilkan. Persempit daftar melalui API untuk hasil lengkap."
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "Tidak dapat terhubung ke redis"
+
+msgid "utils.flash.invalid_request"
+msgstr "Permintaan tidak valid"
+
+msgid "utils.flash.missing_form"
+msgstr "%(key)s tidak ada dalam formulir"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "Masukkan kata sandi Anda saat ini untuk menambahkan passkey."
@@ -7530,6 +9918,27 @@ msgstr "Layanan diaktifkan"
 
 msgid "web_cache.error"
 msgstr "Kesalahan"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "Kesalahan saat mengambil metrik web cache: %(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "Kesalahan saat mengambil status web cache: %(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "Kesalahan saat membersihkan web cache: %(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "Cache web dibersihkan (semua entri)"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "Cache web dibersihkan untuk %(url)s"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "URL diperlukan untuk membersihkan berdasarkan URL"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "Cache web dibersihkan. Instans yang dibersihkan: %(value)s, gagal: %(value2)s, tidak terjangkau dan dilewati: %(value3)s (tidak ada yang diantrekan)."
 
 msgid "web_cache.hit_rate"
 msgstr "Tingkat hit"
@@ -7666,6 +10075,9 @@ msgstr "Aturan %(n)s dari %(total)s, ubah posisi"
 msgid "workflows.aria.collapse"
 msgstr "Ciutkan"
 
+msgid "workflows.aria.collapseRule"
+msgstr "Ciutkan aturan %(n)s"
+
 msgid "workflows.aria.combinator"
 msgstr "Ubah kombinator, saat ini"
 
@@ -7684,6 +10096,9 @@ msgstr "Seret untuk mengatur ulang urutan"
 msgid "workflows.aria.expand"
 msgstr "Perluas"
 
+msgid "workflows.aria.expandRule"
+msgstr "Perluas aturan %(n)s"
+
 msgid "workflows.aria.groupKind"
 msgstr "Jenis grup"
 
@@ -7693,11 +10108,20 @@ msgstr "Sisipkan aturan pada posisi %(n)s"
 msgid "workflows.aria.more"
 msgstr "Lainnya"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "Tindakan lainnya untuk aturan %(n)s"
+
 msgid "workflows.aria.moveDown"
 msgstr "Pindah turun — berjalan lebih akhir"
 
 msgid "workflows.aria.moveRule"
 msgstr "Pindahkan aturan"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "Pindahkan aturan %(n)s ke bawah"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "Pindahkan aturan %(n)s ke atas"
 
 msgid "workflows.aria.moveUp"
 msgstr "Pindah naik — berjalan lebih awal"
@@ -7734,6 +10158,9 @@ msgstr "Jumlah permintaan"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "Grup sumber daya"
+
+msgid "workflows.aria.ruleCard"
+msgstr "Aturan %(n)s dari %(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "%(count)s masalah validasi pada aturan ini"
@@ -7897,6 +10324,9 @@ msgstr "Alur kerja berjalan dalam urutan lampiran; aturan di dalamnya berjalan a
 msgid "workflows.entry_title"
 msgstr "Setiap permintaan ke layanan terlampir"
 
+msgid "workflows.err.load"
+msgstr "Aturan yang tersimpan tidak dapat dibaca. Penyimpanan dinonaktifkan agar tidak ditimpa; muat ulang halaman."
+
 msgid "workflows.err.save"
 msgstr "Tidak dapat menyimpan"
 
@@ -7929,6 +10359,69 @@ msgstr "Permintaan berlanjut ke alur kerja terlampir berikutnya, lalu ke sisa tu
 
 msgid "workflows.exit_title"
 msgstr "Tidak ada aturan yang cocok"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "Tidak dapat melampirkan alur kerja: %(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "Tidak dapat mengkloning alur kerja: %(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "Tidak dapat membuat alur kerja: %(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "Tidak dapat menghapus alur kerja: %(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "Tidak dapat melepaskan alur kerja: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "Tidak dapat mengambil layanan untuk penetapan alur kerja: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "Tidak dapat mengambil alur kerja: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "Tidak dapat mengambil alur kerja: %(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "Tidak dapat memperbarui alur kerja: %(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "Nama alur kerja diperlukan"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "Daftar layanan tidak dapat dibaca; buka kembali halaman dan coba lagi"
+
+msgid "workflows.flash.too_many_services"
+msgstr "Alur kerja tidak dapat dilampirkan ke lebih dari %(value)s layanan"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "Alur kerja dikloning sebagai %(name)s"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "Alur kerja %(value)s berhasil dibuat"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "Alur kerja berhasil dihapus"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "Alur kerja berhasil dilepaskan"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "Alur kerja dan nama baru diperlukan"
+
+msgid "workflows.flash.workflow_required"
+msgstr "Alur kerja diperlukan"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "Alur kerja dan layanan diperlukan"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "Layanan alur kerja diperbarui (%(len)s dilampirkan)"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "Alur kerja berhasil diperbarui"
 
 msgid "workflows.gate.and"
 msgstr "dan hanya setelah IP klien yang sama membuat lebih dari"
@@ -8038,8 +10531,14 @@ msgstr ", evaluasi berhenti di sini — tidak ada aturan di bawah yang dicapai."
 msgid "workflows.rules"
 msgstr "Aturan"
 
-msgid "workflows.say.actionChanged"
-msgstr "Aksi diubah menjadi %(type)s. Ini masih satu-satunya aksi, dan masih menghentikan evaluasi."
+msgid "workflows.say.actionChangedBlock"
+msgstr "Aksi diubah menjadi blokir. Ini masih satu-satunya aksi, dan masih menghentikan evaluasi."
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "Aksi diubah menjadi tantangan (challenge). Ini masih satu-satunya aksi, dan masih menghentikan evaluasi."
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "Aksi diubah menjadi pengalihan. Ini masih satu-satunya aksi, dan masih menghentikan evaluasi."
 
 msgid "workflows.say.added"
 msgstr "Aturan ditambahkan pada posisi %(n)s — terakhir, sehingga setiap aturan di atasnya diperiksa terlebih dahulu."
@@ -8066,13 +10565,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "Nilai terakhir dihapus — kondisi ini tidak dapat disimpan sampai memiliki satu nilai."
 
 msgid "workflows.say.moved"
-msgstr "%(name)s dipindahkan ke posisi %(to)s dari %(total)s%(how)s. Sekarang berjalan %(where)s."
+msgstr "%(name)s dipindahkan ke posisi %(to)s dari %(total)s."
+
+msgid "workflows.say.movedDrag"
+msgstr "%(name)s diseret ke posisi %(to)s dari %(total)s."
+
+msgid "workflows.say.movedKeyboard"
+msgstr "%(name)s dipindahkan dengan keyboard ke posisi %(to)s dari %(total)s."
 
 msgid "workflows.say.predicateCap"
 msgstr "Aturan ini sudah memiliki %(max)s kondisi, jumlah maksimum."
-
-msgid "workflows.say.ruleAbove"
-msgstr "aturan di atas"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "%(name)s dinonaktifkan — dilewati sepenuhnya dan aturan di bawahnya sekarang melihat permintaan tersebut."
@@ -8081,13 +10583,16 @@ msgid "workflows.say.ruleEnabled"
 msgstr "%(name)s diaktifkan — dievaluasi lagi pada posisi %(n)s."
 
 msgid "workflows.say.runsAfter"
-msgstr "setelah %(name)s"
+msgstr "Sekarang berjalan setelah %(name)s."
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "Sekarang berjalan setelah aturan di atas."
 
 msgid "workflows.say.runsFirst"
-msgstr "pertama"
+msgstr "Sekarang berjalan pertama."
 
 msgid "workflows.say.runsLast"
-msgstr "terakhir"
+msgstr "Sekarang berjalan terakhir."
 
 msgid "workflows.say.saved"
 msgstr "Aturan disimpan dan didorong ke layanan yang terlampir."
@@ -8096,13 +10601,7 @@ msgid "workflows.say.theRule"
 msgstr "Aturan"
 
 msgid "workflows.say.valuesDropped"
-msgstr "Kondisi diubah menjadi %(type)s. Nilai yang tidak dapat dibawa: %(count)s."
-
-msgid "workflows.say.via.drag"
-msgstr "seret"
-
-msgid "workflows.say.via.keyboard"
-msgstr "keyboard"
+msgstr "Kondisi diubah. Nilai yang tidak dapat dibawa: %(count)s."
 
 msgid "workflows.say.viewCanvas"
 msgstr "Tampilan kanvas. Aturan berjalan kiri ke kanan; kecocokan pertama menang."
@@ -8222,7 +10721,16 @@ msgid "workflows.test.out_draft"
 msgstr "Layanan ini adalah draf — belum ada alur kerja yang dikompilasi untuknya."
 
 msgid "workflows.test.out_match"
-msgstr "%(workflow)s · %(rule)s cocok dan %(action)s permintaan."
+msgstr "%(workflow)s · %(rule)s cocok."
+
+msgid "workflows.test.out_match_block"
+msgstr "%(workflow)s · %(rule)s cocok dan memblokir permintaan."
+
+msgid "workflows.test.out_match_challenge"
+msgstr "%(workflow)s · %(rule)s cocok dan menantang (challenge) permintaan."
+
+msgid "workflows.test.out_match_redirect"
+msgstr "%(workflow)s · %(rule)s cocok dan mengalihkan permintaan."
 
 msgid "workflows.test.out_no_match"
 msgstr "Tidak ada aturan yang cocok. Permintaan berlanjut ke sisa tumpukan keamanan."
@@ -8300,7 +10808,7 @@ msgid "workflows.tree.empty"
 msgstr "Grup kosong — tambahkan kondisi, tidak dapat disimpan seperti ini."
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "tidak ada grup yang menyimpan entri %(kind)s"
+msgstr "Tidak ada grup sumber daya yang menyimpan entri jenis ini."
 
 msgid "workflows.tree.noneMeta"
 msgstr "cocok ketika tidak satu pun dari ini benar"

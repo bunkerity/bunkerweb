@@ -31,7 +31,11 @@ SUPPORTED_LANGUAGES = [
 # forms and Taiwanese users Twi's two. The UI codes stay as they are — they are persisted on user
 # records, drive the flag lookup, and are what `/set_language` accepts — and this maps them to the
 # locale each one actually means.
-BABEL_LOCALES = {"br": "pt_BR", "tw": "zh_Hant"}
+#
+# `tl` (this UI's Filipino) isn't wrong the same way — CLDR doesn't have a separate `fil` UI bug —
+# but `Locale.parse("tl")` normalizes to `fil_PH`, so Flask-Babel looks for a `fil_PH` translations
+# directory and gets `NullTranslations` unless this maps it there too.
+BABEL_LOCALES = {"br": "pt_BR", "tw": "zh_Hant", "tl": "fil_PH"}
 
 DEFAULT_LANGUAGE = "en"
 

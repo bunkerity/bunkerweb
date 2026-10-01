@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: BunkerWeb UI VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: tl\n"
-"Language-Team: tl <LL@li.org>\n"
+"Language: fil_PH\n"
+"Language-Team: fil_PH <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -61,6 +61,9 @@ msgstr "Mangyaring i-upload ang isang valid na file ng custom na configuration (
 msgid "alert.credential_action_failed"
 msgstr "Nabigo ang aksyon."
 
+msgid "alert.custom_end_date_past"
+msgstr "Ang custom na petsa ng pagtatapos ay dapat nasa hinaharap."
+
 msgid "alert.custom_end_date_required"
 msgstr "Mangyaring pumili ng pasadyang petsa ng pagtatapos."
 
@@ -97,8 +100,17 @@ msgstr "Mangyaring mag-upload ng wastong services export file (.env o .zip)."
 msgid "antibot.reason.sentence"
 msgstr "Naihatid ang antibot challenge (%(provider)s)"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "Mga takdang-aral ng imbentaryo ng sertipiko"
+
+msgid "aria.label.certificate_public_details"
+msgstr "Pampublikong detalye ng sertipiko"
+
 msgid "aria.label.clear_search"
 msgstr "Linisin ang paghahanap"
+
+msgid "aria.label.clone_item"
+msgstr "Kopyahin ang %(name)s"
 
 msgid "aria.label.close"
 msgstr "Isara"
@@ -111,6 +123,9 @@ msgstr "Pumili ng custom na file ng export ng mga configuration o i-drop dito"
 
 msgid "aria.label.copy"
 msgstr "Kopyahin ang mga log"
+
+msgid "aria.label.detach_from_service"
+msgstr "I-detach ang %(name)s mula sa %(service)s"
 
 msgid "aria.label.download_log"
 msgstr "I-download ang log file na ito"
@@ -148,6 +163,9 @@ msgstr "Ipakita ang mga timestamp sa lokal na oras"
 msgid "aria.label.next_issue"
 msgstr "Susunod na error o babala"
 
+msgid "aria.label.open_user_menu"
+msgstr "Buksan ang menu ng user"
+
 msgid "aria.label.passkey_name"
 msgstr "Pangalan ng passkey"
 
@@ -159,6 +177,9 @@ msgstr "Nakaraang error o babala"
 
 msgid "aria.label.raw_configuration"
 msgstr "Raw na configuration"
+
+msgid "aria.label.remove_this_server"
+msgstr "Alisin ang server na ito"
 
 msgid "aria.label.remove_value"
 msgstr "Alisin ang halaga"
@@ -178,8 +199,23 @@ msgstr "Pumili ng File"
 msgid "aria.label.select_page"
 msgstr "Pumili ng Pahina"
 
+msgid "aria.label.select_template"
+msgstr "Piliin ang template na %(name)s"
+
 msgid "aria.label.services_dropzone"
 msgstr "Pumili ng file ng export ng mga serbisyo o i-drop dito"
+
+msgid "aria.label.show_details"
+msgstr "Ipakita ang mga detalye ng %(name)s"
+
+msgid "aria.label.toggle_item"
+msgstr "I-toggle ang %(name)s"
+
+msgid "aria.label.toggle_section"
+msgstr "I-toggle ang seksyong %(name)s"
+
+msgid "aria.label.toggle_theme"
+msgstr "I-toggle ang dark mode"
 
 msgid "aria.label.toggle_wrap"
 msgstr "I-toggle ang pag-wrap ng linya"
@@ -244,6 +280,15 @@ msgstr "Nabigong i-ban ang %(ip)s: %(error)s"
 msgid "bans.flash.ban_success"
 msgstr "Matagumpay na na-ban ang %(ip)s."
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "Ang custom na petsa ng pagtatapos ng ban para sa %(ip)s ay dapat nasa hinaharap"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "Hindi wastong mode ng pagpili ng ban."
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "Hindi wastong parameter na bans sa /bans/ban."
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "Hindi wastong pasadyang tagal ng ban para sa %(ip)s"
 
@@ -253,11 +298,44 @@ msgstr "Hindi wastong pasadyang petsa ng pagtatapos ng ban para sa %(ip)s"
 msgid "bans.flash.invalid_duration"
 msgstr "Hindi wastong tagal ng ban: %(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "Hindi wastong mode ng pagpili ng tagal."
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "Hindi wastong pinaghalungkat na pinagmulan ng ban."
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "Hindi wastong pinaghalungkat na pinagmulan ng tagal."
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "Hindi wastong pinaghalungkat na pinagmulan ng unban."
+
 msgid "bans.flash.invalid_ip"
 msgstr "Hindi wastong IP address: %(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "Hindi wastong parameter na ips sa /bans/unban."
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "Hindi wastong mode ng pagpili ng unban."
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "Hindi wastong parameter na updates sa /bans/update_duration."
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "Kulang ang pasadyang petsa ng pagtatapos ng ban para sa %(ip)s"
+
+msgid "bans.flash.no_bans"
+msgstr "Walang mga ban."
+
+msgid "bans.flash.no_matching_bans"
+msgstr "Walang tumutugmang mga ban."
+
+msgid "bans.flash.no_matching_reports"
+msgstr "Walang tumutugmang mga report."
+
+msgid "bans.flash.no_updates"
+msgstr "Walang mga update."
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "Nabigong kunin ang mga ban mula sa Redis, tingnan ang mga log para sa karagdagang impormasyon."
@@ -448,11 +526,14 @@ msgstr "Kumpirmahin"
 msgid "button.convert_configs"
 msgstr "I-convert ang Mga Config"
 
-msgid "button.convert_configs_to"
-msgstr "I-convert sa %(state)s"
-
 msgid "button.convert_services"
 msgstr "I-convert ang Mga Serbisyo"
+
+msgid "button.convert_to_draft"
+msgstr "I-convert sa burador"
+
+msgid "button.convert_to_online"
+msgstr "I-convert sa online"
 
 msgid "button.copy"
 msgstr "Kopyahin"
@@ -549,6 +630,9 @@ msgstr "Mag-import ng mga custom na configuration"
 
 msgid "button.import_services"
 msgstr "Mag-import ng mga serbisyo"
+
+msgid "button.import_template"
+msgstr "I-import ang template"
 
 msgid "button.local_time"
 msgstr "Lokal na oras"
@@ -727,6 +811,39 @@ msgstr "I-log out ang iba pang session"
 msgid "button.wrap"
 msgstr "I-wrap"
 
+msgid "cache.flash.api_unavailable"
+msgstr "Hindi available ang API: %(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "Hindi nahanap ang cache file na %(file_name)s mula sa trabahong %(job_name)s, plugin na %(plugin_id)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "Hindi nahanap ang cache file na %(file_name)s mula sa trabahong %(job_name)s, plugin na %(plugin_id)s, serbisyong %(service)s"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "Na-delete ang %(deleted_count)s na file na may %(len)s na error: %(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "Error habang tinatanggal ang mga cache file: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "Error habang kinukuha ang cache file: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "Error habang kinukuha ang mga cache file: %(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "Hindi wastong parameter ng cache files"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "Walang napiling cache file"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "Matagumpay na na-delete ang %(deleted_count)s cache file"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "Matagumpay na na-delete ang %(deleted_count)s cache file"
+
 msgid "cache.kpi_files"
 msgstr "Mga file"
 
@@ -839,7 +956,118 @@ msgid "certificates.file_size_limit"
 msgstr "Ang file ay hindi dapat lumampas sa 1 MiB."
 
 msgid "certificates.fingerprint"
-msgstr "SHA-256 fingerprint"
+msgstr "Fingerprint na SHA-256"
+
+msgid "certificates.flash.certificate_action_failed"
+msgstr "Nabigo ang aksyon sa sertipiko: %(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "Matagumpay na na-delete ang sertipiko"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "Matagumpay na naidagdag ang takdang-aral ng imbentaryo ng sertipiko"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "Matagumpay na naalis ang takdang-aral ng imbentaryo ng sertipiko"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "Matagumpay na na-update ang metadata ng sertipiko"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "Kailangan ang sertipiko at pangalan"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "Kailangan ang pangalan ng sertipiko"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "Matagumpay na na-renew ang sertipiko"
+
+msgid "certificates.flash.certificate_required"
+msgstr "Kailangan ang sertipiko"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "Kailangan ang sertipiko at serbisyo"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "Lumampas sa 2 MiB na limitasyon ng request ang pag-upload ng sertipiko"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "Nasuri ang %(total_due)s sertipiko na malapit nang mag-expire"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "Hindi na-attach ang sertipiko: %(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "Hindi nagawa ang sertipiko: %(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "Hindi na-detach ang sertipiko: %(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "Hindi na-download ang sertipiko: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "Hindi nakuha ang mga sertipiko: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "Hindi nakuha ang mga serbisyo para sa mga takdang-aral ng sertipiko: %(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "Hindi na-iskedyul ang pag-isyu ng Let's Encrypt: %(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "Hindi na-update ang sertipiko: %(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "Hindi na-upload ang sertipiko: %(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "Matagumpay na na-upload ang custom na sertipiko"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "Hindi suportado ang mga encrypted na private key."
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "Hindi valid ang aksyon sa sertipiko"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "Hindi wastong bahagi ng sertipiko"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "Ang certificate file ay hindi wastong PEM certificate."
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "Hindi valid ang pinagmulan ng sertipiko"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "Ang private key file ay hindi wastong PEM private key."
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "Naka-iskedyul ang pag-isyu ng Let's Encrypt"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "Kailangan ang pangalan at common name"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "Kailangan ng PEM certificate at private key"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "Pumili ng hindi kukulangin sa isang serbisyo para sa pag-isyu ng Let's Encrypt"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "Nagawa ang self-signed na sertipiko"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "Ang isang sertipiko ay hindi maaaring maglaman ng mahigit 100 alternative subject name"
+
+msgid "certificates.flash.too_many_services"
+msgstr "Ang isang sertipiko ay hindi maaaring ikabit sa mahigit 100 serbisyo"
+
+msgid "certificates.flash.validity_range"
+msgstr "Ang bisa ay dapat sa pagitan ng 1 at 825 na araw"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "Ang bisa ay dapat na buong bilang ng mga araw"
 
 msgid "certificates.issuer"
 msgstr "Tagapaglabas"
@@ -944,7 +1172,7 @@ msgid "certificates.source.letsencrypt"
 msgstr "Let's Encrypt"
 
 msgid "certificates.source.selfsigned"
-msgstr "Self-signed"
+msgstr "Nilagdaan ng sarili"
 
 msgid "certificates.source_label"
 msgstr "Pinagmulan"
@@ -1053,6 +1281,168 @@ msgstr "Ipakita ang higit pang %(count)s"
 
 msgid "compose.unavailable"
 msgstr "Hindi ma-load ang listahan ng plugin, kaya hindi ligtas na mabago ang pahinang ito. I-reload kapag sumagot ang API."
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "Lahat ng napiling custom config ay hindi nahanap, hindi UI/API custom config, o na-convert na."
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "Lahat ng napiling custom config ay hindi nahanap o hindi UI/API custom config."
+
+msgid "configs.flash.config_already_exists"
+msgstr "Mayroon nang config na %(config_type)s/%(config_name)s"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "Mayroon nang config na %(config_type)s/%(config_name)s para sa serbisyong %(service)s"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "Walang config na %(clone)s."
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "Walang config na %(config_type)s/%(name)s."
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "Walang config na %(config_type)s/%(name)s para sa serbisyong %(service)s."
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "Ang config na %(config_type)s/%(name)s ay hindi isang UI/API custom config at hindi maaaring i-edit."
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "Ang config na %(config_type)s/%(name)s para sa serbisyong %(service)s ay hindi isang UI/API custom config at hindi maaaring i-edit."
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "Na-convert sa \"burador\" na mga config: %(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "Na-convert sa \"online\" na mga config: %(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "Hindi nakuha ang mga custom configuration mula sa API: %(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "Nalikha ang custom configuration na %(config_type)s/%(config_name)s"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "Nalikha ang custom na configuration na %(config_type)s/%(config_name)s para sa serbisyong %(service)s"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "Ang custom config na %(non_convertible_config)s ay burador na config na at hindi na iko-convert."
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "Ang custom config na %(non_convertible_config)s ay online config na at hindi na iko-convert."
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "Hindi nahanap ang custom config na %(missing_config)s."
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "Ang custom config na %(non_editable_config)s ay hindi UI/API custom config at hindi na i-co-convert."
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "Ang custom config na %(skipped_config)s ay hindi UI/API custom config at hindi na i-de-delete."
+
+msgid "configs.flash.deleted_config_one"
+msgstr "Na-delete ang config: %(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "Na-delete ang mga config: %(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "May naganap na error habang tinatanggal ang mga custom config: %(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "May naganap na error habang sina-save ang mga custom config: %(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "Nabigong i-import ang custom configuration: %(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "Nabigong i-import ang mga custom configuration: %(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "Error sa pag-import: %(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "Na-import ang custom configuration: %(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "Na-import ang mga custom configuration: %(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "Hindi wastong parameter na configs sa /configs/convert."
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "Hindi wastong parameter na configs sa /configs/delete."
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "Hindi wastong parameter na configs sa /configs/export."
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Hindi wastong file encoding. Mangyaring mag-upload ng UTF-8 JSON file."
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "Hindi wastong parameter na name sa /configs/new."
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "Hindi wastong parameter na type sa /configs/new."
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "Kulang ang parameter na configs sa /configs/convert."
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "Kulang ang parameter na configs sa /configs/delete."
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "Kulang ang parameter na convert_to sa /configs/convert."
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "Kulang ang parameter na name sa /configs/new."
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "Kulang ang parameter na service sa /configs/new."
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "Kulang ang parameter na type sa /configs/new."
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "Kulang ang parameter na value sa /configs/new."
+
+msgid "configs.flash.no_configs_selected"
+msgstr "Walang napiling config."
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "Walang custom configuration na ie-export."
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "Walang na-upload na custom configuration file."
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "Walang nahanap na custom configuration sa import file."
+
+msgid "configs.flash.no_values_changed"
+msgstr "Walang nabagong value."
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "Na-overwrite ang custom configuration: %(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "Na-overwrite ang mga custom configuration: %(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "Hindi pinapayagan ang pagpalit ng pangalan ng template-based na custom config."
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "Na-save ang custom configuration na %(new_type)s/%(new_name)s"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "Na-save ang custom na configuration na %(new_type)s/%(new_name)s para sa serbisyong %(service)s"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "Walang serbisyong %(new_service)s."
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "Nilaktawan ang custom configuration: %(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "Nilaktawan ang mga custom configuration: %(names)s"
 
 msgid "configs.subtitle"
 msgstr "Mga snippet ng custom na configuration ng NGINX para sa iyong mga serbisyo — lumikha, i-edit, at pamahalaan ang HTTP, ModSecurity, at mga override sa antas ng stream."
@@ -1703,7 +2093,7 @@ msgid "country.SY"
 msgstr "Sirya"
 
 msgid "country.SZ"
-msgstr "Eswatini"
+msgstr "Swaziland"
 
 msgid "country.TC"
 msgstr "Mga Isla ng Turks at Caicos"
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "Hindi Naaangkop"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "ID ng alerto"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "I-load ang buong ebidensya"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "Nagsimula"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "Huminto"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "Nasa allowlist ayon sa CrowdSec"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "Komento"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "Pinamamahalaan ng Console"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "Walang nahanap na allowlist sa engine na ito."
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "Magdagdag ng mga pinagkakatiwalaang IP o CIDR network."
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "I-edit ang mga listahang pinamamahalaan ng Console sa CrowdSec Console."
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "Gumawa ng listahan nang isang beses, o gumamit ng umiiral na listahang lokal na pinamamahalaan."
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "Dokumentasyon ng allowlist ng CrowdSec"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "Mag-e-expire ang halimbawang ito pagkalipas ng 24 oras. Alisin ang --expiration para sa entry na hindi nag-e-expire. Sinusuportahan ang IPv4 at IPv6."
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "Suriin ang listahan at ang mga petsa ng pag-expire nito."
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "Dito, maaari mong i-browse ang mga allowlist at suriin ang mga IP. Para magdagdag o mag-alis ng mga entry, gamitin ang cscli sa CrowdSec engine."
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "Pagkatapos ng pagbabago, i-refresh ang mga allowlist at imbestigahan muli ang IP. Ang pag-alis ng exception ay nagpapahintulot sa mga darating na desisyon ng CrowdSec; hindi ito lumilikha ng ban. Nananatiling hiwalay ang mga lokal na ban ng BunkerWeb at iba pang proteksyon."
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "Alisin ang exception kapag hindi na ito kailangan."
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "Paano pamahalaan ang mga pinagkakatiwalaang IP at network"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "Nangangailangan ng CrowdSec 1.7 o mas bago. Patakbuhin ang mga command na ito sa host o sa loob ng container na nagpapatakbo ng Local API (LAPI) ng napiling engine, na may access sa CrowdSec configuration at database nito. Palitan ng sarili mo ang halimbawang pangalan ng listahan, IP, at network."
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "Mga pinagkakatiwalaang IP at network para sa napiling engine. Ang mga exception na ito ay umaakma sa lahat ng nakakonektang serbisyo at bouncer nito."
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "Ito ay exception para sa buong engine. Maaari pa ring harangan ang IP na ito ng mga lokal na ban ng BunkerWeb, iba pang proteksyon, o mga naka-cache na desisyon."
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "Lokal na pinamamahalaan"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "Hindi kailanman"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "Walang aktibong entry."
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "Hindi tumutugma ang IP na ito sa anumang allowlist ng CrowdSec."
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "Mga pahina ng allowlist"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "I-refresh ang mga allowlist"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "Mga allowlist ng CrowdSec"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "Hindi available ang status ng allowlist."
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "Nakuhang kasaysayan"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "Inilalarawan ng nakuhang datos ng ulat ang naobserbahan sa oras ng request; hindi nito pinatutunayan ang kasalukuyang estado ng desisyon."
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "Huling obserbasyon ng AppSec"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "Naka-configure"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "Nakakonekta"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "Error sa koneksyon"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "I-filter ang mga koneksyon ayon sa hostname o serbisyo"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "lahat ng serbisyo"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "Koneksyon sa CrowdSec"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "Huling matagumpay na sync"
 
 msgid "crowdsec.connection.local_api"
 msgstr "Local API"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "Pamamahala"
 
 msgid "crowdsec.connection.mode"
 msgstr "Mode"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "Walang nahanap na magagamit na koneksyon sa CrowdSec. Suriin ang mga error ng instance at ang configuration ng plugin."
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "Read-only"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "Pumili muna ng koneksyon sa CrowdSec."
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "Ang napiling koneksyon ay umaakma sa mga desisyon, allowlist, at pag-iimbestiga ng IP sa ibaba."
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "Napiling koneksyon"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "Sync ng desisyon"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "Napapanahon"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "Hindi pa naka-sync"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "Luma na"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "Kasalukuyang estado"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "Maaaring magbago ang kasalukuyang estado pagkatapos ng obserbasyong ito."
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "Tagal"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "Mag-e-expire"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "ID ng desisyon"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "Pinagmulan"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "Senaryo"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "Saklaw"
 
 msgid "crowdsec.decision.target"
 msgstr "Target"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "Uri"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "Ipinapakita ang %(start)s–%(end)s sa %(total)s"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "Ito ang kasalukuyang estadong direktang binasa mula sa napiling CrowdSec engine."
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "Walang aktibong desisyon na tumutugma sa mga filter na ito."
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "Mga pahina ng desisyon"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "Mga aktibong desisyon"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "Nabigo ang request sa CrowdSec."
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "Available na ebidensya ng alerto ng CrowdSec"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "Mga kasalukuyang desisyon ng CrowdSec"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "Sinusuri ang mga kasalukuyang desisyon ng CrowdSec kasabay ng mga lokal na ban at nakuhang ulat."
 
 msgid "crowdsec.investigation.ip"
 msgstr "IP address"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "Mga kasalukuyang lokal na ban ng BunkerWeb"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "Walang available na ebidensya ng alerto."
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "Walang nahanap na kasalukuyang lokal na ban."
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "Walang nahanap na kasalukuyang desisyon ng CrowdSec."
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "Walang nahanap na kamakailang nakuhang ulat."
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "Mga kamakailang ulat ng BunkerWeb"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "Imbestigasyon para sa %(ip)s"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "Imbestigahan"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "Mga ebidensyang nahanap para sa IP na ito"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "%(total)s aktibo"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "Ebidensya ng alerto ng CrowdSec"
 
 msgid "crowdsec.investigation.summary_available"
 msgstr "%(total)s available"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "Mga lokal na ban ng BunkerWeb"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "%(total)s nakuha"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "Mga desisyon ng CrowdSec"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "Sakop nito ang napiling koneksyon sa CrowdSec at ang sariling mga ban ng BunkerWeb. Hindi sinusuri dito ang iba pang proteksyon, at ang ebidensyang hindi mabasa ay hindi patunay na pinapayagan ang IP na ito."
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "Walang nahanap"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "Mga ulat ng BunkerWeb"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "Hindi nabasa"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "Mag-imbestiga ng IP"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "Ipinapakita ang %(shown)s sa %(total)s resulta (limitasyon ng pinagmulan: %(limit)s)."
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "Hindi available: %(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "Mag-e-expire"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "Dahilan"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "Serbisyo"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "Susunod"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "Naobserbahan %(time)s"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "Nakaraan"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "na-block ang request"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "Failure policy ng CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "I-refresh ang status"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "Alisin"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "Naiintindihan ko at nais kong alisin ang desisyong ito."
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "Aalisin nito ang desisyon sa nakabahaging CrowdSec engine at maaapektuhan ang bawat nakakonektang bouncer. Maaari pa ring harangan ang target ng mga naka-cache na desisyon, ibang range, mga lokal na ban, o AppSec."
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "Alisin ang %(scope)s %(value)s (%(type)s), senaryo %(scenario)s, pinagmulan %(origin)s, mula sa %(source)s (%(engine)s)?"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "Alisin ang desisyon"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "Naalis sa pinagmulan ng CrowdSec. Ang propagation ay %(status)s (%(mode)s, agwat %(interval)s). Mga natirang tumutugmang desisyon: %(remaining)s. Maaari pa ring humarang ang mga lokal na ban o AppSec."
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "Alisin ang desisyon ng CrowdSec"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "Nakuha noong"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "Oras ng ulat"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "Mga nakuhang desisyon"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "Ulat sa seguridad"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "Identifier ng ulat"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "Tumugmang target"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "Metadata ng desisyon"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "Kumpleto"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "Hindi kumpleto"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "Hindi available ang snapshot metadata ng CrowdSec para sa mas lumang ulat na ito."
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "Hindi available sa oras ng request ang ilang nakuhang metadata ng desisyon."
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "Dahilan"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "Nakuhang remediation"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "Nakuhang saklaw ng serbisyo"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "Serbisyo"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "Nakuhang pinagmulan"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "Suriin ang bawat naka-configure na CrowdSec engine at imbestigahan ang isang IP mula sa kasalukuyan at nakuhang ebidensya."
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "Operator ng CrowdSec"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "Hindi alam"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "May isa o higit pang job na nabigo sa huli nitong pagpapatakbo."
@@ -2416,17 +2806,128 @@ msgstr "Nakaraang %(days)s araw"
 msgid "dashboard.window.title"
 msgstr "Window ng Dashboard"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "Lahat ng %(count)s na katugmang %(entity)s ay napili na."
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga ban ay napili na."
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "Piliin ang lahat ng %(count)s na katugmang %(entity)s"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga ban"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "%(count)s ban sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "Lahat ng %(count)s na mga ban sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga cache file ay napili na."
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga cache file"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "%(count)s cache file sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "Lahat ng %(count)s na mga cache file sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga custom config ay napili na."
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga custom config"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "%(count)s custom config sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "Lahat ng %(count)s na mga custom config sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga instance ay napili na."
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga instance"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "%(count)s instance sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "Lahat ng %(count)s na mga instance sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga item ay napili na."
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga item"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "%(count)s item sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "Lahat ng %(count)s na mga item sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga trabaho ay napili na."
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga trabaho"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "%(count)s trabaho sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "Lahat ng %(count)s na mga trabaho sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga plugin ay napili na."
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga plugin"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "%(count)s plugin sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "Lahat ng %(count)s na mga plugin sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga ulat ay napili na."
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga ulat"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "%(count)s ulat sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "Lahat ng %(count)s na mga ulat sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga serbisyo ay napili na."
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga serbisyo"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "%(count)s serbisyo sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "Lahat ng %(count)s na mga serbisyo sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga template ay napili na."
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga template"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "%(count)s template sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "Lahat ng %(count)s na mga template sa pahinang ito ay napili."
 
 msgid "datatable.bulk_select_clear"
 msgstr "Alisin ang pagpili"
-
-msgid "datatable.bulk_select_page"
-msgstr "Lahat ng %(count)s %(entity)s sa pahinang ito ay napili na."
 
 msgid "datatable.info_bans"
 msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Ban"
@@ -2569,6 +3070,9 @@ msgstr "Pinoproseso..."
 msgid "datatable.search"
 msgstr "Maghanap:"
 
+msgid "datatable.select_row"
+msgstr "Piliin ang hilera"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "Walang napiling Mga Ban"
 
@@ -2659,11 +3163,50 @@ msgstr "Napili ang 1 Template"
 msgid "datatable.select_rows_templates_plural"
 msgstr "Napili ang %d na Mga Template"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s napili"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "%(count)s custom config ang napili"
 
-msgid "datatable.selected_list_empty"
-msgstr "Walang %(entity)s napili."
+msgid "datatable.selected_list.configs.count_other"
+msgstr "%(count)s mga custom config ang napili"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "Walang napiling custom config."
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "%(count)s item ang napili"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "%(count)s mga item ang napili"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "Walang napiling item."
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "%(count)s plugin ang napili"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "%(count)s mga plugin ang napili"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "Walang napiling plugin."
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "%(count)s serbisyo ang napili"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "%(count)s mga serbisyo ang napili"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "Walang napiling serbisyo."
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "%(count)s template ang napili"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "%(count)s mga template ang napili"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "Walang napiling template."
 
 msgid "datatable.zero_records_bans"
 msgstr "Walang nahanap na katugmang Mga Ban"
@@ -2794,11 +3337,41 @@ msgstr "Tingnan ang pahina ng Jobs para sa detalye."
 msgid "flash.configuration_pending_instance"
 msgstr "Hindi pa naaplay ang configuration — hinihintay ang isang instance na mag-start."
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "Kailangan ng CORS o AJAX request"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "Hindi nakuha ang mga global setting mula sa API."
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "Hindi nakuha ang mga resource group: %(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "Nasa read-only mode ang database"
+
+msgid "flash.description_too_long"
+msgstr "Hindi maaaring lumampas sa 4000 na karakter ang deskripsyon"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "Wala kang write permission"
+
 msgid "flash.easter_egg"
 msgstr "Kung nabasa mo ito, ibig sabihin ay mausisa ka"
 
 msgid "flash.error"
 msgstr "Kamalian"
+
+msgid "flash.error_fetching_instances"
+msgstr "Error habang kinukuha ang mga instance"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "May naganap na error habang sina-save ang mga custom config: %(e)s"
+
+msgid "flash.import_warning"
+msgstr "Babala sa pag-import: %(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "Hindi wastong parameter na convert_to."
 
 msgid "flash.last_configuration_change_failed"
 msgstr "Hindi na-apply ang huli mong pagbabago sa configuration."
@@ -2806,11 +3379,20 @@ msgstr "Hindi na-apply ang huli mong pagbabago sa configuration."
 msgid "flash.message"
 msgstr "Impormasyon"
 
+msgid "flash.plugin_not_found"
+msgstr "Hindi nahanap ang plugin"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "Mayroon kang higit pang serbisyo kaysa sa pinapayagan ng iyong PRO license. I-upgrade ang iyong license o ilipat ang ilang serbisyo sa Draft mode upang i-unlock ang iyong PRO license."
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "Susubukan ng Scheduler na ilapat ang mga pagbabago."
+
+msgid "flash.service_does_not_exist"
+msgstr "Walang serbisyong %(service)s."
 
 msgid "flash.time.just_now"
 msgstr "ngayon lang"
@@ -2845,6 +3427,9 @@ msgstr "I-overwrite ang mga umiiral na UI/API custom na configuration"
 msgid "form.checkbox.remember_me"
 msgstr "Alalahanin Ako"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "Palitan ang template na may parehong id kung ito ay umiiral na"
+
 msgid "form.help.ban_specific_service"
 msgstr "Ang ban ay ilalapat lamang sa partikular na serbisyong ito."
 
@@ -2862,6 +3447,9 @@ msgstr "Kung naka-check, ang ban ay hindi kailanman mag-e-expire hanggang sa man
 
 msgid "form.help.photo_extensions"
 msgstr "Pinapayagan ang JPG, GIF, o PNG. Max na laki: 800KB."
+
+msgid "form.help.secret_stored"
+msgstr "May nakaimbak na halaga na hindi ipinapakita. Iwanan ang field na ganito na lang upang panatilihin ito, mag-type ng bagong halaga upang palitan ito, o linisin ang field upang alisin ito."
 
 msgid "form.label.2fa_code"
 msgstr "Code ng 2FA"
@@ -3031,6 +3619,9 @@ msgstr "Pangalan ng Server"
 msgid "form.label.service_name"
 msgstr "Pangalan ng Serbisyo"
 
+msgid "form.label.template_file"
+msgstr "Template File"
+
 msgid "form.label.template_id"
 msgstr "ID ng Template"
 
@@ -3130,6 +3721,438 @@ msgstr "Ang password ay dapat may hindi bababa sa 1 espesyal na character."
 msgid "form.validation.password_uppercase"
 msgstr "Ang password ay dapat may hindi bababa sa 1 malaking titik."
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "Landas na gagamitin para sa mga access log ng NGINX (file path, syslog:server=host[:port][,param=value], o memory:name:size; itakda sa off upang i-disable)."
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "Landas ng Access Log"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "Listen port number (TLS) para sa internal API ng BunkerWeb."
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "API HTTPS Port Number"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "Listen port number para sa internal API ng BunkerWeb."
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "API Port Number"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "Listen sa HTTP para sa internal API ng BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "API Listen HTTP"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "Listen sa HTTPS (SSL/TLS) para sa internal API ng BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "API Listen HTTPS"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "Listen IP address para sa internal API ng BunkerWeb."
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "API Listen IP"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "Server name (virtual host) para sa internal API ng BunkerWeb."
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "API Server Name"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "Opsyonal na token upang i-authenticate ang mga API call. Kung naka-set, dapat itong ipadala ng scheduler (at ng kahit sinong client) sa pamamagitan ng Authorization header. Paalala: dapat itong naka-set sa parehong BunkerWeb at scheduler environment."
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "API Access Token"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "Listahan ng IP/network na pinapayagang makipag-ugnayan sa internal API ng BunkerWeb. (format: ip/netmask o ipv6/netmask, pinaghihiwalay ng espasyo)"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "API Whitelist IP"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "I-enable ang Autoconf Docker integration."
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "Autoconf Mode"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "Listahan ng mga instance ng BunkerWeb na pinaghihiwalay ng espasyo (format: fqdn-o-ip:5000 http://fqdn-o-ip:5000)"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "BunkerWeb Instances"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "Sukat ng internal cachestore (ipc)."
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "Cachestore IPC Memory Size"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "Sukat ng internal cachestore (locks)."
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "Cachestore Locks Memory Size"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "Sukat ng internal cachestore."
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "Cachestore Memory Size"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "Sukat ng internal cachestore (miss)."
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "Cachestore Miss Memory Size"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "Timeout para sa pagbasa ng client request body."
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "Client Body Timeout"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "Timeout para sa pagbasa ng client request header."
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "Client Header Timeout"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "Ang nangyayari kapag nagbago ang isang na-project na .conf file mula sa huling naitalang projection o wala ito rito. Ang mga file na tumutugma sa kasalukuyang row ng database ay hindi pinapansin; kung walang mababasang projection history, walang drift na iuulat. Ang 'overwrite' ay naglo-log ng bawat na-detect na drift at isinusulat muli ang file mula sa database, o binubura ito kung walang aktibong row na papalit dito. Ang 'refuse' ay walang isinusulat doon mula sa database hangga't hindi nareresolba ang drift, naglo-log ng error, at iniiwan ang nakabinbing custom na pagbabago sa configuration na hindi kinikilala upang muling subukan."
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "Custom Configs Drift Policy"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "Bilang ng slot para sa shared na datastore LRU kada worker (ginagamit ng internalstore at ng worker-local cache ng mga plugin). Tumatanggap ng plain na integer o `k`/`m` na paiklian (hal., `1k`, `10k`, `1m`)."
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "Datastore LRU Size"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "Sukat ng internal datastore."
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "Datastore Memory Size"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "Mga DNS address ng mga resolver na gagamitin."
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "DNS Resolvers"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "Landas na gagamitin para sa mga error log ng NGINX (file path, stderr, syslog:server=host[:port][,param=value], o memory:size)."
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "Landas ng Error Log"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "HTTPS port number na kinabibitan ng bunkerweb. Iwanang blangko upang i-disable ang HTTPS listening."
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "HTTPS Port"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "HTTP port number na kinabibitan ng bunkerweb. Iwanang blangko upang i-disable ang HTTP listening."
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "HTTP Port"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "Sukat ng internal internalstore."
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "Internalstore Memory Size"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "Internal na gamit: itakda sa yes kapag nasa draft mode ang serbisyo."
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "internal na gamit draft"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "Internal na gamit: itakda sa yes kapag nagloload ang BW."
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "internal na gamit loading"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "Lokal na oras (timezone ng scheduler, HH:MM, 24h) kung kailan tumatakbo ang araw-araw na naka-iskedyul na trabaho; tumatakbo rin sa oras na ito ang lingguhang trabaho, sa araw na JOBS_WEEKLY_DAY."
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "Oras ng Araw-araw na Trabaho"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "Araw ng linggo kung kailan tumatakbo ang lingguhang naka-iskedyul na trabaho, sa oras na JOBS_DAILY_TIME."
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "Araw ng Lingguhang Trabaho"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "Timeout para sa mga keep-alive na koneksyon ng client."
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "Keepalive Timeout"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "Panatilihin ang configuration sa restart. Itakda sa 'yes' upang maiwasan ang pag-reset ng configuration kapag nag-restart."
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "Panatilihin ang Config sa Restart"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "I-enable ang Kubernetes integration."
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "Kubernetes Mode"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "I-enable ang listening na walang ssl (passthrough)."
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "Listen Stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "Listening port na walang ssl (passthrough). Iwanang blangko upang i-disable ang non-SSL stream listening."
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "Listen Stream Port"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "Listening port na may ssl (passthrough). Iwanang blangko upang i-disable ang SSL stream listening."
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "Listen Stream Port SSL"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "Ang format na gagamitin para sa mga access log."
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "Access Log Format"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "Ang antas na gagamitin para sa mga error log."
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "Log Level"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "Pag-activate ng multisite."
+
+msgid "general.settings.MULTISITE.label"
+msgstr "Multisite"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "Kung saan maghahanap ang nginx ng mga configuration."
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "nginx Prefix"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "Mga plugin na dapat unang tumakbo sa access phase para sa site na ito (pagtanggap/kontrol ng request). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "Plugin Order (access)"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "Mga plugin na dapat unang tumakbo sa header phase para sa site na ito (pag-filter ng response header). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "Plugin Order (header)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "Mga plugin na dapat unang tumakbo sa init phase (pag-bootstrap ng engine, tumatakbo isang beses). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "Plugin Order (init)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "Mga plugin na dapat unang tumakbo sa init_worker phase (bootstrap kada worker). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "Plugin Order (init_worker)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "Mga plugin ID na pinaghihiwalay ng comma o espasyo, tatakbuhin sa init_workers phase."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "Plugin Order (init_workers)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "Mga plugin na dapat unang tumakbo sa log phase para sa site na ito (pagproseso ng HTTP log pagkatapos ng response). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "Plugin Order (log)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "Mga plugin na dapat unang tumakbo sa log_default phase para sa site na ito (pagproseso ng log ng default vhost). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "Plugin Order (log_default)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "Mga plugin na dapat unang tumakbo sa log_stream phase para sa site na ito (pagproseso ng log ng stream). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "Plugin Order (log_stream)"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "Mga plugin na dapat unang tumakbo sa preread phase para sa site na ito (mga check ng TCP preread bago mag-proxy). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "Plugin Order (preread)"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "Mga plugin na dapat unang tumakbo sa set phase para sa site na ito (pag-setup ng variable bago ang rewrite/access). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "Plugin Order (set)"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "Mga plugin na dapat unang tumakbo sa ssl_certificate phase para sa site na ito (pagpili/pag-issue ng TLS certificate). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "Plugin Order (ssl_certificate)"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "Mga plugin na dapat unang tumakbo sa timer phase (mga background timer). Paghiwalayin ang mga ID ng espasyo; ang natitirang mga plugin ay tumatakbo pa rin pagkatapos sa kanilang normal na pagkakasunod-sunod."
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "Plugin Order (timer)"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "Tinutukoy ang tugon sa mga banta: \"detect\" upang mag-monitor at mag-log, o \"block\" upang harangan ang access at i-log ang mga insidente."
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "Security Mode"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "Timeout para sa pagpapadala ng response sa client."
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "Send Timeout"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "Listahan ng mga virtual host na sinisilbihan ng bunkerweb. (pinaghihiwalay ng espasyo)"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "Pangalan ng Server"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "Halaga para sa server_names_hash_bucket_size directive."
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "Server Names Hash Bucket Size"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "Uri ng server: http o stream."
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "Uri ng Server"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "Sukat ng internal store na naghahawak ng mga na-revoke na cookie session identifier."
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "Sessions Revocation Memory Size"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "I-enable ang Docker Swarm integration."
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "Swarm Mode"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "Log level para sa mga timer."
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "Timers Log Level"
+
+msgid "general.settings.USE_API.help"
+msgstr "I-activate ang internal API ng BunkerWeb."
+
+msgid "general.settings.USE_API.label"
+msgstr "I-activate ang API"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "I-enable ang IPv6 connectivity."
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "Gamitin ang IPv6"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "Listen sa TCP (stream)."
+
+msgid "general.settings.USE_TCP.label"
+msgstr "Makinig sa TCP"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "Mga config template na ilalapat, pinaghihiwalay ng espasyo, na papalit sa default na halaga ng mga partikular na setting. Inilalapat ang mga template ayon sa pagkakasunod-sunod at pinapalitan ng mas huling template ang mas naunang isa; ang halagang itinakda sa serbisyo ay pumapalit sa template."
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "Gamitin ang Template"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "Listen sa UDP (stream)."
+
+msgid "general.settings.USE_UDP.label"
+msgstr "Makinig sa UDP"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "Sukat ng lua_shared_dict para sa mga initialization worker"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "Initialization Workerlock Memory Size"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "Maximum na bilang ng koneksyon kada worker."
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "Mga Koneksyon Kada Worker"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "Bilang ng mga worker process."
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "Mga Worker Process"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "Maximum na bilang ng bukas na file para sa mga worker process."
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "Mga Bukas na File Kada Worker"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "Timeout para sa graceful shutdown ng mga worker process. Pagkatapos ng delay na ito, sapilitang tinatapos ang mga lumang worker habang nag-reload upang maiwasan ang paglaki ng memory."
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "Worker Shutdown Timeout"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "Sinusuri ang license key para sa pag-upgrade."
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "Hindi na-save ang mga global setting: tinanggihan ang bawat binagong value."
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "Hindi na-edit ang mga global setting dahil walang value na nabago."
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "Na-save ang mga global setting, ngunit %(refused_count)s value ang tinanggihan."
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "Matagumpay na na-save ang mga global setting."
+
+msgid "home.flash.error_fetching_services"
+msgstr "Error habang kinukuha ang mga serbisyo: %(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "Tingnan ang lahat ng %(count)s setting"
 
@@ -3152,10 +4175,79 @@ msgid "instance.type.pod"
 msgstr "Pod"
 
 msgid "instance.type.static"
-msgstr "Static"
+msgstr "Estatiko"
 
 msgid "instances.down"
 msgstr "Hindi Aktibo"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "Hindi nagawa ang instance: %(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "Hindi nakuha ang mga instance mula sa API."
+
+msgid "instances.flash.could_not_found_one"
+msgstr "Hindi nahanap ang napiling instance o hindi ito isang UI/API instance."
+
+msgid "instances.flash.could_not_found_other"
+msgstr "Hindi nahanap ang lahat ng napiling instance o hindi ang mga ito UI/API instance."
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "Hindi na-delete ang instance: %(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "Hindi na-delete ang mga instance: %(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "Ang hostname na %(hostname)s ay ginagamit na."
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "Matagumpay na nagawa ang instance na %(value)s."
+
+msgid "instances.flash.instance_deleted"
+msgstr "Matagumpay na natanggal ang instance na %(instance)s."
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "Walang instance na %(instance)s."
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "Ang instance na %(instance)s ay walang reload na method."
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "Ang instance na %(instance)s ay walang stop na method."
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "Ang instance na %(non_deletable_instance)s ay hindi UI/API instance at hindi na i-de-delete."
+
+msgid "instances.flash.instance_reloaded"
+msgstr "Matagumpay na na-reload ang instance na %(instance)s."
+
+msgid "instances.flash.instance_stopped"
+msgstr "Matagumpay na nahinto ang instance na %(instance)s."
+
+msgid "instances.flash.instances_deleted"
+msgstr "Matagumpay na natanggal ang mga instance na %(instance)s."
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "Kulang ang parameter na instance hostname sa /instances/new."
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "Kulang ang parameter na instance name sa /instances/new."
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "Kulang ang parameter na instances sa /instances/delete."
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "Kulang ang parameter na instances sa /instances/ping."
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "Kulang ang parameter na instances sa /instances/reload."
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "Kulang ang parameter na instances sa /instances/stop."
+
+msgid "instances.flash.no_instance_selected"
+msgstr "Walang napiling instance."
 
 msgid "instances.loading"
 msgstr "Naglo-load"
@@ -3193,6 +4285,24 @@ msgstr "Petsa ng Simula"
 msgid "job.history.success"
 msgstr "Matagumpay"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "Error habang kinukuha ang mga job: %(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "Hindi wastong parameter na jobs sa /jobs/run."
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "Ang mga plugin ng trabaho ay patatakbuhin sa background ng scheduler."
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "Ang mga trabaho ng mga plugin ay patatakbuhin sa background ng scheduler."
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "Kulang ang parameter na jobs sa /jobs/run."
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "Walang napiling job."
+
 msgid "jobs.subtitle"
 msgstr "Mga naka-iskedyul at one-off na gawain na pinapatakbo ng scheduler ng BunkerWeb — subaybayan ang kanilang katayuan at patakbuhin ang mga ito sa pangangailangan."
 
@@ -3213,6 +4323,15 @@ msgstr "Naka-lock (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "Ang mga naka-lock na setting ay naka-highlight"
+
+msgid "legend.raw_setting_drafts"
+msgstr "Sa simula ng isang setting, pindutin ang # para i-toggle ang draft o Backspace para i-activate ito. I-save para ilapat. Pinananatili ng mga draft ang kanilang mga halaga habang ang minana o default na mga halaga ang umiiral."
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "Buksan ang Mga Sertipiko upang siyasatin"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt: ang ulilang sertipiko <strong>%(cert_name)s</strong> ay tumutukoy sa nawawalang ACME account <code>%(account)s</code>. Naka-block ang mga pag-renew hanggang maayos ang estado ng provider. <a href=\"%(certificates_url)s\">%(link_text)s</a>."
 
 msgid "link.back_to_login"
 msgstr "Bumalik sa Login"
@@ -3253,6 +4372,12 @@ msgstr "Gumamit ng code ng pag-authenticate"
 msgid "link.use_recovery_code"
 msgstr "Gumamit ng code ng pagbawi"
 
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "Hindi ka na-log in, subukan muli"
+
+msgid "login.flash.invalid_username_password"
+msgstr "Hindi wastong username o password"
+
 msgid "login.notice_password_changed"
 msgstr "Nabago na ang iyong password. Mag-log in gamit ang bagong password."
 
@@ -3288,6 +4413,12 @@ msgstr "I-expand"
 
 msgid "logs.filter_levels"
 msgstr "Mga antas"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "Hindi wastong file path"
+
+msgid "logs.flash.no_such_file"
+msgstr "Walang ganoong file"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,25 +4504,55 @@ msgstr "Mas mataas"
 msgid "logs.trimmed_notice"
 msgstr "--- Inalis ang %(count)s na mas lumang linya ng log para sa pagganap ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "Nasa read-only mode ang koneksyon sa database: walang posibleng pagbabago."
+
+msgid "main.flash.failover_configuration_error"
+msgstr "Hindi na-apply ang mga huling pagbabago dahil nagdulot ito ng configuration error sa NGINX, mangyaring suriin ang mga log ng BunkerWeb para sa karagdagang impormasyon. Bumalik ang configuration sa huling gumaganang bersyon."
+
+msgid "main.flash.failover_message"
+msgstr "Mensahe ng Failover:"
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "Pinilit na i-reload ang status"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "Mayroon kang mas maraming serbisyo kaysa sa pinapayagan ng iyong pro license. I-upgrade ang iyong license o ilipat ang ilang serbisyo sa draft mode para ma-unlock ang iyong pro license."
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "Matagumpay na na-apply ang mga huling pagbabago."
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "Naka-enable ang two-factor authentication ngunit walang available na recovery code, i-refresh ang mga ito:"
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "I-drag at i-drop ang iyong plugin archive dito o mag-click upang pumili ng mga file."
 
 msgid "modal.body.ban_filtered_confirmation"
 msgstr "I-ban ang mga IP mula sa lahat ng %(count)s tumutugmang report? Isang beses lang ilalapat ang mga dobleng target."
 
-#. plural pair; 2 form(s) for tl, singular in slot 0
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
 msgid "modal.body.confirm_cache_deletion_alert"
 msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
 msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling cache file?"
 msgstr[1] "Sigurado ka bang gusto mong burahin ang mga napiling cache file?"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "Sigurado ka bang gusto mong i-convert ang napiling custom configuration sa burador?"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "Sigurado ka bang gusto mong i-convert ang napiling custom configuration sa online?"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling custom na configuration?"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling custom na configuration sa %(state)s?"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling custom configuration sa burador?"
 
-#. plural pair; 2 form(s) for tl, singular in slot 0
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling custom configuration sa online?"
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
 msgid "modal.body.confirm_configs_deletion_alert"
 msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
 msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling custom na configuration?"
@@ -3403,22 +4564,40 @@ msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling serbisyo?"
 msgid "modal.body.confirm_next_step"
 msgstr "Sigurado ka bang gusto mong magpatuloy sa susunod na hakbang?"
 
-#. plural pair; 2 form(s) for tl, singular in slot 0
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
 msgid "modal.body.confirm_plugin_deletion"
 msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling plugin?"
 msgstr[1] "Sigurado ka bang gusto mong burahin ang mga napiling plugin?"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "Sigurado ka bang gusto mong i-convert ang napiling serbisyo sa burador?"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "Sigurado ka bang gusto mong i-convert ang napiling serbisyo sa online?"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "Sigurado ka bang gusto mong baguhin ang idineklarang mode ng serbisyong ito?"
+
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling serbisyo sa burador?"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling serbisyo sa online?"
 
 msgid "modal.body.confirm_template_deletion"
 msgstr "Sigurado ka bang gusto mong burahin ang template na %(name)s?"
 
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "Sigurado ka bang gusto mong tanggalin ang napiling template?"
+msgstr[1] "Sigurado ka bang gusto mong tanggalin ang mga napiling template?"
+
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "Sigurado ka bang gusto mong burahin ang napiling instance?"
 
-#. plural pair; 2 form(s) for tl, singular in slot 0
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
 msgid "modal.body.delete_confirmation_alert"
 msgid_plural "modal.body.delete_confirmation_alert_plural"
 msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling instance?"
@@ -3475,6 +4654,12 @@ msgstr "I-drag at i-drop ang iyong services export file dito o mag-click upang p
 msgid "modal.body.import_services_warning"
 msgstr "Ang pag-import ng mga serbisyo ay lilikha ng mga bagong UI service mula sa export file. Ang mga umiiral na serbisyo ay nilalaktawan. Ang isang .zip archive na na-export kasama ang mga custom na configuration ay tinatanggap din."
 
+msgid "modal.body.import_template_help"
+msgstr "Isang template package na na-export mula sa BunkerWeb (.json), o isang archive (.zip, .tar.gz, .tar.xz) na may isang folder ng template kasama ang template.json at mga configuration nito. 1 MiB pinakamalaki."
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "Ang pagpapalit ng template ay nagbabago sa bawat serbisyo na gumagamit nito sa susunod na configuration generation. Ang mga template na pag-aari ng isang plugin o pinamamahalaan sa labas ng web UI ay hindi kailanman papalitan."
+
 msgid "modal.body.instance_creation_alert"
 msgstr "Hindi mo kailangang ibigay ang port o pangalan ng server; ang mga value ng `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, at `API_SERVER_NAME` ang gagamitin para sa configuration ng instance."
 
@@ -3490,13 +4675,16 @@ msgstr "Ang mga recovery code na ito ay ipinakita nang isang beses lamang. Mangy
 msgid "modal.body.reset_template_alert"
 msgstr "Sigurado ka bang gusto mong i-reset ang kasalukuyang mga setting ng template at custom na mga configuration?"
 
+msgid "modal.body.service_deletion_confirmation"
+msgstr "Sigurado ka bang gusto mong burahin ang napiling serbisyo?"
+
 msgid "modal.body.services_conversion_confirmation"
 msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling serbisyo?"
 
 msgid "modal.body.services_deletion_confirmation"
 msgstr "Sigurado ka bang gusto mong burahin ang mga napiling serbisyo?"
 
-#. plural pair; 2 form(s) for tl, singular in slot 0
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
 msgid "modal.body.unban_confirmation_alert"
 msgid_plural "modal.body.unban_confirmation_alert_plural"
 msgstr[0] "Sigurado ka bang gusto mong i-unban ang napiling IP address?"
@@ -3583,6 +4771,9 @@ msgstr "Mag-import ng mga custom na configuration"
 msgid "modal.title.import_services"
 msgstr "Mag-import ng mga serbisyo"
 
+msgid "modal.title.import_template"
+msgstr "I-import ang Template"
+
 msgid "modal.title.job_history"
 msgstr "Huling 10 Pagpapatupad ng Trabaho"
 
@@ -3618,6 +4809,21 @@ msgstr "Madali"
 
 msgid "mode.raw"
 msgstr "Hilaw"
+
+msgid "navbar.aria.close_navigation"
+msgstr "Isara ang navigation"
+
+msgid "navbar.aria.help"
+msgstr "Tulong"
+
+msgid "navbar.aria.news"
+msgstr "Balita"
+
+msgid "navbar.aria.notifications"
+msgstr "Mga Abiso"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "I-toggle ang navigation"
 
 msgid "navbar.button.upgrade_to_pro"
 msgstr "Mag-upgrade sa PRO"
@@ -3769,6 +4975,9 @@ msgstr "Naka-subscribe na"
 msgid "notice.dismiss_mfa"
 msgstr "Huwag na paalalahanan ulit"
 
+msgid "notice.enable_mfa"
+msgstr "Paki-enable ang two-factor authentication upang siguruhin ang iyong account <a href=\"%(url)s\">dito</a>"
+
 msgid "onboarding.dismiss"
 msgstr "Huwag nang ipakita"
 
@@ -3822,6 +5031,39 @@ msgstr "Irehistro ang unang serbisyo"
 
 msgid "onboarding.item.workflow"
 msgstr "Maglakip ng security workflow"
+
+msgid "onboarding.item_hint.first_block"
+msgstr "Lumalabas dito ang mga report kapag na-block na ng BunkerWeb ang isang request — magpadala ng masamang request at tingnan muli."
+
+msgid "onboarding.item_hint.https"
+msgstr "Magdagdag o gumawa ng certificate dito upang maihatid ang iyong serbisyo sa pamamagitan ng HTTPS."
+
+msgid "onboarding.item_hint.install"
+msgstr "Magdagdag ng instance dito, pagkatapos ay i-save ang iyong unang configuration upang isailalim ito sa pamamahala."
+
+msgid "onboarding.item_hint.mfa"
+msgstr "Buksan ang iyong profile mula sa menu na ito, pagkatapos ay i-on ang two-factor authentication."
+
+msgid "onboarding.item_hint.pro"
+msgstr "Ilagay ang iyong PRO license key dito upang ma-unlock ang mga PRO plugin at suporta."
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "Ipinapakita ng bawat row dito ang na-ban na client, ang dahilan, at kung kailan mag-e-expire ang ban."
+
+msgid "onboarding.item_hint.read_home"
+msgstr "Ipinapakita ng dashboard na ito ang mga aktibong instance, mga sinisilbihang serbisyo, at kamakailang trapiko sa isang tingin lang."
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "Lumalabas dito ang mga live log mula sa bawat instance, na maaaring i-filter ayon sa instance at antas ng kahalagahan."
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "Buksan ang isang report dito upang makita kung aling security check ang humarang dito, at kung bakit."
+
+msgid "onboarding.item_hint.service"
+msgstr "Gumawa ng serbisyo dito upang sabihin sa BunkerWeb kung aling application ang iprotektahan."
+
+msgid "onboarding.item_hint.workflow"
+msgstr "Gumawa ng workflow dito upang pagsamahin ang mga check at tugon sa isang panuntunan."
 
 msgid "onboarding.not_saved"
 msgstr "Hindi ito na-save."
@@ -3886,6 +5128,9 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "Hindi nabasa ang bersyon ng BunkerWeb (%(current)s), kaya hindi masusuri ang compatibility ng %(id)s; walang na-install"
+
 msgid "plugins.catalog.incompatible"
 msgstr "Hindi idineklara ng release na ito ang compatibility sa BunkerWeb; ang kasalukuyan ay %(current)s"
 
@@ -3904,8 +5149,32 @@ msgstr "Alamin pa"
 msgid "plugins.catalog.release"
 msgstr "Basahin mula sa release %(tag)s"
 
+msgid "plugins.catalog.remove"
+msgstr "Alisin"
+
 msgid "plugins.catalog.stale"
 msgstr "Hindi kamakailan na-refresh ang catalogue, kaya naka-disable ang pag-install hanggang maging up to date ulit ito."
+
+msgid "plugins.catalog.state_installed"
+msgstr "Naka-install (bersyon %(version)s)"
+
+msgid "plugins.catalog.state_managed"
+msgstr "Naka-install sa labas ng catalogue; i-update o alisin ito kung saan ito na-install"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "Naka-install sa labas ng catalogue bilang core plugin; i-update o alisin ito kung saan ito na-install"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "Naka-install sa labas ng catalogue bilang external plugin; i-update o alisin ito kung saan ito na-install"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "Naka-install sa labas ng catalogue bilang pro plugin; i-update o alisin ito kung saan ito na-install"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "Naka-install sa labas ng catalogue bilang ui plugin; i-update o alisin ito kung saan ito na-install"
+
+msgid "plugins.catalog.state_update"
+msgstr "May available na update: naka-install ang bersyon %(installed)s, %(version)s ang nakalista"
 
 msgid "plugins.catalog.tab"
 msgstr "Magagamit"
@@ -3913,8 +5182,188 @@ msgstr "Magagamit"
 msgid "plugins.catalog.trust_notice"
 msgstr "Ang mga item ng community ay binabasa mula sa mga repository na inilalathala ng BunkerWeb organization sa GitHub, sa pamamagitan ng TLS, at ang na-install ay sinusuri laban sa nakalista — pero walang cryptographically signed dito. Ang naka-install na plugin ay nagpapatakbo ng code na may buong BunkerWeb privileges."
 
+msgid "plugins.catalog.update"
+msgstr "I-update"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "Papalitan nito ang naka-install na plugin na %(name)s (%(id)s, bersyon %(installed)s) ng bersyon %(version)s mula sa catalogue. Papalitan ito kahit na na-upload ito ng manu-mano sa halip na na-install mula sa catalogue."
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "Walang setting na tinanggal ng update na ito."
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "Hindi pa maaaring ilista ngayon ang mga setting na tatanggalin ng update na ito, kaya naka-disable ang pag-update hanggang sa susunod na pag-refresh ng catalogue."
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "Hindi na idineklara ng bersyon %(version)s ang mga setting na ito. Tatanggalin ang mga ito, kasama ang bawat halagang itinakda para sa mga ito sa global settings, mga serbisyo, at mga template:"
+
+msgid "plugins.catalog.update_title"
+msgstr "I-update ang Community Plugin"
+
 msgid "plugins.catalog.version"
 msgstr "Version %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "Hindi nabasa ang kasalukuyang tumatakbong bersyon ng BunkerWeb (%(current)s), kaya hindi masusuri ang compatibility ng release na ito"
+
+msgid "plugins.flash.already_at_version"
+msgstr "Nasa version %(version)s na ang plugin na %(plugin_id)s"
+
+msgid "plugins.flash.already_installed"
+msgstr "May naka-install nang plugin na may id na %(plugin_id)s"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "Hindi na tugma ang %(tag)s archive sa nakalista sa catalogue. Walang na-install para sa %(plugin_id)s."
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "Nagbago ang catalogue entry para sa %(plugin_id)s mula nang kumpirmahin ang update; suriing muli ang update"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "Mas luma ang cached catalogue entry para sa %(plugin_id)s kaysa sa mga update; hintayin ang susunod na refresh"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s, suriin ang mga log para sa karagdagang detalye"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "Naka-disable ang community catalogue"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "Hindi na-delete ang plugin na %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "Hindi na-delete ang plugin na %(plugin)s sa database: %(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "Hindi na-download ang %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "Hindi na-install ang %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "Hindi na-install ang %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "Hindi na-update ang %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "Hindi na-update ang %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "Hindi na-update ang plugin na %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "Hindi na-update ang plugin na %(plugin)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "Hindi na-update ang mga UI plugin sa pamamagitan ng API: %(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "Matagumpay na na-delete ang plugin na %(plugin)s"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "Kulang ang file na plugin.json ng isa o higit pa sa mga sumusunod na key: %(value)s (%(value2)s)"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "Hindi wasto ang plugin.json file sa %(file)s (%(msg)s: linya %(lineno)s column %(colno)s (character %(pos)s)) (%(value)s)"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "Hindi natapos ang pag-install ng %(plugin_id)s: %(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "Matagumpay na na-install ang plugin na %(plugin_id)s"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "Ang file ay hindi wastong plugin archive (.zip, .tar.gz, o .tar.xz)."
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "Hindi wastong plugin id, (dapat 4 hanggang 64 na karakter, mga letra, numero, underscore, at hyphen lamang)"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "Hindi wastong plugin name para sa %(temp_folder_name)s. (Mga numero, letra, underscore, at hyphen lamang ang pwede (min 4 na karakter at max 64))"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "Ang plugin na %(plugin_id)s ay pinamamahalaan sa labas ng catalogue at hindi maaaring i-update mula rito"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "Ang plugin na %(plugin_id)s ay isang core plugin na pinamamahalaan sa labas ng catalogue at hindi maaaring i-update mula rito"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "Ang plugin na %(plugin_id)s ay isang external plugin na pinamamahalaan sa labas ng catalogue at hindi maaaring i-update mula rito"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "Ang plugin na %(plugin_id)s ay isang pro plugin na pinamamahalaan sa labas ng catalogue at hindi maaaring i-update mula rito"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "Ang plugin na %(plugin_id)s ay isang ui plugin na pinamamahalaan sa labas ng catalogue at hindi maaaring i-update mula rito"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "Kulang ang parameter na csrf_token sa /plugins."
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "Kulang ang parameter na id sa /plugins/catalog/install."
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "Kulang ang parameter na id o version sa /plugins/catalog/update."
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "Kulang ang parameter na plugin o enabled sa /plugins/enable."
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "Kulang ang parameter na plugins sa /plugins/delete."
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "Walang plugin data na ia-upload"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "Hindi naka-install ang %(plugin_id)s; i-install ito mula sa catalogue"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "Hindi valid na plugin ang %(file)s (kulang ang plugin.json file) (%(value)s)"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "Mangyaring mag-upload ng bagong mga plugin upang i-reload ang mga plugin"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "Mayroon nang plugin na %(plugin)s"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "Matagumpay na hindi pinagana ang plugin na %(plugin)s."
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "Matagumpay na pinagana ang plugin na %(plugin)s."
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "Nakalaan lamang sa mga administrator ang plugin management"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "Mayroon nang plugin na pinangalanang %(folder_name)s"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "Hindi nahanap ang plugin na may id na %(plugin)s"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "Error sa pag-upload ng plugin (%(value)s): %(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "Matagumpay na na-upload ang mga plugin: %(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "Matagumpay na na-upload ang mga plugin"
+
+msgid "plugins.flash.refused_download"
+msgstr "Tinanggihan ang pag-download ng %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "Tinanggihan ang pag-install ng %(plugin_id)s: %(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "Tinanggihan ang pag-update ng %(plugin_id)s: %(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "Hindi natapos ang pag-update ng %(plugin_id)s: %(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "Na-update sa version %(version)s ang plugin na %(plugin_id)s"
 
 msgid "plugins.marketplace.active"
 msgstr "Aktibo"
@@ -3988,6 +5437,36 @@ msgstr "Petsa ng Pag-expire ng Pro"
 msgid "pro.expiration_date.unknown"
 msgstr "Hindi kilalang petsa ng pag-expire"
 
+msgid "pro.flash.checking_license_key"
+msgstr "Sinusuri ang license key."
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "Naka-iskedyul na ang pinilit na update ng mga PRO plugin."
+
+msgid "pro.flash.invalid_license_key"
+msgstr "Hindi wastong license key"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "Hindi na-update ang PRO license key: tinanggihan ang value."
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "Kapareho ng kasalukuyan ang license key."
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "Matagumpay na na-update ang PRO license key."
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "Kulang ang parameter na license key sa /pro/key."
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "Naka-iskedyul na ang bagong pagsusuri para sa mga PRO plugin."
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "Susubukan ng Scheduler na ilapat ang mga pagbabago at i-download ang mga PRO plugin."
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "Ire-reload ng web UI ang mga PRO plugin nito sa lalong madaling panahon."
+
 msgid "pro.force_check.description"
 msgstr "Pilitin ang bagong pagsusuri para sa mga PRO plugin. Magti-trigger ito ng bagong pag-download ng mga plugin kung may mga bagong bersyon na available."
 
@@ -4024,8 +5503,17 @@ msgstr "NAG-EXPIRE"
 msgid "pro.status.free_version"
 msgstr "Libreng Bersyon"
 
+msgid "pro.status.invalid"
+msgstr "HINDI WASTONG KEY"
+
+msgid "pro.status.invalid_key"
+msgstr "Tinanggihan ng license server ang naka-imbak na license key. Suriin ito, o alisin sa Global Settings → Pro."
+
 msgid "pro.status.overlapped"
 msgstr "NAOBERLAPAN"
+
+msgid "pro.status.pending_key"
+msgstr "Hindi pa nasusuri ang license key. Susuriin ito ng Scheduler sa lalong madaling panahon pagkatapos itong ma-save."
 
 msgid "pro.status.pro_version"
 msgstr "PRO na Bersyon"
@@ -4041,6 +5529,15 @@ msgstr "Katayuan"
 
 msgid "pro.title"
 msgstr "Lisensyang Pro"
+
+msgid "pro.trial.cta"
+msgstr "Simulan ang Libreng Pagsubok"
+
+msgid "pro.trial.description"
+msgstr "Subukan ang <span class=\"text-primary\">BunkerWeb PRO</span> nang libre sa loob ng <strong>30 araw</strong>."
+
+msgid "pro.trial.title"
+msgstr "Libreng Pagsubok"
 
 msgid "profile.2fa.disable_title"
 msgstr "I-disable ang 2FA"
@@ -4083,6 +5580,132 @@ msgstr "I-refresh ang Mga Recovery Code"
 
 msgid "profile.card.title.sessions"
 msgstr "Mga Session"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "Hindi na-delete ang passkey: %(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "Hindi na-disable ang two-factor authentication: %(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "Hindi na-enable ang two-factor authentication: %(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "Hindi na-refresh ang mga recovery code: %(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "Hindi na-rename ang passkey: %(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "Hindi na-revoke ang ibang session: %(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "Hindi na-update ang %(value)s na user: %(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "Hindi na-wipe ang ibang session: %(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "Mali ang kasalukuyang password."
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "Sobrang haba ng email. Dapat itong wala pang 256 na karakter."
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "Kulang ang parameter na current password sa /profile/edit."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "Kulang ang parameter na current password sa /profile/totp-refresh."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "Kulang ang parameter na current password sa /profile/totp-disable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "Kulang ang parameter na current password sa /profile/totp-enable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "Kulang ang parameter na current password sa /profile/wipe-other-sessions."
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "Kulang ang parameter na email sa /profile/edit."
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "Kulang ang parameter na new password confirm sa /profile/edit."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "Kulang ang mga parameter sa /profile/webauthn/delete."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "Kulang ang mga parameter sa /profile/webauthn/rename."
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "Kulang ang parameter na totp token sa /profile/totp-enable."
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "Hindi sapat na malakas ang bagong password. Dapat itong maglaman ng hindi bababa sa 8 na karakter, kabilang ang hindi bababa sa 1 malaking titik, 1 maliit na titik, 1 numero, at 1 espesyal na karakter (#@?!$%^&*-)."
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "Kapareho ng kasalukuyan ang bagong password."
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "Sobrang haba ng bagong password. Hindi dapat lumampas sa %(MAX_PASSWORD_BYTES)s bytes (hard limit ng bcrypt); ang mga accented o emoji na karakter ay bawat isa ay nagbibilang ng ilang byte."
+
+msgid "profile.flash.no_fields_updated"
+msgstr "Walang na-update na field."
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "Matagumpay na na-wipe ang ibang session."
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "Matagumpay na na-delete ang passkey."
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "Matagumpay na na-register ang passkey."
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "Matagumpay na na-rename ang passkey."
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "Hindi maaaring blangko ang pangalan ng passkey."
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "Nabago ang iyong password, ngunit hindi na-revoke ang iba mong session. Gamitin ang \"Wipe other sessions\" sa ibaba at suriin ang listahan ng mga aktibong session."
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "Hindi tugma ang mga password sa confirm password."
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "Matagumpay na na-update ang profile."
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "Matagumpay na na-refresh ang mga recovery code. Hindi na valid ang mga luma."
+
+msgid "profile.flash.theme_invalid"
+msgstr "Hindi wasto ang tema."
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "Hindi wasto ang totp token."
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "Naka-enable na ang two-factor authentication."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "Matagumpay na na-disable ang two-factor authentication."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "Matagumpay na na-enable ang two-factor authentication."
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "Hindi naka-enable ang two-factor authentication."
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "Nag-expire na ang two-factor enrolment. I-reload ang page at i-scan ang bagong QR code."
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "Kapareho ng kasalukuyan ang username at email."
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "Sobrang haba ng username. Dapat itong wala pang 256 na karakter."
 
 msgid "profile.help.photo_extensions"
 msgstr "Pinapayagan ang JPG, GIF, o PNG. Max na laki: 800KB."
@@ -4168,6 +5791,39 @@ msgstr "Saklaw ng oras"
 msgid "range_picker.custom"
 msgstr "Pasadya"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "Hindi maaaring gawing draft ang setting na %(setting)s."
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "Hindi ipinadala ang draft na setting na %(setting)s."
+
+msgid "raw_drafts.draft_not_present"
+msgstr "Wala sa RAW editor ang draft na setting na %(setting)s."
+
+msgid "raw_drafts.edits_discarded"
+msgstr "Nananatiling hindi nagbabago ang mga draft na setting; i-activate o i-edit ang mga ito sa Raw mode."
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "Hindi maaaring gawing draft ng serbisyo ang pandaigdigang setting na %(setting)s."
+
+msgid "raw_drafts.locked_by_method"
+msgstr "Hindi mababago ng setting na %(setting)s ang estado ng draft dahil pinamamahalaan ito ng paraang %(method)s."
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "Ang metadata ng draft ng setting ay tinatanggap lamang sa raw mode."
+
+msgid "raw_drafts.missing_metadata"
+msgstr "Nawawala ang metadata na %(field)s."
+
+msgid "raw_drafts.present_not_posted"
+msgstr "Hindi ipinadala ang kasalukuyang setting na %(setting)s."
+
+msgid "raw_drafts.present_not_valid"
+msgstr "Hindi wasto ang kasalukuyang setting na %(setting)s."
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "Hindi wasto ang setting na %(setting)s."
+
 msgid "redirects.all"
 msgstr "Lahat"
 
@@ -4221,6 +5877,69 @@ msgstr "Ang redirect ay isang pangalan na patakaran na ikinakabit sa isa o higit
 
 msgid "redirects.empty_title"
 msgstr "Walang redirect pa"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "Hindi wasto ang source path: hindi ito maaaring maglaman ng espasyo, semicolon, o braces."
+
+msgid "redirects.err.invalid_to_url"
+msgstr "Ang target ay dapat kumpletong http:// o https:// URL."
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "Kailangan ng hindi bababa sa isang serbisyo"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "Hindi na-attach ang redirect: %(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "Hindi nalikha ang redirect: %(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "Hindi na-delete ang redirect: %(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "Hindi na-detach ang redirect: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "Hindi nakuha ang mga redirect: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "Hindi nakuha ang mga serbisyo para sa mga takdang-aral ng redirect: %(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "Hindi na-update ang redirect: %(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "Kailangan ng pangalan ng redirect"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "Naikabit ang redirect. Mga serbisyo: %(len)s"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "Matagumpay na nagawa ang redirect na %(value)s"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "Matagumpay na na-delete ang redirect"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "Matagumpay na na-detach ang redirect"
+
+msgid "redirects.flash.redirect_required"
+msgstr "Kailangan ang redirect"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "Kailangan ang redirect at serbisyo"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "Matagumpay na na-update ang redirect"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "Ang status code ay dapat isa sa %(value)s"
+
+msgid "redirects.flash.target_required"
+msgstr "Kailangan ang target ng redirect"
+
+msgid "redirects.flash.too_many_services"
+msgstr "Hindi maaaring mag-attach ang redirect sa mahigit sa %(value)s na serbisyo"
 
 msgid "redirects.from_path"
 msgstr "Redirect mula sa"
@@ -4307,16 +6026,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "Mga na-block na kahilingan sa paglipas ng panahon"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "Inspeksyon ng AppSec"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "Failure policy ng AppSec"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "Desisyon ng Local API"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "Mga teknikal na detalye"
 
 msgid "reports.security_incident"
 msgstr "Insidente ng Seguridad"
@@ -4477,6 +6196,63 @@ msgstr "Mga entry"
 msgid "resource_groups.expand_all"
 msgstr "I-expand lahat"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "Ang alias ay dapat maglaman ng 1 hanggang 64 na letra, numero, underscore, o dash"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "Nakalaan ang alias na ito ng BunkerWeb"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "Hindi na-clone ang resource group: %(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "Hindi na-delete ang resource group: %(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "Hindi na-export ang mga resource group: %(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "Hindi na-save ang resource group: %(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "Dapat listahan ang mga entry ng resource"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "Hindi valid na JSON ang mga entry ng resource"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "Ang entry %(index)s ay may komentong sobrang haba"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "Hindi wasto ang entry %(index)s"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "Ang entry %(index)s ay may hindi wastong kind"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "Ang entry %(index)s ay may hindi wastong value"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "Na-clone ang resource group bilang @%(alias)s"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "Matagumpay na nagawa ang resource group na @%(alias)s"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "Matagumpay na na-delete ang resource group"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "Kailangan ang resource group"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "Matagumpay na na-update ang resource group"
+
+msgid "resource_groups.flash.source_required"
+msgstr "Kailangan ang source resource group"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "Hindi maaaring maglaman ang resource group ng mahigit sa %(value)s na entry"
+
 msgid "resource_groups.global_configuration"
 msgstr "Pangkalahatang konfigurasyon"
 
@@ -4492,6 +6268,24 @@ msgstr "Ang pag-import ng TXT/CSV ay limitado sa 256 KiB."
 msgid "resource_groups.kind"
 msgstr "Uri"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "Bansa"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "Reverse DNS"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "User agent"
+
 msgid "resource_groups.kinds"
 msgstr "Mga uri"
 
@@ -4501,8 +6295,23 @@ msgstr "Naglo-load ng mga sanggunian..."
 msgid "resource_groups.max_entries"
 msgstr "Hindi maaaring maglaman ang isang grupo ng mga mapagkukunan ng higit sa %(max)s na entry."
 
-msgid "resource_groups.meta_line"
-msgstr "%(kinds)s uri · %(values)s value · %(usages)s paggamit"
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s uri"
+msgstr[1] "%(count)s na uri"
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s paggamit"
+msgstr[1] "%(count)s na paggamit"
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s halaga"
+msgstr[1] "%(count)s na halaga"
 
 msgid "resource_groups.new"
 msgstr "Bagong grupo"
@@ -4521,6 +6330,12 @@ msgstr "Walang sanggunian"
 
 msgid "resource_groups.readonly"
 msgstr "Ang database ay read-only. Maaaring suriin at i-export ang mga grupo ng mapagkukunan, ngunit hindi mababago."
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s sanggunian"
+msgstr[1] "%(count)s na reference"
 
 msgid "resource_groups.references_error"
 msgstr "Hindi ma-load ang mga sanggunian"
@@ -4684,6 +6499,9 @@ msgstr "Kailangan ng Reload"
 msgid "searchpane.scope"
 msgstr "Saklaw"
 
+msgid "searchpane.search_title"
+msgstr "Maghanap: {name}"
+
 msgid "searchpane.security_mode"
 msgstr "Mode ng Seguridad"
 
@@ -4774,14 +6592,35 @@ msgstr "Mode ng serbisyo"
 msgid "service.resources.attach"
 msgstr "Ikabit"
 
+msgid "service.resources.confirm_detach"
+msgstr "Tanggalin ang resource na ito mula sa %(service)s?"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "Tanggalin ang sertipiko na ito mula sa %(service)s?"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "Tanggalin ang redirect na ito mula sa %(service)s?"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "Tanggalin ang template na ito mula sa %(service)s?"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "Tanggalin ang upstream na ito mula sa %(service)s?"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "Tanggalin ang daloy ng trabaho na ito mula sa %(service)s?"
+
 msgid "service.resources.conflict.inline"
 msgstr "Ang %(service)s ay nagsisilbi sa %(path)s sa pamamagitan ng sarili nitong mga setting na %(family)s. Linisin ang mga setting na ito para sa %(path)s, o gumamit ng ibang landas."
 
 msgid "service.resources.conflict.primary"
 msgstr "Ang “%(name)s” ang kasalukuyang primary certificate ng serbisyong ito at hindi na ito magiging primary nang walang karagdagang babala. Ang primary ang aktwal na naka-deploy."
 
-msgid "service.resources.conflict.resource"
-msgstr "Ang %(service)s ay nagsisilbi sa %(path)s sa pamamagitan ng “%(kind)s” na %(name)s. Tanggalin ang “%(name)s”, o bigyan ang isa sa kanila ng ibang landas."
+msgid "service.resources.conflict.resource_redirect"
+msgstr "Ang %(service)s ay nagsisilbi na sa %(path)s sa pamamagitan ng redirect na “%(name)s”. Tanggalin ang “%(name)s”, o bigyan ang isa sa kanila ng ibang landas."
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "Ang %(service)s ay nagsisilbi na sa %(path)s sa pamamagitan ng upstream na “%(name)s”. Tanggalin ang “%(name)s”, o bigyan ang isa sa kanila ng ibang landas."
 
 msgid "service.resources.conflict.stream"
 msgstr "Ipinapasa ng stream service ang bawat koneksyon sa iisang backend, at ginagamit na ng %(service)s ang upstream na “%(name)s”. Ihiwalay muna ito."
@@ -4820,7 +6659,7 @@ msgid "service.resources.primary"
 msgstr "Pangunahing sertipiko"
 
 msgid "service.resources.template.add"
-msgstr "Add"
+msgstr "Idagdag"
 
 msgid "service.resources.template.add_label"
 msgstr "Template na idadagdag bilang layer"
@@ -4872,6 +6711,222 @@ msgstr "Hindi magagamit"
 
 msgid "services.draft"
 msgstr "Mga serbisyo sa draft"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "Lahat ng napiling serbisyo ay hindi nahanap, hindi UI/API na serbisyo, o na-convert na."
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "Lahat ng napiling serbisyo ay hindi nahanap o hindi UI/API na serbisyo."
+
+msgid "services.flash.configuration_created"
+msgstr "Nagawa na ang configuration para sa serbisyong %(service)s."
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "Nagawa na ang configuration para sa serbisyong %(service)s, ngunit tinanggihan ang %(refused_count)s halaga."
+
+msgid "services.flash.configuration_saved"
+msgstr "Na-save na ang configuration para sa serbisyong %(service)s."
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "Na-save na ang configuration para sa serbisyong %(service)s, ngunit tinanggihan ang %(refused_count)s halaga."
+
+msgid "services.flash.converted_services_draft"
+msgstr "Na-convert sa \"burador\" na mga serbisyo: %(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "Na-convert sa \"online\" na mga serbisyo: %(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "Hindi makuha ang mga nakakabit na sertipiko ng serbisyong ito."
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "Hindi makuha ang mga nakakabit na redirect ng serbisyong ito."
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "Hindi makuha ang mga nakakabit na upstream ng serbisyong ito."
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "Hindi makuha ang mga nakakabit na daloy ng trabaho ng serbisyong ito."
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "Hindi nakuha ang mga custom config mula sa API."
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "Hindi nakuha ang mga custom configuration mula sa API."
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "Hindi nakuha ang serbisyo mula sa API."
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "Hindi nakuha ang serbisyong %(service)s mula sa API."
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "Hindi nakuha ang serbisyong %(clone)s para sa pag-clone."
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "Hindi nakuha ang mga serbisyo mula sa API."
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "Hindi nakuha ang configuration ng mga serbisyo."
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "Hindi nakuha ang mga template mula sa API."
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "Hindi na-save ang mga custom config dahil tinanggihan ang pagpalit ng pangalan."
+
+msgid "services.flash.default_server_reserved"
+msgstr "Ang %(default_server_id)s ay ang reserved na default server: sinasagot nito ang mga request na hindi tumutugma sa anumang naka-configure na serbisyo (hindi kilalang hostname, direktang access sa IP), kaya hindi ito magagawa, mapapalitan ng pangalan, o mabubura."
+
+msgid "services.flash.default_server_type_refused"
+msgstr "Hindi maiitakda ang SERVER_TYPE sa reserved na serbisyong %(default_server_id)s: walang sariling server block ito na mapapalitan. Ang HTTP na bahagi nito ay ang default server block mismo, at ang stream na bahagi nito ay ang setting na DEFAULT_SERVER_STREAM_PORTS."
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "Wala kang pahintulot na baguhin ang mode ng serbisyo"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "Nabigong tanggalin ang drafted autoconf service na %(service_id)s: %(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "Nabigong i-import ang serbisyo: %(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "Nabigong i-import ang mga serbisyo: %(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "Na-import ang serbisyo: %(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "Na-import ang mga serbisyo: %(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "Hindi wastong encoding para sa configs_export.json sa loob ng archive."
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "Hindi wastong encoding para sa services_export.env sa loob ng archive."
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Hindi wastong file encoding. Mangyaring mag-upload ng UTF-8 file."
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "Hindi wastong parameter na mode."
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "Kulang ang parameter na convert_to sa /services/convert."
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "Kulang ang parameter na mode sa /services/%(service)s/mode."
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "Kulang ang parameter na services sa /services/convert."
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "Kulang ang parameter na services sa /services/delete."
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "Walang nahanap na serbisyo o custom configuration sa import file."
+
+msgid "services.flash.no_services_export"
+msgstr "Walang serbisyo na ie-export."
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "Walang na-upload na services file."
+
+msgid "services.flash.no_services_selected"
+msgstr "Walang napiling serbisyo."
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "Hindi applicable ang plugin na ito sa default server"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "Tinatanggihan ang pag-extract ng archive: lumampas sa safety limit ang uncompressed size."
+
+msgid "services.flash.resource_attach_failed"
+msgstr "Hindi na-attach: %(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "Hindi maaaring i-attach: %(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "Na-attach ang resource sa %(service)s."
+
+msgid "services.flash.resource_detach_failed"
+msgstr "Hindi na-detach: %(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "Hindi maaaring i-detach: %(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "Na-detach ang resource mula sa %(service)s."
+
+msgid "services.flash.resource_unknown_family"
+msgstr "Hindi kilalang uri ng resource."
+
+msgid "services.flash.server_name_missing"
+msgstr "Hindi nagawa ang serbisyo dahil hindi ibinigay ang server name."
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "Ang serbisyong %(non_convertible_service)s ay burador na serbisyo na at hindi na iko-convert."
+
+msgid "services.flash.service_already_exists"
+msgstr "Umiiral na ang serbisyong %(service)s."
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "Ang serbisyong %(non_convertible_service)s ay online na serbisyo na at hindi na iko-convert."
+
+msgid "services.flash.service_deleted"
+msgstr "Na-delete ang serbisyo: %(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "Hindi na-edit ang serbisyong %(service)s dahil walang binagong value."
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "Hindi na-edit ang serbisyong %(service)s dahil walang binagong value o custom config."
+
+msgid "services.flash.service_not_found"
+msgstr "Hindi nahanap ang serbisyo"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "Hindi na-save ang serbisyong %(service)s: tinanggihan ang bawat binagong value."
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "Ang serbisyong %(non_editable_service)s ay hindi UI/API serbisyo at hindi na i-co-convert."
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "Ang serbisyong %(service)s ay ngayon ay idineklarang \"redirect lang\"."
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "Ang serbisyong %(service)s ay ngayon ay idineklarang \"karaniwan\"."
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "Ang serbisyong %(non_deletable_service)s ay hindi isang UI/API na serbisyo at hindi ito made-delete."
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "Ang serbisyong %(non_deletable_service)s ay isang online na autoconf na serbisyo (i-convert muna ito sa burador) at hindi ito made-delete."
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "Ang serbisyong %(non_deletable_service)s ay ang nakareserbang default na server, na sumasagot sa mga request na hindi tumutugma sa anumang serbisyo, at hindi ito made-delete."
+
+msgid "services.flash.services_deleted"
+msgstr "Na-delete ang mga serbisyo: %(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "Nilaktawan ang umiiral na serbisyo: %(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "Nilaktawan ang mga umiiral na serbisyo: %(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "Hindi ma-edit ang Template Custom config na %(key)s dahil nagawa ito sa pamamagitan ng %(value)s na method."
+
+msgid "services.flash.template_not_found"
+msgstr "Hindi nahanap ang template"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "Ang na-upload na archive ay dapat maglaman ng services_export.env at/o configs_export.json."
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "Hindi valid na zip archive ang na-upload na file."
 
 msgid "services.online"
 msgstr "Online"
@@ -4961,10 +7016,10 @@ msgid "settings.access_control.order.description"
 msgstr "Bilang default, dumaraan ang bawat request sa apat na check na ito sa ganitong pagkakasunod-sunod, at ang unang nagdesisyon ang siyang magdedesisyon. Agad na tinatapos ng match sa whitelist ang pagsuri: pinapayagan ang request at hindi na tumatakbo ang tatlong check pagkatapos nito. Configurable ang pagkakasunod-sunod mismo kada service, sa pamamagitan ng PLUGINS_ORDER_ACCESS at PLUGINS_ORDER_PREREAD."
 
 msgid "settings.access_control.order.off"
-msgstr "Off"
+msgstr "Naka-off"
 
 msgid "settings.access_control.order.on"
-msgstr "On"
+msgstr "Naka-on"
 
 msgid "settings.access_control.order.title"
 msgstr "Pagkakasunod-sunod ng desisyon"
@@ -5009,7 +7064,7 @@ msgid "settings.access_control.rules.remove_term"
 msgstr "Alisin ang term na ito"
 
 msgid "settings.access_control.rules.rule"
-msgstr "Rule"
+msgstr "Panuntunan"
 
 msgid "settings.access_control.rules.title"
 msgstr "Mga composite rule"
@@ -5290,6 +7345,45 @@ msgstr "Na-load mula sa %(name)s · mga character: %(count)s"
 msgid "setup.file.read_error"
 msgstr "Error sa pagbasa ng file"
 
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "Sobrang haba ng admin email. Dapat itong wala pang 256 na karakter."
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "Hindi sapat na malakas ang admin password. Dapat itong maglaman ng hindi bababa sa 8 na karakter, kabilang ang hindi bababa sa 1 malaking titik, 1 maliit na titik, 1 numero, at 1 espesyal na karakter (#@?!$%^&*-)."
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "Sobrang haba ng admin password. Hindi dapat lumampas sa %(MAX_PASSWORD_BYTES)s bytes (hard limit ng bcrypt); ang mga accented o emoji na karakter ay bawat isa ay nagbibilang ng ilang byte."
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "Matagumpay na nagawa ang admin user"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "Sobrang haba ng admin username. Dapat itong wala pang 256 na karakter."
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "Hindi nagawa ang admin user: %(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "Hindi nagawa ang bagong serbisyo: %(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "Hindi na-edit ang bagong serbisyo: %(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "Ginagamit na ang hostname na %(value)s."
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "Hindi wasto ang hostname."
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "Kulang ang isa sa mga sumusunod na parameter: %(value)s."
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "Hindi tugma ang mga password."
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "Kapag gumagamit ng custom SSL certificate, kailangan mong itakda ang parehong certificate at key."
+
 msgid "setup.status.admin_user_exists"
 msgstr "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang."
 
@@ -5446,6 +7540,12 @@ msgstr "Malapit nang mag-expire"
 msgid "status.failed"
 msgstr "Nabigo"
 
+msgid "status.failover"
+msgstr "Failover"
+
+msgid "status.inactive"
+msgstr "Hindi Aktibo"
+
 msgid "status.invalid_json_payload"
 msgstr "Hindi valid na JSON payload."
 
@@ -5583,6 +7683,9 @@ msgstr "Hindi alam"
 
 msgid "status.up"
 msgstr "Aktibo"
+
+msgid "status.uploaded"
+msgstr "Na-upload"
 
 msgid "status.yes"
 msgstr "Oo"
@@ -5833,6 +7936,9 @@ msgstr "Lumikha ng template"
 msgid "template.editor.heading_edit"
 msgstr "I-edit ang template %(id)s"
 
+msgid "template.editor.heading_view"
+msgstr "Tingnan ang Template %(id)s"
+
 msgid "template.editor.label_config_data"
 msgstr "Data"
 
@@ -5918,7 +8024,10 @@ msgid "template.editor.multivalue_add"
 msgstr "Magdagdag ng value"
 
 msgid "template.editor.multivalue_helper"
-msgstr "Isang value bawat linya.%(separatorNote)s"
+msgstr "Isang value bawat linya."
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "Isang value bawat linya. Pagsasamahin gamit ang \"%(separator)s\"."
 
 msgid "template.editor.panel_overview"
 msgstr "Pangkalahatang-tanaw"
@@ -6081,6 +8190,9 @@ msgstr "Kasalukuyang read-only ang database. Hindi maaaring baguhin ang mga temp
 
 msgid "template.editor.readonly_method"
 msgstr "Ang template na ito ay nilikha ng proseso ng %(method)s at hindi maaaring i-edit mula sa UI."
+
+msgid "template.editor.readonly_method_plugin"
+msgstr "Ang template na ito ay ginawa ng %(plugin)s plugin at hindi maaaring i-edit mula sa UI."
 
 msgid "template.editor.readonly_title"
 msgstr "Basahin lamang"
@@ -6256,6 +8368,9 @@ msgstr "Kailangan ng uri ng config kapag may tinukoy na config."
 msgid "template.editor.validation_configs_unique"
 msgstr "Ang bawat pangalan ng config ay dapat natatangi."
 
+msgid "template.editor.validation_id_invalid"
+msgstr "Ang Template ID ay maaari lamang maglaman ng mga letra, numero, tuldok, gitling, at underscore, at dapat magsimula sa letra o numero."
+
 msgid "template.editor.validation_id_required"
 msgstr "Kailangan ng ID ng template."
 
@@ -6268,6 +8383,36 @@ msgstr "Ang bawat key ng setting ay dapat natatangi."
 msgid "template.none"
 msgstr "Walang Template"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "Idinagdag na custom configuration"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "Binago na custom configuration"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "Tinanggal na custom configuration"
+
+msgid "templates.catalog.diff.name"
+msgstr "Pangalan: %(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "Idinagdag na setting"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "Binago na setting"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "Tinanggal na setting"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "Idinagdag na hakbang"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "Binago na hakbang"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "Tinanggal na hakbang"
+
 msgid "templates.catalog.heading"
 msgstr "Mga available na template"
 
@@ -6277,8 +8422,89 @@ msgstr "Layer ang template: ang pagdaragdag nito sa service na gumagamit na ng m
 msgid "templates.catalog.no_compat_notice"
 msgstr "Hindi idineklara ng catalogue na ito ang compatibility sa BunkerWeb. Tinatanggihan ang template sa install kung nagtutukoy ito ng setting na wala sa BunkerWeb na ito."
 
+msgid "templates.catalog.state_installed"
+msgstr "Naka-install, kapareho ng catalogue"
+
+msgid "templates.catalog.state_managed"
+msgstr "Naka-install at pinamamahalaan ni %(owner)s: hindi ito binabago ng catalogue"
+
+msgid "templates.catalog.state_update"
+msgstr "Naka-install, magkaiba ang bersyon ng catalogue"
+
 msgid "templates.catalog.subheading"
 msgstr "Mga piniling service template na inilathala ng BunkerWeb organization."
+
+msgid "templates.catalog.update_changed"
+msgstr "Nagbago ang template na %(template)s o ang catalogue mula noong preview. I-reload ang page at suriin muli ang mga pagbabago."
+
+msgid "templates.catalog.update_confirm"
+msgstr "Palitan ang template %(id)s ng bersyon nito mula sa catalogue release %(tag)s. Ang mga pagbabagong ito ay ilalapat sa template:"
+
+msgid "templates.catalog.update_failed"
+msgstr "Hindi ma-update ang template."
+
+msgid "templates.catalog.update_managed"
+msgstr "Ang template na %(template)s ay pinamamahalaan ni %(owner)s: hindi ito binabago ng catalogue"
+
+msgid "templates.catalog.update_no_services"
+msgstr "Wala pang serbisyong gumagamit ng template na ito."
+
+msgid "templates.catalog.update_not_installed"
+msgstr "Hindi naka-install ang template na %(template)s: i-install na lang ito sa halip"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "Masusuri ang mga pagbabago pagkatapos ng susunod na pag-refresh ng catalogue."
+
+msgid "templates.catalog.update_services"
+msgstr "Ginagamit ng mga serbisyong ito ang template na ito. Sa susunod na configuration generation nila, bawat setting na hindi nila mismo itinakda ay kukuha ng bagong halaga:"
+
+msgid "templates.catalog.update_title"
+msgstr "I-update ang Community Template"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "Tumutugma na ang template na %(template)s sa catalogue"
+
+msgid "templates.flash.catalog_updated"
+msgstr "Na-update ang template na %(template)s mula sa catalogue."
+
+msgid "templates.flash.error_deleting_template"
+msgstr "Error habang tinatanggal ang template na %(template_id)s: %(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "Hindi ma-export ang template na %(template)s: %(error)s"
+
+msgid "templates.flash.imported"
+msgstr "Na-import ang template na %(template)s."
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "Walang napiling template na tatanggalin."
+
+msgid "templates.flash.replaced"
+msgstr "Napalitan ang template na %(template)s."
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "Mga template na binura: %(success_count)s."
+
+msgid "templates.flash.template_created_successfully"
+msgstr "Matagumpay na nagawa ang template na %(template_id)s."
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "Matagumpay na na-delete ang template na %(template_id)s."
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "Na-install mula sa catalogue ang template na %(template_id)s."
+
+msgid "templates.flash.template_not_found"
+msgstr "Hindi nahanap ang template na %(clone_id)s."
+
+msgid "templates.flash.template_not_found_2"
+msgstr "Hindi nahanap ang template."
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "Matagumpay na na-update ang template na %(template_id)s."
+
+msgid "templates.flash.user_is_read_only"
+msgstr "Read-only ang user"
 
 msgid "templates.gallery.delete_selected"
 msgstr "Burahin ang napili"
@@ -6294,6 +8520,24 @@ msgstr "Piliin"
 
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
+
+msgid "templates.import.admin_only"
+msgstr "Ang pag-import ng mga template ay limitado lamang sa mga administrator"
+
+msgid "templates.import.failed"
+msgstr "Hindi ma-import ang template."
+
+msgid "templates.import.no_file"
+msgstr "Pumili ng file na i-import."
+
+msgid "templates.import.refused"
+msgstr "Hindi na-import ang template: %(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "Hindi na-import ang template: mas malaki sa 1 MiB ang file"
+
+msgid "templates.import.unreadable"
+msgstr "Hindi na-import ang template: hindi mabasa ang file"
 
 msgid "templates.name.api"
 msgstr "API"
@@ -6332,7 +8576,7 @@ msgid "theme.light"
 msgstr "Maliwanag"
 
 msgid "theme.system"
-msgstr "System"
+msgstr "Sistema"
 
 msgid "threatmap.attacks_today"
 msgstr "Mga pag-atake ngayong araw"
@@ -6429,6 +8673,9 @@ msgstr "Itakda ang METRICS_COLLECT_TIMINGS sa yes para sukatin ang tagal ng bawa
 
 msgid "timings.disabled_title"
 msgstr "Naka-off ang pagsukat ng oras ng plugin"
+
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "Error habang kinukuha ang mga plugin timing: %(message)s"
 
 msgid "timings.max"
 msgstr "Pinakamataas"
@@ -6532,11 +8779,23 @@ msgstr "Kung awtomatikong hihilingin ang isang Let's Encrypt certificate."
 msgid "tooltip.badge.redirect_candidate"
 msgstr "Wala nang iba ang serbisyong ito kundi isang redirect, kaya maaari itong ideklarang redirect lamang — na mag-aalis dito sa bilang ng mga serbisyong PRO sa oras na umandar ang pagsingil na iyon."
 
+msgid "tooltip.button.attach_redirect"
+msgstr "Ikabit ang %(name)s sa isang serbisyo"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "Ikabit ang %(name)s sa isang serbisyo"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "Ikabit ang %(name)s sa isang serbisyo"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Bumalik sa pag-upload ng file"
 
 msgid "tooltip.button.ban_ip"
 msgstr "I-ban ang IP address na ito"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "Kopyahin ang %(name)s"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "I-convert ang Config na %(name)s sa Draft"
@@ -6550,6 +8809,9 @@ msgstr "I-convert ang Serbisyo na %(name)s sa Draft"
 msgid "tooltip.button.convert_service_to_online"
 msgstr "I-convert ang Serbisyo na %(name)s sa Online"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "Burahin ang sertipiko"
+
 msgid "tooltip.button.delete_config"
 msgstr "Burahin ang Custom Config na %(name)s"
 
@@ -6562,11 +8824,32 @@ msgstr "Burahin ang Instance na %(hostname)s"
 msgid "tooltip.button.delete_plugin"
 msgstr "Burahin ang Plugin na %(name)s"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "Burahin ang %(name)s"
+
 msgid "tooltip.button.delete_service"
 msgstr "Burahin ang Serbisyo na %(name)s"
 
 msgid "tooltip.button.delete_template"
 msgstr "Burahin ang Template na %(name)s"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "Burahin ang %(name)s"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "Burahin ang %(name)s"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "I-edit ang %(name)s"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "I-edit ang %(name)s"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "I-edit ang pangalan at paglalarawan ng %(name)s"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "I-edit ang mga panuntunan ng %(name)s"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "Magbigay ng enrollment code para sa %(hostname)s"
@@ -6673,6 +8956,9 @@ msgstr "Ang kumpirmasyon ng password ay dapat tumugma sa password na ipinasok sa
 msgid "tooltip.copied"
 msgstr "Nakopya!"
 
+msgid "tooltip.copy_failed"
+msgstr "Nabigo ang pagkopya"
+
 msgid "tooltip.copy_https_only"
 msgstr "Ang feature ng pagkopya ay available lamang sa HTTPS."
 
@@ -6693,6 +8979,9 @@ msgstr "Ang value ay naiiba sa default ng template"
 
 msgid "tooltip.disabled_by_method"
 msgstr "Hindi pinagana: Pinamamahalaan sa pamamagitan ng paraan na '%(method)s'."
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "Naka-disable: Pinamamahalaan ng plugin na %(plugin)s."
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "Hindi pinagana: Ang database ay nasa read-only na mode."
@@ -6813,6 +9102,9 @@ msgstr "I-export ang Custom Config na %(name)s"
 
 msgid "tooltip.link.export_service"
 msgstr "I-export ang Configuration ng Serbisyo na %(service)s"
+
+msgid "tooltip.link.export_template"
+msgstr "I-export ang Template %(template)s"
 
 msgid "tooltip.link.manage_activation"
 msgstr "Pamahalaan ang pag-activate ng %(name)s sa mga pangkalahatang setting"
@@ -7285,6 +9577,21 @@ msgstr "Pagkaantala sa segundo sa pagitan ng mga ulit ng ZeroSSL API."
 msgid "totp.cant_access"
 msgstr "Hindi makakuha ng access sa iyong authenticator?"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "Read-only ang database, mananatiling valid ang recovery code na ginamit mo."
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "May naganap na error habang ginagamit ang recovery code."
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "Walang ibinigay na token sa /totp."
+
+msgid "totp.flash.token_invalid"
+msgstr "Hindi wasto ang token."
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "Nagamit mo na ang isa sa iyong mga recovery code. May natitira kang %(len)s."
+
 msgid "totp.or_use_security_key"
 msgstr "o gamitin ang iyong security key"
 
@@ -7350,6 +9657,78 @@ msgstr "Ang upstream ay isang pangalan na pool ng mga backends na ikinakabit sa 
 
 msgid "upstreams.empty_title"
 msgstr "Walang upstream pa"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "Kailangan ng hindi bababa sa isang server"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "Kailangan ng hindi bababa sa isang serbisyo"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "Hindi na-attach ang upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "Hindi nagawa ang upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "Hindi na-delete ang upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "Hindi na-detach ang upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "Hindi nakuha ang mga serbisyo para sa mga takdang-aral ng upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "Hindi nakuha ang mga upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "Hindi na-update ang upstream: %(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "Ang bilang ng keepalive ay dapat positibong buong numero"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "Ang reverse proxy path ay dapat magsimula sa /"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "Ang method ay dapat isa sa %(value)s"
+
+msgid "upstreams.flash.name_required"
+msgstr "Kailangan ang pangalan ng upstream"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "Ang protocol ay dapat isa sa %(value)s"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "Hindi maaaring magkaroon ang upstream ng mahigit sa %(value)s na server"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "Hindi maaaring mag-attach ang upstream sa mahigit sa %(value)s na serbisyo"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "Naikabit ang upstream. Mga serbisyo: %(len)s"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "Matagumpay na nagawa ang upstream na %(value)s"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "Matagumpay na na-delete ang upstream"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "Matagumpay na na-detach ang upstream"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "Kailangan ang upstream"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "Kailangan ang upstream at serbisyo"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "Matagumpay na na-update ang upstream"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "Ang weight at max fails ng %(host)s ay dapat buong numero"
 
 msgid "upstreams.keepalive"
 msgstr "Panatilihin ang koneksyon"
@@ -7434,6 +9813,15 @@ msgstr "Ang serbisyo na %(count)s ay nakatago: ang isang upstream na %(protocol)
 
 msgid "upstreams.truncated"
 msgstr "Ang unang 500 upstream lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "Hindi maka-connect sa redis"
+
+msgid "utils.flash.invalid_request"
+msgstr "Hindi wastong request"
+
+msgid "utils.flash.missing_form"
+msgstr "Kulang ang %(key)s sa form"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "Ilagay ang iyong kasalukuyang password upang magdagdag ng passkey."
@@ -7530,6 +9918,27 @@ msgstr "Mga naka-enable na serbisyo"
 
 msgid "web_cache.error"
 msgstr "Kamalian"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "Error habang kinukuha ang mga metric ng web cache: %(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "Error habang kinukuha ang status ng web cache: %(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "Error habang pino-purge ang web cache: %(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "Na-purge ang web cache (lahat ng entry)"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "Na-purge ang web cache para sa %(url)s"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "Kailangan ng URL para mag-purge base sa URL"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "Na-purge ang web cache. Mga instance na na-purge: %(value)s, nabigo: %(value2)s, hindi maabot at nilaktawan: %(value3)s (walang inilagay sa pila)."
 
 msgid "web_cache.hit_rate"
 msgstr "Rate ng pag-hit"
@@ -7666,6 +10075,9 @@ msgstr "Patakaran %(n)s sa %(total)s, baguhin ang posisyon"
 msgid "workflows.aria.collapse"
 msgstr "I-collapse"
 
+msgid "workflows.aria.collapseRule"
+msgstr "I-collapse ang rule %(n)s"
+
 msgid "workflows.aria.combinator"
 msgstr "Baguhin ang combinator, kasalukuyang"
 
@@ -7684,6 +10096,9 @@ msgstr "I-drag para baguhin ang ayos"
 msgid "workflows.aria.expand"
 msgstr "I-expand"
 
+msgid "workflows.aria.expandRule"
+msgstr "I-expand ang rule %(n)s"
+
 msgid "workflows.aria.groupKind"
 msgstr "Uri ng grupo"
 
@@ -7693,11 +10108,20 @@ msgstr "Magdagdag ng patakaran sa posisyon %(n)s"
 msgid "workflows.aria.more"
 msgstr "Higit pa"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "Higit pang aksyon para sa rule %(n)s"
+
 msgid "workflows.aria.moveDown"
 msgstr "Ilipat pababa — mas huling tatakbo"
 
 msgid "workflows.aria.moveRule"
 msgstr "Ilipat ang patakaran"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "Ilipat pababa ang rule %(n)s"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "Ilipat pataas ang rule %(n)s"
 
 msgid "workflows.aria.moveUp"
 msgstr "Ilipat pataas — mas maagang tatakbo"
@@ -7734,6 +10158,9 @@ msgstr "Bilang ng mga request"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "Grupo ng resource"
+
+msgid "workflows.aria.ruleCard"
+msgstr "Panuntunan %(n)s ng %(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "Mga problema sa pagpapatunay ng %(count)s sa patakarang ito"
@@ -7897,6 +10324,9 @@ msgstr "Tumatakbo ang mga workflow ayon sa pagkakalakip; ang mga patakaran dito 
 msgid "workflows.entry_title"
 msgstr "Bawat request sa nakalakip na serbisyo"
 
+msgid "workflows.err.load"
+msgstr "Hindi mabasa ang mga nakaimbak na panuntunan. Naka-disable ang pag-save upang hindi ito ma-overwrite; i-reload ang page."
+
 msgid "workflows.err.save"
 msgstr "Hindi ma-save"
 
@@ -7929,6 +10359,69 @@ msgstr "Magpapatuloy ang request sa susunod na nakalakip na workflow, at saka sa
 
 msgid "workflows.exit_title"
 msgstr "Walang tumugmang patakaran"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "Hindi na-attach ang daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "Hindi na-clone ang daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "Hindi nagawa ang daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "Hindi na-delete ang daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "Hindi na-detach ang daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "Hindi nakuha ang mga serbisyo para sa mga takdang-aral ng daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "Hindi nakuha ang daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "Hindi nakuha ang mga daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "Hindi na-update ang daloy ng trabaho: %(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "Kailangan ang pangalan ng daloy ng trabaho"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "Hindi mabasa ang listahan ng serbisyo; buksang muli ang page at subukan ulit"
+
+msgid "workflows.flash.too_many_services"
+msgstr "Hindi maaaring mag-attach ang daloy ng trabaho sa mahigit sa %(value)s na serbisyo"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "Na-clone ang daloy ng trabaho bilang %(name)s"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "Matagumpay na nagawa ang daloy ng trabaho na %(value)s"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "Matagumpay na na-delete ang daloy ng trabaho"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "Matagumpay na na-detach ang daloy ng trabaho"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "Kailangan ang daloy ng trabaho at bagong pangalan"
+
+msgid "workflows.flash.workflow_required"
+msgstr "Kailangan ang daloy ng trabaho"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "Kailangan ang daloy ng trabaho at serbisyo"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "Na-update ang mga serbisyo ng daloy ng trabaho (%(len)s naka-attach)"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "Matagumpay na na-update ang daloy ng trabaho"
 
 msgid "workflows.gate.and"
 msgstr "at kapag nakagawa na ang parehong client IP ng higit sa"
@@ -8038,8 +10531,14 @@ msgstr ", dito titigil ang pagsusuri — hindi na maaabot ang patakaran sa ibaba
 msgid "workflows.rules"
 msgstr "Mga panuntunan"
 
-msgid "workflows.say.actionChanged"
-msgstr "Binago ang aksyon sa %(type)s. Ito pa rin ang nag-iisang aksyon at itinitigil pa rin nito ang pagsusuri."
+msgid "workflows.say.actionChangedBlock"
+msgstr "Binago ang aksyon sa block. Ito pa rin ang nag-iisang aksyon at itinitigil pa rin nito ang pagsusuri."
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "Binago ang aksyon sa challenge. Ito pa rin ang nag-iisang aksyon at itinitigil pa rin nito ang pagsusuri."
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "Binago ang aksyon sa redirect. Ito pa rin ang nag-iisang aksyon at itinitigil pa rin nito ang pagsusuri."
 
 msgid "workflows.say.added"
 msgstr "Idinagdag ang patakaran sa puwestong %(n)s — huli, kaya susuriin muna ang lahat ng patakaran sa itaas."
@@ -8066,13 +10565,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "Inalis ang huling value — hindi mase-save ang kondisyong ito hangga't wala itong value."
 
 msgid "workflows.say.moved"
-msgstr "Inilipat ang %(name)s sa puwestong %(to)s sa %(total)s%(how)s. Tumatakbo na ito %(where)s."
+msgstr "Inilipat ang %(name)s sa puwestong %(to)s sa %(total)s."
+
+msgid "workflows.say.movedDrag"
+msgstr "Na-drag ang %(name)s sa puwestong %(to)s sa %(total)s."
+
+msgid "workflows.say.movedKeyboard"
+msgstr "Inilipat ang %(name)s gamit ang keyboard sa puwestong %(to)s sa %(total)s."
 
 msgid "workflows.say.predicateCap"
 msgstr "Mayroon nang %(max)s kondisyon ang patakarang ito, ang maximum."
-
-msgid "workflows.say.ruleAbove"
-msgstr "patakaran sa itaas"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "Naka-disable ang %(name)s — lubos itong nilalaktawan at nakikita na ng mga patakaran sa ibaba ang mga request na iyon."
@@ -8081,13 +10583,16 @@ msgid "workflows.say.ruleEnabled"
 msgstr "Naka-enable ang %(name)s — sinusuri ulit ito sa puwestong %(n)s."
 
 msgid "workflows.say.runsAfter"
-msgstr "pagkatapos ng %(name)s"
+msgstr "Tumatakbo na ito pagkatapos ng %(name)s."
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "Tumatakbo na ito pagkatapos ng patakaran sa itaas."
 
 msgid "workflows.say.runsFirst"
-msgstr "una"
+msgstr "Tumatakbo na ito nang una."
 
 msgid "workflows.say.runsLast"
-msgstr "huli"
+msgstr "Tumatakbo na ito nang huli."
 
 msgid "workflows.say.saved"
 msgstr "Na-save ang mga patakaran at ipinadala sa mga nakalakip na serbisyo."
@@ -8096,13 +10601,7 @@ msgid "workflows.say.theRule"
 msgstr "Ang patakaran"
 
 msgid "workflows.say.valuesDropped"
-msgstr "Binago ang kondisyon sa %(type)s — hindi mailipat ang %(count)s value na laman nito."
-
-msgid "workflows.say.via.drag"
-msgstr "sa pag-drag"
-
-msgid "workflows.say.via.keyboard"
-msgstr "gamit ang keyboard"
+msgstr "Binago ang kondisyon. Mga value na hindi nadala: %(count)s."
 
 msgid "workflows.say.viewCanvas"
 msgstr "Tingnan ang canvas. Ang mga patakaran ay tumatakbo mula kaliwa pakanan; ang unang pagtutugma ang panalo."
@@ -8222,7 +10721,16 @@ msgid "workflows.test.out_draft"
 msgstr "Draft ang serbisyong ito — wala pang workflow na na-compile para rito."
 
 msgid "workflows.test.out_match"
-msgstr "Tumugma ang %(workflow)s · %(rule)s at %(action)s ang request."
+msgstr "Tumugma ang %(workflow)s · %(rule)s."
+
+msgid "workflows.test.out_match_block"
+msgstr "Tumugma ang %(workflow)s · %(rule)s at na-block ang request."
+
+msgid "workflows.test.out_match_challenge"
+msgstr "Tumugma ang %(workflow)s · %(rule)s at na-challenge ang request."
+
+msgid "workflows.test.out_match_redirect"
+msgstr "Tumugma ang %(workflow)s · %(rule)s at na-redirect ang request."
 
 msgid "workflows.test.out_no_match"
 msgstr "Walang tumugmang patakaran. Magpapatuloy ang request sa natitirang security stack."
@@ -8300,7 +10808,7 @@ msgid "workflows.tree.empty"
 msgstr "Walang laman ang grupo — magdagdag ng kondisyon; hindi ito mase-save nang ganito."
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "walang grupong naglalaman ng %(kind)s entry"
+msgstr "Walang grupo ng resource na naglalaman ng mga entry ng ganitong uri."
 
 msgid "workflows.tree.noneMeta"
 msgstr "tutugma kapag walang true sa mga ito"

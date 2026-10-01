@@ -61,6 +61,9 @@ msgstr "Por favor, carregue um arquivo de exportação de configuração persona
 msgid "alert.credential_action_failed"
 msgstr "A ação falhou."
 
+msgid "alert.custom_end_date_past"
+msgstr "A data de término personalizada deve ser futura."
+
 msgid "alert.custom_end_date_required"
 msgstr "Por favor, selecione uma data final personalizada."
 
@@ -97,8 +100,17 @@ msgstr "Envie um arquivo de exportação de serviços válido (.env ou .zip)."
 msgid "antibot.reason.sentence"
 msgstr "Desafio antibot (%(provider)s) apresentado"
 
+msgid "aria.label.certificate_inventory_assignments"
+msgstr "Atribuições do inventário de certificados"
+
+msgid "aria.label.certificate_public_details"
+msgstr "Detalhes públicos do certificado"
+
 msgid "aria.label.clear_search"
 msgstr "Limpar pesquisa"
+
+msgid "aria.label.clone_item"
+msgstr "Clonar %(name)s"
 
 msgid "aria.label.close"
 msgstr "Fechar"
@@ -111,6 +123,9 @@ msgstr "Selecione um arquivo de exportação de configurações personalizadas o
 
 msgid "aria.label.copy"
 msgstr "Copiar logs"
+
+msgid "aria.label.detach_from_service"
+msgstr "Desanexar %(name)s de %(service)s"
 
 msgid "aria.label.download_log"
 msgstr "Baixar este arquivo de log"
@@ -148,6 +163,9 @@ msgstr "Mostrar carimbos de data/hora no horário local"
 msgid "aria.label.next_issue"
 msgstr "Próximo erro ou aviso"
 
+msgid "aria.label.open_user_menu"
+msgstr "Abrir o menu do usuário"
+
 msgid "aria.label.passkey_name"
 msgstr "Nome da chave de acesso"
 
@@ -159,6 +177,9 @@ msgstr "Erro ou aviso anterior"
 
 msgid "aria.label.raw_configuration"
 msgstr "Configuração bruta"
+
+msgid "aria.label.remove_this_server"
+msgstr "Remover este servidor"
 
 msgid "aria.label.remove_value"
 msgstr "Remover valor"
@@ -178,8 +199,23 @@ msgstr "Selecionar arquivo"
 msgid "aria.label.select_page"
 msgstr "Selecionar página"
 
+msgid "aria.label.select_template"
+msgstr "Selecionar modelo %(name)s"
+
 msgid "aria.label.services_dropzone"
 msgstr "Selecione um arquivo de exportação de serviços ou solte-o aqui"
+
+msgid "aria.label.show_details"
+msgstr "Mostrar detalhes de %(name)s"
+
+msgid "aria.label.toggle_item"
+msgstr "Alternar %(name)s"
+
+msgid "aria.label.toggle_section"
+msgstr "Alternar a seção %(name)s"
+
+msgid "aria.label.toggle_theme"
+msgstr "Alternar o modo escuro"
 
 msgid "aria.label.toggle_wrap"
 msgstr "Alternar quebra de linha"
@@ -244,6 +280,15 @@ msgstr "Falha ao banir %(ip)s: %(error)s"
 msgid "bans.flash.ban_success"
 msgstr "%(ip)s banido com sucesso."
 
+msgid "bans.flash.custom_end_date_in_past"
+msgstr "A data de término de banimento personalizada para %(ip)s deve ser futura"
+
+msgid "bans.flash.invalid_ban_selection_mode"
+msgstr "Modo de seleção de banimentos inválido."
+
+msgid "bans.flash.invalid_bans_parameter_bans_ban"
+msgstr "Parâmetro bans inválido em /bans/ban."
+
 msgid "bans.flash.invalid_custom_duration"
 msgstr "Duração de banimento personalizada inválida para %(ip)s"
 
@@ -253,11 +298,44 @@ msgstr "Data de término de banimento personalizada inválida para %(ip)s"
 msgid "bans.flash.invalid_duration"
 msgstr "Duração de banimento inválida: %(duration)s"
 
+msgid "bans.flash.invalid_duration_selection_mode"
+msgstr "Modo de seleção de duração inválido."
+
+msgid "bans.flash.invalid_filtered_ban_source"
+msgstr "Origem de banimento filtrada inválida."
+
+msgid "bans.flash.invalid_filtered_duration_source"
+msgstr "Origem de duração filtrada inválida."
+
+msgid "bans.flash.invalid_filtered_unban_source"
+msgstr "Origem de remoção de banimento filtrada inválida."
+
 msgid "bans.flash.invalid_ip"
 msgstr "Endereço IP inválido: %(ip)s"
 
+msgid "bans.flash.invalid_ips_parameter_bans_unban"
+msgstr "Parâmetro ips inválido em /bans/unban."
+
+msgid "bans.flash.invalid_unban_selection_mode"
+msgstr "Modo de seleção de remoção de banimento inválido."
+
+msgid "bans.flash.invalid_updates_parameter_bans_update_duration"
+msgstr "Parâmetro updates inválido em /bans/update_duration."
+
 msgid "bans.flash.missing_custom_end_date"
 msgstr "Data de término de banimento personalizada ausente para %(ip)s"
+
+msgid "bans.flash.no_bans"
+msgstr "Sem banimentos."
+
+msgid "bans.flash.no_matching_bans"
+msgstr "Nenhum banimento correspondente."
+
+msgid "bans.flash.no_matching_reports"
+msgstr "Nenhum relatório correspondente."
+
+msgid "bans.flash.no_updates"
+msgstr "Sem atualizações."
 
 msgid "bans.flash.redis_fetch_failed"
 msgstr "Falha ao buscar os banimentos no Redis, consulte os logs para mais informações."
@@ -448,11 +526,14 @@ msgstr "Confirmar"
 msgid "button.convert_configs"
 msgstr "Converter Configs"
 
-msgid "button.convert_configs_to"
-msgstr "Converter para %(state)s"
-
 msgid "button.convert_services"
 msgstr "Converter Serviços"
+
+msgid "button.convert_to_draft"
+msgstr "Converter em rascunho"
+
+msgid "button.convert_to_online"
+msgstr "Converter em online"
 
 msgid "button.copy"
 msgstr "Copiar"
@@ -549,6 +630,9 @@ msgstr "Importar configurações personalizadas"
 
 msgid "button.import_services"
 msgstr "Importar serviços"
+
+msgid "button.import_template"
+msgstr "Importar modelo"
 
 msgid "button.local_time"
 msgstr "Horário local"
@@ -727,6 +811,39 @@ msgstr "Encerrar outras sessões"
 msgid "button.wrap"
 msgstr "Quebrar linha"
 
+msgid "cache.flash.api_unavailable"
+msgstr "API indisponível: %(message)s"
+
+msgid "cache.flash.cache_file_job_plugin_not_found"
+msgstr "Arquivo de cache %(file_name)s da tarefa %(job_name)s, plugin %(plugin_id)s não encontrado"
+
+msgid "cache.flash.cache_file_job_plugin_not_found_service"
+msgstr "Arquivo de cache %(file_name)s da tarefa %(job_name)s, plugin %(plugin_id)s, serviço %(service)s não encontrado"
+
+msgid "cache.flash.deleted_files_errors"
+msgstr "%(deleted_count)s arquivos excluídos com %(len)s erros: %(value)s"
+
+msgid "cache.flash.error_deleting_cache_files"
+msgstr "Erro ao excluir os arquivos de cache: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_file"
+msgstr "Erro ao buscar o arquivo de cache: %(message)s"
+
+msgid "cache.flash.error_fetching_cache_files"
+msgstr "Erro ao buscar os arquivos de cache: %(message)s"
+
+msgid "cache.flash.invalid_cache_files_parameter"
+msgstr "Parâmetro de arquivos de cache inválido"
+
+msgid "cache.flash.no_cache_files_selected"
+msgstr "Nenhum arquivo de cache selecionado"
+
+msgid "cache.flash.successfully_deleted_cache_file"
+msgstr "%(deleted_count)s arquivo de cache excluído com sucesso"
+
+msgid "cache.flash.successfully_deleted_cache_files"
+msgstr "%(deleted_count)s arquivos de cache excluídos com sucesso"
+
 msgid "cache.kpi_files"
 msgstr "Arquivos"
 
@@ -840,6 +957,117 @@ msgstr "O arquivo não pode exceder 1 MiB."
 
 msgid "certificates.fingerprint"
 msgstr "Impressão SHA-256"
+
+msgid "certificates.flash.certificate_action_failed"
+msgstr "Falha na ação sobre o certificado: %(message)s"
+
+msgid "certificates.flash.certificate_deleted_successfully"
+msgstr "Certificado excluído com sucesso"
+
+msgid "certificates.flash.certificate_inventory_assignment_added_successfully"
+msgstr "Atribuição do inventário de certificados adicionada com sucesso"
+
+msgid "certificates.flash.certificate_inventory_assignment_removed_successfully"
+msgstr "Atribuição do inventário de certificados removida com sucesso"
+
+msgid "certificates.flash.certificate_metadata_updated_successfully"
+msgstr "Metadados do certificado atualizados com sucesso"
+
+msgid "certificates.flash.certificate_name_are_required"
+msgstr "O certificado e o nome são obrigatórios"
+
+msgid "certificates.flash.certificate_name_required"
+msgstr "O nome do certificado é obrigatório"
+
+msgid "certificates.flash.certificate_renewed_successfully"
+msgstr "Certificado renovado com sucesso"
+
+msgid "certificates.flash.certificate_required"
+msgstr "O certificado é obrigatório"
+
+msgid "certificates.flash.certificate_service_are_required"
+msgstr "O certificado e o serviço são obrigatórios"
+
+msgid "certificates.flash.certificate_upload_exceeds_2_mib_request"
+msgstr "O upload do certificado excede o limite de requisição de 2 MiB"
+
+msgid "certificates.flash.checked_certificates_due_renewal"
+msgstr "Verificados %(total_due)s certificados a vencer"
+
+msgid "certificates.flash.could_not_attach_certificate"
+msgstr "Não foi possível anexar o certificado: %(message)s"
+
+msgid "certificates.flash.could_not_create_certificate"
+msgstr "Não foi possível criar o certificado: %(message)s"
+
+msgid "certificates.flash.could_not_detach_certificate"
+msgstr "Não foi possível desanexar o certificado: %(message)s"
+
+msgid "certificates.flash.could_not_download_certificate"
+msgstr "Não foi possível baixar o certificado: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_certificates"
+msgstr "Não foi possível buscar os certificados: %(message)s"
+
+msgid "certificates.flash.could_not_fetch_services_certificate_assignments"
+msgstr "Não foi possível buscar os serviços para as atribuições de certificados: %(message)s"
+
+msgid "certificates.flash.could_not_schedule_letsencrypt"
+msgstr "Não foi possível agendar a emissão do Let's Encrypt: %(message)s"
+
+msgid "certificates.flash.could_not_update_certificate"
+msgstr "Não foi possível atualizar o certificado: %(message)s"
+
+msgid "certificates.flash.could_not_upload_certificate"
+msgstr "Não foi possível enviar o certificado: %(message)s"
+
+msgid "certificates.flash.custom_certificate_uploaded_successfully"
+msgstr "Certificado personalizado carregado com sucesso"
+
+msgid "certificates.flash.encrypted_private_key"
+msgstr "Chaves privadas criptografadas não são suportadas."
+
+msgid "certificates.flash.invalid_certificate_action"
+msgstr "Ação de certificado inválida"
+
+msgid "certificates.flash.invalid_certificate_part"
+msgstr "Parte do certificado inválida"
+
+msgid "certificates.flash.invalid_certificate_pem"
+msgstr "O arquivo de certificado não é um certificado PEM válido."
+
+msgid "certificates.flash.invalid_certificate_source"
+msgstr "Origem de certificado inválida"
+
+msgid "certificates.flash.invalid_private_key_pem"
+msgstr "O arquivo de chave privada não é uma chave privada PEM válida."
+
+msgid "certificates.flash.letsencrypt_issuance_scheduled"
+msgstr "Emissão do Let's Encrypt agendada"
+
+msgid "certificates.flash.name_common_name_are_required"
+msgstr "O nome e o nome comum são obrigatórios"
+
+msgid "certificates.flash.pem_certificate_private_key_required"
+msgstr "É necessário um certificado PEM e uma chave privada"
+
+msgid "certificates.flash.select_service_letsencrypt"
+msgstr "Selecione pelo menos um serviço para a emissão do Let's Encrypt"
+
+msgid "certificates.flash.selfsigned_certificate_created"
+msgstr "Certificado autoassinado criado"
+
+msgid "certificates.flash.too_many_sans"
+msgstr "Um certificado não pode conter mais de 100 nomes alternativos de sujeito"
+
+msgid "certificates.flash.too_many_services"
+msgstr "Um certificado não pode estar anexado a mais de 100 serviços"
+
+msgid "certificates.flash.validity_range"
+msgstr "A validade deve estar entre 1 e 825 dias"
+
+msgid "certificates.flash.validity_whole_number"
+msgstr "A validade deve ser um número inteiro de dias"
 
 msgid "certificates.issuer"
 msgstr "Emissor"
@@ -1053,6 +1281,168 @@ msgstr "Mostrar mais sobre %(count)s"
 
 msgid "compose.unavailable"
 msgstr "A lista de plugins não pôde ser carregada, portanto esta página não pode ser editada com segurança. Recarregue após API responder."
+
+msgid "configs.flash.all_selected_custom_configs_could_not"
+msgstr "Todas as configurações personalizadas selecionadas não foram encontradas, não são configurações personalizadas de UI/API ou já foram convertidas."
+
+msgid "configs.flash.all_selected_custom_configs_could_not_2"
+msgstr "Todas as configurações personalizadas selecionadas não foram encontradas ou não são configurações personalizadas de UI/API."
+
+msgid "configs.flash.config_already_exists"
+msgstr "A configuração %(config_type)s/%(config_name)s já existe"
+
+msgid "configs.flash.config_already_exists_service"
+msgstr "A configuração %(config_type)s/%(config_name)s do serviço %(service)s já existe"
+
+msgid "configs.flash.config_does_not_exist"
+msgstr "A configuração %(clone)s não existe."
+
+msgid "configs.flash.config_does_not_exist_2"
+msgstr "A configuração %(config_type)s/%(name)s não existe."
+
+msgid "configs.flash.config_does_not_exist_2_service"
+msgstr "A configuração %(config_type)s/%(name)s do serviço %(service)s não existe."
+
+msgid "configs.flash.config_not_ui_api_custom_config"
+msgstr "A configuração %(config_type)s/%(name)s não é uma configuração personalizada de UI/API e não pode ser editada."
+
+msgid "configs.flash.config_not_ui_api_custom_config_service"
+msgstr "A configuração %(config_type)s/%(name)s do serviço %(service)s não é uma configuração personalizada de UI/API e não pode ser editada."
+
+msgid "configs.flash.converted_configs_draft"
+msgstr "Convertidas em configurações \"rascunho\": %(names)s"
+
+msgid "configs.flash.converted_configs_online"
+msgstr "Convertidas em configurações \"online\": %(names)s"
+
+msgid "configs.flash.could_not_fetch_custom_configurations_api"
+msgstr "Não foi possível buscar as configurações personalizadas da API: %(fetch_err)s"
+
+msgid "configs.flash.created_custom_configuration"
+msgstr "Configuração personalizada %(config_type)s/%(config_name)s criada"
+
+msgid "configs.flash.created_custom_configuration_service"
+msgstr "Configuração personalizada %(config_type)s/%(config_name)s criada para o serviço %(service)s"
+
+msgid "configs.flash.custom_config_already_draft_will_not"
+msgstr "A configuração personalizada %(non_convertible_config)s já é uma configuração em rascunho e não será convertida."
+
+msgid "configs.flash.custom_config_already_online_will_not"
+msgstr "A configuração personalizada %(non_convertible_config)s já é uma configuração online e não será convertida."
+
+msgid "configs.flash.custom_config_could_not_found"
+msgstr "A configuração personalizada %(missing_config)s não foi encontrada."
+
+msgid "configs.flash.custom_config_not_ui_api_custom"
+msgstr "A configuração personalizada %(non_editable_config)s não é uma configuração personalizada de UI/API e não será convertida."
+
+msgid "configs.flash.custom_config_not_ui_api_custom_2"
+msgstr "A configuração personalizada %(skipped_config)s não é uma configuração personalizada de UI/API e não será excluída."
+
+msgid "configs.flash.deleted_config_one"
+msgstr "Configuração excluída: %(names)s"
+
+msgid "configs.flash.deleted_config_other"
+msgstr "Configurações excluídas: %(names)s"
+
+msgid "configs.flash.error_occurred_while_deleting_custom_configs"
+msgstr "Ocorreu um erro ao excluir as configurações personalizadas: %(e)s"
+
+msgid "configs.flash.error_occurred_while_saving_custom_configs"
+msgstr "Ocorreu um erro ao salvar as configurações personalizadas: %(error_msg)s"
+
+msgid "configs.flash.failed_import_custom_configuration_one"
+msgstr "Falha ao importar a configuração personalizada: %(names)s"
+
+msgid "configs.flash.failed_import_custom_configuration_other"
+msgstr "Falha ao importar as configurações personalizadas: %(names)s"
+
+msgid "configs.flash.import_error"
+msgstr "Erro de importação: %(error)s"
+
+msgid "configs.flash.imported_custom_configuration_one"
+msgstr "Configuração personalizada importada: %(names)s"
+
+msgid "configs.flash.imported_custom_configuration_other"
+msgstr "Configurações personalizadas importadas: %(names)s"
+
+msgid "configs.flash.invalid_configs_parameter_configs_convert"
+msgstr "Parâmetro configs inválido em /configs/convert."
+
+msgid "configs.flash.invalid_configs_parameter_configs_delete"
+msgstr "Parâmetro configs inválido em /configs/delete."
+
+msgid "configs.flash.invalid_configs_parameter_configs_export"
+msgstr "Parâmetro configs inválido em /configs/export."
+
+msgid "configs.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Codificação de arquivo inválida. Carregue um arquivo JSON em UTF-8."
+
+msgid "configs.flash.invalid_name_parameter_configs_new"
+msgstr "Parâmetro name inválido em /configs/new."
+
+msgid "configs.flash.invalid_type_parameter_configs_new"
+msgstr "Parâmetro type inválido em /configs/new."
+
+msgid "configs.flash.missing_configs_parameter_configs_convert"
+msgstr "Parâmetro configs ausente em /configs/convert."
+
+msgid "configs.flash.missing_configs_parameter_configs_delete"
+msgstr "Parâmetro configs ausente em /configs/delete."
+
+msgid "configs.flash.missing_convert_parameter_configs_convert"
+msgstr "Parâmetro convert_to ausente em /configs/convert."
+
+msgid "configs.flash.missing_name_parameter_configs_new"
+msgstr "Parâmetro name ausente em /configs/new."
+
+msgid "configs.flash.missing_service_parameter_configs_new"
+msgstr "Parâmetro service ausente em /configs/new."
+
+msgid "configs.flash.missing_type_parameter_configs_new"
+msgstr "Parâmetro type ausente em /configs/new."
+
+msgid "configs.flash.missing_value_parameter_configs_new"
+msgstr "Parâmetro value ausente em /configs/new."
+
+msgid "configs.flash.no_configs_selected"
+msgstr "Nenhuma configuração selecionada."
+
+msgid "configs.flash.no_custom_configurations_export"
+msgstr "Nenhuma configuração personalizada para exportar."
+
+msgid "configs.flash.no_custom_configurations_file_uploaded"
+msgstr "Nenhum arquivo de configurações personalizadas carregado."
+
+msgid "configs.flash.no_custom_configurations_found_import_file"
+msgstr "Não foram encontradas configurações personalizadas no arquivo de importação."
+
+msgid "configs.flash.no_values_changed"
+msgstr "Nenhum valor foi alterado."
+
+msgid "configs.flash.overwrote_custom_configuration_one"
+msgstr "Configuração personalizada sobrescrita: %(names)s"
+
+msgid "configs.flash.overwrote_custom_configuration_other"
+msgstr "Configurações personalizadas sobrescritas: %(names)s"
+
+msgid "configs.flash.renaming_template_based_custom_config_not"
+msgstr "Não é permitido renomear uma configuração personalizada baseada em um modelo."
+
+msgid "configs.flash.saved_custom_configuration"
+msgstr "Configuração personalizada %(new_type)s/%(new_name)s salva"
+
+msgid "configs.flash.saved_custom_configuration_service"
+msgstr "Configuração personalizada %(new_type)s/%(new_name)s salva para o serviço %(service)s"
+
+msgid "configs.flash.service_does_not_exist"
+msgstr "O serviço %(new_service)s não existe."
+
+msgid "configs.flash.skipped_custom_configuration_one"
+msgstr "Configuração personalizada ignorada: %(names)s"
+
+msgid "configs.flash.skipped_custom_configuration_other"
+msgstr "Configurações personalizadas ignoradas: %(names)s"
 
 msgid "configs.subtitle"
 msgstr "Trechos de configuração NGINX personalizados para seus serviços — crie, edite e gerencie sobreposições de HTTP, ModSecurity e nível de streaming."
@@ -1820,304 +2210,304 @@ msgid "country.not_applicable"
 msgstr "N/A"
 
 msgid "crowdsec.alert.id"
-msgstr "Alert ID"
+msgstr "ID do alerta"
 
 msgid "crowdsec.alert.load"
-msgstr "Load full evidence"
+msgstr "Carregar todas as evidências"
 
 msgid "crowdsec.alert.started"
-msgstr "Started"
+msgstr "Iniciado"
 
 msgid "crowdsec.alert.stopped"
-msgstr "Stopped"
+msgstr "Interrompido"
 
 msgid "crowdsec.allowlists.allowed"
-msgstr "Allowlisted by CrowdSec"
+msgstr "Na lista de permissões pelo CrowdSec"
 
 msgid "crowdsec.allowlists.comment"
-msgstr "Comment"
+msgstr "Comentário"
 
 msgid "crowdsec.allowlists.console"
-msgstr "Console managed"
+msgstr "Gerenciada pela Console"
 
 msgid "crowdsec.allowlists.empty"
-msgstr "No allowlists were found on this engine."
+msgstr "Nenhuma lista de permissões foi encontrada neste motor."
 
 msgid "crowdsec.allowlists.guide.add"
-msgstr "Add trusted IPs or CIDR networks."
+msgstr "Adicione IPs ou redes CIDR confiáveis."
 
 msgid "crowdsec.allowlists.guide.console"
-msgstr "Edit Console-managed lists in the CrowdSec Console."
+msgstr "Edite as listas gerenciadas pelo Console no CrowdSec Console."
 
 msgid "crowdsec.allowlists.guide.create"
-msgstr "Create a list once, or use an existing locally managed list."
+msgstr "Crie uma lista uma única vez ou use uma lista existente gerenciada localmente."
 
 msgid "crowdsec.allowlists.guide.docs"
-msgstr "CrowdSec allowlist documentation"
+msgstr "Documentação das listas de permissões do CrowdSec"
 
 msgid "crowdsec.allowlists.guide.expiration"
-msgstr "This example expires after 24 hours. Omit --expiration for an entry that does not expire. IPv4 and IPv6 are supported."
+msgstr "Este exemplo expira após 24 horas. Omita --expiration para uma entrada que não expira. IPv4 e IPv6 são suportados."
 
 msgid "crowdsec.allowlists.guide.inspect"
-msgstr "Inspect the list and its expiry dates."
+msgstr "Inspecione a lista e suas datas de expiração."
 
 msgid "crowdsec.allowlists.guide.intro"
-msgstr "You can browse allowlists and check IPs here. To add or remove entries, use cscli on the CrowdSec engine."
+msgstr "Aqui você pode consultar as listas de permissões e verificar IPs. Para adicionar ou remover entradas, use o cscli no motor CrowdSec."
 
 msgid "crowdsec.allowlists.guide.refresh"
-msgstr "After a change, refresh allowlists and investigate the IP again. Removing an exception permits future CrowdSec decisions; it does not create a ban. Local BunkerWeb bans and other protections remain separate."
+msgstr "Após uma alteração, atualize as listas de permissões e investigue novamente o IP. Remover uma exceção permite futuras decisões do CrowdSec; não cria um banimento. Os banimentos locais do BunkerWeb e as outras proteções permanecem separados."
 
 msgid "crowdsec.allowlists.guide.remove"
-msgstr "Remove an exception when it is no longer needed."
+msgstr "Remova uma exceção quando não for mais necessária."
 
 msgid "crowdsec.allowlists.guide.title"
-msgstr "How to manage trusted IPs and networks"
+msgstr "Como gerenciar IPs e redes confiáveis"
 
 msgid "crowdsec.allowlists.guide.where"
-msgstr "Requires CrowdSec 1.7 or later. Run these commands on the host or inside the container running the selected engine's Local API (LAPI), with access to its CrowdSec configuration and database. Replace the example list name, IP and network with your own."
+msgstr "Requer CrowdSec 1.7 ou posterior. Execute estes comandos no host ou dentro do contêiner que executa a API local (LAPI) do motor selecionado, com acesso à respectiva configuração e base de dados do CrowdSec. Substitua o nome da lista, o IP e a rede de exemplo pelos seus."
 
 msgid "crowdsec.allowlists.help"
-msgstr "Trusted IPs and networks for the selected engine. These exceptions apply across its connected services and bouncers."
+msgstr "IPs e redes confiáveis para o motor selecionado. Estas exceções aplicam-se a todos os seus serviços e bouncers conectados."
 
 msgid "crowdsec.allowlists.impact"
-msgstr "This is an engine-wide exception. Local BunkerWeb bans, other protections, or cached decisions can still block this IP."
+msgstr "Esta é uma exceção para todo o motor. Os banimentos locais do BunkerWeb, outras proteções ou decisões em cache ainda podem bloquear este IP."
 
 msgid "crowdsec.allowlists.local"
-msgstr "Locally managed"
+msgstr "Gerenciada localmente"
 
 msgid "crowdsec.allowlists.never"
-msgstr "Never"
+msgstr "Nunca"
 
 msgid "crowdsec.allowlists.no_entries"
-msgstr "No active entries."
+msgstr "Nenhuma entrada ativas."
 
 msgid "crowdsec.allowlists.not_allowed"
-msgstr "This IP does not match a CrowdSec allowlist."
+msgstr "Este IP não corresponde a nenhuma lista de permissões do CrowdSec."
 
 msgid "crowdsec.allowlists.pages"
-msgstr "Allowlist pages"
+msgstr "Páginas de listas de permissões"
 
 msgid "crowdsec.allowlists.refresh"
-msgstr "Refresh allowlists"
+msgstr "Atualizar listas de permissões"
 
 msgid "crowdsec.allowlists.title"
-msgstr "CrowdSec allowlists"
+msgstr "Listas de permissões do CrowdSec"
 
 msgid "crowdsec.allowlists.unknown"
-msgstr "Allowlist status is unavailable."
+msgstr "O estado da lista de permissões não está disponível."
 
 msgid "crowdsec.captured_history"
-msgstr "Captured history"
+msgstr "Histórico capturado"
 
 msgid "crowdsec.captured_history_help"
-msgstr "Captured report data describes what was observed at request time; it does not prove the current decision state."
+msgstr "Os dados de relatório capturados descrevem o que foi observado no momento da solicitação; não provam o estado atual da decisão."
 
 msgid "crowdsec.connection.appsec"
-msgstr "Last AppSec observation"
+msgstr "Última observação do AppSec"
 
 msgid "crowdsec.connection.configured"
-msgstr "Configured"
+msgstr "Configurado"
 
 msgid "crowdsec.connection.connected"
-msgstr "Connected"
+msgstr "Conectado"
 
 msgid "crowdsec.connection.connection_error"
-msgstr "Connection error"
+msgstr "Erro de conexão"
 
 msgid "crowdsec.connection.filter"
-msgstr "Filter connections by hostname or service"
+msgstr "Filtrar conexões por nome de host ou serviço"
 
 msgid "crowdsec.connection.global"
-msgstr "all services"
+msgstr "todos os serviços"
 
 msgid "crowdsec.connection.label"
-msgstr "CrowdSec connection"
+msgstr "Conexão CrowdSec"
 
 msgid "crowdsec.connection.last_sync"
-msgstr "Last successful sync"
+msgstr "Última sincronização bem-sucedida"
 
 msgid "crowdsec.connection.local_api"
-msgstr "Local API"
+msgstr "API local"
 
 msgid "crowdsec.connection.management"
-msgstr "Management"
+msgstr "Gerenciamento"
 
 msgid "crowdsec.connection.mode"
-msgstr "Mode"
+msgstr "Modo"
 
 msgid "crowdsec.connection.none"
-msgstr "No usable CrowdSec connection was found. Check the instance errors and plugin configuration."
+msgstr "Não foi encontrada nenhuma conexão CrowdSec utilizável. Verifique os erros da instância e a configuração do plugin."
 
 msgid "crowdsec.connection.read_only"
-msgstr "Read only"
+msgstr "Somente leitura"
 
 msgid "crowdsec.connection.required"
-msgstr "Choose a CrowdSec connection first."
+msgstr "Escolha primeiro uma conexão CrowdSec."
 
 msgid "crowdsec.connection.scope_help"
-msgstr "The selected connection applies to decisions, allowlists and IP investigation below."
+msgstr "A conexão selecionada aplica-se às decisões, às listas de permissões e à investigação de IPs abaixo."
 
 msgid "crowdsec.connection.selected"
-msgstr "Selected connection"
+msgstr "Conexão selecionada"
 
 msgid "crowdsec.connection.sync"
-msgstr "Decision sync"
+msgstr "Sincronização de decisões"
 
 msgid "crowdsec.connection.sync_current"
-msgstr "Up to date"
+msgstr "Atualizado"
 
 msgid "crowdsec.connection.sync_not_synchronized"
-msgstr "Not synchronized yet"
+msgstr "Ainda não sincronizado"
 
 msgid "crowdsec.connection.sync_stale"
-msgstr "Stale"
+msgstr "Desatualizado"
 
 msgid "crowdsec.current_state"
-msgstr "Current state"
+msgstr "Estado atual"
 
 msgid "crowdsec.current_state_help"
-msgstr "Current state may change after this observation."
+msgstr "O estado atual pode mudar após esta observação."
 
 msgid "crowdsec.decision.duration"
-msgstr "Duration"
+msgstr "Duração"
 
 msgid "crowdsec.decision.expires"
-msgstr "Expires"
+msgstr "Expira"
 
 msgid "crowdsec.decision.id"
-msgstr "Decision ID"
+msgstr "ID da decisão"
 
 msgid "crowdsec.decision.origin"
-msgstr "Origin"
+msgstr "Origem"
 
 msgid "crowdsec.decision.scenario"
-msgstr "Scenario"
+msgstr "Cenário"
 
 msgid "crowdsec.decision.scope"
-msgstr "Scope"
+msgstr "Escopo"
 
 msgid "crowdsec.decision.target"
-msgstr "Target"
+msgstr "Alvo"
 
 msgid "crowdsec.decision.type"
-msgstr "Type"
+msgstr "Tipo"
 
 msgid "crowdsec.decisions.count"
-msgstr "Showing %(start)s–%(end)s of %(total)s"
+msgstr "Mostrando %(start)s–%(end)s de %(total)s"
 
 msgid "crowdsec.decisions.help"
-msgstr "This is current state read directly from the selected CrowdSec engine."
+msgstr "Este é o estado atual, lido diretamente do motor CrowdSec selecionado."
 
 msgid "crowdsec.decisions.none"
-msgstr "No active decisions match these filters."
+msgstr "Nenhuma decisão ativa corresponde a estes filtros."
 
 msgid "crowdsec.decisions.pagination"
-msgstr "Decision pages"
+msgstr "Páginas de decisões"
 
 msgid "crowdsec.decisions.title"
-msgstr "Active decisions"
+msgstr "Decisões ativas"
 
 msgid "crowdsec.error.request"
-msgstr "The CrowdSec request failed."
+msgstr "A solicitação ao CrowdSec falhou."
 
 msgid "crowdsec.investigation.alerts"
-msgstr "Available CrowdSec alert evidence"
+msgstr "Evidências de alertas do CrowdSec disponíveis"
 
 msgid "crowdsec.investigation.current_decisions"
-msgstr "Current CrowdSec decisions"
+msgstr "Decisões atuais do CrowdSec"
 
 msgid "crowdsec.investigation.help"
-msgstr "Current CrowdSec decisions are checked alongside local bans and captured reports."
+msgstr "As decisões atuais do CrowdSec são verificadas em conjunto com os banimentos locais e os relatórios capturados."
 
 msgid "crowdsec.investigation.ip"
-msgstr "IP address"
+msgstr "Endereço IP"
 
 msgid "crowdsec.investigation.local_bans"
-msgstr "Current local BunkerWeb bans"
+msgstr "Banimentos locais atuais do BunkerWeb"
 
 msgid "crowdsec.investigation.no_alerts"
-msgstr "No alert evidence is available."
+msgstr "Não há evidências de alertas disponíveis."
 
 msgid "crowdsec.investigation.no_bans"
-msgstr "No current local ban was found."
+msgstr "Não foi encontrado nenhum banimento local atual."
 
 msgid "crowdsec.investigation.no_decisions"
-msgstr "No current CrowdSec decision was found."
+msgstr "Não foi encontrada nenhuma decisão atual do CrowdSec."
 
 msgid "crowdsec.investigation.no_reports"
-msgstr "No recent captured report was found."
+msgstr "Não foi encontrado nenhum relatório capturado recente."
 
 msgid "crowdsec.investigation.placeholder"
 msgstr "192.0.2.10"
 
 msgid "crowdsec.investigation.reports"
-msgstr "Recent BunkerWeb reports"
+msgstr "Relatórios recentes do BunkerWeb"
 
 msgid "crowdsec.investigation.result"
-msgstr "Investigation for %(ip)s"
+msgstr "Investigação de %(ip)s"
 
 msgid "crowdsec.investigation.submit"
-msgstr "Investigate"
+msgstr "Investigar"
 
 msgid "crowdsec.investigation.summary"
-msgstr "Evidence found for this IP"
+msgstr "Evidências encontradas para este IP"
 
 msgid "crowdsec.investigation.summary_active"
-msgstr "%(total)s active"
+msgstr "%(total)s ativas"
 
 msgid "crowdsec.investigation.summary_alerts"
-msgstr "CrowdSec alert evidence"
+msgstr "Evidências de alertas do CrowdSec"
 
 msgid "crowdsec.investigation.summary_available"
-msgstr "%(total)s available"
+msgstr "%(total)s disponíveis"
 
 msgid "crowdsec.investigation.summary_bans"
-msgstr "Local BunkerWeb bans"
+msgstr "Banimentos locais do BunkerWeb"
 
 msgid "crowdsec.investigation.summary_captured"
-msgstr "%(total)s captured"
+msgstr "%(total)s capturados"
 
 msgid "crowdsec.investigation.summary_decisions"
-msgstr "CrowdSec decisions"
+msgstr "Decisões do CrowdSec"
 
 msgid "crowdsec.investigation.summary_help"
-msgstr "This covers the selected CrowdSec connection and BunkerWeb's own bans. Other protections are not checked here, and evidence that could not be read is no proof that this IP is permitted."
+msgstr "Isso abrange a conexão CrowdSec selecionada e os banimentos do próprio BunkerWeb. As outras proteções não são verificadas aqui, e evidências que não puderam ser lidas não provam que este IP é permitido."
 
 msgid "crowdsec.investigation.summary_none"
-msgstr "None found"
+msgstr "Nada encontrado"
 
 msgid "crowdsec.investigation.summary_reports"
-msgstr "BunkerWeb reports"
+msgstr "Relatórios do BunkerWeb"
 
 msgid "crowdsec.investigation.summary_unreadable"
-msgstr "Could not be read"
+msgstr "Não foi possível ler"
 
 msgid "crowdsec.investigation.title"
-msgstr "Investigate an IP"
+msgstr "Investigar um IP"
 
 msgid "crowdsec.investigation.truncated"
-msgstr "Showing %(shown)s of %(total)s results (source limit: %(limit)s)."
+msgstr "Mostrando %(shown)s de %(total)s resultados (limite da origem: %(limit)s)."
 
 msgid "crowdsec.investigation.unavailable"
-msgstr "Unavailable: %(error)s"
+msgstr "Indisponível: %(error)s"
 
 msgid "crowdsec.local_ban.expires"
-msgstr "Expires"
+msgstr "Expira"
 
 msgid "crowdsec.local_ban.reason"
-msgstr "Reason"
+msgstr "Motivo"
 
 msgid "crowdsec.local_ban.service"
-msgstr "Service"
+msgstr "Serviço"
 
 msgid "crowdsec.next"
-msgstr "Next"
+msgstr "Próxima"
 
 msgid "crowdsec.observed_at"
-msgstr "Observed %(time)s"
+msgstr "Observado %(time)s"
 
 msgid "crowdsec.previous"
-msgstr "Previous"
+msgstr "Anterior"
 
 msgid "crowdsec.reason.action.ban"
 msgstr "solicitação bloqueada"
@@ -2138,91 +2528,91 @@ msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.failure_policy"
-msgstr "CrowdSec AppSec failure policy"
+msgstr "Política de falha do CrowdSec AppSec"
 
 msgid "crowdsec.reason.source.lapi"
 msgstr "CrowdSec LAPI"
 
 msgid "crowdsec.refresh"
-msgstr "Refresh status"
+msgstr "Atualizar estado"
 
 msgid "crowdsec.remove.action"
-msgstr "Remove"
+msgstr "Remover"
 
 msgid "crowdsec.remove.confirm"
-msgstr "I understand and want to remove this decision."
+msgstr "Entendo e quero remover esta decisão."
 
 msgid "crowdsec.remove.impact"
-msgstr "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target."
+msgstr "Isso remove a decisão no motor CrowdSec compartilhado e afeta todos os bouncers conectados. Decisões em cache, outro intervalo, banimentos locais ou o AppSec ainda podem bloquear o alvo."
 
 msgid "crowdsec.remove.selection"
-msgstr "Remove %(scope)s %(value)s (%(type)s), scenario %(scenario)s, origin %(origin)s, from %(source)s (%(engine)s)?"
+msgstr "Remover %(scope)s %(value)s (%(type)s), cenário %(scenario)s, origem %(origin)s, de %(source)s (%(engine)s)?"
 
 msgid "crowdsec.remove.submit"
-msgstr "Remove decision"
+msgstr "Remover decisão"
 
 msgid "crowdsec.remove.success"
-msgstr "Removed at the CrowdSec source. Propagation is %(status)s (%(mode)s, interval %(interval)s). Matching decisions remaining: %(remaining)s. Local bans or AppSec may still block."
+msgstr "Removida na origem do CrowdSec. A propagação está %(status)s (%(mode)s, intervalo %(interval)s). Decisões correspondentes restantes: %(remaining)s. Banimentos locais ou o AppSec ainda podem bloquear."
 
 msgid "crowdsec.remove.title"
-msgstr "Remove CrowdSec decision"
+msgstr "Remover decisão do CrowdSec"
 
 msgid "crowdsec.report.captured"
-msgstr "Captured at"
+msgstr "Capturado em"
 
 msgid "crowdsec.report.date"
-msgstr "Report time"
+msgstr "Hora do relatório"
 
 msgid "crowdsec.report.decisions"
-msgstr "Captured decisions"
+msgstr "Decisões capturadas"
 
 msgid "crowdsec.report.entry"
-msgstr "Security report"
+msgstr "Relatório de segurança"
 
 msgid "crowdsec.report.identifier"
-msgstr "Report identifier"
+msgstr "Identificador do relatório"
 
 msgid "crowdsec.report.matched_target"
-msgstr "Matched target"
+msgstr "Alvo correspondente"
 
 msgid "crowdsec.report.metadata"
-msgstr "Decision metadata"
+msgstr "Metadados da decisão"
 
 msgid "crowdsec.report.metadata_complete"
-msgstr "Complete"
+msgstr "Completo"
 
 msgid "crowdsec.report.metadata_incomplete"
-msgstr "Incomplete"
+msgstr "Incompleto"
 
 msgid "crowdsec.report.metadata_unavailable"
-msgstr "CrowdSec snapshot metadata is unavailable for this older report."
+msgstr "Os metadados do instantâneo do CrowdSec não estão disponíveis para este relatório mais antigo."
 
 msgid "crowdsec.report.metadata_warning"
-msgstr "Some captured decision metadata was unavailable at request time."
+msgstr "Alguns metadados de decisão capturados não estavam disponíveis no momento da solicitação."
 
 msgid "crowdsec.report.reason"
-msgstr "Reason"
+msgstr "Motivo"
 
 msgid "crowdsec.report.remediation"
-msgstr "Captured remediation"
+msgstr "Remediação capturada"
 
 msgid "crowdsec.report.scope"
-msgstr "Captured service scope"
+msgstr "Escopo de serviço capturado"
 
 msgid "crowdsec.report.service"
-msgstr "Service"
+msgstr "Serviço"
 
 msgid "crowdsec.report.source"
-msgstr "Captured source"
+msgstr "Origem capturada"
 
 msgid "crowdsec.subtitle"
-msgstr "Inspect each configured CrowdSec engine and investigate an IP across current and captured evidence."
+msgstr "Inspecione cada motor CrowdSec configurado e investigue um IP a partir das evidências atuais e capturadas."
 
 msgid "crowdsec.title"
-msgstr "CrowdSec operator"
+msgstr "Operador do CrowdSec"
 
 msgid "crowdsec.unknown"
-msgstr "Unknown"
+msgstr "Desconhecido"
 
 msgid "dashboard.alert.jobs_failed"
 msgstr "Uma ou mais tarefas falharam na última execução."
@@ -2416,17 +2806,128 @@ msgstr "Últimos %(days)s dias"
 msgid "dashboard.window.title"
 msgstr "Janela do painel"
 
-msgid "datatable.bulk_select_all_done"
-msgstr "Todos os %(count)s %(entity)s correspondentes estão selecionados."
+msgid "datatable.bulk_select.bans.all_done"
+msgstr "Todos os %(count)s banimentos correspondentes estão selecionados."
 
-msgid "datatable.bulk_select_all_filtered"
-msgstr "Selecionar todos os %(count)s %(entity)s correspondentes"
+msgid "datatable.bulk_select.bans.all_filtered"
+msgstr "Selecionar todos os %(count)s banimentos correspondentes"
+
+msgid "datatable.bulk_select.bans.page_one"
+msgstr "%(count)s banimento nesta página está selecionado."
+
+msgid "datatable.bulk_select.bans.page_other"
+msgstr "Todos os %(count)s banimentos nesta página estão selecionados."
+
+msgid "datatable.bulk_select.cache.all_done"
+msgstr "Todos os %(count)s arquivos de cache correspondentes estão selecionados."
+
+msgid "datatable.bulk_select.cache.all_filtered"
+msgstr "Selecionar todos os %(count)s arquivos de cache correspondentes"
+
+msgid "datatable.bulk_select.cache.page_one"
+msgstr "%(count)s arquivo de cache nesta página está selecionado."
+
+msgid "datatable.bulk_select.cache.page_other"
+msgstr "Todos os %(count)s arquivos de cache nesta página estão selecionados."
+
+msgid "datatable.bulk_select.configs.all_done"
+msgstr "Todas as %(count)s configurações personalizadas correspondentes estão selecionadas."
+
+msgid "datatable.bulk_select.configs.all_filtered"
+msgstr "Selecionar todas as %(count)s configurações personalizadas correspondentes"
+
+msgid "datatable.bulk_select.configs.page_one"
+msgstr "%(count)s configuração personalizada nesta página está selecionada."
+
+msgid "datatable.bulk_select.configs.page_other"
+msgstr "Todas as %(count)s configurações personalizadas nesta página estão selecionadas."
+
+msgid "datatable.bulk_select.instances.all_done"
+msgstr "Todas as %(count)s instâncias correspondentes estão selecionadas."
+
+msgid "datatable.bulk_select.instances.all_filtered"
+msgstr "Selecionar todas as %(count)s instâncias correspondentes"
+
+msgid "datatable.bulk_select.instances.page_one"
+msgstr "%(count)s instância nesta página está selecionada."
+
+msgid "datatable.bulk_select.instances.page_other"
+msgstr "Todas as %(count)s instâncias nesta página estão selecionadas."
+
+msgid "datatable.bulk_select.items.all_done"
+msgstr "Todos os %(count)s itens correspondentes estão selecionados."
+
+msgid "datatable.bulk_select.items.all_filtered"
+msgstr "Selecionar todos os %(count)s itens correspondentes"
+
+msgid "datatable.bulk_select.items.page_one"
+msgstr "%(count)s item nesta página está selecionado."
+
+msgid "datatable.bulk_select.items.page_other"
+msgstr "Todos os %(count)s itens nesta página estão selecionados."
+
+msgid "datatable.bulk_select.jobs.all_done"
+msgstr "Todas as %(count)s tarefas correspondentes estão selecionadas."
+
+msgid "datatable.bulk_select.jobs.all_filtered"
+msgstr "Selecionar todas as %(count)s tarefas correspondentes"
+
+msgid "datatable.bulk_select.jobs.page_one"
+msgstr "%(count)s tarefa nesta página está selecionada."
+
+msgid "datatable.bulk_select.jobs.page_other"
+msgstr "Todas as %(count)s tarefas nesta página estão selecionadas."
+
+msgid "datatable.bulk_select.plugins.all_done"
+msgstr "Todos os %(count)s plugins correspondentes estão selecionados."
+
+msgid "datatable.bulk_select.plugins.all_filtered"
+msgstr "Selecionar todos os %(count)s plugins correspondentes"
+
+msgid "datatable.bulk_select.plugins.page_one"
+msgstr "%(count)s plugin nesta página está selecionado."
+
+msgid "datatable.bulk_select.plugins.page_other"
+msgstr "Todos os %(count)s plugins nesta página estão selecionados."
+
+msgid "datatable.bulk_select.reports.all_done"
+msgstr "Todos os %(count)s relatórios correspondentes estão selecionados."
+
+msgid "datatable.bulk_select.reports.all_filtered"
+msgstr "Selecionar todos os %(count)s relatórios correspondentes"
+
+msgid "datatable.bulk_select.reports.page_one"
+msgstr "%(count)s relatório nesta página está selecionado."
+
+msgid "datatable.bulk_select.reports.page_other"
+msgstr "Todos os %(count)s relatórios nesta página estão selecionados."
+
+msgid "datatable.bulk_select.services.all_done"
+msgstr "Todos os %(count)s serviços correspondentes estão selecionados."
+
+msgid "datatable.bulk_select.services.all_filtered"
+msgstr "Selecionar todos os %(count)s serviços correspondentes"
+
+msgid "datatable.bulk_select.services.page_one"
+msgstr "%(count)s serviço nesta página está selecionado."
+
+msgid "datatable.bulk_select.services.page_other"
+msgstr "Todos os %(count)s serviços nesta página estão selecionados."
+
+msgid "datatable.bulk_select.templates.all_done"
+msgstr "Todos os %(count)s modelos correspondentes estão selecionados."
+
+msgid "datatable.bulk_select.templates.all_filtered"
+msgstr "Selecionar todos os %(count)s modelos correspondentes"
+
+msgid "datatable.bulk_select.templates.page_one"
+msgstr "%(count)s modelo nesta página está selecionado."
+
+msgid "datatable.bulk_select.templates.page_other"
+msgstr "Todos os %(count)s modelos nesta página estão selecionados."
 
 msgid "datatable.bulk_select_clear"
 msgstr "Limpar seleção"
-
-msgid "datatable.bulk_select_page"
-msgstr "Todos os %(count)s %(entity)s desta página estão selecionados."
 
 msgid "datatable.info_bans"
 msgstr "Mostrando de %(start)s a %(end)s de %(total)s Bloqueios"
@@ -2569,6 +3070,9 @@ msgstr "Processando..."
 msgid "datatable.search"
 msgstr "Pesquisar:"
 
+msgid "datatable.select_row"
+msgstr "Selecionar linha"
+
 msgid "datatable.select_rows_bans_0"
 msgstr "Nenhum Bloqueio selecionado"
 
@@ -2659,11 +3163,50 @@ msgstr "1 Modelo selecionado"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d Modelos selecionados"
 
-msgid "datatable.selected_list_count"
-msgstr "%(count)s %(entity)s selecionados"
+msgid "datatable.selected_list.configs.count_one"
+msgstr "%(count)s configuração personalizada selecionada"
 
-msgid "datatable.selected_list_empty"
-msgstr "Nenhuma %(entity)s selecionada."
+msgid "datatable.selected_list.configs.count_other"
+msgstr "%(count)s configurações personalizadas selecionadas"
+
+msgid "datatable.selected_list.configs.empty"
+msgstr "Nenhuma configuração personalizada selecionada."
+
+msgid "datatable.selected_list.items.count_one"
+msgstr "%(count)s item selecionado"
+
+msgid "datatable.selected_list.items.count_other"
+msgstr "%(count)s itens selecionados"
+
+msgid "datatable.selected_list.items.empty"
+msgstr "Nenhum item selecionado."
+
+msgid "datatable.selected_list.plugins.count_one"
+msgstr "%(count)s plugin selecionado"
+
+msgid "datatable.selected_list.plugins.count_other"
+msgstr "%(count)s plugins selecionados"
+
+msgid "datatable.selected_list.plugins.empty"
+msgstr "Nenhum plugin selecionado."
+
+msgid "datatable.selected_list.services.count_one"
+msgstr "%(count)s serviço selecionado"
+
+msgid "datatable.selected_list.services.count_other"
+msgstr "%(count)s serviços selecionados"
+
+msgid "datatable.selected_list.services.empty"
+msgstr "Nenhum serviço selecionado."
+
+msgid "datatable.selected_list.templates.count_one"
+msgstr "%(count)s modelo selecionado"
+
+msgid "datatable.selected_list.templates.count_other"
+msgstr "%(count)s modelos selecionados"
+
+msgid "datatable.selected_list.templates.empty"
+msgstr "Nenhum modelo selecionado."
 
 msgid "datatable.zero_records_bans"
 msgstr "Nenhum Bloqueio correspondente encontrado"
@@ -2794,11 +3337,41 @@ msgstr "Consulte a página de Tarefas para mais detalhes."
 msgid "flash.configuration_pending_instance"
 msgstr "Configuração ainda não aplicada — aguardando uma instância iniciar."
 
+msgid "flash.cors_or_ajax_request_required"
+msgstr "É necessária uma requisição CORS ou AJAX"
+
+msgid "flash.could_not_fetch_global_settings_api"
+msgstr "Não foi possível buscar as configurações globais da API."
+
+msgid "flash.could_not_fetch_resource_groups"
+msgstr "Não foi possível buscar os grupos de recursos: %(message)s"
+
+msgid "flash.database_read_only_mode"
+msgstr "O banco de dados está em modo somente leitura"
+
+msgid "flash.description_too_long"
+msgstr "A descrição não pode exceder 4000 caracteres"
+
+msgid "flash.do_not_have_write_permission"
+msgstr "Você não tem a permissão de escrita"
+
 msgid "flash.easter_egg"
 msgstr "Se você está lendo isto, significa que você é curioso"
 
 msgid "flash.error"
 msgstr "Erro"
+
+msgid "flash.error_fetching_instances"
+msgstr "Erro ao buscar as instâncias"
+
+msgid "flash.error_occurred_while_saving_custom_configs"
+msgstr "Ocorreu um erro ao salvar as configurações personalizadas: %(e)s"
+
+msgid "flash.import_warning"
+msgstr "Aviso de importação: %(error)s"
+
+msgid "flash.invalid_convert_parameter"
+msgstr "Parâmetro convert_to inválido."
 
 msgid "flash.last_configuration_change_failed"
 msgstr "Não foi possível aplicar sua última alteração de configuração."
@@ -2806,11 +3379,20 @@ msgstr "Não foi possível aplicar sua última alteração de configuração."
 msgid "flash.message"
 msgstr "Informação"
 
+msgid "flash.plugin_not_found"
+msgstr "Plugin não encontrado"
+
 msgid "flash.pro"
 msgstr "BunkerWeb PRO"
 
 msgid "flash.pro_services_exceeded"
 msgstr "Você tem mais serviços do que o permitido pela sua licença PRO. Faça upgrade da sua licença ou mova alguns serviços para o modo Rascunho para desbloquear a sua licença PRO."
+
+msgid "flash.scheduler_will_attempt_apply_changes"
+msgstr "O Scheduler tentará aplicar as alterações."
+
+msgid "flash.service_does_not_exist"
+msgstr "O serviço %(service)s não existe."
 
 msgid "flash.time.just_now"
 msgstr "agora mesmo"
@@ -2845,6 +3427,9 @@ msgstr "Sobrescrever configurações personalizadas UI/API existentes"
 msgid "form.checkbox.remember_me"
 msgstr "Lembrar-me"
 
+msgid "form.checkbox.replace_existing_template"
+msgstr "Substituir o modelo com o mesmo id, caso exista"
+
 msgid "form.help.ban_specific_service"
 msgstr "O bloqueio será aplicado apenas a este serviço específico."
 
@@ -2862,6 +3447,9 @@ msgstr "Se marcado, o bloqueio nunca expirará até ser removido manualmente"
 
 msgid "form.help.photo_extensions"
 msgstr "Permitido JPG, GIF ou PNG. Tamanho máximo: 800KB."
+
+msgid "form.help.secret_stored"
+msgstr "Um valor está armazenado e não é exibido. Mantenha o campo como está para conservá-lo, digite um novo valor para substituí-lo, ou limpe o campo para removê-lo."
 
 msgid "form.label.2fa_code"
 msgstr "Código 2FA"
@@ -3031,6 +3619,9 @@ msgstr "Nome do Servidor"
 msgid "form.label.service_name"
 msgstr "Nome do Serviço"
 
+msgid "form.label.template_file"
+msgstr "Arquivo do modelo"
+
 msgid "form.label.template_id"
 msgstr "ID do Modelo"
 
@@ -3130,6 +3721,438 @@ msgstr "A senha deve ter pelo menos 1 caractere especial."
 msgid "form.validation.password_uppercase"
 msgstr "A senha deve ter pelo menos 1 letra maiúscula."
 
+msgid "general.settings.ACCESS_LOG.help"
+msgstr "Caminho a ser usado para os logs de acesso do NGINX (caminho de arquivo, syslog:server=host[:port][,param=value], ou memory:name:size; defina como off para desativar)."
+
+msgid "general.settings.ACCESS_LOG.label"
+msgstr "Caminho do log de acesso"
+
+msgid "general.settings.API_HTTPS_PORT.help"
+msgstr "Número da porta de escuta (TLS) para a API interna do BunkerWeb."
+
+msgid "general.settings.API_HTTPS_PORT.label"
+msgstr "Número da porta HTTPS da API"
+
+msgid "general.settings.API_HTTP_PORT.help"
+msgstr "Número da porta de escuta para a API interna do BunkerWeb."
+
+msgid "general.settings.API_HTTP_PORT.label"
+msgstr "Número da porta da API"
+
+msgid "general.settings.API_LISTEN_HTTP.help"
+msgstr "Escuta HTTP para a API interna do BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTP.label"
+msgstr "Escuta HTTP da API"
+
+msgid "general.settings.API_LISTEN_HTTPS.help"
+msgstr "Escuta HTTPS (SSL/TLS) para a API interna do BunkerWeb."
+
+msgid "general.settings.API_LISTEN_HTTPS.label"
+msgstr "Escuta HTTPS da API"
+
+msgid "general.settings.API_LISTEN_IP.help"
+msgstr "Endereço IP de escuta para a API interna do BunkerWeb."
+
+msgid "general.settings.API_LISTEN_IP.label"
+msgstr "IP de escuta da API"
+
+msgid "general.settings.API_SERVER_NAME.help"
+msgstr "Nome do servidor (host virtual) para a API interna do BunkerWeb."
+
+msgid "general.settings.API_SERVER_NAME.label"
+msgstr "Nome do servidor da API"
+
+msgid "general.settings.API_TOKEN.help"
+msgstr "Token opcional para autenticar chamadas à API. Se definido, o scheduler (e qualquer cliente) deve enviá-lo pelo cabeçalho Authorization. Observação: deve ser definido tanto no ambiente do BunkerWeb quanto no do scheduler."
+
+msgid "general.settings.API_TOKEN.label"
+msgstr "Token de acesso à API"
+
+msgid "general.settings.API_WHITELIST_IP.help"
+msgstr "Lista de IP/rede autorizados a contatar a API interna do BunkerWeb. (formato: ip/máscara ou ipv6/máscara, separados por espaços)"
+
+msgid "general.settings.API_WHITELIST_IP.label"
+msgstr "IP na lista branca da API"
+
+msgid "general.settings.AUTOCONF_MODE.help"
+msgstr "Ativar a integração com o Docker Autoconf."
+
+msgid "general.settings.AUTOCONF_MODE.label"
+msgstr "Modo Autoconf"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.help"
+msgstr "Lista de instâncias do BunkerWeb separadas por espaços (formato: fqdn-ou-ip:5000 http://fqdn-ou-ip:5000)"
+
+msgid "general.settings.BUNKERWEB_INSTANCES.label"
+msgstr "Instâncias do BunkerWeb"
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.help"
+msgstr "Tamanho do cachestore interno (ipc)."
+
+msgid "general.settings.CACHESTORE_IPC_MEMORY_SIZE.label"
+msgstr "Tamanho de memória do cachestore ipc"
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.help"
+msgstr "Tamanho do cachestore interno (locks)."
+
+msgid "general.settings.CACHESTORE_LOCKS_MEMORY_SIZE.label"
+msgstr "Tamanho de memória do cachestore locks"
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.help"
+msgstr "Tamanho do cachestore interno."
+
+msgid "general.settings.CACHESTORE_MEMORY_SIZE.label"
+msgstr "Tamanho de memória do cachestore"
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.help"
+msgstr "Tamanho do cachestore interno (miss)."
+
+msgid "general.settings.CACHESTORE_MISS_MEMORY_SIZE.label"
+msgstr "Tamanho de memória do cachestore miss"
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.help"
+msgstr "Tempo limite para leitura do corpo da requisição do cliente."
+
+msgid "general.settings.CLIENT_BODY_TIMEOUT.label"
+msgstr "Tempo limite do corpo do cliente"
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.help"
+msgstr "Tempo limite para leitura do cabeçalho da requisição do cliente."
+
+msgid "general.settings.CLIENT_HEADER_TIMEOUT.label"
+msgstr "Tempo limite do cabeçalho do cliente"
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.help"
+msgstr "O que acontece quando um arquivo .conf projetado muda desde a última projeção registrada ou estava ausente dela. Arquivos que correspondem à linha atual do banco de dados são ignorados; sem histórico de projeção legível, nenhum desvio é relatado. 'overwrite' registra cada desvio detectado e reescreve o arquivo a partir do banco de dados, ou o exclui se nenhuma linha ativa o substituir. 'refuse' deixa de gravar ali a partir do banco de dados até que o desvio seja resolvido, registra um erro e deixa a alteração de configuração personalizada pendente sem confirmação para que seja repetida."
+
+msgid "general.settings.CUSTOM_CONFIGS_DRIFT.label"
+msgstr "Política de desvio de configs personalizadas"
+
+msgid "general.settings.DATASTORE_LRU_SIZE.help"
+msgstr "Número de slots para o LRU compartilhado do datastore por worker (usado pelo internalstore e pelos caches locais de plugins por worker). Aceita um inteiro simples ou uma abreviação `k`/`m` (ex.: `1k`, `10k`, `1m`)."
+
+msgid "general.settings.DATASTORE_LRU_SIZE.label"
+msgstr "Tamanho do LRU do datastore"
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.help"
+msgstr "Tamanho do datastore interno."
+
+msgid "general.settings.DATASTORE_MEMORY_SIZE.label"
+msgstr "Tamanho de memória do datastore"
+
+msgid "general.settings.DNS_RESOLVERS.help"
+msgstr "Endereços DNS dos resolvedores a serem usados."
+
+msgid "general.settings.DNS_RESOLVERS.label"
+msgstr "Resolvedores DNS"
+
+msgid "general.settings.ERROR_LOG.help"
+msgstr "Caminho a ser usado para os logs de erro do NGINX (caminho de arquivo, stderr, syslog:server=host[:port][,param=value], ou memory:size)."
+
+msgid "general.settings.ERROR_LOG.label"
+msgstr "Caminho do log de erros"
+
+msgid "general.settings.HTTPS_PORT.help"
+msgstr "Número da porta HTTPS à qual o bunkerweb se vincula. Deixe em branco para desativar a escuta HTTPS."
+
+msgid "general.settings.HTTPS_PORT.label"
+msgstr "Porta HTTPS"
+
+msgid "general.settings.HTTP_PORT.help"
+msgstr "Número da porta HTTP à qual o bunkerweb se vincula. Deixe em branco para desativar a escuta HTTP."
+
+msgid "general.settings.HTTP_PORT.label"
+msgstr "Porta HTTP"
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.help"
+msgstr "Tamanho do internalstore interno."
+
+msgid "general.settings.INTERNALSTORE_MEMORY_SIZE.label"
+msgstr "Tamanho de memória do internalstore"
+
+msgid "general.settings.IS_DRAFT.help"
+msgstr "Uso interno: definir como yes quando o serviço está em modo rascunho."
+
+msgid "general.settings.IS_DRAFT.label"
+msgstr "uso interno rascunho"
+
+msgid "general.settings.IS_LOADING.help"
+msgstr "Uso interno: definir como yes quando o BW está carregando."
+
+msgid "general.settings.IS_LOADING.label"
+msgstr "uso interno carregamento"
+
+msgid "general.settings.JOBS_DAILY_TIME.help"
+msgstr "Horário local (fuso horário do scheduler, HH:MM, 24h) em que os jobs diários agendados são executados; os jobs semanais também são executados nesse horário, em JOBS_WEEKLY_DAY."
+
+msgid "general.settings.JOBS_DAILY_TIME.label"
+msgstr "Horário diário dos jobs"
+
+msgid "general.settings.JOBS_WEEKLY_DAY.help"
+msgstr "Dia da semana em que os jobs semanais agendados são executados, no horário JOBS_DAILY_TIME."
+
+msgid "general.settings.JOBS_WEEKLY_DAY.label"
+msgstr "Dia semanal dos jobs"
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.help"
+msgstr "Tempo limite para conexões de cliente keep-alive."
+
+msgid "general.settings.KEEPALIVE_TIMEOUT.label"
+msgstr "Tempo limite keepalive"
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.help"
+msgstr "Manter a configuração ao reiniciar. Defina como 'yes' para evitar a redefinição da configuração ao reiniciar."
+
+msgid "general.settings.KEEP_CONFIG_ON_RESTART.label"
+msgstr "Manter config ao reiniciar"
+
+msgid "general.settings.KUBERNETES_MODE.help"
+msgstr "Ativar a integração com o Kubernetes."
+
+msgid "general.settings.KUBERNETES_MODE.label"
+msgstr "Modo Kubernetes"
+
+msgid "general.settings.LISTEN_STREAM.help"
+msgstr "Ativar a escuta não-ssl (passthrough)."
+
+msgid "general.settings.LISTEN_STREAM.label"
+msgstr "Escuta stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT.help"
+msgstr "Porta de escuta para não-ssl (passthrough). Deixe em branco para desativar a escuta stream não-SSL."
+
+msgid "general.settings.LISTEN_STREAM_PORT.label"
+msgstr "Porta de escuta stream"
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.help"
+msgstr "Porta de escuta para ssl (passthrough). Deixe em branco para desativar a escuta stream SSL."
+
+msgid "general.settings.LISTEN_STREAM_PORT_SSL.label"
+msgstr "Porta de escuta stream ssl"
+
+msgid "general.settings.LOG_FORMAT.help"
+msgstr "O formato a ser usado para os logs de acesso."
+
+msgid "general.settings.LOG_FORMAT.label"
+msgstr "Formato do log de acesso"
+
+msgid "general.settings.LOG_LEVEL.help"
+msgstr "O nível a ser usado para os logs de erro."
+
+msgid "general.settings.LOG_LEVEL.label"
+msgstr "Nível de log"
+
+msgid "general.settings.MULTISITE.help"
+msgstr "Ativação multisite."
+
+msgid "general.settings.MULTISITE.label"
+msgstr "Multisite"
+
+msgid "general.settings.NGINX_PREFIX.help"
+msgstr "Onde o nginx procurará as configurações."
+
+msgid "general.settings.NGINX_PREFIX.label"
+msgstr "prefixo nginx"
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase access para este site (admissão/controle de requisições). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_ACCESS.label"
+msgstr "Ordem dos plugins (access)"
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase header para este site (filtragem de cabeçalhos de resposta). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_HEADER.label"
+msgstr "Ordem dos plugins (header)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase init (inicialização do motor, executa uma vez). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_INIT.label"
+msgstr "Ordem dos plugins (init)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase init_worker (inicialização por worker). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKER.label"
+msgstr "Ordem dos plugins (init_worker)"
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.help"
+msgstr "IDs de plugins separados por vírgulas ou espaços a serem executados durante a fase init_workers."
+
+msgid "general.settings.PLUGINS_ORDER_INIT_WORKERS.label"
+msgstr "Ordem dos plugins (init_workers)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase log para este site (processamento de logs HTTP após a resposta). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_LOG.label"
+msgstr "Ordem dos plugins (log)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase log_default para este site (processamento de logs do vhost padrão). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_DEFAULT.label"
+msgstr "Ordem dos plugins (log_default)"
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase log_stream para este site (processamento de logs de stream). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_LOG_STREAM.label"
+msgstr "Ordem dos plugins (log_stream)"
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase preread para este site (verificações TCP preread antes do proxying). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_PREREAD.label"
+msgstr "Ordem dos plugins (preread)"
+
+msgid "general.settings.PLUGINS_ORDER_SET.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase set para este site (configuração de variáveis antes de rewrite/access). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_SET.label"
+msgstr "Ordem dos plugins (set)"
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase ssl_certificate para este site (seleção/emissão do certificado TLS). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_SSL_CERTIFICATE.label"
+msgstr "Ordem dos plugins (ssl_certificate)"
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.help"
+msgstr "Plugins que devem ser executados primeiro durante a fase timer (temporizadores em segundo plano). Separe os IDs com espaços; os demais plugins são executados de qualquer forma depois, em sua ordem normal."
+
+msgid "general.settings.PLUGINS_ORDER_TIMER.label"
+msgstr "Ordem dos plugins (timer)"
+
+msgid "general.settings.SECURITY_MODE.help"
+msgstr "Define a resposta a ameaças: \"detect\" para monitorar e registrar, ou \"block\" para impedir o acesso e registrar incidentes."
+
+msgid "general.settings.SECURITY_MODE.label"
+msgstr "Modo de segurança"
+
+msgid "general.settings.SEND_TIMEOUT.help"
+msgstr "Tempo limite para transmitir uma resposta ao cliente."
+
+msgid "general.settings.SEND_TIMEOUT.label"
+msgstr "Tempo limite de envio"
+
+msgid "general.settings.SERVER_NAME.help"
+msgstr "Lista dos hosts virtuais atendidos pelo bunkerweb. (separados por espaços)"
+
+msgid "general.settings.SERVER_NAME.label"
+msgstr "Nome do servidor"
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.help"
+msgstr "Valor para a diretiva server_names_hash_bucket_size."
+
+msgid "general.settings.SERVER_NAMES_HASH_BUCKET_SIZE.label"
+msgstr "Tamanho do bucket de hash dos nomes de servidor"
+
+msgid "general.settings.SERVER_TYPE.help"
+msgstr "Tipo de servidor: http ou stream."
+
+msgid "general.settings.SERVER_TYPE.label"
+msgstr "Tipo de servidor"
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.help"
+msgstr "Tamanho do armazenamento interno que contém os identificadores de sessão de cookie revogados."
+
+msgid "general.settings.SESSIONS_REVOCATION_MEMORY_SIZE.label"
+msgstr "Tamanho de memória de revogação de sessões"
+
+msgid "general.settings.SWARM_MODE.help"
+msgstr "Ativar a integração com o Docker Swarm."
+
+msgid "general.settings.SWARM_MODE.label"
+msgstr "Modo Swarm"
+
+msgid "general.settings.TIMERS_LOG_LEVEL.help"
+msgstr "Nível de log para os temporizadores."
+
+msgid "general.settings.TIMERS_LOG_LEVEL.label"
+msgstr "Nível de log dos temporizadores"
+
+msgid "general.settings.USE_API.help"
+msgstr "Ativar a API interna do BunkerWeb."
+
+msgid "general.settings.USE_API.label"
+msgstr "Ativar API"
+
+msgid "general.settings.USE_IPV6.help"
+msgstr "Ativar a conectividade IPv6."
+
+msgid "general.settings.USE_IPV6.label"
+msgstr "Usar IPv6"
+
+msgid "general.settings.USE_TCP.help"
+msgstr "Escuta TCP (stream)."
+
+msgid "general.settings.USE_TCP.label"
+msgstr "Escutar TCP"
+
+msgid "general.settings.USE_TEMPLATE.help"
+msgstr "Modelos de configuração a serem aplicados, separados por espaços, que substituirão os valores padrão de configurações específicas. Os modelos se aplicam em ordem e um mais recente substitui um anterior; um valor definido no serviço substitui o modelo."
+
+msgid "general.settings.USE_TEMPLATE.label"
+msgstr "Usar modelo"
+
+msgid "general.settings.USE_UDP.help"
+msgstr "Escuta UDP (stream)."
+
+msgid "general.settings.USE_UDP.label"
+msgstr "Escutar UDP"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.help"
+msgstr "Tamanho do lua_shared_dict para os workers de inicialização"
+
+msgid "general.settings.WORKERLOCK_MEMORY_SIZE.label"
+msgstr "Tamanho de memória do Workerlock de inicialização"
+
+msgid "general.settings.WORKER_CONNECTIONS.help"
+msgstr "Número máximo de conexões por worker."
+
+msgid "general.settings.WORKER_CONNECTIONS.label"
+msgstr "Conexões por worker"
+
+msgid "general.settings.WORKER_PROCESSES.help"
+msgstr "Número de processos worker."
+
+msgid "general.settings.WORKER_PROCESSES.label"
+msgstr "Processos worker"
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.help"
+msgstr "Número máximo de arquivos abertos para os processos worker."
+
+msgid "general.settings.WORKER_RLIMIT_NOFILE.label"
+msgstr "Arquivos abertos por worker"
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.help"
+msgstr "Tempo limite para um encerramento gradual dos processos worker. Após esse atraso, os workers antigos são finalizados à força durante um reload para evitar o crescimento de memória."
+
+msgid "general.settings.WORKER_SHUTDOWN_TIMEOUT.label"
+msgstr "Tempo limite de encerramento do worker"
+
+msgid "global_settings.flash.checking_license_key_upgrade"
+msgstr "Verificando a chave de licença para atualização."
+
+msgid "global_settings.flash.global_settings_not_saved_every_changed"
+msgstr "As configurações globais não foram salvas: todos os valores alterados foram recusados."
+
+msgid "global_settings.flash.not_edited_no_values_changed"
+msgstr "As configurações globais não foram editadas porque nenhum valor foi alterado."
+
+msgid "global_settings.flash.saved_but_values_refused"
+msgstr "Configurações globais salvas, mas %(refused_count)s valores foram recusados."
+
+msgid "global_settings.flash.saved_successfully"
+msgstr "Configurações globais salvas com sucesso."
+
+msgid "home.flash.error_fetching_services"
+msgstr "Erro ao buscar os serviços: %(message)s"
+
 msgid "input_list.view_all_settings"
 msgstr "Visualizar todas as %(count)s configurações"
 
@@ -3156,6 +4179,75 @@ msgstr "Estático"
 
 msgid "instances.down"
 msgstr "Inativo"
+
+msgid "instances.flash.could_not_create_instance"
+msgstr "Não foi possível criar a instância: %(message)s"
+
+msgid "instances.flash.could_not_fetch_instances_api"
+msgstr "Não foi possível buscar as instâncias da API."
+
+msgid "instances.flash.could_not_found_one"
+msgstr "A instância selecionada não foi encontrada ou não é uma instância de UI/API."
+
+msgid "instances.flash.could_not_found_other"
+msgstr "Todas as instâncias selecionadas não foram encontradas ou não são instâncias de UI/API."
+
+msgid "instances.flash.couldn_t_delete_instance"
+msgstr "Não foi possível excluir a instância: %(message)s"
+
+msgid "instances.flash.couldn_t_delete_instances"
+msgstr "Não foi possível excluir as instâncias: %(message)s"
+
+msgid "instances.flash.hostname_already_in_use"
+msgstr "O nome de host %(hostname)s já está em uso."
+
+msgid "instances.flash.instance_created_successfully"
+msgstr "Instância %(value)s criada com sucesso."
+
+msgid "instances.flash.instance_deleted"
+msgstr "A instância %(instance)s foi excluída com sucesso."
+
+msgid "instances.flash.instance_does_not_exist"
+msgstr "A instância %(instance)s não existe."
+
+msgid "instances.flash.instance_does_not_have_reload_method"
+msgstr "A instância %(instance)s não tem um método de recarregamento."
+
+msgid "instances.flash.instance_does_not_have_stop_method"
+msgstr "A instância %(instance)s não tem um método de parada."
+
+msgid "instances.flash.instance_not_ui_api_instance_will"
+msgstr "A instância %(non_deletable_instance)s não é uma instância de UI/API e não será excluída."
+
+msgid "instances.flash.instance_reloaded"
+msgstr "A instância %(instance)s foi recarregada com sucesso."
+
+msgid "instances.flash.instance_stopped"
+msgstr "A instância %(instance)s foi interrompida com sucesso."
+
+msgid "instances.flash.instances_deleted"
+msgstr "As instâncias %(instance)s foram excluídas com sucesso."
+
+msgid "instances.flash.missing_instance_hostname_parameter_instances_new"
+msgstr "Parâmetro instance hostname ausente em /instances/new."
+
+msgid "instances.flash.missing_instance_name_parameter_instances_new"
+msgstr "Parâmetro instance name ausente em /instances/new."
+
+msgid "instances.flash.missing_instances_parameter_instances_delete"
+msgstr "Parâmetro instances ausente em /instances/delete."
+
+msgid "instances.flash.missing_instances_parameter_instances_ping"
+msgstr "Parâmetro instances ausente em /instances/ping."
+
+msgid "instances.flash.missing_instances_parameter_instances_reload"
+msgstr "Parâmetro instances ausente em /instances/reload."
+
+msgid "instances.flash.missing_instances_parameter_instances_stop"
+msgstr "Parâmetro instances ausente em /instances/stop."
+
+msgid "instances.flash.no_instance_selected"
+msgstr "Nenhuma instância selecionada."
 
 msgid "instances.loading"
 msgstr "Carregando"
@@ -3193,6 +4285,24 @@ msgstr "Data de Início"
 msgid "job.history.success"
 msgstr "Sucesso"
 
+msgid "jobs.flash.error_fetching_jobs"
+msgstr "Erro ao buscar as tarefas: %(message)s"
+
+msgid "jobs.flash.invalid_jobs_parameter_jobs_run"
+msgstr "Parâmetro jobs inválido em /jobs/run."
+
+msgid "jobs.flash.job_plugins_will_run_background_by"
+msgstr "Os plugins da tarefa serão executados em segundo plano pelo Scheduler."
+
+msgid "jobs.flash.jobs_plugins_will_run_background_by"
+msgstr "Os plugins das tarefas serão executados em segundo plano pelo Scheduler."
+
+msgid "jobs.flash.missing_jobs_parameter_jobs_run"
+msgstr "Parâmetro jobs ausente em /jobs/run."
+
+msgid "jobs.flash.no_jobs_selected"
+msgstr "Nenhuma tarefa selecionada."
+
 msgid "jobs.subtitle"
 msgstr "Tarefas agendadas e únicas executadas pelo agendador do BunkerWeb — acompanhe seu status e execute-as sob demanda."
 
@@ -3213,6 +4323,15 @@ msgstr "Bloqueado (%(method)s)"
 
 msgid "legend.locked_settings_hint"
 msgstr "Configurações bloqueadas estão destacadas"
+
+msgid "legend.raw_setting_drafts"
+msgstr "No início de uma configuração, pressione # para alternar o rascunho ou Backspace para ativá-la. Salve para aplicar. Os rascunhos mantêm seus valores enquanto os valores herdados ou padrão entram em vigor."
+
+msgid "letsencrypt.flash.open_certificates_to_inspect"
+msgstr "Abrir Certificados para inspecionar"
+
+msgid "letsencrypt.flash.orphan_certificate"
+msgstr "Let's Encrypt: o certificado órfão <strong>%(cert_name)s</strong> faz referência a uma conta ACME ausente <code>%(account)s</code>. As renovações ficam bloqueadas até que o estado do provedor seja reparado. <a href=\"%(certificates_url)s\">%(link_text)s</a>."
 
 msgid "link.back_to_login"
 msgstr "Voltar ao Login"
@@ -3253,6 +4372,12 @@ msgstr "Use um código de autenticação"
 msgid "link.use_recovery_code"
 msgstr "Use um código de recuperação"
 
+msgid "login.flash.couldn_t_log_please_try_again"
+msgstr "Não foi possível fazer login, tente novamente"
+
+msgid "login.flash.invalid_username_password"
+msgstr "Nome de usuário ou senha inválidos"
+
 msgid "login.notice_password_changed"
 msgstr "Sua senha foi alterada. Faça login com a nova senha."
 
@@ -3288,6 +4413,12 @@ msgstr "Expandir"
 
 msgid "logs.filter_levels"
 msgstr "Níveis"
+
+msgid "logs.flash.invalid_file_path"
+msgstr "Caminho de arquivo inválido"
+
+msgid "logs.flash.no_such_file"
+msgstr "Arquivo inexistente"
 
 msgid "logs.grep_placeholder"
 msgstr "grep…"
@@ -3373,6 +4504,27 @@ msgstr "Mais alto"
 msgid "logs.trimmed_notice"
 msgstr "--- %(count)s linhas de log mais antigas foram removidas para performance ---"
 
+msgid "main.flash.database_connection_read_only_mode_no"
+msgstr "A conexão com o banco de dados está em modo somente leitura: nenhuma modificação é possível."
+
+msgid "main.flash.failover_configuration_error"
+msgstr "As últimas alterações não puderam ser aplicadas porque criam um erro de configuração no NGINX; consulte os logs do BunkerWeb para mais informações. A configuração voltou para a última versão funcional."
+
+msgid "main.flash.failover_message"
+msgstr "Mensagem de failover:"
+
+msgid "main.flash.forced_status_reloaded"
+msgstr "Status forçado a ser recarregado"
+
+msgid "main.flash.have_more_services_than_allowed_by"
+msgstr "Você tem mais serviços do que o permitido pela sua licença pro. Atualize sua licença ou mova alguns serviços para o modo rascunho para desbloquear sua licença pro."
+
+msgid "main.flash.last_changes_have_applied_successfully"
+msgstr "As últimas alterações foram aplicadas com sucesso."
+
+msgid "main.flash.two_factor_no_recovery_codes"
+msgstr "A autenticação de dois fatores está ativada mas não há códigos de recuperação disponíveis, atualize-os:"
+
 msgid "modal.body.add_plugin_dropzone"
 msgstr "Arraste e solte o arquivo do seu plugin aqui ou clique para selecionar arquivos."
 
@@ -3385,11 +4537,20 @@ msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
 msgstr[0] "Tem certeza de que deseja excluir o arquivo de cache selecionado?"
 msgstr[1] "Tem certeza de que deseja excluir os arquivos de cache selecionados?"
 
+msgid "modal.body.confirm_config_conversion_draft"
+msgstr "Tem certeza de que deseja converter a configuração personalizada selecionada em rascunho?"
+
+msgid "modal.body.confirm_config_conversion_online"
+msgstr "Tem certeza de que deseja converter a configuração personalizada selecionada em online?"
+
 msgid "modal.body.confirm_configs_conversion"
 msgstr "Tem certeza de que deseja converter as configurações personalizadas selecionadas?"
 
-msgid "modal.body.confirm_configs_conversion_to"
-msgstr "Tem certeza de que deseja converter as configurações personalizadas selecionadas para %(state)s?"
+msgid "modal.body.confirm_configs_conversion_draft"
+msgstr "Tem certeza de que deseja converter as configurações personalizadas selecionadas em rascunho?"
+
+msgid "modal.body.confirm_configs_conversion_online"
+msgstr "Tem certeza de que deseja converter as configurações personalizadas selecionadas em online?"
 
 #. plural pair; 2 form(s) for pt_BR, singular in slot 0
 msgid "modal.body.confirm_configs_deletion_alert"
@@ -3409,11 +4570,29 @@ msgid_plural "modal.body.confirm_plugin_deletion_plural"
 msgstr[0] "Tem certeza de que deseja excluir o plugin selecionado?"
 msgstr[1] "Tem certeza de que deseja excluir os plugins selecionados?"
 
+msgid "modal.body.confirm_service_conversion_draft"
+msgstr "Tem certeza de que deseja converter o serviço selecionado em rascunho?"
+
+msgid "modal.body.confirm_service_conversion_online"
+msgstr "Tem certeza de que deseja converter o serviço selecionado em online?"
+
 msgid "modal.body.confirm_service_mode_conversion"
 msgstr "Tem certeza de que deseja alterar o modo declarado deste serviço?"
 
+msgid "modal.body.confirm_services_conversion_draft"
+msgstr "Tem certeza de que deseja converter os serviços selecionados em rascunho?"
+
+msgid "modal.body.confirm_services_conversion_online"
+msgstr "Tem certeza de que deseja converter os serviços selecionados em online?"
+
 msgid "modal.body.confirm_template_deletion"
 msgstr "Tem certeza de que deseja excluir o modelo %(name)s?"
+
+#. plural pair; 2 form(s) for pt_BR, singular in slot 0
+msgid "modal.body.confirm_templates_deletion_alert"
+msgid_plural "modal.body.confirm_templates_deletion_alert_plural"
+msgstr[0] "Tem certeza de que deseja excluir o modelo selecionado?"
+msgstr[1] "Tem certeza de que deseja excluir os modelos selecionados?"
 
 msgid "modal.body.confirmation_instance_deletion"
 msgstr "Tem certeza de que deseja excluir a instância selecionada?"
@@ -3475,6 +4654,12 @@ msgstr "Arraste e solte aqui o arquivo de exportação de serviços ou clique pa
 msgid "modal.body.import_services_warning"
 msgstr "A importação criará novos serviços na interface a partir do arquivo exportado. Os serviços existentes serão ignorados. Também é aceito um arquivo .zip exportado com configurações personalizadas."
 
+msgid "modal.body.import_template_help"
+msgstr "Um pacote de modelo exportado do BunkerWeb (.json), ou um arquivo compactado (.zip, .tar.gz, .tar.xz) contendo uma pasta de modelo com seu template.json e configurações. 1 MiB no máximo."
+
+msgid "modal.body.import_template_replace_warning"
+msgstr "Substituir um modelo altera todos os serviços que o utilizam na próxima geração de configuração. Modelos pertencentes a um plugin ou gerenciados fora da interface Web nunca são substituídos."
+
 msgid "modal.body.instance_creation_alert"
 msgstr "Você não precisa fornecer a porta ou o nome do servidor; os valores de `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` e `API_SERVER_NAME` serão usados para a configuração da instância."
 
@@ -3489,6 +4674,9 @@ msgstr "Estes códigos de recuperação são mostrados apenas uma vez. Certifiqu
 
 msgid "modal.body.reset_template_alert"
 msgstr "Tem certeza de que deseja redefinir as configurações do modelo atual e as configurações personalizadas?"
+
+msgid "modal.body.service_deletion_confirmation"
+msgstr "Tem certeza de que deseja excluir o serviço selecionado?"
 
 msgid "modal.body.services_conversion_confirmation"
 msgstr "Tem certeza de que deseja converter os serviços selecionados?"
@@ -3583,6 +4771,9 @@ msgstr "Importar configurações personalizadas"
 msgid "modal.title.import_services"
 msgstr "Importar serviços"
 
+msgid "modal.title.import_template"
+msgstr "Importar um modelo"
+
 msgid "modal.title.job_history"
 msgstr "Últimas 10 Execuções de Tarefas"
 
@@ -3618,6 +4809,21 @@ msgstr "Fácil"
 
 msgid "mode.raw"
 msgstr "Bruto"
+
+msgid "navbar.aria.close_navigation"
+msgstr "Fechar navegação"
+
+msgid "navbar.aria.help"
+msgstr "Ajuda"
+
+msgid "navbar.aria.news"
+msgstr "Novidades"
+
+msgid "navbar.aria.notifications"
+msgstr "Notificações"
+
+msgid "navbar.aria.toggle_navigation"
+msgstr "Alternar navegação"
 
 msgid "navbar.button.upgrade_to_pro"
 msgstr "Atualizar para PRO"
@@ -3769,6 +4975,9 @@ msgstr "Já inscrito"
 msgid "notice.dismiss_mfa"
 msgstr "Não me lembre novamente"
 
+msgid "notice.enable_mfa"
+msgstr "Ative a autenticação de dois fatores para proteger sua conta <a href=\"%(url)s\">aqui</a>"
+
 msgid "onboarding.dismiss"
 msgstr "Dispensar"
 
@@ -3823,6 +5032,39 @@ msgstr "Cadastre seu primeiro serviço"
 msgid "onboarding.item.workflow"
 msgstr "Anexar um fluxo de segurança"
 
+msgid "onboarding.item_hint.first_block"
+msgstr "Os relatórios chegam aqui assim que o BunkerWeb bloqueia uma solicitação — envie uma solicitação maliciosa e volte para conferir."
+
+msgid "onboarding.item_hint.https"
+msgstr "Adicione ou gere um certificado aqui para que seu serviço seja servido por HTTPS."
+
+msgid "onboarding.item_hint.install"
+msgstr "Adicione uma instância aqui e depois salve sua primeira configuração para colocá-la sob gestão."
+
+msgid "onboarding.item_hint.mfa"
+msgstr "Abra seu perfil a partir deste menu e depois ative a autenticação de dois fatores."
+
+msgid "onboarding.item_hint.pro"
+msgstr "Digite aqui sua chave de licença PRO para desbloquear os plugins PRO e o suporte."
+
+msgid "onboarding.item_hint.read_bans"
+msgstr "Cada linha aqui mostra um cliente banido, o motivo e quando o banimento expira."
+
+msgid "onboarding.item_hint.read_home"
+msgstr "Este painel mostra, num relance, as instâncias ativas, os serviços atendidos e o tráfego recente."
+
+msgid "onboarding.item_hint.read_logs"
+msgstr "Os logs em tempo real de cada instância aparecem aqui, filtráveis por instância e gravidade."
+
+msgid "onboarding.item_hint.read_reports"
+msgstr "Abra um relatório aqui para ver qual verificação de segurança o interrompeu, e por quê."
+
+msgid "onboarding.item_hint.service"
+msgstr "Crie um serviço aqui para indicar ao BunkerWeb qual aplicação proteger."
+
+msgid "onboarding.item_hint.workflow"
+msgstr "Crie um workflow aqui para encadear verificações e respostas em uma única regra."
+
 msgid "onboarding.not_saved"
 msgstr "Não foi possível salvar."
 
@@ -3875,7 +5117,7 @@ msgid "plugin.type.all"
 msgstr "Todos"
 
 msgid "plugin.type.core"
-msgstr "Core"
+msgstr "Núcleo"
 
 msgid "plugin.type.external"
 msgstr "Externo"
@@ -3885,6 +5127,9 @@ msgstr "Pro"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.catalog.flash.version_unreadable"
+msgstr "Não foi possível ler a versão do BunkerWeb (%(current)s), portanto a compatibilidade de %(id)s não pode ser verificada; nada foi instalado"
 
 msgid "plugins.catalog.incompatible"
 msgstr "Esta versão não declara compatibilidade com o BunkerWeb; a versão atual é %(current)s"
@@ -3904,8 +5149,32 @@ msgstr "Saiba mais"
 msgid "plugins.catalog.release"
 msgstr "Ler a partir da versão %(tag)s"
 
+msgid "plugins.catalog.remove"
+msgstr "Remover"
+
 msgid "plugins.catalog.stale"
 msgstr "O catálogo não pôde ser atualizado recentemente, então a instalação fica desativada até que ele seja atualizado novamente."
+
+msgid "plugins.catalog.state_installed"
+msgstr "Instalado (versão %(version)s)"
+
+msgid "plugins.catalog.state_managed"
+msgstr "Instalado fora do catálogo; atualize-o ou remova-o de onde foi instalado"
+
+msgid "plugins.catalog.state_managed_core"
+msgstr "Instalado fora do catálogo como plugin core; atualize-o ou remova-o de onde foi instalado"
+
+msgid "plugins.catalog.state_managed_external"
+msgstr "Instalado fora do catálogo como plugin externo; atualize-o ou remova-o de onde foi instalado"
+
+msgid "plugins.catalog.state_managed_pro"
+msgstr "Instalado fora do catálogo como plugin pro; atualize-o ou remova-o de onde foi instalado"
+
+msgid "plugins.catalog.state_managed_ui"
+msgstr "Instalado fora do catálogo como plugin ui; atualize-o ou remova-o de onde foi instalado"
+
+msgid "plugins.catalog.state_update"
+msgstr "Atualização disponível: a versão %(installed)s está instalada, %(version)s está listada"
 
 msgid "plugins.catalog.tab"
 msgstr "Disponível"
@@ -3913,8 +5182,188 @@ msgstr "Disponível"
 msgid "plugins.catalog.trust_notice"
 msgstr "Os itens da comunidade são lidos dos repositórios que a organização BunkerWeb publica no GitHub, via TLS, e o que é instalado é verificado em relação ao que foi listado — mas nada aqui é assinado criptograficamente. Um plugin instalado executa código com privilégios completos do BunkerWeb."
 
+msgid "plugins.catalog.update"
+msgstr "Atualizar"
+
+msgid "plugins.catalog.update_confirm"
+msgstr "Isso substitui o plugin instalado %(name)s (%(id)s, versão %(installed)s) pela versão %(version)s do catálogo. Ele é substituído mesmo que tenha sido enviado manualmente em vez de instalado a partir do catálogo."
+
+msgid "plugins.catalog.update_no_removed_settings"
+msgstr "Nenhuma configuração é removida por esta atualização."
+
+msgid "plugins.catalog.update_preview_unknown"
+msgstr "As configurações que esta atualização removeria não podem ser listadas no momento, portanto a atualização está desativada até a próxima atualização do catálogo."
+
+msgid "plugins.catalog.update_removed_settings"
+msgstr "A versão %(version)s não declara mais estas configurações. Elas são excluídas, junto com cada valor definido para elas nas configurações globais, nos serviços e nos modelos:"
+
+msgid "plugins.catalog.update_title"
+msgstr "Atualizar um plugin da comunidade"
+
 msgid "plugins.catalog.version"
 msgstr "Versão %(version)s"
+
+msgid "plugins.catalog.version_unknown"
+msgstr "Não foi possível ler a versão do BunkerWeb em execução (%(current)s), portanto a compatibilidade desta versão não pode ser verificada"
+
+msgid "plugins.flash.already_at_version"
+msgstr "O plugin %(plugin_id)s já está na versão %(version)s"
+
+msgid "plugins.flash.already_installed"
+msgstr "Já existe um plugin instalado com o id %(plugin_id)s"
+
+msgid "plugins.flash.archive_no_longer_matches_what_catalogue"
+msgstr "O arquivo %(tag)s não corresponde mais ao que o catálogo indicava. Nada foi instalado para %(plugin_id)s."
+
+msgid "plugins.flash.catalogue_entry_changed"
+msgstr "A entrada do catálogo para %(plugin_id)s mudou desde que a atualização foi confirmada; revise a atualização novamente"
+
+msgid "plugins.flash.catalogue_entry_predates_updates"
+msgstr "A entrada do catálogo em cache para %(plugin_id)s é anterior às atualizações; aguarde a próxima atualização"
+
+msgid "plugins.flash.check_logs_more_details"
+msgstr "%(message)s, consulte os logs para mais detalhes"
+
+msgid "plugins.flash.community_catalogue_disabled"
+msgstr "O catálogo da comunidade está desativado"
+
+msgid "plugins.flash.couldn_t_delete_plugin"
+msgstr "Não foi possível excluir o plugin %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_delete_plugin_in_database"
+msgstr "Não foi possível excluir o plugin %(plugin)s no banco de dados: %(message)s"
+
+msgid "plugins.flash.couldn_t_download"
+msgstr "Não foi possível baixar %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue"
+msgstr "Não foi possível instalar %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_install_catalogue_2"
+msgstr "Não foi possível instalar %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue"
+msgstr "Não foi possível atualizar %(plugin_id)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_catalogue_2"
+msgstr "Não foi possível atualizar %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_plugin"
+msgstr "Não foi possível atualizar o plugin %(plugin)s: %(message)s"
+
+msgid "plugins.flash.couldn_t_update_plugin_2"
+msgstr "Não foi possível atualizar o plugin %(plugin)s: %(e)s"
+
+msgid "plugins.flash.couldn_t_update_ui_plugins_via"
+msgstr "Não foi possível atualizar os plugins de UI via API: %(e)s"
+
+msgid "plugins.flash.deleted_plugin_successfully"
+msgstr "Plugin %(plugin)s excluído com sucesso"
+
+msgid "plugins.flash.file_plugin_json_missing_one_more"
+msgstr "Ao arquivo plugin.json falta uma ou mais das seguintes chaves: %(value)s (%(value2)s)"
+
+msgid "plugins.flash.file_plugin_json_not_valid_line"
+msgstr "O arquivo plugin.json em %(file)s não é válido (%(msg)s: linha %(lineno)s coluna %(colno)s (caractere %(pos)s)) (%(value)s)"
+
+msgid "plugins.flash.install_did_not_complete"
+msgstr "A instalação de %(plugin_id)s não foi concluída: %(detail)s"
+
+msgid "plugins.flash.installed_successfully"
+msgstr "Plugin %(plugin_id)s instalado com sucesso"
+
+msgid "plugins.flash.invalid_archive"
+msgstr "O arquivo não é um arquivo de plugin válido (.zip, .tar.gz ou .tar.xz)."
+
+msgid "plugins.flash.invalid_plugin_id_must_between_4"
+msgstr "Id de plugin inválido (deve ter entre 4 e 64 caracteres, apenas letras, números, sublinhados e hifens)"
+
+msgid "plugins.flash.invalid_plugin_name_can_only_contain"
+msgstr "Nome de plugin inválido para %(temp_folder_name)s. (Só pode conter números, letras, sublinhados e hifens (mín. 4 caracteres e máx. 64))"
+
+msgid "plugins.flash.managed_outside_catalogue"
+msgstr "O plugin %(plugin_id)s é gerenciado fora do catálogo e não pode ser atualizado a partir dele"
+
+msgid "plugins.flash.managed_outside_catalogue_core"
+msgstr "O plugin %(plugin_id)s é um plugin core gerenciado fora do catálogo e não pode ser atualizado a partir dele"
+
+msgid "plugins.flash.managed_outside_catalogue_external"
+msgstr "O plugin %(plugin_id)s é um plugin externo gerenciado fora do catálogo e não pode ser atualizado a partir dele"
+
+msgid "plugins.flash.managed_outside_catalogue_pro"
+msgstr "O plugin %(plugin_id)s é um plugin pro gerenciado fora do catálogo e não pode ser atualizado a partir dele"
+
+msgid "plugins.flash.managed_outside_catalogue_ui"
+msgstr "O plugin %(plugin_id)s é um plugin ui gerenciado fora do catálogo e não pode ser atualizado a partir dele"
+
+msgid "plugins.flash.missing_csrf_token_parameter_plugins"
+msgstr "Parâmetro csrf_token ausente em /plugins."
+
+msgid "plugins.flash.missing_id_parameter_plugins_catalog_install"
+msgstr "Parâmetro id ausente em /plugins/catalog/install."
+
+msgid "plugins.flash.missing_id_version_parameter_plugins_catalog"
+msgstr "Parâmetro id ou version ausente em /plugins/catalog/update."
+
+msgid "plugins.flash.missing_plugin_enabled_parameter_plugins_enable"
+msgstr "Parâmetro plugin ou enabled ausente em /plugins/enable."
+
+msgid "plugins.flash.missing_plugins_parameter_plugins_delete"
+msgstr "Parâmetro plugins ausente em /plugins/delete."
+
+msgid "plugins.flash.no_plugin_data_upload"
+msgstr "Nenhum dado de plugin para carregar"
+
+msgid "plugins.flash.not_installed_install_from_catalogue"
+msgstr "O plugin %(plugin_id)s não está instalado; instale-o a partir do catálogo"
+
+msgid "plugins.flash.not_valid_plugin_plugin_json_file"
+msgstr "%(file)s não é um plugin válido (o arquivo plugin.json está ausente) (%(value)s)"
+
+msgid "plugins.flash.please_upload_new_plugins_reload_plugins"
+msgstr "Carregue novos plugins para recarregar os plugins"
+
+msgid "plugins.flash.plugin_already_exists"
+msgstr "O plugin %(plugin)s já existe"
+
+msgid "plugins.flash.plugin_disabled"
+msgstr "O plugin %(plugin)s foi desativado com sucesso."
+
+msgid "plugins.flash.plugin_enabled"
+msgstr "O plugin %(plugin)s foi ativado com sucesso."
+
+msgid "plugins.flash.plugin_management_restricted_administrators"
+msgstr "O gerenciamento de plugins é restrito a administradores"
+
+msgid "plugins.flash.plugin_named_already_exists"
+msgstr "Já existe um plugin com o nome %(folder_name)s"
+
+msgid "plugins.flash.plugin_not_found"
+msgstr "Plugin com o id %(plugin)s não encontrado"
+
+msgid "plugins.flash.plugin_upload_error"
+msgstr "Erro ao carregar o plugin (%(value)s): %(value2)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully"
+msgstr "Plugins carregados com sucesso: %(value)s"
+
+msgid "plugins.flash.plugins_uploaded_successfully_2"
+msgstr "Plugins carregados com sucesso"
+
+msgid "plugins.flash.refused_download"
+msgstr "Recusado o download de %(plugin_id)s: %(e)s"
+
+msgid "plugins.flash.refused_install"
+msgstr "Instalação de %(plugin_id)s recusada: %(problem)s"
+
+msgid "plugins.flash.refused_update"
+msgstr "Atualização de %(plugin_id)s recusada: %(problem)s"
+
+msgid "plugins.flash.update_did_not_complete"
+msgstr "A atualização de %(plugin_id)s não foi concluída: %(detail)s"
+
+msgid "plugins.flash.updated_to_version"
+msgstr "Plugin %(plugin_id)s atualizado para a versão %(version)s"
 
 msgid "plugins.marketplace.active"
 msgstr "Ativo"
@@ -3988,6 +5437,36 @@ msgstr "Data de Expiração Pro"
 msgid "pro.expiration_date.unknown"
 msgstr "Data de expiração desconhecida"
 
+msgid "pro.flash.checking_license_key"
+msgstr "Verificando a chave de licença."
+
+msgid "pro.flash.forced_update_pro_plugins_has_scheduled"
+msgstr "Foi agendada uma atualização forçada dos plugins PRO."
+
+msgid "pro.flash.invalid_license_key"
+msgstr "Chave de licença inválida"
+
+msgid "pro.flash.license_key_not_updated_refused"
+msgstr "A chave de licença PRO não foi atualizada: o valor foi recusado."
+
+msgid "pro.flash.license_key_same_current_one"
+msgstr "A chave de licença é igual à atual."
+
+msgid "pro.flash.license_key_updated_successfully"
+msgstr "A chave de licença PRO foi atualizada com sucesso."
+
+msgid "pro.flash.missing_license_key_parameter_pro_key"
+msgstr "Parâmetro de chave de licença ausente em /pro/key."
+
+msgid "pro.flash.new_check_pro_plugins_has_scheduled"
+msgstr "Foi agendada uma nova verificação dos plugins PRO."
+
+msgid "pro.flash.scheduler_will_attempt_apply_changes_download"
+msgstr "O Scheduler tentará aplicar as alterações e baixar os plugins PRO."
+
+msgid "pro.flash.web_ui_will_reload_pro_plugins"
+msgstr "A interface web recarregará seus plugins PRO em breve."
+
 msgid "pro.force_check.description"
 msgstr "Força uma nova verificação dos plugins PRO. Isso faz o download novamente se houver versões novas disponíveis."
 
@@ -4024,8 +5503,17 @@ msgstr "EXPIRADO"
 msgid "pro.status.free_version"
 msgstr "Versão GRATUITA"
 
+msgid "pro.status.invalid"
+msgstr "CHAVE INVÁLIDA"
+
+msgid "pro.status.invalid_key"
+msgstr "O servidor de licenças rejeitou a chave de licença armazenada. Verifique-a, ou remova-a em Configurações globais → Pro."
+
 msgid "pro.status.overlapped"
 msgstr "SOBREPOSTO"
+
+msgid "pro.status.pending_key"
+msgstr "A chave de licença ainda não foi verificada. O Scheduler a verifica pouco depois de ser salva."
 
 msgid "pro.status.pro_version"
 msgstr "Versão PRO"
@@ -4041,6 +5529,15 @@ msgstr "Estado"
 
 msgid "pro.title"
 msgstr "Licença Pro"
+
+msgid "pro.trial.cta"
+msgstr "Iniciar teste gratuito"
+
+msgid "pro.trial.description"
+msgstr "Experimente o <span class=\"text-primary\">BunkerWeb PRO</span> gratuitamente por <strong>30 dias</strong>."
+
+msgid "pro.trial.title"
+msgstr "Teste gratuito"
 
 msgid "profile.2fa.disable_title"
 msgstr "Desativar 2FA"
@@ -4083,6 +5580,132 @@ msgstr "Atualizar Códigos de Recuperação"
 
 msgid "profile.card.title.sessions"
 msgstr "Sessões"
+
+msgid "profile.flash.couldn_t_delete_passkey"
+msgstr "Não foi possível excluir a chave de acesso: %(message)s"
+
+msgid "profile.flash.couldn_t_disable_two_factor_authentication"
+msgstr "Não foi possível desativar a autenticação de dois fatores: %(message)s"
+
+msgid "profile.flash.couldn_t_enable_two_factor_authentication"
+msgstr "Não foi possível ativar a autenticação de dois fatores: %(message)s"
+
+msgid "profile.flash.couldn_t_refresh_recovery_codes"
+msgstr "Não foi possível atualizar os códigos de recuperação: %(message)s"
+
+msgid "profile.flash.couldn_t_rename_passkey"
+msgstr "Não foi possível renomear a chave de acesso: %(message)s"
+
+msgid "profile.flash.couldn_t_revoke_other_sessions"
+msgstr "Não foi possível revogar as outras sessões: %(err)s"
+
+msgid "profile.flash.couldn_t_update_user"
+msgstr "Não foi possível atualizar o usuário %(value)s: %(message)s"
+
+msgid "profile.flash.couldn_t_wipe_other_sessions"
+msgstr "Não foi possível apagar as outras sessões: %(message)s"
+
+msgid "profile.flash.current_password_incorrect"
+msgstr "A senha atual está incorreta."
+
+msgid "profile.flash.email_too_long_must_less_than"
+msgstr "O e-mail é muito longo. Deve ter menos de 256 caracteres."
+
+msgid "profile.flash.missing_current_password_parameter_profile_edit"
+msgstr "Parâmetro current password ausente em /profile/edit."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp"
+msgstr "Parâmetro current password ausente em /profile/totp-refresh."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_2"
+msgstr "Parâmetro current password ausente em /profile/totp-disable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_totp_3"
+msgstr "Parâmetro current password ausente em /profile/totp-enable."
+
+msgid "profile.flash.missing_current_password_parameter_profile_wipe"
+msgstr "Parâmetro current password ausente em /profile/wipe-other-sessions."
+
+msgid "profile.flash.missing_email_parameter_profile_edit"
+msgstr "Parâmetro email ausente em /profile/edit."
+
+msgid "profile.flash.missing_new_password_confirm_parameter_profile"
+msgstr "Parâmetro new password confirm ausente em /profile/edit."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_delete"
+msgstr "Parâmetros ausentes em /profile/webauthn/delete."
+
+msgid "profile.flash.missing_parameters_profile_webauthn_rename"
+msgstr "Parâmetros ausentes em /profile/webauthn/rename."
+
+msgid "profile.flash.missing_totp_token_parameter_profile_totp"
+msgstr "Parâmetro totp token ausente em /profile/totp-enable."
+
+msgid "profile.flash.new_password_not_strong_enough_must"
+msgstr "A nova senha não é forte o suficiente. Deve conter pelo menos 8 caracteres, incluindo pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial (#@?!$%^&*-)."
+
+msgid "profile.flash.new_password_same_current_one"
+msgstr "A nova senha é igual à atual."
+
+msgid "profile.flash.new_password_too_long_must_not"
+msgstr "A nova senha é muito longa. Não deve exceder %(MAX_PASSWORD_BYTES)s bytes (limite rígido do bcrypt); caracteres acentuados ou emojis contam como vários bytes cada um."
+
+msgid "profile.flash.no_fields_updated"
+msgstr "Nenhum campo foi atualizado."
+
+msgid "profile.flash.other_sessions_have_successfully_wiped"
+msgstr "As outras sessões foram apagadas com sucesso."
+
+msgid "profile.flash.passkey_has_successfully_deleted"
+msgstr "A chave de acesso foi excluída com sucesso."
+
+msgid "profile.flash.passkey_has_successfully_registered"
+msgstr "A chave de acesso foi registrada com sucesso."
+
+msgid "profile.flash.passkey_has_successfully_renamed"
+msgstr "A chave de acesso foi renomeada com sucesso."
+
+msgid "profile.flash.passkey_name_cannot_empty"
+msgstr "O nome da chave de acesso não pode estar vazio."
+
+msgid "profile.flash.password_changed_but_other_sessions_could"
+msgstr "Sua senha foi alterada, mas não foi possível revogar as outras sessões. Use \"Encerrar outras sessões\" abaixo e verifique a lista de sessões ativas."
+
+msgid "profile.flash.passwords_do_not_match_confirm_password"
+msgstr "As senhas não correspondem à confirmação da senha."
+
+msgid "profile.flash.profile_has_successfully_updated"
+msgstr "O perfil foi atualizado com sucesso."
+
+msgid "profile.flash.recovery_codes_have_successfully_refreshed_old"
+msgstr "Os códigos de recuperação foram atualizados com sucesso. Os antigos não são mais válidos."
+
+msgid "profile.flash.theme_invalid"
+msgstr "O tema é inválido."
+
+msgid "profile.flash.totp_token_invalid"
+msgstr "O token TOTP é inválido."
+
+msgid "profile.flash.two_factor_authentication_already_enabled"
+msgstr "A autenticação de dois fatores já está ativada."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_disabled"
+msgstr "A autenticação de dois fatores foi desativada com sucesso."
+
+msgid "profile.flash.two_factor_authentication_has_successfully_enabled"
+msgstr "A autenticação de dois fatores foi ativada com sucesso."
+
+msgid "profile.flash.two_factor_authentication_not_enabled"
+msgstr "A autenticação de dois fatores não está ativada."
+
+msgid "profile.flash.two_factor_enrolment_expired_reload_page"
+msgstr "O registro de autenticação de dois fatores expirou. Recarregue a página e escaneie o novo código QR."
+
+msgid "profile.flash.username_email_are_same_current_ones"
+msgstr "O nome de usuário e o e-mail são iguais aos atuais."
+
+msgid "profile.flash.username_too_long_must_less_than"
+msgstr "O nome de usuário é muito longo. Deve ter menos de 256 caracteres."
 
 msgid "profile.help.photo_extensions"
 msgstr "Permitido JPG, GIF ou PNG. Tamanho máximo: 800KB."
@@ -4168,6 +5791,39 @@ msgstr "Intervalo de tempo"
 msgid "range_picker.custom"
 msgstr "Personalizado"
 
+msgid "raw_drafts.cannot_be_draft"
+msgstr "A configuração %(setting)s não pode ser transformada em rascunho."
+
+msgid "raw_drafts.draft_not_posted"
+msgstr "A configuração em rascunho %(setting)s não foi enviada."
+
+msgid "raw_drafts.draft_not_present"
+msgstr "A configuração em rascunho %(setting)s não está presente no editor RAW."
+
+msgid "raw_drafts.edits_discarded"
+msgstr "As configurações em rascunho permanecem inalteradas; ative-as ou edite-as no modo Raw."
+
+msgid "raw_drafts.global_not_service_draft"
+msgstr "A configuração global %(setting)s não pode ser transformada em rascunho de serviço."
+
+msgid "raw_drafts.locked_by_method"
+msgstr "A configuração %(setting)s não pode alterar o estado de rascunho porque é gerenciada pelo método %(method)s."
+
+msgid "raw_drafts.metadata_raw_only"
+msgstr "Os metadados de rascunho de uma configuração só são aceitos no modo raw."
+
+msgid "raw_drafts.missing_metadata"
+msgstr "Metadado %(field)s ausente."
+
+msgid "raw_drafts.present_not_posted"
+msgstr "A configuração presente %(setting)s não foi enviada."
+
+msgid "raw_drafts.present_not_valid"
+msgstr "A configuração presente %(setting)s não é válida."
+
+msgid "raw_drafts.setting_not_valid"
+msgstr "A configuração %(setting)s não é válida."
+
 msgid "redirects.all"
 msgstr "Todos"
 
@@ -4221,6 +5877,69 @@ msgstr "Um redirecionamento é uma regra nomeada que você anexa a um ou mais se
 
 msgid "redirects.empty_title"
 msgstr "Nenhum redirecionamento ainda"
+
+msgid "redirects.err.invalid_from_path"
+msgstr "O caminho de origem não é válido: não pode conter espaços, ponto e vírgula ou chaves."
+
+msgid "redirects.err.invalid_to_url"
+msgstr "O destino deve ser uma URL completa http:// ou https://."
+
+msgid "redirects.flash.at_least_one_service_required"
+msgstr "É necessário pelo menos um serviço"
+
+msgid "redirects.flash.could_not_attach_redirect"
+msgstr "Não foi possível associar o redirecionamento: %(message)s"
+
+msgid "redirects.flash.could_not_create"
+msgstr "Não foi possível criar o redirecionamento: %(message)s"
+
+msgid "redirects.flash.could_not_delete_redirect"
+msgstr "Não foi possível excluir o redirecionamento: %(message)s"
+
+msgid "redirects.flash.could_not_detach_redirect"
+msgstr "Não foi possível desassociar o redirecionamento: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_redirects"
+msgstr "Não foi possível buscar os redirecionamentos: %(message)s"
+
+msgid "redirects.flash.could_not_fetch_services_redirect_assignments"
+msgstr "Não foi possível buscar os serviços para as atribuições de redirecionamentos: %(message)s"
+
+msgid "redirects.flash.could_not_update"
+msgstr "Não foi possível atualizar o redirecionamento: %(message)s"
+
+msgid "redirects.flash.name_required"
+msgstr "O nome do redirecionamento é obrigatório"
+
+msgid "redirects.flash.redirect_attached_service"
+msgstr "Redirecionamento vinculado. Serviços: %(len)s"
+
+msgid "redirects.flash.redirect_created_successfully"
+msgstr "Redirecionamento %(value)s criado com sucesso"
+
+msgid "redirects.flash.redirect_deleted_successfully"
+msgstr "Redirecionamento excluído com sucesso"
+
+msgid "redirects.flash.redirect_detached_successfully"
+msgstr "Redirecionamento desassociado com sucesso"
+
+msgid "redirects.flash.redirect_required"
+msgstr "O redirecionamento é obrigatório"
+
+msgid "redirects.flash.redirect_service_are_required"
+msgstr "O redirecionamento e o serviço são obrigatórios"
+
+msgid "redirects.flash.redirect_updated_successfully"
+msgstr "Redirecionamento atualizado com sucesso"
+
+msgid "redirects.flash.status_code_must_be_one_of"
+msgstr "O código de status deve ser um dos seguintes: %(value)s"
+
+msgid "redirects.flash.target_required"
+msgstr "O destino do redirecionamento é obrigatório"
+
+msgid "redirects.flash.too_many_services"
+msgstr "Um redirecionamento não pode ser associado a mais de %(value)s serviços"
 
 msgid "redirects.from_path"
 msgstr "Redirecionar de"
@@ -4307,16 +6026,16 @@ msgid "reports.chart.timeseries.title"
 msgstr "Solicitações bloqueadas ao longo do tempo"
 
 msgid "reports.crowdsec.source_appsec"
-msgstr "AppSec inspection"
+msgstr "Inspeção do AppSec"
 
 msgid "reports.crowdsec.source_failure_policy"
-msgstr "AppSec failure policy"
+msgstr "Política de falha do AppSec"
 
 msgid "reports.crowdsec.source_lapi"
-msgstr "Local API decision"
+msgstr "Decisão da API local"
 
 msgid "reports.crowdsec.technical_details"
-msgstr "Technical details"
+msgstr "Detalhes técnicos"
 
 msgid "reports.security_incident"
 msgstr "Incidente de Segurança"
@@ -4477,6 +6196,63 @@ msgstr "Entradas"
 msgid "resource_groups.expand_all"
 msgstr "Expandir tudo"
 
+msgid "resource_groups.flash.alias_invalid_chars"
+msgstr "O alias deve conter entre 1 e 64 letras, dígitos, sublinhados ou hifens"
+
+msgid "resource_groups.flash.alias_reserved"
+msgstr "Este alias está reservado pelo BunkerWeb"
+
+msgid "resource_groups.flash.could_not_clone_resource_group"
+msgstr "Não foi possível clonar o grupo de recursos: %(message)s"
+
+msgid "resource_groups.flash.could_not_delete_resource_group"
+msgstr "Não foi possível excluir o grupo de recursos: %(message)s"
+
+msgid "resource_groups.flash.could_not_export_resource_groups"
+msgstr "Não foi possível exportar os grupos de recursos: %(message)s"
+
+msgid "resource_groups.flash.could_not_save_resource_group"
+msgstr "Não foi possível salvar o grupo de recursos: %(message)s"
+
+msgid "resource_groups.flash.entries_not_a_list"
+msgstr "As entradas de recursos devem ser uma lista"
+
+msgid "resource_groups.flash.entries_not_valid_json"
+msgstr "As entradas de recursos não são um JSON válido"
+
+msgid "resource_groups.flash.entry_comment_too_long"
+msgstr "A entrada %(index)s tem um comentário muito longo"
+
+msgid "resource_groups.flash.entry_invalid"
+msgstr "A entrada %(index)s é inválida"
+
+msgid "resource_groups.flash.entry_invalid_kind"
+msgstr "A entrada %(index)s tem um tipo inválido"
+
+msgid "resource_groups.flash.entry_invalid_value"
+msgstr "A entrada %(index)s tem um valor inválido"
+
+msgid "resource_groups.flash.resource_group_cloned"
+msgstr "Grupo de recursos clonado como @%(alias)s"
+
+msgid "resource_groups.flash.resource_group_created_successfully"
+msgstr "Grupo de recursos @%(alias)s criado com sucesso"
+
+msgid "resource_groups.flash.resource_group_deleted_successfully"
+msgstr "Grupo de recursos excluído com sucesso"
+
+msgid "resource_groups.flash.resource_group_required"
+msgstr "O grupo de recursos é obrigatório"
+
+msgid "resource_groups.flash.resource_group_updated_successfully"
+msgstr "Grupo de recursos atualizado com sucesso"
+
+msgid "resource_groups.flash.source_required"
+msgstr "O grupo de recursos de origem é obrigatório"
+
+msgid "resource_groups.flash.too_many_entries"
+msgstr "Um grupo de recursos não pode conter mais de %(value)s entradas"
+
 msgid "resource_groups.global_configuration"
 msgstr "Configuração global"
 
@@ -4492,6 +6268,24 @@ msgstr "As importações TXT/CSV são limitadas a 256 KiB."
 msgid "resource_groups.kind"
 msgstr "Tipo"
 
+msgid "resource_groups.kind_label.asn"
+msgstr "ASN"
+
+msgid "resource_groups.kind_label.country"
+msgstr "País"
+
+msgid "resource_groups.kind_label.ip"
+msgstr "IP"
+
+msgid "resource_groups.kind_label.rdns"
+msgstr "DNS reverso"
+
+msgid "resource_groups.kind_label.uri"
+msgstr "URI"
+
+msgid "resource_groups.kind_label.user_agent"
+msgstr "Agente de usuário"
+
 msgid "resource_groups.kinds"
 msgstr "Tipos"
 
@@ -4501,8 +6295,23 @@ msgstr "Carregando referências..."
 msgid "resource_groups.max_entries"
 msgstr "Um grupo de recursos não pode conter mais de %(max)s entradas."
 
-msgid "resource_groups.meta_line"
-msgstr "%(kinds)s tipos · %(values)s valores · %(usages)s usos"
+#. plural pair; 2 form(s) for pt_BR, singular in slot 0
+msgid "resource_groups.meta_kinds"
+msgid_plural "resource_groups.meta_kinds_plural"
+msgstr[0] "%(count)s tipo"
+msgstr[1] "%(count)s tipos"
+
+#. plural pair; 2 form(s) for pt_BR, singular in slot 0
+msgid "resource_groups.meta_usages"
+msgid_plural "resource_groups.meta_usages_plural"
+msgstr[0] "%(count)s uso"
+msgstr[1] "%(count)s usos"
+
+#. plural pair; 2 form(s) for pt_BR, singular in slot 0
+msgid "resource_groups.meta_values"
+msgid_plural "resource_groups.meta_values_plural"
+msgstr[0] "%(count)s valor"
+msgstr[1] "%(count)s valores"
 
 msgid "resource_groups.new"
 msgstr "Novo grupo"
@@ -4521,6 +6330,12 @@ msgstr "Sem referências"
 
 msgid "resource_groups.readonly"
 msgstr "O banco de dados é somente leitura. Os grupos de recursos podem ser inspecionados e exportados, mas não podem ser alterados."
+
+#. plural pair; 2 form(s) for pt_BR, singular in slot 0
+msgid "resource_groups.reference_count"
+msgid_plural "resource_groups.reference_count_plural"
+msgstr[0] "%(count)s referência"
+msgstr[1] "%(count)s referências"
 
 msgid "resource_groups.references_error"
 msgstr "Não foi possível carregar referências"
@@ -4684,6 +6499,9 @@ msgstr "Recarga Necessária"
 msgid "searchpane.scope"
 msgstr "Escopo"
 
+msgid "searchpane.search_title"
+msgstr "Pesquisar: {name}"
+
 msgid "searchpane.security_mode"
 msgstr "Modo de Segurança"
 
@@ -4774,14 +6592,35 @@ msgstr "Modo do serviço"
 msgid "service.resources.attach"
 msgstr "Associar"
 
+msgid "service.resources.confirm_detach"
+msgstr "Desanexar este recurso de %(service)s?"
+
+msgid "service.resources.confirm_detach_certificate"
+msgstr "Desanexar este certificado de %(service)s?"
+
+msgid "service.resources.confirm_detach_redirect"
+msgstr "Desanexar este redirecionamento de %(service)s?"
+
+msgid "service.resources.confirm_detach_template"
+msgstr "Desanexar este modelo de %(service)s?"
+
+msgid "service.resources.confirm_detach_upstream"
+msgstr "Desanexar este servidor upstream de %(service)s?"
+
+msgid "service.resources.confirm_detach_workflow"
+msgstr "Desanexar este fluxo de trabalho de %(service)s?"
+
 msgid "service.resources.conflict.inline"
 msgstr "O %(service)s já serve o %(path)s através das suas próprias configurações %(family)s. Limpe essas configurações para o %(path)s, ou use um caminho diferente."
 
 msgid "service.resources.conflict.primary"
 msgstr "O “%(name)s” é atualmente o certificado primário para este serviço e será desativado sem aviso prévio. O primário é aquele que está realmente em uso."
 
-msgid "service.resources.conflict.resource"
-msgstr "O %(service)s já serve o %(path)s através do “%(kind)s” %(name)s. Desanexe o “%(name)s”, ou atribua um caminho diferente a um deles."
+msgid "service.resources.conflict.resource_redirect"
+msgstr "O %(service)s já serve o %(path)s através do redirecionamento “%(name)s”. Desanexe o “%(name)s”, ou atribua um caminho diferente a um deles."
+
+msgid "service.resources.conflict.resource_upstream"
+msgstr "O %(service)s já serve o %(path)s através do servidor upstream “%(name)s”. Desanexe o “%(name)s”, ou atribua um caminho diferente a um deles."
 
 msgid "service.resources.conflict.stream"
 msgstr "Um serviço de streaming proxy todas as conexões para um único backend, e o %(service)s já usa o upstream “%(name)s”. Desanexe-o primeiro."
@@ -4820,7 +6659,7 @@ msgid "service.resources.primary"
 msgstr "Certificado primário"
 
 msgid "service.resources.template.add"
-msgstr "Add"
+msgstr "Adicionar"
 
 msgid "service.resources.template.add_label"
 msgstr "Modelo para adicionar como camada"
@@ -4872,6 +6711,222 @@ msgstr "Indisponível"
 
 msgid "services.draft"
 msgstr "Serviços em rascunho"
+
+msgid "services.flash.all_selected_services_could_not_found"
+msgstr "Todos os serviços selecionados não foram encontrados, não são serviços de UI/API ou já foram convertidos."
+
+msgid "services.flash.all_selected_services_could_not_found_2"
+msgstr "Todos os serviços selecionados não foram encontrados ou não são serviços de UI/API."
+
+msgid "services.flash.configuration_created"
+msgstr "A configuração do serviço %(service)s foi criada."
+
+msgid "services.flash.configuration_created_with_refusals"
+msgstr "A configuração do serviço %(service)s foi criada, mas %(refused_count)s valores foram recusados."
+
+msgid "services.flash.configuration_saved"
+msgstr "A configuração do serviço %(service)s foi salva."
+
+msgid "services.flash.configuration_saved_with_refusals"
+msgstr "A configuração do serviço %(service)s foi salva, mas %(refused_count)s valores foram recusados."
+
+msgid "services.flash.converted_services_draft"
+msgstr "Convertidos em serviços \"rascunho\": %(names)s"
+
+msgid "services.flash.converted_services_online"
+msgstr "Convertidos em serviços \"online\": %(names)s"
+
+msgid "services.flash.could_not_fetch_attached_certificates"
+msgstr "Não foi possível obter os certificados anexados a este serviço."
+
+msgid "services.flash.could_not_fetch_attached_redirects"
+msgstr "Não foi possível obter os redirecionamentos anexados a este serviço."
+
+msgid "services.flash.could_not_fetch_attached_upstreams"
+msgstr "Não foi possível obter os servidores upstream anexados a este serviço."
+
+msgid "services.flash.could_not_fetch_attached_workflows"
+msgstr "Não foi possível obter os fluxos de trabalho anexados a este serviço."
+
+msgid "services.flash.could_not_fetch_custom_configs_api"
+msgstr "Não foi possível buscar as configurações personalizadas da API."
+
+msgid "services.flash.could_not_fetch_custom_configurations_api"
+msgstr "Não foi possível buscar as configurações personalizadas da API."
+
+msgid "services.flash.could_not_fetch_service_api"
+msgstr "Não foi possível buscar o serviço da API."
+
+msgid "services.flash.could_not_fetch_service_api_2"
+msgstr "Não foi possível buscar o serviço %(service)s da API."
+
+msgid "services.flash.could_not_fetch_service_cloning"
+msgstr "Não foi possível buscar o serviço %(clone)s para clonagem."
+
+msgid "services.flash.could_not_fetch_services_api"
+msgstr "Não foi possível buscar os serviços da API."
+
+msgid "services.flash.could_not_fetch_services_configuration"
+msgstr "Não foi possível buscar a configuração dos serviços."
+
+msgid "services.flash.could_not_fetch_templates_api"
+msgstr "Não foi possível buscar os modelos da API."
+
+msgid "services.flash.custom_configs_not_saved_because_rename"
+msgstr "As configurações personalizadas não foram salvas porque a renomeação foi recusada."
+
+msgid "services.flash.default_server_reserved"
+msgstr "%(default_server_id)s é o servidor padrão reservado: ele responde a solicitações que não correspondem a nenhum serviço configurado (nomes de host desconhecidos, acesso por IP direto), portanto não pode ser criado, renomeado ou excluído."
+
+msgid "services.flash.default_server_type_refused"
+msgstr "O SERVER_TYPE não pode ser definido no serviço reservado %(default_server_id)s: ele não tem um bloco de servidor próprio para alternar. Sua metade HTTP é o próprio bloco de servidor padrão, e sua metade stream é a configuração DEFAULT_SERVER_STREAM_PORTS."
+
+msgid "services.flash.do_not_have_permission_change_service"
+msgstr "Você não tem permissão para alterar o modo de um serviço"
+
+msgid "services.flash.failed_delete_drafted_autoconf_service"
+msgstr "Falha ao excluir o serviço autoconf em rascunho %(service_id)s: %(message)s"
+
+msgid "services.flash.failed_import_service"
+msgstr "Falha ao importar o serviço: %(names)s"
+
+msgid "services.flash.failed_import_services"
+msgstr "Falha ao importar os serviços: %(names)s"
+
+msgid "services.flash.imported_service"
+msgstr "Serviço importado: %(names)s"
+
+msgid "services.flash.imported_services"
+msgstr "Serviços importados: %(names)s"
+
+msgid "services.flash.invalid_encoding_configs_export_json_inside"
+msgstr "Codificação inválida para configs_export.json dentro do arquivo."
+
+msgid "services.flash.invalid_encoding_services_export_env_inside"
+msgstr "Codificação inválida para services_export.env dentro do arquivo."
+
+msgid "services.flash.invalid_file_encoding_please_upload_utf"
+msgstr "Codificação de arquivo inválida. Carregue um arquivo em UTF-8."
+
+msgid "services.flash.invalid_mode_parameter"
+msgstr "Parâmetro mode inválido."
+
+msgid "services.flash.missing_convert_parameter_services_convert"
+msgstr "Parâmetro convert_to ausente em /services/convert."
+
+msgid "services.flash.missing_mode_parameter_services_mode"
+msgstr "Parâmetro mode ausente em /services/%(service)s/mode."
+
+msgid "services.flash.missing_services_parameter_services_convert"
+msgstr "Parâmetro services ausente em /services/convert."
+
+msgid "services.flash.missing_services_parameter_services_delete"
+msgstr "Parâmetro services ausente em /services/delete."
+
+msgid "services.flash.no_services_custom_configurations_found_import"
+msgstr "Não foram encontrados serviços ou configurações personalizadas no arquivo de importação."
+
+msgid "services.flash.no_services_export"
+msgstr "Nenhum serviço para exportar."
+
+msgid "services.flash.no_services_file_uploaded"
+msgstr "Nenhum arquivo de serviços carregado."
+
+msgid "services.flash.no_services_selected"
+msgstr "Nenhum serviço selecionado."
+
+msgid "services.flash.plugin_does_not_apply_default_server"
+msgstr "Este plugin não se aplica ao servidor padrão"
+
+msgid "services.flash.refusing_extract_archive_uncompressed_size_exceeds"
+msgstr "Extração do arquivo recusada: o tamanho descomprimido excede o limite de segurança."
+
+msgid "services.flash.resource_attach_failed"
+msgstr "Não foi possível anexar: %(error)s"
+
+msgid "services.flash.resource_attach_refused"
+msgstr "Não é possível anexar: %(error)s"
+
+msgid "services.flash.resource_attached"
+msgstr "Recurso anexado a %(service)s."
+
+msgid "services.flash.resource_detach_failed"
+msgstr "Não foi possível desanexar: %(error)s"
+
+msgid "services.flash.resource_detach_refused"
+msgstr "Não é possível desanexar: %(error)s"
+
+msgid "services.flash.resource_detached"
+msgstr "Recurso desanexado de %(service)s."
+
+msgid "services.flash.resource_unknown_family"
+msgstr "Tipo de recurso desconhecido."
+
+msgid "services.flash.server_name_missing"
+msgstr "O serviço não foi criado porque o nome do servidor não foi fornecido."
+
+msgid "services.flash.service_already_draft_will_not_converted"
+msgstr "O serviço %(non_convertible_service)s já é um serviço em rascunho e não será convertido."
+
+msgid "services.flash.service_already_exists"
+msgstr "O serviço %(service)s já existe."
+
+msgid "services.flash.service_already_online_will_not_converted"
+msgstr "O serviço %(non_convertible_service)s já é um serviço online e não será convertido."
+
+msgid "services.flash.service_deleted"
+msgstr "Serviço excluído: %(services)s"
+
+msgid "services.flash.service_not_edited_because_no_values"
+msgstr "O serviço %(service)s não foi editado porque nenhum valor foi alterado."
+
+msgid "services.flash.service_not_edited_because_no_values_or_configs"
+msgstr "O serviço %(service)s não foi editado porque nenhum valor nem configuração personalizada foi alterado."
+
+msgid "services.flash.service_not_found"
+msgstr "Serviço não encontrado"
+
+msgid "services.flash.service_not_saved_every_changed_value"
+msgstr "O serviço %(service)s não foi salvo: todos os valores alterados foram recusados."
+
+msgid "services.flash.service_not_ui_api_service_will"
+msgstr "O serviço %(non_editable_service)s não é um serviço de UI/API e não será convertido."
+
+msgid "services.flash.service_now_declared_redirect_only"
+msgstr "O serviço %(service)s agora está declarado como \"somente redirecionamento\"."
+
+msgid "services.flash.service_now_declared_standard"
+msgstr "O serviço %(service)s agora está declarado como \"padrão\"."
+
+msgid "services.flash.service_will_not_deleted"
+msgstr "O serviço %(non_deletable_service)s não é um serviço de UI/API e não será excluído."
+
+msgid "services.flash.service_will_not_deleted_autoconf"
+msgstr "O serviço %(non_deletable_service)s é um serviço autoconf online (converta-o primeiro em rascunho) e não será excluído."
+
+msgid "services.flash.service_will_not_deleted_reserved"
+msgstr "O serviço %(non_deletable_service)s é o servidor padrão reservado, que responde às requisições que não correspondem a nenhum serviço, e não será excluído."
+
+msgid "services.flash.services_deleted"
+msgstr "Serviços excluídos: %(services)s"
+
+msgid "services.flash.skipped_existing_service"
+msgstr "Serviço existente ignorado: %(names)s"
+
+msgid "services.flash.skipped_existing_services"
+msgstr "Serviços existentes ignorados: %(names)s"
+
+msgid "services.flash.template_custom_config_cannot_edited_because"
+msgstr "A configuração personalizada do modelo %(key)s não pode ser editada porque foi criada através do método %(value)s."
+
+msgid "services.flash.template_not_found"
+msgstr "Modelo não encontrado"
+
+msgid "services.flash.uploaded_archive_must_contain_services_export"
+msgstr "O arquivo carregado deve conter services_export.env e/ou configs_export.json."
+
+msgid "services.flash.uploaded_file_not_valid_zip_archive"
+msgstr "O arquivo carregado não é um arquivo zip válido."
 
 msgid "services.online"
 msgstr "Online"
@@ -4946,7 +7001,7 @@ msgid "settings.access_control.kind.uri"
 msgstr "URIs"
 
 msgid "settings.access_control.kind.user_agent"
-msgstr "User agents"
+msgstr "Agentes de usuário"
 
 msgid "settings.access_control.kinds.description"
 msgstr "Uma seção para cada tipo de correspondência. Em cada uma, as entradas que você digita e as listas que o BunkerWeb baixa são verificadas juntas; um cliente que corresponda a qualquer uma delas corresponde à seção."
@@ -4961,10 +7016,10 @@ msgid "settings.access_control.order.description"
 msgstr "Por padrão, cada solicitação passa por essas quatro verificações nesta ordem, e a primeira que decide, decide. Uma correspondência na lista branca encerra o processo imediatamente: a solicitação é permitida e as três verificações seguintes nunca são executadas. A própria ordem é configurável por serviço, através de PLUGINS_ORDER_ACCESS e PLUGINS_ORDER_PREREAD."
 
 msgid "settings.access_control.order.off"
-msgstr "Off"
+msgstr "Desativado"
 
 msgid "settings.access_control.order.on"
-msgstr "On"
+msgstr "Ativado"
 
 msgid "settings.access_control.order.title"
 msgstr "Ordem de decisão"
@@ -4994,7 +7049,7 @@ msgid "settings.access_control.rules.kind_rdns"
 msgstr "DNS reverso"
 
 msgid "settings.access_control.rules.kind_ua"
-msgstr "User agent"
+msgstr "Agente de usuário"
 
 msgid "settings.access_control.rules.kind_uri"
 msgstr "URI"
@@ -5009,7 +7064,7 @@ msgid "settings.access_control.rules.remove_term"
 msgstr "Remover este termo"
 
 msgid "settings.access_control.rules.rule"
-msgstr "Rule"
+msgstr "Regra"
 
 msgid "settings.access_control.rules.title"
 msgstr "Regras compostas"
@@ -5222,7 +7277,7 @@ msgid "settings.modsecurity.engine.description"
 msgstr "Se o ModSecurity está carregado ou não, e o que ele faz com uma correspondência de regra."
 
 msgid "settings.modsecurity.engine.title"
-msgstr "Engine"
+msgstr "Motor"
 
 msgid "settings.modsecurity.global_crs.description"
 msgstr "Carrega o Core Rule Set uma vez para toda a instância, em vez de uma vez por serviço. Mais rápido de carregar com muitos serviços, mas configurações modsec-crs restritas a um serviço são recusadas enquanto estiver ativado: crie uma global e delimite-a com uma regra de Host."
@@ -5289,6 +7344,45 @@ msgstr "Carregado de %(name)s · caracteres: %(count)s"
 
 msgid "setup.file.read_error"
 msgstr "Erro ao ler o arquivo"
+
+msgid "setup.flash.admin_email_too_long_must_less"
+msgstr "O e-mail do administrador é muito longo. Deve ter menos de 256 caracteres."
+
+msgid "setup.flash.admin_password_not_strong_enough_must"
+msgstr "A senha de administrador não é forte o suficiente. Deve conter pelo menos 8 caracteres, incluindo pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial (#@?!$%^&*-)."
+
+msgid "setup.flash.admin_password_too_long_must_not"
+msgstr "A senha de administrador é muito longa. Não deve exceder %(MAX_PASSWORD_BYTES)s bytes (limite rígido do bcrypt); caracteres acentuados ou emojis contam como vários bytes cada um."
+
+msgid "setup.flash.admin_user_created_successfully"
+msgstr "O usuário administrador foi criado com sucesso"
+
+msgid "setup.flash.admin_username_too_long_must_less"
+msgstr "O nome de usuário administrador é muito longo. Deve ter menos de 256 caracteres."
+
+msgid "setup.flash.couldn_t_create_admin_user"
+msgstr "Não foi possível criar o usuário administrador: %(message)s"
+
+msgid "setup.flash.couldn_t_create_new_service"
+msgstr "Não foi possível criar o novo serviço: %(operation)s"
+
+msgid "setup.flash.couldn_t_edit_new_service"
+msgstr "Não foi possível editar o novo serviço: %(operation)s"
+
+msgid "setup.flash.hostname_already_use"
+msgstr "O nome do host %(value)s já está em uso."
+
+msgid "setup.flash.hostname_not_valid"
+msgstr "O nome do host não é válido."
+
+msgid "setup.flash.missing_either_one_following_parameters"
+msgstr "Está faltando um dos seguintes parâmetros: %(value)s."
+
+msgid "setup.flash.passwords_do_not_match"
+msgstr "As senhas não coincidem."
+
+msgid "setup.flash.when_using_custom_ssl_certificate_must"
+msgstr "Ao usar um certificado SSL personalizado, você deve definir tanto o certificado quanto a chave."
 
 msgid "setup.status.admin_user_exists"
 msgstr "Já existe um usuário administrador. Por favor, prossiga para o próximo passo."
@@ -5446,6 +7540,12 @@ msgstr "Expirando"
 msgid "status.failed"
 msgstr "Falhou"
 
+msgid "status.failover"
+msgstr "Failover"
+
+msgid "status.inactive"
+msgstr "Inativo"
+
 msgid "status.invalid_json_payload"
 msgstr "Payload JSON inválido."
 
@@ -5531,7 +7631,7 @@ msgid "status.no_url_available"
 msgstr "Nenhuma URL disponível"
 
 msgid "status.not_applicable"
-msgstr "N/A"
+msgstr "N/D"
 
 msgid "status.online"
 msgstr "Online"
@@ -5583,6 +7683,9 @@ msgstr "Desconhecido"
 
 msgid "status.up"
 msgstr "Ativo"
+
+msgid "status.uploaded"
+msgstr "Enviado"
 
 msgid "status.yes"
 msgstr "Sim"
@@ -5833,6 +7936,9 @@ msgstr "Criar modelo"
 msgid "template.editor.heading_edit"
 msgstr "Editar modelo %(id)s"
 
+msgid "template.editor.heading_view"
+msgstr "Ver modelo %(id)s"
+
 msgid "template.editor.label_config_data"
 msgstr "Dados"
 
@@ -5918,7 +8024,10 @@ msgid "template.editor.multivalue_add"
 msgstr "Adicionar valor"
 
 msgid "template.editor.multivalue_helper"
-msgstr "Um valor por linha.%(separatorNote)s"
+msgstr "Um valor por linha."
+
+msgid "template.editor.multivalue_helper_joined"
+msgstr "Um valor por linha. Será unido com \"%(separator)s\"."
 
 msgid "template.editor.panel_overview"
 msgstr "Visão geral"
@@ -6081,6 +8190,9 @@ msgstr "O banco de dados está atualmente em modo somente leitura. Os modelos n�
 
 msgid "template.editor.readonly_method"
 msgstr "Este modelo foi criado pelo processo %(method)s e não pode ser editado na interface do usuário."
+
+msgid "template.editor.readonly_method_plugin"
+msgstr "Este modelo foi criado pelo plugin %(plugin)s e não pode ser editado pela interface Web."
 
 msgid "template.editor.readonly_title"
 msgstr "Somente leitura"
@@ -6256,6 +8368,9 @@ msgstr "O tipo de configuração é obrigatório quando uma configuração é de
 msgid "template.editor.validation_configs_unique"
 msgstr "Cada nome de configuração deve ser único."
 
+msgid "template.editor.validation_id_invalid"
+msgstr "O ID do modelo só pode conter letras, dígitos, pontos, hifens e sublinhados, e deve começar com uma letra ou um dígito."
+
 msgid "template.editor.validation_id_required"
 msgstr "O ID do modelo é obrigatório."
 
@@ -6268,6 +8383,36 @@ msgstr "Cada chave de configuração deve ser única."
 msgid "template.none"
 msgstr "Nenhum modelo"
 
+msgid "templates.catalog.diff.configs_added"
+msgstr "Configurações personalizadas adicionadas"
+
+msgid "templates.catalog.diff.configs_changed"
+msgstr "Configurações personalizadas alteradas"
+
+msgid "templates.catalog.diff.configs_removed"
+msgstr "Configurações personalizadas removidas"
+
+msgid "templates.catalog.diff.name"
+msgstr "Nome: %(old)s → %(new)s"
+
+msgid "templates.catalog.diff.settings_added"
+msgstr "Configurações adicionadas"
+
+msgid "templates.catalog.diff.settings_changed"
+msgstr "Configurações alteradas"
+
+msgid "templates.catalog.diff.settings_removed"
+msgstr "Configurações removidas"
+
+msgid "templates.catalog.diff.steps_added"
+msgstr "Etapas adicionadas"
+
+msgid "templates.catalog.diff.steps_changed"
+msgstr "Etapas alteradas"
+
+msgid "templates.catalog.diff.steps_removed"
+msgstr "Etapas removidas"
+
 msgid "templates.catalog.heading"
 msgstr "Modelos disponíveis"
 
@@ -6277,8 +8422,89 @@ msgstr "Um modelo é uma camada: adicionar um a um serviço que já usa modelos 
 msgid "templates.catalog.no_compat_notice"
 msgstr "Este catálogo não declara compatibilidade com o BunkerWeb. Um modelo é recusado na instalação se nomear uma configuração que este BunkerWeb não possui."
 
+msgid "templates.catalog.state_installed"
+msgstr "Instalado, igual ao catálogo"
+
+msgid "templates.catalog.state_managed"
+msgstr "Instalado e gerenciado por %(owner)s: o catálogo não o altera"
+
+msgid "templates.catalog.state_update"
+msgstr "Instalado, a versão do catálogo é diferente"
+
 msgid "templates.catalog.subheading"
 msgstr "Modelos de serviço selecionados publicados pela organização BunkerWeb."
+
+msgid "templates.catalog.update_changed"
+msgstr "O modelo %(template)s ou o catálogo mudaram desde a pré-visualização. Recarregue a página e revise as alterações novamente."
+
+msgid "templates.catalog.update_confirm"
+msgstr "Substituir o modelo %(id)s pela sua versão da release %(tag)s do catálogo. Estas alterações se aplicam ao modelo:"
+
+msgid "templates.catalog.update_failed"
+msgstr "Não foi possível atualizar o modelo."
+
+msgid "templates.catalog.update_managed"
+msgstr "O modelo %(template)s é gerenciado por %(owner)s: o catálogo não o altera"
+
+msgid "templates.catalog.update_no_services"
+msgstr "Nenhum serviço utiliza este modelo ainda."
+
+msgid "templates.catalog.update_not_installed"
+msgstr "O modelo %(template)s não está instalado: instale-o em vez disso"
+
+msgid "templates.catalog.update_preview_unknown"
+msgstr "As alterações poderão ser verificadas após a próxima atualização do catálogo."
+
+msgid "templates.catalog.update_services"
+msgstr "Estes serviços utilizam este modelo. Na próxima geração de configuração deles, cada configuração que não tenham definido eles mesmos assume o novo valor:"
+
+msgid "templates.catalog.update_title"
+msgstr "Atualizar um modelo da comunidade"
+
+msgid "templates.catalog.update_up_to_date"
+msgstr "O modelo %(template)s já corresponde ao catálogo"
+
+msgid "templates.flash.catalog_updated"
+msgstr "Modelo %(template)s atualizado a partir do catálogo."
+
+msgid "templates.flash.error_deleting_template"
+msgstr "Erro ao excluir o modelo %(template_id)s: %(message)s"
+
+msgid "templates.flash.export_failed"
+msgstr "Não foi possível exportar o modelo %(template)s: %(error)s"
+
+msgid "templates.flash.imported"
+msgstr "Modelo %(template)s importado."
+
+msgid "templates.flash.no_templates_selected_deletion"
+msgstr "Nenhum modelo selecionado para exclusão."
+
+msgid "templates.flash.replaced"
+msgstr "Modelo %(template)s substituído."
+
+msgid "templates.flash.successfully_deleted_template"
+msgstr "Modelos excluídos: %(success_count)s."
+
+msgid "templates.flash.template_created_successfully"
+msgstr "Modelo %(template_id)s criado com sucesso."
+
+msgid "templates.flash.template_deleted_successfully"
+msgstr "Modelo %(template_id)s excluído com sucesso."
+
+msgid "templates.flash.template_installed_catalogue"
+msgstr "Modelo %(template_id)s instalado a partir do catálogo."
+
+msgid "templates.flash.template_not_found"
+msgstr "Modelo %(clone_id)s não encontrado."
+
+msgid "templates.flash.template_not_found_2"
+msgstr "Modelo não encontrado."
+
+msgid "templates.flash.template_updated_successfully"
+msgstr "Modelo %(template_id)s atualizado com sucesso."
+
+msgid "templates.flash.user_is_read_only"
+msgstr "O usuário é somente leitura"
 
 msgid "templates.gallery.delete_selected"
 msgstr "Excluir selecionados"
@@ -6294,6 +8520,24 @@ msgstr "Selecionar"
 
 msgid "templates.gallery.svc_suffix"
 msgstr "svc"
+
+msgid "templates.import.admin_only"
+msgstr "A importação de modelos é restrita a administradores"
+
+msgid "templates.import.failed"
+msgstr "Não foi possível importar o modelo."
+
+msgid "templates.import.no_file"
+msgstr "Escolha um arquivo para importar."
+
+msgid "templates.import.refused"
+msgstr "O modelo não foi importado: %(reason)s"
+
+msgid "templates.import.too_large"
+msgstr "O modelo não foi importado: o arquivo é maior do que 1 MiB"
+
+msgid "templates.import.unreadable"
+msgstr "O modelo não foi importado: não foi possível ler o arquivo"
 
 msgid "templates.name.api"
 msgstr "API"
@@ -6332,7 +8576,7 @@ msgid "theme.light"
 msgstr "Claro"
 
 msgid "theme.system"
-msgstr "System"
+msgstr "Sistema"
 
 msgid "threatmap.attacks_today"
 msgstr "Ataques hoje"
@@ -6429,6 +8673,9 @@ msgstr "Defina METRICS_COLLECT_TIMINGS como yes para medir quanto tempo cada plu
 
 msgid "timings.disabled_title"
 msgstr "Os tempos dos plugins estão desativados"
+
+msgid "timings.flash.error_fetching_plugin_timings"
+msgstr "Erro ao buscar os tempos de execução dos plugins: %(message)s"
 
 msgid "timings.max"
 msgstr "Máximo"
@@ -6532,11 +8779,23 @@ msgstr "Se deve solicitar automaticamente um certificado Let's Encrypt."
 msgid "tooltip.badge.redirect_candidate"
 msgstr "Este serviço não contém nada além de um redirecionamento, então pode ser declarado como somente redirecionamento — o que o retirará da contagem de serviços PRO assim que essa cobrança entrar em vigor."
 
+msgid "tooltip.button.attach_redirect"
+msgstr "Associar %(name)s a um serviço"
+
+msgid "tooltip.button.attach_upstream"
+msgstr "Associar %(name)s a um serviço"
+
+msgid "tooltip.button.attach_workflow"
+msgstr "Associar %(name)s a um serviço"
+
 msgid "tooltip.button.back_to_file_upload"
 msgstr "Voltar ao upload de arquivo"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Bloquear este endereço IP"
+
+msgid "tooltip.button.clone_workflow"
+msgstr "Clonar %(name)s"
 
 msgid "tooltip.button.convert_config_to_draft"
 msgstr "Converter configuração %(name)s em rascunho"
@@ -6550,6 +8809,9 @@ msgstr "Converter Serviço %(name)s para Rascunho"
 msgid "tooltip.button.convert_service_to_online"
 msgstr "Converter Serviço %(name)s para Online"
 
+msgid "tooltip.button.delete_certificate"
+msgstr "Excluir certificado"
+
 msgid "tooltip.button.delete_config"
 msgstr "Excluir Configuração Personalizada %(name)s"
 
@@ -6562,11 +8824,32 @@ msgstr "Excluir Instância %(hostname)s"
 msgid "tooltip.button.delete_plugin"
 msgstr "Excluir Plugin %(name)s"
 
+msgid "tooltip.button.delete_redirect"
+msgstr "Excluir %(name)s"
+
 msgid "tooltip.button.delete_service"
 msgstr "Excluir Serviço %(name)s"
 
 msgid "tooltip.button.delete_template"
 msgstr "Excluir Modelo %(name)s"
+
+msgid "tooltip.button.delete_upstream"
+msgstr "Excluir %(name)s"
+
+msgid "tooltip.button.delete_workflow"
+msgstr "Excluir %(name)s"
+
+msgid "tooltip.button.edit_redirect"
+msgstr "Editar %(name)s"
+
+msgid "tooltip.button.edit_upstream"
+msgstr "Editar %(name)s"
+
+msgid "tooltip.button.edit_workflow_details"
+msgstr "Editar o nome e a descrição de %(name)s"
+
+msgid "tooltip.button.edit_workflow_rules"
+msgstr "Editar as regras de %(name)s"
 
 msgid "tooltip.button.enroll_instance"
 msgstr "Emitir um código de registro para %(hostname)s"
@@ -6673,6 +8956,9 @@ msgstr "A senha de confirmação deve corresponder à senha inserida acima."
 msgid "tooltip.copied"
 msgstr "Copiado!"
 
+msgid "tooltip.copy_failed"
+msgstr "Falha ao copiar"
+
 msgid "tooltip.copy_https_only"
 msgstr "A funcionalidade de cópia só está disponível através de HTTPS."
 
@@ -6693,6 +8979,9 @@ msgstr "O valor difere do padrão do modelo"
 
 msgid "tooltip.disabled_by_method"
 msgstr "Desabilitado: Gerenciado através do método '%(method)s'."
+
+msgid "tooltip.disabled_by_plugin"
+msgstr "Desativado: gerenciado pelo plugin %(plugin)s."
 
 msgid "tooltip.disabled_db_readonly"
 msgstr "Desabilitado: O banco de dados está em modo somente leitura."
@@ -6813,6 +9102,9 @@ msgstr "Exportar configuração personalizada %(name)s"
 
 msgid "tooltip.link.export_service"
 msgstr "Exportar Configuração do Serviço %(service)s"
+
+msgid "tooltip.link.export_template"
+msgstr "Exportar modelo %(template)s"
 
 msgid "tooltip.link.manage_activation"
 msgstr "Gerenciar a ativação de %(name)s nas configurações globais"
@@ -7285,6 +9577,21 @@ msgstr "Atraso em segundos entre tentativas da API ZeroSSL."
 msgid "totp.cant_access"
 msgstr "Não consegue acessar seu código de autenticação?"
 
+msgid "totp.flash.database_read_only_recovery_code_used"
+msgstr "O banco de dados é somente leitura, o código de recuperação que você usou continua válido."
+
+msgid "totp.flash.error_occurred_while_using_recovery_code"
+msgstr "Ocorreu um erro ao usar o código de recuperação."
+
+msgid "totp.flash.no_token_provided_totp"
+msgstr "Nenhum token fornecido em /totp."
+
+msgid "totp.flash.token_invalid"
+msgstr "O token é inválido."
+
+msgid "totp.flash.ve_used_one_recovery_codes_have"
+msgstr "Você usou um dos seus códigos de recuperação. Você tem %(len)s restantes."
+
 msgid "totp.or_use_security_key"
 msgstr "ou use sua chave de segurança"
 
@@ -7350,6 +9657,78 @@ msgstr "Um upstream é um conjunto nomeado de backends que você associa a um ou
 
 msgid "upstreams.empty_title"
 msgstr "Ainda não existem upstreams"
+
+msgid "upstreams.flash.at_least_one_server_required"
+msgstr "É necessário pelo menos um servidor"
+
+msgid "upstreams.flash.at_least_one_service_required"
+msgstr "É necessário pelo menos um serviço"
+
+msgid "upstreams.flash.could_not_attach_upstream"
+msgstr "Não foi possível associar o upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_create_upstream"
+msgstr "Não foi possível criar o upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_delete_upstream"
+msgstr "Não foi possível excluir o upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_detach_upstream"
+msgstr "Não foi possível desassociar o upstream: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_services_upstream_assignments"
+msgstr "Não foi possível buscar os serviços para as atribuições de upstreams: %(message)s"
+
+msgid "upstreams.flash.could_not_fetch_upstreams"
+msgstr "Não foi possível buscar os upstreams: %(message)s"
+
+msgid "upstreams.flash.could_not_update_upstream"
+msgstr "Não foi possível atualizar o upstream: %(message)s"
+
+msgid "upstreams.flash.keepalive_must_be_positive_whole_number"
+msgstr "O número de keepalive deve ser um número inteiro positivo"
+
+msgid "upstreams.flash.match_path_must_start_with_slash"
+msgstr "O caminho do proxy reverso deve começar com /"
+
+msgid "upstreams.flash.method_must_be_one_of"
+msgstr "O método deve ser um dos seguintes: %(value)s"
+
+msgid "upstreams.flash.name_required"
+msgstr "O nome do upstream é obrigatório"
+
+msgid "upstreams.flash.protocol_must_be_one_of"
+msgstr "O protocolo deve ser um dos seguintes: %(value)s"
+
+msgid "upstreams.flash.too_many_servers"
+msgstr "Um upstream não pode ter mais de %(value)s servidores"
+
+msgid "upstreams.flash.too_many_services"
+msgstr "Um upstream não pode ser associado a mais de %(value)s serviços"
+
+msgid "upstreams.flash.upstream_attached_service"
+msgstr "Upstream vinculado. Serviços: %(len)s"
+
+msgid "upstreams.flash.upstream_created_successfully"
+msgstr "Upstream %(value)s criado com sucesso"
+
+msgid "upstreams.flash.upstream_deleted_successfully"
+msgstr "Upstream excluído com sucesso"
+
+msgid "upstreams.flash.upstream_detached_successfully"
+msgstr "Upstream desassociado com sucesso"
+
+msgid "upstreams.flash.upstream_required"
+msgstr "O upstream é obrigatório"
+
+msgid "upstreams.flash.upstream_service_are_required"
+msgstr "O upstream e o serviço são obrigatórios"
+
+msgid "upstreams.flash.upstream_updated_successfully"
+msgstr "Upstream atualizado com sucesso"
+
+msgid "upstreams.flash.weight_max_fails_whole_numbers"
+msgstr "O peso e o max_fails de %(host)s devem ser números inteiros"
 
 msgid "upstreams.keepalive"
 msgstr "Manter conexão"
@@ -7434,6 +9813,15 @@ msgstr "Serviços ocultos: %(count)s. Um upstream %(protocol)s só pode ser asso
 
 msgid "upstreams.truncated"
 msgstr "Apenas os primeiros 500 upstream são exibidos. Refine a lista usando API para obter o resultado completo."
+
+msgid "utils.flash.couldn_t_connect_redis"
+msgstr "Não foi possível conectar ao Redis"
+
+msgid "utils.flash.invalid_request"
+msgstr "Requisição inválida"
+
+msgid "utils.flash.missing_form"
+msgstr "%(key)s ausente no formulário"
 
 msgid "validation.current_password_required_for_passkey"
 msgstr "Digite sua senha atual para adicionar uma chave de acesso."
@@ -7530,6 +9918,27 @@ msgstr "Serviços habilitados"
 
 msgid "web_cache.error"
 msgstr "Erro"
+
+msgid "web_cache.flash.error_fetching_web_cache_metrics"
+msgstr "Erro ao buscar as métricas do cache web: %(message)s"
+
+msgid "web_cache.flash.error_fetching_web_cache_status"
+msgstr "Erro ao buscar o status do cache web: %(message)s"
+
+msgid "web_cache.flash.error_purging_web_cache"
+msgstr "Erro ao limpar o cache web: %(message)s"
+
+msgid "web_cache.flash.purged_all_entries"
+msgstr "Cache web limpo (todas as entradas)"
+
+msgid "web_cache.flash.purged_for_url"
+msgstr "Cache web limpo para %(url)s"
+
+msgid "web_cache.flash.url_required_purge_by_url"
+msgstr "É necessária uma URL para limpar por URL"
+
+msgid "web_cache.flash.web_cache_purged_instance_failed_unreachable"
+msgstr "Cache web limpo. Instâncias limpas: %(value)s, com falha: %(value2)s, inacessíveis e ignoradas: %(value3)s (nada foi enfileirado)."
 
 msgid "web_cache.hit_rate"
 msgstr "Taxa de acerto"
@@ -7666,6 +10075,9 @@ msgstr "Regra %(n)s de %(total)s, alterar posição"
 msgid "workflows.aria.collapse"
 msgstr "Recolher"
 
+msgid "workflows.aria.collapseRule"
+msgstr "Recolher a regra %(n)s"
+
 msgid "workflows.aria.combinator"
 msgstr "Alterar combinador, atualmente"
 
@@ -7684,6 +10096,9 @@ msgstr "Arraste para reordenar"
 msgid "workflows.aria.expand"
 msgstr "Expandir"
 
+msgid "workflows.aria.expandRule"
+msgstr "Expandir a regra %(n)s"
+
 msgid "workflows.aria.groupKind"
 msgstr "Tipo de grupo"
 
@@ -7693,11 +10108,20 @@ msgstr "Adicionar uma regra na posição %(n)s"
 msgid "workflows.aria.more"
 msgstr "Mais"
 
+msgid "workflows.aria.moreActionsForRule"
+msgstr "Mais ações para a regra %(n)s"
+
 msgid "workflows.aria.moveDown"
 msgstr "Mover para baixo: executa depois"
 
 msgid "workflows.aria.moveRule"
 msgstr "Mover regra"
+
+msgid "workflows.aria.moveRuleDown"
+msgstr "Mover a regra %(n)s para baixo"
+
+msgid "workflows.aria.moveRuleUp"
+msgstr "Mover a regra %(n)s para cima"
 
 msgid "workflows.aria.moveUp"
 msgstr "Mover para cima: executa antes"
@@ -7734,6 +10158,9 @@ msgstr "Contagem de solicitações"
 
 msgid "workflows.aria.resourceGroup"
 msgstr "Grupo de recursos"
+
+msgid "workflows.aria.ruleCard"
+msgstr "Regra %(n)s de %(total)s — %(name)s"
 
 msgid "workflows.aria.ruleErrors"
 msgstr "Problemas de validação na regra %(count)s"
@@ -7897,6 +10324,9 @@ msgstr "Os fluxos de trabalho são executados na ordem de vinculação; as regra
 msgid "workflows.entry_title"
 msgstr "Cada solicitação a um serviço vinculado"
 
+msgid "workflows.err.load"
+msgstr "As regras salvas não puderam ser lidas. O salvamento está desativado para que não sejam sobrescritas; recarregue a página."
+
 msgid "workflows.err.save"
 msgstr "Não foi possível salvar"
 
@@ -7929,6 +10359,69 @@ msgstr "A solicitação continua para o próximo fluxo de trabalho vinculado e d
 
 msgid "workflows.exit_title"
 msgstr "Nenhuma regra correspondeu"
+
+msgid "workflows.flash.could_not_attach_workflow"
+msgstr "Não foi possível associar o fluxo de trabalho: %(message)s"
+
+msgid "workflows.flash.could_not_clone_workflow"
+msgstr "Não foi possível clonar o fluxo de trabalho: %(message)s"
+
+msgid "workflows.flash.could_not_create_workflow"
+msgstr "Não foi possível criar o fluxo de trabalho: %(message)s"
+
+msgid "workflows.flash.could_not_delete_workflow"
+msgstr "Não foi possível excluir o fluxo de trabalho: %(message)s"
+
+msgid "workflows.flash.could_not_detach_workflow"
+msgstr "Não foi possível desassociar o fluxo de trabalho: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_services_workflow_assignments"
+msgstr "Não foi possível buscar os serviços para as atribuições de fluxos de trabalho: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflow"
+msgstr "Não foi possível buscar o fluxo de trabalho: %(message)s"
+
+msgid "workflows.flash.could_not_fetch_workflows"
+msgstr "Não foi possível buscar os fluxos de trabalho: %(message)s"
+
+msgid "workflows.flash.could_not_update_workflow"
+msgstr "Não foi possível atualizar o fluxo de trabalho: %(message)s"
+
+msgid "workflows.flash.name_required"
+msgstr "O nome do fluxo de trabalho é obrigatório"
+
+msgid "workflows.flash.service_list_not_read_reopen_page"
+msgstr "Não foi possível ler a lista de serviços; reabra a página e tente novamente"
+
+msgid "workflows.flash.too_many_services"
+msgstr "Um fluxo de trabalho não pode ser associado a mais de %(value)s serviços"
+
+msgid "workflows.flash.workflow_cloned"
+msgstr "Fluxo de trabalho clonado como %(name)s"
+
+msgid "workflows.flash.workflow_created_successfully"
+msgstr "Fluxo de trabalho %(value)s criado com sucesso"
+
+msgid "workflows.flash.workflow_deleted_successfully"
+msgstr "Fluxo de trabalho excluído com sucesso"
+
+msgid "workflows.flash.workflow_detached_successfully"
+msgstr "Fluxo de trabalho desassociado com sucesso"
+
+msgid "workflows.flash.workflow_new_name_are_required"
+msgstr "O fluxo de trabalho e o novo nome são obrigatórios"
+
+msgid "workflows.flash.workflow_required"
+msgstr "O fluxo de trabalho é obrigatório"
+
+msgid "workflows.flash.workflow_service_are_required"
+msgstr "O fluxo de trabalho e o serviço são obrigatórios"
+
+msgid "workflows.flash.workflow_services_updated_attached"
+msgstr "Serviços do workflow atualizados (vinculados: %(len)s)"
+
+msgid "workflows.flash.workflow_updated_successfully"
+msgstr "Fluxo de trabalho atualizado com sucesso"
 
 msgid "workflows.gate.and"
 msgstr "e somente depois que o mesmo IP de cliente tiver feito mais de"
@@ -8038,8 +10531,14 @@ msgstr ", a avaliação termina aqui; nenhuma regra abaixo é alcançada."
 msgid "workflows.rules"
 msgstr "Regras"
 
-msgid "workflows.say.actionChanged"
-msgstr "A ação mudou para %(type)s. Ela continua sendo a única ação e ainda encerra a avaliação."
+msgid "workflows.say.actionChangedBlock"
+msgstr "A ação mudou para bloquear. Ela continua sendo a única ação e ainda encerra a avaliação."
+
+msgid "workflows.say.actionChangedChallenge"
+msgstr "A ação mudou para desafio. Ela continua sendo a única ação e ainda encerra a avaliação."
+
+msgid "workflows.say.actionChangedRedirect"
+msgstr "A ação mudou para redirecionar. Ela continua sendo a única ação e ainda encerra a avaliação."
 
 msgid "workflows.say.added"
 msgstr "Regra adicionada na posição %(n)s, por último; todas as regras acima são verificadas primeiro."
@@ -8066,13 +10565,16 @@ msgid "workflows.say.lastValueRemoved"
 msgstr "Último valor removido: esta condição não pode ser salva até conter um valor."
 
 msgid "workflows.say.moved"
-msgstr "%(name)s movida para a posição %(to)s de %(total)s%(how)s. Agora ela é executada %(where)s."
+msgstr "%(name)s movida para a posição %(to)s de %(total)s."
+
+msgid "workflows.say.movedDrag"
+msgstr "%(name)s arrastada para a posição %(to)s de %(total)s."
+
+msgid "workflows.say.movedKeyboard"
+msgstr "%(name)s movida com o teclado para a posição %(to)s de %(total)s."
 
 msgid "workflows.say.predicateCap"
 msgstr "Esta regra já contém o máximo de %(max)s condições."
-
-msgid "workflows.say.ruleAbove"
-msgstr "a regra acima"
 
 msgid "workflows.say.ruleDisabled"
 msgstr "%(name)s desativada: ela é ignorada por completo e as regras abaixo agora recebem essas solicitações."
@@ -8082,6 +10584,9 @@ msgstr "%(name)s ativada: ela volta a ser avaliada na posição %(n)s."
 
 msgid "workflows.say.runsAfter"
 msgstr "depois de %(name)s"
+
+msgid "workflows.say.runsAfterAbove"
+msgstr "Agora ela é executada depois da regra acima."
 
 msgid "workflows.say.runsFirst"
 msgstr "primeiro"
@@ -8096,13 +10601,7 @@ msgid "workflows.say.theRule"
 msgstr "A regra"
 
 msgid "workflows.say.valuesDropped"
-msgstr "A condição mudou para %(type)s. Valores que não puderam ser mantidos: %(count)s."
-
-msgid "workflows.say.via.drag"
-msgstr "por arrastar"
-
-msgid "workflows.say.via.keyboard"
-msgstr "pelo teclado"
+msgstr "Condição alterada. Valores que não puderam ser mantidos: %(count)s."
 
 msgid "workflows.say.viewCanvas"
 msgstr "Visualização do canvas. As regras são executadas da esquerda para a direita; a primeira correspondência vence."
@@ -8222,7 +10721,16 @@ msgid "workflows.test.out_draft"
 msgstr "Este serviço é um rascunho: nenhum fluxo de trabalho foi compilado para ele ainda."
 
 msgid "workflows.test.out_match"
-msgstr "%(workflow)s · %(rule)s correspondeu — ação: %(action)s."
+msgstr "%(workflow)s · %(rule)s correspondeu."
+
+msgid "workflows.test.out_match_block"
+msgstr "%(workflow)s · %(rule)s correspondeu e bloqueou a requisição."
+
+msgid "workflows.test.out_match_challenge"
+msgstr "%(workflow)s · %(rule)s correspondeu e submeteu a requisição a um desafio."
+
+msgid "workflows.test.out_match_redirect"
+msgstr "%(workflow)s · %(rule)s correspondeu e redirecionou a requisição."
 
 msgid "workflows.test.out_no_match"
 msgstr "Nenhuma regra correspondeu. A solicitação continua para o restante da pilha de segurança."
@@ -8300,7 +10808,7 @@ msgid "workflows.tree.empty"
 msgstr "Grupo vazio: adicione uma condição; ele não pode ser salvo assim."
 
 msgid "workflows.tree.noGroupHolds"
-msgstr "nenhum grupo contém entradas %(kind)s"
+msgstr "Nenhum grupo de recursos contém entradas deste tipo."
 
 msgid "workflows.tree.noneMeta"
 msgstr "corresponde quando nenhuma delas é verdadeira"
