@@ -22,6 +22,7 @@ from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest.mock import Mock, patch
 
+import password_utils  # type: ignore
 import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -64,6 +65,9 @@ def _load_router():
     names["bw_users.auth"].__path__ = []
     names["bw_users.auth.guard"].guard = object()
     names["bw_users.utils"].get_db = lambda: _DB
+    # The password helpers the router imports from `..utils` (H15), taken from the real module.
+    for name in ("USER_PASSWORD_RX", "gen_password_hash", "is_bcrypt_hash", "password_exceeds_bcrypt_limit"):
+        setattr(names["bw_users.utils"], name, getattr(password_utils, name))
 
     with patch.dict(sys.modules, names):
         path = ROOT / "src" / "api" / "app" / "routers" / "users.py"

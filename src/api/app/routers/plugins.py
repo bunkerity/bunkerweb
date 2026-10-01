@@ -274,8 +274,25 @@ def get_plugin_icon(plugin_id: str):
     return Response(content=payload, media_type=plugin_icon_content_type(name), headers=_icon_response_headers(name))
 
 
+def _replace_refusal(pid: str, existing: Dict[str, Dict[str, Any]], replace: bool, done: List[str]) -> Optional[str]:
+    """Why an archive's plugin id may not be written, or None when it may.
+
+    Without ``replace`` any existing id is refused. With it, only a ``ui`` row installed by the
+    ``ui`` method may be overwritten: that is what an upload or a catalogue install writes. Core,
+    pro, external and scheduler rows are refused HERE because the DB layer would skip them
+    silently (``_uep_sync_plugin_row``) and this router would then report the id as written. An id
+    already written by this same request is refused either way.
+    """
+    row = existing.get(pid)
+    if pid in done or (row is not None and not replace):
+        return f"Plugin {pid} already exists"
+    if row is not None and not row.get("type") == row.get("method") == "ui":
+        return f"Plugin {pid} is a {row.get('type')} plugin installed by {row.get('method')} and cannot be replaced"
+    return None
+
+
 @router.post("/upload", dependencies=[Depends(guard)])
-def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")) -> JSONResponse:
+def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui"), replace: bool = Form(False)) -> JSONResponse:
     """Upload and install UI plugins from archive files.
 
     Supports .zip, .tar.gz, .tar.xz formats. Each archive may contain
@@ -284,6 +301,10 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
     Args:
         files: Archive files containing plugins
         method: Installation method (currently only "ui" supported)
+        replace: Overwrite an existing plugin of the same id. Only a ``ui`` plugin installed by
+            the ``ui`` method (an upload or a catalogue install) can be replaced; any other
+            existing id answers 409. The DB prunes the settings the new plugin.json no longer
+            declares, together with their values. This is how the catalogue updates a plugin.
     """
     if method != "ui":
         return JSONResponse(status_code=422, content={"status": "error", "message": "Only method=ui is supported"})
@@ -299,9 +320,12 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
     # (method mismatch, or `db_plugin.type` not in external/ui/pro) and still returns "" -- so
     # the id landed in `created` and the API answered success for a plugin it never installed.
     try:
-        existing_ids = {p.get("id") for p in db.get_plugins(_type="all", with_data=False, with_settings=False)}
+        existing = {p.get("id"): p for p in db.get_plugins(_type="all", with_data=False, with_settings=False)}
     except Exception:
-        existing_ids = set()
+        return JSONResponse(status_code=500, content={"status": "error", "message": "Could not read plugin inventory"})
+    # id -> checksum written, for the ids this request replaced (confirmed at the end).
+    replaced: Dict[str, str] = {}
+    refused = 0
 
     TMP_UI_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -341,8 +365,10 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
                             if not _PLUGIN_ID_RX.match(pid):
                                 errors.append({"file": filename, "error": f"Invalid plugin id '{pid}'"})
                                 continue
-                            if pid in existing_ids:
-                                errors.append({"file": filename, "error": f"Plugin {pid} already exists"})
+                            refusal = _replace_refusal(pid, existing, replace, created)
+                            if refusal:
+                                refused += "cannot be replaced" in refusal
+                                errors.append({"file": filename, "error": refusal})
                                 continue
 
                             # Extract to /var/tmp/bunkerweb/ui/<id>
@@ -369,8 +395,9 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
                             if err:
                                 errors.append({"file": filename, "error": err})
                             else:
+                                if pid in existing:
+                                    replaced[pid] = checksum
                                 created.append(pid)
-                                existing_ids.add(pid)
                 except BadZipFile:
                     errors.append({"file": filename, "error": "Invalid zip archive"})
                 continue
@@ -397,8 +424,10 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
                         if not _PLUGIN_ID_RX.match(pid):
                             errors.append({"file": filename, "error": f"Invalid plugin id '{pid}'"})
                             continue
-                        if pid in existing_ids:
-                            errors.append({"file": filename, "error": f"Plugin {pid} already exists"})
+                        refusal = _replace_refusal(pid, existing, replace, created)
+                        if refusal:
+                            refused += "cannot be replaced" in refusal
+                            errors.append({"file": filename, "error": refusal})
                             continue
 
                         dest = TMP_UI_ROOT / pid
@@ -421,8 +450,9 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
                         if err:
                             errors.append({"file": filename, "error": err})
                         else:
+                            if pid in existing:
+                                replaced[pid] = checksum
                             created.append(pid)
-                            existing_ids.add(pid)
             except Exception as e:
                 errors.append({"file": filename, "error": f"Invalid tar archive: {e}"})
                 continue
@@ -434,23 +464,25 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
     # above already refused every id that existed BEFORE this request, so a `ui` row carrying one
     # of these ids now can only be one this request wrote -- which also closes the window between
     # that check and the write. Same-request-only: an id we did not append is never inspected.
-    # That premise holds only while the pre-check actually ran: it is fail-open (`except Exception`
-    # -> `existing_ids = set()`), so if listing the plugins failed there, a pre-existing `ui` id can
-    # reach this point and be confirmed as "installed" when it was really skipped. Acceptable: both
-    # lookups fail together in practice (the same `db.get_plugins`), and the fallback is the old
-    # behaviour, not something worse.
+    # A REPLACED id is the exception to "a ui row now carrying it is ours": the row existed before
+    # this request, so its presence proves nothing. The stored checksum must be the one we wrote.
     if created:
         try:
-            installed_ids = {p.get("id") for p in db.get_plugins(_type="ui", with_data=False, with_settings=False)}
+            installed = {p.get("id"): p.get("checksum") for p in db.get_plugins(_type="ui", with_data=False, with_settings=False)}
         except Exception:
-            installed_ids = None
-        if installed_ids is not None:
-            skipped = [pid for pid in created if pid not in installed_ids]
-            if skipped:
-                created = [pid for pid in created if pid in installed_ids]
+            installed = None
+        if installed is not None:
+            skipped = [pid for pid in created if pid not in installed]
+            stale = [pid for pid in created if pid in replaced and installed.get(pid) != replaced[pid]]
+            if skipped or stale:
+                created = [pid for pid in created if pid not in skipped and pid not in stale]
                 errors.extend({"file": pid, "error": f"Plugin {pid} was not installed: the id is already taken by another plugin"} for pid in skipped)
+                errors.extend({"file": pid, "error": f"Plugin {pid} was not replaced: the stored plugin is not the uploaded one"} for pid in stale)
 
-    status = 207 if errors and created else (400 if errors and not created else 201)
+    if refused and refused == len(errors) and not created:
+        status = 409
+    else:
+        status = 207 if errors and created else (400 if errors and not created else 201)
     body: Dict[str, Any] = {"status": "success" if created and not errors else ("partial" if created else "error")}
     if created:
         body["created"] = sorted(created)

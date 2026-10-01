@@ -471,7 +471,7 @@ class TestSessionFlagMigration:
         as the *fallback*.
         """
         source = (Path(_UI_ROOT) / "main.py").read_text()
-        assert 'if not session.get("mfa_validated", False) and bool(current_user.totp_secret) and request.endpoint != "totp.totp_page":' in source
+        assert 'if not session.get("mfa_validated", False) and bool(current_user.totp_secret) and request.endpoint not in MFA_PENDING_ENDPOINTS:' in source
         assert "has_second_factor" not in source
 
 

@@ -270,3 +270,28 @@ class TestInstanceStaysBackwardCompatible:
     def test_a_none_from_the_api_projection_still_lands_on_a_usable_default(self):
         instance = _instance(enrollment_state=None, tls_mode=None)
         assert (instance.enrollment_state, instance.tls_mode) == ("none", "off")
+
+
+class TestReloadAndStopFollowTheWritePermission:
+    """H16: Reload and Stop were enabled for a reader (only Enroll and Delete were gated), and a
+    click led to the full-page 403 of `/instances/<action>`. They mutate the instances, so they
+    follow the same `is_readonly` gate as the other write actions."""
+
+    @staticmethod
+    def _button(html, action):
+        button = re.search(rf'class="icon-btn {action}([^"]*)"', html)
+        assert button, f"the {action} button is gone"
+        return button.group(1)
+
+    @pytest.mark.parametrize("action", ("reload-instance", "stop-instance"))
+    def test_disabled_for_a_reader(self, action):
+        assert "disabled" in self._button(_render([_instance()], is_readonly=True, user_readonly=True), action)
+
+    @pytest.mark.parametrize("action", ("reload-instance", "stop-instance"))
+    def test_enabled_for_a_writer_on_an_up_instance(self, action):
+        assert "disabled" not in self._button(_render([_instance()]), action)
+
+    def test_the_click_handler_refuses_a_read_only_session(self):
+        handler = re.search(r'\$\(document\)\.on\("click", "\.reload-instance, \.stop-instance", function \(\) \{(.*?)\n  \}\);', PAGE_JS, re.S)
+        assert handler, "the reload/stop click handler is gone from instances.js"
+        assert handler.group(1).index("isReadOnly") < handler.group(1).index("execForm(")

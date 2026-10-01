@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from ..auth.guard import guard
-from ..utils import get_db
+from ..utils import USER_PASSWORD_RX, gen_password_hash, get_db, is_bcrypt_hash, password_exceeds_bcrypt_limit
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 class CreateUserRequest(BaseModel):
     username: str
     password: str
-    roles: List[str] = Field(default_factory=lambda: ["admin"])
+    roles: List[str] = Field(default_factory=lambda: ["reader"])
     email: Optional[str] = None
     theme: str = "light"
     language: str = "en"
@@ -94,6 +94,26 @@ def _error(message: str, default: int = 400) -> JSONResponse:
     return JSONResponse(status_code=default, content={"status": "error", "message": message})
 
 
+def _password_hash(password: str) -> Union[bytes, JSONResponse]:
+    """What ``bw_ui_users.password`` stores: always a bcrypt hash, never the password itself.
+
+    A value that already is a bcrypt hash passes through -- that is what the UI's own callers
+    send (routes/setup.py, routes/profile.py, utils/gunicorn.conf.py, and routes/login.py, which
+    posts the stored hash back on every login). Anything else is a plaintext password: it gets
+    the same rules the UI enforces before hashing, then it is hashed here. Storing it verbatim
+    made the UI login fail with a 500 (``checkpw`` raises ``Invalid salt`` on a non-hash).
+    """
+    if is_bcrypt_hash(password):
+        return password.encode("utf-8")
+    if password_exceeds_bcrypt_limit(password):
+        return _error(f"The password is too long: bcrypt reads at most 72 bytes, this one is {len(password.encode('utf-8'))} bytes.")
+    if not USER_PASSWORD_RX.match(password):
+        return _error(
+            "The password is not strong enough: at least 8 characters, including 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character."
+        )
+    return gen_password_hash(password)
+
+
 def _serialize_webauthn_credential(credential: dict) -> dict:
     """JSON-safe copy of a credential dict (datetimes -> ISO strings)."""
     data = {**credential}
@@ -130,10 +150,13 @@ def get_admin_user(auth: bool = False) -> JSONResponse:
 
 @router.post("", dependencies=[Depends(guard)])
 def create_user(req: CreateUserRequest) -> JSONResponse:
-    """Create a new UI user."""
+    """Create a new UI user. ``password`` is a plaintext password or a bcrypt hash."""
+    password = _password_hash(req.password)
+    if isinstance(password, JSONResponse):
+        return password
     ret = get_db().create_ui_user(
         username=req.username,
-        password=req.password.encode("utf-8"),
+        password=password,
         roles=req.roles,
         email=req.email,
         theme=req.theme,
@@ -182,9 +205,13 @@ def update_user(username: str, req: UpdateUserRequest) -> JSONResponse:
     if not user:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"User {username} not found"})
 
+    password = _password_hash(req.password) if req.password else user["password"]
+    if isinstance(password, JSONResponse):
+        return password
+
     ret = db.update_ui_user(
         username=username,
-        password=req.password.encode("utf-8") if req.password else user["password"],
+        password=password,
         # An explicit null means "clear the secret" (that is how the UI disables 2FA); only an
         # absent field falls back to the stored value.
         totp_secret=req.totp_secret if "totp_secret" in req.model_fields_set else user.get("totp_secret"),
@@ -221,6 +248,15 @@ def delete_user_sessions(username: str, keep_session_id: Optional[int] = None) -
     ret = get_db().delete_ui_user_old_sessions(username, keep_session_id=keep_session_id)
     if ret:
         return JSONResponse(status_code=500, content={"status": "error", "message": ret})
+    return JSONResponse(status_code=200, content={"status": "success"})
+
+
+@router.delete("/{username}/sessions/{session_id}", dependencies=[Depends(guard)])
+def delete_user_session(username: str, session_id: int) -> JSONResponse:
+    """Delete one session row of a user, once that session has ended (the UI calls it at logout)."""
+    ret = get_db().delete_ui_user_session(username, session_id)
+    if ret:
+        return JSONResponse(status_code=400 if "read-only" in ret else 500, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})
 
 

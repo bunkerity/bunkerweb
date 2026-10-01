@@ -627,7 +627,9 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
 
         tmp_file = Path(sep, "var", "tmp", "bunkerweb", backup_file.with_suffix(".sql").name)
         with ZipFile(backup_file, "r") as zipf:
-            safe_zip_extractall(zipf, tmp_file.parent)
+            # Uncapped: the database is already cleared, so refusing a large (legitimate) dump here
+            # would lose it. The file is a local backup, not a download or an upload.
+            safe_zip_extractall(zipf, tmp_file.parent, capped=False)
 
         proc = run(
             ["sqlite3", db_path.as_posix(), f".read {tmp_file.as_posix()}"],

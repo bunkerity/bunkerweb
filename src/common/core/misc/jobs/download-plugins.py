@@ -8,7 +8,6 @@ from os.path import join
 from pathlib import Path
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from sys import exit as sys_exit, path as sys_path
-from time import sleep
 from traceback import format_exc
 from uuid import uuid4
 from json import JSONDecodeError, load as json_load, loads
@@ -29,16 +28,18 @@ for deps_path in [
         sys_path.append(deps_path)
 
 from magic import Magic
-from requests import get
-from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall, safe_zip_extractall  # type: ignore
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
+from url_download import download, split_pin  # type: ignore
 
 EXTERNAL_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "plugins")
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "plugins")
 LOGGER = getLogger("DOWNLOAD-EXTERNAL-PLUGINS")
+# One URL's download, whatever it holds. The web UI's upload limit (UI_MAX_CONTENT_LENGTH) defaults
+# to the same 50 MiB, so an archive that installs through one path installs through the other.
+PLUGIN_DOWNLOAD_MAX = 50 * 1024 * 1024
 status = 0
 
 
@@ -199,32 +200,16 @@ try:
         with BytesIO() as content:
             # Download Plugin file
             try:
-                if plugin_url.startswith("file://"):
-                    content.write(Path(plugin_url[7:]).read_bytes())
-                else:
-                    max_retries = 3
-                    retry_count = 0
-                    while retry_count < max_retries:
-                        try:
-                            resp = get(plugin_url, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=10)
-                            break
-                        except ConnectionError as e:
-                            retry_count += 1
-                            if retry_count == max_retries:
-                                raise e
-                            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
-                            sleep(3)
-
-                    if resp.status_code != 200:
-                        LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
-                        continue
-
-                    # Iterate over the response content in chunks
-                    for chunk in resp.iter_content(chunk_size=8192):
-                        if chunk:
-                            content.write(chunk)
-
+                if plugin_url.startswith("http://"):
+                    LOGGER.warning(
+                        f"Downloading {plugin_url} over plain http://, where the archive can be altered in transit. "
+                        "Use https:// or a file:/// path, or pin it with #sha256=<digest>: plain http will be refused in BunkerWeb 1.7.0."
+                    )
+                # Capped, and checked against the URL's #sha256= pin when it carries one.
+                content.write(download(plugin_url, max_bytes=PLUGIN_DOWNLOAD_MAX, allow_http=True))
                 content.seek(0)
+                # The pin is not part of the file name the type detection below falls back to.
+                plugin_url = split_pin(plugin_url)[0]
             except BaseException as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while downloading plugin(s) from {plugin_url} :\n{e}")
@@ -256,6 +241,7 @@ try:
                     except BadZipFile as e:
                         LOGGER.debug(format_exc())
                         LOGGER.error(f"Invalid ZIP file: {e}")
+                        status = 2
                         continue
 
                 # Handle TAR files (all compression types)
@@ -276,15 +262,18 @@ try:
                     except TarError as e:
                         LOGGER.debug(format_exc())
                         LOGGER.error(f"Invalid TAR file: {e}")
+                        status = 2
                         continue
 
                 else:
                     LOGGER.error(f"Unknown file type for {plugin_url}, either ZIP or TAR is supported, skipping...")
+                    status = 2
                     continue
 
             except BaseException as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while decompressing plugin(s) from {plugin_url}:\n{e}")
+                status = 2
                 continue
 
         # Install plugins
@@ -302,7 +291,8 @@ try:
 
     if not plugin_nbr:
         LOGGER.info("No external plugins to update to database")
-        sys_exit(0)
+        # `status`, not 0: a URL that failed above must still fail the job when nothing else installed.
+        sys_exit(status)
 
     external_plugins = []
     external_plugins_ids = []
@@ -339,8 +329,9 @@ try:
 
     if err:
         LOGGER.error(f"Couldn't update external plugins to database: {err}")
+        status = 2
 
-    status = 1
+    status = max(status, 1)
     LOGGER.info("External plugins downloaded and installed")
 
 except SystemExit as e:

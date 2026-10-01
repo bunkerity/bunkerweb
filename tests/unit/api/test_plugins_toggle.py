@@ -260,3 +260,115 @@ def test_an_unreadable_plugin_list_never_erases_created(upload_db):
 
     assert resp.status_code == 201
     assert resp.content == {"status": "success", "created": ["brandnew"]}
+
+
+def test_unreadable_inventory_refuses_upload_before_any_write(upload_db):
+    upload_db.get_plugins.side_effect = Exception("db down")
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("clamav")], method="ui", replace=True)
+
+    assert resp.status_code == 500
+    upload_db.update_external_plugins.assert_not_called()
+
+
+# ── C3: `replace` — the catalogue update path ───────────────────────────────
+#
+# Design (design-catalog.md §2.2): with `replace`, an existing id is accepted ONLY when the row
+# is type `ui` installed by method `ui` -- what a catalogue install writes. Every other row is
+# refused before the write: the DB layer would skip it silently and the router would report it
+# as done. Without `replace`, any existing id is refused exactly as before.
+
+
+def _zip(plugin_id):
+    from io import BytesIO as _BytesIO
+    from json import dumps
+    from zipfile import ZipFile
+
+    payload = dumps({"id": plugin_id, "name": plugin_id, "description": "d", "version": "2.0", "stream": "no", "settings": {}}).encode()
+    buffer = _BytesIO()
+    with ZipFile(buffer, "w") as archive:
+        archive.writestr(f"{plugin_id}/plugin.json", payload)
+    return SimpleNamespace(filename=f"{plugin_id}.zip", file=_BytesIO(buffer.getvalue()))
+
+
+def _ui_row(plugin_id="clamav", checksum="old", **over):
+    return {"id": plugin_id, "type": "ui", "method": "ui", "checksum": checksum} | over
+
+
+def test_replace_updates_a_catalogue_installed_plugin(upload_db):
+    upload_db.get_plugins.side_effect = [[_ui_row()], [_ui_row(checksum="sha")]]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("clamav")], method="ui", replace=True)
+
+    assert resp.status_code == 201
+    assert resp.content == {"status": "success", "created": ["clamav"]}
+    upload_db.update_external_plugins.assert_called_once()
+
+
+def test_replace_works_through_the_zip_branch_too(upload_db):
+    upload_db.get_plugins.side_effect = [[_ui_row()], [_ui_row(checksum="sha")]]
+
+    resp = ROUTER.upload_plugins(files=[_zip("clamav")], method="ui", replace=True)
+
+    assert resp.content == {"status": "success", "created": ["clamav"]}
+
+
+def test_without_replace_an_existing_ui_plugin_is_still_refused(upload_db):
+    upload_db.get_plugins.return_value = [_ui_row()]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("clamav")], method="ui")
+
+    assert resp.content["errors"] == [{"file": "clamav.tar.gz", "error": "Plugin clamav already exists"}]
+    upload_db.update_external_plugins.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        {"type": "core", "method": "manual"},
+        {"type": "pro", "method": "scheduler"},
+        {"type": "external", "method": "scheduler"},
+        {"type": "external", "method": "manual"},
+        {"type": "ui", "method": "scheduler"},
+    ],
+)
+@pytest.mark.parametrize("archive", [_tar_gz, _zip])
+def test_replace_refuses_every_row_the_catalogue_does_not_own(upload_db, row, archive):
+    upload_db.get_plugins.return_value = [{"id": "clamav", "checksum": "old"} | row]
+
+    resp = ROUTER.upload_plugins(files=[archive("clamav")], method="ui", replace=True)
+
+    assert resp.status_code == 409
+    assert "created" not in resp.content
+    [error] = resp.content["errors"]
+    assert "cannot be replaced" in error["error"] and row["type"] in error["error"]
+    upload_db.update_external_plugins.assert_not_called()
+
+
+def test_a_replace_the_db_skipped_is_reported_not_claimed(upload_db):
+    """A pre-existing `ui` row always carries the id, so membership proves nothing after a
+    replace; the stored checksum must be the one this request wrote."""
+    upload_db.get_plugins.side_effect = [[_ui_row()], [_ui_row(checksum="old")]]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("clamav")], method="ui", replace=True)
+
+    assert "created" not in resp.content
+    assert resp.content["errors"] == [{"file": "clamav", "error": "Plugin clamav was not replaced: the stored plugin is not the uploaded one"}]
+
+
+def test_replace_on_an_absent_id_is_a_plain_install(upload_db):
+    upload_db.get_plugins.side_effect = [[], [_ui_row("brandnew", checksum="sha")]]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("brandnew")], method="ui", replace=True)
+
+    assert resp.content == {"status": "success", "created": ["brandnew"]}
+
+
+def test_one_request_cannot_replace_the_same_id_twice(upload_db):
+    upload_db.get_plugins.side_effect = [[_ui_row()], [_ui_row(checksum="sha")]]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("clamav"), _tar_gz("clamav", filename="again.tar.gz")], method="ui", replace=True)
+
+    assert resp.content["created"] == ["clamav"]
+    assert resp.content["errors"] == [{"file": "again.tar.gz", "error": "Plugin clamav already exists"}]
+    upload_db.update_external_plugins.assert_called_once()

@@ -646,6 +646,28 @@ def _validate_tar_members(members, *, allow_symlinks=False):
                 raise ValueError(f"Tar member {member.name!r} links outside target directory")
 
 
+# Expansion budget for every archive the two helpers below extract: plugin downloads and uploads,
+# job-cache, Let's Encrypt and backup restores. The official bunkerweb-plugins v1.12 archive
+# expands to 1.27 MB in 265 members, so this leaves ~800x/~190x headroom for any real plugin set
+# or cache, and still turns a 50 MiB DEFLATE bomb (~50 GiB on disk) into a refusal. Checked from
+# the archive metadata before anything is written, which bounds what extraction can write:
+# zipfile stops a member at its declared file_size, and a tar member is exactly `size` bytes.
+MAX_ARCHIVE_EXTRACTED_BYTES = 1 << 30  # 1 GiB
+MAX_ARCHIVE_MEMBERS = 50_000
+
+
+def _enforce_archive_budget(kind: str, sizes) -> None:
+    """Raise ValueError once the running member count or size passes the budget (lazy on `sizes`)."""
+    count = total = 0
+    for size in sizes:
+        count += 1
+        total += size
+        if count > MAX_ARCHIVE_MEMBERS:
+            raise ValueError(f"{kind} archive has more than {MAX_ARCHIVE_MEMBERS} members")
+        if total > MAX_ARCHIVE_EXTRACTED_BYTES:
+            raise ValueError(f"{kind} archive expands to more than {MAX_ARCHIVE_EXTRACTED_BYTES} bytes")
+
+
 def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
     """Extract a tar archive safely with pre-validation and Python 3.12+ filter.
 
@@ -662,7 +684,18 @@ def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
     """
     members_to_check = kwargs.get("members")
     if members_to_check is None:
-        members_to_check = tar.getmembers()
+        # Read the member list lazily so a bomb is refused before the rest of a compressed stream
+        # is inflated; extractall() then reuses the members already loaded.
+        members_to_check = []
+
+        def _collect():
+            for member in tar:
+                members_to_check.append(member)
+                yield member.size if member.isreg() else 0
+
+        _enforce_archive_budget("Tar", _collect())
+    else:
+        _enforce_archive_budget("Tar", (member.size if member.isreg() else 0 for member in members_to_check))
     if tar_filter == "auto":
         tar_filter = "tar" if any(m.issym() or m.islnk() for m in members_to_check) else "data"
     _validate_tar_members(members_to_check, allow_symlinks=(tar_filter != "data"))
@@ -672,8 +705,12 @@ def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
         tar.extractall(path, **kwargs)
 
 
-def safe_zip_extractall(zf, path):
-    """Extract a zip archive safely, rejecting members with absolute paths or path traversal."""
+def safe_zip_extractall(zf, path, *, capped=True):
+    """Extract a zip archive safely, rejecting members with absolute paths or path traversal, and
+    archives past the expansion budget unless `capped=False` (a local SQLite backup restore, which
+    has already cleared the database and must not be refused for being large)."""
+    if capped:
+        _enforce_archive_budget("Zip", (info.file_size for info in zf.infolist()))
     dest = Path(path).resolve()
     for member in zf.namelist():
         member_path = (dest / member).resolve()

@@ -199,3 +199,40 @@ class TestNormalization:
         assert config["app1_TEST_FLAG"] == "yes"
         assert config["app1_TEST_MS"] == "on"
         assert config["app1_TEST_NUM_MS"] == "8080"
+
+
+class TestRefusedValueNotLogged:
+    """A refused value never reaches the log. `get_config` redacts it on the "Ignoring variable" line,
+    but the error text `__check_var` returned quoted the raw value on the same line, so a secret
+    (a DNS API token with a typo) leaked into syslog and docker logs anyway."""
+
+    SECRET = "SECRETtoken"
+
+    def _logged(self, cfg_paths, variables):
+        settings_file, core = cfg_paths
+        records = []
+        logger = logging.getLogger("cfg-test-capture")
+        logger.propagate = False
+        logger.setLevel(logging.DEBUG)
+        handler = logging.Handler()
+        handler.emit = lambda record: records.append(record.getMessage())
+        logger.addHandler(handler)
+        try:
+            Configurator(settings_file, core, [], [], variables, logger).get_config()
+        finally:
+            logger.removeHandler(handler)
+        return records
+
+    @pytest.mark.parametrize(
+        "variables",
+        [
+            {"TEST_GLOBAL": SECRET},  # regex mismatch, global path
+            {"MULTISITE": "yes", "SERVER_NAME": "app1", "app1_TEST_MS": SECRET},  # regex mismatch, multisite path
+            {"TEST_NUM": SECRET},  # type check (isn't a valid number)
+        ],
+        ids=["global-regex", "multisite-regex", "type"],
+    )
+    def test_the_refused_value_is_not_in_the_log(self, cfg_paths, variables):
+        records = self._logged(cfg_paths, variables)
+        assert any("Ignoring variable" in line for line in records), records
+        assert not any(self.SECRET in line for line in records), records

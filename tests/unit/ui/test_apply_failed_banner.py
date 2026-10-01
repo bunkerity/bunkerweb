@@ -14,6 +14,7 @@ from unittest.mock import Mock
 import pytest
 
 from jobs import JOB_DEFERRAL_PREFIX  # type: ignore — src/common/utils on sys.path, see tests/unit/conftest.py
+from markupsafe import Markup
 
 MAIN = Path(__file__).resolve().parents[3] / "src" / "ui" / "main.py"
 
@@ -59,7 +60,7 @@ def _status_banner_branch():
         body=[outer],
         decorator_list=[],
     )
-    namespace = {}
+    namespace = {"Markup": Markup}  # a module-level import of main.py the branch uses
     exec(compile(ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[])), str(MAIN), "exec"), namespace)
     return namespace["run_status_banner"]
 
