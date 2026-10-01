@@ -71,6 +71,12 @@ def _submit_service_task(task, *args):
     future.add_done_callback(completed)
 
 
+def _normalize_service_comment(raw_comment: Optional[str]) -> str:
+    if not raw_comment:
+        return ""
+    return " ".join(raw_comment.splitlines()).strip()[:256]
+
+
 def parse_services_export(content: str) -> Tuple[Dict[str, Dict[str, str]], List[str]]:
     services_map: Dict[str, Dict[str, str]] = {}
     errors: List[str] = []
@@ -337,6 +343,7 @@ def services_service_page(service: str):
         # Check variables
         variables = request.form.to_dict().copy()
         del variables["csrf_token"]
+        service_comment = _normalize_service_comment(variables.pop("service_comment", ""))
         file_setting_names = extract_file_setting_names(variables)
 
         mode = request.args.get("mode", "easy")
@@ -396,6 +403,7 @@ def services_service_page(service: str):
             clone: str,
             file_setting_names: Dict[str, str],
             draft_settings: Optional[Dict[str, Optional[bool]]],
+            service_comment: str,
         ):
             wait_applying()
 
@@ -665,6 +673,10 @@ def services_service_page(service: str):
                     no_removed_settings = False
                     break
 
+            current_service_meta = next((item for item in DB.get_services(with_drafts=True) if item["id"] == service), None) if service != "new" else None
+            current_comment = (current_service_meta or {}).get("comment", "")
+            comment_changed = service != "new" and service_comment != current_comment
+
             if (
                 no_removed_settings
                 and service != "new"
@@ -674,6 +686,25 @@ def services_service_page(service: str):
                 and not configs_changed
                 and not has_file_name_changes
             ):
+                if comment_changed:
+                    service_owner_method = current_service_meta["method"] if current_service_meta else service_method
+                    if not is_editable_method(service_owner_method):
+                        DATA["TO_FLASH"].append(
+                            {
+                                "content": f"Service {service} is managed by the {service_owner_method} method and cannot be edited from the Web UI.",
+                                "type": "error",
+                            }
+                        )
+                        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                        return
+                    comment_error = DB.set_service_comment(service, service_comment)
+                    if comment_error:
+                        DATA["TO_FLASH"].append({"content": f"An error occurred while saving the service comment: {comment_error}", "type": "error"})
+                    else:
+                        DATA["TO_FLASH"].append({"content": f"Comment successfully saved for service {service}.", "type": "success"})
+                    DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                    return
+
                 draft_notice = " Draft settings remain unchanged; activate or edit them in Raw mode." if preserved_draft_edits else ""
                 DATA["TO_FLASH"].append(
                     {
@@ -763,8 +794,7 @@ def services_service_page(service: str):
                     DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                     return
 
-                service_metadata = next((item for item in DB.get_services(with_drafts=True) if item["id"] == service), None)
-                service_owner_method = service_metadata["method"] if service_metadata else service_method
+                service_owner_method = current_service_meta["method"] if current_service_meta else service_method
                 if not is_editable_method(service_owner_method):
                     DATA["TO_FLASH"].append(
                         {
@@ -815,13 +845,19 @@ def services_service_page(service: str):
                     DATA["CONFIG_CHANGED"] = False
                     return
 
-            operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {variables['SERVER_NAME'].split(' ')[0]}."
+            target_service_id = variables["SERVER_NAME"].split(" ")[0]
+            if (service == "new" and service_comment) or comment_changed:
+                comment_error = DB.set_service_comment(target_service_id, service_comment)
+                if comment_error:
+                    DATA["TO_FLASH"].append({"content": f"An error occurred while saving the service comment: {comment_error}", "type": "error"})
+
+            operation = f"Configuration successfully {'created' if service == 'new' else 'saved'} for service {target_service_id}."
             DATA["TO_FLASH"].append({"content": operation, "type": "success"})
             if preserved_draft_edits:
                 DATA["TO_FLASH"].append({"content": "Draft settings remain unchanged; activate or edit them in Raw mode.", "type": "warning"})
             DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
 
-        _submit_service_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, draft_settings)
+        _submit_service_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, draft_settings, service_comment)
 
         new_service = False
         if service == "new":
@@ -897,6 +933,13 @@ def services_service_page(service: str):
         db_config = DB.get_config(methods=True, with_drafts=True, service=service)
         raw_draft_config = DB.get_config(methods=True, with_drafts=True, with_setting_drafts=True, service=service)
 
+    service_lookup_id = clone if service == "new" and clone else (service if service != "new" else "")
+    service_comment = ""
+    if service_lookup_id:
+        service_meta = next((item for item in DB.get_services(with_drafts=True) if item["id"] == service_lookup_id), None)
+        if service_meta:
+            service_comment = service_meta.get("comment", "")
+
     return render_template(
         "service_settings.html",
         config=db_config,
@@ -907,6 +950,7 @@ def services_service_page(service: str):
         type=search_type,
         current_template=template,
         raw_draft_config=raw_draft_config,
+        service_comment=service_comment,
     )
 
 
@@ -920,12 +964,15 @@ def services_service_export():
     include_configs = request.args.get("include_configs", "").lower() in ("1", "yes", "true", "on")
 
     db_config = BW_CONFIG.get_config(methods=False, with_drafts=True)
+    service_comments = {item["id"]: _normalize_service_comment(item.get("comment", "")) for item in DB.get_services(with_drafts=True)}
 
     def export_service(service: str) -> List[str]:
         if service not in db_config["SERVER_NAME"].split():
             return [f"# Configuration for {service} not found\n\n"]
 
         lines = [f"# Configuration for {service}\n"]
+        if service_comments.get(service):
+            lines.append(f"{service}_COMMENT={service_comments[service]}\n")
         for setting in db_config:
             if setting.startswith(f"{service}_"):
                 lines.append(f"{setting}={db_config[setting]}\n")
@@ -1068,6 +1115,7 @@ def services_service_import():
         for service_id, variables in services_map.items():
             service_variables = variables.copy()
             is_draft = service_variables.pop("IS_DRAFT", "no") == "yes"
+            service_comment = _normalize_service_comment(service_variables.pop("COMMENT", ""))
 
             if service_id in existing_services:
                 skipped.append(service_id)
@@ -1090,7 +1138,17 @@ def services_service_import():
                 DATA["TO_FLASH"].append({"content": operation, "type": "error"})
                 continue
 
-            created.append(server_name.split(" ")[0])
+            created_service_id = server_name.split(" ")[0]
+            if service_comment:
+                comment_error = DB.set_service_comment(created_service_id, service_comment)
+                if comment_error:
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": f"Service {created_service_id} was imported, but its comment could not be saved: {comment_error}",
+                            "type": "warning",
+                        }
+                    )
+            created.append(created_service_id)
 
         if created:
             DATA["TO_FLASH"].append({"content": f"Imported service{'s' if len(created) > 1 else ''}: {', '.join(created)}", "type": "success"})

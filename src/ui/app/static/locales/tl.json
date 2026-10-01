@@ -828,6 +828,7 @@
       "certificate_authority": "Certificate Authority",
       "certificate_priority": "Priyoridad ng Certificate",
       "challenge_type": "Uri ng Challenge",
+      "comment": "Komento",
       "config_type": "Uri ng Config",
       "configuration_name": "Pangalan ng Configuration",
       "confirm_password": "Kumpirmahin ang Password",
@@ -896,6 +897,7 @@
       "search": "Maghanap...",
       "secret_token": "Secret Token",
       "select_service": "Pumili ng Serbisyo",
+      "service_comment": "Opsyonal na tala o paglalarawan para sa serbisyong ito...",
       "username_example": "juandelacruz"
     },
     "validation": {
@@ -1440,6 +1442,7 @@
       "active": "Aktibo",
       "async": "Async",
       "checksum": "Checksum",
+      "comment": "Komento",
       "configs": "Mga Config",
       "country": "Bansa",
       "created": "Nilikha",
@@ -1894,6 +1897,7 @@
       "select_rows_for_action": "Mangyaring pumili ng isa o higit pang row upang magsagawa ng aksyon.",
       "services": {
         "actions": "Mga aksyon na available para sa Serbisyo na ito",
+        "comment": "Tala o paglalarawan para sa Serbisyo",
         "created": "Petsa at oras kung kailan nilikha ang Serbisyo",
         "details": "Ipakita ang mga detalye ng Serbisyo",
         "last_update": "Petsa at oras kung kailan huling na-update ang Serbisyo",

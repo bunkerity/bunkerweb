@@ -71,6 +71,12 @@
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
+                        data-bs-original-title="Note or description for the Service"
+                        data-i18n="tooltip.table.services.comment">
+                        <span data-i18n="table.header.comment">Comment</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The Service's creation date"
                         data-i18n="tooltip.table.services.created">
                         <span data-i18n="table.header.created">Created</span>
@@ -139,6 +145,11 @@
                                 <span class="badge rounded-pill bg-label-secondary"
                                       data-i18n="badge.no_template">No template</span>
                             {% endif %}
+                        </td>
+                        <td class="text-truncate"
+                            style="max-width: 240px"
+                            {% if service['comment'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ service['comment'] }}"{% endif %}>
+                            {{ service["comment"] or "-" }}
                         </td>
                         <td class="service-creation-date">{{ service['creation_date'].astimezone().isoformat() }}</td>
                         <td class="service-last-update-date">{{ service['last_update'].astimezone().isoformat() }}</td>

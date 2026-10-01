@@ -496,13 +496,24 @@ class UIDatabase(Database):
 
     def get_ui_user_columns_preferences(self, username: str, table_name: str) -> Dict[str, bool]:
         """Get ui user columns preferences."""
+        default_columns = COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})
         with self._db_session() as session:
             columns_preferences = session.query(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).first()
             if not columns_preferences:
-                default_columns = COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})
                 if not self.readonly and session.query(UiUsers).filter_by(username=username).first():
                     session.add(UserColumnsPreferences(user_name=username, table_name=table_name, columns=default_columns))
                     session.commit()
                 return default_columns
 
-            return columns_preferences.columns
+            stored_columns = dict(columns_preferences.columns or {})
+            if table_name == "services" and "9" not in stored_columns and ("7" in stored_columns or "8" in stored_columns):
+                old_created = stored_columns.get("7", default_columns.get("8", True))
+                old_last_update = stored_columns.get("8", default_columns.get("9", True))
+                stored_columns["7"] = default_columns.get("7", True)
+                stored_columns["8"] = old_created
+                stored_columns["9"] = old_last_update
+                if not self.readonly:
+                    columns_preferences.columns = default_columns | stored_columns
+                    session.commit()
+
+            return default_columns | stored_columns

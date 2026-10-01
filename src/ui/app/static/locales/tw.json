@@ -828,6 +828,7 @@
       "certificate_authority": "憑證授權單位",
       "certificate_priority": "憑證優先順序",
       "challenge_type": "挑戰類型",
+      "comment": "備註",
       "config_type": "設定類型",
       "configuration_name": "設定名稱",
       "confirm_password": "確認密碼",
@@ -896,6 +897,7 @@
       "search": "搜尋...",
       "secret_token": "密鑰",
       "select_service": "選擇服務",
+      "service_comment": "此服務的選填備註或說明...",
       "username_example": "王小明"
     },
     "validation": {
@@ -1440,6 +1442,7 @@
       "active": "啟用中",
       "async": "非同步",
       "checksum": "校驗和",
+      "comment": "備註",
       "configs": "設定檔",
       "country": "國家/地區",
       "created": "建立時間",
@@ -1894,6 +1897,7 @@
       "select_rows_for_action": "請選取一或多列以執行操作。",
       "services": {
         "actions": "此服務可用的操作",
+        "comment": "服務的備註或說明",
         "created": "服務建立的日期和時間",
         "details": "顯示服務詳情",
         "last_update": "服務最後更新的日期和時間",

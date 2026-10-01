@@ -430,6 +430,24 @@ function initializeDataTable(config) {
       columnVisibility = { ...originalColumnsPreferences };
     } else {
       columnVisibility = JSON.parse(columnVisibility);
+      if (
+        tableName === "services" &&
+        !Object.prototype.hasOwnProperty.call(columnVisibility, "9") &&
+        (Object.prototype.hasOwnProperty.call(columnVisibility, "7") ||
+          Object.prototype.hasOwnProperty.call(columnVisibility, "8"))
+      ) {
+        const oldCreated =
+          columnVisibility["7"] ?? defaultColsVisibility["8"] ?? true;
+        const oldLastUpdate =
+          columnVisibility["8"] ?? defaultColsVisibility["9"] ?? true;
+        columnVisibility["7"] = defaultColsVisibility["7"] ?? true;
+        columnVisibility["8"] = oldCreated;
+        columnVisibility["9"] = oldLastUpdate;
+        localStorage.setItem(
+          `bw-${tableName}-columns`,
+          JSON.stringify(columnVisibility),
+        );
+      }
     }
 
     // Without the second argument every call re-measures the whole table; the

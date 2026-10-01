@@ -144,6 +144,7 @@ class Services(Base):
     id = Column(String(256), primary_key=True)
     method = Column(METHODS_ENUM, nullable=False)
     is_draft = Column(Boolean, default=False, nullable=False, index=True)
+    comment = Column(Text, nullable=True, default="")
     creation_date = Column(DateTime(timezone=True), nullable=False)
     last_update = Column(DateTime(timezone=True), nullable=False)
 

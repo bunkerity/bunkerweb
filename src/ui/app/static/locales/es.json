@@ -828,6 +828,7 @@
       "certificate_authority": "Autoridad de Certificación",
       "certificate_priority": "Prioridad del Certificado",
       "challenge_type": "Tipo de Desafío",
+      "comment": "Comentario",
       "config_type": "Tipo de Configuración",
       "configuration_name": "Nombre de Configuración",
       "confirm_password": "Confirmar Contraseña",
@@ -896,6 +897,7 @@
       "search": "Buscar...",
       "secret_token": "Token Secreto",
       "select_service": "Seleccionar Servicio",
+      "service_comment": "Nota o descripción opcional para este servicio...",
       "username_example": "juandoe"
     },
     "validation": {
@@ -1441,6 +1443,7 @@
       "active": "Activo",
       "async": "Asíncrono",
       "checksum": "Checksum",
+      "comment": "Comentario",
       "configs": "Configs",
       "country": "País",
       "created": "Creado",
@@ -1895,6 +1898,7 @@
       "select_rows_for_action": "Por favor, selecciona una o más filas para realizar una acción.",
       "services": {
         "actions": "Acciones disponibles para este Servicio",
+        "comment": "Nota o descripción del Servicio",
         "created": "Fecha y hora de creación del Servicio",
         "details": "Mostrar detalles del Servicio",
         "last_update": "Fecha y hora de la última actualización del Servicio",
