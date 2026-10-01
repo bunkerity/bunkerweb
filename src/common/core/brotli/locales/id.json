@@ -1,0 +1,26 @@
+{
+  "brotli": {
+    "meta": {
+      "name": "Brotli",
+      "description": "Mengompresi permintaan HTTP dengan algoritme brotli."
+    },
+    "settings": {
+      "BROTLI_COMP_LEVEL": {
+        "label": "Tingkat kompresi",
+        "help": "Tingkat kompresi untuk Brotli (0 = tanpa kompresi, 11 = kompresi maksimum)."
+      },
+      "BROTLI_MIN_LENGTH": {
+        "label": "Panjang minimum",
+        "help": "Ukuran respons minimum (dalam byte) agar kompresi Brotli diterapkan."
+      },
+      "BROTLI_TYPES": {
+        "label": "Tipe MIME",
+        "help": "Daftar tipe MIME yang akan dikompresi dengan brotli."
+      },
+      "USE_BROTLI": {
+        "label": "Gunakan brotli",
+        "help": "Aktifkan atau nonaktifkan kompresi Brotli. Nonaktif secara default, yang juga merupakan default bawaan modul ngx_brotli. Pengaturan ini per layanan: biarkan nonaktif untuk layanan mana pun yang responsnya sekaligus membawa rahasia (token CSRF, kunci API) dan menggemakan kembali input dari penyerang, karena kombinasi tersebut adalah prasyarat serangan BREACH — perhatikan bahwa text/html selalu dikompresi, apa pun yang tercantum di BROTLI_TYPES. UI web BunkerWeb adalah layanan semacam itu."
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "Mga sukatan",
+      "description": "Pangongolekta at pagkuha ng mga sukatan."
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "Gamitin ang Metrics",
+        "help": "I-enable ang pangongolekta at pagkuha ng internal na metrics."
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "Metrics Memory Size",
+        "help": "Sukat ng internal na storage para sa metrics."
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "Metrics Memory Max Retries",
+        "help": "Pinakamataas na bilang ng retry para sa mga operasyon ng memory."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "Metrics Max Blocked Requests",
+        "help": "Pinakamataas na bilang ng blocked request na iimbak (kada worker). Tumatanggap ng plain integer o `k`/`m` shorthand (hal., `1000`, `1k`, `10k`, `1m`)."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "Metrics Max Blocked Requests Redis",
+        "help": "Pinakamataas na bilang ng blocked request na iimbak sa Redis. Tumatanggap ng plain integer o `k`/`m` shorthand (hal., `10000`, `10k`, `100k`, `1m`)."
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "Metrics Redis TTL",
+        "help": "Time-to-live sa segundo para sa mga metrics key na nakaimbak sa Redis (default `2592000`, 30 araw; pinapanatiling permanente ang key kung `0`). Nire-refresh sa bawat sync kaya hindi na-e-expire ang aktibong data; sa `volatile-lru` na eviction policy, nagagawa nitong evictable ang mga naabandunang metrics data kaya nakaka-recover ang Redis mula sa maxmemory sa halip na tanggihan ang mga writes magpakailanman. Tumatanggap ng plain integer o `k`/`m` shorthand."
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "Max LRU History",
+        "help": "Nililimitahan ang LRU event history kada worker: nililimitahan ang bilang ng LRU slot at ang haba ng event-history array kada key (block trail, auth trail, atbp.). Tumatanggap ng plain integer o `k`/`m` shorthand (hal., `1k`, `10k`, `1m`). Nililimitahan ang walang-hangganang paglaki mula sa high-cardinality na source tulad ng spoofed-IP floods."
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "Collect Plugin Timings",
+        "help": "Sinusukat kung gaano katagal ang bawat plugin sa bawat request phase, ipinapakita bilang count/sum/max aggregate kada (plugin, phase). Kinakailangan pilitin ang NGINX time refresh sa paligid ng bawat plugin call, kaya nagdaragdag ito ng humigit-kumulang isang microsecond kada request sa buong plugin chain; i-set sa `no` para ganap na alisin ang cost na iyon. Lagi namang kinokolekta ang buong tagal ng request at hindi apektado ng setting na ito."
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "Traffic Baseline Sample Rate (%)",
+        "help": "Porsyento ng mga hindi naka-block na request na itinatala bilang traffic baseline, para matutunan ng anomaly detection kung ano ang normal (nakadisable kung `0`, sinasampol ang isa sa bawat isang daang request kung `1`). Deterministic ang sampling batay sa request id, kaya matatag ang desisyon sa buong subrequest. Hindi kailanman naiimbak ang client IP. Walang dagdag na trabaho ang collection sa request path, pero malaki ang volume: humigit-kumulang 8.6 milyong record kada araw ang 1% ng 10k req/s, na pinuputol pagkatapos ng `METRICS_BASELINE_RETENTION_MAX_ROWS`. Itaas ito nang sinasadya."
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "Metrics Max Baseline Requests",
+        "help": "Pinakamataas na bilang ng sampled baseline record na itatago kada worker bago itapon ang pinakaluma. Ang buffer na ito ay nagbabahagi ng METRICS_MEMORY_SIZE kasama ang blocked-request report at iba pang metrics, pero itatapon ito sa halip na i-evict ang mga ito kapag naubusan ng espasyo. Tumatanggap ng plain integer o `k`/`m` shorthand. Ibaba ang sample rate sa halip na itaas ito."
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "Baseline Retention (days)",
+        "help": "Pinakamataas na edad (sa araw) ng sampled baseline record bago burahin ito ng retention job. Sinadyang mas maikli kaysa sa blocked-report retention: mas mabilis lumaki ang baseline, at ang model ay sinasanay sa kamakailang normal na behavior sa halip na sa history."
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "Baseline Retention (max rows)",
+        "help": "Pinakamataas na bilang ng sampled baseline record na itatago; binubura ng retention job ang pinakalumang row lampas sa bilang na ito. Hiwalay sa blocked-report cap dahil magkaiba nang husto ang bilis ng paglaki ng dalawang table."
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "I-save ang Metrics sa Redis",
+        "help": "I-save ang metrics (counter at table) sa Redis para sa cluster-wide na aggregation."
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "I-persist ang Reports sa Database",
+        "help": "I-persist ang blocked-request report sa database (matibay, maaaring i-query) sa pamamagitan ng regular na pag-scrape ng mga instance. Kapag naka-disable, mananatili lang ang mga report sa in-memory/Redis store."
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "Reports Retention (days)",
+        "help": "Pinakamataas na edad (sa araw) ng mga na-persist na blocked-request report bago burahin ito ng retention job."
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "Reports Retention (max rows)",
+        "help": "Pinakamataas na bilang ng na-persist na blocked-request report na itatago; binubura ng retention job ang pinakalumang row lampas sa bilang na ito."
+      }
+    }
+  }
+}

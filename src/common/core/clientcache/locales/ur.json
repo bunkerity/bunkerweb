@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "کلائنٹ کیشے",
+      "description": "کلائنٹس کے لیے کیشنگ کا انتظام کرتا ہے۔"
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "کلائنٹ کیش استعمال کریں",
+        "help": "کلائنٹ کو مقامی طور پر جامد فائلیں ذخیرہ کرنے کی ہدایت دیں۔"
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "وہ ایکسٹینشنز جنہیں کلائنٹ کیش کرے",
+        "help": "فائل ایکسٹینشنز کی فہرست، پائپ سے الگ، جنہیں کیش کیا جانا چاہیے۔"
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "جامد وسائل کے لیے HTTP ETag ہیڈر بھیجیں۔"
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control ہیڈر",
+        "help": "Cache-Control HTTP ہیڈر کی ویلیو۔"
+      }
+    }
+  }
+}

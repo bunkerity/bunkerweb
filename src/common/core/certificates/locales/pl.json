@@ -1,0 +1,8 @@
+{
+  "certificates": {
+    "meta": {
+      "name": "Certyfikaty",
+      "description": "Udostępnia certyfikat przypisany do usługi z centralnego inwentarza, niezależnie od tego, jaki dostawca go wystawił."
+    }
+  }
+}

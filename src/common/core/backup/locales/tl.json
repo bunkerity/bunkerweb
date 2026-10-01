@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Backup",
+      "description": "I-back up ang iyong data sa isang custom na lokasyon. Tiyakin ang kaligtasan at availability ng iyong mahahalagang file sa pamamagitan ng regular na pag-backup."
+    },
+    "settings": {
+      "BACKUP_DIRECTORY": {
+        "label": "Backup Directory",
+        "help": "Directory kung saan iimbak ang backup"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Backup Rotation",
+        "help": "Bilang ng mga backup na itatago"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Backup Rotation Strategy",
+        "help": "Paano pinipili ang mga lumang backup para tanggalin: pinapanatili ng fifo ang pinakabago, pinapanatili ng hanoi ang hagdan ng Tower of Hanoi (masinsin malapit sa kasalukuyan, paunti-unti pababa) para sa parehong bilang ng file"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Backup Schedule",
+        "help": "Kadalasan ng backup (araw-araw, lingguhan, o buwanan)"
+      },
+      "USE_BACKUP": {
+        "label": "I-activate ang Automatic na Backup",
+        "help": "I-enable o i-disable ang backup feature"
+      }
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Huling Backup"
+      }
+    }
+  }
+}

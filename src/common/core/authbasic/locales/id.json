@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Autentikasi dasar",
+      "description": "Mewajibkan login sebelum mengakses sumber daya atau seluruh situs menggunakan metode autentikasi HTTP dasar."
+    },
+    "settings": {
+      "AUTH_BASIC_LOCATION": {
+        "label": "Lokasi Auth Basic",
+        "help": "URL sumber daya yang dilindungi atau nilai untuk seluruh situs."
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Kata Sandi",
+        "help": "Kata sandi"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Teks",
+        "help": "Teks yang akan ditampilkan"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Nama Pengguna Auth Basic",
+        "help": "Nama pengguna"
+      },
+      "USE_AUTH_BASIC": {
+        "label": "Gunakan HTTP basic auth",
+        "help": "Gunakan HTTP basic auth"
+      }
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "AUTENTIKASI DASAR",
+        "subtitle": "Berhasil"
+      },
+      "counter_failed_authbasic": {
+        "title": "AUTENTIKASI DASAR",
+        "subtitle": "Gagal"
+      }
+    }
+  }
+}

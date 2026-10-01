@@ -1,0 +1,62 @@
+{
+  "modsecurity": {
+    "meta": {
+      "name": "ModSecurity",
+      "description": "إدارة جدار الحماية ModSecurity WAF."
+    },
+    "settings": {
+      "USE_MODSECURITY": {
+        "label": "استخدام ModSecurity",
+        "help": "تفعيل جدار حماية تطبيقات الويب (WAF) الخاص بـ ModSecurity."
+      },
+      "USE_MODSECURITY_CRS": {
+        "label": "استخدام مجموعة القواعد الأساسية (CRS)",
+        "help": "تفعيل مجموعة القواعد الأساسية OWASP (Core Rule Set)."
+      },
+      "USE_MODSECURITY_CRS_PLUGINS": {
+        "label": "استخدام إضافات مجموعة القواعد الأساسية",
+        "help": "تفعيل إضافات OWASP Core Rule Set."
+      },
+      "MODSECURITY_CRS_VERSION": {
+        "label": "إصدار مجموعة القواعد الأساسية",
+        "help": "إصدار OWASP Core Rule Set المراد استخدامه مع ModSecurity (3 أو 4). ملاحظة: nightly مهجور وسيُستبدل افتراضيًا بـ v4."
+      },
+      "MODSECURITY_CRS_PLUGINS": {
+        "label": "إضافات مجموعة القواعد الأساسية",
+        "help": "قائمة إضافات OWASP CRS (plugin-name[/tag] أو رابط URL) المراد تنزيلها وتثبيتها (مفصولة بمسافات). (غير متوافق مع الإصدار 3 من CRS)"
+      },
+      "USE_MODSECURITY_GLOBAL_CRS": {
+        "label": "وضع CRS العالمي في ModSecurity",
+        "help": "استخدام CRS الخاص بـ ModSecurity في الوضع العالمي لتحسين تحميل القواعد عند وجود العديد من الخدمات."
+      },
+      "MODSECURITY_SEC_AUDIT_ENGINE": {
+        "label": "SecAuditEngine",
+        "help": "توجيه SecAuditEngine الخاص بـ ModSecurity."
+      },
+      "MODSECURITY_SEC_RULE_ENGINE": {
+        "label": "SecRuleEngine",
+        "help": "توجيه SecRuleEngine الخاص بـ ModSecurity."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+        "label": "SecAuditLogParts",
+        "help": "توجيه SecAuditLogParts الخاص بـ ModSecurity. يتم تضمين الجزأين A وZ دائمًا تلقائيًا كبادئة ولاحقة."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG": {
+        "label": "SecAuditLog",
+        "help": "مسار الملف الذي يكتب فيه ModSecurity إدخالات التدقيق. يجب أن يكون ملفًا عاديًا: يقوم كاتب التدقيق Serial بقفله، وهو أمر غير ممكن على أنبوب أو تدفق. يجب أن ينتهي بـ .log، تحت /var/log/bunkerweb/."
+      },
+      "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
+        "label": "SecRequestBodyNoFilesLimit",
+        "help": "توجيه SecRequestBodyNoFilesLimit الخاص بـ ModSecurity."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
+        "label": "SecRequestBodyLimit",
+        "help": "توجيه SecRequestBodyLimit الخاص بـ ModSecurity. الحد الأقصى لحجم نص الطلب الذي سيفحصه ModSecurity (لواحق k/m/g، مثل 10m). الطلبات التي تتجاوز هذا الحد تتبع SecRequestBodyLimitAction (Reject افتراضيًا). عندما تكون فارغة، تُشتق من MAX_CLIENT_SIZE. اضبطها على 0 لعدم وجود حد (غير مستحسن، قد يتسبب في عمليات قتل بسبب نفاد الذاكرة). يفرض NGINX قيمة MAX_CLIENT_SIZE أولاً، لذا فإن قيمة أعلى هنا ليس لها أي تأثير. تتجاوز REVERSE_PROXY_MAX_CLIENT_SIZE هذه القيمة لموقعها (location) الخاص."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
+        "label": "SecRequestBodyLimitAction",
+        "help": "توجيه SecRequestBodyLimitAction الخاص بـ ModSecurity. يُرجع Reject رمز HTTP 413 للطلبات التي تتجاوز حد النص. يفحص ProcessPartial الجزء ضمن الحد فقط ويُحيل الطلب الكامل إلى الخلفية (مفيد لتحميلات الملفات الكبيرة، لكنه يقلل من تغطية WAF لأنواع المحتوى غير الملفية مثل JSON أو بيانات النماذج)."
+      }
+    }
+  }
+}

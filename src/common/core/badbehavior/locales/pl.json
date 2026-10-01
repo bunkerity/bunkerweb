@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "Złe zachowanie",
+      "description": "Blokuje adres IP generujący zbyt wiele „złych” kodów statusu HTTP w danym okresie."
+    },
+    "settings": {
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "Zakres bana",
+        "help": "Określa poziom bana. 'service' zbanuje IP tylko dla danej usługi, 'global' zbanuje IP w całym systemie."
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "Czas trwania bana (w sekundach)",
+        "help": "Czas trwania (w sekundach) bana, gdy dany adres IP osiągnie próg. (Ustaw 0, aby zbanować na stałe)"
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "Okres (w sekundach)",
+        "help": "Okres czasu (w sekundach), w którym liczymy 'złe' kody statusu HTTP."
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "Złe kody statusu",
+        "help": "Lista kodów statusu HTTP uznawanych za 'złe'."
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "Próg",
+        "help": "Maksymalna liczba 'złych' kodów statusu HTTP w danym okresie czasu, zanim IP zostanie zbanowane."
+      },
+      "USE_BAD_BEHAVIOR": {
+        "label": "Aktywuj bad behavior",
+        "help": "Aktywuj funkcję Bad behavior."
+      }
+    }
+  }
+}

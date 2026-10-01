@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Sicherung",
+      "description": "Sichern Sie Ihre Daten an einem benutzerdefinierten Speicherort. Stellen Sie die Sicherheit und Verfügbarkeit Ihrer wichtigen Dateien durch regelmäßige Sicherungen sicher."
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Letzte Sicherung"
+      }
+    },
+    "settings": {
+      "USE_BACKUP": {
+        "label": "Automatische Sicherung aktivieren",
+        "help": "Aktiviert oder deaktiviert die Sicherungsfunktion"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Sicherungsplan",
+        "help": "Häufigkeit der Sicherung (täglich, wöchentlich oder monatlich)"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Sicherungsrotation",
+        "help": "Anzahl der aufzubewahrenden Sicherungen"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Sicherungsrotationsstrategie",
+        "help": "Wie alte Sicherungen zur Löschung ausgewählt werden: fifo behält die neuesten, hanoi behält eine Turm-von-Hanoi-Staffelung (fein in der Nähe der Gegenwart, grob weiter zurückliegend) bei gleicher Dateianzahl"
+      },
+      "BACKUP_DIRECTORY": {
+        "label": "Sicherungsverzeichnis",
+        "help": "Verzeichnis, in dem die Sicherung gespeichert wird"
+      }
+    }
+  }
+}

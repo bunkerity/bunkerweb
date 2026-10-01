@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "स्थानीय या दूरस्थ PHP-FPM प्रबंधित करता है।"
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "रिमोट PHP",
+        "help": "रिमोट PHP-FPM इंस्टेंस का होस्टनेम।"
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "रिमोट PHP पथ",
+        "help": "रिमोट PHP-FPM इंस्टेंस में फ़ाइलें रखने वाला रूट फ़ोल्डर।"
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "रिमोट PHP पोर्ट",
+        "help": "रिमोट PHP-FPM इंस्टेंस का पोर्ट।"
+      },
+      "LOCAL_PHP": {
+        "label": "लोकल PHP",
+        "help": "PHP-FPM सॉकेट फ़ाइल का पथ।"
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "लोकल PHP पथ",
+        "help": "लोकल PHP-FPM इंस्टेंस में फ़ाइलें रखने वाला रूट फ़ोल्डर।"
+      }
+    }
+  }
+}

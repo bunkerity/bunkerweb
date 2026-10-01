@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "BunkerWeb를 클러스터 모드로 사용할 때의 Redis 서버 설정."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "REDIS 상태"
+      },
+      "counter_redis_nb_keys": {
+        "title": "REDIS 키",
+        "subtitle": "키 개수"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Redis 활성화",
+        "help": "Redis를 활성화합니다."
+      },
+      "REDIS_HOST": {
+        "label": "Redis 서버",
+        "help": "Redis 서버의 IP 또는 호스트 이름입니다."
+      },
+      "REDIS_PORT": {
+        "label": "Redis 포트",
+        "help": "Redis 서버 포트입니다."
+      },
+      "REDIS_DATABASE": {
+        "label": "Redis 데이터베이스",
+        "help": "Redis 데이터베이스 번호입니다."
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Redis 서버와의 연결에 SSL/TLS를 사용합니다."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Redis SSL/TLS 검증",
+        "help": "Redis 서버의 인증서를 검증합니다."
+      },
+      "REDIS_SSL_CA": {
+        "label": "Redis SSL/TLS CA 번들",
+        "help": "Redis/Valkey 서버 인증서를 검증하는 데 사용되는 PEM CA 번들의 경로입니다(사설 CA); 설정하지 않으면 시스템 신뢰 저장소를 사용합니다. 설정하면 Python 클라이언트(Celery 브로커, 작업, API 속도 제한기, bwcli, 웹 UI)가 이를 신뢰하며, NGINX Lua 신뢰 번들에도 추가되어 요청 경로에서도 신뢰됩니다. 설정이 생성되는 위치와 각 클라이언트가 읽는 위치 모두에 해당 파일이 존재해야 합니다; 번들이 없거나 유효하지 않으면 설정 생성이 실패합니다."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Redis 제한 시간(ms)",
+        "help": "연결, 읽기, 쓰기에 대한 Redis 서버 제한 시간(ms)입니다."
+      },
+      "REDIS_USERNAME": {
+        "label": "Redis 사용자 이름",
+        "help": "AUTH 명령에 사용되는 Redis 사용자 이름입니다."
+      },
+      "REDIS_PASSWORD": {
+        "label": "Redis 비밀번호",
+        "help": "AUTH 명령에 사용되는 Redis 비밀번호입니다."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Redis sentinel 호스트",
+        "help": "Redis sentinel 호스트입니다. host:[port] 형식이며 공백으로 구분합니다."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Redis sentinel 사용자 이름",
+        "help": "Redis sentinel 사용자 이름입니다."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Redis sentinel 비밀번호",
+        "help": "Redis sentinel 비밀번호입니다."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Redis sentinel 마스터",
+        "help": "Redis sentinel 마스터 이름입니다."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Redis keepalive 유휴 시간(ms)",
+        "help": "풀 안의 Redis 연결이 닫히기 전까지의 최대 유휴 시간(ms)입니다."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Redis keepalive 풀",
+        "help": "NGINX 워커당 풀에 유지되는 최대 Redis 연결 수입니다. 정상 상태 연결 수는 대략 nginx_workers x pool x instances이며 Redis/Valkey의 maxclients 제한 이내여야 합니다."
+      }
+    }
+  }
+}

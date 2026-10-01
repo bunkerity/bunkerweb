@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Совместное использование ресурсов между разными источниками (Cross-Origin Resource Sharing)."
+    },
+    "settings": {
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Отправлять Access-Control-Allow-Credentials",
+        "help": "Отправлять заголовок Access-Control-Allow-Credentials."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Значение Access-Control-Allow-Headers",
+        "help": "Значение заголовка Access-Control-Allow-Headers."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Значение Access-Control-Allow-Methods",
+        "help": "Значение заголовка Access-Control-Allow-Methods."
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "Разрешённые источники (origin)",
+        "help": "Разрешённые источники (origin) для запросов CORS: регулярное выражение PCRE, * или self (для того же источника)."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "Отклонить запрос",
+        "help": "Отклонить запрос и не отправлять его на бэкенд, если Origin не разрешён."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Значение Access-Control-Expose-Headers",
+        "help": "Значение заголовка Access-Control-Expose-Headers."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Значение Access-Control-Max-Age",
+        "help": "Значение заголовка Access-Control-Max-Age."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Значение заголовка Cross-Origin-Embedder-Policy."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Значение заголовка Cross-Origin-Opener-Policy."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Значение заголовка Cross-Origin-Resource-Policy."
+      },
+      "USE_CORS": {
+        "label": "Использовать CORS",
+        "help": "Использовать CORS"
+      }
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "Запрос заблокирован"
+      }
+    }
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "Pagtukoy ng mga bot gamit ang isang hamon."
+    },
+    "settings": {
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "Cap.js backend URL",
+        "help": "Internal na origin na tinatawagan ng BunkerWeb para sa /siteverify (hal. http://cap-server:3000). Origin lang, walang path. Babalik sa frontend URL kapag blangko."
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "Cap.js frontend URL",
+        "help": "Public na origin kung saan nilo-load ng browser ang Cap.js widget (hal. https://cap.example.com). Origin lang, walang path."
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Cap.js secret",
+        "help": "Secret na naka-pares sa sitekey, ginagamit ng BunkerWeb para patunayan ang mga tawag sa /siteverify."
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Cap.js sitekey",
+        "help": "Sitekey na ginawa sa Cap.js dashboard para sa site na ito."
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "Captcha alphabet",
+        "help": "Custom na alphabet na gagamitin sa paggawa ng captcha. Bubuuin ang captcha mula sa random na mga karakter mula sa string na ito. Suportadong mga karakter: lahat ng letra (a-z, A-Z), numerong 2-9, at suportadong espesyal na karakter (tingnan ang dokumentasyon para sa buong listahan)."
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "hCaptcha secret",
+        "help": "Secret para sa hamon na hCaptcha."
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "hCaptcha sitekey",
+        "help": "Sitekey para sa hamon na hCaptcha."
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "Hindi Papansinin na ASN",
+        "help": "Listahan ng mga numero ng ASN, na pinaghihiwalay ng space, na hindi papansinin ng hamon ng antibot."
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "Hindi Papansinin na mga Bansa",
+        "help": "Listahan ng mga country code na ISO 3166-1 alpha-2, na pinaghihiwalay ng space, na hindi papansinin ng hamon ng antibot."
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "Pangalan ng Hindi Papansinin na Header",
+        "help": "Pangalan ng request header na nagpapawalang-bisa sa request mula sa hamon ng antibot. Kahit sinong client ay maaaring magpadala ng header na ito: ituring itong shared secret, sa HTTPS lang."
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "Value ng Hindi Papansinin na Header",
+        "help": "Value (PCRE regex) na dapat itumbas ng header para hindi isama ang request sa hamon ng antibot. Iwanang blangko para tumugma base sa pagkakaroon lang ng header. I-anchor gamit ang ^ at $: hindi naka-anchor ang pagtutugma bilang default."
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "Hindi Papansinin na IP/Network",
+        "help": "Listahan ng IP/network, na pinaghihiwalay ng space, na hindi papansinin ng hamon ng antibot."
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "Hindi Papansinin na Reverse DNS",
+        "help": "Listahan ng mga reverse DNS suffix, na pinaghihiwalay ng space, na hindi papansinin ng hamon ng antibot."
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "Hindi Papansinin na URI",
+        "help": "Listahan ng mga pattern ng PCRE regex (pinaghihiwalay ng space) para sa mga URI na dapat ihiwalay sa hamon ng antibot. Sinusuri ang mga pattern laban sa path at sa buong request URI kasama ang query string."
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "Hindi Papansinin na User-Agent",
+        "help": "Listahan ng User-Agent (PCRE regex), na pinaghihiwalay ng space, na hindi papansinin ng hamon ng antibot."
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "mCaptcha secret",
+        "help": "Secret para sa hamon na mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "mCaptcha sitekey",
+        "help": "Sitekey para sa hamon na mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "mCaptcha domain",
+        "help": "Domain na gagamitin para sa hamon na mCaptcha."
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "Mga Bansang Hahamunin Lang",
+        "help": "Listahan ng mga country code na ISO 3166-1 alpha-2, na pinaghihiwalay ng space, na dapat matanggap ang hamon ng antibot."
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "Antibot reverse DNS sa Global na IP Lang",
+        "help": "Isagawa lang ang mga RDNS antibot check sa mga global na IP address."
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "reCAPTCHA API key",
+        "help": "API key para sa hamon na reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "Gamitin ang Classic na reCAPTCHA",
+        "help": "Gamitin ang classic na reCAPTCHA sa halip na mas bagong bersyon."
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "JA3 fingerprint para sa TLS client. Iminumungkahi naming gamitin ang salesforce/ja3 para kalkulahin ang JA3 fingerprint."
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "JA4 fingerprint para sa TLS client. Iminumungkahi naming gamitin ang FoxIO-LLC/ja4 para kalkulahin ang JA4 fingerprint."
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "reCAPTCHA Project ID",
+        "help": "Project ID para sa hamon na reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "reCAPTCHA v3 Score",
+        "help": "Minimum na score na kailangan para sa hamon na reCAPTCHA (compatible lang sa reCAPTCHA v3)."
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "reCAPTCHA secret",
+        "help": "Secret para sa hamon na reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "reCAPTCHA sitekey",
+        "help": "Sitekey para sa hamon na reCAPTCHA."
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "URL ng Pag-redirect Matapos Magtagumpay",
+        "help": "Fixed na URI kung saan iredirect ang mga client pagkatapos nilang lutasin ang hamon, sa halip na sa page na orihinal nilang hiningi. Iwanang blangko para bumalik sa orihinal na hiniling na page."
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "Oras Para Lutasin",
+        "help": "Maximum na oras (sa segundo) na meron ang mga client para lutasin ang hamon. Kapag lumipas na ang oras na ito, gagawa ng bagong hamon."
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "Bisa ng Oras",
+        "help": "Maximum na oras ng bisa ng mga nalutas na hamon. Kapag lumipas na ang oras na ito, kailangang lutasin ng mga client ang bago."
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Turnstile secret",
+        "help": "Secret para sa hamon na Turnstile."
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Turnstile sitekey",
+        "help": "Sitekey para sa hamon na Turnstile."
+      },
+      "ANTIBOT_URI": {
+        "label": "Antibot URL",
+        "help": "Hindi ginagamit na URI kung saan iredirect ang mga client para lutasin ang hamon."
+      },
+      "USE_ANTIBOT": {
+        "label": "Hamon ng Antibot",
+        "help": "I-activate ang feature na antibot."
+      }
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "Mga Hamon",
+        "subtitle": "Nabigo"
+      }
+    }
+  }
+}

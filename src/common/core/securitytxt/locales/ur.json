@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "security.txt فائل کا انتظام کرتا ہے۔ ایک تجویز کردہ معیار جو ویب سائٹس کو اپنی سیکیورٹی پالیسیاں متعین کرنے کی اجازت دیتا ہے۔"
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "security.txt استعمال کریں",
+        "help": "security.txt فائل فعال کریں۔"
+      },
+      "SECURITYTXT_URI": {
+        "label": "Security.txt URI",
+        "help": "وہ URI بتاتا ہے جہاں سے \"security.txt\" فائل تک رسائی حاصل ہو گی۔"
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Security.txt رابطہ",
+        "help": "وہ طریقہ بتاتا ہے جسے محققین کو سیکیورٹی کمزوریوں کی اطلاع دینے کے لیے استعمال کرنا چاہیے، جیسے ای میل ایڈریس، فون نمبر، اور/یا رابطہ معلومات کے ساتھ ویب پیج۔ (اگر ویلیو خالی ہو تو security.txt فائل نہیں بنائی جائے گی کیونکہ یہ ایک لازمی فیلڈ ہے)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Security.txt میعاد ختم",
+        "help": "وہ تاریخ اور وقت بتاتا ہے جس کے بعد \"security.txt\" فائل میں موجود ڈیٹا کو پرانا سمجھا جاتا ہے اور استعمال نہیں کیا جانا چاہیے (اگر ویلیو خالی ہو تو ویلیو ہمیشہ موجودہ تاریخ اور وقت + 1 سال ہو گی)۔"
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Security.txt خفیہ کاری",
+        "help": "وہ خفیہ کاری کلید بتاتا ہے جسے سیکیورٹی محققین کو خفیہ کردہ رابطے کے لیے استعمال کرنا چاہیے۔"
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Security.txt اعتراف",
+        "help": "اس صفحے کا لنک بتاتا ہے جہاں سیکیورٹی محققین کو ان کی رپورٹس کے لیے تسلیم کیا جاتا ہے۔"
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Security.txt ترجیحی زبان",
+        "help": "سیکیورٹی رپورٹس جمع کراتے وقت ترجیحی قدرتی زبانوں کا مجموعہ بتانے کے لیے استعمال کیا جا سکتا ہے۔"
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Security.txt کینونیکل",
+        "help": "وہ کینونیکل URIs بتاتا ہے جہاں \"security.txt\" فائل موجود ہے، جو عام طور پر \"https://example.com/.well-known/security.txt\" جیسی چیز ہوتی ہے۔ (اگر ویلیو خالی ہو تو ڈیفالٹ ویلیو خودکار طور پر سائٹ URL + SECURITYTXT_URI سے تیار کی جائے گی)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Security.txt پالیسی",
+        "help": "اس مقام کا لنک بتاتا ہے جہاں کمزوری ظاہر کرنے کی پالیسی موجود ہے۔"
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Security.txt بھرتی",
+        "help": "وینڈر کی سیکیورٹی سے متعلق ملازمتوں سے لنک کرنے کے لیے استعمال ہوتا ہے۔"
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "آپ کے CSAF (Common Security Advisory Framework) پرووائیڈر کے provider-metadata.json کا لنک۔"
+      }
+    }
+  }
+}

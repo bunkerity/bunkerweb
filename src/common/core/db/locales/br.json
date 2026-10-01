@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Banco de dados",
+      "description": "Integra facilmente o banco de dados."
+    },
+    "settings": {
+      "DATABASE_URI": {
+        "label": "A URI do banco de dados",
+        "help": "A URI do banco de dados, no formato do sqlalchemy."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "A URI do banco de dados para operações somente leitura",
+        "help": "A URI do banco de dados para operações somente leitura; também pode servir como alternativa (fallback) caso o banco de dados principal esteja indisponível. No formato do sqlalchemy."
+      },
+      "DATABASE_LOG_LEVEL": {
+        "label": "Nível de log do banco de dados",
+        "help": "O nível a ser usado para os logs do banco de dados."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "Número máximo de execuções de tarefas",
+        "help": "Número máximo de execuções de tarefas a manter no banco de dados."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "Idade máxima em dias das sessões de usuário da UI",
+        "help": "Idade máxima em dias das sessões de usuário da UI antes de serem eliminadas."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Tamanho do pool do banco de dados",
+        "help": "Número de conexões a manter no pool de conexões do banco de dados."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Overflow máximo do pool do banco de dados",
+        "help": "Número máximo de conexões a criar além do tamanho do pool."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Tempo limite do pool do banco de dados",
+        "help": "Número de segundos a esperar antes de desistir de obter uma conexão do pool."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Reciclagem do pool do banco de dados",
+        "help": "Número de segundos após os quais uma conexão é reciclada automaticamente. Defina como -1 para desativar."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Pre-ping do pool do banco de dados",
+        "help": "Define se as conexões devem ser testadas quanto à disponibilidade a cada retirada do pool."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Reset do pool do banco de dados ao retornar",
+        "help": "Como a conexão deve ser redefinida ao retornar ao pool. Deixe vazio para automático (none para MySQL/MariaDB, rollback para os demais). Valores possíveis: rollback, commit, none."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Tempo limite de nova tentativa do banco de dados",
+        "help": "Número máximo de segundos a esperar para que o banco de dados fique disponível na inicialização."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Tentativas de repetição de requisição do banco de dados",
+        "help": "Número de tentativas de repetição para erros transitórios do banco de dados."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Atraso de repetição de requisição do banco de dados",
+        "help": "O atraso em segundos entre as tentativas de repetição para erros transitórios do banco de dados."
+      }
+    }
+  }
+}

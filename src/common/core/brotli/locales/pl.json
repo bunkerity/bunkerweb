@@ -1,0 +1,26 @@
+{
+  "brotli": {
+    "meta": {
+      "name": "Brotli",
+      "description": "Kompresuje żądania HTTP algorytmem brotli."
+    },
+    "settings": {
+      "BROTLI_COMP_LEVEL": {
+        "label": "Poziom kompresji",
+        "help": "Poziom kompresji dla Brotli (0 = brak kompresji, 11 = maksymalna kompresja)."
+      },
+      "BROTLI_MIN_LENGTH": {
+        "label": "Minimalna długość",
+        "help": "Minimalny rozmiar odpowiedzi (w bajtach), dla którego stosowana jest kompresja Brotli."
+      },
+      "BROTLI_TYPES": {
+        "label": "Typy MIME",
+        "help": "Lista typów MIME, które będą kompresowane za pomocą brotli."
+      },
+      "USE_BROTLI": {
+        "label": "Użyj brotli",
+        "help": "Włącz lub wyłącz kompresję Brotli. Domyślnie wyłączona, co jest też domyślnym ustawieniem samego modułu ngx_brotli. Ustawienie jest per usługa: pozostaw je wyłączone dla każdej usługi, której odpowiedzi jednocześnie niosą sekret (token CSRF, klucz API) i odbijają dane wejściowe podane przez atakującego, ponieważ to połączenie jest warunkiem ataku BREACH — zwróć uwagę, że text/html jest zawsze kompresowane, niezależnie od tego, co zawiera BROTLI_TYPES. Interfejs webowy BunkerWeb jest taką usługą."
+      }
+    }
+  }
+}

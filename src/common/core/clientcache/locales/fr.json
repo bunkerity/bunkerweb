@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "Cache client",
+      "description": "Gère la mise en cache pour les clients."
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "Utiliser le cache client",
+        "help": "Indique au client de stocker localement les fichiers statiques."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "Extensions à mettre en cache par le client",
+        "help": "Liste des extensions de fichiers, séparées par des barres verticales, qui doivent être mises en cache."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "Envoie l'en-tête HTTP ETag pour les ressources statiques."
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "En-tête Cache-Control",
+        "help": "Valeur de l'en-tête HTTP Cache-Control."
+      }
+    }
+  }
+}

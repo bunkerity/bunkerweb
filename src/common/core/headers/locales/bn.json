@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "হেডার",
+      "description": "ক্লায়েন্টদের পাঠানো HTTP হেডার পরিচালনা করে।"
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "কাস্টম হেডার (HeaderName: HeaderValue)",
+        "help": "যোগ করার জন্য কাস্টম হেডার (HeaderName: HeaderValue)।"
+      },
+      "REMOVE_HEADERS": {
+        "label": "হেডার সরান",
+        "help": "সরানোর জন্য হেডার (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "আপস্ট্রিম হেডার রাখুন",
+        "help": "আপস্ট্রিম থেকে রাখার হেডার (Header1 Header2 Header3 ... অথবা সবের জন্য *)।"
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Strict-Transport-Security (HSTS) হেডারের জন্য মান।"
+      },
+      "COOKIE_FLAGS": {
+        "label": "কুকি ফ্ল্যাগ",
+        "help": "সব কুকিতে স্বয়ংক্রিয়ভাবে যোগ করা ফ্ল্যাগ (nginx_cookie_flag_module-এর জন্য গৃহীত মান)।"
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "কুকি স্বয়ংক্রিয় Secure ফ্ল্যাগ",
+        "help": "সব কুকিতে স্বয়ংক্রিয়ভাবে Secure ফ্ল্যাগ যোগ করুন।"
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Content-Security-Policy হেডারের জন্য মান।"
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Content-Security-Policy হেডারের লঙ্ঘনের জন্য ব্লক করার পরিবর্তে রিপোর্ট পাঠান।"
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Referrer-Policy হেডারের জন্য মান।"
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Permissions-Policy হেডারের জন্য মান।"
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "X-Frame-Options হেডারের জন্য মান।"
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "X-Content-Type-Options হেডারের জন্য মান।"
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "X-DNS-Prefetch-Control হেডারের জন্য মান।"
+      }
+    }
+  }
+}

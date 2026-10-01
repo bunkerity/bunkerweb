@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "Konfigurasi server Redis saat menggunakan BunkerWeb dalam mode klaster."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS REDIS"
+      },
+      "counter_redis_nb_keys": {
+        "title": "KUNCI REDIS",
+        "subtitle": "Jumlah kunci"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Aktifkan Redis",
+        "help": "Aktifkan Redis."
+      },
+      "REDIS_HOST": {
+        "label": "Server Redis",
+        "help": "IP atau hostname server Redis."
+      },
+      "REDIS_PORT": {
+        "label": "Port Redis",
+        "help": "Port server Redis."
+      },
+      "REDIS_DATABASE": {
+        "label": "Database Redis",
+        "help": "Nomor database Redis."
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Gunakan koneksi SSL/TLS dengan server Redis."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Verifikasi SSL/TLS Redis",
+        "help": "Verifikasi sertifikat server Redis."
+      },
+      "REDIS_SSL_CA": {
+        "label": "Bundle CA SSL/TLS Redis",
+        "help": "Path ke bundle CA PEM yang digunakan untuk memverifikasi sertifikat server Redis/Valkey (CA privat); tidak diatur berarti trust store sistem. Saat diatur, dipercaya oleh klien Python (broker Celery, job, rate limiter API, bwcli, UI web) dan ditambahkan ke bundle trust NGINX Lua, sehingga jalur permintaan juga mempercayainya. Dibaca di tempat konfigurasi dibuat dan oleh setiap klien, sehingga file harus ada di path tersebut di sana; bundle yang hilang atau tidak valid menyebabkan pembuatan konfigurasi gagal."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Timeout Redis (ms)",
+        "help": "Timeout server Redis (dalam md) untuk connect, read, dan write."
+      },
+      "REDIS_USERNAME": {
+        "label": "Username Redis",
+        "help": "Username Redis yang digunakan dalam perintah AUTH."
+      },
+      "REDIS_PASSWORD": {
+        "label": "Password Redis",
+        "help": "Password Redis yang digunakan dalam perintah AUTH."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Host sentinel Redis",
+        "help": "Host sentinel Redis dengan format host:[port], dipisahkan dengan spasi."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Username sentinel Redis",
+        "help": "Username sentinel Redis."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Password sentinel Redis",
+        "help": "Password sentinel Redis."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Master sentinel Redis",
+        "help": "Nama master sentinel Redis."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Idle keepalive Redis (ms)",
+        "help": "Waktu idle maksimum (dalam md) sebelum menutup koneksi redis di pool."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Pool keepalive Redis",
+        "help": "Koneksi Redis maksimum yang disimpan dalam pool per worker NGINX. Koneksi steady-state kira-kira nginx_workers x pool x instances dan harus tetap dalam batas maxclients Redis/Valkey."
+      }
+    }
+  }
+}

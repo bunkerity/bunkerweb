@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Criação, renovação e configuração automáticas de certificados Let's Encrypt."
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "Let's Encrypt automático",
+        "help": "Ativa o modo Let's Encrypt automático."
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Deixar passar Let's Encrypt",
+        "help": "Deixa passar os pedidos Let's Encrypt para o servidor web."
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Email Let's Encrypt",
+        "help": "Email utilizado para as notificações Let's Encrypt e no certificado."
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "Servidor da autoridade de certificação",
+        "help": "Selecione o servidor da autoridade de certificação a utilizar para a geração do certificado."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "Chave de API ZeroSSL",
+        "help": "Chave de API ZeroSSL opcional utilizada pelo zerossl-bot. Se vazia, é utilizado EMAIL_LETS_ENCRYPT para obter as credenciais EAB."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "Tentativas de API ZeroSSL",
+        "help": "Número de tentativas para os pedidos de API ZeroSSL efetuados pelo zerossl-bot (0 desativa as tentativas)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "Atraso das tentativas de API ZeroSSL",
+        "help": "Atraso em segundos entre as tentativas da API ZeroSSL no zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "Tempo limite de ligação da API ZeroSSL",
+        "help": "Tempo limite de ligação em segundos para os pedidos de API ZeroSSL no zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "Tempo máximo de API ZeroSSL",
+        "help": "Tempo total máximo em segundos para cada pedido de API ZeroSSL no zerossl-bot."
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "Tipo de desafio",
+        "help": "O tipo de desafio a utilizar para o Let's Encrypt (http ou dns)."
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "Fornecedor DNS",
+        "help": "O fornecedor DNS a utilizar para os desafios DNS."
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "Propagação DNS",
+        "help": "O tempo de espera para a propagação DNS, em segundos, para os desafios DNS."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "Item de credencial",
+        "help": "Item de configuração que será adicionado ao ficheiro credentials.ini para o fornecedor DNS, para os desafios DNS. Escreva-o como a chave, espaço, depois o valor (por ex., 'cloudflare_api_token 123456'); não coloque a chave entre aspas. O valor também pode estar codificado em base64, ou o item inteiro pode ser um objeto json codificado em base64."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Descodificar credenciais DNS em Base64",
+        "help": "Descodifica automaticamente as credenciais do fornecedor DNS codificadas em base64. Quando ativado, as credenciais que correspondem ao formato base64 são descodificadas antes de serem utilizadas (exceto para o fornecedor rfc2136). Desative se as suas credenciais forem intencionalmente cadeias base64."
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "Certificados wildcard",
+        "help": "Cria certificados wildcard para todos os domínios. Isto permite que um único certificado proteja vários subdomínios. (Apenas disponível com desafios DNS)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Usar staging do Let's Encrypt",
+        "help": "Utiliza o ambiente de staging para a geração de certificados Let's Encrypt. Útil quando está a testar as suas implementações para evitar ser limitado por taxa no ambiente de produção."
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "Eliminar certificados antigos quando já não forem necessários",
+        "help": "Elimina os certificados antigos ao renovar."
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "Perfil de certificado",
+        "help": "Selecione o perfil de certificado a utilizar com o Let's Encrypt. 'classic' é um certificado de uso geral com validade de 90 dias e ampla compatibilidade. 'tlsserver' está otimizado para autenticação de servidor TLS, com validade de 90 dias e payload menor. 'shortlived' oferece certificados de 7 dias para maior segurança em ambientes automatizados."
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "Perfil de certificado personalizado (ACME)",
+        "help": "Perfil de certificado personalizado a utilizar com servidores ACME que suportam perfis não padrão. Substitui LETS_ENCRYPT_PROFILE se definido."
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "Desativar sufixos públicos (lista negra PSL)",
+        "help": "Desativa os pedidos de certificado para domínios que correspondam à Public Suffix List (recomendado, predefinição: yes)."
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "Tentativas máximas",
+        "help": "Número de vezes que a geração do certificado será tentada novamente em caso de falha (0 desativa as tentativas)."
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "Pedidos de certificado concorrentes",
+        "help": "Executa os pedidos de certificado concorrentemente no job certbot-new (pode aumentar o risco de limites de taxa)."
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "Cópias de segurança máximas dos logs do Certbot",
+        "help": "Número máximo de ficheiros de log certbot rodados a manter por job. A predefinição do próprio Certbot é 1000, o que se acumula rapidamente. Defina como 0 para manter apenas o log ativo."
+      }
+    }
+  }
+}

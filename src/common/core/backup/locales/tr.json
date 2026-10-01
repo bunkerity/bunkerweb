@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Yedekleme",
+      "description": "Verilerinizi özel bir konuma yedekleyin. Düzenli yedeklemeler oluşturarak önemli dosyalarınızın güvenliğini ve kullanılabilirliğini sağlayın."
+    },
+    "settings": {
+      "BACKUP_DIRECTORY": {
+        "label": "Yedekleme dizini",
+        "help": "Yedeğin saklanacağı dizin"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Yedekleme rotasyonu",
+        "help": "Saklanacak yedek sayısı"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Yedekleme rotasyon stratejisi",
+        "help": "Silinecek eski yedeklerin nasıl seçildiği: fifo en yeni olanları tutar, hanoi aynı dosya sayısı için bir Hanoi Kulesi merdiveni tutar (şimdiki zamana yakın sık, geriye doğru seyrek)"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Yedekleme zamanlaması",
+        "help": "Yedekleme sıklığı (günlük, haftalık veya aylık)"
+      },
+      "USE_BACKUP": {
+        "label": "Otomatik yedeklemeyi etkinleştir",
+        "help": "Yedekleme özelliğini etkinleştir veya devre dışı bırak"
+      }
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Son Yedekleme"
+      }
+    }
+  }
+}

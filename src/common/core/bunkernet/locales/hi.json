@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "BunkerNet के माध्यम से अन्य BunkerWeb इंस्टेंस के साथ ख़तरे का डेटा साझा करता है।"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "BUNKERNET स्थिति"
+      },
+      "info_connectivity": {
+        "title": "कनेक्टिविटी"
+      },
+      "info_instance_id": {
+        "title": "इंस्टेंस ID"
+      }
+    },
+    "settings": {
+      "USE_BUNKERNET": {
+        "label": "BunkerNet सक्रिय करें",
+        "help": "BunkerNet सुविधा सक्रिय करें।"
+      },
+      "BUNKERNET_SERVER": {
+        "label": "BunkerNet सर्वर",
+        "help": "BunkerNet API का पता।"
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "BunkerNet प्रभावशीलता आँकड़े",
+        "help": "BunkerNet प्रभावशीलता आँकड़े (योगदान, ब्लॉकलिस्ट आकार, कनेक्टिविटी) डेटाबेस में सुरक्षित रखें।"
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "BunkerNet आँकड़े प्रतिधारण (दिन)",
+        "help": "सुरक्षित BunkerNet प्रभावशीलता आँकड़ों की अधिकतम आयु (दिनों में)।"
+      }
+    }
+  }
+}

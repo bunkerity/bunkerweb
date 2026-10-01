@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "الإنشاء والتجديد والتهيئة التلقائية لشهادات Let's Encrypt."
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "Let's Encrypt التلقائي",
+        "help": "تفعيل وضع Let's Encrypt التلقائي."
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "تمرير طلبات Let's Encrypt",
+        "help": "تمرير طلبات Let's Encrypt إلى خادم الويب."
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "بريد Let's Encrypt الإلكتروني",
+        "help": "البريد الإلكتروني المستخدم لإشعارات Let's Encrypt وفي الشهادة."
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "خادم جهة إصدار الشهادات",
+        "help": "اختر خادم جهة إصدار الشهادات المراد استخدامه لإنشاء الشهادة."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "مفتاح API لـ ZeroSSL",
+        "help": "مفتاح API اختياري لـ ZeroSSL يستخدمه zerossl-bot. إذا كان فارغًا، يُستخدم EMAIL_LETS_ENCRYPT لجلب بيانات اعتماد EAB."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "محاولات إعادة API لـ ZeroSSL",
+        "help": "عدد محاولات إعادة المحاولة لطلبات API الخاصة بـ ZeroSSL التي يقوم بها zerossl-bot (0 تعطّل إعادة المحاولة)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "تأخير إعادة محاولة API لـ ZeroSSL",
+        "help": "التأخير بالثواني بين محاولات إعادة المحاولة لـ API الخاصة بـ ZeroSSL في zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "مهلة اتصال API لـ ZeroSSL",
+        "help": "مهلة الاتصال بالثواني لطلبات API الخاصة بـ ZeroSSL في zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "الحد الأقصى لوقت API لـ ZeroSSL",
+        "help": "الحد الأقصى للوقت الإجمالي بالثواني لكل طلب API الخاص بـ ZeroSSL في zerossl-bot."
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "نوع التحدي",
+        "help": "نوع التحدي المستخدم لـ Let's Encrypt (http أو dns)."
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "مزوّد DNS",
+        "help": "مزوّد DNS المستخدم لتحديات DNS."
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "انتشار DNS",
+        "help": "الوقت المراد الانتظار لانتشار DNS بالثواني لتحديات DNS."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "عنصر بيانات الاعتماد",
+        "help": "عنصر تهيئة سيُضاف إلى ملف credentials.ini الخاص بمزوّد DNS لتحديات DNS. اكتبه كمفتاح، ثم مسافة بيضاء، ثم القيمة (مثال: 'cloudflare_api_token 123456')؛ لا تضع المفتاح بين علامتي اقتباس. يمكن أيضًا أن تكون القيمة مُرمَّزة بـ base64، أو أن يكون العنصر بأكمله كائن json مُرمَّزًا بـ base64."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "فك ترميز بيانات اعتماد DNS بصيغة Base64",
+        "help": "فك ترميز بيانات اعتماد مزوّد DNS المُرمَّزة بـ base64 تلقائيًا. عند التفعيل، تُفك بيانات الاعتماد المطابقة لصيغة base64 قبل الاستخدام (باستثناء مزوّد rfc2136). عطّل هذا الخيار إذا كانت بيانات اعتمادك عن قصد سلاسل base64."
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "شهادات Wildcard",
+        "help": "إنشاء شهادات Wildcard لجميع النطاقات. يتيح هذا لشهادة واحدة تأمين نطاقات فرعية متعددة. (متاح فقط مع تحديات DNS)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "استخدام بيئة Staging لـ Let's Encrypt",
+        "help": "استخدام بيئة الاختبار (staging) لإنشاء شهادات Let's Encrypt. مفيد عند اختبار عمليات النشر لتجنب تقييد المعدل في بيئة الإنتاج."
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "مسح الشهادات القديمة عندما لا تعود هناك حاجة إليها",
+        "help": "مسح الشهادات القديمة عند التجديد."
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "ملف تعريف الشهادة",
+        "help": "اختر ملف تعريف الشهادة المراد استخدامه مع Let's Encrypt. 'classic' شهادة عامة الغرض بمدة صلاحية 90 يومًا وتوافق واسع. 'tlsserver' مُحسَّنة لمصادقة خادم TLS بمدة صلاحية 90 يومًا وحمولة أصغر. 'shortlived' توفر شهادات لمدة 7 أيام لأمان معزز في البيئات الآلية."
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "ملف تعريف شهادة مخصص (ACME)",
+        "help": "ملف تعريف شهادة مخصص لاستخدامه مع خوادم ACME التي تدعم ملفات تعريف غير قياسية. يتجاوز LETS_ENCRYPT_PROFILE إذا تم ضبطه."
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "تعطيل اللواحق العامة (القائمة السوداء PSL)",
+        "help": "تعطيل طلبات الشهادات للنطاقات المطابقة لقائمة اللواحق العامة (Public Suffix List) (موصى به، الافتراضي: yes)."
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "الحد الأقصى لإعادة المحاولة",
+        "help": "عدد مرات إعادة محاولة إنشاء الشهادة عند الفشل (0 تعطّل إعادة المحاولة)."
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "طلبات الشهادات المتزامنة",
+        "help": "تشغيل طلبات الشهادات بشكل متزامن في مهمة certbot-new (قد يزيد من خطر تقييد المعدل)."
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "الحد الأقصى لنسخ سجل Certbot الاحتياطية",
+        "help": "العدد الأقصى لملفات سجل certbot المُدارة (rotated) المراد الاحتفاظ بها لكل مهمة. الافتراضي الخاص بـ certbot هو 1000، وهو ما يتراكم بسرعة. اضبطه على 0 للاحتفاظ بالسجل الحي فقط."
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "Bouncer CrowdSec para o BunkerWeb."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "ESTADO DO CROWDSEC"
+      }
+    },
+    "settings": {
+      "USE_CROWDSEC": {
+        "label": "Usar CrowdSec",
+        "help": "Ativa o bouncer CrowdSec."
+      },
+      "CROWDSEC_API": {
+        "label": "API CrowdSec",
+        "help": "Endereço da API CrowdSec."
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "Chave API CrowdSec",
+        "help": "Chave da API CrowdSec, fornecida por cscli bouncer add."
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "Início de sessão de gestão CrowdSec",
+        "help": "Início de sessão de máquina CrowdSec dedicada para investigação de alertas e remoção de decisões. Deixar vazio para acesso de bouncer só de leitura."
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "Palavra-passe de gestão CrowdSec",
+        "help": "Palavra-passe da máquina de gestão CrowdSec dedicada. Necessária com o início de sessão de gestão; nunca utilize aqui a chave API do bouncer."
+      },
+      "CROWDSEC_MODE": {
+        "label": "Modo CrowdSec",
+        "help": "Modo da API CrowdSec (live ou stream)."
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "Ativar análise interna CrowdSec",
+        "help": "Ativa a análise do tráfego interno."
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "Tempo limite de pedidos live CrowdSec",
+        "help": "Tempo limite em milissegundos para os pedidos HTTP efetuados pelo bouncer para consultar a API local do CrowdSec."
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "Localizações excluídas do CrowdSec",
+        "help": "As localizações a excluir durante o bouncing. É uma lista de localizações, separadas por vírgulas."
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "Desafio captcha CrowdSec",
+        "help": "Desafio antibot apresentado quando o CrowdSec solicita um captcha. O antibot tem de estar ativado neste serviço (USE_ANTIBOT definido como qualquer valor exceto «no»), caso contrário o pedido é banido em alternativa. Os fornecedores terceiros obtêm as suas chaves das definições ANTIBOT_*. Evite «cookie»: não prova nada para uma decisão que significa «prove que é humano». «no» ignora as decisões de captcha, como antes; a cache de decisões é partilhada por API local, pelo que cada serviço nessa API local tem de ser definido como «no» para restaurar totalmente o comportamento anterior."
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "Deixar os workflows de segurança decidir",
+        "help": "Deixa os workflows de segurança decidirem o que acontece a um pedido sinalizado pelo CrowdSec. «no» (predefinição) bloqueia-o aqui. «yes» entrega-o aos workflows associados a este serviço; o veredito continua a aplicar-se quando nenhuma regra corresponde ou nenhum está associado. O preflight CORS (204), /robots.txt e /security.txt são gerados pelo BunkerWeb antes de os workflows serem executados, pelo que um cliente sinalizado ainda pode recebê-los. Nenhum deles chega à sua aplicação, e todos os pedidos que o fariam são primeiro verificados pela escada de workflows."
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "Expiração da cache CrowdSec",
+        "help": "A expiração da cache, em segundos, para os IP que o bouncer armazena em cache no modo live."
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "Tempo limite de pedido CrowdSec",
+        "help": "A frequência de atualização, em segundos, para obter IP novos/antigos a partir da API local do CrowdSec."
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "URL AppSec",
+        "help": "URL do componente de segurança de aplicações."
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "Ação em caso de falha do AppSec",
+        "help": "Comportamento quando o componente AppSec devolve um 500. Pode deixar passar o pedido ou negá-lo."
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "Tempo limite de ligação AppSec",
+        "help": "O tempo limite em milissegundos da ligação entre o componente de remediação e o componente AppSec."
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "Tempo limite de envio AppSec",
+        "help": "O tempo limite em milissegundos para enviar dados do componente de remediação para o componente AppSec."
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "Tempo limite de processamento AppSec",
+        "help": "O tempo limite em milissegundos para processar o pedido do componente de remediação para o componente AppSec."
+      },
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "Enviar sempre para o AppSec",
+        "help": "Envia o pedido para o componente AppSec mesmo que já exista uma decisão para o IP."
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "Verificação SSL AppSec",
+        "help": "Verifica a validade do certificado SSL do componente AppSec."
+      }
+    }
+  }
+}

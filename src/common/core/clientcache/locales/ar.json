@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "ذاكرة تخزين العميل المؤقتة",
+      "description": "يدير التخزين المؤقت للعملاء."
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "استخدام ذاكرة تخزين العميل المؤقتة",
+        "help": "إخبار العميل بتخزين الملفات الثابتة محليًا."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "الامتدادات التي يجب أن يخزّنها العميل مؤقتًا",
+        "help": "قائمة امتدادات الملفات، مفصولة بخط عمودي |، التي يجب تخزينها مؤقتًا."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "إرسال رأس HTTP الخاص بـ ETag للموارد الثابتة."
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "رأس Cache-Control",
+        "help": "قيمة رأس HTTP الخاص بـ Cache-Control."
+      }
+    }
+  }
+}

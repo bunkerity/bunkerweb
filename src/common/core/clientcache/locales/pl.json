@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "Pamięć podręczna klienta",
+      "description": "Zarządza buforowaniem dla klientów."
+    },
+    "settings": {
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Nagłówek Cache-Control",
+        "help": "Wartość nagłówka HTTP Cache-Control."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "Wysyłaj nagłówek HTTP ETag dla zasobów statycznych."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "Rozszerzenia, które powinny być cachowane przez klienta",
+        "help": "Lista rozszerzeń plików, rozdzielonych pionowymi kreskami, które powinny być cachowane."
+      },
+      "USE_CLIENT_CACHE": {
+        "label": "Użyj cache klienta",
+        "help": "Nakaż klientowi przechowywanie lokalnie plików statycznych."
+      }
+    }
+  }
+}

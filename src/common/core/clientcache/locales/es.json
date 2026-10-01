@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "Caché de cliente",
+      "description": "Gestiona el almacenamiento en caché para los clientes."
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "Usar caché del cliente",
+        "help": "Indica al cliente que almacene localmente los archivos estáticos."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "Extensiones que debe almacenar en caché el cliente",
+        "help": "Lista de extensiones de archivo, separadas por barras verticales, que deben almacenarse en caché."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "Envía la cabecera HTTP ETag para los recursos estáticos."
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cabecera Cache-Control",
+        "help": "Valor de la cabecera HTTP Cache-Control."
+      }
+    }
+  }
+}

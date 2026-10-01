@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "跨來源資源共用(Cross-Origin Resource Sharing)。"
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "請求已封鎖"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "使用 CORS",
+        "help": "使用 CORS"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "允許的來源",
+        "help": "允許發起 CORS 請求的來源:PCRE 正規表示式、* 或 self(表示同源)。"
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Access-Control-Allow-Methods 的值",
+        "help": "Access-Control-Allow-Methods 標頭的值。"
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Access-Control-Allow-Headers 的值",
+        "help": "Access-Control-Allow-Headers 標頭的值。"
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "傳送 Access-Control-Allow-Credentials",
+        "help": "傳送 Access-Control-Allow-Credentials 標頭。"
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Access-Control-Expose-Headers 的值",
+        "help": "Access-Control-Expose-Headers 標頭的值。"
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Cross-Origin-Opener-Policy 標頭的值。"
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Cross-Origin-Embedder-Policy 標頭的值。"
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Cross-Origin-Resource-Policy 標頭的值。"
+      },
+      "CORS_MAX_AGE": {
+        "label": "Access-Control-Max-Age 的值",
+        "help": "Access-Control-Max-Age 標頭的值。"
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "拒絕請求",
+        "help": "如果 Origin 不被允許,則拒絕該請求,不再轉發給後端。"
+      }
+    }
+  }
+}

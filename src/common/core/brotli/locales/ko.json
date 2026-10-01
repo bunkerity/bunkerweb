@@ -1,0 +1,26 @@
+{
+  "brotli": {
+    "meta": {
+      "name": "Brotli",
+      "description": "brotli 알고리즘으로 HTTP 요청을 압축합니다."
+    },
+    "settings": {
+      "USE_BROTLI": {
+        "label": "Brotli 사용",
+        "help": "Brotli 압축을 활성화 또는 비활성화합니다. 기본값은 꺼짐이며, 이는 ngx_brotli 모듈 자체의 기본값과도 같습니다. 이 설정은 서비스별로 적용됩니다: 응답에 비밀 값(CSRF 토큰, API 키)이 포함되고 공격자가 제공한 입력을 그대로 반환하는 서비스는 이 조합이 BREACH 공격의 전제 조건이 되므로 꺼진 상태로 두십시오. 또한 BROTLI_TYPES에 무엇이 지정되어 있든 text/html은 항상 압축됩니다. BunkerWeb 웹 UI가 바로 그러한 서비스입니다."
+      },
+      "BROTLI_TYPES": {
+        "label": "MIME 유형",
+        "help": "brotli로 압축할 MIME 유형 목록입니다."
+      },
+      "BROTLI_MIN_LENGTH": {
+        "label": "최소 길이",
+        "help": "Brotli 압축이 적용되기 위한 최소 응답 크기(바이트)입니다."
+      },
+      "BROTLI_COMP_LEVEL": {
+        "label": "압축 수준",
+        "help": "Brotli의 압축 수준입니다(0 = 압축 없음, 11 = 최대 압축)."
+      }
+    }
+  }
+}

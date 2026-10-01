@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Awtomatikong paglikha, pag-renew, at pag-configure ng mga sertipikong Let's Encrypt."
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "Automatic Let's Encrypt",
+        "help": "I-activate ang automatic Let's Encrypt mode."
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Pass Through Let's Encrypt",
+        "help": "I-pass through ang mga Let's Encrypt request papunta sa web server."
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Email Let's Encrypt",
+        "help": "Email na ginagamit para sa Let's Encrypt notification at sa certificate."
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "Certificate Authority Server",
+        "help": "Piliin ang certificate authority server na gagamitin para sa paggawa ng certificate."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "ZeroSSL API Key",
+        "help": "Opsyonal na ZeroSSL API key na ginagamit ng zerossl-bot. Kapag blangko, ginagamit ang EMAIL_LETS_ENCRYPT para kunin ang EAB credentials."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "ZeroSSL API Retries",
+        "help": "Bilang ng retry para sa mga ZeroSSL API request na ginagawa ng zerossl-bot (nakadisable ang retry kung 0)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "ZeroSSL API Retry Delay",
+        "help": "Delay sa segundo sa pagitan ng mga ZeroSSL API retry sa zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "ZeroSSL API Connect Timeout",
+        "help": "Connection timeout sa segundo para sa mga ZeroSSL API request sa zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "ZeroSSL API Max Time",
+        "help": "Pinakamataas na kabuuang oras sa segundo para sa bawat ZeroSSL API request sa zerossl-bot."
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "Challenge Type",
+        "help": "Ang challenge type na gagamitin para sa Let's Encrypt (http o dns)."
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "DNS Provider",
+        "help": "Ang DNS provider na gagamitin para sa mga DNS challenge."
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "DNS Propagation",
+        "help": "Ang oras na hihintayin para sa DNS propagation sa segundo para sa mga DNS challenge."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "Credential Item",
+        "help": "Configuration item na idaragdag sa credentials.ini file para sa DNS provider para sa mga DNS challenge. Isulat ito bilang key, whitespace, tapos value (hal. 'cloudflare_api_token 123456'); huwag lagyan ng quote ang key. Maaari ring naka-encode sa base64 ang value, o maaaring base64-encoded json object ang buong item."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Decode Base64 DNS Credentials",
+        "help": "Awtomatikong i-decode ang base64-encoded na DNS provider credentials. Kapag naka-enable, dine-decode ang mga credentials na tumutugma sa base64 format bago gamitin (maliban sa rfc2136 provider). I-disable kung sinasadya ngang base64 string ang iyong mga credentials."
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "Wildcard Certificates",
+        "help": "Gumawa ng wildcard certificate para sa lahat ng domain. Pinapayagan nito ang iisang certificate na protektahan ang maraming subdomain. (Available lang sa mga DNS challenge)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Use Let's Encrypt Staging",
+        "help": "Gamitin ang staging environment para sa paggawa ng Let's Encrypt certificate. Kapaki-pakinabang kapag sinusubukan mo ang iyong mga deployment para maiwasan ang rate limit sa production environment."
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "Burahin ang mga lumang certificate kapag hindi na kailangan",
+        "help": "Burahin ang mga lumang certificate kapag nire-renew."
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "Certificate Profile",
+        "help": "Piliin ang certificate profile na gagamitin kasama ang Let's Encrypt. Pangkalahatang gamit na certificate ang 'classic' na may 90-araw na lifetime at malawak na compatibility. Naka-optimize ang 'tlsserver' para sa TLS server authentication na may 90-araw na lifetime at mas maliit na payload. Nag-aalok ang 'shortlived' ng 7-araw na certificate para sa pinahusay na seguridad sa mga automated environment."
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "Custom Certificate Profile (ACME)",
+        "help": "Custom na certificate profile na gagamitin sa mga ACME server na sumusuporta sa hindi-standard na profile. Mananaig ito kaysa sa LETS_ENCRYPT_PROFILE kapag naka-set."
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "I-disable ang Public Suffixes (PSL Blacklist)",
+        "help": "I-disable ang certificate request para sa mga domain na tumutugma sa Public Suffix List (inirerekomenda, default: yes)."
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "Maximum Retries",
+        "help": "Bilang ng ulit na susubukan ang paggawa ng certificate kapag nabigo (nakadisable ang retry kung 0)."
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "Concurrent Certificate Requests",
+        "help": "Patakbuhin nang sabay-sabay ang mga certificate request sa certbot-new job (maaaring dagdagan ang panganib ng rate limit)."
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "Maximum Certbot Log Backups",
+        "help": "Pinakamataas na bilang ng rotated certbot log file na itatago kada job. 1000 ang sariling default ng Certbot, na mabilis na natatambak. I-set sa 0 para itago lang ang live log."
+      }
+    }
+  }
+}

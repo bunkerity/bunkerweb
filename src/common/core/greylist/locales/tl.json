@@ -1,0 +1,76 @@
+{
+  "greylist": {
+    "meta": {
+      "name": "Greylist",
+      "description": "Nagbibigay-daan sa access habang pinananatili ang mga feature ng seguridad batay sa internal at external na IP/network/rDNS/ASN greylist."
+    },
+    "settings": {
+      "GREYLIST_ASN": {
+        "label": "Greylist ASN",
+        "help": "Listahan ng mga numero ng ASN, na pinaghihiwalay ng space, na ilalagay sa greylist."
+      },
+      "GREYLIST_ASN_URLS": {
+        "label": "Greylist ASN URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng ASN na ilalagay sa greylist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "GREYLIST_HEADER_NAME": {
+        "label": "Pangalan ng Header sa Greylist",
+        "help": "Pangalan ng request header na nagdaragdag sa request sa greylist. Kahit sinong client ay maaaring magpadala ng header na ito: ituring itong shared secret, sa HTTPS lang."
+      },
+      "GREYLIST_HEADER_VALUE": {
+        "label": "Value ng Header sa Greylist",
+        "help": "Value (PCRE regex) na dapat itumbas ng header para idagdag ang request sa greylist. Iwanang blangko para tumugma base sa pagkakaroon lang ng header. I-anchor gamit ang ^ at $: hindi naka-anchor ang pagtutugma bilang default."
+      },
+      "GREYLIST_IP": {
+        "label": "Greylist IP/Network",
+        "help": "Listahan ng IP/network, na pinaghihiwalay ng space, na ilalagay sa greylist."
+      },
+      "GREYLIST_IP_URLS": {
+        "label": "Greylist IP/Network URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng mabuting IP/network na ilalagay sa greylist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "GREYLIST_RDNS": {
+        "label": "Greylist Reverse DNS",
+        "help": "Listahan ng mga reverse DNS suffix, na pinaghihiwalay ng space, na ilalagay sa greylist."
+      },
+      "GREYLIST_RDNS_GLOBAL": {
+        "label": "Greylist Reverse DNS sa Global na IP Lang",
+        "help": "Isagawa lang ang mga RDNS greylist check sa mga global na IP address."
+      },
+      "GREYLIST_RDNS_URLS": {
+        "label": "Greylist Reverse DNS URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng reverse DNS suffix na ilalagay sa greylist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "GREYLIST_RULE": {
+        "label": "Greylist Rule",
+        "help": "Composite na rule: kailangang tumugma ang bawat term para tumugma ang rule. Pinaghihiwalay ang mga term ng \" AND \" (malaking letra) at ang bawat isa ay [NOT ]<kind>:<value>, kung saan ang <kind> ay ip, country, asn, rdns, ua (alias user_agent), o uri. Halimbawa: ip:10.0.0.0/8 AND NOT ua:^curl. Pinagsasama-sama ang mga rule gamit ang OR sa isa't isa at sa mga flat list sa itaas. Ang value ay maaari ring resource-group token tulad ng @office. Sinusuri lang ng mga stream service ang ip, country, asn, at rdns."
+      },
+      "GREYLIST_URI": {
+        "label": "Greylist URI",
+        "help": "Listahan ng URI (PCRE regex), na pinaghihiwalay ng space, na ilalagay sa greylist."
+      },
+      "GREYLIST_URI_URLS": {
+        "label": "Greylist URI URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng masamang URI na ilalagay sa greylist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "GREYLIST_USER_AGENT": {
+        "label": "Greylist User-Agent",
+        "help": "Listahan ng User-Agent (PCRE regex), na pinaghihiwalay ng space, na ilalagay sa greylist."
+      },
+      "GREYLIST_USER_AGENT_URLS": {
+        "label": "Greylist User-Agent URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng mabuting User-Agent na ilalagay sa greylist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "USE_GREYLIST": {
+        "label": "I-activate ang Greylisting",
+        "help": "I-activate ang feature na greylist."
+      }
+    },
+    "widgets": {
+      "counter_failed_greylist": {
+        "title": "GREYLIST",
+        "subtitle": "Na-block na kahilingan"
+      }
+    }
+  }
+}

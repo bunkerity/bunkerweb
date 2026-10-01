@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "يشارك بيانات التهديدات مع نسخ BunkerWeb الأخرى عبر BunkerNet."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "حالة BUNKERNET"
+      },
+      "info_connectivity": {
+        "title": "الاتصال"
+      },
+      "info_instance_id": {
+        "title": "معرّف النسخة"
+      }
+    },
+    "settings": {
+      "USE_BUNKERNET": {
+        "label": "تفعيل BunkerNet",
+        "help": "تفعيل ميزة BunkerNet."
+      },
+      "BUNKERNET_SERVER": {
+        "label": "خادم BunkerNet",
+        "help": "عنوان واجهة برمجة تطبيقات BunkerNet."
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "إحصاءات فعالية BunkerNet",
+        "help": "حفظ إحصاءات فعالية BunkerNet (المساهمة، حجم قائمة الحظر، الاتصال) في قاعدة البيانات."
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "مدة الاحتفاظ بإحصاءات BunkerNet (بالأيام)",
+        "help": "أقصى عمر (بالأيام) لإحصاءات فعالية BunkerNet المحفوظة."
+      }
+    }
+  }
+}

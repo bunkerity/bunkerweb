@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "robots.txt 파일을 관리합니다. 웹 크롤러의 사이트 접근을 제어하기 위한 표준입니다."
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "robots.txt 사용",
+        "help": "robots.txt 파일을 활성화합니다."
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "커뮤니티 robots.txt 목록",
+        "help": "robots.txt에 포함할 커뮤니티 관리 목록을 선택합니다."
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "Robots.txt URL",
+        "help": "robots.txt 규칙을 포함하는 URL 목록입니다. 공백으로 구분합니다. file:// URL과 http://user:pass@url 형식을 사용하는 기본 인증도 지원합니다."
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Robots.txt 규칙",
+        "help": "robots.txt에 대한 규칙입니다(줄당 하나)."
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Robots.txt 헤더",
+        "help": "robots.txt 파일의 헤더입니다(규칙 앞에 위치). Base64로 인코딩할 수 있습니다."
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Robots.txt 푸터",
+        "help": "robots.txt 파일의 푸터입니다(규칙 뒤에 위치). Base64로 인코딩할 수 있습니다."
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Robots.txt 사이트맵",
+        "help": "robots.txt에 포함할 사이트맵 URL입니다."
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "무시 규칙",
+        "help": "무시할 규칙입니다(PCRE 정규식). 여러 번 지정할 수 있습니다."
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "DarkVisitors API 토큰",
+        "help": "DarkVisitors API용 Bearer 토큰입니다."
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "DarkVisitors 에이전트 유형",
+        "help": "DarkVisitors API 호출 시 DarkVisitors의 agent_types 필드에 포함할, 쉼표로 구분된 에이전트 유형 목록입니다."
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "어떤 URL이 허용되지 않는지 지정하는 문자열입니다. DarkVisitors API 호출 시 이 값이 disallow 필드로 전송됩니다."
+      }
+    }
+  }
+}

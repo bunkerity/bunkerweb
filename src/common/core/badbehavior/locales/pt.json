@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "Mau comportamento",
+      "description": "Bane um IP que gere demasiados códigos de estado HTTP «maus» num período de tempo."
+    },
+    "settings": {
+      "USE_BAD_BEHAVIOR": {
+        "label": "Ativar Mau comportamento",
+        "help": "Ativa a funcionalidade Mau comportamento."
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "Códigos de estado «maus»",
+        "help": "Lista de códigos de estado HTTP considerados «maus»."
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "Limite",
+        "help": "Número máximo de códigos de estado HTTP «maus» dentro do período de tempo antes de o IP ser banido."
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "Período (em segundos)",
+        "help": "Período de tempo (em segundos) durante o qual são contados os códigos de estado HTTP «maus»."
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "Duração do banimento (em segundos)",
+        "help": "Duração (em segundos) de um banimento quando o IP correspondente atingiu o limite. (Definir como 0 para banir permanentemente)"
+      },
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "Âmbito do banimento",
+        "help": "Determina o nível do banimento. «service» bane o IP apenas para o serviço, «global» bane o IP para todo o sistema."
+      }
+    }
+  }
+}

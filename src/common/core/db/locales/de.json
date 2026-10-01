@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Datenbank",
+      "description": "Integriert die Datenbank ganz einfach."
+    },
+    "settings": {
+      "DATABASE_URI": {
+        "label": "Die Datenbank-URI",
+        "help": "Die Datenbank-URI im sqlalchemy-Format."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "Die Datenbank-URI für schreibgeschützte Vorgänge",
+        "help": "Die Datenbank-URI für schreibgeschützte Vorgänge; sie kann auch als Fallback dienen, wenn die Hauptdatenbank nicht erreichbar ist. Im sqlalchemy-Format."
+      },
+      "DATABASE_LOG_LEVEL": {
+        "label": "Datenbank-Protokollstufe",
+        "help": "Die für die Datenbankprotokolle zu verwendende Stufe."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "Die maximale Anzahl an Job-Ausführungen",
+        "help": "Die maximale Anzahl an Job-Ausführungen, die in der Datenbank aufbewahrt werden."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "Das maximale Alter in Tagen für UI-Benutzersitzungen",
+        "help": "Das maximale Alter in Tagen für UI-Benutzersitzungen, bevor sie bereinigt werden."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Datenbank-Pool-Größe",
+        "help": "Die Anzahl der im Datenbank-Verbindungspool zu haltenden Verbindungen."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Maximaler Pool-Überlauf der Datenbank",
+        "help": "Die maximale Anzahl an Verbindungen, die über die Pool-Größe hinaus erstellt werden."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Datenbank-Pool-Timeout",
+        "help": "Die Anzahl der Sekunden, die gewartet wird, bevor der Versuch, eine Verbindung aus dem Pool zu erhalten, aufgegeben wird."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Datenbank-Pool-Recycling",
+        "help": "Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. Auf -1 setzen, um zu deaktivieren."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Datenbank-Pool-Pre-Ping",
+        "help": "Ob Verbindungen bei jeder Entnahme aus dem Pool auf Lebendigkeit getestet werden sollen."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Datenbank-Pool-Reset bei Rückgabe",
+        "help": "Wie die Verbindung bei der Rückgabe an den Pool zurückgesetzt werden soll. Leer lassen für auto (none für MySQL/MariaDB, rollback für andere). Mögliche Werte: rollback, commit, none."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Datenbank-Wiederholungs-Timeout",
+        "help": "Die maximale Anzahl an Sekunden, die beim Start auf die Verfügbarkeit der Datenbank gewartet wird."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Wiederholungsversuche für Datenbankanfragen",
+        "help": "Die Anzahl der Wiederholungsversuche für vorübergehende Datenbankfehler."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Verzögerung zwischen Wiederholungsversuchen für Datenbankanfragen",
+        "help": "Die Verzögerung in Sekunden zwischen den Wiederholungsversuchen für vorübergehende Datenbankfehler."
+      }
+    }
+  }
+}

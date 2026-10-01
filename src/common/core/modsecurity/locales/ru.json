@@ -1,0 +1,62 @@
+{
+  "modsecurity": {
+    "meta": {
+      "name": "ModSecurity",
+      "description": "Управление WAF ModSecurity."
+    },
+    "settings": {
+      "USE_MODSECURITY": {
+        "label": "Использовать ModSecurity",
+        "help": "Включить ModSecurity WAF."
+      },
+      "USE_MODSECURITY_CRS": {
+        "label": "Использовать Core Rule Set",
+        "help": "Включить OWASP Core Rule Set."
+      },
+      "USE_MODSECURITY_CRS_PLUGINS": {
+        "label": "Использовать плагины Core Rule Set",
+        "help": "Включить плагины OWASP Core Rule Set."
+      },
+      "MODSECURITY_CRS_VERSION": {
+        "label": "Версия Core Rule Set",
+        "help": "Версия OWASP Core Rule Set для использования с ModSecurity (3 или 4). Примечание: nightly устарела и по умолчанию будет использоваться v4."
+      },
+      "MODSECURITY_CRS_PLUGINS": {
+        "label": "Плагины Core Rule Set",
+        "help": "Список плагинов OWASP CRS (plugin-name[/tag] или URL) для загрузки и установки (разделённых пробелами). (Несовместимо с CRS версии 3)"
+      },
+      "USE_MODSECURITY_GLOBAL_CRS": {
+        "label": "Режим глобального CRS ModSecurity",
+        "help": "Использовать CRS ModSecurity в глобальном режиме для ускорения загрузки правил при большом количестве сервисов."
+      },
+      "MODSECURITY_SEC_AUDIT_ENGINE": {
+        "label": "SecAuditEngine",
+        "help": "Директива SecAuditEngine ModSecurity."
+      },
+      "MODSECURITY_SEC_RULE_ENGINE": {
+        "label": "SecRuleEngine",
+        "help": "Директива SecRuleEngine ModSecurity."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+        "label": "SecAuditLogParts",
+        "help": "Директива SecAuditLogParts ModSecurity. Части A и Z всегда автоматически включаются как префикс и суффикс."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG": {
+        "label": "SecAuditLog",
+        "help": "Путь к файлу, в который ModSecurity записывает записи аудита. Должен быть обычным файлом: writer аудита Serial блокирует его, что невозможно для канала (pipe) или потока. Должен заканчиваться на .log, в каталоге /var/log/bunkerweb/."
+      },
+      "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
+        "label": "SecRequestBodyNoFilesLimit",
+        "help": "Директива SecRequestBodyNoFilesLimit ModSecurity."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
+        "label": "SecRequestBodyLimit",
+        "help": "Директива SecRequestBodyLimit ModSecurity. Максимальный размер тела запроса, который проверит ModSecurity (суффиксы k/m/g, например 10m). Запросы, превышающие этот лимит, подчиняются SecRequestBodyLimitAction (по умолчанию Reject). Если пусто, значение выводится из MAX_CLIENT_SIZE. Установите 0, чтобы снять ограничение (не рекомендуется, может привести к уничтожению процесса из-за нехватки памяти). NGINX применяет MAX_CLIENT_SIZE первым, поэтому более высокое значение здесь не имеет эффекта. REVERSE_PROXY_MAX_CLIENT_SIZE переопределяет это значение для своей собственной location."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
+        "label": "SecRequestBodyLimitAction",
+        "help": "Директива SecRequestBodyLimitAction ModSecurity. Reject возвращает HTTP 413 для запросов, превышающих лимит тела. ProcessPartial проверяет только часть в пределах лимита и передаёт полный запрос на бэкенд (полезно для загрузки больших файлов, но снижает покрытие WAF для не-файловых типов содержимого, таких как JSON или данные формы)."
+      }
+    }
+  }
+}

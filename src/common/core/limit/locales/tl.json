@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "Limitasyon",
+      "description": "Nililimitahan ang maximum na bilang ng mga request at koneksyon."
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "Pangkalahatang limitasyon",
+        "subtitle": "Mga na-block na kahilingan"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "I-activate ang Limit Requests",
+        "help": "I-activate ang limit requests feature."
+      },
+      "LIMIT_REQ_URL": {
+        "label": "Limit Request URL",
+        "help": "URL (PCRE regex) kung saan ilalapat ang limit request o ang special value na / para sa lahat ng request."
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "Limit Request Rate",
+        "help": "Rate na ilalapat sa URL (s para sa segundo, m para sa minuto, h para sa oras, at d para sa araw)."
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "I-activate ang Global Limit Requests",
+        "help": "I-activate ang global rate limit: iisang aggregate quota para sa buong service, binibilang lahat ng client at URL nang magkasama (pinoprotektahan ang kapasidad ng origin, hiwalay sa per-IP/per-URL na limit requests)."
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "Global Limit Request Rate",
+        "help": "Pinakamataas na aggregate rate para sa buong service, pinagsamang lahat ng client at URL (s para sa segundo, m para sa minuto, h para sa oras, at d para sa araw)."
+      },
+      "USE_LIMIT_CONN": {
+        "label": "I-activate ang Limit Connections",
+        "help": "I-activate ang limit connections feature."
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "Maximum na Bilang ng HTTP/1.X Connections",
+        "help": "Pinakamataas na bilang ng connection kada IP kapag ginagamit ang HTTP/1.X protocol."
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "Maximum na Bilang ng HTTP/2 Streams",
+        "help": "Pinakamataas na bilang ng stream kada IP kapag ginagamit ang HTTP/2 protocol."
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "Maximum na Bilang ng HTTP/3 Streams",
+        "help": "Pinakamataas na bilang ng stream kada IP kapag ginagamit ang HTTP/3 protocol."
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "Maximum na Bilang ng Stream Connections",
+        "help": "Pinakamataas na bilang ng connection kada IP kapag ginagamit ang stream."
+      }
+    }
+  }
+}

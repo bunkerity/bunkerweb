@@ -1,0 +1,76 @@
+{
+  "whitelist": {
+    "meta": {
+      "name": "Daftar putih",
+      "description": "Mengizinkan akses berdasarkan daftar putih IP/jaringan/rDNS/ASN internal dan eksternal."
+    },
+    "settings": {
+      "USE_WHITELIST": {
+        "label": "Aktifkan whitelist",
+        "help": "Aktifkan fitur whitelist."
+      },
+      "WHITELIST_ASN": {
+        "label": "Whitelist ASN",
+        "help": "Daftar nomor ASN, dipisahkan dengan spasi, untuk dimasukkan ke dalam whitelist."
+      },
+      "WHITELIST_ASN_URLS": {
+        "label": "URL Whitelist ASN",
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi ASN untuk dimasukkan ke dalam whitelist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+      },
+      "WHITELIST_HEADER_NAME": {
+        "label": "Nama header whitelist",
+        "help": "Nama header permintaan yang menambahkan permintaan ke whitelist. Klien mana pun dapat mengirim header ini: perlakukan sebagai rahasia bersama, hanya melalui HTTPS."
+      },
+      "WHITELIST_HEADER_VALUE": {
+        "label": "Nilai header whitelist",
+        "help": "Nilai (regex PCRE) yang harus dicocokkan oleh header untuk menambahkan permintaan ke whitelist. Biarkan kosong agar cocok berdasarkan keberadaan header saja. Jangkarkan dengan ^ dan $: kecocokan tidak dijangkarkan secara default."
+      },
+      "WHITELIST_IP": {
+        "label": "Whitelist IP/jaringan",
+        "help": "Daftar IP/jaringan, dipisahkan dengan spasi, untuk dimasukkan ke dalam whitelist."
+      },
+      "WHITELIST_IP_URLS": {
+        "label": "URL Whitelist IP/jaringan",
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi IP/jaringan baik untuk dimasukkan ke dalam whitelist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+      },
+      "WHITELIST_RDNS": {
+        "label": "Whitelist reverse DNS",
+        "help": "Daftar akhiran reverse DNS, dipisahkan dengan spasi, untuk dimasukkan ke dalam whitelist."
+      },
+      "WHITELIST_RDNS_GLOBAL": {
+        "label": "Whitelist reverse DNS untuk IP global saja",
+        "help": "Hanya lakukan pemeriksaan RDNS whitelist pada alamat IP global."
+      },
+      "WHITELIST_RDNS_URLS": {
+        "label": "URL Whitelist reverse DNS",
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi akhiran reverse DNS untuk dimasukkan ke dalam whitelist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+      },
+      "WHITELIST_RULE": {
+        "label": "Aturan whitelist",
+        "help": "Aturan komposit: setiap istilah harus cocok agar aturan cocok. Istilah dipisahkan dengan \" AND \" (huruf besar) dan masing-masing berbentuk [NOT ]<kind>:<value>, di mana <kind> adalah ip, country, asn, rdns, ua (alias user_agent), atau uri. Contoh: ip:10.0.0.0/8 AND NOT ua:^curl. Aturan digabungkan dengan OR satu sama lain dan dengan daftar datar di atas. Nilai juga bisa berupa token grup sumber daya seperti @office. Layanan stream hanya mengevaluasi ip, country, asn, dan rdns."
+      },
+      "WHITELIST_URI": {
+        "label": "Whitelist URI",
+        "help": "Daftar URI (regex PCRE), dipisahkan dengan spasi, untuk dimasukkan ke dalam whitelist."
+      },
+      "WHITELIST_URI_URLS": {
+        "label": "URL Whitelist URI",
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi URI buruk untuk dimasukkan ke dalam whitelist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+      },
+      "WHITELIST_USER_AGENT": {
+        "label": "Whitelist User-Agent",
+        "help": "Daftar User-Agent (regex PCRE), dipisahkan dengan spasi, untuk dimasukkan ke dalam whitelist."
+      },
+      "WHITELIST_USER_AGENT_URLS": {
+        "label": "URL Whitelist User-Agent",
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi User-Agent baik untuk dimasukkan ke dalam whitelist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+      }
+    },
+    "widgets": {
+      "counter_passed_whitelist": {
+        "title": "DAFTAR PUTIH",
+        "subtitle": "Permintaan diizinkan"
+      }
+    }
+  }
+}

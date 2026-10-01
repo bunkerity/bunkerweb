@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "管理 gRPC 反向代理設定。"
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "使用 gRPC",
+        "help": "啟用 gRPC 反向代理模式。"
+      },
+      "GRPC_HOST": {
+        "label": "gRPC 主機",
+        "help": "grpc_pass 使用的完整上游值(例如 grpc://app:50051 或 grpcs://app:443)。"
+      },
+      "GRPC_URL": {
+        "label": "gRPC URL",
+        "help": "將被代理到 gRPC 上游的 location URL。以 ^ 開頭或以 $ 結尾的值將被視為正規表示式 location。可選擇在前面加上 ~、~*、= 或 ^~,後接一個空格,以明確設定 nginx 的 location 修飾詞;值的其他位置不允許出現空格、;、{ 或 }。"
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "gRPC 自訂 Host",
+        "help": "覆寫傳送給 gRPC 上游的 Host 標頭。"
+      },
+      "GRPC_HEADERS": {
+        "label": "gRPC 標頭",
+        "help": "要傳送給 gRPC 上游的標頭清單,以分號分隔(用作 grpc_set_header 指令的值)。"
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "gRPC 隱藏標頭",
+        "help": "從 gRPC 上游收到後,需要對客戶端隱藏的標頭清單(用作 grpc_hide_header 指令的值)。"
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "gRPC 標頭-客戶端",
+        "help": "要傳送給客戶端的標頭清單,以分號分隔(用作 add_header 指令的值)。"
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "gRPC 透傳標頭",
+        "help": "即使預設會被隱藏,也要從 gRPC 上游透傳給客戶端的標頭清單,以空格分隔(用作 grpc_pass_header 指令的值)。"
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "gRPC 忽略標頭",
+        "help": "來自 gRPC 上游、且不應由 NGINX 處理的標頭清單,以空格分隔(用作 grpc_ignore_headers 指令的值)。"
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "允許標頭中使用底線",
+        "help": "啟用或停用 underscores_in_headers 指令。"
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "攔截錯誤",
+        "help": "攔截並重寫 gRPC 上游的錯誤。"
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "gRPC 緩衝區大小",
+        "help": "grpc_buffer_size 指令的值(用於從 gRPC 上游讀取回應的緩衝區大小)。"
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "gRPC 連線逾時",
+        "help": "連線 gRPC 上游時的逾時時間。"
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "gRPC 讀取逾時",
+        "help": "從 gRPC 上游讀取資料時的逾時時間。"
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "gRPC 傳送逾時",
+        "help": "向 gRPC 上游傳送資料時的逾時時間。"
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "gRPC socket keepalive",
+        "help": "啟用或停用 gRPC 上游 socket 的 keepalive。"
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "啟用或停用向 gRPC 上游伺服器傳送 SNI。"
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "SSL SNI 名稱",
+        "help": "設定要傳送給 gRPC 上游伺服器的 SNI 主機。"
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "SSL 驗證",
+        "help": "啟用或停用對 gRPC 上游伺服器 SSL 憑證的驗證。"
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "信任憑證優先順序",
+        "help": "信任的 CA 憑證的來源:檔案路徑或 base64/PEM 資料(file 或 data)。"
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL 信任憑證路徑",
+        "help": "用於驗證 gRPC 上游憑證的 PEM CA 憑證組合的路徑(優先順序為 'file',須可被 scheduler 讀取,由其快取並分發)。驗證時為必填;對於公開上游,可使用系統憑證組合(例如 /etc/ssl/certs/ca-certificates.crt)。若未設定,則停用驗證。"
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "信任憑證資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式提供的信任 CA 憑證(優先順序為 'data')。"
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "SSL 驗證深度",
+        "help": "設定 gRPC 上游伺服器憑證鏈的驗證深度。"
+      },
+      "GRPC_SSL_CRL": {
+        "label": "CRL 路徑",
+        "help": "驗證 gRPC 上游伺服器時使用的 PEM 憑證撤銷清單的路徑。優先於 GRPC_SSL_CRL_DATA。僅在 GRPC_SSL_VERIFY 為 yes 時才會生效。已設定但路徑不存在會被視為錯誤;GRPC_SSL_CRL_DATA 不會作為備援使用。"
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "CRL 資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式提供的憑證撤銷清單。僅在 CRL 路徑設定為空時使用。"
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "上游 SSL 通訊協定",
+        "help": "提供給 gRPC 上游伺服器的 TLS 版本(用作 grpc_ssl_protocols 指令的值)。留空則保留 NGINX 預設值。"
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "上游 SSL 加密套件",
+        "help": "提供給 gRPC 上游伺服器的加密套件字串(用作 grpc_ssl_ciphers 指令的值)。留空則保留 NGINX 預設值。"
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "gRPC 下一個上游",
+        "help": "選擇下一個 gRPC 上游伺服器的條件。"
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "gRPC 下一個上游逾時",
+        "help": "將請求傳遞給下一個 gRPC 上游伺服器的時間限制。"
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "gRPC 下一個上游嘗試次數",
+        "help": "將請求傳遞給下一個 gRPC 上游伺服器的最大嘗試次數。"
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "gRPC 驗證請求",
+        "help": "啟用使用外部提供者進行驗證(用作 auth_request 指令的值)。"
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "驗證請求登入 URL",
+        "help": "使用 GRPC_AUTH_REQUEST 時,將客戶端重新導向到登入 URL(當 auth_request 呼叫回傳 401 時使用)。支援 $scheme、$host 及 $request_uri 等 NGINX 變數。"
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "gRPC 驗證請求設定",
+        "help": "要從驗證提供者設定的變數清單,以分號分隔(用作 auth_request_set 指令的值)。"
+      },
+      "GRPC_INCLUDES": {
+        "label": "gRPC includes",
+        "help": "要包含在 gRPC location 區塊中的額外設定,以空格分隔。"
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "gRPC 最大請求主體大小",
+        "help": "該 gRPC location 的最大請求主體大小(0 表示無限制)。留空時,使用服務層級的 MAX_CLIENT_SIZE。"
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "用戶端憑證優先順序",
+        "help": "用於與上游進行雙向 TLS 的用戶端憑證與私密金鑰的來源:檔案路徑或 base64/PEM 資料(file 或 data)。"
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "SSL 用戶端憑證路徑",
+        "help": "BunkerWeb 向 gRPC 上游出示的 PEM 用戶端憑證的路徑(雙向 TLS,優先順序為 file)。需要對應的 GRPC_SSL_CLIENT_KEY;trusted-cert 工作會快取並分發這個 gRPC 專屬的身分憑證。"
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "用戶端憑證資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式提供的用戶端憑證(優先順序為 'data')。"
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "SSL 用戶端私密金鑰路徑",
+        "help": "與用戶端憑證匹配的 PEM 私密金鑰的路徑(優先順序為 'file')。該私密金鑰會如同任何其他工作產出物一樣被快取並分發到各執行個體,並以僅擁有者/群組可存取的權限寫入。"
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "用戶端私密金鑰資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式提供的用戶端私密金鑰(優先順序為 'data')。請盡量優先使用檔案路徑:在此處設定的私密金鑰會以設定值的形式儲存。"
+      }
+    }
+  }
+}

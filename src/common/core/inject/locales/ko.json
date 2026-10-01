@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "HTML 삽입",
+      "description": "</body> 또는 </head> 태그 앞에 사용자 지정 HTML 코드를 삽입합니다."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "body HTML 코드",
+        "help": "</body> 태그 앞에 삽입할 HTML 코드입니다."
+      },
+      "INJECT_HEAD": {
+        "label": "head HTML 코드",
+        "help": "</head> 태그 앞에 삽입할 HTML 코드입니다."
+      }
+    }
+  }
+}

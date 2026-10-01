@@ -1,0 +1,34 @@
+{
+  "geoip": {
+    "meta": {
+      "name": "GeoIP",
+      "description": "Mga database ng GeoIP na ginagamit upang matukoy ang bansa, ASN, at lungsod ng isang IP ng client."
+    },
+    "settings": {
+      "GEOIP_ASN_MMDB": {
+        "label": "Custom na ASN Database",
+        "help": "Custom na ASN database: absolute path na mababasa ng worker, o http(s) URL. May priyoridad kaysa sa MaxMind at DB-IP."
+      },
+      "GEOIP_CITY": {
+        "label": "City Database",
+        "help": "I-download ang city database. Mas malaki ito nang husto kaysa sa iba (nagiging 125 MB ang DB-IP City Lite kapag na-unpack) at hindi kasama sa mga image."
+      },
+      "GEOIP_CITY_MMDB": {
+        "label": "Custom na City Database",
+        "help": "Custom na city database: absolute path na mababasa ng worker, o http(s) URL. May priyoridad kaysa sa MaxMind at DB-IP."
+      },
+      "GEOIP_COUNTRY_MMDB": {
+        "label": "Custom na Country Database",
+        "help": "Custom na country database: absolute path na mababasa ng worker, o http(s) URL. May priyoridad kaysa sa MaxMind at DB-IP."
+      },
+      "MAXMIND_ACCOUNT_ID": {
+        "label": "MaxMind Account ID",
+        "help": "MaxMind account ID. Optional pero inirerekomenda: kung wala nito, gagamitin ang deprecated na key-only endpoint, na dala ang license key sa URL sa halip na sa auth header."
+      },
+      "MAXMIND_LICENSE_KEY": {
+        "label": "MaxMind License Key",
+        "help": "MaxMind license key. Kapag naka-set, dina-download ang mga database ng country, ASN, at city mula sa MaxMind sa halip na DB-IP."
+      }
+    }
+  }
+}

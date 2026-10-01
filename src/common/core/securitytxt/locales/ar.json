@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "يدير ملف security.txt. معيار مقترح يتيح لمواقع الويب تحديد سياسات الأمان الخاصة بها."
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "استخدام security.txt",
+        "help": "تفعيل ملف security.txt."
+      },
+      "SECURITYTXT_URI": {
+        "label": "معرّف URI لملف Security.txt",
+        "help": "يحدد معرّف URI الذي سيكون ملف \"security.txt\" متاحًا منه."
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "جهة اتصال Security.txt",
+        "help": "يحدد طريقة يجب أن يستخدمها الباحثون للإبلاغ عن الثغرات الأمنية، مثل عنوان بريد إلكتروني، رقم هاتف، و/أو صفحة ويب تحتوي على معلومات الاتصال. (إذا كانت القيمة فارغة، فلن يتم إنشاء ملف security.txt لأنه حقل مطلوب)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "انتهاء صلاحية Security.txt",
+        "help": "يحدد التاريخ والوقت اللذين تُعتبر بعدهما البيانات الموجودة في ملف \"security.txt\" قديمة ولا ينبغي استخدامها (إذا كانت القيمة فارغة، ستكون القيمة دائمًا التاريخ والوقت الحاليين + سنة واحدة)."
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "تشفير Security.txt",
+        "help": "يحدد مفتاح تشفير يجب أن يستخدمه باحثو الأمن للاتصال المشفّر."
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "شكر وتقدير Security.txt",
+        "help": "يحدد رابطًا لصفحة يُعترف فيها بباحثي الأمن على تقاريرهم."
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "اللغة المفضلة لـ Security.txt",
+        "help": "يمكن استخدامه للإشارة إلى مجموعة من اللغات الطبيعية المفضلة عند تقديم تقارير أمنية."
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "الرابط الأساسي لـ Security.txt",
+        "help": "يحدد معرّفات URI الأساسية حيث يوجد ملف \"security.txt\"، وعادةً ما يكون شيئًا مثل \"https://example.com/.well-known/security.txt\". (إذا كانت القيمة فارغة، سيتم إنشاء القيمة الافتراضية تلقائيًا من رابط الموقع + SECURITYTXT_URI)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "سياسة Security.txt",
+        "help": "يحدد رابطًا لموقع سياسة الإفصاح عن الثغرات."
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "توظيف Security.txt",
+        "help": "يُستخدم للربط بالوظائف المتعلقة بالأمن لدى المورّد."
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "CSAF لـ Security.txt",
+        "help": "رابط إلى provider-metadata.json الخاص بمزود CSAF (إطار عمل الاستشارات الأمنية الموحد) الخاص بك."
+      }
+    }
+  }
+}

@@ -34,6 +34,20 @@ This directory contains translation files for the BunkerWeb UI. Below is a summa
 
 ---
 
+## Core Plugin Metadata & Widget Translations
+
+Each core plugin under `src/common/core/<id>/locales/*.json` ships its own catalogue (plugin/template
+`meta.*`, `templates.*`, and widget `widgets.*.title`/`.subtitle` copy) — see `docs/plugins.md`
+"Plugin translations". There is no `en.json` in these directories: the English source is the
+plugin's own `plugin.json`, `templates/*.json` and `ui/actions.py`.
+
+| Scope | Created By | Checked By |
+| --- | --- | --- |
+| `meta.*` / `templates.*` for all 45 core plugins, all 18 non-English languages | AI (Anthropic:claude-sonnet-5) — metadata, untranslated-key sweep | AI (Anthropic:claude-sonnet-5) — metadata, untranslated-key sweep |
+| `widgets.*.title` / `.subtitle` for the 14 core plugins whose `pre_render()` ships a widget title/subtitle, all 18 non-English languages | AI (Anthropic:claude-sonnet-5) — metadata, untranslated-key sweep | AI (Anthropic:claude-sonnet-5) — metadata, untranslated-key sweep |
+
+---
+
 ## How to Contribute
 
 We welcome contributions to improve or add new locale files!

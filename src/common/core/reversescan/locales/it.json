@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Scansione inversa",
+      "description": "Migliora la sicurezza scansionando le porte del client per rilevare e bloccare connessioni provenienti da proxy o server, aiutando a prevenire l'elusione delle misure di sicurezza."
+    },
+    "settings": {
+      "USE_REVERSE_SCAN": {
+        "label": "Scansione inversa",
+        "help": "Attiva la scansione delle porte del client e nega l'accesso se una di esse è aperta."
+      },
+      "REVERSE_SCAN_PORTS": {
+        "label": "Porte della scansione inversa",
+        "help": "Elenco delle porte da scansionare quando si utilizza la funzione di scansione inversa."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Timeout della scansione inversa",
+        "help": "Specifica il timeout massimo (in ms) durante la scansione di una porta."
+      }
+    }
+  }
+}

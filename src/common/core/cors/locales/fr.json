@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Partage des ressources entre origines multiples (Cross-Origin Resource Sharing)."
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "Requête bloquée"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "Utiliser CORS",
+        "help": "Utiliser CORS"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "Origines autorisées",
+        "help": "Origines autorisées à effectuer des requêtes CORS : regex PCRE, * ou self (pour la même origine)."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Valeur d'Access-Control-Allow-Methods",
+        "help": "Valeur de l'en-tête Access-Control-Allow-Methods."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Valeur d'Access-Control-Allow-Headers",
+        "help": "Valeur de l'en-tête Access-Control-Allow-Headers."
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Envoyer Access-Control-Allow-Credentials",
+        "help": "Envoie l'en-tête Access-Control-Allow-Credentials."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Valeur d'Access-Control-Expose-Headers",
+        "help": "Valeur de l'en-tête Access-Control-Expose-Headers."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Valeur de l'en-tête Cross-Origin-Opener-Policy."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Valeur de l'en-tête Cross-Origin-Embedder-Policy."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Valeur de l'en-tête Cross-Origin-Resource-Policy."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Valeur d'Access-Control-Max-Age",
+        "help": "Valeur de l'en-tête Access-Control-Max-Age."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "Refuser la requête",
+        "help": "Refuse la requête et ne l'envoie pas au backend si l'Origin n'est pas autorisée."
+      }
+    }
+  }
+}

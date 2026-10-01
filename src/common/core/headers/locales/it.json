@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "Intestazioni",
+      "description": "Gestisce le intestazioni HTTP inviate ai client."
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "Intestazione personalizzata (HeaderName: HeaderValue)",
+        "help": "Intestazione personalizzata da aggiungere (HeaderName: HeaderValue)."
+      },
+      "REMOVE_HEADERS": {
+        "label": "Rimuovi intestazioni",
+        "help": "Intestazioni da rimuovere (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "Mantieni intestazioni upstream",
+        "help": "Intestazioni da mantenere dall'upstream (Header1 Header2 Header3 ... oppure * per tutte)."
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Valore dell'intestazione Strict-Transport-Security (HSTS)."
+      },
+      "COOKIE_FLAGS": {
+        "label": "Flag dei cookie",
+        "help": "Flag dei cookie aggiunti automaticamente a tutti i cookie (valore accettato per nginx_cookie_flag_module)."
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "Flag Secure automatico dei cookie",
+        "help": "Aggiunge automaticamente il flag Secure a tutti i cookie."
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Valore dell'intestazione Content-Security-Policy."
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Invia segnalazioni per le violazioni dell'intestazione Content-Security-Policy invece di bloccarle."
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Valore dell'intestazione Referrer-Policy."
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Valore dell'intestazione Permissions-Policy."
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "Valore dell'intestazione X-Frame-Options."
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "Valore dell'intestazione X-Content-Type-Options."
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "Valore dell'intestazione X-DNS-Prefetch-Control."
+      }
+    }
+  }
+}

@@ -1,0 +1,230 @@
+{
+  "reverseproxy": {
+    "meta": {
+      "name": "Reverse-Proxy",
+      "description": "Verwaltet Reverse-Proxy-Konfigurationen."
+    },
+    "settings": {
+      "USE_REVERSE_PROXY": {
+        "label": "Reverse-Proxy verwenden",
+        "help": "Aktiviert den Reverse-Proxy-Modus."
+      },
+      "REVERSE_PROXY_HOST": {
+        "label": "Reverse-Proxy-Host",
+        "help": "Vollständige URL der weitergeleiteten Ressource (proxy_pass)."
+      },
+      "REVERSE_PROXY_URL": {
+        "label": "Reverse-Proxy-URL",
+        "help": "Location-URL, die weitergeleitet wird. Ein Wert, der mit ^ beginnt oder mit $ endet, wird als Regex-Location behandelt. Optional mit ~, ~*, = oder ^~ gefolgt von einem Leerzeichen voranstellen, um den nginx-Location-Modifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, ;, { oder } zulässig."
+      },
+      "REVERSE_PROXY_WS": {
+        "label": "Reverse-Proxy-WebSocket",
+        "help": "Aktiviert WebSocket für die weitergeleitete Ressource."
+      },
+      "REVERSE_PROXY_BUFFERING": {
+        "label": "Reverse-Proxy-Buffering",
+        "help": "Aktiviert oder deaktiviert das Buffering von Antworten der weitergeleiteten Ressource."
+      },
+      "REVERSE_PROXY_REQUEST_BUFFERING": {
+        "label": "Reverse-Proxy-Request-Buffering",
+        "help": "Aktiviert oder deaktiviert das Buffering von Anfragen an die weitergeleitete Ressource."
+      },
+      "REVERSE_PROXY_KEEPALIVE": {
+        "label": "Reverse-Proxy-Keepalive",
+        "help": "Aktiviert oder deaktiviert Keepalive-Verbindungen mit der weitergeleiteten Ressource."
+      },
+      "REVERSE_PROXY_HTTP_VERSION": {
+        "label": "Reverse-Proxy-HTTP-Version",
+        "help": "HTTP-Protokollversion, die für die Kommunikation mit dem Upstream verwendet wird (1.0, 1.1 oder 2). Auf 2 setzen, um HTTP/2-Multiplexing auf der Upstream-Strecke für kompatible Backends zu aktivieren. WebSocket-Locations sind unabhängig davon auf 1.1 fixiert."
+      },
+      "REVERSE_PROXY_CUSTOM_HOST": {
+        "label": "Benutzerdefinierter Reverse-Proxy-Host",
+        "help": "Überschreibt den an den Upstream-Server gesendeten Host-Header."
+      },
+      "REVERSE_PROXY_HEADERS": {
+        "label": "Reverse-Proxy-Header",
+        "help": "Liste von HTTP-Headern, die an die weitergeleitete Ressource gesendet werden, durch Semikolons getrennt (Werte für die Direktive proxy_set_header)."
+      },
+      "REVERSE_PROXY_HIDE_HEADERS": {
+        "label": "Reverse-Proxy versteckte Header",
+        "help": "Liste von HTTP-Headern, die vor Clients verborgen werden, wenn sie von der weitergeleiteten Ressource empfangen werden (Werte für die Direktive proxy_hide_header)."
+      },
+      "REVERSE_PROXY_HEADERS_CLIENT": {
+        "label": "Reverse-Proxy Header-Client",
+        "help": "Liste von HTTP-Headern, die an den Client gesendet werden, durch Semikolons getrennt (Werte für die Direktive add_header)."
+      },
+      "REVERSE_PROXY_UNDERSCORES_IN_HEADERS": {
+        "label": "Unterstriche in Headern erlauben",
+        "help": "Aktiviert oder deaktiviert die Direktive underscores_in_headers."
+      },
+      "REVERSE_PROXY_INTERCEPT_ERRORS": {
+        "label": "Fehler abfangen",
+        "help": "Fängt HTTP-Fehlerantworten der weitergeleiteten Ressource ab und schreibt sie um (Wert der Direktive proxy_intercept_errors)."
+      },
+      "REVERSE_PROXY_CONNECT_TIMEOUT": {
+        "label": "Reverse-Proxy-Verbindungs-Timeout",
+        "help": "Timeout beim Verbinden mit der weitergeleiteten Ressource."
+      },
+      "REVERSE_PROXY_READ_TIMEOUT": {
+        "label": "Reverse-Proxy-Lese-Timeout",
+        "help": "Timeout beim Lesen von der weitergeleiteten Ressource."
+      },
+      "REVERSE_PROXY_SEND_TIMEOUT": {
+        "label": "Reverse-Proxy-Sende-Timeout",
+        "help": "Timeout beim Senden an die weitergeleitete Ressource."
+      },
+      "REVERSE_PROXY_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "Aktiviert oder deaktiviert das Senden von SNI an den Upstream-Server."
+      },
+      "REVERSE_PROXY_SSL_SNI_NAME": {
+        "label": "SSL-SNI-Name",
+        "help": "Legt den SNI-Host fest, der an den Upstream-Server gesendet wird."
+      },
+      "REVERSE_PROXY_SSL_VERIFY": {
+        "label": "SSL-Prüfung",
+        "help": "Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des Upstream-Servers."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Priorität des vertrauenswürdigen Zertifikats",
+        "help": "Quelle des vertrauenswürdigen CA-Zertifikats: Dateipfad oder base64/PEM-Daten (file oder data)."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL-Vertrauenswürdiges-Zertifikat-Pfad",
+        "help": "Pfad zu einem PEM-CA-Bundle, das zur Überprüfung des Upstream-Zertifikats verwendet wird (Priorität 'file', lesbar für den scheduler, der es zwischenspeichert und verteilt). Für die Überprüfung erforderlich; für öffentliche Upstreams verwenden Sie das System-Bundle (z. B. /etc/ssl/certs/ca-certificates.crt). Wenn nicht gesetzt, ist die Überprüfung deaktiviert."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Vertrauenswürdige Zertifikatsdaten (base64/Klartext)",
+        "help": "Vertrauenswürdiges CA-Zertifikat als base64 oder Klartext-PEM (Priorität 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "Priorität des Client-Zertifikats",
+        "help": "Quelle des Client-Zertifikats und -Schlüssels, die für gegenseitiges TLS mit dem Upstream verwendet werden: Dateipfad oder base64/PEM-Daten (file oder data)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT": {
+        "label": "SSL-Client-Zertifikat-Pfad",
+        "help": "Pfad zum PEM-Client-Zertifikat, das BunkerWeb dem Upstream vorlegt (gegenseitiges TLS, Priorität 'file', lesbar für den scheduler, der es zwischenspeichert und verteilt). Erfordert den passenden Schlüssel; wird von den HTTP- und Stream-Reverse-Proxys des Dienstes gemeinsam genutzt (gRPC hat sein eigenes GRPC_SSL_CLIENT_CERT)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_DATA": {
+        "label": "Client-Zertifikatsdaten (base64/Klartext)",
+        "help": "Client-Zertifikat als base64 oder Klartext-PEM (Priorität 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY": {
+        "label": "SSL-Client-Schlüssel-Pfad",
+        "help": "Pfad zum privaten PEM-Schlüssel, der zum Client-Zertifikat passt (Priorität 'file'). Der Schlüssel wird wie jedes andere Job-Artefakt zwischengespeichert und an Instanzen verteilt und mit auf Besitzer/Gruppe beschränkten Berechtigungen geschrieben."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY_DATA": {
+        "label": "Client-Schlüsseldaten (base64/Klartext)",
+        "help": "Privater Client-Schlüssel als base64 oder Klartext-PEM (Priorität 'data'). Bevorzugen Sie nach Möglichkeit einen Dateipfad: Ein hier gesetzter Schlüssel wird als Einstellungswert gespeichert."
+      },
+      "REVERSE_PROXY_SSL_CRL": {
+        "label": "CRL-Pfad",
+        "help": "Pfad zu einer PEM-Zertifikatsperrliste, die bei der Überprüfung des Upstream-Servers verwendet wird. Hat Vorrang vor REVERSE_PROXY_SSL_CRL_DATA. Wird nur angewendet, wenn REVERSE_PROXY_SSL_VERIFY auf yes steht. Ein gesetzter, aber fehlender Pfad ist ein Fehler; REVERSE_PROXY_SSL_CRL_DATA wird nicht als Fallback verwendet."
+      },
+      "REVERSE_PROXY_SSL_CRL_DATA": {
+        "label": "CRL-Daten (base64/Klartext)",
+        "help": "Zertifikatsperrliste als base64 oder Klartext-PEM. Wird nur verwendet, wenn die Einstellung für den CRL-Pfad leer ist."
+      },
+      "REVERSE_PROXY_SSL_PROTOCOLS": {
+        "label": "Upstream-SSL-Protokolle",
+        "help": "TLS-Versionen, die dem Upstream-Server angeboten werden (Wert der Direktive proxy_ssl_protocols). Leer belässt den NGINX-Standard."
+      },
+      "REVERSE_PROXY_SSL_CIPHERS": {
+        "label": "Upstream-SSL-Ciphers",
+        "help": "Cipher-Suite-Zeichenkette, die dem Upstream-Server angeboten wird (Wert der Direktive proxy_ssl_ciphers). Leer belässt den NGINX-Standard."
+      },
+      "REVERSE_PROXY_SEND_PROXY_PROTOCOL": {
+        "label": "PROXY-Protokoll an Upstream senden",
+        "help": "Sendet den PROXY-Protokoll-Header an den Stream-Upstream. 'auto' folgt der globalen Einstellung USE_PROXY_PROTOCOL, was BunkerWeb tat, bevor diese Einstellung existierte; 'yes' und 'no' entscheiden unabhängig vom eingehenden Listener."
+      },
+      "REVERSE_PROXY_STREAM_HALF_CLOSE": {
+        "label": "Reverse-Proxy-Stream-Half-Close",
+        "help": "Hält eine TCP-Stream-Verbindung zum Backend offen, nachdem der Client seine Schreibseite geschlossen hat. Wird von Protokollen benötigt, bei denen der Client halb schließt und dann auf die Antwort wartet; nginx baut die Verbindung standardmäßig ab."
+      },
+      "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
+        "label": "SSL-Verifizierungstiefe",
+        "help": "Legt die Verifizierungstiefe in der Zertifikatskette des Upstream-Servers fest."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST": {
+        "label": "Reverse-Proxy-Auth-Request",
+        "help": "Aktiviert die Authentifizierung über einen externen Anbieter (Wert der Direktive auth_request)."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "Anmelde-URL für Auth-Request",
+        "help": "Leitet Clients zur Anmelde-URL um, wenn REVERSE_PROXY_AUTH_REQUEST verwendet wird (genutzt, wenn der auth_request-Aufruf 401 zurückgibt). NGINX-Variablen wie $scheme, $host und $request_uri werden unterstützt."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SET": {
+        "label": "Reverse-Proxy Auth-Request-Set",
+        "help": "Liste von Variablen, die vom Authentifizierungsanbieter gesetzt werden, durch Semikolons getrennt (Werte der Direktiven auth_request_set)."
+      },
+      "REVERSE_PROXY_INCLUDES": {
+        "label": "Reverse-Proxy-Includes",
+        "help": "Zusätzliche Konfiguration, die in den location-Block eingefügt wird, durch Leerzeichen getrennt."
+      },
+      "REVERSE_PROXY_PASS_REQUEST_BODY": {
+        "label": "Reverse-Proxy Request-Body weiterleiten",
+        "help": "Aktiviert oder deaktiviert die Weiterleitung des Anfragekörpers an die weitergeleitete Ressource."
+      },
+      "REVERSE_PROXY_MODSECURITY": {
+        "label": "Reverse-Proxy-ModSecurity",
+        "help": "Aktiviert oder deaktiviert ModSecurity für diese Reverse-Proxy-Location. Auf no setzen für Endpunkte, die sehr große Uploads akzeptieren (z. B. Video, Backup, Objektspeicher): Der ModSecurity-nginx-Connector puffert den gesamten Anfragekörper im Speicher, unabhängig von SecRequestBodyLimit, und kann bei Multi-GB-Uploads OOM auslösen. Gibt 'modsecurity off;' innerhalb des location-Blocks aus."
+      },
+      "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+        "label": "Maximale Body-Größe des Reverse-Proxy",
+        "help": "Maximale Body-Größe für diese Reverse-Proxy-Location (0 für unbegrenzt). Wenn leer, gilt das MAX_CLIENT_SIZE des Dienstes. Ein Wert setzt auch das ModSecurity-Anfragekörperlimit für diese Location und überschreibt das dienstweite; MODSECURITY_REQ_BODY_NO_FILES_LIMIT wird dadurch nicht geändert."
+      },
+      "USE_PROXY_CACHE": {
+        "label": "Reverse-Proxy-Cache",
+        "help": "Aktiviert oder deaktiviert das Caching der weitergeleiteten Ressourcen."
+      },
+      "PROXY_CACHE_PATH_LEVELS": {
+        "label": "Hierarchieebenen",
+        "help": "Hierarchieebenen des Caches."
+      },
+      "PROXY_CACHE_PATH_ZONE_SIZE": {
+        "label": "Reverse-Proxy-Cache-Zonengröße",
+        "help": "Maximale Größe der zwischengespeicherten Metadaten beim Caching weitergeleiteter Ressourcen."
+      },
+      "PROXY_CACHE_PATH_PARAMS": {
+        "label": "Reverse-Proxy-Cache-Parameter",
+        "help": "Zusätzliche Parameter, die der Direktive proxy_cache hinzugefügt werden."
+      },
+      "PROXY_CACHE_METHODS": {
+        "label": "Reverse-Proxy-Cache-Methoden",
+        "help": "HTTP-Methoden, die eine Cache-Operation auslösen sollen."
+      },
+      "PROXY_CACHE_MIN_USES": {
+        "label": "Reverse-Proxy-Cache Mindestverwendungen",
+        "help": "Die Mindestanzahl an Anfragen, bevor eine Antwort zwischengespeichert wird."
+      },
+      "PROXY_CACHE_KEY": {
+        "label": "Reverse-Proxy-Cache-Schlüssel",
+        "help": "Der Schlüssel, der zur eindeutigen Identifizierung einer zwischengespeicherten Antwort verwendet wird."
+      },
+      "PROXY_CACHE_VALID": {
+        "label": "Reverse-Proxy-Cache-Gültigkeit",
+        "help": "Definiert die Caching-Dauer abhängig vom HTTP-Statuscode (Liste von status=Zeit), durch Leerzeichen getrennt."
+      },
+      "PROXY_NO_CACHE": {
+        "label": "Reverse-Proxy kein Cache",
+        "help": "Bedingungen zum Deaktivieren des Cachings von Antworten."
+      },
+      "PROXY_CACHE_BYPASS": {
+        "label": "Reverse-Proxy-Cache-Umgehung",
+        "help": "Bedingungen zum Umgehen des Cachings von Antworten."
+      },
+      "PROXY_BUFFERS": {
+        "label": "Proxy-Buffer",
+        "help": "Wert für die Direktive proxy_buffers."
+      },
+      "PROXY_BUFFER_SIZE": {
+        "label": "Proxy-Buffer-Größe",
+        "help": "Wert für die Direktive proxy_buffer_size."
+      },
+      "PROXY_BUSY_BUFFERS_SIZE": {
+        "label": "Proxy-Busy-Buffer-Größe",
+        "help": "Wert für die Direktive proxy_busy_buffers_size."
+      }
+    }
+  }
+}

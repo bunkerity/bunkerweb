@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "Gère le fichier security.txt. Une norme proposée qui permet aux sites web de définir leurs politiques de sécurité."
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "Utiliser security.txt",
+        "help": "Active le fichier security.txt."
+      },
+      "SECURITYTXT_URI": {
+        "label": "URI de Security.txt",
+        "help": "Indique l'URI depuis laquelle le fichier \"security.txt\" sera accessible."
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Contact de Security.txt",
+        "help": "Indique une méthode que les chercheurs doivent utiliser pour signaler les vulnérabilités de sécurité, telle qu'une adresse e-mail, un numéro de téléphone et/ou une page web avec des informations de contact. (Si la valeur est vide, le fichier security.txt ne sera pas créé car il s'agit d'un champ obligatoire)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Expiration de Security.txt",
+        "help": "Indique la date et l'heure après lesquelles les données contenues dans le fichier \"security.txt\" sont considérées comme obsolètes et ne doivent plus être utilisées (Si la valeur est vide, elle correspondra toujours à la date et l'heure actuelles + 1 an)."
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Chiffrement de Security.txt",
+        "help": "Indique une clé de chiffrement que les chercheurs en sécurité doivent utiliser pour une communication chiffrée."
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Remerciements de Security.txt",
+        "help": "Indique un lien vers une page où les chercheurs en sécurité sont reconnus pour leurs rapports."
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Langue préférée de Security.txt",
+        "help": "Peut être utilisé pour indiquer un ensemble de langues naturelles préférées lors de la soumission de rapports de sécurité."
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Canonique de Security.txt",
+        "help": "Indique les URI canoniques où se trouve le fichier \"security.txt\", généralement quelque chose comme \"https://example.com/.well-known/security.txt\". (Si la valeur est vide, la valeur par défaut sera générée automatiquement à partir de l'URL du site + SECURITYTXT_URI)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Politique de Security.txt",
+        "help": "Indique un lien vers l'emplacement de la politique de divulgation des vulnérabilités."
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Recrutement Security.txt",
+        "help": "Utilisé pour créer un lien vers les postes liés à la sécurité chez l'éditeur."
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "CSAF de Security.txt",
+        "help": "Un lien vers le fichier provider-metadata.json de votre fournisseur CSAF (Common Security Advisory Framework)."
+      }
+    }
+  }
+}

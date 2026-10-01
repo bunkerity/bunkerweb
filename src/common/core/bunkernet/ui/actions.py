@@ -7,6 +7,7 @@ def pre_render(**kwargs):
     ret = {
         "ping_status": {
             "title": "BUNKERNET STATUS",
+            "title_i18n": "widgets.ping_status.title",
             "value": "error",
             "col-size": "col-12 col-md-4",
             "card-classes": "h-100",
@@ -15,6 +16,7 @@ def pre_render(**kwargs):
             "value": "Unknown",
             "description": "",
             "title": "Connectivity",
+            "title_i18n": "widgets.info_connectivity.title",
             "subtitle_color": "primary",
             "svg_color": "primary",
             "col-size": "col-12 col-md-4",
@@ -23,6 +25,7 @@ def pre_render(**kwargs):
         "info_instance_id": {
             "value": "Unknown",
             "title": "Instance ID",
+            "title_i18n": "widgets.info_instance_id.title",
             "subtitle_color": "primary",
             "svg_color": "primary",
             "col-size": "col-12 col-md-4",
@@ -58,10 +61,10 @@ def pre_render(**kwargs):
             # leaking the ID we just masked.
             if status == "success":
                 ret["info_connectivity"]["value"] = "Connected"
-                ret["info_connectivity"]["svg_color"] = "success"
+                ret["info_connectivity"]["svg_color"] = "success-emphasis"
             else:
                 ret["info_connectivity"]["value"] = "API unreachable"
-                ret["info_connectivity"]["svg_color"] = "warning"
+                ret["info_connectivity"]["svg_color"] = "warning-emphasis"
             ret["info_connectivity"]["description"] = ping_msg.replace(instance_id, "***") if ping_msg else ""
 
             ips_file = kwargs["api_client"].get_cache_file_or_none(None, "bunkernet", "bunkernet-data", "ip.list", download=True)
@@ -74,7 +77,7 @@ def pre_render(**kwargs):
                     ret["list_bunkernet_ips"]["data"]["ip"].append(ip)
         else:
             ret["info_connectivity"]["value"] = "Not registered yet"
-            ret["info_connectivity"]["svg_color"] = "warning"
+            ret["info_connectivity"]["svg_color"] = "warning-emphasis"
             ret["info_connectivity"]["description"] = ping_msg or "No BunkerNet instance ID yet; registration runs hourly."
     except BaseException as e:
         logger.debug(format_exc())

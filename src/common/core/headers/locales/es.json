@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "Cabeceras",
+      "description": "Gestiona las cabeceras HTTP enviadas a los clientes."
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "Cabecera personalizada (HeaderName: HeaderValue)",
+        "help": "Cabecera personalizada a añadir (HeaderName: HeaderValue)."
+      },
+      "REMOVE_HEADERS": {
+        "label": "Eliminar cabeceras",
+        "help": "Cabeceras a eliminar (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "Conservar cabeceras del upstream",
+        "help": "Cabeceras a conservar del upstream (Header1 Header2 Header3 ... o * para todas)."
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Valor de la cabecera Strict-Transport-Security (HSTS)."
+      },
+      "COOKIE_FLAGS": {
+        "label": "Indicadores de cookie",
+        "help": "Indicadores de cookie añadidos automáticamente a todas las cookies (valor aceptado por nginx_cookie_flag_module)."
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "Indicador Secure automático de cookies",
+        "help": "Añade automáticamente el indicador Secure a todas las cookies."
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Valor de la cabecera Content-Security-Policy."
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Envía informes de las infracciones de la cabecera Content-Security-Policy en lugar de bloquearlas."
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Valor de la cabecera Referrer-Policy."
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Valor de la cabecera Permissions-Policy."
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "Valor de la cabecera X-Frame-Options."
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "Valor de la cabecera X-Content-Type-Options."
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "Valor de la cabecera X-DNS-Prefetch-Control."
+      }
+    }
+  }
+}

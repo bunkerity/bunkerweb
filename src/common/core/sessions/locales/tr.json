@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Oturumlar",
+      "description": "Diğer eklentiler tarafından kullanılan oturumların yönetimi."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Oturum sırrı",
+        "help": "Sorgularla ilgili verileri saklamak için oturum değişkenlerini şifrelemede kullanılan sır."
+      },
+      "SESSIONS_NAME": {
+        "label": "Oturum adı",
+        "help": "İstemcilere verilen çerezin adı."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Oturum çerezi alan adı",
+        "help": "Bu sunucu için oturum çerezinde ayarlanan Domain özniteliği (ör. `example.com` veya `.example.com`). Çerezi tam olarak bu ana bilgisayarla sınırlı tutmak için boş bırakın. Kardeş alt alan adları arasında oturumu (ve dolayısıyla antibot/sorgu durumunu) paylaşmak için üst kayıtlı bir alan adına ayarlayın. Çok siteli (multisite) bir kurulumda, ilgisiz kiracıların asla başka bir kiracının `Domain` özniteliğini almaması için bunu sunucu başına yapılandırın."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Oturum boşta kalma zaman aşımı",
+        "help": "Oturumun geçersiz kılınmasından önceki maksimum işlem yapılmama süresi (saniye cinsinden)."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Oturum kayan zaman aşımı",
+        "help": "Bir oturumun yenilenmesi gereken maksimum süre (saniye cinsinden)."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Oturum mutlak zaman aşımı",
+        "help": "Bir oturumun yok edilmesinden önceki maksimum süre (saniye cinsinden)."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Oturum IP kontrolü",
+        "help": "IP adresi orijinalinden farklıysa oturumu yok et."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Oturum User-Agent kontrolü",
+        "help": "User-Agent orijinalinden farklıysa oturumu yok et."
+      }
+    }
+  }
+}

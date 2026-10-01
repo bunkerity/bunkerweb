@@ -1,0 +1,34 @@
+{
+  "realip": {
+    "meta": {
+      "name": "真实 IP",
+      "description": "当 BunkerWeb 位于反向代理/负载均衡器之后时获取客户端的真实 IP。"
+    },
+    "settings": {
+      "USE_REAL_IP": {
+        "label": "使用真实 IP",
+        "help": "获取客户端的真实 IP。"
+      },
+      "USE_PROXY_PROTOCOL": {
+        "label": "使用 PROXY 协议",
+        "help": "启用 PROXY 协议通信。"
+      },
+      "REAL_IP_FROM": {
+        "label": "真实 IP 来源",
+        "help": "以空格分隔的可信 IP / 网段列表,代理请求即来自这些地址。"
+      },
+      "REAL_IP_HEADER": {
+        "label": "真实 IP 标头",
+        "help": "包含真实 IP 的 HTTP 标头,或使用特殊值 proxy_protocol 表示 PROXY 协议。"
+      },
+      "REAL_IP_RECURSIVE": {
+        "label": "真实 IP 递归查找",
+        "help": "在包含 IP 地址的标头中执行递归查找。"
+      },
+      "REAL_IP_FROM_URLS": {
+        "label": "真实 IP 来源 URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含代理请求来源的可信 IP / 网段。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      }
+    }
+  }
+}

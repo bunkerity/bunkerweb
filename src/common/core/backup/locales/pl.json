@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Kopia zapasowa",
+      "description": "Twórz kopie zapasowe danych w niestandardowej lokalizacji. Zapewnij bezpieczeństwo i dostępność ważnych plików dzięki regularnym kopiom zapasowym."
+    },
+    "settings": {
+      "BACKUP_DIRECTORY": {
+        "label": "Katalog kopii zapasowych",
+        "help": "Katalog, w którym będzie przechowywana kopia zapasowa"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Rotacja kopii zapasowych",
+        "help": "Liczba kopii zapasowych do zachowania"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Strategia rotacji kopii zapasowych",
+        "help": "Sposób wybierania starych kopii zapasowych do usunięcia: fifo zachowuje te najnowsze, hanoi zachowuje drabinkę Wież Hanoi (gęstą blisko teraźniejszości, rzadszą w głąb przeszłości) przy tej samej liczbie plików"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Harmonogram kopii zapasowych",
+        "help": "Częstotliwość wykonywania kopii zapasowej (codziennie, co tydzień lub co miesiąc)"
+      },
+      "USE_BACKUP": {
+        "label": "Aktywuj automatyczną kopię zapasową",
+        "help": "Włącz lub wyłącz funkcję kopii zapasowej"
+      }
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Ostatnia kopia zapasowa"
+      }
+    }
+  }
+}

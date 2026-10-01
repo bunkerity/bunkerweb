@@ -1,0 +1,14 @@
+{
+  "workflows": {
+    "meta": {
+      "name": "Alur kerja keamanan",
+      "description": "Susun kebijakan keamanan yang dapat digunakan kembali: aturan berurutan yang memasangkan pohon kondisi atas IP, negara, ASN, URI, dan metode dengan ambang laju opsional serta satu tindakan akhir (tantangan, blokir, atau pengalihan)."
+    },
+    "settings": {
+      "WORKFLOWS_REGEX_BUDGET": {
+        "label": "Anggaran regex alur kerja",
+        "help": "Jumlah maksimum ekspresi reguler berbeda yang dikompilasi di seluruh aturan alur kerja. NGINX berbagi satu cache regex di antara semua plugin, sehingga aturan yang melebihi anggaran ini dinonaktifkan alih-alih diam-diam menurunkan kinerja seluruh instance."
+      }
+    }
+  }
+}

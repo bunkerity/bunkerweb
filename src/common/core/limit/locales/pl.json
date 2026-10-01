@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "Limit",
+      "description": "Ogranicza maksymalną liczbę żądań i połączeń."
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "Limit globalny",
+        "subtitle": "Żądania zablokowane"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "Aktywuj limit żądań",
+        "help": "Aktywuj funkcję limitu żądań."
+      },
+      "LIMIT_REQ_URL": {
+        "label": "URL limitu żądań",
+        "help": "URL (wyrażenie regularne PCRE), do którego będzie stosowany limit żądań, lub specjalna wartość / dla wszystkich żądań."
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "Częstotliwość limitu żądań",
+        "help": "Częstotliwość stosowana do URL (s dla sekundy, m dla minuty, h dla godziny i d dla dnia)."
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "Aktywuj globalny limit żądań",
+        "help": "Aktywuj globalny limit szybkości: jedna zagregowana kwota dla całej usługi, licząca wszystkich klientów i URL-e razem (chroni pojemność źródła, niezależnie od limitów żądań per IP/URL)."
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "Globalna częstotliwość limitu żądań",
+        "help": "Maksymalna zagregowana częstotliwość dla całej usługi, łącznie dla wszystkich klientów i URL-i (s dla sekundy, m dla minuty, h dla godziny i d dla dnia)."
+      },
+      "USE_LIMIT_CONN": {
+        "label": "Aktywuj limit połączeń",
+        "help": "Aktywuj funkcję limitu połączeń."
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "Maksymalna liczba połączeń HTTP/1.X",
+        "help": "Maksymalna liczba połączeń na IP przy korzystaniu z protokołu HTTP/1.X."
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "Maksymalna liczba strumieni HTTP/2",
+        "help": "Maksymalna liczba strumieni na IP przy korzystaniu z protokołu HTTP/2."
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "Maksymalna liczba strumieni HTTP/3",
+        "help": "Maksymalna liczba strumieni na IP przy korzystaniu z protokołu HTTP/3."
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "Maksymalna liczba połączeń stream",
+        "help": "Maksymalna liczba połączeń na IP przy korzystaniu z trybu stream."
+      }
+    }
+  }
+}

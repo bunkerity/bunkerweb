@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "İstemci önbelleği",
+      "description": "İstemciler için önbelleklemeyi yönetir."
+    },
+    "settings": {
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control üstbilgisi",
+        "help": "HTTP Cache-Control üstbilgisinin değeri."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "Statik kaynaklar için HTTP ETag üstbilgisini gönder."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "İstemci tarafından önbelleğe alınması gereken uzantılar",
+        "help": "Dikey çizgiyle ayrılmış, önbelleğe alınması gereken dosya uzantılarının listesi."
+      },
+      "USE_CLIENT_CACHE": {
+        "label": "İstemci önbelleğini kullan",
+        "help": "İstemciye statik dosyaları yerel olarak saklamasını söyle."
+      }
+    }
+  }
+}

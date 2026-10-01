@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "Mal comportamiento",
+      "description": "Bloquea una IP que genera demasiados códigos de estado HTTP «malos» en un período de tiempo."
+    },
+    "settings": {
+      "USE_BAD_BEHAVIOR": {
+        "label": "Activar Mal comportamiento",
+        "help": "Activa la función Mal comportamiento."
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "Códigos de estado «malos»",
+        "help": "Lista de códigos de estado HTTP considerados «malos»."
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "Umbral",
+        "help": "Número máximo de códigos de estado HTTP «malos» dentro del período de tiempo antes de que se bloquee la IP."
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "Período (en segundos)",
+        "help": "Período de tiempo (en segundos) durante el cual se cuentan los códigos de estado HTTP «malos»."
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "Duración del bloqueo (en segundos)",
+        "help": "Duración (en segundos) de un bloqueo cuando la IP correspondiente ha alcanzado el umbral. (Establecer en 0 para bloquear de forma permanente)"
+      },
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "Alcance del bloqueo",
+        "help": "Determina el nivel del bloqueo. «service» bloqueará la IP solo para el servicio, «global» bloqueará la IP para todo el sistema."
+      }
+    }
+  }
+}

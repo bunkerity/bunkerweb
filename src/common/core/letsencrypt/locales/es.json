@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Creación, renovación y configuración automáticas de certificados Let's Encrypt."
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "Let's Encrypt automático",
+        "help": "Activa el modo Let's Encrypt automático."
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Dejar pasar Let's Encrypt",
+        "help": "Deja pasar las solicitudes de Let's Encrypt al servidor web."
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Email Let's Encrypt",
+        "help": "Email utilizado para las notificaciones de Let's Encrypt y en el certificado."
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "Servidor de la autoridad de certificación",
+        "help": "Seleccione el servidor de la autoridad de certificación a utilizar para la generación del certificado."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "Clave de API de ZeroSSL",
+        "help": "Clave de API de ZeroSSL opcional utilizada por zerossl-bot. Si está vacía, se usa EMAIL_LETS_ENCRYPT para obtener las credenciales EAB."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "Reintentos de API de ZeroSSL",
+        "help": "Número de reintentos para las solicitudes de API de ZeroSSL realizadas por zerossl-bot (0 desactiva los reintentos)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "Retraso de reintentos de API ZeroSSL",
+        "help": "Retraso en segundos entre reintentos de la API ZeroSSL en zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "Tiempo de espera de conexión de API ZeroSSL",
+        "help": "Tiempo de espera de conexión en segundos para las solicitudes de API ZeroSSL en zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "Tiempo máximo de API ZeroSSL",
+        "help": "Tiempo total máximo en segundos para cada solicitud de API ZeroSSL en zerossl-bot."
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "Tipo de desafío",
+        "help": "El tipo de desafío a utilizar para Let's Encrypt (http o dns)."
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "Proveedor DNS",
+        "help": "El proveedor DNS a utilizar para los desafíos DNS."
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "Propagación DNS",
+        "help": "El tiempo de espera para la propagación DNS, en segundos, para los desafíos DNS."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "Elemento de credencial",
+        "help": "Elemento de configuración que se añadirá al archivo credentials.ini para el proveedor DNS, para los desafíos DNS. Escríbalo como la clave, un espacio en blanco, luego el valor (p. ej., 'cloudflare_api_token 123456'); no ponga la clave entre comillas. El valor también puede estar codificado en base64, o el elemento completo puede ser un objeto json codificado en base64."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Decodificar credenciales DNS en Base64",
+        "help": "Decodifica automáticamente las credenciales del proveedor DNS codificadas en base64. Cuando está activado, las credenciales que coinciden con el formato base64 se decodifican antes de su uso (excepto para el proveedor rfc2136). Desactívelo si sus credenciales son intencionalmente cadenas base64."
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "Certificados comodín",
+        "help": "Crea certificados comodín (wildcard) para todos los dominios. Esto permite que un único certificado proteja varios subdominios. (Solo disponible con desafíos DNS)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Usar staging de Let's Encrypt",
+        "help": "Usa el entorno de staging para la generación de certificados Let's Encrypt. Útil cuando está probando sus despliegues para evitar ser limitado por tasa en el entorno de producción."
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "Eliminar certificados antiguos cuando ya no sean necesarios",
+        "help": "Elimina los certificados antiguos al renovar."
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "Perfil de certificado",
+        "help": "Seleccione el perfil de certificado a utilizar con Let's Encrypt. 'classic' es un certificado de propósito general con una vida útil de 90 días y amplia compatibilidad. 'tlsserver' está optimizado para la autenticación de servidor TLS, con una vida útil de 90 días y una carga útil más pequeña. 'shortlived' ofrece certificados de 7 días para mayor seguridad en entornos automatizados."
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "Perfil de certificado personalizado (ACME)",
+        "help": "Perfil de certificado personalizado a utilizar con servidores ACME que admiten perfiles no estándar. Sobrescribe LETS_ENCRYPT_PROFILE si está definido."
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "Desactivar sufijos públicos (lista negra PSL)",
+        "help": "Desactiva las solicitudes de certificado para dominios que coincidan con la Public Suffix List (recomendado, valor predeterminado: yes)."
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "Reintentos máximos",
+        "help": "Número de veces que se reintentará la generación del certificado en caso de fallo (0 desactiva los reintentos)."
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "Solicitudes de certificado concurrentes",
+        "help": "Ejecuta las solicitudes de certificado de forma concurrente en el job certbot-new (puede aumentar el riesgo de límites de tasa)."
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "Copias de seguridad máximas de logs de Certbot",
+        "help": "Número máximo de archivos de log de certbot rotados a conservar por job. El valor predeterminado propio de Certbot es 1000, lo que se acumula rápidamente. Establezca 0 para conservar solo el log activo."
+      }
+    }
+  }
+}

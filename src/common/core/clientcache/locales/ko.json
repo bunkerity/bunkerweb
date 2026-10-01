@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "클라이언트 캐시",
+      "description": "클라이언트에 대한 캐싱을 관리합니다."
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "클라이언트 캐시 사용",
+        "help": "클라이언트가 정적 파일을 로컬에 저장하도록 지시합니다."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "클라이언트가 캐시해야 할 확장자",
+        "help": "캐시해야 할 파일 확장자 목록입니다(파이프 문자로 구분)."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "정적 리소스에 대해 HTTP ETag 헤더를 전송합니다."
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control 헤더",
+        "help": "Cache-Control HTTP 헤더의 값입니다."
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "指标",
+      "description": "指标的采集与获取。"
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "使用指标",
+        "help": "启用内部指标的采集与获取。"
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "指标内存大小",
+        "help": "指标内部存储的大小。"
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "指标内存最大重试次数",
+        "help": "内存操作的最大重试次数。"
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "指标最大被拦截请求数",
+        "help": "每个 worker 要存储的被拦截请求的最大数量。可接受纯整数或 `k`/`m` 简写(例如 `1000`、`1k`、`10k`、`1m`)。"
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "指标最大被拦截请求数(Redis)",
+        "help": "存储在 Redis 中的被拦截请求的最大数量。可接受纯整数或 `k`/`m` 简写(例如 `10000`、`10k`、`100k`、`1m`)。"
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "指标 Redis TTL",
+        "help": "存储在 Redis 中的指标键的存活时间(秒)(默认 `2592000`,即 30 天;`0` 表示键永久保留)。每次同步都会刷新,因此活跃数据永不过期;配合 `volatile-lru` 淘汰策略,这可以让已废弃的指标数据变得可被淘汰,从而使 Redis 能够从 maxmemory 状态中恢复,而不是永远拒绝写入。可接受纯整数或 `k`/`m` 简写。"
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "最大 LRU 历史记录",
+        "help": "限制每个 worker 的 LRU 事件历史:同时限制 LRU 槽位数量以及每个键的事件历史数组长度(拦截轨迹、认证轨迹等)。可接受纯整数或 `k`/`m` 简写(例如 `1k`、`10k`、`1m`)。用于限制来自高基数来源(如伪造 IP 洪泛)导致的无限制增长。"
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "采集插件耗时",
+        "help": "测量每个插件在每个请求阶段所花费的时间,以每个(插件、阶段)的 count/sum/max 聚合值形式暴露。这需要在每次插件调用前后强制刷新 NGINX 时间,因此在完整的插件链中,每个请求大约会增加一微秒的开销;设为 `no` 可完全消除这项开销。整个请求的耗时始终会被采集,不受该设置影响。"
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "流量基线采样率(%)",
+        "help": "记录为流量基线的未被拦截请求所占百分比,用于让异常检测学习正常流量的样貌(`0` 表示禁用,`1` 表示每百个请求采样一个)。采样基于请求 id 是确定性的,因此在子请求之间决策保持一致。客户端 IP 永远不会被存储。采集本身不会给请求路径增加开销,但数据量很大:以 10k req/s 计算,1% 的采样率大约相当于每天 860 万条记录,随后由 `METRICS_BASELINE_RETENTION_MAX_ROWS` 进行裁剪。请谨慎地提高该值。"
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "指标最大基线请求数",
+        "help": "每个 worker 在丢弃最旧记录之前所能保留的采样基线记录的最大数量。该缓冲区与被拦截请求报告及其他指标共用 METRICS_MEMORY_SIZE;当空间不足时,会被丢弃,而不是去淘汰其他数据。可接受纯整数或 `k`/`m` 简写。请优先降低采样率,而不是提高该值。"
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "基线保留期(天)",
+        "help": "采样基线记录在被保留任务删除之前的最大留存天数。刻意比被拦截报告的保留期更短:基线数据增长得快得多,而且模型是基于近期正常行为训练的,而不是基于历史数据。"
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "基线保留(最大行数)",
+        "help": "要保留的采样基线记录的最大数量;保留任务会删除超出该数量的最旧行。与被拦截报告的上限分开设置,因为两张表的增长速度截然不同。"
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "将指标保存到 Redis",
+        "help": "将指标(计数器和表)保存到 Redis,以便进行集群范围的聚合。"
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "将报告持久化到数据库",
+        "help": "通过定期抓取各实例,将被拦截请求报告持久化到数据库中(持久且可查询)。禁用时,报告将仅保留在内存/Redis 存储中。"
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "报告保留期(天)",
+        "help": "已持久化的被拦截请求报告在被保留任务删除之前的最大留存天数。"
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "报告保留(最大行数)",
+        "help": "要保留的已持久化被拦截请求报告的最大数量;保留任务会删除超出该数量的最旧行。"
+      }
+    }
+  }
+}

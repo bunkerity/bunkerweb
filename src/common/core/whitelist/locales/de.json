@@ -1,0 +1,76 @@
+{
+  "whitelist": {
+    "meta": {
+      "name": "Positivliste",
+      "description": "Erlaubt den Zugriff anhand interner und externer IP-/Netzwerk-/rDNS-/ASN-Positivlisten."
+    },
+    "widgets": {
+      "counter_passed_whitelist": {
+        "title": "POSITIVLISTE",
+        "subtitle": "Anfrage zugelassen"
+      }
+    },
+    "settings": {
+      "USE_WHITELIST": {
+        "label": "Positivliste aktivieren",
+        "help": "Aktiviert die Positivlistenfunktion."
+      },
+      "WHITELIST_IP": {
+        "label": "IP/Netzwerk der Positivliste",
+        "help": "Liste von IPs/Netzwerken, durch Leerzeichen getrennt, die in die Positivliste aufgenommen werden."
+      },
+      "WHITELIST_RDNS": {
+        "label": "Reverse-DNS der Positivliste",
+        "help": "Liste von Reverse-DNS-Suffixen, durch Leerzeichen getrennt, die auf die Positivliste gesetzt werden."
+      },
+      "WHITELIST_RDNS_GLOBAL": {
+        "label": "Positivliste Reverse-DNS nur globale IPs",
+        "help": "RDNS-Positivlistenprüfungen nur bei globalen IP-Adressen durchführen."
+      },
+      "WHITELIST_ASN": {
+        "label": "ASN der Positivliste",
+        "help": "Liste von ASN-Nummern, durch Leerzeichen getrennt, die auf die Positivliste gesetzt werden."
+      },
+      "WHITELIST_USER_AGENT": {
+        "label": "User-Agent der Positivliste",
+        "help": "Liste von User-Agents (PCRE-Regex), durch Leerzeichen getrennt, die auf die Positivliste gesetzt werden."
+      },
+      "WHITELIST_URI": {
+        "label": "URI der Positivliste",
+        "help": "Liste von URIs (PCRE-Regex), durch Leerzeichen getrennt, die auf die Positivliste gesetzt werden."
+      },
+      "WHITELIST_RULE": {
+        "label": "Positivlisten-Regel",
+        "help": "Zusammengesetzte Regel: Jeder Ausdruck muss übereinstimmen, damit die Regel übereinstimmt. Ausdrücke werden mit „ AND “ (Großbuchstaben) getrennt, und jeder hat die Form [NOT ]<kind>:<value>, wobei <kind> ip, country, asn, rdns, ua (Alias user_agent) oder uri ist. Beispiel: ip:10.0.0.0/8 AND NOT ua:^curl. Regeln werden untereinander und mit den obigen einfachen Listen ODER-verknüpft. Ein Wert kann ein Ressourcengruppen-Token wie @office sein. Stream-Dienste werten nur ip, country, asn und rdns aus."
+      },
+      "WHITELIST_HEADER_NAME": {
+        "label": "Header-Name der Positivliste",
+        "help": "Name eines Anfrage-Headers, der die Anfrage zur Positivliste hinzufügt. Jeder Client kann diesen Header senden: behandeln Sie ihn wie ein gemeinsames Geheimnis, nur über HTTPS."
+      },
+      "WHITELIST_HEADER_VALUE": {
+        "label": "Header-Wert der Positivliste",
+        "help": "Wert (PCRE-Regex), dem der Header entsprechen muss, damit die Anfrage zur Positivliste hinzugefügt wird. Leer lassen, um bereits bei Vorhandensein des Headers zu greifen. Verankern Sie ihn mit ^ und $: der Abgleich ist standardmäßig nicht verankert."
+      },
+      "WHITELIST_IP_URLS": {
+        "label": "IP/Netzwerk der Positivliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die vertrauenswürdige IPs/Netzwerke für die Positivliste enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "WHITELIST_RDNS_URLS": {
+        "label": "Reverse-DNS der Positivliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die Reverse-DNS-Suffixe für die Positivliste enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "WHITELIST_ASN_URLS": {
+        "label": "ASN der Positivliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die ASN für die Positivliste enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "WHITELIST_USER_AGENT_URLS": {
+        "label": "User-Agent der Positivliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die vertrauenswürdige User-Agents für die Positivliste enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "WHITELIST_URI_URLS": {
+        "label": "URI der Positivliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die schädliche URIs für die Positivliste enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      }
+    }
+  }
+}

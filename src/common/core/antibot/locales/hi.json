@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "चुनौती का उपयोग करके बॉट का पता लगाना।"
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "चुनौतियाँ",
+        "subtitle": "विफल"
+      }
+    },
+    "settings": {
+      "USE_ANTIBOT": {
+        "label": "Antibot चुनौती",
+        "help": "Antibot सुविधा सक्रिय करें।"
+      },
+      "ANTIBOT_URI": {
+        "label": "Antibot यूआरएल",
+        "help": "एक अप्रयुक्त URI जहाँ क्लाइंट को चुनौती हल करने के लिए पुनर्निर्देशित किया जाएगा।"
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "हल करने का समय",
+        "help": "चुनौती हल करने के लिए क्लाइंट के पास अधिकतम समय (सेकंड में)। यह समय बीत जाने के बाद, एक नई चुनौती उत्पन्न की जाएगी।"
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "मान्यता समय",
+        "help": "हल की गई चुनौतियों की अधिकतम वैधता अवधि। यह समय बीत जाने के बाद, क्लाइंट को एक नई चुनौती हल करनी होगी।"
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "सफलता पर रीडायरेक्ट यूआरएल",
+        "help": "चुनौती हल करने के बाद क्लाइंट को मूल रूप से अनुरोधित पृष्ठ के बजाय जिस निश्चित URI पर पुनर्निर्देशित किया जाए। मूल रूप से अनुरोधित पृष्ठ पर वापस जाने के लिए खाली छोड़ दें।"
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "कैप्चा वर्णमाला",
+        "help": "कैप्चा बनाने के लिए उपयोग की जाने वाली कस्टम वर्णमाला। कैप्चा इस स्ट्रिंग के यादृच्छिक अक्षरों से बनेगा। समर्थित अक्षर: सभी अक्षर (a-z, A-Z), संख्याएँ 2-9, और समर्थित विशेष वर्ण (पूरी सूची के लिए दस्तावेज़ देखें)।"
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "नज़रअंदाज़ किए गए URI",
+        "help": "उन URI के लिए PCRE रेगेक्स पैटर्न की सूची (स्पेस से अलग) जिन्हें Antibot चुनौती से बाहर रखा जाना चाहिए। पैटर्न को पथ और क्वेरी स्ट्रिंग सहित पूर्ण अनुरोध URI के विरुद्ध जाँचा जाता है।"
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "नज़रअंदाज़ किए गए IP/नेटवर्क",
+        "help": "Antibot चुनौती को नज़रअंदाज़ करने के लिए IP/नेटवर्क की सूची, स्पेस से अलग।"
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "नज़रअंदाज़ किया गया रिवर्स DNS",
+        "help": "Antibot चुनौती को नज़रअंदाज़ करने के लिए रिवर्स DNS प्रत्ययों की सूची, स्पेस से अलग।"
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "Antibot रिवर्स DNS ग्लोबल आईपी",
+        "help": "केवल ग्लोबल IP पतों पर RDNS Antibot जाँच करें।"
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "नज़रअंदाज़ किए गए ASN",
+        "help": "Antibot चुनौती को नज़रअंदाज़ करने के लिए ASN नंबरों की सूची, स्पेस से अलग।"
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "नज़रअंदाज़ किया गया User-Agent",
+        "help": "Antibot चुनौती को नज़रअंदाज़ करने के लिए User-Agent (PCRE रेगेक्स) की सूची, स्पेस से अलग।"
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "नज़रअंदाज़ किए गए हेडर का नाम",
+        "help": "एक अनुरोध हेडर का नाम जो अनुरोध को Antibot चुनौती से छूट देता है। कोई भी क्लाइंट यह हेडर भेज सकता है: इसे साझा गुप्त कुंजी की तरह मानें, केवल HTTPS पर।"
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "नज़रअंदाज़ किया गया हेडर मान",
+        "help": "वह मान (PCRE रेगेक्स) जिससे हेडर का मेल खाना ज़रूरी है ताकि अनुरोध को Antibot चुनौती से छूट मिले। केवल हेडर की मौजूदगी पर मेल कराने के लिए खाली छोड़ दें। इसे ^ और $ से एंकर करें: मेल डिफ़ॉल्ट रूप से एंकर नहीं होता।"
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "नज़रअंदाज़ किए गए देश",
+        "help": "Antibot चुनौती को नज़रअंदाज़ करने के लिए ISO 3166-1 alpha-2 देश कोड की सूची, स्पेस से अलग।"
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "केवल इन देशों को चुनौती दें",
+        "help": "ISO 3166-1 alpha-2 देश कोड की सूची, स्पेस से अलग, जिन्हें Antibot चुनौती मिलनी चाहिए।"
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "reCAPTCHA v3 स्कोर",
+        "help": "reCAPTCHA चुनौती के लिए आवश्यक न्यूनतम स्कोर (केवल reCAPTCHA v3 के साथ संगत)।"
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "reCAPTCHA साइटकुंजी",
+        "help": "reCAPTCHA चुनौती के लिए साइटकुंजी।"
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "reCAPTCHA सीक्रेट",
+        "help": "reCAPTCHA चुनौती के लिए सीक्रेट।"
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "क्लासिक reCAPTCHA उपयोग करें",
+        "help": "नए संस्करण के बजाय क्लासिक reCAPTCHA का उपयोग करें।"
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "reCAPTCHA प्रोजेक्ट आईडी",
+        "help": "reCAPTCHA चुनौती के लिए प्रोजेक्ट आईडी।"
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "reCAPTCHA API कुंजी",
+        "help": "reCAPTCHA चुनौती के लिए API कुंजी।"
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "TLS क्लाइंट के लिए JA4 फ़िंगरप्रिंट। हम JA4 फ़िंगरप्रिंट की गणना के लिए FoxIO-LLC/ja4 उपयोग करने की सलाह देते हैं।"
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "TLS क्लाइंट के लिए JA3 फ़िंगरप्रिंट। हम JA3 फ़िंगरप्रिंट की गणना के लिए salesforce/ja3 उपयोग करने की सलाह देते हैं।"
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "hCaptcha साइटकुंजी",
+        "help": "hCaptcha चुनौती के लिए साइटकुंजी।"
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "hCaptcha सीक्रेट",
+        "help": "hCaptcha चुनौती के लिए सीक्रेट।"
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Turnstile साइटकुंजी",
+        "help": "Turnstile चुनौती के लिए साइटकुंजी।"
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Turnstile सीक्रेट",
+        "help": "Turnstile चुनौती के लिए सीक्रेट।"
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "mCaptcha साइटकुंजी",
+        "help": "mCaptcha चुनौती के लिए साइटकुंजी।"
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "mCaptcha सीक्रेट",
+        "help": "mCaptcha चुनौती के लिए सीक्रेट।"
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "mCaptcha डोमेन",
+        "help": "mCaptcha चुनौती के लिए उपयोग किया जाने वाला डोमेन।"
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "Cap.js फ्रंटएंड यूआरएल",
+        "help": "वह सार्वजनिक ऑरिजिन जहाँ से ब्राउज़र Cap.js विजेट लोड करता है (उदाहरण: https://cap.example.com)। केवल ऑरिजिन, कोई पथ नहीं।"
+      },
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "Cap.js बैकएंड यूआरएल",
+        "help": "आंतरिक ऑरिजिन जिसे BunkerWeb /siteverify के लिए कॉल करता है (उदाहरण: http://cap-server:3000)। केवल ऑरिजिन, कोई पथ नहीं। खाली होने पर फ्रंटएंड यूआरएल पर वापस चला जाता है।"
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Cap.js साइटकुंजी",
+        "help": "इस साइट के लिए Cap.js डैशबोर्ड में बनाई गई साइटकुंजी।"
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Cap.js सीक्रेट",
+        "help": "साइटकुंजी के साथ जोड़ा गया सीक्रेट, जिसे BunkerWeb /siteverify कॉल को प्रमाणित करने के लिए उपयोग करता है।"
+      }
+    }
+  }
+}

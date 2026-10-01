@@ -1,0 +1,108 @@
+{
+  "misc": {
+    "meta": {
+      "name": "Iba pa",
+      "description": "Iba't ibang setting."
+    },
+    "widgets": {
+      "counter_failed_default": {
+        "title": "NAKA-DISABLE ANG DEFAULT NA SERVER",
+        "subtitle": "Kabuuan"
+      },
+      "counter_failed_method": {
+        "title": "MGA HINDI PINAHIHINTULUTANG PARAAN",
+        "subtitle": "Bilang"
+      }
+    },
+    "settings": {
+      "SERVICE_MODE": {
+        "label": "Service Mode",
+        "help": "Idineklara na layunin ng service: \"standard\" para sa ordinaryong service, \"redirect_only\" para sa listener na wala nang ginagawa kundi mag-redirect. Ang deklarasyon na ito ang binabasa ng PRO quota classification; hindi ito kailanman kinukuha mula sa redirect settings."
+      },
+      "DISABLE_DEFAULT_SERVER": {
+        "label": "I-disable ang Default Server",
+        "help": "Tanggihan ang HTTP request kung hindi kilala ang vhost ng request."
+      },
+      "DISABLE_DEFAULT_SERVER_STRICT_SNI": {
+        "label": "I-disable ang Default Server Strict SNI",
+        "help": "Isara ang SSL/TLS na koneksyon kung hindi kilala ang SNI."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS": {
+        "label": "Default Server Stream Ports",
+        "help": "Mga port kung saan tinatanggap ng default server ang stream (TCP) na koneksyon na walang tugmang naka-configure na service; iwanang blangko para i-disable. Tinatanggihan para sa port na pinapakinggan ng isang stream service, port na ginagamit ng HTTP/HTTPS listener, o port na iginagapos ng BunkerWeb para sa sarili nito. Karaniwang naka-set sa reserved na default-server service."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS_SSL": {
+        "label": "Default Server Stream Ports (TLS)",
+        "help": "Alin sa mga default server stream port sa itaas ang pinapaglingkuran sa pamamagitan ng TLS; iwanang blangko para sa plain TCP lang. Dapat ding nakalista ang bawat value sa \"Default Server Stream Ports\" — ito ang TLS switch ng mga port na naideklara na ng default server, hindi pangalawang set ng listener, at tatanggihan ang port na nasa dito lang."
+      },
+      "ALLOWED_METHODS": {
+        "label": "Allowed Methods",
+        "help": "Mga pinapayagang HTTP at WebDAV method, pinaghihiwalay ng pipe. Maaaring maglaman ng underscore at dash ang mga custom na uppercase na method."
+      },
+      "MAX_CLIENT_SIZE": {
+        "label": "Maximum Body Size",
+        "help": "Pinakamataas na sukat ng body (0 para sa walang hangganan)."
+      },
+      "MAX_HEADERS": {
+        "label": "Maximum Headers",
+        "help": "Pinakamataas na bilang ng header line kada request. Tinatanggihan ang mga request na lumagpas sa limit na ito nang may 400 Bad Request."
+      },
+      "SERVE_FILES": {
+        "label": "Serve Files",
+        "help": "I-serve ang mga file mula sa local folder."
+      },
+      "ROOT_FOLDER": {
+        "label": "Root Folder",
+        "help": "Root folder na naglalaman ng mga file na i-se-serve (/var/www/html/{server_name} kung hindi naka-set)."
+      },
+      "HTTP2": {
+        "label": "HTTP2",
+        "help": "Suportahan ang HTTP2 protocol kapag naka-enable ang HTTPS."
+      },
+      "HTTP3": {
+        "label": "HTTP3",
+        "help": "Suportahan ang HTTP3 protocol kapag naka-enable ang HTTPS."
+      },
+      "HTTP3_ALT_SVC_PORT": {
+        "label": "HTTP3 Alt-Svc Port",
+        "help": "Alternate service port ng HTTP3. Gagamitin ang value na ito bilang bahagi ng Alt-Svc header."
+      },
+      "LISTEN_HTTP": {
+        "label": "HTTP Listen",
+        "help": "Tumugon sa (hindi secure na) HTTP request."
+      },
+      "USE_OPEN_FILE_CACHE": {
+        "label": "Gamitin ang Open File Cache",
+        "help": "I-enable ang open file cache feature"
+      },
+      "OPEN_FILE_CACHE": {
+        "label": "Gamitin ang Open File Cache",
+        "help": "Open file cache directive"
+      },
+      "OPEN_FILE_CACHE_ERRORS": {
+        "label": "Open File Cache Errors",
+        "help": "I-enable ang open file cache para sa mga error"
+      },
+      "OPEN_FILE_CACHE_MIN_USES": {
+        "label": "Open File Cache Min Uses",
+        "help": "I-enable ang open file cache minimum uses"
+      },
+      "OPEN_FILE_CACHE_VALID": {
+        "label": "Open File Cache Valid Time",
+        "help": "Open file cache valid time"
+      },
+      "EXTERNAL_PLUGIN_URLS": {
+        "label": "External Plugin URLs",
+        "help": "Listahan ng external plugin URL (direktang download sa .zip o .tar file) na ida-download at i-install (pinaghihiwalay ng space ang mga URL). Hanggang 50 MiB kada URL. Idagdag ang #sha256=<digest> sa URL para i-pin ang content nito. Deprecated na ang plain http:// at tatanggihan sa 1.7.0: gamitin ang https:// o file:///."
+      },
+      "DENY_HTTP_STATUS": {
+        "label": "Deny HTTP Status",
+        "help": "HTTP status code na ipapadala kapag tinanggihan ang request (403 o 444). Kapag ginamit ang 444, isasara ng BunkerWeb ang koneksyon."
+      },
+      "SEND_ANONYMOUS_REPORT": {
+        "label": "Magpadala ng Anonymous Report",
+        "help": "Magpadala ng anonymous report sa mga maintainer ng BunkerWeb."
+      }
+    }
+  }
+}

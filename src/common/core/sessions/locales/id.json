@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Sesi",
+      "description": "Manajemen sesi yang digunakan oleh plugin lain."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Secret sesi",
+        "help": "Secret yang digunakan untuk mengenkripsi variabel sesi guna menyimpan data terkait tantangan."
+      },
+      "SESSIONS_NAME": {
+        "label": "Nama sesi",
+        "help": "Nama cookie yang diberikan kepada klien."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Domain cookie sesi",
+        "help": "Atribut domain yang diatur pada cookie sesi untuk server ini (mis. `example.com` atau `.example.com`). Biarkan kosong agar cookie tetap terbatas pada host yang persis sama. Atur ke domain terdaftar induk untuk berbagi sesi (dan karenanya status antibot/tantangan) di antara subdomain saudara. Dalam setup multisite, konfigurasikan ini per server agar tenant yang tidak terkait tidak pernah menerima atribut `Domain` lintas tenant."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Batas waktu idle sesi",
+        "help": "Waktu maksimum (dalam detik) ketidakaktifan sebelum sesi dibatalkan."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Batas waktu rolling sesi",
+        "help": "Waktu maksimum (dalam detik) sebelum sesi harus diperbarui."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Batas waktu absolut sesi",
+        "help": "Waktu maksimum (dalam detik) sebelum sesi dihancurkan."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Periksa IP sesi",
+        "help": "Hancurkan sesi jika alamat IP berbeda dari yang asli."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Periksa User-Agent sesi",
+        "help": "Hancurkan sesi jika User-Agent berbeda dari yang asli."
+      }
+    }
+  }
+}

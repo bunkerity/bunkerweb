@@ -8,8 +8,10 @@ def pre_render(**kwargs):
         "counter_passed_whitelist": {
             "value": 0,
             "title": "WHITELIST",
+            "title_i18n": "widgets.counter_passed_whitelist.title",
             "subtitle": "Request passed",
-            "subtitle_color": "success",
+            "subtitle_i18n": "widgets.counter_passed_whitelist.subtitle",
+            "subtitle_color": "success-emphasis",
             "svg_color": "emerald",
         },
     }

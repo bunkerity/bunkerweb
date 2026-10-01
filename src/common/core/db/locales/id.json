@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Basis data",
+      "description": "Mengintegrasikan basis data dengan mudah."
+    },
+    "settings": {
+      "DATABASE_LOG_LEVEL": {
+        "label": "Tingkat log database",
+        "help": "Tingkat yang digunakan untuk log database."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "Jumlah maksimum eksekusi job",
+        "help": "Jumlah maksimum eksekusi job yang disimpan dalam database."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "Usia maksimum sesi pengguna UI dalam hari",
+        "help": "Usia maksimum dalam hari untuk sesi pengguna UI sebelum dihapus."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Overflow maksimum pool database",
+        "help": "Jumlah maksimum koneksi yang dibuat di atas ukuran pool."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Pre-ping pool database",
+        "help": "Apakah menguji keaktifan koneksi setiap kali diambil dari pool."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Daur ulang pool database",
+        "help": "Jumlah detik setelah koneksi didaur ulang secara otomatis. Atur ke -1 untuk menonaktifkan."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Reset pool database saat dikembalikan",
+        "help": "Bagaimana koneksi direset saat dikembalikan ke pool. Biarkan kosong untuk otomatis (none untuk MySQL/MariaDB, rollback untuk lainnya). Nilai yang mungkin: rollback, commit, none."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Ukuran pool database",
+        "help": "Jumlah koneksi yang disimpan dalam pool koneksi database."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Timeout pool database",
+        "help": "Jumlah detik untuk menunggu sebelum menyerah mendapatkan koneksi dari pool."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Jumlah percobaan ulang permintaan database",
+        "help": "Jumlah percobaan ulang untuk kesalahan database sementara."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Penundaan percobaan ulang permintaan database",
+        "help": "Penundaan dalam detik antar percobaan ulang untuk kesalahan database sementara."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Timeout percobaan ulang database",
+        "help": "Jumlah detik maksimum untuk menunggu database tersedia saat startup."
+      },
+      "DATABASE_URI": {
+        "label": "URI database",
+        "help": "URI database, mengikuti format sqlalchemy."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "URI database untuk operasi hanya-baca",
+        "help": "URI database untuk operasi hanya-baca; juga dapat berfungsi sebagai cadangan jika database utama sedang down. Mengikuti format sqlalchemy."
+      }
+    }
+  }
+}

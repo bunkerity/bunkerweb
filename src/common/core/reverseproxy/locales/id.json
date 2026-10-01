@@ -1,0 +1,230 @@
+{
+  "reverseproxy": {
+    "meta": {
+      "name": "Reverse proxy",
+      "description": "Mengelola konfigurasi reverse proxy."
+    },
+    "settings": {
+      "USE_REVERSE_PROXY": {
+        "label": "Gunakan reverse proxy",
+        "help": "Aktifkan mode reverse proxy."
+      },
+      "REVERSE_PROXY_HOST": {
+        "label": "Host reverse proxy",
+        "help": "URL lengkap dari resource yang di-proxy (proxy_pass)."
+      },
+      "REVERSE_PROXY_URL": {
+        "label": "URL reverse proxy",
+        "help": "URL location yang akan di-proxy. Nilai yang diawali ^ atau diakhiri $ diperlakukan sebagai lokasi regex. Secara opsional, tambahkan awalan ~, ~*, = atau ^~ diikuti satu spasi untuk mengatur modifier location nginx secara eksplisit; spasi, ;, { atau } tidak diperbolehkan di bagian lain nilai."
+      },
+      "REVERSE_PROXY_WS": {
+        "label": "WebSocket reverse proxy",
+        "help": "Aktifkan websocket pada resource yang di-proxy."
+      },
+      "REVERSE_PROXY_BUFFERING": {
+        "label": "Buffering reverse proxy",
+        "help": "Aktifkan atau nonaktifkan buffering respons dari resource yang di-proxy."
+      },
+      "REVERSE_PROXY_REQUEST_BUFFERING": {
+        "label": "Buffering permintaan reverse proxy",
+        "help": "Aktifkan atau nonaktifkan buffering permintaan ke resource yang di-proxy."
+      },
+      "REVERSE_PROXY_KEEPALIVE": {
+        "label": "Keepalive reverse proxy",
+        "help": "Aktifkan atau nonaktifkan koneksi keepalive dengan resource yang di-proxy."
+      },
+      "REVERSE_PROXY_HTTP_VERSION": {
+        "label": "Versi HTTP reverse proxy",
+        "help": "Versi protokol HTTP yang digunakan untuk berkomunikasi dengan upstream (1.0, 1.1, atau 2). Atur ke 2 untuk mengaktifkan multiplexing HTTP/2 pada sisi upstream untuk backend yang kompatibel. Location WebSocket selalu terkunci ke 1.1."
+      },
+      "REVERSE_PROXY_CUSTOM_HOST": {
+        "label": "Host kustom reverse proxy",
+        "help": "Ganti header Host yang dikirim ke server upstream."
+      },
+      "REVERSE_PROXY_HEADERS": {
+        "label": "Header reverse proxy",
+        "help": "Daftar header HTTP yang dikirim ke resource yang di-proxy, dipisahkan dengan titik koma (nilai untuk direktif proxy_set_header)."
+      },
+      "REVERSE_PROXY_HIDE_HEADERS": {
+        "label": "Sembunyikan header reverse proxy",
+        "help": "Daftar header HTTP yang disembunyikan dari klien saat diterima dari resource yang di-proxy (nilai untuk direktif proxy_hide_header)."
+      },
+      "REVERSE_PROXY_HEADERS_CLIENT": {
+        "label": "Header-klien reverse proxy",
+        "help": "Daftar header HTTP yang dikirim ke klien, dipisahkan dengan titik koma (nilai untuk direktif add_header)."
+      },
+      "REVERSE_PROXY_UNDERSCORES_IN_HEADERS": {
+        "label": "Izinkan garis bawah pada header",
+        "help": "Aktifkan atau nonaktifkan direktif underscores_in_headers."
+      },
+      "REVERSE_PROXY_INTERCEPT_ERRORS": {
+        "label": "Cegat error",
+        "help": "Cegat dan tulis ulang respons error HTTP dari resource yang di-proxy (nilai direktif proxy_intercept_errors)."
+      },
+      "REVERSE_PROXY_CONNECT_TIMEOUT": {
+        "label": "Timeout koneksi reverse proxy",
+        "help": "Timeout saat terhubung ke resource yang di-proxy."
+      },
+      "REVERSE_PROXY_READ_TIMEOUT": {
+        "label": "Timeout baca reverse proxy",
+        "help": "Timeout saat membaca dari resource yang di-proxy."
+      },
+      "REVERSE_PROXY_SEND_TIMEOUT": {
+        "label": "Timeout kirim reverse proxy",
+        "help": "Timeout saat mengirim ke resource yang di-proxy."
+      },
+      "REVERSE_PROXY_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "Aktifkan atau nonaktifkan pengiriman SNI ke server upstream."
+      },
+      "REVERSE_PROXY_SSL_SNI_NAME": {
+        "label": "Nama SNI SSL",
+        "help": "Mengatur host SNI yang dikirim ke server upstream."
+      },
+      "REVERSE_PROXY_SSL_VERIFY": {
+        "label": "Verifikasi SSL",
+        "help": "Aktifkan atau nonaktifkan verifikasi sertifikat SSL server upstream."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Prioritas sertifikat tepercaya",
+        "help": "Sumber sertifikat CA tepercaya: path file atau data base64/PEM (file atau data)."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE": {
+        "label": "Path sertifikat tepercaya SSL",
+        "help": "Path ke bundle CA PEM yang digunakan untuk memverifikasi sertifikat upstream (prioritas 'file', dapat dibaca oleh scheduler, yang meng-cache dan mendistribusikannya). Diperlukan untuk verifikasi; untuk upstream publik gunakan bundle sistem (mis. /etc/ssl/certs/ca-certificates.crt). Jika tidak diatur, verifikasi dinonaktifkan."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Data sertifikat tepercaya (base64/plaintext)",
+        "help": "Sertifikat CA tepercaya sebagai base64 atau PEM teks biasa (prioritas 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "Prioritas sertifikat klien",
+        "help": "Sumber sertifikat klien dan kunci yang digunakan untuk mutual TLS dengan upstream: path file atau data base64/PEM (file atau data)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT": {
+        "label": "Path sertifikat klien SSL",
+        "help": "Path ke sertifikat klien PEM yang disajikan BunkerWeb ke upstream (mutual TLS, prioritas 'file', dapat dibaca oleh scheduler, yang meng-cache dan mendistribusikannya). Memerlukan kunci yang sesuai; dibagikan oleh reverse proxy HTTP dan stream layanan (gRPC memiliki GRPC_SSL_CLIENT_CERT sendiri)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_DATA": {
+        "label": "Data sertifikat klien (base64/plaintext)",
+        "help": "Sertifikat klien sebagai base64 atau PEM teks biasa (prioritas 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY": {
+        "label": "Path kunci klien SSL",
+        "help": "Path ke private key PEM yang cocok dengan sertifikat klien (prioritas 'file'). Kunci di-cache dan didistribusikan ke instance seperti artefak job lainnya, dan ditulis dengan izin owner/group saja."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY_DATA": {
+        "label": "Data kunci klien (base64/plaintext)",
+        "help": "Private key klien sebagai base64 atau PEM teks biasa (prioritas 'data'). Lebih baik gunakan path file jika memungkinkan: kunci yang diatur di sini disimpan sebagai nilai pengaturan."
+      },
+      "REVERSE_PROXY_SSL_CRL": {
+        "label": "Path CRL",
+        "help": "Path ke certificate revocation list PEM yang digunakan saat memverifikasi server upstream. Diprioritaskan di atas REVERSE_PROXY_SSL_CRL_DATA. Hanya diterapkan saat REVERSE_PROXY_SSL_VERIFY bernilai yes. Path yang diatur tetapi hilang adalah error; REVERSE_PROXY_SSL_CRL_DATA tidak digunakan sebagai fallback."
+      },
+      "REVERSE_PROXY_SSL_CRL_DATA": {
+        "label": "Data CRL (base64/plaintext)",
+        "help": "Certificate revocation list sebagai base64 atau PEM teks biasa. Hanya digunakan saat pengaturan path CRL kosong."
+      },
+      "REVERSE_PROXY_SSL_PROTOCOLS": {
+        "label": "Protokol SSL upstream",
+        "help": "Versi TLS yang ditawarkan ke server upstream (nilai direktif proxy_ssl_protocols). Kosong mempertahankan default NGINX."
+      },
+      "REVERSE_PROXY_SSL_CIPHERS": {
+        "label": "Cipher SSL upstream",
+        "help": "String cipher suite yang ditawarkan ke server upstream (nilai direktif proxy_ssl_ciphers). Kosong mempertahankan default NGINX."
+      },
+      "REVERSE_PROXY_SEND_PROXY_PROTOCOL": {
+        "label": "Kirim protokol PROXY ke upstream",
+        "help": "Kirim header protokol PROXY ke upstream stream. 'auto' mengikuti pengaturan global USE_PROXY_PROTOCOL, yang merupakan perilaku BunkerWeb sebelum pengaturan ini ada; 'yes' dan 'no' menentukan secara independen dari listener masuk."
+      },
+      "REVERSE_PROXY_STREAM_HALF_CLOSE": {
+        "label": "Half close stream reverse proxy",
+        "help": "Jaga koneksi stream TCP tetap terbuka ke arah backend setelah klien menutup sisi tulisnya. Diperlukan oleh protokol di mana klien melakukan half-close lalu menunggu respons; nginx menutup koneksi secara default."
+      },
+      "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
+        "label": "Kedalaman verifikasi SSL",
+        "help": "Mengatur kedalaman verifikasi dalam rantai sertifikat server upstream."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST": {
+        "label": "Permintaan auth reverse proxy",
+        "help": "Aktifkan autentikasi menggunakan penyedia eksternal (nilai direktif auth_request)."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "URL sign-in permintaan auth",
+        "help": "Alihkan klien ke URL sign-in saat menggunakan REVERSE_PROXY_AUTH_REQUEST (digunakan saat panggilan auth_request mengembalikan 401). Variabel NGINX seperti $scheme, $host, dan $request_uri didukung."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SET": {
+        "label": "Set permintaan auth reverse proxy",
+        "help": "Daftar variabel yang diatur dari penyedia autentikasi, dipisahkan dengan titik koma (nilai direktif auth_request_set)."
+      },
+      "REVERSE_PROXY_INCLUDES": {
+        "label": "Include reverse proxy",
+        "help": "Konfigurasi tambahan untuk disertakan dalam blok location, dipisahkan dengan spasi."
+      },
+      "REVERSE_PROXY_PASS_REQUEST_BODY": {
+        "label": "Teruskan body permintaan reverse proxy",
+        "help": "Aktifkan atau nonaktifkan penerusan body permintaan ke resource yang di-proxy."
+      },
+      "REVERSE_PROXY_MODSECURITY": {
+        "label": "ModSecurity reverse proxy",
+        "help": "Aktifkan atau nonaktifkan ModSecurity untuk location reverse proxy ini. Atur ke no untuk endpoint yang menerima unggahan sangat besar (mis. video, backup, object storage): konektor ModSecurity-nginx menyimpan seluruh body permintaan dalam memori terlepas dari SecRequestBodyLimit dan dapat memicu OOM pada unggahan multi-GB. Menghasilkan 'modsecurity off;' di dalam blok location."
+      },
+      "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+        "label": "Ukuran body maksimum reverse proxy",
+        "help": "Ukuran body maksimum untuk location reverse proxy ini (0 untuk tak terbatas). Jika kosong, MAX_CLIENT_SIZE layanan berlaku. Nilai juga mengatur batas body permintaan ModSecurity untuk location ini, menggantikan yang berlaku untuk seluruh layanan; ini tidak mengubah MODSECURITY_REQ_BODY_NO_FILES_LIMIT."
+      },
+      "USE_PROXY_CACHE": {
+        "label": "Cache reverse proxy",
+        "help": "Aktifkan atau nonaktifkan caching resource yang di-proxy."
+      },
+      "PROXY_CACHE_PATH_LEVELS": {
+        "label": "Level hierarki",
+        "help": "Level hierarki cache."
+      },
+      "PROXY_CACHE_PATH_ZONE_SIZE": {
+        "label": "Ukuran zona cache reverse proxy",
+        "help": "Ukuran maksimum metadata yang di-cache saat meng-cache resource yang di-proxy."
+      },
+      "PROXY_CACHE_PATH_PARAMS": {
+        "label": "Parameter cache reverse proxy",
+        "help": "Parameter tambahan untuk ditambahkan ke direktif proxy_cache."
+      },
+      "PROXY_CACHE_METHODS": {
+        "label": "Metode cache reverse proxy",
+        "help": "Metode HTTP yang harus memicu operasi cache."
+      },
+      "PROXY_CACHE_MIN_USES": {
+        "label": "Penggunaan minimum cache reverse proxy",
+        "help": "Jumlah minimum permintaan sebelum respons di-cache."
+      },
+      "PROXY_CACHE_KEY": {
+        "label": "Kunci cache reverse proxy",
+        "help": "Kunci yang digunakan untuk mengidentifikasi respons yang di-cache secara unik."
+      },
+      "PROXY_CACHE_VALID": {
+        "label": "Validitas cache reverse proxy",
+        "help": "Tentukan waktu caching berdasarkan kode status HTTP (daftar status=waktu), dipisahkan dengan spasi."
+      },
+      "PROXY_NO_CACHE": {
+        "label": "Tanpa cache reverse proxy",
+        "help": "Kondisi untuk menonaktifkan caching respons."
+      },
+      "PROXY_CACHE_BYPASS": {
+        "label": "Bypass reverse proxy",
+        "help": "Kondisi untuk melewati caching respons."
+      },
+      "PROXY_BUFFERS": {
+        "label": "Buffer proxy",
+        "help": "Nilai untuk direktif proxy_buffers."
+      },
+      "PROXY_BUFFER_SIZE": {
+        "label": "Ukuran buffer proxy",
+        "help": "Nilai untuk direktif proxy_buffer_size."
+      },
+      "PROXY_BUSY_BUFFERS_SIZE": {
+        "label": "Ukuran buffer sibuk proxy",
+        "help": "Nilai untuk direktif proxy_busy_buffers_size."
+      }
+    }
+  }
+}

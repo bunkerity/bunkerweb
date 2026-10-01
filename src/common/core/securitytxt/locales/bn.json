@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "security.txt ফাইল পরিচালনা করে। একটি প্রস্তাবিত মানদণ্ড যা ওয়েবসাইটগুলোকে তাদের নিরাপত্তা নীতি নির্ধারণ করতে দেয়।"
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "security.txt ব্যবহার করুন",
+        "help": "security.txt ফাইল সক্ষম করুন।"
+      },
+      "SECURITYTXT_URI": {
+        "label": "Security.txt URI",
+        "help": "যে URI থেকে \"security.txt\" ফাইল অ্যাক্সেসযোগ্য হবে তা নির্দেশ করে।"
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Security.txt যোগাযোগ",
+        "help": "গবেষকদের নিরাপত্তা দুর্বলতা রিপোর্ট করার জন্য ব্যবহার করা উচিত এমন একটি পদ্ধতি নির্দেশ করে, যেমন একটি ইমেইল ঠিকানা, ফোন নম্বর, এবং/অথবা যোগাযোগের তথ্যসহ একটি ওয়েব পেজ। (মান খালি থাকলে, security.txt ফাইল তৈরি হবে না কারণ এটি একটি আবশ্যক ফিল্ড)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Security.txt মেয়াদ",
+        "help": "যে তারিখ ও সময়ের পরে \"security.txt\" ফাইলে থাকা ডেটা পুরনো বলে বিবেচিত হয় এবং ব্যবহার করা উচিত নয় তা নির্দেশ করে (মান খালি থাকলে, মান সবসময় বর্তমান তারিখ ও সময় + ১ বছর হবে)।"
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Security.txt এনক্রিপশন",
+        "help": "নিরাপত্তা গবেষকদের এনক্রিপ্ট করা যোগাযোগের জন্য ব্যবহার করা উচিত এমন একটি এনক্রিপশন কী নির্দেশ করে।"
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Security.txt স্বীকৃতি",
+        "help": "যে পৃষ্ঠায় নিরাপত্তা গবেষকদের তাদের রিপোর্টের জন্য স্বীকৃতি দেওয়া হয় তার একটি লিংক নির্দেশ করে।"
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Security.txt পছন্দের ভাষা",
+        "help": "নিরাপত্তা রিপোর্ট জমা দেওয়ার সময় পছন্দের স্বাভাবিক ভাষার একটি সেট নির্দেশ করতে ব্যবহার করা যেতে পারে।"
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Security.txt ক্যানোনিক্যাল",
+        "help": "যেখানে \"security.txt\" ফাইল অবস্থিত সেই ক্যানোনিক্যাল URI নির্দেশ করে, যা সাধারণত \"https://example.com/.well-known/security.txt\"-এর মতো কিছু হয়। (মান খালি থাকলে, ডিফল্ট মান সাইট URL + SECURITYTXT_URI থেকে স্বয়ংক্রিয়ভাবে তৈরি হবে)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Security.txt নীতি",
+        "help": "যেখানে দুর্বলতা প্রকাশ নীতি অবস্থিত তার একটি লিংক নির্দেশ করে।"
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Security.txt নিয়োগ",
+        "help": "ভেন্ডরের নিরাপত্তা-সম্পর্কিত চাকরির পদগুলোর সাথে লিংক করতে ব্যবহৃত হয়।"
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "আপনার CSAF (Common Security Advisory Framework) প্রদানকারীর provider-metadata.json-এর একটি লিংক।"
+      }
+    }
+  }
+}

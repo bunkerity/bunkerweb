@@ -1,0 +1,8 @@
+{
+  "jobs": {
+    "meta": {
+      "name": "İşler",
+      "description": "Dahili işler için sahte çekirdek eklenti."
+    }
+  }
+}

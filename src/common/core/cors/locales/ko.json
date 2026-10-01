@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "교차 출처 리소스 공유(Cross-Origin Resource Sharing)."
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "요청 차단됨"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "CORS 사용",
+        "help": "CORS 사용"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "허용된 출처",
+        "help": "CORS 요청을 허용할 출처입니다: PCRE 정규식, * 또는 self(동일 출처의 경우)."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Access-Control-Allow-Methods 값",
+        "help": "Access-Control-Allow-Methods 헤더의 값입니다."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Access-Control-Allow-Headers 값",
+        "help": "Access-Control-Allow-Headers 헤더의 값입니다."
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Access-Control-Allow-Credentials 전송",
+        "help": "Access-Control-Allow-Credentials 헤더를 전송합니다."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Access-Control-Expose-Headers 값",
+        "help": "Access-Control-Expose-Headers 헤더의 값입니다."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Cross-Origin-Opener-Policy 헤더의 값입니다."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Cross-Origin-Embedder-Policy 헤더의 값입니다."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Cross-Origin-Resource-Policy 헤더의 값입니다."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Access-Control-Max-Age 값",
+        "help": "Access-Control-Max-Age 헤더의 값입니다."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "요청 거부",
+        "help": "Origin이 허용되지 않으면 요청을 거부하고 백엔드로 전달하지 않습니다."
+      }
+    }
+  }
+}

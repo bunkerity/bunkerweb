@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Sessioni",
+      "description": "Gestione delle sessioni usate da altri plugin."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Secret delle sessioni",
+        "help": "Secret utilizzato per cifrare le variabili di sessione che memorizzano i dati relativi alle sfide."
+      },
+      "SESSIONS_NAME": {
+        "label": "Nome delle sessioni",
+        "help": "Nome del cookie dato ai client."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Dominio del cookie di sessione",
+        "help": "Attributo di dominio impostato sul cookie di sessione per questo server (ad es. `example.com` o `.example.com`). Lascia vuoto per mantenere il cookie limitato all'host esatto. Impostalo su un dominio registrabile superiore per condividere la sessione (e quindi lo stato antibot/sfida) tra sottodomini fratelli. In una configurazione multisite, configura questo per server in modo che tenant non correlati non ricevano mai un attributo `Domain` tra tenant."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Timeout di inattività delle sessioni",
+        "help": "Tempo massimo (in secondi) di inattività prima che la sessione venga invalidata."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Timeout scorrevole delle sessioni",
+        "help": "Tempo massimo (in secondi) prima che una sessione debba essere rinnovata."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Timeout assoluto delle sessioni",
+        "help": "Tempo massimo (in secondi) prima che una sessione venga distrutta."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Verifica IP delle sessioni",
+        "help": "Distrugge la sessione se l'indirizzo IP è diverso da quello originale."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Verifica User-Agent delle sessioni",
+        "help": "Distrugge la sessione se lo User-Agent è diverso da quello originale."
+      }
+    }
+  }
+}

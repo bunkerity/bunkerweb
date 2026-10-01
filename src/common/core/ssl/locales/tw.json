@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "管理與 SSL/TLS 相關的設定。"
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "將 HTTP 重新導向到 HTTPS",
+        "help": "將所有 HTTP 請求重新導向到 HTTPS。"
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "自動將 HTTP 重新導向到 HTTPS",
+        "help": "嘗試偵測是否使用了 HTTPS,若是,則啟用 HTTP 到 HTTPS 的重新導向。"
+      },
+      "SSL_PROTOCOLS": {
+        "label": "SSL 通訊協定",
+        "help": "支援的 TLS 版本。基於相容性考量,我們建議使用預設值 TLSv1.2 TLSv1.3。"
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "SSL 加密套件層級",
+        "help": "SSL 加密套件的預設安全層級。'Modern' 最安全,但可能無法在較舊的裝置上使用。"
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "自訂 SSL 加密套件",
+        "help": "自訂 SSL 加密套件字串。若指定,將覆寫 SSL 加密套件層級。留空則使用基於層級的設定。"
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "SSL ECDH 曲線",
+        "help": "用於金鑰交換的偏好 ECDH 曲線(TLS 群組)。使用 \"auto\" 可進行智慧選擇(在 OpenSSL 3.5+ 上,若可用,則優先選用 X25519MLKEM768 等 PQC 群組)。"
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "SSL 工作階段快取大小",
+        "help": "SSL 工作階段快取的大小(例如 '10m' 表示 10 百萬位元組,'512k' 表示 512 千位元組)。設為 'off' 或 'none' 可停用工作階段快取。"
+      }
+    }
+  }
+}

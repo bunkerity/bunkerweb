@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "क्रॉस-ओरिजिन रिसोर्स शेयरिंग (Cross-Origin Resource Sharing)।"
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "अनुरोध अवरुद्ध"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "CORS उपयोग करें",
+        "help": "CORS उपयोग करें"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "अनुमत ऑरिजिन",
+        "help": "CORS अनुरोध करने के लिए अनुमत ऑरिजिन: PCRE रेगेक्स या * या self (समान ऑरिजिन के लिए)।"
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Access-Control-Allow-Methods मान",
+        "help": "Access-Control-Allow-Methods हेडर का मान।"
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Access-Control-Allow-Headers मान",
+        "help": "Access-Control-Allow-Headers हेडर का मान।"
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Access-Control-Allow-Credentials भेजें",
+        "help": "Access-Control-Allow-Credentials हेडर भेजें।"
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Access-Control-Expose-Headers मान",
+        "help": "Access-Control-Expose-Headers हेडर का मान।"
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Cross-Origin-Opener-Policy हेडर के लिए मान।"
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Cross-Origin-Embedder-Policy हेडर के लिए मान।"
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Cross-Origin-Resource-Policy हेडर के लिए मान।"
+      },
+      "CORS_MAX_AGE": {
+        "label": "Access-Control-Max-Age मान",
+        "help": "Access-Control-Max-Age हेडर का मान।"
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "अनुरोध अस्वीकार करें",
+        "help": "यदि Origin की अनुमति नहीं है तो अनुरोध अस्वीकार करें और उसे बैकएंड को न भेजें।"
+      }
+    }
+  }
+}

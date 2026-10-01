@@ -1,0 +1,26 @@
+{
+  "redirect": {
+    "meta": {
+      "name": "Redirection",
+      "description": "Gère les redirections HTTP."
+    },
+    "settings": {
+      "REDIRECT_FROM": {
+        "label": "Rediriger depuis",
+        "help": "Chemin depuis lequel rediriger. Une valeur commençant par ^ ou se terminant par $ est traitée comme une location regex. Vous pouvez la préfixer par ~, ~*, = ou ^~ suivi d'un espace pour définir explicitement le modificateur de location nginx ; aucun espace, ;, { ou } n'est autorisé ailleurs dans la valeur."
+      },
+      "REDIRECT_TO": {
+        "label": "Rediriger vers",
+        "help": "Redirige un site entier vers un autre."
+      },
+      "REDIRECT_TO_REQUEST_URI": {
+        "label": "Ajouter l'URI de la requête",
+        "help": "Ajoute l'URI demandée à l'adresse de redirection."
+      },
+      "REDIRECT_TO_STATUS_CODE": {
+        "label": "Code de statut de redirection",
+        "help": "Code de statut HTTP pour la redirection : 301 (Moved Permanently - mis en cache par les navigateurs), 302 (Found - temporaire, peut changer de méthode), 303 (See Other - utilise toujours GET), 307 (Temporary Redirect - préserve la méthode), 308 (Permanent Redirect - préserve la méthode, mis en cache)."
+      }
+    }
+  }
+}

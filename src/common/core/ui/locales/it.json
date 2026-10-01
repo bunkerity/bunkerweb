@@ -1,0 +1,18 @@
+{
+  "ui": {
+    "meta": {
+      "name": "UI",
+      "description": "Integra facilmente l'UI di BunkerWeb."
+    },
+    "settings": {
+      "USE_UI": {
+        "label": "Usa l'UI",
+        "help": "Usa l'UI"
+      },
+      "UI_HOST": {
+        "label": "Host UI",
+        "help": "Indirizzo dell'interfaccia web utilizzata per la configurazione iniziale."
+      }
+    }
+  }
+}

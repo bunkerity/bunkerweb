@@ -1,0 +1,144 @@
+{
+  "blacklist": {
+    "meta": {
+      "name": "Чёрный список",
+      "description": "Запрещает доступ на основе внутренних и внешних чёрных списков IP/сети/rDNS/ASN."
+    },
+    "settings": {
+      "BLACKLIST_ASN": {
+        "label": "Blacklist ASN",
+        "help": "Список номеров ASN, разделённых пробелами, для блокировки."
+      },
+      "BLACKLIST_ASN_URLS": {
+        "label": "Blacklist ASN URL",
+        "help": "Список URL, разделённых пробелами, содержащих ASN для блокировки. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_COMMUNITY_LISTS": {
+        "label": "Списки сообщества",
+        "help": "Выберите поддерживаемые сообществом чёрные списки для включения в блокировку."
+      },
+      "BLACKLIST_HEADER_NAME": {
+        "label": "Имя заголовка blacklist",
+        "help": "Имя заголовка запроса, добавляющего запрос в чёрный список. Любой клиент может отправить этот заголовок: считайте его общим секретом, только по HTTPS."
+      },
+      "BLACKLIST_HEADER_VALUE": {
+        "label": "Значение заголовка blacklist",
+        "help": "Значение (регулярное выражение PCRE), которому должен соответствовать заголовок, чтобы добавить запрос в чёрный список. Оставьте пустым, чтобы сопоставление происходило по самому наличию заголовка. Закрепите его символами ^ и $: по умолчанию совпадение не закреплено."
+      },
+      "BLACKLIST_IGNORE_ASN": {
+        "label": "Blacklist — игнорируемые ASN",
+        "help": "Список номеров ASN, разделённых пробелами, игнорируемых в чёрном списке."
+      },
+      "BLACKLIST_IGNORE_ASN_URLS": {
+        "label": "Blacklist — игнорируемые ASN URL",
+        "help": "Список URL, разделённых пробелами, содержащих ASN, игнорируемые в чёрном списке. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_HEADER_NAME": {
+        "label": "Имя игнорируемого заголовка",
+        "help": "Имя заголовка запроса, освобождающего запрос от чёрного списка. Любой клиент может отправить этот заголовок: считайте его общим секретом, только по HTTPS."
+      },
+      "BLACKLIST_IGNORE_HEADER_VALUE": {
+        "label": "Значение игнорируемого заголовка",
+        "help": "Значение (регулярное выражение PCRE), которому должен соответствовать заголовок, чтобы освободить запрос от чёрного списка. Оставьте пустым, чтобы сопоставление происходило по самому наличию заголовка. Закрепите его символами ^ и $: по умолчанию совпадение не закреплено."
+      },
+      "BLACKLIST_IGNORE_IP": {
+        "label": "Blacklist — игнорируемые IP/сеть",
+        "help": "Список IP-адресов/сетей, разделённых пробелами, игнорируемых в чёрном списке."
+      },
+      "BLACKLIST_IGNORE_IP_URLS": {
+        "label": "Blacklist — игнорируемые IP/сеть URL",
+        "help": "Список URL, разделённых пробелами, содержащих IP/сети, игнорируемые в чёрном списке. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_RDNS": {
+        "label": "Blacklist — игнорируемый reverse DNS",
+        "help": "Список суффиксов reverse DNS, разделённых пробелами, игнорируемых в чёрном списке."
+      },
+      "BLACKLIST_IGNORE_RDNS_URLS": {
+        "label": "Blacklist — игнорируемый reverse DNS URL",
+        "help": "Список URL, разделённых пробелами, содержащих суффиксы reverse DNS, игнорируемые в чёрном списке. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_URI": {
+        "label": "Blacklist — игнорируемый URI",
+        "help": "Список URI (регулярное выражение PCRE), разделённых пробелами, игнорируемых в чёрном списке."
+      },
+      "BLACKLIST_IGNORE_URI_URLS": {
+        "label": "Blacklist — игнорируемый URI URL",
+        "help": "Список URL, разделённых пробелами, содержащих URI, игнорируемые в чёрном списке. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_USER_AGENT": {
+        "label": "Blacklist — игнорируемый User-Agent",
+        "help": "Список User-Agent (регулярное выражение PCRE), разделённых пробелами, игнорируемых в чёрном списке."
+      },
+      "BLACKLIST_IGNORE_USER_AGENT_URLS": {
+        "label": "Blacklist — игнорируемый User-Agent URL",
+        "help": "Список URL, разделённых пробелами, содержащих User-Agent, игнорируемые в чёрном списке. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_IP": {
+        "label": "Blacklist IP/сеть",
+        "help": "Список IP-адресов/сетей, разделённых пробелами, для блокировки."
+      },
+      "BLACKLIST_IP_URLS": {
+        "label": "Blacklist IP/сеть URL",
+        "help": "Список URL, разделённых пробелами, содержащих вредоносные IP/сети для блокировки. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_RDNS": {
+        "label": "Blacklist reverse DNS",
+        "help": "Список суффиксов reverse DNS, разделённых пробелами, для блокировки."
+      },
+      "BLACKLIST_RDNS_GLOBAL": {
+        "label": "Blacklist reverse DNS только для глобальных IP",
+        "help": "Выполнять проверки RDNS чёрного списка только для глобальных IP-адресов."
+      },
+      "BLACKLIST_RDNS_URLS": {
+        "label": "Blacklist reverse DNS URL",
+        "help": "Список URL, разделённых пробелами, содержащих суффиксы reverse DNS для блокировки. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_RULE": {
+        "label": "Правило blacklist",
+        "help": "Составное правило: каждый член должен совпасть, чтобы правило совпало. Члены разделяются словом \" AND \" (заглавными буквами), и каждый из них имеет вид [NOT ]<kind>:<value>, где <kind> — это ip, country, asn, rdns, ua (псевдоним user_agent) или uri. Пример: ip:10.0.0.0/8 AND NOT ua:^curl. Правила объединяются между собой и с приведёнными выше плоскими списками через OR. Значением может быть также токен группы ресурсов, например @office. Stream-сервисы проверяют только ip, country, asn и rdns."
+      },
+      "BLACKLIST_URI": {
+        "label": "Blacklist URI",
+        "help": "Список URI (регулярное выражение PCRE), разделённых пробелами, для блокировки."
+      },
+      "BLACKLIST_URI_URLS": {
+        "label": "Blacklist URI URL",
+        "help": "Список URL, разделённых пробелами, содержащих вредоносные URI для блокировки. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "BLACKLIST_USER_AGENT": {
+        "label": "Blacklist User-Agent",
+        "help": "Список User-Agent (регулярное выражение PCRE), разделённых пробелами, для блокировки."
+      },
+      "BLACKLIST_USER_AGENT_URLS": {
+        "label": "Blacklist User-Agent URL",
+        "help": "Список URL, разделённых пробелами, содержащих вредоносные User-Agent для блокировки. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "USE_BLACKLIST": {
+        "label": "Включить blacklist",
+        "help": "Включить функцию blacklist."
+      }
+    },
+    "widgets": {
+      "counter_failed_uri": {
+        "title": "URI",
+        "subtitle": "Отказано"
+      },
+      "counter_failed_ip": {
+        "title": "IP",
+        "subtitle": "Отказано"
+      },
+      "counter_failed_rdns": {
+        "title": "RDNS",
+        "subtitle": "Отказано"
+      },
+      "counter_failed_asn": {
+        "title": "ASN",
+        "subtitle": "Отказано"
+      },
+      "counter_failed_ua": {
+        "title": "UA",
+        "subtitle": "Отказано"
+      }
+    }
+  }
+}

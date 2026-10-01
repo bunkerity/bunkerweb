@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "ক্রস-অরিজিন রিসোর্স শেয়ারিং (Cross-Origin Resource Sharing)।"
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "অনুরোধ অবরুদ্ধ"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "CORS ব্যবহার করুন",
+        "help": "CORS ব্যবহার করুন"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "অনুমোদিত অরিজিন",
+        "help": "CORS অনুরোধ করার জন্য অনুমোদিত অরিজিন: PCRE রেগেক্স অথবা * অথবা self (একই অরিজিনের জন্য)।"
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Access-Control-Allow-Methods মান",
+        "help": "Access-Control-Allow-Methods হেডারের মান।"
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Access-Control-Allow-Headers মান",
+        "help": "Access-Control-Allow-Headers হেডারের মান।"
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Access-Control-Allow-Credentials পাঠান",
+        "help": "Access-Control-Allow-Credentials হেডার পাঠান।"
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Access-Control-Expose-Headers মান",
+        "help": "Access-Control-Expose-Headers হেডারের মান।"
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Cross-Origin-Opener-Policy হেডারের জন্য মান।"
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Cross-Origin-Embedder-Policy হেডারের জন্য মান।"
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Cross-Origin-Resource-Policy হেডারের জন্য মান।"
+      },
+      "CORS_MAX_AGE": {
+        "label": "Access-Control-Max-Age মান",
+        "help": "Access-Control-Max-Age হেডারের মান।"
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "অনুরোধ প্রত্যাখ্যান করুন",
+        "help": "Origin অনুমোদিত না হলে অনুরোধ প্রত্যাখ্যান করুন এবং তা ব্যাকএন্ডে পাঠাবেন না।"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Skanowanie odwrotne",
+      "description": "Zwiększa bezpieczeństwo, skanując porty klienta w celu wykrycia i zablokowania połączeń pochodzących z serwerów proxy lub serwerów, pomagając zapobiegać obchodzeniu środków bezpieczeństwa."
+    },
+    "settings": {
+      "REVERSE_SCAN_PORTS": {
+        "label": "Porty reverse scan",
+        "help": "Lista portów do skanowania podczas korzystania z funkcji reverse scan."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Limit czasu reverse scan",
+        "help": "Określ maksymalny limit czasu (w ms) podczas skanowania portu."
+      },
+      "USE_REVERSE_SCAN": {
+        "label": "Reverse scan",
+        "help": "Włącz skanowanie portów klientów i odmawiaj dostępu, jeśli jeden z nich jest otwarty."
+      }
+    }
+  }
+}

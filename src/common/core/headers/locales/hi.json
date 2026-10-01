@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "हेडर",
+      "description": "क्लाइंट को भेजे गए HTTP हेडर प्रबंधित करता है।"
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "कस्टम हेडर (HeaderName: HeaderValue)",
+        "help": "जोड़ने के लिए कस्टम हेडर (HeaderName: HeaderValue)।"
+      },
+      "REMOVE_HEADERS": {
+        "label": "हेडर हटाएँ",
+        "help": "हटाने के लिए हेडर (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "अपस्ट्रीम हेडर बनाए रखें",
+        "help": "अपस्ट्रीम से बनाए रखे जाने वाले हेडर (Header1 Header2 Header3 ... या सभी के लिए *)।"
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Strict-Transport-Security (HSTS) हेडर के लिए मान।"
+      },
+      "COOKIE_FLAGS": {
+        "label": "कुकी फ़्लैग",
+        "help": "सभी कुकी में स्वतः जोड़े जाने वाले फ़्लैग (nginx_cookie_flag_module के लिए स्वीकृत मान)।"
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "कुकी स्वतः Secure फ़्लैग",
+        "help": "सभी कुकी में स्वतः Secure फ़्लैग जोड़ें।"
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Content-Security-Policy हेडर के लिए मान।"
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Content-Security-Policy हेडर के उल्लंघनों को ब्लॉक करने के बजाय उनकी रिपोर्ट भेजें।"
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Referrer-Policy हेडर के लिए मान।"
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Permissions-Policy हेडर के लिए मान।"
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "X-Frame-Options हेडर के लिए मान।"
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "X-Content-Type-Options हेडर के लिए मान।"
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "X-DNS-Prefetch-Control हेडर के लिए मान।"
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "Límite",
+      "description": "Limita el número máximo de solicitudes y conexiones."
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "Límite global",
+        "subtitle": "Solicitudes bloqueadas"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "Activar límite de solicitudes",
+        "help": "Activa la función de límite de solicitudes."
+      },
+      "LIMIT_REQ_URL": {
+        "label": "URL del límite de solicitudes",
+        "help": "URL (regex PCRE) donde se aplicará el límite de solicitudes, o el valor especial / para todas las solicitudes."
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "Tasa del límite de solicitudes",
+        "help": "Tasa a aplicar a la URL (s para segundo, m para minuto, h para hora y d para día)."
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "Activar límite global de solicitudes",
+        "help": "Activa el límite de tasa global: una cuota agregada única para todo el servicio, contando todos los clientes y URL en conjunto (protege la capacidad de origen, independientemente de los límites de solicitudes por IP/por URL)."
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "Tasa global del límite de solicitudes",
+        "help": "Tasa agregada máxima para todo el servicio, todos los clientes y URL combinados (s para segundo, m para minuto, h para hora y d para día)."
+      },
+      "USE_LIMIT_CONN": {
+        "label": "Activar límite de conexiones",
+        "help": "Activa la función de límite de conexiones."
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "Número máximo de conexiones HTTP/1.X",
+        "help": "Número máximo de conexiones por IP al utilizar el protocolo HTTP/1.X."
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "Número máximo de streams HTTP/2",
+        "help": "Número máximo de streams por IP al utilizar el protocolo HTTP/2."
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "Número máximo de streams HTTP/3",
+        "help": "Número máximo de streams por IP al utilizar el protocolo HTTP/3."
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "Número máximo de conexiones stream",
+        "help": "Número máximo de conexiones por IP al utilizar stream."
+      }
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "自定义 SSL 证书",
+      "description": "为 SSL 选择自定义证书。"
+    },
+    "settings": {
+      "USE_CUSTOM_SSL": {
+        "label": "使用自定义证书",
+        "help": "使用自定义 SSL 证书。"
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "证书优先级",
+        "help": "选择优先使用来自文件路径的证书,还是来自 base64 数据的证书。(file | data)"
+      },
+      "CUSTOM_SSL_CERT": {
+        "label": "证书路径",
+        "help": "证书或证书包文件的完整路径。该文件必须可被 WORKER 读取——自 1.7 版本将任务执行移出 scheduler 后,custom-cert 任务就运行在 WORKER 上——而不是 scheduler,无论较旧的文档怎么说。在 Docker Swarm 下,请将其挂载到 bw-worker 上,并填写其挂载路径,例如 /run/secrets/example.com.pem;由于证书本身是公开的,使用 Swarm config 挂载即可。"
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "私钥路径",
+        "help": "私钥文件的完整路径。该文件必须可被 WORKER 读取——自 1.7 版本将任务执行移出 scheduler 后,custom-cert 任务就运行在 WORKER 上——而不是 scheduler,无论较旧的文档怎么说。在 Docker Swarm 下,请将私钥以 Swarm SECRET 的形式挂载到 bw-worker 上,并填写其挂载路径,例如 /run/secrets/example.com.key。切勿以 Swarm config 的形式分发私钥:config 会以未加密的形式存储在每个管理节点的 raft store 中。"
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "证书数据(base64/明文)",
+        "help": "以 base64 或明文 PEM 格式编码的证书数据。"
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "私钥数据(base64/明文)",
+        "help": "以 base64 或明文 PEM 格式编码的私钥数据。"
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "默认服务器证书路径",
+        "help": "由默认服务器(DEFAULT SERVER,即处理未匹配任何已配置服务的请求的区块)提供的证书或证书包文件的完整路径。留空则保留内部自签名证书。该文件必须可被 WORKER 读取,custom-cert 任务运行在 WORKER 上。若证书同时覆盖了某个已配置服务的主机名,将被拒绝,因为这样默认服务器就能够代替该服务响应请求。仅在 MULTISITE=yes 或 DISABLE_DEFAULT_SERVER=yes 时才会生效。"
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "默认服务器私钥路径",
+        "help": "默认服务器(DEFAULT SERVER,即处理未匹配任何已配置服务的请求——如未知 SNI、直接 IP 访问——的区块)证书的私钥的完整路径。留空则保留内部自签名证书。该文件必须可被 WORKER 读取,custom-cert 任务运行在 WORKER 上。在 Docker Swarm 下,请将其以 Swarm SECRET 的形式挂载,切勿以 config 形式挂载。"
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "默认服务器证书数据(base64/明文)",
+        "help": "默认服务器(DEFAULT SERVER)的证书数据,以 base64 或明文 PEM 格式编码。仅在 DEFAULT_SERVER_SSL_CERT 为空时使用。两者都留空则保留内部自签名证书。仅在 MULTISITE=yes 或 DISABLE_DEFAULT_SERVER=yes 时才会生效。"
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "默认服务器私钥数据(base64/明文)",
+        "help": "默认服务器(DEFAULT SERVER)证书的私钥数据,以 base64 或明文 PEM 格式编码。仅在 DEFAULT_SERVER_SSL_KEY 为空时使用。两者都留空则保留内部自签名证书。"
+      }
+    }
+  }
+}

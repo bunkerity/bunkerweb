@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "Header",
+      "description": "Verwaltet die an Clients gesendeten HTTP-Header."
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "Benutzerdefinierter Header (HeaderName: HeaderValue)",
+        "help": "Hinzuzufügender benutzerdefinierter Header (HeaderName: HeaderValue)."
+      },
+      "REMOVE_HEADERS": {
+        "label": "Header entfernen",
+        "help": "Zu entfernende Header (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "Upstream-Header beibehalten",
+        "help": "Vom Upstream beizubehaltende Header (Header1 Header2 Header3 ... oder * für alle)."
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Wert des Headers Strict-Transport-Security (HSTS)."
+      },
+      "COOKIE_FLAGS": {
+        "label": "Cookie-Flags",
+        "help": "Cookie-Flags, die automatisch allen Cookies hinzugefügt werden (von nginx_cookie_flag_module akzeptierter Wert)."
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "Automatisches Secure-Flag für Cookies",
+        "help": "Fügt automatisch das Secure-Flag zu allen Cookies hinzu."
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Wert des Headers Content-Security-Policy."
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Sendet Berichte über Verstöße gegen den Header Content-Security-Policy, anstatt sie zu blockieren."
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Wert des Headers Referrer-Policy."
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Wert des Headers Permissions-Policy."
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "Wert des Headers X-Frame-Options."
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "Wert des Headers X-Content-Type-Options."
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "Wert des Headers X-DNS-Prefetch-Control."
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "workflows": {
+    "meta": {
+      "name": "Sicherheits-Workflows",
+      "description": "Erstellen Sie wiederverwendbare Sicherheitsrichtlinien: geordnete Regeln, die einen Bedingungsbaum über IP, Land, ASN, URI und Methode mit einem optionalen Ratenschwellenwert und einer abschließenden Aktion (Challenge, Blockieren oder Weiterleitung) verknüpfen."
+    },
+    "settings": {
+      "WORKFLOWS_REGEX_BUDGET": {
+        "label": "Regex-Budget für Workflows",
+        "help": "Maximale Anzahl unterschiedlicher regulärer Ausdrücke, die über alle Workflow-Regeln hinweg kompiliert werden. NGINX teilt sich einen Regex-Cache zwischen allen Plugins, sodass Regeln, die dieses Budget überschreiten, deaktiviert werden, anstatt die gesamte Instanz stillschweigend zu beeinträchtigen."
+      }
+    }
+  }
+}

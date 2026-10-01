@@ -1,0 +1,76 @@
+{
+  "whitelist": {
+    "meta": {
+      "name": "Whitelist",
+      "description": "Nagbibigay-daan sa access batay sa internal at external na IP/network/rDNS/ASN whitelist."
+    },
+    "settings": {
+      "USE_WHITELIST": {
+        "label": "I-activate ang Whitelisting",
+        "help": "I-activate ang feature na whitelist."
+      },
+      "WHITELIST_ASN": {
+        "label": "Whitelist ASN",
+        "help": "Listahan ng mga numero ng ASN, na pinaghihiwalay ng space, na ilalagay sa whitelist."
+      },
+      "WHITELIST_ASN_URLS": {
+        "label": "Whitelist ASN URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng ASN na ilalagay sa whitelist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "WHITELIST_HEADER_NAME": {
+        "label": "Pangalan ng Header sa Whitelist",
+        "help": "Pangalan ng request header na nagdaragdag sa request sa whitelist. Kahit sinong client ay maaaring magpadala ng header na ito: ituring itong shared secret, sa HTTPS lang."
+      },
+      "WHITELIST_HEADER_VALUE": {
+        "label": "Value ng Header sa Whitelist",
+        "help": "Value (PCRE regex) na dapat itumbas ng header para idagdag ang request sa whitelist. Iwanang blangko para tumugma base sa pagkakaroon lang ng header. I-anchor gamit ang ^ at $: hindi naka-anchor ang pagtutugma bilang default."
+      },
+      "WHITELIST_IP": {
+        "label": "Whitelist IP/Network",
+        "help": "Listahan ng IP/network, na pinaghihiwalay ng space, na ilalagay sa whitelist."
+      },
+      "WHITELIST_IP_URLS": {
+        "label": "Whitelist IP/Network URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng mabuting IP/network na ilalagay sa whitelist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "WHITELIST_RDNS": {
+        "label": "Whitelist Reverse DNS",
+        "help": "Listahan ng mga reverse DNS suffix, na pinaghihiwalay ng space, na ilalagay sa whitelist."
+      },
+      "WHITELIST_RDNS_GLOBAL": {
+        "label": "Whitelist Reverse DNS sa Global na IP Lang",
+        "help": "Isagawa lang ang mga RDNS whitelist check sa mga global na IP address."
+      },
+      "WHITELIST_RDNS_URLS": {
+        "label": "Whitelist Reverse DNS URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng reverse DNS suffix na ilalagay sa whitelist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "WHITELIST_RULE": {
+        "label": "Whitelist Rule",
+        "help": "Composite na rule: kailangang tumugma ang bawat term para tumugma ang rule. Pinaghihiwalay ang mga term ng \" AND \" (malaking letra) at ang bawat isa ay [NOT ]<kind>:<value>, kung saan ang <kind> ay ip, country, asn, rdns, ua (alias user_agent), o uri. Halimbawa: ip:10.0.0.0/8 AND NOT ua:^curl. Pinagsasama-sama ang mga rule gamit ang OR sa isa't isa at sa mga flat list sa itaas. Ang value ay maaari ring resource-group token tulad ng @office. Sinusuri lang ng mga stream service ang ip, country, asn, at rdns."
+      },
+      "WHITELIST_URI": {
+        "label": "Whitelist URI",
+        "help": "Listahan ng URI (PCRE regex), na pinaghihiwalay ng space, na ilalagay sa whitelist."
+      },
+      "WHITELIST_URI_URLS": {
+        "label": "Whitelist URI URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng masamang URI na ilalagay sa whitelist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "WHITELIST_USER_AGENT": {
+        "label": "Whitelist User-Agent",
+        "help": "Listahan ng User-Agent (PCRE regex), na pinaghihiwalay ng space, na ilalagay sa whitelist."
+      },
+      "WHITELIST_USER_AGENT_URLS": {
+        "label": "Whitelist User-Agent URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng mabuting User-Agent na ilalagay sa whitelist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      }
+    },
+    "widgets": {
+      "counter_passed_whitelist": {
+        "title": "WHITELIST",
+        "subtitle": "Pinayagang kahilingan"
+      }
+    }
+  }
+}

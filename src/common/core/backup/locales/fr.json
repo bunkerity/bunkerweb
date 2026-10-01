@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Sauvegarde",
+      "description": "Sauvegardez vos données vers un emplacement personnalisé. Assurez la sécurité et la disponibilité de vos fichiers importants grâce à des sauvegardes régulières."
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Dernière sauvegarde"
+      }
+    },
+    "settings": {
+      "USE_BACKUP": {
+        "label": "Activer la sauvegarde automatique",
+        "help": "Active ou désactive la fonctionnalité de sauvegarde"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Planification de la sauvegarde",
+        "help": "Fréquence de la sauvegarde (quotidienne, hebdomadaire ou mensuelle)"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Rotation des sauvegardes",
+        "help": "Nombre de sauvegardes à conserver"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Stratégie de rotation des sauvegardes",
+        "help": "Comment les anciennes sauvegardes sont choisies pour suppression : fifo conserve les plus récentes, hanoi conserve une échelle de la Tour de Hanoï (fine à proximité du présent, grossière plus loin dans le passé) pour le même nombre de fichiers"
+      },
+      "BACKUP_DIRECTORY": {
+        "label": "Répertoire de sauvegarde",
+        "help": "Répertoire où la sauvegarde sera stockée"
+      }
+    }
+  }
+}

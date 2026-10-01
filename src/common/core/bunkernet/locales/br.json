@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "Compartilha dados de ameaças com outras instâncias do BunkerWeb via BunkerNet."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS DO BUNKERNET"
+      },
+      "info_connectivity": {
+        "title": "Conectividade"
+      },
+      "info_instance_id": {
+        "title": "ID da instância"
+      }
+    },
+    "settings": {
+      "USE_BUNKERNET": {
+        "label": "Ativar BunkerNet",
+        "help": "Ativa o recurso BunkerNet."
+      },
+      "BUNKERNET_SERVER": {
+        "label": "Servidor BunkerNet",
+        "help": "Endereço da API do BunkerNet."
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "Estatísticas de eficácia do BunkerNet",
+        "help": "Persiste as estatísticas de eficácia do BunkerNet (contribuição, tamanho da lista de bloqueio, conectividade) no banco de dados."
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "Retenção de estatísticas do BunkerNet (dias)",
+        "help": "Idade máxima (em dias) das estatísticas de eficácia do BunkerNet persistidas."
+      }
+    }
+  }
+}

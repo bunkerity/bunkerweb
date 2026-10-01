@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "BunkerNet을 통해 다른 BunkerWeb 인스턴스와 위협 데이터를 공유합니다."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "BUNKERNET 상태"
+      },
+      "info_connectivity": {
+        "title": "연결 상태"
+      },
+      "info_instance_id": {
+        "title": "인스턴스 ID"
+      }
+    },
+    "settings": {
+      "USE_BUNKERNET": {
+        "label": "BunkerNet 활성화",
+        "help": "BunkerNet 기능을 활성화합니다."
+      },
+      "BUNKERNET_SERVER": {
+        "label": "BunkerNet 서버",
+        "help": "BunkerNet API의 주소입니다."
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "BunkerNet 효과 통계",
+        "help": "BunkerNet 효과 통계(기여도, 차단 목록 크기, 연결 상태)를 데이터베이스에 저장합니다."
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "BunkerNet 통계 보관 기간(일)",
+        "help": "저장된 BunkerNet 효과 통계의 최대 보관 기간(일)입니다."
+      }
+    }
+  }
+}

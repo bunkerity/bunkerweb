@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "बेसिक प्रमाणीकरण",
+      "description": "बेसिक HTTP प्रमाणीकरण विधि का उपयोग करते हुए किसी संसाधन या पूरी साइट तक पहुँचने से पहले लॉगिन अनिवार्य करता है।"
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "बेसिक प्रमाणीकरण",
+        "subtitle": "सफल"
+      },
+      "counter_failed_authbasic": {
+        "title": "बेसिक प्रमाणीकरण",
+        "subtitle": "विफल"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "HTTP बेसिक ऑथ उपयोग करें",
+        "help": "HTTP बेसिक ऑथ उपयोग करें"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "ऑथ बेसिक लोकेशन",
+        "help": "सुरक्षित संसाधन का URL या साइटव्यापी मान।"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "ऑथ बेसिक यूज़रनेम",
+        "help": "यूज़रनेम"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "पासवर्ड",
+        "help": "पासवर्ड"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "टेक्स्ट",
+        "help": "प्रदर्शित करने के लिए टेक्स्ट"
+      }
+    }
+  }
+}

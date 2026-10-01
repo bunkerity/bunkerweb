@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "क्लस्टर मोड में BunkerWeb का उपयोग करते समय Redis सर्वर कॉन्फ़िगरेशन।"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "REDIS स्थिति"
+      },
+      "counter_redis_nb_keys": {
+        "title": "REDIS कुंजियाँ",
+        "subtitle": "कुंजियों की संख्या"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Redis सक्रिय करें",
+        "help": "Redis सक्रिय करें।"
+      },
+      "REDIS_HOST": {
+        "label": "Redis सर्वर",
+        "help": "Redis सर्वर का IP या होस्टनेम।"
+      },
+      "REDIS_PORT": {
+        "label": "Redis पोर्ट",
+        "help": "Redis सर्वर का पोर्ट।"
+      },
+      "REDIS_DATABASE": {
+        "label": "Redis डेटाबेस",
+        "help": "Redis डेटाबेस नंबर।"
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Redis सर्वर के साथ SSL/TLS कनेक्शन उपयोग करें।"
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Redis SSL/TLS सत्यापन",
+        "help": "Redis सर्वर के प्रमाणपत्र का सत्यापन करें।"
+      },
+      "REDIS_SSL_CA": {
+        "label": "Redis SSL/TLS CA बंडल",
+        "help": "Redis/Valkey सर्वर प्रमाणपत्र (निजी CA) सत्यापित करने के लिए उपयोग किया जाने वाला PEM CA बंडल का पथ; सेट न होने का अर्थ है सिस्टम ट्रस्ट स्टोर। सेट होने पर इसे Python क्लाइंट (Celery ब्रोकर, जॉब, API रेट लिमिटर, bwcli, वेब UI) पर भरोसा करते हैं और यह NGINX Lua ट्रस्ट बंडल में जोड़ा जाता है, इसलिए अनुरोध पथ भी इस पर भरोसा करता है। यह जहाँ कॉन्फ़िगरेशन जनरेट होता है और हर क्लाइंट द्वारा पढ़ा जाता है, इसलिए फ़ाइल वहाँ उसी पथ पर मौजूद होनी चाहिए; गुम या अमान्य बंडल कॉन्फ़िगरेशन जनरेशन को विफल कर देता है।"
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Redis टाइमआउट (ms)",
+        "help": "कनेक्ट, पढ़ने और लिखने के लिए Redis सर्वर टाइमआउट (ms में)।"
+      },
+      "REDIS_USERNAME": {
+        "label": "Redis यूज़रनेम",
+        "help": "AUTH कमांड में उपयोग किया जाने वाला Redis यूज़रनेम।"
+      },
+      "REDIS_PASSWORD": {
+        "label": "Redis पासवर्ड",
+        "help": "AUTH कमांड में उपयोग किया जाने वाला Redis पासवर्ड।"
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Redis सेंटिनल होस्ट",
+        "help": "host:[port] प्रारूप में Redis सेंटिनल होस्ट, स्पेस से अलग।"
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Redis सेंटिनल यूज़रनेम",
+        "help": "Redis सेंटिनल यूज़रनेम।"
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Redis सेंटिनल पासवर्ड",
+        "help": "Redis सेंटिनल पासवर्ड।"
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Redis सेंटिनल मास्टर",
+        "help": "Redis सेंटिनल मास्टर का नाम।"
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Redis कीपअलाइव निष्क्रियता (ms)",
+        "help": "पूल में Redis कनेक्शन बंद करने से पहले अधिकतम निष्क्रिय समय (ms में)।"
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Redis कीपअलाइव पूल",
+        "help": "प्रति NGINX वर्कर पूल में रखे जाने वाले अधिकतम Redis कनेक्शन। स्थिर-स्थिति कनेक्शन लगभग nginx_workers × pool × instances होते हैं और इन्हें Redis/Valkey की maxclients सीमा के भीतर रहना चाहिए।"
+      }
+    }
+  }
+}

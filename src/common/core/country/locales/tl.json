@@ -1,0 +1,36 @@
+{
+  "country": {
+    "meta": {
+      "name": "Bansa",
+      "description": "Tumatanggi ng access batay sa bansa ng IP ng client."
+    },
+    "settings": {
+      "BLACKLIST_COUNTRY": {
+        "label": "Blacklist ng Bansa",
+        "help": "Tanggihan ang access kung nasa listahan ang bansa ng client (format na ISO 3166-1 alpha-2, pinaghihiwalay ng space). Puwede ring gumamit ng group token tulad ng @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH, at @BENELUX."
+      },
+      "COUNTRY_IGNORE_HEADER_NAME": {
+        "label": "Pangalan ng Hindi Papansinin na Header",
+        "help": "Pangalan ng request header na nagpapawalang-bisa sa request mula sa country check. Kahit sinong client ay maaaring magpadala ng header na ito: ituring itong shared secret, sa HTTPS lang."
+      },
+      "COUNTRY_IGNORE_HEADER_VALUE": {
+        "label": "Value ng Hindi Papansinin na Header",
+        "help": "Value (PCRE regex) na dapat itumbas ng header para hindi isama ang request sa country check. Iwanang blangko para tumugma base sa pagkakaroon lang ng header. I-anchor gamit ang ^ at $: hindi naka-anchor ang pagtutugma bilang default."
+      },
+      "COUNTRY_IGNORE_URI": {
+        "label": "Hindi Papansinin na URI",
+        "help": "Listahan ng mga pattern ng PCRE regex (pinaghihiwalay ng space) para sa mga URI na dapat ihiwalay sa country check. Sinusuri ang mga pattern laban sa path at sa buong request URI kasama ang query string."
+      },
+      "WHITELIST_COUNTRY": {
+        "label": "Whitelist ng Bansa",
+        "help": "Tanggihan ang access kung wala sa listahan ang bansa ng client (format na ISO 3166-1 alpha-2, pinaghihiwalay ng space). Puwede ring gumamit ng group token tulad ng @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH, at @BENELUX."
+      }
+    },
+    "widgets": {
+      "counter_failed_country": {
+        "title": "Bansa",
+        "subtitle": "Na-block na kahilingan"
+      }
+    }
+  }
+}

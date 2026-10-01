@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "Bot-Erkennung mithilfe einer Challenge."
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "Herausforderungen",
+        "subtitle": "Fehlgeschlagen"
+      }
+    },
+    "settings": {
+      "USE_ANTIBOT": {
+        "label": "Antibot-Challenge",
+        "help": "Aktiviert die Antibot-Funktion."
+      },
+      "ANTIBOT_URI": {
+        "label": "Antibot-URL",
+        "help": "Ungenutzte URI, zu der Clients zur Lösung der Challenge weitergeleitet werden."
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "Zeit zum Lösen",
+        "help": "Maximale Zeit (in Sekunden), die Clients zum Lösen der Challenge haben. Nach Ablauf dieser Zeit wird eine neue Challenge erzeugt."
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "Gültigkeitsdauer",
+        "help": "Maximale Gültigkeitsdauer gelöster Challenges. Nach Ablauf dieser Zeit müssen Clients eine neue lösen."
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "Erfolgs-Weiterleitungs-URL",
+        "help": "Feste URI, zu der Clients nach dem Lösen der Challenge weitergeleitet werden, anstelle der ursprünglich angeforderten Seite. Leer lassen, um zur ursprünglich angeforderten Seite zurückzukehren."
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "Captcha-Alphabet",
+        "help": "Benutzerdefiniertes Alphabet für die Captcha-Erzeugung. Das Captcha besteht aus zufälligen Zeichen dieser Zeichenkette. Unterstützte Zeichen: alle Buchstaben (a-z, A-Z), Zahlen 2-9 und unterstützte Sonderzeichen (vollständige Liste siehe Dokumentation)."
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "Ignorierte URI",
+        "help": "Liste von PCRE-Regex-Mustern (durch Leerzeichen getrennt) für URIs, die von der Antibot-Challenge ausgeschlossen werden sollen. Die Muster werden mit dem Pfad und der vollständigen Anfrage-URI samt Query-String abgeglichen."
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "Ignorierte IP/Netzwerk",
+        "help": "Liste von IPs/Netzwerken, durch Leerzeichen getrennt, für die die Antibot-Challenge ignoriert wird."
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "Ignoriertes Reverse-DNS",
+        "help": "Liste von Reverse-DNS-Suffixen, durch Leerzeichen getrennt, für die die Antibot-Challenge ignoriert wird."
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "Antibot Reverse-DNS nur globale IPs",
+        "help": "RDNS-Antibot-Prüfungen nur bei globalen IP-Adressen durchführen."
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "Ignorierte ASN",
+        "help": "Liste von ASN-Nummern, durch Leerzeichen getrennt, für die die Antibot-Challenge ignoriert wird."
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "Ignorierter User-Agent",
+        "help": "Liste von User-Agents (PCRE-Regex), durch Leerzeichen getrennt, für die die Antibot-Challenge ignoriert wird."
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "Ignorierter Header-Name",
+        "help": "Name eines Anfrage-Headers, der die Anfrage von der Antibot-Challenge befreit. Jeder Client kann diesen Header senden: behandeln Sie ihn wie ein gemeinsames Geheimnis, nur über HTTPS."
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "Ignorierter Header-Wert",
+        "help": "Wert (PCRE-Regex), dem der Header entsprechen muss, damit die Anfrage von der Antibot-Challenge befreit wird. Leer lassen, um bereits bei Vorhandensein des Headers zu greifen. Verankern Sie ihn mit ^ und $: der Abgleich ist standardmäßig nicht verankert."
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "Ignorierte Länder",
+        "help": "Liste von ISO-3166-1-alpha-2-Ländercodes, durch Leerzeichen getrennt, für die die Antibot-Challenge ignoriert wird."
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "Nur diese Länder herausfordern",
+        "help": "Liste von ISO-3166-1-alpha-2-Ländercodes, durch Leerzeichen getrennt, die die Antibot-Challenge erhalten sollen."
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "reCAPTCHA-v3-Score",
+        "help": "Mindest-Score, der für die reCAPTCHA-Challenge erforderlich ist (nur mit reCAPTCHA v3 kompatibel)."
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "reCAPTCHA-Sitekey",
+        "help": "Sitekey für die reCAPTCHA-Challenge."
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "reCAPTCHA-Secret",
+        "help": "Secret für die reCAPTCHA-Challenge."
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "Klassisches reCAPTCHA verwenden",
+        "help": "Klassisches reCAPTCHA anstelle der neueren Version verwenden."
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "reCAPTCHA-Projekt-ID",
+        "help": "Projekt-ID für die reCAPTCHA-Challenge."
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "reCAPTCHA-API-Schlüssel",
+        "help": "API-Schlüssel für die reCAPTCHA-Challenge."
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "JA4-Fingerabdruck des TLS-Clients. Wir empfehlen FoxIO-LLC/ja4 zur Berechnung des JA4-Fingerabdrucks."
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "JA3-Fingerabdruck des TLS-Clients. Wir empfehlen salesforce/ja3 zur Berechnung des JA3-Fingerabdrucks."
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "hCaptcha-Sitekey",
+        "help": "Sitekey für die hCaptcha-Challenge."
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "hCaptcha-Secret",
+        "help": "Secret für die hCaptcha-Challenge."
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Turnstile-Sitekey",
+        "help": "Sitekey für die Turnstile-Challenge."
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Turnstile-Secret",
+        "help": "Secret für die Turnstile-Challenge."
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "mCaptcha-Sitekey",
+        "help": "Sitekey für die mCaptcha-Challenge."
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "mCaptcha-Secret",
+        "help": "Secret für die mCaptcha-Challenge."
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "mCaptcha-Domain",
+        "help": "Zu verwendende Domain für die mCaptcha-Challenge."
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "Cap.js-Frontend-URL",
+        "help": "Öffentlicher Origin, von dem der Browser das Cap.js-Widget lädt (z. B. https://cap.example.com). Nur Origin, kein Pfad."
+      },
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "Cap.js-Backend-URL",
+        "help": "Interner Origin, den BunkerWeb für /siteverify aufruft (z. B. http://cap-server:3000). Nur Origin, kein Pfad. Fällt bei leerem Wert auf die Frontend-URL zurück."
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Cap.js-Sitekey",
+        "help": "Im Cap.js-Dashboard für diese Site erstellter Sitekey."
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Cap.js-Secret",
+        "help": "Mit dem Sitekey gepaartes Secret, mit dem BunkerWeb /siteverify-Aufrufe authentifiziert."
+      }
+    }
+  }
+}

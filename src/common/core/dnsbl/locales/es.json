@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "Deniega el acceso según servidores DNSBL externos."
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "Solicitud bloqueada"
+      }
+    },
+    "settings": {
+      "USE_DNSBL": {
+        "label": "Activar DNSBL",
+        "help": "Activa la función DNSBL."
+      },
+      "DNSBL_LIST": {
+        "label": "Lista DNSBL",
+        "help": "Lista de servidores DNSBL."
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "IP/red ignorada para DNSBL",
+        "help": "Lista de IP/redes, separadas por espacios, que se ignorarán en las comprobaciones DNSBL."
+      },
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "Nombre de cabecera ignorada",
+        "help": "Nombre de una cabecera de solicitud que exime a la solicitud de las comprobaciones DNSBL. Cualquier cliente puede enviar esta cabecera: trátela como un secreto compartido, solo a través de HTTPS."
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "Valor de cabecera ignorado",
+        "help": "Valor (regex PCRE) que debe coincidir con la cabecera para eximir a la solicitud de las comprobaciones DNSBL. Dejar vacío para que coincida con la simple presencia de la cabecera. Ánclelo con ^ y $: la coincidencia no está anclada de forma predeterminada."
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "IP/red ignorada para DNSBL (URL)",
+        "help": "Lista de URL, separadas por espacios, que contienen IP/redes que se ignorarán en las comprobaciones DNSBL. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url."
+      }
+    }
+  }
+}

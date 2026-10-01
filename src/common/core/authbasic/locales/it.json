@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Autenticazione di base",
+      "description": "Impone l'accesso prima di raggiungere una risorsa o l'intero sito tramite il metodo di autenticazione HTTP di base."
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "AUTH BASE",
+        "subtitle": "Riuscito"
+      },
+      "counter_failed_authbasic": {
+        "title": "AUTH BASE",
+        "subtitle": "Non riuscito"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "Usa l'autenticazione HTTP basic",
+        "help": "Usa l'autenticazione HTTP basic"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "Percorso auth basic",
+        "help": "URL della risorsa protetta o valore per l'intero sito."
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Nome utente auth basic",
+        "help": "Nome utente"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Password",
+        "help": "Password"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Testo",
+        "help": "Testo da visualizzare"
+      }
+    }
+  }
+}

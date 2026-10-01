@@ -1,0 +1,8 @@
+{
+  "certificates": {
+    "meta": {
+      "name": "Sertifikat",
+      "description": "Menyajikan sertifikat yang terkait dengan sebuah layanan dari inventaris pusat, apa pun penyedia yang menerbitkannya."
+    }
+  }
+}

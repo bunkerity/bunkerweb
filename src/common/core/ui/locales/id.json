@@ -1,0 +1,18 @@
+{
+  "ui": {
+    "meta": {
+      "name": "UI",
+      "description": "Mengintegrasikan UI BunkerWeb dengan mudah."
+    },
+    "settings": {
+      "USE_UI": {
+        "label": "Gunakan UI",
+        "help": "Gunakan UI"
+      },
+      "UI_HOST": {
+        "label": "Host UI",
+        "help": "Alamat UI web yang digunakan untuk pengaturan awal"
+      }
+    }
+  }
+}

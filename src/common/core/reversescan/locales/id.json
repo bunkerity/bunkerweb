@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Pemindaian terbalik",
+      "description": "Meningkatkan keamanan dengan memindai port klien untuk mendeteksi dan memblokir koneksi dari proxy atau server, membantu mencegah penghindaran langkah-langkah keamanan."
+    },
+    "settings": {
+      "REVERSE_SCAN_PORTS": {
+        "label": "Port reverse scan",
+        "help": "Daftar port yang akan dipindai saat menggunakan fitur reverse scan."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Timeout reverse scan",
+        "help": "Tentukan timeout maksimum (dalam md) saat memindai sebuah port."
+      },
+      "USE_REVERSE_SCAN": {
+        "label": "Reverse scan",
+        "help": "Aktifkan pemindaian port klien dan tolak akses jika salah satunya terbuka."
+      }
+    }
+  }
+}

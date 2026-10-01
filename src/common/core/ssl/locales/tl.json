@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "Pinamamahalaan ang mga setting na may kaugnayan sa SSL/TLS."
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "I-redirect ang HTTP sa HTTPS",
+        "help": "I-redirect ang lahat ng HTTP request patungo sa HTTPS."
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "Auto Redirect HTTP to HTTPS",
+        "help": "Subukang i-detect kung ginagamit ang HTTPS at i-activate ang HTTP to HTTPS redirection kung ganoon nga."
+      },
+      "SSL_PROTOCOLS": {
+        "label": "SSL Protocols",
+        "help": "Ang suportadong bersyon ng TLS. Inirerekomenda namin ang default value na TLSv1.2 TLSv1.3 para sa compatibility."
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "SSL Ciphers Level",
+        "help": "Preset na security level para sa SSL cipher suite. Pinaka-secure ang 'Modern' pero maaaring hindi gumana sa mas lumang device."
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "Custom SSL Ciphers",
+        "help": "Custom na SSL cipher suite string. Kapag itinakda, ito ang mananaig kaysa sa SSL Ciphers Level. Iwanang blangko para gamitin ang level-based na configuration."
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "SSL ECDH Curves",
+        "help": "Preferred na ECDH curve (TLS group) para sa key exchange. Gamitin ang \"auto\" para sa smart selection (mas pinipili ang PQC group tulad ng X25519MLKEM768 sa OpenSSL 3.5+ kapag available)."
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "SSL Session Cache Size",
+        "help": "Sukat ng SSL session cache (hal., '10m' para sa 10 megabytes, '512k' para sa 512 kilobytes). I-set sa 'off' o 'none' para i-disable ang session caching."
+      }
+    }
+  }
+}

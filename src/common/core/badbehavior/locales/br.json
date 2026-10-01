@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "Mau comportamento",
+      "description": "Bane um IP que gera muitos códigos de status HTTP \"ruins\" em um período de tempo."
+    },
+    "settings": {
+      "USE_BAD_BEHAVIOR": {
+        "label": "Ativar comportamento ruim",
+        "help": "Ativa o recurso de comportamento ruim (Bad behavior)."
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "Códigos de status ruins",
+        "help": "Lista de códigos de status HTTP considerados como \"ruins\"."
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "Limite",
+        "help": "Número máximo de códigos de status HTTP \"ruins\" dentro do período de tempo antes que o IP seja banido."
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "Período (em segundos)",
+        "help": "Período de tempo (em segundos) durante o qual contamos os códigos de status HTTP \"ruins\"."
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "Duração do banimento (em segundos)",
+        "help": "Duração (em segundos) do banimento quando o IP correspondente atingir o limite. (Defina como 0 para banir permanentemente)"
+      },
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "Escopo do banimento",
+        "help": "Determina o nível do banimento. \"service\" bane o IP apenas para o serviço, \"global\" bane o IP em todo o sistema."
+      }
+    }
+  }
+}

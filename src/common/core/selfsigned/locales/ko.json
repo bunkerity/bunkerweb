@@ -1,0 +1,26 @@
+{
+  "selfsigned": {
+    "meta": {
+      "name": "자체 서명 인증서",
+      "description": "자체 서명 인증서를 생성합니다."
+    },
+    "settings": {
+      "GENERATE_SELF_SIGNED_SSL": {
+        "label": "자체 서명 인증서 활성화",
+        "help": "자체 서명 인증서를 생성하여 사용합니다."
+      },
+      "SELF_SIGNED_SSL_ALGORITHM": {
+        "label": "인증서 알고리즘",
+        "help": "자체 서명 인증서에 사용할 알고리즘입니다."
+      },
+      "SELF_SIGNED_SSL_EXPIRY": {
+        "label": "인증서 만료",
+        "help": "자체 서명 인증서의 만료 기간(일)입니다."
+      },
+      "SELF_SIGNED_SSL_SUBJ": {
+        "label": "인증서 주체",
+        "help": "자체 서명 인증서의 주체(subject)입니다."
+      }
+    }
+  }
+}

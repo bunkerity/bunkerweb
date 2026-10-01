@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Reverse scan",
+      "description": "Pinapahusay ang seguridad sa pamamagitan ng pag-scan sa mga port ng client upang matukoy at mabara ang mga koneksyong galing sa proxy o server, na tumutulong pigilan ang pag-iwas sa mga hakbang sa seguridad."
+    },
+    "settings": {
+      "REVERSE_SCAN_PORTS": {
+        "label": "Reverse Scan Ports",
+        "help": "Listahan ng port na sisiyasatin kapag ginagamit ang reverse scan feature."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Reverse Scan Timeout",
+        "help": "Tukuyin ang maximum na timeout (sa ms) kapag sinisiyasat ang isang port."
+      },
+      "USE_REVERSE_SCAN": {
+        "label": "Reverse Scan",
+        "help": "I-enable ang pagsiyasat sa mga port ng client at tanggihan ang access kung may bukas."
+      }
+    }
+  }
+}

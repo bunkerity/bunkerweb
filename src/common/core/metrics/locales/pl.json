@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "Metryki",
+      "description": "Zbieranie i pobieranie metryk."
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "Użyj metryk",
+        "help": "Włącz zbieranie i pobieranie wewnętrznych metryk."
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "Rozmiar pamięci metryk",
+        "help": "Rozmiar wewnętrznego magazynu dla metryk."
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "Maksymalna liczba prób pamięci metryk",
+        "help": "Maksymalna liczba ponownych prób dla operacji pamięci."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "Maksymalna liczba zablokowanych żądań metryk",
+        "help": "Maksymalna liczba zablokowanych żądań do przechowania (na proces roboczy). Akceptuje zwykłą liczbę całkowitą lub skrót `k`/`m` (np. `1000`, `1k`, `10k`, `1m`)."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "Maksymalna liczba zablokowanych żądań metryk w Redis",
+        "help": "Maksymalna liczba zablokowanych żądań do przechowania w Redis. Akceptuje zwykłą liczbę całkowitą lub skrót `k`/`m` (np. `10000`, `10k`, `100k`, `1m`)."
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "TTL Redis metryk",
+        "help": "Czas życia w sekundach dla kluczy metryk przechowywanych w Redis (domyślnie `2592000`, 30 dni; `0` sprawia, że klucze są trwałe). Odświeżany przy każdej synchronizacji, więc aktywne dane nigdy nie wygasają; przy polityce usuwania `volatile-lru` pozwala to, aby porzucone dane metryk stały się usuwalne, dzięki czemu Redis wychodzi z maxmemory zamiast na zawsze odrzucać zapisy. Akceptuje zwykłą liczbę całkowitą lub skrót `k`/`m`."
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "Maksymalna historia LRU",
+        "help": "Ogranicza historię zdarzeń LRU na proces roboczy: ogranicza zarówno liczbę slotów LRU, jak i długość tablicy historii zdarzeń na klucz (ślady blokad, ślady uwierzytelniania itd.). Akceptuje zwykłą liczbę całkowitą lub skrót `k`/`m` (np. `1k`, `10k`, `1m`). Ogranicza nieograniczony wzrost z wysoko-kardynalnych źródeł, takich jak zalewy sfałszowanych IP."
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "Zbieraj czasy wtyczek",
+        "help": "Mierzy, ile czasu zajmuje każda wtyczka w każdej fazie żądania, ujawniane jako agregat count/sum/max na (wtyczkę, fazę). Wymaga wymuszenia odświeżenia czasu NGINX wokół każdego wywołania wtyczki, więc dodaje w przybliżeniu mikrosekundę na żądanie w całym łańcuchu wtyczek; ustaw na `no`, aby całkowicie usunąć ten koszt. Czas trwania całego żądania jest zawsze zbierany i nie jest objęty tym ustawieniem."
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "Częstotliwość próbkowania linii bazowej ruchu (%)",
+        "help": "Procent niezablokowanych żądań rejestrowanych jako linia bazowa ruchu, aby wykrywanie anomalii mogło nauczyć się, jak wygląda norma (`0` wyłącza to, `1` próbkuje jedno żądanie na sto). Próbkowanie jest deterministyczne względem id żądania, więc decyzja jest stabilna w podżądaniach. Adres IP klienta nigdy nie jest przechowywany. Zbieranie nie dodaje pracy na ścieżce żądania, ale wolumen jest duży: 1% z 10 tys. żądań/s to w przybliżeniu 8,6 miliona rekordów dziennie, które następnie przycina `METRICS_BASELINE_RETENTION_MAX_ROWS`. Podnoś tę wartość świadomie."
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "Maksymalna liczba żądań bazowych metryk",
+        "help": "Maksymalna liczba próbkowanych rekordów bazowych przechowywanych na proces roboczy, zanim najstarsze zostaną odrzucone. Ten bufor współdzieli METRICS_MEMORY_SIZE z raportami zablokowanych żądań i innymi metrykami, ale gdy zabraknie miejsca, zostanie odrzucony zamiast je wypierać. Akceptuje zwykłą liczbę całkowitą lub skrót `k`/`m`. Zamiast podnosić tę wartość, obniż częstotliwość próbkowania."
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "Retencja bazowa (dni)",
+        "help": "Maksymalny wiek (w dniach) próbkowanych rekordów bazowych, zanim zadanie retencji je usunie. Celowo krótsza niż retencja raportów o blokadach: linia bazowa rośnie znacznie szybciej, a model jest trenowany na niedawnym normalnym zachowaniu, a nie na historii."
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "Retencja bazowa (maks. wierszy)",
+        "help": "Maksymalna liczba przechowywanych próbkowanych rekordów bazowych; zadanie retencji usuwa najstarsze wiersze powyżej tej liczby. Oddzielna od limitu raportów o blokadach, ponieważ obie tabele rosną w bardzo różnym tempie."
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "Zapisuj metryki do Redis",
+        "help": "Zapisuj metryki (liczniki i tabele) do Redis w celu agregacji w całym klastrze."
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "Zachowuj raporty w bazie danych",
+        "help": "Zachowuj raporty zablokowanych żądań w bazie danych (trwałe, przeszukiwalne) poprzez okresowe odpytywanie instancji. Gdy wyłączone, raporty pozostają wyłącznie w magazynach w pamięci/Redis."
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "Retencja raportów (dni)",
+        "help": "Maksymalny wiek (w dniach) zachowanych raportów zablokowanych żądań, zanim zadanie retencji je usunie."
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "Retencja raportów (maks. wierszy)",
+        "help": "Maksymalna liczba zachowanych raportów zablokowanych żądań; zadanie retencji usuwa najstarsze wiersze powyżej tej liczby."
+      }
+    }
+  }
+}

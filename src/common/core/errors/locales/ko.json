@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "meta": {
+      "name": "오류",
+      "description": "기본 오류 페이지를 관리합니다"
+    },
+    "settings": {
+      "ERRORS": {
+        "label": "오류",
+        "help": "HTTP 오류 코드와 그에 대응하는 오류 페이지 목록입니다(공백으로 구분, 404=/my404.html 403=/errors/403.html ...)."
+      },
+      "INTERCEPTED_ERROR_CODES": {
+        "label": "가로챈 오류 코드",
+        "help": "BunkerWeb이 가로채는 HTTP 오류 코드 목록입니다(공백으로 구분)."
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "Обменивается данными об угрозах с другими экземплярами BunkerWeb через BunkerNet."
+    },
+    "settings": {
+      "BUNKERNET_SERVER": {
+        "label": "Сервер BunkerNet",
+        "help": "Адрес API BunkerNet."
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "Хранение статистики BunkerNet (дни)",
+        "help": "Максимальный возраст (в днях) сохранённой статистики эффективности BunkerNet."
+      },
+      "USE_BUNKERNET": {
+        "label": "Включить BunkerNet",
+        "help": "Включить функцию BunkerNet."
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "Статистика эффективности BunkerNet",
+        "help": "Сохранять статистику эффективности BunkerNet (вклад, размер списка блокировок, связность) в базе данных."
+      }
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "СТАТУС BUNKERNET"
+      },
+      "info_connectivity": {
+        "title": "Подключение"
+      },
+      "info_instance_id": {
+        "title": "ID экземпляра"
+      }
+    }
+  }
+}

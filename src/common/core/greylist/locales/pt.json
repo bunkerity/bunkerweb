@@ -1,0 +1,76 @@
+{
+  "greylist": {
+    "meta": {
+      "name": "Lista cinzenta",
+      "description": "Permite o acesso mantendo as funcionalidades de segurança baseadas em listas cinzentas internas e externas de IP/rede/rDNS/ASN."
+    },
+    "widgets": {
+      "counter_failed_greylist": {
+        "title": "LISTA CINZENTA",
+        "subtitle": "Pedido bloqueado"
+      }
+    },
+    "settings": {
+      "USE_GREYLIST": {
+        "label": "Ativar a lista cinzenta",
+        "help": "Ativa a funcionalidade de lista cinzenta."
+      },
+      "GREYLIST_IP": {
+        "label": "IP/rede da lista cinzenta",
+        "help": "Lista de IP/redes, separados por espaços, a colocar na lista cinzenta."
+      },
+      "GREYLIST_RDNS": {
+        "label": "DNS inverso da lista cinzenta",
+        "help": "Lista de sufixos de DNS inverso, separados por espaços, a colocar na lista cinzenta."
+      },
+      "GREYLIST_RDNS_GLOBAL": {
+        "label": "DNS inverso lista cinzenta só IP globais",
+        "help": "Efetuar as verificações RDNS da lista cinzenta apenas em endereços IP globais."
+      },
+      "GREYLIST_ASN": {
+        "label": "ASN da lista cinzenta",
+        "help": "Lista de números ASN, separados por espaços, a colocar na lista cinzenta."
+      },
+      "GREYLIST_USER_AGENT": {
+        "label": "User-Agent da lista cinzenta",
+        "help": "Lista de User-Agent (regex PCRE), separados por espaços, a colocar na lista cinzenta."
+      },
+      "GREYLIST_URI": {
+        "label": "URI da lista cinzenta",
+        "help": "Lista de URI (regex PCRE), separados por espaços, a colocar na lista cinzenta."
+      },
+      "GREYLIST_RULE": {
+        "label": "Regra da lista cinzenta",
+        "help": "Regra composta: cada termo deve corresponder para que a regra corresponda. Os termos são separados por « AND » (maiúsculas) e cada um tem a forma [NOT ]<kind>:<value>, em que <kind> é ip, country, asn, rdns, ua (alias user_agent) ou uri. Exemplo: ip:10.0.0.0/8 AND NOT ua:^curl. As regras são combinadas entre si e com as listas simples acima através de um OU lógico. Um valor pode ser um token de grupo de recursos como @office. Os serviços stream avaliam apenas ip, country, asn e rdns."
+      },
+      "GREYLIST_HEADER_NAME": {
+        "label": "Nome de cabeçalho da lista cinzenta",
+        "help": "Nome de um cabeçalho do pedido que adiciona o pedido à lista cinzenta. Qualquer cliente pode enviar este cabeçalho: trate-o como um segredo partilhado, apenas através de HTTPS."
+      },
+      "GREYLIST_HEADER_VALUE": {
+        "label": "Valor de cabeçalho da lista cinzenta",
+        "help": "Valor (regex PCRE) que o cabeçalho deve corresponder para adicionar o pedido à lista cinzenta. Deixar vazio para corresponder apenas à presença do cabeçalho. Ancore-o com ^ e $: a correspondência não é ancorada por predefinição."
+      },
+      "GREYLIST_IP_URLS": {
+        "label": "IP/rede da lista cinzenta (URL)",
+        "help": "Lista de URL, separados por espaços, contendo IP/redes fiáveis a colocar na lista cinzenta. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "GREYLIST_RDNS_URLS": {
+        "label": "DNS inverso da lista cinzenta (URL)",
+        "help": "Lista de URL, separados por espaços, contendo sufixos de DNS inverso a colocar na lista cinzenta. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "GREYLIST_ASN_URLS": {
+        "label": "ASN da lista cinzenta (URL)",
+        "help": "Lista de URL, separados por espaços, contendo ASN a colocar na lista cinzenta. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "GREYLIST_USER_AGENT_URLS": {
+        "label": "User-Agent da lista cinzenta (URL)",
+        "help": "Lista de URL, separados por espaços, contendo User-Agent fiáveis a colocar na lista cinzenta. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "GREYLIST_URI_URLS": {
+        "label": "URI da lista cinzenta (URL)",
+        "help": "Lista de URL, separados por espaços, contendo URI maliciosos a colocar na lista cinzenta. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      }
+    }
+  }
+}

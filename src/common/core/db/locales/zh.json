@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "数据库",
+      "description": "轻松集成数据库。"
+    },
+    "settings": {
+      "DATABASE_URI": {
+        "label": "数据库 URI",
+        "help": "数据库 URI,遵循 sqlalchemy 格式。"
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "只读操作的数据库 URI",
+        "help": "用于只读操作的数据库 URI,当主数据库不可用时,也可以作为回退使用。遵循 sqlalchemy 格式。"
+      },
+      "DATABASE_LOG_LEVEL": {
+        "label": "数据库日志级别",
+        "help": "数据库日志所使用的级别。"
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "任务运行记录的最大数量",
+        "help": "数据库中要保留的任务运行记录的最大数量。"
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "UI 用户会话的最长保留天数",
+        "help": "UI 用户会话在被清除之前的最长保留天数。"
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "数据库连接池大小",
+        "help": "数据库连接池中要保持的连接数量。"
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "数据库连接池最大溢出数",
+        "help": "在连接池大小之上,最多可额外创建的连接数量。"
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "数据库连接池超时",
+        "help": "在放弃从连接池获取连接之前要等待的秒数。"
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "数据库连接池回收周期",
+        "help": "连接被自动回收前经过的秒数。设为 -1 表示禁用。"
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "数据库连接池预检测(pre-ping)",
+        "help": "是否在每次从连接池取出连接时测试其存活状态。"
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "连接归还连接池时的重置方式",
+        "help": "连接归还连接池时应如何重置。留空表示自动(MySQL/MariaDB 为 none,其他数据库为 rollback)。可选值:rollback、commit、none。"
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "数据库重试超时",
+        "help": "启动时等待数据库可用的最长秒数。"
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "数据库请求重试次数",
+        "help": "针对瞬时数据库错误的重试次数。"
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "数据库请求重试延迟",
+        "help": "针对瞬时数据库错误进行重试之间的延迟时间(以秒为单位)。"
+      }
+    }
+  }
+}

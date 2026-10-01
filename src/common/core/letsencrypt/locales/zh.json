@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "自动创建、续期和配置 Let's Encrypt 证书。"
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "自动 Let's Encrypt",
+        "help": "启用自动 Let's Encrypt 模式。"
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Let's Encrypt 透传",
+        "help": "将 Let's Encrypt 请求透传给 Web 服务器。"
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Let's Encrypt 邮箱",
+        "help": "用于 Let's Encrypt 通知以及写入证书的邮箱地址。"
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "证书颁发机构服务器",
+        "help": "选择用于生成证书的证书颁发机构(CA)服务器。"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "ZeroSSL API 密钥",
+        "help": "zerossl-bot 使用的可选 ZeroSSL API 密钥。留空时,将使用 EMAIL_LETS_ENCRYPT 获取 EAB 凭据。"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "ZeroSSL API 重试次数",
+        "help": "zerossl-bot 发出的 ZeroSSL API 请求的重试次数(0 表示禁用重试)。"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "ZeroSSL API 重试延迟",
+        "help": "zerossl-bot 中 ZeroSSL API 重试之间的延迟秒数。"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "ZeroSSL API 连接超时",
+        "help": "zerossl-bot 中 ZeroSSL API 请求的连接超时秒数。"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "ZeroSSL API 最长耗时",
+        "help": "zerossl-bot 中每个 ZeroSSL API 请求的最长总耗时秒数。"
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "验证方式",
+        "help": "用于 Let's Encrypt 的验证方式(http 或 dns)。"
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "DNS 提供商",
+        "help": "用于 DNS 验证的 DNS 提供商。"
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "DNS 传播等待时间",
+        "help": "在 DNS 验证中等待 DNS 传播的秒数。"
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "凭据条目",
+        "help": "用于 DNS 验证的 DNS 提供商 credentials.ini 文件中要添加的配置条目。写法为:键、空白字符、值(例如 'cloudflare_api_token 123456');键不要加引号。值也可以是 base64 编码,或整个条目可以是一个 base64 编码的 json 对象。"
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "解码 Base64 DNS 凭据",
+        "help": "自动解码 base64 编码的 DNS 提供商凭据。启用后,匹配 base64 格式的凭据会在使用前被解码(rfc2136 提供商除外)。如果您的凭据本身就是有意使用的 base64 字符串,请禁用此选项。"
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "通配符证书",
+        "help": "为所有域名创建通配符证书。这样单张证书即可保护多个子域名。(仅在使用 DNS 验证时可用)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "使用 Let's Encrypt 预发布环境",
+        "help": "在生成 Let's Encrypt 证书时使用预发布(staging)环境。适合在测试部署时使用,以避免在生产环境中触发速率限制。"
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "不再需要时清除旧证书",
+        "help": "续期时清除旧证书。"
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "证书配置(profile)",
+        "help": "选择用于 Let's Encrypt 的证书配置(profile)。'classic' 是通用证书,有效期 90 天,兼容性广泛。'tlsserver' 针对 TLS 服务器认证做了优化,有效期 90 天,负载更小。'shortlived' 提供有效期 7 天的证书,适合在自动化环境中增强安全性。"
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "自定义证书配置(ACME)",
+        "help": "用于支持非标准配置的 ACME 服务器的自定义证书配置。设置后将覆盖 LETS_ENCRYPT_PROFILE。"
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "禁用公共后缀(PSL 黑名单)",
+        "help": "禁止为匹配公共后缀列表(Public Suffix List)的域名申请证书(推荐,默认:yes)。"
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "最大重试次数",
+        "help": "证书生成失败时的重试次数(0 表示禁用重试)。"
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "并发证书请求",
+        "help": "在 certbot-new 任务中并发运行证书请求(可能增加触发速率限制的风险)。"
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "最大 Certbot 日志备份数",
+        "help": "每个任务保留的已轮转 certbot 日志文件的最大数量。Certbot 自身的默认值为 1000,会很快堆积。设为 0 则仅保留当前日志。"
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "বেসিক প্রমাণীকরণ",
+      "description": "বেসিক HTTP প্রমাণীকরণ পদ্ধতি ব্যবহার করে কোনো সম্পদ বা পুরো সাইটে প্রবেশের আগে লগইন বাধ্যতামূলক করে।"
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "বেসিক প্রমাণীকরণ",
+        "subtitle": "সফল"
+      },
+      "counter_failed_authbasic": {
+        "title": "বেসিক প্রমাণীকরণ",
+        "subtitle": "ব্যর্থ"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "HTTP বেসিক অথ ব্যবহার করুন",
+        "help": "HTTP বেসিক অথ ব্যবহার করুন"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "অথ বেসিক লোকেশন",
+        "help": "সুরক্ষিত রিসোর্সের URL অথবা সাইটব্যাপী মান।"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "অথ বেসিক ইউজারনেম",
+        "help": "ইউজারনেম"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "পাসওয়ার্ড",
+        "help": "পাসওয়ার্ড"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "টেক্সট",
+        "help": "প্রদর্শনের জন্য টেক্সট"
+      }
+    }
+  }
+}

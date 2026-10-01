@@ -1,0 +1,36 @@
+{
+  "country": {
+    "meta": {
+      "name": "Paese",
+      "description": "Nega l'accesso in base al paese dell'IP del client."
+    },
+    "widgets": {
+      "counter_failed_country": {
+        "title": "Paese",
+        "subtitle": "Richiesta bloccata"
+      }
+    },
+    "settings": {
+      "BLACKLIST_COUNTRY": {
+        "label": "Lista nera dei paesi",
+        "help": "Nega l'accesso se il paese del client è nell'elenco (formato ISO 3166-1 alpha-2, separati da spazi). Puoi anche usare token di gruppo come @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH e @BENELUX."
+      },
+      "COUNTRY_IGNORE_URI": {
+        "label": "URI ignorato",
+        "help": "Elenco di pattern regex PCRE (separati da spazi) per gli URI da escludere dai controlli sul paese. I pattern vengono confrontati con il percorso e con l'URI completo della richiesta, inclusa la query string."
+      },
+      "COUNTRY_IGNORE_HEADER_NAME": {
+        "label": "Nome intestazione ignorata",
+        "help": "Nome di un'intestazione della richiesta che esenta la richiesta dal controllo sul paese. Qualsiasi client può inviare questa intestazione: trattatela come un segreto condiviso, solo tramite HTTPS."
+      },
+      "COUNTRY_IGNORE_HEADER_VALUE": {
+        "label": "Valore intestazione ignorato",
+        "help": "Valore (regex PCRE) che l'intestazione deve rispettare per esentare la richiesta dal controllo sul paese. Lasciare vuoto per far coincidere semplicemente la presenza dell'intestazione. Ancoratelo con ^ e $: la corrispondenza non è ancorata per impostazione predefinita."
+      },
+      "WHITELIST_COUNTRY": {
+        "label": "Lista bianca dei paesi",
+        "help": "Nega l'accesso se il paese del client non è nell'elenco (formato ISO 3166-1 alpha-2, separati da spazi). Puoi anche usare token di gruppo come @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH e @BENELUX."
+      }
+    }
+  }
+}

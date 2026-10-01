@@ -1,0 +1,30 @@
+{
+  "gzip": {
+    "meta": {
+      "name": "Gzip",
+      "description": "Comprime las solicitudes HTTP con el algoritmo gzip."
+    },
+    "settings": {
+      "USE_GZIP": {
+        "label": "Usar gzip",
+        "help": "Activa o desactiva la compresión Gzip. Desactivada por defecto, que es también el comportamiento predeterminado propio de NGINX. El ajuste es por servicio: déjelo desactivado para cualquier servicio cuyas respuestas lleven a la vez un secreto (un token CSRF, una clave API) y reflejen una entrada proporcionada por el atacante, ya que esa combinación es la condición previa de BREACH — y tenga en cuenta que text/html siempre se comprime, sea lo que sea lo que indique GZIP_TYPES. La interfaz web de BunkerWeb es uno de esos servicios."
+      },
+      "GZIP_TYPES": {
+        "label": "Tipos MIME",
+        "help": "Lista de tipos MIME que se comprimirán con gzip."
+      },
+      "GZIP_MIN_LENGTH": {
+        "label": "Longitud mínima",
+        "help": "Tamaño mínimo de la respuesta (en bytes) para que se aplique la compresión Gzip."
+      },
+      "GZIP_COMP_LEVEL": {
+        "label": "Nivel de compresión",
+        "help": "Nivel de compresión para Gzip (1 = compresión mínima, 9 = compresión máxima)."
+      },
+      "GZIP_PROXIED": {
+        "label": "Solicitudes proxificadas",
+        "help": "Especifica qué solicitudes proxificadas deben comprimirse."
+      }
+    }
+  }
+}

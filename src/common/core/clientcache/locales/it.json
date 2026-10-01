@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "Cache client",
+      "description": "Gestisce la memorizzazione nella cache per i client."
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "Usa cache client",
+        "help": "Indica al client di memorizzare localmente i file statici."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "Estensioni che devono essere memorizzate nella cache dal client",
+        "help": "Elenco di estensioni di file, separate da barre verticali, che devono essere memorizzate nella cache."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "Invia l'intestazione HTTP ETag per le risorse statiche."
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Intestazione Cache-Control",
+        "help": "Valore dell'intestazione HTTP Cache-Control."
+      }
+    }
+  }
+}

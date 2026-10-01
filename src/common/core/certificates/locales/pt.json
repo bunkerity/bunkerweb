@@ -1,0 +1,8 @@
+{
+  "certificates": {
+    "meta": {
+      "name": "Certificados",
+      "description": "Serve o certificado associado a um serviço a partir do inventário central, seja qual for o fornecedor que o emitiu."
+    }
+  }
+}

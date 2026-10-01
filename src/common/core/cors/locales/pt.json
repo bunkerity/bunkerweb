@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Partilha de recursos entre origens diferentes (Cross-Origin Resource Sharing)."
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "Pedido bloqueado"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "Usar CORS",
+        "help": "Usar CORS"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "Origens permitidas",
+        "help": "Origens permitidas para efetuar pedidos CORS: regex PCRE, * ou self (para a mesma origem)."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Valor de Access-Control-Allow-Methods",
+        "help": "Valor do cabeçalho Access-Control-Allow-Methods."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Valor de Access-Control-Allow-Headers",
+        "help": "Valor do cabeçalho Access-Control-Allow-Headers."
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Enviar Access-Control-Allow-Credentials",
+        "help": "Envia o cabeçalho Access-Control-Allow-Credentials."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Valor de Access-Control-Expose-Headers",
+        "help": "Valor do cabeçalho Access-Control-Expose-Headers."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Valor do cabeçalho Cross-Origin-Opener-Policy."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Valor do cabeçalho Cross-Origin-Embedder-Policy."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Valor do cabeçalho Cross-Origin-Resource-Policy."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Valor de Access-Control-Max-Age",
+        "help": "Valor do cabeçalho Access-Control-Max-Age."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "Negar pedido",
+        "help": "Nega o pedido e não o envia para o backend se a Origin não for permitida."
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "selfsigned": {
+    "meta": {
+      "name": "Kendinden imzalı sertifika",
+      "description": "Kendinden imzalı bir sertifika oluşturur."
+    },
+    "settings": {
+      "GENERATE_SELF_SIGNED_SSL": {
+        "label": "Kendinden imzalı sertifikayı etkinleştir",
+        "help": "Kendinden imzalı sertifika oluştur ve kullan."
+      },
+      "SELF_SIGNED_SSL_ALGORITHM": {
+        "label": "Sertifika algoritması",
+        "help": "Kendinden imzalı sertifika için kullanılacak algoritma."
+      },
+      "SELF_SIGNED_SSL_EXPIRY": {
+        "label": "Sertifika süresi",
+        "help": "Kendinden imzalı sertifikanın gün cinsinden geçerlilik süresi."
+      },
+      "SELF_SIGNED_SSL_SUBJ": {
+        "label": "Sertifika konusu",
+        "help": "Kendinden imzalı sertifikanın konusu."
+      }
+    }
+  }
+}

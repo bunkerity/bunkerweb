@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "Mengelola pengaturan terkait SSL/TLS."
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "Alihkan HTTP ke HTTPS",
+        "help": "Alihkan semua permintaan HTTP ke HTTPS."
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "Alihkan otomatis HTTP ke HTTPS",
+        "help": "Coba deteksi apakah HTTPS digunakan dan aktifkan pengalihan HTTP ke HTTPS jika demikian."
+      },
+      "SSL_PROTOCOLS": {
+        "label": "Protokol SSL",
+        "help": "Versi TLS yang didukung. Kami merekomendasikan nilai default TLSv1.2 TLSv1.3 untuk alasan kompatibilitas."
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "Tingkat Cipher SSL",
+        "help": "Tingkat keamanan preset untuk cipher suite SSL. 'Modern' paling aman tetapi mungkin tidak bekerja dengan perangkat lama."
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "Cipher SSL Kustom",
+        "help": "String cipher suite SSL kustom. Jika ditentukan, akan menggantikan Tingkat Cipher SSL. Biarkan kosong untuk menggunakan konfigurasi berbasis tingkat."
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "Kurva ECDH SSL",
+        "help": "Kurva ECDH (grup TLS) yang lebih disukai untuk pertukaran kunci. Gunakan \"auto\" untuk pemilihan cerdas (lebih memilih grup PQC seperti X25519MLKEM768 pada OpenSSL 3.5+ jika tersedia)."
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "Ukuran Cache Sesi SSL",
+        "help": "Ukuran cache sesi SSL (mis., '10m' untuk 10 megabyte, '512k' untuk 512 kilobyte). Atur ke 'off' atau 'none' untuk menonaktifkan caching sesi."
+      }
+    }
+  }
+}

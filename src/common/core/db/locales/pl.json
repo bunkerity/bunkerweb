@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Baza danych",
+      "description": "Łatwo integruje bazę danych."
+    },
+    "settings": {
+      "DATABASE_LOG_LEVEL": {
+        "label": "Poziom logów bazy danych",
+        "help": "Poziom używany dla logów bazy danych."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "Maksymalna liczba uruchomień zadań",
+        "help": "Maksymalna liczba uruchomień zadań przechowywanych w bazie danych."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "Maksymalny wiek sesji użytkownika UI w dniach",
+        "help": "Maksymalny wiek w dniach dla sesji użytkownika UI, zanim zostaną usunięte."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Maksymalny overflow puli bazy danych",
+        "help": "Maksymalna liczba połączeń tworzonych ponad rozmiar puli."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Pre-ping puli bazy danych",
+        "help": "Czy testować połączenia pod kątem aktywności przy każdym pobraniu z puli."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Recykling puli bazy danych",
+        "help": "Liczba sekund, po których połączenie jest automatycznie odnawiane. Ustaw -1, aby wyłączyć."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Reset puli bazy danych przy zwrocie",
+        "help": "Sposób resetowania połączenia przy zwrocie do puli. Pozostaw puste dla trybu automatycznego (none dla MySQL/MariaDB, rollback dla pozostałych). Możliwe wartości: rollback, commit, none."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Rozmiar puli bazy danych",
+        "help": "Liczba połączeń utrzymywanych w puli połączeń bazy danych."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Limit czasu puli bazy danych",
+        "help": "Liczba sekund oczekiwania przed rezygnacją z uzyskania połączenia z puli."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Liczba prób ponowienia żądania bazy danych",
+        "help": "Liczba prób ponowienia dla przejściowych błędów bazy danych."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Opóźnienie ponowienia żądania bazy danych",
+        "help": "Opóźnienie w sekundach między próbami ponowienia dla przejściowych błędów bazy danych."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Limit czasu ponawiania bazy danych",
+        "help": "Maksymalna liczba sekund oczekiwania na dostępność bazy danych przy starcie."
+      },
+      "DATABASE_URI": {
+        "label": "URI bazy danych",
+        "help": "URI bazy danych, zgodny z formatem sqlalchemy."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "URI bazy danych dla operacji tylko do odczytu",
+        "help": "URI bazy danych dla operacji tylko do odczytu; może też służyć jako rezerwa, gdy główna baza danych jest niedostępna. Zgodny z formatem sqlalchemy."
+      }
+    }
+  }
+}

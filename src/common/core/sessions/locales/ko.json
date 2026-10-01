@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "세션",
+      "description": "다른 플러그인이 사용하는 세션 관리."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "세션 시크릿",
+        "help": "챌린지 관련 데이터를 저장하기 위해 세션 변수를 암호화하는 데 사용되는 시크릿입니다."
+      },
+      "SESSIONS_NAME": {
+        "label": "세션 이름",
+        "help": "클라이언트에 부여되는 쿠키의 이름입니다."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "세션 쿠키 도메인",
+        "help": "이 서버의 세션 쿠키에 설정되는 Domain 속성입니다(예: `example.com` 또는 `.example.com`). 비워 두면 쿠키의 범위가 정확한 호스트로 제한됩니다. 상위 등록 가능 도메인으로 설정하면 형제 서브도메인 간에 세션(및 그에 따른 antibot/챌린지 상태)을 공유할 수 있습니다. 멀티사이트 구성에서는 서버별로 이 값을 설정하여, 관련 없는 테넌트가 다른 테넌트의 `Domain` 속성을 절대 받지 않도록 하십시오."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "세션 유휴 제한 시간",
+        "help": "세션이 무효화되기 전까지 허용되는 최대 비활성 시간(초)입니다."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "세션 롤링 제한 시간",
+        "help": "세션을 갱신해야 하기까지의 최대 시간(초)입니다."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "세션 절대 제한 시간",
+        "help": "세션이 파기되기까지의 최대 시간(초)입니다."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "세션 IP 확인",
+        "help": "IP 주소가 원래 주소와 다르면 세션을 파기합니다."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "세션 User-Agent 확인",
+        "help": "User-Agent가 원래 값과 다르면 세션을 파기합니다."
+      }
+    }
+  }
+}

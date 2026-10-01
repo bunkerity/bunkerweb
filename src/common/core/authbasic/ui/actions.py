@@ -74,16 +74,20 @@ def pre_render(**kwargs):
         "counter_passed_authbasic": {
             "value": 0,
             "title": "AUTH BASIC",
+            "title_i18n": "widgets.counter_passed_authbasic.title",
             "subtitle": "Successful",
-            "subtitle_color": "success",
-            "svg_color": "success",
+            "subtitle_i18n": "widgets.counter_passed_authbasic.subtitle",
+            "subtitle_color": "success-emphasis",
+            "svg_color": "success-emphasis",
         },
         "counter_failed_authbasic": {
             "value": 0,
             "title": "AUTH BASIC",
+            "title_i18n": "widgets.counter_failed_authbasic.title",
             "subtitle": "Failed",
-            "subtitle_color": "danger",
-            "svg_color": "danger",
+            "subtitle_i18n": "widgets.counter_failed_authbasic.subtitle",
+            "subtitle_color": "danger-emphasis",
+            "svg_color": "danger-emphasis",
         },
         "top_authbasic_users": {
             "col-size": "col-12 col-md-6",
@@ -101,7 +105,7 @@ def pre_render(**kwargs):
                 "column": 1,
                 "dir": "desc",
             },
-            "svg_color": "warning",
+            "svg_color": "warning-emphasis",
         },
         "list_authbasic_authentications": {
             "col-size": "col-12",
@@ -119,7 +123,7 @@ def pre_render(**kwargs):
                 "column": 0,
                 "dir": "asc",
             },
-            "svg_color": "info",
+            "svg_color": "info-emphasis",
         },
     }
     try:

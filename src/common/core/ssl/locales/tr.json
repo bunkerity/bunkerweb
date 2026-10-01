@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "SSL/TLS ile ilgili ayarları yönetir."
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "HTTP'yi HTTPS'ye yönlendir",
+        "help": "Tüm HTTP isteklerini HTTPS'ye yönlendir."
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "HTTP'den HTTPS'ye otomatik yönlendirme",
+        "help": "HTTPS kullanılıp kullanılmadığını algılamayı dene ve durum buysa HTTP'den HTTPS'ye yönlendirmeyi etkinleştir."
+      },
+      "SSL_PROTOCOLS": {
+        "label": "SSL protokolleri",
+        "help": "Desteklenen TLS sürümü. Uyumluluk nedeniyle varsayılan değer olan TLSv1.2 TLSv1.3'ü öneririz."
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "SSL Şifreleme Düzeyi",
+        "help": "SSL şifreleme paketleri için önceden ayarlanmış güvenlik düzeyi. 'Modern' en güvenlisidir ancak eski cihazlarla çalışmayabilir."
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "Özel SSL Şifreleri",
+        "help": "Özel SSL şifreleme paketi dizesi. Belirtilirse SSL Şifreleme Düzeyi'nin yerini alır. Düzey tabanlı yapılandırmayı kullanmak için boş bırakın."
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "SSL ECDH Eğrileri",
+        "help": "Anahtar değişimi için tercih edilen ECDH eğrileri (TLS grupları). Akıllı seçim için \"auto\" kullanın (mevcut olduğunda OpenSSL 3.5+ üzerinde X25519MLKEM768 gibi PQC gruplarını tercih eder)."
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "SSL Oturum Önbelleği Boyutu",
+        "help": "SSL oturum önbelleğinin boyutu (örneğin, 10 megabayt için '10m', 512 kilobayt için '512k'). Oturum önbelleklemeyi devre dışı bırakmak için 'off' veya 'none' olarak ayarlayın."
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Kaynaklar arası paylaşım (Cross-Origin Resource Sharing)."
+    },
+    "settings": {
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Access-Control-Allow-Credentials gönder",
+        "help": "Access-Control-Allow-Credentials üstbilgisini gönder."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Access-Control-Allow-Headers değeri",
+        "help": "Access-Control-Allow-Headers üstbilgisinin değeri."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Access-Control-Allow-Methods değeri",
+        "help": "Access-Control-Allow-Methods üstbilgisinin değeri."
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "İzin verilen kaynaklar (origin)",
+        "help": "CORS isteği yapmasına izin verilen kaynaklar (origin): PCRE normal ifadesi, * veya self (aynı origin için)."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "İsteği reddet",
+        "help": "Origin izinli değilse isteği reddet ve backend'e gönderme."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Access-Control-Expose-Headers değeri",
+        "help": "Access-Control-Expose-Headers üstbilgisinin değeri."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Access-Control-Max-Age değeri",
+        "help": "Access-Control-Max-Age üstbilgisinin değeri."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Cross-Origin-Embedder-Policy üstbilgisinin değeri."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Cross-Origin-Opener-Policy üstbilgisinin değeri."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Cross-Origin-Resource-Policy üstbilgisinin değeri."
+      },
+      "USE_CORS": {
+        "label": "CORS kullan",
+        "help": "CORS kullan"
+      }
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "İstek engellendi"
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "Metriken",
+      "description": "Erfassung und Abruf von Metriken."
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "Metriken verwenden",
+        "help": "Aktiviert die Erfassung und den Abruf interner Metriken."
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "Metriken-Speichergröße",
+        "help": "Größe des internen Speichers für Metriken."
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "Maximale Wiederholungen für Metriken-Speicher",
+        "help": "Maximale Anzahl an Wiederholungsversuchen für Speicheroperationen."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "Maximale blockierte Anfragen der Metriken",
+        "help": "Maximale Anzahl blockierter Anfragen, die gespeichert werden (pro Worker). Akzeptiert eine einfache Ganzzahl oder eine `k`/`m`-Kurzform (z. B. `1000`, `1k`, `10k`, `1m`)."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "Maximale blockierte Anfragen der Metriken in Redis",
+        "help": "Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden. Akzeptiert eine einfache Ganzzahl oder eine `k`/`m`-Kurzform (z. B. `10000`, `10k`, `100k`, `1m`)."
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "Metriken-Redis-TTL",
+        "help": "Time-to-live in Sekunden für die in Redis gespeicherten Metriken-Schlüssel (Standard `2592000`, 30 Tage; `0` hält die Schlüssel dauerhaft). Wird bei jeder Synchronisierung aufgefrischt, sodass aktive Daten nie ablaufen; mit einer `volatile-lru`-Verdrängungsrichtlinie können dadurch verwaiste Metrikdaten verdrängbar werden, sodass sich Redis nach einem maxmemory-Zustand erholt, anstatt Schreibvorgänge dauerhaft abzulehnen. Akzeptiert eine einfache Ganzzahl oder eine `k`/`m`-Kurzform."
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "Maximale LRU-Historie",
+        "help": "Begrenzt den LRU-Ereignisverlauf pro Worker: begrenzt sowohl die Anzahl der LRU-Slots als auch die Länge des Ereignisverlauf-Arrays pro Schlüssel (Block-Spuren, Auth-Spuren usw.). Akzeptiert eine einfache Ganzzahl oder eine `k`/`m`-Kurzform (z. B. `1k`, `10k`, `1m`). Begrenzt unkontrolliertes Wachstum durch Quellen mit hoher Kardinalität wie IP-Spoofing-Fluten."
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "Plugin-Zeiten erfassen",
+        "help": "Misst, wie lange jedes Plugin in jeder Anfragephase benötigt, dargestellt als count/sum/max-Aggregat pro (Plugin, Phase). Erfordert das Erzwingen einer NGINX-Zeitaktualisierung bei jedem Plugin-Aufruf, was pro Anfrage über eine vollständige Plugin-Kette hinweg ungefähr eine Mikrosekunde hinzufügt; auf `no` setzen, um diese Kosten vollständig zu entfernen. Die Gesamtdauer der Anfrage wird immer erfasst und von dieser Einstellung nicht beeinflusst."
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "Traffic-Baseline-Stichprobenrate (%)",
+        "help": "Prozentsatz der nicht blockierten Anfragen, die als Traffic-Baseline erfasst werden, damit die Anomalieerkennung lernt, wie normal aussieht (`0` deaktiviert dies, `1` erfasst eine von hundert Anfragen als Stichprobe). Die Stichprobenziehung ist deterministisch anhand der Anfrage-ID, sodass die Entscheidung über Subrequests hinweg stabil bleibt. Die Client-IP wird niemals gespeichert. Die Erfassung fügt dem Anfragepfad keine Arbeit hinzu, aber das Volumen ist groß: 1 % von 10.000 Anfragen/s sind etwa 8,6 Millionen Datensätze pro Tag, die `METRICS_BASELINE_RETENTION_MAX_ROWS` anschließend zurechtstutzt. Erhöhen Sie diesen Wert bewusst."
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "Maximale Baseline-Anfragen der Metriken",
+        "help": "Maximale Anzahl an abgetasteten Baseline-Datensätzen, die pro Worker gehalten werden, bevor die ältesten verworfen werden. Dieser Puffer teilt sich METRICS_MEMORY_SIZE mit Berichten über blockierte Anfragen und anderen Metriken, wird aber verworfen, statt diese zu verdrängen, wenn der Platz ausgeht. Akzeptiert eine einfache Ganzzahl oder eine `k`/`m`-Kurzform. Senken Sie stattdessen die Stichprobenrate, anstatt dies zu erhöhen."
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "Baseline-Aufbewahrung (Tage)",
+        "help": "Maximales Alter (in Tagen) der abgetasteten Baseline-Datensätze, bevor der Aufbewahrungs-Job sie löscht. Bewusst kürzer als die Aufbewahrung der Blockierungsberichte: Eine Baseline wächst weit schneller, und ein Modell wird auf aktuellem normalem Verhalten trainiert statt auf der Historie."
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "Baseline-Aufbewahrung (max. Zeilen)",
+        "help": "Maximale Anzahl an abgetasteten Baseline-Datensätzen, die aufbewahrt werden; der Aufbewahrungs-Job löscht die ältesten Zeilen über dieser Anzahl hinaus. Getrennt vom Limit für Blockierungsberichte, da die beiden Tabellen mit sehr unterschiedlichen Raten wachsen."
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "Metriken in Redis speichern",
+        "help": "Speichert Metriken (Zähler und Tabellen) in Redis für eine clusterweite Aggregation."
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "Berichte in der Datenbank persistieren",
+        "help": "Persistiert Berichte über blockierte Anfragen in der Datenbank (dauerhaft, abfragbar), indem die Instanzen regelmäßig abgefragt werden. Bei Deaktivierung verbleiben die Berichte nur in den In-Memory-/Redis-Speichern."
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "Berichts-Aufbewahrung (Tage)",
+        "help": "Maximales Alter (in Tagen) der persistierten Berichte über blockierte Anfragen, bevor der Aufbewahrungs-Job sie löscht."
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "Berichts-Aufbewahrung (max. Zeilen)",
+        "help": "Maximale Anzahl an persistierten Berichten über blockierte Anfragen, die aufbewahrt werden; der Aufbewahrungs-Job löscht die ältesten Zeilen über dieser Anzahl hinaus."
+      }
+    }
+  }
+}

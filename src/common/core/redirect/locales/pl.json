@@ -1,0 +1,26 @@
+{
+  "redirect": {
+    "meta": {
+      "name": "Przekierowanie",
+      "description": "Zarządza przekierowaniami HTTP."
+    },
+    "settings": {
+      "REDIRECT_FROM": {
+        "label": "Przekieruj z",
+        "help": "Ścieżka, z której nastąpi przekierowanie. Wartość zaczynająca się od ^ lub kończąca się na $ jest traktowana jako lokalizacja regex. Opcjonalnie poprzedź ją ~, ~*, = lub ^~ i jedną spacją, aby jawnie ustawić modyfikator lokalizacji nginx; poza tym w wartości niedozwolone są spacje, ;, { ani }."
+      },
+      "REDIRECT_TO": {
+        "label": "Przekieruj do",
+        "help": "Przekieruj całą witrynę do innej."
+      },
+      "REDIRECT_TO_REQUEST_URI": {
+        "label": "Dołącz URI żądania",
+        "help": "Dołącz żądany URI do adresu przekierowania."
+      },
+      "REDIRECT_TO_STATUS_CODE": {
+        "label": "Kod statusu przekierowania",
+        "help": "Kod statusu HTTP dla przekierowania: 301 (Moved Permanently - buforowane przez przeglądarki), 302 (Found - tymczasowe, może zmienić metodę), 303 (See Other - zawsze używa GET), 307 (Temporary Redirect - zachowuje metodę), 308 (Permanent Redirect - zachowuje metodę, buforowane)."
+      }
+    }
+  }
+}

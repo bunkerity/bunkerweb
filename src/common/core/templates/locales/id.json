@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "Templat",
+      "description": "Plugin core palsu untuk templat internal."
+    },
+    "templates": {
+      "low": {
+        "name": "Tingkat keamanan dasar yang menyediakan pengaturan penting untuk perlindungan aplikasi web",
+        "steps": {
+          "0": {
+            "title": "Layanan web - Layanan depan",
+            "subtitle": "Konfigurasikan layanan web Anda yang menghadap klien"
+          },
+          "1": {
+            "title": "Layanan web - Server upstream",
+            "subtitle": "Konfigurasikan server upstream yang akan dilindungi oleh BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Umum",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan protokol HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Header",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan header HTTP"
+          },
+          "4": {
+            "title": "Keamanan - Perilaku buruk",
+            "subtitle": "Konfigurasikan pengaturan terkait pemblokiran otomatis saat perilaku buruk terdeteksi."
+          },
+          "5": {
+            "title": "Keamanan - Daftar hitam",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan daftar hitam eksternal."
+          },
+          "6": {
+            "title": "Keamanan - Pembatasan",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan pembatasan permintaan dan koneksi."
+          },
+          "7": {
+            "title": "Keamanan - Antibot",
+            "subtitle": "Konfigurasikan pengaturan tentang deteksi bot"
+          },
+          "8": {
+            "title": "Keamanan - Autentikasi dasar",
+            "subtitle": "Konfigurasikan autentikasi dasar HTTP"
+          },
+          "9": {
+            "title": "Keamanan - Negara",
+            "subtitle": "Konfigurasikan pengaturan tentang kebijakan akses berdasarkan negara"
+          },
+          "10": {
+            "title": "Keamanan - ModSecurity",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan WAF ModSecurity"
+          }
+        }
+      },
+      "medium": {
+        "name": "Tingkat keamanan seimbang yang menawarkan kombinasi fitur keamanan dan optimalisasi kinerja",
+        "steps": {
+          "0": {
+            "title": "Layanan web - Layanan depan",
+            "subtitle": "Konfigurasikan layanan web Anda yang menghadap klien"
+          },
+          "1": {
+            "title": "Layanan web - Server upstream",
+            "subtitle": "Konfigurasikan server upstream yang akan dilindungi oleh BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Umum",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan protokol HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Header",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan header HTTP"
+          },
+          "4": {
+            "title": "Keamanan - Perilaku buruk",
+            "subtitle": "Konfigurasikan pengaturan terkait pemblokiran otomatis saat perilaku buruk terdeteksi."
+          },
+          "5": {
+            "title": "Keamanan - Daftar hitam",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan daftar hitam eksternal."
+          },
+          "6": {
+            "title": "Keamanan - Pembatasan",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan pembatasan permintaan dan koneksi."
+          },
+          "7": {
+            "title": "Keamanan - Antibot",
+            "subtitle": "Konfigurasikan pengaturan tentang deteksi bot"
+          },
+          "8": {
+            "title": "Keamanan - Autentikasi dasar",
+            "subtitle": "Konfigurasikan autentikasi dasar HTTP"
+          },
+          "9": {
+            "title": "Keamanan - Negara",
+            "subtitle": "Konfigurasikan pengaturan tentang kebijakan akses berdasarkan negara"
+          },
+          "10": {
+            "title": "Keamanan - Pemindaian terbalik",
+            "subtitle": "Konfigurasikan pengaturan tentang pemindaian port klien"
+          },
+          "11": {
+            "title": "Keamanan - ModSecurity",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan WAF ModSecurity"
+          }
+        }
+      },
+      "high": {
+        "name": "Tingkat keamanan lanjutan dengan fokus pada langkah-langkah keamanan yang kuat dan perlindungan menyeluruh",
+        "steps": {
+          "0": {
+            "title": "Layanan web - Layanan depan",
+            "subtitle": "Konfigurasikan layanan web Anda yang menghadap klien"
+          },
+          "1": {
+            "title": "Layanan web - Server upstream",
+            "subtitle": "Konfigurasikan server upstream yang akan dilindungi oleh BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Umum",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan protokol HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Header",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan header HTTP"
+          },
+          "4": {
+            "title": "Keamanan - Perilaku buruk",
+            "subtitle": "Konfigurasikan pengaturan terkait pemblokiran otomatis saat perilaku buruk terdeteksi."
+          },
+          "5": {
+            "title": "Keamanan - Daftar hitam",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan daftar hitam eksternal."
+          },
+          "6": {
+            "title": "Keamanan - Pembatasan",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan pembatasan permintaan dan koneksi."
+          },
+          "7": {
+            "title": "Keamanan - Antibot",
+            "subtitle": "Konfigurasikan pengaturan tentang deteksi bot"
+          },
+          "8": {
+            "title": "Keamanan - Autentikasi dasar",
+            "subtitle": "Konfigurasikan autentikasi dasar HTTP"
+          },
+          "9": {
+            "title": "Keamanan - Negara",
+            "subtitle": "Konfigurasikan pengaturan tentang kebijakan akses berdasarkan negara"
+          },
+          "10": {
+            "title": "Keamanan - Pemindaian terbalik",
+            "subtitle": "Konfigurasikan pengaturan tentang pemindaian port klien"
+          },
+          "11": {
+            "title": "Keamanan - ModSecurity",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan WAF ModSecurity"
+          }
+        }
+      },
+      "api": {
+        "name": "Pengaturan dasar saat menggunakan API BunkerWeb",
+        "steps": {
+          "0": {
+            "title": "Layanan - Layanan depan",
+            "subtitle": "Konfigurasikan nama server dan pengaturan SSL/TLS"
+          },
+          "1": {
+            "title": "Layanan - Server upstream",
+            "subtitle": "Konfigurasikan server upstream yang akan dilindungi oleh BunkerWeb"
+          },
+          "2": {
+            "title": "API - Pembatasan laju",
+            "subtitle": "Konfigurasikan pengaturan pembatasan laju - perlu diingat bahwa API juga memiliki pembatasan laju internal"
+          },
+          "3": {
+            "title": "API - Pengaturan lain-lain",
+            "subtitle": "Pengaturan penting lainnya agar API berfungsi dengan baik"
+          }
+        }
+      },
+      "ui": {
+        "name": "Pengaturan dasar saat menggunakan UI web",
+        "steps": {
+          "0": {
+            "title": "Langkah contoh",
+            "subtitle": "Ini adalah langkah contoh untuk menampilkan pengaturan dasar saat menggunakan UI web"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "URL templat eksternal",
+        "help": "Daftar URL templat layanan untuk diunduh dan dipasang, dipisahkan dengan spasi. Setiap URL adalah satu templat: paket JSON bunkerweb-template/1, atau file .zip atau .tar.gz yang berisi <id>/template.json beserta konfigurasinya. Hanya https:// dan file:/// yang diterima, maksimal 1 MiB. Tambahkan #sha256=<digest> ke URL untuk mengunci kontennya. Templat yang URL-nya dihapus akan dihapus kecuali masih digunakan oleh suatu layanan."
+      }
+    }
+  }
+}

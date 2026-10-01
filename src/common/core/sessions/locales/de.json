@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Sitzungen",
+      "description": "Verwaltung der von anderen Plugins genutzten Sitzungen."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Sitzungs-Secret",
+        "help": "Secret, das zum Verschlüsseln der Sitzungsvariablen verwendet wird, die Daten zu Challenges speichern."
+      },
+      "SESSIONS_NAME": {
+        "label": "Sitzungsname",
+        "help": "Name des Cookies, das den Clients gegeben wird."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Sitzungs-Cookie-Domain",
+        "help": "Domain-Attribut, das für das Sitzungs-Cookie dieses Servers gesetzt wird (z. B. `example.com` oder `.example.com`). Leer lassen, um das Cookie auf den exakten Host zu beschränken. Setzen Sie es auf eine übergeordnete registrierbare Domain, um die Sitzung (und damit den Antibot-/Challenge-Status) über Geschwister-Subdomains zu teilen. Konfigurieren Sie dies in einem Multisite-Setup pro Server, damit unabhängige Mandanten niemals ein mandantenübergreifendes `Domain`-Attribut erhalten."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Sitzungs-Leerlauf-Timeout",
+        "help": "Maximale Zeit (in Sekunden) der Inaktivität, bevor die Sitzung ungültig wird."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Sitzungs-Rolling-Timeout",
+        "help": "Maximale Zeit (in Sekunden), bevor eine Sitzung erneuert werden muss."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Sitzungs-Absolut-Timeout",
+        "help": "Maximale Zeit (in Sekunden), bevor eine Sitzung zerstört wird."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Sitzungs-IP-Prüfung",
+        "help": "Zerstört die Sitzung, wenn sich die IP-Adresse von der ursprünglichen unterscheidet."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Sitzungs-User-Agent-Prüfung",
+        "help": "Zerstört die Sitzung, wenn sich der User-Agent vom ursprünglichen unterscheidet."
+      }
+    }
+  }
+}

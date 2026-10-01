@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "robots.txt ফাইল পরিচালনা করে। আপনার সাইটে ওয়েব ক্রলারের প্রবেশাধিকার নিয়ন্ত্রণের জন্য মানদণ্ড।"
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "robots.txt ব্যবহার করুন",
+        "help": "robots.txt ফাইল সক্ষম করুন।"
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "কমিউনিটি robots.txt তালিকা",
+        "help": "robots.txt-এ অন্তর্ভুক্ত করার জন্য কমিউনিটি-রক্ষিত তালিকা নির্বাচন করুন।"
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "Robots.txt ইউআরএল",
+        "help": "URL-এর তালিকা, স্পেস দিয়ে পৃথক, যাতে robots.txt নিয়ম রয়েছে। file:// URL এবং http://user:pass@url স্কিম দিয়ে বেসিক অথও সমর্থিত।"
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Robots.txt নিয়ম",
+        "help": "robots.txt-এর জন্য নিয়ম (প্রতি লাইনে একটি)।"
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Robots.txt হেডার",
+        "help": "robots.txt ফাইলের হেডার (নিয়মের আগে)। Base64-এ এনকোড করা যেতে পারে।"
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Robots.txt ফুটার",
+        "help": "robots.txt ফাইলের ফুটার (নিয়মের পরে)। Base64-এ এনকোড করা যেতে পারে।"
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Robots.txt সাইটম্যাপ",
+        "help": "robots.txt-এ অন্তর্ভুক্ত করার জন্য সাইটম্যাপ URL।"
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "নিয়ম উপেক্ষা করুন",
+        "help": "উপেক্ষা করার জন্য নিয়ম (PCRE রেগেক্স)। একাধিকবার নির্দিষ্ট করা যেতে পারে।"
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "DarkVisitors API টোকেন",
+        "help": "DarkVisitors API-এর জন্য Bearer টোকেন।"
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "DarkVisitors এজেন্ট প্রকার",
+        "help": "DarkVisitors API-এর সাথে যোগাযোগের সময় DarkVisitors-এর agent_types ফিল্ডে অন্তর্ভুক্ত করার জন্য কমা দিয়ে পৃথক এজেন্ট প্রকারের তালিকা।"
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "একটি স্ট্রিং যা নির্দিষ্ট করে কোন URL অনুমোদিত নয়। DarkVisitors API-এর সাথে যোগাযোগের সময় এই মান disallow ফিল্ড হিসেবে পাঠানো হবে।"
+      }
+    }
+  }
+}

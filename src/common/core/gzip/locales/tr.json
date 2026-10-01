@@ -1,0 +1,30 @@
+{
+  "gzip": {
+    "meta": {
+      "name": "Gzip",
+      "description": "HTTP isteklerini gzip algoritmasıyla sıkıştırır."
+    },
+    "settings": {
+      "USE_GZIP": {
+        "label": "Gzip kullan",
+        "help": "Gzip sıkıştırmasını etkinleştir veya devre dışı bırak. Varsayılan olarak kapalıdır; bu, NGINX'in kendi varsayılanıyla da aynıdır. Ayar hizmet başınadır: yanıtları hem bir sır (CSRF token'ı, API anahtarı) taşıyan hem de saldırganın sağladığı girdiyi geri yansıtan herhangi bir hizmet için kapalı bırakın, çünkü bu kombinasyon BREACH ön koşuludur — ayrıca GZIP_TYPES'ta ne listelenirse listelensin text/html'nin her zaman sıkıştırıldığını unutmayın. BunkerWeb web arayüzü böyle bir hizmettir."
+      },
+      "GZIP_TYPES": {
+        "label": "MIME türleri",
+        "help": "gzip ile sıkıştırılacak MIME türlerinin listesi."
+      },
+      "GZIP_MIN_LENGTH": {
+        "label": "Minimum uzunluk",
+        "help": "Gzip sıkıştırmasının uygulanacağı minimum yanıt boyutu (bayt cinsinden)."
+      },
+      "GZIP_COMP_LEVEL": {
+        "label": "Sıkıştırma düzeyi",
+        "help": "Gzip için sıkıştırma düzeyi (1 = en az sıkıştırma, 9 = maksimum sıkıştırma)."
+      },
+      "GZIP_PROXIED": {
+        "label": "Proxy istekleri",
+        "help": "Hangi proxy isteklerinin sıkıştırılacağını belirtir."
+      }
+    }
+  }
+}

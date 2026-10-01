@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Mga sesyon",
+      "description": "Pamamahala ng mga sesyong ginagamit ng ibang mga plugin."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Sessions Secret",
+        "help": "Secret na ginagamit para i-encrypt ang mga session variable para sa pag-iimbak ng data na may kinalaman sa mga hamon."
+      },
+      "SESSIONS_NAME": {
+        "label": "Sessions Name",
+        "help": "Pangalan ng cookie na ibinibigay sa mga client."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Sessions Cookie Domain",
+        "help": "Domain attribute na naka-set sa session cookie para sa server na ito (hal. `example.com` o `.example.com`). Iwanang blangko para manatiling naka-scope ang cookie sa eksaktong host. I-set ito sa parent registrable domain para ma-share ang session (at kasama na ang antibot/challenge state) sa magkakapatid na subdomain. Sa multisite setup, i-configure ito kada server para hindi makatanggap ang mga hindi-kaugnay na tenant ng cross-tenant na `Domain` attribute."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Sessions Idling Timeout",
+        "help": "Pinakamataas na oras (sa segundo) ng inactivity bago mag-invalid ang session."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Sessions Rolling Timeout",
+        "help": "Pinakamataas na oras (sa segundo) bago kailanganing i-renew ang session."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Sessions Absolute Timeout",
+        "help": "Pinakamataas na oras (sa segundo) bago sirain ang session."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Sessions Check IP",
+        "help": "Sirain ang session kung iba ang IP address kaysa sa orihinal."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Sessions Check User-Agent",
+        "help": "Sirain ang session kung iba ang User-Agent kaysa sa orihinal."
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "Cabeçalhos",
+      "description": "Gere os cabeçalhos HTTP enviados aos clientes."
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "Cabeçalho personalizado (HeaderName: HeaderValue)",
+        "help": "Cabeçalho personalizado a adicionar (HeaderName: HeaderValue)."
+      },
+      "REMOVE_HEADERS": {
+        "label": "Remover cabeçalhos",
+        "help": "Cabeçalhos a remover (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "Manter cabeçalhos do upstream",
+        "help": "Cabeçalhos a manter do upstream (Header1 Header2 Header3 ... ou * para todos)."
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Valor do cabeçalho Strict-Transport-Security (HSTS)."
+      },
+      "COOKIE_FLAGS": {
+        "label": "Flags de cookie",
+        "help": "Flags de cookie adicionadas automaticamente a todos os cookies (valor aceite por nginx_cookie_flag_module)."
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "Flag Secure automática dos cookies",
+        "help": "Adiciona automaticamente a flag Secure a todos os cookies."
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Valor do cabeçalho Content-Security-Policy."
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Envia relatórios das violações do cabeçalho Content-Security-Policy em vez de as bloquear."
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Valor do cabeçalho Referrer-Policy."
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Valor do cabeçalho Permissions-Policy."
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "Valor do cabeçalho X-Frame-Options."
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "Valor do cabeçalho X-Content-Type-Options."
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "Valor do cabeçalho X-DNS-Prefetch-Control."
+      }
+    }
+  }
+}

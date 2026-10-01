@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "管理 security.txt 文件。一项拟议标准,允许网站定义其安全策略。"
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "使用 security.txt",
+        "help": "启用 security.txt 文件。"
+      },
+      "SECURITYTXT_URI": {
+        "label": "Security.txt URI",
+        "help": "指明可访问 \"security.txt\" 文件的 URI。"
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Security.txt 联系方式",
+        "help": "指明研究人员报告安全漏洞时应使用的方式,例如电子邮箱地址、电话号码,和/或包含联系信息的网页。(若该值为空,由于这是必填字段,将不会创建 security.txt 文件)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Security.txt 过期时间",
+        "help": "指明在此日期和时间之后,\"security.txt\" 文件中包含的数据将被视为过时,不应再使用(若该值为空,则该值将始终为当前日期和时间 + 1 年)。"
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Security.txt 加密",
+        "help": "指明安全研究人员进行加密通信时应使用的加密密钥。"
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Security.txt 致谢",
+        "help": "指明一个链接,指向安全研究人员因其报告而获得致谢的页面。"
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Security.txt 首选语言",
+        "help": "可用于指明提交安全报告时首选的一组自然语言。"
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Security.txt 规范 URI",
+        "help": "指明 \"security.txt\" 文件所在的规范 URI,通常类似于 \"https://example.com/.well-known/security.txt\"。(若该值为空,默认值将根据站点 URL + SECURITYTXT_URI 自动生成)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Security.txt 政策",
+        "help": "指明指向漏洞披露政策所在位置的链接。"
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Security.txt 招聘",
+        "help": "用于链接到厂商与安全相关的招聘职位。"
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "指向您的 CSAF(Common Security Advisory Framework)提供方的 provider-metadata.json 的链接。"
+      }
+    }
+  }
+}

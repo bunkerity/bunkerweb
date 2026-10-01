@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Basisauthentifizierung",
+      "description": "Erzwingt eine Anmeldung, bevor auf eine Ressource oder die gesamte Website über die HTTP-Basisauthentifizierung zugegriffen werden kann."
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "BASISAUTHENTIFIZIERUNG",
+        "subtitle": "Erfolgreich"
+      },
+      "counter_failed_authbasic": {
+        "title": "BASISAUTHENTIFIZIERUNG",
+        "subtitle": "Fehlgeschlagen"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "HTTP-Basic-Auth verwenden",
+        "help": "HTTP-Basic-Auth verwenden"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "Auth-Basic-Standort",
+        "help": "URL der geschützten Ressource oder standortweiter Wert."
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Auth-Basic-Benutzername",
+        "help": "Benutzername"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Passwort",
+        "help": "Passwort"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Text",
+        "help": "Anzuzeigender Text"
+      }
+    }
+  }
+}

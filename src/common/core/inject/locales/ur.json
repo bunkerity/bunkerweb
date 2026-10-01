@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "HTML انجیکشن",
+      "description": "</body> یا </head> ٹیگ سے پہلے حسب ضرورت HTML کوڈ انجیکٹ کرتا ہے۔"
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "باڈی HTML کوڈ",
+        "help": "</body> ٹیگ سے پہلے انجیکٹ کیا جانے والا HTML کوڈ۔"
+      },
+      "INJECT_HEAD": {
+        "label": "ہیڈ HTML کوڈ",
+        "help": "</head> ٹیگ سے پہلے انجیکٹ کیا جانے والا HTML کوڈ۔"
+      }
+    }
+  }
+}

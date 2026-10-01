@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "Tumatanggi ng access batay sa mga external na DNSBL server."
+    },
+    "settings": {
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "Pangalan ng Hindi Papansinin na Header",
+        "help": "Pangalan ng request header na nagpapawalang-bisa sa request mula sa DNSBL check. Kahit sinong client ay maaaring magpadala ng header na ito: ituring itong shared secret, sa HTTPS lang."
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "Value ng Hindi Papansinin na Header",
+        "help": "Value (PCRE regex) na dapat itumbas ng header para hindi isama ang request sa DNSBL check. Iwanang blangko para tumugma base sa pagkakaroon lang ng header. I-anchor gamit ang ^ at $: hindi naka-anchor ang pagtutugma bilang default."
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "DNSBL – Hindi Papansinin na IP/Network",
+        "help": "Listahan ng IP/network, na pinaghihiwalay ng space, na hindi papansinin para sa DNSBL check."
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "DNSBL – Hindi Papansinin na IP/Network URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng IP/network na hindi papansinin para sa DNSBL check. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "DNSBL_LIST": {
+        "label": "Listahan ng DNSBL",
+        "help": "Listahan ng mga DNSBL server."
+      },
+      "USE_DNSBL": {
+        "label": "I-activate ang DNSBL",
+        "help": "I-activate ang feature na DNSBL."
+      }
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "Na-block na kahilingan"
+      }
+    }
+  }
+}

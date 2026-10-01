@@ -1,0 +1,34 @@
+{
+  "realip": {
+    "meta": {
+      "name": "Tunay na IP",
+      "description": "Kinukuha ang tunay na IP ng mga client kapag ang BunkerWeb ay nasa likod ng reverse proxy / load balancer."
+    },
+    "settings": {
+      "USE_REAL_IP": {
+        "label": "Gamitin ang Tunay na IP",
+        "help": "Kunin ang tunay na IP ng client."
+      },
+      "USE_PROXY_PROTOCOL": {
+        "label": "Gamitin ang PROXY Protocol",
+        "help": "I-enable ang PROXY protocol na komunikasyon."
+      },
+      "REAL_IP_FROM": {
+        "label": "Real IP From",
+        "help": "Listahan ng pinagkakatiwalaang IP/network, pinaghihiwalay ng space, kung saan nanggagaling ang mga proxied request."
+      },
+      "REAL_IP_HEADER": {
+        "label": "Real IP Header",
+        "help": "HTTP header na naglalaman ng tunay na IP o ang special value na proxy_protocol para sa PROXY protocol."
+      },
+      "REAL_IP_RECURSIVE": {
+        "label": "Real IP Recursive",
+        "help": "Magsagawa ng recursive search sa header na naglalaman ng IP address."
+      },
+      "REAL_IP_FROM_URLS": {
+        "label": "Real IP From URLs",
+        "help": "Listahan ng mga URL na naglalaman ng pinagkakatiwalaang IP/network, pinaghihiwalay ng space, kung saan nanggagaling ang mga proxied request. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      }
+    }
+  }
+}

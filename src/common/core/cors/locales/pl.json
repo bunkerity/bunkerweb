@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Udostępnianie zasobów między różnymi pochodzeniami (Cross-Origin Resource Sharing)."
+    },
+    "settings": {
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Wysyłaj Access-Control-Allow-Credentials",
+        "help": "Wysyłaj nagłówek Access-Control-Allow-Credentials."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Wartość Access-Control-Allow-Headers",
+        "help": "Wartość nagłówka Access-Control-Allow-Headers."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Wartość Access-Control-Allow-Methods",
+        "help": "Wartość nagłówka Access-Control-Allow-Methods."
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "Dozwolone źródła (origin)",
+        "help": "Dozwolone źródła (origin) dla żądań CORS: wyrażenie regularne PCRE, * lub self (dla tego samego origin)."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "Odrzuć żądanie",
+        "help": "Odrzuć żądanie i nie wysyłaj go do backendu, jeśli Origin nie jest dozwolony."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Wartość Access-Control-Expose-Headers",
+        "help": "Wartość nagłówka Access-Control-Expose-Headers."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Wartość Access-Control-Max-Age",
+        "help": "Wartość nagłówka Access-Control-Max-Age."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Wartość nagłówka Cross-Origin-Embedder-Policy."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Wartość nagłówka Cross-Origin-Opener-Policy."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Wartość nagłówka Cross-Origin-Resource-Policy."
+      },
+      "USE_CORS": {
+        "label": "Użyj CORS",
+        "help": "Użyj CORS"
+      }
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "Żądanie zablokowane"
+      }
+    }
+  }
+}

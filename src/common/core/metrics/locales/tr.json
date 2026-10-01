@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "Metrikler",
+      "description": "Metrik toplama ve alma."
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "Metrikleri kullan",
+        "help": "Dahili metriklerin toplanmasını ve alınmasını etkinleştir."
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "Metrik bellek boyutu",
+        "help": "Metrikler için dahili depolama boyutu."
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "Metrik belleği maksimum yeniden deneme",
+        "help": "Bellek işlemleri için maksimum yeniden deneme sayısı."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "Metrik maksimum engellenen istek",
+        "help": "Depolanacak maksimum engellenen istek sayısı (worker başına). Düz bir tam sayı veya `k`/`m` kısayolunu kabul eder (ör. `1000`, `1k`, `10k`, `1m`)."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "Metrik maksimum engellenen istek Redis",
+        "help": "Redis'te depolanacak maksimum engellenen istek sayısı. Düz bir tam sayı veya `k`/`m` kısayolunu kabul eder (ör. `10000`, `10k`, `100k`, `1m`)."
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "Metrik Redis TTL",
+        "help": "Redis'te depolanan metrik anahtarları için saniye cinsinden yaşam süresi (varsayılan `2592000`, 30 gün; `0` anahtarları kalıcı tutar). Her senkronizasyonda yenilenir, böylece etkin veriler asla süresi dolmaz; `volatile-lru` tahliye politikasıyla bu, terk edilmiş metrik verilerinin tahliye edilebilir hale gelmesini sağlar, böylece Redis yazmaları sonsuza dek reddetmek yerine maxmemory'den kurtulur. Düz bir tam sayı veya `k`/`m` kısayolunu kabul eder."
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "Maksimum LRU geçmişi",
+        "help": "Worker başına LRU olay geçmişini sınırlar: hem LRU yuva sayısını hem de anahtar başına olay geçmişi dizisi uzunluğunu sınırlar (engelleme izleri, kimlik doğrulama izleri vb.). Düz bir tam sayı veya `k`/`m` kısayolunu kabul eder (ör. `1k`, `10k`, `1m`). Sahte IP sellerine benzer yüksek kardinaliteli kaynaklardan gelen sınırsız büyümeyi sınırlar."
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "Eklenti zamanlamalarını topla",
+        "help": "Her eklentinin her istek aşamasında ne kadar sürdüğünü ölçer, (eklenti, aşama) başına count/sum/max toplamı olarak sunulur. Her eklenti çağrısı etrafında bir NGINX zaman yenilemesi zorlamayı gerektirir, bu nedenle tam bir eklenti zinciri boyunca istek başına kabaca bir mikro saniye ekler; bu maliyeti tamamen kaldırmak için `no` olarak ayarlayın. Tüm isteğin süresi her zaman toplanır ve bu ayardan etkilenmez."
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "Trafik referans örnekleme oranı (%)",
+        "help": "Anomali tespitinin normalin nasıl göründüğünü öğrenmesi için trafik referansı olarak kaydedilen engellenmemiş isteklerin yüzdesi (`0` devre dışı bırakır, `1` yüzde bir istek örnekler). Örnekleme, istek kimliğine göre belirlenimlidir, bu nedenle karar alt istekler arasında sabittir. İstemci IP'si asla saklanmaz. Toplama, istek yolunda hiçbir iş eklemez, ancak hacim büyüktür: saniyede 10 bin isteğin %1'i günde yaklaşık 8,6 milyon kayıttır ve bunları `METRICS_BASELINE_RETENTION_MAX_ROWS` kırpar. Bunu bilinçli olarak artırın."
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "Metrik maksimum referans isteği",
+        "help": "En eskileri atılmadan önce worker başına tutulacak örneklenmiş referans kaydı sayısı. Bu arabellek METRICS_MEMORY_SIZE'ı engellenen istek raporları ve diğer metriklerle paylaşır, ancak alan tükendiğinde onları tahliye etmek yerine kendisi atılır. Düz bir tam sayı veya `k`/`m` kısayolunu kabul eder. Bunu artırmak yerine örnekleme oranını düşürün."
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "Referans saklama (gün)",
+        "help": "Saklama işi silmeden önce örneklenmiş referans kayıtlarının maksimum yaşı (gün cinsinden). Engellenen rapor saklamasından bilinçli olarak daha kısadır: referans çok daha hızlı büyür ve model geçmiş yerine yakın zamandaki normal davranış üzerinde eğitilir."
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "Referans saklama (maks. satır)",
+        "help": "Tutulacak maksimum örneklenmiş referans kaydı sayısı; saklama işi bu sayının ötesindeki en eski satırları siler. Engellenen rapor sınırından ayrıdır çünkü iki tablo çok farklı hızlarda büyür."
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "Metrikleri Redis'e kaydet",
+        "help": "Küme genelinde toplama için metrikleri (sayaçlar ve tablolar) Redis'e kaydet."
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "Raporları veritabanına kaydet",
+        "help": "Örnekleri periyodik olarak tarayarak engellenen istek raporlarını veritabanına (kalıcı, sorgulanabilir) kaydet. Devre dışı bırakıldığında raporlar yalnızca bellek içi/Redis depolarında kalır."
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "Rapor saklama (gün)",
+        "help": "Saklama işi silmeden önce kalıcı hale getirilmiş engellenen istek raporlarının maksimum yaşı (gün cinsinden)."
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "Rapor saklama (maks. satır)",
+        "help": "Tutulacak kalıcı hale getirilmiş maksimum engellenen istek raporu sayısı; saklama işi bu sayının ötesindeki en eski satırları siler."
+      }
+    }
+  }
+}

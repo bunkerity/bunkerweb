@@ -1,0 +1,8 @@
+{
+  "jobs": {
+    "meta": {
+      "name": "Tâches",
+      "description": "Faux plugin core pour les tâches internes."
+    }
+  }
+}

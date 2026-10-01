@@ -1,0 +1,36 @@
+{
+  "country": {
+    "meta": {
+      "name": "Kraj",
+      "description": "Odmawia dostępu na podstawie kraju adresu IP klienta."
+    },
+    "settings": {
+      "BLACKLIST_COUNTRY": {
+        "label": "Blacklista krajów",
+        "help": "Odmów dostępu, jeśli kraj klienta znajduje się na liście (format ISO 3166-1 alpha-2, rozdzielony spacjami). Możesz też użyć tokenów grupowych, takich jak @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH i @BENELUX."
+      },
+      "COUNTRY_IGNORE_HEADER_NAME": {
+        "label": "Nazwa ignorowanego nagłówka",
+        "help": "Nazwa nagłówka żądania, który zwalnia żądanie ze sprawdzania kraju. Każdy klient może wysłać ten nagłówek: traktuj go jak współdzielony sekret, tylko przez HTTPS."
+      },
+      "COUNTRY_IGNORE_HEADER_VALUE": {
+        "label": "Wartość ignorowanego nagłówka",
+        "help": "Wartość (wyrażenie regularne PCRE), z którą musi się zgadzać nagłówek, aby zwolnić żądanie ze sprawdzania kraju. Pozostaw puste, aby dopasowanie następowało na podstawie samej obecności nagłówka. Zakotwicz wyrażenie znakami ^ i $: dopasowanie domyślnie nie jest zakotwiczone."
+      },
+      "COUNTRY_IGNORE_URI": {
+        "label": "Ignorowany URI",
+        "help": "Lista wzorców wyrażeń regularnych PCRE (rozdzielonych spacjami) dla URI, które mają być wykluczone ze sprawdzania kraju. Wzorce są sprawdzane zarówno względem ścieżki, jak i pełnego URI żądania wraz z query string."
+      },
+      "WHITELIST_COUNTRY": {
+        "label": "Whitelista krajów",
+        "help": "Odmów dostępu, jeśli kraj klienta nie znajduje się na liście (format ISO 3166-1 alpha-2, rozdzielony spacjami). Możesz też użyć tokenów grupowych, takich jak @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH i @BENELUX."
+      }
+    },
+    "widgets": {
+      "counter_failed_country": {
+        "title": "Kraj",
+        "subtitle": "Żądanie zablokowane"
+      }
+    }
+  }
+}

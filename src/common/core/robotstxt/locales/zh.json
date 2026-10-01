@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "管理 robots.txt 文件。用于控制网络爬虫访问您站点的标准。"
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "使用 robots.txt",
+        "help": "启用 robots.txt 文件。"
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "社区 robots.txt 列表",
+        "help": "选择要纳入 robots.txt 的社区维护列表。"
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "Robots.txt URL",
+        "help": "包含 robots.txt 规则的 URL 列表,以空格分隔。也支持 file:// URL,以及使用 http://user:pass@url 方案的基本认证。"
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Robots.txt 规则",
+        "help": "robots.txt 的规则(每行一条)。"
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Robots.txt 头部",
+        "help": "robots.txt 文件的头部内容(位于规则之前)。可以是 Base64 编码。"
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Robots.txt 尾部",
+        "help": "robots.txt 文件的尾部内容(位于规则之后)。可以是 Base64 编码。"
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Robots.txt 站点地图",
+        "help": "要纳入 robots.txt 的站点地图 URL。"
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "忽略规则",
+        "help": "要忽略的规则(PCRE 正则表达式)。可多次指定。"
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "DarkVisitors API 令牌",
+        "help": "DarkVisitors API 的 Bearer 令牌。"
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "DarkVisitors 代理类型",
+        "help": "以逗号分隔的代理类型列表,在联系 DarkVisitors API 时用于填充 DarkVisitors 的 agent_types 字段。"
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors 禁止访问",
+        "help": "指定哪些 URL 被禁止访问的字符串。在联系 DarkVisitors API 时,该值将作为 disallow 字段发送。"
+      }
+    }
+  }
+}

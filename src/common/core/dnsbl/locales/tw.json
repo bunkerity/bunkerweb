@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "根據外部 DNSBL 伺服器拒絕存取。"
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "請求已封鎖"
+      }
+    },
+    "settings": {
+      "USE_DNSBL": {
+        "label": "啟用 DNSBL",
+        "help": "啟用 DNSBL 功能。"
+      },
+      "DNSBL_LIST": {
+        "label": "DNSBL 清單",
+        "help": "DNSBL 伺服器清單。"
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "DNSBL 忽略的 IP/網段",
+        "help": "以空格分隔的 IP/網段清單,用於在 DNSBL 檢查中忽略。"
+      },
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "忽略的標頭名稱",
+        "help": "使請求免於 DNSBL 檢查的請求標頭名稱。任何客戶端都可以傳送此標頭:請將其視為共享密鑰,並僅透過 HTTPS 使用。"
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "忽略的標頭值",
+        "help": "標頭必須比對的值(PCRE 正規表示式),以使請求免於 DNSBL 檢查。留空則僅比對標頭是否存在。請使用 ^ 和 $ 進行錨定:預設情況下比對不會被錨定。"
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "DNSBL 忽略的 IP/網段 URL 清單",
+        "help": "以空格分隔的 URL 清單,其中包含要在 DNSBL 檢查中忽略的 IP/網段。同時支援 file:// URL,以及使用 http://user:pass@url 形式的基本驗證。"
+      }
+    }
+  }
+}

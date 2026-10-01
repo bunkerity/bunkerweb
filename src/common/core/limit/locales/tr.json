@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "Sınır",
+      "description": "Maksimum istek ve bağlantı sayısını sınırlar."
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "Genel sınır",
+        "subtitle": "İstekler engellendi"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "İstek limitini etkinleştir",
+        "help": "İstek limiti özelliğini etkinleştir."
+      },
+      "LIMIT_REQ_URL": {
+        "label": "İstek limiti URL'si",
+        "help": "İstek limitinin uygulanacağı URL (PCRE regex) veya tüm istekler için özel değer /."
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "İstek limiti hızı",
+        "help": "URL'ye uygulanacak hız (saniye için s, dakika için m, saat için h ve gün için d)."
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "Genel istek limitini etkinleştir",
+        "help": "Genel hız limitini etkinleştir: tüm hizmet için tek bir toplam kota, tüm istemcileri ve URL'leri birlikte sayar (kaynak kapasitesini korur, IP/URL başına istek limitlerinden bağımsızdır)."
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "Genel istek limiti hızı",
+        "help": "Tüm hizmet için maksimum toplam hız, tüm istemciler ve URL'ler birleşik (saniye için s, dakika için m, saat için h ve gün için d)."
+      },
+      "USE_LIMIT_CONN": {
+        "label": "Bağlantı limitini etkinleştir",
+        "help": "Bağlantı limiti özelliğini etkinleştir."
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "Maksimum HTTP/1.X bağlantı sayısı",
+        "help": "HTTP/1.X protokolü kullanılırken IP başına maksimum bağlantı sayısı."
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "Maksimum HTTP/2 akış sayısı",
+        "help": "HTTP/2 protokolü kullanılırken IP başına maksimum akış (stream) sayısı."
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "Maksimum HTTP/3 akış sayısı",
+        "help": "HTTP/3 protokolü kullanılırken IP başına maksimum akış (stream) sayısı."
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "Maksimum stream bağlantı sayısı",
+        "help": "Stream modu kullanılırken IP başına maksimum bağlantı sayısı."
+      }
+    }
+  }
+}

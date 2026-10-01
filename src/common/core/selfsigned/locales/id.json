@@ -1,0 +1,26 @@
+{
+  "selfsigned": {
+    "meta": {
+      "name": "Sertifikat self-signed",
+      "description": "Menghasilkan sertifikat self-signed."
+    },
+    "settings": {
+      "GENERATE_SELF_SIGNED_SSL": {
+        "label": "Aktifkan sertifikat self-signed",
+        "help": "Buat dan gunakan sertifikat self-signed."
+      },
+      "SELF_SIGNED_SSL_ALGORITHM": {
+        "label": "Algoritma sertifikat",
+        "help": "Algoritma yang digunakan untuk sertifikat self-signed."
+      },
+      "SELF_SIGNED_SSL_EXPIRY": {
+        "label": "Masa berlaku sertifikat",
+        "help": "Masa berlaku sertifikat self-signed dalam hari."
+      },
+      "SELF_SIGNED_SSL_SUBJ": {
+        "label": "Subjek sertifikat",
+        "help": "Subjek sertifikat self-signed."
+      }
+    }
+  }
+}

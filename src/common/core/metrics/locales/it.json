@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "Metriche",
+      "description": "Raccolta e recupero delle metriche."
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "Usa metriche",
+        "help": "Attiva la raccolta e il recupero delle metriche interne."
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "Dimensione memoria delle metriche",
+        "help": "Dimensione dello storage interno per le metriche."
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "Tentativi massimi memoria delle metriche",
+        "help": "Numero massimo di tentativi per le operazioni di memoria."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "Massimo richieste bloccate delle metriche",
+        "help": "Numero massimo di richieste bloccate da memorizzare (per worker). Accetta un intero semplice o un'abbreviazione `k`/`m` (ad es. `1000`, `1k`, `10k`, `1m`)."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "Massimo richieste bloccate delle metriche in Redis",
+        "help": "Numero massimo di richieste bloccate da memorizzare in Redis. Accetta un intero semplice o un'abbreviazione `k`/`m` (ad es. `10000`, `10k`, `100k`, `1m`)."
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "TTL Redis delle metriche",
+        "help": "Tempo di vita in secondi per le chiavi di metriche memorizzate in Redis (predefinito `2592000`, 30 giorni; `0` mantiene le chiavi permanenti). Viene aggiornato a ogni sincronizzazione, quindi i dati attivi non scadono mai; con una policy di eviction `volatile-lru`, ciò consente ai dati di metriche abbandonati di diventare eliminabili, così Redis si riprende da un maxmemory invece di rifiutare le scritture per sempre. Accetta un intero semplice o un'abbreviazione `k`/`m`."
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "Cronologia LRU massima",
+        "help": "Limita la cronologia degli eventi LRU per worker: limita sia il numero di slot LRU sia la lunghezza dell'array della cronologia eventi per chiave (tracce di blocco, tracce di autenticazione, ecc.). Accetta un intero semplice o un'abbreviazione `k`/`m` (ad es. `1k`, `10k`, `1m`). Limita la crescita illimitata da fonti ad alta cardinalità come le inondazioni di IP falsificati."
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "Raccogli i tempi dei plugin",
+        "help": "Misura quanto tempo impiega ciascun plugin in ogni fase della richiesta, esposto come aggregato count/sum/max per (plugin, fase). Richiede di forzare un aggiornamento dell'orologio di NGINX a ogni chiamata di plugin, aggiungendo circa un microsecondo per richiesta lungo un'intera catena di plugin; imposta su `no` per rimuovere completamente questo costo. La durata totale della richiesta viene sempre raccolta e non è influenzata da questa impostazione."
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "Frequenza di campionamento della baseline del traffico (%)",
+        "help": "Percentuale di richieste non bloccate registrate come baseline del traffico, affinché il rilevamento delle anomalie impari a riconoscere ciò che è normale (`0` lo disattiva, `1` campiona una richiesta su cento). Il campionamento è deterministico in base all'id della richiesta, quindi la decisione è stabile tra le subrichieste. L'IP del client non viene mai memorizzato. La raccolta non aggiunge lavoro sul percorso della richiesta, ma il volume è grande: l'1% di 10k richieste/s corrisponde a circa 8,6 milioni di record al giorno, che `METRICS_BASELINE_RETENTION_MAX_ROWS` poi riduce. Aumentalo deliberatamente."
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "Massimo richieste di baseline delle metriche",
+        "help": "Numero massimo di record di baseline campionati da conservare per worker prima che i più vecchi vengano eliminati. Questo buffer condivide METRICS_MEMORY_SIZE con i report delle richieste bloccate e altre metriche, ma verrà eliminato anziché sfrattarli quando lo spazio si esaurisce. Accetta un intero semplice o un'abbreviazione `k`/`m`. Riduci la frequenza di campionamento invece di aumentare questo valore."
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "Conservazione della baseline (giorni)",
+        "help": "Età massima (in giorni) dei record di baseline campionati prima che il job di conservazione li elimini. Deliberatamente più breve della conservazione dei report bloccati: una baseline cresce molto più rapidamente, e un modello viene addestrato sul comportamento normale recente piuttosto che sulla storia."
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "Conservazione della baseline (righe max)",
+        "help": "Numero massimo di record di baseline campionati da conservare; il job di conservazione elimina le righe più vecchie oltre questo numero. Separato dal limite dei report bloccati perché le due tabelle crescono a ritmi molto diversi."
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "Salva le metriche in Redis",
+        "help": "Salva le metriche (contatori e tabelle) in Redis per un'aggregazione a livello di cluster."
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "Persisti i report nel database",
+        "help": "Persiste i report delle richieste bloccate nel database (durevole, interrogabile) effettuando periodicamente lo scraping delle istanze. Se disattivato, i report rimangono solo negli storage in memoria/Redis."
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "Conservazione dei report (giorni)",
+        "help": "Età massima (in giorni) dei report delle richieste bloccate persistiti prima che il job di conservazione li elimini."
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "Conservazione dei report (righe max)",
+        "help": "Numero massimo di report delle richieste bloccate persistiti da conservare; il job di conservazione elimina le righe più vecchie oltre questo numero."
+      }
+    }
+  }
+}

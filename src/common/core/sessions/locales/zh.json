@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "会话",
+      "description": "管理其他插件所使用的会话。"
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "会话密钥",
+        "help": "用于加密会话变量的密钥,以存储与质询相关的数据。"
+      },
+      "SESSIONS_NAME": {
+        "label": "会话名称",
+        "help": "分配给客户端的 Cookie 名称。"
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "会话 Cookie 域",
+        "help": "为该服务器的会话 Cookie 设置的 Domain 属性(例如 `example.com` 或 `.example.com`)。留空则将 Cookie 的作用域限定为精确主机名。设置为父级可注册域,可在同级子域名之间共享会话(从而共享 antibot/质询状态)。在多站点环境中,请按服务器逐一配置该值,以避免不相关的租户收到跨租户的 `Domain` 属性。"
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "会话空闲超时",
+        "help": "会话失效前允许的最长不活动时间(秒)。"
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "会话滚动超时",
+        "help": "会话必须续期前的最长时间(秒)。"
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "会话绝对超时",
+        "help": "会话被销毁前的最长时间(秒)。"
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "会话检查 IP",
+        "help": "若 IP 地址与原始地址不同,则销毁会话。"
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "会话检查 User-Agent",
+        "help": "若 User-Agent 与原始值不同,则销毁会话。"
+      }
+    }
+  }
+}

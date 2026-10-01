@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "Métricas",
+      "description": "Recolha e obtenção de métricas."
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "Usar métricas",
+        "help": "Ativa a recolha e obtenção de métricas internas."
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "Tamanho de memória das métricas",
+        "help": "Tamanho do armazenamento interno para as métricas."
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "Tentativas máximas de memória das métricas",
+        "help": "Número máximo de tentativas para as operações de memória."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "Máximo de pedidos bloqueados das métricas",
+        "help": "Número máximo de pedidos bloqueados a armazenar (por worker). Aceita um número inteiro simples ou uma abreviatura `k`/`m` (por ex. `1000`, `1k`, `10k`, `1m`)."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "Máximo de pedidos bloqueados das métricas no Redis",
+        "help": "Número máximo de pedidos bloqueados a armazenar no Redis. Aceita um número inteiro simples ou uma abreviatura `k`/`m` (por ex. `10000`, `10k`, `100k`, `1m`)."
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "TTL Redis das métricas",
+        "help": "Tempo de vida em segundos para as chaves de métricas armazenadas no Redis (predefinição `2592000`, 30 dias; `0` mantém as chaves permanentes). É atualizado em cada sincronização, pelo que os dados ativos nunca expiram; com uma política de evição `volatile-lru`, isto permite que os dados de métricas abandonados se tornem elegíveis para evição, para que o Redis recupere de um maxmemory em vez de rejeitar escritas para sempre. Aceita um número inteiro simples ou uma abreviatura `k`/`m`."
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "Histórico LRU máximo",
+        "help": "Limita o histórico de eventos LRU por worker: limita tanto o número de slots LRU como o comprimento do array de histórico de eventos por chave (rastos de bloqueio, rastos de autenticação, etc.). Aceita um número inteiro simples ou uma abreviatura `k`/`m` (por ex. `1k`, `10k`, `1m`). Limita o crescimento ilimitado proveniente de fontes de alta cardinalidade, como inundações de IP falsificado."
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "Recolher tempos dos plugins",
+        "help": "Mede quanto tempo cada plugin demora em cada fase do pedido, exposto como um agregado count/sum/max por (plugin, fase). Requer forçar uma atualização do relógio do NGINX em cada chamada de plugin, o que acrescenta cerca de um microssegundo por pedido ao longo de toda a cadeia de plugins; defina como `no` para eliminar completamente este custo. A duração total do pedido é sempre recolhida e não é afetada por esta definição."
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "Taxa de amostragem da referência de tráfego (%)",
+        "help": "Percentagem de pedidos não bloqueados registados como referência de tráfego, para que a deteção de anomalias aprenda como é o normal (`0` desativa-a, `1` amostra um pedido em cem). A amostragem é determinística com base no id do pedido, pelo que a decisão é estável entre subpedidos. O IP do cliente nunca é armazenado. A recolha não acrescenta trabalho no caminho do pedido, mas o volume é grande: 1% de 10k pedidos/s são cerca de 8,6 milhões de registos por dia, que o `METRICS_BASELINE_RETENTION_MAX_ROWS` depois reduz. Aumente-o deliberadamente."
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "Máximo de pedidos de referência das métricas",
+        "help": "Número máximo de registos de referência amostrados a manter por worker antes de os mais antigos serem descartados. Este buffer partilha METRICS_MEMORY_SIZE com os relatórios de pedidos bloqueados e outras métricas, mas será descartado em vez de os despejar quando o espaço se esgotar. Aceita um número inteiro simples ou uma abreviatura `k`/`m`. Reduza a taxa de amostragem em vez de aumentar este valor."
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "Retenção da referência (dias)",
+        "help": "Idade máxima (em dias) dos registos de referência amostrados antes de o job de retenção os eliminar. Deliberadamente mais curta do que a retenção dos relatórios bloqueados: uma referência cresce muito mais depressa, e um modelo é treinado com o comportamento normal recente em vez de com o histórico."
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "Retenção da referência (linhas máx.)",
+        "help": "Número máximo de registos de referência amostrados a manter; o job de retenção elimina as linhas mais antigas acima deste número. Separado do limite dos relatórios bloqueados porque as duas tabelas crescem a ritmos muito diferentes."
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "Guardar métricas no Redis",
+        "help": "Guarda as métricas (contadores e tabelas) no Redis para agregação a nível de cluster."
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "Persistir relatórios na base de dados",
+        "help": "Persiste os relatórios de pedidos bloqueados na base de dados (durável, consultável) através da recolha periódica de dados das instâncias. Quando desativado, os relatórios permanecem apenas nos armazenamentos em memória/Redis."
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "Retenção dos relatórios (dias)",
+        "help": "Idade máxima (em dias) dos relatórios de pedidos bloqueados persistidos antes de o job de retenção os eliminar."
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "Retenção dos relatórios (linhas máx.)",
+        "help": "Número máximo de relatórios de pedidos bloqueados persistidos a manter; o job de retenção elimina as linhas mais antigas acima deste número."
+      }
+    }
+  }
+}

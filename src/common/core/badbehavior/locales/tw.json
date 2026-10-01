@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "不良行為",
+      "description": "封鎖在一段時間內產生過多「不良」HTTP 狀態碼的 IP。"
+    },
+    "settings": {
+      "USE_BAD_BEHAVIOR": {
+        "label": "啟用不良行為偵測",
+        "help": "啟用不良行為(Bad behavior)功能。"
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "不良狀態碼",
+        "help": "被視為「不良」的 HTTP 狀態碼清單。"
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "閾值",
+        "help": "在指定時間段內,IP 被封鎖前允許出現的「不良」HTTP 狀態碼的最大數量。"
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "統計週期(秒)",
+        "help": "統計「不良」HTTP 狀態碼的時間段(以秒為單位)。"
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "封鎖時長(秒)",
+        "help": "當對應 IP 達到閾值時的封鎖持續時間(以秒為單位)。(設為 0 表示永久封鎖)"
+      },
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "封鎖範圍",
+        "help": "決定封鎖的層級。「service」僅在該服務內封鎖該 IP,「global」會在整個系統範圍內封鎖該 IP。"
+      }
+    }
+  }
+}

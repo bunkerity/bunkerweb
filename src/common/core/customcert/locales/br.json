@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "Certificado SSL personalizado",
+      "description": "Escolha um certificado personalizado para SSL."
+    },
+    "settings": {
+      "USE_CUSTOM_SSL": {
+        "label": "Usar certificado personalizado",
+        "help": "Usa um certificado SSL personalizado."
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "Prioridade do certificado",
+        "help": "Escolha priorizar o certificado a partir do caminho do arquivo ou dos dados base64. (file | data)"
+      },
+      "CUSTOM_SSL_CERT": {
+        "label": "Caminho do certificado",
+        "help": "Caminho completo do arquivo de certificado ou pacote (bundle). Ele deve ser legível pelo WORKER, que é onde a tarefa custom-cert é executada desde que a versão 1.7 moveu a execução de tarefas para fora do scheduler - não pelo scheduler, seja o que for que a documentação mais antiga diga. No Docker Swarm, monte-o no bw-worker e informe o caminho em que está montado, por exemplo /run/secrets/example.com.pem; um Swarm config é adequado para um certificado, que é público."
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "Caminho da chave",
+        "help": "Caminho completo do arquivo de chave. Ele deve ser legível pelo WORKER, que é onde a tarefa custom-cert é executada desde que a versão 1.7 moveu a execução de tarefas para fora do scheduler - não pelo scheduler, seja o que for que a documentação mais antiga diga. No Docker Swarm, monte a chave privada no bw-worker como um Swarm SECRET e informe o caminho em que está montada, por exemplo /run/secrets/example.com.key. Nunca distribua uma chave privada como um Swarm config: os configs são armazenados sem criptografia no raft store em todo nó manager."
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "Dados do certificado (base64/texto simples)",
+        "help": "Dados do certificado codificados em base64 ou em formato PEM em texto simples."
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "Dados da chave (base64/texto simples)",
+        "help": "Dados da chave codificados em base64 ou em formato PEM em texto simples."
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "Caminho do certificado do servidor padrão",
+        "help": "Caminho completo do arquivo de certificado ou pacote servido pelo SERVIDOR PADRÃO (DEFAULT SERVER) - o bloco que responde a requisições que não correspondem a nenhum serviço configurado. Deixe vazio para manter o certificado autoassinado interno. Ele deve ser legível pelo WORKER, que é onde a tarefa custom-cert é executada. Um certificado que também cubra o hostname de um serviço configurado é recusado, pois o servidor padrão passaria então a poder responder por esse serviço. Servido somente se MULTISITE=yes ou DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "Caminho da chave do servidor padrão",
+        "help": "Caminho completo da chave privada do certificado do SERVIDOR PADRÃO (DEFAULT SERVER) - o bloco que responde a requisições que não correspondem a nenhum serviço configurado (SNI desconhecido, acesso por IP bruto). Deixe vazio para manter o certificado autoassinado interno. Ela deve ser legível pelo WORKER, que é onde a tarefa custom-cert é executada. No Docker Swarm, monte-a como um Swarm SECRET, nunca como um config."
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "Dados do certificado do servidor padrão (base64/texto simples)",
+        "help": "Dados do certificado do SERVIDOR PADRÃO (DEFAULT SERVER), codificados em base64 ou em formato PEM em texto simples. Usado somente quando DEFAULT_SERVER_SSL_CERT estiver vazio. Deixe ambos vazios para manter o certificado autoassinado interno. Servido somente se MULTISITE=yes ou DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "Dados da chave do servidor padrão (base64/texto simples)",
+        "help": "Dados da chave do certificado do SERVIDOR PADRÃO (DEFAULT SERVER), codificados em base64 ou em formato PEM em texto simples. Usados somente quando DEFAULT_SERVER_SSL_KEY estiver vazio. Deixe ambos vazios para manter o certificado autoassinado interno."
+      }
+    }
+  }
+}

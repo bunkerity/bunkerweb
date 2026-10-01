@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "meta": {
+      "name": "Mga error",
+      "description": "Pinamamahalaan ang mga default na pahina ng error"
+    },
+    "settings": {
+      "ERRORS": {
+        "label": "Mga Error",
+        "help": "Listahan ng HTTP error code at ang kaukulang error page, pinaghihiwalay ng space (404=/my404.html 403=/errors/403.html ...)."
+      },
+      "INTERCEPTED_ERROR_CODES": {
+        "label": "Na-intercept na Error Code",
+        "help": "Listahan ng HTTP error code na na-intercept ng BunkerWeb, pinaghihiwalay ng space."
+      }
+    }
+  }
+}

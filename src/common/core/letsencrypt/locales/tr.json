@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Let's Encrypt sertifikalarının otomatik oluşturulması, yenilenmesi ve yapılandırılması."
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "Otomatik Let's Encrypt",
+        "help": "Otomatik Let's Encrypt modunu etkinleştir."
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Let's Encrypt'i Geçir",
+        "help": "Let's Encrypt isteklerini web sunucusuna geçir."
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Let's Encrypt E-postası",
+        "help": "Let's Encrypt bildirimi için ve sertifikada kullanılan e-posta."
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "Sertifika Otoritesi Sunucusu",
+        "help": "Sertifika oluşturma için kullanılacak sertifika otoritesi sunucusunu seçin."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "ZeroSSL API Anahtarı",
+        "help": "zerossl-bot tarafından kullanılan isteğe bağlı ZeroSSL API anahtarı. Boşsa, EAB kimlik bilgilerini almak için EMAIL_LETS_ENCRYPT kullanılır."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "ZeroSSL API Yeniden Denemeleri",
+        "help": "zerossl-bot tarafından yapılan ZeroSSL API isteklerinin yeniden deneme sayısı (0 yeniden denemeleri devre dışı bırakır)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "ZeroSSL API Yeniden Deneme Gecikmesi",
+        "help": "zerossl-bot'ta ZeroSSL API yeniden denemeleri arasındaki gecikme (saniye cinsinden)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "ZeroSSL API Bağlantı Zaman Aşımı",
+        "help": "zerossl-bot'ta ZeroSSL API istekleri için bağlantı zaman aşımı (saniye cinsinden)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "ZeroSSL API Maksimum Süresi",
+        "help": "zerossl-bot'ta her bir ZeroSSL API isteği için maksimum toplam süre (saniye cinsinden)."
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "Sorgu Türü",
+        "help": "Let's Encrypt için kullanılacak sorgu türü (http veya dns)."
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "DNS Sağlayıcı",
+        "help": "DNS sorguları için kullanılacak DNS sağlayıcı."
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "DNS Yayılımı",
+        "help": "DNS sorguları için DNS yayılımının bekleneceği süre (saniye cinsinden)."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "Kimlik Bilgisi Öğesi",
+        "help": "DNS sorguları için DNS sağlayıcısının credentials.ini dosyasına eklenecek yapılandırma öğesi. Anahtar, boşluk, ardından değer olarak yazın (ör. 'cloudflare_api_token 123456'); anahtarı tırnak içine almayın. Değer ayrıca base64 ile kodlanmış olabilir veya tüm öğe base64 ile kodlanmış bir json nesnesi olabilir."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Base64 DNS Kimlik Bilgilerini Çöz",
+        "help": "Base64 ile kodlanmış DNS sağlayıcı kimlik bilgilerini otomatik olarak çöz. Etkinleştirildiğinde, base64 biçimiyle eşleşen kimlik bilgileri kullanılmadan önce çözülür (rfc2136 sağlayıcısı hariç). Kimlik bilgileriniz kasıtlı olarak base64 dizeleriyse devre dışı bırakın."
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "Wildcard Sertifikaları",
+        "help": "Tüm alan adları için wildcard sertifikaları oluştur. Bu, tek bir sertifikanın birden çok alt alan adını güvence altına almasını sağlar. (Yalnızca DNS sorgularıyla kullanılabilir)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Let's Encrypt Staging Kullan",
+        "help": "Let's Encrypt sertifika oluşturma için staging ortamını kullan. Üretim ortamında hız sınırına takılmamak için dağıtımlarınızı test ederken kullanışlıdır."
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "Artık gerekli olmadığında eski sertifikaları temizle",
+        "help": "Yenileme sırasında eski sertifikaları temizle."
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "Sertifika Profili",
+        "help": "Let's Encrypt ile kullanılacak sertifika profilini seçin. 'classic', 90 günlük ömre ve geniş uyumluluğa sahip genel amaçlı bir sertifikadır. 'tlsserver', 90 günlük ömür ve daha küçük yükle TLS sunucu kimlik doğrulaması için optimize edilmiştir. 'shortlived', otomatikleştirilmiş ortamlarda gelişmiş güvenlik için 7 günlük sertifikalar sunar."
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "Özel Sertifika Profili (ACME)",
+        "help": "Standart olmayan profilleri destekleyen ACME sunucularıyla kullanılacak özel sertifika profili. Ayarlanmışsa LETS_ENCRYPT_PROFILE'ın yerini alır."
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "Genel Son Ekleri Devre Dışı Bırak (PSL Kara Listesi)",
+        "help": "Public Suffix List ile eşleşen alan adları için sertifika isteklerini devre dışı bırak (önerilir, varsayılan: yes)."
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "Maksimum Yeniden Deneme",
+        "help": "Başarısızlık durumunda sertifika oluşturmanın kaç kez yeniden deneneceği (0 yeniden denemeleri devre dışı bırakır)."
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "Eşzamanlı Sertifika İstekleri",
+        "help": "certbot-new işinde sertifika isteklerini eşzamanlı olarak çalıştır (hız sınırı riskini artırabilir)."
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "Maksimum Certbot Günlük Yedeği",
+        "help": "İş başına saklanacak döndürülmüş certbot günlük dosyalarının maksimum sayısı. Certbot'un kendi varsayılanı 1000'dir ve bu hızla birikir. Yalnızca canlı günlüğü tutmak için 0 olarak ayarlayın."
+      }
+    }
+  }
+}

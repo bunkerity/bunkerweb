@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "資料庫",
+      "description": "輕鬆整合資料庫。"
+    },
+    "settings": {
+      "DATABASE_URI": {
+        "label": "資料庫 URI",
+        "help": "資料庫 URI,遵循 sqlalchemy 格式。"
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "唯讀操作的資料庫 URI",
+        "help": "用於唯讀操作的資料庫 URI,當主資料庫無法使用時,也可以作為備援使用。遵循 sqlalchemy 格式。"
+      },
+      "DATABASE_LOG_LEVEL": {
+        "label": "資料庫日誌等級",
+        "help": "資料庫日誌所使用的等級。"
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "工作執行記錄的最大數量",
+        "help": "資料庫中要保留的工作執行記錄的最大數量。"
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "UI 使用者工作階段的最長保留天數",
+        "help": "UI 使用者工作階段在被清除之前的最長保留天數。"
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "資料庫連線池大小",
+        "help": "資料庫連線池中要保持的連線數量。"
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "資料庫連線池最大溢出數",
+        "help": "在連線池大小之上,最多可額外建立的連線數量。"
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "資料庫連線池逾時",
+        "help": "在放棄從連線池取得連線之前要等待的秒數。"
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "資料庫連線池回收週期",
+        "help": "連線被自動回收前經過的秒數。設為 -1 表示停用。"
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "資料庫連線池預先檢測(pre-ping)",
+        "help": "是否在每次從連線池取出連線時測試其存活狀態。"
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "連線歸還連線池時的重設方式",
+        "help": "連線歸還連線池時應如何重設。留空表示自動(MySQL/MariaDB 為 none,其他資料庫為 rollback)。可選值:rollback、commit、none。"
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "資料庫重試逾時",
+        "help": "啟動時等待資料庫可用的最長秒數。"
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "資料庫請求重試次數",
+        "help": "針對暫時性資料庫錯誤的重試次數。"
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "資料庫請求重試延遲",
+        "help": "針對暫時性資料庫錯誤進行重試之間的延遲時間(以秒為單位)。"
+      }
+    }
+  }
+}

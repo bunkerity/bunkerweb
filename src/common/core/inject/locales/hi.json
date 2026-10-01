@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "HTML इंजेक्शन",
+      "description": "</body> या </head> टैग से पहले कस्टम HTML कोड इंजेक्ट करता है।"
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "बॉडी HTML कोड",
+        "help": "</body> टैग से पहले इंजेक्ट किया जाने वाला HTML कोड।"
+      },
+      "INJECT_HEAD": {
+        "label": "हेड HTML कोड",
+        "help": "</head> टैग से पहले इंजेक्ट किया जाने वाला HTML कोड।"
+      }
+    }
+  }
+}

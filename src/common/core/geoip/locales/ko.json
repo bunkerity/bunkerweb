@@ -1,0 +1,34 @@
+{
+  "geoip": {
+    "meta": {
+      "name": "GeoIP",
+      "description": "클라이언트 IP의 국가, ASN, 도시를 확인하는 데 사용되는 GeoIP 데이터베이스."
+    },
+    "settings": {
+      "MAXMIND_LICENSE_KEY": {
+        "label": "MaxMind 라이선스 키",
+        "help": "MaxMind 라이선스 키입니다. 설정하면 국가, ASN, 도시 데이터베이스가 DB-IP 대신 MaxMind에서 다운로드됩니다."
+      },
+      "MAXMIND_ACCOUNT_ID": {
+        "label": "MaxMind 계정 ID",
+        "help": "MaxMind 계정 ID입니다. 선택 사항이지만 권장됩니다: 설정하지 않으면 인증 헤더 대신 URL에 라이선스 키를 담아 전달하는, 더 이상 사용되지 않는(deprecated) 키 전용 엔드포인트가 사용됩니다."
+      },
+      "GEOIP_CITY": {
+        "label": "도시 데이터베이스",
+        "help": "도시 데이터베이스를 다운로드합니다. 다른 데이터베이스보다 훨씬 크며(DB-IP City Lite는 압축 해제 시 125MB), 이미지에는 포함되어 있지 않습니다."
+      },
+      "GEOIP_COUNTRY_MMDB": {
+        "label": "사용자 지정 국가 데이터베이스",
+        "help": "사용자 지정 국가 데이터베이스: worker가 읽을 수 있는 절대 경로 또는 http(s) URL입니다. MaxMind 및 DB-IP보다 우선합니다."
+      },
+      "GEOIP_ASN_MMDB": {
+        "label": "사용자 지정 ASN 데이터베이스",
+        "help": "사용자 지정 ASN 데이터베이스: worker가 읽을 수 있는 절대 경로 또는 http(s) URL입니다. MaxMind 및 DB-IP보다 우선합니다."
+      },
+      "GEOIP_CITY_MMDB": {
+        "label": "사용자 지정 도시 데이터베이스",
+        "help": "사용자 지정 도시 데이터베이스: worker가 읽을 수 있는 절대 경로 또는 http(s) URL입니다. MaxMind 및 DB-IP보다 우선합니다."
+      }
+    }
+  }
+}

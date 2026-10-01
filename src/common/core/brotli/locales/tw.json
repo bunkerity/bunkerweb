@@ -1,0 +1,26 @@
+{
+  "brotli": {
+    "meta": {
+      "name": "Brotli",
+      "description": "使用 brotli 演算法壓縮 HTTP 請求。"
+    },
+    "settings": {
+      "USE_BROTLI": {
+        "label": "使用 Brotli",
+        "help": "啟用或停用 Brotli 壓縮。預設為關閉,這也是 ngx_brotli 模組本身的預設值。此設定為每個服務個別生效:對於回應中同時攜帶密鑰(CSRF token、API key)並回顯攻擊者提供輸入的任何服務,請將其保持關閉,因為這種組合正是 BREACH 攻擊的前提條件——另請注意,無論 BROTLI_TYPES 中列出什麼,text/html 一律會被壓縮。BunkerWeb Web UI 就是這樣一種服務。"
+      },
+      "BROTLI_TYPES": {
+        "label": "MIME 類型",
+        "help": "將使用 brotli 壓縮的 MIME 類型清單。"
+      },
+      "BROTLI_MIN_LENGTH": {
+        "label": "最小長度",
+        "help": "套用 Brotli 壓縮所需的最小回應大小(以位元組為單位)。"
+      },
+      "BROTLI_COMP_LEVEL": {
+        "label": "壓縮等級",
+        "help": "Brotli 的壓縮等級(0 = 不壓縮,11 = 最大壓縮)。"
+      }
+    }
+  }
+}

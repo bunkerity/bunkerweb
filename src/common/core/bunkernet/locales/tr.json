@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "BunkerNet aracılığıyla diğer BunkerWeb örnekleriyle tehdit verilerini paylaşır."
+    },
+    "settings": {
+      "BUNKERNET_SERVER": {
+        "label": "BunkerNet sunucusu",
+        "help": "BunkerNet API'sinin adresi."
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "BunkerNet istatistik saklama süresi (gün)",
+        "help": "Kalıcı hale getirilen BunkerNet etkinlik istatistiklerinin maksimum yaşı (gün)."
+      },
+      "USE_BUNKERNET": {
+        "label": "BunkerNet'i etkinleştir",
+        "help": "BunkerNet özelliğini etkinleştir."
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "BunkerNet etkinlik istatistikleri",
+        "help": "BunkerNet etkinlik istatistiklerini (katkı, engelleme listesi boyutu, bağlantı) veritabanında kalıcı hale getir."
+      }
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "BUNKERNET DURUMU"
+      },
+      "info_connectivity": {
+        "title": "Bağlantı"
+      },
+      "info_instance_id": {
+        "title": "Örnek Kimliği"
+      }
+    }
+  }
+}

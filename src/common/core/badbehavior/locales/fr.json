@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "Mauvais comportement",
+      "description": "Bannit une IP générant trop de codes de statut HTTP « mauvais » sur une période donnée."
+    },
+    "settings": {
+      "USE_BAD_BEHAVIOR": {
+        "label": "Activer Mauvais comportement",
+        "help": "Active la fonctionnalité Mauvais comportement."
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "Codes de statut « mauvais »",
+        "help": "Liste des codes de statut HTTP considérés comme « mauvais »."
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "Seuil",
+        "help": "Nombre maximal de codes de statut HTTP « mauvais » pendant la période avant que l'IP ne soit bannie."
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "Période (en secondes)",
+        "help": "Période (en secondes) pendant laquelle les codes de statut HTTP « mauvais » sont comptabilisés."
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "Durée du bannissement (en secondes)",
+        "help": "Durée (en secondes) d'un bannissement lorsque l'IP correspondante a atteint le seuil. (Mettre à 0 pour bannir de façon permanente)"
+      },
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "Portée du bannissement",
+        "help": "Détermine le niveau du bannissement. « service » bannira l'IP pour le service uniquement, « global » bannira l'IP pour l'ensemble du système."
+      }
+    }
+  }
+}

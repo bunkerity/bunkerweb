@@ -1,0 +1,34 @@
+{
+  "geoip": {
+    "meta": {
+      "name": "GeoIP",
+      "description": "用於解析用戶端 IP 所在國家/地區、ASN 與城市的 GeoIP 資料庫。"
+    },
+    "settings": {
+      "MAXMIND_LICENSE_KEY": {
+        "label": "MaxMind 授權金鑰",
+        "help": "MaxMind 授權金鑰。設定後,國家/地區、ASN 和城市資料庫將從 MaxMind 下載,而非從 DB-IP 下載。"
+      },
+      "MAXMIND_ACCOUNT_ID": {
+        "label": "MaxMind 帳戶 ID",
+        "help": "MaxMind 帳戶 ID。可選,但建議填寫:若不填寫,將使用已淘汰的「僅金鑰」端點,該端點會將授權金鑰放在 URL 中,而非放在身分驗證標頭中。"
+      },
+      "GEOIP_CITY": {
+        "label": "城市資料庫",
+        "help": "下載城市資料庫。它比其他資料庫大得多(DB-IP City Lite 解壓後約 125 MB),且未打包在映像檔中。"
+      },
+      "GEOIP_COUNTRY_MMDB": {
+        "label": "自訂國家/地區資料庫",
+        "help": "自訂國家/地區資料庫:worker 可讀取的絕對路徑,或 http(s) URL。優先順序高於 MaxMind 和 DB-IP。"
+      },
+      "GEOIP_ASN_MMDB": {
+        "label": "自訂 ASN 資料庫",
+        "help": "自訂 ASN 資料庫:worker 可讀取的絕對路徑,或 http(s) URL。優先順序高於 MaxMind 和 DB-IP。"
+      },
+      "GEOIP_CITY_MMDB": {
+        "label": "自訂城市資料庫",
+        "help": "自訂城市資料庫:worker 可讀取的絕對路徑,或 http(s) URL。優先順序高於 MaxMind 和 DB-IP。"
+      }
+    }
+  }
+}

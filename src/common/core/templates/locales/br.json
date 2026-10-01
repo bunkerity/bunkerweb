@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "Modelos",
+      "description": "Plugin core fictício para os modelos internos."
+    },
+    "templates": {
+      "low": {
+        "name": "Nível de segurança básico que fornece as configurações essenciais para a proteção de aplicações web",
+        "steps": {
+          "0": {
+            "title": "Serviço web - Serviço frontal",
+            "subtitle": "Configure seu serviço web voltado para seus clientes"
+          },
+          "1": {
+            "title": "Serviço web - Servidor upstream",
+            "subtitle": "Configure o servidor upstream a ser protegido pelo BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Geral",
+            "subtitle": "Configure as configurações relacionadas ao protocolo HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Cabeçalhos",
+            "subtitle": "Configure as configurações relacionadas aos cabeçalhos HTTP"
+          },
+          "4": {
+            "title": "Segurança - Mau comportamento",
+            "subtitle": "Configure as configurações relacionadas ao banimento automático quando um mau comportamento é detectado."
+          },
+          "5": {
+            "title": "Segurança - Lista negra",
+            "subtitle": "Configure as configurações relacionadas às listas negras externas."
+          },
+          "6": {
+            "title": "Segurança - Limitação",
+            "subtitle": "Configure as configurações relacionadas à limitação de requisições e conexões."
+          },
+          "7": {
+            "title": "Segurança - Antibot",
+            "subtitle": "Configure as configurações sobre a detecção de robôs"
+          },
+          "8": {
+            "title": "Segurança - Autenticação básica",
+            "subtitle": "Configure a autenticação HTTP básica"
+          },
+          "9": {
+            "title": "Segurança - País",
+            "subtitle": "Configure as configurações sobre a política de acesso por país"
+          },
+          "10": {
+            "title": "Segurança - ModSecurity",
+            "subtitle": "Configure as configurações relacionadas ao WAF ModSecurity"
+          }
+        }
+      },
+      "medium": {
+        "name": "Nível de segurança equilibrado que oferece uma combinação de recursos de segurança e otimizações de desempenho",
+        "steps": {
+          "0": {
+            "title": "Serviço web - Serviço frontal",
+            "subtitle": "Configure seu serviço web voltado para seus clientes"
+          },
+          "1": {
+            "title": "Serviço web - Servidor upstream",
+            "subtitle": "Configure o servidor upstream a ser protegido pelo BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Geral",
+            "subtitle": "Configure as configurações relacionadas ao protocolo HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Cabeçalhos",
+            "subtitle": "Configure as configurações relacionadas aos cabeçalhos HTTP"
+          },
+          "4": {
+            "title": "Segurança - Mau comportamento",
+            "subtitle": "Configure as configurações relacionadas ao banimento automático quando um mau comportamento é detectado."
+          },
+          "5": {
+            "title": "Segurança - Lista negra",
+            "subtitle": "Configure as configurações relacionadas às listas negras externas."
+          },
+          "6": {
+            "title": "Segurança - Limitação",
+            "subtitle": "Configure as configurações relacionadas à limitação de requisições e conexões."
+          },
+          "7": {
+            "title": "Segurança - Antibot",
+            "subtitle": "Configure as configurações sobre a detecção de robôs"
+          },
+          "8": {
+            "title": "Segurança - Autenticação básica",
+            "subtitle": "Configure a autenticação HTTP básica"
+          },
+          "9": {
+            "title": "Segurança - País",
+            "subtitle": "Configure as configurações sobre a política de acesso por país"
+          },
+          "10": {
+            "title": "Segurança - Varredura reversa",
+            "subtitle": "Configure as configurações sobre a varredura das portas dos clientes"
+          },
+          "11": {
+            "title": "Segurança - ModSecurity",
+            "subtitle": "Configure as configurações relacionadas ao WAF ModSecurity"
+          }
+        }
+      },
+      "high": {
+        "name": "Nível de segurança avançado com foco em medidas de segurança robustas e proteção abrangente",
+        "steps": {
+          "0": {
+            "title": "Serviço web - Serviço frontal",
+            "subtitle": "Configure seu serviço web voltado para seus clientes"
+          },
+          "1": {
+            "title": "Serviço web - Servidor upstream",
+            "subtitle": "Configure o servidor upstream a ser protegido pelo BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Geral",
+            "subtitle": "Configure as configurações relacionadas ao protocolo HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Cabeçalhos",
+            "subtitle": "Configure as configurações relacionadas aos cabeçalhos HTTP"
+          },
+          "4": {
+            "title": "Segurança - Mau comportamento",
+            "subtitle": "Configure as configurações relacionadas ao banimento automático quando um mau comportamento é detectado."
+          },
+          "5": {
+            "title": "Segurança - Lista negra",
+            "subtitle": "Configure as configurações relacionadas às listas negras externas."
+          },
+          "6": {
+            "title": "Segurança - Limitação",
+            "subtitle": "Configure as configurações relacionadas à limitação de requisições e conexões."
+          },
+          "7": {
+            "title": "Segurança - Antibot",
+            "subtitle": "Configure as configurações sobre a detecção de robôs"
+          },
+          "8": {
+            "title": "Segurança - Autenticação básica",
+            "subtitle": "Configure a autenticação HTTP básica"
+          },
+          "9": {
+            "title": "Segurança - País",
+            "subtitle": "Configure as configurações sobre a política de acesso por país"
+          },
+          "10": {
+            "title": "Segurança - Varredura reversa",
+            "subtitle": "Configure as configurações sobre a varredura das portas dos clientes"
+          },
+          "11": {
+            "title": "Segurança - ModSecurity",
+            "subtitle": "Configure as configurações relacionadas ao WAF ModSecurity"
+          }
+        }
+      },
+      "api": {
+        "name": "Configurações básicas ao usar a API do BunkerWeb",
+        "steps": {
+          "0": {
+            "title": "Serviço - Serviço frontal",
+            "subtitle": "Configure o nome do servidor e as configurações de SSL/TLS"
+          },
+          "1": {
+            "title": "Serviço - Servidor upstream",
+            "subtitle": "Configure o servidor upstream a ser protegido pelo BunkerWeb"
+          },
+          "2": {
+            "title": "API - Limitação de taxa",
+            "subtitle": "Configure as configurações de limitação de taxa - lembre-se de que a API também tem limitação de taxa interna"
+          },
+          "3": {
+            "title": "API - Configurações diversas",
+            "subtitle": "Outras configurações importantes para o funcionamento adequado da API"
+          }
+        }
+      },
+      "ui": {
+        "name": "Configurações básicas ao usar a interface web (UI)",
+        "steps": {
+          "0": {
+            "title": "Etapa fictícia",
+            "subtitle": "Esta é uma etapa fictícia para mostrar as configurações básicas ao usar a interface web"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "URLs de templates externos",
+        "help": "Lista de URLs de templates de serviço a baixar e instalar, separadas por espaços. Cada URL é um template: um pacote JSON bunkerweb-template/1, ou um .zip ou .tar.gz contendo <id>/template.json e suas configurações. Somente https:// e file:/// são aceitos, no máximo 1 MiB. Acrescente #sha256=<digest> a uma URL para fixar seu conteúdo. Um template cuja URL for removida é excluído, a menos que algum serviço ainda o utilize."
+      }
+    }
+  }
+}

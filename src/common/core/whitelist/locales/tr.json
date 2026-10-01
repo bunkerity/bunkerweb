@@ -1,0 +1,76 @@
+{
+  "whitelist": {
+    "meta": {
+      "name": "Beyaz liste",
+      "description": "Dahili ve harici IP/ağ/rDNS/ASN beyaz listelerine göre erişime izin verir."
+    },
+    "settings": {
+      "USE_WHITELIST": {
+        "label": "Beyaz listelemeyi etkinleştir",
+        "help": "Whitelist özelliğini etkinleştir."
+      },
+      "WHITELIST_ASN": {
+        "label": "Whitelist ASN",
+        "help": "Beyaz listeye alınacak, boşluklarla ayrılmış ASN numaralarının listesi."
+      },
+      "WHITELIST_ASN_URLS": {
+        "label": "Whitelist ASN URL'leri",
+        "help": "Beyaz listeye alınacak ASN'leri içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "WHITELIST_HEADER_NAME": {
+        "label": "Beyaz listeye alınan üstbilgi adı",
+        "help": "İsteği beyaz listeye ekleyen istek üstbilgisinin adı. Herhangi bir istemci bu üstbilgiyi gönderebilir: onu yalnızca HTTPS üzerinden kullanılan paylaşılan bir sır olarak değerlendirin."
+      },
+      "WHITELIST_HEADER_VALUE": {
+        "label": "Beyaz listeye alınan üstbilgi değeri",
+        "help": "İsteği beyaz listeye eklemek için üstbilginin eşleşmesi gereken değer (PCRE normal ifadesi). Yalnızca üstbilginin varlığına göre eşleştirmek için boş bırakın. ^ ve $ ile sabitleyin: eşleşme varsayılan olarak sabitlenmemiştir."
+      },
+      "WHITELIST_IP": {
+        "label": "Whitelist IP/ağ",
+        "help": "Beyaz listeye alınacak, boşluklarla ayrılmış IP/ağ listesi."
+      },
+      "WHITELIST_IP_URLS": {
+        "label": "Whitelist IP/ağ URL'leri",
+        "help": "Beyaz listeye alınacak iyi IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "WHITELIST_RDNS": {
+        "label": "Whitelist reverse DNS",
+        "help": "Beyaz listeye alınacak, boşluklarla ayrılmış reverse DNS soneklerinin listesi."
+      },
+      "WHITELIST_RDNS_GLOBAL": {
+        "label": "Whitelist reverse DNS, yalnızca genel IP'ler",
+        "help": "RDNS beyaz liste kontrollerini yalnızca genel (global) IP adresleri üzerinde gerçekleştir."
+      },
+      "WHITELIST_RDNS_URLS": {
+        "label": "Whitelist reverse DNS URL'leri",
+        "help": "Beyaz listeye alınacak reverse DNS soneklerini içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "WHITELIST_RULE": {
+        "label": "Whitelist kuralı",
+        "help": "Bileşik kural: kuralın eşleşmesi için her terimin eşleşmesi gerekir. Terimler \" AND \" (büyük harf) ile ayrılır ve her biri [NOT ]<kind>:<value> biçimindedir; burada <kind>, ip, country, asn, rdns, ua (user_agent takma adı) veya uri olabilir. Örnek: ip:10.0.0.0/8 AND NOT ua:^curl. Kurallar hem birbiriyle hem de yukarıdaki düz listelerle OR ile birleştirilir. Değer, @office gibi bir kaynak grubu belirteci de olabilir. Stream hizmetleri yalnızca ip, country, asn ve rdns'yi değerlendirir."
+      },
+      "WHITELIST_URI": {
+        "label": "Whitelist URI",
+        "help": "Beyaz listeye alınacak, boşluklarla ayrılmış URI (PCRE normal ifadesi) listesi."
+      },
+      "WHITELIST_URI_URLS": {
+        "label": "Whitelist URI URL'leri",
+        "help": "Beyaz listeye alınacak kötü amaçlı URI'leri içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "WHITELIST_USER_AGENT": {
+        "label": "Whitelist User-Agent",
+        "help": "Beyaz listeye alınacak, boşluklarla ayrılmış User-Agent (PCRE normal ifadesi) listesi."
+      },
+      "WHITELIST_USER_AGENT_URLS": {
+        "label": "Whitelist User-Agent URL'leri",
+        "help": "Beyaz listeye alınacak iyi User-Agent'ları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      }
+    },
+    "widgets": {
+      "counter_passed_whitelist": {
+        "title": "BEYAZ LİSTE",
+        "subtitle": "İsteğe izin verildi"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "selfsigned": {
+    "meta": {
+      "name": "自我簽署憑證",
+      "description": "產生自我簽署憑證。"
+    },
+    "settings": {
+      "GENERATE_SELF_SIGNED_SSL": {
+        "label": "啟用自簽憑證",
+        "help": "產生並使用自簽憑證。"
+      },
+      "SELF_SIGNED_SSL_ALGORITHM": {
+        "label": "憑證演算法",
+        "help": "用於產生自簽憑證的演算法。"
+      },
+      "SELF_SIGNED_SSL_EXPIRY": {
+        "label": "憑證有效期限",
+        "help": "自簽憑證的有效期限(以天為單位)。"
+      },
+      "SELF_SIGNED_SSL_SUBJ": {
+        "label": "憑證主體",
+        "help": "自簽憑證的主體。"
+      }
+    }
+  }
+}

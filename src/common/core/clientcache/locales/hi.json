@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "क्लाइंट कैश",
+      "description": "क्लाइंट के लिए कैशिंग प्रबंधित करता है।"
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "क्लाइंट कैश उपयोग करें",
+        "help": "क्लाइंट को स्टैटिक फ़ाइलें स्थानीय रूप से संग्रहीत करने के लिए कहें।"
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "क्लाइंट द्वारा कैश किए जाने वाले एक्सटेंशन",
+        "help": "पाइप से अलग की गई फ़ाइल एक्सटेंशन की सूची जिन्हें कैश किया जाना चाहिए।"
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "स्टैटिक संसाधनों के लिए HTTP ETag हेडर भेजें।"
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control हेडर",
+        "help": "Cache-Control HTTP हेडर का मान।"
+      }
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "以叢集模式使用 BunkerWeb 時的 Redis 伺服器設定。"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "REDIS 狀態"
+      },
+      "counter_redis_nb_keys": {
+        "title": "REDIS 鍵",
+        "subtitle": "鍵數量"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "啟用 Redis",
+        "help": "啟用 Redis。"
+      },
+      "REDIS_HOST": {
+        "label": "Redis 伺服器",
+        "help": "Redis 伺服器的 IP 或主機名稱。"
+      },
+      "REDIS_PORT": {
+        "label": "Redis 連接埠",
+        "help": "Redis 伺服器連接埠。"
+      },
+      "REDIS_DATABASE": {
+        "label": "Redis 資料庫",
+        "help": "Redis 資料庫編號。"
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "與 Redis 伺服器使用 SSL/TLS 連線。"
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Redis SSL/TLS 驗證",
+        "help": "驗證 Redis 伺服器的憑證。"
+      },
+      "REDIS_SSL_CA": {
+        "label": "Redis SSL/TLS CA 憑證組合",
+        "help": "用於驗證 Redis/Valkey 伺服器憑證的 PEM CA 憑證組合的路徑(私有 CA);未設定時使用系統信任存放區。設定後,該憑證組合會被 Python 用戶端(Celery broker、工作、API 速率限制器、bwcli、Web UI)信任,並附加到 NGINX Lua 信任組合中,使請求路徑也信任它。該檔案在產生設定的位置以及每個用戶端讀取的位置都必須存在;憑證組合缺失或無效將導致設定產生失敗。"
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Redis 逾時(毫秒)",
+        "help": "Redis 伺服器連線、讀取和寫入的逾時時間(毫秒)。"
+      },
+      "REDIS_USERNAME": {
+        "label": "Redis 使用者名稱",
+        "help": "AUTH 命令中使用的 Redis 使用者名稱。"
+      },
+      "REDIS_PASSWORD": {
+        "label": "Redis 密碼",
+        "help": "AUTH 命令中使用的 Redis 密碼。"
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Redis sentinel 主機",
+        "help": "Redis sentinel 主機,格式為 host:[port],以空格分隔。"
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Redis sentinel 使用者名稱",
+        "help": "Redis sentinel 使用者名稱。"
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Redis sentinel 密碼",
+        "help": "Redis sentinel 密碼。"
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Redis sentinel 主節點",
+        "help": "Redis sentinel 主節點名稱。"
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Redis keepalive 閒置時間(毫秒)",
+        "help": "連線池中 Redis 連線在被關閉前的最大閒置時間(毫秒)。"
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Redis keepalive 連線池",
+        "help": "每個 NGINX worker 的連線池中保留的最大 Redis 連線數。穩態連線數大致等於 nginx_workers x pool x instances,必須保持在 Redis/Valkey 的 maxclients 限制以內。"
+      }
+    }
+  }
+}

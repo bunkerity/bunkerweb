@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Rückwärts-Scan",
+      "description": "Erhöht die Sicherheit, indem Client-Ports gescannt werden, um Verbindungen von Proxys oder Servern zu erkennen und zu blockieren und so die Umgehung von Sicherheitsmaßnahmen zu verhindern."
+    },
+    "settings": {
+      "USE_REVERSE_SCAN": {
+        "label": "Rückwärts-Scan",
+        "help": "Aktiviert das Scannen der Client-Ports und verweigert den Zugriff, wenn einer davon geöffnet ist."
+      },
+      "REVERSE_SCAN_PORTS": {
+        "label": "Rückwärts-Scan-Ports",
+        "help": "Liste der zu scannenden Ports bei Verwendung der Rückwärts-Scan-Funktion."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Rückwärts-Scan-Timeout",
+        "help": "Legt das maximale Timeout (in ms) beim Scannen eines Ports fest."
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "jobs": {
+    "meta": {
+      "name": "Zadania",
+      "description": "Fikcyjna wtyczka core dla zadań wewnętrznych."
+    }
+  }
+}

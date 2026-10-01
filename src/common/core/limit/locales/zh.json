@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "限制",
+      "description": "限制请求和连接的最大数量。"
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "全局限制",
+        "subtitle": "已阻止的请求"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "启用请求限制",
+        "help": "启用请求限制功能。"
+      },
+      "LIMIT_REQ_URL": {
+        "label": "请求限制 URL",
+        "help": "应用请求限制的 URL(PCRE 正则表达式),或使用特殊值 / 表示适用于所有请求。"
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "请求限制速率",
+        "help": "应用于该 URL 的速率(s 表示秒,m 表示分钟,h 表示小时,d 表示天)。"
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "启用全局请求限制",
+        "help": "启用全局速率限制:为整个服务设置一个聚合配额,将所有客户端和 URL 合并计数(用于保护源站容量,独立于按 IP/按 URL 的请求限制)。"
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "全局请求限制速率",
+        "help": "整个服务的最大聚合速率,所有客户端和 URL 合并计算(s 表示秒,m 表示分钟,h 表示小时,d 表示天)。"
+      },
+      "USE_LIMIT_CONN": {
+        "label": "启用连接数限制",
+        "help": "启用连接数限制功能。"
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "HTTP/1.X 连接数上限",
+        "help": "使用 HTTP/1.X 协议时,每个 IP 的最大连接数。"
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "HTTP/2 流数上限",
+        "help": "使用 HTTP/2 协议时,每个 IP 的最大流数。"
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "HTTP/3 流数上限",
+        "help": "使用 HTTP/3 协议时,每个 IP 的最大流数。"
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "流连接数上限",
+        "help": "使用流(stream)时,每个 IP 的最大连接数。"
+      }
+    }
+  }
+}

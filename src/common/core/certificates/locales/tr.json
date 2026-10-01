@@ -1,0 +1,8 @@
+{
+  "certificates": {
+    "meta": {
+      "name": "Sertifikalar",
+      "description": "Bir hizmete bağlı sertifikayı, onu hangi sağlayıcı düzenlemiş olursa olsun, merkezi envanterden sunar."
+    }
+  }
+}

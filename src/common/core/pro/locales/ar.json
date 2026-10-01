@@ -1,0 +1,14 @@
+{
+  "pro": {
+    "meta": {
+      "name": "Pro",
+      "description": "إعدادات Pro لإصدار BunkerWeb Pro."
+    },
+    "settings": {
+      "PRO_LICENSE_KEY": {
+        "label": "مفتاح ترخيص Pro",
+        "help": "مفتاح الترخيص لإصدار BunkerWeb Pro."
+      }
+    }
+  }
+}

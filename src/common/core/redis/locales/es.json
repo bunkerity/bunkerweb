@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "Configuración del servidor Redis al usar BunkerWeb en modo clúster."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "ESTADO DE REDIS"
+      },
+      "counter_redis_nb_keys": {
+        "title": "CLAVES DE REDIS",
+        "subtitle": "Número de claves"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Activar Redis",
+        "help": "Activa Redis."
+      },
+      "REDIS_HOST": {
+        "label": "Servidor Redis",
+        "help": "IP o nombre de host del servidor Redis."
+      },
+      "REDIS_PORT": {
+        "label": "Puerto Redis",
+        "help": "Puerto del servidor Redis."
+      },
+      "REDIS_DATABASE": {
+        "label": "Base de datos Redis",
+        "help": "Número de la base de datos Redis."
+      },
+      "REDIS_SSL": {
+        "label": "SSL/TLS Redis",
+        "help": "Usa una conexión SSL/TLS con el servidor Redis."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Verificación SSL/TLS Redis",
+        "help": "Verifica el certificado del servidor Redis."
+      },
+      "REDIS_SSL_CA": {
+        "label": "Bundle CA SSL/TLS de Redis",
+        "help": "Ruta a un bundle CA PEM utilizado para verificar el certificado del servidor Redis/Valkey (CA privada); sin definir significa el almacén de confianza del sistema. Cuando se define, es de confianza para los clientes Python (broker de Celery, jobs, limitador de tasa de la API, bwcli, interfaz web) y se añade al bundle de confianza Lua de NGINX, de modo que la ruta de la solicitud también confía en él. Se lee donde se genera la configuración y por cada cliente, por lo que el archivo debe existir en esa ruta allí; un bundle ausente o no válido hace fallar la generación de la configuración."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Tiempo de espera Redis (ms)",
+        "help": "Tiempo de espera del servidor Redis (en ms) para conexión, lectura y escritura."
+      },
+      "REDIS_USERNAME": {
+        "label": "Nombre de usuario Redis",
+        "help": "Nombre de usuario Redis utilizado en el comando AUTH."
+      },
+      "REDIS_PASSWORD": {
+        "label": "Contraseña Redis",
+        "help": "Contraseña Redis utilizada en el comando AUTH."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Hosts sentinel Redis",
+        "help": "Hosts sentinel Redis con formato host:[port], separados por espacios."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Nombre de usuario sentinel Redis",
+        "help": "Nombre de usuario sentinel Redis."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Contraseña sentinel Redis",
+        "help": "Contraseña sentinel Redis."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Master sentinel Redis",
+        "help": "Nombre del master sentinel Redis."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Inactividad keepalive Redis (ms)",
+        "help": "Tiempo de inactividad máximo (en ms) antes de cerrar una conexión Redis en el pool."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Pool keepalive Redis",
+        "help": "Número máximo de conexiones Redis mantenidas en el pool por worker de NGINX. En régimen estable, las conexiones son aproximadamente nginx_workers x pool x instances y deben permanecer dentro del límite maxclients de Redis/Valkey."
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "제한",
+      "description": "최대 요청 및 연결 수를 제한합니다."
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "전역 제한",
+        "subtitle": "차단된 요청"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "요청 제한 활성화",
+        "help": "요청 제한 기능을 활성화합니다."
+      },
+      "LIMIT_REQ_URL": {
+        "label": "요청 제한 URL",
+        "help": "요청 제한이 적용될 URL입니다(PCRE 정규식). 모든 요청에 적용하려면 특수 값 /를 사용합니다."
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "요청 제한 속도",
+        "help": "해당 URL에 적용할 속도입니다(s는 초, m은 분, h는 시간, d는 일)."
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "전역 요청 제한 활성화",
+        "help": "전역 속도 제한을 활성화합니다: 모든 클라이언트와 URL을 함께 집계하여 전체 서비스에 대해 하나의 통합 할당량을 적용합니다(오리진 용량을 보호하며, IP별/URL별 요청 제한과는 독립적입니다)."
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "전역 요청 제한 속도",
+        "help": "전체 서비스, 모든 클라이언트와 URL을 합산한 최대 통합 속도입니다(s는 초, m은 분, h는 시간, d는 일)."
+      },
+      "USE_LIMIT_CONN": {
+        "label": "연결 제한 활성화",
+        "help": "연결 제한 기능을 활성화합니다."
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "HTTP/1.X 연결 최대 수",
+        "help": "HTTP/1.X 프로토콜 사용 시 IP당 최대 연결 수입니다."
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "HTTP/2 스트림 최대 수",
+        "help": "HTTP/2 프로토콜 사용 시 IP당 최대 스트림 수입니다."
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "HTTP/3 스트림 최대 수",
+        "help": "HTTP/3 프로토콜 사용 시 IP당 최대 스트림 수입니다."
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "스트림 연결 최대 수",
+        "help": "스트림 사용 시 IP당 최대 연결 수입니다."
+      }
+    }
+  }
+}

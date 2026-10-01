@@ -1,0 +1,14 @@
+{
+  "pro": {
+    "meta": {
+      "name": "Pro",
+      "description": "BunkerWeb'in Pro sürümü için Pro ayarları."
+    },
+    "settings": {
+      "PRO_LICENSE_KEY": {
+        "label": "Pro Lisans Anahtarı",
+        "help": "BunkerWeb'in Pro sürümü için Lisans Anahtarı."
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "通过 BunkerNet 与其他 BunkerWeb 实例共享威胁数据。"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "BUNKERNET 状态"
+      },
+      "info_connectivity": {
+        "title": "连接状态"
+      },
+      "info_instance_id": {
+        "title": "实例 ID"
+      }
+    },
+    "settings": {
+      "USE_BUNKERNET": {
+        "label": "启用 BunkerNet",
+        "help": "启用 BunkerNet 功能。"
+      },
+      "BUNKERNET_SERVER": {
+        "label": "BunkerNet 服务器",
+        "help": "BunkerNet API 的地址。"
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "BunkerNet 有效性统计",
+        "help": "将 BunkerNet 有效性统计信息(贡献量、封锁列表大小、连接状态)持久化保存到数据库。"
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "BunkerNet 统计保留期(天)",
+        "help": "已持久化的 BunkerNet 有效性统计信息的最长保留时间(以天为单位)。"
+      }
+    }
+  }
+}

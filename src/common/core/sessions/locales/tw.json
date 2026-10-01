@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "工作階段",
+      "description": "管理其他外掛所使用的工作階段。"
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "工作階段密鑰",
+        "help": "用於加密工作階段變數的密鑰,以儲存與質詢相關的資料。"
+      },
+      "SESSIONS_NAME": {
+        "label": "工作階段名稱",
+        "help": "分配給客戶端的 Cookie 名稱。"
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "工作階段 Cookie 網域",
+        "help": "為該伺服器的工作階段 Cookie 設定的 Domain 屬性(例如 `example.com` 或 `.example.com`)。留空則將 Cookie 的作用域限定為精確主機名稱。設定為父層可註冊網域,可在同層子網域之間共用工作階段(從而共用 antibot/質詢狀態)。在多站台環境中,請依伺服器逐一設定該值,以避免不相關的租戶收到跨租戶的 `Domain` 屬性。"
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "工作階段閒置逾時",
+        "help": "工作階段失效前允許的最長閒置時間(秒)。"
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "工作階段滾動逾時",
+        "help": "工作階段必須續期前的最長時間(秒)。"
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "工作階段絕對逾時",
+        "help": "工作階段被銷毀前的最長時間(秒)。"
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "工作階段檢查 IP",
+        "help": "若 IP 位址與原始位址不同,則銷毀工作階段。"
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "工作階段檢查 User-Agent",
+        "help": "若 User-Agent 與原始值不同,則銷毀工作階段。"
+      }
+    }
+  }
+}

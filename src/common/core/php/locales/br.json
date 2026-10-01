@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "Gerencia um PHP-FPM local ou remoto."
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "PHP remoto",
+        "help": "Nome de host da instância remota do PHP-FPM."
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "Caminho do PHP remoto",
+        "help": "Pasta raiz contendo os arquivos na instância remota do PHP-FPM."
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "Porta do PHP remoto",
+        "help": "Porta da instância remota do PHP-FPM."
+      },
+      "LOCAL_PHP": {
+        "label": "PHP local",
+        "help": "Caminho para o arquivo de socket do PHP-FPM."
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "Caminho do PHP local",
+        "help": "Pasta raiz contendo os arquivos na instância local do PHP-FPM."
+      }
+    }
+  }
+}

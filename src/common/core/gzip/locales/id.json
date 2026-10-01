@@ -1,0 +1,30 @@
+{
+  "gzip": {
+    "meta": {
+      "name": "Gzip",
+      "description": "Mengompresi permintaan HTTP dengan algoritme gzip."
+    },
+    "settings": {
+      "USE_GZIP": {
+        "label": "Gunakan gzip",
+        "help": "Aktifkan atau nonaktifkan kompresi Gzip. Nonaktif secara default, yang juga merupakan default bawaan NGINX sendiri. Pengaturan ini per layanan: biarkan nonaktif untuk layanan mana pun yang responsnya sekaligus membawa rahasia (token CSRF, kunci API) dan menggemakan kembali input dari penyerang, karena kombinasi tersebut adalah prasyarat serangan BREACH — perhatikan bahwa text/html selalu dikompresi, apa pun yang tercantum di GZIP_TYPES. UI web BunkerWeb adalah layanan semacam itu."
+      },
+      "GZIP_TYPES": {
+        "label": "Tipe MIME",
+        "help": "Daftar tipe MIME yang akan dikompresi dengan gzip."
+      },
+      "GZIP_MIN_LENGTH": {
+        "label": "Panjang minimum",
+        "help": "Ukuran respons minimum (dalam byte) agar kompresi Gzip diterapkan."
+      },
+      "GZIP_COMP_LEVEL": {
+        "label": "Tingkat kompresi",
+        "help": "Tingkat kompresi untuk Gzip (1 = kompresi paling minimal, 9 = kompresi maksimum)."
+      },
+      "GZIP_PROXIED": {
+        "label": "Permintaan proxy",
+        "help": "Menentukan permintaan proxy mana yang harus dikompresi."
+      }
+    }
+  }
+}

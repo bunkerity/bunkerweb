@@ -1,0 +1,76 @@
+{
+  "greylist": {
+    "meta": {
+      "name": "Lista gris",
+      "description": "Permite el acceso conservando las funciones de seguridad basadas en listas grises internas y externas de IP/red/rDNS/ASN."
+    },
+    "widgets": {
+      "counter_failed_greylist": {
+        "title": "LISTA GRIS",
+        "subtitle": "Solicitud bloqueada"
+      }
+    },
+    "settings": {
+      "USE_GREYLIST": {
+        "label": "Activar la lista gris",
+        "help": "Activa la función de lista gris."
+      },
+      "GREYLIST_IP": {
+        "label": "IP/red de la lista gris",
+        "help": "Lista de IP/redes, separadas por espacios, que se incluirán en la lista gris."
+      },
+      "GREYLIST_RDNS": {
+        "label": "DNS inverso de la lista gris",
+        "help": "Lista de sufijos de DNS inverso, separados por espacios, que se incluirán en la lista gris."
+      },
+      "GREYLIST_RDNS_GLOBAL": {
+        "label": "DNS inverso lista gris solo IP globales",
+        "help": "Realizar las comprobaciones RDNS de lista gris únicamente en direcciones IP globales."
+      },
+      "GREYLIST_ASN": {
+        "label": "ASN de la lista gris",
+        "help": "Lista de números ASN, separados por espacios, que se incluirán en la lista gris."
+      },
+      "GREYLIST_USER_AGENT": {
+        "label": "User-Agent de la lista gris",
+        "help": "Lista de User-Agent (regex PCRE), separados por espacios, que se incluirán en la lista gris."
+      },
+      "GREYLIST_URI": {
+        "label": "URI de la lista gris",
+        "help": "Lista de URI (regex PCRE), separadas por espacios, que se incluirán en la lista gris."
+      },
+      "GREYLIST_RULE": {
+        "label": "Regla de lista gris",
+        "help": "Regla compuesta: cada término debe coincidir para que la regla coincida. Los términos se separan con « AND » (en mayúsculas) y cada uno tiene la forma [NOT ]<kind>:<value>, donde <kind> es ip, country, asn, rdns, ua (alias user_agent) o uri. Ejemplo: ip:10.0.0.0/8 AND NOT ua:^curl. Las reglas se combinan entre sí y con las listas planas anteriores mediante un O lógico. Un valor puede ser un token de grupo de recursos como @office. Los servicios stream solo evalúan ip, country, asn y rdns."
+      },
+      "GREYLIST_HEADER_NAME": {
+        "label": "Nombre de cabecera de lista gris",
+        "help": "Nombre de una cabecera de solicitud que añade la solicitud a la lista gris. Cualquier cliente puede enviar esta cabecera: trátela como un secreto compartido, solo a través de HTTPS."
+      },
+      "GREYLIST_HEADER_VALUE": {
+        "label": "Valor de cabecera de lista gris",
+        "help": "Valor (regex PCRE) que debe coincidir con la cabecera para añadir la solicitud a la lista gris. Dejar vacío para que coincida con la simple presencia de la cabecera. Ánclelo con ^ y $: la coincidencia no está anclada de forma predeterminada."
+      },
+      "GREYLIST_IP_URLS": {
+        "label": "IP/red de la lista gris (URL)",
+        "help": "Lista de URL, separadas por espacios, que contienen IP/redes fiables para incluir en la lista gris. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url."
+      },
+      "GREYLIST_RDNS_URLS": {
+        "label": "DNS inverso de la lista gris (URL)",
+        "help": "Lista de URL, separadas por espacios, que contienen sufijos de DNS inverso para incluir en la lista gris. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url."
+      },
+      "GREYLIST_ASN_URLS": {
+        "label": "ASN de la lista gris (URL)",
+        "help": "Lista de URL, separadas por espacios, que contienen ASN para incluir en la lista gris. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url."
+      },
+      "GREYLIST_USER_AGENT_URLS": {
+        "label": "User-Agent de la lista gris (URL)",
+        "help": "Lista de URL, separadas por espacios, que contienen User-Agent fiables para incluir en la lista gris. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url."
+      },
+      "GREYLIST_URI_URLS": {
+        "label": "URI de la lista gris (URL)",
+        "help": "Lista de URL, separadas por espacios, que contienen URI maliciosas para incluir en la lista gris. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url."
+      }
+    }
+  }
+}

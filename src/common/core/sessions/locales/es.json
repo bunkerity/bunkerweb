@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Sesiones",
+      "description": "Gestión de las sesiones usadas por otros plugins."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Secreto de las sesiones",
+        "help": "Secreto utilizado para cifrar las variables de sesión que almacenan datos relacionados con los desafíos."
+      },
+      "SESSIONS_NAME": {
+        "label": "Nombre de las sesiones",
+        "help": "Nombre de la cookie dada a los clientes."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Dominio de la cookie de sesión",
+        "help": "Atributo de dominio establecido en la cookie de sesión para este servidor (p. ej., `example.com` o `.example.com`). Déjelo vacío para mantener la cookie limitada al host exacto. Establézcalo en un dominio registrable superior para compartir la sesión (y por tanto el estado antibot/desafío) entre subdominios hermanos. En una configuración multisite, configure esto por servidor para que los inquilinos no relacionados nunca reciban un atributo `Domain` entre inquilinos."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Tiempo de espera de inactividad de las sesiones",
+        "help": "Tiempo máximo (en segundos) de inactividad antes de que la sesión se invalide."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Tiempo de espera renovable de las sesiones",
+        "help": "Tiempo máximo (en segundos) antes de que una sesión deba renovarse."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Tiempo de espera absoluto de las sesiones",
+        "help": "Tiempo máximo (en segundos) antes de que una sesión sea destruida."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Verificación de IP de las sesiones",
+        "help": "Destruye la sesión si la dirección IP es diferente de la original."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Verificación de User-Agent de las sesiones",
+        "help": "Destruye la sesión si el User-Agent es diferente del original."
+      }
+    }
+  }
+}

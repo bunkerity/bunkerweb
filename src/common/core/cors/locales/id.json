@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Berbagi sumber daya lintas asal (Cross-Origin Resource Sharing)."
+    },
+    "settings": {
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Kirim Access-Control-Allow-Credentials",
+        "help": "Kirim header Access-Control-Allow-Credentials."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Nilai Access-Control-Allow-Headers",
+        "help": "Nilai header Access-Control-Allow-Headers."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Nilai Access-Control-Allow-Methods",
+        "help": "Nilai header Access-Control-Allow-Methods."
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "Origin yang diizinkan",
+        "help": "Origin yang diizinkan untuk membuat permintaan CORS: regex PCRE, * atau self (untuk origin yang sama)."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "Tolak permintaan",
+        "help": "Tolak permintaan dan jangan kirim ke backend jika Origin tidak diizinkan."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Nilai Access-Control-Expose-Headers",
+        "help": "Nilai header Access-Control-Expose-Headers."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Nilai Access-Control-Max-Age",
+        "help": "Nilai header Access-Control-Max-Age."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Nilai header Cross-Origin-Embedder-Policy."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Nilai header Cross-Origin-Opener-Policy."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Nilai header Cross-Origin-Resource-Policy."
+      },
+      "USE_CORS": {
+        "label": "Gunakan CORS",
+        "help": "Gunakan CORS"
+      }
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "Permintaan diblokir"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "HTML-Injektion",
+      "description": "Fügt benutzerdefinierten HTML-Code vor dem Tag </body> oder </head> ein."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "Body-HTML-Code",
+        "help": "Der HTML-Code, der vor dem Tag </body> eingefügt wird."
+      },
+      "INJECT_HEAD": {
+        "label": "Head-HTML-Code",
+        "help": "Der HTML-Code, der vor dem Tag </head> eingefügt wird."
+      }
+    }
+  }
+}

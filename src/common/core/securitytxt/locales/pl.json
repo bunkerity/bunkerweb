@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "Zarządza plikiem security.txt. Proponowany standard umożliwiający witrynom definiowanie własnych zasad bezpieczeństwa."
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "Użyj security.txt",
+        "help": "Włącz plik security.txt."
+      },
+      "SECURITYTXT_URI": {
+        "label": "URI Security.txt",
+        "help": "Wskazuje URI, pod którym będzie dostępny plik \"security.txt\"."
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Kontakt Security.txt",
+        "help": "Wskazuje metodę, jakiej badacze powinni użyć do zgłaszania luk bezpieczeństwa, np. adres e-mail, numer telefonu i/lub stronę internetową z danymi kontaktowymi. (Jeśli wartość jest pusta, plik security.txt nie zostanie utworzony, ponieważ jest to pole wymagane)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Wygaśnięcie Security.txt",
+        "help": "Wskazuje datę i godzinę, po której dane zawarte w pliku \"security.txt\" są uznawane za nieaktualne i nie powinny być używane (jeśli wartość jest pusta, będzie to zawsze bieżąca data i godzina + 1 rok)."
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Szyfrowanie Security.txt",
+        "help": "Wskazuje klucz szyfrowania, którego badacze bezpieczeństwa powinni używać do zaszyfrowanej komunikacji."
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Podziękowania Security.txt",
+        "help": "Wskazuje link do strony, na której badacze bezpieczeństwa są wyróżniani za swoje zgłoszenia."
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Preferowany język Security.txt",
+        "help": "Może być użyty do wskazania zestawu języków naturalnych preferowanych przy zgłaszaniu raportów bezpieczeństwa."
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Kanoniczny Security.txt",
+        "help": "Wskazuje kanoniczne URI, pod którymi znajduje się plik \"security.txt\", zwykle w postaci \"https://example.com/.well-known/security.txt\". (Jeśli wartość jest pusta, wartość domyślna zostanie automatycznie wygenerowana z URL witryny + SECURITYTXT_URI)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Polityka Security.txt",
+        "help": "Wskazuje link do miejsca, w którym znajduje się polityka ujawniania luk bezpieczeństwa."
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Rekrutacja Security.txt",
+        "help": "Używane do linkowania do stanowisk pracy związanych z bezpieczeństwem u dostawcy."
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "Link do pliku provider-metadata.json Twojego dostawcy CSAF (Common Security Advisory Framework)."
+      }
+    }
+  }
+}

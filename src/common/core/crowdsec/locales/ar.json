@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "مانع (bouncer) CrowdSec الخاص بـ BunkerWeb."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "حالة CROWDSEC"
+      }
+    },
+    "settings": {
+      "USE_CROWDSEC": {
+        "label": "استخدام CrowdSec",
+        "help": "تفعيل bouncer الخاص بـ CrowdSec."
+      },
+      "CROWDSEC_API": {
+        "label": "واجهة برمجة تطبيقات CrowdSec",
+        "help": "عنوان واجهة برمجة تطبيقات CrowdSec."
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "مفتاح واجهة برمجة تطبيقات CrowdSec",
+        "help": "المفتاح الخاص بواجهة برمجة تطبيقات CrowdSec الذي يوفره الأمر cscli bouncer add."
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "تسجيل دخول إدارة CrowdSec",
+        "help": "تسجيل دخول آلة CrowdSec مخصص للتحقيق في التنبيهات وإزالة القرارات. اتركه فارغًا للوصول عبر bouncer للقراءة فقط."
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "كلمة مرور إدارة CrowdSec",
+        "help": "كلمة مرور آلة إدارة CrowdSec المخصصة. مطلوبة مع تسجيل دخول الإدارة؛ لا تستخدم أبدًا مفتاح API الخاص بـ bouncer هنا."
+      },
+      "CROWDSEC_MODE": {
+        "label": "وضع CrowdSec",
+        "help": "وضع واجهة برمجة تطبيقات CrowdSec (live أو stream)."
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "تفعيل التحليل الداخلي في CrowdSec",
+        "help": "تفعيل تحليل الحركة الداخلية."
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "مهلة طلب CrowdSec المباشر",
+        "help": "المهلة بالمللي ثانية لطلبات HTTP التي يقوم بها bouncer للاستعلام عن CrowdSec local API."
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "استثناء مواقع CrowdSec",
+        "help": "المواقع (locations) المراد استثناؤها أثناء bouncing. وهي قائمة مواقع مفصولة بفواصل."
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "تحدي كابتشا CrowdSec",
+        "help": "تحدي Antibot الذي يظهر عندما يطلب CrowdSec كابتشا. يجب تفعيل Antibot على هذه الخدمة (ضبط USE_ANTIBOT على أي قيمة عدا \"no\")، وإلا سيُحظر الطلب بدلاً من ذلك. تأخذ مزودو الطرف الثالث مفاتيحهم من إعدادات ANTIBOT_*. تجنّب \"cookie\": فهو لا يثبت شيئًا لقرار معناه \"أثبت أنك إنسان\". يتجاهل \"no\" قرارات الكابتشا كما كان سابقًا؛ ذاكرة التخزين المؤقت للقرارات مشتركة لكل Local API، لذا يجب ضبط كل خدمة على ذلك Local API إلى \"no\" لاستعادة السلوك القديم بالكامل."
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "ترك القرار لسير عمل الأمان",
+        "help": "ترك سير عمل الأمان يقرر ما يحدث لطلب مُعلَّم من CrowdSec. \"no\" (الافتراضي) يحظره هنا. \"yes\" يُسلّمه إلى سير العمل المرفق بهذه الخدمة؛ لا يزال الحكم يُطبَّق عندما لا تطابق أي قاعدة أو لا يوجد سير عمل مرفق. يُنشئ BunkerWeb طلب CORS preflight (204)، وrobots.txt/ وsecurity.txt/ قبل تشغيل سير العمل، لذا لا يزال بإمكان عميل مُعلَّم تلقي هذه الثلاثة. لا يصل أي منها إلى تطبيقك، وكل طلب قد يصل إليه يُفحص أولاً عبر سلّم سير العمل."
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "انتهاء صلاحية ذاكرة تخزين CrowdSec المؤقتة",
+        "help": "مدة انتهاء صلاحية ذاكرة التخزين المؤقت، بالثواني، لعناوين IP التي يخزّنها bouncer في وضع live."
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "مهلة طلب CrowdSec",
+        "help": "وتيرة التحديث، بالثواني، لسحب عناوين IP الجديدة/القديمة من CrowdSec local API."
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "رابط AppSec",
+        "help": "رابط مكوّن الأمان التطبيقي (Application Security Component)."
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "إجراء فشل AppSec",
+        "help": "السلوك عند إرجاع مكوّن AppSec لرمز 500. يمكن أن يسمح بمرور الطلب أو يرفضه."
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "مهلة اتصال AppSec",
+        "help": "المهلة بالمللي ثانية للاتصال بين مكوّن المعالجة (remediation component) ومكوّن AppSec."
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "مهلة إرسال AppSec",
+        "help": "المهلة بالمللي ثانية لإرسال البيانات من مكوّن المعالجة إلى مكوّن AppSec."
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "مهلة معالجة AppSec",
+        "help": "المهلة بالمللي ثانية لمعالجة الطلب من مكوّن المعالجة إلى مكوّن AppSec."
+      },
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "الإرسال دائمًا إلى AppSec",
+        "help": "إرسال الطلب إلى مكوّن AppSec حتى لو كان هناك قرار بشأن عنوان IP."
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "التحقق من SSL لـ AppSec",
+        "help": "التحقق من صلاحية شهادة SSL الخاصة بمكوّن AppSec."
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "Zarządza lokalnym lub zdalnym PHP-FPM."
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "Zdalny PHP",
+        "help": "Nazwa hosta zdalnej instancji PHP-FPM."
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "Ścieżka zdalnego PHP",
+        "help": "Folder główny zawierający pliki w zdalnej instancji PHP-FPM."
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "Port zdalnego PHP",
+        "help": "Port zdalnej instancji PHP-FPM."
+      },
+      "LOCAL_PHP": {
+        "label": "Lokalny PHP",
+        "help": "Ścieżka do pliku gniazda (socket) PHP-FPM."
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "Ścieżka lokalnego PHP",
+        "help": "Folder główny zawierający pliki w lokalnej instancji PHP-FPM."
+      }
+    }
+  }
+}

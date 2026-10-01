@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "模板",
+      "description": "用于内部模板的虚拟核心插件。"
+    },
+    "templates": {
+      "low": {
+        "name": "提供 Web 应用防护基本设置的基础安全级别",
+        "steps": {
+          "0": {
+            "title": "Web 服务 - 前端服务",
+            "subtitle": "配置面向客户端的 Web 服务"
+          },
+          "1": {
+            "title": "Web 服务 - 上游服务器",
+            "subtitle": "配置将由 BunkerWeb 保护的上游服务器"
+          },
+          "2": {
+            "title": "HTTP - 通用",
+            "subtitle": "配置与 HTTP(S) 协议相关的设置"
+          },
+          "3": {
+            "title": "HTTP - 响应头",
+            "subtitle": "配置与 HTTP 响应头相关的设置"
+          },
+          "4": {
+            "title": "安全 - 不良行为",
+            "subtitle": "配置检测到不良行为时自动封禁的相关设置。"
+          },
+          "5": {
+            "title": "安全 - 黑名单",
+            "subtitle": "配置与外部黑名单相关的设置。"
+          },
+          "6": {
+            "title": "安全 - 限制",
+            "subtitle": "配置限制请求和连接数量的相关设置。"
+          },
+          "7": {
+            "title": "安全 - Antibot",
+            "subtitle": "配置机器人检测相关设置"
+          },
+          "8": {
+            "title": "安全 - 基本认证",
+            "subtitle": "配置 HTTP 基本认证"
+          },
+          "9": {
+            "title": "安全 - 国家/地区",
+            "subtitle": "配置按国家/地区访问策略的相关设置"
+          },
+          "10": {
+            "title": "安全 - ModSecurity",
+            "subtitle": "配置与 ModSecurity WAF 相关的设置"
+          }
+        }
+      },
+      "medium": {
+        "name": "兼顾安全功能与性能优化的均衡安全级别",
+        "steps": {
+          "0": {
+            "title": "Web 服务 - 前端服务",
+            "subtitle": "配置面向客户端的 Web 服务"
+          },
+          "1": {
+            "title": "Web 服务 - 上游服务器",
+            "subtitle": "配置将由 BunkerWeb 保护的上游服务器"
+          },
+          "2": {
+            "title": "HTTP - 通用",
+            "subtitle": "配置与 HTTP(S) 协议相关的设置"
+          },
+          "3": {
+            "title": "HTTP - 响应头",
+            "subtitle": "配置与 HTTP 响应头相关的设置"
+          },
+          "4": {
+            "title": "安全 - 不良行为",
+            "subtitle": "配置检测到不良行为时自动封禁的相关设置。"
+          },
+          "5": {
+            "title": "安全 - 黑名单",
+            "subtitle": "配置与外部黑名单相关的设置。"
+          },
+          "6": {
+            "title": "安全 - 限制",
+            "subtitle": "配置限制请求和连接数量的相关设置。"
+          },
+          "7": {
+            "title": "安全 - Antibot",
+            "subtitle": "配置机器人检测相关设置"
+          },
+          "8": {
+            "title": "安全 - 基本认证",
+            "subtitle": "配置 HTTP 基本认证"
+          },
+          "9": {
+            "title": "安全 - 国家/地区",
+            "subtitle": "配置按国家/地区访问策略的相关设置"
+          },
+          "10": {
+            "title": "安全 - 反向扫描",
+            "subtitle": "配置扫描客户端端口的相关设置"
+          },
+          "11": {
+            "title": "安全 - ModSecurity",
+            "subtitle": "配置与 ModSecurity WAF 相关的设置"
+          }
+        }
+      },
+      "high": {
+        "name": "专注于强健安全措施和全面防护的高级安全级别",
+        "steps": {
+          "0": {
+            "title": "Web 服务 - 前端服务",
+            "subtitle": "配置面向客户端的 Web 服务"
+          },
+          "1": {
+            "title": "Web 服务 - 上游服务器",
+            "subtitle": "配置将由 BunkerWeb 保护的上游服务器"
+          },
+          "2": {
+            "title": "HTTP - 通用",
+            "subtitle": "配置与 HTTP(S) 协议相关的设置"
+          },
+          "3": {
+            "title": "HTTP - 响应头",
+            "subtitle": "配置与 HTTP 响应头相关的设置"
+          },
+          "4": {
+            "title": "安全 - 不良行为",
+            "subtitle": "配置检测到不良行为时自动封禁的相关设置。"
+          },
+          "5": {
+            "title": "安全 - 黑名单",
+            "subtitle": "配置与外部黑名单相关的设置。"
+          },
+          "6": {
+            "title": "安全 - 限制",
+            "subtitle": "配置限制请求和连接数量的相关设置。"
+          },
+          "7": {
+            "title": "安全 - Antibot",
+            "subtitle": "配置机器人检测相关设置"
+          },
+          "8": {
+            "title": "安全 - 基本认证",
+            "subtitle": "配置 HTTP 基本认证"
+          },
+          "9": {
+            "title": "安全 - 国家/地区",
+            "subtitle": "配置按国家/地区访问策略的相关设置"
+          },
+          "10": {
+            "title": "安全 - 反向扫描",
+            "subtitle": "配置扫描客户端端口的相关设置"
+          },
+          "11": {
+            "title": "安全 - ModSecurity",
+            "subtitle": "配置与 ModSecurity WAF 相关的设置"
+          }
+        }
+      },
+      "api": {
+        "name": "使用 BunkerWeb API 时的基本设置",
+        "steps": {
+          "0": {
+            "title": "服务 - 前端服务",
+            "subtitle": "配置服务器名称和 SSL/TLS 设置"
+          },
+          "1": {
+            "title": "服务 - 上游服务器",
+            "subtitle": "配置将由 BunkerWeb 保护的上游服务器"
+          },
+          "2": {
+            "title": "API - 速率限制",
+            "subtitle": "配置速率限制设置——请注意,API 本身也具有内部速率限制"
+          },
+          "3": {
+            "title": "API - 其他设置",
+            "subtitle": "确保 API 正常运行的其他重要设置"
+          }
+        }
+      },
+      "ui": {
+        "name": "使用 Web UI 时的基本设置",
+        "steps": {
+          "0": {
+            "title": "示例步骤",
+            "subtitle": "这是一个示例步骤,用于展示使用 Web UI 时的基本设置"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "外部模板 URL",
+        "help": "以空格分隔的、要下载并安装的服务模板 URL 列表。每个 URL 对应一个模板:可以是 bunkerweb-template/1 JSON 包,也可以是包含 <id>/template.json 及其配置的 .zip 或 .tar.gz 文件。仅接受 https:// 和 file:///,且大小最多为 1 MiB。在 URL 末尾追加 #sha256=<digest> 可锁定其内容。若某个模板的 URL 被移除,只要没有服务仍在使用该模板,它就会被删除。"
+      }
+    }
+  }
+}

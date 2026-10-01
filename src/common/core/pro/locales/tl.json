@@ -1,0 +1,14 @@
+{
+  "pro": {
+    "meta": {
+      "name": "Pro",
+      "description": "Mga setting ng Pro para sa Pro na bersyon ng BunkerWeb."
+    },
+    "settings": {
+      "PRO_LICENSE_KEY": {
+        "label": "Pro License Key",
+        "help": "Ang License Key para sa Pro na bersyon ng BunkerWeb."
+      }
+    }
+  }
+}

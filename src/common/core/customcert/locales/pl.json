@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "Niestandardowy certyfikat SSL",
+      "description": "Wybierz niestandardowy certyfikat dla SSL."
+    },
+    "settings": {
+      "CUSTOM_SSL_CERT": {
+        "label": "Ścieżka certyfikatu",
+        "help": "Pełna ścieżka do pliku certyfikatu lub pakietu (bundle). Musi być odczytywalna przez WORKER, ponieważ to tam uruchamiane jest zadanie custom-cert od czasu, gdy 1.7 przeniosła wykonywanie zadań poza scheduler — nie przez scheduler, niezależnie od tego, co mówi starsza dokumentacja. Pod Docker Swarm zamontuj go na bw-worker i podaj ścieżkę, pod którą jest zamontowany, np. /run/secrets/example.com.pem; Swarm config jest odpowiedni dla certyfikatu, który jest publiczny."
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "Dane certyfikatu (base64/plaintext)",
+        "help": "Dane certyfikatu zakodowane w formacie base64 lub czystym tekście PEM."
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "Priorytet certyfikatu",
+        "help": "Wybierz, czy priorytetowo traktować certyfikat ze ścieżki pliku, czy z danych base64. (file | data)"
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "Ścieżka klucza",
+        "help": "Pełna ścieżka do pliku klucza. Musi być odczytywalna przez WORKER, ponieważ to tam uruchamiane jest zadanie custom-cert od czasu, gdy 1.7 przeniosła wykonywanie zadań poza scheduler — nie przez scheduler, niezależnie od tego, co mówi starsza dokumentacja. Pod Docker Swarm zamontuj klucz prywatny na bw-worker jako Swarm SECRET i podaj ścieżkę, pod którą jest zamontowany, np. /run/secrets/example.com.key. Nigdy nie dostarczaj klucza prywatnego jako Swarm config: configi są przechowywane w postaci niezaszyfrowanej w raft store na każdym węźle managera."
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "Dane klucza (base64/plaintext)",
+        "help": "Dane klucza zakodowane w formacie base64 lub czystym tekście PEM."
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "Ścieżka certyfikatu DOMYŚLNEGO SERWERA",
+        "help": "Pełna ścieżka do pliku certyfikatu lub pakietu obsługiwanego przez DOMYŚLNY SERWER - blok odpowiadający na żądania niepasujące do żadnej skonfigurowanej usługi. Pozostaw puste, aby zachować wewnętrzny certyfikat samopodpisany. Musi być odczytywalna przez WORKER, ponieważ to tam uruchamiane jest zadanie custom-cert. Certyfikat, który obejmuje też nazwę hosta skonfigurowanej usługi, jest odrzucany, ponieważ domyślny serwer mógłby wtedy odpowiadać za tę usługę. Obsługiwane tylko, gdy MULTISITE=yes lub DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "Dane certyfikatu DOMYŚLNEGO SERWERA (base64/plaintext)",
+        "help": "Dane certyfikatu DOMYŚLNEGO SERWERA, zakodowane w formacie base64 lub czystym tekście PEM. Używane tylko, gdy DEFAULT_SERVER_SSL_CERT jest puste. Pozostaw oba puste, aby zachować wewnętrzny certyfikat samopodpisany. Obsługiwane tylko, gdy MULTISITE=yes lub DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "Ścieżka klucza DOMYŚLNEGO SERWERA",
+        "help": "Pełna ścieżka do klucza prywatnego certyfikatu DOMYŚLNEGO SERWERA - bloku odpowiadającego na żądania niepasujące do żadnej skonfigurowanej usługi (nieznane SNI, dostęp po surowym IP). Pozostaw puste, aby zachować wewnętrzny certyfikat samopodpisany. Musi być odczytywalna przez WORKER, ponieważ to tam uruchamiane jest zadanie custom-cert. Pod Docker Swarm zamontuj go jako Swarm SECRET, nigdy jako config."
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "Dane klucza DOMYŚLNEGO SERWERA (base64/plaintext)",
+        "help": "Dane klucza certyfikatu DOMYŚLNEGO SERWERA, zakodowane w formacie base64 lub czystym tekście PEM. Używane tylko, gdy DEFAULT_SERVER_SSL_KEY jest puste. Pozostaw oba puste, aby zachować wewnętrzny certyfikat samopodpisany."
+      },
+      "USE_CUSTOM_SSL": {
+        "label": "Użyj niestandardowego certyfikatu",
+        "help": "Użyj niestandardowego certyfikatu SSL."
+      }
+    }
+  }
+}

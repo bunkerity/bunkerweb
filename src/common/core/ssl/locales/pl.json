@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "Zarządza ustawieniami związanymi z SSL/TLS."
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "Przekieruj HTTP na HTTPS",
+        "help": "Przekierowuj wszystkie żądania HTTP na HTTPS."
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "Automatyczne przekierowanie HTTP na HTTPS",
+        "help": "Spróbuj wykryć, czy używane jest HTTPS, i aktywuj przekierowanie z HTTP na HTTPS, jeśli tak jest."
+      },
+      "SSL_PROTOCOLS": {
+        "label": "Protokoły SSL",
+        "help": "Obsługiwana wersja TLS. Zalecamy wartość domyślną TLSv1.2 TLSv1.3 ze względu na kompatybilność."
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "Poziom szyfrów SSL",
+        "help": "Predefiniowany poziom bezpieczeństwa dla zestawów szyfrów SSL. 'Modern' jest najbezpieczniejszy, ale może nie działać ze starszymi urządzeniami."
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "Niestandardowe szyfry SSL",
+        "help": "Niestandardowy ciąg zestawu szyfrów SSL. Jeśli podany, zastępuje poziom szyfrów SSL. Pozostaw puste, aby użyć konfiguracji opartej na poziomie."
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "Krzywe ECDH SSL",
+        "help": "Preferowane krzywe ECDH (grupy TLS) do wymiany kluczy. Użyj \"auto\" dla inteligentnego wyboru (preferuje grupy PQC, takie jak X25519MLKEM768, na OpenSSL 3.5+, gdy są dostępne)."
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "Rozmiar pamięci podręcznej sesji SSL",
+        "help": "Rozmiar pamięci podręcznej sesji SSL (np. '10m' dla 10 megabajtów, '512k' dla 512 kilobajtów). Ustaw na 'off' lub 'none', aby wyłączyć buforowanie sesji."
+      }
+    }
+  }
+}

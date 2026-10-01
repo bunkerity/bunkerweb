@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "Konfiguracja serwera Redis przy używaniu BunkerWeb w trybie klastra."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS REDIS"
+      },
+      "counter_redis_nb_keys": {
+        "title": "KLUCZE REDIS",
+        "subtitle": "Liczba kluczy"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Aktywuj Redis",
+        "help": "Aktywuj Redis."
+      },
+      "REDIS_HOST": {
+        "label": "Serwer Redis",
+        "help": "Adres IP lub nazwa hosta serwera Redis."
+      },
+      "REDIS_PORT": {
+        "label": "Port Redis",
+        "help": "Port serwera Redis."
+      },
+      "REDIS_DATABASE": {
+        "label": "Baza danych Redis",
+        "help": "Numer bazy danych Redis."
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Użyj połączenia SSL/TLS z serwerem Redis."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Weryfikacja SSL/TLS Redis",
+        "help": "Weryfikuj certyfikat serwera Redis."
+      },
+      "REDIS_SSL_CA": {
+        "label": "Pakiet CA SSL/TLS Redis",
+        "help": "Ścieżka do pakietu CA w formacie PEM używanego do weryfikacji certyfikatu serwera Redis/Valkey (prywatne CA); brak wartości oznacza systemowy magazyn zaufania. Gdy ustawiona, jest zaufana przez klientów Python (broker Celery, zadania, limiter szybkości API, bwcli, interfejs webowy) i dołączana do pakietu zaufania NGINX Lua, więc ścieżka żądania też jej ufa. Odczytywana tam, gdzie generowana jest konfiguracja, oraz przez każdego klienta, więc plik musi tam istnieć pod tą ścieżką; brakujący lub nieprawidłowy pakiet powoduje niepowodzenie generowania konfiguracji."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Limit czasu Redis (ms)",
+        "help": "Limit czasu serwera Redis (w ms) dla połączenia, odczytu i zapisu."
+      },
+      "REDIS_USERNAME": {
+        "label": "Nazwa użytkownika Redis",
+        "help": "Nazwa użytkownika Redis używana w poleceniu AUTH."
+      },
+      "REDIS_PASSWORD": {
+        "label": "Hasło Redis",
+        "help": "Hasło Redis używane w poleceniu AUTH."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Hosty sentinel Redis",
+        "help": "Hosty sentinel Redis w formacie host:[port], rozdzielone spacjami."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Nazwa użytkownika sentinel Redis",
+        "help": "Nazwa użytkownika sentinel Redis."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Hasło sentinel Redis",
+        "help": "Hasło sentinel Redis."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Master sentinel Redis",
+        "help": "Nazwa mastera sentinel Redis."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Bezczynność keepalive Redis (ms)",
+        "help": "Maksymalny czas bezczynności (w ms) przed zamknięciem połączenia redis w puli."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Pula keepalive Redis",
+        "help": "Maksymalna liczba połączeń Redis utrzymywanych w puli na proces roboczy NGINX. Liczba połączeń w stanie ustalonym wynosi w przybliżeniu nginx_workers x pool x instances i musi mieścić się w limicie maxclients Redis/Valkey."
+      }
+    }
+  }
+}

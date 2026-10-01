@@ -1,0 +1,26 @@
+{
+  "redirect": {
+    "meta": {
+      "name": "重定向",
+      "description": "管理 HTTP 重定向。"
+    },
+    "settings": {
+      "REDIRECT_FROM": {
+        "label": "重定向来源路径",
+        "help": "要重定向的来源路径。以 ^ 开头或以 $ 结尾的值将被视为正则表达式 location。可选择在前面加上 ~、~*、= 或 ^~,后跟一个空格,以显式设置 nginx 的 location 修饰符;值的其他位置不允许出现空格、;、{ 或 }。"
+      },
+      "REDIRECT_TO": {
+        "label": "重定向目标",
+        "help": "将整个站点重定向到另一个站点。"
+      },
+      "REDIRECT_TO_REQUEST_URI": {
+        "label": "追加请求 URI",
+        "help": "将请求的 URI 追加到重定向地址后面。"
+      },
+      "REDIRECT_TO_STATUS_CODE": {
+        "label": "重定向状态码",
+        "help": "重定向所使用的 HTTP 状态码:301(永久移动 - 会被浏览器缓存)、302(临时移动 - 可能会改变请求方法)、303(见其他位置 - 始终使用 GET)、307(临时重定向 - 保留请求方法)、308(永久重定向 - 保留请求方法,并会被缓存)。"
+      }
+    }
+  }
+}

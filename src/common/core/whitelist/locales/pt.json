@@ -1,0 +1,76 @@
+{
+  "whitelist": {
+    "meta": {
+      "name": "Lista branca",
+      "description": "Permite o acesso com base em listas brancas internas e externas de IP/rede/rDNS/ASN."
+    },
+    "widgets": {
+      "counter_passed_whitelist": {
+        "title": "LISTA BRANCA",
+        "subtitle": "Pedido permitido"
+      }
+    },
+    "settings": {
+      "USE_WHITELIST": {
+        "label": "Ativar a lista branca",
+        "help": "Ativa a funcionalidade de lista branca."
+      },
+      "WHITELIST_IP": {
+        "label": "IP/rede da lista branca",
+        "help": "Lista de IP/redes, separados por espaços, a colocar na lista branca."
+      },
+      "WHITELIST_RDNS": {
+        "label": "DNS inverso da lista branca",
+        "help": "Lista de sufixos de DNS inverso, separados por espaços, a colocar na lista branca."
+      },
+      "WHITELIST_RDNS_GLOBAL": {
+        "label": "DNS inverso lista branca só IP globais",
+        "help": "Efetuar as verificações RDNS da lista branca apenas em endereços IP globais."
+      },
+      "WHITELIST_ASN": {
+        "label": "ASN da lista branca",
+        "help": "Lista de números ASN, separados por espaços, a colocar na lista branca."
+      },
+      "WHITELIST_USER_AGENT": {
+        "label": "User-Agent da lista branca",
+        "help": "Lista de User-Agent (regex PCRE), separados por espaços, a colocar na lista branca."
+      },
+      "WHITELIST_URI": {
+        "label": "URI da lista branca",
+        "help": "Lista de URI (regex PCRE), separados por espaços, a colocar na lista branca."
+      },
+      "WHITELIST_RULE": {
+        "label": "Regra da lista branca",
+        "help": "Regra composta: cada termo deve corresponder para que a regra corresponda. Os termos são separados por « AND » (maiúsculas) e cada um tem a forma [NOT ]<kind>:<value>, em que <kind> é ip, country, asn, rdns, ua (alias user_agent) ou uri. Exemplo: ip:10.0.0.0/8 AND NOT ua:^curl. As regras são combinadas entre si e com as listas simples acima através de um OU lógico. Um valor pode ser um token de grupo de recursos como @office. Os serviços stream avaliam apenas ip, country, asn e rdns."
+      },
+      "WHITELIST_HEADER_NAME": {
+        "label": "Nome de cabeçalho da lista branca",
+        "help": "Nome de um cabeçalho do pedido que adiciona o pedido à lista branca. Qualquer cliente pode enviar este cabeçalho: trate-o como um segredo partilhado, apenas através de HTTPS."
+      },
+      "WHITELIST_HEADER_VALUE": {
+        "label": "Valor de cabeçalho da lista branca",
+        "help": "Valor (regex PCRE) que o cabeçalho deve corresponder para adicionar o pedido à lista branca. Deixar vazio para corresponder apenas à presença do cabeçalho. Ancore-o com ^ e $: a correspondência não é ancorada por predefinição."
+      },
+      "WHITELIST_IP_URLS": {
+        "label": "IP/rede da lista branca (URL)",
+        "help": "Lista de URL, separados por espaços, contendo IP/redes fiáveis a colocar na lista branca. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "WHITELIST_RDNS_URLS": {
+        "label": "DNS inverso da lista branca (URL)",
+        "help": "Lista de URL, separados por espaços, contendo sufixos de DNS inverso a colocar na lista branca. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "WHITELIST_ASN_URLS": {
+        "label": "ASN da lista branca (URL)",
+        "help": "Lista de URL, separados por espaços, contendo ASN a colocar na lista branca. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "WHITELIST_USER_AGENT_URLS": {
+        "label": "User-Agent da lista branca (URL)",
+        "help": "Lista de URL, separados por espaços, contendo User-Agent fiáveis a colocar na lista branca. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "WHITELIST_URI_URLS": {
+        "label": "URI da lista branca (URL)",
+        "help": "Lista de URL, separados por espaços, contendo URI maliciosos a colocar na lista branca. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "Schlechtes Verhalten",
+      "description": "Sperrt eine IP, die in einem bestimmten Zeitraum zu viele „schlechte“ HTTP-Statuscodes erzeugt."
+    },
+    "settings": {
+      "USE_BAD_BEHAVIOR": {
+        "label": "Schlechtes Verhalten aktivieren",
+        "help": "Aktiviert die Funktion „Schlechtes Verhalten“."
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "Schlechte Statuscodes",
+        "help": "Liste der HTTP-Statuscodes, die als „schlecht“ gelten."
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "Schwellenwert",
+        "help": "Maximale Anzahl „schlechter“ HTTP-Statuscodes innerhalb des Zeitraums, bevor die IP gesperrt wird."
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "Zeitraum (in Sekunden)",
+        "help": "Zeitraum (in Sekunden), in dem „schlechte“ HTTP-Statuscodes gezählt werden."
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "Sperrdauer (in Sekunden)",
+        "help": "Dauer (in Sekunden) einer Sperre, wenn die entsprechende IP den Schwellenwert erreicht hat. (Auf 0 setzen, um dauerhaft zu sperren)"
+      },
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "Sperrbereich",
+        "help": "Bestimmt die Ebene der Sperre. „service“ sperrt die IP nur für den Dienst, „global“ sperrt die IP für das gesamte System."
+      }
+    }
+  }
+}

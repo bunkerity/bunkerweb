@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "Wykrywanie botów za pomocą wyzwania."
+    },
+    "settings": {
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "Backendowy URL Cap.js",
+        "help": "Wewnętrzny origin, który BunkerWeb wywołuje dla /siteverify (np. http://cap-server:3000). Tylko origin, bez ścieżki. Gdy puste, używany jest URL frontendu."
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "Frontendowy URL Cap.js",
+        "help": "Publiczny origin, z którego przeglądarka ładuje widżet Cap.js (np. https://cap.example.com). Tylko origin, bez ścieżki."
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Sekret Cap.js",
+        "help": "Sekret powiązany z sitekey, używany przez BunkerWeb do uwierzytelniania wywołań /siteverify."
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Sitekey Cap.js",
+        "help": "Sitekey utworzony w panelu Cap.js dla tej witryny."
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "Alfabet captcha",
+        "help": "Niestandardowy alfabet używany do generowania captchy. Captcha będzie złożona z losowych znaków z tego ciągu. Obsługiwane znaki: wszystkie litery (a-z, A-Z), cyfry 2-9 oraz obsługiwane znaki specjalne (pełną listę znajdziesz w dokumentacji)."
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "Sekret hCaptcha",
+        "help": "Sekret dla wyzwania hCaptcha."
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "Sitekey hCaptcha",
+        "help": "Sitekey dla wyzwania hCaptcha."
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "Ignorowane ASN",
+        "help": "Lista numerów ASN, rozdzielonych spacjami, dla których wyzwanie antibot jest ignorowane."
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "Ignorowane kraje",
+        "help": "Lista kodów krajów ISO 3166-1 alpha-2, rozdzielonych spacjami, dla których wyzwanie antibot jest ignorowane."
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "Nazwa ignorowanego nagłówka",
+        "help": "Nazwa nagłówka żądania, który zwalnia żądanie z wyzwania antibot. Każdy klient może wysłać ten nagłówek: traktuj go jak współdzielony sekret, tylko przez HTTPS."
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "Wartość ignorowanego nagłówka",
+        "help": "Wartość (wyrażenie regularne PCRE), z którą musi się zgadzać nagłówek, aby zwolnić żądanie z wyzwania antibot. Pozostaw puste, aby dopasowanie następowało na podstawie samej obecności nagłówka. Zakotwicz wyrażenie znakami ^ i $: dopasowanie domyślnie nie jest zakotwiczone."
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "Ignorowane IP/sieć",
+        "help": "Lista adresów IP/sieci, rozdzielonych spacjami, dla których wyzwanie antibot jest ignorowane."
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "Ignorowany reverse DNS",
+        "help": "Lista sufiksów reverse DNS, rozdzielonych spacjami, dla których wyzwanie antibot jest ignorowane."
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "Ignorowany URI",
+        "help": "Lista wzorców wyrażeń regularnych PCRE (rozdzielonych spacjami) dla URI, które mają być wykluczone z wyzwania antibot. Wzorce są sprawdzane zarówno względem ścieżki, jak i pełnego URI żądania wraz z query string."
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "Ignorowany User-Agent",
+        "help": "Lista User-Agent (wyrażenie regularne PCRE), rozdzielonych spacjami, dla których wyzwanie antibot jest ignorowane."
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "Sekret mCaptcha",
+        "help": "Sekret dla wyzwania mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "Sitekey mCaptcha",
+        "help": "Sitekey dla wyzwania mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "Domena mCaptcha",
+        "help": "Domena używana dla wyzwania mCaptcha."
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "Kraje objęte wyzwaniem",
+        "help": "Lista kodów krajów ISO 3166-1 alpha-2, rozdzielonych spacjami, które mają otrzymywać wyzwanie antibot."
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "Antibot reverse DNS tylko dla globalnych IP",
+        "help": "Wykonuj sprawdzanie RDNS antibot tylko dla globalnych adresów IP."
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "Klucz API reCAPTCHA",
+        "help": "Klucz API dla wyzwania reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "Użyj klasycznego reCAPTCHA",
+        "help": "Użyj klasycznego reCAPTCHA zamiast nowszej wersji."
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "Odcisk JA3 dla klienta TLS. Zalecamy użycie salesforce/ja3 do obliczania odcisku JA3."
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "Odcisk JA4 dla klienta TLS. Zalecamy użycie FoxIO-LLC/ja4 do obliczania odcisku JA4."
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "ID projektu reCAPTCHA",
+        "help": "ID projektu dla wyzwania reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "Wynik reCAPTCHA v3",
+        "help": "Minimalny wynik wymagany dla wyzwania reCAPTCHA (kompatybilne tylko z reCAPTCHA v3)."
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "Sekret reCAPTCHA",
+        "help": "Sekret dla wyzwania reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "Sitekey reCAPTCHA",
+        "help": "Sitekey dla wyzwania reCAPTCHA."
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "URL przekierowania po sukcesie",
+        "help": "Stały URI, na który klienci zostaną przekierowani po rozwiązaniu wyzwania, zamiast na stronę pierwotnie żądaną. Pozostaw puste, aby wrócić do pierwotnie żądanej strony."
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "Czas na rozwiązanie",
+        "help": "Maksymalny czas (w sekundach), jaki klienci mają na rozwiązanie wyzwania. Po jego upływie zostanie wygenerowane nowe wyzwanie."
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "Czas ważności",
+        "help": "Maksymalny czas ważności rozwiązanych wyzwań. Po jego upływie klienci będą musieli rozwiązać nowe."
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Sekret Turnstile",
+        "help": "Sekret dla wyzwania Turnstile."
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Sitekey Turnstile",
+        "help": "Sitekey dla wyzwania Turnstile."
+      },
+      "ANTIBOT_URI": {
+        "label": "URL antibot",
+        "help": "Nieużywany URI, na który klienci zostaną przekierowani, aby rozwiązać wyzwanie."
+      },
+      "USE_ANTIBOT": {
+        "label": "Wyzwanie antibot",
+        "help": "Aktywuj funkcję antibot."
+      }
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "Wyzwania",
+        "subtitle": "Niepowodzenie"
+      }
+    }
+  }
+}

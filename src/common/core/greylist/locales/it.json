@@ -1,0 +1,76 @@
+{
+  "greylist": {
+    "meta": {
+      "name": "Lista grigia",
+      "description": "Consente l'accesso mantenendo le funzionalità di sicurezza basate su liste grigie interne ed esterne di IP/rete/rDNS/ASN."
+    },
+    "widgets": {
+      "counter_failed_greylist": {
+        "title": "LISTA GRIGIA",
+        "subtitle": "Richiesta bloccata"
+      }
+    },
+    "settings": {
+      "USE_GREYLIST": {
+        "label": "Attiva la lista grigia",
+        "help": "Attiva la funzionalità di lista grigia."
+      },
+      "GREYLIST_IP": {
+        "label": "IP/rete della lista grigia",
+        "help": "Elenco di IP/reti, separati da spazi, da inserire nella lista grigia."
+      },
+      "GREYLIST_RDNS": {
+        "label": "DNS inverso della lista grigia",
+        "help": "Elenco di suffissi DNS inverso, separati da spazi, da inserire nella lista grigia."
+      },
+      "GREYLIST_RDNS_GLOBAL": {
+        "label": "DNS inverso lista grigia solo IP globali",
+        "help": "Eseguire i controlli RDNS della lista grigia solo sugli indirizzi IP globali."
+      },
+      "GREYLIST_ASN": {
+        "label": "ASN della lista grigia",
+        "help": "Elenco di numeri ASN, separati da spazi, da inserire nella lista grigia."
+      },
+      "GREYLIST_USER_AGENT": {
+        "label": "User-Agent della lista grigia",
+        "help": "Elenco di User-Agent (regex PCRE), separati da spazi, da inserire nella lista grigia."
+      },
+      "GREYLIST_URI": {
+        "label": "URI della lista grigia",
+        "help": "Elenco di URI (regex PCRE), separati da spazi, da inserire nella lista grigia."
+      },
+      "GREYLIST_RULE": {
+        "label": "Regola della lista grigia",
+        "help": "Regola composita: ogni termine deve corrispondere affinché la regola corrisponda. I termini sono separati da « AND » (maiuscolo) e ciascuno è nella forma [NOT ]<kind>:<value>, dove <kind> è ip, country, asn, rdns, ua (alias user_agent) o uri. Esempio: ip:10.0.0.0/8 AND NOT ua:^curl. Le regole sono combinate tra loro e con gli elenchi semplici sopra tramite un OR logico. Un valore può essere un token di gruppo di risorse come @office. I servizi stream valutano solo ip, country, asn e rdns."
+      },
+      "GREYLIST_HEADER_NAME": {
+        "label": "Nome intestazione lista grigia",
+        "help": "Nome di un'intestazione della richiesta che aggiunge la richiesta alla lista grigia. Qualsiasi client può inviare questa intestazione: trattatela come un segreto condiviso, solo tramite HTTPS."
+      },
+      "GREYLIST_HEADER_VALUE": {
+        "label": "Valore intestazione lista grigia",
+        "help": "Valore (regex PCRE) che l'intestazione deve rispettare per aggiungere la richiesta alla lista grigia. Lasciare vuoto per far coincidere semplicemente la presenza dell'intestazione. Ancoratelo con ^ e $: la corrispondenza non è ancorata per impostazione predefinita."
+      },
+      "GREYLIST_IP_URLS": {
+        "label": "IP/rete della lista grigia (URL)",
+        "help": "Elenco di URL, separati da spazi, contenenti IP/reti affidabili da inserire nella lista grigia. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+      },
+      "GREYLIST_RDNS_URLS": {
+        "label": "DNS inverso della lista grigia (URL)",
+        "help": "Elenco di URL, separati da spazi, contenenti suffissi DNS inverso da inserire nella lista grigia. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+      },
+      "GREYLIST_ASN_URLS": {
+        "label": "ASN della lista grigia (URL)",
+        "help": "Elenco di URL, separati da spazi, contenenti ASN da inserire nella lista grigia. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+      },
+      "GREYLIST_USER_AGENT_URLS": {
+        "label": "User-Agent della lista grigia (URL)",
+        "help": "Elenco di URL, separati da spazi, contenenti User-Agent affidabili da inserire nella lista grigia. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+      },
+      "GREYLIST_URI_URLS": {
+        "label": "URI della lista grigia (URL)",
+        "help": "Elenco di URL, separati da spazi, contenenti URI dannosi da inserire nella lista grigia. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+      }
+    }
+  }
+}

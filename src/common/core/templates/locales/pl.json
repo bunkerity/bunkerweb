@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "Szablony",
+      "description": "Fikcyjna wtyczka core dla szablonów wewnętrznych."
+    },
+    "templates": {
+      "low": {
+        "name": "Podstawowy poziom bezpieczeństwa zapewniający niezbędne ustawienia ochrony aplikacji webowych",
+        "steps": {
+          "0": {
+            "title": "Usługa webowa - Usługa frontowa",
+            "subtitle": "Skonfiguruj swoją usługę webową udostępnianą klientom"
+          },
+          "1": {
+            "title": "Usługa webowa - Serwer upstream",
+            "subtitle": "Skonfiguruj serwer upstream, który ma być chroniony przez BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Ogólne",
+            "subtitle": "Skonfiguruj ustawienia związane z protokołem HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Nagłówki",
+            "subtitle": "Skonfiguruj ustawienia związane z nagłówkami HTTP"
+          },
+          "4": {
+            "title": "Bezpieczeństwo - Złe zachowanie",
+            "subtitle": "Skonfiguruj ustawienia związane z automatyczną blokadą po wykryciu złego zachowania."
+          },
+          "5": {
+            "title": "Bezpieczeństwo - Czarna lista",
+            "subtitle": "Skonfiguruj ustawienia związane z zewnętrznymi czarnymi listami."
+          },
+          "6": {
+            "title": "Bezpieczeństwo - Ograniczanie",
+            "subtitle": "Skonfiguruj ustawienia związane z ograniczaniem żądań i połączeń."
+          },
+          "7": {
+            "title": "Bezpieczeństwo - Antibot",
+            "subtitle": "Skonfiguruj ustawienia dotyczące wykrywania botów"
+          },
+          "8": {
+            "title": "Bezpieczeństwo - Uwierzytelnianie podstawowe",
+            "subtitle": "Skonfiguruj podstawowe uwierzytelnianie HTTP"
+          },
+          "9": {
+            "title": "Bezpieczeństwo - Kraj",
+            "subtitle": "Skonfiguruj ustawienia dotyczące polityki dostępu według kraju"
+          },
+          "10": {
+            "title": "Bezpieczeństwo - ModSecurity",
+            "subtitle": "Skonfiguruj ustawienia związane z zaporą WAF ModSecurity"
+          }
+        }
+      },
+      "medium": {
+        "name": "Zrównoważony poziom bezpieczeństwa łączący funkcje bezpieczeństwa z optymalizacjami wydajności",
+        "steps": {
+          "0": {
+            "title": "Usługa webowa - Usługa frontowa",
+            "subtitle": "Skonfiguruj swoją usługę webową udostępnianą klientom"
+          },
+          "1": {
+            "title": "Usługa webowa - Serwer upstream",
+            "subtitle": "Skonfiguruj serwer upstream, który ma być chroniony przez BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Ogólne",
+            "subtitle": "Skonfiguruj ustawienia związane z protokołem HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Nagłówki",
+            "subtitle": "Skonfiguruj ustawienia związane z nagłówkami HTTP"
+          },
+          "4": {
+            "title": "Bezpieczeństwo - Złe zachowanie",
+            "subtitle": "Skonfiguruj ustawienia związane z automatyczną blokadą po wykryciu złego zachowania."
+          },
+          "5": {
+            "title": "Bezpieczeństwo - Czarna lista",
+            "subtitle": "Skonfiguruj ustawienia związane z zewnętrznymi czarnymi listami."
+          },
+          "6": {
+            "title": "Bezpieczeństwo - Ograniczanie",
+            "subtitle": "Skonfiguruj ustawienia związane z ograniczaniem żądań i połączeń."
+          },
+          "7": {
+            "title": "Bezpieczeństwo - Antibot",
+            "subtitle": "Skonfiguruj ustawienia dotyczące wykrywania botów"
+          },
+          "8": {
+            "title": "Bezpieczeństwo - Uwierzytelnianie podstawowe",
+            "subtitle": "Skonfiguruj podstawowe uwierzytelnianie HTTP"
+          },
+          "9": {
+            "title": "Bezpieczeństwo - Kraj",
+            "subtitle": "Skonfiguruj ustawienia dotyczące polityki dostępu według kraju"
+          },
+          "10": {
+            "title": "Bezpieczeństwo - Skanowanie odwrotne",
+            "subtitle": "Skonfiguruj ustawienia dotyczące skanowania portów klientów"
+          },
+          "11": {
+            "title": "Bezpieczeństwo - ModSecurity",
+            "subtitle": "Skonfiguruj ustawienia związane z zaporą WAF ModSecurity"
+          }
+        }
+      },
+      "high": {
+        "name": "Zaawansowany poziom bezpieczeństwa skupiony na solidnych środkach bezpieczeństwa i kompleksowej ochronie",
+        "steps": {
+          "0": {
+            "title": "Usługa webowa - Usługa frontowa",
+            "subtitle": "Skonfiguruj swoją usługę webową udostępnianą klientom"
+          },
+          "1": {
+            "title": "Usługa webowa - Serwer upstream",
+            "subtitle": "Skonfiguruj serwer upstream, który ma być chroniony przez BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Ogólne",
+            "subtitle": "Skonfiguruj ustawienia związane z protokołem HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Nagłówki",
+            "subtitle": "Skonfiguruj ustawienia związane z nagłówkami HTTP"
+          },
+          "4": {
+            "title": "Bezpieczeństwo - Złe zachowanie",
+            "subtitle": "Skonfiguruj ustawienia związane z automatyczną blokadą po wykryciu złego zachowania."
+          },
+          "5": {
+            "title": "Bezpieczeństwo - Czarna lista",
+            "subtitle": "Skonfiguruj ustawienia związane z zewnętrznymi czarnymi listami."
+          },
+          "6": {
+            "title": "Bezpieczeństwo - Ograniczanie",
+            "subtitle": "Skonfiguruj ustawienia związane z ograniczaniem żądań i połączeń."
+          },
+          "7": {
+            "title": "Bezpieczeństwo - Antibot",
+            "subtitle": "Skonfiguruj ustawienia dotyczące wykrywania botów"
+          },
+          "8": {
+            "title": "Bezpieczeństwo - Uwierzytelnianie podstawowe",
+            "subtitle": "Skonfiguruj podstawowe uwierzytelnianie HTTP"
+          },
+          "9": {
+            "title": "Bezpieczeństwo - Kraj",
+            "subtitle": "Skonfiguruj ustawienia dotyczące polityki dostępu według kraju"
+          },
+          "10": {
+            "title": "Bezpieczeństwo - Skanowanie odwrotne",
+            "subtitle": "Skonfiguruj ustawienia dotyczące skanowania portów klientów"
+          },
+          "11": {
+            "title": "Bezpieczeństwo - ModSecurity",
+            "subtitle": "Skonfiguruj ustawienia związane z zaporą WAF ModSecurity"
+          }
+        }
+      },
+      "api": {
+        "name": "Podstawowe ustawienia przy korzystaniu z API BunkerWeb",
+        "steps": {
+          "0": {
+            "title": "Usługa - Usługa frontowa",
+            "subtitle": "Skonfiguruj nazwę serwera oraz ustawienia SSL/TLS"
+          },
+          "1": {
+            "title": "Usługa - Serwer upstream",
+            "subtitle": "Skonfiguruj serwer upstream, który ma być chroniony przez BunkerWeb"
+          },
+          "2": {
+            "title": "API - Ograniczanie liczby żądań",
+            "subtitle": "Skonfiguruj ustawienia ograniczania liczby żądań - pamiętaj, że API również posiada wewnętrzne ograniczanie liczby żądań"
+          },
+          "3": {
+            "title": "API - Ustawienia różne",
+            "subtitle": "Inne ważne ustawienia dla prawidłowego działania API"
+          }
+        }
+      },
+      "ui": {
+        "name": "Podstawowe ustawienia przy korzystaniu z interfejsu webowego (UI)",
+        "steps": {
+          "0": {
+            "title": "Krok testowy",
+            "subtitle": "To jest krok testowy pokazujący podstawowe ustawienia przy korzystaniu z interfejsu webowego"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "Zewnętrzne adresy URL szablonów",
+        "help": "Lista adresów URL szablonów usług do pobrania i instalacji, rozdzielonych spacjami. Każdy URL to jeden szablon: pakiet JSON bunkerweb-template/1 albo plik .zip lub .tar.gz zawierający <id>/template.json i jego konfiguracje. Akceptowane są tylko https:// i file:///, maksymalnie 1 MiB. Dodaj #sha256=<digest> do adresu URL, aby przypiąć jego zawartość. Szablon, którego URL zostanie usunięty, jest kasowany, chyba że nadal korzysta z niego jakaś usługa."
+      }
+    }
+  }
+}

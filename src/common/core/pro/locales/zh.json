@@ -1,0 +1,14 @@
+{
+  "pro": {
+    "meta": {
+      "name": "Pro",
+      "description": "适用于 BunkerWeb Pro 版本的 Pro 设置。"
+    },
+    "settings": {
+      "PRO_LICENSE_KEY": {
+        "label": "Pro 许可证密钥",
+        "help": "BunkerWeb Pro 版本的许可证密钥。"
+      }
+    }
+  }
+}

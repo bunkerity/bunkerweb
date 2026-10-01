@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "反向掃描",
+      "description": "透過掃描用戶端連接埠來偵測並封鎖來自代理伺服器或伺服器的連線,藉此增強安全性,並協助防止規避安全措施。"
+    },
+    "settings": {
+      "USE_REVERSE_SCAN": {
+        "label": "反向埠掃描",
+        "help": "啟用對客戶端埠的掃描,若發現有埠開放則拒絕存取。"
+      },
+      "REVERSE_SCAN_PORTS": {
+        "label": "反向掃描埠",
+        "help": "使用反向掃描功能時要掃描的埠清單。"
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "反向掃描逾時",
+        "help": "指定掃描埠時的最長逾時時間(以毫秒為單位)。"
+      }
+    }
+  }
+}

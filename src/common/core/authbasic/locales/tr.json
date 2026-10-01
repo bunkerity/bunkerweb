@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Temel kimlik doğrulama",
+      "description": "Temel HTTP kimlik doğrulama yöntemini kullanarak bir kaynağa veya tüm siteye erişmeden önce oturum açmayı zorunlu kılar."
+    },
+    "settings": {
+      "AUTH_BASIC_LOCATION": {
+        "label": "Auth basic Konumu",
+        "help": "Korunan kaynağın URL'si veya site geneli değer."
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Parola",
+        "help": "Parola"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Metin",
+        "help": "Görüntülenecek metin"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Auth basic Kullanıcı Adı",
+        "help": "Kullanıcı adı"
+      },
+      "USE_AUTH_BASIC": {
+        "label": "HTTP basic auth kullan",
+        "help": "HTTP basic auth kullan"
+      }
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "TEMEL KİMLİK DOĞRULAMA",
+        "subtitle": "Başarılı"
+      },
+      "counter_failed_authbasic": {
+        "title": "TEMEL KİMLİK DOĞRULAMA",
+        "subtitle": "Başarısız"
+      }
+    }
+  }
+}

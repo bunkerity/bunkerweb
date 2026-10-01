@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "Configuration ng Redis server kapag ginagamit ang BunkerWeb sa cluster mode."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS NG REDIS"
+      },
+      "counter_redis_nb_keys": {
+        "title": "MGA KEY NG REDIS",
+        "subtitle": "Bilang ng key"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "I-activate ang Redis",
+        "help": "I-activate ang Redis."
+      },
+      "REDIS_HOST": {
+        "label": "Redis Server",
+        "help": "IP o hostname ng Redis server."
+      },
+      "REDIS_PORT": {
+        "label": "Redis Port",
+        "help": "Port ng Redis server."
+      },
+      "REDIS_DATABASE": {
+        "label": "Redis Database",
+        "help": "Numero ng Redis database."
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Gamitin ang SSL/TLS na koneksyon sa Redis server."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Redis SSL/TLS Verify",
+        "help": "I-verify ang certificate ng Redis server."
+      },
+      "REDIS_SSL_CA": {
+        "label": "Redis SSL/TLS CA Bundle",
+        "help": "Path patungo sa PEM CA bundle na ginagamit para i-verify ang certificate ng Redis/Valkey server (private CA); kapag blangko, ang system trust store ang gagamitin. Kapag naka-set, pinagkakatiwalaan ito ng mga Python client (Celery broker, job, API rate limiter, bwcli, web UI) at idinaragdag sa NGINX Lua trust bundle, kaya pinagkakatiwalaan din ito ng request path. Binabasa kung saan ginagawa ang configuration at ng bawat client, kaya dapat umiral ang file sa path na iyon doon; ang nawawala o invalid na bundle ay nagpapabigo sa paggawa ng configuration."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Redis Timeout (ms)",
+        "help": "Timeout ng Redis server (sa ms) para sa connect, read, at write."
+      },
+      "REDIS_USERNAME": {
+        "label": "Redis Username",
+        "help": "Redis username na ginagamit sa AUTH command."
+      },
+      "REDIS_PASSWORD": {
+        "label": "Redis Password",
+        "help": "Redis password na ginagamit sa AUTH command."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Redis Sentinel Hosts",
+        "help": "Mga Redis sentinel host gamit ang format na host:[port], pinaghihiwalay ng space."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Redis Sentinel Username",
+        "help": "Redis sentinel username."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Redis Sentinel Password",
+        "help": "Redis sentinel password."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Redis Sentinel Master",
+        "help": "Pangalan ng Redis sentinel master."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Redis Keepalive Idle (ms)",
+        "help": "Pinakamataas na idle time (sa ms) bago isara ang koneksyon ng redis sa pool."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Redis Keepalive Pool",
+        "help": "Pinakamataas na bilang ng Redis connection na itinatago sa pool kada NGINX worker. Humigit-kumulang nginx_workers x pool x instances ang steady-state connection at dapat manatili sa loob ng limit ng maxclients ng Redis/Valkey."
+      }
+    }
+  }
+}

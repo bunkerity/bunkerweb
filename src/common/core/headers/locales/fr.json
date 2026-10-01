@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "En-têtes",
+      "description": "Gère les en-têtes HTTP envoyés aux clients."
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "En-tête personnalisé (HeaderName: HeaderValue)",
+        "help": "En-tête personnalisé à ajouter (HeaderName: HeaderValue)."
+      },
+      "REMOVE_HEADERS": {
+        "label": "Supprimer des en-têtes",
+        "help": "En-têtes à supprimer (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "Conserver les en-têtes upstream",
+        "help": "En-têtes à conserver depuis l'upstream (Header1 Header2 Header3 ... ou * pour tous)."
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Valeur de l'en-tête Strict-Transport-Security (HSTS)."
+      },
+      "COOKIE_FLAGS": {
+        "label": "Indicateurs de cookie",
+        "help": "Indicateurs de cookie ajoutés automatiquement à tous les cookies (valeur acceptée pour nginx_cookie_flag_module)."
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "Indicateur Secure automatique des cookies",
+        "help": "Ajoute automatiquement l'indicateur Secure à tous les cookies."
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Valeur de l'en-tête Content-Security-Policy."
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Envoie des rapports pour les violations de l'en-tête Content-Security-Policy au lieu de les bloquer."
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Valeur de l'en-tête Referrer-Policy."
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Valeur de l'en-tête Permissions-Policy."
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "Valeur de l'en-tête X-Frame-Options."
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "Valeur de l'en-tête X-Content-Type-Options."
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "Valeur de l'en-tête X-DNS-Prefetch-Control."
+      }
+    }
+  }
+}

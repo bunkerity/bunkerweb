@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "gRPC 리버스 프록시 설정을 관리합니다."
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "gRPC 사용",
+        "help": "gRPC 리버스 프록시 모드를 활성화합니다."
+      },
+      "GRPC_HOST": {
+        "label": "gRPC 호스트",
+        "help": "grpc_pass에서 사용하는 전체 업스트림 값입니다(예: grpc://app:50051 또는 grpcs://app:443)."
+      },
+      "GRPC_URL": {
+        "label": "gRPC URL",
+        "help": "gRPC 업스트림으로 프록시될 location URL입니다. ^로 시작하거나 $로 끝나는 값은 정규식 location으로 처리됩니다. 필요하면 ~, ~*, = 또는 ^~ 뒤에 공백 하나를 붙여 nginx location 수정자를 명시적으로 지정할 수 있습니다. 값의 다른 부분에는 공백, ;, { 또는 }를 사용할 수 없습니다."
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "gRPC 사용자 지정 호스트",
+        "help": "gRPC 업스트림으로 전송되는 Host 헤더를 재정의합니다."
+      },
+      "GRPC_HEADERS": {
+        "label": "gRPC 헤더",
+        "help": "gRPC 업스트림으로 전송할 헤더 목록입니다. 세미콜론으로 구분합니다(grpc_set_header 지시어의 값)."
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "gRPC 헤더 숨기기",
+        "help": "gRPC 업스트림으로부터 수신했을 때 클라이언트에게 숨길 헤더 목록입니다(grpc_hide_header 지시어의 값)."
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "gRPC 헤더-클라이언트",
+        "help": "클라이언트로 전송할 헤더 목록입니다. 세미콜론으로 구분합니다(add_header 지시어의 값)."
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "gRPC 헤더 전달",
+        "help": "기본적으로 숨겨지더라도 gRPC 업스트림에서 클라이언트로 그대로 전달할 헤더 목록입니다. 공백으로 구분합니다(grpc_pass_header 지시어의 값)."
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "gRPC 헤더 무시",
+        "help": "NGINX가 처리하지 않아야 하는, gRPC 업스트림에서 온 헤더 목록입니다. 공백으로 구분합니다(grpc_ignore_headers 지시어의 값)."
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "헤더에 밑줄 허용",
+        "help": "underscores_in_headers 지시어를 활성화하거나 비활성화합니다."
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "오류 가로채기",
+        "help": "gRPC 업스트림 오류를 가로채서 다시 작성합니다."
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "gRPC 버퍼 크기",
+        "help": "grpc_buffer_size 지시어의 값입니다(gRPC 업스트림으로부터 응답을 읽는 데 사용되는 버퍼 크기)."
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "gRPC 연결 제한 시간",
+        "help": "gRPC 업스트림에 연결할 때의 제한 시간입니다."
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "gRPC 읽기 제한 시간",
+        "help": "gRPC 업스트림으로부터 읽을 때의 제한 시간입니다."
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "gRPC 전송 제한 시간",
+        "help": "gRPC 업스트림으로 전송할 때의 제한 시간입니다."
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "gRPC 소켓 keepalive",
+        "help": "gRPC 업스트림 소켓의 keepalive를 활성화하거나 비활성화합니다."
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "gRPC 업스트림 서버로 SNI 전송을 활성화하거나 비활성화합니다."
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "SSL SNI 이름",
+        "help": "gRPC 업스트림 서버로 전송할 SNI 호스트를 설정합니다."
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "SSL 검증",
+        "help": "gRPC 업스트림 서버의 SSL 인증서 검증을 활성화하거나 비활성화합니다."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "신뢰할 인증서 우선순위",
+        "help": "신뢰할 CA 인증서의 출처입니다: 파일 경로 또는 base64/PEM 데이터(file 또는 data)."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL 신뢰 인증서 경로",
+        "help": "gRPC 업스트림 인증서를 검증하는 데 사용되는 PEM CA 번들의 경로입니다(우선순위 'file', scheduler가 읽을 수 있어야 하며 scheduler가 이를 캐시하고 배포합니다). 검증을 위해 필수입니다; 공개 업스트림에는 시스템 번들(예: /etc/ssl/certs/ca-certificates.crt)을 사용하십시오. 설정하지 않으면 검증이 비활성화됩니다."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "신뢰 인증서 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식의 신뢰할 수 있는 CA 인증서입니다(우선순위 'data')."
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "SSL 검증 깊이",
+        "help": "gRPC 업스트림 서버 인증서 체인의 검증 깊이를 설정합니다."
+      },
+      "GRPC_SSL_CRL": {
+        "label": "CRL 경로",
+        "help": "gRPC 업스트림 서버를 검증할 때 사용되는 PEM 인증서 폐기 목록의 경로입니다. GRPC_SSL_CRL_DATA보다 우선합니다. GRPC_SSL_VERIFY가 yes일 때만 적용됩니다. 설정되었지만 경로가 없으면 오류로 처리됩니다; GRPC_SSL_CRL_DATA는 대체로 사용되지 않습니다."
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "CRL 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식의 인증서 폐기 목록입니다. CRL 경로 설정이 비어 있을 때만 사용됩니다."
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "업스트림 SSL 프로토콜",
+        "help": "gRPC 업스트림 서버에 제공되는 TLS 버전입니다(grpc_ssl_protocols 지시어의 값). 비워 두면 NGINX 기본값을 유지합니다."
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "업스트림 SSL 암호화 방식",
+        "help": "gRPC 업스트림 서버에 제공되는 암호 스위트 문자열입니다(grpc_ssl_ciphers 지시어의 값). 비워 두면 NGINX 기본값을 유지합니다."
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "gRPC 다음 업스트림",
+        "help": "다음 gRPC 업스트림 서버를 선택하는 조건입니다."
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "gRPC 다음 업스트림 제한 시간",
+        "help": "요청을 다음 gRPC 업스트림 서버로 전달하는 시간 제한입니다."
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "gRPC 다음 업스트림 시도 횟수",
+        "help": "요청을 다음 gRPC 업스트림 서버로 전달하는 최대 시도 횟수입니다."
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "gRPC 인증 요청",
+        "help": "외부 제공자를 사용한 인증을 활성화합니다(auth_request 지시어의 값)."
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "인증 요청 로그인 URL",
+        "help": "GRPC_AUTH_REQUEST를 사용할 때 클라이언트를 로그인 URL로 리디렉션합니다(auth_request 호출이 401을 반환했을 때 사용됨). $scheme, $host, $request_uri 같은 NGINX 변수를 지원합니다."
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "gRPC 인증 요청 설정",
+        "help": "인증 제공자로부터 설정할 변수 목록입니다. 세미콜론으로 구분합니다(auth_request_set 지시어의 값)."
+      },
+      "GRPC_INCLUDES": {
+        "label": "gRPC includes",
+        "help": "gRPC location 블록에 포함할 추가 설정입니다. 공백으로 구분합니다."
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "gRPC 최대 본문 크기",
+        "help": "이 gRPC location의 최대 요청 본문 크기입니다(0은 무제한). 비워 두면 서비스 수준의 MAX_CLIENT_SIZE가 적용됩니다."
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "클라이언트 인증서 우선순위",
+        "help": "업스트림과의 상호 TLS에 사용되는 클라이언트 인증서 및 키의 출처입니다: 파일 경로 또는 base64/PEM 데이터(file 또는 data)."
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "SSL 클라이언트 인증서 경로",
+        "help": "BunkerWeb이 gRPC 업스트림에 제시하는 PEM 클라이언트 인증서의 경로입니다(상호 TLS, 우선순위 file). 짝이 되는 GRPC_SSL_CLIENT_KEY가 필요합니다; trusted-cert 작업이 이 gRPC 전용 자격 증명을 캐시하고 배포합니다."
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "클라이언트 인증서 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식의 클라이언트 인증서입니다(우선순위 'data')."
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "SSL 클라이언트 키 경로",
+        "help": "클라이언트 인증서와 짝을 이루는 PEM 개인 키의 경로입니다(우선순위 'file'). 이 키는 다른 작업 산출물과 마찬가지로 캐시되어 인스턴스에 배포되며, 소유자/그룹만 접근 가능한 권한으로 기록됩니다."
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "클라이언트 키 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식의 클라이언트 개인 키입니다(우선순위 'data'). 가능하면 파일 경로를 우선 사용하십시오: 여기에 설정한 키는 설정 값으로 저장됩니다."
+      }
+    }
+  }
+}

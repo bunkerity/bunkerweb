@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "SSL/TLS 관련 설정을 관리합니다."
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "HTTP를 HTTPS로 리디렉션",
+        "help": "모든 HTTP 요청을 HTTPS로 리디렉션합니다."
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "HTTP를 HTTPS로 자동 리디렉션",
+        "help": "HTTPS가 사용되는지 감지를 시도하고, 그렇다면 HTTP에서 HTTPS로의 리디렉션을 활성화합니다."
+      },
+      "SSL_PROTOCOLS": {
+        "label": "SSL 프로토콜",
+        "help": "지원되는 TLS 버전입니다. 호환성을 위해 기본값인 TLSv1.2 TLSv1.3을 권장합니다."
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "SSL 암호화 방식 수준",
+        "help": "SSL 암호 스위트의 사전 설정 보안 수준입니다. 'Modern'이 가장 안전하지만 오래된 기기에서는 작동하지 않을 수 있습니다."
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "사용자 지정 SSL 암호화 방식",
+        "help": "사용자 지정 SSL 암호 스위트 문자열입니다. 지정하면 SSL 암호화 방식 수준을 재정의합니다. 비워 두면 수준 기반 설정을 사용합니다."
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "SSL ECDH 곡선",
+        "help": "키 교환에 사용할 선호 ECDH 곡선(TLS 그룹)입니다. \"auto\"를 사용하면 스마트 선택이 이루어집니다(사용 가능한 경우 OpenSSL 3.5+에서 X25519MLKEM768과 같은 PQC 그룹을 우선 선택)."
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "SSL 세션 캐시 크기",
+        "help": "SSL 세션 캐시의 크기입니다(예: 10메가바이트는 '10m', 512킬로바이트는 '512k'). 세션 캐싱을 비활성화하려면 'off' 또는 'none'으로 설정하십시오."
+      }
+    }
+  }
+}

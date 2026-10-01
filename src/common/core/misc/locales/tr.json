@@ -1,0 +1,108 @@
+{
+  "misc": {
+    "meta": {
+      "name": "Çeşitli",
+      "description": "Çeşitli ayarlar."
+    },
+    "widgets": {
+      "counter_failed_default": {
+        "title": "VARSAYILAN SUNUCU DEVRE DIŞI",
+        "subtitle": "Toplam"
+      },
+      "counter_failed_method": {
+        "title": "İZİN VERİLMEYEN YÖNTEMLER",
+        "subtitle": "Sayı"
+      }
+    },
+    "settings": {
+      "SERVICE_MODE": {
+        "label": "Hizmet modu",
+        "help": "\"standard\" sıradan bir hizmet, \"redirect_only\" ise yalnızca yönlendirme yapan bir dinleyici için hizmetin bildirilen amacı. PRO kota sınıflandırmasının okuduğu şey bu bildirimdir; asla yönlendirme ayarlarından çıkarılmaz."
+      },
+      "DISABLE_DEFAULT_SERVER": {
+        "label": "Varsayılan sunucuyu devre dışı bırak",
+        "help": "İstek vhost'u bilinmiyorsa HTTP isteğini reddet."
+      },
+      "DISABLE_DEFAULT_SERVER_STRICT_SNI": {
+        "label": "Varsayılan sunucu katı SNI'yi devre dışı bırak",
+        "help": "SNI bilinmiyorsa SSL/TLS bağlantısını kapat."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS": {
+        "label": "Varsayılan sunucu stream portları",
+        "help": "Varsayılan sunucunun, yapılandırılmış hiçbir hizmetle eşleşmeyen stream (TCP) bağlantılarını kabul ettiği portlar; devre dışı bırakmak için boş bırakın. Bir stream hizmetinin dinlediği bir port, bir HTTP/HTTPS dinleyicisinin kullandığı bir port veya BunkerWeb'in kendisi için bağladığı bir port için reddedilir. Genellikle ayrılmış default-server hizmetinde ayarlanır."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS_SSL": {
+        "label": "Varsayılan sunucu stream portları (TLS)",
+        "help": "Yukarıdaki varsayılan sunucu stream portlarından hangilerinin TLS üzerinden sunulduğu; yalnızca düz TCP için boş bırakın. Her değer ayrıca \"Varsayılan sunucu stream portları\" içinde de listelenmelidir — bu, varsayılan sunucunun zaten bildirdiği portların TLS anahtarıdır, ikinci bir dinleyici seti değildir ve yalnızca burada olan bir port reddedilir."
+      },
+      "ALLOWED_METHODS": {
+        "label": "İzin verilen yöntemler",
+        "help": "İzin verilen HTTP ve WebDAV yöntemleri, dikey çizgilerle ayrılmış. Özel büyük harfli yöntemler alt çizgi ve tire içerebilir."
+      },
+      "MAX_CLIENT_SIZE": {
+        "label": "Maksimum gövde boyutu",
+        "help": "Maksimum gövde boyutu (sonsuz için 0)."
+      },
+      "MAX_HEADERS": {
+        "label": "Maksimum üstbilgi",
+        "help": "İstek başına maksimum üstbilgi satırı sayısı. Bu limiti aşan istekler 400 Bad Request ile reddedilir."
+      },
+      "SERVE_FILES": {
+        "label": "Dosyaları sun",
+        "help": "Yerel klasörden dosyaları sun."
+      },
+      "ROOT_FOLDER": {
+        "label": "Kök klasör",
+        "help": "Sunulacak dosyaları içeren kök klasör (ayarlanmamışsa /var/www/html/{server_name})."
+      },
+      "HTTP2": {
+        "label": "HTTP2",
+        "help": "HTTPS etkinken HTTP2 protokolünü destekle."
+      },
+      "HTTP3": {
+        "label": "HTTP3",
+        "help": "HTTPS etkinken HTTP3 protokolünü destekle."
+      },
+      "HTTP3_ALT_SVC_PORT": {
+        "label": "HTTP3 Alt-Svc portu",
+        "help": "HTTP3 alternatif hizmet portu. Bu değer Alt-Svc üstbilgisinin bir parçası olarak kullanılacaktır."
+      },
+      "LISTEN_HTTP": {
+        "label": "HTTP dinleme",
+        "help": "(Güvensiz) HTTP isteklerine yanıt ver."
+      },
+      "USE_OPEN_FILE_CACHE": {
+        "label": "Açık dosya önbelleğini kullan",
+        "help": "Açık dosya önbelleği özelliğini etkinleştir"
+      },
+      "OPEN_FILE_CACHE": {
+        "label": "Açık dosya önbelleğini kullan",
+        "help": "Açık dosya önbelleği yönergesi"
+      },
+      "OPEN_FILE_CACHE_ERRORS": {
+        "label": "Açık dosya önbelleği hataları",
+        "help": "Hatalar için açık dosya önbelleğini etkinleştir"
+      },
+      "OPEN_FILE_CACHE_MIN_USES": {
+        "label": "Açık dosya önbelleği minimum kullanım",
+        "help": "Açık dosya önbelleği minimum kullanımını etkinleştir"
+      },
+      "OPEN_FILE_CACHE_VALID": {
+        "label": "Açık dosya önbelleği geçerlilik süresi",
+        "help": "Açık dosya önbelleği geçerlilik süresi"
+      },
+      "EXTERNAL_PLUGIN_URLS": {
+        "label": "Harici eklenti URL'leri",
+        "help": "İndirilip kurulacak harici eklenti URL'lerinin listesi (.zip veya .tar dosyasına doğrudan indirme) (URL'ler boşlukla ayrılmıştır). URL başına en fazla 50 MiB. İçeriğini sabitlemek için URL'ye #sha256=<digest> ekleyin. Düz http:// kullanımdan kaldırılmıştır ve 1.7.0'da reddedilecektir: https:// veya file:/// kullanın."
+      },
+      "DENY_HTTP_STATUS": {
+        "label": "Reddetme HTTP durumu",
+        "help": "İstek reddedildiğinde gönderilecek HTTP durum kodu (403 veya 444). 444 kullanıldığında BunkerWeb bağlantıyı kapatacaktır."
+      },
+      "SEND_ANONYMOUS_REPORT": {
+        "label": "Anonim rapor gönder",
+        "help": "BunkerWeb bakımcılarına anonim rapor gönder."
+      }
+    }
+  }
+}

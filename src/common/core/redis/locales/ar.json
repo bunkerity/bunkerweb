@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "تهيئة خادم Redis عند استخدام BunkerWeb في وضع العنقود (cluster)."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "حالة REDIS"
+      },
+      "counter_redis_nb_keys": {
+        "title": "مفاتيح REDIS",
+        "subtitle": "عدد المفاتيح"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "تفعيل Redis",
+        "help": "تفعيل Redis."
+      },
+      "REDIS_HOST": {
+        "label": "خادم Redis",
+        "help": "عنوان IP أو اسم مضيف خادم Redis."
+      },
+      "REDIS_PORT": {
+        "label": "منفذ Redis",
+        "help": "منفذ خادم Redis."
+      },
+      "REDIS_DATABASE": {
+        "label": "قاعدة بيانات Redis",
+        "help": "رقم قاعدة بيانات Redis."
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "استخدام اتصال SSL/TLS مع خادم Redis."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "التحقق من Redis SSL/TLS",
+        "help": "التحقق من شهادة خادم Redis."
+      },
+      "REDIS_SSL_CA": {
+        "label": "حزمة CA لـ Redis SSL/TLS",
+        "help": "مسار حزمة CA بصيغة PEM تُستخدم للتحقق من شهادة خادم Redis/Valkey (CA خاصة)؛ عدم الضبط يعني مخزن الثقة الخاص بالنظام. عند ضبطها، تثق بها عملاء Python (وسيط Celery، المهام، محدد معدل API، bwcli، واجهة الويب) وتُضاف إلى حزمة الثقة الخاصة بـ NGINX Lua، لذا يثق بها مسار الطلب أيضًا. تُقرأ في مكان إنشاء الإعداد وبواسطة كل عميل، لذا يجب أن يوجد الملف في ذلك المسار هناك؛ فشل إنشاء الإعداد إذا كانت الحزمة مفقودة أو غير صالحة."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "مهلة Redis (مللي ثانية)",
+        "help": "مهلة خادم Redis (بالمللي ثانية) للاتصال والقراءة والكتابة."
+      },
+      "REDIS_USERNAME": {
+        "label": "اسم مستخدم Redis",
+        "help": "اسم المستخدم الخاص بـ Redis المستخدم في أمر AUTH."
+      },
+      "REDIS_PASSWORD": {
+        "label": "كلمة مرور Redis",
+        "help": "كلمة مرور Redis المستخدمة في أمر AUTH."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "مضيفو Redis Sentinel",
+        "help": "مضيفو Redis Sentinel بتنسيق host:[port] مفصولة بمسافات."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "اسم مستخدم Redis Sentinel",
+        "help": "اسم مستخدم Redis Sentinel."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "كلمة مرور Redis Sentinel",
+        "help": "كلمة مرور Redis Sentinel."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "الرئيسي في Redis Sentinel",
+        "help": "اسم الرئيسي (master) في Redis Sentinel."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "خمول keepalive في Redis (مللي ثانية)",
+        "help": "أقصى وقت خمول (بالمللي ثانية) قبل إغلاق اتصال Redis في التجمع."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "تجمع keepalive في Redis",
+        "help": "الحد الأقصى لاتصالات Redis المحفوظة في التجمع لكل عامل NGINX. الاتصالات في الحالة المستقرة تساوي تقريبًا nginx_workers × pool × instances ويجب أن تبقى ضمن حد maxclients لـ Redis/Valkey."
+      }
+    }
+  }
+}

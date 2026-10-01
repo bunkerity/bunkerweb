@@ -1,0 +1,62 @@
+{
+  "modsecurity": {
+    "meta": {
+      "name": "ModSecurity",
+      "description": "Manajemen WAF ModSecurity."
+    },
+    "settings": {
+      "USE_MODSECURITY": {
+        "label": "Gunakan ModSecurity",
+        "help": "Aktifkan ModSecurity WAF."
+      },
+      "USE_MODSECURITY_CRS": {
+        "label": "Gunakan Core Rule Set",
+        "help": "Aktifkan OWASP Core Rule Set."
+      },
+      "USE_MODSECURITY_CRS_PLUGINS": {
+        "label": "Gunakan Plugin Core Rule Set",
+        "help": "Aktifkan plugin OWASP Core Rule Set."
+      },
+      "MODSECURITY_CRS_VERSION": {
+        "label": "Versi Core Rule Set",
+        "help": "Versi OWASP Core Rule Set yang digunakan dengan ModSecurity (3 atau 4). Catatan: nightly sudah usang dan akan default ke v4."
+      },
+      "MODSECURITY_CRS_PLUGINS": {
+        "label": "Plugin Core Rule Set",
+        "help": "Daftar plugin OWASP CRS (plugin-name[/tag] atau URL) untuk diunduh dan dipasang (dipisahkan dengan spasi). (Tidak kompatibel dengan CRS versi 3)"
+      },
+      "USE_MODSECURITY_GLOBAL_CRS": {
+        "label": "Mode CRS global ModSecurity",
+        "help": "Gunakan CRS ModSecurity dalam mode global untuk meningkatkan pemuatan aturan saat Anda memiliki banyak layanan."
+      },
+      "MODSECURITY_SEC_AUDIT_ENGINE": {
+        "label": "SecAuditEngine",
+        "help": "Direktif SecAuditEngine dari ModSecurity."
+      },
+      "MODSECURITY_SEC_RULE_ENGINE": {
+        "label": "SecRuleEngine",
+        "help": "Direktif SecRuleEngine dari ModSecurity."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+        "label": "SecAuditLogParts",
+        "help": "Direktif SecAuditLogParts dari ModSecurity. Bagian A dan Z selalu otomatis disertakan sebagai prefix dan suffix."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG": {
+        "label": "SecAuditLog",
+        "help": "Path file tempat ModSecurity menulis entri audit. Harus berupa file biasa: penulis audit Serial menguncinya, yang tidak mungkin dilakukan pada pipe atau stream. Harus diakhiri dengan .log, di bawah /var/log/bunkerweb/."
+      },
+      "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
+        "label": "SecRequestBodyNoFilesLimit",
+        "help": "Direktif SecRequestBodyNoFilesLimit dari ModSecurity."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
+        "label": "SecRequestBodyLimit",
+        "help": "Direktif SecRequestBodyLimit dari ModSecurity. Ukuran body permintaan maksimum yang akan diperiksa ModSecurity (akhiran k/m/g, mis. 10m). Permintaan yang melebihi batas ini mengikuti SecRequestBodyLimitAction (Reject secara default). Jika kosong, diturunkan dari MAX_CLIENT_SIZE. Atur 0 untuk tanpa batas (tidak disarankan, dapat menyebabkan proses dimatikan karena kehabisan memori). NGINX menerapkan MAX_CLIENT_SIZE terlebih dahulu, sehingga nilai yang lebih tinggi di sini tidak berpengaruh. REVERSE_PROXY_MAX_CLIENT_SIZE menggantikan nilai ini untuk location-nya sendiri."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
+        "label": "SecRequestBodyLimitAction",
+        "help": "Direktif SecRequestBodyLimitAction dari ModSecurity. Reject mengembalikan HTTP 413 untuk permintaan yang melebihi batas body. ProcessPartial hanya memeriksa bagian dalam batas dan meneruskan permintaan lengkap ke backend (berguna untuk unggahan file besar, tetapi mengurangi cakupan WAF untuk tipe konten non-file seperti JSON atau data formulir)."
+      }
+    }
+  }
+}

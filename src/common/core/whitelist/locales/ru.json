@@ -1,0 +1,76 @@
+{
+  "whitelist": {
+    "meta": {
+      "name": "Белый список",
+      "description": "Разрешает доступ на основе внутренних и внешних белых списков IP/сети/rDNS/ASN."
+    },
+    "settings": {
+      "USE_WHITELIST": {
+        "label": "Включить whitelist",
+        "help": "Включить функцию whitelist."
+      },
+      "WHITELIST_ASN": {
+        "label": "Whitelist ASN",
+        "help": "Список номеров ASN, разделённых пробелами, для помещения в белый список."
+      },
+      "WHITELIST_ASN_URLS": {
+        "label": "Whitelist ASN URL",
+        "help": "Список URL, разделённых пробелами, содержащих ASN для помещения в белый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "WHITELIST_HEADER_NAME": {
+        "label": "Имя заголовка whitelist",
+        "help": "Имя заголовка запроса, добавляющего запрос в белый список. Любой клиент может отправить этот заголовок: считайте его общим секретом, только по HTTPS."
+      },
+      "WHITELIST_HEADER_VALUE": {
+        "label": "Значение заголовка whitelist",
+        "help": "Значение (регулярное выражение PCRE), которому должен соответствовать заголовок, чтобы добавить запрос в белый список. Оставьте пустым, чтобы сопоставление происходило по самому наличию заголовка. Закрепите его символами ^ и $: по умолчанию совпадение не закреплено."
+      },
+      "WHITELIST_IP": {
+        "label": "Whitelist IP/сеть",
+        "help": "Список IP-адресов/сетей, разделённых пробелами, для помещения в белый список."
+      },
+      "WHITELIST_IP_URLS": {
+        "label": "Whitelist IP/сеть URL",
+        "help": "Список URL, разделённых пробелами, содержащих хорошие IP/сети для помещения в белый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "WHITELIST_RDNS": {
+        "label": "Whitelist reverse DNS",
+        "help": "Список суффиксов reverse DNS, разделённых пробелами, для помещения в белый список."
+      },
+      "WHITELIST_RDNS_GLOBAL": {
+        "label": "Whitelist reverse DNS только для глобальных IP",
+        "help": "Выполнять проверки RDNS белого списка только для глобальных IP-адресов."
+      },
+      "WHITELIST_RDNS_URLS": {
+        "label": "Whitelist reverse DNS URL",
+        "help": "Список URL, разделённых пробелами, содержащих суффиксы reverse DNS для помещения в белый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "WHITELIST_RULE": {
+        "label": "Правило whitelist",
+        "help": "Составное правило: каждый член должен совпасть, чтобы правило совпало. Члены разделяются словом \" AND \" (заглавными буквами), и каждый из них имеет вид [NOT ]<kind>:<value>, где <kind> — это ip, country, asn, rdns, ua (псевдоним user_agent) или uri. Пример: ip:10.0.0.0/8 AND NOT ua:^curl. Правила объединяются между собой и с приведёнными выше плоскими списками через OR. Значением может быть также токен группы ресурсов, например @office. Stream-сервисы проверяют только ip, country, asn и rdns."
+      },
+      "WHITELIST_URI": {
+        "label": "Whitelist URI",
+        "help": "Список URI (регулярное выражение PCRE), разделённых пробелами, для помещения в белый список."
+      },
+      "WHITELIST_URI_URLS": {
+        "label": "Whitelist URI URL",
+        "help": "Список URL, разделённых пробелами, содержащих вредоносные URI для помещения в белый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "WHITELIST_USER_AGENT": {
+        "label": "Whitelist User-Agent",
+        "help": "Список User-Agent (регулярное выражение PCRE), разделённых пробелами, для помещения в белый список."
+      },
+      "WHITELIST_USER_AGENT_URLS": {
+        "label": "Whitelist User-Agent URL",
+        "help": "Список URL, разделённых пробелами, содержащих хорошие User-Agent для помещения в белый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      }
+    },
+    "widgets": {
+      "counter_passed_whitelist": {
+        "title": "БЕЛЫЙ СПИСОК",
+        "subtitle": "Запрос пропущен"
+      }
+    }
+  }
+}

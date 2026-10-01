@@ -1,0 +1,34 @@
+{
+  "geoip": {
+    "meta": {
+      "name": "GeoIP",
+      "description": "Bir istemci IP'sinin ülkesini, ASN'sini ve şehrini çözmek için kullanılan GeoIP veritabanları."
+    },
+    "settings": {
+      "GEOIP_ASN_MMDB": {
+        "label": "Özel ASN veritabanı",
+        "help": "Özel ASN veritabanı: worker tarafından okunabilen mutlak yol veya http(s) URL'si. MaxMind ve DB-IP'ye göre önceliklidir."
+      },
+      "GEOIP_CITY": {
+        "label": "Şehir veritabanı",
+        "help": "Şehir veritabanını indir. Diğerlerinden çok daha büyüktür (DB-IP City Lite açıldığında 125 MB'a ulaşır) ve imajlara dahil değildir."
+      },
+      "GEOIP_CITY_MMDB": {
+        "label": "Özel şehir veritabanı",
+        "help": "Özel şehir veritabanı: worker tarafından okunabilen mutlak yol veya http(s) URL'si. MaxMind ve DB-IP'ye göre önceliklidir."
+      },
+      "GEOIP_COUNTRY_MMDB": {
+        "label": "Özel ülke veritabanı",
+        "help": "Özel ülke veritabanı: worker tarafından okunabilen mutlak yol veya http(s) URL'si. MaxMind ve DB-IP'ye göre önceliklidir."
+      },
+      "MAXMIND_ACCOUNT_ID": {
+        "label": "MaxMind hesap kimliği",
+        "help": "MaxMind hesap kimliği. İsteğe bağlıdır ancak önerilir: olmadan, lisans anahtarını bir kimlik doğrulama üstbilgisi yerine URL'de taşıyan, kullanımdan kaldırılmış yalnızca anahtar tabanlı uç nokta kullanılır."
+      },
+      "MAXMIND_LICENSE_KEY": {
+        "label": "MaxMind lisans anahtarı",
+        "help": "MaxMind lisans anahtarı. Ayarlandığında, ülke, ASN ve şehir veritabanları DB-IP yerine MaxMind'dan indirilir."
+      }
+    }
+  }
+}

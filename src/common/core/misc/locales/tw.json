@@ -1,0 +1,108 @@
+{
+  "misc": {
+    "meta": {
+      "name": "雜項",
+      "description": "雜項設定。"
+    },
+    "widgets": {
+      "counter_failed_default": {
+        "title": "預設伺服器已停用",
+        "subtitle": "總計"
+      },
+      "counter_failed_method": {
+        "title": "不允許的方法",
+        "subtitle": "數量"
+      }
+    },
+    "settings": {
+      "SERVICE_MODE": {
+        "label": "服務模式",
+        "help": "服務宣告的用途:\"standard\" 表示一般服務,\"redirect_only\" 表示僅用於重新導向的監聽器。PRO 配額分類讀取的正是該宣告;絕不會從重新導向設定中推斷得出。"
+      },
+      "DISABLE_DEFAULT_SERVER": {
+        "label": "停用預設伺服器",
+        "help": "當請求的虛擬主機未知時拒絕該 HTTP 請求。"
+      },
+      "DISABLE_DEFAULT_SERVER_STRICT_SNI": {
+        "label": "停用預設伺服器嚴格 SNI",
+        "help": "當 SNI 未知時關閉 SSL/TLS 連線。"
+      },
+      "DEFAULT_SERVER_STREAM_PORTS": {
+        "label": "預設伺服器串流連接埠",
+        "help": "預設伺服器用於接受不比對任何已設定服務的串流(TCP)連線的連接埠;留空表示停用。若某連接埠已被某個串流服務監聽、被某個 HTTP/HTTPS 監聽器使用,或被 BunkerWeb 自身綁定,則會被拒絕。通常設定在保留的 default-server 服務上。"
+      },
+      "DEFAULT_SERVER_STREAM_PORTS_SSL": {
+        "label": "預設伺服器串流連接埠(TLS)",
+        "help": "上述預設伺服器串流連接埠中,哪些透過 TLS 提供服務;留空表示僅使用純 TCP。每個值也必須列在「預設伺服器串流連接埠」中——這只是為預設伺服器已宣告的連接埠設定 TLS 開關,而不是另一組監聽器;僅出現在此處而未出現在上面的連接埠將被拒絕。"
+      },
+      "ALLOWED_METHODS": {
+        "label": "允許的方法",
+        "help": "允許使用的 HTTP 和 WebDAV 方法,以豎線分隔。自訂方法須為大寫,可包含底線和連字號。"
+      },
+      "MAX_CLIENT_SIZE": {
+        "label": "最大請求主體大小",
+        "help": "最大請求主體大小(0 表示無限制)。"
+      },
+      "MAX_HEADERS": {
+        "label": "最大標頭數",
+        "help": "每個請求允許的最大標頭行數。超過該限制的請求將被拒絕,並回傳 400 Bad Request。"
+      },
+      "SERVE_FILES": {
+        "label": "提供檔案服務",
+        "help": "從本機資料夾提供檔案服務。"
+      },
+      "ROOT_FOLDER": {
+        "label": "根資料夾",
+        "help": "包含待提供檔案的根資料夾(未設定時為 /var/www/html/{server_name})。"
+      },
+      "HTTP2": {
+        "label": "HTTP2",
+        "help": "在啟用 HTTPS 時支援 HTTP2 通訊協定。"
+      },
+      "HTTP3": {
+        "label": "HTTP3",
+        "help": "在啟用 HTTPS 時支援 HTTP3 通訊協定。"
+      },
+      "HTTP3_ALT_SVC_PORT": {
+        "label": "HTTP3 Alt-Svc 連接埠",
+        "help": "HTTP3 備用服務連接埠。該值將作為 Alt-Svc 標頭的一部分使用。"
+      },
+      "LISTEN_HTTP": {
+        "label": "HTTP 監聽",
+        "help": "回應(不安全的)HTTP 請求。"
+      },
+      "USE_OPEN_FILE_CACHE": {
+        "label": "使用開啟檔案快取",
+        "help": "啟用開啟檔案快取功能"
+      },
+      "OPEN_FILE_CACHE": {
+        "label": "使用開啟檔案快取",
+        "help": "open_file_cache 指令"
+      },
+      "OPEN_FILE_CACHE_ERRORS": {
+        "label": "開啟檔案快取錯誤",
+        "help": "為錯誤啟用開啟檔案快取"
+      },
+      "OPEN_FILE_CACHE_MIN_USES": {
+        "label": "開啟檔案快取最小使用次數",
+        "help": "啟用開啟檔案快取的最小使用次數"
+      },
+      "OPEN_FILE_CACHE_VALID": {
+        "label": "開啟檔案快取有效期",
+        "help": "開啟檔案快取的有效期"
+      },
+      "EXTERNAL_PLUGIN_URLS": {
+        "label": "外部外掛程式 URL",
+        "help": "要下載並安裝的外部外掛程式 URL 清單(直接指向 .zip 或 .tar 檔案的下載連結;URL 之間以空格分隔)。每個 URL 最多 50 MiB。可在 URL 後附加 #sha256=<digest> 以鎖定其內容。純 http:// 已淘汰,將在 1.7.0 中被拒絕:請使用 https:// 或 file:///。"
+      },
+      "DENY_HTTP_STATUS": {
+        "label": "拒絕時的 HTTP 狀態碼",
+        "help": "拒絕請求時傳送的 HTTP 狀態碼(403 或 444)。使用 444 時,BunkerWeb 將關閉連線。"
+      },
+      "SEND_ANONYMOUS_REPORT": {
+        "label": "傳送匿名報告",
+        "help": "向 BunkerWeb 維護者傳送匿名報告。"
+      }
+    }
+  }
+}

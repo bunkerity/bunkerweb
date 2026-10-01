@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Sessions",
+      "description": "Gestion des sessions utilisées par d'autres plugins."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Secret des sessions",
+        "help": "Secret utilisé pour chiffrer les variables de session servant à stocker les données liées aux défis."
+      },
+      "SESSIONS_NAME": {
+        "label": "Nom des sessions",
+        "help": "Nom du cookie donné aux clients."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Domaine du cookie de session",
+        "help": "Attribut de domaine défini sur le cookie de session pour ce serveur (par ex. `example.com` ou `.example.com`). Laissez vide pour garder le cookie limité à l'hôte exact. Réglez-le sur un domaine enregistrable parent pour partager la session (et donc l'état antibot/défi) entre sous-domaines frères. Dans une configuration multisite, configurez ceci par serveur afin que des locataires non liés ne reçoivent jamais un attribut `Domain` inter-locataires."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Délai d'inactivité des sessions",
+        "help": "Durée maximale (en secondes) d'inactivité avant que la session ne soit invalidée."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Délai glissant des sessions",
+        "help": "Durée maximale (en secondes) avant qu'une session doive être renouvelée."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Délai absolu des sessions",
+        "help": "Durée maximale (en secondes) avant qu'une session ne soit détruite."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Vérification IP des sessions",
+        "help": "Détruit la session si l'adresse IP est différente de l'originale."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Vérification User-Agent des sessions",
+        "help": "Détruit la session si le User-Agent est différent de l'original."
+      }
+    }
+  }
+}

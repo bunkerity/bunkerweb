@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Analyse inversée",
+      "description": "Renforce la sécurité en scannant les ports du client afin de détecter et bloquer les connexions provenant de proxies ou de serveurs, aidant à empêcher le contournement des mesures de sécurité."
+    },
+    "settings": {
+      "USE_REVERSE_SCAN": {
+        "label": "Analyse inversée",
+        "help": "Active l'analyse des ports du client et refuse l'accès si l'un d'eux est ouvert."
+      },
+      "REVERSE_SCAN_PORTS": {
+        "label": "Ports de l'analyse inversée",
+        "help": "Liste des ports à analyser lors de l'utilisation de la fonctionnalité d'analyse inversée."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Délai d'expiration de l'analyse inversée",
+        "help": "Spécifie le délai d'expiration maximal (en ms) lors de l'analyse d'un port."
+      }
+    }
+  }
+}

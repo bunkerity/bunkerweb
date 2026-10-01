@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "کراس اوریجن ریسورس شیئرنگ (Cross-Origin Resource Sharing)۔"
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "درخواست مسدود"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "CORS استعمال کریں",
+        "help": "CORS استعمال کریں"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "اجازت یافتہ اوریجنز",
+        "help": "CORS درخواستیں کرنے کے لیے اجازت یافتہ اوریجنز: PCRE ریجیکس یا * یا self (اسی اوریجن کے لیے)۔"
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Access-Control-Allow-Methods ویلیو",
+        "help": "Access-Control-Allow-Methods ہیڈر کی ویلیو۔"
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Access-Control-Allow-Headers ویلیو",
+        "help": "Access-Control-Allow-Headers ہیڈر کی ویلیو۔"
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Access-Control-Allow-Credentials بھیجیں",
+        "help": "Access-Control-Allow-Credentials ہیڈر بھیجیں۔"
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Access-Control-Expose-Headers ویلیو",
+        "help": "Access-Control-Expose-Headers ہیڈر کی ویلیو۔"
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Cross-Origin-Opener-Policy ہیڈر کی ویلیو۔"
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Cross-Origin-Embedder-Policy ہیڈر کی ویلیو۔"
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Cross-Origin-Resource-Policy ہیڈر کی ویلیو۔"
+      },
+      "CORS_MAX_AGE": {
+        "label": "Access-Control-Max-Age ویلیو",
+        "help": "Access-Control-Max-Age ہیڈر کی ویلیو۔"
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "درخواست مسترد کریں",
+        "help": "اگر Origin کی اجازت نہیں ہے تو درخواست مسترد کریں اور اسے بیک اینڈ کو نہ بھیجیں۔"
+      }
+    }
+  }
+}

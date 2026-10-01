@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "Mengelola konfigurasi reverse proxy gRPC."
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "Gunakan gRPC",
+        "help": "Aktifkan mode reverse proxy gRPC."
+      },
+      "GRPC_HOST": {
+        "label": "Host gRPC",
+        "help": "Nilai upstream lengkap yang digunakan oleh grpc_pass (misalnya grpc://app:50051 atau grpcs://app:443)."
+      },
+      "GRPC_URL": {
+        "label": "URL gRPC",
+        "help": "URL location yang akan di-proxy ke upstream gRPC. Nilai yang diawali ^ atau diakhiri $ diperlakukan sebagai lokasi regex. Secara opsional, tambahkan awalan ~, ~*, = atau ^~ diikuti satu spasi untuk mengatur modifier location nginx secara eksplisit; spasi, ;, { atau } tidak diperbolehkan di bagian lain nilai."
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "Host kustom gRPC",
+        "help": "Ganti header Host yang dikirim ke upstream gRPC."
+      },
+      "GRPC_HEADERS": {
+        "label": "Header gRPC",
+        "help": "Daftar header yang dikirim ke upstream gRPC, dipisahkan dengan titik koma (nilai untuk direktif grpc_set_header)."
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "Sembunyikan header gRPC",
+        "help": "Daftar header yang disembunyikan dari klien saat diterima dari upstream gRPC (nilai untuk direktif grpc_hide_header)."
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "Header-klien gRPC",
+        "help": "Daftar header yang dikirim ke klien, dipisahkan dengan titik koma (nilai untuk direktif add_header)."
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "Loloskan header gRPC",
+        "help": "Daftar header yang diteruskan dari upstream gRPC ke klien meskipun disembunyikan secara default, dipisahkan dengan spasi (nilai untuk direktif grpc_pass_header)."
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "Abaikan header gRPC",
+        "help": "Daftar header dari upstream gRPC yang tidak boleh diproses oleh NGINX, dipisahkan dengan spasi (nilai untuk direktif grpc_ignore_headers)."
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "Izinkan garis bawah pada header",
+        "help": "Aktifkan atau nonaktifkan direktif underscores_in_headers."
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "Cegat error",
+        "help": "Cegat dan tulis ulang error upstream gRPC."
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "Ukuran buffer gRPC",
+        "help": "Nilai untuk direktif grpc_buffer_size (ukuran buffer yang digunakan untuk membaca respons dari upstream gRPC)."
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "Timeout koneksi gRPC",
+        "help": "Timeout saat terhubung ke upstream gRPC."
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "Timeout baca gRPC",
+        "help": "Timeout saat membaca dari upstream gRPC."
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "Timeout kirim gRPC",
+        "help": "Timeout saat mengirim ke upstream gRPC."
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "Keepalive socket gRPC",
+        "help": "Aktifkan atau nonaktifkan keepalive untuk socket upstream gRPC."
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "Aktifkan atau nonaktifkan pengiriman SNI ke server upstream gRPC."
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "Nama SNI SSL",
+        "help": "Mengatur host SNI yang dikirim ke server upstream gRPC."
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "Verifikasi SSL",
+        "help": "Aktifkan atau nonaktifkan verifikasi sertifikat SSL server upstream gRPC."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Prioritas sertifikat tepercaya",
+        "help": "Sumber sertifikat CA tepercaya: path file atau data base64/PEM (file atau data)."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "Path sertifikat tepercaya SSL",
+        "help": "Path ke bundle CA PEM yang digunakan untuk memverifikasi sertifikat upstream gRPC (prioritas 'file', dapat dibaca oleh scheduler, yang meng-cache dan mendistribusikannya). Diperlukan untuk verifikasi; untuk upstream publik gunakan bundle sistem (mis. /etc/ssl/certs/ca-certificates.crt). Jika tidak diatur, verifikasi dinonaktifkan."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Data sertifikat tepercaya (base64/plaintext)",
+        "help": "Sertifikat CA tepercaya sebagai base64 atau PEM teks biasa (prioritas 'data')."
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "Kedalaman verifikasi SSL",
+        "help": "Mengatur kedalaman verifikasi dalam rantai sertifikat server upstream gRPC."
+      },
+      "GRPC_SSL_CRL": {
+        "label": "Path CRL",
+        "help": "Path ke certificate revocation list PEM yang digunakan saat memverifikasi server upstream gRPC. Diprioritaskan di atas GRPC_SSL_CRL_DATA. Hanya diterapkan saat GRPC_SSL_VERIFY bernilai yes. Path yang diatur tetapi hilang adalah error; GRPC_SSL_CRL_DATA tidak digunakan sebagai fallback."
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "Data CRL (base64/plaintext)",
+        "help": "Certificate revocation list sebagai base64 atau PEM teks biasa. Hanya digunakan saat pengaturan path CRL kosong."
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "Protokol SSL upstream",
+        "help": "Versi TLS yang ditawarkan ke server upstream gRPC (nilai direktif grpc_ssl_protocols). Kosong mempertahankan default NGINX."
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "Cipher SSL upstream",
+        "help": "String cipher suite yang ditawarkan ke server upstream gRPC (nilai direktif grpc_ssl_ciphers). Kosong mempertahankan default NGINX."
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "Upstream gRPC berikutnya",
+        "help": "Kondisi untuk memilih server upstream gRPC berikutnya."
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "Timeout upstream gRPC berikutnya",
+        "help": "Batas waktu untuk meneruskan permintaan ke server upstream gRPC berikutnya."
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "Percobaan upstream gRPC berikutnya",
+        "help": "Jumlah maksimum percobaan untuk meneruskan permintaan ke server upstream gRPC berikutnya."
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "Permintaan auth gRPC",
+        "help": "Aktifkan autentikasi menggunakan penyedia eksternal (nilai direktif auth_request)."
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "URL sign-in permintaan auth",
+        "help": "Alihkan klien ke URL sign-in saat menggunakan GRPC_AUTH_REQUEST (digunakan saat panggilan auth_request mengembalikan 401). Variabel NGINX seperti $scheme, $host, dan $request_uri didukung."
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "Set permintaan auth gRPC",
+        "help": "Daftar variabel yang diatur dari penyedia autentikasi, dipisahkan dengan titik koma (nilai direktif auth_request_set)."
+      },
+      "GRPC_INCLUDES": {
+        "label": "Include gRPC",
+        "help": "Konfigurasi tambahan untuk disertakan dalam blok location gRPC, dipisahkan dengan spasi."
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "Ukuran body maksimum gRPC",
+        "help": "Ukuran body maksimum untuk location gRPC ini (0 untuk tak terbatas). Jika kosong, MAX_CLIENT_SIZE layanan berlaku."
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "Prioritas sertifikat klien",
+        "help": "Sumber sertifikat klien dan kunci yang digunakan untuk mutual TLS dengan upstream: path file atau data base64/PEM (file atau data)."
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "Path sertifikat klien SSL",
+        "help": "Path ke sertifikat klien PEM yang disajikan BunkerWeb ke upstream gRPC (mutual TLS, prioritas file). Memerlukan GRPC_SSL_CLIENT_KEY yang sesuai; job trusted-cert meng-cache dan mendistribusikan identitas milik gRPC ini."
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "Data sertifikat klien (base64/plaintext)",
+        "help": "Sertifikat klien sebagai base64 atau PEM teks biasa (prioritas 'data')."
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "Path kunci klien SSL",
+        "help": "Path ke private key PEM yang cocok dengan sertifikat klien (prioritas 'file'). Kunci di-cache dan didistribusikan ke instance seperti artefak job lainnya, dan ditulis dengan izin owner/group saja."
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "Data kunci klien (base64/plaintext)",
+        "help": "Private key klien sebagai base64 atau PEM teks biasa (prioritas 'data'). Lebih baik gunakan path file jika memungkinkan: kunci yang diatur di sini disimpan sebagai nilai pengaturan."
+      }
+    }
+  }
+}

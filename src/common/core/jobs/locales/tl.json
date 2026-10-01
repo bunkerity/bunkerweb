@@ -1,0 +1,8 @@
+{
+  "jobs": {
+    "meta": {
+      "name": "Mga trabaho",
+      "description": "Peke (fake) na core plugin para sa mga internal na trabaho."
+    }
+  }
+}

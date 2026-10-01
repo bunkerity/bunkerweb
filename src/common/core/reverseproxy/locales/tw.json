@@ -1,0 +1,230 @@
+{
+  "reverseproxy": {
+    "meta": {
+      "name": "反向代理",
+      "description": "管理反向代理設定。"
+    },
+    "settings": {
+      "USE_REVERSE_PROXY": {
+        "label": "使用反向代理",
+        "help": "啟用反向代理模式。"
+      },
+      "REVERSE_PROXY_HOST": {
+        "label": "反向代理主機",
+        "help": "被代理資源的完整 URL(proxy_pass)。"
+      },
+      "REVERSE_PROXY_URL": {
+        "label": "反向代理 url",
+        "help": "將被代理的 location URL。以 ^ 開頭或以 $ 結尾的值將被視為正規表示式 location。可選擇在前面加上 ~、~*、= 或 ^~,後接一個空格,以明確設定 nginx 的 location 修飾詞;值的其他位置不允許出現空格、;、{ 或 }。"
+      },
+      "REVERSE_PROXY_WS": {
+        "label": "反向代理 WebSocket",
+        "help": "在被代理資源上啟用 WebSocket。"
+      },
+      "REVERSE_PROXY_BUFFERING": {
+        "label": "反向代理緩衝",
+        "help": "啟用或停用來自被代理資源的回應緩衝。"
+      },
+      "REVERSE_PROXY_REQUEST_BUFFERING": {
+        "label": "反向代理請求緩衝",
+        "help": "啟用或停用傳送給被代理資源的請求緩衝。"
+      },
+      "REVERSE_PROXY_KEEPALIVE": {
+        "label": "反向代理 keepalive",
+        "help": "啟用或停用與被代理資源之間的 keepalive 連線。"
+      },
+      "REVERSE_PROXY_HTTP_VERSION": {
+        "label": "反向代理 HTTP 版本",
+        "help": "與上游通訊所使用的 HTTP 通訊協定版本(1.0、1.1 或 2)。設為 2 可在相容的後端上,為上游這一段啟用 HTTP/2 多工。無論如何設定,WebSocket location 一律固定使用 1.1。"
+      },
+      "REVERSE_PROXY_CUSTOM_HOST": {
+        "label": "反向代理自訂 Host",
+        "help": "覆寫傳送給上游伺服器的 Host 標頭。"
+      },
+      "REVERSE_PROXY_HEADERS": {
+        "label": "反向代理標頭",
+        "help": "要傳送給被代理資源的 HTTP 標頭清單,以分號分隔(用作 proxy_set_header 指令的值)。"
+      },
+      "REVERSE_PROXY_HIDE_HEADERS": {
+        "label": "反向代理隱藏標頭",
+        "help": "從被代理資源收到後,需要對客戶端隱藏的 HTTP 標頭清單(用作 proxy_hide_header 指令的值)。"
+      },
+      "REVERSE_PROXY_HEADERS_CLIENT": {
+        "label": "反向代理標頭-客戶端",
+        "help": "要傳送給客戶端的 HTTP 標頭清單,以分號分隔(用作 add_header 指令的值)。"
+      },
+      "REVERSE_PROXY_UNDERSCORES_IN_HEADERS": {
+        "label": "允許標頭中使用底線",
+        "help": "啟用或停用 underscores_in_headers 指令。"
+      },
+      "REVERSE_PROXY_INTERCEPT_ERRORS": {
+        "label": "攔截錯誤",
+        "help": "攔截並重寫來自被代理資源的 HTTP 錯誤回應(用作 proxy_intercept_errors 指令的值)。"
+      },
+      "REVERSE_PROXY_CONNECT_TIMEOUT": {
+        "label": "反向代理連線逾時",
+        "help": "連線被代理資源時的逾時時間。"
+      },
+      "REVERSE_PROXY_READ_TIMEOUT": {
+        "label": "反向代理讀取逾時",
+        "help": "從被代理資源讀取資料時的逾時時間。"
+      },
+      "REVERSE_PROXY_SEND_TIMEOUT": {
+        "label": "反向代理傳送逾時",
+        "help": "向被代理資源傳送資料時的逾時時間。"
+      },
+      "REVERSE_PROXY_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "啟用或停用向上游伺服器傳送 SNI。"
+      },
+      "REVERSE_PROXY_SSL_SNI_NAME": {
+        "label": "SSL SNI 名稱",
+        "help": "設定要傳送給上游伺服器的 SNI 主機。"
+      },
+      "REVERSE_PROXY_SSL_VERIFY": {
+        "label": "SSL 驗證",
+        "help": "啟用或停用對上游伺服器 SSL 憑證的驗證。"
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "信任憑證優先順序",
+        "help": "信任的 CA 憑證的來源:檔案路徑或 base64/PEM 資料(file 或 data)。"
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL 信任憑證路徑",
+        "help": "用於驗證上游憑證的 PEM CA 憑證組合的路徑(優先順序為 'file',須可被 scheduler 讀取,由其快取並分發)。驗證時為必填;對於公開上游,可使用系統憑證組合(例如 /etc/ssl/certs/ca-certificates.crt)。若未設定,則停用驗證。"
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "信任憑證資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式提供的信任 CA 憑證(優先順序為 'data')。"
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "用戶端憑證優先順序",
+        "help": "用於與上游進行雙向 TLS 的用戶端憑證與私密金鑰的來源:檔案路徑或 base64/PEM 資料(file 或 data)。"
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT": {
+        "label": "SSL 用戶端憑證路徑",
+        "help": "BunkerWeb 向上游出示的 PEM 用戶端憑證的路徑(雙向 TLS,優先順序為 'file',須可被 scheduler 讀取,由其快取並分發)。需要對應的私密金鑰;由該服務的 HTTP 與串流(Stream)反向代理共用(gRPC 有自己的 GRPC_SSL_CLIENT_CERT)。"
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_DATA": {
+        "label": "用戶端憑證資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式提供的用戶端憑證(優先順序為 'data')。"
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY": {
+        "label": "SSL 用戶端私密金鑰路徑",
+        "help": "與用戶端憑證匹配的 PEM 私密金鑰的路徑(優先順序為 'file')。該私密金鑰會如同任何其他工作產出物一樣被快取並分發到各執行個體,並以僅擁有者/群組可存取的權限寫入。"
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY_DATA": {
+        "label": "用戶端私密金鑰資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式提供的用戶端私密金鑰(優先順序為 'data')。請盡量優先使用檔案路徑:在此處設定的私密金鑰會以設定值的形式儲存。"
+      },
+      "REVERSE_PROXY_SSL_CRL": {
+        "label": "CRL 路徑",
+        "help": "驗證上游伺服器時使用的 PEM 憑證撤銷清單的路徑。優先於 REVERSE_PROXY_SSL_CRL_DATA。僅在 REVERSE_PROXY_SSL_VERIFY 為 yes 時才會生效。已設定但路徑不存在會被視為錯誤;REVERSE_PROXY_SSL_CRL_DATA 不會作為備援使用。"
+      },
+      "REVERSE_PROXY_SSL_CRL_DATA": {
+        "label": "CRL 資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式提供的憑證撤銷清單。僅在 CRL 路徑設定為空時使用。"
+      },
+      "REVERSE_PROXY_SSL_PROTOCOLS": {
+        "label": "上游 SSL 通訊協定",
+        "help": "提供給上游伺服器的 TLS 版本(用作 proxy_ssl_protocols 指令的值)。留空則保留 NGINX 預設值。"
+      },
+      "REVERSE_PROXY_SSL_CIPHERS": {
+        "label": "上游 SSL 加密套件",
+        "help": "提供給上游伺服器的加密套件字串(用作 proxy_ssl_ciphers 指令的值)。留空則保留 NGINX 預設值。"
+      },
+      "REVERSE_PROXY_SEND_PROXY_PROTOCOL": {
+        "label": "向上游傳送 PROXY 通訊協定",
+        "help": "向串流(Stream)上游傳送 PROXY 通訊協定標頭。'auto' 遵循全域 USE_PROXY_PROTOCOL 設定,這也是在該設定出現之前 BunkerWeb 的行為;'yes' 與 'no' 則獨立於傳入監聽器單獨決定。"
+      },
+      "REVERSE_PROXY_STREAM_HALF_CLOSE": {
+        "label": "反向代理串流半關閉",
+        "help": "在客戶端關閉其寫入端之後,仍保持通往後端的 TCP 串流連線開啟。這是部分通訊協定所需要的行為:客戶端半關閉連線後等待回應;而 nginx 預設會直接關閉該連線。"
+      },
+      "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
+        "label": "SSL 驗證深度",
+        "help": "設定上游伺服器憑證鏈的驗證深度。"
+      },
+      "REVERSE_PROXY_AUTH_REQUEST": {
+        "label": "反向代理驗證請求",
+        "help": "啟用使用外部提供者進行驗證(用作 auth_request 指令的值)。"
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "驗證請求登入 URL",
+        "help": "使用 REVERSE_PROXY_AUTH_REQUEST 時,將客戶端重新導向到登入 URL(當 auth_request 呼叫回傳 401 時使用)。支援 $scheme、$host 及 $request_uri 等 NGINX 變數。"
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SET": {
+        "label": "反向代理驗證請求設定",
+        "help": "要從驗證提供者設定的變數清單,以分號分隔(用作 auth_request_set 指令的值)。"
+      },
+      "REVERSE_PROXY_INCLUDES": {
+        "label": "反向代理 includes",
+        "help": "要包含在 location 區塊中的額外設定,以空格分隔。"
+      },
+      "REVERSE_PROXY_PASS_REQUEST_BODY": {
+        "label": "反向代理傳遞請求主體",
+        "help": "啟用或停用將請求主體傳遞給被代理資源。"
+      },
+      "REVERSE_PROXY_MODSECURITY": {
+        "label": "反向代理 ModSecurity",
+        "help": "為該反向代理 location 啟用或停用 ModSecurity。對於接受超大上傳的端點(例如影片、備份、物件儲存),請設為 no:無論 SecRequestBodyLimit 設定為何,ModSecurity-nginx 連接器都會將整個請求主體緩衝在記憶體中,在數 GB 等級的上傳時可能觸發 OOM(記憶體不足)。會在該 location 區塊內輸出 'modsecurity off;'。"
+      },
+      "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+        "label": "反向代理最大請求主體大小",
+        "help": "該反向代理 location 的最大請求主體大小(0 表示無限制)。留空時,使用服務層級的 MAX_CLIENT_SIZE。設定該值也會為該 location 設定 ModSecurity 請求主體大小限制,覆寫服務層級的設定;但不會改變 MODSECURITY_REQ_BODY_NO_FILES_LIMIT。"
+      },
+      "USE_PROXY_CACHE": {
+        "label": "反向代理快取",
+        "help": "啟用或停用對被代理資源的快取。"
+      },
+      "PROXY_CACHE_PATH_LEVELS": {
+        "label": "階層層級",
+        "help": "快取的目錄階層層級。"
+      },
+      "PROXY_CACHE_PATH_ZONE_SIZE": {
+        "label": "反向代理快取區大小",
+        "help": "快取被代理資源時,快取中繼資料的最大大小。"
+      },
+      "PROXY_CACHE_PATH_PARAMS": {
+        "label": "反向代理快取參數",
+        "help": "要新增到 proxy_cache 指令的額外參數。"
+      },
+      "PROXY_CACHE_METHODS": {
+        "label": "反向代理快取方法",
+        "help": "應觸發快取操作的 HTTP 方法。"
+      },
+      "PROXY_CACHE_MIN_USES": {
+        "label": "反向代理快取最小使用次數",
+        "help": "回應被快取之前所需的最少請求次數。"
+      },
+      "PROXY_CACHE_KEY": {
+        "label": "反向代理快取鍵",
+        "help": "用於唯一識別快取回應的鍵。"
+      },
+      "PROXY_CACHE_VALID": {
+        "label": "反向代理快取有效期",
+        "help": "根據 HTTP 狀態碼定義快取時間(status=time 清單),以空格分隔。"
+      },
+      "PROXY_NO_CACHE": {
+        "label": "反向代理不快取",
+        "help": "停用回應快取的條件。"
+      },
+      "PROXY_CACHE_BYPASS": {
+        "label": "反向代理略過快取",
+        "help": "略過回應快取的條件。"
+      },
+      "PROXY_BUFFERS": {
+        "label": "代理緩衝區",
+        "help": "proxy_buffers 指令的值。"
+      },
+      "PROXY_BUFFER_SIZE": {
+        "label": "代理緩衝區大小",
+        "help": "proxy_buffer_size 指令的值。"
+      },
+      "PROXY_BUSY_BUFFERS_SIZE": {
+        "label": "代理忙碌緩衝區大小",
+        "help": "proxy_busy_buffers_size 指令的值。"
+      }
+    }
+  }
+}

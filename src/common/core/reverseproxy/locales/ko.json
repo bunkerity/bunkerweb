@@ -1,0 +1,230 @@
+{
+  "reverseproxy": {
+    "meta": {
+      "name": "리버스 프록시",
+      "description": "리버스 프록시 설정을 관리합니다."
+    },
+    "settings": {
+      "USE_REVERSE_PROXY": {
+        "label": "리버스 프록시 사용",
+        "help": "리버스 프록시 모드를 활성화합니다."
+      },
+      "REVERSE_PROXY_HOST": {
+        "label": "리버스 프록시 호스트",
+        "help": "프록시 대상 리소스의 전체 URL입니다(proxy_pass)."
+      },
+      "REVERSE_PROXY_URL": {
+        "label": "리버스 프록시 url",
+        "help": "프록시될 location URL입니다. ^로 시작하거나 $로 끝나는 값은 정규식 location으로 처리됩니다. 필요하면 ~, ~*, = 또는 ^~ 뒤에 공백 하나를 붙여 nginx location 수정자를 명시적으로 지정할 수 있습니다. 값의 다른 부분에는 공백, ;, { 또는 }를 사용할 수 없습니다."
+      },
+      "REVERSE_PROXY_WS": {
+        "label": "리버스 프록시 WebSocket",
+        "help": "프록시 대상 리소스에서 WebSocket을 활성화합니다."
+      },
+      "REVERSE_PROXY_BUFFERING": {
+        "label": "리버스 프록시 버퍼링",
+        "help": "프록시 대상 리소스로부터의 응답 버퍼링을 활성화하거나 비활성화합니다."
+      },
+      "REVERSE_PROXY_REQUEST_BUFFERING": {
+        "label": "리버스 프록시 요청 버퍼링",
+        "help": "프록시 대상 리소스로 보내는 요청 버퍼링을 활성화하거나 비활성화합니다."
+      },
+      "REVERSE_PROXY_KEEPALIVE": {
+        "label": "리버스 프록시 keepalive",
+        "help": "프록시 대상 리소스와의 keepalive 연결을 활성화하거나 비활성화합니다."
+      },
+      "REVERSE_PROXY_HTTP_VERSION": {
+        "label": "리버스 프록시 HTTP 버전",
+        "help": "업스트림과 통신할 때 사용하는 HTTP 프로토콜 버전입니다(1.0, 1.1 또는 2). 호환되는 백엔드에서 업스트림 구간에 HTTP/2 멀티플렉싱을 활성화하려면 2로 설정하십시오. WebSocket location은 설정과 관계없이 항상 1.1로 고정됩니다."
+      },
+      "REVERSE_PROXY_CUSTOM_HOST": {
+        "label": "리버스 프록시 사용자 지정 호스트",
+        "help": "업스트림 서버로 전송되는 Host 헤더를 재정의합니다."
+      },
+      "REVERSE_PROXY_HEADERS": {
+        "label": "리버스 프록시 헤더",
+        "help": "프록시 대상 리소스로 전송할 HTTP 헤더 목록입니다. 세미콜론으로 구분합니다(proxy_set_header 지시어의 값)."
+      },
+      "REVERSE_PROXY_HIDE_HEADERS": {
+        "label": "리버스 프록시 헤더 숨기기",
+        "help": "프록시 대상 리소스로부터 수신했을 때 클라이언트에게 숨길 HTTP 헤더 목록입니다(proxy_hide_header 지시어의 값)."
+      },
+      "REVERSE_PROXY_HEADERS_CLIENT": {
+        "label": "리버스 프록시 헤더-클라이언트",
+        "help": "클라이언트로 전송할 HTTP 헤더 목록입니다. 세미콜론으로 구분합니다(add_header 지시어의 값)."
+      },
+      "REVERSE_PROXY_UNDERSCORES_IN_HEADERS": {
+        "label": "헤더에 밑줄 허용",
+        "help": "underscores_in_headers 지시어를 활성화하거나 비활성화합니다."
+      },
+      "REVERSE_PROXY_INTERCEPT_ERRORS": {
+        "label": "오류 가로채기",
+        "help": "프록시 대상 리소스에서 발생한 HTTP 오류 응답을 가로채서 다시 작성합니다(proxy_intercept_errors 지시어의 값)."
+      },
+      "REVERSE_PROXY_CONNECT_TIMEOUT": {
+        "label": "리버스 프록시 연결 제한 시간",
+        "help": "프록시 대상 리소스에 연결할 때의 제한 시간입니다."
+      },
+      "REVERSE_PROXY_READ_TIMEOUT": {
+        "label": "리버스 프록시 읽기 제한 시간",
+        "help": "프록시 대상 리소스로부터 읽을 때의 제한 시간입니다."
+      },
+      "REVERSE_PROXY_SEND_TIMEOUT": {
+        "label": "리버스 프록시 전송 제한 시간",
+        "help": "프록시 대상 리소스로 전송할 때의 제한 시간입니다."
+      },
+      "REVERSE_PROXY_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "업스트림 서버로 SNI 전송을 활성화하거나 비활성화합니다."
+      },
+      "REVERSE_PROXY_SSL_SNI_NAME": {
+        "label": "SSL SNI 이름",
+        "help": "업스트림 서버로 전송할 SNI 호스트를 설정합니다."
+      },
+      "REVERSE_PROXY_SSL_VERIFY": {
+        "label": "SSL 검증",
+        "help": "업스트림 서버의 SSL 인증서 검증을 활성화하거나 비활성화합니다."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "신뢰할 인증서 우선순위",
+        "help": "신뢰할 CA 인증서의 출처입니다: 파일 경로 또는 base64/PEM 데이터(file 또는 data)."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL 신뢰 인증서 경로",
+        "help": "업스트림 인증서를 검증하는 데 사용되는 PEM CA 번들의 경로입니다(우선순위 'file', scheduler가 읽을 수 있어야 하며 scheduler가 이를 캐시하고 배포합니다). 검증을 위해 필수입니다; 공개 업스트림에는 시스템 번들(예: /etc/ssl/certs/ca-certificates.crt)을 사용하십시오. 설정하지 않으면 검증이 비활성화됩니다."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "신뢰 인증서 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식의 신뢰할 수 있는 CA 인증서입니다(우선순위 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "클라이언트 인증서 우선순위",
+        "help": "업스트림과의 상호 TLS에 사용되는 클라이언트 인증서 및 키의 출처입니다: 파일 경로 또는 base64/PEM 데이터(file 또는 data)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT": {
+        "label": "SSL 클라이언트 인증서 경로",
+        "help": "BunkerWeb이 업스트림에 제시하는 PEM 클라이언트 인증서의 경로입니다(상호 TLS, 우선순위 'file', scheduler가 읽을 수 있어야 하며 scheduler가 이를 캐시하고 배포합니다). 짝이 되는 키가 필요합니다; 해당 서비스의 HTTP 및 스트림(Stream) 리버스 프록시가 공유합니다(gRPC는 자체 GRPC_SSL_CLIENT_CERT를 가집니다)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_DATA": {
+        "label": "클라이언트 인증서 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식의 클라이언트 인증서입니다(우선순위 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY": {
+        "label": "SSL 클라이언트 키 경로",
+        "help": "클라이언트 인증서와 짝을 이루는 PEM 개인 키의 경로입니다(우선순위 'file'). 이 키는 다른 작업 산출물과 마찬가지로 캐시되어 인스턴스에 배포되며, 소유자/그룹만 접근 가능한 권한으로 기록됩니다."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY_DATA": {
+        "label": "클라이언트 키 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식의 클라이언트 개인 키입니다(우선순위 'data'). 가능하면 파일 경로를 우선 사용하십시오: 여기에 설정한 키는 설정 값으로 저장됩니다."
+      },
+      "REVERSE_PROXY_SSL_CRL": {
+        "label": "CRL 경로",
+        "help": "업스트림 서버를 검증할 때 사용되는 PEM 인증서 폐기 목록의 경로입니다. REVERSE_PROXY_SSL_CRL_DATA보다 우선합니다. REVERSE_PROXY_SSL_VERIFY가 yes일 때만 적용됩니다. 설정되었지만 경로가 없으면 오류로 처리됩니다; REVERSE_PROXY_SSL_CRL_DATA는 대체로 사용되지 않습니다."
+      },
+      "REVERSE_PROXY_SSL_CRL_DATA": {
+        "label": "CRL 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식의 인증서 폐기 목록입니다. CRL 경로 설정이 비어 있을 때만 사용됩니다."
+      },
+      "REVERSE_PROXY_SSL_PROTOCOLS": {
+        "label": "업스트림 SSL 프로토콜",
+        "help": "업스트림 서버에 제공되는 TLS 버전입니다(proxy_ssl_protocols 지시어의 값). 비워 두면 NGINX 기본값을 유지합니다."
+      },
+      "REVERSE_PROXY_SSL_CIPHERS": {
+        "label": "업스트림 SSL 암호화 방식",
+        "help": "업스트림 서버에 제공되는 암호 스위트 문자열입니다(proxy_ssl_ciphers 지시어의 값). 비워 두면 NGINX 기본값을 유지합니다."
+      },
+      "REVERSE_PROXY_SEND_PROXY_PROTOCOL": {
+        "label": "업스트림으로 PROXY 프로토콜 전송",
+        "help": "스트림(Stream) 업스트림으로 PROXY 프로토콜 헤더를 전송합니다. 'auto'는 전역 USE_PROXY_PROTOCOL 설정을 따르며, 이는 이 설정이 존재하기 전 BunkerWeb의 동작 방식이었습니다; 'yes'와 'no'는 인바운드 리스너와 무관하게 독립적으로 결정됩니다."
+      },
+      "REVERSE_PROXY_STREAM_HALF_CLOSE": {
+        "label": "리버스 프록시 스트림 하프 클로즈",
+        "help": "클라이언트가 쓰기 측을 닫은 후에도 백엔드로의 TCP 스트림 연결을 열어 둡니다. 클라이언트가 하프 클로즈한 뒤 응답을 기다리는 프로토콜에 필요합니다; nginx는 기본적으로 연결을 종료합니다."
+      },
+      "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
+        "label": "SSL 검증 깊이",
+        "help": "업스트림 서버 인증서 체인의 검증 깊이를 설정합니다."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST": {
+        "label": "리버스 프록시 인증 요청",
+        "help": "외부 제공자를 사용한 인증을 활성화합니다(auth_request 지시어의 값)."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "인증 요청 로그인 URL",
+        "help": "REVERSE_PROXY_AUTH_REQUEST를 사용할 때 클라이언트를 로그인 URL로 리디렉션합니다(auth_request 호출이 401을 반환했을 때 사용됨). $scheme, $host, $request_uri 같은 NGINX 변수를 지원합니다."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SET": {
+        "label": "리버스 프록시 인증 요청 설정",
+        "help": "인증 제공자로부터 설정할 변수 목록입니다. 세미콜론으로 구분합니다(auth_request_set 지시어의 값)."
+      },
+      "REVERSE_PROXY_INCLUDES": {
+        "label": "리버스 프록시 includes",
+        "help": "location 블록에 포함할 추가 설정입니다. 공백으로 구분합니다."
+      },
+      "REVERSE_PROXY_PASS_REQUEST_BODY": {
+        "label": "리버스 프록시 요청 본문 전달",
+        "help": "요청 본문을 프록시 대상 리소스로 전달할지 여부를 활성화하거나 비활성화합니다."
+      },
+      "REVERSE_PROXY_MODSECURITY": {
+        "label": "리버스 프록시 ModSecurity",
+        "help": "이 리버스 프록시 location에 대해 ModSecurity를 활성화하거나 비활성화합니다. 매우 큰 업로드를 받는 엔드포인트(예: 동영상, 백업, 오브젝트 스토리지)에는 no로 설정하십시오: ModSecurity-nginx 커넥터는 SecRequestBodyLimit 설정과 무관하게 전체 요청 본문을 메모리에 버퍼링하며, 수 GB 규모의 업로드에서 OOM(메모리 부족)을 유발할 수 있습니다. 해당 location 블록 안에 'modsecurity off;'를 출력합니다."
+      },
+      "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+        "label": "리버스 프록시 최대 본문 크기",
+        "help": "이 리버스 프록시 location의 최대 요청 본문 크기입니다(0은 무제한). 비워 두면 서비스 수준의 MAX_CLIENT_SIZE가 적용됩니다. 값을 설정하면 이 location에 대한 ModSecurity 요청 본문 크기 제한도 설정되어 서비스 전체 설정을 재정의합니다; MODSECURITY_REQ_BODY_NO_FILES_LIMIT는 변경하지 않습니다."
+      },
+      "USE_PROXY_CACHE": {
+        "label": "리버스 프록시 캐시",
+        "help": "프록시 대상 리소스의 캐싱을 활성화하거나 비활성화합니다."
+      },
+      "PROXY_CACHE_PATH_LEVELS": {
+        "label": "계층 수준",
+        "help": "캐시의 디렉터리 계층 수준입니다."
+      },
+      "PROXY_CACHE_PATH_ZONE_SIZE": {
+        "label": "리버스 프록시 캐시 영역 크기",
+        "help": "프록시 대상 리소스를 캐싱할 때 캐시된 메타데이터의 최대 크기입니다."
+      },
+      "PROXY_CACHE_PATH_PARAMS": {
+        "label": "리버스 프록시 캐시 매개변수",
+        "help": "proxy_cache 지시어에 추가할 추가 매개변수입니다."
+      },
+      "PROXY_CACHE_METHODS": {
+        "label": "리버스 프록시 캐시 메서드",
+        "help": "캐시 작업을 트리거해야 하는 HTTP 메서드입니다."
+      },
+      "PROXY_CACHE_MIN_USES": {
+        "label": "리버스 프록시 캐시 최소 사용 횟수",
+        "help": "응답이 캐시되기 전 필요한 최소 요청 횟수입니다."
+      },
+      "PROXY_CACHE_KEY": {
+        "label": "리버스 프록시 캐시 키",
+        "help": "캐시된 응답을 고유하게 식별하는 데 사용되는 키입니다."
+      },
+      "PROXY_CACHE_VALID": {
+        "label": "리버스 프록시 캐시 유효 기간",
+        "help": "HTTP 상태 코드에 따라 캐싱 시간을 정의합니다(status=time 목록). 공백으로 구분합니다."
+      },
+      "PROXY_NO_CACHE": {
+        "label": "리버스 프록시 캐시 안 함",
+        "help": "응답 캐싱을 비활성화하는 조건입니다."
+      },
+      "PROXY_CACHE_BYPASS": {
+        "label": "리버스 프록시 우회",
+        "help": "응답 캐싱을 우회하는 조건입니다."
+      },
+      "PROXY_BUFFERS": {
+        "label": "프록시 버퍼",
+        "help": "proxy_buffers 지시어의 값입니다."
+      },
+      "PROXY_BUFFER_SIZE": {
+        "label": "프록시 버퍼 크기",
+        "help": "proxy_buffer_size 지시어의 값입니다."
+      },
+      "PROXY_BUSY_BUFFERS_SIZE": {
+        "label": "프록시 사용 중 버퍼 크기",
+        "help": "proxy_busy_buffers_size 지시어의 값입니다."
+      }
+    }
+  }
+}

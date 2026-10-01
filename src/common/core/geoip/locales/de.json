@@ -1,0 +1,34 @@
+{
+  "geoip": {
+    "meta": {
+      "name": "GeoIP",
+      "description": "GeoIP-Datenbanken zur Ermittlung von Land, ASN und Stadt einer Client-IP."
+    },
+    "settings": {
+      "MAXMIND_LICENSE_KEY": {
+        "label": "MaxMind-Lizenzschlüssel",
+        "help": "MaxMind-Lizenzschlüssel. Wenn festgelegt, werden die Länder-, ASN- und Stadtdatenbanken von MaxMind statt von DB-IP heruntergeladen."
+      },
+      "MAXMIND_ACCOUNT_ID": {
+        "label": "MaxMind-Konto-ID",
+        "help": "MaxMind-Konto-ID. Optional, aber empfohlen: Ohne sie wird der veraltete, nur-Schlüssel-basierte Endpunkt verwendet, der den Lizenzschlüssel in der URL statt in einem Auth-Header überträgt."
+      },
+      "GEOIP_CITY": {
+        "label": "Stadtdatenbank",
+        "help": "Lädt die Stadtdatenbank herunter. Sie ist deutlich größer als die anderen (DB-IP City Lite entpackt sich auf 125 MB) und ist nicht in den Images enthalten."
+      },
+      "GEOIP_COUNTRY_MMDB": {
+        "label": "Benutzerdefinierte Länderdatenbank",
+        "help": "Benutzerdefinierte Länderdatenbank: absoluter, vom Worker lesbarer Pfad oder http(s)-URL. Hat Vorrang vor MaxMind und DB-IP."
+      },
+      "GEOIP_ASN_MMDB": {
+        "label": "Benutzerdefinierte ASN-Datenbank",
+        "help": "Benutzerdefinierte ASN-Datenbank: absoluter, vom Worker lesbarer Pfad oder http(s)-URL. Hat Vorrang vor MaxMind und DB-IP."
+      },
+      "GEOIP_CITY_MMDB": {
+        "label": "Benutzerdefinierte Stadtdatenbank",
+        "help": "Benutzerdefinierte Stadtdatenbank: absoluter, vom Worker lesbarer Pfad oder http(s)-URL. Hat Vorrang vor MaxMind und DB-IP."
+      }
+    }
+  }
+}

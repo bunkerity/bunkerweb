@@ -1,0 +1,34 @@
+{
+  "realip": {
+    "meta": {
+      "name": "Echte IP",
+      "description": "Ermittelt die echte IP der Clients, wenn BunkerWeb hinter einem Reverse-Proxy / Load-Balancer betrieben wird."
+    },
+    "settings": {
+      "USE_REAL_IP": {
+        "label": "Echte IP verwenden",
+        "help": "Ruft die echte IP des Clients ab."
+      },
+      "USE_PROXY_PROTOCOL": {
+        "label": "PROXY-Protokoll verwenden",
+        "help": "Aktiviert die Kommunikation über das PROXY-Protokoll."
+      },
+      "REAL_IP_FROM": {
+        "label": "Echte IP von",
+        "help": "Liste vertrauenswürdiger IPs/Netzwerke, durch Leerzeichen getrennt, von denen weitergeleitete Anfragen stammen."
+      },
+      "REAL_IP_HEADER": {
+        "label": "Echter-IP-Header",
+        "help": "HTTP-Header, der die echte IP enthält, oder der spezielle Wert proxy_protocol für das PROXY-Protokoll."
+      },
+      "REAL_IP_RECURSIVE": {
+        "label": "Rekursive echte IP",
+        "help": "Führt eine rekursive Suche im Header durch, der die IP-Adresse enthält."
+      },
+      "REAL_IP_FROM_URLS": {
+        "label": "Echte IP von URLs",
+        "help": "Liste von URLs, die vertrauenswürdige IPs/Netzwerke enthalten, durch Leerzeichen getrennt, von denen weitergeleitete Anfragen stammen. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      }
+    }
+  }
+}

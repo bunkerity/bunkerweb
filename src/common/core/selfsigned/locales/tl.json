@@ -1,0 +1,26 @@
+{
+  "selfsigned": {
+    "meta": {
+      "name": "Self-signed na sertipiko",
+      "description": "Bumubuo ng self-signed na sertipiko."
+    },
+    "settings": {
+      "GENERATE_SELF_SIGNED_SSL": {
+        "label": "I-activate ang Self-Signed na Certificate",
+        "help": "Gumawa at gamitin ang self-signed na certificate."
+      },
+      "SELF_SIGNED_SSL_ALGORITHM": {
+        "label": "Algorithm ng Certificate",
+        "help": "Algorithm na gagamitin para sa self-signed na certificate."
+      },
+      "SELF_SIGNED_SSL_EXPIRY": {
+        "label": "Pag-expire ng Certificate",
+        "help": "Pag-expire ng self-signed na certificate, sa araw."
+      },
+      "SELF_SIGNED_SSL_SUBJ": {
+        "label": "Subject ng Certificate",
+        "help": "Subject ng self-signed na certificate."
+      }
+    }
+  }
+}

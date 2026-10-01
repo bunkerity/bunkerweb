@@ -1,0 +1,76 @@
+{
+  "greylist": {
+    "meta": {
+      "name": "Graue Liste",
+      "description": "Erlaubt den Zugriff und behält dabei Sicherheitsfunktionen anhand interner und externer IP-/Netzwerk-/rDNS-/ASN-Grauen Listen bei."
+    },
+    "widgets": {
+      "counter_failed_greylist": {
+        "title": "GRAUE LISTE",
+        "subtitle": "Anfrage blockiert"
+      }
+    },
+    "settings": {
+      "USE_GREYLIST": {
+        "label": "Graue Liste aktivieren",
+        "help": "Aktiviert die Funktion der grauen Liste."
+      },
+      "GREYLIST_IP": {
+        "label": "IP/Netzwerk der grauen Liste",
+        "help": "Liste von IPs/Netzwerken, durch Leerzeichen getrennt, die in die graue Liste aufgenommen werden."
+      },
+      "GREYLIST_RDNS": {
+        "label": "Reverse-DNS der grauen Liste",
+        "help": "Liste von Reverse-DNS-Suffixen, durch Leerzeichen getrennt, die in die graue Liste aufgenommen werden."
+      },
+      "GREYLIST_RDNS_GLOBAL": {
+        "label": "Graue Liste Reverse-DNS nur globale IPs",
+        "help": "RDNS-Prüfungen der grauen Liste nur bei globalen IP-Adressen durchführen."
+      },
+      "GREYLIST_ASN": {
+        "label": "ASN der grauen Liste",
+        "help": "Liste von ASN-Nummern, durch Leerzeichen getrennt, die in die graue Liste aufgenommen werden."
+      },
+      "GREYLIST_USER_AGENT": {
+        "label": "User-Agent der grauen Liste",
+        "help": "Liste von User-Agents (PCRE-Regex), durch Leerzeichen getrennt, die in die graue Liste aufgenommen werden."
+      },
+      "GREYLIST_URI": {
+        "label": "URI der grauen Liste",
+        "help": "Liste von URIs (PCRE-Regex), durch Leerzeichen getrennt, die in die graue Liste aufgenommen werden."
+      },
+      "GREYLIST_RULE": {
+        "label": "Regel der grauen Liste",
+        "help": "Zusammengesetzte Regel: Jeder Ausdruck muss übereinstimmen, damit die Regel übereinstimmt. Ausdrücke werden mit „ AND “ (Großbuchstaben) getrennt, und jeder hat die Form [NOT ]<kind>:<value>, wobei <kind> ip, country, asn, rdns, ua (Alias user_agent) oder uri ist. Beispiel: ip:10.0.0.0/8 AND NOT ua:^curl. Regeln werden untereinander und mit den obigen einfachen Listen ODER-verknüpft. Ein Wert kann ein Ressourcengruppen-Token wie @office sein. Stream-Dienste werten nur ip, country, asn und rdns aus."
+      },
+      "GREYLIST_HEADER_NAME": {
+        "label": "Header-Name der grauen Liste",
+        "help": "Name eines Anfrage-Headers, der die Anfrage zur grauen Liste hinzufügt. Jeder Client kann diesen Header senden: behandeln Sie ihn wie ein gemeinsames Geheimnis, nur über HTTPS."
+      },
+      "GREYLIST_HEADER_VALUE": {
+        "label": "Header-Wert der grauen Liste",
+        "help": "Wert (PCRE-Regex), dem der Header entsprechen muss, damit die Anfrage zur grauen Liste hinzugefügt wird. Leer lassen, um bereits bei Vorhandensein des Headers zu greifen. Verankern Sie ihn mit ^ und $: der Abgleich ist standardmäßig nicht verankert."
+      },
+      "GREYLIST_IP_URLS": {
+        "label": "IP/Netzwerk der grauen Liste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die vertrauenswürdige IPs/Netzwerke enthalten, die in die graue Liste aufgenommen werden. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "GREYLIST_RDNS_URLS": {
+        "label": "Reverse-DNS der grauen Liste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die Reverse-DNS-Suffixe enthalten, die in die graue Liste aufgenommen werden. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "GREYLIST_ASN_URLS": {
+        "label": "ASN der grauen Liste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die ASN enthalten, die in die graue Liste aufgenommen werden. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "GREYLIST_USER_AGENT_URLS": {
+        "label": "User-Agent der grauen Liste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die vertrauenswürdige User-Agents enthalten, die in die graue Liste aufgenommen werden. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "GREYLIST_URI_URLS": {
+        "label": "URI der grauen Liste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die schädliche URIs enthalten, die in die graue Liste aufgenommen werden. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      }
+    }
+  }
+}

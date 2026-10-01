@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "HTML enjeksiyonu",
+      "description": "</body> veya </head> etiketinden önce özel HTML kodu ekler."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "body HTML kodu",
+        "help": "</body> etiketinden önce eklenecek HTML kodu."
+      },
+      "INJECT_HEAD": {
+        "label": "head HTML kodu",
+        "help": "</head> etiketinden önce eklenecek HTML kodu."
+      }
+    }
+  }
+}

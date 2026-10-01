@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "Pinamamahalaan ang mga configuration ng gRPC reverse proxy."
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "Gamitin ang gRPC",
+        "help": "I-activate ang gRPC reverse proxy mode."
+      },
+      "GRPC_HOST": {
+        "label": "gRPC Host",
+        "help": "Buong upstream value na ginagamit ng grpc_pass (hal. grpc://app:50051 o grpcs://app:443)."
+      },
+      "GRPC_URL": {
+        "label": "gRPC URL",
+        "help": "Location URL na ipoproxy sa isang gRPC upstream. Ang value na nagsisimula sa ^ o nagtatapos sa $ ay ituturing na regex location. Opsyonal na maglagay ng prefix na ~, ~*, = o ^~ na sinusundan ng isang space para tahasang i-set ang nginx location modifier; walang space, ;, { o } ang pinapayagan sa ibang bahagi ng value."
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "gRPC Custom Host",
+        "help": "I-override ang Host header na ipinapadala sa gRPC upstream."
+      },
+      "GRPC_HEADERS": {
+        "label": "gRPC Headers",
+        "help": "Listahan ng mga header na ipapadala sa gRPC upstream, pinaghihiwalay ng semicolon (mga value para sa grpc_set_header directive)."
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "gRPC Hide Headers",
+        "help": "Listahan ng mga header na itatago sa mga client kapag natanggap mula sa gRPC upstream (mga value para sa grpc_hide_header directive)."
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "gRPC Headers-Client",
+        "help": "Listahan ng mga header na ipapadala sa client, pinaghihiwalay ng semicolon (mga value para sa add_header directive)."
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "gRPC Pass Headers",
+        "help": "Listahan ng mga header na ipapasa mula sa gRPC upstream papunta sa client kahit itinatago ang mga ito bilang default, pinaghihiwalay ng space (mga value para sa grpc_pass_header directive)."
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "gRPC Ignore Headers",
+        "help": "Listahan ng mga header mula sa gRPC upstream na hindi dapat iproseso ng NGINX, pinaghihiwalay ng space (mga value para sa grpc_ignore_headers directive)."
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "Payagan ang Underscore sa Headers",
+        "help": "I-enable o i-disable ang underscores_in_headers directive."
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "I-intercept ang mga Error",
+        "help": "I-intercept at i-rewrite ang mga error ng gRPC upstream."
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "gRPC Buffer Size",
+        "help": "Value para sa grpc_buffer_size directive (sukat ng buffer na ginagamit para basahin ang response mula sa gRPC upstream)."
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "gRPC Connect Timeout",
+        "help": "Timeout kapag kumokonekta sa gRPC upstream."
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "gRPC Read Timeout",
+        "help": "Timeout kapag nagbabasa mula sa gRPC upstream."
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "gRPC Send Timeout",
+        "help": "Timeout kapag nagpapadala patungo sa gRPC upstream."
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "gRPC Socket Keepalive",
+        "help": "I-enable o i-disable ang keepalive para sa mga socket ng gRPC upstream."
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "I-enable o i-disable ang pagpapadala ng SNI sa gRPC upstream server."
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "SSL SNI Name",
+        "help": "Itinatakda ang SNI host na ipapadala sa gRPC upstream server."
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "SSL Verify",
+        "help": "I-enable o i-disable ang verification ng SSL certificate ng gRPC upstream server."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Trusted Certificate Priority",
+        "help": "Source ng trusted CA certificate: file path o base64/PEM data (file o data)."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL Trusted Certificate Path",
+        "help": "Path patungo sa PEM CA bundle na ginagamit para i-verify ang gRPC upstream certificate (priyoridad 'file', nababasa ng scheduler, na nagca-cache at namamahagi nito). Kailangan para sa verification; para sa public upstream gamitin ang system bundle (hal. /etc/ssl/certs/ca-certificates.crt). Kapag hindi naka-set, naka-disable ang verification."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Trusted Certificate Data (base64/plaintext)",
+        "help": "Trusted CA certificate bilang base64 o plaintext PEM (priyoridad 'data')."
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "SSL Verify Depth",
+        "help": "Itinatakda ang verification depth sa certificate chain ng gRPC upstream server."
+      },
+      "GRPC_SSL_CRL": {
+        "label": "CRL Path",
+        "help": "Path patungo sa PEM certificate revocation list na ginagamit kapag ni-verify ang gRPC upstream server. Mananaig ito kaysa sa GRPC_SSL_CRL_DATA. Ilalapat lang kapag ang GRPC_SSL_VERIFY ay yes. Error ang naka-set pero nawawalang path; hindi ginagamit ang GRPC_SSL_CRL_DATA bilang fallback."
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "CRL Data (base64/plaintext)",
+        "help": "Certificate revocation list bilang base64 o plaintext PEM. Ginagamit lang kapag blangko ang CRL path setting."
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "Upstream SSL Protocols",
+        "help": "Mga bersyon ng TLS na inaalok sa gRPC upstream server (value ng grpc_ssl_protocols directive). Pinapanatili ng blangkong value ang default ng NGINX."
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "Upstream SSL Ciphers",
+        "help": "Cipher suite string na inaalok sa gRPC upstream server (value ng grpc_ssl_ciphers directive). Pinapanatili ng blangkong value ang default ng NGINX."
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "gRPC Next Upstream",
+        "help": "Mga kondisyon para sa pagpili ng susunod na gRPC upstream server."
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "gRPC Next Upstream Timeout",
+        "help": "Time limit para sa pagpasa ng request sa susunod na gRPC upstream server."
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "gRPC Next Upstream Tries",
+        "help": "Pinakamataas na bilang ng pagsubok para sa pagpasa ng request sa susunod na gRPC upstream server."
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "gRPC Auth Request",
+        "help": "I-enable ang authentication gamit ang external provider (value ng auth_request directive)."
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "Auth Request Signin URL",
+        "help": "I-redirect ang mga client sa sign-in URL kapag ginagamit ang GRPC_AUTH_REQUEST (ginagamit kapag nagbalik ng 401 ang auth_request call). Suportado ang mga NGINX variable tulad ng $scheme, $host, at $request_uri."
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "gRPC Auth Request Set",
+        "help": "Listahan ng mga variable na ise-set mula sa authentication provider, pinaghihiwalay ng semicolon (mga value ng auth_request_set directive)."
+      },
+      "GRPC_INCLUDES": {
+        "label": "gRPC Includes",
+        "help": "Karagdagang configuration na isasama sa gRPC location block, pinaghihiwalay ng space."
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "gRPC Maximum Body Size",
+        "help": "Pinakamataas na sukat ng body para sa gRPC location na ito (0 para sa walang hangganan). Kapag blangko, ilalapat ang MAX_CLIENT_SIZE ng service."
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "Client Certificate Priority",
+        "help": "Source ng client certificate at key na ginagamit para sa mutual TLS kasama ang upstream: file path o base64/PEM data (file o data)."
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "SSL Client Certificate Path",
+        "help": "Path patungo sa PEM client certificate na ipinapakita ng BunkerWeb sa mga gRPC upstream (mutual TLS, priyoridad file). Kailangan ang tugmang GRPC_SSL_CLIENT_KEY; ang trusted-cert job ang nagca-cache at namamahagi ng gRPC-owned identity na ito."
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "Client Certificate Data (base64/plaintext)",
+        "help": "Client certificate bilang base64 o plaintext PEM (priyoridad 'data')."
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "SSL Client Key Path",
+        "help": "Path patungo sa PEM private key na tumutugma sa client certificate (priyoridad 'file'). Nica-cache ang key at ipinapamahagi sa mga instance tulad ng anumang iba pang job artifact, at isinusulat nang may owner/group-only na pahintulot."
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "Client Key Data (base64/plaintext)",
+        "help": "Client private key bilang base64 o plaintext PEM (priyoridad 'data'). Mas mainam ang file path kapag posible: ang key na naka-set dito ay naka-imbak bilang setting value."
+      }
+    }
+  }
+}

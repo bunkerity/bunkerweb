@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "meta": {
+      "name": "Hatalar",
+      "description": "Varsayılan hata sayfalarını yönetir"
+    },
+    "settings": {
+      "ERRORS": {
+        "label": "Hatalar",
+        "help": "HTTP hata kodlarının ve karşılık gelen hata sayfalarının, boşluklarla ayrılmış listesi (404=/my404.html 403=/errors/403.html ...)."
+      },
+      "INTERCEPTED_ERROR_CODES": {
+        "label": "Yakalanan hata kodları",
+        "help": "BunkerWeb tarafından yakalanan HTTP hata kodlarının, boşluklarla ayrılmış listesi."
+      }
+    }
+  }
+}

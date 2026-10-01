@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Let's Encrypt سرٹیفکیٹس کی خودکار تخلیق، تجدید اور تشکیل۔"
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "خودکار Let's Encrypt",
+        "help": "خودکار Let's Encrypt موڈ فعال کریں۔"
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Let's Encrypt پاس تھرو کریں",
+        "help": "Let's Encrypt درخواستوں کو ویب سرور تک پاس تھرو کریں۔"
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Let's Encrypt ای میل",
+        "help": "Let's Encrypt اطلاعات کے لیے اور سرٹیفکیٹ میں استعمال ہونے والا ای میل۔"
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "سرٹیفکیٹ اتھارٹی سرور",
+        "help": "سرٹیفکیٹ بنانے کے لیے استعمال ہونے والا سرٹیفکیٹ اتھارٹی سرور منتخب کریں۔"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "ZeroSSL API کلید",
+        "help": "zerossl-bot کے ذریعے استعمال ہونے والی اختیاری ZeroSSL API کلید۔ اگر خالی ہو تو EAB اسناد حاصل کرنے کے لیے EMAIL_LETS_ENCRYPT استعمال کیا جاتا ہے۔"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "ZeroSSL API کوششیں",
+        "help": "zerossl-bot کے ذریعے کی جانے والی ZeroSSL API درخواستوں کے لیے دوبارہ کوشش کی تعداد (0 دوبارہ کوشش کو غیر فعال کرتا ہے)۔"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "ZeroSSL API دوبارہ کوشش تاخیر",
+        "help": "zerossl-bot میں ZeroSSL API دوبارہ کوششوں کے درمیان تاخیر سیکنڈوں میں۔"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "ZeroSSL API کنیکٹ ٹائم آؤٹ",
+        "help": "zerossl-bot میں ZeroSSL API درخواستوں کے لیے کنکشن ٹائم آؤٹ سیکنڈوں میں۔"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "ZeroSSL API زیادہ سے زیادہ وقت",
+        "help": "zerossl-bot میں ہر ZeroSSL API درخواست کے لیے زیادہ سے زیادہ کل وقت سیکنڈوں میں۔"
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "چیلنج کی قسم",
+        "help": "Let's Encrypt کے لیے استعمال ہونے والی چیلنج کی قسم (http یا dns)۔"
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "DNS فراہم کنندہ",
+        "help": "DNS چیلنجز کے لیے استعمال ہونے والا DNS فراہم کنندہ۔"
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "DNS پھیلاؤ",
+        "help": "DNS چیلنجز کے لیے DNS پھیلاؤ کا انتظار کرنے کا وقت سیکنڈوں میں۔"
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "کریڈینشل آئٹم",
+        "help": "کنفیگریشن آئٹم جو DNS چیلنجز کے لیے DNS فراہم کنندہ کی credentials.ini فائل میں شامل کیا جائے گا۔ اسے کلید، وائٹ اسپیس، پھر ویلیو کے طور پر لکھیں (مثلاً 'cloudflare_api_token 123456')؛ کلید کو کوٹ نہ کریں۔ ویلیو base64 میں انکوڈ بھی ہو سکتی ہے، یا پورا آئٹم base64 میں انکوڈ شدہ json آبجیکٹ ہو سکتا ہے۔"
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Base64 DNS اسناد ڈی کوڈ کریں",
+        "help": "base64 میں انکوڈ شدہ DNS فراہم کنندہ اسناد کو خودکار طور پر ڈی کوڈ کریں۔ فعال ہونے پر، base64 فارمیٹ سے میل کھانے والی اسناد استعمال سے پہلے ڈی کوڈ کی جاتی ہیں (rfc2136 فراہم کنندہ کے علاوہ)۔ اگر آپ کی اسناد جان بوجھ کر base64 اسٹرنگز ہیں تو اسے غیر فعال کریں۔"
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "وائلڈ کارڈ سرٹیفکیٹس",
+        "help": "تمام ڈومینز کے لیے وائلڈ کارڈ سرٹیفکیٹس بنائیں۔ اس سے ایک سرٹیفکیٹ متعدد سب ڈومینز کو محفوظ بنا سکتا ہے۔ (صرف DNS چیلنجز کے ساتھ دستیاب)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Let's Encrypt سٹیجنگ استعمال کریں",
+        "help": "Let's Encrypt سرٹیفکیٹ بنانے کے لیے سٹیجنگ ماحول استعمال کریں۔ جب آپ اپنی ڈیپلائمنٹس کو ٹیسٹ کر رہے ہوں تو پروڈکشن ماحول میں ریٹ لمیٹ ہونے سے بچنے کے لیے مفید ہے۔"
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "پرانے سرٹیفکیٹس کی ضرورت نہ رہنے پر انہیں صاف کریں",
+        "help": "تجدید کے دوران پرانے سرٹیفکیٹس صاف کریں۔"
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "سرٹیفکیٹ پروفائل",
+        "help": "Let's Encrypt کے ساتھ استعمال کے لیے سرٹیفکیٹ پروفائل منتخب کریں۔ 'classic' 90 دن کی میعاد اور وسیع مطابقت کے ساتھ عمومی مقصد کا سرٹیفکیٹ ہے۔ 'tlsserver' 90 دن کی میعاد اور چھوٹے پے لوڈ کے ساتھ TLS سرور تصدیق کے لیے بہتر بنایا گیا ہے۔ 'shortlived' خودکار ماحول میں بہتر سیکیورٹی کے لیے 7 دن کے سرٹیفکیٹس فراہم کرتا ہے۔"
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "کسٹم سرٹیفکیٹ پروفائل (ACME)",
+        "help": "ان ACME سرورز کے ساتھ استعمال کے لیے کسٹم سرٹیفکیٹ پروفائل جو غیر معیاری پروفائلز کو سپورٹ کرتے ہیں۔ اگر سیٹ کیا جائے تو LETS_ENCRYPT_PROFILE کو اوور رائیڈ کرتا ہے۔"
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "پبلک سفکسز غیر فعال کریں (PSL بلیک لسٹ)",
+        "help": "پبلک سفکس لسٹ (Public Suffix List) سے میل کھانے والے ڈومینز کے لیے سرٹیفکیٹ درخواستیں غیر فعال کریں (تجویز کردہ، ڈیفالٹ: yes)۔"
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "زیادہ سے زیادہ کوششیں",
+        "help": "ناکامی پر سرٹیفکیٹ بنانے کی دوبارہ کوشش کی تعداد (0 دوبارہ کوشش کو غیر فعال کرتا ہے)۔"
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "بیک وقت سرٹیفکیٹ درخواستیں",
+        "help": "certbot-new جاب میں سرٹیفکیٹ درخواستیں بیک وقت چلائیں (ریٹ لمیٹس کا خطرہ بڑھا سکتا ہے)۔"
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "زیادہ سے زیادہ Certbot لاگ بیک اپس",
+        "help": "فی جاب رکھے جانے والی گردش شدہ certbot لاگ فائلوں کی زیادہ سے زیادہ تعداد۔ certbot کا اپنا ڈیفالٹ 1000 ہے، جو تیزی سے جمع ہو جاتا ہے۔ صرف لائیو لاگ رکھنے کے لیے اسے 0 پر سیٹ کریں۔"
+      }
+    }
+  }
+}

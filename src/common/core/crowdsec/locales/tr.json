@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "BunkerWeb için CrowdSec bouncer."
+    },
+    "settings": {
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "Her zaman AppSec'e gönder",
+        "help": "IP için bir karar olsa bile isteği AppSec Bileşenine gönder."
+      },
+      "CROWDSEC_API": {
+        "label": "CrowdSec API",
+        "help": "CrowdSec API'sinin adresi."
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "CrowdSec API anahtarı",
+        "help": "cscli bouncer add ile verilen CrowdSec API anahtarı."
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "AppSec bağlantı zaman aşımı",
+        "help": "Düzeltme bileşeni ile AppSec Bileşeni arasındaki bağlantının milisaniye cinsinden zaman aşımı."
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "AppSec hata eylemi",
+        "help": "AppSec Bileşeni 500 döndürdüğünde davranış. İsteğin geçmesine izin verebilir veya reddedebilir."
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "AppSec işleme zaman aşımı",
+        "help": "İsteğin düzeltme bileşeninden AppSec Bileşenine işlenmesi için milisaniye cinsinden zaman aşımı."
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "AppSec gönderme zaman aşımı",
+        "help": "Verinin düzeltme bileşeninden AppSec Bileşenine gönderilmesi için milisaniye cinsinden zaman aşımı."
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "AppSec SSL doğrulama",
+        "help": "AppSec Bileşeninin SSL sertifikası geçerliliğini doğrula."
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "AppSec URL'si",
+        "help": "Application Security Bileşeninin URL'si."
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "CrowdSec önbellek süresi",
+        "help": "Bouncer'ın live modda önbellekte tuttuğu IP'ler için önbellek süresi (saniye)."
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "CrowdSec captcha sorgusu",
+        "help": "CrowdSec bir captcha istediğinde gösterilen antibot sorgusu. Antibot bu hizmette etkinleştirilmiş olmalıdır (USE_ANTIBOT, \"no\" dışında bir değere ayarlanmış), aksi takdirde istek yasaklanır. Üçüncü taraf sağlayıcılar anahtarlarını ANTIBOT_* ayarlarından alır. \"cookie\"den kaçının: \"insan olduğunu kanıtla\" anlamına gelen bir karar için hiçbir şey kanıtlamaz. \"no\", öncekiyle aynı şekilde captcha kararlarını yoksayar; karar önbelleği her Local API için paylaşılır, bu nedenle eski davranışı tam olarak geri getirmek için o Local API'deki her hizmetin \"no\" olarak ayarlanması gerekir."
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "Güvenlik workflow'larına bırak",
+        "help": "CrowdSec tarafından işaretlenen bir isteğe ne olacağına güvenlik workflow'larının karar vermesine izin ver. \"no\" (varsayılan) burada engeller. \"yes\" bu hizmete bağlı workflow'lara devreder; hiçbir kural eşleşmediğinde veya hiçbiri bağlı olmadığında bile karar geçerli olmaya devam eder. CORS preflight (204), /robots.txt ve /security.txt, workflow'lar çalışmadan önce BunkerWeb tarafından üretilir, bu nedenle işaretlenmiş bir istemci yine de bu üçünü alabilir. Bunlardan hiçbiri uygulamanıza ulaşmaz ve ulaşacak her istek önce workflow merdiveni tarafından kontrol edilir."
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "CrowdSec dahili trafik analizini etkinleştir",
+        "help": "Dahili trafiğin analizini etkinleştir."
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "CrowdSec hariç tutulan konumlar",
+        "help": "Bouncing sırasında hariç tutulacak konumlar. Virgülle ayrılmış bir konum listesidir."
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "CrowdSec yönetim girişi",
+        "help": "Uyarı araştırması ve karar kaldırma için özel CrowdSec makine girişi. Salt okunur bouncer erişimi için boş bırakın."
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "CrowdSec yönetim parolası",
+        "help": "Özel CrowdSec yönetim makinesinin parolası. Yönetim girişiyle birlikte gereklidir; burada asla bouncer API anahtarını kullanmayın."
+      },
+      "CROWDSEC_MODE": {
+        "label": "CrowdSec Modu",
+        "help": "CrowdSec API'sinin modu (live veya stream)."
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "CrowdSec live istek zaman aşımı",
+        "help": "Bouncer'ın CrowdSec yerel API'sini sorgulamak için yaptığı HTTP isteklerinin milisaniye cinsinden zaman aşımı."
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "CrowdSec istek zaman aşımı",
+        "help": "CrowdSec yerel API'sinden yeni/eski IP'leri çekmek için güncelleme sıklığı (saniye)."
+      },
+      "USE_CROWDSEC": {
+        "label": "CrowdSec kullan",
+        "help": "CrowdSec bouncer'ı etkinleştir."
+      }
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "CROWDSEC DURUMU"
+      }
+    }
+  }
+}

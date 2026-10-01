@@ -1,0 +1,34 @@
+{
+  "realip": {
+    "meta": {
+      "name": "IP reale",
+      "description": "Ottiene l'IP reale dei client quando BunkerWeb si trova dietro un reverse proxy / load balancer."
+    },
+    "settings": {
+      "USE_REAL_IP": {
+        "label": "Usa IP reale",
+        "help": "Recupera l'IP reale del client."
+      },
+      "USE_PROXY_PROTOCOL": {
+        "label": "Usa protocollo PROXY",
+        "help": "Attiva la comunicazione tramite il protocollo PROXY."
+      },
+      "REAL_IP_FROM": {
+        "label": "IP reale da",
+        "help": "Elenco di IP/reti affidabili, separati da spazi, da cui provengono le richieste con proxy."
+      },
+      "REAL_IP_HEADER": {
+        "label": "Intestazione IP reale",
+        "help": "Intestazione HTTP contenente l'IP reale, o il valore speciale proxy_protocol per il protocollo PROXY."
+      },
+      "REAL_IP_RECURSIVE": {
+        "label": "IP reale ricorsiva",
+        "help": "Esegue una ricerca ricorsiva nell'intestazione che contiene l'indirizzo IP."
+      },
+      "REAL_IP_FROM_URLS": {
+        "label": "IP reale da URL",
+        "help": "Elenco di URL contenenti IP/reti affidabili, separati da spazi, da cui provengono le richieste con proxy. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "데이터베이스",
+      "description": "데이터베이스를 손쉽게 통합합니다."
+    },
+    "settings": {
+      "DATABASE_URI": {
+        "label": "데이터베이스 URI",
+        "help": "sqlalchemy 형식을 따르는 데이터베이스 URI입니다."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "읽기 전용 작업용 데이터베이스 URI",
+        "help": "읽기 전용 작업에 사용할 데이터베이스 URI이며, 기본 데이터베이스가 다운되었을 때 대체 용도로도 사용할 수 있습니다. sqlalchemy 형식을 따릅니다."
+      },
+      "DATABASE_LOG_LEVEL": {
+        "label": "데이터베이스 로그 수준",
+        "help": "데이터베이스 로그에 사용할 수준입니다."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "작업 실행 기록의 최대 개수",
+        "help": "데이터베이스에 보관할 작업 실행 기록의 최대 개수입니다."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "UI 사용자 세션의 최대 보관 기간(일)",
+        "help": "UI 사용자 세션이 삭제되기 전까지의 최대 보관 기간(일)입니다."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "데이터베이스 풀 크기",
+        "help": "데이터베이스 연결 풀에 유지할 연결 수입니다."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "데이터베이스 풀 최대 오버플로",
+        "help": "풀 크기를 초과하여 생성할 수 있는 최대 연결 수입니다."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "데이터베이스 풀 제한 시간",
+        "help": "풀에서 연결을 가져오기를 포기하기 전에 대기할 시간(초)입니다."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "데이터베이스 풀 재활용 주기",
+        "help": "연결이 자동으로 재활용되기까지의 시간(초)입니다. -1로 설정하면 비활성화됩니다."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "데이터베이스 풀 사전 확인(pre-ping)",
+        "help": "풀에서 연결을 가져올 때마다 연결 상태를 확인할지 여부입니다."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "풀에 반환될 때 연결 재설정 방식",
+        "help": "연결이 풀에 반환될 때 재설정하는 방식입니다. 비워 두면 자동(MySQL/MariaDB는 none, 그 외에는 rollback)으로 처리됩니다. 가능한 값: rollback, commit, none."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "데이터베이스 재시도 제한 시간",
+        "help": "시작 시 데이터베이스가 사용 가능해지기를 기다리는 최대 시간(초)입니다."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "데이터베이스 요청 재시도 횟수",
+        "help": "일시적인 데이터베이스 오류에 대한 재시도 횟수입니다."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "데이터베이스 요청 재시도 지연",
+        "help": "일시적인 데이터베이스 오류에 대한 재시도 사이의 지연 시간(초)입니다."
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "يدير PHP-FPM محليًا أو عن بُعد."
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "PHP البعيد",
+        "help": "اسم مضيف مثيل PHP-FPM البعيد."
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "مسار PHP البعيد",
+        "help": "المجلد الجذري الذي يحتوي على الملفات في مثيل PHP-FPM البعيد."
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "منفذ PHP البعيد",
+        "help": "منفذ مثيل PHP-FPM البعيد."
+      },
+      "LOCAL_PHP": {
+        "label": "PHP المحلي",
+        "help": "المسار إلى ملف مقبس PHP-FPM."
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "مسار PHP المحلي",
+        "help": "المجلد الجذري الذي يحتوي على الملفات في مثيل PHP-FPM المحلي."
+      }
+    }
+  }
+}

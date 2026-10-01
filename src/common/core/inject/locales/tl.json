@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "HTML injection",
+      "description": "Nagsisingit ng custom na HTML code bago ang tag na </body> o </head>."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "Body HTML Code",
+        "help": "Ang HTML code na isisingit bago ang tag na </body>."
+      },
+      "INJECT_HEAD": {
+        "label": "Head HTML Code",
+        "help": "Ang HTML code na isisingit bago ang tag na </head>."
+      }
+    }
+  }
+}

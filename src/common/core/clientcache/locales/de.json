@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "Client-Cache",
+      "description": "Verwaltet das Caching für Clients."
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "Client-Cache verwenden",
+        "help": "Weist den Client an, statische Dateien lokal zu speichern."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "Vom Client zu cachende Erweiterungen",
+        "help": "Liste der Dateierweiterungen, getrennt durch Pipe-Zeichen, die zwischengespeichert werden sollen."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "Sendet den HTTP-Header ETag für statische Ressourcen."
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control-Header",
+        "help": "Wert des HTTP-Headers Cache-Control."
+      }
+    }
+  }
+}

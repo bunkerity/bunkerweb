@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "不良行为",
+      "description": "封禁在一段时间内产生过多“不良” HTTP 状态码的 IP。"
+    },
+    "settings": {
+      "USE_BAD_BEHAVIOR": {
+        "label": "启用不良行为检测",
+        "help": "启用不良行为(Bad behavior)功能。"
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "不良状态码",
+        "help": "被视为“不良”的 HTTP 状态码列表。"
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "阈值",
+        "help": "在指定时间段内,IP 被封禁前允许出现的“不良” HTTP 状态码的最大数量。"
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "统计周期(秒)",
+        "help": "统计“不良” HTTP 状态码的时间段(以秒为单位)。"
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "封禁时长(秒)",
+        "help": "当对应 IP 达到阈值时的封禁持续时间(以秒为单位)。(设为 0 表示永久封禁)"
+      },
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "封禁范围",
+        "help": "确定封禁的级别。“service” 仅在该服务内封禁该 IP,“global” 会在整个系统范围内封禁该 IP。"
+      }
+    }
+  }
+}

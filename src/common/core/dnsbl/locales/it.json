@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "Nega l'accesso in base a server DNSBL esterni."
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "Richiesta bloccata"
+      }
+    },
+    "settings": {
+      "USE_DNSBL": {
+        "label": "Attiva DNSBL",
+        "help": "Attiva la funzionalità DNSBL."
+      },
+      "DNSBL_LIST": {
+        "label": "Elenco DNSBL",
+        "help": "Elenco dei server DNSBL."
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "IP/rete ignorato per DNSBL",
+        "help": "Elenco di IP/reti, separati da spazi, da ignorare nei controlli DNSBL."
+      },
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "Nome intestazione ignorata",
+        "help": "Nome di un'intestazione della richiesta che esenta la richiesta dai controlli DNSBL. Qualsiasi client può inviare questa intestazione: trattatela come un segreto condiviso, solo tramite HTTPS."
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "Valore intestazione ignorato",
+        "help": "Valore (regex PCRE) che l'intestazione deve rispettare per esentare la richiesta dai controlli DNSBL. Lasciare vuoto per far coincidere semplicemente la presenza dell'intestazione. Ancoratelo con ^ e $: la corrispondenza non è ancorata per impostazione predefinita."
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "IP/rete ignorato per DNSBL (URL)",
+        "help": "Elenco di URL, separati da spazi, contenenti IP/reti da ignorare nei controlli DNSBL. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+      }
+    }
+  }
+}

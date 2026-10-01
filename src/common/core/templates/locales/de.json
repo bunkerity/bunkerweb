@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "Vorlagen",
+      "description": "Fiktives Core-Plugin für interne Vorlagen."
+    },
+    "templates": {
+      "low": {
+        "name": "Grundlegende Sicherheitsstufe mit den wesentlichen Einstellungen zum Schutz von Webanwendungen",
+        "steps": {
+          "0": {
+            "title": "Webdienst - Front-Dienst",
+            "subtitle": "Konfigurieren Sie den Ihren Kunden zugewandten Webdienst"
+          },
+          "1": {
+            "title": "Webdienst - Upstream-Server",
+            "subtitle": "Konfigurieren Sie den von BunkerWeb zu schützenden Upstream-Server"
+          },
+          "2": {
+            "title": "HTTP - Allgemein",
+            "subtitle": "Konfigurieren Sie die Einstellungen zum HTTP(S)-Protokoll"
+          },
+          "3": {
+            "title": "HTTP - Header",
+            "subtitle": "Konfigurieren Sie die Einstellungen zu den HTTP-Headern"
+          },
+          "4": {
+            "title": "Sicherheit - Schlechtes Verhalten",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur automatischen Sperrung bei erkanntem schlechten Verhalten."
+          },
+          "5": {
+            "title": "Sicherheit - Sperrliste",
+            "subtitle": "Konfigurieren Sie die Einstellungen zu den externen Sperrlisten."
+          },
+          "6": {
+            "title": "Sicherheit - Begrenzung",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur Begrenzung von Anfragen und Verbindungen."
+          },
+          "7": {
+            "title": "Sicherheit - Antibot",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur Bot-Erkennung"
+          },
+          "8": {
+            "title": "Sicherheit - Basisauthentifizierung",
+            "subtitle": "Konfigurieren Sie die HTTP-Basisauthentifizierung"
+          },
+          "9": {
+            "title": "Sicherheit - Land",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur länderbasierten Zugriffsrichtlinie"
+          },
+          "10": {
+            "title": "Sicherheit - ModSecurity",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur ModSecurity-WAF"
+          }
+        }
+      },
+      "medium": {
+        "name": "Ausgewogene Sicherheitsstufe mit einer Mischung aus Sicherheitsfunktionen und Leistungsoptimierungen",
+        "steps": {
+          "0": {
+            "title": "Webdienst - Front-Dienst",
+            "subtitle": "Konfigurieren Sie den Ihren Kunden zugewandten Webdienst"
+          },
+          "1": {
+            "title": "Webdienst - Upstream-Server",
+            "subtitle": "Konfigurieren Sie den von BunkerWeb zu schützenden Upstream-Server"
+          },
+          "2": {
+            "title": "HTTP - Allgemein",
+            "subtitle": "Konfigurieren Sie die Einstellungen zum HTTP(S)-Protokoll"
+          },
+          "3": {
+            "title": "HTTP - Header",
+            "subtitle": "Konfigurieren Sie die Einstellungen zu den HTTP-Headern"
+          },
+          "4": {
+            "title": "Sicherheit - Schlechtes Verhalten",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur automatischen Sperrung bei erkanntem schlechten Verhalten."
+          },
+          "5": {
+            "title": "Sicherheit - Sperrliste",
+            "subtitle": "Konfigurieren Sie die Einstellungen zu den externen Sperrlisten."
+          },
+          "6": {
+            "title": "Sicherheit - Begrenzung",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur Begrenzung von Anfragen und Verbindungen."
+          },
+          "7": {
+            "title": "Sicherheit - Antibot",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur Bot-Erkennung"
+          },
+          "8": {
+            "title": "Sicherheit - Basisauthentifizierung",
+            "subtitle": "Konfigurieren Sie die HTTP-Basisauthentifizierung"
+          },
+          "9": {
+            "title": "Sicherheit - Land",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur länderbasierten Zugriffsrichtlinie"
+          },
+          "10": {
+            "title": "Sicherheit - Rückwärts-Scan",
+            "subtitle": "Konfigurieren Sie die Einstellungen zum Scannen der Client-Ports"
+          },
+          "11": {
+            "title": "Sicherheit - ModSecurity",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur ModSecurity-WAF"
+          }
+        }
+      },
+      "high": {
+        "name": "Erweiterte Sicherheitsstufe mit Fokus auf robuste Sicherheitsmaßnahmen und umfassenden Schutz",
+        "steps": {
+          "0": {
+            "title": "Webdienst - Front-Dienst",
+            "subtitle": "Konfigurieren Sie den Ihren Kunden zugewandten Webdienst"
+          },
+          "1": {
+            "title": "Webdienst - Upstream-Server",
+            "subtitle": "Konfigurieren Sie den von BunkerWeb zu schützenden Upstream-Server"
+          },
+          "2": {
+            "title": "HTTP - Allgemein",
+            "subtitle": "Konfigurieren Sie die Einstellungen zum HTTP(S)-Protokoll"
+          },
+          "3": {
+            "title": "HTTP - Header",
+            "subtitle": "Konfigurieren Sie die Einstellungen zu den HTTP-Headern"
+          },
+          "4": {
+            "title": "Sicherheit - Schlechtes Verhalten",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur automatischen Sperrung bei erkanntem schlechten Verhalten."
+          },
+          "5": {
+            "title": "Sicherheit - Sperrliste",
+            "subtitle": "Konfigurieren Sie die Einstellungen zu den externen Sperrlisten."
+          },
+          "6": {
+            "title": "Sicherheit - Begrenzung",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur Begrenzung von Anfragen und Verbindungen."
+          },
+          "7": {
+            "title": "Sicherheit - Antibot",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur Bot-Erkennung"
+          },
+          "8": {
+            "title": "Sicherheit - Basisauthentifizierung",
+            "subtitle": "Konfigurieren Sie die HTTP-Basisauthentifizierung"
+          },
+          "9": {
+            "title": "Sicherheit - Land",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur länderbasierten Zugriffsrichtlinie"
+          },
+          "10": {
+            "title": "Sicherheit - Rückwärts-Scan",
+            "subtitle": "Konfigurieren Sie die Einstellungen zum Scannen der Client-Ports"
+          },
+          "11": {
+            "title": "Sicherheit - ModSecurity",
+            "subtitle": "Konfigurieren Sie die Einstellungen zur ModSecurity-WAF"
+          }
+        }
+      },
+      "api": {
+        "name": "Grundeinstellungen bei Verwendung der API von BunkerWeb",
+        "steps": {
+          "0": {
+            "title": "Dienst - Front-Dienst",
+            "subtitle": "Konfigurieren Sie den Servernamen und die SSL/TLS-Einstellungen"
+          },
+          "1": {
+            "title": "Dienst - Upstream-Server",
+            "subtitle": "Konfigurieren Sie den von BunkerWeb zu schützenden Upstream-Server"
+          },
+          "2": {
+            "title": "API - Ratenbegrenzung",
+            "subtitle": "Konfigurieren Sie die Ratenbegrenzungseinstellungen - beachten Sie, dass die API ebenfalls eine interne Ratenbegrenzung hat"
+          },
+          "3": {
+            "title": "API - Sonstige Einstellungen",
+            "subtitle": "Weitere wichtige Einstellungen für die ordnungsgemäße Funktion der API"
+          }
+        }
+      },
+      "ui": {
+        "name": "Grundeinstellungen bei Verwendung der Web-UI",
+        "steps": {
+          "0": {
+            "title": "Platzhalterschritt",
+            "subtitle": "Dies ist ein Platzhalterschritt, der die Grundeinstellungen bei Verwendung der Web-UI zeigt"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "Externe Vorlagen-URLs",
+        "help": "Liste von Service-Vorlagen-URLs zum Herunterladen und Installieren, durch Leerzeichen getrennt. Jede URL ist eine Vorlage: ein bunkerweb-template/1-JSON-Paket oder eine .zip- oder .tar.gz-Datei mit <id>/template.json und den zugehörigen Konfigurationen. Es werden nur https:// und file:/// akzeptiert, maximal 1 MiB. Hängen Sie #sha256=<digest> an eine URL an, um deren Inhalt festzulegen. Eine Vorlage, deren URL entfernt wird, wird gelöscht, es sei denn, ein Dienst verwendet sie noch."
+      }
+    }
+  }
+}

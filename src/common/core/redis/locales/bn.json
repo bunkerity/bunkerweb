@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "ক্লাস্টার মোডে BunkerWeb ব্যবহার করার সময় Redis সার্ভার কনফিগারেশন।"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "REDIS অবস্থা"
+      },
+      "counter_redis_nb_keys": {
+        "title": "REDIS কী",
+        "subtitle": "কী-এর সংখ্যা"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Redis সক্রিয় করুন",
+        "help": "Redis সক্রিয় করুন।"
+      },
+      "REDIS_HOST": {
+        "label": "Redis সার্ভার",
+        "help": "Redis সার্ভারের IP অথবা হোস্টনেম।"
+      },
+      "REDIS_PORT": {
+        "label": "Redis পোর্ট",
+        "help": "Redis সার্ভারের পোর্ট।"
+      },
+      "REDIS_DATABASE": {
+        "label": "Redis ডেটাবেস",
+        "help": "Redis ডেটাবেস নম্বর।"
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Redis সার্ভারের সাথে SSL/TLS কানেকশন ব্যবহার করুন।"
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Redis SSL/TLS যাচাই",
+        "help": "Redis সার্ভারের সার্টিফিকেট যাচাই করুন।"
+      },
+      "REDIS_SSL_CA": {
+        "label": "Redis SSL/TLS CA বান্ডল",
+        "help": "Redis/Valkey সার্ভার সার্টিফিকেট (প্রাইভেট CA) যাচাই করতে ব্যবহৃত PEM CA বান্ডলের পাথ; সেট না থাকলে সিস্টেম ট্রাস্ট স্টোর বোঝায়। সেট করা থাকলে এটি Python ক্লায়েন্ট (Celery ব্রোকার, জব, API রেট লিমিটার, bwcli, ওয়েব UI) দ্বারা বিশ্বস্ত হয় এবং NGINX Lua ট্রাস্ট বান্ডলে যুক্ত হয়, তাই অনুরোধ পথও এটিকে বিশ্বাস করে। এটি যেখানে কনফিগারেশন তৈরি হয় এবং প্রতিটি ক্লায়েন্ট দ্বারা পঠিত হয়, তাই ফাইলটি সেখানে সেই পাথে অবশ্যই থাকতে হবে; অনুপস্থিত বা অবৈধ বান্ডল কনফিগারেশন তৈরি ব্যর্থ করে।"
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Redis টাইমআউট (ms)",
+        "help": "কানেক্ট, পড়া ও লেখার জন্য Redis সার্ভার টাইমআউট (ms-এ)।"
+      },
+      "REDIS_USERNAME": {
+        "label": "Redis ইউজারনেম",
+        "help": "AUTH কমান্ডে ব্যবহৃত Redis ইউজারনেম।"
+      },
+      "REDIS_PASSWORD": {
+        "label": "Redis পাসওয়ার্ড",
+        "help": "AUTH কমান্ডে ব্যবহৃত Redis পাসওয়ার্ড।"
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Redis সেন্টিনেল হোস্ট",
+        "help": "host:[port] ফরম্যাটে Redis সেন্টিনেল হোস্ট, স্পেস দিয়ে পৃথক।"
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Redis সেন্টিনেল ইউজারনেম",
+        "help": "Redis সেন্টিনেল ইউজারনেম।"
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Redis সেন্টিনেল পাসওয়ার্ড",
+        "help": "Redis সেন্টিনেল পাসওয়ার্ড।"
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Redis সেন্টিনেল মাস্টার",
+        "help": "Redis সেন্টিনেল মাস্টারের নাম।"
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Redis কিপঅ্যালাইভ নিষ্ক্রিয়তা (ms)",
+        "help": "পুলে Redis কানেকশন বন্ধ করার আগে সর্বোচ্চ নিষ্ক্রিয় সময় (ms-এ)।"
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Redis কিপঅ্যালাইভ পুল",
+        "help": "প্রতি NGINX ওয়ার্কারে পুলে রাখা সর্বোচ্চ Redis কানেকশন। স্থিতিশীল-অবস্থার কানেকশন প্রায় nginx_workers × pool × instances এবং এগুলোকে Redis/Valkey-এর maxclients সীমার মধ্যে থাকতে হবে।"
+      }
+    }
+  }
+}

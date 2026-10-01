@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "客户端缓存",
+      "description": "管理客户端的缓存。"
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "使用客户端缓存",
+        "help": "告知客户端将静态文件缓存在本地。"
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "客户端应缓存的扩展名",
+        "help": "应被缓存的文件扩展名列表,以竖线(|)分隔。"
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "为静态资源发送 HTTP ETag 标头。"
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control 标头",
+        "help": "Cache-Control HTTP 标头的值。"
+      }
+    }
+  }
+}

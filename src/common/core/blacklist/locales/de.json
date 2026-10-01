@@ -1,0 +1,144 @@
+{
+  "blacklist": {
+    "meta": {
+      "name": "Sperrliste",
+      "description": "Verweigert den Zugriff anhand interner und externer IP-/Netzwerk-/rDNS-/ASN-Sperrlisten."
+    },
+    "widgets": {
+      "counter_failed_uri": {
+        "title": "URI",
+        "subtitle": "Verweigert"
+      },
+      "counter_failed_ip": {
+        "title": "IP",
+        "subtitle": "Verweigert"
+      },
+      "counter_failed_rdns": {
+        "title": "RDNS",
+        "subtitle": "Verweigert"
+      },
+      "counter_failed_asn": {
+        "title": "ASN",
+        "subtitle": "Verweigert"
+      },
+      "counter_failed_ua": {
+        "title": "UA",
+        "subtitle": "Verweigert"
+      }
+    },
+    "settings": {
+      "USE_BLACKLIST": {
+        "label": "Sperrliste aktivieren",
+        "help": "Aktiviert die Sperrlistenfunktion."
+      },
+      "BLACKLIST_COMMUNITY_LISTS": {
+        "label": "Community-Sperrlisten",
+        "help": "Wählen Sie von der Community gepflegte Sperrlisten aus, die in die Blockierung einbezogen werden sollen."
+      },
+      "BLACKLIST_IP": {
+        "label": "IP/Netzwerk der Sperrliste",
+        "help": "Liste von IPs/Netzwerken, durch Leerzeichen getrennt, die blockiert werden sollen."
+      },
+      "BLACKLIST_RDNS": {
+        "label": "Reverse-DNS der Sperrliste",
+        "help": "Liste von Reverse-DNS-Suffixen, durch Leerzeichen getrennt, die blockiert werden sollen."
+      },
+      "BLACKLIST_RDNS_GLOBAL": {
+        "label": "Sperrliste Reverse-DNS nur globale IPs",
+        "help": "RDNS-Sperrlistenprüfungen nur bei globalen IP-Adressen durchführen."
+      },
+      "BLACKLIST_ASN": {
+        "label": "ASN der Sperrliste",
+        "help": "Liste von ASN-Nummern, durch Leerzeichen getrennt, die blockiert werden sollen."
+      },
+      "BLACKLIST_USER_AGENT": {
+        "label": "User-Agent der Sperrliste",
+        "help": "Liste von User-Agents (PCRE-Regex), durch Leerzeichen getrennt, die blockiert werden sollen."
+      },
+      "BLACKLIST_URI": {
+        "label": "URI der Sperrliste",
+        "help": "Liste von URIs (PCRE-Regex), durch Leerzeichen getrennt, die blockiert werden sollen."
+      },
+      "BLACKLIST_HEADER_NAME": {
+        "label": "Header-Name der Sperrliste",
+        "help": "Name eines Anfrage-Headers, der die Anfrage zur Sperrliste hinzufügt. Jeder Client kann diesen Header senden: behandeln Sie ihn wie ein gemeinsames Geheimnis, nur über HTTPS."
+      },
+      "BLACKLIST_HEADER_VALUE": {
+        "label": "Header-Wert der Sperrliste",
+        "help": "Wert (PCRE-Regex), dem der Header entsprechen muss, damit die Anfrage zur Sperrliste hinzugefügt wird. Leer lassen, um bereits bei Vorhandensein des Headers zu greifen. Verankern Sie ihn mit ^ und $: der Abgleich ist standardmäßig nicht verankert."
+      },
+      "BLACKLIST_IGNORE_IP": {
+        "label": "Ignorierte IP/Netzwerk der Sperrliste",
+        "help": "Liste von IPs/Netzwerken, durch Leerzeichen getrennt, die in der Sperrliste ignoriert werden."
+      },
+      "BLACKLIST_IGNORE_RDNS": {
+        "label": "Ignoriertes Reverse-DNS der Sperrliste",
+        "help": "Liste von Reverse-DNS-Suffixen, durch Leerzeichen getrennt, die in der Sperrliste ignoriert werden."
+      },
+      "BLACKLIST_IGNORE_ASN": {
+        "label": "Ignorierte ASN der Sperrliste",
+        "help": "Liste von ASN-Nummern, durch Leerzeichen getrennt, die in der Sperrliste ignoriert werden."
+      },
+      "BLACKLIST_IGNORE_USER_AGENT": {
+        "label": "Ignorierter User-Agent der Sperrliste",
+        "help": "Liste von User-Agents (PCRE-Regex), durch Leerzeichen getrennt, die in der Sperrliste ignoriert werden."
+      },
+      "BLACKLIST_IGNORE_URI": {
+        "label": "Ignorierte URI der Sperrliste",
+        "help": "Liste von URIs (PCRE-Regex), durch Leerzeichen getrennt, die in der Sperrliste ignoriert werden."
+      },
+      "BLACKLIST_RULE": {
+        "label": "Sperrlisten-Regel",
+        "help": "Zusammengesetzte Regel: Jeder Ausdruck muss übereinstimmen, damit die Regel übereinstimmt. Ausdrücke werden mit „ AND “ (Großbuchstaben) getrennt, und jeder hat die Form [NOT ]<kind>:<value>, wobei <kind> ip, country, asn, rdns, ua (Alias user_agent) oder uri ist. Beispiel: ip:10.0.0.0/8 AND NOT ua:^curl. Regeln werden untereinander und mit den obigen einfachen Listen ODER-verknüpft. Ein Wert kann ein Ressourcengruppen-Token wie @office sein. Stream-Dienste werten nur ip, country, asn und rdns aus."
+      },
+      "BLACKLIST_IGNORE_HEADER_NAME": {
+        "label": "Ignorierter Header-Name",
+        "help": "Name eines Anfrage-Headers, der die Anfrage von der Sperrliste befreit. Jeder Client kann diesen Header senden: behandeln Sie ihn wie ein gemeinsames Geheimnis, nur über HTTPS."
+      },
+      "BLACKLIST_IGNORE_HEADER_VALUE": {
+        "label": "Ignorierter Header-Wert",
+        "help": "Wert (PCRE-Regex), dem der Header entsprechen muss, damit die Anfrage von der Sperrliste befreit wird. Leer lassen, um bereits bei Vorhandensein des Headers zu greifen. Verankern Sie ihn mit ^ und $: der Abgleich ist standardmäßig nicht verankert."
+      },
+      "BLACKLIST_IP_URLS": {
+        "label": "IP/Netzwerk der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die schädliche IPs/Netzwerke zum Blockieren enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_RDNS_URLS": {
+        "label": "Reverse-DNS der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die zu blockierende Reverse-DNS-Suffixe enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_ASN_URLS": {
+        "label": "ASN der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die zu blockierende ASN enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_USER_AGENT_URLS": {
+        "label": "User-Agent der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die schädliche User-Agents zum Blockieren enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_URI_URLS": {
+        "label": "URI der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die schädliche URIs zum Blockieren enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_IP_URLS": {
+        "label": "Ignorierte IP/Netzwerk der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die in der Sperrliste zu ignorierende IPs/Netzwerke enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_RDNS_URLS": {
+        "label": "Ignoriertes Reverse-DNS der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die in der Sperrliste zu ignorierende Reverse-DNS-Suffixe enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_ASN_URLS": {
+        "label": "Ignorierte ASN der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die in der Sperrliste zu ignorierende ASN enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_USER_AGENT_URLS": {
+        "label": "Ignorierter User-Agent der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die in der Sperrliste zu ignorierende User-Agents enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_URI_URLS": {
+        "label": "Ignorierte URI der Sperrliste (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die in der Sperrliste zu ignorierende URIs enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      }
+    }
+  }
+}

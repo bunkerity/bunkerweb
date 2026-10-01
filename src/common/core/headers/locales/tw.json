@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "標頭",
+      "description": "管理傳送給用戶端的 HTTP 標頭。"
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "自訂標頭(HeaderName: HeaderValue)",
+        "help": "要新增的自訂標頭(HeaderName: HeaderValue)。"
+      },
+      "REMOVE_HEADERS": {
+        "label": "移除標頭",
+        "help": "要移除的標頭(Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "保留上游標頭",
+        "help": "要從上游保留的標頭(Header1 Header2 Header3 ... 或 * 表示全部)。"
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security(HSTS)",
+        "help": "Strict-Transport-Security(HSTS)標頭的值。"
+      },
+      "COOKIE_FLAGS": {
+        "label": "Cookie 旗標",
+        "help": "自動新增到所有 Cookie 的旗標(nginx_cookie_flag_module 可接受的值)。"
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "自動新增 Cookie Secure 旗標",
+        "help": "自動為所有 Cookie 新增 Secure 旗標。"
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Content-Security-Policy 標頭的值。"
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "針對 Content-Security-Policy 標頭的違規行為傳送報告,而不是直接封鎖。"
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Referrer-Policy 標頭的值。"
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Permissions-Policy 標頭的值。"
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "X-Frame-Options 標頭的值。"
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "X-Content-Type-Options 標頭的值。"
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "X-DNS-Prefetch-Control 標頭的值。"
+      }
+    }
+  }
+}

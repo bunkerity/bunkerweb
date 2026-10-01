@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "security.txt dosyasını yönetir. Web sitelerinin güvenlik politikalarını tanımlamasına olanak tanıyan önerilen bir standart."
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "security.txt kullan",
+        "help": "security.txt dosyasını etkinleştir."
+      },
+      "SECURITYTXT_URI": {
+        "label": "Security.txt URI'si",
+        "help": "\"security.txt\" dosyasının erişilebilir olacağı URI'yi belirtir."
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Security.txt iletişim",
+        "help": "Araştırmacıların güvenlik açıklarını bildirmek için kullanması gereken bir yöntemi belirtir; örneğin bir e-posta adresi, bir telefon numarası ve/veya iletişim bilgileri içeren bir web sayfası. (Değer boşsa, bu zorunlu bir alan olduğundan security.txt dosyası oluşturulmayacaktır)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Security.txt son kullanma",
+        "help": "\"security.txt\" dosyasında bulunan verilerin bayat kabul edileceği ve kullanılmaması gereken tarih ve saati belirtir (değer boşsa, değer her zaman geçerli tarih ve saat + 1 yıl olacaktır)."
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Security.txt şifreleme",
+        "help": "Güvenlik araştırmacılarının şifreli iletişim için kullanması gereken bir şifreleme anahtarını belirtir."
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Security.txt teşekkür",
+        "help": "Güvenlik araştırmacılarının raporları için takdir edildiği bir sayfaya bağlantıyı belirtir."
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Security.txt tercih edilen dil",
+        "help": "Güvenlik raporları gönderilirken tercih edilen doğal dillerin bir kümesini belirtmek için kullanılabilir."
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Security.txt kanonik",
+        "help": "\"security.txt\" dosyasının bulunduğu, genellikle \"https://example.com/.well-known/security.txt\" gibi olan kanonik URI'leri belirtir. (Değer boşsa, varsayılan değer site URL'si + SECURITYTXT_URI'den otomatik olarak oluşturulur)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Security.txt politikası",
+        "help": "Güvenlik açığı ifşa politikasının bulunduğu yere bir bağlantıyı belirtir."
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Security.txt işe alım",
+        "help": "Satıcının güvenlikle ilgili iş pozisyonlarına bağlantı vermek için kullanılır."
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "CSAF (Common Security Advisory Framework) sağlayıcınızın provider-metadata.json dosyasına bağlantı."
+      }
+    }
+  }
+}

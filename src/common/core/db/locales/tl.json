@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Database",
+      "description": "Madaling isinasama ang database."
+    },
+    "settings": {
+      "DATABASE_LOG_LEVEL": {
+        "label": "Database Log Level",
+        "help": "Ang level na gagamitin para sa mga log ng database."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "Maximum na Bilang ng Pagtakbo ng Job",
+        "help": "Maximum na bilang ng pagtakbo ng job na itatago sa database."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "Maximum na Edad sa Araw para sa mga UI User Session",
+        "help": "Maximum na edad sa araw para sa mga UI user session bago ito burahin."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Maximum na Overflow ng Database Pool",
+        "help": "Maximum na bilang ng koneksyon na gagawin higit pa sa laki ng pool."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Pre-ping ng Database Pool",
+        "help": "Kung susuriin ang mga koneksyon para sa liveness sa bawat kuha mula sa pool."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Pag-recycle ng Database Pool",
+        "help": "Bilang ng segundo bago awtomatikong ma-recycle ang isang koneksyon. I-set sa -1 para i-disable."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Pag-reset ng Database Pool sa Pagbalik",
+        "help": "Kung paano ire-reset ang koneksyon kapag ibinalik sa pool. Iwanang blangko para sa auto (none para sa MySQL/MariaDB, rollback para sa iba). Posibleng value: rollback, commit, none."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Laki ng Database Pool",
+        "help": "Bilang ng koneksyon na itatago sa database connection pool."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Timeout ng Database Pool",
+        "help": "Bilang ng segundong hihintayin bago sumuko sa pagkuha ng koneksyon mula sa pool."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Bilang ng Pagsubok Muli ng Database Request",
+        "help": "Bilang ng pagsubok muli para sa mga pansamantalang error ng database."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Pagkaantala ng Pagsubok Muli ng Database Request",
+        "help": "Pagkaantala sa segundo sa pagitan ng mga pagsubok muli para sa mga pansamantalang error ng database."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Timeout ng Pagsubok Muli ng Database",
+        "help": "Maximum na bilang ng segundong hihintayin para maging available ang database sa startup."
+      },
+      "DATABASE_URI": {
+        "label": "URI ng Database",
+        "help": "URI ng database, sumusunod sa format ng sqlalchemy."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "URI ng Database para sa Read-Only na Operasyon",
+        "help": "URI ng database para sa read-only na operasyon; puwede rin itong maging fallback kung down ang pangunahing database. Sumusunod sa format ng sqlalchemy."
+      }
+    }
+  }
+}

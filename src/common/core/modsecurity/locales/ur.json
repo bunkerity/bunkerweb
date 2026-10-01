@@ -1,0 +1,62 @@
+{
+  "modsecurity": {
+    "meta": {
+      "name": "ModSecurity",
+      "description": "ModSecurity WAF کا انتظام۔"
+    },
+    "settings": {
+      "USE_MODSECURITY": {
+        "label": "ModSecurity استعمال کریں",
+        "help": "ModSecurity WAF فعال کریں۔"
+      },
+      "USE_MODSECURITY_CRS": {
+        "label": "کور رول سیٹ استعمال کریں",
+        "help": "OWASP Core Rule Set فعال کریں۔"
+      },
+      "USE_MODSECURITY_CRS_PLUGINS": {
+        "label": "کور رول سیٹ پلگ انز استعمال کریں",
+        "help": "OWASP Core Rule Set پلگ انز فعال کریں۔"
+      },
+      "MODSECURITY_CRS_VERSION": {
+        "label": "کور رول سیٹ ورژن",
+        "help": "ModSecurity کے ساتھ استعمال کے لیے OWASP Core Rule Set کا ورژن (3 یا 4)۔ نوٹ: nightly متروک ہے اور بطور ڈیفالٹ v4 استعمال ہو گا۔"
+      },
+      "MODSECURITY_CRS_PLUGINS": {
+        "label": "کور رول سیٹ پلگ انز",
+        "help": "ڈاؤن لوڈ اور انسٹال کرنے کے لیے OWASP CRS پلگ انز کی فہرست (plugin-name[/tag] یا URL) (اسپیس سے الگ)۔ (CRS ورژن 3 کے ساتھ مطابقت نہیں رکھتا)"
+      },
+      "USE_MODSECURITY_GLOBAL_CRS": {
+        "label": "ModSecurity عالمی CRS موڈ",
+        "help": "بہت سی سروسز ہونے پر قواعد کی لوڈنگ بہتر بنانے کے لیے ModSecurity CRS کو عالمی موڈ میں استعمال کریں۔"
+      },
+      "MODSECURITY_SEC_AUDIT_ENGINE": {
+        "label": "SecAuditEngine",
+        "help": "ModSecurity کی SecAuditEngine ڈائریکٹو۔"
+      },
+      "MODSECURITY_SEC_RULE_ENGINE": {
+        "label": "SecRuleEngine",
+        "help": "ModSecurity کی SecRuleEngine ڈائریکٹو۔"
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+        "label": "SecAuditLogParts",
+        "help": "ModSecurity کی SecAuditLogParts ڈائریکٹو۔ حصے A اور Z ہمیشہ بطور سابقہ اور لاحقہ خودکار طور پر شامل ہوتے ہیں۔"
+      },
+      "MODSECURITY_SEC_AUDIT_LOG": {
+        "label": "SecAuditLog",
+        "help": "وہ فائل کا پاتھ جہاں ModSecurity آڈٹ اندراجات لکھتا ہے۔ ایک عام فائل ہونی چاہیے: Serial آڈٹ رائٹر اسے لاک کرتا ہے، جو پائپ یا سٹریم پر ممکن نہیں۔ /var/log/bunkerweb/ کے تحت .log پر ختم ہونی چاہیے۔"
+      },
+      "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
+        "label": "SecRequestBodyNoFilesLimit",
+        "help": "ModSecurity کی SecRequestBodyNoFilesLimit ڈائریکٹو۔"
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
+        "label": "SecRequestBodyLimit",
+        "help": "ModSecurity کی SecRequestBodyLimit ڈائریکٹو۔ ModSecurity جس درخواست باڈی کا زیادہ سے زیادہ سائز معائنہ کرے گا (k/m/g لاحقے، مثلاً 10m)۔ اس حد سے زیادہ درخواستیں SecRequestBodyLimitAction کی پیروی کرتی ہیں (بطور ڈیفالٹ Reject)۔ خالی ہونے پر، MAX_CLIENT_SIZE سے اخذ کیا جاتا ہے۔ کوئی حد نہ ہونے کے لیے 0 پر سیٹ کریں (تجویز نہیں کی جاتی، میموری ختم ہونے کی وجہ سے کِل ہو سکتا ہے)۔ NGINX پہلے MAX_CLIENT_SIZE نافذ کرتا ہے، اس لیے یہاں زیادہ ویلیو کا کوئی اثر نہیں ہوتا۔ REVERSE_PROXY_MAX_CLIENT_SIZE اپنے لوکیشن کے لیے اس ویلیو کو اووررائیڈ کرتا ہے۔"
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
+        "label": "SecRequestBodyLimitAction",
+        "help": "ModSecurity کی SecRequestBodyLimitAction ڈائریکٹو۔ Reject باڈی کی حد سے تجاوز کرنے والی درخواستوں کے لیے HTTP 413 لوٹاتا ہے۔ ProcessPartial صرف حد کے اندر موجود حصے کا معائنہ کرتا ہے اور مکمل درخواست بیک اینڈ کو بھیجتا ہے (بڑی فائل اپ لوڈز کے لیے مفید، لیکن JSON یا فارم ڈیٹا جیسے غیر فائل مواد کی اقسام کے لیے WAF کوریج کم کرتا ہے)۔"
+      }
+    }
+  }
+}

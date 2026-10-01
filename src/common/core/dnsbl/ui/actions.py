@@ -8,9 +8,11 @@ def pre_render(**kwargs):
         "counter_failed_dnsbl": {
             "value": 0,
             "title": "DNSBL",
+            "title_i18n": "widgets.counter_failed_dnsbl.title",
             "subtitle": "Request blocked",
-            "subtitle_color": "danger",
-            "svg_color": "danger",
+            "subtitle_i18n": "widgets.counter_failed_dnsbl.subtitle",
+            "subtitle_color": "danger-emphasis",
+            "svg_color": "danger-emphasis",
         },
     }
     try:

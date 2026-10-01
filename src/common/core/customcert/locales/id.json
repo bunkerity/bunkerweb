@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "Sertifikat SSL kustom",
+      "description": "Pilih sertifikat kustom untuk SSL."
+    },
+    "settings": {
+      "CUSTOM_SSL_CERT": {
+        "label": "Path sertifikat",
+        "help": "Path lengkap file sertifikat atau bundle. Harus dapat dibaca oleh WORKER, tempat job custom-cert berjalan sejak 1.7 memindahkan eksekusi job dari scheduler - bukan oleh scheduler, apa pun yang dikatakan dokumentasi lama. Di Docker Swarm, mount ini pada bw-worker dan berikan path tempatnya di-mount, mis. /run/secrets/example.com.pem; Swarm config sudah cukup untuk sertifikat, yang bersifat publik."
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "Data sertifikat (base64/plaintext)",
+        "help": "Data sertifikat yang dienkode dalam format base64 atau plaintext PEM."
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "Prioritas sertifikat",
+        "help": "Pilih apakah memprioritaskan sertifikat dari path file atau dari data base64. (file | data)"
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "Path kunci",
+        "help": "Path lengkap file kunci. Harus dapat dibaca oleh WORKER, tempat job custom-cert berjalan sejak 1.7 memindahkan eksekusi job dari scheduler - bukan oleh scheduler, apa pun yang dikatakan dokumentasi lama. Di Docker Swarm, mount kunci privat pada bw-worker sebagai Swarm SECRET dan berikan path tempatnya di-mount, mis. /run/secrets/example.com.key. Jangan pernah mengirim kunci privat sebagai Swarm config: config disimpan tanpa enkripsi di raft store pada setiap node manager."
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "Data kunci (base64/plaintext)",
+        "help": "Data kunci yang dienkode dalam format base64 atau plaintext PEM."
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "Path sertifikat DEFAULT SERVER",
+        "help": "Path lengkap file sertifikat atau bundle yang dilayani oleh DEFAULT SERVER - blok yang menjawab permintaan yang tidak cocok dengan layanan mana pun yang dikonfigurasi. Biarkan kosong untuk mempertahankan sertifikat self-signed internal. Harus dapat dibaca oleh WORKER, tempat job custom-cert berjalan. Sertifikat yang juga mencakup hostname layanan yang dikonfigurasi akan ditolak, karena default server kemudian dapat menjawab untuk layanan tersebut. Hanya dilayani jika MULTISITE=yes atau DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "Data sertifikat DEFAULT SERVER (base64/plaintext)",
+        "help": "Data sertifikat DEFAULT SERVER, dienkode dalam format base64 atau plaintext PEM. Hanya digunakan ketika DEFAULT_SERVER_SSL_CERT kosong. Biarkan keduanya kosong untuk mempertahankan sertifikat self-signed internal. Hanya dilayani jika MULTISITE=yes atau DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "Path kunci DEFAULT SERVER",
+        "help": "Path lengkap kunci privat sertifikat DEFAULT SERVER - blok yang menjawab permintaan yang tidak cocok dengan layanan mana pun yang dikonfigurasi (SNI tidak dikenal, akses IP mentah). Biarkan kosong untuk mempertahankan sertifikat self-signed internal. Harus dapat dibaca oleh WORKER, tempat job custom-cert berjalan. Di Docker Swarm, mount ini sebagai Swarm SECRET, jangan pernah sebagai config."
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "Data kunci DEFAULT SERVER (base64/plaintext)",
+        "help": "Data kunci sertifikat DEFAULT SERVER, dienkode dalam format base64 atau plaintext PEM. Hanya digunakan ketika DEFAULT_SERVER_SSL_KEY kosong. Biarkan keduanya kosong untuk mempertahankan sertifikat self-signed internal."
+      },
+      "USE_CUSTOM_SSL": {
+        "label": "Gunakan sertifikat kustom",
+        "help": "Gunakan sertifikat SSL kustom."
+      }
+    }
+  }
+}

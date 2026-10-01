@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "HTML 注入",
+      "description": "在 </body> 或 </head> 标签之前注入自定义 HTML 代码。"
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "body HTML 代码",
+        "help": "要注入到 </body> 标签之前的 HTML 代码。"
+      },
+      "INJECT_HEAD": {
+        "label": "head HTML 代码",
+        "help": "要注入到 </head> 标签之前的 HTML 代码。"
+      }
+    }
+  }
+}

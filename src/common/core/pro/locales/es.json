@@ -1,0 +1,14 @@
+{
+  "pro": {
+    "meta": {
+      "name": "Pro",
+      "description": "Ajustes Pro para la versión Pro de BunkerWeb."
+    },
+    "settings": {
+      "PRO_LICENSE_KEY": {
+        "label": "Clave de licencia Pro",
+        "help": "La clave de licencia para la versión Pro de BunkerWeb."
+      }
+    }
+  }
+}

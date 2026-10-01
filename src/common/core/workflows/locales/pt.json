@@ -1,0 +1,14 @@
+{
+  "workflows": {
+    "meta": {
+      "name": "Workflows de segurança",
+      "description": "Componha políticas de segurança reutilizáveis: regras ordenadas que associam uma árvore de condições sobre IP, país, ASN, URI e método a um limiar de taxa opcional e uma ação final (desafio, bloqueio ou redirecionamento)."
+    },
+    "settings": {
+      "WORKFLOWS_REGEX_BUDGET": {
+        "label": "Limite de expressões regulares dos workflows",
+        "help": "Número máximo de expressões regulares distintas compiladas em todas as regras de workflows. O NGINX partilha uma única cache de expressões regulares entre todos os plugins, pelo que as regras que excedem este limite são desativadas em vez de degradarem silenciosamente toda a instância."
+      }
+    }
+  }
+}

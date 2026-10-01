@@ -1,0 +1,26 @@
+{
+  "selfsigned": {
+    "meta": {
+      "name": "自签名证书",
+      "description": "生成自签名证书。"
+    },
+    "settings": {
+      "GENERATE_SELF_SIGNED_SSL": {
+        "label": "启用自签名证书",
+        "help": "生成并使用自签名证书。"
+      },
+      "SELF_SIGNED_SSL_ALGORITHM": {
+        "label": "证书算法",
+        "help": "用于生成自签名证书的算法。"
+      },
+      "SELF_SIGNED_SSL_EXPIRY": {
+        "label": "证书有效期",
+        "help": "自签名证书的有效期(以天为单位)。"
+      },
+      "SELF_SIGNED_SSL_SUBJ": {
+        "label": "证书主体",
+        "help": "自签名证书的主体。"
+      }
+    }
+  }
+}

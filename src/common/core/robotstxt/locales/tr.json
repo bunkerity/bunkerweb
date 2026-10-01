@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "robots.txt dosyasını yönetir. Web tarayıcılarının sitenize erişimini kontrol etmek için standart."
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "robots.txt kullan",
+        "help": "robots.txt dosyasını etkinleştir."
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "Topluluk robots.txt listeleri",
+        "help": "robots.txt içine dahil edilecek topluluk tarafından yönetilen listeleri seçin."
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "Robots.txt URL'leri",
+        "help": "robots.txt kurallarını içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Robots.txt kuralı",
+        "help": "robots.txt için kurallar (satır başına bir tane)."
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Robots.txt üstbilgisi",
+        "help": "robots.txt dosyası için üstbilgi (kurallardan önce). Base64 ile kodlanmış olabilir."
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Robots.txt altbilgisi",
+        "help": "robots.txt dosyası için altbilgi (kurallardan sonra). Base64 ile kodlanmış olabilir."
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Robots.txt site haritası",
+        "help": "robots.txt içine dahil edilecek site haritası URL'si/URL'leri."
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "Yoksayma kuralı",
+        "help": "Yoksayılacak kural (PCRE regex). Birden çok kez belirtilebilir."
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "DarkVisitors API Token'ı",
+        "help": "DarkVisitors API'si için Bearer token."
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "DarkVisitors Aracı Türleri",
+        "help": "DarkVisitors API'sine bağlanırken DarkVisitors agent_types alanına dahil edilecek, virgülle ayrılmış aracı türleri listesi."
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "Hangi URL'lerin yasaklandığını belirten bir dize. Bu değer, DarkVisitors API'sine bağlanırken disallow alanı olarak gönderilecektir."
+      }
+    }
+  }
+}

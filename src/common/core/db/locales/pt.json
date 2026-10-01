@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Base de dados",
+      "description": "Integra facilmente a base de dados."
+    },
+    "settings": {
+      "DATABASE_URI": {
+        "label": "O URI da base de dados",
+        "help": "O URI da base de dados, seguindo o formato sqlalchemy."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "O URI da base de dados para operações só de leitura",
+        "help": "O URI da base de dados para operações só de leitura; também pode servir como alternativa se a base de dados principal estiver indisponível. Seguindo o formato sqlalchemy."
+      },
+      "DATABASE_LOG_LEVEL": {
+        "label": "Nível de registo da base de dados",
+        "help": "O nível a utilizar para os registos da base de dados."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "O número máximo de execuções de jobs",
+        "help": "O número máximo de execuções de jobs a manter na base de dados."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "A idade máxima em dias para as sessões de utilizador da UI",
+        "help": "A idade máxima em dias para as sessões de utilizador da UI antes de serem purgadas."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Tamanho do pool da base de dados",
+        "help": "O número de ligações a manter no pool de ligações da base de dados."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Overflow máximo do pool da base de dados",
+        "help": "O número máximo de ligações a criar acima do tamanho do pool."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Tempo limite do pool da base de dados",
+        "help": "O número de segundos a aguardar antes de desistir de obter uma ligação do pool."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Reciclagem do pool da base de dados",
+        "help": "O número de segundos após os quais uma ligação é reciclada automaticamente. Definir como -1 para desativar."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Pre-ping do pool da base de dados",
+        "help": "Se deve testar a vivacidade das ligações em cada extração do pool."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Reposição do pool da base de dados ao devolver",
+        "help": "Como a ligação deve ser reposta quando devolvida ao pool. Deixar vazio para auto (none para MySQL/MariaDB, rollback para os outros). Valores possíveis: rollback, commit, none."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Tempo limite de nova tentativa da base de dados",
+        "help": "O número máximo de segundos a aguardar até a base de dados estar disponível no arranque."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Tentativas de nova tentativa de pedidos à base de dados",
+        "help": "O número de tentativas de nova tentativa para erros transitórios da base de dados."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Atraso de nova tentativa de pedidos à base de dados",
+        "help": "O atraso em segundos entre as tentativas para erros transitórios da base de dados."
+      }
+    }
+  }
+}

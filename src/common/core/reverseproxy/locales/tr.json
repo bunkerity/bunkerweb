@@ -1,0 +1,230 @@
+{
+  "reverseproxy": {
+    "meta": {
+      "name": "Ters proxy",
+      "description": "Ters proxy yapılandırmalarını yönetir."
+    },
+    "settings": {
+      "USE_REVERSE_PROXY": {
+        "label": "Ters proxy kullan",
+        "help": "Ters proxy modunu etkinleştir."
+      },
+      "REVERSE_PROXY_HOST": {
+        "label": "Ters proxy host",
+        "help": "Proxy'lenen kaynağın tam URL'si (proxy_pass)."
+      },
+      "REVERSE_PROXY_URL": {
+        "label": "Ters proxy URL'si",
+        "help": "Proxy'lenecek location URL'si. ^ ile başlayan veya $ ile biten bir değer regex location olarak kabul edilir. nginx location değiştiricisini açıkça ayarlamak için isteğe bağlı olarak başına ~, ~*, = veya ^~ ve bir boşluk ekleyin; değerin geri kalanında boşluk, ;, { veya } kullanılamaz."
+      },
+      "REVERSE_PROXY_WS": {
+        "label": "Ters proxy WebSocket",
+        "help": "Proxy'lenen kaynakta websocket'i etkinleştir."
+      },
+      "REVERSE_PROXY_BUFFERING": {
+        "label": "Ters proxy tamponlama",
+        "help": "Proxy'lenen kaynaktan gelen yanıtların tamponlanmasını etkinleştir veya devre dışı bırak."
+      },
+      "REVERSE_PROXY_REQUEST_BUFFERING": {
+        "label": "Ters proxy istek tamponlama",
+        "help": "Proxy'lenen kaynağa giden isteklerin tamponlanmasını etkinleştir veya devre dışı bırak."
+      },
+      "REVERSE_PROXY_KEEPALIVE": {
+        "label": "Ters proxy keepalive",
+        "help": "Proxy'lenen kaynakla keepalive bağlantılarını etkinleştir veya devre dışı bırak."
+      },
+      "REVERSE_PROXY_HTTP_VERSION": {
+        "label": "Ters proxy HTTP sürümü",
+        "help": "Upstream ile iletişim kurmak için kullanılan HTTP protokol sürümü (1.0, 1.1 veya 2). Uyumlu arka uçlar için upstream tarafında HTTP/2 çoklamayı etkinleştirmek üzere 2 olarak ayarlayın. WebSocket location'ları her durumda 1.1'e sabitlenmiştir."
+      },
+      "REVERSE_PROXY_CUSTOM_HOST": {
+        "label": "Ters proxy özel host",
+        "help": "Upstream sunucusuna gönderilen Host üstbilgisini geçersiz kıl."
+      },
+      "REVERSE_PROXY_HEADERS": {
+        "label": "Ters proxy üstbilgileri",
+        "help": "Proxy'lenen kaynağa gönderilecek, noktalı virgülle ayrılmış HTTP üstbilgisi listesi (proxy_set_header yönergesi için değerler)."
+      },
+      "REVERSE_PROXY_HIDE_HEADERS": {
+        "label": "Ters proxy üstbilgilerini gizle",
+        "help": "Proxy'lenen kaynaktan alındığında istemcilerden gizlenecek HTTP üstbilgisi listesi (proxy_hide_header yönergesi için değerler)."
+      },
+      "REVERSE_PROXY_HEADERS_CLIENT": {
+        "label": "Ters proxy üstbilgileri-istemci",
+        "help": "İstemciye gönderilecek, noktalı virgülle ayrılmış HTTP üstbilgisi listesi (add_header yönergesi için değerler)."
+      },
+      "REVERSE_PROXY_UNDERSCORES_IN_HEADERS": {
+        "label": "Üstbilgilerde alt çizgiye izin ver",
+        "help": "underscores_in_headers yönergesini etkinleştir veya devre dışı bırak."
+      },
+      "REVERSE_PROXY_INTERCEPT_ERRORS": {
+        "label": "Hataları yakala",
+        "help": "Proxy'lenen kaynaktan gelen HTTP hata yanıtlarını yakala ve yeniden yaz (proxy_intercept_errors yönergesinin değeri)."
+      },
+      "REVERSE_PROXY_CONNECT_TIMEOUT": {
+        "label": "Ters proxy bağlantı zaman aşımı",
+        "help": "Proxy'lenen kaynağa bağlanırken zaman aşımı."
+      },
+      "REVERSE_PROXY_READ_TIMEOUT": {
+        "label": "Ters proxy okuma zaman aşımı",
+        "help": "Proxy'lenen kaynaktan okurken zaman aşımı."
+      },
+      "REVERSE_PROXY_SEND_TIMEOUT": {
+        "label": "Ters proxy gönderme zaman aşımı",
+        "help": "Proxy'lenen kaynağa gönderirken zaman aşımı."
+      },
+      "REVERSE_PROXY_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "Upstream sunucusuna SNI gönderimini etkinleştir veya devre dışı bırak."
+      },
+      "REVERSE_PROXY_SSL_SNI_NAME": {
+        "label": "SSL SNI adı",
+        "help": "Upstream sunucusuna gönderilecek SNI host'unu ayarlar."
+      },
+      "REVERSE_PROXY_SSL_VERIFY": {
+        "label": "SSL doğrulama",
+        "help": "Upstream sunucusunun SSL sertifikasının doğrulanmasını etkinleştir veya devre dışı bırak."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Güvenilir sertifika önceliği",
+        "help": "Güvenilir CA sertifikasının kaynağı: dosya yolu veya base64/PEM verisi (file veya data)."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL güvenilir sertifika yolu",
+        "help": "Upstream sertifikasını doğrulamak için kullanılan PEM CA paketinin yolu (öncelik 'file', zamanlayıcı tarafından okunur, önbelleğe alır ve dağıtır). Doğrulama için gereklidir; genel upstreamlar için sistem paketini kullanın (ör. /etc/ssl/certs/ca-certificates.crt). Ayarlanmamışsa doğrulama devre dışıdır."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Güvenilir sertifika verisi (base64/plaintext)",
+        "help": "base64 veya düz metin PEM olarak güvenilir CA sertifikası (öncelik 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "İstemci sertifikası önceliği",
+        "help": "Upstream ile mutual TLS için kullanılan istemci sertifikası ve anahtarının kaynağı: dosya yolu veya base64/PEM verisi (file veya data)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT": {
+        "label": "SSL istemci sertifikası yolu",
+        "help": "BunkerWeb'in upstream'e sunduğu PEM istemci sertifikasının yolu (mutual TLS, öncelik 'file', zamanlayıcı tarafından okunur, önbelleğe alır ve dağıtır). Eşleşen anahtarı gerektirir; hizmetin HTTP ve stream ters proxy'leri tarafından paylaşılır (gRPC'nin kendi GRPC_SSL_CLIENT_CERT'i vardır)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_DATA": {
+        "label": "İstemci sertifikası verisi (base64/plaintext)",
+        "help": "base64 veya düz metin PEM olarak istemci sertifikası (öncelik 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY": {
+        "label": "SSL istemci anahtarı yolu",
+        "help": "İstemci sertifikasıyla eşleşen PEM özel anahtarının yolu (öncelik 'file'). Anahtar, diğer iş yapıtları gibi önbelleğe alınır ve örneklere dağıtılır, yalnızca sahip/grup izinleriyle yazılır."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY_DATA": {
+        "label": "İstemci anahtarı verisi (base64/plaintext)",
+        "help": "base64 veya düz metin PEM olarak istemci özel anahtarı (öncelik 'data'). Mümkün olduğunda bir dosya yolunu tercih edin: burada ayarlanan bir anahtar bir ayar değeri olarak saklanır."
+      },
+      "REVERSE_PROXY_SSL_CRL": {
+        "label": "CRL yolu",
+        "help": "Upstream sunucusu doğrulanırken kullanılan PEM sertifika iptal listesinin yolu. REVERSE_PROXY_SSL_CRL_DATA'ya göre önceliklidir. Yalnızca REVERSE_PROXY_SSL_VERIFY yes olduğunda uygulanır. Ayarlanmış ama eksik bir yol hatadır; REVERSE_PROXY_SSL_CRL_DATA yedek olarak kullanılmaz."
+      },
+      "REVERSE_PROXY_SSL_CRL_DATA": {
+        "label": "CRL verisi (base64/plaintext)",
+        "help": "base64 veya düz metin PEM olarak sertifika iptal listesi. Yalnızca CRL yolu ayarı boş olduğunda kullanılır."
+      },
+      "REVERSE_PROXY_SSL_PROTOCOLS": {
+        "label": "Upstream SSL protokolleri",
+        "help": "Upstream sunucusuna sunulan TLS sürümleri (proxy_ssl_protocols yönergesinin değeri). Boş bırakılırsa NGINX varsayılanı korunur."
+      },
+      "REVERSE_PROXY_SSL_CIPHERS": {
+        "label": "Upstream SSL şifreleri",
+        "help": "Upstream sunucusuna sunulan şifreleme paketi dizesi (proxy_ssl_ciphers yönergesinin değeri). Boş bırakılırsa NGINX varsayılanı korunur."
+      },
+      "REVERSE_PROXY_SEND_PROXY_PROTOCOL": {
+        "label": "Upstream'e PROXY protokolü gönder",
+        "help": "Stream upstream'e PROXY protokolü üstbilgisini gönder. 'auto', bu ayar var olmadan önce BunkerWeb'in yaptığı gibi genel USE_PROXY_PROTOCOL ayarını izler; 'yes' ve 'no', gelen dinleyiciden bağımsız olarak karar verir."
+      },
+      "REVERSE_PROXY_STREAM_HALF_CLOSE": {
+        "label": "Ters proxy stream half close",
+        "help": "İstemci yazma tarafını kapattıktan sonra arka uca doğru bir TCP stream bağlantısını açık tut. İstemcinin half-close yapıp ardından yanıtı beklediği protokoller için gereklidir; nginx varsayılan olarak bağlantıyı sonlandırır."
+      },
+      "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
+        "label": "SSL doğrulama derinliği",
+        "help": "Upstream sunucusu sertifika zincirindeki doğrulama derinliğini ayarlar."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST": {
+        "label": "Ters proxy kimlik doğrulama isteği",
+        "help": "Harici bir sağlayıcı kullanarak kimlik doğrulamayı etkinleştir (auth_request yönergesinin değeri)."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "Kimlik doğrulama isteği giriş URL'si",
+        "help": "REVERSE_PROXY_AUTH_REQUEST kullanılırken istemcileri giriş URL'sine yönlendir (auth_request çağrısı 401 döndürdüğünde kullanılır). $scheme, $host ve $request_uri gibi NGINX değişkenleri desteklenir."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SET": {
+        "label": "Ters proxy kimlik doğrulama isteği kümesi",
+        "help": "Kimlik doğrulama sağlayıcısından ayarlanacak, noktalı virgülle ayrılmış değişken listesi (auth_request_set yönergelerinin değerleri)."
+      },
+      "REVERSE_PROXY_INCLUDES": {
+        "label": "Ters proxy dahil etmeleri",
+        "help": "Location bloğuna dahil edilecek, boşluklarla ayrılmış ek yapılandırma."
+      },
+      "REVERSE_PROXY_PASS_REQUEST_BODY": {
+        "label": "Ters proxy istek gövdesini geçir",
+        "help": "İstek gövdesinin proxy'lenen kaynağa geçirilmesini etkinleştir veya devre dışı bırak."
+      },
+      "REVERSE_PROXY_MODSECURITY": {
+        "label": "Ters proxy ModSecurity",
+        "help": "Bu ters proxy location'ı için ModSecurity'yi etkinleştir veya devre dışı bırak. Çok büyük yüklemeleri kabul eden uç noktalar için (ör. video, yedekleme, nesne depolama) no olarak ayarlayın: ModSecurity-nginx bağlayıcısı, SecRequestBodyLimit'ten bağımsız olarak tüm istek gövdesini bellekte tamponlar ve çok GB'lık yüklemelerde OOM'a neden olabilir. location bloğunun içinde 'modsecurity off;' üretir."
+      },
+      "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+        "label": "Ters proxy maksimum gövde boyutu",
+        "help": "Bu ters proxy location'ı için maksimum gövde boyutu (sonsuz için 0). Boş bırakılırsa hizmetin MAX_CLIENT_SIZE'ı uygulanır. Bir değer, bu location için ModSecurity istek gövdesi limitini de ayarlayarak hizmet genelindekinin yerini alır; MODSECURITY_REQ_BODY_NO_FILES_LIMIT'i değiştirmez."
+      },
+      "USE_PROXY_CACHE": {
+        "label": "Ters proxy önbelleği",
+        "help": "Proxy'lenen kaynakların önbelleğe alınmasını etkinleştir veya devre dışı bırak."
+      },
+      "PROXY_CACHE_PATH_LEVELS": {
+        "label": "Hiyerarşi düzeyleri",
+        "help": "Önbelleğin hiyerarşi düzeyleri."
+      },
+      "PROXY_CACHE_PATH_ZONE_SIZE": {
+        "label": "Ters proxy önbellek bölgesi boyutu",
+        "help": "Proxy'lenen kaynaklar önbelleğe alınırken önbelleğe alınan meta verilerin maksimum boyutu."
+      },
+      "PROXY_CACHE_PATH_PARAMS": {
+        "label": "Ters proxy önbellek parametreleri",
+        "help": "proxy_cache yönergesine eklenecek ek parametreler."
+      },
+      "PROXY_CACHE_METHODS": {
+        "label": "Ters proxy önbellek yöntemleri",
+        "help": "Bir önbellekleme işlemini tetiklemesi gereken HTTP yöntemleri."
+      },
+      "PROXY_CACHE_MIN_USES": {
+        "label": "Ters proxy önbellek minimum kullanım",
+        "help": "Bir yanıt önbelleğe alınmadan önceki minimum istek sayısı."
+      },
+      "PROXY_CACHE_KEY": {
+        "label": "Ters proxy önbellek anahtarı",
+        "help": "Önbelleğe alınan bir yanıtı benzersiz şekilde tanımlamak için kullanılan anahtar."
+      },
+      "PROXY_CACHE_VALID": {
+        "label": "Ters proxy önbellek geçerliliği",
+        "help": "HTTP durum koduna bağlı olarak önbellekleme süresini tanımlayın (status=süre listesi), boşluklarla ayrılmış."
+      },
+      "PROXY_NO_CACHE": {
+        "label": "Ters proxy önbelleksiz",
+        "help": "Yanıtların önbelleğe alınmasını devre dışı bırakacak koşullar."
+      },
+      "PROXY_CACHE_BYPASS": {
+        "label": "Ters proxy baypas",
+        "help": "Yanıtların önbelleğe alınmasını baypas edecek koşullar."
+      },
+      "PROXY_BUFFERS": {
+        "label": "Proxy arabellekleri",
+        "help": "proxy_buffers yönergesi için değer."
+      },
+      "PROXY_BUFFER_SIZE": {
+        "label": "Proxy arabellek boyutu",
+        "help": "proxy_buffer_size yönergesi için değer."
+      },
+      "PROXY_BUSY_BUFFERS_SIZE": {
+        "label": "Proxy meşgul arabellek boyutu",
+        "help": "proxy_busy_buffers_size yönergesi için değer."
+      }
+    }
+  }
+}

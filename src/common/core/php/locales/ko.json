@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "로컬 또는 원격 PHP-FPM을 관리합니다."
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "원격 PHP",
+        "help": "원격 PHP-FPM 인스턴스의 호스트 이름입니다."
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "원격 PHP 경로",
+        "help": "원격 PHP-FPM 인스턴스에서 파일이 있는 루트 폴더입니다."
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "원격 PHP 포트",
+        "help": "원격 PHP-FPM 인스턴스의 포트입니다."
+      },
+      "LOCAL_PHP": {
+        "label": "로컬 PHP",
+        "help": "PHP-FPM 소켓 파일의 경로입니다."
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "로컬 PHP 경로",
+        "help": "로컬 PHP-FPM 인스턴스에서 파일이 있는 루트 폴더입니다."
+      }
+    }
+  }
+}

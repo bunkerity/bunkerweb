@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "Plantillas",
+      "description": "Plugin core ficticio para las plantillas internas."
+    },
+    "templates": {
+      "low": {
+        "name": "Nivel de seguridad básico que proporciona los ajustes esenciales para la protección de aplicaciones web",
+        "steps": {
+          "0": {
+            "title": "Servicio web - Servicio frontal",
+            "subtitle": "Configure su servicio web orientado a sus clientes"
+          },
+          "1": {
+            "title": "Servicio web - Servidor upstream",
+            "subtitle": "Configure el servidor upstream que protegerá BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - General",
+            "subtitle": "Configure los ajustes relacionados con el protocolo HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Cabeceras",
+            "subtitle": "Configure los ajustes relacionados con las cabeceras HTTP"
+          },
+          "4": {
+            "title": "Seguridad - Mal comportamiento",
+            "subtitle": "Configure los ajustes relacionados con el baneo automático cuando se detecta un mal comportamiento."
+          },
+          "5": {
+            "title": "Seguridad - Lista negra",
+            "subtitle": "Configure los ajustes relacionados con las listas negras externas."
+          },
+          "6": {
+            "title": "Seguridad - Limitación",
+            "subtitle": "Configure los ajustes relacionados con la limitación de solicitudes y conexiones."
+          },
+          "7": {
+            "title": "Seguridad - Antibot",
+            "subtitle": "Configure los ajustes sobre la detección de robots"
+          },
+          "8": {
+            "title": "Seguridad - Autenticación básica",
+            "subtitle": "Configure la autenticación HTTP básica"
+          },
+          "9": {
+            "title": "Seguridad - País",
+            "subtitle": "Configure los ajustes sobre la política de acceso por país"
+          },
+          "10": {
+            "title": "Seguridad - ModSecurity",
+            "subtitle": "Configure los ajustes relacionados con el WAF ModSecurity"
+          }
+        }
+      },
+      "medium": {
+        "name": "Nivel de seguridad equilibrado que ofrece una combinación de funciones de seguridad y optimizaciones de rendimiento",
+        "steps": {
+          "0": {
+            "title": "Servicio web - Servicio frontal",
+            "subtitle": "Configure su servicio web orientado a sus clientes"
+          },
+          "1": {
+            "title": "Servicio web - Servidor upstream",
+            "subtitle": "Configure el servidor upstream que protegerá BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - General",
+            "subtitle": "Configure los ajustes relacionados con el protocolo HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Cabeceras",
+            "subtitle": "Configure los ajustes relacionados con las cabeceras HTTP"
+          },
+          "4": {
+            "title": "Seguridad - Mal comportamiento",
+            "subtitle": "Configure los ajustes relacionados con el baneo automático cuando se detecta un mal comportamiento."
+          },
+          "5": {
+            "title": "Seguridad - Lista negra",
+            "subtitle": "Configure los ajustes relacionados con las listas negras externas."
+          },
+          "6": {
+            "title": "Seguridad - Limitación",
+            "subtitle": "Configure los ajustes relacionados con la limitación de solicitudes y conexiones."
+          },
+          "7": {
+            "title": "Seguridad - Antibot",
+            "subtitle": "Configure los ajustes sobre la detección de robots"
+          },
+          "8": {
+            "title": "Seguridad - Autenticación básica",
+            "subtitle": "Configure la autenticación HTTP básica"
+          },
+          "9": {
+            "title": "Seguridad - País",
+            "subtitle": "Configure los ajustes sobre la política de acceso por país"
+          },
+          "10": {
+            "title": "Seguridad - Escaneo inverso",
+            "subtitle": "Configure los ajustes sobre el escaneo de los puertos de los clientes"
+          },
+          "11": {
+            "title": "Seguridad - ModSecurity",
+            "subtitle": "Configure los ajustes relacionados con el WAF ModSecurity"
+          }
+        }
+      },
+      "high": {
+        "name": "Nivel de seguridad avanzado centrado en medidas de seguridad robustas y protección integral",
+        "steps": {
+          "0": {
+            "title": "Servicio web - Servicio frontal",
+            "subtitle": "Configure su servicio web orientado a sus clientes"
+          },
+          "1": {
+            "title": "Servicio web - Servidor upstream",
+            "subtitle": "Configure el servidor upstream que protegerá BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - General",
+            "subtitle": "Configure los ajustes relacionados con el protocolo HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - Cabeceras",
+            "subtitle": "Configure los ajustes relacionados con las cabeceras HTTP"
+          },
+          "4": {
+            "title": "Seguridad - Mal comportamiento",
+            "subtitle": "Configure los ajustes relacionados con el baneo automático cuando se detecta un mal comportamiento."
+          },
+          "5": {
+            "title": "Seguridad - Lista negra",
+            "subtitle": "Configure los ajustes relacionados con las listas negras externas."
+          },
+          "6": {
+            "title": "Seguridad - Limitación",
+            "subtitle": "Configure los ajustes relacionados con la limitación de solicitudes y conexiones."
+          },
+          "7": {
+            "title": "Seguridad - Antibot",
+            "subtitle": "Configure los ajustes sobre la detección de robots"
+          },
+          "8": {
+            "title": "Seguridad - Autenticación básica",
+            "subtitle": "Configure la autenticación HTTP básica"
+          },
+          "9": {
+            "title": "Seguridad - País",
+            "subtitle": "Configure los ajustes sobre la política de acceso por país"
+          },
+          "10": {
+            "title": "Seguridad - Escaneo inverso",
+            "subtitle": "Configure los ajustes sobre el escaneo de los puertos de los clientes"
+          },
+          "11": {
+            "title": "Seguridad - ModSecurity",
+            "subtitle": "Configure los ajustes relacionados con el WAF ModSecurity"
+          }
+        }
+      },
+      "api": {
+        "name": "Ajustes básicos al usar la API de BunkerWeb",
+        "steps": {
+          "0": {
+            "title": "Servicio - Servicio frontal",
+            "subtitle": "Configure el nombre del servidor y los ajustes SSL/TLS"
+          },
+          "1": {
+            "title": "Servicio - Servidor upstream",
+            "subtitle": "Configure el servidor upstream que protegerá BunkerWeb"
+          },
+          "2": {
+            "title": "API - Limitación de tasa",
+            "subtitle": "Configure los ajustes de limitación de tasa; tenga en cuenta que la API también dispone de limitación de tasa interna"
+          },
+          "3": {
+            "title": "API - Ajustes varios",
+            "subtitle": "Otros ajustes importantes para el correcto funcionamiento de la API"
+          }
+        }
+      },
+      "ui": {
+        "name": "Ajustes básicos al usar la interfaz web (UI)",
+        "steps": {
+          "0": {
+            "title": "Paso ficticio",
+            "subtitle": "Este es un paso ficticio para mostrar los ajustes básicos al usar la interfaz web"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "URLs de plantillas externas",
+        "help": "Lista de URLs de plantillas de servicio para descargar e instalar, separadas por espacios. Cada URL es una plantilla: un paquete JSON bunkerweb-template/1, o un archivo .zip o .tar.gz que contiene <id>/template.json y sus configuraciones. Solo se aceptan https:// y file:///, con un máximo de 1 MiB. Añada #sha256=<digest> a una URL para fijar su contenido. Una plantilla cuya URL se elimina se borra, a menos que un servicio siga utilizándola."
+      }
+    }
+  }
+}

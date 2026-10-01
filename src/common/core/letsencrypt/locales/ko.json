@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Let's Encrypt 인증서의 자동 생성, 갱신 및 구성."
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "자동 Let's Encrypt",
+        "help": "자동 Let's Encrypt 모드를 활성화합니다."
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Let's Encrypt 통과",
+        "help": "Let's Encrypt 요청을 웹 서버로 통과시킵니다."
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Let's Encrypt 이메일",
+        "help": "Let's Encrypt 알림 및 인증서에 사용되는 이메일입니다."
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "인증 기관 서버",
+        "help": "인증서 생성에 사용할 인증 기관(CA) 서버를 선택합니다."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "ZeroSSL API 키",
+        "help": "zerossl-bot이 사용하는 선택적 ZeroSSL API 키입니다. 비어 있으면 EAB 자격 증명을 가져오는 데 EMAIL_LETS_ENCRYPT가 사용됩니다."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "ZeroSSL API 재시도",
+        "help": "zerossl-bot이 수행하는 ZeroSSL API 요청의 재시도 횟수입니다(0은 재시도를 비활성화)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "ZeroSSL API 재시도 지연",
+        "help": "zerossl-bot에서 ZeroSSL API 재시도 사이의 지연 시간(초)입니다."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "ZeroSSL API 연결 제한 시간",
+        "help": "zerossl-bot에서 ZeroSSL API 요청의 연결 제한 시간(초)입니다."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "ZeroSSL API 최대 시간",
+        "help": "zerossl-bot에서 각 ZeroSSL API 요청의 최대 총 소요 시간(초)입니다."
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "챌린지 유형",
+        "help": "Let's Encrypt에 사용할 챌린지 유형입니다(http 또는 dns)."
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "DNS 제공자",
+        "help": "DNS 챌린지에 사용할 DNS 제공자입니다."
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "DNS 전파 대기 시간",
+        "help": "DNS 챌린지에서 DNS 전파를 기다리는 시간(초)입니다."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "자격 증명 항목",
+        "help": "DNS 챌린지를 위한 DNS 제공자의 credentials.ini 파일에 추가될 설정 항목입니다. 키, 공백, 값 순서로 작성하십시오(예: 'cloudflare_api_token 123456'); 키에는 따옴표를 사용하지 마십시오. 값은 base64로 인코딩할 수도 있으며, 항목 전체를 base64로 인코딩된 json 객체로 작성할 수도 있습니다."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Base64 DNS 자격 증명 디코딩",
+        "help": "base64로 인코딩된 DNS 제공자 자격 증명을 자동으로 디코딩합니다. 활성화하면 base64 형식과 일치하는 자격 증명이 사용 전에 디코딩됩니다(rfc2136 제공자는 제외). 자격 증명이 의도적으로 base64 문자열인 경우 비활성화하십시오."
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "와일드카드 인증서",
+        "help": "모든 도메인에 대해 와일드카드 인증서를 생성합니다. 이를 통해 단일 인증서로 여러 서브도메인을 보호할 수 있습니다. (DNS 챌린지를 사용할 때만 사용 가능)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Let's Encrypt 스테이징 사용",
+        "help": "Let's Encrypt 인증서 생성에 스테이징 환경을 사용합니다. 배포를 테스트할 때 프로덕션 환경에서 속도 제한에 걸리지 않도록 하는 데 유용합니다."
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "더 이상 필요하지 않은 오래된 인증서 삭제",
+        "help": "갱신 시 오래된 인증서를 삭제합니다."
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "인증서 프로필",
+        "help": "Let's Encrypt와 함께 사용할 인증서 프로필을 선택합니다. 'classic'은 90일 수명과 폭넓은 호환성을 가진 범용 인증서입니다. 'tlsserver'는 TLS 서버 인증에 최적화되어 있으며 수명은 90일이고 페이로드가 더 작습니다. 'shortlived'는 자동화된 환경에서 보안을 강화하기 위한 7일짜리 인증서를 제공합니다."
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "사용자 지정 인증서 프로필(ACME)",
+        "help": "비표준 프로필을 지원하는 ACME 서버와 함께 사용할 사용자 지정 인증서 프로필입니다. 설정하면 LETS_ENCRYPT_PROFILE을 재정의합니다."
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "퍼블릭 서픽스 비활성화(PSL 블랙리스트)",
+        "help": "퍼블릭 서픽스 목록(Public Suffix List)과 일치하는 도메인에 대한 인증서 요청을 비활성화합니다(권장, 기본값: yes)."
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "최대 재시도 횟수",
+        "help": "인증서 생성 실패 시 재시도할 횟수입니다(0은 재시도를 비활성화)."
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "동시 인증서 요청",
+        "help": "certbot-new 작업에서 인증서 요청을 동시에 실행합니다(속도 제한 위험이 증가할 수 있음)."
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "최대 Certbot 로그 백업 수",
+        "help": "작업당 유지할 로테이션된 certbot 로그 파일의 최대 개수입니다. Certbot 자체 기본값은 1000이며, 이는 빠르게 쌓입니다. 0으로 설정하면 현재 로그만 유지됩니다."
+      }
+    }
+  }
+}

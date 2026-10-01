@@ -1,0 +1,34 @@
+{
+  "geoip": {
+    "meta": {
+      "name": "GeoIP",
+      "description": "Bases de données GeoIP utilisées pour résoudre le pays, l'ASN et la ville d'une IP cliente."
+    },
+    "settings": {
+      "MAXMIND_LICENSE_KEY": {
+        "label": "Clé de licence MaxMind",
+        "help": "Clé de licence MaxMind. Lorsqu'elle est définie, les bases de données pays, ASN et ville sont téléchargées depuis MaxMind au lieu de DB-IP."
+      },
+      "MAXMIND_ACCOUNT_ID": {
+        "label": "ID de compte MaxMind",
+        "help": "ID de compte MaxMind. Facultatif mais recommandé : sans lui, le point de terminaison obsolète basé uniquement sur la clé est utilisé, qui transporte la clé de licence dans l'URL au lieu d'un en-tête d'authentification."
+      },
+      "GEOIP_CITY": {
+        "label": "Base de données des villes",
+        "help": "Télécharge la base de données des villes. Elle est bien plus volumineuse que les autres (DB-IP City Lite se décompresse en 125 Mo) et n'est pas intégrée aux images."
+      },
+      "GEOIP_COUNTRY_MMDB": {
+        "label": "Base de données pays personnalisée",
+        "help": "Base de données pays personnalisée : chemin absolu lisible par le worker, ou URL http(s). Prioritaire sur MaxMind et DB-IP."
+      },
+      "GEOIP_ASN_MMDB": {
+        "label": "Base de données ASN personnalisée",
+        "help": "Base de données ASN personnalisée : chemin absolu lisible par le worker, ou URL http(s). Prioritaire sur MaxMind et DB-IP."
+      },
+      "GEOIP_CITY_MMDB": {
+        "label": "Base de données des villes personnalisée",
+        "help": "Base de données des villes personnalisée : chemin absolu lisible par le worker, ou URL http(s). Prioritaire sur MaxMind et DB-IP."
+      }
+    }
+  }
+}

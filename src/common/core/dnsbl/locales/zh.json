@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "根据外部 DNSBL 服务器拒绝访问。"
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "请求已阻止"
+      }
+    },
+    "settings": {
+      "USE_DNSBL": {
+        "label": "启用 DNSBL",
+        "help": "启用 DNSBL 功能。"
+      },
+      "DNSBL_LIST": {
+        "label": "DNSBL 列表",
+        "help": "DNSBL 服务器列表。"
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "DNSBL 忽略的 IP/网段",
+        "help": "以空格分隔的 IP/网段列表,用于在 DNSBL 检查中忽略。"
+      },
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "忽略的标头名称",
+        "help": "使请求免于 DNSBL 检查的请求标头名称。任何客户端都可以发送此标头:请将其视为共享密钥,并仅通过 HTTPS 使用。"
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "忽略的标头值",
+        "help": "标头必须匹配的值(PCRE 正则表达式),以使请求免于 DNSBL 检查。留空则仅匹配标头是否存在。请使用 ^ 和 $ 进行锚定:默认情况下匹配不会被锚定。"
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "DNSBL 忽略的 IP/网段 URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要在 DNSBL 检查中忽略的 IP/网段。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Autenticação básica",
+      "description": "Exige login antes de acessar um recurso ou o site inteiro usando o método de autenticação HTTP básica."
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "AUTH BÁSICA",
+        "subtitle": "Bem-sucedido"
+      },
+      "counter_failed_authbasic": {
+        "title": "AUTH BÁSICA",
+        "subtitle": "Falhou"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "Usar autenticação básica HTTP",
+        "help": "Usar autenticação básica HTTP"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "Local da autenticação básica",
+        "help": "URL do recurso protegido ou valor aplicado a todo o site."
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Nome de usuário da autenticação básica",
+        "help": "Nome de usuário"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Senha",
+        "help": "Senha"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Texto",
+        "help": "Texto a ser exibido"
+      }
+    }
+  }
+}

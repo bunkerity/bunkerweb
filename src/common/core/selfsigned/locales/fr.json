@@ -1,0 +1,26 @@
+{
+  "selfsigned": {
+    "meta": {
+      "name": "Certificat auto-signé",
+      "description": "Génère un certificat auto-signé."
+    },
+    "settings": {
+      "GENERATE_SELF_SIGNED_SSL": {
+        "label": "Activer le certificat auto-signé",
+        "help": "Génère et utilise un certificat auto-signé."
+      },
+      "SELF_SIGNED_SSL_ALGORITHM": {
+        "label": "Algorithme du certificat",
+        "help": "Algorithme à utiliser pour le certificat auto-signé."
+      },
+      "SELF_SIGNED_SSL_EXPIRY": {
+        "label": "Expiration du certificat",
+        "help": "Expiration du certificat auto-signé, en jours."
+      },
+      "SELF_SIGNED_SSL_SUBJ": {
+        "label": "Sujet du certificat",
+        "help": "Sujet du certificat auto-signé."
+      }
+    }
+  }
+}

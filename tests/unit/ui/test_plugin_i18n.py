@@ -122,6 +122,8 @@ def _inject_variables():
     namespace = {
         "app": SimpleNamespace(config={"CONTEXT_PROCESSOR_HOOKS": [], "SCRIPTS_HOOKS": [], "STYLES_HOOKS": []}),
         "g": SimpleNamespace(_env={}),
+        # Plugin context processors only run for a logged-in render (test_session_plumbing.py).
+        "current_user": SimpleNamespace(is_authenticated=False),
         "plugin_catalog_fingerprint": lambda: "abcdef123456",
     }
     exec(compile(ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[])), str(REPO / "src/ui/main.py"), "exec"), namespace)
@@ -487,3 +489,308 @@ def test_invalid_plugin_catalog_warns_and_does_not_break_the_others(core_static,
     assert messages["myplugin"]["title"] == "My Plugin"
     assert "broken_plugin" not in messages
     assert any("broken_plugin" in record.getMessage() for record in caplog.records)
+
+
+# --------------------------------------------------------------------------------------
+# (e) CAT-C6 / M13: translations of plugin.json / template.json metadata shipped by the package
+# --------------------------------------------------------------------------------------
+def _plugin_root_locales(plugin_root: Path, plugin_id: str) -> Path:
+    """The root layout — the only one a plugin without a UI can ship."""
+    return plugin_root / plugin_id / "locales"
+
+
+FULL_FR = {
+    "myplugin": {
+        "meta": {"name": "Mon plugin", "description": "Il protège"},
+        "settings": {"USE_MY": {"label": "Activer", "help": "Active le plugin"}},
+        "templates": {"low": {"name": "Niveau bas", "steps": {"0": {"title": "Étape un"}}}},
+        "widgets": {"status": "ÉTAT"},
+        "page": {"title": "Page"},
+    }
+}
+
+
+def _text_in(app, lang: str, template: str) -> str:
+    from flask import render_template_string
+    from flask_babel import force_locale
+
+    with app.test_request_context("/"):
+        with force_locale(lang):
+            return render_template_string(template)
+
+
+def test_a_plugin_shipping_only_root_locales_is_read(core_static, plugin_root):
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", {"myplugin": {"page": {"title": "Racine"}}})
+
+    messages = _merged_messages(browser_catalog(str(core_static), "fr"))
+
+    assert messages["myplugin"]["page"]["title"] == "Racine"
+
+
+def test_root_and_ui_locales_merge_root_wins_metadata_ui_wins_page_strings(core_static, plugin_root):
+    """A plugin can ship a root `locales/` (metadata — the only layout available to a plugin with
+    no UI at all) AND a `ui/…/locales/` (page strings) at once (CAT-C6's open question). Reading
+    only the first match, as before, silently dropped whichever half the other layout owned."""
+    _write_json(
+        _plugin_root_locales(plugin_root, "myplugin") / "fr.json",
+        {"myplugin": {"meta": {"name": "Racine"}, "page": {"title": "Racine page"}}},
+    )
+    _write_json(
+        _plugin_locales(plugin_root, "myplugin") / "fr.json",
+        {"myplugin": {"page": {"title": "Blueprint page"}, "widgets": {"status": "État"}}},
+    )
+
+    messages = _merged_messages(browser_catalog(str(core_static), "fr"))
+
+    # meta is metadata: root wins the key, though it never reaches the browser (stripped)
+    assert "meta" not in messages["myplugin"]
+    # page is a page string ships by both: the more specific UI file wins the shared key
+    assert messages["myplugin"]["page"]["title"] == "Blueprint page"
+    # a page-string key only the root ships still comes through
+    assert messages["myplugin"]["widgets"]["status"] == "État"
+
+
+def test_root_metadata_reaches_plugin_text_even_when_a_ui_locales_dir_also_exists(app, plugin_root):
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", {"myplugin": {"meta": {"name": "Racine"}}})
+    _write_json(
+        _plugin_locales(plugin_root, "myplugin") / "fr.json",
+        {"myplugin": {"meta": {"name": "Blueprint"}, "page": {"title": "Page"}}},
+    )
+
+    assert _text_in(app, "fr", "{{ plugin_text('myplugin', 'meta.name', 'x') }}|{{ plugin_text('myplugin', 'page.title', 'x') }}") == "Racine|Page"
+
+
+def test_the_fingerprint_covers_the_root_locales_dir(plugin_root):
+    before = plugin_catalog_fingerprint()
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", {"myplugin": {"meta": {"name": "Mon plugin"}}})
+
+    assert plugin_catalog_fingerprint() != before
+
+
+def test_plugin_text_translates_metadata_in_the_active_language(app, plugin_root):
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", FULL_FR)
+
+    rendered = _text_in(
+        app,
+        "fr",
+        "{{ plugin_text('myplugin', 'meta.name', 'My plugin') }}|{{ plugin_text('myplugin', 'meta.description', 'It protects') }}"
+        "|{{ plugin_text('myplugin', 'templates.low.steps.0.title', 'Step one') }}|{{ plugin_text('myplugin', 'widgets.status', 'STATUS') }}",
+    )
+
+    assert rendered == "Mon plugin|Il protège|Étape un|ÉTAT"
+
+
+def test_plugin_text_falls_back_per_string_to_the_plugins_en_then_to_the_raw_text(app, plugin_root):
+    """A partial catalog never breaks a page: each missing string falls back on its own — to the
+    plugin's `en.json` when it has one, else to the raw `plugin.json` text, never to a raw key."""
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", {"myplugin": {"meta": {"name": "Mon plugin"}}})
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "en.json", {"myplugin": {"meta": {"description": "English from en.json"}}})
+
+    rendered = _text_in(
+        app,
+        "fr",
+        "{{ plugin_text('myplugin', 'meta.name', 'Raw name') }}|{{ plugin_text('myplugin', 'meta.description', 'Raw description') }}"
+        "|{{ setting_text('USE_MY', 'help', 'Raw help') }}",
+    )
+
+    assert rendered == "Mon plugin|English from en.json|Raw help"
+
+
+def test_plugin_text_with_no_catalog_or_no_plugin_id_is_the_raw_text(app, plugin_root):
+    (plugin_root / "bare").mkdir()
+
+    rendered = _text_in(
+        app,
+        "fr",
+        "{{ plugin_text('bare', 'meta.name', 'Bare') }}|{{ plugin_text(none, 'templates.x.name', 'No owner') }}"
+        "|{{ plugin_text('myplugin', 'meta', 'Not a leaf') }}|{{ setting_text('UNKNOWN_SETTING', 'label', 'Unknown') }}",
+    )
+
+    assert rendered == "Bare|No owner|Not a leaf|Unknown"
+
+
+def test_plugin_text_only_reads_the_plugins_own_namespace(app, plugin_root):
+    _write_json(_plugin_root_locales(plugin_root, "evil") / "fr.json", {"evil": {}, "myplugin": {"meta": {"name": "Hijacked"}}})
+
+    assert _text_in(app, "fr", "{{ plugin_text('myplugin', 'meta.name', 'My plugin') }}") == "My plugin"
+
+
+def test_plugin_text_output_is_escaped(app, plugin_root):
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", {"myplugin": {"meta": {"name": "<b>x</b>"}}})
+
+    assert _text_in(app, "fr", "{% autoescape true %}{{ plugin_text('myplugin', 'meta.name', 'y') }}{% endautoescape %}") == "&lt;b&gt;x&lt;/b&gt;"
+
+
+def test_setting_text_resolves_by_setting_id_and_by_a_multiple_settings_base(app, plugin_root):
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", FULL_FR)
+
+    rendered = _text_in(app, "fr", "{{ setting_text('USE_MY', 'label', 'Enable') }}|{{ setting_text('USE_MY_2', 'help', 'Enables it') }}")
+
+    assert rendered == "Activer|Active le plugin"
+
+
+def test_setting_text_prefers_the_first_root_so_an_external_plugin_cannot_restate_a_core_setting(app, tmp_path, monkeypatch, plugin_root):
+    core_root = tmp_path / "core_plugins"
+    monkeypatch.setattr(plugin_extensions, "CORE_PLUGINS_PATH", str(core_root))
+    _write_json(_plugin_root_locales(core_root, "antibot") / "fr.json", {"antibot": {"settings": {"USE_ANTIBOT": {"label": "Anti-robot"}}}})
+    _write_json(_plugin_root_locales(plugin_root, "aaa") / "fr.json", {"aaa": {"settings": {"USE_ANTIBOT": {"label": "Shadowed"}}}})
+
+    assert _text_in(app, "fr", "{{ setting_text('USE_ANTIBOT', 'label', 'Antibot') }}") == "Anti-robot"
+
+
+def test_general_settings_read_the_core_catalog(app, plugin_root, monkeypatch):
+    """`src/common/settings.json` has no plugin directory: its strings live in the core catalogs
+    under `general.settings.*`, and win over any plugin catalog, like every core key."""
+    monkeypatch.setattr(i18n_module, "translated", lambda key, **_: {"general.settings.LOG_LEVEL.label": "Niveau de journal"}.get(key))
+    _write_json(_plugin_root_locales(plugin_root, "aaa") / "fr.json", {"aaa": {"settings": {"LOG_LEVEL": {"label": "Plugin"}}}})
+
+    assert _text_in(app, "fr", "{{ setting_text('LOG_LEVEL', 'label', 'Log level') }}") == "Niveau de journal"
+
+
+def test_metadata_lookups_read_the_plugin_catalogs_once_per_request(app, plugin_root, monkeypatch):
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", FULL_FR)
+    calls = {"n": 0}
+    real_iter = i18n_module.iter_plugin_catalogs
+
+    def counting_iter(lang, roots=None):
+        calls["n"] += 1
+        return real_iter(lang, roots)
+
+    monkeypatch.setattr(i18n_module, "iter_plugin_catalogs", counting_iter)
+
+    _text_in(app, "fr", "{% for i in range(50) %}{{ setting_text('USE_MY', 'label', 'x') }}{{ plugin_text('myplugin', 'meta.name', 'x') }}{% endfor %}")
+
+    assert calls["n"] == 1  # fr hit everything: the en fallback was never scanned
+
+
+def test_browser_catalog_leaves_the_metadata_subtrees_server_side(core_static, plugin_root):
+    """About 10.7k English words of metadata must not ride on every page's blocking script: the
+    `meta` / `settings` / `templates` subtrees of plugin namespaces are stripped, page strings stay,
+    and core's own keys that happen to share those names are untouched."""
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", FULL_FR)
+    _write_json(
+        core_static / "locales" / "fr.json",
+        {"button": {"save": "Enregistrer"}, "logs": {"meta": "{{size}}"}, "general": {"settings": {"LOG_LEVEL": {"label": "Niveau"}}, "title": "Général"}},
+    )
+
+    messages = _merged_messages(browser_catalog(str(core_static), "fr"))
+
+    assert messages["myplugin"] == {"widgets": {"status": "ÉTAT"}, "page": {"title": "Page"}}
+    assert messages["logs"]["meta"] == "{{size}}"
+    assert messages["general"] == {"title": "Général"}
+    assert messages["button"]["save"] == "Enregistrer"
+
+
+def test_browser_catalog_strip_never_mutates_the_cached_core_catalog(core_static, plugin_root):
+    _write_json(core_static / "locales" / "fr.json", {"general": {"settings": {"LOG_LEVEL": {"label": "Niveau"}}}})
+
+    browser_catalog(str(core_static), "fr")
+
+    assert i18n_module._core_catalog(str(core_static), "fr")["general"]["settings"]["LOG_LEVEL"]["label"] == "Niveau"
+
+
+# Every display site of plugin metadata goes through the helpers (design-catalog.md §1.4). A raw
+# `setting_data["help"]` left behind is an untranslatable string on a translated page.
+TEMPLATES_DIR = REPO / "src" / "ui" / "app" / "templates"
+DISPLAY_SITES = {
+    "plugins.html": ("plugin_text(plugin, 'meta.description'", "plugin_text(plugin, 'meta.name'"),
+    "menu.html": ("plugin_text(plugin, 'meta.name'",),
+    "models/compose_shelf.html": ("plugin_text(plugin, 'meta.name'",),
+    "plugin_page.html": ("plugin_text(plugin['id'], 'meta.name'", "value.get('title_i18n')", "value.get('subtitle_i18n')"),
+    "models/plugin_setting_field.html": ("setting_text(setting, 'label'", "setting_text(setting, 'help'"),
+    "models/plugin_multiple_groups.html": ("setting_text(setting, 'label'", "setting_text(setting, 'help'"),
+    "models/multiselect_setting.html": ("setting_text(setting, 'label'",),
+    "models/template_steps_body.html": ("setting_text(setting, 'label'", "setting_text(setting, 'help'", "'.steps.' ~ loop.index0 ~ '.title'"),
+    "plugin_bodies/access_control/rules.html": ("setting_text(family['base'], 'help'",),
+    "models/service_resources_band.html": ("'templates.' ~ tpl ~ '.name'",),
+    "templates.html": ("'templates.' ~ template ~ '.name'",),
+    "plugin_settings_page.html": ("plugin_text(plugin, 'meta.name'", "plugin_text(plugin, 'meta.description'"),
+}
+RAW_EXPRESSIONS = (
+    '{{ setting_data["label"] }}',
+    "{{ setting_data['help'] }}",
+    "{{ setting_data.get('label', setting) }}",
+    "{{ plugin_data.get('description', '') }}",
+    "{{ plugin_data['name'] }}",
+    '{{ plugin_data["name"] }}',
+    "{{ extra_plugin_data['name'] }}",
+    '{{ value.get("title") }}',
+    '{{ template_data["name"] }}',
+    "{{ template_data.name }}",
+    '{{ plugin_data["description"] }}',
+)
+
+
+@pytest.mark.parametrize("site", sorted(DISPLAY_SITES))
+def test_every_metadata_display_site_uses_the_translation_helpers(site):
+    source = (TEMPLATES_DIR / site).read_text(encoding="utf-8")
+
+    assert [raw for raw in RAW_EXPRESSIONS if raw in source] == []
+    assert [call for call in DISPLAY_SITES[site] if call not in source] == []
+
+
+def _templates_route_module():
+    """`routes/templates.py` loaded with stub dependencies, the way test_templates_catalog_routes.py
+    does it — importing it for real would need a live API client."""
+    import importlib.util
+    from types import ModuleType
+    from unittest.mock import Mock, patch
+
+    dependencies = ModuleType("app.dependencies")
+    dependencies.API_CLIENT, dependencies.BW_CONFIG, dependencies.DATA = Mock(), Mock(), {}
+    dependencies.BW_INSTANCES_UTILS = dependencies.LOGGER = dependencies.CONFIG_TASKS_EXECUTOR = Mock()
+    dependencies.CORE_PLUGINS_PATH = dependencies.EXTERNAL_PLUGINS_PATH = dependencies.PRO_PLUGINS_PATH = Path("/tmp/_none")
+    qrcode, qrcode_main = ModuleType("qrcode"), ModuleType("qrcode.main")
+    qrcode_main.QRCode = Mock()
+    qrcode.main = qrcode_main
+    name = "app.routes._templates_plugin_i18n_test"
+    spec = importlib.util.spec_from_file_location(name, REPO / "src" / "ui" / "app" / "routes" / "templates.py")
+    module = importlib.util.module_from_spec(spec)
+    with patch.dict(sys.modules, {"app.dependencies": dependencies, "qrcode": qrcode, "qrcode.main": qrcode_main, name: module}):
+        spec.loader.exec_module(module)
+    return module
+
+
+def test_the_template_editor_catalog_is_translated_before_it_is_serialised(app, plugin_root):
+    """The editor reads this catalog as JSON in the browser, where the metadata subtrees are never
+    shipped: it has to arrive translated, with the raw text wherever the plugin has no string."""
+    from flask_babel import force_locale
+
+    _write_json(_plugin_root_locales(plugin_root, "myplugin") / "fr.json", FULL_FR)
+    module = _templates_route_module()
+    module.BW_CONFIG.get_settings.return_value = {}
+    module.API_CLIENT.get_plugins.return_value = [{"id": "myplugin"}]
+    module.BW_CONFIG.get_plugins.return_value = {
+        "myplugin": {
+            "name": "My plugin",
+            "settings": {
+                "USE_MY": {"context": "multisite", "label": "Enable", "help": "Enables it", "type": "check"},
+                "MY_OTHER": {"context": "multisite", "label": "Other", "help": "Untranslated", "type": "text"},
+            },
+        }
+    }
+
+    with app.test_request_context("/"):
+        with force_locale("fr"):
+            catalog = {entry["key"]: entry for entry in module._build_multisite_settings_catalog()}
+
+    assert (catalog["USE_MY"]["label"], catalog["USE_MY"]["description"], catalog["USE_MY"]["plugin"]["name"]) == ("Activer", "Active le plugin", "Mon plugin")
+    assert (catalog["MY_OTHER"]["label"], catalog["MY_OTHER"]["description"]) == ("Other", "Untranslated")
+
+
+def test_a_key_resolved_from_the_json_fallback_interpolates_its_placeholders(app, plugin_root):
+    """`_()` is Jinja's newstyle gettext: it always applies `% variables`, which the compiled `.mo`
+    is built for (`{{name}}` becomes `%(name)s`, a literal `%` is doubled). A key only the JSON
+    has — every plugin catalog, and a new core key until the `.mo` is regenerated — rendered its
+    raw `{{version}}` instead (seen live by CAT-C3)."""
+    _write_json(_plugin_locales(plugin_root, "myplugin") / "fr.json", {"myplugin": {"installed": "v{{installed}} → v{{ version }}, 100% sûr"}})
+
+    rendered = _text_in(app, "fr", "{{ _('myplugin.installed', installed='1.0', version='<2.0>') }}")
+
+    assert rendered == "v1.0 → v&lt;2.0&gt;, 100% sûr"
+
+
+def test_a_placeholder_the_caller_does_not_pass_stays_visible_instead_of_failing_the_page(app, plugin_root):
+    _write_json(_plugin_locales(plugin_root, "myplugin") / "fr.json", {"myplugin": {"installed": "v{{installed}} 50%"}})
+
+    assert _text_in(app, "fr", "{{ _('myplugin.installed') }}") == "v{{installed}} 50%"

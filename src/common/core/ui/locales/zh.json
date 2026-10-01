@@ -1,0 +1,18 @@
+{
+  "ui": {
+    "meta": {
+      "name": "UI",
+      "description": "轻松集成 BunkerWeb 的 UI。"
+    },
+    "settings": {
+      "USE_UI": {
+        "label": "使用 UI",
+        "help": "使用 UI"
+      },
+      "UI_HOST": {
+        "label": "UI 主机",
+        "help": "用于初始设置的 Web UI 地址"
+      }
+    }
+  }
+}

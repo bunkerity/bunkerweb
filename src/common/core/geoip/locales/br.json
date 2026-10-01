@@ -1,0 +1,34 @@
+{
+  "geoip": {
+    "meta": {
+      "name": "GeoIP",
+      "description": "Bancos de dados GeoIP usados para resolver o país, o ASN e a cidade de um IP cliente."
+    },
+    "settings": {
+      "MAXMIND_LICENSE_KEY": {
+        "label": "Chave de licença do MaxMind",
+        "help": "Chave de licença do MaxMind. Quando definida, os bancos de dados de país, ASN e cidade são baixados do MaxMind em vez do DB-IP."
+      },
+      "MAXMIND_ACCOUNT_ID": {
+        "label": "ID da conta MaxMind",
+        "help": "ID da conta MaxMind. Opcional, mas recomendado: sem ele, é usado o endpoint somente-chave (obsoleto), que leva a chave de licença na URL em vez de em um cabeçalho de autenticação."
+      },
+      "GEOIP_CITY": {
+        "label": "Banco de dados de cidades",
+        "help": "Baixa o banco de dados de cidades. É muito maior que os demais (o DB-IP City Lite descompactado tem 125 MB) e não vem incluído nas imagens."
+      },
+      "GEOIP_COUNTRY_MMDB": {
+        "label": "Banco de dados de país personalizado",
+        "help": "Banco de dados de país personalizado: caminho absoluto legível pelo worker, ou URL http(s). Tem prioridade sobre o MaxMind e o DB-IP."
+      },
+      "GEOIP_ASN_MMDB": {
+        "label": "Banco de dados de ASN personalizado",
+        "help": "Banco de dados de ASN personalizado: caminho absoluto legível pelo worker, ou URL http(s). Tem prioridade sobre o MaxMind e o DB-IP."
+      },
+      "GEOIP_CITY_MMDB": {
+        "label": "Banco de dados de cidade personalizado",
+        "help": "Banco de dados de cidade personalizado: caminho absoluto legível pelo worker, ou URL http(s). Tem prioridade sobre o MaxMind e o DB-IP."
+      }
+    }
+  }
+}

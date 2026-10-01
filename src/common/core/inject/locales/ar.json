@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "حقن HTML",
+      "description": "يحقن رمز HTML مخصصًا قبل وسم </body> أو </head>."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "كود HTML للجسم",
+        "help": "كود HTML المراد حقنه قبل وسم </body>."
+      },
+      "INJECT_HEAD": {
+        "label": "كود HTML للرأس",
+        "help": "كود HTML المراد حقنه قبل وسم </head>."
+      }
+    }
+  }
+}

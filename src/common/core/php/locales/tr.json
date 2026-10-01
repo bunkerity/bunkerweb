@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "Yerel veya uzak bir PHP-FPM'i yönetir."
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "Uzak PHP",
+        "help": "Uzak PHP-FPM örneğinin ana bilgisayar adı."
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "Uzak PHP yolu",
+        "help": "Uzak PHP-FPM örneğindeki dosyaları içeren kök klasör."
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "Uzak PHP portu",
+        "help": "Uzak PHP-FPM örneğinin portu."
+      },
+      "LOCAL_PHP": {
+        "label": "Yerel PHP",
+        "help": "PHP-FPM soket dosyasının yolu."
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "Yerel PHP yolu",
+        "help": "Yerel PHP-FPM örneğindeki dosyaları içeren kök klasör."
+      }
+    }
+  }
+}

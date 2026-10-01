@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "Özel SSL sertifikası",
+      "description": "SSL için özel bir sertifika seçin."
+    },
+    "settings": {
+      "CUSTOM_SSL_CERT": {
+        "label": "Sertifika yolu",
+        "help": "Sertifika veya paket dosyasının tam yolu. WORKER tarafından okunabilir olmalıdır; 1.7'de iş yürütme scheduler'dan taşındığından beri custom-cert işi orada çalışır - eski belgeler ne derse desin, scheduler tarafından değil. Docker Swarm altında, bunu bw-worker'a bağlayın ve bağlandığı yolu belirtin, örn. /run/secrets/example.com.pem; herkese açık olan bir sertifika için Swarm config uygundur."
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "Sertifika verisi (base64/düz metin)",
+        "help": "base64 veya düz metin PEM biçiminde kodlanmış sertifika verisi."
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "Sertifika önceliği",
+        "help": "Sertifikanın dosya yolundan mı yoksa base64 verisinden mi önceliklendirileceğini seçin. (file | data)"
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "Anahtar yolu",
+        "help": "Anahtar dosyasının tam yolu. WORKER tarafından okunabilir olmalıdır; 1.7'de iş yürütme scheduler'dan taşındığından beri custom-cert işi orada çalışır - eski belgeler ne derse desin, scheduler tarafından değil. Docker Swarm altında, özel anahtarı bw-worker'a bir Swarm SECRET olarak bağlayın ve bağlandığı yolu belirtin, örn. /run/secrets/example.com.key. Özel bir anahtarı asla Swarm config olarak göndermeyin: config'ler her yönetici düğümündeki raft deposunda şifrelenmemiş olarak saklanır."
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "Anahtar verisi (base64/düz metin)",
+        "help": "base64 veya düz metin PEM biçiminde kodlanmış anahtar verisi."
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "VARSAYILAN SUNUCU sertifika yolu",
+        "help": "Yapılandırılmış hiçbir hizmetle eşleşmeyen istekleri yanıtlayan blok olan VARSAYILAN SUNUCU tarafından sunulan sertifika veya paket dosyasının tam yolu. Dahili kendinden imzalı sertifikayı korumak için boş bırakın. WORKER tarafından okunabilir olmalıdır; custom-cert işi orada çalışır. Yapılandırılmış bir hizmetin ana bilgisayar adını da kapsayan bir sertifika reddedilir, çünkü bu durumda varsayılan sunucu o hizmet için yanıt verebilir hale gelir. Yalnızca MULTISITE=yes veya DISABLE_DEFAULT_SERVER=yes ise sunulur."
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "VARSAYILAN SUNUCU sertifika verisi (base64/düz metin)",
+        "help": "VARSAYILAN SUNUCU'nun base64 veya düz metin PEM biçiminde kodlanmış sertifika verisi. Yalnızca DEFAULT_SERVER_SSL_CERT boşsa kullanılır. Dahili kendinden imzalı sertifikayı korumak için ikisini de boş bırakın. Yalnızca MULTISITE=yes veya DISABLE_DEFAULT_SERVER=yes ise sunulur."
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "VARSAYILAN SUNUCU anahtar yolu",
+        "help": "Yapılandırılmış hiçbir hizmetle eşleşmeyen istekleri yanıtlayan blok olan (bilinmeyen SNI, ham IP erişimi) VARSAYILAN SUNUCU sertifikasının özel anahtarının tam yolu. Dahili kendinden imzalı sertifikayı korumak için boş bırakın. WORKER tarafından okunabilir olmalıdır; custom-cert işi orada çalışır. Docker Swarm altında, bunu bir Swarm SECRET olarak bağlayın, asla config olarak değil."
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "VARSAYILAN SUNUCU anahtar verisi (base64/düz metin)",
+        "help": "VARSAYILAN SUNUCU sertifikasının base64 veya düz metin PEM biçiminde kodlanmış anahtar verisi. Yalnızca DEFAULT_SERVER_SSL_KEY boşsa kullanılır. Dahili kendinden imzalı sertifikayı korumak için ikisini de boş bırakın."
+      },
+      "USE_CUSTOM_SSL": {
+        "label": "Özel sertifika kullan",
+        "help": "Özel SSL sertifikası kullan."
+      }
+    }
+  }
+}

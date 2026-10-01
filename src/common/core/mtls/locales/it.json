@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "TLS reciproco",
+      "description": "Richiede certificati client tramite TLS reciproco (mTLS)."
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "Usa TLS reciproco",
+        "help": "Attiva l'autenticazione del client con TLS reciproco."
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "Bundle CA del client",
+        "help": "Percorso assoluto al bundle CA client attendibile (PEM). Obbligatorio quando MTLS_VERIFY_CLIENT è impostato su on o optional."
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "Modalità di verifica del client",
+        "help": "Modalità di verifica del client. 'on' richiede un certificato valido, 'optional' lascia passare le richieste quando non viene presentato alcun certificato, e 'optional_no_ca' salta la validazione della CA (solo a scopo diagnostico, non una protezione reale)."
+      },
+      "MTLS_URL": {
+        "label": "URL mTLS",
+        "help": "Regex confrontata con l'URI della richiesta per richiedere un certificato client valido solo sui percorsi corrispondenti (solo HTTP). Imposta MTLS_VERIFY_CLIENT su optional affinché l'handshake si completi per i percorsi non corrispondenti; l'applicazione viene eseguita per ogni richiesta in Lua. Una regex non valida fallisce in modo chiuso (le richieste corrispondenti vengono negate e registrate) invece di essere consentita silenziosamente. Usa slot numerati per più percorsi (MTLS_URL_1, MTLS_URL_2). Lascia vuoto per applicare mTLS all'intero sito."
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "Profondità di verifica",
+        "help": "Profondità massima della catena di certificati accettata durante la verifica del client."
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "Inoltra intestazioni client",
+        "help": "Inoltra i risultati della verifica ai backend a monte utilizzando le intestazioni X-SSL-Client-*. Le intestazioni X-SSL-* fornite dal client vengono sempre rimosse in ingresso, quindi questi valori non possono essere falsificati."
+      },
+      "MTLS_CRL": {
+        "label": "Percorso CRL del client",
+        "help": "Percorso assoluto facoltativo a una lista di revoca dei certificati (PEM). Lascia vuoto per saltare i controlli CRL."
+      }
+    }
+  }
+}

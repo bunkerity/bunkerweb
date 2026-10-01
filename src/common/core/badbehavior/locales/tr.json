@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "Kötü davranış",
+      "description": "Belirli bir sürede çok fazla 'kötü' HTTP durum kodu üreten bir IP'yi yasaklar."
+    },
+    "settings": {
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "Yasaklama kapsamı",
+        "help": "Yasaklamanın düzeyini belirler. 'service' IP'yi yalnızca ilgili hizmet için, 'global' IP'yi tüm sistem için yasaklar."
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "Yasaklama süresi (saniye)",
+        "help": "İlgili IP eşiğe ulaştığında uygulanan yasaklamanın süresi (saniye). (Kalıcı olarak yasaklamak için 0 olarak ayarlayın)"
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "Süre (saniye)",
+        "help": "'Kötü' HTTP durum kodlarını saydığımız süre (saniye)."
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "Kötü durum kodları",
+        "help": "'Kötü' olarak kabul edilen HTTP durum kodlarının listesi."
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "Eşik",
+        "help": "IP yasaklanmadan önce, süre içinde izin verilen maksimum 'kötü' HTTP durum kodu sayısı."
+      },
+      "USE_BAD_BEHAVIOR": {
+        "label": "Bad behavior'ı etkinleştir",
+        "help": "Bad behavior özelliğini etkinleştir."
+      }
+    }
+  }
+}

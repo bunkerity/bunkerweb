@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "robots.txt فائل کا انتظام کرتا ہے۔ آپ کی سائٹ تک ویب کرالرز کی رسائی کو کنٹرول کرنے کا ایک معیار۔"
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "robots.txt استعمال کریں",
+        "help": "robots.txt فائل فعال کریں۔"
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "کمیونٹی robots.txt فہرستیں",
+        "help": "robots.txt میں شامل کرنے کے لیے کمیونٹی کی برقرار رکھی گئی فہرستیں منتخب کریں۔"
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "Robots.txt یو آر ایلز",
+        "help": "URLs کی فہرست، اسپیس سے الگ، جن میں robots.txt قواعد شامل ہیں۔ file:// یو آر ایلز اور http://user:pass@url اسکیم کے ذریعے بیسک آتھ بھی معاون ہے۔"
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Robots.txt قاعدہ",
+        "help": "robots.txt کے لیے قواعد (فی سطر ایک)۔"
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Robots.txt ہیڈر",
+        "help": "robots.txt فائل کا ہیڈر (قواعد سے پہلے)۔ Base64 میں انکوڈ کیا جا سکتا ہے۔"
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Robots.txt فوٹر",
+        "help": "robots.txt فائل کا فوٹر (قواعد کے بعد)۔ Base64 میں انکوڈ کیا جا سکتا ہے۔"
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Robots.txt سائٹ میپ",
+        "help": "robots.txt میں شامل کرنے کے لیے سائٹ میپ URL(s)۔"
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "قاعدہ نظر انداز کریں",
+        "help": "نظر انداز کرنے کے لیے قاعدہ (PCRE ریجیکس)۔ کئی بار متعین کیا جا سکتا ہے۔"
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "DarkVisitors API ٹوکن",
+        "help": "DarkVisitors API کے لیے Bearer ٹوکن۔"
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "DarkVisitors ایجنٹ اقسام",
+        "help": "DarkVisitors API سے رابطہ کرتے وقت DarkVisitors کے agent_types فیلڈ میں شامل کرنے کے لیے کوما سے الگ ایجنٹ اقسام کی فہرست۔"
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "ایک سٹرنگ جو بتاتی ہے کون سے URLs غیر مجاز ہیں۔ DarkVisitors API سے رابطہ کرتے وقت یہ ویلیو disallow فیلڈ کے طور پر بھیجی جائے گی۔"
+      }
+    }
+  }
+}

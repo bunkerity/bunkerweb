@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "ایک چیلنج کے ذریعے بوٹس کی شناخت۔"
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "چیلنجز",
+        "subtitle": "ناکام"
+      }
+    },
+    "settings": {
+      "USE_ANTIBOT": {
+        "label": "Antibot چیلنج",
+        "help": "Antibot خصوصیت فعال کریں۔"
+      },
+      "ANTIBOT_URI": {
+        "label": "Antibot یو آر ایل",
+        "help": "غیر مستعمل URI جس کی طرف کلائنٹس کو چیلنج حل کرنے کے لیے ری ڈائریکٹ کیا جائے گا۔"
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "حل کرنے کا وقت",
+        "help": "چیلنج حل کرنے کے لیے کلائنٹس کے پاس زیادہ سے زیادہ وقت (سیکنڈوں میں)۔ یہ وقت گزرنے کے بعد، ایک نیا چیلنج تیار کیا جائے گا۔"
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "درست وقت",
+        "help": "حل شدہ چیلنجز کی زیادہ سے زیادہ درستگی کی مدت۔ یہ وقت گزرنے کے بعد، کلائنٹس کو ایک نیا چیلنج حل کرنا ہوگا۔"
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "کامیابی پر ری ڈائریکٹ یو آر ایل",
+        "help": "چیلنج حل کرنے کے بعد کلائنٹس کو جس مقررہ URI کی طرف ری ڈائریکٹ کیا جائے، اصل درخواست کردہ صفحے کے بجائے۔ اصل درخواست کردہ صفحے پر واپس جانے کے لیے خالی چھوڑ دیں۔"
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "کیپچا حروفِ تہجی",
+        "help": "کیپچا تیار کرنے کے لیے استعمال ہونے والی مخصوص حروفِ تہجی۔ کیپچا اس سٹرنگ کے بے ترتیب حروف سے بنے گا۔ معاون حروف: تمام حروف (a-z، A-Z)، نمبر 2-9، اور معاون خصوصی حروف (مکمل فہرست کے لیے دستاویزات دیکھیں)۔"
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "نظر انداز کردہ URI",
+        "help": "PCRE ریجیکس پیٹرنز کی فہرست (اسپیس سے الگ) ان URIs کے لیے جنہیں Antibot چیلنج سے خارج کیا جانا چاہیے۔ پیٹرنز کو پاتھ اور کوئری سٹرنگ کے ساتھ مکمل درخواست URI کے خلاف چیک کیا جاتا ہے۔"
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "نظر انداز کردہ IP/نیٹ ورک",
+        "help": "IP/نیٹ ورک کی فہرست، اسپیس سے الگ، Antibot چیلنج نظر انداز کرنے کے لیے۔"
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "نظر انداز کردہ ریورس DNS",
+        "help": "ریورس DNS لاحقوں کی فہرست، اسپیس سے الگ، Antibot چیلنج نظر انداز کرنے کے لیے۔"
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "Antibot ریورس DNS گلوبل IPs",
+        "help": "صرف گلوبل IP پتوں پر RDNS Antibot چیکس انجام دیں۔"
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "نظر انداز کردہ ASN",
+        "help": "ASN نمبروں کی فہرست، اسپیس سے الگ، Antibot چیلنج نظر انداز کرنے کے لیے۔"
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "نظر انداز کردہ User-Agent",
+        "help": "User-Agent (PCRE ریجیکس) کی فہرست، اسپیس سے الگ، Antibot چیلنج نظر انداز کرنے کے لیے۔"
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "نظر انداز کردہ ہیڈر کا نام",
+        "help": "ایک درخواست ہیڈر کا نام جو درخواست کو Antibot چیلنج سے مستثنیٰ کرتا ہے۔ کوئی بھی کلائنٹ یہ ہیڈر بھیج سکتا ہے: اسے مشترکہ راز کے طور پر برتیں، صرف HTTPS پر۔"
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "نظر انداز کردہ ہیڈر ویلیو",
+        "help": "وہ ویلیو (PCRE ریجیکس) جس سے ہیڈر کا میچ ہونا ضروری ہے تاکہ درخواست کو Antibot چیلنج سے استثنیٰ ملے۔ صرف ہیڈر کی موجودگی پر میچ کرنے کے لیے خالی چھوڑ دیں۔ اسے ^ اور $ سے اینکر کریں: میچ بطور ڈیفالٹ اینکر شدہ نہیں ہے۔"
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "نظر انداز کردہ ممالک",
+        "help": "ISO 3166-1 alpha-2 ممالک کے کوڈز کی فہرست، اسپیس سے الگ، Antibot چیلنج نظر انداز کرنے کے لیے۔"
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "صرف ان ممالک کو چیلنج کریں",
+        "help": "ISO 3166-1 alpha-2 ممالک کے کوڈز کی فہرست، اسپیس سے الگ، جنہیں Antibot چیلنج ملنا چاہیے۔"
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "reCAPTCHA v3 اسکور",
+        "help": "reCAPTCHA چیلنج کے لیے مطلوبہ کم از کم اسکور (صرف reCAPTCHA v3 کے ساتھ مطابقت رکھتا ہے)۔"
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "reCAPTCHA سائٹ کلید",
+        "help": "reCAPTCHA چیلنج کے لیے سائٹ کلید۔"
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "reCAPTCHA راز",
+        "help": "reCAPTCHA چیلنج کے لیے راز۔"
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "کلاسک reCAPTCHA استعمال کریں",
+        "help": "نئے ورژن کے بجائے کلاسک reCAPTCHA استعمال کریں۔"
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "reCAPTCHA پراجیکٹ آئی ڈی",
+        "help": "reCAPTCHA چیلنج کے لیے پراجیکٹ آئی ڈی۔"
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "reCAPTCHA API کلید",
+        "help": "reCAPTCHA چیلنج کے لیے API کلید۔"
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "TLS کلائنٹ کے لیے JA4 فنگر پرنٹ۔ ہم JA4 فنگر پرنٹ کے حساب کے لیے FoxIO-LLC/ja4 استعمال کرنے کی سفارش کرتے ہیں۔"
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "TLS کلائنٹ کے لیے JA3 فنگر پرنٹ۔ ہم JA3 فنگر پرنٹ کے حساب کے لیے salesforce/ja3 استعمال کرنے کی سفارش کرتے ہیں۔"
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "hCaptcha سائٹ کلید",
+        "help": "hCaptcha چیلنج کے لیے سائٹ کلید۔"
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "hCaptcha راز",
+        "help": "hCaptcha چیلنج کے لیے راز۔"
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Turnstile سائٹ کلید",
+        "help": "Turnstile چیلنج کے لیے سائٹ کلید۔"
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Turnstile راز",
+        "help": "Turnstile چیلنج کے لیے راز۔"
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "mCaptcha سائٹ کلید",
+        "help": "mCaptcha چیلنج کے لیے سائٹ کلید۔"
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "mCaptcha راز",
+        "help": "mCaptcha چیلنج کے لیے راز۔"
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "mCaptcha ڈومین",
+        "help": "mCaptcha چیلنج کے لیے استعمال ہونے والا ڈومین۔"
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "Cap.js فرنٹ اینڈ یو آر ایل",
+        "help": "وہ عوامی اوریجن جہاں سے براؤزر Cap.js وجیٹ لوڈ کرتا ہے (مثلاً https://cap.example.com)۔ صرف اوریجن، کوئی پاتھ نہیں۔"
+      },
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "Cap.js بیک اینڈ یو آر ایل",
+        "help": "وہ اندرونی اوریجن جسے BunkerWeb /siteverify کے لیے کال کرتا ہے (مثلاً http://cap-server:3000)۔ صرف اوریجن، کوئی پاتھ نہیں۔ خالی ہونے پر فرنٹ اینڈ یو آر ایل پر واپس چلا جاتا ہے۔"
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Cap.js سائٹ کلید",
+        "help": "اس سائٹ کے لیے Cap.js ڈیش بورڈ میں بنائی گئی سائٹ کلید۔"
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Cap.js راز",
+        "help": "سائٹ کلید کے ساتھ جوڑا گیا راز، جسے BunkerWeb /siteverify کالز کی توثیق کے لیے استعمال کرتا ہے۔"
+      }
+    }
+  }
+}

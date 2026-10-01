@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "meta": {
+      "name": "Fehler",
+      "description": "Verwaltet die Standard-Fehlerseiten"
+    },
+    "settings": {
+      "ERRORS": {
+        "label": "Fehler",
+        "help": "Liste von HTTP-Fehlercodes und den zugehörigen Fehlerseiten, durch Leerzeichen getrennt (404=/my404.html 403=/errors/403.html ...)."
+      },
+      "INTERCEPTED_ERROR_CODES": {
+        "label": "Abgefangene Fehlercodes",
+        "help": "Liste der von BunkerWeb abgefangenen HTTP-Fehlercodes, durch Leerzeichen getrennt."
+      }
+    }
+  }
+}

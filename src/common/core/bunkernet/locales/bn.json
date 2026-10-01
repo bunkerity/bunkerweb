@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "BunkerNet-এর মাধ্যমে অন্যান্য BunkerWeb ইনস্ট্যান্সের সাথে হুমকি সংক্রান্ত ডেটা শেয়ার করে।"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "BUNKERNET অবস্থা"
+      },
+      "info_connectivity": {
+        "title": "সংযোগ"
+      },
+      "info_instance_id": {
+        "title": "ইনস্ট্যান্স ID"
+      }
+    },
+    "settings": {
+      "USE_BUNKERNET": {
+        "label": "BunkerNet সক্রিয় করুন",
+        "help": "BunkerNet বৈশিষ্ট্য সক্রিয় করুন।"
+      },
+      "BUNKERNET_SERVER": {
+        "label": "BunkerNet সার্ভার",
+        "help": "BunkerNet API-এর ঠিকানা।"
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "BunkerNet কার্যকারিতা পরিসংখ্যান",
+        "help": "BunkerNet কার্যকারিতা পরিসংখ্যান (অবদান, ব্লকলিস্টের আকার, সংযোগ) ডেটাবেসে সংরক্ষণ করুন।"
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "BunkerNet পরিসংখ্যান ধারণকাল (দিন)",
+        "help": "সংরক্ষিত BunkerNet কার্যকারিতা পরিসংখ্যানের সর্বোচ্চ বয়স (দিনে)।"
+      }
+    }
+  }
+}

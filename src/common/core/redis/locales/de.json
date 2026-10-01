@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "Konfiguration des Redis-Servers bei Verwendung von BunkerWeb im Clustermodus."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "REDIS-STATUS"
+      },
+      "counter_redis_nb_keys": {
+        "title": "REDIS-SCHLÜSSEL",
+        "subtitle": "Anzahl der Schlüssel"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Redis aktivieren",
+        "help": "Aktiviert Redis."
+      },
+      "REDIS_HOST": {
+        "label": "Redis-Server",
+        "help": "IP oder Hostname des Redis-Servers."
+      },
+      "REDIS_PORT": {
+        "label": "Redis-Port",
+        "help": "Port des Redis-Servers."
+      },
+      "REDIS_DATABASE": {
+        "label": "Redis-Datenbank",
+        "help": "Nummer der Redis-Datenbank."
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Verwendet eine SSL/TLS-Verbindung mit dem Redis-Server."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Redis-SSL/TLS-Prüfung",
+        "help": "Überprüft das Zertifikat des Redis-Servers."
+      },
+      "REDIS_SSL_CA": {
+        "label": "Redis SSL/TLS-CA-Bundle",
+        "help": "Pfad zu einem PEM-CA-Bundle, das zur Überprüfung des Redis-/Valkey-Serverzertifikats verwendet wird (private CA); nicht gesetzt bedeutet den System-Vertrauensspeicher. Wenn gesetzt, wird es von den Python-Clients (Celery-Broker, Jobs, API-Ratenbegrenzer, bwcli, Web-UI) vertraut und an das NGINX-Lua-Vertrauensbundle angehängt, sodass auch der Anfragepfad ihm vertraut. Wird dort gelesen, wo die Konfiguration generiert wird, und von jedem Client, daher muss die Datei dort unter diesem Pfad existieren; ein fehlendes oder ungültiges Bundle lässt die Konfigurationsgenerierung fehlschlagen."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Redis-Timeout (ms)",
+        "help": "Timeout des Redis-Servers (in ms) für Verbindung, Lesen und Schreiben."
+      },
+      "REDIS_USERNAME": {
+        "label": "Redis-Benutzername",
+        "help": "Redis-Benutzername, der im AUTH-Befehl verwendet wird."
+      },
+      "REDIS_PASSWORD": {
+        "label": "Redis-Passwort",
+        "help": "Redis-Passwort, das im AUTH-Befehl verwendet wird."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Redis-Sentinel-Hosts",
+        "help": "Redis-Sentinel-Hosts im Format host:[port], durch Leerzeichen getrennt."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Redis-Sentinel-Benutzername",
+        "help": "Redis-Sentinel-Benutzername."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Redis-Sentinel-Passwort",
+        "help": "Redis-Sentinel-Passwort."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Redis-Sentinel-Master",
+        "help": "Name des Redis-Sentinel-Masters."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Redis-Keepalive-Leerlauf (ms)",
+        "help": "Maximale Leerlaufzeit (in ms), bevor eine Redis-Verbindung im Pool geschlossen wird."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Redis-Keepalive-Pool",
+        "help": "Maximale Anzahl an Redis-Verbindungen, die pro NGINX-Worker im Pool gehalten werden. Im stationären Zustand betragen die Verbindungen ungefähr nginx_workers x pool x instances und müssen innerhalb des maxclients-Limits von Redis/Valkey bleiben."
+      }
+    }
+  }
+}

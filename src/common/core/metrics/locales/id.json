@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "Metrik",
+      "description": "Pengumpulan dan pengambilan metrik."
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "Gunakan metrik",
+        "help": "Aktifkan pengumpulan dan pengambilan metrik internal."
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "Ukuran memori metrik",
+        "help": "Ukuran penyimpanan internal untuk metrik."
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "Percobaan ulang maksimum memori metrik",
+        "help": "Jumlah maksimum percobaan ulang untuk operasi memori."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "Permintaan diblokir maksimum metrik",
+        "help": "Jumlah maksimum permintaan yang diblokir untuk disimpan (per worker). Menerima bilangan bulat biasa atau singkatan `k`/`m` (mis., `1000`, `1k`, `10k`, `1m`)."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "Permintaan diblokir maksimum metrik Redis",
+        "help": "Jumlah maksimum permintaan yang diblokir untuk disimpan di Redis. Menerima bilangan bulat biasa atau singkatan `k`/`m` (mis., `10000`, `10k`, `100k`, `1m`)."
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "TTL Redis Metrik",
+        "help": "Time-to-live dalam detik untuk key metrik yang disimpan di Redis (default `2592000`, 30 hari; `0` membuat key permanen). Diperbarui pada setiap sinkronisasi sehingga data aktif tidak pernah kedaluwarsa; dengan kebijakan eviction `volatile-lru`, ini memungkinkan data metrik yang ditinggalkan menjadi dapat dievict sehingga Redis pulih dari maxmemory alih-alih menolak penulisan selamanya. Menerima bilangan bulat biasa atau singkatan `k`/`m`."
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "Riwayat LRU maksimum",
+        "help": "Membatasi riwayat event LRU per worker: membatasi jumlah slot LRU dan panjang array riwayat event per key (jejak blokir, jejak autentikasi, dll.). Menerima bilangan bulat biasa atau singkatan `k`/`m` (mis., `1k`, `10k`, `1m`). Membatasi pertumbuhan tak terbatas dari sumber berkardinalitas tinggi seperti banjir IP palsu."
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "Kumpulkan timing plugin",
+        "help": "Mengukur berapa lama setiap plugin berjalan di setiap fase permintaan, diekspos sebagai agregat count/sum/max per (plugin, fase). Memerlukan pemaksaan refresh waktu NGINX di sekitar setiap panggilan plugin, sehingga menambah kira-kira satu mikrodetik per permintaan di seluruh rantai plugin; atur ke `no` untuk menghilangkan biaya ini sepenuhnya. Durasi seluruh permintaan selalu dikumpulkan dan tidak dipengaruhi oleh pengaturan ini."
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "Rate sampling baseline lalu lintas (%)",
+        "help": "Persentase permintaan yang tidak diblokir yang dicatat sebagai baseline lalu lintas, agar deteksi anomali dapat mempelajari seperti apa kondisi normal (`0` menonaktifkannya, `1` mengambil sampel satu dari seratus permintaan). Sampling bersifat deterministik berdasarkan id permintaan, sehingga keputusannya stabil di seluruh subpermintaan. IP klien tidak pernah disimpan. Pengumpulan tidak menambah beban pada jalur permintaan, tetapi volumenya besar: 1% dari 10 ribu req/dtk adalah sekitar 8,6 juta rekaman per hari, yang kemudian dipangkas oleh `METRICS_BASELINE_RETENTION_MAX_ROWS`. Naikkan nilai ini dengan sengaja."
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "Permintaan baseline maksimum metrik",
+        "help": "Jumlah maksimum rekaman baseline yang disampel untuk disimpan per worker sebelum yang tertua dibuang. Buffer ini berbagi METRICS_MEMORY_SIZE dengan laporan permintaan diblokir dan metrik lainnya, tetapi akan dibuang alih-alih mengeviksi mereka saat ruang habis. Menerima bilangan bulat biasa atau singkatan `k`/`m`. Turunkan sample rate alih-alih menaikkan nilai ini."
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "Retensi baseline (hari)",
+        "help": "Usia maksimum (dalam hari) rekaman baseline yang disampel sebelum job retensi menghapusnya. Sengaja dibuat lebih pendek dari retensi laporan diblokir: baseline tumbuh jauh lebih cepat, dan model dilatih pada perilaku normal terbaru, bukan pada riwayat."
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "Retensi baseline (baris maks.)",
+        "help": "Jumlah maksimum rekaman baseline yang disampel untuk disimpan; job retensi menghapus baris tertua di luar jumlah ini. Terpisah dari batas laporan diblokir karena kedua tabel tumbuh dengan laju yang sangat berbeda."
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "Simpan metrik ke Redis",
+        "help": "Simpan metrik (counter dan tabel) ke Redis untuk agregasi seluruh cluster."
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "Persist laporan ke database",
+        "help": "Persist laporan permintaan diblokir ke database (tahan lama, dapat dikueri) dengan secara berkala mengambil data dari instance. Saat dinonaktifkan, laporan hanya tetap berada di penyimpanan in-memory/Redis."
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "Retensi laporan (hari)",
+        "help": "Usia maksimum (dalam hari) laporan permintaan diblokir yang di-persist sebelum job retensi menghapusnya."
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "Retensi laporan (baris maks.)",
+        "help": "Jumlah maksimum laporan permintaan diblokir yang di-persist untuk disimpan; job retensi menghapus baris tertua di luar jumlah ini."
+      }
+    }
+  }
+}

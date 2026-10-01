@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "管理与 SSL/TLS 相关的设置。"
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "将 HTTP 重定向到 HTTPS",
+        "help": "将所有 HTTP 请求重定向到 HTTPS。"
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "自动将 HTTP 重定向到 HTTPS",
+        "help": "尝试检测是否使用了 HTTPS,若是,则启用 HTTP 到 HTTPS 的重定向。"
+      },
+      "SSL_PROTOCOLS": {
+        "label": "SSL 协议",
+        "help": "支持的 TLS 版本。出于兼容性考虑,我们建议使用默认值 TLSv1.2 TLSv1.3。"
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "SSL 加密套件级别",
+        "help": "SSL 加密套件的预设安全级别。'Modern' 最安全,但可能无法在较旧的设备上使用。"
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "自定义 SSL 加密套件",
+        "help": "自定义 SSL 加密套件字符串。若指定,将覆盖 SSL 加密套件级别。留空则使用基于级别的配置。"
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "SSL ECDH 曲线",
+        "help": "用于密钥交换的首选 ECDH 曲线(TLS 组)。使用 \"auto\" 可进行智能选择(在 OpenSSL 3.5+ 上,若可用,则优先选用 X25519MLKEM768 等 PQC 组)。"
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "SSL 会话缓存大小",
+        "help": "SSL 会话缓存的大小(例如 '10m' 表示 10 兆字节,'512k' 表示 512 千字节)。设为 'off' 或 'none' 可禁用会话缓存。"
+      }
+    }
+  }
+}

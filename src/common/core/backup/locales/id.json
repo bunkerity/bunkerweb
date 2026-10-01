@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Cadangan",
+      "description": "Cadangkan data Anda ke lokasi khusus. Pastikan keamanan dan ketersediaan berkas penting Anda dengan membuat cadangan secara berkala."
+    },
+    "settings": {
+      "BACKUP_DIRECTORY": {
+        "label": "Direktori backup",
+        "help": "Direktori tempat backup akan disimpan"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Rotasi backup",
+        "help": "Jumlah backup yang disimpan"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Strategi rotasi backup",
+        "help": "Cara backup lama dipilih untuk dihapus: fifo menyimpan yang paling baru, hanoi menyimpan tangga Menara Hanoi (rapat di dekat masa kini, jarang semakin jauh ke belakang) untuk jumlah file yang sama"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Jadwal backup",
+        "help": "Frekuensi backup (harian, mingguan, atau bulanan)"
+      },
+      "USE_BACKUP": {
+        "label": "Aktifkan backup otomatis",
+        "help": "Aktifkan atau nonaktifkan fitur backup"
+      }
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Cadangan Terakhir"
+      }
+    }
+  }
+}

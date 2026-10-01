@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "Menolak akses berdasarkan server DNSBL eksternal."
+    },
+    "settings": {
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "Nama header yang diabaikan",
+        "help": "Nama header permintaan yang membebaskan permintaan dari pemeriksaan DNSBL. Klien mana pun dapat mengirim header ini: perlakukan sebagai rahasia bersama, hanya melalui HTTPS."
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "Nilai header yang diabaikan",
+        "help": "Nilai (regex PCRE) yang harus dicocokkan oleh header untuk mengecualikan permintaan dari pemeriksaan DNSBL. Biarkan kosong agar cocok berdasarkan keberadaan header saja. Jangkarkan dengan ^ dan $: kecocokan tidak dijangkarkan secara default."
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "DNSBL – IP/jaringan yang diabaikan",
+        "help": "Daftar IP/jaringan, dipisahkan dengan spasi, yang diabaikan untuk pemeriksaan DNSBL."
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "URL DNSBL – IP/jaringan yang diabaikan",
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi IP/jaringan yang diabaikan untuk pemeriksaan DNSBL. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+      },
+      "DNSBL_LIST": {
+        "label": "Daftar DNSBL",
+        "help": "Daftar server DNSBL."
+      },
+      "USE_DNSBL": {
+        "label": "Aktifkan DNSBL",
+        "help": "Aktifkan fitur DNSBL."
+      }
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "Permintaan diblokir"
+      }
+    }
+  }
+}

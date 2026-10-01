@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "Header",
+      "description": "Mengelola header HTTP yang dikirim ke klien."
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "Header kustom (HeaderName: HeaderValue)",
+        "help": "Header kustom yang akan ditambahkan (HeaderName: HeaderValue)."
+      },
+      "REMOVE_HEADERS": {
+        "label": "Hapus header",
+        "help": "Header yang akan dihapus (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "Pertahankan header upstream",
+        "help": "Header yang dipertahankan dari upstream (Header1 Header2 Header3 ... atau * untuk semua)."
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Nilai untuk header Strict-Transport-Security (HSTS)."
+      },
+      "COOKIE_FLAGS": {
+        "label": "Flag cookie",
+        "help": "Flag cookie yang otomatis ditambahkan ke semua cookie (nilai yang diterima untuk nginx_cookie_flag_module)."
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "Flag Secure otomatis untuk cookie",
+        "help": "Otomatis tambahkan flag Secure ke semua cookie."
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Nilai untuk header Content-Security-Policy."
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Kirim laporan untuk pelanggaran header Content-Security-Policy alih-alih memblokirnya."
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Nilai untuk header Referrer-Policy."
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Nilai untuk header Permissions-Policy."
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "Nilai untuk header X-Frame-Options."
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "Nilai untuk header X-Content-Type-Options."
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "Nilai untuk header X-DNS-Prefetch-Control."
+      }
+    }
+  }
+}

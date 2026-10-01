@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Varredura reversa",
+      "description": "Reforça a segurança ao varrer as portas do cliente para detectar e bloquear conexões vindas de proxies ou servidores, ajudando a impedir a burla das medidas de segurança."
+    },
+    "settings": {
+      "USE_REVERSE_SCAN": {
+        "label": "Varredura reversa",
+        "help": "Ativa a varredura de portas dos clientes e nega o acesso se alguma estiver aberta."
+      },
+      "REVERSE_SCAN_PORTS": {
+        "label": "Portas da varredura reversa",
+        "help": "Lista de portas a varrer ao usar o recurso de varredura reversa."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Tempo limite da varredura reversa",
+        "help": "Especifica o tempo limite máximo (em ms) ao varrer uma porta."
+      }
+    }
+  }
+}

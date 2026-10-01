@@ -1,0 +1,14 @@
+{
+  "workflows": {
+    "meta": {
+      "name": "Przepływy zabezpieczeń",
+      "description": "Twórz wielokrotnego użytku polityki bezpieczeństwa: uporządkowane reguły łączące drzewo warunków dla adresu IP, kraju, ASN, URI i metody z opcjonalnym progiem częstotliwości i jedną akcją końcową (wyzwanie, blokada lub przekierowanie)."
+    },
+    "settings": {
+      "WORKFLOWS_REGEX_BUDGET": {
+        "label": "Budżet wyrażeń regularnych przepływu",
+        "help": "Maksymalna liczba odrębnych wyrażeń regularnych kompilowanych we wszystkich regułach przepływów. NGINX współdzieli jedną pamięć podręczną wyrażeń regularnych między wszystkimi wtyczkami, więc reguły przekraczające ten budżet są wyłączane zamiast po cichu degradować całą instancję."
+      }
+    }
+  }
+}

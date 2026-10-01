@@ -1,0 +1,8 @@
+{
+  "jobs": {
+    "meta": {
+      "name": "Tarefas",
+      "description": "Plugin core fictício para tarefas internas."
+    }
+  }
+}

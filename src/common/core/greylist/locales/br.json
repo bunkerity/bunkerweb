@@ -1,0 +1,76 @@
+{
+  "greylist": {
+    "meta": {
+      "name": "Lista cinza",
+      "description": "Permite o acesso mantendo os recursos de segurança baseados em listas cinzas internas e externas de IP/rede/rDNS/ASN."
+    },
+    "widgets": {
+      "counter_failed_greylist": {
+        "title": "LISTA CINZA",
+        "subtitle": "Requisição bloqueada"
+      }
+    },
+    "settings": {
+      "USE_GREYLIST": {
+        "label": "Ativar lista cinza",
+        "help": "Ativa o recurso de lista cinza."
+      },
+      "GREYLIST_IP": {
+        "label": "IP/rede da lista cinza",
+        "help": "Lista de IP/rede, separados por espaços, a colocar na lista cinza."
+      },
+      "GREYLIST_RDNS": {
+        "label": "DNS reverso da lista cinza",
+        "help": "Lista de sufixos de DNS reverso, separados por espaços, a colocar na lista cinza."
+      },
+      "GREYLIST_RDNS_GLOBAL": {
+        "label": "IPs globais de DNS reverso da lista cinza",
+        "help": "Realiza verificações de RDNS da lista cinza somente em endereços IP globais."
+      },
+      "GREYLIST_ASN": {
+        "label": "ASN da lista cinza",
+        "help": "Lista de números de ASN, separados por espaços, a colocar na lista cinza."
+      },
+      "GREYLIST_USER_AGENT": {
+        "label": "User-Agent da lista cinza",
+        "help": "Lista de User-Agent (expressão regular PCRE), separados por espaços, a colocar na lista cinza."
+      },
+      "GREYLIST_URI": {
+        "label": "URI da lista cinza",
+        "help": "Lista de URI (expressão regular PCRE), separados por espaços, a colocar na lista cinza."
+      },
+      "GREYLIST_RULE": {
+        "label": "Regra da lista cinza",
+        "help": "Regra composta: todos os termos devem corresponder para que a regra corresponda. Os termos são separados por \" AND \" (em maiúsculas) e cada um tem o formato [NOT ]<kind>:<value>, em que <kind> é ip, country, asn, rdns, ua (alias de user_agent) ou uri. Exemplo: ip:10.0.0.0/8 AND NOT ua:^curl. As regras são combinadas com OR entre si e com as listas simples acima. Um valor pode ser um token de grupo de recursos como @office. Serviços de stream avaliam apenas ip, country, asn e rdns."
+      },
+      "GREYLIST_HEADER_NAME": {
+        "label": "Nome do cabeçalho da lista cinza",
+        "help": "Nome de um cabeçalho de requisição que adiciona a requisição à lista cinza. Qualquer cliente pode enviar esse cabeçalho: trate-o como um segredo compartilhado, apenas em HTTPS."
+      },
+      "GREYLIST_HEADER_VALUE": {
+        "label": "Valor do cabeçalho da lista cinza",
+        "help": "Valor (expressão regular PCRE) que o cabeçalho deve corresponder para adicionar a requisição à lista cinza. Deixe vazio para corresponder apenas à presença do cabeçalho. Ancore-o com ^ e $: a correspondência não é ancorada por padrão."
+      },
+      "GREYLIST_IP_URLS": {
+        "label": "URLs de IP/rede da lista cinza",
+        "help": "Lista de URLs, separadas por espaços, contendo IP/rede confiáveis a colocar na lista cinza. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url."
+      },
+      "GREYLIST_RDNS_URLS": {
+        "label": "URLs de DNS reverso da lista cinza",
+        "help": "Lista de URLs, separadas por espaços, contendo sufixos de DNS reverso a colocar na lista cinza. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url."
+      },
+      "GREYLIST_ASN_URLS": {
+        "label": "URLs de ASN da lista cinza",
+        "help": "Lista de URLs, separadas por espaços, contendo ASN a colocar na lista cinza. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url."
+      },
+      "GREYLIST_USER_AGENT_URLS": {
+        "label": "URLs de User-Agent da lista cinza",
+        "help": "Lista de URLs, separadas por espaços, contendo User-Agent confiáveis a colocar na lista cinza. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url."
+      },
+      "GREYLIST_URI_URLS": {
+        "label": "URLs de URI da lista cinza",
+        "help": "Lista de URLs, separadas por espaços, contendo URI maliciosas a colocar na lista cinza. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url."
+      }
+    }
+  }
+}

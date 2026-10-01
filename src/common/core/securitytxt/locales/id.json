@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "Mengelola berkas security.txt. Standar yang diusulkan yang memungkinkan situs web menentukan kebijakan keamanan mereka."
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "Gunakan security.txt",
+        "help": "Aktifkan file security.txt."
+      },
+      "SECURITYTXT_URI": {
+        "label": "URI Security.txt",
+        "help": "Menunjukkan URI tempat file \"security.txt\" akan dapat diakses."
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Kontak Security.txt",
+        "help": "Menunjukkan metode yang harus digunakan peneliti untuk melaporkan kerentanan keamanan, seperti alamat email, nomor telepon, dan/atau halaman web berisi informasi kontak. (Jika nilai kosong, file security.txt tidak akan dibuat karena ini adalah field wajib)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Kedaluwarsa Security.txt",
+        "help": "Menunjukkan tanggal dan waktu setelah data yang terdapat dalam file \"security.txt\" dianggap usang dan tidak boleh digunakan (jika nilai kosong, nilainya akan selalu berupa tanggal dan waktu saat ini + 1 tahun)."
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Enkripsi Security.txt",
+        "help": "Menunjukkan kunci enkripsi yang harus digunakan peneliti keamanan untuk komunikasi terenkripsi."
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Ucapan terima kasih Security.txt",
+        "help": "Menunjukkan tautan ke halaman tempat peneliti keamanan diakui atas laporan mereka."
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Bahasa pilihan Security.txt",
+        "help": "Dapat digunakan untuk menunjukkan sekumpulan bahasa alami yang lebih disukai saat mengirimkan laporan keamanan."
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Kanonik Security.txt",
+        "help": "Menunjukkan URI kanonik tempat file \"security.txt\" berada, yang biasanya berupa \"https://example.com/.well-known/security.txt\". (Jika nilai kosong, nilai default akan otomatis dibuat dari URL situs + SECURITYTXT_URI)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Kebijakan Security.txt",
+        "help": "Menunjukkan tautan ke lokasi kebijakan pengungkapan kerentanan."
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Perekrutan Security.txt",
+        "help": "Digunakan untuk menautkan ke posisi pekerjaan terkait keamanan dari vendor."
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "Tautan ke provider-metadata.json dari penyedia CSAF (Common Security Advisory Framework) Anda."
+      }
+    }
+  }
+}

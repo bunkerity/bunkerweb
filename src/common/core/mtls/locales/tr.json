@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "Karşılıklı TLS",
+      "description": "Karşılıklı TLS (mTLS) kullanarak istemci sertifikaları gerektirir."
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "Mutual TLS kullan",
+        "help": "Mutual TLS ile istemci kimlik doğrulamasını etkinleştir."
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "İstemci CA paketi",
+        "help": "Güvenilir istemci CA paketinin (PEM) mutlak yolu. MTLS_VERIFY_CLIENT on veya optional olarak ayarlandığında gereklidir."
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "İstemci doğrulama modu",
+        "help": "İstemci doğrulama modu. 'on' geçerli bir sertifika gerektirir, 'optional' sertifika sunulmadığında isteklerin geçmesine izin verir ve 'optional_no_ca' CA doğrulamasını atlar (yalnızca tanılama amaçlıdır, gerçek bir koruma değildir)."
+      },
+      "MTLS_URL": {
+        "label": "mTLS URL'si",
+        "help": "Yalnızca eşleşen yollarda geçerli bir istemci sertifikası gerektirmek için istek URI'sine karşı eşleştirilen regex (yalnızca HTTP). Eşleşmeyen yollar için el sıkışmanın (handshake) tamamlanması için MTLS_VERIFY_CLIENT'i optional olarak ayarlayın; uygulama Lua içinde istek başına çalışır. Geçersiz bir regex, sessizce izin verilmek yerine fail-closed çalışır (eşleşen istekler reddedilir ve günlüğe kaydedilir). Birden çok yol için numaralandırılmış yuvaları kullanın (MTLS_URL_1, MTLS_URL_2). mTLS'yi tüm sitede zorunlu kılmak için boş bırakın."
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "Doğrulama derinliği",
+        "help": "İstemci doğrulaması sırasında kabul edilen maksimum sertifika zinciri derinliği."
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "İstemci üstbilgilerini ilet",
+        "help": "Doğrulama sonuçlarını X-SSL-Client-* üstbilgileri kullanarak upstream arka uçlara ilet. İstemci tarafından sağlanan X-SSL-* üstbilgileri her zaman girişte kaldırılır, bu nedenle bu değerler taklit edilemez."
+      },
+      "MTLS_CRL": {
+        "label": "İstemci CRL yolu",
+        "help": "Sertifika iptal listesine (PEM) isteğe bağlı mutlak yol. CRL kontrollerini atlamak için boş bırakın."
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "greylist": {
+    "meta": {
+      "name": "Gri liste",
+      "description": "Dahili ve harici IP/ağ/rDNS/ASN gri listelerine dayalı güvenlik özelliklerini korurken erişime izin verir."
+    },
+    "settings": {
+      "GREYLIST_ASN": {
+        "label": "Greylist ASN",
+        "help": "Gri listeye alınacak, boşluklarla ayrılmış ASN numaralarının listesi."
+      },
+      "GREYLIST_ASN_URLS": {
+        "label": "Greylist ASN URL'leri",
+        "help": "Gri listeye alınacak ASN'leri içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "GREYLIST_HEADER_NAME": {
+        "label": "Gri listeye alınan üstbilgi adı",
+        "help": "İsteği gri listeye ekleyen istek üstbilgisinin adı. Herhangi bir istemci bu üstbilgiyi gönderebilir: onu yalnızca HTTPS üzerinden kullanılan paylaşılan bir sır olarak değerlendirin."
+      },
+      "GREYLIST_HEADER_VALUE": {
+        "label": "Gri listeye alınan üstbilgi değeri",
+        "help": "İsteği gri listeye eklemek için üstbilginin eşleşmesi gereken değer (PCRE normal ifadesi). Yalnızca üstbilginin varlığına göre eşleştirmek için boş bırakın. ^ ve $ ile sabitleyin: eşleşme varsayılan olarak sabitlenmemiştir."
+      },
+      "GREYLIST_IP": {
+        "label": "Greylist IP/ağ",
+        "help": "Gri listeye alınacak, boşluklarla ayrılmış IP/ağ listesi."
+      },
+      "GREYLIST_IP_URLS": {
+        "label": "Greylist IP/ağ URL'leri",
+        "help": "Gri listeye alınacak iyi IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "GREYLIST_RDNS": {
+        "label": "Greylist reverse DNS",
+        "help": "Gri listeye alınacak, boşluklarla ayrılmış reverse DNS soneklerinin listesi."
+      },
+      "GREYLIST_RDNS_GLOBAL": {
+        "label": "Greylist reverse DNS, yalnızca genel IP'ler",
+        "help": "RDNS gri liste kontrollerini yalnızca genel (global) IP adresleri üzerinde gerçekleştir."
+      },
+      "GREYLIST_RDNS_URLS": {
+        "label": "Greylist reverse DNS URL'leri",
+        "help": "Gri listeye alınacak reverse DNS soneklerini içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "GREYLIST_RULE": {
+        "label": "Greylist kuralı",
+        "help": "Bileşik kural: kuralın eşleşmesi için her terimin eşleşmesi gerekir. Terimler \" AND \" (büyük harf) ile ayrılır ve her biri [NOT ]<kind>:<value> biçimindedir; burada <kind>, ip, country, asn, rdns, ua (user_agent takma adı) veya uri olabilir. Örnek: ip:10.0.0.0/8 AND NOT ua:^curl. Kurallar hem birbiriyle hem de yukarıdaki düz listelerle OR ile birleştirilir. Değer, @office gibi bir kaynak grubu belirteci de olabilir. Stream hizmetleri yalnızca ip, country, asn ve rdns'yi değerlendirir."
+      },
+      "GREYLIST_URI": {
+        "label": "Greylist URI",
+        "help": "Gri listeye alınacak, boşluklarla ayrılmış URI (PCRE normal ifadesi) listesi."
+      },
+      "GREYLIST_URI_URLS": {
+        "label": "Greylist URI URL'leri",
+        "help": "Gri listeye alınacak kötü amaçlı URI'leri içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "GREYLIST_USER_AGENT": {
+        "label": "Greylist User-Agent",
+        "help": "Gri listeye alınacak, boşluklarla ayrılmış User-Agent (PCRE normal ifadesi) listesi."
+      },
+      "GREYLIST_USER_AGENT_URLS": {
+        "label": "Greylist User-Agent URL'leri",
+        "help": "Gri listeye alınacak iyi User-Agent'ları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      },
+      "USE_GREYLIST": {
+        "label": "Gri listelemeyi etkinleştir",
+        "help": "Greylist özelliğini etkinleştir."
+      }
+    },
+    "widgets": {
+      "counter_failed_greylist": {
+        "title": "GRİ LİSTE",
+        "subtitle": "İstek engellendi"
+      }
+    }
+  }
+}

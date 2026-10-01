@@ -1,0 +1,30 @@
+{
+  "gzip": {
+    "meta": {
+      "name": "Gzip",
+      "description": "使用 gzip 演算法壓縮 HTTP 請求。"
+    },
+    "settings": {
+      "USE_GZIP": {
+        "label": "使用 Gzip",
+        "help": "啟用或停用 Gzip 壓縮。預設為關閉,這也是 NGINX 本身的預設值。此設定為每個服務個別生效:對於回應中同時攜帶密鑰(CSRF token、API key)並回顯攻擊者提供輸入的任何服務,請將其保持關閉,因為這種組合正是 BREACH 攻擊的前提條件——另請注意,無論 GZIP_TYPES 中列出什麼,text/html 一律會被壓縮。BunkerWeb Web UI 就是這樣一種服務。"
+      },
+      "GZIP_TYPES": {
+        "label": "MIME 類型",
+        "help": "將使用 gzip 壓縮的 MIME 類型清單。"
+      },
+      "GZIP_MIN_LENGTH": {
+        "label": "最小長度",
+        "help": "套用 Gzip 壓縮所需的最小回應大小(以位元組為單位)。"
+      },
+      "GZIP_COMP_LEVEL": {
+        "label": "壓縮等級",
+        "help": "Gzip 的壓縮等級(1 = 最低壓縮,9 = 最大壓縮)。"
+      },
+      "GZIP_PROXIED": {
+        "label": "代理請求",
+        "help": "指定哪些代理請求應被壓縮。"
+      }
+    }
+  }
+}

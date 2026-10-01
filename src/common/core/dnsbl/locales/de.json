@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "Verweigert den Zugriff anhand externer DNSBL-Server."
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "Anfrage blockiert"
+      }
+    },
+    "settings": {
+      "USE_DNSBL": {
+        "label": "DNSBL aktivieren",
+        "help": "Aktiviert die DNSBL-Funktion."
+      },
+      "DNSBL_LIST": {
+        "label": "DNSBL-Liste",
+        "help": "Liste der DNSBL-Server."
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "Ignorierte IP/Netzwerk für DNSBL",
+        "help": "Liste von IPs/Netzwerken, durch Leerzeichen getrennt, die bei DNSBL-Prüfungen ignoriert werden."
+      },
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "Ignorierter Header-Name",
+        "help": "Name eines Anfrage-Headers, der die Anfrage von den DNSBL-Prüfungen befreit. Jeder Client kann diesen Header senden: behandeln Sie ihn wie ein gemeinsames Geheimnis, nur über HTTPS."
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "Ignorierter Header-Wert",
+        "help": "Wert (PCRE-Regex), dem der Header entsprechen muss, damit die Anfrage von den DNSBL-Prüfungen befreit wird. Leer lassen, um bereits bei Vorhandensein des Headers zu greifen. Verankern Sie ihn mit ^ und $: der Abgleich ist standardmäßig nicht verankert."
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "Ignorierte IP/Netzwerk für DNSBL (URLs)",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die bei DNSBL-Prüfungen zu ignorierende IPs/Netzwerke enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      }
+    }
+  }
+}

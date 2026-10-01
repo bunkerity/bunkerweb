@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "Gère les paramètres liés au SSL/TLS."
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "Rediriger HTTP vers HTTPS",
+        "help": "Redirige toutes les requêtes HTTP vers HTTPS."
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "Redirection automatique HTTP vers HTTPS",
+        "help": "Tente de détecter si HTTPS est utilisé et active la redirection HTTP vers HTTPS si c'est le cas."
+      },
+      "SSL_PROTOCOLS": {
+        "label": "Protocoles SSL",
+        "help": "La version prise en charge de TLS. Nous recommandons la valeur par défaut TLSv1.2 TLSv1.3 pour des raisons de compatibilité."
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "Niveau des suites de chiffrement SSL",
+        "help": "Niveau de sécurité prédéfini pour les suites de chiffrement SSL. 'Modern' est le plus sûr mais peut ne pas fonctionner avec des appareils plus anciens."
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "Suites de chiffrement SSL personnalisées",
+        "help": "Chaîne personnalisée de suites de chiffrement SSL. Si spécifiée, elle remplace le niveau des suites de chiffrement SSL. Laissez vide pour utiliser la configuration basée sur le niveau."
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "Courbes ECDH SSL",
+        "help": "Courbes ECDH (groupes TLS) préférées pour l'échange de clés. Utilisez \"auto\" pour une sélection intelligente (privilégie les groupes PQC comme X25519MLKEM768 sur OpenSSL 3.5+ lorsque disponible)."
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "Taille du cache de session SSL",
+        "help": "Taille du cache de session SSL (par ex. '10m' pour 10 mégaoctets, '512k' pour 512 kilooctets). Réglez sur 'off' ou 'none' pour désactiver la mise en cache des sessions."
+      }
+    }
+  }
+}

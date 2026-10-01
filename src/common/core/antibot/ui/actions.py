@@ -8,9 +8,11 @@ def pre_render(**kwargs):
         "counter_failed_challenges": {
             "value": 0,
             "title": "Challenges",
+            "title_i18n": "widgets.counter_failed_challenges.title",
             "subtitle": "Failed",
-            "subtitle_color": "danger",
-            "svg_color": "danger",
+            "subtitle_i18n": "widgets.counter_failed_challenges.subtitle",
+            "subtitle_color": "danger-emphasis",
+            "svg_color": "danger-emphasis",
         },
     }
     try:

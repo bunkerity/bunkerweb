@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Cross-Origin Resource Sharing."
+    },
+    "settings": {
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Ipadala ang Access-Control-Allow-Credentials",
+        "help": "Ipadala ang Access-Control-Allow-Credentials header."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Value ng Access-Control-Allow-Headers",
+        "help": "Value ng Access-Control-Allow-Headers header."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Value ng Access-Control-Allow-Methods",
+        "help": "Value ng Access-Control-Allow-Methods header."
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "Pinapayagang Origin",
+        "help": "Pinapayagang origin para gumawa ng CORS request: PCRE regex o * o self (para sa parehong origin)."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "Tanggihan ang Request",
+        "help": "Tanggihan ang request at huwag ipadala sa backend kung hindi pinapayagan ang Origin."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Value ng Access-Control-Expose-Headers",
+        "help": "Value ng Access-Control-Expose-Headers header."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Value ng Access-Control-Max-Age",
+        "help": "Value ng Access-Control-Max-Age header."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Value para sa Cross-Origin-Embedder-Policy header."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Value para sa Cross-Origin-Opener-Policy header."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Value para sa Cross-Origin-Resource-Policy header."
+      },
+      "USE_CORS": {
+        "label": "Gamitin ang CORS",
+        "help": "Gamitin ang CORS"
+      }
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "Na-block na kahilingan"
+      }
+    }
+  }
+}

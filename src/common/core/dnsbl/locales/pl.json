@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "Odmawia dostępu na podstawie zewnętrznych serwerów DNSBL."
+    },
+    "settings": {
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "Nazwa ignorowanego nagłówka",
+        "help": "Nazwa nagłówka żądania, który zwalnia żądanie ze sprawdzania DNSBL. Każdy klient może wysłać ten nagłówek: traktuj go jak współdzielony sekret, tylko przez HTTPS."
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "Wartość ignorowanego nagłówka",
+        "help": "Wartość (wyrażenie regularne PCRE), z którą musi się zgadzać nagłówek, aby zwolnić żądanie ze sprawdzania DNSBL. Pozostaw puste, aby dopasowanie następowało na podstawie samej obecności nagłówka. Zakotwicz wyrażenie znakami ^ i $: dopasowanie domyślnie nie jest zakotwiczone."
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "DNSBL – ignorowane IP/sieć",
+        "help": "Lista adresów IP/sieci, rozdzielonych spacjami, ignorowanych przy sprawdzaniu DNSBL."
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "DNSBL – ignorowane IP/sieć URL-e",
+        "help": "Lista URL-i, rozdzielonych spacjami, zawierających IP/sieć ignorowane przy sprawdzaniu DNSBL. Obsługuje również URL-e file:// oraz auth basic w formacie http://user:pass@url."
+      },
+      "DNSBL_LIST": {
+        "label": "Lista DNSBL",
+        "help": "Lista serwerów DNSBL."
+      },
+      "USE_DNSBL": {
+        "label": "Aktywuj DNSBL",
+        "help": "Aktywuj funkcję DNSBL."
+      }
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "Żądanie zablokowane"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "ui": {
+    "meta": {
+      "name": "UI",
+      "description": "Madaling isinasama ang UI ng BunkerWeb."
+    },
+    "settings": {
+      "USE_UI": {
+        "label": "Gamitin ang UI",
+        "help": "Gamitin ang UI"
+      },
+      "UI_HOST": {
+        "label": "UI Host",
+        "help": "Address ng web UI na ginagamit para sa unang setup"
+      }
+    }
+  }
+}

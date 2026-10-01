@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Let's Encrypt সার্টিফিকেটের স্বয়ংক্রিয় তৈরি, পুনর্নবীকরণ এবং কনফিগারেশন।"
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "স্বয়ংক্রিয় Let's Encrypt",
+        "help": "স্বয়ংক্রিয় Let's Encrypt মোড সক্রিয় করুন।"
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Let's Encrypt পাস থ্রু করুন",
+        "help": "Let's Encrypt অনুরোধ ওয়েব সার্ভারে পাস থ্রু করুন।"
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Let's Encrypt ইমেইল",
+        "help": "Let's Encrypt বিজ্ঞপ্তির জন্য এবং সার্টিফিকেটে ব্যবহৃত ইমেইল।"
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "সার্টিফিকেট অথরিটি সার্ভার",
+        "help": "সার্টিফিকেট তৈরির জন্য ব্যবহৃত সার্টিফিকেট অথরিটি সার্ভার নির্বাচন করুন।"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "ZeroSSL API কী",
+        "help": "zerossl-bot দ্বারা ব্যবহৃত ঐচ্ছিক ZeroSSL API কী। খালি থাকলে, EAB ক্রেডেনশিয়াল আনতে EMAIL_LETS_ENCRYPT ব্যবহার করা হয়।"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "ZeroSSL API পুনঃচেষ্টা",
+        "help": "zerossl-bot দ্বারা করা ZeroSSL API অনুরোধের জন্য পুনঃচেষ্টার সংখ্যা (0 পুনঃচেষ্টা নিষ্ক্রিয় করে)।"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "ZeroSSL API পুনঃচেষ্টা বিলম্ব",
+        "help": "zerossl-bot-এ ZeroSSL API পুনঃচেষ্টার মধ্যে বিলম্ব সেকেন্ডে।"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "ZeroSSL API কানেক্ট টাইমআউট",
+        "help": "zerossl-bot-এ ZeroSSL API অনুরোধের জন্য কানেকশন টাইমআউট সেকেন্ডে।"
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "ZeroSSL API সর্বোচ্চ সময়",
+        "help": "zerossl-bot-এ প্রতিটি ZeroSSL API অনুরোধের জন্য সর্বোচ্চ মোট সময় সেকেন্ডে।"
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "চ্যালেঞ্জের ধরন",
+        "help": "Let's Encrypt-এর জন্য ব্যবহৃত চ্যালেঞ্জের ধরন (http বা dns)।"
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "DNS প্রদানকারী",
+        "help": "DNS চ্যালেঞ্জের জন্য ব্যবহৃত DNS প্রদানকারী।"
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "DNS প্রসার",
+        "help": "DNS চ্যালেঞ্জের জন্য DNS প্রসারের জন্য অপেক্ষা করার সময় সেকেন্ডে।"
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "ক্রেডেনশিয়াল আইটেম",
+        "help": "কনফিগারেশন আইটেম যা DNS চ্যালেঞ্জের জন্য DNS প্রদানকারীর credentials.ini ফাইলে যোগ করা হবে। এটি কী, হোয়াইটস্পেস, তারপর মান হিসেবে লিখুন (যেমন 'cloudflare_api_token 123456'); কী-কে কোট করবেন না। মানটি base64-এ এনকোড করাও থাকতে পারে, অথবা পুরো আইটেমটি base64-এনকোডেড json অবজেক্ট হতে পারে।"
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Base64 DNS ক্রেডেনশিয়াল ডিকোড করুন",
+        "help": "base64-এনকোডেড DNS প্রদানকারী ক্রেডেনশিয়াল স্বয়ংক্রিয়ভাবে ডিকোড করুন। সক্রিয় থাকলে, base64 ফরম্যাটের সাথে মেলে এমন ক্রেডেনশিয়াল ব্যবহারের আগে ডিকোড করা হয় (rfc2136 প্রদানকারী ব্যতীত)। যদি আপনার ক্রেডেনশিয়াল ইচ্ছাকৃতভাবে base64 স্ট্রিং হয় তবে এটি নিষ্ক্রিয় করুন।"
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "ওয়াইল্ডকার্ড সার্টিফিকেট",
+        "help": "সমস্ত ডোমেইনের জন্য ওয়াইল্ডকার্ড সার্টিফিকেট তৈরি করুন। এটি একটি একক সার্টিফিকেটকে একাধিক সাবডোমেইন সুরক্ষিত করতে দেয়। (শুধুমাত্র DNS চ্যালেঞ্জের সাথে উপলব্ধ)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Let's Encrypt স্টেজিং ব্যবহার করুন",
+        "help": "Let's Encrypt সার্টিফিকেট তৈরির জন্য স্টেজিং পরিবেশ ব্যবহার করুন। আপনার ডিপ্লয়মেন্ট পরীক্ষা করার সময় প্রোডাকশন পরিবেশে রেট লিমিটেড হওয়া এড়াতে উপযোগী।"
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "পুরনো সার্টিফিকেটের আর প্রয়োজন না থাকলে তা মুছে ফেলুন",
+        "help": "নবায়নের সময় পুরনো সার্টিফিকেট মুছে ফেলুন।"
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "সার্টিফিকেট প্রোফাইল",
+        "help": "Let's Encrypt-এর সাথে ব্যবহারের জন্য সার্টিফিকেট প্রোফাইল নির্বাচন করুন। 'classic' হলো ৯০-দিনের মেয়াদ এবং ব্যাপক সামঞ্জস্যতাসহ একটি সাধারণ-উদ্দেশ্য সার্টিফিকেট। 'tlsserver' ৯০-দিনের মেয়াদ এবং ছোট পেলোডসহ TLS সার্ভার প্রমাণীকরণের জন্য অপ্টিমাইজড। 'shortlived' স্বয়ংক্রিয় পরিবেশে উন্নত নিরাপত্তার জন্য ৭-দিনের সার্টিফিকেট প্রদান করে।"
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "কাস্টম সার্টিফিকেট প্রোফাইল (ACME)",
+        "help": "নন-স্ট্যান্ডার্ড প্রোফাইল সমর্থনকারী ACME সার্ভারের সাথে ব্যবহারের জন্য কাস্টম সার্টিফিকেট প্রোফাইল। সেট করা থাকলে LETS_ENCRYPT_PROFILE-কে ওভাররাইড করে।"
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "পাবলিক সাফিক্স নিষ্ক্রিয় করুন (PSL ব্ল্যাকলিস্ট)",
+        "help": "পাবলিক সাফিক্স লিস্ট (Public Suffix List)-এর সাথে মেলে এমন ডোমেইনের জন্য সার্টিফিকেট অনুরোধ নিষ্ক্রিয় করুন (প্রস্তাবিত, ডিফল্ট: yes)।"
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "সর্বোচ্চ পুনঃচেষ্টা",
+        "help": "ব্যর্থ হলে সার্টিফিকেট তৈরির পুনঃচেষ্টার সংখ্যা (0 পুনঃচেষ্টা নিষ্ক্রিয় করে)।"
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "সমসাময়িক সার্টিফিকেট অনুরোধ",
+        "help": "certbot-new জবে সার্টিফিকেট অনুরোধ সমসাময়িকভাবে চালান (রেট লিমিটের ঝুঁকি বাড়াতে পারে)।"
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "সর্বোচ্চ Certbot লগ ব্যাকআপ",
+        "help": "প্রতি জবে রাখা রোটেটেড certbot লগ ফাইলের সর্বোচ্চ সংখ্যা। certbot-এর নিজস্ব ডিফল্ট 1000, যা দ্রুত জমে যায়। শুধু লাইভ লগ রাখতে এটি 0-তে সেট করুন।"
+      }
+    }
+  }
+}

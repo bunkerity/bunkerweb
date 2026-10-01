@@ -1,0 +1,8 @@
+{
+  "certificates": {
+    "meta": {
+      "name": "Mga sertipiko",
+      "description": "Naghahatid ng sertipikong nakalakip sa isang serbisyo mula sa sentral na imbentaryo, anuman ang provider na nag-isyu nito."
+    }
+  }
+}

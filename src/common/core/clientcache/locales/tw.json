@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "用戶端快取",
+      "description": "管理用戶端的快取。"
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "使用客戶端快取",
+        "help": "告知客戶端將靜態檔案快取於本機。"
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "客戶端應快取的副檔名",
+        "help": "應被快取的檔案副檔名清單,以豎線(|)分隔。"
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "為靜態資源傳送 HTTP ETag 標頭。"
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control 標頭",
+        "help": "Cache-Control HTTP 標頭的值。"
+      }
+    }
+  }
+}

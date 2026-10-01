@@ -1,0 +1,26 @@
+{
+  "redirect": {
+    "meta": {
+      "name": "Weiterleitung",
+      "description": "Verwaltet HTTP-Weiterleitungen."
+    },
+    "settings": {
+      "REDIRECT_FROM": {
+        "label": "Umleiten von",
+        "help": "Pfad, von dem umgeleitet werden soll. Ein Wert, der mit ^ beginnt oder mit $ endet, wird als Regex-Location behandelt. Optional mit ~, ~*, = oder ^~ gefolgt von einem Leerzeichen voranstellen, um den nginx-Location-Modifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, ;, { oder } zulässig."
+      },
+      "REDIRECT_TO": {
+        "label": "Umleiten zu",
+        "help": "Leitet eine ganze Website zu einer anderen um."
+      },
+      "REDIRECT_TO_REQUEST_URI": {
+        "label": "Angeforderte URI anhängen",
+        "help": "Hängt die angeforderte URI an die Umleitungsadresse an."
+      },
+      "REDIRECT_TO_STATUS_CODE": {
+        "label": "Statuscode der Umleitung",
+        "help": "HTTP-Statuscode für die Umleitung: 301 (Moved Permanently – wird von Browsern zwischengespeichert), 302 (Found – vorübergehend, Methode kann sich ändern), 303 (See Other – verwendet immer GET), 307 (Temporary Redirect – behält die Methode bei), 308 (Permanent Redirect – behält die Methode bei, wird zwischengespeichert)."
+      }
+    }
+  }
+}

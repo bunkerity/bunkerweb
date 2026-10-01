@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Escaneo inverso",
+      "description": "Mejora la seguridad escaneando los puertos del cliente para detectar y bloquear conexiones provenientes de proxies o servidores, ayudando a impedir la elusión de las medidas de seguridad."
+    },
+    "settings": {
+      "USE_REVERSE_SCAN": {
+        "label": "Escaneo inverso",
+        "help": "Activa el escaneo de los puertos del cliente y deniega el acceso si alguno está abierto."
+      },
+      "REVERSE_SCAN_PORTS": {
+        "label": "Puertos del escaneo inverso",
+        "help": "Lista de puertos a escanear al utilizar la función de escaneo inverso."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Tiempo de espera del escaneo inverso",
+        "help": "Especifica el tiempo de espera máximo (en ms) al escanear un puerto."
+      }
+    }
+  }
+}

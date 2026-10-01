@@ -1,0 +1,14 @@
+{
+  "pro": {
+    "meta": {
+      "name": "Pro",
+      "description": "BunkerWeb Pro 버전을 위한 Pro 설정."
+    },
+    "settings": {
+      "PRO_LICENSE_KEY": {
+        "label": "Pro 라이선스 키",
+        "help": "BunkerWeb Pro 버전의 라이선스 키입니다."
+      }
+    }
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "Mga template",
+      "description": "Peke (fake) na core plugin para sa mga internal na template."
+    },
+    "templates": {
+      "low": {
+        "name": "Pangunahing antas ng seguridad na nagbibigay ng mahahalagang setting para sa proteksyon ng web application",
+        "steps": {
+          "0": {
+            "title": "Web service - Front service",
+            "subtitle": "I-configure ang iyong web service na nakaharap sa iyong mga client"
+          },
+          "1": {
+            "title": "Web service - Upstream server",
+            "subtitle": "I-configure ang upstream server na poprotektahan ng BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Pangkalahatan",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa HTTP(S) protocol"
+          },
+          "3": {
+            "title": "HTTP - Mga header",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa mga HTTP header"
+          },
+          "4": {
+            "title": "Seguridad - Masamang pag-uugali",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa awtomatikong pag-ban kapag natukoy ang masamang pag-uugali."
+          },
+          "5": {
+            "title": "Seguridad - Blacklisting",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa mga external na blacklist."
+          },
+          "6": {
+            "title": "Seguridad - Limitasyon",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa paglilimita ng mga request at koneksyon."
+          },
+          "7": {
+            "title": "Seguridad - Antibot",
+            "subtitle": "I-configure ang mga setting tungkol sa pagtukoy ng bot"
+          },
+          "8": {
+            "title": "Seguridad - Basic na pagpapatunay",
+            "subtitle": "I-configure ang basic na pagpapatunay ng HTTP"
+          },
+          "9": {
+            "title": "Seguridad - Bansa",
+            "subtitle": "I-configure ang mga setting tungkol sa patakaran sa access ayon sa bansa"
+          },
+          "10": {
+            "title": "Seguridad - ModSecurity",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa ModSecurity WAF"
+          }
+        }
+      },
+      "medium": {
+        "name": "Balanseng antas ng seguridad na nag-aalok ng kombinasyon ng mga feature ng seguridad at optimization ng performance",
+        "steps": {
+          "0": {
+            "title": "Web service - Front service",
+            "subtitle": "I-configure ang iyong web service na nakaharap sa iyong mga client"
+          },
+          "1": {
+            "title": "Web service - Upstream server",
+            "subtitle": "I-configure ang upstream server na poprotektahan ng BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Pangkalahatan",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa HTTP(S) protocol"
+          },
+          "3": {
+            "title": "HTTP - Mga header",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa mga HTTP header"
+          },
+          "4": {
+            "title": "Seguridad - Masamang pag-uugali",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa awtomatikong pag-ban kapag natukoy ang masamang pag-uugali."
+          },
+          "5": {
+            "title": "Seguridad - Blacklisting",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa mga external na blacklist."
+          },
+          "6": {
+            "title": "Seguridad - Limitasyon",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa paglilimita ng mga request at koneksyon."
+          },
+          "7": {
+            "title": "Seguridad - Antibot",
+            "subtitle": "I-configure ang mga setting tungkol sa pagtukoy ng bot"
+          },
+          "8": {
+            "title": "Seguridad - Basic na pagpapatunay",
+            "subtitle": "I-configure ang basic na pagpapatunay ng HTTP"
+          },
+          "9": {
+            "title": "Seguridad - Bansa",
+            "subtitle": "I-configure ang mga setting tungkol sa patakaran sa access ayon sa bansa"
+          },
+          "10": {
+            "title": "Seguridad - Reverse scan",
+            "subtitle": "I-configure ang mga setting tungkol sa pag-scan ng mga port ng client"
+          },
+          "11": {
+            "title": "Seguridad - ModSecurity",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa ModSecurity WAF"
+          }
+        }
+      },
+      "high": {
+        "name": "Advanced na antas ng seguridad na nakatuon sa matatag na mga hakbang sa seguridad at komprehensibong proteksyon",
+        "steps": {
+          "0": {
+            "title": "Web service - Front service",
+            "subtitle": "I-configure ang iyong web service na nakaharap sa iyong mga client"
+          },
+          "1": {
+            "title": "Web service - Upstream server",
+            "subtitle": "I-configure ang upstream server na poprotektahan ng BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Pangkalahatan",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa HTTP(S) protocol"
+          },
+          "3": {
+            "title": "HTTP - Mga header",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa mga HTTP header"
+          },
+          "4": {
+            "title": "Seguridad - Masamang pag-uugali",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa awtomatikong pag-ban kapag natukoy ang masamang pag-uugali."
+          },
+          "5": {
+            "title": "Seguridad - Blacklisting",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa mga external na blacklist."
+          },
+          "6": {
+            "title": "Seguridad - Limitasyon",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa paglilimita ng mga request at koneksyon."
+          },
+          "7": {
+            "title": "Seguridad - Antibot",
+            "subtitle": "I-configure ang mga setting tungkol sa pagtukoy ng bot"
+          },
+          "8": {
+            "title": "Seguridad - Basic na pagpapatunay",
+            "subtitle": "I-configure ang basic na pagpapatunay ng HTTP"
+          },
+          "9": {
+            "title": "Seguridad - Bansa",
+            "subtitle": "I-configure ang mga setting tungkol sa patakaran sa access ayon sa bansa"
+          },
+          "10": {
+            "title": "Seguridad - Reverse scan",
+            "subtitle": "I-configure ang mga setting tungkol sa pag-scan ng mga port ng client"
+          },
+          "11": {
+            "title": "Seguridad - ModSecurity",
+            "subtitle": "I-configure ang mga setting na may kaugnayan sa ModSecurity WAF"
+          }
+        }
+      },
+      "api": {
+        "name": "Mga pangunahing setting kapag ginagamit ang API ng BunkerWeb",
+        "steps": {
+          "0": {
+            "title": "Serbisyo - Front service",
+            "subtitle": "I-configure ang pangalan ng server at ang mga setting ng SSL/TLS"
+          },
+          "1": {
+            "title": "Serbisyo - Upstream server",
+            "subtitle": "I-configure ang upstream server na poprotektahan ng BunkerWeb"
+          },
+          "2": {
+            "title": "API - Rate limiting",
+            "subtitle": "I-configure ang mga setting ng rate limiting - tandaan na may internal rate limiting din ang API"
+          },
+          "3": {
+            "title": "API - Iba't ibang setting",
+            "subtitle": "Iba pang mahahalagang setting para sa tamang paggana ng API"
+          }
+        }
+      },
+      "ui": {
+        "name": "Mga pangunahing setting kapag ginagamit ang web UI",
+        "steps": {
+          "0": {
+            "title": "Halimbawang hakbang",
+            "subtitle": "Ito ay isang halimbawang hakbang upang ipakita ang mga pangunahing setting kapag ginagamit ang web UI"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "External Template URL",
+        "help": "Listahan ng service template URL na ida-download at i-install, pinaghihiwalay ng space. Bawat URL ay isang template: isang bunkerweb-template/1 JSON package, o isang .zip o .tar.gz na naglalaman ng <id>/template.json at ang mga config nito. https:// at file:/// lang ang tinatanggap, hanggang 1 MiB. Idagdag ang #sha256=<digest> sa URL para i-pin ang content nito. Ang template na na-remove ang URL ay buburahin maliban kung ginagamit pa ito ng isang service."
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Sesje",
+      "description": "Zarządzanie sesjami używanymi przez inne wtyczki."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Sekret sesji",
+        "help": "Sekret używany do szyfrowania zmiennych sesji służących do przechowywania danych związanych z wyzwaniami."
+      },
+      "SESSIONS_NAME": {
+        "label": "Nazwa sesji",
+        "help": "Nazwa ciasteczka nadawana klientom."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Domena ciasteczka sesji",
+        "help": "Atrybut domeny ustawiany na ciasteczku sesji dla tego serwera (np. `example.com` lub `.example.com`). Pozostaw puste, aby ciasteczko było ograniczone dokładnie do tego hosta. Ustaw na nadrzędną domenę rejestrowalną, aby współdzielić sesję (a tym samym stan antibot/wyzwania) między siostrzanymi subdomenami. W konfiguracji multisite skonfiguruj to per serwer, aby niepowiązani najemcy nigdy nie otrzymali atrybutu `Domain` innego najemcy."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Limit czasu bezczynności sesji",
+        "help": "Maksymalny czas (w sekundach) bezczynności, zanim sesja zostanie unieważniona."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Limit czasu odnawiania sesji",
+        "help": "Maksymalny czas (w sekundach), po którym sesja musi zostać odnowiona."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Bezwzględny limit czasu sesji",
+        "help": "Maksymalny czas (w sekundach), po którym sesja zostaje zniszczona."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Sprawdzanie IP sesji",
+        "help": "Zniszcz sesję, jeśli adres IP różni się od pierwotnego."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Sprawdzanie User-Agent sesji",
+        "help": "Zniszcz sesję, jeśli User-Agent różni się od pierwotnego."
+      }
+    }
+  }
+}

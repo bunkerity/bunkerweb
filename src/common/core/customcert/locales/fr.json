@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "Certificat SSL personnalisé",
+      "description": "Choisissez un certificat personnalisé pour le SSL."
+    },
+    "settings": {
+      "USE_CUSTOM_SSL": {
+        "label": "Utiliser un certificat personnalisé",
+        "help": "Utilise un certificat SSL personnalisé."
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "Priorité du certificat",
+        "help": "Choisissez de prioriser le certificat depuis un chemin de fichier ou depuis des données base64. (file | data)"
+      },
+      "CUSTOM_SSL_CERT": {
+        "label": "Chemin du certificat",
+        "help": "Chemin complet du fichier de certificat ou du bundle. Il doit être lisible par le WORKER, qui est l'endroit où s'exécute le job custom-cert depuis que 1.7 a déplacé l'exécution des jobs hors du scheduler - pas par le scheduler, quoi qu'en dise une documentation plus ancienne. Sous Docker Swarm, montez-le sur bw-worker et indiquez le chemin où il est monté, par ex. /run/secrets/example.com.pem ; un Swarm config convient pour un certificat, qui est public."
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "Chemin de la clé",
+        "help": "Chemin complet du fichier de clé. Il doit être lisible par le WORKER, qui est l'endroit où s'exécute le job custom-cert depuis que 1.7 a déplacé l'exécution des jobs hors du scheduler - pas par le scheduler, quoi qu'en dise une documentation plus ancienne. Sous Docker Swarm, montez la clé privée sur bw-worker en tant que Swarm SECRET et indiquez le chemin où elle est montée, par ex. /run/secrets/example.com.key. Ne fournissez jamais une clé privée sous forme de Swarm config : les configs sont stockées non chiffrées dans le magasin raft de chaque nœud manager."
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "Données du certificat (base64/texte brut)",
+        "help": "Données du certificat encodées en base64 ou au format PEM en texte brut."
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "Données de la clé (base64/texte brut)",
+        "help": "Données de la clé encodées en base64 ou au format PEM en texte brut."
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "Chemin du certificat du serveur par défaut",
+        "help": "Chemin complet du fichier de certificat ou du bundle servi par le SERVEUR PAR DÉFAUT - le bloc qui répond aux requêtes ne correspondant à aucun service configuré. Laisser vide pour conserver le certificat auto-signé interne. Il doit être lisible par le WORKER, qui est l'endroit où s'exécute le job custom-cert. Un certificat qui couvre également le nom d'hôte d'un service configuré est refusé, car le serveur par défaut pourrait alors répondre pour ce service. Servi uniquement si MULTISITE=yes ou DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "Chemin de la clé du serveur par défaut",
+        "help": "Chemin complet de la clé privée du certificat du SERVEUR PAR DÉFAUT - le bloc qui répond aux requêtes ne correspondant à aucun service configuré (SNI inconnu, accès par IP brute). Laisser vide pour conserver le certificat auto-signé interne. Il doit être lisible par le WORKER, qui est l'endroit où s'exécute le job custom-cert. Sous Docker Swarm, montez-la en tant que Swarm SECRET, jamais en tant que config."
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "Données du certificat du serveur par défaut (base64/texte brut)",
+        "help": "Données du certificat du SERVEUR PAR DÉFAUT, encodées en base64 ou au format PEM en texte brut. Utilisées uniquement lorsque DEFAULT_SERVER_SSL_CERT est vide. Laisser les deux vides pour conserver le certificat auto-signé interne. Servi uniquement si MULTISITE=yes ou DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "Données de la clé du serveur par défaut (base64/texte brut)",
+        "help": "Données de la clé du certificat du SERVEUR PAR DÉFAUT, encodées en base64 ou au format PEM en texte brut. Utilisées uniquement lorsque DEFAULT_SERVER_SSL_KEY est vide. Laisser les deux vides pour conserver le certificat auto-signé interne."
+      }
+    }
+  }
+}

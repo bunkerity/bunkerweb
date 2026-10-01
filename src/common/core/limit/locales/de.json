@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "Limit",
+      "description": "Begrenzt die maximale Anzahl von Anfragen und Verbindungen."
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "Globales Limit",
+        "subtitle": "Anfragen blockiert"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "Anfragenlimit aktivieren",
+        "help": "Aktiviert die Funktion zur Begrenzung der Anfragen."
+      },
+      "LIMIT_REQ_URL": {
+        "label": "URL des Anfragenlimits",
+        "help": "URL (PCRE-Regex), auf die das Anfragenlimit angewendet wird, oder der spezielle Wert / für alle Anfragen."
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "Rate des Anfragenlimits",
+        "help": "Rate, die auf die URL angewendet wird (s für Sekunde, m für Minute, h für Stunde und d für Tag)."
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "Globales Anfragenlimit aktivieren",
+        "help": "Aktiviert das globale Ratenlimit: ein aggregiertes Kontingent für den gesamten Dienst, das alle Clients und URLs zusammen zählt (schützt die Kapazität des Ursprungsservers, unabhängig von den Anfragenlimits pro IP/pro URL)."
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "Globale Rate des Anfragenlimits",
+        "help": "Maximale aggregierte Rate für den gesamten Dienst, alle Clients und URLs zusammen (s für Sekunde, m für Minute, h für Stunde und d für Tag)."
+      },
+      "USE_LIMIT_CONN": {
+        "label": "Verbindungslimit aktivieren",
+        "help": "Aktiviert die Funktion zur Begrenzung der Verbindungen."
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "Maximale Anzahl an HTTP/1.X-Verbindungen",
+        "help": "Maximale Anzahl an Verbindungen pro IP bei Verwendung des HTTP/1.X-Protokolls."
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "Maximale Anzahl an HTTP/2-Streams",
+        "help": "Maximale Anzahl an Streams pro IP bei Verwendung des HTTP/2-Protokolls."
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "Maximale Anzahl an HTTP/3-Streams",
+        "help": "Maximale Anzahl an Streams pro IP bei Verwendung des HTTP/3-Protokolls."
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "Maximale Anzahl an Stream-Verbindungen",
+        "help": "Maximale Anzahl an Verbindungen pro IP bei Verwendung von stream."
+      }
+    }
+  }
+}

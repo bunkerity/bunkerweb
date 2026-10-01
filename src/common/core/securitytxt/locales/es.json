@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "Gestiona el archivo security.txt. Un estándar propuesto que permite a los sitios web definir sus políticas de seguridad."
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "Usar security.txt",
+        "help": "Activa el archivo security.txt."
+      },
+      "SECURITYTXT_URI": {
+        "label": "URI de Security.txt",
+        "help": "Indica el URI desde el que será accesible el archivo \"security.txt\"."
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Contacto de Security.txt",
+        "help": "Indica un método que los investigadores deben usar para informar de vulnerabilidades de seguridad, como una dirección de correo electrónico, un número de teléfono y/o una página web con información de contacto. (Si el valor está vacío, el archivo security.txt no se creará, ya que es un campo obligatorio)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Expiración de Security.txt",
+        "help": "Indica la fecha y hora después de las cuales los datos contenidos en el archivo \"security.txt\" se consideran obsoletos y no deben utilizarse (Si el valor está vacío, siempre será la fecha y hora actuales + 1 año)."
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Cifrado de Security.txt",
+        "help": "Indica una clave de cifrado que los investigadores de seguridad deben usar para la comunicación cifrada."
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Agradecimientos de Security.txt",
+        "help": "Indica un enlace a una página donde se reconoce a los investigadores de seguridad por sus informes."
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Idioma preferido de Security.txt",
+        "help": "Se puede usar para indicar un conjunto de idiomas naturales preferidos al enviar informes de seguridad."
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Canónico de Security.txt",
+        "help": "Indica los URI canónicos donde se encuentra el archivo \"security.txt\", que suele ser algo como \"https://example.com/.well-known/security.txt\". (Si el valor está vacío, el valor predeterminado se generará automáticamente a partir de la URL del sitio + SECURITYTXT_URI)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Política de Security.txt",
+        "help": "Indica un enlace a la ubicación de la política de divulgación de vulnerabilidades."
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Contratación de Security.txt",
+        "help": "Se usa para enlazar a los puestos de trabajo relacionados con la seguridad del proveedor."
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "CSAF de Security.txt",
+        "help": "Un enlace al provider-metadata.json de su proveedor CSAF (Common Security Advisory Framework)."
+      }
+    }
+  }
+}

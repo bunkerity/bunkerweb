@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "Benutzerdefiniertes SSL-Zertifikat",
+      "description": "Wählen Sie ein benutzerdefiniertes Zertifikat für SSL."
+    },
+    "settings": {
+      "USE_CUSTOM_SSL": {
+        "label": "Benutzerdefiniertes Zertifikat verwenden",
+        "help": "Verwendet ein benutzerdefiniertes SSL-Zertifikat."
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "Zertifikatspriorität",
+        "help": "Wählen Sie, ob das Zertifikat aus dem Dateipfad oder aus Base64-Daten bevorzugt werden soll. (file | data)"
+      },
+      "CUSTOM_SSL_CERT": {
+        "label": "Zertifikatspfad",
+        "help": "Vollständiger Pfad der Zertifikats- oder Bundle-Datei. Sie muss vom WORKER lesbar sein, wo der custom-cert-Job seit der Verlagerung der Job-Ausführung aus dem Scheduler in 1.7 läuft - nicht vom Scheduler, was ältere Dokumentation auch behaupten mag. Unter Docker Swarm mounten Sie sie auf bw-worker und geben den Pfad an, unter dem sie gemountet ist, z. B. /run/secrets/example.com.pem; ein Swarm-Config ist für ein Zertifikat, das öffentlich ist, unbedenklich."
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "Schlüsselpfad",
+        "help": "Vollständiger Pfad der Schlüsseldatei. Sie muss vom WORKER lesbar sein, wo der custom-cert-Job seit der Verlagerung der Job-Ausführung aus dem Scheduler in 1.7 läuft - nicht vom Scheduler, was ältere Dokumentation auch behaupten mag. Unter Docker Swarm mounten Sie den privaten Schlüssel auf bw-worker als Swarm SECRET und geben den Pfad an, unter dem er gemountet ist, z. B. /run/secrets/example.com.key. Liefern Sie einen privaten Schlüssel niemals als Swarm-Config aus: Configs werden unverschlüsselt im Raft-Store jedes Manager-Knotens gespeichert."
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "Zertifikatsdaten (Base64/Klartext)",
+        "help": "Zertifikatsdaten, base64-kodiert oder im PEM-Klartextformat."
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "Schlüsseldaten (Base64/Klartext)",
+        "help": "Schlüsseldaten, base64-kodiert oder im PEM-Klartextformat."
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "Zertifikatspfad des Standardservers",
+        "help": "Vollständiger Pfad der Zertifikats- oder Bundle-Datei, die vom STANDARDSERVER ausgeliefert wird - dem Block, der Anfragen beantwortet, die keinem konfigurierten Dienst entsprechen. Leer lassen, um das interne selbstsignierte Zertifikat beizubehalten. Sie muss vom WORKER lesbar sein, wo der custom-cert-Job läuft. Ein Zertifikat, das auch einen Hostnamen eines konfigurierten Dienstes abdeckt, wird abgelehnt, da der Standardserver dann für diesen Dienst antworten könnte. Wird nur ausgeliefert, wenn MULTISITE=yes oder DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "Schlüsselpfad des Standardservers",
+        "help": "Vollständiger Pfad des privaten Schlüssels des STANDARDSERVER-Zertifikats - dem Block, der Anfragen beantwortet, die keinem konfigurierten Dienst entsprechen (unbekannter SNI, direkter IP-Zugriff). Leer lassen, um das interne selbstsignierte Zertifikat beizubehalten. Er muss vom WORKER lesbar sein, wo der custom-cert-Job läuft. Unter Docker Swarm mounten Sie ihn als Swarm SECRET, niemals als Config."
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "Zertifikatsdaten des Standardservers (Base64/Klartext)",
+        "help": "Zertifikatsdaten des STANDARDSERVERS, base64-kodiert oder im PEM-Klartextformat. Wird nur verwendet, wenn DEFAULT_SERVER_SSL_CERT leer ist. Beide leer lassen, um das interne selbstsignierte Zertifikat beizubehalten. Wird nur ausgeliefert, wenn MULTISITE=yes oder DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "Schlüsseldaten des Standardservers (Base64/Klartext)",
+        "help": "Schlüsseldaten des STANDARDSERVER-Zertifikats, base64-kodiert oder im PEM-Klartextformat. Wird nur verwendet, wenn DEFAULT_SERVER_SSL_KEY leer ist. Beide leer lassen, um das interne selbstsignierte Zertifikat beizubehalten."
+      }
+    }
+  }
+}

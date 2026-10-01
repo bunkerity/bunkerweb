@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "TLS mútuo",
+      "description": "Exige certificados de cliente usando TLS mútuo (mTLS)."
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "Usar TLS mútuo",
+        "help": "Ativa a autenticação de cliente com TLS mútuo."
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "Pacote de CA do cliente",
+        "help": "Caminho absoluto para o pacote de CA confiável do cliente (PEM). Obrigatório quando MTLS_VERIFY_CLIENT está definido como on ou optional."
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "Modo de verificação de cliente",
+        "help": "Modo de verificação de cliente. 'on' exige um certificado válido, 'optional' permite a passagem de requisições quando nenhum certificado é apresentado, e 'optional_no_ca' ignora a validação de CA (apenas para diagnóstico, não é proteção real)."
+      },
+      "MTLS_URL": {
+        "label": "URL mTLS",
+        "help": "Regex comparada com o URI da requisição para exigir um certificado de cliente válido somente nos caminhos correspondentes (somente HTTP). Defina MTLS_VERIFY_CLIENT como optional para que o handshake seja concluído em caminhos não correspondentes; a aplicação ocorre por requisição em Lua. Um regex inválido falha de forma fechada (as requisições correspondentes são negadas e registradas) em vez de serem permitidas silenciosamente. Use slots numerados para vários caminhos (MTLS_URL_1, MTLS_URL_2). Deixe vazio para aplicar o mTLS a todo o site."
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "Profundidade de verificação",
+        "help": "Profundidade máxima da cadeia de certificados aceita durante a verificação do cliente."
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "Repassar cabeçalhos de cliente",
+        "help": "Repassa os resultados da verificação aos backends upstream usando cabeçalhos X-SSL-Client-*. Cabeçalhos X-SSL-* fornecidos pelo cliente são sempre removidos na entrada, portanto esses valores não podem ser falsificados."
+      },
+      "MTLS_CRL": {
+        "label": "Caminho da CRL do cliente",
+        "help": "Caminho absoluto opcional para uma lista de revogação de certificados (PEM). Deixe vazio para pular as verificações de CRL."
+      }
+    }
+  }
+}

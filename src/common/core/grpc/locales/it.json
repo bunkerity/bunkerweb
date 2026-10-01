@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "Gestisce le configurazioni di reverse proxy gRPC."
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "Usa gRPC",
+        "help": "Attiva la modalità reverse proxy gRPC."
+      },
+      "GRPC_HOST": {
+        "label": "Host gRPC",
+        "help": "Valore upstream completo utilizzato da grpc_pass (ad esempio grpc://app:50051 o grpcs://app:443)."
+      },
+      "GRPC_URL": {
+        "label": "URL gRPC",
+        "help": "URL di location che verrà inoltrato a un upstream gRPC. Un valore che inizia con ^ o termina con $ viene trattato come una location regex. Facoltativamente, anteponi ~, ~*, = o ^~ seguito da uno spazio per impostare esplicitamente il modificatore di location di nginx; altrove nel valore non sono ammessi spazi, ;, { o }."
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "Host personalizzato gRPC",
+        "help": "Sovrascrive l'intestazione Host inviata all'upstream gRPC."
+      },
+      "GRPC_HEADERS": {
+        "label": "Intestazioni gRPC",
+        "help": "Elenco di intestazioni da inviare all'upstream gRPC, separate da punto e virgola (valori per la direttiva grpc_set_header)."
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "Intestazioni nascoste gRPC",
+        "help": "Elenco di intestazioni da nascondere ai client quando ricevute dall'upstream gRPC (valori per la direttiva grpc_hide_header)."
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "Intestazioni-client gRPC",
+        "help": "Elenco di intestazioni da inviare al client, separate da punto e virgola (valori per la direttiva add_header)."
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "Intestazioni trasmesse gRPC",
+        "help": "Elenco di intestazioni da trasmettere dall'upstream gRPC al client anche quando sono nascoste per impostazione predefinita, separate da spazi (valori per la direttiva grpc_pass_header)."
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "Intestazioni ignorate gRPC",
+        "help": "Elenco di intestazioni provenienti dall'upstream gRPC che NGINX non deve elaborare, separate da spazi (valori per la direttiva grpc_ignore_headers)."
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "Consenti underscore nelle intestazioni",
+        "help": "Attiva o disattiva la direttiva underscores_in_headers."
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "Intercetta errori",
+        "help": "Intercetta e riscrive gli errori dell'upstream gRPC."
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "Dimensione del buffer gRPC",
+        "help": "Valore per la direttiva grpc_buffer_size (dimensione del buffer utilizzato per leggere la risposta dall'upstream gRPC)."
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "Timeout di connessione gRPC",
+        "help": "Timeout durante la connessione all'upstream gRPC."
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "Timeout di lettura gRPC",
+        "help": "Timeout durante la lettura dall'upstream gRPC."
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "Timeout di invio gRPC",
+        "help": "Timeout durante l'invio all'upstream gRPC."
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "Keepalive del socket gRPC",
+        "help": "Attiva o disattiva il keepalive per i socket dell'upstream gRPC."
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SNI SSL",
+        "help": "Attiva o disattiva l'invio dello SNI al server upstream gRPC."
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "Nome SNI SSL",
+        "help": "Imposta l'host SNI da inviare al server upstream gRPC."
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "Verifica SSL",
+        "help": "Attiva o disattiva la verifica del certificato SSL del server upstream gRPC."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Priorità del certificato attendibile",
+        "help": "Origine del certificato CA attendibile: percorso file o dati base64/PEM (file o data)."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "Percorso del certificato SSL attendibile",
+        "help": "Percorso a un bundle CA PEM usato per verificare il certificato dell'upstream gRPC (priorità 'file', leggibile dallo scheduler, che lo mette in cache e lo distribuisce). Obbligatorio per la verifica; per gli upstream pubblici usa il bundle di sistema (ad es. /etc/ssl/certs/ca-certificates.crt). Se non impostato, la verifica è disattivata."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Dati del certificato attendibile (base64/testo semplice)",
+        "help": "Certificato CA attendibile in base64 o in PEM testo semplice (priorità 'data')."
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "Profondità di verifica SSL",
+        "help": "Imposta la profondità di verifica nella catena di certificati del server upstream gRPC."
+      },
+      "GRPC_SSL_CRL": {
+        "label": "Percorso CRL",
+        "help": "Percorso a una lista di revoca dei certificati PEM usata durante la verifica del server upstream gRPC. Ha la precedenza su GRPC_SSL_CRL_DATA. Applicato solo quando GRPC_SSL_VERIFY è yes. Un percorso impostato ma mancante è un errore; GRPC_SSL_CRL_DATA non viene usato come ripiego."
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "Dati CRL (base64/testo semplice)",
+        "help": "Lista di revoca dei certificati in base64 o in PEM testo semplice. Usata solo quando l'impostazione del percorso CRL è vuota."
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "Protocolli SSL upstream",
+        "help": "Versioni TLS offerte al server upstream gRPC (valore della direttiva grpc_ssl_protocols). Vuoto mantiene il valore predefinito di NGINX."
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "Cifrari SSL upstream",
+        "help": "Stringa di suite di cifratura offerta al server upstream gRPC (valore della direttiva grpc_ssl_ciphers). Vuoto mantiene il valore predefinito di NGINX."
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "Upstream successivo gRPC",
+        "help": "Condizioni per selezionare il successivo server upstream gRPC."
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "Timeout upstream successivo gRPC",
+        "help": "Limite di tempo per passare una richiesta al successivo server upstream gRPC."
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "Tentativi upstream successivo gRPC",
+        "help": "Numero massimo di tentativi per passare una richiesta al successivo server upstream gRPC."
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "Richiesta di autenticazione gRPC",
+        "help": "Attiva l'autenticazione tramite un provider esterno (valore della direttiva auth_request)."
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "URL di accesso per la richiesta di autenticazione",
+        "help": "Reindirizza i client all'URL di accesso quando si usa GRPC_AUTH_REQUEST (usato quando la chiamata auth_request restituisce 401). Sono supportate variabili NGINX come $scheme, $host e $request_uri."
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "Set della richiesta di autenticazione gRPC",
+        "help": "Elenco di variabili da impostare dal provider di autenticazione, separate da punto e virgola (valori delle direttive auth_request_set)."
+      },
+      "GRPC_INCLUDES": {
+        "label": "Inclusioni gRPC",
+        "help": "Configurazione aggiuntiva da includere nel blocco location gRPC, separata da spazi."
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "Dimensione massima del corpo gRPC",
+        "help": "Dimensione massima del corpo per questa location gRPC (0 per illimitato). Se vuoto, si applica il MAX_CLIENT_SIZE del servizio."
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "Priorità del certificato client",
+        "help": "Origine del certificato client e della chiave utilizzati per il TLS reciproco con l'upstream: percorso file o dati base64/PEM (file o data)."
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "Percorso del certificato client SSL",
+        "help": "Percorso al certificato client PEM che BunkerWeb presenta agli upstream gRPC (TLS reciproco, priorità 'file'). Richiede la chiave corrispondente GRPC_SSL_CLIENT_KEY; il job trusted-cert mette in cache e distribuisce questa identità di proprietà di gRPC."
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "Dati del certificato client (base64/testo semplice)",
+        "help": "Certificato client in base64 o in PEM testo semplice (priorità 'data')."
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "Percorso della chiave client SSL",
+        "help": "Percorso alla chiave privata PEM corrispondente al certificato client (priorità 'file'). La chiave viene messa in cache e distribuita alle istanze come qualsiasi altro artefatto di job, e scritta con permessi riservati a proprietario/gruppo."
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "Dati della chiave client (base64/testo semplice)",
+        "help": "Chiave privata client in base64 o in PEM testo semplice (priorità 'data'). Preferisci un percorso file quando possibile: una chiave impostata qui viene memorizzata come valore dell'impostazione."
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "反向扫描",
+      "description": "通过扫描客户端端口来检测并阻止来自代理或服务器的连接,从而增强安全性,帮助防止绕过安全措施。"
+    },
+    "settings": {
+      "USE_REVERSE_SCAN": {
+        "label": "反向端口扫描",
+        "help": "启用对客户端端口的扫描,若发现有端口开放则拒绝访问。"
+      },
+      "REVERSE_SCAN_PORTS": {
+        "label": "反向扫描端口",
+        "help": "使用反向扫描功能时要扫描的端口列表。"
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "反向扫描超时",
+        "help": "指定扫描端口时的最长超时时间(以毫秒为单位)。"
+      }
+    }
+  }
+}

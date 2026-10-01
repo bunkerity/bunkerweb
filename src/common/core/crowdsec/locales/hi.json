@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "BunkerWeb के लिए CrowdSec बाउंसर।"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "CROWDSEC स्थिति"
+      }
+    },
+    "settings": {
+      "USE_CROWDSEC": {
+        "label": "CrowdSec उपयोग करें",
+        "help": "CrowdSec bouncer सक्रिय करें।"
+      },
+      "CROWDSEC_API": {
+        "label": "CrowdSec API",
+        "help": "CrowdSec API का पता।"
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "CrowdSec API कुंजी",
+        "help": "CrowdSec API के लिए कुंजी जो cscli bouncer add द्वारा दी जाती है।"
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "CrowdSec प्रबंधन लॉगिन",
+        "help": "अलर्ट जाँच और निर्णय हटाने के लिए समर्पित CrowdSec मशीन लॉगिन। केवल-पठन bouncer एक्सेस के लिए खाली छोड़ दें।"
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "CrowdSec प्रबंधन पासवर्ड",
+        "help": "समर्पित CrowdSec प्रबंधन मशीन का पासवर्ड। प्रबंधन लॉगिन के साथ आवश्यक; यहाँ कभी bouncer API कुंजी का उपयोग न करें।"
+      },
+      "CROWDSEC_MODE": {
+        "label": "CrowdSec मोड",
+        "help": "CrowdSec API का मोड (live या stream)।"
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "CrowdSec आंतरिक सक्षम करें",
+        "help": "आंतरिक ट्रैफ़िक के विश्लेषण को सक्षम करें।"
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "CrowdSec लाइव अनुरोध टाइमआउट",
+        "help": "bouncer द्वारा CrowdSec local API से पूछताछ के लिए किए गए HTTP अनुरोधों के लिए टाइमआउट मिलीसेकंड में।"
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "CrowdSec बहिष्कृत स्थान",
+        "help": "bouncing के दौरान बहिष्कृत किए जाने वाले स्थान। यह कॉमा से अलग किए गए स्थानों की सूची है।"
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "CrowdSec कैप्चा चुनौती",
+        "help": "जब CrowdSec कैप्चा माँगता है तब दिखाई जाने वाली Antibot चुनौती। इस सेवा पर Antibot सक्षम होना चाहिए (USE_ANTIBOT को \"no\" के अलावा किसी भी मान पर सेट किया गया हो), अन्यथा अनुरोध को इसके बजाय प्रतिबंधित कर दिया जाता है। तृतीय-पक्ष प्रदाता अपनी कुंजियाँ ANTIBOT_* सेटिंग्स से लेते हैं। \"cookie\" से बचें: यह उस निर्णय के लिए कुछ भी सिद्ध नहीं करता जिसका अर्थ है \"साबित करें कि आप इंसान हैं\"। \"no\" कैप्चा निर्णयों को पहले की तरह नज़रअंदाज़ करता है; निर्णय कैश प्रति Local API साझा किया जाता है, इसलिए पुराने व्यवहार को पूरी तरह बहाल करने के लिए उस Local API पर हर सेवा को \"no\" पर सेट करना आवश्यक है।"
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "सुरक्षा वर्कफ़्लो को निर्णय लेने दें",
+        "help": "सुरक्षा वर्कफ़्लो को यह तय करने दें कि CrowdSec-चिह्नित अनुरोध का क्या होता है। \"no\" (डिफ़ॉल्ट) इसे यहीं ब्लॉक कर देता है। \"yes\" इसे इस सेवा से जुड़े वर्कफ़्लो को सौंपता है; जब कोई नियम मेल न खाए या कोई जुड़ा न हो तब भी निर्णय लागू होता है। CORS preflight (204), /robots.txt और /security.txt वर्कफ़्लो चलने से पहले BunkerWeb द्वारा उत्पन्न किए जाते हैं, इसलिए एक चिह्नित क्लाइंट अभी भी ये तीन प्राप्त कर सकता है। इनमें से कोई भी आपके एप्लिकेशन तक नहीं पहुँचता, और हर वह अनुरोध जो पहुँचेगा पहले वर्कफ़्लो सीढ़ी से जाँचा जाता है।"
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "CrowdSec कैश समाप्ति",
+        "help": "लाइव मोड में bouncer द्वारा कैश किए गए IP के लिए कैश की समाप्ति, सेकंड में।"
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "CrowdSec अनुरोध टाइमआउट",
+        "help": "CrowdSec local API से नए/पुराने IP लाने के लिए अद्यतन की आवृत्ति, सेकंड में।"
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "AppSec URL",
+        "help": "Application Security Component का URL।"
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "AppSec विफलता क्रिया",
+        "help": "जब AppSec Component 500 लौटाए तो व्यवहार। अनुरोध को गुजरने दे सकता है या अस्वीकार कर सकता है।"
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "AppSec कनेक्ट टाइमआउट",
+        "help": "remediation component और AppSec Component के बीच कनेक्शन का टाइमआउट मिलीसेकंड में।"
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "AppSec भेजने का टाइमआउट",
+        "help": "remediation component से AppSec Component को डेटा भेजने का टाइमआउट मिलीसेकंड में।"
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "AppSec प्रोसेस टाइमआउट",
+        "help": "remediation component से AppSec Component तक अनुरोध को संसाधित करने का टाइमआउट मिलीसेकंड में।"
+      },
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "हमेशा AppSec को भेजें",
+        "help": "IP के लिए निर्णय होने पर भी अनुरोध AppSec Component को भेजें।"
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "AppSec SSL सत्यापन",
+        "help": "AppSec Component के SSL प्रमाणपत्र की वैधता सत्यापित करें।"
+      }
+    }
+  }
+}

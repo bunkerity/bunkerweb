@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "헤더",
+      "description": "클라이언트로 전송되는 HTTP 헤더를 관리합니다."
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "사용자 지정 헤더(HeaderName: HeaderValue)",
+        "help": "추가할 사용자 지정 헤더입니다(HeaderName: HeaderValue)."
+      },
+      "REMOVE_HEADERS": {
+        "label": "헤더 제거",
+        "help": "제거할 헤더입니다(Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "업스트림 헤더 유지",
+        "help": "업스트림에서 유지할 헤더입니다(Header1 Header2 Header3 ... 또는 전체는 *)."
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security(HSTS)",
+        "help": "Strict-Transport-Security(HSTS) 헤더의 값입니다."
+      },
+      "COOKIE_FLAGS": {
+        "label": "쿠키 플래그",
+        "help": "모든 쿠키에 자동으로 추가되는 플래그입니다(nginx_cookie_flag_module에서 허용하는 값)."
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "쿠키 Secure 플래그 자동 추가",
+        "help": "모든 쿠키에 Secure 플래그를 자동으로 추가합니다."
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Content-Security-Policy 헤더의 값입니다."
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Content-Security-Policy 헤더 위반 사항을 차단하는 대신 보고서를 전송합니다."
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Referrer-Policy 헤더의 값입니다."
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Permissions-Policy 헤더의 값입니다."
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "X-Frame-Options 헤더의 값입니다."
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "X-Content-Type-Options 헤더의 값입니다."
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "X-DNS-Prefetch-Control 헤더의 값입니다."
+      }
+    }
+  }
+}

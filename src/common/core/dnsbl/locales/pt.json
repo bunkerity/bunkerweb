@@ -1,0 +1,40 @@
+{
+  "dnsbl": {
+    "meta": {
+      "name": "DNSBL",
+      "description": "Nega o acesso com base em servidores DNSBL externos."
+    },
+    "widgets": {
+      "counter_failed_dnsbl": {
+        "title": "DNSBL",
+        "subtitle": "Pedido bloqueado"
+      }
+    },
+    "settings": {
+      "USE_DNSBL": {
+        "label": "Ativar DNSBL",
+        "help": "Ativa a funcionalidade DNSBL."
+      },
+      "DNSBL_LIST": {
+        "label": "Lista DNSBL",
+        "help": "Lista de servidores DNSBL."
+      },
+      "DNSBL_IGNORE_IP": {
+        "label": "IP/rede ignorado para DNSBL",
+        "help": "Lista de IP/redes, separados por espaços, a ignorar nas verificações DNSBL."
+      },
+      "DNSBL_IGNORE_HEADER_NAME": {
+        "label": "Nome de cabeçalho ignorado",
+        "help": "Nome de um cabeçalho do pedido que isenta o pedido das verificações DNSBL. Qualquer cliente pode enviar este cabeçalho: trate-o como um segredo partilhado, apenas através de HTTPS."
+      },
+      "DNSBL_IGNORE_HEADER_VALUE": {
+        "label": "Valor de cabeçalho ignorado",
+        "help": "Valor (regex PCRE) que o cabeçalho deve corresponder para isentar o pedido das verificações DNSBL. Deixar vazio para corresponder apenas à presença do cabeçalho. Ancore-o com ^ e $: a correspondência não é ancorada por predefinição."
+      },
+      "DNSBL_IGNORE_IP_URLS": {
+        "label": "IP/rede ignorado para DNSBL (URL)",
+        "help": "Lista de URL, separados por espaços, contendo IP/redes a ignorar nas verificações DNSBL. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      }
+    }
+  }
+}

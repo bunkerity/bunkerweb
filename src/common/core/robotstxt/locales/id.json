@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "Mengelola berkas robots.txt. Standar untuk mengontrol akses perayap web ke situs Anda."
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "Gunakan robots.txt",
+        "help": "Aktifkan file robots.txt."
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "Daftar komunitas robots.txt",
+        "help": "Pilih daftar yang dikelola komunitas untuk disertakan dalam robots.txt."
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "URL Robots.txt",
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi aturan robots.txt. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Aturan Robots.txt",
+        "help": "Aturan untuk robots.txt (satu per baris)."
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Header Robots.txt",
+        "help": "Header untuk file robots.txt (sebelum aturan). Dapat dienkode Base64."
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Footer Robots.txt",
+        "help": "Footer untuk file robots.txt (setelah aturan). Dapat dienkode Base64."
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Sitemap Robots.txt",
+        "help": "URL sitemap untuk disertakan dalam robots.txt."
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "Aturan abaikan",
+        "help": "Aturan (regex PCRE) untuk diabaikan. Dapat ditentukan beberapa kali."
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "Token API DarkVisitors",
+        "help": "Token Bearer untuk API DarkVisitors."
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "Jenis Agent DarkVisitors",
+        "help": "Daftar jenis agent yang dipisahkan koma untuk disertakan dalam field agent_types DarkVisitors saat menghubungi API DarkVisitors."
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "String yang menentukan URL mana yang tidak diizinkan. Nilai ini akan dikirim sebagai field disallow saat menghubungi API DarkVisitors."
+      }
+    }
+  }
+}

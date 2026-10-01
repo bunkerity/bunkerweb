@@ -1,0 +1,108 @@
+{
+  "misc": {
+    "meta": {
+      "name": "Lain-lain",
+      "description": "Pengaturan lain-lain."
+    },
+    "widgets": {
+      "counter_failed_default": {
+        "title": "SERVER BAWAAN DINONAKTIFKAN",
+        "subtitle": "Total"
+      },
+      "counter_failed_method": {
+        "title": "METODE YANG TIDAK DIIZINKAN",
+        "subtitle": "Jumlah"
+      }
+    },
+    "settings": {
+      "SERVICE_MODE": {
+        "label": "Mode layanan",
+        "help": "Tujuan yang dideklarasikan dari layanan: \"standard\" untuk layanan biasa, \"redirect_only\" untuk listener yang hanya melakukan redirect. Deklarasi inilah yang dibaca oleh klasifikasi kuota PRO; tidak pernah disimpulkan dari pengaturan redirect."
+      },
+      "DISABLE_DEFAULT_SERVER": {
+        "label": "Nonaktifkan server default",
+        "help": "Tolak permintaan HTTP jika vhost permintaan tidak diketahui."
+      },
+      "DISABLE_DEFAULT_SERVER_STRICT_SNI": {
+        "label": "Nonaktifkan SNI ketat server default",
+        "help": "Tutup koneksi SSL/TLS jika SNI tidak diketahui."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS": {
+        "label": "Port stream server default",
+        "help": "Port tempat server default menerima koneksi stream (TCP) yang tidak cocok dengan layanan mana pun yang dikonfigurasi; biarkan kosong untuk menonaktifkan. Ditolak untuk port yang didengarkan oleh layanan stream, port yang digunakan oleh listener HTTP/HTTPS, atau port yang diikat BunkerWeb untuk dirinya sendiri. Biasanya diatur pada layanan default-server yang dicadangkan."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS_SSL": {
+        "label": "Port stream server default (TLS)",
+        "help": "Port stream server default mana di atas yang dilayani melalui TLS; biarkan kosong untuk TCP biasa saja. Setiap nilai juga harus tercantum dalam \"Port stream server default\" — ini adalah sakelar TLS untuk port yang sudah dideklarasikan server default, bukan sekumpulan listener kedua, dan port yang hanya ada di sini akan ditolak."
+      },
+      "ALLOWED_METHODS": {
+        "label": "Metode yang diizinkan",
+        "help": "Metode HTTP dan WebDAV yang diizinkan, dipisahkan dengan pipa (|). Metode huruf besar kustom dapat menyertakan garis bawah dan tanda hubung."
+      },
+      "MAX_CLIENT_SIZE": {
+        "label": "Ukuran body maksimum",
+        "help": "Ukuran body maksimum (0 untuk tak terbatas)."
+      },
+      "MAX_HEADERS": {
+        "label": "Header maksimum",
+        "help": "Jumlah maksimum baris header per permintaan. Permintaan yang melebihi batas ini ditolak dengan 400 Bad Request."
+      },
+      "SERVE_FILES": {
+        "label": "Sajikan file",
+        "help": "Sajikan file dari folder lokal."
+      },
+      "ROOT_FOLDER": {
+        "label": "Folder root",
+        "help": "Folder root yang berisi file untuk disajikan (/var/www/html/{server_name} jika tidak diatur)."
+      },
+      "HTTP2": {
+        "label": "HTTP2",
+        "help": "Dukung protokol HTTP2 saat HTTPS diaktifkan."
+      },
+      "HTTP3": {
+        "label": "HTTP3",
+        "help": "Dukung protokol HTTP3 saat HTTPS diaktifkan."
+      },
+      "HTTP3_ALT_SVC_PORT": {
+        "label": "Port Alt-Svc HTTP3",
+        "help": "Port layanan alternatif HTTP3. Nilai ini akan digunakan sebagai bagian dari header Alt-Svc."
+      },
+      "LISTEN_HTTP": {
+        "label": "Dengarkan HTTP",
+        "help": "Tanggapi permintaan HTTP (tidak aman)."
+      },
+      "USE_OPEN_FILE_CACHE": {
+        "label": "Gunakan cache file terbuka",
+        "help": "Aktifkan fitur cache file terbuka"
+      },
+      "OPEN_FILE_CACHE": {
+        "label": "Gunakan cache file terbuka",
+        "help": "Direktif cache file terbuka"
+      },
+      "OPEN_FILE_CACHE_ERRORS": {
+        "label": "Error cache file terbuka",
+        "help": "Aktifkan cache file terbuka untuk error"
+      },
+      "OPEN_FILE_CACHE_MIN_USES": {
+        "label": "Penggunaan minimum cache file terbuka",
+        "help": "Aktifkan penggunaan minimum cache file terbuka"
+      },
+      "OPEN_FILE_CACHE_VALID": {
+        "label": "Waktu valid cache file terbuka",
+        "help": "Waktu valid cache file terbuka"
+      },
+      "EXTERNAL_PLUGIN_URLS": {
+        "label": "URL plugin eksternal",
+        "help": "Daftar URL plugin eksternal (unduhan langsung ke file .zip atau .tar) untuk diunduh dan dipasang (URL dipisahkan dengan spasi). Maksimal 50 MiB per URL. Tambahkan #sha256=<digest> ke URL untuk mengunci kontennya. http:// biasa sudah usang dan akan ditolak di 1.7.0: gunakan https:// atau file:///."
+      },
+      "DENY_HTTP_STATUS": {
+        "label": "Status HTTP penolakan",
+        "help": "Kode status HTTP yang dikirim saat permintaan ditolak (403 atau 444). Saat menggunakan 444, BunkerWeb akan menutup koneksi."
+      },
+      "SEND_ANONYMOUS_REPORT": {
+        "label": "Kirim laporan anonim",
+        "help": "Kirim laporan anonim ke maintainer BunkerWeb."
+      }
+    }
+  }
+}

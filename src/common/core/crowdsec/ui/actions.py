@@ -9,6 +9,7 @@ def pre_render(**kwargs):
     ret = {
         "ping_status": {
             "title": "CROWDSEC STATUS",
+            "title_i18n": "widgets.ping_status.title",
             "value": "error",
             "col-size": "col-12 col-md-6",
             "card-classes": "h-100",

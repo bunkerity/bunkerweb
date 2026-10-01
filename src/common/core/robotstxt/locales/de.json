@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "Verwaltet die Datei robots.txt. Standard zur Steuerung des Zugriffs von Webcrawlern auf Ihre Website."
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "robots.txt verwenden",
+        "help": "Aktiviert die robots.txt-Datei."
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "Community-robots.txt-Listen",
+        "help": "Wählen Sie von der Community gepflegte Listen aus, die in robots.txt einbezogen werden sollen."
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "robots.txt-URLs",
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die robots.txt-Regeln enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "robots.txt-Regel",
+        "help": "Regeln für robots.txt (eine pro Zeile)."
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "robots.txt-Header",
+        "help": "Header für die robots.txt-Datei (vor den Regeln). Kann Base64-codiert sein."
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "robots.txt-Footer",
+        "help": "Footer für die robots.txt-Datei (nach den Regeln). Kann Base64-codiert sein."
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "robots.txt-Sitemap",
+        "help": "Sitemap-URL(s), die in robots.txt einbezogen werden sollen."
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "Zu ignorierende Regel",
+        "help": "Regel (PCRE-Regex), die ignoriert werden soll. Kann mehrfach angegeben werden."
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "DarkVisitors-API-Token",
+        "help": "Bearer-Token für die DarkVisitors-API."
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "DarkVisitors-Agententypen",
+        "help": "Durch Kommas getrennte Liste von Agententypen, die in das Feld agent_types von DarkVisitors aufgenommen werden, wenn die DarkVisitors-API kontaktiert wird."
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "Eine Zeichenkette, die angibt, welche URLs nicht erlaubt sind. Dieser Wert wird als Feld disallow gesendet, wenn die DarkVisitors-API kontaktiert wird."
+      }
+    }
+  }
+}

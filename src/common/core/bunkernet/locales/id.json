@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "Membagikan data ancaman dengan instans BunkerWeb lain melalui BunkerNet."
+    },
+    "settings": {
+      "BUNKERNET_SERVER": {
+        "label": "Server BunkerNet",
+        "help": "Alamat API BunkerNet."
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "Retensi statistik BunkerNet (hari)",
+        "help": "Usia maksimum (dalam hari) statistik efektivitas BunkerNet yang disimpan secara persisten."
+      },
+      "USE_BUNKERNET": {
+        "label": "Aktifkan BunkerNet",
+        "help": "Aktifkan fitur BunkerNet."
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "Statistik efektivitas BunkerNet",
+        "help": "Simpan statistik efektivitas BunkerNet (kontribusi, ukuran blocklist, konektivitas) secara persisten ke database."
+      }
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS BUNKERNET"
+      },
+      "info_connectivity": {
+        "title": "Konektivitas"
+      },
+      "info_instance_id": {
+        "title": "ID Instans"
+      }
+    }
+  }
+}

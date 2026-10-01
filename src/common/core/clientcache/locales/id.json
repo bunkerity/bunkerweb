@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "Cache klien",
+      "description": "Mengelola caching untuk klien."
+    },
+    "settings": {
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Header Cache-Control",
+        "help": "Nilai header HTTP Cache-Control."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "Kirim header HTTP ETag untuk sumber daya statis."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "Ekstensi yang harus di-cache oleh klien",
+        "help": "Daftar ekstensi file, dipisahkan dengan garis vertikal, yang harus di-cache."
+      },
+      "USE_CLIENT_CACHE": {
+        "label": "Gunakan cache klien",
+        "help": "Perintahkan klien untuk menyimpan file statis secara lokal."
+      }
+    }
+  }
+}

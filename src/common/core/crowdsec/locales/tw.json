@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "適用於 BunkerWeb 的 CrowdSec bouncer。"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "CROWDSEC 狀態"
+      }
+    },
+    "settings": {
+      "USE_CROWDSEC": {
+        "label": "使用 CrowdSec",
+        "help": "啟用 CrowdSec bouncer。"
+      },
+      "CROWDSEC_API": {
+        "label": "CrowdSec API",
+        "help": "CrowdSec API 的位址。"
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "CrowdSec API 金鑰",
+        "help": "由 cscli bouncer add 產生的 CrowdSec API 金鑰。"
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "CrowdSec 管理登入名稱",
+        "help": "用於警示調查和移除決策的專用 CrowdSec 機器登入名稱。留空則僅具有唯讀的 bouncer 存取權限。"
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "CrowdSec 管理密碼",
+        "help": "專用 CrowdSec 管理機器的密碼。與管理登入名稱一起使用時為必填項目;切勿在此處使用 bouncer API 金鑰。"
+      },
+      "CROWDSEC_MODE": {
+        "label": "CrowdSec 模式",
+        "help": "CrowdSec API 的模式(live 或 stream)。"
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "CrowdSec 啟用內部流量分析",
+        "help": "啟用對內部流量的分析。"
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "CrowdSec live 請求逾時",
+        "help": "bouncer 查詢 CrowdSec 本地 API 時,HTTP 請求的逾時時間(以毫秒為單位)。"
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "CrowdSec 排除的位置",
+        "help": "在執行 bouncing 時要排除的位置。這是一個以逗號分隔的位置清單。"
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "CrowdSec 驗證碼質詢",
+        "help": "當 CrowdSec 要求進行驗證碼驗證時顯示的 antibot 質詢。必須在該服務上啟用 antibot(將 USE_ANTIBOT 設定為除 \"no\" 以外的任意值),否則請求將被直接封鎖。第三方提供商的金鑰取自 ANTIBOT_* 相關設定。請避免使用 \"cookie\":對於「證明你是人類」這項決策而言,它毫無證明力。\"no\" 會像以往一樣忽略驗證碼決策;由於決策快取是按 Local API 共用的,因此要完全恢復舊行為,該 Local API 上的每個服務都必須設定為 \"no\"。"
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "交由安全工作流程決定",
+        "help": "交由安全工作流程決定如何處理被 CrowdSec 標記的請求。\"no\"(預設值)會在此處直接攔截該請求。\"yes\" 會將請求交給綁定到該服務的工作流程處理;即使沒有規則比對或未綁定任何工作流程,判定結果仍會生效。CORS 預檢請求(204)、/robots.txt 和 /security.txt 是由 BunkerWeb 在工作流程執行之前產生的,因此被標記的客戶端仍可以收到這三者。它們都不會到達你的應用程式,而其餘任何本會到達應用程式的請求都會先經過工作流程階梯的檢查。"
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "CrowdSec 快取過期時間",
+        "help": "bouncer 在 live 模式下快取 IP 的快取過期時間(以秒為單位)。"
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "CrowdSec 請求逾時",
+        "help": "從 CrowdSec 本地 API 拉取新增/失效 IP 的更新頻率(以秒為單位)。"
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "AppSec URL",
+        "help": "應用程式安全元件(Application Security Component)的 URL。"
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "AppSec 失敗操作",
+        "help": "AppSec 元件回傳 500 時的行為。可以選擇放行請求或拒絕該請求。"
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "AppSec 連線逾時",
+        "help": "處理元件與 AppSec 元件之間連線的逾時時間(以毫秒為單位)。"
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "AppSec 傳送逾時",
+        "help": "從處理元件向 AppSec 元件傳送資料的逾時時間(以毫秒為單位)。"
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "AppSec 處理逾時",
+        "help": "處理元件向 AppSec 元件發出的請求的處理逾時時間(以毫秒為單位)。"
+      },
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "永遠傳送至 AppSec",
+        "help": "即使該 IP 已有決策結果,也永遠將請求傳送至 AppSec 元件。"
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "AppSec SSL 驗證",
+        "help": "驗證 AppSec 元件 SSL 憑證的有效性。"
+      }
+    }
+  }
+}

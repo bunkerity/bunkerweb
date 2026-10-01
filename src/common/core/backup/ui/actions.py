@@ -9,6 +9,7 @@ def pre_render(**kwargs):
         "date_last_backup": {
             "value": "N/A",
             "title": "Last Backup",
+            "title_i18n": "widgets.date_last_backup.title",
             "subtitle_color": "primary",
             "svg_color": "primary",
         },

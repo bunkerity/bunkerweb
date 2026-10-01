@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "백업",
+      "description": "사용자 지정 위치로 데이터를 백업합니다. 정기적인 백업을 통해 중요한 파일의 안전성과 가용성을 보장합니다."
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "마지막 백업"
+      }
+    },
+    "settings": {
+      "USE_BACKUP": {
+        "label": "자동 백업 활성화",
+        "help": "백업 기능을 활성화 또는 비활성화합니다"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "백업 일정",
+        "help": "백업 빈도(매일, 매주 또는 매월)"
+      },
+      "BACKUP_ROTATION": {
+        "label": "백업 보관 개수",
+        "help": "보관할 백업 개수입니다"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "백업 보관 전략",
+        "help": "오래된 백업을 삭제 대상으로 선택하는 방식입니다: fifo는 가장 최근 백업을 유지하고, hanoi는 하노이의 탑 방식 계단형 보존(최근일수록 세밀하고 오래될수록 거칠게)으로 동일한 파일 수를 유지합니다."
+      },
+      "BACKUP_DIRECTORY": {
+        "label": "백업 디렉터리",
+        "help": "백업이 저장될 디렉터리입니다"
+      }
+    }
+  }
+}

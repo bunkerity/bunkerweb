@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "BunkerNet کے ذریعے دیگر BunkerWeb انسٹینسز کے ساتھ خطرے کا ڈیٹا شیئر کرتا ہے۔"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "BUNKERNET کی حیثیت"
+      },
+      "info_connectivity": {
+        "title": "کنیکٹیویٹی"
+      },
+      "info_instance_id": {
+        "title": "انسٹینس ID"
+      }
+    },
+    "settings": {
+      "USE_BUNKERNET": {
+        "label": "BunkerNet فعال کریں",
+        "help": "BunkerNet خصوصیت فعال کریں۔"
+      },
+      "BUNKERNET_SERVER": {
+        "label": "BunkerNet سرور",
+        "help": "BunkerNet API کا ایڈریس۔"
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "BunkerNet افادیت کے اعدادوشمار",
+        "help": "BunkerNet افادیت کے اعدادوشمار (شراکت، بلاک لسٹ کا سائز، کنیکٹیویٹی) ڈیٹابیس میں محفوظ کریں۔"
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "BunkerNet اعدادوشمار برقراری (دن)",
+        "help": "محفوظ شدہ BunkerNet افادیت کے اعدادوشمار کی زیادہ سے زیادہ عمر (دنوں میں)۔"
+      }
+    }
+  }
+}

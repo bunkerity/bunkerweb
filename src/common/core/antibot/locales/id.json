@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "Deteksi bot menggunakan tantangan."
+    },
+    "settings": {
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "URL backend Cap.js",
+        "help": "Origin internal yang dipanggil BunkerWeb untuk /siteverify (mis. http://cap-server:3000). Hanya origin, tanpa path. Kembali ke URL frontend jika kosong."
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "URL frontend Cap.js",
+        "help": "Origin publik tempat browser memuat widget Cap.js (mis. https://cap.example.com). Hanya origin, tanpa path."
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Secret Cap.js",
+        "help": "Secret yang dipasangkan dengan sitekey, digunakan BunkerWeb untuk mengautentikasi panggilan /siteverify."
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Sitekey Cap.js",
+        "help": "Sitekey yang dibuat di dashboard Cap.js untuk situs ini."
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "Alfabet captcha",
+        "help": "Alfabet kustom untuk digunakan dalam pembuatan captcha. Captcha akan disusun dari karakter acak dari string ini. Karakter yang didukung: semua huruf (a-z, A-Z), angka 2-9, dan karakter khusus yang didukung (lihat dokumentasi untuk daftar lengkap)."
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "Secret hCaptcha",
+        "help": "Secret untuk tantangan hCaptcha."
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "Sitekey hCaptcha",
+        "help": "Sitekey untuk tantangan hCaptcha."
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "ASN yang diabaikan",
+        "help": "Daftar nomor ASN, dipisahkan dengan spasi, yang mengabaikan tantangan antibot."
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "Negara yang diabaikan",
+        "help": "Daftar kode negara ISO 3166-1 alpha-2, dipisahkan dengan spasi, yang mengabaikan tantangan antibot."
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "Nama header yang diabaikan",
+        "help": "Nama header permintaan yang membebaskan permintaan dari tantangan antibot. Klien mana pun dapat mengirim header ini: perlakukan sebagai rahasia bersama, hanya melalui HTTPS."
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "Nilai header yang diabaikan",
+        "help": "Nilai (regex PCRE) yang harus dicocokkan oleh header untuk mengecualikan permintaan dari tantangan antibot. Biarkan kosong agar cocok berdasarkan keberadaan header saja. Jangkarkan dengan ^ dan $: kecocokan tidak dijangkarkan secara default."
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "IP/jaringan yang diabaikan",
+        "help": "Daftar IP/jaringan, dipisahkan dengan spasi, yang mengabaikan tantangan antibot."
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "Reverse DNS yang diabaikan",
+        "help": "Daftar akhiran reverse DNS, dipisahkan dengan spasi, yang mengabaikan tantangan antibot."
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "URI yang diabaikan",
+        "help": "Daftar pola regex PCRE (dipisahkan dengan spasi) untuk URI yang harus dikecualikan dari tantangan antibot. Pola dicocokkan terhadap path dan URI permintaan lengkap beserta query string."
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "User-Agent yang diabaikan",
+        "help": "Daftar User-Agent (regex PCRE), dipisahkan dengan spasi, yang mengabaikan tantangan antibot."
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "Secret mCaptcha",
+        "help": "Secret untuk tantangan mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "Sitekey mCaptcha",
+        "help": "Sitekey untuk tantangan mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "Domain mCaptcha",
+        "help": "Domain yang digunakan untuk tantangan mCaptcha."
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "Negara yang ditantang saja",
+        "help": "Daftar kode negara ISO 3166-1 alpha-2, dipisahkan dengan spasi, yang akan menerima tantangan antibot."
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "Antibot reverse DNS untuk IP global saja",
+        "help": "Hanya lakukan pemeriksaan RDNS antibot pada alamat IP global."
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "Kunci API reCAPTCHA",
+        "help": "Kunci API untuk tantangan reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "Gunakan reCAPTCHA klasik",
+        "help": "Gunakan reCAPTCHA klasik, bukan versi yang lebih baru."
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "Fingerprint JA3 untuk klien TLS. Kami menyarankan penggunaan salesforce/ja3 untuk menghitung fingerprint JA3."
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "Fingerprint JA4 untuk klien TLS. Kami menyarankan penggunaan FoxIO-LLC/ja4 untuk menghitung fingerprint JA4."
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "ID Proyek reCAPTCHA",
+        "help": "ID proyek untuk tantangan reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "Skor reCAPTCHA v3",
+        "help": "Skor minimum yang diperlukan untuk tantangan reCAPTCHA (hanya kompatibel dengan reCAPTCHA v3)."
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "Secret reCAPTCHA",
+        "help": "Secret untuk tantangan reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "Sitekey reCAPTCHA",
+        "help": "Sitekey untuk tantangan reCAPTCHA."
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "URL pengalihan sukses",
+        "help": "URI tetap tempat klien dialihkan setelah menyelesaikan tantangan, alih-alih ke halaman yang awalnya diminta. Biarkan kosong untuk kembali ke halaman yang awalnya diminta."
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "Waktu untuk menyelesaikan",
+        "help": "Waktu maksimum (dalam detik) yang dimiliki klien untuk menyelesaikan tantangan. Setelah waktu ini terlampaui, tantangan baru akan dibuat."
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "Masa berlaku",
+        "help": "Waktu masa berlaku maksimum dari tantangan yang telah diselesaikan. Setelah waktu ini terlampaui, klien harus menyelesaikan tantangan baru."
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Secret Turnstile",
+        "help": "Secret untuk tantangan Turnstile."
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Sitekey Turnstile",
+        "help": "Sitekey untuk tantangan Turnstile."
+      },
+      "ANTIBOT_URI": {
+        "label": "URL antibot",
+        "help": "URI yang tidak digunakan tempat klien akan dialihkan untuk menyelesaikan tantangan."
+      },
+      "USE_ANTIBOT": {
+        "label": "Tantangan antibot",
+        "help": "Aktifkan fitur antibot."
+      }
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "Tantangan",
+        "subtitle": "Gagal"
+      }
+    }
+  }
+}

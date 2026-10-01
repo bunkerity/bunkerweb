@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "Custom na SSL certificate",
+      "description": "Pumili ng custom na sertipiko para sa SSL."
+    },
+    "settings": {
+      "CUSTOM_SSL_CERT": {
+        "label": "Path ng Certificate",
+        "help": "Buong path ng certificate o bundle file. Dapat itong mababasa ng WORKER, kung saan tumatakbo ang custom-cert job simula nang inilipat ng 1.7 ang job execution palabas ng scheduler - hindi ng scheduler, kahit ano pa ang sabi ng mas lumang dokumentasyon. Sa Docker Swarm, i-mount ito sa bw-worker at ibigay ang path kung saan ito naka-mount, hal. /run/secrets/example.com.pem; okay lang ang Swarm config para sa certificate, na public naman."
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "Data ng Certificate (base64/plaintext)",
+        "help": "Data ng certificate na naka-encode sa base64 o plaintext PEM format."
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "Priyoridad ng Certificate",
+        "help": "Piliin kung bibigyang-priyoridad ang certificate mula sa file path o mula sa base64 data. (file | data)"
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "Path ng Key",
+        "help": "Buong path ng key file. Dapat itong mababasa ng WORKER, kung saan tumatakbo ang custom-cert job simula nang inilipat ng 1.7 ang job execution palabas ng scheduler - hindi ng scheduler, kahit ano pa ang sabi ng mas lumang dokumentasyon. Sa Docker Swarm, i-mount ang private key sa bw-worker bilang Swarm SECRET at ibigay ang path kung saan ito naka-mount, hal. /run/secrets/example.com.key. Huwag kailanman ipadala ang private key bilang Swarm config: naka-imbak nang walang encryption ang mga config sa raft store sa bawat manager node."
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "Data ng Key (base64/plaintext)",
+        "help": "Data ng key na naka-encode sa base64 o plaintext PEM format."
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "Path ng Certificate ng DEFAULT SERVER",
+        "help": "Buong path ng certificate o bundle file na sini-serve ng DEFAULT SERVER - ang block na sumasagot sa mga request na walang tumugmang naka-configure na service. Iwanang blangko para panatilihin ang internal na self-signed certificate. Dapat itong mababasa ng WORKER, kung saan tumatakbo ang custom-cert job. Tatanggihan ang certificate na sumasaklaw din sa hostname ng naka-configure na service, dahil sa gayon ay makakasagot na ang default server para sa service na iyon. Sini-serve lang kapag MULTISITE=yes o DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "Data ng Certificate ng DEFAULT SERVER (base64/plaintext)",
+        "help": "Data ng certificate ng DEFAULT SERVER, naka-encode sa base64 o plaintext PEM format. Ginagamit lang kapag blangko ang DEFAULT_SERVER_SSL_CERT. Iwanang blangko ang dalawa para panatilihin ang internal na self-signed certificate. Sini-serve lang kapag MULTISITE=yes o DISABLE_DEFAULT_SERVER=yes."
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "Path ng Key ng DEFAULT SERVER",
+        "help": "Buong path ng private key ng certificate ng DEFAULT SERVER - ang block na sumasagot sa mga request na walang tumugmang naka-configure na service (hindi kilalang SNI, raw IP access). Iwanang blangko para panatilihin ang internal na self-signed certificate. Dapat itong mababasa ng WORKER, kung saan tumatakbo ang custom-cert job. Sa Docker Swarm, i-mount ito bilang Swarm SECRET, huwag kailanman bilang config."
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "Data ng Key ng DEFAULT SERVER (base64/plaintext)",
+        "help": "Data ng key ng certificate ng DEFAULT SERVER, naka-encode sa base64 o plaintext PEM format. Ginagamit lang kapag blangko ang DEFAULT_SERVER_SSL_KEY. Iwanang blangko ang dalawa para panatilihin ang internal na self-signed certificate."
+      },
+      "USE_CUSTOM_SSL": {
+        "label": "Gamitin ang Custom na Certificate",
+        "help": "Gamitin ang custom na SSL certificate."
+      }
+    }
+  }
+}

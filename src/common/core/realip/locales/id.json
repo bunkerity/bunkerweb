@@ -1,0 +1,34 @@
+{
+  "realip": {
+    "meta": {
+      "name": "IP asli",
+      "description": "Mendapatkan IP asli klien saat BunkerWeb berada di belakang reverse proxy / load balancer."
+    },
+    "settings": {
+      "USE_REAL_IP": {
+        "label": "Gunakan IP asli",
+        "help": "Ambil IP asli klien."
+      },
+      "USE_PROXY_PROTOCOL": {
+        "label": "Gunakan protokol PROXY",
+        "help": "Aktifkan komunikasi protokol PROXY."
+      },
+      "REAL_IP_FROM": {
+        "label": "IP asli dari",
+        "help": "Daftar IP/jaringan tepercaya, dipisahkan dengan spasi, tempat asal permintaan yang di-proxy."
+      },
+      "REAL_IP_HEADER": {
+        "label": "Header IP asli",
+        "help": "Header HTTP yang berisi IP asli atau nilai khusus proxy_protocol untuk protokol PROXY."
+      },
+      "REAL_IP_RECURSIVE": {
+        "label": "IP asli rekursif",
+        "help": "Lakukan pencarian rekursif dalam header yang berisi alamat IP."
+      },
+      "REAL_IP_FROM_URLS": {
+        "label": "IP asli dari URL",
+        "help": "Daftar URL berisi IP/jaringan tepercaya, dipisahkan dengan spasi, tempat asal permintaan yang di-proxy. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+      }
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "misc": {
+    "meta": {
+      "name": "Różne",
+      "description": "Różne ustawienia."
+    },
+    "widgets": {
+      "counter_failed_default": {
+        "title": "SERWER DOMYŚLNY WYŁĄCZONY",
+        "subtitle": "Łącznie"
+      },
+      "counter_failed_method": {
+        "title": "NIEDOZWOLONE METODY",
+        "subtitle": "Liczba"
+      }
+    },
+    "settings": {
+      "SERVICE_MODE": {
+        "label": "Tryb usługi",
+        "help": "Deklarowany cel usługi: \"standard\" dla zwykłej usługi, \"redirect_only\" dla nasłuchu, który tylko przekierowuje. To właśnie tę deklarację odczytuje klasyfikacja limitów PRO; nigdy nie jest wnioskowana z ustawień przekierowania."
+      },
+      "DISABLE_DEFAULT_SERVER": {
+        "label": "Wyłącz serwer domyślny",
+        "help": "Odrzuć żądanie HTTP, jeśli vhost żądania jest nieznany."
+      },
+      "DISABLE_DEFAULT_SERVER_STRICT_SNI": {
+        "label": "Wyłącz ścisłe SNI serwera domyślnego",
+        "help": "Zamknij połączenie SSL/TLS, jeśli SNI jest nieznane."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS": {
+        "label": "Porty stream serwera domyślnego",
+        "help": "Porty, na których serwer domyślny akceptuje połączenia stream (TCP) niepasujące do żadnej skonfigurowanej usługi; pozostaw puste, aby wyłączyć. Odrzucane dla portu, na którym nasłuchuje usługa stream, portu używanego przez nasłuch HTTP/HTTPS, lub portu, który BunkerWeb wiąże dla siebie. Zwykle ustawiane na zarezerwowanej usłudze default-server."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS_SSL": {
+        "label": "Porty stream serwera domyślnego (TLS)",
+        "help": "Które z powyższych portów stream serwera domyślnego są obsługiwane przez TLS; pozostaw puste dla samego zwykłego TCP. Każda wartość musi być też wymieniona w \"Porty stream serwera domyślnego\" — to jest przełącznik TLS dla portów, które serwer domyślny już deklaruje, a nie drugi zestaw nasłuchów, więc port podany tylko tutaj jest odrzucany."
+      },
+      "ALLOWED_METHODS": {
+        "label": "Dozwolone metody",
+        "help": "Dozwolone metody HTTP i WebDAV, rozdzielone znakami pionowej kreski. Niestandardowe metody pisane wielkimi literami mogą zawierać podkreślenia i myślniki."
+      },
+      "MAX_CLIENT_SIZE": {
+        "label": "Maksymalny rozmiar treści",
+        "help": "Maksymalny rozmiar treści (0 dla nieskończonego)."
+      },
+      "MAX_HEADERS": {
+        "label": "Maksymalna liczba nagłówków",
+        "help": "Maksymalna liczba linii nagłówków na żądanie. Żądania przekraczające ten limit są odrzucane z 400 Bad Request."
+      },
+      "SERVE_FILES": {
+        "label": "Serwuj pliki",
+        "help": "Serwuj pliki z lokalnego folderu."
+      },
+      "ROOT_FOLDER": {
+        "label": "Folder główny",
+        "help": "Folder główny zawierający pliki do serwowania (/var/www/html/{server_name}, jeśli nieustawiony)."
+      },
+      "HTTP2": {
+        "label": "HTTP2",
+        "help": "Obsługuj protokół HTTP2, gdy HTTPS jest włączone."
+      },
+      "HTTP3": {
+        "label": "HTTP3",
+        "help": "Obsługuj protokół HTTP3, gdy HTTPS jest włączone."
+      },
+      "HTTP3_ALT_SVC_PORT": {
+        "label": "Port Alt-Svc HTTP3",
+        "help": "Alternatywny port usługi HTTP3. Ta wartość zostanie użyta jako część nagłówka Alt-Svc."
+      },
+      "LISTEN_HTTP": {
+        "label": "Nasłuch HTTP",
+        "help": "Odpowiadaj na (niebezpieczne) żądania HTTP."
+      },
+      "USE_OPEN_FILE_CACHE": {
+        "label": "Użyj pamięci podręcznej otwartych plików",
+        "help": "Włącz funkcję pamięci podręcznej otwartych plików"
+      },
+      "OPEN_FILE_CACHE": {
+        "label": "Użyj pamięci podręcznej otwartych plików",
+        "help": "Dyrektywa pamięci podręcznej otwartych plików"
+      },
+      "OPEN_FILE_CACHE_ERRORS": {
+        "label": "Błędy pamięci podręcznej otwartych plików",
+        "help": "Włącz pamięć podręczną otwartych plików dla błędów"
+      },
+      "OPEN_FILE_CACHE_MIN_USES": {
+        "label": "Minimalne użycia pamięci podręcznej otwartych plików",
+        "help": "Włącz minimalną liczbę użyć pamięci podręcznej otwartych plików"
+      },
+      "OPEN_FILE_CACHE_VALID": {
+        "label": "Czas ważności pamięci podręcznej otwartych plików",
+        "help": "Czas ważności pamięci podręcznej otwartych plików"
+      },
+      "EXTERNAL_PLUGIN_URLS": {
+        "label": "Zewnętrzne URL-e wtyczek",
+        "help": "Lista URL-i zewnętrznych wtyczek (bezpośrednie pobranie pliku .zip lub .tar) do pobrania i instalacji (URL-e rozdzielone spacją). Maksymalnie 50 MiB na URL. Dodaj #sha256=<digest> do URL, aby przypiąć jego zawartość. Zwykłe http:// jest przestarzałe i zostanie odrzucone w 1.7.0: użyj https:// lub file:///."
+      },
+      "DENY_HTTP_STATUS": {
+        "label": "Status HTTP odmowy",
+        "help": "Kod statusu HTTP wysyłany, gdy żądanie zostanie odrzucone (403 lub 444). W przypadku użycia 444 BunkerWeb zamknie połączenie."
+      },
+      "SEND_ANONYMOUS_REPORT": {
+        "label": "Wysyłaj anonimowy raport",
+        "help": "Wysyłaj anonimowy raport do opiekunów BunkerWeb."
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "雙向 TLS",
+      "description": "透過雙向 TLS(mTLS)要求用戶端憑證。"
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "使用雙向 TLS",
+        "help": "啟用基於雙向 TLS 的用戶端身分驗證。"
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "用戶端 CA 憑證組合",
+        "help": "信任的用戶端 CA 憑證組合(PEM)的絕對路徑。當 MTLS_VERIFY_CLIENT 設定為 on 或 optional 時為必填項目。"
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "用戶端驗證模式",
+        "help": "用戶端驗證模式。'on' 要求提供有效憑證,'optional' 允許在未提供憑證時放行請求,'optional_no_ca' 會跳過 CA 驗證(僅用於診斷,並非真正的防護)。"
+      },
+      "MTLS_URL": {
+        "label": "mTLS URL",
+        "help": "與請求 URI 比對的正規表示式,僅對比對成功的路徑要求提供有效用戶端憑證(僅限 HTTP)。請將 MTLS_VERIFY_CLIENT 設為 optional,以便未比對到的路徑也能完成交握;實際強制執行按請求在 Lua 中進行。無效的正規表示式會按拒絕處理(比對成功的請求會被拒絕並記錄日誌),而不是被悄悄放行。多個路徑可使用帶編號的欄位(MTLS_URL_1、MTLS_URL_2)。留空則對整個網站強制啟用 mTLS。"
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "驗證深度",
+        "help": "用戶端驗證過程中所接受的最大憑證鏈深度。"
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "轉發用戶端標頭",
+        "help": "透過 X-SSL-Client-* 標頭將驗證結果轉發給上游後端。用戶端提供的 X-SSL-* 標頭在傳入時一律會被剝除,因此這些值無法被偽造。"
+      },
+      "MTLS_CRL": {
+        "label": "用戶端 CRL 路徑",
+        "help": "憑證撤銷清單(PEM)的選用絕對路徑。留空可跳過 CRL 檢查。"
+      }
+    }
+  }
+}

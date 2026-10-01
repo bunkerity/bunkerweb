@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "Pinamamahalaan ang file na security.txt. Isang iminumungkahing pamantayan na nagpapahintulot sa mga website na tukuyin ang kanilang mga patakaran sa seguridad."
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "Gamitin ang security.txt",
+        "help": "I-enable ang security.txt file."
+      },
+      "SECURITYTXT_URI": {
+        "label": "Security.txt URI",
+        "help": "Tinutukoy ang URI kung saan ma-a-access ang \"security.txt\" file."
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Security.txt Contact",
+        "help": "Tinutukoy ang paraan na dapat gamitin ng mga researcher para mag-report ng security vulnerability, tulad ng email address, numero ng telepono, at/o web page na may contact information. (Kung blangko ang value, hindi gagawin ang security.txt file dahil required field ito)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Security.txt Expiration",
+        "help": "Tinutukoy ang petsa at oras kung kailan ituturing na luma na ang data sa \"security.txt\" file at hindi na dapat gamitin (kung blangko ang value, laging magiging kasalukuyang petsa at oras + 1 taon ang value)."
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Security.txt Encryption",
+        "help": "Tinutukoy ang encryption key na dapat gamitin ng mga security researcher para sa encrypted na komunikasyon."
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Security.txt Acknowledgement",
+        "help": "Tinutukoy ang link sa page kung saan kinikilala ang mga security researcher para sa kanilang mga report."
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Security.txt Preferred Language",
+        "help": "Maaaring gamitin para tukuyin ang set ng natural na wika na mas gusto kapag nagsusumite ng security report."
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Security.txt Canonical",
+        "help": "Tinutukoy ang canonical URI kung saan matatagpuan ang \"security.txt\" file, na karaniwang tulad ng \"https://example.com/.well-known/security.txt\". (Kung blangko ang value, awtomatikong bubuuin ang default value mula sa site URL + SECURITYTXT_URI)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Security.txt Policy",
+        "help": "Tinutukoy ang link kung saan matatagpuan ang vulnerability disclosure policy."
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Security.txt Hiring",
+        "help": "Ginagamit para mag-link sa mga trabahong may kinalaman sa seguridad ng vendor."
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "Link patungo sa provider-metadata.json ng iyong CSAF (Common Security Advisory Framework) provider."
+      }
+    }
+  }
+}

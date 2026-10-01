@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "Gere o ficheiro robots.txt. Norma para controlar o acesso dos crawlers web ao seu site."
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "Usar robots.txt",
+        "help": "Ativa o ficheiro robots.txt."
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "Listas robots.txt da comunidade",
+        "help": "Selecione as listas mantidas pela comunidade a incluir no robots.txt."
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "URLs do robots.txt",
+        "help": "Lista de URL, separados por espaços, contendo regras robots.txt. Também suporta URL file:// e autenticação básica através do esquema http://user:pass@url."
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Regra robots.txt",
+        "help": "Regras para robots.txt (uma por linha)."
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Cabeçalho robots.txt",
+        "help": "Cabeçalho do ficheiro robots.txt (antes das regras). Pode ser codificado em Base64."
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Rodapé robots.txt",
+        "help": "Rodapé do ficheiro robots.txt (depois das regras). Pode ser codificado em Base64."
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Sitemap robots.txt",
+        "help": "URL(s) de sitemap a incluir no robots.txt."
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "Regra a ignorar",
+        "help": "Regra (regex PCRE) a ignorar. Pode ser especificada várias vezes."
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "Token de API DarkVisitors",
+        "help": "Token Bearer para a API DarkVisitors."
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "Tipos de agentes DarkVisitors",
+        "help": "Lista de tipos de agentes separados por vírgulas a incluir no campo agent_types do DarkVisitors ao contactar a API do DarkVisitors."
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "Disallow DarkVisitors",
+        "help": "Uma cadeia que especifica quais URL são proibidos. Este valor será enviado como o campo disallow ao contactar a API DarkVisitors."
+      }
+    }
+  }
+}

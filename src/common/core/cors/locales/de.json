@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Cross-Origin Resource Sharing."
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "Anfrage blockiert"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "CORS verwenden",
+        "help": "CORS verwenden"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "Erlaubte Ursprünge",
+        "help": "Erlaubte Ursprünge (Origins) für CORS-Anfragen: PCRE-Regex, * oder self (für denselben Ursprung)."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Wert von Access-Control-Allow-Methods",
+        "help": "Wert des Headers Access-Control-Allow-Methods."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Wert von Access-Control-Allow-Headers",
+        "help": "Wert des Headers Access-Control-Allow-Headers."
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Access-Control-Allow-Credentials senden",
+        "help": "Sendet den Header Access-Control-Allow-Credentials."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Wert von Access-Control-Expose-Headers",
+        "help": "Wert des Headers Access-Control-Expose-Headers."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Wert des Headers Cross-Origin-Opener-Policy."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Wert des Headers Cross-Origin-Embedder-Policy."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Wert des Headers Cross-Origin-Resource-Policy."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Wert von Access-Control-Max-Age",
+        "help": "Wert des Headers Access-Control-Max-Age."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "Anfrage ablehnen",
+        "help": "Lehnt die Anfrage ab und sendet sie nicht an das Backend, wenn der Origin nicht erlaubt ist."
+      }
+    }
+  }
+}

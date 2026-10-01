@@ -1,0 +1,26 @@
+{
+  "brotli": {
+    "meta": {
+      "name": "Brotli",
+      "description": "Comprime las solicitudes HTTP con el algoritmo brotli."
+    },
+    "settings": {
+      "USE_BROTLI": {
+        "label": "Usar brotli",
+        "help": "Activa o desactiva la compresión Brotli. Desactivada por defecto, que es también el comportamiento predeterminado propio del módulo ngx_brotli. El ajuste es por servicio: déjelo desactivado para cualquier servicio cuyas respuestas lleven a la vez un secreto (un token CSRF, una clave API) y reflejen una entrada proporcionada por el atacante, ya que esa combinación es la condición previa de BREACH — y tenga en cuenta que text/html siempre se comprime, sea lo que sea lo que indique BROTLI_TYPES. La interfaz web de BunkerWeb es uno de esos servicios."
+      },
+      "BROTLI_TYPES": {
+        "label": "Tipos MIME",
+        "help": "Lista de tipos MIME que se comprimirán con brotli."
+      },
+      "BROTLI_MIN_LENGTH": {
+        "label": "Longitud mínima",
+        "help": "Tamaño mínimo de la respuesta (en bytes) para que se aplique la compresión Brotli."
+      },
+      "BROTLI_COMP_LEVEL": {
+        "label": "Nivel de compresión",
+        "help": "Nivel de compresión para Brotli (0 = sin compresión, 11 = compresión máxima)."
+      }
+    }
+  }
+}

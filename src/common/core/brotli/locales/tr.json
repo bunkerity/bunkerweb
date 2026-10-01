@@ -1,0 +1,26 @@
+{
+  "brotli": {
+    "meta": {
+      "name": "Brotli",
+      "description": "HTTP isteklerini brotli algoritmasıyla sıkıştırır."
+    },
+    "settings": {
+      "BROTLI_COMP_LEVEL": {
+        "label": "Sıkıştırma düzeyi",
+        "help": "Brotli için sıkıştırma düzeyi (0 = sıkıştırma yok, 11 = maksimum sıkıştırma)."
+      },
+      "BROTLI_MIN_LENGTH": {
+        "label": "Minimum uzunluk",
+        "help": "Brotli sıkıştırmasının uygulanacağı minimum yanıt boyutu (bayt cinsinden)."
+      },
+      "BROTLI_TYPES": {
+        "label": "MIME türleri",
+        "help": "brotli ile sıkıştırılacak MIME türlerinin listesi."
+      },
+      "USE_BROTLI": {
+        "label": "Brotli kullan",
+        "help": "Brotli sıkıştırmasını etkinleştir veya devre dışı bırak. Varsayılan olarak kapalıdır; bu, ngx_brotli modülünün kendi varsayılanıyla da aynıdır. Ayar hizmet başınadır: yanıtları hem bir sır (CSRF token'ı, API anahtarı) taşıyan hem de saldırganın sağladığı girdiyi geri yansıtan herhangi bir hizmet için kapalı bırakın, çünkü bu kombinasyon BREACH ön koşuludur — ayrıca BROTLI_TYPES'ta ne listelenirse listelensin text/html'nin her zaman sıkıştırıldığını unutmayın. BunkerWeb web arayüzü böyle bir hizmettir."
+      }
+    }
+  }
+}

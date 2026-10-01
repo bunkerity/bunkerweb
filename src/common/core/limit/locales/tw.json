@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "限制",
+      "description": "限制請求與連線的最大數量。"
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "全域限制",
+        "subtitle": "已封鎖的請求"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "啟用請求限制",
+        "help": "啟用請求限制功能。"
+      },
+      "LIMIT_REQ_URL": {
+        "label": "請求限制 URL",
+        "help": "套用請求限制的 URL(PCRE 正規表示式),或使用特殊值 / 表示適用於所有請求。"
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "請求限制速率",
+        "help": "套用於該 URL 的速率(s 表示秒,m 表示分鐘,h 表示小時,d 表示天)。"
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "啟用全域請求限制",
+        "help": "啟用全域速率限制:為整個服務設定一個彙總配額,將所有客戶端和 URL 合併計數(用於保護源站容量,獨立於依 IP/依 URL 的請求限制)。"
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "全域請求限制速率",
+        "help": "整個服務的最大彙總速率,所有客戶端和 URL 合併計算(s 表示秒,m 表示分鐘,h 表示小時,d 表示天)。"
+      },
+      "USE_LIMIT_CONN": {
+        "label": "啟用連線數限制",
+        "help": "啟用連線數限制功能。"
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "HTTP/1.X 連線數上限",
+        "help": "使用 HTTP/1.X 通訊協定時,每個 IP 的最大連線數。"
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "HTTP/2 串流數上限",
+        "help": "使用 HTTP/2 通訊協定時,每個 IP 的最大串流數。"
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "HTTP/3 串流數上限",
+        "help": "使用 HTTP/3 通訊協定時,每個 IP 的最大串流數。"
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "串流連線數上限",
+        "help": "使用串流(stream)時,每個 IP 的最大連線數。"
+      }
+    }
+  }
+}

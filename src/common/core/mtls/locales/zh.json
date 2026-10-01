@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "双向 TLS",
+      "description": "通过双向 TLS(mTLS)要求客户端证书。"
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "使用双向 TLS",
+        "help": "启用基于双向 TLS 的客户端身份验证。"
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "客户端 CA 证书包",
+        "help": "可信客户端 CA 证书包(PEM)的绝对路径。当 MTLS_VERIFY_CLIENT 设置为 on 或 optional 时为必填项。"
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "客户端验证模式",
+        "help": "客户端验证模式。'on' 要求提供有效证书,'optional' 允许在未提供证书时放行请求,'optional_no_ca' 会跳过 CA 校验(仅用于诊断,并非真正的防护)。"
+      },
+      "MTLS_URL": {
+        "label": "mTLS URL",
+        "help": "与请求 URI 匹配的正则表达式,仅对匹配的路径要求提供有效客户端证书(仅限 HTTP)。请将 MTLS_VERIFY_CLIENT 设为 optional,以便非匹配路径也能完成握手;实际强制执行按请求在 Lua 中进行。无效的正则表达式会按拒绝处理(匹配的请求会被拒绝并记录日志),而不是被悄悄放行。多个路径可使用带编号的槽位(MTLS_URL_1、MTLS_URL_2)。留空则对整个站点强制启用 mTLS。"
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "验证深度",
+        "help": "客户端验证过程中所接受的最大证书链深度。"
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "转发客户端标头",
+        "help": "通过 X-SSL-Client-* 标头将验证结果转发给上游后端。客户端提供的 X-SSL-* 标头在入站时始终会被剥离,因此这些值无法被伪造。"
+      },
+      "MTLS_CRL": {
+        "label": "客户端 CRL 路径",
+        "help": "证书吊销列表(PEM)的可选绝对路径。留空可跳过 CRL 检查。"
+      }
+    }
+  }
+}

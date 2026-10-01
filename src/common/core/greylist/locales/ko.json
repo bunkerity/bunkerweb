@@ -1,0 +1,76 @@
+{
+  "greylist": {
+    "meta": {
+      "name": "그레이리스트",
+      "description": "내부 및 외부 IP/네트워크/rDNS/ASN 그레이리스트를 기반으로 보안 기능을 유지하면서 접근을 허용합니다."
+    },
+    "widgets": {
+      "counter_failed_greylist": {
+        "title": "그레이리스트",
+        "subtitle": "요청 차단됨"
+      }
+    },
+    "settings": {
+      "USE_GREYLIST": {
+        "label": "그레이리스트 활성화",
+        "help": "그레이리스트 기능을 활성화합니다."
+      },
+      "GREYLIST_IP": {
+        "label": "그레이리스트 IP/네트워크",
+        "help": "그레이리스트에 추가할 IP/네트워크 목록입니다(공백으로 구분)."
+      },
+      "GREYLIST_RDNS": {
+        "label": "그레이리스트 역방향 DNS",
+        "help": "그레이리스트에 추가할 역방향 DNS 접미사 목록입니다(공백으로 구분)."
+      },
+      "GREYLIST_RDNS_GLOBAL": {
+        "label": "그레이리스트 역방향 DNS 글로벌 IP",
+        "help": "글로벌 IP 주소에 대해서만 RDNS 그레이리스트 검사를 수행합니다."
+      },
+      "GREYLIST_ASN": {
+        "label": "그레이리스트 ASN",
+        "help": "그레이리스트에 추가할 ASN 번호 목록입니다(공백으로 구분)."
+      },
+      "GREYLIST_USER_AGENT": {
+        "label": "그레이리스트 User-Agent",
+        "help": "그레이리스트에 추가할 User-Agent(PCRE 정규식) 목록입니다(공백으로 구분)."
+      },
+      "GREYLIST_URI": {
+        "label": "그레이리스트 URI",
+        "help": "그레이리스트에 추가할 URI(PCRE 정규식) 목록입니다(공백으로 구분)."
+      },
+      "GREYLIST_RULE": {
+        "label": "그레이리스트 규칙",
+        "help": "복합 규칙: 규칙이 일치하려면 모든 항목이 일치해야 합니다. 항목은 \" AND \"(대문자)로 구분되며, 각 항목은 [NOT ]<kind>:<value> 형식입니다. 여기서 <kind>는 ip, country, asn, rdns, ua(user_agent의 별칭) 또는 uri입니다. 예: ip:10.0.0.0/8 AND NOT ua:^curl. 규칙들은 서로, 그리고 위의 평면 목록들과 OR로 결합됩니다. 값은 @office와 같은 리소스 그룹 토큰일 수 있습니다. 스트림 서비스는 ip, country, asn, rdns만 평가합니다."
+      },
+      "GREYLIST_HEADER_NAME": {
+        "label": "그레이리스트 헤더 이름",
+        "help": "요청을 그레이리스트에 추가하는 요청 헤더의 이름입니다. 어떤 클라이언트든 이 헤더를 보낼 수 있으므로, 공유 비밀로 취급하고 HTTPS를 통해서만 사용하십시오."
+      },
+      "GREYLIST_HEADER_VALUE": {
+        "label": "그레이리스트 헤더 값",
+        "help": "요청을 그레이리스트에 추가하기 위해 헤더가 일치해야 하는 값(PCRE 정규식)입니다. 헤더가 존재하는지만 확인하려면 비워 두십시오. ^ 와 $ 로 고정하십시오: 기본적으로 일치는 고정되지 않습니다."
+      },
+      "GREYLIST_IP_URLS": {
+        "label": "그레이리스트 IP/네트워크 URL",
+        "help": "그레이리스트에 추가할 신뢰 IP/네트워크가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다."
+      },
+      "GREYLIST_RDNS_URLS": {
+        "label": "그레이리스트 역방향 DNS URL",
+        "help": "그레이리스트에 추가할 역방향 DNS 접미사가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다."
+      },
+      "GREYLIST_ASN_URLS": {
+        "label": "그레이리스트 ASN URL",
+        "help": "그레이리스트에 추가할 ASN이 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다."
+      },
+      "GREYLIST_USER_AGENT_URLS": {
+        "label": "그레이리스트 User-Agent URL",
+        "help": "그레이리스트에 추가할 신뢰 User-Agent가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다."
+      },
+      "GREYLIST_URI_URLS": {
+        "label": "그레이리스트 URI URL",
+        "help": "그레이리스트에 추가할 악성 URI가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다."
+      }
+    }
+  }
+}

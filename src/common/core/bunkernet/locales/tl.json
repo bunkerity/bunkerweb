@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "Nagbabahagi ng datos ng banta sa ibang instance ng BunkerWeb sa pamamagitan ng BunkerNet."
+    },
+    "settings": {
+      "BUNKERNET_SERVER": {
+        "label": "BunkerNet Server",
+        "help": "Address ng BunkerNet API."
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "Pagpapanatili ng Stats ng BunkerNet (Araw)",
+        "help": "Maximum na edad (sa araw) ng na-persist na statistics ng effectiveness ng BunkerNet."
+      },
+      "USE_BUNKERNET": {
+        "label": "I-activate ang BunkerNet",
+        "help": "I-activate ang feature na BunkerNet."
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "Effectiveness Stats ng BunkerNet",
+        "help": "I-persist ang effectiveness statistics ng BunkerNet (contribution, laki ng blocklist, connectivity) sa database."
+      }
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS NG BUNKERNET"
+      },
+      "info_connectivity": {
+        "title": "Koneksyon"
+      },
+      "info_instance_id": {
+        "title": "Instance ID"
+      }
+    }
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "Détection des robots à l'aide d'un défi."
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "Défis",
+        "subtitle": "Échoué"
+      }
+    },
+    "settings": {
+      "USE_ANTIBOT": {
+        "label": "Défi antibot",
+        "help": "Active la fonctionnalité antibot."
+      },
+      "ANTIBOT_URI": {
+        "label": "URL antibot",
+        "help": "URI inutilisée vers laquelle les clients seront redirigés pour résoudre le défi."
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "Délai de résolution",
+        "help": "Durée maximale (en secondes) dont disposent les clients pour résoudre le défi. Une fois ce délai écoulé, un nouveau défi sera généré."
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "Durée de validité",
+        "help": "Durée maximale de validité des défis résolus. Une fois ce délai écoulé, les clients devront en résoudre un nouveau."
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "URL de redirection après succès",
+        "help": "URI fixe vers laquelle rediriger les clients après la résolution du défi, à la place de la page initialement demandée. Laisser vide pour revenir à la page initialement demandée."
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "Alphabet du captcha",
+        "help": "Alphabet personnalisé à utiliser pour la génération du captcha. Le captcha sera composé de caractères aléatoires issus de cette chaîne. Caractères pris en charge : toutes les lettres (a-z, A-Z), les chiffres 2-9, et les caractères spéciaux pris en charge (voir la documentation pour la liste complète)."
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "URI ignorée",
+        "help": "Liste de motifs regex PCRE (séparés par des espaces) pour les URI à exclure du défi antibot. Les motifs sont vérifiés par rapport au chemin et à l'URI complète de la requête avec la chaîne de requête."
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "IP/réseau ignoré",
+        "help": "Liste d'IP/réseaux, séparés par des espaces, pour lesquels ignorer le défi antibot."
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "DNS inversé ignoré",
+        "help": "Liste de suffixes DNS inversé, séparés par des espaces, pour lesquels ignorer le défi antibot."
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "DNS inversé antibot IP globales uniquement",
+        "help": "N'effectuer les vérifications RDNS antibot que sur les adresses IP globales."
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "ASN ignoré",
+        "help": "Liste de numéros ASN, séparés par des espaces, pour lesquels ignorer le défi antibot."
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "User-Agent ignoré",
+        "help": "Liste de User-Agent (regex PCRE), séparés par des espaces, pour lesquels ignorer le défi antibot."
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "Nom d'en-tête ignoré",
+        "help": "Nom d'un en-tête de requête qui exempte la requête du défi antibot. N'importe quel client peut envoyer cet en-tête : traitez-le comme un secret partagé, uniquement via HTTPS."
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "Valeur d'en-tête ignorée",
+        "help": "Valeur (regex PCRE) que l'en-tête doit respecter pour exempter la requête du défi antibot. Laisser vide pour correspondre à la simple présence de l'en-tête. Ancrez-la avec ^ et $ : la correspondance n'est pas ancrée par défaut."
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "Pays ignorés",
+        "help": "Liste de codes pays ISO 3166-1 alpha-2, séparés par des espaces, pour lesquels ignorer le défi antibot."
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "Défier uniquement ces pays",
+        "help": "Liste de codes pays ISO 3166-1 alpha-2, séparés par des espaces, qui doivent recevoir le défi antibot."
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "Score reCAPTCHA v3",
+        "help": "Score minimal requis pour le défi reCAPTCHA (compatible uniquement avec reCAPTCHA v3)."
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "Clé de site reCAPTCHA",
+        "help": "Clé de site pour le défi reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "Secret reCAPTCHA",
+        "help": "Secret pour le défi reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "Utiliser reCAPTCHA classique",
+        "help": "Utiliser reCAPTCHA classique au lieu de la version la plus récente."
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "ID de projet reCAPTCHA",
+        "help": "ID de projet pour le défi reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "Clé API reCAPTCHA",
+        "help": "Clé API pour le défi reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "JA4 reCAPTCHA",
+        "help": "Empreinte JA4 du client TLS. Nous recommandons d'utiliser FoxIO-LLC/ja4 pour calculer l'empreinte JA4."
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "JA3 reCAPTCHA",
+        "help": "Empreinte JA3 du client TLS. Nous recommandons d'utiliser salesforce/ja3 pour calculer l'empreinte JA3."
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "Clé de site hCaptcha",
+        "help": "Clé de site pour le défi hCaptcha."
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "Secret hCaptcha",
+        "help": "Secret pour le défi hCaptcha."
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Clé de site Turnstile",
+        "help": "Clé de site pour le défi Turnstile."
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Secret Turnstile",
+        "help": "Secret pour le défi Turnstile."
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "Clé de site mCaptcha",
+        "help": "Clé de site pour le défi mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "Secret mCaptcha",
+        "help": "Secret pour le défi mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "Domaine mCaptcha",
+        "help": "Domaine à utiliser pour le défi mCaptcha."
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "URL frontend Cap.js",
+        "help": "Origine publique depuis laquelle le navigateur charge le widget Cap.js (par ex. https://cap.example.com). Origine uniquement, sans chemin."
+      },
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "URL backend Cap.js",
+        "help": "Origine interne que BunkerWeb appelle pour /siteverify (par ex. http://cap-server:3000). Origine uniquement, sans chemin. Retombe sur l'URL frontend si vide."
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Clé de site Cap.js",
+        "help": "Clé de site créée dans le tableau de bord Cap.js pour ce site."
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Secret Cap.js",
+        "help": "Secret associé à la clé de site, utilisé par BunkerWeb pour authentifier les appels /siteverify."
+      }
+    }
+  }
+}

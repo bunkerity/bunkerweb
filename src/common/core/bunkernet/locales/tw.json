@@ -1,0 +1,37 @@
+{
+  "bunkernet": {
+    "meta": {
+      "name": "BunkerNet",
+      "description": "透過 BunkerNet 與其他 BunkerWeb 執行個體共享威脅資料。"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "BUNKERNET 狀態"
+      },
+      "info_connectivity": {
+        "title": "連線狀態"
+      },
+      "info_instance_id": {
+        "title": "執行個體 ID"
+      }
+    },
+    "settings": {
+      "USE_BUNKERNET": {
+        "label": "啟用 BunkerNet",
+        "help": "啟用 BunkerNet 功能。"
+      },
+      "BUNKERNET_SERVER": {
+        "label": "BunkerNet 伺服器",
+        "help": "BunkerNet API 的位址。"
+      },
+      "USE_BUNKERNET_STATS": {
+        "label": "BunkerNet 有效性統計",
+        "help": "將 BunkerNet 有效性統計資訊(貢獻量、封鎖清單大小、連線狀態)持久化保存至資料庫。"
+      },
+      "BUNKERNET_STATS_RETENTION_DAYS": {
+        "label": "BunkerNet 統計保留期(天)",
+        "help": "已持久化的 BunkerNet 有效性統計資訊的最長保留時間(以天為單位)。"
+      }
+    }
+  }
+}

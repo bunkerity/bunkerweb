@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "بنیادی تصدیق",
+      "description": "بنیادی HTTP تصدیقی طریقے کے ذریعے کسی وسیلے یا پورے سائٹ تک رسائی سے پہلے لاگ اِن لازمی قرار دیتا ہے۔"
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "بنیادی تصدیق",
+        "subtitle": "کامیاب"
+      },
+      "counter_failed_authbasic": {
+        "title": "بنیادی تصدیق",
+        "subtitle": "ناکام"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "HTTP بیسک آتھ استعمال کریں",
+        "help": "HTTP بیسک آتھ استعمال کریں"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "آتھ بیسک لوکیشن",
+        "help": "محفوظ وسیلے کا URL یا سائٹ وائیڈ ویلیو۔"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "آتھ بیسک یوزرنیم",
+        "help": "یوزرنیم"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "پاس ورڈ",
+        "help": "پاس ورڈ"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "متن",
+        "help": "دکھانے کے لیے متن"
+      }
+    }
+  }
+}

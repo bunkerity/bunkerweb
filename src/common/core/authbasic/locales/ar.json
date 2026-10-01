@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "المصادقة الأساسية",
+      "description": "يفرض تسجيل الدخول قبل الوصول إلى مورد أو إلى الموقع بأكمله باستخدام طريقة مصادقة HTTP الأساسية."
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "المصادقة الأساسية",
+        "subtitle": "نجح"
+      },
+      "counter_failed_authbasic": {
+        "title": "المصادقة الأساسية",
+        "subtitle": "فشل"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "استخدام مصادقة HTTP الأساسية",
+        "help": "استخدام مصادقة HTTP الأساسية"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "موقع المصادقة الأساسية",
+        "help": "رابط URL للمورد المحمي أو قيمة على مستوى الموقع بأكمله."
+      },
+      "AUTH_BASIC_USER": {
+        "label": "اسم مستخدم المصادقة الأساسية",
+        "help": "اسم المستخدم"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "كلمة المرور",
+        "help": "كلمة المرور"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "النص",
+        "help": "النص المراد عرضه"
+      }
+    }
+  }
+}

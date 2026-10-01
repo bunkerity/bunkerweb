@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "Inyección HTML",
+      "description": "Inyecta código HTML personalizado antes de la etiqueta </body> o </head>."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "Código HTML del body",
+        "help": "El código HTML que se inyectará antes de la etiqueta </body>."
+      },
+      "INJECT_HEAD": {
+        "label": "Código HTML del head",
+        "help": "El código HTML que se inyectará antes de la etiqueta </head>."
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "Gegenseitiges TLS",
+      "description": "Erfordert Client-Zertifikate über gegenseitiges TLS (mTLS)."
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "Gegenseitiges TLS verwenden",
+        "help": "Aktiviert die Client-Authentifizierung mit gegenseitigem TLS."
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "Client-CA-Bundle",
+        "help": "Absoluter Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM). Erforderlich, wenn MTLS_VERIFY_CLIENT auf on oder optional gesetzt ist."
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "Client-Verifizierungsmodus",
+        "help": "Client-Verifizierungsmodus. 'on' erfordert ein gültiges Zertifikat, 'optional' lässt Anfragen durch, wenn kein Zertifikat vorgelegt wird, und 'optional_no_ca' überspringt die CA-Validierung (nur zu Diagnosezwecken, kein echter Schutz)."
+      },
+      "MTLS_URL": {
+        "label": "mTLS-URL",
+        "help": "Regex, die mit der Request-URI abgeglichen wird, um ein gültiges Client-Zertifikat nur auf übereinstimmenden Pfaden zu verlangen (nur HTTP). Setzen Sie MTLS_VERIFY_CLIENT auf optional, damit der Handshake für nicht übereinstimmende Pfade abgeschlossen wird; die Durchsetzung erfolgt pro Anfrage in Lua. Eine ungültige Regex schlägt geschlossen fehl (übereinstimmende Anfragen werden abgelehnt und protokolliert), anstatt stillschweigend zugelassen zu werden. Verwenden Sie nummerierte Slots für mehrere Pfade (MTLS_URL_1, MTLS_URL_2). Leer lassen, um mTLS für die gesamte Website durchzusetzen."
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "Verifizierungstiefe",
+        "help": "Maximale Zertifikatskettentiefe, die während der Client-Verifizierung akzeptiert wird."
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "Client-Header weiterleiten",
+        "help": "Leitet Verifizierungsergebnisse mithilfe der X-SSL-Client-*-Header an vorgelagerte Backends weiter. Vom Client gelieferte X-SSL-*-Header werden beim Eingang immer entfernt, sodass diese Werte nicht gefälscht werden können."
+      },
+      "MTLS_CRL": {
+        "label": "Client-CRL-Pfad",
+        "help": "Optionaler absoluter Pfad zu einer Zertifikatsperrliste (PEM). Leer lassen, um CRL-Prüfungen zu überspringen."
+      }
+    }
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "একটি চ্যালেঞ্জ ব্যবহার করে বট শনাক্তকরণ।"
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "চ্যালেঞ্জ",
+        "subtitle": "ব্যর্থ"
+      }
+    },
+    "settings": {
+      "USE_ANTIBOT": {
+        "label": "Antibot চ্যালেঞ্জ",
+        "help": "Antibot বৈশিষ্ট্য সক্রিয় করুন।"
+      },
+      "ANTIBOT_URI": {
+        "label": "Antibot ইউআরএল",
+        "help": "একটি অব্যবহৃত URI যেখানে ক্লায়েন্টদের চ্যালেঞ্জ সমাধানের জন্য রিডাইরেক্ট করা হবে।"
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "সমাধানের সময়",
+        "help": "চ্যালেঞ্জ সমাধানের জন্য ক্লায়েন্টদের হাতে থাকা সর্বোচ্চ সময় (সেকেন্ডে)। এই সময় পার হয়ে গেলে, একটি নতুন চ্যালেঞ্জ তৈরি করা হবে।"
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "বৈধতার সময়",
+        "help": "সমাধান করা চ্যালেঞ্জের সর্বোচ্চ বৈধতার সময়। এই সময় পার হয়ে গেলে, ক্লায়েন্টদের একটি নতুন চ্যালেঞ্জ সমাধান করতে হবে।"
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "সফলতার রিডাইরেক্ট ইউআরএল",
+        "help": "চ্যালেঞ্জ সমাধানের পর ক্লায়েন্টদের মূলত অনুরোধ করা পৃষ্ঠার পরিবর্তে যে নির্দিষ্ট URI-তে রিডাইরেক্ট করা হবে। মূলত অনুরোধ করা পৃষ্ঠায় ফিরে যেতে খালি রাখুন।"
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "ক্যাপচা বর্ণমালা",
+        "help": "ক্যাপচা তৈরির জন্য ব্যবহৃত কাস্টম বর্ণমালা। ক্যাপচা এই স্ট্রিং থেকে র‍্যান্ডম অক্ষর দিয়ে গঠিত হবে। সমর্থিত অক্ষর: সব অক্ষর (a-z, A-Z), সংখ্যা 2-9, এবং সমর্থিত বিশেষ অক্ষর (সম্পূর্ণ তালিকার জন্য ডকুমেন্টেশন দেখুন)।"
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "উপেক্ষিত URI",
+        "help": "যেসব URI-কে Antibot চ্যালেঞ্জ থেকে বাদ দেওয়া উচিত তাদের জন্য PCRE রেগেক্স প্যাটার্নের তালিকা (স্পেস দিয়ে পৃথক)। প্যাটার্নগুলো পাথ এবং কোয়েরি স্ট্রিং সহ সম্পূর্ণ অনুরোধ URI-এর বিরুদ্ধে যাচাই করা হয়।"
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "উপেক্ষিত IP/নেটওয়ার্ক",
+        "help": "Antibot চ্যালেঞ্জ উপেক্ষা করার জন্য IP/নেটওয়ার্কের তালিকা, স্পেস দিয়ে পৃথক।"
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "উপেক্ষিত রিভার্স DNS",
+        "help": "Antibot চ্যালেঞ্জ উপেক্ষা করার জন্য রিভার্স DNS প্রত্যয়ের তালিকা, স্পেস দিয়ে পৃথক।"
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "Antibot রিভার্স DNS গ্লোবাল আইপি",
+        "help": "শুধুমাত্র গ্লোবাল IP ঠিকানায় RDNS Antibot চেক করুন।"
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "উপেক্ষিত ASN",
+        "help": "Antibot চ্যালেঞ্জ উপেক্ষা করার জন্য ASN নম্বরের তালিকা, স্পেস দিয়ে পৃথক।"
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "উপেক্ষিত User-Agent",
+        "help": "Antibot চ্যালেঞ্জ উপেক্ষা করার জন্য User-Agent (PCRE রেগেক্স)-এর তালিকা, স্পেস দিয়ে পৃথক।"
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "উপেক্ষিত হেডারের নাম",
+        "help": "একটি অনুরোধ হেডারের নাম যা অনুরোধকে Antibot চ্যালেঞ্জ থেকে অব্যাহতি দেয়। যেকোনো ক্লায়েন্ট এই হেডার পাঠাতে পারে: এটিকে একটি শেয়ার্ড সিক্রেট হিসেবে বিবেচনা করুন, শুধুমাত্র HTTPS-এর মাধ্যমে।"
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "উপেক্ষিত হেডার মান",
+        "help": "যে মান (PCRE রেগেক্স) হেডারের সাথে মিলতে হবে যাতে অনুরোধ Antibot চ্যালেঞ্জ থেকে অব্যাহতি পায়। শুধু হেডারের উপস্থিতিতে মেলাতে খালি রাখুন। ^ এবং $ দিয়ে এটি অ্যাঙ্কর করুন: ডিফল্টরূপে মিল অ্যাঙ্কর করা থাকে না।"
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "উপেক্ষিত দেশসমূহ",
+        "help": "Antibot চ্যালেঞ্জ উপেক্ষা করার জন্য ISO 3166-1 alpha-2 দেশের কোডের তালিকা, স্পেস দিয়ে পৃথক।"
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "শুধুমাত্র এই দেশগুলোকে চ্যালেঞ্জ করুন",
+        "help": "ISO 3166-1 alpha-2 দেশের কোডের তালিকা, স্পেস দিয়ে পৃথক, যাদের Antibot চ্যালেঞ্জ পাওয়া উচিত।"
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "reCAPTCHA v3 স্কোর",
+        "help": "reCAPTCHA চ্যালেঞ্জের জন্য প্রয়োজনীয় সর্বনিম্ন স্কোর (শুধুমাত্র reCAPTCHA v3-এর সাথে সামঞ্জস্যপূর্ণ)।"
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "reCAPTCHA সাইটকী",
+        "help": "reCAPTCHA চ্যালেঞ্জের জন্য সাইটকী।"
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "reCAPTCHA সিক্রেট",
+        "help": "reCAPTCHA চ্যালেঞ্জের জন্য সিক্রেট।"
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "ক্লাসিক reCAPTCHA ব্যবহার করুন",
+        "help": "নতুন সংস্করণের পরিবর্তে ক্লাসিক reCAPTCHA ব্যবহার করুন।"
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "reCAPTCHA প্রজেক্ট আইডি",
+        "help": "reCAPTCHA চ্যালেঞ্জের জন্য প্রজেক্ট আইডি।"
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "reCAPTCHA API কী",
+        "help": "reCAPTCHA চ্যালেঞ্জের জন্য API কী।"
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "TLS ক্লায়েন্টের জন্য JA4 ফিঙ্গারপ্রিন্ট। JA4 ফিঙ্গারপ্রিন্ট গণনার জন্য FoxIO-LLC/ja4 ব্যবহারের পরামর্শ দেওয়া হয়।"
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "TLS ক্লায়েন্টের জন্য JA3 ফিঙ্গারপ্রিন্ট। JA3 ফিঙ্গারপ্রিন্ট গণনার জন্য salesforce/ja3 ব্যবহারের পরামর্শ দেওয়া হয়।"
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "hCaptcha সাইটকী",
+        "help": "hCaptcha চ্যালেঞ্জের জন্য সাইটকী।"
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "hCaptcha সিক্রেট",
+        "help": "hCaptcha চ্যালেঞ্জের জন্য সিক্রেট।"
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Turnstile সাইটকী",
+        "help": "Turnstile চ্যালেঞ্জের জন্য সাইটকী।"
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Turnstile সিক্রেট",
+        "help": "Turnstile চ্যালেঞ্জের জন্য সিক্রেট।"
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "mCaptcha সাইটকী",
+        "help": "mCaptcha চ্যালেঞ্জের জন্য সাইটকী।"
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "mCaptcha সিক্রেট",
+        "help": "mCaptcha চ্যালেঞ্জের জন্য সিক্রেট।"
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "mCaptcha ডোমেইন",
+        "help": "mCaptcha চ্যালেঞ্জের জন্য ব্যবহৃত ডোমেইন।"
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "Cap.js ফ্রন্টএন্ড ইউআরএল",
+        "help": "যে পাবলিক অরিজিন থেকে ব্রাউজার Cap.js উইজেট লোড করে (যেমন https://cap.example.com)। শুধুমাত্র অরিজিন, কোনো পাথ নয়।"
+      },
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "Cap.js ব্যাকএন্ড ইউআরএল",
+        "help": "অভ্যন্তরীণ অরিজিন যা BunkerWeb /siteverify-এর জন্য কল করে (যেমন http://cap-server:3000)। শুধুমাত্র অরিজিন, কোনো পাথ নয়। খালি থাকলে ফ্রন্টএন্ড ইউআরএলে ফিরে যায়।"
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Cap.js সাইটকী",
+        "help": "এই সাইটের জন্য Cap.js ড্যাশবোর্ডে তৈরি করা সাইটকী।"
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Cap.js সিক্রেট",
+        "help": "সাইটকীর সাথে যুক্ত সিক্রেট, যা BunkerWeb /siteverify কল প্রমাণীকরণে ব্যবহার করে।"
+      }
+    }
+  }
+}

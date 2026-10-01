@@ -1,0 +1,26 @@
+{
+  "redirect": {
+    "meta": {
+      "name": "Pengalihan",
+      "description": "Mengelola pengalihan HTTP."
+    },
+    "settings": {
+      "REDIRECT_FROM": {
+        "label": "Alihkan dari",
+        "help": "Path untuk dialihkan. Nilai yang diawali ^ atau diakhiri $ diperlakukan sebagai lokasi regex. Secara opsional, tambahkan awalan ~, ~*, = atau ^~ diikuti satu spasi untuk mengatur modifier location nginx secara eksplisit; spasi, ;, { atau } tidak diperbolehkan di bagian lain nilai."
+      },
+      "REDIRECT_TO": {
+        "label": "Alihkan ke",
+        "help": "Alihkan seluruh situs ke situs lain."
+      },
+      "REDIRECT_TO_REQUEST_URI": {
+        "label": "Tambahkan URI permintaan",
+        "help": "Tambahkan URI yang diminta ke alamat pengalihan."
+      },
+      "REDIRECT_TO_STATUS_CODE": {
+        "label": "Kode status pengalihan",
+        "help": "Kode status HTTP untuk pengalihan: 301 (Moved Permanently - di-cache oleh browser), 302 (Found - sementara, dapat mengubah metode), 303 (See Other - selalu menggunakan GET), 307 (Temporary Redirect - mempertahankan metode), 308 (Permanent Redirect - mempertahankan metode, di-cache)."
+      }
+    }
+  }
+}

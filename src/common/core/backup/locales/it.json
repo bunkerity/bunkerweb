@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Backup",
+      "description": "Esegui il backup dei tuoi dati in una posizione personalizzata. Garantisci la sicurezza e la disponibilità dei tuoi file importanti creando backup regolari."
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Ultimo backup"
+      }
+    },
+    "settings": {
+      "USE_BACKUP": {
+        "label": "Attiva il backup automatico",
+        "help": "Attiva o disattiva la funzionalità di backup"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Pianificazione del backup",
+        "help": "Frequenza del backup (giornaliera, settimanale o mensile)"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Rotazione dei backup",
+        "help": "Numero di backup da conservare"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Strategia di rotazione dei backup",
+        "help": "Come vengono scelti i vecchi backup per l'eliminazione: fifo conserva i più recenti, hanoi conserva una scala della Torre di Hanoi (fine vicino al presente, grossolana più indietro) a parità di numero di file"
+      },
+      "BACKUP_DIRECTORY": {
+        "label": "Directory di backup",
+        "help": "Directory in cui verrà archiviato il backup"
+      }
+    }
+  }
+}

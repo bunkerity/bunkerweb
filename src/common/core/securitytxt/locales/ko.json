@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "security.txt 파일을 관리합니다. 웹사이트가 보안 정책을 정의할 수 있도록 하는 제안된 표준입니다."
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "security.txt 사용",
+        "help": "security.txt 파일을 활성화합니다."
+      },
+      "SECURITYTXT_URI": {
+        "label": "Security.txt URI",
+        "help": "\"security.txt\" 파일에 접근할 수 있는 URI를 나타냅니다."
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Security.txt 연락처",
+        "help": "연구자가 보안 취약점을 보고할 때 사용해야 하는 방법(이메일 주소, 전화번호, 그리고/또는 연락처 정보가 있는 웹페이지 등)을 나타냅니다. (값이 비어 있으면 필수 항목이므로 security.txt 파일이 생성되지 않습니다)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Security.txt 만료",
+        "help": "이 날짜와 시간 이후에는 \"security.txt\" 파일에 포함된 데이터가 오래된 것으로 간주되어 사용해서는 안 됨을 나타냅니다(값이 비어 있으면 항상 현재 날짜와 시간 + 1년이 사용됩니다)."
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Security.txt 암호화",
+        "help": "보안 연구자가 암호화된 통신에 사용해야 하는 암호화 키를 나타냅니다."
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Security.txt 감사의 글",
+        "help": "보안 연구자가 자신의 보고에 대해 공로를 인정받는 페이지로 연결되는 링크를 나타냅니다."
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Security.txt 선호 언어",
+        "help": "보안 보고서를 제출할 때 선호되는 자연어 집합을 나타내는 데 사용할 수 있습니다."
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Security.txt 정규 URI",
+        "help": "\"security.txt\" 파일이 위치한 정규 URI를 나타내며, 보통 \"https://example.com/.well-known/security.txt\"와 같은 형태입니다. (값이 비어 있으면 기본값은 사이트 URL + SECURITYTXT_URI에서 자동으로 생성됩니다)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Security.txt 정책",
+        "help": "취약점 공개 정책이 위치한 곳으로 연결되는 링크를 나타냅니다."
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Security.txt 채용",
+        "help": "공급업체의 보안 관련 채용 공고로 연결하는 데 사용됩니다."
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "CSAF(Common Security Advisory Framework) 제공자의 provider-metadata.json에 대한 링크입니다."
+      }
+    }
+  }
+}

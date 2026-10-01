@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "meta": {
+      "name": "Kesalahan",
+      "description": "Mengelola halaman kesalahan bawaan"
+    },
+    "settings": {
+      "ERRORS": {
+        "label": "Kesalahan",
+        "help": "Daftar kode kesalahan HTTP dan halaman kesalahan yang sesuai, dipisahkan dengan spasi (404=/my404.html 403=/errors/403.html ...)."
+      },
+      "INTERCEPTED_ERROR_CODES": {
+        "label": "Kode kesalahan yang dicegat",
+        "help": "Daftar kode kesalahan HTTP yang dicegat oleh BunkerWeb, dipisahkan dengan spasi."
+      }
+    }
+  }
+}

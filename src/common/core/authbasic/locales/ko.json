@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "기본 인증",
+      "description": "HTTP 기본 인증 방식을 사용하여 리소스나 사이트 전체에 접근하기 전에 로그인을 강제합니다."
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "기본 인증",
+        "subtitle": "성공"
+      },
+      "counter_failed_authbasic": {
+        "title": "기본 인증",
+        "subtitle": "실패"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "HTTP 기본 인증 사용",
+        "help": "HTTP 기본 인증 사용"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "기본 인증 위치",
+        "help": "보호된 리소스의 URL 또는 사이트 전체 값입니다."
+      },
+      "AUTH_BASIC_USER": {
+        "label": "기본 인증 사용자 이름",
+        "help": "사용자 이름"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "비밀번호",
+        "help": "비밀번호"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "텍스트",
+        "help": "표시할 텍스트"
+      }
+    }
+  }
+}

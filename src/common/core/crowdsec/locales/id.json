@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "Bouncer CrowdSec untuk BunkerWeb."
+    },
+    "settings": {
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "Selalu kirim ke AppSec",
+        "help": "Kirim permintaan ke Komponen AppSec meskipun sudah ada keputusan untuk IP tersebut."
+      },
+      "CROWDSEC_API": {
+        "label": "API CrowdSec",
+        "help": "Alamat API CrowdSec."
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "Kunci API CrowdSec",
+        "help": "Kunci untuk API CrowdSec yang diberikan oleh cscli bouncer add."
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "Timeout koneksi AppSec",
+        "help": "Timeout dalam milidetik untuk koneksi antara komponen remediasi dan Komponen AppSec."
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "Aksi kegagalan AppSec",
+        "help": "Perilaku saat Komponen AppSec mengembalikan 500. Dapat meloloskan permintaan atau menolaknya."
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "Timeout pemrosesan AppSec",
+        "help": "Timeout dalam milidetik untuk memproses permintaan dari komponen remediasi ke Komponen AppSec."
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "Timeout pengiriman AppSec",
+        "help": "Timeout dalam milidetik untuk mengirim data dari komponen remediasi ke Komponen AppSec."
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "Verifikasi SSL AppSec",
+        "help": "Verifikasi validitas sertifikat SSL Komponen AppSec."
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "URL AppSec",
+        "help": "URL Komponen Application Security."
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "Kedaluwarsa cache CrowdSec",
+        "help": "Waktu kedaluwarsa cache, dalam detik, untuk IP yang disimpan bouncer dalam cache pada mode live."
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "Tantangan captcha CrowdSec",
+        "help": "Tantangan antibot yang ditampilkan ketika CrowdSec meminta captcha. Antibot harus diaktifkan pada layanan ini (USE_ANTIBOT diatur ke selain \"no\"), jika tidak permintaan akan di-ban. Penyedia pihak ketiga mengambil kunci mereka dari pengaturan ANTIBOT_*. Hindari \"cookie\": ini tidak membuktikan apa pun untuk keputusan yang berarti \"buktikan bahwa Anda manusia\". \"no\" mengabaikan keputusan captcha, seperti sebelumnya; cache keputusan dibagikan per Local API, jadi setiap layanan pada Local API tersebut harus diatur ke \"no\" untuk sepenuhnya memulihkan perilaku lama."
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "Biarkan workflow keamanan memutuskan",
+        "help": "Biarkan workflow keamanan memutuskan apa yang terjadi pada permintaan yang ditandai CrowdSec. \"no\" (default) memblokirnya di sini. \"yes\" menyerahkannya ke workflow yang dipasang pada layanan ini; putusan tetap berlaku ketika tidak ada aturan yang cocok atau tidak ada yang dipasang. CORS preflight (204), /robots.txt, dan /security.txt dibuat oleh BunkerWeb sebelum workflow berjalan, sehingga klien yang ditandai tetap dapat menerima ketiganya. Tidak satu pun dari ketiganya mencapai aplikasi Anda, dan setiap permintaan yang akan mencapainya diperiksa lebih dulu oleh tangga workflow."
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "Aktifkan analisis internal CrowdSec",
+        "help": "Aktifkan analisis lalu lintas internal."
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "Lokasi yang dikecualikan CrowdSec",
+        "help": "Lokasi yang dikecualikan saat bouncing. Ini adalah daftar lokasi, dipisahkan dengan koma."
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "Login manajemen CrowdSec",
+        "help": "Login mesin manajemen CrowdSec khusus untuk investigasi peringatan dan penghapusan keputusan. Biarkan kosong untuk akses bouncer hanya-baca."
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "Kata sandi manajemen CrowdSec",
+        "help": "Kata sandi mesin manajemen CrowdSec khusus. Diperlukan bersama login manajemen; jangan pernah gunakan kunci API bouncer di sini."
+      },
+      "CROWDSEC_MODE": {
+        "label": "Mode CrowdSec",
+        "help": "Mode API CrowdSec (live atau stream)."
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "Timeout permintaan live CrowdSec",
+        "help": "Timeout dalam milidetik untuk permintaan HTTP yang dilakukan bouncer untuk meminta API lokal CrowdSec."
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "Timeout permintaan CrowdSec",
+        "help": "Frekuensi pembaruan, dalam detik, untuk menarik IP baru/lama dari API lokal CrowdSec."
+      },
+      "USE_CROWDSEC": {
+        "label": "Gunakan CrowdSec",
+        "help": "Aktifkan bouncer CrowdSec."
+      }
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS CROWDSEC"
+      }
+    }
+  }
+}

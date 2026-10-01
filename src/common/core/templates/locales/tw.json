@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "範本",
+      "description": "用於內部範本的虛擬核心外掛。"
+    },
+    "templates": {
+      "low": {
+        "name": "提供 Web 應用程式防護基本設定的基礎安全等級",
+        "steps": {
+          "0": {
+            "title": "Web 服務 - 前端服務",
+            "subtitle": "設定面向用戶端的 Web 服務"
+          },
+          "1": {
+            "title": "Web 服務 - 上游伺服器",
+            "subtitle": "設定將由 BunkerWeb 保護的上游伺服器"
+          },
+          "2": {
+            "title": "HTTP - 一般",
+            "subtitle": "設定與 HTTP(S) 通訊協定相關的設定"
+          },
+          "3": {
+            "title": "HTTP - 標頭",
+            "subtitle": "設定與 HTTP 標頭相關的設定"
+          },
+          "4": {
+            "title": "安全 - 不良行為",
+            "subtitle": "設定偵測到不良行為時自動封鎖的相關設定。"
+          },
+          "5": {
+            "title": "安全 - 黑名單",
+            "subtitle": "設定與外部黑名單相關的設定。"
+          },
+          "6": {
+            "title": "安全 - 限制",
+            "subtitle": "設定限制請求與連線數量的相關設定。"
+          },
+          "7": {
+            "title": "安全 - Antibot",
+            "subtitle": "設定機器人偵測相關設定"
+          },
+          "8": {
+            "title": "安全 - 基本驗證",
+            "subtitle": "設定 HTTP 基本驗證"
+          },
+          "9": {
+            "title": "安全 - 國家/地區",
+            "subtitle": "設定依國家/地區存取政策的相關設定"
+          },
+          "10": {
+            "title": "安全 - ModSecurity",
+            "subtitle": "設定與 ModSecurity WAF 相關的設定"
+          }
+        }
+      },
+      "medium": {
+        "name": "兼顧安全功能與效能優化的均衡安全等級",
+        "steps": {
+          "0": {
+            "title": "Web 服務 - 前端服務",
+            "subtitle": "設定面向用戶端的 Web 服務"
+          },
+          "1": {
+            "title": "Web 服務 - 上游伺服器",
+            "subtitle": "設定將由 BunkerWeb 保護的上游伺服器"
+          },
+          "2": {
+            "title": "HTTP - 一般",
+            "subtitle": "設定與 HTTP(S) 通訊協定相關的設定"
+          },
+          "3": {
+            "title": "HTTP - 標頭",
+            "subtitle": "設定與 HTTP 標頭相關的設定"
+          },
+          "4": {
+            "title": "安全 - 不良行為",
+            "subtitle": "設定偵測到不良行為時自動封鎖的相關設定。"
+          },
+          "5": {
+            "title": "安全 - 黑名單",
+            "subtitle": "設定與外部黑名單相關的設定。"
+          },
+          "6": {
+            "title": "安全 - 限制",
+            "subtitle": "設定限制請求與連線數量的相關設定。"
+          },
+          "7": {
+            "title": "安全 - Antibot",
+            "subtitle": "設定機器人偵測相關設定"
+          },
+          "8": {
+            "title": "安全 - 基本驗證",
+            "subtitle": "設定 HTTP 基本驗證"
+          },
+          "9": {
+            "title": "安全 - 國家/地區",
+            "subtitle": "設定依國家/地區存取政策的相關設定"
+          },
+          "10": {
+            "title": "安全 - 反向掃描",
+            "subtitle": "設定掃描用戶端連接埠的相關設定"
+          },
+          "11": {
+            "title": "安全 - ModSecurity",
+            "subtitle": "設定與 ModSecurity WAF 相關的設定"
+          }
+        }
+      },
+      "high": {
+        "name": "專注於強健安全措施與全面防護的進階安全等級",
+        "steps": {
+          "0": {
+            "title": "Web 服務 - 前端服務",
+            "subtitle": "設定面向用戶端的 Web 服務"
+          },
+          "1": {
+            "title": "Web 服務 - 上游伺服器",
+            "subtitle": "設定將由 BunkerWeb 保護的上游伺服器"
+          },
+          "2": {
+            "title": "HTTP - 一般",
+            "subtitle": "設定與 HTTP(S) 通訊協定相關的設定"
+          },
+          "3": {
+            "title": "HTTP - 標頭",
+            "subtitle": "設定與 HTTP 標頭相關的設定"
+          },
+          "4": {
+            "title": "安全 - 不良行為",
+            "subtitle": "設定偵測到不良行為時自動封鎖的相關設定。"
+          },
+          "5": {
+            "title": "安全 - 黑名單",
+            "subtitle": "設定與外部黑名單相關的設定。"
+          },
+          "6": {
+            "title": "安全 - 限制",
+            "subtitle": "設定限制請求與連線數量的相關設定。"
+          },
+          "7": {
+            "title": "安全 - Antibot",
+            "subtitle": "設定機器人偵測相關設定"
+          },
+          "8": {
+            "title": "安全 - 基本驗證",
+            "subtitle": "設定 HTTP 基本驗證"
+          },
+          "9": {
+            "title": "安全 - 國家/地區",
+            "subtitle": "設定依國家/地區存取政策的相關設定"
+          },
+          "10": {
+            "title": "安全 - 反向掃描",
+            "subtitle": "設定掃描用戶端連接埠的相關設定"
+          },
+          "11": {
+            "title": "安全 - ModSecurity",
+            "subtitle": "設定與 ModSecurity WAF 相關的設定"
+          }
+        }
+      },
+      "api": {
+        "name": "使用 BunkerWeb API 時的基本設定",
+        "steps": {
+          "0": {
+            "title": "服務 - 前端服務",
+            "subtitle": "設定伺服器名稱與 SSL/TLS 設定"
+          },
+          "1": {
+            "title": "服務 - 上游伺服器",
+            "subtitle": "設定將由 BunkerWeb 保護的上游伺服器"
+          },
+          "2": {
+            "title": "API - 速率限制",
+            "subtitle": "設定速率限制設定——請注意,API 本身也具有內部速率限制"
+          },
+          "3": {
+            "title": "API - 其他設定",
+            "subtitle": "確保 API 正常運作的其他重要設定"
+          }
+        }
+      },
+      "ui": {
+        "name": "使用 Web UI 時的基本設定",
+        "steps": {
+          "0": {
+            "title": "範例步驟",
+            "subtitle": "這是一個範例步驟,用於顯示使用 Web UI 時的基本設定"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "外部範本 URL",
+        "help": "以空格分隔的、要下載並安裝的服務範本 URL 清單。每個 URL 對應一個範本:可以是 bunkerweb-template/1 JSON 套件,也可以是包含 <id>/template.json 及其設定的 .zip 或 .tar.gz 檔案。僅接受 https:// 和 file:///,且大小最多為 1 MiB。在 URL 末尾附加 #sha256=<digest> 可鎖定其內容。若某個範本的 URL 被移除,只要沒有服務仍在使用該範本,它就會被刪除。"
+      }
+    }
+  }
+}

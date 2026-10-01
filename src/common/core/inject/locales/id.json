@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "Injeksi HTML",
+      "description": "Menyisipkan kode HTML khusus sebelum tag </body> atau </head>."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "Kode HTML body",
+        "help": "Kode HTML yang akan disisipkan sebelum tag </body>."
+      },
+      "INJECT_HEAD": {
+        "label": "Kode HTML head",
+        "help": "Kode HTML yang akan disisipkan sebelum tag </head>."
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "SSL/TLS سے متعلق ترتیبات کا انتظام کرتا ہے۔"
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "HTTP کو HTTPS کی طرف ری ڈائریکٹ کریں",
+        "help": "تمام HTTP درخواستوں کو HTTPS کی طرف ری ڈائریکٹ کریں۔"
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "خودکار HTTP سے HTTPS ری ڈائریکٹ",
+        "help": "یہ پتہ لگانے کی کوشش کریں کہ آیا HTTPS استعمال ہو رہا ہے اور اگر ایسا ہو تو HTTP سے HTTPS ری ڈائریکشن فعال کریں۔"
+      },
+      "SSL_PROTOCOLS": {
+        "label": "SSL پروٹوکولز",
+        "help": "TLS کا معاون ورژن۔ ہم مطابقت کی وجوہات کی بنا پر ڈیفالٹ ویلیو TLSv1.2 TLSv1.3 کی سفارش کرتے ہیں۔"
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "SSL سائفرز سطح",
+        "help": "SSL cipher suites کے لیے پہلے سے طے شدہ سیکیورٹی سطح۔ 'Modern' سب سے محفوظ ہے لیکن پرانے آلات کے ساتھ کام نہیں کر سکتا۔"
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "کسٹم SSL سائفرز",
+        "help": "کسٹم SSL cipher suite سٹرنگ۔ اگر متعین کیا جائے تو یہ SSL Ciphers Level کو نظرانداز کر دیتا ہے۔ سطح پر مبنی کنفیگریشن استعمال کرنے کے لیے خالی چھوڑ دیں۔"
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "SSL ECDH وکریوز",
+        "help": "کلید کے تبادلے کے لیے ترجیحی ECDH curves (TLS گروپس)۔ ذہین انتخاب کے لیے \"auto\" استعمال کریں (دستیاب ہونے پر OpenSSL 3.5+ پر X25519MLKEM768 جیسے PQC گروپس کو ترجیح دیتا ہے)۔"
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "SSL سیشن کیش سائز",
+        "help": "SSL سیشن کیش کا سائز (مثلاً '10m' 10 میگابائٹس کے لیے، '512k' 512 کلوبائٹس کے لیے)۔ سیشن کیشنگ غیر فعال کرنے کے لیے 'off' یا 'none' پر سیٹ کریں۔"
+      }
+    }
+  }
+}

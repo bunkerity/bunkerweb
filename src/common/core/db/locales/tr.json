@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Veritabanı",
+      "description": "Veritabanını kolayca entegre eder."
+    },
+    "settings": {
+      "DATABASE_LOG_LEVEL": {
+        "label": "Veritabanı günlük düzeyi",
+        "help": "Veritabanı günlükleri için kullanılacak düzey."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "Maksimum iş çalıştırma sayısı",
+        "help": "Veritabanında tutulacak maksimum iş çalıştırma sayısı."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "UI kullanıcı oturumları için maksimum yaş (gün)",
+        "help": "UI kullanıcı oturumlarının temizlenmeden önceki maksimum yaşı (gün)."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Veritabanı havuzu maksimum taşması",
+        "help": "Havuz boyutunun üzerinde oluşturulacak maksimum bağlantı sayısı."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Veritabanı havuzu pre-ping",
+        "help": "Havuzdan her çekişte bağlantıların canlılığının test edilip edilmeyeceği."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Veritabanı havuzu geri dönüşümü",
+        "help": "Bir bağlantının otomatik olarak yenilenmesinden önce geçecek saniye sayısı. Devre dışı bırakmak için -1 olarak ayarlayın."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Havuza dönüşte veritabanı havuzu sıfırlama",
+        "help": "Bağlantının havuza döndüğünde nasıl sıfırlanacağı. Otomatik için boş bırakın (MySQL/MariaDB için none, diğerleri için rollback). Olası değerler: rollback, commit, none."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Veritabanı havuzu boyutu",
+        "help": "Veritabanı bağlantı havuzunda tutulacak bağlantı sayısı."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Veritabanı havuzu zaman aşımı",
+        "help": "Havuzdan bağlantı almaktan vazgeçmeden önce beklenecek saniye sayısı."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Veritabanı isteği yeniden deneme sayısı",
+        "help": "Geçici veritabanı hataları için yeniden deneme sayısı."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Veritabanı isteği yeniden deneme gecikmesi",
+        "help": "Geçici veritabanı hataları için yeniden denemeler arasındaki gecikme (saniye)."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Veritabanı yeniden deneme zaman aşımı",
+        "help": "Başlangıçta veritabanının kullanılabilir olmasını beklemek için maksimum saniye sayısı."
+      },
+      "DATABASE_URI": {
+        "label": "Veritabanı URI'si",
+        "help": "sqlalchemy biçimini izleyen veritabanı URI'si."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "Salt okunur işlemler için veritabanı URI'si",
+        "help": "Salt okunur işlemler için veritabanı URI'si; ana veritabanı çalışmadığında yedek olarak da hizmet edebilir. sqlalchemy biçimini izler."
+      }
+    }
+  }
+}

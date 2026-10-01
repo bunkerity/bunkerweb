@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "TLS timbal balik",
+      "description": "Mewajibkan sertifikat klien melalui TLS timbal balik (mTLS)."
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "Gunakan mutual TLS",
+        "help": "Aktifkan autentikasi klien dengan mutual TLS."
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "Bundle CA klien",
+        "help": "Path absolut ke bundle CA klien tepercaya (PEM). Diperlukan saat MTLS_VERIFY_CLIENT diatur ke on atau optional."
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "Mode verifikasi klien",
+        "help": "Mode verifikasi klien. 'on' memerlukan sertifikat yang valid, 'optional' meloloskan permintaan saat tidak ada sertifikat yang disajikan, dan 'optional_no_ca' melewati validasi CA (hanya untuk diagnostik, bukan perlindungan sesungguhnya)."
+      },
+      "MTLS_URL": {
+        "label": "URL mTLS",
+        "help": "Regex yang dicocokkan dengan URI permintaan untuk mewajibkan sertifikat klien yang valid hanya pada path yang cocok (hanya HTTP). Atur MTLS_VERIFY_CLIENT ke optional agar handshake selesai untuk path yang tidak cocok; penerapan berjalan per permintaan di Lua. Regex yang tidak valid akan fail closed (permintaan yang cocok ditolak dan dicatat) alih-alih diam-diam diizinkan. Gunakan slot bernomor untuk beberapa path (MTLS_URL_1, MTLS_URL_2). Biarkan kosong untuk menerapkan mTLS di seluruh situs."
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "Kedalaman verifikasi",
+        "help": "Kedalaman rantai sertifikat maksimum yang diterima selama verifikasi klien."
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "Teruskan header klien",
+        "help": "Teruskan hasil verifikasi ke backend upstream menggunakan header X-SSL-Client-*. Header X-SSL-* yang disediakan klien selalu dihapus saat masuk (ingress), sehingga nilai ini tidak dapat dipalsukan."
+      },
+      "MTLS_CRL": {
+        "label": "Path CRL klien",
+        "help": "Path absolut opsional ke certificate revocation list (PEM). Biarkan kosong untuk melewati pemeriksaan CRL."
+      }
+    }
+  }
+}

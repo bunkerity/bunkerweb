@@ -1,0 +1,34 @@
+{
+  "geoip": {
+    "meta": {
+      "name": "GeoIP",
+      "description": "Basis data GeoIP yang digunakan untuk menentukan negara, ASN, dan kota dari IP klien."
+    },
+    "settings": {
+      "GEOIP_ASN_MMDB": {
+        "label": "Database ASN kustom",
+        "help": "Database ASN kustom: path absolut yang dapat dibaca worker, atau URL http(s). Diprioritaskan di atas MaxMind dan DB-IP."
+      },
+      "GEOIP_CITY": {
+        "label": "Database kota",
+        "help": "Unduh database kota. Ukurannya jauh lebih besar daripada yang lain (DB-IP City Lite terekstrak menjadi 125 MB) dan tidak disertakan dalam image."
+      },
+      "GEOIP_CITY_MMDB": {
+        "label": "Database kota kustom",
+        "help": "Database kota kustom: path absolut yang dapat dibaca worker, atau URL http(s). Diprioritaskan di atas MaxMind dan DB-IP."
+      },
+      "GEOIP_COUNTRY_MMDB": {
+        "label": "Database negara kustom",
+        "help": "Database negara kustom: path absolut yang dapat dibaca worker, atau URL http(s). Diprioritaskan di atas MaxMind dan DB-IP."
+      },
+      "MAXMIND_ACCOUNT_ID": {
+        "label": "ID akun MaxMind",
+        "help": "ID akun MaxMind. Opsional tetapi disarankan: tanpanya, endpoint lama yang hanya berbasis kunci digunakan, yang membawa kunci lisensi di URL alih-alih di header autentikasi."
+      },
+      "MAXMIND_LICENSE_KEY": {
+        "label": "Kunci lisensi MaxMind",
+        "help": "Kunci lisensi MaxMind. Jika diatur, database negara, ASN, dan kota diunduh dari MaxMind, bukan dari DB-IP."
+      }
+    }
+  }
+}

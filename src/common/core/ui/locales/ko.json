@@ -1,0 +1,18 @@
+{
+  "ui": {
+    "meta": {
+      "name": "UI",
+      "description": "BunkerWeb UI를 손쉽게 통합합니다."
+    },
+    "settings": {
+      "USE_UI": {
+        "label": "UI 사용",
+        "help": "UI 사용"
+      },
+      "UI_HOST": {
+        "label": "UI 호스트",
+        "help": "초기 설정에 사용되는 웹 UI의 주소"
+      }
+    }
+  }
+}

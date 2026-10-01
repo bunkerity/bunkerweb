@@ -1,0 +1,108 @@
+{
+  "misc": {
+    "meta": {
+      "name": "Sonstiges",
+      "description": "Sonstige Einstellungen."
+    },
+    "widgets": {
+      "counter_failed_default": {
+        "title": "STANDARDSERVER DEAKTIVIERT",
+        "subtitle": "Gesamt"
+      },
+      "counter_failed_method": {
+        "title": "NICHT ERLAUBTE METHODEN",
+        "subtitle": "Anzahl"
+      }
+    },
+    "settings": {
+      "SERVICE_MODE": {
+        "label": "Dienstmodus",
+        "help": "Deklarierter Zweck des Dienstes: \"standard\" für einen gewöhnlichen Dienst, \"redirect_only\" für einen Listener, der nur umleitet. Diese Deklaration ist das, was die PRO-Kontingentklassifizierung liest; sie wird niemals aus den Umleitungseinstellungen abgeleitet."
+      },
+      "DISABLE_DEFAULT_SERVER": {
+        "label": "Standardserver deaktivieren",
+        "help": "Verweigert die HTTP-Anfrage, wenn der vhost der Anfrage unbekannt ist."
+      },
+      "DISABLE_DEFAULT_SERVER_STRICT_SNI": {
+        "label": "Strikte SNI-Prüfung des Standardservers deaktivieren",
+        "help": "Schließt die SSL/TLS-Verbindung, wenn das SNI unbekannt ist."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS": {
+        "label": "Stream-Ports des Standardservers",
+        "help": "Ports, auf denen der Standardserver Stream-Verbindungen (TCP) akzeptiert, die zu keinem konfigurierten Dienst passen; leer lassen, um dies zu deaktivieren. Wird abgelehnt für einen Port, auf dem ein Stream-Dienst lauscht, einen Port, den ein HTTP/HTTPS-Listener verwendet, oder einen Port, den BunkerWeb für sich selbst bindet. Normalerweise auf dem reservierten default-server-Dienst gesetzt."
+      },
+      "DEFAULT_SERVER_STREAM_PORTS_SSL": {
+        "label": "Stream-Ports des Standardservers (TLS)",
+        "help": "Welche der oben genannten Stream-Ports des Standardservers über TLS bereitgestellt werden; leer lassen für reines TCP. Jeder Wert muss auch in „Stream-Ports des Standardservers“ aufgeführt sein — dies ist der TLS-Schalter der bereits vom Standardserver deklarierten Ports, kein zweiter Satz an Listenern, und ein Port, der nur hier steht, wird abgelehnt."
+      },
+      "ALLOWED_METHODS": {
+        "label": "Erlaubte Methoden",
+        "help": "Erlaubte HTTP- und WebDAV-Methoden, getrennt durch Pipes. Benutzerdefinierte Methoden in Großbuchstaben dürfen Unterstriche und Bindestriche enthalten."
+      },
+      "MAX_CLIENT_SIZE": {
+        "label": "Maximale Body-Größe",
+        "help": "Maximale Body-Größe (0 für unbegrenzt)."
+      },
+      "MAX_HEADERS": {
+        "label": "Maximale Header",
+        "help": "Maximale Anzahl an Header-Zeilen pro Anfrage. Anfragen, die dieses Limit überschreiten, werden mit 400 Bad Request abgelehnt."
+      },
+      "SERVE_FILES": {
+        "label": "Dateien bereitstellen",
+        "help": "Stellt Dateien aus dem lokalen Ordner bereit."
+      },
+      "ROOT_FOLDER": {
+        "label": "Stammordner",
+        "help": "Stammordner mit den bereitzustellenden Dateien (/var/www/html/{server_name}, falls nicht gesetzt)."
+      },
+      "HTTP2": {
+        "label": "HTTP2",
+        "help": "Unterstützt das HTTP2-Protokoll, wenn HTTPS aktiviert ist."
+      },
+      "HTTP3": {
+        "label": "HTTP3",
+        "help": "Unterstützt das HTTP3-Protokoll, wenn HTTPS aktiviert ist."
+      },
+      "HTTP3_ALT_SVC_PORT": {
+        "label": "HTTP3-Alt-Svc-Port",
+        "help": "Alternativer HTTP3-Dienstport. Dieser Wert wird als Teil des Alt-Svc-Headers verwendet."
+      },
+      "LISTEN_HTTP": {
+        "label": "HTTP-Listen",
+        "help": "Antwortet auf (unsichere) HTTP-Anfragen."
+      },
+      "USE_OPEN_FILE_CACHE": {
+        "label": "Open-File-Cache verwenden",
+        "help": "Aktiviert die Open-File-Cache-Funktion"
+      },
+      "OPEN_FILE_CACHE": {
+        "label": "Open-File-Cache verwenden",
+        "help": "Open-File-Cache-Direktive"
+      },
+      "OPEN_FILE_CACHE_ERRORS": {
+        "label": "Open-File-Cache-Fehler",
+        "help": "Aktiviert den Open-File-Cache für Fehler"
+      },
+      "OPEN_FILE_CACHE_MIN_USES": {
+        "label": "Open-File-Cache Mindestverwendungen",
+        "help": "Aktiviert die Mindestanzahl an Verwendungen für den Open-File-Cache"
+      },
+      "OPEN_FILE_CACHE_VALID": {
+        "label": "Open-File-Cache-Gültigkeitsdauer",
+        "help": "Open-File-Cache-Gültigkeitsdauer"
+      },
+      "EXTERNAL_PLUGIN_URLS": {
+        "label": "Externe Plugin-URLs",
+        "help": "Liste externer Plugin-URLs (direkter Download zu einer .zip- oder .tar-Datei) zum Herunterladen und Installieren (URLs sind durch Leerzeichen getrennt). Höchstens 50 MiB pro URL. Hängen Sie #sha256=<digest> an eine URL an, um deren Inhalt festzulegen. Einfaches http:// ist veraltet und wird in 1.7.0 abgelehnt: verwenden Sie https:// oder file:///."
+      },
+      "DENY_HTTP_STATUS": {
+        "label": "HTTP-Status bei Ablehnung",
+        "help": "HTTP-Statuscode, der beim Ablehnen der Anfrage gesendet wird (403 oder 444). Bei Verwendung von 444 schließt BunkerWeb die Verbindung."
+      },
+      "SEND_ANONYMOUS_REPORT": {
+        "label": "Anonymen Bericht senden",
+        "help": "Sendet einen anonymen Bericht an die BunkerWeb-Maintainer."
+      }
+    }
+  }
+}

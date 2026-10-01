@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Création, renouvellement et configuration automatiques des certificats Let's Encrypt."
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "Let's Encrypt automatique",
+        "help": "Active le mode Let's Encrypt automatique."
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Laisser passer Let's Encrypt",
+        "help": "Laisse passer les requêtes Let's Encrypt vers le serveur web."
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Email Let's Encrypt",
+        "help": "Email utilisé pour les notifications Let's Encrypt et dans le certificat."
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "Serveur de l'autorité de certification",
+        "help": "Sélectionnez le serveur de l'autorité de certification à utiliser pour la génération du certificat."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "Clé API ZeroSSL",
+        "help": "Clé API ZeroSSL optionnelle utilisée par zerossl-bot. Si vide, EMAIL_LETS_ENCRYPT est utilisé pour récupérer les identifiants EAB."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "Tentatives API ZeroSSL",
+        "help": "Nombre de tentatives pour les requêtes API ZeroSSL effectuées par zerossl-bot (0 désactive les tentatives)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "Délai entre tentatives API ZeroSSL",
+        "help": "Délai en secondes entre les tentatives de l'API ZeroSSL dans zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "Délai de connexion API ZeroSSL",
+        "help": "Délai d'expiration de connexion en secondes pour les requêtes API ZeroSSL dans zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "Temps max API ZeroSSL",
+        "help": "Temps total maximal en secondes pour chaque requête API ZeroSSL dans zerossl-bot."
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "Type de défi",
+        "help": "Le type de défi à utiliser pour Let's Encrypt (http ou dns)."
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "Fournisseur DNS",
+        "help": "Le fournisseur DNS à utiliser pour les défis DNS."
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "Propagation DNS",
+        "help": "Le temps à attendre pour la propagation DNS, en secondes, pour les défis DNS."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "Élément d'identifiants",
+        "help": "Élément de configuration qui sera ajouté au fichier credentials.ini pour le fournisseur DNS, pour les défis DNS. Écrivez-le sous la forme clé, espace, puis valeur (par ex. 'cloudflare_api_token 123456') ; ne mettez pas la clé entre guillemets. La valeur peut aussi être encodée en base64, ou l'élément entier peut être un objet json encodé en base64."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Décoder les identifiants DNS en Base64",
+        "help": "Décode automatiquement les identifiants du fournisseur DNS encodés en base64. Lorsque c'est activé, les identifiants correspondant au format base64 sont décodés avant utilisation (sauf pour le fournisseur rfc2136). Désactivez si vos identifiants sont intentionnellement des chaînes base64."
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "Certificats génériques",
+        "help": "Crée des certificats génériques (wildcard) pour tous les domaines. Cela permet à un seul certificat de sécuriser plusieurs sous-domaines. (Disponible uniquement avec les défis DNS)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Utiliser le staging Let's Encrypt",
+        "help": "Utilise l'environnement de staging pour la génération de certificats Let's Encrypt. Utile lors du test de vos déploiements pour éviter d'être limité en débit dans l'environnement de production."
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "Supprimer les anciens certificats lorsqu'ils ne sont plus nécessaires",
+        "help": "Supprime les anciens certificats lors du renouvellement."
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "Profil de certificat",
+        "help": "Sélectionnez le profil de certificat à utiliser avec Let's Encrypt. 'classic' est un certificat polyvalent avec une durée de vie de 90 jours et une large compatibilité. 'tlsserver' est optimisé pour l'authentification de serveur TLS avec une durée de vie de 90 jours et une charge utile plus petite. 'shortlived' propose des certificats de 7 jours pour une sécurité renforcée dans les environnements automatisés."
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "Profil de certificat personnalisé (ACME)",
+        "help": "Profil de certificat personnalisé à utiliser avec les serveurs ACME prenant en charge des profils non standard. Remplace LETS_ENCRYPT_PROFILE si défini."
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "Désactiver les suffixes publics (liste noire PSL)",
+        "help": "Désactive les demandes de certificat pour les domaines correspondant à la Public Suffix List (recommandé, valeur par défaut : yes)."
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "Tentatives maximales",
+        "help": "Nombre de fois où réessayer la génération du certificat en cas d'échec (0 désactive les tentatives)."
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "Requêtes de certificat concurrentes",
+        "help": "Exécute les demandes de certificat simultanément dans le job certbot-new (peut augmenter le risque de limitations de débit)."
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "Sauvegardes maximales des logs Certbot",
+        "help": "Nombre maximal de fichiers de log certbot pivotés à conserver par job. La valeur par défaut propre à Certbot est 1000, ce qui s'accumule rapidement. Réglez sur 0 pour ne conserver que le log actif."
+      }
+    }
+  }
+}

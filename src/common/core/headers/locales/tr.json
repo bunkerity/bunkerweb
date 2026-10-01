@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "Başlıklar",
+      "description": "İstemcilere gönderilen HTTP başlıklarını yönetir."
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "Özel üstbilgi (HeaderName: HeaderValue)",
+        "help": "Eklenecek özel üstbilgi (HeaderName: HeaderValue)."
+      },
+      "REMOVE_HEADERS": {
+        "label": "Üstbilgileri kaldır",
+        "help": "Kaldırılacak üstbilgiler (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "Upstream üstbilgilerini koru",
+        "help": "Upstream'den korunacak üstbilgiler (Header1 Header2 Header3 ... veya tümü için *)."
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Strict-Transport-Security (HSTS) üstbilgisi için değer."
+      },
+      "COOKIE_FLAGS": {
+        "label": "Çerez bayrakları",
+        "help": "Tüm çerezlere otomatik olarak eklenen çerez bayrakları (nginx_cookie_flag_module için kabul edilen değer)."
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "Otomatik çerez Secure bayrağı",
+        "help": "Tüm çerezlere otomatik olarak Secure bayrağını ekle."
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Content-Security-Policy üstbilgisi için değer."
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Content-Security-Policy üstbilgisi ihlallerini engellemek yerine bunlar için rapor gönder."
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Referrer-Policy üstbilgisi için değer."
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Permissions-Policy üstbilgisi için değer."
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "X-Frame-Options üstbilgisi için değer."
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "X-Content-Type-Options üstbilgisi için değer."
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "X-DNS-Prefetch-Control üstbilgisi için değer."
+      }
+    }
+  }
+}

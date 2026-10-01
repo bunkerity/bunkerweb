@@ -9,7 +9,9 @@ def pre_render(**kwargs):
         "counter_limited_global": {
             "value": 0,
             "title": "Global limit",
+            "title_i18n": "widgets.counter_limited_global.title",
             "subtitle": "Requests blocked",
+            "subtitle_i18n": "widgets.counter_limited_global.subtitle",
             "subtitle_color": "amber",
             "svg_color": "amber",
         },

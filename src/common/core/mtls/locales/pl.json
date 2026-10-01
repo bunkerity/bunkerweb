@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "Wzajemne TLS",
+      "description": "Wymaga certyfikatów klienta za pomocą wzajemnego TLS (mTLS)."
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "Użyj mutual TLS",
+        "help": "Włącz uwierzytelnianie klienta za pomocą mutual TLS."
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "Pakiet CA klienta",
+        "help": "Bezwzględna ścieżka do zaufanego pakietu CA klienta (PEM). Wymagane, gdy MTLS_VERIFY_CLIENT jest ustawione na on lub optional."
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "Tryb weryfikacji klienta",
+        "help": "Tryb weryfikacji klienta. 'on' wymaga ważnego certyfikatu, 'optional' przepuszcza żądania, gdy nie przedstawiono certyfikatu, a 'optional_no_ca' pomija walidację CA (tylko do diagnostyki, nie stanowi realnej ochrony)."
+      },
+      "MTLS_URL": {
+        "label": "URL mTLS",
+        "help": "Wyrażenie regularne dopasowywane do URI żądania, aby wymagać ważnego certyfikatu klienta tylko na pasujących ścieżkach (tylko HTTP). Ustaw MTLS_VERIFY_CLIENT na optional, aby uzgadnianie (handshake) kończyło się powodzeniem dla niepasujących ścieżek; egzekwowanie działa dla każdego żądania w Lua. Nieprawidłowe wyrażenie regularne działa fail-closed (pasujące żądania są odrzucane i logowane) zamiast być po cichu dopuszczane. Użyj ponumerowanych slotów dla kilku ścieżek (MTLS_URL_1, MTLS_URL_2). Pozostaw puste, aby wymusić mTLS na całej witrynie."
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "Głębokość weryfikacji",
+        "help": "Maksymalna akceptowana głębokość łańcucha certyfikatów podczas weryfikacji klienta."
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "Przekazuj nagłówki klienta",
+        "help": "Przekazuj wyniki weryfikacji do backendów upstream za pomocą nagłówków X-SSL-Client-*. Nagłówki X-SSL-* dostarczone przez klienta są zawsze usuwane na wejściu, więc tych wartości nie da się podrobić."
+      },
+      "MTLS_CRL": {
+        "label": "Ścieżka CRL klienta",
+        "help": "Opcjonalna bezwzględna ścieżka do listy unieważnionych certyfikatów (PEM). Pozostaw puste, aby pominąć sprawdzanie CRL."
+      }
+    }
+  }
+}

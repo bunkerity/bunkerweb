@@ -1,0 +1,26 @@
+{
+  "brotli": {
+    "meta": {
+      "name": "Brotli",
+      "description": "Kino-compress ang mga HTTP request gamit ang brotli algorithm."
+    },
+    "settings": {
+      "BROTLI_COMP_LEVEL": {
+        "label": "Compression Level",
+        "help": "Antas ng compression para sa Brotli (0 = walang compression, 11 = maximum na compression)."
+      },
+      "BROTLI_MIN_LENGTH": {
+        "label": "Minimum na Haba",
+        "help": "Minimum na sukat ng response (sa bytes) para ilapat ang Brotli compression."
+      },
+      "BROTLI_TYPES": {
+        "label": "MIME Types",
+        "help": "Listahan ng mga MIME type na iko-compress gamit ang brotli."
+      },
+      "USE_BROTLI": {
+        "label": "Gamitin ang Brotli",
+        "help": "I-enable o i-disable ang Brotli compression. Naka-off bilang default, na siya ring default ng ngx_brotli module mismo. Per-service ang setting na ito: iwanang naka-off para sa kahit anong service na ang response ay may dalang secret (CSRF token, API key) at inuulit ang input mula sa attacker, dahil ang kombinasyong iyon ang BREACH precondition — at tandaan na palaging naka-compress ang text/html, kahit ano pa ang nakalista sa BROTLI_TYPES. Ganito ang BunkerWeb web UI."
+      }
+    }
+  }
+}

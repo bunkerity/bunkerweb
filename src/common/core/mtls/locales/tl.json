@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "Mutual TLS",
+      "description": "Nangangailangan ng mga client certificate sa pamamagitan ng mutual TLS (mTLS)."
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "Gamitin ang Mutual TLS",
+        "help": "I-enable ang client authentication gamit ang mutual TLS."
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "Client CA Bundle",
+        "help": "Absolute path patungo sa pinagkakatiwalaang client CA bundle (PEM). Kailangan kapag naka-set ang MTLS_VERIFY_CLIENT sa on o optional."
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "Verify Client Mode",
+        "help": "Mode ng client verification. Kailangan ng valid certificate kung 'on', papayagan ang request kahit walang ipinakitang certificate kung 'optional', at lalaktawan ang CA validation kung 'optional_no_ca' (para sa diagnostics lang, hindi tunay na proteksyon)."
+      },
+      "MTLS_URL": {
+        "label": "mTLS URL",
+        "help": "Regex na itinutugma sa request URI para hingin ang valid client certificate sa mga path lang na tugma (HTTP lang). I-set ang MTLS_VERIFY_CLIENT sa optional para matapos ang handshake para sa mga path na hindi tugma; tumatakbo ang enforcement per-request sa Lua. Ang invalid na regex ay fail closed (ang mga tumutugmang request ay ti-tanggihan at ilo-log) sa halip na tahimik na papayagan. Gumamit ng numbered slot para sa ilang path (MTLS_URL_1, MTLS_URL_2). Iwanang blangko para i-enforce ang mTLS sa buong site."
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "Verify Depth",
+        "help": "Pinakamataas na certificate chain depth na tinatanggap habang sinusuri ang client."
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "Forward Client Headers",
+        "help": "I-forward ang resulta ng verification sa upstream backend gamit ang X-SSL-Client-* header. Lagi namang tinatanggal ang mga X-SSL-* header mula sa client sa ingress, kaya hindi ma-spoof ang mga value na ito."
+      },
+      "MTLS_CRL": {
+        "label": "Client CRL Path",
+        "help": "Opsyonal na absolute path patungo sa certificate revocation list (PEM). Iwanang blangko para laktawan ang CRL check."
+      }
+    }
+  }
+}

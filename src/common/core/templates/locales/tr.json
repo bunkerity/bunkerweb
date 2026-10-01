@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "Şablonlar",
+      "description": "Dahili şablonlar için sahte çekirdek eklenti."
+    },
+    "templates": {
+      "low": {
+        "name": "Web uygulaması korumasına yönelik temel ayarları sağlayan temel güvenlik düzeyi",
+        "steps": {
+          "0": {
+            "title": "Web hizmeti - Ön hizmet",
+            "subtitle": "Müşterilerinize açık web hizmetinizi yapılandırın"
+          },
+          "1": {
+            "title": "Web hizmeti - Üst akış sunucusu",
+            "subtitle": "BunkerWeb tarafından korunacak üst akış sunucusunu yapılandırın"
+          },
+          "2": {
+            "title": "HTTP - Genel",
+            "subtitle": "HTTP(S) protokolüyle ilgili ayarları yapılandırın"
+          },
+          "3": {
+            "title": "HTTP - Başlıklar",
+            "subtitle": "HTTP başlıklarıyla ilgili ayarları yapılandırın"
+          },
+          "4": {
+            "title": "Güvenlik - Kötü davranış",
+            "subtitle": "Kötü bir davranış tespit edildiğinde otomatik yasaklamayla ilgili ayarları yapılandırın."
+          },
+          "5": {
+            "title": "Güvenlik - Kara listeleme",
+            "subtitle": "Harici kara listelerle ilgili ayarları yapılandırın."
+          },
+          "6": {
+            "title": "Güvenlik - Sınırlama",
+            "subtitle": "İstek ve bağlantı sınırlamasıyla ilgili ayarları yapılandırın."
+          },
+          "7": {
+            "title": "Güvenlik - Antibot",
+            "subtitle": "Bot tespitiyle ilgili ayarları yapılandırın"
+          },
+          "8": {
+            "title": "Güvenlik - Temel kimlik doğrulama",
+            "subtitle": "Temel HTTP kimlik doğrulamasını yapılandırın"
+          },
+          "9": {
+            "title": "Güvenlik - Ülke",
+            "subtitle": "Ülkeye göre erişim politikasıyla ilgili ayarları yapılandırın"
+          },
+          "10": {
+            "title": "Güvenlik - ModSecurity",
+            "subtitle": "ModSecurity WAF ile ilgili ayarları yapılandırın"
+          }
+        }
+      },
+      "medium": {
+        "name": "Güvenlik özellikleri ile performans optimizasyonlarının bir karışımını sunan dengeli güvenlik düzeyi",
+        "steps": {
+          "0": {
+            "title": "Web hizmeti - Ön hizmet",
+            "subtitle": "Müşterilerinize açık web hizmetinizi yapılandırın"
+          },
+          "1": {
+            "title": "Web hizmeti - Üst akış sunucusu",
+            "subtitle": "BunkerWeb tarafından korunacak üst akış sunucusunu yapılandırın"
+          },
+          "2": {
+            "title": "HTTP - Genel",
+            "subtitle": "HTTP(S) protokolüyle ilgili ayarları yapılandırın"
+          },
+          "3": {
+            "title": "HTTP - Başlıklar",
+            "subtitle": "HTTP başlıklarıyla ilgili ayarları yapılandırın"
+          },
+          "4": {
+            "title": "Güvenlik - Kötü davranış",
+            "subtitle": "Kötü bir davranış tespit edildiğinde otomatik yasaklamayla ilgili ayarları yapılandırın."
+          },
+          "5": {
+            "title": "Güvenlik - Kara listeleme",
+            "subtitle": "Harici kara listelerle ilgili ayarları yapılandırın."
+          },
+          "6": {
+            "title": "Güvenlik - Sınırlama",
+            "subtitle": "İstek ve bağlantı sınırlamasıyla ilgili ayarları yapılandırın."
+          },
+          "7": {
+            "title": "Güvenlik - Antibot",
+            "subtitle": "Bot tespitiyle ilgili ayarları yapılandırın"
+          },
+          "8": {
+            "title": "Güvenlik - Temel kimlik doğrulama",
+            "subtitle": "Temel HTTP kimlik doğrulamasını yapılandırın"
+          },
+          "9": {
+            "title": "Güvenlik - Ülke",
+            "subtitle": "Ülkeye göre erişim politikasıyla ilgili ayarları yapılandırın"
+          },
+          "10": {
+            "title": "Güvenlik - Ters tarama",
+            "subtitle": "İstemci portlarının taranmasıyla ilgili ayarları yapılandırın"
+          },
+          "11": {
+            "title": "Güvenlik - ModSecurity",
+            "subtitle": "ModSecurity WAF ile ilgili ayarları yapılandırın"
+          }
+        }
+      },
+      "high": {
+        "name": "Sağlam güvenlik önlemlerine ve kapsamlı korumaya odaklanan gelişmiş güvenlik düzeyi",
+        "steps": {
+          "0": {
+            "title": "Web hizmeti - Ön hizmet",
+            "subtitle": "Müşterilerinize açık web hizmetinizi yapılandırın"
+          },
+          "1": {
+            "title": "Web hizmeti - Üst akış sunucusu",
+            "subtitle": "BunkerWeb tarafından korunacak üst akış sunucusunu yapılandırın"
+          },
+          "2": {
+            "title": "HTTP - Genel",
+            "subtitle": "HTTP(S) protokolüyle ilgili ayarları yapılandırın"
+          },
+          "3": {
+            "title": "HTTP - Başlıklar",
+            "subtitle": "HTTP başlıklarıyla ilgili ayarları yapılandırın"
+          },
+          "4": {
+            "title": "Güvenlik - Kötü davranış",
+            "subtitle": "Kötü bir davranış tespit edildiğinde otomatik yasaklamayla ilgili ayarları yapılandırın."
+          },
+          "5": {
+            "title": "Güvenlik - Kara listeleme",
+            "subtitle": "Harici kara listelerle ilgili ayarları yapılandırın."
+          },
+          "6": {
+            "title": "Güvenlik - Sınırlama",
+            "subtitle": "İstek ve bağlantı sınırlamasıyla ilgili ayarları yapılandırın."
+          },
+          "7": {
+            "title": "Güvenlik - Antibot",
+            "subtitle": "Bot tespitiyle ilgili ayarları yapılandırın"
+          },
+          "8": {
+            "title": "Güvenlik - Temel kimlik doğrulama",
+            "subtitle": "Temel HTTP kimlik doğrulamasını yapılandırın"
+          },
+          "9": {
+            "title": "Güvenlik - Ülke",
+            "subtitle": "Ülkeye göre erişim politikasıyla ilgili ayarları yapılandırın"
+          },
+          "10": {
+            "title": "Güvenlik - Ters tarama",
+            "subtitle": "İstemci portlarının taranmasıyla ilgili ayarları yapılandırın"
+          },
+          "11": {
+            "title": "Güvenlik - ModSecurity",
+            "subtitle": "ModSecurity WAF ile ilgili ayarları yapılandırın"
+          }
+        }
+      },
+      "api": {
+        "name": "BunkerWeb'in API'sini kullanırken temel ayarlar",
+        "steps": {
+          "0": {
+            "title": "Hizmet - Ön hizmet",
+            "subtitle": "Sunucu adını ve SSL/TLS ayarlarını yapılandırın"
+          },
+          "1": {
+            "title": "Hizmet - Üst akış sunucusu",
+            "subtitle": "BunkerWeb tarafından korunacak üst akış sunucusunu yapılandırın"
+          },
+          "2": {
+            "title": "API - Hız sınırlama",
+            "subtitle": "Hız sınırlama ayarlarını yapılandırın - API'nin de dahili bir hız sınırlaması olduğunu unutmayın"
+          },
+          "3": {
+            "title": "API - Çeşitli ayarlar",
+            "subtitle": "API'nin düzgün çalışması için diğer önemli ayarlar"
+          }
+        }
+      },
+      "ui": {
+        "name": "Web arayüzünü (UI) kullanırken temel ayarlar",
+        "steps": {
+          "0": {
+            "title": "Örnek adım",
+            "subtitle": "Bu, web arayüzünü kullanırken temel ayarları göstermek için örnek bir adımdır"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "Harici şablon URL'leri",
+        "help": "İndirilip kurulacak hizmet şablonu URL'lerinin, boşluklarla ayrılmış listesi. Her URL bir şablondur: bir bunkerweb-template/1 JSON paketi ya da <id>/template.json ve yapılandırmalarını içeren bir .zip veya .tar.gz. Yalnızca https:// ve file:/// kabul edilir, en fazla 1 MiB. İçeriğini sabitlemek için URL'ye #sha256=<digest> ekleyin. URL'si kaldırılan bir şablon, bir hizmet onu hâlâ kullanmıyorsa silinir."
+      }
+    }
+  }
+}

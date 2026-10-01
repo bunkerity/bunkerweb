@@ -7,6 +7,7 @@ def pre_render(**kwargs):
     ret = {
         "ping_status": {
             "title": "REDIS STATUS",
+            "title_i18n": "widgets.ping_status.title",
             "value": "error",
             "col-size": "col-12 col-md-6",
             "card-classes": "h-100",
@@ -14,7 +15,9 @@ def pre_render(**kwargs):
         "counter_redis_nb_keys": {
             "value": 0,
             "title": "REDIS KEYS",
+            "title_i18n": "widgets.counter_redis_nb_keys.title",
             "subtitle": "Keys number",
+            "subtitle_i18n": "widgets.counter_redis_nb_keys.subtitle",
             "subtitle_color": "maroon",
             "svg_color": "maroon",
             "col-size": "col-12 col-md-6",

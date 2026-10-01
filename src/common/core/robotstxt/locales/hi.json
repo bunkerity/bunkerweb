@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "robots.txt फ़ाइल का प्रबंधन करता है। आपकी साइट तक वेब क्रॉलर की पहुँच को नियंत्रित करने के लिए मानक।"
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "robots.txt उपयोग करें",
+        "help": "robots.txt फ़ाइल सक्षम करें।"
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "सामुदायिक robots.txt सूचियाँ",
+        "help": "robots.txt में शामिल करने के लिए समुदाय द्वारा बनाए रखी गई सूचियाँ चुनें।"
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "Robots.txt URL",
+        "help": "URL की सूची, स्पेस से अलग, जिनमें robots.txt नियम शामिल हैं। file:// URL और http://user:pass@url स्कीम से बेसिक ऑथ भी समर्थित है।"
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Robots.txt नियम",
+        "help": "robots.txt के लिए नियम (प्रति पंक्ति एक)।"
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Robots.txt हेडर",
+        "help": "robots.txt फ़ाइल का हेडर (नियमों से पहले)। Base64 में एन्कोड किया जा सकता है।"
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Robots.txt फ़ुटर",
+        "help": "robots.txt फ़ाइल का फ़ुटर (नियमों के बाद)। Base64 में एन्कोड किया जा सकता है।"
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Robots.txt साइटमैप",
+        "help": "robots.txt में शामिल करने के लिए साइटमैप URL।"
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "नियम नज़रअंदाज़ करें",
+        "help": "नज़रअंदाज़ करने के लिए नियम (PCRE रेगेक्स)। कई बार निर्दिष्ट किया जा सकता है।"
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "DarkVisitors API टोकन",
+        "help": "DarkVisitors API के लिए Bearer टोकन।"
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "DarkVisitors एजेंट प्रकार",
+        "help": "DarkVisitors API से संपर्क करते समय DarkVisitors के agent_types फ़ील्ड में शामिल करने के लिए कॉमा से अलग किए गए एजेंट प्रकारों की सूची।"
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "एक स्ट्रिंग जो निर्दिष्ट करती है कि कौन-से URL अस्वीकृत हैं। DarkVisitors API से संपर्क करते समय यह मान disallow फ़ील्ड के रूप में भेजा जाएगा।"
+      }
+    }
+  }
+}

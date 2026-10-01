@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "Внедрение HTML",
+      "description": "Внедряет пользовательский HTML-код перед тегом </body> или </head>."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "HTML-код body",
+        "help": "HTML-код, который будет внедрён перед тегом </body>."
+      },
+      "INJECT_HEAD": {
+        "label": "HTML-код head",
+        "help": "HTML-код, который будет внедрён перед тегом </head>."
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "redirect": {
+    "meta": {
+      "name": "Yönlendirme",
+      "description": "HTTP yönlendirmelerini yönetir."
+    },
+    "settings": {
+      "REDIRECT_FROM": {
+        "label": "Şuradan yönlendir",
+        "help": "Yönlendirmenin yapılacağı yol. ^ ile başlayan veya $ ile biten bir değer regex location olarak kabul edilir. nginx location değiştiricisini açıkça ayarlamak için isteğe bağlı olarak başına ~, ~*, = veya ^~ ve bir boşluk ekleyin; değerin geri kalanında boşluk, ;, { veya } kullanılamaz."
+      },
+      "REDIRECT_TO": {
+        "label": "Şuraya yönlendir",
+        "help": "Tüm siteyi başka bir siteye yönlendir."
+      },
+      "REDIRECT_TO_REQUEST_URI": {
+        "label": "İstek URI'sini ekle",
+        "help": "İstenen URI'yi yönlendirme adresine ekle."
+      },
+      "REDIRECT_TO_STATUS_CODE": {
+        "label": "Yönlendirme durum kodu",
+        "help": "Yönlendirme için HTTP durum kodu: 301 (Moved Permanently - tarayıcılar tarafından önbelleğe alınır), 302 (Found - geçici, yöntemi değiştirebilir), 303 (See Other - her zaman GET kullanır), 307 (Temporary Redirect - yöntemi korur), 308 (Permanent Redirect - yöntemi korur, önbelleğe alınır)."
+      }
+    }
+  }
+}

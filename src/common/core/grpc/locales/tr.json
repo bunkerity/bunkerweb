@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "gRPC ters proxy yapılandırmalarını yönetir."
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "gRPC kullan",
+        "help": "gRPC ters proxy modunu etkinleştir."
+      },
+      "GRPC_HOST": {
+        "label": "gRPC host",
+        "help": "grpc_pass tarafından kullanılan tam upstream değeri (örneğin grpc://app:50051 veya grpcs://app:443)."
+      },
+      "GRPC_URL": {
+        "label": "gRPC URL'si",
+        "help": "Bir gRPC upstream'e proxy'lenecek location URL'si. ^ ile başlayan veya $ ile biten bir değer regex location olarak kabul edilir. nginx location değiştiricisini açıkça ayarlamak için isteğe bağlı olarak başına ~, ~*, = veya ^~ ve bir boşluk ekleyin; değerin geri kalanında boşluk, ;, { veya } kullanılamaz."
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "gRPC özel host",
+        "help": "gRPC upstream'e gönderilen Host üstbilgisini geçersiz kıl."
+      },
+      "GRPC_HEADERS": {
+        "label": "gRPC üstbilgileri",
+        "help": "gRPC upstream'e gönderilecek, noktalı virgülle ayrılmış üstbilgi listesi (grpc_set_header yönergesi için değerler)."
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "gRPC üstbilgilerini gizle",
+        "help": "gRPC upstream'den alındığında istemcilerden gizlenecek üstbilgi listesi (grpc_hide_header yönergesi için değerler)."
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "gRPC üstbilgileri-istemci",
+        "help": "İstemciye gönderilecek, noktalı virgülle ayrılmış üstbilgi listesi (add_header yönergesi için değerler)."
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "gRPC üstbilgilerini geçir",
+        "help": "Varsayılan olarak gizli olsalar bile gRPC upstream'den istemciye geçirilecek, boşluklarla ayrılmış üstbilgi listesi (grpc_pass_header yönergesi için değerler)."
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "gRPC üstbilgilerini yoksay",
+        "help": "NGINX tarafından işlenmemesi gereken, gRPC upstream'den gelen, boşluklarla ayrılmış üstbilgi listesi (grpc_ignore_headers yönergesi için değerler)."
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "Üstbilgilerde alt çizgiye izin ver",
+        "help": "underscores_in_headers yönergesini etkinleştir veya devre dışı bırak."
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "Hataları yakala",
+        "help": "gRPC upstream hatalarını yakala ve yeniden yaz."
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "gRPC arabellek boyutu",
+        "help": "grpc_buffer_size yönergesi için değer (gRPC upstream'den yanıtı okumak için kullanılan arabelleğin boyutu)."
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "gRPC bağlantı zaman aşımı",
+        "help": "gRPC upstream'e bağlanırken zaman aşımı."
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "gRPC okuma zaman aşımı",
+        "help": "gRPC upstream'den okurken zaman aşımı."
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "gRPC gönderme zaman aşımı",
+        "help": "gRPC upstream'e gönderirken zaman aşımı."
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "gRPC soket keepalive",
+        "help": "gRPC upstream soketleri için keepalive'ı etkinleştir veya devre dışı bırak."
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "gRPC upstream sunucusuna SNI gönderimini etkinleştir veya devre dışı bırak."
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "SSL SNI adı",
+        "help": "gRPC upstream sunucusuna gönderilecek SNI host'unu ayarlar."
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "SSL doğrulama",
+        "help": "gRPC upstream sunucusunun SSL sertifikasının doğrulanmasını etkinleştir veya devre dışı bırak."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Güvenilir sertifika önceliği",
+        "help": "Güvenilir CA sertifikasının kaynağı: dosya yolu veya base64/PEM verisi (file veya data)."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL güvenilir sertifika yolu",
+        "help": "gRPC upstream sertifikasını doğrulamak için kullanılan PEM CA paketinin yolu (öncelik 'file', zamanlayıcı tarafından okunur, önbelleğe alır ve dağıtır). Doğrulama için gereklidir; genel upstreamlar için sistem paketini kullanın (ör. /etc/ssl/certs/ca-certificates.crt). Ayarlanmamışsa doğrulama devre dışıdır."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Güvenilir sertifika verisi (base64/plaintext)",
+        "help": "base64 veya düz metin PEM olarak güvenilir CA sertifikası (öncelik 'data')."
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "SSL doğrulama derinliği",
+        "help": "gRPC upstream sunucusu sertifika zincirindeki doğrulama derinliğini ayarlar."
+      },
+      "GRPC_SSL_CRL": {
+        "label": "CRL yolu",
+        "help": "gRPC upstream sunucusu doğrulanırken kullanılan PEM sertifika iptal listesinin yolu. GRPC_SSL_CRL_DATA'ya göre önceliklidir. Yalnızca GRPC_SSL_VERIFY yes olduğunda uygulanır. Ayarlanmış ama eksik bir yol hatadır; GRPC_SSL_CRL_DATA yedek olarak kullanılmaz."
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "CRL verisi (base64/plaintext)",
+        "help": "base64 veya düz metin PEM olarak sertifika iptal listesi. Yalnızca CRL yolu ayarı boş olduğunda kullanılır."
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "Upstream SSL protokolleri",
+        "help": "gRPC upstream sunucusuna sunulan TLS sürümleri (grpc_ssl_protocols yönergesinin değeri). Boş bırakılırsa NGINX varsayılanı korunur."
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "Upstream SSL şifreleri",
+        "help": "gRPC upstream sunucusuna sunulan şifreleme paketi dizesi (grpc_ssl_ciphers yönergesinin değeri). Boş bırakılırsa NGINX varsayılanı korunur."
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "gRPC sonraki upstream",
+        "help": "Bir sonraki gRPC upstream sunucusunu seçme koşulları."
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "gRPC sonraki upstream zaman aşımı",
+        "help": "İsteğin bir sonraki gRPC upstream sunucusuna geçirilmesi için zaman sınırı."
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "gRPC sonraki upstream denemeleri",
+        "help": "İsteğin bir sonraki gRPC upstream sunucusuna geçirilmesi için maksimum deneme sayısı."
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "gRPC kimlik doğrulama isteği",
+        "help": "Harici bir sağlayıcı kullanarak kimlik doğrulamayı etkinleştir (auth_request yönergesinin değeri)."
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "Kimlik doğrulama isteği giriş URL'si",
+        "help": "GRPC_AUTH_REQUEST kullanılırken istemcileri giriş URL'sine yönlendir (auth_request çağrısı 401 döndürdüğünde kullanılır). $scheme, $host ve $request_uri gibi NGINX değişkenleri desteklenir."
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "gRPC kimlik doğrulama isteği kümesi",
+        "help": "Kimlik doğrulama sağlayıcısından ayarlanacak, noktalı virgülle ayrılmış değişken listesi (auth_request_set yönergelerinin değerleri)."
+      },
+      "GRPC_INCLUDES": {
+        "label": "gRPC dahil etmeleri",
+        "help": "gRPC location bloğuna dahil edilecek, boşluklarla ayrılmış ek yapılandırma."
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "gRPC maksimum gövde boyutu",
+        "help": "Bu gRPC location'ı için maksimum gövde boyutu (sonsuz için 0). Boş bırakılırsa hizmetin MAX_CLIENT_SIZE'ı uygulanır."
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "İstemci sertifikası önceliği",
+        "help": "Upstream ile mutual TLS için kullanılan istemci sertifikası ve anahtarının kaynağı: dosya yolu veya base64/PEM verisi (file veya data)."
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "SSL istemci sertifikası yolu",
+        "help": "BunkerWeb'in gRPC upstreamlerine sunduğu PEM istemci sertifikasının yolu (mutual TLS, öncelik file). Eşleşen GRPC_SSL_CLIENT_KEY gerektirir; trusted-cert işi bu gRPC'ye ait kimliği önbelleğe alır ve dağıtır."
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "İstemci sertifikası verisi (base64/plaintext)",
+        "help": "base64 veya düz metin PEM olarak istemci sertifikası (öncelik 'data')."
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "SSL istemci anahtarı yolu",
+        "help": "İstemci sertifikasıyla eşleşen PEM özel anahtarının yolu (öncelik 'file'). Anahtar, diğer iş yapıtları gibi önbelleğe alınır ve örneklere dağıtılır, yalnızca sahip/grup izinleriyle yazılır."
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "İstemci anahtarı verisi (base64/plaintext)",
+        "help": "base64 veya düz metin PEM olarak istemci özel anahtarı (öncelik 'data'). Mümkün olduğunda bir dosya yolunu tercih edin: burada ayarlanan bir anahtar bir ayar değeri olarak saklanır."
+      }
+    }
+  }
+}

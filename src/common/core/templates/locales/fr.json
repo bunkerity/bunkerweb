@@ -1,0 +1,201 @@
+{
+  "templates": {
+    "meta": {
+      "name": "Modèles",
+      "description": "Faux plugin core pour les modèles internes."
+    },
+    "templates": {
+      "low": {
+        "name": "Niveau de sécurité basique fournissant les paramètres essentiels pour la protection des applications web",
+        "steps": {
+          "0": {
+            "title": "Service web - Service frontal",
+            "subtitle": "Configurez votre service web exposé à vos clients"
+          },
+          "1": {
+            "title": "Service web - Serveur upstream",
+            "subtitle": "Configurez le serveur upstream à protéger par BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Général",
+            "subtitle": "Configurez les paramètres liés au protocole HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - En-têtes",
+            "subtitle": "Configurez les paramètres liés aux en-têtes HTTP"
+          },
+          "4": {
+            "title": "Sécurité - Mauvais comportement",
+            "subtitle": "Configurez les paramètres liés au bannissement automatique lorsqu'un mauvais comportement est détecté."
+          },
+          "5": {
+            "title": "Sécurité - Liste noire",
+            "subtitle": "Configurez les paramètres liés aux listes noires externes."
+          },
+          "6": {
+            "title": "Sécurité - Limitation",
+            "subtitle": "Configurez les paramètres liés à la limitation des requêtes et des connexions."
+          },
+          "7": {
+            "title": "Sécurité - Antibot",
+            "subtitle": "Configurez les paramètres relatifs à la détection des robots"
+          },
+          "8": {
+            "title": "Sécurité - Authentification basique",
+            "subtitle": "Configurez l'authentification HTTP basique"
+          },
+          "9": {
+            "title": "Sécurité - Pays",
+            "subtitle": "Configurez les paramètres relatifs à la politique d'accès par pays"
+          },
+          "10": {
+            "title": "Sécurité - ModSecurity",
+            "subtitle": "Configurez les paramètres liés au WAF ModSecurity"
+          }
+        }
+      },
+      "medium": {
+        "name": "Niveau de sécurité équilibré offrant un mélange de fonctions de sécurité et d'optimisations de performance",
+        "steps": {
+          "0": {
+            "title": "Service web - Service frontal",
+            "subtitle": "Configurez votre service web exposé à vos clients"
+          },
+          "1": {
+            "title": "Service web - Serveur upstream",
+            "subtitle": "Configurez le serveur upstream à protéger par BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Général",
+            "subtitle": "Configurez les paramètres liés au protocole HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - En-têtes",
+            "subtitle": "Configurez les paramètres liés aux en-têtes HTTP"
+          },
+          "4": {
+            "title": "Sécurité - Mauvais comportement",
+            "subtitle": "Configurez les paramètres liés au bannissement automatique lorsqu'un mauvais comportement est détecté."
+          },
+          "5": {
+            "title": "Sécurité - Liste noire",
+            "subtitle": "Configurez les paramètres liés aux listes noires externes."
+          },
+          "6": {
+            "title": "Sécurité - Limitation",
+            "subtitle": "Configurez les paramètres liés à la limitation des requêtes et des connexions."
+          },
+          "7": {
+            "title": "Sécurité - Antibot",
+            "subtitle": "Configurez les paramètres relatifs à la détection des robots"
+          },
+          "8": {
+            "title": "Sécurité - Authentification basique",
+            "subtitle": "Configurez l'authentification HTTP basique"
+          },
+          "9": {
+            "title": "Sécurité - Pays",
+            "subtitle": "Configurez les paramètres relatifs à la politique d'accès par pays"
+          },
+          "10": {
+            "title": "Sécurité - Analyse inversée",
+            "subtitle": "Configurez les paramètres relatifs à l'analyse des ports des clients"
+          },
+          "11": {
+            "title": "Sécurité - ModSecurity",
+            "subtitle": "Configurez les paramètres liés au WAF ModSecurity"
+          }
+        }
+      },
+      "high": {
+        "name": "Niveau de sécurité avancé axé sur des mesures de sécurité robustes et une protection complète",
+        "steps": {
+          "0": {
+            "title": "Service web - Service frontal",
+            "subtitle": "Configurez votre service web exposé à vos clients"
+          },
+          "1": {
+            "title": "Service web - Serveur upstream",
+            "subtitle": "Configurez le serveur upstream à protéger par BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - Général",
+            "subtitle": "Configurez les paramètres liés au protocole HTTP(S)"
+          },
+          "3": {
+            "title": "HTTP - En-têtes",
+            "subtitle": "Configurez les paramètres liés aux en-têtes HTTP"
+          },
+          "4": {
+            "title": "Sécurité - Mauvais comportement",
+            "subtitle": "Configurez les paramètres liés au bannissement automatique lorsqu'un mauvais comportement est détecté."
+          },
+          "5": {
+            "title": "Sécurité - Liste noire",
+            "subtitle": "Configurez les paramètres liés aux listes noires externes."
+          },
+          "6": {
+            "title": "Sécurité - Limitation",
+            "subtitle": "Configurez les paramètres liés à la limitation des requêtes et des connexions."
+          },
+          "7": {
+            "title": "Sécurité - Antibot",
+            "subtitle": "Configurez les paramètres relatifs à la détection des robots"
+          },
+          "8": {
+            "title": "Sécurité - Authentification basique",
+            "subtitle": "Configurez l'authentification HTTP basique"
+          },
+          "9": {
+            "title": "Sécurité - Pays",
+            "subtitle": "Configurez les paramètres relatifs à la politique d'accès par pays"
+          },
+          "10": {
+            "title": "Sécurité - Analyse inversée",
+            "subtitle": "Configurez les paramètres relatifs à l'analyse des ports des clients"
+          },
+          "11": {
+            "title": "Sécurité - ModSecurity",
+            "subtitle": "Configurez les paramètres liés au WAF ModSecurity"
+          }
+        }
+      },
+      "api": {
+        "name": "Paramètres de base lors de l'utilisation de l'API de BunkerWeb",
+        "steps": {
+          "0": {
+            "title": "Service - Service frontal",
+            "subtitle": "Configurez le nom du serveur et les paramètres SSL/TLS"
+          },
+          "1": {
+            "title": "Service - Serveur upstream",
+            "subtitle": "Configurez le serveur upstream à protéger par BunkerWeb"
+          },
+          "2": {
+            "title": "API - Limitation de débit",
+            "subtitle": "Configurez les paramètres de limitation de débit - notez que l'API dispose aussi d'une limitation de débit interne"
+          },
+          "3": {
+            "title": "API - Paramètres divers",
+            "subtitle": "Autres paramètres importants pour le bon fonctionnement de l'API"
+          }
+        }
+      },
+      "ui": {
+        "name": "Paramètres de base lors de l'utilisation de l'UI web",
+        "steps": {
+          "0": {
+            "title": "Étape factice",
+            "subtitle": "Ceci est une étape factice montrant les paramètres de base lors de l'utilisation de l'UI web"
+          }
+        }
+      }
+    },
+    "settings": {
+      "EXTERNAL_TEMPLATE_URLS": {
+        "label": "URLs de modèles externes",
+        "help": "Liste des URLs de modèles de service à télécharger et installer, séparées par des espaces. Chaque URL est un modèle : soit un paquet JSON bunkerweb-template/1, soit une archive .zip ou .tar.gz contenant <id>/template.json et ses configurations. Seuls https:// et file:/// sont acceptés, jusqu'à 1 MiB maximum. Ajoutez #sha256=<digest> à une URL pour figer son contenu. Un modèle dont l'URL est supprimée est supprimé, sauf si un service l'utilise encore."
+      }
+    }
+  }
+}

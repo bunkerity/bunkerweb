@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Базовая аутентификация",
+      "description": "Требует входа перед доступом к ресурсу или всему сайту с помощью метода базовой HTTP-аутентификации."
+    },
+    "settings": {
+      "AUTH_BASIC_LOCATION": {
+        "label": "Расположение auth basic",
+        "help": "URL защищённого ресурса или значение для всего сайта."
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Пароль",
+        "help": "Пароль"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Текст",
+        "help": "Текст для отображения"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Имя пользователя auth basic",
+        "help": "Имя пользователя"
+      },
+      "USE_AUTH_BASIC": {
+        "label": "Использовать HTTP basic auth",
+        "help": "Использовать HTTP basic auth"
+      }
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "БАЗОВАЯ АУТЕНТИФИКАЦИЯ",
+        "subtitle": "Успешно"
+      },
+      "counter_failed_authbasic": {
+        "title": "БАЗОВАЯ АУТЕНТИФИКАЦИЯ",
+        "subtitle": "Неудачно"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "Verwaltet einen lokalen oder entfernten PHP-FPM."
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "Entferntes PHP",
+        "help": "Hostname der entfernten PHP-FPM-Instanz."
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "Entfernter PHP-Pfad",
+        "help": "Stammordner, der die Dateien in der entfernten PHP-FPM-Instanz enthält."
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "Entfernter PHP-Port",
+        "help": "Port der entfernten PHP-FPM-Instanz."
+      },
+      "LOCAL_PHP": {
+        "label": "Lokales PHP",
+        "help": "Pfad zur PHP-FPM-Socket-Datei."
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "Lokaler PHP-Pfad",
+        "help": "Stammordner, der die Dateien in der lokalen PHP-FPM-Instanz enthält."
+      }
+    }
+  }
+}

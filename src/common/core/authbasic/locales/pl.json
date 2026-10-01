@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Uwierzytelnianie podstawowe",
+      "description": "Wymusza logowanie przed uzyskaniem dostępu do zasobu lub całej witryny za pomocą podstawowej metody uwierzytelniania HTTP."
+    },
+    "settings": {
+      "AUTH_BASIC_LOCATION": {
+        "label": "Lokalizacja auth basic",
+        "help": "URL chronionego zasobu lub wartość obowiązująca dla całej witryny."
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Hasło",
+        "help": "Hasło"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Tekst",
+        "help": "Tekst do wyświetlenia"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Nazwa użytkownika auth basic",
+        "help": "Nazwa użytkownika"
+      },
+      "USE_AUTH_BASIC": {
+        "label": "Użyj uwierzytelniania HTTP basic",
+        "help": "Użyj uwierzytelniania HTTP basic"
+      }
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "UWIERZYTELNIANIE PODSTAWOWE",
+        "subtitle": "Powodzenie"
+      },
+      "counter_failed_authbasic": {
+        "title": "UWIERZYTELNIANIE PODSTAWOWE",
+        "subtitle": "Niepowodzenie"
+      }
+    }
+  }
+}

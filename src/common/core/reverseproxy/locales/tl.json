@@ -1,0 +1,230 @@
+{
+  "reverseproxy": {
+    "meta": {
+      "name": "Reverse proxy",
+      "description": "Pinamamahalaan ang mga configuration ng reverse proxy."
+    },
+    "settings": {
+      "USE_REVERSE_PROXY": {
+        "label": "Gamitin ang Reverse Proxy",
+        "help": "I-activate ang reverse proxy mode."
+      },
+      "REVERSE_PROXY_HOST": {
+        "label": "Reverse Proxy Host",
+        "help": "Buong URL ng pinoproxy na resource (proxy_pass)."
+      },
+      "REVERSE_PROXY_URL": {
+        "label": "Reverse Proxy URL",
+        "help": "Location URL na ipoproxy. Ang value na nagsisimula sa ^ o nagtatapos sa $ ay ituturing na regex location. Opsyonal na maglagay ng prefix na ~, ~*, = o ^~ na sinusundan ng isang space para tahasang i-set ang nginx location modifier; walang space, ;, { o } ang pinapayagan sa ibang bahagi ng value."
+      },
+      "REVERSE_PROXY_WS": {
+        "label": "Reverse Proxy WebSocket",
+        "help": "I-enable ang websocket sa pinoproxy na resource."
+      },
+      "REVERSE_PROXY_BUFFERING": {
+        "label": "Reverse Proxy Buffering",
+        "help": "I-enable o i-disable ang buffering ng mga response mula sa pinoproxy na resource."
+      },
+      "REVERSE_PROXY_REQUEST_BUFFERING": {
+        "label": "Reverse Proxy Request Buffering",
+        "help": "I-enable o i-disable ang buffering ng mga request papunta sa pinoproxy na resource."
+      },
+      "REVERSE_PROXY_KEEPALIVE": {
+        "label": "Reverse Proxy Keepalive",
+        "help": "I-enable o i-disable ang keepalive na koneksyon sa pinoproxy na resource."
+      },
+      "REVERSE_PROXY_HTTP_VERSION": {
+        "label": "Reverse Proxy HTTP Version",
+        "help": "Bersyon ng HTTP protocol na ginagamit para makipag-usap sa upstream (1.0, 1.1, o 2). I-set sa 2 para i-enable ang HTTP/2 multiplexing sa panig ng upstream para sa mga compatible na backend. Naka-pin sa 1.1 palagi ang mga WebSocket location."
+      },
+      "REVERSE_PROXY_CUSTOM_HOST": {
+        "label": "Reverse Proxy Custom Host",
+        "help": "I-override ang Host header na ipinapadala sa upstream server."
+      },
+      "REVERSE_PROXY_HEADERS": {
+        "label": "Reverse Proxy Headers",
+        "help": "Listahan ng mga HTTP header na ipapadala sa pinoproxy na resource, pinaghihiwalay ng semicolon (mga value para sa proxy_set_header directive)."
+      },
+      "REVERSE_PROXY_HIDE_HEADERS": {
+        "label": "Reverse Proxy Hide Headers",
+        "help": "Listahan ng mga HTTP header na itatago sa mga client kapag natanggap mula sa pinoproxy na resource (mga value para sa proxy_hide_header directive)."
+      },
+      "REVERSE_PROXY_HEADERS_CLIENT": {
+        "label": "Reverse Proxy Headers-Client",
+        "help": "Listahan ng mga HTTP header na ipapadala sa client, pinaghihiwalay ng semicolon (mga value para sa add_header directive)."
+      },
+      "REVERSE_PROXY_UNDERSCORES_IN_HEADERS": {
+        "label": "Payagan ang Underscore sa Headers",
+        "help": "I-enable o i-disable ang underscores_in_headers directive."
+      },
+      "REVERSE_PROXY_INTERCEPT_ERRORS": {
+        "label": "I-intercept ang mga Error",
+        "help": "I-intercept at i-rewrite ang mga HTTP error response mula sa pinoproxy na resource (value ng proxy_intercept_errors directive)."
+      },
+      "REVERSE_PROXY_CONNECT_TIMEOUT": {
+        "label": "Reverse Proxy Connect Timeout",
+        "help": "Timeout kapag kumokonekta sa pinoproxy na resource."
+      },
+      "REVERSE_PROXY_READ_TIMEOUT": {
+        "label": "Reverse Proxy Read Timeout",
+        "help": "Timeout kapag nagbabasa mula sa pinoproxy na resource."
+      },
+      "REVERSE_PROXY_SEND_TIMEOUT": {
+        "label": "Reverse Proxy Send Timeout",
+        "help": "Timeout kapag nagpapadala patungo sa pinoproxy na resource."
+      },
+      "REVERSE_PROXY_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "I-enable o i-disable ang pagpapadala ng SNI sa upstream server."
+      },
+      "REVERSE_PROXY_SSL_SNI_NAME": {
+        "label": "SSL SNI Name",
+        "help": "Itinatakda ang SNI host na ipapadala sa upstream server."
+      },
+      "REVERSE_PROXY_SSL_VERIFY": {
+        "label": "SSL Verify",
+        "help": "I-enable o i-disable ang verification ng SSL certificate ng upstream server."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Trusted Certificate Priority",
+        "help": "Source ng trusted CA certificate: file path o base64/PEM data (file o data)."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL Trusted Certificate Path",
+        "help": "Path patungo sa PEM CA bundle na ginagamit para i-verify ang upstream certificate (priyoridad 'file', nababasa ng scheduler, na nagca-cache at namamahagi nito). Kailangan para sa verification; para sa public upstream gamitin ang system bundle (hal. /etc/ssl/certs/ca-certificates.crt). Kapag hindi naka-set, naka-disable ang verification."
+      },
+      "REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Trusted Certificate Data (base64/plaintext)",
+        "help": "Trusted CA certificate bilang base64 o plaintext PEM (priyoridad 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "Client Certificate Priority",
+        "help": "Source ng client certificate at key na ginagamit para sa mutual TLS kasama ang upstream: file path o base64/PEM data (file o data)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT": {
+        "label": "SSL Client Certificate Path",
+        "help": "Path patungo sa PEM client certificate na ipinapakita ng BunkerWeb sa upstream (mutual TLS, priyoridad 'file', nababasa ng scheduler, na nagca-cache at namamahagi nito). Kailangan ang tugmang key; pinagsasaluhan ng HTTP at stream reverse proxy ng service (may sarili itong GRPC_SSL_CLIENT_CERT ang gRPC)."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_CERT_DATA": {
+        "label": "Client Certificate Data (base64/plaintext)",
+        "help": "Client certificate bilang base64 o plaintext PEM (priyoridad 'data')."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY": {
+        "label": "SSL Client Key Path",
+        "help": "Path patungo sa PEM private key na tumutugma sa client certificate (priyoridad 'file'). Nica-cache ang key at ipinapamahagi sa mga instance tulad ng anumang iba pang job artifact, at isinusulat nang may owner/group-only na pahintulot."
+      },
+      "REVERSE_PROXY_SSL_CLIENT_KEY_DATA": {
+        "label": "Client Key Data (base64/plaintext)",
+        "help": "Client private key bilang base64 o plaintext PEM (priyoridad 'data'). Mas mainam ang file path kapag posible: ang key na naka-set dito ay naka-imbak bilang setting value."
+      },
+      "REVERSE_PROXY_SSL_CRL": {
+        "label": "CRL Path",
+        "help": "Path patungo sa PEM certificate revocation list na ginagamit kapag ni-verify ang upstream server. Mananaig ito kaysa sa REVERSE_PROXY_SSL_CRL_DATA. Ilalapat lang kapag ang REVERSE_PROXY_SSL_VERIFY ay yes. Error ang naka-set pero nawawalang path; hindi ginagamit ang REVERSE_PROXY_SSL_CRL_DATA bilang fallback."
+      },
+      "REVERSE_PROXY_SSL_CRL_DATA": {
+        "label": "CRL Data (base64/plaintext)",
+        "help": "Certificate revocation list bilang base64 o plaintext PEM. Ginagamit lang kapag blangko ang CRL path setting."
+      },
+      "REVERSE_PROXY_SSL_PROTOCOLS": {
+        "label": "Upstream SSL Protocols",
+        "help": "Mga bersyon ng TLS na inaalok sa upstream server (value ng proxy_ssl_protocols directive). Pinapanatili ng blangkong value ang default ng NGINX."
+      },
+      "REVERSE_PROXY_SSL_CIPHERS": {
+        "label": "Upstream SSL Ciphers",
+        "help": "Cipher suite string na inaalok sa upstream server (value ng proxy_ssl_ciphers directive). Pinapanatili ng blangkong value ang default ng NGINX."
+      },
+      "REVERSE_PROXY_SEND_PROXY_PROTOCOL": {
+        "label": "Send PROXY Protocol to Upstream",
+        "help": "Ipadala ang PROXY protocol header sa stream upstream. Sinusunod ng 'auto' ang global na USE_PROXY_PROTOCOL setting, na siyang ginawa ng BunkerWeb bago pa umiral ang setting na ito; nagpapasya nang hiwalay sa inbound listener ang 'yes' at 'no'."
+      },
+      "REVERSE_PROXY_STREAM_HALF_CLOSE": {
+        "label": "Reverse Proxy Stream Half Close",
+        "help": "Panatilihing bukas ang TCP stream connection papunta sa backend matapos isara ng client ang write side nito. Kailangan ng mga protocol kung saan half-close ang client tapos maghihintay ng response; sinisira ng nginx ang koneksyon bilang default."
+      },
+      "REVERSE_PROXY_SSL_VERIFY_DEPTH": {
+        "label": "SSL Verify Depth",
+        "help": "Itinatakda ang verification depth sa certificate chain ng upstream server."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST": {
+        "label": "Reverse Proxy Auth Request",
+        "help": "I-enable ang authentication gamit ang external provider (value ng auth_request directive)."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "Auth Request Signin URL",
+        "help": "I-redirect ang mga client sa sign-in URL kapag ginagamit ang REVERSE_PROXY_AUTH_REQUEST (ginagamit kapag nagbalik ng 401 ang auth_request call). Suportado ang mga NGINX variable tulad ng $scheme, $host, at $request_uri."
+      },
+      "REVERSE_PROXY_AUTH_REQUEST_SET": {
+        "label": "Reverse Proxy Auth Request Set",
+        "help": "Listahan ng mga variable na ise-set mula sa authentication provider, pinaghihiwalay ng semicolon (mga value ng auth_request_set directive)."
+      },
+      "REVERSE_PROXY_INCLUDES": {
+        "label": "Reverse Proxy Includes",
+        "help": "Karagdagang configuration na isasama sa location block, pinaghihiwalay ng space."
+      },
+      "REVERSE_PROXY_PASS_REQUEST_BODY": {
+        "label": "Reverse Proxy Pass Request Body",
+        "help": "I-enable o i-disable ang pagpasa ng request body papunta sa pinoproxy na resource."
+      },
+      "REVERSE_PROXY_MODSECURITY": {
+        "label": "Reverse Proxy ModSecurity",
+        "help": "I-enable o i-disable ang ModSecurity para sa reverse proxy location na ito. I-set sa no para sa mga endpoint na tumatanggap ng napakalaking upload (hal. video, backup, object storage): binu-buffer ng ModSecurity-nginx connector ang buong request body sa memory anuman ang SecRequestBodyLimit at maaaring mag-trigger ng OOM sa mga multi-GB na upload. Naglalabas ng 'modsecurity off;' sa loob ng location block."
+      },
+      "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+        "label": "Reverse Proxy Maximum Body Size",
+        "help": "Pinakamataas na sukat ng body para sa reverse proxy location na ito (0 para sa walang hangganan). Kapag blangko, ilalapat ang MAX_CLIENT_SIZE ng service. Nagtatakda rin ang value ng ModSecurity request body limit para sa location na ito, mananaig ito kaysa sa panserbisyong isa; hindi nito binabago ang MODSECURITY_REQ_BODY_NO_FILES_LIMIT."
+      },
+      "USE_PROXY_CACHE": {
+        "label": "Reverse Proxy Cache",
+        "help": "I-enable o i-disable ang caching ng mga pinoproxy na resource."
+      },
+      "PROXY_CACHE_PATH_LEVELS": {
+        "label": "Hierarchy Levels",
+        "help": "Mga hierarchy level ng cache."
+      },
+      "PROXY_CACHE_PATH_ZONE_SIZE": {
+        "label": "Reverse Proxy Cache Zone Size",
+        "help": "Pinakamataas na sukat ng cached metadata kapag kino-cache ang mga pinoproxy na resource."
+      },
+      "PROXY_CACHE_PATH_PARAMS": {
+        "label": "Reverse Proxy Cache Params",
+        "help": "Karagdagang parameter na idaragdag sa proxy_cache directive."
+      },
+      "PROXY_CACHE_METHODS": {
+        "label": "Reverse Proxy Cache Methods",
+        "help": "Mga HTTP method na dapat mag-trigger ng cache operation."
+      },
+      "PROXY_CACHE_MIN_USES": {
+        "label": "Reverse Proxy Cache Minimum Uses",
+        "help": "Ang pinakamababang bilang ng request bago i-cache ang isang response."
+      },
+      "PROXY_CACHE_KEY": {
+        "label": "Reverse Proxy Cache Key",
+        "help": "Ang key na ginagamit para tukuyin nang natatangi ang isang cached na response."
+      },
+      "PROXY_CACHE_VALID": {
+        "label": "Reverse Proxy Cache Valid",
+        "help": "Tukuyin ang caching time depende sa HTTP status code (listahan ng status=time), pinaghihiwalay ng space."
+      },
+      "PROXY_NO_CACHE": {
+        "label": "Reverse Proxy No Cache",
+        "help": "Mga kondisyon para i-disable ang caching ng mga response."
+      },
+      "PROXY_CACHE_BYPASS": {
+        "label": "Reverse Proxy Bypass",
+        "help": "Mga kondisyon para i-bypass ang caching ng mga response."
+      },
+      "PROXY_BUFFERS": {
+        "label": "Proxy Buffers",
+        "help": "Value para sa proxy_buffers directive."
+      },
+      "PROXY_BUFFER_SIZE": {
+        "label": "Proxy Buffer Size",
+        "help": "Value para sa proxy_buffer_size directive."
+      },
+      "PROXY_BUSY_BUFFERS_SIZE": {
+        "label": "Proxy Busy Buffers Size",
+        "help": "Value para sa proxy_busy_buffers_size directive."
+      }
+    }
+  }
+}

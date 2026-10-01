@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Análise inversa",
+      "description": "Reforça a segurança ao analisar as portas do cliente para detetar e bloquear ligações provenientes de proxies ou servidores, ajudando a evitar a contornação das medidas de segurança."
+    },
+    "settings": {
+      "USE_REVERSE_SCAN": {
+        "label": "Análise inversa",
+        "help": "Ativa a análise das portas do cliente e nega o acesso se alguma estiver aberta."
+      },
+      "REVERSE_SCAN_PORTS": {
+        "label": "Portas da análise inversa",
+        "help": "Lista de portas a analisar ao utilizar a funcionalidade de análise inversa."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Tempo limite da análise inversa",
+        "help": "Especifica o tempo limite máximo (em ms) ao analisar uma porta."
+      }
+    }
+  }
+}

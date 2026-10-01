@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "اكتشاف الروبوتات باستخدام تحدٍّ."
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "التحديات",
+        "subtitle": "فشل"
+      }
+    },
+    "settings": {
+      "USE_ANTIBOT": {
+        "label": "تحدي Antibot",
+        "help": "تفعيل ميزة Antibot."
+      },
+      "ANTIBOT_URI": {
+        "label": "رابط Antibot",
+        "help": "معرّف URI غير مستخدم يُعاد توجيه العملاء إليه لحل التحدي."
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "وقت الحل",
+        "help": "أقصى وقت (بالثواني) متاح للعملاء لحل التحدي. بعد انقضاء هذا الوقت، سيتم إنشاء تحدٍ جديد."
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "مدة الصلاحية",
+        "help": "أقصى مدة صلاحية للتحديات التي تم حلها. بعد انقضاء هذه المدة، سيحتاج العملاء إلى حل تحدٍ جديد."
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "رابط إعادة التوجيه عند النجاح",
+        "help": "معرّف URI ثابت لإعادة توجيه العملاء إليه بعد حل التحدي، بدلاً من الصفحة التي طلبوها في الأصل. اتركه فارغًا للعودة إلى الصفحة المطلوبة أصلاً."
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "أبجدية الكابتشا",
+        "help": "أبجدية مخصصة تُستخدم لإنشاء الكابتشا. ستتكوّن الكابتشا من أحرف عشوائية من هذه السلسلة. الأحرف المدعومة: جميع الحروف (a-z، A-Z)، الأرقام 2-9، والرموز الخاصة المدعومة (راجع التوثيق للحصول على القائمة الكاملة)."
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "معرّفات URI المتجاهَلة",
+        "help": "قائمة أنماط PCRE regex (مفصولة بمسافات) لمعرّفات URI التي يجب استثناؤها من تحدي Antibot. تُفحص الأنماط مقابل المسار ومقابل معرّف URI الكامل للطلب مع سلسلة الاستعلام."
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "عناوين IP/شبكات المتجاهَلة",
+        "help": "قائمة عناوين IP/شبكات، مفصولة بمسافات، لتجاهل تحدي Antibot."
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "DNS العكسي المتجاهَل",
+        "help": "قائمة لواحق DNS العكسي، مفصولة بمسافات، لتجاهل تحدي Antibot."
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "IP العالمية لـ DNS العكسي في Antibot",
+        "help": "إجراء فحوصات RDNS الخاصة بـ Antibot على عناوين IP العالمية فقط."
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "أرقام ASN المتجاهَلة",
+        "help": "قائمة أرقام ASN، مفصولة بمسافات، لتجاهل تحدي Antibot."
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "User-Agent المتجاهَل",
+        "help": "قائمة User-Agent (تعبير PCRE النمطي)، مفصولة بمسافات، لتجاهل تحدي Antibot."
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "اسم الرأس المتجاهَل",
+        "help": "اسم رأس طلب يُعفي الطلب من تحدي Antibot. يمكن لأي عميل إرسال هذا الرأس: تعامل معه كسر مشترك، وفقط عبر HTTPS."
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "قيمة الرأس المتجاهَلة",
+        "help": "القيمة (تعبير PCRE النمطي) التي يجب أن يطابقها الرأس لإعفاء الطلب من تحدي Antibot. اتركها فارغة للمطابقة بمجرد وجود الرأس. ثبّتها باستخدام ^ و $: المطابقة غير مثبّتة افتراضيًا."
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "الدول المتجاهَلة",
+        "help": "قائمة رموز الدول ISO 3166-1 alpha-2، مفصولة بمسافات، لتجاهل تحدي Antibot."
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "تحدي الدول فقط",
+        "help": "قائمة رموز الدول ISO 3166-1 alpha-2، مفصولة بمسافات، التي يجب أن تتلقى تحدي Antibot."
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "درجة reCAPTCHA v3",
+        "help": "الحد الأدنى للدرجة المطلوبة لتحدي reCAPTCHA (متوافق فقط مع reCAPTCHA v3)."
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "مفتاح موقع reCAPTCHA",
+        "help": "مفتاح الموقع لتحدي reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "سر reCAPTCHA",
+        "help": "السر الخاص بتحدي reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "استخدام reCAPTCHA الكلاسيكي",
+        "help": "استخدام reCAPTCHA الكلاسيكي بدلاً من الإصدار الأحدث."
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "معرّف مشروع reCAPTCHA",
+        "help": "معرّف المشروع لتحدي reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "مفتاح API لـ reCAPTCHA",
+        "help": "مفتاح API لتحدي reCAPTCHA."
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "بصمة JA4 لعميل TLS. نوصي باستخدام FoxIO-LLC/ja4 لحساب بصمة JA4."
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "بصمة JA3 لعميل TLS. نوصي باستخدام salesforce/ja3 لحساب بصمة JA3."
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "مفتاح موقع hCaptcha",
+        "help": "مفتاح الموقع لتحدي hCaptcha."
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "سر hCaptcha",
+        "help": "السر الخاص بتحدي hCaptcha."
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "مفتاح موقع Turnstile",
+        "help": "مفتاح الموقع لتحدي Turnstile."
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "سر Turnstile",
+        "help": "السر الخاص بتحدي Turnstile."
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "مفتاح موقع mCaptcha",
+        "help": "مفتاح الموقع لتحدي mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "سر mCaptcha",
+        "help": "السر الخاص بتحدي mCaptcha."
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "نطاق mCaptcha",
+        "help": "النطاق المستخدم لتحدي mCaptcha."
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "رابط الواجهة الأمامية لـ Cap.js",
+        "help": "المصدر العام الذي يحمّل منه المتصفح أداة Cap.js (مثال: https://cap.example.com). المصدر فقط، بدون مسار."
+      },
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "رابط الخلفية لـ Cap.js",
+        "help": "المصدر الداخلي الذي يستدعيه BunkerWeb لـ /siteverify (مثال: http://cap-server:3000). المصدر فقط، بدون مسار. يعود إلى رابط الواجهة الأمامية عند تركه فارغًا."
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "مفتاح موقع Cap.js",
+        "help": "مفتاح الموقع الذي تم إنشاؤه في لوحة تحكم Cap.js لهذا الموقع."
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "سر Cap.js",
+        "help": "سر مقترن بمفتاح الموقع، يستخدمه BunkerWeb لمصادقة استدعاءات /siteverify."
+      }
+    }
+  }
+}

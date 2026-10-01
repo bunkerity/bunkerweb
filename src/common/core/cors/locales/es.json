@@ -1,0 +1,60 @@
+{
+  "cors": {
+    "meta": {
+      "name": "CORS",
+      "description": "Uso compartido de recursos entre orígenes (Cross-Origin Resource Sharing)."
+    },
+    "widgets": {
+      "counter_failed_cors": {
+        "title": "CORS",
+        "subtitle": "Solicitud bloqueada"
+      }
+    },
+    "settings": {
+      "USE_CORS": {
+        "label": "Usar CORS",
+        "help": "Usar CORS"
+      },
+      "CORS_ALLOW_ORIGIN": {
+        "label": "Orígenes permitidos",
+        "help": "Orígenes permitidos para realizar solicitudes CORS: regex PCRE, * o self (para el mismo origen)."
+      },
+      "CORS_ALLOW_METHODS": {
+        "label": "Valor de Access-Control-Allow-Methods",
+        "help": "Valor de la cabecera Access-Control-Allow-Methods."
+      },
+      "CORS_ALLOW_HEADERS": {
+        "label": "Valor de Access-Control-Allow-Headers",
+        "help": "Valor de la cabecera Access-Control-Allow-Headers."
+      },
+      "CORS_ALLOW_CREDENTIALS": {
+        "label": "Enviar Access-Control-Allow-Credentials",
+        "help": "Envía la cabecera Access-Control-Allow-Credentials."
+      },
+      "CORS_EXPOSE_HEADERS": {
+        "label": "Valor de Access-Control-Expose-Headers",
+        "help": "Valor de la cabecera Access-Control-Expose-Headers."
+      },
+      "CROSS_ORIGIN_OPENER_POLICY": {
+        "label": "Cross-Origin-Opener-Policy",
+        "help": "Valor de la cabecera Cross-Origin-Opener-Policy."
+      },
+      "CROSS_ORIGIN_EMBEDDER_POLICY": {
+        "label": "Cross-Origin-Embedder-Policy",
+        "help": "Valor de la cabecera Cross-Origin-Embedder-Policy."
+      },
+      "CROSS_ORIGIN_RESOURCE_POLICY": {
+        "label": "Cross-Origin-Resource-Policy",
+        "help": "Valor de la cabecera Cross-Origin-Resource-Policy."
+      },
+      "CORS_MAX_AGE": {
+        "label": "Valor de Access-Control-Max-Age",
+        "help": "Valor de la cabecera Access-Control-Max-Age."
+      },
+      "CORS_DENY_REQUEST": {
+        "label": "Denegar solicitud",
+        "help": "Deniega la solicitud y no la envía al backend si el Origin no está permitido."
+      }
+    }
+  }
+}

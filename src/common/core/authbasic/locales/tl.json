@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Basic na pagpapatunay",
+      "description": "Nagpapatupad ng pag-login bago makapag-access sa isang resource o sa buong site gamit ang basic na paraan ng pagpapatunay ng HTTP."
+    },
+    "settings": {
+      "AUTH_BASIC_LOCATION": {
+        "label": "Auth Basic Location",
+        "help": "URL ng protektadong resource o value para sa buong site."
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Password",
+        "help": "Password"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Text",
+        "help": "Text na ipapakita"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Auth Basic Username",
+        "help": "Username"
+      },
+      "USE_AUTH_BASIC": {
+        "label": "Gamitin ang HTTP basic auth",
+        "help": "Gamitin ang HTTP basic auth"
+      }
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "BASIC NA PAGPAPATUNAY",
+        "subtitle": "Matagumpay"
+      },
+      "counter_failed_authbasic": {
+        "title": "BASIC NA PAGPAPATUNAY",
+        "subtitle": "Nabigo"
+      }
+    }
+  }
+}

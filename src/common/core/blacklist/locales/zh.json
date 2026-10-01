@@ -1,0 +1,144 @@
+{
+  "blacklist": {
+    "meta": {
+      "name": "黑名单",
+      "description": "根据内部和外部的 IP/网络/rDNS/ASN 黑名单拒绝访问。"
+    },
+    "widgets": {
+      "counter_failed_uri": {
+        "title": "URI",
+        "subtitle": "已拒绝"
+      },
+      "counter_failed_ip": {
+        "title": "IP",
+        "subtitle": "已拒绝"
+      },
+      "counter_failed_rdns": {
+        "title": "RDNS",
+        "subtitle": "已拒绝"
+      },
+      "counter_failed_asn": {
+        "title": "ASN",
+        "subtitle": "已拒绝"
+      },
+      "counter_failed_ua": {
+        "title": "UA",
+        "subtitle": "已拒绝"
+      }
+    },
+    "settings": {
+      "USE_BLACKLIST": {
+        "label": "启用黑名单",
+        "help": "启用黑名单功能。"
+      },
+      "BLACKLIST_COMMUNITY_LISTS": {
+        "label": "社区黑名单",
+        "help": "选择要纳入拦截的社区维护黑名单。"
+      },
+      "BLACKLIST_IP": {
+        "label": "黑名单 IP/网段",
+        "help": "以空格分隔的要拦截的 IP/网段列表。"
+      },
+      "BLACKLIST_RDNS": {
+        "label": "黑名单反向 DNS",
+        "help": "以空格分隔的要拦截的反向 DNS 后缀列表。"
+      },
+      "BLACKLIST_RDNS_GLOBAL": {
+        "label": "黑名单反向 DNS 全局 IP",
+        "help": "仅对公网 IP 地址执行 RDNS 黑名单检查。"
+      },
+      "BLACKLIST_ASN": {
+        "label": "黑名单 ASN",
+        "help": "以空格分隔的要拦截的 ASN 编号列表。"
+      },
+      "BLACKLIST_USER_AGENT": {
+        "label": "黑名单 User-Agent",
+        "help": "以空格分隔的要拦截的 User-Agent(PCRE 正则表达式)列表。"
+      },
+      "BLACKLIST_URI": {
+        "label": "黑名单 URI",
+        "help": "以空格分隔的要拦截的 URI(PCRE 正则表达式)列表。"
+      },
+      "BLACKLIST_HEADER_NAME": {
+        "label": "黑名单标头名称",
+        "help": "使请求被加入黑名单的请求标头名称。任何客户端都可以发送此标头:请将其视为共享密钥,并仅通过 HTTPS 使用。"
+      },
+      "BLACKLIST_HEADER_VALUE": {
+        "label": "黑名单标头值",
+        "help": "标头必须匹配的值(PCRE 正则表达式),以将请求加入黑名单。留空则仅匹配标头是否存在。请使用 ^ 和 $ 进行锚定:默认情况下匹配不会被锚定。"
+      },
+      "BLACKLIST_IGNORE_IP": {
+        "label": "黑名单忽略的 IP/网段",
+        "help": "以空格分隔的、在黑名单中忽略的 IP/网段列表。"
+      },
+      "BLACKLIST_IGNORE_RDNS": {
+        "label": "黑名单忽略的反向 DNS",
+        "help": "以空格分隔的、在黑名单中忽略的反向 DNS 后缀列表。"
+      },
+      "BLACKLIST_IGNORE_ASN": {
+        "label": "黑名单忽略的 ASN",
+        "help": "以空格分隔的、在黑名单中忽略的 ASN 编号列表。"
+      },
+      "BLACKLIST_IGNORE_USER_AGENT": {
+        "label": "黑名单忽略的 User-Agent",
+        "help": "以空格分隔的、在黑名单中忽略的 User-Agent(PCRE 正则表达式)列表。"
+      },
+      "BLACKLIST_IGNORE_URI": {
+        "label": "黑名单忽略的 URI",
+        "help": "以空格分隔的、在黑名单中忽略的 URI(PCRE 正则表达式)列表。"
+      },
+      "BLACKLIST_RULE": {
+        "label": "黑名单规则",
+        "help": "复合规则:每个条件都必须匹配,规则才算匹配。条件之间以 \" AND \"(大写)分隔,每个条件的形式为 [NOT ]<kind>:<value>,其中 <kind> 可以是 ip、country、asn、rdns、ua(user_agent 的别名)或 uri。示例:ip:10.0.0.0/8 AND NOT ua:^curl。多条规则之间,以及规则与上方各扁平列表之间,均以“或”的方式组合。该值可以是资源组标记,例如 @office。流(Stream)服务仅评估 ip、country、asn 和 rdns。"
+      },
+      "BLACKLIST_IGNORE_HEADER_NAME": {
+        "label": "忽略的标头名称",
+        "help": "使请求免于黑名单检查的请求标头名称。任何客户端都可以发送此标头:请将其视为共享密钥,并仅通过 HTTPS 使用。"
+      },
+      "BLACKLIST_IGNORE_HEADER_VALUE": {
+        "label": "忽略的标头值",
+        "help": "标头必须匹配的值(PCRE 正则表达式),以使请求免于黑名单检查。留空则仅匹配标头是否存在。请使用 ^ 和 $ 进行锚定:默认情况下匹配不会被锚定。"
+      },
+      "BLACKLIST_IP_URLS": {
+        "label": "黑名单 IP/网段 URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要拦截的恶意 IP/网段。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_RDNS_URLS": {
+        "label": "黑名单反向 DNS URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要拦截的反向 DNS 后缀。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_ASN_URLS": {
+        "label": "黑名单 ASN URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要拦截的 ASN。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_USER_AGENT_URLS": {
+        "label": "黑名单 User-Agent URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要拦截的恶意 User-Agent。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_URI_URLS": {
+        "label": "黑名单 URI URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要拦截的恶意 URI。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_IGNORE_IP_URLS": {
+        "label": "黑名单忽略的 IP/网段 URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要在黑名单中忽略的 IP/网段。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_IGNORE_RDNS_URLS": {
+        "label": "黑名单忽略的反向 DNS URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要在黑名单中忽略的反向 DNS 后缀。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_IGNORE_ASN_URLS": {
+        "label": "黑名单忽略的 ASN URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要在黑名单中忽略的 ASN。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_IGNORE_USER_AGENT_URLS": {
+        "label": "黑名单忽略的 User-Agent URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要在黑名单中忽略的 User-Agent。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      },
+      "BLACKLIST_IGNORE_URI_URLS": {
+        "label": "黑名单忽略的 URI URL 列表",
+        "help": "以空格分隔的 URL 列表,其中包含要在黑名单中忽略的 URI。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+      }
+    }
+  }
+}

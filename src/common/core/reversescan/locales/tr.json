@@ -1,0 +1,22 @@
+{
+  "reversescan": {
+    "meta": {
+      "name": "Ters tarama",
+      "description": "Proxy veya sunuculardan gelen bağlantıları tespit edip engellemek için istemci portlarını tarayarak güvenliği artırır ve güvenlik önlemlerinin atlatılmasını önlemeye yardımcı olur."
+    },
+    "settings": {
+      "REVERSE_SCAN_PORTS": {
+        "label": "Reverse scan bağlantı noktaları",
+        "help": "Reverse scan özelliği kullanılırken taranacak bağlantı noktalarının listesi."
+      },
+      "REVERSE_SCAN_TIMEOUT": {
+        "label": "Reverse scan zaman aşımı",
+        "help": "Bir bağlantı noktası taranırken izin verilen maksimum zaman aşımını (ms) belirtin."
+      },
+      "USE_REVERSE_SCAN": {
+        "label": "Reverse scan",
+        "help": "İstemci bağlantı noktalarının taranmasını etkinleştir ve biri açıksa erişimi reddet."
+      }
+    }
+  }
+}

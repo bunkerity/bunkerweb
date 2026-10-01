@@ -1,0 +1,34 @@
+{
+  "badbehavior": {
+    "meta": {
+      "name": "나쁜 행동",
+      "description": "일정 기간 동안 너무 많은 '나쁜' HTTP 상태 코드를 생성하는 IP를 차단합니다."
+    },
+    "settings": {
+      "USE_BAD_BEHAVIOR": {
+        "label": "이상 행동 탐지 활성화",
+        "help": "이상 행동(Bad behavior) 기능을 활성화합니다."
+      },
+      "BAD_BEHAVIOR_STATUS_CODES": {
+        "label": "이상 상태 코드",
+        "help": "'불량(bad)'으로 간주되는 HTTP 상태 코드 목록입니다."
+      },
+      "BAD_BEHAVIOR_THRESHOLD": {
+        "label": "임계값",
+        "help": "IP가 차단되기 전, 지정된 기간 내에 허용되는 '불량' HTTP 상태 코드의 최대 개수입니다."
+      },
+      "BAD_BEHAVIOR_COUNT_TIME": {
+        "label": "기간(초)",
+        "help": "'불량' HTTP 상태 코드를 집계하는 기간(초)입니다."
+      },
+      "BAD_BEHAVIOR_BAN_TIME": {
+        "label": "차단 기간(초)",
+        "help": "해당 IP가 임계값에 도달했을 때의 차단 지속 시간(초)입니다. (0으로 설정하면 영구 차단됩니다)"
+      },
+      "BAD_BEHAVIOR_BAN_SCOPE": {
+        "label": "차단 범위",
+        "help": "차단 범위를 결정합니다. 'service'는 해당 서비스에서만 IP를 차단하고, 'global'은 전체 시스템에서 IP를 차단합니다."
+      }
+    }
+  }
+}

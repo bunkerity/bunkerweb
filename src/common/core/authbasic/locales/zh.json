@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "基本认证",
+      "description": "在访问资源或整个站点之前,通过 HTTP 基本认证方式强制要求登录。"
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "基本认证",
+        "subtitle": "成功"
+      },
+      "counter_failed_authbasic": {
+        "title": "基本认证",
+        "subtitle": "失败"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "使用 HTTP 基本认证",
+        "help": "使用 HTTP 基本认证"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "基本认证位置",
+        "help": "受保护资源的 URL,或站点级的值。"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "基本认证用户名",
+        "help": "用户名"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "密码",
+        "help": "密码"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "文本",
+        "help": "要显示的文本"
+      }
+    }
+  }
+}

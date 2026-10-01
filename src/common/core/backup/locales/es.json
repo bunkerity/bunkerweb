@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Copia de seguridad",
+      "description": "Realice copias de seguridad de sus datos en una ubicación personalizada. Garantice la seguridad y disponibilidad de sus archivos importantes mediante copias de seguridad periódicas."
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Última copia de seguridad"
+      }
+    },
+    "settings": {
+      "USE_BACKUP": {
+        "label": "Activar la copia de seguridad automática",
+        "help": "Activa o desactiva la función de copia de seguridad"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Programación de la copia de seguridad",
+        "help": "Frecuencia de la copia de seguridad (diaria, semanal o mensual)"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Rotación de copias de seguridad",
+        "help": "Número de copias de seguridad que se conservarán"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Estrategia de rotación de copias de seguridad",
+        "help": "Cómo se eligen las copias de seguridad antiguas para su eliminación: fifo conserva las más recientes, hanoi conserva una escala de la Torre de Hanói (fina cerca del presente, gruesa más atrás) para el mismo número de archivos"
+      },
+      "BACKUP_DIRECTORY": {
+        "label": "Directorio de copia de seguridad",
+        "help": "Directorio donde se almacenará la copia de seguridad"
+      }
+    }
+  }
+}

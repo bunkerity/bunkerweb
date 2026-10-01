@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "يدير ملف robots.txt. معيار للتحكم في وصول زواحف الويب إلى موقعك."
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "استخدام robots.txt",
+        "help": "تفعيل ملف robots.txt."
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "قوائم robots.txt المجتمعية",
+        "help": "اختر القوائم التي يحافظ عليها المجتمع لتضمينها في robots.txt."
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "روابط Robots.txt",
+        "help": "قائمة روابط URL، مفصولة بمسافات، تحتوي على قواعد robots.txt. يدعم أيضًا روابط file:// والمصادقة الأساسية باستخدام مخطط http://user:pass@url."
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "قاعدة Robots.txt",
+        "help": "قواعد لـ robots.txt (واحدة لكل سطر)."
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "رأس Robots.txt",
+        "help": "رأس ملف robots.txt (قبل القواعد). يمكن ترميزه بصيغة Base64."
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "تذييل Robots.txt",
+        "help": "تذييل ملف robots.txt (بعد القواعد). يمكن ترميزه بصيغة Base64."
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "خريطة موقع Robots.txt",
+        "help": "رابط (روابط) خريطة الموقع المراد تضمينها في robots.txt."
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "تجاهل القاعدة",
+        "help": "قاعدة (تعبير PCRE النمطي) يُراد تجاهلها. يمكن تحديدها عدة مرات."
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "رمز API الخاص بـ DarkVisitors",
+        "help": "رمز Bearer الخاص بواجهة برمجة تطبيقات DarkVisitors."
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "أنواع وكلاء DarkVisitors",
+        "help": "قائمة أنواع الوكلاء مفصولة بفواصل لتضمينها في حقل agent_types الخاص بـ DarkVisitors عند الاتصال بواجهة برمجة تطبيقات DarkVisitors."
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "حظر DarkVisitors",
+        "help": "سلسلة تحدد الروابط الممنوعة. تُرسل هذه القيمة كحقل disallow عند الاتصال بواجهة برمجة تطبيقات DarkVisitors."
+      }
+    }
+  }
+}

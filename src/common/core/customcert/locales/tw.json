@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "自訂 SSL 憑證",
+      "description": "為 SSL 選擇自訂憑證。"
+    },
+    "settings": {
+      "USE_CUSTOM_SSL": {
+        "label": "使用自訂憑證",
+        "help": "使用自訂 SSL 憑證。"
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "憑證優先順序",
+        "help": "選擇優先使用來自檔案路徑的憑證,還是來自 base64 資料的憑證。(file | data)"
+      },
+      "CUSTOM_SSL_CERT": {
+        "label": "憑證路徑",
+        "help": "憑證或憑證組合檔案的完整路徑。該檔案必須可被 WORKER 讀取——自 1.7 版本將工作執行移出 scheduler 後,custom-cert 工作就在 WORKER 上執行——而不是 scheduler,無論較舊的文件怎麼說。在 Docker Swarm 下,請將其掛載到 bw-worker 上,並填寫其掛載路徑,例如 /run/secrets/example.com.pem;由於憑證本身是公開的,使用 Swarm config 掛載即可。"
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "私密金鑰路徑",
+        "help": "私密金鑰檔案的完整路徑。該檔案必須可被 WORKER 讀取——自 1.7 版本將工作執行移出 scheduler 後,custom-cert 工作就在 WORKER 上執行——而不是 scheduler,無論較舊的文件怎麼說。在 Docker Swarm 下,請將私密金鑰以 Swarm SECRET 的形式掛載到 bw-worker 上,並填寫其掛載路徑,例如 /run/secrets/example.com.key。切勿以 Swarm config 的形式分發私密金鑰:config 會以未加密的形式儲存在每個管理節點的 raft store 中。"
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "憑證資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式編碼的憑證資料。"
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "私密金鑰資料(base64/純文字)",
+        "help": "以 base64 或純文字 PEM 格式編碼的私密金鑰資料。"
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "預設伺服器憑證路徑",
+        "help": "由預設伺服器(DEFAULT SERVER,即處理未比對到任何已設定服務的請求的區塊)提供的憑證或憑證組合檔案的完整路徑。留空則保留內部自簽憑證。該檔案必須可被 WORKER 讀取,custom-cert 工作在 WORKER 上執行。若憑證同時涵蓋了某個已設定服務的主機名稱,將被拒絕,因為這樣預設伺服器就能夠代替該服務回應請求。僅在 MULTISITE=yes 或 DISABLE_DEFAULT_SERVER=yes 時才會生效。"
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "預設伺服器私密金鑰路徑",
+        "help": "預設伺服器(DEFAULT SERVER,即處理未比對到任何已設定服務的請求——如未知 SNI、直接 IP 存取——的區塊)憑證的私密金鑰的完整路徑。留空則保留內部自簽憑證。該檔案必須可被 WORKER 讀取,custom-cert 工作在 WORKER 上執行。在 Docker Swarm 下,請將其以 Swarm SECRET 的形式掛載,切勿以 config 形式掛載。"
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "預設伺服器憑證資料(base64/純文字)",
+        "help": "預設伺服器(DEFAULT SERVER)的憑證資料,以 base64 或純文字 PEM 格式編碼。僅在 DEFAULT_SERVER_SSL_CERT 為空時使用。兩者皆留空則保留內部自簽憑證。僅在 MULTISITE=yes 或 DISABLE_DEFAULT_SERVER=yes 時才會生效。"
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "預設伺服器私密金鑰資料(base64/純文字)",
+        "help": "預設伺服器(DEFAULT SERVER)憑證的私密金鑰資料,以 base64 或純文字 PEM 格式編碼。僅在 DEFAULT_SERVER_SSL_KEY 為空時使用。兩者皆留空則保留內部自簽憑證。"
+      }
+    }
+  }
+}

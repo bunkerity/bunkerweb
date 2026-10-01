@@ -1,0 +1,74 @@
+{
+  "metrics": {
+    "meta": {
+      "name": "Métriques",
+      "description": "Collecte et récupération de métriques."
+    },
+    "settings": {
+      "USE_METRICS": {
+        "label": "Utiliser les métriques",
+        "help": "Active la collecte et la récupération des métriques internes."
+      },
+      "METRICS_MEMORY_SIZE": {
+        "label": "Taille mémoire des métriques",
+        "help": "Taille du stockage interne pour les métriques."
+      },
+      "METRICS_MEMORY_MAX_RETRIES": {
+        "label": "Tentatives max mémoire des métriques",
+        "help": "Nombre maximal de tentatives pour les opérations mémoire."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS": {
+        "label": "Max requêtes bloquées des métriques",
+        "help": "Nombre maximal de requêtes bloquées à stocker (par worker). Accepte un entier simple ou un raccourci `k`/`m` (par ex. `1000`, `1k`, `10k`, `1m`)."
+      },
+      "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
+        "label": "Max requêtes bloquées des métriques dans Redis",
+        "help": "Nombre maximal de requêtes bloquées à stocker dans Redis. Accepte un entier simple ou un raccourci `k`/`m` (par ex. `10000`, `10k`, `100k`, `1m`)."
+      },
+      "METRICS_REDIS_TTL": {
+        "label": "TTL Redis des métriques",
+        "help": "Durée de vie (TTL) en secondes des clés de métriques stockées dans Redis (par défaut `2592000`, 30 jours ; `0` conserve les clés indéfiniment). Rafraîchie à chaque synchronisation, si bien que les données actives n'expirent jamais ; avec une politique d'éviction `volatile-lru`, cela permet aux données de métriques abandonnées de devenir éligibles à l'éviction, afin que Redis se rétablisse après un maxmemory au lieu de rejeter les écritures indéfiniment. Accepte un entier simple ou un raccourci `k`/`m`."
+      },
+      "MAX_LRU_HISTORY": {
+        "label": "Historique LRU max",
+        "help": "Plafonne l'historique d'événements LRU par worker : limite à la fois le nombre d'emplacements LRU et la longueur du tableau d'historique d'événements par clé (traces de blocage, traces d'authentification, etc.). Accepte un entier simple ou un raccourci `k`/`m` (par ex. `1k`, `10k`, `1m`). Plafonne la croissance illimitée provenant de sources à forte cardinalité comme les inondations d'IP usurpées."
+      },
+      "METRICS_COLLECT_TIMINGS": {
+        "label": "Collecter les temps des plugins",
+        "help": "Mesure la durée que prend chaque plugin dans chaque phase de requête, exposée sous forme d'agrégat count/sum/max par (plugin, phase). Nécessite de forcer un rafraîchissement de l'horloge NGINX autour de chaque appel de plugin, ce qui ajoute environ une microseconde par requête sur une chaîne de plugins complète ; réglez sur `no` pour supprimer entièrement ce coût. La durée totale de la requête est toujours collectée et n'est pas affectée par ce paramètre."
+      },
+      "METRICS_BASELINE_SAMPLE_RATE": {
+        "label": "Taux d'échantillonnage de la référence de trafic (%)",
+        "help": "Pourcentage de requêtes non bloquées enregistrées comme référence de trafic, pour que la détection d'anomalies apprenne à quoi ressemble la normale (`0` la désactive, `1` échantillonne une requête sur cent). L'échantillonnage est déterministe sur l'id de requête, donc la décision est stable entre les sous-requêtes. L'IP du client n'est jamais stockée. La collecte n'ajoute aucun travail sur le chemin de la requête, mais le volume est important : 1 % de 10k req/s représente environ 8,6 millions d'enregistrements par jour, que `METRICS_BASELINE_RETENTION_MAX_ROWS` élague ensuite. Augmentez-le délibérément."
+      },
+      "METRICS_MAX_BASELINE_REQUESTS": {
+        "label": "Max requêtes de référence des métriques",
+        "help": "Nombre maximal d'enregistrements de référence échantillonnés à conserver par worker avant que les plus anciens ne soient supprimés. Ce tampon partage METRICS_MEMORY_SIZE avec les rapports de requêtes bloquées et les autres métriques, mais il sera supprimé plutôt que de les évincer lorsque l'espace vient à manquer. Accepte un entier simple ou un raccourci `k`/`m`. Réduisez plutôt le taux d'échantillonnage que d'augmenter cette valeur."
+      },
+      "METRICS_BASELINE_RETENTION_DAYS": {
+        "label": "Rétention de la référence (jours)",
+        "help": "Âge maximal (en jours) des enregistrements de référence échantillonnés avant que le job de rétention ne les supprime. Délibérément plus courte que la rétention des rapports bloqués : une référence croît bien plus vite, et un modèle est entraîné sur le comportement normal récent plutôt que sur l'historique."
+      },
+      "METRICS_BASELINE_RETENTION_MAX_ROWS": {
+        "label": "Rétention de la référence (lignes max)",
+        "help": "Nombre maximal d'enregistrements de référence échantillonnés à conserver ; le job de rétention supprime les lignes les plus anciennes au-delà de ce nombre. Distinct du plafond des rapports bloqués car les deux tables croissent à des rythmes très différents."
+      },
+      "METRICS_SAVE_TO_REDIS": {
+        "label": "Enregistrer les métriques dans Redis",
+        "help": "Enregistre les métriques (compteurs et tables) dans Redis pour une agrégation à l'échelle du cluster."
+      },
+      "METRICS_PERSIST_TO_DB": {
+        "label": "Persister les rapports dans la base de données",
+        "help": "Persiste les rapports de requêtes bloquées dans la base de données (durable, interrogeable) en interrogeant périodiquement les instances. Si désactivé, les rapports restent uniquement dans les stockages en mémoire/Redis."
+      },
+      "METRICS_RETENTION_DAYS": {
+        "label": "Rétention des rapports (jours)",
+        "help": "Âge maximal (en jours) des rapports de requêtes bloquées persistés avant que le job de rétention ne les supprime."
+      },
+      "METRICS_RETENTION_MAX_ROWS": {
+        "label": "Rétention des rapports (lignes max)",
+        "help": "Nombre maximal de rapports de requêtes bloquées persistés à conserver ; le job de rétention supprime les lignes les plus anciennes au-delà de ce nombre."
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "modsecurity": {
+    "meta": {
+      "name": "ModSecurity",
+      "description": "ModSecurity WAF 的管理。"
+    },
+    "settings": {
+      "USE_MODSECURITY": {
+        "label": "使用 ModSecurity",
+        "help": "启用 ModSecurity WAF。"
+      },
+      "USE_MODSECURITY_CRS": {
+        "label": "使用 Core Rule Set",
+        "help": "启用 OWASP Core Rule Set。"
+      },
+      "USE_MODSECURITY_CRS_PLUGINS": {
+        "label": "使用 Core Rule Set 插件",
+        "help": "启用 OWASP Core Rule Set 插件。"
+      },
+      "MODSECURITY_CRS_VERSION": {
+        "label": "Core Rule Set 版本",
+        "help": "与 ModSecurity 配合使用的 OWASP Core Rule Set 版本(3 或 4)。注意:nightly 已弃用,将默认使用 v4。"
+      },
+      "MODSECURITY_CRS_PLUGINS": {
+        "label": "Core Rule Set 插件",
+        "help": "要下载并安装的 OWASP CRS 插件列表(plugin-name[/tag] 或 URL,以空格分隔)。(与 CRS 版本 3 不兼容)"
+      },
+      "USE_MODSECURITY_GLOBAL_CRS": {
+        "label": "ModSecurity 全局 CRS 模式",
+        "help": "在拥有大量服务时,以全局模式使用 ModSecurity CRS 以改善规则加载。"
+      },
+      "MODSECURITY_SEC_AUDIT_ENGINE": {
+        "label": "SecAuditEngine",
+        "help": "ModSecurity 的 SecAuditEngine 指令。"
+      },
+      "MODSECURITY_SEC_RULE_ENGINE": {
+        "label": "SecRuleEngine",
+        "help": "ModSecurity 的 SecRuleEngine 指令。"
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+        "label": "SecAuditLogParts",
+        "help": "ModSecurity 的 SecAuditLogParts 指令。A 部分和 Z 部分始终会作为前缀和后缀自动包含在内。"
+      },
+      "MODSECURITY_SEC_AUDIT_LOG": {
+        "label": "SecAuditLog",
+        "help": "ModSecurity 写入审计条目的文件路径。必须是常规文件:Serial 审计写入器会对其加锁,这在管道或流上是无法实现的。必须以 .log 结尾,并位于 /var/log/bunkerweb/ 目录下。"
+      },
+      "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
+        "label": "SecRequestBodyNoFilesLimit",
+        "help": "ModSecurity 的 SecRequestBodyNoFilesLimit 指令。"
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
+        "label": "SecRequestBodyLimit",
+        "help": "ModSecurity 的 SecRequestBodyLimit 指令。ModSecurity 会检查的最大请求体大小(k/m/g 后缀,例如 10m)。超过该限制的请求将遵循 SecRequestBodyLimitAction(默认 Reject)。留空时,从 MAX_CLIENT_SIZE 推导得出。设为 0 表示无限制(不推荐,可能导致因内存不足而被终止)。NGINX 会先强制执行 MAX_CLIENT_SIZE,因此此处设置更大的值不会有任何效果。REVERSE_PROXY_MAX_CLIENT_SIZE 会为其自身的 location 覆盖该值。"
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
+        "label": "SecRequestBodyLimitAction",
+        "help": "ModSecurity 的 SecRequestBodyLimitAction 指令。Reject 会为超出请求体限制的请求返回 HTTP 413。ProcessPartial 仅检查限制范围内的部分,并将完整请求转发给后端(适合大文件上传,但会降低对 JSON 或表单数据等非文件内容类型的 WAF 覆盖率)。"
+      }
+    }
+  }
+}

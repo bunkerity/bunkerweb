@@ -1,0 +1,156 @@
+{
+  "antibot": {
+    "meta": {
+      "name": "Antibot",
+      "description": "챌린지를 사용한 봇 탐지."
+    },
+    "widgets": {
+      "counter_failed_challenges": {
+        "title": "챌린지",
+        "subtitle": "실패"
+      }
+    },
+    "settings": {
+      "USE_ANTIBOT": {
+        "label": "Antibot 챌린지",
+        "help": "Antibot 기능을 활성화합니다."
+      },
+      "ANTIBOT_URI": {
+        "label": "Antibot URL",
+        "help": "클라이언트가 챌린지를 해결하기 위해 리디렉션되는 사용되지 않는 URI입니다."
+      },
+      "ANTIBOT_TIME_RESOLVE": {
+        "label": "해결 시간",
+        "help": "클라이언트가 챌린지를 해결하는 데 걸리는 최대 시간(초)입니다. 이 시간이 지나면 새로운 챌린지가 생성됩니다."
+      },
+      "ANTIBOT_TIME_VALID": {
+        "label": "유효 시간",
+        "help": "해결된 챌린지의 최대 유효 시간입니다. 이 시간이 지나면 클라이언트는 새로운 챌린지를 해결해야 합니다."
+      },
+      "ANTIBOT_SUCCESS_URI": {
+        "label": "성공 시 리디렉션 URL",
+        "help": "클라이언트가 챌린지를 해결한 후 원래 요청한 페이지 대신 리디렉션할 고정 URI입니다. 원래 요청한 페이지로 돌아가려면 비워 두십시오."
+      },
+      "ANTIBOT_CAPTCHA_ALPHABET": {
+        "label": "캡차 문자 집합",
+        "help": "캡차 생성에 사용할 사용자 지정 문자 집합입니다. 캡차는 이 문자열의 무작위 문자로 구성됩니다. 지원되는 문자: 모든 문자(a-z, A-Z), 숫자 2-9, 지원되는 특수 문자(전체 목록은 문서를 참조하십시오)."
+      },
+      "ANTIBOT_IGNORE_URI": {
+        "label": "무시할 URI",
+        "help": "antibot 챌린지에서 제외할 URI에 대한 PCRE 정규식 패턴 목록입니다(공백으로 구분). 패턴은 경로 및 쿼리 문자열이 포함된 전체 요청 URI에 대해 검사됩니다."
+      },
+      "ANTIBOT_IGNORE_IP": {
+        "label": "무시할 IP/네트워크",
+        "help": "antibot 챌린지를 무시할 IP/네트워크 목록입니다(공백으로 구분)."
+      },
+      "ANTIBOT_IGNORE_RDNS": {
+        "label": "무시할 역방향 DNS",
+        "help": "antibot 챌린지를 무시할 역방향 DNS 접미사 목록입니다(공백으로 구분)."
+      },
+      "ANTIBOT_RDNS_GLOBAL": {
+        "label": "Antibot 역방향 DNS 글로벌 IP",
+        "help": "글로벌 IP 주소에 대해서만 RDNS antibot 검사를 수행합니다."
+      },
+      "ANTIBOT_IGNORE_ASN": {
+        "label": "무시할 ASN",
+        "help": "antibot 챌린지를 무시할 ASN 번호 목록입니다(공백으로 구분)."
+      },
+      "ANTIBOT_IGNORE_USER_AGENT": {
+        "label": "무시할 User-Agent",
+        "help": "antibot 챌린지를 무시할 User-Agent(PCRE 정규식) 목록입니다(공백으로 구분)."
+      },
+      "ANTIBOT_IGNORE_HEADER_NAME": {
+        "label": "무시할 헤더 이름",
+        "help": "요청을 antibot 챌린지에서 면제해 주는 요청 헤더의 이름입니다. 어떤 클라이언트든 이 헤더를 보낼 수 있으므로, 공유 비밀로 취급하고 HTTPS를 통해서만 사용하십시오."
+      },
+      "ANTIBOT_IGNORE_HEADER_VALUE": {
+        "label": "무시할 헤더 값",
+        "help": "요청을 antibot 챌린지에서 면제하기 위해 헤더가 일치해야 하는 값(PCRE 정규식)입니다. 헤더가 존재하는지만 확인하려면 비워 두십시오. ^ 와 $ 로 고정하십시오: 기본적으로 일치는 고정되지 않습니다."
+      },
+      "ANTIBOT_IGNORE_COUNTRY": {
+        "label": "무시할 국가",
+        "help": "antibot 챌린지를 무시할 ISO 3166-1 alpha-2 국가 코드 목록입니다(공백으로 구분)."
+      },
+      "ANTIBOT_ONLY_COUNTRY": {
+        "label": "챌린지 대상 국가만",
+        "help": "antibot 챌린지를 받아야 하는 ISO 3166-1 alpha-2 국가 코드 목록입니다(공백으로 구분)."
+      },
+      "ANTIBOT_RECAPTCHA_SCORE": {
+        "label": "reCAPTCHA v3 점수",
+        "help": "reCAPTCHA 챌린지에 필요한 최소 점수입니다(reCAPTCHA v3에서만 지원)."
+      },
+      "ANTIBOT_RECAPTCHA_SITEKEY": {
+        "label": "reCAPTCHA sitekey",
+        "help": "reCAPTCHA 챌린지용 sitekey입니다."
+      },
+      "ANTIBOT_RECAPTCHA_SECRET": {
+        "label": "reCAPTCHA 시크릿",
+        "help": "reCAPTCHA 챌린지용 시크릿입니다."
+      },
+      "ANTIBOT_RECAPTCHA_CLASSIC": {
+        "label": "기존 reCAPTCHA 사용",
+        "help": "최신 버전 대신 기존(classic) reCAPTCHA를 사용합니다."
+      },
+      "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+        "label": "reCAPTCHA 프로젝트 ID",
+        "help": "reCAPTCHA 챌린지용 프로젝트 ID입니다."
+      },
+      "ANTIBOT_RECAPTCHA_API_KEY": {
+        "label": "reCAPTCHA API 키",
+        "help": "reCAPTCHA 챌린지용 API 키입니다."
+      },
+      "ANTIBOT_RECAPTCHA_JA4": {
+        "label": "reCAPTCHA JA4",
+        "help": "TLS 클라이언트의 JA4 지문입니다. JA4 지문 계산에는 FoxIO-LLC/ja4 사용을 권장합니다."
+      },
+      "ANTIBOT_RECAPTCHA_JA3": {
+        "label": "reCAPTCHA JA3",
+        "help": "TLS 클라이언트의 JA3 지문입니다. JA3 지문 계산에는 salesforce/ja3 사용을 권장합니다."
+      },
+      "ANTIBOT_HCAPTCHA_SITEKEY": {
+        "label": "hCaptcha sitekey",
+        "help": "hCaptcha 챌린지용 sitekey입니다."
+      },
+      "ANTIBOT_HCAPTCHA_SECRET": {
+        "label": "hCaptcha 시크릿",
+        "help": "hCaptcha 챌린지용 시크릿입니다."
+      },
+      "ANTIBOT_TURNSTILE_SITEKEY": {
+        "label": "Turnstile sitekey",
+        "help": "Turnstile 챌린지용 sitekey입니다."
+      },
+      "ANTIBOT_TURNSTILE_SECRET": {
+        "label": "Turnstile 시크릿",
+        "help": "Turnstile 챌린지용 시크릿입니다."
+      },
+      "ANTIBOT_MCAPTCHA_SITEKEY": {
+        "label": "mCaptcha sitekey",
+        "help": "mCaptcha 챌린지용 sitekey입니다."
+      },
+      "ANTIBOT_MCAPTCHA_SECRET": {
+        "label": "mCaptcha 시크릿",
+        "help": "mCaptcha 챌린지용 시크릿입니다."
+      },
+      "ANTIBOT_MCAPTCHA_URL": {
+        "label": "mCaptcha 도메인",
+        "help": "mCaptcha 챌린지에 사용할 도메인입니다."
+      },
+      "ANTIBOT_CAPJS_FRONTEND_URL": {
+        "label": "Cap.js 프런트엔드 URL",
+        "help": "브라우저가 Cap.js 위젯을 불러오는 공개 출처입니다(예: https://cap.example.com). 출처(origin)만 입력하고 경로는 포함하지 않습니다."
+      },
+      "ANTIBOT_CAPJS_BACKEND_URL": {
+        "label": "Cap.js 백엔드 URL",
+        "help": "BunkerWeb이 /siteverify를 호출하는 내부 출처입니다(예: http://cap-server:3000). 출처(origin)만 입력하고 경로는 포함하지 않습니다. 비워 두면 프런트엔드 URL로 대체됩니다."
+      },
+      "ANTIBOT_CAPJS_SITEKEY": {
+        "label": "Cap.js sitekey",
+        "help": "이 사이트를 위해 Cap.js 대시보드에서 생성한 sitekey입니다."
+      },
+      "ANTIBOT_CAPJS_SECRET": {
+        "label": "Cap.js 시크릿",
+        "help": "sitekey와 짝을 이루는 시크릿으로, BunkerWeb이 /siteverify 호출을 인증하는 데 사용합니다."
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "meta": {
+      "name": "Erros",
+      "description": "Gerencia as páginas de erro padrão"
+    },
+    "settings": {
+      "ERRORS": {
+        "label": "Erros",
+        "help": "Lista de códigos de erro HTTP e as páginas de erro correspondentes, separados por espaços (404=/my404.html 403=/errors/403.html ...)."
+      },
+      "INTERCEPTED_ERROR_CODES": {
+        "label": "Códigos de erro interceptados",
+        "help": "Lista de códigos de erro HTTP interceptados pelo BunkerWeb, separados por espaços."
+      }
+    }
+  }
+}

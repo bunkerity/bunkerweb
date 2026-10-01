@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Authentification basique",
+      "description": "Impose une connexion avant d'accéder à une ressource ou à tout le site via la méthode d'authentification HTTP basique."
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "AUTH BASIQUE",
+        "subtitle": "Réussi"
+      },
+      "counter_failed_authbasic": {
+        "title": "AUTH BASIQUE",
+        "subtitle": "Échoué"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "Utiliser l'authentification HTTP basique",
+        "help": "Utiliser l'authentification HTTP basique"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "Emplacement de l'authentification basique",
+        "help": "URL de la ressource protégée, ou valeur globale au site."
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Nom d'utilisateur auth basic",
+        "help": "Nom d'utilisateur"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Mot de passe",
+        "help": "Mot de passe"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Texte",
+        "help": "Texte à afficher"
+      }
+    }
+  }
+}

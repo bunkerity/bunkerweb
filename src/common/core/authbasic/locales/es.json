@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "Autenticación básica",
+      "description": "Exige iniciar sesión antes de acceder a un recurso o a todo el sitio mediante el método de autenticación HTTP básica."
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "AUTH BÁSICA",
+        "subtitle": "Correcto"
+      },
+      "counter_failed_authbasic": {
+        "title": "AUTH BÁSICA",
+        "subtitle": "Fallido"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "Usar autenticación HTTP básica",
+        "help": "Usar autenticación HTTP básica"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "Ubicación de auth basic",
+        "help": "URL del recurso protegido o valor para todo el sitio."
+      },
+      "AUTH_BASIC_USER": {
+        "label": "Nombre de usuario de auth basic",
+        "help": "Nombre de usuario"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "Contraseña",
+        "help": "Contraseña"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "Texto",
+        "help": "Texto a mostrar"
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "limit": {
+    "meta": {
+      "name": "Batas",
+      "description": "Membatasi jumlah maksimum permintaan dan koneksi."
+    },
+    "widgets": {
+      "counter_limited_global": {
+        "title": "Batas global",
+        "subtitle": "Permintaan yang diblokir"
+      }
+    },
+    "settings": {
+      "USE_LIMIT_REQ": {
+        "label": "Aktifkan batas permintaan",
+        "help": "Aktifkan fitur batas permintaan."
+      },
+      "LIMIT_REQ_URL": {
+        "label": "URL batas permintaan",
+        "help": "URL (regex PCRE) tempat batas permintaan akan diterapkan atau nilai khusus / untuk semua permintaan."
+      },
+      "LIMIT_REQ_RATE": {
+        "label": "Rate batas permintaan",
+        "help": "Rate yang diterapkan ke URL (s untuk detik, m untuk menit, h untuk jam, dan d untuk hari)."
+      },
+      "USE_LIMIT_REQ_GLOBAL": {
+        "label": "Aktifkan batas permintaan global",
+        "help": "Aktifkan batas rate global: satu kuota agregat untuk seluruh layanan, menghitung semua klien dan URL bersama-sama (melindungi kapasitas origin, independen dari batas permintaan per-IP/per-URL)."
+      },
+      "LIMIT_REQ_GLOBAL_RATE": {
+        "label": "Rate batas permintaan global",
+        "help": "Rate agregat maksimum untuk seluruh layanan, gabungan semua klien dan URL (s untuk detik, m untuk menit, h untuk jam, dan d untuk hari)."
+      },
+      "USE_LIMIT_CONN": {
+        "label": "Aktifkan batas koneksi",
+        "help": "Aktifkan fitur batas koneksi."
+      },
+      "LIMIT_CONN_MAX_HTTP1": {
+        "label": "Jumlah maksimum koneksi HTTP/1.X",
+        "help": "Jumlah maksimum koneksi per IP saat menggunakan protokol HTTP/1.X."
+      },
+      "LIMIT_CONN_MAX_HTTP2": {
+        "label": "Jumlah maksimum stream HTTP/2",
+        "help": "Jumlah maksimum stream per IP saat menggunakan protokol HTTP/2."
+      },
+      "LIMIT_CONN_MAX_HTTP3": {
+        "label": "Jumlah maksimum stream HTTP/3",
+        "help": "Jumlah maksimum stream per IP saat menggunakan protokol HTTP/3."
+      },
+      "LIMIT_CONN_MAX_STREAM": {
+        "label": "Jumlah maksimum koneksi stream",
+        "help": "Jumlah maksimum koneksi per IP saat menggunakan stream."
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "workflows": {
+    "meta": {
+      "name": "Mga workflow ng seguridad",
+      "description": "Bumuo ng magagamit-muling patakaran sa seguridad: mga nakaayos na patakaran na nagpapares ng puno ng kondisyon sa IP, bansa, ASN, URI, at method sa isang opsyonal na rate threshold at iisang huling aksyon (hamon, harang, o redirect)."
+    },
+    "settings": {
+      "WORKFLOWS_REGEX_BUDGET": {
+        "label": "Regex Budget ng Workflow",
+        "help": "Pinakamataas na bilang ng magkakaibang regular expression na kino-compile sa lahat ng workflow rule. Nagsha-share ang NGINX ng iisang regex cache sa lahat ng plugin, kaya ang mga rule na lumagpas sa budget na ito ay dini-disable sa halip na tahimik na palalain ang performance ng buong instance."
+      }
+    }
+  }
+}

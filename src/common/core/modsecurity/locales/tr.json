@@ -1,0 +1,62 @@
+{
+  "modsecurity": {
+    "meta": {
+      "name": "ModSecurity",
+      "description": "ModSecurity WAF yönetimi."
+    },
+    "settings": {
+      "USE_MODSECURITY": {
+        "label": "ModSecurity kullan",
+        "help": "ModSecurity WAF'ı etkinleştir."
+      },
+      "USE_MODSECURITY_CRS": {
+        "label": "Core Rule Set kullan",
+        "help": "OWASP Core Rule Set'i etkinleştir."
+      },
+      "USE_MODSECURITY_CRS_PLUGINS": {
+        "label": "Core Rule Set Eklentilerini kullan",
+        "help": "OWASP Core Rule Set eklentilerini etkinleştir."
+      },
+      "MODSECURITY_CRS_VERSION": {
+        "label": "Core Rule Set Sürümü",
+        "help": "ModSecurity ile kullanılacak OWASP Core Rule Set sürümü (3 veya 4). Not: nightly kullanımdan kaldırılmıştır ve varsayılan olarak v4 kullanılacaktır."
+      },
+      "MODSECURITY_CRS_PLUGINS": {
+        "label": "Core Rule Set Eklentileri",
+        "help": "İndirilip kurulacak OWASP CRS eklentilerinin listesi (plugin-name[/tag] veya URL), boşluklarla ayrılmış. (CRS sürüm 3 ile uyumlu değildir)"
+      },
+      "USE_MODSECURITY_GLOBAL_CRS": {
+        "label": "ModSecurity genel CRS modu",
+        "help": "Çok sayıda hizmetiniz olduğunda kural yüklemeyi iyileştirmek için ModSecurity CRS'yi genel modda kullanın."
+      },
+      "MODSECURITY_SEC_AUDIT_ENGINE": {
+        "label": "SecAuditEngine",
+        "help": "ModSecurity'nin SecAuditEngine yönergesi."
+      },
+      "MODSECURITY_SEC_RULE_ENGINE": {
+        "label": "SecRuleEngine",
+        "help": "ModSecurity'nin SecRuleEngine yönergesi."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+        "label": "SecAuditLogParts",
+        "help": "ModSecurity'nin SecAuditLogParts yönergesi. A ve Z bölümleri her zaman önek ve sonek olarak otomatik dahil edilir."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG": {
+        "label": "SecAuditLog",
+        "help": "ModSecurity'nin denetim girdilerini yazdığı dosyanın yolu. Normal bir dosya olmalıdır: Serial denetim yazıcısı onu kilitler, bu da bir pipe veya stream üzerinde mümkün değildir. .log ile bitmeli, /var/log/bunkerweb/ altında olmalıdır."
+      },
+      "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
+        "label": "SecRequestBodyNoFilesLimit",
+        "help": "ModSecurity'nin SecRequestBodyNoFilesLimit yönergesi."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
+        "label": "SecRequestBodyLimit",
+        "help": "ModSecurity'nin SecRequestBodyLimit yönergesi. ModSecurity'nin inceleyeceği maksimum istek gövdesi boyutu (k/m/g son ekleri, örn. 10m). Bu limiti aşan istekler SecRequestBodyLimitAction'a tabidir (varsayılan olarak Reject). Boşsa, MAX_CLIENT_SIZE'dan türetilir. Limitsiz olması için 0 ayarlayın (önerilmez, bellek yetersizliği nedeniyle sonlandırmalara yol açabilir). NGINX önce MAX_CLIENT_SIZE'ı uygular, bu nedenle buradaki daha yüksek bir değerin etkisi olmaz. REVERSE_PROXY_MAX_CLIENT_SIZE, kendi location'ı için bu değeri geçersiz kılar."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
+        "label": "SecRequestBodyLimitAction",
+        "help": "ModSecurity'nin SecRequestBodyLimitAction yönergesi. Reject, gövde limitini aşan istekler için HTTP 413 döndürür. ProcessPartial yalnızca limit içindeki kısmı inceler ve isteğin tamamını arka uca iletir (büyük dosya yüklemeleri için kullanışlıdır, ancak JSON veya form verisi gibi dosya olmayan içerik türleri için WAF kapsamını azaltır)."
+      }
+    }
+  }
+}

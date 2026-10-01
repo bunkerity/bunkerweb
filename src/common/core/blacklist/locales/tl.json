@@ -1,0 +1,144 @@
+{
+  "blacklist": {
+    "meta": {
+      "name": "Blacklist",
+      "description": "Tumatanggi ng access batay sa internal at external na IP/network/rDNS/ASN blacklist."
+    },
+    "settings": {
+      "BLACKLIST_ASN": {
+        "label": "Blacklist ASN",
+        "help": "Listahan ng mga numero ng ASN, na pinaghihiwalay ng space, na i-block."
+      },
+      "BLACKLIST_ASN_URLS": {
+        "label": "Blacklist ASN URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng ASN na i-block. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_COMMUNITY_LISTS": {
+        "label": "Community Blacklists",
+        "help": "Pumili ng mga blacklist na pinapanatili ng komunidad na isasama sa pag-block."
+      },
+      "BLACKLIST_HEADER_NAME": {
+        "label": "Pangalan ng Header sa Blacklist",
+        "help": "Pangalan ng request header na nagdaragdag sa request sa blacklist. Kahit sinong client ay maaaring magpadala ng header na ito: ituring itong shared secret, sa HTTPS lang."
+      },
+      "BLACKLIST_HEADER_VALUE": {
+        "label": "Value ng Header sa Blacklist",
+        "help": "Value (PCRE regex) na dapat itumbas ng header para idagdag ang request sa blacklist. Iwanang blangko para tumugma base sa pagkakaroon lang ng header. I-anchor gamit ang ^ at $: hindi naka-anchor ang pagtutugma bilang default."
+      },
+      "BLACKLIST_IGNORE_ASN": {
+        "label": "Blacklist – Hindi Papansinin na ASN",
+        "help": "Listahan ng mga numero ng ASN, na pinaghihiwalay ng space, na hindi papansinin sa blacklist."
+      },
+      "BLACKLIST_IGNORE_ASN_URLS": {
+        "label": "Blacklist – Hindi Papansinin na ASN URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng ASN na hindi papansinin sa blacklist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_HEADER_NAME": {
+        "label": "Pangalan ng Hindi Papansinin na Header",
+        "help": "Pangalan ng request header na nagpapawalang-bisa sa request mula sa blacklist. Kahit sinong client ay maaaring magpadala ng header na ito: ituring itong shared secret, sa HTTPS lang."
+      },
+      "BLACKLIST_IGNORE_HEADER_VALUE": {
+        "label": "Value ng Hindi Papansinin na Header",
+        "help": "Value (PCRE regex) na dapat itumbas ng header para hindi isama ang request sa blacklist. Iwanang blangko para tumugma base sa pagkakaroon lang ng header. I-anchor gamit ang ^ at $: hindi naka-anchor ang pagtutugma bilang default."
+      },
+      "BLACKLIST_IGNORE_IP": {
+        "label": "Blacklist – Hindi Papansinin na IP/Network",
+        "help": "Listahan ng IP/network, na pinaghihiwalay ng space, na hindi papansinin sa blacklist."
+      },
+      "BLACKLIST_IGNORE_IP_URLS": {
+        "label": "Blacklist – Hindi Papansinin na IP/Network URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng IP/network na hindi papansinin sa blacklist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_RDNS": {
+        "label": "Blacklist – Hindi Papansinin na Reverse DNS",
+        "help": "Listahan ng mga reverse DNS suffix, na pinaghihiwalay ng space, na hindi papansinin sa blacklist."
+      },
+      "BLACKLIST_IGNORE_RDNS_URLS": {
+        "label": "Blacklist – Hindi Papansinin na Reverse DNS URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng reverse DNS suffix na hindi papansinin sa blacklist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_URI": {
+        "label": "Blacklist – Hindi Papansinin na URI",
+        "help": "Listahan ng URI (PCRE regex), na pinaghihiwalay ng space, na hindi papansinin sa blacklist."
+      },
+      "BLACKLIST_IGNORE_URI_URLS": {
+        "label": "Blacklist – Hindi Papansinin na URI URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng URI na hindi papansinin sa blacklist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_IGNORE_USER_AGENT": {
+        "label": "Blacklist – Hindi Papansinin na User-Agent",
+        "help": "Listahan ng User-Agent (PCRE regex), na pinaghihiwalay ng space, na hindi papansinin sa blacklist."
+      },
+      "BLACKLIST_IGNORE_USER_AGENT_URLS": {
+        "label": "Blacklist – Hindi Papansinin na User-Agent URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng User-Agent na hindi papansinin sa blacklist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_IP": {
+        "label": "Blacklist IP/Network",
+        "help": "Listahan ng IP/network, na pinaghihiwalay ng space, na i-block."
+      },
+      "BLACKLIST_IP_URLS": {
+        "label": "Blacklist IP/Network URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng masamang IP/network na i-block. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_RDNS": {
+        "label": "Blacklist Reverse DNS",
+        "help": "Listahan ng mga reverse DNS suffix, na pinaghihiwalay ng space, na i-block."
+      },
+      "BLACKLIST_RDNS_GLOBAL": {
+        "label": "Blacklist Reverse DNS sa Global na IP Lang",
+        "help": "Isagawa lang ang mga RDNS blacklist check sa mga global na IP address."
+      },
+      "BLACKLIST_RDNS_URLS": {
+        "label": "Blacklist Reverse DNS URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng reverse DNS suffix na i-block. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_RULE": {
+        "label": "Blacklist Rule",
+        "help": "Composite na rule: kailangang tumugma ang bawat term para tumugma ang rule. Pinaghihiwalay ang mga term ng \" AND \" (malaking letra) at ang bawat isa ay [NOT ]<kind>:<value>, kung saan ang <kind> ay ip, country, asn, rdns, ua (alias user_agent), o uri. Halimbawa: ip:10.0.0.0/8 AND NOT ua:^curl. Pinagsasama-sama ang mga rule gamit ang OR sa isa't isa at sa mga flat list sa itaas. Ang value ay maaari ring resource-group token tulad ng @office. Sinusuri lang ng mga stream service ang ip, country, asn, at rdns."
+      },
+      "BLACKLIST_URI": {
+        "label": "Blacklist URI",
+        "help": "Listahan ng URI (PCRE regex), na pinaghihiwalay ng space, na i-block."
+      },
+      "BLACKLIST_URI_URLS": {
+        "label": "Blacklist URI URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng masamang URI na i-block. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "BLACKLIST_USER_AGENT": {
+        "label": "Blacklist User-Agent",
+        "help": "Listahan ng User-Agent (PCRE regex), na pinaghihiwalay ng space, na i-block."
+      },
+      "BLACKLIST_USER_AGENT_URLS": {
+        "label": "Blacklist User-Agent URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng masamang User-Agent na i-block. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "USE_BLACKLIST": {
+        "label": "I-activate ang Blacklisting",
+        "help": "I-activate ang feature na blacklist."
+      }
+    },
+    "widgets": {
+      "counter_failed_uri": {
+        "title": "URI",
+        "subtitle": "Tinanggihan"
+      },
+      "counter_failed_ip": {
+        "title": "IP",
+        "subtitle": "Tinanggihan"
+      },
+      "counter_failed_rdns": {
+        "title": "RDNS",
+        "subtitle": "Tinanggihan"
+      },
+      "counter_failed_asn": {
+        "title": "ASN",
+        "subtitle": "Tinanggihan"
+      },
+      "counter_failed_ua": {
+        "title": "UA",
+        "subtitle": "Tinanggihan"
+      }
+    }
+  }
+}

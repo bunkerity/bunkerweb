@@ -1,0 +1,26 @@
+{
+  "redirect": {
+    "meta": {
+      "name": "Redirect",
+      "description": "Pinamamahalaan ang mga HTTP redirect."
+    },
+    "settings": {
+      "REDIRECT_FROM": {
+        "label": "Redirect From",
+        "help": "Path na pagmumulan ng redirect. Ang value na nagsisimula sa ^ o nagtatapos sa $ ay ituturing na regex location. Opsyonal na maglagay ng prefix na ~, ~*, = o ^~ na sinusundan ng isang space para tahasang i-set ang nginx location modifier; walang space, ;, { o } ang pinapayagan sa ibang bahagi ng value."
+      },
+      "REDIRECT_TO": {
+        "label": "Redirect To",
+        "help": "I-redirect ang buong site patungo sa iba."
+      },
+      "REDIRECT_TO_REQUEST_URI": {
+        "label": "Idagdag ang Request URI",
+        "help": "Idagdag ang hiniling na URI sa redirect address."
+      },
+      "REDIRECT_TO_STATUS_CODE": {
+        "label": "Redirect Status Code",
+        "help": "HTTP status code para sa redirect: 301 (Moved Permanently - kina-cache ng browser), 302 (Found - pansamantala, maaaring magpalit ng method), 303 (See Other - laging GET ang ginagamit), 307 (Temporary Redirect - pinapanatili ang method), 308 (Permanent Redirect - pinapanatili ang method, kina-cache)."
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "workflows": {
+    "meta": {
+      "name": "Workflow di sicurezza",
+      "description": "Componi policy di sicurezza riutilizzabili: regole ordinate che abbinano un albero di condizioni su IP, paese, ASN, URI e metodo a una soglia di frequenza opzionale e un'azione finale (sfida, blocco o reindirizzamento)."
+    },
+    "settings": {
+      "WORKFLOWS_REGEX_BUDGET": {
+        "label": "Budget di espressioni regolari dei workflow",
+        "help": "Numero massimo di espressioni regolari distinte compilate in tutte le regole dei workflow. NGINX condivide un'unica cache di espressioni regolari tra tutti i plugin, quindi le regole che superano questo budget vengono disabilitate anziché degradare silenziosamente l'intera istanza."
+      }
+    }
+  }
+}

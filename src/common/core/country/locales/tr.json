@@ -1,0 +1,36 @@
+{
+  "country": {
+    "meta": {
+      "name": "Ülke",
+      "description": "İstemci IP'sinin ülkesine göre erişimi reddeder."
+    },
+    "settings": {
+      "BLACKLIST_COUNTRY": {
+        "label": "Ülke kara listesi",
+        "help": "İstemcinin ülkesi listedeyse erişimi reddet (boşluklarla ayrılmış ISO 3166-1 alpha-2 biçiminde). @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH ve @BENELUX gibi grup belirteçlerini de kullanabilirsiniz."
+      },
+      "COUNTRY_IGNORE_HEADER_NAME": {
+        "label": "Yoksayılan üstbilgi adı",
+        "help": "İsteği ülke kontrolünden muaf tutan istek üstbilgisinin adı. Herhangi bir istemci bu üstbilgiyi gönderebilir: onu yalnızca HTTPS üzerinden kullanılan paylaşılan bir sır olarak değerlendirin."
+      },
+      "COUNTRY_IGNORE_HEADER_VALUE": {
+        "label": "Yoksayılan üstbilgi değeri",
+        "help": "İsteği ülke kontrolünden muaf tutmak için üstbilginin eşleşmesi gereken değer (PCRE normal ifadesi). Yalnızca üstbilginin varlığına göre eşleştirmek için boş bırakın. ^ ve $ ile sabitleyin: eşleşme varsayılan olarak sabitlenmemiştir."
+      },
+      "COUNTRY_IGNORE_URI": {
+        "label": "Yoksayılan URI",
+        "help": "Ülke kontrollerinden hariç tutulacak URI'ler için (boşluklarla ayrılmış) PCRE normal ifade kalıplarının listesi. Kalıplar hem yol hem de sorgu dizesiyle birlikte tam istek URI'sine göre kontrol edilir."
+      },
+      "WHITELIST_COUNTRY": {
+        "label": "Ülke beyaz listesi",
+        "help": "İstemcinin ülkesi listede değilse erişimi reddet (boşluklarla ayrılmış ISO 3166-1 alpha-2 biçiminde). @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH ve @BENELUX gibi grup belirteçlerini de kullanabilirsiniz."
+      }
+    },
+    "widgets": {
+      "counter_failed_country": {
+        "title": "Ülke",
+        "subtitle": "İstek engellendi"
+      }
+    }
+  }
+}

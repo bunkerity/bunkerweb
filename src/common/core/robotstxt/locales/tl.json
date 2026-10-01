@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "Pinamamahalaan ang file na robots.txt. Isang pamantayan para kontrolin ang access ng mga web crawler sa iyong site."
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "Gamitin ang robots.txt",
+        "help": "I-enable ang robots.txt file."
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "Community robots.txt Lists",
+        "help": "Pumili ng mga listahan na inaalagaan ng community para isama sa robots.txt."
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "Robots.txt URLs",
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng robots.txt rule. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Robots.txt Rule",
+        "help": "Mga rule para sa robots.txt (isa kada linya)."
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Robots.txt Header",
+        "help": "Header para sa robots.txt file (bago ang mga rule). Maaaring naka-encode sa Base64."
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Robots.txt Footer",
+        "help": "Footer para sa robots.txt file (pagkatapos ng mga rule). Maaaring naka-encode sa Base64."
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Robots.txt Sitemap",
+        "help": "Sitemap URL na isasama sa robots.txt."
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "Ignore Rule",
+        "help": "Rule (PCRE regex) na babalewalain. Maaaring itakda nang paulit-ulit."
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "DarkVisitors API Token",
+        "help": "Bearer token para sa DarkVisitors API."
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "DarkVisitors Agent Types",
+        "help": "Listahan ng agent type na pinaghihiwalay ng comma na isasama sa agent_types field ng DarkVisitors kapag kumokontak sa DarkVisitors API."
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "Isang string na nagtatakda kung aling mga URL ang bawal. Ipapadala ang value na ito bilang disallow field kapag kumokontak sa DarkVisitors API."
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "certificates": {
+    "meta": {
+      "name": "Zertifikate",
+      "description": "Stellt das einem Dienst zugeordnete Zertifikat aus dem zentralen Inventar bereit, unabhängig davon, welcher Anbieter es ausgestellt hat."
+    }
+  }
+}

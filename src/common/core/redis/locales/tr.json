@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "BunkerWeb küme modunda kullanılırken Redis sunucusu yapılandırması."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "REDIS DURUMU"
+      },
+      "counter_redis_nb_keys": {
+        "title": "REDIS ANAHTARLARI",
+        "subtitle": "Anahtar sayısı"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Redis'i etkinleştir",
+        "help": "Redis'i etkinleştir."
+      },
+      "REDIS_HOST": {
+        "label": "Redis sunucusu",
+        "help": "Redis sunucusunun IP adresi veya ana bilgisayar adı."
+      },
+      "REDIS_PORT": {
+        "label": "Redis portu",
+        "help": "Redis sunucusunun portu."
+      },
+      "REDIS_DATABASE": {
+        "label": "Redis veritabanı",
+        "help": "Redis veritabanı numarası."
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Redis sunucusuyla SSL/TLS bağlantısı kullan."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Redis SSL/TLS doğrulama",
+        "help": "Redis sunucusunun sertifikasını doğrula."
+      },
+      "REDIS_SSL_CA": {
+        "label": "Redis SSL/TLS CA paketi",
+        "help": "Redis/Valkey sunucu sertifikasını doğrulamak için kullanılan PEM CA paketinin yolu (özel CA); ayarlanmamışsa sistem güven deposu anlamına gelir. Ayarlandığında Python istemcileri (Celery broker, işler, API hız sınırlayıcı, bwcli, web arayüzü) tarafından güvenilir kabul edilir ve NGINX Lua güven paketine eklenir, böylece istek yolu da ona güvenir. Yapılandırmanın üretildiği yerde ve her istemci tarafından okunur, bu nedenle dosyanın orada o yolda bulunması gerekir; eksik veya geçersiz bir paket yapılandırma üretimini başarısız kılar."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Redis zaman aşımı (ms)",
+        "help": "Bağlantı, okuma ve yazma için Redis sunucusu zaman aşımı (ms cinsinden)."
+      },
+      "REDIS_USERNAME": {
+        "label": "Redis kullanıcı adı",
+        "help": "AUTH komutunda kullanılan Redis kullanıcı adı."
+      },
+      "REDIS_PASSWORD": {
+        "label": "Redis parolası",
+        "help": "AUTH komutunda kullanılan Redis parolası."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Redis sentinel ana bilgisayarları",
+        "help": "host:[port] biçiminde, boşluklarla ayrılmış Redis sentinel ana bilgisayarları."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Redis sentinel kullanıcı adı",
+        "help": "Redis sentinel kullanıcı adı."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Redis sentinel parolası",
+        "help": "Redis sentinel parolası."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Redis sentinel master",
+        "help": "Redis sentinel master adı."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Redis keepalive boşta kalma (ms)",
+        "help": "Havuzdaki redis bağlantısını kapatmadan önceki maksimum boşta kalma süresi (ms cinsinden)."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Redis keepalive havuzu",
+        "help": "NGINX worker başına havuzda tutulan maksimum Redis bağlantısı. Kararlı durum bağlantıları yaklaşık nginx_workers x pool x instances kadardır ve Redis/Valkey maxclients limiti içinde kalmalıdır."
+      }
+    }
+  }
+}

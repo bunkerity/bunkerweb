@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "BunkerWeb용 CrowdSec 바운서."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "CROWDSEC 상태"
+      }
+    },
+    "settings": {
+      "USE_CROWDSEC": {
+        "label": "CrowdSec 사용",
+        "help": "CrowdSec bouncer를 활성화합니다."
+      },
+      "CROWDSEC_API": {
+        "label": "CrowdSec API",
+        "help": "CrowdSec API의 주소입니다."
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "CrowdSec API 키",
+        "help": "cscli bouncer add로 발급된 CrowdSec API 키입니다."
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "CrowdSec 관리 로그인",
+        "help": "경보 조사 및 결정 제거를 위한 전용 CrowdSec 머신 로그인입니다. 읽기 전용 bouncer 접근으로 두려면 비워 두십시오."
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "CrowdSec 관리 비밀번호",
+        "help": "전용 CrowdSec 관리 머신의 비밀번호입니다. 관리 로그인과 함께 필요하며, 여기에 bouncer API 키를 사용하지 마십시오."
+      },
+      "CROWDSEC_MODE": {
+        "label": "CrowdSec 모드",
+        "help": "CrowdSec API의 모드입니다(live 또는 stream)."
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "CrowdSec 내부 트래픽 활성화",
+        "help": "내부 트래픽 분석을 활성화합니다."
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "CrowdSec live 요청 제한 시간",
+        "help": "bouncer가 CrowdSec 로컬 API를 조회할 때 사용하는 HTTP 요청의 제한 시간(밀리초)입니다."
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "CrowdSec 제외 위치",
+        "help": "차단(bouncing) 시 제외할 위치입니다. 쉼표로 구분된 위치 목록입니다."
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "CrowdSec 캡차 챌린지",
+        "help": "CrowdSec가 캡차를 요구할 때 표시되는 antibot 챌린지입니다. 이 서비스에서 antibot이 활성화되어 있어야 하며(USE_ANTIBOT을 \"no\"가 아닌 값으로 설정), 그렇지 않으면 요청이 대신 차단됩니다. 타사 제공업체는 ANTIBOT_* 설정에서 키를 가져옵니다. \"cookie\"는 피하십시오: \"당신이 인간임을 증명하라\"는 결정에 대해 아무것도 증명하지 못합니다. \"no\"는 이전처럼 캡차 결정을 무시합니다. 결정 캐시는 Local API별로 공유되므로, 이전 동작을 완전히 복원하려면 해당 Local API의 모든 서비스를 \"no\"로 설정해야 합니다."
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "보안 워크플로가 결정하도록 허용",
+        "help": "CrowdSec가 표시한 요청에 대해 어떻게 처리할지 보안 워크플로가 결정하도록 합니다. \"no\"(기본값)는 여기서 요청을 차단합니다. \"yes\"는 이 서비스에 연결된 워크플로에 요청을 넘기며, 일치하는 규칙이 없거나 연결된 워크플로가 없어도 판정 결과는 그대로 적용됩니다. CORS 사전 요청(204), /robots.txt, /security.txt는 워크플로가 실행되기 전에 BunkerWeb이 생성하므로, 표시된 클라이언트도 이 세 가지는 계속 받을 수 있습니다. 이 셋은 애플리케이션에 도달하지 않으며, 그 외에 도달할 모든 요청은 먼저 워크플로 단계별 검사를 거칩니다."
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "CrowdSec 캐시 만료 시간",
+        "help": "bouncer가 live 모드에서 IP를 캐시할 때의 캐시 만료 시간(초)입니다."
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "CrowdSec 요청 제한 시간",
+        "help": "CrowdSec 로컬 API에서 신규/만료 IP를 가져오는 갱신 빈도(초)입니다."
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "AppSec URL",
+        "help": "애플리케이션 보안 구성 요소(Application Security Component)의 URL입니다."
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "AppSec 실패 동작",
+        "help": "AppSec 구성 요소가 500을 반환할 때의 동작입니다. 요청을 통과시키거나 거부할 수 있습니다."
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "AppSec 연결 제한 시간",
+        "help": "처리 구성 요소와 AppSec 구성 요소 간 연결의 제한 시간(밀리초)입니다."
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "AppSec 전송 제한 시간",
+        "help": "처리 구성 요소에서 AppSec 구성 요소로 데이터를 전송하는 제한 시간(밀리초)입니다."
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "AppSec 처리 제한 시간",
+        "help": "처리 구성 요소에서 AppSec 구성 요소로 보낸 요청을 처리하는 제한 시간(밀리초)입니다."
+      },
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "항상 AppSec으로 전송",
+        "help": "해당 IP에 대한 결정이 이미 있어도 요청을 항상 AppSec 구성 요소로 전송합니다."
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "AppSec SSL 검증",
+        "help": "AppSec 구성 요소의 SSL 인증서 유효성을 검증합니다."
+      }
+    }
+  }
+}

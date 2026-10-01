@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "備份",
+      "description": "將您的資料備份至自訂位置。透過定期備份確保重要檔案的安全性與可用性。"
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "最近備份"
+      }
+    },
+    "settings": {
+      "USE_BACKUP": {
+        "label": "啟用自動備份",
+        "help": "啟用或停用備份功能"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "備份排程",
+        "help": "備份頻率(每天、每週或每月)"
+      },
+      "BACKUP_ROTATION": {
+        "label": "備份保留數量",
+        "help": "要保留的備份數量"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "備份保留策略",
+        "help": "舊備份的刪除選取方式:fifo 保留最近的備份,hanoi 使用河內塔式階梯(越接近目前越精細,越久遠越粗略)保留相同數量的檔案。"
+      },
+      "BACKUP_DIRECTORY": {
+        "label": "備份目錄",
+        "help": "儲存備份的目錄"
+      }
+    }
+  }
+}

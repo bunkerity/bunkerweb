@@ -1,0 +1,36 @@
+{
+  "country": {
+    "meta": {
+      "name": "국가",
+      "description": "클라이언트 IP의 국가를 기반으로 접근을 거부합니다."
+    },
+    "widgets": {
+      "counter_failed_country": {
+        "title": "국가",
+        "subtitle": "요청 차단됨"
+      }
+    },
+    "settings": {
+      "BLACKLIST_COUNTRY": {
+        "label": "국가 블랙리스트",
+        "help": "클라이언트의 국가가 목록에 있으면 접근을 거부합니다(ISO 3166-1 alpha-2 형식, 공백으로 구분). @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH, @BENELUX와 같은 그룹 토큰도 사용할 수 있습니다."
+      },
+      "COUNTRY_IGNORE_URI": {
+        "label": "무시할 URI",
+        "help": "국가 검사에서 제외할 URI에 대한 PCRE 정규식 패턴 목록입니다(공백으로 구분). 패턴은 경로 및 쿼리 문자열이 포함된 전체 요청 URI에 대해 검사됩니다."
+      },
+      "COUNTRY_IGNORE_HEADER_NAME": {
+        "label": "무시할 헤더 이름",
+        "help": "요청을 국가 검사에서 면제해 주는 요청 헤더의 이름입니다. 어떤 클라이언트든 이 헤더를 보낼 수 있으므로, 공유 비밀로 취급하고 HTTPS를 통해서만 사용하십시오."
+      },
+      "COUNTRY_IGNORE_HEADER_VALUE": {
+        "label": "무시할 헤더 값",
+        "help": "요청을 국가 검사에서 면제하기 위해 헤더가 일치해야 하는 값(PCRE 정규식)입니다. 헤더가 존재하는지만 확인하려면 비워 두십시오. ^ 와 $ 로 고정하십시오: 기본적으로 일치는 고정되지 않습니다."
+      },
+      "WHITELIST_COUNTRY": {
+        "label": "국가 화이트리스트",
+        "help": "클라이언트의 국가가 목록에 없으면 접근을 거부합니다(ISO 3166-1 alpha-2 형식, 공백으로 구분). @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH, @BENELUX와 같은 그룹 토큰도 사용할 수 있습니다."
+      }
+    }
+  }
+}

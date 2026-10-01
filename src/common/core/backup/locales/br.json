@@ -1,0 +1,35 @@
+{
+  "backup": {
+    "meta": {
+      "name": "Backup",
+      "description": "Faça backup dos seus dados em um local personalizado. Garanta a segurança e a disponibilidade dos seus arquivos importantes com backups regulares."
+    },
+    "widgets": {
+      "date_last_backup": {
+        "title": "Último backup"
+      }
+    },
+    "settings": {
+      "USE_BACKUP": {
+        "label": "Ativar backup automático",
+        "help": "Habilita ou desabilita o recurso de backup"
+      },
+      "BACKUP_SCHEDULE": {
+        "label": "Agendamento do backup",
+        "help": "Frequência do backup (diária, semanal ou mensal)"
+      },
+      "BACKUP_ROTATION": {
+        "label": "Rotação de backup",
+        "help": "Número de backups a manter"
+      },
+      "BACKUP_ROTATION_STRATEGY": {
+        "label": "Estratégia de rotação de backup",
+        "help": "Como os backups antigos são escolhidos para exclusão: fifo mantém os mais recentes, hanoi mantém uma escada da Torre de Hanói (mais detalhada perto do presente, mais esparsa quanto mais distante) para o mesmo número de arquivos."
+      },
+      "BACKUP_DIRECTORY": {
+        "label": "Diretório de backup",
+        "help": "Diretório onde o backup será armazenado"
+      }
+    }
+  }
+}

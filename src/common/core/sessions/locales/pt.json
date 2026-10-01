@@ -1,0 +1,42 @@
+{
+  "sessions": {
+    "meta": {
+      "name": "Sessões",
+      "description": "Gestão das sessões usadas por outros plugins."
+    },
+    "settings": {
+      "SESSIONS_SECRET": {
+        "label": "Secret das sessões",
+        "help": "Secret utilizado para cifrar as variáveis de sessão que armazenam dados relacionados com os desafios."
+      },
+      "SESSIONS_NAME": {
+        "label": "Nome das sessões",
+        "help": "Nome do cookie atribuído aos clientes."
+      },
+      "SESSIONS_DOMAIN": {
+        "label": "Domínio do cookie de sessão",
+        "help": "Atributo de domínio definido no cookie de sessão para este servidor (por ex. `example.com` ou `.example.com`). Deixe vazio para manter o cookie limitado ao host exato. Defina-o como um domínio registável superior para partilhar a sessão (e, portanto, o estado antibot/desafio) entre subdomínios irmãos. Numa configuração multisite, configure isto por servidor para que inquilinos não relacionados nunca recebam um atributo `Domain` entre inquilinos."
+      },
+      "SESSIONS_IDLING_TIMEOUT": {
+        "label": "Tempo limite de inatividade das sessões",
+        "help": "Tempo máximo (em segundos) de inatividade antes de a sessão ser invalidada."
+      },
+      "SESSIONS_ROLLING_TIMEOUT": {
+        "label": "Tempo limite contínuo das sessões",
+        "help": "Tempo máximo (em segundos) antes de uma sessão ter de ser renovada."
+      },
+      "SESSIONS_ABSOLUTE_TIMEOUT": {
+        "label": "Tempo limite absoluto das sessões",
+        "help": "Tempo máximo (em segundos) antes de uma sessão ser destruída."
+      },
+      "SESSIONS_CHECK_IP": {
+        "label": "Verificação de IP das sessões",
+        "help": "Destrói a sessão se o endereço IP for diferente do original."
+      },
+      "SESSIONS_CHECK_USER_AGENT": {
+        "label": "Verificação de User-Agent das sessões",
+        "help": "Destrói a sessão se o User-Agent for diferente do original."
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "whitelist": {
+    "meta": {
+      "name": "Liste blanche",
+      "description": "Autorise l'accès selon des listes blanches internes et externes d'IP/réseaux/rDNS/ASN."
+    },
+    "widgets": {
+      "counter_passed_whitelist": {
+        "title": "LISTE BLANCHE",
+        "subtitle": "Requête autorisée"
+      }
+    },
+    "settings": {
+      "USE_WHITELIST": {
+        "label": "Activer la liste blanche",
+        "help": "Active la fonctionnalité de liste blanche."
+      },
+      "WHITELIST_IP": {
+        "label": "IP/réseau de la liste blanche",
+        "help": "Liste d'IP/réseaux, séparés par des espaces, à mettre dans la liste blanche."
+      },
+      "WHITELIST_RDNS": {
+        "label": "DNS inversé de la liste blanche",
+        "help": "Liste de suffixes DNS inversé, séparés par des espaces, à mettre en liste blanche."
+      },
+      "WHITELIST_RDNS_GLOBAL": {
+        "label": "DNS inversé liste blanche IP globales uniquement",
+        "help": "N'effectuer les vérifications RDNS de liste blanche que sur les adresses IP globales."
+      },
+      "WHITELIST_ASN": {
+        "label": "ASN de la liste blanche",
+        "help": "Liste de numéros ASN, séparés par des espaces, à mettre en liste blanche."
+      },
+      "WHITELIST_USER_AGENT": {
+        "label": "User-Agent de la liste blanche",
+        "help": "Liste de User-Agent (regex PCRE), séparés par des espaces, à mettre en liste blanche."
+      },
+      "WHITELIST_URI": {
+        "label": "URI de la liste blanche",
+        "help": "Liste d'URI (regex PCRE), séparées par des espaces, à mettre en liste blanche."
+      },
+      "WHITELIST_RULE": {
+        "label": "Règle de liste blanche",
+        "help": "Règle composite : chaque terme doit correspondre pour que la règle corresponde. Les termes sont séparés par « AND » (en majuscules) et chacun est de la forme [NOT ]<kind>:<value>, où <kind> est ip, country, asn, rdns, ua (alias user_agent) ou uri. Exemple : ip:10.0.0.0/8 AND NOT ua:^curl. Les règles sont combinées entre elles et avec les listes ci-dessus par un OU logique. Une valeur peut être un jeton de groupe de ressources comme @office. Les services stream n'évaluent que ip, country, asn et rdns."
+      },
+      "WHITELIST_HEADER_NAME": {
+        "label": "Nom d'en-tête de liste blanche",
+        "help": "Nom d'un en-tête de requête qui ajoute la requête à la liste blanche. N'importe quel client peut envoyer cet en-tête : traitez-le comme un secret partagé, uniquement via HTTPS."
+      },
+      "WHITELIST_HEADER_VALUE": {
+        "label": "Valeur d'en-tête de liste blanche",
+        "help": "Valeur (regex PCRE) que l'en-tête doit respecter pour ajouter la requête à la liste blanche. Laisser vide pour correspondre à la simple présence de l'en-tête. Ancrez-la avec ^ et $ : la correspondance n'est pas ancrée par défaut."
+      },
+      "WHITELIST_IP_URLS": {
+        "label": "IP/réseau de la liste blanche (URL)",
+        "help": "Liste d'URL, séparées par des espaces, contenant des IP/réseaux fiables à mettre en liste blanche. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url."
+      },
+      "WHITELIST_RDNS_URLS": {
+        "label": "DNS inversé de la liste blanche (URL)",
+        "help": "Liste d'URL, séparées par des espaces, contenant des suffixes DNS inversé à mettre en liste blanche. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url."
+      },
+      "WHITELIST_ASN_URLS": {
+        "label": "ASN de la liste blanche (URL)",
+        "help": "Liste d'URL, séparées par des espaces, contenant des ASN à mettre en liste blanche. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url."
+      },
+      "WHITELIST_USER_AGENT_URLS": {
+        "label": "User-Agent de la liste blanche (URL)",
+        "help": "Liste d'URL, séparées par des espaces, contenant des User-Agent fiables à mettre en liste blanche. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url."
+      },
+      "WHITELIST_URI_URLS": {
+        "label": "URI de la liste blanche (URL)",
+        "help": "Liste d'URL, séparées par des espaces, contenant des URI malveillantes à mettre en liste blanche. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url."
+      }
+    }
+  }
+}

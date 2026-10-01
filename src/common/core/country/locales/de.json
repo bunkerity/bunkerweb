@@ -1,0 +1,36 @@
+{
+  "country": {
+    "meta": {
+      "name": "Land",
+      "description": "Verweigert den Zugriff anhand des Landes der Client-IP."
+    },
+    "widgets": {
+      "counter_failed_country": {
+        "title": "Land",
+        "subtitle": "Anfrage blockiert"
+      }
+    },
+    "settings": {
+      "BLACKLIST_COUNTRY": {
+        "label": "Länder-Sperrliste",
+        "help": "Verweigert den Zugriff, wenn sich das Land des Clients in der Liste befindet (Format ISO 3166-1 alpha-2, durch Leerzeichen getrennt). Sie können auch Gruppen-Tokens wie @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH und @BENELUX verwenden."
+      },
+      "COUNTRY_IGNORE_URI": {
+        "label": "Ignorierte URI",
+        "help": "Liste von PCRE-Regex-Mustern (durch Leerzeichen getrennt) für URIs, die von den Länderprüfungen ausgeschlossen werden sollen. Die Muster werden mit dem Pfad und der vollständigen Anfrage-URI samt Query-String abgeglichen."
+      },
+      "COUNTRY_IGNORE_HEADER_NAME": {
+        "label": "Ignorierter Header-Name",
+        "help": "Name eines Anfrage-Headers, der die Anfrage von der Länderprüfung befreit. Jeder Client kann diesen Header senden: behandeln Sie ihn wie ein gemeinsames Geheimnis, nur über HTTPS."
+      },
+      "COUNTRY_IGNORE_HEADER_VALUE": {
+        "label": "Ignorierter Header-Wert",
+        "help": "Wert (PCRE-Regex), dem der Header entsprechen muss, damit die Anfrage von der Länderprüfung befreit wird. Leer lassen, um bereits bei Vorhandensein des Headers zu greifen. Verankern Sie ihn mit ^ und $: der Abgleich ist standardmäßig nicht verankert."
+      },
+      "WHITELIST_COUNTRY": {
+        "label": "Länder-Positivliste",
+        "help": "Verweigert den Zugriff, wenn sich das Land des Clients nicht in der Liste befindet (Format ISO 3166-1 alpha-2, durch Leerzeichen getrennt). Sie können auch Gruppen-Tokens wie @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH und @BENELUX verwenden."
+      }
+    }
+  }
+}

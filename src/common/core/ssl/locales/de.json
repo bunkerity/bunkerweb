@@ -1,0 +1,38 @@
+{
+  "ssl": {
+    "meta": {
+      "name": "SSL",
+      "description": "Verwaltet die SSL/TLS-bezogenen Einstellungen."
+    },
+    "settings": {
+      "REDIRECT_HTTP_TO_HTTPS": {
+        "label": "HTTP zu HTTPS umleiten",
+        "help": "Leitet alle HTTP-Anfragen zu HTTPS um."
+      },
+      "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+        "label": "Automatische Umleitung HTTP zu HTTPS",
+        "help": "Versucht zu erkennen, ob HTTPS verwendet wird, und aktiviert in diesem Fall die Umleitung von HTTP zu HTTPS."
+      },
+      "SSL_PROTOCOLS": {
+        "label": "SSL-Protokolle",
+        "help": "Die unterstützte Version von TLS. Wir empfehlen den Standardwert TLSv1.2 TLSv1.3 aus Kompatibilitätsgründen."
+      },
+      "SSL_CIPHERS_LEVEL": {
+        "label": "SSL-Cipher-Suite-Stufe",
+        "help": "Voreingestellte Sicherheitsstufe für SSL-Cipher-Suites. 'Modern' ist am sichersten, funktioniert aber möglicherweise nicht mit älteren Geräten."
+      },
+      "SSL_CIPHERS_CUSTOM": {
+        "label": "Benutzerdefinierte SSL-Ciphers",
+        "help": "Benutzerdefinierte SSL-Cipher-Suite-Zeichenkette. Falls angegeben, überschreibt sie die SSL-Cipher-Suite-Stufe. Leer lassen, um die stufenbasierte Konfiguration zu verwenden."
+      },
+      "SSL_ECDH_CURVE": {
+        "label": "SSL-ECDH-Kurven",
+        "help": "Bevorzugte ECDH-Kurven (TLS-Gruppen) für den Schlüsselaustausch. Verwenden Sie \"auto\" für eine intelligente Auswahl (bevorzugt PQC-Gruppen wie X25519MLKEM768 auf OpenSSL 3.5+, sofern verfügbar)."
+      },
+      "SSL_SESSION_CACHE_SIZE": {
+        "label": "SSL-Sitzungscache-Größe",
+        "help": "Größe des SSL-Sitzungscaches (z. B. '10m' für 10 Megabyte, '512k' für 512 Kilobyte). Auf 'off' oder 'none' setzen, um das Sitzungscaching zu deaktivieren."
+      }
+    }
+  }
+}

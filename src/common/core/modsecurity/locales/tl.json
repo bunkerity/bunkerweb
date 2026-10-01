@@ -1,0 +1,62 @@
+{
+  "modsecurity": {
+    "meta": {
+      "name": "ModSecurity",
+      "description": "Pamamahala ng ModSecurity WAF."
+    },
+    "settings": {
+      "USE_MODSECURITY": {
+        "label": "Gamitin ang ModSecurity",
+        "help": "I-enable ang ModSecurity WAF."
+      },
+      "USE_MODSECURITY_CRS": {
+        "label": "Gamitin ang Core Rule Set",
+        "help": "I-enable ang OWASP Core Rule Set."
+      },
+      "USE_MODSECURITY_CRS_PLUGINS": {
+        "label": "Gamitin ang Core Rule Set Plugins",
+        "help": "I-enable ang OWASP Core Rule Set plugin."
+      },
+      "MODSECURITY_CRS_VERSION": {
+        "label": "Core Rule Set Version",
+        "help": "Bersyon ng OWASP Core Rule Set na gagamitin kasama ang ModSecurity (3 o 4). Tandaan: deprecated na ang nightly at magiging default sa v4."
+      },
+      "MODSECURITY_CRS_PLUGINS": {
+        "label": "Core Rule Set Plugins",
+        "help": "Listahan ng mga OWASP CRS plugin (plugin-name[/tag] o URL) na ida-download at i-install (pinaghihiwalay ng space). (Hindi compatible sa CRS version 3)"
+      },
+      "USE_MODSECURITY_GLOBAL_CRS": {
+        "label": "ModSecurity Global CRS Mode",
+        "help": "Gamitin ang ModSecurity CRS sa global mode para mapahusay ang pag-load ng rule kapag marami kang service."
+      },
+      "MODSECURITY_SEC_AUDIT_ENGINE": {
+        "label": "SecAuditEngine",
+        "help": "SecAuditEngine directive ng ModSecurity."
+      },
+      "MODSECURITY_SEC_RULE_ENGINE": {
+        "label": "SecRuleEngine",
+        "help": "SecRuleEngine directive ng ModSecurity."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+        "label": "SecAuditLogParts",
+        "help": "SecAuditLogParts directive ng ModSecurity. Lagi namang awtomatikong isinasama ang Parts A at Z bilang prefix at suffix."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG": {
+        "label": "SecAuditLog",
+        "help": "Path ng file kung saan isinusulat ng ModSecurity ang mga audit entry. Dapat itong regular na file: ni-lock ito ng Serial audit writer, na hindi posible sa pipe o stream. Dapat magtapos sa .log, sa ilalim ng /var/log/bunkerweb/."
+      },
+      "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
+        "label": "SecRequestBodyNoFilesLimit",
+        "help": "SecRequestBodyNoFilesLimit directive ng ModSecurity."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
+        "label": "SecRequestBodyLimit",
+        "help": "SecRequestBodyLimit directive ng ModSecurity. Pinakamataas na sukat ng request body na susuriin ng ModSecurity (k/m/g suffixes, hal. 10m). Ang mga request na lumagpas sa limit na ito ay susunod sa SecRequestBodyLimitAction (Reject bilang default). Kapag blangko, kinukuha mula sa MAX_CLIENT_SIZE. I-set sa 0 para walang limit (hindi inirerekomenda, maaaring magdulot ng out-of-memory kill). Pina-enforce muna ng NGINX ang MAX_CLIENT_SIZE, kaya walang epekto ang mas mataas na value dito. Ang REVERSE_PROXY_MAX_CLIENT_SIZE ay nag-o-override sa value na ito para sa sarili nitong location."
+      },
+      "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION": {
+        "label": "SecRequestBodyLimitAction",
+        "help": "SecRequestBodyLimitAction directive ng ModSecurity. Ang Reject ay nagbabalik ng HTTP 413 para sa mga request na lumagpas sa body limit. Sinusuri lang ng ProcessPartial ang bahaging nasa loob ng limit at ipinapasa ang buong request sa backend (kapaki-pakinabang para sa malalaking file upload, pero binabawasan ang saklaw ng WAF para sa mga content type na hindi file tulad ng JSON o form data)."
+      }
+    }
+  }
+}

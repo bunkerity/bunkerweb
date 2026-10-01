@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "Настройка сервера Redis при использовании BunkerWeb в кластерном режиме."
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "СТАТУС REDIS"
+      },
+      "counter_redis_nb_keys": {
+        "title": "КЛЮЧИ REDIS",
+        "subtitle": "Количество ключей"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "Активировать Redis",
+        "help": "Активировать Redis."
+      },
+      "REDIS_HOST": {
+        "label": "Сервер Redis",
+        "help": "IP-адрес или имя хоста сервера Redis."
+      },
+      "REDIS_PORT": {
+        "label": "Порт Redis",
+        "help": "Порт сервера Redis."
+      },
+      "REDIS_DATABASE": {
+        "label": "База данных Redis",
+        "help": "Номер базы данных Redis."
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "Использовать соединение SSL/TLS с сервером Redis."
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Проверка SSL/TLS Redis",
+        "help": "Проверять сертификат сервера Redis."
+      },
+      "REDIS_SSL_CA": {
+        "label": "Пакет CA SSL/TLS Redis",
+        "help": "Путь к пакету CA в формате PEM, используемому для проверки сертификата сервера Redis/Valkey (частный CA); не задано означает системное хранилище доверия. При задании ему доверяют Python-клиенты (брокер Celery, задания, ограничитель скорости API, bwcli, веб-интерфейс), и он добавляется в пакет доверия NGINX Lua, поэтому путь запроса тоже ему доверяет. Читается там, где генерируется конфигурация, и каждым клиентом, поэтому файл должен существовать по этому пути там же; отсутствующий или недействительный пакет приводит к сбою генерации конфигурации."
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Тайм-аут Redis (мс)",
+        "help": "Тайм-аут сервера Redis (в мс) для подключения, чтения и записи."
+      },
+      "REDIS_USERNAME": {
+        "label": "Имя пользователя Redis",
+        "help": "Имя пользователя Redis, используемое в команде AUTH."
+      },
+      "REDIS_PASSWORD": {
+        "label": "Пароль Redis",
+        "help": "Пароль Redis, используемый в команде AUTH."
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Хосты sentinel Redis",
+        "help": "Хосты sentinel Redis в формате host:[port], разделённые пробелами."
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Имя пользователя sentinel Redis",
+        "help": "Имя пользователя sentinel Redis."
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Пароль sentinel Redis",
+        "help": "Пароль sentinel Redis."
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Мастер sentinel Redis",
+        "help": "Имя мастера sentinel Redis."
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Простой keepalive Redis (мс)",
+        "help": "Максимальное время простоя (в мс) перед закрытием соединения redis в пуле."
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Пул keepalive Redis",
+        "help": "Максимальное количество соединений Redis, удерживаемых в пуле на один воркер NGINX. Количество соединений в установившемся режиме составляет примерно nginx_workers x pool x instances и должно оставаться в пределах лимита maxclients Redis/Valkey."
+      }
+    }
+  }
+}

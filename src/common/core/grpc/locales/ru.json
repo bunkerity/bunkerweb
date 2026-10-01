@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "Управляет конфигурациями обратного прокси gRPC."
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "Использовать gRPC",
+        "help": "Активировать режим обратного прокси gRPC."
+      },
+      "GRPC_HOST": {
+        "label": "Хост gRPC",
+        "help": "Полное значение upstream, используемое grpc_pass (например, grpc://app:50051 или grpcs://app:443)."
+      },
+      "GRPC_URL": {
+        "label": "URL gRPC",
+        "help": "URL location, который будет проксироваться на upstream gRPC. Значение, начинающееся с ^ или заканчивающееся на $, трактуется как regex-локация. При необходимости добавьте перед ним ~, ~*, = или ^~ и один пробел, чтобы явно задать модификатор location nginx; в остальной части значения пробелы, ;, { и } не допускаются."
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "Пользовательский хост gRPC",
+        "help": "Переопределить заголовок Host, отправляемый на upstream gRPC."
+      },
+      "GRPC_HEADERS": {
+        "label": "Заголовки gRPC",
+        "help": "Список заголовков для отправки на upstream gRPC, разделённых точкой с запятой (значения для директивы grpc_set_header)."
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "Скрытие заголовков gRPC",
+        "help": "Список заголовков, скрываемых от клиентов при получении с upstream gRPC (значения для директивы grpc_hide_header)."
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "Заголовки gRPC для клиента",
+        "help": "Список заголовков для отправки клиенту, разделённых точкой с запятой (значения для директивы add_header)."
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "Пропуск заголовков gRPC",
+        "help": "Список заголовков, пропускаемых с upstream gRPC к клиенту, даже если они скрыты по умолчанию, разделённых пробелами (значения для директивы grpc_pass_header)."
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "Игнорирование заголовков gRPC",
+        "help": "Список заголовков с upstream gRPC, которые не должны обрабатываться NGINX, разделённых пробелами (значения для директивы grpc_ignore_headers)."
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "Разрешить подчёркивания в заголовках",
+        "help": "Включить или отключить директиву underscores_in_headers."
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "Перехватывать ошибки",
+        "help": "Перехватывать и переписывать ошибки upstream gRPC."
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "Размер буфера gRPC",
+        "help": "Значение для директивы grpc_buffer_size (размер буфера, используемого для чтения ответа с upstream gRPC)."
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "Тайм-аут подключения gRPC",
+        "help": "Тайм-аут при подключении к upstream gRPC."
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "Тайм-аут чтения gRPC",
+        "help": "Тайм-аут при чтении с upstream gRPC."
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "Тайм-аут отправки gRPC",
+        "help": "Тайм-аут при отправке на upstream gRPC."
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "Keepalive сокета gRPC",
+        "help": "Включить или отключить keepalive для сокетов upstream gRPC."
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "Включить или отключить отправку SNI на сервер upstream gRPC."
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "Имя SNI SSL",
+        "help": "Устанавливает хост SNI, отправляемый на сервер upstream gRPC."
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "Проверка SSL",
+        "help": "Включить или отключить проверку SSL-сертификата сервера upstream gRPC."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Приоритет доверенного сертификата",
+        "help": "Источник доверенного сертификата CA: путь к файлу или данные base64/PEM (file или data)."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "Путь доверенного сертификата SSL",
+        "help": "Путь к пакету CA в формате PEM, используемому для проверки сертификата upstream gRPC (приоритет 'file', читается планировщиком, который его кеширует и распространяет). Требуется для проверки; для публичных upstream используйте системный пакет (например, /etc/ssl/certs/ca-certificates.crt). Если не задано, проверка отключена."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Данные доверенного сертификата (base64/plaintext)",
+        "help": "Доверенный сертификат CA в виде base64 или открытого текста PEM (приоритет 'data')."
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "Глубина проверки SSL",
+        "help": "Устанавливает глубину проверки в цепочке сертификатов сервера upstream gRPC."
+      },
+      "GRPC_SSL_CRL": {
+        "label": "Путь CRL",
+        "help": "Путь к списку отзыва сертификатов PEM, используемому при проверке сервера upstream gRPC. Имеет приоритет над GRPC_SSL_CRL_DATA. Применяется только когда GRPC_SSL_VERIFY имеет значение yes. Заданный, но отсутствующий путь является ошибкой; GRPC_SSL_CRL_DATA не используется как запасной вариант."
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "Данные CRL (base64/plaintext)",
+        "help": "Список отзыва сертификатов в виде base64 или открытого текста PEM. Используется только, если настройка пути CRL пуста."
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "Протоколы SSL upstream",
+        "help": "Версии TLS, предлагаемые серверу upstream gRPC (значение директивы grpc_ssl_protocols). Пустое сохраняет значение по умолчанию NGINX."
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "Шифры SSL upstream",
+        "help": "Строка набора шифров, предлагаемая серверу upstream gRPC (значение директивы grpc_ssl_ciphers). Пустое сохраняет значение по умолчанию NGINX."
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "Следующий upstream gRPC",
+        "help": "Условия выбора следующего сервера upstream gRPC."
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "Тайм-аут следующего upstream gRPC",
+        "help": "Ограничение по времени на передачу запроса следующему серверу upstream gRPC."
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "Попытки следующего upstream gRPC",
+        "help": "Максимальное количество попыток передачи запроса следующему серверу upstream gRPC."
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "Запрос аутентификации gRPC",
+        "help": "Включить аутентификацию с использованием внешнего провайдера (значение директивы auth_request)."
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "URL входа для запроса аутентификации",
+        "help": "Перенаправлять клиентов на URL входа при использовании GRPC_AUTH_REQUEST (используется, когда вызов auth_request вернул 401). Поддерживаются переменные NGINX, такие как $scheme, $host и $request_uri."
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "Переменные запроса аутентификации gRPC",
+        "help": "Список переменных для установки от провайдера аутентификации, разделённых точкой с запятой (значения директив auth_request_set)."
+      },
+      "GRPC_INCLUDES": {
+        "label": "Включения gRPC",
+        "help": "Дополнительная конфигурация для включения в блок location gRPC, разделённая пробелами."
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "Максимальный размер тела gRPC",
+        "help": "Максимальный размер тела для этой location gRPC (0 для неограниченного). Если пусто, применяется MAX_CLIENT_SIZE сервиса."
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "Приоритет сертификата клиента",
+        "help": "Источник сертификата клиента и ключа, используемых для mutual TLS с upstream: путь к файлу или данные base64/PEM (file или data)."
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "Путь клиентского сертификата SSL",
+        "help": "Путь к клиентскому сертификату PEM, который BunkerWeb предъявляет upstream gRPC (mutual TLS, приоритет file). Требует соответствующий GRPC_SSL_CLIENT_KEY; задание trusted-cert кеширует и распространяет эту принадлежащую gRPC идентичность."
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "Данные сертификата клиента (base64/plaintext)",
+        "help": "Сертификат клиента в виде base64 или открытого текста PEM (приоритет 'data')."
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "Путь клиентского ключа SSL",
+        "help": "Путь к приватному ключу PEM, соответствующему клиентскому сертификату (приоритет 'file'). Ключ кешируется и распространяется на инстансы, как и любой другой артефакт задания, и записывается с правами доступа только для владельца/группы."
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "Данные ключа клиента (base64/plaintext)",
+        "help": "Приватный ключ клиента в виде base64 или открытого текста PEM (приоритет 'data'). По возможности предпочитайте путь к файлу: ключ, заданный здесь, хранится как значение настройки."
+      }
+    }
+  }
+}

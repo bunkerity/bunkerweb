@@ -1,0 +1,186 @@
+{
+  "templates": {
+    "templates": {
+      "api": {
+        "steps": {
+          "0": {
+            "title": "Service - Front service",
+            "subtitle": "Configure the server name and SSL/TLS settings"
+          },
+          "1": {
+            "title": "Service - Upstream server",
+            "subtitle": "Configure the upstream server to be protected by BunkerWeb"
+          },
+          "2": {
+            "title": "API - Rate limiting",
+            "subtitle": "Configure rate limiting settings - keep in mind that the API has internal rate limiting as well"
+          },
+          "3": {
+            "title": "API - Miscellaneous settings",
+            "subtitle": "Other important settings for proper API functioning"
+          }
+        }
+      },
+      "high": {
+        "steps": {
+          "0": {
+            "title": "Web service - Front service",
+            "subtitle": "Configure your web service facing your clients"
+          },
+          "1": {
+            "title": "Web service - Upstream server",
+            "subtitle": "Configure the upstream server to be protected by BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - General",
+            "subtitle": "Configure the settings related to the HTTP(S) protocol"
+          },
+          "3": {
+            "title": "HTTP - Headers",
+            "subtitle": "Configure the settings related to the HTTP headers"
+          },
+          "4": {
+            "title": "Security - Bad behavior",
+            "subtitle": "Configure the settings related to the automatic ban when a bad behavior is detected."
+          },
+          "5": {
+            "title": "Security - Blacklisting",
+            "subtitle": "Configure the settings related to the external blacklists."
+          },
+          "6": {
+            "title": "Security - Limiting",
+            "subtitle": "Configure the settings related to limiting requests and connections."
+          },
+          "7": {
+            "title": "Security - Antibot",
+            "subtitle": "Configure the settings about bot detection"
+          },
+          "8": {
+            "title": "Security - Auth basic",
+            "subtitle": "Configure HTTP basic authentication"
+          },
+          "9": {
+            "title": "Security - Country",
+            "subtitle": "Configure the settings about country access policy"
+          },
+          "10": {
+            "title": "Security - Reverse scan",
+            "subtitle": "Configure the settings about scanning clients ports"
+          },
+          "11": {
+            "title": "Security - ModSecurity",
+            "subtitle": "Configure the settings related to the ModSecurity WAF"
+          }
+        }
+      },
+      "low": {
+        "steps": {
+          "0": {
+            "title": "Web service - Front service",
+            "subtitle": "Configure your web service facing your clients"
+          },
+          "1": {
+            "title": "Web service - Upstream server",
+            "subtitle": "Configure the upstream server to be protected by BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - General",
+            "subtitle": "Configure the settings related to the HTTP(S) protocol"
+          },
+          "3": {
+            "title": "HTTP - Headers",
+            "subtitle": "Configure the settings related to the HTTP headers"
+          },
+          "4": {
+            "title": "Security - Bad behavior",
+            "subtitle": "Configure the settings related to the automatic ban when a bad behavior is detected."
+          },
+          "5": {
+            "title": "Security - Blacklisting",
+            "subtitle": "Configure the settings related to the external blacklists."
+          },
+          "6": {
+            "title": "Security - Limiting",
+            "subtitle": "Configure the settings related to limiting requests and connections."
+          },
+          "7": {
+            "title": "Security - Antibot",
+            "subtitle": "Configure the settings about bot detection"
+          },
+          "8": {
+            "title": "Security - Auth basic",
+            "subtitle": "Configure HTTP basic authentication"
+          },
+          "9": {
+            "title": "Security - Country",
+            "subtitle": "Configure the settings about country access policy"
+          },
+          "10": {
+            "title": "Security - ModSecurity",
+            "subtitle": "Configure the settings related to the ModSecurity WAF"
+          }
+        }
+      },
+      "medium": {
+        "steps": {
+          "0": {
+            "title": "Web service - Front service",
+            "subtitle": "Configure your web service facing your clients"
+          },
+          "1": {
+            "title": "Web service - Upstream server",
+            "subtitle": "Configure the upstream server to be protected by BunkerWeb"
+          },
+          "2": {
+            "title": "HTTP - General",
+            "subtitle": "Configure the settings related to the HTTP(S) protocol"
+          },
+          "3": {
+            "title": "HTTP - Headers",
+            "subtitle": "Configure the settings related to the HTTP headers"
+          },
+          "4": {
+            "title": "Security - Bad behavior",
+            "subtitle": "Configure the settings related to the automatic ban when a bad behavior is detected."
+          },
+          "5": {
+            "title": "Security - Blacklisting",
+            "subtitle": "Configure the settings related to the external blacklists."
+          },
+          "6": {
+            "title": "Security - Limiting",
+            "subtitle": "Configure the settings related to limiting requests and connections."
+          },
+          "7": {
+            "title": "Security - Antibot",
+            "subtitle": "Configure the settings about bot detection"
+          },
+          "8": {
+            "title": "Security - Auth basic",
+            "subtitle": "Configure HTTP basic authentication"
+          },
+          "9": {
+            "title": "Security - Country",
+            "subtitle": "Configure the settings about country access policy"
+          },
+          "10": {
+            "title": "Security - Reverse scan",
+            "subtitle": "Configure the settings about scanning clients ports"
+          },
+          "11": {
+            "title": "Security - ModSecurity",
+            "subtitle": "Configure the settings related to the ModSecurity WAF"
+          }
+        }
+      },
+      "ui": {
+        "steps": {
+          "0": {
+            "title": "Dummy step",
+            "subtitle": "This is a dummy step to show the basic settings when using the web UI"
+          }
+        }
+      }
+    }
+  }
+}

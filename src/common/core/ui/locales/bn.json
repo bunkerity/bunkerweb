@@ -1,0 +1,18 @@
+{
+  "ui": {
+    "meta": {
+      "name": "UI",
+      "description": "BunkerWeb-এর UI সহজে সংযুক্ত করে।"
+    },
+    "settings": {
+      "USE_UI": {
+        "label": "UI ব্যবহার করুন",
+        "help": "UI ব্যবহার করুন"
+      },
+      "UI_HOST": {
+        "label": "UI হোস্ট",
+        "help": "প্রাথমিক সেটআপের জন্য ব্যবহৃত ওয়েব UI-এর ঠিকানা"
+      }
+    }
+  }
+}

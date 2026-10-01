@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "管理 security.txt 檔案。一項提議中的標準,允許網站定義其安全政策。"
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "使用 security.txt",
+        "help": "啟用 security.txt 檔案。"
+      },
+      "SECURITYTXT_URI": {
+        "label": "Security.txt URI",
+        "help": "指明可存取 \"security.txt\" 檔案的 URI。"
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Security.txt 聯絡方式",
+        "help": "指明研究人員回報安全漏洞時應使用的方式,例如電子郵件地址、電話號碼,和/或包含聯絡資訊的網頁。(若該值為空,由於這是必填欄位,將不會建立 security.txt 檔案)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Security.txt 過期時間",
+        "help": "指明在此日期和時間之後,\"security.txt\" 檔案中包含的資料將被視為過時,不應再使用(若該值為空,則該值將一律為目前日期和時間 + 1 年)。"
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Security.txt 加密",
+        "help": "指明安全研究人員進行加密通訊時應使用的加密金鑰。"
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Security.txt 致謝",
+        "help": "指明一個連結,指向安全研究人員因其回報而獲得致謝的頁面。"
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Security.txt 慣用語言",
+        "help": "可用於指明提交安全報告時慣用的一組自然語言。"
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Security.txt 標準 URI",
+        "help": "指明 \"security.txt\" 檔案所在的標準 URI,通常類似於 \"https://example.com/.well-known/security.txt\"。(若該值為空,預設值將根據網站 URL + SECURITYTXT_URI 自動產生)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Security.txt 政策",
+        "help": "指明指向漏洞揭露政策所在位置的連結。"
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Security.txt 招募",
+        "help": "用於連結到廠商與安全相關的招募職缺。"
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "指向您的 CSAF(Common Security Advisory Framework)提供者的 provider-metadata.json 的連結。"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "Mengelola PHP-FPM lokal atau jarak jauh."
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "PHP Jarak Jauh",
+        "help": "Hostname instance PHP-FPM jarak jauh."
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "Path PHP Jarak Jauh",
+        "help": "Folder root yang berisi file di instance PHP-FPM jarak jauh."
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "Port PHP Jarak Jauh",
+        "help": "Port instance PHP-FPM jarak jauh."
+      },
+      "LOCAL_PHP": {
+        "label": "PHP Lokal",
+        "help": "Path ke file socket PHP-FPM."
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "Path PHP Lokal",
+        "help": "Folder root yang berisi file di instance PHP-FPM lokal."
+      }
+    }
+  }
+}

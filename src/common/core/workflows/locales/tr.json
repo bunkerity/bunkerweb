@@ -1,0 +1,14 @@
+{
+  "workflows": {
+    "meta": {
+      "name": "Güvenlik iş akışları",
+      "description": "Yeniden kullanılabilir güvenlik politikaları oluşturun: IP, ülke, ASN, URI ve yöntem üzerinden bir koşul ağacını isteğe bağlı bir hız eşiğiyle ve tek bir sonlandırıcı eylemle (sorgu, engelleme veya yönlendirme) eşleştiren sıralı kurallar."
+    },
+    "settings": {
+      "WORKFLOWS_REGEX_BUDGET": {
+        "label": "İş akışı regex bütçesi",
+        "help": "Tüm iş akışı kuralları genelinde derlenen farklı düzenli ifadelerin en fazla sayısı. NGINX her eklenti arasında tek bir regex önbelleği paylaşır, bu nedenle bu bütçeyi aşan kurallar, tüm örneği sessizce düşürmek yerine devre dışı bırakılır."
+      }
+    }
+  }
+}

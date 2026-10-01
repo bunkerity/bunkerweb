@@ -1,0 +1,30 @@
+{
+  "gzip": {
+    "meta": {
+      "name": "Gzip",
+      "description": "使用 gzip 算法压缩 HTTP 请求。"
+    },
+    "settings": {
+      "USE_GZIP": {
+        "label": "使用 Gzip",
+        "help": "启用或禁用 Gzip 压缩。默认关闭,这也是 NGINX 本身的默认值。此设置按服务单独生效:对于响应中同时携带密钥(CSRF token、API key)并回显攻击者提供的输入的任何服务,请将其保持关闭,因为这种组合正是 BREACH 攻击的前提条件——另请注意,无论 GZIP_TYPES 中列出什么,text/html 始终会被压缩。BunkerWeb Web UI 就是这样一种服务。"
+      },
+      "GZIP_TYPES": {
+        "label": "MIME 类型",
+        "help": "将使用 gzip 压缩的 MIME 类型列表。"
+      },
+      "GZIP_MIN_LENGTH": {
+        "label": "最小长度",
+        "help": "应用 Gzip 压缩所需的最小响应大小(以字节为单位)。"
+      },
+      "GZIP_COMP_LEVEL": {
+        "label": "压缩级别",
+        "help": "Gzip 的压缩级别(1 = 最低压缩,9 = 最大压缩)。"
+      },
+      "GZIP_PROXIED": {
+        "label": "代理请求",
+        "help": "指定哪些代理请求应被压缩。"
+      }
+    }
+  }
+}

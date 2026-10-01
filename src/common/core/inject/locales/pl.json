@@ -1,0 +1,18 @@
+{
+  "inject": {
+    "meta": {
+      "name": "Wstrzykiwanie HTML",
+      "description": "Wstrzykuje niestandardowy kod HTML przed znacznikiem </body> lub </head>."
+    },
+    "settings": {
+      "INJECT_BODY": {
+        "label": "Kod HTML body",
+        "help": "Kod HTML do wstrzyknięcia przed znacznikiem </body>."
+      },
+      "INJECT_HEAD": {
+        "label": "Kod HTML head",
+        "help": "Kod HTML do wstrzyknięcia przed znacznikiem </head>."
+      }
+    }
+  }
+}

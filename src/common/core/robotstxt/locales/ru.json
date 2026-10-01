@@ -1,0 +1,54 @@
+{
+  "robotstxt": {
+    "meta": {
+      "name": "Robots.txt",
+      "description": "Управляет файлом robots.txt. Стандарт для управления доступом поисковых роботов к вашему сайту."
+    },
+    "settings": {
+      "USE_ROBOTSTXT": {
+        "label": "Использовать robots.txt",
+        "help": "Включить файл robots.txt."
+      },
+      "ROBOTSTXT_COMMUNITY_LISTS": {
+        "label": "Списки сообщества robots.txt",
+        "help": "Выберите поддерживаемые сообществом списки для включения в robots.txt."
+      },
+      "ROBOTSTXT_URLS": {
+        "label": "URL Robots.txt",
+        "help": "Список URL, разделённых пробелами, содержащих правила robots.txt. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+      },
+      "ROBOTSTXT_RULE": {
+        "label": "Правило Robots.txt",
+        "help": "Правила для robots.txt (по одному на строку)."
+      },
+      "ROBOTSTXT_HEADER": {
+        "label": "Заголовок Robots.txt",
+        "help": "Заголовок файла robots.txt (перед правилами). Может быть закодирован в Base64."
+      },
+      "ROBOTSTXT_FOOTER": {
+        "label": "Подвал Robots.txt",
+        "help": "Подвал файла robots.txt (после правил). Может быть закодирован в Base64."
+      },
+      "ROBOTSTXT_SITEMAP": {
+        "label": "Карта сайта Robots.txt",
+        "help": "URL карты сайта для включения в robots.txt."
+      },
+      "ROBOTSTXT_IGNORE_RULE": {
+        "label": "Правило игнорирования",
+        "help": "Правило (регулярное выражение PCRE) для игнорирования. Можно указать несколько раз."
+      },
+      "ROBOTSTXT_DARKVISITORS_TOKEN": {
+        "label": "Токен API DarkVisitors",
+        "help": "Bearer-токен для API DarkVisitors."
+      },
+      "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+        "label": "Типы агентов DarkVisitors",
+        "help": "Список типов агентов через запятую для включения в поле agent_types DarkVisitors при обращении к API DarkVisitors."
+      },
+      "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+        "label": "DarkVisitors Disallow",
+        "help": "Строка, указывающая, какие URL запрещены. Это значение будет отправлено как поле disallow при обращении к API DarkVisitors."
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "Pinamamahalaan ang lokal o malayuang PHP-FPM."
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "Remote PHP",
+        "help": "Hostname ng remote PHP-FPM instance."
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "Remote PHP Path",
+        "help": "Root folder na naglalaman ng mga file sa remote PHP-FPM instance."
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "Remote PHP Port",
+        "help": "Port ng remote PHP-FPM instance."
+      },
+      "LOCAL_PHP": {
+        "label": "Local PHP",
+        "help": "Path patungo sa PHP-FPM socket file."
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "Local PHP Path",
+        "help": "Root folder na naglalaman ng mga file sa local PHP-FPM instance."
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "realip": {
+    "meta": {
+      "name": "Gerçek IP",
+      "description": "BunkerWeb bir ters proxy / yük dengeleyici arkasında olduğunda istemcilerin gerçek IP'sini alır."
+    },
+    "settings": {
+      "USE_REAL_IP": {
+        "label": "Gerçek IP kullan",
+        "help": "İstemcinin gerçek IP'sini al."
+      },
+      "USE_PROXY_PROTOCOL": {
+        "label": "PROXY protokolünü kullan",
+        "help": "PROXY protokolü iletişimini etkinleştir."
+      },
+      "REAL_IP_FROM": {
+        "label": "Gerçek IP kaynağı",
+        "help": "Proxy edilen isteklerin geldiği, boşluklarla ayrılmış güvenilir IP/ağ listesi."
+      },
+      "REAL_IP_HEADER": {
+        "label": "Gerçek IP üstbilgisi",
+        "help": "Gerçek IP'yi veya PROXY protokolü için özel proxy_protocol değerini içeren HTTP üstbilgisi."
+      },
+      "REAL_IP_RECURSIVE": {
+        "label": "Gerçek IP özyinelemeli",
+        "help": "IP adresini içeren üstbilgide özyinelemeli arama yap."
+      },
+      "REAL_IP_FROM_URLS": {
+        "label": "URL'lerden gerçek IP",
+        "help": "Proxy edilen isteklerin geldiği güvenilir IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+      }
+    }
+  }
+}

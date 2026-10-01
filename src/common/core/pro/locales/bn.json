@@ -1,0 +1,14 @@
+{
+  "pro": {
+    "meta": {
+      "name": "Pro",
+      "description": "BunkerWeb-এর Pro সংস্করণের জন্য Pro সেটিংস।"
+    },
+    "settings": {
+      "PRO_LICENSE_KEY": {
+        "label": "Pro লাইসেন্স কী",
+        "help": "BunkerWeb Pro সংস্করণের জন্য লাইসেন্স কী।"
+      }
+    }
+  }
+}

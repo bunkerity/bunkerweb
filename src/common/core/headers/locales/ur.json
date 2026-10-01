@@ -1,0 +1,62 @@
+{
+  "headers": {
+    "meta": {
+      "name": "ہیڈرز",
+      "description": "کلائنٹس کو بھیجے گئے HTTP ہیڈرز کا انتظام کرتا ہے۔"
+    },
+    "settings": {
+      "CUSTOM_HEADER": {
+        "label": "کسٹم ہیڈر (HeaderName: HeaderValue)",
+        "help": "شامل کرنے کے لیے کسٹم ہیڈر (HeaderName: HeaderValue)۔"
+      },
+      "REMOVE_HEADERS": {
+        "label": "ہیڈرز ہٹائیں",
+        "help": "ہٹانے کے لیے ہیڈرز (Header1 Header2 Header3 ...)"
+      },
+      "KEEP_UPSTREAM_HEADERS": {
+        "label": "اپ سٹریم ہیڈرز رکھیں",
+        "help": "اپ سٹریم سے رکھے جانے والے ہیڈرز (Header1 Header2 Header3 ... یا سب کے لیے *)۔"
+      },
+      "STRICT_TRANSPORT_SECURITY": {
+        "label": "Strict-Transport-Security (HSTS)",
+        "help": "Strict-Transport-Security (HSTS) ہیڈر کی ویلیو۔"
+      },
+      "COOKIE_FLAGS": {
+        "label": "کوکی فلیگز",
+        "help": "تمام کوکیز میں خودکار طور پر شامل کیے جانے والے فلیگز (nginx_cookie_flag_module کے لیے قابل قبول ویلیو)۔"
+      },
+      "COOKIE_AUTO_SECURE_FLAG": {
+        "label": "کوکی خودکار Secure فلیگ",
+        "help": "تمام کوکیز میں خودکار طور پر Secure فلیگ شامل کریں۔"
+      },
+      "CONTENT_SECURITY_POLICY": {
+        "label": "Content-Security-Policy",
+        "help": "Content-Security-Policy ہیڈر کی ویلیو۔"
+      },
+      "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+        "label": "Content-Security-Policy-Report-Only",
+        "help": "Content-Security-Policy ہیڈر کی خلاف ورزیوں کو بلاک کرنے کے بجائے ان کی رپورٹس بھیجیں۔"
+      },
+      "REFERRER_POLICY": {
+        "label": "Referrer-Policy",
+        "help": "Referrer-Policy ہیڈر کی ویلیو۔"
+      },
+      "PERMISSIONS_POLICY": {
+        "label": "Permissions-Policy",
+        "help": "Permissions-Policy ہیڈر کی ویلیو۔"
+      },
+      "X_FRAME_OPTIONS": {
+        "label": "X-Frame-Options",
+        "help": "X-Frame-Options ہیڈر کی ویلیو۔"
+      },
+      "X_CONTENT_TYPE_OPTIONS": {
+        "label": "X-Content-Type-Options",
+        "help": "X-Content-Type-Options ہیڈر کی ویلیو۔"
+      },
+      "X_DNS_PREFETCH_CONTROL": {
+        "label": "X-DNS-Prefetch-Control",
+        "help": "X-DNS-Prefetch-Control ہیڈر کی ویلیو۔"
+      }
+    }
+  }
+}

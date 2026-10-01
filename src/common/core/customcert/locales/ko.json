@@ -1,0 +1,50 @@
+{
+  "customcert": {
+    "meta": {
+      "name": "사용자 지정 SSL 인증서",
+      "description": "SSL용 사용자 지정 인증서를 선택합니다."
+    },
+    "settings": {
+      "USE_CUSTOM_SSL": {
+        "label": "사용자 지정 인증서 사용",
+        "help": "사용자 지정 SSL 인증서를 사용합니다."
+      },
+      "CUSTOM_SSL_CERT_PRIORITY": {
+        "label": "인증서 우선순위",
+        "help": "파일 경로의 인증서와 base64 데이터의 인증서 중 어느 것을 우선할지 선택합니다. (file | data)"
+      },
+      "CUSTOM_SSL_CERT": {
+        "label": "인증서 경로",
+        "help": "인증서 또는 번들 파일의 전체 경로입니다. 이 파일은 WORKER가 읽을 수 있어야 합니다 — 1.7에서 작업 실행이 scheduler에서 분리된 이후로 custom-cert 작업은 WORKER에서 실행되며, scheduler에서 실행되지 않습니다. 예전 문서에 무엇이 적혀 있든 마찬가지입니다. Docker Swarm에서는 bw-worker에 마운트하고 마운트된 경로(예: /run/secrets/example.com.pem)를 지정하십시오. 인증서는 공개 정보이므로 Swarm config로 마운트해도 괜찮습니다."
+      },
+      "CUSTOM_SSL_KEY": {
+        "label": "키 경로",
+        "help": "키 파일의 전체 경로입니다. 이 파일은 WORKER가 읽을 수 있어야 합니다 — 1.7에서 작업 실행이 scheduler에서 분리된 이후로 custom-cert 작업은 WORKER에서 실행되며, scheduler에서 실행되지 않습니다. 예전 문서에 무엇이 적혀 있든 마찬가지입니다. Docker Swarm에서는 개인 키를 Swarm SECRET으로 bw-worker에 마운트하고 마운트된 경로(예: /run/secrets/example.com.key)를 지정하십시오. 개인 키는 절대 Swarm config로 배포하지 마십시오: config는 모든 매니저 노드의 raft store에 암호화되지 않은 상태로 저장됩니다."
+      },
+      "CUSTOM_SSL_CERT_DATA": {
+        "label": "인증서 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식으로 인코딩된 인증서 데이터입니다."
+      },
+      "CUSTOM_SSL_KEY_DATA": {
+        "label": "키 데이터(base64/일반 텍스트)",
+        "help": "base64 또는 일반 텍스트 PEM 형식으로 인코딩된 키 데이터입니다."
+      },
+      "DEFAULT_SERVER_SSL_CERT": {
+        "label": "기본 서버 인증서 경로",
+        "help": "기본 서버(DEFAULT SERVER, 즉 설정된 어떤 서비스와도 일치하지 않는 요청에 응답하는 블록)가 제공하는 인증서 또는 번들 파일의 전체 경로입니다. 내부 자체 서명 인증서를 유지하려면 비워 두십시오. 이 파일은 WORKER가 읽을 수 있어야 하며, custom-cert 작업은 WORKER에서 실행됩니다. 설정된 서비스의 호스트 이름도 함께 포함하는 인증서는 거부됩니다. 그렇게 되면 기본 서버가 해당 서비스를 대신 응답할 수 있게 되기 때문입니다. MULTISITE=yes 또는 DISABLE_DEFAULT_SERVER=yes일 때만 제공됩니다."
+      },
+      "DEFAULT_SERVER_SSL_KEY": {
+        "label": "기본 서버 키 경로",
+        "help": "기본 서버(DEFAULT SERVER, 즉 설정된 어떤 서비스와도 일치하지 않는 요청 — 알 수 없는 SNI, 원시 IP 접근 — 에 응답하는 블록) 인증서의 개인 키 전체 경로입니다. 내부 자체 서명 인증서를 유지하려면 비워 두십시오. 이 파일은 WORKER가 읽을 수 있어야 하며, custom-cert 작업은 WORKER에서 실행됩니다. Docker Swarm에서는 config가 아니라 Swarm SECRET으로 마운트하십시오."
+      },
+      "DEFAULT_SERVER_SSL_CERT_DATA": {
+        "label": "기본 서버 인증서 데이터(base64/일반 텍스트)",
+        "help": "기본 서버(DEFAULT SERVER)의 인증서 데이터로, base64 또는 일반 텍스트 PEM 형식으로 인코딩됩니다. DEFAULT_SERVER_SSL_CERT가 비어 있을 때만 사용됩니다. 둘 다 비워 두면 내부 자체 서명 인증서가 유지됩니다. MULTISITE=yes 또는 DISABLE_DEFAULT_SERVER=yes일 때만 제공됩니다."
+      },
+      "DEFAULT_SERVER_SSL_KEY_DATA": {
+        "label": "기본 서버 키 데이터(base64/일반 텍스트)",
+        "help": "기본 서버(DEFAULT SERVER) 인증서의 키 데이터로, base64 또는 일반 텍스트 PEM 형식으로 인코딩됩니다. DEFAULT_SERVER_SSL_KEY가 비어 있을 때만 사용됩니다. 둘 다 비워 두면 내부 자체 서명 인증서가 유지됩니다."
+      }
+    }
+  }
+}

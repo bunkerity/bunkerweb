@@ -1,0 +1,36 @@
+{
+  "country": {
+    "meta": {
+      "name": "Negara",
+      "description": "Menolak akses berdasarkan negara IP klien."
+    },
+    "settings": {
+      "BLACKLIST_COUNTRY": {
+        "label": "Blacklist negara",
+        "help": "Tolak akses jika negara klien ada dalam daftar (format ISO 3166-1 alpha-2 dipisahkan dengan spasi). Anda juga dapat menggunakan token grup seperti @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH, dan @BENELUX."
+      },
+      "COUNTRY_IGNORE_HEADER_NAME": {
+        "label": "Nama header yang diabaikan",
+        "help": "Nama header permintaan yang membebaskan permintaan dari pemeriksaan negara. Klien mana pun dapat mengirim header ini: perlakukan sebagai rahasia bersama, hanya melalui HTTPS."
+      },
+      "COUNTRY_IGNORE_HEADER_VALUE": {
+        "label": "Nilai header yang diabaikan",
+        "help": "Nilai (regex PCRE) yang harus dicocokkan oleh header untuk mengecualikan permintaan dari pemeriksaan negara. Biarkan kosong agar cocok berdasarkan keberadaan header saja. Jangkarkan dengan ^ dan $: kecocokan tidak dijangkarkan secara default."
+      },
+      "COUNTRY_IGNORE_URI": {
+        "label": "URI yang diabaikan",
+        "help": "Daftar pola regex PCRE (dipisahkan dengan spasi) untuk URI yang harus dikecualikan dari pemeriksaan negara. Pola dicocokkan terhadap path dan URI permintaan lengkap beserta query string."
+      },
+      "WHITELIST_COUNTRY": {
+        "label": "Whitelist negara",
+        "help": "Tolak akses jika negara klien tidak ada dalam daftar (format ISO 3166-1 alpha-2 dipisahkan dengan spasi). Anda juga dapat menggunakan token grup seperti @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH, dan @BENELUX."
+      }
+    },
+    "widgets": {
+      "counter_failed_country": {
+        "title": "Negara",
+        "subtitle": "Permintaan diblokir"
+      }
+    }
+  }
+}

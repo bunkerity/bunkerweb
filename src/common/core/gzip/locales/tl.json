@@ -1,0 +1,30 @@
+{
+  "gzip": {
+    "meta": {
+      "name": "Gzip",
+      "description": "Kino-compress ang mga HTTP request gamit ang gzip algorithm."
+    },
+    "settings": {
+      "USE_GZIP": {
+        "label": "Gamitin ang Gzip",
+        "help": "I-enable o i-disable ang Gzip compression. Naka-off bilang default, na siya ring default ng NGINX mismo. Per-service ang setting na ito: iwanang naka-off para sa kahit anong service na ang response ay may dalang secret (CSRF token, API key) at inuulit ang input mula sa attacker, dahil ang kombinasyong iyon ang BREACH precondition — at tandaan na palaging naka-compress ang text/html, kahit ano pa ang nakalista sa GZIP_TYPES. Ganito ang BunkerWeb web UI."
+      },
+      "GZIP_TYPES": {
+        "label": "MIME Types",
+        "help": "Listahan ng mga MIME type na iko-compress gamit ang gzip."
+      },
+      "GZIP_MIN_LENGTH": {
+        "label": "Minimum na Haba",
+        "help": "Minimum na sukat ng response (sa bytes) para ilapat ang Gzip compression."
+      },
+      "GZIP_COMP_LEVEL": {
+        "label": "Compression Level",
+        "help": "Antas ng compression para sa Gzip (1 = pinakamababang compression, 9 = maximum na compression)."
+      },
+      "GZIP_PROXIED": {
+        "label": "Mga Proxied Request",
+        "help": "Tinutukoy kung aling mga proxied request ang dapat i-compress."
+      }
+    }
+  }
+}

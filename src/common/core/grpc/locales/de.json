@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "Verwaltet gRPC-Reverse-Proxy-Konfigurationen."
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "gRPC verwenden",
+        "help": "Aktiviert den gRPC-Reverse-Proxy-Modus."
+      },
+      "GRPC_HOST": {
+        "label": "gRPC-Host",
+        "help": "Vollständiger Upstream-Wert, der von grpc_pass verwendet wird (zum Beispiel grpc://app:50051 oder grpcs://app:443)."
+      },
+      "GRPC_URL": {
+        "label": "gRPC-URL",
+        "help": "Location-URL, die an einen gRPC-Upstream weitergeleitet wird. Ein Wert, der mit ^ beginnt oder mit $ endet, wird als Regex-Location behandelt. Optional mit ~, ~*, = oder ^~ gefolgt von einem Leerzeichen voranstellen, um den nginx-Location-Modifikator explizit festzulegen; an anderer Stelle im Wert sind keine Leerzeichen, ;, { oder } zulässig."
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "Benutzerdefinierter gRPC-Host",
+        "help": "Überschreibt den an den gRPC-Upstream gesendeten Host-Header."
+      },
+      "GRPC_HEADERS": {
+        "label": "gRPC-Header",
+        "help": "Liste von Headern, die an den gRPC-Upstream gesendet werden, durch Semikolons getrennt (Werte für die Direktive grpc_set_header)."
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "gRPC versteckte Header",
+        "help": "Liste von Headern, die vor Clients verborgen werden, wenn sie vom gRPC-Upstream empfangen werden (Werte für die Direktive grpc_hide_header)."
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "gRPC Header-Client",
+        "help": "Liste von Headern, die an den Client gesendet werden, durch Semikolons getrennt (Werte für die Direktive add_header)."
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "gRPC durchgereichte Header",
+        "help": "Liste von Headern, die vom gRPC-Upstream an den Client durchgereicht werden, auch wenn sie standardmäßig versteckt sind, durch Leerzeichen getrennt (Werte für die Direktive grpc_pass_header)."
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "gRPC ignorierte Header",
+        "help": "Liste von Headern vom gRPC-Upstream, die von NGINX nicht verarbeitet werden dürfen, durch Leerzeichen getrennt (Werte für die Direktive grpc_ignore_headers)."
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "Unterstriche in Headern erlauben",
+        "help": "Aktiviert oder deaktiviert die Direktive underscores_in_headers."
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "Fehler abfangen",
+        "help": "Fängt Fehler des gRPC-Upstreams ab und schreibt sie um."
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "gRPC-Buffer-Größe",
+        "help": "Wert für die Direktive grpc_buffer_size (Größe des Buffers, der zum Lesen der Antwort vom gRPC-Upstream verwendet wird)."
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "gRPC-Verbindungs-Timeout",
+        "help": "Timeout beim Verbinden mit dem gRPC-Upstream."
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "gRPC-Lese-Timeout",
+        "help": "Timeout beim Lesen vom gRPC-Upstream."
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "gRPC-Sende-Timeout",
+        "help": "Timeout beim Senden an den gRPC-Upstream."
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "gRPC-Socket-Keepalive",
+        "help": "Aktiviert oder deaktiviert Keepalive für gRPC-Upstream-Sockets."
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SSL SNI",
+        "help": "Aktiviert oder deaktiviert das Senden von SNI an den gRPC-Upstream-Server."
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "SSL-SNI-Name",
+        "help": "Legt den SNI-Host fest, der an den gRPC-Upstream-Server gesendet wird."
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "SSL-Prüfung",
+        "help": "Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des gRPC-Upstream-Servers."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "Priorität des vertrauenswürdigen Zertifikats",
+        "help": "Quelle des vertrauenswürdigen CA-Zertifikats: Dateipfad oder base64/PEM-Daten (file oder data)."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "SSL-Vertrauenswürdiges-Zertifikat-Pfad",
+        "help": "Pfad zu einem PEM-CA-Bundle, das zur Überprüfung des gRPC-Upstream-Zertifikats verwendet wird (Priorität 'file', lesbar für den scheduler, der es zwischenspeichert und verteilt). Für die Überprüfung erforderlich; für öffentliche Upstreams verwenden Sie das System-Bundle (z. B. /etc/ssl/certs/ca-certificates.crt). Wenn nicht gesetzt, ist die Überprüfung deaktiviert."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "Vertrauenswürdige Zertifikatsdaten (base64/Klartext)",
+        "help": "Vertrauenswürdiges CA-Zertifikat als base64 oder Klartext-PEM (Priorität 'data')."
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "SSL-Verifizierungstiefe",
+        "help": "Legt die Verifizierungstiefe in der Zertifikatskette des gRPC-Upstream-Servers fest."
+      },
+      "GRPC_SSL_CRL": {
+        "label": "CRL-Pfad",
+        "help": "Pfad zu einer PEM-Zertifikatsperrliste, die bei der Überprüfung des gRPC-Upstream-Servers verwendet wird. Hat Vorrang vor GRPC_SSL_CRL_DATA. Wird nur angewendet, wenn GRPC_SSL_VERIFY auf yes steht. Ein gesetzter, aber fehlender Pfad ist ein Fehler; GRPC_SSL_CRL_DATA wird nicht als Fallback verwendet."
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "CRL-Daten (base64/Klartext)",
+        "help": "Zertifikatsperrliste als base64 oder Klartext-PEM. Wird nur verwendet, wenn die Einstellung für den CRL-Pfad leer ist."
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "Upstream-SSL-Protokolle",
+        "help": "TLS-Versionen, die dem gRPC-Upstream-Server angeboten werden (Wert der Direktive grpc_ssl_protocols). Leer belässt den NGINX-Standard."
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "Upstream-SSL-Ciphers",
+        "help": "Cipher-Suite-Zeichenkette, die dem gRPC-Upstream-Server angeboten wird (Wert der Direktive grpc_ssl_ciphers). Leer belässt den NGINX-Standard."
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "Nächster gRPC-Upstream",
+        "help": "Bedingungen für die Auswahl des nächsten gRPC-Upstream-Servers."
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "Timeout für nächsten gRPC-Upstream",
+        "help": "Zeitlimit für die Weitergabe einer Anfrage an den nächsten gRPC-Upstream-Server."
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "Versuche für nächsten gRPC-Upstream",
+        "help": "Maximale Anzahl von Versuchen, eine Anfrage an den nächsten gRPC-Upstream-Server weiterzugeben."
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "gRPC-Auth-Request",
+        "help": "Aktiviert die Authentifizierung über einen externen Anbieter (Wert der Direktive auth_request)."
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "Anmelde-URL für Auth-Request",
+        "help": "Leitet Clients zur Anmelde-URL um, wenn GRPC_AUTH_REQUEST verwendet wird (genutzt, wenn der auth_request-Aufruf 401 zurückgibt). NGINX-Variablen wie $scheme, $host und $request_uri werden unterstützt."
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "gRPC Auth-Request-Set",
+        "help": "Liste von Variablen, die vom Authentifizierungsanbieter gesetzt werden, durch Semikolons getrennt (Werte der Direktiven auth_request_set)."
+      },
+      "GRPC_INCLUDES": {
+        "label": "gRPC-Includes",
+        "help": "Zusätzliche Konfiguration, die in den gRPC-location-Block eingefügt wird, durch Leerzeichen getrennt."
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "Maximale gRPC-Body-Größe",
+        "help": "Maximale Body-Größe für diese gRPC-Location (0 für unbegrenzt). Wenn leer, gilt das MAX_CLIENT_SIZE des Dienstes."
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "Priorität des Client-Zertifikats",
+        "help": "Quelle des Client-Zertifikats und -Schlüssels, die für gegenseitiges TLS mit dem Upstream verwendet werden: Dateipfad oder base64/PEM-Daten (file oder data)."
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "SSL-Client-Zertifikat-Pfad",
+        "help": "Pfad zum PEM-Client-Zertifikat, das BunkerWeb gRPC-Upstreams vorlegt (gegenseitiges TLS, Priorität 'file'). Erfordert den passenden Schlüssel GRPC_SSL_CLIENT_KEY; der trusted-cert-Job speichert diese gRPC-eigene Identität zwischen und verteilt sie."
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "Client-Zertifikatsdaten (base64/Klartext)",
+        "help": "Client-Zertifikat als base64 oder Klartext-PEM (Priorität 'data')."
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "SSL-Client-Schlüssel-Pfad",
+        "help": "Pfad zum privaten PEM-Schlüssel, der zum Client-Zertifikat passt (Priorität 'file'). Der Schlüssel wird wie jedes andere Job-Artefakt zwischengespeichert und an Instanzen verteilt und mit auf Besitzer/Gruppe beschränkten Berechtigungen geschrieben."
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "Client-Schlüsseldaten (base64/Klartext)",
+        "help": "Privater Client-Schlüssel als base64 oder Klartext-PEM (Priorität 'data'). Bevorzugen Sie nach Möglichkeit einen Dateipfad: Ein hier gesetzter Schlüssel wird als Einstellungswert gespeichert."
+      }
+    }
+  }
+}

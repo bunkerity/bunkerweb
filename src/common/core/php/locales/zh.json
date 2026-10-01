@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "管理本地或远程 PHP-FPM。"
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "远程 PHP",
+        "help": "远程 PHP-FPM 实例的主机名。"
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "远程 PHP 路径",
+        "help": "远程 PHP-FPM 实例中包含文件的根文件夹。"
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "远程 PHP 端口",
+        "help": "远程 PHP-FPM 实例的端口。"
+      },
+      "LOCAL_PHP": {
+        "label": "本地 PHP",
+        "help": "PHP-FPM 套接字文件的路径。"
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "本地 PHP 路径",
+        "help": "本地 PHP-FPM 实例中包含文件的根文件夹。"
+      }
+    }
+  }
+}

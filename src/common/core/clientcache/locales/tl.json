@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "Client cache",
+      "description": "Pinamamahalaan ang caching para sa mga client."
+    },
+    "settings": {
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control Header",
+        "help": "Value ng HTTP Cache-Control header."
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "Ipadala ang HTTP ETag header para sa mga static resource."
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "Mga Extension na Dapat I-cache ng Client",
+        "help": "Listahan ng mga file extension, na pinaghihiwalay ng pipe, na dapat i-cache."
+      },
+      "USE_CLIENT_CACHE": {
+        "label": "Gamitin ang Client Cache",
+        "help": "Sabihin sa client na i-store lokal ang mga static file."
+      }
+    }
+  }
+}

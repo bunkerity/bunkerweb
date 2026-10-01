@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "مقامی یا دور دراز PHP-FPM کا انتظام کرتا ہے۔"
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "ریموٹ PHP",
+        "help": "ریموٹ PHP-FPM انسٹنس کا ہوسٹ نیم۔"
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "ریموٹ PHP پاتھ",
+        "help": "ریموٹ PHP-FPM انسٹنس میں فائلیں رکھنے والا روٹ فولڈر۔"
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "ریموٹ PHP پورٹ",
+        "help": "ریموٹ PHP-FPM انسٹنس کا پورٹ۔"
+      },
+      "LOCAL_PHP": {
+        "label": "لوکل PHP",
+        "help": "PHP-FPM ساکٹ فائل کا پاتھ۔"
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "لوکل PHP پاتھ",
+        "help": "لوکل PHP-FPM انسٹنس میں فائلیں رکھنے والا روٹ فولڈر۔"
+      }
+    }
+  }
+}

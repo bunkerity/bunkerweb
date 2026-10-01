@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Database",
+      "description": "Integra facilmente il database."
+    },
+    "settings": {
+      "DATABASE_URI": {
+        "label": "L'URI del database",
+        "help": "L'URI del database, nel formato sqlalchemy."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "L'URI del database per le operazioni di sola lettura",
+        "help": "L'URI del database per le operazioni di sola lettura; può anche fungere da fallback se il database principale non è disponibile. Nel formato sqlalchemy."
+      },
+      "DATABASE_LOG_LEVEL": {
+        "label": "Livello di log del database",
+        "help": "Il livello da usare per i log del database."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "Il numero massimo di esecuzioni dei job",
+        "help": "Il numero massimo di esecuzioni dei job da conservare nel database."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "L'età massima in giorni per le sessioni utente dell'UI",
+        "help": "L'età massima in giorni per le sessioni utente dell'UI prima che vengano eliminate."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Dimensione del pool del database",
+        "help": "Il numero di connessioni da mantenere nel pool di connessioni del database."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Overflow massimo del pool del database",
+        "help": "Il numero massimo di connessioni da creare oltre la dimensione del pool."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Timeout del pool del database",
+        "help": "Il numero di secondi di attesa prima di rinunciare a ottenere una connessione dal pool."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Riciclo del pool del database",
+        "help": "Il numero di secondi dopo i quali una connessione viene riciclata automaticamente. Impostare su -1 per disattivare."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Pre-ping del pool del database",
+        "help": "Se testare la vitalità delle connessioni a ogni prelievo dal pool."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Ripristino del pool del database al ritorno",
+        "help": "Come deve essere ripristinata la connessione quando viene restituita al pool. Lasciare vuoto per auto (none per MySQL/MariaDB, rollback per gli altri). Valori possibili: rollback, commit, none."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Timeout di ritentativo del database",
+        "help": "Il numero massimo di secondi di attesa affinché il database sia disponibile all'avvio."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Tentativi di ritentativo delle richieste del database",
+        "help": "Il numero di tentativi di ritentativo per gli errori transitori del database."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Ritardo di ritentativo delle richieste del database",
+        "help": "Il ritardo in secondi tra i tentativi di ritentativo per gli errori transitori del database."
+      }
+    }
+  }
+}

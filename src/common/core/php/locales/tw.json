@@ -1,0 +1,30 @@
+{
+  "php": {
+    "meta": {
+      "name": "PHP",
+      "description": "管理本機或遠端 PHP-FPM。"
+    },
+    "settings": {
+      "REMOTE_PHP": {
+        "label": "遠端 PHP",
+        "help": "遠端 PHP-FPM 執行個體的主機名稱。"
+      },
+      "REMOTE_PHP_PATH": {
+        "label": "遠端 PHP 路徑",
+        "help": "遠端 PHP-FPM 執行個體中包含檔案的根資料夾。"
+      },
+      "REMOTE_PHP_PORT": {
+        "label": "遠端 PHP 連接埠",
+        "help": "遠端 PHP-FPM 執行個體的連接埠。"
+      },
+      "LOCAL_PHP": {
+        "label": "本機 PHP",
+        "help": "PHP-FPM 通訊端檔案的路徑。"
+      },
+      "LOCAL_PHP_PATH": {
+        "label": "本機 PHP 路徑",
+        "help": "本機 PHP-FPM 執行個體中包含檔案的根資料夾。"
+      }
+    }
+  }
+}

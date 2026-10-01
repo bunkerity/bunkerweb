@@ -1,0 +1,54 @@
+{
+  "securitytxt": {
+    "meta": {
+      "name": "Security.txt",
+      "description": "security.txt फ़ाइल का प्रबंधन करता है। एक प्रस्तावित मानक जो वेबसाइटों को अपनी सुरक्षा नीतियाँ परिभाषित करने की अनुमति देता है।"
+    },
+    "settings": {
+      "USE_SECURITYTXT": {
+        "label": "security.txt उपयोग करें",
+        "help": "security.txt फ़ाइल सक्षम करें।"
+      },
+      "SECURITYTXT_URI": {
+        "label": "Security.txt URI",
+        "help": "वह URI बताता है जहाँ से \"security.txt\" फ़ाइल सुलभ होगी।"
+      },
+      "SECURITYTXT_CONTACT": {
+        "label": "Security.txt संपर्क",
+        "help": "उस विधि को इंगित करता है जिसका उपयोग शोधकर्ताओं को सुरक्षा कमजोरियों की रिपोर्ट करने के लिए करना चाहिए, जैसे ईमेल पता, फ़ोन नंबर, और/या संपर्क जानकारी वाला वेब पेज। (यदि मान खाली है, तो security.txt फ़ाइल नहीं बनाई जाएगी क्योंकि यह एक आवश्यक फ़ील्ड है)"
+      },
+      "SECURITYTXT_EXPIRES": {
+        "label": "Security.txt समाप्ति",
+        "help": "वह तिथि और समय बताता है जिसके बाद \"security.txt\" फ़ाइल में मौजूद डेटा पुराना माना जाता है और उसका उपयोग नहीं किया जाना चाहिए (यदि मान खाली है, तो मान हमेशा वर्तमान तिथि और समय + 1 वर्ष होगा)।"
+      },
+      "SECURITYTXT_ENCRYPTION": {
+        "label": "Security.txt एन्क्रिप्शन",
+        "help": "उस एन्क्रिप्शन कुंजी को इंगित करता है जिसका उपयोग सुरक्षा शोधकर्ताओं को एन्क्रिप्टेड संचार के लिए करना चाहिए।"
+      },
+      "SECURITYTXT_ACKNOWLEDGEMENTS": {
+        "label": "Security.txt आभार",
+        "help": "उस पृष्ठ का लिंक इंगित करता है जहाँ सुरक्षा शोधकर्ताओं को उनकी रिपोर्ट के लिए मान्यता दी जाती है।"
+      },
+      "SECURITYTXT_PREFERRED_LANG": {
+        "label": "Security.txt पसंदीदा भाषा",
+        "help": "सुरक्षा रिपोर्ट प्रस्तुत करते समय पसंदीदा प्राकृतिक भाषाओं के समूह को इंगित करने के लिए उपयोग किया जा सकता है।"
+      },
+      "SECURITYTXT_CANONICAL": {
+        "label": "Security.txt कैननिकल",
+        "help": "उन कैननिकल URI को बताता है जहाँ \"security.txt\" फ़ाइल स्थित है, जो आमतौर पर \"https://example.com/.well-known/security.txt\" जैसा कुछ होता है। (यदि मान खाली है, तो डिफ़ॉल्ट मान साइट URL + SECURITYTXT_URI से स्वचालित रूप से जनरेट किया जाएगा)"
+      },
+      "SECURITYTXT_POLICY": {
+        "label": "Security.txt नीति",
+        "help": "उस स्थान का लिंक इंगित करता है जहाँ भेद्यता प्रकटीकरण नीति स्थित है।"
+      },
+      "SECURITYTXT_HIRING": {
+        "label": "Security.txt भर्ती",
+        "help": "विक्रेता की सुरक्षा-संबंधी नौकरी के पदों से लिंक करने के लिए उपयोग किया जाता है।"
+      },
+      "SECURITYTXT_CSAF": {
+        "label": "Security.txt CSAF",
+        "help": "आपके CSAF (Common Security Advisory Framework) प्रदाता के provider-metadata.json का लिंक।"
+      }
+    }
+  }
+}

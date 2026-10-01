@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "Bouncer ng CrowdSec para sa BunkerWeb."
+    },
+    "settings": {
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "Palaging Ipadala sa AppSec",
+        "help": "Ipadala ang request sa AppSec Component kahit may desisyon na para sa IP."
+      },
+      "CROWDSEC_API": {
+        "label": "CrowdSec API",
+        "help": "Address ng CrowdSec API."
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "CrowdSec API Key",
+        "help": "Key para sa CrowdSec API na ibinigay ng cscli bouncer add."
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "AppSec Connect Timeout",
+        "help": "Ang timeout sa milliseconds ng koneksyon sa pagitan ng remediation component at AppSec Component."
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "AppSec Failure Action",
+        "help": "Ang behavior kapag nagbalik ng 500 ang AppSec Component. Puwedeng payagang dumaan ang request o tanggihan ito."
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "AppSec Process Timeout",
+        "help": "Ang timeout sa milliseconds para iproseso ang request mula sa remediation component papunta sa AppSec Component."
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "AppSec Send Timeout",
+        "help": "Ang timeout sa milliseconds para ipadala ang data mula sa remediation component papunta sa AppSec Component."
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "AppSec SSL Verify",
+        "help": "I-verify ang validity ng SSL certificate ng AppSec Component."
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "AppSec URL",
+        "help": "URL ng Application Security Component."
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "Pag-expire ng Cache ng CrowdSec",
+        "help": "Ang pag-expire ng cache, sa segundo, para sa mga IP na iniimbak ng bouncer sa cache sa live mode."
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "Hamon na Captcha ng CrowdSec",
+        "help": "Hamon ng antibot na ipinapakita kapag humihingi ng captcha ang CrowdSec. Dapat naka-enable ang antibot sa service na ito (USE_ANTIBOT naka-set sa kahit ano maliban sa \"no\"), kung hindi ay ba-ban-nin na lang ang request. Kinukuha ng third-party provider ang kanilang mga key mula sa mga setting na ANTIBOT_*. Iwasan ang \"cookie\": walang napapatunayan ito para sa desisyong ang ibig sabihin ay \"patunayan na tao ka\". Hindi pinapansin ng \"no\" ang mga desisyon sa captcha, tulad ng dati; shared ang decision cache kada Local API, kaya kailangang i-set sa \"no\" ang bawat service sa Local API na iyon para ibalik nang buo ang lumang behavior."
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "Hayaang Magdesisyon ang Security Workflows",
+        "help": "Hayaang magdesisyon ang security workflow kung ano ang mangyayari sa request na na-flag ng CrowdSec. Bino-block ito rito ng \"no\" (default). Ibinibigay ito ng \"yes\" sa mga workflow na naka-attach sa service na ito; ilalapat pa rin ang verdict kapag walang tumugmang rule o walang naka-attach. Nagagawa na ng BunkerWeb ang CORS preflight (204), /robots.txt, at /security.txt bago tumakbo ang mga workflow, kaya matatanggap pa rin ng na-flag na client ang tatlong ito. Wala sa mga ito ang umaabot sa application mo, at ang bawat request na aabot ay sinusuri muna ng workflow ladder."
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "I-enable ang Internal Analysis ng CrowdSec",
+        "help": "I-enable ang pagsusuri ng internal traffic."
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "Hindi Isasamang Location ng CrowdSec",
+        "help": "Ang mga location na hindi isasama habang nagba-bounce. Listahan ito ng mga location, na pinaghihiwalay ng comma."
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "Management Login ng CrowdSec",
+        "help": "Dedicated na login ng CrowdSec machine para sa pag-imbestiga ng alert at pagtanggal ng desisyon. Iwanang blangko para sa read-only na access ng bouncer."
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "Management Password ng CrowdSec",
+        "help": "Password ng dedicated na management machine ng CrowdSec. Kailangan kasama ng management login; huwag kailanman gamitin dito ang API key ng bouncer."
+      },
+      "CROWDSEC_MODE": {
+        "label": "Mode ng CrowdSec",
+        "help": "Mode ng CrowdSec API (live o stream)."
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "Live Request Timeout ng CrowdSec",
+        "help": "Timeout sa milliseconds para sa mga HTTP request na ginagawa ng bouncer para mag-query sa local API ng CrowdSec."
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "Request Timeout ng CrowdSec",
+        "help": "Ang dalas ng update, sa segundo, para kunin ang bago/lumang IP mula sa local API ng CrowdSec."
+      },
+      "USE_CROWDSEC": {
+        "label": "Gamitin ang CrowdSec",
+        "help": "I-activate ang bouncer ng CrowdSec."
+      }
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS NG CROWDSEC"
+      }
+    }
+  }
+}

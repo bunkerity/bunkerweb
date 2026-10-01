@@ -1,0 +1,95 @@
+{
+  "crowdsec": {
+    "meta": {
+      "name": "CrowdSec",
+      "description": "Bouncer CrowdSec dla BunkerWeb."
+    },
+    "settings": {
+      "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
+        "label": "Zawsze wysyłaj do AppSec",
+        "help": "Wysyłaj żądanie do komponentu AppSec, nawet jeśli istnieje decyzja dla danego IP."
+      },
+      "CROWDSEC_API": {
+        "label": "API CrowdSec",
+        "help": "Adres API CrowdSec."
+      },
+      "CROWDSEC_API_KEY": {
+        "label": "Klucz API CrowdSec",
+        "help": "Klucz do API CrowdSec, uzyskany za pomocą cscli bouncer add."
+      },
+      "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
+        "label": "Limit czasu połączenia AppSec",
+        "help": "Limit czasu (w milisekundach) połączenia między komponentem remediacji a komponentem AppSec."
+      },
+      "CROWDSEC_APPSEC_FAILURE_ACTION": {
+        "label": "Działanie przy awarii AppSec",
+        "help": "Zachowanie, gdy komponent AppSec zwróci 500. Może przepuścić żądanie lub je odrzucić."
+      },
+      "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
+        "label": "Limit czasu przetwarzania AppSec",
+        "help": "Limit czasu (w milisekundach) na przetworzenie żądania od komponentu remediacji do komponentu AppSec."
+      },
+      "CROWDSEC_APPSEC_SEND_TIMEOUT": {
+        "label": "Limit czasu wysyłania AppSec",
+        "help": "Limit czasu (w milisekundach) na wysłanie danych od komponentu remediacji do komponentu AppSec."
+      },
+      "CROWDSEC_APPSEC_SSL_VERIFY": {
+        "label": "Weryfikacja SSL AppSec",
+        "help": "Weryfikuj ważność certyfikatu SSL komponentu AppSec."
+      },
+      "CROWDSEC_APPSEC_URL": {
+        "label": "URL AppSec",
+        "help": "URL komponentu Application Security."
+      },
+      "CROWDSEC_CACHE_EXPIRATION": {
+        "label": "Wygaśnięcie cache CrowdSec",
+        "help": "Czas wygaśnięcia cache (w sekundach) dla adresów IP, które bouncer przechowuje w cache w trybie live."
+      },
+      "CROWDSEC_CAPTCHA_PROVIDER": {
+        "label": "Wyzwanie captcha CrowdSec",
+        "help": "Wyzwanie antibot wyświetlane, gdy CrowdSec prosi o captchę. Antibot musi być włączony dla tej usługi (USE_ANTIBOT ustawione na cokolwiek innego niż \"no\"), w przeciwnym razie żądanie zostanie zbanowane. Dostawcy zewnętrzni pobierają swoje klucze z ustawień ANTIBOT_*. Unikaj \"cookie\": nie dowodzi to niczego w przypadku decyzji, która ma znaczyć \"udowodnij, że jesteś człowiekiem\". \"no\" ignoruje decyzje captcha, tak jak wcześniej; cache decyzji jest współdzielony dla każdego Local API, więc każda usługa na tym Local API musi mieć ustawione \"no\", aby w pełni przywrócić poprzednie zachowanie."
+      },
+      "CROWDSEC_DEFER_TO_WORKFLOWS": {
+        "label": "Pozwól workflowom bezpieczeństwa decydować",
+        "help": "Pozwól workflowom bezpieczeństwa decydować, co dzieje się z żądaniem oznaczonym przez CrowdSec. \"no\" (domyślnie) blokuje je tutaj. \"yes\" przekazuje je do workflowów podłączonych do tej usługi; werdykt nadal obowiązuje, gdy żadna reguła nie pasuje lub żadna nie jest podłączona. CORS preflight (204), /robots.txt i /security.txt są generowane przez BunkerWeb przed uruchomieniem workflowów, więc oznaczony klient może nadal otrzymać te trzy. Żadne z nich nie dociera do Twojej aplikacji, a każde żądanie, które by dotarło, jest najpierw sprawdzane przez drabinkę workflowów."
+      },
+      "CROWDSEC_ENABLE_INTERNAL": {
+        "label": "Włącz analizę ruchu wewnętrznego CrowdSec",
+        "help": "Włącz analizę ruchu wewnętrznego."
+      },
+      "CROWDSEC_EXCLUDE_LOCATION": {
+        "label": "Wykluczone lokalizacje CrowdSec",
+        "help": "Lokalizacje wykluczone podczas bouncingu. To lista lokalizacji, rozdzielonych przecinkami."
+      },
+      "CROWDSEC_MANAGEMENT_LOGIN": {
+        "label": "Login zarządzania CrowdSec",
+        "help": "Dedykowany login maszyny zarządzającej CrowdSec do analizy alertów i usuwania decyzji. Pozostaw puste dla dostępu bouncera tylko do odczytu."
+      },
+      "CROWDSEC_MANAGEMENT_PASSWORD": {
+        "label": "Hasło zarządzania CrowdSec",
+        "help": "Hasło dedykowanej maszyny zarządzającej CrowdSec. Wymagane razem z loginem zarządzania; nigdy nie używaj tutaj klucza API bouncera."
+      },
+      "CROWDSEC_MODE": {
+        "label": "Tryb CrowdSec",
+        "help": "Tryb API CrowdSec (live lub stream)."
+      },
+      "CROWDSEC_REQUEST_TIMEOUT": {
+        "label": "Limit czasu żądania live CrowdSec",
+        "help": "Limit czasu (w milisekundach) dla żądań HTTP wykonywanych przez bouncera do lokalnego API CrowdSec."
+      },
+      "CROWDSEC_UPDATE_FREQUENCY": {
+        "label": "Limit czasu żądania CrowdSec",
+        "help": "Częstotliwość aktualizacji (w sekundach) do pobierania nowych/starych adresów IP z lokalnego API CrowdSec."
+      },
+      "USE_CROWDSEC": {
+        "label": "Użyj CrowdSec",
+        "help": "Aktywuj bouncera CrowdSec."
+      }
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "STATUS CROWDSEC"
+      }
+    }
+  }
+}

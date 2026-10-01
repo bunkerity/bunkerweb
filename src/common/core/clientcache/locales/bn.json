@@ -1,0 +1,26 @@
+{
+  "clientcache": {
+    "meta": {
+      "name": "ক্লায়েন্ট ক্যাশে",
+      "description": "ক্লায়েন্টদের জন্য ক্যাশিং পরিচালনা করে।"
+    },
+    "settings": {
+      "USE_CLIENT_CACHE": {
+        "label": "ক্লায়েন্ট ক্যাশ ব্যবহার করুন",
+        "help": "ক্লায়েন্টকে স্ট্যাটিক ফাইল স্থানীয়ভাবে সংরক্ষণ করতে বলুন।"
+      },
+      "CLIENT_CACHE_EXTENSIONS": {
+        "label": "ক্লায়েন্ট দ্বারা ক্যাশ করা উচিত এমন এক্সটেনশন",
+        "help": "পাইপ দিয়ে পৃথক ফাইল এক্সটেনশনের তালিকা যা ক্যাশ করা উচিত।"
+      },
+      "CLIENT_CACHE_ETAG": {
+        "label": "ETag",
+        "help": "স্ট্যাটিক রিসোর্সের জন্য HTTP ETag হেডার পাঠান।"
+      },
+      "CLIENT_CACHE_CONTROL": {
+        "label": "Cache-Control হেডার",
+        "help": "Cache-Control HTTP হেডারের মান।"
+      }
+    }
+  }
+}

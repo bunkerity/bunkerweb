@@ -1,0 +1,170 @@
+{
+  "grpc": {
+    "meta": {
+      "name": "gRPC",
+      "description": "يدير إعدادات الوكيل العكسي (reverse proxy) لـ gRPC."
+    },
+    "settings": {
+      "USE_GRPC": {
+        "label": "استخدام gRPC",
+        "help": "تفعيل وضع الوكيل العكسي (reverse proxy) لـ gRPC."
+      },
+      "GRPC_HOST": {
+        "label": "مضيف gRPC",
+        "help": "القيمة الكاملة للمنبع (upstream) المستخدمة في grpc_pass (مثلاً grpc://app:50051 أو grpcs://app:443)."
+      },
+      "GRPC_URL": {
+        "label": "رابط gRPC",
+        "help": "رابط الموقع (location) الذي سيُوكَّل إلى منبع gRPC. القيمة التي تبدأ بـ ^ أو تنتهي بـ $ تُعامل كموقع تعبير نمطي (regex). يمكن اختياريًا إضافة بادئة ~ أو ~* أو = أو ^~ متبوعة بمسافة واحدة لضبط مُعدِّل موقع nginx صراحةً؛ لا يُسمح بمسافات أو ; أو { أو } في أي مكان آخر من القيمة."
+      },
+      "GRPC_CUSTOM_HOST": {
+        "label": "مضيف gRPC المخصص",
+        "help": "تجاوز رأس Host المُرسَل إلى منبع gRPC."
+      },
+      "GRPC_HEADERS": {
+        "label": "رؤوس gRPC",
+        "help": "قائمة الرؤوس المراد إرسالها إلى منبع gRPC، مفصولة بفواصل منقوطة (قيم لتوجيه grpc_set_header)."
+      },
+      "GRPC_HIDE_HEADERS": {
+        "label": "إخفاء رؤوس gRPC",
+        "help": "قائمة الرؤوس المراد إخفاؤها عن العملاء عند استلامها من منبع gRPC (قيم لتوجيه grpc_hide_header)."
+      },
+      "GRPC_HEADERS_CLIENT": {
+        "label": "رؤوس gRPC للعميل",
+        "help": "قائمة الرؤوس المراد إرسالها إلى العميل، مفصولة بفواصل منقوطة (قيم لتوجيه add_header)."
+      },
+      "GRPC_PASS_HEADERS": {
+        "label": "تمرير رؤوس gRPC",
+        "help": "قائمة الرؤوس المراد تمريرها من منبع gRPC إلى العميل حتى عندما تكون مخفية افتراضيًا، مفصولة بمسافات (قيم لتوجيه grpc_pass_header)."
+      },
+      "GRPC_IGNORE_HEADERS": {
+        "label": "تجاهل رؤوس gRPC",
+        "help": "قائمة الرؤوس من منبع gRPC التي يجب ألا تُعالجها NGINX، مفصولة بمسافات (قيم لتوجيه grpc_ignore_headers)."
+      },
+      "GRPC_UNDERSCORES_IN_HEADERS": {
+        "label": "السماح بالشرطات السفلية في الرؤوس",
+        "help": "تفعيل أو تعطيل توجيه underscores_in_headers."
+      },
+      "GRPC_INTERCEPT_ERRORS": {
+        "label": "اعتراض الأخطاء",
+        "help": "اعتراض وإعادة كتابة أخطاء منبع gRPC."
+      },
+      "GRPC_BUFFER_SIZE": {
+        "label": "حجم مخزن gRPC المؤقت",
+        "help": "قيمة توجيه grpc_buffer_size (حجم المخزن المؤقت المستخدم لقراءة الاستجابة من منبع gRPC)."
+      },
+      "GRPC_CONNECT_TIMEOUT": {
+        "label": "مهلة اتصال gRPC",
+        "help": "المهلة عند الاتصال بمنبع gRPC."
+      },
+      "GRPC_READ_TIMEOUT": {
+        "label": "مهلة قراءة gRPC",
+        "help": "المهلة عند القراءة من منبع gRPC."
+      },
+      "GRPC_SEND_TIMEOUT": {
+        "label": "مهلة إرسال gRPC",
+        "help": "المهلة عند الإرسال إلى منبع gRPC."
+      },
+      "GRPC_SOCKET_KEEPALIVE": {
+        "label": "keepalive لمقبس gRPC",
+        "help": "تفعيل أو تعطيل keepalive لمقابس منبع gRPC."
+      },
+      "GRPC_SSL_SNI": {
+        "label": "SNI لـ SSL",
+        "help": "تفعيل أو تعطيل إرسال SNI إلى خادم منبع gRPC."
+      },
+      "GRPC_SSL_SNI_NAME": {
+        "label": "اسم SNI لـ SSL",
+        "help": "ضبط مضيف SNI المراد إرساله إلى خادم منبع gRPC."
+      },
+      "GRPC_SSL_VERIFY": {
+        "label": "التحقق من SSL",
+        "help": "تفعيل أو تعطيل التحقق من شهادة SSL الخاصة بخادم منبع gRPC."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_PRIORITY": {
+        "label": "أولوية الشهادة الموثوقة",
+        "help": "مصدر شهادة CA الموثوقة: مسار ملف أو بيانات base64/PEM (file أو data)."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE": {
+        "label": "مسار شهادة SSL الموثوقة",
+        "help": "مسار حزمة CA بصيغة PEM تُستخدم للتحقق من شهادة منبع gRPC (أولوية 'file'، قابلة للقراءة من قِبل الـscheduler، الذي يخزّنها مؤقتًا ويوزّعها). مطلوبة للتحقق؛ للمنابع العامة استخدم حزمة النظام (مثل /etc/ssl/certs/ca-certificates.crt). إذا لم تُضبط، يُعطَّل التحقق."
+      },
+      "GRPC_SSL_TRUSTED_CERTIFICATE_DATA": {
+        "label": "بيانات الشهادة الموثوقة (base64/نص عادي)",
+        "help": "شهادة CA الموثوقة بصيغة base64 أو PEM كنص عادي (أولوية 'data')."
+      },
+      "GRPC_SSL_VERIFY_DEPTH": {
+        "label": "عمق التحقق من SSL",
+        "help": "ضبط عمق التحقق في سلسلة شهادات خادم منبع gRPC."
+      },
+      "GRPC_SSL_CRL": {
+        "label": "مسار CRL",
+        "help": "مسار قائمة إبطال شهادات بصيغة PEM تُستخدم عند التحقق من خادم منبع gRPC. لها الأولوية على GRPC_SSL_CRL_DATA. تُطبَّق فقط عندما يكون GRPC_SSL_VERIFY مضبوطًا على yes. المسار المضبوط ولكن المفقود يُعَدّ خطأً؛ لا يُستخدم GRPC_SSL_CRL_DATA كبديل احتياطي."
+      },
+      "GRPC_SSL_CRL_DATA": {
+        "label": "بيانات CRL (base64/نص عادي)",
+        "help": "قائمة إبطال الشهادات بصيغة base64 أو PEM كنص عادي. تُستخدم فقط عندما يكون إعداد مسار CRL فارغًا."
+      },
+      "GRPC_SSL_PROTOCOLS": {
+        "label": "بروتوكولات SSL للمنبع",
+        "help": "إصدارات TLS المعروضة على خادم منبع gRPC (قيمة توجيه grpc_ssl_protocols). الفراغ يُبقي على افتراضي NGINX."
+      },
+      "GRPC_SSL_CIPHERS": {
+        "label": "شفرات SSL للمنبع",
+        "help": "سلسلة مجموعة الشفرات المعروضة على خادم منبع gRPC (قيمة توجيه grpc_ssl_ciphers). الفراغ يُبقي على افتراضي NGINX."
+      },
+      "GRPC_NEXT_UPSTREAM": {
+        "label": "منبع gRPC التالي",
+        "help": "شروط اختيار خادم منبع gRPC التالي."
+      },
+      "GRPC_NEXT_UPSTREAM_TIMEOUT": {
+        "label": "مهلة منبع gRPC التالي",
+        "help": "الحد الزمني لتمرير طلب إلى خادم منبع gRPC التالي."
+      },
+      "GRPC_NEXT_UPSTREAM_TRIES": {
+        "label": "محاولات منبع gRPC التالي",
+        "help": "العدد الأقصى لمحاولات تمرير طلب إلى خادم منبع gRPC التالي."
+      },
+      "GRPC_AUTH_REQUEST": {
+        "label": "طلب مصادقة gRPC",
+        "help": "تفعيل المصادقة باستخدام مزوّد خارجي (قيمة توجيه auth_request)."
+      },
+      "GRPC_AUTH_REQUEST_SIGNIN_URL": {
+        "label": "رابط تسجيل الدخول لطلب المصادقة",
+        "help": "إعادة توجيه العملاء إلى رابط تسجيل الدخول عند استخدام GRPC_AUTH_REQUEST (يُستخدم عندما يُعيد استدعاء auth_request الرمز 401). مدعومة متغيرات NGINX مثل $scheme و$host و$request_uri."
+      },
+      "GRPC_AUTH_REQUEST_SET": {
+        "label": "ضبط طلب مصادقة gRPC",
+        "help": "قائمة المتغيرات المراد ضبطها من مزوّد المصادقة، مفصولة بفواصل منقوطة (قيم توجيهات auth_request_set)."
+      },
+      "GRPC_INCLUDES": {
+        "label": "تضمينات gRPC",
+        "help": "تهيئة إضافية تُدرَج في كتلة موقع (location) gRPC، مفصولة بمسافات."
+      },
+      "GRPC_MAX_CLIENT_SIZE": {
+        "label": "الحد الأقصى لحجم نص gRPC",
+        "help": "الحد الأقصى لحجم النص لهذا الموقع gRPC (0 للانهاية). عند تركه فارغًا، يُطبَّق MAX_CLIENT_SIZE الخاص بالخدمة."
+      },
+      "GRPC_SSL_CLIENT_CERT_PRIORITY": {
+        "label": "أولوية شهادة العميل",
+        "help": "مصدر شهادة العميل ومفتاحه المستخدمَين لـ TLS المتبادل مع المنبع: مسار ملف أو بيانات base64/PEM (file أو data)."
+      },
+      "GRPC_SSL_CLIENT_CERT": {
+        "label": "مسار شهادة عميل SSL",
+        "help": "مسار شهادة عميل PEM التي يقدّمها BunkerWeb إلى منابع gRPC (TLS متبادل، أولوية file). يتطلب GRPC_SSL_CLIENT_KEY المطابق؛ تقوم مهمة trusted-cert بتخزين هذه الهوية الخاصة بـ gRPC مؤقتًا وتوزيعها."
+      },
+      "GRPC_SSL_CLIENT_CERT_DATA": {
+        "label": "بيانات شهادة العميل (base64/نص عادي)",
+        "help": "شهادة العميل بصيغة base64 أو PEM كنص عادي (أولوية 'data')."
+      },
+      "GRPC_SSL_CLIENT_KEY": {
+        "label": "مسار مفتاح عميل SSL",
+        "help": "مسار المفتاح الخاص بصيغة PEM المطابق لشهادة العميل (أولوية 'file'). يُخزَّن المفتاح مؤقتًا ويُوزَّع إلى النسخ مثل أي عنصر آخر من نواتج المهام، ويُكتَب بأذونات مقصورة على المالك/المجموعة."
+      },
+      "GRPC_SSL_CLIENT_KEY_DATA": {
+        "label": "بيانات مفتاح العميل (base64/نص عادي)",
+        "help": "المفتاح الخاص بالعميل بصيغة base64 أو PEM كنص عادي (أولوية 'data'). يُفضَّل استخدام مسار ملف عند الإمكان: المفتاح المضبوط هنا يُخزَّن كقيمة إعداد."
+      }
+    }
+  }
+}

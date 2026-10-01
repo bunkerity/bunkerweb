@@ -1,0 +1,34 @@
+{
+  "realip": {
+    "meta": {
+      "name": "실제 IP",
+      "description": "BunkerWeb가 리버스 프록시/로드 밸런서 뒤에 있을 때 클라이언트의 실제 IP를 가져옵니다."
+    },
+    "settings": {
+      "USE_REAL_IP": {
+        "label": "실제 IP 사용",
+        "help": "클라이언트의 실제 IP를 가져옵니다."
+      },
+      "USE_PROXY_PROTOCOL": {
+        "label": "PROXY 프로토콜 사용",
+        "help": "PROXY 프로토콜 통신을 활성화합니다."
+      },
+      "REAL_IP_FROM": {
+        "label": "실제 IP 출처",
+        "help": "프록시된 요청이 유입되는, 신뢰할 수 있는 IP/네트워크 목록입니다(공백으로 구분)."
+      },
+      "REAL_IP_HEADER": {
+        "label": "실제 IP 헤더",
+        "help": "실제 IP를 담은 HTTP 헤더이거나, PROXY 프로토콜을 위한 특수 값 proxy_protocol입니다."
+      },
+      "REAL_IP_RECURSIVE": {
+        "label": "실제 IP 재귀 검색",
+        "help": "IP 주소를 담은 헤더에서 재귀적으로 검색을 수행합니다."
+      },
+      "REAL_IP_FROM_URLS": {
+        "label": "실제 IP 출처 URL",
+        "help": "프록시된 요청이 유입되는, 신뢰할 수 있는 IP/네트워크가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다."
+      }
+    }
+  }
+}

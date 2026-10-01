@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "meta": {
+      "name": "错误",
+      "description": "管理默认错误页面"
+    },
+    "settings": {
+      "ERRORS": {
+        "label": "错误页面",
+        "help": "以空格分隔的 HTTP 错误代码及对应错误页面列表(404=/my404.html 403=/errors/403.html ...)。"
+      },
+      "INTERCEPTED_ERROR_CODES": {
+        "label": "拦截的错误代码",
+        "help": "以空格分隔的、由 BunkerWeb 拦截的 HTTP 错误代码列表。"
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "mtls": {
+    "meta": {
+      "name": "상호 TLS",
+      "description": "상호 TLS(mTLS)를 통해 클라이언트 인증서를 요구합니다."
+    },
+    "settings": {
+      "USE_MTLS": {
+        "label": "상호 TLS 사용",
+        "help": "상호 TLS를 통한 클라이언트 인증을 활성화합니다."
+      },
+      "MTLS_CA_CERTIFICATE": {
+        "label": "클라이언트 CA 번들",
+        "help": "신뢰할 수 있는 클라이언트 CA 번들(PEM)의 절대 경로입니다. MTLS_VERIFY_CLIENT가 on 또는 optional로 설정된 경우 필수입니다."
+      },
+      "MTLS_VERIFY_CLIENT": {
+        "label": "클라이언트 검증 모드",
+        "help": "클라이언트 검증 모드입니다. 'on'은 유효한 인증서를 요구하고, 'optional'은 인증서가 제시되지 않아도 요청을 통과시키며, 'optional_no_ca'는 CA 검증을 건너뜁니다(진단 전용이며 실제 보호 기능이 아님)."
+      },
+      "MTLS_URL": {
+        "label": "mTLS URL",
+        "help": "요청 URI와 매칭되는 정규식으로, 일치하는 경로에서만 유효한 클라이언트 인증서를 요구합니다(HTTP 전용). 일치하지 않는 경로도 핸드셰이크가 완료되도록 MTLS_VERIFY_CLIENT를 optional로 설정하십시오; 실제 적용은 Lua에서 요청마다 이루어집니다. 잘못된 정규식은 실패 시 차단 방식으로 처리됩니다(일치하는 요청은 거부되고 로그에 기록됨), 조용히 허용되지 않습니다. 여러 경로에는 번호가 매겨진 슬롯(MTLS_URL_1, MTLS_URL_2)을 사용하십시오. 비워 두면 사이트 전체에 mTLS가 강제 적용됩니다."
+      },
+      "MTLS_VERIFY_DEPTH": {
+        "label": "검증 깊이",
+        "help": "클라이언트 검증 중 허용되는 최대 인증서 체인 깊이입니다."
+      },
+      "MTLS_FORWARD_CLIENT_HEADERS": {
+        "label": "클라이언트 헤더 전달",
+        "help": "X-SSL-Client-* 헤더를 사용하여 검증 결과를 업스트림 백엔드로 전달합니다. 클라이언트가 제공한 X-SSL-* 헤더는 수신 시 항상 제거되므로 이 값들은 위조될 수 없습니다."
+      },
+      "MTLS_CRL": {
+        "label": "클라이언트 CRL 경로",
+        "help": "인증서 폐기 목록(PEM)의 선택적 절대 경로입니다. 비워 두면 CRL 검사를 건너뜁니다."
+      }
+    }
+  }
+}

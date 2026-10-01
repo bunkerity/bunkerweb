@@ -1,0 +1,83 @@
+{
+  "redis": {
+    "meta": {
+      "name": "Redis",
+      "description": "在集群模式下使用 BunkerWeb 时的 Redis 服务器配置。"
+    },
+    "widgets": {
+      "ping_status": {
+        "title": "REDIS 状态"
+      },
+      "counter_redis_nb_keys": {
+        "title": "REDIS 键",
+        "subtitle": "键数量"
+      }
+    },
+    "settings": {
+      "USE_REDIS": {
+        "label": "启用 Redis",
+        "help": "启用 Redis。"
+      },
+      "REDIS_HOST": {
+        "label": "Redis 服务器",
+        "help": "Redis 服务器的 IP 或主机名。"
+      },
+      "REDIS_PORT": {
+        "label": "Redis 端口",
+        "help": "Redis 服务器端口。"
+      },
+      "REDIS_DATABASE": {
+        "label": "Redis 数据库",
+        "help": "Redis 数据库编号。"
+      },
+      "REDIS_SSL": {
+        "label": "Redis SSL/TLS",
+        "help": "与 Redis 服务器使用 SSL/TLS 连接。"
+      },
+      "REDIS_SSL_VERIFY": {
+        "label": "Redis SSL/TLS 验证",
+        "help": "验证 Redis 服务器的证书。"
+      },
+      "REDIS_SSL_CA": {
+        "label": "Redis SSL/TLS CA 证书包",
+        "help": "用于验证 Redis/Valkey 服务器证书的 PEM CA 证书包的路径(私有 CA);未设置时使用系统信任库。设置后,该证书包会被 Python 客户端(Celery broker、任务、API 速率限制器、bwcli、Web UI)信任,并追加到 NGINX Lua 信任包中,使请求路径也信任它。该文件在生成配置的位置以及每个客户端读取的位置都必须存在;证书包缺失或无效将导致配置生成失败。"
+      },
+      "REDIS_TIMEOUT": {
+        "label": "Redis 超时(毫秒)",
+        "help": "Redis 服务器连接、读取和写入的超时时间(毫秒)。"
+      },
+      "REDIS_USERNAME": {
+        "label": "Redis 用户名",
+        "help": "AUTH 命令中使用的 Redis 用户名。"
+      },
+      "REDIS_PASSWORD": {
+        "label": "Redis 密码",
+        "help": "AUTH 命令中使用的 Redis 密码。"
+      },
+      "REDIS_SENTINEL_HOSTS": {
+        "label": "Redis sentinel 主机",
+        "help": "Redis sentinel 主机,格式为 host:[port],以空格分隔。"
+      },
+      "REDIS_SENTINEL_USERNAME": {
+        "label": "Redis sentinel 用户名",
+        "help": "Redis sentinel 用户名。"
+      },
+      "REDIS_SENTINEL_PASSWORD": {
+        "label": "Redis sentinel 密码",
+        "help": "Redis sentinel 密码。"
+      },
+      "REDIS_SENTINEL_MASTER": {
+        "label": "Redis sentinel 主节点",
+        "help": "Redis sentinel 主节点名称。"
+      },
+      "REDIS_KEEPALIVE_IDLE": {
+        "label": "Redis keepalive 空闲时间(毫秒)",
+        "help": "连接池中 Redis 连接在被关闭前的最大空闲时间(毫秒)。"
+      },
+      "REDIS_KEEPALIVE_POOL": {
+        "label": "Redis keepalive 连接池",
+        "help": "每个 NGINX worker 的连接池中保留的最大 Redis 连接数。稳态连接数大致等于 nginx_workers x pool x instances,必须保持在 Redis/Valkey 的 maxclients 限制以内。"
+      }
+    }
+  }
+}

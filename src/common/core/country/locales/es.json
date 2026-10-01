@@ -1,0 +1,36 @@
+{
+  "country": {
+    "meta": {
+      "name": "País",
+      "description": "Deniega el acceso según el país de la IP del cliente."
+    },
+    "widgets": {
+      "counter_failed_country": {
+        "title": "País",
+        "subtitle": "Solicitud bloqueada"
+      }
+    },
+    "settings": {
+      "BLACKLIST_COUNTRY": {
+        "label": "Lista negra de países",
+        "help": "Deniega el acceso si el país del cliente está en la lista (formato ISO 3166-1 alpha-2, separados por espacios). También puede usar tokens de grupo como @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH y @BENELUX."
+      },
+      "COUNTRY_IGNORE_URI": {
+        "label": "URI ignorada",
+        "help": "Lista de patrones regex PCRE (separados por espacios) para las URI que deben excluirse de las comprobaciones de país. Los patrones se comprueban contra la ruta y la URI completa de la solicitud con la cadena de consulta."
+      },
+      "COUNTRY_IGNORE_HEADER_NAME": {
+        "label": "Nombre de cabecera ignorada",
+        "help": "Nombre de una cabecera de solicitud que exime a la solicitud de la comprobación de país. Cualquier cliente puede enviar esta cabecera: trátela como un secreto compartido, solo a través de HTTPS."
+      },
+      "COUNTRY_IGNORE_HEADER_VALUE": {
+        "label": "Valor de cabecera ignorado",
+        "help": "Valor (regex PCRE) que debe coincidir con la cabecera para eximir a la solicitud de la comprobación de país. Dejar vacío para que coincida con la simple presencia de la cabecera. Ánclelo con ^ y $: la coincidencia no está anclada de forma predeterminada."
+      },
+      "WHITELIST_COUNTRY": {
+        "label": "Lista blanca de países",
+        "help": "Deniega el acceso si el país del cliente no está en la lista (formato ISO 3166-1 alpha-2, separados por espacios). También puede usar tokens de grupo como @EU, @SCHENGEN, @EEA, @USMCA, @FIVE_EYES, @ASEAN, @GCC, @G7, @LATAM, @NORDICS, @DACH y @BENELUX."
+      }
+    }
+  }
+}

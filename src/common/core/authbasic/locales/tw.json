@@ -1,0 +1,40 @@
+{
+  "authbasic": {
+    "meta": {
+      "name": "基本驗證",
+      "description": "在存取資源或整個網站之前,透過 HTTP 基本驗證方式強制要求登入。"
+    },
+    "widgets": {
+      "counter_passed_authbasic": {
+        "title": "基本驗證",
+        "subtitle": "成功"
+      },
+      "counter_failed_authbasic": {
+        "title": "基本驗證",
+        "subtitle": "失敗"
+      }
+    },
+    "settings": {
+      "USE_AUTH_BASIC": {
+        "label": "使用 HTTP 基本驗證",
+        "help": "使用 HTTP 基本驗證"
+      },
+      "AUTH_BASIC_LOCATION": {
+        "label": "基本驗證位置",
+        "help": "受保護資源的 URL,或站台層級的值。"
+      },
+      "AUTH_BASIC_USER": {
+        "label": "基本驗證使用者名稱",
+        "help": "使用者名稱"
+      },
+      "AUTH_BASIC_PASSWORD": {
+        "label": "密碼",
+        "help": "密碼"
+      },
+      "AUTH_BASIC_TEXT": {
+        "label": "文字",
+        "help": "要顯示的文字"
+      }
+    }
+  }
+}

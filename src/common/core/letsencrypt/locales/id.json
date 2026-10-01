@@ -1,0 +1,102 @@
+{
+  "letsencrypt": {
+    "meta": {
+      "name": "Let's Encrypt",
+      "description": "Pembuatan, pembaruan, dan konfigurasi otomatis sertifikat Let's Encrypt."
+    },
+    "settings": {
+      "AUTO_LETS_ENCRYPT": {
+        "label": "Let's Encrypt otomatis",
+        "help": "Aktifkan mode Let's Encrypt otomatis."
+      },
+      "LETS_ENCRYPT_PASSTHROUGH": {
+        "label": "Teruskan Let's Encrypt",
+        "help": "Teruskan permintaan Let's Encrypt ke server web."
+      },
+      "EMAIL_LETS_ENCRYPT": {
+        "label": "Email Let's Encrypt",
+        "help": "Email yang digunakan untuk notifikasi Let's Encrypt dan dalam sertifikat."
+      },
+      "LETS_ENCRYPT_SERVER": {
+        "label": "Server Certificate Authority",
+        "help": "Pilih server certificate authority yang digunakan untuk pembuatan sertifikat."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_KEY": {
+        "label": "Kunci API ZeroSSL",
+        "help": "Kunci API ZeroSSL opsional yang digunakan oleh zerossl-bot. Jika kosong, EMAIL_LETS_ENCRYPT digunakan untuk mengambil kredensial EAB."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY": {
+        "label": "Percobaan Ulang API ZeroSSL",
+        "help": "Jumlah percobaan ulang untuk permintaan API ZeroSSL yang dilakukan oleh zerossl-bot (0 menonaktifkan percobaan ulang)."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
+        "label": "Jeda Percobaan Ulang API ZeroSSL",
+        "help": "Jeda dalam detik antara percobaan ulang API ZeroSSL di zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
+        "label": "Timeout Koneksi API ZeroSSL",
+        "help": "Timeout koneksi dalam detik untuk permintaan API ZeroSSL di zerossl-bot."
+      },
+      "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
+        "label": "Waktu Maksimum API ZeroSSL",
+        "help": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL di zerossl-bot."
+      },
+      "LETS_ENCRYPT_CHALLENGE": {
+        "label": "Jenis Tantangan",
+        "help": "Jenis tantangan yang digunakan untuk Let's Encrypt (http atau dns)."
+      },
+      "LETS_ENCRYPT_DNS_PROVIDER": {
+        "label": "Penyedia DNS",
+        "help": "Penyedia DNS yang digunakan untuk tantangan DNS."
+      },
+      "LETS_ENCRYPT_DNS_PROPAGATION": {
+        "label": "Propagasi DNS",
+        "help": "Waktu tunggu propagasi DNS dalam detik untuk tantangan DNS."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
+        "label": "Item Kredensial",
+        "help": "Item konfigurasi yang akan ditambahkan ke file credentials.ini untuk penyedia DNS pada tantangan DNS. Tulis sebagai key, spasi, lalu value (mis. 'cloudflare_api_token 123456'); jangan beri tanda kutip pada key. Value juga dapat dienkode base64, atau seluruh item dapat berupa objek json yang dienkode base64."
+      },
+      "LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64": {
+        "label": "Decode Kredensial DNS Base64",
+        "help": "Otomatis decode kredensial penyedia DNS yang dienkode base64. Saat diaktifkan, kredensial yang cocok dengan format base64 di-decode sebelum digunakan (kecuali untuk penyedia rfc2136). Nonaktifkan jika kredensial Anda memang sengaja berupa string base64."
+      },
+      "USE_LETS_ENCRYPT_WILDCARD": {
+        "label": "Sertifikat Wildcard",
+        "help": "Buat sertifikat wildcard untuk semua domain. Ini memungkinkan satu sertifikat mengamankan beberapa subdomain. (Hanya tersedia dengan tantangan DNS)"
+      },
+      "USE_LETS_ENCRYPT_STAGING": {
+        "label": "Gunakan Let's Encrypt Staging",
+        "help": "Gunakan lingkungan staging untuk pembuatan sertifikat Let's Encrypt. Berguna saat Anda menguji deployment untuk menghindari rate limit di lingkungan produksi."
+      },
+      "LETS_ENCRYPT_CLEAR_OLD_CERTS": {
+        "label": "Hapus sertifikat lama saat tidak lagi diperlukan",
+        "help": "Hapus sertifikat lama saat memperbarui."
+      },
+      "LETS_ENCRYPT_PROFILE": {
+        "label": "Profil Sertifikat",
+        "help": "Pilih profil sertifikat untuk digunakan dengan Let's Encrypt. 'classic' adalah sertifikat serbaguna dengan masa berlaku 90 hari dan kompatibilitas luas. 'tlsserver' dioptimalkan untuk autentikasi server TLS dengan masa berlaku 90 hari dan payload lebih kecil. 'shortlived' menawarkan sertifikat 7 hari untuk keamanan yang ditingkatkan di lingkungan otomatis."
+      },
+      "LETS_ENCRYPT_CUSTOM_PROFILE": {
+        "label": "Profil Sertifikat Kustom (ACME)",
+        "help": "Profil sertifikat kustom untuk digunakan dengan server ACME yang mendukung profil non-standar. Menggantikan LETS_ENCRYPT_PROFILE jika diatur."
+      },
+      "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
+        "label": "Nonaktifkan Public Suffix (Blacklist PSL)",
+        "help": "Nonaktifkan permintaan sertifikat untuk domain yang cocok dengan Public Suffix List (disarankan, default: yes)."
+      },
+      "LETS_ENCRYPT_MAX_RETRIES": {
+        "label": "Percobaan Ulang Maksimum",
+        "help": "Jumlah percobaan ulang pembuatan sertifikat saat gagal (0 menonaktifkan percobaan ulang)."
+      },
+      "LETS_ENCRYPT_CONCURRENT_REQUESTS": {
+        "label": "Permintaan Sertifikat Bersamaan",
+        "help": "Jalankan permintaan sertifikat secara bersamaan di job certbot-new (dapat meningkatkan risiko rate limit)."
+      },
+      "LETS_ENCRYPT_MAX_LOG_BACKUPS": {
+        "label": "Backup Log Certbot Maksimum",
+        "help": "Jumlah maksimum file log certbot yang dirotasi untuk disimpan per job. Default bawaan Certbot adalah 1000, yang cepat menumpuk. Atur ke 0 untuk hanya menyimpan log yang aktif."
+      }
+    }
+  }
+}

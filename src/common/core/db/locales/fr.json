@@ -1,0 +1,66 @@
+{
+  "db": {
+    "meta": {
+      "name": "Base de données",
+      "description": "Intègre facilement la base de données."
+    },
+    "settings": {
+      "DATABASE_URI": {
+        "label": "L'URI de la base de données",
+        "help": "L'URI de la base de données, suivant le format sqlalchemy."
+      },
+      "DATABASE_URI_READONLY": {
+        "label": "L'URI de la base de données pour les opérations en lecture seule",
+        "help": "L'URI de la base de données pour les opérations en lecture seule ; elle peut également servir de solution de repli si la base de données principale est indisponible. Suivant le format sqlalchemy."
+      },
+      "DATABASE_LOG_LEVEL": {
+        "label": "Niveau de journalisation de la base de données",
+        "help": "Le niveau à utiliser pour les journaux de la base de données."
+      },
+      "DATABASE_MAX_JOBS_RUNS": {
+        "label": "Le nombre maximal d'exécutions de jobs",
+        "help": "Le nombre maximal d'exécutions de jobs à conserver dans la base de données."
+      },
+      "DATABASE_MAX_SESSION_AGE_DAYS": {
+        "label": "L'âge maximal en jours des sessions utilisateur de l'UI",
+        "help": "L'âge maximal en jours des sessions utilisateur de l'UI avant leur purge."
+      },
+      "DATABASE_POOL_SIZE": {
+        "label": "Taille du pool de la base de données",
+        "help": "Le nombre de connexions à conserver dans le pool de connexions de la base de données."
+      },
+      "DATABASE_POOL_MAX_OVERFLOW": {
+        "label": "Débordement maximal du pool de la base de données",
+        "help": "Le nombre maximal de connexions à créer au-delà de la taille du pool."
+      },
+      "DATABASE_POOL_TIMEOUT": {
+        "label": "Délai d'attente du pool de la base de données",
+        "help": "Le nombre de secondes à attendre avant d'abandonner l'obtention d'une connexion depuis le pool."
+      },
+      "DATABASE_POOL_RECYCLE": {
+        "label": "Recyclage du pool de la base de données",
+        "help": "Le nombre de secondes après lequel une connexion est automatiquement recyclée. Mettre à -1 pour désactiver."
+      },
+      "DATABASE_POOL_PRE_PING": {
+        "label": "Pré-ping du pool de la base de données",
+        "help": "Indique s'il faut tester la vivacité des connexions à chaque emprunt depuis le pool."
+      },
+      "DATABASE_POOL_RESET_ON_RETURN": {
+        "label": "Réinitialisation du pool de la base de données au retour",
+        "help": "Comment la connexion doit être réinitialisée lorsqu'elle est retournée au pool. Laisser vide pour auto (none pour MySQL/MariaDB, rollback pour les autres). Valeurs possibles : rollback, commit, none."
+      },
+      "DATABASE_RETRY_TIMEOUT": {
+        "label": "Délai d'attente de nouvelle tentative de la base de données",
+        "help": "Le nombre maximal de secondes à attendre que la base de données soit disponible au démarrage."
+      },
+      "DATABASE_REQUEST_RETRY_ATTEMPTS": {
+        "label": "Tentatives de nouvelle tentative des requêtes de la base de données",
+        "help": "Le nombre de tentatives de nouvelle tentative pour les erreurs transitoires de la base de données."
+      },
+      "DATABASE_REQUEST_RETRY_DELAY": {
+        "label": "Délai entre les nouvelles tentatives des requêtes de la base de données",
+        "help": "Le délai en secondes entre les tentatives pour les erreurs transitoires de la base de données."
+      }
+    }
+  }
+}
