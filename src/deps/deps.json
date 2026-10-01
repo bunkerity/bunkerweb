@@ -259,7 +259,8 @@
       "id": "nginx_cookie_flag_module",
       "name": "Nginx cookie flag module v1.1.0",
       "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
-      "commit": "4e48acf132952bbed43b28a8e6af0584dacb7b4c"
+      "commit": "4e48acf132952bbed43b28a8e6af0584dacb7b4c",
+      "post_install": "patch --forward src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c src/deps/misc/nginx-cookie-flag-samesite-none.patch || rm src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c.orig src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c.rej"
     },
     {
       "id": "ngx_brotli",
