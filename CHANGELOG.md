@@ -25,6 +25,7 @@
 - [BUGFIX] `backup`: the built-in backup no longer fails on MySQL 26.x.
 - [BUGFIX] `ui`: after saving the global config, a service, a custom config or the PRO license key, the page shows the new value instead of the old one until a refresh. (Fixes #3991)
 - [BUGFIX] `ui`: the "More info" link of core and PRO plugins opens their section of the Features page. (Fixes #3990)
+- [BUGFIX] `misc`: the default server serves its placeholder page only on `/` and answers 404 on every other path instead of 200. (Fixes #3992)
 - [PERF] `ui`: the reports table no longer rebuilds every tooltip on each draw, which also stops its memory growth.
 - [PERF] `ui`: restoring saved hidden columns measures the table once instead of once per column.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
