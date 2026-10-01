@@ -118,6 +118,55 @@ class TestUpdateExternalPlugins:
         assert db.update_external_plugins([plugin], _type="external") == ""
         assert db.get_template_settings("flag") == {"EXTPLUG_FLAG": "yes"}
 
+    @staticmethod
+    def _flag_setting(pid_up, context="multisite"):
+        return {
+            f"{pid_up}_FLAG": {
+                "id": f"{pid_up.lower()}-flag",
+                "context": context,
+                "default": "no",
+                "help": "h",
+                "label": "L",
+                "regex": "^(yes|no)$",
+                "type": "check",
+            }
+        }
+
+    @staticmethod
+    def _write_template(tmp_path, settings):
+        templates = tmp_path / "templates"
+        templates.mkdir(exist_ok=True)
+        (templates / "flag.json").write_text(
+            dumps({"name": "Flag", "settings": settings, "steps": [{"title": "S", "subtitle": "", "settings": list(settings)}]})
+        )
+
+    @pytest.mark.parametrize("per_plugin_commit", [True, False])
+    def test_template_settings_kept_on_first_sync(self, db, monkeypatch, tmp_path, per_plugin_commit):
+        # The plugin's own settings are only staged when its templates are checked: they must
+        # count as existing, or a brand-new plugin's template lands with no settings at all.
+        plugin = make_external_plugin("extplug")
+        plugin["settings"] = self._flag_setting("EXTPLUG") | self._flag_setting("EXTPLUG_G", context="global")
+        monkeypatch.setattr(db, "_uep_resolve_plugin_dir", lambda *_: tmp_path)
+        self._write_template(tmp_path, {"EXTPLUG_FLAG": "on", "EXTPLUG_G_FLAG": "yes"})
+
+        assert db.update_external_plugins([plugin], _type="external", per_plugin_commit=per_plugin_commit) == ""
+        # The global setting is still refused: only the multisite one belongs in a template.
+        assert db.get_template_settings("flag") == {"EXTPLUG_FLAG": "yes"}
+
+    @pytest.mark.parametrize("per_plugin_commit", [True, False])
+    def test_template_settings_kept_when_setting_added_in_same_sync(self, db, monkeypatch, tmp_path, per_plugin_commit):
+        # Same ordering on the update path: a new version adds a setting and a template that uses it.
+        plugin = make_external_plugin("extplug", version="1.0", checksum="sum-1")
+        monkeypatch.setattr(db, "_uep_resolve_plugin_dir", lambda *_: tmp_path)
+        assert db.update_external_plugins([plugin], _type="external", per_plugin_commit=per_plugin_commit) == ""
+
+        updated = make_external_plugin("extplug", version="2.0", checksum="sum-2")
+        updated["settings"] |= self._flag_setting("EXTPLUG")
+        self._write_template(tmp_path, {"EXTPLUG_FLAG": "on"})
+
+        assert db.update_external_plugins([updated], _type="external", per_plugin_commit=per_plugin_commit) == ""
+        assert db.get_template_settings("flag") == {"EXTPLUG_FLAG": "yes"}
+
 
 class TestPluginIcon:
     """The Plugins.icon column round-trips through update_external_plugins: a shipped

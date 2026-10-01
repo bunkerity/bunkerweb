@@ -207,6 +207,8 @@ def browser_payload(parser):
 def render_shelf():
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         url_for=lambda endpoint, **kwargs: "/" + endpoint,
         get_filtered_settings=get_filtered_settings,
         is_plugin_active=is_plugin_active,
@@ -1019,6 +1021,8 @@ def test_rendering_never_mutates_a_config_entry(render_shelf):
     before = deepcopy(config)
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         url_for=lambda endpoint, **kwargs: "/" + endpoint,
         get_filtered_settings=get_filtered_settings,
         is_plugin_active=is_plugin_active,

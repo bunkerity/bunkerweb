@@ -379,9 +379,12 @@ def test_flipping_the_flag_makes_the_TEMPLATE_ROUTE_refuse(ctx, monkeypatch):
     import app.models.plugin_catalog as pc  # type: ignore
 
     monkeypatch.setitem(pc.SOURCES["templates"], "version_gate", True)
+    # An entry that lists only newer versions: under the PO rule (2026-09-25) an item with no
+    # entry at all is compatible, so refusing needs one that excludes this build.
+    ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry(supported=["1.7.1"])])
     body, status = _post(ctx)
     assert status == 422
-    assert "declares support for no BunkerWeb version" in body["message"]
+    assert "declares support for 1.7.1" in body["message"]
     assert ctx.created == [] and ctx.downloads == []
 
 

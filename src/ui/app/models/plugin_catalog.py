@@ -26,7 +26,7 @@ The chain, in order, and the order is the design:
       -> [operator clicks Install on ONE item]
       -> item re-looked-up in the CACHED VALIDATED catalogue by id (never from the POST body)
       -> freshness gate             a catalogue nobody could refresh stops being installable
-      -> version gate               fails CLOSED
+      -> version gate               no entry or a newer build passes (PO rule, 2026-09-25)
       -> archive re-fetched AT THE PINNED TAG, never at "latest"
       -> verify_digest()            compare_digest against the digest recorded at refresh
       -> the ONE folder is repacked / materialised, by id
@@ -58,12 +58,13 @@ is deferred; until it lands, this catalogue's security equals those repositories
 from datetime import datetime, timedelta
 from hmac import compare_digest
 from io import BytesIO
-from json import JSONDecodeError, loads
+from json import JSONDecodeError, dumps, loads
+from logging import getLogger
 from os import getenv
 from posixpath import normpath
 from re import compile as re_compile
 from tarfile import TarError, TarInfo, open as tar_open
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import unquote, urlsplit
 
 from packaging.version import InvalidVersion, Version
@@ -71,6 +72,11 @@ from requests import get
 from requests.exceptions import RequestException
 
 from common_utils import bytes_hash, normalize_bunkerweb_version  # type: ignore
+from template_package import template_from_folder  # type: ignore
+
+# The UI's own logger, by name: `app.utils` configures "UI" at startup, and importing it from
+# there would pull the whole app into this pure module.
+LOGGER = getLogger("UI")
 
 # ── Pinned sources ──────────────────────────────────────────────────────────
 #
@@ -201,6 +207,9 @@ _ALLOWED = {
 
 _MAX_NAME = 64
 _MAX_DESCRIPTION = 512
+# Setting ids a listed plugin declares (C3 update preview). Real plugins declare a few dozen.
+_MAX_SETTINGS = 500
+_MAX_SETTING_ID = 256
 
 
 def catalog_enabled() -> bool:
@@ -497,9 +506,12 @@ def archive_entries(payload: Any, kind: str) -> Tuple[Dict[str, Dict[str, Any]],
 # inside the same archive we already downloaded and already trust, so it is the compatibility
 # source, keyed by each plugin's `version`.
 #
-# It is read as a membership list rather than a range because that is what it is -- an explicit
-# enumeration of versions, not bounds -- and inventing a range from it would claim a compatibility
-# the publisher never stated.
+# How the list is read is a PO decision (2026-09-25), replacing the fail-closed exact match that
+# left every card incompatible on 1.7 because upstream never listed a 1.7.x: "if not provided or
+# specifically stated, it's compatible, if the semver is superior". So a release line with no
+# entry declares nothing to refuse on, and a line with an entry is read as "these versions and
+# anything after them". The trust root is unchanged by this -- the pinned repositories plus the
+# archive digest; this only decides which verified items the button is offered for.
 COMPATIBILITY_MEMBER = "COMPATIBILITY.json"
 _MAX_COMPAT_LINES = 200
 _MAX_COMPAT_VERSIONS = 200
@@ -519,8 +531,8 @@ def parse_compatibility(blob: Any) -> Dict[str, List[str]]:
     """``COMPATIBILITY.json`` as ``{release line: [BunkerWeb versions]}``.
 
     Every key and every entry is re-typed and re-validated; an unusable line is dropped rather
-    than failing the file, and an unusable file is an empty map -- which, given the gate below
-    fails closed, means nothing installs. That is the correct direction to fail in.
+    than failing the file, and an unusable file is an empty map -- which, under the PO rule the
+    gate below implements, means no line declares anything and every item reads as compatible.
     """
     if not isinstance(blob, (bytes, bytearray)):
         return {}
@@ -544,34 +556,43 @@ def parse_compatibility(blob: Any) -> Dict[str, List[str]]:
 def is_compatible(bw_version: Any, supported: Any) -> bool:
     """Whether an item whose release line supports ``supported`` may be installed here.
 
-    Fails CLOSED on everything: an empty or absent list, an unparseable running version, an
-    unparseable entry. Deliberately the opposite stance to ``is_newer_version_available``, whose
-    docstring prefers a false negative. There a parse failure costs a missed notification; here it
-    costs running an unvetted plugin as code in the UI process, in the worker and in nginx.
+    The PO rule (2026-09-25):
 
-    Comparison is on normalised ``Version`` objects, not on strings: "1.6.10" and "1.6.10" can be
-    spelled differently ("v1.6.10", "1.6.10-rc1" is a different version and must stay different),
-    and a string compare would both miss real matches and accept near-misses.
+    * ``supported`` is ``None`` or ``[]`` -- the release line has no entry -- so the item is
+      compatible;
+    * otherwise it is compatible when the running version is listed, or is strictly greater than
+      every listed version (``1.7.0~alpha`` is greater than ``1.6.16``: pre-releases compare as
+      ``packaging`` orders them);
+    * anything else is incompatible, and so is an entry that is present but carries no
+      parseable version, or is not a list at all -- that is not "no entry".
+
+    An unparseable running version is refused whatever the entry says. That is deliberately the
+    opposite stance to ``is_newer_version_available``, whose docstring prefers a false negative:
+    there a parse failure costs a missed notification, here it costs running an unvetted plugin
+    as code in the UI process, in the worker and in nginx.
+
+    Comparison is on normalised ``Version`` objects, not on strings: "v1.6.10" and "1.6.10" are
+    one version, "1.10.0" is greater than "1.9.0", and a string compare gets both wrong.
     """
-    # No `not supported` short-circuit: an empty list already falls out of the loop below as
-    # False. A guard that cannot change an outcome only looks like one.
-    if not isinstance(supported, list) or not _valid_version(bw_version):
+    if not _valid_version(bw_version):
         return False
+    if supported is None:
+        supported = []
+    if not isinstance(supported, list):
+        return False
+    if not supported:
+        return True
     current = Version(normalize_bunkerweb_version(bw_version))
-    for candidate in supported:
-        if _valid_version(candidate) and Version(normalize_bunkerweb_version(candidate)) == current:
-            return True
-    return False
+    listed = [Version(normalize_bunkerweb_version(candidate)) for candidate in supported if _valid_version(candidate)]
+    return bool(listed) and (current in listed or all(current > version for version in listed))
 
 
 def supported_versions(meta: Dict[str, Any], compatibility: Dict[str, List[str]]) -> List[str]:
     """The BunkerWeb versions one item declares support for, or ``[]`` when it declares none.
 
-    ``[]`` is the honest answer for every item in the catalogue as it stands today: the plugins
-    repository has published v1.9, v1.10 and v1.11 without adding a `COMPATIBILITY.json` line for
-    any of them, and the templates repository has no compatibility data at all. The gate above
-    then refuses, the card says why, and the moment upstream adds the line the catalogue lights up
-    with no change here.
+    ``[]`` means the item's release line has no ``COMPATIBILITY.json`` entry (or the item has no
+    ``version`` to look one up by), which the gate above reads as compatible. The templates
+    repository has no compatibility data at all, so every template gets ``[]``.
     """
     line = meta.get("version")
     if not isinstance(line, str):
@@ -591,11 +612,9 @@ def item_compatible(kind: str, bw_version: Any, item: Any) -> bool:
 
     It splits by source because the two repositories are genuinely different, not to be lenient:
 
-    * **plugins** are gated on `COMPATIBILITY.json`, and it fails closed. Today that refuses every
-      plugin, because the plugins repository has shipped v1.9, v1.10 and v1.11 without adding a
-      line for any of them and no line anywhere names a 1.7.x. That is upstream's statement to
-      make, and the card says so rather than the page going quietly blank. The moment the line
-      lands, the catalogue lights up with no change here.
+    * **plugins** are gated on `COMPATIBILITY.json` through ``is_compatible``: no entry for the
+      item's release line, a listed running version, or a running version newer than every listed
+      one is compatible (PO decision, 2026-09-25). An item that is not a dict at all is refused.
 
     * **templates** declare nothing to gate on -- no version field, no compatibility file, nothing
       -- so there is no bound to check and inventing one would assert a compatibility the
@@ -611,7 +630,9 @@ def item_compatible(kind: str, bw_version: Any, item: Any) -> bool:
     """
     if not SOURCES.get(kind, {}).get("version_gate"):
         return True
-    return is_compatible(bw_version, (item or {}).get("supported") if isinstance(item, dict) else None)
+    if not isinstance(item, dict):
+        return False
+    return is_compatible(bw_version, item.get("supported"))
 
 
 # ── Building the listing ────────────────────────────────────────────────────
@@ -651,17 +672,25 @@ def build_items(kind: str, entries: Dict[str, Dict[str, Any]], compatibility: Di
     not model, ``settings`` and ``jobs`` among them -- cannot ride into DATA, into a template, or
     into an install.
     """
-    return [
-        {
+    items = []
+    for folder in sorted(entries):
+        meta = entries[folder]
+        item = {
             "id": folder,
-            "name": _text(entries[folder].get("name"), _MAX_NAME) or folder,
-            "description": _text(entries[folder].get("description"), _MAX_DESCRIPTION),
-            "version": _text(entries[folder].get("version"), 32),
-            "supported": supported_versions(entries[folder], compatibility),
+            "name": _text(meta.get("name"), _MAX_NAME) or folder,
+            "description": _text(meta.get("description"), _MAX_DESCRIPTION),
+            "version": _text(meta.get("version"), 32),
+            "supported": supported_versions(meta, compatibility),
             "homepage": item_homepage(kind, folder),
         }
-        for folder in sorted(entries)
-    ]
+        if kind == "plugins":
+            # The setting IDS, never their specs: the update preview lists what the new version
+            # drops, and the DB prunes those settings with every value set for them. The archive
+            # is digest-pinned, so this list is exactly what an update would install.
+            settings = meta.get("settings") if isinstance(meta.get("settings"), dict) else {}
+            item["settings"] = sorted(k for k in settings if isinstance(k, str) and len(k) <= _MAX_SETTING_ID)[:_MAX_SETTINGS]
+        items.append(item)
+    return items
 
 
 # ── Freshness ───────────────────────────────────────────────────────────────
@@ -720,6 +749,11 @@ def _read_capped(response, cap: int) -> Optional[bytes]:
     return buf.getvalue()
 
 
+class GitHubRefused(ValueError):
+    """GitHub answered and refused (403/429): in practice the unauthenticated rate limit, 60
+    requests an hour per IP address, which every stack behind one shared IP spends together."""
+
+
 def _get_allowlisted(url: str, *, timeout, cap: int) -> bytes:
     """GET an allowlisted URL, walking redirects ourselves so each hop is re-validated.
 
@@ -748,6 +782,8 @@ def _get_allowlisted(url: str, *, timeout, cap: int) -> bytes:
                     raise ValueError("redirect without a target")
                 current = target
                 continue
+            if response.status_code in (403, 429):
+                raise GitHubRefused(f"unexpected status {response.status_code}")
             if response.status_code != 200:
                 raise ValueError(f"unexpected status {response.status_code}")
             data = _read_capped(response, cap)
@@ -796,10 +832,18 @@ def fetch_source(kind: str) -> Tuple[Optional[Dict[str, Any]], List[str]]:
     if not entries:
         return None, errors + entry_errors + [f"{repo}@{tag} contains no {kind}"]
 
+    items = build_items(kind, entries, compatibility)
+    if kind == "templates":
+        # A template has no version, so its update state is a content comparison (C4). The
+        # fingerprint is read out of these same bytes, so it describes exactly what an update
+        # installs. A template that does not assemble gets none and the card offers no update.
+        for item in items:
+            item["fingerprint"] = template_fingerprint(template_payload(payload, item["id"])[0])
+
     return {
         "tag": tag,
         "sha256": bytes_hash(payload, algorithm="sha256"),
-        "items": build_items(kind, entries, compatibility),
+        "items": items,
     }, errors + entry_errors
 
 
@@ -825,13 +869,28 @@ def fetch_catalog() -> Optional[Dict[str, Any]]:
         return None
 
     catalog: Dict[str, Any] = {}
+    refused: List[str] = []
     for kind in SOURCES:
         try:
             section, _ = fetch_source(kind)
+        except GitHubRefused as e:
+            refused.append(f"{SOURCES[kind]['repo']} ({e})")
+            continue
         except (ValueError, RequestException):
             continue
         if section is not None:
             catalog[kind] = section
+
+    # Everything else stays silent (an air-gapped install never reaches GitHub, and an hourly
+    # warning about that is noise about a deployment choice). A refusal is different: GitHub is
+    # reachable and said no, the catalogue stays empty or ages towards the staleness gate, and on
+    # a shared IP that lasts hours. One line per refresh, no retry: retrying spends the same
+    # exhausted budget.
+    if refused:
+        LOGGER.warning(
+            f"GitHub refused the community catalogue refresh for {', '.join(refused)}; keeping the cached listing. "
+            "Unauthenticated GitHub requests share a rate limit per IP address, so this clears on its own."
+        )
 
     if not catalog:
         return None
@@ -968,86 +1027,22 @@ def repack_plugin(payload: Any, plugin_id: str) -> Tuple[Optional[bytes], Option
     return out.getvalue(), None
 
 
-# Config references inside a template: `<type>/<name>.conf`, where `<type>` is one of BunkerWeb's
-# custom-config types. Anchored, one separator, no dots in either half beyond the extension --
-# because this string is joined onto a path to read the blob out of the archive, and it is also
-# what `_prepare_template_entities` splits back into a type and a name.
-TEMPLATE_CONFIG_RX = re_compile(r"^[a-z][a-z0-9-]{0,31}/[A-Za-z0-9][A-Za-z0-9_-]{0,63}\.conf\Z")
-
-MAX_TEMPLATE_CONFIGS = 32
-
-
 def template_payload(payload: Any, template_id: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
-    """One template, assembled from its folder, ready for ``create_template``. ``(data, error)``.
+    """One catalogue template, assembled from its folder, ready for ``create_template``. ``(data, error)``.
 
-    The manifest design could hand `create_template` the downloaded JSON as-is, because a manifest
-    artifact was one self-contained blob. A repository is not shaped that way and this is the one
-    place the re-scope needs genuinely new code: upstream splits a template across
-    ``template.json`` and sibling files, and its ``configs`` value is a list of **relative paths**
-    (``"modsec-crs/nextcloud_false_positives.conf"``), while ``_prepare_template_entities``
-    (``db_methods/templates.py``) requires config **objects** carrying ``type``, ``name`` and the
-    config ``data`` itself. So each reference is resolved against
-    ``templates/<id>/configs/<reference>`` in the same verified archive and materialised here.
-
-    Every reference is pattern-checked before it is used as a path, and resolution goes through
-    ``archive_file``, which re-derives each member relative to the wrapper root -- so a reference
-    cannot address a file outside its own template's folder even if the pattern were loose.
-
-    Only the five fields ``create_template`` takes are carried across. The rest of an upstream
-    ``template.json`` is left where it is.
+    A thin wrapper: the parser is ``template_package.template_from_folder``, shared with template
+    import and the scheduler's URL installs, so the catalogue and those paths cannot disagree on
+    what a template folder is. What stays here is what only the catalogue knows -- its stricter
+    id rule (``CATALOG_ID_RX``: the id is also a DOM id and a dict key here) and where its
+    folders sit in the release archive. Every file is read through ``archive_file``, which
+    re-derives each member relative to the wrapper root and caps it at ``MEMBER_MAX``, so a
+    reference cannot address a file outside its own template's folder.
     """
     if not CATALOG_ID_RX.match(template_id or ""):  # noqa: FURB143 - keep None input on the error-return path
         return None, f"invalid template id {template_id!r}"
 
     base = f"{SOURCES['templates']['subdir']}/{template_id}"
-    blob = archive_file(payload, f"{base}/{SOURCES['templates']['member']}")
-    if blob is None:
-        return None, f"the archive contains no template named {template_id}"
-    if len(blob) > MAX_MEMBER_JSON:
-        return None, f"{template_id}: template.json is oversized"
-    try:
-        data = loads(blob.decode("utf-8"))
-    except (UnicodeDecodeError, JSONDecodeError, ValueError):
-        return None, f"{template_id}: template.json is not valid UTF-8 JSON"
-    if not isinstance(data, dict):
-        return None, f"{template_id}: template.json is not a JSON object"
-
-    # The same identity check the listing made, made again on the bytes actually being installed:
-    # the declared id is what `create_template` writes.
-    declared = data.get("id")
-    if declared != template_id:
-        return None, f"the payload declares id {declared!r} but the catalogue entry is {template_id!r}"
-
-    settings = data.get("settings")
-    steps = data.get("steps")
-    if not isinstance(settings, dict) or not isinstance(steps, list):
-        return None, f"{template_id}: settings must be an object and steps a list"
-
-    references = data.get("configs") or []
-    if not isinstance(references, list) or len(references) > MAX_TEMPLATE_CONFIGS:
-        return None, f"{template_id}: configs must be a list of at most {MAX_TEMPLATE_CONFIGS} references"
-
-    configs: List[Dict[str, Any]] = []
-    for reference in references:
-        if not isinstance(reference, str) or not TEMPLATE_CONFIG_RX.match(reference):
-            return None, f"{template_id}: invalid config reference {reference!r}"
-        blob = archive_file(payload, f"{base}/configs/{reference}")
-        if blob is None:
-            return None, f"{template_id}: config {reference} is missing from the archive"
-        try:
-            text = blob.decode("utf-8")
-        except UnicodeDecodeError:
-            return None, f"{template_id}: config {reference} is not valid UTF-8"
-        config_type, filename = reference.split("/", 1)
-        configs.append({"type": config_type, "name": filename.removesuffix(".conf"), "data": text})
-
-    return {
-        "id": template_id,
-        "name": _text(data.get("name"), _MAX_NAME) or template_id,
-        "settings": settings,
-        "steps": steps,
-        "configs": configs,
-    }, None
+    return template_from_folder(lambda relative: archive_file(payload, f"{base}/{relative}"), template_id)
 
 
 # ── Reading the cache ───────────────────────────────────────────────────────
@@ -1096,19 +1091,166 @@ def collides_with_installed(item_id: str, installed: Dict[str, Any]) -> bool:
     return item_id in installed
 
 
-def build_catalog_view(kind: str, cached: Any, installed_ids: Any, bw_version: str) -> Dict[str, Any]:
+def replaceable(row: Any) -> bool:
+    """Whether an installed plugin row is one the catalogue may update or remove.
+
+    Only a ``ui`` type installed by the ``ui`` method: that is what a catalogue install writes, and
+    it is the only row the API's ``replace`` flag accepts. Core and pro rows belong to the image
+    and the licence; an ``external`` row belongs to ``EXTERNAL_PLUGIN_URLS`` or to a mounted
+    folder, whose next run would put its own copy back over ours. There is no provenance column
+    (design Q1), so a hand-uploaded ``ui`` plugin with a catalogue id counts as the catalogue item;
+    the update confirmation names the replaced plugin and version for exactly that case (Q2).
+    """
+    return isinstance(row, dict) and row.get("type") == row.get("method") == "ui"
+
+
+def plugin_state(item: Dict[str, Any], row: Any) -> Dict[str, Any]:
+    """The C3 state of one plugin card, from its catalogue item and its installed row (or None).
+
+    ``available`` (not installed), ``installed`` (same version), ``update`` (another version) or
+    ``managed`` (installed some other way; the card offers nothing). ``removed_settings`` is the
+    update preview: the ids the installed plugin has and the listed version drops, or None when
+    either side is unknown -- an installed row read without its settings, or a listing cached
+    before setting ids were recorded. Never ``[]`` for "unknown": ``[]`` tells the operator that
+    nothing will be deleted.
+    """
+    state: Dict[str, Any] = {"state": "available", "installed_version": "", "installed_type": "", "removed_settings": None}
+    if row is None:
+        return state
+    row = row if isinstance(row, dict) else {}
+    state |= {"installed_version": _text(row.get("version"), 32), "installed_type": _text(row.get("type"), 16)}
+    if not replaceable(row):
+        return state | {"state": "managed"}
+    if state["installed_version"] == item.get("version"):
+        return state | {"state": "installed"}
+    listed, current = item.get("settings"), row.get("settings")
+    if isinstance(listed, list) and isinstance(current, dict):
+        state["removed_settings"] = sorted(set(current) - set(listed))
+    return state | {"state": "update"}
+
+
+# A catalogue template's fingerprint is cached with the listing, so it is bounded. Real ones are a
+# few KB (the v0.7 release's largest settings block is netbird's 49 settings).
+FINGERPRINT_MAX = 64 * 1024
+
+
+def _config_ref(reference: str) -> str:
+    """``modsec-crs/x.conf`` and ``modsec_crs/x.conf`` are one config: the DB stores the type with ``_``."""
+    config_type, _, name = reference.partition("/")
+    return f"{config_type.replace('-', '_').lower()}/{name}"
+
+
+def template_fingerprint(data: Any) -> Optional[Dict[str, Any]]:
+    """What an update of one template compares, or None when ``data`` is not a template.
+
+    ``data`` is a template in either shape the UI sees: ``create_template``'s input (configs as
+    ``{type, name, data}`` objects -- ``template_payload`` and packages) or a row of
+    ``get_templates()`` (configs as ``{"type/name.conf": data}``). Both reduce to the same form:
+    the DB's spelling of every config reference, stripped titles, and each config's **digest**
+    rather than its text, so the cached listing stays small and never holds NGINX configuration.
+    Setting values are kept as given; ``template_diff`` canonicalises them.
+    """
+    try:
+        configs = data["configs"]
+        if isinstance(configs, list):
+            configs = {f"{config['type']}/{config['name']}.conf": config["data"] for config in configs}
+        fingerprint = {
+            "name": str(data["name"]).strip(),
+            "settings": {str(key).strip(): "" if value is None else str(value) for key, value in data["settings"].items()},
+            "steps": [
+                [
+                    str(step.get("title", "")).strip(),
+                    str(step.get("subtitle") or "").strip(),
+                    [str(setting).strip() for setting in step.get("settings") or []],
+                    # Display order only: the DB returns a step's configs in the template's config order.
+                    sorted(_config_ref(str(reference)) for reference in step.get("configs") or []),
+                ]
+                for step in data["steps"]
+            ],
+            "configs": {_config_ref(str(reference)): bytes_hash(str(text).encode("utf-8"), algorithm="sha256") for reference, text in configs.items()},
+        }
+    except (TypeError, KeyError, AttributeError):
+        return None
+    return fingerprint if len(dumps(fingerprint)) <= FINGERPRINT_MAX else None
+
+
+def template_diff(listed: Any, installed: Any, canon: Optional[Callable[[str, str], str]] = None) -> Dict[str, List[Any]]:
+    """What updating the installed template to the listed one changes, part by part; ``{}`` for nothing.
+
+    ``canon(key, value)`` puts a setting value in the form the DB stores it (``20M`` -> ``20m``):
+    the installed side is already canonical and the catalogue side is not, so comparing raw values
+    would show every catalogue template that uses a non-canonical spelling as changed forever.
+    Steps are compared by position, the way the editor shows them; a changed step is named by its
+    new title. Raises on a malformed fingerprint -- the caller treats that as "unknown".
+    """
+    fold = canon or (lambda _key, value: value)
+    new = {key: fold(key, value) for key, value in listed["settings"].items()}
+    old = {key: fold(key, value) for key, value in installed["settings"].items()}
+    new_steps, old_steps = listed["steps"], installed["steps"]
+    new_configs, old_configs = listed["configs"], installed["configs"]
+    diff = {
+        "name": [installed["name"], listed["name"]] if installed["name"] != listed["name"] else [],
+        "settings_added": [[key, new[key]] for key in sorted(new.keys() - old.keys())],
+        "settings_changed": [[key, old[key], new[key]] for key in sorted(new.keys() & old.keys()) if new[key] != old[key]],
+        "settings_removed": [[key, old[key]] for key in sorted(old.keys() - new.keys())],
+        "steps_added": [step[0] for step in new_steps[len(old_steps) :]],
+        "steps_changed": [new_step[0] for new_step, old_step in zip(new_steps, old_steps) if new_step != old_step],
+        "steps_removed": [step[0] for step in old_steps[len(new_steps) :]],
+        "configs_added": sorted(new_configs.keys() - old_configs.keys()),
+        "configs_changed": sorted(key for key in new_configs.keys() & old_configs.keys() if new_configs[key] != old_configs[key]),
+        "configs_removed": sorted(old_configs.keys() - new_configs.keys()),
+    }
+    return {part: changes for part, changes in diff.items() if changes}
+
+
+def update_token(listed: Any, installed: Any) -> str:
+    """Names the exact pair of templates a diff preview showed.
+
+    The update route rebuilds both fingerprints from a freshly verified download and the live
+    installed row, and refuses unless this matches what the confirmation carried: a listing that
+    moved or a template edited after the preview is never replaced unseen.
+    """
+    return bytes_hash(dumps([listed, installed], sort_keys=True).encode("utf-8"), algorithm="sha256")
+
+
+def template_state(item: Dict[str, Any], row: Any, canon: Optional[Callable[[str, str], str]] = None) -> Dict[str, Any]:
+    """The C4 state of one template card, from its catalogue item and its installed row (or None).
+
+    ``available`` (not installed), ``installed`` (same content), ``update`` (the content differs;
+    ``diff`` and ``confirm`` carry the preview) or ``managed`` (a plugin owns it or another method
+    wrote it: the API refuses to replace it, so the card offers nothing). ``diff`` is None when the
+    comparison is impossible -- a listing cached before fingerprints existed, or a tampered one --
+    and never ``{}`` for that: ``{}`` tells the operator the template matches the catalogue.
+    """
+    state: Dict[str, Any] = {"state": "available", "managed_by": "", "diff": None, "confirm": ""}
+    if row is None:
+        return state
+    row = row if isinstance(row, dict) else {}
+    if row.get("plugin_id") or row.get("method") != "ui":
+        return state | {"state": "managed", "managed_by": _text(row.get("plugin_id") or row.get("method") or "unknown", 64)}
+    listed, installed = item.get("fingerprint"), template_fingerprint(row)
+    try:
+        diff = template_diff(listed, installed, canon)
+    except (TypeError, KeyError, AttributeError, ValueError):
+        return state | {"state": "installed"}
+    if not diff:
+        return state | {"state": "installed", "diff": diff}
+    return state | {"state": "update", "diff": diff, "confirm": update_token(listed, installed)}
+
+
+def build_catalog_view(kind: str, cached: Any, installed_ids: Any, bw_version: str, canon: Optional[Callable[[str, str], str]] = None) -> Dict[str, Any]:
     """The template context a catalogue section needs: its items, their state, and staleness.
 
     Pure: the caller does the I/O and passes the results in. That is not purity for its own sake --
     it keeps this out of the route modules, so neither route has to import the other, and it makes
     the listing logic testable without a Flask app.
 
-    Items already installed are dropped, not greyed: the installed card is the truth for those,
-    and rendering both would be two cards claiming one id. Incompatible items are kept and marked
+    Installed items are kept and carry a state, because the card is where update and remove live:
+    ``plugin_state`` (C3) with ``installed_ids`` = ``BW_CONFIG.get_plugins()``, or
+    ``template_state`` (C4) with ``installed_ids`` = ``API_CLIENT.get_templates()`` and ``canon``
+    for its setting values; both are id -> row. Incompatible items are kept and marked
     instead -- hiding them makes the catalogue look empty and generates support tickets, while
-    showing the reason makes the constraint explain itself. That distinction carries real weight
-    now that upstream declares no compatibility for its current releases: every card says so, out
-    loud, instead of the page rendering as an unexplained blank.
+    showing the reason makes the constraint explain itself.
 
     Everything here decides what is *drawn*. Every one of these checks is made again, server-side,
     in the install route: a disabled button is a hint, never a control.
@@ -1122,8 +1264,12 @@ def build_catalog_view(kind: str, cached: Any, installed_ids: Any, bw_version: s
     if not items:
         return {"catalog_items": [], "catalog_available": False, "catalog_stale": False, "catalog_tag": ""}
 
-    installed = set(installed_ids or ())
-    view = [item | {"compatible": item_compatible(kind, bw_version, item), "bw_version": bw_version} for item in items if item.get("id") not in installed]
+    rows = installed_ids if isinstance(installed_ids, dict) else dict.fromkeys(installed_ids or (), {})
+    view = []
+    for item in items:
+        row = rows[item.get("id")] if item.get("id") in rows else None
+        state = plugin_state(item, row) if kind == "plugins" else template_state(item, row, canon)
+        view.append(item | state | {"compatible": item_compatible(kind, bw_version, item), "bw_version": bw_version})
     return {
         "catalog_items": view,
         "catalog_available": True,

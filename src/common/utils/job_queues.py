@@ -29,6 +29,7 @@ HEAVY_JOBS = frozenset(
         "download-crs-plugins",
         "download-plugins",
         "download-pro-plugins",
+        "download-templates",
         "push-configs",
     }
 )

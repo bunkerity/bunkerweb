@@ -34,6 +34,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from flask import Flask, get_flashed_messages
+from flask_babel import Babel
 from flask_login import LoginManager
 
 from app.models.plugin_catalog import CATALOG_MAX_AGE  # type: ignore
@@ -147,6 +148,9 @@ def ctx(route_module, monkeypatch):
     manager = LoginManager()
     manager.init_app(app)
     manager.user_loader(lambda user_id: None)
+    # The product app initialises Flask-Babel; `translated()` needs it (no catalog is loaded, so
+    # every lookup falls back to the route's English text).
+    Babel(app)
     app.register_blueprint(module.plugins)
     app.add_url_rule("/loading", endpoint="loading", view_func=lambda: "loading")
 
@@ -275,13 +279,26 @@ def test_an_incompatible_version_refuses(ctx):
     assert ctx.uploads == []
 
 
-def test_an_item_declaring_no_compatibility_refuses(ctx):
-    # The state every real plugin is in today: the plugins repository has shipped v1.9/v1.10/v1.11
-    # without a COMPATIBILITY.json line, so `supported` is empty and the gate fails closed.
+def test_an_item_declaring_no_compatibility_installs(ctx):
+    # PO decision 2026-09-25: a release line with no COMPATIBILITY.json entry states no
+    # incompatibility, so the item installs.
+    ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry(supported=[])])
+    _post(ctx)
+    assert len(ctx.uploads) == 1
+
+
+def test_a_version_newer_than_every_listed_one_installs(ctx):
+    ctx.client.get_metadata.return_value = {"version": "1.7.0~alpha"}
+    ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry(supported=["1.6.15"])])
+    _post(ctx)
+    assert len(ctx.uploads) == 1
+
+
+def test_an_unparseable_running_version_refuses_even_without_an_entry(ctx):
+    ctx.client.get_metadata.return_value = {"version": "unknown"}
     ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry(supported=[])])
     _post(ctx)
     assert ctx.uploads == []
-    assert "declares support for no BunkerWeb version" in _flashes(ctx)
 
 
 def test_a_compatible_version_installs(ctx):
@@ -402,4 +419,169 @@ def test_the_route_is_login_protected(ctx):
     assert getattr(ctx.module.install_catalog_plugin, "__wrapped__", None) is not None
     with ctx.app.test_client() as http:
         assert http.post("/plugins/catalog/install", data={"id": "clamav"}).status_code in (302, 401)
+    assert ctx.uploads == []
+
+
+# ── CAT-C1 follow-up: the "no supported version" branch means an unreadable version ──
+
+
+def test_an_unreadable_version_says_so_instead_of_blaming_the_plugin(ctx):
+    # Under the PO rule an item with no entry is compatible, so this refusal is reached only when
+    # the running version cannot be parsed. "declares support for no BunkerWeb version" blamed
+    # the plugin for our own unreadable version.
+    ctx.client.get_metadata.return_value = {"version": "unknown"}
+    ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry(supported=[])])
+    _post(ctx)
+    flashes = _flashes(ctx)
+    assert "declares support for no BunkerWeb version" not in flashes
+    assert "read the BunkerWeb version" in flashes and "unknown" in flashes
+
+
+# ── C3: /plugins/catalog/update ─────────────────────────────────────────────
+#
+# Same chain as install (kill switch, read-only, admin, freshness, pinned tag, digest, repack,
+# `created == [id]`), plus what only an update has: the installed row must be one the catalogue
+# owns (`ui` type, `ui` method), the operator must have confirmed THIS listed version (the form
+# carries it back, so a listing refreshed between the modal and the click is refused rather than
+# installing a version nobody reviewed), and the listing must know the new version's setting ids
+# -- the preview the operator confirmed is built from them.
+
+SETTINGS = ["CLAMAV_HOST", "USE_CLAMAV"]
+
+
+def _updatable(ctx, installed_version="1.10", **row):
+    ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry(settings=SETTINGS)])
+    ctx.config.get_plugins.return_value = {"clamav": {"type": "ui", "method": "ui", "version": installed_version} | row}
+    ctx.client.upload_plugins.side_effect = lambda files, method="ui", replace=False: ctx.uploads.append((files, method, replace)) or {"created": ["clamav"]}
+
+
+def _update(ctx, **form):
+    payload = {"csrf_token": "x", "id": "clamav", "version": "1.11"}
+    payload.update(form)
+    view = ctx.module.update_catalog_plugin
+    with ctx.app.test_request_context("/plugins/catalog/update", method="POST", data=payload):
+        response = view.__wrapped__()
+        ctx.session_flashes = list(get_flashed_messages())
+        return response
+
+
+def test_an_update_replaces_the_installed_plugin_with_the_listed_one(ctx):
+    _updatable(ctx)
+    _update(ctx)
+    [(files, method, replace)] = ctx.uploads
+    assert method == "ui" and replace is True
+    _, (filename, handle, _) = files[0]
+    assert filename == "clamav.tar.gz"
+    with tar_open(fileobj=BytesIO(handle.read())) as tar:
+        assert all(n == "clamav" or n.startswith("clamav/") for n in tar.getnames())
+    assert "updated to version 1.11" in _flashes(ctx)
+
+
+@pytest.mark.parametrize(
+    "setup",
+    [
+        lambda ctx, mp: mp.setenv("USE_PLUGIN_CATALOG", "no"),
+        lambda ctx, mp: setattr(ctx.client, "readonly", True),
+        lambda ctx, mp: mp.setattr(ctx.module, "current_user", SimpleNamespace(admin=False, is_authenticated=True, list_permissions=["write"])),
+    ],
+    ids=["kill-switch", "read-only", "non-admin"],
+)
+def test_an_update_is_refused_before_anything_else(ctx, monkeypatch, setup):
+    _updatable(ctx)
+    setup(ctx, monkeypatch)
+    _update(ctx)
+    assert ctx.uploads == []
+    ctx.config.get_plugins.assert_not_called()
+
+
+def test_an_update_without_the_confirmed_version_is_refused(ctx):
+    _updatable(ctx)
+    _update(ctx, version="")
+    assert ctx.uploads == []
+
+
+def test_a_listing_that_moved_since_the_confirmation_is_refused(ctx):
+    # The modal showed 1.12's preview; the hourly refresh has since cached 1.11 (or the reverse).
+    _updatable(ctx)
+    _update(ctx, version="1.12")
+    assert ctx.uploads == []
+    assert "changed since" in _flashes(ctx)
+
+
+def test_updating_a_plugin_that_is_not_installed_is_refused(ctx):
+    _updatable(ctx)
+    ctx.config.get_plugins.return_value = {"antibot": {"type": "core", "method": "manual"}}
+    _update(ctx)
+    assert ctx.uploads == []
+    assert "not installed" in _flashes(ctx)
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        {"type": "core", "method": "manual"},
+        {"type": "external", "method": "scheduler"},
+        {"type": "pro", "method": "scheduler"},
+        {"type": "ui", "method": "scheduler"},
+    ],
+)
+def test_updating_a_plugin_managed_elsewhere_is_refused(ctx, row):
+    _updatable(ctx)
+    ctx.config.get_plugins.return_value = {"clamav": row | {"version": "1.10"}}
+    _update(ctx)
+    assert ctx.uploads == []
+    assert "managed outside the catalogue" in _flashes(ctx)
+
+
+def test_updating_to_the_installed_version_is_refused(ctx):
+    _updatable(ctx, installed_version="1.11")
+    _update(ctx)
+    assert ctx.uploads == []
+    assert "already at version 1.11" in _flashes(ctx)
+
+
+def test_an_incompatible_update_is_refused(ctx):
+    _updatable(ctx)
+    ctx.client.get_metadata.return_value = {"version": "1.6.11"}
+    _update(ctx)
+    assert ctx.uploads == []
+
+
+def test_a_stale_listing_refuses_the_update(ctx):
+    _updatable(ctx)
+    stale = (datetime.now().astimezone() - CATALOG_MAX_AGE - timedelta(minutes=1)).isoformat()
+    ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry(settings=SETTINGS)], fetched_at=stale)
+    _update(ctx)
+    assert ctx.uploads == []
+
+
+def test_a_listing_without_setting_ids_cannot_be_updated_from(ctx):
+    # Cached before C3: no preview can be shown, so nothing was confirmed.
+    _updatable(ctx)
+    ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry()])
+    _update(ctx)
+    assert ctx.uploads == []
+    assert "next refresh" in _flashes(ctx)
+
+
+def test_an_update_whose_bytes_changed_uploads_nothing(ctx, monkeypatch):
+    _updatable(ctx)
+    monkeypatch.setattr(ctx.module, "fetch_archive", lambda repo, tag: _tar(("clamav", "clamav"), ("evil", "evil")))
+    _update(ctx)
+    assert ctx.uploads == []
+    assert "no longer matches" in _flashes(ctx)
+
+
+def test_an_update_the_api_did_not_confirm_is_a_failure(ctx):
+    _updatable(ctx)
+    ctx.client.upload_plugins.side_effect = lambda files, method="ui", replace=False: ctx.uploads.append((files, method, replace)) or {"created": []}
+    _update(ctx)
+    flashes = _flashes(ctx)
+    assert "did not complete" in flashes and "updated to version" not in flashes
+
+
+def test_the_update_route_is_login_protected(ctx):
+    assert getattr(ctx.module.update_catalog_plugin, "__wrapped__", None) is not None
+    with ctx.app.test_client() as http:
+        assert http.post("/plugins/catalog/update", data={"id": "clamav", "version": "1.11"}).status_code in (302, 401)
     assert ctx.uploads == []

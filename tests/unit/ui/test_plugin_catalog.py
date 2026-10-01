@@ -27,6 +27,7 @@ stop being hostile because the source model changed.
 from datetime import datetime, timedelta
 from io import BytesIO
 from json import dumps
+from logging import WARNING
 from tarfile import DIRTYPE, TarInfo, open as tar_open
 
 import pytest
@@ -36,8 +37,10 @@ from app.models.plugin_catalog import (  # type: ignore
     CATALOG_MAX_AGE,
     EXTRACT_MAX,
     MEMBER_MAX,
+    PLUGINS_REPO,
     RELEASE_MAX,
     SOURCES,
+    TEMPLATES_REPO,
     archive_entries,
     archive_file,
     archive_root,
@@ -477,44 +480,84 @@ def test_an_oversized_metadata_member_does_not_expand_in_memory():
     assert entries == {} and errors
 
 
-# ── The version gate: it fails CLOSED, on data upstream does not publish yet ─
+# ── The version gate: PO decision 2026-09-25 ─────────────────────────────────
+#
+# "If not provided or specifically stated, it's compatible, if the semver is superior": no
+# COMPATIBILITY.json line for the item's release line -> compatible; a line -> compatible when
+# the running version is listed OR strictly greater than every listed version. An unparseable
+# running version is still refused.
 
 
 def test_the_compatibility_map_drives_the_gate():
     compat = parse_compatibility(COMPAT.encode())
     assert compat["1.11"] == ["1.7.0", "1.7.1"]
     assert is_compatible("1.7.0", compat["1.11"]) is True
-    assert is_compatible("1.7.2", compat["1.11"]) is False
     assert is_compatible("1.6.11", compat["1.8"]) is True
 
 
-@pytest.mark.parametrize("supported", [None, [], "1.7.0", {}, 0, False, ["nonsense"], [None], [""], [123]])
-def test_the_gate_fails_closed_on_anything_unusable(supported):
+@pytest.mark.parametrize("supported", [None, []])
+def test_an_item_with_no_compatibility_entry_is_compatible(supported):
+    # `[]` is what `supported_versions` returns when the item's release line has no entry; `None`
+    # is an item cached without the key at all. Neither states an incompatibility.
+    assert is_compatible("1.7.0", supported) is True
+
+
+def test_a_version_newer_than_every_listed_one_is_compatible():
+    assert is_compatible("1.7.2", ["1.7.0", "1.7.1"]) is True
+    assert is_compatible("1.8.0", ["1.6.15"]) is True
+
+
+def test_a_version_older_than_a_listed_one_and_not_listed_is_incompatible():
+    assert is_compatible("1.6.5", ["1.7.0", "1.7.1"]) is False
+    # Between two listed versions is not "newer than every listed one" either.
+    assert is_compatible("1.6.12", ["1.6.11", "1.7.0"]) is False
+
+
+def test_a_listed_version_is_compatible_even_when_a_newer_one_is_listed():
+    assert is_compatible("1.6.11", ["1.6.11", "1.7.0"]) is True
+
+
+def test_the_alpha_prerelease_is_newer_than_the_last_1_6_release():
+    # The running version on this branch. `1.7.0~alpha` normalises to `1.7.0-alpha`, which
+    # packaging reads as 1.7.0a0: a pre-release of 1.7.0, still strictly greater than 1.6.16.
+    assert is_compatible("1.7.0~alpha", ["1.6.15", "1.6.16"]) is True
+    # And still lower than the 1.7.0 final it precedes.
+    assert is_compatible("1.7.0~alpha", ["1.7.0"]) is False
+
+
+@pytest.mark.parametrize("supported", ["1.7.0", {}, 0, False, ["nonsense"], [None], [""], [123]])
+def test_a_malformed_entry_is_incompatible(supported):
+    # An entry that exists but carries nothing parseable is not "no entry": it stays refused.
     assert is_compatible("1.7.0", supported) is False
 
 
 @pytest.mark.parametrize("bw", [None, "", "unknown", "not-a-version", 1.7, [], "∞"])
-def test_an_unresolvable_running_version_reads_as_INCOMPATIBLE(bw):
-    # Deliberately the opposite stance to `is_newer_version_available`, whose docstring prefers a
-    # false negative. There a parse failure costs a missed notification; here it costs running an
-    # unvetted plugin as code in the UI process, in the worker and in nginx.
-    assert is_compatible(bw, ["1.7.0"]) is False
+@pytest.mark.parametrize("supported", [["1.7.0"], [], None])
+def test_an_unresolvable_running_version_reads_as_INCOMPATIBLE(bw, supported):
+    # With or without an entry. Deliberately the opposite stance to `is_newer_version_available`,
+    # whose docstring prefers a false negative. There a parse failure costs a missed
+    # notification; here it costs running an unvetted plugin as code in the UI process, in the
+    # worker and in nginx.
+    assert is_compatible(bw, supported) is False
 
 
 def test_the_comparison_is_on_versions_not_strings():
-    # "1.7.0" and "v1.7.0" are the same version; "1.7.0-rc1" is not.
+    # "1.7.0" and "v1.7.0" are the same version; "1.7.0-rc1" is lower than "1.7.0".
     assert is_compatible("v1.7.0", ["1.7.0"]) is True
-    assert is_compatible("1.7.0", ["1.7.0-rc1"]) is False
+    assert is_compatible("1.7.0-rc1", ["1.7.0"]) is False
+    assert is_compatible("1.7.0", ["1.7.0-rc1"]) is True
+    # A string compare would say "1.10.0" < "1.9.0".
+    assert is_compatible("1.10.0", ["1.9.0"]) is True
 
 
 @pytest.mark.parametrize(
     "blob",
     [None, b"", b"not json", b"[]", b'"x"', b"null", dumps({"1.8": "not a list"}).encode(), dumps({"1.8": []}).encode(), dumps([1, 2]).encode()],
 )
-def test_an_unusable_compatibility_file_yields_nothing_and_therefore_installs_nothing(blob):
+def test_an_unusable_compatibility_file_declares_no_entry_so_every_item_is_compatible(blob):
     compat = parse_compatibility(blob)
     assert compat == {} or all(v for v in compat.values())
-    assert is_compatible("1.7.0", compat.get("1.11")) is False
+    assert is_compatible("1.7.0", compat.get("1.11")) is True
 
 
 def test_only_parseable_versions_survive_the_compatibility_map():
@@ -522,23 +565,26 @@ def test_only_parseable_versions_survive_the_compatibility_map():
     assert compat["1.8"] == ["1.6.0", "1.6.1"]
 
 
-def test_the_real_repository_state_gates_everything_off_today():
-    # The measured fact this whole design has to be honest about: `bunkerweb-plugins` has shipped
-    # v1.9, v1.10 and v1.11 without adding a COMPATIBILITY.json line for any of them, and no line
-    # anywhere names a 1.7.x. Reading that map therefore refuses every plugin. The catalogue says
-    # so on each card rather than rendering an unexplained empty page.
-    real_shaped = dumps({"1.8": ["1.6.0", "1.6.11"]})  # highest key upstream actually publishes
-    entries, _ = archive_entries(plugin_archive(ids=("clamav",), version="1.11"), "plugins")
-    items = build_items("plugins", entries, parse_compatibility(real_shaped.encode()))
-    assert items[0]["supported"] == []
-    assert item_compatible("plugins", "1.7.0", items[0]) is False
+def test_the_real_repository_state_is_installable_on_the_alpha():
+    # `bunkerweb-plugins` v1.13 (2026-09-22): COMPATIBILITY.json ends at `"1.13": ["1.6.15"]` and
+    # no line names a 1.7.x. Under the old fail-closed rule every card was incompatible; under the
+    # PO rule the alpha is newer than every listed version, and a release line with no entry at
+    # all declares nothing to refuse on.
+    real_shaped = dumps({"1.8": ["1.6.0", "1.6.11"], "1.13": ["1.6.15"]})
+    compat = parse_compatibility(real_shaped.encode())
+    for line, expected in (("1.13", ["1.6.15"]), ("1.11", [])):
+        entries, _ = archive_entries(plugin_archive(ids=("clamav",), version=line), "plugins")
+        items = build_items("plugins", entries, compat)
+        assert items[0]["supported"] == expected
+        assert item_compatible("plugins", "1.7.0~alpha", items[0]) is True
 
 
-def test_one_upstream_line_lights_the_catalogue_up_with_no_code_change():
+def test_one_upstream_line_can_still_refuse_an_older_build():
     entries, _ = archive_entries(plugin_archive(ids=("clamav",), version="1.11"), "plugins")
     items = build_items("plugins", entries, parse_compatibility(COMPAT.encode()))
     assert items[0]["supported"] == ["1.7.0", "1.7.1"]
     assert item_compatible("plugins", "1.7.0", items[0]) is True
+    assert item_compatible("plugins", "1.6.11", items[0]) is False
 
 
 def test_templates_are_not_version_gated_because_upstream_declares_nothing():
@@ -566,8 +612,12 @@ def test_the_two_halves_are_switched_by_one_flag():
 
 
 def test_item_compatible_survives_a_junk_item():
-    for junk in (None, "x", 42, [], {}):
+    for junk in (None, "x", 42, []):
         assert item_compatible("plugins", "1.7.0", junk) is False
+    # A dict with no `supported` key declares no entry, which is compatible -- but a junk value
+    # under the key is still refused.
+    assert item_compatible("plugins", "1.7.0", {}) is True
+    assert item_compatible("plugins", "1.7.0", {"supported": "1.7.0"}) is False
 
 
 # ── Building the listing ───────────────────────────────────────────────────
@@ -579,7 +629,9 @@ def test_unknown_metadata_keys_never_reach_the_listing():
     )
     entries, _ = archive_entries(payload, "plugins")
     item = build_items("plugins", entries, {})[0]
-    assert set(item) == {"id", "name", "description", "version", "supported", "homepage"}
+    assert set(item) == {"id", "name", "description", "version", "supported", "homepage", "settings"}
+    # The setting IDS ride along (the update preview needs them), never their specs.
+    assert item["settings"] == ["X"]
 
 
 def test_the_listing_is_built_fresh_not_aliased_to_the_parsed_metadata():
@@ -984,16 +1036,18 @@ def test_find_item_on_an_absent_id_returns_nothing_at_all():
 
 def test_the_view_marks_rather_than_hides_an_incompatible_item():
     # Hiding makes the catalogue look empty and generates support tickets; showing the reason
-    # makes the constraint explain itself. With upstream declaring nothing today, this is the
-    # difference between a blank page and a page that says why.
-    view = build_catalog_view("plugins", _cached(plugins=[{"id": "clamav", "supported": []}]), set(), "1.7.0")
+    # makes the constraint explain itself: this is the difference between a blank page and a
+    # page that says why.
+    view = build_catalog_view("plugins", _cached(plugins=[{"id": "clamav", "supported": ["1.7.1"]}]), set(), "1.7.0")
     assert view["catalog_available"] is True
     assert [i["compatible"] for i in view["catalog_items"]] == [False]
 
 
-def test_an_installed_item_is_dropped_not_greyed():
-    view = build_catalog_view("plugins", _cached(), {"clamav"}, "1.7.0")
-    assert view["catalog_items"] == [] and view["catalog_available"] is True
+def test_an_installed_template_is_kept_with_a_state():
+    # C4: the card is where a template's update and remove live, so it is no longer dropped. A bare
+    # id with no row cannot be proven the UI's own, so it reads as managed (no action offered).
+    view = build_catalog_view("templates", _cached(), {"nextcloud"}, "1.7.0")
+    assert [(i["id"], i["state"]) for i in view["catalog_items"]] == [("nextcloud", "managed")]
 
 
 def test_the_view_carries_the_release_tag_for_the_notice():
@@ -1199,3 +1253,133 @@ def test_fetch_archive_refuses_a_hostile_tag_without_issuing_a_request(monkeypat
     # only the message distinguishes "the tag was rejected" from "the URL happened not to match".
     with pytest.raises(ValueError, match="invalid tag"):
         pc.fetch_archive(SOURCES["plugins"]["repo"], tag)
+
+
+# ── C3: installed plugins stay listed, with a state ─────────────────────────
+#
+# The listing used to drop every installed id, so no "update available" could ever be shown
+# (design-catalog.md G1). The plugins half now keeps them and says what the card may offer. What
+# `installed` carries is `BW_CONFIG.get_plugins()`: id -> row with `type`, `method`, `version`
+# and, when fetched with settings, `settings`.
+
+
+def _row(type_="ui", method="ui", version="1.11", settings=None):
+    row = {"type": type_, "method": method, "version": version}
+    if settings is not None:
+        row["settings"] = dict.fromkeys(settings, {})
+    return row
+
+
+def _state_view(installed, item=None, version="1.7.0"):
+    item = item or {"id": "clamav", "name": "ClamAV", "version": "1.11", "supported": [], "settings": ["CLAMAV_HOST", "USE_CLAMAV"]}
+    return build_catalog_view("plugins", _cached(plugins=[item]), installed, version)["catalog_items"]
+
+
+def test_an_absent_id_is_available():
+    [item] = _state_view({"antibot": _row(type_="core", method="manual")})
+    assert item["state"] == "available"
+
+
+def test_a_catalogue_plugin_at_the_listed_version_is_installed_and_kept():
+    [item] = _state_view({"clamav": _row()})
+    assert item["state"] == "installed"
+    assert item["installed_version"] == "1.11"
+
+
+def test_a_different_installed_version_is_an_update():
+    [item] = _state_view({"clamav": _row(version="1.10")})
+    assert item["state"] == "update"
+    assert item["installed_version"] == "1.10"
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        _row(type_="core", method="manual"),
+        _row(type_="pro", method="scheduler"),
+        # EXTERNAL_PLUGIN_URLS: the scheduler owns it, and would re-download over our update.
+        _row(type_="external", method="scheduler"),
+        _row(type_="external", method="manual"),
+        # A `ui` type with another method is not ours to replace either (the API refuses it).
+        _row(type_="ui", method="scheduler"),
+        # No type at all: nothing proves it is a catalogue-replaceable row.
+        {},
+    ],
+)
+def test_a_plugin_installed_any_other_way_is_managed_elsewhere(row):
+    [item] = _state_view({"clamav": row}, item={"id": "clamav", "version": "1.12", "supported": [], "settings": []})
+    assert item["state"] == "managed"
+
+
+def test_an_update_lists_exactly_the_settings_the_new_version_drops():
+    installed = {"clamav": _row(version="1.10", settings=["CLAMAV_HOST", "CLAMAV_PORT", "USE_CLAMAV"])}
+    [item] = _state_view(installed)
+    assert item["removed_settings"] == ["CLAMAV_PORT"]
+
+
+def test_an_update_that_drops_nothing_says_so_with_an_empty_list():
+    [item] = _state_view({"clamav": _row(version="1.10", settings=["USE_CLAMAV"])})
+    assert item["removed_settings"] == []
+
+
+def test_no_preview_is_invented_when_either_side_is_unknown():
+    # Installed row fetched without settings: unknown, not "nothing removed".
+    [item] = _state_view({"clamav": _row(version="1.10")})
+    assert item["removed_settings"] is None
+    # A listing cached before the ids were recorded: unknown too.
+    [item] = _state_view({"clamav": _row(version="1.10", settings=["X"])}, item={"id": "clamav", "version": "1.11", "supported": []})
+    assert item["removed_settings"] is None
+
+
+def test_the_listing_records_setting_ids_only_for_plugins():
+    payload = make_archive({"clamav/plugin.json": dumps({"id": "clamav", "version": "1.11", "settings": {"B": {}, "A": {}, "L" * 300: {}}})})
+    # Sorted, and an id longer than any real setting id is not recorded.
+    assert build_items("plugins", archive_entries(payload, "plugins")[0], {})[0]["settings"] == ["A", "B"]
+    entries, _ = archive_entries(template_archive(), "templates")
+    assert "settings" not in build_items("templates", entries, {})[0]
+
+
+@pytest.mark.parametrize("settings", [None, "X", ["X"], 42])
+def test_a_junk_settings_block_records_no_ids(settings):
+    payload = make_archive({"clamav/plugin.json": dumps({"id": "clamav", "version": "1.11", "settings": settings})})
+    assert build_items("plugins", archive_entries(payload, "plugins")[0], {})[0]["settings"] == []
+
+
+# ── C3: a refused GitHub refresh is logged, once per refresh ────────────────
+
+
+def test_a_github_rate_limit_is_logged_once_per_refresh(monkeypatch, caplog):
+    """The unauthenticated API allows 60 requests an hour per IP. On a shared IP the refresh got
+    403 on every source, `fetch_catalog` swallowed it, and the catalogue stayed empty for hours
+    with nothing in the log. One warning per refresh, whatever the number of sources refused, and
+    no retry."""
+    import app.models.plugin_catalog as pc  # type: ignore
+
+    class _Forbidden(_Ok):
+        status_code = 403
+
+    calls = []
+    monkeypatch.setenv("USE_PLUGIN_CATALOG", "yes")
+    monkeypatch.setattr(pc, "get", lambda url, **k: calls.append(url) or _Forbidden(b""))
+    with caplog.at_level("DEBUG"):
+        assert pc.fetch_catalog() is None
+    warnings = [r for r in caplog.records if r.levelno == WARNING]
+    assert len(warnings) == 1
+    assert "403" in warnings[0].getMessage()
+    assert PLUGINS_REPO in warnings[0].getMessage() and TEMPLATES_REPO in warnings[0].getMessage()
+    assert len(calls) == 2  # one release lookup per source, never retried
+
+
+def test_an_unreachable_github_stays_quiet(monkeypatch, caplog):
+    # Air-gapped installs never reach GitHub; a warning every hour there is noise about a
+    # deployment choice. Only an answer that REFUSES us is worth a warning.
+    import app.models.plugin_catalog as pc  # type: ignore
+
+    def _down(url, **k):
+        raise pc.RequestException("no route to host")
+
+    monkeypatch.setenv("USE_PLUGIN_CATALOG", "yes")
+    monkeypatch.setattr(pc, "get", _down)
+    with caplog.at_level("DEBUG"):
+        assert pc.fetch_catalog() is None
+    assert not [r for r in caplog.records if r.levelno >= WARNING]

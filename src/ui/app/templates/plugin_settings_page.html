@@ -54,11 +54,11 @@
                                   >{{ _("navigation.global_settings") }}</a>
                             </li>
                         {% endif %}
-                        <li class="breadcrumb-item active" aria-current="page">{{ plugin_data["name"] }}</li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ plugin_text(plugin, 'meta.name', plugin_data["name"]) }}</li>
                     </ol>
                 </nav>
-                <h5 class="mb-0 don-jose">{{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}</h5>
-                <p class="text-muted mb-0 courier-prime">{{ plugin_data["description"] }}</p>
+                <h5 class="mb-0 don-jose">{{ plugin_text(plugin, 'meta.name', plugin_data["name"]) }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}</h5>
+                <p class="text-muted mb-0 courier-prime">{{ plugin_text(plugin, 'meta.description', plugin_data["description"]) }}</p>
             </div>
             <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
                  {% endif %}>

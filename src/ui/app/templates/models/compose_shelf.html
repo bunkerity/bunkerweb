@@ -187,6 +187,8 @@
        the full shelf. #}
     {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], global_page) and ((not allowed_plugins) or plugin in allowed_plugins) %}
         {% set settings = plugin_data["settings"] or {} %}
+        {# Display only: `name_key` below derives USE_<NAME> from the raw name, never this one. #}
+        {% set shelf_name = plugin_text(plugin, 'meta.name', plugin_data["name"]) %}
         {% set declaration = activation_map.get(plugin) %}
         {% set scope = shelf_plugin_scope(plugin, plugin_data, config, global_page=global_page, is_pro_version=is_pro_version, blacklisted=blacklisted_settings, is_stream=is_stream, activation_map=activation_map) %}
         {# The keys the manifest DECLARES, in manifest order (a set has none, and "the first key"
@@ -331,7 +333,7 @@
                 <i class="bx bx-xs align-middle me-1 {{ 'bxs-circle text-success' if row_on else 'bx-circle text-muted' }}"
                    data-shelf-dot
                    aria-hidden="true"></i>
-                {{ plugin_data["name"] }}
+                {{ shelf_name }}
             </span>
             {% if stream_excluded %}
                 <span class="badge rounded-pill bg-danger-subtle text-dark"
@@ -359,7 +361,7 @@
                                value="{{ inactive }}"
                                data-shelf-post
                                data-shelf-fallback>
-                        <label class="form-check-label visually-hidden" for="shelf-switch-{{ plugin }}">{{ plugin_data["name"] }}</label>
+                        <label class="form-check-label visually-hidden" for="shelf-switch-{{ plugin }}">{{ shelf_name }}</label>
                     </span>
                 {% elif kind == "picker" %}
                     {# A real <select> always posts, so it IS the postable input; no fallback needed. #}
@@ -367,7 +369,7 @@
                             id="shelf-picker-{{ plugin }}"
                             name="{{ first_key }}"
                             data-shelf-post
-                            aria-label="{{ plugin_data['name'] }}">
+                            aria-label="{{ shelf_name }}">
                         {% set current = (config.get(first_key) or {}).get("value", first_data.get("default", inactive)) %}
                         {% for option in first_data.get("select") or [] %}
                             <option value="{{ option }}" {% if option == current %}selected{% endif %}>{{ option }}</option>
@@ -422,7 +424,7 @@
             </span>
             <a href="{{ plugin_page }}"
                class="shelf-chevron btn btn-sm btn-link p-0"
-               aria-label="{{ plugin_data['name'] }}">
+               aria-label="{{ shelf_name }}">
                 <i class="bx bx-chevron-right" aria-hidden="true"></i>
             </a>
         </div>

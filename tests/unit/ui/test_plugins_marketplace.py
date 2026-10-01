@@ -85,6 +85,8 @@ def _render(**context):
         return f"/{endpoint}"
 
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         csrf_token=lambda: "test-token",
         url_for=_url_for,
         is_plugin_active=_fake_is_plugin_active,
@@ -850,3 +852,95 @@ def test_no_card_links_to_a_shelf_row_the_shelf_would_not_render():
         html = _render(plugins={plugin_id: _plugin(name=plugin_id.title(), settings={})}, config={})
         card = _card_slice(html, plugin_id)
         assert "plugin-activation-link" not in card, f"{plugin_id} has no shelf row but its card links to one"
+
+
+# ── C3: catalogue card states (update, remove, managed elsewhere) ───────────
+
+
+def _catalog_item(state, **over):
+    item = {
+        "id": "clamav",
+        "name": "ClamAV",
+        "description": "",
+        "version": "1.11",
+        "supported": [],
+        "homepage": "",
+        "settings": ["USE_CLAMAV"],
+        "compatible": True,
+        "bw_version": "1.7.0",
+        "state": state,
+        "installed_version": "1.10" if state == "update" else ("1.11" if state == "installed" else ""),
+        "installed_type": "ui" if state in ("installed", "update") else "",
+        "removed_settings": None,
+    }
+    item.update(over)
+    return item
+
+
+def _catalog_page(*items, **context):
+    return _render(catalog_enabled=True, catalog_available=True, catalog_stale=False, catalog_tag="v1.13", catalog_items=list(items), **context)
+
+
+def _catalog_card(html, plugin_id="clamav"):
+    start = html.index(f'id="catalog-card-{plugin_id}"')
+    # One catalogue card per test page, so it ends where the trust notice starts.
+    return html[start : html.index('id="plugin-catalog-notice"')]
+
+
+def test_an_available_item_offers_install_only():
+    card = _catalog_card(_catalog_page(_catalog_item("available")))
+    assert "/plugins.install_catalog_plugin" in card
+    assert "delete-plugin" not in card and "modal-catalog-update" not in card
+
+
+def test_an_installed_item_offers_remove_through_the_shared_delete_modal():
+    card = _catalog_card(_catalog_page(_catalog_item("installed")))
+    assert 'class="btn btn-sm btn-outline-danger delete-plugin"' in card and 'data-plugin-id="clamav"' in card
+    assert "/plugins.install_catalog_plugin" not in card and "modal-catalog-update" not in card
+
+
+def test_an_update_offers_update_and_remove_and_renders_the_confirmation():
+    html = _catalog_page(_catalog_item("update", removed_settings=["CLAMAV_PORT", "CLAMAV_TIMEOUT"]))
+    card = _catalog_card(html)
+    assert 'data-bs-target="#modal-catalog-update-clamav"' in card and "delete-plugin" in card
+    modal = html[html.index('id="modal-catalog-update-clamav"') :]
+    modal = modal[: modal.index("</form>")]
+    assert 'action="/plugins.update_catalog_plugin"' in modal
+    # The version the operator confirms goes back to the route, which refuses if it moved.
+    assert 'name="id" value="clamav"' in modal and 'name="version" value="1.11"' in modal
+    assert "<code>CLAMAV_PORT</code>" in modal and "<code>CLAMAV_TIMEOUT</code>" in modal
+
+
+def test_an_update_that_removes_nothing_says_so():
+    html = _catalog_page(_catalog_item("update", removed_settings=[]))
+    modal = html[html.index('id="modal-catalog-update-clamav"') :]
+    assert "<code>" not in modal[: modal.index("</form>")]
+
+
+def test_an_update_with_an_unknown_preview_is_not_offered():
+    html = _catalog_page(_catalog_item("update", removed_settings=None))
+    assert "modal-catalog-update-clamav" not in html
+    assert "delete-plugin" in _catalog_card(html)
+
+
+@pytest.mark.parametrize("over", [{"compatible": False}, {}], ids=["incompatible", "stale"])
+def test_an_update_is_not_offered_when_the_install_gates_would_refuse(over):
+    stale = not over
+    html = _render(
+        catalog_enabled=True,
+        catalog_available=True,
+        catalog_stale=stale,
+        catalog_tag="v1.13",
+        catalog_items=[_catalog_item("update", removed_settings=[], **over)],
+    )
+    assert 'data-bs-target="#modal-catalog-update-clamav"' not in html
+
+
+def test_a_plugin_managed_elsewhere_offers_nothing():
+    card = _catalog_card(_catalog_page(_catalog_item("managed", installed_type="external")))
+    assert "form" not in card and "delete-plugin" not in card and "modal-catalog-update" not in card
+
+
+def test_a_read_only_admin_gets_no_catalogue_action():
+    html = _catalog_page(_catalog_item("update", removed_settings=[]), is_readonly=True)
+    assert "delete-plugin" not in _catalog_card(html) and "modal-catalog-update" not in html

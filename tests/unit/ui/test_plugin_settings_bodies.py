@@ -212,6 +212,8 @@ def render_page():
         return f"/{endpoint}?{query}" if query else f"/{endpoint}"
 
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         csrf_token=lambda: "test-csrf-token",
         url_for=_url_for,
         get_blacklisted_settings=get_blacklisted_settings,

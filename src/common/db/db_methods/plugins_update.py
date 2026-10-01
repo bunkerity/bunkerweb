@@ -100,9 +100,13 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
                     changes = self._uep_sync_cli_commands(session, plugin, commands, plugin_path, local_to_put) or changes
 
-                    changes = self._uep_sync_templates(session, plugin, plugin_path, plugin_settings, db_settings, local_to_put) or changes
-
                     try:
+                        # Templates check their settings against the DB (is_valid_setting): flush what this plugin
+                        # staged first, or a setting added by this very sync reads as missing and is dropped.
+                        bulk_add_in_fk_order(session, local_to_put)
+                        local_to_put.clear()
+                        changes = self._uep_sync_templates(session, plugin, plugin_path, plugin_settings, db_settings, local_to_put) or changes
+
                         if per_plugin_commit:
                             if local_to_put:
                                 bulk_add_in_fk_order(session, local_to_put)
@@ -119,9 +123,14 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
                 changes = True
                 plugin_path, plugin_settings = self._uep_insert_plugin(session, plugin, settings, jobs, page, commands, _type, local_to_put)
-                self._uep_insert_templates(session, plugin, plugin_path, plugin_settings, db_settings, local_to_put)
 
                 try:
+                    # Templates check their settings against the DB (is_valid_setting): flush what this plugin
+                    # staged first, or a setting added by this very sync reads as missing and is dropped.
+                    bulk_add_in_fk_order(session, local_to_put)
+                    local_to_put.clear()
+                    self._uep_insert_templates(session, plugin, plugin_path, plugin_settings, db_settings, local_to_put)
+
                     if per_plugin_commit:
                         if local_to_put:
                             bulk_add_in_fk_order(session, local_to_put)
