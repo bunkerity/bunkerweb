@@ -174,17 +174,18 @@ try:
     if not cookie_flags_1:
         samesite_flag = next((flag for flag in cookie_flags.split() if flag.lower().split("=", 1)[0] == "samesite"), None)
         if samesite_flag is not None:
-            expected_samesite = samesite_flag.split("=", 1)[1] if "=" in samesite_flag else None
-            actual_samesite = cookie.get_nonstandard_attr("SameSite")
-            if not cookie.has_nonstandard_attr("SameSite"):
+            # Inspect the raw Set-Cookie header, the parsed cookie hides duplicated attributes
+            set_cookie = response.headers.get("Set-Cookie", "")
+            samesite_attrs = [attr.strip() for attr in set_cookie.split(";")[1:] if attr.strip().lower().split("=", 1)[0] == "samesite"]
+            if len(samesite_attrs) != 1:
                 print(
-                    f"❌ Cookie {cookie.name} doesn't have the SameSite flag even though it's set in the env, exiting ...",
+                    f"❌ Cookie {cookie.name} should have exactly one SameSite attribute, exiting ...\nSet-Cookie: {set_cookie}",
                     flush=True,
                 )
                 exit(1)
-            elif expected_samesite and (actual_samesite or "").lower() != expected_samesite.lower():
+            elif samesite_attrs[0].lower() != samesite_flag.lower():
                 print(
-                    f"❌ Cookie {cookie.name} has SameSite = {actual_samesite} but {expected_samesite} was expected, exiting ...",
+                    f"❌ Cookie {cookie.name} has {samesite_attrs[0]} but {samesite_flag} was expected, exiting ...\nSet-Cookie: {set_cookie}",
                     flush=True,
                 )
                 exit(1)
