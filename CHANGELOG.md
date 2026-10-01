@@ -22,6 +22,7 @@
 - [BUGFIX] `ui`: the bans table header and country tooltips now show.
 - [BUGFIX] The scheduler and autoconf log a warning when two services share a server name.
 - [BUGFIX] `ui`: renaming a service no longer drops the settings of services whose name starts with the old one.
+- [BUGFIX] `backup`: the built-in backup no longer fails on MySQL 26.x.
 - [PERF] `ui`: the reports table no longer rebuilds every tooltip on each draw, which also stops its memory growth.
 - [PERF] `ui`: restoring saved hidden columns measures the table once instead of once per column.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
