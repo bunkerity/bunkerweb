@@ -1,7 +1,7 @@
 {% extends "dashboard.html" %}
 {% block head %}
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/pages/crowdsec.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/crowdsec.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}

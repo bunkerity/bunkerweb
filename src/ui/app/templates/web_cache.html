@@ -13,7 +13,7 @@
 
 {% block head %}
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/pages/web-cache.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/web-cache.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}

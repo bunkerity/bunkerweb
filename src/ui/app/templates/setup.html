@@ -10,10 +10,10 @@
 {% from "components/button.html" import button %}
 {% block head %}
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/login.css')) }}"
           nonce="{{ style_nonce }}" />
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/pages/auth-legacy.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/auth-legacy.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block page %}
@@ -489,7 +489,7 @@
                                                                            value="{{ lets_encrypt_zerossl_api_key }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_KEY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] | v_safe_pattern }}" />
                                                                     <small class="text-muted d-block mt-1"
                                                                           >{{ _("setup.step2.lets_encrypt.zerossl_api_key_hint") }}</small>
                                                                 </div>
@@ -519,7 +519,7 @@
                                                                            min="0"
                                                                            value="{{ lets_encrypt_zerossl_api_retry }}"
                                                                            class="form-control plugin-setting mt-1"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY', {'regex': '^\\d+$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -547,7 +547,7 @@
                                                                            min="0"
                                                                            value="{{ lets_encrypt_zerossl_api_retry_delay }}"
                                                                            class="form-control plugin-setting mt-1"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -575,7 +575,7 @@
                                                                            min="1"
                                                                            value="{{ lets_encrypt_zerossl_api_connect_timeout }}"
                                                                            class="form-control plugin-setting mt-1"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -603,7 +603,7 @@
                                                                            min="1"
                                                                            value="{{ lets_encrypt_zerossl_api_max_time }}"
                                                                            class="form-control plugin-setting mt-1"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*$'})['regex'] | v_safe_pattern }}" />
                                                                 </div>
                                                             </div>
                                                         </div>

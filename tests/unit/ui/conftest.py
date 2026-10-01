@@ -12,7 +12,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import pytest
-from jinja2.defaults import DEFAULT_NAMESPACE
+from jinja2.defaults import DEFAULT_FILTERS, DEFAULT_NAMESPACE
 
 _UI_ROOT = str(Path(__file__).resolve().parents[3] / "src" / "ui")
 if _UI_ROOT not in sys.path:
@@ -20,6 +20,7 @@ if _UI_ROOT not in sys.path:
 
 import plugin_extensions  # type: ignore  # noqa: E402 — on sys.path via the root conftest
 
+from app.html_pattern import v_safe_pattern  # noqa: E402
 from app.models.ui_database import UIDatabase  # noqa: E402
 from app.utils import get_activation_map  # noqa: E402
 
@@ -136,3 +137,12 @@ DEFAULT_NAMESPACE.update(babel_globals())
 # It answers False, so a template's own fallback is what gets exercised. A harness that cares which
 # routes exist passes its own — `test_breadcrumb.py` does.
 DEFAULT_NAMESPACE.setdefault("endpoint_exists", lambda endpoint: False)
+
+# Same reason for the `v_safe_pattern` filter `main.py` registers: the plugin-setting macros ask it
+# (models/input_setting.html, models/multivalue_setting.html), and they are reached from half a
+# dozen page harnesses. Jinja copies DEFAULT_FILTERS into `Environment.filters` the same way.
+DEFAULT_FILTERS.setdefault("v_safe_pattern", v_safe_pattern)
+
+# `rtl_sheet` is registered beside `_` in `i18n.init_i18n` and asked by `base.html` and every page that
+# links a stylesheet. Identity (LTR) here: `test_rtl_stylesheets.py` covers the swap itself.
+DEFAULT_NAMESPACE.setdefault("rtl_sheet", lambda filename: filename)

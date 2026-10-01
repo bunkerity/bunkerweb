@@ -6,7 +6,7 @@
                type="hidden"
                class="plugin-setting plugin-setting-file-text"
                aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
-               pattern="{{ setting_data['regex'] }}"
+               {% if setting_data['regex'] | v_safe_pattern %}pattern="{{ setting_data['regex'] | v_safe_pattern }}"{% endif %}
                value="{{ setting_value }}"
                data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
                data-default="{{ setting_default }}"
@@ -89,7 +89,7 @@
                type="{{ setting_data['type'] }}"
                class="form-control plugin-setting"
                aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
-               pattern="{{ setting_data['regex'] }}"
+               {% if setting_data['regex'] | v_safe_pattern %}pattern="{{ setting_data['regex'] | v_safe_pattern }}"{% endif %}
                value="{{ setting_value }}"
                data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
                data-default="{{ setting_default }}"
@@ -99,7 +99,8 @@
                {% if setting == 'SERVER_NAME' or required %}required{% endif %}
                {% if input_readonly %}readonly{% endif %}>
         <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
-               class="text-truncate">{{ setting }}</label>
+               class="text-truncate"
+               title="{{ setting }}">{{ setting }}</label>
         {% if setting_data['type'] == 'password' %}
             <span class="input-group-text cursor-pointer rounded-end"><i class="bx bx-hide"></i></span>
         {% endif %}
@@ -120,4 +121,9 @@
             </button>
         {% endif %}
     </div>
+    {# A stored secret arrives as the placeholder, never as its value (app/models/secret_settings.py):
+       the page says it is set, and saving the placeholder back keeps it. #}
+    {% if setting_data['type'] == 'password' and setting_value == "__BW_SECRET_UNCHANGED__" %}
+        <small class="form-text text-muted d-block">{{ _("form.help.secret_stored") }}</small>
+    {% endif %}
 {% endif %}

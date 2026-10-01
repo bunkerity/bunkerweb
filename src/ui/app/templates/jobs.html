@@ -14,10 +14,10 @@
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           as="style" />
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
@@ -219,7 +219,7 @@
                                         </button>
                                     {% endcall %}
                                 {% endif %}
-                                {% call dropdown_menu(id="job-" ~ job ~ "-" ~ job_data['plugin_id'] ~ "-cache", items=[], label="Cache", i18n_key="button.cache", label_classes="d-none d-md-inline", icon="bx-data", variant="outline-secondary", size="sm", disabled=(not job_data['cache']), menu_classes="nav-pills max-vh-60 overflow-auto pt-0 pb-0", attrs=('data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _("tooltip.no_cache") }}"' if not job_data['cache'] else '')) %}
+                                {% call dropdown_menu(id="job-" ~ job ~ "-" ~ job_data['plugin_id'] ~ "-cache", items=[], label="Cache", i18n_key="button.cache", label_classes="d-none d-md-inline", icon="bx-data", variant="outline-secondary", size="sm", disabled=(not job_data['cache']), menu_classes="nav-pills max-vh-60 overflow-auto pt-0 pb-0", attrs=('data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="' ~ _("tooltip.no_cache") ~ '"' if not job_data['cache'] else '')) %}
                                     {% for cache in job_data['cache'] %}
                                         {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
                                         <li role="presentation">

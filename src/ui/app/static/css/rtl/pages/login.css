@@ -77,14 +77,14 @@
 }
 .sw-hatch {
   top: 28px;
-  left: 44px;
+  right: 44px;
   width: 150px;
   height: 22px;
   color: var(--bs-bw-green);
 }
 .sw-hatch-r {
   top: 400px;
-  right: 70px;
+  left: 70px;
   width: 22px;
   height: 150px;
   color: var(--bs-primary);
@@ -96,22 +96,22 @@
 }
 .sw-rule-1 {
   top: 150px;
-  left: 0;
+  right: 0;
   width: 300px;
 }
 .sw-rule-2 {
   top: 105px;
-  right: 0;
+  left: 0;
   width: 330px;
 }
 .sw-rule-3 {
   bottom: 175px;
-  right: 0;
+  left: 0;
   width: 330px;
 }
 .sw-vertical-text {
   top: 50%;
-  left: 78px;
+  right: 78px;
   transform: translateY(-50%);
   writing-mode: vertical-rl;
   text-orientation: upright;
@@ -124,7 +124,7 @@
 }
 .sw-poly {
   bottom: 30px;
-  left: 50px;
+  right: 50px;
   width: 580px;
   height: 105px;
   color: var(--bs-primary);
@@ -174,7 +174,7 @@
 }
 /* Pushes the topbar controls to the right, keeping the back-link at the left */
 .sw-back {
-  margin-right: auto;
+  margin-left: auto;
 }
 /* Keep the app's existing theme-toggle pill readable in both themes */
 .theme-toggle-pill {
@@ -284,12 +284,12 @@
 }
 /* Password field: leave room for the eye */
 .form-password-toggle .sw-input {
-  padding-right: 44px;
+  padding-left: 44px;
 }
 .sw-eye {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   height: 42px;
   width: 42px;
   display: flex;
@@ -549,8 +549,8 @@
 .totp-code {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 50%;
+  transform: translateX(50%);
   width: 362px; /* 6*52 + 5*10 */
   height: 62px;
   border: 0;
@@ -560,7 +560,7 @@
   font-family: var(--font-courier-prime), "Courier New", monospace;
   font-size: 26px;
   font-weight: 700;
-  text-align: left;
+  text-align: right;
   text-indent: 18px; /* center first glyph in first box */
   letter-spacing: 46px; /* pitch(62) − glyph(≈16) */
   caret-color: var(--bs-primary);
@@ -663,3 +663,5 @@
     letter-spacing: 37px; /* pitch(51) − glyph(≈14) */
   }
 }
+
+/* rtlcss@4.3.0 source=css/pages/login.css sha256=28cf943f9631b873b0a05451ee8ba7173022d351202e198915abcf970d8daa53 */

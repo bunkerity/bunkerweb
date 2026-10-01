@@ -38,5 +38,13 @@ $(document).on("click", "[data-recovery-copy-target]", function () {
     })
     .catch((err) => {
       console.error("Failed to copy recovery codes: ", err);
+      const failedLabel =
+        typeof i18next !== "undefined"
+          ? i18next.t("tooltip.copy_failed")
+          : "Copy failed";
+      button.attr("data-bs-original-title", failedLabel).tooltip("show");
+      setTimeout(() => {
+        button.tooltip("hide").attr("data-bs-original-title", "");
+      }, 2000);
     });
 });

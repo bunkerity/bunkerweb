@@ -152,7 +152,8 @@
     let popover = null;
     if (window.bootstrap && window.bootstrap.Popover) {
       popover = new window.bootstrap.Popover(target, {
-        content: t(step.i18n_key, step.en),
+        title: t(step.i18n_key, step.en),
+        content: t(step.hint_i18n_key, step.hint_en),
         placement: "right",
         trigger: "manual",
         container: "body",

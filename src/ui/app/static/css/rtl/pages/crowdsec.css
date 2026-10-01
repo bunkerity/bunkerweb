@@ -1,0 +1,67 @@
+.crowdsec-table-wrap {
+  max-height: 30rem;
+}
+
+.crowdsec-connection-card {
+  border: 1px solid var(--bs-border-color);
+}
+
+.crowdsec-connection-card.is-selected {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 1px var(--bs-primary);
+}
+
+.crowdsec-connection-card:focus-within {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 3px;
+}
+
+.crowdsec-connection-card .card-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.crowdsec-connection-card .stretched-link {
+  cursor: pointer;
+}
+
+.crowdsec-connection-card .form-check-input {
+  position: relative;
+  z-index: 2;
+}
+
+.crowdsec-meta {
+  overflow-wrap: anywhere;
+}
+
+.crowdsec-summary-tile {
+  width: 100%;
+  text-align: start;
+  cursor: pointer;
+  border-right-width: 0.25rem;
+}
+
+/* The state colour belongs to the leading edge only. Bootstrap's .border-start and
+   .border-* utilities are !important shorthands, so the edge is owned here instead. */
+.crowdsec-summary-tile.is-blocking {
+  border-right-color: var(--bs-danger);
+}
+
+.crowdsec-summary-tile.is-evidence {
+  border-right-color: var(--bs-secondary);
+}
+
+.crowdsec-summary-tile.is-unreadable {
+  border-right-color: var(--bs-warning);
+}
+
+.crowdsec-summary-tile.active {
+  box-shadow: 0 0 0 2px var(--bs-primary);
+}
+
+.crowdsec-summary-tile:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+/* rtlcss@4.3.0 source=css/pages/crowdsec.css sha256=c6c6bd6a8d0124d4be4b6b96235190ef806c3d72940104dd48e75e5092336697 */

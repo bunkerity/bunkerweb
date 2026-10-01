@@ -9,7 +9,7 @@
 {% from "components/page-head.html" import page_head %}
 {% block head %}
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/pages/logs.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/logs.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {# The page-head band owns the breadcrumb + title, so drop the dashboard shell's

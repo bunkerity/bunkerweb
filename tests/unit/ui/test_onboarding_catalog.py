@@ -241,3 +241,27 @@ def test_every_hint_has_its_own_copy_in_en_json(page_id):
 
     assert page_id in hints
     assert hints[page_id].strip()
+
+
+# --------------------------------------------------------------------------------------
+# The spotlight popover hint (L18)
+# --------------------------------------------------------------------------------------
+@pytest.mark.parametrize("step", CATALOG, ids=[step.id for step in CATALOG])
+def test_every_step_has_a_non_empty_spotlight_hint(step):
+    """The spotlight popover falls back to `hint_en` when the key is missing a translation, so
+    an empty one would render nothing under the title."""
+    assert step.hint_i18n_key.strip()
+    assert step.hint_en.strip()
+
+
+@pytest.mark.parametrize("step", CATALOG, ids=[step.id for step in CATALOG])
+def test_every_spotlight_hint_has_its_own_copy_in_en_json(step):
+    """Same failure mode as the per-page hints above: a missing key silently falls back to
+    `hint_en`, which a translated locale never sees."""
+    import json
+
+    locales = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "static" / "locales"
+    hints = json.loads((locales / "en.json").read_text())["onboarding"]["item_hint"]
+
+    assert step.id in hints
+    assert hints[step.id].strip()

@@ -1,4 +1,4 @@
-{% from 'macros/docs_link.html' import docs_url %}
+{% from 'macros/docs_link.html' import docs_url with context %}
 {# One template's stepper pane body: the card header, the "template in use" gate, the steps nav,
    the step panes with their settings grid, the per-step custom-config ace editors, and the
    no-steps / template-in-use empty states.
@@ -39,7 +39,7 @@
      height="15.5px"
      loading="lazy">') |safe }}
         </h5>
-        <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ template_data["name"] }}</p>
+        <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin_text(template_plugin_id, 'templates.' ~ template ~ '.name', template_data["name"]) }}</p>
     </div>
 </div>
 <div class="card-body">
@@ -77,8 +77,8 @@
                                             <span class="btn btn-sm step-number me-0{% if loop.index != 1 %} btn-outline-primary disabled{% else %} btn-primary{% endif %}">{{ loop.index }}</span>
                                         </div>
                                         <div class="step-details text-truncate">
-                                            <div class="fw-bold{% if loop.index == 1 %} text-primary{% else %} text-muted{% endif %}">{{ step["title"] }}</div>
-                                            <small class="text-muted d-none d-sm-block">{{ step["subtitle"] }}</small>
+                                            <div class="fw-bold{% if loop.index == 1 %} text-primary{% else %} text-muted{% endif %}">{{ plugin_text(template_plugin_id, 'templates.' ~ template ~ '.steps.' ~ loop.index0 ~ '.title', step["title"]) }}</div>
+                                            <small class="text-muted d-none d-sm-block">{{ plugin_text(template_plugin_id, 'templates.' ~ template ~ '.steps.' ~ loop.index0 ~ '.subtitle', step["subtitle"]) }}</small>
                                         </div>
                                     </li>
                                 {% endfor %}
@@ -118,8 +118,8 @@
                                      data-template-dom-id="{{ template_data['dom_id'] }}"
                                      aria-labelledby="step-nav-{{ template_data['dom_id'] }}-{{ loop.index }}">
                                     <div class="pt-1 pb-4">
-                                        <h5 class="mb-1 fw-bold{{ plugin_types[template_plugin['type']].get('text-class', '') }}">{{ step["title"] }}</h5>
-                                        <p class="card-subtitle text-muted">{{ step["subtitle"] }}</p>
+                                        <h5 class="mb-1 fw-bold{{ plugin_types[template_plugin['type']].get('text-class', '') }}">{{ plugin_text(template_plugin_id, 'templates.' ~ template ~ '.steps.' ~ loop.index0 ~ '.title', step["title"]) }}</h5>
+                                        <p class="card-subtitle text-muted">{{ plugin_text(template_plugin_id, 'templates.' ~ template ~ '.steps.' ~ loop.index0 ~ '.subtitle', step["subtitle"]) }}</p>
                                     </div>
                                     <div class="row pb-0">
                                         {% for setting in step["settings"] %}
@@ -148,7 +148,7 @@
                                                     <label id="label-{{ template }}-setting-{{ plugin_dom_id }}-{{ setting_data['id'] }}"
                                                            for="{{ template }}-setting-{{ plugin_dom_id }}-{{ setting_data['id'] }}"
                                                            class="form-label fw-semibold text-truncate">
-                                                        {{ setting_data["label"] }}
+                                                        {{ setting_text(setting, 'label', setting_data["label"]) }}
                                                     </label>
                                                     <div class="d-flex align-items-center">
                                                         {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
@@ -159,10 +159,11 @@
                                                                data-fragment="#multisite-mode"
                                                                data-bs-toggle="tooltip"
                                                                data-bs-placement="top"
-                                                               data-bs-original-title="Multisite setting"
+                                                               data-bs-original-title="{{ _("tooltip.multisite_setting") }}"
+                                                               aria-label="{{ _("tooltip.multisite_setting") }}"
                                                                target="_blank"
                                                                rel="noopener">
-                                                                <span class="bx bx-server bx-xs"></span>
+                                                                <span class="bx bx-server bx-xs" aria-hidden="true"></span>
                                                             </a>
                                                         {% endif %}
                                                         {% if setting_method == "api" %}
@@ -205,7 +206,7 @@
                                                         <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                               data-bs-toggle="tooltip"
                                                               data-bs-placement="top"
-                                                              data-bs-original-title="{{ setting_data['help'] }}">
+                                                              data-bs-original-title="{{ setting_text(setting, 'help', setting_data['help']) }}">
                                                             <span class="bx bx-question-mark bx-xs"></span>
                                                         </span>
                                                     </div>

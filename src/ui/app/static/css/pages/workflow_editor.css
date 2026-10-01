@@ -840,6 +840,52 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* H12: at phone width a rule card's own room is already down to ~200px (nested
+   rail/gutter/group indentation each take their own slice), and every piece below
+   assumed that room in a single row: the clause's fixed 58px "IF"/"THEN" gutter, the
+   predicate's 4-column grid, the condition/operator selects sized to their widest
+   option, the value input's deliberate 11rem minimum (workflow_editor.css:711, "not a
+   full-width form field" -- true until there is no width left to give it), and the
+   card-header toolbar's flex-shrink: 0 icon row. None of that shrinks; it silently
+   clips against `.bw-flow-node`'s `overflow: hidden` instead, taking the operator,
+   value and delete button with it (H12) as well as the header's own drag/move/collapse
+   controls. Stack rather than clip. */
+@media (max-width: 480px) {
+  .bw-flow-head {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .bw-flow-clause {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .bw-flow-clause-lbl {
+    padding-top: 0;
+  }
+  .bw-flow-pred {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .bw-flow-vals {
+    flex-basis: 100%;
+  }
+  .bw-flow-pred-type-select,
+  .bw-flow-pred-op-select {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bw-flow-pred-op {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bw-flow-val-input {
+    min-width: 0;
+  }
+}
 .bw-flow-pick {
   display: flex;
   align-items: flex-start;

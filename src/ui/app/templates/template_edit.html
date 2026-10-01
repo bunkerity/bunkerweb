@@ -17,7 +17,10 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 px-3 py-2 py-md-3">
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     {{ button(tag="a", href=url_for('templates.templates_page'), variant="outline-secondary", size="sm", icon="bx-arrow-back", label="Go Back", i18n_key="button.go_back") }}
-                    {% if editor_mode == 'edit' %}
+                    {% if editor_mode == 'edit' and not can_edit_template %}
+                        <h2 class="h5 mb-0"
+                            >{{ _("template.editor.heading_view", id=template_id) }}</h2>
+                    {% elif editor_mode == 'edit' %}
                         <h2 class="h5 mb-0"
                             >{{ _("template.editor.heading_edit", id=template_id) }}</h2>
                     {% else %}
@@ -40,7 +43,12 @@
                             {% elif reason == 'user' %}
                                 <span>{{ _("template.editor.readonly_user") }}</span>
                             {% elif reason == 'method' %}
-                                <span>{{ _("template.editor.readonly_method", method=template_meta_serialized.get('method', 'ui')) }}</span>
+                                {% set restricting_plugin = template_meta_serialized.get('plugin_id') %}
+                                {% if restricting_plugin %}
+                                    <span>{{ _("template.editor.readonly_method_plugin", plugin=restricting_plugin) }}</span>
+                                {% else %}
+                                    <span>{{ _("template.editor.readonly_method", method=template_meta_serialized.get('method', 'ui')) }}</span>
+                                {% endif %}
                             {% endif %}
                         </li>
                     {% endfor %}
@@ -78,12 +86,19 @@
                                        >{{ _("template.editor.summary_metadata_title") }}</h6>
                                     <div class="vstack gap-2 small">
                                         {% set summary_method = template_meta_serialized.get('method') %}
+                                        {# plugin_id wins whenever it is set, matching the readonly
+                                           banner above (restricting_plugin) -- a bundled template's
+                                           raw method ("manual", "core", ...) means nothing to the
+                                           operator next to the plugin that actually owns it. #}
+                                        {% set summary_plugin = template_meta_serialized.get('plugin_id') %}
                                         <div class="d-flex align-items-center justify-content-between px-3 py-2 border rounded-3">
                                             <span class="d-flex align-items-center gap-2 text-muted">
                                                 <i class="bx bx-cog" aria-hidden="true"></i>
                                                 <span>{{ _("template.editor.summary_metadata_method") }}</span>
                                             </span>
-                                            {% if summary_method %}
+                                            {% if summary_plugin %}
+                                                <span class="badge bg-label-primary">{{ summary_plugin }}</span>
+                                            {% elif summary_method %}
                                                 <span class="badge bg-label-primary text-uppercase">{{ summary_method }}</span>
                                             {% else %}
                                                 <span class="text-muted"

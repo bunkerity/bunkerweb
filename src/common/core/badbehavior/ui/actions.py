@@ -112,7 +112,7 @@ def pre_render(**kwargs):
                 "column": 4,
                 "dir": "desc",
             },
-            "svg_color": "warning",
+            "svg_color": "warning-emphasis",
         },
     }
     try:

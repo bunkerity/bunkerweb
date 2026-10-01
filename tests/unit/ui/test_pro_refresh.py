@@ -61,5 +61,7 @@ def test_refresh_ui_rearms_extraction_and_schedules_a_plugin_reload(pro_route):
 
     assert response.status_code == 302
     assert response.location == "/pro"
-    assert pro_route.DATA == {"IS_RELOADING_PLUGINS": False, "loaded": True}
+    # The route no longer clears the latch by hand: safe_reload_plugins()'s own `finally`
+    # clears it after every reload (report-FIX-RELOAD-LATCH.md), so DATA is untouched here.
+    assert pro_route.DATA == {"IS_RELOADING_PLUGINS": True}
     pro_route.API_CLIENT.checked_changes.assert_called_once_with(["ui_plugins"], value=True)

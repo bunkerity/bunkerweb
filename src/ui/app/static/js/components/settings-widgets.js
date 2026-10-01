@@ -420,6 +420,21 @@ $(document).ready(() => {
           .toggleClass("is-invalid", !isValid);
         $input.toggleClass("is-invalid", !isValid);
       }
+      // M15: an invalid value used to flip the field red with no explanation (an empty
+      // .invalid-feedback). The browser already computed one via the Constraint Validation
+      // API for the `pattern` attribute -- reuse it, falling back to the existing generic key.
+      upsertValidationFeedback($target).text(
+        isValid
+          ? ""
+          : this.validationMessage ||
+              t(
+                "validation.pattern",
+                "Please enter a valid value for {{field}}.",
+                {
+                  field: $input.attr("name") || $input.attr("id") || "",
+                },
+              ),
+      );
     }, 100)();
   });
 

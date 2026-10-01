@@ -158,7 +158,9 @@ def test_logout_forwards_a_known_reason_to_the_login_page(app, routes):
     with app.test_request_context("/logout?reason=password_changed"):
         response = logout.logout_page()
 
-    assert response.headers["Location"] == "/login?reason=password_changed"
+    # `lang=` (below) rides on every logout redirect, `reason=` on this one -- `lang` always
+    # comes first, since `url_for`'s `**values` preserves the keyword order `logout_page` passed.
+    assert response.headers["Location"] == "/login?lang=en&reason=password_changed"
 
 
 @pytest.mark.parametrize("reason", ["nope", "<script>alert(1)</script>", "//evil.example.com"])
@@ -168,7 +170,60 @@ def test_logout_drops_an_unknown_reason_rather_than_reflecting_it(app, routes, r
     with app.test_request_context("/logout", query_string={"reason": reason}):
         response = logout.logout_page()
 
-    assert response.headers["Location"] == "/login"
+    assert response.headers["Location"] == "/login?lang=en"
+
+
+# --------------------------------------------------------------------------------------
+# QA-UI-5 item 7: /login was English after a logout when the last user was fr
+# --------------------------------------------------------------------------------------
+# `logout_page`'s own `Clear-Site-Data: "cookies"` header (a deliberate wipe, for stale
+# credentials) discards any cookie that same response sets before the browser ever follows the
+# redirect -- so the language a `session["language"] = ...` write made in `logout_page` itself
+# never reaches `/login`. It has to travel in the URL, exactly like `reason` above.
+def test_logout_forwards_the_resolved_language_to_the_login_page(app, routes):
+    _, logout = routes
+
+    with app.test_request_context("/logout", headers={"Accept-Language": "fr"}):
+        response = logout.logout_page()
+
+    assert response.headers["Location"] == "/login?lang=fr"
+
+
+_ANONYMOUS = SimpleNamespace(is_authenticated=False, totp_secret=None)
+
+
+def test_login_page_adopts_the_forwarded_language_when_it_has_none_of_its_own(app, routes):
+    login, _ = routes
+
+    with app.test_request_context("/login?lang=fr"):
+        login.API_CLIENT.get_admin_user.return_value = {"username": "admin"}
+        with patch.object(login, "render_template", lambda template, **context: ""), patch.object(login, "current_user", _ANONYMOUS):
+            login.login_page()
+        assert session.get("language") == "fr"
+
+
+def test_login_page_never_overrides_a_language_already_picked_this_visit(app, routes):
+    """A failed-login POST resubmit, or a `/set_language` call from the selector, both write this
+    key themselves -- `?lang=` from a stale bookmark or resubmission must not stomp either one."""
+    login, _ = routes
+
+    with app.test_request_context("/login?lang=fr"):
+        session["language"] = "de"
+        login.API_CLIENT.get_admin_user.return_value = {"username": "admin"}
+        with patch.object(login, "render_template", lambda template, **context: ""), patch.object(login, "current_user", _ANONYMOUS):
+            login.login_page()
+        assert session.get("language") == "de"
+
+
+@pytest.mark.parametrize("lang", ["nope", "<script>alert(1)</script>", ""])
+def test_login_page_ignores_an_unsupported_lang_hint(app, routes, lang):
+    login, _ = routes
+
+    with app.test_request_context("/login", query_string={"lang": lang}):
+        login.API_CLIENT.get_admin_user.return_value = {"username": "admin"}
+        with patch.object(login, "render_template", lambda template, **context: ""), patch.object(login, "current_user", _ANONYMOUS):
+            login.login_page()
+        assert "language" not in session
 
 
 # --------------------------------------------------------------------------------------

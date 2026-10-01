@@ -91,6 +91,8 @@ def _serialize(step, signals):
         "id": step.id,
         "i18n_key": step.i18n_key,
         "en": step.en,
+        "hint_i18n_key": step.hint_i18n_key,
+        "hint_en": step.hint_en,
         "done": bool(step.done(signals)),
         "optional": step.optional,
         "target": target,

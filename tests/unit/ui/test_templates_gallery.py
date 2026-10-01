@@ -39,6 +39,8 @@ def _render_dashboard_page(template, **context):
         autoescape=True,
     )
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         csrf_token=lambda: "test-token",
         url_for=lambda endpoint, **_kwargs: f"/{endpoint}",
     )
@@ -221,12 +223,14 @@ def test_gallery_card_title_is_short_id_and_description_is_full_name():
     assert 'class="bw-tpl-desc' in card
     assert "Basic security level for web apps" in card  # long name = description
 
-    # Custom id -> capitalized id as static title, no name data-i18n (i18next echoes
-    # missing keys, so the fallback text must not be overwritten).
+    # Custom id -> humanized (hyphens/underscores to spaces, title-cased per word) as static
+    # title, no name data-i18n (i18next echoes missing keys, so the fallback text must not be
+    # overwritten). L14 (LOW sweep): a plain `capitalize` only capitalized the first letter of
+    # the whole id ("Tpl-a"), which is why every custom id shown to QA looked like a typo.
     html = _render_dashboard_page("templates.html", **_two_template_context())
     tpl_a_card = _card_slice(html, "tpl-a", 'data-template-id="tpl-b"')
     assert "templates.name.tpl-a" not in tpl_a_card
-    assert "Tpl-a" in tpl_a_card
+    assert "Tpl A" in tpl_a_card
     assert "WordPress site" in tpl_a_card  # long name = description
 
 

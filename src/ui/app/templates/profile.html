@@ -252,7 +252,7 @@
                                 </div>
                                 <div class="col-md-12"
                                      {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
-                                    {{ password(id="new_password_confirm", label="Confirm Password", label_i18n="form.label.confirm_password", autocomplete="off", maxlength=72, pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !\"#$%&'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]).{8,}$", disabled=is_readonly) }}
+                                    {{ password(id="new_password_confirm", label="Confirm Password", label_i18n="form.label.confirm_password", autocomplete="off", maxlength=72, pattern=("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !\"#$%&'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]).{8,}$" | v_safe_pattern), disabled=is_readonly) }}
                                 </div>
                                 <div class="col-md-12"
                                      {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>

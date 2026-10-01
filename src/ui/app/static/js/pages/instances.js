@@ -28,9 +28,6 @@ $(document).ready(function () {
       if (actionLock && showLoadingModal) {
         $(".dt-button-background").click();
         $("#loadingModal").modal("show");
-        setTimeout(() => {
-          $("#loadingModal").modal("hide");
-        }, 5000);
       }
     }, 500);
 
@@ -234,24 +231,13 @@ $(document).ready(function () {
         "Columns",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
+      // L2: the header is already server-translated (native i18n Lot D dropped the client-side
+      // `data-i18n` attribute this used to look for), so every column landed in the "not found"
+      // branch and logged a console warning on load. The header text is the translation.
       columnText: function (dt, idx, title) {
         const headerCell = dt.column(idx).header();
-        const $header = $(headerCell);
-        const $translatableElement = $header.find("[data-i18n]");
-        let i18nKey = $translatableElement.data("i18n");
-        let translatedTitle = title; // Fallback
-
-        if (i18nKey) {
-          translatedTitle = t(i18nKey, title);
-        } else {
-          translatedTitle = $header.text().trim() || title;
-          console.warn(
-            `ColVis: No data-i18n key found for column index ${idx}, using header text or title: '${translatedTitle}'`,
-          );
-        }
-        return `${idx + 1}. <span data-i18n="${
-          i18nKey || ""
-        }">${translatedTitle}</span>`;
+        const translatedTitle = $(headerCell).text().trim() || title;
+        return `${idx + 1}. <span>${translatedTitle}</span>`;
       },
     },
     {
@@ -683,8 +669,17 @@ $(document).ready(function () {
   });
 
   $(document).on("click", ".reload-instance, .stop-instance", function () {
-    // No read-only check here as these actions interact with instances directly, not DB usually
-    // But actionLock prevents simultaneous actions
+    // The server refuses both without the write permission (routes/instances.py). The template's
+    // `disabled` is a class, not the attribute, so the click still reaches this handler.
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
     if (actionLock) return;
     actionLock = true; // Lock action
 

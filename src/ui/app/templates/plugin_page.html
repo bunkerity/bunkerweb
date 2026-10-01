@@ -1,4 +1,4 @@
-{% from 'macros/docs_link.html' import docs_url %}
+{% from 'macros/docs_link.html' import docs_url with context %}
 {% from "components/page-head.html" import page_head %}
 {% extends "dashboard.html" %}
 {# page-head band owns the breadcrumb + plugin H1, so drop the dashboard shell's legacy header row. #}
@@ -6,10 +6,10 @@
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           as="style" />
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block content %}
@@ -22,10 +22,11 @@
         {% set plugin_fragment = "" %}
     {% endif %}
     <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
-    {% call page_head(title=plugin["name"],
+    {% set plugin_display_name = plugin_text(plugin['id'], 'meta.name', plugin["name"]) %}
+    {% call page_head(title=plugin_display_name,
                       breadcrumb=[("Configure", "navigation.configure", none),
                                   ("Plugins", "navigation.plugins", url_for("plugins")),
-                                  (plugin["name"], none, none)]) %}
+                                  (plugin_display_name, none, none)]) %}
         <span class="text-muted small courier-prime me-1">v{{ plugin["version"] }}</span>
         <span class="d-inline-flex align-items-center me-1">{{ plugin_types[plugin["type"]].get('icon', '<img src="' + pro_diamond_url + '" alt="Pro plugin" width="18px" height="15.5px" />') |safe }}</span>
         <a href="{{ docs_url(plugin_endpoint, plugin_fragment) }}"
@@ -108,16 +109,16 @@
                                 <i class="bx bx-{% if up %}up{% else %}down{% endif %}-arrow-circle bx-sm position-absolute top-0 end-0 m-3 text-{% if up %}success{% else %}danger{% endif %}"></i>
                                 <div class="card-header p-1">
                                     <div class="card-title mb-0">
-                                        <h5 class="mb-1 me-2 don-jose {{ value.get('title-classes', '') }}">{{ value.get('title', 'STATUS') }}</h5>
+                                        <h5 class="mb-1 me-2 don-jose {{ value.get('title-classes', '') }}">{{ plugin_text(plugin['id'], value.get('title_i18n'), value.get('title', 'STATUS')) }}</h5>
                                     </div>
                                 </div>
                                 <div class="card-body position-relative pb-0">
                                     <div class="d-flex align-items-center justify-content-center h-100">
                                         <div class="text-center mt-2">
                                             <p class="g-3 p-2 text-{% if up %}success{% else %}danger{% endif %} rounded-3 fw-bold mb-0">
-                                                {{ 'Active' if up else 'Inactive' }}
+                                                {{ _("status.active") if up else _("status.inactive") }}
                                             </p>
-                                            {% set ping_subtitle = value.get("subtitle") %}
+                                            {% set ping_subtitle = plugin_text(plugin['id'], value.get('subtitle_i18n'), value.get("subtitle")) %}
                                             {% if ping_subtitle %}
                                                 <p class="card-text small mb-0 text-{{ value.get('subtitle_color', 'muted') }}">{{ ping_subtitle }}</p>
                                             {% endif %}
@@ -137,7 +138,7 @@
                                 <i class='bx bx-{% if key.startswith("info_") %}info-circle{% elif key.startswith("date_") %}calendar{% else %}slider-alt{% endif %} bx-sm position-absolute top-0 end-0 m-3{% if svg_color %} text-{{ svg_color }}{% endif %}'></i>
                                 <div class="card-header p-1">
                                     <div class="card-title mb-0">
-                                        <h5 class="mb-1 me-2 don-jose {{ value.get('title-classes', '') }}">{{ value.get("title") }}</h5>
+                                        <h5 class="mb-1 me-2 don-jose {{ value.get('title-classes', '') }}">{{ plugin_text(plugin['id'], value.get('title_i18n'), value.get("title")) }}</h5>
                                     </div>
                                 </div>
                                 <div class="card-body position-relative">
@@ -174,7 +175,7 @@
                                             </div>
                                         </div>
                                     {% endif %}
-                                    {% set subtitle = value.get("subtitle") %}
+                                    {% set subtitle = plugin_text(plugin['id'], value.get('subtitle_i18n'), value.get("subtitle")) %}
                                     {% if subtitle %}
                                         <small class="position-absolute bottom-0 end-0 text-{{ value.get('subtitle_color', 'muted') }}">{{ subtitle }}</small>
                                     {% endif %}

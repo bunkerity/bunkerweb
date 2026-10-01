@@ -49,7 +49,8 @@ CONCATENATED_PREFIXES = {
     "libs/ace/src-min/theme-cloud9_",
 }
 
-_URL_FOR_STATIC = re.compile(r"""url_for\(\s*['"]static['"]\s*,\s*filename\s*=\s*['"]([^'"]+)['"]""")
+# `rtl_sheet('<css>')` wraps the stylesheets that have a css/rtl/ twin; the literal inside is still the file to check.
+_URL_FOR_STATIC = re.compile(r"""url_for\(\s*['"]static['"]\s*,\s*filename\s*=\s*(?:rtl_sheet\(\s*)?['"]([^'"]+)['"]""")
 
 
 def _references():

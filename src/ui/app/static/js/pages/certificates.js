@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function openAction(action, certificate = null, trigger = null) {
     if (!actionModal) return;
-    const label = certificate?.common_name || certificate?.name || "";
+    const label = certificate?.name || certificate?.common_name || "";
     const copies = {
       renew: translate("certificates.confirm_renew", `Renew “${label}”?`, {
         name: label,

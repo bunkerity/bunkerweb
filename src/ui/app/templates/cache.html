@@ -8,13 +8,13 @@
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           as="style" />
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           nonce="{{ style_nonce }}" />
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/pages/cache.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/cache.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {# The page-head band owns the breadcrumb + title, so drop the dashboard shell's

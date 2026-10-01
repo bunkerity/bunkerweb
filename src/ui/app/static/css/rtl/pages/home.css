@@ -683,7 +683,7 @@
   text-decoration: underline;
   text-underline-offset: 3px;
   letter-spacing: 0.02em;
-  margin-right: 10px;
+  margin-left: 10px;
 }
 .news-see-more:hover {
   color: var(--bs-bw-green);
@@ -799,8 +799,8 @@
 }
 .news-dots {
   position: absolute;
-  left: 0;
   right: 0;
+  left: 0;
   bottom: 6px;
   display: flex;
   justify-content: center;
@@ -876,3 +876,5 @@
     min-height: 140px;
   }
 }
+
+/* rtlcss@4.3.0 source=css/pages/home.css sha256=ea1d7596588a1cad2c0aa772edeaca3acbdad289d67bd5fbb084d7a8be13794e */

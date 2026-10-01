@@ -264,25 +264,13 @@ $(document).ready(function () {
         "Columns",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
+      // L2: the header is already server-translated (native i18n Lot D dropped the client-side
+      // `data-i18n` attribute this used to look for), so every column landed in the "not found"
+      // branch and logged a console warning on load. The header text is the translation.
       columnText: function (dt, idx, title) {
         const headerCell = dt.column(idx).header(); // Get header cell DOM element
-        const $header = $(headerCell);
-        // Find the element with data-i18n (likely a span inside the th)
-        const $translatableElement = $header.find("[data-i18n]");
-        let i18nKey = $translatableElement.data("i18n");
-        let translatedTitle = title; // Use original title as fallback
-
-        if (i18nKey) {
-          translatedTitle = t(i18nKey, title); // Pass original title as defaultValue
-        } else {
-          translatedTitle = $header.text().trim() || title; // Use text content or DT title
-          console.warn(
-            `ColVis: No data-i18n key found for column index ${idx}, using header text or title: '${translatedTitle}'`,
-          );
-        }
-        return `${idx + 1}. <span data-i18n="${
-          i18nKey || ""
-        }">${translatedTitle}</span>`;
+        const translatedTitle = $(headerCell).text().trim() || title;
+        return `${idx + 1}. <span>${translatedTitle}</span>`;
       },
     },
     {

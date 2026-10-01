@@ -113,7 +113,7 @@
       recoveryMode = !recoveryMode;
       if (recoveryMode) {
         wrap.innerHTML =
-          '<input class="sw-input totp-recovery-input" type="text" name="totp_token" id="totp_token" placeholder="XXXXX-XXXXX-XXXXX" autocomplete="off" spellcheck="false" aria-label="Recovery code" required />';
+          '<input class="sw-input totp-recovery-input" type="text" name="totp_token" id="totp_token" placeholder="xxxx-xxxx-xxxx-xxxx" autocomplete="off" spellcheck="false" aria-label="Recovery code" required />';
         recovery.textContent = t(
           "link.use_authenticator_code",
           "Use an authenticator code",

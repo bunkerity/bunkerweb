@@ -14,6 +14,7 @@ from tarfile import TarFile, TarInfo, open as tar_open
 from typing import Mapping, Optional
 
 from cryptography import x509
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519, ed448, rsa
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -91,7 +92,13 @@ def _name_value(name: x509.Name, oid: x509.ObjectIdentifier) -> str:
 
 def parse_certificate(certificate_pem: bytes, private_key_pem: Optional[bytes] = None) -> dict:
     """Parse a PEM chain and optionally verify that its private key matches."""
-    certificates = x509.load_pem_x509_certificates(certificate_pem)
+    # M28: `cryptography` raises its own ValueError for malformed PEM, wording internals and a
+    # docs URL ("Unable to load PEM file. See https://cryptography.io/... MalformedFraming")
+    # straight through to whichever caller (UI, API, a job) does not re-check the file itself.
+    try:
+        certificates = x509.load_pem_x509_certificates(certificate_pem)
+    except ValueError as exc:
+        raise ValueError("The certificate file is not a valid PEM certificate.") from exc
     if not certificates:
         raise ValueError("No PEM certificate found")
     leaf = certificates[0]
@@ -100,6 +107,8 @@ def parse_certificate(certificate_pem: bytes, private_key_pem: Optional[bytes] =
             private_key = serialization.load_pem_private_key(private_key_pem, password=None)
         except TypeError as exc:
             raise ValueError("Encrypted private keys are not supported") from exc
+        except (ValueError, UnsupportedAlgorithm) as exc:
+            raise ValueError("The private key file is not a valid PEM private key.") from exc
         if _public_key_bytes(private_key.public_key()) != _public_key_bytes(leaf.public_key()):
             raise ValueError("Certificate and private key do not match")
 

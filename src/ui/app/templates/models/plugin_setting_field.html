@@ -37,7 +37,7 @@
    caller: plugin_settings_body.html happened to import it at its own top, but every
    plugin_bodies/*.html would have to remember, and forgetting it is a 500 on the page
    rather than a missing badge. The `-` markers keep this preamble whitespace-free. -#}
-{%- from 'macros/docs_link.html' import docs_url -%}
+{%- from 'macros/docs_link.html' import docs_url with context -%}
 {%- set field_col_class = field_col_class | default("col-12 col-sm-6 col-lg-4 pb-3", true) -%}
 {% set setting_config = config.get(setting, {}) %}
         {% set setting_default = setting_data.get("default", "") %}
@@ -68,7 +68,7 @@
                 <label id="label-setting-{{ plugin }}-{{ setting_data['id'] }}"
                        for="setting-{{ plugin }}-{{ setting_data['id'] }}"
                        class="form-label fw-semibold text-truncate">
-                    {{ setting_data["label"] }}
+                    {{ setting_text(setting, 'label', setting_data["label"]) }}
                 </label>
                 <div class="d-flex align-items-center">
                     {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
@@ -79,10 +79,11 @@
                            data-fragment="#multisite-mode"
                            data-bs-toggle="tooltip"
                            data-bs-placement="top"
-                           data-bs-original-title="Multisite setting"
+                           data-bs-original-title="{{ _("tooltip.multisite_setting") }}"
+                           aria-label="{{ _("tooltip.multisite_setting") }}"
                            target="_blank"
                            rel="noopener">
-                            <span class="bx bx-server bx-xs"></span>
+                            <span class="bx bx-server bx-xs" aria-hidden="true"></span>
                         </a>
                     {% endif %}
                     {% if setting_template %}
@@ -119,7 +120,7 @@
                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
-                          data-bs-original-title="{{ setting_data['help'] }}">
+                          data-bs-original-title="{{ setting_text(setting, 'help', setting_data['help']) }}">
                         <span class="bx bx-question-mark bx-xs"></span>
                     </span>
                 </div>

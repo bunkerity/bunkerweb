@@ -31,7 +31,7 @@
    add/remove buttons -- silently, since Jinja's default Undefined is callable-free but the
    surrounding markup still emits. -#}
 {%- from "components/button.html" import button -%}
-{%- from 'macros/docs_link.html' import docs_url -%}
+{%- from 'macros/docs_link.html' import docs_url with context -%}
 <div class="card-body row g-2 gx-6 pt-0">
         {% for multiple, multiples in plugin_multiples.items() %}
             <div id="multiple-{{ plugin }}-{{ multiple }}"
@@ -93,7 +93,7 @@
                                             <label id="label-multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
                                                    for="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
                                                    class="form-label fw-semibold text-truncate">
-                                                {{ setting_data["label"] }}
+                                                {{ setting_text(setting, 'label', setting_data["label"]) }}
                                             </label>
                                             <div class="d-flex align-items-center">
                                                 {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
@@ -104,10 +104,11 @@
                                                        data-fragment="#multisite-mode"
                                                        data-bs-toggle="tooltip"
                                                        data-bs-placement="top"
-                                                       data-bs-original-title="Multisite setting"
+                                                       data-bs-original-title="{{ _("tooltip.multisite_setting") }}"
+                                                       aria-label="{{ _("tooltip.multisite_setting") }}"
                                                        target="_blank"
                                                        rel="noopener">
-                                                        <span class="bx bx-server bx-xs"></span>
+                                                        <span class="bx bx-server bx-xs" aria-hidden="true"></span>
                                                     </a>
                                                 {% endif %}
                                                 {% if setting_template %}
@@ -144,7 +145,7 @@
                                                 <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                       data-bs-toggle="tooltip"
                                                       data-bs-placement="top"
-                                                      data-bs-original-title="{{ setting_data['help'] }}">
+                                                      data-bs-original-title="{{ setting_text(setting, 'help', setting_data['help']) }}">
                                                     <span class="bx bx-question-mark bx-xs"></span>
                                                 </span>
                                             </div>

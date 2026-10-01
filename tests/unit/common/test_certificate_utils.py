@@ -49,6 +49,19 @@ def test_parse_and_key_match():
         parse_certificate(certificate, other_key)
 
 
+def test_parse_certificate_wraps_malformed_pem_errors():
+    """M28 (sweep): `cryptography` raised its own ValueError text (library internals and a
+    docs URL) straight through parse_certificate to every caller, UI upload included."""
+    with pytest.raises(ValueError, match="not a valid PEM certificate") as excinfo:
+        parse_certificate(b"not a pem file")
+    assert "cryptography.io" not in str(excinfo.value)
+
+    certificate, _ = generate_self_signed("example.com", [])
+    with pytest.raises(ValueError, match="not a valid PEM private key") as excinfo:
+        parse_certificate(certificate, b"not a private key")
+    assert "cryptography.io" not in str(excinfo.value)
+
+
 def test_status_boundaries():
     now = datetime.now(timezone.utc)
     assert certificate_status(now - timedelta(days=1), now + timedelta(days=31), now=now) == "valid"
