@@ -43,6 +43,24 @@ class TestBaseCreateGet:
     def test_get_missing_returns_none(self, db):
         assert db.get_ui_user(username="ghost") is None
 
+    def test_admin_role_holder_is_not_reported_as_the_owner(self, db):
+        # `admin` is the owner flag, which the UI maps to the "super_admin" Biscuit role and its
+        # admin-only gates (plugin install, templates). Holding the RBAC role named "admin" (the
+        # POST /users default) must not grant that.
+        assert db.create_ui_user("carol", b"h", ["admin"]) == ""
+        u = db.get_ui_user(username="carol", as_dict=True)
+        assert u["admin"] is False
+        assert u["roles"] == ["admin"]
+
+    def test_the_owner_is_reported_as_admin(self, db):
+        assert db.create_ui_user("erin", b"h", ["admin"], admin=True) == ""
+        assert db.get_ui_user(username="erin", as_dict=True)["admin"] is True
+
+    def test_non_admin_role_holder_reports_as_non_admin(self, db):
+        assert db.create_ui_user("dave", b"h", ["reader"]) == ""
+        u = db.get_ui_user(username="dave", as_dict=True)
+        assert u["admin"] is False
+
 
 class TestBaseListAndCleanup:
     def test_get_ui_users_as_dict(self, db):

@@ -65,6 +65,10 @@ def _save_with_one_new_config(monkeypatch, *, returns=None, raises=None):
         api.bulk_save_configs.return_value = returns
 
     bw_config = Mock()
+
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.check_variables.side_effect = lambda variables, *args, **kwargs: variables
     bw_config.edit_service.return_value = ("Configuration saved", None)
 

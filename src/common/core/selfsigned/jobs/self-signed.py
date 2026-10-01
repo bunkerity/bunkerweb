@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from datetime import datetime, timedelta
+from ipaddress import ip_address
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -8,7 +9,7 @@ from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from tempfile import TemporaryDirectory
 from traceback import format_exc
-from typing import Tuple
+from typing import List, Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -26,6 +27,44 @@ JOB = Job(LOGGER, __file__)
 status = 0
 
 multisite = getenv("MULTISITE", "no") == "yes"
+
+# plugin.json's SELF_SIGNED_SSL_SUBJ default.
+DEFAULT_SUBJ = "/CN=www.example.com/"
+
+
+def certificate_identity(subj: str, server_names: List[str]) -> Tuple[str, List[str]]:
+    """The subject and the subjectAltName entries a service's certificate is issued for.
+
+    The default subject names `www.example.com` whatever the service is called, so every
+    certificate left at it matched none of the service's own names, and carried no SAN at all
+    (QA-UI-6 Q6-M4). Left at the default, the subject becomes the service's first server name --
+    the first one that fits the 64-character CN limit; a subject the operator set stays as set.
+    The SANs list every server name either way: browsers ignore the CN. A comma cannot be written
+    into `-addext subjectAltName=`, so a name holding one is left out.
+    """
+    names = [name for name in dict.fromkeys(server_names) if name and "," not in name]
+    sans = []
+    for name in names:
+        try:
+            sans.append(f"IP:{ip_address(name)}")
+        except ValueError:
+            sans.append(f"DNS:{name}")
+    if subj == DEFAULT_SUBJ:
+        common_name = next((name for name in names if len(name) <= 64), None)
+        if common_name:
+            subj = f"/CN={common_name}/"
+    return subj, sans
+
+
+def certificate_sans(certificate: x509.Certificate) -> List[str]:
+    """The certificate's subjectAltName entries, written the way `certificate_identity` writes them."""
+    try:
+        extension = certificate.extensions.get_extension_for_class(x509.SubjectAlternativeName).value
+    except x509.ExtensionNotFound:
+        return []
+    return [f"DNS:{name}" for name in extension.get_values_for_type(x509.DNSName)] + [
+        f"IP:{address}" for address in extension.get_values_for_type(x509.IPAddress)
+    ]
 
 
 def normalize_algorithm_name(algorithm: str) -> str:
@@ -81,7 +120,8 @@ def key_matches_certificate(key_path: Path, certificate: x509.Certificate) -> bo
         return False
 
 
-def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path) -> Tuple[bool, int]:
+def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path, server_names: List[str]) -> Tuple[bool, int]:
+    subj, sans = certificate_identity(subj, server_names or [first_server])
     server_path = self_signed_path.joinpath(first_server)
     cert_path = server_path.joinpath("cert.pem")
     key_path = server_path.joinpath("key.pem")
@@ -135,6 +175,8 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 )
             elif sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
                 LOGGER.warning(f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
+            elif sorted(certificate_sans(certificate)) != sorted(sans):
+                LOGGER.warning(f"Alternative names of self-signed certificate for {first_server} differ from its server names, regenerating ...")
             elif not_valid_after - not_valid_before != timedelta(days=int(days)):
                 LOGGER.warning(
                     f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
@@ -186,6 +228,8 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 subj,
             ]
         )
+        if sans:
+            openssl_cmd.extend(["-addext", f"subjectAltName={','.join(sans)}"])
 
         if (
             run(
@@ -221,6 +265,8 @@ try:
 
     if isinstance(servers, str):
         servers = servers.split()
+    # Single-site: one certificate, for every name the server answers.
+    all_servers = list(servers)
 
     if not servers:
         LOGGER.info("No server found, skipping self-signed certificate generation ...")
@@ -247,6 +293,7 @@ try:
                 getenv(f"{first_server}_SELF_SIGNED_SSL_EXPIRY", "365") if multisite else getenv("SELF_SIGNED_SSL_EXPIRY", "365"),
                 getenv(f"{first_server}_SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/") if multisite else getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"),
                 self_signed_path,
+                getenv(f"{first_server}_SERVER_NAME", first_server).split() if multisite else all_servers,
             )
             if not ret:
                 skipped_servers.append(first_server)

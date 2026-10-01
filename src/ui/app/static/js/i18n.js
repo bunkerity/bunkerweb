@@ -204,9 +204,14 @@ function updateLanguageSelector(lang) {
   if (!$flagSelector.length) {
     return;
   }
+  // `url_for('static', ...)` appends `?v=<content fingerprint>` (static_assets.py) to every
+  // flag src, so a bare `$` anchor never matched and this silently no-op'ed (QA-UI-5 item 7).
+  // The old fingerprint is for the OLD flag file anyway, so it is dropped rather than kept:
+  // `_static_cache_control` answers a query-less request `no-cache` and revalidates instead of
+  // wrongly serving the immutable-cache header for an unverified pairing.
   const flagSrc = $flagSelector
     .attr("src")
-    .replace(/\/[a-z]{2}\.svg$/, `/${flagCode}.svg`);
+    .replace(/\/[a-z]{2}\.svg(?:\?.*)?$/, `/${flagCode}.svg`);
   $flagSelector.attr("src", flagSrc);
   $("#current-lang-text").text(
     langNames[alpha2] || langNames["en"] || "English",
@@ -274,8 +279,19 @@ function updateDocumentationLinks(lang) {
   const langPrefix = supportedDocLangs.includes(alpha2) ? `/${alpha2}` : "";
 
   // Get BunkerWeb version from a global variable or data attribute
+  const rawVersion = window.bw_version || $("body").data("bw-version") || "";
+  // A pre-release build has no docs published at its own version -- alpha/rc docs are hidden
+  // by design and a beta/dev build has usually not been through the release pipeline yet.
+  // Fall back to "latest" instead of a 404, same rule as templates/macros/docs_link.html's
+  // docs_version (M26): this function rewrites the same .docs-link hrefs client-side, on every
+  // language switch, and used to ship the raw version straight through unmapped.
   const bwVersion =
-    window.bw_version || $("body").data("bw-version") || "latest";
+    !rawVersion ||
+    rawVersion === "dev" ||
+    rawVersion === "testing" ||
+    rawVersion.includes("~")
+      ? "latest"
+      : rawVersion;
 
   // Update all documentation links
   $(".docs-link").each(function () {

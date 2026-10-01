@@ -308,6 +308,10 @@ $(document).ready(function () {
     $(this).blur();
   });
 
+  $("#config-name").on("input", function () {
+    $(this).removeClass("is-invalid").removeAttr("aria-invalid");
+  });
+
   $(".save-config").on("click", function () {
     if (isReadOnly) {
       alert(
@@ -317,23 +321,14 @@ $(document).ready(function () {
     }
     const value = editor.getValue().trim();
     $("#config-is-draft").val(isDraft ? "yes" : "no");
-    const noChanges =
-      value === initialContent &&
-      selectedService === originalService &&
-      selectedType === originalType &&
-      $("#config-name").val().trim() === originalName &&
-      isDraft === originalDraft;
 
-    if (noChanges) {
-      alert(t("alert.no_changes_detected", "No changes detected."));
-      return;
-    }
-
+    // The name is checked FIRST: an empty new config used to answer "No changes detected." instead
+    // of saying the name is required, and a bad name only got a tooltip that vanished after 2 s
+    // with the field never marked (QA-UI M9). The mark stays until the name is edited.
     const $configInput = $("#config-name");
     const configName = $configInput.val().trim();
     const pattern = $configInput.attr("pattern");
     let errorMessage = "";
-    let isValid = true;
     // Same shape as template-settings-page.js: the generic validation messages take the field
     // name, so the label has to be translated before it is interpolated into them.
     const fieldLabel = t("form.label.configuration_name", "Configuration Name");
@@ -342,27 +337,37 @@ $(document).ready(function () {
       errorMessage = t("validation.required", "{{field}} is required.", {
         field: fieldLabel,
       });
-      isValid = false;
-    } else if (pattern && !new RegExp(pattern).test(configName))
-      isValid = false;
+    } else if (pattern && !new RegExp(`^(?:${pattern})$`).test(configName)) {
+      errorMessage = t(
+        "validation.pattern",
+        "Please enter a valid value for {{field}}.",
+        { field: fieldLabel },
+      );
+    }
 
-    if (!isValid) {
+    if (errorMessage) {
+      let $feedback = $configInput.siblings(".invalid-feedback");
+      if (!$feedback.length)
+        $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+          $configInput,
+        );
+      $feedback.text(errorMessage);
       $configInput
-        .attr(
-          "data-bs-original-title",
-          errorMessage ||
-            t(
-              "validation.pattern",
-              "Please enter a valid value for {{field}}.",
-              { field: fieldLabel },
-            ),
-        )
-        .tooltip("show");
+        .addClass("is-invalid")
+        .attr("aria-invalid", "true")
+        .trigger("focus");
+      return;
+    }
 
-      // Hide tooltip after 2 seconds
-      setTimeout(() => {
-        $configInput.tooltip("hide").attr("data-bs-original-title", "");
-      }, 2000);
+    const noChanges =
+      value === initialContent &&
+      selectedService === originalService &&
+      selectedType === originalType &&
+      configName === originalName &&
+      isDraft === originalDraft;
+
+    if (noChanges) {
+      alert(t("alert.no_changes_detected", "No changes detected."));
       return;
     }
 

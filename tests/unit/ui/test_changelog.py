@@ -92,6 +92,17 @@ def test_tags_dates_and_wrapped_markup_survive_the_round_trip():
     assert releases[1].entries[0].tag == ""
 
 
+def test_display_date_hides_an_unset_placeholder():
+    """M32: the recap must not print `2026/07/??` to a user -- the date is set on tag day
+    (decision 5), so a release still carrying its `??` placeholder has no date to show yet.
+    `date` itself is untouched: it is what the file says."""
+    releases = parse(SAMPLE)
+
+    assert releases[0].date == "2026/07/??"
+    assert releases[0].display_date == ""
+    assert releases[1].date == releases[1].display_date == "2026/02/26"
+
+
 def test_a_debian_style_prerelease_sorts_below_its_release():
     releases = parse(SAMPLE)
     by_version = {release.version: release.sortable for release in releases}

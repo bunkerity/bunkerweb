@@ -2,18 +2,17 @@
 
 from concurrent.futures import ThreadPoolExecutor
 from os import getenv, sep
-from flask import flash
 from json import loads as json_loads
 from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
-from typing import List, Literal, Optional, Set, Tuple, Union
+from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 
 from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, split_templates, trim_scalar_value  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.utils import get_blacklisted_settings, is_editable_method
+from app.utils import flash, get_blacklisted_settings, is_editable_method
 
 
 class Config:
@@ -32,6 +31,7 @@ class Config:
         changed_service: Optional[str] = None,
         override_method: str = "ui",
         file_name_map: Optional[dict[str, str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
     ) -> Union[str, Set[str]]:
         """Generates the nginx configuration file from the given configuration
 
@@ -74,7 +74,7 @@ class Config:
         conf["DATABASE_URI"] = getenv("DATABASE_URI", "")
 
         try:
-            resp = self.__api_client.save_config(conf, override_method, changed=check_changes)
+            resp = self.__api_client.save_config(conf, override_method, changed=check_changes, draft_settings=draft_settings)
         except (ApiClientError, ApiUnavailableError) as e:
             return str(e)
         return set(resp.get("changed_plugins", []))
@@ -108,6 +108,7 @@ class Config:
         with_drafts: bool = False,
         filtered_settings: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
         full: bool = False,
+        with_setting_drafts: bool = False,
     ) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
@@ -122,7 +123,12 @@ class Config:
             The nginx variables env file as a dict
         """
         return self.__api_client.get_global_settings(
-            full=full, methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings, global_only=global_only
+            full=full,
+            methods=methods,
+            with_drafts=with_drafts,
+            filtered_settings=filtered_settings,
+            global_only=global_only,
+            with_setting_drafts=with_setting_drafts,
         )
 
     def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
@@ -207,7 +213,7 @@ class Config:
             if threaded:
                 self.__data["TO_FLASH"].append({"content": message, "type": "error"})
             else:
-                flash(message, "error")
+                flash(message, "error", save=False)
 
         def reject_value(key: str) -> None:
             """Reject an invalid *value* without deleting the setting.
@@ -306,9 +312,11 @@ class Config:
             value = trim_scalar_value(stype, value)
             if stype == "check":
                 value = normalize_check_value(value)
-            elif stype in ("size", "duration"):
+            elif stype in ("size", "duration") and value:
                 # The parser is authoritative for size/duration (the regex cannot encode
                 # NGINX's unit-order rule), so an unparseable value is rejected here.
+                # An empty value skips it: the setting's own regex below says whether "" is allowed
+                # (an unset size/duration, e.g. GRPC_NEXT_UPSTREAM_TIMEOUT, is the default).
                 canonical = normalize_unit(stype, value)
                 if canonical is None:
                     if not self.__ignore_regex_check:
@@ -404,6 +412,7 @@ class Config:
         override_method: str = "ui",
         check_changes: bool = True,
         file_name_map: Optional[dict[str, str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
     ) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
@@ -435,6 +444,7 @@ class Config:
             check_changes=False if not check_changes else not is_draft,
             override_method=override_method,
             file_name_map=file_name_map,
+            draft_settings=draft_settings,
         )
         if isinstance(ret, str):
             return ret, 1
@@ -449,6 +459,7 @@ class Config:
         is_draft: bool = False,
         override_method: str = "ui",
         file_name_map: Optional[dict[str, str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
     ) -> Tuple[str, int]:
         """Edits a service
 
@@ -492,13 +503,20 @@ class Config:
             changed_service=server_name_splitted[0],
             override_method=override_method,
             file_name_map=file_name_map,
+            draft_settings=draft_settings,
         )
         if isinstance(ret, str):
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
     def edit_global_conf(
-        self, variables: dict, *, check_changes: bool = True, override_method: str = "ui", file_name_map: Optional[dict[str, str]] = None
+        self,
+        variables: dict,
+        *,
+        check_changes: bool = True,
+        override_method: str = "ui",
+        file_name_map: Optional[dict[str, str]] = None,
+        draft_settings: Optional[Dict[str, Optional[bool]]] = None,
     ) -> Tuple[str, int]:
         """Edits the global conf
 
@@ -518,6 +536,7 @@ class Config:
             check_changes=check_changes,
             override_method=override_method,
             file_name_map=file_name_map,
+            draft_settings=draft_settings,
         )
         if isinstance(ret, str):
             return ret, 1

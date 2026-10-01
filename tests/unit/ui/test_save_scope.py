@@ -592,6 +592,8 @@ def _run_update_service(*, posted, db_config=None, scope=None, mode="compose", e
     api.get_configs.return_value = []
     api.get_templates.return_value = {}
     bw_config = Mock()
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.check_variables.side_effect = lambda variables, *args, **kwargs: variables
     if edit_service is None:
         bw_config.edit_service.return_value = ("Configuration saved", None)
@@ -838,6 +840,8 @@ def _post_service_page(app, monkeypatch, *, service="app.example.com", query="",
     api.get_service.return_value = _SERVICE_STORED
     api.get_metadata.return_value = {"is_pro": False}
     bw_config = Mock()
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.get_config.return_value = {"SERVER_NAME": "app.example.com"}
     bw_config.get_plugins.return_value = REAL_PLUGINS
     executor = Mock()

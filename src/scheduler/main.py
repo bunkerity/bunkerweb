@@ -148,6 +148,12 @@ LOADING_SLOW_RETRY_EVERY = 20
 # than the 300s re-arm it is meant to improve on.
 PENDING_REDISPATCH_PASSES = 0
 PENDING_REDISPATCH_SLOW_RETRY_EVERY = 20
+# What the change flags and watermarks looked like when a `failover` -> `up` recovery last re-pushed.
+# push-configs marks the fleet `failover` when a reload is refused and the previous configuration cannot
+# be restored, and the healthcheck flips it back to `up` on its next pass: without this, an unchanged
+# broken configuration was re-pushed (and refused again) on every pass. Held in memory on purpose -- a
+# scheduler restart earns one more attempt, which is what a restart should do.
+FAILED_PUSH_FINGERPRINT = None
 
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
@@ -214,6 +220,11 @@ def changes_from_metadata(db_metadata: dict) -> dict:
         "certificates_changed": db_metadata.get("certificates_changed", False),
         "last_certificates_change": db_metadata.get("last_certificates_change"),
     }
+
+
+def push_fingerprint(changes: dict) -> str:
+    """A comparable digest of the change flags and their watermarks (see FAILED_PUSH_FINGERPRINT)."""
+    return repr(sorted(changes.items()))
 
 
 # The change flags a job clears when it acknowledges an apply. Kept in one place: the healthcheck
@@ -618,8 +629,43 @@ def generate_caches():
                     resource_path.chmod(desired_perms)
 
 
+def apply_rearm_due(changes: dict, last_dispatch, now) -> bool:
+    """Whether the APPLY_RETRY_INTERVAL re-arm should forget the baseline and dispatch again.
+
+    Never for the configuration a failover already rejected (FAILED_PUSH_FINGERPRINT): that one stays
+    pending with every instance up, and re-arming it would re-push it every interval.
+    """
+    return (
+        has_pending_changes(changes)
+        and last_dispatch is not None
+        and (now - last_dispatch).total_seconds() >= APPLY_RETRY_INTERVAL
+        and push_fingerprint(changes) != FAILED_PUSH_FINGERPRINT
+    )
+
+
+def failover_retry_is_pointless() -> bool:
+    """Whether the configuration is the very one whose push already ended in a failover.
+
+    Records the fingerprint when it is not, so the first recovery is still retried once. Any error
+    reading the metadata means "retry": the old behaviour.
+    """
+    global FAILED_PUSH_FINGERPRINT
+    try:
+        metadata = API_CLIENT.get_metadata()
+        if isinstance(metadata, str):
+            return False
+        fingerprint = push_fingerprint(changes_from_metadata(metadata))
+    except BaseException as e:
+        HEALTHCHECK_LOGGER.error(f"Exception while fingerprinting the pending configuration: {e}")
+        return False
+    if fingerprint == FAILED_PUSH_FINGERPRINT:
+        return True
+    FAILED_PUSH_FINGERPRINT = fingerprint
+    return False
+
+
 def healthcheck_job():
-    global PENDING_REDISPATCH_PASSES
+    global PENDING_REDISPATCH_PASSES, FAILED_PUSH_FINGERPRINT
 
     if HEALTHCHECK_EVENT.is_set():
         HEALTHCHECK_LOGGER.warning("Healthcheck job is already running, skipping execution ...")
@@ -662,7 +708,11 @@ def healthcheck_job():
                 HEALTHCHECK_LOGGER.error(f"Couldn't update instance {hostname} status to up: {ret}")
                 continue
 
-            if previous_status in ("down", "failover"):
+            if previous_status == "failover" and failover_retry_is_pointless():
+                HEALTHCHECK_LOGGER.info(
+                    f"Instance {hostname} answers again after a failover, but the configuration is unchanged since the last push; not retrying"
+                )
+            elif previous_status in ("down", "failover"):
                 HEALTHCHECK_LOGGER.info(f"Instance {hostname} recovered from {previous_status} → up; will trigger push-configs to re-sync it")
                 recovered = True
 
@@ -747,7 +797,13 @@ def healthcheck_job():
         if not recovered and fleet_reachable and not still_loading and SCHEDULER is not None and not API_CLIENT.readonly:
             try:
                 metadata = API_CLIENT.get_metadata()
-                if not isinstance(metadata, str) and has_pending_changes(changes_from_metadata(metadata)):
+                changes = None if isinstance(metadata, str) else changes_from_metadata(metadata)
+                if changes is not None and not has_pending_changes(changes):
+                    PENDING_REDISPATCH_PASSES = 0
+                    FAILED_PUSH_FINGERPRINT = None  # applied: the next failure gets its one retry again
+                elif changes is not None and push_fingerprint(changes) != FAILED_PUSH_FINGERPRINT:
+                    # A fingerprint equal to the failover-recovery one is the rejected configuration the instance now
+                    # stays `up` with: re-pushing it here (every 20th pass included) would loop as the failover did.
                     PENDING_REDISPATCH_PASSES += 1
                     if PENDING_REDISPATCH_PASSES == 1:
                         HEALTHCHECK_LOGGER.warning("Changes are still pending while every instance is up; re-dispatching push-configs ...")
@@ -760,8 +816,6 @@ def healthcheck_job():
                             "once now, but this needs an operator."
                         )
                         recovered = True
-                else:
-                    PENDING_REDISPATCH_PASSES = 0
             except BaseException as e:
                 HEALTHCHECK_LOGGER.error(f"Exception while checking for pending changes: {e}")
 
@@ -1181,11 +1235,8 @@ if __name__ == "__main__":
                 if not SCHEDULER.run_single("push-configs"):
                     LOGGER.error("Failed to dispatch push-configs job")
 
-            try:
-                API_CLIENT.set_metadata({"failover": not success, "failover_message": ""})
-            except BaseException as e:
-                LOGGER.error(f"Error while setting failover metadata: {e}")
-
+            # `success` is the ping result, not a reload result: an unreachable instance is not an
+            # NGINX configuration error (M18). push-configs owns the failover metadata (`_record_failover`).
             if success:
                 LOGGER.info("All BunkerWeb instances are up")
             else:
@@ -1410,8 +1461,7 @@ if __name__ == "__main__":
                     # forever. Forgetting what we last saw makes the next poll treat the pending
                     # flags as new and dispatch again.
                     # ponytail: fixed interval, no backoff -- add one only if flapping shows up.
-                    still_pending = has_pending_changes(changes)
-                    if still_pending and last_dispatch is not None and (datetime.now().astimezone() - last_dispatch).total_seconds() >= APPLY_RETRY_INTERVAL:
+                    if apply_rearm_due(changes, last_dispatch, datetime.now().astimezone()):
                         LOGGER.warning(
                             f"Configuration changes are still pending {APPLY_RETRY_INTERVAL}s after the last dispatch; "
                             "the job that should have applied them never completed. Dispatching again ..."

@@ -5,5 +5,14 @@
     {%- else -%}
         {%- set lang_prefix = "" -%}
     {%- endif -%}
-    https://docs.bunkerweb.io/{{ bw_version }}{{ lang_prefix }}{{ endpoint }}/?utm_campaign={{ utm_campaign }}&utm_source={{ utm_source }}{{ fragment }}
+    {#- A pre-release build has no docs published at its own version: alpha/rc docs are hidden
+       by design and a beta/dev build has usually not been through the release pipeline yet.
+       Fall back to "latest" instead of a 404 -- also the safe default when `bw_version` itself
+       failed to resolve (every current caller imports this macro without `with context`). #}
+    {%- if not bw_version or bw_version in ('dev', 'testing') or '~' in bw_version -%}
+        {%- set docs_version = 'latest' -%}
+    {%- else -%}
+        {%- set docs_version = bw_version -%}
+    {%- endif -%}
+    https://docs.bunkerweb.io/{{ docs_version }}{{ lang_prefix }}{{ endpoint }}/?utm_campaign={{ utm_campaign }}&utm_source={{ utm_source }}{{ fragment }}
 {%- endmacro %}

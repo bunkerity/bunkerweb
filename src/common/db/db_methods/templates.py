@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from contextlib import suppress
 from datetime import datetime
+from re import compile as re_compile
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from model import (
@@ -24,6 +25,31 @@ from sqlalchemy import case, delete, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from .common import DatabaseMixinBase, canonicalize_setting_value
+
+# What a NEW template id may be. An id is a layer of USE_TEMPLATE, a multivalue split on a literal
+# " " (common_utils.split_templates), so `bad id!` was stored and could never be applied: it read
+# as the two layers `bad` and `id!` (QA-UI H14). It is also a UI path segment (/templates/<id>).
+# Checked on creation only -- ids stored before the rule existed keep working everywhere else.
+# The API router and the UI template editor (static/js/pages/template_edit.js) mirror it.
+TEMPLATE_ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,255}$"
+TEMPLATE_ID_RX = re_compile(TEMPLATE_ID_PATTERN)
+TEMPLATE_ID_RULE = "Template ids may only contain letters, digits, dots, hyphens and underscores, and must start with a letter or a digit"
+
+
+def template_owner(template: Templates) -> Optional[str]:
+    """Who manages a template other than the web UI and the API, or None when they do.
+
+    A plugin-owned template is re-seeded from the plugin's files: at every scheduler boot for a
+    core plugin (``init_tables``), at every plugin sync for an external one. An edit or a delete
+    was therefore accepted and then silently undone -- and an edited external template even kept
+    its new name and ``method="ui"`` while its content reverted (measured, CAT-C2). A template
+    another method wrote (``scheduler``, ``autoconf``) belongs to that source the same way.
+    """
+    if template.plugin_id:
+        return f"plugin {template.plugin_id}"
+    if template.method != "ui":
+        return template.method
+    return None
 
 
 class DatabaseTemplatesMixin(DatabaseMixinBase):
@@ -543,6 +569,8 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             template_id = template_id.strip()
             if not template_id:
                 return "Template id is required"
+            if not TEMPLATE_ID_RX.fullmatch(template_id):
+                return TEMPLATE_ID_RULE
 
             normalized_name = name.strip()
             if not normalized_name:
@@ -605,8 +633,15 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
         settings: Optional[Dict[str, Any]] = None,
         steps: Optional[List[Dict[str, Any]]] = None,
         configs: Optional[List[Dict[str, Any]]] = None,
+        method: str = "ui",
     ) -> str:
-        """Update an existing template."""
+        """Update an existing template.
+
+        ``method`` is who is asking, as in ``create_template``. Only the web UI and the API (``ui``)
+        may change a ``ui`` template, and a template another method wrote only that method: the
+        URL-install job (``scheduler``) updates the templates it installed. A plugin-owned template
+        is refused to everyone.
+        """
 
         current_details = self.get_template_details(template_id)
         if not current_details:
@@ -644,6 +679,9 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             if template is None:
                 return "Template not found"
 
+            if (owner := template_owner(template) or "ui") != method:
+                return f"Template {template_id} is managed by {owner} and cannot be changed"
+
             if plugin_id is not None:
                 normalized_plugin = None
                 if isinstance(plugin_id, str):
@@ -667,7 +705,6 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
 
                 template.name = normalized_name
 
-            template.method = "ui"
             template.last_update = datetime.now().astimezone()
 
             error, step_entities, setting_entities, config_entities = self._prepare_template_entities(
@@ -726,6 +763,11 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             template = session.scalars(select(Templates).filter_by(id=template_id).limit(1)).first()
             if template is None:
                 return "Template not found"
+
+            # Plugin-owned only: the plugin re-seeds it, so the delete would not stick. A template
+            # another method wrote is left to that method -- the URL-install job removes its own.
+            if template.plugin_id:
+                return f"Template {template_id} is managed by plugin {template.plugin_id} and cannot be deleted"
 
             # Membership, not equality: USE_TEMPLATE holds an ORDERED LIST, so a service on
             # "low high" does not match the literal "low" and the guard would wave the delete

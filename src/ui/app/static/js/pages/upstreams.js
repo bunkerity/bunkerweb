@@ -242,4 +242,101 @@ document.addEventListener("DOMContentLoaded", () => {
       if (searchInput) searchInput.value = "";
       applyFilters();
     });
+
+  // A create or edit the server refused comes back with ?retry=create|edit: reopen the modal
+  // with what was typed instead of making the operator start over. The input stays in this
+  // tab's sessionStorage, never in the URL.
+  function wireRetry(
+    form,
+    modalId,
+    draftKey,
+    retryValue,
+    serversId,
+    onRestore,
+  ) {
+    form?.addEventListener("submit", () => {
+      try {
+        sessionStorage.setItem(
+          draftKey,
+          JSON.stringify(
+            Array.from(new FormData(form)).filter(
+              ([name]) => name !== "csrf_token",
+            ),
+          ),
+        );
+      } catch (error) {
+        // Storage refused (private mode, quota): the submit still goes through.
+      }
+    });
+    let draft = null;
+    try {
+      draft = JSON.parse(sessionStorage.getItem(draftKey) || "null");
+      sessionStorage.removeItem(draftKey);
+    } catch (error) {
+      draft = null;
+    }
+    if (form && draft && url.searchParams.get("retry") === retryValue) {
+      // One editor row per submitted server; the server_* lists are parallel, row by row.
+      const hosts = draft.filter(([name]) => name === "server_host");
+      setServers(
+        document.getElementById(serversId),
+        hosts.map(() => ({})),
+      );
+      const seen = {};
+      Array.from(form.elements).forEach((field) => {
+        if (!field.name || field.name === "csrf_token") return;
+        const values = draft
+          .filter(([name]) => name === field.name)
+          .map(([, value]) => value);
+        const index = seen[field.name] || 0;
+        seen[field.name] = index + 1;
+        if (field.type === "checkbox")
+          field.checked = values.includes(field.value);
+        else if (field.multiple)
+          Array.from(field.options).forEach((option) => {
+            option.selected = values.includes(option.value);
+          });
+        else if (index < values.length) field.value = values[index];
+      });
+      onRestore?.();
+      showModal(modalId);
+    }
+  }
+
+  const url = new URL(window.location.href);
+  wireRetry(
+    document.querySelector("#upstream-create-modal form"),
+    "upstream-create-modal",
+    "bw-upstream-create-draft",
+    "create",
+    "upstream-create-servers",
+    syncCreate,
+  );
+  const editForm = document.querySelector("#upstream-edit-modal form");
+  wireRetry(
+    editForm,
+    "upstream-edit-modal",
+    "bw-upstream-edit-draft",
+    "edit",
+    "upstream-edit-servers",
+    () => {
+      const pool = upstreams.get(editForm.elements["upstream_id"]?.value);
+      const shared = document.getElementById("upstream-edit-shared");
+      const services = (pool?.services || []).map(
+        (attachment) => `${attachment.service_id} (${attachment.match_path})`,
+      );
+      shared.classList.toggle("d-none", services.length === 0);
+      if (services.length) {
+        shared.textContent = translate(
+          "upstreams.edit_shared",
+          `This upstream is attached to ${services.length} service(s): ${services.join(", ")}. Saving changes all of them.`,
+          { count: services.length, services: services.join(", ") },
+        );
+      }
+    },
+  );
+  if (url.searchParams.has("retry")) {
+    url.searchParams.delete("retry");
+    window.history.replaceState(null, "", url);
+  }
 });

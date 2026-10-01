@@ -4,7 +4,6 @@
         {% with breadcrumbs = request.path.split("/") %}
             {% set breadcrumbs_ns = namespace(working_url="") %}
             {% for breadcrumb in breadcrumbs %}
-                {% set check_i18n = breadcrumb not in extra_pages %}
                 {% set breadcrumb_prefix = "" %}
                 {# Ask whether the segment names a route, rather than building a URL and reading the
                    placeholder back: a path segment is not an endpoint name, and the branch below
@@ -27,29 +26,20 @@
                         {% if breadcrumb == "new" %}
                             {% set breadcrumb_url = url_for("configs", action="new") %}
                         {% else %}
-                            {% set check_i18n = false %}
                             {% set breadcrumb_prefix = "?service=" + breadcrumb %}
                         {% endif %}
                     {% elif loop.index == 4 %}
-                        {% set check_i18n = false %}
                         {% set breadcrumb_prefix = "?type=" + breadcrumb %}
-                    {% elif loop.index > 4 %}
-                        {% set check_i18n = false %}
                     {% endif %}
                 {% endif %}
                 {% if current_endpoint != "cache" and "cache" in request.path %}
                     {% set breadcrumb_url = url_for("cache") %}
                     {% if loop.index == 3 %}
-                        {% set check_i18n = false %}
                         {% set breadcrumb_prefix = "?service=" + breadcrumb %}
                     {% elif loop.index == 4 %}
-                        {% set check_i18n = false %}
                         {% set breadcrumb_prefix = "?plugin=" + breadcrumb %}
                     {% elif loop.index == 5 %}
-                        {% set check_i18n = false %}
                         {% set breadcrumb_prefix = "?job_name=" + breadcrumb %}
-                    {% elif loop.index > 5 %}
-                        {% set check_i18n = false %}
                     {% endif %}
                 {% endif %}
                 {# `request.path.split("/")` opens with an empty segment ("/profile" -> ["", "profile"]).
@@ -57,13 +47,23 @@
                    and every page showed a first crumb reading "breadcrumb." — which `common.js` then read
                    into the document title. The loop still visits it, because the `loop.index` tests below
                    for /configs and /cache are written against positions that count it. #}
+                {# A dynamic id (service, template, workflow name...) has no catalog entry, so a
+                   naive `_("breadcrumb." ~ segment)` just echoes that dotted key back onto the
+                   page -- and into the tab title, which reads this same text (`common.js`). Try
+                   the translation and detect the echo, rather than keeping a hand-maintained
+                   exclusion list (the old `extra_pages`-only `check_i18n`): that missed known
+                   segments with a real catalog entry (`breadcrumb.crowdsec` exists and was never
+                   reached) and could never cover every future dynamic id. #}
+                {% set breadcrumb_i18n_key = "breadcrumb." ~ breadcrumb | lower | replace('-', '_') %}
+                {% set breadcrumb_translated = _(breadcrumb_i18n_key) %}
+                {% set breadcrumb_label = breadcrumb if breadcrumb_translated == breadcrumb_i18n_key else breadcrumb_translated %}
                 {% if breadcrumb %}
                     <li class="breadcrumb-item{% if breadcrumb == current_endpoint %} active{% endif %}"
                         {% if breadcrumb == current_endpoint %}aria-current="page"{% endif %}>
-                        <a {% if breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"
-                           {% elif loop.index == 2 and check_i18n %}
+                        <a {% if breadcrumb_url %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"
+                           {% elif loop.index == 2 and breadcrumb != current_endpoint %}
                            href="#"
-                           {% endif %}>{{ _("breadcrumb." ~ breadcrumb | lower | replace('-', '_')) if check_i18n else breadcrumb }}</a>
+                           {% endif %}>{{ breadcrumb_label }}</a>
                     </li>
                 {% endif %}
             {% endfor %}

@@ -5,12 +5,20 @@ from pathlib import Path
 from re import compile as re_compile, escape
 from zipfile import ZipFile
 from flask import Blueprint, render_template, request, send_file
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from app.dependencies import API_CLIENT, BW_CONFIG
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.i18n import translated
+from app.models.biscuit import render_error_page
+from app.models.secret_settings import REDACTED, redact_secrets, secret_setting_names
 
 support = Blueprint("support", __name__)
+
+
+def _may_download() -> bool:
+    """The bundles hold every setting and every log line: same `write` gate as the pages that edit them."""
+    return "write" in current_user.list_permissions
 
 
 @support.route("/support")
@@ -25,6 +33,9 @@ def support_page():
 @support.route("/support/logs")
 @login_required
 def support_logs():
+    if not _may_download():
+        return render_error_page(403, translated("flash.do_not_have_write_permission") or "You do not have the write permission")
+
     logs_path = Path(sep, "var", "log", "bunkerweb")
 
     # If no files are in the directory, return an error message
@@ -66,6 +77,11 @@ def support_logs():
 @support.route("/support/config")
 @login_required
 def support_config():
+    if not _may_download():
+        return render_error_page(403, translated("flash.do_not_have_write_permission") or "You do not have the write permission")
+
+    # Meant to be attached to a support request: no secret value leaves, whoever downloads it.
+    secrets = secret_setting_names(BW_CONFIG.get_plugins_settings())
     service = request.args.get("service")
 
     if service:
@@ -73,12 +89,12 @@ def support_config():
             return "Service not found", 404
 
         try:
-            service_config = API_CLIENT.get_service(service, full=True, methods=True)
+            service_config = redact_secrets(API_CLIENT.get_service(service, full=True, methods=True), secrets, REDACTED)
         except (ApiClientError, ApiUnavailableError):
             return "Could not retrieve service config", 500
         return send_file(
             BytesIO(dumps(service_config, indent=2).encode()), mimetype="application/json", as_attachment=True, download_name=f"{service}_config.json"
         )
 
-    db_config = BW_CONFIG.get_config(methods=True, with_drafts=True)
+    db_config = redact_secrets(BW_CONFIG.get_config(methods=True, with_drafts=True), secrets, REDACTED)
     return send_file(BytesIO(dumps(db_config, indent=2).encode()), mimetype="application/json", as_attachment=True, download_name="bunkerweb_config.json")

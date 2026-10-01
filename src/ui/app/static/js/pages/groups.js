@@ -269,6 +269,33 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
+  // A refused save comes back with what was posted (js/components/form-retry.js refills the plain
+  // fields and reopens the modal); the entry rows are built here, so this rebuilds them from the
+  // posted JSON and puts the editor back in the create/edit state it was posted from (QA-UI M28).
+  document
+    .getElementById("resource-group-form")
+    ?.addEventListener("bw:form-retry", (event) => {
+      const fields = event.detail?.fields || {};
+      const group = fields.group_id ? groups.get(fields.group_id) : null;
+      let entries = [];
+      try {
+        entries = JSON.parse(fields.entries || "[]");
+      } catch (_error) {
+        entries = [];
+      }
+      aliasInput.readOnly = Boolean(group);
+      entryRows.replaceChildren();
+      (Array.isArray(entries) ? entries : []).forEach(addEntry);
+      syncEntryEmpty();
+      const title = document.getElementById("resource-group-editor-title");
+      if (title)
+        title.textContent = group
+          ? translate("resource_groups.editor_edit", `Edit @${group.name}`, {
+              name: group.name,
+            })
+          : translate("resource_groups.editor_new", "New resource group");
+    });
+
   function showImportError(message = "") {
     importError.textContent = message;
     importError.hidden = !message;

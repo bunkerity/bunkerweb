@@ -1,8 +1,8 @@
-{% from 'macros/docs_link.html' import docs_url %}
+{% from 'macros/docs_link.html' import docs_url with context %}
 {% extends "base.html" %}
 {% block head %}
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('css/pages/login.css')) }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block page %}
@@ -58,7 +58,7 @@
                 <div class="alert alert-warning" role="alert">{{ _(notice) }}</div>
             {% endif %}
             <form method="POST" id="login-form" class="login-fields">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}" />
                 <input type="hidden"
                        name="next"
                        value="{{ request.values.get('next', '') }}" />

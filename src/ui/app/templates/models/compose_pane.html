@@ -140,17 +140,37 @@
                            value=""
                            placeholder="www.example.com"
                            autocomplete="off"
+                           aria-describedby="compose-server-name-feedback"
+                           data-regex="{{ server_name_regex | default('') }}"
                            required>
+                    <div class="invalid-feedback" id="compose-server-name-feedback">{{ _("validation.server_name_invalid") }}</div>
                     <input type="hidden" name="OLD_SERVER_NAME" value="">
                 </div>
+                {# A clone keeps its source's USE_TEMPLATE EXACTLY (QA H13). The picker's own list
+                   leaves `ui` out and offers single layers only, so a source on `ui` or on an
+                   ordered multi-layer list ("low api") gets that exact value as an extra,
+                   preselected option -- the select is first-value-wins over the shelf's fallback,
+                   so whatever it holds is what the clone saves. A source with no template keeps
+                   "no template" rather than falling back to `low`. #}
+                {% set picker_templates = (templates | default({})) | reject("equalto", "ui") | list %}
+                {% set picked_template = (config.get("USE_TEMPLATE", {}).get("value", "") | default("", true)) if clone else (current_template | default("low")) %}
+                {# Same id -> display-name mapping as templates.html's gallery card title: a core
+                   id gets its i18n key, anything else is de-slugged and title-cased. Plain
+                   `capitalize` (the previous logic) only uppercases the first character and
+                   leaves underscores/dashes in place, so the picker showed raw ids ("low",
+                   "custom_thing") instead of translated names ("Low security", "Custom thing"). #}
+                {% set core_template_names = {"low": "Low security", "medium": "Medium security", "high": "High security", "api": "API", "ui": "Web UI"} %}
                 <div class="col-12 col-md-6">
                     <label for="compose-template"
                            class="form-label"
                           >{{ _("navigation.templates") }}</label>
                     <select class="form-select" id="compose-template" name="USE_TEMPLATE">
                         <option value="">{{ _("badge.no_template") }}</option>
-                        {% for template in (templates | default({})) if template != "ui" %}
-                            <option value="{{ template }}" {% if template == (current_template | default("low")) %}selected{% endif %}>{{ template | capitalize }}</option>
+                        {% if picked_template and picked_template not in picker_templates %}
+                            <option value="{{ picked_template }}" selected>{% for layer in picked_template.split(" ") %}{{ _("templates.name." ~ layer) if layer in core_template_names else layer|replace('-', ' ')|replace('_', ' ')|title }}{% if not loop.last %} → {% endif %}{% endfor %}</option>
+                        {% endif %}
+                        {% for template in picker_templates %}
+                            <option value="{{ template }}" {% if template == picked_template %}selected{% endif %}>{{ _("templates.name." ~ template) if template in core_template_names else template|replace('-', ' ')|replace('_', ' ')|title }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -163,4 +183,41 @@
     {# LAST: its trailing control-key fallbacks must lose first-value-wins to everything above. #}
     {% include "models/compose_shelf.html" %}
 </form>
+{% if not global_page and not service_id %}
+    {# /services/new: an invalid name is refused HERE, with the field marked and every other
+       input kept. Refused by the save instead, it cost the whole form (QA H6). Capture phase
+       plus stopImmediatePropagation, so compose-shelf.js's own submit listener -- which clears
+       the unsaved-edit guard -- never runs for a submit that does not happen. #}
+    <script nonce="{{ script_nonce }}">
+        (() => {
+            const form = document.getElementById("compose-form");
+            const input = document.getElementById("compose-server-name");
+            if (!form || !input || !input.dataset.regex) return;
+            let rule;
+            try {
+                // ponytail: JS `\b` is ASCII-only, Python's is Unicode -- a name that starts or
+                // ends with a non-ASCII letter is refused here but accepted by the save. Punycode
+                // is what NGINX matches anyway; a `\p{L}` rewrite if IDN names ever matter.
+                rule = new RegExp(input.dataset.regex);
+            } catch (_error) {
+                return;
+            }
+            const check = () => {
+                const valid = !input.value.trim() || rule.test(input.value.trim());
+                input.classList.toggle("is-invalid", !valid);
+                input.setAttribute("aria-invalid", String(!valid));
+                return valid;
+            };
+            input.addEventListener("input", () => {
+                if (input.classList.contains("is-invalid")) check();
+            });
+            form.addEventListener("submit", (event) => {
+                if (check()) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                input.focus();
+            }, true);
+        })();
+    </script>
+{% endif %}
 {% endif %}

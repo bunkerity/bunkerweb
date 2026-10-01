@@ -285,6 +285,8 @@ def _run_plugin_save(monkeypatch, *, db_config, posted, scope):
     api.get_configs.return_value = []
     api.get_templates.return_value = {}
     bw_config = Mock()
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+    bw_config.get_plugins_settings.return_value = {}
     # The real check_variables validates and returns the payload; identity keeps this test about
     # the restore layer rather than about validation.
     bw_config.check_variables.side_effect = lambda variables, *args, **kwargs: variables
@@ -339,6 +341,8 @@ def _post_plugin_page(module, app, monkeypatch, *, db_config=None, form=None, pl
     api.get_service.return_value = _STORED if db_config is None else db_config
     api.get_metadata.return_value = {"is_pro": False}
     bw_config = Mock()
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.get_plugins.return_value = {"antibot": ANTIBOT}
     executor = Mock()
     monkeypatch.setattr(module, "API_CLIENT", api)
@@ -448,6 +452,8 @@ def render_plugin_page():
         return f"/{endpoint}"
 
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         csrf_token=lambda: "test-csrf-token",
         url_for=_url_for,
         get_blacklisted_settings=get_blacklisted_settings,
@@ -677,4 +683,4 @@ def test_a_resource_group_setting_emits_no_narrow_pattern():
 
 def test_a_plain_multivalue_setting_keeps_its_pattern():
     html = _render_multivalue("DNS_RESOLVERS", r"^( *([0-9.]+) *)*$", None)
-    assert 'pattern="^( *([0-9.]+) *)*$"' in html
+    assert 'pattern="^( *([0-9\\.]+) *)*$"' in html, "the v-safe spelling of the regex (app/html_pattern.py)"

@@ -49,7 +49,7 @@
                                     </div>
                                 </div>
                                 <div class="layout-main-info mt-3 mb-1 text-center">
-                                    <h3 class="mb-0 don-jose text-danger">{{ message|default("Unauthorized Access") }}</h3>
+                                    {% if message %}<h3 class="mb-0 don-jose text-danger">{{ message }}</h3>{% endif %}
                                     {% if detail %}
                                         <p class="mb-3 mt-2 text-{% if theme == 'light' %}dark{% else %}light{% endif %}-emphasis">{{ detail }}</p>
                                     {% else %}

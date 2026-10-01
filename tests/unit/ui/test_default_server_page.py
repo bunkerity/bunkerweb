@@ -72,6 +72,8 @@ class TestTheRow:
 def _render_shelf(plugins, allowed_plugins=None):
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)  # nosec B701 - HTML, autoescaped
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         url_for=lambda endpoint, **kwargs: "/" + endpoint,
         get_filtered_settings=get_filtered_settings,
         is_plugin_active=lambda *args, **kwargs: False,
@@ -170,6 +172,8 @@ def _get_service_page(app, monkeypatch, service):
     ):
         getattr(api, getter).return_value = {rows_key: []}
     bw_config = Mock()
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.get_plugins.return_value = {}
     bw_config.get_config.return_value = {"SERVER_NAME": f"{DEFAULT_SERVER_ID} app.example.com"}
     monkeypatch.setattr(_services, "API_CLIENT", api)
@@ -210,6 +214,8 @@ class TestThePluginPageDirectURL:
         api.get_metadata.return_value = {"is_pro": False}
         api.get_services.return_value = [{"id": DEFAULT_SERVER_ID, "method": "wizard", "is_draft": False}]
         bw_config = Mock()
+        # No secret settings: routes/services.py masks and restores `type: password` values.
+        bw_config.get_plugins_settings.return_value = {}
         bw_config.get_plugins.return_value = {plugin: {"id": plugin, "name": plugin, "type": "core", "stream": "no", "settings": {}}}
         monkeypatch.setattr(_services, "API_CLIENT", api)
         monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
@@ -256,6 +262,8 @@ class TestTheOtherTwoWritePaths:
         monkeypatch.setattr(_services, "DATA", _FakeData(TO_FLASH=flashed))
         monkeypatch.setattr(_services, "wait_applying", lambda: None)
         bw_config = Mock()
+        # No secret settings: routes/services.py masks and restores `type: password` values.
+        bw_config.get_plugins_settings.return_value = {}
         bw_config.get_config.return_value = {"SERVER_NAME": f"{DEFAULT_SERVER_ID} app.example.com"}
         monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
         executor = Mock()
@@ -291,6 +299,8 @@ class TestTheOtherTwoWritePaths:
         api.get_services.return_value = [{"id": DEFAULT_SERVER_ID, "method": "wizard", "is_draft": False}]
         api.get_metadata.return_value = {"is_pro": False}
         bw_config = Mock()
+        # No secret settings: routes/services.py masks and restores `type: password` values.
+        bw_config.get_plugins_settings.return_value = {}
         bw_config.get_plugins.return_value = {}
         bw_config.get_config.return_value = {
             "MULTISITE": "yes",
@@ -330,6 +340,8 @@ class TestTheOtherTwoWritePaths:
         api.get_services.return_value = [{"id": DEFAULT_SERVER_ID, "method": method, "is_draft": False}]
         api.get_metadata.return_value = {"is_pro": False}
         bw_config = Mock()
+        # No secret settings: routes/services.py masks and restores `type: password` values.
+        bw_config.get_plugins_settings.return_value = {}
         bw_config.get_plugins.return_value = {}
         bw_config.get_config.return_value = {
             "MULTISITE": "yes",
@@ -381,6 +393,8 @@ class TestTheOtherTwoWritePaths:
         api.get_services.return_value = [{"id": DEFAULT_SERVER_ID, "method": "wizard", "is_draft": False}]
         api.get_metadata.return_value = {"is_pro": False}
         bw_config = Mock()
+        # No secret settings: routes/services.py masks and restores `type: password` values.
+        bw_config.get_plugins_settings.return_value = {}
         bw_config.get_plugins.return_value = {}
         bw_config.get_config.return_value = {
             "MULTISITE": "yes",
@@ -410,6 +424,8 @@ def _render_raw(plugins, allowed_plugins=None):
     """`models/plugins_settings_raw.html`, the pane the shelf allowlist never reached."""
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)  # nosec B701 - HTML, autoescaped
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         url_for=lambda endpoint, **kwargs: "/" + endpoint,
         get_filtered_settings=get_filtered_settings,
         is_editable_method=lambda method, allow_default=False: True,
@@ -471,6 +487,8 @@ def _post_service_page(app, monkeypatch, service, data, *, services_rows=None):
     api.get_services.return_value = services_rows or [{"id": DEFAULT_SERVER_ID, "method": "wizard", "is_draft": False}]
     api.get_metadata.return_value = {"is_pro": False}
     bw_config = Mock()
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.get_config.return_value = {"SERVER_NAME": f"{DEFAULT_SERVER_ID} app.example.com"}
     monkeypatch.setattr(_services, "API_CLIENT", api)
     monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
@@ -554,6 +572,8 @@ class TestTheServicesListInSingleSite:
         api.get_services.return_value = [{"id": "app.example.com", "method": "ui", "is_draft": False}]
         api.get_configs.return_value = []
         bw_config = Mock()
+        # No secret settings: routes/services.py masks and restores `type: password` values.
+        bw_config.get_plugins_settings.return_value = {}
         monkeypatch.setattr(_services, "API_CLIENT", api)
         monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
         captured = {}
@@ -571,6 +591,8 @@ class TestTheServicesListInSingleSite:
         api.get_services.return_value = []
         api.get_configs.return_value = []
         bw_config = Mock()
+        # No secret settings: routes/services.py masks and restores `type: password` values.
+        bw_config.get_plugins_settings.return_value = {}
         bw_config.get_config.side_effect = RuntimeError("boom")
         monkeypatch.setattr(_services, "API_CLIENT", api)
         monkeypatch.setattr(_services, "BW_CONFIG", bw_config)

@@ -350,6 +350,8 @@ def _run_template_save(monkeypatch, *, db_config, posted, scope, mode="template"
     api.get_configs.return_value = configs or []
     api.get_templates.return_value = {}
     bw_config = Mock()
+    # No secret settings: routes/services.py masks and restores `type: password` values.
+    bw_config.get_plugins_settings.return_value = {}
     # The real check_variables validates and returns the payload; identity keeps this test about
     # the restore/re-injection layer rather than about validation.
     bw_config.check_variables.side_effect = lambda variables, *args, **kwargs: variables
@@ -728,6 +730,8 @@ def test_get_hands_the_page_the_context_it_cannot_derive_itself(route_app, monke
     api.get_configs.return_value = [{"service": "app.example.com", "type": "modsec", "name": "anomaly_score", "data": "# stored"}]
     monkeypatch.setattr(module, "API_CLIENT", api)
     monkeypatch.setattr(module, "DATA", _FakeData(TO_FLASH=[]))
+    # No secret settings: routes/services.py masks `type: password` values on render.
+    monkeypatch.setattr(module, "BW_CONFIG", Mock(get_plugins_settings=Mock(return_value={})))
     monkeypatch.setattr("app.utils.current_user", SimpleNamespace(list_permissions=["read", "write"]))
     captured = {}
     monkeypatch.setattr(module, "render_template", lambda name, **context: captured.update(context, _name=name) or "")
@@ -744,7 +748,8 @@ def test_get_hands_the_page_the_context_it_cannot_derive_itself(route_app, monke
     assert captured["template_method"] == "ui"
     assert captured["clone"] is None
     assert captured["configs"]["app.example.com_modsec_anomaly_score"]["data"] == b"# stored"
-    assert captured["config"] is api.get_service.return_value
+    # Equal, not identical: the render hands a copy with any secret masked (models/secret_settings.py).
+    assert captured["config"] == api.get_service.return_value
 
 
 # ======================================================================================
@@ -773,6 +778,8 @@ def render_template_page():
         return f"/{endpoint}"
 
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         csrf_token=lambda: "test-csrf-token",
         url_for=_url_for,
         get_blacklisted_settings=get_blacklisted_settings,

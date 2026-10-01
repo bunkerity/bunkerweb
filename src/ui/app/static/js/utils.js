@@ -651,11 +651,7 @@ $(document).ready(() => {
         sessionStorage.setItem("notificationsRead", 0);
         updateNotificationsBadge();
         $("#clear-notifications-btn").closest(".d-flex").hide();
-        $(
-          "#data-notifications-container p[data-i18n='status.no_notifications']",
-        )
-          .removeClass("d-none")
-          .show();
+        $("#notifications-empty-state").removeClass("d-none").show();
       })
       .catch((error) => {
         console.error(

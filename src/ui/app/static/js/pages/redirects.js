@@ -35,6 +35,21 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.instance.show(trigger);
   }
 
+  function updateSharedBanner(rule) {
+    // The rule is shared: editing it changes every service it is attached to, so say how
+    // many and which ones before the operator saves.
+    const shared = document.getElementById("redirect-edit-shared");
+    const services = rule?.services || [];
+    shared.classList.toggle("d-none", services.length === 0);
+    if (services.length) {
+      shared.textContent = translate(
+        "redirects.edit_shared",
+        `This redirect is attached to ${services.length} service(s): ${services.join(", ")}. Saving changes all of them.`,
+        { count: services.length, services: services.join(", ") },
+      );
+    }
+  }
+
   function fillEditForm(rule) {
     document.getElementById("redirect-edit-id").value = rule.id;
     document.getElementById("redirect-edit-name").value = rule.name || "";
@@ -48,19 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("redirect-edit-append-uri").checked = Boolean(
       rule.append_request_uri,
     );
-
-    // The rule is shared: editing it changes every service it is attached to, so say how
-    // many and which ones before the operator saves.
-    const shared = document.getElementById("redirect-edit-shared");
-    const services = rule.services || [];
-    shared.classList.toggle("d-none", services.length === 0);
-    if (services.length) {
-      shared.textContent = translate(
-        "redirects.edit_shared",
-        `This redirect is attached to ${services.length} service(s): ${services.join(", ")}. Saving changes all of them.`,
-        { count: services.length, services: services.join(", ") },
-      );
-    }
+    updateSharedBanner(rule);
   }
 
   rows.forEach((row) => {
@@ -128,4 +131,71 @@ document.addEventListener("DOMContentLoaded", () => {
       if (searchInput) searchInput.value = "";
       applyFilters();
     });
+
+  // A create or edit the server refused comes back with ?retry=create|edit: reopen the modal
+  // with what was typed instead of making the operator start over. The input stays in this
+  // tab's sessionStorage, never in the URL.
+  function wireRetry(form, modalId, draftKey, retryValue, onRestore) {
+    form?.addEventListener("submit", () => {
+      try {
+        sessionStorage.setItem(
+          draftKey,
+          JSON.stringify(
+            Array.from(new FormData(form)).filter(
+              ([name]) => name !== "csrf_token",
+            ),
+          ),
+        );
+      } catch (error) {
+        // Storage refused (private mode, quota): the submit still goes through.
+      }
+    });
+    let draft = null;
+    try {
+      draft = JSON.parse(sessionStorage.getItem(draftKey) || "null");
+      sessionStorage.removeItem(draftKey);
+    } catch (error) {
+      draft = null;
+    }
+    if (form && draft && url.searchParams.get("retry") === retryValue) {
+      Array.from(form.elements).forEach((field) => {
+        if (!field.name || field.name === "csrf_token") return;
+        const values = draft
+          .filter(([name]) => name === field.name)
+          .map(([, value]) => value);
+        if (field.type === "checkbox")
+          field.checked = values.includes(field.value);
+        else if (field.multiple)
+          Array.from(field.options).forEach((option) => {
+            option.selected = values.includes(option.value);
+          });
+        else if (values.length) field.value = values[0];
+      });
+      onRestore?.();
+      showModal(modalId);
+    }
+  }
+
+  const url = new URL(window.location.href);
+  wireRetry(
+    document.querySelector("#redirect-create-modal form"),
+    "redirect-create-modal",
+    "bw-redirect-create-draft",
+    "create",
+  );
+  const editForm = document.querySelector("#redirect-edit-modal form");
+  wireRetry(
+    editForm,
+    "redirect-edit-modal",
+    "bw-redirect-edit-draft",
+    "edit",
+    () =>
+      updateSharedBanner(
+        redirects.get(editForm.elements["redirect_id"]?.value),
+      ),
+  );
+  if (url.searchParams.has("retry")) {
+    url.searchParams.delete("retry");
+    window.history.replaceState(null, "", url);
+  }
 });

@@ -776,3 +776,36 @@ def test_a_same_source_reimport_still_refreshes_in_place(db, monkeypatch):
     assert second_id == first_id
     assert db.get_certificate_details(second_id)["source"] == "selfsigned"
     assert db.get_certificates()["total"] == 1
+
+
+def test_a_managed_certificate_becomes_deletable_once_every_recorded_service_is_gone(db, monkeypatch):
+    """N-M3: a self-signed certificate issued for a service outlived the service's own deletion
+    and could never be removed. `service_ids`, written by the provider's own import and protected
+    from `update_certificate`'s renewal_metadata merge, records what the certificate was actually
+    issued for independently of the live ResourceAttachments rows `delete_service_rows` clears when
+    the service goes -- comparing that recorded set against currently-live services is what tells
+    a genuine orphan apart from a certificate merely detached from a service that still exists.
+    """
+    seed_minimal(db)
+    add_service(db, "qa5-clone.example.com")
+    (error, resource_id), _ = _import(db, monkeypatch, source="selfsigned", name="qa5-clone.example.com", service_ids=["qa5-clone.example.com"])
+    assert error == ""
+    assert "Managed certificates cannot be deleted" in db.delete_certificate(resource_id)
+
+    assert db.delete_services(["qa5-clone.example.com"]) == ""
+
+    assert db.delete_certificate(resource_id) == ""
+    assert db.get_certificates()["total"] == 0
+
+
+def test_a_managed_certificate_stays_protected_while_any_recorded_service_survives(db, monkeypatch):
+    """A legacy certificate covering several services must not be nuked just because one of them
+    was deleted -- only once every service it was recorded for is gone."""
+    seed_minimal(db)
+    add_service(db, "second.example.com")
+    (error, resource_id), _ = _import(db, monkeypatch, source="letsencrypt", name="multi.example.com", service_ids=["app1.example.com", "second.example.com"])
+    assert error == ""
+
+    assert db.delete_services(["second.example.com"]) == ""
+
+    assert "Managed certificates cannot be deleted" in db.delete_certificate(resource_id)

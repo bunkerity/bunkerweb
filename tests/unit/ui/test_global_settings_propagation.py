@@ -128,11 +128,11 @@ def test_rejected_global_edit_is_not_propagated_to_services():
     # the regex, restored to the stored value by check_variables.
     payload, flashed = _run_update({"SSL_PROTOCOLS": ""}, override=True)
 
-    assert payload is not None, "the save still runs -- the restored key keeps variables_to_check non-empty"
-    assert payload["SSL_PROTOCOLS"] == "TLSv1.2 TLSv1.3", "the rejected edit must revert, not delete the global row"
+    # The refused edit was the only change, so nothing is saved at all (QA-UI M15) -- which
+    # propagates nothing to either service by construction. The mixed case is below.
+    assert payload is None, "a save whose only change was refused must not be sent"
     assert "Variable SSL_PROTOCOLS is not valid." in flashed, "the user must still be told the edit was rejected"
-    assert "svc1_SSL_PROTOCOLS" not in payload, "a rejected edit must not overwrite a service's own override"
-    assert "svc2_SSL_PROTOCOLS" not in payload, "a rejected edit must not write anything down to services"
+    assert "The global settings were not saved: every changed value was refused." in flashed
 
 
 def test_valid_global_change_still_propagates_with_the_override_flag():
@@ -314,6 +314,8 @@ def test_the_global_restore_skip_does_not_pick_up_the_service_control_keys():
     }
     bw_config = Mock()
     bw_config.get_config.return_value = config
+    # No secret settings here; a bare Mock would reach `restore_secrets` as the settings map.
+    bw_config.get_plugins_settings.return_value = {}
     bw_config.check_variables.side_effect = lambda variables, *args, **kwargs: variables
     bw_config.edit_global_conf.return_value = ("saved", None)
     with patch.object(_MODULE, "BW_CONFIG", bw_config), patch.object(_MODULE, "DATA", _FakeData(TO_FLASH=[])), patch.object(

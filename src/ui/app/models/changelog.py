@@ -57,6 +57,17 @@ class Release:
         except InvalidVersion:
             return None
 
+    @property
+    def display_date(self) -> str:
+        """`date`, or "" when it is not fully known yet.
+
+        The date is set on tag day (decision 5), so a release still carrying its `??` day
+        placeholder -- written for a version that has not been tagged -- must not show one to an
+        operator. `date` itself stays untouched: it is what the file says, and inventing or
+        hiding it there would make the parser lie about the source.
+        """
+        return "" if "?" in self.date else self.date
+
 
 def render_inline(text: str) -> Markup:
     """The three markups the changelog actually uses, and nothing else.

@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 from ipaddress import ip_address
 from pathlib import Path
+from secrets import token_urlsafe
 from traceback import format_exc
 from typing import Optional
 
-from flask import Flask, current_app, render_template, request, session
+from flask import Flask, current_app, g, render_template, request, session
 from biscuit_auth import (
     Biscuit,
     BiscuitBuilder,
@@ -30,28 +31,50 @@ OPERATIONS = {
     "POST": "write",
 }
 
-# Some UI endpoints use POST for datatable/query payloads but are read-only operations.
+# Some UI endpoints use POST for datatable/query payloads but are read-only operations: every POST
+# a page makes to READ (serverSide tables, dashboard series, the workflow editor's dry runs). A
+# reader refused one of these sees an empty table or chart (QA-UI-6 Q6-H3). Nothing here may store
+# anything; `test_reader_read_only_posts.py` pins the list against the routes.
 READ_ONLY_POST_ENDPOINTS = frozenset(
     {
         "bans.bans_fetch",
+        "bans.bans_stats",
+        "bans.bans_timeseries",
+        "home.home_dashboard",
+        "reports.reports_dashboard",
         "reports.reports_fetch",
         "reports.reports_filters",
         "reports.report_data_fetch",
+        "services.services_fetch",
+        "workflows.workflows_test",
+        "workflows.workflows_validate",
     }
 )
 READ_ONLY_POST_RULES = frozenset(
     {
         "/bans/fetch",
+        "/bans/stats",
+        "/bans/timeseries",
+        "/home/dashboard",
+        "/reports/dashboard",
         "/reports/fetch",
         "/reports/filters",
         "/reports/data",
+        "/services/fetch",
+        "/workflows/<string:workflow_id>/test",
+        "/workflows/<string:workflow_id>/validate",
     }
 )
 READ_ONLY_POST_PATH_SUFFIXES = (
     "/bans/fetch",
+    "/bans/stats",
+    "/bans/timeseries",
+    "/home/dashboard",
+    "/reports/dashboard",
     "/reports/fetch",
     "/reports/filters",
     "/reports/data",
+    "/services/fetch",
 )
 
 # biscuit-rust authorizes under a wall-clock budget defaulting to 1 ms, and reports blowing it as
@@ -76,20 +99,27 @@ def _raise_time_budget(authorizer: AuthorizerBuilder) -> None:
     authorizer.set_limits(limits)
 
 
+def render_error_page(error_code: int, message: Optional[str] = None):
+    """The one way to render an error page (`unauthorized.html`): 403, 404, 500, any other.
+
+    An error page can be rendered before main's before_request has minted the CSP nonce -- the
+    Biscuit check runs first -- or without it at all, so it is minted here when missing. The
+    after_request hook puts `g.script_nonce` in the Content-Security-Policy header, so page and
+    header always carry the same one; with an empty nonce the CSP blocked every script (B5).
+    """
+    if "script_nonce" not in g:
+        g.script_nonce = token_urlsafe(32)
+    return (
+        render_template("unauthorized.html", message=message, next=url_for("home.home_page"), error_code=error_code, script_nonce=g.script_nonce),
+        error_code,
+    )
+
+
 def _internal_error_response():
     # A failure to reach a verdict is not a verdict. Returning the logout redirect (or a 403) would
     # destroy or disown a session that is still perfectly valid, so surface it as the server-side
     # error it is and leave the session intact for the retry.
-    return (
-        render_template(
-            "unauthorized.html",
-            message="An unexpected error occurred during authorization.",
-            next=url_for("home.home_page"),
-            error_code=500,
-            auto_redirect=False,
-        ),
-        500,
-    )
+    return render_error_page(500, "An unexpected error occurred during authorization.")
 
 
 def _normalize_path(path: str) -> str:
@@ -105,7 +135,9 @@ def resolve_operation(method: str, path: str, endpoint: Optional[str] = None, ru
         return "read"
     if method == "POST" and normalized_rule in READ_ONLY_POST_RULES:
         return "read"
-    if method == "POST" and any(normalized_path.rstrip("/").endswith(suffix) for suffix in READ_ONLY_POST_PATH_SUFFIXES):
+    # A routed request is decided by its endpoint and rule alone: a suffix match there would read
+    # the write route `POST /configs/<service>/<type>/<name>` as `read` for `/configs/x/bans/fetch`.
+    if method == "POST" and not normalized_rule and any(normalized_path.rstrip("/").endswith(suffix) for suffix in READ_ONLY_POST_PATH_SUFFIXES):
         return "read"
     return OPERATIONS.get(method, "read")
 
@@ -228,6 +260,11 @@ class BiscuitMiddleware:
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/profile")'))
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_theme"'))
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_language"'))
+            # The second factor is proven with POSTs (the code form, the security-key ceremony), and
+            # every one of them acts on `current_user` only. Without this a reader with TOTP enabled
+            # could never finish logging in (N-B1).
+            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/totp"'))
+            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/totp/")'))
             authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_columns_preferences"'))
             # A reader has no `write` permission but owns its onboarding state. The route
             # stamps `current_user` and never reads a username from the body, so this
@@ -248,15 +285,8 @@ class BiscuitMiddleware:
             current_app.logger.warning(
                 f"Biscuit authorization error on {request.method} {request.path} endpoint={request.endpoint} rule={route_rule} (operation={operation}): {e}"
             )
-            return (
-                render_template(
-                    "unauthorized.html",
-                    message="You are not authorized to access this resource." if operation == "read" else "You are not authorized to perform this action.",
-                    next=url_for("home.home_page"),
-                    error_code=403,
-                    auto_redirect=False,
-                ),
-                403,
+            return render_error_page(
+                403, "You are not authorized to access this resource." if operation == "read" else "You are not authorized to perform this action."
             )
         except Exception as e:
             current_app.logger.error(f"Unexpected error during Biscuit authorization: {e}")

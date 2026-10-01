@@ -180,6 +180,28 @@ def _wait_for_api(logger, max_retries=30, delay=2):
     raise RuntimeError(f"Could not connect to API after {max_retries} attempts")
 
 
+def _wait_for_first_config(api_client, logger, max_retries=30, delay=2) -> bool:
+    """Wait until the scheduler has saved its first configuration. Returns False on timeout.
+
+    Each worker picks its session backend from USE_REDIS when it boots. On a first start the UI
+    used to boot before the scheduler had stored that setting, read the default `no` and pinned
+    itself to file sessions; the next worker boot then read `yes` and switched to Redis (H18).
+    `first_config_saved` is latched in the transaction that stores the global settings, so once it
+    is set USE_REDIS is readable. Bounded: a scheduler that never gets there must not keep the UI
+    down, and a later switch to Redis still finds the file sessions (chain_session_fallback).
+    """
+    for attempt in range(max_retries):
+        try:
+            if api_client._get("/metadata").get("metadata", {}).get("first_config_saved"):
+                return True
+        except (ApiClientError, ApiUnavailableError) as e:
+            logger.debug(f"Could not check metadata: {e}")
+        if attempt < max_retries - 1:
+            logger.info(f"Waiting for the scheduler to save its first configuration... (attempt {attempt + 1}/{max_retries})")
+            sleep(delay)
+    return False
+
+
 def on_starting(server):
     TMP_DIR.mkdir(parents=True, exist_ok=True)
     TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
@@ -690,7 +712,14 @@ def on_starting(server):
         dumps(
             {
                 "LATEST_VERSION": latest_version,
-                "LATEST_VERSION_LAST_CHECK": datetime.now().astimezone().isoformat(),
+                # No "LATEST_VERSION_LAST_CHECK" here: this boot only ever fetches
+                # LATEST_VERSION, never GITHUB_STARS or PLUGIN_CATALOG (that is
+                # `update_github_metadata`'s job, gated on this key in main.py's
+                # `before_request`). Stamping it "now" made that gate think a full refresh
+                # had just run and suppressed it for a full hour, leaving the catalogue and
+                # star count empty on every fresh boot (N-M4). Leaving the key absent falls
+                # through to `before_request`'s own epoch default, so the first real request
+                # triggers the full refresh right away.
                 "TO_FLASH": [],
                 "READONLY_MODE": readonly_mode,
             }
@@ -698,6 +727,9 @@ def on_starting(server):
         encoding="utf-8",
     )
     set_secure_permissions(UI_DATA_FILE)
+
+    if not _wait_for_first_config(api_client, LOGGER):
+        LOGGER.warning("The scheduler has not saved its first configuration yet, starting anyway: the workers may pick a different session backend later")
 
     # Check if Redis is enabled via environment variable or API global settings
     use_redis = getenv("USE_REDIS", "no").lower() == "yes"

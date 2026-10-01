@@ -46,6 +46,9 @@
 {% set _flash_size_class = ' toast-container-' ~ flash_size if flash_size in ('sm', 'lg') else '' %}
 <div id="feedback-toast-container"
      class="toast-container position-fixed end-0 me-3 {{ _flash_position_classes }}{{ _flash_size_class }}">
+    {# `message|safe` below is safe because app/utils.flash() already HTML-escaped every message
+       that was not built as `Markup` (the session backend drops the Markup type, so it cannot be
+       decided here). Never queue a message with Flask's own `flash`: it skips that escaping. #}
     <!-- prettier-ignore -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if user_readonly and current_endpoint != "profile" %}
@@ -63,7 +66,7 @@
                          aria-live="polite"
                          aria-atomic="true"
                          data-bs-autohide="false">
-                        <div class="toast-header d-flex align-items-center text-warning">
+                        <div class="toast-header d-flex align-items-center text-warning-emphasis">
                             <img class="me-1"
                                  src="{{ pro_diamond_url }}"
                                  alt=""
@@ -86,7 +89,7 @@
                          aria-live="polite"
                          aria-atomic="true"
                          {% if category == 'message' %}data-bs-delay="5000"{% else %}data-bs-autohide="false"{% endif %}>
-                        <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
+                        <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger-emphasis{% elif category == 'warning' %} text-warning-emphasis{% else %} text-primary{% endif %}">
                             <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
                             {# `category` is Flask's flash category: error / warning / message.
                                A `success` flash reaches this template as `message`, because

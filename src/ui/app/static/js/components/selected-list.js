@@ -33,19 +33,22 @@ window.BWSelectedList = window.BWSelectedList || {};
       : node.querySelector("[data-selected-host]");
   }
 
+  // One whole sentence per entity and number (datatable.selected_list.<entity>.*): the noun is part of
+  // the translation, never interpolated from English. An entity with no key falls back to English.
   function countText(count, entity) {
+    const displayEntity =
+      count === 1 && entity.endsWith("s") ? entity.slice(0, -1) : entity;
     return translate(
-      "datatable.selected_list_count",
-      `${count} ${entity} selected`,
-      { count, entity },
+      `datatable.selected_list.${entity}.count_${count === 1 ? "one" : "other"}`,
+      `${count} ${displayEntity} selected`,
+      { count },
     );
   }
 
   function emptyText(entity) {
     return translate(
-      "datatable.selected_list_empty",
+      `datatable.selected_list.${entity}.empty`,
       `No ${entity} selected.`,
-      { entity },
     );
   }
 

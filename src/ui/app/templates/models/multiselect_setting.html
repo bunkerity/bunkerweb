@@ -189,7 +189,7 @@
                        size="sm",
                        static_backdrop=false) %}
             <div class="modal-body" data-multiselect-target="#{{ control_id }}_ms">
-                <p class="text-muted small mb-3">{{ setting_data.get('label', setting) }}</p>
+                <p class="text-muted small mb-3">{{ setting_text(setting, 'label', setting_data.get('label', setting)) }}</p>
                 <div class="d-flex flex-wrap gap-2" data-multiselect-selected-list>
                     {% for option in setting_data.multiselect if option.id in selected_values %}
                         <span class="badge rounded-pill bg-label-secondary d-inline-flex align-items-center gap-1 multiselect-chip"
@@ -203,7 +203,7 @@
                     {% endfor %}
                 </div>
                 <p class="text-muted mb-0 multiselect-selected-empty{% if selected_values %} d-none{% endif %}"
-                   >{{ _("datatable.selected_list_empty", entity="items") }}</p>
+                   >{{ _("datatable.selected_list.items.empty") }}</p>
             </div>
         {% endcall %}
     {% endif %}

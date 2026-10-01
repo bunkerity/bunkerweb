@@ -1,13 +1,34 @@
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+
+from db_methods.templates import TEMPLATE_ID_RULE, TEMPLATE_ID_RX  # type: ignore
+from template_package import PACKAGE_FORMAT, parse_package  # type: ignore
 
 from ..auth.guard import guard
 from ..utils import get_db
 
 router = APIRouter(prefix="/templates", tags=["templates"])
+
+
+def _error_status(message: str) -> int:
+    """The status a refusal from the templates DB methods answers with.
+
+    Every message those methods return is a refusal of the REQUEST (read-only database, unknown
+    or duplicate id, empty name, no step, invalid setting value, ...) except the one a failed
+    commit produces. Listing the refusals instead -- the old hint list -- answered 500 for every
+    message nobody had listed yet ("A template must contain at least one step", QA-UI H14).
+    """
+    if message.startswith("An error occurred while"):
+        return 500
+    if message == "Template not found":
+        return 404
+    # The ownership guard (`template_owner`): the request is fine, the target is not the UI's.
+    if " is managed by " in message:
+        return 409
+    return 400
 
 
 # ── Schemas ─────────────────────────────────────────────────────────
@@ -68,9 +89,75 @@ def get_template(template_id: str) -> JSONResponse:
     return JSONResponse(status_code=200, content={"status": "success", "template": details})
 
 
+@router.get("/{template_id}/export", dependencies=[Depends(guard)])
+def export_template(template_id: str) -> JSONResponse:
+    """A template as a ``bunkerweb-template/1`` package, the body ``POST /templates/import`` takes.
+
+    Any template exports, plugin-owned ones included: copying a core template is how it gets
+    edited. Ownership (``plugin_id``, ``method``) is not part of the package -- an import is
+    always the UI's.
+    """
+    details = get_db().get_template_details(template_id)
+    if not details:
+        return JSONResponse(status_code=404, content={"status": "error", "message": "Template not found"})
+
+    package = {
+        "format": PACKAGE_FORMAT,
+        "id": details["id"],
+        "name": details["name"],
+        "settings": {setting["key"]: setting["default"] for setting in details["settings"]},
+        "steps": [
+            {"title": step["title"], "subtitle": step["subtitle"], "settings": step["settings"], "configs": step["configs"]} for step in details["steps"]
+        ],
+        "configs": [{"type": config["type"], "name": config["name"], "data": config["data"]} for config in details["configs"]],
+    }
+    # Ids stored before the id rule existed may hold anything; never put one in a header.
+    filename = template_id if TEMPLATE_ID_RX.fullmatch(template_id) else "template"
+    return JSONResponse(status_code=200, content=package, headers={"Content-Disposition": f'attachment; filename="{filename}.bwtemplate.json"'})
+
+
+@router.post("/import", dependencies=[Depends(guard)])
+def import_template(package: Any = Body(...), replace: bool = False) -> JSONResponse:
+    """Create a template from a ``bunkerweb-template/1`` package; with ``replace``, overwrite one.
+
+    Only the UI's own templates are ever replaced: ``update_template`` refuses a plugin-owned
+    or otherwise managed one (409). Without ``replace`` an existing id is a 409 and nothing
+    changes. The package is validated structurally here and every setting against this build
+    by ``create_template``/``update_template``, which refuse the whole template on any problem.
+    """
+    if not isinstance(package, dict):
+        return JSONResponse(status_code=400, content={"status": "error", "message": "the package is not a JSON object"})
+    data, problem = parse_package(package)
+    if problem or data is None:
+        return JSONResponse(status_code=400, content={"status": "error", "message": problem})
+
+    db = get_db()
+    template_id = data["id"]
+    templates = db.get_templates()
+    # The DB refuses a duplicate name too, but without saying which template holds it.
+    holder = next((other for other, meta in templates.items() if other != template_id and meta.get("name") == data["name"]), None)
+    if holder:
+        return JSONResponse(status_code=409, content={"status": "error", "message": f"Template name {data['name']} is already used by template {holder}"})
+
+    fields = {key: data[key] for key in ("name", "settings", "steps", "configs")}
+    replaced = template_id in templates
+    if not replaced:
+        ret = db.create_template(template_id, method="ui", **fields)
+    elif not replace:
+        return JSONResponse(status_code=409, content={"status": "error", "message": f"Template {template_id} already exists"})
+    else:
+        ret = db.update_template(template_id, **fields)
+    if ret:
+        return JSONResponse(status_code=_error_status(ret), content={"status": "error", "message": ret})
+    return JSONResponse(status_code=200 if replaced else 201, content={"status": "success", "id": template_id, "replaced": replaced})
+
+
 @router.post("", dependencies=[Depends(guard)])
 def create_template(req: TemplateCreateRequest) -> JSONResponse:
     """Create a new template."""
+    # Same rule as the DB method, checked before it is reached: the id ends up in USE_TEMPLATE.
+    if not TEMPLATE_ID_RX.fullmatch(req.id.strip()):
+        return JSONResponse(status_code=400, content={"status": "error", "message": TEMPLATE_ID_RULE})
     ret = get_db().create_template(
         req.id,
         plugin_id=req.plugin_id,
@@ -81,21 +168,7 @@ def create_template(req: TemplateCreateRequest) -> JSONResponse:
         method=req.method,
     )
     if ret:
-        code = (
-            400
-            if any(
-                hint in ret.lower()
-                for hint in (
-                    "already exists",
-                    "read-only",
-                    "required",
-                    "cannot be empty",
-                    "resource group",
-                )
-            )
-            else 500
-        )
-        return JSONResponse(status_code=code, content={"status": "error", "message": ret})
+        return JSONResponse(status_code=_error_status(ret), content={"status": "error", "message": ret})
     return JSONResponse(status_code=201, content={"status": "success"})
 
 
@@ -111,8 +184,7 @@ def update_template(template_id: str, req: TemplateUpdateRequest) -> JSONRespons
         configs=req.configs,
     )
     if ret:
-        code = 404 if "not found" in ret else (400 if "read-only" in ret.lower() or "resource group" in ret.lower() else 500)
-        return JSONResponse(status_code=code, content={"status": "error", "message": ret})
+        return JSONResponse(status_code=_error_status(ret), content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})
 
 
@@ -121,6 +193,5 @@ def delete_template(template_id: str) -> JSONResponse:
     """Delete a template."""
     ret = get_db().delete_template(template_id)
     if ret:
-        code = 404 if "not found" in ret else (400 if "read-only" in ret or "currently used" in ret else 500)
-        return JSONResponse(status_code=code, content={"status": "error", "message": ret})
+        return JSONResponse(status_code=_error_status(ret), content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})

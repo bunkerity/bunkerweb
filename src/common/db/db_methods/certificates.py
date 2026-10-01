@@ -660,8 +660,22 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                 return "Certificate not found"
             certificate = session.get(Certificates, resource_id)
             metadata = _load_json(certificate.renewal_metadata, {}) if certificate is not None else {}
-            if certificate is not None and (certificate.source == "letsencrypt" or metadata.get("managed_by") or metadata.get("legacy") is True):
-                return "Managed certificates cannot be deleted from inventory; disable the provider and remove its source cache instead"
+            managed = certificate is not None and (certificate.source == "letsencrypt" or metadata.get("managed_by") or metadata.get("legacy") is True)
+            if managed:
+                # `service_ids` is the durable record a provider import writes (protected from
+                # `update_certificate`'s renewal_metadata merge, see CERTIFICATE_PROVIDER_METADATA_KEYS):
+                # the services this certificate was actually issued for, independent of whatever
+                # ResourceAttachments rows exist right now. `delete_service_rows` removes a deleted
+                # service's attachment rows but never touches this metadata, so once every recorded
+                # service is gone the certificate is a genuine orphan -- nothing will ever refresh or
+                # reattach it again. An empty/absent list (a hand-crafted or multi-service legacy
+                # entry with nothing recorded) is not evidence of anything and stays protected; a list
+                # with even one surviving service means the certificate may just have been detached
+                # from it deliberately while other services still use it, which stays protected too.
+                recorded_service_ids = metadata.get("service_ids") or []
+                orphaned = bool(recorded_service_ids) and not session.execute(select(Services.id).where(Services.id.in_(recorded_service_ids)).limit(1)).first()
+                if not orphaned:
+                    return "Managed certificates cannot be deleted from inventory; disable the provider and remove its source cache instead"
             if session.execute(select(ResourceAttachments.id).where(ResourceAttachments.resource_id == resource_id).limit(1)).first():
                 return "Certificate is attached to a service"
             session.delete(resource)

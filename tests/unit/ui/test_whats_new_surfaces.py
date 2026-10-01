@@ -78,6 +78,15 @@ def test_the_modal_lists_every_release_in_the_interval():
     assert "FEATURE" in html and "SECURITY" in html
 
 
+def test_the_modal_hides_an_unset_date_instead_of_printing_the_placeholder():
+    """M32: `RELEASES[0]` carries the CHANGELOG's `??` placeholder -- the recap must not show
+    it, while `RELEASES[1]`'s real date still renders."""
+    html = _render("models/whats_new_modal.html", whatsnew_releases=RELEASES)
+
+    assert "??" not in html
+    assert "2026/07/01" in html
+
+
 def test_the_modal_can_be_left_without_losing_anything():
     """Dismissing is a decision about a modal, not about the release notes."""
     html = _render("models/whats_new_modal.html", whatsnew_releases=RELEASES)
@@ -109,6 +118,13 @@ def test_the_page_shows_every_release_with_the_newest_open():
 
     assert 'aria-expanded="true"' in html
     assert html.count('data-bs-toggle="collapse"') == len(RELEASES)
+
+
+def test_the_page_hides_an_unset_date_instead_of_printing_the_placeholder():
+    html = _render("whats_new.html", releases=RELEASES, changelog_missing=False)
+
+    assert "??" not in html
+    assert "2026/07/01" in html
 
 
 def test_a_build_without_a_changelog_says_so_instead_of_showing_an_empty_page():

@@ -144,6 +144,7 @@ $(document).ready(function () {
 
   // Initialize Flatpickr with altInput and altFormat
   const originalFlatpickr = flatpickrDatetime.flatpickr({
+    ...window.bwFlatpickr.options(),
     enableTime: true,
     dateFormat: "Y-m-d\\TH:i:S", // ISO format
     altInput: true,
@@ -364,6 +365,7 @@ $(document).ready(function () {
     const customEndDateInput = $("#custom-end-date");
     if (!customEndDateInput[0]._flatpickr) {
       customEndDateInput.flatpickr({
+        ...window.bwFlatpickr.options(),
         enableTime: true,
         dateFormat: "Y-m-d\\TH:i:S",
         altInput: true,
@@ -404,6 +406,28 @@ $(document).ready(function () {
       return;
     }
 
+    // Computed once, at submit time: the flatpickr `minDate` was set when the modal was built
+    // and does not age, so a tab left open can let a "valid" pick be in the past by the time the
+    // form is actually submitted. `exp <= 0` collides with the PERMANENT-ban sentinel elsewhere,
+    // so it must be refused here instead of silently clamped to 0 (QA-UI M30).
+    let customEndDateWithOffset = null;
+    let customExp = null;
+    if (duration === "custom") {
+      customEndDateWithOffset = `${customEndDate}${getTimeZoneOffset()}`;
+      customExp = Math.floor(
+        new Date(customEndDateWithOffset).getTime() / 1000 - Date.now() / 1000,
+      );
+      if (customExp <= 0) {
+        alert(
+          t(
+            "alert.custom_end_date_past",
+            "The custom end date must be in the future.",
+          ),
+        );
+        return;
+      }
+    }
+
     if (filteredState) {
       const form = $("<form>", {
         method: "POST",
@@ -418,16 +442,9 @@ $(document).ready(function () {
         duration: duration,
       });
       if (duration === "custom") {
-        const customEndDateWithOffset = `${customEndDate}${getTimeZoneOffset()}`;
         appendDataTableParamsInputs(form, {
           end_date: customEndDateWithOffset,
-          custom_exp: Math.max(
-            0,
-            Math.floor(
-              new Date(customEndDateWithOffset).getTime() / 1000 -
-                Date.now() / 1000,
-            ),
-          ),
+          custom_exp: customExp,
         });
       }
       form.appendTo("body").submit();
@@ -448,15 +465,8 @@ $(document).ready(function () {
 
         // Add custom duration data if applicable
         if (duration === "custom") {
-          const customEndDateWithOffset = `${customEndDate}${getTimeZoneOffset()}`;
           update.end_date = customEndDateWithOffset;
-          update.custom_exp = Math.max(
-            0,
-            Math.floor(
-              new Date(customEndDateWithOffset).getTime() / 1000 -
-                Date.now() / 1000,
-            ),
-          );
+          update.custom_exp = customExp;
         }
 
         return update;
@@ -1126,6 +1136,8 @@ $(document).ready(function () {
                           data-ip="${row.ip}"
                           data-scope="${row.scope}"
                           data-service="${row.service}"
+                          data-permanent="${row.permanent}"
+                          data-time-left="${row.time_left}"
                           data-bs-toggle="tooltip"
                           data-bs-placement="bottom"
                           data-bs-original-title="${unbanTooltip}">
@@ -1137,6 +1149,7 @@ $(document).ready(function () {
                           data-scope="${row.scope}"
                           data-service="${row.service}"
                           data-permanent="${row.permanent}"
+                          data-time-left="${row.time_left}"
                           data-bs-toggle="tooltip"
                           data-bs-placement="bottom"
                           data-bs-original-title="${updateTooltip}">
@@ -1372,6 +1385,7 @@ $(document).ready(function () {
     }
 
     banClone.find(".flatpickr-input").flatpickr({
+      ...window.bwFlatpickr.options(),
       enableTime: true,
       dateFormat: "Y-m-d\\TH:i:S", // ISO format
       altInput: true,
@@ -1711,6 +1725,15 @@ $(document).ready(function () {
   }
 
   // Event handlers for individual row actions
+  // The Time Left the row shows, read off the action button -- the confirm modals used to print a
+  // hard-coded "N/A" for every live ban. `time_left` arrives HTML-escaped from /bans/fetch.
+  const rowTimeLeft = ($button) => {
+    if ($button.data("permanent") === true)
+      return t("scope.permanent", "Permanent");
+    const timeLeft = String($button.attr("data-time-left") || "").trim();
+    return timeLeft || t("status.not_applicable", "N/A");
+  };
+
   $(document).on("click", ".unban-single", function () {
     if (isReadOnly) {
       alert(
@@ -1732,7 +1755,7 @@ $(document).ready(function () {
       ip: ip,
       ban_scope: scope,
       service: service === "_" ? null : service,
-      time_remaining: "N/A", // Not needed for unban
+      time_remaining: rowTimeLeft($(this)),
     };
 
     setupUnbanModal([ban]);
@@ -1755,13 +1778,12 @@ $(document).ready(function () {
     const ip = $(this).data("ip");
     const scope = $(this).data("scope");
     const service = $(this).data("service");
-    const isPermanent = $(this).data("permanent");
 
     const ban = {
       ip: ip,
       ban_scope: scope,
       service: service === "_" ? null : service,
-      time_remaining: isPermanent ? "permanent" : "N/A",
+      time_remaining: rowTimeLeft($(this)),
     };
 
     setupUpdateDurationModal([ban]);

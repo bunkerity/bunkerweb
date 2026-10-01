@@ -27,6 +27,37 @@ def api_client():
         client.session.close()
 
 
+def _pem_pair():
+    """A throwaway self-signed certificate and its unencrypted key, both PEM."""
+    from datetime import datetime, timedelta, timezone
+
+    from cryptography import x509
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.x509.oid import NameOID
+
+    key = ec.generate_private_key(ec.SECP256R1())
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "www.example.com")])
+    now = datetime.now(timezone.utc)
+    certificate = (
+        x509.CertificateBuilder()
+        .subject_name(name)
+        .issuer_name(name)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now)
+        .not_valid_after(now + timedelta(days=1))
+        .sign(key, hashes.SHA256())
+    )
+    return (
+        certificate.public_bytes(serialization.Encoding.PEM),
+        key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()),
+    )
+
+
+PEM_PAIR = _pem_pair()
+
+
 @pytest.fixture(scope="module")
 def certificates_route():
     client = Mock()
@@ -34,6 +65,7 @@ def certificates_route():
     dependencies.API_CLIENT = client
     app_utils = ModuleType("app.utils")
     app_utils.flash = Mock()
+    app_utils.LOGGER = Mock()
     # The route now also refuses a session without the `write` permission
     # (app/utils.py:is_readonly_request). There is no logged-in user in this harness, so stub it
     # on the database flag alone -- the permission half is pinned by
@@ -401,8 +433,9 @@ def test_upload_forwards_only_files_and_non_secret_metadata(route_app, monkeypat
             "description": "Imported",
             "service_ids": ["svc-a", "svc-b"],
             "primary": "on",
-            "certificate": (BytesIO(b"public certificate"), "../../certificate.pem"),
-            "private_key": (BytesIO(b"private key"), "../../private.key"),
+            # Real PEM: the route refuses anything `cryptography` cannot load before uploading it.
+            "certificate": (BytesIO(PEM_PAIR[0]), "../../certificate.pem"),
+            "private_key": (BytesIO(PEM_PAIR[1]), "../../private.key"),
         },
         content_type="multipart/form-data",
     ):

@@ -11,7 +11,21 @@ window.BWRangePicker = (function () {
     if (!root) return null;
     const buttons = root.querySelectorAll(".range-btn");
     const fpInput = root.querySelector(".range-fp");
+    const customLabelEl = root.querySelector(
+      '.range-btn[data-range="custom"] span',
+    );
+    const customLabelDefault = customLabelEl ? customLabelEl.textContent : "";
     let flatpickrInstance = null;
+
+    function formatCustomLabel(startEpoch, endEpochExclusive) {
+      const fmt = new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+      });
+      // endEpochExclusive is the next local midnight after the selected end day (see the
+      // +86400s comment below); step back a second to label the day the user actually picked.
+      return `${fmt.format(new Date(startEpoch * 1000))} – ${fmt.format(new Date((endEpochExclusive - 1) * 1000))}`;
+    }
 
     function computeRange(preset, customStart, customEnd) {
       const end = Math.floor(Date.now() / 1000);
@@ -29,6 +43,12 @@ window.BWRangePicker = (function () {
         btn.setAttribute("aria-pressed", String(on));
       });
       const range = computeRange(preset, customStart, customEnd);
+      if (customLabelEl) {
+        customLabelEl.textContent =
+          preset === "custom" && customStart && customEnd
+            ? formatCustomLabel(range.startEpoch, range.endEpoch)
+            : customLabelDefault;
+      }
       root.dispatchEvent(
         new CustomEvent("change", { detail: { value: preset, ...range } }),
       );
@@ -40,6 +60,7 @@ window.BWRangePicker = (function () {
         if (preset === "custom") {
           if (!flatpickrInstance && window.flatpickr && fpInput) {
             flatpickrInstance = flatpickr(fpInput, {
+              ...window.bwFlatpickr.options(),
               mode: "range",
               maxDate: "today",
               onClose: (dates) => {

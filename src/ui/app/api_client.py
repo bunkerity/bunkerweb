@@ -19,7 +19,7 @@ class ApiClient(BaseApiClient):
 
     # ── Global Settings ─────────────────────────────────────────────────
 
-    def get_global_settings(self, full=False, methods=False, with_drafts=False, filtered_settings=None, global_only=True):
+    def get_global_settings(self, full=False, methods=False, with_drafts=False, filtered_settings=None, global_only=True, with_setting_drafts=False):
         params = {}
         if full:
             params["full"] = "true"
@@ -31,6 +31,8 @@ class ApiClient(BaseApiClient):
             params["filtered_settings"] = list(filtered_settings)
         if not global_only:
             params["global_only"] = "false"
+        if with_setting_drafts:
+            params["with_setting_drafts"] = "true"
         return self._get("/global_settings", params=params).get("settings", {})
 
     def update_global_settings(self, settings: dict):
@@ -249,7 +251,7 @@ class ApiClient(BaseApiClient):
             params["with_drafts"] = "true"
         return self._get("/services", params=params).get("services", [])
 
-    def get_service(self, service_id, full=False, methods=True, with_drafts=True):
+    def get_service(self, service_id, full=False, methods=True, with_drafts=True, with_setting_drafts=False):
         params = {}
         if full:
             params["full"] = "true"
@@ -257,6 +259,8 @@ class ApiClient(BaseApiClient):
             params["methods"] = "false"
         if with_drafts:
             params["with_drafts"] = "true"
+        if with_setting_drafts:
+            params["with_setting_drafts"] = "true"
         data = self._get(f"/services/{service_id}", params=params)
         return data.get("config", data)
 
@@ -522,8 +526,16 @@ class ApiClient(BaseApiClient):
         return self._get("/configs", params=params).get("configs", [])
 
     def get_config_item(self, service, type, name, with_data=True):
+        """Returns None on 404 rather than raising: every caller checks ``if not
+        db_config`` for the not-found case, which used to be dead code because the
+        underlying ApiClientError escaped uncaught first."""
         params = {"with_data": "true"} if with_data else {}
-        data = self._get(f"/configs/{service or 'global'}/{type}/{name}", params=params)
+        try:
+            data = self._get(f"/configs/{service or 'global'}/{type}/{name}", params=params)
+        except ApiClientError as e:
+            if e.status_code == 404:
+                return None
+            raise
         return data.get("config", data)
 
     def create_config(self, **kwargs):
@@ -572,10 +584,12 @@ class ApiClient(BaseApiClient):
     def set_plugin_enabled(self, plugin_id, enabled):
         return self._patch(f"/plugins/{plugin_id}", json={"enabled": bool(enabled)})
 
-    def upload_plugins(self, files, method="ui"):
+    def upload_plugins(self, files, method="ui", replace=False):
         # files should be a list of (filename, file_obj) tuples
         # Remove Content-Type header for multipart upload
-        resp = self._request("POST", "/plugins/upload", files=files, data={"method": method}, headers={"Content-Type": None})
+        # `replace` overwrites an existing ui/ui plugin of the same id (the catalogue update).
+        data = {"method": method} | ({"replace": "true"} if replace else {})
+        resp = self._request("POST", "/plugins/upload", files=files, data=data, headers={"Content-Type": None})
         return resp
 
     def get_plugin_page(self, plugin_id):
@@ -611,6 +625,9 @@ class ApiClient(BaseApiClient):
         if keep_session_id is not None:
             params["keep_session_id"] = keep_session_id
         return self._delete(f"/users/{username}/sessions", params=params)
+
+    def delete_user_session(self, username, session_id):
+        return self._delete(f"/users/{username}/sessions/{session_id}")
 
     def mark_user_login(self, username, ip, user_agent):
         return self._post(f"/users/{username}/login", json={"ip": ip, "user_agent": user_agent}).get("session_id")
@@ -677,9 +694,16 @@ class ApiClient(BaseApiClient):
                 return None
             raise
 
-    def save_config(self, config, method, changed=False):
-        """Save a complete config dict via PUT /global_settings/config."""
-        return self._put("/global_settings/config", json={"config": config, "method": method, "changed": changed})
+    def save_config(self, config, method, changed=False, draft_settings=None):
+        """Save a complete config dict via PUT /global_settings/config.
+
+        ``draft_settings`` is the RAW editor's setting-draft map; left out of the payload when
+        None so every other save stays byte-identical to what it was.
+        """
+        payload = {"config": config, "method": method, "changed": changed}
+        if draft_settings is not None:
+            payload["draft_settings"] = draft_settings
+        return self._put("/global_settings/config", json=payload)
 
     # ── Templates ───────────────────────────────────────────────────────
 
@@ -687,7 +711,15 @@ class ApiClient(BaseApiClient):
         return self._get("/templates").get("templates", {})
 
     def get_template(self, template_id):
-        data = self._get(f"/templates/{template_id}")
+        """Returns None on 404 rather than raising: every caller checks ``if not
+        details`` for the not-found case, which used to be dead code because the
+        underlying ApiClientError escaped uncaught first."""
+        try:
+            data = self._get(f"/templates/{template_id}")
+        except ApiClientError as e:
+            if e.status_code == 404:
+                return None
+            raise
         return data.get("template", data)
 
     def create_template(self, template_id, name, **kwargs):
@@ -698,6 +730,12 @@ class ApiClient(BaseApiClient):
 
     def delete_template(self, template_id):
         return self._delete(f"/templates/{template_id}")
+
+    def export_template(self, template_id):
+        return self._get(f"/templates/{quote(template_id, safe='')}/export")
+
+    def import_template(self, package, replace=False):
+        return self._post("/templates/import", params={"replace": "true" if replace else "false"}, json=package)
 
     # ── Metadata ────────────────────────────────────────────────────────
 

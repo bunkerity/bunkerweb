@@ -12,6 +12,7 @@ from traceback import format_exc
 from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall  # type: ignore
 
 from app.api_client import ApiClient
+from app.i18n import LocaleThreadPoolExecutor
 from app.perf import record_api_call
 from app.models.config import Config
 from app.models.instance import InstancesUtils
@@ -46,8 +47,9 @@ EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 
 # Shared thread pool executor for configuration tasks in routes
-# This prevents spawning new threads for each config operation
-CONFIG_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-ui-route-tasks")
+# This prevents spawning new threads for each config operation. Its tasks flash in the language of
+# the request that queued them (see LocaleThreadPoolExecutor).
+CONFIG_TASKS_EXECUTOR = LocaleThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-ui-route-tasks")
 
 # Dedicated pool for read-heavy page fan-outs (e.g. /home runs its Redis
 # aggregations and DB queries concurrently). Kept separate from
@@ -137,4 +139,11 @@ def safe_reload_plugins(force: bool = False):
     DATA.load_from_file()
     if force or DATA.get("FORCE_RELOAD_PLUGIN", False) or not DATA.get("IS_RELOADING_PLUGINS", False):
         DATA["IS_RELOADING_PLUGINS"] = True
-        reload_plugins()
+        # The latch only keeps workers from extracting concurrently. It used to be cleared on worker
+        # import alone, so once a UI had reloaded, the next plugin change (a delete after an update)
+        # was consumed without re-extracting. Re-read first: the file is shared by every worker.
+        try:
+            reload_plugins()
+        finally:
+            DATA.load_from_file()
+            DATA["IS_RELOADING_PLUGINS"] = False

@@ -119,6 +119,8 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
                 "email": ui_user.email,
                 "password": ui_user.password.encode("utf-8"),
                 "method": ui_user.method,
+                # The owner flag, not membership of the RBAC role named "admin": the UI maps it to
+                # the "super_admin" Biscuit role (login.py, biscuit.py) and its admin-only gates.
                 "admin": ui_user.admin,
                 "theme": ui_user.theme,
                 "language": ui_user.language,
@@ -349,6 +351,27 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
                 query = query.filter(UserSessions.id != keep_session_id)
             for session_to_delete in session.scalars(query).all():
                 session.delete(session_to_delete)
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def delete_ui_user_session(self, username: str, session_id: int) -> str:
+        """Delete one session row of a ui user, once the session it records has ended (logout).
+
+        Scoped to ``username``: a session id alone must not close another account's session. A row
+        already gone is not an error -- that is the state the caller wants.
+        """
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            session.execute(
+                delete(UserSessions).where(UserSessions.user_name == username, UserSessions.id == session_id).execution_options(synchronize_session=False)
+            )
 
             try:
                 session.commit()

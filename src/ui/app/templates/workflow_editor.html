@@ -86,8 +86,8 @@
 
     {# The editor is seeded from these, and posts back to the same two endpoints. Attribute
        values are JSON so the page never re-parses rendered markup to recover its own state. #}
-    <input type="hidden" id="wf-definition" value="{{ workflow.definition | tojson }}" />
-    <input type="hidden" id="wf-groups" value="{{ groups | tojson }}" />
+    <input type="hidden" id="wf-definition" value='{{ workflow.definition | tojson }}' />
+    <input type="hidden" id="wf-groups" value='{{ groups | tojson }}' />
     <input type="hidden" id="wf-readonly" value="{{ 'yes' if readonly else 'no' }}" />
     <input type="hidden" id="wf-validate-url" value="{{ workflows_url }}/{{ workflow.id }}/validate" />
     <input type="hidden" id="wf-save-url" value="{{ workflows_url }}/{{ workflow.id }}/save" />

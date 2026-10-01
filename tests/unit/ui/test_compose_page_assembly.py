@@ -60,6 +60,8 @@ class _Request:
 def render_pane():
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
     env.globals.update(
+        plugin_text=lambda plugin_id, key, fallback="": fallback,  # the i18n.py helpers, English-only here
+        setting_text=lambda setting_id, field, fallback="": fallback,
         url_for=lambda endpoint, **kwargs: "/" + endpoint,
         csrf_token=lambda: "csrf-value",
         get_filtered_settings=get_filtered_settings,
@@ -83,6 +85,7 @@ def render_pane():
         is_draft="no",
         clone=None,
         current_template="low",
+        server_name_regex="",
     ):
         rendered = _config(config, global_page)
         if global_page:
@@ -111,6 +114,8 @@ def render_pane():
             is_draft=is_draft,
             clone=clone,
             current_template=current_template,
+            server_name_regex=server_name_regex,
+            script_nonce="nonce-value",
         )
 
     return _render
@@ -252,6 +257,37 @@ def test_new_service_honours_the_template_selected_by_the_gallery(render_pane):
     assert _payload(render_pane(service_id="", current_template="medium"))["USE_TEMPLATE"] == "medium"
 
 
+@pytest.mark.parametrize("source_template", ["ui", "low medium", "medium low", "medium", ""])
+def test_a_clone_posts_its_source_template_exactly(render_pane, source_template):
+    """QA H13: the picker leaves `ui` out and preselected `low`, so cloning a `ui` service saved a
+    `low` one, and an ordered multi-layer USE_TEMPLATE had no option at all. On a clone the route
+    hands the SOURCE's config (routes/services.py, the `clone` branch of the GET), and whatever the
+    select holds wins first-value over the shelf's fallback -- so the posted value must be the
+    source's, order included, and "no template" must stay "no template"."""
+    html = render_pane(
+        {"USE_TEMPLATE": {"value": source_template}},
+        service_id="",
+        clone="source.example.com",
+        templates={"low": {}, "medium": {}, "ui": {}},
+    )
+    assert _payload(html)["USE_TEMPLATE"] == source_template
+
+
+def test_the_new_service_name_is_checked_against_the_save_regex_before_posting(render_pane):
+    """QA H6: an invalid name was only refused by the queued save, which had already cost the
+    operator the whole form. The field now carries the SAME regex `check_variables` applies, and
+    the page refuses the submit in place, with the field marked."""
+    rule = r"^(?!.*\.\.)(?:(\b[^\s+\/:A-Z]{1,255}\b)(?:\s+\b[^\s+\/:A-Z]{1,255}\b)*)?$"
+    html = render_pane(service_id="", server_name_regex=rule)
+    typed = [attrs for tag, attrs in _form(html).inside if tag == "input" and attrs.get("name") == "SERVER_NAME"]
+    assert typed[0]["data-regex"] == rule
+    assert typed[0]["aria-describedby"] == "compose-server-name-feedback"
+    assert 'id="compose-server-name-feedback"' in html
+    assert 'nonce="nonce-value"' in html and "stopImmediatePropagation" in html
+    # Only /services/new names a service in this form; an existing service never gets the check.
+    assert "compose-server-name-feedback" not in render_pane()
+
+
 def test_the_draft_input_is_inside_the_form_and_precedes_the_shelf_fallback(render_pane):
     """`.toggle-draft` mutates `#is-draft` in place (plugins-settings.js:2217). Left outside the
     form the toggle would be a no-op, and `variables.pop("IS_DRAFT", "no")` publishes a draft
@@ -352,6 +388,8 @@ _PROVIDED_BY_MAIN = {
     "current_endpoint",
     "theme",
     "pro_diamond_url",
+    "script_nonce",
+    "plugin_text",  # registered by app.i18n.init_i18n
 }
 # Set by the host page inside `{% block content %}`, above the include.
 _SET_BY_THE_HOST_PAGE = {"blacklisted_settings", "service_method", "is_draft"}
@@ -359,7 +397,7 @@ _SET_BY_THE_HOST_PAGE = {"blacklisted_settings", "service_method", "is_draft"}
 # service-only entries; a name that appears here and in neither route is the failure this pair of
 # tests exists to catch.
 REQUIRED_FROM_ROUTE = {"config", "shelf_plugin_scope", "activation_map", "control_keys", "global_page", "service_id"}
-SERVICE_ONLY_FROM_ROUTE = {"templates", "clone", "attachments", "plugin_order", "current_template", "allowed_plugins"}
+SERVICE_ONLY_FROM_ROUTE = {"templates", "clone", "attachments", "plugin_order", "current_template", "allowed_plugins", "server_name_regex"}
 
 
 def _locally_bound(tree):

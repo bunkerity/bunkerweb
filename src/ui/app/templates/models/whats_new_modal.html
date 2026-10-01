@@ -22,7 +22,7 @@
         {% for release in whatsnew_releases %}
             <h6 class="mb-1">
                 {{ release.version }}
-                {% if release.date %}<small class="text-muted fw-normal">· {{ release.date }}</small>{% endif %}
+                {% if release.display_date %}<small class="text-muted fw-normal">· {{ release.display_date }}</small>{% endif %}
             </h6>
             {{ release_entries(release) }}
             {% if not loop.last %}<div class="my-4"></div>{% endif %}

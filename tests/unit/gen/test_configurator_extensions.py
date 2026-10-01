@@ -75,6 +75,11 @@ class TestValidExtensions:
     def test_certificate_source_alone_is_valid(self, tmp_path):
         assert _validate(tmp_path, {"certificate_source": {"label": "Custom", "renews": False}})[0]
 
+    def test_downgrade_alone_is_valid(self, tmp_path):
+        """Declarative-only, like activation/certificate_source: no plugin code is loaded for
+        it, so a plugin declaring nothing else must not be rejected."""
+        assert _validate(tmp_path, {"downgrade": {"module": "downgrade.py"}})[0]
+
     def test_every_shipped_core_manifest_validates(self, tmp_path):
         """The regression this class exists for is only caught end to end."""
         from json import loads

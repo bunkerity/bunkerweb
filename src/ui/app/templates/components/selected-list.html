@@ -1,8 +1,8 @@
 {# usage: {% from "components/selected-list.html" import selected_list %}
-          {{ selected_list(name="instances", items=[], entity="instances", columns=[
-               {"key": "hostname", "i18n": "table.header.hostname", "label": "Hostname", "bold": true},
-               {"key": "health",   "i18n": "table.header.health",   "label": "Health", "safe": true}
-             ], hidden_mode="csv", id_key="hostname") }} #}
+          {{ selected_list(name="services", items=[], entity="services", columns=[
+               {"key": "name", "i18n": "table.header.name", "label": "Name", "bold": true},
+               {"key": "type", "i18n": "table.header.type", "label": "Type"}
+             ], hidden_mode="csv", id_key="name") }} #}
 
 {% from "components/text-group.html" import text_group %}
 {% from "components/badge.html" import badge %}
@@ -25,11 +25,10 @@
    actions that don't need a mini-table -- no current page uses that shape
    yet, but it's the natural default for new bulk-selection UI.
 
-   The counting header ("N <entity> selected") and empty-state fallback reuse
-   the same {{count}}/{{entity}} interpolation convention already established
-   by datatable.bulk_select_page/bulk_select_all_filtered in dataTableInit.js
-   (`entity` is a plain, non-translated noun there too -- an existing
-   limitation this macro inherits rather than invents).
+   The counting header ("N <entity> selected") and the empty state are whole
+   sentences, one key per entity and number (datatable.selected_list.<entity>.
+   count_one / count_other / empty): the noun is part of the translation, never
+   interpolated from English. A new `entity` needs its three keys.
 
    The visible list is only ever confirmation chrome -- the hidden <input>
    (name="{{ name }}") is what the form actually submits. Populate `items`
@@ -64,9 +63,8 @@
                             page fills it itself (e.g. configs.js posts a
                             transformed subset, not the displayed items
                             verbatim).
-     entity       plural noun used in the count/empty copy, e.g. "instances",
-                  "bans". Plain English -- not itself translated (see note
-                  above), only interpolated into the translated sentence.
+     entity       plural noun naming the catalog keys of the count/empty copy
+                  (datatable.selected_list.<entity>.*), e.g. "services".
      columns      None (default, simple mode) or a list of
                   { key, i18n=None, label, bold=False }:
                     key    -- attribute read off each item for this column.
@@ -103,11 +101,12 @@
 ) -%}
 {%- set _count = items | length -%}
 {%- set _empty = empty_text or ("No " ~ entity ~ " selected.") -%}
+{%- set _count_text = _("datatable.selected_list." ~ entity ~ ".count_" ~ ("one" if _count == 1 else "other"), count=_count) -%}
 <div{% if id %} id="{{ id }}"{% endif %} class="bw-selected-list{% if classes %} {{ classes }}{% endif %}" data-selected-host data-entity="{{ entity }}" data-id-key="{{ id_key }}" data-hidden-mode="{{ hidden_mode }}">
     {%- if show_count %}
     <div class="d-flex align-items-center gap-2 mb-2">
         <i class="bx bx-list-check" aria-hidden="true"></i>
-        <span data-selected-count>{{ _("datatable.selected_list_count", count=_count, entity=entity) }}</span>
+        <span data-selected-count>{{ _count_text }}</span>
     </div>
     {%- endif %}
     {%- if _count %}
@@ -141,7 +140,7 @@
             </div>
         </div>
         {%- else %}
-        <ul class="list-group overflow-auto" role="list" data-selected-list aria-label="{{ _count }} {{ entity }} selected">
+        <ul class="list-group overflow-auto" role="list" data-selected-list aria-label="{{ _count_text }}">
             {%- for it in items %}
             <li class="list-group-item d-flex align-items-center justify-content-between gap-2" role="listitem">
                 {{ text_group(top=it.label, bottom=it.sub, icon=it.icon or icon, emphasis='top') }}
@@ -151,7 +150,7 @@
         </ul>
         {%- endif %}
     {%- else %}
-    <p class="text-muted mb-0" data-selected-empty>{{ _("datatable.selected_list_empty", entity=entity) }}</p>
+    <p class="text-muted mb-0" data-selected-empty>{{ _("datatable.selected_list." ~ entity ~ ".empty") }}</p>
     {%- endif %}
     {%- if hidden_mode == "csv" %}
     <input type="hidden" name="{{ name }}" data-selected-input value="{{ items | map(attribute=id_key) | list | join(',') }}" />

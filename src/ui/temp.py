@@ -10,11 +10,13 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from flask import Flask, g, render_template, request
+from flask import Flask, Response, g, render_template, request
 
 from logger import getLogger  # type: ignore
 
+from app.i18n import browser_catalog, init_i18n
 from app.models.reverse_proxied import ReverseProxied
+from app.static_assets import version_static_urls
 
 LOGGER = getLogger("TMP-UI")
 
@@ -49,6 +51,15 @@ app.url_map.strict_slashes = False
 with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
     app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
+
+# `starting.html` extends `base.html`, and both call `_()` -- Flask-Babel is what installs it as a
+# Jinja global. Without this, every request served while the UI is booting (any visitor on
+# 0.0.0.0:7000 before main.py takes over) hit `jinja2.exceptions.UndefinedError: '_' is undefined`
+# and fell through to the dependency-free 500 fallback -- so the designed starting page never
+# rendered, and every boot request logged a traceback (M36). `init_i18n` is the same call
+# `main.py` makes; it needs no DB or API client, only the on-disk catalogs this image already ships.
+init_i18n(app)
+version_static_urls(app)
 
 
 @app.before_request
@@ -121,6 +132,17 @@ def internal_error_handler(error):
         "<p>Please wait, this page will refresh automatically.</p></div></body></html>"
     )
     return html, 503, {"Retry-After": "3"}
+
+
+@app.route("/locales/<string:lang>.js")
+def i18n_catalog(lang: str):
+    """The message catalog `base.html` loads as a synchronous script. `main.py` serves the same
+    route once the real app is up; this is what `url_for('i18n_catalog', ...)` in the shared
+    `base.html` resolves to while it isn't."""
+    catalog = browser_catalog(app.static_folder or "", lang)
+    if catalog is None:
+        return Response(status=404)
+    return Response(catalog, content_type="application/javascript; charset=utf-8")
 
 
 @app.route("/", defaults={"path": ""})

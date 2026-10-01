@@ -31,7 +31,7 @@
                 {% call accordion_item(id="release-" ~ loop.index,
                     parent_id="whats-new-releases",
                     title=release.version,
-                    subtitle=release.date,
+                    subtitle=release.display_date,
                     open=loop.first,
                     icon="bx-package") %}
                     {{ release_entries(release) }}

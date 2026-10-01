@@ -14,10 +14,10 @@
 {% block head %}
     <!-- Datatables -->
     <link rel="preload"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           as="style" />
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          href="{{ url_for('static', filename=rtl_sheet('libs/datatables/datatables.min.css')) }}"
           nonce="{{ style_nonce }}" />
     <!-- ApexCharts (Overview tab timeseries chart) -->
     <link rel="preload"
@@ -177,6 +177,9 @@
             defer
             type="module"></script>
     <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/flatpickr-locale.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
     <script src="{{ url_for('static', filename='js/components/range-picker.js') }}"

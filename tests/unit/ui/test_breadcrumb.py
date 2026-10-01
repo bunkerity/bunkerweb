@@ -25,8 +25,13 @@ TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templa
 ROUTES = {"configs": "/configs", "cache": "/cache", "profile": "/profile", "services": "/services"}
 
 
-def _render(path, current_endpoint=None, extra_pages=()):
-    """`breadcrumb.html` on its own, with the globals the app gives it."""
+def _render(path, current_endpoint=None, extra_pages=(), breadcrumbs_url=None):
+    """`breadcrumb.html` on its own, with the globals the app gives it.
+
+    `breadcrumbs_url` defaults to the requested path, matching most routes; pass an explicit
+    falsy value (`""`) for a route that supplies no breadcrumb URL of its own, the way `/crowdsec`
+    does -- the case `test_a_known_static_segment_...` covers.
+    """
 
     def url_for(endpoint, **values):
         url = ROUTES.get(endpoint, "#")
@@ -41,7 +46,7 @@ def _render(path, current_endpoint=None, extra_pages=()):
     return environment.get_template("breadcrumb.html").render(
         request=SimpleNamespace(path=path),
         current_endpoint=current_endpoint if current_endpoint is not None else path.strip("/").split("/")[0],
-        breadcrumbs_url=path,
+        breadcrumbs_url=path if breadcrumbs_url is None else breadcrumbs_url,
         extra_pages=list(extra_pages),
     )
 
@@ -84,3 +89,32 @@ def test_the_configs_positions_still_line_up():
 
 def test_the_root_path_renders_no_crumbs_rather_than_one_empty_one():
     assert _crumbs(_render("/")) == []
+
+
+# --------------------------------------------------------------------------------------
+# H8 / M11 / L13: a dynamic id must never be run through gettext, and a known static
+# segment with a real catalog entry must not be skipped just because it is a plugin page
+# --------------------------------------------------------------------------------------
+def test_a_dynamic_id_segment_renders_as_is_not_as_an_echoed_key():
+    """H8: a service/template/workflow id has no `breadcrumb.*` catalog entry. It must render as
+    the raw id, never as the constructed dotted key (`breadcrumb.www_example_com`) -- which is
+    also what the tab title showed, since `common.js` reads it straight off this crumb (L13)."""
+    crumbs = _crumbs(_render("/services/www.example.com", current_endpoint="www.example.com"))
+
+    texts = [text for text, _ in crumbs]
+    assert texts[-1] == "www.example.com"
+    assert not texts[-1].startswith("breadcrumb.")
+
+
+def test_a_known_static_segment_the_old_extra_pages_list_used_to_skip_is_now_translated():
+    """M11: `crowdsec` was excluded from translation by `extra_pages` even though
+    `breadcrumb.crowdsec` exists in the catalog (-> "CrowdSec") -- no other route supplies a
+    `breadcrumbs_url` for it, unlike `/configs` or `/cache`.
+
+    It used to fall back to `href="#"` as a side effect of that same exclusion; L3 (LOW sweep)
+    later suppressed `href="#"` on the active crumb everywhere (a dead link on the current page
+    is exactly the L3 defect), so the active crowdsec crumb now renders with no `href` at all,
+    same as every other active crumb."""
+    crumbs = _crumbs(_render("/crowdsec", current_endpoint="crowdsec", breadcrumbs_url="", extra_pages=["crowdsec"]))
+
+    assert crumbs == [("CrowdSec", None)]

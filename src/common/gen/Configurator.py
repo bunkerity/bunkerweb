@@ -502,7 +502,7 @@ class Configurator:
             # size/duration -> NGINX unit form, list items trimmed) before the regex.
             ok, value = self.__normalize_value(where[real_var], value)
             if not ok and not self.__ignore_regex_check:
-                return (False, f"value {value} isn't a valid {where[real_var]['type']}", value)
+                return (False, f"value isn't a valid {where[real_var]['type']}", value)
 
             if self.__has_embedded_newline(value, where[real_var].get("type")):
                 return False, f"value of {variable} contains a newline", value
@@ -510,7 +510,7 @@ class Configurator:
             try:
                 regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
                 if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value_for_validation(real_var, value), regex_flags) is None:
-                    return (False, f"value {value} doesn't match regex {where[real_var]['regex']}", value)
+                    return (False, f"value doesn't match regex {where[real_var]['regex']}", value)
             except RegexError:
                 self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
 
@@ -525,7 +525,7 @@ class Configurator:
 
         ok, value = self.__normalize_value(where[real_var], value)
         if not ok and not self.__ignore_regex_check:
-            return (False, f"value {value} isn't a valid {where[real_var]['type']}", value)
+            return (False, f"value isn't a valid {where[real_var]['type']}", value)
 
         if self.__has_embedded_newline(value, where[real_var].get("type")):
             return False, f"value of {variable} contains a newline", value
@@ -533,7 +533,7 @@ class Configurator:
         try:
             regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
             if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value_for_validation(real_var, value), regex_flags) is None:
-                return (False, f"value {value} doesn't match regex {where[real_var]['regex']}", value)
+                return (False, f"value doesn't match regex {where[real_var]['regex']}", value)
         except RegexError:
             self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
 
@@ -874,14 +874,19 @@ class Configurator:
         api_ext = extensions.get("api")
         db_ext = extensions.get("db")
         config_ext = extensions.get("config")
-        # 'activation' and 'certificate_source' are purely declarative — no plugin code is
-        # loaded for them — so a manifest may carry either on its own. Requiring api/db/config
-        # here rejected the whole plugin: ssl, misc, errors, headers, sessions, antibot,
-        # country, inject, limit, php, pro and redirect all declare activation alone, so all
-        # twelve were dropped and NGINX rendered an empty `ssl_protocols ;`.
-        declarative_ext = extensions.get("activation") is not None or extensions.get("certificate_source") is not None
+        # 'activation', 'certificate_source' and 'downgrade' are purely declarative — no plugin
+        # code is loaded for them — so a manifest may carry any of them on its own. Requiring
+        # api/db/config here rejected the whole plugin: ssl, misc, errors, headers, sessions,
+        # antibot, country, inject, limit, php, pro and redirect all declare activation alone, so
+        # all twelve were dropped and NGINX rendered an empty `ssl_protocols ;`.
+        declarative_ext = (
+            extensions.get("activation") is not None or extensions.get("certificate_source") is not None or extensions.get("downgrade") is not None
+        )
         if api_ext is db_ext is config_ext is None and not declarative_ext:
-            return (False, f"Invalid extensions for plugin {plugin_id} (Must declare 'api', 'db', 'config', 'activation' and/or 'certificate_source')")
+            return (
+                False,
+                f"Invalid extensions for plugin {plugin_id} (Must declare 'api', 'db', 'config', 'activation', 'certificate_source' and/or 'downgrade')",
+            )
 
         if api_ext is not None:
             if not isinstance(api_ext, dict):
