@@ -22,6 +22,7 @@
 - [BUGFIX] `errors`: a custom error page is served to blocked POST and PUT requests instead of a 405.
 - [BUGFIX] `grpc`, `reverseproxy`: new or rotated upstream CA, CRL or client certificate files are applied even when another service's files fail.
 - [BUGFIX] `headers`: cookie flags such as `SameSite=Lax` are no longer randomly missing from `Set-Cookie`.
+- [BUGFIX] `headers`: `COOKIE_FLAGS` refuses `Expires`, `Domain`, `Path` and entries without a flag, which used to fail the reload and keep the old configuration.
 - [BUGFIX] `letsencrypt`: renewed certificates reach the instances right after the renewal instead of at the next reload.
 - [BUGFIX] `letsencrypt`: adding names to a certificate expands it instead of deleting it first, so a failing new name keeps the current one.
 - [BUGFIX] `metrics`: instances sharing one Redis no longer overwrite each other's metrics; give each instance a distinct hostname.
