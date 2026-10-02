@@ -14,6 +14,7 @@
 - [BUGFIX] A PRO force update no longer deletes unchanged PRO plugin pages.
 - [BUGFIX] The scheduler and autoconf log a warning when two services share a server name.
 - [BUGFIX] In single-site mode every `SERVER_NAME` entry is served and covered by the certificate, not only the first one.
+- [BUGFIX] `autoconf`: Gateway API backends use `KUBERNETES_SERVICE_PROTOCOL` instead of the listener protocol, so an HTTPS listener no longer breaks HTTP backends. (Fixes bunkerity/bunkerweb-helm#121)
 - [BUGFIX] `backup`: the built-in backup no longer fails on MySQL 26.x.
 - [BUGFIX] `blacklist`: `BLACKLIST_IGNORE_USER_AGENT_URLS` entries are no longer cut at their first space, which exempted most browsers.
 - [BUGFIX] `bunkernet`: the queue of unsent reports keeps the newest 10,000 instead of growing without limit.

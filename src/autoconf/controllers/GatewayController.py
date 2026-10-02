@@ -544,7 +544,8 @@ class GatewayController(KubernetesController):
             if not listener_protocol:
                 self._logger.warning(f"Ignoring HTTPRoute {namespace}/{name}: no compatible HTTP/HTTPS/TLS listener found")
                 return []
-            reverse_proxy_scheme = "tcp" if listener_protocol == "TCP" else listener_protocol.lower()
+            # the backend scheme comes from the backend side, never from the frontend listener
+            reverse_proxy_scheme = "tcp" if listener_protocol == "TCP" else self._service_protocol
 
             if listener_protocol == "TCP":
                 service["SERVER_TYPE"] = "stream"
