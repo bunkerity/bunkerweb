@@ -3064,8 +3064,16 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
 
     !!! tip "Bonnes pratiques"
         - Utilisez `SameSite=Strict` pour les cookies sensibles afin d'empêcher l'accès inter-origines.
+        - Utilisez `SameSite=None` uniquement lorsque les cookies doivent être envoyés dans un contexte intersite (par ex. callbacks SSO ou contenu intégré) ; les navigateurs exigent alors l'attribut `Secure`, gardez donc `COOKIE_AUTO_SECURE_FLAG` activé ou ajoutez `Secure` explicitement.
+        - Si la réponse de l'upstream définit déjà une autre valeur `SameSite`, BunkerWeb ajoute la valeur configurée au lieu de la remplacer ; les navigateurs appliquent le dernier attribut `SameSite`, c'est donc la valeur de `COOKIE_FLAGS` qui s'applique.
         - Auditez régulièrement vos paramètres de cookies pour assurer la conformité avec les réglementations de sécurité et de confidentialité.
         - Évitez de définir des cookies sans l'attribut Secure dans les environnements de production.
+
+    !!! example "SameSite=None pour les cookies intersites"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "En-têtes personnalisés"
 
