@@ -1445,6 +1445,7 @@ utils.get_phases = function()
 		"access",
 		"content",
 		"ssl_client_hello_default",
+		"ssl_certificate_default",
 		"ssl_certificate",
 		"header",
 		"log",

@@ -5,6 +5,7 @@ local env = require "resty.env"
 local plugin = require "bunkerweb.plugin"
 local ssl = require "ngx.ssl"
 local utils = require "bunkerweb.utils"
+local x509 = require "resty.openssl.x509"
 
 local letsencrypt = class("letsencrypt", plugin)
 
@@ -19,6 +20,7 @@ local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local parse_pem_cert = ssl.parse_pem_cert
 local parse_pem_priv_key = ssl.parse_pem_priv_key
 local ssl_server_name = ssl.server_name
+local raw_server_addr = ssl.raw_server_addr
 local is_http_challenge = acme.is_http_challenge
 local is_challenge_uri = acme.is_challenge_uri
 local env_set = env.set
@@ -38,6 +40,9 @@ local pairs = pairs
 local sort = table.sort
 local lower = string.lower
 local gsub = string.gsub
+local byte = string.byte
+local format = string.format
+local tonumber = tonumber
 
 -- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
 local function normalize_hostname(hostname)
@@ -209,6 +214,93 @@ local function resolve_wildcard_base(host, bases)
 	return nil
 end
 
+local function is_ipv4(name)
+	local a, b, c, d = match(name, "^(%d%d?%d?)%.(%d%d?%d?)%.(%d%d?%d?)%.(%d%d?%d?)$")
+	if not a then
+		return false
+	end
+	return tonumber(a) <= 255 and tonumber(b) <= 255 and tonumber(c) <= 255 and tonumber(d) <= 255
+end
+
+-- Set of the IPv4 addresses listed as iPAddress subject alternative names of the leaf certificate.
+local function get_cert_ip_sans(cert_pem)
+	local ips = {}
+	local ok, err = pcall(function()
+		local cert, new_err = x509.new(cert_pem)
+		if not cert then
+			error(new_err, 0)
+		end
+		local sans, san_err = cert:get_subject_alt_name()
+		if san_err then
+			error(san_err, 0)
+		end
+		if sans then
+			for name_type, value in sans:each() do
+				if name_type == "IP" and is_ipv4(value) then
+					ips[value] = true
+				end
+			end
+		end
+	end)
+	if not ok then
+		return nil, tostring(err)
+	end
+	return ips
+end
+
+-- Add to the map (IP -> certificate identifier) the IPv4 names of a service that a loaded
+-- certificate really carries as IP SAN.
+local function collect_ip_names(self, server_list, ip_map)
+	for _, part in ipairs(server_list) do
+		local host = normalize_hostname(part)
+		if is_ipv4(host) then
+			local data, err = self.internalstore:get("plugin_letsencrypt_ipcert_" .. host, true)
+			if data then
+				ip_map[host] = data[3]
+			elseif err ~= "not found" then
+				self.logger:log(ERR, "can't get IP certificate of " .. host .. " : " .. err)
+			end
+		end
+	end
+end
+
+-- A hostname entry counts as loaded whoever cached it. An IP identifier needs its own lineage :
+-- a service that merely lists the IP caches the same key with its own, IP-less certificate.
+local function lineage_loaded(self, ident)
+	local data = self.internalstore:get("plugin_letsencrypt_" .. ident, true)
+	if data and is_ipv4(ident) then
+		return data[3] == ident
+	end
+	return data ~= nil
+end
+
+-- Convert the 4 bytes returned by ngx.ssl.raw_server_addr() to dotted form.
+local function ipv4_from_raw(raw)
+	if not raw or #raw ~= 4 then
+		return nil
+	end
+	return format("%d.%d.%d.%d", byte(raw, 1, 4))
+end
+
+-- Pick the IP name whose certificate answers a handshake without SNI : the local address
+-- if it has one, else the only IP certificate there is (NAT, Docker), else nothing.
+local function select_ip_name(addr, ip_map)
+	if ip_map[addr] then
+		return addr
+	end
+	local only_id, only_ip
+	for ip, id in pairs(ip_map) do
+		if only_id and only_id ~= id then
+			return nil
+		end
+		if not only_ip or ip < only_ip then
+			only_ip = ip
+		end
+		only_id = id
+	end
+	return only_ip
+end
+
 function letsencrypt:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "letsencrypt", ctx)
@@ -276,6 +368,7 @@ function letsencrypt:init()
 	local ret_ok, ret_err = true, "success"
 	local wildcard_servers = {}
 	local wildcard_bases_set = {}
+	local ip_set = {}
 
 	if has_variable("AUTO_LETS_ENCRYPT", "yes") then
 		local multisite, err = get_variable("MULTISITE", false)
@@ -346,8 +439,7 @@ function letsencrypt:init()
 							wildcard_servers[host] = resolve_wildcard_base(host, bases) or host
 						end
 						for _, base in ipairs(bases) do
-							data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
-							if not data then
+							if not lineage_loaded(self, base) then
 								local check
 								check, data = read_files({
 									"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
@@ -372,9 +464,9 @@ function letsencrypt:init()
 							local host = normalize_hostname(part)
 							wildcard_servers[host] = host
 						end
-						data =
-							self.internalstore:get("plugin_letsencrypt_" .. normalize_hostname(cert_identifier), true)
-						if not data then
+						if lineage_loaded(self, normalize_hostname(cert_identifier)) then
+							collect_ip_names(self, server_list, ip_set)
+						else
 							local check
 							check, data = read_files({
 								"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
@@ -390,6 +482,8 @@ function letsencrypt:init()
 									self.logger:log(ERR, "error while loading data : " .. err)
 									ret_ok = false
 									ret_err = "error loading data"
+								else
+									collect_ip_names(self, server_list, ip_set)
 								end
 							end
 						end
@@ -447,10 +541,8 @@ function letsencrypt:init()
 					wildcard_servers[host] = resolve_wildcard_base(host, bases) or host
 				end
 				for _, base in ipairs(bases) do
-					local data = self.internalstore:get("plugin_letsencrypt_" .. base, true)
-					if not data then
-						local check
-						check, data = read_files({
+					if not lineage_loaded(self, base) then
+						local check, data = read_files({
 							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/fullchain.pem",
 							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. base .. "/privkey.pem",
 						})
@@ -487,6 +579,8 @@ function letsencrypt:init()
 						self.logger:log(ERR, "error while loading data : " .. err)
 						ret_ok = false
 						ret_err = "error loading data"
+					else
+						collect_ip_names(self, server_list, ip_set)
 					end
 				end
 			end
@@ -516,7 +610,48 @@ function letsencrypt:init()
 		return self:ret(false, "error while setting wildcard servers into internalstore : " .. err)
 	end
 
+	ok, err = self.internalstore:set("plugin_letsencrypt_ip_names", ip_set, nil, true)
+	if not ok then
+		return self:ret(false, "error while setting IP names into internalstore : " .. err)
+	end
+
 	return self:ret(ret_ok, ret_err)
+end
+
+function letsencrypt:ssl_certificate_default()
+	local server_name, err = ssl_server_name()
+	if server_name then
+		return self:ret(true, "SNI present, nothing to do")
+	elseif err then
+		return self:ret(false, "can't get server_name : " .. err)
+	end
+	local raw, addr_type
+	raw, addr_type = raw_server_addr()
+	local addr
+	if addr_type == "inet" then
+		addr = ipv4_from_raw(raw)
+	end
+	if not addr then
+		return self:ret(true, "no IPv4 local address to match an IP certificate")
+	end
+	local ip_names
+	ip_names, err = self.internalstore:get("plugin_letsencrypt_ip_names", true)
+	if not ip_names then
+		return self:ret(false, "can't get IP names : " .. err)
+	end
+	local name = select_ip_name(addr, ip_names)
+	if not name then
+		return self:ret(true, "no IP certificate for " .. addr)
+	end
+	local data
+	data, err = self.internalstore:get("plugin_letsencrypt_ipcert_" .. name, true)
+	if not data then
+		return self:ret(
+			false,
+			"error while getting plugin_letsencrypt_ipcert_" .. name .. " from internalstore : " .. err
+		)
+	end
+	return self:ret(true, "IP certificate " .. name .. " found for " .. addr, { data[1], data[2] })
 end
 
 function letsencrypt:ssl_certificate()
@@ -588,13 +723,28 @@ function letsencrypt:load_data(data, server_name)
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
+	-- A failed SAN parsing lists no IP for this certificate, the domain names are unaffected
+	local ip_sans
+	ip_sans, err = get_cert_ip_sans(data[1])
+	if not ip_sans then
+		self.logger:log(ERR, "can't read the IP SANs of the certificate : " .. err)
+		ip_sans = {}
+	end
 	-- Cache data
+	local ident = normalize_hostname(server_name:match("%S+"))
 	for key in server_name:gmatch("%S+") do
-		local cache_key = "plugin_letsencrypt_" .. normalize_hostname(key)
+		local host = normalize_hostname(key)
 		local ok
-		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set("plugin_letsencrypt_" .. host, { cert_chain, priv_key, ident }, nil, true)
 		if not ok then
 			return false, "error while setting data into internalstore : " .. err
+		end
+		if ip_sans[host] then
+			ok, err =
+				self.internalstore:set("plugin_letsencrypt_ipcert_" .. host, { cert_chain, priv_key, ident }, nil, true)
+			if not ok then
+				return false, "error while setting data into internalstore : " .. err
+			end
 		end
 	end
 	return true
@@ -654,5 +804,12 @@ function letsencrypt:api()
 	end
 	return self:ret(true, "unknown request", HTTP_NOT_FOUND)
 end
+
+-- Pure helpers, exposed for the plain lua check
+letsencrypt.ipv4_from_raw = ipv4_from_raw
+letsencrypt.select_ip_name = select_ip_name
+letsencrypt.is_ipv4 = is_ipv4
+letsencrypt.get_cert_ip_sans = get_cert_ip_sans
+letsencrypt.collect_ip_names = collect_ip_names
 
 return letsencrypt

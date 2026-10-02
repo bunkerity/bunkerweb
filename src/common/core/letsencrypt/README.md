@@ -36,6 +36,46 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! info "Profile Availability"
     Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile.
 
+### IP Address Certificates
+
+Let's Encrypt can issue certificates for IP addresses. List the IP next to your hostnames in `SERVER_NAME` and BunkerWeb requests one certificate covering all of them. In single-site mode (`MULTISITE=no`) only the first `SERVER_NAME` entry is used, so a certificate for an IP address needs that address as the only `SERVER_NAME` entry. Use multisite mode for a certificate that covers hostnames and an IP address.
+
+!!! info "Requirements"
+    An IP address is only requested when all of these are true, otherwise it is skipped with a warning and the other names are still issued:
+
+    - `LETS_ENCRYPT_SERVER` is `letsencrypt`
+    - `LETS_ENCRYPT_CHALLENGE` is `http`
+    - `LETS_ENCRYPT_PROFILE` is `shortlived`
+    - The address is a public IPv4 address (IPv6 is not supported)
+    - Port 80 on that address is reachable from the internet
+
+Certificates for IP addresses last 160 hours and are renewed automatically by the daily renewal job.
+
+A client that connects by IP address sends no SNI, so BunkerWeb picks the certificate from the address the client connected to:
+
+1. If the local address matches an IP certificate, that one is served.
+2. Otherwise, if there is only one IP certificate, that one is served.
+3. Otherwise the default certificate is served.
+
+!!! warning "Docker and NAT"
+    Behind Docker port publishing or NAT, BunkerWeb sees a private local address that matches none of the public IPs. With several IP certificates it cannot tell them apart and serves the default certificate.
+
+Setting `DISABLE_DEFAULT_SERVER_STRICT_SNI` to `yes` makes BunkerWeb refuse clients that connect by IP address, so certificates for IP addresses are never used.
+
+The certificate lists every name of the service, so a client connecting by IP address also sees the hostnames. To keep hostnames private, put the IP address in a dedicated service whose `SERVER_NAME` contains only the IP address.
+
+When IP addresses are added to a service that already has a certificate, BunkerWeb expands it and keeps the current certificate if the IP validation fails. Later, if an IP address stops validating (for example port 80 becomes unreachable), the renewal of the whole certificate fails, hostnames included. In that case, remove the IP address from `SERVER_NAME`.
+
+Only an IP address that is actually in the certificate is served to clients without SNI.
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+EMAIL_LETS_ENCRYPT: "admin@example.com"
+SERVER_NAME: "www.example.com 203.0.113.10"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_PROFILE: "shortlived"
+```
+
 ### Configuration Settings
 
 | Setting                                     | Default       | Context   | Multiple | Description                                                                                                                                                                                                                                                                    |

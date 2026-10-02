@@ -14,7 +14,7 @@ from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from threading import Event, Lock, Thread
 from traceback import format_exc
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 from certbot_concurrency import (
     CertbotPaths,
     ensure_accounts,
@@ -135,22 +135,123 @@ def warn_profile_name_limit(service: str, config: Dict[str, Union[str, bool, int
 
 
 def unissuable_names(names: List[str]) -> List[str]:
-    """Return the names no public ACME CA can issue for: IP literals and single-label hosts.
+    """Return the names no public ACME CA can issue for: IPv6, non-public IPv4 and single-label hosts.
 
     Nothing else rejects them, so they reach certbot, fail on every run and keep the whole job
-    red even when every other service got its certificate.
+    red even when every other service got its certificate. Public IPv4 addresses are issuable
+    depending on the service settings, see `ip_requirement_problems`.
     """
     unissuable = []
     for name in names:
         candidate = name.strip().lower().removeprefix("*.")
         try:
-            ip_address(candidate)
+            ip = ip_address(candidate)
         except ValueError:
             if "." not in candidate.rstrip("."):
                 unissuable.append(name)
         else:
-            unissuable.append(name)
+            # is_global already rejects loopback, link-local, unspecified, reserved and broadcast, but not multicast.
+            if ip.version != 4 or not ip.is_global or ip.is_multicast or name.strip().startswith("*."):
+                unissuable.append(name)
     return unissuable
+
+
+def split_ip_names(names: Iterable[str]) -> Tuple[List[str], List[str]]:
+    """Split server names into (hostnames, IP literals)."""
+    hostnames: List[str] = []
+    ips: List[str] = []
+    for name in names:
+        try:
+            ip_address(name.strip())
+        except ValueError:
+            hostnames.append(name)
+        else:
+            ips.append(name)
+    return hostnames, ips
+
+
+def ip_requirement_problems(acme_server: str, challenge: str, profile: str) -> List[str]:
+    """Return the settings that keep a service from getting a certificate for an IP address."""
+    problems = []
+    if acme_server != "letsencrypt":
+        problems.append("LETS_ENCRYPT_SERVER=letsencrypt (only Let's Encrypt issues IP certificates)")
+    if challenge != "http":
+        problems.append("LETS_ENCRYPT_CHALLENGE=http (an IP address cannot be validated with the dns challenge)")
+    if profile != "shortlived":
+        problems.append("LETS_ENCRYPT_PROFILE=shortlived (Let's Encrypt only issues IP certificates with that profile)")
+    return problems
+
+
+def certbot_name_args(server_names: str) -> List[str]:
+    """Return the certbot arguments for the names: hostnames go to a single -d, each IP to its own --ip-address."""
+    hostnames, ips = split_ip_names(name for name in server_names.split(",") if name)
+    args = ["-d", ",".join(hostnames)] if hostnames else []
+    for ip in ips:
+        args.extend(["--ip-address", ip])
+    return args
+
+
+def ips_only_added(config_names: Set[str], existing_names: Set[str]) -> bool:
+    """Return True when the configured names are the existing ones plus IP addresses and nothing else."""
+    added = config_names - existing_names
+    return bool(existing_names) and existing_names < config_names and not split_ip_names(added)[0]
+
+
+def certificate_changes(
+    server_name: str,
+    config: Dict[str, Union[str, bool, int, Dict[str, str]]],
+    existing_cert: Dict[str, Union[str, bool, Set[str]]],
+    zerossl_api_key_hashes: Dict[str, str],
+) -> Tuple[List[str], bool]:
+    """Compare a service with its existing certificate.
+
+    Returns the reasons that force a renewal (delete then issue) and whether the certificate can instead be
+    expanded in place because the only difference is IP addresses added to its names.
+    """
+    reasons: List[str] = []
+    config_server_names = normalize_server_names(config["server_names"])
+    existing_server_names = existing_cert["server_names_set"]
+    wildcard_valid = config["wildcard"] and config["challenge"] == "dns"
+
+    if not wildcard_valid:
+        config_server_names = filter_wildcard_names(config_server_names)
+        existing_server_names = filter_wildcard_names(existing_server_names)
+
+    expand_ips = config_server_names != existing_server_names and ips_only_added(config_server_names, existing_server_names)
+
+    if config_server_names != existing_server_names and not expand_ips:
+        reasons.append(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
+    elif config["challenge"] != existing_cert["challenge"]:
+        reasons.append(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
+    elif config["authenticator"] != existing_cert["authenticator"]:
+        reasons.append(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
+    elif config["staging"] != existing_cert["staging"]:
+        reasons.append(f"[Service: {server_name}] Staging environment does not match existing certificate, forcing renewal.")
+    elif config["profile"] != existing_cert["profile"]:
+        reasons.append(f"[Service: {server_name}] Profile does not match existing certificate, forcing renewal.")
+    elif normalize_server_url(str(config.get("acme_server_url") or "")) != normalize_server_url(str(existing_cert.get("acme_server_url") or "")):
+        reasons.append(f"[Service: {server_name}] ACME server does not match existing certificate, forcing renewal.")
+    elif config.get("acme_server") == "zerossl":
+        configured_api_key_hash = str(config.get("zerossl_api_key_hash") or "")
+        previous_api_key_hash = str(zerossl_api_key_hashes.get(server_name, ""))
+        if server_name in zerossl_api_key_hashes and configured_api_key_hash != previous_api_key_hash:
+            reasons.append(f"[Service: {server_name}] ZeroSSL API key changed, forcing renewal.")
+
+    if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
+        reasons.append(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
+
+    return reasons, expand_ips and not reasons
+
+
+def warn_strict_sni_for_ips(services: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]) -> None:
+    """Warn once when strict SNI would refuse the clients that connect to an IP certificate by address."""
+    if getenv("DISABLE_DEFAULT_SERVER_STRICT_SNI", "no").lower() != "yes":
+        return
+    if any(config["activated"] and split_ip_names(normalize_server_names(str(config["server_names"])))[1] for config in services.values()):
+        LOGGER.warning(
+            "DISABLE_DEFAULT_SERVER_STRICT_SNI=yes refuses TLS connections without SNI, and clients that connect to an IP address send none, "
+            "so they will not be able to reach the IP certificate(s)."
+        )
 
 
 def filter_wildcard_names(names: Set[str]) -> Set[str]:
@@ -276,7 +377,7 @@ def is_domain_blacklisted(domain, psl):
 
 def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) -> bool:
     """Check if any domains are blacklisted by PSL rules."""
-    for domain in domains:
+    for domain in split_ip_names(domains)[0]:
         if is_domain_blacklisted(domain, psl_rules):
             LOGGER.error(f"Domain {domain} is blacklisted by Public Suffix List, refusing certificate request for {service_name}.")
             return True
@@ -452,13 +553,20 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     server_names = server_names_val.split()
 
     unissuable = unissuable_names(server_names)
-    if unissuable:
-        issuable = [name for name in server_names if name not in unissuable]
+    issuable = [name for name in server_names if name not in unissuable]
+    ip_problems = ip_requirement_problems(acme_server, challenge_val, profile_val)
+    skipped_ips = split_ip_names(issuable)[1] if ip_problems else []
+    if unissuable or skipped_ips:
+        issuable = [name for name in issuable if name not in skipped_ips]
         if activated:
-            LOGGER.warning(
-                f"[Service: {service}] No public CA issues certificates for {', '.join(unissuable)}"
-                + (", requesting one for the remaining server names." if issuable else ", skipping generation.")
-            )
+            if unissuable:
+                LOGGER.warning(
+                    f"[Service: {service}] No public CA issues certificates for {', '.join(unissuable)}"
+                    + (", requesting one for the remaining server names." if issuable else ", skipping generation.")
+                )
+            for ip in skipped_ips:
+                for problem in ip_problems:
+                    LOGGER.warning(f"[Service: {service}] {ip} needs {problem}, skipping it.")
         if issuable:
             server_names = issuable
         else:
@@ -489,6 +597,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         "retries": retries_int,
         "exists": False,
         "force_renew": False,
+        "expand_ips": False,
     }
 
 
@@ -687,8 +796,7 @@ def certbot_new(
         "-n",
         "--cert-name",
         service,
-        "-d",
-        config["server_names"],
+        *certbot_name_args(str(config["server_names"])),
         "--preferred-profile",
         config["profile"],
         "--agree-tos",
@@ -908,6 +1016,8 @@ try:
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
         sys_exit(0)
 
+    warn_strict_sni_for_ips(services)
+
     # Still needed before certbot runs: sets the umask and sweeps unwritable log files.
     # The job's own log file is attached earlier, at import, without that side effect.
     prepare_logs_dir(LOGS_DIR, LOGGER)
@@ -1060,49 +1170,24 @@ try:
                 config["activated"] = False
                 continue
 
-        config_server_names = normalize_server_names(config["server_names"])
-        existing_server_names = existing_cert["server_names_set"]
-        wildcard_valid = config["wildcard"] and config["challenge"] == "dns"
-
-        if not wildcard_valid:
-            config_server_names = filter_wildcard_names(config_server_names)
-            existing_server_names = filter_wildcard_names(existing_server_names)
-
-        if config_server_names != existing_server_names:
-            LOGGER.warning(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
+        reasons, expand_ips = certificate_changes(server_name, config, existing_cert, zerossl_api_key_hashes)
+        for reason in reasons:
+            LOGGER.warning(reason)
+        if reasons:
             config["force_renew"] = True
-        elif config["challenge"] != existing_cert["challenge"]:
-            LOGGER.warning(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
-            config["force_renew"] = True
-        elif config["authenticator"] != existing_cert["authenticator"]:
-            LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
-            config["force_renew"] = True
-        elif config["staging"] != existing_cert["staging"]:
-            LOGGER.warning(f"[Service: {server_name}] Staging environment does not match existing certificate, forcing renewal.")
-            config["force_renew"] = True
-        elif config["profile"] != existing_cert["profile"]:
-            LOGGER.warning(f"[Service: {server_name}] Profile does not match existing certificate, forcing renewal.")
-            config["force_renew"] = True
-        elif normalize_server_url(str(config.get("acme_server_url") or "")) != normalize_server_url(str(existing_cert.get("acme_server_url") or "")):
-            LOGGER.warning(f"[Service: {server_name}] ACME server does not match existing certificate, forcing renewal.")
-            config["force_renew"] = True
-        elif config.get("acme_server") == "zerossl":
-            configured_api_key_hash = str(config.get("zerossl_api_key_hash") or "")
-            previous_api_key_hash = str(zerossl_api_key_hashes.get(server_name, ""))
-            if server_name in zerossl_api_key_hashes and configured_api_key_hash != previous_api_key_hash:
-                LOGGER.warning(f"[Service: {server_name}] ZeroSSL API key changed, forcing renewal.")
-                config["force_renew"] = True
-
-        if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
-            LOGGER.warning(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
-            config["force_renew"] = True
+        elif expand_ips:
+            LOGGER.warning(
+                f"[Service: {server_name}] The existing certificate does not include the configured IP address(es), expanding it. "
+                "If the order fails, the current certificate stays in place."
+            )
+            config["expand_ips"] = True
 
     # ? generate new certificates and renew existing ones if needed
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
     pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
 
     for service, config in services.items():
-        if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
+        if existing_certificates.get(service, {}).get("active") and not config["force_renew"] and not config["expand_ips"]:
             LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue
