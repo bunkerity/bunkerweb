@@ -191,10 +191,9 @@ def certbot_name_args(server_names: str) -> List[str]:
     return args
 
 
-def ips_only_added(config_names: Set[str], existing_names: Set[str]) -> bool:
-    """Return True when the configured names are the existing ones plus IP addresses and nothing else."""
-    added = config_names - existing_names
-    return bool(existing_names) and existing_names < config_names and not split_ip_names(added)[0]
+def names_only_added(config_names: Set[str], existing_names: Set[str]) -> bool:
+    """Return True when the configured names are the existing ones plus added names and no removal."""
+    return bool(existing_names) and existing_names < config_names
 
 
 def certificate_changes(
@@ -206,7 +205,7 @@ def certificate_changes(
     """Compare a service with its existing certificate.
 
     Returns the reasons that force a renewal (delete then issue) and whether the certificate can instead be
-    expanded in place because the only difference is IP addresses added to its names.
+    expanded in place because the only difference is names (hostnames or IP addresses) added to its names.
     """
     reasons: List[str] = []
     config_server_names = normalize_server_names(config["server_names"])
@@ -217,9 +216,9 @@ def certificate_changes(
         config_server_names = filter_wildcard_names(config_server_names)
         existing_server_names = filter_wildcard_names(existing_server_names)
 
-    expand_ips = config_server_names != existing_server_names and ips_only_added(config_server_names, existing_server_names)
+    expand_names = config_server_names != existing_server_names and names_only_added(config_server_names, existing_server_names)
 
-    if config_server_names != existing_server_names and not expand_ips:
+    if config_server_names != existing_server_names and not expand_names:
         reasons.append(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
     elif config["challenge"] != existing_cert["challenge"]:
         reasons.append(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
@@ -240,7 +239,7 @@ def certificate_changes(
     if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
         reasons.append(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
 
-    return reasons, expand_ips and not reasons
+    return reasons, expand_names and not reasons
 
 
 def warn_strict_sni_for_ips(services: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]) -> None:
@@ -597,7 +596,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         "retries": retries_int,
         "exists": False,
         "force_renew": False,
-        "expand_ips": False,
+        "expand_names": False,
     }
 
 
@@ -991,7 +990,8 @@ try:
     # Keep service errors separate from certificate lineage names: a valid sibling can use the
     # same lineage name as a rejected service, and must still receive its certificate.
     rejected_services: Set[str] = set()
-    for service in server_names.split():
+    # Single-site: the other SERVER_NAME entries are aliases of the first, which names the lineage.
+    for service in server_names.split() if IS_MULTISITE else server_names.split()[:1]:
         if not service.strip():
             continue
 
@@ -1170,24 +1170,24 @@ try:
                 config["activated"] = False
                 continue
 
-        reasons, expand_ips = certificate_changes(server_name, config, existing_cert, zerossl_api_key_hashes)
+        reasons, expand_names = certificate_changes(server_name, config, existing_cert, zerossl_api_key_hashes)
         for reason in reasons:
             LOGGER.warning(reason)
         if reasons:
             config["force_renew"] = True
-        elif expand_ips:
+        elif expand_names:
             LOGGER.warning(
-                f"[Service: {server_name}] The existing certificate does not include the configured IP address(es), expanding it. "
+                f"[Service: {server_name}] The existing certificate does not include all the configured names, expanding it. "
                 "If the order fails, the current certificate stays in place."
             )
-            config["expand_ips"] = True
+            config["expand_names"] = True
 
     # ? generate new certificates and renew existing ones if needed
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
     pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
 
     for service, config in services.items():
-        if existing_certificates.get(service, {}).get("active") and not config["force_renew"] and not config["expand_ips"]:
+        if existing_certificates.get(service, {}).get("active") and not config["force_renew"] and not config["expand_names"]:
             LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue

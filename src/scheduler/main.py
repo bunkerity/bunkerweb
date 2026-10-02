@@ -123,6 +123,24 @@ except ValueError:
 HEALTHCHECK_EVENT = Event()
 HEALTHCHECK_LOGGER = getLogger("SCHEDULER.HEALTHCHECK")
 
+# A restart that kept its configuration reports "needs_config": it serves and enforces that
+# configuration and only asks for the latest one. If the instance cannot clear its marker, a
+# render, push and reload on every healthcheck would follow, so those pushes are bounded.
+NEEDS_CONFIG_FAST_RETRIES = 3
+NEEDS_CONFIG_SLOW_RETRY_EVERY = 20
+NEEDS_CONFIG_PASSES: dict = {}
+# The instance drops its marker as soon as /confs lands, so when the push fails after that (a
+# sibling upload or the reload) it answers "ok" although the configuration it was sent is not
+# live. These still need a push, until a reload succeeds.
+NEEDS_CONFIG_PENDING: set = set()
+
+
+def needs_config_push_due(hostname: str) -> bool:
+    passes = NEEDS_CONFIG_PASSES.get(hostname, 0) + 1
+    NEEDS_CONFIG_PASSES[hostname] = passes
+    return passes <= NEEDS_CONFIG_FAST_RETRIES or (passes - NEEDS_CONFIG_FAST_RETRIES) % NEEDS_CONFIG_SLOW_RETRY_EVERY == 0
+
+
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
 
@@ -378,6 +396,8 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
         logger.info(f"Successfully sent {file_path} folder to reachable BunkerWeb instances")
     elif not IGNORE_FAIL_SENDING_CONFIG:
         logger.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
+
+    return success
 
 
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH, send: bool = True):
@@ -979,7 +999,22 @@ def healthcheck_job():
                             break
                     continue
 
-                if resp["msg"] == "loading":
+                hostname = db_instance["hostname"]
+                state = resp["msg"]
+                if state == "ok" and hostname in NEEDS_CONFIG_PENDING:
+                    state = "needs_config"
+                if state not in ("needs_config", "reloading"):
+                    NEEDS_CONFIG_PASSES.pop(hostname, None)
+
+                push = state == "loading"
+                if state == "needs_config":
+                    push = needs_config_push_due(hostname)
+                    if not push and NEEDS_CONFIG_PASSES[hostname] == NEEDS_CONFIG_FAST_RETRIES + 1:
+                        HEALTHCHECK_LOGGER.error(
+                            f"Instance {bw_instance.endpoint} still asks for its configuration after {NEEDS_CONFIG_FAST_RETRIES} pushes, it keeps enforcing the configuration it restarted with; check that it can remove /var/tmp/bunkerweb_needs_config. Retrying every {NEEDS_CONFIG_SLOW_RETRY_EVERY} healthchecks ..."
+                        )
+
+                if push:
                     if db_instance["status"] == "failover":
                         # Pushing from here is not an option: this runs on the scheduler loop and would
                         # submit five tasks into a four-worker pool. Clearing the status that made the
@@ -988,14 +1023,22 @@ def healthcheck_job():
                         # its loading configuration, with every is_loading-gated control bypassed,
                         # until an unrelated configuration change happens to come along.
                         HEALTHCHECK_LOGGER.warning(
-                            f"Instance {db_instance['hostname']} is in failover mode and loading, marking it down so its configuration is pushed again ..."
+                            f"Instance {db_instance['hostname']} is in failover mode and reports {state}, marking it down so its configuration is pushed again ..."
                         )
                         ret = SCHEDULER.db.update_instance(db_instance["hostname"], "down")
                         if ret:
                             HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to down in the database: {ret}")
                         continue
 
-                    HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
+                    if state == "needs_config":
+                        # Recorded before the uploads: /confs clears the instance's marker, so a failure
+                        # in a sibling upload would otherwise leave an "ok" instance nobody retries.
+                        NEEDS_CONFIG_PENDING.add(hostname)
+                        HEALTHCHECK_LOGGER.info(
+                            f"Instance {bw_instance.endpoint} restarted with its configuration preserved and enforced, sending the latest config ..."
+                        )
+                    else:
+                        HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
                     api_caller = ApiCaller([bw_instance])
 
                     if env is None:
@@ -1044,8 +1087,16 @@ def healthcheck_job():
                             api_caller=api_caller,
                         ),
                     ]
-                    for future in tmp_futures:
-                        future.result()
+                    # Every upload is awaited before judging: a reload on a partial push would clear the
+                    # pending marker for an instance that still lacks part of its configuration.
+                    if not all([future.result() for future in tmp_futures]):
+                        HEALTHCHECK_LOGGER.error(
+                            f"Error while sending the configuration to instance {bw_instance.endpoint}, reload skipped, it will be retried"
+                        )
+                        ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
+                        if ret:
+                            HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
+                        continue
 
                     if not api_caller.send_to_apis(
                         "POST",
@@ -1058,6 +1109,7 @@ def healthcheck_job():
                             HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
                         continue
                     HEALTHCHECK_LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
+                    NEEDS_CONFIG_PENDING.discard(hostname)
 
                 ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up")
                 if ret:

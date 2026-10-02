@@ -928,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Zablokowane ({{method}})",
-    "locked_settings_hint": "Zablokowane ustawienia są wyróżnione"
+    "locked_settings_hint": "Zablokowane ustawienia są wyróżnione",
+    "raw_setting_drafts": "Na początku ustawienia naciśnij #, aby przełączyć szkic, lub Backspace, aby je aktywować. Zapisz, aby zastosować. Szkice zachowują swoje wartości, a obowiązują wartości odziedziczone lub domyślne."
   },
   "link": {
     "back_to_login": "Powrót do logowania",

@@ -928,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Naka-lock ({{method}})",
-    "locked_settings_hint": "Ang mga naka-lock na setting ay naka-highlight"
+    "locked_settings_hint": "Ang mga naka-lock na setting ay naka-highlight",
+    "raw_setting_drafts": "Sa simula ng isang setting, pindutin ang # para i-toggle ang draft o Backspace para i-activate ito. I-save para ilapat. Pinananatili ng mga draft ang kanilang mga value habang umiiral ang mga minanang value o default na value."
   },
   "link": {
     "back_to_login": "Bumalik sa Login",

@@ -928,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Bloccato ({{method}})",
-    "locked_settings_hint": "Le impostazioni bloccate sono evidenziate"
+    "locked_settings_hint": "Le impostazioni bloccate sono evidenziate",
+    "raw_setting_drafts": "All'inizio di un'impostazione, premi # per attivare o disattivare la bozza oppure Backspace per attivarla. Salva per applicare. Le bozze mantengono i propri valori mentre hanno effetto i valori ereditati o predefiniti."
   },
   "link": {
     "back_to_login": "Torna al Login",

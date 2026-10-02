@@ -195,11 +195,12 @@ try:
 
     LOGGER.info("Checking BunkerWeb Pro status..." if not force_update else "Force update requested: skipping status check and metadata update")
 
+    server_names = getenv("SERVER_NAME", "www.example.com").split()
     data = {
         "integration": get_integration(),
         "version": get_version(),
         "os": get_os_info(),
-        "service_number": str(len(getenv("SERVER_NAME", "www.example.com").split())),
+        "service_number": str(len(server_names) if getenv("MULTISITE", "no") == "yes" else min(len(server_names), 1)),
     }
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
     default_metadata = {

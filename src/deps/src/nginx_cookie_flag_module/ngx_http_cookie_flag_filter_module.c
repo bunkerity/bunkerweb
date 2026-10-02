@@ -53,6 +53,7 @@ static u_char *ngx_get_arg_name(ngx_pool_t *pool, ngx_str_t src) {
             return NULL;
         }
         ngx_memcpy(dst, src.data, pos);
+        dst[pos] = '\0';
         return dst;
     } else {
         return src.data;
@@ -242,61 +243,67 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
     ngx_str_t tmp;
 
     if (cookie->httponly == 1 && ngx_strcasestrn(header->value.data, "; HttpOnly", 10 - 1) == NULL) {
-        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; HttpOnly") - 1);
+        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; HttpOnly"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
         }
         tmp.len = ngx_sprintf(tmp.data, "%V; HttpOnly", &header->value) - tmp.data;
+        tmp.data[tmp.len] = '\0';
         header->value.data = tmp.data;
         header->value.len = tmp.len;
     }
 
     if (cookie->secure == 1 && ngx_strcasestrn(header->value.data, "; secure", 8 - 1) == NULL) {
-        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; secure") - 1);
+        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; secure"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
         }
         tmp.len = ngx_sprintf(tmp.data, "%V; secure", &header->value) - tmp.data;
+        tmp.data[tmp.len] = '\0';
         header->value.data = tmp.data;
         header->value.len = tmp.len;
     }
 
     if (cookie->samesite == 1 && ngx_strcasestrn(header->value.data, "; SameSite", 10 - 1) == NULL) {
-        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite") - 1);
+        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
         }
         tmp.len = ngx_sprintf(tmp.data, "%V; SameSite", &header->value) - tmp.data;
+        tmp.data[tmp.len] = '\0';
         header->value.data = tmp.data;
         header->value.len = tmp.len;
     }
 
     if (cookie->samesite_lax == 1 && ngx_strcasestrn(header->value.data, "; SameSite=Lax", 14 - 1) == NULL) {
-        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=Lax") - 1);
+        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=Lax"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
         }
         tmp.len = ngx_sprintf(tmp.data, "%V; SameSite=Lax", &header->value) - tmp.data;
+        tmp.data[tmp.len] = '\0';
         header->value.data = tmp.data;
         header->value.len = tmp.len;
     }
 
     if (cookie->samesite_strict == 1 && ngx_strcasestrn(header->value.data, "; SameSite=Strict", 17 - 1) == NULL) {
-        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=Strict") - 1);
+        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=Strict"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
         }
         tmp.len = ngx_sprintf(tmp.data, "%V; SameSite=Strict", &header->value) - tmp.data;
+        tmp.data[tmp.len] = '\0';
         header->value.data = tmp.data;
         header->value.len = tmp.len;
     }
 
     if (cookie->samesite_none == 1 && ngx_strcasestrn(header->value.data, "; SameSite=None", 15 - 1) == NULL) {
-        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=None") - 1);
+        tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=None"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
         }
         tmp.len = ngx_sprintf(tmp.data, "%V; SameSite=None", &header->value) - tmp.data;
+        tmp.data[tmp.len] = '\0';
         header->value.data = tmp.data;
         header->value.len = tmp.len;
     }
@@ -348,7 +355,7 @@ ngx_http_cookie_flag_filter_handler(ngx_http_request_t *r)
 
                 if (ngx_strncasecmp(cookie[j].cookie_name.data, (u_char *) "*", 1) != 0) {
                     // append "=" to the security cookie name. The result will be something like "cookie_name="
-                    char *cookie_name = ngx_pnalloc(r->pool,  sizeof("=") - 1 + cookie[j].cookie_name.len);
+                    char *cookie_name = ngx_pnalloc(r->pool, cookie[j].cookie_name.len + sizeof("="));
                     if (cookie_name == NULL) {
                         return NGX_ERROR;
                     }

@@ -344,7 +344,12 @@ class JobScheduler(ApiCaller):
         if ret in (1, 3):
             with self.__thread_lock:
                 self.__job_reload = True
-                if (plugin, name) in (("mtls", "client-cert"), ("modsecurity", "download-crs-plugins")):
+                if (plugin, name) in (
+                    ("mtls", "client-cert"),
+                    ("modsecurity", "download-crs-plugins"),
+                    ("grpc", "grpc-trusted-cert"),
+                    ("reverseproxy", "trusted-cert"),
+                ):
                     self.__job_regenerate = True
                     # A render kept from before a failed push predates this job's change, and
                     # the retry would publish it. Every new request renders again.

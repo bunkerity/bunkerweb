@@ -2815,12 +2815,8 @@ class Database:
                     if not skip_service_management:
                         server_name = config.get("SERVER_NAME", None)
                         if template and server_name is None:
-                            server_name = (
-                                session.query(Template_settings)
-                                .with_entities(Template_settings.value)
-                                .filter_by(template_id=template, setting_id="SERVER_NAME")
-                                .first()
-                            )
+                            template_row = session.query(Template_settings.default).filter_by(template_id=template, setting_id="SERVER_NAME", suffix=0).first()
+                            server_name = template_row.default if template_row else None
 
                         if server_name is None or server_name:
                             server_name = server_name or "www.example.com"
@@ -3481,6 +3477,29 @@ class Database:
                     }
             else:
                 servers = " ".join(db_service.id for db_service in services)
+                if servers:
+
+                    def stored_global(setting_id: str) -> Optional[str]:
+                        # The caller's filter may have left the setting out, so fall back to the stored, non-draft row.
+                        if setting_id in effective_global_config:
+                            entry = effective_global_config[setting_id]
+                            return self._empty_if_none(entry["value"]) if entry.get("method", "default") != "default" else None
+                        row = session.query(Global_values.value).filter_by(setting_id=setting_id, suffix=0, is_draft=False).first()
+                        return self._empty_if_none(row.value) if row else None
+
+                    if not is_multisite and stored_global("MULTISITE") != "yes":
+                        global_names = stored_global("SERVER_NAME")
+                        if global_names is None:  # no stored value: a template may provide the names
+                            template_id = stored_global("USE_TEMPLATE")
+                            row = (
+                                session.query(Template_settings.default).filter_by(template_id=template_id, setting_id="SERVER_NAME", suffix=0).first()
+                                if template_id
+                                else None
+                            )
+                            global_names = self._empty_if_none(row.default) if row else ""
+                        # Single-site: the one service is named after the first SERVER_NAME entry, the other entries are its aliases.
+                        if global_names.split()[:1] == [servers]:
+                            servers = global_names
 
             config["SERVER_NAME"] = {
                 "value": servers,

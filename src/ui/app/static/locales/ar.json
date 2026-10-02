@@ -928,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "مقفل ({{method}})",
-    "locked_settings_hint": "الإعدادات المقفلة مميزة"
+    "locked_settings_hint": "الإعدادات المقفلة مميزة",
+    "raw_setting_drafts": "في بداية الإعداد، اضغط # لتبديل حالة المسودة أو Backspace لتفعيله. احفظ للتطبيق. تحتفظ المسودات بقيمها بينما تسري القيم الموروثة أو الافتراضية."
   },
   "link": {
     "back_to_login": "العودة إلى تسجيل الدخول",

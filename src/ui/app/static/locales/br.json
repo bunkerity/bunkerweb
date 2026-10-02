@@ -928,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Bloqueado ({{method}})",
-    "locked_settings_hint": "Configurações bloqueadas estão destacadas"
+    "locked_settings_hint": "Configurações bloqueadas estão destacadas",
+    "raw_setting_drafts": "No início de uma configuração, pressione # para alternar o rascunho ou Backspace para ativá-la. Salve para aplicar. Os rascunhos mantêm seus valores enquanto os valores herdados ou padrão entram em vigor."
   },
   "link": {
     "back_to_login": "Voltar ao Login",
