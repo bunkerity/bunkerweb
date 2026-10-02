@@ -1,0 +1,39 @@
+src/ui/main.py
+  s_93b11c28ab1284::t_e2665e4ddac9c1 28,33-34,36
+  s_4600783926e6d7::t_384ced19cb25bd 29-32,35,37-40
+  s_d84ef94af5f841::t_7147f2f79f8af5 27
+CHANGELOG.md
+  s_4600783926e6d7::t_482a6b4c67f469 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2333734de7b8428002bd7eb9d6a4ca1d5499e3e8",
+  "prompts": {},
+  "sessions": {
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_93b11c28ab1284": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3ea39246-ae92-47e9-8170-40acf5106b5e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d84ef94af5f841": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f90e9bf0-6d39-49b1-a200-df6cba11a4aa",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
