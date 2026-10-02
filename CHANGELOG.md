@@ -11,12 +11,14 @@
 - [BUGFIX] Jobs no longer load every plugin's cached files at startup, which could get the scheduler OOM-killed.
 - [BUGFIX] A PRO force update no longer deletes unchanged PRO plugin pages.
 - [BUGFIX] The scheduler and autoconf log a warning when two services share a server name.
+- [BUGFIX] In single-site mode every `SERVER_NAME` entry is served and covered by the certificate, not only the first one.
 - [BUGFIX] `backup`: the built-in backup no longer fails on MySQL 26.x.
 - [BUGFIX] `blacklist`: `BLACKLIST_IGNORE_USER_AGENT_URLS` entries are no longer cut at their first space, which exempted most browsers.
 - [BUGFIX] `bunkernet`: the queue of unsent reports keeps the newest 10,000 instead of growing without limit.
 - [BUGFIX] `db`: large blobs are stored in chunks, so PRO plugin updates no longer need a raised `max_allowed_packet` on MariaDB/MySQL. (Fixes #3965)
 - [BUGFIX] `headers`: cookie flags such as `SameSite=Lax` are no longer randomly missing from `Set-Cookie`.
 - [BUGFIX] `letsencrypt`: renewed certificates reach the instances right after the renewal instead of at the next reload.
+- [BUGFIX] `letsencrypt`: adding names to a certificate expands it instead of deleting it first, so a failing new name keeps the current one.
 - [BUGFIX] `metrics`: instances sharing one Redis no longer overwrite each other's metrics; give each instance a distinct hostname.
 - [BUGFIX] `misc`: the default server serves its placeholder page only on `/` and answers 404 elsewhere instead of 200. (Fixes #3992)
 - [BUGFIX] `ui`, `api`: editing a service no longer deletes another one sharing a server name; shared server names are refused.

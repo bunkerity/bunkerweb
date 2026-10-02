@@ -38,7 +38,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 
 ### Certificados para direcciones IP
 
-Let's Encrypt puede emitir certificados para direcciones IP. Indique la IP junto a sus nombres de host en `SERVER_NAME` y BunkerWeb solicitará un único certificado que los cubra a todos. En modo de un solo sitio (`MULTISITE=no`) solo se usa la primera entrada de `SERVER_NAME`, por lo que un certificado para una dirección IP necesita esa dirección como única entrada de `SERVER_NAME`. Utilice el modo multisitio para un certificado que cubra nombres de host y una dirección IP.
+Let's Encrypt puede emitir certificados para direcciones IP. Indique la IP junto a sus nombres de host en `SERVER_NAME` y BunkerWeb solicitará un único certificado que los cubra a todos. En modo de un solo sitio (`MULTISITE=no`), las demás entradas de `SERVER_NAME` son alias de la primera y todas van al mismo certificado, por lo que un nombre de host y una dirección IP funcionan juntos.
 
 !!! info "Requisitos"
     Una dirección IP solo se solicita cuando se cumplen todas estas condiciones. En caso contrario se omite con una advertencia y los demás nombres se emiten igualmente:
@@ -64,7 +64,7 @@ Si `DISABLE_DEFAULT_SERVER_STRICT_SNI` vale `yes`, BunkerWeb rechaza a los clien
 
 El certificado lista todos los nombres del servicio, por lo que un cliente que se conecta por IP también ve los nombres de host. Para mantener privados los nombres de host, ponga la dirección IP en un servicio dedicado cuyo `SERVER_NAME` contenga solo la dirección IP.
 
-Cuando se añaden direcciones IP a un servicio que ya tiene un certificado, BunkerWeb lo amplía y conserva el certificado actual si falla la validación de la IP. Más adelante, si una dirección IP deja de validarse (por ejemplo, el puerto 80 deja de ser accesible), falla la renovación de todo el certificado, nombres de host incluidos. En ese caso, elimine la dirección IP de `SERVER_NAME`.
+Cuando se añaden nombres (nombres de host o direcciones IP) a un servicio que ya tiene un certificado, BunkerWeb lo amplía y conserva el certificado actual si falla la validación de un nombre nuevo. Quitar o sustituir un nombre sigue reemitiendo el certificado desde cero. Más adelante, si una dirección IP deja de validarse (por ejemplo, el puerto 80 deja de ser accesible), falla la renovación de todo el certificado, nombres de host incluidos. En ese caso, elimine la dirección IP de `SERVER_NAME`.
 
 Solo una dirección IP que realmente está en el certificado se sirve a los clientes sin SNI.
 

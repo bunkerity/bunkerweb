@@ -38,7 +38,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 
 ### Certificats pour adresses IP
 
-Let's Encrypt peut émettre des certificats pour des adresses IP. Indiquez l'IP à côté de vos noms d'hôte dans `SERVER_NAME` et BunkerWeb demande un seul certificat qui les couvre tous. En mode mono-site (`MULTISITE=no`), seule la première entrée de `SERVER_NAME` est utilisée : un certificat pour une adresse IP exige donc cette adresse comme unique entrée de `SERVER_NAME`. Utilisez le mode multisite pour un certificat couvrant des noms d'hôte et une adresse IP.
+Let's Encrypt peut émettre des certificats pour des adresses IP. Indiquez l'IP à côté de vos noms d'hôte dans `SERVER_NAME` et BunkerWeb demande un seul certificat qui les couvre tous. En mode mono-site (`MULTISITE=no`), les autres entrées de `SERVER_NAME` sont des alias de la première et figurent toutes dans le même certificat : un nom d'hôte et une adresse IP fonctionnent donc ensemble.
 
 !!! info "Prérequis"
     Une adresse IP n'est demandée que si toutes ces conditions sont remplies. Sinon elle est ignorée avec un avertissement et les autres noms sont tout de même émis :
@@ -64,7 +64,7 @@ Avec `DISABLE_DEFAULT_SERVER_STRICT_SNI` à `yes`, BunkerWeb refuse les clients 
 
 Le certificat liste tous les noms du service : un client qui se connecte par IP voit donc aussi les noms d'hôte. Pour garder les noms d'hôte privés, placez l'adresse IP dans un service dédié dont le `SERVER_NAME` ne contient que l'adresse IP.
 
-Lorsque des adresses IP sont ajoutées à un service qui possède déjà un certificat, BunkerWeb l'étend et conserve le certificat actuel si la validation de l'IP échoue. Plus tard, si une adresse IP cesse d'être validée (par exemple le port 80 devient inaccessible), le renouvellement de tout le certificat échoue, noms d'hôte compris. Dans ce cas, retirez l'adresse IP de `SERVER_NAME`.
+Lorsque des noms (noms d'hôte ou adresses IP) sont ajoutés à un service qui possède déjà un certificat, BunkerWeb l'étend et conserve le certificat actuel si la validation d'un nouveau nom échoue. Retirer ou remplacer un nom réémet toujours le certificat depuis zéro. Plus tard, si une adresse IP cesse d'être validée (par exemple le port 80 devient inaccessible), le renouvellement de tout le certificat échoue, noms d'hôte compris. Dans ce cas, retirez l'adresse IP de `SERVER_NAME`.
 
 Seule une adresse IP réellement présente dans le certificat est servie aux clients sans SNI.
 

@@ -38,7 +38,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 
 ### Zertifikate für IP-Adressen
 
-Let's Encrypt kann Zertifikate für IP-Adressen ausstellen. Tragen Sie die IP zusammen mit Ihren Hostnamen in `SERVER_NAME` ein, und BunkerWeb fordert ein einziges Zertifikat an, das alle Einträge abdeckt. Im Single-Site-Modus (`MULTISITE=no`) wird nur der erste Eintrag von `SERVER_NAME` verwendet. Ein Zertifikat für eine IP-Adresse benötigt daher diese Adresse als einzigen `SERVER_NAME`-Eintrag. Verwenden Sie den Multisite-Modus für ein Zertifikat, das Hostnamen und eine IP-Adresse abdeckt.
+Let's Encrypt kann Zertifikate für IP-Adressen ausstellen. Tragen Sie die IP zusammen mit Ihren Hostnamen in `SERVER_NAME` ein, und BunkerWeb fordert ein einziges Zertifikat an, das alle Einträge abdeckt. Im Single-Site-Modus (`MULTISITE=no`) sind die weiteren `SERVER_NAME`-Einträge Aliase des ersten und landen alle im selben Zertifikat. Ein Hostname und eine IP-Adresse funktionieren daher zusammen.
 
 !!! info "Voraussetzungen"
     Eine IP-Adresse wird nur angefordert, wenn alle diese Bedingungen erfüllt sind. Andernfalls wird sie mit einer Warnung übersprungen, und die übrigen Namen werden trotzdem ausgestellt:
@@ -64,7 +64,7 @@ Wenn `DISABLE_DEFAULT_SERVER_STRICT_SNI` auf `yes` steht, weist BunkerWeb Client
 
 Das Zertifikat enthält alle Namen des Dienstes, ein Client, der sich per IP-Adresse verbindet, sieht daher auch die Hostnamen. Um Hostnamen privat zu halten, legen Sie die IP-Adresse in einem eigenen Dienst an, dessen `SERVER_NAME` nur die IP-Adresse enthält.
 
-Werden IP-Adressen zu einem Dienst hinzugefügt, der bereits ein Zertifikat hat, erweitert BunkerWeb es und behält das aktuelle Zertifikat, falls die IP-Validierung fehlschlägt. Hört später eine IP-Adresse auf zu validieren (z. B. weil Port 80 nicht mehr erreichbar ist), schlägt die Erneuerung des gesamten Zertifikats fehl, einschließlich der Hostnamen. Entfernen Sie in diesem Fall die IP-Adresse aus `SERVER_NAME`.
+Werden Namen (Hostnamen oder IP-Adressen) zu einem Dienst hinzugefügt, der bereits ein Zertifikat hat, erweitert BunkerWeb es und behält das aktuelle Zertifikat, falls die Validierung eines neuen Namens fehlschlägt. Das Entfernen oder Austauschen eines Namens stellt das Zertifikat weiterhin komplett neu aus. Hört später eine IP-Adresse auf zu validieren (z. B. weil Port 80 nicht mehr erreichbar ist), schlägt die Erneuerung des gesamten Zertifikats fehl, einschließlich der Hostnamen. Entfernen Sie in diesem Fall die IP-Adresse aus `SERVER_NAME`.
 
 Nur eine IP-Adresse, die tatsächlich im Zertifikat enthalten ist, wird an Clients ohne SNI ausgeliefert.
 
