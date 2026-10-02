@@ -242,7 +242,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
 {
     ngx_str_t tmp;
 
-    if (cookie->httponly == 1 && ngx_strcasestrn(header->value.data, "; HttpOnly", 10 - 1) == NULL) {
+    if (cookie->httponly == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; HttpOnly", 10 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; HttpOnly"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -253,7 +253,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->secure == 1 && ngx_strcasestrn(header->value.data, "; secure", 8 - 1) == NULL) {
+    if (cookie->secure == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; secure", 8 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; secure"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -264,7 +264,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->samesite == 1 && ngx_strcasestrn(header->value.data, "; SameSite", 10 - 1) == NULL) {
+    if (cookie->samesite == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; SameSite", 10 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -275,7 +275,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->samesite_lax == 1 && ngx_strcasestrn(header->value.data, "; SameSite=Lax", 14 - 1) == NULL) {
+    if (cookie->samesite_lax == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; SameSite=Lax", 14 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=Lax"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -286,7 +286,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->samesite_strict == 1 && ngx_strcasestrn(header->value.data, "; SameSite=Strict", 17 - 1) == NULL) {
+    if (cookie->samesite_strict == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; SameSite=Strict", 17 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=Strict"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -297,7 +297,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->samesite_none == 1 && ngx_strcasestrn(header->value.data, "; SameSite=None", 15 - 1) == NULL) {
+    if (cookie->samesite_none == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; SameSite=None", 15 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=None"));
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -363,7 +363,7 @@ ngx_http_cookie_flag_filter_handler(ngx_http_request_t *r)
                     strcat(cookie_name, "=");
 
                     // if Set-Cookie contains a cookie from settings
-                    if (ngx_strcasestrn(header[i].value.data, cookie_name, strlen(cookie_name) - 1) != NULL) {
+                    if (ngx_strlcasestrn(header[i].value.data, header[i].value.data + header[i].value.len, (u_char *) cookie_name, strlen(cookie_name) - 1) != NULL) {
                         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "filter http_cookie_flag - add flags for cookie \"%V\"", &cookie[j].cookie_name);
                         ngx_int_t res = ngx_http_cookie_flag_filter_append(r, &cookie[j], &header[i]);
                         if (res != NGX_OK) {

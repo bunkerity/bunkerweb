@@ -267,7 +267,7 @@
       "name": "Nginx cookie flag module v1.1.0",
       "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
       "commit": "4e48acf132952bbed43b28a8e6af0584dacb7b4c",
-      "post_install": "patch --forward src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c src/deps/misc/nginx-cookie-flag-samesite-none.patch || rm src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c.orig src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c.rej"
+      "post_install": "F=src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c M=src/deps/misc; patch --reverse --dry-run --force --silent \"$F\" \"$M/nginx-cookie-flag-bounded-search.patch\" >/dev/null 2>&1 || { { patch --reverse --dry-run --force --silent \"$F\" \"$M/nginx-cookie-flag-samesite-none.patch\" >/dev/null 2>&1 || patch --forward --no-backup-if-mismatch \"$F\" \"$M/nginx-cookie-flag-samesite-none.patch\"; } && patch --forward --no-backup-if-mismatch \"$F\" \"$M/nginx-cookie-flag-bounded-search.patch\"; }"
     },
     {
       "id": "ngx_brotli",
