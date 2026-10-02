@@ -928,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Dikunci ({{method}})",
-    "locked_settings_hint": "Pengaturan yang dikunci disorot"
+    "locked_settings_hint": "Pengaturan yang dikunci disorot",
+    "raw_setting_drafts": "Di awal sebuah pengaturan, tekan # untuk mengalihkan draf atau Backspace untuk mengaktifkannya. Simpan untuk menerapkan. Draf mempertahankan nilainya, sementara nilai turunan atau bawaan yang berlaku."
   },
   "link": {
     "back_to_login": "Kembali ke Halaman Masuk",

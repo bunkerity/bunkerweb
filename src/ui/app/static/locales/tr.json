@@ -928,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Kilitli ({{method}})",
-    "locked_settings_hint": "Kilitli ayarlar vurgulanıyor"
+    "locked_settings_hint": "Kilitli ayarlar vurgulanıyor",
+    "raw_setting_drafts": "Bir ayarın başında taslağı açıp kapatmak için # tuşuna ya da etkinleştirmek için Backspace tuşuna basın. Uygulamak için kaydedin. Taslaklar değerlerini korur, devralınan veya varsayılan değerler ise geçerli olur."
   },
   "link": {
     "back_to_login": "Girişe Dön",

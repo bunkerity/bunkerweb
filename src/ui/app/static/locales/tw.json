@@ -928,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "已鎖定 ({{method}})",
-    "locked_settings_hint": "鎖定的設定會反白顯示"
+    "locked_settings_hint": "鎖定的設定會反白顯示",
+    "raw_setting_drafts": "在設定開頭按 # 可切換草稿，按 Backspace 可啟用。儲存後即會套用。草稿會保留其值，而繼承值或預設值會生效。"
   },
   "link": {
     "back_to_login": "返回登入",
