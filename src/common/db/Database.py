@@ -2815,12 +2815,8 @@ class Database:
                     if not skip_service_management:
                         server_name = config.get("SERVER_NAME", None)
                         if template and server_name is None:
-                            server_name = (
-                                session.query(Template_settings)
-                                .with_entities(Template_settings.value)
-                                .filter_by(template_id=template, setting_id="SERVER_NAME")
-                                .first()
-                            )
+                            template_row = session.query(Template_settings.default).filter_by(template_id=template, setting_id="SERVER_NAME", suffix=0).first()
+                            server_name = template_row.default if template_row else None
 
                         if server_name is None or server_name:
                             server_name = server_name or "www.example.com"
