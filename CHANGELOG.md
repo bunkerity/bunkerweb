@@ -8,6 +8,8 @@
 - [BUGFIX] `metrics`: instances sharing one Redis no longer overwrite each other's metrics: Redis keys now carry the instance hostname next to the worker id, so give each instance a distinct hostname. Keys written by older versions are kept as history, still counted in the Web UI and renewed with `METRICS_REDIS_TTL` while the instance runs.
 - [FEATURE] `realip`, `blacklist`, `whitelist`, `greylist`: IP list URLs also read JSON documents, JSON lines, CSV and tab-separated lists, such as the AWS, Google, Cloudflare API, Fastly or Spamhaus feeds, and a `#key=value` fragment keeps only part of a JSON list, e.g. `ip-ranges.json#service=CLOUDFRONT`.
 - [FEATURE] `letsencrypt`: certificates can be issued for public IPv4 addresses listed in `SERVER_NAME`, with `LETS_ENCRYPT_PROFILE=shortlived` and the `http` challenge; addresses that do not meet these conditions are skipped with a warning.
+- [BUGFIX] `letsencrypt`: certificates renewed by the daily renewal job are published to the instances right after the renewal instead of the instances serving the previous certificate until an unrelated reload.
+- [FEATURE] `scheduler`: a job can exit with code 3 to request a reload while still being reported as failed; the Let's Encrypt renewal uses it when some certificates renewed and others failed.
 - [BUGFIX] `blacklist`: `BLACKLIST_IGNORE_USER_AGENT_URLS` entries are no longer cut at their first space, which turned an ignored user agent into its first word and exempted most browsers.
 - [BUGFIX] The loading page answers 503 with `Retry-After` instead of 200. (Fixes #3988)
 - [BUGFIX] `ui`: logins no longer fail with "The CSRF session token is missing" on a fresh worker or when the Web UI is reached both through BunkerWeb and directly.

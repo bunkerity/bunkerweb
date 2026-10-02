@@ -341,7 +341,7 @@ class JobScheduler(ApiCaller):
                 self.__failed_jobs.append(f"{plugin}/{name}")
         end_date = datetime.now().astimezone()
 
-        if ret == 1:
+        if ret in (1, 3):
             with self.__thread_lock:
                 self.__job_reload = True
                 if (plugin, name) in (("mtls", "client-cert"), ("modsecurity", "download-crs-plugins")):
@@ -350,7 +350,8 @@ class JobScheduler(ApiCaller):
                     # the retry would publish it. Every new request renders again.
                     self.__configs_generated = False
 
-        if self.__job_success and (ret < 0 or ret >= 2):
+        # 3 asks for the publication like 1 and is still a failed run like 2, even when another job already failed in this batch
+        if ret == 3 or (self.__job_success and (ret < 0 or ret >= 2)):
             success = False
             self.__logger.error(f"Error while executing job '{name}' from plugin '{plugin}'")
             with self.__thread_lock:
