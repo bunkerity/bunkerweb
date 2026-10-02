@@ -1209,12 +1209,12 @@ def before_request():
             if DB.readonly:
                 LOGGER.warning("reload_ui_plugins is set but database is read-only, skipping plugin reload to prevent infinite loop")
             else:
-                safe_reload_plugins()
-                # Reset the flag BEFORE sending SIGHUP so new workers see it cleared
-                err = DB.checked_changes(changes=["ui_plugins"], value=False)
+                # The flag is cleared before the plugins are read, so new workers after the SIGHUP see it cleared;
+                # None means another worker is mid-reload and the flag stays set so the update is not lost
+                err = safe_reload_plugins()
                 if err:
-                    LOGGER.error(f"Couldn't reset reload_ui_plugins flag: {err}, skipping worker restart to prevent loop")
-                else:
+                    LOGGER.error(f"Plugin reload failed: {err}, skipping worker restart to prevent loop")
+                elif err is not None:
                     schedule_restart_workers()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):

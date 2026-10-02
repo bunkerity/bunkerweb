@@ -41,6 +41,7 @@
 - [BUGFIX] `ui`: the active PRO plugin entry in the dark-mode menu is readable again.
 - [BUGFIX] `ui`: the bans table header and country tooltips now show.
 - [BUGFIX] `ui`: the RAW editor's draft help is translated in every language.
+- [BUGFIX] `ui`: PRO and external plugin pages no longer stay outdated when two plugin updates land a few seconds apart.
 - [PERF] `ui`: the reports table no longer rebuilds every tooltip on each draw, which also stops its memory growth.
 - [PERF] `ui`: restoring saved hidden columns measures the table once instead of once per column.
 - [DEPS] `modsecurity`: libmodsecurity v3.0.17 (security fixes); custom rules selecting `MULTIPART_FILENAME` by file name must use the field name.
