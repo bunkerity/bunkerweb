@@ -24,7 +24,20 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from app.models.safe_session_cache import SafeFileSystemCache
 from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
-from flask_compress import Compress
+
+try:
+    from flask_compress import Compress
+except ModuleNotFoundError as e:  # Alpine's python3 is built without _zstd; Flask-Compress imports it on 3.14+ and the UI only uses br and gzip
+    if e.name != "_zstd":
+        raise
+    from types import ModuleType
+
+    # Stub only while Flask-Compress loads, so later importers (urllib3) still see zstd as unavailable
+    sys_modules["compression.zstd"] = ModuleType("compression.zstd")
+    try:
+        from flask_compress import Compress
+    finally:
+        del sys_modules["compression.zstd"]
 from markupsafe import Markup
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session

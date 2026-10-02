@@ -33,6 +33,7 @@
 - [BUGFIX] `ui`: after saving a setting, the page shows the new value instead of the old one until a refresh. (Fixes #3991)
 - [BUGFIX] `ui`: logins no longer fail with "The CSRF session token is missing" on a fresh worker or with mixed proxied and direct access.
 - [BUGFIX] `ui`: for signed-in users, a form field over 500 kB, such as a large Easy Resolve request, no longer fails with 413.
+- [BUGFIX] `ui`: the Web UI of the all-in-one image starts again instead of failing with `No module named '_zstd'`.
 - [BUGFIX] `ui`: the "More info" link of core and PRO plugins opens their section of the Features page. (Fixes #3990)
 - [BUGFIX] `ui`: country flags load again on the reports, bans and plugin pages.
 - [BUGFIX] `ui`: raw translation keys no longer flash on page load. (Fixes #3963)
