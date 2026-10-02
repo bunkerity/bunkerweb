@@ -3,6 +3,7 @@
 ## v1.6.16~rc3 - ????/??/??
 
 - [SECURITY] A restart with `KEEP_CONFIG_ON_RESTART=yes` keeps every access control enforced instead of disabling most of them until the next config push.
+- [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `publickey-credentials-remote-client-data-json`.
 - [FEATURE] `letsencrypt`: certificates for public IPv4 addresses in `SERVER_NAME`, with the `shortlived` profile and the `http` challenge. (Fixes #3628)
 - [FEATURE] `realip`, `blacklist`, `whitelist`, `greylist`: IP list URLs also read JSON, JSON lines, CSV and tab-separated lists, with a `#key=value` filter.
 - [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting.
