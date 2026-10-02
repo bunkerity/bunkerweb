@@ -105,7 +105,7 @@ Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'in
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples) du dépôt.
+    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc3/examples) du dépôt.
 
 ## Configurations personnalisées {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestion des configurations personnalisées à partir de l'interface utilisate
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples) du dépôt.
+    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc3/examples) du dépôt.
 
 ## Base de données
 
@@ -212,7 +212,7 @@ Si vous utilisez l'interface utilisateur Web, vous pouvez gérer les tâches du 
   <figcaption>Gérer les tâches à partir de l'interface utilisateur web</figcaption>
 </figure>
 
-**Vérification de l'état des instances**
+### Vérification de l'état des instances
 
 Depuis la version 1.6.0, le planificateur dispose d'un système de vérification de l'état intégré qui surveille l'état des instances. Si une instance devient défectueuse, le planificateur cessera de lui envoyer la configuration. Si l'instance redevient saine, le planificateur reprend l'envoi de la configuration.
 

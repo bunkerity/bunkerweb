@@ -59,6 +59,7 @@
     "configs": "Configurações",
     "crowdsec": "CrowdSec",
     "extra_pages": "Páginas Extras",
+    "global_config": "Configurações Globais",
     "global_settings": "Configurações Globais",
     "home": "Início",
     "instances": "Instâncias",
@@ -927,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Bloqueado ({{method}})",
-    "locked_settings_hint": "Configurações bloqueadas estão destacadas"
+    "locked_settings_hint": "Configurações bloqueadas estão destacadas",
+    "raw_setting_drafts": "No início de uma configuração, pressione # para alternar o rascunho ou Backspace para ativá-la. Salve para aplicar. Os rascunhos mantêm seus valores enquanto os valores herdados ou padrão entram em vigor."
   },
   "link": {
     "back_to_login": "Voltar ao Login",
@@ -977,6 +979,7 @@
       "confirm_plugin_deletion_plural": "Tem certeza de que deseja eliminar os plugins selecionados?",
       "confirm_template_deletion": "Tem a certeza de que deseja eliminar o modelo {{name}}?",
       "confirmation_instance_deletion": "Tem certeza de que deseja eliminar a instância selecionada?",
+      "delete_cache_confirmation_alert": "Tem certeza de que deseja eliminar os arquivos de cache selecionados?",
       "delete_confirmation_alert": "Tem certeza de que deseja eliminar a instância selecionada?",
       "delete_confirmation_alert_plural": "Tem certeza de que deseja eliminar as instâncias selecionadas?",
       "delete_confirmation_template_used": "Um ou mais modelos selecionados estão atribuídos a serviços ({{services_count}} serviço(s) no total). A sua remoção limpará essas atribuições. Pretende continuar?",
@@ -999,6 +1002,7 @@
       "recovery_codes_save_alert": "Guarde estes códigos de recuperação em um local seguro (como um gerenciador de senhas ou cofre). Você pode usá-los para acessar sua conta se perder seu dispositivo de autenticação.",
       "recovery_codes_shown_once_alert": "Estes códigos de recuperação são mostrados apenas uma vez. Certifique-se de guardá-los em segurança.",
       "reset_template_alert": "Tem certeza de que deseja redefinir as configurações do modelo atual e as configurações personalizadas?",
+      "services_conversion_confirmation": "Tem certeza de que deseja converter os serviços selecionados?",
       "services_deletion_confirmation": "Tem certeza de que deseja eliminar os serviços selecionados?",
       "unban_confirmation_alert": "Tem certeza de que deseja desbloquear o endereço IP selecionado?",
       "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?",

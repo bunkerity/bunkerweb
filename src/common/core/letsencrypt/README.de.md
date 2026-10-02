@@ -36,6 +36,46 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 !!! info "Profilverfügbarkeit"
     Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherweise nicht in allen Umgebungen oder mit allen ACME-Clients verfügbar sind. Das `classic`-Profil hat die breiteste Kompatibilität und wird für die meisten Benutzer empfohlen. Wenn ein ausgewähltes Profil nicht verfügbar ist, greift das System automatisch auf das `classic`-Profil zurück.
 
+### Zertifikate für IP-Adressen
+
+Let's Encrypt kann Zertifikate für IP-Adressen ausstellen. Tragen Sie die IP zusammen mit Ihren Hostnamen in `SERVER_NAME` ein, und BunkerWeb fordert ein einziges Zertifikat an, das alle Einträge abdeckt. Im Single-Site-Modus (`MULTISITE=no`) sind die weiteren `SERVER_NAME`-Einträge Aliase des ersten und landen alle im selben Zertifikat. Ein Hostname und eine IP-Adresse funktionieren daher zusammen.
+
+!!! info "Voraussetzungen"
+    Eine IP-Adresse wird nur angefordert, wenn alle diese Bedingungen erfüllt sind. Andernfalls wird sie mit einer Warnung übersprungen, und die übrigen Namen werden trotzdem ausgestellt:
+
+    - `LETS_ENCRYPT_SERVER` ist `letsencrypt`
+    - `LETS_ENCRYPT_CHALLENGE` ist `http`
+    - `LETS_ENCRYPT_PROFILE` ist `shortlived`
+    - Die Adresse ist eine öffentliche IPv4-Adresse (IPv6 wird nicht unterstützt)
+    - Port 80 dieser Adresse ist aus dem Internet erreichbar
+
+Zertifikate für IP-Adressen sind 160 Stunden gültig und werden vom täglichen Erneuerungsjob automatisch erneuert.
+
+Ein Client, der sich über die IP-Adresse verbindet, sendet kein SNI. BunkerWeb wählt das Zertifikat daher anhand der Adresse, mit der sich der Client verbunden hat:
+
+1. Passt die lokale Adresse zu einem IP-Zertifikat, wird dieses ausgeliefert.
+2. Gibt es sonst nur ein einziges IP-Zertifikat, wird dieses ausgeliefert.
+3. Andernfalls wird das Standardzertifikat ausgeliefert.
+
+!!! warning "Docker und NAT"
+    Hinter Docker-Portfreigaben oder NAT sieht BunkerWeb eine private lokale Adresse, die zu keiner der öffentlichen IPs passt. Bei mehreren IP-Zertifikaten kann es diese nicht unterscheiden und liefert das Standardzertifikat aus.
+
+Wenn `DISABLE_DEFAULT_SERVER_STRICT_SNI` auf `yes` steht, weist BunkerWeb Clients ab, die sich über eine IP-Adresse verbinden. Zertifikate für IP-Adressen werden dann nie verwendet.
+
+Das Zertifikat enthält alle Namen des Dienstes, ein Client, der sich per IP-Adresse verbindet, sieht daher auch die Hostnamen. Um Hostnamen privat zu halten, legen Sie die IP-Adresse in einem eigenen Dienst an, dessen `SERVER_NAME` nur die IP-Adresse enthält.
+
+Werden Namen (Hostnamen oder IP-Adressen) zu einem Dienst hinzugefügt, der bereits ein Zertifikat hat, erweitert BunkerWeb es und behält das aktuelle Zertifikat, falls die Validierung eines neuen Namens fehlschlägt. Das Entfernen oder Austauschen eines Namens stellt das Zertifikat weiterhin komplett neu aus. Hört später eine IP-Adresse auf zu validieren (z. B. weil Port 80 nicht mehr erreichbar ist), schlägt die Erneuerung des gesamten Zertifikats fehl, einschließlich der Hostnamen. Entfernen Sie in diesem Fall die IP-Adresse aus `SERVER_NAME`.
+
+Nur eine IP-Adresse, die tatsächlich im Zertifikat enthalten ist, wird an Clients ohne SNI ausgeliefert.
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+EMAIL_LETS_ENCRYPT: "admin@example.com"
+SERVER_NAME: "www.example.com 203.0.113.10"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_PROFILE: "shortlived"
+```
+
 ### Konfigurationseinstellungen
 
 | Einstellung                                 | Standard      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                           |

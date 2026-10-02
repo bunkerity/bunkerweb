@@ -38,9 +38,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.14.0",
+      "name": "libmaxminddb v1.14.1",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "0077fd76d00a1656b9cb3028d467736504794f41",
+      "commit": "4a3d17a621c0ebcb81498fd34d313f67fd940ab5",
       "post_install": "rm -rf src/deps/src/libmaxminddb/t/libtap src/deps/src/libmaxminddb/t/maxmind-db"
     },
     {
@@ -152,6 +152,13 @@
       "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t && patch --forward src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua src/deps/misc/lua-resty-redis-connector.patch || rm src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.orig src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.rej"
     },
     {
+      "id": "resty-redis-cluster",
+      "name": "resty-redis-cluster v1.6.1",
+      "url": "https://github.com/Kong/resty-redis-cluster.git",
+      "commit": "09ab3295db2e42b144a3a8c67117a1c55c052409",
+      "post_install": "rm -r src/deps/src/resty-redis-cluster/t src/deps/src/resty-redis-cluster/.github src/deps/src/resty-redis-cluster/rockspec && patch --forward src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch || rm src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.orig src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.rej"
+    },
+    {
       "id": "lua-resty-session",
       "name": "lua-resty-session v4.2.0",
       "url": "https://github.com/bungle/lua-resty-session.git",
@@ -236,10 +243,10 @@
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.16",
+      "name": "ModSecurity v3.0.17",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
-      "commit": "7ea9fefbe0ba409d8733b4d682c8c4c059cd028d",
-      "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls src/deps/src/modsecurity/bindings/python src/deps/src/modsecurity/test/test-cases/secrules-language-tests && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
+      "commit": "1925753989ccce977cdaae417b55c9726c7cf02c",
+      "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls src/deps/src/modsecurity/bindings/python src/deps/src/modsecurity/test/test-cases/secrules-language-tests && patch --forward --no-backup-if-mismatch src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward --no-backup-if-mismatch src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward --no-backup-if-mismatch src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
     },
     {
       "id": "modsecurity-nginx",
@@ -259,7 +266,8 @@
       "id": "nginx_cookie_flag_module",
       "name": "Nginx cookie flag module v1.1.0",
       "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
-      "commit": "4e48acf132952bbed43b28a8e6af0584dacb7b4c"
+      "commit": "4e48acf132952bbed43b28a8e6af0584dacb7b4c",
+      "post_install": "F=src/deps/src/nginx_cookie_flag_module/ngx_http_cookie_flag_filter_module.c M=src/deps/misc; patch --reverse --dry-run --force --silent \"$F\" \"$M/nginx-cookie-flag-bounded-search.patch\" >/dev/null 2>&1 || { { patch --reverse --dry-run --force --silent \"$F\" \"$M/nginx-cookie-flag-samesite-none.patch\" >/dev/null 2>&1 || patch --forward --no-backup-if-mismatch \"$F\" \"$M/nginx-cookie-flag-samesite-none.patch\"; } && patch --forward --no-backup-if-mismatch \"$F\" \"$M/nginx-cookie-flag-bounded-search.patch\"; }"
     },
     {
       "id": "ngx_brotli",

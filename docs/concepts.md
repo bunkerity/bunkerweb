@@ -105,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc3/examples) directory of the repository.
 
 ## Custom configurations {#custom-configurations}
 
@@ -126,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc2/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16-rc3/examples) directory of the repository.
 
 ## Database
 
@@ -165,13 +165,15 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 | Integration        | PostgreSQL          | MariaDB             | MySQL              | SQLite      |
 | :----------------- | :------------------ | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v18` and earlier | ✅ `v12` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Docker**         | ✅ `v18` and earlier | ✅ `v13` and earlier | ✅ `v26` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v18` and earlier | ✅ `v13` and earlier | ✅ `v26` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v18` and earlier | ✅ `v13` and earlier | ✅ `v26` and earlier | ✅ Supported |
 | **Linux packages** | See notes below     | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
     - **PostgreSQL**: Alpine-based images, including all-in-one, now ship with the `v18` client, so `v18` and earlier are supported out of the box.
+    - **MariaDB**: Alpine-based images ship the `v11.8` client, which works against MariaDB `v13` servers, including the built-in backup and restore.
+    - **MySQL**: The Alpine-based images use the MariaDB client for backups, which works against MySQL `v9` (`9.7` LTS) and `26.x` (the new year-based Innovation releases), including the built-in backup and restore.
     - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
     - **SQLite**: Ships with the packages and is ready to use.
 

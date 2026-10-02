@@ -39,9 +39,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
     | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | non      | **HSTS :** Force les connexions HTTPS sécurisées, réduisant les risques d'attaques de type "man-in-the-middle".                                           |
     | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | non      | **CSP :** Restreint le chargement des ressources aux sources de confiance, atténuant les attaques de type cross-site scripting et d'injection de données. |
     | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | non      | **Mode rapport CSP :** Signale les violations sans bloquer le contenu, aidant à tester les politiques de sécurité tout en capturant les journaux.         |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | non      | **X-Frame-Options :** Empêche le clickjacking en contrôlant si votre site peut être intégré dans une frame.                                               |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | non      | **X-Content-Type-Options :** Empêche les navigateurs de "MIME-sniffer", protégeant contre les attaques de type "drive-by download".                       |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | non      | **X-DNS-Prefetch-Control :** Régule le préchargement DNS pour réduire les requêtes réseau involontaires et améliorer la confidentialité.                  |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | non      | **X-Frame-Options :** Empêche le clickjacking en contrôlant si votre site peut être intégré dans une frame. Valeurs admises : `DENY`, `SAMEORIGIN` ; une valeur vide supprime cet en-tête. |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | non      | **X-Content-Type-Options :** Empêche les navigateurs de "MIME-sniffer", protégeant contre les attaques de type "drive-by download". Valeurs admises : `nosniff` ; une valeur vide supprime cet en-tête. |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | non      | **X-DNS-Prefetch-Control :** Régule le préchargement DNS pour réduire les requêtes réseau involontaires et améliorer la confidentialité. Valeurs admises : `on`, `off`. |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | non      | **Politique de Referrer :** Contrôle la quantité d'informations de référent envoyées, protégeant la vie privée de l'utilisateur.                          |
     | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | non      | **Politique de permissions :** Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.                          |
     | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | non      | **Conserver les en-têtes :** Préserve les en-têtes en amont sélectionnés, facilitant l'intégration héritée tout en maintenant la sécurité.                |
@@ -71,8 +71,16 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
 
     !!! tip "Bonnes pratiques"
         - Utilisez `SameSite=Strict` pour les cookies sensibles afin d'empêcher l'accès inter-origines.
+        - Utilisez `SameSite=None` uniquement lorsque les cookies doivent être envoyés dans un contexte intersite (par ex. callbacks SSO ou contenu intégré) ; les navigateurs exigent alors l'attribut `Secure`, gardez donc `COOKIE_AUTO_SECURE_FLAG` activé ou ajoutez `Secure` explicitement.
+        - Si la réponse de l'upstream définit déjà une autre valeur `SameSite`, BunkerWeb ajoute la valeur configurée au lieu de la remplacer ; les navigateurs appliquent le dernier attribut `SameSite`, c'est donc la valeur de `COOKIE_FLAGS` qui s'applique.
         - Auditez régulièrement vos paramètres de cookies pour assurer la conformité avec les réglementations de sécurité et de confidentialité.
         - Évitez de définir des cookies sans l'attribut Secure dans les environnements de production.
+
+    !!! example "SameSite=None pour les cookies intersites"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "En-têtes personnalisés"
 
@@ -119,7 +127,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 

@@ -36,6 +36,46 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 !!! info "配置文件可用性"
     请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。
 
+### IP 地址证书
+
+Let's Encrypt 可以为 IP 地址签发证书。在 `SERVER_NAME` 中把 IP 与主机名一起列出，BunkerWeb 会申请一张覆盖所有条目的证书。在单站点模式（`MULTISITE=no`）下，`SERVER_NAME` 的其余条目是第一个条目的别名，并且都包含在同一张证书中，因此主机名和 IP 地址可以一起使用。
+
+!!! info "要求"
+    只有同时满足以下所有条件，才会申请 IP 地址的证书。否则该 IP 会被跳过并给出警告，其余名称仍会正常签发：
+
+    - `LETS_ENCRYPT_SERVER` 为 `letsencrypt`
+    - `LETS_ENCRYPT_CHALLENGE` 为 `http`
+    - `LETS_ENCRYPT_PROFILE` 为 `shortlived`
+    - 该地址是公网 IPv4 地址（不支持 IPv6）
+    - 该地址的 80 端口可从互联网访问
+
+IP 地址证书的有效期为 160 小时，由每日续期任务自动续期。
+
+通过 IP 地址连接的客户端不会发送 SNI，因此 BunkerWeb 根据客户端所连接的地址选择证书：
+
+1. 如果本地地址与某张 IP 证书匹配，则使用该证书。
+2. 否则，如果只有一张 IP 证书，则使用该证书。
+3. 否则使用默认证书。
+
+!!! warning "Docker 与 NAT"
+    在 Docker 端口映射或 NAT 之后，BunkerWeb 看到的是私有本地地址，与任何公网 IP 都不匹配。存在多张 IP 证书时，它无法区分它们，会使用默认证书。
+
+将 `DISABLE_DEFAULT_SERVER_STRICT_SNI` 设为 `yes` 后，BunkerWeb 会拒绝通过 IP 地址连接的客户端，因此 IP 地址证书永远不会被使用。
+
+证书会列出该服务的所有名称，因此通过 IP 连接的客户端也能看到主机名。若要保持主机名私密，请将 IP 地址放在单独的服务中，该服务的 `SERVER_NAME` 只包含 IP 地址。
+
+向已有证书的服务添加名称（主机名或 IP 地址）时，BunkerWeb 会扩展该证书，并在新名称验证失败时保留当前证书。移除或替换名称仍会从头重新签发证书。之后如果某个 IP 地址不再通过验证（例如 80 端口无法访问），整张证书（包括主机名）的续期都会失败。这种情况下，请从 `SERVER_NAME` 中移除该 IP 地址。
+
+只有确实包含在证书中的 IP 地址，才会提供给不带 SNI 的客户端。
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+EMAIL_LETS_ENCRYPT: "admin@example.com"
+SERVER_NAME: "www.example.com 203.0.113.10"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_PROFILE: "shortlived"
+```
+
 ### 配置设置
 
 | 设置                                        | 默认值        | 上下文    | 多选 | 描述                                                                                                                                                                                 |

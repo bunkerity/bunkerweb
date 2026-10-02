@@ -1,6 +1,7 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local rediskeys = require "bunkerweb.rediskeys"
 local session = require "resty.session"
 local utils = require "bunkerweb.utils"
 
@@ -77,6 +78,7 @@ function sessions:init()
 		["REDIS_SENTINEL_USERNAME"] = "",
 		["REDIS_SENTINEL_PASSWORD"] = "",
 		["REDIS_SENTINEL_MASTER"] = "",
+		["REDIS_CLUSTER_NODES"] = "",
 	}
 	for k, _ in pairs(redis_vars) do
 		local value, err = get_variable(k, false)
@@ -88,6 +90,15 @@ function sessions:init()
 		else
 			redis_vars[k] = value
 		end
+	end
+	local config_error = rediskeys.cluster_config_error(
+		redis_vars["REDIS_CLUSTER_NODES"],
+		redis_vars["REDIS_SENTINEL_HOSTS"],
+		redis_vars["REDIS_DATABASE"]
+	)
+	if config_error then
+		self.logger:log(ERR, "invalid redis configuration, sessions use cookie storage : " .. config_error)
+		redis_vars["USE_REDIS"] = "no"
 	end
 	-- Init configuration
 	local config = {
@@ -136,7 +147,17 @@ function sessions:init()
 			ssl_verify = redis_vars["REDIS_SSL_VERIFY"] == "yes",
 			database = tonumber(redis_vars["REDIS_DATABASE"]),
 		}
-		if redis_vars["REDIS_SENTINEL_HOSTS"] ~= nil then
+		if rediskeys.nodes_value(redis_vars["REDIS_CLUSTER_NODES"]) then
+			-- lua-resty-session switches to its Redis Cluster backend when nodes is set.
+			config.redis.name = "bw"
+			config.redis.nodes = rediskeys.parse_nodes(redis_vars["REDIS_CLUSTER_NODES"])
+			config.redis.lock_zone = "redis_cluster_locks"
+			config.redis.lock_prefix = "bw_sessions_refresh_"
+			config.redis.max_redirections = 2
+			config.redis.max_connection_attempts = 1
+			config.redis.max_connection_timeout = parse_duration(redis_vars["REDIS_TIMEOUT"], "ms")
+			config.redis.database = nil
+		elseif redis_vars["REDIS_SENTINEL_HOSTS"] ~= nil then
 			config.redis.master = redis_vars["REDIS_SENTINEL_MASTER"]
 			config.redis.role = "master"
 			config.redis.sentinel_username = redis_vars["REDIS_SENTINEL_USERNAME"]

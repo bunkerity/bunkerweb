@@ -1,0 +1,125 @@
+/*
+* Core overrides
+******************************************************************************/
+:root,
+[data-bs-theme="light"] {
+  --bs-bw-green: #2eac68;
+  --bs-bw-blue: #0b5577;
+  --bs-primary: #0b354a;
+  --bs-secondary: #35728e;
+  --bs-bw-green-rgb: 46, 172, 104;
+  --bs-primary-rgb: 11, 53, 74;
+  --bs-secondary-rgb: 53, 114, 142;
+  --bs-primary-text-emphasis: #07354a;
+  --bs-secondary-text-emphasis: #395d6e;
+  --bs-link-color: #0b354a;
+  --bs-link-color-rgb: 11, 53, 74;
+  --bs-link-hover-color: #2eac68;
+  --bs-link-hover-color-rgb: 46, 172, 104;
+
+  /* Country-choropleth palette — derived from --bs-primary / --bs-bw-blue.
+     Consumed by static/js/pages/home.js via getComputedStyle().
+     Steps 1–2 and --bw-map-land-border target ≥3:1 vs --bw-map-ocean
+     (WCAG 1.4.11); --bw-map-land stays subtle because the land-border hairline
+     carries the shape cue. */
+  --bw-map-ocean: #eef3f6;
+  --bw-map-land: #d9dfe4;
+  --bw-map-land-border: #7c8890;
+  --bw-map-border: #ffffff;
+  --bw-map-step-1: #6a8999;
+  --bw-map-step-2: #3f6c88;
+  --bw-map-step-3: #215778;
+  --bw-map-step-4: #114360;
+  --bw-map-step-5: #0b354a;
+}
+[data-bs-theme="dark"] {
+  --bw-map-ocean: #08141c;
+  --bw-map-land: #1b2e3a;
+  --bw-map-land-border: #4e6a7a;
+  --bw-map-border: #0a1a24;
+  --bw-map-step-1: #537185;
+  --bw-map-step-2: #6a92ab;
+  --bw-map-step-3: #87b2cc;
+  --bw-map-step-4: #abcde3;
+  --bw-map-step-5: #d1e6f3;
+}
+:root {
+  --dt-row-selected: 230, 234, 237;
+  --font-don-jose:
+    "Don Jose", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  --font-courier-prime:
+    "Courier Prime", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+.dark-style,
+[data-bs-theme="dark"] {
+  --bs-primary: #fff;
+  --bs-primary-rgb: 255, 255, 255;
+  --bs-primary-text-emphasis: #fff;
+  --bs-link-color: #fff;
+  --bs-link-color-rgb: 255, 255, 255;
+  --bs-breadcrumb-divider-color: #fff;
+  --bs-body-color-rgb: 255, 255, 255;
+  --dt-row-selected: 31, 31, 31;
+  --bs-breadcrumb-item-active-color: #fff;
+  --bw-dark-surface: #0c283a;
+  color-scheme: dark;
+
+  /* Core surfaces & text */
+  --bs-body-bg: #0d2f45;
+  --bs-body-bg-rgb: 13, 47, 69;
+  --bs-body-color: #fff;
+  --bs-emphasis-color: #fff;
+  --bs-emphasis-color-rgb: 255, 255, 255;
+  --bs-heading-color: #fff;
+  --bs-secondary-color: rgba(255, 255, 255, 0.7);
+  --bs-secondary-color-rgb: 255, 255, 255;
+  --bs-secondary-bg: #0c283a;
+  --bs-secondary-bg-rgb: 12, 40, 58;
+  --bs-tertiary-color: rgba(255, 255, 255, 0.55);
+  --bs-tertiary-color-rgb: 255, 255, 255;
+  --bs-tertiary-bg: #0a2233;
+  --bs-tertiary-bg-rgb: 10, 34, 51;
+
+  /* Borders */
+  --bs-border-color: rgba(255, 255, 255, 0.18);
+  --bs-border-color-translucent: rgba(255, 255, 255, 0.15);
+
+  /* Links */
+  --bs-link-hover-color: #2eac68;
+  --bs-link-hover-color-rgb: 46, 172, 104;
+
+  /* Semantic emphasis / subtle families (dark-derived, navy-tinted) */
+  --bs-secondary-text-emphasis: #9caeb7;
+  --bs-success-text-emphasis: #74d6a2;
+  --bs-info-text-emphasis: #6fb6db;
+  --bs-warning-text-emphasis: #e0c074;
+  --bs-danger-text-emphasis: #e88f96;
+  --bs-light-text-emphasis: #e6edf1;
+  --bs-dark-text-emphasis: #9caeb7;
+  --bs-primary-bg-subtle: #11212c;
+  --bs-secondary-bg-subtle: #14242c;
+  --bs-success-bg-subtle: #0e2a1c;
+  --bs-info-bg-subtle: #0c2533;
+  --bs-warning-bg-subtle: #2e2410;
+  --bs-danger-bg-subtle: #2e1416;
+  --bs-light-bg-subtle: #14242c;
+  --bs-dark-bg-subtle: #0a1e2b;
+  --bs-primary-border-subtle: #1d3a4d;
+  --bs-secondary-border-subtle: #2a4753;
+  --bs-success-border-subtle: #1c553a;
+  --bs-info-border-subtle: #1c5577;
+  --bs-warning-border-subtle: #6a541c;
+  --bs-danger-border-subtle: #6a1c22;
+  --bs-light-border-subtle: #2a4753;
+  --bs-dark-border-subtle: #18313f;
+
+  /* Form validation */
+  --bs-form-valid-color: #74d6a2;
+  --bs-form-valid-border-color: #2eac68;
+  --bs-form-invalid-color: #e88f96;
+  --bs-form-invalid-border-color: #dc3545;
+}

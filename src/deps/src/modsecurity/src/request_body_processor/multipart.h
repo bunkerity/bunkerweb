@@ -97,7 +97,13 @@ class MultipartPart {
      m_value_parts(),
      m_tmp_file_size(),
      m_filename(""),
+     m_filenameStar(""),
      m_filenameOffset(0),
+     m_filenameStarOffset(0),
+     m_filename_charset(""),
+     m_filename_charsetOffset(0),
+     m_filename_language(""),
+     m_filename_languageOffset(0),
      m_last_header_name(""),
      m_headers(),
      m_offset(0),
@@ -133,7 +139,17 @@ class MultipartPart {
 
     /* files only, filename as supplied by the browser */
     std::string m_filename;
+    // Note: Every consumer reading the filename must evaluate m_filenameStar first
+    // to respect RFC precedence rules before falling back to m_filename.
+    std::string m_filenameStar; // need to keep track of this for filename* parsing
     size_t m_filenameOffset;
+    size_t m_filenameStarOffset;
+
+    std::string m_filename_charset;
+    size_t m_filename_charsetOffset;
+
+    std::string m_filename_language;
+    size_t m_filename_languageOffset;
 
     std::string m_last_header_name;
     std::unordered_map<std::string, std::pair<size_t, std::string>,
@@ -236,6 +252,7 @@ class Multipart {
     int m_flag_error;
     int m_flag_data_before;
     int m_flag_data_after;
+    int m_flag_duplicate_part_header;
     int m_flag_header_folding;
     int m_flag_boundary_quoted;
     int m_flag_lf_line;

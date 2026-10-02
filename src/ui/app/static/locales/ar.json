@@ -59,6 +59,7 @@
     "configs": "التكوينات",
     "crowdsec": "CrowdSec",
     "extra_pages": "صفحات إضافية",
+    "global_config": "الإعدادات العامة",
     "global_settings": "الإعدادات العامة",
     "home": "الرئيسية",
     "instances": "المثيلات",
@@ -927,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "مقفل ({{method}})",
-    "locked_settings_hint": "الإعدادات المقفلة مميزة"
+    "locked_settings_hint": "الإعدادات المقفلة مميزة",
+    "raw_setting_drafts": "في بداية الإعداد، اضغط # لتبديل حالة المسودة أو Backspace لتفعيله. احفظ للتطبيق. تحتفظ المسودات بقيمها بينما تسري القيم الموروثة أو الافتراضية."
   },
   "link": {
     "back_to_login": "العودة إلى تسجيل الدخول",
@@ -977,6 +979,7 @@
       "confirm_plugin_deletion_plural": "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟",
       "confirm_template_deletion": "هل أنت متأكد أنك تريد حذف القالب {{name}}؟",
       "confirmation_instance_deletion": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
+      "delete_cache_confirmation_alert": "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟",
       "delete_confirmation_alert": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
       "delete_confirmation_alert_plural": "هل أنت متأكد أنك تريد حذف المثيلات المحددة؟",
       "delete_confirmation_template_used": "يُستخدم هذا القالب بواسطة خدمة واحدة أو أكثر. سيؤدي حذفه إلى إزالته من تلك الخدمات.",
@@ -999,6 +1002,7 @@
       "recovery_codes_save_alert": "يرجى حفظ رموز الاسترداد هذه في مكان آمن (مثل مدير كلمات المرور أو قبو). يمكنك استخدامها للوصول إلى حسابك إذا فقدت جهاز المصادقة الخاص بك.",
       "recovery_codes_shown_once_alert": "يتم عرض رموز الاسترداد هذه مرة واحدة فقط. يرجى التأكد من حفظها بأمان.",
       "reset_template_alert": "هل أنت متأكد أنك تريد إعادة تعيين إعدادات القالب الحالية والتكوينات المخصصة؟",
+      "services_conversion_confirmation": "هل أنت متأكد أنك تريد تحويل الخدمات المحددة؟",
       "services_deletion_confirmation": "هل أنت متأكد أنك تريد حذف الخدمات المحددة؟",
       "unban_confirmation_alert": "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟",
       "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟",

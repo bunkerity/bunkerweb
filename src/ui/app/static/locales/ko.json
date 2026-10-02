@@ -59,6 +59,7 @@
     "configs": "설정",
     "crowdsec": "CrowdSec",
     "extra_pages": "추가 페이지",
+    "global_config": "전역 설정",
     "global_settings": "전역 설정",
     "home": "홈",
     "instances": "인스턴스",
@@ -927,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "잠금됨 ({{method}})",
-    "locked_settings_hint": "잠금된 설정은 강조 표시됩니다"
+    "locked_settings_hint": "잠금된 설정은 강조 표시됩니다",
+    "raw_setting_drafts": "설정의 시작 부분에서 #을 누르면 초안을 전환하고, Backspace를 누르면 활성화합니다. 저장하면 적용됩니다. 초안은 값을 유지하며, 상속된 값이나 기본값이 적용됩니다."
   },
   "link": {
     "back_to_login": "로그인으로 돌아가기",
@@ -977,6 +979,7 @@
       "confirm_plugin_deletion_plural": "선택한 플러그인들을 삭제하시겠습니까?",
       "confirm_template_deletion": "템플릿 {{name}}을(를) 삭제하시겠습니까?",
       "confirmation_instance_deletion": "선택한 인스턴스를 삭제하시겠습니까?",
+      "delete_cache_confirmation_alert": "선택한 캐시 파일들을 삭제하시겠습니까?",
       "delete_confirmation_alert": "선택한 인스턴스를 삭제하시겠습니까?",
       "delete_confirmation_alert_plural": "선택한 인스턴스들을 삭제하시겠습니까?",
       "delete_confirmation_template_used": "선택한 템플릿 중 하나 이상이 서비스(총 {{services_count}}개)에 할당되어 있습니다. 템플릿을 삭제하면 할당이 취소됩니다. 계속하시겠습니까?",
@@ -999,6 +1002,7 @@
       "recovery_codes_save_alert": "이 복구 코드를 안전한 장소(비밀번호 관리자 등)에 저장하세요. 인증 기기를 분실했을 때 계정에 접근하는 데 필요합니다.",
       "recovery_codes_shown_once_alert": "이 복구 코드는 한 번만 표시됩니다. 반드시 안전하게 저장해 주세요.",
       "reset_template_alert": "현재 템플릿 설정과 사용자 정의 설정을 초기화하시겠습니까?",
+      "services_conversion_confirmation": "선택한 서비스를 전환하시겠습니까?",
       "services_deletion_confirmation": "선택한 서비스를 삭제하시겠습니까?",
       "unban_confirmation_alert": "선택한 IP 주소의 차단을 해제하시겠습니까?",
       "unban_confirmation_alert_plural": "선택한 IP 주소들의 차단을 해제하시겠습니까?",

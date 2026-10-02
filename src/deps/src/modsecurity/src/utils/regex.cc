@@ -261,6 +261,12 @@ RegexResult Regex::searchGlobal(const std::string& s, std::vector<SMatchCapture>
         }
         int rc = pcre2_match(m_pc, pcre2_s, s.length(),
                             startOffset, pcre2_options, match_data, static_cast<pcre2_match_context*>(match_context));
+
+        RegexResult regex_result = to_regex_result(rc);
+        if (regex_result != RegexResult::Ok) {
+            pcre2_match_data_free(match_data);
+            return regex_result;
+        }
         const PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
 
 #else

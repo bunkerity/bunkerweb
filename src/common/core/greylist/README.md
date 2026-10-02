@@ -43,6 +43,9 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_IP`      |         | multisite | no       | **IP Greylist:** List of IP addresses or networks (in CIDR notation) to greylist, separated by spaces.   |
     | `GREYLIST_IP_URLS` |         | multisite | no       | **IP Greylist URLs:** List of URLs containing IP addresses or networks to greylist, separated by spaces. |
 
+    !!! info "List formats"
+        URL lists can hold one entry per line (lines starting with `#` or `;` are comments, and only the first word of a line is read), CSV, a JSON document, or JSON lines. In IP lists, commas also separate fields, and JSON lists keep every string that is an IP or network. Add a fragment to keep only part of a JSON list: `#key` keeps the values under `key`, `#key=value` keeps the objects whose `key` equals or contains `value`, and `&` combines terms. Example: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. A URL with a fragment keeps only what the fragment selects, so it keeps nothing if the list is not JSON.
+
 === "Reverse DNS"
     **What this does:** Greylist visitors based on their domain name (in reverse). Useful for allowing conditional access to visitors from specific organizations or networks.
 

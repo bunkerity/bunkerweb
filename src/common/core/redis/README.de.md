@@ -29,10 +29,11 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_TIMEOUT`           | `1s`       | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
 | `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                   |
 | `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                     |
+| `REDIS_CLUSTER_NODES`     |            | global  | nein     | Seed-Knoten eines Redis-Clusters, `host[:port]` durch Leerzeichen getrennt, `[ipv6]:port` für IPv6. Aktiviert den Cluster-Modus. |
 | `REDIS_SENTINEL_HOSTS`    |            | global  | nein     | Sentinel-Hosts (durch Leerzeichen getrennt, `host:port`).     |
 | `REDIS_SENTINEL_USERNAME` |            | global  | nein     | Sentinel-Benutzer.                                            |
 | `REDIS_SENTINEL_PASSWORD` |            | global  | nein     | Sentinel-Passwort.                                            |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | nein     | Name des Sentinel-Masters.                                    |
+| `REDIS_SENTINEL_MASTER`   |            | global  | nein     | Name des Sentinel-Masters.                                    |
 | `REDIS_KEEPALIVE_IDLE`    | `30s`      | global  | nein     | Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen, pro NGINX-Worker. |
 
@@ -52,6 +53,18 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     - Alle BunkerWeb-Instanzen sollten sich mit demselben Redis- oder Valkey-Server oder Sentinel-Cluster verbinden
     - Konfigurieren Sie dieselbe Datenbanknummer auf allen Instanzen
     - Stellen Sie die Netzwerkkonnektivität zwischen allen BunkerWeb-Instanzen und den Redis-/Valkey-Servern sicher
+
+### Redis Cluster
+
+Setzen Sie `REDIS_CLUSTER_NODES` auf mindestens einen erreichbaren Knoten; BunkerWeb ermittelt den Rest des Clusters von dort aus. Dies funktioniert mit Redis 6.2+, Valkey und verwalteten Cluster-Diensten wie ElastiCache oder MemoryDB über deren Konfigurations-Endpunkt. Seed-Knoten akzeptieren `host`, `host:port` oder `[ipv6]:port`, aber der Cluster selbst muss IPv4-Adressen oder Hostnamen ankündigen (`cluster-announce-hostname` mit `cluster-preferred-endpoint-type hostname`); Cluster, die IPv6 ankündigen, werden nicht unterstützt.
+
+Der Cluster-Modus verwendet Datenbank 0. Wird `REDIS_CLUSTER_NODES` zusammen mit `REDIS_SENTINEL_HOSTS` oder mit `REDIS_DATABASE` ungleich 0 gesetzt, ist das ein Konfigurationsfehler: BunkerWeb protokolliert einen Fehler, der beide Einstellungen nennt, und verwendet Redis überhaupt nicht (Rückfall auf lokale Zähler und Cookie-Sitzungen), bis eine der beiden entfernt wird.
+
+Die Umstellung einer bestehenden Bereitstellung auf den Cluster-Modus beginnt mit einem leeren Schlüsselraum: aktive und dauerhafte Sperren, Sitzungen und Berichte werden nicht übernommen. Wenden Sie dauerhafte Sperren nach der Umstellung erneut an.
+
+Sperren und Bad-Behavior-Zähler werden nach Client-IP auf die Primaries verteilt. Berichte zu blockierten Anfragen teilen sich einen einzigen Hash-Slot, sodass ein Primary alle davon speichert.
+
+Mit der Standardeinstellung `cluster-require-full-coverage yes` stoppt der Verlust eines Primary ohne Replica den gesamten Cluster; BunkerWeb fällt dann bis zur Wiederherstellung auf lokale Zähler und Cookie-Sitzungen zurück. `cluster-require-full-coverage no` begrenzt die Auswirkung auf die Schlüssel der verlorenen Shard.
 
 ### Beispiele
 

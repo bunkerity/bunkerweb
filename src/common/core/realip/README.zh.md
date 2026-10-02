@@ -34,6 +34,9 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
 | `REAL_IP_FROM_URLS`  |                                           | multisite | 否   | **IP 列表 URL：** 包含要下载的受信任代理 IP/网络的 URL，以空格分隔。支持 file:// URL。   |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | 否   | **PROXY 协议：** 设置为 `yes` 以启用 PROXY 协议支持，用于直接的代理到 BunkerWeb 的通信。 |
 
+!!! info "列表格式"
+    URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
 !!! tip "云提供商网络"
     如果您正在使用像 AWS、GCP 或 Azure 这样的云提供商，请考虑将其负载均衡器的 IP 范围添加到您的 `REAL_IP_FROM` 设置中，以确保正确的客户端 IP 识别。
 
@@ -111,5 +114,17 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
     REAL_IP_FROM: "" # 我们只信任 Cloudflare 的 IP
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # 自动下载 Cloudflare IP
     REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare 用于客户端 IP 的标头
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "位于 AWS CloudFront 后面"
+
+    用于位于 AWS CloudFront 后面的网站的配置：
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```

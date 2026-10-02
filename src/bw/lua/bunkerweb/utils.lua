@@ -2,6 +2,7 @@ local ngx = ngx
 local cdatastore = require "bunkerweb.datastore"
 local clogger = require "bunkerweb.logger"
 local mmdb = require "bunkerweb.mmdb"
+local rediskeys = require "bunkerweb.rediskeys"
 
 local cjson = require "cjson"
 local ipmatcher = require "resty.ipmatcher"
@@ -1139,11 +1140,18 @@ utils.is_banned = function(ip, server_name)
 		return banned, local_reason, ttl, local_reason_data
 	end
 	keys = missing
+	-- A local ban holds even when Redis cannot tell whether a higher-priority one exists.
+	local function redis_failed(msg)
+		if banned then
+			return banned, local_reason, ttl, local_reason_data
+		end
+		return nil, msg, nil, nil
+	end
 
 	local clusterstore = require "bunkerweb.clusterstore":new()
 	local connected, connect_err = clusterstore:connect(true)
 	if not connected then
-		return nil, "can't connect to redis: " .. connect_err, nil, nil
+		return redis_failed("can't connect to redis: " .. connect_err)
 	end
 	local redis_script = [[
 		for i, key in ipairs(KEYS) do
@@ -1161,12 +1169,19 @@ utils.is_banned = function(ip, server_name)
 		end
 		return {false, -2, 0}
 	]]
-	local data, script_err = clusterstore:call("eval", redis_script, #keys, unpack(keys))
+	-- Redis names may differ from the local ones (cluster hash tags); the hit index still
+	-- points into the local keys list below.
+	local cluster = rediskeys.cluster_mode()
+	local redis_keys = {}
+	for i, key in ipairs(keys) do
+		redis_keys[i] = rediskeys.ban(key, cluster)
+	end
+	local data, script_err = clusterstore:call("eval", redis_script, #redis_keys, unpack(redis_keys))
 	clusterstore:close()
 	if not data then
-		return nil, "redis call error: " .. script_err, nil, nil
+		return redis_failed("redis call error: " .. script_err)
 	elseif data.err then
-		return nil, "redis script error: " .. data.err, nil, nil
+		return redis_failed("redis script error: " .. data.err)
 	elseif data[1] ~= null then
 		-- Cache locally with a short TTL so unbans propagate within BAN_LOCAL_CACHE_TTL seconds.
 		-- For permanent bans (redis_ttl <= 0), also use BAN_LOCAL_CACHE_TTL to re-validate periodically.
@@ -1253,14 +1268,18 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 	local clusterstore = require "bunkerweb.clusterstore":new()
 	ok, err = clusterstore:connect()
 	if not ok then
+		-- The configuration refuses Redis, so the local ban above is the whole ban.
+		if clusterstore.config_error then
+			return true, "success"
+		end
 		return false, "can't connect to redis server : " .. err
 	end
 
 	-- For Redis, set without expiration if permanent, otherwise with EX and ttl
 	if not ttl or ttl == 0 then
-		ok, err = clusterstore:call("set", ban_key, ban_data)
+		ok, err = clusterstore:call("set", rediskeys.ban(ban_key, rediskeys.cluster_mode()), ban_data)
 	else
-		ok, err = clusterstore:call("set", ban_key, ban_data, "EX", ttl)
+		ok, err = clusterstore:call("set", rediskeys.ban(ban_key, rediskeys.cluster_mode()), ban_data, "EX", ttl)
 	end
 
 	if not ok then
@@ -1332,8 +1351,9 @@ utils.remove_ban = function(ip, service, ban_scope)
 		if not ok then
 			logger:log(ERR, "can't connect to redis for unban: " .. connect_err)
 		else
+			local cluster = rediskeys.cluster_mode()
 			for _, key in ipairs(keys_to_delete) do
-				clusterstore:call("del", key)
+				clusterstore:call("del", rediskeys.ban(key, cluster))
 			end
 			clusterstore:close()
 		end
@@ -1425,6 +1445,7 @@ utils.get_phases = function()
 		"access",
 		"content",
 		"ssl_client_hello_default",
+		"ssl_certificate_default",
 		"ssl_certificate",
 		"header",
 		"log",

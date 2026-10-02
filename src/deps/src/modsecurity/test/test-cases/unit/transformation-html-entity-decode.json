@@ -1,0 +1,100 @@
+[
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "javascript&colon;alert(1)",
+    "ret": 1,
+    "output": "javascript:alert(1)"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "it&apos;s",
+    "ret": 1,
+    "output": "it's"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&num;&dollar;&percnt;&lpar;&rpar;&ast;&plus;&comma;&period;&sol;&semi;&equals;&quest;&commat;&excl;",
+    "ret": 1,
+    "output": "#$%()*+,./;=?@!"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&lbrack;&bsol;&rbrack;&lowbar;&grave;&lbrace;&verbar;&rbrace;&Hat;",
+    "ret": 1,
+    "output": "[\\]_`{|}^"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&lcub;&rcub;&lsqb;&rsqb;&vert;&VerticalLine;&midast;&UnderBar;&DiacriticalGrave;",
+    "ret": 1,
+    "output": "{}[]||*_`"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&NewLine;&Tab;&shy;&NonBreakingSpace;",
+    "ret": 1,
+    "output": "\n\t\\xad\\xa0"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&dollar;&lcub;jndi&colon;ldap&rcub;",
+    "ret": 1,
+    "output": "${jndi:ldap}"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&caret;&hyphen;&tilde;",
+    "ret": 0,
+    "output": "&caret;&hyphen;&tilde;"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&ltest;&amped;&gtfoo;",
+    "ret": 0,
+    "output": "&ltest;&amped;&gtfoo;"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&COLON;&Apos;",
+    "ret": 1,
+    "output": ":'"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&ltest;",
+    "ret": 1,
+    "output": "&ltest;"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&amped;",
+    "ret": 1,
+    "output": "&amped;"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&gtfoo;",
+    "ret": 1,
+    "output": "&gtfoo;"
+  },
+  {
+    "type": "tfn",
+    "name": "htmlEntityDecode",
+    "input": "&unknown;",
+    "ret": 1,
+    "output": "&unknown;"
+  }
+]

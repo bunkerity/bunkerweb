@@ -1,6 +1,7 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
  * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2026 OWASP Foundation (http://www.owasp.org/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -120,7 +121,7 @@ std::unique_ptr<std::string> AnchoredSetVariable::resolveFirst(
     return nullptr;
 }
 
-
+// cppcheck-suppress constParameterPointer  -  keep the old signatures for ABI compatibility
 void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
     std::vector<const VariableValue *> *l) const {
     for (const auto& x : *this) {
@@ -138,7 +139,7 @@ void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
     static_cast<const AnchoredSetVariable&>(*this).resolveRegularExpression(r, l);
 }
 
-
+// cppcheck-suppress constParameterPointer  -  keep the old signatures for ABI compatibility
 void AnchoredSetVariable::resolveRegularExpression(Utils::Regex *r,
     std::vector<const VariableValue *> *l,
     const variables::KeyExclusions &ke) const {

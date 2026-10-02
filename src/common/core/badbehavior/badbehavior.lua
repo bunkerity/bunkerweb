@@ -1,6 +1,7 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local rediskeys = require "bunkerweb.rediskeys"
 local utils = require "bunkerweb.utils"
 
 local badbehavior = class("badbehavior", plugin)
@@ -523,11 +524,12 @@ end
 
 function badbehavior:redis_increase(ip, count_time, threshold, ban_time, server_name, ban_scope)
 	-- Determine key based on ban scope
-	local counter_key = "plugin_bad_behavior_" .. ip
-	local ban_key = "bans_ip_" .. ip
+	local cluster = rediskeys.cluster_mode()
+	local counter_key = rediskeys.badbehavior(ip, nil, cluster)
+	local ban_key = rediskeys.ban("bans_ip_" .. ip, cluster)
 	if ban_scope == "service" then
-		counter_key = "plugin_bad_behavior_" .. server_name .. "_" .. ip
-		ban_key = "bans_service_" .. server_name .. "_ip_" .. ip
+		counter_key = rediskeys.badbehavior(ip, server_name, cluster)
+		ban_key = rediskeys.ban("bans_service_" .. server_name .. "_ip_" .. ip, cluster)
 	end
 
 	-- Our LUA script to execute on redis
@@ -581,10 +583,8 @@ end
 
 function badbehavior:redis_decrease(ip, count_time, server_name, ban_scope)
 	-- Determine key based on ban scope
-	local counter_key = "plugin_bad_behavior_" .. ip
-	if ban_scope == "service" then
-		counter_key = "plugin_bad_behavior_" .. server_name .. "_" .. ip
-	end
+	local counter_key =
+		rediskeys.badbehavior(ip, ban_scope == "service" and server_name or nil, rediskeys.cluster_mode())
 
 	-- Our LUA script to execute on redis
 	local redis_script = [[

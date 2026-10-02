@@ -1,0 +1,282 @@
+.buy-now .btn-buy-now {
+  position: unset;
+  box-shadow: 0 1px 20px 1px var(--bs-primary); /* Initial shadow */
+  background-color: var(--bs-bw-green); /* Initial background color */
+  color: #fff;
+  animation: colorPhase 3s infinite; /* Apply the color phasing animation */
+  transition:
+    background-color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out; /* Smooth transitions */
+}
+
+.dark-style .buy-now .btn-buy-now {
+  animation: darkColorPhase 3s infinite; /* Apply the color phasing animation */
+}
+
+.buy-now .btn-buy-now:hover {
+  background-color: var(
+    --bs-bw-green
+  ) !important; /* Keep the primary color on hover */
+}
+
+.btn-pro-now {
+  background-color: var(--bs-bw-green); /* Initial background color */
+  color: #fff;
+}
+
+.btn-pro-now:hover {
+  background-color: var(
+    --bs-bw-green
+  ) !important; /* Keep the primary color on hover */
+}
+
+/* .pro-icon {
+  position: relative;
+  width: 18px;
+  height: 15.5px;
+  overflow: hidden;
+}
+
+.pro-icon::before,
+.pro-icon::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.pro-icon::before {
+  background-image: url("../../img/diamond.svg");
+  opacity: 1;
+  animation: fadeOut 1.5s infinite alternate;
+}
+
+.pro-icon::after {
+  background-image: url("../../img/diamond-blue.svg");
+  opacity: 0;
+  animation: fadeIn 1.5s infinite alternate;
+} */
+
+.shine {
+  background-image: linear-gradient(
+    120deg,
+    rgba(46, 172, 104, 0) 0%,
+    rgba(46, 172, 104, 0.8) 50%,
+    rgba(46, 172, 104, 0) 100%
+  );
+  background-size: 40%;
+  background-position: -100% center;
+  background-repeat: no-repeat;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shine 8s linear infinite;
+  animation-fill-mode: forwards;
+}
+
+.shine-sm {
+  animation: shineSm 5s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes shineSm {
+  0% {
+    background-position: -200% center;
+  }
+  60% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.text-primary.shine {
+  color: rgba(var(--bs-primary-rgb), 0.1) !important;
+  background-color: var(--bs-primary) !important;
+}
+
+.dark-style .text-primary.shine {
+  color: rgba(var(--bs-primary-rgb), 0.1) !important;
+  background-color: var(--bs-primary) !important;
+}
+
+.pro-alert {
+  background: none;
+  border: linear-gradient(135deg, #0b354a, var(--bs-bw-blue));
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pro-alert .alert-link {
+  font-weight: bold !important;
+  text-decoration: underline !important;
+}
+
+.dark-style .pro-alert .alert-link {
+  color: #cdd7db;
+}
+
+.pro-card {
+  background: linear-gradient(135deg, #0b354a, var(--bs-bw-blue));
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.5s ease,
+    border-color 0.5s ease;
+  border: 2px solid transparent;
+}
+
+.pro-card h6,
+.pro-card .list-group-item {
+  color: #fff;
+}
+
+/* PRO License Key unlock effect — input glow */
+
+#PRO_LICENSE_KEY {
+  transition:
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+#PRO_LICENSE_KEY.pro-unlocked {
+  border-color: var(--bs-bw-green) !important;
+  box-shadow:
+    0 0 0 0.2rem rgba(46, 172, 104, 0.35),
+    0 0 15px rgba(46, 172, 104, 0.15);
+}
+
+/* PRO card unlock transform and glow */
+
+.pro-card.pro-card-unlocked {
+  transform: scale(1.02);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(46, 172, 104, 0.3),
+    0 0 40px rgba(46, 172, 104, 0.1);
+  border-color: var(--bs-bw-green);
+}
+
+/* One-shot shimmer sweep across the card */
+
+.pro-card.pro-card-unlocked .card-body {
+  position: relative;
+  overflow: hidden;
+}
+
+.pro-card.pro-card-unlocked .card-body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(46, 172, 104, 0.15) 50%,
+    transparent 100%
+  );
+  animation: proCardShimmer 0.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes proCardShimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Staggered check icon pulse on unlock */
+
+.pro-card.pro-card-unlocked .list-group-item i.bx-check {
+  display: inline-block;
+  animation: proCheckPulse 0.4s ease-out both;
+}
+
+.pro-card.pro-card-unlocked .list-group-item:nth-child(1) i.bx-check {
+  animation-delay: 0.1s;
+}
+
+.pro-card.pro-card-unlocked .list-group-item:nth-child(2) i.bx-check {
+  animation-delay: 0.2s;
+}
+
+.pro-card.pro-card-unlocked .list-group-item:nth-child(3) i.bx-check {
+  animation-delay: 0.3s;
+}
+
+.pro-card.pro-card-unlocked .list-group-item:nth-child(4) i.bx-check {
+  animation-delay: 0.4s;
+}
+
+@keyframes proCheckPulse {
+  0% {
+    transform: scale(1);
+    color: #198754;
+  }
+  50% {
+    transform: scale(1.6);
+    color: var(--bs-bw-green);
+  }
+  100% {
+    transform: scale(1);
+    color: #198754;
+  }
+}
+
+/* Accessibility: respect reduced motion preference */
+
+@media (prefers-reduced-motion: reduce) {
+  .pro-card {
+    transition: none !important;
+  }
+
+  .pro-card.pro-card-unlocked {
+    transform: none;
+  }
+
+  .pro-card.pro-card-unlocked .card-body::after {
+    animation: none;
+  }
+
+  .pro-card.pro-card-unlocked .list-group-item i.bx-check {
+    animation: none;
+  }
+
+  #PRO_LICENSE_KEY {
+    transition: none !important;
+  }
+}
+
+.dark-style
+  .bg-menu-theme
+  .menu-inner
+  > .menu-item.active
+  > .menu-link
+  .text-primary.shine {
+  color: rgba(7, 53, 74, 0.1) !important;
+  background-color: #07354a !important;
+}
+
+.dark-style .pro-alert .alert-link:hover {
+  color: var(--bs-bw-green) !important;
+}

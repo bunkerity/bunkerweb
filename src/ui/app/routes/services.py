@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from io import BytesIO
 from itertools import chain
 from json import dumps
-from time import time
 from typing import Dict, List, Optional, Tuple
 from flask import Blueprint, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
@@ -12,7 +11,7 @@ from regex import sub
 
 from certificate_validation import normalize_pem, uncovered_server_names, validate_certificate_pair  # type: ignore
 
-from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
+from app.dependencies import BW_CONFIG, DATA, DB
 from app.raw_drafts import (
     RAW_DRAFT_SETTINGS,
     RAW_PRESENT_SETTINGS,
@@ -23,7 +22,7 @@ from app.raw_drafts import (
 )
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
-from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
+from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, submit_config_task, verify_data_in_form, wait_applying
 from app.utils import (
     LOGGER,
     can_delete_service,
@@ -47,28 +46,6 @@ def _first_service_id(value: object) -> str:
 def _settings_catalog() -> dict:
     settings = BW_CONFIG.get_plugins_settings()
     return settings if isinstance(settings, dict) else {}
-
-
-def _submit_service_task(task, *args):
-    def completed(future):
-        try:
-            future.result()
-        except Exception:
-            LOGGER.exception("Service operation failed")
-            DATA["TO_FLASH"].append(
-                {"content": "An unexpected error occurred during the service operation. Please check the UI logs for more information.", "type": "error"}
-            )
-            DATA["CONFIG_CHANGED"] = False
-        finally:
-            DATA["RELOADING"] = False
-
-    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    try:
-        future = CONFIG_TASKS_EXECUTOR.submit(task, *args)
-    except Exception:
-        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
-        raise
-    future.add_done_callback(completed)
 
 
 def parse_services_export(content: str) -> Tuple[Dict[str, Dict[str, str]], List[str]]:
@@ -185,7 +162,7 @@ def services_convert():
             return
         DATA["TO_FLASH"].append({"content": f"Converted to \"{convert_to.title()}\" services: {', '.join(services_to_convert)}", "type": "success"})
 
-    _submit_service_task(convert_services, services, convert_to)
+    submit_config_task(convert_services, services, convert_to)
 
     return redirect(
         url_for(
@@ -272,7 +249,7 @@ def services_delete():
             return
         DATA["TO_FLASH"].append({"content": f"Deleted service{'s' if len(services_to_delete) > 1 else ''}: {', '.join(services_to_delete)}", "type": "success"})
 
-    _submit_service_task(delete_services, services)
+    submit_config_task(delete_services, services)
 
     return redirect(
         url_for(
@@ -821,7 +798,7 @@ def services_service_page(service: str):
                 DATA["TO_FLASH"].append({"content": "Draft settings remain unchanged; activate or edit them in Raw mode.", "type": "warning"})
             DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
 
-        _submit_service_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, draft_settings)
+        submit_config_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, draft_settings)
 
         new_service = False
         if service == "new":
@@ -1109,7 +1086,7 @@ def services_service_import():
         config_changed = bool(created) or bool(configs_results and (configs_results["created"] or configs_results["overwritten"]))
         DATA.update({"RELOADING": False, "CONFIG_CHANGED": config_changed})
 
-    _submit_service_task(
+    submit_config_task(
         import_services,
         services_map,
         parse_errors,

@@ -59,6 +59,7 @@
     "configs": "Konfigurasi",
     "crowdsec": "CrowdSec",
     "extra_pages": "Halaman Tambahan",
+    "global_config": "Pengaturan Global",
     "global_settings": "Pengaturan Global",
     "home": "Beranda",
     "instances": "Instans",
@@ -927,7 +928,8 @@
   },
   "legend": {
     "locked_settings_annotation": "Dikunci ({{method}})",
-    "locked_settings_hint": "Pengaturan yang dikunci disorot"
+    "locked_settings_hint": "Pengaturan yang dikunci disorot",
+    "raw_setting_drafts": "Di awal sebuah pengaturan, tekan # untuk mengalihkan draf atau Backspace untuk mengaktifkannya. Simpan untuk menerapkan. Draf mempertahankan nilainya, sementara nilai turunan atau bawaan yang berlaku."
   },
   "link": {
     "back_to_login": "Kembali ke Halaman Masuk",
@@ -977,6 +979,7 @@
       "confirm_plugin_deletion_plural": "Apakah Anda yakin ingin menghapus plugin yang dipilih?",
       "confirm_template_deletion": "Apakah Anda yakin ingin menghapus template {{name}}?",
       "confirmation_instance_deletion": "Apakah Anda yakin ingin menghapus instans yang dipilih?",
+      "delete_cache_confirmation_alert": "Apakah Anda yakin ingin menghapus file cache yang dipilih?",
       "delete_confirmation_alert": "Apakah Anda yakin ingin menghapus instans yang dipilih?",
       "delete_confirmation_alert_plural": "Apakah Anda yakin ingin menghapus instans yang dipilih?",
       "delete_confirmation_template_used": "Satu atau lebih template yang dipilih ditugaskan ke layanan ({{services_count}} layanan total). Menghapusnya akan menghapus penugasan tersebut. Apakah Anda ingin melanjutkan?",
@@ -999,6 +1002,7 @@
       "recovery_codes_save_alert": "Silakan simpan kode pemulihan ini di lokasi yang aman (seperti pengelola kata sandi atau brankas). Anda dapat menggunakannya untuk mengakses akun Anda jika Anda kehilangan perangkat autentikasi Anda.",
       "recovery_codes_shown_once_alert": "Kode pemulihan ini hanya ditampilkan sekali. Silakan pastikan Anda menyimpannya dengan aman.",
       "reset_template_alert": "Apakah Anda yakin ingin mengatur ulang pengaturan template saat ini dan konfigurasi kustom?",
+      "services_conversion_confirmation": "Apakah Anda yakin ingin mengkonversi layanan yang dipilih?",
       "services_deletion_confirmation": "Apakah Anda yakin ingin menghapus layanan yang dipilih?",
       "unban_confirmation_alert": "Apakah Anda yakin ingin membatalkan larangan alamat IP yang dipilih?",
       "unban_confirmation_alert_plural": "Apakah Anda yakin ingin membatalkan larangan alamat IP yang dipilih?",

@@ -34,6 +34,9 @@ Follow these steps to configure and use the Real IP feature:
 | `REAL_IP_FROM_URLS`  |                                           | multisite | no       | **IP List URLs:** URLs containing trusted proxy IPs/networks to download, separated by spaces. Supports file:// URLs. |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | no       | **PROXY Protocol:** Set to `yes` to enable PROXY protocol support for direct proxy-to-BunkerWeb communication.        |
 
+!!! info "List formats"
+    URL lists can hold one entry per line (lines starting with `#` or `;` are comments, and only the first word of a line is read), CSV, a JSON document, or JSON lines. In IP lists, commas also separate fields, and JSON lists keep every string that is an IP or network. Add a fragment to keep only part of a JSON list: `#key` keeps the values under `key`, `#key=value` keeps the objects whose `key` equals or contains `value`, and `&` combines terms. Example: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. A URL with a fragment keeps only what the fragment selects, so it keeps nothing if the list is not JSON.
+
 !!! tip "Cloud Provider Networks"
     If you're using a cloud provider like AWS, GCP, or Azure, consider adding their load balancer IP ranges to your `REAL_IP_FROM` setting to ensure proper client IP identification.
 
@@ -111,5 +114,17 @@ Follow these steps to configure and use the Real IP feature:
     REAL_IP_FROM: "" # We only trust Cloudflare IPs
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Download Cloudflare IPs automatically
     REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare header for client IP
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Behind AWS CloudFront"
+
+    Configuration for a website behind AWS CloudFront:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```

@@ -74,25 +74,6 @@ $(document).ready(function () {
     },
   ];
 
-  // Batch update tooltips
-  const updateCountryTooltips = () => {
-    $("[data-country]").each(function () {
-      const $elem = $(this);
-      const countryCode = $elem.data("country");
-
-      const countryName = t(
-        countryCode === "unknown" || countryCode === "local"
-          ? "country.not_applicable"
-          : `country.${countryCode}`,
-        "Unknown",
-      );
-      if (countryName && countryName !== "country.not_applicable") {
-        $elem.attr("data-bs-original-title", countryName);
-      }
-    });
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
-  };
-
   // Utility functions
   function addDays(date, days) {
     const result = new Date(date);
@@ -970,6 +951,7 @@ $(document).ready(function () {
   const bans_config = {
     tableSelector: "#bans",
     tableName: "bans",
+    delegatedTooltips: true,
     columnVisibilityCondition: (column) => column > 2 && column < 11,
     dataTableOptions: {
       columnDefs: [
@@ -1287,10 +1269,9 @@ $(document).ready(function () {
             .attr("data-bs-placement", "right")
             .tooltip();
         }
-        throttle(updateCountryTooltips, 200);
       },
       headerCallback: function (thead) {
-        throttle(updateHeaderTooltips, 200, thead, headers);
+        updateHeaderTooltips(thead, headers);
       },
     },
   };
@@ -1325,19 +1306,17 @@ $(document).ready(function () {
     }).then(() => {
       const dt = initializeDataTable(bans_config);
       dt.on("draw.dt", function () {
-        throttle(updateCountryTooltips, 200);
-        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-        $(".tooltip").remove();
+        // The rows are new: translate their [data-i18n] (country names)
+        applyTranslations();
         // Hide waiting message and show table
         $("#bans-waiting").addClass("visually-hidden");
         $("#bans").removeClass("d-none");
       });
       dt.on("column-visibility.dt", function (e, settings, column, state) {
-        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-        $(".tooltip").remove();
+        updateHeaderTooltips(dt.table().header(), headers);
       });
       // Ensure tooltips are set after initialization
-      throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
+      updateHeaderTooltips(dt.table().header(), headers);
       // Hide waiting message and show table
       $("#bans-waiting").addClass("visually-hidden");
       $("#bans").removeClass("d-none");
@@ -1347,10 +1326,12 @@ $(document).ready(function () {
 
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
+    let changed = false;
     $(selector)
       .find("th")
       .each((index, element) => {
         const $th = $(element);
+        if ($th.attr("data-bs-toggle") === "tooltip") return;
         // Try to get the data-i18n attribute from the header's span
         const i18nKey =
           $th.find("[data-i18n]").data("i18n") || $th.data("i18n");
@@ -1365,13 +1346,13 @@ $(document).ready(function () {
               "data-bs-toggle": "tooltip",
               "data-bs-placement": "bottom",
               "data-i18n": header.i18n,
-              title: header.tooltip,
+              "data-bs-original-title": header.tooltip,
             });
+            changed = true;
           }
         }
       });
-    applyTranslations();
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
+    if (changed) applyTranslations();
   }
 
   $("#add-ban").on("click", function () {

@@ -1100,10 +1100,13 @@ Follow these steps to configure and use the Blacklist feature:
     | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
     | `BLACKLIST_IP`             |                                       | multisite | no       | **IP Blacklist:** List of IP addresses or networks (CIDR notation) to block, separated by spaces.      |
     | `BLACKLIST_IGNORE_IP`      |                                       | multisite | no       | **IP Ignore List:** List of IP addresses or networks that should bypass IP blacklist checks.           |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | no       | **IP Blacklist URLs:** List of URLs containing IP addresses or networks to block, separated by spaces. |
+    | `BLACKLIST_IP_URLS`        |                                       | multisite | no       | **IP Blacklist URLs:** List of URLs containing IP addresses or networks to block, separated by spaces. |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | no       | **IP Ignore List URLs:** List of URLs containing IP addresses or networks to ignore.                   |
 
-    The default `BLACKLIST_IP_URLS` setting includes a URL that provides a **list of known Tor exit nodes**. This is a common source of malicious traffic and is a good starting point for many sites.
+    !!! info "List formats"
+        URL lists can hold one entry per line (lines starting with `#` or `;` are comments, and only the first word of a line is read), CSV, a JSON document, or JSON lines. In IP lists, commas also separate fields, and JSON lists keep every string that is an IP or network. Add a fragment to keep only part of a JSON list: `#key` keeps the values under `key`, `#key=value` keeps the objects whose `key` equals or contains `value`, and `&` combines terms. Example: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. A URL with a fragment keeps only what the fragment selects, so it keeps nothing if the list is not JSON.
+
+    By default, `BLACKLIST_COMMUNITY_LISTS` includes `ip:danmeuk-tor-exit`, which adds the Tor exit-node feed; `BLACKLIST_IP_URLS` is empty unless you configure it.
 
 === "Reverse DNS"
     **What this does:** Blocks visitors based on their reverse domain name. This is useful for blocking known scanners and crawlers based on their organization domains.
@@ -1138,10 +1141,10 @@ Follow these steps to configure and use the Blacklist feature:
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
     | `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | no       | **User-Agent Blacklist:** List of User-Agent patterns (PCRE regex) to block, separated by spaces.       |
     | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | no       | **User-Agent Ignore List:** List of User-Agent patterns that should bypass User-Agent blacklist checks. |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | no       | **User-Agent Blacklist URLs:** List of URLs containing User-Agent patterns to block.                    |
+    | `BLACKLIST_USER_AGENT_URLS`        |                                                                                                                                | multisite | no       | **User-Agent Blacklist URLs:** List of URLs containing User-Agent patterns to block.                    |
     | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | no       | **User-Agent Ignore List URLs:** List of URLs containing User-Agent patterns to ignore.                 |
 
-    The default `BLACKLIST_USER_AGENT_URLS` setting includes a URL that provides a **list of known bad user agents**. These are often used by malicious bots and scanners to identify vulnerable sites.
+    By default, `BLACKLIST_COMMUNITY_LISTS` includes `ua:mitchellkrogza-bad-user-agents`, which adds the bad User-Agent feed; `BLACKLIST_USER_AGENT_URLS` is empty unless you configure it.
 
 === "URI"
     **What this does:** Blocks requests to specific URLs on your site. This is helpful for blocking attempts to access admin pages, login forms, or other sensitive areas that might be targeted.
@@ -1601,9 +1604,9 @@ Follow these steps to configure and use the CORS feature:
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | no       | **Allowed Headers:** HTTP headers that can be used in cross-origin requests.                                                       |
 | `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | no       | **Allow Credentials:** Set to `yes` to allow credentials (cookies, HTTP authentication) in CORS requests.                          |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | no       | **Exposed Headers:** HTTP headers that browsers are permitted to access from cross-origin responses.                               |
-| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | no       | **Cross-Origin-Opener-Policy:** Controls communication between browsing contexts.                                                  |
-| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | no       | **Cross-Origin-Embedder-Policy:** Controls whether a document can load resources from other origins.                               |
-| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | no       | **Cross-Origin-Resource-Policy:** Controls which websites can embed your resources.                                                |
+| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | no       | **Cross-Origin-Opener-Policy:** Controls communication between browsing contexts. Allowed values: `unsafe-none`, `same-origin-allow-popups`, `same-origin`; leave empty to omit this header. |
+| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | no       | **Cross-Origin-Embedder-Policy:** Controls whether a document can load resources from other origins. Allowed values: `unsafe-none`, `require-corp`, `credentialless`; leave empty to omit this header. |
+| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | no       | **Cross-Origin-Resource-Policy:** Controls which websites can embed your resources. Allowed values: `same-site`, `same-origin`, `cross-origin`; leave empty to omit this header. |
 | `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | no       | **Preflight Cache Duration:** How long (in seconds) browsers should cache the preflight response. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | no       | **Deny Unauthorized Origins:** When `yes`, requests from unauthorized origins are denied with an error code.                       |
 
@@ -1952,7 +1955,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.16-rc2
+        image: bunkerity/bunkerweb:1.6.16-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1969,7 +1972,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2468,7 +2471,7 @@ The DNSBL (Domain Name System Blacklist) plugin provides protection against know
 
 Follow these steps to configure and use the DNSBL feature:
 
-1. **Enable the feature:** The DNSBL feature is disabled by default. Set the `USE_DNSBL` setting to `yes` to enable it.
+1. **Control the feature:** DNSBL is enabled by default. Set `USE_DNSBL` to `no` to disable it.
 2. **Configure DNSBL servers:** Add the domain names of the DNSBL services you want to use to the `DNSBL_LIST` setting.
 3. **Apply settings:** Once configured, BunkerWeb will automatically check incoming connections against the specified DNSBL servers.
 4. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on requests blocked by DNSBL checks.
@@ -2479,17 +2482,17 @@ Follow these steps to configure and use the DNSBL feature:
 
 | Setting      | Default                                             | Context   | Multiple | Description                                                                 |
 | ------------ | --------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | no       | Enable DNSBL: set to `yes` to enable DNSBL checks for incoming connections. |
+| `USE_DNSBL`  | `yes`                                               | multisite | no       | DNSBL is enabled by default; set `USE_DNSBL` to `no` to disable checks for incoming connections. |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | DNSBL servers: list of DNSBL server domains to check, separated by spaces.  |
 
 **Ignore Lists**
 
 | Setting                     | Default | Context   | Multiple | Description                                                                                                                               |
 | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`           | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                                                           |
+| `DNSBL_IGNORE_IP`           | ``      | multisite | no       | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                                                           |
 | `DNSBL_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the DNSBL checks. Numbered pairs: `_NAME_1` goes with `_VALUE_1`. |
 | `DNSBL_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.          |
-| `DNSBL_IGNORE_IP_URLS`      | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes.                                            |
+| `DNSBL_IGNORE_IP_URLS`      | ``      | multisite | no       | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes.                                            |
 
 !!! warning "A header rule is a shared secret"
     Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
@@ -2699,6 +2702,9 @@ Follow these steps to configure and use the Greylist feature:
     | ------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
     | `GREYLIST_IP`      |         | multisite | no       | **IP Greylist:** List of IP addresses or networks (in CIDR notation) to greylist, separated by spaces.   |
     | `GREYLIST_IP_URLS` |         | multisite | no       | **IP Greylist URLs:** List of URLs containing IP addresses or networks to greylist, separated by spaces. |
+
+    !!! info "List formats"
+        URL lists can hold one entry per line (lines starting with `#` or `;` are comments, and only the first word of a line is read), CSV, a JSON document, or JSON lines. In IP lists, commas also separate fields, and JSON lists keep every string that is an IP or network. Add a fragment to keep only part of a JSON list: `#key` keeps the values under `key`, `#key=value` keeps the objects whose `key` equals or contains `value`, and `&` combines terms. Example: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. A URL with a fragment keeps only what the fragment selects, so it keeps nothing if the list is not JSON.
 
 === "Reverse DNS"
     **What this does:** Greylist visitors based on their domain name (in reverse). Useful for allowing conditional access to visitors from specific organizations or networks.
@@ -3133,9 +3139,9 @@ Follow these steps to configure and use the Headers feature:
     | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | no       | **HSTS:** Enforces secure HTTPS connections, reducing risks of man-in-the-middle attacks.                                    |
     | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | no       | **CSP:** Restricts resource loading to trusted sources, mitigating cross-site scripting and data injection attacks.          |
     | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | no       | **CSP Report Mode:** Reports violations without blocking content, helping in testing security policies while capturing logs. |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | no       | **X-Frame-Options:** Prevents clickjacking by controlling whether your site can be framed.                                   |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing, protecting against drive-by download attacks.              |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | no       | **X-DNS-Prefetch-Control:** Regulates DNS prefetching to reduce unintentional network requests and enhance privacy.          |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Prevents clickjacking by controlling whether your site can be framed. Allowed values: `DENY`, `SAMEORIGIN`; an empty value removes this header. |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing, protecting against drive-by download attacks. Allowed values: `nosniff`; an empty value removes this header. |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regulates DNS prefetching to reduce unintentional network requests and enhance privacy. Allowed values: `on`, `off`. |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | no       | **Referrer Policy:** Controls the amount of referrer information sent, safeguarding user privacy.                            |
     | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | no       | **Permissions Policy:** Restricts browser feature access, reducing potential attack vectors.                                 |
     | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | no       | **Keep Headers:** Preserves selected upstream headers, aiding legacy integration while maintaining security.                 |
@@ -3165,8 +3171,16 @@ Follow these steps to configure and use the Headers feature:
 
     !!! tip "Best Practices"
         - Use `SameSite=Strict` for sensitive cookies to prevent cross-origin access.
+        - Use `SameSite=None` only when cookies must be sent in cross-site contexts (e.g. SSO callbacks or embedded content); browsers require the `Secure` flag alongside it, so keep `COOKIE_AUTO_SECURE_FLAG` enabled or add `Secure` explicitly.
+        - If the upstream response already sets a different `SameSite` value, BunkerWeb appends the configured one rather than replacing it; browsers apply the last `SameSite` attribute, so the `COOKIE_FLAGS` value takes effect.
         - Regularly audit your cookie settings to ensure compliance with security and privacy regulations.
         - Avoid setting cookies without the Secure flag in production environments.
+
+    !!! example "SameSite=None for cross-site cookies"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "Custom Headers"
 
@@ -3213,7 +3227,7 @@ Follow these steps to configure and use the Headers feature:
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 
@@ -4322,6 +4336,10 @@ Follow these steps to configure and use ModSecurity:
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Audit Engine:** Control how audit logging works. Options: `On`, `Off`, or `RelevantOnly`.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Audit Log Path:** Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support. The path must end in `.log`. Rotation via that suffix only applies where logrotate is installed (the Linux packages and the All-In-One image); on Docker, Swarm and Kubernetes a non-default name is neither streamed nor rotated and grows unbounded inside the container, because only `modsec_audit.log` is symlinked into the container's log stream. |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | multisite | no | Writer: `Serial` (default) or `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` |  | multisite | no | Empty by default; required absolute storage directory for `Concurrent`. |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | no | Maximum inspected request body size, in bytes or with `k`/`m`/`g` suffixes. Empty derives from `MAX_CLIENT_SIZE`; NGINX enforces that limit first. `REVERSE_PROXY_MAX_CLIENT_SIZE` overrides this setting for its location. `0` removes the inspection limit and risks memory exhaustion. |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject` | multisite | no | `Reject` returns HTTP 413 above the inspection limit. `ProcessPartial` inspects only the portion within the limit and forwards the full body, reducing WAF coverage. The separate no-files limit still applies. |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Request Body Limit (No Files):** Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (`k`, `m`, `g`), e.g. `131072`, `256k`, `1m`, `2g`.                                                                                                                                                                                                                                                                                                                                           |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Enable CRS Plugins:** Enable additional plugin rule sets for the Core Rule Set.                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **CRS Plugins List:** Space-separated list of plugins to download and install (`plugin-name[/tag]` or URL).                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -4968,6 +4986,9 @@ Follow these steps to configure and use the Real IP feature:
 | `REAL_IP_FROM_URLS`  |                                           | multisite | no       | **IP List URLs:** URLs containing trusted proxy IPs/networks to download, separated by spaces. Supports file:// URLs. |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | no       | **PROXY Protocol:** Set to `yes` to enable PROXY protocol support for direct proxy-to-BunkerWeb communication.        |
 
+!!! info "List formats"
+    URL lists can hold one entry per line (lines starting with `#` or `;` are comments, and only the first word of a line is read), CSV, a JSON document, or JSON lines. In IP lists, commas also separate fields, and JSON lists keep every string that is an IP or network. Add a fragment to keep only part of a JSON list: `#key` keeps the values under `key`, `#key=value` keeps the objects whose `key` equals or contains `value`, and `&` combines terms. Example: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. A URL with a fragment keeps only what the fragment selects, so it keeps nothing if the list is not JSON.
+
 !!! tip "Cloud Provider Networks"
     If you're using a cloud provider like AWS, GCP, or Azure, consider adding their load balancer IP ranges to your `REAL_IP_FROM` setting to ensure proper client IP identification.
 
@@ -5045,6 +5066,18 @@ Follow these steps to configure and use the Real IP feature:
     REAL_IP_FROM: "" # We only trust Cloudflare IPs
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Download Cloudflare IPs automatically
     REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare header for client IP
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Behind AWS CloudFront"
+
+    Configuration for a website behind AWS CloudFront:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```
 
@@ -5215,10 +5248,11 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_TIMEOUT`           | `1s`       | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds. |
 | `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                                                                                           |
 | `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                                                                                                        |
+| `REDIS_CLUSTER_NODES`     |            | global  | no       | **Cluster Nodes:** Seed nodes of a Redis Cluster, `host[:port]` separated by spaces, `[ipv6]:port` for IPv6. Enables cluster mode. |
 | `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).                                                                                           |
 | `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                                                                                                          |
 | `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                                                                                                          |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                                                                                                    |
+| `REDIS_SENTINEL_MASTER`   |            | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                                                                                                    |
 | `REDIS_KEEPALIVE_IDLE`    | `30s`      | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds. |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool, per NGINX worker.                                                                          |
 
@@ -5239,6 +5273,18 @@ Follow these steps to configure and use the Redis plugin:
     - All BunkerWeb instances should connect to the same Redis or Valkey server or Sentinel cluster
     - Configure the same database number across all instances
     - Ensure network connectivity between all BunkerWeb instances and Redis/Valkey servers
+
+### Redis Cluster
+
+Set `REDIS_CLUSTER_NODES` to at least one reachable node; BunkerWeb discovers the rest of the cluster from there. This works with Redis 6.2+, Valkey, and managed cluster-mode services such as ElastiCache or MemoryDB through their configuration endpoint. Seeds accept `host`, `host:port` or `[ipv6]:port`, but the cluster itself must announce IPv4 addresses or hostnames (`cluster-announce-hostname` with `cluster-preferred-endpoint-type hostname`); clusters announcing IPv6 are not supported.
+
+Cluster mode uses database 0. Setting `REDIS_CLUSTER_NODES` together with `REDIS_SENTINEL_HOSTS`, or with `REDIS_DATABASE` other than 0, is a configuration error: BunkerWeb logs an error naming both settings and does not use Redis at all (falling back to local counters and cookie sessions) until one of them is removed.
+
+Switching an existing deployment to cluster mode starts from an empty keyspace: active and permanent bans, sessions and reports are not carried over. Re-apply permanent bans after the switch.
+
+Bans and bad behavior counters are spread across primaries by client IP. Blocked-request reports share one hash slot, so one primary stores all of them.
+
+With the default `cluster-require-full-coverage yes`, losing a primary without a replica stops the whole cluster; BunkerWeb then falls back to local counters and cookie sessions until it recovers. `cluster-require-full-coverage no` limits the impact to the keys of the lost shard.
 
 ### Example Configurations
 
@@ -6436,7 +6482,7 @@ The Whitelist plugin provides a comprehensive approach to explicitly allow acces
 
 1. You define criteria for visitors who should be "whitelisted" (*IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns*).
 2. When a visitor attempts to access your site, BunkerWeb checks whether they match any of these whitelist criteria.
-3. If a visitor matches any whitelist rule (and doesn't match any ignore rule), they are granted access to your site and **bypass all other security checks**.
+3. If a visitor matches any whitelist rule, they are granted access to your site and **bypass all other security checks**.
 4. If a visitor doesn't match any whitelist criteria, they proceed through all normal security checks as usual.
 5. Whitelists can be automatically updated from external sources on a regular schedule.
 
@@ -6444,11 +6490,10 @@ The Whitelist plugin provides a comprehensive approach to explicitly allow acces
 
 Follow these steps to configure and use the Whitelist feature:
 
-1. **Enable the feature:** The Whitelist feature is disabled by default. Set the `USE_WHITELIST` setting to `yes` to enable it.
+1. **Enable the feature:** Whitelist is enabled by default (`USE_WHITELIST=yes`), with preset rDNS suffixes and ASN `32934`. Review these trusted sources; set `USE_WHITELIST=no` to disable it.
 2. **Configure allow rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be whitelisted.
-3. **Set up ignore rules:** Specify any exceptions that should bypass the whitelist checks.
-4. **Add external sources:** Configure URLs for automatically downloading and updating whitelist data.
-5. **Monitor access:** Check the [web UI](web-ui.md) to see which visitors are being allowed or denied.
+3. **Add external sources:** Configure URLs for automatically downloading and updating whitelist data.
+4. **Monitor access:** Check the [web UI](web-ui.md) to see which visitors are being allowed or denied.
 
 !!! info "stream mode"
     When using stream mode, only IP, rDNS, and ASN checks are performed.
@@ -6459,7 +6504,7 @@ Follow these steps to configure and use the Whitelist feature:
 
 | Setting         | Default | Context   | Multiple | Description                                                         |
 | --------------- | ------- | --------- | -------- | ------------------------------------------------------------------- |
-| `USE_WHITELIST` | `no`    | multisite | no       | **Enable Whitelist:** Set to `yes` to enable the whitelist feature. |
+| `USE_WHITELIST` | `yes` | multisite | no       | **Enable Whitelist:** Set to `yes` to enable the whitelist feature. |
 
 === "IP Address"
     **What this does:** Whitelists visitors based on their IP address or network. These visitors will bypass all security checks.
@@ -6467,30 +6512,27 @@ Follow these steps to configure and use the Whitelist feature:
     | Setting                    | Default | Context   | Multiple | Description                                                                                                |
     | -------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_IP`             |         | multisite | no       | **IP Whitelist:** List of IP addresses or networks (CIDR notation) to allow, separated by spaces.          |
-    | `WHITELIST_IGNORE_IP`      |         | multisite | no       | **IP Ignore List:** List of IP addresses or networks that should bypass IP whitelist checks.               |
     | `WHITELIST_IP_URLS`        |         | multisite | no       | **IP Whitelist URLs:** List of URLs containing IP addresses or networks to whitelist, separated by spaces. |
-    | `WHITELIST_IGNORE_IP_URLS` |         | multisite | no       | **IP Ignore List URLs:** List of URLs containing IP addresses or networks to ignore.                       |
+
+    !!! info "List formats"
+        URL lists can hold one entry per line (lines starting with `#` or `;` are comments, and only the first word of a line is read), CSV, a JSON document, or JSON lines. In IP lists, commas also separate fields, and JSON lists keep every string that is an IP or network. Add a fragment to keep only part of a JSON list: `#key` keeps the values under `key`, `#key=value` keeps the objects whose `key` equals or contains `value`, and `&` combines terms. Example: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. A URL with a fragment keeps only what the fragment selects, so it keeps nothing if the list is not JSON.
 
 === "Reverse DNS"
     **What this does:** Whitelists visitors based on their domain name (in reverse). This is useful for allowing access to visitors from specific organizations or networks by their domain.
 
     | Setting                      | Default | Context   | Multiple | Description                                                                                              |
     | ---------------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_RDNS`             |         | multisite | no       | **rDNS Whitelist:** List of reverse DNS suffixes to allow, separated by spaces.                          |
+    | `WHITELIST_RDNS`             | `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com` | multisite | no       | **rDNS Whitelist:** List of reverse DNS suffixes to allow, separated by spaces.                          |
     | `WHITELIST_RDNS_GLOBAL`      | `yes`   | multisite | no       | **rDNS Global Only:** Only perform rDNS whitelist checks on global IP addresses when set to `yes`.       |
-    | `WHITELIST_IGNORE_RDNS`      |         | multisite | no       | **rDNS Ignore List:** List of reverse DNS suffixes that should bypass rDNS whitelist checks.             |
     | `WHITELIST_RDNS_URLS`        |         | multisite | no       | **rDNS Whitelist URLs:** List of URLs containing reverse DNS suffixes to whitelist, separated by spaces. |
-    | `WHITELIST_IGNORE_RDNS_URLS` |         | multisite | no       | **rDNS Ignore List URLs:** List of URLs containing reverse DNS suffixes to ignore.                       |
 
 === "ASN"
     **What this does:** Whitelists visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.
 
     | Setting                     | Default | Context   | Multiple | Description                                                                             |
     | --------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------- |
-    | `WHITELIST_ASN`             |         | multisite | no       | **ASN Whitelist:** List of Autonomous System Numbers to allow, separated by spaces.     |
-    | `WHITELIST_IGNORE_ASN`      |         | multisite | no       | **ASN Ignore List:** List of ASNs that should bypass ASN whitelist checks.              |
+    | `WHITELIST_ASN`             | `32934` | multisite | no       | **ASN Whitelist:** List of Autonomous System Numbers to allow, separated by spaces.     |
     | `WHITELIST_ASN_URLS`        |         | multisite | no       | **ASN Whitelist URLs:** List of URLs containing ASNs to whitelist, separated by spaces. |
-    | `WHITELIST_IGNORE_ASN_URLS` |         | multisite | no       | **ASN Ignore List URLs:** List of URLs containing ASNs to ignore.                       |
 
 === "User Agent"
     **What this does:** Whitelists visitors based on what browser or tool they claim to be using. This is effective for allowing access to specific known tools or services.
@@ -6498,9 +6540,7 @@ Follow these steps to configure and use the Whitelist feature:
     | Setting                            | Default | Context   | Multiple | Description                                                                                             |
     | ---------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_USER_AGENT`             |         | multisite | no       | **User-Agent Whitelist:** List of User-Agent patterns (PCRE regex) to allow, separated by spaces.       |
-    | `WHITELIST_IGNORE_USER_AGENT`      |         | multisite | no       | **User-Agent Ignore List:** List of User-Agent patterns that should bypass User-Agent whitelist checks. |
     | `WHITELIST_USER_AGENT_URLS`        |         | multisite | no       | **User-Agent Whitelist URLs:** List of URLs containing User-Agent patterns to whitelist.                |
-    | `WHITELIST_IGNORE_USER_AGENT_URLS` |         | multisite | no       | **User-Agent Ignore List URLs:** List of URLs containing User-Agent patterns to ignore.                 |
 
 === "URI"
     **What this does:** Whitelists requests to specific URLs on your site. This is helpful for allowing access to specific endpoints regardless of other factors.
@@ -6508,9 +6548,7 @@ Follow these steps to configure and use the Whitelist feature:
     | Setting                     | Default | Context   | Multiple | Description                                                                                     |
     | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------- |
     | `WHITELIST_URI`             |         | multisite | no       | **URI Whitelist:** List of URI patterns (PCRE regex) to allow, separated by spaces.             |
-    | `WHITELIST_IGNORE_URI`      |         | multisite | no       | **URI Ignore List:** List of URI patterns that should bypass URI whitelist checks.              |
     | `WHITELIST_URI_URLS`        |         | multisite | no       | **URI Whitelist URLs:** List of URLs containing URI patterns to whitelist, separated by spaces. |
-    | `WHITELIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                       |
 
     !!! tip "Anchor a path pattern to cover everything below it"
         Write `^/admin(/|$)` rather than `^/admin$`. A pattern anchored on a single exact path does not match `/admin/`, `/admin%2f` or `/admin;foo`, and your application may still serve the same resource on those. Matching runs on the decoded, dot-resolved path, so `/a/../admin` and `//admin` are already covered.

@@ -42,7 +42,7 @@ Elige el sabor que encaje con tu entorno.
     services:
       bunkerweb:
         # Nombre que usará el scheduler para identificar la instancia
-        image: bunkerity/bunkerweb:1.6.16-rc2
+        image: bunkerity/bunkerweb:1.6.16-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ Elige el sabor que encaje con tu entorno.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de poner el nombre de instancia correcto
@@ -77,7 +77,7 @@ Elige el sabor que encaje con tu entorno.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.16-rc2
+        image: bunkerity/bunkerweb-api:1.6.16-rc3
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -144,7 +144,7 @@ Elige el sabor que encaje con tu entorno.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.16-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.16-rc3
     ```
 
 === "Linux"
@@ -191,8 +191,8 @@ Elige el sabor que encaje con tu entorno.
 - `resource_id` suele ser el segundo componente del path (ej. `/services/{id}`); "*" da acceso global.
 - Inicializa usuarios no admin y permisos con `API_ACL_BOOTSTRAP_FILE` o un `/var/lib/bunkerweb/api_acl_bootstrap.json` montado. Cada usuario admite una `password` en texto plano o un `password_hash`/`password_bcrypt` pre-hasheado (ver el consejo a continuación).
 
-!!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
+!!! danger "Estos permisos de escritura equivalen a los de administrador"
+    Conceder cualquiera de los siguientes equivale a otorgar acceso administrativo completo. El contenido que escriben — configuraciones personalizadas, variables de servicio (p. ej., `REVERSE_PROXY_URL`), plugins subidos y ajustes globales — se representa **literalmente** como configuración NGINX / OpenResty Lua sin procesar, que se ejecuta en los workers y el scheduler de BunkerWeb. Un token que tenga uno de ellos puede ejecutar código arbitrario con los permisos del usuario del proceso de BunkerWeb. Los permisos de escritura de instancias equivalen a los de administrador por otro motivo: cada llamada a una instancia registrada incluye la excepción administrativa `API_TOKEN`, y el scheduler distribuye la configuración generada y la caché (incluidas las claves privadas TLS) a todas las instancias de la base de datos; por tanto, registrar un único endpoint permite recopilar todo ese contenido:
 
     - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
@@ -200,7 +200,7 @@ Elige el sabor que encaje con tu entorno.
     - `plugins`: `plugin_create`
     - `global_config`: `global_config_update`
 
-    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
+    Trátalos como permisos de administrador: **no los concedas nunca a alguien en quien no confiarías como administrador.** Reserva los permisos de lectura (`*_read`, `service_export`, `cache_read`, …) para tokens limitados o de automatización. Conceder uno de ellos a un usuario no administrador genera una advertencia en los registros de la API.
 
 !!! tip "Contraseñas de arranque pre-hasheadas"
     Reemplaza la `password` en texto plano de un usuario por un **hash bcrypt** mediante `password_hash` (o `password_bcrypt`) para que las credenciales nunca queden en el archivo como texto plano. El hash debe ser un hash bcrypt válido (`$2a$`/`$2b$`/`$2y$`) cuyo factor de coste sea al menos `10` (se recomienda `12`+). Un hash malformado o demasiado débil se **ignora**: el cargador recurre a la `password` en texto plano del usuario si existe; de lo contrario, un usuario nuevo recibe una contraseña aleatoria segura que no conocerás, y un usuario existente conserva la suya actual. Una `password` en texto plano se somete a una comprobación de robustez (8+ caracteres con mayúsculas/minúsculas/dígito/carácter especial). La variable de entorno `API_PASSWORD` del admin solo acepta texto plano — el pre-hasheo se aplica a estos usuarios de la ACL.

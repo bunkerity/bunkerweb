@@ -96,7 +96,7 @@ bool HttpsClient::download(const std::string &uri) {
 
     /* those are the default options, but lets make sure */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
 #ifdef WIN32
     /* use the operating system's native CA store for certificate verification.*/
