@@ -19,6 +19,7 @@
 - [BUGFIX] `blacklist`: `BLACKLIST_IGNORE_USER_AGENT_URLS` entries are no longer cut at their first space, which exempted most browsers.
 - [BUGFIX] `bunkernet`: the queue of unsent reports keeps the newest 10,000 instead of growing without limit.
 - [BUGFIX] `db`: large blobs are stored in chunks, so PRO plugin updates no longer need a raised `max_allowed_packet` on MariaDB/MySQL. (Fixes #3965)
+- [BUGFIX] `errors`: a custom error page is served to blocked POST and PUT requests instead of a 405.
 - [BUGFIX] `headers`: cookie flags such as `SameSite=Lax` are no longer randomly missing from `Set-Cookie`.
 - [BUGFIX] `letsencrypt`: renewed certificates reach the instances right after the renewal instead of at the next reload.
 - [BUGFIX] `letsencrypt`: adding names to a certificate expands it instead of deleting it first, so a failing new name keeps the current one.
