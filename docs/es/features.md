@@ -3154,8 +3154,16 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
 
     !!! tip "Mejores Prácticas"
         - Use `SameSite=Strict` para cookies sensibles para prevenir el acceso entre orígenes.
+        - Use `SameSite=None` solo cuando las cookies deban enviarse en contextos entre sitios (p. ej., callbacks de SSO o contenido incrustado); los navegadores exigen el indicador `Secure` junto con él, así que mantenga `COOKIE_AUTO_SECURE_FLAG` activado o añada `Secure` explícitamente.
+        - Si la respuesta del upstream ya define otro valor de `SameSite`, BunkerWeb añade el valor configurado en lugar de reemplazarlo; los navegadores aplican el último atributo `SameSite`, por lo que prevalece el valor de `COOKIE_FLAGS`.
         - Audite regularmente la configuración de sus cookies para asegurar el cumplimiento con las regulaciones de seguridad y privacidad.
         - Evite establecer cookies sin el indicador `Secure` en entornos de producción.
+
+    !!! example "SameSite=None para cookies entre sitios"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "Cabeceras Personalizadas"
 

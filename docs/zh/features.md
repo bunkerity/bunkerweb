@@ -3164,8 +3164,16 @@ STREAM 支持 :x:
 
     !!! tip "最佳实践"
         -   对敏感 cookie 使用 `SameSite=Strict` 以防止跨源访问。
+        -   仅在 cookie 必须在跨站场景中发送时（例如 SSO 回调或嵌入内容）使用 `SameSite=None`；浏览器要求同时设置 `Secure` 标志，因此请保持 `COOKIE_AUTO_SECURE_FLAG` 启用或显式添加 `Secure`。
+        -   如果上游响应已设置了不同的 `SameSite` 值，BunkerWeb 会追加配置的值而不是替换它；浏览器以最后一个 `SameSite` 属性为准，因此 `COOKIE_FLAGS` 中的值生效。
         -   定期审计您的 cookie 设置，以确保符合安全和隐私法规。
         -   避免在生产环境中设置没有 Secure 标志的 cookie。
+
+    !!! example "跨站 cookie 使用 SameSite=None"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "自定义头"
 
