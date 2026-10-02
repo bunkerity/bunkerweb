@@ -1,0 +1,41 @@
+src/common/core/headers/README.de.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 130
+src/common/core/headers/README.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 130
+docs/features.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 3230
+docs/fr/features.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 3123
+docs/es/features.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 3213
+src/common/core/headers/README.es.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 130
+src/common/core/headers/README.zh.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 130
+src/common/core/headers/README.fr.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 130
+docs/zh/features.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 3223
+CHANGELOG.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 25
+docs/de/features.md
+  s_93b11c28ab1284::t_e2665e4ddac9c1 3160
+src/common/core/headers/plugin.json
+  s_93b11c28ab1284::t_e2665e4ddac9c1 51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e7f27027661f2b67450dc3313fc4bed51590d1b9",
+  "prompts": {},
+  "sessions": {
+    "s_93b11c28ab1284": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3ea39246-ae92-47e9-8170-40acf5106b5e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
