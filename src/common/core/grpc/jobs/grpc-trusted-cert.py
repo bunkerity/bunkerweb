@@ -217,6 +217,8 @@ def handle_crl(first_server: str, get) -> Tuple[Optional[Dict[str, bytes]], str]
     return {CRL_NAME: blob}, ""
 
 
+changed = False
+failed = False
 status = 0
 
 try:
@@ -258,25 +260,25 @@ try:
                     wanted[name].append(first_server)
                 detail = f", keeping the {', '.join(kept)} already cached" if kept else ""
                 LOGGER.warning(f"{first_server}: {err}; the matching {DIRECTIVE} directives will not be regenerated{detail}")
-                status = 2
+                failed = True
                 continue
             materials.update(resolved)
 
         for name, blob in materials.items():
             wanted[name].append(first_server)
             try:
-                changed, err = cache_material(name, blob, first_server)
+                need_reload, err = cache_material(name, blob, first_server)
             except BaseException as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while caching {name} for {first_server}: {e}")
-                status = 2
+                failed = True
                 continue
             if err:
                 LOGGER.error(f"Error while caching {name} for {first_server}: {err}")
-                status = 2
-            elif changed:
+                failed = True
+            elif need_reload:
                 LOGGER.info(f"Detected change in {first_server}'s {name}")
-                status = 1 if status != 2 else status
+                changed = True
             else:
                 LOGGER.info(f"No change in {first_server}'s {name}")
 
@@ -288,14 +290,16 @@ try:
             deleted, err = JOB.del_cache(name, service_id=first_server)
             if not deleted:
                 LOGGER.error(f"Error while removing {first_server}'s {name}: {err}")
-                status = 2
+                failed = True
             else:
                 LOGGER.info(f"Removed {first_server}'s {name}")
-                status = 1 if status != 2 else status
+                changed = True
+    # a failed service must not hide another service's change: 3 asks for the reload and still reports the failure
+    status = 3 if changed and failed else (1 if changed else (2 if failed else 0))
 except SystemExit as e:
     status = e.code
 except BaseException as e:
-    status = 2
+    status = 3 if changed else 2
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running grpc-trusted-cert.py :\n{e}")
 
