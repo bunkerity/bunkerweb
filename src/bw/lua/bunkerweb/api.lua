@@ -195,7 +195,34 @@ api.global.GET["^/health$"] = function(self)
 		return self:response(HTTP_OK, "success", "reloading")
 	end
 
+	f = open(api.NEEDS_CONFIG_PATH, "r")
+	if f then
+		f:close()
+		return self:response(HTTP_OK, "success", "needs_config")
+	end
+
 	return self:response(HTTP_OK, "success", "ok")
+end
+
+-- A restart that kept its configuration keeps enforcing it and asks for the latest one by
+-- leaving this file behind (entrypoint.sh, start.sh). Unlike the loading state, every access
+-- control stays active, so it is reported on its own.
+api.NEEDS_CONFIG_PATH = "/var/tmp/bunkerweb_needs_config"
+
+-- Only a pushed main configuration answers that request. The other trees share the /confs
+-- handler and arrive in parallel with it, so they must leave the file alone.
+function api.clear_needs_config(uri)
+	if uri ~= "/confs" then
+		return false
+	end
+	local removed, err = os.remove(api.NEEDS_CONFIG_PATH)
+	if not removed then
+		if err and not err:find("No such file", 1, true) then
+			logger:log(ERR, "can't remove " .. api.NEEDS_CONFIG_PATH .. " : " .. err)
+		end
+		return false
+	end
+	return true
 end
 
 -- Both the swap and the reload path take one instance-wide lock: "nginx -t" and the master's
@@ -400,6 +427,7 @@ api.global.POST["^/confs$"] = function(self)
 	local digest = pushswap.digest_file(tmp)
 	if digest and pushswap.read_applied(destination) == digest then
 		os.remove(tmp)
+		api.clear_needs_config(self.ctx.bw.uri)
 		return self:response(HTTP_OK, "success", "already applied at " .. destination)
 	end
 
@@ -467,6 +495,7 @@ api.global.POST["^/confs$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
 	end
 
+	api.clear_needs_config(self.ctx.bw.uri)
 	return self:response(HTTP_OK, "success", "saved data at " .. destination)
 end
 

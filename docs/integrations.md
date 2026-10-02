@@ -1688,7 +1688,7 @@ services:
     When a container should be ignored by autoconf, set `DOCKER_IGNORE_LABELS` on the controller. Provide a space- or comma-separated list of label keys (for example `bunkerweb.SERVER_NAME`) or just the suffix (`SERVER_NAME`). Any container or custom-config source carrying a matching label is skipped during discovery, and the label is ignored when translating settings.
 
 !!! info "KEEP_CONFIG_ON_RESTART"
-    Unlike the settings above, `KEEP_CONFIG_ON_RESTART` is read directly by the `bunkerweb` container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the `bunkerweb` container itself. Set to `yes` to keep the previously generated configuration across a container restart instead of rendering the loading configuration. Default `no`.
+    Unlike the settings above, `KEEP_CONFIG_ON_RESTART` is read directly by the `bunkerweb` container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the `bunkerweb` container itself. Set to `yes` to keep the previously generated configuration across a container restart instead of rendering the loading configuration. With `yes`, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. Default `no`.
 
 ### Using Docker secrets
 
@@ -2610,7 +2610,7 @@ The `bunkerweb` service's entrypoint also reads the following variable directly,
 
 | Setting                  | Description                                                                                                                                                                                                             | Accepted values | Default |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------- |
-| `KEEP_CONFIG_ON_RESTART` | Keep the previously generated configuration on restart of the `bunkerweb` service instead of rendering the loading configuration. Read from the environment or `/etc/bunkerweb/variables.env`, never from the database. | `yes` or `no`   | `no`    |
+| `KEEP_CONFIG_ON_RESTART` | Keep the previously generated configuration on restart of the `bunkerweb` service instead of rendering the loading configuration. With `yes`, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. Read from the environment or `/etc/bunkerweb/variables.env`, never from the database. | `yes` or `no`   | `no`    |
 
 ### High availability
 
