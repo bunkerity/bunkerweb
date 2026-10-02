@@ -38,8 +38,8 @@
 | `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | 否   | **启用不良行为检测：** 设置为 `yes` 以启用不良行为检测和封禁功能。                                                                 |
 | `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | 否   | **不良状态码：** 当返回给客户端时，将被计为“不良”行为的 HTTP 状态码列表。                                                          |
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | 否   | **阈值：** 一个 IP 在计数周期内可以生成的“不良”状态码的数量，超过该数量将被封禁。                                                  |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。                                                                  |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。  |
+| `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。          |
 
 !!! warning "误报"

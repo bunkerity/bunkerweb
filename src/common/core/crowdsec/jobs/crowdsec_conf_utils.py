@@ -3,10 +3,12 @@
 
 Every CROWDSEC_* setting is context=multisite, so each service resolves its own
 value: the ``{service}_NAME`` key when it exists, the unprefixed key otherwise, and
-finally the plugin default. Kept free of BunkerWeb imports so it can be unit tested
-on its own; callers pass ``os.getenv`` (never a ``from os import environ`` binding,
+finally the plugin default. Only ``common_utils`` is imported so it can be unit tested
+with just ``src/common/utils`` on the path; callers pass ``os.getenv`` (never a ``from os import environ`` binding,
 which freezes on a start-time snapshot of the job environment).
 """
+
+from common_utils import parse_duration_int  # type: ignore
 
 # Template variable -> plugin.json default
 SETTINGS = {
@@ -16,17 +18,27 @@ SETTINGS = {
     "CROWDSEC_MANAGEMENT_PASSWORD": "",
     "CROWDSEC_MODE": "live",
     "CROWDSEC_ENABLE_INTERNAL": "no",
-    "CROWDSEC_REQUEST_TIMEOUT": "1000",
+    "CROWDSEC_REQUEST_TIMEOUT": "1s",
     "CROWDSEC_EXCLUDE_LOCATION": "",
-    "CROWDSEC_CACHE_EXPIRATION": "1",
-    "CROWDSEC_UPDATE_FREQUENCY": "10",
+    "CROWDSEC_CACHE_EXPIRATION": "1s",
+    "CROWDSEC_UPDATE_FREQUENCY": "10s",
     "CROWDSEC_APPSEC_URL": "",
     "CROWDSEC_APPSEC_FAILURE_ACTION": "passthrough",
-    "CROWDSEC_APPSEC_CONNECT_TIMEOUT": "100",
-    "CROWDSEC_APPSEC_SEND_TIMEOUT": "100",
-    "CROWDSEC_APPSEC_PROCESS_TIMEOUT": "500",
+    "CROWDSEC_APPSEC_CONNECT_TIMEOUT": "100ms",
+    "CROWDSEC_APPSEC_SEND_TIMEOUT": "100ms",
+    "CROWDSEC_APPSEC_PROCESS_TIMEOUT": "500ms",
     "CROWDSEC_ALWAYS_SEND_TO_APPSEC": "no",
     "CROWDSEC_APPSEC_SSL_VERIFY": "no",
+}
+
+# Rendered as the bare integer the vendored bouncer expects, in the unit it reads them in
+DURATION_SETTINGS = {
+    "CROWDSEC_REQUEST_TIMEOUT": "ms",
+    "CROWDSEC_CACHE_EXPIRATION": "s",
+    "CROWDSEC_UPDATE_FREQUENCY": "s",
+    "CROWDSEC_APPSEC_CONNECT_TIMEOUT": "ms",
+    "CROWDSEC_APPSEC_SEND_TIMEOUT": "ms",
+    "CROWDSEC_APPSEC_PROCESS_TIMEOUT": "ms",
 }
 
 # Rendered as the true/false literals the bouncer config parser expects
@@ -76,5 +88,11 @@ def render_variables(getenv, service: str = ""):
         value = get_setting(getenv, name, service, default)
         if name in BOOLEAN_SETTINGS:
             value = "true" if value == "yes" else "false"
+        elif name in DURATION_SETTINGS:
+            unit = DURATION_SETTINGS[name]
+            try:
+                value = str(parse_duration_int(value, unit))
+            except ValueError:
+                value = str(parse_duration_int(default, unit))
         variables[name] = value
     return variables

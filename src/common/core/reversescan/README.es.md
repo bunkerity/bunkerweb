@@ -30,7 +30,7 @@ Siga estos pasos para configurar y usar la función de Escaneo Inverso:
 | ---------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------ |
 | `USE_REVERSE_SCAN`     | `no`                       | multisite | no       | **Habilitar Escaneo Inverso:** Establezca en `yes` para habilitar el escaneo de los puertos de los clientes. |
 | `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | no       | **Puertos a Escanear:** Lista de puertos separados por espacios para verificar en el lado del cliente.       |
-| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | no       | **Tiempo de Espera del Escaneo:** Tiempo máximo en milisegundos permitido para escanear un puerto.           |
+| `REVERSE_SCAN_TIMEOUT` | `500ms`                    | multisite | no       | **Tiempo de Espera del Escaneo:** Tiempo máximo en milisegundos permitido para escanear un puerto. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
 
 !!! warning "Consideraciones de Rendimiento"
     Escanear múltiples puertos puede agregar latencia a las conexiones de los clientes. Use un valor de tiempo de espera apropiado y limite el número de puertos escaneados para mantener un buen rendimiento.

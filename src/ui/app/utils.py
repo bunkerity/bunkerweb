@@ -57,6 +57,16 @@ BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
 RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
 MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed ADMIN_PASSWORD below this is refused
 MAX_PASSWORD_BYTES = 72  # bcrypt only consumes the first 72 bytes of a secret; 5.x raises ValueError on more
+
+
+def custom_config_data_matches(value: bytes, stored_value: bytes) -> bool:
+    return value == stored_value.replace(b"\r\n", b"\n").strip()
+
+
+def custom_config_needs_upsert(config: Dict[str, Any], original: Optional[Dict[str, Any]]) -> bool:
+    return original is None or any(config.get(field) != original.get(field) for field in ("data", "method", "is_draft"))
+
+
 # \Z, not $: a trailing newline would otherwise pass and become a directory name. The
 # ".bw-" prefix is the instance-side swap's own bookkeeping namespace: an entry carrying it
 # is exempt from the stale-entry sweep, so a plugin named that way survives its own deletion.

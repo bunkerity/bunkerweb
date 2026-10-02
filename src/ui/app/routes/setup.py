@@ -190,6 +190,9 @@ def setup_page():
             flash("The admin user was created successfully", save=False)
 
         if not ui_reverse_proxy:
+            if not request.form["server_name"].strip():
+                return handle_error("The hostname can't be empty.", "setup")
+
             server_names = db_config["SERVER_NAME"].split()
             if request.form["server_name"] in server_names:
                 return handle_error(f"The hostname {request.form['server_name']} is already in use.", "setup")

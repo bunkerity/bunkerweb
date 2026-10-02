@@ -34,6 +34,9 @@ COPY src/common/utils utils
 COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/ui ui
+COPY misc/build/merge_css_imports.py /tmp/merge_css_imports.py
+RUN python3 /tmp/merge_css_imports.py /usr/share/bunkerweb/ui/app/static/css/overrides.css && \
+  rm -f /tmp/merge_css_imports.py
 
 WORKDIR /tmp
 
@@ -105,7 +108,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.15"
+LABEL version="1.6.16~rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

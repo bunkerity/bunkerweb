@@ -3,6 +3,7 @@ local class = require "middleclass"
 local datastore = require "bunkerweb.datastore"
 local lrucache = require "resty.lrucache"
 local plugin = require "bunkerweb.plugin"
+local rediskeys = require "bunkerweb.rediskeys"
 local utils = require "bunkerweb.utils"
 
 local metrics = class("metrics", plugin)
@@ -26,6 +27,40 @@ end
 -- Keys this worker wrote to Redis on the previous sync, so the next one can tell which
 -- ones the LRU has since evicted. Nothing else ever deletes their Redis counterpart.
 local synced_redis_keys = {}
+-- What each table key last left in Redis: the LRU array synced, its length and its last item.
+-- log() appends item tables to that same array, so the last synced item is found back by
+-- reference and only what follows it is pushed, instead of rewriting the whole list every tick.
+local synced_tables = {}
+-- Last value each counter wrote to Redis, so an idle counter costs no SET every tick.
+local synced_counters = {}
+-- Values per RPUSH or EXISTS, well under LuaJIT's unpack() limit.
+local REDIS_BATCH = 500
+
+-- Redis keys carry the instance hostname next to the worker id, so instances sharing one Redis
+-- never write the same key. The UI keeps only what precedes the first ":" as the metric name.
+local instance_id
+local function get_instance_id()
+	if not instance_id then
+		local f = io.open("/proc/sys/kernel/hostname", "r")
+		local name = f and f:read("*l") or ""
+		if f then
+			f:close()
+		end
+		if name == "" then
+			name = "unknown"
+		elseif name:find("[^%w%.%-_]") then
+			-- Hashed rather than sanitised, and "~" never appears in a raw id: two distinct
+			-- hostnames can never share an id.
+			name = "~" .. ngx.md5(name)
+		end
+		instance_id = name
+	end
+	return instance_id
+end
+
+local function metric_redis_key(key, wid)
+	return "metrics:" .. key .. ":" .. wid .. "@" .. get_instance_id()
+end
 
 -- A worker-local latch cannot be evicted along with metric data.
 local restored_shm = false
@@ -37,6 +72,13 @@ local persisted_redis = false
 -- instead of spending one wasted round trip per worker every cycle forever.
 local MAX_PREFILL_ATTEMPTS = 12
 local prefill_attempts = 0
+-- Legacy counter TTL sweep: SCAN cursor kept across ticks, next sweep time, consecutive failures
+-- (backoff only, the sweep is never abandoned).
+local legacy_cursor = "0"
+local legacy_due = 0
+local legacy_failures = 0
+-- SCAN steps of 1000 keys one tick may spend on the sweep.
+local MAX_LEGACY_SCAN_STEPS = 10
 -- Consecutive cycles that found the reports list gone and refilled it from this worker's
 -- buffer. Reset by any cycle that finds the list still there.
 local MAX_RECLAIM_ATTEMPTS = 12
@@ -54,6 +96,7 @@ local get_country = utils.get_country
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
 local is_oom_error = utils.is_oom_error
+local parse_duration = utils.parse_duration
 local encode = cjson.encode
 local decode = cjson.decode
 
@@ -68,6 +111,26 @@ local table_remove = table.remove
 local unpack = unpack
 
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
+
+local function report_keys()
+	return rediskeys.reports(rediskeys.cluster_mode(), REQUEST_FACET_FIELDS)
+end
+
+-- EVAL over every report key: script, key count, keys, then ARGV.
+local function report_eval(self, script, ...)
+	local keys = report_keys()
+	local args = { script, #keys }
+	local n = 2
+	for i = 1, #keys do
+		n = n + 1
+		args[n] = keys[i]
+	end
+	for i = 1, select("#", ...) do
+		n = n + 1
+		args[n] = select(i, ...)
+	end
+	return self:redis_call("eval", unpack(args, 1, n))
+end
 
 -- The list is authoritative. Facet failures invalidate its derived cache without
 -- retrying an already inserted report. ARGV[10] marks an uncertain transport retry;
@@ -87,20 +150,20 @@ local PUSH_SCRIPT = [==[
     end
   end
   local nb = redis.call('LLEN', KEYS[1])
-  local raw = redis.pcall('GET', 'requests:facets:initialized')
+  local raw = redis.pcall('GET', KEYS[2])
   local ok, state = pcall(cjson.decode, type(raw) == 'string' and raw or '')
   local healthy = ok and type(state) == 'table' and state.version == 2 and state.length == nb
       and type(state.valid) == 'number' and type(state.nonfast) == 'number'
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   for i = 1, #fields do
-    local kind = redis.call('TYPE', 'requests:facet:' .. fields[i]).ok
+    local kind = redis.call('TYPE', KEYS[4 + i]).ok
     if kind ~= 'hash' and not (nb == 0 and kind == 'none') then healthy = false end
   end
   local pushed = redis.pcall('RPUSH', KEYS[1], ARGV[1])
   if type(pushed) == 'table' and pushed.err then
     return pushed
   end
-  redis.call('DEL', 'requests:facets:initialized')
+  redis.call('DEL', KEYS[2])
   if not healthy then return {pushed, 0} end
   -- REBUILD_SCRIPT's own predicate, applied to the row just pushed: a row the rebuild
   -- would reject must not bump valid nor the facets, or the certificate and the facets
@@ -115,7 +178,7 @@ local PUSH_SCRIPT = [==[
       and (rid == nil or type(rid) == 'string' or type(rid) == 'number')
   if counted then
     for i = 1, #fields do
-      local result = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], ARGV[1 + i], 1)
+      local result = redis.pcall('HINCRBY', KEYS[4 + i], ARGV[1 + i], 1)
       if type(result) == 'table' and result.err then return {pushed, 0} end
     end
     state.valid = state.valid + 1
@@ -125,7 +188,7 @@ local PUSH_SCRIPT = [==[
   -- the offending rows scroll out of the retained window.
   if not (finite and id) then state.nonfast = state.nonfast + 1 end
   state.length = pushed
-  local marked = redis.pcall('SET', 'requests:facets:initialized', cjson.encode(state))
+  local marked = redis.pcall('SET', KEYS[2], cjson.encode(state))
   if type(marked) == 'table' and marked.err then return {pushed, 0} end
   return {pushed, 1}
 ]==]
@@ -138,74 +201,77 @@ local TRIM_SCRIPT = [==[
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   if max == 0 then
     redis.call('DEL', KEYS[1])
-    for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
-    redis.call('SET', 'requests:facets:initialized', cjson.encode({version=2,length=0,valid=0,nonfast=0,tail=''}))
+    for i = 1, #fields do redis.call('DEL', KEYS[4 + i]) end
+    redis.call('SET', KEYS[2], cjson.encode({version=2,length=0,valid=0,nonfast=0,tail=''}))
     return 0
   end
   local nb = redis.call('LLEN', KEYS[1])
   if nb <= max then return 0 end
-  local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
+  local probe = redis.pcall('SET', KEYS[4], '1', 'PX', 1)
   if type(probe) == 'table' and probe.err then
     return probe
   end
   local to_remove = nb - max
-  local certificate = redis.pcall('GET', 'requests:facets:initialized')
+  local certificate = redis.pcall('GET', KEYS[2])
   local ok, state = pcall(cjson.decode, type(certificate) == 'string' and certificate or '')
   -- A complete population can be decremented even when paging needs a fallback and even
   -- when the rebuild rejected some rows: only the list length has to match. Requiring
   -- valid == length made one rejected row invalidate the certificate on every tick.
   local healthy = ok and type(state) == 'table' and state.version == 2 and state.length == nb
       and type(state.valid) == 'number' and type(state.nonfast) == 'number'
-  redis.call('DEL', 'requests:facets:initialized')
-  local items = redis.call('LRANGE', KEYS[1], 0, to_remove - 1)
+  redis.call('DEL', KEYS[2])
   local seen = {}
   local removed_valid = 0
   local removed_nonfast = 0
-  for _, raw in ipairs(items) do
-    -- Same predicate as REBUILD_SCRIPT, over the same prefix it counted first.
-    local decoded, req = pcall(cjson.decode, raw)
-    local object = decoded and type(req) == 'table' and string.match(raw, '^%s*{')
-    local id = object and req.id
-    if id == cjson.null then id = nil end
-    local date = object and tonumber(req.date)
-    local finite = date and date == date and math.abs(date) ~= math.huge
-    local counted = object and (finite or req.date == nil or req.date == cjson.null)
-        and (id == nil or (type(id) == 'string' or type(id) == 'number') and not seen[id])
-    -- Same fast-pageable predicate as REBUILD_SCRIPT, evaluated before this row joins seen.
-    local pageable = finite and type(id) == 'string' and id ~= '' and not seen[id]
-    if healthy and not pageable then removed_nonfast = removed_nonfast + 1 end
-    if healthy and counted then
-      if id ~= nil then seen[id] = true end
-      removed_valid = removed_valid + 1
-      for i = 1, #fields do
-        local v = req[fields[i]]
-        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-        local n = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, -1)
-        if type(n) ~= 'number' or n < 0 then healthy = false; break end
-        if n == 0 then redis.call('HDEL', 'requests:facet:' .. fields[i], v) end
+  -- Sliced for the same reason as REBUILD_SCRIPT: a lowered cap can drop most of the list at once.
+  for start = 0, to_remove - 1, 256 do
+    for _, raw in ipairs(redis.call('LRANGE', KEYS[1], start, math.min(start + 255, to_remove - 1))) do
+      -- Same predicate as REBUILD_SCRIPT, over the same prefix it counted first.
+      local decoded, req = pcall(cjson.decode, raw)
+      local object = decoded and type(req) == 'table' and string.match(raw, '^%s*{')
+      local id = object and req.id
+      if id == cjson.null then id = nil end
+      local date = object and tonumber(req.date)
+      local finite = date and date == date and math.abs(date) ~= math.huge
+      local counted = object and (finite or req.date == nil or req.date == cjson.null)
+          and (id == nil or (type(id) == 'string' or type(id) == 'number') and not seen[id])
+      -- Same fast-pageable predicate as REBUILD_SCRIPT, evaluated before this row joins seen.
+      local pageable = finite and type(id) == 'string' and id ~= '' and not seen[id]
+      if healthy and not pageable then removed_nonfast = removed_nonfast + 1 end
+      if healthy and counted then
+        if id ~= nil then seen[id] = true end
+        removed_valid = removed_valid + 1
+        for i = 1, #fields do
+          local v = req[fields[i]]
+          if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+          local n = redis.pcall('HINCRBY', KEYS[4 + i], v, -1)
+          if type(n) ~= 'number' or n < 0 then healthy = false; break end
+          if n == 0 then redis.call('HDEL', KEYS[4 + i], v) end
+        end
       end
     end
+    collectgarbage('collect')
   end
   redis.call('LTRIM', KEYS[1], to_remove, -1)
   if healthy and state.valid >= removed_valid and state.nonfast >= removed_nonfast then
     state.length = max
     state.valid = state.valid - removed_valid
     state.nonfast = state.nonfast - removed_nonfast
-    redis.pcall('SET', 'requests:facets:initialized', cjson.encode(state))
+    redis.pcall('SET', KEYS[2], cjson.encode(state))
   end
   return to_remove
 ]==]
 
 -- Marker invalidated up-front so an OOM-aborted rebuild retries next cycle instead
 -- of latching a partial result.
--- ponytail: one atomic LRANGE + 8xN HINCRBY blocks Redis; fine as it only fires on
--- rare facet desync, and chunking would break atomicity.
+-- ponytail: one EVAL + 8xN HINCRBY blocks Redis for the whole list; fine as it only
+-- fires on facet desync, and splitting it across EVALs would break atomicity.
 local REBUILD_SCRIPT = [==[
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   -- Every worker checks health then rebuilds in two separate EVALs, so on a restart or an
   -- upgrade they all queue a rebuild at once. Re-checking here makes all but the first a
   -- no-op: Redis serialises EVALs, so the later ones see the certificate the first wrote.
-  local current = redis.pcall('GET', 'requests:facets:initialized')
+  local current = redis.pcall('GET', KEYS[2])
   local valid, published = pcall(cjson.decode, type(current) == 'string' and current or '')
   if valid and type(published) == 'table' and published.version == 2
       and type(published.valid) == 'number' and published.valid >= 0
@@ -213,7 +279,7 @@ local REBUILD_SCRIPT = [==[
       and published.length == redis.call('LLEN', KEYS[1]) then
     local healthy = true
     for i = 1, #fields do
-      local kind = redis.call('TYPE', 'requests:facet:' .. fields[i]).ok
+      local kind = redis.call('TYPE', KEYS[4 + i]).ok
       if (published.valid > 0 and kind ~= 'hash') or (published.valid == 0 and kind ~= 'none') then healthy = false end
     end
     if healthy then return 0 end
@@ -222,46 +288,52 @@ local REBUILD_SCRIPT = [==[
   -- without maintaining the certificate (a 1.6.14 instance during a rolling upgrade)
   -- leaves it stale on every tick, which would otherwise make every worker of every
   -- instance rebuild the entire list every 5 s. The TTL is what releases the lease.
-  local lease = redis.pcall('SET', 'requests:facets:rebuilding', ARGV[1] or '1', 'NX', 'PX', 30000)
+  local lease = redis.pcall('SET', KEYS[3], ARGV[1] or '1', 'NX', 'PX', 30000)
   if type(lease) == 'table' and lease.err then return lease end
   if not lease then return 0 end
-  local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
+  local probe = redis.pcall('SET', KEYS[4], '1', 'PX', 1)
   if type(probe) == 'table' and probe.err then return probe end
-  redis.call('DEL', 'requests:facets:initialized')
-  for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
-  local items = redis.call('LRANGE', KEYS[1], 0, -1)
+  redis.call('DEL', KEYS[2])
+  for i = 1, #fields do redis.call('DEL', KEYS[4 + i]) end
+  -- Read in slices so the Lua heap holds one slice instead of the whole list: Redis
+  -- counts script memory against maxmemory, and a full decode made it evict keys,
+  -- the list itself included.
+  local total = redis.call('LLEN', KEYS[1])
   local seen = {}
-  local state = {version=2,length=#items,valid=0,nonfast=0,tail=''}
-  for _, raw in ipairs(items) do
-    local ok, req = pcall(cjson.decode, raw)
-    local object = ok and type(req) == 'table' and string.match(raw, '^%s*{')
-    local id = object and req.id
-    if id == cjson.null then id = nil end
-    local date = object and tonumber(req.date)
-    local finite = date and date == date and math.abs(date) ~= math.huge
-    if not date or date ~= date or math.abs(date) == math.huge
-        or type(id) ~= 'string' or id == '' or seen[id] then state.nonfast = state.nonfast + 1 end
-    if object and (finite or req.date == nil or req.date == cjson.null)
-        and (id == nil or (type(id) == 'string' or type(id) == 'number') and not seen[id]) then
-      if id ~= nil then seen[id] = true end
-      state.tail = type(id) == 'string' and id or ''
-      state.valid = state.valid + 1
-      for i = 1, #fields do
-        local v = req[fields[i]]
-        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-        local r = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, 1)
-        if type(r) == 'table' and r.err then return r end
+  local state = {version=2,length=total,valid=0,nonfast=0,tail=''}
+  for start = 0, total - 1, 256 do
+    for _, raw in ipairs(redis.call('LRANGE', KEYS[1], start, start + 255)) do
+      local ok, req = pcall(cjson.decode, raw)
+      local object = ok and type(req) == 'table' and string.match(raw, '^%s*{')
+      local id = object and req.id
+      if id == cjson.null then id = nil end
+      local date = object and tonumber(req.date)
+      local finite = date and date == date and math.abs(date) ~= math.huge
+      if not date or date ~= date or math.abs(date) == math.huge
+          or type(id) ~= 'string' or id == '' or seen[id] then state.nonfast = state.nonfast + 1 end
+      if object and (finite or req.date == nil or req.date == cjson.null)
+          and (id == nil or (type(id) == 'string' or type(id) == 'number') and not seen[id]) then
+        if id ~= nil then seen[id] = true end
+        state.tail = type(id) == 'string' and id or ''
+        state.valid = state.valid + 1
+        for i = 1, #fields do
+          local v = req[fields[i]]
+          if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+          local r = redis.pcall('HINCRBY', KEYS[4 + i], v, 1)
+          if type(r) == 'table' and r.err then return r end
+        end
       end
     end
+    collectgarbage('collect')
   end
-  redis.call('SET', 'requests:facets:initialized', cjson.encode(state))
-  return #items
+  redis.call('SET', KEYS[2], cjson.encode(state))
+  return total
 ]==]
 
 -- O(8) on every worker tick, independent of retained history/cardinality. Writers
 -- invalidate on errors; UI pane scans check deeper sums and request a rebuild.
 local HEALTH_SCRIPT = [==[
-  local raw = redis.pcall('GET', 'requests:facets:initialized')
+  local raw = redis.pcall('GET', KEYS[2])
   local ok, state = pcall(cjson.decode, type(raw) == 'string' and raw or '')
   if not ok or type(state) ~= 'table' or state.version ~= 2
       or type(state.valid) ~= 'number' or state.valid < 0
@@ -269,7 +341,7 @@ local HEALTH_SCRIPT = [==[
       or state.length ~= redis.call('LLEN', KEYS[1]) then return 0 end
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   for i = 1, #fields do
-    local kind = redis.call('TYPE', 'requests:facet:' .. fields[i]).ok
+    local kind = redis.call('TYPE', KEYS[4 + i]).ok
     if (state.valid > 0 and kind ~= 'hash') or (state.valid == 0 and kind ~= 'none') then return 0 end
   end
   return 1
@@ -312,7 +384,7 @@ local function enforce_redis_requests_cap(self)
 		-- Unparsable cap must not become 0: cap 0 wipes the list and facets.
 		return
 	end
-	local _, err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", tostring(max_requests))
+	local _, err = report_eval(self, TRIM_SCRIPT, tostring(max_requests))
 	if err then
 		self:log_throttled(ERR, "cap_enforce", "Can't enforce Redis requests cap: " .. err)
 	end
@@ -338,7 +410,7 @@ local function reclaim_wiped_requests(self, requests)
 	end
 	-- Captured before tonumber: redis_call also returns an error string, which would land
 	-- in tonumber's base argument.
-	local raw = self:redis_call("llen", "requests")
+	local raw = self:redis_call("llen", report_keys()[1])
 	local llen = tonumber(raw)
 	if llen ~= 0 then
 		-- Only a list seen alive clears the ceiling; an unreadable reply proves nothing.
@@ -379,13 +451,13 @@ end
 
 -- Rebuild on an invalid certificate or missing/wrong-typed facet keys.
 local function self_heal_request_facets(self)
-	local healthy, health_err = self:redis_call("eval", HEALTH_SCRIPT, 1, "requests")
+	local healthy, health_err = report_eval(self, HEALTH_SCRIPT)
 	if health_err then
 		self:log_throttled(ERR, "facet_check", "Can't check request facets: " .. health_err)
 		return
 	end
 	if healthy ~= 1 then
-		local _, err = self:redis_call("eval", REBUILD_SCRIPT, 1, "requests", tostring(worker_id()))
+		local _, err = report_eval(self, REBUILD_SCRIPT, tostring(worker_id()))
 		if err then
 			self:log_throttled(ERR, "facet_rebuild", "Can't rebuild request facets: " .. err)
 		end
@@ -394,16 +466,131 @@ end
 
 local function reap_evicted_redis_keys(self, wid, live_keys)
 	for key in pairs(synced_redis_keys) do
+		if not live_keys[key] then
+			synced_tables[key] = nil
+			synced_counters[key] = nil
+		end
 		-- Numeric totals remain authoritative in Redis after local LRU eviction.
 		-- Their existing TTL bounds dormant retention; TTL=0 intentionally retains them.
 		if not live_keys[key] and not key:find("_counter_", 1, true) then
-			local ok, err = self:redis_call("del", "metrics:" .. key .. ":" .. wid)
+			local ok, err = self:redis_call("del", metric_redis_key(key, wid))
 			if not ok then
 				self:log_throttled(ERR, "reap_evicted", "Can't delete evicted metric " .. key .. " from Redis: " .. err)
 			end
 		end
 	end
 	synced_redis_keys = live_keys
+end
+
+-- Without a TTL there is no per-tick EXPIRE reply to reveal a lost key, so one EXISTS over every
+-- key this worker believes is in Redis does it instead. Any missing one (FLUSHDB, restart without
+-- persistence, maxmemory eviction) drops every synced state, and the sync below rewrites all
+-- tables and counters in full.
+local function check_synced_keys(self, wid)
+	local keys = {}
+	for key, state in pairs(synced_tables) do
+		-- An empty table was only DEL'd: it has no key to find.
+		if state.len > 0 then
+			keys[#keys + 1] = metric_redis_key(key, wid)
+		end
+	end
+	for key in pairs(synced_counters) do
+		keys[#keys + 1] = metric_redis_key(key, wid)
+	end
+	-- A multi-key EXISTS spreads over every slot in cluster mode: the keys carry no hash
+	-- tag (they must not, one per worker/metric), so the cluster answers CROSSSLOT. Check
+	-- one key per call instead; the single-slot batch call below is unaffected.
+	if rediskeys.cluster_mode() then
+		for _, key in ipairs(keys) do
+			local found = self:redis_call("exists", key)
+			-- An error proves nothing: keep the state until the next tick.
+			if type(found) ~= "number" then
+				return
+			end
+			if found == 0 then
+				synced_tables = {}
+				synced_counters = {}
+				return
+			end
+		end
+		return
+	end
+	for i = 1, #keys, REDIS_BATCH do
+		local last = math.min(i + REDIS_BATCH - 1, #keys)
+		local found = self:redis_call("exists", unpack(keys, i, last))
+		-- An error proves nothing: keep the state until the next tick.
+		if type(found) ~= "number" then
+			return
+		end
+		if found < last - i + 1 then
+			synced_tables = {}
+			synced_counters = {}
+			return
+		end
+	end
+end
+
+-- Mirror a table metric into its Redis list. Unchanged since the last sync: no command at all.
+-- Appended to: one RPUSH of the new items, then an LTRIM for what log() dropped from the head.
+-- Anything else (new array, last synced item gone, unexpected list length): full rewrite.
+local function sync_table(self, key, redis_key, value)
+	local len = #value
+	local last = value[len]
+	local state = synced_tables[key]
+	local first = 1
+	if state and state.tbl == value and type(state.last) == "table" then
+		if len == state.len and last == state.last then
+			return true
+		end
+		for idx = len, 1, -1 do
+			if value[idx] == state.last then
+				first = idx + 1
+				break
+			end
+		end
+	end
+	-- Encoded up front: every call below yields, and log() shifts this array in place meanwhile.
+	local payload = {}
+	for i = first, len do
+		local item = value[i]
+		payload[#payload + 1] = type(item) == "table" and encode(item) or tostring(item)
+	end
+	-- Invalid until this sync completes, so a failure below forces a full rewrite next tick.
+	synced_tables[key] = nil
+	local redis_len = 0
+	if first > 1 then
+		redis_len = state.len
+	else
+		local ok, err = self:redis_call("del", redis_key)
+		if not ok then
+			return false, "can't clear metric table " .. key .. " in Redis: " .. (err or "unknown error")
+		end
+	end
+	for i = 1, #payload, REDIS_BATCH do
+		local pushed, err =
+			self:redis_call("rpush", redis_key, unpack(payload, i, math.min(i + REDIS_BATCH - 1, #payload)))
+		if not pushed then
+			return false, "can't push metric table " .. key .. " to Redis: " .. (err or "unknown error")
+		end
+		redis_len = redis_len + math.min(REDIS_BATCH, #payload - i + 1)
+		if pushed ~= redis_len then
+			-- The list is not what this sync expects (lost, replayed push or another writer).
+			-- Incremental: start over now. Full rewrite: a replayed batch sits mid-list where no
+			-- trim can reach it, so leave the key unsynced and let the next tick rewrite it.
+			if first > 1 then
+				return sync_table(self, key, redis_key, value)
+			end
+			return true
+		end
+	end
+	if redis_len > len then
+		local ok, err = self:redis_call("ltrim", redis_key, -len, -1)
+		if not ok then
+			return false, "can't trim metric table " .. key .. " in Redis: " .. (err or "unknown error")
+		end
+	end
+	synced_tables[key] = { tbl = value, len = len, last = last }
+	return true
 end
 
 -- Baseline and increments share the counter's existing LRU slot. A cache miss
@@ -418,7 +605,7 @@ local function restore_counter(self, key, counter, wid)
 	if counter.restored then
 		return true
 	end
-	local stored, err = self:redis_call("get", "metrics:" .. key .. ":" .. wid)
+	local stored, err = self:redis_call("get", metric_redis_key(key, wid))
 	if stored == false or stored == nil then
 		self:log_throttled(
 			ERR,
@@ -427,10 +614,19 @@ local function restore_counter(self, key, counter, wid)
 		)
 		return false
 	end
+	-- An unparsable value is not a transient failure: no later cycle makes it parse. Older
+	-- releases could store the literal string "nil" here, and refusing to restore left the
+	-- counter unrestored, which also skips its own SET, so the bad value survived every cycle
+	-- and the key was logged forever while this worker's counts never reached Redis. Discard
+	-- it instead and let the sync below overwrite the key with the live value.
 	local baseline = stored == null and 0 or tonumber(stored)
 	if not baseline then
-		self:log_throttled(ERR, "counter_restore", "Invalid Redis metric counter " .. key)
-		return false
+		self:log_throttled(
+			WARN,
+			"counter_discard",
+			"Discarding invalid Redis metric counter " .. key .. ", overwriting it with the local value"
+		)
+		baseline = 0
 	end
 	-- log() can increment or evict this record while GET yields. Never reinsert a
 	-- stale record, and merge the live increments only after the reply arrives.
@@ -446,11 +642,39 @@ end
 -- This optional prefill never establishes correctness for a later cache miss;
 -- restore_counter still protects every newly active counter independently.
 local function prefill_counters(self, wid)
-	local cursor, scanned = "0", 0
+	local suffix = ":" .. wid .. "@" .. get_instance_id()
 	local budget = lru:capacity() - #lru:get_keys()
+	-- SCAN walks one node of a cluster and MGET cannot span slots: scan every primary, then GET
+	-- each key on its own slot.
+	if rediskeys.cluster_mode() then
+		if budget <= 0 then
+			return true
+		end
+		local redis_keys = self.clusterstore:scan_primaries("metrics:*_counter_*" .. suffix, budget)
+		if not redis_keys then
+			return false
+		end
+		for _, redis_key in ipairs(redis_keys) do
+			local key = redis_key:sub(9, -(#suffix + 1))
+			if lru:get(key) == nil then
+				local stored = self:redis_call("get", redis_key)
+				-- A failed GET must not latch the prefill as done: retry on the next tick.
+				if stored == false or stored == nil then
+					return false
+				end
+				local value = stored ~= null and tonumber(stored)
+				-- A log() during the GET owns its live record; lazy restore will merge it.
+				if value and lru:get(key) == nil then
+					lru:set(key, { value = value, baseline = value, increments = 0, restored = true })
+				end
+			end
+		end
+		return true
+	end
+	local cursor, scanned = "0", 0
 	while budget > 0 do
 		local page =
-			self:redis_call("scan", cursor, "MATCH", "metrics:*_counter_*:" .. wid, "COUNT", math.min(budget, 100))
+			self:redis_call("scan", cursor, "MATCH", "metrics:*_counter_*" .. suffix, "COUNT", math.min(budget, 100))
 		if type(page) ~= "table" or type(page[1]) ~= "string" or type(page[2]) ~= "table" then
 			return false
 		end
@@ -467,7 +691,7 @@ local function prefill_counters(self, wid)
 				if budget <= 0 then
 					break
 				end
-				local key = redis_key:sub(9, -(#wid + 2))
+				local key = redis_key:sub(9, -(#suffix + 1))
 				local value = values[i] ~= null and tonumber(values[i])
 				-- A log() during SCAN/MGET owns its live record; lazy restore will merge it.
 				if value and lru:get(key) == nil then
@@ -483,6 +707,42 @@ local function prefill_counters(self, wid)
 	return true
 end
 
+-- Counters from before per-instance keys (metrics:<key>:<wid>) are never written by an upgraded
+-- worker again: they hold the totals recorded before the upgrade, which the Web UI still adds to the
+-- per-instance keys, so nothing is moved (a still-old instance may keep writing its slot) and nothing
+-- is counted twice. Their TTL follows the live keys: a sweep every half TTL (once with TTL 0) keeps
+-- that history until every instance using this worker id has stopped. Returns true once a sweep
+-- reached the end of the keyspace, false while it is still walking or failed.
+local function refresh_legacy_counters(self, wid, ttl)
+	-- A cluster keyspace starts empty: there are no pre-instance legacy counters to keep.
+	if rediskeys.cluster_mode() then
+		return true
+	end
+	for _ = 1, MAX_LEGACY_SCAN_STEPS do
+		-- The last segment must be exactly this worker id: "...:<wid>@<instance>" never matches.
+		local page = self:redis_call("scan", legacy_cursor, "MATCH", "metrics:*_counter_*:" .. wid, "COUNT", 1000)
+		if type(page) ~= "table" or type(page[1]) ~= "string" or type(page[2]) ~= "table" then
+			return false, true
+		end
+		for _, redis_key in ipairs(page[2]) do
+			local ok
+			if ttl > 0 then
+				ok = self:redis_call("expire", redis_key, ttl)
+			else
+				ok = self:redis_call("persist", redis_key)
+			end
+			if not ok then
+				return false, true
+			end
+		end
+		legacy_cursor = page[1]
+		if legacy_cursor == "0" then
+			return true
+		end
+	end
+	return false
+end
+
 -- METRICS_REDIS_TTL=0 is documented as keeping the keys permanent. Only refreshing the
 -- TTL when it is set leaves a key that already carries one expiring for another full
 -- period, and under volatile-lru it stays evictable for exactly that long, which is how
@@ -494,12 +754,18 @@ local function refresh_request_ttls(self, ttl, wid)
 		return
 	end
 	local failed = false
-	local function touch(key)
+	local function touch(key, lru_key)
 		local ok, err
 		if persist then
 			ok, err = self.clusterstore:call("persist", key)
 		else
 			ok, err = self.clusterstore:call("expire", key, ttl)
+			-- 0 means the key is gone (eviction, FLUSHDB, restart without persistence): forget
+			-- what was synced so the next tick writes it again in full.
+			if ok == 0 and lru_key then
+				synced_tables[lru_key] = nil
+				synced_counters[lru_key] = nil
+			end
 		end
 		-- Silence here is a deferred loss: the key keeps the TTL it already carries, expires
 		-- a full period later and stays evictable under volatile-lru until it does.
@@ -512,15 +778,16 @@ local function refresh_request_ttls(self, ttl, wid)
 			)
 		end
 	end
-	touch("requests")
-	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		touch("requests:facet:" .. field)
+	local keys = report_keys()
+	touch(keys[1])
+	for i = 1, #REQUEST_FACET_FIELDS do
+		touch(keys[4 + i])
 	end
-	touch("requests:facets:initialized")
+	touch(keys[2])
 	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 		for _, key in ipairs(lru:get_keys()) do
 			if key ~= "setup" and key ~= "requests" then
-				touch("metrics:" .. key .. ":" .. wid)
+				touch(metric_redis_key(key, wid), key)
 			end
 		end
 	end
@@ -594,7 +861,9 @@ function metrics:redis_call(method, ...)
 		end
 		local args = { ... }
 		if method == "eval" and args[1] == PUSH_SCRIPT then
-			args[13] = "1" -- uncertain RPUSH reply: look up the original JSON before replay
+			-- ARGV[10] (uncertain RPUSH reply: look up the original JSON before replay) sits
+			-- after the script, the key count and the keys.
+			args[2 + args[2] + 10] = "1"
 		end
 		local res2, err2 = self.clusterstore:call(method, unpack(args))
 		if not res2 and err2 then
@@ -768,7 +1037,7 @@ function metrics:timer()
 	end
 
 	self.redis_ok = nil
-	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"])
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
 	local redis_connected = false
 	if self.use_redis then
 		self.redis_ok, err = self.clusterstore:connect()
@@ -786,7 +1055,24 @@ function metrics:timer()
 				prefill_attempts = prefill_attempts + 1
 				prefilled_redis = prefill_counters(self, wid) or prefill_attempts >= MAX_PREFILL_ATTEMPTS
 			end
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and ngx.now() >= legacy_due then
+				local legacy_ttl = ttl or 0
+				local done, failed = refresh_legacy_counters(self, wid, legacy_ttl)
+				if done then
+					legacy_failures = 0
+					legacy_due = legacy_ttl > 0 and ngx.now() + legacy_ttl / 2 or math.huge
+				elseif failed then
+					-- Never give up (Redis may recover), but back off: an ACL-denied SCAN fails forever.
+					legacy_failures = legacy_failures + 1
+					local cap = legacy_ttl > 0 and legacy_ttl / 2 or 3600
+					legacy_due = ngx.now() + math.min(60 * 2 ^ math.min(legacy_failures - 1, 10), cap)
+				end
+			end
 			self_heal_request_facets(self)
+			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
+				check_synced_keys(self, wid)
+			end
 		end
 	end
 
@@ -832,11 +1118,9 @@ function metrics:timer()
 							end
 							local ok
 							local payload = request.redis_retry_json or encode(request)
-							ok, err = self:redis_call(
-								"eval",
+							ok, err = report_eval(
+								self,
 								PUSH_SCRIPT,
-								1,
-								"requests",
 								payload,
 								v[1],
 								v[2],
@@ -873,47 +1157,32 @@ function metrics:timer()
 					lru:set("requests", value)
 				elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 					-- Sync other metrics (counters and tables) to Redis with optimized data structures
-					local redis_key = "metrics:" .. key .. ":" .. wid
+					local redis_key = metric_redis_key(key, wid)
 					local ok
 					if type(value) == "table" then
 						-- Use Redis list for table values
-						ok, err = self:redis_call("del", redis_key)
-						if ok then
-							for _, item in ipairs(value) do
-								local item_value = type(item) == "table" and encode(item) or tostring(item)
-								ok, err = self:redis_call("rpush", redis_key, item_value)
-								if not ok then
-									self:log_throttled(
-										ERR,
-										"sync_table_item",
-										"Can't push metric table item " .. key .. " to Redis: " .. err
-									)
-									break
-								end
-							end
-						else
-							self:log_throttled(
-								ERR,
-								"sync_table_clear",
-								"Can't clear metric table " .. key .. " in Redis: " .. err
-							)
+						ok, err = sync_table(self, key, redis_key, value)
+						if not ok then
+							self:log_throttled(ERR, "sync_table", err)
 						end
 					elseif type(value) == "number" then
 						-- Use Redis string for numeric counters
 						-- ponytail: increments survive yields only while the LRU record remains;
 						-- eviction during SET can drop newer deltas. Durable queues are separate work.
-						if not counter or counter.restored then
+						if (not counter or counter.restored) and synced_counters[key] ~= value then
 							-- Scoped here: the outer err still holds the previous key's failure,
 							-- which would be reported as this counter's own.
 							local set_ok, set_err = self:redis_call("set", redis_key, value)
-							if not set_ok then
+							if set_ok then
+								synced_counters[key] = value
+							else
 								self:log_throttled(
 									ERR,
 									"sync_counter",
 									"Can't sync metric counter " .. key .. " to Redis: " .. (set_err or "unknown error")
 								)
 							end
-						else
+						elseif counter and not counter.restored then
 							self:log_throttled(
 								WARN,
 								"counter_unrestored",

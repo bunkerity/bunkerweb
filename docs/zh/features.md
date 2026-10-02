@@ -345,15 +345,15 @@ STREAM 支持 :x:
 !!! warning "集群环境中的会话配置"
     antibot 功能使用 cookie 来跟踪用户是否已完成挑战。如果您在集群环境中运行 BunkerWeb（多个 BunkerWeb 实例），您**必须**正确配置会话管理。这涉及在所有 BunkerWeb 实例中将 `SESSIONS_SECRET` 和 `SESSIONS_NAME` 设置设置为**相同的值**。如果您不这样做，用户可能会被反复提示完成 antibot 挑战。您可以在[此处](#sessions)找到有关会话配置的更多信息。
 
-### 通用设置
+### 通用设置 {#通用设置}
 
 以下设置在所有挑战机制中共享：
 
 | 设置                   | 默认值       | 上下文    | 多个 | 描述                                                                                                                    |
 | ---------------------- | ------------ | --------- | ---- | ----------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_URI`          | `/challenge` | multisite | 否   | **挑战 URL：** 用户将被重定向到以完成挑战的 URL。确保此 URL 未用于您网站上的任何其他内容。                              |
-| `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | 否   | **挑战时间限制：** 用户完成挑战的最长时间（以秒为单位）。此时间过后，将生成新的挑战。                                   |
-| `ANTIBOT_TIME_VALID`   | `86400`      | multisite | 否   | **挑战有效期：** 已完成的挑战的有效时间（以秒为单位）。此时间过后，用户将必须解决新的挑战。                             |
+| `ANTIBOT_TIME_RESOLVE` | `1m`         | multisite | 否   | **挑战时间限制：** 用户完成挑战的最长时间（以秒为单位）。此时间过后，将生成新的挑战。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `ANTIBOT_TIME_VALID`   | `1d`         | multisite | 否   | **挑战有效期：** 已完成的挑战的有效时间（以秒为单位）。此时间过后，用户将必须解决新的挑战。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `ANTIBOT_SUCCESS_URI`  |              | multisite | 否   | **成功后重定向 URL：** 用户成功解决挑战后重定向到的固定 URL，而不是他们最初请求的页面。留空则将用户返回其原始目标页面。 |
 
 ### 从挑战中排除流量
@@ -447,11 +447,14 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     -   该挑战为每个客户端动态生成一个独特的任务。
     -   计算任务涉及具有特定条件的哈希（例如，找到具有某个前缀的哈希）。
 
+    挑战的成本由 `ANTIBOT_JAVASCRIPT_DIFFICULTY` 设置，单位是前导零比特数（16 到 28，默认 16）；每多一比特，平均求解时间翻倍。如果你使用 PRO 自定义 JavaScript 挑战页面，请在把此设置提高到默认值以上之前重新生成它们，否则它们仍会证明旧的、更低的难度，从而被拒绝。
+
     **配置设置：**
 
-    | 设置          | 默认值 | 上下文    | 多个 | 描述                                                            |
-    | ------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`   | multisite | no   | **启用 Antibot：** 设置为 `javascript` 以启用 JavaScript 挑战。 |
+    | 设置                            | 默认值 | 上下文    | 多个 | 描述                                                            |
+    | ------------------------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
+    | `USE_ANTIBOT`                    | `no`   | multisite | no   | **启用 Antibot：** 设置为 `javascript` 以启用 JavaScript 挑战。 |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`  | `16`   | multisite | no   | **JavaScript 难度：** 工作量证明难度，单位为前导零比特数（16 到 28）。 |
 
     有关其他配置选项，请参阅[通用设置](#通用设置)。
 
@@ -969,8 +972,8 @@ STREAM 支持 :white_check_mark:
 | `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | 否   | **启用不良行为检测：** 设置为 `yes` 以启用不良行为检测和封禁功能。                                                                 |
 | `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | 否   | **不良状态码：** 当返回给客户端时，将被计为“不良”行为的 HTTP 状态码列表。                                                          |
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | 否   | **阈值：** 一个 IP 在计数周期内可以生成的“不良”状态码的数量，超过该数量将被封禁。                                                  |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。                                                                  |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。  |
+| `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。           |
 
 !!! warning "误报"
@@ -1099,10 +1102,13 @@ STREAM 支持 :warning:
     | -------------------------- | ------------------------------------- | --------- | ---- | ----------------------------------------------------------------------- |
     | `BLACKLIST_IP`             |                                       | multisite | 否   | **IP 黑名单：** 要阻止的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。 |
     | `BLACKLIST_IGNORE_IP`      |                                       | multisite | 否   | **IP 忽略列表：** 应绕过 IP 黑名单检查的 IP 地址或网络列表。            |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | 否   | **IP 黑名单 URL：** 包含要阻止的 IP 地址或网络的 URL 列表，以空格分隔。 |
+    | `BLACKLIST_IP_URLS`        |                                       | multisite | 否   | **IP 黑名单 URL：** 包含要阻止的 IP 地址或网络的 URL 列表，以空格分隔。 |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | 否   | **IP 忽略列表 URL：** 包含要忽略的 IP 地址或网络的 URL 列表。           |
 
-    默认的 `BLACKLIST_IP_URLS` 设置包含一个提供**已知 Tor 出口节点列表**的 URL。这是恶意流量的常见来源，对于许多网站来说是一个很好的起点。
+    !!! info "列表格式"
+        URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
+    默认情况下，`BLACKLIST_COMMUNITY_LISTS` 包含 `ip:danmeuk-tor-exit`，因此会加入 Tor 出口节点列表；`BLACKLIST_IP_URLS` 默认为空，除非您配置它。
 
 === "反向 DNS"
     **这是做什么的：** 根据访问者的反向域名阻止访问。这对于根据其组织域名阻止已知的扫描器和爬虫非常有用。
@@ -1137,10 +1143,10 @@ STREAM 支持 :warning:
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | ---- | ------------------------------------------------------------------------------ |
     | `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | 否   | **用户代理黑名单：** 要阻止的用户代理模式（PCRE 正则表达式）列表，以空格分隔。 |
     | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | 否   | **用户代理忽略列表：** 应绕过用户代理黑名单检查的用户代理模式列表。            |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | 否   | **用户代理黑名单 URL：** 包含要阻止的用户代理模式的 URL 列表。                 |
+    | `BLACKLIST_USER_AGENT_URLS`        |                                                                                                                                | multisite | 否   | **用户代理黑名单 URL：** 包含要阻止的用户代理模式的 URL 列表。                 |
     | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | 否   | **用户代理忽略列表 URL：** 包含要忽略的用户代理模式的 URL 列表。               |
 
-    默认的 `BLACKLIST_USER_AGENT_URLS` 设置包含一个提供**已知恶意用户代理列表**的 URL。这些通常被恶意机器人和扫描器用来识别易受攻击的网站。
+    默认情况下，`BLACKLIST_COMMUNITY_LISTS` 包含 `ua:mitchellkrogza-bad-user-agents`，因此会加入恶意用户代理列表；`BLACKLIST_USER_AGENT_URLS` 默认为空，除非您配置它。
 
 === "URI"
     **这是做什么的：** 阻止对您网站上特定 URL 的请求。这对于阻止尝试访问管理页面、登录表单或其他可能成为攻击目标的敏感区域非常有用。
@@ -1600,10 +1606,10 @@ CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | 否   | **允许的标头：** 可在跨源请求中使用的 HTTP 标头。                                                |
 | `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | 否   | **允许凭据：** 设置为 `yes` 以允许在 CORS 请求中使用凭据（cookie、HTTP 身份验证）。              |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | 否   | **公开的标头：** 浏览器允许从跨源响应中访问的 HTTP 标头。                                        |
-| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | 否   | **跨源打开器策略：** 控制浏览上下文之间的通信。                                                  |
-| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | 否   | **跨源嵌入器策略：** 控制文档是否可以加载来自其他来源的资源。                                    |
-| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | 否   | **跨源资源策略：** 控制哪些网站可以嵌入您的资源。                                                |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | 否   | **预检缓存持续时间：** 浏览器应缓存预检响应的时间（以秒为单位）。                                |
+| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | 否   | **跨源打开器策略：** 控制浏览上下文之间的通信。 允许值：`unsafe-none`、`same-origin-allow-popups`、`same-origin`；留空可不发送此响应头。 |
+| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | 否   | **跨源嵌入器策略：** 控制文档是否可以加载来自其他来源的资源。 允许值：`unsafe-none`、`require-corp`、`credentialless`；留空可不发送此响应头。 |
+| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | 否   | **跨源资源策略：** 控制哪些网站可以嵌入您的资源。 允许值：`same-site`、`same-origin`、`cross-origin`；留空可不发送此响应头。 |
+| `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | 否   | **预检缓存持续时间：** 浏览器应缓存预检响应的时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | 否   | **拒绝未经授权的来源：** 当为 `yes` 时，来自未经授权来源的请求将被拒绝并返回错误代码。           |
 
 !!! tip "优化预检请求"
@@ -1947,7 +1953,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.15
+        image: bunkerity/bunkerweb:1.6.16-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1964,7 +1970,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2144,10 +2150,10 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_API_KEY`          |                        | multisite | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
 | `CROWDSEC_MODE`             | `live`                 | multisite | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
 | `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1s`                   | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
+| `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 
 #### 应用程序安全组件设置
 
@@ -2155,9 +2161,9 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | --------------------------------- | ------------- | --------- | ---- | --------------------------------------------------------------------------------- |
 | `CROWDSEC_APPSEC_URL`             |               | multisite | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
 | `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100ms`       | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100ms`       | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500ms`       | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
 
@@ -2408,16 +2414,16 @@ STREAM 支持 :white_check_mark:
 | `DATABASE_URI_READONLY`           |                                           | global | 否   | **只读数据库 URI：** 用于只读操作或在主数据库宕机时作为故障转移的可选数据库。                                                               |
 | `DATABASE_LOG_LEVEL`              | `warning`                                 | global | 否   | **日志级别：** 数据库日志的详细程度。选项：`debug`、`info`、`warn`、`warning` 或 `error`。                                                  |
 | `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global | 否   | **最大作业运行次数：** 在自动清理之前，数据库中保留的作业执行记录的最大数量。                                                               |
-| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global | 否   | **会话保留：** UI 用户会话在自动清理前允许存在的最大天数。                                                                                  |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14d`                                     | global | 否   | **会话保留：** UI 用户会话在自动清理前允许存在的最大天数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为天。                  |
 | `DATABASE_POOL_SIZE`              | `40`                                      | global | 否   | **连接池大小：** 数据库连接池中保持的连接数。                                                                                               |
 | `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global | 否   | **连接池最大溢出：** 超出连接池大小可创建的最大额外连接数。设为 `-1` 表示无限制。                                                           |
-| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global | 否   | **连接池超时：** 从连接池获取连接前等待的最大秒数。                                                                                         |
-| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global | 否   | **连接池回收：** 连接自动回收的时间间隔（秒）。设为 `-1` 禁用。                                                                             |
+| `DATABASE_POOL_TIMEOUT`           | `5s`                                      | global | 否   | **连接池超时：** 从连接池获取连接前等待的最大秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                         |
+| `DATABASE_POOL_RECYCLE`           | `30m`                                     | global | 否   | **连接池回收：** 连接自动回收的时间间隔（秒）。设为 `-1` 禁用。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。             |
 | `DATABASE_POOL_PRE_PING`          | `yes`                                     | global | 否   | **连接池预检测：** 每次从连接池取出连接时是否测试其活性。                                                                                   |
 | `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global | 否   | **归还时重置：** 连接归还连接池时的重置方式。留空为自动（MySQL/MariaDB 用 `none`，其他用 `rollback`）。选项：`rollback`、`commit`、`none`。 |
-| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global | 否   | **重试超时：** 启动时等待数据库可用的最大秒数。                                                                                             |
+| `DATABASE_RETRY_TIMEOUT`          | `1m`                                      | global | 否   | **重试超时：** 启动时等待数据库可用的最大秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                             |
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global | 否   | **请求重试次数：** 操作中遇到瞬态数据库错误时的重试次数。                                                                                   |
-| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global | 否   | **请求重试延迟：** 瞬态数据库错误重试之间的延迟秒数。                                                                                       |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `250ms`                                   | global | 否   | **请求重试延迟：** 瞬态数据库错误重试之间的延迟秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                       |
 
 !!! tip "数据库选择"
     - **SQLite**（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。
@@ -2459,7 +2465,7 @@ DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查�
 
 请按照以下步骤配置和使用 DNSBL 功能：
 
-1.  **启用该功能：** DNSBL 功能默认禁用。将 `USE_DNSBL` 设置为 `yes` 以启用它。
+1.  **控制该功能：** DNSBL 功能默认启用。将 `USE_DNSBL` 设置为 `no` 即可禁用。
 2.  **配置 DNSBL 服务器：** 将您要使用的 DNSBL 服务的域名添加到 `DNSBL_LIST` 设置中。
 3.  **应用设置：** 配置完成后，BunkerWeb 将自动对照指定的 DNSBL 服务器检查传入的连接。
 4.  **监控有效性：** 查看 [web UI](web-ui.md) 以查看因 DNSBL 检查而被阻止的请求的统计信息。
@@ -2470,17 +2476,17 @@ DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查�
 
 | 设置         | 默认值                                              | 上下文    | 多个 | 描述                                                      |
 | ------------ | --------------------------------------------------- | --------- | ---- | --------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | 否   | 启用 DNSBL：设置为 `yes` 以启用对传入连接的 DNSBL 检查。  |
+| `USE_DNSBL`  | `yes`                                               | multisite | 否   | DNSBL 默认启用；将 `USE_DNSBL` 设置为 `no` 可禁用对传入连接的检查。 |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | 否   | DNSBL 服务器：要检查的 DNSBL 服务器域名列表，以空格分隔。 |
 
 **忽略列表**
 
 | 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                                         |
 | --------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`           | ``     | multisite | 是   | 以空格分隔的 IP/CIDR，用于跳过 DNSBL 检查（白名单）。                                        |
+| `DNSBL_IGNORE_IP`           | ``  | multisite | 否   | 以空格分隔的 IP/CIDR，用于跳过 DNSBL 检查（白名单）。                              |
 | `DNSBL_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过 DNSBL 检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
 | `DNSBL_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
-| `DNSBL_IGNORE_IP_URLS`      | ``     | multisite | 是   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。                |
+| `DNSBL_IGNORE_IP_URLS`      | ``  | multisite | 否   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。       |
 
 !!! warning "请求头规则是共享密钥"
     任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
@@ -2690,6 +2696,9 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
     | ------------------ | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
     | `GREYLIST_IP`      |        | multisite | 否   | **IP 灰名单：** 要列入灰名单的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。 |
     | `GREYLIST_IP_URLS` |        | multisite | 否   | **IP 灰名单 URL：** 包含要列入灰名单的 IP 地址或网络的 URL 列表，以空格分隔。 |
+
+    !!! info "列表格式"
+        URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
 
 === "反向 DNS"
     **这是做什么的：** 根据访问者的域名（反向）将访问者列入灰名单。对于允许来自特定组织或网络的访问者有条件地访问非常有用。
@@ -3123,9 +3132,9 @@ STREAM 支持 :x:
     | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | 否   | **HSTS：** 强制执行安全的 HTTPS 连接，降低中间人攻击的风险。                      |
     | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | 否   | **CSP：** 将资源加载限制在受信任的来源，减轻跨站脚本和数据注入攻击。              |
     | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | 否   | **CSP 报告模式：** 报告违规行为而不阻止内容，有助于在测试安全策略的同时捕获日志。 |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。            |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。       |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。        |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。 允许值：`DENY`、`SAMEORIGIN`；留空会移除此响应头。 |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。 允许值：`nosniff`；留空会移除此响应头。 |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。 允许值：`on`、`off`。 |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | 否   | **Referrer Policy：** 控制发送的引荐来源信息的数量，保护用户隐私。                |
     | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | 否   | **Permissions Policy：** 限制浏览器功能访问，减少潜在的攻击向量。                 |
     | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
@@ -3155,8 +3164,16 @@ STREAM 支持 :x:
 
     !!! tip "最佳实践"
         -   对敏感 cookie 使用 `SameSite=Strict` 以防止跨源访问。
+        -   仅在 cookie 必须在跨站场景中发送时（例如 SSO 回调或嵌入内容）使用 `SameSite=None`；浏览器要求同时设置 `Secure` 标志，因此请保持 `COOKIE_AUTO_SECURE_FLAG` 启用或显式添加 `Secure`。
+        -   如果上游响应已设置了不同的 `SameSite` 值，BunkerWeb 会追加配置的值而不是替换它；浏览器以最后一个 `SameSite` 属性为准，因此 `COOKIE_FLAGS` 中的值生效。
         -   定期审计您的 cookie 设置，以确保符合安全和隐私法规。
         -   避免在生产环境中设置没有 Secure 标志的 cookie。
+
+    !!! example "跨站 cookie 使用 SameSite=None"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "自定义头"
 
@@ -3410,12 +3427,12 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | 否   | **证书颁发机构：** 选择用于签发证书的 ACME 服务器。可选值：`letsencrypt` 或 `zerossl`。                                                                                              |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | 否   | **ZeroSSL API 密钥：** 当 `LETS_ENCRYPT_SERVER=zerossl` 时由 `zerossl-bot` 使用的可选密钥。若为空，则使用 `EMAIL_LETS_ENCRYPT` 获取 EAB 凭据。                                       |
 | `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`           | multisite | 否   | **ZeroSSL API 重试次数：** `zerossl-bot` 发起 ZeroSSL API 请求时的重试次数（`0` 表示禁用重试）。                                                                                     |
-| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`           | multisite | 否   | **ZeroSSL API 重试延迟：** `zerossl-bot` 中 ZeroSSL API 重试之间的延迟秒数。                                                                                                         |
-| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`           | multisite | 否   | **ZeroSSL API 连接超时：** `zerossl-bot` 中 ZeroSSL API 调用的连接超时时间（秒）。                                                                                                   |
-| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`          | multisite | 否   | **ZeroSSL API 最大时长：** `zerossl-bot` 中每次 ZeroSSL API 调用允许的最大总时长（秒）。                                                                                             |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2s`          | multisite | 否   | **ZeroSSL API 重试延迟：** `zerossl-bot` 中 ZeroSSL API 重试之间的延迟秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                         |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5s`          | multisite | 否   | **ZeroSSL API 连接超时：** `zerossl-bot` 中 ZeroSSL API 调用的连接超时时间（秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                   |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20s`         | multisite | 否   | **ZeroSSL API 最大时长：** `zerossl-bot` 中每次 ZeroSSL API 调用允许的最大总时长（秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                             |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                     |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                    |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                                 |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                 |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。请依次写入键、空白字符和值，并且不要为键加引号。值可以是原始文本、base64 编码或 JSON 对象。      |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | 否   | **自动解码 Base64 DNS 凭据：** 启用后自动解码 base64 编码的 DNS 提供商凭据（`rfc2136` 提供商除外）。如果凭据故意为 base64，请设置为 `no`。                                           |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                      |
@@ -3432,7 +3449,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
     - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
     - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
-    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。此时对 `/.well-known/acme-challenge/` 下单个令牌的 `GET` 或 `HEAD` 请求会被加入白名单并直达后端，不经过任何其他检查：antibot、黑名单、ModSecurity、请求速率限制、Basic Auth 以及封禁检查都会对该请求跳过（连接数限制仍然生效，由 nginx 强制执行），比本地处理的验证跳过得更多。更深的路径、其他方法以及不符合令牌形式的名称仍走正常检查。
+    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。此时对 `/.well-known/acme-challenge/` 下单个令牌的 `GET` 或 `HEAD` 请求会被加入白名单并直达后端，不经过任何其他检查：antibot、黑名单、ModSecurity、请求速率限制、Basic Auth 以及封禁检查都会对该请求跳过（连接数限制仍然生效，由 nginx 强制执行），比本地处理的验证跳过得更多。更深的路径、其他方法以及不符合令牌形式的名称仍走正常检查。即使 `REVERSE_PROXY_CUSTOM_HOST` 设置为固定名称，后端收到的仍是请求中的 `Host`，因为验证是针对该名称进行的（使用 nginx 变量的值仍然生效）。
 
 !!! tip "HTTP 与 DNS 验证"
     **HTTP 验证** 更容易设置，并且适用于大多数网站：
@@ -3887,7 +3904,7 @@ STREAM 支持 :warning:
 | `METRICS_MEMORY_SIZE`                | `16m`     | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                                                                                                                          |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`      | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                                                                                                                           |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`     | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。                                                                                                                      |
-| `METRICS_REDIS_TTL`                  | `2592000` | global    | 否   | **指标 Redis TTL：** Redis 指标键过期前的秒数（`0` = 永久）；每次同步都会刷新，因此活跃数据永不过期，而被遗弃的数据可在 `volatile-lru` 下被驱逐，从而让 Redis 从 maxmemory 压力中恢复。支持 `k`/`m` 简写。 |
+| `METRICS_REDIS_TTL`                  | `30d`     | global    | 否   | **指标 Redis TTL：** Redis 指标键过期前的秒数（`0` = 永久）；每次同步都会刷新，因此活跃数据永不过期，而被遗弃的数据可在 `volatile-lru` 下被驱逐，从而让 Redis 从 maxmemory 压力中恢复。支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `MAX_LRU_HISTORY`                    | `1k`      | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。                                                                             |
 | `METRICS_SAVE_TO_REDIS`              | `yes`     | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。                                                                                                           |
 
@@ -4311,6 +4328,10 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                                                                                                                                                                                                                                                            |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                                                                                                                                                                                                                                                              |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。路径必须以 `.log` 结尾。通过该后缀实现的轮转仅适用于安装了 logrotate 的场景（Linux 软件包和 All-In-One 镜像）；在 Docker、Swarm 和 Kubernetes 上，非默认名称既不会被流式传输也不会被轮转，会在容器内无限增长，因为容器的日志流仅链接了 `modsec_audit.log`。 |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | multisite | 否 | 写入模式：`Serial`（默认）或 `Concurrent`。 |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` |  | multisite | 否 | 默认为空；`Concurrent` 必须使用绝对存储目录。 |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | 否 | 最大请求体检查大小，以字节或 `k`/`m`/`g` 后缀表示。留空时取自 `MAX_CLIENT_SIZE`，NGINX 会先执行该限制。`REVERSE_PROXY_MAX_CLIENT_SIZE` 会在对应 location 中覆盖此值。`0` 取消检查大小限制，可能耗尽内存。 |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject` | multisite | 否 | `Reject` 对超过检查限制的请求返回 HTTP 413。`ProcessPartial` 只检查限制内的部分并转发完整请求体，因此会降低 WAF 覆盖范围。独立的无文件请求体限制仍然有效。 |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。                                                                                                                                                                                                                                             |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                                                                                                                                                                                                                                                                    |
 | `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                                                                                                                                                                                                                                                                     |
@@ -4943,6 +4964,9 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
 | `REAL_IP_FROM_URLS`  |                                           | multisite | 否   | **IP 列表 URL：** 包含要下载的受信任代理 IP/网络的 URL，以空格分隔。支持 file:// URL。   |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | 否   | **PROXY 协议：** 设置为 `yes` 以启用 PROXY 协议支持，用于直接的代理到 BunkerWeb 的通信。 |
 
+!!! info "列表格式"
+    URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
 !!! tip "云提供商网络"
     如果您正在使用像 AWS、GCP 或 Azure 这样的云提供商，请考虑将其负载均衡器的 IP 范围添加到您的 `REAL_IP_FROM` 设置中，以确保正确的客户端 IP 识别。
 
@@ -5020,6 +5044,18 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
     REAL_IP_FROM: "" # 我们只信任 Cloudflare 的 IP
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # 自动下载 Cloudflare IP
     REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare 用于客户端 IP 的标头
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "位于 AWS CloudFront 后面"
+
+    用于位于 AWS CloudFront 后面的网站的配置：
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```
 
@@ -5187,14 +5223,15 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_DATABASE`          | `0`        | global | 否   | **Redis/Valkey 数据库：** 在 Redis/Valkey 服务器上使用的数据库编号 (0-15)。                                                              |
 | `REDIS_SSL`               | `no`       | global | 否   | **Redis/Valkey SSL：** 设置为 `yes` 以启用 Redis/Valkey 连接的 SSL/TLS 加密。                                                            |
 | `REDIS_SSL_VERIFY`        | `no`       | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。                                                         |
-| `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。                                                              |
+| `REDIS_TIMEOUT`           | `1s`       | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。                                                              |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                                                                               |
+| `REDIS_CLUSTER_NODES`     |            | global | 否   | **集群节点：** Redis 集群的种子节点，`主机[:端口]`，以空格分隔，IPv6 使用 `[ipv6]:端口`。启用集群模式。 |
 | `REDIS_SENTINEL_HOSTS`    |            | global | 否   | **Sentinel 主机：** Redis Sentinel 主机的空格分隔列表 (hostname:port)。                                                                  |
 | `REDIS_SENTINEL_USERNAME` |            | global | 否   | **Sentinel 用户名：** 用于 Redis Sentinel 身份验证的用户名。                                                                             |
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                                                                                 |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                                                                                |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。                                                            |
+| `REDIS_SENTINEL_MASTER`   |            | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                                                                                |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`      | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global | 否   | **Keepalive 池：** 每个 NGINX worker 在池中保留的最大 Redis/Valkey 连接数。                                                              |
 
 !!! tip "使用 Redis Sentinel 实现高可用性"
@@ -5214,6 +5251,18 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
     -   所有 BunkerWeb 实例都应连接到相同的 Redis 或 Valkey 服务器或 Sentinel 集群
     -   在所有实例中配置相同的数据库编号
     -   确保所有 BunkerWeb 实例与 Redis/Valkey 服务器之间的网络连接
+
+### Redis 集群
+
+将 `REDIS_CLUSTER_NODES` 设置为至少一个可访问的节点；BunkerWeb 会从该节点发现集群中的其余节点。此功能适用于 Redis 6.2+、Valkey，以及通过其配置端点提供的托管集群服务（如 ElastiCache、MemoryDB）。种子节点接受 `主机`、`主机:端口` 或 `[ipv6]:端口`，但集群本身必须宣告 IPv4 地址或主机名（使用 `cluster-announce-hostname` 配合 `cluster-preferred-endpoint-type hostname`）；不支持宣告 IPv6 的集群。
+
+集群模式使用数据库 0。将 `REDIS_CLUSTER_NODES` 与 `REDIS_SENTINEL_HOSTS` 同时设置，或与非 0 的 `REDIS_DATABASE` 同时设置，属于配置错误：BunkerWeb 会记录一条同时指出这两个设置的错误日志，并且在移除其中一个之前完全不使用 Redis（回退到本地计数器和 cookie 会话）。
+
+将现有部署切换到集群模式会从空的键空间开始：活跃和永久封禁、会话及报告都不会被保留。切换后请重新应用永久封禁。
+
+封禁和不良行为计数器按客户端 IP 分散在各个主节点上。被阻止请求的报告共用一个哈希槽，因此只有一个主节点存储全部报告。
+
+在默认的 `cluster-require-full-coverage yes` 下，失去一个没有副本的主节点会导致整个集群停止；此时 BunkerWeb 会回退到本地计数器和 cookie 会话，直至集群恢复。`cluster-require-full-coverage no` 可将影响限制在丢失分片的键范围内。
 
 ### 配置示例
 
@@ -5274,7 +5323,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
     `settings.redis.redisSentinelHosts` 和 `settings.redis.redisSentinelMaster` 配置 Sentinel（chart ≥ v1.0.21）。
     对于没有专用 chart 键的任何设置，请使用 `scheduler.extraEnvs`。仅在 `bunkerweb.extraEnvs` 上设置它们将**不起作用**。
 
-### Redis 最佳实践
+### Redis 最佳实践 {#redis-best-practices}
 
 在使用 Redis 或 Valkey 与 BunkerWeb 时，请考虑以下最佳实践以确保最佳性能、安全性和可靠性：
 
@@ -5736,7 +5785,7 @@ STREAM 支持 :white_check_mark:
 | ---------------------- | -------------------------- | --------- | ---- | ------------------------------------------------------- |
 | `USE_REVERSE_SCAN`     | `no`                       | multisite | 否   | **启用反向扫描：** 设置为 `yes` 以启用客户端端口扫描。  |
 | `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | 否   | **要扫描的端口：** 要在客户端检查的端口的空格分隔列表。 |
-| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | 否   | **扫描超时：** 允许扫描端口的最长时间（毫秒）。         |
+| `REVERSE_SCAN_TIMEOUT` | `500ms`                    | multisite | 否   | **扫描超时：** 允许扫描端口的最长时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 
 !!! warning "性能注意事项"
     扫描多个端口会增加客户端连接的延迟。请使用适当的超时值并限制扫描的端口数量以保持良好的性能。
@@ -6057,7 +6106,7 @@ STREAM 支持 :white_check_mark:
 | --------------------------- | ---------------------- | --------- | ---- | ---------------------------------------------------------------------------------------------- |
 | `GENERATE_SELF_SIGNED_SSL`  | `no`                   | multisite | 否   | **启用自签名：** 设置为 `yes` 以启用自动自签名证书生成。                                       |
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | multisite | 否   | **证书算法：** 用于证书生成的算法：`ec-prime256v1`、`ec-secp384r1`、`rsa-2048` 或 `rsa-4096`。 |
-| `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | multisite | 否   | **证书有效期：** 自签名证书的有效天数（默认为 1 年）。                                         |
+| `SELF_SIGNED_SSL_EXPIRY`    | `1y`                   | multisite | 否   | **证书有效期：** 自签名证书的有效天数（默认为 1 年）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为天。 |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | 否   | **证书主题：** 证书的主题字段，用于标识域名。                                                  |
 
 !!! tip "开发环境"
@@ -6135,9 +6184,9 @@ STREAM 支持 :white_check_mark:
 | `SESSIONS_SECRET`           | `random` | global    | 否   | **会话密钥：** 用于签署会话 Cookie 的加密密钥。应该是一个强大的、随机的、对您的站点唯一的字符串。                                                                                                    |
 | `SESSIONS_NAME`             | `random` | global    | 否   | **Cookie 名称：** 将存储会话标识符的 Cookie 的名称。                                                                                                                                                 |
 | `SESSIONS_DOMAIN`           |          | multisite | 否   | **Cookie 域：** 应用于会话 Cookie 的可选 `Domain` 属性（例如 `example.com`）。留空则保持 Cookie 仅作用于主机。按服务器配置它，以便在同一可注册域名下的同级子域之间共享会话状态（反机器人、挑战等）。 |
-| `SESSIONS_IDLING_TIMEOUT`   | `1800`   | global    | 否   | **空闲超时：** 会话在失效前允许保持不活动的最长时间（以秒为单位）。                                                                                                                                  |
-| `SESSIONS_ROLLING_TIMEOUT`  | `3600`   | global    | 否   | **滚动超时：** 会话在必须续订之前允许存在的最长时间（以秒为单位）。                                                                                                                                  |
-| `SESSIONS_ABSOLUTE_TIMEOUT` | `86400`  | global    | 否   | **绝对超时：** 无论活动情况如何，会话在被销毁前允许存在的最长时间（以秒为单位）。                                                                                                                    |
+| `SESSIONS_IDLING_TIMEOUT`   | `30m`    | global    | 否   | **空闲超时：** 会话在失效前允许保持不活动的最长时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                  |
+| `SESSIONS_ROLLING_TIMEOUT`  | `1h`     | global    | 否   | **滚动超时：** 会话在必须续订之前允许存在的最长时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                  |
+| `SESSIONS_ABSOLUTE_TIMEOUT` | `1d`     | global    | 否   | **绝对超时：** 无论活动情况如何，会话在被销毁前允许存在的最长时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                    |
 | `SESSIONS_CHECK_IP`         | `yes`    | global    | 否   | **检查 IP：** 设置为 `yes` 时，如果客户端 IP 地址发生变化，则销毁会话。                                                                                                                              |
 | `SESSIONS_CHECK_USER_AGENT` | `yes`    | global    | 否   | **检查 User-Agent：** 设置为 `yes` 时，如果客户端 User-Agent 发生变化，则销毁会话。                                                                                                                  |
 
@@ -6412,7 +6461,7 @@ STREAM 支持 :warning:
 
 1.  您定义应被“列入白名单”的访问者的标准（_IP 地址、网络、反向 DNS、ASN、用户代理或 URI 模式_）。
 2.  当访问者尝试访问您的网站时，BunkerWeb 会检查他们是否符合任何这些白名单标准。
-3.  如果访问者符合任何白名单规则（并且不符合任何忽略规则），他们将被授予访问您网站的权限，并**绕过所有其他安全检查**。
+3.  如果访问者符合任何白名单规则，他们将被授予访问您网站的权限，并**绕过所有其他安全检查**。
 4.  如果访问者不符合任何白名单标准，他们将照常通过所有正常的安全检查。
 5.  白名单可以按计划从外部来源自动更新。
 
@@ -6420,11 +6469,10 @@ STREAM 支持 :warning:
 
 请按照以下步骤配置和使用白名单功能：
 
-1.  **启用该功能：** 白名单功能默认被禁用。将 `USE_WHITELIST` 设置为 `yes` 以启用它。
+1. **启用该功能：** 白名单默认启用（`USE_WHITELIST=yes`），包含预设的反向 DNS 后缀和 ASN `32934`。请检查这些可信来源；设置 `USE_WHITELIST=no` 可禁用白名单。
 2.  **配置允许规则：** 定义哪些 IP、网络、反向 DNS 模式、ASN、用户代理或 URI 应被列入白名单。
-3.  **设置忽略规则：** 指定任何应绕过白名单检查的例外情况。
-4.  **添加外部来源：** 配置用于自动下载和更新白名单数据的 URL。
-5.  **监控访问：** 检查 [Web UI](web-ui.md) 以查看哪些访问者被允许或拒绝。
+3.  **添加外部来源：** 配置用于自动下载和更新白名单数据的 URL。
+4.  **监控访问：** 检查 [Web UI](web-ui.md) 以查看哪些访问者被允许或拒绝。
 
 !!! info "流模式"
     当使用流模式时，仅执行 IP、反向 DNS 和 ASN 检查。
@@ -6435,7 +6483,7 @@ STREAM 支持 :warning:
 
 | 设置            | 默认值 | 上下文    | 多选 | 描述                                             |
 | --------------- | ------ | --------- | ---- | ------------------------------------------------ |
-| `USE_WHITELIST` | `no`   | multisite | 否   | **启用白名单：** 设置为 `yes` 以启用白名单功能。 |
+| `USE_WHITELIST` | `yes` | multisite | 否   | **启用白名单：** 设置为 `yes` 以启用白名单功能。 |
 
 === "IP 地址"
     **功能说明：** 根据访问者的 IP 地址或网络将其列入白名单。这些访问者将绕过所有安全检查。
@@ -6443,30 +6491,27 @@ STREAM 支持 :warning:
     | 设置                       | 默认值 | 上下文    | 多选 | 描述                                                                          |
     | -------------------------- | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
     | `WHITELIST_IP`             |        | multisite | 否   | **IP 白名单：** 允许的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。         |
-    | `WHITELIST_IGNORE_IP`      |        | multisite | 否   | **IP 忽略列表：** 应绕过 IP 白名单检查的 IP 地址或网络列表。                  |
     | `WHITELIST_IP_URLS`        |        | multisite | 否   | **IP 白名单 URL：** 包含要列入白名单的 IP 地址或网络的 URL 列表，以空格分隔。 |
-    | `WHITELIST_IGNORE_IP_URLS` |        | multisite | 否   | **IP 忽略列表 URL：** 包含要忽略的 IP 地址或网络的 URL 列表。                 |
+
+    !!! info "列表格式"
+        URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
 
 === "反向 DNS"
     **功能说明：** 根据访问者的域名（反向）将其列入白名单。这对于允许来自特定组织或网络的访问者按其域名访问非常有用。
 
     | 设置                         | 默认值 | 上下文    | 多选 | 描述                                                                           |
     | ---------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------ |
-    | `WHITELIST_RDNS`             |        | multisite | 否   | **rDNS 白名单：** 允许的反向 DNS 后缀列表，以空格分隔。                        |
+    | `WHITELIST_RDNS`             | `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com` | multisite | 否   | **rDNS 白名单：** 允许的反向 DNS 后缀列表，以空格分隔。                        |
     | `WHITELIST_RDNS_GLOBAL`      | `yes`  | multisite | 否   | **仅限全局 rDNS：** 当设置为 `yes` 时，仅对全局 IP 地址执行 rDNS 白名单检查。  |
-    | `WHITELIST_IGNORE_RDNS`      |        | multisite | 否   | **rDNS 忽略列表：** 应绕过 rDNS 白名单检查的反向 DNS 后缀列表。                |
     | `WHITELIST_RDNS_URLS`        |        | multisite | 否   | **rDNS 白名单 URL：** 包含要列入白名单的反向 DNS 后缀的 URL 列表，以空格分隔。 |
-    | `WHITELIST_IGNORE_RDNS_URLS` |        | multisite | 否   | **rDNS 忽略列表 URL：** 包含要忽略的反向 DNS 后缀的 URL 列表。                 |
 
 === "ASN"
     **功能说明：** 使用自治系统编号（ASN）将来自特定网络提供商的访问者列入白名单。ASN 标识 IP 属于哪个提供商或组织。
 
     | 设置                        | 默认值 | 上下文    | 多选 | 描述                                                                  |
     | --------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------- |
-    | `WHITELIST_ASN`             |        | multisite | 否   | **ASN 白名单：** 允许的自治系统编号列表，以空格分隔。                 |
-    | `WHITELIST_IGNORE_ASN`      |        | multisite | 否   | **ASN 忽略列表：** 应绕过 ASN 白名单检查的 ASN 列表。                 |
+    | `WHITELIST_ASN`             | `32934` | multisite | 否   | **ASN 白名单：** 允许的自治系统编号列表，以空格分隔。                 |
     | `WHITELIST_ASN_URLS`        |        | multisite | 否   | **ASN 白名单 URL：** 包含要列入白名单的 ASN 的 URL 列表，以空格分隔。 |
-    | `WHITELIST_IGNORE_ASN_URLS` |        | multisite | 否   | **ASN 忽略列表 URL：** 包含要忽略的 ASN 的 URL 列表。                 |
 
 === "用户代理"
     **功能说明：** 根据访问者声称使用的浏览器或工具将其列入白名单。这对于允许访问特定的已知工具或服务非常有效。
@@ -6474,9 +6519,7 @@ STREAM 支持 :warning:
     | 设置                               | 默认值 | 上下文    | 多选 | 描述                                                                         |
     | ---------------------------------- | ------ | --------- | ---- | ---------------------------------------------------------------------------- |
     | `WHITELIST_USER_AGENT`             |        | multisite | 否   | **用户代理白名单：** 允许的用户代理模式（PCRE 正则表达式）列表，以空格分隔。 |
-    | `WHITELIST_IGNORE_USER_AGENT`      |        | multisite | 否   | **用户代理忽略列表：** 应绕过用户代理白名单检查的用户代理模式列表。          |
     | `WHITELIST_USER_AGENT_URLS`        |        | multisite | 否   | **用户代理白名单 URL：** 包含要列入白名单的用户代理模式的 URL 列表。         |
-    | `WHITELIST_IGNORE_USER_AGENT_URLS` |        | multisite | 否   | **用户代理忽略列表 URL：** 包含要忽略的用户代理模式的 URL 列表。             |
 
 === "URI"
     **功能说明：** 将对您网站上特定 URL 的请求列入白名单。这对于允许访问特定端点而不考虑其他因素很有帮助。
@@ -6484,9 +6527,7 @@ STREAM 支持 :warning:
     | 设置                        | 默认值 | 上下文    | 多选 | 描述                                                                      |
     | --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------- |
     | `WHITELIST_URI`             |        | multisite | 否   | **URI 白名单：** 允许的 URI 模式（PCRE 正则表达式）列表，以空格分隔。     |
-    | `WHITELIST_IGNORE_URI`      |        | multisite | 否   | **URI 忽略列表：** 应绕过 URI 白名单检查的 URI 模式列表。                 |
     | `WHITELIST_URI_URLS`        |        | multisite | 否   | **URI 白名单 URL：** 包含要列入白名单的 URI 模式的 URL 列表，以空格分隔。 |
-    | `WHITELIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。                 |
 
     !!! tip "锚定路径模式时要覆盖其下的所有内容"
         请写 `^/admin(/|$)` 而不是 `^/admin$`。只锚定单一精确路径的模式不会匹配 `/admin/`、`/admin%2f` 或 `/admin;foo`，而你的应用仍可能在这些路径上提供同一资源。匹配基于解码并规范化后的路径，因此 `/a/../admin` 和 `//admin` 已被覆盖。

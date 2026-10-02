@@ -1,6 +1,69 @@
 # Changelog
 
-## v1.6.15 - 2026/09/??
+## v1.6.16~rc3 - ????/??/??
+
+- [BUGFIX] `/healthz` answers `ok` during a graceful reload instead of `loading`, so readiness probes and keepalived checks using `healthcheck.sh ok` no longer fail on every reload; only an instance without its configuration answers `loading`; the instance API `/health` still reports `reloading`. (Refs bunkerity/bunkerweb-helm#97)
+- [BUGFIX] `ui`: country flags load again on the reports, bans and plugin pages instead of returning 404.
+- [BUGFIX] `ui`: for signed-in users, a single form field larger than 500 kB, such as an Easy Resolve request for a report with a large matched body, is accepted up to `MAX_CONTENT_LENGTH` instead of failing with 413. The login form keeps the 500 kB cap.
+- [BUGFIX] `metrics`: instances sharing one Redis no longer overwrite each other's metrics: Redis keys now carry the instance hostname next to the worker id, so give each instance a distinct hostname. Keys written by older versions are kept as history, still counted in the Web UI and renewed with `METRICS_REDIS_TTL` while the instance runs.
+- [FEATURE] `realip`, `blacklist`, `whitelist`, `greylist`: IP list URLs also read JSON documents, JSON lines, CSV and tab-separated lists, such as the AWS, Google, Cloudflare API, Fastly or Spamhaus feeds, and a `#key=value` fragment keeps only part of a JSON list, e.g. `ip-ranges.json#service=CLOUDFRONT`.
+- [FEATURE] `letsencrypt`: certificates can be issued for public IPv4 addresses listed in `SERVER_NAME`, with `LETS_ENCRYPT_PROFILE=shortlived` and the `http` challenge; addresses that do not meet these conditions are skipped with a warning.
+- [BUGFIX] `letsencrypt`: certificates renewed by the daily renewal job are published to the instances right after the renewal instead of the instances serving the previous certificate until an unrelated reload.
+- [FEATURE] `scheduler`: a job can exit with code 3 to request a reload while still being reported as failed; the Let's Encrypt renewal uses it when some certificates renewed and others failed.
+- [BUGFIX] `blacklist`: `BLACKLIST_IGNORE_USER_AGENT_URLS` entries are no longer cut at their first space, which turned an ignored user agent into its first word and exempted most browsers.
+- [BUGFIX] The loading page answers 503 with `Retry-After` instead of 200. (Fixes #3988)
+- [BUGFIX] `ui`: logins no longer fail with "The CSRF session token is missing" on a fresh worker or when the Web UI is reached both through BunkerWeb and directly.
+- [BUGFIX] `ui`: raw translation keys no longer flash on page load. (Fixes #3963)
+- [BUGFIX] `ui`: wrapped table toolbars keep their controls aligned. (Fixes #3969)
+- [BUGFIX] `ui`: creating or deleting a service no longer rewrites the other services' settings. (Fixes #3986)
+- [BUGFIX] A PRO force update no longer deletes unchanged PRO plugin pages.
+- [BUGFIX] `db`: large blobs are stored in chunks, so PRO plugin updates no longer need a raised `max_allowed_packet` on MariaDB/MySQL. (Fixes #3965)
+- [BUGFIX] `ui`, `api`: editing a service no longer deletes another one sharing a server name; shared server names are refused.
+- [BUGFIX] `ui`: plugins without a page (e.g. PRO Maintenance) no longer ask to restart the Web UI.
+- [BUGFIX] `ui`: the Global config breadcrumb and the service conversion and cache deletion modals are translated.
+- [BUGFIX] `ui`: the active PRO plugin entry in the dark-mode menu is readable again.
+- [BUGFIX] `ui`: the bans table header and country tooltips now show.
+- [BUGFIX] The scheduler and autoconf log a warning when two services share a server name.
+- [BUGFIX] `ui`: renaming a service no longer drops the settings of services whose name starts with the old one.
+- [BUGFIX] `backup`: the built-in backup no longer fails on MySQL 26.x.
+- [BUGFIX] `ui`: after saving the global config, a service, a custom config or the PRO license key, the page shows the new value instead of the old one until a refresh. (Fixes #3991)
+- [BUGFIX] `ui`: the "More info" link of core and PRO plugins opens their section of the Features page. (Fixes #3990)
+- [BUGFIX] `misc`: the default server serves its placeholder page only on `/` and answers 404 on every other path instead of 200. (Fixes #3992)
+- [PERF] `ui`: the reports table no longer rebuilds every tooltip on each draw, which also stops its memory growth.
+- [PERF] `ui`: restoring saved hidden columns measures the table once instead of once per column.
+- [FEATURE] `redis`: Redis Cluster support via the new `REDIS_CLUSTER_NODES` setting (bans and counters spread across primaries by client IP).
+- [DEPS] Added resty-redis-cluster v1.6.1 (Kong) for Redis Cluster support.
+- [DEPS] `modsecurity`: update libmodsecurity to v3.0.17 (security fixes in transformations, XML and multipart parsing, Content-Type handling). `MULTIPART_FILENAME` entries are now keyed by the form field name, so custom rules that select them by file name need updating. libmaxminddb goes to v1.14.1.
+- [CONTRIBUTION] Thank you [MageInt](https://github.com/MageInt) for syncing metrics to Redis incrementally, so an idle instance no longer rewrites every metric every 5 seconds. (#3972)
+- [BUGFIX] Jobs no longer load every plugin's cached files at startup, which could get the scheduler OOM-killed.
+- [BUGFIX] `bunkernet`: the queue of unsent reports keeps the newest 10,000 instead of growing without limit.
+
+## v1.6.16~rc2 - 2026/09/25
+
+- [BUGFIX] `db`: on SQLite, settings written in the same save as a service rename or removal are no longer deleted by reused row ids, which could leave a renamed service without any settings and make the reload fall back to failover.
+- [BUGFIX] `ui`: renaming a service moves its settings, custom configs and job cache in one transaction, in every editor mode, instead of deleting and recreating the service, which dropped its per-service certificates and job cache.
+- [BUGFIX] `metrics`: a counter whose Redis value cannot be parsed is now discarded and rewritten with the live count instead of being retried forever, ending the `Invalid Redis metric counter` error logged every 5s on instances upgraded from 1.6.13 or older, where that counter also stopped reaching Redis entirely.
+- [BUGFIX] `metrics`: rebuilding the request filters and trimming the stored reports now read the list in slices, instead of decoding it whole inside Redis, where the script memory counts against `maxmemory` and made an `allkeys-lru` Redis evict the reports themselves, typically on the first start after upgrading from 1.6.14.
+- [BUGFIX] `antibot`: no more `can't get session data` error when an earlier plugin already handled the challenge request.
+- [BUGFIX] `ui`: no startup crash while the database is still migrating (`no such column: bw_global_values.is_draft`).
+- [BUGFIX] A service without its own `SERVER_NAME` is named by its id instead of inheriting the global value, empty on Linux, which rendered `server_name ;`, failed every reload and got the service deleted or renamed by the next Web UI save. An empty `SERVER_NAME` is now refused for a service, still allowed globally.
+- [BUGFIX] `letsencrypt`: a passed-through ACME challenge keeps the client `Host` instead of a fixed `REVERSE_PROXY_CUSTOM_HOST`. (Fixes #3957)
+- [BUGFIX] `whitelist`, `greylist`, `antibot`, `blacklist`: rDNS rules now confirm IPv6 clients instead of treating them as spoofing their reverse DNS. (Fixes #3966)
+- [BUGFIX] `ui`: deleting a custom config with a digit-only name no longer deletes other configs of that service and type on MariaDB.
+- [BUGFIX] `ui`: row actions on the jobs, plugins, templates, services and bans pages keep digit-only ids as text.
+- [BUGFIX] `autoconf`: with `KUBERNETES_SKIP_FOREIGN_CLASSES=yes`, the Kubernetes controller ignores Ingresses and Gateways whose class belongs to another controller.
+- [FEATURE] `antibot`: `ANTIBOT_JAVASCRIPT_DIFFICULTY` (16 to 28 bits) raises the JavaScript challenge cost. Regenerate custom JavaScript pages first.
+- [FEATURE] `antibot`: redesigned challenge pages that follow browser preferences (theme, reduced motion, contrast, text size), with a discreet reload link.
+- [UI] Responses are compressed (brotli/gzip) and static assets carry a versioned, long-lived cache header, so the Web UI stays fast when reached directly; the API gains gzip.
+- [MISC] Duration settings accept nginx-style time suffixes (ms, s, m, h, d, w, M, y): antibot, badbehavior, sessions, cors, reversescan, redis, metrics, crowdsec, db, letsencrypt, selfsigned and the scheduler timeouts. A bare number keeps its previous unit.
+- [BREAKING] `METRICS_REDIS_TTL` now takes time units: `m` means minutes, not millions. Values stored in the database are migrated; values set through the environment are not.
+- [CONTRIBUTION] Thank you [Ayushsinha322](https://github.com/Ayushsinha322) for anchoring the `BROTLI_MIN_LENGTH` regex so trailing garbage is rejected. (#3959)
+
+## v1.6.16~rc1 - 2026/09/21
+
+- [BUGFIX] `grpc`, `reverseproxy`: gRPC and the reverse proxy on the same service no longer fail the NGINX configuration check. (Fixes #3950)
+
+## v1.6.15 - 2026/09/21
 
 - [SECURITY] `jobs`: a folder cache or Let's Encrypt import is now verified link by link on disk, so a chain of relative links can no longer point outside the cache directory; an archive that fails the check is refused and the previous files are kept. (Fixes #3930)
 - [SECURITY] `api`: moving a custom config with `PATCH /configs` needs `config_update` on the destination service; a body without `service` keeps the current one, not global.
@@ -242,7 +305,7 @@
 - [UI] Removed vendored front-end assets that were never loaded: 28 unused ACE extensions, keybindings and themes, the ACE stylesheet directory, the 45 ApexCharts locale files, and the unminified topojson-client build.
 - [CONTRIBUTION] Thank you [xabru](https://github.com/xabru) for your contribution regarding wildcard SNI fallback for custom certificates. (#3745)
 
-## v1.6.14~rc1 - 2026/07/23
+## v1.6.14~rc1 - 2026/07/28
 
 - [BUGFIX] `mtls`: the Scheduler now validates the client CA bundle and CRL, caches them, and distributes them to every instance instead of shipping the raw configured path straight into the NGINX configuration, so a Scheduler-only mount works as documented instead of causing "cannot load certificate" errors on instances that cannot read that path. Adds `MTLS_CA_CERTIFICATE_DATA` and `MTLS_CRL_DATA` to supply either file inline as base64 or plaintext PEM.
 - [BUGFIX] `backup`: support MySQL 9 and MariaDB 12 backup/restore with current authentication, TLS, and privilege defaults while preserving compatibility with older servers; refresh the documented database compatibility matrix, including PostgreSQL 18.
@@ -284,7 +347,7 @@
 - [DEPS] Updated LuaJIT version to v2.1-20260701
 - [DEPS] Updated Modsecurity version to v3.0.16
 
-## v1.6.12~rc3 - 2026/06/18
+## v1.6.12~rc3 - 2026/06/19
 
 - [SECURITY] `nginx`: update nginx to 1.30.3 (except for Fedora, which stays on 1.30.2 until it is available in its repositories) to fix CVE-2026-42055 — a heap buffer overflow in `ngx_http_proxy_v2_module`/`ngx_http_grpc_module` — and CVE-2026-48142 — a heap buffer overread in `ngx_http_charset_module`.
 - [FEATURE] `antibot`: `ANTIBOT_IGNORE_URI` can now match full request URIs including query strings. (Fixes #3374)
@@ -328,7 +391,7 @@
 - [CONTRIBUTION] Thank you [ray910408](https://github.com/ray910408) for your contribution regarding the refresh of the `src/deps` npm build-tool dependencies. (#3623)
 - [CONTRIBUTION] Thank you [immanuwell](https://github.com/immanuwell) for your contribution regarding parsing the `DEBUG` environment variable as a boolean in the `Gunicorn` configuration (UI and API), so a string value no longer always enables debug logging. (#3589)
 
-## v1.6.12~rc1 - 2026/06/03
+## v1.6.12~rc1 - 2026/06/08
 
 - [SECURITY] `antibot`: Cap.js `script-src` now uses a strict per-request nonce (no more `'unsafe-inline'`); every challenge response also sends `Cache-Control: no-store`. Requires Cap.js widget `0.1.48`+.
 - [SECURITY] `letsencrypt` (UI): harden delete + new heal flow — per-request scratch dir, `fcntl.flock`, `.`/`..` rejected in `cert_name`, DOMPurify + `markupsafe.escape` at every HTML sink, 500 on persistence failure; new `/letsencrypt/{orphans,accounts,cache-status,heal}` endpoints, per-row Heal button, sidebar orphan toast.
@@ -360,7 +423,7 @@
 - [DEPS] Updated lua-resty-string version to v0.18
 - [DEPS] Updated coreruleset-v4 version to v4.27.0
 
-## v1.6.11 - 2026/05/23
+## v1.6.11 - 2026/05/25
 
 - [SECURITY] `nginx`: update nginx to 1.30.2 (except for Fedora as it is not yet available) to fix CVE-2026-9256 — a heap buffer overflow in `ngx_http_rewrite_module` with overlapping captures that could lead to worker-process arbitrary code execution.
 
@@ -591,7 +654,7 @@
 - [API] Fix redis sentinel issue when a password is set on the master node
 - [MISC] Remove warning for uninitialized variables in default server configuration (as we control the configuration and we know that some variables may be uninitialized in some cases, especially for 400 errors) (Fixes #1963)
 
-## v1.6.8 - 2026/02/06
+## v1.6.8 - 2026/02/13
 
 - [DOCS] Add forward proxy configuration for outgoing traffic (Fixes #2535)
 - [DEPS] Update coreruleset-v4 version to v4.23.0
@@ -770,7 +833,7 @@
 - [DEPS] Updated lua-cjson version to v2.1.0.15
 - [DEPS] Update Mbed TLS version to v3.6.5
 
-## v1.6.5 - 2025/10/03
+## v1.6.5 - 2025/10/06
 
 - [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
 - [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes
@@ -846,7 +909,7 @@
 - [LINUX] Support RHEL 10.0
 - [LINUX] Support Debian 13 (Trixie)
 
-## v1.6.3 - 2025/08/05
+## v1.6.3 - 2025/08/08
 
 - [BUGFIX] Fix connection error shenanigans regarding the `Let's Encrypt` plugin when generating wildcard domains by adding the `--expand` flag to the certbot command.
 - [BUGFIX] Fix errors with `PostgreSQL` database, ensuring that suffixes are stored as integers for consistency.
@@ -949,7 +1012,7 @@
 - [BUGFIX] Enhance cache robustness by using dict.get() for lookups to avoid KeyError exceptions during cache operations.
 - [SECURITY] Make sure the files/dirs in /usr/share/bunkerweb have the appropriate permissions to prevent unauthorized access to sensitive files on Linux integration
 
-## v1.6.2-rc5 - 2025/06/17
+## v1.6.2-rc5 - 2025/06/16
 
 - [BUGFIX] Ensure jobs correctly retrieve multisite settings when a service uses its default value while the global setting is overridden, preventing configuration mismatches.
 - [FEATURE] Add new `LETS_ENCRYPT_PASSTHROUGH` setting to the `Let's Encrypt` plugin to allow passing through the Let's Encrypt challenge requests to the upstream server (default is `no`)
@@ -1131,7 +1194,7 @@
 - [MISC] Update regex for `SERVER_NAME` to improve accuracy and avoid issues
 - [MISC] Revamped DNS credential validation to minimize configuration errors and enhance overall reliability.
 
-## v1.6.0 - 2025/02/13
+## v1.6.0 - 2025/02/14
 
 - [BUGFIX] Fix CRS plugins not being included correctly in ModSecurity configuration
 - [FEATURE] Add mCaptcha antibot mode
@@ -1237,7 +1300,7 @@
 - [SECURITY] Fix CVE-2024-53254
 - [UI] Fix issues in several pages because of a wrong key being used to fetch the data
 
-## v1.5.11 - 2024/11/08
+## v1.5.11 - 2024/11/10
 
 - [BUGFIX] Fix INTERCEPTED_ERROR_CODES to allow empty value
 - [UI] Fix missing settings when a service is published online
@@ -1250,7 +1313,7 @@
 - [DEPS] Updated coreruleset-v4 version to v4.8.0
 - [DEPS] Updated coreruleset-v3 version to v3.3.7
 
-## v1.5.10 - 2024/08/17
+## v1.5.10 - 2024/09/17
 
 - [UI] Fix setup wizard bug related to certificate
 - [UI] Fix bug when adding more than 3 reverse proxies URLs
@@ -1274,7 +1337,7 @@
 - [DEPS] Updated ModSecurity version to v3.0.13
 - [DEPS] Start managing Mbed TLS as a dependency for ModSecurity (v3.6.1)
 
-## v1.5.9 - 2024/07/22
+## v1.5.9 - 2024/07/24
 
 - [BUGFIX] Fix compatibility issues with mysql 8.4+ version and the `backup` plugin by adding the `mariadb-connector-c` dependency to the scheduler Dockerfile (on alpine)
 - [BUGFIX] Fix potential issues with multiple settings in helpers.load_variables when multiple settings have the same suffix (the issue is only present in future external plugins)
@@ -1441,7 +1504,7 @@
 - [MISC] Updated Python Docker image to 3.12.1-alpine3.18 in Dockerfiles
 - [DEPS] Updated ModSecurity to v3.0.11
 
-## v1.5.4 - 2023/12/04
+## v1.5.4 - 2023/12/05
 
 - [UI] Add an optional setup wizard for the web UI
 - [BUGFIX] Fix issues with the Linux integration and external databases
@@ -1454,7 +1517,7 @@
 - [MISC] Updated python dependencies
 - [MISC] Updated Python Docker image to 3.12.0-alpine3.18 in Dockerfiles
 
-## v1.5.3 - 2023/10/31
+## v1.5.3 - 2023/10/30
 
 - [BUGFIX] Fix BunkerWeb not loading his own settings after a docker restart
 - [BUGFIX] Fix Custom configs not following the service name after an update on the UI
@@ -1675,7 +1738,7 @@
 - Improve documentation for Linux integration
 - Various fixes in the documentation
 
-## v1.4.0 - 2022/06/06
+## v1.4.0 - 2022/06/05
 
 - Project renamed to BunkerWeb
 - Internal architecture fully revised with a modular approach
@@ -1737,7 +1800,7 @@
 - Fix bug in autoconf (missing instances parameter to reload function)
 - Remove old .env files when generating a new configuration
 
-## v1.2.7 - 2021/06/14
+## v1.2.7 - 2021/06/15
 
 - Add custom robots.txt and sitemap to RTD
 - Fix missing GeoIP DB bug when using BLACKLIST/WHITELIST_COUNTRY
@@ -1752,7 +1815,7 @@
 - Bump modsecurity-nginx to v1.0.2
 - Community chat with bridged platforms
 
-## v1.2.6 - 2021/06/06
+## v1.2.6 - 2021/06/07
 
 - Move from "ghetto-style" shell scripts to generic jinja2 templating
 - Init work on a basic plugins system

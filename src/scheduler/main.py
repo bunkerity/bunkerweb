@@ -38,6 +38,7 @@ from common_utils import (  # type: ignore
     DatabaseLockBusy,
     dict_to_frozenset,
     handle_docker_secrets,
+    parse_duration,
     plugin_tar_exclude,
     release_db_lock,
     safe_tar_extractall,
@@ -114,34 +115,28 @@ DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 LOGGER = getLogger("SCHEDULER")
 PLUGIN_VALIDATOR: Optional[Configurator] = None
 
-HEALTHCHECK_INTERVAL = getenv("HEALTHCHECK_INTERVAL", "30")
-
-if not HEALTHCHECK_INTERVAL.isdigit():
-    LOGGER.error("HEALTHCHECK_INTERVAL must be an integer, defaulting to 30")
+try:
+    HEALTHCHECK_INTERVAL = parse_duration(getenv("HEALTHCHECK_INTERVAL", "30"), "s")
+except ValueError:
+    LOGGER.error("HEALTHCHECK_INTERVAL must be a duration like 30 or 30s, defaulting to 30")
     HEALTHCHECK_INTERVAL = 30
-
-HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 HEALTHCHECK_EVENT = Event()
 HEALTHCHECK_LOGGER = getLogger("SCHEDULER.HEALTHCHECK")
 
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
 
-RELOAD_MIN_TIMEOUT = getenv("RELOAD_MIN_TIMEOUT", "5")
-
-if not RELOAD_MIN_TIMEOUT.isdigit():
-    LOGGER.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
+try:
+    RELOAD_MIN_TIMEOUT = parse_duration(getenv("RELOAD_MIN_TIMEOUT", "5"), "s")
+except ValueError:
+    LOGGER.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
     RELOAD_MIN_TIMEOUT = 5
 
-RELOAD_MIN_TIMEOUT = int(RELOAD_MIN_TIMEOUT)
-
-SEND_FILES_MIN_TIMEOUT = getenv("SEND_FILES_MIN_TIMEOUT", "30")
-
-if not SEND_FILES_MIN_TIMEOUT.isdigit():
-    LOGGER.error("SEND_FILES_MIN_TIMEOUT must be an integer, defaulting to 30")
+try:
+    SEND_FILES_MIN_TIMEOUT = parse_duration(getenv("SEND_FILES_MIN_TIMEOUT", "30"), "s")
+except ValueError:
+    LOGGER.error("SEND_FILES_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 30")
     SEND_FILES_MIN_TIMEOUT = 30
-
-SEND_FILES_MIN_TIMEOUT = int(SEND_FILES_MIN_TIMEOUT)
 
 # Cadence for work the loop is holding on to: a configuration push the once-jobs are waiting for,
 # and a manual custom-config edit whose database write was refused. Both have to be retried by the

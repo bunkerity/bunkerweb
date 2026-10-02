@@ -20,6 +20,7 @@ local tonumber = tonumber
 local tostring = tostring
 local get_session = utils.get_session
 local get_deny_status = utils.get_deny_status
+local parse_duration = utils.parse_duration
 local rand = utils.rand
 local now = ngx.now
 local captcha_new = captcha.new
@@ -131,6 +132,27 @@ local function first_value(v)
 	return v
 end
 
+-- Older challenge pages hardcode a 16-bit target; solutions at that level but below the configured
+-- difficulty come from an outdated page.
+local LEGACY_POW_DIFFICULTY = 16
+
+-- Leading zero bits of a binary digest (arithmetic only, no bit library needed).
+local function leading_zero_bits(digest)
+	local bits = 0
+	for i = 1, #digest do
+		local byte = digest:byte(i)
+		if byte ~= 0 then
+			while byte < 128 do
+				bits = bits + 1
+				byte = byte * 2
+			end
+			return bits
+		end
+		bits = bits + 8
+	end
+	return bits
+end
+
 -- Drop the query so the URL-borne "next" never leaks secrets; full URI stays in the session.
 local function path_only(p)
 	if not p then
@@ -229,7 +251,7 @@ function antibot:header()
 	-- Get session data
 	self.session_data = self.ctx.bw.antibot_session_data
 	if not self.session_data then
-		return self:ret(false, "can't get session data", HTTP_INTERNAL_SERVER_ERROR)
+		return self:ret(true, "no session data available, skipping CSP header override")
 	end
 
 	-- Don't go further if client resolved the challenge. The header_filter phase
@@ -327,6 +349,8 @@ function antibot:header()
 			csp_directives["script-src"] = "'nonce-" .. self.ctx.bw.antibot_nonce_script .. "'"
 			csp_directives["frame-src"] = "'self'"
 		end
+	elseif self.session_data.type == "javascript" then
+		csp_directives["worker-src"] = "blob:"
 	end
 	local csp_content = ""
 	for directive, value in pairs(csp_directives) do
@@ -544,14 +568,18 @@ function antibot:check_session()
 	-- Check if still valid
 	local time = now()
 	local resolved = self.session_data.resolved
-	if resolved and (time_valid > time or time - time_valid > tonumber(self.variables["ANTIBOT_TIME_VALID"])) then
+	if
+		resolved
+		and (time_valid > time or time - time_valid > parse_duration(self.variables["ANTIBOT_TIME_VALID"], "s"))
+	then
 		self.session_data = {}
 		self:set_session_data()
 		return "need new resolve"
 	end
 	-- Check if new prepare is needed
 	if
-		not resolved and (time_resolve > time or time - time_resolve > tonumber(self.variables["ANTIBOT_TIME_RESOLVE"]))
+		not resolved
+		and (time_resolve > time or time - time_resolve > parse_duration(self.variables["ANTIBOT_TIME_RESOLVE"], "s"))
 	then
 		self.session_data = {}
 		self:set_session_data()
@@ -598,6 +626,8 @@ function antibot:prepare_challenge()
 			session_update.time_valid = now_time
 		elseif session_update.type == "javascript" then
 			session_update.random = rand(20)
+			session_update.difficulty = tonumber(self.variables["ANTIBOT_JAVASCRIPT_DIFFICULTY"])
+				or LEGACY_POW_DIFFICULTY
 		elseif session_update.type == "captcha" then
 			session_update.captcha = rand(6, true, self.variables["ANTIBOT_CAPTCHA_ALPHABET"])
 		end
@@ -629,6 +659,7 @@ function antibot:display_challenge()
 	-- Javascript case
 	if self.session_data.type == "javascript" then
 		template_vars.random = self.session_data.random
+		template_vars.antibot_difficulty = self.session_data.difficulty or LEGACY_POW_DIFFICULTY
 	end
 
 	-- Captcha case
@@ -685,7 +716,6 @@ function antibot:check_challenge()
 		return nil, "challenge not prepared"
 	end
 
-	local resolved
 	local ngx_req = ngx.req
 	local read_body = ngx_req.read_body
 	local get_post_args = ngx_req.get_post_args
@@ -703,9 +733,11 @@ function antibot:check_challenge()
 		end
 		local hash = sha256:new()
 		hash:update(self.session_data.random .. args["challenge"])
-		local digest = hash:final()
-		resolved = to_hex(digest):find("^0000") ~= nil
-		if not resolved then
+		local zero_bits = leading_zero_bits(hash:final())
+		if zero_bits < (self.session_data.difficulty or LEGACY_POW_DIFFICULTY) then
+			if zero_bits >= LEGACY_POW_DIFFICULTY then
+				return false, "solution below configured difficulty, challenge page may be outdated"
+			end
 			return false, "wrong value"
 		end
 		self.session_data.resolved = true

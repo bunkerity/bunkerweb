@@ -24,6 +24,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from app.models.safe_session_cache import SafeFileSystemCache
 from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask_compress import Compress
 from markupsafe import Markup
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session
@@ -31,10 +32,11 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import is_newer_version_available  # type: ignore
+from common_utils import get_version, is_newer_version_available  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
+from app.models.session_cookie import use_per_request_cookie
 
 from app.dependencies import BW_CONFIG, DATA, DB, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.models.models import AnonymousUser
@@ -83,7 +85,7 @@ from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
 from app.routes.templates import templates as templates_bp
-from app.routes.utils import get_redis_client as get_ui_redis_client, session_storage_due
+from app.routes.utils import active_config_tasks, get_redis_client as get_ui_redis_client, session_storage_due
 
 BLUEPRINTS = (
     about,
@@ -163,9 +165,6 @@ _db_check_lock = Lock()
 _db_check_future = None
 _db_check_next_allowed = 0.0
 
-_cookie_config_lock = Lock()
-_cookie_config_detected = False
-
 _SESSION_CLEANUP_INTERVAL_SECONDS = 3600.0
 _session_cleanup_last_run = 0.0
 
@@ -173,6 +172,13 @@ _restart_workers_lock = Lock()
 _restart_workers_future = None
 _restart_workers_next_allowed = 0.0
 RESTART_WORKERS_MIN_INTERVAL_SECONDS = 10.0
+BW_VERSION = get_version()
+
+
+def _static_cache_control(version_arg: str | None, version: str) -> str | None:
+    if version_arg == version:
+        return "public, max-age=31536000, immutable"
+    return None
 
 
 def _shutdown_executors():
@@ -613,7 +619,7 @@ with app.app_context():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-    # Secure by default — auto-detection in before_request may downgrade if no proxy detected
+    # Strict defaults; the session interface below picks the real name and Secure flag per request
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_SECURE"] = True
 
@@ -695,6 +701,30 @@ with app.app_context():
     sess = Session()
     sess.init_app(app)
 
+    app.config.update(
+        COMPRESS_ALGORITHM=["br", "gzip"],
+        # Static files are streamed responses and use this list; its default has no gzip.
+        COMPRESS_ALGORITHM_STREAMING=["br", "gzip"],
+        COMPRESS_BR_LEVEL=4,
+        COMPRESS_LEVEL=6,
+        COMPRESS_MIN_SIZE=1024,
+        # Do not compress authenticated HTML: it carries CSRF tokens and echoed user input.
+        COMPRESS_MIMETYPES=[
+            "text/css",
+            "text/javascript",
+            "application/javascript",
+            "application/json",
+            "application/geo+json",
+            "image/svg+xml",
+            "font/woff",
+            "font/woff2",
+            "font/ttf",
+            "application/vnd.ms-fontobject",
+            "text/plain",
+        ],
+    )
+    Compress(app)
+
     # Flask-Session picks the backend from SESSION_TYPE and never revisits it, so a Redis that
     # dies or fills up after this point makes every request raise. Same parameters as the
     # interface it replaces, plus the local cache it falls back to.
@@ -727,6 +757,9 @@ with app.app_context():
 
     app.session_interface.should_set_storage = _throttled_should_set_storage
 
+    # Reached through BunkerWeb and directly over HTTP, the same worker needs both cookie flavours
+    use_per_request_cookie(app.session_interface)
+
     biscuit = BiscuitMiddleware(app)
 
     login_manager = LoginManager()
@@ -743,11 +776,23 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
+    def lift_form_field_limit():
+        # Flask caps a single non-file form field at 500 kB, below MAX_CONTENT_LENGTH (Easy Resolve posts more).
+        # Only signed-in users get the larger cap, so the login form keeps the default.
+        if request.method == "POST" and current_user.is_authenticated:
+            request.max_form_memory_size = app.config["MAX_CONTENT_LENGTH"]
+
+    # Must run before CSRFProtect's hook, which parses the form
+    app.before_request_funcs.setdefault(None, []).insert(0, lift_form_field_limit)
+
     app.config["EXTRA_PAGES"] = ["crowdsec"]
 
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
+                # A directory base (img/flags) gets file names appended in JS, so it must stay query-free
+                if endpoint == "static" and not app.debug and "." in values.get("filename", "").rstrip("/").rsplit("/", 1)[-1]:
+                    values.setdefault("v", BW_VERSION)
                 if endpoint not in ("static", "index", "loading", "check", "check_reloading") and not endpoint.endswith("_page"):
                     return url_for(f"{endpoint}.{endpoint}_page", **values)
                 return url_for(endpoint, **values)
@@ -1156,21 +1201,6 @@ def before_request():
     metadata = None
     g.script_nonce = token_urlsafe(32)
 
-    # Auto-detect cookie config once on the first real request using double-checked locking.
-    # The proxy status never changes during a process's lifetime, so detecting once is correct.
-    global _cookie_config_detected
-    if not _cookie_config_detected:
-        with _cookie_config_lock:
-            if not _cookie_config_detected:
-                if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
-                    app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
-                    app.config["SESSION_COOKIE_SECURE"] = True
-                else:
-                    app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
-                    app.config["SESSION_COOKIE_SECURE"] = False
-                    app.config["SESSION_COOKIE_DOMAIN"] = None
-                _cookie_config_detected = True
-
     if not is_static_path(request.path):
         metadata = DB.get_metadata()
 
@@ -1339,7 +1369,7 @@ def before_request():
             pro_services=metadata["pro_services"],
             pro_expire=metadata["pro_expire"].strftime("%Y/%m/%d") if isinstance(metadata["pro_expire"], datetime) else "Unknown",
             pro_overlapped=pro_overlapped,
-            plugins=BW_CONFIG.get_plugins(),
+            plugins=BW_CONFIG.get_plugins(metadata=metadata),
             flash_messages=session.get("flash_messages", []),
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
             db_readonly=DATA.get("READONLY_MODE", False),
@@ -1438,7 +1468,10 @@ def set_security_headers(response):
     # * Cache-Control to keep authenticated pages out of the browser cache, so the back button
     # cannot render the panel after a logout. Static assets keep theirs, and a route that already
     # set its own value wins.
-    if not is_static_path(request.path):
+    cache_control = _static_cache_control(request.args.get("v"), BW_VERSION) if is_static_path(request.path) else None
+    if cache_control:
+        response.headers["Cache-Control"] = cache_control
+    elif not is_static_path(request.path):
         response.headers.setdefault("Cache-Control", "no-store")
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
@@ -1562,6 +1595,7 @@ if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
 def check_reloading():
     DATA.load_from_file()
     current_time = time()
+    tasks_active = active_config_tasks() > 0
 
     db_metadata = DB.get_metadata()
     if (
@@ -1571,8 +1605,12 @@ def check_reloading():
             if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         )
         and DATA.get("LAST_RELOAD", 0) + 2 < current_time
+        and not tasks_active
     ):
         DATA["RELOADING"] = False
+    elif tasks_active and not DATA.get("RELOADING", False):
+        # a finished task body cleared RELOADING while another save has not committed yet
+        DATA["RELOADING"] = True
 
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):

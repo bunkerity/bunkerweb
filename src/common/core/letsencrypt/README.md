@@ -36,6 +36,46 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! info "Profile Availability"
     Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile.
 
+### IP Address Certificates
+
+Let's Encrypt can issue certificates for IP addresses. List the IP next to your hostnames in `SERVER_NAME` and BunkerWeb requests one certificate covering all of them. In single-site mode (`MULTISITE=no`) only the first `SERVER_NAME` entry is used, so a certificate for an IP address needs that address as the only `SERVER_NAME` entry. Use multisite mode for a certificate that covers hostnames and an IP address.
+
+!!! info "Requirements"
+    An IP address is only requested when all of these are true, otherwise it is skipped with a warning and the other names are still issued:
+
+    - `LETS_ENCRYPT_SERVER` is `letsencrypt`
+    - `LETS_ENCRYPT_CHALLENGE` is `http`
+    - `LETS_ENCRYPT_PROFILE` is `shortlived`
+    - The address is a public IPv4 address (IPv6 is not supported)
+    - Port 80 on that address is reachable from the internet
+
+Certificates for IP addresses last 160 hours and are renewed automatically by the daily renewal job.
+
+A client that connects by IP address sends no SNI, so BunkerWeb picks the certificate from the address the client connected to:
+
+1. If the local address matches an IP certificate, that one is served.
+2. Otherwise, if there is only one IP certificate, that one is served.
+3. Otherwise the default certificate is served.
+
+!!! warning "Docker and NAT"
+    Behind Docker port publishing or NAT, BunkerWeb sees a private local address that matches none of the public IPs. With several IP certificates it cannot tell them apart and serves the default certificate.
+
+Setting `DISABLE_DEFAULT_SERVER_STRICT_SNI` to `yes` makes BunkerWeb refuse clients that connect by IP address, so certificates for IP addresses are never used.
+
+The certificate lists every name of the service, so a client connecting by IP address also sees the hostnames. To keep hostnames private, put the IP address in a dedicated service whose `SERVER_NAME` contains only the IP address.
+
+When IP addresses are added to a service that already has a certificate, BunkerWeb expands it and keeps the current certificate if the IP validation fails. Later, if an IP address stops validating (for example port 80 becomes unreachable), the renewal of the whole certificate fails, hostnames included. In that case, remove the IP address from `SERVER_NAME`.
+
+Only an IP address that is actually in the certificate is served to clients without SNI.
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+EMAIL_LETS_ENCRYPT: "admin@example.com"
+SERVER_NAME: "www.example.com 203.0.113.10"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_PROFILE: "shortlived"
+```
+
 ### Configuration Settings
 
 | Setting                                     | Default       | Context   | Multiple | Description                                                                                                                                                                                                                                                                    |
@@ -46,12 +86,12 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | no       | **Certificate Authority:** Select the ACME server to use for issuance. Options: `letsencrypt` or `zerossl`.                                                                                                                                                                    |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | no       | **ZeroSSL API Key:** Optional API key used by `zerossl-bot` when `LETS_ENCRYPT_SERVER=zerossl`. If empty, `EMAIL_LETS_ENCRYPT` is used to retrieve EAB credentials.                                                                                                            |
 | `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`           | multisite | no       | **ZeroSSL API Retries:** Number of retries for ZeroSSL API requests made by `zerossl-bot` (`0` disables retries).                                                                                                                                                              |
-| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`           | multisite | no       | **ZeroSSL Retry Delay:** Delay in seconds between ZeroSSL API retries in `zerossl-bot`.                                                                                                                                                                                        |
-| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`           | multisite | no       | **ZeroSSL Connect Timeout:** Connection timeout in seconds for ZeroSSL API calls in `zerossl-bot`.                                                                                                                                                                             |
-| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`          | multisite | no       | **ZeroSSL Request Max Time:** Maximum total time in seconds for each ZeroSSL API call in `zerossl-bot`.                                                                                                                                                                        |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2s`          | multisite | no       | **ZeroSSL Retry Delay:** Delay in seconds between ZeroSSL API retries in `zerossl-bot`. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                                             |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5s`          | multisite | no       | **ZeroSSL Connect Timeout:** Connection timeout in seconds for ZeroSSL API calls in `zerossl-bot`. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                                  |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20s`         | multisite | no       | **ZeroSSL Request Max Time:** Maximum total time in seconds for each ZeroSSL API call in `zerossl-bot`. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                                                             |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                                                                                                                          |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                                                                                                                                |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used.                                                                                                                                |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.                                                     |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Write the key, whitespace, then the value, and do not quote the key. Values can be raw text, base64 encoded, or a JSON object.                                                                                                      |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | no       | **Decode Base64 DNS credentials:** Automatically decode base64-encoded DNS provider credentials when set to `yes`. Values matching base64 format are decoded before use (except for the `rfc2136` provider). Set to `no` if your credentials are intentionally base64 strings. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                                                                                                               |
@@ -68,7 +108,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
     - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is provided, the provider's default propagation time is used.
     - Full Let's Encrypt automation using the `http` challenge works in stream mode as long as you open the `80/tcp` port from the outside. Use the `LISTEN_STREAM_PORT_SSL` setting to choose your listening SSL/TLS port.
-    - If `LETS_ENCRYPT_PASSTHROUGH` is set to `yes`, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges. A `GET` or `HEAD` of a single token under `/.well-known/acme-challenge/` is then whitelisted and reaches the backend without any other check: antibot, blacklist, ModSecurity, request rate limiting, Basic Auth and the ban check are all skipped for that request (connection limits still apply, nginx enforces them), which is more than a locally served challenge skips. Deeper paths, other methods and non token-shaped names get the normal checks.
+    - If `LETS_ENCRYPT_PASSTHROUGH` is set to `yes`, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges. A `GET` or `HEAD` of a single token under `/.well-known/acme-challenge/` is then whitelisted and reaches the backend without any other check: antibot, blacklist, ModSecurity, request rate limiting, Basic Auth and the ban check are all skipped for that request (connection limits still apply, nginx enforces them), which is more than a locally served challenge skips. Deeper paths, other methods and non token-shaped names get the normal checks. The backend also receives the requested `Host`, even when `REVERSE_PROXY_CUSTOM_HOST` is set to a fixed name, since the challenge is validated against that name (a value using nginx variables still applies).
 
 !!! tip "HTTP vs. DNS Challenges"
     **HTTP Challenges** are easier to set up and work well for most websites:

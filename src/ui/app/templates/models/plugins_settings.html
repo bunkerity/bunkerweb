@@ -213,7 +213,10 @@
                             </a>
                             {% if plugin_data['type'] == 'core' %}
                                 {% set plugin_endpoint = "/features" %}
-                                {% set plugin_fragment = '#' + ('global-settings' if plugin == 'general' else plugin) %}
+                                {% set plugin_fragment = '#' + ('global-settings' if plugin == 'general' else plugin_data['name'] | lower | replace("'", '') | replace('.', '') | replace(' ', '-')) %}
+                            {% elif plugin_data['type'] == 'pro' %}
+                                {% set plugin_endpoint = "/features" %}
+                                {% set plugin_fragment = '#' + (plugin_data['name'] | lower | replace("'", '') | replace('.', '') | replace(' ', '-')) + '-pro' %}
                             {% else %}
                                 {% set plugin_endpoint = "/plugins" %}
                                 {% set plugin_fragment = "" %}

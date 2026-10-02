@@ -153,6 +153,16 @@ if UI_SSL_ENABLED and UI_SSL_CERTFILE and UI_SSL_KEYFILE:
         ca_certs = UI_SSL_CA_CERTS
 
 
+def _get_use_redis_from_database(database, fallback_value, logger):
+    try:
+        db_config = database.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",))
+    except Exception as e:
+        logger.warning(f"Could not detect Redis from the database; it may still be migrating. Falling back to the environment-derived value: {e}")
+        return fallback_value
+
+    return db_config.get("USE_REDIS", "no") == "yes"
+
+
 def on_starting(server):
     TMP_DIR.mkdir(parents=True, exist_ok=True)
     TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
@@ -626,8 +636,7 @@ def on_starting(server):
     ui_redis_enabled = getenv_bool("UI_USE_REDIS", "yes")
     use_redis = ui_redis_enabled and getenv("USE_REDIS", "no").lower() == "yes"
     if ui_redis_enabled and not use_redis:
-        db_config = DB.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",))
-        use_redis = db_config.get("USE_REDIS", "no") == "yes"
+        use_redis = _get_use_redis_from_database(DB, use_redis, LOGGER)
 
     DB.close()  # Close local DB connections before fork to prevent fd leaks
 

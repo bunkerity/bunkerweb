@@ -99,9 +99,9 @@ class Job:
     def restore_cache(self, *, job_name: str = "", plugin_id: str = "", manual: bool = True) -> bool:
         """Restore job cache files from database."""
         ret = True
-        job_cache_files = self.db.get_jobs_cache_files(plugin_id=plugin_id or self.job_path.name)  # type: ignore
-
         job_name = job_name or self.job_name
+        # Sibling jobs' rows are only needed for their paths, so only this job's blobs are loaded.
+        job_cache_files = self.db.get_jobs_cache_files(plugin_id=plugin_id or self.job_path.name, data_job_name=job_name)  # type: ignore
         plugin_cache_files = set()
         ignored_dirs = set()
         crs_manifest = None

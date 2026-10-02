@@ -26,6 +26,7 @@ from app.routes.utils import (
     parse_search_panes,
     parse_search_panes_dict,
 )
+from redis_keys import ban_ip, unescape as redis_unescape  # type: ignore
 
 bans = Blueprint("bans", __name__)
 
@@ -69,7 +70,7 @@ def _collect_all_bans():
                     if not data:
                         continue
                     key_str = key.decode("utf-8", "replace")
-                    ip = key_str.replace("bans_ip_", "")
+                    ip = ban_ip(key_str.replace("bans_ip_", ""))
                     raw_value = data.decode("utf-8", "replace")
                     try:
                         ban_data = loads(raw_value)
@@ -99,6 +100,7 @@ def _collect_all_bans():
                         continue
                     key_str = key.decode("utf-8", "replace")
                     service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
+                    service, ip = redis_unescape(service), ban_ip(ip)
                     raw_value = data.decode("utf-8", "replace")
                     try:
                         ban_data = loads(raw_value)

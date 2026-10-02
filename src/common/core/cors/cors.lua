@@ -8,6 +8,8 @@ local ngx = ngx
 local HTTP_NO_CONTENT = ngx.HTTP_NO_CONTENT
 local regex_match = utils.regex_match
 local get_deny_status = utils.get_deny_status
+local parse_duration = utils.parse_duration
+local tostring = tostring
 
 function cors:initialize(ctx)
 	-- Call parent initialize
@@ -73,7 +75,12 @@ function cors:header()
 					ngx_header[header] = "true"
 				end
 			elseif self.variables[variable] ~= "" then
-				ngx_header[header] = self.variables[variable]
+				if variable == "CORS_MAX_AGE" then
+					local value = parse_duration(self.variables[variable], "s")
+					ngx_header[header] = value and tostring(value) or self.variables[variable]
+				else
+					ngx_header[header] = self.variables[variable]
+				end
 			end
 		end
 		ngx_header["Content-Type"] = "text/html; charset=UTF-8"

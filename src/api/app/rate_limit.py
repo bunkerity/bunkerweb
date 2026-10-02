@@ -15,6 +15,8 @@ from slowapi.errors import RateLimitExceeded
 from yaml import safe_load
 
 from .config import api_config
+from common_utils import parse_duration  # type: ignore
+from redis_keys import cluster_config_error  # type: ignore
 from os import getenv
 from .utils import LOGGER, get_db
 
@@ -408,7 +410,7 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         redis_ssl = str(_env_or_cfg("REDIS_SSL", "no") or "no").lower() == "yes"
         # timeouts are in ms; convert to seconds for redis client options
         try:
-            timeout_ms = float(str(_env_or_cfg("REDIS_TIMEOUT", "1000") or "1000"))
+            timeout_ms = float(parse_duration(str(_env_or_cfg("REDIS_TIMEOUT", "1000") or "1000"), "ms"))
         except Exception:
             timeout_ms = 1000.0
         try:
@@ -422,7 +424,50 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         storage_options.setdefault("socket_keepalive", True)
         storage_options.setdefault("max_connections", keepalive_pool)
 
-        if sentinels and sentinel_master:
+        cluster_nodes = str(_env_or_cfg("REDIS_CLUSTER_NODES", "") or "").strip()
+        config_error = cluster_config_error(cluster_nodes, sentinels, str(_env_or_cfg("REDIS_DATABASE", "0") or "0").strip())
+        if config_error:
+            # Same rule as the WAF: a conflicting configuration leaves Redis unused.
+            LOGGER.error(f"Invalid Redis configuration, API rate limiting uses local memory: {config_error}")
+        elif cluster_nodes:
+            from redis.cluster import ClusterNode
+
+            # Auth and TLS go through options: limits passes them to RedisCluster, which
+            # avoids URL-encoding credentials into the URI.
+            startup_nodes = []
+            try:
+                for item in cluster_nodes.split():
+                    if item.startswith("[") and "]:" in item:
+                        host, _, port = item[1:].partition("]:")
+                    elif item.count(":") == 1:
+                        host, _, port = item.partition(":")
+                    else:
+                        host, port = item, "6379"
+                    if not host or not port:
+                        raise ValueError(f"invalid node {item}")
+                    startup_nodes.append(ClusterNode(host, int(port)))
+                if not startup_nodes:
+                    raise ValueError("no cluster nodes")
+            except ValueError as exc:
+                LOGGER.error(f"Invalid Redis configuration, API rate limiting uses local memory: {exc}")
+                return "memory://", storage_options
+            # Only the first node needs to parse in the URI: urlsplit rejects a bracketed
+            # IPv6 literal that is not the first token in a comma-joined netloc. limits
+            # merges storage_options over the URI-derived node list, so startup_nodes below
+            # (built from every node) is what actually gets used to connect.
+            first = startup_nodes[0]
+            storage = f"redis+cluster://[{first.host}]:{first.port}" if ":" in first.host else f"redis+cluster://{first.host}:{first.port}"
+            storage_options["startup_nodes"] = startup_nodes
+            storage_options.setdefault("ssl", redis_ssl)
+            if redis_ssl:
+                # redis-py verifies unless told otherwise; only an explicit "no" turns it off, as in the Web UI.
+                ssl_verify = str(_env_or_cfg("REDIS_SSL_VERIFY", "yes") or "yes").lower() != "no"
+                storage_options.setdefault("ssl_cert_reqs", "required" if ssl_verify else "none")
+            if username:
+                storage_options.setdefault("username", username)
+            if password:
+                storage_options.setdefault("password", password)
+        elif sentinels and sentinel_master:
             # redis sentinel URI must not embed master auth, otherwise limits applies
             # these credentials to Sentinel too. Keep Sentinel and Redis auth separate.
             # ensure ports on sentinels (default 26379)
@@ -474,6 +519,34 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         storage = "memory://"
 
     return storage, storage_options
+
+
+def _make_limiter(storage: str, storage_options: Dict[str, Any], *, key_func, default_limits: List[str], strategy: str, headers_enabled: bool) -> Limiter:
+    """Construct the Limiter, falling back to local memory if the storage backend cannot be reached.
+
+    Standalone and Sentinel storages connect lazily, so this except path is only ever taken
+    for a Redis Cluster that is down or still forming when the API starts.
+    """
+    try:
+        return Limiter(
+            key_func=key_func,
+            default_limits=default_limits,  # type: ignore[arg-type]
+            storage_uri=storage,
+            storage_options=storage_options,
+            strategy=strategy,
+            headers_enabled=headers_enabled,
+            key_prefix="bwapi-rl-",
+        )
+    except Exception as exc:
+        LOGGER.error(f"Could not reach Redis storage ({storage}), API rate limiting uses local memory: {exc}")
+        return Limiter(
+            key_func=key_func,
+            default_limits=default_limits,  # type: ignore[arg-type]
+            storage_uri="memory://",
+            strategy=strategy,
+            headers_enabled=headers_enabled,
+            key_prefix="bwapi-rl-",
+        )
 
 
 def _path_variants(path: str) -> List[str]:
@@ -574,6 +647,7 @@ def setup_rate_limiter(app) -> None:
                 "REDIS_SENTINEL_USERNAME",
                 "REDIS_SENTINEL_PASSWORD",
                 "REDIS_SENTINEL_MASTER",
+                "REDIS_CLUSTER_NODES",
             ),
         )
     except Exception:
@@ -597,14 +671,13 @@ def setup_rate_limiter(app) -> None:
         strategy = "fixed-window"
         LOGGER.warning(f"Unknown API rate limit strategy '{orig_strategy}'; falling back to '{strategy}'")
 
-    _limiter = Limiter(
+    _limiter = _make_limiter(
+        storage,
+        storage_options,
         key_func=_build_key_func(),
-        default_limits=_base_limits,  # type: ignore[arg-type]
-        storage_uri=storage,
-        storage_options=storage_options,
+        default_limits=_base_limits,
         strategy=strategy,
         headers_enabled=api_config.rate_limit_headers_enabled,
-        key_prefix="bwapi-rl-",
     )
     app.state.limiter = _limiter
 

@@ -716,12 +716,11 @@
                                                                     </div>
                                                                     <input id="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
                                                                            name="LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
-                                                                           type="number"
-                                                                           min="0"
+                                                                           type="text"
                                                                            value="{{ lets_encrypt_zerossl_api_retry_delay }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY', {'regex': '^\\d+(ms?|[shdwMy])?$'})['regex'] }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -751,12 +750,11 @@
                                                                     </div>
                                                                     <input id="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
                                                                            name="LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
-                                                                           type="number"
-                                                                           min="1"
+                                                                           type="text"
                                                                            value="{{ lets_encrypt_zerossl_api_connect_timeout }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] }}" />
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -786,12 +784,11 @@
                                                                     </div>
                                                                     <input id="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
                                                                            name="LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
-                                                                           type="number"
-                                                                           min="1"
+                                                                           type="text"
                                                                            value="{{ lets_encrypt_zerossl_api_max_time }}"
                                                                            class="form-control plugin-setting mt-1"
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_MAX_TIME"
-                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*$'})['regex'] }}" />
+                                                                           pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_MAX_TIME', {'regex': '^[1-9]\\d*(ms?|[shdwMy])?$'})['regex'] }}" />
                                                                 </div>
                                                             </div>
                                                         </div>

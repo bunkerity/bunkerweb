@@ -36,6 +36,46 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 !!! info "Profilverfügbarkeit"
     Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherweise nicht in allen Umgebungen oder mit allen ACME-Clients verfügbar sind. Das `classic`-Profil hat die breiteste Kompatibilität und wird für die meisten Benutzer empfohlen. Wenn ein ausgewähltes Profil nicht verfügbar ist, greift das System automatisch auf das `classic`-Profil zurück.
 
+### Zertifikate für IP-Adressen
+
+Let's Encrypt kann Zertifikate für IP-Adressen ausstellen. Tragen Sie die IP zusammen mit Ihren Hostnamen in `SERVER_NAME` ein, und BunkerWeb fordert ein einziges Zertifikat an, das alle Einträge abdeckt. Im Single-Site-Modus (`MULTISITE=no`) wird nur der erste Eintrag von `SERVER_NAME` verwendet. Ein Zertifikat für eine IP-Adresse benötigt daher diese Adresse als einzigen `SERVER_NAME`-Eintrag. Verwenden Sie den Multisite-Modus für ein Zertifikat, das Hostnamen und eine IP-Adresse abdeckt.
+
+!!! info "Voraussetzungen"
+    Eine IP-Adresse wird nur angefordert, wenn alle diese Bedingungen erfüllt sind. Andernfalls wird sie mit einer Warnung übersprungen, und die übrigen Namen werden trotzdem ausgestellt:
+
+    - `LETS_ENCRYPT_SERVER` ist `letsencrypt`
+    - `LETS_ENCRYPT_CHALLENGE` ist `http`
+    - `LETS_ENCRYPT_PROFILE` ist `shortlived`
+    - Die Adresse ist eine öffentliche IPv4-Adresse (IPv6 wird nicht unterstützt)
+    - Port 80 dieser Adresse ist aus dem Internet erreichbar
+
+Zertifikate für IP-Adressen sind 160 Stunden gültig und werden vom täglichen Erneuerungsjob automatisch erneuert.
+
+Ein Client, der sich über die IP-Adresse verbindet, sendet kein SNI. BunkerWeb wählt das Zertifikat daher anhand der Adresse, mit der sich der Client verbunden hat:
+
+1. Passt die lokale Adresse zu einem IP-Zertifikat, wird dieses ausgeliefert.
+2. Gibt es sonst nur ein einziges IP-Zertifikat, wird dieses ausgeliefert.
+3. Andernfalls wird das Standardzertifikat ausgeliefert.
+
+!!! warning "Docker und NAT"
+    Hinter Docker-Portfreigaben oder NAT sieht BunkerWeb eine private lokale Adresse, die zu keiner der öffentlichen IPs passt. Bei mehreren IP-Zertifikaten kann es diese nicht unterscheiden und liefert das Standardzertifikat aus.
+
+Wenn `DISABLE_DEFAULT_SERVER_STRICT_SNI` auf `yes` steht, weist BunkerWeb Clients ab, die sich über eine IP-Adresse verbinden. Zertifikate für IP-Adressen werden dann nie verwendet.
+
+Das Zertifikat enthält alle Namen des Dienstes, ein Client, der sich per IP-Adresse verbindet, sieht daher auch die Hostnamen. Um Hostnamen privat zu halten, legen Sie die IP-Adresse in einem eigenen Dienst an, dessen `SERVER_NAME` nur die IP-Adresse enthält.
+
+Werden IP-Adressen zu einem Dienst hinzugefügt, der bereits ein Zertifikat hat, erweitert BunkerWeb es und behält das aktuelle Zertifikat, falls die IP-Validierung fehlschlägt. Hört später eine IP-Adresse auf zu validieren (z. B. weil Port 80 nicht mehr erreichbar ist), schlägt die Erneuerung des gesamten Zertifikats fehl, einschließlich der Hostnamen. Entfernen Sie in diesem Fall die IP-Adresse aus `SERVER_NAME`.
+
+Nur eine IP-Adresse, die tatsächlich im Zertifikat enthalten ist, wird an Clients ohne SNI ausgeliefert.
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+EMAIL_LETS_ENCRYPT: "admin@example.com"
+SERVER_NAME: "www.example.com 203.0.113.10"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_PROFILE: "shortlived"
+```
+
 ### Konfigurationseinstellungen
 
 | Einstellung                                 | Standard      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                                                                                                                                           |
@@ -46,12 +86,12 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | nein     | **Zertifizierungsstelle:** Wählen Sie den ACME-Server für die Ausstellung. Optionen: `letsencrypt` oder `zerossl`.                                                                                                                                                                                                                                                     |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | nein     | **ZeroSSL-API-Schlüssel:** Optionaler Schlüssel, der von `zerossl-bot` verwendet wird, wenn `LETS_ENCRYPT_SERVER=zerossl` gesetzt ist. Wenn leer, wird `EMAIL_LETS_ENCRYPT` verwendet, um EAB-Zugangsdaten abzurufen.                                                                                                                                                  |
 | `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`           | multisite | nein     | **ZeroSSL-API-Wiederholungen:** Anzahl der Wiederholungen für ZeroSSL-API-Anfragen durch `zerossl-bot` (`0` deaktiviert Wiederholungen).                                                                                                                                                                                                                               |
-| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`           | multisite | nein     | **ZeroSSL-API-Wiederholungsverzögerung:** Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen in `zerossl-bot`.                                                                                                                                                                                                                                                |
-| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`           | multisite | nein     | **ZeroSSL-API-Verbindungs-Timeout:** Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe in `zerossl-bot`.                                                                                                                                                                                                                                                         |
-| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`          | multisite | nein     | **ZeroSSL-API-Maximalzeit:** Maximale Gesamtzeit in Sekunden für jeden ZeroSSL-API-Aufruf in `zerossl-bot`.                                                                                                                                                                                                                                                            |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2s`          | multisite | nein     | **ZeroSSL-API-Wiederholungsverzögerung:** Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen in `zerossl-bot`. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                                                                   |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5s`          | multisite | nein     | **ZeroSSL-API-Verbindungs-Timeout:** Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe in `zerossl-bot`. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                                                                            |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20s`         | multisite | nein     | **ZeroSSL-API-Maximalzeit:** Maximale Gesamtzeit in Sekunden für jeden ZeroSSL-API-Aufruf in `zerossl-bot`. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                                                                               |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | nein     | **Challenge-Typ:** Methode zur Überprüfung des Domainbesitzes. Optionen: `http` oder `dns`.                                                                                                                                                                                                                                                                            |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | nein     | **DNS-Anbieter:** Bei Verwendung von DNS-Challenges der zu verwendende DNS-Anbieter (z.B. cloudflare, route53, digitalocean).                                                                                                                                                                                                                                          |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | nein     | **DNS-Propagation:** Die Wartezeit für die DNS-Propagation in Sekunden. Wenn kein Wert angegeben wird, wird die Standard-Propagationszeit des Anbieters verwendet.                                                                                                                                                                                                     |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | nein     | **DNS-Propagation:** Die Wartezeit für die DNS-Propagation in Sekunden. Wenn kein Wert angegeben wird, wird die Standard-Propagationszeit des Anbieters verwendet. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.                                                                                                        |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | ja       | **Anmeldeinformationselement:** Konfigurationselemente für die Authentifizierung des DNS-Anbieters (z. B. `cloudflare_api_token 123456`). Schreiben Sie den Schlüssel, ein Leerzeichen und dann den Wert, und setzen Sie den Schlüssel nicht in Anführungszeichen. Werte können Rohtext, base64-kodiert oder ein JSON-Objekt sein.                                                                                                                                                              |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | nein     | **DNS-Anmeldeinformationen Base64 dekodieren:** Dekodiert automatisch base64-kodierte DNS-Anbieter-Anmeldeinformationen, wenn auf `yes` gesetzt. Wenn aktiviert, werden Werte, die dem Base64-Format entsprechen, vor der Verwendung dekodiert (außer beim `rfc2136`-Anbieter). Deaktivieren Sie dies, wenn Ihre Anmeldeinformationen absichtlich Base64-codiert sind. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | nein     | **Wildcard-Zertifikate:** Wenn auf `yes` gesetzt, werden Wildcard-Zertifikate für alle Domains erstellt. Nur mit DNS-Challenges verfügbar.                                                                                                                                                                                                                             |
@@ -68,7 +108,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
     - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.
     - Wenn keine `LETS_ENCRYPT_DNS_PROPAGATION`-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet.
     - Die vollständige Let's Encrypt-Automatisierung mit der `http`-Challenge funktioniert im Stream-Modus, solange Sie den Port `80/tcp` von außen öffnen. Verwenden Sie die Einstellung `LISTEN_STREAM_PORT_SSL`, um Ihren SSL/TLS-Listening-Port zu wählen.
-    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist. Ein `GET` oder `HEAD` eines einzelnen Tokens unter `/.well-known/acme-challenge/` wird dann auf die Whitelist gesetzt und erreicht das Backend ohne weitere Prüfung: Antibot, Blacklist, ModSecurity, Anfragen-Limits, Basic Auth und die Sperrprüfung werden für diese Anfrage übersprungen (Verbindungslimits gelten weiterhin, nginx setzt sie durch), mehr als bei einer lokal beantworteten Challenge. Tiefere Pfade, andere Methoden und nicht tokenförmige Namen durchlaufen die normalen Prüfungen.
+    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist. Ein `GET` oder `HEAD` eines einzelnen Tokens unter `/.well-known/acme-challenge/` wird dann auf die Whitelist gesetzt und erreicht das Backend ohne weitere Prüfung: Antibot, Blacklist, ModSecurity, Anfragen-Limits, Basic Auth und die Sperrprüfung werden für diese Anfrage übersprungen (Verbindungslimits gelten weiterhin, nginx setzt sie durch), mehr als bei einer lokal beantworteten Challenge. Tiefere Pfade, andere Methoden und nicht tokenförmige Namen durchlaufen die normalen Prüfungen. Das Backend erhält außerdem den angefragten `Host`, auch wenn `REVERSE_PROXY_CUSTOM_HOST` auf einen festen Namen gesetzt ist, da die Challenge für diesen Namen validiert wird (ein Wert mit nginx-Variablen gilt weiterhin).
 
 !!! tip "HTTP- vs. DNS-Challenges"
     **HTTP-Challenges** sind einfacher einzurichten und funktionieren für die meisten Websites gut:

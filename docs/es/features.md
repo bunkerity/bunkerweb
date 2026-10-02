@@ -350,8 +350,8 @@ Las siguientes configuraciones son compartidas por todos los mecanismos de desaf
 | Configuración          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                   |
 | ---------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_URI`          | `/challenge`      | multisite | no       | **URL del desafío:** La URL a la que se redirigirá a los usuarios para completar el desafío. Asegúrese de que esta URL no se utilice para nada más en su sitio.                                                                                               |
-| `ANTIBOT_TIME_RESOLVE` | `60`              | multisite | no       | **Límite de tiempo del desafío:** El tiempo máximo (en segundos) que un usuario tiene para completar el desafío. Después de este tiempo, se generará un nuevo desafío.                                                                                        |
-| `ANTIBOT_TIME_VALID`   | `86400`           | multisite | no       | **Validez del desafío:** Cuánto tiempo (en segundos) es válido un desafío completado. Después de este tiempo, los usuarios tendrán que resolver un nuevo desafío.                                                                                             |
+| `ANTIBOT_TIME_RESOLVE` | `1m`              | multisite | no       | **Límite de tiempo del desafío:** El tiempo máximo (en segundos) que un usuario tiene para completar el desafío. Después de este tiempo, se generará un nuevo desafío. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
+| `ANTIBOT_TIME_VALID`   | `1d`              | multisite | no       | **Validez del desafío:** Cuánto tiempo (en segundos) es válido un desafío completado. Después de este tiempo, los usuarios tendrán que resolver un nuevo desafío. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `ANTIBOT_SUCCESS_URI`  |                   | multisite | no       | **URL de redirección tras el éxito:** Una URL fija a la que redirigir a los usuarios después de que resuelvan correctamente el desafío, en lugar de la página que solicitaron originalmente. Déjelo vacío para devolver a los usuarios a su destino original. |
 
 ### Excluir tráfico de los desafíos
@@ -441,11 +441,14 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
     *   El desafío genera dinámicamente una tarea única para cada cliente.
     *   La tarea computacional implica hashing con condiciones específicas (p. ej., encontrar un hash con un prefijo determinado).
 
+    El coste del desafío se fija con `ANTIBOT_JAVASCRIPT_DIFFICULTY`, en bits ceros iniciales (16 a 28, por defecto 16); cada bit adicional duplica el tiempo medio de resolución. Si usa páginas de desafío JavaScript personalizadas PRO, regenérelas antes de subir este ajuste por encima del valor por defecto, o seguirán demostrando la dificultad antigua y más baja y serán rechazadas.
+
     **Ajustes de configuración:**
 
-    | Configuración | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
-    | ------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
-    | `USE_ANTIBOT` | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `javascript` para habilitar el desafío de JavaScript. |
+    | Configuración                       | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
+    | ------------------------------------ | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`                        | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `javascript` para habilitar el desafío de JavaScript. |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`      | `16`               | multisite | no       | **Dificultad JavaScript:** Dificultad de prueba de trabajo en bits ceros iniciales (16 a 28). |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
@@ -963,8 +966,8 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 | `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | no       | **Habilitar Mal Comportamiento:** Establezca en `yes` para habilitar la función de detección y bloqueo de mal comportamiento.                                                                                                         |
 | `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | no       | **Códigos de estado malos:** Lista de códigos de estado HTTP que se contarán como comportamiento "malo" cuando se devuelvan a un cliente.                                                                                             |
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Umbral:** El número de códigos de estado "malos" que una IP puede generar dentro del período de conteo antes de ser bloqueada.                                                                                                      |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Período de conteo:** La ventana de tiempo (en segundos) durante la cual se cuentan los códigos de estado malos para alcanzar el umbral.                                                                                             |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Duración del bloqueo:** Cuánto tiempo (en segundos) permanecerá bloqueada una IP después de exceder el umbral. El valor por defecto es de 24 horas (86400 segundos). Establezca en `0` para bloqueos permanentes que nunca expiran. |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | no       | **Período de conteo:** La ventana de tiempo (en segundos) durante la cual se cuentan los códigos de estado malos para alcanzar el umbral. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
+| `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | no       | **Duración del bloqueo:** Cuánto tiempo (en segundos) permanecerá bloqueada una IP después de exceder el umbral. El valor por defecto es de 24 horas (86400 segundos). Establezca en `0` para bloqueos permanentes que nunca expiran. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`). En el servidor predeterminado (`_`), los bloqueos son siempre globales.                          |
 
 !!! warning "Falsos positivos"
@@ -1093,10 +1096,13 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
     | `BLACKLIST_IP`             |                                       | multisite | no       | **Lista Negra de IP:** Lista de direcciones IP o redes (notación CIDR) a bloquear, separadas por espacios.               |
     | `BLACKLIST_IGNORE_IP`      |                                       | multisite | no       | **Lista de Omisión de IP:** Lista de direcciones IP o redes que deben omitir las comprobaciones de la lista negra de IP. |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | no       | **URL de la Lista Negra de IP:** Lista de URL que contienen direcciones IP o redes a bloquear, separadas por espacios.   |
+    | `BLACKLIST_IP_URLS`        |                                       | multisite | no       | **URL de la Lista Negra de IP:** Lista de URL que contienen direcciones IP o redes a bloquear, separadas por espacios.   |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | no       | **URL de la Lista de Omisión de IP:** Lista de URL que contienen direcciones IP o redes a omitir.                        |
 
-    El ajuste por defecto de `BLACKLIST_IP_URLS` incluye una URL que proporciona una **lista de nodos de salida de Tor conocidos**. Esta es una fuente común de tráfico malicioso y es un buen punto de partida para muchos sitios.
+    !!! info "Formatos de lista"
+        Las listas de URL pueden contener una entrada por línea (las líneas que empiezan por `#` o `;` son comentarios y solo se lee la primera palabra de cada línea), CSV, un documento JSON o JSON Lines. En las listas de IP, las comas también separan campos y las listas JSON conservan todas las cadenas que sean direcciones IP o redes. Añada un fragmento para conservar solo una parte de una lista JSON: `#key` conserva los valores bajo `key`, `#key=value` conserva los objetos cuya propiedad `key` es igual a `value` o contiene `value`, y `&` combina términos. Ejemplo: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Una URL con un fragmento conserva solo lo que este selecciona, por lo que no conserva nada si la lista no es JSON.
+
+    De forma predeterminada, `BLACKLIST_COMMUNITY_LISTS` incluye `ip:danmeuk-tor-exit`, que añade la lista de nodos de salida de Tor; `BLACKLIST_IP_URLS` está vacío hasta que lo configure.
 
 === "DNS Inverso"
     **Qué hace esto:** Bloquea a los visitantes según su nombre de dominio inverso. Esto es útil para bloquear escáneres y rastreadores conocidos basados en los dominios de su organización.
@@ -1131,10 +1137,10 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
     | `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | no       | **Lista Negra de User-Agent:** Lista de patrones de User-Agent (expresión regular PCRE) a bloquear, separados por espacios.              |
     | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | no       | **Lista de Omisión de User-Agent:** Lista de patrones de User-Agent que deben omitir las comprobaciones de la lista negra de User-Agent. |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | no       | **URL de la Lista Negra de User-Agent:** Lista de URL que contienen patrones de User-Agent a bloquear.                                   |
+    | `BLACKLIST_USER_AGENT_URLS`        |                                                                                                                                | multisite | no       | **URL de la Lista Negra de User-Agent:** Lista de URL que contienen patrones de User-Agent a bloquear.                                   |
     | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | no       | **URL de la Lista de Omisión de User-Agent:** Lista de URL que contienen patrones de User-Agent a omitir.                                |
 
-    El ajuste por defecto de `BLACKLIST_USER_AGENT_URLS` incluye una URL que proporciona una **lista de agentes de usuario maliciosos conocidos**. Estos son a menudo utilizados por bots y escáneres maliciosos para identificar sitios vulnerables.
+    De forma predeterminada, `BLACKLIST_COMMUNITY_LISTS` incluye `ua:mitchellkrogza-bad-user-agents`, que añade la lista de User-Agents maliciosos; `BLACKLIST_USER_AGENT_URLS` está vacío hasta que lo configure.
 
 === "URI"
     **Qué hace esto:** Bloquea las solicitudes a URL específicas en su sitio. Esto es útil para bloquear intentos de acceso a páginas de administración, formularios de inicio de sesión u otras áreas sensibles que podrían ser objetivo de ataques.
@@ -1594,10 +1600,10 @@ Siga estos pasos para configurar y usar la función CORS:
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | no       | **Encabezados Permitidos:** Encabezados HTTP que se pueden usar en solicitudes de origen cruzado.                                                          |
 | `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | no       | **Permitir Credenciales:** Establezca en `yes` para permitir credenciales (cookies, autenticación HTTP) en solicitudes CORS.                               |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | no       | **Encabezados Expuestos:** Encabezados HTTP a los que los navegadores pueden acceder desde respuestas de origen cruzado.                                   |
-| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | no       | **Cross-Origin-Opener-Policy:** Controla la comunicación entre contextos de navegación.                                                                    |
-| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | no       | **Cross-Origin-Embedder-Policy:** Controla si un documento puede cargar recursos de otros orígenes.                                                        |
-| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | no       | **Cross-Origin-Resource-Policy:** Controla qué sitios web pueden incrustar sus recursos.                                                                   |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | no       | **Duración de la Caché de Preflight:** Cuánto tiempo (en segundos) los navegadores deben almacenar en caché la respuesta de preflight.                     |
+| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | no       | **Cross-Origin-Opener-Policy:** Controla la comunicación entre contextos de navegación. Valores permitidos: `unsafe-none`, `same-origin-allow-popups`, `same-origin`; deje el campo vacío para omitir esta cabecera. |
+| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | no       | **Cross-Origin-Embedder-Policy:** Controla si un documento puede cargar recursos de otros orígenes. Valores permitidos: `unsafe-none`, `require-corp`, `credentialless`; deje el campo vacío para omitir esta cabecera. |
+| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | no       | **Cross-Origin-Resource-Policy:** Controla qué sitios web pueden incrustar sus recursos. Valores permitidos: `same-site`, `same-origin`, `cross-origin`; deje el campo vacío para omitir esta cabecera. |
+| `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | no       | **Duración de la Caché de Preflight:** Cuánto tiempo (en segundos) los navegadores deben almacenar en caché la respuesta de preflight. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | no       | **Denegar Orígenes No Autorizados:** Cuando es `yes`, las solicitudes de orígenes no autorizados se deniegan con un código de error.                       |
 
 !!! tip "Optimizando las Solicitudes de Preflight"
@@ -1937,7 +1943,7 @@ El entorno de ejecución conserva las decisiones individuales por objetivo, de m
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.15
+        image: bunkerity/bunkerweb:1.6.16-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1954,7 +1960,7 @@ El entorno de ejecución conserva las decisiones individuales por objetivo, de m
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -2134,10 +2140,10 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 | `CROWDSEC_API_KEY`          |                        | multisite | no       | **Clave de API de CrowdSec:** La clave de API para autenticarse con la API de CrowdSec, obtenida usando `cscli bouncers add`.                 |
 | `CROWDSEC_MODE`             | `live`                 | multisite | no       | **Modo de Operación:** `live` (consultar la API para cada solicitud) o `stream` (almacenar en caché periódicamente todas las decisiones).     |
 | `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | no       | **Tráfico Interno:** Establezca en `yes` para verificar el tráfico interno contra las decisiones de CrowdSec.                                 |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | no       | **Tiempo de Espera de la Solicitud:** Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo `live`.   |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1s`                   | multisite | no       | **Tiempo de Espera de la Solicitud:** Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo `live`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Ubicaciones Excluidas:** Lista de ubicaciones (URI) separadas por comas para excluir de las verificaciones de CrowdSec.                     |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`.                         |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. |
+| `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 
 #### Ajustes del Componente de Seguridad de Aplicaciones
 
@@ -2145,9 +2151,9 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 | --------------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `CROWDSEC_APPSEC_URL`             |                   | multisite | no       | **URL de AppSec:** La URL del Componente de Seguridad de Aplicaciones de CrowdSec. Dejar vacío para deshabilitar AppSec.         |
 | `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough`     | multisite | no       | **Acción en Caso de Falla:** Acción a tomar cuando AppSec devuelve un error. Puede ser `passthrough` o `deny`.                   |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`             | multisite | no       | **Tiempo de Espera de Conexión:** El tiempo de espera en milisegundos para conectarse al Componente AppSec.                      |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`             | multisite | no       | **Tiempo de Espera de Envío:** El tiempo de espera en milisegundos para enviar datos al Componente AppSec.                       |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`             | multisite | no       | **Tiempo de Espera de Procesamiento:** El tiempo de espera en milisegundos para procesar la solicitud en el Componente AppSec.   |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100ms`           | multisite | no       | **Tiempo de Espera de Conexión:** El tiempo de espera en milisegundos para conectarse al Componente AppSec. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100ms`           | multisite | no       | **Tiempo de Espera de Envío:** El tiempo de espera en milisegundos para enviar datos al Componente AppSec. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500ms`           | multisite | no       | **Tiempo de Espera de Procesamiento:** El tiempo de espera en milisegundos para procesar la solicitud en el Componente AppSec. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | multisite | no       | **Enviar Siempre:** Establezca en `yes` para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP. |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | multisite | no       | **Verificar SSL:** Establezca en `yes` para verificar el certificado SSL del Componente AppSec.                                  |
 
@@ -2398,16 +2404,16 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 | `DATABASE_URI_READONLY`           |                                           | global   | no       | **URI de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la principal está caída.                                                                |
 | `DATABASE_LOG_LEVEL`              | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                                               |
 | `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global   | no       | **Máximo de Ejecuciones:** El número máximo de registros de ejecución de trabajos a conservar antes de la limpieza automática.                                                              |
-| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                                           |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14d`                                     | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en días. |
 | `DATABASE_POOL_SIZE`              | `40`                                      | global   | no       | **Tamaño del Pool:** El número de conexiones a mantener en el pool de conexiones de la base de datos.                                                                                       |
 | `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global   | no       | **Desbordamiento Máximo del Pool:** El número máximo de conexiones adicionales por encima del tamaño del pool. `-1` para ilimitado.                                                         |
-| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global   | no       | **Tiempo de Espera del Pool:** El número de segundos a esperar antes de abandonar la obtención de una conexión del pool.                                                                    |
-| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global   | no       | **Reciclaje del Pool:** El número de segundos tras los cuales una conexión se recicla automáticamente. `-1` para desactivar.                                                                |
+| `DATABASE_POOL_TIMEOUT`           | `5s`                                      | global   | no       | **Tiempo de Espera del Pool:** El número de segundos a esperar antes de abandonar la obtención de una conexión del pool. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
+| `DATABASE_POOL_RECYCLE`           | `30m`                                     | global   | no       | **Reciclaje del Pool:** El número de segundos tras los cuales una conexión se recicla automáticamente. `-1` para desactivar. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `DATABASE_POOL_PRE_PING`          | `yes`                                     | global   | no       | **Pre-Ping del Pool:** Si se prueba la conexión al extraerla del pool.                                                                                                                      |
 | `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global   | no       | **Reinicio al Devolver:** Cómo se reinician las conexiones al devolverlas al pool. Vacío = auto (`none` para MySQL/MariaDB, `rollback` para otros). Opciones: `rollback`, `commit`, `none`. |
-| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global   | no       | **Tiempo de Reintento:** El número máximo de segundos a esperar la disponibilidad de la base de datos al iniciar.                                                                           |
+| `DATABASE_RETRY_TIMEOUT`          | `1m`                                      | global   | no       | **Tiempo de Reintento:** El número máximo de segundos a esperar la disponibilidad de la base de datos al iniciar. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | no       | **Intentos de Reintento:** El número de reintentos en caso de errores transitorios durante las operaciones.                                                                                 |
-| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global   | no       | **Retraso entre Reintentos:** El retraso en segundos entre reintentos en caso de errores transitorios.                                                                                      |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `250ms`                                   | global   | no       | **Retraso entre Reintentos:** El retraso en segundos entre reintentos en caso de errores transitorios. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 
 !!! tip "Selección de Base de Datos"
     - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos.
@@ -2449,7 +2455,7 @@ El complemento DNSBL (Domain Name System Blacklist) proporciona protección cont
 
 Siga estos pasos para configurar y usar la función DNSBL:
 
-1.  **Habilite la función:** La función DNSBL está deshabilitada de forma predeterminada. Establezca la configuración `USE_DNSBL` en `yes` para habilitarla.
+1.  **Controlar la función:** La función DNSBL está habilitada de forma predeterminada. Establezca `USE_DNSBL` en `no` para deshabilitarla.
 2.  **Configure los servidores DNSBL:** Agregue los nombres de dominio de los servicios DNSBL que desea usar a la configuración `DNSBL_LIST`.
 3.  **Aplique la configuración:** Una vez configurado, BunkerWeb verificará automáticamente las conexiones entrantes contra los servidores DNSBL especificados.
 4.  **Supervise la eficacia:** Consulte la [interfaz de usuario web](web-ui.md) para ver las estadísticas de las solicitudes bloqueadas por las verificaciones de DNSBL.
@@ -2460,17 +2466,17 @@ Siga estos pasos para configurar y usar la función DNSBL:
 
 | Ajuste       | Valor por defecto                                   | Contexto  | Múltiple | Descripción                                                                                                    |
 | ------------ | --------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | no       | Habilitar DNSBL: establezca en `yes` para habilitar las verificaciones de DNSBL para las conexiones entrantes. |
+| `USE_DNSBL`  | `yes`                                               | multisite | no       | DNSBL está habilitada de forma predeterminada; establezca `USE_DNSBL` en `no` para desactivar las comprobaciones de las conexiones entrantes. |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | Servidores DNSBL: lista de dominios de servidores DNSBL para verificar, separados por espacios.                |
 
 **Listas de Omisión**
 
 | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                        |
 | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DNSBL_IGNORE_IP`           | ``                | multisite | yes      | IPs/CIDRs separados por espacios para omitir las verificaciones de DNSBL (lista blanca).                                                                           |
+| `DNSBL_IGNORE_IP`           | ``                | multisite | no       | IPs/CIDRs separados por espacios para omitir las verificaciones de DNSBL (lista blanca).                                                                           |
 | `DNSBL_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir las comprobaciones DNSBL. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
 | `DNSBL_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                       |
-| `DNSBL_IGNORE_IP_URLS`      | ``                | multisite | yes      | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`.                                                   |
+| `DNSBL_IGNORE_IP_URLS`      | ``                | multisite | no       | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`.                                                   |
 
 !!! warning "Una regla de cabecera es un secreto compartido"
     Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
@@ -2680,6 +2686,9 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | ------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
     | `GREYLIST_IP`      |                   | multisite | no       | **Lista Gris de IP:** Lista de direcciones IP o redes (en notación CIDR) para incluir en la lista gris, separadas por espacios.         |
     | `GREYLIST_IP_URLS` |                   | multisite | no       | **URLs de Lista Gris de IP:** Lista de URLs que contienen direcciones IP o redes para incluir en la lista gris, separadas por espacios. |
+
+    !!! info "Formatos de lista"
+        Las listas de URL pueden contener una entrada por línea (las líneas que empiezan por `#` o `;` son comentarios y solo se lee la primera palabra de cada línea), CSV, un documento JSON o JSON Lines. En las listas de IP, las comas también separan campos y las listas JSON conservan todas las cadenas que sean direcciones IP o redes. Añada un fragmento para conservar solo una parte de una lista JSON: `#key` conserva los valores bajo `key`, `#key=value` conserva los objetos cuya propiedad `key` es igual a `value` o contiene `value`, y `&` combina términos. Ejemplo: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Una URL con un fragmento conserva solo lo que este selecciona, por lo que no conserva nada si la lista no es JSON.
 
 === "DNS Inverso"
     **Qué hace esto:** Incluye en la lista gris a los visitantes según su nombre de dominio (en inverso). Útil para permitir el acceso condicional a visitantes de organizaciones o redes específicas.
@@ -3113,9 +3122,9 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
 | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | no       | **HSTS:** Impone conexiones HTTPS seguras, reduciendo los riesgos de ataques de intermediario (man-in-the-middle).                                              |
 | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | no       | **CSP:** Restringe la carga de recursos a fuentes de confianza, mitigando los ataques de cross-site scripting e inyección de datos.                             |
 | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | no       | **Modo de Informe CSP:** Informa de las violaciones sin bloquear el contenido, ayudando a probar las políticas de seguridad mientras se capturan los registros. |
-| `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | no       | **X-Frame-Options:** Previene el clickjacking controlando si su sitio puede ser enmarcado (framed).                                                             |
-| `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | no       | **X-Content-Type-Options:** Evita que los navegadores realicen "MIME-sniffing", protegiendo contra ataques de descarga no autorizada (drive-by download).       |
-| `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | no       | **X-DNS-Prefetch-Control:** Regula la captación previa de DNS para reducir las solicitudes de red no intencionadas y mejorar la privacidad.                     |
+| `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Previene el clickjacking controlando si su sitio puede ser enmarcado (framed). Valores permitidos: `DENY`, `SAMEORIGIN`; un valor vacío elimina esta cabecera. |
+| `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Evita que los navegadores realicen "MIME-sniffing", protegiendo contra ataques de descarga no autorizada (drive-by download). Valores permitidos: `nosniff`; un valor vacío elimina esta cabecera. |
+| `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regula la captación previa de DNS para reducir las solicitudes de red no intencionadas y mejorar la privacidad. Valores permitidos: `on`, `off`. |
 | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | no       | **Política de Referencia:** Controla la cantidad de información de referencia enviada, salvaguardando la privacidad del usuario.                                |
 | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | no       | **Política de Permisos:** Restringe el acceso a las funciones del navegador, reduciendo los posibles vectores de ataque.                                        |
 | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | no       | **Conservar Cabeceras:** Preserva las cabeceras de origen seleccionadas, ayudando a la integración con sistemas heredados mientras se mantiene la seguridad.    |
@@ -3145,8 +3154,16 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
 
     !!! tip "Mejores Prácticas"
         - Use `SameSite=Strict` para cookies sensibles para prevenir el acceso entre orígenes.
+        - Use `SameSite=None` solo cuando las cookies deban enviarse en contextos entre sitios (p. ej., callbacks de SSO o contenido incrustado); los navegadores exigen el indicador `Secure` junto con él, así que mantenga `COOKIE_AUTO_SECURE_FLAG` activado o añada `Secure` explícitamente.
+        - Si la respuesta del upstream ya define otro valor de `SameSite`, BunkerWeb añade el valor configurado en lugar de reemplazarlo; los navegadores aplican el último atributo `SameSite`, por lo que prevalece el valor de `COOKIE_FLAGS`.
         - Audite regularmente la configuración de sus cookies para asegurar el cumplimiento con las regulaciones de seguridad y privacidad.
         - Evite establecer cookies sin el indicador `Secure` en entornos de producción.
+
+    !!! example "SameSite=None para cookies entre sitios"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "Cabeceras Personalizadas"
 
@@ -3400,12 +3417,12 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt`     | multisite | no       | **Autoridad de certificación:** Seleccione el servidor ACME para la emisión. Opciones: `letsencrypt` o `zerossl`.                                                                                                                                                                                                                                                           |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |                   | multisite | no       | **Clave API de ZeroSSL:** Clave opcional utilizada por `zerossl-bot` cuando `LETS_ENCRYPT_SERVER=zerossl`. Si está vacía, se usa `EMAIL_LETS_ENCRYPT` para obtener credenciales EAB.                                                                                                                                                                                        |
 | `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`               | multisite | no       | **Reintentos de API ZeroSSL:** Número de reintentos para las solicitudes de API ZeroSSL realizadas por `zerossl-bot` (`0` desactiva los reintentos).                                                                                                                                                                                                                        |
-| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`               | multisite | no       | **Retraso de reintento ZeroSSL:** Retraso en segundos entre reintentos de API ZeroSSL en `zerossl-bot`.                                                                                                                                                                                                                                                                     |
-| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`               | multisite | no       | **Tiempo de espera de conexión ZeroSSL:** Tiempo de espera de conexión en segundos para llamadas API ZeroSSL en `zerossl-bot`.                                                                                                                                                                                                                                              |
-| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`              | multisite | no       | **Tiempo máximo de solicitud ZeroSSL:** Tiempo total máximo en segundos para cada llamada API ZeroSSL en `zerossl-bot`.                                                                                                                                                                                                                                                     |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2s`              | multisite | no       | **Retraso de reintento ZeroSSL:** Retraso en segundos entre reintentos de API ZeroSSL en `zerossl-bot`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                                                                                                                               |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5s`              | multisite | no       | **Tiempo de espera de conexión ZeroSSL:** Tiempo de espera de conexión en segundos para llamadas API ZeroSSL en `zerossl-bot`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                                                                                                        |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20s`             | multisite | no       | **Tiempo máximo de solicitud ZeroSSL:** Tiempo total máximo en segundos para cada llamada API ZeroSSL en `zerossl-bot`. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                                                                                                               |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`            | multisite | no       | **Tipo de desafío:** Método utilizado para verificar la propiedad del dominio. Opciones: `http` o `dns`.                                                                                                                                                                                                                                                                    |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |                   | multisite | no       | **Proveedor de DNS:** Cuando se utilizan desafíos DNS, el proveedor de DNS a utilizar (por ejemplo, cloudflare, route53, digitalocean).                                                                                                                                                                                                                                     |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`         | multisite | no       | **Propagación de DNS:** El tiempo de espera para la propagación de DNS en segundos. Si no se proporciona ningún valor, se utiliza el tiempo de propagación predeterminado del proveedor.                                                                                                                                                                                    |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`         | multisite | no       | **Propagación de DNS:** El tiempo de espera para la propagación de DNS en segundos. Si no se proporciona ningún valor, se utiliza el tiempo de propagación predeterminado del proveedor. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                                              |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |                   | multisite | yes      | **Elemento de credencial:** Elementos de configuración para la autenticación del proveedor de DNS (por ejemplo, `cloudflare_api_token 123456`). Escriba la clave, un espacio y luego el valor, y no entrecomille la clave. Los valores pueden ser texto sin formato, codificados en base64 o un objeto JSON.                                                                |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`             | multisite | no       | **Decodificar credenciales DNS en Base64:** Decodifica automáticamente las credenciales del proveedor DNS codificadas en base64 cuando se establece en `yes`. Cuando está habilitado, los valores que coinciden con el formato base64 se decodifican antes de su uso (excepto para el proveedor `rfc2136`). Desactive si sus credenciales están intencionalmente en base64. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`              | multisite | no       | **Certificados comodín:** Cuando se establece en `yes`, crea certificados comodín para todos los dominios. Solo disponible con desafíos DNS.                                                                                                                                                                                                                                |
@@ -3422,7 +3439,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
     - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él.
     - Si no se proporciona ningún ajuste `LETS_ENCRYPT_DNS_PROPAGATION`, se utiliza el tiempo de propagación predeterminado del proveedor.
     - La automatización completa de Let's Encrypt utilizando el desafío `http` funciona en modo de flujo (stream) siempre que abra el puerto `80/tcp` desde el exterior. Utilice el ajuste `LISTEN_STREAM_PORT_SSL` para elegir su puerto de escucha SSL/TLS.
-    - Si `LETS_ENCRYPT_PASSTHROUGH` se establece en `yes`, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt. Un `GET` o `HEAD` de un único token bajo `/.well-known/acme-challenge/` queda entonces en la lista blanca y llega al backend sin ninguna otra comprobación: antibot, lista negra, ModSecurity, límites de peticiones, Basic Auth y la comprobación de baneos se omiten para esa solicitud (los límites de conexiones siguen aplicándose, los impone nginx), más de lo que omite un desafío servido localmente. Las rutas más profundas, otros métodos y los nombres que no tienen forma de token reciben las comprobaciones normales.
+    - Si `LETS_ENCRYPT_PASSTHROUGH` se establece en `yes`, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt. Un `GET` o `HEAD` de un único token bajo `/.well-known/acme-challenge/` queda entonces en la lista blanca y llega al backend sin ninguna otra comprobación: antibot, lista negra, ModSecurity, límites de peticiones, Basic Auth y la comprobación de baneos se omiten para esa solicitud (los límites de conexiones siguen aplicándose, los impone nginx), más de lo que omite un desafío servido localmente. Las rutas más profundas, otros métodos y los nombres que no tienen forma de token reciben las comprobaciones normales. El backend también recibe el `Host` solicitado, aunque `REVERSE_PROXY_CUSTOM_HOST` esté definido con un nombre fijo, ya que el desafío se valida para ese nombre (un valor que usa variables de nginx se sigue aplicando).
 
 !!! tip "Desafíos HTTP vs. DNS"
     **Los desafíos HTTP** son más fáciles de configurar y funcionan bien para la mayoría de los sitios web:
@@ -3877,7 +3894,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 | `METRICS_MEMORY_SIZE`                | `16m`             | global    | no       | **Tamaño de la Memoria:** Tamaño del almacenamiento interno para las métricas (p. ej., `8192`, `16m`, `32m`).                                                                                                                                                                                                                                                                  |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`              | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador. Acepta la notación abreviada `k`/`m`.                                                                                                                                                                                                                             |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`             | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis. Acepta la notación abreviada `k`/`m`.                                                                                                                                                                                                                          |
-| `METRICS_REDIS_TTL`                  | `2592000`         | global    | no       | **TTL de Métricas en Redis:** segundos antes de que las claves de métricas en Redis expiren (`0` = permanente); se renueva en cada sincronización para que los datos activos nunca expiren, permitiendo que los datos abandonados sean desalojables bajo `volatile-lru` para que Redis se recupere de la presión de memoria (maxmemory). Acepta la notación abreviada `k`/`m`. |
+| `METRICS_REDIS_TTL`                  | `30d`             | global    | no       | **TTL de Métricas en Redis:** segundos antes de que las claves de métricas en Redis expiren (`0` = permanente); se renueva en cada sincronización para que los datos activos nunca expiren, permitiendo que los datos abandonados sean desalojables bajo `volatile-lru` para que Redis se recupere de la presión de memoria (maxmemory). Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `MAX_LRU_HISTORY`                    | `1k`              | global    | no       | **Historial LRU Máximo:** Número de ranuras LRU por trabajador y límite del arreglo de historial de eventos por clave (trazas de bloqueo, trazas de autenticación, etc.). Acepta la notación abreviada `k`/`m`.                                                                                                                                                                |
 | `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster.                                                                                                                                                                                                                             |
 
@@ -4301,6 +4318,10 @@ Siga estos pasos para configurar y usar ModSecurity:
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar. La ruta debe terminar en `.log`. La rotación mediante esa extensión solo se aplica donde logrotate está instalado (los paquetes de Linux y la imagen All-In-One); en Docker, Swarm y Kubernetes, un nombre distinto del predeterminado no se transmite ni se rota, y crece sin límite dentro del contenedor, porque solo `modsec_audit.log` está enlazado al streaming de logs del contenedor. |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | multisite | no | Modo: `Serial` (predeterminado) o `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` |  | multisite | no | Vacío por defecto; `Concurrent` requiere un directorio de almacenamiento absoluto. |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | no | Tamaño máximo del cuerpo inspeccionado, en bytes o con sufijos `k`/`m`/`g`. Vacío: se deriva de `MAX_CLIENT_SIZE`, que NGINX aplica primero. `REVERSE_PROXY_MAX_CLIENT_SIZE` sustituye el valor para su location. `0` elimina el límite y puede agotar la memoria. |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject` | multisite | no | `Reject` devuelve HTTP 413 por encima del límite de inspección. `ProcessPartial` inspecciona solo la parte dentro del límite y reenvía el cuerpo completo, reduciendo la cobertura WAF. El límite independiente sin archivos sigue aplicándose. |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`.                                                                                                                                                                                                                                                                                                                                                                                        |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **Lista de Complementos de CRS:** Lista de complementos separados por espacios para descargar e instalar (`nombre-plugin[/etiqueta]` o URL).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -4933,6 +4954,9 @@ Siga estos pasos para configurar y usar la función de IP Real:
 | `REAL_IP_FROM_URLS`  |                                           | multisite | no       | **URL de la Lista de IP:** URL que contienen las IP/redes de los proxies de confianza para descargar, separadas por espacios. Admite URL de tipo `file://`. |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | no       | **Protocolo PROXY:** Establezca en `yes` para habilitar el soporte del protocolo PROXY para la comunicación directa de proxy a BunkerWeb.                   |
 
+!!! info "Formatos de lista"
+    Las listas de URL pueden contener una entrada por línea (las líneas que empiezan por `#` o `;` son comentarios y solo se lee la primera palabra de cada línea), CSV, un documento JSON o JSON Lines. En las listas de IP, las comas también separan campos y las listas JSON conservan todas las cadenas que sean direcciones IP o redes. Añada un fragmento para conservar solo una parte de una lista JSON: `#key` conserva los valores bajo `key`, `#key=value` conserva los objetos cuya propiedad `key` es igual a `value` o contiene `value`, y `&` combina términos. Ejemplo: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Una URL con un fragmento conserva solo lo que este selecciona, por lo que no conserva nada si la lista no es JSON.
+
 !!! tip "Redes de Proveedores de la Nube"
     Si está utilizando un proveedor de la nube como AWS, GCP o Azure, considere agregar los rangos de IP de sus balanceadores de carga a su ajuste `REAL_IP_FROM` para garantizar la correcta identificación de la IP del cliente.
 
@@ -5010,6 +5034,18 @@ Siga estos pasos para configurar y usar la función de IP Real:
     REAL_IP_FROM: "" # Solo confiamos en las IPs de Cloudflare
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Descargar las IPs de Cloudflare automáticamente
     REAL_IP_HEADER: "CF-Connecting-IP"  # Encabezado de Cloudflare para la IP del cliente
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Detrás de AWS CloudFront"
+
+    Configuración para un sitio web detrás de AWS CloudFront:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```
 
@@ -5177,14 +5213,15 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_DATABASE`          | `0`               | global   | no       | **Base de datos Redis/Valkey:** Número de base de datos a utilizar en el servidor Redis/Valkey (0-15).                                                                                              |
 | `REDIS_SSL`               | `no`              | global   | no       | **SSL de Redis/Valkey:** Establezca en `yes` para habilitar el cifrado SSL/TLS para la conexión de Redis/Valkey.                                                                                    |
 | `REDIS_SSL_VERIFY`        | `no`              | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.                                                                              |
-| `REDIS_TIMEOUT`           | `1000`            | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey.                                                          |
+| `REDIS_TIMEOUT`           | `1s`              | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
 | `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).                                                                                        |
 | `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                                                                                                   |
+| `REDIS_CLUSTER_NODES`     |                   | global   | no       | **Nodos del clúster:** Nodos semilla de un clúster Redis, `host[:puerto]` separados por espacios, `[ipv6]:puerto` para IPv6. Habilita el modo clúster. |
 | `REDIS_SENTINEL_HOSTS`    |                   | global   | no       | **Hosts de Sentinel:** Lista de hosts de Redis Sentinel separados por espacios (nombredehost:puerto).                                                                                               |
 | `REDIS_SENTINEL_USERNAME` |                   | global   | no       | **Nombre de usuario de Sentinel:** Nombre de usuario para la autenticación de Redis Sentinel.                                                                                                       |
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                                                                                                     |
-| `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                                                                                                  |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo.                                                                      |
+| `REDIS_SENTINEL_MASTER`   |                   | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                                                                                                  |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`             | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
 | `REDIS_KEEPALIVE_POOL`    | `64`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo, por worker de NGINX.                                                                                    |
 
 !!! tip "Alta Disponibilidad con Redis Sentinel"
@@ -5204,6 +5241,18 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     -   Todas las instancias de BunkerWeb deben conectarse al mismo servidor Redis o Valkey o al clúster de Sentinel
     -   Configure el mismo número de base de datos en todas las instancias
     -   Asegúrese de que haya conectividad de red entre todas las instancias de BunkerWeb y los servidores Redis/Valkey
+
+### Clúster de Redis
+
+Establezca `REDIS_CLUSTER_NODES` con al menos un nodo accesible; BunkerWeb descubre el resto del clúster a partir de ahí. Funciona con Redis 6.2+, Valkey, y servicios de clúster gestionados como ElastiCache o MemoryDB a través de su endpoint de configuración. Los nodos semilla aceptan `host`, `host:puerto` o `[ipv6]:puerto`, pero el propio clúster debe anunciar direcciones IPv4 o nombres de host (`cluster-announce-hostname` con `cluster-preferred-endpoint-type hostname`); los clústeres que anuncian IPv6 no son compatibles.
+
+El modo clúster utiliza la base de datos 0. Establecer `REDIS_CLUSTER_NODES` junto con `REDIS_SENTINEL_HOSTS`, o con `REDIS_DATABASE` distinto de 0, es un error de configuración: BunkerWeb registra un error que nombra ambos ajustes y no utiliza Redis en absoluto (recurriendo a contadores locales y sesiones por cookie) hasta que se elimine uno de los dos.
+
+Cambiar una implementación existente al modo clúster parte de un espacio de claves vacío: los baneos activos y permanentes, las sesiones y los informes no se trasladan. Vuelva a aplicar los baneos permanentes después del cambio.
+
+Los baneos y los contadores de mal comportamiento se reparten entre los primarios por IP del cliente. Los informes de peticiones bloqueadas comparten un único hash slot, por lo que un solo primario los almacena todos.
+
+Con el valor predeterminado `cluster-require-full-coverage yes`, la pérdida de un primario sin réplica detiene todo el clúster; BunkerWeb entonces recurre a contadores locales y sesiones por cookie hasta que se recupera. `cluster-require-full-coverage no` limita el impacto a las claves del shard perdido.
 
 ### Configuraciones de Ejemplo
 
@@ -5728,7 +5777,7 @@ Siga estos pasos para configurar y usar la función de Escaneo Inverso:
 | ---------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------ |
 | `USE_REVERSE_SCAN`     | `no`                       | multisite | no       | **Habilitar Escaneo Inverso:** Establezca en `yes` para habilitar el escaneo de los puertos de los clientes. |
 | `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | no       | **Puertos a Escanear:** Lista de puertos separados por espacios para verificar en el lado del cliente.       |
-| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | no       | **Tiempo de Espera del Escaneo:** Tiempo máximo en milisegundos permitido para escanear un puerto.           |
+| `REVERSE_SCAN_TIMEOUT` | `500ms`                    | multisite | no       | **Tiempo de Espera del Escaneo:** Tiempo máximo en milisegundos permitido para escanear un puerto. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos. |
 
 !!! warning "Consideraciones de Rendimiento"
     Escanear múltiples puertos puede agregar latencia a las conexiones de los clientes. Use un valor de tiempo de espera apropiado y limite el número de puertos escaneados para mantener un buen rendimiento.
@@ -6049,7 +6098,7 @@ Siga estos pasos para configurar y usar la función de Certificado Autofirmado:
 | --------------------------- | ---------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `GENERATE_SELF_SIGNED_SSL`  | `no`                   | multisite | no       | **Habilitar autofirmado:** Establezca en `yes` para habilitar la generación automática de certificados autofirmados.                             |
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | multisite | no       | **Algoritmo del certificado:** Algoritmo utilizado para la generación de certificados: `ec-prime256v1`, `ec-secp384r1`, `rsa-2048` o `rsa-4096`. |
-| `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | multisite | no       | **Validez del certificado:** Número de días que el certificado autofirmado debe ser válido (predeterminado: 1 año).                              |
+| `SELF_SIGNED_SSL_EXPIRY`    | `1y`                   | multisite | no       | **Validez del certificado:** Número de días que el certificado autofirmado debe ser válido (predeterminado: 1 año). Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en días. |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | no       | **Sujeto del certificado:** Campo de sujeto para el certificado que identifica el dominio.                                                       |
 
 !!! tip "Entornos de Desarrollo"
@@ -6127,9 +6176,9 @@ Siga estos pasos para configurar y usar la función de Sesiones:
 | `SESSIONS_SECRET`           | `random`          | global    | no       | **Secreto de sesión:** Clave criptográfica utilizada para firmar las cookies de sesión. Debe ser una cadena fuerte y aleatoria única para su sitio.                                                                                                                                           |
 | `SESSIONS_NAME`             | `random`          | global    | no       | **Nombre de la cookie:** El nombre de la cookie que almacenará el identificador de sesión.                                                                                                                                                                                                    |
 | `SESSIONS_DOMAIN`           |                   | multisite | no       | **Dominio de la cookie:** Atributo `Domain` opcional aplicado a la cookie de sesión (por ejemplo `example.com`). Déjelo vacío para mantener la cookie limitada al host. Configúrelo por servidor para compartir el estado de sesión entre subdominios hermanos del mismo dominio registrable. |
-| `SESSIONS_IDLING_TIMEOUT`   | `1800`            | global    | no       | **Tiempo de espera por inactividad:** Tiempo máximo (en segundos) de inactividad antes de que la sesión se invalide.                                                                                                                                                                          |
-| `SESSIONS_ROLLING_TIMEOUT`  | `3600`            | global    | no       | **Tiempo de espera renovable:** Tiempo máximo (en segundos) antes de que una sesión deba renovarse.                                                                                                                                                                                           |
-| `SESSIONS_ABSOLUTE_TIMEOUT` | `86400`           | global    | no       | **Tiempo de espera absoluto:** Tiempo máximo (en segundos) antes de que una sesión se destruya independientemente de la actividad.                                                                                                                                                            |
+| `SESSIONS_IDLING_TIMEOUT`   | `30m`             | global    | no       | **Tiempo de espera por inactividad:** Tiempo máximo (en segundos) de inactividad antes de que la sesión se invalide. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                                    |
+| `SESSIONS_ROLLING_TIMEOUT`  | `1h`              | global    | no       | **Tiempo de espera renovable:** Tiempo máximo (en segundos) antes de que una sesión deba renovarse. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                                                     |
+| `SESSIONS_ABSOLUTE_TIMEOUT` | `1d`              | global    | no       | **Tiempo de espera absoluto:** Tiempo máximo (en segundos) antes de que una sesión se destruya independientemente de la actividad. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos.                                                      |
 | `SESSIONS_CHECK_IP`         | `yes`             | global    | no       | **Comprobar IP:** Cuando se establece en `yes`, destruye la sesión si la dirección IP del cliente cambia.                                                                                                                                                                                     |
 | `SESSIONS_CHECK_USER_AGENT` | `yes`             | global    | no       | **Comprobar User-Agent:** Cuando se establece en `yes`, destruye la sesión si el User-Agent del cliente cambia.                                                                                                                                                                               |
 
@@ -6404,7 +6453,7 @@ El complemento de Lista Blanca proporciona un enfoque integral para permitir exp
 
 1.  Usted define los criterios para los visitantes que deben estar en la "lista blanca" (_direcciones IP, redes, DNS inverso, ASN, User-Agent o patrones de URI_).
 2.  Cuando un visitante intenta acceder a su sitio, BunkerWeb comprueba si coincide con alguno de estos criterios de la lista blanca.
-3.  Si un visitante coincide con alguna regla de la lista blanca (y no coincide con ninguna regla de omisión), se le concede acceso a su sitio y **omite todos los demás controles de seguridad**.
+3.  Si un visitante coincide con alguna regla de la lista blanca, se le concede acceso a su sitio y **omite todos los demás controles de seguridad**.
 4.  Si un visitante no coincide con ningún criterio de la lista blanca, procede a través de todos los controles de seguridad normales como de costumbre.
 5.  Las listas blancas se pueden actualizar automáticamente desde fuentes externas de forma programada.
 
@@ -6412,11 +6461,10 @@ El complemento de Lista Blanca proporciona un enfoque integral para permitir exp
 
 Siga estos pasos para configurar y usar la función de Lista Blanca:
 
-1.  **Habilite la función:** La función de Lista Blanca está deshabilitada por defecto. Establezca el ajuste `USE_WHITELIST` en `yes` para habilitarla.
+1. **Habilitar la función:** La lista blanca está habilitada por defecto (`USE_WHITELIST=yes`), con sufijos rDNS predefinidos y el ASN `32934`. Revise estas fuentes de confianza; use `USE_WHITELIST=no` para deshabilitarla.
 2.  **Configure las reglas de permiso:** Defina qué IP, redes, patrones de DNS inverso, ASN, User-Agents o URI deben estar en la lista blanca.
-3.  **Configure las reglas de omisión:** Especifique cualquier excepción que deba omitir las comprobaciones de la lista blanca.
-4.  **Añada fuentes externas:** Configure URL para descargar y actualizar automáticamente los datos de la lista blanca.
-5.  **Supervise el acceso:** Consulte la [interfaz de usuario web](web-ui.md) para ver qué visitantes están siendo permitidos o denegados.
+3.  **Añada fuentes externas:** Configure URL para descargar y actualizar automáticamente los datos de la lista blanca.
+4.  **Supervise el acceso:** Consulte la [interfaz de usuario web](web-ui.md) para ver qué visitantes están siendo permitidos o denegados.
 
 !!! info "modo stream"
     Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
@@ -6427,7 +6475,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
 
 | Ajuste          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
 | --------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
-| `USE_WHITELIST` | `no`              | multisite | no       | **Habilitar Lista Blanca:** Establezca en `yes` para habilitar la función de lista blanca. |
+| `USE_WHITELIST` | `yes` | multisite | no       | **Habilitar Lista Blanca:** Establezca en `yes` para habilitar la función de lista blanca. |
 
 === "Dirección IP"
     **Qué hace esto:** Pone en la lista blanca a los visitantes según su dirección IP o red. Estos visitantes omitirán todos los controles de seguridad.
@@ -6435,30 +6483,27 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | Ajuste                     | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                               |
     | -------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_IP`             |                   | multisite | no       | **Lista Blanca de IP:** Lista de direcciones IP o redes (notación CIDR) para permitir, separadas por espacios.                            |
-    | `WHITELIST_IGNORE_IP`      |                   | multisite | no       | **Lista de Omisión de IP:** Lista de direcciones IP o redes que deben omitir las comprobaciones de la lista blanca de IP.                 |
     | `WHITELIST_IP_URLS`        |                   | multisite | no       | **URL de Lista Blanca de IP:** Lista de URL que contienen direcciones IP o redes para incluir en la lista blanca, separadas por espacios. |
-    | `WHITELIST_IGNORE_IP_URLS` |                   | multisite | no       | **URL de Lista de Omisión de IP:** Lista de URL que contienen direcciones IP o redes para ignorar.                                        |
+
+    !!! info "Formatos de lista"
+        Las listas de URL pueden contener una entrada por línea (las líneas que empiezan por `#` o `;` son comentarios y solo se lee la primera palabra de cada línea), CSV, un documento JSON o JSON Lines. En las listas de IP, las comas también separan campos y las listas JSON conservan todas las cadenas que sean direcciones IP o redes. Añada un fragmento para conservar solo una parte de una lista JSON: `#key` conserva los valores bajo `key`, `#key=value` conserva los objetos cuya propiedad `key` es igual a `value` o contiene `value`, y `&` combina términos. Ejemplo: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Una URL con un fragmento conserva solo lo que este selecciona, por lo que no conserva nada si la lista no es JSON.
 
 === "DNS Inverso"
     **Qué hace esto:** Pone en la lista blanca a los visitantes según su nombre de dominio (en inverso). Esto es útil para permitir el acceso a visitantes de organizaciones o redes específicas por su dominio.
 
     | Ajuste                       | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                 |
     | ---------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_RDNS`             |                   | multisite | no       | **Lista Blanca de rDNS:** Lista de sufijos de DNS inverso para permitir, separados por espacios.                                            |
+    | `WHITELIST_RDNS`             | `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com` | multisite | no       | **Lista Blanca de rDNS:** Lista de sufijos de DNS inverso para permitir, separados por espacios.                                            |
     | `WHITELIST_RDNS_GLOBAL`      | `yes`             | multisite | no       | **Solo rDNS Global:** Realiza comprobaciones de la lista blanca de rDNS solo en direcciones IP globales cuando se establece en `yes`.       |
-    | `WHITELIST_IGNORE_RDNS`      |                   | multisite | no       | **Lista de Omisión de rDNS:** Lista de sufijos de DNS inverso que deben omitir las comprobaciones de la lista blanca de rDNS.               |
     | `WHITELIST_RDNS_URLS`        |                   | multisite | no       | **URL de Lista Blanca de rDNS:** Lista de URL que contienen sufijos de DNS inverso para incluir en la lista blanca, separadas por espacios. |
-    | `WHITELIST_IGNORE_RDNS_URLS` |                   | multisite | no       | **URL de Lista de Omisión de rDNS:** Lista de URL que contienen sufijos de DNS inverso para ignorar.                                        |
 
 === "ASN"
     **Qué hace esto:** Pone en la lista blanca a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
 
     | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                             |
     | --------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_ASN`             |                   | multisite | no       | **Lista Blanca de ASN:** Lista de Números de Sistema Autónomo para permitir, separados por espacios.                    |
-    | `WHITELIST_IGNORE_ASN`      |                   | multisite | no       | **Lista de Omisión de ASN:** Lista de ASN que deben omitir las comprobaciones de la lista blanca de ASN.                |
+    | `WHITELIST_ASN`             | `32934` | multisite | no       | **Lista Blanca de ASN:** Lista de Números de Sistema Autónomo para permitir, separados por espacios.                    |
     | `WHITELIST_ASN_URLS`        |                   | multisite | no       | **URL de Lista Blanca de ASN:** Lista de URL que contienen ASN para incluir en la lista blanca, separados por espacios. |
-    | `WHITELIST_IGNORE_ASN_URLS` |                   | multisite | no       | **URL de Lista de Omisión de ASN:** Lista de URL que contienen ASN para ignorar.                                        |
 
 === "User Agent"
     **Qué hace esto:** Pone en la lista blanca a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo para permitir el acceso a herramientas o servicios conocidos específicos.
@@ -6466,9 +6511,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | Ajuste                             | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                               |
     | ---------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_USER_AGENT`             |                   | multisite | no       | **Lista Blanca de User-Agent:** Lista de patrones de User-Agent (expresión regular PCRE) para permitir, separados por espacios.           |
-    | `WHITELIST_IGNORE_USER_AGENT`      |                   | multisite | no       | **Lista de Omisión de User-Agent:** Lista de patrones de User-Agent que deben omitir las comprobaciones de la lista blanca de User-Agent. |
     | `WHITELIST_USER_AGENT_URLS`        |                   | multisite | no       | **URL de Lista Blanca de User-Agent:** Lista de URL que contienen patrones de User-Agent para incluir en la lista blanca.                 |
-    | `WHITELIST_IGNORE_USER_AGENT_URLS` |                   | multisite | no       | **URL de Lista de Omisión de User-Agent:** Lista de URL que contienen patrones de User-Agent para ignorar.                                |
 
 === "URI"
     **Qué hace esto:** Pone en la lista blanca las solicitudes a URL específicas de su sitio. Esto es útil para permitir el acceso a puntos finales específicos independientemente de otros factores.
@@ -6476,9 +6519,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                         |
     | --------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_URI`             |                   | multisite | no       | **Lista Blanca de URI:** Lista de patrones de URI (expresión regular PCRE) para permitir, separados por espacios.                   |
-    | `WHITELIST_IGNORE_URI`      |                   | multisite | no       | **Lista de Omisión de URI:** Lista de patrones de URI que deben omitir las comprobaciones de la lista blanca de URI.                |
     | `WHITELIST_URI_URLS`        |                   | multisite | no       | **URL de Lista Blanca de URI:** Lista de URL que contienen patrones de URI para incluir en la lista blanca, separados por espacios. |
-    | `WHITELIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de Lista de Omisión de URI:** Lista de URL que contienen patrones de URI para ignorar.                                        |
 
     !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
         Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.

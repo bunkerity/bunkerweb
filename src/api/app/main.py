@@ -8,6 +8,7 @@ from sys import path as sys_path
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
+from starlette.middleware.gzip import GZipMiddleware
 from traceback import format_exc
 from ipaddress import ip_address, ip_network, IPv4Network, IPv6Network
 
@@ -111,6 +112,8 @@ def create_app() -> FastAPI:
                 LOGGER.info(f"API Host header allowlist enabled: {allowed_hosts}")
             except Exception:
                 LOGGER.error(f"Invalid API_ALLOWED_HOSTS {allowed_hosts!r}, host allowlist NOT enabled: {format_exc()}")
+
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
 
     # Rate limiter (optional, safe if disabled)
     setup_rate_limiter(app)

@@ -10,6 +10,7 @@ local wait = ngx.thread.wait
 local ngx_socket = ngx.socket
 local kill_all_threads = utils.kill_all_threads
 local get_deny_status = utils.get_deny_status
+local parse_duration = utils.parse_duration
 local tonumber = tonumber
 
 function reversescan:initialize(ctx)
@@ -45,7 +46,7 @@ function reversescan:access()
 				self.scan,
 				self.ctx.bw.remote_addr,
 				tonumber(port),
-				tonumber(self.variables["REVERSE_SCAN_TIMEOUT"])
+				parse_duration(self.variables["REVERSE_SCAN_TIMEOUT"], "ms")
 			)
 			threads[port] = thread
 		end

@@ -5,6 +5,9 @@ function getAlpha2(lang) {
 
 // Apply translations to elements with [data-i18n] attribute
 function applyTranslations() {
+  // Before the resources are loaded i18next.t() returns the raw key, which would
+  // overwrite the readable server-rendered text.
+  if (!i18next.isInitialized) return;
   const elements = $("[data-i18n]");
   elements.each(function () {
     const element = $(this);
@@ -262,7 +265,27 @@ function updateFilterTranslations() {
   );
 }
 
-$(document).ready(function () {
+// Page scripts are loaded after this file: hold their jQuery ready callbacks
+// until the first translation pass is done, so tables and toolbars are built
+// with translations available. i18n itself starts on DOMContentLoaded, which
+// a ready hold does not delay.
+$.holdReady(true);
+let i18nReadyReleased = false;
+function releaseI18nReady() {
+  if (i18nReadyReleased) return;
+  i18nReadyReleased = true;
+  $.holdReady(false);
+  // Most page scripts only start their table when window.i18nextReady is still
+  // false in their ready callback and poll for it. Ready callbacks run in
+  // registration order, so this one runs after all of theirs.
+  $(function () {
+    window.i18nextReady = true;
+  });
+}
+// Never block the page for good if the locale files cannot be fetched.
+setTimeout(releaseI18nReady, 8000);
+
+document.addEventListener("DOMContentLoaded", function () {
   i18next
     .use(i18nextHttpBackend)
     .use(i18nextBrowserLanguageDetector)
@@ -288,7 +311,11 @@ $(document).ready(function () {
         supportedLngs: supportedLngs,
       },
       function (err) {
-        if (err) return console.error("Error initializing i18next:", err);
+        if (err) {
+          console.error("Error initializing i18next:", err);
+          releaseI18nReady();
+          return;
+        }
 
         document.documentElement.lang = i18next.language;
 
@@ -298,6 +325,7 @@ $(document).ready(function () {
           updateDocumentationLinks(i18next.language);
           $("[name='language']").val(i18next.language);
           $("#newsletter-locale").val(i18next.language);
+          releaseI18nReady();
         });
 
         i18next.on("languageChanged", function (lng) {
@@ -317,8 +345,6 @@ $(document).ready(function () {
           const lang = $(this).data("lang");
           changeLanguage(lang);
         });
-
-        window.i18nextReady = true;
       },
     );
 

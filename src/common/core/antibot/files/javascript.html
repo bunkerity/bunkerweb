@@ -30,243 +30,450 @@
     {-raw-}
     <style nonce="{*nonce_style*}">
       :root {
-        --color-primary: #fff;
-        --color-inverted: #202020;
-        --color-primary-light: #494949;
-        --color-bw: #0b5577;
-        --color-bw-green: #2eac68;
-      }
-      body,
-      html {
-        background-color: #fff;
-        color: #202020;
+        color-scheme: light dark;
+        --bw-ground: #edf2f5;
+        --bw-card: #ffffff;
+        --bw-border: rgba(11, 53, 74, 0.16);
+        --bw-ink: #0f2a38;
+        --bw-ink-soft: #4d6776;
+        --bw-accent: #1c7a47;
+        --bw-primary: #0b354a;
+        --bw-primary-ink: #ffffff;
+        --bw-danger: #c0341d;
+        --bw-status-bg: #f2f6f8;
+        --bw-widget-bg: #fafafa;
+        --bw-widget-border: #e0e0e0;
+        --bw-shadow:
+          0 1px 2px rgba(11, 53, 74, 0.06), 0 12px 32px rgba(11, 53, 74, 0.1);
+        --bw-grid-dot: rgba(11, 53, 74, 0.1);
+        --bw-grid-line: transparent;
+        --bw-mark: #0b5577;
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          --color-primary: #1a1a1a;
-          --color-inverted: #fff;
-          --color-primary-light: #a3a3a3;
-          --color-bw: #fff;
+          --bw-ground: #062433;
+          --bw-card: #0a3346;
+          --bw-border: rgba(46, 172, 104, 0.3);
+          --bw-ink: #e6f0f5;
+          --bw-ink-soft: #93b4c4;
+          --bw-accent: #3ecb80;
+          --bw-primary: #2eac68;
+          --bw-primary-ink: #062433;
+          --bw-danger: #ff7a66;
+          --bw-status-bg: #062a3b;
+          --bw-widget-bg: #232323;
+          --bw-widget-border: #3a3a3a;
+          --bw-shadow:
+            0 0 0 1px rgba(46, 172, 104, 0.06), 0 22px 48px rgba(0, 0, 0, 0.45);
+          --bw-grid-dot: rgba(143, 199, 230, 0.08);
+          --bw-grid-line: rgba(255, 255, 255, 0.022);
+          --bw-mark: #ffffff;
         }
       }
-      body,
-      html {
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
         margin: 0;
         padding: 0;
         min-height: 100%;
-        height: 100%;
-        width: 100%;
-        background-color: var(--color-primary, #fff);
-        color: var(--color-inverted, #202020);
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bw-ground);
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            transparent 0 3px,
+            var(--bw-grid-line) 3px 4px
+          ),
+          radial-gradient(var(--bw-grid-dot) 1px, transparent 1px);
+        background-size:
+          auto,
+          20px 20px;
+        color: var(--bw-ink);
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
-        font-size: 16px;
-        word-break: keep-all;
+        font-size: 1rem;
         -webkit-font-smoothing: antialiased;
       }
-      @media screen and (min-width: 2000px) {
-        body,
-        html {
-          font-size: 20px;
-        }
-      }
-      body {
-        display: -webkit-flex;
-        display: flex;
-        -webkit-justify-content: center;
-        justify-content: center;
-        -webkit-align-items: center;
-        align-items: center;
-        height: 100%;
-        -webkit-flex-direction: column;
-        flex-direction: column;
-      }
-      article {
-        text-align: center;
+      .bw-main {
+        flex: 1 0 auto;
         width: 100%;
-        display: -webkit-flex;
+        box-sizing: border-box;
         display: flex;
-        -webkit-justify-content: center;
-        justify-content: center;
-        -webkit-align-items: center;
         align-items: center;
-        -webkit-flex-direction: column;
-        flex-direction: column;
-        -webkit-flex-grow: 1;
-        flex-grow: 1;
+        justify-content: center;
+        padding: 24px 16px 16px;
       }
-      article h3 {
-        font-size: 1.5em;
-        text-transform: uppercase;
-        margin: 0.3em auto;
+      .bw-card {
+        width: 100%;
+        max-width: 420px;
+        box-sizing: border-box;
+        background: var(--bw-card);
+        border: 1px solid var(--bw-border);
+        border-radius: 6px;
+        box-shadow: var(--bw-shadow);
+        overflow: visible;
       }
-      .lds-roller {
-        display: inline-block;
-        position: relative;
-        width: 80px;
-        height: 80px;
-        margin-top: 1rem;
+      .bw-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        padding: 11px 16px;
+        border-bottom: 1px solid var(--bw-border);
+        font:
+          600 0.65625rem/1 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        letter-spacing: 0.08em;
+        color: var(--bw-ink-soft);
       }
-      .lds-roller div {
-        -webkit-animation: lds-roller 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-        animation: lds-roller 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-        -webkit-transform-origin: 40px 40px;
-        transform-origin: 40px 40px;
+      .bw-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        overflow-wrap: anywhere;
       }
-      .lds-roller div:after {
-        content: " ";
-        display: block;
-        position: absolute;
+      .bw-dot {
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: var(--color-inverted, #202020);
-        margin: -4px 0 0 -4px;
+        background: #2eac68;
+        display: inline-block;
+        animation: bw-live 1.6s ease-in-out infinite;
       }
-      .lds-roller div:nth-child(1) {
-        -webkit-animation-delay: -36ms;
-        animation-delay: -36ms;
+      .bw-dot.bw-dot-error {
+        background: var(--bw-danger);
+        animation: bw-caret 0.9s steps(1) infinite;
       }
-      .lds-roller div:nth-child(1):after {
-        top: 63px;
-        left: 63px;
+      .bw-topbar-type {
+        overflow-wrap: anywhere;
+        color: var(--bw-accent);
       }
-      .lds-roller div:nth-child(2) {
-        -webkit-animation-delay: -72ms;
-        animation-delay: -72ms;
-      }
-      .lds-roller div:nth-child(2):after {
-        top: 68px;
-        left: 56px;
-      }
-      .lds-roller div:nth-child(3) {
-        -webkit-animation-delay: -108ms;
-        animation-delay: -108ms;
-      }
-      .lds-roller div:nth-child(3):after {
-        top: 71px;
-        left: 48px;
-      }
-      .lds-roller div:nth-child(4) {
-        -webkit-animation-delay: -144ms;
-        animation-delay: -144ms;
-      }
-      .lds-roller div:nth-child(4):after {
-        top: 72px;
-        left: 40px;
-      }
-      .lds-roller div:nth-child(5) {
-        -webkit-animation-delay: -180ms;
-        animation-delay: -180ms;
-      }
-      .lds-roller div:nth-child(5):after {
-        top: 71px;
-        left: 32px;
-      }
-      .lds-roller div:nth-child(6) {
-        -webkit-animation-delay: -216ms;
-        animation-delay: -216ms;
-      }
-      .lds-roller div:nth-child(6):after {
-        top: 68px;
-        left: 24px;
-      }
-      .lds-roller div:nth-child(7) {
-        -webkit-animation-delay: -252ms;
-        animation-delay: -252ms;
-      }
-      .lds-roller div:nth-child(7):after {
-        top: 63px;
-        left: 17px;
-      }
-      .lds-roller div:nth-child(8) {
-        -webkit-animation-delay: -288ms;
-        animation-delay: -288ms;
-      }
-      .lds-roller div:nth-child(8):after {
-        top: 56px;
-        left: 12px;
-      }
-      @-webkit-keyframes lds-roller {
-        0% {
-          -webkit-transform: rotate(0);
-          transform: rotate(0);
-        }
-        100% {
-          -webkit-transform: rotate(360deg);
-          transform: rotate(360deg);
-        }
-      }
-      @keyframes lds-roller {
-        0% {
-          -webkit-transform: rotate(0);
-          transform: rotate(0);
-        }
-        100% {
-          -webkit-transform: rotate(360deg);
-          transform: rotate(360deg);
-        }
-      }
-      footer {
-        width: 100%;
+      .bw-body {
+        padding: 26px 32px 26px;
         text-align: center;
-        padding: 1rem 0;
-        margin-top: auto;
-        padding-top: 0.25em;
-        padding-bottom: 0.25em;
       }
-      footer p {
-        font-family: monospace;
-        font-size: 1em;
-        color: var(--color-primary-light, #a3a3a3);
-        margin-block-start: 0.25em;
-        margin-block-end: 0.25em;
+      .bw-hero {
+        display: block;
+        width: 88px;
+        height: 95px;
+        margin: 0 auto;
       }
-      footer a {
-        color: var(--color-inverted, #202020);
+      .bw-hero-canvas {
+        display: block;
+        width: 88px;
+        height: 95px;
+      }
+      .bw-title {
+        margin: 18px 0 8px;
+        font:
+          700 1rem/1.4 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        letter-spacing: 0.06em;
+        color: var(--bw-ink);
+      }
+      .bw-subtitle {
+        margin: 0 auto;
+        max-width: 330px;
+        font:
+          400 0.8125rem/1.55 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        color: var(--bw-ink-soft);
+      }
+      .bw-status {
+        min-height: 42px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 16px;
+        padding: 9px 12px;
+        background: var(--bw-status-bg);
+        border: 1px solid var(--bw-border);
+        border-radius: 4px;
+        font:
+          500 0.75rem/1.5 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        text-align: left;
+      }
+      #challenge-error {
+        margin: 0;
+        color: var(--bw-danger);
+      }
+      #challenge-error:empty {
+        display: none;
+      }
+      .bw-status-decor {
+        color: var(--bw-accent);
+      }
+      .bw-caret {
+        animation: bw-caret 1s steps(1) infinite;
+      }
+      .bw-retry {
+        min-height: 2.5rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        margin-top: 10px;
+        font:
+          400 0.75rem/1.2 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        color: var(--bw-ink-soft);
+        visibility: hidden;
+      }
+      .bw-retry.bw-visible {
+        visibility: visible;
+      }
+      .bw-retry-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0 2px;
+      }
+      .bw-retry-help {
+        font-size: 0.6875rem;
+        font-weight: 400;
+      }
+      .bw-retry-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-height: 24px;
+        padding: 2px 4px;
+        border: 0;
+        border-radius: 4px;
+        background: transparent;
+        color: inherit;
+        font: inherit;
         text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+      }
+      .bw-retry-btn svg {
+        width: 11px;
+        height: 11px;
+        flex-shrink: 0;
+      }
+      .bw-retry-btn:hover {
+        color: var(--bw-primary);
+      }
+      .bw-retry-btn:focus-visible {
+        outline: 2px solid var(--bw-primary);
+        outline-offset: 2px;
+      }
+      .bw-widget {
+        width: 300px;
+        height: 65px;
+        box-sizing: border-box;
+        margin: 4px auto 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .bw-widget.bw-widget-compact {
+        width: 150px;
+        height: 140px;
+      }
+      .bw-widget-hcaptcha {
+        width: 303px;
+        height: 78px;
+      }
+      .bw-widget-recaptcha {
+        width: 304px;
+        height: 78px;
+      }
+      .bw-widget-hcaptcha.bw-widget-compact,
+      .bw-widget-recaptcha.bw-widget-compact {
+        width: 164px;
+        height: 144px;
+      }
+      .bw-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        margin-top: 18px;
+      }
+      .bw-captcha-img {
+        width: 250px;
+        max-width: 100%;
+        height: auto;
+        aspect-ratio: 250 / 80;
+        box-sizing: border-box;
+        background: var(--bw-status-bg);
+        border: 1px solid var(--bw-border);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .bw-captcha-img img {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+      }
+      .bw-field-label {
+        display: block;
+        margin: 16px 0 6px;
+        font:
+          600 0.65625rem/1 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        letter-spacing: 0.08em;
+        color: var(--bw-ink-soft);
+      }
+      .bw-field-row {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        width: 250px;
+        max-width: 100%;
+        margin: 8px auto 0;
+      }
+      .bw-field-row input {
+        flex: 1;
+        min-width: 0;
+        height: 44px;
+        box-sizing: border-box;
+        padding: 0 12px;
+        border: 1px solid var(--bw-border);
+        border-radius: 4px;
+        background: var(--bw-status-bg);
+        color: var(--bw-ink);
+        font:
+          600 1rem/1 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        letter-spacing: 0.2em;
+        text-align: center;
+      }
+      .bw-field-row button,
+      .bw-submit {
+        height: 44px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 4px;
+        background: var(--bw-primary);
+        color: var(--bw-primary-ink);
+        font:
+          700 0.75rem/1 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+      }
+      .bw-help-link {
+        margin-top: 10px;
+        font:
+          400 0.6875rem/1.4 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        color: var(--bw-ink-soft);
+      }
+      .bw-help-link a {
+        color: var(--bw-ink-soft);
+      }
+      .bw-footer {
+        flex-shrink: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 16px 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        text-align: center;
+      }
+      .bw-footer-logo {
+        display: block;
+        line-height: 0;
+      }
+      .bw-footer-logo svg {
+        width: 132px;
+        height: 37px;
+      }
+      .bw-footer p {
+        margin: 0;
+        font:
+          400 0.71875rem/1.4 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        color: var(--bw-ink-soft);
+      }
+      .bw-footer a {
+        color: var(--bw-ink);
         font-weight: 700;
-        -webkit-transition:
-          color 0.3s ease,
-          text-decoration 0.3s ease,
-          font-style 0.3s ease;
-        transition:
-          color 0.3s ease,
-          text-decoration 0.3s ease,
-          font-style 0.3s ease;
+        text-decoration: underline;
       }
-      footer a:focus,
-      footer a:hover {
-        font-style: italic;
-        color: var(--color-bw-green, #2eac68);
-        outline: 0;
+      .bw-footer a:hover {
+        color: var(--bw-accent);
       }
-      .bunker-cls-2,
-      .bunker-cls-3,
-      .bunker-cls-4 {
-        stroke-width: 0;
-        -webkit-transition: fill 0.3s ease;
-        transition: fill 0.3s ease;
+      .bw-footer a:focus-visible {
+        color: var(--bw-accent);
+        outline: 2px solid var(--bw-accent);
+        outline-offset: 2px;
       }
       .bunker-cls-2 {
-        fill: var(--color-bw, #0b5577);
+        fill: var(--bw-mark);
       }
       .bunker-cls-3 {
         fill: #fff;
       }
       .bunker-cls-4 {
-        fill: var(--color-bw-green, #2eac68);
+        fill: #2eac68;
       }
-      .bunker-svg:hover .bunker-cls-2 {
-        fill: #0b5577;
-      }
-      .bunker-svg svg {
-        width: 200px;
-        height: 56px;
-        margin-bottom: 5px;
-      }
-      .noscript {
+      .bw-noscript-msg {
         display: block;
         background: #f8d7da;
         color: #721c24;
@@ -275,41 +482,265 @@
         margin: 1rem 0;
         border-radius: 4px;
         text-align: center;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+      .bw-recaptcha-v2 .grecaptcha-badge {
+        display: none !important;
+      }
+      .bw-hidden {
+        display: none;
+      }
+      @keyframes bw-live {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+      @keyframes bw-caret {
+        0%,
+        49% {
+          opacity: 1;
+        }
+        50%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bw-dot {
+          animation: none;
+        }
+        .bw-caret {
+          animation: none;
+        }
+      }
+      @media (prefers-contrast: more) {
+        :root {
+          --bw-ink-soft: var(--bw-ink);
+          --bw-border: var(--bw-ink);
+          --bw-grid-dot: transparent;
+          --bw-grid-line: transparent;
+        }
+      }
+      @media (prefers-reduced-transparency: reduce) {
+        :root {
+          --bw-grid-dot: transparent;
+          --bw-grid-line: transparent;
+          --bw-border: var(--bw-ink);
+        }
+        .bw-card {
+          box-shadow: none;
+          border-width: 2px;
+        }
+      }
+      @media (forced-colors: active) {
+        body {
+          background-image: none;
+        }
+        .bw-card,
+        .bw-topbar,
+        .bw-status,
+        .bw-widget,
+        .bw-captcha-img,
+        .bw-field-row input {
+          border-color: CanvasText;
+        }
+        .bw-dot {
+          forced-color-adjust: none;
+          background: Highlight;
+        }
+        .bw-retry-btn,
+        .bw-submit,
+        .bw-field-row button {
+          border: 1px solid ButtonText;
+        }
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible {
+          outline: 2px solid Highlight;
+          outline-offset: 2px;
+        }
+      }
+      @media (max-width: 379px) {
+        .bw-main {
+          padding-left: 8px;
+          padding-right: 8px;
+        }
+        .bw-body {
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+        .bw-widget {
+          width: auto;
+          margin-left: -10px;
+          margin-right: -10px;
+        }
+        .bw-sfx {
+          display: none;
+        }
+        .bw-hero,
+        .bw-hero-canvas {
+          width: 76px;
+          height: 82px;
+        }
+      }
+      @media (max-width: 199px) {
+        .bw-main {
+          padding-left: 4px;
+          padding-right: 4px;
+        }
+        .bw-body {
+          padding-left: 4px;
+          padding-right: 4px;
+        }
+        .bw-field-row {
+          width: 100%;
+        }
+        .bw-field-row button,
+        .bw-submit {
+          padding: 0 8px;
+        }
       }
     </style>
     {-raw-}
   </head>
   <body>
-    <article>
-      <h3>Please wait while we check if you are a Human</h3>
-      <div class="lds-roller">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-      </div>
-      <noscript>
-        <p class="noscript">
-          JavaScript needs to be enabled to complete this challenge.
-        </p> </noscript
-      >{-raw-}
-      <form method="post" class="hidden" action="{*antibot_uri*}" id="form">
-        <input type="hidden" name="challenge" id="challenge" />
-        <input type="hidden" name="next" value="{{next}}" />
-      </form>
-      {-raw-}
-    </article>
-    <footer>
+    <main class="bw-main">
+      <article class="bw-card">
+        <div class="bw-topbar">
+          <span class="bw-topbar-left"
+            ><span class="bw-dot" id="bw-dot"></span>BUNKERWEB<span
+              class="bw-sfx"
+              >&nbsp;&middot; SECURITY CHECK</span
+            ></span
+          >
+          <span class="bw-topbar-type">PROOF-OF-WORK</span>
+        </div>
+        <div class="bw-body">
+          <div class="bw-hero">
+            <canvas
+              class="bw-hero-canvas"
+              id="bw-orb"
+              role="img"
+              aria-label="Computing proof of work"
+            ></canvas>
+            <noscript>
+              {-raw-}
+              <style nonce="{*nonce_style*}">
+                #bw-orb {
+                  display: none;
+                }
+              </style>
+              {-raw-}
+              <svg
+                class="bw-hero-canvas bw-hero-svg"
+                viewBox="0 0 88 95"
+                role="img"
+                aria-label="Computing proof of work"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle cx="71.7" cy="53.5" r="2.25" fill="currentColor" />
+                <circle cx="69.8" cy="45.9" r="2.25" fill="currentColor" />
+                <circle cx="64.7" cy="40.0" r="2.25" fill="currentColor" />
+                <circle cx="67.1" cy="32.5" r="2.25" fill="currentColor" />
+                <circle cx="67.0" cy="24.5" r="2.25" fill="currentColor" />
+                <circle cx="63.6" cy="17.4" r="2.25" fill="currentColor" />
+                <circle cx="56.7" cy="13.6" r="2.25" fill="currentColor" />
+                <circle cx="48.7" cy="12.8" r="2.25" fill="currentColor" />
+                <circle cx="40.8" cy="13.5" r="2.25" fill="currentColor" />
+                <circle cx="32.9" cy="14.5" r="2.25" fill="currentColor" />
+                <circle cx="24.9" cy="15.7" r="2.25" fill="currentColor" />
+                <circle cx="17.0" cy="16.9" r="2.25" fill="currentColor" />
+                <circle cx="13.9" cy="23.0" r="2.25" fill="currentColor" />
+                <circle cx="15.1" cy="30.9" r="2.25" fill="currentColor" />
+                <circle cx="16.4" cy="38.8" r="2.25" fill="currentColor" />
+                <circle cx="17.6" cy="46.7" r="2.25" fill="currentColor" />
+                <circle cx="18.9" cy="54.6" r="2.25" fill="currentColor" />
+                <circle cx="20.1" cy="62.4" r="2.25" fill="currentColor" />
+                <circle cx="25.6" cy="65.4" r="2.25" fill="currentColor" />
+                <circle cx="33.6" cy="65.4" r="2.25" fill="currentColor" />
+                <circle cx="41.6" cy="65.4" r="2.25" fill="currentColor" />
+                <circle cx="49.6" cy="65.4" r="2.25" fill="currentColor" />
+                <circle cx="57.6" cy="65.4" r="2.25" fill="currentColor" />
+                <circle cx="65.5" cy="65.4" r="2.25" fill="currentColor" />
+                <circle cx="71.1" cy="61.4" r="2.25" fill="currentColor" />
+                <circle cx="38.5" cy="56.6" r="2.25" fill="currentColor" />
+                <circle cx="38.1" cy="48.3" r="2.25" fill="currentColor" />
+                <circle cx="34.6" cy="41.3" r="2.25" fill="currentColor" />
+                <circle cx="37.8" cy="34.2" r="2.25" fill="currentColor" />
+                <circle cx="45.6" cy="34.3" r="2.25" fill="currentColor" />
+                <circle cx="48.3" cy="41.6" r="2.25" fill="currentColor" />
+                <circle cx="47.6" cy="49.2" r="2.25" fill="currentColor" />
+                <circle cx="46.8" cy="55.5" r="2.25" fill="currentColor" />
+                <circle cx="17.8" cy="70.5" r="2.25" fill="#2eac68" />
+                <circle cx="30.2" cy="70.5" r="2.25" fill="#2eac68" />
+                <circle cx="42.6" cy="70.5" r="2.25" fill="#2eac68" />
+                <circle cx="55.0" cy="70.5" r="2.25" fill="#2eac68" />
+                <circle cx="67.4" cy="70.5" r="2.25" fill="#2eac68" />
+                <circle cx="22.0" cy="75.2" r="2.25" fill="#2eac68" />
+                <circle cx="34.4" cy="75.2" r="2.25" fill="#2eac68" />
+                <circle cx="46.7" cy="75.2" r="2.25" fill="#2eac68" />
+                <circle cx="59.1" cy="75.2" r="2.25" fill="#2eac68" />
+                <circle cx="71.5" cy="75.2" r="2.25" fill="#2eac68" />
+                <circle cx="26.1" cy="79.9" r="2.25" fill="#2eac68" />
+                <circle cx="38.5" cy="79.9" r="2.25" fill="#2eac68" />
+                <circle cx="50.9" cy="79.9" r="2.25" fill="#2eac68" />
+                <circle cx="63.3" cy="79.9" r="2.25" fill="#2eac68" />
+              </svg>
+            </noscript>
+          </div>
+          <h3 role="status" aria-live="polite" class="bw-title">
+            COMPUTING PROOF OF WORK
+          </h3>
+          <p class="bw-subtitle">
+            Your browser is solving a small puzzle. No action needed, you will
+            be redirected.
+          </p>
+          <div class="bw-status">
+            <p id="challenge-error" role="alert"></p>
+            <span
+              class="bw-status-decor"
+              id="bw-status-decor"
+              aria-hidden="true"
+              ><span id="bw-status-text"
+                >&gt; searching nonce &middot;
+                <span id="bw-pow-count">0</span> tried<span class="bw-caret"
+                  >_</span
+                ></span
+              ></span
+            >
+          </div>
+          <noscript
+            ><p class="bw-noscript-msg">
+              JavaScript needs to be enabled to complete this challenge.
+            </p></noscript
+          >
+          {-raw-}
+          <form
+            method="post"
+            class="bw-hidden"
+            action="{*antibot_uri*}"
+            id="form"
+          >
+            <input type="hidden" name="challenge" id="challenge" />
+            <input type="hidden" name="next" value="{{next}}" />
+          </form>
+          {-raw-}
+        </div>
+      </article>
+    </main>
+    <footer class="bw-footer">
       <a
-        href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=bwantibot"
+        href="https://www.bunkerweb.io/?utm_campaign=self&amp;utm_source=bwantibot"
         target="_blank"
-        class="bunker-svg"
-      >
-        <svg viewBox="0 0 213.09 59.68" xmlns="http://www.w3.org/2000/svg">
+        rel="noopener noreferrer"
+        class="bw-footer-logo"
+        ><svg viewBox="0 0 213.09 59.68" xmlns="http://www.w3.org/2000/svg">
           <path class="bunker-cls-4" d="M76.46 40.57h73.22v19.11H76.46z" />
           <path
             class="bunker-cls-2"
@@ -322,243 +753,738 @@
           <path
             class="bunker-cls-3"
             d="M104.18 45.34h-3.3c-.3.01-.51.07-.63.19-.12.11-.19.26-.19.43 0 .18.07.33.19.44.13.11.34.17.63.17h1.52l-2.02 9.56-2.67-7.62h-1.44l-2.54 7.65-2.17-9.55h1.54c.29 0 .49-.06.62-.18.12-.11.19-.26.19-.43 0-.18-.06-.33-.19-.44-.12-.11-.33-.17-.62-.17h-3.31c-.29.01-.49.07-.62.19-.12.11-.19.26-.19.43 0 .18.06.33.19.44s.33.17.62.17h.59l2.54 11.2h1.49l2.61-7.75 2.68 7.74 1.49-.02 2.41-11.22h.57q.45 0 .63-.18c.12-.11.19-.26.19-.43 0-.18-.06-.33-.19-.44-.12-.11-.34-.17-.63-.17ZM120.64 55.13c-.13 0-.29.07-.47.22-.62.49-1.42.89-2.41 1.19-.98.3-1.93.45-2.83.46-1.62 0-2.97-.46-4.07-1.41s-1.76-2.2-1.97-3.76l12.28-.05c.01-2.05-.62-3.71-1.9-4.99s-2.9-1.92-4.87-1.91c-1.91 0-3.52.64-4.81 1.9s-1.93 2.76-1.93 4.51c0 1.92.7 3.56 2.09 4.91s3.11 2.02 5.18 2.01c1.23 0 2.44-.22 3.61-.64s1.98-.87 2.44-1.35c.15-.15.23-.31.23-.47s-.06-.3-.17-.42a.55.55 0 0 0-.4-.18Zm-9.86-7.8c1.01-.83 2.22-1.24 3.63-1.25 1.41 0 2.62.41 3.64 1.23 1.02.83 1.66 1.91 1.9 3.24l-11.05.04c.24-1.35.87-2.44 1.88-3.26M137.52 46.7c-1.26-1.27-2.77-1.91-4.53-1.9-2.06 0-3.81.96-5.26 2.86l-.03-7.99h-2.83c-.29.01-.49.07-.62.19-.12.12-.19.26-.18.43 0 .18.06.33.19.44s.33.17.62.17h1.62l.06 15.58h-1.62c-.29 0-.49.06-.62.17a.58.58 0 0 0-.19.44c0 .17.06.32.19.43.12.11.33.17.62.17h2.83v-2.38q2.115 2.835 5.28 2.82c1.73 0 3.23-.66 4.49-1.97s1.89-2.9 1.88-4.77c0-1.86-.64-3.42-1.9-4.69m-.86 8.63c-1.04 1.06-2.26 1.59-3.65 1.6-1.4 0-2.62-.52-3.67-1.57s-1.57-2.34-1.58-3.86c0-1.52.51-2.81 1.55-3.87s2.26-1.59 3.65-1.6c1.4 0 2.62.52 3.67 1.57s1.57 2.34 1.58 3.86c0 1.52-.51 2.81-1.55 3.87"
-          />
-        </svg>
-      </a>
+          /></svg
+      ></a>
       <p>
         This website is protected with&nbsp;<a
-          href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=bwantibot"
+          href="https://www.bunkerweb.io/?utm_campaign=self&amp;utm_source=bwantibot"
           target="_blank"
+          rel="noopener noreferrer"
           >BunkerWeb</a
         >
       </p>
     </footer>
     {-raw-}
-    <script defer="defer" nonce="{*nonce_script*}">
-      function textEncode(a) {
-        if (window.TextEncoder) return new TextEncoder("utf-8").encode(a);
-        for (
-          var r = unescape(encodeURIComponent(a)),
-            n = new Uint8Array(r.length),
-            e = 0;
-          e < r.length;
-          e++
-        )
-          n[e] = r.charCodeAt(e);
-        return n;
-      }
-      function utf8Encode(a) {
-        var r,
-          n,
-          e,
-          t = "",
-          s = -1;
-        if (a && a.length)
-          for (e = a.length; (s += 1) < e; )
-            ((r = a.charCodeAt(s)),
-              (n = s + 1 < e ? a.charCodeAt(s + 1) : 0),
-              55296 <= r &&
-                r <= 56319 &&
-                56320 <= n &&
-                n <= 57343 &&
-                ((r = 65536 + ((1023 & r) << 10) + (1023 & n)), (s += 1)),
-              r <= 127
-                ? (t += String.fromCharCode(r))
-                : r <= 2047
-                  ? (t += String.fromCharCode(
-                      192 | ((r >>> 6) & 31),
-                      128 | (63 & r),
-                    ))
-                  : r <= 65535
-                    ? (t += String.fromCharCode(
-                        224 | ((r >>> 12) & 15),
-                        128 | ((r >>> 6) & 63),
-                        128 | (63 & r),
-                      ))
-                    : r <= 2097151 &&
-                      (t += String.fromCharCode(
-                        240 | ((r >>> 18) & 7),
-                        128 | ((r >>> 12) & 63),
-                        128 | ((r >>> 6) & 63),
-                        128 | (63 & r),
-                      )));
-        return t;
-      }
-      function safe_add(a, r) {
-        var n = (65535 & a) + (65535 & r);
-        return (((a >> 16) + (r >> 16) + (n >> 16)) << 16) | (65535 & n);
-      }
-      function rstr2hex(a, r) {
-        for (
-          var n,
-            e = r ? "0123456789ABCDEF" : "0123456789abcdef",
-            t = "",
-            s = 0,
-            d = a.length;
-          s < d;
-          s += 1
-        )
-          ((n = a.charCodeAt(s)),
-            (t += e.charAt((n >>> 4) & 15) + e.charAt(15 & n)));
-        return t;
-      }
-      function binb2rstr(a) {
-        var r,
-          n = 32 * a.length,
-          e = "";
-        for (r = 0; r < n; r += 8)
-          e += String.fromCharCode((a[r >> 5] >>> (24 - (r % 32))) & 255);
-        return e;
-      }
-      function rstr2binb(a) {
-        var r,
-          n = 8 * a.length,
-          e = Array(a.length >> 2),
-          t = e.length;
-        for (r = 0; r < t; r += 1) e[r] = 0;
-        for (r = 0; r < n; r += 8)
-          e[r >> 5] |= (255 & a.charCodeAt(r / 8)) << (24 - (r % 32));
-        return e;
-      }
-      var sha256_K = [
-        1116352408, 1899447441, -1245643825, -373957723, 961987163, 1508970993,
-        -1841331548, -1424204075, -670586216, 310598401, 607225278, 1426881987,
-        1925078388, -2132889090, -1680079193, -1046744716, -459576895,
-        -272742522, 264347078, 604807628, 770255983, 1249150122, 1555081692,
-        1996064986, -1740746414, -1473132947, -1341970488, -1084653625,
-        -958395405, -710438585, 113926993, 338241895, 666307205, 773529912,
-        1294757372, 1396182291, 1695183700, 1986661051, -2117940946,
-        -1838011259, -1564481375, -1474664885, -1035236496, -949202525,
-        -778901479, -694614492, -200395387, 275423344, 430227734, 506948616,
-        659060556, 883997877, 958139571, 1322822218, 1537002063, 1747873779,
-        1955562222, 2024104815, -2067236844, -1933114872, -1866530822,
-        -1538233109, -1090935817, -965641998,
-      ];
-      function sha256_S(a, r) {
-        return (a >>> r) | (a << (32 - r));
-      }
-      function sha256_R(a, r) {
-        return a >>> r;
-      }
-      function sha256_Ch(a, r, n) {
-        return (a & r) ^ (~a & n);
-      }
-      function sha256_Maj(a, r, n) {
-        return (a & r) ^ (a & n) ^ (r & n);
-      }
-      function sha256_Sigma0256(a) {
-        return sha256_S(a, 2) ^ sha256_S(a, 13) ^ sha256_S(a, 22);
-      }
-      function sha256_Sigma1256(a) {
-        return sha256_S(a, 6) ^ sha256_S(a, 11) ^ sha256_S(a, 25);
-      }
-      function sha256_Gamma0256(a) {
-        return sha256_S(a, 7) ^ sha256_S(a, 18) ^ sha256_R(a, 3);
-      }
-      function sha256_Gamma1256(a) {
-        return sha256_S(a, 17) ^ sha256_S(a, 19) ^ sha256_R(a, 10);
-      }
-      function binb(a, r) {
-        var n,
-          e,
-          t,
-          s,
-          d,
-          h,
-          f,
-          o,
-          _,
-          i,
-          u,
-          c,
-          g = [
-            1779033703, -1150833019, 1013904242, -1521486534, 1359893119,
-            -1694144372, 528734635, 1541459225,
+    <script nonce="{*nonce_script*}">
+      var bwColorSchemeMQ =
+        window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+      var bwReducedMotionMQ =
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)");
+      var bwTheme =
+        bwColorSchemeMQ && bwColorSchemeMQ.matches ? "dark" : "light";
+      function bwOrb(canvas, kind, theme, fixedT) {
+        // BunkerWeb mark as an extruded 3D dot cloud: rotated, depth-shaded, z-sorted, one clock.
+        // Technique after github.com/Jakubantalik/thinking-orbs (MIT); geometry sampled from the BunkerWeb icon.
+        var D = {
+          outer: [
+            [0.7333, 0.16],
+            [0.7171, 0.0556],
+            [0.681, -0.0433],
+            [0.6119, -0.122],
+            [0.5463, -0.1997],
+            [0.5788, -0.2971],
+            [0.6107, -0.3974],
+            [0.6162, -0.5027],
+            [0.6066, -0.6079],
+            [0.5769, -0.7089],
+            [0.5179, -0.796],
+            [0.4333, -0.8586],
+            [0.3348, -0.8962],
+            [0.2308, -0.9142],
+            [0.1253, -0.9186],
+            [0.0198, -0.9131],
+            [-0.0852, -0.901],
+            [-0.1899, -0.887],
+            [-0.2946, -0.8727],
+            [-0.3993, -0.858],
+            [-0.5039, -0.8429],
+            [-0.6084, -0.8273],
+            [-0.7128, -0.8114],
+            [-0.7952, -0.7516],
+            [-0.7962, -0.648],
+            [-0.7797, -0.5437],
+            [-0.7631, -0.4393],
+            [-0.7466, -0.3349],
+            [-0.7301, -0.2305],
+            [-0.7135, -0.1262],
+            [-0.697, -0.0218],
+            [-0.6805, 0.0826],
+            [-0.6639, 0.187],
+            [-0.6474, 0.2913],
+            [-0.6309, 0.3957],
+            [-0.5929, 0.475],
+            [-0.4873, 0.475],
+            [-0.3816, 0.475],
+            [-0.2759, 0.475],
+            [-0.1702, 0.475],
+            [-0.0646, 0.475],
+            [0.0411, 0.475],
+            [0.1468, 0.475],
+            [0.2525, 0.475],
+            [0.3582, 0.475],
+            [0.4638, 0.475],
+            [0.5695, 0.475],
+            [0.668, 0.4603],
+            [0.7168, 0.3671],
+            [0.7377, 0.2638],
           ],
-          m = [64];
-        for (
-          a[r >> 5] |= 128 << (24 - (r % 32)),
-            a[15 + (((r + 64) >> 9) << 4)] = r,
-            _ = 0;
-          _ < a.length;
-          _ += 16
-        ) {
-          for (
-            n = g[0],
-              e = g[1],
-              t = g[2],
-              s = g[3],
-              d = g[4],
-              h = g[5],
-              f = g[6],
-              o = g[7],
-              i = 0;
-            i < 64;
-            i += 1
-          )
-            ((m[i] =
-              i < 16
-                ? a[i + _]
-                : safe_add(
-                    safe_add(
-                      safe_add(sha256_Gamma1256(m[i - 2]), m[i - 7]),
-                      sha256_Gamma0256(m[i - 15]),
-                    ),
-                    m[i - 16],
-                  )),
-              (u = safe_add(
-                safe_add(
-                  safe_add(
-                    safe_add(o, sha256_Sigma1256(d)),
-                    sha256_Ch(d, h, f),
-                  ),
-                  sha256_K[i],
-                ),
-                m[i],
-              )),
-              (c = safe_add(sha256_Sigma0256(n), sha256_Maj(n, e, t))),
-              (o = f),
-              (f = h),
-              (h = d),
-              (d = safe_add(s, u)),
-              (s = t),
-              (t = e),
-              (e = n),
-              (n = safe_add(u, c)));
-          ((g[0] = safe_add(n, g[0])),
-            (g[1] = safe_add(e, g[1])),
-            (g[2] = safe_add(t, g[2])),
-            (g[3] = safe_add(s, g[3])),
-            (g[4] = safe_add(d, g[4])),
-            (g[5] = safe_add(h, g[5])),
-            (g[6] = safe_add(f, g[6])),
-            (g[7] = safe_add(o, g[7])));
+          key: [
+            [-0.145, 0.24],
+            [-0.15, 0.1303],
+            [-0.1553, 0.0205],
+            [-0.193, -0.0713],
+            [-0.2477, -0.1645],
+            [-0.2362, -0.2718],
+            [-0.1646, -0.353],
+            [-0.0601, -0.3816],
+            [0.0435, -0.3498],
+            [0.1107, -0.2653],
+            [0.1143, -0.1573],
+            [0.07, -0.0618],
+            [0.0942, 0.0453],
+            [0.1186, 0.1525],
+            [0.0728, 0.2111],
+            [-0.0361, 0.2254],
+          ],
+          plinth: [
+            [-0.6917, 0.6083],
+            [-0.5825, 0.6083],
+            [-0.4733, 0.6083],
+            [-0.3642, 0.6083],
+            [-0.255, 0.6083],
+            [-0.1458, 0.6083],
+            [-0.0367, 0.6083],
+            [0.0725, 0.6083],
+            [0.1817, 0.6083],
+            [0.2908, 0.6083],
+            [0.4, 0.6083],
+            [0.5092, 0.6083],
+            [0.6183, 0.6083],
+            [0.7275, 0.6083],
+            [-0.6917, 0.7333],
+            [-0.5825, 0.7333],
+            [-0.4733, 0.7333],
+            [-0.3642, 0.7333],
+            [-0.255, 0.7333],
+            [-0.1458, 0.7333],
+            [-0.0367, 0.7333],
+            [0.0725, 0.7333],
+            [0.1817, 0.7333],
+            [0.2908, 0.7333],
+            [0.4, 0.7333],
+            [0.5092, 0.7333],
+            [0.6183, 0.7333],
+            [0.7275, 0.7333],
+            [-0.6917, 0.8583],
+            [-0.5825, 0.8583],
+            [-0.4733, 0.8583],
+            [-0.3642, 0.8583],
+            [-0.255, 0.8583],
+            [-0.1458, 0.8583],
+            [-0.0367, 0.8583],
+            [0.0725, 0.8583],
+            [0.1817, 0.8583],
+            [0.2908, 0.8583],
+            [0.4, 0.8583],
+            [0.5092, 0.8583],
+            [0.6183, 0.8583],
+            [0.7275, 0.8583],
+          ],
+        };
+        var dark = theme === "dark";
+        var INK = dark ? [207, 230, 241] : [11, 85, 119];
+        var GREEN = [46, 172, 104];
+        var DANGER = dark ? [255, 122, 102] : [192, 52, 29];
+        var ctx = canvas.getContext("2d");
+        var W = canvas.clientWidth || 88,
+          H = canvas.clientHeight || 95;
+        var dpr = Math.min(2, window.devicePixelRatio || 1);
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        var S = W * 0.43,
+          CX = W / 2,
+          CY = H / 2,
+          DEPTH = 0.13,
+          R0 = (W / 107) * 2.1;
+        var nOuter = D.outer.length;
+
+        function hash(a, b) {
+          var h = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+          return h - Math.floor(h);
         }
-        return g;
-      }
-      function rstr(a, r) {
-        return binb2rstr(
-          binb(rstr2binb((a = r ? utf8Encode(a) : a)), 8 * a.length),
+        function mix(a, b, f) {
+          return [
+            a[0] + (b[0] - a[0]) * f,
+            a[1] + (b[1] - a[1]) * f,
+            a[2] + (b[2] - a[2]) * f,
+          ];
+        }
+        function smooth(x) {
+          x = Math.max(0, Math.min(1, x));
+          return x * x * (3 - 2 * x);
+        }
+
+        var pts = [];
+        function add(list, g, col, zs) {
+          for (var i = 0; i < list.length; i++)
+            for (var k = 0; k < zs.length; k++)
+              pts.push({
+                x: list[i][0],
+                y: list[i][1],
+                z: zs[k],
+                g: g,
+                i: i,
+                c: col,
+              });
+        }
+        add(D.outer, "o", INK, [DEPTH, -DEPTH]);
+        add(D.key, "k", INK, [DEPTH, -DEPTH]);
+        add(D.plinth, "p", GREEN, [DEPTH, -DEPTH]);
+        for (var j = 0; j < nOuter; j += 3)
+          pts.push({
+            x: D.outer[j][0],
+            y: D.outer[j][1],
+            z: 0,
+            g: "o",
+            i: j,
+            c: INK,
+            rim: 1,
+          });
+
+        // solving: rigid body. Dots gather into a spinning dotted sphere, which lands front-facing as the mark, holds, dissolves.
+        var SPH = [],
+          GOLD = Math.PI * (3 - Math.sqrt(5));
+        for (var q0 = 0; q0 < pts.length; q0++) {
+          var fy = 1 - (2 * (q0 + 0.5)) / pts.length,
+            fr = Math.sqrt(1 - fy * fy),
+            fa = q0 * GOLD;
+          SPH.push([
+            fr * Math.cos(fa) * 0.78,
+            fy * 0.78,
+            fr * Math.sin(fa) * 0.78,
+            hash(q0, 4.4) * 0.3,
+          ]);
+        }
+        // pair dots with sphere slots by polar angle so they travel outward, never through the centre
+        var byAng = function (arr, fx, fy) {
+          return arr
+            .map(function (_, k) {
+              return k;
+            })
+            .sort(function (a, b) {
+              return (
+                Math.atan2(fy(arr[a]), fx(arr[a])) -
+                Math.atan2(fy(arr[b]), fx(arr[b]))
+              );
+            });
+        };
+        var om = byAng(
+          pts,
+          function (v) {
+            return v.x;
+          },
+          function (v) {
+            return v.y;
+          },
         );
-      }
-      function hex(a) {
-        return rstr2hex(rstr(a, sha256_K));
-      }
-      async function digestMessage(a) {
-        return hex(a);
-      }
-      (async () => {
-        for (var a = 0; ; ) {
-          if (
-            (await digestMessage("{*random*}" + a.toString())).startsWith(
-              "0000",
-            )
-          )
-            break;
-          a++;
+        var os = byAng(
+          SPH,
+          function (v) {
+            return v[0];
+          },
+          function (v) {
+            return v[1];
+          },
+        );
+        var SPH_FOR = [];
+        for (var q1 = 0; q1 < om.length; q1++) SPH_FOR[om[q1]] = SPH[os[q1]];
+        function solvePhase(t) {
+          var c = t % 4.8;
+          if (c < 2.5)
+            return {
+              m: c < 1.6 ? 0 : (c - 1.6) / 0.9,
+              yaw: 2 * Math.PI * smooth(c / 2.5),
+            };
+          if (c < 3.9)
+            return { m: 1, yaw: 0.15 * Math.sin((Math.PI * (c - 2.5)) / 1.4) };
+          return { m: 1 - (c - 3.9) / 0.9, yaw: 0 };
         }
-        ((document.getElementById("challenge").value = a.toString()),
-          document.getElementById("form").submit());
+
+        function frame(t) {
+          var yaw,
+            tilt,
+            scale = 1,
+            out = [],
+            sc = null,
+            scanX = 0;
+          if (kind === "connecting") {
+            yaw = 0.55 * Math.sin(t * 0.9);
+            tilt = 0.1 * Math.sin(t * 0.6);
+            scanX = 1.05 * Math.sin(t * 1.5);
+          } else if (kind === "solving") {
+            sc = solvePhase(t);
+            yaw = sc.yaw;
+            tilt = 0.14;
+          } else if (kind === "broken") {
+            yaw = 0.3 + 0.05 * Math.sin(t * 0.7);
+            tilt = 0.12 + 0.02 * Math.sin(t * 0.5);
+          } else {
+            yaw = 0.2 * Math.sin(t * 0.45);
+            tilt = 0.06 * Math.sin(t * 0.3);
+            scale = 1 + 0.02 * Math.sin(t * 1.7);
+          }
+          var sy = Math.sin(yaw),
+            cyw = Math.cos(yaw),
+            st = Math.sin(tilt),
+            ct = Math.cos(tilt);
+
+          for (var n = 0; n < pts.length; n++) {
+            var p = pts[n],
+              x = p.x,
+              y = p.y,
+              z = p.z,
+              a = 1,
+              col = p.c,
+              rb = 0;
+            if (kind === "connecting" && p.g !== "p") {
+              var b = Math.exp(-((x - scanX) * (x - scanX)) / 0.012);
+              col = mix(col, GREEN, 0.85 * b);
+              rb = 0.9 * b;
+            } else if (kind === "connecting") {
+              a = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(t * 3 - x * 5));
+            } else if (sc) {
+              var sp = SPH_FOR[n],
+                mi = smooth(sc.m * 1.3 - sp[3]);
+              x = sp[0] + (x - sp[0]) * mi;
+              y = sp[1] + (y - sp[1]) * mi;
+              z = sp[2] + (z - sp[2]) * mi;
+              if (p.g === "p") col = mix(INK, GREEN, mi);
+            } else if (kind === "broken") {
+              var f0 = p.i / nOuter;
+              if (p.g === "o" && f0 >= 0.02 && f0 <= 0.2) {
+                var T = 3.4,
+                  ph = ((((t - ((f0 - 0.02) / 0.18) * 0.5) % T) + T) % T) / T;
+                if (ph < 0.6) {
+                  var f = ph / 0.6;
+                  y += 0.95 * f * f;
+                  x += 0.2 * f * (hash(p.i, 3.1) - 0.3);
+                  z += 0.3 * f * (hash(p.i, 9.2) - 0.5);
+                  a = 1 - smooth(f);
+                  col = DANGER;
+                } else if (ph < 0.75) {
+                  a = 0;
+                } else {
+                  a = smooth((ph - 0.75) / 0.25);
+                  col = mix(DANGER, INK, a);
+                }
+              } else if (p.g === "k") {
+                a = 0.3 + 0.25 * (0.5 + 0.5 * Math.sin(t * 2.3 + p.i));
+              } else if (p.g === "p") {
+                a = 0.35;
+              }
+            } else if (p.g === "p") {
+              a = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(t * 1.6 - x * 4));
+            }
+            if (a < 0.02) continue;
+            x *= scale;
+            y *= scale;
+            z *= scale;
+            var x1 = x * cyw + z * sy,
+              z1 = -x * sy + z * cyw;
+            var yy = y * ct - z1 * st,
+              z2 = y * st + z1 * ct;
+            var d = Math.max(0, Math.min(1, (z2 + 0.9) / 1.8));
+            out.push({
+              x: CX + x1 * S,
+              y: CY + yy * S,
+              z: z2,
+              r: R0 * (0.7 + 0.55 * d + rb) * (p.rim ? 0.8 : 1),
+              a: a * (0.3 + 0.7 * d),
+              c: col,
+            });
+          }
+          out.sort(function (u, v) {
+            return u.z - v.z;
+          });
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.clearRect(0, 0, W, H);
+          for (var q = 0; q < out.length; q++) {
+            var o = out[q];
+            ctx.fillStyle =
+              "rgba(" +
+              Math.round(o.c[0]) +
+              "," +
+              Math.round(o.c[1]) +
+              "," +
+              Math.round(o.c[2]) +
+              "," +
+              o.a.toFixed(3) +
+              ")";
+            ctx.beginPath();
+            ctx.arc(o.x, o.y, o.r, 0, 6.283);
+            ctx.fill();
+          }
+        }
+
+        if (typeof fixedT === "number") {
+          frame(fixedT);
+          return function () {};
+        }
+        if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) {
+          frame(1.2);
+          return function () {};
+        }
+        var raf = 0,
+          t0 = performance.now();
+        function loop(now) {
+          frame((now - t0) / 1000);
+          raf = requestAnimationFrame(loop);
+        }
+        raf = requestAnimationFrame(loop);
+        return function () {
+          cancelAnimationFrame(raf);
+        };
+      }
+      var stopOrb = null;
+      var orbKind = "solving";
+      function bwStartOrb() {
+        var canvas = document.getElementById("bw-orb");
+        if (!canvas) return;
+        if (stopOrb) stopOrb();
+        if (document.visibilityState === "hidden") {
+          stopOrb = function () {};
+          return;
+        }
+        stopOrb = bwOrb(canvas, orbKind, bwTheme);
+      }
+      bwStartOrb();
+      if (bwReducedMotionMQ) {
+        if (bwReducedMotionMQ.addEventListener) {
+          bwReducedMotionMQ.addEventListener("change", bwStartOrb);
+        } else if (bwReducedMotionMQ.addListener) {
+          bwReducedMotionMQ.addListener(bwStartOrb);
+        }
+      }
+      if (bwColorSchemeMQ) {
+        var bwOnColorSchemeChange = function () {
+          bwTheme = bwColorSchemeMQ.matches ? "dark" : "light";
+          bwStartOrb();
+        };
+        if (bwColorSchemeMQ.addEventListener) {
+          bwColorSchemeMQ.addEventListener("change", bwOnColorSchemeChange);
+        } else if (bwColorSchemeMQ.addListener) {
+          bwColorSchemeMQ.addListener(bwOnColorSchemeChange);
+        }
+      }
+      document.addEventListener("visibilitychange", bwStartOrb);
+      function showRetry() {
+        var r = document.getElementById("bw-retry");
+        if (r) r.classList.add("bw-visible");
+      }
+      window.setTimeout(showRetry, 5000);
+      function challenge_error() {
+        var dot = document.getElementById("bw-dot");
+        if (dot) dot.classList.add("bw-dot-error");
+        var decor = document.getElementById("bw-status-decor");
+        if (decor) decor.style.display = "none";
+        var err = document.getElementById("challenge-error");
+        if (err) {
+          var tag = document.createElement("span");
+          tag.setAttribute("aria-hidden", "true");
+          tag.textContent = "ERR ";
+          err.textContent = "";
+          err.appendChild(tag);
+          err.appendChild(
+            document.createTextNode(
+              "The challenge could not load. Check your connection, then reload.",
+            ),
+          );
+        }
+        var title = document.getElementById("bw-title");
+        if (title) title.textContent = "VERIFICATION FAILED";
+        showRetry();
+        orbKind = "broken";
+        bwStartOrb();
+      }
+      var retryBtn = document.getElementById("challenge-retry");
+      if (retryBtn)
+        retryBtn.addEventListener("click", function () {
+          window.location.reload();
+        });
+      document.addEventListener(
+        "error",
+        function (event) {
+          if (
+            event.target.tagName === "SCRIPT" &&
+            event.target.hasAttribute("data-challenge-script")
+          ) {
+            challenge_error();
+          }
+        },
+        true,
+      );
+      // SHA-256 over raw bytes with preallocated buffers; returns the leading zero bits of
+      // sha256(prefix + decimal nonce). Also runs as a Web Worker body when given a scope.
+      function powCore(scope) {
+        var K = new Int32Array([
+          0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b,
+          0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01,
+          0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7,
+          0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+          0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152,
+          0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147,
+          0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc,
+          0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+          0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819,
+          0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08,
+          0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f,
+          0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+          0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
+        ]);
+        var W = new Int32Array(64);
+        var H = new Int32Array(8);
+        var buf = new Uint8Array(0);
+        function zeroBits(prefix, nonce) {
+          var s = String(nonce);
+          var len = prefix.length + s.length;
+          var total = ((len + 72) >> 6) << 6;
+          var i, j, off;
+          if (buf.length < total) buf = new Uint8Array(total);
+          buf.set(prefix, 0);
+          for (i = 0; i < s.length; i++)
+            buf[prefix.length + i] = s.charCodeAt(i);
+          buf[len] = 0x80;
+          for (i = len + 1; i < total - 4; i++) buf[i] = 0;
+          var bits = len * 8;
+          buf[total - 4] = bits >>> 24;
+          buf[total - 3] = (bits >>> 16) & 255;
+          buf[total - 2] = (bits >>> 8) & 255;
+          buf[total - 1] = bits & 255;
+          H[0] = 0x6a09e667;
+          H[1] = 0xbb67ae85;
+          H[2] = 0x3c6ef372;
+          H[3] = 0xa54ff53a;
+          H[4] = 0x510e527f;
+          H[5] = 0x9b05688c;
+          H[6] = 0x1f83d9ab;
+          H[7] = 0x5be0cd19;
+          for (off = 0; off < total; off += 64) {
+            for (i = 0; i < 16; i++) {
+              j = off + i * 4;
+              W[i] =
+                (buf[j] << 24) |
+                (buf[j + 1] << 16) |
+                (buf[j + 2] << 8) |
+                buf[j + 3];
+            }
+            for (i = 16; i < 64; i++) {
+              var w15 = W[i - 15];
+              var w2 = W[i - 2];
+              var s0 =
+                ((w15 >>> 7) | (w15 << 25)) ^
+                ((w15 >>> 18) | (w15 << 14)) ^
+                (w15 >>> 3);
+              var s1 =
+                ((w2 >>> 17) | (w2 << 15)) ^
+                ((w2 >>> 19) | (w2 << 13)) ^
+                (w2 >>> 10);
+              W[i] = (W[i - 16] + s0 + W[i - 7] + s1) | 0;
+            }
+            var a = H[0],
+              b = H[1],
+              c = H[2],
+              d = H[3];
+            var e = H[4],
+              f = H[5],
+              g = H[6],
+              h = H[7];
+            for (i = 0; i < 64; i++) {
+              var S1 =
+                ((e >>> 6) | (e << 26)) ^
+                ((e >>> 11) | (e << 21)) ^
+                ((e >>> 25) | (e << 7));
+              var t1 = (h + S1 + ((e & f) ^ (~e & g)) + K[i] + W[i]) | 0;
+              var S0 =
+                ((a >>> 2) | (a << 30)) ^
+                ((a >>> 13) | (a << 19)) ^
+                ((a >>> 22) | (a << 10));
+              var t2 = (S0 + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+              h = g;
+              g = f;
+              f = e;
+              e = (d + t1) | 0;
+              d = c;
+              c = b;
+              b = a;
+              a = (t1 + t2) | 0;
+            }
+            H[0] = (H[0] + a) | 0;
+            H[1] = (H[1] + b) | 0;
+            H[2] = (H[2] + c) | 0;
+            H[3] = (H[3] + d) | 0;
+            H[4] = (H[4] + e) | 0;
+            H[5] = (H[5] + f) | 0;
+            H[6] = (H[6] + g) | 0;
+            H[7] = (H[7] + h) | 0;
+          }
+          return H[0] === 0 ? 32 + Math.clz32(H[1]) : Math.clz32(H[0]);
+        }
+        if (scope) {
+          scope.onmessage = function (ev) {
+            var m = ev.data;
+            var prefix = new Uint8Array(m.prefix);
+            var n = m.start;
+            var tried = 0;
+            var last = Date.now();
+            for (;;) {
+              tried++;
+              if (zeroBits(prefix, n) >= m.difficulty) {
+                scope.postMessage({ nonce: n, tried: tried });
+                return;
+              }
+              n += m.step;
+              if ((tried & 4095) === 0 && Date.now() - last > 250) {
+                scope.postMessage({ tried: tried });
+                tried = 0;
+                last = Date.now();
+              }
+            }
+          };
+        }
+        return zeroBits;
+      }
+      // end powCore
+      (function () {
+        var prefixText = "{*random*}";
+        var difficulty = parseInt("{*antibot_difficulty*}", 10);
+        if (!(difficulty >= 16 && difficulty <= 28)) difficulty = 16;
+        var prefix = new Uint8Array(prefixText.length);
+        for (var i = 0; i < prefixText.length; i++)
+          prefix[i] = prefixText.charCodeAt(i) & 255;
+        var countEl = document.getElementById("bw-pow-count");
+        var workers = [];
+        var alive = 0;
+        var blobURL = null;
+        var total = 0;
+        var done = false;
+        var fellBack = false;
+        function show() {
+          if (countEl) countEl.textContent = total.toLocaleString();
+        }
+        function stopWorkers() {
+          for (var w = 0; w < workers.length; w++) workers[w].terminate();
+          workers = [];
+          alive = 0;
+          if (blobURL) {
+            URL.revokeObjectURL(blobURL);
+            blobURL = null;
+          }
+        }
+        function finish(nonce) {
+          if (done) return;
+          done = true;
+          stopWorkers();
+          show();
+          var input = document.getElementById("challenge");
+          var form = document.getElementById("form");
+          if (input && form) {
+            input.value = String(nonce);
+            form.submit();
+          }
+        }
+        function mainThread() {
+          if (done || fellBack) return;
+          fellBack = true;
+          stopWorkers();
+          var zeroBits = powCore(null);
+          var n = 0;
+          function slice() {
+            var end = performance.now() + 12;
+            while (performance.now() < end) {
+              for (var k = 0; k < 256; k++, n++) {
+                if (zeroBits(prefix, n) >= difficulty) {
+                  total += k + 1;
+                  finish(n);
+                  return;
+                }
+              }
+              total += 256;
+            }
+            show();
+            requestAnimationFrame(slice);
+          }
+          slice();
+        }
+        function startWorkers() {
+          var count = Math.min(navigator.hardwareConcurrency || 2, 8);
+          var url = URL.createObjectURL(
+            new Blob(["(" + powCore.toString() + ")(self);"], {
+              type: "text/javascript",
+            }),
+          );
+          blobURL = url;
+          var scriptURL = url;
+          if (window.trustedTypes && window.trustedTypes.createPolicy) {
+            scriptURL = window.trustedTypes
+              .createPolicy("bw-pow", {
+                createScriptURL: function (u) {
+                  if (u.indexOf("blob:") !== 0)
+                    throw new TypeError("bw-pow accepts blob: URLs only");
+                  return u;
+                },
+              })
+              .createScriptURL(url);
+          }
+          var progressed = false;
+          // The blob URL stays valid until stopWorkers(): a slower worker may still be
+          // loading its script when the first one reports.
+          function onMessage(ev) {
+            progressed = true;
+            total += ev.data.tried;
+            if (ev.data.nonce !== undefined) finish(ev.data.nonce);
+            else show();
+          }
+          // Strided nonces: survivors keep finding solutions in their own residue classes, so
+          // only fall back once no worker is left.
+          function onError(ev) {
+            if (ev && ev.preventDefault) ev.preventDefault();
+            this.terminate();
+            alive--;
+            if (!progressed || alive <= 0) mainThread();
+          }
+          for (var w = 0; w < count; w++) {
+            var worker = new Worker(scriptURL);
+            worker.onmessage = onMessage;
+            worker.onerror = onError;
+            worker.postMessage({
+              prefix: prefix,
+              start: w,
+              step: count,
+              difficulty: difficulty,
+            });
+            workers.push(worker);
+            alive++;
+          }
+          setTimeout(function () {
+            if (!progressed) mainThread();
+          }, 3000);
+        }
+        try {
+          if (
+            !window.Worker ||
+            !window.Blob ||
+            !window.URL ||
+            !URL.createObjectURL
+          )
+            throw new Error("no workers");
+          startWorkers();
+        } catch (e) {
+          mainThread();
+        }
       })();
     </script>
     {-raw-}
