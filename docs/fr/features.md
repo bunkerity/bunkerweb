@@ -428,7 +428,7 @@ Exemples :
     | ------------- | ------ | --------- | -------- | ----------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | non      | Activer Antibot : définir sur `cookie` pour activer ce mécanisme. |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "JavaScript"
 
@@ -454,7 +454,7 @@ Exemples :
     | `USE_ANTIBOT`                   | `no`   | multisite | non      | Activer Antibot : définir sur `javascript` pour activer ce mécanisme. |
     | `ANTIBOT_JAVASCRIPT_DIFFICULTY` | `16`   | multisite | non      | Difficulté JavaScript : difficulté de preuve de travail en bits de zéros de poids fort (16 à 28). |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "Captcha"
 
@@ -489,7 +489,7 @@ Exemples :
     | `USE_ANTIBOT`              | `no`                                                   | multisite | non      | **Activer Antibot :** définir sur `captcha` pour activer ce mécanisme.                                                                                                                                                                                    |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | non      | **Alphabet du Captcha :** une chaîne de caractères à utiliser pour générer le CAPTCHA. Caractères pris en charge : toutes les lettres (a-z, A-Z), les chiffres 2-9 (exclut 0 et 1), et les caractères spéciaux : ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "reCAPTCHA"
 
@@ -516,7 +516,7 @@ Exemples :
     | `ANTIBOT_RECAPTCHA_JA4`        |        | multisite | non      | Empreinte TLS JA4 optionnelle à inclure dans les évaluations Enterprise.                                            |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`  | multisite | non      | Score minimum requis pour passer (s’applique à la v3 classique et à la nouvelle version).                           |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "hCaptcha"
 
@@ -532,7 +532,7 @@ Exemples :
     | `ANTIBOT_HCAPTCHA_SITEKEY` |        | multisite | non      | Clé site hCaptcha.                                                  |
     | `ANTIBOT_HCAPTCHA_SECRET`  |        | multisite | non      | Clé secrète hCaptcha.                                               |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "Turnstile"
 
@@ -548,7 +548,7 @@ Exemples :
     | `ANTIBOT_TURNSTILE_SITEKEY` |        | multisite | non      | Clé site Turnstile (Cloudflare).                                     |
     | `ANTIBOT_TURNSTILE_SECRET`  |        | multisite | non      | Clé secrète Turnstile (Cloudflare).                                  |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "mCaptcha"
 
@@ -567,7 +567,7 @@ Exemples :
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | non      | Clé secrète mCaptcha.                                               |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | non      | Domaine à utiliser pour mCaptcha.                                   |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "Cap.js"
 
@@ -592,7 +592,7 @@ Exemples :
         - Utilisez le widget Cap.js **0.1.48 ou ultérieur**. BunkerWeb diffuse une CSP stricte basée sur un nonce ; les widgets antérieurs cassent les défis d’instrumentation parce que le `<script>` inline injecté dans l’iframe `srcdoc` isolée ne propage pas le nonce. Si vous auto-hébergez `tiago2/cap`, épinglez une version récente (par ex. `tiago2/cap:3.1.2` ou plus récente) ou définissez `WIDGET_VERSION` à `0.1.48` ou plus.
         - Les **défis d’instrumentation** de Cap.js (activés par défaut) exécutent du JavaScript fourni par le serveur via `eval`, qu’un nonce ne peut pas autoriser. BunkerWeb exécute le widget dans une iframe isolée de même origine qui porte le `'unsafe-eval'` nécessaire, afin que la page de défi principale conserve une CSP stricte et sans `eval` — aucune configuration requise.
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 ### Exemples de configuration
 
@@ -1068,13 +1068,13 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
     | `BLACKLIST_IP`             |                                       | multisite | non      | **Liste noire d’IP :** Liste d’adresses IP ou de réseaux (notation CIDR) à bloquer, séparés par des espaces.                    |
     | `BLACKLIST_IGNORE_IP`      |                                       | multisite | non      | **Liste d’ignorance d’IP :** Liste d’adresses IP ou de réseaux qui doivent contourner les vérifications de la liste noire d’IP. |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | non      | **URL de listes noires d’IP :** Liste d’URL contenant des adresses IP ou des réseaux à bloquer, séparés par des espaces.        |
+    | `BLACKLIST_IP_URLS`        |                                       | multisite | non      | **URL de listes noires d’IP :** Liste d’URL contenant des adresses IP ou des réseaux à bloquer, séparés par des espaces.        |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | non      | **URL de listes d’ignorance d’IP :** Liste d’URL contenant des adresses IP ou des réseaux à ignorer.                            |
 
     !!! info "Formats des listes"
         Les listes d’URL peuvent contenir une entrée par ligne (les lignes commençant par `#` ou `;` sont des commentaires et seul le premier mot de chaque ligne est lu), du CSV, un document JSON ou du JSON Lines. Dans les listes d’IP, les virgules séparent aussi les champs, et les listes JSON conservent chaque chaîne qui correspond à une adresse IP ou à un réseau. Ajoutez un fragment pour ne conserver qu’une partie d’une liste JSON : `#key` conserve les valeurs sous `key`, `#key=value` conserve les objets dont la propriété `key` est égale à `value` ou contient `value`, et `&` combine les termes. Exemple : `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Une URL avec un fragment ne conserve que les éléments sélectionnés par celui-ci ; si la liste n’est pas au format JSON, elle ne conserve rien.
 
-    Le paramètre par défaut `BLACKLIST_IP_URLS` inclut une URL qui fournit une **liste des nœuds de sortie Tor connus**. C’est une source courante de trafic malveillant et un bon point de départ pour de nombreux sites.
+    Par défaut, `BLACKLIST_COMMUNITY_LISTS` inclut `ip:danmeuk-tor-exit`, qui ajoute la liste des nœuds de sortie Tor ; `BLACKLIST_IP_URLS` reste vide sauf si vous le configurez.
 
 === "Reverse DNS"
     **Ce que ça fait :** Bloque les visiteurs en fonction de leur nom de domaine inversé. C’est utile pour bloquer les scanners et les crawlers connus en se basant sur les domaines de leur organisation.
@@ -1109,10 +1109,10 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
     | `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | non      | **Liste noire de User-Agent :** Liste de motifs de User-Agent (regex PCRE) à bloquer, séparés par des espaces.                                |
     | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | non      | **Liste d’ignorance de User-Agent :** Liste de motifs de User-Agent qui doivent contourner les vérifications de la liste noire de User-Agent. |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | non      | **URL de listes noires de User-Agent :** Liste d’URL contenant des motifs de User-Agent à bloquer.                                            |
+    | `BLACKLIST_USER_AGENT_URLS`        |                                                                                                                                | multisite | non      | **URL de listes noires de User-Agent :** Liste d’URL contenant des motifs de User-Agent à bloquer.                                            |
     | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | non      | **URL de listes d’ignorance de User-Agent :** Liste d’URL contenant des motifs de User-Agent à ignorer.                                       |
 
-    Le paramètre par défaut `BLACKLIST_USER_AGENT_URLS` inclut une URL qui fournit une **liste de user agents malveillants connus**. Ils sont souvent utilisés par des bots et des scanners malveillants pour identifier des sites vulnérables.
+    Par défaut, `BLACKLIST_COMMUNITY_LISTS` inclut `ua:mitchellkrogza-bad-user-agents`, qui ajoute la liste des User-Agents malveillants ; `BLACKLIST_USER_AGENT_URLS` reste vide sauf si vous le configurez.
 
 === "URI"
     **Ce que ça fait :** Bloque les requêtes vers des URL spécifiques de votre site. C’est utile pour bloquer les tentatives d’accès aux pages d’administration, aux formulaires de connexion ou à d’autres zones sensibles qui pourraient être ciblées.
@@ -1553,9 +1553,9 @@ Comment ça marche :
 | `CORS_ALLOW_HEADERS`           | `DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range` | multisite | non      | En‑têtes autorisés côté requête.                                              |
 | `CORS_ALLOW_CREDENTIALS`       | `no`                                                                                 | multisite | non      | Autoriser les identifiants (cookies, auth HTTP).                              |
 | `CORS_EXPOSE_HEADERS`          | `Content-Length,Content-Range`                                                       | multisite | non      | En‑têtes exposés côté réponse.                                                |
-| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | non      | Politique COOP.                                                               |
-| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | non      | Politique COEP.                                                               |
-| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | non      | Politique CORP.                                                               |
+| `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | non      | Politique COOP. Valeurs admises : `unsafe-none`, `same-origin-allow-popups`, `same-origin` ; laisser vide pour ne pas envoyer cet en-tête. |
+| `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | non      | Politique COEP. Valeurs admises : `unsafe-none`, `require-corp`, `credentialless` ; laisser vide pour ne pas envoyer cet en-tête. |
+| `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | non      | Politique CORP. Valeurs admises : `same-site`, `same-origin`, `cross-origin` ; laisser vide pour ne pas envoyer cet en-tête. |
 | `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | non      | Durée de cache du preflight (secondes). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | non      | Refuser les origines non autorisées avec un code d’erreur.                    |
 
@@ -2382,7 +2382,7 @@ Le plugin DNSBL (Domain Name System Blacklist) protège contre les IP malveillan
 
 Suivez ces étapes pour configurer et utiliser la fonctionnalité DNSBL :
 
-1.  **Activer la fonction :** La fonction DNSBL est désactivée par défaut. Passez `USE_DNSBL` à `yes` pour l'activer.
+1.  **Contrôler la fonction :** La fonction DNSBL est activée par défaut. Passez `USE_DNSBL` à `no` pour la désactiver.
 2.  **Configurer les serveurs DNSBL :** Ajoutez les noms de domaine des services DNSBL que vous souhaitez utiliser dans le paramètre `DNSBL_LIST`.
 3.  **Appliquer les paramètres :** Une fois configuré, BunkerWeb vérifiera automatiquement les connexions entrantes auprès des serveurs DNSBL spécifiés.
 4.  **Surveiller l'efficacité :** Consultez la [web UI](web-ui.md) pour voir les statistiques des requêtes bloquées par les vérifications DNSBL.
@@ -2393,17 +2393,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité DNSBL :
 
 | Paramètre    | Défaut                                              | Contexte  | Multiple | Description                                                                                        |
 | ------------ | --------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | non      | Activer DNSBL : mettre à `yes` pour activer les vérifications DNSBL pour les connexions entrantes. |
+| `USE_DNSBL`  | `yes`                                               | multisite | non      | La fonction DNSBL est activée par défaut ; réglez `USE_DNSBL` sur `no` pour désactiver les vérifications des connexions entrantes. |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | non      | Serveurs DNSBL : liste des domaines de serveurs DNSBL à vérifier, séparés par des espaces.         |
 
 **Listes d’exception**
 
 | Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                                                                                  |
 | --------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DNSBL_IGNORE_IP`           | ``     | multisite | oui      | IP/CIDR séparés par des espaces pour lesquels ignorer les vérifications DNSBL (liste blanche).                                                               |
+| `DNSBL_IGNORE_IP`           | ``     | multisite | non      | IP/CIDR séparés par des espaces pour lesquels ignorer les vérifications DNSBL (liste blanche).                                                               |
 | `DNSBL_IGNORE_HEADER_NAME`  |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de contourner les vérifications DNSBL. Paires numérotées : `_NAME_1` va avec `_VALUE_1`. |
 | `DNSBL_IGNORE_HEADER_VALUE` |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.           |
-| `DNSBL_IGNORE_IP_URLS`      | ``     | multisite | oui      | URL séparées par des espaces fournissant des IP/CIDR à ignorer. Supporte `http(s)://` et `file://`.                                                          |
+| `DNSBL_IGNORE_IP_URLS`      | ``     | multisite | non      | URL séparées par des espaces fournissant des IP/CIDR à ignorer. Supporte `http(s)://` et `file://`.                                                          |
 
 !!! warning "Une règle d’en-tête est un secret partagé"
     N’importe quel client peut envoyer un en-tête : une règle d’en-tête est donc un jeton porteur, pas un contrôle réseau. À servir uniquement en HTTPS, avec une regex ancrée par `^` et `$` (la recherche n’est pas ancrée par défaut, `abc` correspond aussi à `xabcx`), et une valeur à faire tourner. Si BunkerWeb est derrière un proxy, ce proxy doit écraser toute copie de l’en-tête envoyée par le client. Ces règles ne valent qu’en HTTP : un service stream ne transporte aucun en-tête de requête, rien n’y correspond donc.
@@ -3032,9 +3032,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
     | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | non      | **HSTS :** Force les connexions HTTPS sécurisées, réduisant les risques d'attaques de type "man-in-the-middle".                                           |
     | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | non      | **CSP :** Restreint le chargement des ressources aux sources de confiance, atténuant les attaques de type cross-site scripting et d'injection de données. |
     | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | non      | **Mode rapport CSP :** Signale les violations sans bloquer le contenu, aidant à tester les politiques de sécurité tout en capturant les journaux.         |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | non      | **X-Frame-Options :** Empêche le clickjacking en contrôlant si votre site peut être intégré dans une frame.                                               |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | non      | **X-Content-Type-Options :** Empêche les navigateurs de "MIME-sniffer", protégeant contre les attaques de type "drive-by download".                       |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | non      | **X-DNS-Prefetch-Control :** Régule le préchargement DNS pour réduire les requêtes réseau involontaires et améliorer la confidentialité.                  |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | non      | **X-Frame-Options :** Empêche le clickjacking en contrôlant si votre site peut être intégré dans une frame. Valeurs admises : `DENY`, `SAMEORIGIN` ; une valeur vide supprime cet en-tête. |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | non      | **X-Content-Type-Options :** Empêche les navigateurs de "MIME-sniffer", protégeant contre les attaques de type "drive-by download". Valeurs admises : `nosniff` ; une valeur vide supprime cet en-tête. |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | non      | **X-DNS-Prefetch-Control :** Régule le préchargement DNS pour réduire les requêtes réseau involontaires et améliorer la confidentialité. Valeurs admises : `on`, `off`. |
     | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | non      | **Politique de Referrer :** Contrôle la quantité d'informations de référent envoyées, protégeant la vie privée de l'utilisateur.                          |
     | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | non      | **Politique de permissions :** Restreint l'accès aux fonctionnalités du navigateur, réduisant les vecteurs d'attaque potentiels.                          |
     | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | non      | **Conserver les en-têtes :** Préserve les en-têtes en amont sélectionnés, facilitant l'intégration héritée tout en maintenant la sécurité.                |
@@ -4210,6 +4210,10 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Moteur d'audit :** Contrôle le fonctionnement de la journalisation d'audit. Options : `On`, `Off`, ou `RelevantOnly`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Parties du journal d'audit :** Quelles parties des requêtes/réponses inclure dans les journaux d'audit.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Chemin du journal d'audit :** Chemin du fichier dans lequel ModSecurity écrit les entrées d'audit. Doit être un fichier régulier : l'écrivain d'audit Serial le verrouille, ce qu'un tube ou un flux ne peut pas supporter. Le chemin doit se terminer par `.log`. La rotation via ce suffixe ne s'applique que là où logrotate est installé (les paquets Linux et l'image All-In-One) ; sur Docker, Swarm et Kubernetes, un nom différent du nom par défaut n'est ni diffusé ni fait tourner et croît sans limite dans le conteneur, car seul `modsec_audit.log` est lié au flux de journaux du conteneur. |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | multisite | no | Mode : `Serial` (par défaut) ou `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` |  | multisite | no | Vide par défaut ; répertoire de stockage absolu requis pour `Concurrent`. |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | no | Taille maximale du corps inspecté, en octets ou avec les suffixes `k`/`m`/`g`. Vide : dérivée de `MAX_CLIENT_SIZE`, que NGINX applique en premier. `REVERSE_PROXY_MAX_CLIENT_SIZE` remplace cette valeur dans sa location. `0` supprime la limite et risque d’épuiser la mémoire. |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject` | multisite | no | `Reject` renvoie HTTP 413 au-delà de la limite d’inspection. `ProcessPartial` inspecte uniquement la partie dans la limite et transmet le corps complet, ce qui réduit la couverture WAF. La limite sans fichiers reste distincte et applicable. |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Limite du corps de requête (sans fichiers) :** Taille maximale pour les corps de requête sans téléversement de fichiers. Accepte les octets bruts ou un suffixe lisible (`k`, `m`, `g`).                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Activer les plugins CRS :** Active des jeux de règles de plugins supplémentaires pour le Core Rule Set.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **Liste des plugins CRS :** Liste de plugins séparés par des espaces à télécharger et installer (`nom-plugin[/tag]` ou URL).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -5068,10 +5072,11 @@ Comment ça marche :
 | `REDIS_TIMEOUT`           | `1s`       | global   | non      | Timeout (ms) pour connexion/lecture/écriture. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
 | `REDIS_USERNAME`          |            | global   | non      | Nom d’utilisateur (Redis ≥ 6.0).                                                                                             |
 | `REDIS_PASSWORD`          |            | global   | non      | Mot de passe.                                                                                                                |
+| `REDIS_CLUSTER_NODES`     |            | global   | non      | Nœuds de départ d’un cluster Redis, `hôte[:port]` séparés par espaces, `[ipv6]:port` pour IPv6. Active le mode cluster. |
 | `REDIS_SENTINEL_HOSTS`    |            | global   | non      | Hôtes Sentinel (séparés par espaces, `hôte:port`).                                                                           |
 | `REDIS_SENTINEL_USERNAME` |            | global   | non      | Utilisateur Sentinel.                                                                                                        |
 | `REDIS_SENTINEL_PASSWORD` |            | global   | non      | Mot de passe Sentinel.                                                                                                       |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global   | non      | Nom du master Sentinel.                                                                                                      |
+| `REDIS_SENTINEL_MASTER`   |            | global   | non      | Nom du master Sentinel.                                                                                                      |
 | `REDIS_KEEPALIVE_IDLE`    | `30s`      | global   | non      | Temps d’inactivité max (ms) avant fermeture d’une connexion du pool. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global   | non      | Nb max de connexions conservées dans le pool, par worker NGINX.                                                              |
 
@@ -5090,6 +5095,18 @@ Comment ça marche :
     - Toutes les instances BunkerWeb doivent se connecter au même serveur Redis/Valkey ou cluster Sentinel
     - Configurez le même numéro de base de données sur toutes les instances
     - Assurez-vous de la connectivité réseau entre toutes les instances BunkerWeb et les serveurs Redis/Valkey
+
+### Cluster Redis
+
+Définissez `REDIS_CLUSTER_NODES` avec au moins un nœud joignable ; BunkerWeb découvre le reste du cluster à partir de là. Fonctionne avec Redis 6.2+, Valkey, et les services de cluster managés comme ElastiCache ou MemoryDB via leur endpoint de configuration. Les nœuds de départ acceptent `hôte`, `hôte:port` ou `[ipv6]:port`, mais le cluster doit lui-même annoncer des adresses IPv4 ou des noms d’hôte (`cluster-announce-hostname` avec `cluster-preferred-endpoint-type hostname`) ; les clusters qui annoncent de l’IPv6 ne sont pas pris en charge.
+
+Le mode cluster utilise la base 0. Définir `REDIS_CLUSTER_NODES` en même temps que `REDIS_SENTINEL_HOSTS`, ou avec `REDIS_DATABASE` différent de 0, est une erreur de configuration : BunkerWeb consigne une erreur nommant les deux paramètres et n’utilise pas Redis du tout (retour aux compteurs locaux et aux sessions en cookie) tant que l’un des deux n’est pas retiré.
+
+Basculer un déploiement existant en mode cluster repart d’un espace de clés vide : bannissements actifs et permanents, sessions et rapports ne sont pas repris. Réappliquez les bannissements permanents après le basculement.
+
+Les bannissements et compteurs de mauvais comportement sont répartis entre les primaires par IP client. Les rapports de requêtes bloquées partagent un seul hash slot, donc un seul primaire les stocke tous.
+
+Avec la valeur par défaut `cluster-require-full-coverage yes`, la perte d’un primaire sans réplica arrête tout le cluster ; BunkerWeb revient alors aux compteurs locaux et aux sessions en cookie jusqu’au rétablissement. `cluster-require-full-coverage no` limite l’impact aux clés du shard perdu.
 
 ### Exemples
 
@@ -6247,7 +6264,7 @@ Le plugin Whitelist fournit une approche complète pour autoriser explicitement 
 
 1. Vous définissez les critères des visiteurs à placer en "whitelist" (*adresses IP, réseaux, rDNS, ASN, User-Agent ou motifs d'URI*).
 2. Lorsqu'un visiteur tente d'accéder à votre site, BunkerWeb vérifie s'il correspond à l'un de ces critères de whitelist.
-3. Si un visiteur correspond à une règle de whitelist (et ne correspond à aucune règle d'ignore), l'accès à votre site lui est accordé et il **contourne tous les autres contrôles de sécurité**.
+3. Si un visiteur correspond à une règle de whitelist, l'accès à votre site lui est accordé et il **contourne tous les autres contrôles de sécurité**.
 4. Si un visiteur ne correspond à aucun critère de whitelist, il passe normalement par tous les contrôles de sécurité habituels.
 5. Les whitelists peuvent être automatiquement mises à jour depuis des sources externes selon une planification régulière.
 
@@ -6255,11 +6272,10 @@ Le plugin Whitelist fournit une approche complète pour autoriser explicitement 
 
 Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
 
-1. **Activer la fonctionnalité :** La fonctionnalité Whitelist est désactivée par défaut. Mettez le paramètre `USE_WHITELIST` à `yes` pour l'activer.
+1. **Activer la fonctionnalité :** La whitelist est activée par défaut (`USE_WHITELIST=yes`), avec des suffixes rDNS prédéfinis et l’ASN `32934`. Vérifiez ces sources de confiance ; mettez `USE_WHITELIST=no` pour la désactiver.
 2. **Configurer les règles d'autorisation :** Définissez les IP, réseaux, motifs rDNS, ASN, User-Agents ou URI à placer en whitelist.
-3. **Définir les règles d'ignore :** Indiquez les exceptions qui doivent contourner les contrôles de whitelist.
-4. **Ajouter des sources externes :** Configurez des URL pour télécharger et mettre à jour automatiquement les données de whitelist.
-5. **Surveiller l'accès :** Consultez l'[interface web](web-ui.md) pour voir quels visiteurs sont autorisés ou refusés.
+3. **Ajouter des sources externes :** Configurez des URL pour télécharger et mettre à jour automatiquement les données de whitelist.
+4. **Surveiller l'accès :** Consultez l'[interface web](web-ui.md) pour voir quels visiteurs sont autorisés ou refusés.
 
 !!! info "mode stream"
     En mode stream, seuls les contrôles IP, rDNS et ASN sont effectués.
@@ -6270,7 +6286,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
 
 | Paramètre       | Défaut | Contexte  | Multiple | Description                                                                      |
 | --------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------- |
-| `USE_WHITELIST` | `no`   | multisite | non      | **Activer Whitelist :** Mettre à `yes` pour activer la fonctionnalité whitelist. |
+| `USE_WHITELIST` | `yes` | multisite | non      | **Activer Whitelist :** Mettre à `yes` pour activer la fonctionnalité whitelist. |
 
 === "Adresse IP"
     **Ce que cela fait :** Place les visiteurs en whitelist selon leur adresse IP ou leur réseau. Ces visiteurs contourneront tous les contrôles de sécurité.
@@ -6278,9 +6294,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
     | Paramètre                  | Défaut | Contexte  | Multiple | Description                                                                                                                 |
     | -------------------------- | ------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_IP`             |        | multisite | non      | **Whitelist IP :** Liste d'adresses IP ou de réseaux (notation CIDR) à autoriser, séparés par des espaces.                  |
-    | `WHITELIST_IGNORE_IP`      |        | multisite | non      | **Liste d'ignore IP :** Liste d'adresses IP ou de réseaux qui doivent contourner les contrôles de whitelist IP.             |
     | `WHITELIST_IP_URLS`        |        | multisite | non      | **URL de whitelist IP :** Liste d'URL contenant des adresses IP ou réseaux à placer en whitelist, séparées par des espaces. |
-    | `WHITELIST_IGNORE_IP_URLS` |        | multisite | non      | **URL de liste d'ignore IP :** Liste d'URL contenant des adresses IP ou réseaux à ignorer.                                  |
 
     !!! info "Formats des listes"
         Les listes d’URL peuvent contenir une entrée par ligne (les lignes commençant par `#` ou `;` sont des commentaires et seul le premier mot de chaque ligne est lu), du CSV, un document JSON ou du JSON Lines. Dans les listes d’IP, les virgules séparent aussi les champs, et les listes JSON conservent chaque chaîne qui correspond à une adresse IP ou à un réseau. Ajoutez un fragment pour ne conserver qu’une partie d’une liste JSON : `#key` conserve les valeurs sous `key`, `#key=value` conserve les objets dont la propriété `key` est égale à `value` ou contient `value`, et `&` combine les termes. Exemple : `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Une URL avec un fragment ne conserve que les éléments sélectionnés par celui-ci ; si la liste n’est pas au format JSON, elle ne conserve rien.
@@ -6290,21 +6304,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
 
     | Paramètre                    | Défaut | Contexte  | Multiple | Description                                                                                                                          |
     | ---------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-    | `WHITELIST_RDNS`             |        | multisite | non      | **Whitelist rDNS :** Liste de suffixes DNS inversés à autoriser, séparés par des espaces.                                            |
+    | `WHITELIST_RDNS`             | `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com` | multisite | non      | **Whitelist rDNS :** Liste de suffixes DNS inversés à autoriser, séparés par des espaces.                    |
     | `WHITELIST_RDNS_GLOBAL`      | `yes`  | multisite | non      | **rDNS global seulement :** Effectue les contrôles de whitelist rDNS uniquement sur les adresses IP globales lorsque défini à `yes`. |
-    | `WHITELIST_IGNORE_RDNS`      |        | multisite | non      | **Liste d'ignore rDNS :** Liste de suffixes DNS inversés qui doivent contourner les contrôles de whitelist rDNS.                     |
     | `WHITELIST_RDNS_URLS`        |        | multisite | non      | **URL de whitelist rDNS :** Liste d'URL contenant des suffixes DNS inversés à placer en whitelist, séparées par des espaces.         |
-    | `WHITELIST_IGNORE_RDNS_URLS` |        | multisite | non      | **URL de liste d'ignore rDNS :** Liste d'URL contenant des suffixes DNS inversés à ignorer.                                          |
 
 === "ASN"
     **Ce que cela fait :** Place les visiteurs de fournisseurs réseau précis en whitelist à l'aide des numéros de système autonome. Les ASN identifient le fournisseur ou l'organisation auquel appartient une IP.
 
     | Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                               |
     | --------------------------- | ------ | --------- | -------- | --------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_ASN`             |        | multisite | non      | **Whitelist ASN :** Liste de numéros de système autonome à autoriser, séparés par des espaces.            |
-    | `WHITELIST_IGNORE_ASN`      |        | multisite | non      | **Liste d'ignore ASN :** Liste d'ASN qui doivent contourner les contrôles de whitelist ASN.               |
+    | `WHITELIST_ASN`             | `32934` | multisite | non      | **Whitelist ASN :** Liste de numéros de système autonome à autoriser, séparés par des espaces. |
     | `WHITELIST_ASN_URLS`        |        | multisite | non      | **URL de whitelist ASN :** Liste d'URL contenant des ASN à placer en whitelist, séparées par des espaces. |
-    | `WHITELIST_IGNORE_ASN_URLS` |        | multisite | non      | **URL de liste d'ignore ASN :** Liste d'URL contenant des ASN à ignorer.                                  |
 
 === "User Agent"
     **Ce que cela fait :** Place les visiteurs en whitelist selon le navigateur ou l'outil qu'ils déclarent utiliser. C'est efficace pour autoriser l'accès à des outils ou services connus précis.
@@ -6312,9 +6322,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
     | Paramètre                          | Défaut | Contexte  | Multiple | Description                                                                                                              |
     | ---------------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
     | `WHITELIST_USER_AGENT`             |        | multisite | non      | **Whitelist User-Agent :** Liste de motifs User-Agent (regex PCRE) à autoriser, séparés par des espaces.                 |
-    | `WHITELIST_IGNORE_USER_AGENT`      |        | multisite | non      | **Liste d'ignore User-Agent :** Liste de motifs User-Agent qui doivent contourner les contrôles de whitelist User-Agent. |
     | `WHITELIST_USER_AGENT_URLS`        |        | multisite | non      | **URL de whitelist User-Agent :** Liste d'URL contenant des motifs User-Agent à placer en whitelist.                     |
-    | `WHITELIST_IGNORE_USER_AGENT_URLS` |        | multisite | non      | **URL de liste d'ignore User-Agent :** Liste d'URL contenant des motifs User-Agent à ignorer.                            |
 
 === "URI"
     **Ce que cela fait :** Place en whitelist les requêtes vers des URL précises de votre site. C'est utile pour autoriser l'accès à certains endpoints indépendamment des autres facteurs.
@@ -6322,9 +6330,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
     | Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                                        |
     | --------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
     | `WHITELIST_URI`             |        | multisite | non      | **Whitelist URI :** Liste de motifs d'URI (regex PCRE) à autoriser, séparés par des espaces.                       |
-    | `WHITELIST_IGNORE_URI`      |        | multisite | non      | **Liste d'ignore URI :** Liste de motifs d'URI qui doivent contourner les contrôles de whitelist URI.              |
     | `WHITELIST_URI_URLS`        |        | multisite | non      | **URL de whitelist URI :** Liste d'URL contenant des motifs d'URI à placer en whitelist, séparées par des espaces. |
-    | `WHITELIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de liste d'ignore URI :** Liste d'URL contenant des motifs d'URI à ignorer.                                  |
 
     !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
         Écrivez `^/admin(/|$)` plutôt que `^/admin$`. Un motif ancré sur un seul chemin exact ne correspond ni à `/admin/`, ni à `/admin%2f`, ni à `/admin;foo`, alors que votre application peut toujours y servir la même ressource. La correspondance se fait sur le chemin décodé et normalisé, donc `/a/../admin` et `//admin` sont déjà couverts.

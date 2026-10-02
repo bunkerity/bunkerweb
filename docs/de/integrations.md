@@ -2154,7 +2154,7 @@ Für nicht-interaktive oder automatisierte Setups kann das Skript mit Befehlszei
 
 | Option                      | Beschreibung                                                                                          |
 | --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"`     | Durch Leerzeichen getrennte Liste von BunkerWeb-Instanzen (erforderlich für Manager-/Scheduler-Modi). |
+| `--instances "IP1 IP2"` | Optional für Manager-/Scheduler-Modi; Worker können später hinzugefügt werden. |
 | `--manager-ip IPs`          | Manager-/Scheduler-IPs zur Whitelist (erforderlich für Worker im nicht-interaktiven Modus).           |
 | `--dns-resolvers "IP1 IP2"` | Benutzerdefinierte DNS-Resolver-IPs (für Full-, Manager- oder Worker-Installationen).                 |
 | `--api-https`               | HTTPS für interne API-Kommunikation aktivieren (Standard: nur HTTP).                                  |
@@ -2212,16 +2212,17 @@ sudo ./install-bunkerweb.sh --yes --api
 # Fehler: CrowdSec kann nicht mit Worker-Installationen verwendet werden
 # sudo ./install-bunkerweb.sh --worker --crowdsec  # Dies schlägt fehl
 
-# Fehler: Instanzen für Manager im nicht-interaktiven Modus erforderlich
-# sudo ./install-bunkerweb.sh --manager --yes  # Dies schlägt ohne --instances fehl
+# Die Liste --instances ist optional: Ohne Worker gibt der Manager eine Warnung aus.
+# sudo ./install-bunkerweb.sh --manager --yes
 ```
 
 !!! warning "Wichtige Hinweise zur Optionskompatibilität"
 
     **CrowdSec-Einschränkungen:**
 
-    - CrowdSec-Optionen (`--crowdsec`, `--crowdsec-appsec`) sind nur mit dem Installationstyp `--full` (Standard) kompatibel
-    - Sie können nicht mit `--manager`, `--worker`, `--scheduler-only`, `--ui-only` oder `--api-only` Installationen verwendet werden
+    - CrowdSec-Optionen (`--crowdsec`, `--crowdsec-appsec`) sind mit `--full` (Standard) und `--manager` kompatibel.
+    - Die interaktive CrowdSec-Abfrage erscheint nur bei Full Stack; verwenden Sie CLI-Optionen für Manager.
+    - Sie sind nicht mit `--worker`, `--scheduler-only`, `--ui-only` oder `--api-only` kompatibel.
 
     **Redis-Einschränkungen:**
 
@@ -2236,7 +2237,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
     **Anforderungen für Instanzen:**
     - Die Option `--instances` ist nur mit den Installationstypen `--manager` und `--scheduler-only` gültig
-    - Bei Verwendung von `--manager` oder `--scheduler-only` mit `--yes` (nicht-interaktiver Modus) ist die Option `--instances` obligatorisch
+    - Die Liste ist bei der Installation optional; ohne Einträge warnt der Installer und Worker können später hinzugefügt werden.
     - Format: `--instances "192.168.1.10 192.168.1.11 192.168.1.12"`
 
     **Interaktiv vs. Nicht-interaktiv:**

@@ -6,6 +6,7 @@ copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</sc
 
 exclude_docs: |
   node_modules/**
+  superpowers/**
 
 nav: # language-agnostic structure (same file names in each locale folder)
   - Introduction: "index.md"

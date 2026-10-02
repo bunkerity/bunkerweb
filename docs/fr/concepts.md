@@ -212,7 +212,7 @@ Si vous utilisez l'interface utilisateur Web, vous pouvez gérer les tâches du 
   <figcaption>Gérer les tâches à partir de l'interface utilisateur web</figcaption>
 </figure>
 
-**Vérification de l'état des instances**
+### Vérification de l'état des instances
 
 Depuis la version 1.6.0, le planificateur dispose d'un système de vérification de l'état intégré qui surveille l'état des instances. Si une instance devient défectueuse, le planificateur cessera de lui envoyer la configuration. Si l'instance redevient saine, le planificateur reprend l'envoi de la configuration.
 

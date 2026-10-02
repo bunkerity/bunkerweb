@@ -1427,7 +1427,7 @@ La imagen **Todo en Uno** de BunkerWeb incluye Redis listo para usar para la [pe
 - Sobrescribe `REDIS_HOST` únicamente cuando tengas un extremo Redis/Valkey externo disponible; de lo contrario, la instancia integrada no se iniciará.
 - Para deshabilitar Redis por completo, establece `USE_REDIS=no`.
 - **Precedencia de configuración (importante):** el Redis integrado se lanza desde `/var/lib/bunkerweb/redis-runtime.conf`, generado en el arranque copiando `/etc/redis.conf` y añadiendo valores por defecto basados en variables de entorno **solo para las directivas que la configuración no especifica**. Un `/etc/redis.conf` montado siempre gana; las variables de entorno de abajo solo rellenan los huecos.
-- **Ajuste de memoria:** los valores por defecto siguen las [buenas prácticas de Redis](features.md#redis-best-practices) — `maxmemory 256mb` y `maxmemory-policy volatile-lru`. Sobrescribe con `REDIS_MAXMEMORY` y `REDIS_MAXMEMORY_POLICY` cuando la configuración no los fije.
+- **Ajuste de memoria:** los valores por defecto siguen las [buenas prácticas de Redis](features.md#mejores-practicas-de-redis) — `maxmemory 256mb` y `maxmemory-policy volatile-lru`. Sobrescribe con `REDIS_MAXMEMORY` y `REDIS_MAXMEMORY_POLICY` cuando la configuración no los fije.
 - **Sobrescrituras de persistencia:** `REDIS_APPENDONLY=yes|no` alterna AOF (por defecto `yes`); los snapshots RDB se configuran con `REDIS_SAVE` y, opcionalmente, `REDIS_SAVE_0`, `REDIS_SAVE_1`, … aportando cada uno un par `save <segundos> <cambios>` (p. ej. `REDIS_SAVE_0="900 1"`, `REDIS_SAVE_1="300 10"`). Definir cualquiera de ellas reemplaza el conjunto por defecto `900 1 / 300 10 / 60 10000`; un valor vacío emite `save ""`, deshabilitando RDB. Se ignora si la configuración ya declara `save` por su cuenta.
 - **Autenticación:** cuando se define `REDIS_PASSWORD` y la configuración no contiene ya `requirepass`, el Redis integrado se lanza con `requirepass` para mantener la coherencia entre el cliente y el servidor de BunkerWeb. El servidor integrado solo admite el usuario predeterminado: define `REDIS_USERNAME` únicamente cuando apuntes a un Redis externo con ACLs.
 - Los registros de Redis aparecen con el prefijo `[REDIS]` en los registros de Docker y en `/var/log/bunkerweb/redis.log`.
@@ -2155,7 +2155,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 
 | Opción                      | Descripción                                                                                           |
 | :-------------------------- | :---------------------------------------------------------------------------------------------------- |
-| `--instances "IP1 IP2"`     | Lista de instancias de BunkerWeb separadas por espacios (requerido para los modos manager/scheduler). |
+| `--instances "IP1 IP2"` | Opcional para los modos manager/scheduler; se pueden añadir workers más tarde. |
 | `--manager-ip IPs`          | IPs del manager/scheduler para la lista blanca (requerido para worker en modo no interactivo).        |
 | `--dns-resolvers "IP1 IP2"` | IPs de resolvers DNS personalizados (para instalaciones full, manager o worker).                      |
 | `--api-https`               | Habilitar HTTPS para la comunicación API interna (predeterminado: solo HTTP).                         |
@@ -2213,16 +2213,17 @@ sudo ./install-bunkerweb.sh --yes --api
 # Error: CrowdSec no se puede usar con instalaciones de trabajador
 # sudo ./install-bunkerweb.sh --worker --crowdsec  # Esto fallará
 
-# Error: Se requieren instancias para el gestor en modo no interactivo
-# sudo ./install-bunkerweb.sh --manager --yes  # Esto fallará sin --instances
+# La lista --instances es opcional: el manager avisa si no hay workers configurados.
+# sudo ./install-bunkerweb.sh --manager --yes
 ```
 
 !!! warning "Notas importantes sobre la compatibilidad de las opciones"
 
     **Limitaciones de CrowdSec:**
 
-    - Las opciones de CrowdSec (`--crowdsec`, `--crowdsec-appsec`) solo son compatibles con el tipo de instalación `--full` (predeterminado)
-    - No se pueden usar con instalaciones `--manager`, `--worker`, `--scheduler-only`, `--ui-only` o `--api-only`
+    - Las opciones CrowdSec (`--crowdsec`, `--crowdsec-appsec`) son compatibles con `--full` (por defecto) y `--manager`.
+    - La pregunta interactiva de CrowdSec solo aparece para Full Stack; use las opciones CLI para Manager.
+    - No se pueden usar con `--worker`, `--scheduler-only`, `--ui-only` ni `--api-only`.
 
     **Limitaciones de Redis:**
 
@@ -2237,7 +2238,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
     **Requisitos de las instancias:**
     - La opción `--instances` solo es válida con los tipos de instalación `--manager` y `--scheduler-only`
-    - Cuando se usan `--manager` o `--scheduler-only` con `--yes` (modo no interactivo), la opción `--instances` es obligatoria
+    - La lista es opcional durante la instalación; si está vacía, el instalador avisa y los workers se pueden añadir después.
     - Formato: `--instances "192.168.1.10 192.168.1.11 192.168.1.12"`
 
     **Interactivo vs No interactivo:**
@@ -3795,7 +3796,8 @@ Address:        172.26.112.1#53
 
 Non-authoritative answer:
 Name:   myapp.example.com
-Address: 1.2.3.4```
+Address: 1.2.3.4
+```
 
 **Instalación de BunkerWeb**
 

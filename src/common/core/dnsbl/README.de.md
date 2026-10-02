@@ -12,7 +12,7 @@ Das DNSBL (Domain Name System Blacklist) Plugin bietet Schutz vor bekannten bös
 
 Führen Sie die folgenden Schritte aus, um die DNSBL-Funktion zu konfigurieren und zu verwenden:
 
-1.  **Aktivieren Sie die Funktion:** Die DNSBL-Funktion ist standardmäßig deaktiviert. Setzen Sie die Einstellung `USE_DNSBL` auf `yes`, um sie zu aktivieren.
+1.  **Funktion steuern:** Die DNSBL-Funktion ist standardmäßig aktiviert. Setzen Sie `USE_DNSBL` auf `no`, um sie zu deaktivieren.
 2.  **DNSBL-Server konfigurieren:** Fügen Sie die Domainnamen der DNSBL-Dienste, die Sie verwenden möchten, zur Einstellung `DNSBL_LIST` hinzu.
 3.  **Einstellungen anwenden:** Nach der Konfiguration überprüft BunkerWeb eingehende Verbindungen automatisch mit den angegebenen DNSBL-Servern.
 4.  **Wirksamkeit überwachen:** Überprüfen Sie die [Web-Benutzeroberfläche](web-ui.md), um Statistiken über Anfragen zu sehen, die durch DNSBL-Prüfungen blockiert wurden.
@@ -23,17 +23,17 @@ Führen Sie die folgenden Schritte aus, um die DNSBL-Funktion zu konfigurieren u
 
 | Einstellung  | Standard                                            | Kontext   | Mehrfach | Beschreibung                                                                                      |
 | ------------ | --------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | nein     | DNSBL aktivieren: auf `yes` setzen, um DNSBL-Prüfungen für eingehende Verbindungen zu aktivieren. |
+| `USE_DNSBL`  | `yes`                                               | multisite | nein     | DNSBL ist standardmäßig aktiviert; setzen Sie `USE_DNSBL` auf `no`, um Prüfungen eingehender Verbindungen zu deaktivieren. |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | nein     | DNSBL-Server: Liste der zu überprüfenden DNSBL-Server-Domains, durch Leerzeichen getrennt.        |
 
 **Ausnahmelisten**
 
 | Einstellung                 | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                |
 | --------------------------- | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`           | ``       | multisite | ja       | Durch Leerzeichen getrennte IPs/CIDRs, für die DNSBL-Prüfungen übersprungen werden sollen (Whitelist).                                                      |
+| `DNSBL_IGNORE_IP`           | ``       | multisite | nein     | Durch Leerzeichen getrennte IPs/CIDRs, für die DNSBL-Prüfungen übersprungen werden sollen (Whitelist).                                                      |
 | `DNSBL_IGNORE_HEADER_NAME`  |          | multisite | ja       | **Header-Name:** Name eines Request-Headers, der es der Anfrage erlaubt, die DNSBL-Prüfungen zu umgehen. Nummerierte Paare: `_NAME_1` gehört zu `_VALUE_1`. |
 | `DNSBL_IGNORE_HEADER_VALUE` |          | multisite | ja       | **Header-Wert:** PCRE-Regex, dem der Header-Wert entsprechen muss. Leer lassen, um nur auf das Vorhandensein des Headers zu prüfen.                         |
-| `DNSBL_IGNORE_IP_URLS`      | ``       | multisite | ja       | Durch Leerzeichen getrennte URLs, die IPs/CIDRs zum Überspringen bereitstellen. Unterstützt `http(s)://` und `file://`.                                     |
+| `DNSBL_IGNORE_IP_URLS`      | ``       | multisite | nein     | Durch Leerzeichen getrennte URLs, die IPs/CIDRs zum Überspringen bereitstellen. Unterstützt `http(s)://` und `file://`.                                     |
 
 !!! warning "Eine Header-Regel ist ein gemeinsames Geheimnis"
     Jeder Client kann einen Header senden, eine Header-Regel ist daher ein Bearer-Token und keine Netzwerkkontrolle. Nur über HTTPS ausliefern, die Regex mit `^` und `$` verankern (die Suche ist standardmäßig nicht verankert, `abc` passt also auch auf `xabcx`) und den Wert rotieren. Steht BunkerWeb hinter einem Proxy, muss dieser jede vom Client gesendete Kopie des Headers überschreiben. Diese Regeln gelten nur für HTTP: ein Stream-Dienst überträgt keine Request-Header, dort greift also nichts.

@@ -22,7 +22,7 @@
 !!! warning "集群环境中的会话配置"
     antibot 功能使用 cookie 来跟踪用户是否已完成挑战。如果您在集群环境中运行 BunkerWeb（多个 BunkerWeb 实例），您**必须**正确配置会话管理。这涉及在所有 BunkerWeb 实例中将 `SESSIONS_SECRET` 和 `SESSIONS_NAME` 设置设置为**相同的值**。如果您不这样做，用户可能会被反复提示完成 antibot 挑战。您可以在[此处](#sessions)找到有关会话配置的更多信息。
 
-### 通用设置
+### 通用设置 {#通用设置}
 
 以下设置在所有挑战机制中共享：
 

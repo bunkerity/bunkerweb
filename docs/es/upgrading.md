@@ -463,7 +463,7 @@ Actualice todas las réplicas de la interfaz web a la vez: la protección contra
             ```
 
         4. **Verifica la base de datos**: Verifica que la actualización de la base de datos fue exitosa revisando los datos y las configuraciones en el nuevo contenedor de la base de datos.
-### Reversión
+### Reversión {#rollback}
 
 !!! failure "En caso de problemas"
 

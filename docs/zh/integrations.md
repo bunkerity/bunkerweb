@@ -1548,7 +1548,7 @@ docker run -d \
 
 ---
 
-#### 禁用中央 API
+#### 禁用中央 API {#禁用中央-api}
 
 若要选择退出 Central API 和 Console 注册（不发送任何信号，也不拉取社区黑名单），请将 `DISABLE_ONLINE_API` 设为 `true`。这不会停止 hub 更新：无论此设置如何，collection 和 parser 目录仍会从 CrowdSec hub 获取：
 
@@ -2154,7 +2154,7 @@ sudo ./install-bunkerweb.sh --docker --full --yes --no-syslog
 
 | 选项                        | 描述                                                             |
 | --------------------------- | ---------------------------------------------------------------- |
-| `--instances "IP1 IP2"`     | 以空格分隔的 BunkerWeb 实例列表（在管理器/调度器模式下为必需）。 |
+| `--instances "IP1 IP2"` | 管理器/调度器模式下可选；可在安装后添加工作节点。 |
 | `--manager-ip IPs`          | 管理器/调度器 IP 白名单（在非交互模式下的工作节点中为必需）。    |
 | `--dns-resolvers "IP1 IP2"` | 自定义 DNS 解析器 IP（用于完整、管理器或工作节点安装）。         |
 | `--api-https`               | 为内部 API 通信启用 HTTPS（默认：仅 HTTP）。                     |
@@ -2212,16 +2212,17 @@ sudo ./install-bunkerweb.sh --yes --api
 # 错误：CrowdSec 不能用于工作节点安装
 # sudo ./install-bunkerweb.sh --worker --crowdsec  # 这将失败
 
-# 错误：在非交互模式下，管理器需要 instances
-# sudo ./install-bunkerweb.sh --manager --yes  # 如果没有 --instances，这将失败
+# --instances 列表是可选的：未配置工作节点时，管理器会给出警告。
+# sudo ./install-bunkerweb.sh --manager --yes
 ```
 
 !!! warning "关于选项兼容性的重要说明"
 
     **CrowdSec 限制：**
 
-    - CrowdSec 选项（`--crowdsec`, `--crowdsec-appsec`）仅与 `--full`（默认）安装类型兼容
-    - 它们不能与 `--manager`, `--worker`, `--scheduler-only`, `--ui-only` 或 `--api-only` 安装一起使用
+    - CrowdSec 选项（`--crowdsec`、`--crowdsec-appsec`）兼容 `--full`（默认）和 `--manager`。
+    - CrowdSec 交互式提示仅在完整堆栈模式显示；管理器模式请使用 CLI 选项。
+    - 不兼容 `--worker`、`--scheduler-only`、`--ui-only` 或 `--api-only`。
 
     **Redis 限制：**
 
@@ -2236,7 +2237,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
     **Instances 要求：**
     - `--instances` 选项仅对 `--manager` 和 `--scheduler-only` 安装类型有效
-    - 当使用 `--manager` 或 `--scheduler-only` 并带有 `--yes`（非交互模式）时，`--instances` 选项是强制性的
+    - 安装时实例列表是可选的；如果为空，安装程序会给出警告，可稍后添加工作节点。
     - 格式：`--instances "192.168.1.10 192.168.1.11 192.168.1.12"`
 
     **交互式与非交互式：**

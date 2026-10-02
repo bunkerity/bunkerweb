@@ -12,7 +12,7 @@ DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查�
 
 请按照以下步骤配置和使用 DNSBL 功能：
 
-1.  **启用该功能：** DNSBL 功能默认禁用。将 `USE_DNSBL` 设置为 `yes` 以启用它。
+1.  **控制该功能：** DNSBL 功能默认启用。将 `USE_DNSBL` 设置为 `no` 即可禁用。
 2.  **配置 DNSBL 服务器：** 将您要使用的 DNSBL 服务的域名添加到 `DNSBL_LIST` 设置中。
 3.  **应用设置：** 配置完成后，BunkerWeb 将自动对照指定的 DNSBL 服务器检查传入的连接。
 4.  **监控有效性：** 查看 [web UI](web-ui.md) 以查看因 DNSBL 检查而被阻止的请求的统计信息。
@@ -23,17 +23,17 @@ DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查�
 
 | 设置         | 默认值                                              | 上下文    | 多个 | 描述                                                      |
 | ------------ | --------------------------------------------------- | --------- | ---- | --------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | 否   | 启用 DNSBL：设置为 `yes` 以启用对传入连接的 DNSBL 检查。  |
+| `USE_DNSBL`  | `yes`                                               | multisite | 否   | DNSBL 默认启用；将 `USE_DNSBL` 设置为 `no` 可禁用对传入连接的检查。 |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | 否   | DNSBL 服务器：要检查的 DNSBL 服务器域名列表，以空格分隔。 |
 
 **忽略列表**
 
 | 设置                          | 默认值 | 上下文       | 多个  | 描述                                                              |
 | --------------------------- | --- | --------- | --- | --------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`           | ``  | multisite | 是   | 以空格分隔的 IP/CIDR，用于跳过 DNSBL 检查（白名单）。                              |
+| `DNSBL_IGNORE_IP`           | ``  | multisite | 否   | 以空格分隔的 IP/CIDR，用于跳过 DNSBL 检查（白名单）。                              |
 | `DNSBL_IGNORE_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求绕过 DNSBL 检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
 | `DNSBL_IGNORE_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                  |
-| `DNSBL_IGNORE_IP_URLS`      | ``  | multisite | 是   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。       |
+| `DNSBL_IGNORE_IP_URLS`      | ``  | multisite | 否   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。       |
 
 !!! warning "请求头规则是共享密钥"
     任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。

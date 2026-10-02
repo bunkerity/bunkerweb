@@ -1434,7 +1434,7 @@ L'image **BunkerWeb All-In-One** inclut Redis prêt à l'emploi pour la [persist
 - Ne redéfinissez `REDIS_HOST` que si vous disposez d'un point de terminaison Redis/Valkey externe, autrement l'instance embarquée ne sera pas lancée.
 - Pour désactiver Redis complètement, définissez `USE_REDIS=no`.
 - **Précédence de configuration (important) :** le Redis embarqué est lancé depuis `/var/lib/bunkerweb/redis-runtime.conf`, généré au démarrage en copiant `/etc/redis.conf` puis en ajoutant des valeurs par défaut tirées de l'environnement **uniquement pour les directives sur lesquelles la conf reste muette**. Un fichier `/etc/redis.conf` monté l'emporte donc toujours ; les variables d'environnement ci-dessous ne servent qu'à combler les manques.
-- **Réglage mémoire :** les valeurs par défaut suivent les [bonnes pratiques Redis](features.md#redis-best-practices) — `maxmemory 256mb` et `maxmemory-policy volatile-lru`. Surchargez via `REDIS_MAXMEMORY` et `REDIS_MAXMEMORY_POLICY` lorsque la conf ne les fixe pas.
+- **Réglage mémoire :** les valeurs par défaut suivent les [bonnes pratiques Redis](features.md#bonnes-pratiques-redis) — `maxmemory 256mb` et `maxmemory-policy volatile-lru`. Surchargez via `REDIS_MAXMEMORY` et `REDIS_MAXMEMORY_POLICY` lorsque la conf ne les fixe pas.
 - **Surcharges de persistance :** `REDIS_APPENDONLY=yes|no` bascule l'AOF (défaut `yes`) ; les snapshots RDB se configurent avec `REDIS_SAVE` et, en option, `REDIS_SAVE_0`, `REDIS_SAVE_1`, … chacune fournissant une paire `save <secondes> <modifications>` (ex. `REDIS_SAVE_0="900 1"`, `REDIS_SAVE_1="300 10"`). Dès qu'une de ces variables est définie, elles remplacent les valeurs par défaut intégrées `900 1 / 300 10 / 60 10000` ; une chaîne vide produit `save ""` et désactive le RDB. Ignoré dès que la conf déclare elle-même `save`.
 - **Authentification :** lorsque `REDIS_PASSWORD` est défini et que la conf ne contient pas déjà `requirepass`, le Redis embarqué est lancé avec `requirepass`, ce qui maintient la cohérence entre client et serveur BunkerWeb. Le serveur embarqué ne prend en charge que l'utilisateur par défaut — ne définissez `REDIS_USERNAME` que pour cibler un Redis externe avec des ACLs.
 - Les journaux Redis apparaissent avec le préfixe `[REDIS]` dans les journaux Docker et dans `/var/log/bunkerweb/redis.log`.
@@ -2160,7 +2160,7 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 
 | Option                      | Description                                                                                            |
 | --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `--instances "IP1 IP2"`     | Liste séparée par des espaces des instances BunkerWeb (requise pour les modes gestionnaire/Scheduler). |
+| `--instances "IP1 IP2"` | Facultatif pour les modes manager/scheduler ; les workers peuvent être ajoutés plus tard. |
 | `--manager-ip IPs`          | IPs du gestionnaire/Scheduler à mettre en liste blanche (requis pour worker en mode non-interactif).   |
 | `--dns-resolvers "IP1 IP2"` | IPs des résolveurs DNS personnalisés (pour les installations full, manager ou worker).                 |
 | `--api-https`               | Activer HTTPS pour la communication API interne (par défaut : HTTP uniquement).                        |
@@ -2191,7 +2191,7 @@ sudo ./install-bunkerweb.sh --worker --no-wizard
 # Install a specific version
 sudo ./install-bunkerweb.sh --version 1.6.16~rc3
 
-# Manager setup with remote worker instances (instances required)
+# Installation du manager avec des workers distants (liste facultative)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
 
 # Manager avec communication API interne HTTPS
@@ -2215,16 +2215,17 @@ sudo ./install-bunkerweb.sh --dry-run
 # Error: CrowdSec cannot be used with worker installations
 # sudo ./install-bunkerweb.sh --worker --crowdsec  # This will fail
 
-# Error: Instances required for manager in non-interactive mode
-# sudo ./install-bunkerweb.sh --manager --yes  # This will fail without --instances
+# La liste --instances est facultative : le manager avertit si aucun worker n’est configuré.
+# sudo ./install-bunkerweb.sh --manager --yes
 ```
 
 !!! warning "Remarques importantes sur la compatibilité des options"
 
     **CrowdSec Limitations:**
 
-    - Les options CrowdSec (`--crowdsec`, `--crowdsec-appsec`) ne sont compatibles qu'avec le type d'installation `--full` (par défaut)
-    - Ils ne peuvent pas être utilisés avec les installations `--manager`, `--worker`, `--scheduler-only`, `--ui-only` ou `--api-only`
+    - Les options CrowdSec (`--crowdsec`, `--crowdsec-appsec`) sont compatibles avec `--full` (par défaut) et `--manager`.
+    - L’invite interactive CrowdSec est proposée uniquement pour Full Stack ; utilisez les options CLI pour Manager.
+    - Elles ne peuvent pas être utilisées avec `--worker`, `--scheduler-only`, `--ui-only` ou `--api-only`.
 
     **Limitations Redis :**
 
@@ -2238,8 +2239,8 @@ sudo ./install-bunkerweb.sh --dry-run
     - Utilisez `--api-only` pour une installation dédiée du service API
 
     **Exigences relatives aux instances :**
-    - L `--instances` 'option n'est valable qu'avec `--manager` les types d `--scheduler-only` 'installation et
-    - Lors de l'utilisation `--manager` ou `--scheduler-only` avec `--yes` (mode non interactif), l' `--instances` option est obligatoire
+    - L’option `--instances` est uniquement valable avec `--manager` et `--scheduler-only`.
+    - La liste est facultative à l’installation ; si elle est vide, le script avertit et vous pouvez ajouter les workers plus tard.
     - Format: `--instances "192.168.1.10 192.168.1.11 192.168.1.12"`
 
     **Interactif vs non interactif :**
@@ -3195,9 +3196,68 @@ scheduler:
 
 ##### Étape 2 : Création du Déploiement avec Sidecar
 
-###### Structure du Déploiement
+###### Structure du déploiement avec controller (mode automatique recommandé)
 
-Créez un déploiement Kubernetes avec deux conteneurs :
+**Configuration recommandée** avec découverte automatique :
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mon-app-bunkerweb
+  namespace: votre-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mon-app
+  template:
+    metadata:
+      labels:
+        app: mon-app
+      annotations:
+        bunkerweb.io/INSTANCE: "yes"  # Activer la découverte automatique
+    spec:
+      containers:
+        # Votre application
+        - name: mon-app
+          image: mon-image:latest
+          ports:
+            - containerPort: 80  # Port de votre application
+
+        # Sidecar BunkerWeb
+        - name: bunkerweb
+          image: bunkerity/bunkerweb:1.6.16-rc3
+          ports:
+            - containerPort: 8080  # Port HTTP exposé
+            - containerPort: 5000  # API interne (obligatoire)
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"  # Activer le mode Kubernetes
+            - name: API_WHITELIST_IP
+              value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
+            - name: MULTISITE
+              value: "yes"
+            - name: USE_REVERSE_PROXY
+              value: "yes"
+            - name: LOG_LEVEL
+              value: "info"
+```
+
+**Points clés du mode automatique :**
+- ✅ **Annotation obligatoire**: `bunkerweb.io/INSTANCE: "yes"` au niveau du pod
+- ✅ **Variable d’environnement obligatoire**: `KUBERNETES_MODE: "yes"`
+- ✅ **Aucun service headless nécessaire** : le controller communique directement avec les pods via l’API Kubernetes
+- ✅ **Aucune configuration manuelle nécessaire pour** `BUNKERWEB_INSTANCES`
+
+###### Structure du déploiement sans controller (mode manuel)
+
+Si vous n’utilisez pas le controller :
 
 ```yaml
 apiVersion: apps/v1
@@ -3220,7 +3280,7 @@ spec:
         - name: mon-app
           image: mon-image:latest
           ports:
-            - containerPort: 80  # Port sur lequel écoute votre app
+            - containerPort: 80  # Port de votre application
 
         # Sidecar BunkerWeb
         - name: bunkerweb
@@ -3228,12 +3288,7 @@ spec:
           ports:
             - containerPort: 8080  # Port HTTP exposé
             - containerPort: 5000  # API interne (obligatoire)
-              name: bwapi
-            - containerPort: 9113 # Prometheus exporter
-              name: metrics
           env:
-            - name: KUBERNETES_MODE  # OBLIGATOIRE pour le mode controller
-              value: "yes"
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
             - name: API_TOKEN
@@ -3241,26 +3296,7 @@ spec:
                 secretKeyRef:
                   name: bunkerweb-api
                   key: token
-  ---
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: nginx-bunkerweb
-    namespace: bunkerweb
-  spec:
-    type: ClusterIP
-    selector:
-      app: nginx-bw
-    ports:
-      - name: http
-        port: 80
-        targetPort: 8080 # BunkerWeb exposed port
-  ```
-
-**Points clés :**
-- **Annotation obligatoire** : `bunkerweb.io/INSTANCE: "yes"` doit être ajoutée dans `template.metadata.annotations` (au même niveau que `labels`)
-- **Variable d'environnement obligatoire** : `KUBERNETES_MODE: "yes"` active le mode Kubernetes
-- **Pas de service headless nécessaire** : le controller communique directement avec les pods
+```
 
 ###### Variables d'environnement importantes
 

@@ -858,6 +858,138 @@ Para más información, consulta la [documentación oficial de HAProxy](http://d
 
     Revisa `/var/log/bunkerweb/access.log` en cada worker para confirmar que las solicitudes llegan desde la red del PROXY protocol y que los dos workers comparten la carga. Tu clúster BunkerWeb ya está listo para proteger cargas de producción con alta disponibilidad.
 
+### 6. IP flotante con keepalived (sin Load Balancer)
+
+Si no tienes un Load Balancer, puedes ejecutar los workers en modo activo/pasivo con [keepalived](https://www.keepalived.org/). Una IP virtual (VIP) se desplaza entre los workers mediante VRRP, el DNS apunta a la VIP y solo el worker que la posee atiende el tráfico. Es una alternativa a la [sección 5](#5-balanceo-de-carga): el tráfico no se reparte entre los workers, pero un worker que falla es sustituido en unos segundos.
+
+Los ejemplos usan la VIP `192.168.10.100`, `worker01` (`192.168.10.11`, master) y `worker02` (`192.168.10.12`, backup).
+
+**Instala keepalived** en cada worker:
+
+```bash
+# Debian / Ubuntu
+sudo apt install keepalived
+# RHEL / Fedora
+sudo dnf install keepalived
+```
+
+El script de comprobación de salud de BunkerWeb, llamado con el argumento `ok`, sale con código `0` cuando la instancia responde `ok` en `http://127.0.0.1:6000/healthz`. `ok` significa que NGINX está en ejecución y la instancia ha recibido su configuración, incluso mientras aplica una nueva y sigue sirviendo la anterior (desde la versión 1.6.16). El script sale con código `1` mientras la instancia siga en estado `loading` o NGINX esté detenido. Si se llama sin argumentos, el script también acepta `loading`; no uses esa forma aquí, porque un worker recién iniciado tomaría la VIP y mostraría la página «Generating...».
+
+=== "Linux"
+
+    ```bash
+    /usr/share/bunkerweb/helpers/healthcheck.sh ok
+    ```
+
+=== "Docker"
+
+    ```bash
+    /usr/bin/docker compose -f /path/to/docker-compose.yml exec -T bunkerweb /usr/share/bunkerweb/helpers/healthcheck.sh ok
+    ```
+
+**Configura keepalived.** Crea `/etc/keepalived/keepalived.conf` en cada worker. Ajusta `interface` a la interfaz de red (consulta `ip addr`) y usa los mismos valores de `virtual_router_id` y `auth_pass` en ambos workers. En la pestaña Docker, sustituye la línea `script` por el comando `docker compose` anterior (keepalived avisa si el binario no se indica con su ruta completa).
+
+=== "worker01 (master)"
+
+    ```cfg title="/etc/keepalived/keepalived.conf"
+    global_defs {
+        enable_script_security
+        script_user root
+    }
+
+    vrrp_script chk_bunkerweb {
+        script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"
+        interval 2
+        fall 2
+        rise 2
+    }
+
+    vrrp_instance VI_BUNKERWEB {
+        state MASTER
+        interface eth0
+        virtual_router_id 51
+        priority 110
+        advert_int 1
+        authentication {
+            auth_type PASS
+            auth_pass changeme
+        }
+        virtual_ipaddress {
+            192.168.10.100/24
+        }
+        track_script {
+            chk_bunkerweb
+        }
+    }
+    ```
+
+=== "worker02 (backup)"
+
+    ```cfg title="/etc/keepalived/keepalived.conf"
+    global_defs {
+        enable_script_security
+        script_user root
+    }
+
+    vrrp_script chk_bunkerweb {
+        script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"
+        interval 2
+        fall 2
+        rise 2
+    }
+
+    vrrp_instance VI_BUNKERWEB {
+        state BACKUP
+        interface eth0
+        virtual_router_id 51
+        priority 100
+        advert_int 1
+        authentication {
+            auth_type PASS
+            auth_pass changeme
+        }
+        virtual_ipaddress {
+            192.168.10.100/24
+        }
+        track_script {
+            chk_bunkerweb
+        }
+    }
+    ```
+
+La comprobación no tiene `weight`, así que dos fallos consecutivos (unos 4 segundos) ponen el nodo en estado `FAULT` y liberan la VIP. `script_user root` es necesario para ejecutar `docker compose exec`. `enable_script_security` acepta el script porque otros usuarios no pueden modificar los archivos de BunkerWeb. La contraseña `auth_pass` de VRRP se transmite en texto claro y solo protege frente a errores de configuración; mantén los workers en una red de confianza.
+
+!!! note "BunkerWeb 1.6.15"
+    En la versión 1.6.15, `/healthz` responde `loading` en todos los workers durante unos 5 segundos con cada recarga. Usa `fall 4` y `interval 2` en lugar de `fall 2` para que una recarga no ponga ambos workers en estado `FAULT`.
+
+Inicia keepalived en ambos workers:
+
+```bash
+sudo systemctl enable --now keepalived
+```
+
+!!! info "Cortafuegos"
+    VRRP usa el protocolo IP `112` (no es un puerto TCP ni UDP). Permítelo entre los workers, junto con los puertos `80` y `443` hacia los clientes.
+
+!!! tip "IP real"
+    Los clientes se conectan directamente a la VIP, por lo que no hace falta configurar PROXY protocol ni `X-Forwarded-For`. BunkerWeb ve la IP real del cliente de forma predeterminada.
+
+**Verifica la conmutación por error:**
+
+1. En `worker01`, ejecuta `ip addr show eth0`. Debe aparecer la VIP `192.168.10.100`.
+2. Detén BunkerWeb en `worker01`: `sudo systemctl stop bunkerweb` (Linux) o `docker compose stop bunkerweb` (Docker).
+3. Tras unos segundos, la VIP desaparece de `worker01` y aparece en `worker02`. En nuestras pruebas, los clientes recuperaron el servicio en unos 4 segundos al detener el contenedor y en unos 7 segundos cuando solo falló la comprobación de salud.
+4. Inicia BunkerWeb de nuevo. `worker01` solo recupera la VIP cuando la comprobación pasa, por lo que nunca atiende tráfico mientras está cargando.
+5. Sigue los cambios de estado con `sudo journalctl -u keepalived -f`.
+
+### Consideraciones
+
+- **Sidecar de Docker.** Si keepalived se ejecuta en un contenedor con `network_mode: "service:bunkerweb"`, pierde su interfaz de red cuando se reinicia el contenedor de BunkerWeb y no vuelve a obtener la VIP. Añadir `depends_on: { bunkerweb: { condition: service_started, restart: true } }` al servicio keepalived solo cubre los reinicios hechos mediante Compose (`docker compose restart` o `up`). No cubre un reinicio automático por la política de reinicio de Docker (fallo, falta de memoria) ni un `docker restart` normal. En esos casos, reinicia juntos los contenedores de keepalived y BunkerWeb, o ejecuta keepalived en el host como en la pestaña Docker anterior.
+- **Manager no disponible.** Los workers que ya tienen su configuración siguen respondiendo `ok` y conservan la VIP. Un worker que se reinicia mientras el manager está caído permanece en estado `loading` y no obtiene la VIP. Si ambos se reinician, ningún worker puede asumirla y el servicio queda inactivo hasta que vuelva el manager.
+- **Configuración.** El manager envía la configuración a ambos workers sin importar el estado de la VIP, así que el worker de reserva ya tiene los últimos ajustes cuando toma el relevo.
+- **Estado compartido.** Los bloqueos, los contadores y las sesiones residen en cada worker. Un cliente bloqueado en `worker01` no queda bloqueado en `worker02` tras un fallo. Activa Redis (`USE_REDIS=yes`, consulta los ajustes de Redis/Valkey) y usa la misma instancia Redis en ambos workers para compartir bloqueos y contadores. Redis por sí solo no mantiene las sesiones válidas entre workers: `SESSIONS_SECRET` y `SESSIONS_NAME` tienen el valor `random` de forma predeterminada y se generan por instancia. Define valores fijos e idénticos para ambos en el manager (son ajustes globales que se envían a los dos workers).
+- **Let's Encrypt.** El token del desafío HTTP se envía a todas las instancias registradas en el manager, por lo que ambos workers pueden responder.
+
 ## Usando mecanismos de resolución DNS personalizados
 
 La configuración de NGINX de BunkerWeb se puede personalizar para usar diferentes resolutores de DNS según tus necesidades. Esto puede ser particularmente útil en varios escenarios:
