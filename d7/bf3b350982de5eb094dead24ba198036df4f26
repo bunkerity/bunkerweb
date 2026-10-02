@@ -1,0 +1,18 @@
+CHANGELOG.md
+  h_a33a1e80933106 11-12
+src/common/core/letsencrypt/jobs/certbot-renew.py
+  h_a33a1e80933106 3,6,10,58-85,140-141,193-194,252
+src/scheduler/JobScheduler.py
+  h_a33a1e80933106 344,353-354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d7bf3b350982de5eb094dead24ba198036df4f26",
+  "prompts": {},
+  "humans": {
+    "h_a33a1e80933106": {
+      "author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
