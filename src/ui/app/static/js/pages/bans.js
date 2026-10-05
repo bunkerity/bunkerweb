@@ -1128,14 +1128,16 @@ $(document).ready(function () {
                     "tooltip.button.update_ban_duration",
                     "Update ban duration",
                   );
-              const investigateUrl = `${crowdsecUrl}?ip=${encodeURIComponent(
-                String(row.ip || ""),
-              )}`;
-
-              return `
-                <div class="d-flex justify-content-evenly">
-                  <a class="btn btn-outline-primary btn-sm me-1"
-                     href="${investigateUrl}"
+              // Same rule as the reports: only a CrowdSec ban has CrowdSec evidence to investigate
+              const isCrowdsecBan =
+                String(row.reason || "")
+                  .trim()
+                  .toLowerCase() === "crowdsec";
+              const investigateLink = isCrowdsecBan
+                ? `<a class="btn btn-outline-primary btn-sm me-1"
+                     href="${crowdsecUrl}?ip=${encodeURIComponent(
+                       String(row.ip || ""),
+                     )}"
                      data-bs-toggle="tooltip"
                      data-bs-placement="bottom"
                      data-bs-original-title="${t(
@@ -1143,7 +1145,12 @@ $(document).ready(function () {
                        "Investigate",
                      )}">
                     <i class="bx bx-search-alt bx-xs" aria-hidden="true"></i>
-                  </a>
+                  </a>`
+                : "";
+
+              return `
+                <div class="d-flex justify-content-evenly">
+                  ${investigateLink}
                   <button type="button"
                           class="btn btn-outline-danger btn-sm me-1 unban-single${readOnlyClass}"
                           data-ip="${row.ip}"

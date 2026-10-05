@@ -6,6 +6,7 @@
 - [BUGFIX] `jobs`: the update check stays on the installed release line; a newer line such as 1.7 only logs a link to the upgrade guide.
 - [BUGFIX] `ui`: the language selector flag changes with the language. (Fixes #4002)
 - [BUGFIX] `ui`: the Unban button tooltip shows the IP address instead of `{{ip}}`. (Fixes #4001)
+- [BUGFIX] `ui`: the Bans page offers Investigate only for CrowdSec bans. (Refs #4000)
 - [DOCKER] Final releases also publish a floating `1.6` image tag that follows the newest 1.6.x.
 - [MISC] `install-bunkerweb.sh` pulls the `1.6` Docker tag by default, so an install stays on 1.6.x once a newer line ships.
 - [DOCS] Links in the documentation, installer, service files and examples point to the 1.6 docs instead of `latest`.
