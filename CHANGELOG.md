@@ -4,6 +4,7 @@
 
 - [BUGFIX] `antibot`: the JavaScript challenge no longer fails on every attempt and loops until the client is rate limited.
 - [DOCKER] Final releases also publish a floating `1.6` image tag that follows the newest 1.6.x.
+- [MISC] `install-bunkerweb.sh` pulls the `1.6` Docker tag by default, so an install stays on 1.6.x once a newer line ships.
 
 ## v1.6.16~rc3 - 2026/10/02
 
