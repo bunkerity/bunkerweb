@@ -3,6 +3,7 @@
 ## v1.6.16~rc4 - 2026/10/??
 
 - [BUGFIX] `antibot`: the JavaScript challenge no longer fails on every attempt and loops until the client is rate limited.
+- [BUGFIX] `crowdsec`: serving a captcha no longer fails with `attempt to concatenate a nil value`.
 - [BUGFIX] `jobs`: the update check stays on the installed release line; a newer line such as 1.7 only logs a link to the upgrade guide.
 - [BUGFIX] `ui`: the language selector flag changes with the language. (Fixes #4002)
 - [BUGFIX] `ui`: the Unban button tooltip shows the IP address instead of `{{ip}}`. (Fixes #4001)

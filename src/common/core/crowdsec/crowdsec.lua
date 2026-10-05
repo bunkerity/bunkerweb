@@ -246,7 +246,11 @@ function crowdsec:access()
 	-- Do the check
 	local ok, err, banned, evidence = bouncer.Allow(self.ctx.bw.remote_addr, challenge_prefixes[scope])
 	if not ok then
-		return self:ret(false, "Error while executing CrowdSec bouncer : " .. err)
+		if err == nil then
+			-- The bouncer sent its challenge page and returns nothing: the request is answered
+			return self:ret(true, "CrowdSec challenge served", HTTP_OK)
+		end
+		return self:ret(false, "Error while executing CrowdSec bouncer : " .. tostring(err))
 	end
 	if banned then
 		if type(evidence) == "table" then
