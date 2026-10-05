@@ -9,6 +9,7 @@
 - [BUGFIX] `crowdsec`: serving a captcha no longer fails with `attempt to concatenate a nil value`.
 - [BUGFIX] `jobs`: the update check stays on the installed release line; a newer line such as 1.7 only logs a link to the upgrade guide.
 - [BUGFIX] `letsencrypt`: the certbot hooks log the instance API's HTTP status and reply instead of `KeyError: 'status'`.
+- [BUGFIX] `ui`: an updated plugin replaces its page, routes and templates instead of leaving the old ones served.
 - [BUGFIX] `ui`: the language selector flag changes with the language. (Fixes #4002)
 - [BUGFIX] `ui`: the Unban button tooltip shows the IP address instead of `{{ip}}`. (Fixes #4001)
 - [BUGFIX] `ui`: the Bans page offers Investigate only for CrowdSec bans. (Refs #4000)
