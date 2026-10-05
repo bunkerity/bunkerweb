@@ -1,0 +1,29 @@
+src/ui/app/static/js/i18n.js
+  s_1487d9e64548ca::t_3f7c2426375294 96
+CHANGELOG.md
+  s_1981a6d47f11f8::t_62c65b721b7960 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "04df0376479a60c35ecae811f0f7942dd9f6920c",
+  "prompts": {},
+  "sessions": {
+    "s_1487d9e64548ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4420bb9e-5d55-43aa-949a-98b3f0710d09",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_1981a6d47f11f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81d4e090-9d15-4bff-bc6b-4a6e5d427958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
