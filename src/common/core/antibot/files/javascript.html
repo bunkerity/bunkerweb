@@ -726,6 +726,7 @@
             class="bw-hidden"
             action="{*antibot_uri*}"
             id="form"
+            data-random="{*random*}"
           >
             <input type="hidden" name="challenge" id="challenge" />
             <input type="hidden" name="next" value="{{next}}" />
@@ -1359,7 +1360,10 @@
       }
       // end powCore
       (function () {
-        var prefixText = "{*random*}";
+        // Read from the DOM: a string literal here lets the image minifier fold its .length to the placeholder's
+        var prefixText = document
+          .getElementById("form")
+          .getAttribute("data-random");
         var difficulty = parseInt("{*antibot_difficulty*}", 10);
         if (!(difficulty >= 16 && difficulty <= 28)) difficulty = 16;
         var prefix = new Uint8Array(prefixText.length);

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.16~rc4 - 2026/10/??
+
+- [BUGFIX] `antibot`: the JavaScript challenge no longer fails on every attempt and loops until the client is rate limited.
+
 ## v1.6.16~rc3 - 2026/10/02
 
 - [SECURITY] A restart with `KEEP_CONFIG_ON_RESTART=yes` keeps every access control enforced instead of disabling most of them until the next config push.
