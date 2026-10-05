@@ -1,0 +1,30 @@
+src/common/core/antibot/files/javascript.html
+  s_4600783926e6d7::t_33a384a8f3f45c 729,1363
+  s_4600783926e6d7::t_d0d1305d92bd27 1364-1366
+CHANGELOG.md
+  s_1981a6d47f11f8::t_62c65b721b7960 3-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4e8835e3614d0bee2de0bb5a04497a7a5f67517f",
+  "prompts": {},
+  "sessions": {
+    "s_1981a6d47f11f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81d4e090-9d15-4bff-bc6b-4a6e5d427958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
