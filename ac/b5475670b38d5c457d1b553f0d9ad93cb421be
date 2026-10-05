@@ -1,0 +1,59 @@
+CHANGELOG.md
+  s_1981a6d47f11f8::t_62c65b721b7960 7
+docs/upgrading.md
+  s_2717e4bbf1068f::t_54540434d53a11 52
+misc/install-bunkerweb.sh
+  s_4600783926e6d7::t_82cda9a301b8c3 3265-3266,3268,3271-3277
+  s_2717e4bbf1068f::t_b9f5b7efb10f7a 2874,2939,3077,4239,4488,6817,7054,8739,9186,9234
+  s_4600783926e6d7::t_b110a7c23c6730 3227-3228,3234
+  s_43fdbc5d705273::t_5e950cf3ad7989 3204,3208,7924
+  s_4600783926e6d7::t_9010d165beabb8 3214-3217,3220-3221
+docs/fr/upgrading.md
+  s_2717e4bbf1068f::t_54540434d53a11 53
+docs/es/upgrading.md
+  s_2717e4bbf1068f::t_54540434d53a11 53
+docs/zh/upgrading.md
+  s_2717e4bbf1068f::t_54540434d53a11 52
+docs/de/upgrading.md
+  s_2717e4bbf1068f::t_54540434d53a11 54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "acb5475670b38d5c457d1b553f0d9ad93cb421be",
+  "prompts": {},
+  "sessions": {
+    "s_1981a6d47f11f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "81d4e090-9d15-4bff-bc6b-4a6e5d427958",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2717e4bbf1068f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8b608e72-daaf-48f3-be56-dac542ffa651",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_43fdbc5d705273": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96a2837d-dbda-4515-9b39-c3bfb6ecc2a2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
