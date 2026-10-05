@@ -1115,7 +1115,10 @@ $(document).ready(function () {
                     "tooltip.readonly_mode",
                     "This action is not allowed in read-only mode.",
                   )
-                : t("tooltip.button.unban_ip", "Unban this IP address");
+                : t("tooltip.button.unban_ip", {
+                    defaultValue: "Unban {{ip}}",
+                    ip: row.ip,
+                  });
               const updateTooltip = isReadOnly
                 ? t(
                     "tooltip.readonly_mode",
