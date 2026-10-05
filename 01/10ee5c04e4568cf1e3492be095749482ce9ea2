@@ -1,0 +1,29 @@
+src/deps/package.json
+  s_5bf07aee179e4f::t_a563f1892af01c 6
+src/deps/package-lock.json
+  s_ad0f286dcdc004::t_12866e63a0cbd5 2,11,79-81,84-87,91-93,96,200-202,205,208,227-229,232-234,237,240-243,246-248,251-254,508-510,543-547,549-552,732-734,737,740,746,752,844-846,859,867-868,879-881,1261-1263,1266-1270,1332-1334,1337-1338,1341-1344,1348-1350,1353,1356-1359,1542-1544,1547-1549,1552,1558-1574,1585-1587,1590,1593,1595,1598,1602-1604,1607
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0110ee5c04e4568cf1e3492be095749482ce9ea2",
+  "prompts": {},
+  "sessions": {
+    "s_5bf07aee179e4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61f4b95d-8691-40d7-941c-85c5710efd76",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ad0f286dcdc004": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a64a5657-3127-4444-a5a9-2dad9d71b783",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
