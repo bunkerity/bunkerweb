@@ -10,7 +10,11 @@ on:
       IMAGE:
         required: true
         type: string
+      IMAGE_NAME:
+        required: true
+        type: string
       TAGS:
+        description: Comma-separated tag names, published on every registry
         required: true
         type: string
       MANIFEST_SHA256:
@@ -64,6 +68,15 @@ jobs:
       - name: Promote exact tested indexes and attestations
         env:
           IMAGE: ${{ inputs.IMAGE }}
-          TAGS: ${{ inputs.TAGS }}
+          IMAGE_NAME: ${{ inputs.IMAGE_NAME }}
+          TAG_NAMES: ${{ inputs.TAGS }}
           MANIFEST_SHA256: ${{ inputs.MANIFEST_SHA256 }}
-        run: python3 .github/scripts/release_artifacts.py promote --image "$IMAGE" --tags "$TAGS"
+        run: |
+          set -euo pipefail
+          TAGS=""
+          for name in ${TAG_NAMES//,/ }; do
+            for registry in docker.io/bunkerity ghcr.io/bunkerity registry.gitlab.com/bunkerity/bunkerweb; do
+              TAGS="${TAGS:+$TAGS,}${registry}/${IMAGE_NAME}:${name}"
+            done
+          done
+          python3 .github/scripts/release_artifacts.py promote --image "$IMAGE" --tags "$TAGS"

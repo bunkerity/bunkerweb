@@ -31,6 +31,8 @@ jobs:
       channel: ${{ steps.derive.outputs.channel }}
       prerelease: ${{ steps.derive.outputs.prerelease }}
       hidden: ${{ steps.derive.outputs.hidden }}
+      docs_aliases: ${{ steps.derive.outputs.docs_aliases }}
+      docker_tags: ${{ steps.derive.outputs.docker_tags }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -116,12 +118,44 @@ jobs:
             *)       CHANNEL=latest ; PRERELEASE=false ; HIDDEN=false ;;
           esac
 
+          # A final owns the floating <major>.<minor> names only when it is the highest final of
+          # its minor, and `latest` only when it is the highest final across all v* tags, so an
+          # older patch released late never moves either name backward.
+          case "$TAG" in
+            *-rc*|*-beta*)
+              DOCS_ALIASES="$CHANNEL"
+              DOCKER_TAGS="$CHANNEL,$VERSION"
+              ;;
+            *)
+              MINOR="${VERSION%.*}"
+              REMOTE_TAGS="$(git ls-remote --tags --refs "https://github.com/${GITHUB_REPOSITORY}.git" 'refs/tags/v*')" || {
+                echo "::error::Cannot list the remote tags to decide the floating aliases"
+                exit 1
+              }
+              FINALS="$({ printf '%s\n' "$REMOTE_TAGS" | sed 's|.*refs/tags/||'; echo "$TAG"; } | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -uV)"
+              HIGHEST="$(printf '%s\n' "$FINALS" | tail -n 1)"
+              HIGHEST_MINOR="$(printf '%s\n' "$FINALS" | grep "^v${MINOR//./\\.}\." | tail -n 1)"
+              DOCS_ALIASES=""
+              DOCKER_TAGS="$VERSION"
+              if [ "$HIGHEST_MINOR" = "$TAG" ]; then
+                DOCS_ALIASES="$MINOR"
+                DOCKER_TAGS="$MINOR,$DOCKER_TAGS"
+              fi
+              if [ "$HIGHEST" = "$TAG" ]; then
+                DOCS_ALIASES="latest${DOCS_ALIASES:+ $DOCS_ALIASES}"
+                DOCKER_TAGS="latest,$DOCKER_TAGS"
+              fi
+              ;;
+          esac
+
           {
             echo "version=$VERSION"
             echo "versionrpm=${VERSION//-/_}"
             echo "channel=$CHANNEL"
             echo "prerelease=$PRERELEASE"
             echo "hidden=$HIDDEN"
+            echo "docs_aliases=$DOCS_ALIASES"
+            echo "docker_tags=$DOCKER_TAGS"
           } >> "$GITHUB_OUTPUT"
 
           echo "Releasing \`$VERSION\` on the \`$CHANNEL\` channel, from signed tag \`$TAG\`." >> "$GITHUB_STEP_SUMMARY"
@@ -436,7 +470,8 @@ jobs:
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: ${{ matrix.source }}
-      TAGS: bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},registry.gitlab.com/bunkerity/bunkerweb/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},registry.gitlab.com/bunkerity/bunkerweb/${{ matrix.image }}:${{ needs.prepare.outputs.version }}
+      IMAGE_NAME: ${{ matrix.image }}
+      TAGS: ${{ needs.prepare.outputs.docker_tags }}
       MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -619,7 +654,7 @@ jobs:
     uses: ./.github/workflows/push-doc.yml
     with:
       VERSION: ${{ needs.prepare.outputs.version }}
-      ALIAS: ${{ needs.prepare.outputs.channel }}
+      ALIAS: ${{ needs.prepare.outputs.docs_aliases }}
       HIDDEN: ${{ needs.prepare.outputs.hidden == 'true' }}
     secrets:
       BUNKERBOT_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
