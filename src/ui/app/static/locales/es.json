@@ -1431,6 +1431,8 @@
         "title": "Descargar Registros"
       },
       "extract_config": {
+        "hide_passwords": "Ocultar contraseñas",
+        "hide_passwords_warning": "Las exportaciones sin ocultar contienen credenciales. Compártalas solo por un canal de soporte privado.",
         "title": "Extraer Configuración"
       },
       "support_link": {

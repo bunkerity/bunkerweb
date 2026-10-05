@@ -5,6 +5,7 @@
 - [FEATURE] `BANS_TLS_DROP_REASONS` closes the TLS handshake of banned IPs for the listed ban reasons instead of serving the 403 page.
 - [FEATURE] `crowdsec`: `CROWDSEC_BAN_REFRESH` turns CrowdSec blocks into short, renewed bans listed on the Bans page and removed with their decisions on Unban.
 - [FEATURE] `ui`: an admin-only Web UI Diagnostics bundle on the Support page; `/support/logs` also anonymizes IPv6 addresses and credentials.
+- [SECURITY] `ui`: the Support page configuration export masks password settings and the database password by default; only an admin can export clear values.
 - [BUGFIX] `antibot`: the JavaScript challenge no longer fails on every attempt and loops until the client is rate limited.
 - [BUGFIX] `crowdsec`: serving a captcha no longer fails with `attempt to concatenate a nil value`.
 - [BUGFIX] `jobs`: the update check stays on the installed release line; a newer line such as 1.7 only logs a link to the upgrade guide.

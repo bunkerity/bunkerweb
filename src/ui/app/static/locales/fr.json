@@ -1431,6 +1431,8 @@
         "title": "Télécharger les Logs"
       },
       "extract_config": {
+        "hide_passwords": "Masquer les mots de passe",
+        "hide_passwords_warning": "Un export non masqué contient des identifiants. Partagez-le uniquement par un canal de support privé.",
         "title": "Extraire la Configuration"
       },
       "support_link": {

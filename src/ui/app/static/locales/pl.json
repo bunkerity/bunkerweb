@@ -1431,6 +1431,8 @@
         "title": "Pobierz logi"
       },
       "extract_config": {
+        "hide_passwords": "Ukryj hasła",
+        "hide_passwords_warning": "Eksporty bez ukrywania zawierają dane uwierzytelniające. Udostępniaj je tylko przez prywatny kanał wsparcia.",
         "title": "Wyodrębnij konfigurację"
       },
       "support_link": {

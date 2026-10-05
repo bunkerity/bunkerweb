@@ -1431,6 +1431,8 @@
         "title": "I-download ang Mga Log"
       },
       "extract_config": {
+        "hide_passwords": "Itago ang mga password",
+        "hide_passwords_warning": "Ang mga export na hindi nakatago ay may lamang mga kredensyal. Ibahagi lamang ito sa pribadong channel ng suporta.",
         "title": "Kunin ang Configuration"
       },
       "support_link": {

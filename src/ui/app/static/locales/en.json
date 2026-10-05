@@ -1431,6 +1431,8 @@
         "title": "Download Logs"
       },
       "extract_config": {
+        "hide_passwords": "Hide passwords",
+        "hide_passwords_warning": "Unchecked exports contain credentials. Share them only through a private support channel.",
         "title": "Extract Configuration"
       },
       "support_link": {

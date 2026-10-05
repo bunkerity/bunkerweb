@@ -1431,6 +1431,8 @@
         "title": "下载日志"
       },
       "extract_config": {
+        "hide_passwords": "隐藏密码",
+        "hide_passwords_warning": "未隐藏的导出文件包含凭据。请仅通过私密支持渠道分享。",
         "title": "提取配置"
       },
       "support_link": {

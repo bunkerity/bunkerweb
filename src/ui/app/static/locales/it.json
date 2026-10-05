@@ -1431,6 +1431,8 @@
         "title": "Download Log"
       },
       "extract_config": {
+        "hide_passwords": "Nascondi le password",
+        "hide_passwords_warning": "Le esportazioni non mascherate contengono credenziali. Condividile solo tramite un canale di supporto privato.",
         "title": "Estrai Configurazione"
       },
       "support_link": {

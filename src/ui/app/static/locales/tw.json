@@ -1431,6 +1431,8 @@
         "title": "下載日誌"
       },
       "extract_config": {
+        "hide_passwords": "隱藏密碼",
+        "hide_passwords_warning": "未隱藏的匯出檔案包含憑證。請僅透過私人支援管道分享。",
         "title": "擷取設定"
       },
       "support_link": {

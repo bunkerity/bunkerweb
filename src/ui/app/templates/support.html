@@ -46,7 +46,7 @@
                             <a href="{{ support_url }}/config"
                                role="button"
                                aria-pressed="true"
-                               class="btn btn-outline-secondary justify-content-center align-items-center"
+                               class="btn btn-outline-secondary justify-content-center align-items-center support-config-link"
                                target="_blank"
                                rel="noopener">
                                 <i class="bx bx-cog me-0 me-md-2"></i>
@@ -80,7 +80,7 @@
                                     <a href="{{ support_url }}/config?service={{ service }}"
                                        role="button"
                                        aria-pressed="true"
-                                       class="dropdown-item"
+                                       class="dropdown-item support-config-link"
                                        target="_blank"
                                        rel="noopener">{{ service }}</a>
                                 </li>
@@ -88,6 +88,21 @@
                         </ul>
                     </div>
                 </div>
+                {% if current_user.admin %}
+                    <div class="card-footer border-0 px-2 pb-0">
+                        <div class="form-check mb-1">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="mask-passwords"
+                                   checked>
+                            <label class="form-check-label"
+                                   for="mask-passwords"
+                                   data-i18n="support.card.extract_config.hide_passwords">Hide passwords</label>
+                        </div>
+                        <small class="text-muted"
+                               data-i18n="support.card.extract_config.hide_passwords_warning">Unchecked exports contain credentials. Share them only through a private support channel.</small>
+                    </div>
+                {% endif %}
             </div>
         </div>
         <div class="col-12 col-xl-4">

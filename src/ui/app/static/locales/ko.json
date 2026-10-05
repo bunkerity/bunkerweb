@@ -1431,6 +1431,8 @@
         "title": "로그 다운로드"
       },
       "extract_config": {
+        "hide_passwords": "비밀번호 숨기기",
+        "hide_passwords_warning": "숨기지 않은 내보내기에는 자격 증명이 포함됩니다. 비공개 지원 채널을 통해서만 공유하세요.",
         "title": "설정 추출"
       },
       "support_link": {

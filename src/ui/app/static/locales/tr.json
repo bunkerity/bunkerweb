@@ -1431,6 +1431,8 @@
         "title": "Kayıtları İndir"
       },
       "extract_config": {
+        "hide_passwords": "Parolaları gizle",
+        "hide_passwords_warning": "Gizlenmemiş dışa aktarımlar kimlik bilgileri içerir. Bunları yalnızca özel bir destek kanalı üzerinden paylaşın.",
         "title": "Yapılandırmayı Çıkar"
       },
       "support_link": {

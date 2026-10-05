@@ -1431,6 +1431,8 @@
         "title": "Unduh Log"
       },
       "extract_config": {
+        "hide_passwords": "Sembunyikan kata sandi",
+        "hide_passwords_warning": "Ekspor tanpa penyembunyian berisi kredensial. Bagikan hanya melalui kanal dukungan pribadi.",
         "title": "Ekstrak Konfigurasi"
       },
       "support_link": {
