@@ -356,7 +356,7 @@
                                                accept=".json,application/json"
                                                {% if not can_edit_template %}disabled{% endif %}>
                                         <i class="bx bx-upload"></i>&nbsp;
-                                        <span data-i18n="template.editor.raw_editor_upload_template">Upload template JSON</span>
+                                        <span data-i18n="template.editor.raw_editor_upload_template">Upload template JSON (.json only)</span>
                                     </label>
                                 </div>
                             </div>
@@ -366,7 +366,7 @@
                                 <div class="raw-template-drop-target" aria-hidden="true">
                                     <div class="raw-template-drop-label">
                                         <i class="bx bx-import bx-lg mb-2"></i>
-                                        <span data-i18n="template.editor.raw_editor_drop_hint">Drop a template JSON file to replace the current content.</span>
+                                        <span data-i18n="template.editor.raw_editor_drop_hint">Drop a template JSON file (.json only) to replace the current content.</span>
                                     </div>
                                 </div>
                                 <div id="raw-template-editor"
@@ -398,11 +398,11 @@
                                 <div class="raw-config-dropzone-content">
                                     <i class="bx bx-file-import bx-lg mb-3 text-primary"></i>
                                     <p class="mb-1" data-i18n="template.editor.raw_configs_drop_hint">
-                                        Drag and drop config files here or click to browse.
+                                        Drag and drop config files here or click to browse (.conf, .cfg, .txt)
                                     </p>
                                     <p class="text-muted small mb-3"
                                        data-i18n="template.editor.raw_configs_drop_supported">
-                                        Supported formats: .conf, .txt, .json, .lua, .tmpl, .cfg
+                                        Supported formats: .conf, .cfg, .txt
                                     </p>
                                     <button type="button"
                                             id="raw-config-browse"
@@ -501,7 +501,7 @@
                     </ul>
                     <div class="mb-3">
                         <label class="form-label fw-semibold"
-                               data-i18n="template.editor.missing_configs_upload_label">Upload missing configs</label>
+                               data-i18n="template.editor.missing_configs_upload_label">Upload missing configs (.conf, .cfg, .txt)</label>
                         <div id="missing-configs-dropzone"
                              class="missing-configs-dropzone text-center"
                              role="button"
@@ -511,7 +511,7 @@
                                 <i class="bx bx-cloud-upload bx-lg mb-2 text-primary"></i>
                                 <p class="mb-1 fw-semibold"
                                    data-i18n="template.editor.missing_configs_drop_hint">
-                                    Drag and drop config files here
+                                    Drag and drop config files here (.conf, .cfg, .txt)
                                 </p>
                                 <p class="text-muted small mb-3"
                                    data-i18n="template.editor.missing_configs_drop_or">or</p>

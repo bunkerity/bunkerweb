@@ -62,7 +62,7 @@
                 data-bs-original-title="Fetch global settings and apply them to the current template"
                 data-i18n="tooltip.fetch_global_settings">
             <i class="bx bx-sm bx-download"></i>
-            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.fetch_global">Fetch Global</span>
+            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.fetch_global">Fetch Global Settings</span>
         </span>
     </button>
     {% if current_endpoint != "global-config" and current_endpoint != 'global-settings' %}
@@ -345,8 +345,8 @@
                         </div>
                     {% else %}
                         <div class="text-center">
-                            <h5 class="text-dark fw-bold mt-5" data-i18n="status.no_steps">No steps available</h5>
-                            <p class="text-muted" data-i18n="status.no_steps_description">This template does not have any steps to configure</p>
+                            <h5 class="text-dark fw-bold mt-5" data-i18n="status.no_steps">No Steps Available</h5>
+                            <p class="text-muted" data-i18n="status.no_steps_description">This template does not have any steps to configure.</p>
                         </div>
                     {% endif %}
                 {% else %}
@@ -357,7 +357,7 @@
                             This service currently uses template "{{ selected_template }}" which is of method "{{ template_method }}"
                         </h5>
                         <p class="text-muted" data-i18n="status.template_in_use_description">
-                            Therefore no changes outside of the current template are allowed, please make changes to the current template or via the advanced/raw mode
+                            Changes outside the current template are not allowed. Please make changes using the current template or switch to Advanced/Raw mode.
                         </p>
                     </div>
                 {% endif %}
@@ -374,7 +374,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" data-i18n="modal.title.reset_template_config">Reset template configuration?</h5>
+                <h5 class="modal-title" data-i18n="modal.title.reset_template_config">Reset Template Configuration?</h5>
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="modal"
@@ -392,7 +392,7 @@
                 <button id="confirm-reset-template-config"
                         class="btn btn-outline-danger me-2"
                         data-bs-dismiss="modal"
-                        data-i18n="modal.button.reset_template_confirm">Reset template configuration</button>
+                        data-i18n="modal.button.reset_template_confirm">Reset Template Configuration</button>
             </div>
         </div>
     </div>
@@ -406,7 +406,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" data-i18n="modal.title.fetch_global_settings">Apply global settings?</h5>
+                <h5 class="modal-title" data-i18n="modal.title.fetch_global_settings">Apply Global Settings?</h5>
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="modal"

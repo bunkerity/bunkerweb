@@ -68,7 +68,7 @@
                         data-bs-placement="bottom"
                         data-bs-original-title="Does the last Job's execution was successful?"
                         data-i18n="tooltip.table.jobs.last_run">
-                        <span data-i18n="table.header.last_run">Last run</span>
+                        <span data-i18n="table.header.last_run">Last Run</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
@@ -100,7 +100,7 @@
                             {% if job_data['history'] %}
                                 <i class="bx bx-sm bx-{% if job_data['history'][0]['success'] %}check text-success{% else %}x text-danger{% endif %}"></i>
                             {% else %}
-                                <span data-i18n="status.no_history">No history</span>
+                                <span data-i18n="status.no_history">No history available.</span>
                             {% endif %}
                         </td>
                         <td>
@@ -124,12 +124,12 @@
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
                                                 <div class="ms-2 me-auto">
-                                                    <div class="fw-bold" data-i18n="job.history.start_date">Start date</div>
+                                                    <div class="fw-bold" data-i18n="job.history.start_date">Start Date</div>
                                                 </div>
                                             </li>
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
-                                                <div class="fw-bold" data-i18n="job.history.end_date">End date</div>
+                                                <div class="fw-bold" data-i18n="job.history.end_date">End Date</div>
                                             </li>
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
@@ -200,7 +200,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content position-relative">
                 <div class="modal-header">
-                    <h5 class="modal-title" data-i18n="modal.title.job_history">Last 10 Job's executions</h5>
+                    <h5 class="modal-title" data-i18n="modal.title.job_history">Last 10 Job Executions</h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"

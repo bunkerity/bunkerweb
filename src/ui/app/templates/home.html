@@ -53,7 +53,7 @@
                 </p>
                 <a class="ps-4 text-underline text-white-80" href="{{ url_for('pro') }}">
                     {% if is_pro_version %}
-                        <span data-i18n="link.more_info">More info</span>
+                        <span data-i18n="link.more_info">More Info</span>
                     {% else %}
                         <span data-i18n="link.upgrade">Upgrade?</span>
                     {% endif %}
@@ -231,7 +231,7 @@
                     <div class="card-header p-2">
                         <div class="card-title mb-0">
                             <h5 class="mb-1 me-2 don-jose"
-                                data-i18n="dashboard.chart.request_status.title">Request status</h5>
+                                data-i18n="dashboard.chart.request_status.title">Request Status Distribution</h5>
                             <small class="text-muted">
                                 {% if statuses_all_time %}
                                     <i class='bx bx-infinite'></i> <span data-i18n="dashboard.window.all_time">All time</span>
@@ -253,7 +253,7 @@
                     <div class="card-header p-2">
                         <div class="card-title mb-0">
                             <h5 class="mb-1 me-2 don-jose"
-                                data-i18n="dashboard.chart.top_blocked_ips.title">Top 10 - Blocked IPs</h5>
+                                data-i18n="dashboard.chart.top_blocked_ips.title">Top 10 Blocked IPs</h5>
                         </div>
                     </div>
                     <div class="card-body d-flex align-items-center justify-content-center">
@@ -263,7 +263,7 @@
                         {% else %}
                             <div class="text-center mt-2">
                                 <p class="g-3 p-2 text-primary rounded-lg fw-bold"
-                                   data-i18n="status.no_data">No data to show</p>
+                                   data-i18n="status.no_data">No data</p>
                             </div>
                         {% endif %}
                     </div>
@@ -275,7 +275,7 @@
                         <div class="card-title mb-0">
                             <h5 class="me-2 don-jose mb-0"
                                 data-i18n="dashboard.chart.blocked_request_countries.title">
-                                Blocked Requests countries
+                                Blocked Requests by Country
                             </h5>
                         </div>
                     </div>
@@ -295,7 +295,7 @@
                            href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
                            target="_blank"
                            rel="noopener"
-                           data-i18n="link.see_more">See more</a>
+                           data-i18n="link.see_more">See More</a>
                     </div>
                 </div>
                 <div class="bg-bw-green position-relative w-100 p-2 text-white rounded fw-bold overflow-hidden">
@@ -316,7 +316,7 @@
                 </div>
                 <div id="data-news-container-home" class="mt-3">
                     <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
-                       data-i18n="status.news_connection_error">Impossible to connect to blog news.</p>
+                       data-i18n="status.news_connection_error">Could not connect to the blog for news updates.</p>
                 </div>
             </div>
         </div>
@@ -325,7 +325,7 @@
                 <div class="card-header p-2">
                     <div class="card-title mb-0">
                         <h5 class="mb-1 me-2 don-jose"
-                            data-i18n="dashboard.chart.blocking_status.title">Blocking status</h5>
+                            data-i18n="dashboard.chart.blocking_status.title">Blocking Status Over Time</h5>
                     </div>
                 </div>
                 <div class="card-body">
