@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "支援連結"
+      },
+      "ui_bundle": {
+        "button": "下載診斷包",
+        "help": "日誌、外掛版本、環境及近期錯誤。私人資料將被匿名化。",
+        "title": "Web UI 診斷"
       }
     }
   },

@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "Link Supporto"
+      },
+      "ui_bundle": {
+        "button": "Scarica pacchetto",
+        "help": "Log, versioni dei plugin, ambiente ed errori recenti. I dati privati vengono anonimizzati.",
+        "title": "Diagnostica della Web UI"
       }
     }
   },

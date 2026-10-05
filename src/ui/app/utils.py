@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from datetime import datetime
+from logging import Formatter
 from os import _exit
 from os.path import sep
 from pathlib import Path
@@ -19,12 +20,17 @@ from regex import compile as re_compile, match
 from requests import get
 
 from common_utils import fetch_bunkerweb_releases, get_version, pick_latest_line_release  # type: ignore
-from logger import getLogger  # type: ignore
+from logger import DATE_FORMAT, LOG_FORMAT, getLogger  # type: ignore
+
+from app.support_bundle import RING_HANDLER
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
 LOGGER = getLogger("UI")
+RING_HANDLER.setFormatter(Formatter(LOG_FORMAT, DATE_FORMAT))
+if RING_HANDLER not in LOGGER.handlers:
+    LOGGER.addHandler(RING_HANDLER)
 
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
 

@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "Support-Link"
+      },
+      "ui_bundle": {
+        "button": "Paket herunterladen",
+        "help": "Logs, Plugin-Versionen, Umgebung und aktuelle Fehler. Private Daten werden anonymisiert.",
+        "title": "Web-UI-Diagnose"
       }
     }
   },

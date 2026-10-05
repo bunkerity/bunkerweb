@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "Link pomocy technicznej"
+      },
+      "ui_bundle": {
+        "button": "Pobierz pakiet",
+        "help": "Logi, wersje wtyczek, środowisko i ostatnie błędy. Dane prywatne są anonimizowane.",
+        "title": "Diagnostyka Web UI"
       }
     }
   },

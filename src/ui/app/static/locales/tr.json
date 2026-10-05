@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "Destek Bağlantısı"
+      },
+      "ui_bundle": {
+        "button": "Paketi İndir",
+        "help": "Günlükler, eklenti sürümleri, ortam ve son hatalar. Özel veriler anonimleştirilir.",
+        "title": "Web UI Tanılaması"
       }
     }
   },

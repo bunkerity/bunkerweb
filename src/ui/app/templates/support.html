@@ -125,6 +125,35 @@
                 </div>
             </div>
         </div>
+        {% if user_admin %}
+            <div class="col-6 col-xl-3">
+                <div class="card p-4 position-relative h-100">
+                    <i class='bx bx-package bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
+                    <div class="card-header p-2">
+                        <div class="card-title">
+                            <h5 class="me-2 text-secondary don-jose mb-0"
+                                data-i18n="support.card.ui_bundle.title">Web UI Diagnostics</h5>
+                        </div>
+                    </div>
+                    <div class="card-body position-relative">
+                        <div class="d-flex align-items-center justify-content-center h-100 mb-3">
+                            <div class="text-center text-primary">
+                                <a href="{{ support_url }}/ui_bundle"
+                                   role="button"
+                                   aria-pressed="true"
+                                   class="btn btn-outline-secondary justify-content-center align-items-center"
+                                   target="_blank"
+                                   rel="noopener">
+                                    <span class="bx bx-download me-0 me-md-2"></span>
+                                    <span class="d-none d-md-inline" data-i18n="support.card.ui_bundle.button">Download Bundle</span>
+                                </a>
+                            </div>
+                        </div>
+                        <small class="d-block text-muted" data-i18n="support.card.ui_bundle.help">Logs, plugin versions, environment and recent errors. Private data is anonymized.</small>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
     <!--/ Content -->
 {% endblock %}

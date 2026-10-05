@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "支持链接"
+      },
+      "ui_bundle": {
+        "button": "下载诊断包",
+        "help": "日志、插件版本、环境和近期错误。私有数据将被匿名化。",
+        "title": "Web UI 诊断"
       }
     }
   },

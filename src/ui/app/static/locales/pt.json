@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "Link de Suporte"
+      },
+      "ui_bundle": {
+        "button": "Transferir pacote",
+        "help": "Registos, versões dos plugins, ambiente e erros recentes. Os dados privados são anonimizados.",
+        "title": "Diagnóstico da Web UI"
       }
     }
   },

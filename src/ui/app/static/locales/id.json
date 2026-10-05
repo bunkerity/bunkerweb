@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "Tautan Dukungan"
+      },
+      "ui_bundle": {
+        "button": "Unduh Paket",
+        "help": "Log, versi plugin, lingkungan, dan error terbaru. Data pribadi akan dianonimkan.",
+        "title": "Diagnostik Web UI"
       }
     }
   },

@@ -1435,6 +1435,11 @@
       },
       "support_link": {
         "title": "Link ng Suporta"
+      },
+      "ui_bundle": {
+        "button": "I-download ang Bundle",
+        "help": "Mga log, bersyon ng plugin, environment, at kamakailang error. Ina-anonymize ang pribadong data.",
+        "title": "Diagnostics ng Web UI"
       }
     }
   },
