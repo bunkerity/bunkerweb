@@ -112,7 +112,7 @@ nslookup example.com
 2. **Use Reverse Proxy**：`yes`
 3. **Reverse Proxy Host**：`185.87.1.100:443`（您的服务器 IP）
 
-您可以在[反向代理文档](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)中找到所有配置选项
+您可以在[反向代理文档](https://docs.bunkerweb.io/1.6/settings/#reverse-proxy)中找到所有配置选项
 
 #### 带 SNI 的多服务
 
@@ -146,7 +146,7 @@ REVERSE_PROXY_SSL_SNI: yes
 REVERSE_PROXY_SSL_SNI_NAME: other-example.com
 ```
 
-您可以在[反向代理文档](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)中找到所有配置选项
+您可以在[反向代理文档](https://docs.bunkerweb.io/1.6/settings/#reverse-proxy)中找到所有配置选项
 
 ##### SNI 技术细节
 
@@ -884,7 +884,7 @@ REAL_IP_RECURSIVE: yes # 默认
 REAL_IP_FROM_URLS: https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/
 ```
 
-您可以在[Real Ip 文档](https://docs.bunkerweb.io/latest/settings/#real-ip)中找到所有配置选项
+您可以在[Real Ip 文档](https://docs.bunkerweb.io/1.6/settings/#real-ip)中找到所有配置选项
 
 #### 客户端基础设施侧配置
 
@@ -4948,7 +4948,7 @@ output "api_service_id" {
 - [完整 Provider 文档](https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs)
 - [GitHub 仓库](https://github.com/bunkerity/terraform-provider-bunkerweb)
 - [使用示例](https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples)
-- [BunkerWeb API 文档](https://docs.bunkerweb.io/latest/api/)
+- [BunkerWeb API 文档](https://docs.bunkerweb.io/1.6/api/)
 
 ### 支持和贡献
 

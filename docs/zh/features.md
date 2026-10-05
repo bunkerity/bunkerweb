@@ -1414,7 +1414,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
 通过我们与 CrowdSec 的合作，您可以将您的 BunkerWeb 实例注册到您的 [CrowdSec 控制台](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration)。这意味着由 BunkerWeb 阻止的攻击将与由 CrowdSec 安全引擎阻止的攻击一起显示在您的 CrowdSec 控制台中，为您提供统一的威胁视图。
 
-重要的是，此集成无需安装 CrowdSec（尽管我们强烈建议您使用 [BunkerWeb 的 CrowdSec 插件](https://docs.bunkerweb.io/latest/features/#crowdsec)来进一步增强您的 Web 服务的安全性）。此外，您可以将您的 CrowdSec 安全引擎注册到同一个控制台帐户，以实现更大的协同作用。
+重要的是，此集成无需安装 CrowdSec（尽管我们强烈建议您使用 [BunkerWeb 的 CrowdSec 插件](https://docs.bunkerweb.io/1.6/features/#crowdsec)来进一步增强您的 Web 服务的安全性）。此外，您可以将您的 CrowdSec 安全引擎注册到同一个控制台帐户，以实现更大的协同作用。
 
 **步骤 1：创建您的 CrowdSec 控制台帐户**
 

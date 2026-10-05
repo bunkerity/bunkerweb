@@ -112,7 +112,7 @@ For a simple service hosted on your infrastructure:
 2. **Use Reverse Proxy**: `yes`
 3. **Reverse Proxy Host**: `185.87.1.100:443` (your server IP)
 
-You can find all configuration options in the [Reverse Proxy Documentation](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)
+You can find all configuration options in the [Reverse Proxy Documentation](https://docs.bunkerweb.io/1.6/settings/#reverse-proxy)
 
 #### Multi-services with SNI
 
@@ -146,7 +146,7 @@ REVERSE_PROXY_SSL_SNI: yes
 REVERSE_PROXY_SSL_SNI_NAME: other-example.com
 ```
 
-You can find all configuration options in the [Reverse Proxy Documentation](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)
+You can find all configuration options in the [Reverse Proxy Documentation](https://docs.bunkerweb.io/1.6/settings/#reverse-proxy)
 
 ##### SNI Technical Details
 
@@ -891,7 +891,7 @@ REAL_IP_RECURSIVE: yes # Default
 REAL_IP_FROM_URLS: https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/
 ```
 
-You can find all configuration options in the [Documentation Real Ip](https://docs.bunkerweb.io/latest/settings/#real-ip)
+You can find all configuration options in the [Documentation Real Ip](https://docs.bunkerweb.io/1.6/settings/#real-ip)
 
 #### Client Infrastructure Side Configuration
 
@@ -5077,7 +5077,7 @@ output "api_service_id" {
 - [Complete provider documentation](https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs)
 - [GitHub Repository](https://github.com/bunkerity/terraform-provider-bunkerweb)
 - [Usage Examples](https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples)
-- [BunkerWeb API Documentation](https://docs.bunkerweb.io/latest/api/)
+- [BunkerWeb API Documentation](https://docs.bunkerweb.io/1.6/api/)
 
 ### Support and Contribution
 

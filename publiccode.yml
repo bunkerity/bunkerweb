@@ -28,7 +28,7 @@ description:
       extensible via plugins, and easy to manage through a clean UI, giving devs
       and SecOps both freedom and confidence in their infrastructure.
     documentation: https://docs.bunkerweb.io
-    apiDocumentation: https://docs.bunkerweb.io/latest/api/
+    apiDocumentation: https://docs.bunkerweb.io/1.6/api/
     features:
       - OWASP Top 10 protection
       - Antibot
