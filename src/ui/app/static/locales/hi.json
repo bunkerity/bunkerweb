@@ -1009,6 +1009,13 @@
       "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
       "ban_filtered_confirmation": "सभी {{count}} मिलान वाली रिपोर्ट से IP प्रतिबंधित करें? डुप्लिकेट लक्ष्य केवल एक बार लागू किए जाएंगे।",
       "unban_filtered_confirmation": "क्या आप वाकई सभी {{count}} मिलान वाले प्रतिबंध हटाना चाहते हैं?",
+      "crowdsec_unban_intro": "प्रतिबंध हटाने से ये CrowdSec निर्णय भी हट जाएंगे:",
+      "crowdsec_unban_list_warning": "कुछ निर्णय CrowdSec सूचियों से आते हैं और वापस आ सकते हैं। इस IP को स्थायी रूप से अनुमति देने के लिए CrowdSec अनुमति सूची का उपयोग करें।",
+      "crowdsec_unban_range_warning": "कुछ निर्णय एक रेंज को कवर करते हैं। उस रेंज के अन्य IP का प्रतिबंध समाप्त होने तक वे प्रतिबंधित रहेंगे।",
+      "crowdsec_unban_confirm": "मैं समझता हूं कि ये CrowdSec निर्णय हटा दिए जाएंगे",
+      "crowdsec_unban_error": "{{ip}} के लिए CrowdSec निर्णय लोड नहीं हो सके",
+      "crowdsec_unban_management_missing": "इन पर CrowdSec प्रबंधन क्रेडेंशियल उपलब्ध नहीं हैं: {{connections}}",
+      "crowdsec_unban_unavailable": "इन CrowdSec कनेक्शनों की जांच नहीं हो सकी: {{connections}}",
       "update_filtered_duration_alert": "सभी {{count}} मिलान वाले प्रतिबंधों के लिए एक नई अवधि चुनें:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "सेवा {{name}} को ड्राफ्ट में बदलें",
       "convert_service_to_online": "सेवा {{name}} को ऑनलाइन में बदलें",
+      "crowdsec_unban_unavailable": "CrowdSec प्रबंधन क्रेडेंशियल उपलब्ध नहीं हैं या स्रोत इंस्टेंस उपलब्ध नहीं है",
       "delete_config": "कस्टम कॉन्फ़िगरेशन {{name}} हटाएं",
       "delete_file": "कैश फ़ाइल हटाएं: {{filename}}",
       "delete_instance": "इंस्टेंस {{hostname}} हटाएं",

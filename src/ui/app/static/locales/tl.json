@@ -1009,6 +1009,13 @@
       "update_duration_alert": "Pumili ng bagong tagal para sa mga napiling ban:",
       "ban_filtered_confirmation": "I-ban ang mga IP mula sa lahat ng {{count}} tumutugmang ulat? Ang mga duplicate na target ay ilalapat lamang nang isang beses.",
       "unban_filtered_confirmation": "Sigurado ka bang gusto mong alisin ang ban sa lahat ng {{count}} tumutugmang ban?",
+      "crowdsec_unban_intro": "Aalisin din ng pag-unban ang mga desisyong ito ng CrowdSec:",
+      "crowdsec_unban_list_warning": "Ang ilang desisyon ay galing sa mga listahan ng CrowdSec at maaaring bumalik. Gumamit ng allowlist ng CrowdSec para tuluyang makadaan ang IP na ito.",
+      "crowdsec_unban_range_warning": "Sakop ng ilang desisyon ang isang range. Mananatiling naka-ban ang ibang IP sa range na iyon hanggang matapos ang ban nila.",
+      "crowdsec_unban_confirm": "Naiintindihan kong aalisin ang mga desisyong ito ng CrowdSec",
+      "crowdsec_unban_error": "Hindi ma-load ang mga desisyon ng CrowdSec para sa {{ip}}",
+      "crowdsec_unban_management_missing": "Kulang ang mga kredensyal sa pamamahala ng CrowdSec sa: {{connections}}",
+      "crowdsec_unban_unavailable": "Hindi ma-check ang mga koneksyong ito ng CrowdSec: {{connections}}",
       "update_filtered_duration_alert": "Pumili ng bagong tagal para sa lahat ng {{count}} tumutugmang ban:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "I-convert ang Config na {{name}} sa Online",
       "convert_service_to_draft": "I-convert ang Serbisyo na {{name}} sa Draft",
       "convert_service_to_online": "I-convert ang Serbisyo na {{name}} sa Online",
+      "crowdsec_unban_unavailable": "Kulang ang mga kredensyal sa pamamahala ng CrowdSec o hindi available ang source instance",
       "delete_config": "Burahin ang Custom Config na {{name}}",
       "delete_file": "Burahin ang Cache File: {{filename}}",
       "delete_instance": "Burahin ang Instance na {{hostname}}",

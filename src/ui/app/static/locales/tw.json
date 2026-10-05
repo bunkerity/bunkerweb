@@ -1009,6 +1009,13 @@
       "update_duration_alert": "請為選定的封鎖選擇新的期限：",
       "ban_filtered_confirmation": "封鎖全部 {{count}} 筆符合條件報告中的 IP？重複的目標僅會套用一次。",
       "unban_filtered_confirmation": "您確定要解除全部 {{count}} 筆符合條件的封鎖嗎？",
+      "crowdsec_unban_intro": "解除封鎖同時會移除以下 CrowdSec 決策：",
+      "crowdsec_unban_list_warning": "部分決策來自 CrowdSec 清單，可能會再次出現。請使用 CrowdSec 允許清單讓此 IP 永久通行。",
+      "crowdsec_unban_range_warning": "部分決策涵蓋一個範圍。該範圍內的其他 IP 在其封鎖結束前仍會被封鎖。",
+      "crowdsec_unban_confirm": "我了解這些 CrowdSec 決策將被移除",
+      "crowdsec_unban_error": "無法載入 {{ip}} 的 CrowdSec 決策",
+      "crowdsec_unban_management_missing": "以下位置缺少 CrowdSec 管理憑證：{{connections}}",
+      "crowdsec_unban_unavailable": "無法檢查以下 CrowdSec 連線：{{connections}}",
       "update_filtered_duration_alert": "請為全部 {{count}} 筆符合條件的封鎖選擇新的期限："
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
       "convert_service_to_online": "將服務 {{name}} 轉換為線上",
+      "crowdsec_unban_unavailable": "缺少 CrowdSec 管理憑證，或來源執行個體無法使用",
       "delete_config": "刪除自訂設定 {{name}}",
       "delete_file": "刪除快取檔案：{{filename}}",
       "delete_instance": "刪除執行個體 {{hostname}}",

@@ -1009,6 +1009,13 @@
       "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:",
       "ban_filtered_confirmation": "일치하는 {{count}}개 보고서의 모든 IP를 차단하시겠습니까? 중복된 대상은 한 번만 적용됩니다.",
       "unban_filtered_confirmation": "일치하는 {{count}}개 차단을 모두 해제하시겠습니까?",
+      "crowdsec_unban_intro": "차단을 해제하면 다음 CrowdSec 결정도 함께 제거됩니다:",
+      "crowdsec_unban_list_warning": "일부 결정은 CrowdSec 목록에서 가져온 것이라 다시 생길 수 있습니다. 이 IP를 영구적으로 허용하려면 CrowdSec 허용 목록을 사용하세요.",
+      "crowdsec_unban_range_warning": "일부 결정은 IP 범위에 적용됩니다. 해당 범위의 다른 IP는 차단이 끝날 때까지 계속 차단됩니다.",
+      "crowdsec_unban_confirm": "이 CrowdSec 결정이 제거된다는 점을 이해합니다",
+      "crowdsec_unban_error": "{{ip}}의 CrowdSec 결정을 불러오지 못했습니다",
+      "crowdsec_unban_management_missing": "다음 항목에 CrowdSec 관리 자격 증명이 없습니다: {{connections}}",
+      "crowdsec_unban_unavailable": "다음 CrowdSec 연결을 확인하지 못했습니다: {{connections}}",
       "update_filtered_duration_alert": "일치하는 {{count}}개 차단 모두에 대해 새로운 기간을 선택하세요:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "설정 {{name}}을(를) 온라인으로 전환",
       "convert_service_to_draft": "서비스 {{name}}을(를) 초안으로 전환",
       "convert_service_to_online": "서비스 {{name}}을(를) 온라인으로 전환",
+      "crowdsec_unban_unavailable": "CrowdSec 관리 자격 증명이 없거나 소스 인스턴스를 사용할 수 없습니다",
       "delete_config": "사용자 정의 설정 {{name}} 삭제",
       "delete_file": "캐시 파일 삭제: {{filename}}",
       "delete_instance": "인스턴스 {{hostname}} 삭제",

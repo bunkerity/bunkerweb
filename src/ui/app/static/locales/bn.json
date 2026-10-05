@@ -1009,6 +1009,13 @@
       "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:",
       "ban_filtered_confirmation": "সব {{count}}টি মিলে যাওয়া রিপোর্ট থেকে IP নিষিদ্ধ করবেন? পুনরাবৃত্ত লক্ষ্যগুলো একবারই প্রয়োগ করা হবে।",
       "unban_filtered_confirmation": "আপনি কি নিশ্চিত যে আপনি সব {{count}}টি মিলে যাওয়া নিষেধাজ্ঞা প্রত্যাহার করতে চান?",
+      "crowdsec_unban_intro": "নিষেধাজ্ঞা সরালে এই CrowdSec সিদ্ধান্তগুলোও মুছে যাবে:",
+      "crowdsec_unban_list_warning": "কিছু সিদ্ধান্ত CrowdSec তালিকা থেকে আসে এবং আবার ফিরে আসতে পারে। এই IP-কে স্থায়ীভাবে অনুমতি দিতে CrowdSec অ্যালাউলিস্ট ব্যবহার করুন।",
+      "crowdsec_unban_range_warning": "কিছু সিদ্ধান্ত একটি রেঞ্জ কভার করে। সেই রেঞ্জের অন্য IP-গুলো নিষেধাজ্ঞার মেয়াদ শেষ না হওয়া পর্যন্ত নিষিদ্ধ থাকবে।",
+      "crowdsec_unban_confirm": "আমি বুঝি যে এই CrowdSec সিদ্ধান্তগুলো সরানো হবে",
+      "crowdsec_unban_error": "{{ip}}-এর জন্য CrowdSec সিদ্ধান্ত লোড করা যায়নি",
+      "crowdsec_unban_management_missing": "এগুলোতে CrowdSec ব্যবস্থাপনার ক্রেডেনশিয়াল নেই: {{connections}}",
+      "crowdsec_unban_unavailable": "এই CrowdSec সংযোগগুলো যাচাই করা যায়নি: {{connections}}",
       "update_filtered_duration_alert": "সব {{count}}টি মিলে যাওয়া নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "পরিষেবা {{name}} কে খসড়াতে রূপান্তর করুন",
       "convert_service_to_online": "পরিষেবা {{name}} কে অনলাইনে রূপান্তর করুন",
+      "crowdsec_unban_unavailable": "CrowdSec ব্যবস্থাপনার ক্রেডেনশিয়াল নেই অথবা সোর্স ইনস্ট্যান্স পাওয়া যাচ্ছে না",
       "delete_config": "কাস্টম কনফিগারেশন {{name}} মুছুন",
       "delete_file": "ক্যাশ ফাইল মুছুন: {{filename}}",
       "delete_instance": "ইনস্ট্যান্স {{hostname}} মুছুন",

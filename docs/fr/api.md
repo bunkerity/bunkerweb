@@ -400,7 +400,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 - **Bans**
   - `GET /bans` : agréger les bans actifs depuis les instances.
   - `POST /bans` ou `/bans/ban` : appliquer un ou plusieurs bans ; le payload peut être objet, tableau ou JSON sérialisé.
-  - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service.
+  - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service. Pour un ban CrowdSec (`kind: "crowdsec_lease"`), envoyez aussi `remove_crowdsec_decisions: true`, `confirmed: true` et `decision_keys` (les clés de l'aperçu `409`) pour supprimer les décisions CrowdSec qui en sont à l'origine ; l'appel exige `crowdsec_delete` sur chaque connexion concernée, répond `409` si la sélection a changé et `502` en cas de résultat partiel.
 - **Plugins (UI)**
   - `GET /plugins` : lister les plugins ; `with_data=true` inclut les bytes packagés quand dispo.
   - `POST /plugins/upload` : installer des plugins UI depuis `.zip`, `.tar.gz`, `.tar.xz`.

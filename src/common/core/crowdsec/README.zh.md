@@ -75,6 +75,27 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
 
+### CrowdSec 封禁
+
+默认情况下，BunkerWeb 会针对每个请求查询 CrowdSec。将 `CROWDSEC_BAN_REFRESH` 设置为一个时长（例如 `5m`），即可把 CrowdSec 的拦截转换为 **CrowdSec 封禁**：一个短时的 BunkerWeb 封禁，只要 CrowdSec 决策仍然有效就会持续续期。该 IP 之后的请求会在封禁检查处被拦下，早于其他插件，也早于 CrowdSec 查询。该封禁会作为独立的一行显示在封禁页面中，并带有 **调查 IP** 操作。默认值 `0` 保持原有行为，不创建任何封禁。
+
+- **何时创建封禁：** 仅当 BunkerWeb 自身因本地 API 的 `ban` 决策拦截了请求，且 `SECURITY_MODE` 为 `block`、决策尚未过期时。AppSec 拒绝以及其他处置方式（例如验证码）从不创建封禁。
+- **持续多久：** 取 `CROWDSEC_BAN_REFRESH` 与决策剩余有效期中较短的一个。封禁结束后，下一个请求会再次接受 CrowdSec 检查，如果决策仍然适用，则会创建新的封禁。
+- **时效性：** 当决策直接在 CrowdSec 中被移除时（通过 `cscli`、Console、列表刷新或允许列表），该 IP 最迟在以下各项之和之后被放行：`CROWDSEC_BAN_REFRESH`、CrowdSec 缓存延迟（stream 模式下为 `CROWDSEC_UPDATE_FREQUENCY`，live 模式下为 `CROWDSEC_CACHE_EXPIRATION`），以及启用 Redis 时其他实例上本地副本的最多 30 秒。在 stream 模式下，只要最近一次成功同步早于 `CROWDSEC_UPDATE_FREQUENCY` 的两倍，就不会创建新的封禁。
+- **排除的位置：** 服务上的任何 `CROWDSEC_EXCLUDE_LOCATION` 都会为该服务关闭 CrowdSec 封禁，因为封禁也会拦截被排除的路径。CrowdSec 仍会在那里检查每个请求。插件排除自身的挑战位置时同样如此。
+- **作用范围：** 由服务自身的 CrowdSec 连接创建的封禁只适用于该服务，由全局连接创建的封禁适用于所有服务。全局 CrowdSec 封禁也适用于 TCP/UDP 服务，但仅在启用 Redis 时通过最多保留 30 秒的本地副本生效。没有 Redis 时，TCP/UDP 服务永远看不到 CrowdSec 封禁。
+- **内存：** 封禁使用共享内存区域 `bans_meta`，该区域始终以 10 MiB 的大小声明。只有设置了 `CROWDSEC_BAN_REFRESH` 或 `BANS_TLS_DROP_REASONS` 后才会使用其内存。
+
+**解封与 CrowdSec。** 移除 CrowdSec 封禁时也会移除其背后的 CrowdSec 决策，否则该 IP 会在下一次检查时再次被封禁。Web 界面、API 和 `bwcli unban` 遵循相同的流程：
+
+- 需要每个包含所选决策的连接的管理凭据（`CROWDSEC_MANAGEMENT_LOGIN` 和 `CROWDSEC_MANAGEMENT_PASSWORD`）。使用 API 时，除 `ban_delete` 外，还需要对每个涉及的连接拥有 `crowdsec_delete` 权限。
+- 在移除任何 CrowdSec 决策之前，必须确认决策列表（IP 或范围、类型、来源和场景）。`bwcli unban` 使用 `-confirm` 完成确认：不带该选项时，命令只打印列表，不会更改 CrowdSec 中的任何内容。同一 IP 的显式封禁不属于这次确认：`bwcli unban` 会先移除它，早于预览，且不带 `-confirm` 时也会移除。该命令只能在可访问数据库的主机上运行，通常是 scheduler 所在主机。其他情况请使用 Web 界面或 API。
+- 如果看到该拦截的实例不可用，解封会被拒绝。封禁会在 `CROWDSEC_BAN_REFRESH` 内自行过期。
+- 如果某个决策无法移除，其他已选决策仍会被删除，但会跳过其余步骤，并保留 BunkerWeb 封禁。结果会报告为部分成功，并列出已删除和失败的决策。在失败的决策被移除之前，该 IP 仍会被封锁。如果部分 CrowdSec 连接无法检查，解封仍会在已响应的连接上执行：删除这些连接上的决策，并在可用实例上移除 BunkerWeb 封禁。结果会报告为部分成功，并列出无法检查的内容；在这些连接上的决策结束之前，该 IP 可能仍被它们拦截。重试是安全的。
+- 来自 Central API 或列表的决策（`CAPI` 和 `lists` 来源）可能在下一次刷新时重新出现。如需永久例外，请创建 CrowdSec 允许列表。
+- 移除范围决策会影响整个范围。已为该范围内其他 IP 创建的 CrowdSec 封禁会保留到其时长结束，最长为 `CROWDSEC_BAN_REFRESH`。
+- 同一 IP 的 CrowdSec 封禁与显式封禁是两行独立记录，各自单独移除。CrowdSec 封禁的时长不可编辑。
+
 ### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
 === "Docker"
@@ -344,6 +365,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `CROWDSEC_BAN_REFRESH` | `0` | multisite | 否 | **封禁刷新：** 将 CrowdSec 拦截转换为短时的 BunkerWeb 封禁，只要 CrowdSec 决策有效就会续期。该值是封禁在再次询问 CrowdSec 之前最长持续的时间。`0` 表示禁用。设置了 `CROWDSEC_EXCLUDE_LOCATION` 的服务永远不会产生 CrowdSec 封禁。支持时间后缀（ms、s、m、h、d、w、M、y）；纯数字表示秒。 |
 
 #### 应用程序安全组件设置
 

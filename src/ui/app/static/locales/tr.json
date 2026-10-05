@@ -1009,6 +1009,13 @@
       "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
       "ban_filtered_confirmation": "Eşleşen {{count}} rapordaki tüm IP'ler yasaklansın mı? Yinelenen hedefler yalnızca bir kez uygulanacaktır.",
       "unban_filtered_confirmation": "Eşleşen {{count}} yasağın tümünün yasağını kaldırmak istediğinizden emin misiniz?",
+      "crowdsec_unban_intro": "Yasağı kaldırmak şu CrowdSec kararlarını da siler:",
+      "crowdsec_unban_list_warning": "Bazı kararlar CrowdSec listelerinden gelir ve geri dönebilir. Bu IP'ye kalıcı olarak izin vermek için bir CrowdSec izin listesi kullanın.",
+      "crowdsec_unban_range_warning": "Bazı kararlar bir aralığı kapsar. Bu aralıktaki diğer IP'ler yasakları bitene kadar yasaklı kalır.",
+      "crowdsec_unban_confirm": "Bu CrowdSec kararlarının kaldırılacağını anlıyorum",
+      "crowdsec_unban_error": "{{ip}} için CrowdSec kararları yüklenemedi",
+      "crowdsec_unban_management_missing": "CrowdSec yönetim kimlik bilgileri şurada eksik: {{connections}}",
+      "crowdsec_unban_unavailable": "Bu CrowdSec bağlantıları denetlenemedi: {{connections}}",
       "update_filtered_duration_alert": "Eşleşen {{count}} yasağın tümü için yeni bir süre seçin:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
       "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
+      "crowdsec_unban_unavailable": "CrowdSec yönetim kimlik bilgileri eksik veya kaynak örnek kullanılamıyor",
       "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
       "delete_file": "Önbellek Dosyasını Sil: {{filename}}",
       "delete_instance": "Örneği Sil: {{hostname}}",

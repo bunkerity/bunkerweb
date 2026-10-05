@@ -1009,6 +1009,13 @@
       "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:",
       "ban_filtered_confirmation": "Bloquear IPs de todos os {{count}} relatórios correspondentes? Os alvos duplicados serão aplicados uma única vez.",
       "unban_filtered_confirmation": "Tem certeza de que deseja desbloquear todos os {{count}} bloqueios correspondentes?",
+      "crowdsec_unban_intro": "Desbloquear também remove estas decisões do CrowdSec:",
+      "crowdsec_unban_list_warning": "Algumas decisões vêm de listas do CrowdSec e podem voltar. Use uma lista de permissões do CrowdSec para deixar este IP passar definitivamente.",
+      "crowdsec_unban_range_warning": "Algumas decisões abrangem um intervalo. Os outros IPs desse intervalo continuam bloqueados até o fim do bloqueio deles.",
+      "crowdsec_unban_confirm": "Entendo que estas decisões do CrowdSec serão removidas",
+      "crowdsec_unban_error": "Não foi possível carregar as decisões do CrowdSec para {{ip}}",
+      "crowdsec_unban_management_missing": "As credenciais de gerenciamento do CrowdSec estão ausentes em: {{connections}}",
+      "crowdsec_unban_unavailable": "Não foi possível verificar estas conexões do CrowdSec: {{connections}}",
       "update_filtered_duration_alert": "Selecione uma nova duração para todos os {{count}} bloqueios correspondentes:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Converter Serviço {{name}} para Rascunho",
       "convert_service_to_online": "Converter Serviço {{name}} para Online",
+      "crowdsec_unban_unavailable": "As credenciais de gerenciamento do CrowdSec estão ausentes ou a instância de origem não está disponível",
       "delete_config": "Excluir Configuração Personalizada {{name}}",
       "delete_file": "Excluir Arquivo de Cache: {{filename}}",
       "delete_instance": "Excluir Instância {{hostname}}",

@@ -403,7 +403,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 - **Bans**
   - `GET /bans`: aggregate active bans from instances.
   - `POST /bans` or `/bans/ban`: apply one or more bans; payload can be object, array, or stringified JSON.
-  - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service.
+  - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service. For a CrowdSec ban (`kind: "crowdsec_lease"`), also send `remove_crowdsec_decisions: true`, `confirmed: true` and `decision_keys` (the keys listed in the `409` preview) to delete the CrowdSec decisions behind it; the call needs `crowdsec_delete` on every affected connection, answers `409` when the selection changed, and `502` on a partial result.
 - **Plugins (UI plugins)**
   - `GET /plugins`: list plugins; `with_data=true` includes packaged bytes when available.
   - `POST /plugins/upload`: install UI plugins from `.zip`, `.tar.gz`, `.tar.xz`.

@@ -2,6 +2,8 @@
 
 ## v1.6.16~rc4 - 2026/10/??
 
+- [FEATURE] `BANS_TLS_DROP_REASONS` closes the TLS handshake of banned IPs for the listed ban reasons instead of serving the 403 page.
+- [FEATURE] `crowdsec`: `CROWDSEC_BAN_REFRESH` turns CrowdSec blocks into short, renewed bans listed on the Bans page and removed with their decisions on Unban.
 - [BUGFIX] `antibot`: the JavaScript challenge no longer fails on every attempt and loops until the client is rate limited.
 - [BUGFIX] `crowdsec`: serving a captcha no longer fails with `attempt to concatenate a nil value`.
 - [BUGFIX] `jobs`: the update check stays on the installed release line; a newer line such as 1.7 only logs a link to the upgrade guide.

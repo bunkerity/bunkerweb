@@ -1009,6 +1009,13 @@
       "update_duration_alert": "请为选定的封禁选择新的期限：",
       "ban_filtered_confirmation": "封禁全部 {{count}} 条匹配报告中的 IP？重复的目标只会应用一次。",
       "unban_filtered_confirmation": "您确定要解禁全部 {{count}} 条匹配的封禁吗？",
+      "crowdsec_unban_intro": "解禁同时会移除以下 CrowdSec 决策：",
+      "crowdsec_unban_list_warning": "部分决策来自 CrowdSec 列表，可能会再次出现。请使用 CrowdSec 允许列表让该 IP 永久通行。",
+      "crowdsec_unban_range_warning": "部分决策覆盖一个范围。该范围内的其他 IP 在其封禁结束前仍会被封禁。",
+      "crowdsec_unban_confirm": "我了解这些 CrowdSec 决策将被移除",
+      "crowdsec_unban_error": "无法加载 {{ip}} 的 CrowdSec 决策",
+      "crowdsec_unban_management_missing": "以下位置缺少 CrowdSec 管理凭据：{{connections}}",
+      "crowdsec_unban_unavailable": "无法检查以下 CrowdSec 连接：{{connections}}",
       "update_filtered_duration_alert": "请为全部 {{count}} 条匹配的封禁选择新的期限："
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
       "convert_service_to_online": "将服务 {{name}} 转换为在线",
+      "crowdsec_unban_unavailable": "缺少 CrowdSec 管理凭据，或来源实例不可用",
       "delete_config": "删除自定义配置 {{name}}",
       "delete_file": "删除缓存文件：{{filename}}",
       "delete_instance": "删除实例 {{hostname}}",

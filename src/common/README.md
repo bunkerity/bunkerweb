@@ -49,6 +49,20 @@ The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. T
 
 Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
 
+### Dropping Bans at the TLS Handshake {#bans-tls-drop}
+
+A banned client normally completes the TLS handshake and then receives the ban page (403). `BANS_TLS_DROP_REASONS` lists the ban reasons for which BunkerWeb closes the connection at the very start of the handshake instead, before any certificate or key exchange work. The client sees a TLS error, not a page. This saves CPU when banned addresses keep reconnecting.
+
+The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behavior`, `manual`, `ui` and `api`. The default is empty, which keeps the 403 page for every ban. We suggest `crowdsec`.
+
+- Only the reason of the ban that applies counts. For an IP that has a `manual` ban and a CrowdSec ban, listing only `crowdsec` drops nothing, and the client gets the 403 page.
+- The drop is skipped, and the 403 page stays, when `USE_PROXY_PROTOCOL` is `yes` or when `USE_REAL_IP` is `yes` with a header-based source, because the client address is not known at that point. It is also skipped for IPs allowed by a local whitelist.
+- With Redis enabled, a handshake is dropped only after a request from the banned IP has gone through the regular ban check, so the first request still gets the 403 page.
+- With `SECURITY_MODE` set to `detect`, the handshake continues and a warning is logged.
+- HTTP/3 (QUIC) connections are never dropped. They get the 403 page.
+- Each drop is counted per reason in the metrics.
+- The state of this feature and of CrowdSec bans lives in the `bans_meta` shared memory zone. It is always declared with a size of 10 MiB, but its memory is only used once `BANS_TLS_DROP_REASONS` or `CROWDSEC_BAN_REFRESH` is set.
+
 ### Configuration Settings
 
 === "Core Settings"
@@ -59,6 +73,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **BunkerWeb Instances:** List of BunkerWeb instances separated with spaces.                         |
     | `MULTISITE`           | `no`              | global    | No       | **Multiple Sites:** Set to `yes` to enable hosting multiple websites with different configurations. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Security Level:** Controls the level of security enforcement. Options: `detect` or `block`.       |
+    | `BANS_TLS_DROP_REASONS` | | multisite | No | **Bans Dropped at TLS:** Ban reasons (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separated by spaces) whose banned IPs are dropped at the TLS handshake instead of getting the 403 page. Skipped behind PROXY protocol and header-based real IP, and never applied to HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | No       | **Server Type:** Defines if the server is `http` or `stream` type.                                  |
 
 === "API Settings"

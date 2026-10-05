@@ -1009,6 +1009,13 @@
       "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:",
       "ban_filtered_confirmation": "Vietare gli IP di tutti i {{count}} report corrispondenti? Gli obiettivi duplicati verranno applicati una sola volta.",
       "unban_filtered_confirmation": "Sei sicuro di voler sbloccare tutti i {{count}} divieti corrispondenti?",
+      "crowdsec_unban_intro": "Lo sblocco rimuove anche queste decisioni di CrowdSec:",
+      "crowdsec_unban_list_warning": "Alcune decisioni provengono da liste CrowdSec e possono tornare. Usa una allowlist di CrowdSec per lasciar passare questo IP in modo definitivo.",
+      "crowdsec_unban_range_warning": "Alcune decisioni coprono un intervallo. Gli altri IP di quell'intervallo restano bloccati fino alla fine del loro blocco.",
+      "crowdsec_unban_confirm": "Capisco che queste decisioni di CrowdSec verranno rimosse",
+      "crowdsec_unban_error": "Impossibile caricare le decisioni di CrowdSec per {{ip}}",
+      "crowdsec_unban_management_missing": "Le credenziali di gestione di CrowdSec mancano su: {{connections}}",
+      "crowdsec_unban_unavailable": "Impossibile verificare queste connessioni CrowdSec: {{connections}}",
       "update_filtered_duration_alert": "Seleziona una nuova durata per tutti i {{count}} divieti corrispondenti:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Converti Servizio {{name}} in Bozza",
       "convert_service_to_online": "Converti Servizio {{name}} in Online",
+      "crowdsec_unban_unavailable": "Le credenziali di gestione di CrowdSec mancano oppure l'istanza di origine non è disponibile",
       "delete_config": "Elimina Configurazione Personalizzata {{name}}",
       "delete_file": "Elimina file cache: {{filename}}",
       "delete_instance": "Elimina Istanza {{hostname}}",

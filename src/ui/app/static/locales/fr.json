@@ -1009,6 +1009,13 @@
       "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :",
       "ban_filtered_confirmation": "Bannir les IP des {{count}} rapports correspondants ? Les cibles en double ne seront appliquées qu'une seule fois.",
       "unban_filtered_confirmation": "Êtes-vous sûr de vouloir débannir les {{count}} bannissements correspondants ?",
+      "crowdsec_unban_intro": "Le débannissement supprime aussi ces décisions CrowdSec :",
+      "crowdsec_unban_list_warning": "Certaines décisions proviennent de listes CrowdSec et peuvent revenir. Utilisez une liste d'autorisation CrowdSec pour laisser passer cette IP définitivement.",
+      "crowdsec_unban_range_warning": "Certaines décisions couvrent une plage. Les autres IP de cette plage restent bannies jusqu'à la fin de leur bannissement.",
+      "crowdsec_unban_confirm": "Je comprends que ces décisions CrowdSec seront supprimées",
+      "crowdsec_unban_error": "Impossible de charger les décisions CrowdSec pour {{ip}}",
+      "crowdsec_unban_management_missing": "Les identifiants de gestion CrowdSec sont absents sur : {{connections}}",
+      "crowdsec_unban_unavailable": "Impossible de vérifier ces connexions CrowdSec : {{connections}}",
       "update_filtered_duration_alert": "Sélectionnez une nouvelle durée pour les {{count}} bannissements correspondants :"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Convertir le Service {{name}} en Brouillon",
       "convert_service_to_online": "Convertir le Service {{name}} en En Ligne",
+      "crowdsec_unban_unavailable": "Les identifiants de gestion CrowdSec sont absents ou l'instance source est indisponible",
       "delete_config": "Supprimer la Config Perso {{name}}",
       "delete_file": "Supprimer le fichier cache : {{filename}}",
       "delete_instance": "Supprimer l'Instance {{hostname}}",

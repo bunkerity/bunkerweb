@@ -106,6 +106,15 @@
       "regex": "^\\d+(ms?|[shdwMy])?$",
       "type": "text"
     },
+    "CROWDSEC_BAN_REFRESH": {
+      "context": "multisite",
+      "default": "0",
+      "help": "Turn CrowdSec blocks into short BunkerWeb bans that are renewed while the CrowdSec decision lasts. The value is the longest a ban lasts before CrowdSec is asked again. 0 disables it. A service with a CROWDSEC_EXCLUDE_LOCATION never gets CrowdSec bans. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "crowdsec-ban-refresh",
+      "label": "CrowdSec ban refresh",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
     "CROWDSEC_APPSEC_URL": {
       "context": "multisite",
       "default": "",

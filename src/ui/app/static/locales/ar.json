@@ -1009,6 +1009,13 @@
       "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:",
       "ban_filtered_confirmation": "هل تريد حظر عناوين IP من جميع التقارير المطابقة البالغ عددها {{count}}؟ سيتم تطبيق الأهداف المكررة مرة واحدة فقط.",
       "unban_filtered_confirmation": "هل أنت متأكد أنك تريد رفع الحظر عن جميع الحظورات المطابقة البالغ عددها {{count}}؟",
+      "crowdsec_unban_intro": "رفع الحظر يزيل أيضًا قرارات CrowdSec التالية:",
+      "crowdsec_unban_list_warning": "بعض القرارات مصدرها قوائم CrowdSec وقد تعود. استخدم قائمة السماح في CrowdSec للسماح لهذا العنوان بشكل دائم.",
+      "crowdsec_unban_range_warning": "بعض القرارات تشمل نطاقًا. تبقى عناوين IP الأخرى في هذا النطاق محظورة حتى ينتهي حظرها.",
+      "crowdsec_unban_confirm": "أفهم أنه ستتم إزالة قرارات CrowdSec هذه",
+      "crowdsec_unban_error": "تعذر تحميل قرارات CrowdSec للعنوان {{ip}}",
+      "crowdsec_unban_management_missing": "بيانات اعتماد إدارة CrowdSec مفقودة في: {{connections}}",
+      "crowdsec_unban_unavailable": "تعذر فحص اتصالات CrowdSec التالية: {{connections}}",
       "update_filtered_duration_alert": "حدد مدة جديدة لجميع الحظورات المطابقة البالغ عددها {{count}}:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "تحويل الخدمة {{name}} إلى مسودة",
       "convert_service_to_online": "تحويل الخدمة {{name}} إلى متصل",
+      "crowdsec_unban_unavailable": "بيانات اعتماد إدارة CrowdSec مفقودة أو أن النسخة المصدر غير متاحة",
       "delete_config": "حذف التكوين المخصص {{name}}",
       "delete_file": "حذف ملف الذاكرة المؤقتة: {{filename}}",
       "delete_instance": "حذف المثيل {{hostname}}",

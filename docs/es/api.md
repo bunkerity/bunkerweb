@@ -400,7 +400,7 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
 - **Bans**
   - `GET /bans`: agrega bans activos desde las instancias.
   - `POST /bans` o `/bans/ban`: aplica uno o varios bans; payload puede ser objeto, array o JSON como string.
-  - `POST /bans/unban` o `DELETE /bans`: eliminar bans globalmente o por servicio.
+  - `POST /bans/unban` o `DELETE /bans`: eliminar bans globalmente o por servicio. Para un ban de CrowdSec (`kind: "crowdsec_lease"`), envíe además `remove_crowdsec_decisions: true`, `confirmed: true` y `decision_keys` (las claves de la vista previa `409`) para eliminar las decisiones de CrowdSec que lo originan; la llamada requiere `crowdsec_delete` en cada conexión afectada, responde `409` si la selección cambió y `502` ante un resultado parcial.
 - **Plugins (UI)**
   - `GET /plugins`: lista plugins; `with_data=true` incluye los bytes del paquete cuando están disponibles.
   - `POST /plugins/upload`: instala plugins de UI desde `.zip`, `.tar.gz`, `.tar.xz`.

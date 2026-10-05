@@ -1009,6 +1009,13 @@
       "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
       "ban_filtered_confirmation": "Забанить IP из всех {{count}} совпадающих отчётов? Повторяющиеся цели будут применены только один раз.",
       "unban_filtered_confirmation": "Вы уверены, что хотите разбанить все {{count}} совпадающих банов?",
+      "crowdsec_unban_intro": "Разбан также удалит эти решения CrowdSec:",
+      "crowdsec_unban_list_warning": "Некоторые решения поступают из списков CrowdSec и могут вернуться. Используйте список разрешённых CrowdSec, чтобы навсегда пропускать этот IP.",
+      "crowdsec_unban_range_warning": "Некоторые решения охватывают диапазон. Остальные IP этого диапазона остаются заблокированными до окончания их бана.",
+      "crowdsec_unban_confirm": "Я понимаю, что эти решения CrowdSec будут удалены",
+      "crowdsec_unban_error": "Не удалось загрузить решения CrowdSec для {{ip}}",
+      "crowdsec_unban_management_missing": "Учётные данные управления CrowdSec отсутствуют для: {{connections}}",
+      "crowdsec_unban_unavailable": "Не удалось проверить эти подключения CrowdSec: {{connections}}",
       "update_filtered_duration_alert": "Выберите новую продолжительность для всех {{count}} совпадающих банов:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Конвертировать сервис {{name}} в черновик",
       "convert_service_to_online": "Конвертировать сервис {{name}} в онлайн",
+      "crowdsec_unban_unavailable": "Учётные данные управления CrowdSec отсутствуют или исходный экземпляр недоступен",
       "delete_config": "Удалить кастомную конфигурацию {{name}}",
       "delete_file": "Удалить файл кэша: {{filename}}",
       "delete_instance": "Удалить экземпляр {{hostname}}",

@@ -75,6 +75,27 @@ Use the returned connection ID verbatim. It includes instance identity, so ident
 
 The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
 
+### CrowdSec bans
+
+By default, BunkerWeb asks CrowdSec about every request. Set `CROWDSEC_BAN_REFRESH` to a duration, for example `5m`, to turn a CrowdSec block into a **CrowdSec ban**: a short BunkerWeb ban that is renewed while the CrowdSec decision lasts. Later requests from the IP are stopped at the ban check, before the other plugins and before the CrowdSec lookup. The ban appears on the Bans page as its own row, with the **Investigate IP** action. The default `0` keeps the previous behavior and creates no ban.
+
+- **When a ban is created:** only when BunkerWeb itself blocked the request because of a `ban` decision from the Local API, with `SECURITY_MODE` set to `block` and a decision that has not expired. AppSec rejections and other remediations, such as a captcha, never create a ban.
+- **How long it lasts:** the shorter of `CROWDSEC_BAN_REFRESH` and the remaining life of the decision. When the ban ends, the next request is checked against CrowdSec again, and a new ban is created if the decision still applies.
+- **Freshness:** when a decision is removed directly in CrowdSec (with `cscli`, in the Console, by a list refresh or by an allowlist), the IP is let through after at most the sum of `CROWDSEC_BAN_REFRESH`, the CrowdSec cache delay (`CROWDSEC_UPDATE_FREQUENCY` in stream mode, `CROWDSEC_CACHE_EXPIRATION` in live mode) and, when Redis is enabled, up to 30 seconds for the local copies on the other instances. In stream mode, no new ban is created while the last successful synchronization is older than twice `CROWDSEC_UPDATE_FREQUENCY`.
+- **Excluded locations:** any `CROWDSEC_EXCLUDE_LOCATION` on a service turns CrowdSec bans off for that service, because a ban would also block the excluded paths. CrowdSec keeps checking each request there. The same applies when the plugin excludes its own challenge location.
+- **Scope:** a ban created from a service's own CrowdSec connection applies to that service only, and a ban created from a global connection applies to every service. A global CrowdSec ban also applies to TCP/UDP services, but only when Redis is enabled, through a local copy that lasts at most 30 seconds. Without Redis, TCP/UDP services never see CrowdSec bans.
+- **Memory:** bans use the `bans_meta` shared memory zone, which is always declared with a size of 10 MiB. Its memory is only used once `CROWDSEC_BAN_REFRESH` or `BANS_TLS_DROP_REASONS` is set.
+
+**Unban and CrowdSec.** Removing a CrowdSec ban also removes the CrowdSec decisions behind it, because the IP would otherwise be banned again at the next check. The Web UI, the API and `bwcli unban` follow the same flow:
+
+- It needs the management credentials (`CROWDSEC_MANAGEMENT_LOGIN` and `CROWDSEC_MANAGEMENT_PASSWORD`) for every connection where a selected decision lives. With the API, it also needs the `crowdsec_delete` permission on every connection involved, in addition to `ban_delete`.
+- You must confirm the list of decisions (IP or range, type, origin and scenario) before any CrowdSec decision is removed. `bwcli unban` takes `-confirm` for this: without it, the command only prints the list and changes nothing in CrowdSec. The explicit ban on the same IP is not part of that confirmation: `bwcli unban` removes it first, before the preview and even without `-confirm`. The command works only on a host that has access to the database, usually the scheduler host. Elsewhere, use the Web UI or the API.
+- If the instance that saw the block is down, the unban is refused. The ban expires by itself within `CROWDSEC_BAN_REFRESH`.
+- If a decision cannot be removed, the other selected decisions are still deleted, but the remaining steps are skipped and the BunkerWeb ban is kept. The result is reported as partial and lists the decisions that were deleted and the ones that failed. The IP stays blocked until the failed decisions are removed. If some CrowdSec connections cannot be checked, the unban still goes ahead on the connections that answered: their decisions are deleted and the BunkerWeb ban is removed on the healthy instances. The result is then reported as partial and lists what could not be checked, and the IP can stay blocked by those connections until their decisions end. Retrying is safe.
+- Decisions that come from the Central API or from lists (the `CAPI` and `lists` origins) may come back at the next refresh. Create a CrowdSec allowlist for a permanent exception.
+- Removing a range decision affects the whole range. CrowdSec bans already created for other IPs of that range stay until their duration ends, at most `CROWDSEC_BAN_REFRESH`.
+- A CrowdSec ban and an explicit ban on the same IP are two separate rows, and each one is removed on its own. The duration of a CrowdSec ban cannot be edited.
+
 ### Step&nbsp;1 – Prepare CrowdSec to ingest BunkerWeb logs
 
 Follow one of the environment-specific guides below so the CrowdSec agent ingests BunkerWeb access, error, and ModSecurity audit logs. This is what drives the remediation decisions that the plugin will later enforce.
@@ -348,6 +369,7 @@ Every setting is `multisite`, so a value set without a prefix applies to all ser
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
+| `CROWDSEC_BAN_REFRESH` | `0` | multisite | no | **Ban Refresh:** Turn CrowdSec blocks into short BunkerWeb bans that are renewed while the CrowdSec decision lasts. The value is the longest a ban lasts before CrowdSec is asked again. `0` disables it. A service with a `CROWDSEC_EXCLUDE_LOCATION` never gets CrowdSec bans. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
 
 #### Application Security Component Settings
 

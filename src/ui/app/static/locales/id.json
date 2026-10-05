@@ -1009,6 +1009,13 @@
       "update_duration_alert": "Pilih durasi baru untuk larangan yang dipilih:",
       "ban_filtered_confirmation": "Larang IP dari semua {{count}} laporan yang cocok? Target duplikat hanya akan diterapkan sekali.",
       "unban_filtered_confirmation": "Apakah Anda yakin ingin membatalkan semua {{count}} larangan yang cocok?",
+      "crowdsec_unban_intro": "Membatalkan larangan juga menghapus keputusan CrowdSec berikut:",
+      "crowdsec_unban_list_warning": "Beberapa keputusan berasal dari daftar CrowdSec dan bisa muncul kembali. Gunakan allowlist CrowdSec agar IP ini diizinkan secara permanen.",
+      "crowdsec_unban_range_warning": "Beberapa keputusan mencakup suatu rentang. IP lain dalam rentang itu tetap dilarang sampai larangannya berakhir.",
+      "crowdsec_unban_confirm": "Saya mengerti bahwa keputusan CrowdSec ini akan dihapus",
+      "crowdsec_unban_error": "Tidak dapat memuat keputusan CrowdSec untuk {{ip}}",
+      "crowdsec_unban_management_missing": "Kredensial manajemen CrowdSec tidak ada pada: {{connections}}",
+      "crowdsec_unban_unavailable": "Tidak dapat memeriksa koneksi CrowdSec berikut: {{connections}}",
       "update_filtered_duration_alert": "Pilih durasi baru untuk semua {{count}} larangan yang cocok:"
     },
     "button": {
@@ -1682,6 +1689,7 @@
       "convert_config_to_online": "Konversi Konfigurasi {{name}} ke Aktif",
       "convert_service_to_draft": "Konversi Layanan {{name}} ke Draf",
       "convert_service_to_online": "Konversi Layanan {{name}} ke Aktif",
+      "crowdsec_unban_unavailable": "Kredensial manajemen CrowdSec tidak ada atau instans sumber tidak tersedia",
       "delete_config": "Hapus Konfigurasi Kustom {{name}}",
       "delete_file": "Hapus File Cache: {{filename}}",
       "delete_instance": "Hapus Instans {{hostname}}",

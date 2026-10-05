@@ -626,8 +626,8 @@ class InstancesUtils:
                 else:
                     item["ban_scope"] = "service"
 
-            # Create a unique key that combines IP, ban scope, and service
-            ban_key = (item["ip"], item["ban_scope"], item.get("service", "_"))
+            # Create a unique key that combines IP, ban scope, service and kind, so a CrowdSec lease and an explicit ban stay apart
+            ban_key = (item["ip"], item["ban_scope"], item.get("service", "_"), item.get("kind", "ban"))
             if ban_key not in unique_bans:
                 unique_bans[ban_key] = item
 
