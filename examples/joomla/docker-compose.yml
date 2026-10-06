@@ -49,6 +49,7 @@ services:
       JOOMLA_DB_NAME: "joomla_db"
       JOOMLA_DB_USER: "user"
       JOOMLA_DB_PASSWORD: "db-user-pwd" # set a stronger password in a .env file (must match MYSQL_PASSWORD)
+    restart: "unless-stopped"
     networks:
       - bw-services
 

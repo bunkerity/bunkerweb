@@ -12,6 +12,7 @@ services:
       - JOOMLA_DB_NAME=joomla_db
       - JOOMLA_DB_USER=user
       - JOOMLA_DB_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
+    restart: "unless-stopped"
     labels:
       - bunkerweb.SERVER_NAME=www.example.com
       - bunkerweb.USE_REVERSE_PROXY=yes
