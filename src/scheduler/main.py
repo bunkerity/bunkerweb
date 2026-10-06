@@ -16,7 +16,7 @@ from shutil import copy, rmtree, copytree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
-from sys import path as sys_path
+from sys import executable as sys_executable, path as sys_path
 from tarfile import open as tar_open
 from threading import Event, Lock
 from time import monotonic, sleep
@@ -270,6 +270,7 @@ def handle_reload(signum, frame):
 
             proc = subprocess_run(
                 [
+                    sys_executable,
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -734,6 +735,7 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
     # run the generator
     proc = subprocess_run(
         [
+            sys_executable,
             BUNKERWEB_PATH.joinpath("gen", "main.py").as_posix(),
             "--settings",
             BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -1216,6 +1218,7 @@ if __name__ == "__main__":
             # run the config saver
             proc = subprocess_run(
                 [
+                    sys_executable,
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -1280,6 +1283,7 @@ if __name__ == "__main__":
 
             proc = subprocess_run(
                 [
+                    sys_executable,
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
