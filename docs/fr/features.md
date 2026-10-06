@@ -1916,7 +1916,7 @@ Par défaut, BunkerWeb interroge CrowdSec à chaque requête. Définissez `CROWD
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1933,7 +1933,7 @@ Par défaut, BunkerWeb interroge CrowdSec à chaque requête. Définissez `CROWD
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
