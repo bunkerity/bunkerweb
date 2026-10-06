@@ -2,6 +2,7 @@
     <ol class="breadcrumb mb-0">
         <!-- prettier-ignore -->
         {% with breadcrumbs = request.path.split("/") %}
+            {% set breadcrumb_names = {"crowdsec": "CrowdSec", "global_config": "Global Settings", "more": "More..."} %}
             {% set breadcrumbs_ns = namespace(working_url="") %}
             {% for breadcrumb in breadcrumbs %}
                 {% set check_i18n = breadcrumb not in extra_pages %}
@@ -46,13 +47,16 @@
                         {% set check_i18n = false %}
                     {% endif %}
                 {% endif %}
+                {% set breadcrumb_linked = breadcrumb and breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}
+                {% set breadcrumb_key = (breadcrumb | lower | replace('-', '_')) if breadcrumb_linked else (current_endpoint | replace('-', '_')) %}
+                {% set breadcrumb_text = breadcrumb_names.get(breadcrumb_key, breadcrumb_key | replace('_', ' ') | title) if check_i18n and (breadcrumb_linked or loop.index == 2) else breadcrumb %}
                 <li class="breadcrumb-item{% if breadcrumb == current_endpoint %} active{% endif %}"
                     {% if breadcrumb == current_endpoint %}aria-current="page"{% endif %}>
                     <a {% if breadcrumb and breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"{% if check_i18n %} data-i18n="breadcrumb.{{ breadcrumb | lower | replace('-', '_') }}"{% endif %}
                        {% elif loop.index == 2 and check_i18n %}
                        href="#"
                        data-i18n="breadcrumb.{{ current_endpoint | replace('-', '_') }}"
-                       {% endif %}>{{ breadcrumb }}</a>
+                       {% endif %}>{{ breadcrumb_text }}</a>
                 </li>
             {% endfor %}
         {% endwith %}

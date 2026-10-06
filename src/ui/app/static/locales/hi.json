@@ -847,7 +847,7 @@
       "ip_address": "आईपी पता",
       "keywords": "कीवर्ड",
       "lets_encrypt_custom_profile": "Let's Encrypt कस्टम प्रोफ़ाइल",
-      "lets_encrypt_disable_public_suffixes": "सार्वजनिक प्रत्यय अक्षम करें (PSL ब्लैकलिस्ट)",
+      "lets_encrypt_disable_public_suffixes": "सार्वजनिक प्रत्यय सूची की जाँच छोड़ें",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS क्रेडेंशियल आइटम",
       "lets_encrypt_profile": "Let's Encrypt प्रोफ़ाइल",
       "license_key": "लाइसेंस कुंजी",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "क्या आप वाकई चयनित प्लगइन हटाना चाहते हैं?",
       "confirm_plugin_deletion_plural": "क्या आप वाकई चयनित प्लगइन्स हटाना चाहते हैं?",
       "confirm_template_deletion": "क्या आप वाकई टेम्पलेट {{name}} को हटाना चाहते हैं?",
+      "confirm_templates_deletion_alert": "क्या आप वाकई चयनित टेम्पलेट हटाना चाहते हैं?",
+      "confirm_templates_deletion_alert_plural": "क्या आप वाकई चयनित टेम्पलेट्स हटाना चाहते हैं?",
       "confirmation_instance_deletion": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
       "delete_cache_confirmation_alert": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
       "delete_confirmation_alert": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
       "ban_filtered_confirmation": "सभी {{count}} मिलान वाली रिपोर्ट से IP प्रतिबंधित करें? डुप्लिकेट लक्ष्य केवल एक बार लागू किए जाएंगे।",
       "unban_filtered_confirmation": "क्या आप वाकई सभी {{count}} मिलान वाले प्रतिबंध हटाना चाहते हैं?",
+      "crowdsec_unban_intro": "प्रतिबंध हटाने से ये CrowdSec निर्णय भी हट जाएंगे:",
+      "crowdsec_unban_list_warning": "कुछ निर्णय CrowdSec सूचियों से आते हैं और वापस आ सकते हैं। इस IP को स्थायी रूप से अनुमति देने के लिए CrowdSec अनुमति सूची का उपयोग करें।",
+      "crowdsec_unban_range_warning": "कुछ निर्णय एक रेंज को कवर करते हैं। उस रेंज के अन्य IP का प्रतिबंध समाप्त होने तक वे प्रतिबंधित रहेंगे।",
+      "crowdsec_unban_confirm": "मैं समझता हूं कि ये CrowdSec निर्णय हटा दिए जाएंगे",
+      "crowdsec_unban_error": "{{ip}} के लिए CrowdSec निर्णय लोड नहीं हो सके",
+      "crowdsec_unban_management_missing": "इन पर CrowdSec प्रबंधन क्रेडेंशियल उपलब्ध नहीं हैं: {{connections}}",
+      "crowdsec_unban_unavailable": "इन CrowdSec कनेक्शनों की जांच नहीं हो सकी: {{connections}}",
       "update_filtered_duration_alert": "सभी {{count}} मिलान वाले प्रतिबंधों के लिए एक नई अवधि चुनें:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "लॉग डाउनलोड करें"
       },
       "extract_config": {
+        "hide_passwords": "पासवर्ड छिपाएं",
+        "hide_passwords_warning": "बिना छिपाए गए एक्सपोर्ट में क्रेडेंशियल होते हैं। इन्हें केवल निजी सहायता चैनल से साझा करें।",
         "title": "कॉन्फ़िगरेशन निकालें"
       },
       "support_link": {
         "title": "समर्थन लिंक"
+      },
+      "ui_bundle": {
+        "button": "बंडल डाउनलोड करें",
+        "help": "लॉग, प्लगइन संस्करण, परिवेश और हाल की त्रुटियाँ। निजी डेटा को गुमनाम किया जाता है।",
+        "title": "वेब UI डायग्नोस्टिक्स"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "सेवा {{name}} को ड्राफ्ट में बदलें",
       "convert_service_to_online": "सेवा {{name}} को ऑनलाइन में बदलें",
+      "crowdsec_unban_unavailable": "CrowdSec प्रबंधन क्रेडेंशियल उपलब्ध नहीं हैं या स्रोत इंस्टेंस उपलब्ध नहीं है",
       "delete_config": "कस्टम कॉन्फ़िगरेशन {{name}} हटाएं",
       "delete_file": "कैश फ़ाइल हटाएं: {{filename}}",
       "delete_instance": "इंस्टेंस {{hostname}} हटाएं",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "इंस्टेंस {{hostname}} वर्तमान में प्रतिक्रिया नहीं दे रहा है ('up')।",
     "latest_version_installed": "आप नवीनतम संस्करण चला रहे हैं।",
     "lets_encrypt_custom_profile": "Let's Encrypt के लिए उपयोग करने हेतु कस्टम प्रोफ़ाइल (जैसे 'my_custom_profile')।",
-    "lets_encrypt_disable_public_suffixes": "सार्वजनिक प्रत्यय सूची से मेल खाने वाले डोमेन के लिए प्रमाणपत्र अनुरोध अक्षम करें (अनुशंसित)।",
+    "lets_encrypt_disable_public_suffixes": "सक्षम होने पर (डिफ़ॉल्ट), डोमेन की जाँच सार्वजनिक प्रत्यय सूची से नहीं की जाती। सार्वजनिक प्रत्यय से मेल खाने वाले डोमेन के प्रमाणपत्र अनुरोध अस्वीकार करने के लिए इसे अक्षम करें (उदाहरण के लिए co.uk)।",
     "lets_encrypt_server": "प्रदाता-विशिष्ट सेटिंग्स दिखाने के लिए अपना प्रमाणपत्र प्रदाता चुनें।",
     "lets_encrypt_profile": "Let's Encrypt के लिए उपयोग करने हेतु प्रोफ़ाइल (classic, tlsserver, shortlived)।",
     "license_key": "आपकी BunkerWeb PRO लाइसेंस कुंजी।",

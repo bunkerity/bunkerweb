@@ -521,6 +521,12 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     return storage, storage_options
 
 
+def _redact_storage(storage: str) -> str:
+    """Storage URI without its user:password, for logs. Host and path never contain "@", so the last one ends the credentials."""
+    scheme, sep, rest = storage.partition("://")
+    return f"{scheme}{sep}{rest.rpartition('@')[2]}"
+
+
 def _make_limiter(storage: str, storage_options: Dict[str, Any], *, key_func, default_limits: List[str], strategy: str, headers_enabled: bool) -> Limiter:
     """Construct the Limiter, falling back to local memory if the storage backend cannot be reached.
 
@@ -538,7 +544,8 @@ def _make_limiter(storage: str, storage_options: Dict[str, Any], *, key_func, de
             key_prefix="bwapi-rl-",
         )
     except Exception as exc:
-        LOGGER.error(f"Could not reach Redis storage ({storage}), API rate limiting uses local memory: {exc}")
+        # The message is left out: URI parser errors echo pieces of the credentials.
+        LOGGER.error(f"Could not reach Redis storage ({_redact_storage(storage)}), API rate limiting uses local memory ({type(exc).__name__})")
         return Limiter(
             key_func=key_func,
             default_limits=default_limits,  # type: ignore[arg-type]
@@ -582,6 +589,30 @@ def _auth_default_limit(method: str, path: str) -> Optional[str]:
     return None
 
 
+_limit_checks: Dict[str, Any] = {}
+
+
+def _reset_limit_cache() -> None:
+    _limit_checks.clear()
+
+
+def _limit_check(limit_value: str):
+    """Decorated no-op carrying `limit_value`, built once per distinct limit string.
+
+    slowapi keeps route limits per function name and appends on every decoration, so each limit
+    string needs its own name and a single decoration.
+    """
+    check = _limit_checks.get(limit_value)
+    if check is None:
+
+        async def _noop(request: Request, response: Response | None = None):
+            return None
+
+        _noop.__name__ = f"_limit_check_{len(_limit_checks)}"
+        check = _limit_checks[limit_value] = _limiter.limit(limit_value)(_noop)  # type: ignore[union-attr]
+    return check
+
+
 def limiter_dep_dynamic():
     async def _dep(request: Request):  # pragma: no cover
         if not _enabled or _limiter is None:
@@ -592,12 +623,12 @@ def limiter_dep_dynamic():
         match = _match_rule(request.method, request.scope.get("path", "/"))
         if match is None:
             match = _auth_default_limit(request.method, request.scope.get("path", "/"))
-
-        async def _noop(request: Request, response: Response | None = None):
+        if match is None:
+            match = ";".join(_base_limits)
+        if not match:
             return None
 
-        for lstr in _base_limits if match is None else [match]:
-            await _limiter.limit(lstr)(_noop)(request, response=Response())  # type: ignore[arg-type]
+        await _limit_check(match)(request, response=Response())  # type: ignore[arg-type]
         return None
 
     return Depends(_dep)
@@ -679,6 +710,7 @@ def setup_rate_limiter(app) -> None:
         strategy=strategy,
         headers_enabled=api_config.rate_limit_headers_enabled,
     )
+    _reset_limit_cache()
     app.state.limiter = _limiter
 
     # Use slowapi's default handler to include useful headers
@@ -688,6 +720,6 @@ def setup_rate_limiter(app) -> None:
     sentinel_auth_enabled = isinstance(sentinel_opts, dict) and bool(sentinel_opts.get("password"))
     master_auth_enabled = bool(storage_options.get("password"))
     LOGGER.info(
-        f"Rate limiting enabled with storage={storage}; strategy={api_config.API_RATE_LIMIT_STRATEGY}; headers={api_config.rate_limit_headers_enabled}; defaults={len(_base_limits)}; rules={len(_rules)}; auth_limit={'on' if _auth_limit else 'off'}; "
+        f"Rate limiting enabled with storage={_redact_storage(storage)}; strategy={api_config.API_RATE_LIMIT_STRATEGY}; headers={api_config.rate_limit_headers_enabled}; defaults={len(_base_limits)}; rules={len(_rules)}; auth_limit={'on' if _auth_limit else 'off'}; "
         + f"redis_master_auth={'on' if master_auth_enabled else 'off'}; redis_sentinel_auth={'on' if sentinel_auth_enabled else 'off'}"
     )

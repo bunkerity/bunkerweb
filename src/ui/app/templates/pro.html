@@ -39,23 +39,23 @@
                         <div class="text-center text-primary">
                             <h4 class="mt-0 mb-2 fw-semibold{% if is_pro_version %} text-primary shine courier-prime{% endif %}">
                                 {% if is_pro_version %}
-                                    <span data-i18n="pro.status.pro_version">PRO version</span>
+                                    <span data-i18n="pro.status.pro_version">PRO Version</span>
                                 {% else %}
                                     {% if is_overlapped %}
-                                        <span data-i18n="pro.status.pro_version">PRO version</span> / <span class="text-danger fw-bold" data-i18n="pro.status.overlapped">OVERLAPPED</span>
+                                        <span data-i18n="pro.status.pro_version">PRO Version</span> / <span class="text-danger fw-bold" data-i18n="pro.status.overlapped">OVERLAPPED</span>
                                     {% elif pro_status == "expired" %}
-                                        <span data-i18n="pro.status.pro_version">PRO version</span> / <span class="text-warning fw-bold" data-i18n="pro.status.expired">EXPIRED</span>
+                                        <span data-i18n="pro.status.pro_version">PRO Version</span> / <span class="text-warning fw-bold" data-i18n="pro.status.expired">EXPIRED</span>
                                     {% elif pro_status == "suspended" %}
-                                        <span data-i18n="pro.status.pro_version">PRO version</span> / <span class="text-danger fw-bold" data-i18n="pro.status.suspended">SUSPENDED</span>
+                                        <span data-i18n="pro.status.pro_version">PRO Version</span> / <span class="text-danger fw-bold" data-i18n="pro.status.suspended">SUSPENDED</span>
                                     {% else %}
-                                        <span data-i18n="pro.status.free_version">FREE version</span>
+                                        <span data-i18n="pro.status.free_version">FREE Version</span>
                                     {% endif %}
                                 {% endif %}
                             </h4>
                             <h5 class="mt-2 mb-2 courier-prime fw-medium{% if is_overlapped %} text-decoration-line-through{% endif %}"
                                 data-i18n="pro.status.services_count"
                                 data-i18n-options='{"online_services": {{ online_services }}, "pro_services": {{ pro_services }}}'>
-                                {{ online_services }} Online service{{ 's' if online_services > 1 else '' }} / {{ pro_services }} PRO service{{ 's' if pro_services > 1 else '' }}
+                                {{ online_services }} Online Service(s) / {{ pro_services }} PRO Service(s)
                             </h5>
                             {% if is_overlapped %}
                                 <div class="mt-2 mb-2 alert alert-danger text-center" role="alert">
@@ -78,14 +78,14 @@
                                          height="15.5px">
                                 </span>
                                 {% if is_pro_version %}
-                                    <span data-i18n="pro.button.all_features_available">All features available</span>
+                                    <span data-i18n="pro.button.all_features_available">All Features Available</span>
                                 {% else %}
                                     {% if is_overlapped %}
-                                        <span data-i18n="pro.button.awaiting_compliance">Awaiting compliance...</span>
+                                        <span data-i18n="pro.button.awaiting_compliance">Awaiting Compliance...</span>
                                     {% elif pro_status == "expired" %}
-                                        <span data-i18n="pro.button.renew_license">Renew license</span>
+                                        <span data-i18n="pro.button.renew_license">Renew License</span>
                                     {% elif pro_status == "suspended" %}
-                                        <span data-i18n="pro.button.suspended_license">Suspended license</span>
+                                        <span data-i18n="pro.button.suspended_license">Suspended License</span>
                                     {% else %}
                                         <span data-i18n="pro.button.upgrade_to_pro">Upgrade to PRO</span>
                                     {% endif %}
@@ -96,7 +96,7 @@
                     <small class="position-absolute bottom-0 end-0 text-muted"
                            data-i18n="pro.status.draft_services_count"
                            data-i18n-options='{"draft_services": {{ draft_services }}}'>
-                        {{ draft_services }} Draft service{{ 's' if draft_services > 1 else '' }}
+                        {{ draft_services }} Draft service(s)
                     </small>
                 </div>
             </div>
@@ -129,7 +129,7 @@
                     <div class="card-header p-2">
                         <div class="card-title">
                             <h5 class="me-2 text-primary shine don-jose mb-0"
-                                data-i18n="pro.expiration_date.title">Pro expiration date</h5>
+                                data-i18n="pro.expiration_date.title">Pro Expiration Date</h5>
                         </div>
                     </div>
                 {% endif %}
@@ -162,9 +162,9 @@
                         <div class="card-title">
                             <h5 class="me-2 text-primary shine don-jose mb-0">
                                 {% if is_pro_version %}
-                                    <span data-i18n="pro.key.title.update">Update key</span>
+                                    <span data-i18n="pro.key.title.update">Update Key</span>
                                 {% else %}
-                                    <span data-i18n="pro.key.title.activate">Activate key</span>
+                                    <span data-i18n="pro.key.title.activate">Activate Key</span>
                                 {% endif %}
                             </h5>
                         </div>
@@ -179,7 +179,7 @@
                                 <label id="label-username"
                                        for="username"
                                        class="form-label fw-semibold text-truncate"
-                                       data-i18n="form.label.license_key">License key</label>
+                                       data-i18n="form.label.license_key">License Key</label>
                                 <div class="d-flex align-items-center">
                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                           data-bs-toggle="tooltip"
@@ -202,9 +202,9 @@
                             <div class="d-flex justify-content-center align-items-center">
                                 <button type="submit" class="btn btn-primary text-uppercase don-jose mt-3">
                                     {% if is_pro_version %}
-                                        <span data-i18n="button.update_key">Update key</span>
+                                        <span data-i18n="button.update_key">Update Key</span>
                                     {% else %}
-                                        <span data-i18n="button.activate_key">Activate key</span>
+                                        <span data-i18n="button.activate_key">Activate Key</span>
                                     {% endif %}
                                 </button>
                             </div>

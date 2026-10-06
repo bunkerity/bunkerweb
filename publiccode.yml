@@ -1,9 +1,9 @@
 publiccodeYmlVersion: 0.5.0
 name: BunkerWeb
 url: https://github.com/bunkerity/bunkerweb
-softwareVersion: 1.6.16~rc3
-releaseDate: 2026-09-30
-logo: https://github.com/bunkerity/bunkerweb/raw/v1.6.16-rc3/misc/logo.png
+softwareVersion: 1.6.16~rc4
+releaseDate: 2026-10-06
+logo: https://github.com/bunkerity/bunkerweb/raw/v1.6.16-rc4/misc/logo.png
 platforms:
   - linux
 categories:
@@ -28,7 +28,7 @@ description:
       extensible via plugins, and easy to manage through a clean UI, giving devs
       and SecOps both freedom and confidence in their infrastructure.
     documentation: https://docs.bunkerweb.io
-    apiDocumentation: https://docs.bunkerweb.io/latest/api/
+    apiDocumentation: https://docs.bunkerweb.io/1.6/api/
     features:
       - OWASP Top 10 protection
       - Antibot

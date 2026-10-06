@@ -847,7 +847,7 @@
       "ip_address": "IP 地址",
       "keywords": "关键词",
       "lets_encrypt_custom_profile": "Let's Encrypt 自定义配置文件",
-      "lets_encrypt_disable_public_suffixes": "禁用公共后缀（PSL 黑名单）",
+      "lets_encrypt_disable_public_suffixes": "跳过公共后缀列表检查",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS 凭证项",
       "lets_encrypt_profile": "Let's Encrypt 配置文件",
       "license_key": "许可证密钥",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "您确定要删除选定的插件吗？",
       "confirm_plugin_deletion_plural": "您确定要删除选定的插件吗？",
       "confirm_template_deletion": "您确定要删除模板 {{name}} 吗？",
+      "confirm_templates_deletion_alert": "您确定要删除选定的模板吗？",
+      "confirm_templates_deletion_alert_plural": "您确定要删除选定的模板吗？",
       "confirmation_instance_deletion": "您确定要删除选定的实例吗？",
       "delete_cache_confirmation_alert": "您确定要删除选定的缓存文件吗？",
       "delete_confirmation_alert": "您确定要删除选定的实例吗？",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "请为选定的封禁选择新的期限：",
       "ban_filtered_confirmation": "封禁全部 {{count}} 条匹配报告中的 IP？重复的目标只会应用一次。",
       "unban_filtered_confirmation": "您确定要解禁全部 {{count}} 条匹配的封禁吗？",
+      "crowdsec_unban_intro": "解禁同时会移除以下 CrowdSec 决策：",
+      "crowdsec_unban_list_warning": "部分决策来自 CrowdSec 列表，可能会再次出现。请使用 CrowdSec 允许列表让该 IP 永久通行。",
+      "crowdsec_unban_range_warning": "部分决策覆盖一个范围。该范围内的其他 IP 在其封禁结束前仍会被封禁。",
+      "crowdsec_unban_confirm": "我了解这些 CrowdSec 决策将被移除",
+      "crowdsec_unban_error": "无法加载 {{ip}} 的 CrowdSec 决策",
+      "crowdsec_unban_management_missing": "以下位置缺少 CrowdSec 管理凭据：{{connections}}",
+      "crowdsec_unban_unavailable": "无法检查以下 CrowdSec 连接：{{connections}}",
       "update_filtered_duration_alert": "请为全部 {{count}} 条匹配的封禁选择新的期限："
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "下载日志"
       },
       "extract_config": {
+        "hide_passwords": "隐藏密码",
+        "hide_passwords_warning": "未隐藏的导出文件包含凭据。请仅通过私密支持渠道分享。",
         "title": "提取配置"
       },
       "support_link": {
         "title": "支持链接"
+      },
+      "ui_bundle": {
+        "button": "下载诊断包",
+        "help": "日志、插件版本、环境和近期错误。私有数据将被匿名化。",
+        "title": "Web UI 诊断"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
       "convert_service_to_online": "将服务 {{name}} 转换为在线",
+      "crowdsec_unban_unavailable": "缺少 CrowdSec 管理凭据，或来源实例不可用",
       "delete_config": "删除自定义配置 {{name}}",
       "delete_file": "删除缓存文件：{{filename}}",
       "delete_instance": "删除实例 {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "实例 {{hostname}} 当前未响应 ('up')。",
     "latest_version_installed": "您正在运行最新版本。",
     "lets_encrypt_custom_profile": "用于 Let's Encrypt 的自定义配置文件（例如 'my_custom_profile'）。",
-    "lets_encrypt_disable_public_suffixes": "禁用针对符合公共后缀列表的域名的证书请求（推荐）。",
+    "lets_encrypt_disable_public_suffixes": "启用时（默认），不会根据公共后缀列表检查域名。禁用后，将拒绝为匹配公共后缀（例如 co.uk）的域名申请证书。",
     "lets_encrypt_server": "选择您的证书提供商以显示提供商特定设置。",
     "lets_encrypt_profile": "用于 Let's Encrypt 的配置文件（classic、tlsserver、shortlived）。",
     "license_key": "您的 BunkerWeb PRO 许可证密钥。",

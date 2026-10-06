@@ -58,6 +58,20 @@ The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. T
 
 Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
 
+### Dropping Bans at the TLS Handshake {#bans-tls-drop}
+
+A banned client normally completes the TLS handshake and then receives the ban page (403). `BANS_TLS_DROP_REASONS` lists the ban reasons for which BunkerWeb closes the connection at the very start of the handshake instead, before any certificate or key exchange work. The client sees a TLS error, not a page. This saves CPU when banned addresses keep reconnecting.
+
+The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behavior`, `manual`, `ui` and `api`. The default is empty, which keeps the 403 page for every ban. We suggest `crowdsec`.
+
+- Only the reason of the ban that applies counts. For an IP that has a `manual` ban and a CrowdSec ban, listing only `crowdsec` drops nothing, and the client gets the 403 page.
+- The drop is skipped, and the 403 page stays, when `USE_PROXY_PROTOCOL` is `yes` or when `USE_REAL_IP` is `yes` with a header-based source, because the client address is not known at that point. It is also skipped for IPs allowed by a local whitelist.
+- With Redis enabled, a handshake is dropped only after a request from the banned IP has gone through the regular ban check, so the first request still gets the 403 page.
+- With `SECURITY_MODE` set to `detect`, the handshake continues and a warning is logged.
+- HTTP/3 (QUIC) connections are never dropped. They get the 403 page.
+- Each drop is counted per reason in the metrics.
+- The state of this feature and of CrowdSec bans lives in the `bans_meta` shared memory zone. It is always declared with a size of 10 MiB, but its memory is only used once `BANS_TLS_DROP_REASONS` or `CROWDSEC_BAN_REFRESH` is set.
+
 ### Configuration Settings
 
 === "Core Settings"
@@ -68,6 +82,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **BunkerWeb Instances:** List of BunkerWeb instances separated with spaces.                         |
     | `MULTISITE`           | `no`              | global    | No       | **Multiple Sites:** Set to `yes` to enable hosting multiple websites with different configurations. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Security Level:** Controls the level of security enforcement. Options: `detect` or `block`.       |
+    | `BANS_TLS_DROP_REASONS` | | multisite | No | **Bans Dropped at TLS:** Ban reasons (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separated by spaces) whose banned IPs are dropped at the TLS handshake instead of getting the 403 page. Skipped behind PROXY protocol and header-based real IP, and never applied to HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | No       | **Server Type:** Defines if the server is `http` or `stream` type.                                  |
 
 === "API Settings"
@@ -1412,7 +1427,7 @@ If you aren’t already familiar with CrowdSec Console integration, [CrowdSec](h
 
 Through our partnership with CrowdSec, you can enroll your BunkerWeb instances into your [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration). This means that attacks blocked by BunkerWeb will be visible in your CrowdSec Console alongside attacks blocked by CrowdSec Security Engines, giving you a unified view of threats.
 
-Importantly, CrowdSec does not need to be installed for this integration (though we highly recommend trying it out with the [CrowdSec plugin for BunkerWeb](https://docs.bunkerweb.io/latest/features/#crowdsec) to further enhance the security of your web services). Additionally, you can enroll your CrowdSec Security Engines into the same Console account for even greater synergy.
+Importantly, CrowdSec does not need to be installed for this integration (though we highly recommend trying it out with the [CrowdSec plugin for BunkerWeb](https://docs.bunkerweb.io/1.6/features/#crowdsec) to further enhance the security of your web services). Additionally, you can enroll your CrowdSec Security Engines into the same Console account for even greater synergy.
 
 **Step #1: Create your CrowdSec Console account**
 
@@ -1885,6 +1900,27 @@ Use the returned connection ID verbatim. It includes instance identity, so ident
 
 The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
 
+### CrowdSec bans
+
+By default, BunkerWeb asks CrowdSec about every request. Set `CROWDSEC_BAN_REFRESH` to a duration, for example `5m`, to turn a CrowdSec block into a **CrowdSec ban**: a short BunkerWeb ban that is renewed while the CrowdSec decision lasts. Later requests from the IP are stopped at the ban check, before the other plugins and before the CrowdSec lookup. The ban appears on the Bans page as its own row, with the **Investigate IP** action. The default `0` keeps the previous behavior and creates no ban.
+
+- **When a ban is created:** only when BunkerWeb itself blocked the request because of a `ban` decision from the Local API, with `SECURITY_MODE` set to `block` and a decision that has not expired. AppSec rejections and other remediations, such as a captcha, never create a ban.
+- **How long it lasts:** the shorter of `CROWDSEC_BAN_REFRESH` and the remaining life of the decision. When the ban ends, the next request is checked against CrowdSec again, and a new ban is created if the decision still applies.
+- **Freshness:** when a decision is removed directly in CrowdSec (with `cscli`, in the Console, by a list refresh or by an allowlist), the IP is let through after at most the sum of `CROWDSEC_BAN_REFRESH`, the CrowdSec cache delay (`CROWDSEC_UPDATE_FREQUENCY` in stream mode, `CROWDSEC_CACHE_EXPIRATION` in live mode) and, when Redis is enabled, up to 30 seconds for the local copies on the other instances. In stream mode, no new ban is created while the last successful synchronization is older than twice `CROWDSEC_UPDATE_FREQUENCY`.
+- **Excluded locations:** any `CROWDSEC_EXCLUDE_LOCATION` on a service turns CrowdSec bans off for that service, because a ban would also block the excluded paths. CrowdSec keeps checking each request there. The same applies when the plugin excludes its own challenge location.
+- **Scope:** a ban created from a service's own CrowdSec connection applies to that service only, and a ban created from a global connection applies to every service. A global CrowdSec ban also applies to TCP/UDP services, but only when Redis is enabled, through a local copy that lasts at most 30 seconds. Without Redis, TCP/UDP services never see CrowdSec bans.
+- **Memory:** bans use the `bans_meta` shared memory zone, which is always declared with a size of 10 MiB. Its memory is only used once `CROWDSEC_BAN_REFRESH` or `BANS_TLS_DROP_REASONS` is set.
+
+**Unban and CrowdSec.** Removing a CrowdSec ban also removes the CrowdSec decisions behind it, because the IP would otherwise be banned again at the next check. The Web UI, the API and `bwcli unban` follow the same flow:
+
+- It needs the management credentials (`CROWDSEC_MANAGEMENT_LOGIN` and `CROWDSEC_MANAGEMENT_PASSWORD`) for every connection where a selected decision lives. With the API, it also needs the `crowdsec_delete` permission on every connection involved, in addition to `ban_delete`.
+- You must confirm the list of decisions (IP or range, type, origin and scenario) before any CrowdSec decision is removed. `bwcli unban` takes `-confirm` for this: without it, the command only prints the list and changes nothing in CrowdSec. The explicit ban on the same IP is not part of that confirmation: `bwcli unban` removes it first, before the preview and even without `-confirm`. The command works only on a host that has access to the database, usually the scheduler host. Elsewhere, use the Web UI or the API.
+- If the instance that saw the block is down, the unban is refused. The ban expires by itself within `CROWDSEC_BAN_REFRESH`.
+- If a decision cannot be removed, the other selected decisions are still deleted, but the remaining steps are skipped and the BunkerWeb ban is kept. The result is reported as partial and lists the decisions that were deleted and the ones that failed. The IP stays blocked until the failed decisions are removed. If some CrowdSec connections cannot be checked, the unban still goes ahead on the connections that answered: their decisions are deleted and the BunkerWeb ban is removed on the healthy instances. The result is then reported as partial and lists what could not be checked, and the IP can stay blocked by those connections until their decisions end. Retrying is safe.
+- Decisions that come from the Central API or from lists (the `CAPI` and `lists` origins) may come back at the next refresh. Create a CrowdSec allowlist for a permanent exception.
+- Removing a range decision affects the whole range. CrowdSec bans already created for other IPs of that range stay until their duration ends, at most `CROWDSEC_BAN_REFRESH`.
+- A CrowdSec ban and an explicit ban on the same IP are two separate rows, and each one is removed on its own. The duration of a CrowdSec ban cannot be edited.
+
 ### Step&nbsp;1 – Prepare CrowdSec to ingest BunkerWeb logs
 
 Follow one of the environment-specific guides below so the CrowdSec agent ingests BunkerWeb access, error, and ModSecurity audit logs. This is what drives the remediation decisions that the plugin will later enforce.
@@ -1955,7 +1991,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1972,7 +2008,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2158,6 +2194,7 @@ Every setting is `multisite`, so a value set without a prefix applies to all ser
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
+| `CROWDSEC_BAN_REFRESH` | `0` | multisite | no | **Ban Refresh:** Turn CrowdSec blocks into short BunkerWeb bans that are renewed while the CrowdSec decision lasts. The value is the longest a ban lasts before CrowdSec is asked again. `0` disables it. A service with a `CROWDSEC_EXCLUDE_LOCATION` never gets CrowdSec bans. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
 
 #### Application Security Component Settings
 
@@ -3448,6 +3485,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | no       | **Concurrent Requests:** When set to `yes`, certbot-new issues certificate requests concurrently. Use with caution to avoid rate limits.                                                                                                                                       |
 | `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates).                                                                                           |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                                                                                                           |
+| `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`      | `yes`         | multisite | no       | **Disable Public Suffix Check:** When set to `yes`, domains are not checked against the Public Suffix List before a certificate is requested. Set to `no` to refuse requests for domains that match a public suffix (for example `co.uk`). |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | no       | **Maximum Retries:** Number of times to retry certificate generation on failure. Set to `0` to disable retries. Useful for handling temporary network issues or API rate limits.                                                                                               |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | no       | **Maximum Certbot Log Backups:** Number of rotated `letsencrypt.log` backups certbot keeps per job. Certbot's own default of 1000 piles up quickly; `50` is a sensible cap. Set to `0` to keep only the live log.                                                              |
 

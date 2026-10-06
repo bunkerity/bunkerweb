@@ -67,11 +67,21 @@ pushed, not the tag object's own signature, so it does not replace the guard in
 
 The channel is derived from the tag, and one workflow serves all three:
 
-| tag            | Docker tags             | packagecloud  | docs alias   | GitHub release   |
-| -------------- | ----------------------- | ------------- | ------------ | ---------------- |
-| `v1.6.15`      | `:latest`, `:1.6.15`    | `1.6.15`      | `latest`     | draft            |
-| `v1.6.15-rc1`  | `:rc`, `:1.6.15-rc1`    | `1.6.15~rc1`  | `rc`, hidden | draft prerelease |
-| `v1.6.15-beta` | `:beta`, `:1.6.15-beta` | `1.6.15~beta` | `beta`       | draft prerelease |
+| tag            | Docker tags                  | packagecloud  | docs alias      | GitHub release   |
+| -------------- | ---------------------------- | ------------- | --------------- | ---------------- |
+| `v1.6.15`      | `:latest`, `:1.6`, `:1.6.15` | `1.6.15`      | `latest`, `1.6` | draft            |
+| `v1.6.15-rc1`  | `:rc`, `:1.6.15-rc1`         | `1.6.15~rc1`  | `rc`, hidden    | draft prerelease |
+| `v1.6.15-beta` | `:beta`, `:1.6.15-beta`      | `1.6.15~beta` | `beta`          | draft prerelease |
+
+A final tag also moves the floating `<major>.<minor>` Docker tag and docs alias when it
+is the highest final of that minor, so `docs.bunkerweb.io/1.6/` and `:1.6` keep the
+newest 1.6.x once 1.7 ships. `latest` (Docker tag, docs alias and the default docs
+version) goes only to the highest final across all `v*` tags, read from the remote: a
+`v1.6.17` tagged after `v1.7.0` gets `:1.6` and `:1.6.17` and leaves `latest` on 1.7,
+and a patch older than its minor's newest gets only its own version. `prepare` fails
+when the remote tags cannot be listed, and computes both lists (`docs_aliases`,
+`docker_tags`). The channel stays `latest` for every final, as it only keys build
+caches and the version-stamping branches.
 
 ## What the guards reject
 

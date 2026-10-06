@@ -1,6 +1,7 @@
 local ngx = ngx
 local ngx_req = ngx.req
 local shared = ngx.shared
+local banlease = require "bunkerweb.banlease"
 local bit = require "bit"
 local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
@@ -39,6 +40,7 @@ local ERR = ngx.ERR
 local HTTP_OK = ngx.HTTP_OK
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
+local HTTP_BAD_GATEWAY = ngx.HTTP_BAD_GATEWAY
 local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE
 local HTTP_NOT_FOUND = ngx.HTTP_NOT_FOUND
 local kill = rsignal.kill
@@ -563,6 +565,75 @@ api.global.POST["^/unban$"] = function(self)
 	return self:response(HTTP_OK, "success", response_msg)
 end
 
+-- Parses and validates the body of a lease request: returns ip, ban_scope and service, or nil plus an error response
+local function read_lease_args(self)
+	read_body()
+	local data = get_body_data()
+	if not data then
+		local data_file = get_body_file()
+		local file = data_file and open(data_file)
+		if file then
+			data = file:read("*a")
+			file:close()
+		end
+	end
+	local ok, body = pcall(decode, data)
+	if not ok or type(body) ~= "table" then
+		return nil, self:response(HTTP_BAD_REQUEST, "error", "can't decode JSON")
+	end
+	local ip, ban_scope, service = body["ip"], body["ban_scope"] or "global", body["service"]
+	if type(ip) ~= "string" or (not is_ipv4(ip) and not is_ipv6(ip)) then
+		return nil, self:response(HTTP_BAD_REQUEST, "error", "invalid IP address")
+	end
+	if ban_scope ~= "global" and ban_scope ~= "service" then
+		return nil, self:response(HTTP_BAD_REQUEST, "error", "invalid ban scope")
+	end
+	if ban_scope == "service" then
+		if type(service) ~= "string" then
+			return nil, self:response(HTTP_BAD_REQUEST, "error", "service is required for a service ban scope")
+		elseif RESERVED_SERVICE_NAMES[service] then
+			ban_scope, service = "global", nil
+		end
+	else
+		service = nil
+	end
+	return ip, ban_scope, service
+end
+
+-- The status line of a response that carries data (do_api_call drops a table msg without array items)
+local function response_with_data(self, http_status, api_status, msg, data)
+	local status, resp = self:response(http_status, api_status, msg)
+	resp["data"] = data
+	return status, resp
+end
+
+api.global.POST["^/lease_lookup$"] = function(self)
+	local ip, ban_scope, service = read_lease_args(self)
+	if not ip then
+		return ban_scope, service
+	end
+	local row, err, redis_checked = banlease.lookup_lease(ip, service, ban_scope)
+	if err then
+		return self:response(HTTP_BAD_GATEWAY, "error", err)
+	end
+	if row then
+		return response_with_data(self, HTTP_OK, "success", "success", { found = true, row = row })
+	end
+	return response_with_data(self, HTTP_OK, "success", "success", { found = false, redis_checked = redis_checked })
+end
+
+api.global.POST["^/remove_lease$"] = function(self)
+	local ip, ban_scope, service = read_lease_args(self)
+	if not ip then
+		return ban_scope, service
+	end
+	local ok, detail = banlease.remove_lease(ip, service, ban_scope)
+	if not ok then
+		return self:response(HTTP_BAD_GATEWAY, "error", "failed to remove lease: " .. tostring(detail))
+	end
+	return response_with_data(self, HTTP_OK, "success", "success", detail)
+end
+
 api.global.POST["^/ban$"] = function(self)
 	read_body()
 	local data = get_body_data()
@@ -649,91 +720,64 @@ api.global.POST["^/ban$"] = function(self)
 	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " banned " .. scope_text .. " " .. duration_text)
 end
 
+-- kind, ip and service of a datastore key that holds a ban or a lease. The service group is greedy: it splits at the
+-- last "_ip_", since an IP never contains it and a service name might.
+local function parse_ban_key(key)
+	if key:find("^bans_ip_") then
+		return "ban", key:sub(9)
+	elseif key:find("^bans_cs_ip_") then
+		return "crowdsec_lease", key:sub(12)
+	end
+	local service, ip = key:match("^bans_service_(.+)_ip_(.+)$")
+	if service then
+		return "ban", ip, service
+	end
+	service, ip = key:match("^bans_cs_service_(.+)_ip_(.+)$")
+	if service then
+		return "crowdsec_lease", ip, service
+	end
+end
+
+-- Value and TTL of a ban key. A key that is gone (a lease lives for seconds) gives nothing and no error.
+local function read_ban(key)
+	local value, err = datastore:get(key)
+	if not value then
+		return nil, nil, err ~= "not found" and err or nil
+	end
+	local ok, ttl = datastore:ttl(key)
+	if not ok then
+		return nil, nil, ttl ~= "not found" and ttl or nil
+	end
+	return value, ttl
+end
+
 api.global.GET["^/bans$"] = function(self)
 	local data = {}
-	-- Get system-wide bans
 	for _, k in ipairs(datastore:keys()) do
-		if k:find("^bans_ip_") then
-			local result, err = datastore:get(k)
+		local kind, ip, service = parse_ban_key(k)
+		if kind then
+			local value, ttl, err = read_ban(k)
 			if err then
 				return self:response(
 					HTTP_INTERNAL_SERVER_ERROR,
 					"error",
-					"can't access " .. k .. " from datastore : " .. result
+					"can't access " .. k .. " from datastore : " .. tostring(err)
 				)
 			end
-			local ok, ttl = datastore:ttl(k)
-			if not ok then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access ttl " .. k .. " from datastore : " .. ttl
-				)
-			end
-			local ban_data
-			ok, ban_data = pcall(decode, result)
-			if not ok then
-				ban_data = { reason = result, service = "unknown", date = 0, ban_scope = "global" }
-			end
-
-			-- Check for permanent ban flag and override TTL if set
-			if ban_data["permanent"] then
-				ttl = 0
-			end
-
-			table.insert(data, {
-				ip = k:sub(9, #k),
-				reason = ban_data["reason"],
-				service = ban_data["service"],
-				date = ban_data["date"],
-				country = ban_data["country"],
-				ban_scope = ban_data["ban_scope"] or "global",
-				exp = math.floor(ttl),
-				permanent = ban_data["permanent"] or false,
-			})
-		elseif k:find("^bans_service_") then
-			-- Service-specific ban (format: bans_service_<servicename>_ip_<ipaddress>)
-			local result, err = datastore:get(k)
-			if err then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access " .. k .. " from datastore : " .. result
-				)
-			end
-			local ok, ttl = datastore:ttl(k)
-			if not ok then
-				return self:response(
-					HTTP_INTERNAL_SERVER_ERROR,
-					"error",
-					"can't access ttl " .. k .. " from datastore : " .. ttl
-				)
-			end
-
-			-- Extract service and IP from the key
-			local service, ip = k:match("^bans_service_(.-)_ip_(.+)$")
-			if service and ip then
-				local ban_data
-				ok, ban_data = pcall(decode, result)
-				if not ok then
-					ban_data = { reason = result, service = service, date = 0, ban_scope = "service" }
+			if value then
+				local ban_scope = service and "service" or "global"
+				local ok, ban_data = pcall(decode, value)
+				if not ok or type(ban_data) ~= "table" then
+					ban_data = { reason = value, service = service or "unknown", date = 0, ban_scope = ban_scope }
 				end
-
-				-- Check for permanent ban flag and override TTL if set
-				if ban_data["permanent"] then
-					ttl = 0
+				if not service then
+					ban_scope = ban_data["ban_scope"] or "global"
 				end
-
-				table.insert(data, {
-					ip = ip,
-					reason = ban_data["reason"],
-					service = service,
-					date = ban_data["date"],
-					country = ban_data["country"],
-					ban_scope = "service",
-					exp = math.floor(ttl),
-					permanent = ban_data["permanent"] or false,
-				})
+				-- A lease copy of an older epoch counts as absent
+				local epoch = banlease.lease_epoch(ip, false)
+				if kind == "ban" or (epoch ~= nil and ban_data["lease_epoch"] == epoch) then
+					table.insert(data, banlease.ban_row(kind, ip, service, ban_scope, ban_data, ttl))
+				end
 			end
 		end
 	end

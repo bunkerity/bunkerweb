@@ -847,7 +847,7 @@
       "ip_address": "Alamat IP",
       "keywords": "Kata Kunci",
       "lets_encrypt_custom_profile": "Profil Kustom Let's Encrypt",
-      "lets_encrypt_disable_public_suffixes": "Nonaktifkan Suffix Publik (Daftar Hitam PSL)",
+      "lets_encrypt_disable_public_suffixes": "Lewati Pemeriksaan Daftar Suffix Publik",
       "lets_encrypt_dns_credential_items": "Item Kredensial DNS Let's Encrypt",
       "lets_encrypt_profile": "Profil Let's Encrypt",
       "license_key": "Kunci Lisensi",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Apakah Anda yakin ingin menghapus plugin yang dipilih?",
       "confirm_plugin_deletion_plural": "Apakah Anda yakin ingin menghapus plugin yang dipilih?",
       "confirm_template_deletion": "Apakah Anda yakin ingin menghapus template {{name}}?",
+      "confirm_templates_deletion_alert": "Apakah Anda yakin ingin menghapus template yang dipilih?",
+      "confirm_templates_deletion_alert_plural": "Apakah Anda yakin ingin menghapus template yang dipilih?",
       "confirmation_instance_deletion": "Apakah Anda yakin ingin menghapus instans yang dipilih?",
       "delete_cache_confirmation_alert": "Apakah Anda yakin ingin menghapus file cache yang dipilih?",
       "delete_confirmation_alert": "Apakah Anda yakin ingin menghapus instans yang dipilih?",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "Pilih durasi baru untuk larangan yang dipilih:",
       "ban_filtered_confirmation": "Larang IP dari semua {{count}} laporan yang cocok? Target duplikat hanya akan diterapkan sekali.",
       "unban_filtered_confirmation": "Apakah Anda yakin ingin membatalkan semua {{count}} larangan yang cocok?",
+      "crowdsec_unban_intro": "Membatalkan larangan juga menghapus keputusan CrowdSec berikut:",
+      "crowdsec_unban_list_warning": "Beberapa keputusan berasal dari daftar CrowdSec dan bisa muncul kembali. Gunakan allowlist CrowdSec agar IP ini diizinkan secara permanen.",
+      "crowdsec_unban_range_warning": "Beberapa keputusan mencakup suatu rentang. IP lain dalam rentang itu tetap dilarang sampai larangannya berakhir.",
+      "crowdsec_unban_confirm": "Saya mengerti bahwa keputusan CrowdSec ini akan dihapus",
+      "crowdsec_unban_error": "Tidak dapat memuat keputusan CrowdSec untuk {{ip}}",
+      "crowdsec_unban_management_missing": "Kredensial manajemen CrowdSec tidak ada pada: {{connections}}",
+      "crowdsec_unban_unavailable": "Tidak dapat memeriksa koneksi CrowdSec berikut: {{connections}}",
       "update_filtered_duration_alert": "Pilih durasi baru untuk semua {{count}} larangan yang cocok:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "Unduh Log"
       },
       "extract_config": {
+        "hide_passwords": "Sembunyikan kata sandi",
+        "hide_passwords_warning": "Ekspor tanpa penyembunyian berisi kredensial. Bagikan hanya melalui kanal dukungan pribadi.",
         "title": "Ekstrak Konfigurasi"
       },
       "support_link": {
         "title": "Tautan Dukungan"
+      },
+      "ui_bundle": {
+        "button": "Unduh Paket",
+        "help": "Log, versi plugin, lingkungan, dan error terbaru. Data pribadi akan dianonimkan.",
+        "title": "Diagnostik Web UI"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Konversi Konfigurasi {{name}} ke Aktif",
       "convert_service_to_draft": "Konversi Layanan {{name}} ke Draf",
       "convert_service_to_online": "Konversi Layanan {{name}} ke Aktif",
+      "crowdsec_unban_unavailable": "Kredensial manajemen CrowdSec tidak ada atau instans sumber tidak tersedia",
       "delete_config": "Hapus Konfigurasi Kustom {{name}}",
       "delete_file": "Hapus File Cache: {{filename}}",
       "delete_instance": "Hapus Instans {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "Instans {{hostname}} saat ini tidak merespons ('aktif').",
     "latest_version_installed": "Anda menjalankan versi terbaru.",
     "lets_encrypt_custom_profile": "Profil kustom yang digunakan untuk Let's Encrypt (misalnya 'my_custom_profile').",
-    "lets_encrypt_disable_public_suffixes": "Nonaktifkan permintaan sertifikat untuk domain yang cocok dengan Daftar Suffix Publik (disarankan).",
+    "lets_encrypt_disable_public_suffixes": "Jika diaktifkan (default), domain tidak diperiksa terhadap Daftar Suffix Publik. Nonaktifkan untuk menolak permintaan sertifikat bagi domain yang cocok dengan suffix publik (misalnya co.uk).",
     "lets_encrypt_server": "Pilih penyedia sertifikat Anda untuk menampilkan pengaturan khusus penyedia.",
     "lets_encrypt_profile": "Profil yang digunakan untuk Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "Kunci lisensi BunkerWeb PRO Anda.",

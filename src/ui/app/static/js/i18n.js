@@ -93,7 +93,7 @@ function updateLanguageSelector(lang) {
   }
   const flagSrc = $flagSelector
     .attr("src")
-    .replace(/\/[a-z]{2}\.svg$/, `/${flagCode}.svg`);
+    .replace(/\/[a-z]{2}\.svg(?=\?|$)/, `/${flagCode}.svg`);
   $flagSelector.attr("src", flagSrc);
   $("#current-lang-text").text(
     langNames[alpha2] || langNames["en"] || "English",

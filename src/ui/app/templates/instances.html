@@ -118,7 +118,7 @@
                             {% elif instance.status == "loading" %}
                                 <span id="status-{{ instance.hostname }}"
                                       class="badge rounded-pill bg-label-warning"
-                                      data-i18n="status.loading">Loading</span>
+                                      data-i18n="status.loading">Loading...</span>
                             {% else %}
                                 <span id="status-{{ instance.hostname }}"
                                       class="badge rounded-pill bg-label-danger"
@@ -224,7 +224,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.create_new_instance">Create new instance</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.create_new_instance">Create New Instance</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
@@ -249,7 +249,7 @@
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item bg-transparent border-0 d-flex align-items-center">
                                             <i class="bx bx-info-circle me-2"></i>
-                                            <span data-i18n="form.help.hostname_length_limit">The hostname is limited to 256 characters long.</span>
+                                            <span data-i18n="form.help.hostname_length_limit">The hostname is limited to 256 characters.</span>
                                         </li>
                                         <li class="list-group-item bg-transparent border-0 d-flex align-items-center">
                                             <i class="bx bx-info-circle me-2"></i>
@@ -277,7 +277,7 @@
                         <div class="modal-footer justify-content-center">
                             <button type="submit"
                                     class="btn btn-bw-green me-2"
-                                    data-i18n="button.create_instance">Create instance</button>
+                                    data-i18n="button.create_instance">Create Instance</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"
@@ -296,7 +296,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.delete_instance">Delete instances</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.delete_instance">Delete Instances</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
@@ -310,14 +310,14 @@
                             <div class="alert alert-danger text-center"
                                  role="alert"
                                  data-i18n="modal.body.delete_confirmation_alert">
-                                Are you sure you want to delete the selected instances?
+                                Are you sure you want to delete the selected instance?
                             </div>
                             <div id="selected-instances" class="mb-3"></div>
                         </div>
                         <div class="modal-footer justify-content-center">
                             <button type="submit"
                                     class="btn btn-outline-danger me-2"
-                                    data-i18n="button.delete_instance">Delete instances</button>
+                                    data-i18n="button.delete_instance">Delete Instances</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"

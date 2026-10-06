@@ -75,6 +75,27 @@ Verwenden Sie die zurückgegebene Verbindungs-ID unverändert. Sie enthält die 
 
 Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 5 MiB und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in `/var/run/bunkerweb`, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.
 
+### CrowdSec-Sperren
+
+Standardmäßig fragt BunkerWeb bei jeder Anfrage CrowdSec ab. Setzen Sie `CROWDSEC_BAN_REFRESH` auf eine Dauer, zum Beispiel `5m`, um einen CrowdSec-Block in eine **CrowdSec-Sperre** umzuwandeln: eine kurze BunkerWeb-Sperre, die erneuert wird, solange die CrowdSec-Entscheidung gilt. Weitere Anfragen der IP werden bei der Sperrprüfung gestoppt, noch vor den anderen Plugins und vor der CrowdSec-Abfrage. Die Sperre erscheint auf der Seite „Sperren“ als eigene Zeile, mit der Aktion **IP untersuchen**. Der Standardwert `0` behält das bisherige Verhalten bei und erzeugt keine Sperre.
+
+- **Wann eine Sperre entsteht:** nur wenn BunkerWeb die Anfrage selbst wegen einer `ban`-Entscheidung der Local API blockiert hat, `SECURITY_MODE` auf `block` steht und die Entscheidung noch nicht abgelaufen ist. AppSec-Ablehnungen und andere Gegenmaßnahmen, etwa ein Captcha, erzeugen nie eine Sperre.
+- **Wie lange sie gilt:** der kürzere Wert aus `CROWDSEC_BAN_REFRESH` und der Restlaufzeit der Entscheidung. Nach Ablauf der Sperre wird die nächste Anfrage erneut mit CrowdSec abgeglichen, und eine neue Sperre entsteht, wenn die Entscheidung weiterhin gilt.
+- **Aktualität:** Wird eine Entscheidung direkt in CrowdSec entfernt (mit `cscli`, in der Console, durch eine Listenaktualisierung oder durch eine Zulassungsliste), wird die IP spätestens nach der Summe aus `CROWDSEC_BAN_REFRESH`, der CrowdSec-Cache-Verzögerung (`CROWDSEC_UPDATE_FREQUENCY` im Stream-Modus, `CROWDSEC_CACHE_EXPIRATION` im Live-Modus) und, wenn Redis aktiviert ist, bis zu 30 Sekunden für die lokalen Kopien auf den anderen Instanzen durchgelassen. Im Stream-Modus entsteht keine neue Sperre, solange die letzte erfolgreiche Synchronisierung länger als das Doppelte von `CROWDSEC_UPDATE_FREQUENCY` zurückliegt.
+- **Ausgeschlossene Pfade:** Jedes `CROWDSEC_EXCLUDE_LOCATION` an einem Dienst schaltet CrowdSec-Sperren für diesen Dienst ab, weil eine Sperre auch die ausgeschlossenen Pfade blockieren würde. CrowdSec prüft dort weiterhin jede Anfrage. Dasselbe gilt, wenn das Plugin seinen eigenen Challenge-Pfad ausschließt.
+- **Geltungsbereich:** Eine Sperre aus der eigenen CrowdSec-Verbindung eines Dienstes gilt nur für diesen Dienst, eine Sperre aus einer globalen Verbindung gilt für alle Dienste. Eine globale CrowdSec-Sperre gilt auch für TCP/UDP-Dienste, aber nur bei aktiviertem Redis, über eine lokale Kopie, die höchstens 30 Sekunden gültig ist. Ohne Redis sehen TCP/UDP-Dienste nie CrowdSec-Sperren.
+- **Speicher:** Die Sperren nutzen die Shared-Memory-Zone `bans_meta`, die immer mit 10 MiB deklariert ist. Ihr Speicher wird erst belegt, wenn `CROWDSEC_BAN_REFRESH` oder `BANS_TLS_DROP_REASONS` gesetzt ist.
+
+**Entsperren und CrowdSec.** Das Aufheben einer CrowdSec-Sperre entfernt auch die dahinterstehenden CrowdSec-Entscheidungen, da die IP sonst bei der nächsten Prüfung erneut gesperrt würde. Die Weboberfläche, die API und `bwcli unban` folgen demselben Ablauf:
+
+- Er benötigt die Verwaltungszugangsdaten (`CROWDSEC_MANAGEMENT_LOGIN` und `CROWDSEC_MANAGEMENT_PASSWORD`) für jede Verbindung, in der eine ausgewählte Entscheidung liegt. Bei der API ist zusätzlich zu `ban_delete` die Berechtigung `crowdsec_delete` für jede beteiligte Verbindung erforderlich.
+- Sie müssen die Liste der Entscheidungen (IP oder Bereich, Typ, Ursprung und Szenario) bestätigen, bevor eine CrowdSec-Entscheidung entfernt wird. `bwcli unban` verwendet dafür `-confirm`: Ohne diese Option gibt der Befehl nur die Liste aus und ändert nichts in CrowdSec. Die explizite Sperre derselben IP gehört nicht zu dieser Bestätigung: `bwcli unban` entfernt sie zuerst, vor der Vorschau und auch ohne `-confirm`. Der Befehl funktioniert nur auf einem Host mit Zugriff auf die Datenbank, in der Regel dem Scheduler-Host. Verwenden Sie andernfalls die Weboberfläche oder die API.
+- Ist die Instanz, die den Block gesehen hat, nicht erreichbar, wird das Entsperren abgelehnt. Die Sperre läuft innerhalb von `CROWDSEC_BAN_REFRESH` von selbst ab.
+- Lässt sich eine Entscheidung nicht entfernen, werden die übrigen ausgewählten Entscheidungen trotzdem gelöscht, die weiteren Schritte entfallen jedoch und die BunkerWeb-Sperre bleibt bestehen. Das Ergebnis wird als teilweise gemeldet und nennt die gelöschten und die fehlgeschlagenen Entscheidungen. Die IP bleibt gesperrt, bis die fehlgeschlagenen Entscheidungen entfernt sind. Lassen sich einzelne CrowdSec-Verbindungen nicht prüfen, wird das Entsperren auf den Verbindungen, die geantwortet haben, trotzdem ausgeführt: Deren Entscheidungen werden gelöscht und die BunkerWeb-Sperre wird auf den erreichbaren Instanzen entfernt. Das Ergebnis wird dann als teilweise gemeldet und nennt, was nicht geprüft werden konnte; die IP kann von diesen Verbindungen weiter blockiert werden, bis deren Entscheidungen enden. Ein erneuter Versuch ist sicher.
+- Entscheidungen der Central API oder aus Listen (die Ursprünge `CAPI` und `lists`) können bei der nächsten Aktualisierung zurückkehren. Legen Sie für eine dauerhafte Ausnahme eine CrowdSec-Zulassungsliste an.
+- Das Entfernen einer Bereichsentscheidung betrifft den gesamten Bereich. CrowdSec-Sperren, die bereits für andere IPs dieses Bereichs erstellt wurden, bleiben bis zum Ende ihrer Dauer bestehen, höchstens `CROWDSEC_BAN_REFRESH`.
+- Eine CrowdSec-Sperre und eine explizite Sperre derselben IP sind zwei getrennte Zeilen und werden jeweils einzeln aufgehoben. Die Dauer einer CrowdSec-Sperre kann nicht bearbeitet werden.
+
 ### Schritt&nbsp;1 – CrowdSec auf das Einlesen von BunkerWeb-Protokollen vorbereiten
 
 === "Docker"
@@ -143,7 +164,7 @@ Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen ein
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -160,7 +181,7 @@ Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen ein
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -342,6 +363,7 @@ Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `CROWDSEC_BAN_REFRESH` | `0` | multisite | no | **Sperrerneuerung:** Wandelt CrowdSec-Blocks in kurze BunkerWeb-Sperren um, die erneuert werden, solange die CrowdSec-Entscheidung gilt. Der Wert ist die längste Dauer einer Sperre, bevor CrowdSec erneut gefragt wird. `0` deaktiviert die Funktion. Ein Dienst mit `CROWDSEC_EXCLUDE_LOCATION` erhält nie CrowdSec-Sperren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine reine Zahl bedeutet Sekunden. |
 
 #### Parameter der Anwendungssicherheitskomponente
 

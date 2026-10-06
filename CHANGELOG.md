@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.6.16~rc4 - 2026/10/06
+
+- [FEATURE] `BANS_TLS_DROP_REASONS` closes the TLS handshake of banned IPs for the listed ban reasons instead of serving the 403 page.
+- [FEATURE] `crowdsec`: `CROWDSEC_BAN_REFRESH` turns CrowdSec blocks into short, renewed bans listed on the Bans page and removed with their decisions on Unban.
+- [FEATURE] `ui`: an admin-only Web UI Diagnostics bundle on the Support page; `/support/logs` also anonymizes IPv6 addresses and credentials.
+- [SECURITY] `ui`: the Support page configuration export masks password settings and the database password by default; only an admin can export clear values.
+- [BUGFIX] `antibot`: the JavaScript challenge no longer fails on every attempt and loops until the client is rate limited.
+- [BUGFIX] `api`: each request counts once against the rate limit; the cost grew with every request, so every client got 429 after about `API_RATE_LIMIT` requests since the API started. The rate-limit Redis password is no longer logged.
+- [BUGFIX] `api`: `POST /instances/{hostname}/reload` retries a busy instance instead of answering 502.
+- [BUGFIX] `crowdsec`: serving a captcha no longer fails with `attempt to concatenate a nil value`.
+- [BUGFIX] `jobs`: the update check stays on the installed release line; a newer line such as 1.7 only logs a link to the upgrade guide.
+- [BUGFIX] `letsencrypt`: the certbot hooks log the instance API's HTTP status and reply instead of `KeyError: 'status'`.
+- [BUGFIX] `letsencrypt`: the certbot deploy hook retries a busy instance instead of failing the reload after a renewal.
+- [BUGFIX] `scheduler`: the config saver and generator run with the scheduler's own Python, so RHEL 9 installs no longer run them under Python 3.9 and fail.
+- [BUGFIX] `scheduler`: a read-only database with pending plugin changes no longer crash-loops the scheduler.
+- [BUGFIX] `ui`: an updated plugin replaces its page, routes and templates instead of leaving the old ones served.
+- [BUGFIX] `ui`: the language selector flag changes with the language. (Fixes #4002)
+- [BUGFIX] `ui`: the Unban button tooltip shows the IP address instead of `{{ip}}`. (Fixes #4001)
+- [BUGFIX] `ui`: the Bans page offers Investigate only for CrowdSec bans. (Refs #4000)
+- [BUGFIX] `ui`: server-rendered labels match the English translation, so text no longer changes case while the page loads. (Refs #3963)
+- [BUGFIX] `ui`: updated external plugin pages load after a scheduler restart instead of the old ones.
+- [BUGFIX] `ui`: a logout sent while Redis is unreachable revokes the session, so the old cookie stays refused once Redis is back.
+- [BUGFIX] `ui`: the Templates delete confirmation names templates instead of instances.
+- [BUGFIX] `ui`: the setup wizard's Public Suffix switch says what it does: enabled skips the check.
+- [BUGFIX] `ui`: custom configs named with a leading or trailing `_` or with non-ASCII letters open and rename again instead of failing with "does not exist".
+- [DOCKER] Final releases also publish a floating `1.6` image tag that follows the newest 1.6.x.
+- [MISC] `install-bunkerweb.sh` pulls the `1.6` Docker tag by default, so an install stays on 1.6.x once a newer line ships.
+- [DOCS] Links in the documentation, installer, service files and examples point to the 1.6 docs instead of `latest`.
+- [DOCS] `letsencrypt`: `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` is documented: `yes` skips the public suffix check, `no` refuses matching domains.
+
 ## v1.6.16~rc3 - 2026/10/02
 
 - [SECURITY] A restart with `KEEP_CONFIG_ON_RESTART=yes` keeps every access control enforced instead of disabling most of them until the next config push.

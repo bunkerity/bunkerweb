@@ -103,7 +103,7 @@
                                      data-i18n="profile.card.coming_soon">
                                     <label for="upload" class="btn btn-primary me-3 mb-4 disabled" tabindex="0">
                                         <i class="bx bx-upload me-0 me-sm-1"></i>
-                                        <span class="d-none d-sm-block" data-i18n="button.upload_photo">Upload new photo</span>
+                                        <span class="d-none d-sm-block" data-i18n="button.upload_photo">Upload New Photo</span>
                                         <input type="file"
                                                id="upload"
                                                class="account-file-input"
@@ -115,7 +115,7 @@
                                         <i class="bx bx-reset me-0 me-sm-1"></i>
                                         <span class="d-none d-sm-block" data-i18n="button.reset">Reset</span>
                                     </button>
-                                    <div data-i18n="profile.help.photo_extensions">Allowed JPG, GIF or PNG. Max size of 800K</div>
+                                    <div data-i18n="profile.help.photo_extensions">Allowed JPG, GIF, or PNG. Max size: 800KB.</div>
                                 </div>
                             </div>
                         </div>
@@ -138,7 +138,7 @@
                                     </div>
                                     <div class="col-md-6"
                                          {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
-                                        <label for="email" class="form-label" data-i18n="form.label.email">E-mail</label>
+                                        <label for="email" class="form-label" data-i18n="form.label.email">Email</label>
                                         <input class="form-control"
                                                type="email"
                                                name="email"
@@ -150,7 +150,7 @@
                                     <div class="col-md-12 form-password-toggle">
                                         <label class="form-label"
                                                for="password"
-                                               data-i18n="form.label.current_password">Current password</label>
+                                               data-i18n="form.label.current_password">Current Password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
@@ -255,20 +255,16 @@
                                         <div class="mt-3">
                                             <ul class="list-unstyled" id="password-requirements">
                                                 <li id="length-check">
-                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_length">Your password must
-                                                    have at least 8 characters.</span>
+                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_length">Password must have at least 8 characters.</span>
                                                 </li>
                                                 <li id="uppercase-check">
-                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_uppercase">Your password must
-                                                    have at least 1 uppercase letter.</span>
+                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_uppercase">Password must have at least 1 uppercase letter.</span>
                                                 </li>
                                                 <li id="number-check">
-                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_number">Your password must
-                                                    have at least 1 number.</span>
+                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_number">Password must have at least 1 number.</span>
                                                 </li>
                                                 <li id="special-check">
-                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_special">Your password must
-                                                    have at least 1 special character.</span>
+                                                    <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_special">Password must have at least 1 special character.</span>
                                                 </li>
                                             </ul>
                                         </div>
@@ -288,7 +284,7 @@
                                     <div class="col-md-12 form-password-toggle">
                                         <label class="form-label"
                                                for="password"
-                                               data-i18n="form.label.current_password">Current password</label>
+                                               data-i18n="form.label.current_password">Current Password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
@@ -379,7 +375,7 @@
                                         <div class="col-md-12 form-password-toggle">
                                             <label class="form-label"
                                                    for="password"
-                                                   data-i18n="form.label.current_password">Current password</label>
+                                                   data-i18n="form.label.current_password">Current Password</label>
                                             <div class="input-group input-group-merge"
                                                  {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input type="password"
@@ -432,7 +428,7 @@
                                         <div class="col-md-12 form-password-toggle">
                                             <label class="form-label"
                                                    for="password"
-                                                   data-i18n="form.label.current_password">Current password</label>
+                                                   data-i18n="form.label.current_password">Current Password</label>
                                             <div class="input-group input-group-merge"
                                                  {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                                 <input type="password"
@@ -467,8 +463,7 @@
                                 data-i18n="profile.card.title.refresh_recovery_codes">Refresh Recovery Codes</h5>
                             <div class="card-body">
                                 <div class="alert alert-danger text-center" role="alert">
-                                    <strong data-i18n="alert.notice">Notice</strong>: <span data-i18n="profile.alert.refresh_recovery_codes">Refreshing your recovery codes will
-                                    invalidate the previous ones.</span>
+                                    <strong data-i18n="alert.notice">Notice</strong>: <span data-i18n="profile.alert.refresh_recovery_codes">Refreshing your recovery codes will invalidate the previous ones.</span>
                                 </div>
                                 <form method="POST"
                                       action="{{ profile_url }}/totp-refresh"
@@ -479,7 +474,7 @@
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <label class="form-label"
                                                    for="password"
-                                                   data-i18n="form.label.current_password">Current password</label>
+                                                   data-i18n="form.label.current_password">Current Password</label>
                                             <div class="input-group input-group-merge">
                                                 <input type="password"
                                                        class="form-control"
@@ -522,7 +517,7 @@
                                     <div class="col-md-12 form-password-toggle">
                                         <label class="form-label"
                                                for="password"
-                                               data-i18n="form.label.current_password">Current password</label>
+                                               data-i18n="form.label.current_password">Current Password</label>
                                         <div class="input-group input-group-merge"
                                              {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by readonly"{% endif %}>
                                             <input type="password"
@@ -540,7 +535,7 @@
                                     <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The database is in readonly, therefore the configuration is locked" {% endif %}>
                                         <button type="submit"
                                                 class="btn btn-danger{% if is_readonly %} disabled{% endif %}"
-                                                data-i18n="button.wipe_other_sessions">Wipe other sessions</button>
+                                                data-i18n="button.wipe_other_sessions">Wipe Other Sessions</button>
                                     </div>
                                 </div>
                             </div>
@@ -614,7 +609,7 @@
                                         <div class="list-group-item d-flex align-items-center">
                                             <strong>
                                                 <i class="bx bx-time {{ items_classes }}"></i>
-                                                <span data-i18n="profile.session.creation_date">Creation date</span>:</strong>
+                                                <span data-i18n="profile.session.creation_date">Creation Date</span>:</strong>
                                             &nbsp;{{ session["creation_date"] }}
                                         </div>
                                         <div class="list-group-item d-flex align-items-center">
@@ -651,13 +646,10 @@
                     </div>
                     <div class="modal-body">
                         <div class="alert alert-danger text-center" role="alert">
-                            <strong data-i18n="alert.notice">Notice</strong>: <span data-i18n="modal.body.recovery_codes_shown_once_alert">These recovery codes will only be shown once.
-                            Please ensure you save them securely.</span>
+                            <strong data-i18n="alert.notice">Notice</strong>: <span data-i18n="modal.body.recovery_codes_shown_once_alert">These recovery codes are shown only once. Please ensure you save them securely.</span>
                         </div>
                         <div class="alert alert-primary text-center" role="alert">
-                            <strong data-i18n="alert.important">Important</strong>: <span data-i18n="modal.body.recovery_codes_save_alert">Please save these recovery codes in a
-                                secure location (like a bunker). You can use them to access your account if you lose
-                            your authentication device.</span>
+                            <strong data-i18n="alert.important">Important</strong>: <span data-i18n="modal.body.recovery_codes_save_alert">Please save these recovery codes in a secure location (like a password manager or bunker). You can use them to access your account if you lose your authentication device.</span>
                         </div>
                         <div class="row g-3">
                             {% for code in totp_recovery_codes %}

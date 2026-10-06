@@ -847,7 +847,7 @@
       "ip_address": "IP Address",
       "keywords": "Keywords",
       "lets_encrypt_custom_profile": "Let's Encrypt Custom Profile",
-      "lets_encrypt_disable_public_suffixes": "Disable Public Suffixes (PSL Blacklist)",
+      "lets_encrypt_disable_public_suffixes": "Skip Public Suffix List Check",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS Credential Items",
       "lets_encrypt_profile": "Let's Encrypt Profile",
       "license_key": "License Key",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Are you sure you want to delete the selected plugin?",
       "confirm_plugin_deletion_plural": "Are you sure you want to delete the selected plugins?",
       "confirm_template_deletion": "Are you sure you want to delete template {{name}}?",
+      "confirm_templates_deletion_alert": "Are you sure you want to delete the selected template?",
+      "confirm_templates_deletion_alert_plural": "Are you sure you want to delete the selected templates?",
       "confirmation_instance_deletion": "Are you sure you want to delete the selected instance?",
       "delete_cache_confirmation_alert": "Are you sure you want to delete the selected cache files?",
       "delete_confirmation_alert": "Are you sure you want to delete the selected instance?",
@@ -1008,6 +1010,13 @@
       "unban_confirmation_alert": "Are you sure you want to unban the selected IP address?",
       "unban_confirmation_alert_plural": "Are you sure you want to unban the selected IP addresses?",
       "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "crowdsec_unban_intro": "Unbanning also removes these CrowdSec decisions:",
+      "crowdsec_unban_list_warning": "Some decisions come from CrowdSec lists and may come back. Use a CrowdSec allowlist to let this IP through for good.",
+      "crowdsec_unban_range_warning": "Some decisions cover a range. Other IPs of that range stay banned until their ban ends.",
+      "crowdsec_unban_confirm": "I understand that these CrowdSec decisions will be removed",
+      "crowdsec_unban_error": "Could not load the CrowdSec decisions for {{ip}}",
+      "crowdsec_unban_management_missing": "CrowdSec management credentials are missing on: {{connections}}",
+      "crowdsec_unban_unavailable": "Could not check these CrowdSec connections: {{connections}}",
       "update_duration_alert": "Select a new duration for the selected bans:",
       "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
@@ -1424,10 +1433,17 @@
         "title": "Download Logs"
       },
       "extract_config": {
+        "hide_passwords": "Hide passwords",
+        "hide_passwords_warning": "Unchecked exports contain credentials. Share them only through a private support channel.",
         "title": "Extract Configuration"
       },
       "support_link": {
         "title": "Support Link"
+      },
+      "ui_bundle": {
+        "button": "Download Bundle",
+        "help": "Logs, plugin versions, environment and recent errors. Private data is anonymized.",
+        "title": "Web UI Diagnostics"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Convert Service {{name}} to Draft",
       "convert_service_to_online": "Convert Service {{name}} to Online",
+      "crowdsec_unban_unavailable": "CrowdSec management credentials are missing or the source instance is unavailable",
       "delete_config": "Delete Custom Config {{name}}",
       "delete_file": "Delete Cache File: {{filename}}",
       "delete_instance": "Delete Instance {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "Instance {{hostname}} is currently not responding ('up').",
     "latest_version_installed": "You are running the latest version.",
     "lets_encrypt_custom_profile": "The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile').",
-    "lets_encrypt_disable_public_suffixes": "Disable certificate requests for domains matching the Public Suffix List (recommended).",
+    "lets_encrypt_disable_public_suffixes": "When enabled (default), domains are not checked against the Public Suffix List. Disable to refuse certificate requests for domains that match a public suffix (for example co.uk).",
     "lets_encrypt_server": "Choose your certificate provider to show provider-specific settings.",
     "lets_encrypt_profile": "The profile to use for Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "Your BunkerWeb PRO license key.",

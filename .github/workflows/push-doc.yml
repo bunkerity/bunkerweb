@@ -10,6 +10,7 @@ on:
         required: true
         type: string
       ALIAS:
+        description: Space-separated mike aliases
         required: true
         type: string
       HIDDEN:
@@ -49,16 +50,23 @@ jobs:
         if: inputs.HIDDEN == true
         env:
           GH_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
+          VERSION: ${{ inputs.VERSION }}
+          ALIAS: ${{ inputs.ALIAS }}
         run: |
-          mike deploy --update-aliases --alias-type=copy ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
-          mike props ${{ inputs.VERSION }} --set hidden=true --push
+          # shellcheck disable=SC2086
+          mike deploy --update-aliases --alias-type=copy "$VERSION" $ALIAS
+          mike props "$VERSION" --set hidden=true --push
       - name: Deploy documentation
         if: inputs.HIDDEN == false
         env:
           GH_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
-        run: mike deploy --update-aliases --push --alias-type=copy ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
+          VERSION: ${{ inputs.VERSION }}
+          ALIAS: ${{ inputs.ALIAS }}
+        run: |
+          # shellcheck disable=SC2086
+          mike deploy --update-aliases --push --alias-type=copy "$VERSION" $ALIAS
       - name: Set default doc
-        if: inputs.ALIAS == 'latest'
+        if: contains(format(' {0} ', inputs.ALIAS), ' latest ')
         env:
           GH_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
         run: mike set-default --push latest

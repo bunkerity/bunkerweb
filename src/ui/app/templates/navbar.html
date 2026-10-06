@@ -112,7 +112,7 @@
                 <a role="button"
                    class="btn btn-sm btn-outline-{% if current_user.theme == 'light' %}dark{% else %}light{% endif %} px-2 px-md-3 position-relative"
                    aria-pressed="true"
-                   href="https://github.com/bunkerity/bunkerweb/releases/latest"
+                   href="https://github.com/bunkerity/bunkerweb/releases/{% if latest_version and latest_version != 'unknown' %}tag/v{{ latest_version }}{% else %}latest{% endif %}"
                    target="_blank"
                    rel="noreferrer"
                    data-bs-toggle="tooltip"

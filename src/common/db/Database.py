@@ -845,7 +845,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.16~rc3"
+                return "1.6.16~rc4"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -879,7 +879,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.16~rc3",
+            "version": "1.6.16~rc4",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -942,8 +942,13 @@ class Database:
         plugins_changes: Optional[Union[Literal["all"], Set[str], List[str], Tuple[str]]] = None,
         value: Optional[bool] = False,
     ) -> str:
-        """Set changed bit for config, custom configs, instances and plugins"""
-        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances", "ui_plugins"]
+        """Set changed bit for config, custom configs, instances and plugins.
+
+        ``ui_plugins`` is part of the default list only when setting (``value`` true), so a restore or an
+        import still asks the Web UI to reload its plugins. The flag belongs to the Web UI, which clears it
+        itself with an explicit list, so a default-list acknowledgement by the scheduler must not drop it.
+        """
+        changes = changes or ["config", "custom_configs", "external_plugins", "pro_plugins", "instances"] + (["ui_plugins"] if value else [])
         plugins_changes = plugins_changes or set()
         with self._db_session() as session:
             if self.readonly:

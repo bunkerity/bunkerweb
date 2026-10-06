@@ -36,7 +36,7 @@
                         <div class="card px-sm-6 px-0">
                             <a href="{{ url_for('login') }}">
                                 <i class="bx bx-arrow-back me-1"></i>
-                                <span data-i18n="link.back_to_login">back to login</span></a>
+                                <span data-i18n="link.back_to_login">Back to Login</span></a>
                             <div class="card-body">
                                 <!-- Logo -->
                                 <div class="app-brand justify-content-center">
@@ -55,7 +55,7 @@
                                     </a>
                                 </div>
                                 <!-- /Logo -->
-                                <p class="mb-6" data-i18n="totp.prompt">Please enter your TOTP code</p>
+                                <p class="mb-6" data-i18n="totp.prompt">Please enter your TOTP code.</p>
                                 <form id="formAuthentication" class="mb-6" method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden"

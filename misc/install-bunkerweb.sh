@@ -105,7 +105,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.16~rc3"
+DEFAULT_BUNKERWEB_VERSION="1.6.16~rc4"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 BUNKERWEB_VERSION_EXPLICIT="no"
@@ -2871,7 +2871,7 @@ _docker_upgrade_backup() {
         return 0
     fi
     if [ "$AUTO_BACKUP" != "yes" ]; then
-        print_warning "Automatic backup disabled. Ensure you already performed a manual backup (see https://docs.bunkerweb.io/latest/upgrading)."
+        print_warning "Automatic backup disabled. Ensure you already performed a manual backup (see https://docs.bunkerweb.io/1.6/upgrading)."
         return 0
     fi
 
@@ -2936,7 +2936,7 @@ _docker_upgrade_backup() {
         print_warning "Continuing without a backup at your request."
         return 0
     fi
-    print_error "Take a backup manually (see https://docs.bunkerweb.io/latest/upgrading),"
+    print_error "Take a backup manually (see https://docs.bunkerweb.io/1.6/upgrading),"
     print_error "or re-run with --no-auto-backup to upgrade without one."
     exit 1
 }
@@ -3074,7 +3074,7 @@ docker_install_flow() {
             else
                 print_error "Restore a backup first, then redeploy tag '${DOCKER_INSTALLED_TAG}':"
             fi
-            print_error "  https://docs.bunkerweb.io/latest/upgrading#rollback"
+            print_error "  https://docs.bunkerweb.io/1.6/upgrading#rollback"
             exit 1
         fi
     fi
@@ -3201,35 +3201,37 @@ validate_docker_image_tag() {
 
 # Turn a BunkerWeb version into a Docker-Hub-safe image tag.
 # Debian-style versions use '~' (e.g. 1.6.10~rc7) which Docker tags forbid → '-'.
-# Empty input falls back to "latest".
+# Empty input falls back to "1.6": the 1.6 installer never pulls another line.
 derive_docker_image_tag() {
     local v="${1:-}"
     if [ -z "$v" ]; then
-        printf 'latest'
+        printf '1.6'
         return 0
     fi
     printf '%s' "${v//\~/-}"
 }
 
-# A tag that does not start with a digit is a floating alias (latest, testing,
-# dev, ...) rather than a pinned version: the image behind it moves without the
-# tag string changing, so tag equality proves nothing about what is running.
+# A tag that is not a full X.Y.Z version is a floating alias (latest, testing,
+# dev, or a line alias such as 1.6) rather than a pinned version: the image behind
+# it moves without the tag string changing, so tag equality proves nothing about
+# what is running.
 _docker_tag_is_floating() {
     case "${1:-}" in
-        [0-9]*) return 1 ;;
-        *)      return 0 ;;
+        [0-9]*.*.*) return 1 ;;
+        *)          return 0 ;;
     esac
 }
 
 # Numeric X.Y.Z core of a version or tag, with any pre-release suffix dropped:
 # 1.6.15-rc1 -> 1.6.15, 1.6.15~rc1 -> 1.6.15, 1.6.15 -> 1.6.15. Empty when the
-# argument is not a dotted numeric version at all (latest/testing/dev).
+# argument is not a full dotted numeric version (latest/testing/dev, or a line
+# alias such as 1.6, which is floating and must not enter downgrade comparisons).
 _docker_version_core() {
     local v="${1:-}"
     v="${v%%[-~]*}"
     case "$v" in
         [0-9]*[!0-9.]*) printf '' ;;
-        [0-9]*)         printf '%s' "$v" ;;
+        [0-9]*.*.*)     printf '%s' "$v" ;;
         *)              printf '' ;;
     esac
 }
@@ -3260,11 +3262,19 @@ _docker_prerelease_rank() {
 # Comparing the full strings would break the core check, because `sort -V`
 # orders 1.6.15 BEFORE 1.6.15-rc1.
 # Returns 1 (not a downgrade) whenever either side has no comparable core,
-# which also leaves floating tags (latest, testing) unordered.
+# which also leaves floating tags (latest, testing) unordered. A line alias
+# (1.6) is still compared by line: 1.7.x -> 1.6 is a downgrade.
 _docker_is_downgrade() {
-    local _from_core _to_core _from_rank _to_rank _older
+    local _from_core _to_core _from_rank _to_rank _older _from_line
     _from_core=$(_docker_version_core "${1:-}")
     _to_core=$(_docker_version_core "${2:-}")
+    if [ -n "$_from_core" ] && [[ "${2:-}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+        _from_line="${_from_core%.*}"
+        [ "$_from_line" != "$2" ] || return 1
+        _older=$(printf '%s\n%s\n' "$_from_line" "$2" | sort -V | head -n1)
+        [ "$_older" = "$2" ]
+        return $?
+    fi
     [ -n "$_from_core" ] && [ -n "$_to_core" ] || return 1
     if [ "$_from_core" = "$_to_core" ]; then
         _from_rank=$(_docker_prerelease_rank "${1:-}")
@@ -4226,7 +4236,7 @@ _docker_resolve_upgrade_scenario() {
         print_error "Refusing to downgrade: the stack runs ${_from}, and ${_to} is older."
         print_error "BunkerWeb has no downgrade migration — the scheduler would fail to start and restart in a loop."
         print_error "To roll back, restore a backup FIRST and redeploy the older tag afterwards:"
-        print_error "  https://docs.bunkerweb.io/latest/upgrading#rollback"
+        print_error "  https://docs.bunkerweb.io/1.6/upgrading#rollback"
         exit 1
     fi
 
@@ -4475,7 +4485,7 @@ ask_user_preferences() {
                     "") || BUNKERWEB_INSTANCES_INPUT=""
                 if [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
                     print_warning "No instances configured. You can add workers later."
-                    print_status "See: https://docs.bunkerweb.io/latest/advanced/#3-manage-workers"
+                    print_status "See: https://docs.bunkerweb.io/1.6/advanced/#3-manage-workers"
                 fi
             fi
         fi
@@ -6804,7 +6814,7 @@ source: appsec
 
     echo
     echo -e "${GREEN}CrowdSec installed successfully${NC}"
-    echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#crowdsec"
+    echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/1.6/features/#crowdsec"
     echo -e "${BLUE}========================================${NC}"
 }
 
@@ -7041,7 +7051,7 @@ install_redis() {
     if [ "$redis_started" = "yes" ]; then
         echo -e "${GREEN}${label^} installed and configured successfully${NC}"
         echo "Used by BunkerWeb to persist metrics and bans across restarts and to sync state between workers."
-        echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#redis"
+        echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/1.6/features/#redis"
     else
         # Optional daemon down — install continues. BunkerWeb still runs without
         # Redis (in-memory only); USE_REDIS=yes points at a server not yet up.
@@ -7911,7 +7921,7 @@ show_final_info() {
     fi
 
     echo "📚 Resources:"
-    echo "  • Documentation: https://docs.bunkerweb.io"
+    echo "  • Documentation: https://docs.bunkerweb.io/1.6/"
     echo "  • Community support: https://discord.bunkerity.com"
     echo "  • Commercial support: https://panel.bunkerweb.io/store/support"
     echo "========================================="
@@ -8726,7 +8736,7 @@ fi
 # Inform about missing instances for manager/scheduler in non-interactive mode
 if [ "$INTERACTIVE_MODE" = "no" ] && [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]] && [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
     print_warning "No BunkerWeb instances configured. You can add workers later."
-    print_status "See: https://docs.bunkerweb.io/latest/integrations/#linux"
+    print_status "See: https://docs.bunkerweb.io/1.6/integrations/#linux"
 fi
 
 if [ "$INTERACTIVE_MODE" = "no" ] && [ "$INSTALL_TYPE" = "worker" ] && [ -z "$MANAGER_IP_INPUT" ]; then
@@ -9173,7 +9183,7 @@ perform_upgrade_backup() {
         return 0
     fi
     if [ "$AUTO_BACKUP" != "yes" ]; then
-        print_warning "Automatic backup disabled. Ensure you already performed a manual backup (see https://docs.bunkerweb.io/latest/upgrading)."
+        print_warning "Automatic backup disabled. Ensure you already performed a manual backup (see https://docs.bunkerweb.io/1.6/upgrading)."
         return 0
     fi
     if ! command -v bwcli >/dev/null 2>&1; then
@@ -9221,7 +9231,7 @@ perform_upgrade_backup() {
             print_warning "Continuing without a backup at your request."
             return 0
         fi
-        print_error "Take a backup manually (see https://docs.bunkerweb.io/latest/upgrading),"
+        print_error "Take a backup manually (see https://docs.bunkerweb.io/1.6/upgrading),"
         print_error "or re-run with --no-auto-backup to upgrade without one."
         exit 1
     fi

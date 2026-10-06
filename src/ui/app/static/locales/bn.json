@@ -847,7 +847,7 @@
       "ip_address": "আইপি ঠিকানা",
       "keywords": "কীওয়ার্ড",
       "lets_encrypt_custom_profile": "Let's Encrypt কাস্টম প্রোফাইল",
-      "lets_encrypt_disable_public_suffixes": "পাবলিক সাফিক্স (PSL ব্ল্যাকলিস্ট) নিষ্ক্রিয় করুন",
+      "lets_encrypt_disable_public_suffixes": "পাবলিক সাফিক্স লিস্ট যাচাই এড়িয়ে যান",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS ক্রেডেনশিয়াল আইটেম",
       "lets_encrypt_profile": "Let's Encrypt প্রোফাইল",
       "license_key": "লাইসেন্স কী",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইন মুছতে চান?",
       "confirm_plugin_deletion_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইনগুলি মুছতে চান?",
       "confirm_template_deletion": "আপনি কি নিশ্চিত যে টেমপ্লেট {{name}} মুছে ফেলতে চান?",
+      "confirm_templates_deletion_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত টেমপ্লেট মুছতে চান?",
+      "confirm_templates_deletion_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত টেমপ্লেটগুলি মুছতে চান?",
       "confirmation_instance_deletion": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ইনস্ট্যান্স মুছতে চান?",
       "delete_cache_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ক্যাশ ফাইলগুলি মুছতে চান?",
       "delete_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ইনস্ট্যান্স মুছতে চান?",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:",
       "ban_filtered_confirmation": "সব {{count}}টি মিলে যাওয়া রিপোর্ট থেকে IP নিষিদ্ধ করবেন? পুনরাবৃত্ত লক্ষ্যগুলো একবারই প্রয়োগ করা হবে।",
       "unban_filtered_confirmation": "আপনি কি নিশ্চিত যে আপনি সব {{count}}টি মিলে যাওয়া নিষেধাজ্ঞা প্রত্যাহার করতে চান?",
+      "crowdsec_unban_intro": "নিষেধাজ্ঞা সরালে এই CrowdSec সিদ্ধান্তগুলোও মুছে যাবে:",
+      "crowdsec_unban_list_warning": "কিছু সিদ্ধান্ত CrowdSec তালিকা থেকে আসে এবং আবার ফিরে আসতে পারে। এই IP-কে স্থায়ীভাবে অনুমতি দিতে CrowdSec অ্যালাউলিস্ট ব্যবহার করুন।",
+      "crowdsec_unban_range_warning": "কিছু সিদ্ধান্ত একটি রেঞ্জ কভার করে। সেই রেঞ্জের অন্য IP-গুলো নিষেধাজ্ঞার মেয়াদ শেষ না হওয়া পর্যন্ত নিষিদ্ধ থাকবে।",
+      "crowdsec_unban_confirm": "আমি বুঝি যে এই CrowdSec সিদ্ধান্তগুলো সরানো হবে",
+      "crowdsec_unban_error": "{{ip}}-এর জন্য CrowdSec সিদ্ধান্ত লোড করা যায়নি",
+      "crowdsec_unban_management_missing": "এগুলোতে CrowdSec ব্যবস্থাপনার ক্রেডেনশিয়াল নেই: {{connections}}",
+      "crowdsec_unban_unavailable": "এই CrowdSec সংযোগগুলো যাচাই করা যায়নি: {{connections}}",
       "update_filtered_duration_alert": "সব {{count}}টি মিলে যাওয়া নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "লগ ডাউনলোড করুন"
       },
       "extract_config": {
+        "hide_passwords": "পাসওয়ার্ড লুকান",
+        "hide_passwords_warning": "না লুকানো এক্সপোর্টে ক্রেডেনশিয়াল থাকে। এগুলো শুধু একটি ব্যক্তিগত সহায়তা চ্যানেলের মাধ্যমে শেয়ার করুন।",
         "title": "কনফিগারেশন এক্সট্র্যাক্ট করুন"
       },
       "support_link": {
         "title": "সমর্থন লিঙ্ক"
+      },
+      "ui_bundle": {
+        "button": "বান্ডেল ডাউনলোড করুন",
+        "help": "লগ, প্লাগইনের সংস্করণ, পরিবেশ এবং সাম্প্রতিক ত্রুটি। ব্যক্তিগত ডেটা বেনামী করা হয়।",
+        "title": "ওয়েব UI ডায়াগনস্টিক্স"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "পরিষেবা {{name}} কে খসড়াতে রূপান্তর করুন",
       "convert_service_to_online": "পরিষেবা {{name}} কে অনলাইনে রূপান্তর করুন",
+      "crowdsec_unban_unavailable": "CrowdSec ব্যবস্থাপনার ক্রেডেনশিয়াল নেই অথবা সোর্স ইনস্ট্যান্স পাওয়া যাচ্ছে না",
       "delete_config": "কাস্টম কনফিগারেশন {{name}} মুছুন",
       "delete_file": "ক্যাশ ফাইল মুছুন: {{filename}}",
       "delete_instance": "ইনস্ট্যান্স {{hostname}} মুছুন",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "ইনস্ট্যান্স {{hostname}} বর্তমানে প্রতিক্রিয়া দিচ্ছে না ('up')।",
     "latest_version_installed": "আপনি সর্বশেষ সংস্করণটি চালাচ্ছেন।",
     "lets_encrypt_custom_profile": "Let's Encrypt-এর জন্য ব্যবহারের কাস্টম প্রোফাইল (যেমন 'my_custom_profile')।",
-    "lets_encrypt_disable_public_suffixes": "পাবলিক সাফিক্স লিস্টের সাথে মিলে যাওয়া ডোমেইনের জন্য শংসাপত্র অনুরোধ নিষ্ক্রিয় করুন (প্রস্তাবিত)।",
+    "lets_encrypt_disable_public_suffixes": "চালু থাকলে (ডিফল্ট) ডোমেইনগুলো পাবলিক সাফিক্স লিস্টের বিপরীতে যাচাই করা হয় না। কোনো পাবলিক সাফিক্সের সাথে মিলে যাওয়া ডোমেইনের সার্টিফিকেট অনুরোধ প্রত্যাখ্যান করতে বন্ধ করুন (যেমন co.uk)।",
     "lets_encrypt_server": "প্রদানকারী-নির্দিষ্ট সেটিংস দেখাতে আপনার সার্টিফিকেট প্রদানকারী নির্বাচন করুন।",
     "lets_encrypt_profile": "Let's Encrypt-এর জন্য ব্যবহার করার প্রোফাইল (classic, tlsserver, shortlived)।",
     "license_key": "আপনার BunkerWeb PRO লাইসেন্স কী।",

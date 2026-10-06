@@ -117,7 +117,7 @@
                                                                name="permanent">
                                                         <label class="form-check-label"
                                                                for="permanentBan-1"
-                                                               data-i18n="form.label.permanent_ban">Ban Forever</label>
+                                                               data-i18n="form.label.permanent_ban">Permanent Ban</label>
                                                         <div class="form-text text-muted" data-i18n="form.help.permanent_ban">
                                                             If checked, the ban will never expire until manually removed
                                                         </div>
@@ -146,13 +146,13 @@
                                                                     disabled
                                                                     selected
                                                                     data-i18n="form.placeholder.select_service">
-                                                                Select a service
+                                                                Select Service
                                                             </option>
                                                             {% for service in services %}<option value="{{ service }}">{{ service }}</option>{% endfor %}
                                                         </select>
                                                         <div class="form-text text-muted"
                                                              data-i18n="form.help.ban_specific_service">
-                                                            Ban will apply only to this specific service
+                                                            Ban will apply only to this specific service.
                                                         </div>
                                                     </div>
                                                 </div>
@@ -206,13 +206,42 @@
                             <div class="alert alert-danger text-center"
                                  role="alert"
                                  data-i18n="modal.body.unban_confirmation_alert">
-                                Are you sure you want to unban the selected IP addresses?
+                                Are you sure you want to unban the selected IP address?
                             </div>
                             <ul id="selected-ips-unban" class="list-group w-100 mb-3">
                             </ul>
+                            <input type="hidden"
+                                   id="crowdsec-unban-confirmed"
+                                   name="crowdsec_confirmed"
+                                   value="" />
+                            <input type="hidden"
+                                   id="crowdsec-unban-selection"
+                                   name="crowdsec_selection"
+                                   value="" />
+                            <div id="crowdsec-unban-section" class="d-none">
+                                <p class="fw-bold mb-2" data-i18n="modal.body.crowdsec_unban_intro">
+                                    Unbanning also removes these CrowdSec decisions:
+                                </p>
+                                <div id="crowdsec-unban-previews" class="mb-2"></div>
+                                <div id="crowdsec-unban-warnings"></div>
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="crowdsec-unban-confirm"
+                                           disabled />
+                                    <label class="form-check-label"
+                                           for="crowdsec-unban-confirm"
+                                           data-i18n="modal.body.crowdsec_unban_confirm">
+                                        I understand that these CrowdSec decisions will be removed
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-danger me-2" data-i18n="button.unban">Unban</button>
+                            <button type="submit"
+                                    id="unban-submit"
+                                    class="btn btn-danger me-2"
+                                    data-i18n="button.unban">Unban</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"
@@ -284,7 +313,7 @@
                         <div class="modal-footer justify-content-center">
                             <button type="submit"
                                     class="btn btn-warning me-2"
-                                    data-i18n="button.update_duration">Update Duration</button>
+                                    data-i18n="button.update_duration">Update Ban Duration</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"

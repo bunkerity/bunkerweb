@@ -42,7 +42,7 @@ Choose the flavor that matches your environment.
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ Choose the flavor that matches your environment.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -77,7 +77,7 @@ Choose the flavor that matches your environment.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.16-rc3
+        image: bunkerity/bunkerweb-api:1.6.16-rc4
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -144,7 +144,7 @@ Choose the flavor that matches your environment.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.16-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.16-rc4
     ```
 
 === "Linux"
@@ -403,7 +403,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 - **Bans**
   - `GET /bans`: aggregate active bans from instances.
   - `POST /bans` or `/bans/ban`: apply one or more bans; payload can be object, array, or stringified JSON.
-  - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service.
+  - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service. For a CrowdSec ban (`kind: "crowdsec_lease"`), also send `remove_crowdsec_decisions: true`, `confirmed: true` and `decision_keys` (the keys listed in the `409` preview) to delete the CrowdSec decisions behind it; the call needs `crowdsec_delete` on every affected connection, answers `409` when the selection changed, and `502` on a partial result.
 - **Plugins (UI plugins)**
   - `GET /plugins`: list plugins; `with_data=true` includes packaged bytes when available.
   - `POST /plugins/upload`: install UI plugins from `.zip`, `.tar.gz`, `.tar.xz`.

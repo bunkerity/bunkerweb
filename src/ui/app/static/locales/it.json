@@ -847,7 +847,7 @@
       "ip_address": "Indirizzo IP",
       "keywords": "Parole chiave",
       "lets_encrypt_custom_profile": "Profilo Let's Encrypt Personalizzato",
-      "lets_encrypt_disable_public_suffixes": "Disabilita Suffissi Pubblici (Blacklist PSL)",
+      "lets_encrypt_disable_public_suffixes": "Salta il controllo della lista dei suffissi pubblici",
       "lets_encrypt_dns_credential_items": "Elementi Credenziali DNS Let's Encrypt",
       "lets_encrypt_profile": "Profilo Let's Encrypt",
       "license_key": "Chiave di Licenza",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Sei sicuro di voler eliminare il plugin selezionato?",
       "confirm_plugin_deletion_plural": "Sei sicuro di voler eliminare i plugin selezionati?",
       "confirm_template_deletion": "Sei sicuro di voler eliminare il modello {{name}}?",
+      "confirm_templates_deletion_alert": "Sei sicuro di voler eliminare il modello selezionato?",
+      "confirm_templates_deletion_alert_plural": "Sei sicuro di voler eliminare i modelli selezionati?",
       "confirmation_instance_deletion": "Sei sicuro di voler eliminare l'istanza selezionata?",
       "delete_cache_confirmation_alert": "Sei sicuro di voler eliminare i file cache selezionati?",
       "delete_confirmation_alert": "Sei sicuro di voler eliminare l'istanza selezionata?",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:",
       "ban_filtered_confirmation": "Vietare gli IP di tutti i {{count}} report corrispondenti? Gli obiettivi duplicati verranno applicati una sola volta.",
       "unban_filtered_confirmation": "Sei sicuro di voler sbloccare tutti i {{count}} divieti corrispondenti?",
+      "crowdsec_unban_intro": "Lo sblocco rimuove anche queste decisioni di CrowdSec:",
+      "crowdsec_unban_list_warning": "Alcune decisioni provengono da liste CrowdSec e possono tornare. Usa una allowlist di CrowdSec per lasciar passare questo IP in modo definitivo.",
+      "crowdsec_unban_range_warning": "Alcune decisioni coprono un intervallo. Gli altri IP di quell'intervallo restano bloccati fino alla fine del loro blocco.",
+      "crowdsec_unban_confirm": "Capisco che queste decisioni di CrowdSec verranno rimosse",
+      "crowdsec_unban_error": "Impossibile caricare le decisioni di CrowdSec per {{ip}}",
+      "crowdsec_unban_management_missing": "Le credenziali di gestione di CrowdSec mancano su: {{connections}}",
+      "crowdsec_unban_unavailable": "Impossibile verificare queste connessioni CrowdSec: {{connections}}",
       "update_filtered_duration_alert": "Seleziona una nuova durata per tutti i {{count}} divieti corrispondenti:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "Download Log"
       },
       "extract_config": {
+        "hide_passwords": "Nascondi le password",
+        "hide_passwords_warning": "Le esportazioni non mascherate contengono credenziali. Condividile solo tramite un canale di supporto privato.",
         "title": "Estrai Configurazione"
       },
       "support_link": {
         "title": "Link Supporto"
+      },
+      "ui_bundle": {
+        "button": "Scarica pacchetto",
+        "help": "Log, versioni dei plugin, ambiente ed errori recenti. I dati privati vengono anonimizzati.",
+        "title": "Diagnostica della Web UI"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Converti Servizio {{name}} in Bozza",
       "convert_service_to_online": "Converti Servizio {{name}} in Online",
+      "crowdsec_unban_unavailable": "Le credenziali di gestione di CrowdSec mancano oppure l'istanza di origine non è disponibile",
       "delete_config": "Elimina Configurazione Personalizzata {{name}}",
       "delete_file": "Elimina file cache: {{filename}}",
       "delete_instance": "Elimina Istanza {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "L'istanza {{hostname}} non risponde attualmente ('up').",
     "latest_version_installed": "Stai usando l'ultima versione.",
     "lets_encrypt_custom_profile": "Il profilo personalizzato da utilizzare per Let's Encrypt (es. 'my_custom_profile').",
-    "lets_encrypt_disable_public_suffixes": "Disabilita le richieste di certificati per i domini che corrispondono alla Public Suffix List (consigliato).",
+    "lets_encrypt_disable_public_suffixes": "Se abilitato (predefinito), i domini non vengono verificati rispetto alla lista dei suffissi pubblici. Disabilita per rifiutare le richieste di certificato per i domini che corrispondono a un suffisso pubblico (ad esempio co.uk).",
     "lets_encrypt_server": "Scegli il tuo provider di certificati per mostrare impostazioni specifiche del provider.",
     "lets_encrypt_profile": "Il profilo da utilizzare per Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "La tua chiave di licenza BunkerWeb PRO.",
