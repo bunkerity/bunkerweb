@@ -447,6 +447,42 @@
     "type": "select",
     "select": ["detect", "block"]
   },
+  "BANS_TLS_DROP_REASONS": {
+    "context": "multisite",
+    "default": "",
+    "help": "Ban reasons whose banned IPs are dropped at the TLS ClientHello instead of getting the 403 page. Skipped behind PROXY protocol and header-based real IP.",
+    "id": "bans-tls-drop-reasons",
+    "label": "Bans dropped at TLS",
+    "regex": "^((crowdsec|bad_behavior|manual|ui|api)( (crowdsec|bad_behavior|manual|ui|api))*)?$",
+    "type": "multiselect",
+    "multiselect": [
+      {
+        "id": "crowdsec",
+        "label": "CrowdSec",
+        "value": "crowdsec"
+      },
+      {
+        "id": "bad_behavior",
+        "label": "Bad behavior",
+        "value": "bad_behavior"
+      },
+      {
+        "id": "manual",
+        "label": "Manual",
+        "value": "manual"
+      },
+      {
+        "id": "ui",
+        "label": "Web UI",
+        "value": "ui"
+      },
+      {
+        "id": "api",
+        "label": "API",
+        "value": "api"
+      }
+    ]
+  },
   "SERVER_NAMES_HASH_BUCKET_SIZE": {
     "context": "global",
     "default": "",

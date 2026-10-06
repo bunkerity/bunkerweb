@@ -60,6 +60,20 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 切换到 `detect` 模式可以帮助您识别和解决潜在的误报，而不会干扰合法客户端。一旦这些问题得到解决，您就可以自信地切换回 `block` 模式以获得全面保护。
 
+### 在 TLS 握手时丢弃封禁 {#bans-tls-drop}
+
+被封禁的客户端通常会完成 TLS 握手，然后收到封禁页面（403）。`BANS_TLS_DROP_REASONS` 列出了一些封禁原因，对于这些原因，BunkerWeb 会在握手一开始就关闭连接，早于任何证书或密钥交换工作。客户端看到的是 TLS 错误，而不是页面。当被封禁的地址不断重连时，这样可以节省 CPU。
+
+该值是以空格分隔的原因列表，可选 `crowdsec`、`bad_behavior`、`manual`、`ui` 和 `api`。默认值为空，即所有封禁都保留 403 页面。我们建议使用 `crowdsec`。
+
+- 只有实际生效的封禁的原因才有意义。对于同时有 `manual` 封禁和 CrowdSec 封禁的 IP，只列出 `crowdsec` 不会丢弃任何连接，客户端会收到 403 页面。
+- 当 `USE_PROXY_PROTOCOL` 为 `yes`，或 `USE_REAL_IP` 为 `yes` 且来源基于请求头时，会跳过丢弃并保留 403 页面，因为此时无法得知客户端地址。被本地白名单放行的 IP 也会跳过。
+- 启用 Redis 时，只有在被封禁 IP 的请求经过常规封禁检查之后，握手才会被丢弃，因此第一个请求仍会收到 403 页面。
+- 当 `SECURITY_MODE` 为 `detect` 时，握手会继续，并记录一条警告。
+- HTTP/3（QUIC）连接永远不会被丢弃，它们会收到 403 页面。
+- 每次丢弃都会按原因计入指标。
+- 此功能与 CrowdSec 封禁的状态存放在共享内存区域 `bans_meta` 中。该区域始终以 10 MiB 声明，但只有设置了 `BANS_TLS_DROP_REASONS` 或 `CROWDSEC_BAN_REFRESH` 后才会使用其内存。
+
 ### 配置设置
 
 === "核心设置"
@@ -70,6 +84,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | 否   | **BunkerWeb 实例：** 以空格分隔的 BunkerWeb 实例列表。             |
     | `MULTISITE`           | `no`              | global    | 否   | **多站点：** 设置为 `yes` 以启用托管具有不同配置的多个网站。       |
     | `SECURITY_MODE`       | `block`           | multisite | 否   | **安全级别：** 控制安全强制执行的级别。选项：`detect` 或 `block`。 |
+    | `BANS_TLS_DROP_REASONS` | | multisite | 否 | **在 TLS 丢弃的封禁：** 其被封禁 IP 在 TLS 握手时被丢弃（而不是收到 403 页面）的封禁原因（`crowdsec`、`bad_behavior`、`manual`、`ui`、`api`，以空格分隔）。在 PROXY 协议之后以及基于请求头的真实 IP 下会跳过，且从不应用于 HTTP/3。 |
     | `SERVER_TYPE`         | `http`            | multisite | 否   | **服务器类型：** 定义服务器是 `http` 还是 `stream` 类型。          |
 
 === "API 设置"
@@ -1414,7 +1429,7 @@ BunkerNet 插件通过 BunkerWeb 实例之间的集体威胁情报共享，创�
 
 通过我们与 CrowdSec 的合作，您可以将您的 BunkerWeb 实例注册到您的 [CrowdSec 控制台](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration)。这意味着由 BunkerWeb 阻止的攻击将与由 CrowdSec 安全引擎阻止的攻击一起显示在您的 CrowdSec 控制台中，为您提供统一的威胁视图。
 
-重要的是，此集成无需安装 CrowdSec（尽管我们强烈建议您使用 [BunkerWeb 的 CrowdSec 插件](https://docs.bunkerweb.io/latest/features/#crowdsec)来进一步增强您的 Web 服务的安全性）。此外，您可以将您的 CrowdSec 安全引擎注册到同一个控制台帐户，以实现更大的协同作用。
+重要的是，此集成无需安装 CrowdSec（尽管我们强烈建议您使用 [BunkerWeb 的 CrowdSec 插件](https://docs.bunkerweb.io/1.6/features/#crowdsec)来进一步增强您的 Web 服务的安全性）。此外，您可以将您的 CrowdSec 安全引擎注册到同一个控制台帐户，以实现更大的协同作用。
 
 **步骤 1：创建您的 CrowdSec 控制台帐户**
 
@@ -1885,6 +1900,27 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
 
+### CrowdSec 封禁
+
+默认情况下，BunkerWeb 会针对每个请求查询 CrowdSec。将 `CROWDSEC_BAN_REFRESH` 设置为一个时长（例如 `5m`），即可把 CrowdSec 的拦截转换为 **CrowdSec 封禁**：一个短时的 BunkerWeb 封禁，只要 CrowdSec 决策仍然有效就会持续续期。该 IP 之后的请求会在封禁检查处被拦下，早于其他插件，也早于 CrowdSec 查询。该封禁会作为独立的一行显示在封禁页面中，并带有 **调查 IP** 操作。默认值 `0` 保持原有行为，不创建任何封禁。
+
+- **何时创建封禁：** 仅当 BunkerWeb 自身因本地 API 的 `ban` 决策拦截了请求，且 `SECURITY_MODE` 为 `block`、决策尚未过期时。AppSec 拒绝以及其他处置方式（例如验证码）从不创建封禁。
+- **持续多久：** 取 `CROWDSEC_BAN_REFRESH` 与决策剩余有效期中较短的一个。封禁结束后，下一个请求会再次接受 CrowdSec 检查，如果决策仍然适用，则会创建新的封禁。
+- **时效性：** 当决策直接在 CrowdSec 中被移除时（通过 `cscli`、Console、列表刷新或允许列表），该 IP 最迟在以下各项之和之后被放行：`CROWDSEC_BAN_REFRESH`、CrowdSec 缓存延迟（stream 模式下为 `CROWDSEC_UPDATE_FREQUENCY`，live 模式下为 `CROWDSEC_CACHE_EXPIRATION`），以及启用 Redis 时其他实例上本地副本的最多 30 秒。在 stream 模式下，只要最近一次成功同步早于 `CROWDSEC_UPDATE_FREQUENCY` 的两倍，就不会创建新的封禁。
+- **排除的位置：** 服务上的任何 `CROWDSEC_EXCLUDE_LOCATION` 都会为该服务关闭 CrowdSec 封禁，因为封禁也会拦截被排除的路径。CrowdSec 仍会在那里检查每个请求。插件排除自身的挑战位置时同样如此。
+- **作用范围：** 由服务自身的 CrowdSec 连接创建的封禁只适用于该服务，由全局连接创建的封禁适用于所有服务。全局 CrowdSec 封禁也适用于 TCP/UDP 服务，但仅在启用 Redis 时通过最多保留 30 秒的本地副本生效。没有 Redis 时，TCP/UDP 服务永远看不到 CrowdSec 封禁。
+- **内存：** 封禁使用共享内存区域 `bans_meta`，该区域始终以 10 MiB 的大小声明。只有设置了 `CROWDSEC_BAN_REFRESH` 或 `BANS_TLS_DROP_REASONS` 后才会使用其内存。
+
+**解封与 CrowdSec。** 移除 CrowdSec 封禁时也会移除其背后的 CrowdSec 决策，否则该 IP 会在下一次检查时再次被封禁。Web 界面、API 和 `bwcli unban` 遵循相同的流程：
+
+- 需要每个包含所选决策的连接的管理凭据（`CROWDSEC_MANAGEMENT_LOGIN` 和 `CROWDSEC_MANAGEMENT_PASSWORD`）。使用 API 时，除 `ban_delete` 外，还需要对每个涉及的连接拥有 `crowdsec_delete` 权限。
+- 在移除任何 CrowdSec 决策之前，必须确认决策列表（IP 或范围、类型、来源和场景）。`bwcli unban` 使用 `-confirm` 完成确认：不带该选项时，命令只打印列表，不会更改 CrowdSec 中的任何内容。同一 IP 的显式封禁不属于这次确认：`bwcli unban` 会先移除它，早于预览，且不带 `-confirm` 时也会移除。该命令只能在可访问数据库的主机上运行，通常是 scheduler 所在主机。其他情况请使用 Web 界面或 API。
+- 如果看到该拦截的实例不可用，解封会被拒绝。封禁会在 `CROWDSEC_BAN_REFRESH` 内自行过期。
+- 如果某个决策无法移除，其他已选决策仍会被删除，但会跳过其余步骤，并保留 BunkerWeb 封禁。结果会报告为部分成功，并列出已删除和失败的决策。在失败的决策被移除之前，该 IP 仍会被封锁。如果部分 CrowdSec 连接无法检查，解封仍会在已响应的连接上执行：删除这些连接上的决策，并在可用实例上移除 BunkerWeb 封禁。结果会报告为部分成功，并列出无法检查的内容；在这些连接上的决策结束之前，该 IP 可能仍被它们拦截。重试是安全的。
+- 来自 Central API 或列表的决策（`CAPI` 和 `lists` 来源）可能在下一次刷新时重新出现。如需永久例外，请创建 CrowdSec 允许列表。
+- 移除范围决策会影响整个范围。已为该范围内其他 IP 创建的 CrowdSec 封禁会保留到其时长结束，最长为 `CROWDSEC_BAN_REFRESH`。
+- 同一 IP 的 CrowdSec 封禁与显式封禁是两行独立记录，各自单独移除。CrowdSec 封禁的时长不可编辑。
+
 ### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
 === "Docker"
@@ -1953,7 +1989,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1970,7 +2006,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2154,6 +2190,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `CROWDSEC_BAN_REFRESH` | `0` | multisite | 否 | **封禁刷新：** 将 CrowdSec 拦截转换为短时的 BunkerWeb 封禁，只要 CrowdSec 决策有效就会续期。该值是封禁在再次询问 CrowdSec 之前最长持续的时间。`0` 表示禁用。设置了 `CROWDSEC_EXCLUDE_LOCATION` 的服务永远不会产生 CrowdSec 封禁。支持时间后缀（ms、s、m、h、d、w、M、y）；纯数字表示秒。 |
 
 #### 应用程序安全组件设置
 
@@ -3220,7 +3257,7 @@ STREAM 支持 :x:
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 
@@ -3441,6 +3478,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | 否   | **并发请求：** 设置为 `yes` 时，certbot-new 将并发发起证书请求。请谨慎使用以避免速率限制。                                                                                           |
 | `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用）、`tlsserver`（针对 TLS 服务器优化）或 `shortlived`（7 天证书）。                                                |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。                                         |
+| `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`      | `yes`         | multisite | 否   | **禁用公共后缀检查：** 设为 `yes` 时，申请证书前不会将域名与公共后缀列表（Public Suffix List）比对。设为 `no` 时，将拒绝与公共后缀匹配的域名（例如 `co.uk`）的证书申请。 |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                            |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | 否   | **Certbot 日志备份上限：** Certbot 每个任务保留的轮转 `letsencrypt.log` 备份数量。Certbot 自带的默认值 `1000` 很容易迅速堆积；`50` 是一个更合理的上限。设置为 `0` 时仅保留当前日志。 |
 

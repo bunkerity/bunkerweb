@@ -847,7 +847,7 @@
       "ip_address": "IP ایڈریس",
       "keywords": "کلیدی الفاظ",
       "lets_encrypt_custom_profile": "Let's Encrypt کسٹم پروفائل",
-      "lets_encrypt_disable_public_suffixes": "پبلک سفکسز (PSL بلیک لسٹ) غیر فعال کریں",
+      "lets_encrypt_disable_public_suffixes": "پبلک سفکس لسٹ کی جانچ چھوڑ دیں",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS کریڈینشل آئٹمز",
       "lets_encrypt_profile": "Let's Encrypt پروفائل",
       "license_key": "لائسنس کلید",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "کیا آپ واقعی منتخب کردہ پلگ ان حذف کرنا چاہتے ہیں؟",
       "confirm_plugin_deletion_plural": "کیا آپ واقعی منتخب کردہ پلگ انز حذف کرنا چاہتے ہیں؟",
       "confirm_template_deletion": "کیا آپ واقعی ٹیمپلیٹ {{name}} کو حذف کرنا چاہتے ہیں؟",
+      "confirm_templates_deletion_alert": "کیا آپ واقعی منتخب کردہ ٹیمپلیٹ حذف کرنا چاہتے ہیں؟",
+      "confirm_templates_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ ٹیمپلیٹس حذف کرنا چاہتے ہیں؟",
       "confirmation_instance_deletion": "کیا آپ واقعی منتخب کردہ انسٹینس حذف کرنا چاہتے ہیں؟",
       "delete_cache_confirmation_alert": "کیا آپ واقعی منتخب کردہ کیشے فائلیں حذف کرنا چاہتے ہیں؟",
       "delete_confirmation_alert": "کیا آپ واقعی منتخب کردہ انسٹینس حذف کرنا چاہتے ہیں؟",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:",
       "ban_filtered_confirmation": "مماثل تمام {{count}} رپورٹس سے IPs پر پابندی لگائیں؟ نقل شدہ اہداف صرف ایک بار لاگو ہوں گے۔",
       "unban_filtered_confirmation": "کیا آپ واقعی مماثل تمام {{count}} پابندیاں ہٹانا چاہتے ہیں؟",
+      "crowdsec_unban_intro": "پابندی ہٹانے سے یہ CrowdSec فیصلے بھی ہٹ جائیں گے:",
+      "crowdsec_unban_list_warning": "کچھ فیصلے CrowdSec کی فہرستوں سے آتے ہیں اور واپس آ سکتے ہیں۔ اس IP کو مستقل طور پر اجازت دینے کے لیے CrowdSec کی اجازت فہرست استعمال کریں۔",
+      "crowdsec_unban_range_warning": "کچھ فیصلے ایک رینج کا احاطہ کرتے ہیں۔ اس رینج کے دوسرے IP پابندی ختم ہونے تک بلاک رہیں گے۔",
+      "crowdsec_unban_confirm": "میں سمجھتا ہوں کہ یہ CrowdSec فیصلے ہٹا دیے جائیں گے",
+      "crowdsec_unban_error": "{{ip}} کے لیے CrowdSec کے فیصلے لوڈ نہیں ہو سکے",
+      "crowdsec_unban_management_missing": "ان پر CrowdSec کے انتظامی اسناد موجود نہیں ہیں: {{connections}}",
+      "crowdsec_unban_unavailable": "ان CrowdSec کنکشنز کی جانچ نہیں ہو سکی: {{connections}}",
       "update_filtered_duration_alert": "مماثل تمام {{count}} پابندیوں کے لیے نئی مدت منتخب کریں:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "لاگز ڈاؤن لوڈ کریں"
       },
       "extract_config": {
+        "hide_passwords": "پاس ورڈ چھپائیں",
+        "hide_passwords_warning": "بغیر چھپائی گئی ایکسپورٹ میں اسناد شامل ہوتی ہیں۔ انہیں صرف نجی سپورٹ چینل کے ذریعے شیئر کریں۔",
         "title": "کنفیگریشن نکالیں"
       },
       "support_link": {
         "title": "سپورٹ لنک"
+      },
+      "ui_bundle": {
+        "button": "بنڈل ڈاؤن لوڈ کریں",
+        "help": "لاگز، پلگ ان ورژنز، ماحول اور حالیہ خرابیاں۔ نجی ڈیٹا کو گمنام کر دیا جاتا ہے۔",
+        "title": "ویب UI تشخیص"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "سروس {{name}} کو ڈرافٹ میں تبدیل کریں",
       "convert_service_to_online": "سروس {{name}} کو آن لائن میں تبدیل کریں",
+      "crowdsec_unban_unavailable": "CrowdSec کے انتظامی اسناد موجود نہیں ہیں یا ماخذ انسٹینس دستیاب نہیں ہے",
       "delete_config": "کسٹم کنفیگریشن {{name}} حذف کریں",
       "delete_file": "کیشے فائل حذف کریں: {{filename}}",
       "delete_instance": "انسٹینس {{hostname}} حذف کریں",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "انسٹینس {{hostname}} فی الحال جواب نہیں دے رہا ہے ('up')۔",
     "latest_version_installed": "آپ تازہ ترین ورژن چلا رہے ہیں۔",
     "lets_encrypt_custom_profile": "Let's Encrypt کے لیے استعمال ہونے والا کسٹم پروفائل (مثلاً 'my_custom_profile')۔",
-    "lets_encrypt_disable_public_suffixes": "پبلک سفکس لسٹ سے ملنے والے ڈومینز کے لیے سرٹیفکیٹ کی درخواستیں غیر فعال کریں (تجویز کردہ)۔",
+    "lets_encrypt_disable_public_suffixes": "فعال ہونے پر (ڈیفالٹ) ڈومینز کو پبلک سفکس لسٹ کے خلاف نہیں جانچا جاتا۔ پبلک سفکس سے ملنے والے ڈومینز کی سرٹیفکیٹ درخواستیں مسترد کرنے کے لیے اسے غیر فعال کریں (مثلاً co.uk)۔",
     "lets_encrypt_server": "فراہم کنندہ مخصوص ترتیبات دکھانے کے لیے اپنا سرٹیفکیٹ فراہم کنندہ منتخب کریں۔",
     "lets_encrypt_profile": "Let's Encrypt کے لیے استعمال ہونے والا پروفائل (classic، tlsserver، shortlived)۔",
     "license_key": "آپ کی BunkerWeb PRO لائسنس کلید۔",

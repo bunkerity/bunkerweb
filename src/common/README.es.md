@@ -49,6 +49,20 @@ El ajuste `SECURITY_MODE` determina cómo BunkerWeb maneja las amenazas detectad
 
 Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos positivos sin interrumpir a los clientes legítimos. Una vez que estos problemas se resuelvan, puedes volver con confianza al modo `block` para una protección completa.
 
+### Descartar baneos en el handshake TLS {#bans-tls-drop}
+
+Un cliente baneado normalmente completa el handshake TLS y después recibe la página de baneo (403). `BANS_TLS_DROP_REASONS` enumera los motivos de baneo para los que BunkerWeb cierra la conexión al comienzo del handshake, antes de cualquier trabajo de certificado o de intercambio de claves. El cliente ve un error TLS, no una página. Esto ahorra CPU cuando las direcciones baneadas se reconectan sin parar.
+
+El valor es una lista de motivos separados por espacios, entre `crowdsec`, `bad_behavior`, `manual`, `ui` y `api`. El valor por defecto está vacío, lo que mantiene la página 403 para todos los baneos. Recomendamos `crowdsec`.
+
+- Solo cuenta el motivo del baneo que se aplica. Para una IP con un baneo `manual` y un baneo de CrowdSec, indicar solo `crowdsec` no descarta nada y el cliente recibe la página 403.
+- El descarte se omite, y la página 403 se mantiene, cuando `USE_PROXY_PROTOCOL` es `yes` o cuando `USE_REAL_IP` es `yes` con un origen basado en cabecera, porque en ese momento no se conoce la dirección del cliente. También se omite para las IP permitidas por una whitelist local.
+- Con Redis activado, un handshake se descarta solo después de que una solicitud de la IP baneada haya pasado por la comprobación de baneos habitual, por lo que la primera solicitud sigue recibiendo la página 403.
+- Con `SECURITY_MODE` en `detect`, el handshake continúa y se registra una advertencia.
+- Las conexiones HTTP/3 (QUIC) nunca se descartan. Reciben la página 403.
+- Cada descarte se contabiliza por motivo en las métricas.
+- El estado de esta función y de los baneos de CrowdSec vive en la zona de memoria compartida `bans_meta`. Siempre se declara con 10 MiB, pero su memoria solo se utiliza cuando se define `BANS_TLS_DROP_REASONS` o `CROWDSEC_BAN_REFRESH`.
+
 ### Ajustes de Configuración
 
 === "Ajustes Principales"
@@ -59,6 +73,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **Instancias de BunkerWeb:** Lista de instancias de BunkerWeb separadas por espacios.                                           |
     | `MULTISITE`           | `no`              | global    | No       | **Múltiples Sitios:** Establécelo en `yes` para permitir el alojamiento de múltiples sitios web con diferentes configuraciones. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Nivel de Seguridad:** Controla el nivel de aplicación de la seguridad. Opciones: `detect` o `block`.                          |
+    | `BANS_TLS_DROP_REASONS` | | multisite | No | **Baneos descartados en TLS:** Motivos de baneo (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separados por espacios) cuyas IP baneadas se descartan en el handshake TLS en lugar de recibir la página 403. Se omite tras el protocolo PROXY y con IP real basada en cabecera, y nunca se aplica a HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | No       | **Tipo de Servidor:** Define si el servidor es de tipo `http` o `stream`.                                                       |
 
 === "Ajustes de la API"

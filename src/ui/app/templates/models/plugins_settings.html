@@ -138,7 +138,7 @@
             <ol class="list-group step-navigation-list" role="tablist">
                 <li class="list-group-item no-plugin-items border-0 p-2"
                     style="display: none">
-                    <span class="text-muted ms-2" data-i18n="status.no_item">No items found.</span>
+                    <span class="text-muted ms-2" data-i18n="status.no_item">No Item</span>
                 </li>
                 {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], (current_endpoint == "global-config" or current_endpoint == "global-settings")) %}
                     <li class="list-group-item plugin-navigation-item border-0 d-flex align-items-center p-2 cursor-pointer{% if loop.index == 1 %} show active{% endif %}"
@@ -227,13 +227,13 @@
                                data-fragment="{{ plugin_fragment }}"
                                target="_blank"
                                rel="noopener">
-                                <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="link.more_info">More info</span></span>
+                                <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="link.more_info">More Info</span></span>
                             </a>
                             {% if plugin_data["page"] %}
                                 {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
                                 <a href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
                                    class="btn btn-sm btn-primary rounded-pill">
-                                    <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="button.plugin_page">Plugin page</span></span>
+                                    <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="button.plugin_page">Plugin Page</span></span>
                                 </a>
                             {% endif %}
                         </div>
@@ -357,10 +357,10 @@
                             {% set setting_id_prefix = "multiple-setting-" + plugin +"-" %}
                             <div class="card-header pb-2 mt-6">
                                 <h5 class="card-title d-inline border p-2{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}"
-                                    data-i18n="settings.multiple.title">Multiple settings</h5>
+                                    data-i18n="settings.multiple.title">Multiple Settings</h5>
                                 <p class="card-subtitle text-muted mt-2"
                                    data-i18n="settings.multiple.description">
-                                    This is where you can configure multiple settings for this plugin.
+                                    Configure multiple instances of settings for this plugin here.
                                 </p>
                             </div>
                             <div class="card-body row g-2 gx-6 pt-0">

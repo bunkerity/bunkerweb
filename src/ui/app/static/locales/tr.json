@@ -847,7 +847,7 @@
       "ip_address": "IP Adresi",
       "keywords": "Anahtar Kelimeler",
       "lets_encrypt_custom_profile": "Let's Encrypt Özel Profil",
-      "lets_encrypt_disable_public_suffixes": "Genel Sonekleri Devre Dışı Bırak (PSL Kara Listesi)",
+      "lets_encrypt_disable_public_suffixes": "Genel Sonek Listesi Kontrolünü Atla",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS Kimlik Bilgileri",
       "lets_encrypt_profile": "Let's Encrypt Profili",
       "license_key": "Lisans Anahtarı",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Seçili eklentiyi silmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion_plural": "Seçili eklentileri silmek istediğinizden emin misiniz?",
       "confirm_template_deletion": "{{name}} şablonunu silmek istediğinizden emin misiniz?",
+      "confirm_templates_deletion_alert": "Seçili şablonu silmek istediğinizden emin misiniz?",
+      "confirm_templates_deletion_alert_plural": "Seçili şablonları silmek istediğinizden emin misiniz?",
       "confirmation_instance_deletion": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_cache_confirmation_alert": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert": "Seçili örneği silmek istediğinizden emin misiniz?",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
       "ban_filtered_confirmation": "Eşleşen {{count}} rapordaki tüm IP'ler yasaklansın mı? Yinelenen hedefler yalnızca bir kez uygulanacaktır.",
       "unban_filtered_confirmation": "Eşleşen {{count}} yasağın tümünün yasağını kaldırmak istediğinizden emin misiniz?",
+      "crowdsec_unban_intro": "Yasağı kaldırmak şu CrowdSec kararlarını da siler:",
+      "crowdsec_unban_list_warning": "Bazı kararlar CrowdSec listelerinden gelir ve geri dönebilir. Bu IP'ye kalıcı olarak izin vermek için bir CrowdSec izin listesi kullanın.",
+      "crowdsec_unban_range_warning": "Bazı kararlar bir aralığı kapsar. Bu aralıktaki diğer IP'ler yasakları bitene kadar yasaklı kalır.",
+      "crowdsec_unban_confirm": "Bu CrowdSec kararlarının kaldırılacağını anlıyorum",
+      "crowdsec_unban_error": "{{ip}} için CrowdSec kararları yüklenemedi",
+      "crowdsec_unban_management_missing": "CrowdSec yönetim kimlik bilgileri şurada eksik: {{connections}}",
+      "crowdsec_unban_unavailable": "Bu CrowdSec bağlantıları denetlenemedi: {{connections}}",
       "update_filtered_duration_alert": "Eşleşen {{count}} yasağın tümü için yeni bir süre seçin:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "Kayıtları İndir"
       },
       "extract_config": {
+        "hide_passwords": "Parolaları gizle",
+        "hide_passwords_warning": "Gizlenmemiş dışa aktarımlar kimlik bilgileri içerir. Bunları yalnızca özel bir destek kanalı üzerinden paylaşın.",
         "title": "Yapılandırmayı Çıkar"
       },
       "support_link": {
         "title": "Destek Bağlantısı"
+      },
+      "ui_bundle": {
+        "button": "Paketi İndir",
+        "help": "Günlükler, eklenti sürümleri, ortam ve son hatalar. Özel veriler anonimleştirilir.",
+        "title": "Web UI Tanılaması"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
       "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
+      "crowdsec_unban_unavailable": "CrowdSec yönetim kimlik bilgileri eksik veya kaynak örnek kullanılamıyor",
       "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
       "delete_file": "Önbellek Dosyasını Sil: {{filename}}",
       "delete_instance": "Örneği Sil: {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "Örnek {{hostname}} şu anda yanıt vermiyor ('açık' değil).",
     "latest_version_installed": "En son sürümü kullanıyorsunuz.",
     "lets_encrypt_custom_profile": "Let's Encrypt için kullanılacak özel profil (örn. 'my_custom_profile').",
-    "lets_encrypt_disable_public_suffixes": "Genel Sonek Listesi (Public Suffix List) ile eşleşen alan adları için sertifika isteklerini devre dışı bırak (önerilir).",
+    "lets_encrypt_disable_public_suffixes": "Etkinleştirildiğinde (varsayılan), alan adları Genel Sonek Listesi'ne karşı kontrol edilmez. Genel bir sonekle eşleşen alan adları için sertifika isteklerini reddetmek için devre dışı bırakın (örneğin co.uk).",
     "lets_encrypt_server": "Sağlayıcıya özel ayarları göstermek için sertifika sağlayıcınızı seçin.",
     "lets_encrypt_profile": "Let's Encrypt için kullanılacak profil (classic, tlsserver, shortlived).",
     "license_key": "BunkerWeb PRO lisans anahtarınız.",

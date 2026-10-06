@@ -42,7 +42,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     services:
       bunkerweb:
         # 调度器识别实例的名称
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保填写正确的实例名
@@ -77,7 +77,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.16-rc3
+        image: bunkerity/bunkerweb-api:1.6.16-rc4
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -144,7 +144,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.16-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.16-rc4
     ```
 
 === "Linux"
@@ -400,7 +400,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 - **Bans**
   - `GET /bans`: 汇总来自各实例的活动封禁。
   - `POST /bans` 或 `/bans/ban`: 应用一个或多个封禁；负载可为对象、数组或字符串化 JSON。
-  - `POST /bans/unban` 或 `DELETE /bans`: 全局或按服务解除封禁。
+  - `POST /bans/unban` 或 `DELETE /bans`: 全局或按服务解除封禁。对于 CrowdSec 封禁（`kind: "crowdsec_lease"`），还需发送 `remove_crowdsec_decisions: true`、`confirmed: true` 和 `decision_keys`（`409` 预览中列出的键），以删除其背后的 CrowdSec 决策；该调用需要对每个受影响的连接拥有 `crowdsec_delete` 权限，所选内容发生变化时返回 `409`，部分失败时返回 `502`。
 - **Plugins（UI 插件）**
   - `GET /plugins`: 列出插件；`with_data=true` 包含可用的打包字节。
   - `POST /plugins/upload`: 从 `.zip`、`.tar.gz`、`.tar.xz` 安装 UI 插件。

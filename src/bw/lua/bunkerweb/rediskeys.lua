@@ -52,6 +52,14 @@ function rediskeys.badbehavior(ip, server_name, cluster)
 	return "plugin_bad_behavior_{" .. ip .. "}"
 end
 
+-- CrowdSec lease epoch of one IP, in the same slot as that IP's ban keys
+function rediskeys.cs_epoch(ip, cluster)
+	if not cluster then
+		return "cs_epoch_" .. ip
+	end
+	return "cs_epoch_{" .. ip .. "}"
+end
+
 -- KEYS layout shared with the metrics scripts: list, initialized, rebuilding, oomprobe,
 -- then one facet hash per field in the given order.
 function rediskeys.reports(cluster, fields)

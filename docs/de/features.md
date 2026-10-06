@@ -58,6 +58,20 @@ Die Einstellung `SECURITY_MODE` bestimmt, wie BunkerWeb erkannte Bedrohungen beh
 
 Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Positive zu identifizieren und zu beheben, ohne legitime Clients zu stören. Sobald diese Probleme behoben sind, können Sie für vollen Schutz getrost in den `block`-Modus zurückwechseln.
 
+### Sperren beim TLS-Handshake verwerfen {#bans-tls-drop}
+
+Ein gesperrter Client schließt normalerweise den TLS-Handshake ab und erhält dann die Sperrseite (403). `BANS_TLS_DROP_REASONS` listet die Sperrgründe auf, für die BunkerWeb die Verbindung stattdessen gleich zu Beginn des Handshakes schließt, noch vor jeder Zertifikats- oder Schlüsselaustauscharbeit. Der Client sieht einen TLS-Fehler, keine Seite. Das spart CPU, wenn gesperrte Adressen sich immer wieder verbinden.
+
+Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus `crowdsec`, `bad_behavior`, `manual`, `ui` und `api`. Der Standardwert ist leer, wodurch jede Sperre die 403-Seite behält. Wir empfehlen `crowdsec`.
+
+- Nur der Grund der tatsächlich geltenden Sperre zählt. Hat eine IP eine `manual`-Sperre und eine CrowdSec-Sperre, verwirft die alleinige Angabe von `crowdsec` nichts, und der Client erhält die 403-Seite.
+- Das Verwerfen entfällt, und die 403-Seite bleibt, wenn `USE_PROXY_PROTOCOL` auf `yes` steht oder `USE_REAL_IP` auf `yes` mit einer headerbasierten Quelle, da die Client-Adresse zu diesem Zeitpunkt nicht bekannt ist. Es entfällt auch für IPs, die eine lokale Whitelist zulässt.
+- Bei aktiviertem Redis wird ein Handshake erst verworfen, nachdem eine Anfrage der gesperrten IP die reguläre Sperrprüfung durchlaufen hat; die erste Anfrage erhält also weiterhin die 403-Seite.
+- Steht `SECURITY_MODE` auf `detect`, wird der Handshake fortgesetzt und eine Warnung protokolliert.
+- HTTP/3-Verbindungen (QUIC) werden nie verworfen. Sie erhalten die 403-Seite.
+- Jedes Verwerfen wird pro Grund in den Metriken gezählt.
+- Der Zustand dieser Funktion und der CrowdSec-Sperren liegt in der Shared-Memory-Zone `bans_meta`. Sie ist immer mit 10 MiB deklariert, ihr Speicher wird aber erst belegt, wenn `BANS_TLS_DROP_REASONS` oder `CROWDSEC_BAN_REFRESH` gesetzt ist.
+
 ### Konfigurationseinstellungen
 
 === "Kerneinstellungen"
@@ -68,6 +82,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Nein     | **BunkerWeb-Instanzen:** Liste der BunkerWeb-Instanzen, durch Leerzeichen getrennt.                                           |
     | `MULTISITE`           | `no`              | global    | Nein     | **Mehrere Websites:** Auf `yes` setzen, um das Hosten mehrerer Websites mit unterschiedlichen Konfigurationen zu ermöglichen. |
     | `SECURITY_MODE`       | `block`           | multisite | Nein     | **Sicherheitsstufe:** Steuert die Stufe der Sicherheitsdurchsetzung. Optionen: `detect` oder `block`.                         |
+    | `BANS_TLS_DROP_REASONS` | | multisite | Nein | **Beim TLS verworfene Sperren:** Sperrgründe (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, durch Leerzeichen getrennt), deren gesperrte IPs beim TLS-Handshake verworfen werden, statt die 403-Seite zu erhalten. Entfällt hinter dem PROXY-Protokoll und bei headerbasierter echter IP und gilt nie für HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | Nein     | **Servertyp:** Definiert, ob der Server vom Typ `http` oder `stream` ist.                                                     |
 
 === "API-Einstellungen"
@@ -1391,7 +1406,7 @@ Falls Sie noch nicht mit der CrowdSec-Konsolenintegration vertraut sind: [CrowdS
 
 Durch unsere Partnerschaft mit CrowdSec können Sie Ihre BunkerWeb-Instanzen in Ihre [CrowdSec-Konsole](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration) eintragen. Das bedeutet, dass von BunkerWeb blockierte Angriffe in Ihrer CrowdSec-Konsole neben den von CrowdSec Security Engines blockierten Angriffen sichtbar sind, was Ihnen einen einheitlichen Überblick über Bedrohungen gibt.
 
-Wichtig ist, dass CrowdSec für diese Integration nicht installiert sein muss (obwohl wir dringend empfehlen, es mit dem [CrowdSec-Plugin für BunkerWeb](https://docs.bunkerweb.io/latest/features/#crowdsec) auszuprobieren, um die Sicherheit Ihrer Webdienste weiter zu erhöhen). Zusätzlich können Sie Ihre CrowdSec Security Engines in dasselbe Konsolenkonto eintragen, um eine noch größere Synergie zu erzielen.
+Wichtig ist, dass CrowdSec für diese Integration nicht installiert sein muss (obwohl wir dringend empfehlen, es mit dem [CrowdSec-Plugin für BunkerWeb](https://docs.bunkerweb.io/1.6/features/#crowdsec) auszuprobieren, um die Sicherheit Ihrer Webdienste weiter zu erhöhen). Zusätzlich können Sie Ihre CrowdSec Security Engines in dasselbe Konsolenkonto eintragen, um eine noch größere Synergie zu erzielen.
 
 **Schritt 1: Erstellen Sie Ihr CrowdSec-Konsolenkonto**
 
@@ -1852,6 +1867,27 @@ Verwenden Sie die zurückgegebene Verbindungs-ID unverändert. Sie enthält die 
 
 Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 5 MiB und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in `/var/run/bunkerweb`, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.
 
+### CrowdSec-Sperren
+
+Standardmäßig fragt BunkerWeb bei jeder Anfrage CrowdSec ab. Setzen Sie `CROWDSEC_BAN_REFRESH` auf eine Dauer, zum Beispiel `5m`, um einen CrowdSec-Block in eine **CrowdSec-Sperre** umzuwandeln: eine kurze BunkerWeb-Sperre, die erneuert wird, solange die CrowdSec-Entscheidung gilt. Weitere Anfragen der IP werden bei der Sperrprüfung gestoppt, noch vor den anderen Plugins und vor der CrowdSec-Abfrage. Die Sperre erscheint auf der Seite „Sperren“ als eigene Zeile, mit der Aktion **IP untersuchen**. Der Standardwert `0` behält das bisherige Verhalten bei und erzeugt keine Sperre.
+
+- **Wann eine Sperre entsteht:** nur wenn BunkerWeb die Anfrage selbst wegen einer `ban`-Entscheidung der Local API blockiert hat, `SECURITY_MODE` auf `block` steht und die Entscheidung noch nicht abgelaufen ist. AppSec-Ablehnungen und andere Gegenmaßnahmen, etwa ein Captcha, erzeugen nie eine Sperre.
+- **Wie lange sie gilt:** der kürzere Wert aus `CROWDSEC_BAN_REFRESH` und der Restlaufzeit der Entscheidung. Nach Ablauf der Sperre wird die nächste Anfrage erneut mit CrowdSec abgeglichen, und eine neue Sperre entsteht, wenn die Entscheidung weiterhin gilt.
+- **Aktualität:** Wird eine Entscheidung direkt in CrowdSec entfernt (mit `cscli`, in der Console, durch eine Listenaktualisierung oder durch eine Zulassungsliste), wird die IP spätestens nach der Summe aus `CROWDSEC_BAN_REFRESH`, der CrowdSec-Cache-Verzögerung (`CROWDSEC_UPDATE_FREQUENCY` im Stream-Modus, `CROWDSEC_CACHE_EXPIRATION` im Live-Modus) und, wenn Redis aktiviert ist, bis zu 30 Sekunden für die lokalen Kopien auf den anderen Instanzen durchgelassen. Im Stream-Modus entsteht keine neue Sperre, solange die letzte erfolgreiche Synchronisierung länger als das Doppelte von `CROWDSEC_UPDATE_FREQUENCY` zurückliegt.
+- **Ausgeschlossene Pfade:** Jedes `CROWDSEC_EXCLUDE_LOCATION` an einem Dienst schaltet CrowdSec-Sperren für diesen Dienst ab, weil eine Sperre auch die ausgeschlossenen Pfade blockieren würde. CrowdSec prüft dort weiterhin jede Anfrage. Dasselbe gilt, wenn das Plugin seinen eigenen Challenge-Pfad ausschließt.
+- **Geltungsbereich:** Eine Sperre aus der eigenen CrowdSec-Verbindung eines Dienstes gilt nur für diesen Dienst, eine Sperre aus einer globalen Verbindung gilt für alle Dienste. Eine globale CrowdSec-Sperre gilt auch für TCP/UDP-Dienste, aber nur bei aktiviertem Redis, über eine lokale Kopie, die höchstens 30 Sekunden gültig ist. Ohne Redis sehen TCP/UDP-Dienste nie CrowdSec-Sperren.
+- **Speicher:** Die Sperren nutzen die Shared-Memory-Zone `bans_meta`, die immer mit 10 MiB deklariert ist. Ihr Speicher wird erst belegt, wenn `CROWDSEC_BAN_REFRESH` oder `BANS_TLS_DROP_REASONS` gesetzt ist.
+
+**Entsperren und CrowdSec.** Das Aufheben einer CrowdSec-Sperre entfernt auch die dahinterstehenden CrowdSec-Entscheidungen, da die IP sonst bei der nächsten Prüfung erneut gesperrt würde. Die Weboberfläche, die API und `bwcli unban` folgen demselben Ablauf:
+
+- Er benötigt die Verwaltungszugangsdaten (`CROWDSEC_MANAGEMENT_LOGIN` und `CROWDSEC_MANAGEMENT_PASSWORD`) für jede Verbindung, in der eine ausgewählte Entscheidung liegt. Bei der API ist zusätzlich zu `ban_delete` die Berechtigung `crowdsec_delete` für jede beteiligte Verbindung erforderlich.
+- Sie müssen die Liste der Entscheidungen (IP oder Bereich, Typ, Ursprung und Szenario) bestätigen, bevor eine CrowdSec-Entscheidung entfernt wird. `bwcli unban` verwendet dafür `-confirm`: Ohne diese Option gibt der Befehl nur die Liste aus und ändert nichts in CrowdSec. Die explizite Sperre derselben IP gehört nicht zu dieser Bestätigung: `bwcli unban` entfernt sie zuerst, vor der Vorschau und auch ohne `-confirm`. Der Befehl funktioniert nur auf einem Host mit Zugriff auf die Datenbank, in der Regel dem Scheduler-Host. Verwenden Sie andernfalls die Weboberfläche oder die API.
+- Ist die Instanz, die den Block gesehen hat, nicht erreichbar, wird das Entsperren abgelehnt. Die Sperre läuft innerhalb von `CROWDSEC_BAN_REFRESH` von selbst ab.
+- Lässt sich eine Entscheidung nicht entfernen, werden die übrigen ausgewählten Entscheidungen trotzdem gelöscht, die weiteren Schritte entfallen jedoch und die BunkerWeb-Sperre bleibt bestehen. Das Ergebnis wird als teilweise gemeldet und nennt die gelöschten und die fehlgeschlagenen Entscheidungen. Die IP bleibt gesperrt, bis die fehlgeschlagenen Entscheidungen entfernt sind. Lassen sich einzelne CrowdSec-Verbindungen nicht prüfen, wird das Entsperren auf den Verbindungen, die geantwortet haben, trotzdem ausgeführt: Deren Entscheidungen werden gelöscht und die BunkerWeb-Sperre wird auf den erreichbaren Instanzen entfernt. Das Ergebnis wird dann als teilweise gemeldet und nennt, was nicht geprüft werden konnte; die IP kann von diesen Verbindungen weiter blockiert werden, bis deren Entscheidungen enden. Ein erneuter Versuch ist sicher.
+- Entscheidungen der Central API oder aus Listen (die Ursprünge `CAPI` und `lists`) können bei der nächsten Aktualisierung zurückkehren. Legen Sie für eine dauerhafte Ausnahme eine CrowdSec-Zulassungsliste an.
+- Das Entfernen einer Bereichsentscheidung betrifft den gesamten Bereich. CrowdSec-Sperren, die bereits für andere IPs dieses Bereichs erstellt wurden, bleiben bis zum Ende ihrer Dauer bestehen, höchstens `CROWDSEC_BAN_REFRESH`.
+- Eine CrowdSec-Sperre und eine explizite Sperre derselben IP sind zwei getrennte Zeilen und werden jeweils einzeln aufgehoben. Die Dauer einer CrowdSec-Sperre kann nicht bearbeitet werden.
+
 ### Schritt&nbsp;1 – CrowdSec auf das Einlesen von BunkerWeb-Protokollen vorbereiten
 
 === "Docker"
@@ -1920,7 +1956,7 @@ Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen ein
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1937,7 +1973,7 @@ Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen ein
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -2119,6 +2155,7 @@ Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
+| `CROWDSEC_BAN_REFRESH` | `0` | multisite | no | **Sperrerneuerung:** Wandelt CrowdSec-Blocks in kurze BunkerWeb-Sperren um, die erneuert werden, solange die CrowdSec-Entscheidung gilt. Der Wert ist die längste Dauer einer Sperre, bevor CrowdSec erneut gefragt wird. `0` deaktiviert die Funktion. Ein Dienst mit `CROWDSEC_EXCLUDE_LOCATION` erhält nie CrowdSec-Sperren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine reine Zahl bedeutet Sekunden. |
 
 #### Parameter der Anwendungssicherheitskomponente
 
@@ -3157,7 +3194,7 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 
@@ -3378,6 +3415,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | nein     | **Parallele Anfragen:** Wenn auf `yes` gesetzt, stellt certbot-new Zertifikatsanfragen parallel. Vorsicht wegen Rate-Limits.                                                                                                                                                                                                                                           |
 | `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (7-Tage-Zertifikate).                                                                                                                                                                             |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | nein     | **Benutzerdefiniertes Zertifikatsprofil:** Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt `LETS_ENCRYPT_PROFILE`, falls gesetzt.                                                                                                                                            |
+| `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`      | `yes`         | multisite | nein     | **Prüfung öffentlicher Suffixe deaktivieren:** Bei `yes` werden Domains vor der Zertifikatsanforderung nicht gegen die Public Suffix List geprüft. Bei `no` werden Anforderungen für Domains abgelehnt, die einem öffentlichen Suffix entsprechen (z. B. `co.uk`). |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | nein     | **Maximale Certbot-Log-Backups:** Anzahl rotierter `letsencrypt.log`-Backups, die Certbot pro Job behält. Certbots eigener Standardwert von 1000 sammelt sich schnell an; `50` ist ein sinnvoller Grenzwert. Setzen Sie `0`, um nur das aktuelle Log zu behalten.                                                                                                      |
 

@@ -51,6 +51,20 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 切换到 `detect` 模式可以帮助您识别和解决潜在的误报，而不会干扰合法客户端。一旦这些问题得到解决，您就可以自信地切换回 `block` 模式以获得全面保护。
 
+### 在 TLS 握手时丢弃封禁 {#bans-tls-drop}
+
+被封禁的客户端通常会完成 TLS 握手，然后收到封禁页面（403）。`BANS_TLS_DROP_REASONS` 列出了一些封禁原因，对于这些原因，BunkerWeb 会在握手一开始就关闭连接，早于任何证书或密钥交换工作。客户端看到的是 TLS 错误，而不是页面。当被封禁的地址不断重连时，这样可以节省 CPU。
+
+该值是以空格分隔的原因列表，可选 `crowdsec`、`bad_behavior`、`manual`、`ui` 和 `api`。默认值为空，即所有封禁都保留 403 页面。我们建议使用 `crowdsec`。
+
+- 只有实际生效的封禁的原因才有意义。对于同时有 `manual` 封禁和 CrowdSec 封禁的 IP，只列出 `crowdsec` 不会丢弃任何连接，客户端会收到 403 页面。
+- 当 `USE_PROXY_PROTOCOL` 为 `yes`，或 `USE_REAL_IP` 为 `yes` 且来源基于请求头时，会跳过丢弃并保留 403 页面，因为此时无法得知客户端地址。被本地白名单放行的 IP 也会跳过。
+- 启用 Redis 时，只有在被封禁 IP 的请求经过常规封禁检查之后，握手才会被丢弃，因此第一个请求仍会收到 403 页面。
+- 当 `SECURITY_MODE` 为 `detect` 时，握手会继续，并记录一条警告。
+- HTTP/3（QUIC）连接永远不会被丢弃，它们会收到 403 页面。
+- 每次丢弃都会按原因计入指标。
+- 此功能与 CrowdSec 封禁的状态存放在共享内存区域 `bans_meta` 中。该区域始终以 10 MiB 声明，但只有设置了 `BANS_TLS_DROP_REASONS` 或 `CROWDSEC_BAN_REFRESH` 后才会使用其内存。
+
 ### 配置设置
 
 === "核心设置"
@@ -61,6 +75,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | 否   | **BunkerWeb 实例：** 以空格分隔的 BunkerWeb 实例列表。             |
     | `MULTISITE`           | `no`              | global    | 否   | **多站点：** 设置为 `yes` 以启用托管具有不同配置的多个网站。       |
     | `SECURITY_MODE`       | `block`           | multisite | 否   | **安全级别：** 控制安全强制执行的级别。选项：`detect` 或 `block`。 |
+    | `BANS_TLS_DROP_REASONS` | | multisite | 否 | **在 TLS 丢弃的封禁：** 其被封禁 IP 在 TLS 握手时被丢弃（而不是收到 403 页面）的封禁原因（`crowdsec`、`bad_behavior`、`manual`、`ui`、`api`，以空格分隔）。在 PROXY 协议之后以及基于请求头的真实 IP 下会跳过，且从不应用于 HTTP/3。 |
     | `SERVER_TYPE`         | `http`            | multisite | 否   | **服务器类型：** 定义服务器是 `http` 还是 `stream` 类型。          |
 
 === "API 设置"

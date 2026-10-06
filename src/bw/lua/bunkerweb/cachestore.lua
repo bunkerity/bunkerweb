@@ -128,6 +128,17 @@ function cachestore:get(key)
 	return true, value
 end
 
+-- Worker LRU and shared dict only: no callback, no lock, no IPC, never yields (safe in ssl_client_hello)
+-- luacheck: push ignore 212 431
+function cachestore:get_local_nolock(key)
+	local value, err = cache:get(key, nil, nil)
+	if value == nil and err ~= nil then
+		return false, err
+	end
+	return true, value
+end
+-- luacheck: pop
+
 function cachestore:set(key, value, ex)
 	-- luacheck: ignore 431
 	local ok, err

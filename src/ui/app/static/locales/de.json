@@ -847,7 +847,7 @@
       "ip_address": "IP-Adresse",
       "keywords": "Schlüsselwörter",
       "lets_encrypt_custom_profile": "Let's Encrypt benutzerdefiniertes Profil",
-      "lets_encrypt_disable_public_suffixes": "Öffentliche Suffixe deaktivieren (PSL-Blacklist)",
+      "lets_encrypt_disable_public_suffixes": "Prüfung der Public-Suffix-Liste überspringen",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS-Anmeldeinformationen",
       "lets_encrypt_profile": "Let's Encrypt-Profil",
       "license_key": "Lizenzschlüssel",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Sind Sie sicher, dass Sie das ausgewählte Plugin löschen möchten?",
       "confirm_plugin_deletion_plural": "Sind Sie sicher, dass Sie die ausgewählten Plugins löschen möchten?",
       "confirm_template_deletion": "Sind Sie sicher, dass Sie die Vorlage {{name}} löschen möchten?",
+      "confirm_templates_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte Vorlage löschen möchten?",
+      "confirm_templates_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten Vorlagen löschen möchten?",
       "confirmation_instance_deletion": "Sind Sie sicher, dass Sie die ausgewählte Instanz löschen möchten?",
       "delete_cache_confirmation_alert": "Sind Sie sicher, dass Sie die ausgewählten Cache-Dateien löschen möchten?",
       "delete_confirmation_alert": "Sind Sie sicher, dass Sie die ausgewählte Instanz löschen möchten?",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:",
       "ban_filtered_confirmation": "IPs aus allen {{count}} übereinstimmenden Meldungen sperren? Doppelte Ziele werden nur einmal angewendet.",
       "unban_filtered_confirmation": "Sind Sie sicher, dass Sie alle {{count}} übereinstimmenden Sperren aufheben möchten?",
+      "crowdsec_unban_intro": "Das Aufheben der Sperre entfernt auch diese CrowdSec-Entscheidungen:",
+      "crowdsec_unban_list_warning": "Einige Entscheidungen stammen aus CrowdSec-Listen und können zurückkehren. Verwenden Sie eine CrowdSec-Allowlist, um diese IP dauerhaft durchzulassen.",
+      "crowdsec_unban_range_warning": "Einige Entscheidungen betreffen einen Bereich. Andere IPs dieses Bereichs bleiben gesperrt, bis ihre Sperre endet.",
+      "crowdsec_unban_confirm": "Ich verstehe, dass diese CrowdSec-Entscheidungen entfernt werden",
+      "crowdsec_unban_error": "Die CrowdSec-Entscheidungen für {{ip}} konnten nicht geladen werden",
+      "crowdsec_unban_management_missing": "Die CrowdSec-Verwaltungszugangsdaten fehlen bei: {{connections}}",
+      "crowdsec_unban_unavailable": "Diese CrowdSec-Verbindungen konnten nicht geprüft werden: {{connections}}",
       "update_filtered_duration_alert": "Wählen Sie eine neue Dauer für alle {{count}} übereinstimmenden Sperren:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "Logs herunterladen"
       },
       "extract_config": {
+        "hide_passwords": "Passwörter ausblenden",
+        "hide_passwords_warning": "Nicht maskierte Exporte enthalten Zugangsdaten. Teilen Sie sie nur über einen privaten Support-Kanal.",
         "title": "Konfiguration extrahieren"
       },
       "support_link": {
         "title": "Support-Link"
+      },
+      "ui_bundle": {
+        "button": "Paket herunterladen",
+        "help": "Logs, Plugin-Versionen, Umgebung und aktuelle Fehler. Private Daten werden anonymisiert.",
+        "title": "Web-UI-Diagnose"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Dienst {{name}} in Entwurf konvertieren",
       "convert_service_to_online": "Dienst {{name}} in Online konvertieren",
+      "crowdsec_unban_unavailable": "Die CrowdSec-Verwaltungszugangsdaten fehlen oder die Quellinstanz ist nicht verfügbar",
       "delete_config": "Benutzerdefinierte Konfiguration {{name}} löschen",
       "delete_file": "Cache-Datei löschen: {{filename}}",
       "delete_instance": "Instanz {{hostname}} löschen",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "Instanz {{hostname}} antwortet derzeit nicht ('up').",
     "latest_version_installed": "Sie verwenden die neueste Version.",
     "lets_encrypt_custom_profile": "Das benutzerdefinierte Profil, das für Let's Encrypt verwendet werden soll (z. B. 'mein_benutzerdefiniertes_profil').",
-    "lets_encrypt_disable_public_suffixes": "Zertifikatsanfragen für Domains, die mit der Public Suffix List übereinstimmen, deaktivieren (empfohlen).",
+    "lets_encrypt_disable_public_suffixes": "Wenn aktiviert (Standard), werden Domains nicht gegen die Public-Suffix-Liste geprüft. Deaktivieren, um Zertifikatsanfragen für Domains abzulehnen, die einem öffentlichen Suffix entsprechen (z. B. co.uk).",
     "lets_encrypt_server": "Wählen Sie Ihren Zertifikatsanbieter, um anbieterspezifische Einstellungen anzuzeigen.",
     "lets_encrypt_profile": "Das Profil, das für Let's Encrypt verwendet werden soll (classic, tlsserver, shortlived).",
     "license_key": "Ihr BunkerWeb PRO Lizenzschlüssel.",

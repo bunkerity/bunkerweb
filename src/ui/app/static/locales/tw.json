@@ -847,7 +847,7 @@
       "ip_address": "IP 位址",
       "keywords": "關鍵字",
       "lets_encrypt_custom_profile": "Let's Encrypt 自訂設定檔",
-      "lets_encrypt_disable_public_suffixes": "停用公共字尾（PSL 黑名單）",
+      "lets_encrypt_disable_public_suffixes": "略過公共字尾清單檢查",
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS 憑證項目",
       "lets_encrypt_profile": "Let's Encrypt 設定檔",
       "license_key": "授權金鑰",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "您確定要刪除選定的外掛程式嗎？",
       "confirm_plugin_deletion_plural": "您確定要刪除選定的外掛程式嗎？",
       "confirm_template_deletion": "您確定要刪除範本 {{name}} 嗎？",
+      "confirm_templates_deletion_alert": "您確定要刪除選定的範本嗎？",
+      "confirm_templates_deletion_alert_plural": "您確定要刪除選定的範本嗎？",
       "confirmation_instance_deletion": "您確定要刪除選定的執行個體嗎？",
       "delete_cache_confirmation_alert": "您確定要刪除選定的快取檔案嗎？",
       "delete_confirmation_alert": "您確定要刪除選定的執行個體嗎？",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "請為選定的封鎖選擇新的期限：",
       "ban_filtered_confirmation": "封鎖全部 {{count}} 筆符合條件報告中的 IP？重複的目標僅會套用一次。",
       "unban_filtered_confirmation": "您確定要解除全部 {{count}} 筆符合條件的封鎖嗎？",
+      "crowdsec_unban_intro": "解除封鎖同時會移除以下 CrowdSec 決策：",
+      "crowdsec_unban_list_warning": "部分決策來自 CrowdSec 清單，可能會再次出現。請使用 CrowdSec 允許清單讓此 IP 永久通行。",
+      "crowdsec_unban_range_warning": "部分決策涵蓋一個範圍。該範圍內的其他 IP 在其封鎖結束前仍會被封鎖。",
+      "crowdsec_unban_confirm": "我了解這些 CrowdSec 決策將被移除",
+      "crowdsec_unban_error": "無法載入 {{ip}} 的 CrowdSec 決策",
+      "crowdsec_unban_management_missing": "以下位置缺少 CrowdSec 管理憑證：{{connections}}",
+      "crowdsec_unban_unavailable": "無法檢查以下 CrowdSec 連線：{{connections}}",
       "update_filtered_duration_alert": "請為全部 {{count}} 筆符合條件的封鎖選擇新的期限："
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "下載日誌"
       },
       "extract_config": {
+        "hide_passwords": "隱藏密碼",
+        "hide_passwords_warning": "未隱藏的匯出檔案包含憑證。請僅透過私人支援管道分享。",
         "title": "擷取設定"
       },
       "support_link": {
         "title": "支援連結"
+      },
+      "ui_bundle": {
+        "button": "下載診斷包",
+        "help": "日誌、外掛版本、環境及近期錯誤。私人資料將被匿名化。",
+        "title": "Web UI 診斷"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
       "convert_service_to_online": "將服務 {{name}} 轉換為線上",
+      "crowdsec_unban_unavailable": "缺少 CrowdSec 管理憑證，或來源執行個體無法使用",
       "delete_config": "刪除自訂設定 {{name}}",
       "delete_file": "刪除快取檔案：{{filename}}",
       "delete_instance": "刪除執行個體 {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "執行個體 {{hostname}} 目前未回應 ('up')。",
     "latest_version_installed": "您正在執行最新版本。",
     "lets_encrypt_custom_profile": "用於 Let's Encrypt 的自訂設定檔（例如 'my_custom_profile'）。",
-    "lets_encrypt_disable_public_suffixes": "停用符合公共字尾清單（PSL）的網域的憑證請求（建議啟用）。",
+    "lets_encrypt_disable_public_suffixes": "啟用時（預設），不會依公共字尾清單檢查網域。停用後，將拒絕為符合公共字尾（例如 co.uk）的網域申請憑證。",
     "lets_encrypt_server": "選擇您的憑證供應商以顯示供應商專屬設定。",
     "lets_encrypt_profile": "用於 Let's Encrypt 的設定檔（classic、tlsserver、shortlived）。",
     "license_key": "您的 BunkerWeb PRO 授權金鑰。",

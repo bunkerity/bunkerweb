@@ -692,6 +692,57 @@ def is_newer_version_available(current_version: str, latest_version: str) -> boo
         return False
 
 
+def fetch_bunkerweb_releases(http_get, max_pages: int = 10) -> List[Dict[str, Any]]:
+    """Every BunkerWeb GitHub release, newest first, following the API pagination.
+
+    ``http_get`` is ``requests.get`` (passed in so this module does not import requests).
+    Raises like ``requests`` does; a page shorter than 100 entries ends the listing.
+    """
+    releases: List[Dict[str, Any]] = []
+    for page in range(1, max_pages + 1):
+        response = http_get(
+            f"https://api.github.com/repos/bunkerity/bunkerweb/releases?per_page=100&page={page}", headers={"User-Agent": "BunkerWeb"}, timeout=3
+        )
+        response.raise_for_status()
+        batch = response.json()
+        if not isinstance(batch, list):  # an error object such as {"message": "API rate limit exceeded"}
+            break
+        releases.extend(batch)
+        if len(batch) < 100:
+            break
+    return releases
+
+
+def pick_latest_line_release(releases: List[Dict[str, Any]], current_version: str) -> Optional[Dict[str, Any]]:
+    """Return the highest stable GitHub release in the installed ``major.minor`` line.
+
+    Drafts, prereleases and unparsable tags are ignored. When ``current_version`` cannot be
+    parsed (``testing``, ``dev``...) or its line has no stable release yet (``1.7.0~rc1``),
+    the highest stable release overall is returned.
+    """
+    try:
+        current = Version(normalize_bunkerweb_version(current_version))
+        line = (current.major, current.minor)
+    except InvalidVersion:
+        line = None
+
+    best = best_version = overall = overall_version = None
+    for release in releases:
+        if release.get("prerelease") or release.get("draft"):
+            continue
+        try:
+            version = Version(normalize_bunkerweb_version(release["tag_name"]))
+        except (InvalidVersion, KeyError, TypeError, AttributeError):
+            continue
+        if version.is_prerelease:
+            continue
+        if overall_version is None or version > overall_version:
+            overall, overall_version = release, version
+        if line is not None and (version.major, version.minor) == line and (best_version is None or version > best_version):
+            best, best_version = release, version
+    return best or overall
+
+
 _REDIS_CLIENT_LOCK = Lock()
 # Single-entry, process-wide memo: (cache_key, client_or_None, negative_window_deadline).
 # A configuration change yields a different key and therefore a new client, so there is no

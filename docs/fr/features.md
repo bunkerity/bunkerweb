@@ -58,6 +58,20 @@ Le paramètre `SECURITY_MODE` détermine la façon dont BunkerWeb gère les mena
 
 Passer en mode `detect` aide à identifier et corriger les faux positifs sans impacter les clients légitimes. Une fois ces problèmes résolus, repassez en mode `block` pour une protection complète.
 
+### Abandonner les bannissements à la négociation TLS {#bans-tls-drop}
+
+Un client banni termine normalement la négociation TLS puis reçoit la page de bannissement (403). `BANS_TLS_DROP_REASONS` liste les motifs de bannissement pour lesquels BunkerWeb ferme la connexion dès le début de la négociation, avant tout travail de certificat ou d’échange de clés. Le client voit une erreur TLS, pas une page. Cela économise du CPU lorsque des adresses bannies se reconnectent sans cesse.
+
+La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `bad_behavior`, `manual`, `ui` et `api`. La valeur par défaut est vide, ce qui conserve la page 403 pour tous les bannissements. Nous suggérons `crowdsec`.
+
+- Seul le motif du bannissement qui s’applique compte. Pour une IP ayant un bannissement `manual` et un bannissement CrowdSec, indiquer seulement `crowdsec` n’abandonne rien et le client reçoit la page 403.
+- L’abandon est ignoré, et la page 403 reste, lorsque `USE_PROXY_PROTOCOL` vaut `yes` ou lorsque `USE_REAL_IP` vaut `yes` avec une source basée sur un en-tête, car l’adresse du client n’est pas connue à ce stade. Il est aussi ignoré pour les IP autorisées par une liste blanche locale.
+- Avec Redis activé, une négociation n’est abandonnée qu’après qu’une requête de l’IP bannie est passée par la vérification habituelle des bannissements ; la première requête reçoit donc encore la page 403.
+- Avec `SECURITY_MODE` sur `detect`, la négociation se poursuit et un avertissement est journalisé.
+- Les connexions HTTP/3 (QUIC) ne sont jamais abandonnées. Elles reçoivent la page 403.
+- Chaque abandon est compté par motif dans les métriques.
+- L’état de cette fonction et des bannissements CrowdSec se trouve dans la zone de mémoire partagée `bans_meta`. Elle est toujours déclarée avec 10 MiB, mais sa mémoire n’est utilisée que lorsque `BANS_TLS_DROP_REASONS` ou `CROWDSEC_BAN_REFRESH` est défini.
+
 ### Paramètres de configuration
 
 === "Paramètres principaux"
@@ -68,6 +82,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Non      | **Instances BunkerWeb :** Liste des instances BunkerWeb séparées par des espaces.                        |
     | `MULTISITE`           | `no`              | global    | Non      | **Sites multiples :** Définir à `yes` pour héberger plusieurs sites avec des configurations différentes. |
     | `SECURITY_MODE`       | `block`           | multisite | Non      | **Niveau de sécurité :** `detect` ou `block` pour contrôler l’application de la sécurité.                |
+    | `BANS_TLS_DROP_REASONS` | | multisite | Non | **Bannissements abandonnés en TLS :** Motifs de bannissement (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, séparés par des espaces) dont les IP bannies sont abandonnées à la négociation TLS au lieu de recevoir la page 403. Ignoré derrière le protocole PROXY et avec une IP réelle basée sur un en-tête, et jamais appliqué à HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | Non      | **Type de serveur :** Définit si le serveur est de type `http` ou `stream`.                              |
 
 === "Paramètres API"
@@ -1371,7 +1386,7 @@ Si vous ne connaissez pas encore l'intégration CrowdSec Console, [CrowdSec](htt
 
 Grâce à notre partenariat avec CrowdSec, vous pouvez enrôler vos instances BunkerWeb dans votre [CrowdSec Console](https://app.crowdsec.net/signup?utm_source=external-blog&utm_medium=cta&utm_campaign=bunker-web-integration). Les attaques bloquées par BunkerWeb seront visibles dans votre CrowdSec Console aux côtés des attaques bloquées par les CrowdSec Security Engines, ce qui vous donne une vue unifiée des menaces.
 
-Important : CrowdSec n'a pas besoin d'être installé pour cette intégration, même si nous recommandons fortement de l'essayer avec le [plugin CrowdSec pour BunkerWeb](https://docs.bunkerweb.io/latest/features/#crowdsec) afin de renforcer davantage la sécurité de vos services web. Vous pouvez également enrôler vos CrowdSec Security Engines dans le même compte Console pour encore plus de synergie.
+Important : CrowdSec n'a pas besoin d'être installé pour cette intégration, même si nous recommandons fortement de l'essayer avec le [plugin CrowdSec pour BunkerWeb](https://docs.bunkerweb.io/1.6/features/#crowdsec) afin de renforcer davantage la sécurité de vos services web. Vous pouvez également enrôler vos CrowdSec Security Engines dans le même compte Console pour encore plus de synergie.
 
 **Étape n°1 : Créer votre compte CrowdSec Console**
 
@@ -1812,6 +1827,27 @@ Utilisez l’identifiant de connexion renvoyé sans le modifier. Il inclut l’i
 
 Le moteur d’exécution conserve les décisions individuelles par cible : en supprimer une ne peut donc pas effacer un autre bannissement sur la même IP ou plage. Les métadonnées facultatives des rapports utilisent un cache distinct de 5 Mio et ne peuvent pas évincer les entrées servant au blocage. Les actualisations du flux utilisent un verrou de processus non bloquant dans `/var/run/bunkerweb`, conservé jusqu’à la publication de la mise à jour et libéré automatiquement si le worker s’arrête.
 
+### Bannissements CrowdSec
+
+Par défaut, BunkerWeb interroge CrowdSec à chaque requête. Définissez `CROWDSEC_BAN_REFRESH` sur une durée, par exemple `5m`, pour transformer un blocage CrowdSec en **bannissement CrowdSec** : un bannissement BunkerWeb court, renouvelé tant que la décision CrowdSec dure. Les requêtes suivantes de l’IP sont arrêtées à la vérification des bannissements, avant les autres plugins et avant la consultation de CrowdSec. Le bannissement apparaît sur la page Bannissements comme une ligne distincte, avec l’action **Examiner l’IP**. La valeur par défaut `0` conserve le comportement précédent et ne crée aucun bannissement.
+
+- **Quand un bannissement est créé :** uniquement lorsque BunkerWeb a bloqué lui-même la requête à cause d’une décision `ban` de l’API locale, avec `SECURITY_MODE` sur `block` et une décision non expirée. Les rejets AppSec et les autres remédiations, comme un captcha, ne créent jamais de bannissement.
+- **Sa durée :** la plus courte de `CROWDSEC_BAN_REFRESH` et de la durée restante de la décision. Quand le bannissement se termine, la requête suivante est de nouveau vérifiée auprès de CrowdSec, et un nouveau bannissement est créé si la décision s’applique toujours.
+- **Fraîcheur :** lorsqu’une décision est supprimée directement dans CrowdSec (avec `cscli`, dans la Console, par une actualisation de liste ou par une liste d’autorisation), l’IP est laissée passer au plus tard après la somme de `CROWDSEC_BAN_REFRESH`, du délai de cache CrowdSec (`CROWDSEC_UPDATE_FREQUENCY` en mode stream, `CROWDSEC_CACHE_EXPIRATION` en mode live) et, si Redis est activé, de 30 secondes au plus pour les copies locales des autres instances. En mode stream, aucun nouveau bannissement n’est créé tant que la dernière synchronisation réussie date de plus de deux fois `CROWDSEC_UPDATE_FREQUENCY`.
+- **Emplacements exclus :** tout `CROWDSEC_EXCLUDE_LOCATION` sur un service désactive les bannissements CrowdSec pour ce service, car un bannissement bloquerait aussi les chemins exclus. CrowdSec continue d’y vérifier chaque requête. Il en va de même lorsque le plugin exclut son propre emplacement de défi.
+- **Portée :** un bannissement créé depuis la connexion CrowdSec propre à un service s’applique à ce service uniquement, et un bannissement créé depuis une connexion globale s’applique à tous les services. Un bannissement CrowdSec global s’applique aussi aux services TCP/UDP, mais seulement avec Redis activé, via une copie locale qui dure 30 secondes au plus. Sans Redis, les services TCP/UDP ne voient jamais les bannissements CrowdSec.
+- **Mémoire :** les bannissements utilisent la zone de mémoire partagée `bans_meta`, toujours déclarée avec une taille de 10 MiB. Sa mémoire n’est utilisée que lorsque `CROWDSEC_BAN_REFRESH` ou `BANS_TLS_DROP_REASONS` est défini.
+
+**Débannissement et CrowdSec.** Supprimer un bannissement CrowdSec supprime aussi les décisions CrowdSec qui le sous-tendent, car l’IP serait sinon bannie de nouveau à la vérification suivante. L’interface Web, l’API et `bwcli unban` suivent le même déroulement :
+
+- Il nécessite les identifiants de gestion (`CROWDSEC_MANAGEMENT_LOGIN` et `CROWDSEC_MANAGEMENT_PASSWORD`) de chaque connexion où se trouve une décision sélectionnée. Avec l’API, il faut en plus la permission `crowdsec_delete` sur chaque connexion concernée, en complément de `ban_delete`.
+- Vous devez confirmer la liste des décisions (IP ou plage, type, origine et scénario) avant la suppression de toute décision CrowdSec. `bwcli unban` utilise `-confirm` pour cela : sans cette option, la commande affiche seulement la liste et ne modifie rien dans CrowdSec. Le bannissement explicite de la même IP ne fait pas partie de cette confirmation : `bwcli unban` le supprime en premier, avant l’aperçu et même sans `-confirm`. La commande ne fonctionne que sur un hôte ayant accès à la base de données, en général l’hôte du scheduler. Ailleurs, utilisez l’interface Web ou l’API.
+- Si l’instance qui a vu le blocage est indisponible, le débannissement est refusé. Le bannissement expire de lui-même dans le délai `CROWDSEC_BAN_REFRESH`.
+- Si une décision ne peut pas être supprimée, les autres décisions sélectionnées sont tout de même supprimées, mais les étapes restantes sont ignorées et le bannissement BunkerWeb est conservé. Le résultat est signalé comme partiel et liste les décisions supprimées et celles qui ont échoué. L’IP reste bloquée tant que les décisions en échec ne sont pas supprimées. Si certaines connexions CrowdSec ne peuvent pas être vérifiées, le débannissement a quand même lieu sur les connexions qui ont répondu : leurs décisions sont supprimées et le bannissement BunkerWeb est retiré sur les instances disponibles. Le résultat est alors signalé comme partiel et indique ce qui n’a pas pu être vérifié, et l’IP peut rester bloquée par ces connexions jusqu’à la fin de leurs décisions. Réessayer est sans risque.
+- Les décisions issues de la Central API ou de listes (les origines `CAPI` et `lists`) peuvent revenir à la prochaine actualisation. Créez une liste d’autorisation CrowdSec pour une exception permanente.
+- Supprimer une décision de plage affecte toute la plage. Les bannissements CrowdSec déjà créés pour d’autres IP de cette plage restent jusqu’à la fin de leur durée, au plus `CROWDSEC_BAN_REFRESH`.
+- Un bannissement CrowdSec et un bannissement explicite sur la même IP sont deux lignes distinctes, supprimées chacune séparément. La durée d’un bannissement CrowdSec ne peut pas être modifiée.
+
 ### Étape&nbsp;1 – Préparer CrowdSec à ingérer les journaux BunkerWeb
 
 === "Docker"
@@ -1880,7 +1916,7 @@ Le moteur d’exécution conserve les décisions individuelles par cible : en su
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1897,7 +1933,7 @@ Le moteur d’exécution conserve les décisions individuelles par cible : en su
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -2081,6 +2117,7 @@ Appliquez les variables d’environnement suivantes (ou leurs équivalents via l
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Emplacements exclus :** Liste d'emplacements (URI) séparés par des virgules à exclure des vérifications de CrowdSec.                         |
 | `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | no       | **Expiration du cache :** Le temps d'expiration du cache en secondes pour les décisions IP en mode live. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | no       | **Fréquence de mise à jour :** À quelle fréquence (en secondes) récupérer les décisions nouvelles/expirées de l'API CrowdSec en mode stream. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
+| `CROWDSEC_BAN_REFRESH` | `0` | multisite | no | **Renouvellement des bannissements :** Transforme les blocages CrowdSec en bannissements BunkerWeb courts, renouvelés tant que la décision CrowdSec dure. La valeur est la durée maximale d’un bannissement avant de réinterroger CrowdSec. `0` le désactive. Un service ayant un `CROWDSEC_EXCLUDE_LOCATION` ne reçoit jamais de bannissements CrowdSec. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre seul est en secondes. |
 
 #### Paramètres du composant de sécurité applicative
 
@@ -3120,7 +3157,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 
@@ -3331,6 +3368,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | no       | **Requêtes concurrentes :** Si mis à `yes`, certbot-new effectue les demandes de certificats en parallèle. À utiliser avec prudence pour éviter les limites de débit.                                                                                                                                                        |
 | `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Profil de certificat :** Sélectionnez le profil à utiliser. Options : `classic` (général), `tlsserver` (optimisé TLS), ou `shortlived` (7 jours).                                                                                                                                                                          |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Profil de certificat personnalisé :** Saisissez un profil personnalisé si votre serveur ACME le supporte. Remplace `LETS_ENCRYPT_PROFILE` s'il est défini.                                                                                                                                                                 |
+| `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`      | `yes`         | multisite | no       | **Désactiver la vérification des suffixes publics :** Avec `yes`, les domaines ne sont pas comparés à la Public Suffix List avant la demande de certificat. Avec `no`, les demandes pour les domaines correspondant à un suffixe public (par exemple `co.uk`) sont refusées. |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | no       | **Tentatives maximales :** Nombre de tentatives de génération de certificat en cas d'échec. `0` pour désactiver. Utile pour les problèmes réseau temporaires.                                                                                                                                                                |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | no       | **Nombre maximal de sauvegardes de logs Certbot :** Nombre de sauvegardes rotatives de `letsencrypt.log` que Certbot conserve par job. La valeur par défaut de Certbot, `1000`, s'accumule vite ; `50` est une limite raisonnable. Définissez `0` pour ne conserver que le log actif.                                        |
 

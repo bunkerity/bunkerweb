@@ -26,6 +26,7 @@ if __name__ == "__main__":
         parser_unban = subparsers.add_parser("unban", help="remove a ban from the cache")
         parser_unban.add_argument("ip", type=str, help="IP address to unban")
         parser_unban.add_argument("-service", type=str, help="service to unban from (default: unban globally)", default=None)
+        parser_unban.add_argument("-confirm", action="store_true", help="apply the unban of a CrowdSec ban after reviewing its preview")
 
         # Ban subparser
         parser_ban = subparsers.add_parser("ban", help="add a ban to the cache")
@@ -79,7 +80,7 @@ if __name__ == "__main__":
         # Execute command
         ret, err = False, "unknown command"
         if args.command == "unban":
-            ret, err = cli.unban(args.ip, args.service)
+            ret, err = cli.unban(args.ip, args.service, args.confirm)
         elif args.command == "ban":
             ret, err = cli.ban(args.ip, args.exp, args.reason, args.service)
         elif args.command == "bans":

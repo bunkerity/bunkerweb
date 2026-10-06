@@ -217,7 +217,7 @@
     "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": {
       "context": "multisite",
       "default": "yes",
-      "help": "Disable certificate requests for domains matching the Public Suffix List (recommended, default: yes).",
+      "help": "Skip the Public Suffix List check before requesting a certificate. With yes (default) no domain is checked against the list. Set to no to refuse certificate requests for domains that match a public suffix (for example co.uk).",
       "id": "lets-encrypt-disable-public-suffixes",
       "label": "Disable Public Suffixes (PSL Blacklist)",
       "regex": "^(yes|no)$",

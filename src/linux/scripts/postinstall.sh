@@ -315,7 +315,7 @@ fi
 echo ""
 echo "For more information on BunkerWeb, visit:"
 echo "  * Official website: https://www.bunkerweb.io"
-echo "  * Documentation: https://docs.bunkerweb.io"
+echo "  * Documentation: https://docs.bunkerweb.io/1.6/"
 echo "  * Community Support: https://discord.bunkerity.com"
 echo "  * Commercial Support: https://panel.bunkerweb.io/store/support"
 echo "🛡 Thank you for using BunkerWeb!"

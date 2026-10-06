@@ -79,7 +79,7 @@
                         data-bs-placement="bottom"
                         data-bs-original-title="The Service's last update date"
                         data-i18n="tooltip.table.services.last_update">
-                        <span data-i18n="table.header.last_update">Last update</span>
+                        <span data-i18n="table.header.last_update">Last Update</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
@@ -137,7 +137,7 @@
                                    data-bs-original-title="{% if is_readonly or service["template"] in ["low", "medium", "high", "ui", "api"] %}View{% else %}Edit{% endif %} template {{ service["template"] }}"><i class="bx bx-{% if is_readonly or service["template"] in ["low", "medium", "high", "ui", "api"] %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ service["template"] }}</a>
                             {% else %}
                                 <span class="badge rounded-pill bg-label-secondary"
-                                      data-i18n="badge.no_template">No template</span>
+                                      data-i18n="badge.no_template">No Template</span>
                             {% endif %}
                         </td>
                         <td class="service-creation-date">{{ service['creation_date'].astimezone().isoformat() }}</td>
@@ -398,7 +398,7 @@
                         <div class="modal-footer justify-content-center">
                             <button type="submit"
                                     class="btn btn-outline-primary me-2"
-                                    data-i18n="button.convert_services">Convert services</button>
+                                    data-i18n="button.convert_services">Convert Services</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"
@@ -417,7 +417,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm Deletion</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"

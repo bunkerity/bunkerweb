@@ -10,7 +10,7 @@ from traceback import format_exc
 from html import escape, unescape
 
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
@@ -26,9 +26,13 @@ from app.routes.utils import (
     parse_search_panes,
     parse_search_panes_dict,
 )
+from CrowdSec import CrowdSecClient, CrowdSecError  # type: ignore
+from crowdsec_unban import apply as crowdsec_apply, preview as crowdsec_preview_data, revalidate as crowdsec_revalidate  # type: ignore
 from redis_keys import ban_ip, unescape as redis_unescape  # type: ignore
 
 bans = Blueprint("bans", __name__)
+
+LEASE_KIND = "crowdsec_lease"
 
 
 # Column order shared between the table and exports — must stay in sync with bans.js
@@ -43,6 +47,105 @@ _BAN_COLUMNS = (
     "time_left",  # 7
     "actions",  # 8
 )
+
+
+def _ban_identity(row):
+    """Row identity: a lease and an explicit ban for the same IP and scope are two rows."""
+    return (row.get("ip"), row.get("ban_scope"), row.get("service", "_"), row.get("kind", "ban"))
+
+
+def _ban_id(ban):
+    """IP+scope+service+kind as the unique ID of a ban."""
+    service = ban.get("service")
+    # Normalize service to "_" for global bans or when service is None
+    if ban.get("ban_scope") == "global" or service is None:
+        service = "_"
+    return f"{ban.get('ip','')}|{ban.get('ban_scope','')}|{service}|{ban.get('kind', 'ban')}"  # noqa: E231
+
+
+def _lease_source(ban):
+    reason_data = ban.get("reason_data")
+    return reason_data if ban.get("kind") == LEASE_KIND and isinstance(reason_data, dict) else {}
+
+
+def format_ban(ban):
+    """One ban as a DataTable row. Defensive: some bans may lack some fields."""
+    source = _lease_source(ban)
+    return {
+        "date": datetime.fromtimestamp(floor(ban.get("date", 0))).isoformat() if ban.get("date") else "N/A",
+        "ip": escape(str(ban.get("ip", "N/A"))),
+        "country": escape(str(ban.get("country", "N/A"))),
+        "reason": escape(str(ban.get("reason", "N/A"))),
+        "scope": escape(str(ban.get("ban_scope", "global"))),
+        "service": escape(str(ban.get("service") or "_")),
+        "end_date": "permanent" if ban.get("permanent", False) else escape(str(ban.get("end_date", "N/A"))),
+        "time_left": "permanent" if ban.get("permanent", False) else escape(str(ban.get("remain", "N/A"))),
+        "permanent": bool(ban.get("permanent", False)),
+        "kind": escape(str(ban.get("kind") or "ban")),
+        "cs_node": escape(str(source.get("instance") or "")),
+        "cs_connection": escape(str(source.get("connection") or "")),
+        "actions": "",  # Actions column for buttons
+    }
+
+
+def _redis_scan(redis_client, patterns):
+    """(key, data, ttl) for every key matching one of the patterns, in two pipelined round trips per pattern."""
+    scan = []
+    for pattern in patterns:
+        keys = list(redis_client.scan_iter(pattern, count=1000))
+        if not keys:
+            continue
+        pipe = redis_client.pipeline(transaction=False)
+        for key in keys:
+            pipe.get(key)
+            pipe.ttl(key)
+        results = pipe.execute()
+        scan.extend((key, results[2 * idx], results[2 * idx + 1]) for idx, key in enumerate(keys))
+    return scan
+
+
+def _redis_lease_rows(scan):
+    """Ban rows for the CrowdSec lease keys of a `_redis_scan`: `bans_cs_ip_<ip>` and `bans_cs_service_<svc>_ip_<ip>`."""
+    rows = []
+    for key, data, exp in scan:
+        if not data:
+            continue
+        key_str = key.decode("utf-8", "replace") if isinstance(key, bytes) else key
+        if key_str.startswith("bans_cs_service_"):
+            service, ip = key_str[len("bans_cs_service_") :].rsplit("_ip_", 1)  # noqa: E203
+            ban_scope, service, ip = "service", redis_unescape(service), ban_ip(ip)
+        elif key_str.startswith("bans_cs_ip_"):
+            ban_scope, ip = "global", ban_ip(key_str[len("bans_cs_ip_") :])  # noqa: E203
+            service = None
+        else:
+            continue
+        try:
+            lease = loads(data.decode("utf-8", "replace") if isinstance(data, bytes) else data)
+        except (JSONDecodeError, ValueError) as e:
+            LOGGER.warning(f"Failed to decode CrowdSec ban data for {ip}, skipping it: {e}")
+            continue
+        if not isinstance(lease, dict):
+            continue
+        lease.update({"ip": ip, "exp": exp, "ban_scope": ban_scope, "kind": LEASE_KIND, "permanent": False})
+        lease["service"] = service or lease.get("service") or "unknown"
+        rows.append(lease)
+    return rows
+
+
+def _merge_instance_bans(bans_list, instance_bans):
+    """Add the instance rows whose identity Redis did not already provide. Redis wins: the cluster shares one Redis."""
+    # Set membership rather than a scan of bans_list per instance ban: both sides usually hold the same bans and
+    # the scan was quadratic (measured ~1.7 s at 10k bans, on every table draw).
+    seen_bans = {_ban_identity(b) for b in bans_list}
+
+    for ban in instance_bans:
+        if "ban_scope" not in ban:
+            ban["ban_scope"] = "global" if ban.get("service", "_") == "_" else "service"
+        ban_key = _ban_identity(ban)
+        if ban_key not in seen_bans:
+            seen_bans.add(ban_key)
+            bans_list.append(ban)
+    return bans_list
 
 
 def _collect_all_bans():
@@ -116,6 +219,8 @@ def _collect_all_bans():
                         exp = 0
 
                     bans_list.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
+
+            bans_list.extend(_redis_lease_rows(_redis_scan(redis_client, ("bans_cs_ip_*", "bans_cs_service_*_ip_*"))))
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Couldn't get bans from redis: {e}")
@@ -125,18 +230,7 @@ def _collect_all_bans():
 
     timestamp_now = time()
 
-    # Set membership rather than a scan of bans_list per instance ban: the cluster
-    # shares one Redis, so both sides usually hold the same bans and the scan was
-    # quadratic (measured ~1.7 s at 10k bans, on every table draw).
-    seen_bans = {(b["ip"], b["ban_scope"], b.get("service", "_")) for b in bans_list}
-
-    for ban in instance_bans:
-        if "ban_scope" not in ban:
-            ban["ban_scope"] = "global" if ban.get("service", "_") == "_" else "service"
-        ban_key = (ban["ip"], ban["ban_scope"], ban.get("service", "_"))
-        if ban_key not in seen_bans:
-            seen_bans.add(ban_key)
-            bans_list.append(ban)
+    _merge_instance_bans(bans_list, instance_bans)
 
     for ban in bans_list:
         exp = ban.pop("exp", 0)
@@ -351,22 +445,6 @@ def bans_fetch():
     # Local alias kept for the formatter / pane-counts code below
     columns = list(_BAN_COLUMNS)
 
-    # Helper: format a ban for DataTable row
-    def format_ban(ban):
-        # Defensive: some bans may lack some fields
-        return {
-            "date": datetime.fromtimestamp(floor(ban.get("date", 0))).isoformat() if ban.get("date") else "N/A",
-            "ip": escape(str(ban.get("ip", "N/A"))),
-            "country": escape(str(ban.get("country", "N/A"))),
-            "reason": escape(str(ban.get("reason", "N/A"))),
-            "scope": escape(str(ban.get("ban_scope", "global"))),
-            "service": escape(str(ban.get("service") or "_")),
-            "end_date": "permanent" if ban.get("permanent", False) else escape(str(ban.get("end_date", "N/A"))),
-            "time_left": "permanent" if ban.get("permanent", False) else escape(str(ban.get("remain", "N/A"))),
-            "permanent": bool(ban.get("permanent", False)),
-            "actions": "",  # Actions column for buttons
-        }
-
     filtered_bans = _filter_and_sort_bans(bans, search_value, search_panes, order_column_index, order_direction)
 
     paginated_bans = filtered_bans if length == -1 else filtered_bans[start : start + length]  # noqa: E203
@@ -377,15 +455,7 @@ def bans_fetch():
     # Calculate pane counts (for SearchPanes)
     pane_counts = defaultdict(lambda: defaultdict(lambda: {"total": 0, "count": 0}))
 
-    # Use IP+scope+service as unique ID for bans
-    def ban_id(ban):
-        service = ban.get("service")
-        # Normalize service to "_" for global bans or when service is None
-        if ban.get("ban_scope") == "global" or service is None:
-            service = "_"
-        return f"{ban.get('ip','')}|{ban.get('ban_scope','')}|{service}"  # noqa: E231
-
-    filtered_ids = {ban_id(ban) for ban in filtered_bans}
+    filtered_ids = {_ban_id(ban) for ban in filtered_bans}
     for ban in bans:
         for field in columns[1:]:  # skip date
             value = ban.get(field, "N/A")
@@ -396,7 +466,7 @@ def bans_fetch():
             if isinstance(value, (dict, list)):
                 value = str(value)
             pane_counts[field][value]["total"] += 1
-            if ban_id(ban) in filtered_ids:
+            if _ban_id(ban) in filtered_ids:
                 pane_counts[field][value]["count"] += 1
 
     # Prepare SearchPanes options (special formatting for date, country, scope, service, and end_date)
@@ -749,6 +819,90 @@ def bans_ban():
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Banning {len(bans)} IP{'s' if len(bans) > 1 else ''}"))
 
 
+def _normalize_target(ip, ban_scope, service):
+    """(ip, ban_scope, service) of a CrowdSec ban as the instances store it. Raises ValueError on a malformed target."""
+    if not isinstance(ip, str):
+        raise ValueError("Invalid IP address")
+    validate_ip_address(ip)
+    if service is not None and not isinstance(service, str):
+        raise ValueError("Invalid service")
+    if ban_scope not in ("global", "service"):
+        ban_scope = "global"
+    # Same downgrade as the explicit Unban and the instance API: reserved names are the global scope
+    if service in RESERVED_SERVICE_NAMES:
+        ban_scope, service = "global", None
+    elif ban_scope == "service" and service is None:
+        raise ValueError("A service ban needs a service")
+    return ip, ban_scope, service if ban_scope == "service" else None
+
+
+def _selection_key(ip, ban_scope, service):
+    return f"{ip}|{ban_scope}|{service or '_'}"
+
+
+def _parse_selection(raw):
+    """`crowdsec_selection` form field, `{"<ip>|<ban_scope>|<service>": ["<key>", ...]}`, keyed by the normalized target."""
+    if not raw:
+        return {}
+    data = loads(raw)
+    if not isinstance(data, dict):
+        raise ValueError("Invalid selection")
+    selection = {}
+    for key, values in data.items():
+        parts = key.split("|", 2)
+        if len(parts) != 3 or not isinstance(values, list) or not all(isinstance(value, str) for value in values):
+            raise ValueError("Invalid selection")
+        selection[_selection_key(*_normalize_target(*parts))] = values
+    return selection
+
+
+def _partial_message(ip, result):
+    details = [f"decision {item.get('key') or item.get('connection_id')}: {item.get('error')}" for item in result.get("failed", [])]
+    details += [f"lease on {item.get('instance')}: {item.get('error')}" for item in result.get("lease_failed", [])]
+    if result.get("unavailable"):
+        details.append("could not check " + ", ".join(map(str, result["unavailable"])))
+    if result.get("down"):
+        details.append("instances down: " + ", ".join(map(str, result["down"])))
+    tail = (
+        "The ban stays on the instances that failed or were down, repeat the Unban."
+        if result.get("lease_removed")
+        else "The ban stays until the Unban is repeated or it expires."
+    )
+    return f"The CrowdSec Unban of {ip} is incomplete ({'; '.join(details)}). {tail}"
+
+
+def _is_crowdsec_admin():
+    return bool(current_user.admin and "write" in current_user.list_permissions)
+
+
+@bans.route("/bans/crowdsec_preview", methods=["POST"])
+@login_required
+def bans_crowdsec_preview():
+    actor = current_user.get_id()
+    if not _is_crowdsec_admin():
+        LOGGER.warning("CrowdSec Unban preview actor=%r outcome=denied", actor)
+        return jsonify({"error": "CrowdSec decision removal is restricted to administrators"}), 403
+    if DB.readonly:
+        return jsonify({"error": "Database is in read-only mode"}), 423
+
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"error": "Invalid CrowdSec ban target"}), 400
+    try:
+        ip, ban_scope, service = _normalize_target(body.get("ip"), body.get("ban_scope", "global"), body.get("service"))
+    except ValueError:
+        return jsonify({"error": "Invalid CrowdSec ban target"}), 400
+
+    try:
+        return jsonify(crowdsec_preview_data(CrowdSecClient(DB), ip, ban_scope, service))
+    except CrowdSecError as exc:
+        LOGGER.warning("CrowdSec Unban preview actor=%r ip=%s outcome=error status=%s", actor, ip, exc.status)
+        return jsonify({"error": str(exc)}), exc.status
+    except Exception:
+        LOGGER.exception("CrowdSec Unban preview actor=%r ip=%s outcome=error", actor, ip)
+        return jsonify({"error": "Unable to complete the CrowdSec request"}), 500
+
+
 @bans.route("/bans/unban", methods=["POST"])
 @login_required
 def bans_unban():
@@ -765,9 +919,14 @@ def bans_unban():
                 "ip": ban.get("ip"),
                 "ban_scope": ban.get("ban_scope", "global"),
                 "service": ban.get("service"),
+                "kind": ban.get("kind", "ban"),
             }
             for ban in _get_filtered_bans(request.form)
         ]
+        # A CrowdSec Unban needs a preview and a confirmation per ban, which a filtered selection cannot give
+        if any(unban["kind"] == LEASE_KIND for unban in unbans):
+            unbans = [unban for unban in unbans if unban["kind"] != LEASE_KIND]
+            flash("CrowdSec bans were skipped, unban them from their own row.", "warning")
     elif selection_mode == "explicit":
         raw_unbans = request.form.get("ips", "")
         if not raw_unbans:
@@ -782,11 +941,44 @@ def bans_unban():
     if not unbans:
         return handle_error("No matching bans.", "bans", True)
 
-    for unban in unbans:
-        # Validate unban structure
-        if "ip" not in unban:
-            continue
+    unbans = [unban for unban in unbans if isinstance(unban, dict) and "ip" in unban]
+    lease_unbans = [unban for unban in unbans if unban.get("kind") == LEASE_KIND]
+    unbans = [unban for unban in unbans if unban.get("kind") != LEASE_KIND]
 
+    # Lease items: every one is checked before anything is removed, so a changed or failing item leaves all bans as they were
+    prepared = []
+    if lease_unbans:
+        actor = current_user.get_id()
+        if not _is_crowdsec_admin():
+            LOGGER.warning("CrowdSec Unban actor=%r outcome=denied", actor)
+            return handle_error("CrowdSec decision removal is restricted to administrators", "bans", True)
+        if request.form.get("crowdsec_confirmed") != "yes":
+            return handle_error("Removing a CrowdSec ban needs an explicit confirmation", "bans", True)
+        try:
+            selection = _parse_selection(request.form.get("crowdsec_selection", ""))
+            targets = {}
+            for lease_unban in lease_unbans:
+                target = _normalize_target(lease_unban.get("ip"), lease_unban.get("ban_scope", "global"), lease_unban.get("service"))
+                targets[_selection_key(*target)] = target
+        except ValueError:
+            return handle_error("Invalid CrowdSec ban selection on /bans/unban.", "bans", True)
+
+        client = CrowdSecClient(DB)
+        for key, (ip, ban_scope, service) in targets.items():
+            try:
+                checked = crowdsec_revalidate(client, ip, ban_scope, service, selection.get(key, []))
+            except CrowdSecError as exc:
+                LOGGER.warning("CrowdSec Unban actor=%r ip=%s scope=%s service=%r outcome=error status=%s", actor, ip, ban_scope, service, exc.status)
+                return handle_error(f"CrowdSec Unban of {ip} refused: {exc}", "bans", True)
+            except Exception:
+                LOGGER.exception("CrowdSec Unban actor=%r ip=%s scope=%s service=%r outcome=error", actor, ip, ban_scope, service)
+                return handle_error(f"Unable to check the CrowdSec ban of {ip}, see logs for more information.", "bans", True)
+            if checked["status"] != "ready":
+                LOGGER.info("CrowdSec Unban actor=%r ip=%s scope=%s service=%r outcome=changed", actor, ip, ban_scope, service)
+                return handle_error("The CrowdSec decisions changed, review the Unban again", "bans", True)
+            prepared.append((ip, ban_scope, service, checked["preview"]))
+
+    for unban in unbans:
         # Extract and normalize unban parameters
         ip = unban.get("ip")
         ban_scope = unban.get("ban_scope", "global")
@@ -813,7 +1005,21 @@ def bans_unban():
             LOGGER.info(f"Unbanned {ip} on all instances")
             flash(f"Unbanned {ip} successfully.", "success")
 
-    return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Unbanning {len(unbans)} IP{'s' if len(unbans) > 1 else ''}"))
+    for ip, ban_scope, service, current in prepared:
+        try:
+            result = crowdsec_apply(client, ip, ban_scope, service, current)
+        except Exception:
+            LOGGER.exception("CrowdSec Unban actor=%r ip=%s scope=%s service=%r outcome=error", actor, ip, ban_scope, service)
+            flash(f"The CrowdSec Unban of {ip} failed unexpectedly. The ban stays until the Unban is repeated or it expires.", "error")
+            continue
+        LOGGER.info("CrowdSec Unban actor=%r ip=%s scope=%s service=%r outcome=%s", actor, ip, ban_scope, service, result["status"])
+        if result["status"] == "success":
+            flash(f"Removed the CrowdSec ban on {ip}.", "success")
+        else:
+            flash(_partial_message(ip, result), "error")
+
+    total = len(unbans) + len(prepared)
+    return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Unbanning {total} IP{'s' if total > 1 else ''}"))
 
 
 @bans.route("/bans/update_duration", methods=["POST"])
@@ -834,11 +1040,16 @@ def bans_update_duration():
                 "duration": duration,
                 "ban_scope": ban.get("ban_scope", "global"),
                 "service": ban.get("service"),
+                "kind": ban.get("kind", "ban"),
                 "custom_exp": request.form.get("custom_exp"),
                 "end_date": request.form.get("end_date"),
             }
             for ban in _get_filtered_bans(request.form)
         ]
+        # CrowdSec bans are not editable; a filtered selection skips them instead of failing the whole request
+        if any(update["kind"] == LEASE_KIND for update in updates):
+            updates = [update for update in updates if update["kind"] != LEASE_KIND]
+            flash("CrowdSec bans were skipped, they follow their CrowdSec decision.", "warning")
     elif selection_mode == "explicit":
         raw_updates = request.form.get("updates", "")
         if not raw_updates:
@@ -853,6 +1064,9 @@ def bans_update_duration():
     if not updates:
         return handle_error("No matching bans.", "bans", True)
 
+    if any(isinstance(update, dict) and update.get("kind") == LEASE_KIND for update in updates):
+        return handle_error("CrowdSec bans follow their CrowdSec decision and cannot be edited", "bans")
+
     # Fetch existing bans from instances to get original reasons
     instance_bans = BW_INSTANCES_UTILS.get_bans()
     instance_bans_dict = {}
@@ -863,8 +1077,8 @@ def bans_update_duration():
                 ban["ban_scope"] = "global"
             else:
                 ban["ban_scope"] = "service"
-        ban_key = f"{ban.get('ip')}|{ban.get('ban_scope', 'global')}|{ban.get('service', '_') if ban['ban_scope'] == 'service' else '_'}"
-        instance_bans_dict[ban_key] = ban
+        ban_key = _selection_key(ban.get("ip"), ban.get("ban_scope", "global"), ban.get("service", "_") if ban["ban_scope"] == "service" else None)
+        instance_bans_dict[f"{ban_key}|{ban.get('kind', 'ban')}"] = ban
 
     for update in updates:
         # Validate update structure
@@ -928,7 +1142,7 @@ def bans_update_duration():
 
         # Fetch existing ban data first to preserve original reason
         original_reason = "ui"  # Default fallback
-        ban_key = f"{ip}|{ban_scope}|{service if ban_scope == 'service' else '_'}"
+        ban_key = f"{_selection_key(ip, ban_scope, service if ban_scope == 'service' else None)}|ban"
         if ban_key in instance_bans_dict:
             original_reason = instance_bans_dict[ban_key].get("reason", "ui")
 

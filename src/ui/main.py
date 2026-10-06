@@ -24,7 +24,20 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from app.models.safe_session_cache import SafeFileSystemCache
 from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
-from flask_compress import Compress
+
+try:
+    from flask_compress import Compress
+except ModuleNotFoundError as e:  # Alpine's python3 is built without _zstd; Flask-Compress imports it on 3.14+ and the UI only uses br and gzip
+    if e.name != "_zstd":
+        raise
+    from types import ModuleType
+
+    # Stub only while Flask-Compress loads, so later importers (urllib3) still see zstd as unavailable
+    sys_modules["compression.zstd"] = ModuleType("compression.zstd")
+    try:
+        from flask_compress import Compress
+    finally:
+        del sys_modules["compression.zstd"]
 from markupsafe import Markup
 from flask_login import current_user, LoginManager, login_required, logout_user
 from flask_session import Session
@@ -63,6 +76,7 @@ from app.utils import (
     restart_workers,
 )
 from app.lang_config import SUPPORTED_LANGUAGES
+from app.support_bundle import read_plugin_version
 
 from app.routes.about import about
 from app.routes.bans import bans
@@ -241,7 +255,28 @@ def parse_size_to_bytes(size: str) -> int:
     return bytes_value
 
 
+def should_replace_blueprint(existing, new):
+    """Tell whether `new` takes the place of the already registered blueprint `existing` of the same name.
+
+    plugin_priority arbitrates between sources: PRO plugin (2) over external plugin (1) over core plugin and the
+    built-in UI blueprints (0). Equal priorities only replace each other when both were loaded from a plugin
+    folder (`import_path` is set by refresh_app_context): that is a reload of the plugin after an update, and the
+    caller picks one blueprint per name, so the new one is the current one. A built-in UI blueprint is never
+    replaced at its own priority.
+    """
+    existing_priority = getattr(existing, "plugin_priority", 0)
+    new_priority = getattr(new, "plugin_priority", 0)
+    if new_priority != existing_priority:
+        return new_priority > existing_priority
+    return hasattr(existing, "import_path") and hasattr(new, "import_path")
+
+
 class DynamicFlask(Flask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # blueprint name -> (url rules, view function endpoints) added while registering it
+        self._blueprint_owned = {}
+
     def create_global_jinja_loader(self):
         """
         Override Flask's default template loader creation so that
@@ -283,33 +318,96 @@ class DynamicFlask(Flask):
         LOGGER.debug("Global jinja loader created successfully")
         return final_loader
 
+    def _remove_blueprint(self, name):
+        """Drop a registered blueprint with the URL rules, view functions and per-blueprint handlers it added."""
+        prefix = f"{name}."
+        del self.blueprints[name]
+        # A blueprint can also add rules outside its own namespace from a record_once callback (a bare `/<name>` alias
+        # whose endpoint is the plain blueprint name), so drop what its registration recorded, not only `<name>.*`.
+        owned_rules, owned_endpoints = self._blueprint_owned.pop(name, ([], set()))
+        owned_rule_ids = {id(rule) for rule in owned_rules}
+        by_endpoint = self.url_map._rules_by_endpoint
+        for endpoint in list(by_endpoint):
+            by_endpoint[endpoint] = [rule for rule in by_endpoint[endpoint] if id(rule) not in owned_rule_ids and not endpoint.startswith(prefix)]
+            if not by_endpoint[endpoint]:
+                del by_endpoint[endpoint]
+        # Werkzeug has no way to remove a rule from its matcher, so rebuild it from the rules that are left
+        # (a stale rule would still match and send the request to a view function that no longer exists).
+        self.url_map._matcher = type(self.url_map._matcher)(self.url_map.merge_slashes)
+        for rule in self.url_map.iter_rules():
+            if not rule.build_only:
+                self.url_map._matcher.add(rule)
+        self.url_map._remap = True
+        for endpoint in [endpoint for endpoint in self.view_functions if endpoint in owned_endpoints or endpoint.startswith(prefix)]:
+            del self.view_functions[endpoint]
+        # Flask appends a blueprint's handlers to these on every registration, so a replacement would run them twice
+        for handlers in (
+            self.before_request_funcs,
+            self.after_request_funcs,
+            self.teardown_request_funcs,
+            self.url_default_functions,
+            self.url_value_preprocessors,
+            self.template_context_processors,
+            self.error_handler_spec,
+        ):
+            for key in [key for key in handlers if key == name or (isinstance(key, str) and key.startswith(prefix))]:
+                del handlers[key]
+
     def register_blueprint(self, blueprint, **options):
         # Check if a blueprint with this name is already registered.
         if blueprint.name in self.blueprints:
             existing_bp = self.blueprints[blueprint.name]
-            existing_priority = getattr(existing_bp, "plugin_priority", 0)
-            new_priority = getattr(blueprint, "plugin_priority", 0)
-            if new_priority > existing_priority:
-                LOGGER.debug(f"Overriding blueprint '{blueprint.name}': new priority {new_priority} over {existing_priority}")
-                # Remove the existing blueprint.
-                del self.blueprints[blueprint.name]
-                # Also remove all URL rules associated with the existing blueprint.
-                rules_to_remove = [rule for rule in list(self.url_map.iter_rules()) if rule.endpoint.startswith(blueprint.name + ".")]
-                for rule in rules_to_remove:
-                    self.url_map._rules.remove(rule)
-                    self.url_map._rules_by_endpoint.pop(rule.endpoint, None)
+            if should_replace_blueprint(existing_bp, blueprint):
+                LOGGER.debug(
+                    f"Replacing blueprint '{blueprint.name}': priority {getattr(blueprint, 'plugin_priority', 0)} over {getattr(existing_bp, 'plugin_priority', 0)}"
+                )
+                self._remove_blueprint(blueprint.name)
             else:
-                LOGGER.debug(f"Skipping blueprint '{blueprint.name}' with priority {new_priority} " f"(existing priority {existing_priority})")
-                return  # Do not register a lower- or equal-priority blueprint.
+                LOGGER.debug(
+                    f"Skipping blueprint '{blueprint.name}' with priority {getattr(blueprint, 'plugin_priority', 0)} "
+                    f"(existing priority {getattr(existing_bp, 'plugin_priority', 0)})"
+                )
+                return  # Do not register a lower-priority blueprint, nor an equal-priority one that is not a reload of a plugin.
 
         # Allow registration even after first request by temporarily resetting the flag.
         original_got_first = self._got_first_request
         self._got_first_request = False
+        rules_before = {id(rule) for rule in self.url_map.iter_rules()}
+        endpoints_before = set(self.view_functions)
         try:
             result = super().register_blueprint(blueprint, **options)
         finally:
             self._got_first_request = original_got_first
+            self._blueprint_owned[blueprint.name] = (
+                [rule for rule in self.url_map.iter_rules() if id(rule) not in rules_before],
+                set(self.view_functions) - endpoints_before,
+            )
         return result
+
+
+def register_plugin_blueprints(app, blueprint_registry):
+    """Register the blueprints picked by refresh_app_context, replacing the ones already registered when the priority allows it."""
+    for bp_name, bp in blueprint_registry.items():
+        # Check if we should replace existing blueprint (DynamicFlask.register_blueprint removes the old one)
+        if bp_name in app.blueprints and not should_replace_blueprint(app.blueprints[bp_name], bp):
+            LOGGER.debug(
+                f"Skipping registration for '{bp_name}' (priority {getattr(bp, 'plugin_priority', 0)}, existing {getattr(app.blueprints[bp_name], 'plugin_priority', 0)})"
+            )
+            continue
+
+        # Register the blueprint
+        app.register_blueprint(bp)
+        LOGGER.debug(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
+
+        # Add to extra pages if it has a root route
+        for rule in app.url_map.iter_rules():
+            if rule.endpoint.startswith(f"{bp_name}.") and str(rule) == f"/{bp_name}" and bp_name not in app.config["EXTRA_PAGES"]:
+                app.config["EXTRA_PAGES"].append(bp_name)
+                break
+
+    # Reset Jinja2 environment to apply template changes
+    app.jinja_env.cache = {}
+    app.jinja_env.loader = app.create_global_jinja_loader()
 
 
 def refresh_app_context():
@@ -494,6 +592,7 @@ def refresh_app_context():
                         plugin_blueprints.add(bp_name)
 
                         bp.plugin_priority = priority
+                        bp.plugin_version = read_plugin_version(plugin_root)
                         bp.import_path = blueprint_dir
                         app.plugin_sys_paths[bp_name] = blueprint_dir
 
@@ -548,40 +647,7 @@ def refresh_app_context():
             app.register_blueprint(bp)
             LOGGER.debug(f"Re-registered original blueprint '{bp_name}'")
 
-    # Register new and updated plugin blueprints
-    for bp_name, bp in blueprint_registry.items():
-        # Check if we should replace existing blueprint
-        if bp_name in app.blueprints:
-            existing_bp = app.blueprints[bp_name]
-            existing_priority = getattr(existing_bp, "plugin_priority", 0)
-            new_priority = getattr(bp, "plugin_priority", 0)
-
-            if new_priority <= existing_priority:
-                LOGGER.debug(f"Skipping registration for '{bp_name}' (priority {new_priority} <= {existing_priority})")
-                continue
-
-            # Remove existing blueprint before registering the new one
-            for rule in list(app.url_map.iter_rules()):
-                if rule.endpoint.startswith(f"{bp_name}."):
-                    app.url_map._rules.remove(rule)
-                    app.url_map._rules_by_endpoint.pop(rule.endpoint, None)
-
-            for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
-                app.view_functions.pop(endpoint, None)
-
-        # Register the blueprint
-        app.register_blueprint(bp)
-        LOGGER.debug(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
-
-        # Add to extra pages if it has a root route
-        for rule in app.url_map.iter_rules():
-            if rule.endpoint.startswith(f"{bp_name}.") and str(rule) == f"/{bp_name}" and bp_name not in app.config["EXTRA_PAGES"]:
-                app.config["EXTRA_PAGES"].append(bp_name)
-                break
-
-    # Reset Jinja2 environment to apply template changes
-    app.jinja_env.cache = {}
-    app.jinja_env.loader = app.create_global_jinja_loader()
+    register_plugin_blueprints(app, blueprint_registry)
 
     # Remove other legacy flags
     if "NEEDS_CONTEXT_REFRESH" in DATA:

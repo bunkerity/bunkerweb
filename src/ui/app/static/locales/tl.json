@@ -847,7 +847,7 @@
       "ip_address": "IP Address",
       "keywords": "Mga Keyword",
       "lets_encrypt_custom_profile": "Custom Profile ng Let's Encrypt",
-      "lets_encrypt_disable_public_suffixes": "I-disable ang Mga Public Suffix (PSL Blacklist)",
+      "lets_encrypt_disable_public_suffixes": "Laktawan ang Pagsusuri ng Public Suffix List",
       "lets_encrypt_dns_credential_items": "Mga Kredensyal ng Let's Encrypt DNS",
       "lets_encrypt_profile": "Profile ng Let's Encrypt",
       "license_key": "License Key",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Sigurado ka bang gusto mong burahin ang napiling plugin?",
       "confirm_plugin_deletion_plural": "Sigurado ka bang gusto mong burahin ang mga napiling plugin?",
       "confirm_template_deletion": "Sigurado ka bang gusto mong burahin ang template na {{name}}?",
+      "confirm_templates_deletion_alert": "Sigurado ka bang gusto mong burahin ang napiling template?",
+      "confirm_templates_deletion_alert_plural": "Sigurado ka bang gusto mong burahin ang mga napiling template?",
       "confirmation_instance_deletion": "Sigurado ka bang gusto mong burahin ang napiling instance?",
       "delete_cache_confirmation_alert": "Sigurado ka bang gusto mong burahin ang mga napiling cache file?",
       "delete_confirmation_alert": "Sigurado ka bang gusto mong burahin ang napiling instance?",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "Pumili ng bagong tagal para sa mga napiling ban:",
       "ban_filtered_confirmation": "I-ban ang mga IP mula sa lahat ng {{count}} tumutugmang ulat? Ang mga duplicate na target ay ilalapat lamang nang isang beses.",
       "unban_filtered_confirmation": "Sigurado ka bang gusto mong alisin ang ban sa lahat ng {{count}} tumutugmang ban?",
+      "crowdsec_unban_intro": "Aalisin din ng pag-unban ang mga desisyong ito ng CrowdSec:",
+      "crowdsec_unban_list_warning": "Ang ilang desisyon ay galing sa mga listahan ng CrowdSec at maaaring bumalik. Gumamit ng allowlist ng CrowdSec para tuluyang makadaan ang IP na ito.",
+      "crowdsec_unban_range_warning": "Sakop ng ilang desisyon ang isang range. Mananatiling naka-ban ang ibang IP sa range na iyon hanggang matapos ang ban nila.",
+      "crowdsec_unban_confirm": "Naiintindihan kong aalisin ang mga desisyong ito ng CrowdSec",
+      "crowdsec_unban_error": "Hindi ma-load ang mga desisyon ng CrowdSec para sa {{ip}}",
+      "crowdsec_unban_management_missing": "Kulang ang mga kredensyal sa pamamahala ng CrowdSec sa: {{connections}}",
+      "crowdsec_unban_unavailable": "Hindi ma-check ang mga koneksyong ito ng CrowdSec: {{connections}}",
       "update_filtered_duration_alert": "Pumili ng bagong tagal para sa lahat ng {{count}} tumutugmang ban:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "I-download ang Mga Log"
       },
       "extract_config": {
+        "hide_passwords": "Itago ang mga password",
+        "hide_passwords_warning": "Ang mga export na hindi nakatago ay may lamang mga kredensyal. Ibahagi lamang ito sa pribadong channel ng suporta.",
         "title": "Kunin ang Configuration"
       },
       "support_link": {
         "title": "Link ng Suporta"
+      },
+      "ui_bundle": {
+        "button": "I-download ang Bundle",
+        "help": "Mga log, bersyon ng plugin, environment, at kamakailang error. Ina-anonymize ang pribadong data.",
+        "title": "Diagnostics ng Web UI"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "I-convert ang Config na {{name}} sa Online",
       "convert_service_to_draft": "I-convert ang Serbisyo na {{name}} sa Draft",
       "convert_service_to_online": "I-convert ang Serbisyo na {{name}} sa Online",
+      "crowdsec_unban_unavailable": "Kulang ang mga kredensyal sa pamamahala ng CrowdSec o hindi available ang source instance",
       "delete_config": "Burahin ang Custom Config na {{name}}",
       "delete_file": "Burahin ang Cache File: {{filename}}",
       "delete_instance": "Burahin ang Instance na {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "Ang Instance na {{hostname}} ay kasalukuyang hindi tumutugon ('up').",
     "latest_version_installed": "Nagpapatakbo ka ng pinakabagong bersyon.",
     "lets_encrypt_custom_profile": "Ang custom na profile na gagamitin para sa Let's Encrypt (hal. 'aking_custom_profile').",
-    "lets_encrypt_disable_public_suffixes": "I-disable ang mga kahilingan ng certificate para sa mga domain na tumutugma sa Public Suffix List (inirerekomenda).",
+    "lets_encrypt_disable_public_suffixes": "Kapag naka-enable (default), hindi sinusuri ang mga domain laban sa Public Suffix List. I-disable para tanggihan ang mga kahilingan ng certificate para sa mga domain na tumutugma sa isang public suffix (halimbawa co.uk).",
     "lets_encrypt_server": "Pumili ng iyong certificate provider upang ipakita ang mga setting na tukoy sa provider.",
     "lets_encrypt_profile": "Ang profile na gagamitin para sa Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "Ang iyong BunkerWeb PRO license key.",

@@ -847,7 +847,7 @@
       "ip_address": "عنوان IP",
       "keywords": "الكلمات المفتاحية",
       "lets_encrypt_custom_profile": "ملف تعريف Let's Encrypt مخصص",
-      "lets_encrypt_disable_public_suffixes": "تعطيل اللاحقات العامة (قائمة PSL السوداء)",
+      "lets_encrypt_disable_public_suffixes": "تخطي فحص قائمة اللاحقات العامة",
       "lets_encrypt_dns_credential_items": "عناصر بيانات اعتماد DNS لـ Let's Encrypt",
       "lets_encrypt_profile": "ملف تعريف Let's Encrypt",
       "license_key": "مفتاح الترخيص",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "هل أنت متأكد أنك تريد حذف الإضافة المحددة؟",
       "confirm_plugin_deletion_plural": "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟",
       "confirm_template_deletion": "هل أنت متأكد أنك تريد حذف القالب {{name}}؟",
+      "confirm_templates_deletion_alert": "هل أنت متأكد أنك تريد حذف القالب المحدد؟",
+      "confirm_templates_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف القوالب المحددة؟",
       "confirmation_instance_deletion": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
       "delete_cache_confirmation_alert": "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟",
       "delete_confirmation_alert": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:",
       "ban_filtered_confirmation": "هل تريد حظر عناوين IP من جميع التقارير المطابقة البالغ عددها {{count}}؟ سيتم تطبيق الأهداف المكررة مرة واحدة فقط.",
       "unban_filtered_confirmation": "هل أنت متأكد أنك تريد رفع الحظر عن جميع الحظورات المطابقة البالغ عددها {{count}}؟",
+      "crowdsec_unban_intro": "رفع الحظر يزيل أيضًا قرارات CrowdSec التالية:",
+      "crowdsec_unban_list_warning": "بعض القرارات مصدرها قوائم CrowdSec وقد تعود. استخدم قائمة السماح في CrowdSec للسماح لهذا العنوان بشكل دائم.",
+      "crowdsec_unban_range_warning": "بعض القرارات تشمل نطاقًا. تبقى عناوين IP الأخرى في هذا النطاق محظورة حتى ينتهي حظرها.",
+      "crowdsec_unban_confirm": "أفهم أنه ستتم إزالة قرارات CrowdSec هذه",
+      "crowdsec_unban_error": "تعذر تحميل قرارات CrowdSec للعنوان {{ip}}",
+      "crowdsec_unban_management_missing": "بيانات اعتماد إدارة CrowdSec مفقودة في: {{connections}}",
+      "crowdsec_unban_unavailable": "تعذر فحص اتصالات CrowdSec التالية: {{connections}}",
       "update_filtered_duration_alert": "حدد مدة جديدة لجميع الحظورات المطابقة البالغ عددها {{count}}:"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "تنزيل السجلات"
       },
       "extract_config": {
+        "hide_passwords": "إخفاء كلمات المرور",
+        "hide_passwords_warning": "تحتوي عمليات التصدير غير المخفية على بيانات اعتماد. شاركها فقط عبر قناة دعم خاصة.",
         "title": "استخراج التكوين"
       },
       "support_link": {
         "title": "رابط الدعم"
+      },
+      "ui_bundle": {
+        "button": "تنزيل الحزمة",
+        "help": "السجلات وإصدارات الإضافات والبيئة والأخطاء الأخيرة. يتم إخفاء هوية البيانات الخاصة.",
+        "title": "تشخيصات واجهة الويب"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "تحويل الخدمة {{name}} إلى مسودة",
       "convert_service_to_online": "تحويل الخدمة {{name}} إلى متصل",
+      "crowdsec_unban_unavailable": "بيانات اعتماد إدارة CrowdSec مفقودة أو أن النسخة المصدر غير متاحة",
       "delete_config": "حذف التكوين المخصص {{name}}",
       "delete_file": "حذف ملف الذاكرة المؤقتة: {{filename}}",
       "delete_instance": "حذف المثيل {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "المثيل {{hostname}} لا يستجيب حاليًا ('up').",
     "latest_version_installed": "أنت تستخدم أحدث إصدار.",
     "lets_encrypt_custom_profile": "ملف التعريف المخصص الذي سيتم استخدامه لـ Let's Encrypt (مثل 'my_custom_profile').",
-    "lets_encrypt_disable_public_suffixes": "تعطيل طلبات الشهادات للنطاقات التي تطابق قائمة Public Suffix List (موصى به).",
+    "lets_encrypt_disable_public_suffixes": "عند التفعيل (الافتراضي)، لا يتم فحص النطاقات مقابل قائمة اللاحقات العامة. عطّله لرفض طلبات الشهادات للنطاقات التي تطابق لاحقة عامة (مثل co.uk).",
     "lets_encrypt_server": "اختر موفر الشهادات لعرض الإعدادات الخاصة بكل موفر.",
     "lets_encrypt_profile": "ملف التعريف الذي سيتم استخدامه لـ Let's Encrypt (classic، tlsserver، shortlived).",
     "license_key": "مفتاح ترخيص BunkerWeb PRO الخاص بك.",

@@ -73,7 +73,7 @@ function M.new(cache, metadata)
       local expires = ngx.time() + ttl
       active[#active + 1] = {id, expires, remediation}
       if metadata then
-        local evidence = {expires_at = ngx.time() + M.duration(decision.duration)}
+        local evidence = {expires_at = ngx.time() + M.duration(decision.duration), remediation = remediation}
         for _, name in ipairs({"id", "origin", "scenario", "type", "scope", "value"}) do
           local value = decision[name]
           if type(value) == "string" then value = value:sub(1, 512) end
@@ -102,6 +102,7 @@ function M.new(cache, metadata)
       local ok, decision = false, nil
       if raw then ok, decision = pcall(cjson.decode, raw) end
       if ok and type(decision) == "table" then
+        decision.remediation = record[3]
         evidence.decisions[#evidence.decisions + 1] = decision
         evidence.matched_target = evidence.matched_target or decision.value
       else

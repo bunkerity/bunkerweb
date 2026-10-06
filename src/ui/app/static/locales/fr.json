@@ -847,7 +847,7 @@
       "ip_address": "Adresse IP",
       "keywords": "Mots-clés",
       "lets_encrypt_custom_profile": "Profil Let's Encrypt Personnalisé",
-      "lets_encrypt_disable_public_suffixes": "Désactiver les suffixes publics (liste noire PSL)",
+      "lets_encrypt_disable_public_suffixes": "Ignorer la vérification de la liste des suffixes publics",
       "lets_encrypt_dns_credential_items": "Identifiants DNS Let's Encrypt",
       "lets_encrypt_profile": "Profil Let's Encrypt",
       "license_key": "Clé de Licence",
@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Êtes-vous sûr de vouloir supprimer le plugin sélectionné ?",
       "confirm_plugin_deletion_plural": "Êtes-vous sûr de vouloir supprimer les plugins sélectionnés ?",
       "confirm_template_deletion": "Êtes-vous sûr de vouloir supprimer le modèle {{name}} ?",
+      "confirm_templates_deletion_alert": "Êtes-vous sûr de vouloir supprimer le modèle sélectionné ?",
+      "confirm_templates_deletion_alert_plural": "Êtes-vous sûr de vouloir supprimer les modèles sélectionnés ?",
       "confirmation_instance_deletion": "Êtes-vous sûr de vouloir supprimer l'instance sélectionnée ?",
       "delete_cache_confirmation_alert": "Êtes-vous sûr de vouloir supprimer les fichiers cache sélectionnés ?",
       "delete_confirmation_alert": "Êtes-vous sûr de vouloir supprimer l'instance sélectionnée ?",
@@ -1009,6 +1011,13 @@
       "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :",
       "ban_filtered_confirmation": "Bannir les IP des {{count}} rapports correspondants ? Les cibles en double ne seront appliquées qu'une seule fois.",
       "unban_filtered_confirmation": "Êtes-vous sûr de vouloir débannir les {{count}} bannissements correspondants ?",
+      "crowdsec_unban_intro": "Le débannissement supprime aussi ces décisions CrowdSec :",
+      "crowdsec_unban_list_warning": "Certaines décisions proviennent de listes CrowdSec et peuvent revenir. Utilisez une liste d'autorisation CrowdSec pour laisser passer cette IP définitivement.",
+      "crowdsec_unban_range_warning": "Certaines décisions couvrent une plage. Les autres IP de cette plage restent bannies jusqu'à la fin de leur bannissement.",
+      "crowdsec_unban_confirm": "Je comprends que ces décisions CrowdSec seront supprimées",
+      "crowdsec_unban_error": "Impossible de charger les décisions CrowdSec pour {{ip}}",
+      "crowdsec_unban_management_missing": "Les identifiants de gestion CrowdSec sont absents sur : {{connections}}",
+      "crowdsec_unban_unavailable": "Impossible de vérifier ces connexions CrowdSec : {{connections}}",
       "update_filtered_duration_alert": "Sélectionnez une nouvelle durée pour les {{count}} bannissements correspondants :"
     },
     "button": {
@@ -1424,10 +1433,17 @@
         "title": "Télécharger les Logs"
       },
       "extract_config": {
+        "hide_passwords": "Masquer les mots de passe",
+        "hide_passwords_warning": "Un export non masqué contient des identifiants. Partagez-le uniquement par un canal de support privé.",
         "title": "Extraire la Configuration"
       },
       "support_link": {
         "title": "Lien de Support"
+      },
+      "ui_bundle": {
+        "button": "Télécharger le paquet",
+        "help": "Journaux, versions des plugins, environnement et erreurs récentes. Les données privées sont anonymisées.",
+        "title": "Diagnostic de la Web UI"
       }
     }
   },
@@ -1682,6 +1698,7 @@
       "convert_config_to_online": "Convert Config {{name}} to Online",
       "convert_service_to_draft": "Convertir le Service {{name}} en Brouillon",
       "convert_service_to_online": "Convertir le Service {{name}} en En Ligne",
+      "crowdsec_unban_unavailable": "Les identifiants de gestion CrowdSec sont absents ou l'instance source est indisponible",
       "delete_config": "Supprimer la Config Perso {{name}}",
       "delete_file": "Supprimer le fichier cache : {{filename}}",
       "delete_instance": "Supprimer l'Instance {{hostname}}",
@@ -1745,7 +1762,7 @@
     "instance_not_up": "L'instance {{hostname}} ne répond pas actuellement ('up').",
     "latest_version_installed": "Vous utilisez la dernière version.",
     "lets_encrypt_custom_profile": "Le profil personnalisé à utiliser pour Let's Encrypt (ex : 'mon_profil_personnalise').",
-    "lets_encrypt_disable_public_suffixes": "Désactiver les demandes de certificat pour les domaines correspondant à la Public Suffix List (recommandé).",
+    "lets_encrypt_disable_public_suffixes": "Activé (par défaut), les domaines ne sont pas vérifiés par rapport à la liste des suffixes publics. Désactivez pour refuser les demandes de certificat pour les domaines correspondant à un suffixe public (par exemple co.uk).",
     "lets_encrypt_server": "Choisissez votre fournisseur de certificats pour afficher les paramètres spécifiques au fournisseur.",
     "lets_encrypt_profile": "Le profil à utiliser pour Let's Encrypt (classic, tlsserver, shortlived).",
     "license_key": "Votre clé de licence BunkerWeb PRO.",

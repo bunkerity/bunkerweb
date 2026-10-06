@@ -49,6 +49,20 @@ Die Einstellung `SECURITY_MODE` bestimmt, wie BunkerWeb erkannte Bedrohungen beh
 
 Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Positive zu identifizieren und zu beheben, ohne legitime Clients zu stören. Sobald diese Probleme behoben sind, können Sie für vollen Schutz getrost in den `block`-Modus zurückwechseln.
 
+### Sperren beim TLS-Handshake verwerfen {#bans-tls-drop}
+
+Ein gesperrter Client schließt normalerweise den TLS-Handshake ab und erhält dann die Sperrseite (403). `BANS_TLS_DROP_REASONS` listet die Sperrgründe auf, für die BunkerWeb die Verbindung stattdessen gleich zu Beginn des Handshakes schließt, noch vor jeder Zertifikats- oder Schlüsselaustauscharbeit. Der Client sieht einen TLS-Fehler, keine Seite. Das spart CPU, wenn gesperrte Adressen sich immer wieder verbinden.
+
+Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus `crowdsec`, `bad_behavior`, `manual`, `ui` und `api`. Der Standardwert ist leer, wodurch jede Sperre die 403-Seite behält. Wir empfehlen `crowdsec`.
+
+- Nur der Grund der tatsächlich geltenden Sperre zählt. Hat eine IP eine `manual`-Sperre und eine CrowdSec-Sperre, verwirft die alleinige Angabe von `crowdsec` nichts, und der Client erhält die 403-Seite.
+- Das Verwerfen entfällt, und die 403-Seite bleibt, wenn `USE_PROXY_PROTOCOL` auf `yes` steht oder `USE_REAL_IP` auf `yes` mit einer headerbasierten Quelle, da die Client-Adresse zu diesem Zeitpunkt nicht bekannt ist. Es entfällt auch für IPs, die eine lokale Whitelist zulässt.
+- Bei aktiviertem Redis wird ein Handshake erst verworfen, nachdem eine Anfrage der gesperrten IP die reguläre Sperrprüfung durchlaufen hat; die erste Anfrage erhält also weiterhin die 403-Seite.
+- Steht `SECURITY_MODE` auf `detect`, wird der Handshake fortgesetzt und eine Warnung protokolliert.
+- HTTP/3-Verbindungen (QUIC) werden nie verworfen. Sie erhalten die 403-Seite.
+- Jedes Verwerfen wird pro Grund in den Metriken gezählt.
+- Der Zustand dieser Funktion und der CrowdSec-Sperren liegt in der Shared-Memory-Zone `bans_meta`. Sie ist immer mit 10 MiB deklariert, ihr Speicher wird aber erst belegt, wenn `BANS_TLS_DROP_REASONS` oder `CROWDSEC_BAN_REFRESH` gesetzt ist.
+
 ### Konfigurationseinstellungen
 
 === "Kerneinstellungen"
@@ -59,6 +73,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Nein     | **BunkerWeb-Instanzen:** Liste der BunkerWeb-Instanzen, durch Leerzeichen getrennt.                                           |
     | `MULTISITE`           | `no`              | global    | Nein     | **Mehrere Websites:** Auf `yes` setzen, um das Hosten mehrerer Websites mit unterschiedlichen Konfigurationen zu ermöglichen. |
     | `SECURITY_MODE`       | `block`           | multisite | Nein     | **Sicherheitsstufe:** Steuert die Stufe der Sicherheitsdurchsetzung. Optionen: `detect` oder `block`.                         |
+    | `BANS_TLS_DROP_REASONS` | | multisite | Nein | **Beim TLS verworfene Sperren:** Sperrgründe (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, durch Leerzeichen getrennt), deren gesperrte IPs beim TLS-Handshake verworfen werden, statt die 403-Seite zu erhalten. Entfällt hinter dem PROXY-Protokoll und bei headerbasierter echter IP und gilt nie für HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | Nein     | **Servertyp:** Definiert, ob der Server vom Typ `http` oder `stream` ist.                                                     |
 
 === "API-Einstellungen"

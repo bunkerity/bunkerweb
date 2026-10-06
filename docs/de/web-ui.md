@@ -35,7 +35,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
     Verwenden Sie die veröffentlichten Images und das Layout aus dem [Quickstart-Guide](quickstart-guide.md#__tabbed_1_3). Stack starten, dann den Wizard im Browser abschließen.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.16~rc3-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.16~rc4-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Öffnen Sie den Scheduler-Host (z. B. `https://www.example.com/changeme`) und führen Sie den `/setup`-Wizard aus, um UI, Scheduler und Instanz zu konfigurieren.
@@ -52,7 +52,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.16-rc3
+        image: bunkerity/bunkerweb:1.6.16-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.16-rc3
+        image: bunkerity/bunkerweb-ui:1.6.16-rc4
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -169,7 +169,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
     Recovery-Codes werden einmalig angezeigt; gehen die Verschlüsselungs-Keys verloren, werden gespeicherte TOTP-Secrets verworfen.
 - Sessions: Standard-Leerlauf-Lebensdauer 12 h (`SESSION_LIFETIME_HOURS`), bei jeder Anfrage erneuert. Ein hartes Absolutlimit gilt über `SESSION_ABSOLUTE_HOURS` (Standard `168` = 7 Tage) — danach werden Nutzer unabhängig von Aktivität ausgeloggt. Optionale Session-ID-Rotation (`SESSION_ROLLING_HOURS`, Standard `0` = deaktiviert) erzeugt in diesem Intervall eine neue Session-ID. Sessions an IP und User-Agent gebunden; `CHECK_PRIVATE_IP=no` lockert die IP-Prüfung nur für private Netze. `ALWAYS_REMEMBER=yes` erzwingt persistente Cookies.
-- Sitzungsspeicher: Sitzungen liegen in Redis, wenn `USE_REDIS=yes` gesetzt ist, sonst in einem lokalen Cache unter `/var/lib/bunkerweb`. Ein Redis, das nicht mehr antwortet oder Schreibvorgänge ablehnt, weil es `maxmemory` erreicht hat, legt die Oberfläche nicht mehr lahm: die betroffenen Sitzungen weichen auf diesen lokalen Cache aus, der vor Redis gelesen wird, damit eine Änderung oder Löschung, die Redis nie erreicht hat, nicht von der älteren Kopie verdeckt wird, die Redis noch hält, und sie werden zurück nach Redis geschrieben, sobald es wieder antwortet. Auch eine Abmeldung oder eine Rotation der Sitzungs-ID während eines Ausfalls wird durch die Wiederherstellung nicht rückgängig gemacht. Jeder Widerruf wird in beiden Speichern vermerkt, damit er in jedem Fall greift. Eine Verdrängung ist nicht abgedeckt, da Redis Erfolg meldet und den Schlüssel einfach nicht mehr hält; dimensionieren Sie `maxmemory` daher für die Schlüssel, die Sie behalten. Lehnt Redis eine Aktualisierung ab, wandert diese Sitzung in den lokalen Speicher und die noch in Redis liegende Kopie wird sofort entfernt, damit die Änderung nicht von der älteren Fassung verdeckt wird und ein mehrstufiger Ablauf wie 2FA nicht auf seinem vorherigen Stand hängen bleibt. Dieser lokale Cache gilt pro Host, was bei mehreren Instanzen der Oberfläche zählt: die übrigen Instanzen sehen eine in den lokalen Cache einer Instanz gewanderte Sitzung erst wieder, wenn diese Instanz sie nach Redis zurückgeschrieben hat, ein während eines Redis-Ausfalls ausgesprochener Widerruf wird nur von der Instanz durchgesetzt, die ihn ausgesprochen hat, und eine Instanz, die eine Sitzung bereits aus ihrem lokalen Cache bedient, kann das bis zu `SESSION_LIFETIME_HOURS` lang weiter tun, nachdem eine andere Instanz diese Sitzung über Redis gelöscht hat. `UI_USE_REDIS=no` nimmt allein die Oberfläche von Redis, anders als das globale `USE_REDIS`, das auch das Teilen von Sperren und Berichten zwischen Instanzen beendet.
+- Sitzungsspeicher: Sitzungen liegen in Redis, wenn `USE_REDIS=yes` gesetzt ist, sonst in einem lokalen Cache unter `/var/lib/bunkerweb`. Ein Redis, das nicht mehr antwortet oder Schreibvorgänge ablehnt, weil es `maxmemory` erreicht hat, legt die Oberfläche nicht mehr lahm: die betroffenen Sitzungen weichen auf diesen lokalen Cache aus, der vor Redis gelesen wird, damit eine Änderung oder Löschung, die Redis nie erreicht hat, nicht von der älteren Kopie verdeckt wird, die Redis noch hält, und sie werden zurück nach Redis geschrieben, sobald es wieder antwortet. Auch eine Abmeldung oder eine Rotation der Sitzungs-ID während eines Ausfalls wird durch die Wiederherstellung nicht rückgängig gemacht, selbst wenn die Sitzung während des Redis-Ausfalls nicht gelesen werden konnte. Jeder Widerruf wird in beiden Speichern vermerkt, damit er in jedem Fall greift. Eine Verdrängung ist nicht abgedeckt, da Redis Erfolg meldet und den Schlüssel einfach nicht mehr hält; dimensionieren Sie `maxmemory` daher für die Schlüssel, die Sie behalten. Lehnt Redis eine Aktualisierung ab, wandert diese Sitzung in den lokalen Speicher und die noch in Redis liegende Kopie wird sofort entfernt, damit die Änderung nicht von der älteren Fassung verdeckt wird und ein mehrstufiger Ablauf wie 2FA nicht auf seinem vorherigen Stand hängen bleibt. Dieser lokale Cache gilt pro Host, was bei mehreren Instanzen der Oberfläche zählt: die übrigen Instanzen sehen eine in den lokalen Cache einer Instanz gewanderte Sitzung erst wieder, wenn diese Instanz sie nach Redis zurückgeschrieben hat, ein während eines Redis-Ausfalls ausgesprochener Widerruf wird nur von der Instanz durchgesetzt, die ihn ausgesprochen hat, und eine Instanz, die eine Sitzung bereits aus ihrem lokalen Cache bedient, kann das bis zu `SESSION_LIFETIME_HOURS` lang weiter tun, nachdem eine andere Instanz diese Sitzung über Redis gelöscht hat. `UI_USE_REDIS=no` nimmt allein die Oberfläche von Redis, anders als das globale `USE_REDIS`, das auch das Teilen von Sperren und Berichten zwischen Instanzen beendet.
 - `PROXY_NUMBERS` setzen, wenn mehrere Proxies `X-Forwarded-*` anhängen.
 
 !!! warning "2FA ist nach dem Neuerstellen des Containers weg"

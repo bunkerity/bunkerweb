@@ -49,6 +49,20 @@ Le paramètre `SECURITY_MODE` détermine la façon dont BunkerWeb gère les mena
 
 Passer en mode `detect` aide à identifier et corriger les faux positifs sans impacter les clients légitimes. Une fois ces problèmes résolus, repassez en mode `block` pour une protection complète.
 
+### Abandonner les bannissements à la négociation TLS {#bans-tls-drop}
+
+Un client banni termine normalement la négociation TLS puis reçoit la page de bannissement (403). `BANS_TLS_DROP_REASONS` liste les motifs de bannissement pour lesquels BunkerWeb ferme la connexion dès le début de la négociation, avant tout travail de certificat ou d’échange de clés. Le client voit une erreur TLS, pas une page. Cela économise du CPU lorsque des adresses bannies se reconnectent sans cesse.
+
+La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `bad_behavior`, `manual`, `ui` et `api`. La valeur par défaut est vide, ce qui conserve la page 403 pour tous les bannissements. Nous suggérons `crowdsec`.
+
+- Seul le motif du bannissement qui s’applique compte. Pour une IP ayant un bannissement `manual` et un bannissement CrowdSec, indiquer seulement `crowdsec` n’abandonne rien et le client reçoit la page 403.
+- L’abandon est ignoré, et la page 403 reste, lorsque `USE_PROXY_PROTOCOL` vaut `yes` ou lorsque `USE_REAL_IP` vaut `yes` avec une source basée sur un en-tête, car l’adresse du client n’est pas connue à ce stade. Il est aussi ignoré pour les IP autorisées par une liste blanche locale.
+- Avec Redis activé, une négociation n’est abandonnée qu’après qu’une requête de l’IP bannie est passée par la vérification habituelle des bannissements ; la première requête reçoit donc encore la page 403.
+- Avec `SECURITY_MODE` sur `detect`, la négociation se poursuit et un avertissement est journalisé.
+- Les connexions HTTP/3 (QUIC) ne sont jamais abandonnées. Elles reçoivent la page 403.
+- Chaque abandon est compté par motif dans les métriques.
+- L’état de cette fonction et des bannissements CrowdSec se trouve dans la zone de mémoire partagée `bans_meta`. Elle est toujours déclarée avec 10 MiB, mais sa mémoire n’est utilisée que lorsque `BANS_TLS_DROP_REASONS` ou `CROWDSEC_BAN_REFRESH` est défini.
+
 ### Paramètres de configuration
 
 === "Paramètres principaux"
@@ -59,6 +73,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Non      | **Instances BunkerWeb :** Liste des instances BunkerWeb séparées par des espaces.                        |
     | `MULTISITE`           | `no`              | global    | Non      | **Sites multiples :** Définir à `yes` pour héberger plusieurs sites avec des configurations différentes. |
     | `SECURITY_MODE`       | `block`           | multisite | Non      | **Niveau de sécurité :** `detect` ou `block` pour contrôler l’application de la sécurité.                |
+    | `BANS_TLS_DROP_REASONS` | | multisite | Non | **Bannissements abandonnés en TLS :** Motifs de bannissement (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, séparés par des espaces) dont les IP bannies sont abandonnées à la négociation TLS au lieu de recevoir la page 403. Ignoré derrière le protocole PROXY et avec une IP réelle basée sur un en-tête, et jamais appliqué à HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | Non      | **Type de serveur :** Définit si le serveur est de type `http` ou `stream`.                              |
 
 === "Paramètres API"
