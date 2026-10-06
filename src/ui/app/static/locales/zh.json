@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "您确定要删除选定的插件吗？",
       "confirm_plugin_deletion_plural": "您确定要删除选定的插件吗？",
       "confirm_template_deletion": "您确定要删除模板 {{name}} 吗？",
+      "confirm_templates_deletion_alert": "您确定要删除选定的模板吗？",
+      "confirm_templates_deletion_alert_plural": "您确定要删除选定的模板吗？",
       "confirmation_instance_deletion": "您确定要删除选定的实例吗？",
       "delete_cache_confirmation_alert": "您确定要删除选定的缓存文件吗？",
       "delete_confirmation_alert": "您确定要删除选定的实例吗？",

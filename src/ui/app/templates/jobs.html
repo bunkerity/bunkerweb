@@ -87,7 +87,7 @@
                         <td>{{ job_data["plugin_id"] }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;<span data-i18n="interval.{{ job_data['every'] }}">{{ job_data["every"] }}</span>
+                                <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;<span data-i18n="interval.{{ job_data['every'] }}">{{ {"once": "Once", "hour": "Hourly", "day": "Daily", "week": "Weekly"}.get(job_data["every"], job_data["every"]) }}</span>
                             </div>
                         </td>
                         <td class="text-center">

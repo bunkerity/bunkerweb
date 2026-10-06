@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "هل أنت متأكد أنك تريد حذف الإضافة المحددة؟",
       "confirm_plugin_deletion_plural": "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟",
       "confirm_template_deletion": "هل أنت متأكد أنك تريد حذف القالب {{name}}؟",
+      "confirm_templates_deletion_alert": "هل أنت متأكد أنك تريد حذف القالب المحدد؟",
+      "confirm_templates_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف القوالب المحددة؟",
       "confirmation_instance_deletion": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
       "delete_cache_confirmation_alert": "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟",
       "delete_confirmation_alert": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",

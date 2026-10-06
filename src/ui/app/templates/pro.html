@@ -55,7 +55,7 @@
                             <h5 class="mt-2 mb-2 courier-prime fw-medium{% if is_overlapped %} text-decoration-line-through{% endif %}"
                                 data-i18n="pro.status.services_count"
                                 data-i18n-options='{"online_services": {{ online_services }}, "pro_services": {{ pro_services }}}'>
-                                {{ online_services }} Online service{{ 's' if online_services > 1 else '' }} / {{ pro_services }} PRO service{{ 's' if pro_services > 1 else '' }}
+                                {{ online_services }} Online Service(s) / {{ pro_services }} PRO Service(s)
                             </h5>
                             {% if is_overlapped %}
                                 <div class="mt-2 mb-2 alert alert-danger text-center" role="alert">
@@ -96,7 +96,7 @@
                     <small class="position-absolute bottom-0 end-0 text-muted"
                            data-i18n="pro.status.draft_services_count"
                            data-i18n-options='{"draft_services": {{ draft_services }}}'>
-                        {{ draft_services }} Draft service{{ 's' if draft_services > 1 else '' }}
+                        {{ draft_services }} Draft service(s)
                     </small>
                 </div>
             </div>

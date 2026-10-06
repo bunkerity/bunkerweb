@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "¿Estás seguro de que quieres eliminar el plugin seleccionado?",
       "confirm_plugin_deletion_plural": "¿Estás seguro de que quieres eliminar los plugins seleccionados?",
       "confirm_template_deletion": "¿Estás seguro de que quieres eliminar la plantilla {{name}}?",
+      "confirm_templates_deletion_alert": "¿Estás seguro de que quieres eliminar la plantilla seleccionada?",
+      "confirm_templates_deletion_alert_plural": "¿Estás seguro de que quieres eliminar las plantillas seleccionadas?",
       "confirmation_instance_deletion": "¿Estás seguro de que quieres eliminar la instancia seleccionada?",
       "delete_cache_confirmation_alert": "¿Estás seguro de que quieres eliminar los archivos de caché seleccionados?",
       "delete_confirmation_alert": "¿Estás seguro de que quieres eliminar la instancia seleccionada?",

@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "क्या आप वाकई चयनित प्लगइन हटाना चाहते हैं?",
       "confirm_plugin_deletion_plural": "क्या आप वाकई चयनित प्लगइन्स हटाना चाहते हैं?",
       "confirm_template_deletion": "क्या आप वाकई टेम्पलेट {{name}} को हटाना चाहते हैं?",
+      "confirm_templates_deletion_alert": "क्या आप वाकई चयनित टेम्पलेट हटाना चाहते हैं?",
+      "confirm_templates_deletion_alert_plural": "क्या आप वाकई चयनित टेम्पलेट्स हटाना चाहते हैं?",
       "confirmation_instance_deletion": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",
       "delete_cache_confirmation_alert": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
       "delete_confirmation_alert": "क्या आप वाकई चयनित इंस्टेंस हटाना चाहते हैं?",

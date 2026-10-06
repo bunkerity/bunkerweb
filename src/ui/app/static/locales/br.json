@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Tem certeza de que deseja excluir o plugin selecionado?",
       "confirm_plugin_deletion_plural": "Tem certeza de que deseja excluir os plugins selecionados?",
       "confirm_template_deletion": "Tem certeza de que deseja excluir o modelo {{name}}?",
+      "confirm_templates_deletion_alert": "Tem certeza de que deseja excluir o modelo selecionado?",
+      "confirm_templates_deletion_alert_plural": "Tem certeza de que deseja excluir os modelos selecionados?",
       "confirmation_instance_deletion": "Tem certeza de que deseja excluir a instância selecionada?",
       "delete_cache_confirmation_alert": "Tem certeza de que deseja excluir os arquivos de cache selecionados?",
       "delete_confirmation_alert": "Tem certeza de que deseja excluir a instância selecionada?",

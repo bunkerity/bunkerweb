@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "您確定要刪除選定的外掛程式嗎？",
       "confirm_plugin_deletion_plural": "您確定要刪除選定的外掛程式嗎？",
       "confirm_template_deletion": "您確定要刪除範本 {{name}} 嗎？",
+      "confirm_templates_deletion_alert": "您確定要刪除選定的範本嗎？",
+      "confirm_templates_deletion_alert_plural": "您確定要刪除選定的範本嗎？",
       "confirmation_instance_deletion": "您確定要刪除選定的執行個體嗎？",
       "delete_cache_confirmation_alert": "您確定要刪除選定的快取檔案嗎？",
       "delete_confirmation_alert": "您確定要刪除選定的執行個體嗎？",

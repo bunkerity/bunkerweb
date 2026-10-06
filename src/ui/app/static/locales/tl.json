@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Sigurado ka bang gusto mong burahin ang napiling plugin?",
       "confirm_plugin_deletion_plural": "Sigurado ka bang gusto mong burahin ang mga napiling plugin?",
       "confirm_template_deletion": "Sigurado ka bang gusto mong burahin ang template na {{name}}?",
+      "confirm_templates_deletion_alert": "Sigurado ka bang gusto mong burahin ang napiling template?",
+      "confirm_templates_deletion_alert_plural": "Sigurado ka bang gusto mong burahin ang mga napiling template?",
       "confirmation_instance_deletion": "Sigurado ka bang gusto mong burahin ang napiling instance?",
       "delete_cache_confirmation_alert": "Sigurado ka bang gusto mong burahin ang mga napiling cache file?",
       "delete_confirmation_alert": "Sigurado ka bang gusto mong burahin ang napiling instance?",

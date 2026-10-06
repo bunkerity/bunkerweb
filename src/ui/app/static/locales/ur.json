@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "کیا آپ واقعی منتخب کردہ پلگ ان حذف کرنا چاہتے ہیں؟",
       "confirm_plugin_deletion_plural": "کیا آپ واقعی منتخب کردہ پلگ انز حذف کرنا چاہتے ہیں؟",
       "confirm_template_deletion": "کیا آپ واقعی ٹیمپلیٹ {{name}} کو حذف کرنا چاہتے ہیں؟",
+      "confirm_templates_deletion_alert": "کیا آپ واقعی منتخب کردہ ٹیمپلیٹ حذف کرنا چاہتے ہیں؟",
+      "confirm_templates_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ ٹیمپلیٹس حذف کرنا چاہتے ہیں؟",
       "confirmation_instance_deletion": "کیا آپ واقعی منتخب کردہ انسٹینس حذف کرنا چاہتے ہیں؟",
       "delete_cache_confirmation_alert": "کیا آپ واقعی منتخب کردہ کیشے فائلیں حذف کرنا چاہتے ہیں؟",
       "delete_confirmation_alert": "کیا آپ واقعی منتخب کردہ انسٹینس حذف کرنا چاہتے ہیں؟",

@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Czy na pewno chcesz usunąć wybraną wtyczkę?",
       "confirm_plugin_deletion_plural": "Czy na pewno chcesz usunąć wybrane wtyczki?",
       "confirm_template_deletion": "Czy na pewno chcesz usunąć szablon {{name}}?",
+      "confirm_templates_deletion_alert": "Czy na pewno chcesz usunąć wybrany szablon?",
+      "confirm_templates_deletion_alert_plural": "Czy na pewno chcesz usunąć wybrane szablony?",
       "confirmation_instance_deletion": "Czy na pewno chcesz usunąć wybraną instancję?",
       "delete_cache_confirmation_alert": "Czy na pewno chcesz usunąć wybrane pliki pamięci podręcznej?",
       "delete_confirmation_alert": "Czy na pewno chcesz usunąć wybraną instancję?",

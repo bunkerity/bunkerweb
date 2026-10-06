@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "선택한 플러그인을 삭제하시겠습니까?",
       "confirm_plugin_deletion_plural": "선택한 플러그인들을 삭제하시겠습니까?",
       "confirm_template_deletion": "템플릿 {{name}}을(를) 삭제하시겠습니까?",
+      "confirm_templates_deletion_alert": "선택한 템플릿을 삭제하시겠습니까?",
+      "confirm_templates_deletion_alert_plural": "선택한 템플릿들을 삭제하시겠습니까?",
       "confirmation_instance_deletion": "선택한 인스턴스를 삭제하시겠습니까?",
       "delete_cache_confirmation_alert": "선택한 캐시 파일들을 삭제하시겠습니까?",
       "delete_confirmation_alert": "선택한 인스턴스를 삭제하시겠습니까?",

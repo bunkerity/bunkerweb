@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Вы уверены, что хотите удалить выбранный плагин?",
       "confirm_plugin_deletion_plural": "Вы уверены, что хотите удалить выбранные плагины?",
       "confirm_template_deletion": "Вы уверены, что хотите удалить шаблон {{name}}?",
+      "confirm_templates_deletion_alert": "Вы уверены, что хотите удалить выбранный шаблон?",
+      "confirm_templates_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные шаблоны?",
       "confirmation_instance_deletion": "Вы уверены, что хотите удалить выбранный экземпляр?",
       "delete_cache_confirmation_alert": "Вы уверены, что хотите удалить выбранные файлы кэша?",
       "delete_confirmation_alert": "Вы уверены, что хотите удалить выбранный экземпляр?",

@@ -1277,7 +1277,6 @@ $(function () {
     // Update map labels
     if (map) {
       try {
-        info.update();
         // Remove and re-add legend to update translations
         if (legend) {
           map.removeControl(legend);

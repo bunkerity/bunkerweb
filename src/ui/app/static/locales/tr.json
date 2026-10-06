@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Seçili eklentiyi silmek istediğinizden emin misiniz?",
       "confirm_plugin_deletion_plural": "Seçili eklentileri silmek istediğinizden emin misiniz?",
       "confirm_template_deletion": "{{name}} şablonunu silmek istediğinizden emin misiniz?",
+      "confirm_templates_deletion_alert": "Seçili şablonu silmek istediğinizden emin misiniz?",
+      "confirm_templates_deletion_alert_plural": "Seçili şablonları silmek istediğinizden emin misiniz?",
       "confirmation_instance_deletion": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_cache_confirmation_alert": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert": "Seçili örneği silmek istediğinizden emin misiniz?",

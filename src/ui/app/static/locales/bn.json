@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইন মুছতে চান?",
       "confirm_plugin_deletion_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইনগুলি মুছতে চান?",
       "confirm_template_deletion": "আপনি কি নিশ্চিত যে টেমপ্লেট {{name}} মুছে ফেলতে চান?",
+      "confirm_templates_deletion_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত টেমপ্লেট মুছতে চান?",
+      "confirm_templates_deletion_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত টেমপ্লেটগুলি মুছতে চান?",
       "confirmation_instance_deletion": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ইনস্ট্যান্স মুছতে চান?",
       "delete_cache_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ক্যাশ ফাইলগুলি মুছতে চান?",
       "delete_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ইনস্ট্যান্স মুছতে চান?",

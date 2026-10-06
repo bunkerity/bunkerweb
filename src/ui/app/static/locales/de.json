@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Sind Sie sicher, dass Sie das ausgewählte Plugin löschen möchten?",
       "confirm_plugin_deletion_plural": "Sind Sie sicher, dass Sie die ausgewählten Plugins löschen möchten?",
       "confirm_template_deletion": "Sind Sie sicher, dass Sie die Vorlage {{name}} löschen möchten?",
+      "confirm_templates_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte Vorlage löschen möchten?",
+      "confirm_templates_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten Vorlagen löschen möchten?",
       "confirmation_instance_deletion": "Sind Sie sicher, dass Sie die ausgewählte Instanz löschen möchten?",
       "delete_cache_confirmation_alert": "Sind Sie sicher, dass Sie die ausgewählten Cache-Dateien löschen möchten?",
       "delete_confirmation_alert": "Sind Sie sicher, dass Sie die ausgewählte Instanz löschen möchten?",

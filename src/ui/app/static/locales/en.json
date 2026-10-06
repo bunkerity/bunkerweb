@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Are you sure you want to delete the selected plugin?",
       "confirm_plugin_deletion_plural": "Are you sure you want to delete the selected plugins?",
       "confirm_template_deletion": "Are you sure you want to delete template {{name}}?",
+      "confirm_templates_deletion_alert": "Are you sure you want to delete the selected template?",
+      "confirm_templates_deletion_alert_plural": "Are you sure you want to delete the selected templates?",
       "confirmation_instance_deletion": "Are you sure you want to delete the selected instance?",
       "delete_cache_confirmation_alert": "Are you sure you want to delete the selected cache files?",
       "delete_confirmation_alert": "Are you sure you want to delete the selected instance?",

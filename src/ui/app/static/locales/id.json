@@ -978,6 +978,8 @@
       "confirm_plugin_deletion": "Apakah Anda yakin ingin menghapus plugin yang dipilih?",
       "confirm_plugin_deletion_plural": "Apakah Anda yakin ingin menghapus plugin yang dipilih?",
       "confirm_template_deletion": "Apakah Anda yakin ingin menghapus template {{name}}?",
+      "confirm_templates_deletion_alert": "Apakah Anda yakin ingin menghapus template yang dipilih?",
+      "confirm_templates_deletion_alert_plural": "Apakah Anda yakin ingin menghapus template yang dipilih?",
       "confirmation_instance_deletion": "Apakah Anda yakin ingin menghapus instans yang dipilih?",
       "delete_cache_confirmation_alert": "Apakah Anda yakin ingin menghapus file cache yang dipilih?",
       "delete_confirmation_alert": "Apakah Anda yakin ingin menghapus instans yang dipilih?",
