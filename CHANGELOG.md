@@ -22,6 +22,7 @@
 - [BUGFIX] `ui`: server-rendered labels match the English translation, so text no longer changes case while the page loads. (Refs #3963)
 - [BUGFIX] `ui`: updated external plugin pages load after a scheduler restart instead of the old ones.
 - [BUGFIX] `ui`: the Templates delete confirmation names templates instead of instances.
+- [BUGFIX] `ui`: the setup wizard's Public Suffix switch says what it does: enabled skips the check.
 - [DOCKER] Final releases also publish a floating `1.6` image tag that follows the newest 1.6.x.
 - [MISC] `install-bunkerweb.sh` pulls the `1.6` Docker tag by default, so an install stays on 1.6.x once a newer line ships.
 - [DOCS] Links in the documentation, installer, service files and examples point to the 1.6 docs instead of `latest`.

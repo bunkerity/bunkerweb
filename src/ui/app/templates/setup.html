@@ -427,7 +427,7 @@
                                                                for="LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES"
                                                                class="form-label fw-semibold text-truncate"
                                                                data-i18n="form.label.lets_encrypt_disable_public_suffixes">
-                                                            Disable Public Suffixes (PSL Blacklist)
+                                                            Skip Public Suffix List Check
                                                         </label>
                                                         <div class="d-flex align-items-center">
                                                             {% if lets_encrypt_disable_public_suffixes == "no" %}
@@ -441,7 +441,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="Disable certificate requests for domains matching the Public Suffix List (recommended)."
+                                                                  data-bs-original-title="When enabled (default), domains are not checked against the Public Suffix List. Disable to refuse certificate requests for domains that match a public suffix (for example co.uk)."
                                                                   data-i18n="tooltip.lets_encrypt_disable_public_suffixes">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
