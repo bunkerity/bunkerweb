@@ -1845,10 +1845,7 @@ if __name__ == "__main__":
 
                     # check if the config have changed since last time
                     if changes["plugins_config_changed"] and (
-                        not SCHEDULER.db.readonly
-                        or not changes["last_plugins_config_change"]
-                        or not old_changes
-                        or old_changes["plugins_config_changed"] != changes["plugins_config_changed"]
+                        not SCHEDULER.db.readonly or not old_changes or old_changes["plugins_config_changed"] != changes["plugins_config_changed"]
                     ):
                         LOGGER.info("Plugins config changed, generating ...")
                         CONFIG_NEED_GENERATION = True

@@ -11,6 +11,7 @@
 - [BUGFIX] `jobs`: the update check stays on the installed release line; a newer line such as 1.7 only logs a link to the upgrade guide.
 - [BUGFIX] `letsencrypt`: the certbot hooks log the instance API's HTTP status and reply instead of `KeyError: 'status'`.
 - [BUGFIX] `scheduler`: the config saver and generator run with the scheduler's own Python, so RHEL 9 installs no longer run them under Python 3.9 and fail.
+- [BUGFIX] `scheduler`: a read-only database with pending plugin changes no longer crash-loops the scheduler.
 - [BUGFIX] `ui`: an updated plugin replaces its page, routes and templates instead of leaving the old ones served.
 - [BUGFIX] `ui`: the language selector flag changes with the language. (Fixes #4002)
 - [BUGFIX] `ui`: the Unban button tooltip shows the IP address instead of `{{ip}}`. (Fixes #4001)
