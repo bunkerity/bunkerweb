@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% set translations = {
+    "en": {
+        "outdated": "You're not viewing the documentation of the latest version.",
+        "latest": "Click here to view latest.",
+        "announcement_before": "📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the",
+        "announcement_after": "for more information on our enterprise offers.",
+        "search_aria": "Search in documentation",
+        "trial_before": "Start a 30-day BunkerWeb PRO free trial from the",
+        "trial_after": ".",
+        "support_before": "Need premium support or tailored consulting around BunkerWeb? Check out our",
+        "support_link": "professional services",
+        "support_after": ".",
+        "community_before": "Be part of the Bunker community by joining the",
+        "discord_link": "Discord chat",
+        "community_middle": "and following us on",
+        "community_after": "."
+    },
+    "fr": {
+        "outdated": "Vous ne consultez pas la documentation de la dernière version.",
+        "latest": "Cliquez ici pour consulter la dernière version.",
+        "announcement_before": "📢 Vous recherchez BunkerWeb CLOUD, la version PRO, une assistance technique ou des services sur mesure ? Consultez le",
+        "announcement_after": "pour en savoir plus sur nos offres aux entreprises.",
+        "search_aria": "Rechercher dans la documentation",
+        "trial_before": "Profitez d’un essai gratuit de 30 jours de BunkerWeb PRO depuis le",
+        "trial_after": ".",
+        "support_before": "Besoin d’une assistance premium ou de conseils personnalisés sur BunkerWeb ? Découvrez nos",
+        "support_link": "services professionnels",
+        "support_after": ".",
+        "community_before": "Rejoignez la communauté Bunker en participant au",
+        "discord_link": "salon Discord",
+        "community_middle": "et en nous suivant sur",
+        "community_after": "."
+    },
+    "de": {
+        "outdated": "Sie sehen nicht die Dokumentation der neuesten Version.",
+        "latest": "Hier klicken, um die neueste Version aufzurufen.",
+        "announcement_before": "📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das",
+        "announcement_after": "und erfahren Sie mehr über unsere Angebote für Unternehmen.",
+        "search_aria": "In der Dokumentation suchen",
+        "trial_before": "Starten Sie über das",
+        "trial_after": " eine kostenlose 30-tägige Testversion von BunkerWeb PRO.",
+        "support_before": "Benötigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich über unsere",
+        "support_link": "professionellen Dienstleistungen",
+        "support_after": ".",
+        "community_before": "Werden Sie Teil der Bunker-Community und treten Sie dem",
+        "discord_link": "Discord-Chat",
+        "community_middle": "bei. Folgen Sie uns auch auf",
+        "community_after": "."
+    },
+    "es": {
+        "outdated": "No está viendo la documentación de la última versión.",
+        "latest": "Haga clic aquí para ver la última versión.",
+        "announcement_before": "📢 ¿Buscas BunkerWeb CLOUD, la versión PRO, asistencia técnica o servicios a medida? Visita el",
+        "announcement_after": "para obtener más información sobre nuestras ofertas para empresas.",
+        "search_aria": "Buscar en la documentación",
+        "trial_before": "Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el",
+        "trial_after": ".",
+        "support_before": "¿Necesitas asistencia prémium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros",
+        "support_link": "servicios profesionales",
+        "support_after": ".",
+        "community_before": "Forma parte de la comunidad de Bunker uniéndote al",
+        "discord_link": "chat de Discord",
+        "community_middle": "y síguenos en",
+        "community_after": "."
+    },
+    "zh": {
+        "outdated": "您当前查看的不是最新版本的文档。",
+        "latest": "点击此处查看最新版本。",
+        "announcement_before": "📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问",
+        "announcement_after": "，了解我们的企业服务。",
+        "search_aria": "在文档中搜索",
+        "trial_before": "通过",
+        "trial_after": "开启 BunkerWeb PRO 30 天免费试用。",
+        "support_before": "需要 BunkerWeb 高级支持或定制咨询？请查看我们的",
+        "support_link": "专业服务",
+        "support_after": "。",
+        "community_before": "加入 Bunker 社区，参与",
+        "discord_link": "Discord 聊天",
+        "community_middle": "并关注我们的",
+        "community_after": "。"
+    }
+} %}
+{% set localized = translations.get(config.theme.language, translations["en"]) %}
+{% block outdated %}
+    {{ localized.outdated|e }}
+    <a href="{{ '../' ~ base_url }}">
+        <strong>{{ localized.latest|e }}</strong>
+    </a>
+{% endblock %}
+{% block announce %}
+    {{ localized.announcement_before|e }}
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    {{ localized.announcement_after|e }}
+{% endblock %}
+{% block libs %}
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+
+    <script defer>
+  // Lazy load images and embed youtube videos
+  window.addEventListener("load", () => {
+    document.querySelectorAll("[data-src]").forEach((el) => {
+      el.setAttribute("src", el.getAttribute("data-src"));
+    });
+  });
+  // Add missing label
+  try {
+    document
+      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
+      .setAttribute("aria-label", {{ localized.search_aria|tojson }});
+  } catch (err) {}
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : {{ ('<p>'|safe ~ localized.trial_before|e ~ ' <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>'|safe ~ localized.trial_after|e ~ '</p>'|safe)|tojson }} },
+        { "content" : {{ ('<p>'|safe ~ localized.support_before|e ~ ' <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">'|safe ~ localized.support_link|e ~ '</a>'|safe ~ localized.support_after|e ~ '</p>'|safe)|tojson }} },
+        { "content" : {{ ('<p>'|safe ~ localized.community_before|e ~ ' <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">'|safe ~ localized.discord_link|e ~ '</a> '|safe ~ localized.community_middle|e ~ ' <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>'|safe ~ localized.community_after|e ~ '</p>'|safe)|tojson }} }
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        startBannerLoop();
+        // Try to get dynamic content
+        // Else keep static ones
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
+{% endblock %}
