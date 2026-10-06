@@ -1,0 +1,21 @@
+examples/joomla/autoconf.yml
+  s_8b587f2de81266::t_b113e848716ce8 15
+examples/joomla/docker-compose.yml
+  s_8b587f2de81266::t_b113e848716ce8 52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ff1083a63d8f1ace51b54dd037c2efb7d29ec0b0",
+  "prompts": {},
+  "sessions": {
+    "s_8b587f2de81266": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9fa5f2d2-46af-4a40-aa74-7757b7dbcda8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
