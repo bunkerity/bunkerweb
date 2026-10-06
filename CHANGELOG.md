@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.16~rc4 - 2026/10/??
+## v1.6.16~rc4 - 2026/10/06
 
 - [FEATURE] `BANS_TLS_DROP_REASONS` closes the TLS handshake of banned IPs for the listed ban reasons instead of serving the 403 page.
 - [FEATURE] `crowdsec`: `CROWDSEC_BAN_REFRESH` turns CrowdSec blocks into short, renewed bans listed on the Bans page and removed with their decisions on Unban.
