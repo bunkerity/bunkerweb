@@ -21,6 +21,9 @@ rules:
     resources: ["ingresses"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses/status"]
+    verbs: ["patch"]
+  - apiGroups: ["networking.k8s.io"]
     resources: ["ingressclasses"]
     verbs: ["get", "watch", "list"]
 ---
@@ -224,7 +227,7 @@ spec:
             - name: KUBERNETES_MODE
               value: "yes"
             - name: DATABASE_URI
-              value: "mysql+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+              value: "oracle://bunkerweb:changeme@svc-bunkerweb-db:1521?service_name=FREEPDB1"
             # replace with your DNS resolvers
             # nginx resolves this once, when it parses its configuration, and keeps the
             # address until the next reload. Use the cluster DNS Service name, whose
@@ -326,8 +329,8 @@ spec:
   ports:
     - name: sql
       protocol: TCP
-      port: 3306
-      targetPort: 3306
+      port: 1521
+      targetPort: 1521
 ---
 apiVersion: v1
 kind: Service
