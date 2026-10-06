@@ -21,6 +21,7 @@
 - [BUGFIX] `ui`: the Bans page offers Investigate only for CrowdSec bans. (Refs #4000)
 - [BUGFIX] `ui`: server-rendered labels match the English translation, so text no longer changes case while the page loads. (Refs #3963)
 - [BUGFIX] `ui`: updated external plugin pages load after a scheduler restart instead of the old ones.
+- [BUGFIX] `ui`: a logout sent while Redis is unreachable revokes the session, so the old cookie stays refused once Redis is back.
 - [BUGFIX] `ui`: the Templates delete confirmation names templates instead of instances.
 - [BUGFIX] `ui`: the setup wizard's Public Suffix switch says what it does: enabled skips the check.
 - [DOCKER] Final releases also publish a floating `1.6` image tag that follows the newest 1.6.x.
