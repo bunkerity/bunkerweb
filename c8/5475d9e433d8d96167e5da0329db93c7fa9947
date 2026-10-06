@@ -1,0 +1,29 @@
+src/api/app/routers/instances.py
+  s_42d7d495dabf2d::t_abd4c6128f7b05 5,70-71
+CHANGELOG.md
+  s_4600783926e6d7::t_6ecfcc5c1083c3 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c85475d9e433d8d96167e5da0329db93c7fa9947",
+  "prompts": {},
+  "sessions": {
+    "s_42d7d495dabf2d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6aab875-da3a-4377-bd15-458b5983ab08",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_4600783926e6d7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "577228b8-9e99-4afb-b5b7-0fab1e1a53d0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
