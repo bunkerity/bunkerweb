@@ -24,6 +24,7 @@
 - [DOCKER] Final releases also publish a floating `1.6` image tag that follows the newest 1.6.x.
 - [MISC] `install-bunkerweb.sh` pulls the `1.6` Docker tag by default, so an install stays on 1.6.x once a newer line ships.
 - [DOCS] Links in the documentation, installer, service files and examples point to the 1.6 docs instead of `latest`.
+- [DOCS] `letsencrypt`: `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` is documented: `yes` skips the public suffix check, `no` refuses matching domains.
 
 ## v1.6.16~rc3 - 2026/10/02
 
