@@ -2,9 +2,9 @@ from contextlib import suppress
 from datetime import datetime
 from re import search
 from os import getenv
-from requests import get
+from requests import get, post
 from requests.exceptions import RequestException
-from time import sleep
+from time import sleep, time
 from traceback import format_exc
 
 try:
@@ -63,6 +63,57 @@ try:
         exit(1)
 
     if use_modsecurity and use_modsecurity_crs:
+        print("ℹ️ Sending a POST request to http://www.example.com/ with XSS payload ...", flush=True)
+        post_time = time()
+        post_resp = post(
+            "http://www.example.com/",
+            data={"test": "<script>alert(1)</script>"},
+            headers={"Host": "www.example.com"},
+            timeout=10,
+        )
+        if post_resp.status_code != 403:
+            print(f"❌ Expected status code 403 for POST, got {post_resp.status_code}", flush=True)
+            exit(1)
+
+        api_host = "192.168.0.2" if getenv("TEST_TYPE", "docker") == "docker" else "localhost"
+        post_found = False
+        last_error = None
+        for _ in range(8):
+            sleep(2)
+            try:
+                metrics_resp = get(f"http://{api_host}:5000/metrics/requests", timeout=10)
+                if metrics_resp.status_code == 200:
+                    metrics_json = metrics_resp.json()
+                    requests_list = metrics_json.get("msg", {}).get("requests", [])
+                    if isinstance(requests_list, list):
+                        for req in requests_list:
+                            data_field = req.get("data") if isinstance(req, dict) else None
+                            req_date = req.get("date") if isinstance(req, dict) else None
+                            if (
+                                isinstance(req, dict)
+                                and req.get("status") == 403
+                                and req.get("reason") == "modsecurity"
+                                and req.get("method") == "POST"
+                                and isinstance(req_date, (int, float))
+                                and req_date >= post_time - 1
+                                and isinstance(data_field, dict)
+                                and data_field.get("ids")
+                            ):
+                                post_found = True
+                                break
+                    if post_found:
+                        break
+                else:
+                    last_error = f"Expected status code 200 from metrics API, got {metrics_resp.status_code}"
+            except RequestException as e:
+                last_error = f"Failed to query metrics endpoint: {e}"
+
+        if not post_found:
+            print(f"❌ POST 403 ModSecurity event not found in metrics ({last_error or 'missing from msg.requests'})", flush=True)
+            exit(1)
+
+        print("✅ ModSecurity 403 POST event correctly recorded in metrics", flush=True)
+
         found = False
         if getenv("TEST_TYPE", "docker") == "docker":
             from docker import DockerClient
