@@ -4,7 +4,7 @@ from re import search
 from os import getenv
 from requests import get, post
 from requests.exceptions import RequestException
-from time import sleep
+from time import sleep, time
 from traceback import format_exc
 
 try:
@@ -64,6 +64,7 @@ try:
 
     if use_modsecurity and use_modsecurity_crs:
         print("ℹ️ Sending a POST request to http://www.example.com/ with XSS payload ...", flush=True)
+        post_time = time()
         post_resp = post(
             "http://www.example.com/",
             data={"test": "<script>alert(1)</script>"},
@@ -87,11 +88,14 @@ try:
                     if isinstance(requests_list, list):
                         for req in requests_list:
                             data_field = req.get("data") if isinstance(req, dict) else None
+                            req_date = req.get("date") if isinstance(req, dict) else None
                             if (
                                 isinstance(req, dict)
                                 and req.get("status") == 403
                                 and req.get("reason") == "modsecurity"
                                 and req.get("method") == "POST"
+                                and isinstance(req_date, (int, float))
+                                and req_date >= post_time - 1
                                 and isinstance(data_field, dict)
                                 and data_field.get("ids")
                             ):
