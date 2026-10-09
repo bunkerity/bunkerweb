@@ -86,12 +86,14 @@ try:
                     requests_list = metrics_json.get("msg", {}).get("requests", [])
                     if isinstance(requests_list, list):
                         for req in requests_list:
+                            data_field = req.get("data") if isinstance(req, dict) else None
                             if (
                                 isinstance(req, dict)
                                 and req.get("status") == 403
                                 and req.get("reason") == "modsecurity"
                                 and req.get("method") == "POST"
-                                and req.get("data", {}).get("ids")
+                                and isinstance(data_field, dict)
+                                and data_field.get("ids")
                             ):
                                 post_found = True
                                 break
