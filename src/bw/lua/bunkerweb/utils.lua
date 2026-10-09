@@ -499,12 +499,16 @@ utils.get_reason = function(ctx)
 	if body_rule_id then
 		return "modsecurity-body", { ids = { body_rule_id } }, security_mode
 	end
-	if modsecurity_reason == "modsecurity" then
+	local env_reason_data_ids = ngx.var.modsecurity_rules
+	local has_modsec_rules = env_reason_data_ids and env_reason_data_ids ~= "" and env_reason_data_ids ~= "none"
+	local env_anomaly_score = ngx.var.modsecurity_anomaly_score
+	local has_anomaly = env_anomaly_score and env_anomaly_score ~= "" and env_anomaly_score ~= "none" and (tonumber(env_anomaly_score) or 0) > 0
+	local is_denied = (ngx.status == utils.get_deny_status())
+	if modsecurity_reason == "modsecurity" or ((has_modsec_rules or has_anomaly) and is_denied) then
 		local reason_data = {}
 
 		-- Handle IDs
-		local env_reason_data_ids = ngx.var.modsecurity_rules
-		if env_reason_data_ids and env_reason_data_ids ~= "" and env_reason_data_ids ~= "none" then
+		if has_modsec_rules then
 			if env_reason_data_ids:sub(1, 1) == " " then
 				env_reason_data_ids = env_reason_data_ids:sub(2)
 			end
@@ -512,6 +516,9 @@ utils.get_reason = function(ctx)
 			for rule_id in env_reason_data_ids:gmatch("%S+") do
 				table.insert(reason_data["ids"], rule_id)
 			end
+		end
+		if not reason_data["ids"] or #reason_data["ids"] == 0 then
+			reason_data["ids"] = { "unknown" }
 		end
 
 		-- Handle messages, matched_vars, and matched_var_names
@@ -551,6 +558,10 @@ utils.get_reason = function(ctx)
 					end
 				end
 			end
+		end
+
+		if not reason_data["anomaly_score"] and has_anomaly then
+			reason_data["anomaly_score"] = { env_anomaly_score }
 		end
 
 		return "modsecurity", reason_data, security_mode

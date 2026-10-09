@@ -882,31 +882,33 @@ function metrics:log(bypass_checks)
 	-- Store blocked requests
 	local reason, data, security_mode = get_reason(self.ctx)
 	if reason then
+		local bw = self.ctx and self.ctx.bw
 		local country = "local"
 		local err
-		if self.ctx.bw.ip_is_global then
-			country, err = get_country(self.ctx.bw.remote_addr)
+		if bw and bw.ip_is_global then
+			country, err = get_country(bw.remote_addr)
 			if not country then
 				country = "unknown"
 				self.logger:log(ERR, "can't get country code " .. err)
 			end
 		end
-		local request_method = self.ctx.bw.request_method
-		-- Early parser denials can redirect to an error page before the context is saved.
-		if reason == "modsecurity-body" and ngx.var.request then
+		local request_method = (bw and bw.request_method) or (ngx.var and ngx.var.request_method)
+		-- ModSecurity denials can redirect to an error page before or after the context is saved.
+		if (reason == "modsecurity" or reason == "modsecurity-body") and ngx.var and ngx.var.request then
 			request_method = ngx.var.request:match("^(%S+)") or request_method
 		end
+		request_method = request_method or "GET"
 		local request = {
-			id = self.ctx.bw.request_id,
-			date = self.ctx.bw.start_time or time(),
-			ip = self.ctx.bw.remote_addr,
+			id = (bw and bw.request_id) or (ngx.var and ngx.var.request_id) or "unknown",
+			date = (bw and bw.start_time) or time(),
+			ip = (bw and bw.remote_addr) or (ngx.var and ngx.var.remote_addr) or "unknown",
 			country = country,
 			method = request_method,
-			url = self.ctx.bw.request_uri,
+			url = (bw and bw.request_uri) or (ngx.var and (ngx.var.request_uri or ngx.var.uri)) or "/",
 			status = ngx.status,
-			user_agent = self.ctx.bw.http_user_agent or "",
+			user_agent = (bw and bw.http_user_agent) or (ngx.var and ngx.var.http_user_agent) or "",
 			reason = reason,
-			server_name = self.ctx.bw.server_name,
+			server_name = (bw and bw.server_name) or (ngx.var and ngx.var.server_name) or "unknown",
 			data = data,
 			security_mode = security_mode,
 			synced = not self.use_redis,

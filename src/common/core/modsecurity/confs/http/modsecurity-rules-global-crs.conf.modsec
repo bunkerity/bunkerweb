@@ -157,6 +157,18 @@ SecRuleUpdateActionById 949110 \
    setvar:'tx.bunkerweb_matched_var_names=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}',\
    setvar:'tx.bunkerweb_anomaly_score=%{TX.BUNKERWEB_ANOMALY_SCORE}'"
 
+    {% if effective_crs_version != "3" -%}
+SecRuleUpdateActionById 949111 \
+  "t:none,deny,status:{{ DENY_HTTP_STATUS }},\
+   setvar:'tx.bunkerweb_reason=modsecurity',\
+   setvar:'tx.bunkerweb_unique_id=%{UNIQUE_ID}',\
+   setvar:'tx.bunkerweb_rules=%{TX.BUNKERWEB_RULES}',\
+   setvar:'tx.bunkerweb_msgs=%{TX.BUNKERWEB_MSGS}',\
+   setvar:'tx.bunkerweb_matched_vars=%{TX.BUNKERWEB_MATCHED_VARS}',\
+   setvar:'tx.bunkerweb_matched_var_names=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}',\
+   setvar:'tx.bunkerweb_anomaly_score=%{TX.BUNKERWEB_ANOMALY_SCORE}'"
+    {% endif -%}
+
 SecRuleUpdateActionById 959100 \
   "t:none,deny,status:{{ DENY_HTTP_STATUS }},\
    setvar:'tx.bunkerweb_reason=modsecurity',\
