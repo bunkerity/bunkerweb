@@ -2,7 +2,7 @@ from contextlib import suppress
 from datetime import datetime
 from re import search
 from os import getenv
-from requests import get
+from requests import get, post
 from requests.exceptions import RequestException
 from time import sleep
 from traceback import format_exc
@@ -63,6 +63,34 @@ try:
         exit(1)
 
     if use_modsecurity and use_modsecurity_crs:
+        print("ℹ️ Sending a POST request to http://www.example.com/ with XSS payload ...", flush=True)
+        post_resp = post(
+            "http://www.example.com/",
+            data={"test": "<script>alert(1)</script>"},
+            headers={"Host": "www.example.com"},
+        )
+        if post_resp.status_code != 403:
+            print(f"❌ Expected status code 403 for POST, got {post_resp.status_code}", flush=True)
+            exit(1)
+
+        api_host = "192.168.0.2" if getenv("TEST_TYPE", "docker") == "docker" else "localhost"
+        with suppress(RequestException):
+            metrics_resp = get(f"http://{api_host}:5000/metrics/requests", timeout=5)
+            if metrics_resp.status_code == 200:
+                requests_data = metrics_resp.json()
+                blocked_reqs = [r for r in requests_data if r.get("status") == 403 and r.get("reason") == "modsecurity"]
+                if not blocked_reqs:
+                    print("❌ No 403 ModSecurity blocked requests found in metrics", flush=True)
+                    exit(1)
+                for req in blocked_reqs:
+                    if req.get("method") not in ("GET", "POST"):
+                        print(f"❌ Invalid method in metrics report: {req.get('method')}", flush=True)
+                        exit(1)
+                    if not req.get("data", {}).get("ids"):
+                        print(f"❌ Missing rule ids in metrics report: {req}", flush=True)
+                        exit(1)
+                print("✅ ModSecurity 403 events correctly recorded in metrics", flush=True)
+
         found = False
         if getenv("TEST_TYPE", "docker") == "docker":
             from docker import DockerClient
