@@ -2,6 +2,7 @@
   {%- set pathlib = import("pathlib") -%}
   {%- set json = import("json") -%}
   {%- set service_id = SERVER_NAME.split(" ")[0] -%}
+  {%- set effective_crs_version = "4" if MODSECURITY_CRS_VERSION == "nightly" else MODSECURITY_CRS_VERSION -%}
 
 # Process rules with disruptive actions
   {% if SECURITY_MODE == "block" -%}
