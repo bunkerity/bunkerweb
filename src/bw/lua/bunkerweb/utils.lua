@@ -503,7 +503,9 @@ utils.get_reason = function(ctx)
 	local has_modsec_rules = env_reason_data_ids and env_reason_data_ids ~= "" and env_reason_data_ids ~= "none"
 	local env_anomaly_score = ngx.var.modsecurity_anomaly_score
 	local has_anomaly = env_anomaly_score and env_anomaly_score ~= "" and env_anomaly_score ~= "none" and (tonumber(env_anomaly_score) or 0) > 0
-	local is_denied = (ngx.status == utils.get_deny_status())
+	local upstream_status = var.upstream_status
+	local upstream_denied = upstream_status and tonumber(upstream_status:match("(%d%d%d)%s*$")) == ngx.status
+	local is_denied = (ngx.status == utils.get_deny_status()) and not upstream_denied
 	if modsecurity_reason == "modsecurity" or ((has_modsec_rules or has_anomaly) and is_denied) then
 		local reason_data = {}
 
@@ -582,9 +584,7 @@ utils.get_reason = function(ctx)
 		return banned, {}, security_mode
 	end
 	-- unknown BunkerWeb denial
-	local upstream_status = var.upstream_status
-	local upstream_denied = upstream_status and tonumber(upstream_status:match("(%d%d%d)%s*$")) == ngx.status
-	if ngx.status == utils.get_deny_status() and not upstream_denied then
+	if is_denied then
 		return "unknown", {}
 	end
 	return nil

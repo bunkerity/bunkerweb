@@ -879,10 +879,10 @@ function metrics:log(bypass_checks)
 	if not bypass_checks and self.variables["USE_METRICS"] == "no" then
 		return self:ret(true, "metrics are disabled")
 	end
+	local bw = self.ctx and self.ctx.bw
 	-- Store blocked requests
 	local reason, data, security_mode = get_reason(self.ctx)
 	if reason then
-		local bw = self.ctx and self.ctx.bw
 		local country = "local"
 		local err
 		if bw and bw.ip_is_global then
@@ -936,7 +936,7 @@ function metrics:log(bypass_checks)
 		lru:set("requests", requests)
 	end
 	-- Get metrics from plugins
-	local all_metrics = self.ctx.bw.metrics
+	local all_metrics = bw and bw.metrics
 	if all_metrics then
 		-- Loop on plugins
 		for plugin_id, plugin_metrics in pairs(all_metrics) do

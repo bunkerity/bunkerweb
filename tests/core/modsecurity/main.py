@@ -68,28 +68,43 @@ try:
             "http://www.example.com/",
             data={"test": "<script>alert(1)</script>"},
             headers={"Host": "www.example.com"},
+            timeout=10,
         )
         if post_resp.status_code != 403:
             print(f"❌ Expected status code 403 for POST, got {post_resp.status_code}", flush=True)
             exit(1)
 
         api_host = "192.168.0.2" if getenv("TEST_TYPE", "docker") == "docker" else "localhost"
-        with suppress(RequestException):
-            metrics_resp = get(f"http://{api_host}:5000/metrics/requests", timeout=5)
-            if metrics_resp.status_code == 200:
-                requests_data = metrics_resp.json()
-                blocked_reqs = [r for r in requests_data if r.get("status") == 403 and r.get("reason") == "modsecurity"]
-                if not blocked_reqs:
-                    print("❌ No 403 ModSecurity blocked requests found in metrics", flush=True)
-                    exit(1)
-                for req in blocked_reqs:
-                    if req.get("method") not in ("GET", "POST"):
-                        print(f"❌ Invalid method in metrics report: {req.get('method')}", flush=True)
-                        exit(1)
-                    if not req.get("data", {}).get("ids"):
-                        print(f"❌ Missing rule ids in metrics report: {req}", flush=True)
-                        exit(1)
-                print("✅ ModSecurity 403 events correctly recorded in metrics", flush=True)
+        try:
+            metrics_resp = get(f"http://{api_host}:5000/metrics/requests", timeout=10)
+        except RequestException as e:
+            print(f"❌ Failed to query metrics endpoint: {e}", flush=True)
+            exit(1)
+
+        if metrics_resp.status_code != 200:
+            print(f"❌ Expected status code 200 from metrics API, got {metrics_resp.status_code}", flush=True)
+            exit(1)
+
+        metrics_json = metrics_resp.json()
+        requests_list = metrics_json.get("msg", {}).get("requests", [])
+        if not isinstance(requests_list, list):
+            print(f"❌ Expected list of requests in msg.requests, got {type(requests_list)}", flush=True)
+            exit(1)
+
+        blocked_reqs = [r for r in requests_list if isinstance(r, dict) and r.get("status") == 403 and r.get("reason") == "modsecurity"]
+        if not blocked_reqs:
+            print("❌ No 403 ModSecurity blocked requests found in metrics", flush=True)
+            exit(1)
+
+        for req in blocked_reqs:
+            if req.get("method") not in ("GET", "POST"):
+                print(f"❌ Invalid method in metrics report: {req.get('method')}", flush=True)
+                exit(1)
+            if not req.get("data", {}).get("ids"):
+                print(f"❌ Missing rule ids in metrics report: {req}", flush=True)
+                exit(1)
+
+        print("✅ ModSecurity 403 events correctly recorded in metrics", flush=True)
 
         found = False
         if getenv("TEST_TYPE", "docker") == "docker":
