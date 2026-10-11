@@ -1320,8 +1320,9 @@ class InstancesUtils:
             # Track status distribution in the selected window.
             request_statuses[status] = request_statuses.get(status, 0) + 1
 
-            # Check if blocked (403, 429, 444)
-            if status in (403, 429, 444):
+            # Every stored report was blocked, whatever status it got (DENY_HTTP_STATUS, a 400 from
+            # bad behavior on the default server...), except detect-mode ones that were only logged.
+            if request.get("security_mode") != "detect":
                 if country not in request_countries:
                     request_countries[country] = {"blocked": 0}
                 request_countries[country]["blocked"] += 1
