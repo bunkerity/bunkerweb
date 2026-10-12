@@ -325,6 +325,12 @@ $(document).ready(function () {
             combiner: "or",
             orderable: false,
           },
+          render: function (data, type) {
+            if (type === "sort") {
+              return data && data.includes("bx-check") ? 1 : 0;
+            }
+            return data;
+          },
           targets: 5,
         },
         {
@@ -350,6 +356,12 @@ $(document).ready(function () {
             combiner: "or",
             orderable: false,
           },
+          render: function (data, type) {
+            if (type === "sort") {
+              return data && data.includes("bx-check") ? 1 : 0;
+            }
+            return data;
+          },
           targets: 6,
         },
         {
@@ -374,6 +386,18 @@ $(document).ready(function () {
             ],
             combiner: "or",
             orderable: false,
+          },
+          render: function (data, type) {
+            if (type === "sort") {
+              if (data && data.includes("bx-check")) {
+                return 2;
+              }
+              if (data && data.includes("bx-x")) {
+                return 1;
+              }
+              return 0;
+            }
+            return data;
           },
           targets: 7,
         },
