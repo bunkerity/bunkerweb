@@ -2,7 +2,7 @@ terraform {
   required_providers {
     scaleway = {
       source = "scaleway/scaleway"
-      version = "2.83.1"
+      version = "2.86.0"
     }
     kubectl = {
       source = "gavinbunney/kubectl"
