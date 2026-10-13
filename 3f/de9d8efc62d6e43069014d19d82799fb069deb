@@ -1,0 +1,39 @@
+src/deps/misc/lua-resty-core-proxy-protocol-addr.patch
+  s_71049c2a6d44a3::t_007c9b1732ec08 1-59
+src/deps/misc/lua-nginx-module-proxy-protocol-addr.patch
+  s_71049c2a6d44a3::t_007c9b1732ec08 1-40
+src/deps/deps.json
+  s_71049c2a6d44a3::t_182fdbaaddaabd 70,77
+CHANGELOG.md
+  s_397d5af37cdd3e::t_44eb9028de2096 11
+src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c
+  s_71049c2a6d44a3::t_8f6cf877f18dbf 1069-1100
+  s_71049c2a6d44a3::t_a8eedda80d6c3f 1068
+src/deps/src/lua-resty-core/lib/ngx/ssl.lua
+  s_71049c2a6d44a3::t_8f6cf877f18dbf 31,79-81,148-149,442-463
+  s_71049c2a6d44a3::t_1153b87c1c5db7 464-466
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3fde9d8efc62d6e43069014d19d82799fb069deb",
+  "prompts": {},
+  "sessions": {
+    "s_397d5af37cdd3e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8e50ef8-fd32-4213-8f50-01a720e36396",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_71049c2a6d44a3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "997b8ff6-9538-4c43-8579-c21bf3c7150f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
