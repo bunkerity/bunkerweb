@@ -86,6 +86,8 @@ RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-
 RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
 RUN apk add --no-cache "nghttp2-libs>=1.70.0-r0" # CVE-2026-58055
 RUN apk add --no-cache "libpng>=1.6.59-r0" # CVE-2026-46675
+RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
+RUN apk add --no-cache "tiff>=4.7.2-r0" # CVE-2026-4775
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -115,7 +117,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.16~rc4"
+LABEL version="1.6.16"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

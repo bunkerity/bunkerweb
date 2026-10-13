@@ -6,6 +6,9 @@ local decode = cjson.decode
 local encode = cjson.encode
 local format = string.format
 local byte = string.byte
+local char = string.char
+local floor = math.floor
+local concat = table.concat
 local ngx = ngx
 
 local banlease = {}
@@ -166,6 +169,59 @@ function banlease.write_marker(service, ip, id, rank, epoch, ttl)
 		or false
 end
 
+-- Port of ngx_inet6_ntop: the text nginx prints for an IPv6 $remote_addr. It compresses the first longest run of
+-- two or more zero words and writes the last 32 bits in dotted form for ::a.b.c.d and ::ffff:a.b.c.d.
+local function inet6_ntop(packed)
+	local p = { byte(packed, 1, 16) }
+	local zero, last, max, n = -1, -1, 1, 0
+	for i = 0, 14, 2 do
+		if p[i + 1] ~= 0 or p[i + 2] ~= 0 then
+			if max < n then
+				zero, max = last, n
+			end
+			n = 0
+		else
+			if n == 0 then
+				last = i
+			end
+			n = n + 1
+		end
+	end
+	if max < n then
+		zero, max = last, n
+	end
+	local parts, count = {}, 0
+	n = 16
+	if zero == 0 then
+		if (max == 5 and p[11] == 0xff and p[12] == 0xff) or max == 6 or (max == 7 and p[15] ~= 0 and p[16] ~= 1) then
+			n = 12
+		end
+		count = count + 1
+		parts[count] = ":"
+	end
+	local i = 0
+	while i < n do
+		if i == zero then
+			count = count + 1
+			parts[count] = ":"
+			i = i + max * 2
+		else
+			count = count + 1
+			parts[count] = format("%x", p[i + 1] * 256 + p[i + 2])
+			if i < 14 then
+				count = count + 1
+				parts[count] = ":"
+			end
+			i = i + 2
+		end
+	end
+	if n == 12 then
+		count = count + 1
+		parts[count] = format("%d.%d.%d.%d", p[13], p[14], p[15], p[16])
+	end
+	return concat(parts)
+end
+
 function banlease.format_raw_addr(packed, family)
 	if type(packed) ~= "string" then
 		return nil, "no address"
@@ -176,44 +232,104 @@ function banlease.format_raw_addr(packed, family)
 	if family ~= "inet6" or #packed ~= 16 then
 		return nil, "unsupported address family"
 	end
+	-- a socket address from a dual-stack listener: judged as its IPv4 client
 	if packed:sub(1, 12) == string.rep("\0", 10) .. "\255\255" then
 		return format("%d.%d.%d.%d", byte(packed, 13, 16))
 	end
-	local words = {}
-	for i = 1, 16, 2 do
-		local hi, lo = byte(packed, i, i + 1)
-		words[#words + 1] = hi * 256 + lo
-	end
-	-- RFC 5952: compress the longest run (2 or more) of zero words
-	local best_start, best_len, cur_start, cur_len = 0, 0, 0, 0
-	for i = 1, 8 do
-		if words[i] == 0 then
-			if cur_len == 0 then
-				cur_start = i
+	return inet6_ntop(packed)
+end
+
+-- Port of ngx_inet_addr, which ngx_parse_addr tries before IPv6: unlike inet_pton it takes leading zeros and
+-- empty octets, and it refuses 255.255.255.255 because that value is INADDR_NONE.
+local function inet_addr(text)
+	local addr, octet, dots = 0, 0, 0
+	for i = 1, #text do
+		local c = byte(text, i)
+		if c >= 48 and c <= 57 then
+			octet = octet * 10 + c - 48
+			if octet > 255 then
+				return nil
 			end
-			cur_len = cur_len + 1
-			if cur_len > best_len then
-				best_start, best_len = cur_start, cur_len
-			end
+		elseif c == 46 and dots < 3 then
+			addr = addr * 256 + octet
+			octet = 0
+			dots = dots + 1
 		else
-			cur_len = 0
+			return nil
 		end
 	end
-	local parts = {}
-	local i = 1
-	while i <= 8 do
-		if best_len >= 2 and i == best_start then
-			parts[#parts + 1] = (i == 1) and ":" or ""
-			i = i + best_len
-			if i > 8 then
-				parts[#parts + 1] = ""
-			end
-		else
-			parts[#parts + 1] = format("%x", words[i])
-			i = i + 1
-		end
+	if dots ~= 3 then
+		return nil
 	end
-	return table.concat(parts, ":")
+	addr = addr * 256 + octet
+	if addr == 4294967295 then
+		return nil
+	end
+	return format("%d.%d.%d.%d", floor(addr / 16777216), floor(addr / 65536) % 256, floor(addr / 256) % 256, addr % 256)
+end
+
+-- The PROXY source address spelled exactly as nginx's realip module leaves it in $remote_addr, which every ban and
+-- whitelist key uses: ngx_parse_addr, then ngx_sock_ntop. An IPv4-mapped address stays IPv6 there.
+local function canonical_addr(text)
+	local v4 = inet_addr(text)
+	if v4 then
+		return v4
+	end
+	if text:find("[", 1, true) then
+		return nil -- resty.ipmatcher strips brackets, nginx does not
+	end
+	local v6 = require("resty.ipmatcher").parse_ipv6(text)
+	if not v6 then
+		return nil
+	end
+	local bytes = {}
+	for i = 1, 4 do
+		local n = v6[i]
+		bytes[#bytes + 1] = char(floor(n / 16777216) % 256, floor(n / 65536) % 256, floor(n / 256) % 256, n % 256)
+	end
+	return inet6_ntop(concat(bytes))
+end
+
+local trusted_matchers = {}
+
+-- Client IP of a connection that came in with a PROXY protocol header. nginx's realip module swaps it in for
+-- $remote_addr only when the peer is listed in set_real_ip_from, so do the same: "trusted" is that list, as the
+-- template rendered it. Returns the peer address when there is no header or the peer is not trusted, and nil
+-- ("do not drop") whenever the answer is not certain.
+function banlease.proxy_protocol_client_ip(peer, trusted)
+	if not peer then
+		return nil
+	end
+	local text, err = require("ngx.ssl").proxy_protocol_addr()
+	if err then
+		return nil
+	end
+	if not text then
+		return peer
+	end
+	local matcher = trusted_matchers[trusted]
+	if not matcher then
+		local networks = {}
+		for network in trusted:gmatch("%S+") do
+			networks[#networks + 1] = network
+		end
+		if #networks == 0 then
+			return peer
+		end
+		matcher = require("resty.ipmatcher").new(networks)
+		if not matcher then
+			return nil
+		end
+		trusted_matchers[trusted] = matcher
+	end
+	local is_trusted, match_err = matcher:match(peer)
+	if match_err then
+		return nil
+	end
+	if not is_trusted then
+		return peer
+	end
+	return canonical_addr(text)
 end
 
 function banlease.new_incarnation()
@@ -579,8 +695,10 @@ end
 -- ClientHello drop. Nothing below may yield: no Redis, no cosocket, no mlcache callback, no resty.lock, no sleep, no
 -- ngx.var. Every unknown means "do not drop": the access phase stays authoritative.
 -- Returns "drop" | "detect" | nil, the canonical reason id and the client IP.
-local function decide(service, proxy_protocol, real_ip)
-	if proxy_protocol or real_ip then
+-- "trusted" is only set when real IP is configured for the PROXY protocol: the networks allowed to send the header.
+-- Otherwise a PROXY protocol or header based real IP means the client IP is unknown here: skip.
+local function decide(service, proxy_protocol, real_ip, trusted)
+	if not trusted and (proxy_protocol or real_ip) then
 		return nil
 	end
 	local utils = require("bunkerweb.utils")
@@ -603,6 +721,9 @@ local function decide(service, proxy_protocol, real_ip)
 		return nil
 	end
 	local ip = banlease.format_raw_addr(require("ngx.ssl").raw_client_addr())
+	if trusted then
+		ip = banlease.proxy_protocol_client_ip(ip, trusted)
+	end
 	if not ip then
 		return nil
 	end
@@ -648,16 +769,16 @@ local function decide(service, proxy_protocol, real_ip)
 	return "drop", id, ip
 end
 
-function banlease.tls_drop_decision(service, proxy_protocol, real_ip)
-	local ok, verdict, id, ip = pcall(decide, service, proxy_protocol, real_ip)
+function banlease.tls_drop_decision(service, proxy_protocol, real_ip, trusted)
+	local ok, verdict, id, ip = pcall(decide, service, proxy_protocol, real_ip, trusted)
 	if not ok then
 		return nil
 	end
 	return verdict, id, ip
 end
 
-function banlease.tls_drop_hook(service, proxy_protocol, real_ip)
-	local verdict, id, ip = banlease.tls_drop_decision(service, proxy_protocol, real_ip)
+function banlease.tls_drop_hook(service, proxy_protocol, real_ip, trusted)
+	local verdict, id, ip = banlease.tls_drop_decision(service, proxy_protocol, real_ip, trusted)
 	if not verdict then
 		return
 	end

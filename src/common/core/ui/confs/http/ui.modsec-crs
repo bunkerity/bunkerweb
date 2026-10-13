@@ -4,12 +4,13 @@
     {% set ip_hosts = [] %}
     {% for server_name in SERVER_NAME.split() %}
         {% if all[server_name + "_USE_UI"] == "yes" %}
-            {% set normalized_host = server_name.lower() %}
-            {% if re.match("^(?:\\d{1,3}\\.){3}\\d{1,3}$|^\\[[0-9a-fA-F:]+\\]$", server_name) %}
-                {% set _ = ip_hosts.append(re.escape(normalized_host)) %}
-            {% else %}
-                {% set _ = ui_hosts.append(re.escape(normalized_host)) %}
-            {% endif %}
+            {% for host in (all[server_name + "_SERVER_NAME"] or server_name).split() %}
+                {% if re.match("^(?:\\d{1,3}\\.){3}\\d{1,3}$|^\\[[0-9a-fA-F:]+\\]$", host) %}
+                    {% set _ = ip_hosts.append(re.escape(host.lower())) %}
+                {% else %}
+                    {% set _ = ui_hosts.append(re.escape(host.lower())) %}
+                {% endif %}
+            {% endfor %}
         {% endif %}
     {% endfor %}
     {% if ui_hosts %}

@@ -183,6 +183,8 @@ RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-
 RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
 RUN apk add --no-cache "nghttp2-libs>=1.70.0-r0" # CVE-2026-58055
 RUN apk add --no-cache "libpng>=1.6.59-r0" # CVE-2026-46675
+RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
+RUN apk add --no-cache "tiff>=4.7.2-r0" # CVE-2026-4775
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -250,7 +252,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.16~rc4"
+LABEL version="1.6.16"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

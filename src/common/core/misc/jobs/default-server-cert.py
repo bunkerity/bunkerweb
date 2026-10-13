@@ -4,7 +4,7 @@ from os import chmod, getenv, sep, replace
 from os.path import join
 from pathlib import Path
 from stat import S_IRUSR, S_IWUSR
-from subprocess import DEVNULL, run, PIPE
+from subprocess import DEVNULL, CalledProcessError, run, PIPE
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from tempfile import NamedTemporaryFile
@@ -20,6 +20,19 @@ from jobs import Job  # type: ignore
 LOGGER = getLogger("DEFAULT-SERVER-CERT")
 status = 0
 
+
+def pair_matches(cert: Optional[bytes], key: Optional[bytes]) -> bool:
+    """Check that the certificate and the private key share the same public key."""
+    if not cert or not key:
+        return False
+    try:
+        cert_pub = run(["openssl", "x509", "-noout", "-pubkey"], input=cert, stdout=PIPE, stderr=DEVNULL, check=True).stdout
+        key_pub = run(["openssl", "pkey", "-pubout"], input=key, stdout=PIPE, stderr=DEVNULL, check=True).stdout
+    except (OSError, CalledProcessError):
+        return False
+    return bool(cert_pub) and cert_pub == key_pub
+
+
 try:
     JOB = Job(LOGGER, __file__)
 
@@ -28,7 +41,14 @@ try:
     key_file = cert_path.joinpath("default-server-cert.key")
     certs_exist_locally = cert_file.is_file() and key_file.is_file()
 
-    if not JOB.is_cached_file("default-server-cert.pem", "month") or not JOB.is_cached_file("default-server-cert.key", "month") or not certs_exist_locally:
+    regenerate = (
+        not JOB.is_cached_file("default-server-cert.pem", "month") or not JOB.is_cached_file("default-server-cert.key", "month") or not certs_exist_locally
+    )
+    if not regenerate and not pair_matches(JOB.get_cache("default-server-cert.pem"), JOB.get_cache("default-server-cert.key")):  # type: ignore
+        LOGGER.warning("The default server certificate and its private key do not match, regenerating both")
+        regenerate = True
+
+    if regenerate:
         LOGGER.info("Generating self-signed certificate for default server")
         cert_path.mkdir(parents=True, exist_ok=True)
         tmp_key_path: Optional[Path] = None
@@ -100,6 +120,9 @@ DNS.1 = www.example.org
             if result.returncode != 0:
                 LOGGER.error("Self-signed certificate generation failed for default server")
                 LOGGER.error(f"OpenSSL error output: {result.stderr}")
+                status = 2
+            elif not pair_matches(tmp_cert_path.read_bytes(), tmp_key_path.read_bytes()):
+                LOGGER.error("The generated certificate and private key do not match, keeping the existing files")
                 status = 2
             else:
                 LOGGER.info("Successfully generated self-signed certificate for default server")
