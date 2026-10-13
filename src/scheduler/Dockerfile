@@ -61,6 +61,7 @@ RUN apk add --no-cache "curl>=8.22.0-r0" "libcurl>=8.22.0-r0" # CVE-2026-13608 C
 RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-76642 CVE-2026-78408 CVE-2026-78409 CVE-2026-78410
 RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
 RUN apk add --no-cache "nghttp2-libs>=1.70.0-r0" # CVE-2026-58055
+RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
