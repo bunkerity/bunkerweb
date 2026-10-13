@@ -77,16 +77,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -203,11 +203,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    ，了解我们的企业服务。
 
           </div>
           
@@ -220,10 +220,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    您当前查看的不是最新版本的文档。
     <a href="../..">
-        <strong>Click here to view latest.</strong>
+        <strong>点击此处查看最新版本。</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   快速入门指南
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  从源代码构建
 
       </a>
     </li>
@@ -956,33 +936,6 @@
   
   
     <li class="md-nav__item">
-      <a href="building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    从源代码构建
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="features/" class="md-nav__link">
         
   
@@ -1239,8 +1192,8 @@
   
 
 
-<h1 id="_1">简介</h1>
-<h2 id="_2">概述</h2>
+<h1 id="_1">简介<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="_2">概述<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="概述" src="../assets/img/intro-overview.svg" width="800" />
   </p>
@@ -1249,7 +1202,7 @@
 <p>BunkerWeb 是新一代的开源 Web 应用程序防火墙 (WAF)。</p>
 <p>作为一款功能齐全的 Web 服务器（底层基于 <a href="https://nginx.org/">NGINX</a>），它能保护您的 Web 服务，使其“默认安全”。BunkerWeb 能够无缝集成到您现有的环境中（<a href="integrations/#linux">Linux</a>、<a href="integrations/#docker">Docker</a>、<a href="integrations/#swarm">Swarm</a>、<a href="integrations/#kubernetes">Kubernetes</a> 等），作为反向代理运行，并且完全可配置（别担心，如果您不喜欢命令行，我们有一个<a href="web-ui/">出色的 Web UI</a>）以满足您的特定用例。换句话说，网络安全不再是件麻烦事。</p>
 <p>BunkerWeb 的核心包含主要的<a href="advanced/#security-tuning">安全功能</a>，但借助<a href="plugins/">插件系统</a>，可以轻松扩展其他功能。</p>
-<h2 id="bunkerweb">为何选择 BunkerWeb？</h2>
+<h2 id="bunkerweb">为何选择 BunkerWeb？<a class="headerlink" href="#bunkerweb" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/oybLtyhWJIo" title="BunkerWeb 概述" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
@@ -1277,7 +1230,7 @@
 <p><strong>专业服务</strong>：直接从 BunkerWeb 的维护者那里获得技术支持、量身定制的咨询和自定义开发。请访问 <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>获取更多信息。</p>
 </li>
 </ul>
-<h2 id="_3">安全特性</h2>
+<h2 id="_3">安全特性<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p>探索 BunkerWeb 提供的令人印象深刻的安全特性。虽然并非详尽无遗，但以下是一些值得注意的亮点：</p>
 <ul>
 <li>
@@ -1306,19 +1259,19 @@
 </li>
 </ul>
 <p>要更深入地了解核心安全特性，我们邀请您探索文档的<a href="advanced/#security-tuning">安全调整</a>部分。了解 BunkerWeb 如何使您能够根据自己的特定需求微调和优化安全措施。</p>
-<h2 id="_4">演示</h2>
+<h2 id="_4">演示<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/ZhYV-QELzA4" title="欺骗自动化工具和扫描器" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>一个受 BunkerWeb 保护的演示网站可在 <a href="https://demo.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">demo.bunkerweb.io</a> 访问。欢迎访问并进行一些安全测试。</p>
-<h2 id="web-ui">Web UI</h2>
+<h2 id="web-ui">Web UI<a class="headerlink" href="#web-ui" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/tGS3pzquEjY" title="BunkerWeb Web UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>BunkerWeb 提供了一个可选的<a href="web-ui/">用户界面</a>来管理您的实例及其配置。一个在线的只读演示可在 <a href="https://demo-ui.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">demo-ui.bunkerweb.io</a> 访问。欢迎您亲自试用。</p>
-<h2 id="bunkerweb-cloud">BunkerWeb Cloud</h2>
+<h2 id="bunkerweb-cloud">BunkerWeb Cloud<a class="headerlink" href="#bunkerweb-cloud" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="概述" src="../assets/img/bunkerweb-cloud.png" width="600" />
   </p>
@@ -1333,7 +1286,7 @@
 <li>协助您进行配置的技术支持</li>
 </ul>
 <p>如果您对 BunkerWeb Cloud 服务感兴趣，请随时<a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">联系我们</a>，以便我们讨论您的需求。</p>
-<h2 id="pro">PRO 版本</h2>
+<h2 id="pro">PRO 版本<a class="headerlink" href="#pro" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO 免费试用</p>
 <p>通过 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始 BunkerWeb PRO 的 30 天免费试用。</p>
@@ -1348,11 +1301,11 @@
 <li>使用 <a href="web-ui/#upgrade-to-pro">Web UI</a> 或<a href="features/#pro">特定设置</a>将您的私钥粘贴到 BunkerWeb 中</li>
 </ul>
 <p>如果您对 PRO 版本有任何疑问，请随时访问 <a href="https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>或<a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">联系我们</a>。</p>
-<h2 id="_5">专业服务</h2>
+<h2 id="_5">专业服务<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>通过直接从项目维护者那里获得专业服务，充分利用 BunkerWeb。从技术支持到量身定制的咨询和开发，我们随时准备协助您保护您的 Web 服务。</p>
 <p>您可以通过访问 <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>找到更多信息，这是我们为专业服务设立的专用平台。</p>
 <p>如果您有任何疑问，请随时<a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">联系我们</a>。我们将非常乐意满足您的需求。</p>
-<h2 id="_6">生态系统、社区和资源</h2>
+<h2 id="_6">生态系统、社区和资源<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <p>关于 BunkerWeb 的官方网站、工具和资源：</p>
 <ul>
 <li><a href="https://www.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc"><strong>网站</strong></a>：获取有关 BunkerWeb 的更多信息、新闻和文章。</li>
@@ -1387,8 +1340,16 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
         
       </main>
       
@@ -1489,7 +1450,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>

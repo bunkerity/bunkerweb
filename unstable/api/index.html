@@ -86,9 +86,9 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,7 +205,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
@@ -222,8 +222,7 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    You&#39;re not viewing the documentation of the latest version.
     <a href="../..">
         <strong>Click here to view latest.</strong>
     </a>
@@ -447,25 +446,6 @@
     
   
   Quickstart guide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Building from source
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Quickstart guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Building from source
   
 
     
@@ -1269,8 +1222,8 @@
   
 
 
-<h1 id="api">API</h1>
-<h2 id="role-of-the-api">Role of the API</h2>
+<h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
+<h2 id="role-of-the-api">Role of the API<a class="headerlink" href="#role-of-the-api" title="Permanent link">&para;</a></h2>
 <p>The BunkerWeb API is the control plane for managing instances, services, bans, plugins, jobs, and custom configs. It runs as a FastAPI app behind Gunicorn and should stay on a trusted network. Interactive docs live at <code>/docs</code> (or <code>&lt;API_ROOT_PATH&gt;/docs</code>); the OpenAPI schema is at <code>/openapi.json</code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Keep it private</p>
@@ -1286,7 +1239,7 @@
 <li>Rate limiting defaults on; <code>/auth</code> always has its own limit</li>
 </ul>
 </div>
-<h2 id="security-checklist">Security checklist</h2>
+<h2 id="security-checklist">Security checklist<a class="headerlink" href="#security-checklist" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Network: keep traffic internal; bind to loopback or an internal interface and restrict source IPs with <code>API_WHITELIST_IPS</code> (enabled by default).</li>
 <li>Auth present: set <code>API_USERNAME</code>/<code>API_PASSWORD</code> (admin) and, if needed, <code>API_ACL_BOOTSTRAP_FILE</code> for extra users/ACLs; keep an override <code>API_TOKEN</code> only for break-glass use.</li>
@@ -1295,9 +1248,9 @@
 <li>Rate limiting: leave it on unless another layer enforces equivalent limits; <code>/auth</code> is always rate limited.</li>
 <li>TLS: terminate TLS at the proxy or set <code>API_SSL_ENABLED=yes</code> with cert/key paths.</li>
 </ul>
-<h2 id="run-it">Run it</h2>
+<h2 id="run-it">Run it<a class="headerlink" href="#run-it" title="Permanent link">&para;</a></h2>
 <p>Choose the flavor that matches your environment.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-One</label><label for="__tabbed_1_3">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-one</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Minimal Compose-style layout with the API behind BunkerWeb. Adjust versions and passwords before use.</p>
@@ -1428,7 +1381,7 @@
 </div>
 </div>
 </div>
-<h2 id="authentication-and-authorization">Authentication and authorization</h2>
+<h2 id="authentication-and-authorization">Authentication and authorization<a class="headerlink" href="#authentication-and-authorization" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>/auth</code> issues Biscuit tokens. Credentials can come from Basic auth, form fields, JSON body, or a Bearer header equal to <code>API_TOKEN</code> (admin override).</li>
 <li>Admin users can also call protected routes directly with HTTP Basic (no Biscuit needed).</li>
@@ -1445,7 +1398,7 @@
 <li>Use <code>Authorization: Bearer &lt;token&gt;</code> on subsequent calls.</li>
 </ol>
 </div>
-<h2 id="permissions-and-acl">Permissions and ACL</h2>
+<h2 id="permissions-and-acl">Permissions and ACL<a class="headerlink" href="#permissions-and-acl" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Coarse role: GET/HEAD/OPTIONS require <code>read</code>; write verbs require <code>write</code>.</li>
 <li>Fine-grained ACL is enforced when routes declare required permissions; <code>admin(true)</code> bypasses checks.</li>
@@ -1504,7 +1457,7 @@
 <p class="admonition-title">The example above grants an admin-equivalent scope</p>
 <p><code>config_update</code> is a code-execution-capable permission (see the danger note above), so this <code>ci</code> user is as powerful as an admin for configuration writes — only issue such a token to automation you fully trust. For a read-only integration, drop <code>config_update</code> and keep just the <code>*_read</code> scopes.</p>
 </div>
-<h2 id="rate-limiting">Rate limiting</h2>
+<h2 id="rate-limiting">Rate limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h2>
 <p>Enabled by default with two strings: <code>API_RATE_LIMIT</code> (global, default <code>100r/m</code>) and <code>API_RATE_LIMIT_AUTH</code> (default <code>10r/m</code> or <code>off</code>). Rates accept NGINX-style notation (<code>3r/s</code>, <code>40r/m</code>, <code>200r/h</code>) or verbose forms (<code>100/minute</code>, <code>200 per 30 minutes</code>). Configure via:</p>
 <ul>
 <li><code>API_RATE_LIMIT</code>, <code>API_RATE_LIMIT_AUTH</code></li>
@@ -1538,7 +1491,7 @@
 <span class="w">    </span><span class="nt">rate</span><span class="p">:</span><span class="w"> </span><span class="s">"100r/m"</span>
 </code></pre></div>
 </details>
-<h2 id="configuration-sources-and-precedence">Configuration sources and precedence</h2>
+<h2 id="configuration-sources-and-precedence">Configuration sources and precedence<a class="headerlink" href="#configuration-sources-and-precedence" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Environment variables (including Docker/Compose <code>environment:</code>)</li>
 <li>Secrets in <code>/run/secrets/&lt;VAR&gt;</code> (Docker)</li>
@@ -1546,7 +1499,7 @@
 <li>Env file at <code>/etc/bunkerweb/api.env</code></li>
 <li>Built-in defaults</li>
 </ol>
-<h3 id="runtime-time-zone">Runtime &amp; time zone</h3>
+<h3 id="runtime-time-zone">Runtime &amp; time zone<a class="headerlink" href="#runtime-time-zone" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1566,8 +1519,8 @@
 </tbody>
 </table>
 <p>Disable docs or schema by setting their URLs to <code>off|disabled|none|false|0</code>. Set <code>API_SSL_ENABLED=yes</code> with <code>API_SSL_CERTFILE</code> and <code>API_SSL_KEYFILE</code> to terminate TLS in the API. When reverse-proxying, set <code>API_FORWARDED_ALLOW_IPS</code> to the proxy IPs so Gunicorn trusts <code>X-Forwarded-*</code> headers.</p>
-<h3 id="configuration-reference-power-users">Configuration reference (power users)</h3>
-<h4 id="surface-docs">Surface &amp; docs</h4>
+<h3 id="configuration-reference-power-users">Configuration reference (power users)<a class="headerlink" href="#configuration-reference-power-users" title="Permanent link">&para;</a></h3>
+<h4 id="surface-docs">Surface &amp; docs<a class="headerlink" href="#surface-docs" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1604,7 +1557,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="auth-acl-biscuit">Auth, ACL, Biscuit</h4>
+<h4 id="auth-acl-biscuit">Auth, ACL, Biscuit<a class="headerlink" href="#auth-acl-biscuit" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1659,7 +1612,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="allowlist">Allowlist</h4>
+<h4 id="allowlist">Allowlist<a class="headerlink" href="#allowlist" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1684,7 +1637,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="rate-limiting_1">Rate limiting</h4>
+<h4 id="rate-limiting_1">Rate limiting<a class="headerlink" href="#rate-limiting_1" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1751,7 +1704,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="redisvalkey-for-rate-limits">Redis/Valkey (for rate limits)</h4>
+<h4 id="redisvalkey-for-rate-limits">Redis/Valkey (for rate limits)<a class="headerlink" href="#redisvalkey-for-rate-limits" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1822,7 +1775,7 @@
 <p class="admonition-title">DB-provided Redis</p>
 <p>If Redis/Valkey settings are present in the BunkerWeb database configuration, the API will automatically reuse them for rate limiting even without <code>USE_REDIS</code> set in the environment. Override via environment variables when you need a different backend.</p>
 </div>
-<h4 id="listener-tls">Listener &amp; TLS</h4>
+<h4 id="listener-tls">Listener &amp; TLS<a class="headerlink" href="#listener-tls" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1859,7 +1812,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="logging-runtime-package-defaults">Logging &amp; runtime (package defaults)</h4>
+<h4 id="logging-runtime-package-defaults">Logging &amp; runtime (package defaults)<a class="headerlink" href="#logging-runtime-package-defaults" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1920,7 +1873,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="api-surface-capability-map">API surface (capability map)</h2>
+<h2 id="api-surface-capability-map">API surface (capability map)<a class="headerlink" href="#api-surface-capability-map" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Core</strong></li>
 <li><code>GET /ping</code>, <code>GET /health</code>: liveness checks for the API itself.</li>
@@ -1946,13 +1899,13 @@
 <li><code>GET /configs</code>: list snippets (default service <code>global</code>); <code>with_data=true</code> embeds printable content.</li>
 <li><code>POST /configs</code>, <code>POST /configs/upload</code>: create snippets via JSON or file upload.</li>
 <li><code>GET /configs/{service}/{type}/{name}</code>: fetch snippet; <code>with_data=true</code> for content.</li>
-<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: update or move API-managed snippets.</li>
+<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: update or move API-managed snippets. A move needs <code>config_update</code> on the destination service as well (<code>global</code> counts as one); a JSON body without <code>service</code> keeps the current service.</li>
 <li><code>DELETE /configs</code> or <code>DELETE /configs/{service}/{type}/{name}</code>: remove API-managed snippets; template-managed entries are skipped.</li>
 <li>Supported types: <code>http</code>, <code>server_http</code>, <code>default_server_http</code>, <code>modsec</code>, <code>modsec_crs</code>, <code>stream</code>, <code>server_stream</code>, CRS/plugin hooks.</li>
 <li><strong>Bans</strong></li>
 <li><code>GET /bans</code>: aggregate active bans from instances.</li>
 <li><code>POST /bans</code> or <code>/bans/ban</code>: apply one or more bans; payload can be object, array, or stringified JSON.</li>
-<li><code>POST /bans/unban</code> or <code>DELETE /bans</code>: remove bans globally or per service.</li>
+<li><code>POST /bans/unban</code> or <code>DELETE /bans</code>: remove bans globally or per service. For a CrowdSec ban (<code>kind: "crowdsec_lease"</code>), also send <code>remove_crowdsec_decisions: true</code>, <code>confirmed: true</code> and <code>decision_keys</code> (the keys listed in the <code>409</code> preview) to delete the CrowdSec decisions behind it; the call needs <code>crowdsec_delete</code> on every affected connection, answers <code>409</code> when the selection changed, and <code>502</code> on a partial result.</li>
 <li><strong>Plugins (UI plugins)</strong></li>
 <li><code>GET /plugins</code>: list plugins; <code>with_data=true</code> includes packaged bytes when available.</li>
 <li><code>POST /plugins/upload</code>: install UI plugins from <code>.zip</code>, <code>.tar.gz</code>, <code>.tar.xz</code>.</li>
@@ -1960,12 +1913,12 @@
 <li><strong>Cache (job artefacts)</strong></li>
 <li><code>GET /cache</code>: list cache files with filters (<code>service</code>, <code>plugin</code>, <code>job_name</code>); <code>with_data=true</code> embeds printable content.</li>
 <li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: fetch/download a specific cache file (<code>download=true</code>).</li>
-<li><code>DELETE /cache</code> or <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: delete cache files and notify scheduler.</li>
+<li><code>DELETE /cache</code> or <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: delete cache files. The scheduler is notified only for a plugin whose row was really deleted; a <code>plugin</code> that does not own the job is refused and nothing is deleted.</li>
 <li><strong>Jobs</strong></li>
 <li><code>GET /jobs</code>: list jobs, schedules, and cache summaries.</li>
 <li><code>POST /jobs/run</code>: mark plugins as changed to trigger associated jobs.</li>
 </ul>
-<h2 id="operational-behaviour">Operational behaviour</h2>
+<h2 id="operational-behaviour">Operational behaviour<a class="headerlink" href="#operational-behaviour" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Error responses are normalized to <code>{"status": "error", "message": "..."}</code> with appropriate HTTP status codes.</li>
 <li>Write operations persist to the shared database; instances consume changes via scheduler sync or after a reload.</li>
@@ -1989,8 +1942,16 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
         
       </main>
       
@@ -2091,7 +2052,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>

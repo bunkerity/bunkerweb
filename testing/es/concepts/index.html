@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Buscar en la documentaci\u00f3n");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 ¿Buscas BunkerWeb CLOUD, la versión PRO, asistencia técnica o servicios a medida? Visita el
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    para obtener más información sobre nuestras ofertas para empresas.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    No está viendo la documentación de la última versión.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Haga clic aquí para ver la última versión.</strong>
     </a>
 
             </div>
@@ -449,25 +448,6 @@
     
   
   Guía de inicio rápido
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compilar desde el código fuente
 
       </a>
     </li>
@@ -981,33 +961,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compilar desde el código fuente
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1264,14 +1217,14 @@
   
 
 
-<h1 id="conceptos">Conceptos</h1>
-<h2 id="arquitectura">Arquitectura</h2>
+<h1 id="conceptos">Conceptos<a class="headerlink" href="#conceptos" title="Permanent link">&para;</a></h1>
+<h2 id="arquitectura">Arquitectura<a class="headerlink" href="#arquitectura" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Descripción general" src="../../assets/img/concepts.svg" width="600" /></p>
 </figure>
 <p>Dentro de tu infraestructura, BunkerWeb actúa como un proxy inverso frente a tus servicios web. La arquitectura típica implica acceder a BunkerWeb desde Internet, que luego reenvía las solicitudes al servicio de aplicación apropiado en una red segura.</p>
 <p>Usar BunkerWeb de esta manera (arquitectura clásica de proxy inverso) con descarga de TLS y políticas de seguridad centralizadas mejora el rendimiento al reducir la sobrecarga de cifrado en los servidores backend, al tiempo que garantiza un control de acceso consistente, mitigación de amenazas y cumplimiento de normativas en todos los servicios.</p>
-<h2 id="integraciones">Integraciones</h2>
+<h2 id="integraciones">Integraciones<a class="headerlink" href="#integraciones" title="Permanent link">&para;</a></h2>
 <p>El primer concepto es la integración de BunkerWeb en el entorno de destino. Preferimos usar la palabra "integración" en lugar de "instalación" porque uno de los objetivos de BunkerWeb es integrarse sin problemas en los entornos existentes.</p>
 <p>Las siguientes integraciones son oficialmente compatibles:</p>
 <ul>
@@ -1286,7 +1239,7 @@
 <p class="admonition-title">Para saber más</p>
 <p>Los detalles técnicos de todas las integraciones de BunkerWeb están disponibles en la <a href="../integrations/">sección de integraciones</a> de la documentación.</p>
 </div>
-<h2 id="configuraciones">Configuraciones</h2>
+<h2 id="configuraciones">Configuraciones<a class="headerlink" href="#configuraciones" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">Configuraciones de BunkerWeb PRO</p>
 <p>Algunos plugins están reservados para la <strong>versión PRO</strong>. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">Panel de BunkerWeb</a>.</p>
@@ -1318,7 +1271,7 @@ USE_BROTLI=no
 <p class="admonition-title">Para saber más</p>
 <p>La lista completa de configuraciones disponibles con descripciones y posibles valores está disponible en la <a href="../features/">sección de características</a> de la documentación.</p>
 </div>
-<h2 id="multisite-mode">Modo multisitio</h2>
+<h2 id="multisite-mode">Modo multisitio<a class="headerlink" href="#multisite-mode" title="Permanent link">&para;</a></h2>
 <p>Comprender el modo multisitio es esencial al utilizar BunkerWeb. Como nuestro enfoque principal es proteger las aplicaciones web, nuestra solución está intrínsecamente vinculada al concepto de "hosts virtuales" o "vhosts" (más información <a href="https://es.wikipedia.org/wiki/Alojamiento_virtual">aquí</a>). Estos hosts virtuales permiten servir múltiples aplicaciones web desde una única instancia o clúster.</p>
 <p>Por defecto, BunkerWeb tiene el modo multisitio deshabilitado. Esto significa que solo se servirá una aplicación web, y todas las configuraciones se aplicarán a ella. Esta configuración es ideal cuando tienes una sola aplicación que proteger, ya que no necesitas preocuparte por las configuraciones multisitio.</p>
 <p>Sin embargo, cuando el modo multisitio está habilitado, BunkerWeb se vuelve capaz de servir y proteger múltiples aplicaciones web. Cada aplicación web se identifica por un nombre de servidor único y tiene su propio conjunto de configuraciones. Este modo resulta beneficioso cuando tienes múltiples aplicaciones que asegurar y prefieres utilizar una única instancia (o un clúster) de BunkerWeb.</p>
@@ -1347,7 +1300,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Para saber más</p>
 <p>Encontrarás ejemplos concretos del modo multisitio en los <a href="../advanced/">usos avanzados</a> de la documentación y en el directorio de <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">ejemplos</a> del repositorio.</p>
 </div>
-<h2 id="custom-configurations">Configuraciones personalizadas</h2>
+<h2 id="custom-configurations">Configuraciones personalizadas<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>Para abordar desafíos únicos y satisfacer casos de uso específicos, BunkerWeb ofrece la flexibilidad de las configuraciones personalizadas. Si bien las configuraciones proporcionadas y los <a href="../plugins/">plugins externos</a> cubren una amplia gama de escenarios, puede haber situaciones que requieran una personalización adicional.</p>
 <p>BunkerWeb está construido sobre el reconocido servidor web NGINX, que proporciona un potente sistema de configuración. Esto significa que puedes aprovechar las capacidades de configuración de NGINX para satisfacer tus necesidades específicas. Las configuraciones personalizadas de NGINX se pueden incluir en varios <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">contextos</a> como HTTP o servidor, lo que te permite ajustar el comportamiento de BunkerWeb según tus requisitos. Ya sea que necesites personalizar configuraciones globales o aplicar configuraciones a bloques de servidor específicos, BunkerWeb te permite optimizar su comportamiento para alinearse perfectamente con tu caso de uso.</p>
 <p>Otro componente integral de BunkerWeb es el Firewall de Aplicaciones Web ModSecurity. Con configuraciones personalizadas, tienes la flexibilidad de abordar falsos positivos o agregar reglas personalizadas para mejorar aún más la protección proporcionada por ModSecurity. Estas configuraciones personalizadas te permiten ajustar el comportamiento del firewall y asegurar que se alinee con los requisitos específicos de tus aplicaciones web.</p>
@@ -1362,7 +1315,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Para saber más</p>
 <p>Encontrarás ejemplos concretos de configuraciones personalizadas en los <a href="../advanced/#custom-configurations">usos avanzados</a> de la documentación y en el directorio de <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">ejemplos</a> del repositorio.</p>
 </div>
-<h2 id="base-de-datos">Base de datos</h2>
+<h2 id="base-de-datos">Base de datos<a class="headerlink" href="#base-de-datos" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb almacena de forma segura su configuración actual en una base de datos de backend, que contiene datos esenciales para un funcionamiento sin problemas. La siguiente información se almacena en la base de datos:</p>
 <ul>
 <li>
@@ -1399,7 +1352,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <li><strong>PostgreSQL</strong>: <code>postgresql://bunkerweb:changeme@bw-db:5432/db</code></li>
 </ul>
 <p>Al especificar el URI de la base de datos apropiado en la configuración, puedes integrar BunkerWeb sin problemas con tu backend de base de datos preferido, garantizando un almacenamiento eficiente y confiable de tus datos de configuración.</p>
-<h3 id="matriz-de-compatibilidad-de-bases-de-datos">Matriz de compatibilidad de bases de datos</h3>
+<h3 id="matriz-de-compatibilidad-de-bases-de-datos">Matriz de compatibilidad de bases de datos<a class="headerlink" href="#matriz-de-compatibilidad-de-bases-de-datos" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1461,7 +1414,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Esquema de la base de datos</figcaption>
 </figure>
-<h2 id="scheduler">Programador</h2>
+<h2 id="scheduler">Programador<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h2>
 <p>Para una coordinación y automatización fluidas, BunkerWeb emplea un servicio especializado conocido como el programador. El programador desempeña un papel vital para garantizar un funcionamiento sin problemas al realizar las siguientes tareas:</p>
 <ul>
 <li>
@@ -1486,10 +1439,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Gestionar trabajos desde la interfaz de usuario web</figcaption>
 </figure>
-<h3 id="comprobacion-del-estado-de-las-instancias">Comprobación del estado de las instancias</h3>
+<h3 id="comprobacion-del-estado-de-las-instancias">Comprobación del estado de las instancias<a class="headerlink" href="#comprobacion-del-estado-de-las-instancias" title="Permanent link">&para;</a></h3>
 <p>Desde la versión 1.6.0, el programador posee un sistema de comprobación de estado incorporado que monitorea la salud de las instancias. Si una instancia deja de estar saludable, el programador dejará de enviarle la configuración. Si la instancia vuelve a estar saludable, el programador reanudará el envío de la configuración.</p>
 <p>El intervalo de comprobación de estado se establece mediante la variable de entorno <code>HEALTHCHECK_INTERVAL</code>, con un valor predeterminado de <code>30</code>, lo que significa que el programador comprobará la salud de las instancias cada 30 segundos.</p>
-<h2 id="templates">Plantillas</h2>
+<h2 id="templates">Plantillas<a class="headerlink" href="#templates" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb aprovecha el poder de las plantillas para simplificar el proceso de configuración y mejorar la flexibilidad. Las plantillas proporcionan un enfoque estructurado y estandarizado para definir configuraciones y configuraciones personalizadas, garantizando la coherencia y la facilidad de uso.</p>
 <ul>
 <li>
@@ -1616,8 +1569,16 @@ app3.example.com_USE_BAD_BEHAVIOR=no
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
         
       </main>
       
@@ -1718,7 +1679,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

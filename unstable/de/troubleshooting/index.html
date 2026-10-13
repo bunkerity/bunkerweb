@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Schnellstart
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
   
 
     
@@ -1419,16 +1372,16 @@
   
 
 
-<h1 id="fehlerbehebung">Fehlerbehebung</h1>
+<h1 id="fehlerbehebung">Fehlerbehebung<a class="headerlink" href="#fehlerbehebung" title="Permanent link">&para;</a></h1>
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb Panel</p>
 <p>Wenn Sie Ihr Problem nicht lösen können, können Sie <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">uns direkt über unser Panel kontaktieren</a>. Dies zentralisiert alle Anfragen zur BunkerWeb-Lösung.</p>
 </div>
-<h2 id="protokolle">Protokolle</h2>
+<h2 id="protokolle">Protokolle<a class="headerlink" href="#protokolle" title="Permanent link">&para;</a></h2>
 <p>Bei der Fehlerbehebung sind Protokolle Ihre besten Freunde. Wir geben unser Bestes, um benutzerfreundliche Protokolle bereitzustellen, damit Sie verstehen, was passiert.</p>
 <p>Bitte beachten Sie, dass Sie <code>LOG_LEVEL</code> auf <code>info</code> (Standard: <code>notice</code>) setzen können, um die Ausführlichkeit von BunkerWeb zu erhöhen.</p>
 <p>Hier erfahren Sie, wie Sie je nach Integration auf die Protokolle zugreifen können:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker Autoconf</label><label for="__tabbed_1_3">All-in-one</label><label for="__tabbed_1_4">Swarm</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">All-in-one</label><label for="__tabbed_1_4">Swarm</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="admonition tip">
@@ -1509,9 +1462,9 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 </div>
-<h2 id="berechtigungen">Berechtigungen</h2>
+<h2 id="berechtigungen">Berechtigungen<a class="headerlink" href="#berechtigungen" title="Permanent link">&para;</a></h2>
 <p>Vergessen Sie nicht, dass BunkerWeb aus offensichtlichen Sicherheitsgründen als unprivilegierter Benutzer ausgeführt wird. Überprüfen Sie die Berechtigungen von Dateien und Ordnern, die von BunkerWeb verwendet werden, insbesondere wenn Sie benutzerdefinierte Konfigurationen verwenden (weitere Informationen <a href="../advanced/#custom-configurations">hier</a>). Sie müssen mindestens <strong><em>RW</em></strong>-Rechte für Dateien und <strong><em>RWX</em></strong> für Ordner festlegen.</p>
-<h2 id="ip-entsperrung">IP-Entsperrung</h2>
+<h2 id="ip-entsperrung">IP-Entsperrung<a class="headerlink" href="#ip-entsperrung" title="Permanent link">&para;</a></h2>
 <p>Sie können eine IP manuell entsperren, was bei Tests nützlich ist, damit Sie die interne API von BunkerWeb kontaktieren können (ersetzen Sie <code>1.2.3.4</code> durch die zu entsperrende IP-Adresse):</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker / Docker Autoconf</label><label for="__tabbed_2_2">All-in-one</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
 <div class="tabbed-content">
@@ -1554,10 +1507,10 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 </div>
-<h2 id="falschmeldungen">Falschmeldungen</h2>
-<h3 id="nur-erkennen-modus">Nur-Erkennen-Modus</h3>
+<h2 id="falschmeldungen">Falschmeldungen<a class="headerlink" href="#falschmeldungen" title="Permanent link">&para;</a></h2>
+<h3 id="nur-erkennen-modus">Nur-Erkennen-Modus<a class="headerlink" href="#nur-erkennen-modus" title="Permanent link">&para;</a></h3>
 <p>Zu Debugging-/Testzwecken können Sie BunkerWeb in den <a href="../features/#security-modes">Nur-Erkennen-Modus</a> versetzen, sodass Anfragen nicht blockiert werden und es sich wie ein klassischer Reverse-Proxy verhält.</p>
-<h3 id="modsecurity">ModSecurity</h3>
+<h3 id="modsecurity">ModSecurity<a class="headerlink" href="#modsecurity" title="Permanent link">&para;</a></h3>
 <p>Die Standardkonfiguration von ModSecurity in BunkerWeb lädt das Core Rule Set im Anomalie-Bewertungsmodus mit einer Paranoia-Stufe (PL) von 1:</p>
 <ul>
 <li>Jede übereinstimmende Regel erhöht eine Anomalie-Punktzahl (so können viele Regeln auf eine einzelne Anfrage zutreffen)</li>
@@ -1642,28 +1595,28 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </ol>
 <p>Eine wichtige Sache zu verstehen ist, dass Regel <strong>949110</strong> keine "echte" Regel ist: Es ist diejenige, die die Anfrage verweigert, weil der Anomalie-Schwellenwert erreicht ist (in diesem Beispiel <strong>10</strong>). Sie sollten die Regel <strong>949110</strong> niemals entfernen!</p>
 <p>Wenn es sich um eine Falschmeldung handelt, sollten Sie sich auf die Regeln <strong>930120</strong> und <strong>932160</strong> konzentrieren. Das Tuning von ModSecurity und/oder CRS liegt außerhalb des Rahmens dieser Dokumentation, aber vergessen Sie nicht, dass Sie benutzerdefinierte Konfigurationen vor und nach dem Laden des CRS anwenden können (weitere Informationen <a href="../advanced/#custom-configurations">hier</a>).</p>
-<h3 id="schlechtes-verhalten">Schlechtes Verhalten</h3>
+<h3 id="schlechtes-verhalten">Schlechtes Verhalten<a class="headerlink" href="#schlechtes-verhalten" title="Permanent link">&para;</a></h3>
 <p>Ein häufiger Fall von Falschmeldungen ist, wenn der Client aufgrund der Funktion "schlechtes Verhalten" gesperrt wird, was bedeutet, dass innerhalb eines Zeitraums zu viele verdächtige HTTP-Statuscodes generiert wurden (weitere Informationen <a href="../features/#bad-behavior">hier</a>). Sie sollten damit beginnen, die Einstellungen zu überprüfen und sie dann entsprechend Ihrer Webanwendung(en) zu bearbeiten, z. B. einen verdächtigen HTTP-Code entfernen, die Zählzeit verringern, den Schwellenwert erhöhen usw.</p>
-<h3 id="whitelisting">Whitelisting</h3>
+<h3 id="whitelisting">Whitelisting<a class="headerlink" href="#whitelisting" title="Permanent link">&para;</a></h3>
 <p>Wenn Sie Bots (oder Administratoren) haben, die auf Ihre Website zugreifen müssen, ist die empfohlene Vorgehensweise, um Falschmeldungen zu vermeiden, sie mit der <a href="../features/#whitelist">Whitelisting-Funktion</a> auf die Whitelist zu setzen. Wir empfehlen nicht, die Einstellungen <code>WHITELIST_URI*</code> oder <code>WHITELIST_USER_AGENT*</code> zu verwenden, es sei denn, sie sind auf geheime und unvorhersehbare Werte gesetzt. Gängige Anwendungsfälle sind:</p>
 <ul>
 <li>Healthcheck / Status-Bot</li>
 <li>Callback wie IPN oder Webhook</li>
 <li>Social-Media-Crawler</li>
 </ul>
-<h2 id="haufige-fehler">Häufige Fehler</h2>
-<h3 id="upstream-hat-zu-groen-header-gesendet">Upstream hat zu großen Header gesendet</h3>
+<h2 id="haufige-fehler">Häufige Fehler<a class="headerlink" href="#haufige-fehler" title="Permanent link">&para;</a></h2>
+<h3 id="upstream-hat-zu-groen-header-gesendet">Upstream hat zu großen Header gesendet<a class="headerlink" href="#upstream-hat-zu-groen-header-gesendet" title="Permanent link">&para;</a></h3>
 <p>Wenn Sie den Fehler <code>upstream sent too big header while reading response header from upstream</code> in den Protokollen sehen, müssen Sie die verschiedenen Proxy-Puffergrößen mit den folgenden Einstellungen anpassen:</p>
 <ul>
 <li><code>PROXY_BUFFERS</code></li>
 <li><code>PROXY_BUFFER_SIZE</code></li>
 <li><code>PROXY_BUSY_BUFFERS_SIZE</code></li>
 </ul>
-<h3 id="konnte-server_names_hash-nicht-erstellen">Konnte server_names_hash nicht erstellen</h3>
+<h3 id="konnte-server_names_hash-nicht-erstellen">Konnte server_names_hash nicht erstellen<a class="headerlink" href="#konnte-server_names_hash-nicht-erstellen" title="Permanent link">&para;</a></h3>
 <p>Wenn Sie den Fehler <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code> in den Protokollen sehen, müssen Sie die Einstellung <code>SERVER_NAMES_HASH_BUCKET_SIZE</code> anpassen.</p>
-<h2 id="zeitzone">Zeitzone</h2>
+<h2 id="zeitzone">Zeitzone<a class="headerlink" href="#zeitzone" title="Permanent link">&para;</a></h2>
 <p>Bei Verwendung von containerbasierten Integrationen kann die Zeitzone des Containers von der des Host-Rechners abweichen. Um dies zu beheben, können Sie die Umgebungsvariable <code>TZ</code> auf die Zeitzone Ihrer Wahl in Ihren Containern setzen (z. B. <code>TZ=Europe/Paris</code>). Eine Liste der Zeitzonen-Identifikatoren finden Sie <a href="https://de.wikipedia.org/wiki/Liste_der_Zeitzonen-Datenbank-Zeitzonen#Liste">hier</a>.</p>
-<h2 id="clear-old-instances-db">Alte Instanzen aus der Datenbank bereinigen</h2>
+<h2 id="clear-old-instances-db">Alte Instanzen aus der Datenbank bereinigen<a class="headerlink" href="#clear-old-instances-db" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb speichert bekannte Instanzen in der Tabelle <code>bw_instances</code> (Primärschlüssel: <code>hostname</code>).
 Wenn du häufig neu ausrollst, können alte Zeilen bestehen bleiben (z. B. Instanzen, die sich seit langer Zeit nicht mehr gemeldet haben) – dann möchtest du sie ggf. löschen.</p>
 <div class="admonition warning">
@@ -1675,7 +1628,7 @@ Wenn du häufig neu ausrollst, können alte Zeilen bestehen bleiben (z. B. Ins
 <p>Um Race-Conditions beim Löschen zu vermeiden, stoppe (oder skaliere herunter) Komponenten, die Instanzen aktualisieren können
 (typischerweise Scheduler / Autoconf – abhängig von deinem Deployment), führe die Bereinigung aus und starte sie anschließend wieder.</p>
 </div>
-<h3 id="tabelle-und-spalten-referenz">Tabelle und Spalten (Referenz)</h3>
+<h3 id="tabelle-und-spalten-referenz">Tabelle und Spalten (Referenz)<a class="headerlink" href="#tabelle-und-spalten-referenz" title="Permanent link">&para;</a></h3>
 <p>Das Instanzmodell ist definiert als:</p>
 <ul>
 <li>Tabelle: <code>bw_instances</code></li>
@@ -1686,12 +1639,12 @@ Wenn du häufig neu ausrollst, können alte Zeilen bestehen bleiben (z. B. Ins
   <code>server_name</code>, <code>type</code>, <code>status</code>, <code>method</code>,
   <code>creation_date</code></li>
 </ul>
-<h3 id="1-mit-der-datenbank-verbinden">1 - Mit der Datenbank verbinden</h3>
+<h3 id="1-mit-der-datenbank-verbinden">1 - Mit der Datenbank verbinden<a class="headerlink" href="#1-mit-der-datenbank-verbinden" title="Permanent link">&para;</a></h3>
 <p>Nutze den bestehenden Abschnitt <a href="#access-database">Datenbankzugriff</a>, um dich zu verbinden
 (SQLite / MariaDB / PostgreSQL).</p>
-<h3 id="2-dry-run-veraltete-instanzen-auflisten">2 - Dry-Run: Veraltete Instanzen auflisten</h3>
+<h3 id="2-dry-run-veraltete-instanzen-auflisten">2 - Dry-Run: Veraltete Instanzen auflisten<a class="headerlink" href="#2-dry-run-veraltete-instanzen-auflisten" title="Permanent link">&para;</a></h3>
 <p>Wähle ein Aufbewahrungsfenster (Beispiel: 90 Tage) und prüfe, was gelöscht würde.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label><label for="__tabbed_3_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MySQL/MariaDB</label><label for="__tabbed_3_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
@@ -1719,9 +1672,9 @@ Wenn du häufig neu ausrollst, können alte Zeilen bestehen bleiben (z. B. Ins
 </div>
 </div>
 </div>
-<h3 id="3-veraltete-instanzen-loschen">3 - Veraltete Instanzen löschen</h3>
+<h3 id="3-veraltete-instanzen-loschen">3 - Veraltete Instanzen löschen<a class="headerlink" href="#3-veraltete-instanzen-loschen" title="Permanent link">&para;</a></h3>
 <p>Nach der Prüfung kannst du die Zeilen löschen.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">SQLite</label><label for="__tabbed_4_2">MariaDB / MySQL</label><label for="__tabbed_4_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">SQLite</label><label for="__tabbed_4_2">MySQL/MariaDB</label><label for="__tabbed_4_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
@@ -1758,12 +1711,12 @@ Wenn du häufig neu ausrollst, können alte Zeilen bestehen bleiben (z. B. Ins
 <div class="highlight"><pre><span></span><code><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'&lt;hostname&gt;'</span><span class="p">;</span>
 </code></pre></div>
 </div>
-<h3 id="4-instanzen-als-geandert-markieren-optional">4 - Instanzen als geändert markieren (optional)</h3>
+<h3 id="4-instanzen-als-geandert-markieren-optional">4 - Instanzen als geändert markieren (optional)<a class="headerlink" href="#4-instanzen-als-geandert-markieren-optional" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb verfolgt Instanzänderungen in der Tabelle <code>bw_metadata</code>
 (<code>instances_changed</code>, <code>last_instances_change</code>).</p>
 <p>Wenn die UI nach der manuellen Bereinigung nicht wie erwartet aktualisiert,
 kannst du ein „Change Marker“-Update erzwingen:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite / PostgreSQL</label><label for="__tabbed_5_2">MariaDB / MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite / PostgreSQL</label><label for="__tabbed_5_2">MySQL/MariaDB</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_metadata</span>
@@ -1781,8 +1734,8 @@ kannst du ein „Change Marker“-Update erzwingen:</p>
 </div>
 </div>
 </div>
-<h3 id="5-speicherplatz-freigeben-optional">5 - Speicherplatz freigeben (optional)</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">PostgreSQL</label><label for="__tabbed_6_3">MariaDB / MySQL</label></div>
+<h3 id="5-speicherplatz-freigeben-optional">5 - Speicherplatz freigeben (optional)<a class="headerlink" href="#5-speicherplatz-freigeben-optional" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">PostgreSQL</label><label for="__tabbed_6_3">MySQL/MariaDB</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">VACUUM</span><span class="p">;</span>
@@ -1798,14 +1751,14 @@ kannst du ein „Change Marker“-Update erzwingen:</p>
 </div>
 </div>
 </div>
-<h2 id="web-ui">Web-UI</h2>
+<h2 id="web-ui">Web-UI<a class="headerlink" href="#web-ui" title="Permanent link">&para;</a></h2>
 <p>Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA haben, können Sie sich mit der Datenbank verbinden, um wieder Zugriff zu erhalten.</p>
 <div class="admonition warning">
 <p class="admonition-title">2FA funktioniert nach dem Neuerstellen des Containers nicht mehr</p>
 <p>Die Schlüssel zum Entschlüsseln der TOTP-Secrets liegen im UI-Container unter <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>, im Image also in <code>/data/lib</code>. Wird der Container <code>bw-ui</code> ohne persistentes Volume auf <code>/data</code> neu erstellt, entsteht ein neuer Schlüsselsatz: die in der Datenbank gespeicherten Secrets sind nicht mehr entschlüsselbar, die Admin-Registrierung wird entfernt und die übrigen Konten müssen mit dem SQL unten zurückgesetzt werden. Binden Sie ein Volume auf <code>/data</code> ein (siehe <a href="../web-ui/">Dokumentation der Weboberfläche</a>), damit die Schlüssel erhalten bleiben, oder geben Sie eigene <code>TOTP_ENCRYPTION_KEYS</code> vor.</p>
 </div>
-<h3 id="access-database">Auf die Datenbank zugreifen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MariaDB / MySQL</label><label for="__tabbed_7_3">PostgreSQL</label></div>
+<h3 id="access-database">Auf die Datenbank zugreifen<a class="headerlink" href="#access-database" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MySQL/MariaDB</label><label for="__tabbed_7_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Linux</label><label for="__tabbed_8_2">Docker</label><label for="__tabbed_8_3">All-in-one</label></div>
@@ -1948,7 +1901,7 @@ sqlite&gt;
 </div>
 </div>
 </div>
-<h3 id="manahmen-zur-fehlerbehebung">Maßnahmen zur Fehlerbehebung</h3>
+<h3 id="manahmen-zur-fehlerbehebung">Maßnahmen zur Fehlerbehebung<a class="headerlink" href="#manahmen-zur-fehlerbehebung" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Tabellenschema</p>
 <p>Das Schema der Tabelle <code>bw_ui_users</code> ist wie folgt:</p>
@@ -2180,7 +2133,7 @@ sqlite&gt;
 </div>
 </div>
 </div>
-<h3 id="plugin-hochladen">Plugin hochladen</h3>
+<h3 id="plugin-hochladen">Plugin hochladen<a class="headerlink" href="#plugin-hochladen" title="Permanent link">&para;</a></h3>
 <p>Es ist möglicherweise nicht möglich, ein Plugin in bestimmten Situationen von der Benutzeroberfläche hochzuladen:</p>
 <ul>
 <li>Fehlendes Paket zur Verwaltung komprimierter Dateien in Ihrer Integration, in diesem Fall müssen Sie die erforderlichen Pakete hinzufügen</li>
@@ -2203,8 +2156,16 @@ sqlite&gt;
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
         
       </main>
       
@@ -2305,7 +2266,7 @@ sqlite&gt;
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

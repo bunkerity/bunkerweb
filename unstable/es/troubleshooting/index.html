@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Buscar en la documentaci\u00f3n");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 ¿Buscas BunkerWeb CLOUD, la versión PRO, asistencia técnica o servicios a medida? Visita el
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    para obtener más información sobre nuestras ofertas para empresas.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    No está viendo la documentación de la última versión.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Haga clic aquí para ver la última versión.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Guía de inicio rápido
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compilar desde el código fuente
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Guía de inicio rápido
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compilar desde el código fuente
   
 
     
@@ -1419,12 +1372,12 @@
   
 
 
-<h1 id="solucion-de-problemas">Solución de problemas</h1>
+<h1 id="solucion-de-problemas">Solución de problemas<a class="headerlink" href="#solucion-de-problemas" title="Permanent link">&para;</a></h1>
 <div class="admonition info">
 <p class="admonition-title">Panel de BunkerWeb</p>
 <p>Si no puedes resolver tu problema, puedes <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">contactarnos directamente a través de nuestro panel</a>. Esto centraliza todas las solicitudes relacionadas con la solución BunkerWeb.</p>
 </div>
-<h2 id="registros">Registros</h2>
+<h2 id="registros">Registros<a class="headerlink" href="#registros" title="Permanent link">&para;</a></h2>
 <p>Al solucionar problemas, los registros son tus mejores amigos. Hacemos nuestro mejor esfuerzo para proporcionar registros fáciles de usar para ayudarte a entender lo que está sucediendo.</p>
 <p>Ten en cuenta que puedes establecer el <code>LOG_LEVEL</code> en <code>info</code> (predeterminado: <code>notice</code>) para aumentar la verbosidad de BunkerWeb.</p>
 <p>Aquí te mostramos cómo puedes acceder a los registros, dependiendo de tu integración:</p>
@@ -1509,9 +1462,9 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 </div>
-<h2 id="permisos">Permisos</h2>
+<h2 id="permisos">Permisos<a class="headerlink" href="#permisos" title="Permanent link">&para;</a></h2>
 <p>No olvides que BunkerWeb se ejecuta como un usuario sin privilegios por razones de seguridad obvias. Verifica dos veces los permisos de los archivos y carpetas utilizados por BunkerWeb, especialmente si usas configuraciones personalizadas (más información <a href="../advanced/#custom-configurations">aquí</a>). Necesitarás establecer al menos derechos <strong><em>RW</em></strong> en los archivos y <strong><em>RWX</em></strong> en las carpetas.</p>
-<h2 id="desbloqueo-de-ip">Desbloqueo de IP</h2>
+<h2 id="desbloqueo-de-ip">Desbloqueo de IP<a class="headerlink" href="#desbloqueo-de-ip" title="Permanent link">&para;</a></h2>
 <p>Puedes desbloquear manualmente una IP, lo cual es útil al realizar pruebas para que puedas contactar la API interna de BunkerWeb (reemplaza <code>1.2.3.4</code> con la dirección IP a desbloquear):</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker / Docker Autoconf</label><label for="__tabbed_2_2">Todo en uno</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
 <div class="tabbed-content">
@@ -1554,10 +1507,10 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 </div>
-<h2 id="falsos-positivos">Falsos positivos</h2>
-<h3 id="modo-de-solo-deteccion">Modo de solo detección</h3>
+<h2 id="falsos-positivos">Falsos positivos<a class="headerlink" href="#falsos-positivos" title="Permanent link">&para;</a></h2>
+<h3 id="modo-de-solo-deteccion">Modo de solo detección<a class="headerlink" href="#modo-de-solo-deteccion" title="Permanent link">&para;</a></h3>
 <p>Para fines de depuración/prueba, puedes configurar BunkerWeb en <a href="../features/#security-modes">modo de solo detección</a> para que no bloquee las solicitudes y actúe como un proxy inverso clásico.</p>
-<h3 id="modsecurity">ModSecurity</h3>
+<h3 id="modsecurity">ModSecurity<a class="headerlink" href="#modsecurity" title="Permanent link">&para;</a></h3>
 <p>La configuración predeterminada de ModSecurity de BunkerWeb es cargar el Core Rule Set en modo de puntuación de anomalías con un nivel de paranoia (PL) de 1:</p>
 <ul>
 <li>Cada regla que coincida aumentará una puntuación de anomalía (por lo que muchas reglas pueden coincidir con una sola solicitud)</li>
@@ -1642,28 +1595,28 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </ol>
 <p>Una cosa importante a entender es que la regla <strong>949110</strong> no es una regla "real": es la que denegará la solicitud porque se alcanza el umbral de anomalía (que es <strong>10</strong> en este ejemplo). ¡Nunca deberías eliminar la regla <strong>949110</strong>!</p>
 <p>Si se trata de un falso positivo, deberías centrarte en las reglas <strong>930120</strong> y <strong>932160</strong>. El ajuste de ModSecurity y/o CRS está fuera del alcance de esta documentación, pero no olvides que puedes aplicar configuraciones personalizadas antes y después de que se cargue el CRS (más información <a href="../advanced/#custom-configurations">aquí</a>).</p>
-<h3 id="mal-comportamiento">Mal comportamiento</h3>
+<h3 id="mal-comportamiento">Mal comportamiento<a class="headerlink" href="#mal-comportamiento" title="Permanent link">&para;</a></h3>
 <p>Un caso común de falso positivo es cuando el cliente es baneado debido a la característica de "mal comportamiento", lo que significa que se generaron demasiados códigos de estado HTTP sospechosos en un período de tiempo (más información <a href="../features/#bad-behavior">aquí</a>). Deberías empezar por revisar la configuración y luego editarla de acuerdo a tu(s) aplicación(es) web, como eliminar un código HTTP sospechoso, disminuir el tiempo de conteo, aumentar el umbral, ...</p>
-<h3 id="lista-blanca">Lista blanca</h3>
+<h3 id="lista-blanca">Lista blanca<a class="headerlink" href="#lista-blanca" title="Permanent link">&para;</a></h3>
 <p>Si tienes bots (o administradores) que necesitan acceder a tu sitio web, la forma recomendada de evitar cualquier falso positivo es incluirlos en la lista blanca usando la <a href="../features/#whitelist">característica de lista blanca</a>. No recomendamos usar las configuraciones <code>WHITELIST_URI*</code> o <code>WHITELIST_USER_AGENT*</code> a menos que se establezcan en valores secretos e impredecibles. Los casos de uso comunes son:</p>
 <ul>
 <li>Bot de comprobación de estado / estado</li>
 <li>Devolución de llamada como IPN o webhook</li>
 <li>Rastreador de redes sociales</li>
 </ul>
-<h2 id="errores-comunes">Errores comunes</h2>
-<h3 id="el-upstream-envio-una-cabecera-demasiado-grande">El upstream envió una cabecera demasiado grande</h3>
+<h2 id="errores-comunes">Errores comunes<a class="headerlink" href="#errores-comunes" title="Permanent link">&para;</a></h2>
+<h3 id="el-upstream-envio-una-cabecera-demasiado-grande">El upstream envió una cabecera demasiado grande<a class="headerlink" href="#el-upstream-envio-una-cabecera-demasiado-grande" title="Permanent link">&para;</a></h3>
 <p>Si ves el siguiente error <code>upstream sent too big header while reading response header from upstream</code> en los registros, necesitarás ajustar los diversos tamaños de los búferes del proxy usando las siguientes configuraciones:</p>
 <ul>
 <li><code>PROXY_BUFFERS</code></li>
 <li><code>PROXY_BUFFER_SIZE</code></li>
 <li><code>PROXY_BUSY_BUFFERS_SIZE</code></li>
 </ul>
-<h3 id="no-se-pudo-construir-el-hash-de-server_names">No se pudo construir el hash de server_names</h3>
+<h3 id="no-se-pudo-construir-el-hash-de-server_names">No se pudo construir el hash de server_names<a class="headerlink" href="#no-se-pudo-construir-el-hash-de-server_names" title="Permanent link">&para;</a></h3>
 <p>Si ves el siguiente error <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code> en los registros, necesitarás ajustar la configuración <code>SERVER_NAMES_HASH_BUCKET_SIZE</code>.</p>
-<h2 id="zona-horaria">Zona horaria</h2>
+<h2 id="zona-horaria">Zona horaria<a class="headerlink" href="#zona-horaria" title="Permanent link">&para;</a></h2>
 <p>Cuando se utilizan integraciones basadas en contenedores, la zona horaria del contenedor puede no coincidir con la de la máquina anfitriona. Para resolver esto, puedes establecer la variable de entorno <code>TZ</code> a la zona horaria de tu elección en tus contenedores (p. ej., <code>TZ=Europe/Paris</code>). Encontrarás la lista de identificadores de zona horaria <a href="https://es.wikipedia.org/wiki/Anexo:Lista_de_zonas_horarias_de_la_base_de_datos_IANA#Lista">aquí</a>.</p>
-<h2 id="clear-old-instances-db">Limpiar instancias antiguas de la base de datos</h2>
+<h2 id="clear-old-instances-db">Limpiar instancias antiguas de la base de datos<a class="headerlink" href="#clear-old-instances-db" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb almacena las instancias conocidas en la tabla <code>bw_instances</code> (clave primaria: <code>hostname</code>).
 Si redespliegas con frecuencia, pueden quedar filas antiguas (por ejemplo, instancias que no han hecho check-in en mucho tiempo) y quizá quieras purgarlas.</p>
 <div class="admonition warning">
@@ -1675,7 +1628,7 @@ Si redespliegas con frecuencia, pueden quedar filas antiguas (por ejemplo, insta
 <p>Para evitar condiciones de carrera al eliminar, detén (o escala hacia abajo) los componentes que pueden actualizar instancias
 (normalmente el scheduler / autoconf según tu despliegue), ejecuta la limpieza y luego vuelve a iniciarlos.</p>
 </div>
-<h3 id="tabla-y-columnas-referencia">Tabla y columnas (referencia)</h3>
+<h3 id="tabla-y-columnas-referencia">Tabla y columnas (referencia)<a class="headerlink" href="#tabla-y-columnas-referencia" title="Permanent link">&para;</a></h3>
 <p>El modelo de instancia se define así:</p>
 <ul>
 <li>Tabla: <code>bw_instances</code></li>
@@ -1686,12 +1639,12 @@ Si redespliegas con frecuencia, pueden quedar filas antiguas (por ejemplo, insta
   <code>server_name</code>, <code>type</code>, <code>status</code>, <code>method</code>,
   <code>creation_date</code></li>
 </ul>
-<h3 id="1-conectarse-a-la-base-de-datos">1 - Conectarse a la base de datos</h3>
+<h3 id="1-conectarse-a-la-base-de-datos">1 - Conectarse a la base de datos<a class="headerlink" href="#1-conectarse-a-la-base-de-datos" title="Permanent link">&para;</a></h3>
 <p>Usa la sección existente <a href="#access-database">Acceso a la base de datos</a> para conectarte
 (SQLite / MariaDB / PostgreSQL).</p>
-<h3 id="2-dry-run-listar-instancias-obsoletas">2 - Dry-run: listar instancias obsoletas</h3>
+<h3 id="2-dry-run-listar-instancias-obsoletas">2 - Dry-run: listar instancias obsoletas<a class="headerlink" href="#2-dry-run-listar-instancias-obsoletas" title="Permanent link">&para;</a></h3>
 <p>Elige una ventana de retención (ejemplo: 90 días) y revisa qué se eliminaría.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label><label for="__tabbed_3_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MySQL/MariaDB</label><label for="__tabbed_3_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
@@ -1719,9 +1672,9 @@ Si redespliegas con frecuencia, pueden quedar filas antiguas (por ejemplo, insta
 </div>
 </div>
 </div>
-<h3 id="3-eliminar-instancias-obsoletas">3 - Eliminar instancias obsoletas</h3>
+<h3 id="3-eliminar-instancias-obsoletas">3 - Eliminar instancias obsoletas<a class="headerlink" href="#3-eliminar-instancias-obsoletas" title="Permanent link">&para;</a></h3>
 <p>Una vez verificado, elimina las filas.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">SQLite</label><label for="__tabbed_4_2">MariaDB / MySQL</label><label for="__tabbed_4_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">SQLite</label><label for="__tabbed_4_2">MySQL/MariaDB</label><label for="__tabbed_4_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
@@ -1758,12 +1711,12 @@ Si redespliegas con frecuencia, pueden quedar filas antiguas (por ejemplo, insta
 <div class="highlight"><pre><span></span><code><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'&lt;hostname&gt;'</span><span class="p">;</span>
 </code></pre></div>
 </div>
-<h3 id="4-marcar-instancias-como-cambiadas-opcional">4 - Marcar instancias como cambiadas (opcional)</h3>
+<h3 id="4-marcar-instancias-como-cambiadas-opcional">4 - Marcar instancias como cambiadas (opcional)<a class="headerlink" href="#4-marcar-instancias-como-cambiadas-opcional" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb registra los cambios de instancias en la tabla <code>bw_metadata</code>
 (<code>instances_changed</code>, <code>last_instances_change</code>).</p>
 <p>Si la UI no se actualiza como esperas tras una limpieza manual,
 puedes forzar una actualización del “marcador de cambios”:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite / PostgreSQL</label><label for="__tabbed_5_2">MariaDB / MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite / PostgreSQL</label><label for="__tabbed_5_2">MySQL/MariaDB</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_metadata</span>
@@ -1781,8 +1734,8 @@ puedes forzar una actualización del “marcador de cambios”:</p>
 </div>
 </div>
 </div>
-<h3 id="5-recuperar-espacio-opcional">5 - Recuperar espacio (opcional)</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">PostgreSQL</label><label for="__tabbed_6_3">MariaDB / MySQL</label></div>
+<h3 id="5-recuperar-espacio-opcional">5 - Recuperar espacio (opcional)<a class="headerlink" href="#5-recuperar-espacio-opcional" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">PostgreSQL</label><label for="__tabbed_6_3">MySQL/MariaDB</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">VACUUM</span><span class="p">;</span>
@@ -1798,14 +1751,14 @@ puedes forzar una actualización del “marcador de cambios”:</p>
 </div>
 </div>
 </div>
-<h2 id="web-ui">Interfaz de usuario web</h2>
+<h2 id="web-ui">Interfaz de usuario web<a class="headerlink" href="#web-ui" title="Permanent link">&para;</a></h2>
 <p>En caso de que hayas olvidado tus credenciales de la interfaz de usuario o estés experimentando problemas con la 2FA, puedes conectarte a la base de datos para recuperar el acceso.</p>
 <div class="admonition warning">
 <p class="admonition-title">La 2FA dejó de funcionar tras recrear el contenedor</p>
 <p>Las claves que descifran los secretos TOTP se guardan en el contenedor de la UI, en <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>, es decir <code>/data/lib</code> dentro de la imagen. Recrear el contenedor <code>bw-ui</code> sin un volumen persistente en <code>/data</code> genera un juego nuevo de claves: los secretos guardados en la base de datos ya no se pueden descifrar, la inscripción del admin se elimina y las demás cuentas deben reiniciarse con el SQL de abajo. Monta un volumen en <code>/data</code> (consulta la <a href="../web-ui/">documentación de la interfaz web</a>) para conservar las claves, o aporta tus propias <code>TOTP_ENCRYPTION_KEYS</code>.</p>
 </div>
-<h3 id="access-database">Acceder a la base de datos</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MariaDB / MySQL</label><label for="__tabbed_7_3">PostgreSQL</label></div>
+<h3 id="access-database">Acceder a la base de datos<a class="headerlink" href="#access-database" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MySQL/MariaDB</label><label for="__tabbed_7_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Linux</label><label for="__tabbed_8_2">Docker</label><label for="__tabbed_8_3">Todo en uno</label></div>
@@ -1948,7 +1901,7 @@ sqlite&gt;
 </div>
 </div>
 </div>
-<h3 id="acciones-de-solucion-de-problemas">Acciones de solución de problemas</h3>
+<h3 id="acciones-de-solucion-de-problemas">Acciones de solución de problemas<a class="headerlink" href="#acciones-de-solucion-de-problemas" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Esquema de las tablas</p>
 <p>El esquema de la tabla <code>bw_ui_users</code> es el siguiente:</p>
@@ -2180,7 +2133,7 @@ sqlite&gt;
 </div>
 </div>
 </div>
-<h3 id="cargar-plugin">Cargar plugin</h3>
+<h3 id="cargar-plugin">Cargar plugin<a class="headerlink" href="#cargar-plugin" title="Permanent link">&para;</a></h3>
 <p>Puede que no sea posible cargar un plugin desde la interfaz de usuario en ciertas situaciones:</p>
 <ul>
 <li>Falta de un paquete para gestionar archivos comprimidos en tu integración, en cuyo caso necesitarás añadir los paquetes necesarios</li>
@@ -2203,8 +2156,16 @@ sqlite&gt;
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
         
       </main>
       
@@ -2305,7 +2266,7 @@ sqlite&gt;
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

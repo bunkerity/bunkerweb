@@ -77,16 +77,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -203,11 +203,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -220,10 +220,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -956,33 +936,6 @@
   
   
     <li class="md-nav__item">
-      <a href="building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="features/" class="md-nav__link">
         
   
@@ -1239,8 +1192,8 @@
   
 
 
-<h1 id="einfuhrung">Einführung</h1>
-<h2 id="ubersicht">Übersicht</h2>
+<h1 id="einfuhrung">Einführung<a class="headerlink" href="#einfuhrung" title="Permanent link">&para;</a></h1>
+<h2 id="ubersicht">Übersicht<a class="headerlink" href="#ubersicht" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../assets/img/intro-overview.svg" width="800" />
   </p>
@@ -1249,7 +1202,7 @@
 <p>BunkerWeb ist eine Open-Source-Webanwendungs-Firewall (WAF) der nächsten Generation.</p>
 <p>Als vollwertiger Webserver (basierend auf <a href="https://nginx.org/">NGINX</a> im Hintergrund) schützt es Ihre Webdienste, um sie "standardmäßig sicher" zu machen. BunkerWeb lässt sich nahtlos in Ihre bestehenden Umgebungen integrieren (<a href="integrations/#linux">Linux</a>, <a href="integrations/#docker">Docker</a>, <a href="integrations/#swarm">Swarm</a>, <a href="integrations/#kubernetes">Kubernetes</a>, …) als Reverse-Proxy und ist vollständig konfigurierbar (keine Panik, es gibt eine <a href="web-ui/">großartige Weboberfläche</a>, wenn Sie die CLI nicht mögen), um Ihre spezifischen Anwendungsfälle zu erfüllen. Mit anderen Worten, Cybersicherheit ist kein Aufwand mehr.</p>
 <p>BunkerWeb enthält primäre <a href="advanced/#security-tuning">Sicherheitsfunktionen</a> als Teil des Kerns, kann aber dank eines <a href="plugins/">Pluginsystems</a> leicht um zusätzliche erweitert werden.</p>
-<h2 id="warum-bunkerweb">Warum BunkerWeb?</h2>
+<h2 id="warum-bunkerweb">Warum BunkerWeb?<a class="headerlink" href="#warum-bunkerweb" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/oybLtyhWJIo" title="BunkerWeb-Übersicht" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
@@ -1277,7 +1230,7 @@
 <p><strong>Professionelle Dienstleistungen</strong>: Erhalten Sie technischen Support, maßgeschneiderte Beratung und kundenspezifische Entwicklung direkt von den Betreuern von BunkerWeb. Besuchen Sie das <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> für weitere Informationen.</p>
 </li>
 </ul>
-<h2 id="sicherheitsfunktionen">Sicherheitsfunktionen</h2>
+<h2 id="sicherheitsfunktionen">Sicherheitsfunktionen<a class="headerlink" href="#sicherheitsfunktionen" title="Permanent link">&para;</a></h2>
 <p>Entdecken Sie die beeindruckende Auswahl an Sicherheitsfunktionen, die BunkerWeb bietet. Obwohl nicht vollständig, hier einige bemerkenswerte Highlights:</p>
 <ul>
 <li>
@@ -1306,19 +1259,19 @@
 </li>
 </ul>
 <p>Um tiefer in die Kernsicherheitsfunktionen einzutauchen, laden wir Sie ein, den Abschnitt <a href="advanced/#security-tuning">Sicherheits-Tuning</a> der Dokumentation zu erkunden. Entdecken Sie, wie BunkerWeb Sie befähigt, Sicherheitsmaßnahmen entsprechend Ihren spezifischen Bedürfnissen zu optimieren.</p>
-<h2 id="demo">Demo</h2>
+<h2 id="demo">Demo<a class="headerlink" href="#demo" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/ZhYV-QELzA4" title="Automatisierte Tools und Scanner täuschen" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>Eine mit BunkerWeb geschützte Demo-Website ist unter <a href="https://demo.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">demo.bunkerweb.io</a> verfügbar. Besuchen Sie sie gerne und führen Sie einige Sicherheitstests durch.</p>
-<h2 id="web-benutzeroberflache">Web-Benutzeroberfläche</h2>
+<h2 id="web-benutzeroberflache">Web-Benutzeroberfläche<a class="headerlink" href="#web-benutzeroberflache" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/tGS3pzquEjY" title="BunkerWeb-Web-UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>BunkerWeb bietet eine optionale <a href="web-ui/">Benutzeroberfläche</a> zur Verwaltung Ihrer Instanzen und deren Konfigurationen. Eine schreibgeschützte Online-Demo ist unter <a href="https://demo-ui.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">demo-ui.bunkerweb.io</a> verfügbar. Testen Sie sie gerne selbst.</p>
-<h2 id="bunkerweb-cloud">BunkerWeb Cloud</h2>
+<h2 id="bunkerweb-cloud">BunkerWeb Cloud<a class="headerlink" href="#bunkerweb-cloud" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../assets/img/bunkerweb-cloud.png" width="600" />
   </p>
@@ -1333,7 +1286,7 @@
 <li>Technischer Support zur Unterstützung bei der Konfiguration</li>
 </ul>
 <p>Wenn Sie am BunkerWeb Cloud-Angebot interessiert sind, zögern Sie nicht, uns zu <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">kontaktieren</a>, damit wir Ihre Bedürfnisse besprechen können.</p>
-<h2 id="pro-version">PRO-Version</h2>
+<h2 id="pro-version">PRO-Version<a class="headerlink" href="#pro-version" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">Kostenlose Testversion von BunkerWeb PRO</p>
 <p>Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>.</p>
@@ -1348,11 +1301,11 @@
 <li>Fügen Sie Ihren privaten Schlüssel in BunkerWeb über die <a href="web-ui/#upgrade-to-pro">Web-UI</a> oder eine <a href="features/#pro">spezifische Einstellung</a> ein.</li>
 </ul>
 <p>Zögern Sie nicht, das <a href="https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&amp;utm_source=doc">BunkerWeb-Panel</a> zu besuchen oder uns zu <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">kontaktieren</a>, wenn Sie Fragen zur PRO-Version haben.</p>
-<h2 id="professionelle-dienstleistungen">Professionelle Dienstleistungen</h2>
+<h2 id="professionelle-dienstleistungen">Professionelle Dienstleistungen<a class="headerlink" href="#professionelle-dienstleistungen" title="Permanent link">&para;</a></h2>
 <p>Holen Sie das Beste aus BunkerWeb heraus, indem Sie professionelle Dienstleistungen direkt von den Betreuern des Projekts in Anspruch nehmen. Von technischem Support über maßgeschneiderte Beratung bis hin zur Entwicklung sind wir hier, um Sie bei der Sicherung Ihrer Webdienste zu unterstützen.</p>
 <p>Weitere Informationen finden Sie im <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>, unserer dedizierten Plattform für professionelle Dienstleistungen.</p>
 <p>Zögern Sie nicht, uns zu <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">kontaktieren</a>, wenn Sie Fragen haben. Wir freuen uns, auf Ihre Bedürfnisse einzugehen.</p>
-<h2 id="okosystem-community-und-ressourcen">Ökosystem, Community und Ressourcen</h2>
+<h2 id="okosystem-community-und-ressourcen">Ökosystem, Community und Ressourcen<a class="headerlink" href="#okosystem-community-und-ressourcen" title="Permanent link">&para;</a></h2>
 <p>Offizielle Websites, Tools und Ressourcen zu BunkerWeb:</p>
 <ul>
 <li><a href="https://www.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc"><strong>Website</strong></a>: Erhalten Sie weitere Informationen, Neuigkeiten und Artikel über BunkerWeb.</li>
@@ -1387,8 +1340,16 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
         
       </main>
       
@@ -1489,7 +1450,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>

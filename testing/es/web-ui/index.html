@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Buscar en la documentaci\u00f3n");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 ¿Buscas BunkerWeb CLOUD, la versión PRO, asistencia técnica o servicios a medida? Visita el
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    para obtener más información sobre nuestras ofertas para empresas.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    No está viendo la documentación de la última versión.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Haga clic aquí para ver la última versión.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Guía de inicio rápido
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compilar desde el código fuente
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Guía de inicio rápido
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compilar desde el código fuente
   
 
     
@@ -1369,8 +1322,8 @@
   
 
 
-<h1 id="interfaz-web">Interfaz Web</h1>
-<h2 id="rol-de-la-interfaz-web">Rol de la interfaz web</h2>
+<h1 id="interfaz-web">Interfaz Web<a class="headerlink" href="#interfaz-web" title="Permanent link">&para;</a></h1>
+<h2 id="rol-de-la-interfaz-web">Rol de la interfaz web<a class="headerlink" href="#rol-de-la-interfaz-web" title="Permanent link">&para;</a></h2>
 <p>La interfaz web es el plano de control visual de BunkerWeb. Administra servicios, ajustes globales, bloqueos, plugins, trabajos, caché, registros y actualizaciones sin usar la CLI. Es una app Flask servida por Gunicorn y normalmente se coloca detrás de un reverse proxy BunkerWeb.</p>
 <div class="admonition warning">
 <p class="admonition-title">Manténla detrás de BunkerWeb</p>
@@ -1388,7 +1341,7 @@
 <li>Dependencias: comparte la base de datos de BunkerWeb y habla con la API para recargar, bloquear o consultar instancias</li>
 </ul>
 </div>
-<h2 id="checklist-de-seguridad">Checklist de seguridad</h2>
+<h2 id="checklist-de-seguridad">Checklist de seguridad<a class="headerlink" href="#checklist-de-seguridad" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Ejecuta la UI detrás de BunkerWeb en una red interna; usa un <code>REVERSE_PROXY_URL</code> difícil de adivinar y limita IPs de origen.</li>
 <li>Establece <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code> fuertes; usa <code>OVERRIDE_ADMIN_CREDS=yes</code> solo cuando quieras forzar un reseteo.</li>
@@ -1398,9 +1351,9 @@
 <li>Mantén <code>CHECK_PRIVATE_IP=yes</code> (por defecto) para ligar sesiones a la IP; deja <code>ALWAYS_REMEMBER=no</code> salvo que requieras cookies largas.</li>
 <li>Asegura que <code>/var/log/bunkerweb</code> sea legible por UID/GID 101 (o el UID mapeado en rootless) para que la UI pueda leer logs.</li>
 </ul>
-<h2 id="puesta-en-marcha">Puesta en marcha</h2>
+<h2 id="puesta-en-marcha">Puesta en marcha<a class="headerlink" href="#puesta-en-marcha" title="Permanent link">&para;</a></h2>
 <p>La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Inicio rápido (asistente)</label><label for="__tabbed_1_2">Avanzado (entorno presembrado)</label><label for="__tabbed_1_3">Docker Autoconf</label><label for="__tabbed_1_4">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Inicio rápido (asistente)</label><label for="__tabbed_1_2">Avanzado (entorno presembrado)</label><label for="__tabbed_1_3">Docker autoconf</label><label for="__tabbed_1_4">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Usa las imágenes publicadas y el layout del <a href="../quickstart-guide/#__tabbed_1_3">guía rápida</a> para levantar el stack, luego completa el asistente en el navegador.</p>
@@ -1509,7 +1462,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h3 id="especificos-linux-vs-docker">Específicos Linux vs Docker</h3>
+<h3 id="especificos-linux-vs-docker">Específicos Linux vs Docker<a class="headerlink" href="#especificos-linux-vs-docker" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Enlaces por defecto: imágenes Docker escuchan en <code>0.0.0.0:7000</code>; paquetes Linux en <code>127.0.0.1:7000</code>. Cambia con <code>UI_LISTEN_ADDR</code> / <code>UI_LISTEN_PORT</code>.</li>
 <li>Cabeceras de proxy: <code>UI_FORWARDED_ALLOW_IPS</code> por defecto <code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code>; <code>UI_PROXY_ALLOW_IPS</code> toma por defecto el valor de <code>FORWARDED_ALLOW_IPS</code>. En Linux ajústalos a las IP de tu proxy para endurecer.</li>
@@ -1517,11 +1470,11 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>Logs: <code>/var/log/bunkerweb</code> debe ser legible por UID/GID 101 (o el UID mapeado en rootless). Los paquetes crean la ruta; los contenedores necesitan un volumen con permisos adecuados.</li>
 <li>Asistente: easy-install en Linux arranca la UI y el asistente automáticamente; en Docker se accede al asistente vía la URL reverse-proxificada salvo que preselecciones variables de entorno.</li>
 </ul>
-<h2 id="autenticacion-y-sesiones">Autenticación y sesiones</h2>
+<h2 id="autenticacion-y-sesiones">Autenticación y sesiones<a class="headerlink" href="#autenticacion-y-sesiones" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Cuenta admin: créala con el asistente o con <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>. La contraseña debe incluir minúsculas, mayúsculas, dígito y carácter especial. <code>OVERRIDE_ADMIN_CREDS=yes</code> fuerza la resiembra aunque ya exista.</li>
 <li>Límite de longitud de contraseña: bcrypt solo usa los primeros <strong>72 bytes</strong> de un secreto, por lo que las contraseñas se limitan a 72 bytes en todos los lugares donde se configuran (asistente de configuración, página de perfil, <code>ADMIN_PASSWORD</code> / <code>API_PASSWORD</code>). Un valor más largo se rechaza con un error o registro explicativo en lugar de truncarse silenciosamente. Ten en cuenta que los caracteres no ASCII (acentos, emoji) consumen varios bytes cada uno; una frase de contraseña de "72 caracteres" formada por esos caracteres puede superar el límite. Los valores bcrypt pre-hasheados están exentos (el hash ya codifica el límite).</li>
-<li>Roles: <code>admin</code>, <code>writer</code> y <code>reader</code> se crean automáticamente; las cuentas viven en la base de datos.</li>
+<li>Roles: <code>admin</code>, <code>writer</code> y <code>reader</code> se crean automáticamente; las cuentas viven en la base de datos. La interfaz de código abierto autoriza solo sobre lectura y escritura, así que <code>admin</code> y <code>writer</code> tienen las mismas capacidades y <code>reader</code> es el único rol restringido. Una separación más fina, incluida la de quién puede gestionar usuarios y ajustes de seguridad, llega con el plugin PRO <code>user_manager</code>, documentado en <a href="../advanced/#user-manager-pro">usos avanzados</a>.</li>
 <li>Secretos: <code>FLASK_SECRET</code> se guarda en <code>/var/lib/bunkerweb/.flask_secret</code>; las llaves Biscuit al lado, opcionalmente vía <code>BISCUIT_PUBLIC_KEY</code> / <code>BISCUIT_PRIVATE_KEY</code>.</li>
 <li>
 <p>2FA: los secretos TOTP se guardan en la base de datos, cifrados con claves que viven en <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>. La UI las genera en el primer arranque, así que no hace falta nada mientras ese fichero se conserve. Define <code>TOTP_ENCRYPTION_KEYS</code> (separadas por espacios o mapa JSON) para aportar las tuyas; entonces cada clave debe tener exactamente <strong>43 caracteres</strong>, cualquier otro valor se descarta con un aviso <code>Invalid TOTP secret for key</code> y se sustituye por una clave aleatoria. Genera una llave:</p>
@@ -1529,7 +1482,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </code></pre></div>
 <p>Los códigos de recuperación se muestran una sola vez; si pierdes las llaves de cifrado, se eliminan los secretos TOTP almacenados.
 - Sesiones: duración de inactividad por defecto 12 h (<code>SESSION_LIFETIME_HOURS</code>), refrescada en cada petición. Se aplica un límite absoluto vía <code>SESSION_ABSOLUTE_HOURS</code> (por defecto <code>168</code> = 7 días) — superado ese tiempo, los usuarios son desconectados aunque sigan activos. Rotación opcional del identificador de sesión (<code>SESSION_ROLLING_HOURS</code>, por defecto <code>0</code> = deshabilitada) regenera el ID de sesión en ese intervalo. Sesiones fijadas a IP y User-Agent; <code>CHECK_PRIVATE_IP=no</code> relaja el control de IP solo en rangos privados. <code>ALWAYS_REMEMBER=yes</code> fuerza cookies persistentes.
-- Almacenamiento de sesiones: las sesiones viven en Redis cuando <code>USE_REDIS=yes</code>, y si no en una caché local bajo <code>/var/lib/bunkerweb</code>. Un Redis que deja de responder, o que rechaza las escrituras porque alcanzó <code>maxmemory</code>, ya no rompe la interfaz: las sesiones afectadas pasan a esa caché local, que se lee antes que Redis para que un cambio o un borrado que nunca llegó a Redis no quede oculto tras la copia antigua que Redis aún conserva, y se reconcilian con Redis en cuanto responde de nuevo. Un cierre de sesión o una rotación del ID de sesión durante la caída tampoco se deshace con la recuperación. Cada revocación se registra en ambos almacenes para seguir aplicándose en cualquier caso. Un desalojo no está cubierto, porque Redis informa éxito y simplemente deja de tener la clave, así que dimensiona <code>maxmemory</code> para las claves que conservas. Cuando Redis rechaza una actualización, esa sesión pasa al almacenamiento local y se elimina de inmediato la copia que Redis aún tenía, de modo que el cambio no quede oculto tras la versión anterior y un flujo de varios pasos como el 2FA no se quede en bucle sobre su estado previo. Esa caché local es por host, lo que importa si ejecutas varias réplicas de la interfaz: las demás réplicas dejan de ver una sesión que se ha movido a la caché local de una réplica hasta que esa réplica la reconcilia con Redis, una revocación emitida mientras Redis no estaba disponible solo la aplica la réplica que la emitió, y una réplica que ya sirve una sesión desde su propia caché local puede seguir haciéndolo hasta <code>SESSION_LIFETIME_HOURS</code> después de que otra réplica borre esa sesión a través de Redis. <code>UI_USE_REDIS=no</code> desconecta solo la interfaz de Redis, a diferencia del <code>USE_REDIS</code> global, que además deja de compartir baneos e informes entre instancias.
+- Almacenamiento de sesiones: las sesiones viven en Redis cuando <code>USE_REDIS=yes</code>, y si no en una caché local bajo <code>/var/lib/bunkerweb</code>. Un Redis que deja de responder, o que rechaza las escrituras porque alcanzó <code>maxmemory</code>, ya no rompe la interfaz: las sesiones afectadas pasan a esa caché local, que se lee antes que Redis para que un cambio o un borrado que nunca llegó a Redis no quede oculto tras la copia antigua que Redis aún conserva, y se reconcilian con Redis en cuanto responde de nuevo. Un cierre de sesión o una rotación del ID de sesión durante la caída tampoco se deshace con la recuperación, incluso si la propia sesión no se pudo leer mientras Redis estaba caído. Cada revocación se registra en ambos almacenes para seguir aplicándose en cualquier caso. Un desalojo no está cubierto, porque Redis informa éxito y simplemente deja de tener la clave, así que dimensiona <code>maxmemory</code> para las claves que conservas. Cuando Redis rechaza una actualización, esa sesión pasa al almacenamiento local y se elimina de inmediato la copia que Redis aún tenía, de modo que el cambio no quede oculto tras la versión anterior y un flujo de varios pasos como el 2FA no se quede en bucle sobre su estado previo. Esa caché local es por host, lo que importa si ejecutas varias réplicas de la interfaz: las demás réplicas dejan de ver una sesión que se ha movido a la caché local de una réplica hasta que esa réplica la reconcilia con Redis, una revocación emitida mientras Redis no estaba disponible solo la aplica la réplica que la emitió, y una réplica que ya sirve una sesión desde su propia caché local puede seguir haciéndolo hasta <code>SESSION_LIFETIME_HOURS</code> después de que otra réplica borre esa sesión a través de Redis. <code>UI_USE_REDIS=no</code> desconecta solo la interfaz de Redis, a diferencia del <code>USE_REDIS</code> global, que además deja de compartir baneos e informes entre instancias.
 - Ajusta <code>PROXY_NUMBERS</code> si varios proxies añaden <code>X-Forwarded-*</code>.</p>
 </li>
 </ul>
@@ -1550,17 +1503,17 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <p class="admonition-title">Un hash incorrecto te bloquea</p>
 <p>Usa un hash solo si conoces su texto plano. Un hash válido pero incorrecto en la primera creación no se puede revertir y un reinicio no lo arregla. Recupera con un <code>ADMIN_PASSWORD</code> distinto y <code>OVERRIDE_ADMIN_CREDS=yes</code>.</p>
 </div>
-<h2 id="fuentes-de-configuracion-y-prioridad">Fuentes de configuración y prioridad</h2>
+<h2 id="fuentes-de-configuracion-y-prioridad">Fuentes de configuración y prioridad<a class="headerlink" href="#fuentes-de-configuracion-y-prioridad" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Variables de entorno (incl. <code>environment:</code> de Docker/Compose)</li>
 <li>Secrets en <code>/run/secrets/&lt;VAR&gt;</code> (Docker)</li>
 <li>Archivo env <code>/etc/bunkerweb/ui.env</code> (paquetes Linux)</li>
 <li>Valores por defecto integrados</li>
 </ol>
-<h2 id="borradores-en-el-editor-raw">Borradores en el editor RAW</h2>
+<h2 id="borradores-en-el-editor-raw">Borradores en el editor RAW<a class="headerlink" href="#borradores-en-el-editor-raw" title="Permanent link">&para;</a></h2>
 <p>El editor RAW de un servicio o de la configuración global puede conservar un ajuste como <strong>borrador</strong>: el valor se guarda pero no se aplica, y el valor efectivo sigue siendo el heredado (global) o el predeterminado. Coloque el cursor al inicio de una línea <code>KEY=value</code> y pulse <code>#</code> para alternar el estado de borrador, o <code>Retroceso</code> en una línea en borrador para activarla, y luego guarde. Las líneas en borrador se resaltan y conservan su valor entre guardados, de modo que un cambio puede prepararse y activarse más tarde con un solo guardado. Un ajuste que no es editable desde la UI (gestionado por autoconf, o un valor predeterminado de plugin que no puede sobrescribirse) no puede cambiar de estado de borrador.</p>
-<h2 id="referencia-de-configuracion">Referencia de configuración</h2>
-<h3 id="tiempo-de-ejecucion-y-zona-horaria">Tiempo de ejecución y zona horaria</h3>
+<h2 id="referencia-de-configuracion">Referencia de configuración<a class="headerlink" href="#referencia-de-configuracion" title="Permanent link">&para;</a></h2>
+<h3 id="tiempo-de-ejecucion-y-zona-horaria">Tiempo de ejecución y zona horaria<a class="headerlink" href="#tiempo-de-ejecucion-y-zona-horaria" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1579,7 +1532,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="listener-y-tls">Listener y TLS</h3>
+<h3 id="listener-y-tls">Listener y TLS<a class="headerlink" href="#listener-y-tls" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1640,7 +1593,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="auth-sesiones-y-cookies">Auth, sesiones y cookies</h3>
+<h3 id="auth-sesiones-y-cookies">Auth, sesiones y cookies<a class="headerlink" href="#auth-sesiones-y-cookies" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1725,7 +1678,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="logging">Logging</h3>
+<h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1774,7 +1727,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="runtime-miscelaneo">Runtime misceláneo</h3>
+<h3 id="runtime-miscelaneo">Runtime misceláneo<a class="headerlink" href="#runtime-miscelaneo" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1835,7 +1788,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h2 id="acceso-a-logs">Acceso a logs</h2>
+<h2 id="acceso-a-logs">Acceso a logs<a class="headerlink" href="#acceso-a-logs" title="Permanent link">&para;</a></h2>
 <p>La UI lee logs de NGINX/servicios desde <code>/var/log/bunkerweb</code>. Alimenta ese directorio con un demonio syslog o un volumen:</p>
 <ul>
 <li>El UID/GID del contenedor es 101. En el host hazlos legibles: <code>chown root:101 bw-logs &amp;&amp; chmod 770 bw-logs</code> (ajusta para rootless).</li>
@@ -1853,7 +1806,7 @@ destination d_dyna_file {
 };
 log { source(s_net); destination(d_dyna_file); };
 </code></pre></div>
-<h2 id="capacidades">Capacidades</h2>
+<h2 id="capacidades">Capacidades<a class="headerlink" href="#capacidades" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Panel para solicitudes, bloqueos, caché y jobs; reinicio/recarga de instancias.</li>
 <li>Crear/actualizar/eliminar servicios y ajustes globales con validación contra esquemas de plugins.</li>
@@ -1862,7 +1815,7 @@ log { source(s_net); destination(d_dyna_file); };
 <li>Gestionar usuarios de UI, roles, sesiones y TOTP con códigos de recuperación.</li>
 <li>Actualizar a BunkerWeb PRO y ver estado de licencia en la página dedicada.</li>
 </ul>
-<h2 id="upgrade-to-pro">Actualizar a PRO</h2>
+<h2 id="upgrade-to-pro">Actualizar a PRO<a class="headerlink" href="#upgrade-to-pro" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">Prueba gratis de BunkerWeb PRO</p>
 <p>Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&amp;utm_campaign=self&amp;utm_source=doc">Panel de BunkerWeb</a>.</p>
@@ -1873,9 +1826,9 @@ log { source(s_net); destination(d_dyna_file); };
   </p>
 <figcaption>Información de licencia PRO</figcaption>
 </figure>
-<h2 id="traducciones-i18n">Traducciones (i18n)</h2>
+<h2 id="traducciones-i18n">Traducciones (i18n)<a class="headerlink" href="#traducciones-i18n" title="Permanent link">&para;</a></h2>
 <p>La interfaz web está disponible en varios idiomas gracias a las contribuciones de la comunidad. Las traducciones se almacenan en archivos JSON por idioma (por ejemplo <code>en.json</code>, <code>fr.json</code>, …). Para cada idioma se documenta claramente si la traducción fue realizada de forma manual o generada mediante IA, así como su estado de revisión.</p>
-<h3 id="idiomas-disponibles-y-colaboradores">Idiomas disponibles y colaboradores</h3>
+<h3 id="idiomas-disponibles-y-colaboradores">Idiomas disponibles y colaboradores<a class="headerlink" href="#idiomas-disponibles-y-colaboradores" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1993,7 +1946,7 @@ log { source(s_net); destination(d_dyna_file); };
 <blockquote>
 <p>💡 Algunas traducciones pueden ser parciales. Se recomienda encarecidamente una revisión manual, especialmente para los elementos críticos de la interfaz.</p>
 </blockquote>
-<h3 id="como-contribuir">Cómo contribuir</h3>
+<h3 id="como-contribuir">Cómo contribuir<a class="headerlink" href="#como-contribuir" title="Permanent link">&para;</a></h3>
 <p>Las contribuciones de traducción siguen el flujo estándar de contribuciones de BunkerWeb:</p>
 <ol>
 <li><strong>Crear o actualizar el archivo de traducción</strong></li>
@@ -2041,8 +1994,16 @@ log { source(s_net); destination(d_dyna_file); };
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
         
       </main>
       
@@ -2143,7 +2104,7 @@ log { source(s_net); destination(d_dyna_file); };
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

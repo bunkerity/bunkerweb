@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Rechercher dans la documentation");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBesoin d\u2019une assistance premium ou de conseils personnalis\u00e9s sur BunkerWeb ? D\u00e9couvrez nos \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservices professionnels\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eRejoignez la communaut\u00e9 Bunker en participant au \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003esalon Discord\u003c/a\u003e et en nous suivant sur \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Vous recherchez BunkerWeb CLOUD, la version PRO, une assistance technique ou des services sur mesure ? Consultez le
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    pour en savoir plus sur nos offres aux entreprises.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Vous ne consultez pas la documentation de la dernière version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Cliquez ici pour consulter la dernière version.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Guide de démarrage rapide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compiler depuis les sources
 
       </a>
     </li>
@@ -812,33 +792,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compiler depuis les sources
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1008,6 +961,28 @@
     <span class="md-ellipsis">
       
         5. Répartition de charge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-ip-flottante-avec-keepalived-sans-equilibreur-de-charge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. IP flottante avec keepalived (sans équilibreur de charge)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#points-de-vigilance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Points de vigilance
       
     </span>
   </a>
@@ -2632,7 +2607,7 @@
   
 
 
-<h1 id="utilisations-avancees">Utilisations avancées</h1>
+<h1 id="utilisations-avancees">Utilisations avancées<a class="headerlink" href="#utilisations-avancees" title="Permanent link">&para;</a></h1>
 <p>De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> du dépôt GitHub.</p>
 <p>Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a>.</p>
 <p>Cette section se concentre uniquement sur les utilisations avancées et le réglage de la sécurité, consultez la <a href="../features/">section fonctionnalités</a> de la documentation pour voir tous les paramètres disponibles.</p>
@@ -2645,7 +2620,7 @@
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: app1.example.com"</span><span class="w"> </span>--resolve<span class="w"> </span>example.com:443:ip-of-server<span class="w"> </span>https://example.com
 </code></pre></div></p>
 </div>
-<h2 id="behind-load-balancer-or-reverse-proxy">Derrière l'équilibreur de charge ou le proxy inverse</h2>
+<h2 id="behind-load-balancer-or-reverse-proxy">Derrière l'équilibreur de charge ou le proxy inverse<a class="headerlink" href="#behind-load-balancer-or-reverse-proxy" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Real IP</p>
 <p>Lorsque BunkerWeb se trouve lui‑même derrière un équilibreur de charge ou un proxy inverse, vous devez le configurer afin qu'il puisse récupérer la véritable adresse IP des clients. <strong>Si vous ne le faites pas, les fonctionnalités de sécurité bloqueront l'adresse IP de l'équilibreur de charge ou du proxy inverse au lieu de celle du client.</strong></p>
@@ -2952,7 +2927,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h2 id="haute-disponibilite-et-repartition-de-charge">Haute disponibilité et répartition de charge</h2>
+<h2 id="haute-disponibilite-et-repartition-de-charge">Haute disponibilité et répartition de charge<a class="headerlink" href="#haute-disponibilite-et-repartition-de-charge" title="Permanent link">&para;</a></h2>
 <p>Pour garantir la disponibilité de vos applications même si un serveur tombe, vous pouvez déployer BunkerWeb en cluster <strong>HA</strong>. Cette architecture comporte un <strong>Manager</strong> (Scheduler) qui orchestre la configuration et plusieurs <strong>Workers</strong> (instances BunkerWeb) qui traitent le trafic.</p>
 <pre class="mermaid"><code>flowchart LR
 
@@ -3040,7 +3015,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>Un <strong>service API</strong> optionnel (<code>bunkerweb-api</code>) qui expose une interface REST publique pour les outils d'automatisation (bwcli, CI/CD, etc.). Il est désactivé par défaut sur les installations Linux et est indépendant des communications internes manager↔worker.</li>
 </ul>
 </div>
-<h3 id="prerequis">Prérequis</h3>
+<h3 id="prerequis">Prérequis<a class="headerlink" href="#prerequis" title="Permanent link">&para;</a></h3>
 <p>Avant de mettre en place un cluster, assurez-vous de disposer de :</p>
 <ul>
 <li><strong>Au moins 2 hôtes Linux</strong> avec accès root/sudo.</li>
@@ -3048,7 +3023,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li><strong>L'IP ou le nom d'hôte</strong> de l'application à protéger.</li>
 <li><em>(Optionnel)</em> <strong>Équilibreur de charge</strong> (par ex. HAProxy) pour répartir le trafic entre les workers.</li>
 </ul>
-<h3 id="1-installer-le-manager">1. Installer le Manager</h3>
+<h3 id="1-installer-le-manager">1. Installer le Manager<a class="headerlink" href="#1-installer-le-manager" title="Permanent link">&para;</a></h3>
 <p>Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de données et, optionnellement, l'interface Web.</p>
 <div class="admonition warning">
 <p class="admonition-title">Sécurité de l'interface Web</p>
@@ -3118,7 +3093,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </li>
 </ol>
-<h4 id="securiser-et-exposer-lui">Sécuriser et exposer l'UI</h4>
+<h4 id="securiser-et-exposer-lui">Sécuriser et exposer l'UI<a class="headerlink" href="#securiser-et-exposer-lui" title="Permanent link">&para;</a></h4>
 <p>Si vous avez activé l'interface Web, vous devez la sécuriser. Elle peut être hébergée sur le Manager ou une machine dédiée.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Hébergée sur le Manager</label><label for="__tabbed_5_2">Hôte externe</label></div>
 <div class="tabbed-content">
@@ -3273,7 +3248,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="2-installer-les-workers">2. Installer les Workers</h3>
+<h3 id="2-installer-les-workers">2. Installer les Workers<a class="headerlink" href="#2-installer-les-workers" title="Permanent link">&para;</a></h3>
 <p>Les workers sont les nœuds qui traitent le trafic entrant.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Linux</label><label for="__tabbed_6_2">Docker</label></div>
 <div class="tabbed-content">
@@ -3326,7 +3301,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="3-gerer-les-workers">3. Gérer les Workers</h3>
+<h3 id="3-gerer-les-workers">3. Gérer les Workers<a class="headerlink" href="#3-gerer-les-workers" title="Permanent link">&para;</a></h3>
 <p>Vous pouvez ajouter d'autres workers plus tard via l'interface Web ou la CLI.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Via l'interface Web</label><label for="__tabbed_7_2">Via la configuration</label></div>
 <div class="tabbed-content">
@@ -3381,7 +3356,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="4-verifier-linstallation">4. Vérifier l'installation</h3>
+<h3 id="4-verifier-linstallation">4. Vérifier l'installation<a class="headerlink" href="#4-verifier-linstallation" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Linux</label><label for="__tabbed_9_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3398,7 +3373,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="5-repartition-de-charge">5. Répartition de charge</h3>
+<h3 id="5-repartition-de-charge">5. Répartition de charge<a class="headerlink" href="#5-repartition-de-charge" title="Permanent link">&para;</a></h3>
 <p>Pour répartir le trafic entre vos workers, utilisez un équilibreur de charge. Nous recommandons un équilibreur de couche 4 (TCP) qui supporte le <strong>PROXY protocol</strong> pour préserver l'IP client.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">HAProxy - Couche 4 (TCP)</label><label for="__tabbed_10_2">HAProxy - Couche 7 (HTTP)</label></div>
 <div class="tabbed-content">
@@ -3476,20 +3451,143 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>Reportez-vous à la section <a href="#behind-load-balancer-or-reverse-proxy">Derrière l'équilibreur de charge ou le proxy inverse</a> pour vérifier que vous utilisez la bonne IP client.</p>
 <p>Consultez <code>/var/log/bunkerweb/access.log</code> sur chaque worker pour confirmer que les requêtes proviennent du réseau PROXY protocol et que les deux workers se partagent la charge. Votre cluster BunkerWeb est maintenant prêt pour la production avec haute disponibilité.</p>
 </div>
-<h2 id="utilisation-de-mecanismes-de-resolution-dns-personnalises">Utilisation de mécanismes de résolution DNS personnalisés</h2>
+<h3 id="6-ip-flottante-avec-keepalived-sans-equilibreur-de-charge">6. IP flottante avec keepalived (sans équilibreur de charge)<a class="headerlink" href="#6-ip-flottante-avec-keepalived-sans-equilibreur-de-charge" title="Permanent link">&para;</a></h3>
+<p>Sans équilibreur de charge, vous pouvez exécuter les workers en mode actif/passif avec <a href="https://www.keepalived.org/">keepalived</a>. Une adresse IP virtuelle (VIP) bascule entre les workers via VRRP, le DNS pointe vers la VIP et seul le worker qui la détient traite le trafic. C'est une alternative à la <a href="#5-repartition-de-charge">section 5</a> : le trafic n'est pas réparti entre les workers, mais un worker en panne est remplacé en quelques secondes.</p>
+<p>Les exemples ci-dessous utilisent la VIP <code>192.168.10.100</code>, <code>worker01</code> (<code>192.168.10.11</code>, master) et <code>worker02</code> (<code>192.168.10.12</code>, backup).</p>
+<p><strong>Installer keepalived</strong> sur chaque worker :</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Debian / Ubuntu</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>keepalived
+<span class="c1"># RHEL / Fedora</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>keepalived
+</code></pre></div>
+<p>Le script de vérification d'état de BunkerWeb, appelé avec l'argument <code>ok</code>, renvoie le code <code>0</code> lorsque l'instance répond <code>ok</code> sur <code>http://127.0.0.1:6000/healthz</code>. <code>ok</code> signifie que NGINX fonctionne et que l'instance a reçu sa configuration, y compris pendant l'application d'une nouvelle configuration alors qu'elle sert encore la précédente (à partir de la version testing). Le script renvoie le code <code>1</code> tant que l'instance est en état <code>loading</code> ou que NGINX est arrêté. Sans argument, le script accepte également <code>loading</code>. N'utilisez donc pas cette forme ici : un worker qui vient de démarrer prendrait la VIP et afficherait la page « Generating... ».</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Linux</label><label for="__tabbed_11_2">Docker</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>/usr/share/bunkerweb/helpers/healthcheck.sh<span class="w"> </span>ok
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>/usr/bin/docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>/path/to/docker-compose.yml<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-T<span class="w"> </span>bunkerweb<span class="w"> </span>/usr/share/bunkerweb/helpers/healthcheck.sh<span class="w"> </span>ok
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><strong>Configurer keepalived.</strong> Créez le fichier <code>/etc/keepalived/keepalived.conf</code> sur chaque worker. Adaptez <code>interface</code> à l'interface réseau (voir <code>ip addr</code>) et utilisez les mêmes valeurs pour <code>virtual_router_id</code> et <code>auth_pass</code> sur les deux workers. Dans l'onglet Docker, remplacez la ligne <code>script</code> par la commande <code>docker compose</code> ci-dessus (keepalived avertit si le binaire n'est pas indiqué avec son chemin complet).</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">worker01 (master)</label><label for="__tabbed_12_2">worker02 (backup)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">/etc/keepalived/keepalived.conf</span><pre><span></span><code><span class="na">global_defs {</span>
+<span class="w">    </span><span class="na">enable_script_security</span>
+<span class="w">    </span><span class="na">script_user root</span>
+<span class="na">}</span>
+
+<span class="na">vrrp_script chk_bunkerweb {</span>
+<span class="w">    </span><span class="na">script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"</span>
+<span class="w">    </span><span class="na">interval 2</span>
+<span class="w">    </span><span class="na">fall 2</span>
+<span class="w">    </span><span class="na">rise 2</span>
+<span class="na">}</span>
+
+<span class="na">vrrp_instance VI_BUNKERWEB {</span>
+<span class="w">    </span><span class="na">state MASTER</span>
+<span class="w">    </span><span class="na">interface eth0</span>
+<span class="w">    </span><span class="na">virtual_router_id 51</span>
+<span class="w">    </span><span class="na">priority 110</span>
+<span class="w">    </span><span class="na">advert_int 1</span>
+<span class="w">    </span><span class="na">authentication {</span>
+<span class="w">        </span><span class="na">auth_type PASS</span>
+<span class="w">        </span><span class="na">auth_pass changeme</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">virtual_ipaddress {</span>
+<span class="w">        </span><span class="na">192.168.10.100/24</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">track_script {</span>
+<span class="w">        </span><span class="na">chk_bunkerweb</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="na">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">/etc/keepalived/keepalived.conf</span><pre><span></span><code><span class="na">global_defs {</span>
+<span class="w">    </span><span class="na">enable_script_security</span>
+<span class="w">    </span><span class="na">script_user root</span>
+<span class="na">}</span>
+
+<span class="na">vrrp_script chk_bunkerweb {</span>
+<span class="w">    </span><span class="na">script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"</span>
+<span class="w">    </span><span class="na">interval 2</span>
+<span class="w">    </span><span class="na">fall 2</span>
+<span class="w">    </span><span class="na">rise 2</span>
+<span class="na">}</span>
+
+<span class="na">vrrp_instance VI_BUNKERWEB {</span>
+<span class="w">    </span><span class="na">state BACKUP</span>
+<span class="w">    </span><span class="na">interface eth0</span>
+<span class="w">    </span><span class="na">virtual_router_id 51</span>
+<span class="w">    </span><span class="na">priority 100</span>
+<span class="w">    </span><span class="na">advert_int 1</span>
+<span class="w">    </span><span class="na">authentication {</span>
+<span class="w">        </span><span class="na">auth_type PASS</span>
+<span class="w">        </span><span class="na">auth_pass changeme</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">virtual_ipaddress {</span>
+<span class="w">        </span><span class="na">192.168.10.100/24</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">track_script {</span>
+<span class="w">        </span><span class="na">chk_bunkerweb</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="na">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Le contrôle n'a pas de <code>weight</code> : deux échecs consécutifs (environ 4 secondes) font passer le nœud à l'état <code>FAULT</code> et lui font libérer la VIP. <code>script_user root</code> est nécessaire pour exécuter <code>docker compose exec</code>. <code>enable_script_security</code> accepte le script parce que les fichiers BunkerWeb ne sont pas modifiables par les autres utilisateurs. Le <code>auth_pass</code> VRRP est transmis en clair et protège uniquement contre les erreurs de configuration ; gardez donc les workers sur un réseau de confiance.</p>
+<div class="admonition note">
+<p class="admonition-title">BunkerWeb 1.6.15</p>
+<p>Avec la version 1.6.15, <code>/healthz</code> répond <code>loading</code> sur tous les workers pendant environ 5 secondes à chaque rechargement. Utilisez <code>fall 4</code> et <code>interval 2</code> au lieu de <code>fall 2</code> pour qu'un rechargement ne place pas les deux workers en état <code>FAULT</code>.</p>
+</div>
+<p>Démarrez keepalived sur les deux workers :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>keepalived
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Pare-feu</p>
+<p>VRRP utilise le protocole IP <code>112</code> (ce n'est ni un port TCP ni UDP). Autorisez ce protocole entre les workers, ainsi que les ports <code>80</code> et <code>443</code> vers les clients.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">IP réelle</p>
+<p>Les clients se connectent directement à la VIP : aucune configuration du PROXY protocol ou de <code>X-Forwarded-For</code> n'est nécessaire. Par défaut, BunkerWeb voit l'adresse IP réelle du client.</p>
+</div>
+<p><strong>Vérifier le basculement :</strong></p>
+<ol>
+<li>Sur <code>worker01</code>, exécutez <code>ip addr show eth0</code>. La VIP <code>192.168.10.100</code> doit apparaître.</li>
+<li>Arrêtez BunkerWeb sur <code>worker01</code> : <code>sudo systemctl stop bunkerweb</code> (Linux) ou <code>docker compose stop bunkerweb</code> (Docker).</li>
+<li>Après quelques secondes, la VIP disparaît de <code>worker01</code> et apparaît sur <code>worker02</code>. Lors de nos tests, les clients ont récupéré en environ 4 secondes à l'arrêt du conteneur et en environ 7 secondes lorsque seul le contrôle d'état échouait.</li>
+<li>Redémarrez BunkerWeb. <code>worker01</code> ne reprend la VIP qu'une fois son contrôle réussi ; il ne traite donc jamais le trafic pendant son chargement.</li>
+<li>Suivez les changements d'état avec <code>sudo journalctl -u keepalived -f</code>.</li>
+</ol>
+<h3 id="points-de-vigilance">Points de vigilance<a class="headerlink" href="#points-de-vigilance" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sidecar Docker.</strong> Si keepalived s'exécute dans un conteneur avec <code>network_mode: "service:bunkerweb"</code>, il perd son interface réseau au redémarrage du conteneur BunkerWeb et ne récupère jamais la VIP. Ajouter <code>depends_on: { bunkerweb: { condition: service_started, restart: true } }</code> au service keepalived ne couvre que les redémarrages effectués par Compose (<code>docker compose restart</code> ou <code>up</code>). Cela ne couvre ni un redémarrage automatique dû à la politique de redémarrage Docker (crash, manque de mémoire), ni un simple <code>docker restart</code>. Dans ces cas, redémarrez ensemble les conteneurs keepalived et BunkerWeb, ou exécutez keepalived sur l'hôte comme dans l'onglet Docker ci-dessus.</li>
+<li><strong>Manager indisponible.</strong> Les workers qui ont déjà leur configuration continuent de répondre <code>ok</code> et conservent la VIP. Un worker qui redémarre pendant l'indisponibilité du manager reste en état <code>loading</code> et ne détient donc pas la VIP. Si les deux redémarrent, aucun worker n'est éligible et le service reste indisponible jusqu'au retour du manager.</li>
+<li><strong>Configuration.</strong> Le manager envoie la configuration aux deux workers quel que soit l'état de la VIP ; le worker de secours dispose donc déjà des derniers réglages lorsqu'il prend le relais.</li>
+<li><strong>État partagé.</strong> Les bannissements, compteurs et sessions sont propres à chaque worker. Un client banni sur <code>worker01</code> ne l'est pas sur <code>worker02</code> après un basculement. Activez Redis (<code>USE_REDIS=yes</code>, voir les paramètres Redis/Valkey) et utilisez la même instance Redis pour les deux workers afin de partager les bannissements et les compteurs. Redis seul ne permet pas de conserver les sessions d'un worker à l'autre : <code>SESSIONS_SECRET</code> et <code>SESSIONS_NAME</code> valent <code>random</code> par défaut et sont générés pour chaque instance. Définissez des valeurs fixes identiques pour les deux workers sur le manager (ce sont des paramètres globaux transmis aux deux workers).</li>
+<li><strong>Let's Encrypt.</strong> Le jeton de challenge HTTP est envoyé à chaque instance enregistrée dans le manager ; les deux workers peuvent donc y répondre.</li>
+</ul>
+<h2 id="utilisation-de-mecanismes-de-resolution-dns-personnalises">Utilisation de mécanismes de résolution DNS personnalisés<a class="headerlink" href="#utilisation-de-mecanismes-de-resolution-dns-personnalises" title="Permanent link">&para;</a></h2>
 <p>La configuration NGINX de BunkerWeb peut être personnalisée pour utiliser différents résolveurs DNS en fonction de vos besoins. Cela peut être particulièrement utile dans divers scénarios :</p>
 <ol>
 <li>Pour respecter les entrées de votre <code>/etc/hosts</code> fichier local</li>
 <li>Lorsque vous devez utiliser des serveurs DNS personnalisés pour certains domaines</li>
 <li>Pour s'intégrer à des solutions de mise en cache DNS locales</li>
 </ol>
-<h3 id="utilisation-de-systemd-resolved">Utilisation de systemd-resolved</h3>
+<h3 id="utilisation-de-systemd-resolved">Utilisation de systemd-resolved<a class="headerlink" href="#utilisation-de-systemd-resolved" title="Permanent link">&para;</a></h3>
 <p>De nombreux systèmes Linux modernes utilisent <code>systemd-resolved</code> la résolution DNS. Si vous souhaitez que BunkerWeb respecte le contenu de votre <code>/etc/hosts</code> fichier et utilise le mécanisme de résolution DNS du système, vous pouvez le configurer pour utiliser le service DNS local résolu par systemd.</p>
 <p>Pour vérifier que systemd-resolved est en cours d'exécution sur votre système, vous pouvez utiliser :</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>systemd-resolved
 </code></pre></div>
 <p>Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez le <code>DNS_RESOLVERS</code> paramètre sur <code>127.0.0.53</code>, qui est l'adresse d'écoute par défaut pour systemd-resolved :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Interface utilisateur Web</label><label for="__tabbed_11_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Interface utilisateur Web</label><label for="__tabbed_13_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Accédez à la page <strong>Config Globale</strong> et définissez les résolveurs DNS sur <code>127.0.0.53</code></p>
@@ -3507,13 +3605,13 @@ DNS_RESOLVERS=127.0.0.53
 </div>
 </div>
 </div>
-<h3 id="utilisation-de-dnsmasq">Utilisation de dnsmasq</h3>
+<h3 id="utilisation-de-dnsmasq">Utilisation de dnsmasq<a class="headerlink" href="#utilisation-de-dnsmasq" title="Permanent link">&para;</a></h3>
 <p><a href="http://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> est un serveur DNS, DHCP et TFTP léger qui est couramment utilisé pour la mise en cache et la personnalisation du DNS local. C'est particulièrement utile lorsque vous avez besoin de plus de contrôle sur votre résolution DNS que celui fourni par systemd-resolved.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label><label for="__tabbed_12_2">Tout-en-un</label><label for="__tabbed_12_3">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">Tout-en-un</label><label for="__tabbed_14_3">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Tout d'abord, installez et configurez dnsmasq sur votre système Linux :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Debian/Ubuntu</label><label for="__tabbed_13_2">RHEL/Fedora</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Debian/Ubuntu</label><label for="__tabbed_15_2">RHEL/Fedora</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1"># Install dnsmasq</span>
@@ -3550,7 +3648,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 </div>
 </div>
 <p>Ensuite, configurez BunkerWeb pour utiliser dnsmasq en définissant <code>DNS_RESOLVERS</code> sur <code>127.0.0.1</code> :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Web UI</label><label for="__tabbed_14_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Web UI</label><label for="__tabbed_16_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Accédez à la page <strong>Config Globale</strong> et sélectionnez le plugin <strong>NGINX</strong>, puis définissez les résolveurs DNS sur <code>127.0.0.1</code>.</p>
@@ -3649,7 +3747,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h2 id="custom-configurations">Configurations personnalisées</h2>
+<h2 id="custom-configurations">Configurations personnalisées<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>Pour personnaliser et ajouter des configurations personnalisées à BunkerWeb, vous pouvez profiter de sa base NGINX. Des configurations NGINX personnalisées peuvent être ajoutées dans différents contextes NGINX, y compris des configurations pour le pare-feu d'applications Web (WAF) ModSecurity, qui est un composant central de BunkerWeb. Vous trouverez plus de détails sur les configurations de ModSecurity <a href="../features/#custom-configurations">ici</a>.</p>
 <p>Voici les types de configurations personnalisées disponibles :</p>
 <ul>
@@ -3666,7 +3764,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <p>Les configurations personnalisées peuvent être appliquées globalement ou spécifiquement pour un serveur particulier, en fonction du contexte applicable et de l'activation ou non du <a href="../features/#multisite-mode">mode multisite</a> .</p>
 <p>La méthode d'application des configurations personnalisées dépend de l'intégration utilisée. Cependant, le processus sous-jacent implique l'ajout de fichiers avec le <code>.conf</code> suffixe à des dossiers spécifiques. Pour appliquer une configuration personnalisée à un serveur spécifique, le fichier doit être placé dans un sous-dossier nommé d'après le nom du serveur principal.</p>
 <p>Certaines intégrations offrent des moyens plus pratiques d'appliquer des configurations, par exemple à l'aide de <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> dans Docker Swarm ou de <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> dans Kubernetes. Ces options offrent des approches plus simples pour la gestion et l'application des configurations.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:7"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><input id="__tabbed_15_5" name="__tabbed_15" type="radio" /><input id="__tabbed_15_6" name="__tabbed_15" type="radio" /><input id="__tabbed_15_7" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Interface utilisateur Web</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">Tout-en-un</label><label for="__tabbed_15_4">Docker</label><label for="__tabbed_15_5">Docker autoconf</label><label for="__tabbed_15_6">Kubernetes</label><label for="__tabbed_15_7">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:7"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><input id="__tabbed_17_5" name="__tabbed_17" type="radio" /><input id="__tabbed_17_6" name="__tabbed_17" type="radio" /><input id="__tabbed_17_7" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Interface utilisateur Web</label><label for="__tabbed_17_2">Linux</label><label for="__tabbed_17_3">Tout-en-un</label><label for="__tabbed_17_4">Docker</label><label for="__tabbed_17_5">Docker autoconf</label><label for="__tabbed_17_6">Kubernetes</label><label for="__tabbed_17_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Accédez à la page <strong>Configs</strong>, cliquez sur <strong>Create new custom config</strong>, puis choisissez s'il s'agit d'une configuration globale ou spécifique à un service, le type de configuration et le nom de la configuration :</p>
@@ -3947,8 +4045,8 @@ Le contrôleur Ingress d'autoconf lit chaque entrée de <code>data</code> et l'a
 </div>
 </div>
 </div>
-<h2 id="running-many-services-in-production">Exécution de nombreux services en production</h2>
-<h3 id="crs-mondial">CRS mondial</h3>
+<h2 id="running-many-services-in-production">Exécution de nombreux services en production<a class="headerlink" href="#running-many-services-in-production" title="Permanent link">&para;</a></h2>
+<h3 id="crs-mondial">CRS mondial<a class="headerlink" href="#crs-mondial" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Plugins CRS</p>
 <p>Lorsque le SCR est chargé globalement, les <strong>plug-ins SCR ne sont pas pris en charge</strong>. Si vous avez besoin de les utiliser, vous devrez charger le SCR par service.</p>
@@ -3959,7 +4057,7 @@ Le contrôleur Ingress d'autoconf lit chaque entrée de <code>data</code> et l'a
 SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 </code></pre></div>
 <p>Vous pouvez activer le chargement global du SCR en définissant <code>USE_MODSECURITY_GLOBAL_CRS</code> la valeur . <code>yes</code></p>
-<h3 id="ajuster-max_allowed_packet-pour-mariadbmysql">Ajuster max_allowed_packet pour MariaDB/MySQL</h3>
+<h3 id="ajuster-max_allowed_packet-pour-mariadbmysql">Ajuster max_allowed_packet pour MariaDB/MySQL<a class="headerlink" href="#ajuster-max_allowed_packet-pour-mariadbmysql" title="Permanent link">&para;</a></h3>
 <p>Il semble que la valeur par défaut du <code>max_allowed_packet</code> paramètre dans les serveurs de bases de données MariaDB et MySQL ne soit pas suffisante lors de l'utilisation de BunkerWeb avec un grand nombre de services.</p>
 <p>Si vous rencontrez des erreurs comme celle-ci, en particulier sur le Scheduler :</p>
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: 'db' user: 'bunkerweb' host: '172.20.0.4' (Got a packet bigger than 'max_allowed_packet' bytes)
@@ -3975,7 +4073,7 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 <div class="highlight"><pre><span></span><code><span class="k">[mysqld]</span>
 <span class="na">max_allowed_packet</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">64M</span>
 </code></pre></div>
-<h2 id="persistence-of-bans-and-reports">Persistance des interdictions et des signalements</h2>
+<h2 id="persistence-of-bans-and-reports">Persistance des interdictions et des signalements<a class="headerlink" href="#persistence-of-bans-and-reports" title="Permanent link">&para;</a></h2>
 <p>Par défaut, BunkerWeb stocke les bannissements et les rapports dans un magasin de données Lua local. Bien que simple et efficace, cette configuration signifie que des données sont perdues lors du redémarrage de l'instance. Pour vous assurer que les bannissements et les rapports persistent lors des redémarrages, vous pouvez configurer BunkerWeb pour utiliser un <a href="https://redis.io/"> serveur Redis</a> ou <a href="https://valkey.io/">Valkey</a> distant  .</p>
 <p><strong>Pourquoi utiliser Redis/Valkey ?</strong></p>
 <p>Redis et Valkey sont de puissants magasins de données en mémoire couramment utilisés comme bases de données, caches et courtiers de messages. Ils sont hautement évolutifs et prennent en charge une variété de structures de données, notamment :</p>
@@ -4008,7 +4106,7 @@ REDIS_DATABASE=0
 <li><strong><code>REDIS_DATABASE</code></strong>: Indiquez le numéro de base de données Redis/Valkey à utiliser. La valeur par défaut est <code>0</code>.</li>
 </ul>
 <p>Si vous avez besoin de paramètres plus avancés, tels que l'authentification, la prise en charge SSL/TLS ou le mode Sentinel, reportez-vous à la documentation sur les paramètres du <a href="../features/#redis">plug-in Redis</a> pour obtenir des conseils détaillés.</p>
-<h2 id="proteger-les-applications-udptcp">Protéger les applications UDP/TCP</h2>
+<h2 id="proteger-les-applications-udptcp">Protéger les applications UDP/TCP<a class="headerlink" href="#proteger-les-applications-udptcp" title="Permanent link">&para;</a></h2>
 <div class="admonition example">
 <p class="admonition-title">Fonctionnalité expérimentale</p>
 <p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
@@ -4036,7 +4134,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 ...
 </code></pre></div>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:6"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><input id="__tabbed_16_4" name="__tabbed_16" type="radio" /><input id="__tabbed_16_5" name="__tabbed_16" type="radio" /><input id="__tabbed_16_6" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Tout-en-un</label><label for="__tabbed_16_2">Docker</label><label for="__tabbed_16_3">Docker autoconf</label><label for="__tabbed_16_4">Kubernetes</label><label for="__tabbed_16_5">Linux</label><label for="__tabbed_16_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:6"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><input id="__tabbed_18_4" name="__tabbed_18" type="radio" /><input id="__tabbed_18_5" name="__tabbed_18" type="radio" /><input id="__tabbed_18_6" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Tout-en-un</label><label for="__tabbed_18_2">Docker</label><label for="__tabbed_18_3">Docker autoconf</label><label for="__tabbed_18_4">Kubernetes</label><label for="__tabbed_18_5">Linux</label><label for="__tabbed_18_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Vous devrez ajouter ces paramètres aux variables d'environnement lors de l'exécution du conteneur All-in-one. Vous devrez également exposer les ports de stream.</p>
@@ -4407,7 +4505,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 </div>
 </div>
 </div>
-<h2 id="le-php">Le PHP</h2>
+<h2 id="le-php">Le PHP<a class="headerlink" href="#le-php" title="Permanent link">&para;</a></h2>
 <div class="admonition example">
 <p class="admonition-title">Fonctionnalité expérimentale</p>
 <p>Pour le moment, le support PHP avec BunkerWeb est encore en version bêta et nous vous recommandons d'utiliser une architecture de proxy inverse si vous le pouvez. D'ailleurs, PHP n'est pas du tout pris en charge pour certaines intégrations comme Kubernetes.</p>
@@ -4421,7 +4519,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 <li><code>LOCAL_PHP</code> : Chemin d'accès au fichier socket local de l'instance PHP-FPM.</li>
 <li><code>LOCAL_PHP_PATH</code> : Dossier racine contenant les fichiers dans l'instance locale PHP-FPM.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:6"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><input id="__tabbed_17_5" name="__tabbed_17" type="radio" /><input id="__tabbed_17_6" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Tout-en-un</label><label for="__tabbed_17_2">Docker</label><label for="__tabbed_17_3">Docker autoconf</label><label for="__tabbed_17_4">Kubernetes</label><label for="__tabbed_17_5">Linux</label><label for="__tabbed_17_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:6"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><input id="__tabbed_19_5" name="__tabbed_19" type="radio" /><input id="__tabbed_19_6" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Tout-en-un</label><label for="__tabbed_19_2">Docker</label><label for="__tabbed_19_3">Docker autoconf</label><label for="__tabbed_19_4">Kubernetes</label><label for="__tabbed_19_5">Linux</label><label for="__tabbed_19_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Lorsque vous utilisez l'image <a href="../integrations/#all-in-one-aio-image">Tout-en-un</a>, pour prendre en charge les applications PHP, vous devrez :</p>
@@ -4899,13 +4997,13 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 </div>
 </div>
 </div>
-<h2 id="ipv6">IPv6</h2>
+<h2 id="ipv6">IPv6<a class="headerlink" href="#ipv6" title="Permanent link">&para;</a></h2>
 <div class="admonition example">
 <p class="admonition-title">Fonctionnalité expérimentale</p>
 <p>Cette fonctionnalité n'est pas prête pour la production. N'hésitez pas à la tester et à nous signaler tout bug via les <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> du dépôt GitHub.</p>
 </div>
 <p>Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6 pour les communications réseau. Si vous souhaitez activer la prise en charge d'IPv6, vous devez définir <code>USE_IPV6=yes</code>. Veuillez noter que la configuration IPv6 de votre réseau et de votre environnement n'entre pas dans le champ d'application de cette documentation.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Docker / Autoconf / Swarm</label><label for="__tabbed_18_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Docker / Autoconf / Swarm</label><label for="__tabbed_20_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Tout d'abord, vous devrez configurer le démon Docker pour activer la prise en charge d'IPv6 pour les conteneurs et utiliser ip6tables si nécessaire. Voici une configuration d'exemple pour votre fichier /etc/docker/daemon.json :</p>
@@ -4958,14 +5056,14 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
-<h2 id="options-de-configuration-de-journalisation">Options de configuration de journalisation</h2>
+<h2 id="options-de-configuration-de-journalisation">Options de configuration de journalisation<a class="headerlink" href="#options-de-configuration-de-journalisation" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb offre une configuration de journalisation flexible, vous permettant d'envoyer les journaux vers plusieurs destinations (comme des fichiers, stdout/stderr ou syslog) simultanément. Cela est particulièrement utile pour l'intégration avec des collecteurs de journaux externes tout en conservant des journaux locaux pour l'interface Web.</p>
 <p>Il y a deux catégories principales de journaux à configurer :</p>
 <ol>
 <li><strong>Journaux de service</strong> : Journaux générés par les composants BunkerWeb (Scheduler, UI, Autoconf, etc.). Contrôlés par service via <code>LOG_TYPES</code> (et optionnellement <code>LOG_FILE_PATH</code>, <code>LOG_SYSLOG_ADDRESS</code>, <code>LOG_SYSLOG_TAG</code>).</li>
 <li><strong>Journaux d'accès et d'erreur</strong> : Journaux d'accès et d'erreur HTTP générés par NGINX. Seuls le service <code>bunkerweb</code> les utilise (<code>ACCESS_LOG</code> / <code>ERROR_LOG</code> / <code>LOG_LEVEL</code>).</li>
 </ol>
-<h3 id="journaux-de-service">Journaux de service</h3>
+<h3 id="journaux-de-service">Journaux de service<a class="headerlink" href="#journaux-de-service" title="Permanent link">&para;</a></h3>
 <p>Les journaux de service sont contrôlés par le paramètre <code>LOG_TYPES</code>, qui peut accepter plusieurs valeurs séparées par des espaces (par exemple, <code>LOG_TYPES="stderr syslog"</code>).</p>
 <table>
 <thead>
@@ -4998,7 +5096,7 @@ USE_IPV6=yes
 <li><code>LOG_SYSLOG_ADDRESS</code> : L'adresse du serveur syslog (par exemple, <code>udp://bw-syslog:514</code> ou <code>/dev/log</code>).</li>
 <li><code>LOG_SYSLOG_TAG</code> : Une étiquette unique pour le service (par exemple, <code>bw-scheduler</code>) pour distinguer ses entrées.</li>
 </ul>
-<h3 id="journaux-dacces-et-derreur">Journaux d'accès et d'erreur</h3>
+<h3 id="journaux-dacces-et-derreur">Journaux d'accès et d'erreur<a class="headerlink" href="#journaux-dacces-et-derreur" title="Permanent link">&para;</a></h3>
 <p>Ce sont des journaux NGINX standard, configurés via <strong>le service <code>bunkerweb</code> uniquement</strong>. Ils prennent en charge plusieurs destinations en suffixant le nom du paramètre (par exemple, <code>ACCESS_LOG</code>, <code>ACCESS_LOG_1</code> et le <code>LOG_FORMAT</code> correspondant, <code>LOG_FORMAT_1</code> ou <code>ERROR_LOG</code>, <code>ERROR_LOG_1</code> et leur <code>LOG_LEVEL</code> respectif, <code>LOG_LEVEL_1</code>).</p>
 <ul>
 <li><code>ACCESS_LOG</code> : Destination pour les journaux d'accès (par défaut : <code>/var/log/bunkerweb/access.log</code>). Accepte un chemin de fichier, <code>syslog:server=host[:port][,param=value]</code>, tampon partagé <code>memory:name:size</code>, ou <code>off</code> pour désactiver. Voir la <a href="https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log">documentation NGINX access_log</a> pour plus de détails.</li>
@@ -5016,7 +5114,7 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
-<h3 id="log-file-retention">Rétention des fichiers journaux</h3>
+<h3 id="log-file-retention">Rétention des fichiers journaux<a class="headerlink" href="#log-file-retention" title="Permanent link">&para;</a></h3>
 <p>Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'une rétention, et toutes deux utilisent le même mécanisme : <code>logrotate</code>, avec la politique que BunkerWeb installe dans <code>/etc/logrotate.d/bunkerweb</code>. Elle fait tourner tout fichier correspondant à <code>/var/log/bunkerweb/*.log</code> chaque jour, ou plus tôt si le fichier dépasse 100 Mo, conserve quatorze générations numérotées (<code>modsec_audit.log.1</code>, <code>.2.gz</code>, etc.) et utilise <code>copytruncate</code>.</p>
 <ul>
 <li><strong>Linux</strong> : les paquets dépendent de <code>logrotate</code>, et le système l'exécute via son propre minuteur. Il n'y a rien d'autre à faire.</li>
@@ -5028,8 +5126,8 @@ LOG_LEVEL_1=error
 <p>Deux directives y sont déterminantes. <code>maxsize</code> est ce qui garde <code>daily</code> actif : la directive <code>size</code>, très proche, est exclusive des directives d'intervalle et ne ferait donc tourner qu'à la taille. Et ajouter <code>dateext</code> nommerait chaque archive d'après la date, si bien qu'une deuxième rotation le même jour échouerait avec <code>destination ... already exists, skipping rotation</code>, laissant le fichier actif non tourné jusqu'au changement de date.</p>
 <p>L'emplacement du journal d'audit est défini par <code>MODSECURITY_SEC_AUDIT_LOG</code> (multisite, par défaut <code>/var/log/bunkerweb/modsec_audit.log</code>) ; voir les <a href="../features/#modsecurity">paramètres ModSecurity</a>. Le pointer en dehors de <code>/var/log/bunkerweb</code> le sort de la politique ci-dessus, et dans une intégration en conteneurs, il remplace le lien symbolique par un fichier réel que rien ne fait tourner. Si vous le déplacez, montez-le sur un volume et faites-le tourner vous-même. Le paramètre n'accepte qu'un chemin sous <code>/var/log/bunkerweb</code>, il ne peut donc pas pointer vers <code>/data</code> : pour conserver l'historique d'audit après une recréation du conteneur, montez un volume sur <code>/var/log/bunkerweb</code> lui-même, ce qui préserve l'ensemble des journaux et pas seulement le journal d'audit.</p>
 <p>Avec la valeur par défaut <code>BCFH</code> de <code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code>, la partie <code>C</code> place le corps de la requête dans le journal d'audit. Traitez ce fichier comme sensible avant de le copier ailleurs.</p>
-<h3 id="valeurs-par-defaut-et-exemples-dintegration">Valeurs par défaut et exemples d'intégration</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">All-in-one</label><label for="__tabbed_19_4">Kubernetes</label></div>
+<h3 id="valeurs-par-defaut-et-exemples-dintegration">Valeurs par défaut et exemples d'intégration<a class="headerlink" href="#valeurs-par-defaut-et-exemples-dintegration" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker / Autoconf / Swarm</label><label for="__tabbed_21_3">Tout-en-un</label><label for="__tabbed_21_4">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Comportement par défaut</strong> : <code>LOG_TYPES="file"</code>. Les journaux sont écrits dans <code>/var/log/bunkerweb/*.log</code>. La rotation est gérée par la configuration système <code>logrotate</code> installée dans <code>/etc/logrotate.d/bunkerweb</code> (quotidienne ou au-delà de 100 Mo, quatorze générations, compression via <code>copytruncate</code>).</p>
@@ -5205,7 +5303,7 @@ LOG_LEVEL_1=error
 </div>
 </div>
 </div>
-<h3 id="configuration-de-syslog-ng">Configuration de syslog-ng</h3>
+<h3 id="configuration-de-syslog-ng">Configuration de syslog-ng<a class="headerlink" href="#configuration-de-syslog-ng" title="Permanent link">&para;</a></h3>
 <p>Voici un exemple de fichier <code>syslog-ng.conf</code> que vous pouvez utiliser pour rediriger les journaux vers un fichier :</p>
 <div class="highlight"><pre><span></span><code>@version: 4.10
 
@@ -5248,7 +5346,7 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h2 id="docker-logging-best-practices">Meilleures pratiques de journalisation Docker</h2>
+<h2 id="docker-logging-best-practices">Meilleures pratiques de journalisation Docker<a class="headerlink" href="#docker-logging-best-practices" title="Permanent link">&para;</a></h2>
 <p>Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation <code>json-file</code>, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.</p>
 <p>Pour éviter cela, vous pouvez configurer la rotation des journaux. Cela peut être fait pour des services spécifiques dans votre fichier <code>docker-compose.yml</code>, ou globalement pour le démon Docker.</p>
 <p><strong>Configuration par service</strong></p>
@@ -5278,7 +5376,7 @@ log {
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
 <p>Ces paramètres globaux seront hérités par tous les conteneurs. Cependant, toute configuration de journalisation définie par service dans un fichier <code>docker-compose.yml</code> remplacera les paramètres globaux dans <code>daemon.json</code>.</p>
-<h2 id="security-tuning">Réglage de la sécurité</h2>
+<h2 id="security-tuning">Réglage de la sécurité<a class="headerlink" href="#security-tuning" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb offre de nombreuses fonctionnalités de sécurité que vous pouvez configurer avec les <a href="../features/">fonctionnalités</a>. Même si les valeurs par défaut des paramètres assurent une "sécurité par défaut" minimale, nous vous recommandons vivement de les régler. Ce faisant, vous serez en mesure de vous assurer du niveau de sécurité de votre choix, mais aussi de gérer les faux positifs.</p>
 <div class="admonition tip">
 <p class="admonition-title">Autres fonctionnalités</p>
@@ -5289,7 +5387,7 @@ log {
   </p>
 <figcaption>Vue d'ensemble et ordre des plugins de sécurité de base</figcaption>
 </figure>
-<h2 id="integration-de-la-console-crowdsec">Intégration de la console CrowdSec</h2>
+<h2 id="integration-de-la-console-crowdsec">Intégration de la console CrowdSec<a class="headerlink" href="#integration-de-la-console-crowdsec" title="Permanent link">&para;</a></h2>
 <p>Si vous n'êtes pas déjà familier avec l'intégration de la console CrowdSec, <a href="https://www.crowdsec.net/?utm_campaign=bunkerweb&amp;utm_source=doc">CrowdSec</a> exploite l'intelligence participative pour lutter contre les cybermenaces. Considérez-le comme le "Waze de la cybersécurité" : lorsqu'un serveur est attaqué, les autres systèmes du monde entier sont alertés et protégés contre les mêmes attaquants. Vous pouvez en savoir plus à ce sujet <a href="https://www.crowdsec.net/about?utm_campaign=bunkerweb&amp;utm_source=blog">ici</a>.</p>
 <p><strong>Félicitations, votre instance BunkerWeb est maintenant inscrite dans votre console CrowdSec !</strong></p>
 <p>Conseil professionnel : Lorsque vous consultez vos alertes, cliquez sur l'option "colonnes" et cochez la case "contexte" pour accéder aux données spécifiques à BunkerWeb.</p>
@@ -5298,7 +5396,7 @@ log {
   </p>
 <figcaption>Données BunkerWeb affichées dans la colonne de contexte</figcaption>
 </figure>
-<h2 id="forward-proxy-outgoing-traffic">Proxy direct pour le trafic sortant</h2>
+<h2 id="forward-proxy-outgoing-traffic">Proxy direct pour le trafic sortant<a class="headerlink" href="#forward-proxy-outgoing-traffic" title="Permanent link">&para;</a></h2>
 <p>Si votre environnement doit faire passer le trafic HTTP(S) sortant par un proxy direct (par exemple un proxy d'entreprise ou Squid), vous pouvez utiliser les variables d'environnement de proxy standard. Il n'existe pas de réglage BunkerWeb dédié.</p>
 <p><strong>NGINX lui-même n'utilise pas ces variables pour le trafic upstream</strong>, donc la configuration du proxy direct ne concerne que les composants qui initient des requêtes sortantes. En pratique, configurez-les sur le <strong>Scheduler</strong>, car il gère des tâches périodiques comme les renouvellements de certificats Let's Encrypt, les appels d'API externes et les webhooks.</p>
 <p>Les variables couramment utilisées sont :</p>
@@ -5311,7 +5409,7 @@ log {
 <p class="admonition-title">NO_PROXY est requis pour le trafic interne</p>
 <p>Si vous omettez les plages internes ou les noms de services, le trafic interne peut être envoyé au proxy et échouer. Adaptez la liste à votre intégration (par exemple noms de services Docker, domaines de cluster Kubernetes ou simplement localhost sous Linux).</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:6"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><input id="__tabbed_20_6" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">All-in-one</label><label for="__tabbed_20_3">Docker</label><label for="__tabbed_20_4">Docker autoconf</label><label for="__tabbed_20_5">Kubernetes</label><label for="__tabbed_20_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:6"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><input id="__tabbed_22_5" name="__tabbed_22" type="radio" /><input id="__tabbed_22_6" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Tout-en-un</label><label for="__tabbed_22_3">Docker</label><label for="__tabbed_22_4">Docker autoconf</label><label for="__tabbed_22_5">Kubernetes</label><label for="__tabbed_22_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Ajoutez les variables dans <code>/etc/bunkerweb/variables.env</code>. Ce fichier est chargé par les deux services, mais seul le Scheduler les utilisera :</p>
@@ -5415,8 +5513,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h2 id="surveillance-et-rapports">Surveillance et rapports</h2>
-<h3 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h2 id="surveillance-et-rapports">Surveillance et rapports<a class="headerlink" href="#surveillance-et-rapports" title="Permanent link">&para;</a></h2>
+<h3 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#monitoring-pro" title="Permanent link">&para;</a></h3>
 <p>Prise en charge de STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin de surveillance vous permet de collecter et de récupérer des métriques sur BunkerWeb. En l'activant, votre ou vos instances commenceront à collecter diverses données liées aux attaques, aux requêtes et aux performances. Vous pouvez ensuite les récupérer en appelant régulièrement le point de terminaison de l' <code>/monitoring</code> API ou en utilisant d'autres plugins comme celui de l'exportateur Prometheus.</p>
 <p><strong>Liste des fonctionnalités</strong></p>
@@ -5461,7 +5559,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h3 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#prometheus-exporter-pro" title="Permanent link">&para;</a></h3>
 <p>Prise en charge de STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin d'exportation Prometheus ajoute un <a href="https://prometheus.io/docs/instrumenting/exporters/">exportateur Prometheus</a> sur votre ou vos instances BunkerWeb. Lorsqu'elle est activée, vous pouvez configurer votre ou vos instances Prometheus pour récupérer un point de terminaison spécifique sur Bunkerweb et collecter des métriques internes.</p>
 <p>Nous fournissons également un <a href="https://grafana.com/grafana/dashboards/20755-bunkerweb/">tableau de bord Grafana</a> que vous pouvez importer dans votre propre instance et connecter à votre propre source de données Prometheus.</p>
@@ -5521,7 +5619,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h3 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#reporting-pro" title="Permanent link">&para;</a></h3>
 <p>Prise en charge de STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
 <p class="admonition-title">Plugin de surveillance nécessaire</p>
@@ -5629,15 +5727,15 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>Les modèles HTML et Markdown se trouvent dans <code>reporting/files/</code> ; personnalisez-les prudemment pour conserver les variables.</li>
 </ul>
 </div>
-<h2 id="sauvegarde-et-restauration">Sauvegarde et restauration</h2>
-<h3 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h2 id="sauvegarde-et-restauration">Sauvegarde et restauration<a class="headerlink" href="#sauvegarde-et-restauration" title="Permanent link">&para;</a></h2>
+<h3 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#backup-s3-pro" title="Permanent link">&para;</a></h3>
 <p>Prise en charge STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>L'outil Backup S3 automatise de manière transparente la protection des données, à l'instar du plug-in de sauvegarde communautaire. Cependant, il se distingue par le stockage sécurisé des sauvegardes directement dans un compartiment S3.</p>
 <p>En activant cette fonctionnalité, vous protégez de manière proactive <strong>l'intégrité de vos données</strong>. Le stockage à <strong>distance</strong> des sauvegardes protège les informations cruciales contre les menaces telles que ** les pannes matérielles<strong>, </strong>les cyberattaques<strong> ou </strong>les catastrophes naturelles<strong>. Cela garantit à la fois </strong>la sécurité<strong> et </strong>la disponibilité<strong>, ce qui permet une récupération rapide en cas ** d'événements inattendus</strong>, préservant la <strong>continuité opérationnelle</strong> et garantissant <strong>la tranquillité d'esprit</strong>.</p>
 <details class="warning">
 <summary>Informations pour les utilisateurs de Red Hat Enterprise Linux (RHEL) 8.9</summary>
 <p>Si vous utilisez <strong>RHEL 8.9</strong> et que vous prévoyez d'utiliser une <strong>base de données externe</strong>, vous devez installer le <code>mysql-community-client</code> package pour vous assurer que la <code>mysqldump</code> commande est disponible. Vous pouvez installer le package en exécutant les commandes suivantes :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">MySQL/MariaDB</label><label for="__tabbed_21_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">MySQL/MariaDB</label><label for="__tabbed_23_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -5751,9 +5849,9 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h4 id="sauvegarde-manuelle">Sauvegarde manuelle</h4>
+<h4 id="sauvegarde-manuelle">Sauvegarde manuelle<a class="headerlink" href="#sauvegarde-manuelle" title="Permanent link">&para;</a></h4>
 <p>Pour lancer manuellement une sauvegarde, exécutez la commande suivante :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Linux</label><label for="__tabbed_24_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -5767,7 +5865,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>Cette commande crée une sauvegarde de votre base de données et la stocke dans le compartiment S3 spécifié dans le <code>BACKUP_S3_BUCKET</code> paramètre.</p>
 <p>Vous pouvez également spécifier un compartiment S3 personnalisé pour la sauvegarde en fournissant la variable d' <code>BACKUP_S3_BUCKET</code> environnement lors de l'exécution de la commande :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -5783,9 +5881,9 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <p class="admonition-title">Compatibilité du client MariaDB/MySQL</p>
 <p>Les images Docker de BunkerWeb incluent les plugins d'authentification de MariaDB Connector/C requis par <code>caching_sha2_password</code> de MySQL. Sous Linux, si le client indique que <code>caching_sha2_password</code> n'a pas pu être chargé, installez les plugins d'authentification MariaDB Connector/C de votre distribution ou un client MySQL compatible. Ne basculez pas le compte de base de données vers <code>mysql_native_password</code>, qui n'est pas disponible dans MySQL <code>v9</code>.</p>
 </div>
-<h4 id="restauration-manuelle">Restauration manuelle</h4>
+<h4 id="restauration-manuelle">Restauration manuelle<a class="headerlink" href="#restauration-manuelle" title="Permanent link">&para;</a></h4>
 <p>Pour lancer manuellement une restauration, exécutez la commande suivante :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Linux</label><label for="__tabbed_24_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -5799,7 +5897,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>Cette commande crée une sauvegarde temporaire de votre base de données dans le compartiment S3 spécifié dans le <code>BACKUP_S3_BUCKET</code> paramètre et restaure votre base de données à la dernière sauvegarde disponible dans le compartiment.</p>
 <p>Vous pouvez également spécifier un fichier de sauvegarde personnalisé pour la restauration en fournissant le chemin d'accès à celui-ci en tant qu'argument lors de l'exécution de la commande :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Linux</label><label for="__tabbed_27_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -5814,7 +5912,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="admonition example">
 <p class="admonition-title">En cas de panne</p>
 <p>Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -5827,19 +5925,19 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h2 id="serveur-mcp">Serveur MCP</h2>
+<h2 id="serveur-mcp">Serveur MCP<a class="headerlink" href="#serveur-mcp" title="Permanent link">&para;</a></h2>
 <p>Le <strong>serveur MCP BunkerWeb</strong> permet aux assistants IA comme <strong>Claude Code</strong> et <strong>Claude Desktop</strong> de gérer votre installation BunkerWeb via le <a href="https://modelcontextprotocol.io/">Model Context Protocol (MCP)</a>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Prérequis</p>
 <p>Le serveur MCP nécessite le déploiement de l'<strong>API externe BunkerWeb</strong> (<code>bunkerity/bunkerweb-api</code>). Il communique avec BunkerWeb exclusivement via cette API.</p>
 </div>
-<h3 id="fonctionnalites">Fonctionnalités</h3>
+<h3 id="fonctionnalites">Fonctionnalités<a class="headerlink" href="#fonctionnalites" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>43 outils</strong> pour gérer les instances, services, configurations, bans, plugins, jobs et cache</li>
 <li><strong>Ressources MCP</strong> pour un accès en lecture seule (<code>@config://global</code>, <code>@bans://active</code>, etc.)</li>
 <li><strong>Plusieurs transports</strong> : Stdio, HTTP, WebSocket</li>
 </ul>
-<h3 id="exemple-docker-compose">Exemple Docker Compose</h3>
+<h3 id="exemple-docker-compose">Exemple Docker Compose<a class="headerlink" href="#exemple-docker-compose" title="Permanent link">&para;</a></h3>
 <p>Un exemple complet est disponible dans <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples/mcp-stack"><code>examples/mcp-stack/</code></a> :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
@@ -5864,8 +5962,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-mcp</span>
 </code></pre></div>
-<h3 id="utilisation-avec-claude-code">Utilisation avec Claude Code</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:1"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Configuration projet</label></div>
+<h3 id="utilisation-avec-claude-code">Utilisation avec Claude Code<a class="headerlink" href="#utilisation-avec-claude-code" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Configuration projet</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Ajoutez un fichier <code>.mcp.json</code> à la racine de votre projet (ou dans <code>~/.claude/.mcp.json</code> pour une configuration globale) :</p>
@@ -5886,9 +5984,9 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 &gt; Montre-moi les bans actuels
 &gt; Analyse @config://global et suggère des améliorations de sécurité
 </code></pre></div>
-<h3 id="integration-kubernetes">Intégration Kubernetes</h3>
+<h3 id="integration-kubernetes">Intégration Kubernetes<a class="headerlink" href="#integration-kubernetes" title="Permanent link">&para;</a></h3>
 <p>Le serveur MCP peut être déployé aux côtés de BunkerWeb en utilisant le chart Helm officiel. Un exemple complet est disponible dans <a href="https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml"><code>examples/mcp-integration.yaml</code></a>.</p>
-<h4 id="valeurs-helm">Valeurs Helm</h4>
+<h4 id="valeurs-helm">Valeurs Helm<a class="headerlink" href="#valeurs-helm" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">mcp</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Activer le serveur MCP</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -5922,7 +6020,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">      </span><span class="nt">bunkerweb.io/USE_WHITELIST</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="w">      </span><span class="nt">bunkerweb.io/WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"10.0.0.0/8</span><span class="nv"> </span><span class="s">192.168.0.0/16"</span>
 </code></pre></div>
-<h4 id="deploiement">Déploiement</h4>
+<h4 id="deploiement">Déploiement<a class="headerlink" href="#deploiement" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="c1"># Déployer BunkerWeb avec MCP activé</span>
 helm<span class="w"> </span>install<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb/bunkerweb<span class="w"> </span>-f<span class="w"> </span>mcp-integration.yaml
 
@@ -5941,7 +6039,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </ul>
 </div>
 <p>Pour la documentation complète, visitez le <a href="https://github.com/bunkerity/bunkerweb-mcp">dépôt BunkerWeb MCP</a>.</p>
-<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
 <p>Prise en charge STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Le plug-in de migration <strong>révolutionne les transferts de</strong> configuration BunkerWeb entre les instances grâce à son <strong>interface Web conviviale</strong>, simplifiant ainsi l'ensemble du parcours de migration. Que vous mettiez à niveau des systèmes, que vous fassiez évoluer une infrastructure ou que vous transformiez d'environnement, cet outil vous permet de transférer sans effort les <strong>paramètres, les préférences et les données</strong> avec une facilité et une confiance inégalées. Dites adieu aux processus manuels fastidieux et bonjour à une expérience de <strong>migration transparente et sans tracas</strong>.</p>
 <p><strong>Liste des fonctionnalités</strong></p>
@@ -5956,9 +6054,9 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <p><strong>Compatibilité entre bases de données :</strong> profitez d'une migration transparente sur diverses plates-formes de bases de données, notamment SQLite, MySQL, MariaDB et PostgreSQL, garantissant la compatibilité avec votre environnement de base de données préféré.</p>
 </li>
 </ul>
-<h3 id="creer-un-fichier-de-migration">Créer un fichier de migration</h3>
+<h3 id="creer-un-fichier-de-migration">Créer un fichier de migration<a class="headerlink" href="#creer-un-fichier-de-migration" title="Permanent link">&para;</a></h3>
 <p>Pour créer manuellement un fichier de migration, exécutez la commande suivante :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:2"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Linux</label><label for="__tabbed_30_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
@@ -5985,9 +6083,9 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <p class="admonition-title">Compatibilité du client MariaDB/MySQL</p>
 <p>Les images Docker de BunkerWeb incluent les plugins d'authentification de MariaDB Connector/C requis par <code>caching_sha2_password</code> de MySQL. Sous Linux, si le client indique que <code>caching_sha2_password</code> n'a pas pu être chargé, installez les plugins d'authentification MariaDB Connector/C de votre distribution ou un client MySQL compatible. Ne basculez pas le compte de base de données vers <code>mysql_native_password</code>, qui n'est pas disponible dans MySQL <code>v9</code>.</p>
 </div>
-<h3 id="initialiser-une-migration">Initialiser une migration</h3>
+<h3 id="initialiser-une-migration">Initialiser une migration<a class="headerlink" href="#initialiser-une-migration" title="Permanent link">&para;</a></h3>
 <p>Pour initialiser manuellement une migration, exécutez la commande suivante :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:3"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Linux</label><label for="__tabbed_29_2">Docker</label><label for="__tabbed_29_3">Tout-en-un</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">Tout-en-un</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
@@ -6024,11 +6122,11 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 </div>
 <p>Cette commande migre de manière transparente vos données BunkerWeb pour qu'elles correspondent précisément à la configuration décrite dans le fichier de migration.</p>
-<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
 <p>Prise en charge de STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le  plug-in <strong>anti-DDoS</strong> offre une protection avancée contre les attaques par déni de service distribué (DDoS) en surveillant, analysant et filtrant le trafic suspect en temps réel.</p>
 <p>En utilisant un mécanisme de <strong>fenêtre glissante</strong>, le plugin maintient un dictionnaire en mémoire des horodatages des requêtes pour détecter les pics de trafic anormaux à partir d'adresses IP individuelles. En fonction du mode de sécurité configuré, il peut soit bloquer les connexions incriminées, soit consigner l'activité suspecte pour un examen plus approfondi.</p>
-<h3 id="fonctionnalites_1">Fonctionnalités</h3>
+<h3 id="fonctionnalites_1">Fonctionnalités<a class="headerlink" href="#fonctionnalites_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Analyse du trafic en temps réel :</strong> surveille en permanence les demandes entrantes pour détecter les attaques DDoS potentielles.</li>
 <li><strong>Mécanisme de fenêtre glissante :</strong> suit l'activité récente des demandes dans une fenêtre de temps configurable.</li>
@@ -6038,7 +6136,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>Magasin de données en mémoire optimisé :</strong> Garantit des recherches à grande vitesse et un suivi efficace des métriques.</li>
 <li><strong>Entretien ménager automatique :</strong> efface périodiquement les données obsolètes pour maintenir des performances optimales.</li>
 </ul>
-<h3 id="configuration">Configuration</h3>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
 <p>Personnalisez le comportement du plug-in à l'aide des paramètres suivants :</p>
 <table>
 <thead>
@@ -6095,13 +6193,13 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="bonnes-pratiques">Bonnes pratiques</h3>
+<h3 id="bonnes-pratiques">Bonnes pratiques<a class="headerlink" href="#bonnes-pratiques" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Réglage du seuil :</strong> ajustez <code>ANTIDDOS_THRESHOLD</code> et <code>ANTIDDOS_WINDOW_TIME</code> en fonction de vos modèles de trafic typiques.</li>
 <li><strong>Révision du code d'état :</strong> mettez régulièrement à jour <code>ANTIDDOS_STATUS_CODES</code> pour capturer les comportements suspects nouveaux ou en évolution.</li>
 <li><strong>Surveillance :</strong> analysez régulièrement les journaux et les métriques pour affiner les paramètres et améliorer la protection globale.</li>
 </ul>
-<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#user-manager-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -6109,7 +6207,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 
 <p>Le plugin <strong>User Manager</strong> offre une interface robuste pour l'administration des comptes utilisateurs au sein de votre système.</p>
 <p>Avec ce plugin, les administrateurs peuvent aisément créer, mettre à jour et désactiver des comptes utilisateurs, gérer les rôles, basculer l'authentification à deux facteurs (2FA) et consulter des informations détaillées sur les utilisateurs telles que les horodatages de la dernière connexion et les statuts des comptes (actif ou inactif). Conçu dans un souci de sécurité et de facilité d'utilisation, ce plugin simplifie les tâches courantes de gestion des utilisateurs tout en garantissant la conformité et l'auditabilité.</p>
-<h3 id="fonctionnalites_2">Fonctionnalités</h3>
+<h3 id="fonctionnalites_2">Fonctionnalités<a class="headerlink" href="#fonctionnalites_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Opérations de compte utilisateur :</strong> importez au format CSV/XLSX, créez, modifiez et supprimez des comptes utilisateur en toute simplicité.</li>
 <li><strong>Contrôle d'accès basé sur les rôles :</strong> attribuez et modifiez les rôles d'utilisateur pour gérer les autorisations et les niveaux d'accès.</li>
@@ -6117,7 +6215,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>Informations complètes sur les utilisateurs :</strong> surveillez les données clés des utilisateurs, notamment les heures de dernière connexion, les dates de création de compte et le statut actif/inactif.</li>
 <li><strong>Journalisation des audits :</strong> conservez une piste d'audit pour toutes les actions de gestion des utilisateurs afin d'améliorer la sécurité et la conformité.</li>
 </ul>
-<h3 id="configuration_1">Configuration</h3>
+<h3 id="configuration_1">Configuration<a class="headerlink" href="#configuration_1" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -6153,7 +6251,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
   </p>
 <figcaption>User Manager - Page Activités</figcaption>
 </figure>
-<h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="ui-single-sign-on-pro">UI Single Sign-On <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#ui-single-sign-on-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin <strong>UI Single Sign-On</strong> permet l'authentification SSO pour l'interface web de BunkerWeb en lisant les en-têtes définis par un proxy d'authentification externe (tel qu'Authentik, Authelia, Keycloak ou Traefik Forward Auth) placé devant l'interface web.</p>
 <p>Au lieu de gérer des identifiants distincts pour BunkerWeb, les administrateurs peuvent déléguer l'authentification à un fournisseur d'identité existant. Le proxy d'authentification gère la connexion des utilisateurs et injecte des en-têtes d'identité avant de transmettre les requêtes à l'interface web de BunkerWeb.</p>
@@ -6162,7 +6260,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <p>Les en-têtes SSO peuvent être facilement falsifiés par n'importe quel client. Vous <strong>devez</strong> restreindre <code>UI_SSO_TRUSTED_IPS</code> aux adresses IP de votre proxy d'authentification. Si ce paramètre est mal configuré, n'importe quel client peut envoyer de faux en-têtes et obtenir un accès non autorisé, y compris un accès administrateur.</p>
 <p>La valeur par défaut <code>127.0.0.1,::1</code> ne fait confiance qu'au localhost. Dans les déploiements <strong>Docker, Swarm ou Kubernetes</strong>, le proxy d'authentification s'exécute dans un conteneur séparé avec sa propre adresse IP. Définissez <code>UI_SSO_TRUSTED_IPS</code> sur l'adresse IP ou le CIDR réel du conteneur du proxy d'authentification (par ex. <code>10.20.30.5</code> ou <code>172.18.0.0/16</code>). Ne le définissez jamais à <code>0.0.0.0/0</code>.</p>
 </div>
-<h3 id="fonctionnalites_3">Fonctionnalités</h3>
+<h3 id="fonctionnalites_3">Fonctionnalités<a class="headerlink" href="#fonctionnalites_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Authentification par en-têtes :</strong> lit le nom d'utilisateur, l'e-mail, le nom d'affichage et les groupes depuis les en-têtes du proxy d'authentification.</li>
 <li><strong>Correspondance groupe-rôle :</strong> associez les groupes de l'IdP aux rôles BunkerWeb (admin, writer, reader).</li>
@@ -6172,7 +6270,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>Repli vers la connexion classique :</strong> permet optionnellement la connexion par mot de passe lorsque les en-têtes SSO sont absents.</li>
 <li><strong>Redirection de déconnexion :</strong> redirige les utilisateurs vers l'endpoint de déconnexion du fournisseur SSO après la déconnexion locale.</li>
 </ul>
-<h3 id="configuration_2">Configuration</h3>
+<h3 id="configuration_2">Configuration<a class="headerlink" href="#configuration_2" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -6291,7 +6389,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="demarrage-rapide">Démarrage rapide</h3>
+<h3 id="demarrage-rapide">Démarrage rapide<a class="headerlink" href="#demarrage-rapide" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Placez un proxy d'authentification (Authentik, Authelia, Keycloak, etc.) devant l'interface web de BunkerWeb.</li>
 <li>Activez le plugin : <code>USE_UI_SSO=yes</code>.</li>
@@ -6299,19 +6397,19 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li>Restreignez les sources de confiance : définissez <code>UI_SSO_TRUSTED_IPS</code> sur les adresses IP du proxy d'authentification.</li>
 <li>Associez les groupes aux rôles : définissez <code>UI_SSO_GROUP_ADMIN</code>, <code>UI_SSO_GROUP_WRITER</code> et <code>UI_SSO_GROUP_READER</code> pour correspondre aux noms de groupes de votre IdP.</li>
 </ol>
-<h3 id="conseils-dutilisation">Conseils d'utilisation</h3>
+<h3 id="conseils-dutilisation">Conseils d'utilisation<a class="headerlink" href="#conseils-dutilisation" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Définissez <code>UI_SSO_FALLBACK_TO_LOGIN=no</code> en production pour imposer un accès exclusivement SSO. Lorsque la valeur est laissée à <code>yes</code> (par défaut), les utilisateurs peuvent contourner le SSO et se connecter avec des identifiants locaux, ignorant ainsi les politiques MFA ou de session imposées par votre fournisseur d'identité.</li>
 <li>Conservez <code>UI_SSO_UPDATE_USER_ON_LOGIN</code> à sa valeur par défaut (<code>yes</code>) pour garantir la synchronisation des rôles avec les modifications de groupes de l'IdP.</li>
 <li>Avec <code>UI_SSO_ACCOUNT_LINKING=username_or_email</code>, les comptes locaux existants sont automatiquement liés lors de la première connexion SSO si le nom d'utilisateur ou l'e-mail correspond. Utilisez <code>username_only</code> si votre IdP permet aux utilisateurs de définir des adresses e-mail arbitraires, afin de prévenir la prise de contrôle de comptes par usurpation d'e-mail.</li>
 </ul>
-<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/45vX0WJqjxo" title="Easy Resolve" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>Le plugin Easy Resolve vous permet de remédier rapidement aux faux positifs et aux problèmes récurrents directement depuis la page Rapports. Il transforme les actions guidées "Résoudre" en mises à jour de configuration sûres et étendues—sans édition manuelle.</p>
-<h3 id="fonctionnalites_4">Fonctionnalités</h3>
+<h3 id="fonctionnalites_4">Fonctionnalités<a class="headerlink" href="#fonctionnalites_4" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Actions en un clic depuis les Rapports et les détails des rapports.</li>
 <li>Suggestions contextuelles pour ModSecurity, blacklist, DNSBL, limitation de débit, méthodes HTTP autorisées et pays en liste blanche/noire.</li>
@@ -6324,13 +6422,13 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
   </p>
 <figcaption>Page Rapports - avec Easy Resolve</figcaption>
 </figure>
-<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#load-balancer-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec garde-fous. Déclarez des pools upstream une fois, pointez votre proxy inverse vers eux, et laissez le équilibrage conscient de la santé garder les utilisateurs sur des backends réactifs. Le mode sticky cookie émet automatiquement un cookie <code>BWLBID</code> pour que les sessions restent ancrées où vous le souhaitez.</p>
-<h3 id="fonctionnalites_5">Fonctionnalités</h3>
+<h3 id="fonctionnalites_5">Fonctionnalités<a class="headerlink" href="#fonctionnalites_5" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Blocs par upstream : nommez les pools et réutilisez-les sur les hôtes proxy inverse.</li>
 <li>Équilibrage flexible : round-robin par défaut, ou sticky via IP ou cookie signé.</li>
@@ -6338,7 +6436,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li>Santé intégrée : sondes HTTP/HTTPS avec chemins personnalisés, intervalles, codes de statut et vérifications SSL.</li>
 <li>Continuité de session : cookie <code>BWLBID</code> automatique lorsque le mode sticky-cookie est activé.</li>
 </ul>
-<h3 id="configuration_3">Configuration</h3>
+<h3 id="configuration_3">Configuration<a class="headerlink" href="#configuration_3" title="Permanent link">&para;</a></h3>
 <p><strong>Définition upstream</strong></p>
 <table>
 <thead>
@@ -6500,7 +6598,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="demarrage-rapide_1">Démarrage rapide</h3>
+<h3 id="demarrage-rapide_1">Démarrage rapide<a class="headerlink" href="#demarrage-rapide_1" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Définissez votre pool : définissez <code>LOADBALANCER_UPSTREAM_NAME=my-app</code> et listez les cibles dans <code>LOADBALANCER_UPSTREAM_SERVERS</code> (ex. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</li>
 <li>Dirigez le trafic : définissez <code>REVERSE_PROXY_HOST=http://my-app</code> pour que le proxy inverse utilise l'upstream nommé.</li>
@@ -6508,17 +6606,17 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li>Ajoutez de la santé : gardez <code>/status</code> ou ajustez les URLs, intervalles et statuts valides pour refléter le comportement de votre app.</li>
 <li>Réglez les connexions : configurez les valeurs keepalive pour réutiliser les connexions backend et réduire la surcharge de handshake.</li>
 </ol>
-<h3 id="conseils-dutilisation_1">Conseils d'utilisation</h3>
+<h3 id="conseils-dutilisation_1">Conseils d'utilisation<a class="headerlink" href="#conseils-dutilisation_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Faites correspondre <code>REVERSE_PROXY_HOST</code> à <code>LOADBALANCER_UPSTREAM_NAME</code> lors de l'utilisation de cookies sticky pour que les clients s'épinglent au bon pool.</li>
 <li>Gardez les intervalles et timeouts des vérifications de santé équilibrés pour éviter les oscillations sur les liens lents.</li>
 <li>Activez <code>LOADBALANCER_UPSTREAM_RESOLVE</code> lorsque vous pointez vers des hostnames qui peuvent changer via DNS.</li>
 <li>Réglez les valeurs keepalive pour refléter la capacité backend et les objectifs de réutilisation des connexions.</li>
 </ul>
-<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#custom-pages-pro" title="Permanent link">&para;</a></h2>
 <p>Le plugin Custom Pages vous permet de remplacer les pages intégrées de BunkerWeb (pages d'erreur, page du serveur par défaut et pages de défi antibot) par vos propres modèles HTML ou Lua personnalisés. Cela vous permet de maintenir une image de marque cohérente sur toutes les pages destinées aux utilisateurs servies par BunkerWeb.</p>
 <p>Pour le comportement et la personnalisation de la Maintenance, consultez le <a href="./#maintenance-pro">guide avancé sur la Maintenance</a>.</p>
-<h3 id="fonctionnalites_6">Fonctionnalités</h3>
+<h3 id="fonctionnalites_6">Fonctionnalités<a class="headerlink" href="#fonctionnalites_6" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Pages d'erreur personnalisées par service</strong> et <strong>pages de défi antibot</strong> (captcha, vérification JavaScript, reCAPTCHA, hCaptcha, Turnstile, mCaptcha, Cap.js).</li>
 <li><strong>Page du serveur par défaut personnalisée globale</strong> pour le vhost de repli/par défaut.</li>
@@ -6526,14 +6624,14 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>Mise en cache automatique</strong> vers <code>/var/cache/bunkerweb/custom_pages</code> avec détection des modifications pour déclencher les rechargements.</li>
 <li><strong>Configuration par site ou globale</strong> via les paramètres/UI ou les variables d'environnement.</li>
 </ul>
-<h3 id="comment-ca-fonctionne">Comment ça fonctionne</h3>
+<h3 id="comment-ca-fonctionne">Comment ça fonctionne<a class="headerlink" href="#comment-ca-fonctionne" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Au démarrage (ou lorsque les paramètres changent), le job <code>custom-pages.py</code> lit les chemins de modèles configurés.</li>
 <li>Chaque fichier doit exister et être lisible par le scheduler ; le job valide la structure HTML et l'équilibre des balises de modèle Lua (<code>{% %}</code>, <code>{{ }}</code>, <code>{* *}</code>).</li>
 <li>Les fichiers acceptés sont mis en cache sous <code>/var/cache/bunkerweb/custom_pages/&lt;type&gt;.html</code> ; les paramètres manquants/vides suppriment le fichier mis en cache.</li>
 <li>NGINX est dirigé vers le répertoire de cache via <code>$template_root</code> lorsqu'au moins une page mise en cache existe, de sorte que vos modèles sont servis à la place des pages par défaut.</li>
 </ol>
-<h3 id="parametres-de-configuration">Paramètres de configuration</h3>
+<h3 id="parametres-de-configuration">Paramètres de configuration<a class="headerlink" href="#parametres-de-configuration" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -6606,9 +6704,9 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="reference-des-variables-de-modele">Référence des variables de modèle</h3>
+<h3 id="reference-des-variables-de-modele">Référence des variables de modèle<a class="headerlink" href="#reference-des-variables-de-modele" title="Permanent link">&para;</a></h3>
 <p>Les modèles BunkerWeb utilisent le moteur <a href="https://github.com/bungle/lua-resty-template">lua-resty-template</a>. Les variables suivantes sont disponibles selon le type de page :</p>
-<h4 id="variables-de-page-derreur">Variables de page d'erreur</h4>
+<h4 id="variables-de-page-derreur">Variables de page d'erreur<a class="headerlink" href="#variables-de-page-derreur" title="Permanent link">&para;</a></h4>
 <p>Ces variables sont disponibles dans les modèles de page d'erreur personnalisés (<code>CUSTOM_ERROR_PAGE</code>) :</p>
 <table>
 <thead>
@@ -6676,7 +6774,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h4 id="variables-de-page-du-serveur-par-defaut">Variables de page du serveur par défaut</h4>
+<h4 id="variables-de-page-du-serveur-par-defaut">Variables de page du serveur par défaut<a class="headerlink" href="#variables-de-page-du-serveur-par-defaut" title="Permanent link">&para;</a></h4>
 <p>Ces variables sont disponibles dans les modèles de page du serveur par défaut personnalisés (<code>CUSTOM_DEFAULT_SERVER_PAGE</code>) :</p>
 <table>
 <thead>
@@ -6694,7 +6792,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h4 id="variables-de-page-de-defi-antibot">Variables de page de défi antibot</h4>
+<h4 id="variables-de-page-de-defi-antibot">Variables de page de défi antibot<a class="headerlink" href="#variables-de-page-de-defi-antibot" title="Permanent link">&para;</a></h4>
 <p>Ces variables sont disponibles dans les modèles de page de défi antibot :</p>
 <p><strong>Variables communes (toutes les pages antibot) :</strong></p>
 <table>
@@ -6857,7 +6955,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="syntaxe-de-modele">Syntaxe de modèle</h3>
+<h3 id="syntaxe-de-modele">Syntaxe de modèle<a class="headerlink" href="#syntaxe-de-modele" title="Permanent link">&para;</a></h3>
 <p>Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants :</p>
 <ul>
 <li><code>{{ variable }}</code> – Afficher une variable (échappée HTML)</li>
@@ -6873,8 +6971,8 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <span class="w">  </span><span class="c1">// Votre JavaScript ici</span>
 <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
 </code></pre></div>
-<h3 id="exemples">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Page d'erreur personnalisée</label><label for="__tabbed_30_2">Page captcha personnalisée</label><label for="__tabbed_30_3">Page du serveur par défaut personnalisée</label></div>
+<h3 id="exemples">Exemples<a class="headerlink" href="#exemples" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:3"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Page d'erreur personnalisée</label><label for="__tabbed_32_2">Page captcha personnalisée</label><label for="__tabbed_32_3">Page du serveur par défaut personnalisée</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Créez un modèle de page d'erreur personnalisé dans <code>/etc/bunkerweb/templates/error.html</code> :</p>
@@ -7064,8 +7162,8 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 </div>
 </div>
-<h3 id="exemples-de-deploiement">Exemples de déploiement</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">Kubernetes</label></div>
+<h3 id="exemples-de-deploiement">Exemples de déploiement<a class="headerlink" href="#exemples-de-deploiement" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:3"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Linux</label><label for="__tabbed_33_2">Docker</label><label for="__tabbed_33_3">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -7240,7 +7338,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </div>
 </div>
 </div>
-<h3 id="notes-et-depannage">Notes et dépannage</h3>
+<h3 id="notes-et-depannage">Notes et dépannage<a class="headerlink" href="#notes-et-depannage" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Les chemins doivent être absolus</strong> et se terminer par un nom de fichier ; les valeurs vides désactivent la page personnalisée correspondante et suppriment son cache.</li>
 <li><strong>Si la validation échoue</strong> (HTML incorrect ou balises Lua déséquilibrées), le modèle est ignoré et la page par défaut reste active. Vérifiez les logs du scheduler pour les détails.</li>
@@ -7248,9 +7346,9 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>Conformité CSP</strong> : Utilisez toujours les variables <code>nonce_script</code> et <code>nonce_style</code> pour les scripts et styles inline afin d'assurer une bonne gestion de la Content Security Policy.</li>
 <li><strong>Test des modèles</strong> : Vous pouvez tester vos modèles localement en les rendant avec un moteur de modèle Lua avant de les déployer sur BunkerWeb.</li>
 </ul>
-<h2 id="maintenance-pro">Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="maintenance-pro">Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
 <p>La Maintenance remplace les réponses des emplacements de proxy inverse standard par une page de maintenance lorsque l'application est indisponible. Elle est activée au niveau de chaque service, renvoie <code>503 Service Unavailable</code> et n'atteint jamais l'upstream. Le paramètre multisite est défini par défaut sur <code>no</code>.</p>
-<h3 id="activer-et-appliquer-le-mode-maintenance">Activer et appliquer le mode maintenance</h3>
+<h3 id="activer-et-appliquer-le-mode-maintenance">Activer et appliquer le mode maintenance<a class="headerlink" href="#activer-et-appliquer-le-mode-maintenance" title="Permanent link">&para;</a></h3>
 <p>Définissez <code>USE_MAINTENANCE</code> sur <code>yes</code> pour un service multisite existant qui utilise le proxy inverse standard. Cet extrait présente les clés d'environnement concernées ; fusionnez-le dans votre configuration du scheduler au lieu de le considérer comme un fichier Compose complet :</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Fragment : environnement du scheduler pour un service avec proxy inverse</span>
 <span class="nt">environment</span><span class="p">:</span>
@@ -7261,12 +7359,12 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p>Appliquez ce réglage via votre intégration BunkerWeb habituelle. Le scheduler génère la configuration du service et recharge les workers. Définissez <code>app.example.com_USE_MAINTENANCE</code> sur <code>no</code>, puis appliquez de nouveau pour rétablir le proxy. Si les paramètres du proxy inverse existent déjà, seul ce paramètre est nécessaire.</p>
 <p>L'interface Web propose deux boutons d'activation rapide : le bouton avec une icône de clé à molette dans la colonne <strong>Maintenance</strong> sur la page des services et le bouton flottant en forme de clé à molette sur la page de modification d'un service. Les deux mettent à jour le paramètre du service et l'appliquent sans rechargement de la page. Le formulaire de modification reste synchronisé, y compris les modes Facile/Avancé et l'éditeur brut, tandis que les modifications non enregistrées sans lien restent en place.</p>
 <p>Les boutons nécessitent une base de données accessible en écriture et un accès en écriture au service. Ils sont désactivés pour les utilisateurs en lecture seule, les bases de données en lecture seule et les services <code>USE_UI=yes</code>, afin que l'interface intégrée reste disponible. Ils refusent de remplacer une valeur <code>USE_MAINTENANCE</code> gérée de l'extérieur ; modifiez-la auprès de son propriétaire. Un bouton est rejeté lorsqu'une application est en cours.</p>
-<h3 id="comportement-et-portee-des-requetes">Comportement et portée des requêtes</h3>
+<h3 id="comportement-et-portee-des-requetes">Comportement et portée des requêtes<a class="headerlink" href="#comportement-et-portee-des-requetes" title="Permanent link">&para;</a></h3>
 <p>La Maintenance s'applique uniquement aux emplacements générés à partir de la configuration de proxy inverse standard de BunkerWeb, y compris <code>REVERSE_PROXY_HOST</code> et ses variantes numérotées. Elle n'ajoute pas d'emplacements de proxy, ne modifie pas les emplacements personnalisés et ne prend pas en charge les gestionnaires de réécriture manuels. Si une configuration personnalisée remplace ces gestionnaires ou les variables du backend, intégrez vous-même la réponse de maintenance.</p>
 <p>La Maintenance conserve la politique HTTPS existante : une redirection HTTP vers HTTPS activée s'effectue d'abord. Sur l'origine HTTPS effective, elle renvoie <code>503</code> avec <code>Cache-Control: no-store</code>, une Content Security Policy restrictive et <code>X-Content-Type-Options: nosniff</code>.</p>
 <p>Les requêtes GET, POST, OPTIONS et les handshakes WebSocket reçoivent la page de maintenance. BunkerWeb ignore le corps de la requête : le corps d'une requête POST n'est jamais transmis ni rejoué. Une requête HEAD reçoit le même statut et les mêmes en-têtes, sans corps. Les WebSockets existantes ne sont pas fermées explicitement ; l'arrêt normal des workers lors du rechargement s'applique.</p>
 <p>La Maintenance s'exécute avant l'authentification, l'antibot et les autres contrôles d'accès ; les clients autorisés et les services en mode détection la reçoivent donc également. Les emplacements NGINX locaux, l'API interne et les endpoints de santé conservent leur comportement normal. Il en va de même pour <code>/.well-known/acme-challenge/</code> et le passthrough Let's Encrypt configuré. La Maintenance conserve cette exception ; elle n'émet pas de certificats et ne crée pas de gestionnaire ACME.</p>
-<h3 id="personnaliser-la-page-de-maintenance">Personnaliser la page de maintenance</h3>
+<h3 id="personnaliser-la-page-de-maintenance">Personnaliser la page de maintenance<a class="headerlink" href="#personnaliser-la-page-de-maintenance" title="Permanent link">&para;</a></h3>
 <p>La page fournie fonctionne sans Custom Pages. Pour la personnaliser avec Custom Pages, ouvrez l'éditeur Custom Pages et choisissez <strong>Maintenance</strong>. Le <strong>Mode facile</strong> modifie le titre et le message de maintenance, le favicon, le logo/texte du pied de page et l'illustration SVG. Le titre met à jour le titre du navigateur et l'en-tête ; un titre ou une illustration vide conserve la valeur par défaut. Conservez les classes SVG <code>maintenance-top</code> et <code>maintenance-tool</code> pour l'animation de l'illustration.</p>
 <p>En <strong>Mode avancé</strong>, modifiez le modèle HTML/Lua complet. Les variables disponibles sont :</p>
 <table>
@@ -7294,7 +7392,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p>Utilisez les valeurs nonce dans chaque style et script inline, par exemple <code>nonce="{* nonce_style *}"</code>. La réponse autorise les images intégrées, les SVG et les polices via des URL <code>data:</code> et bloque les autres origines. Intégrez les ressources en ligne ou sous forme d'URL de données ; les URL de ressources de l'application reçoivent également la maintenance et ne peuvent pas charger de dépendances.</p>
 <p>Pour une page gérée par fichier, définissez <code>CUSTOM_MAINTENANCE_PAGE</code> sur un chemin absolu lisible par le scheduler. Cette valeur est prioritaire sur un modèle UI et verrouille cette portée dans l'éditeur. Sans cette valeur, un service utilise son propre modèle UI ou hérite du modèle global. <strong>Supprimer</strong> retire la surcharge du service et rétablit l'héritage. <strong>Réinitialiser</strong> supprime le modèle UI et force la page fournie, même lorsqu'une personnalisation globale existe. L'enregistrement d'une nouvelle surcharge de service efface son marqueur de réinitialisation. Activez ou désactivez la maintenance séparément avec <code>USE_MAINTENANCE</code>.</p>
 <p>Le job Custom Pages valide le HTML et se protège contre les problèmes connus de compilation des modèles Lua avant la mise en cache. Une source invalide conserve le dernier cache accepté. Une page active indisponible ou défaillante revient à la page fournie, puis à une page d'urgence minimale. Un échec de rendu ne rétablit jamais le trafic vers le proxy.</p>
-<h3 id="depannage-de-la-maintenance">Dépannage de la Maintenance</h3>
+<h3 id="depannage-de-la-maintenance">Dépannage de la Maintenance<a class="headerlink" href="#depannage-de-la-maintenance" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Le bouton est désactivé ou rejeté :</strong> vérifiez les droits d'écriture, <code>USE_UI</code> et la gestion externe de <code>USE_MAINTENANCE</code> ; modifiez les valeurs gérées de l'extérieur auprès de leur propriétaire.</li>
 <li><strong>L'application répond toujours :</strong> vérifiez qu'un emplacement de proxy inverse standard possède <code>USE_REVERSE_PROXY=yes</code> et <code>USE_MAINTENANCE=yes</code>. Les chemins locaux et ACME sont des exceptions.</li>
@@ -7302,14 +7400,14 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>La page fournie est utilisée :</strong> vérifiez le fichier lisible par le scheduler, la validation du modèle et le journal du scheduler ; un paramètre de fichier verrouille le modèle UI.</li>
 <li><strong>Des ressources ou scripts inline sont absents :</strong> intégrez-les et utilisez <code>nonce_style</code> ou <code>nonce_script</code> ; les URL de l'application ne sont pas disponibles.</li>
 </ul>
-<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#openid-connect-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
   <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/0e4lcXTIIfs" title="OpenID Connect" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>Le plugin <strong>OpenID Connect</strong> (PRO) ajoute le Single Sign-On (SSO) devant votre application en utilisant le flux OAuth 2.0 / OIDC <strong>Authorization Code</strong>.</p>
 <p>Il s'exécute dans BunkerWeb (NGINX/Lua) et impose l'authentification pendant la <strong>phase access</strong>, ce qui bloque les requêtes non authentifiées <em>avant</em> qu'elles n'atteignent votre upstream.</p>
-<h3 id="comment-fonctionne-le-flux-de-requete">Comment fonctionne le flux de requête</h3>
+<h3 id="comment-fonctionne-le-flux-de-requete">Comment fonctionne le flux de requête<a class="headerlink" href="#comment-fonctionne-le-flux-de-requete" title="Permanent link">&para;</a></h3>
 <p>Lorsqu'un navigateur demande une URL protégée :</p>
 <ol>
 <li>S'il n'y a pas de session valide, BunkerWeb redirige l'utilisateur vers le fournisseur d'identité (IdP).</li>
@@ -7342,31 +7440,31 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p class="admonition-title">L'URL de callback doit correspondre à la configuration du client IdP</p>
 <p>Enregistrez l'URL de callback complète côté IdP (schéma + hôte + chemin). Par exemple avec les valeurs par défaut : <code>https://app.example.com/callback</code>.</p>
 </div>
-<h3 id="parametres-expliques">Paramètres (expliqués)</h3>
+<h3 id="parametres-expliques">Paramètres (expliqués)<a class="headerlink" href="#parametres-expliques" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Paramètres requis</p>
 <p>Au minimum, <code>OPENIDC_DISCOVERY</code> et <code>OPENIDC_CLIENT_ID</code> doivent être définis pour que le plugin fonctionne.</p>
 </div>
-<h4 id="activation">Activation</h4>
+<h4 id="activation">Activation<a class="headerlink" href="#activation" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>USE_OPENIDC</code> (défaut : <code>no</code>) : activer ou désactiver l'authentification OpenID Connect pour le site.</li>
 </ul>
-<h4 id="fournisseur-didentite-idp-enregistrement-du-client">Fournisseur d'identité (IdP) + enregistrement du client</h4>
+<h4 id="fournisseur-didentite-idp-enregistrement-du-client">Fournisseur d'identité (IdP) + enregistrement du client<a class="headerlink" href="#fournisseur-didentite-idp-enregistrement-du-client" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_DISCOVERY</code> : URL de discovery (ex. <code>https://idp.example.com/.well-known/openid-configuration</code>).</li>
 <li><code>OPENIDC_CLIENT_ID</code> : identifiant du client OAuth 2.0 enregistré auprès de l'IdP.</li>
 <li><code>OPENIDC_CLIENT_SECRET</code> : secret du client OAuth 2.0 (utilisé par <code>basic</code>, <code>post</code> et <code>secret_jwt</code>).</li>
 </ul>
-<h4 id="callback-redirection">Callback / redirection</h4>
+<h4 id="callback-redirection">Callback / redirection<a class="headerlink" href="#callback-redirection" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_REDIRECT_URI</code> (défaut : <code>/callback</code>) : chemin de callback utilisé par l'IdP après authentification (doit être enregistré côté IdP).</li>
 </ul>
-<h4 id="scopes-et-parametres-dautorisation">Scopes et paramètres d'autorisation</h4>
+<h4 id="scopes-et-parametres-dautorisation">Scopes et paramètres d'autorisation<a class="headerlink" href="#scopes-et-parametres-dautorisation" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_SCOPE</code> (défaut : <code>openid email profile</code>) : liste d'espaces des scopes à demander.</li>
 <li><code>OPENIDC_AUTHORIZATION_PARAMS</code> : paramètres d'autorisation supplémentaires sous forme <code>key=value</code> séparés par des virgules.</li>
 </ul>
-<h4 id="renforcement-de-securite">Renforcement de sécurité</h4>
+<h4 id="renforcement-de-securite">Renforcement de sécurité<a class="headerlink" href="#renforcement-de-securite" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_USE_NONCE</code> (défaut : <code>yes</code>) : ajouter un nonce aux requêtes d'autorisation.</li>
 <li><code>OPENIDC_USE_PKCE</code> (défaut : <code>no</code>) : activer PKCE pour le flux Authorization Code.</li>
@@ -7374,7 +7472,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><code>OPENIDC_ACCEPT_UNSUPPORTED_ALG</code> (défaut : <code>no</code>) : accepter des jetons signés avec des algorithmes non supportés (non recommandé).</li>
 <li><code>OPENIDC_FORCE_REAUTHORIZE</code> (défaut : <code>no</code>) : forcer la ré-autorisation à chaque requête (debug uniquement).</li>
 </ul>
-<h4 id="controle-dacces-par-claims-acl">Contrôle d'accès par claims (ACL)</h4>
+<h4 id="controle-dacces-par-claims-acl">Contrôle d'accès par claims (ACL)<a class="headerlink" href="#controle-dacces-par-claims-acl" title="Permanent link">&para;</a></h4>
 <p>Les claims sont des paires clé-valeur du jeton OIDC qui décrivent l'utilisateur (par ex. <code>email</code>, <code>groups</code>, <code>sub</code>). La fonctionnalité ACL vous permet de restreindre l'accès en fonction de valeurs spécifiques de claims.</p>
 <table>
 <thead>
@@ -7436,40 +7534,40 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </code></pre></div>
 <p>Avec <code>OPENIDC_ACL_MATCH_MODE=any</code>, l'accès est accordé si l'utilisateur fait partie du groupe <code>engineering</code> <strong>ou</strong> possède l'e-mail <code>admin@example.com</code>. Avec <code>all</code>, les deux conditions doivent être remplies.</p>
 </div>
-<h4 id="cycle-de-vie-sessionjetons">Cycle de vie session/jetons</h4>
+<h4 id="cycle-de-vie-sessionjetons">Cycle de vie session/jetons<a class="headerlink" href="#cycle-de-vie-sessionjetons" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_REFRESH_SESSION_INTERVAL</code> : intervalle (secondes) pour ré-authentifier/rafraîchir silencieusement la session (vide = désactivé).</li>
 <li><code>OPENIDC_ACCESS_TOKEN_EXPIRES_IN</code> (défaut : <code>3600</code>) : durée par défaut du jeton d'accès si l'IdP ne la fournit pas.</li>
 <li><code>OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY</code> (défaut : <code>yes</code>) : renouveler automatiquement le jeton d'accès via le refresh token.</li>
 </ul>
-<h4 id="parametres-dauthentification-sur-lendpoint-token">Paramètres d'authentification sur l'endpoint token</h4>
+<h4 id="parametres-dauthentification-sur-lendpoint-token">Paramètres d'authentification sur l'endpoint token<a class="headerlink" href="#parametres-dauthentification-sur-lendpoint-token" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD</code> (défaut : <code>basic</code>) : <code>basic</code>, <code>post</code>, <code>secret_jwt</code>, <code>private_key_jwt</code>.</li>
 <li><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code> : requis avec <code>private_key_jwt</code>.</li>
 <li><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code> : <code>kid</code> optionnel pour <code>private_key_jwt</code>.</li>
 <li><code>OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN</code> : durée de vie (secondes) de l'assertion JWT.</li>
 </ul>
-<h4 id="comportement-de-logout">Comportement de logout</h4>
+<h4 id="comportement-de-logout">Comportement de logout<a class="headerlink" href="#comportement-de-logout" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_LOGOUT_PATH</code> (défaut : <code>/logout</code>) : chemin de logout local géré par BunkerWeb.</li>
 <li><code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT</code> (défaut : <code>no</code>) : révoquer les jetons côté IdP lors du logout.</li>
 <li><code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code> : redirection après logout local (vide = comportement par défaut de l'IdP).</li>
 <li><code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code> : redirection après fin du logout IdP (si supporté).</li>
 </ul>
-<h4 id="connectivite-et-tls-vers-lidp">Connectivité et TLS vers l'IdP</h4>
+<h4 id="connectivite-et-tls-vers-lidp">Connectivité et TLS vers l'IdP<a class="headerlink" href="#connectivite-et-tls-vers-lidp" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_TIMEOUT_CONNECT|SEND|READ</code> (défaut : <code>10000</code> ms chacun) : timeouts pour les appels HTTP vers l'IdP.</li>
 <li><code>OPENIDC_SSL_VERIFY</code> (défaut : <code>yes</code>) : vérifier les certificats TLS de l'IdP.</li>
 <li><code>OPENIDC_KEEPALIVE</code> (défaut : <code>yes</code>) : keepalive pour les connexions IdP.</li>
 <li><code>OPENIDC_HTTP_PROXY</code> / <code>OPENIDC_HTTPS_PROXY</code> : proxys pour les appels IdP.</li>
 </ul>
-<h4 id="transmission-de-lidentite-a-lupstream">Transmission de l'identité à l'upstream</h4>
+<h4 id="transmission-de-lidentite-a-lupstream">Transmission de l'identité à l'upstream<a class="headerlink" href="#transmission-de-lidentite-a-lupstream" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_USER_HEADER</code> (défaut : <code>X-User</code>) : header transmis à l'upstream (vide = désactivé).</li>
 <li><code>OPENIDC_USER_HEADER_CLAIM</code> (défaut : <code>sub</code>) : claim à extraire pour la valeur du header.</li>
 <li><code>OPENIDC_DISPLAY_CLAIM</code> (défaut : <code>preferred_username</code>) : claim utilisé pour l'affichage dans les logs/métriques.</li>
 </ul>
-<h4 id="cache">Cache</h4>
+<h4 id="cache">Cache<a class="headerlink" href="#cache" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_DISCOVERY_DICT_SIZE</code> (défaut : <code>1m</code>) : taille du shared dict pour le cache discovery.</li>
 <li><code>OPENIDC_JWKS_DICT_SIZE</code> (défaut : <code>1m</code>) : taille du shared dict pour le cache JWKS.</li>
@@ -7478,17 +7576,17 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p class="admonition-title">Stockage de session Redis</p>
 <p>Lorsque <code>USE_REDIS=yes</code> est configuré globalement dans BunkerWeb, le plugin OpenIDC stocke les sessions dans Redis au lieu des cookies (avec fallback automatique vers les cookies si Redis devient indisponible). C'est le mode recommandé pour les déploiements multi-instance / HA.</p>
 </div>
-<h3 id="cache-discovery-jwks">Cache discovery + JWKS</h3>
+<h3 id="cache-discovery-jwks">Cache discovery + JWKS<a class="headerlink" href="#cache-discovery-jwks" title="Permanent link">&para;</a></h3>
 <p>Le plugin utilise <code>OPENIDC_DISCOVERY</code> (l'URL <code>.well-known/openid-configuration</code> de l'IdP) pour découvrir les endpoints, puis récupère et met en cache les clés JWKS pour valider les signatures.</p>
 <p>Les données discovery/JWKS sont mises en cache dans des shared dictionaries NGINX. Si vous avez beaucoup de tenants/IdP ou de gros ensembles de clés, augmentez :</p>
 <ul>
 <li><code>OPENIDC_DISCOVERY_DICT_SIZE</code> (global)</li>
 <li><code>OPENIDC_JWKS_DICT_SIZE</code> (global)</li>
 </ul>
-<h3 id="sessions-cookies-vs-redis">Sessions (cookies vs Redis)</h3>
+<h3 id="sessions-cookies-vs-redis">Sessions (cookies vs Redis)<a class="headerlink" href="#sessions-cookies-vs-redis" title="Permanent link">&para;</a></h3>
 <p>Par défaut, les sessions sont stockées dans des cookies sécurisés gérés par la bibliothèque OpenID Connect.</p>
 <p>Si <code>USE_REDIS=yes</code> est activé globalement et que Redis est configuré, le plugin bascule automatiquement vers des <strong>sessions Redis</strong> (avec fallback automatique vers les cookies si Redis est temporairement indisponible). Recommandé en load-balancing / HA et évite les limites de taille des cookies lorsque les jetons sont volumineux.</p>
-<h3 id="transmission-de-lidentite-utilisateur-a-lupstream">Transmission de l'identité utilisateur à l'upstream</h3>
+<h3 id="transmission-de-lidentite-utilisateur-a-lupstream">Transmission de l'identité utilisateur à l'upstream<a class="headerlink" href="#transmission-de-lidentite-utilisateur-a-lupstream" title="Permanent link">&para;</a></h3>
 <p>Si <code>OPENIDC_USER_HEADER</code> est défini (défaut : <code>X-User</code>), le plugin injecte un header extrait d'un claim (défaut : <code>OPENIDC_USER_HEADER_CLAIM=sub</code>).</p>
 <p>Comportement de sécurité important :</p>
 <ul>
@@ -7500,20 +7598,20 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p class="admonition-title">Choisir un claim</p>
 <p>Privilégiez des identifiants stables présents dans les jetons (ex. <code>sub</code>, <code>email</code>, <code>preferred_username</code>). Les claims sont lus d'abord depuis l'ID token, puis depuis userinfo si présent.</p>
 </div>
-<h3 id="logout">Logout</h3>
+<h3 id="logout">Logout<a class="headerlink" href="#logout" title="Permanent link">&para;</a></h3>
 <p>Les requêtes de logout sont gérées sur <code>OPENIDC_LOGOUT_PATH</code> (défaut : <code>/logout</code>).</p>
 <ul>
 <li>Pour révoquer les jetons côté IdP lors du logout, définissez <code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT=yes</code>.</li>
 <li>Utilisez <code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code> et <code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code> pour contrôler les redirections après logout.</li>
 </ul>
-<h3 id="authentification-a-lendpoint-token">Authentification à l'endpoint token</h3>
+<h3 id="authentification-a-lendpoint-token">Authentification à l'endpoint token<a class="headerlink" href="#authentification-a-lendpoint-token" title="Permanent link">&para;</a></h3>
 <p>La plupart des IdP fonctionnent avec la valeur par défaut <code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD=basic</code> (client secret via HTTP Basic). Sont aussi supportés :</p>
 <ul>
 <li><code>post</code></li>
 <li><code>secret_jwt</code></li>
 <li><code>private_key_jwt</code> (requiert <code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code>, optionnel <code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code>)</li>
 </ul>
-<h3 id="exemples-de-configuration-minimale">Exemples de configuration minimale</h3>
+<h3 id="exemples-de-configuration-minimale">Exemples de configuration minimale<a class="headerlink" href="#exemples-de-configuration-minimale" title="Permanent link">&para;</a></h3>
 <p>Paramètres minimum requis par service protégé :</p>
 <ul>
 <li><code>USE_OPENIDC=yes</code></li>
@@ -7529,16 +7627,16 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><code>OPENIDC_TIMEOUT_CONNECT|SEND|READ</code> adapté à la latence de l'IdP</li>
 <li><code>OPENIDC_SSL_VERIFY=yes</code> (défaut)</li>
 </ul>
-<h3 id="depannage">Dépannage</h3>
+<h3 id="depannage">Dépannage<a class="headerlink" href="#depannage" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>403 avec "Authentication failed"</strong> : le plus souvent une URL discovery incorrecte, un mismatch d'URL de callback côté IdP, ou un IdP injoignable.</li>
 <li><strong>Dérive d'horloge / "token not yet valid"</strong> : activez NTP ; ajustez <code>OPENIDC_IAT_SLACK</code> si nécessaire.</li>
 <li><strong>Header utilisateur absent</strong> : vérifiez que le claim de <code>OPENIDC_USER_HEADER_CLAIM</code> existe dans l'ID token/userinfo.</li>
 <li><strong>Déploiements multi-instance</strong> : activez <code>USE_REDIS=yes</code> et configurez <code>REDIS_HOST</code> (ou Sentinel) pour partager les sessions.</li>
 </ul>
-<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#saml-pro" title="Permanent link">&para;</a></h2>
 <p>Le plugin <strong>SAML</strong> (PRO) transforme BunkerWeb en fournisseur de services (SP) SAML 2.0 pour le SSO dans le navigateur. Il accepte une réponse IdP dont l'assertion est couverte par une signature de confiance, crée une session et peut exposer certains attributs à l'upstream protégé sous forme d'en-têtes. Il prend en charge BunkerWeb 1.6.14 et les versions 1.6.x ultérieures.</p>
-<h3 id="prerequis-et-elements-de-confiance">Prérequis et éléments de confiance</h3>
+<h3 id="prerequis-et-elements-de-confiance">Prérequis et éléments de confiance<a class="headerlink" href="#prerequis-et-elements-de-confiance" title="Permanent link">&para;</a></h3>
 <p>Utilisez une origine HTTPS publique pour chaque service protégé, telle que <code>https://app.example.com</code>, sans barre oblique finale, chemin ni chaîne de requête. Un port HTTPS non standard est autorisé. SAML nécessite trois éléments au format PEM :</p>
 <ul>
 <li>une <strong>clé privée RSA non chiffrée</strong> pour le SP ;</li>
@@ -7546,7 +7644,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>le certificat de signature PEM de l'IdP, que BunkerWeb utilise pour vérifier les assertions.</li>
 </ul>
 <p>La clé et le certificat SP doivent correspondre et être des clés RSA d'au moins 2048 bits. L'URL SSO de l'IdP et, si elle est fournie, son URL SLO doivent utiliser HTTPS. Gardez la clé privée secrète ; BunkerWeb l'utilise pour signer les requêtes d'authentification et de déconnexion.</p>
-<h3 id="configurer-saml-dans-linterface">Configurer SAML dans l'interface</h3>
+<h3 id="configurer-saml-dans-linterface">Configurer SAML dans l'interface<a class="headerlink" href="#configurer-saml-dans-linterface" title="Permanent link">&para;</a></h3>
 <p>Ouvrez <strong>SAML</strong> pour le service cible et choisissez sa portée. Le formulaire regroupe les paramètres dans les sections IdP, SP, session, en-têtes d'identité et ACL. Suivez cet ordre :</p>
 <ol>
 <li>Activez <code>USE_SAML</code> pour le service.</li>
@@ -7557,7 +7655,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>Configurez les attributs d'identité et les règles ACL, puis enregistrez et appliquez de nouveau.</li>
 </ol>
 <p>BunkerWeb exporte les métadonnées SP ; il n'importe pas les métadonnées IdP et ne les actualise pas automatiquement. Configurez d'abord les champs et certificats IdP, puis exportez les métadonnées afin d'éviter une boucle de configuration.</p>
-<h3 id="flux-de-requete-du-navigateur">Flux de requête du navigateur</h3>
+<h3 id="flux-de-requete-du-navigateur">Flux de requête du navigateur<a class="headerlink" href="#flux-de-requete-du-navigateur" title="Permanent link">&para;</a></h3>
 <p>Une connexion initiée par le SP signe l'AuthnRequest avec la clé privée SP et l'envoie à l'IdP via HTTP-Redirect. L'IdP renvoie à l'ACS une réponse dont l'assertion est couverte par sa signature via HTTP-POST. BunkerWeb valide la corrélation, la destination, l'émetteur, les horodatages de l'assertion, la signature et l'état de rejeu avant de créer une session. Le corps de la requête initiale n'est pas rejoué.</p>
 <pre class="mermaid"><code>sequenceDiagram
   participant B as Navigateur
@@ -7576,7 +7674,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
   BW-&gt;&gt;Up: Requête et en-têtes d'identité configurés
   Up--&gt;&gt;BW: Réponse
   BW--&gt;&gt;B: Réponse</code></pre>
-<h3 id="endpoints">Endpoints</h3>
+<h3 id="endpoints">Endpoints<a class="headerlink" href="#endpoints" title="Permanent link">&para;</a></h3>
 <p>Tous les chemins d'endpoint sont des chemins locaux sur l'origine SP publique. Les valeurs par défaut sont des paramètres multisite et peuvent être modifiées lorsqu'elles sont disponibles pour le service.</p>
 <table>
 <thead>
@@ -7615,7 +7713,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tbody>
 </table>
 <p><code>SAML_LOGOUT_REDIRECT</code> (par défaut <code>/</code>) est le chemin local utilisé après la déconnexion. Conservez les quatre chemins d'endpoint distincts et exempts de chaînes de requête, fragments, barres obliques inverses, espaces ou segments de traversée.</p>
-<h3 id="enregistrement-de-keycloak-2652">Enregistrement de Keycloak 26.5.2</h3>
+<h3 id="enregistrement-de-keycloak-2652">Enregistrement de Keycloak 26.5.2<a class="headerlink" href="#enregistrement-de-keycloak-2652" title="Permanent link">&para;</a></h3>
 <p>Le <a href="https://github.com/keycloak/keycloak/blob/26.5.2/docs/documentation/server_admin/topics/clients/saml/proc-creating-saml-client.adoc">guide du client SAML Keycloak 26.5.2</a> utilise les onglets client <strong>Settings</strong>, <strong>Keys</strong> et <strong>Advanced</strong>. Utilisez les valeurs suivantes pour la disposition d'endpoint par défaut de BunkerWeb. Remplacez <code>https://app.example.com</code> par la valeur exacte de <code>SAML_SP_BASE_URL</code>.</p>
 <p>Créez un client SAML activé avec ces valeurs d'enregistrement. Dans l'interface Keycloak, <strong>Enabled</strong> et <strong>Front channel logout</strong> sont activés (<code>true</code>) ; le protocole client est <code>SAML</code>.</p>
 <table>
@@ -7665,9 +7763,9 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <span class="nt">saml_single_logout_service_url_redirect</span><span class="p">:</span><span class="w"> </span><span class="s">"https://app.example.com/saml/sls"</span>
 </code></pre></div>
 <p>Ajoutez des mappers de protocole pour <code>email</code>, <code>groups</code> et <code>name</code>. Pour chaque mapper, utilisez <code>protocol: "saml"</code>, <code>protocolMapper: "saml-user-attribute-mapper"</code> et <code>consentRequired: false</code> ; définissez <code>config.user.attribute</code> et <code>config.attribute.name</code> sur le même attribut, et <code>config.attribute.nameformat</code> sur <code>Basic</code>. Vérifiez que l'utilisateur IdP possède réellement ces attributs ; l'absence d'un claim ne produit pas l'en-tête upstream correspondant.</p>
-<h3 id="parametres-expliques_1">Paramètres (expliqués)</h3>
+<h3 id="parametres-expliques_1">Paramètres (expliqués)<a class="headerlink" href="#parametres-expliques_1" title="Permanent link">&para;</a></h3>
 <p>Les valeurs par défaut ci-dessous proviennent des paramètres du plugin SAML. Les valeurs par défaut vides sont indiquées par <code>empty</code>.</p>
-<h4 id="activation-confiance-et-routes">Activation, confiance et routes</h4>
+<h4 id="activation-confiance-et-routes">Activation, confiance et routes<a class="headerlink" href="#activation-confiance-et-routes" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -7749,7 +7847,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tr>
 </tbody>
 </table>
-<h4 id="sessions-et-en-tetes-didentite">Sessions et en-têtes d'identité</h4>
+<h4 id="sessions-et-en-tetes-didentite">Sessions et en-têtes d'identité<a class="headerlink" href="#sessions-et-en-tetes-didentite" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -7822,7 +7920,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tbody>
 </table>
 <p>Avant l'authentification, BunkerWeb efface chaque en-tête d'identité SAML configuré de la requête entrante. Il n'ajoute un en-tête qu'après une réponse valide et uniquement lorsque l'attribut mappé existe. Les noms d'en-tête doivent être uniques, syntaxiquement valides et ne peuvent pas utiliser de préfixes liés au routage ou sensibles à la sécurité, tels que <code>X-Forwarded-*</code>, <code>Proxy-*</code> ou <code>Sec-*</code>. Ces en-têtes transmettent l'identité à l'upstream protégé ; ils n'ouvrent pas de session pour l'utilisateur dans l'interface Web BunkerWeb.</p>
-<h4 id="acl-dattributs">ACL d'attributs</h4>
+<h4 id="acl-dattributs">ACL d'attributs<a class="headerlink" href="#acl-dattributs" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -7875,7 +7973,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <span class="nt">app.example.com_SAML_ACL_VALUE_2</span><span class="p">:</span><span class="w"> </span><span class="s">"admin@example.com"</span>
 </code></pre></div>
 <p>La première paire est <code>_1</code> et la seconde <code>_2</code> ; l'interface numérote les règles à partir de 1. Avec un nombre explicite de <code>2</code>, les deux paires sont requises ; l'absence d'un attribut refuse l'accès, tandis qu'une valeur configurée vide constitue un refus. Avec <code>all</code>, toutes les règles doivent correspondre ; avec <code>any</code>, une seule règle correspondante suffit. Sans règle, tous les utilisateurs authentifiés sont autorisés. À la portée d'un service, l'interface hérite de la liste de règles globale jusqu'à ce que vous choisissiez une liste de service ; l'enregistrement d'une liste de service remplace cette liste héritée, y compris lorsque le remplacement est explicitement vide. Laissez <code>SAML_ACL_RULE_COUNT</code> vide pour découvrir les règles numérotées jusqu'au premier des 100 emplacements. Définissez-le sur <code>0</code> pour effacer toutes les règles. Un mode invalide ou une liste explicite mal formée échoue de manière restrictive. <code>SAML_ACL_DENIED_URL</code> redirige lorsqu'il est défini ; sinon BunkerWeb renvoie son statut de refus.</p>
-<h4 id="protection-contre-le-rejeu">Protection contre le rejeu</h4>
+<h4 id="protection-contre-le-rejeu">Protection contre le rejeu<a class="headerlink" href="#protection-contre-le-rejeu" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -7895,9 +7993,9 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tbody>
 </table>
 <p>Chaque identifiant d'assertion accepté est ajouté de manière atomique au magasin de rejeu pendant la durée où il pourrait encore être accepté. L'identifiant AuthnRequest en attente est une valeur de corrélation de session distincte. Sur une instance, augmentez <code>SAML_REPLAY_DICT_SIZE</code> lorsque le dictionnaire partagé est trop petit. Pour les répliques, activez le mode de session core <code>USE_REDIS=yes</code> et pointez chaque instance vers le même service Redis afin que les clés de rejeu utilisent le magasin partagé. Conservez également le même <code>SESSIONS_SECRET</code> core sur chaque réplique ; sinon une session créée par un worker ne peut pas être lue par un autre. Les sessions utilisent par défaut des cookies sécurisés limités à l'hôte, avec <code>HttpOnly</code>, <code>Secure</code> et <code>SameSite=None</code>. Lorsque Redis est activé, les données de session passent dans un magasin Redis avec espace de noms au lieu du cookie. Le <code>SessionNotOnOrAfter</code> de l'IdP peut terminer une session avant les délais configurés. Une assertion consommée reste consommée si une étape ultérieure du callback échoue.</p>
-<h3 id="deconnexion">Déconnexion</h3>
+<h3 id="deconnexion">Déconnexion<a class="headerlink" href="#deconnexion" title="Permanent link">&para;</a></h3>
 <p>Une requête vers <code>SAML_LOGOUT_PATH</code> efface l'état authentifié, enregistre une corrélation de déconnexion en attente et démarre le SLO en frontal. BunkerWeb envoie une requête de déconnexion signée avec le binding Redirect. Après une <code>LogoutResponse</code> signée valide, il détruit la session locale et redirige le navigateur vers <code>SAML_LOGOUT_REDIRECT</code>. Une <code>LogoutRequest</code> initiée par l'IdP peut arriver sur <code>SAML_SLS_PATH</code> ; le SLS valide l'émetteur, la destination, le NameID, l'index de session et l'état de rejeu, détruit la session locale et renvoie une réponse signée à l'IdP. Si aucune session locale n'existe, la route de déconnexion détruit la session vide et redirige localement.</p>
-<h3 id="limites-et-depannage">Limites et dépannage</h3>
+<h3 id="limites-et-depannage">Limites et dépannage<a class="headerlink" href="#limites-et-depannage" title="Permanent link">&para;</a></h3>
 <p>SAML prend actuellement en charge la connexion navigateur initiée par le SP avec un AuthnRequest Redirect signé et une réponse ACS POST. Il ne prend pas en charge la connexion initiée par l'IdP, les assertions chiffrées ni l'importation et l'actualisation automatiques des métadonnées IdP. Configurez l'IdP pour signer les documents/assertions et envoyer la réponse avec le binding POST. Les corps POST d'authentification et de déconnexion sont limités à 256 KiB ; les requêtes trop volumineuses sont rejetées avant traitement.</p>
 <ul>
 <li><strong>L'interface ne peut pas activer SAML :</strong> vérifiez l'origine HTTPS, les trois certificats/clés, la correspondance de la clé et du certificat RSA, les valeurs d'entité/SSO IdP et les quatre chemins locaux distincts. Une configuration invalide est rejetée et la requête échoue de manière restrictive avec <code>503</code> ; aucune requête n'atteint l'upstream.</li>
@@ -7906,7 +8004,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>Un utilisateur s'authentifie mais reçoit un refus :</strong> activez les attributs ACL attendus, confirmez les paires numérotées et <code>SAML_ACL_RULE_COUNT</code>, puis vérifiez <code>all</code> par rapport à <code>any</code>. Une valeur d'attribut vide ou un claim absent peut refuser l'accès par conception.</li>
 <li><strong>Une session disparaît derrière un équilibreur de charge :</strong> utilisez le même magasin Redis et le même secret de session core sur chaque réplique. Redis doit être disponible lorsque <code>USE_REDIS=yes</code> ; la protection contre le rejeu et les sessions ne reviennent pas silencieusement à un état par worker.</li>
 </ul>
-<h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#ldap-sso-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin <strong>LDAP SSO</strong> ajoute le Single Sign-On basé sur LDAP à vos services BunkerWeb. Il fournit un formulaire de connexion, authentifie les utilisateurs auprès d'un annuaire LDAP, crée une session et transmet optionnellement le nom d'utilisateur authentifié à votre upstream via un en-tête configurable.</p>
 <p>Le plugin prend en charge deux modes d'authentification :</p>
@@ -7914,7 +8012,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>Mode recherche puis liaison (search-then-bind)</strong> (recommandé, aussi appelé "mode recherche enterprise") : un compte de service recherche l'utilisateur dans l'annuaire, puis se lie au DN trouvé pour vérifier le mot de passe. Activé lorsque <code>LDAP_USER_SEARCH_BASE_DN</code> est défini.</li>
 <li><strong>Mode liaison directe (direct bind)</strong> : construit le DN de l'utilisateur à partir d'un modèle (<code>LDAP_USER_DN_TEMPLATE</code>) et effectue une liaison directe. Utilisé en repli lorsque le mode recherche n'est pas configuré.</li>
 </ul>
-<h3 id="fonctionnalites_7">Fonctionnalités</h3>
+<h3 id="fonctionnalites_7">Fonctionnalités<a class="headerlink" href="#fonctionnalites_7" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>LDAP/LDAPS/STARTTLS :</strong> connexion en LDAP non chiffré, LDAPS (TLS dès le départ) ou montée en STARTTLS.</li>
 <li><strong>Mode recherche puis liaison :</strong> un compte de service effectue la découverte d'utilisateurs avec base de recherche, filtre, portée et limites de taille/temps configurables.</li>
@@ -7929,7 +8027,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p class="admonition-title">Les identifiants sont transmis en clair par défaut</p>
 <p>Avec les paramètres par défaut (<code>LDAP_LDAPS=no</code>, <code>LDAP_STARTTLS=no</code>), les mots de passe des utilisateurs sont transmis en clair au serveur LDAP. <strong>Activez toujours <code>LDAP_LDAPS=yes</code> (avec <code>LDAP_PORT=636</code>) ou <code>LDAP_STARTTLS=yes</code> en production.</strong> Conservez <code>LDAP_SSL_VERIFY=yes</code> pour prévenir les attaques par dégradation TLS.</p>
 </div>
-<h3 id="configuration_4">Configuration</h3>
+<h3 id="configuration_4">Configuration<a class="headerlink" href="#configuration_4" title="Permanent link">&para;</a></h3>
 <p><strong>Paramètres principaux</strong></p>
 <table>
 <thead>
@@ -8217,7 +8315,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tr>
 </tbody>
 </table>
-<h3 id="demarrage-rapide_2">Démarrage rapide</h3>
+<h3 id="demarrage-rapide_2">Démarrage rapide<a class="headerlink" href="#demarrage-rapide_2" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Définissez les valeurs minimales par service protégé :<ul>
 <li><code>USE_LDAP=yes</code></li>
@@ -8233,7 +8331,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>Pour le mode liaison directe, ajustez <code>LDAP_USER_DN_TEMPLATE</code> pour correspondre à la structure de votre annuaire.</li>
 <li>Optionnellement, restreignez l'accès avec <code>LDAP_AUTHZ_FILTER</code> (par ex. <code>(memberOf=cn=allowed,ou=groups,dc=example,dc=com)</code>).</li>
 </ol>
-<h3 id="conseils-dutilisation_2">Conseils d'utilisation</h3>
+<h3 id="conseils-dutilisation_2">Conseils d'utilisation<a class="headerlink" href="#conseils-dutilisation_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Privilégiez le mode recherche puis liaison par rapport à la liaison directe : il prend en charge des recherches flexibles sur plusieurs attributs (uid, mail, sAMAccountName, UPN).</li>
 <li>Utilisez LDAPS (<code>LDAP_LDAPS=yes</code>) ou STARTTLS (<code>LDAP_STARTTLS=yes</code>) en production pour chiffrer les identifiants en transit.</li>
@@ -8242,19 +8340,19 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>Ajustez <code>LDAP_KEEPALIVE_POOL_SIZE</code> en fonction du volume d'utilisateurs simultanés attendu afin de réduire la surcharge de connexions LDAP.</li>
 <li>Définissez <code>LDAP_USER_HEADER</code> sur une valeur vide pour désactiver la transmission de l'identité aux upstreams.</li>
 </ul>
-<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#openapi-validator-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/3oZOO1XdSlc" title="OpenAPI Validator" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>Le plugin <strong>OpenAPI Validator</strong> applique votre contrat d'API en validant les requêtes entrantes par rapport à une spécification OpenAPI / Swagger. Il s'assure que le chemin demandé existe, que la méthode HTTP est autorisée et valide éventuellement les paramètres de requête, d'en-tête, de cookie et de chemin par rapport à leurs définitions de schéma.</p>
-<h3 id="fonctionnement">Fonctionnement</h3>
+<h3 id="fonctionnement">Fonctionnement<a class="headerlink" href="#fonctionnement" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Un job planifié (<code>openapi-download.py</code>) récupère le document OpenAPI à partir d'une URL ou d'un fichier et le met en cache sur le disque (toutes les heures par défaut).</li>
 <li>Au moment de l'initialisation de NGINX, le plugin compile les routes à partir de la spécification mise en cache et les stocke dans un espace de stockage interne partagé.</li>
 <li>Pendant le traitement de la requête, le plugin fait correspondre la requête aux routes compilées et applique la validation.</li>
 </ol>
-<h3 id="fonctionnalites_8">Fonctionnalités</h3>
+<h3 id="fonctionnalites_8">Fonctionnalités<a class="headerlink" href="#fonctionnalites_8" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Validation du chemin et de la méthode avec une réponse <code>405</code> lorsque la méthode n'est pas autorisée.</li>
 <li>Validation optionnelle des paramètres pour les requêtes, les en-têtes, les cookies et les paramètres de chemin.</li>
@@ -8263,7 +8361,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>Liste d'ignorés configurable pour les points de terminaison tels que la documentation ou les fichiers de spécification.</li>
 <li>La spécification mise en cache est actualisée toutes les heures sans bloquer les requêtes.</li>
 </ul>
-<h3 id="configuration_5">Configuration</h3>
+<h3 id="configuration_5">Configuration<a class="headerlink" href="#configuration_5" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -8333,7 +8431,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tr>
 </tbody>
 </table>
-<h3 id="notes-de-comportement">Notes de comportement</h3>
+<h3 id="notes-de-comportement">Notes de comportement<a class="headerlink" href="#notes-de-comportement" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>OPENAPI_SPEC</code> peut être un fichier local ou une URL HTTPS. Les URL HTTP sont bloquées sauf si <code>OPENAPI_ALLOW_INSECURE_URL=yes</code>.</li>
 <li>Si <code>OPENAPI_BASE_PATH</code> est vide, le plugin déduit le chemin de base à partir de <code>servers[*].url</code> (OpenAPI 3) ou <code>basePath</code> (Swagger 2) lorsqu'il est présent.</li>
@@ -8341,7 +8439,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>Lorsqu'un chemin est absent de la spécification et que <code>OPENAPI_ALLOW_UNSPECIFIED=no</code>, la requête est refusée avec le statut de refus configuré.</li>
 <li>Les échecs de validation de paramètres sont refusés et seule la première erreur est enregistrée pour garder les logs concis.</li>
 </ul>
-<h3 id="demarrage-rapide_3">Démarrage rapide</h3>
+<h3 id="demarrage-rapide_3">Démarrage rapide<a class="headerlink" href="#demarrage-rapide_3" title="Permanent link">&para;</a></h3>
 <p>Définissez les valeurs minimales par service protégé :</p>
 <ul>
 <li><code>USE_OPENAPI_VALIDATOR=yes</code></li>
@@ -8351,7 +8449,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <ul>
 <li><code>OPENAPI_ALLOW_UNSPECIFIED=yes</code></li>
 </ul>
-<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
 <p>Prise en charge de STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin Cache PRO active la mise en cache des réponses au niveau du reverse proxy à l'aide des directives NGINX <code>proxy_cache*</code>. Il est utile pour absorber les lectures répétées sur du contenu cacheable, soulager les upstreams lors des pics de charge et servir du contenu périmé pendant de courtes indisponibilités du backend.</p>
 <p><strong>Fonctionnement</strong></p>
@@ -8531,14 +8629,14 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><code>CACHE_LOCK=yes</code> et <code>CACHE_BACKGROUND_UPDATE=yes</code> permettent de réduire les rafales de requêtes vers l'origine.</li>
 </ul>
 </div>
-<h2 id="acme">ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="acme">ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#acme" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Le plugin <strong>ACME</strong> fournit une gestion avancée des certificats via le protocole ACME avec prise en charge d'autorités de certification personnalisées (Step CA, Vault PKI, Sectigo, Google Trust Services, etc.). Il complète le plugin Let's Encrypt intégré en ajoutant la prise en charge de CA personnalisées, les challenges DNS-01 et TLS-ALPN-01, les certificats wildcard, la surveillance des certificats avec alertes d'expiration, la surveillance des logs Certificate Transparency et un OCSP stapling amélioré.</p>
 <div class="admonition tip">
 <p class="admonition-title">Quand utiliser ACME ou le plugin Let's Encrypt intégré</p>
 <p>Si vous avez uniquement besoin de certificats Let's Encrypt avec des challenges HTTP-01, le plugin Let's Encrypt intégré (<code>AUTO_LETS_ENCRYPT=yes</code>) est suffisant. Utilisez le plugin ACME lorsque vous avez besoin de CA personnalisées, de challenges DNS-01 ou TLS-ALPN-01, de certificats wildcard, ou de surveillance des certificats avec alertes.</p>
 </div>
-<h3 id="fonctionnalites_9">Fonctionnalités</h3>
+<h3 id="fonctionnalites_9">Fonctionnalités<a class="headerlink" href="#fonctionnalites_9" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Prise en charge de CA personnalisées :</strong> utilisez n'importe quelle autorité de certification compatible ACME, pas uniquement Let's Encrypt.</li>
 <li><strong>Plusieurs types de challenges :</strong> HTTP-01, DNS-01 (requis pour les wildcards) et TLS-ALPN-01.</li>
@@ -8551,16 +8649,16 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>OCSP stapling amélioré :</strong> récupération et mise en cache proactives des réponses OCSP.</li>
 <li><strong>Types de clés configurables :</strong> ECDSA (256/384) ou RSA (2048/4096).</li>
 </ul>
-<h3 id="prerequis_1">Prérequis</h3>
-<h4 id="le-challenge-http-01-necessite-lets_encrypt_passthroughyes">Le challenge HTTP-01 nécessite <code>LETS_ENCRYPT_PASSTHROUGH=yes</code></h4>
+<h3 id="prerequis_1">Prérequis<a class="headerlink" href="#prerequis_1" title="Permanent link">&para;</a></h3>
+<h4 id="le-challenge-http-01-necessite-lets_encrypt_passthroughyes">Le challenge HTTP-01 nécessite <code>LETS_ENCRYPT_PASSTHROUGH=yes</code><a class="headerlink" href="#le-challenge-http-01-necessite-lets_encrypt_passthroughyes" title="Permanent link">&para;</a></h4>
 <p>Lorsque vous utilisez <code>ACME_CHALLENGE=http</code> (la valeur par défaut), vous <strong>devez</strong> définir <code>LETS_ENCRYPT_PASSTHROUGH=yes</code> sur le même service.</p>
 <p>Le plugin Let's Encrypt intégré de BunkerWeb inclut à la fois un bloc location NGINX et un gestionnaire d'accès Lua pour <code>/.well-known/acme-challenge/</code>. Comme le bloc location NGINX correspond avant que le code des plugins Lua ne s'exécute, il intercepte les requêtes de challenge avant que le plugin ACME PRO ne puisse les servir. Définir <code>LETS_ENCRYPT_PASSTHROUGH=yes</code> désactive les deux mécanismes afin que le plugin ACME PRO puisse gérer correctement les tokens du challenge HTTP-01.</p>
 <p>Cela n'est <strong>nécessaire que pour HTTP-01</strong>. Les challenges DNS-01 et TLS-ALPN-01 ne sont pas concernés.</p>
-<h4 id="passthrough-acme-vers-lamont-acme_passthrough">Passthrough ACME vers l'amont (<code>ACME_PASSTHROUGH</code>)</h4>
+<h4 id="passthrough-acme-vers-lamont-acme_passthrough">Passthrough ACME vers l'amont (<code>ACME_PASSTHROUGH</code>)<a class="headerlink" href="#passthrough-acme-vers-lamont-acme_passthrough" title="Permanent link">&para;</a></h4>
 <p>Si le serveur amont derrière BunkerWeb exécute déjà son propre client ACME et doit gérer lui-même la validation HTTP-01, définissez <code>ACME_PASSTHROUGH=yes</code> sur le service. Le plugin ACME PRO cessera alors de rendre son bloc location <code>/.well-known/acme-challenge/</code> et n'ajoutera plus les chemins de challenge à la liste blanche en phase <code>access</code>, afin que les fichiers de validation servis par l'amont parviennent à la CA sans être interceptés.</p>
 <p>Laissez <code>ACME_PASSTHROUGH=no</code> (la valeur par défaut) lorsque vous voulez que le plugin ACME PRO obtienne et renouvelle lui-même les certificats. La combinaison standard HTTP-01 pour les services gérés par ACME PRO est <code>LETS_ENCRYPT_PASSTHROUGH=yes</code> (pour que le plugin OSS Let's Encrypt cède son bloc location de challenge) associé à <code>ACME_PASSTHROUGH=no</code>. Ne passez <code>ACME_PASSTHROUGH</code> à <code>yes</code> que lorsque l'amont possède le cycle de vie complet du certificat — dans ce mode, BunkerWeb n'essaiera pas d'émettre de certificat pour ce service.</p>
 <p>Ce paramètre reproduit le comportement du <code>LETS_ENCRYPT_PASSTHROUGH</code> du cœur OSS et n'affecte que HTTP-01 ; les challenges DNS-01 et TLS-ALPN-01 ne sont pas concernés.</p>
-<h4 id="ordre-dexecution-des-plugins">Ordre d'exécution des plugins</h4>
+<h4 id="ordre-dexecution-des-plugins">Ordre d'exécution des plugins<a class="headerlink" href="#ordre-dexecution-des-plugins" title="Permanent link">&para;</a></h4>
 <p>Le plugin ACME se réordonne automatiquement pour s'exécuter en premier dans la phase NGINX <code>ssl_certificate</code>, garantissant que les certificats de challenge TLS-ALPN-01 sont servis avant que d'autres plugins fournisseurs de certificats (selfsigned, letsencrypt, customcert) ne court-circuitent la boucle.</p>
 <p>Lorsque vous utilisez ACME aux côtés d'autres plugins PRO nécessitant un TLS valide (par ex. OpenID Connect, UI SSO), il est recommandé d'ajouter explicitement <code>acme</code> juste après <code>customcert</code> dans les paramètres d'ordre des phases concernées :</p>
 <div class="highlight"><pre><span></span><code>PLUGINS_ORDER_SSL_CERTIFICATE=customcert acme letsencrypt selfsigned
@@ -8571,7 +8669,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <p class="admonition-title">N'activez pas <code>USE_ACME</code> et <code>AUTO_LETS_ENCRYPT</code> sur le même service</p>
 <p>Le plugin ACME et le plugin Let's Encrypt intégré utilisent des stockages et des chemins de challenge séparés, mais les activer tous les deux sur le même service provoquera des conflits. Utilisez l'un ou l'autre par service. En mode multisite, différents services peuvent utiliser différents plugins -- par exemple, <code>app1.example.com_USE_ACME=yes</code> et <code>app2.example.com_AUTO_LETS_ENCRYPT=yes</code>.</p>
 </div>
-<h3 id="configuration_6">Configuration</h3>
+<h3 id="configuration_6">Configuration<a class="headerlink" href="#configuration_6" title="Permanent link">&para;</a></h3>
 <p><strong>Paramètres principaux ACME</strong></p>
 <table>
 <thead>
@@ -8936,7 +9034,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </tr>
 </tbody>
 </table>
-<h3 id="demarrage-rapide_4">Démarrage rapide</h3>
+<h3 id="demarrage-rapide_4">Démarrage rapide<a class="headerlink" href="#demarrage-rapide_4" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Définissez les valeurs minimales par service protégé :<ul>
 <li><code>USE_ACME=yes</code></li>
@@ -8962,7 +9060,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </ul>
 </li>
 </ol>
-<h3 id="conseils-dutilisation_3">Conseils d'utilisation</h3>
+<h3 id="conseils-dutilisation_3">Conseils d'utilisation<a class="headerlink" href="#conseils-dutilisation_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>La surveillance des certificats (<code>USE_ACME_MONITORING</code>) est activée par défaut et suit également les certificats Let's Encrypt OSS. Configurez les seuils <code>ACME_ALERT_DAYS</code> et au moins un canal d'alerte (webhook ou e-mail) pour recevoir les avertissements d'expiration.</li>
 <li>Activez la surveillance CT (<code>USE_ACME_CT_MONITORING=yes</code>) pour détecter les certificats non autorisés émis pour vos domaines via les logs Certificate Transparency.</li>
@@ -8970,7 +9068,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li>Lors de l'utilisation des challenges DNS-01, ajustez <code>ACME_DNS_PROPAGATION</code> si votre fournisseur DNS est lent à propager les enregistrements.</li>
 <li>Définissez <code>ACME_MAX_RETRIES=0</code> pour désactiver les tentatives automatiques si vous préférez investiguer les échecs manuellement.</li>
 </ul>
-<h3 id="coexistence-avec-le-lets-encrypt-integre">Coexistence avec le Let's Encrypt intégré</h3>
+<h3 id="coexistence-avec-le-lets-encrypt-integre">Coexistence avec le Let's Encrypt intégré<a class="headerlink" href="#coexistence-avec-le-lets-encrypt-integre" title="Permanent link">&para;</a></h3>
 <p>Le plugin ACME PRO et le plugin Let's Encrypt OSS utilisent des stockages, des endpoints API et des clés de cache entièrement séparés. Les deux peuvent être actifs simultanément sur différents services en mode multisite :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"app1.example.com</span><span class="nv"> </span><span class="s">app2.example.com"</span>
@@ -8984,14 +9082,14 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <span class="c1"># Let's Encrypt intégré pour app2</span>
 <span class="nt">app2.example.com_AUTO_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 </code></pre></div>
-<h3 id="depannage_1">Dépannage</h3>
+<h3 id="depannage_1">Dépannage<a class="headerlink" href="#depannage_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Échec du challenge HTTP-01</strong> : vérifiez que <code>LETS_ENCRYPT_PASSTHROUGH=yes</code> est défini -- sans cela, le bloc location intégré de BunkerWeb intercepte les requêtes de challenge avant que le plugin ACME PRO ne puisse les servir. Vérifiez également que le port 80 est accessible depuis le serveur ACME et que <code>AUTO_LETS_ENCRYPT</code> n'est pas également activé pour le même service.</li>
 <li><strong>Échec du challenge TLS-ALPN-01</strong> : vérifiez que le port 443 est accessible depuis le serveur ACME et qu'aucun autre plugin ne sert de certificat avant ACME dans la phase <code>ssl_certificate</code>. Vérifiez <code>PLUGINS_ORDER_SSL_CERTIFICATE</code> en cas de doute.</li>
 <li><strong>Échec du challenge DNS-01</strong> : vérifiez les identifiants du fournisseur DNS dans <code>ACME_DNS_CREDENTIAL_ITEM</code> et ajustez <code>ACME_DNS_PROPAGATION</code> si votre fournisseur est lent à propager les enregistrements.</li>
 <li><strong>Certificat non renouvelé</strong> : vérifiez <code>ACME_RENEWAL_DAYS</code> et les logs du scheduler. Le job <code>acme-renew</code> s'exécute quotidiennement et renouvelle les certificats qui se trouvent dans le seuil configuré.</li>
 </ul>
-<h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin <strong>Wildcard</strong> permet à un service BunkerWeb unique de répondre à :</p>
 <ul>
@@ -9015,7 +9113,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li>aucune UI</li>
 </ul>
 <hr />
-<h3 id="fonctionnement_1">Fonctionnement</h3>
+<h3 id="fonctionnement_1">Fonctionnement<a class="headerlink" href="#fonctionnement_1" title="Permanent link">&para;</a></h3>
 <p>Le plugin dérive le nom d'hôte wildcard à partir de la <strong>première valeur</strong> de <code>SERVER_NAME</code> et injecte un nom de serveur wildcard NGINX standard lors de la génération de la configuration.</p>
 <p>Il ne modifie pas la logique de traitement des requêtes au-delà de la correspondance des noms d'hôte.</p>
 <div class="admonition info">
@@ -9029,7 +9127,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </ul>
 </div>
 <hr />
-<h3 id="fonctionnalites_10">Fonctionnalités</h3>
+<h3 id="fonctionnalites_10">Fonctionnalités<a class="headerlink" href="#fonctionnalites_10" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Activation simple</strong> : activez le routage wildcard avec <code>USE_WILDCARD=yes</code></li>
 <li><strong>Dérivation automatique</strong> : l'hôte wildcard est construit à partir de la première entrée de <code>SERVER_NAME</code></li>
@@ -9037,7 +9135,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><strong>Compatible multisite</strong> : chaque service peut activer ou désactiver le routage wildcard indépendamment</li>
 </ul>
 <hr />
-<h3 id="configuration_7">Configuration</h3>
+<h3 id="configuration_7">Configuration<a class="headerlink" href="#configuration_7" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -9059,7 +9157,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </tbody>
 </table>
 <hr />
-<h3 id="demarrage-rapide_5">Démarrage rapide</h3>
+<h3 id="demarrage-rapide_5">Démarrage rapide<a class="headerlink" href="#demarrage-rapide_5" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Placez en premier dans <code>SERVER_NAME</code> le domaine que vous souhaitez utiliser en wildcard</li>
 <li>Définissez <code>USE_WILDCARD=yes</code></li>
@@ -9068,8 +9166,8 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li>Rechargez ou redémarrez BunkerWeb</li>
 </ol>
 <hr />
-<h3 id="exemples_1">Exemples</h3>
-<h4 id="single-site">Single-site</h4>
+<h3 id="exemples_1">Exemples<a class="headerlink" href="#exemples_1" title="Permanent link">&para;</a></h3>
+<h4 id="single-site">Single-site<a class="headerlink" href="#single-site" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"example.com"</span>
 <span class="nt">USE_WILDCARD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 </code></pre></div>
@@ -9080,7 +9178,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><code>api.example.com</code></li>
 <li>tout autre nom d'hôte <code>*.example.com</code> qui résout vers BunkerWeb</li>
 </ul>
-<h4 id="multisite">Multisite</h4>
+<h4 id="multisite">Multisite<a class="headerlink" href="#multisite" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"app.example.com</span><span class="nv"> </span><span class="s">docs.example.org"</span>
 
@@ -9093,7 +9191,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><code>docs.example.org</code> conserve uniquement la correspondance exacte</li>
 </ul>
 <hr />
-<h3 id="comportement-important">Comportement important</h3>
+<h3 id="comportement-important">Comportement important<a class="headerlink" href="#comportement-important" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Seul le premier domaine devient wildcard</p>
 <p>Si <code>SERVER_NAME</code> vaut :</p>
@@ -9119,7 +9217,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <p>Si un autre service définit explicitement <code>foo.example.com</code>, NGINX route d'abord ce nom d'hôte vers la correspondance exacte.</p>
 </div>
 <hr />
-<h3 id="recommande-avec-les-certificats-wildcard-lets-encrypt">Recommandé avec les certificats wildcard Let's Encrypt</h3>
+<h3 id="recommande-avec-les-certificats-wildcard-lets-encrypt">Recommandé avec les certificats wildcard Let's Encrypt<a class="headerlink" href="#recommande-avec-les-certificats-wildcard-lets-encrypt" title="Permanent link">&para;</a></h3>
 <p>Si vous utilisez ce plugin avec <code>USE_LETS_ENCRYPT_WILDCARD=yes</code>, utilisez ce modèle :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;root_domain&gt;</span><span class="nv"> </span><span class="s">&lt;any_app&gt;.&lt;root_domain&gt;"</span>
 </code></pre></div>
@@ -9152,7 +9250,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </li>
 </ul>
 </div>
-<h4 id="multisite-avec-lets-encrypt-wildcard">Multisite avec Let's Encrypt wildcard</h4>
+<h4 id="multisite-avec-lets-encrypt-wildcard">Multisite avec Let's Encrypt wildcard<a class="headerlink" href="#multisite-avec-lets-encrypt-wildcard" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"example.com</span><span class="nv"> </span><span class="s">app.example.com"</span>
 <span class="nt">example.com_USE_WILDCARD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -9162,7 +9260,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <span class="nt">example.com_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</span><span class="p">:</span><span class="w"> </span><span class="s">"api_token</span><span class="nv"> </span><span class="s">YOUR_API_TOKEN"</span>
 </code></pre></div>
 <hr />
-<h3 id="conseils-dutilisation_4">Conseils d'utilisation</h3>
+<h3 id="conseils-dutilisation_4">Conseils d'utilisation<a class="headerlink" href="#conseils-dutilisation_4" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
 <p><strong>Planifiez le TLS séparément</strong>
@@ -9198,8 +9296,16 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
         
       </main>
       
@@ -9300,7 +9406,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    ，了解我们的企业服务。
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    您当前查看的不是最新版本的文档。
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>点击此处查看最新版本。</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   快速入门指南
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  从源代码构建
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     快速入门指南
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    从源代码构建
   
 
     
@@ -1369,8 +1322,8 @@
   
 
 
-<h1 id="web">Web 界面</h1>
-<h2 id="web_1">Web 界面的角色</h2>
+<h1 id="web">Web 界面<a class="headerlink" href="#web" title="Permanent link">&para;</a></h1>
+<h2 id="web_1">Web 界面的角色<a class="headerlink" href="#web_1" title="Permanent link">&para;</a></h2>
 <p>Web 界面是 BunkerWeb 的可视化控制平面。它无需 CLI 即可管理服务、全局设置、封禁、插件、任务、缓存、日志和升级。它是 Flask + Gunicorn 应用，通常部署在 BunkerWeb 反向代理之后。</p>
 <div class="admonition warning">
 <p class="admonition-title">请放在 BunkerWeb 后面</p>
@@ -1388,7 +1341,7 @@
 <li>依赖：共享 BunkerWeb 数据库并通过 API 进行重载、封禁或查询实例</li>
 </ul>
 </div>
-<h2 id="_1">安全清单</h2>
+<h2 id="_1">安全清单<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ul>
 <li>在内部网络通过 BunkerWeb 暴露 UI；选择难猜的 <code>REVERSE_PROXY_URL</code> 并限制来源 IP。</li>
 <li>设置强 <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>；仅在需要时开启 <code>OVERRIDE_ADMIN_CREDS=yes</code> 来重置。</li>
@@ -1398,9 +1351,9 @@
 <li>保持 <code>CHECK_PRIVATE_IP=yes</code>（默认）以绑定会话到客户端 IP；若无长期会话需求，将 <code>ALWAYS_REMEMBER</code> 维持为 <code>no</code>。</li>
 <li>确保 <code>/var/log/bunkerweb</code> 对 UID/GID 101（或 rootless 映射 UID）可读，便于 UI 读取日志。</li>
 </ul>
-<h2 id="_2">运行方式</h2>
+<h2 id="_2">运行方式<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">快速开始（向导）</label><label for="__tabbed_1_2">高级（预设环境变量）</label><label for="__tabbed_1_3">Docker Autoconf</label><label for="__tabbed_1_4">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">快速开始（向导）</label><label for="__tabbed_1_2">高级（预设环境变量）</label><label for="__tabbed_1_3">Docker autoconf</label><label for="__tabbed_1_4">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>使用已发布镜像与<a href="../quickstart-guide/#__tabbed_1_3">快速入门</a>的布局启动栈，然后在浏览器完成向导。</p>
@@ -1509,7 +1462,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h3 id="linux-docker">Linux 与 Docker 差异</h3>
+<h3 id="linux-docker">Linux 与 Docker 差异<a class="headerlink" href="#linux-docker" title="Permanent link">&para;</a></h3>
 <ul>
 <li>监听默认值：Docker 镜像在 <code>0.0.0.0:7000</code>，Linux 包在 <code>127.0.0.1:7000</code>。可用 <code>UI_LISTEN_ADDR</code> / <code>UI_LISTEN_PORT</code> 覆盖。</li>
 <li>代理头：<code>UI_FORWARDED_ALLOW_IPS</code> 默认 <code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code>；<code>UI_PROXY_ALLOW_IPS</code> 默认取 <code>FORWARDED_ALLOW_IPS</code> 的值。在 Linux 安装中将其设为反代 IP 以更严格。</li>
@@ -1517,11 +1470,11 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>日志：<code>/var/log/bunkerweb</code> 需对 UID/GID 101（或 rootless 映射 UID）可读。包会创建路径；容器需挂载权限正确的卷。</li>
 <li>向导行为：Linux easy-install 自动启动 UI 和向导；Docker 需通过反代 URL 访问向导，除非预置环境变量。</li>
 </ul>
-<h2 id="_3">认证与会话</h2>
+<h2 id="_3">认证与会话<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
 <li>管理员账户：通过向导或 <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code> 创建。密码必须包含大小写字母、数字和特殊字符。<code>OVERRIDE_ADMIN_CREDS=yes</code> 会在已有账户时强制重置。</li>
 <li>密码长度限制：bcrypt 只使用秘密的前 <strong>72 字节</strong>，因此所有设置密码的位置（设置向导、个人资料页面、<code>ADMIN_PASSWORD</code> / <code>API_PASSWORD</code>）都会将密码限制为 72 字节。更长的值会被拒绝，并给出明确的错误或日志，而不是静默截断。请注意，非 ASCII 字符（重音字符、emoji）每个都会占用多个字节；由这些字符组成的“72 字符”口令可能超过该限制。预哈希的 bcrypt 值不受影响（哈希本身已经编码了该限制）。</li>
-<li>角色：<code>admin</code>、<code>writer</code>、<code>reader</code> 会自动创建；账户存储在数据库。</li>
+<li>角色：<code>admin</code>、<code>writer</code>、<code>reader</code> 会自动创建；账户存储在数据库。开源界面只按读和写授权，因此 <code>admin</code> 与 <code>writer</code> 拥有相同能力，<code>reader</code> 是唯一受限的角色。更细粒度的区分，包括限制谁可以管理用户和安全设置，需要 PRO 插件 <code>user_manager</code>，详见<a href="../advanced/#user-manager-pro">高级用法</a>文档。</li>
 <li>秘密：<code>FLASK_SECRET</code> 存于 <code>/var/lib/bunkerweb/.flask_secret</code>；Biscuit 密钥位于同目录，可用 <code>BISCUIT_PUBLIC_KEY</code> / <code>BISCUIT_PRIVATE_KEY</code> 提供。</li>
 <li>
 <p>2FA：TOTP 秘钥加密后存放在数据库，解密用的密钥保存在 <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>。UI 会在首次启动时生成它们，只要该文件被持久化就无需额外配置。若要提供自己的密钥，可设置 <code>TOTP_ENCRYPTION_KEYS</code>（空格分隔或 JSON 映射）；此时每个密钥必须正好 <strong>43 个字符</strong>，其他长度会被丢弃并记录 <code>Invalid TOTP secret for key</code> 警告，然后用随机密钥替代。生成密钥：</p>
@@ -1529,7 +1482,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </code></pre></div>
 <p>恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
 - 会话：默认空闲时长 12 小时（<code>SESSION_LIFETIME_HOURS</code>），每次请求刷新。<code>SESSION_ABSOLUTE_HOURS</code>（默认 <code>168</code> = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（<code>SESSION_ROLLING_HOURS</code>，默认 <code>0</code> = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；<code>CHECK_PRIVATE_IP=no</code> 仅对私网放宽 IP 检查。<code>ALWAYS_REMEMBER=yes</code> 始终启用持久 Cookie。
-- 会话存储：当 <code>USE_REDIS=yes</code> 时会话存放在 Redis 中，否则存放在 <code>/var/lib/bunkerweb</code> 下的本地缓存中。Redis 停止响应，或因达到 <code>maxmemory</code> 而拒绝写入，都不再导致 Web UI 不可用：受影响的会话会转入该本地缓存；该缓存先于 Redis 读取，因此从未写入 Redis 的修改或删除不会被 Redis 仍持有的旧副本遮蔽，并会在 Redis 恢复响应后回写到 Redis。停机期间的登出或会话 ID 轮换也不会被恢复过程撤销。每次吊销都会同时写入两个存储，因此在两种情况下都持续生效。逐出不在覆盖范围内，因为 Redis 会报告成功，只是不再持有该键，所以请按你要保留的键来设置 <code>maxmemory</code>。当 Redis 拒绝一次更新时，该会话转入本地存储，并立即删除 Redis 中仍持有的副本，使该修改不会被旧版本遮蔽，也使 2FA 这类多步流程不会停留在此前状态上循环。该本地缓存按主机隔离，这在运行多个 Web UI 副本时很重要：其他副本在该副本把已转入其本地缓存的会话回写到 Redis 之前将看不到该会话，Redis 不可用期间发出的吊销仅由发出它的副本执行，而已经从自身本地缓存提供某个会话的副本，在另一个副本通过 Redis 删除该会话后，仍可能继续提供它长达 <code>SESSION_LIFETIME_HOURS</code>。<code>UI_USE_REDIS=no</code> 只让 Web UI 停用 Redis，而全局的 <code>USE_REDIS</code> 还会停止在各实例之间共享封禁与报告。
+- 会话存储：当 <code>USE_REDIS=yes</code> 时会话存放在 Redis 中，否则存放在 <code>/var/lib/bunkerweb</code> 下的本地缓存中。Redis 停止响应，或因达到 <code>maxmemory</code> 而拒绝写入，都不再导致 Web UI 不可用：受影响的会话会转入该本地缓存；该缓存先于 Redis 读取，因此从未写入 Redis 的修改或删除不会被 Redis 仍持有的旧副本遮蔽，并会在 Redis 恢复响应后回写到 Redis。停机期间的登出或会话 ID 轮换也不会被恢复过程撤销，即使 Redis 停机时无法读取该会话本身。每次吊销都会同时写入两个存储，因此在两种情况下都持续生效。逐出不在覆盖范围内，因为 Redis 会报告成功，只是不再持有该键，所以请按你要保留的键来设置 <code>maxmemory</code>。当 Redis 拒绝一次更新时，该会话转入本地存储，并立即删除 Redis 中仍持有的副本，使该修改不会被旧版本遮蔽，也使 2FA 这类多步流程不会停留在此前状态上循环。该本地缓存按主机隔离，这在运行多个 Web UI 副本时很重要：其他副本在该副本把已转入其本地缓存的会话回写到 Redis 之前将看不到该会话，Redis 不可用期间发出的吊销仅由发出它的副本执行，而已经从自身本地缓存提供某个会话的副本，在另一个副本通过 Redis 删除该会话后，仍可能继续提供它长达 <code>SESSION_LIFETIME_HOURS</code>。<code>UI_USE_REDIS=no</code> 只让 Web UI 停用 Redis，而全局的 <code>USE_REDIS</code> 还会停止在各实例之间共享封禁与报告。
 - 若多级代理附加 <code>X-Forwarded-*</code>，请设置 <code>PROXY_NUMBERS</code>。</p>
 </li>
 </ul>
@@ -1550,17 +1503,17 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <p class="admonition-title">错误的哈希会将你锁定</p>
 <p>仅在知道哈希对应的明文时才使用。首次创建时使用有效但错误的哈希不可逆，重启也无法修复；需用不同的 <code>ADMIN_PASSWORD</code> 配合 <code>OVERRIDE_ADMIN_CREDS=yes</code> 恢复。</p>
 </div>
-<h2 id="_4">配置来源与优先级</h2>
+<h2 id="_4">配置来源与优先级<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <ol>
 <li>环境变量（含 Docker/Compose <code>environment:</code>）</li>
 <li><code>/run/secrets/&lt;VAR&gt;</code> 中的秘密（Docker）</li>
 <li><code>/etc/bunkerweb/ui.env</code>（Linux 包）</li>
 <li>内置默认值</li>
 </ol>
-<h2 id="raw">RAW 编辑器中的草稿</h2>
+<h2 id="raw">RAW 编辑器中的草稿<a class="headerlink" href="#raw" title="Permanent link">&para;</a></h2>
 <p>服务或全局设置的 RAW 编辑器可以将某个设置保留为<strong>草稿</strong>：值会被保存但不会生效，实际生效的值仍然是继承的（全局）值或默认值。将光标放在 <code>KEY=value</code> 行的开头，按 <code>#</code> 切换草稿状态，或在草稿行上按 <code>Backspace</code> 将其激活，然后保存。草稿行会高亮显示，并在多次保存之间保留其值，因此可以先准备好修改，稍后通过一次保存激活。无法在 UI 中编辑的设置（由 autoconf 管理，或不可覆盖的插件默认值）不能更改草稿状态。</p>
-<h2 id="_5">配置参考</h2>
-<h3 id="_6">运行时与时区</h3>
+<h2 id="_5">配置参考<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">运行时与时区<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1579,7 +1532,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="tls">监听与 TLS</h3>
+<h3 id="tls">监听与 TLS<a class="headerlink" href="#tls" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1640,7 +1593,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="cookie">认证、会话与 Cookie</h3>
+<h3 id="cookie">认证、会话与 Cookie<a class="headerlink" href="#cookie" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1725,7 +1678,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="_7">日志</h3>
+<h3 id="_7">日志<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1774,7 +1727,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="_8">其他运行时</h3>
+<h3 id="_8">其他运行时<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1835,7 +1788,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h2 id="_9">日志访问</h2>
+<h2 id="_9">日志访问<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <p>UI 从 <code>/var/log/bunkerweb</code> 读取 NGINX/服务日志。通过 syslog 守护或卷填充该目录：</p>
 <ul>
 <li>容器 UID/GID 为 101。宿主上设置权限：<code>chown root:101 bw-logs &amp;&amp; chmod 770 bw-logs</code>（rootless 需调整）。</li>
@@ -1853,7 +1806,7 @@ destination d_dyna_file {
 };
 log { source(s_net); destination(d_dyna_file); };
 </code></pre></div>
-<h2 id="_10">功能</h2>
+<h2 id="_10">功能<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <ul>
 <li>请求、封禁、缓存和任务的仪表板；重启/重载实例。</li>
 <li>创建/更新/删除服务和全局设置，并按插件模式校验。</li>
@@ -1862,7 +1815,7 @@ log { source(s_net); destination(d_dyna_file); };
 <li>管理 UI 用户、角色、会话及 TOTP（含恢复码）。</li>
 <li>升级到 BunkerWeb PRO 并在专页查看许可证状态。</li>
 </ul>
-<h2 id="upgrade-to-pro">升级到 PRO</h2>
+<h2 id="upgrade-to-pro">升级到 PRO<a class="headerlink" href="#upgrade-to-pro" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO 免费试用</p>
 <p>通过 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始 BunkerWeb PRO 的 30 天免费试用。</p>
@@ -1873,9 +1826,9 @@ log { source(s_net); destination(d_dyna_file); };
   </p>
 <figcaption>PRO 许可证信息</figcaption>
 </figure>
-<h2 id="i18n">翻译（i18n）</h2>
+<h2 id="i18n">翻译（i18n）<a class="headerlink" href="#i18n" title="Permanent link">&para;</a></h2>
 <p>Web 界面支持多种语言，这得益于社区的贡献。翻译内容以按语言划分的 JSON 文件形式存储（例如 <code>en.json</code>、<code>fr.json</code> 等）。每种语言都会明确标注其来源（人工翻译或由 AI 生成）以及审核状态。</p>
-<h3 id="_11">可用语言与贡献者</h3>
+<h3 id="_11">可用语言与贡献者<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1993,7 +1946,7 @@ log { source(s_net); destination(d_dyna_file); };
 <blockquote>
 <p>💡 部分翻译可能尚不完整。强烈建议对关键界面元素进行人工校对。</p>
 </blockquote>
-<h3 id="_12">如何参与贡献</h3>
+<h3 id="_12">如何参与贡献<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
 <p>翻译贡献遵循 BunkerWeb 的标准贡献流程：</p>
 <ol>
 <li><strong>创建或更新翻译文件</strong></li>
@@ -2041,8 +1994,16 @@ log { source(s_net); destination(d_dyna_file); };
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
         
       </main>
       
@@ -2143,7 +2104,7 @@ log { source(s_net); destination(d_dyna_file); };
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Schnellstart
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
   
 
     
@@ -1330,9 +1283,9 @@
   
 
 
-<h1 id="plugins">Plugins</h1>
+<h1 id="plugins">Plugins<a class="headerlink" href="#plugins" title="Permanent link">&para;</a></h1>
 <p>BunkerWeb verfügt über ein Pluginsystem, das es ermöglicht, neue Funktionen einfach hinzuzufügen. Sobald ein Plugin installiert ist, können Sie es über zusätzliche, vom Plugin definierte Einstellungen verwalten.</p>
-<h2 id="offizielle-plugins">Offizielle Plugins</h2>
+<h2 id="offizielle-plugins">Offizielle Plugins<a class="headerlink" href="#offizielle-plugins" title="Permanent link">&para;</a></h2>
 <p>Hier ist die Liste der "offiziellen" Plugins, die wir pflegen (weitere Informationen finden Sie im Repository <a href="https://github.com/bunkerity/bunkerweb-plugins">bunkerweb-plugins</a>):</p>
 <table>
 <thead>
@@ -1346,77 +1299,83 @@
 <tbody>
 <tr>
 <td style="text-align: center;"><strong>Authentik</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Schützen Sie Ihre Webdienste mit der Authentik-Forward-Authentifizierung (auth_request) für Single Sign-On.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/authentik">bunkerweb-plugins/authentik</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>ClamAV</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Scannt hochgeladene Dateien automatisch mit der ClamAV-Antiviren-Engine und lehnt die Anfrage ab, wenn eine Datei als bösartig erkannt wird.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Cloudflare</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Konfigurieren Sie die vertrauenswürdigen IPs von Cloudflare, verwalten Sie Origin-CA-Zertifikate und synchronisieren Sie BunkerWeb-Sperren mit einer Cloudflare-IP-Liste.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/cloudflare">bunkerweb-plugins/cloudflare</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Coraza</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Überprüft Anfragen mit der Coraza WAF (Alternative zu ModSecurity).</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Discord</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Discord-Kanal.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Matrix</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Sendet Sicherheitsbenachrichtigungen über die Matrix-API an einen Matrix-Raum.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/matrix">bunkerweb-plugins/matrix</a></td>
 </tr>
 <tr>
+<td style="text-align: center;"><strong>open-appsec</strong></td>
+<td style="text-align: center;">1.13</td>
+<td style="text-align: left;">Prüft Anfragen mit der Machine-Learning-WAF open-appsec über einen Sidecar-Agenten und blockiert, was diese ablehnt.</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/openappsec">bunkerweb-plugins/openappsec</a></td>
+</tr>
+<tr>
 <td style="text-align: center;"><strong>SentinelOne</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Prüft Hashes hochgeladener Dateien und Client-IPs über die SentinelOne-API und blockiert Anfragen anhand der Hash-Reputation oder von Bedrohungsindikatoren.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/sentinelone">bunkerweb-plugins/sentinelone</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Slack</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen Slack-Kanal.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>SysWarden</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Synchronisiert BunkerWeb-Sperren mit SysWarden für nftables-Blockierung auf Kernel-Ebene und importiert SysWarden-Sperr- und Freigabelisten.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/syswarden">bunkerweb-plugins/syswarden</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>VirusTotal</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Prüft Hashes hochgeladener Dateien und Client-IPs über die VirusTotal-API und blockiert Anfragen, wenn konfigurierte Reputationsschwellen überschritten werden.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>WebHook</strong></td>
-<td style="text-align: center;">1.12</td>
+<td style="text-align: center;">1.13</td>
 <td style="text-align: left;">Sendet Sicherheitsbenachrichtigungen über einen Webhook an einen benutzerdefinierten HTTP-Endpunkt.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
 </tr>
 </tbody>
 </table>
-<h2 id="wie-man-ein-plugin-verwendet">Wie man ein Plugin verwendet</h2>
-<h3 id="automatisch">Automatisch</h3>
+<h2 id="wie-man-ein-plugin-verwendet">Wie man ein Plugin verwendet<a class="headerlink" href="#wie-man-ein-plugin-verwendet" title="Permanent link">&para;</a></h2>
+<h3 id="automatisch">Automatisch<a class="headerlink" href="#automatisch" title="Permanent link">&para;</a></h3>
 <p>Wenn Sie externe Plugins schnell installieren möchten, können Sie die Einstellung <code>EXTERNAL_PLUGIN_URLS</code> verwenden. Sie akzeptiert eine durch Leerzeichen getrennte Liste von URLs, die jeweils auf ein komprimiertes (zip-Format) Archiv mit einem oder mehreren Plugins verweisen.</p>
-<p>Sie können den folgenden Wert verwenden, wenn Sie die offiziellen Plugins automatisch installieren möchten: <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.12.zip</code></p>
-<h3 id="manuell">Manuell</h3>
+<p>Sie können den folgenden Wert verwenden, wenn Sie die offiziellen Plugins automatisch installieren möchten: <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.13.zip</code></p>
+<h3 id="manuell">Manuell<a class="headerlink" href="#manuell" title="Permanent link">&para;</a></h3>
 <p>Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dateien in den entsprechenden Datenordner <code>plugins</code> legen. Das Verfahren hängt von Ihrer Integration ab:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
 <div class="tabbed-content">
@@ -1585,8 +1544,8 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </div>
 </div>
 </div>
-<h2 id="ein-plugin-schreiben">Ein Plugin schreiben</h2>
-<h3 id="struktur">Struktur</h3>
+<h2 id="ein-plugin-schreiben">Ein Plugin schreiben<a class="headerlink" href="#ein-plugin-schreiben" title="Permanent link">&para;</a></h2>
+<h3 id="struktur">Struktur<a class="headerlink" href="#struktur" title="Permanent link">&para;</a></h3>
 <div class="admonition tip">
 <p class="admonition-title">Bestehende Plugins</p>
 <p>Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der <a href="https://github.com/bunkerity/bunkerweb-plugins">offiziellen Plugins</a> und der <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/common/core">Kern-Plugins</a> ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).</p>
@@ -1635,12 +1594,12 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p><strong>plugin.json</strong> : Metadaten, Einstellungen und Jobdefinitionen für Ihr Plugin.</p>
 </li>
 </ul>
-<h3 id="erste-schritte">Erste Schritte</h3>
+<h3 id="erste-schritte">Erste Schritte<a class="headerlink" href="#erste-schritte" title="Permanent link">&para;</a></h3>
 <p>Der erste Schritt ist die Erstellung eines Ordners, der das Plugin enthalten wird:</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>myplugin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="nb">cd</span><span class="w"> </span>myplugin
 </code></pre></div>
-<h3 id="metadaten">Metadaten</h3>
+<h3 id="metadaten">Metadaten<a class="headerlink" href="#metadaten" title="Permanent link">&para;</a></h3>
 <p>Eine Datei namens <strong>plugin.json</strong>, die im Stammverzeichnis des Plugin-Ordners geschrieben wird, muss Metadaten über das Plugin enthalten. Hier ist ein Beispiel:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myplugin"</span><span class="p">,</span>
@@ -1827,7 +1786,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tr>
 </tbody>
 </table>
-<h3 id="cli-befehle">CLI-Befehle</h3>
+<h3 id="cli-befehle">CLI-Befehle<a class="headerlink" href="#cli-befehle" title="Permanent link">&para;</a></h3>
 <p>Plugins können das 'bwcli'-Tool mit benutzerdefinierten Befehlen erweitern, die unter 'bwcli plugin <plugin_id> ...' ausgeführt werden:</p>
 <ol>
 <li>Fügen Sie ein 'bwcli'-Verzeichnis in Ihrem Plugin hinzu und legen Sie eine Datei pro Befehl ab (zum Beispiel 'bwcli/list.py'). Die CLI fügt den Plugin-Pfad zu 'sys.path' hinzu, bevor die Datei ausgeführt wird.</li>
@@ -1841,7 +1800,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="p">}</span>
 </code></pre></div>
 <p>Der Scheduler stellt die deklarierten Befehle automatisch bereit, sobald das Plugin installiert ist. Core-Plugins wie 'backup' in 'src/common/core/backup' folgen demselben Muster.</p>
-<h3 id="konfigurationen">Konfigurationen</h3>
+<h3 id="konfigurationen">Konfigurationen<a class="headerlink" href="#konfigurationen" title="Permanent link">&para;</a></h3>
 <p>Sie können benutzerdefinierte NGINX-Konfigurationen hinzufügen, indem Sie einen Ordner namens <strong>confs</strong> mit Inhalt ähnlich den <a href="../advanced/#custom-configurations">benutzerdefinierten Konfigurationen</a> hinzufügen. Jeder Unterordner in <strong>confs</strong> enthält <a href="https://jinja.palletsprojects.com">jinja2</a>-Vorlagen, die generiert und im entsprechenden Kontext (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>stream</code>, <code>server-stream</code>, <code>modsec</code>, <code>modsec-crs</code>, <code>crs-plugins-before</code> und <code>crs-plugins-after</code>) geladen werden.</p>
 <p>Hier ist ein Beispiel für eine Konfigurationsvorlagendatei im Ordner <strong>confs/server-http</strong> namens <strong>example.conf</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="k">location</span><span class="w"> </span><span class="s">/setting</span><span class="w"> </span><span class="p">{</span>
@@ -1852,10 +1811,10 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="err">}</span>
 </code></pre></div>
 <p><code>{{ DUMMY_SETTING }}</code> wird durch den Wert von <code>DUMMY_SETTING</code> ersetzt, der vom Benutzer des Plugins ausgewählt wurde.</p>
-<h3 id="vorlagen">Vorlagen</h3>
+<h3 id="vorlagen">Vorlagen<a class="headerlink" href="#vorlagen" title="Permanent link">&para;</a></h3>
 <p>Weitere Informationen finden Sie in der <a href="../concepts/#templates">Vorlagendokumentation</a>.</p>
-<h3 id="lua">LUA</h3>
-<h4 id="hauptskript">Hauptskript</h4>
+<h3 id="lua">LUA<a class="headerlink" href="#lua" title="Permanent link">&para;</a></h3>
+<h4 id="hauptskript">Hauptskript<a class="headerlink" href="#hauptskript" title="Permanent link">&para;</a></h4>
 <p>Im Hintergrund verwendet BunkerWeb das <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA-Modul</a>, um Code innerhalb von NGINX auszuführen. Plugins, die Code ausführen müssen, müssen eine Lua-Datei im Stammverzeichnis des Plugin-Ordners bereitstellen, die den <code>id</code>-Wert von <strong>plugin.json</strong> als Namen verwendet. Hier ist ein Beispiel namens <strong>myplugin.lua</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">class</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"middleclass"</span>
 <span class="kd">local</span><span class="w"> </span><span class="nv">plugin</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"bunkerweb.plugin"</span>
@@ -1962,7 +1921,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tr>
 </tbody>
 </table>
-<h4 id="bibliotheken">Bibliotheken</h4>
+<h4 id="bibliotheken">Bibliotheken<a class="headerlink" href="#bibliotheken" title="Permanent link">&para;</a></h4>
 <p>Alle Direktiven aus dem <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA-Modul</a> und dem <a href="https://github.com/openresty/stream-lua-nginx-module">NGINX Stream LUA-Modul</a> sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe <a href="https://github.com/bunkerity/bunkerweb/blob/vtesting/src/deps/clone.sh">dieses Skript</a> für die vollständige Liste.</p>
 <p>Wenn Sie zusätzliche Bibliotheken benötigen, können Sie diese in den Stammordner des Plugins legen und darauf zugreifen, indem Sie ihnen Ihre Plugin-ID voranstellen. Hier ist ein Beispiel für eine Datei namens <strong>mylibrary.lua</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">_M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{}</span>
@@ -1982,7 +1941,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 
 <span class="p">...</span>
 </code></pre></div>
-<h4 id="helfer">Helfer</h4>
+<h4 id="helfer">Helfer<a class="headerlink" href="#helfer" title="Permanent link">&para;</a></h4>
 <p>Einige Helfermodule bieten allgemeine nützliche Helfer:</p>
 <ul>
 <li><code>self.variables</code>: ermöglicht den Zugriff auf und die Speicherung von Plugin-Attributen</li>
@@ -2026,11 +1985,11 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p class="admonition-title">Weitere Beispiele</p>
 <p>Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/src/bw/lua/bunkerweb">lua-Verzeichnis</a> des Repositorys ansehen.</p>
 </div>
-<h3 id="jobs">Jobs</h3>
+<h3 id="jobs">Jobs<a class="headerlink" href="#jobs" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb verwendet einen internen Job-Scheduler für periodische Aufgaben wie die Erneuerung von Zertifikaten mit Certbot, das Herunterladen von Blacklists, das Herunterladen von MMDB-Dateien usw. Sie können Aufgaben Ihrer Wahl hinzufügen, indem Sie sie in einen Unterordner namens <strong>jobs</strong> legen und sie in der Metadatendatei <strong>plugin.json</strong> auflisten. Vergessen Sie nicht, die Ausführungsberechtigungen für alle hinzuzufügen, um Probleme zu vermeiden, wenn ein Benutzer Ihr Plugin klont und installiert.</p>
-<h3 id="plugin-seite">Plugin-Seite</h3>
+<h3 id="plugin-seite">Plugin-Seite<a class="headerlink" href="#plugin-seite" title="Permanent link">&para;</a></h3>
 <p>Alles, was mit der Web-UI zu tun hat, befindet sich im Unterordner <strong>ui</strong>, wie wir im <a href="#struktur">vorherigen Strukturabschnitt</a> gesehen haben.</p>
-<h4 id="voraussetzungen">Voraussetzungen</h4>
+<h4 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h4>
 <p>Wenn Sie eine Plugin-Seite erstellen möchten, benötigen Sie zwei Dateien:</p>
 <ul>
 <li>
@@ -2040,7 +1999,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p><strong>actions.py</strong>, wo Sie Skripte und Logik mit einem <strong>POST /plugins/&lt;<em>plugin_id</em>&gt;</strong> hinzufügen können. Beachten Sie, dass diese Datei <strong>eine Funktion mit demselben Namen wie das Plugin benötigt</strong>, um zu funktionieren. Diese Datei wird auch dann benötigt, wenn die Funktion leer ist.</p>
 </li>
 </ul>
-<h4 id="grundlegendes-beispiel">Grundlegendes Beispiel</h4>
+<h4 id="grundlegendes-beispiel">Grundlegendes Beispiel<a class="headerlink" href="#grundlegendes-beispiel" title="Permanent link">&para;</a></h4>
 <div class="admonition info">
 <p class="admonition-title">Jinja 2-Vorlage</p>
 <p>Die Datei <strong>template.html</strong> ist eine Jinja2-Vorlage. Weitere Informationen finden Sie in der <a href="https://jinja.palletsprojects.com">Jinja2-Dokumentation</a>.</p>
@@ -2049,7 +2008,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p>Sie können beispielsweise die Anforderungsargumente in Ihrer Vorlage wie folgt abrufen:</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Anforderungsargumente: {{ request.args.get() }}.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
 </code></pre></div>
-<h4 id="actionspy">Actions.py</h4>
+<h4 id="actionspy">Actions.py<a class="headerlink" href="#actionspy" title="Permanent link">&para;</a></h4>
 <div class="admonition warning">
 <p class="admonition-title">CSRF-Token</p>
 <p>Bitte beachten Sie, dass jede Formularübermittlung durch ein CSRF-Token geschützt ist. Sie müssen das folgende Snippet in Ihre Formulare einfügen:
@@ -2135,7 +2094,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="highlight"><pre><span></span><code><span class="cm">&lt;!-- Metadaten + Konfiguration --&gt;</span>
 <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>{{ pre_render }}<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 </code></pre></div></p>
-<h3 id="hookspy">Hooks.py</h3>
+<h3 id="hookspy">Hooks.py<a class="headerlink" href="#hookspy" title="Permanent link">&para;</a></h3>
 <p>Diese Dokumentation beschreibt die Lebenszyklus-Hooks, die zur Verwaltung verschiedener Phasen einer Anfrage innerhalb der Anwendung verwendet werden. Jeder Hook ist mit einer bestimmten Phase verbunden.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">before_request</label><label for="__tabbed_2_2">after_request</label><label for="__tabbed_2_3">teardown_request</label><label for="__tabbed_2_4">context_processor</label></div>
 <div class="tabbed-content">
@@ -2215,9 +2174,9 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <li><strong>Erweiterbarkeit:</strong> Das Framework ist flexibel und ermöglicht zusätzliche Hooks oder Erweiterungen, wenn sich die Anwendungsanforderungen ändern.</li>
 </ul>
 <p>Durch die klare Definition der Verantwortlichkeiten jedes Hooks und der zugehörigen Protokollierungspräfixe stellt das System sicher, dass jede Phase der Anforderungsverarbeitung transparent und verwaltbar ist.</p>
-<h3 id="blueprints">Blueprints</h3>
+<h3 id="blueprints">Blueprints<a class="headerlink" href="#blueprints" title="Permanent link">&para;</a></h3>
 <p>In Flask dienen <strong>Blueprints</strong> als modularer Weg, um verwandte Komponenten – wie Ansichten, Vorlagen und statische Dateien – innerhalb Ihrer Anwendung zu organisieren. Sie ermöglichen es Ihnen, Funktionen logisch zu gruppieren und können verwendet werden, um neue Abschnitte Ihrer App zu erstellen oder bestehende zu überschreiben.</p>
-<h4 id="erstellen-eines-blueprints">Erstellen eines Blueprints</h4>
+<h4 id="erstellen-eines-blueprints">Erstellen eines Blueprints<a class="headerlink" href="#erstellen-eines-blueprints" title="Permanent link">&para;</a></h4>
 <p>Um einen Blueprint zu definieren, erstellen Sie eine Instanz der <code>Blueprint</code>-Klasse und geben dabei dessen Namen und Importpfad an. Anschließend definieren Sie Routen und Ansichten, die mit diesem Blueprint verbunden sind.</p>
 <p><strong>Beispiel: Definieren eines neuen Blueprints</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
@@ -2232,7 +2191,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
     <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">'my_blueprint.html'</span><span class="p">)</span>
 </code></pre></div>
 <p>In diesem Beispiel wird ein Blueprint namens <code>my_blueprint</code> erstellt und eine Route <code>/my_blueprint</code> darin definiert.</p>
-<h4 id="uberschreiben-eines-bestehenden-blueprints">Überschreiben eines bestehenden Blueprints</h4>
+<h4 id="uberschreiben-eines-bestehenden-blueprints">Überschreiben eines bestehenden Blueprints<a class="headerlink" href="#uberschreiben-eines-bestehenden-blueprints" title="Permanent link">&para;</a></h4>
 <p>Blueprints können auch bestehende überschreiben, um Funktionalität zu ändern oder zu erweitern. Stellen Sie dazu sicher, dass der neue Blueprint denselben Namen hat wie der, den Sie überschreiben, und registrieren Sie ihn nach dem Original.</p>
 <p><strong>Beispiel: Überschreiben eines bestehenden Blueprints</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
@@ -2251,7 +2210,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p>Seien Sie vorsichtig beim Überschreiben bestehender Blueprints, da dies das Verhalten der Anwendung beeinträchtigen kann. Stellen Sie sicher, dass die Änderungen den Anforderungen der Anwendung entsprechen und keine unerwarteten Nebenwirkungen verursachen.</p>
 <p>Alle bestehenden Routen werden aus dem ursprünglichen Blueprint entfernt, sodass Sie sie bei Bedarf neu implementieren müssen.</p>
 </div>
-<h4 id="namenskonventionen">Namenskonventionen</h4>
+<h4 id="namenskonventionen">Namenskonventionen<a class="headerlink" href="#namenskonventionen" title="Permanent link">&para;</a></h4>
 <div class="admonition danger">
 <p class="admonition-title">Wichtig</p>
 <p>Stellen Sie sicher, dass der Name des Blueprints mit dem Namen der Blueprint-Variable übereinstimmt, andernfalls wird er nicht als gültiger Blueprint betrachtet und nicht registriert.</p>
@@ -2289,8 +2248,16 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
         
       </main>
       
@@ -2391,7 +2358,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

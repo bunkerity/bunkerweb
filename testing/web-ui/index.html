@@ -86,9 +86,9 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,7 +205,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
@@ -222,8 +222,7 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    You&#39;re not viewing the documentation of the latest version.
     <a href="../..">
         <strong>Click here to view latest.</strong>
     </a>
@@ -447,25 +446,6 @@
     
   
   Quickstart guide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Building from source
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Quickstart guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Building from source
   
 
     
@@ -1369,9 +1322,9 @@
   
 
 
-<h1 id="web-ui">Web UI</h1>
-<h2 id="role-of-the-web-ui">Role of the Web UI</h2>
-<p>The Web UI is the visual control plane for BunkerWeb. It drives services, global settings, bans, plugins, jobs, cache, logs, and upgrades without touching the CLI. It is a Flask app served by Gunicorn and normally sits behind a BunkerWeb reverse proxy.</p>
+<h1 id="web-ui">Web UI<a class="headerlink" href="#web-ui" title="Permanent link">&para;</a></h1>
+<h2 id="role-of-the-web-ui">Role of the Web UI<a class="headerlink" href="#role-of-the-web-ui" title="Permanent link">&para;</a></h2>
+<p>The Web UI is the visual control plane for BunkerWeb. It drives services, global settings, bans, plugins, jobs, cache, logs, and upgrades without touching the CLI. It is a Flask app served by Gunicorn and normally sits behind a BunkerWeb reverse proxy. It compresses responses and serves versioned static assets with a long-lived cache header, so direct access on a trusted network is not penalized.</p>
 <div class="admonition warning">
 <p class="admonition-title">Keep it behind BunkerWeb</p>
 <p>The UI can change configuration, run jobs, and deploy custom snippets. Keep it on a trusted network, route it through BunkerWeb, and gate it with strong credentials and 2FA.</p>
@@ -1388,7 +1341,7 @@
 <li>Dependencies: shares the BunkerWeb database and talks to the API to reload, ban, or query instances</li>
 </ul>
 </div>
-<h2 id="security-checklist">Security checklist</h2>
+<h2 id="security-checklist">Security checklist<a class="headerlink" href="#security-checklist" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Run the UI behind BunkerWeb on an internal network; pick a hard-to-guess <code>REVERSE_PROXY_URL</code> and restrict source IPs.</li>
 <li>Set strong <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>; enable <code>OVERRIDE_ADMIN_CREDS=yes</code> only when you intentionally want to reset credentials.</li>
@@ -1398,9 +1351,9 @@
 <li>Keep <code>CHECK_PRIVATE_IP=yes</code> (default) to bind sessions to the client IP. <code>ALWAYS_REMEMBER=yes</code> only makes the session cookie survive a browser restart; it never extends <code>SESSION_LIFETIME_HOURS</code> or <code>SESSION_ABSOLUTE_HOURS</code>.</li>
 <li>Ensure <code>/var/log/bunkerweb</code> is writable by UID/GID 101 (or the mapped ID when running rootless) so the UI can read logs.</li>
 </ul>
-<h2 id="run-it">Run it</h2>
+<h2 id="run-it">Run it<a class="headerlink" href="#run-it" title="Permanent link">&para;</a></h2>
 <p>The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachable.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Quickstart (wizard)</label><label for="__tabbed_1_2">Advanced (preseeded env)</label><label for="__tabbed_1_3">Docker Autoconf</label><label for="__tabbed_1_4">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Quickstart (wizard)</label><label for="__tabbed_1_2">Advanced (preseeded env)</label><label for="__tabbed_1_3">Docker autoconf</label><label for="__tabbed_1_4">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Use the published images and the <a href="../quickstart-guide/#__tabbed_1_3">quickstart guide</a> layout to bring the stack up, then finish the setup via the wizard in your browser.</p>
@@ -1532,7 +1485,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h3 id="linux-vs-docker-specifics">Linux vs Docker specifics</h3>
+<h3 id="linux-vs-docker-specifics">Linux vs Docker specifics<a class="headerlink" href="#linux-vs-docker-specifics" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Bind defaults: Docker images listen on <code>0.0.0.0:7000</code>; Linux packages bind to <code>127.0.0.1:7000</code>. Override with <code>UI_LISTEN_ADDR</code> / <code>UI_LISTEN_PORT</code>.</li>
 <li>Proxy headers: <code>UI_FORWARDED_ALLOW_IPS</code> defaults to <code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code>; <code>UI_PROXY_ALLOW_IPS</code> defaults to the value of <code>FORWARDED_ALLOW_IPS</code>. On Linux installations set them to your reverse proxy IPs for tighter defaults.</li>
@@ -1540,11 +1493,11 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>Logs: <code>/var/log/bunkerweb</code> must be readable by UID/GID 101 (or the mapped UID in rootless Docker). Packages create the path; containers need a volume with correct ownership.</li>
 <li>Wizard behavior: easy-install on Linux starts the UI and wizard automatically; Docker users reach the wizard via the reverse-proxied URL unless they preseed env vars.</li>
 </ul>
-<h2 id="authentication-and-sessions">Authentication and sessions</h2>
+<h2 id="authentication-and-sessions">Authentication and sessions<a class="headerlink" href="#authentication-and-sessions" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Admin account: create via setup wizard or <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>. Passwords must include lowercase, uppercase, digit, and special chars. <code>OVERRIDE_ADMIN_CREDS=yes</code> forces reseeding even if an account exists.</li>
 <li>Password length limit: bcrypt only uses the first <strong>72 bytes</strong> of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, <code>ADMIN_PASSWORD</code> / <code>API_PASSWORD</code>). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).</li>
-<li>Roles: <code>admin</code>, <code>writer</code>, and <code>reader</code> are created automatically; accounts live in the database.</li>
+<li>Roles: <code>admin</code>, <code>writer</code>, and <code>reader</code> are created automatically; accounts live in the database. The open source UI authorizes on read and write only, so <code>admin</code> and <code>writer</code> hold the same capabilities and <code>reader</code> is the only restricted role. Finer separation, including restricting who may manage users and security settings, comes with the PRO <code>user_manager</code> plugin, documented under <a href="../advanced/#user-manager-pro">advanced usages</a>.</li>
 <li>Secrets: <code>FLASK_SECRET</code> is stored at <code>/var/lib/bunkerweb/.flask_secret</code>; Biscuit keys live next to it and can be provided via <code>BISCUIT_PUBLIC_KEY</code> / <code>BISCUIT_PRIVATE_KEY</code>.</li>
 <li>
 <p>2FA: TOTP secrets are stored in the database, encrypted with keys kept in <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>. The UI generates them on first start, so nothing is required as long as that file is persisted. Set <code>TOTP_ENCRYPTION_KEYS</code> (space-separated keys or a JSON map) to supply your own; each key must then be exactly <strong>43 characters</strong>, anything else is discarded with an <code>Invalid TOTP secret for key</code> warning and replaced by a random key. Generate one with:</p>
@@ -1552,7 +1505,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </code></pre></div>
 <p>Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (<code>SESSION_LIFETIME_HOURS</code>), refreshed on every request. A hard absolute cap is enforced by <code>SESSION_ABSOLUTE_HOURS</code> (default <code>168</code> = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (<code>SESSION_ROLLING_HOURS</code>, default <code>0</code> = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; <code>CHECK_PRIVATE_IP=no</code> relaxes the IP check for private ranges only. <code>ALWAYS_REMEMBER=yes</code> (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or <em>Wipe other sessions</em>. To stay logged in longer, raise <strong>both</strong> <code>SESSION_LIFETIME_HOURS</code> and <code>SESSION_ABSOLUTE_HOURS</code>: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
-- Session storage: sessions live in Redis when <code>USE_REDIS=yes</code>, otherwise in a local cache under <code>/var/lib/bunkerweb</code>. A Redis that stops answering, or that refuses writes because it hit <code>maxmemory</code>, no longer breaks the UI: the affected sessions fall back to that local cache, which is read before Redis so a change or a deletion that never reached Redis is never shadowed by the older copy Redis still holds, and reconciles back to Redis the next time it answers. A logout or a session ID rotation during an outage is not undone by the recovery either. Every revocation is recorded in both stores so it keeps applying either way. An eviction is not covered, since Redis reports success and simply stops holding the key, so size <code>maxmemory</code> for the keys you keep. When Redis refuses an update, that session moves to the local store and the copy Redis still held is dropped immediately, so the change is not shadowed by the older payload and a multi-step flow such as 2FA cannot loop on its pre-outage state. That local cache is per host, which matters when you run several UI replicas: the other replicas stop seeing a session that moved to one replica's local cache until that replica reconciles it back to Redis, a revocation issued while Redis was unavailable is enforced only by the replica that issued it, and a replica already serving a session from its own local cache can keep doing so for up to <code>SESSION_LIFETIME_HOURS</code> after another replica deletes that session through Redis. <code>UI_USE_REDIS=no</code> takes the UI off Redis on its own, unlike the global <code>USE_REDIS</code> which also stops bans and reports being shared between instances.
+- Session storage: sessions live in Redis when <code>USE_REDIS=yes</code>, otherwise in a local cache under <code>/var/lib/bunkerweb</code>. A Redis that stops answering, or that refuses writes because it hit <code>maxmemory</code>, no longer breaks the UI: the affected sessions fall back to that local cache, which is read before Redis so a change or a deletion that never reached Redis is never shadowed by the older copy Redis still holds, and reconciles back to Redis the next time it answers. A logout or a session ID rotation during an outage is not undone by the recovery either, even when the session itself could not be read while Redis was down. Every revocation is recorded in both stores so it keeps applying either way. An eviction is not covered, since Redis reports success and simply stops holding the key, so size <code>maxmemory</code> for the keys you keep. When Redis refuses an update, that session moves to the local store and the copy Redis still held is dropped immediately, so the change is not shadowed by the older payload and a multi-step flow such as 2FA cannot loop on its pre-outage state. That local cache is per host, which matters when you run several UI replicas: the other replicas stop seeing a session that moved to one replica's local cache until that replica reconciles it back to Redis, a revocation issued while Redis was unavailable is enforced only by the replica that issued it, and a replica already serving a session from its own local cache can keep doing so for up to <code>SESSION_LIFETIME_HOURS</code> after another replica deletes that session through Redis. <code>UI_USE_REDIS=no</code> takes the UI off Redis on its own, unlike the global <code>USE_REDIS</code> which also stops bans and reports being shared between instances.
 - Remember to set <code>PROXY_NUMBERS</code> if multiple proxies append <code>X-Forwarded-*</code> headers.</p>
 </li>
 </ul>
@@ -1573,17 +1526,17 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <p class="admonition-title">A wrong hash locks you out</p>
 <p>Use a hash only if you know its plaintext. A valid-but-wrong hash on first creation can't be reversed and a restart won't fix it. Recover with a different <code>ADMIN_PASSWORD</code> plus <code>OVERRIDE_ADMIN_CREDS=yes</code>.</p>
 </div>
-<h2 id="configuration-sources-and-precedence">Configuration sources and precedence</h2>
+<h2 id="configuration-sources-and-precedence">Configuration sources and precedence<a class="headerlink" href="#configuration-sources-and-precedence" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Environment variables (including Docker/Compose <code>environment:</code>)</li>
 <li>Secrets in <code>/run/secrets/&lt;VAR&gt;</code> (Docker)</li>
 <li>Env file at <code>/etc/bunkerweb/ui.env</code> (Linux packages)</li>
 <li>Built-in defaults</li>
 </ol>
-<h2 id="drafts-in-the-raw-editor">Drafts in the RAW editor</h2>
+<h2 id="drafts-in-the-raw-editor">Drafts in the RAW editor<a class="headerlink" href="#drafts-in-the-raw-editor" title="Permanent link">&para;</a></h2>
 <p>The RAW editor of a service or of the global settings can keep a setting as a <strong>draft</strong>: the value is stored but not applied, and the effective value stays the inherited (global) or default one. Put the cursor at the start of a <code>KEY=value</code> line and press <code>#</code> to toggle the draft state, or <code>Backspace</code> on a drafted line to activate it, then save. Drafted lines are highlighted and keep their value across saves, so a change can be prepared and activated later in one save. A setting that is not editable from the UI (managed by autoconf, or a plugin default that cannot be overridden) cannot change draft state.</p>
-<h2 id="configuration-reference">Configuration reference</h2>
-<h3 id="runtime-time-zone">Runtime &amp; time zone</h3>
+<h2 id="configuration-reference">Configuration reference<a class="headerlink" href="#configuration-reference" title="Permanent link">&para;</a></h2>
+<h3 id="runtime-time-zone">Runtime &amp; time zone<a class="headerlink" href="#runtime-time-zone" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1602,7 +1555,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="listener-tls">Listener &amp; TLS</h3>
+<h3 id="listener-tls">Listener &amp; TLS<a class="headerlink" href="#listener-tls" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1663,7 +1616,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="auth-sessions-and-cookies">Auth, sessions, and cookies</h3>
+<h3 id="auth-sessions-and-cookies">Auth, sessions, and cookies<a class="headerlink" href="#auth-sessions-and-cookies" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1748,7 +1701,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="logging">Logging</h3>
+<h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1797,7 +1750,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="misc-runtime">Misc runtime</h3>
+<h3 id="misc-runtime">Misc runtime<a class="headerlink" href="#misc-runtime" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1858,7 +1811,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h2 id="log-access">Log access</h2>
+<h2 id="log-access">Log access<a class="headerlink" href="#log-access" title="Permanent link">&para;</a></h2>
 <p>The UI reads NGINX/service logs from <code>/var/log/bunkerweb</code>. Feed that directory from a syslog daemon or volume:</p>
 <ul>
 <li>Container UID/GID is 101. On the host, set permissions so files are readable: <code>chown root:101 bw-logs &amp;&amp; chmod 770 bw-logs</code> (adjust for rootless mappings).</li>
@@ -1905,7 +1858,7 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h2 id="capabilities">Capabilities</h2>
+<h2 id="capabilities">Capabilities<a class="headerlink" href="#capabilities" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Dashboard for requests, bans, cache, and jobs; restart/reload instances.</li>
 <li>Create/update/delete services and global settings with validation against plugin schemas.</li>
@@ -1914,7 +1867,7 @@ log {
 <li>Manage UI users, roles, sessions, and TOTP with recovery codes.</li>
 <li>Upgrade to BunkerWeb PRO and inspect license status from the dedicated page.</li>
 </ul>
-<h2 id="upgrade-to-pro">Upgrade to PRO</h2>
+<h2 id="upgrade-to-pro">Upgrade to PRO<a class="headerlink" href="#upgrade-to-pro" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO free trial</p>
 <p>Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a>.</p>
@@ -1922,9 +1875,9 @@ log {
 <figure>
 <p><img align="center," alt="PRO upgrade" src="../assets/img/ui-pro.png" width="700" /></p>
 </figure>
-<h2 id="translations-i18n">Translations (i18n)</h2>
+<h2 id="translations-i18n">Translations (i18n)<a class="headerlink" href="#translations-i18n" title="Permanent link">&para;</a></h2>
 <p>The Web UI is available in multiple languages thanks to community contributions. Translation strings are stored as per-locale JSON files (for example <code>en.json</code>, <code>fr.json</code>, …). Each locale has a clear provenance indicating whether it was translated manually or generated using AI, as well as its review status.</p>
-<h3 id="available-languages-and-contributors">Available languages and contributors</h3>
+<h3 id="available-languages-and-contributors">Available languages and contributors<a class="headerlink" href="#available-languages-and-contributors" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2042,7 +1995,7 @@ log {
 <blockquote>
 <p>💡 Some translations may be partial. Manual review is encouraged, especially for critical UI elements.</p>
 </blockquote>
-<h3 id="how-to-contribute">How to contribute</h3>
+<h3 id="how-to-contribute">How to contribute<a class="headerlink" href="#how-to-contribute" title="Permanent link">&para;</a></h3>
 <p>Translation contributions follow the standard BunkerWeb contribution workflow:</p>
 <ol>
 <li><strong>Create or update the locale file</strong></li>
@@ -2090,8 +2043,16 @@ log {
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
         
       </main>
       
@@ -2192,7 +2153,7 @@ log {
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>

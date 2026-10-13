@@ -107,7 +107,7 @@ For a simple service hosted on your infrastructure:
 2. **Use Reverse Proxy**: `yes`
 3. **Reverse Proxy Host**: `185.87.1.100:443` (your server IP)
 
-You can find all configuration options in the [Reverse Proxy Documentation](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)
+You can find all configuration options in the [Reverse Proxy Documentation](https://docs.bunkerweb.io/1.6/settings/#reverse-proxy)
 
 #### Multi-services with SNI
 
@@ -141,7 +141,7 @@ REVERSE_PROXY_SSL_SNI: yes
 REVERSE_PROXY_SSL_SNI_NAME: other-example.com
 ```
 
-You can find all configuration options in the [Reverse Proxy Documentation](https://docs.bunkerweb.io/latest/settings/#reverse-proxy)
+You can find all configuration options in the [Reverse Proxy Documentation](https://docs.bunkerweb.io/1.6/settings/#reverse-proxy)
 
 ##### SNI Technical Details
 
@@ -886,7 +886,7 @@ REAL_IP_RECURSIVE: yes # Default
 REAL_IP_FROM_URLS: https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/
 ```
 
-You can find all configuration options in the [Documentation Real Ip](https://docs.bunkerweb.io/latest/settings/#real-ip)
+You can find all configuration options in the [Documentation Real Ip](https://docs.bunkerweb.io/1.6/settings/#real-ip)
 
 #### Client Infrastructure Side Configuration
 
@@ -1642,7 +1642,7 @@ docker pull ghcr.io/bunkerity/bunkerweb:testing
 
 Key concepts for Docker integration include:
 
-- **Environment variables**: Configure BunkerWeb easily using environment variables. These variables allow you to customize various aspects of BunkerWeb's behavior, such as network settings, security options, and other parameters.
+- **Environment variables**: Configure BunkerWeb easily using environment variables. These variables allow you to customize various aspects of BunkerWeb's behaviour, such as network settings, security options, and other parameters.
 - **Scheduler container**: Manage configuration and execute jobs using a dedicated container called the [scheduler](https://docs.bunkerweb.io/latest/concepts/#scheduler).
 - **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage traffic, providing enhanced security and performance.
 
@@ -1673,7 +1673,7 @@ services:
     When a container should be ignored by autoconf, set `DOCKER_IGNORE_LABELS` on the controller. Provide a space- or comma-separated list of label keys (for example `bunkerweb.SERVER_NAME`) or just the suffix (`SERVER_NAME`). Any container or custom-config source carrying a matching label is skipped during discovery, and the label is ignored when translating settings.
 
 !!! info "KEEP_CONFIG_ON_RESTART"
-    Unlike the settings above, `KEEP_CONFIG_ON_RESTART` is read directly by the `bunkerweb` container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the `bunkerweb` container itself. Set to `yes` to keep the previously generated configuration across a container restart instead of rendering the loading configuration. Default `no`.
+    Unlike the settings above, `KEEP_CONFIG_ON_RESTART` is read directly by the `bunkerweb` container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the `bunkerweb` container itself. Set to `yes` to keep the previously generated configuration across a container restart instead of rendering the loading configuration. With `yes`, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. Default `no`.
 
 ### Using Docker secrets
 
@@ -1814,16 +1814,16 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 
 ##### Runtime & safety
 
-| Setting                         | Description                                                                                                                                                                                                                                                       | Accepted values                                | Default                                |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
-| `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                                                                                                                                                                                                                           | Integer seconds                                | `30`                                   |
-| `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                                                                                                                                                                                                                        | Integer seconds                                | `5`                                    |
+| Setting                         | Description                                                                                                                                                                                                                                                                                                                  | Accepted values                                | Default                                |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                                                                                                                                                                                                                                                                                      | Integer seconds                                | `30`                                   |
+| `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                                                                                                                                                                                                                                                                                   | Integer seconds                                | `5`                                    |
 | `SEND_FILES_MIN_TIMEOUT`        | Minimum read timeout for configuration and cache folder pushes; an explicit value is never reduced, and only the value derived from the service count is capped at 120 seconds, so the effective timeout is whichever is higher. The connect timeout stays a fixed 5 seconds and the body send has its own separate timeout. | Integer seconds                                | `30`                                   |
-| `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                 | `yes` or `no`                                  | `no`                                   |
-| `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                           | `yes` or `no`                                  | `no`                                   |
-| `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                         | `yes` or `no`                                  | `no`                                   |
-| `SCHEDULER_MAX_WORKERS`         | Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`. | Positive integer                               | `min(8, max(2, cpu_count*2))`          |
-| `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps                                                                                                                                                                                             | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
+| `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                                                                            | `yes` or `no`                                  | `no`                                   |
+| `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                                                                                      | `yes` or `no`                                  | `no`                                   |
+| `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                                                                                    | `yes` or `no`                                  | `no`                                   |
+| `SCHEDULER_MAX_WORKERS`         | Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`.                                                            | Positive integer                               | `min(8, max(2, cpu_count*2))`          |
+| `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps                                                                                                                                                                                                                                                        | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
 
 ##### Database
 
@@ -2494,9 +2494,6 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    !!! warning "Fedora 43 ships NGINX 1.30.4"
-        Fedora 43 does not provide NGINX 1.30.5 yet, so the BunkerWeb package for Fedora 43 is built against NGINX 1.30.4 and expects `nginx-1.30.4`. Install that version on Fedora 43; the pin moves to 1.30.5 as soon as Fedora 43 publishes it. Fedora 44 already provides 1.30.5.
-
     Fedora already provides NGINX 1.30.5 that we support
 
     ```shell
@@ -2591,9 +2588,9 @@ If you manually edit the BunkerWeb configuration using `/etc/bunkerweb/variables
 
 The `bunkerweb` service's entrypoint also reads the following variable directly, outside the normal settings flow:
 
-| Setting                  | Description                                                                                                                                                                                      | Accepted values | Default |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------- |
-| `KEEP_CONFIG_ON_RESTART` | Keep the previously generated configuration on restart of the `bunkerweb` service instead of rendering the loading configuration. Read from the environment or `/etc/bunkerweb/variables.env`, never from the database. | `yes` or `no`    | `no`    |
+| Setting                  | Description                                                                                                                                                                                                             | Accepted values | Default |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------- |
+| `KEEP_CONFIG_ON_RESTART` | Keep the previously generated configuration on restart of the `bunkerweb` service instead of rendering the loading configuration. With `yes`, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. Read from the environment or `/etc/bunkerweb/variables.env`, never from the database. | `yes` or `no`   | `no`    |
 
 ### High availability
 
@@ -2823,19 +2820,22 @@ The `bw-autoconf` controller watches your orchestrator and writes changes to the
 
 ##### Kubernetes-only
 
-| Setting                                 | Description                                                                                       | Accepted values                                    | Default             |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------- |
-| `KUBERNETES_VERIFY_SSL`                 | Verify Kubernetes API TLS                                                                         | `yes` or `no`                                      | `yes`               |
-| `KUBERNETES_SSL_CA_CERT`                | Path to a custom CA bundle for the Kubernetes API                                                 | File path                                          | unset               |
-| `USE_KUBERNETES_FQDN`                   | Use `<pod>.<ns>.pod.<domain>` instead of Pod IP as instance hostname                              | `yes` or `no`                                      | `yes`               |
-| `KUBERNETES_INGRESS_CLASS`              | Only process ingresses with this class                                                            | String                                             | unset (all classes) |
-| `KUBERNETES_GATEWAY_CLASS`              | Only process Gateways with this class                                                             | String                                             | unset (all classes) |
-| `KUBERNETES_GATEWAY_API_VERSION`        | Gateway API version to use (auto-falls back if missing)                                           | `v1`, `v1beta1`, `v1beta2`, `v1alpha2`, `v1alpha1` | `v1`                |
-| `KUBERNETES_DOMAIN_NAME`                | Cluster domain suffix used when building upstream hosts                                           | String                                             | `cluster.local`     |
-| `KUBERNETES_SERVICE_PROTOCOL`           | Scheme used for generated reverse proxy hosts                                                     | `http` or `https`                                  | `http`              |
-| `BUNKERWEB_SERVICE_NAME`                | Service name to read when patching Ingress/Gateway status with the load balancer address          | String                                             | `bunkerweb`         |
-| `BUNKERWEB_NAMESPACE`                   | Namespace of that Service                                                                         | String                                             | `bunkerweb`         |
-| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Starting index for generated `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` on multi-path ingresses | Integer (>=0)                                      | `1`                 |
+| Setting                                 | Description                                                                                                                                                                                      | Accepted values                                    | Default                           |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- | --------------------------------- |
+| `KUBERNETES_VERIFY_SSL`                 | Verify Kubernetes API TLS                                                                                                                                                                        | `yes` or `no`                                      | `yes`                             |
+| `KUBERNETES_SSL_CA_CERT`                | Path to a custom CA bundle for the Kubernetes API                                                                                                                                                | File path                                          | unset                             |
+| `USE_KUBERNETES_FQDN`                   | Use `<pod>.<ns>.pod.<domain>` instead of Pod IP as instance hostname                                                                                                                             | `yes` or `no`                                      | `yes`                             |
+| `KUBERNETES_INGRESS_CLASS`              | Only process ingresses with this class                                                                                                                                                           | String                                             | unset (all classes)               |
+| `KUBERNETES_GATEWAY_CLASS`              | Only process Gateways with this class                                                                                                                                                            | String                                             | unset (all classes)               |
+| `KUBERNETES_SKIP_FOREIGN_CLASSES`       | When `yes` and no class filter is set, skip Ingresses and Gateways whose IngressClass or GatewayClass belongs to another controller. Needs get/list/watch on `ingressclasses` / `gatewayclasses` | `yes` or `no`                                      | `no`                              |
+| `KUBERNETES_INGRESS_CONTROLLER`         | Controller id that marks an IngressClass as BunkerWeb's (`spec.controller`)                                                                                                                      | String                                             | `bunkerweb.io/ingress-controller` |
+| `KUBERNETES_GATEWAY_CONTROLLER`         | Controller id that marks a GatewayClass as BunkerWeb's (`spec.controllerName`)                                                                                                                   | String                                             | `bunkerweb.io/gateway-controller` |
+| `KUBERNETES_GATEWAY_API_VERSION`        | Gateway API version to use (auto-falls back if missing)                                                                                                                                          | `v1`, `v1beta1`, `v1beta2`, `v1alpha2`, `v1alpha1` | `v1`                              |
+| `KUBERNETES_DOMAIN_NAME`                | Cluster domain suffix used when building upstream hosts                                                                                                                                          | String                                             | `cluster.local`                   |
+| `KUBERNETES_SERVICE_PROTOCOL`           | Scheme used for generated reverse proxy hosts                                                                                                                                                    | `http` or `https`                                  | `http`                            |
+| `BUNKERWEB_SERVICE_NAME`                | Service name to read when patching Ingress/Gateway status with the load balancer address                                                                                                         | String                                             | `bunkerweb`                       |
+| `BUNKERWEB_NAMESPACE`                   | Namespace of that Service                                                                                                                                                                        | String                                             | `bunkerweb`                       |
+| `KUBERNETES_REVERSE_PROXY_SUFFIX_START` | Starting index for generated `REVERSE_PROXY_HOST_n`/`REVERSE_PROXY_URL_n` on multi-path ingresses                                                                                                | Integer (>=0)                                      | `1`                               |
 
 ### Autoconf services
 
@@ -2861,7 +2861,7 @@ networks:
 
 By default, when a container, Swarm service, or Ingress managed by autoconf disappears from the orchestrator, its BunkerWeb service row (and any associated custom configs) is immediately deleted from the shared database. This is destructive: an operator cannot distinguish a genuine teardown from a transient glitch, and recovering requires recreating the service definition from scratch.
 
-Setting `AUTOCONF_DISABLE_CLEANUP=yes` on the `bw-autoconf` container changes this behavior:
+Setting `AUTOCONF_DISABLE_CLEANUP=yes` on the `bw-autoconf` container changes this behaviour:
 
 - Services removed from the orchestrator are flipped to `is_draft = true` instead of being deleted. Their `services_settings` rows, custom configs, and job caches are preserved.
 - Draft services are excluded from the rendered NGINX configuration (they are not served), so removing the orchestration object still takes the site offline — it just keeps the state around.
@@ -2899,7 +2899,7 @@ networks:
     name: bw-services
 ```
 
-!!! info "Namespace behavior"
+!!! info "Namespace behaviour"
 
     By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bw-autoconf` service:
 
@@ -3150,6 +3150,40 @@ controller:
 
     Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
 
+    The whitelist and token are the layers every cluster gets. On a CNI that enforces `NetworkPolicy`, also close port 5000 to everything but the callers while leaving the served ports open. The sidecar pod below is selected by the Deployment's `app: nginx-bw` label, not by its `bunkerweb.io/INSTANCE` annotation; adapt the selector to your own Deployment label. Allow only the Scheduler and the Web UI as callers; if you deploy the API service too, add whatever `app` label its own pods carry, since this example defines none. Port 9113 stays open because the sidecar above exposes metrics on it. The rule covers the whole internal API, the plugin routes included, since they share the `bwapi` server whose access phase checks the token first. Port 5443 is there for `API_LISTEN_HTTPS`, and 5000 stays open with it: the API certificate reaches the worker through the cache push over the HTTP API, and NGINX brings the TLS listener up only once that file has arrived.
+
+    ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: bunkerweb-api
+      namespace: bunkerweb
+    spec:
+      podSelector:
+        matchLabels:
+          app: nginx-bw
+      policyTypes: [Ingress]
+      ingress:
+        - ports:
+            - protocol: TCP
+              port: 8080
+            - protocol: TCP
+              port: 8443
+            - protocol: TCP
+              port: 9113
+        - from:
+            - podSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values: [bunkerweb-scheduler, bunkerweb-ui]
+          ports:
+            - protocol: TCP
+              port: 5000
+            - protocol: TCP
+              port: 5443
+    ```
+
   ```yaml
   apiVersion: apps/v1
   kind: Deployment
@@ -3358,12 +3392,12 @@ spec:
 
 ###### Important Environment Variables
 
-| Variable                  | Value                                                 | Description                                              |
-| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
-| `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
-| `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
+| Variable                  | Value                                                 | Description                                                                                                                                                                 |
+| ------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller                                                                                                                    |
+| `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                                                                                                                                        |
 | `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API. Narrow this to the cluster's actual pod CIDR and pair it with `API_TOKEN`; the whitelist alone does not isolate the API from other workloads |
-| `API_TOKEN`               | *(from a Secret)* | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed |
+| `API_TOKEN`               | *(from a Secret)*                                     | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed                        |
 
 ##### Step 3: Creating Services
 
@@ -3692,7 +3726,7 @@ metadata:
 ...
 ```
 
-!!! info "Namespace behavior"
+!!! info "Namespace behaviour"
 
     By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bunkerweb-controller` deployment:
 
@@ -3773,6 +3807,8 @@ spec:
                   number: 8000
 ```
 
+When `KUBERNETES_INGRESS_CLASS` is unset, set `KUBERNETES_SKIP_FOREIGN_CLASSES=yes` to leave alone Ingresses that belong to another controller instead of serving all of them. An Ingress is processed when it has no class, when its class names an `IngressClass` object that does not exist, or when that object's `spec.controller` matches `KUBERNETES_INGRESS_CONTROLLER`; it is skipped when the object exists and points to another controller. The legacy `kubernetes.io/ingress.class` annotation is read the same way when `ingressClassName` is unset. This needs `get`/`list`/`watch` on `ingressclasses`; without that RBAC the controller logs one warning and processes every Ingress, as if the flag were `no`. Turning the flag on can stop serving an Ingress that kept a stale class (for example a leftover `nginx` `IngressClass` after removing ingress-nginx): set `ingressClassName: bunkerweb` on it, or delete the stale `IngressClass`.
+
 ### Gateway class {#gateway-class}
 
 When using the Gateway API, BunkerWeb expects a `GatewayClass` that points to its controller:
@@ -3802,6 +3838,8 @@ spec:
       port: 80
       hostname: www.example.com
 ```
+
+The same `KUBERNETES_SKIP_FOREIGN_CLASSES` rules apply to Gateways: with `KUBERNETES_GATEWAY_CLASS` unset, a Gateway is skipped when its `gatewayClassName` names a `GatewayClass` whose `spec.controllerName` is not `KUBERNETES_GATEWAY_CONTROLLER`. Without `get`/`list`/`watch` on `gatewayclasses`, the controller logs one warning and processes every Gateway.
 
 ### Custom domain name
 
@@ -4224,7 +4262,7 @@ REST API with rate limiting, CORS, HTTPS redirection, and timeout configuration.
 
         # Additional security (BunkerWeb bonus)
         bunkerweb.io/USE_MODSECURITY: "yes"
-        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+        bunkerweb.io/USE_BAD_BEHAVIOUR: "yes"
     spec:
       ingressClassName: bunkerweb
       tls:
@@ -4256,7 +4294,7 @@ REST API with rate limiting, CORS, HTTPS redirection, and timeout configuration.
 | Timeouts       | `proxy-*-timeout: "60"`               | `REVERSE_PROXY_*_TIMEOUT: "60s"`                                                  |
 | Body Size      | `proxy-body-size: "20m"`              | `MAX_CLIENT_SIZE: "20m"`                                                          |
 | Custom Headers | `proxy-set-headers: "custom-headers"` | `CUSTOM_HEADER: "Header-Name: value"` (multiple annotations for multiple headers) |
-| Security       | N/A                                   | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOR: "yes"`                              |
+| Security       | N/A                                   | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOUR: "yes"`                             |
 
 ---
 
@@ -4372,7 +4410,7 @@ Application with custom NGINX rules via `configuration-snippet`: complex rewrite
         bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
 
         # User-Agent blocking (native BunkerWeb)
-        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+        bunkerweb.io/USE_BAD_BEHAVIOUR: "yes"
         bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider" # Or PCRE regex
 
         # Cache (native BunkerWeb)
@@ -4432,7 +4470,7 @@ Application with custom NGINX rules via `configuration-snippet`: complex rewrite
 
         bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
 
-        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+        bunkerweb.io/USE_BAD_BEHAVIOUR: "yes"
 
         bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider" # Or PCRE regex
     spec:
@@ -4733,7 +4771,7 @@ networks:
     name: bw-services
 ```
 
-!!! info "Namespace behavior"
+!!! info "Namespace behaviour"
 
     By default all Autoconf stacks listen to all namespaces. If you want to restrict a stack to specific namespaces, you can set the `NAMESPACES` environment variable in the `bw-autoconf` service:
 
@@ -5003,7 +5041,7 @@ output "api_service_id" {
 - [Complete provider documentation](https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs)
 - [GitHub Repository](https://github.com/bunkerity/terraform-provider-bunkerweb)
 - [Usage Examples](https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples)
-- [BunkerWeb API Documentation](https://docs.bunkerweb.io/latest/api/)
+- [BunkerWeb API Documentation](https://docs.bunkerweb.io/1.6/api/)
 
 ### Support and Contribution
 
@@ -5060,3 +5098,320 @@ You can easily deploy BunkerWeb on your Azure subscription in several ways:
     You can also go through the [Marketplace](https://azuremarketplace.microsoft.com/fr-fr/marketplace/apps/bunkerity.bunkerweb?tab=Overview){:target="_blank"}.
 
 You can access the setup wizard by browsing the `https://your-ip-address/setup` URI of your virtual machine.
+
+## Building from source
+
+This guide explains how to build BunkerWeb artefacts from source.
+
+### Scope
+
+This section covers:
+
+- Community container images (`bunkerweb`, `scheduler`, `autoconf`, `ui`, `api`, `all-in-one`)
+- Linux packages (`.deb`, `.rpm`)
+
+All commands are expected to be run from the repository root.
+
+FreeBSD users: BunkerWeb is available as an official port, see <https://www.freshports.org/www/bunkerweb/>.
+
+### Build Standards
+
+- Build from a clean, up-to-date working tree.
+- Use the version from `src/VERSION` (packaging scripts read it automatically).
+- Keep artefacts reproducible by using the provided scripts and Dockerfiles.
+
+### Prerequisites
+
+- For containers and Linux packages:
+- Docker (Buildx recommended)
+
+### Artefact Matrix
+
+| Artefact                     | Build path                                        | Main command                              |
+| ---------------------------- | ------------------------------------------------- | ----------------------------------------- |
+| Community container images   | `src/*/Dockerfile`                                | `docker build -f <Dockerfile> -t <tag> .` |
+| Linux packages (`deb`/`rpm`) | `src/linux/Dockerfile-*` + `src/linux/package.sh` | `./src/linux/package.sh <linux> <arch>`   |
+
+### Build Community Container Images
+
+#### Image targets
+
+| Image        | Dockerfile                  |
+| ------------ | --------------------------- |
+| `bunkerweb`  | `src/bw/Dockerfile`         |
+| `scheduler`  | `src/scheduler/Dockerfile`  |
+| `autoconf`   | `src/autoconf/Dockerfile`   |
+| `ui`         | `src/ui/Dockerfile`         |
+| `api`        | `src/api/Dockerfile`        |
+| `all-in-one` | `src/all-in-one/Dockerfile` |
+
+#### Build one image
+
+```sh
+docker build -f src/bw/Dockerfile -t local/bunkerweb:dev .
+```
+
+#### Build all community images
+
+```sh
+set -e
+
+for image in bunkerweb scheduler autoconf ui api all-in-one; do
+  case "$image" in
+    bunkerweb) dockerfile="src/bw/Dockerfile" ;;
+    scheduler) dockerfile="src/scheduler/Dockerfile" ;;
+    autoconf) dockerfile="src/autoconf/Dockerfile" ;;
+    ui) dockerfile="src/ui/Dockerfile" ;;
+    api) dockerfile="src/api/Dockerfile" ;;
+    all-in-one) dockerfile="src/all-in-one/Dockerfile" ;;
+  esac
+  docker build -f "$dockerfile" -t "local/$image:dev" .
+done
+```
+
+#### Development-only build argument (not for production)
+
+Use this only for local iteration on images that support minification args (`bw`, `ui`, `all-in-one`).
+It reduces build time by skipping asset minification, but it does not produce production-grade artefacts.
+
+```sh
+docker build -f src/all-in-one/Dockerfile \
+  --build-arg SKIP_MINIFY=yes \
+  -t local/all-in-one:dev .
+```
+
+### Build Linux Packages (`.deb` / `.rpm`)
+
+Linux package generation can be done directly with Docker in 2 steps:
+
+1. Build the package builder image for your distro.
+2. Run that image with a host output directory mounted to `/data`.
+
+#### Supported distro identifiers
+
+- `ubuntu`
+- `ubuntu-noble`
+- `ubuntu-jammy`
+- `debian-bookworm`
+- `debian-trixie`
+- `fedora-43`
+- `fedora-44`
+- `rhel-8`
+- `rhel-9`
+- `rhel-10`
+
+=== "Quick local method (recommended)"
+
+    This is the simplest community workflow for local package builds.
+    In `-v <host-dir>:/data`, you can choose any host directory you want.
+    Generated package files are exported by the container into that same host directory.
+
+    === "Build a `.deb` (Ubuntu example)"
+
+        ```sh
+        docker build \
+          -t bunkerweb_ubuntu \
+          -f src/linux/Dockerfile-ubuntu . && \
+        docker run --rm \
+          -v "$(pwd)/out/deb:/data" \
+          bunkerweb_ubuntu
+        ```
+
+        Output:
+
+        - `<your-chosen-host-dir>/bunkerweb.deb` (for the example above: `$(pwd)/out/deb/bunkerweb.deb`)
+
+    === "Build an `.rpm` (Fedora example)"
+
+        ```sh
+        docker build \
+          -t bunkerweb_fedora43 \
+          -f src/linux/Dockerfile-fedora-43 . && \
+        docker run --rm \
+          -v "$(pwd)/out/rpm:/data" \
+          bunkerweb_fedora43
+        ```
+
+        Output:
+
+        - `<your-chosen-host-dir>/bunkerweb.rpm` (for the example above: `$(pwd)/out/rpm/bunkerweb.rpm`)
+
+    ##### Development flags (not for production)
+
+    Use these only for local development and troubleshooting:
+
+    - `SKIP_MINIFY=yes` (`docker build --build-arg`): skips static asset minification to speed up builds; output is less optimized.
+    - `FPM_DEBUG=yes` (`docker run -e`): enables verbose FPM/debug logs during package creation.
+    - `FPM_SKIP_COMPRESSION=yes` (`docker run -e`): disables package compression to speed up packaging and simplify inspection; output packages are larger.
+
+    Do not use these flags for release artefacts intended for users.
+
+    !!! example "Development / troubleshooting example"
+
+        Use this only when debugging package generation (verbose FPM logs, no compression). You can still choose any host directory mounted to `/data`, and artefacts will be written there.
+
+        ```sh
+        docker build --build-arg SKIP_MINIFY=yes \
+          -t bunkerweb_ubuntu \
+          -f src/linux/Dockerfile-ubuntu . && \
+        docker run --rm \
+          -e FPM_DEBUG=yes \
+          -e FPM_SKIP_COMPRESSION=yes \
+          -v "$(pwd)/out/deb:/data" \
+          bunkerweb_ubuntu
+        ```
+
+=== "Scripted method (`package.sh`)"
+
+    Use this if you want the repository naming convention in `package-<linux>/`.
+
+    #### Step 1: build builder image
+
+    Example (`ubuntu`):
+
+    ```sh
+    docker build -f src/linux/Dockerfile-ubuntu -t local/bunkerweb-ubuntu:latest .
+    ```
+
+    #### Step 2: build package
+
+    ```sh
+    chmod +x src/linux/package.sh
+    ./src/linux/package.sh ubuntu amd64
+    ```
+
+    Artefacts are written to `package-<linux>/`.
+
+    Examples:
+
+    ```sh
+    # Debian/Ubuntu package
+    docker build -f src/linux/Dockerfile-debian-bookworm -t local/bunkerweb-debian-bookworm:latest .
+    ./src/linux/package.sh debian-bookworm amd64
+
+    # RPM package
+    docker build -f src/linux/Dockerfile-fedora-43 -t local/bunkerweb-fedora-43:latest .
+    ./src/linux/package.sh fedora-43 x86_64
+    ```
+
+    !!! abstract "Notes"
+
+        - For RPM, use Linux arch naming (`x86_64`, `aarch64`, ...).
+        - For DEB, use Debian arch naming (`amd64`, `arm64`, ...).
+        - `curl` is a runtime requirement for scheduler ACME integrations (notably ZeroSSL/EAB flows).
+        - Dockerfiles for Linux package builders are preconfigured with their package type:
+          - Debian/Ubuntu Dockerfiles run `fpm.sh deb`
+          - Fedora/RHEL Dockerfiles run `fpm.sh rpm`
+
+### CI Parity (Reference)
+
+If you want local builds to match CI behaviour, use these workflow references:
+
+- Container builds: `.github/workflows/container-build.yml`
+- Linux package builds: `.github/workflows/linux-build.yml`
+
+### Publish Artefacts
+
+Security baseline:
+
+- Never paste real tokens/passwords directly in command lines or shell history.
+- Prefer interactive login prompts for local/manual publishing.
+- Use short-lived tokens with minimum required scopes.
+- Use CI secret stores for automation.
+- Unset sensitive environment variables after publishing.
+
+#### Publish Docker images (`docker.io` and `ghcr.io`)
+
+Set your image metadata:
+
+```sh
+export VERSION="$(cat src/VERSION)"
+export DOCKERHUB_ORG="<dockerhub-org-or-user>"
+export GHCR_ORG="<github-org-or-user>"
+```
+
+Authenticate registries:
+
+```sh
+docker login docker.io
+docker login ghcr.io -u "<github-user>"
+```
+
+!!! abstract "Notes"
+
+    - The `docker login` commands above prompt for credentials securely (hidden input).
+    - For automated pipelines, read credentials from CI secrets and avoid hardcoded values.
+
+Tag and push one image (example: `all-in-one`):
+
+```sh
+docker tag local/all-in-one:dev docker.io/$DOCKERHUB_ORG/bunkerweb-all-in-one:$VERSION
+docker tag local/all-in-one:dev ghcr.io/$GHCR_ORG/bunkerweb-all-in-one:$VERSION
+
+docker push docker.io/$DOCKERHUB_ORG/bunkerweb-all-in-one:$VERSION
+docker push ghcr.io/$GHCR_ORG/bunkerweb-all-in-one:$VERSION
+```
+
+Optional rolling tag (`latest`) for stable releases only:
+
+```sh
+docker tag local/all-in-one:dev docker.io/$DOCKERHUB_ORG/bunkerweb-all-in-one:latest
+docker tag local/all-in-one:dev ghcr.io/$GHCR_ORG/bunkerweb-all-in-one:latest
+
+docker push docker.io/$DOCKERHUB_ORG/bunkerweb-all-in-one:latest
+docker push ghcr.io/$GHCR_ORG/bunkerweb-all-in-one:latest
+```
+
+#### Publish Linux packages to Packagecloud
+
+Install and authenticate the `package_cloud` CLI, then upload generated packages.
+
+Install CLI first:
+
+```sh
+# Debian/Ubuntu
+sudo apt-get update
+sudo apt-get install -y ruby-full build-essential
+sudo gem install package_cloud
+
+# Fedora/RHEL
+sudo dnf install -y ruby rubygems gcc make
+sudo gem install package_cloud
+```
+
+```sh
+export PACKAGECLOUD_REPO="<owner>/<repo>"
+read -r -s -p "Packagecloud token: " PACKAGECLOUD_TOKEN
+echo
+export PACKAGECLOUD_TOKEN
+```
+
+Examples:
+
+```sh
+# Ubuntu/Debian
+package_cloud push "$PACKAGECLOUD_REPO/ubuntu/jammy" package-ubuntu/*.deb
+package_cloud push "$PACKAGECLOUD_REPO/debian/bookworm" package-debian-bookworm/*.deb
+
+# Fedora/RHEL
+package_cloud push "$PACKAGECLOUD_REPO/fedora/43" package-fedora-43/*.rpm
+package_cloud push "$PACKAGECLOUD_REPO/el/9" package-rhel-9/*.rpm
+```
+
+!!! abstract "Notes"
+
+    - Use the correct distribution path expected by your Packagecloud repository.
+    - Upload only release artefacts; avoid development flags (`SKIP_MINIFY`, `FPM_DEBUG`, `FPM_SKIP_COMPRESSION`) for publish builds.
+    - Verify repository retention, metadata, and signing policy before publishing.
+    - Run `unset PACKAGECLOUD_TOKEN` once uploads are complete.
+
+!!! tip "Quick Validation"
+
+    ```sh
+    # Check generated package files
+    ls -lh package-*/*.{deb,rpm} 2>/dev/null || true
+    ls -lh bunkerweb-*.pkg 2>/dev/null || true
+
+    # Check local images
+    docker image ls | grep -E 'local/(bunkerweb|scheduler|autoconf|ui|api|all-in-one)'
+    ```

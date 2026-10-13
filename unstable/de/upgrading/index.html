@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Schnellstart
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
   
 
     
@@ -1242,12 +1195,12 @@
   
 
 
-<h1 id="aufrusten">Aufrüsten</h1>
-<h2 id="upgrade-von-16x">Upgrade von 1.6.X</h2>
-<h3 id="wiederholungsschutz-der-zwei-faktor-authentifizierung">Wiederholungsschutz der Zwei-Faktor-Authentifizierung</h3>
+<h1 id="aufrusten">Aufrüsten<a class="headerlink" href="#aufrusten" title="Permanent link">&para;</a></h1>
+<h2 id="upgrade-von-16x">Upgrade von 1.6.X<a class="headerlink" href="#upgrade-von-16x" title="Permanent link">&para;</a></h2>
+<h3 id="wiederholungsschutz-der-zwei-faktor-authentifizierung">Wiederholungsschutz der Zwei-Faktor-Authentifizierung<a class="headerlink" href="#wiederholungsschutz-der-zwei-faktor-authentifizierung" title="Permanent link">&para;</a></h3>
 <p>Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für Zwei-Faktor-Codes wird jetzt in der gemeinsamen Datenbank gespeichert und gilt nur für Replikate, die diese Version ausführen. Während der Migration kann ein bereits angezeigter Authentifizierungscode bis zu 33 Sekunden lang abgelehnt werden; verwenden Sie danach einen neueren Code. Halten Sie die vorhandenen TOTP-Verschlüsselungsschlüssel für jedes UI-Replikat verfügbar, wie unter <a href="../troubleshooting/#web-ui">Fehlerbehebung der Web-UI</a> beschrieben. Der Wiederholungszähler ersetzt diese Schlüssel nicht. Solange die Datenbank schreibgeschützt ist, werden Codes ohne Wiederholungsschutz akzeptiert, bis sie wieder beschreibbar ist.</p>
-<h3 id="vorgehensweise">Vorgehensweise</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-In-One (AIO)</label><label for="__tabbed_1_3">Linux</label></div>
+<h3 id="vorgehensweise">Vorgehensweise<a class="headerlink" href="#vorgehensweise" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-one</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Einfaches Upgrade mit dem Installationsskript</label><label for="__tabbed_2_2">Manuell</label></div>
@@ -1291,7 +1244,7 @@ verwenden Sie dafür den Reiter <strong>Manuell</strong>.</p>
 <li>Erkennung<ul>
 <li>Liest den Installationstyp (full, manager, worker, scheduler, ui, api) aus der <code>.env</code> zurück, sodass Sie Ihre Topologie nie erneut angeben müssen.</li>
 <li>Übernimmt Geheimnisse, Host-Ports, Worker-Liste und Compose-Projektnamen aus der <code>.env</code>. Ein Upgrade kann so weder das Datenbankpasswort rotieren noch gespeicherte 2FA-Geheimnisse ungültig machen oder Ihre veröffentlichten Ports verschieben. Wird ein Schlüssel mehrfach gesetzt, gilt die letzte Zuweisung; ein optionales <code>export</code> wird akzeptiert, und explizite Kommandozeilenwerte haben weiterhin Vorrang. Anführungszeichen, Variablenersetzung, Escapes und andere nicht unterstützte dotenv-Syntax werden abgewiesen, bevor die Datei neu geschrieben wird; verwenden Sie für solche Dateien den manuellen Upgrade-Weg.</li>
-<li>Liest die tatsächlich laufende Version aus dem Container statt dem Image-Tag zu vertrauen. So werden ein gleitender Tag (<code>latest</code>, <code>testing</code>) und ein zuvor abgebrochenes Upgrade zuverlässig erkannt.</li>
+<li>Liest die tatsächlich laufende Version aus dem Container statt dem Image-Tag zu vertrauen. So werden ein gleitender Tag (<code>latest</code>, <code>testing</code> oder <code>1.6</code>, das neueste 1.6.x-Release, das auf 1.6 bleibt, wenn 1.7 erscheint) und ein zuvor abgebrochenes Upgrade zuverlässig erkannt.</li>
 </ul>
 </li>
 <li>Upgrade-Entscheidung<ul>
@@ -1824,7 +1777,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </div>
 </div>
 </div>
-<h3 id="rollback">Rollback</h3>
+<h3 id="rollback">Rollback<a class="headerlink" href="#rollback" title="Permanent link">&para;</a></h3>
 <div class="admonition failure">
 <p class="admonition-title">Bei Problemen</p>
 <p>Wenn während des Upgrades Probleme auftreten, können Sie auf die vorherige Version der Datenbank zurückgreifen, indem Sie die in <a href="#__tabbed_1_1">Schritt 1</a> erstellte Sicherung wiederherstellen.</p>
@@ -1835,7 +1788,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 <li><a href="https://discord.bunkerity.com">Treten Sie dem BunkerWeb Discord-Server bei</a></li>
 </ul>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Docker</label><label for="__tabbed_7_2">All-In-One (AIO)</label><label for="__tabbed_7_3">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Docker</label><label for="__tabbed_7_2">All-in-one</label><label for="__tabbed_7_3">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -2090,9 +2043,9 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
-<h2 id="upgrade-von-15x">Upgrade von 1.5.X</h2>
-<h3 id="was-hat-sich-geandert">Was hat sich geändert?</h3>
-<h4 id="scheduler">Scheduler</h4>
+<h2 id="upgrade-von-15x">Upgrade von 1.5.X<a class="headerlink" href="#upgrade-von-15x" title="Permanent link">&para;</a></h2>
+<h3 id="was-hat-sich-geandert">Was hat sich geändert?<a class="headerlink" href="#was-hat-sich-geandert" title="Permanent link">&para;</a></h3>
+<h4 id="scheduler">Scheduler<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h4>
 <p>Im Gegensatz zu den 1.5.X-Versionen verwendet der Scheduler-Dienst <strong>nicht mehr den <em>Docker-Socket-Proxy</em>, um BunkerWeb-Instanzen abzurufen</strong>. Stattdessen verwendet er die neue Umgebungsvariable <code>BUNKERWEB_INSTANCES</code>.</p>
 <div class="admonition info">
 <p class="admonition-title">Über die Umgebungsvariable <code>BUNKERWEB_INSTANCES</code></p>
@@ -2110,25 +2063,25 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p><strong>Die Instanzen werden automatisch vom Controller abgerufen</strong>. Sie können auch benutzerdefinierte Instanzen zur Liste hinzufügen, die möglicherweise nicht vom Controller erfasst werden.</p>
 </div>
 <p>Seit <code>1.6</code> verfügt der Scheduler auch über ein neues <a href="../concepts/">integriertes System zur Zustandsprüfung</a>, das den Zustand der Instanzen überprüft. Wenn eine Instanz ungesund wird, sendet der Scheduler die Konfiguration nicht mehr an sie. Wenn die Instanz wieder gesund wird, beginnt der Scheduler wieder, die Konfiguration an sie zu senden.</p>
-<h4 id="bunkerweb-container">BunkerWeb-Container</h4>
+<h4 id="bunkerweb-container">BunkerWeb-Container<a class="headerlink" href="#bunkerweb-container" title="Permanent link">&para;</a></h4>
 <p>Eine weitere wichtige Änderung ist, dass die <strong>Einstellungen</strong>, die zuvor im BunkerWeb-Container deklariert wurden, <strong>jetzt im Scheduler deklariert werden</strong>. Das bedeutet, dass Sie Ihre Einstellungen vom BunkerWeb-Container in den Scheduler-Container verschieben müssen.</p>
 <p>Obwohl die Einstellungen jetzt im Scheduler-Container deklariert werden, <strong>müssen Sie immer noch API-bezogene obligatorische Einstellungen im BunkerWeb-Container deklarieren</strong>, wie die Einstellung <code>API_WHITELIST_IP</code>, die verwendet wird, um die IP-Adresse des Schedulers auf die Whitelist zu setzen, damit er die Konfiguration an die Instanz senden kann. Wenn Sie <code>API_TOKEN</code> verwenden, müssen Sie es auch im BunkerWeb-Container setzen (und im Scheduler spiegeln), um authentifizierte API-Aufrufe zu ermöglichen.</p>
 <div class="admonition warning">
 <p class="admonition-title">Einstellungen des BunkerWeb-Containers</p>
 <p>Jede API-bezogene Einstellung, die Sie im BunkerWeb-Container deklarieren, <strong>muss im Scheduler-Container gespiegelt werden</strong>, damit sie weiterhin funktioniert, da die Konfiguration durch die vom Scheduler generierte Konfiguration überschrieben wird.</p>
 </div>
-<h4 id="standardwerte-und-neue-einstellungen">Standardwerte und neue Einstellungen</h4>
+<h4 id="standardwerte-und-neue-einstellungen">Standardwerte und neue Einstellungen<a class="headerlink" href="#standardwerte-und-neue-einstellungen" title="Permanent link">&para;</a></h4>
 <p>Wir haben unser Bestes getan, um die Standardwerte nicht zu ändern, aber wir haben viele andere Einstellungen hinzugefügt. Es wird dringend empfohlen, die Abschnitte <a href="../advanced/#security-tuning">Sicherheits-Tuning</a> und <a href="../features/">Einstellungen</a> der Dokumentation zu lesen.</p>
-<h4 id="vorlagen">Vorlagen</h4>
+<h4 id="vorlagen">Vorlagen<a class="headerlink" href="#vorlagen" title="Permanent link">&para;</a></h4>
 <p>Wir haben eine neue Funktion namens <strong>Vorlagen</strong> hinzugefügt. Vorlagen bieten einen strukturierten und standardisierten Ansatz zur Definition von Einstellungen und benutzerdefinierten Konfigurationen. Weitere Informationen finden Sie im Abschnitt <a href="../concepts/#templates">Konzepte/Vorlagen</a>.</p>
-<h4 id="autoconf-namespaces">Autoconf-Namespaces</h4>
+<h4 id="autoconf-namespaces">Autoconf-Namespaces<a class="headerlink" href="#autoconf-namespaces" title="Permanent link">&para;</a></h4>
 <p>Wir haben eine <strong>Namespace</strong>-Funktion zu den Autoconf-Integrationen hinzugefügt. Mit Namespaces können Sie Ihre Instanzen gruppieren und Einstellungen nur auf sie anwenden. Weitere Informationen finden Sie in den folgenden Abschnitten entsprechend Ihrer Integration:</p>
 <ul>
 <li><a href="../integrations/#namespaces">Autoconf/Namespaces</a></li>
 <li><a href="../integrations/#namespaces_1">Kubernetes/Namespaces</a></li>
 <li><a href="../integrations/#namespaces_2">Swarm/Namespaces</a></li>
 </ul>
-<h3 id="vorgehensweise_1">Vorgehensweise</h3>
+<h3 id="vorgehensweise_1">Vorgehensweise<a class="headerlink" href="#vorgehensweise_1" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
 <p><strong>Sichern Sie die Datenbank</strong>:</p>
@@ -2380,7 +2333,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 <p><strong>Überprüfen Sie die Datenbank</strong>: Überprüfen Sie, ob das Datenbank-Upgrade erfolgreich war, indem Sie die Daten und Konfigurationen im neuen Datenbankcontainer überprüfen.</p>
 </li>
 </ol>
-<h3 id="rollback_1">Rollback</h3>
+<h3 id="rollback_1">Rollback<a class="headerlink" href="#rollback_1" title="Permanent link">&para;</a></h3>
 <div class="admonition failure">
 <p class="admonition-title">Bei Problemen</p>
 <p>Wenn während des Upgrades Probleme auftreten, können Sie auf die vorherige Version der Datenbank zurückgreifen, indem Sie die in <a href="#__tabbed_1_1">Schritt 1</a> erstellte Sicherung wiederherstellen.</p>
@@ -2577,8 +2530,16 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
         
       </main>
       
@@ -2679,7 +2640,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

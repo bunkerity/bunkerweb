@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    ，了解我们的企业服务。
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    您当前查看的不是最新版本的文档。
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>点击此处查看最新版本。</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   快速入门指南
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  从源代码构建
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     快速入门指南
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    从源代码构建
   
 
     
@@ -1269,8 +1222,8 @@
   
 
 
-<h1 id="api">API</h1>
-<h2 id="api_1">API 角色</h2>
+<h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
+<h2 id="api_1">API 角色<a class="headerlink" href="#api_1" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定义配置的控制平面。它运行在 Gunicorn 后的 FastAPI 上，应放在可信的内部网络。交互式文档位于 <code>/docs</code>（或 <code>&lt;API_ROOT_PATH&gt;/docs</code>），OpenAPI 模型在 <code>/openapi.json</code>。</p>
 <div class="admonition warning">
 <p class="admonition-title">保持私有</p>
@@ -1286,7 +1239,7 @@
 <li>速率限制默认开启；<code>/auth</code> 始终有自己的限制</li>
 </ul>
 </div>
-<h2 id="_1">安全清单</h2>
+<h2 id="_1">安全清单<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ul>
 <li>网络：保持内部流量；绑定到回环或内网接口，并用 <code>API_WHITELIST_IPS</code> 限制来源 IP（默认启用）。</li>
 <li>认证到位：设置 <code>API_USERNAME</code>/<code>API_PASSWORD</code>（管理员），需要时用 <code>API_ACL_BOOTSTRAP_FILE</code> 添加更多用户/ACL；仅将 <code>API_TOKEN</code> 作为应急备用。</li>
@@ -1295,9 +1248,9 @@
 <li>速率限制：保持启用，除非其他层有同等限制；<code>/auth</code> 始终限速。</li>
 <li>TLS：在代理终止，或设置 <code>API_SSL_ENABLED=yes</code> 并提供证书/密钥路径。</li>
 </ul>
-<h2 id="_2">运行方式</h2>
+<h2 id="_2">运行方式<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>选择适合你环境的方式。</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-One</label><label for="__tabbed_1_3">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-one</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>最小化的 Compose 风格，API 在 BunkerWeb 后面。使用前调整版本和密码。</p>
@@ -1428,7 +1381,7 @@
 </div>
 </div>
 </div>
-<h2 id="_3">认证与授权</h2>
+<h2 id="_3">认证与授权<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>/auth</code> 签发 Biscuit token。凭据可来自 Basic auth、表单字段、JSON body，或 Bearer 头等于 <code>API_TOKEN</code>（管理员 override）。</li>
 <li>管理员也可直接用 HTTP Basic 调用受保护路由（无需 Biscuit）。</li>
@@ -1445,7 +1398,7 @@
 <li>后续调用使用 <code>Authorization: Bearer &lt;token&gt;</code>。</li>
 </ol>
 </div>
-<h2 id="acl">权限与 ACL</h2>
+<h2 id="acl">权限与 ACL<a class="headerlink" href="#acl" title="Permanent link">&para;</a></h2>
 <ul>
 <li>粗粒度角色：GET/HEAD/OPTIONS 需要 <code>read</code>；写操作需要 <code>write</code>。</li>
 <li>当路由声明权限时启用精细 ACL；<code>admin(true)</code> 可跳过检查。</li>
@@ -1463,8 +1416,8 @@
 <li>通过 <code>API_ACL_BOOTSTRAP_FILE</code> 或挂载的 <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> 启动非管理员用户和权限。每个用户可使用明文 <code>password</code> 或预先哈希的 <code>password_hash</code>/<code>password_bcrypt</code>（参见下面的提示）。</li>
 </ul>
 <div class="admonition danger">
-<p class="admonition-title">These write permissions are admin-equivalent</p>
-<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the <code>API_TOKEN</code> admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:</p>
+<p class="admonition-title">这些写入权限等同于管理员权限</p>
+<p>授予以下任一权限就等同于授予完整的管理员权限。写入的内容——自定义配置、服务变量（例如 <code>REVERSE_PROXY_URL</code>）、上传的插件和全局设置——会<strong>原样</strong>渲染为原始 NGINX / OpenResty Lua 配置，并在 BunkerWeb worker 和 scheduler 上运行。因此，持有其中任一权限的令牌都可用 BunkerWeb 进程用户的身份执行任意代码。实例写入范围因另一原因而等同于管理员权限：每次调用已注册实例都会携带 <code>API_TOKEN</code> 管理员覆盖，而 scheduler 会将生成的配置和缓存（包括 TLS 私钥）推送到数据库中的每个实例，因此注册一个 endpoint 就能收集所有这些内容：</p>
 <ul>
 <li><code>instances</code>: <code>instances_create</code>, <code>instances_update</code></li>
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
@@ -1472,7 +1425,7 @@
 <li><code>plugins</code>: <code>plugin_create</code></li>
 <li><code>global_config</code>: <code>global_config_update</code></li>
 </ul>
-<p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
+<p>请将这些权限视同管理员权限：<strong>切勿授予不值得信任为管理员的对象。</strong>将读取权限（<code>*_read</code>、<code>service_export</code>、<code>cache_read</code> 等）保留给受限令牌或自动化令牌。向非管理员用户授予其中任一权限时，API 日志会发出警告。</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">预先哈希的启动密码</p>
@@ -1500,7 +1453,7 @@
 <span class="p">}</span>
 </code></pre></div>
 </details>
-<h2 id="_4">速率限制</h2>
+<h2 id="_4">速率限制<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>默认启用两个字符串：<code>API_RATE_LIMIT</code>（全局，默认 <code>100r/m</code>）和 <code>API_RATE_LIMIT_AUTH</code>（默认 <code>10r/m</code> 或 <code>off</code>）。支持 NGINX 风格（<code>3r/s</code>、<code>40r/m</code>、<code>200r/h</code>）或冗长格式（<code>100/minute</code>、<code>200 per 30 minutes</code>）。通过以下方式配置：</p>
 <ul>
 <li><code>API_RATE_LIMIT</code>, <code>API_RATE_LIMIT_AUTH</code></li>
@@ -1534,7 +1487,7 @@
 <span class="w">    </span><span class="nt">rate</span><span class="p">:</span><span class="w"> </span><span class="s">"100r/m"</span>
 </code></pre></div>
 </details>
-<h2 id="_5">配置来源与优先级</h2>
+<h2 id="_5">配置来源与优先级<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <ol>
 <li>环境变量（包含 Docker/Compose 的 <code>environment:</code>）</li>
 <li><code>/run/secrets/&lt;VAR&gt;</code> 下的 secrets（Docker）</li>
@@ -1542,7 +1495,7 @@
 <li><code>/etc/bunkerweb/api.env</code> 的 env 文件</li>
 <li>内置默认值</li>
 </ol>
-<h3 id="_6">运行时与时区</h3>
+<h3 id="_6">运行时与时区<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1562,8 +1515,8 @@
 </tbody>
 </table>
 <p>将 docs 或 schema 的 URL 设为 <code>off|disabled|none|false|0</code> 可禁用它们。设置 <code>API_SSL_ENABLED=yes</code> 并提供 <code>API_SSL_CERTFILE</code>、<code>API_SSL_KEYFILE</code> 以在 API 终止 TLS。反向代理时，将 <code>API_FORWARDED_ALLOW_IPS</code> 设为代理 IP，使 Gunicorn 信任 <code>X-Forwarded-*</code> 头。</p>
-<h3 id="_7">配置参考（高级）</h3>
-<h4 id="_8">表面与文档</h4>
+<h3 id="_7">配置参考（高级）<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<h4 id="_8">表面与文档<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1600,7 +1553,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="authaclbiscuit">Auth、ACL、Biscuit</h4>
+<h4 id="authaclbiscuit">Auth、ACL、Biscuit<a class="headerlink" href="#authaclbiscuit" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1655,7 +1608,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="_9">白名单</h4>
+<h4 id="_9">白名单<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1680,7 +1633,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="_10">速率限制</h4>
+<h4 id="_10">速率限制<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1747,7 +1700,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="redisvalkey">Redis/Valkey（用于限流）</h4>
+<h4 id="redisvalkey">Redis/Valkey（用于限流）<a class="headerlink" href="#redisvalkey" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1818,7 +1771,7 @@
 <p class="admonition-title">DB 提供的 Redis</p>
 <p>如果 BunkerWeb 数据库配置中存在 Redis/Valkey 设置，即使未在环境中设置 <code>USE_REDIS</code>，API 也会自动复用它们用于限流。需要不同后端时可通过环境变量覆盖。</p>
 </div>
-<h4 id="listener-tls">Listener 与 TLS</h4>
+<h4 id="listener-tls">Listener 与 TLS<a class="headerlink" href="#listener-tls" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1855,7 +1808,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="_11">日志与运行时（包默认）</h4>
+<h4 id="_11">日志与运行时（包默认）<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1916,7 +1869,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="api_2">API 面（能力映射）</h2>
+<h2 id="api_2">API 面（能力映射）<a class="headerlink" href="#api_2" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Core</strong></li>
 <li><code>GET /ping</code>, <code>GET /health</code>: API 自身存活检查。</li>
@@ -1942,13 +1895,13 @@
 <li><code>GET /configs</code>: 列出片段（默认服务 <code>global</code>）；<code>with_data=true</code> 内嵌可打印内容。</li>
 <li><code>POST /configs</code>, <code>POST /configs/upload</code>: 通过 JSON 或文件上传创建片段。</li>
 <li><code>GET /configs/{service}/{type}/{name}</code>: 获取片段；<code>with_data=true</code> 返回内容。</li>
-<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: 更新或移动 API 管理的片段。</li>
+<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: 更新或移动 API 管理的片段。移动还需要目标服务上的 <code>config_update</code>（<code>global</code> 也算一个服务）；JSON 请求体不带 <code>service</code> 时保留当前服务。</li>
 <li><code>DELETE /configs</code> 或 <code>DELETE /configs/{service}/{type}/{name}</code>: 删除 API 管理的片段；模板管理的会被跳过。</li>
 <li>支持类型：<code>http</code>, <code>server_http</code>, <code>default_server_http</code>, <code>modsec</code>, <code>modsec_crs</code>, <code>stream</code>, <code>server_stream</code>，以及 CRS/插件钩子。</li>
 <li><strong>Bans</strong></li>
 <li><code>GET /bans</code>: 汇总来自各实例的活动封禁。</li>
 <li><code>POST /bans</code> 或 <code>/bans/ban</code>: 应用一个或多个封禁；负载可为对象、数组或字符串化 JSON。</li>
-<li><code>POST /bans/unban</code> 或 <code>DELETE /bans</code>: 全局或按服务解除封禁。</li>
+<li><code>POST /bans/unban</code> 或 <code>DELETE /bans</code>: 全局或按服务解除封禁。对于 CrowdSec 封禁（<code>kind: "crowdsec_lease"</code>），还需发送 <code>remove_crowdsec_decisions: true</code>、<code>confirmed: true</code> 和 <code>decision_keys</code>（<code>409</code> 预览中列出的键），以删除其背后的 CrowdSec 决策；该调用需要对每个受影响的连接拥有 <code>crowdsec_delete</code> 权限，所选内容发生变化时返回 <code>409</code>，部分失败时返回 <code>502</code>。</li>
 <li><strong>Plugins（UI 插件）</strong></li>
 <li><code>GET /plugins</code>: 列出插件；<code>with_data=true</code> 包含可用的打包字节。</li>
 <li><code>POST /plugins/upload</code>: 从 <code>.zip</code>、<code>.tar.gz</code>、<code>.tar.xz</code> 安装 UI 插件。</li>
@@ -1956,12 +1909,12 @@
 <li><strong>Cache（任务制品）</strong></li>
 <li><code>GET /cache</code>: 按筛选 (<code>service</code>, <code>plugin</code>, <code>job_name</code>) 列出缓存文件；<code>with_data=true</code> 内嵌可打印内容。</li>
 <li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: 获取/下载特定缓存文件（<code>download=true</code>）。</li>
-<li><code>DELETE /cache</code> 或 <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: 删除缓存文件并通知调度器。</li>
+<li><code>DELETE /cache</code> 或 <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: 删除缓存文件。只有某个插件的行真正被删除时才会通知调度器；<code>plugin</code> 不拥有该 job 时会被拒绝且不删除任何内容。</li>
 <li><strong>Jobs</strong></li>
 <li><code>GET /jobs</code>: 列出作业、计划和缓存摘要。</li>
 <li><code>POST /jobs/run</code>: 将插件标记为已变更以触发关联作业。</li>
 </ul>
-<h2 id="_12">运行行为</h2>
+<h2 id="_12">运行行为<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
 <ul>
 <li>错误响应统一为 <code>{"status": "error", "message": "..."}</code>，并使用合适的 HTTP 状态码。</li>
 <li>写操作持久化到共享数据库；实例通过调度器同步或重载后获取更改。</li>
@@ -1985,8 +1938,16 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
         
       </main>
       
@@ -2087,7 +2048,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

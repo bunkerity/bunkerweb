@@ -86,9 +86,9 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,7 +205,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
@@ -222,8 +222,7 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    You&#39;re not viewing the documentation of the latest version.
     <a href="../..">
         <strong>Click here to view latest.</strong>
     </a>
@@ -447,25 +446,6 @@
     
   
   Quickstart guide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Building from source
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Quickstart guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Building from source
   
 
     
@@ -1419,12 +1372,12 @@
   
 
 
-<h1 id="troubleshooting">Troubleshooting</h1>
+<h1 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h1>
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb Panel</p>
 <p>If you are unable to resolve your issue, you can <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">contact us directly via our panel</a>. This centralizes all requests related to the BunkerWeb solution.</p>
 </div>
-<h2 id="logs">Logs</h2>
+<h2 id="logs">Logs<a class="headerlink" href="#logs" title="Permanent link">&para;</a></h2>
 <p>When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.</p>
 <p>Please note that you can set the <code>LOG_LEVEL</code> to <code>info</code> (default: <code>notice</code>) to increase BunkerWeb’s verbosity.</p>
 <p>Here is how you can access the logs, depending on your integration :</p>
@@ -1509,9 +1462,9 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 </div>
-<h2 id="permissions">Permissions</h2>
+<h2 id="permissions">Permissions<a class="headerlink" href="#permissions" title="Permanent link">&para;</a></h2>
 <p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info <a href="../advanced/#custom-configurations">here</a>). You will need to set at least <strong><em>RW</em></strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
-<h2 id="ip-unban">IP unban</h2>
+<h2 id="ip-unban">IP unban<a class="headerlink" href="#ip-unban" title="Permanent link">&para;</a></h2>
 <p>You can manually unban an IP, which is useful when performing tests so that you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker / Docker Autoconf</label><label for="__tabbed_2_2">All-in-one</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
 <div class="tabbed-content">
@@ -1554,10 +1507,10 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 </div>
-<h2 id="false-positives">False positives</h2>
-<h3 id="detect-only-mode">Detect only mode</h3>
+<h2 id="false-positives">False positives<a class="headerlink" href="#false-positives" title="Permanent link">&para;</a></h2>
+<h3 id="detect-only-mode">Detect only mode<a class="headerlink" href="#detect-only-mode" title="Permanent link">&para;</a></h3>
 <p>For debugging/test purposes, you can set BunkerWeb in <a href="../features/#security-modes">detect only mode</a> so it won't block request and will act as a classical reverse proxy.</p>
-<h3 id="modsecurity">ModSecurity</h3>
+<h3 id="modsecurity">ModSecurity<a class="headerlink" href="#modsecurity" title="Permanent link">&para;</a></h3>
 <p>The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :</p>
 <ul>
 <li>Each matched rule will increase an anomaly score (so many rules can match a single request)</li>
@@ -1642,28 +1595,28 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </ol>
 <p>One important thing to understand is that rule <strong>949110</strong> is not a "real" one : it's the one that will deny the request because the anomaly threshold is reached (which is <strong>10</strong> in this example). You should never remove the <strong>949110</strong> rule !</p>
 <p>If it's a false-positive, you should then focus on both <strong>930120</strong> and <strong>932160</strong> rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info <a href="../advanced/#custom-configurations">here</a>).</p>
-<h3 id="bad-behavior">Bad Behavior</h3>
+<h3 id="bad-behavior">Bad Behavior<a class="headerlink" href="#bad-behavior" title="Permanent link">&para;</a></h3>
 <p>A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info <a href="../features/#bad-behavior">here</a>). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...</p>
-<h3 id="whitelisting">Whitelisting</h3>
+<h3 id="whitelisting">Whitelisting<a class="headerlink" href="#whitelisting" title="Permanent link">&para;</a></h3>
 <p>If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the <a href="../features/#whitelist">whitelisting feature</a>. We don't recommend using the <code>WHITELIST_URI*</code> or <code>WHITELIST_USER_AGENT*</code> settings unless they are set to secret and unpredictable values. Common use cases are :</p>
 <ul>
 <li>Healthcheck / status bot</li>
 <li>Callback like IPN or webhook</li>
 <li>Social media crawler</li>
 </ul>
-<h2 id="common-errors">Common errors</h2>
-<h3 id="upstream-sent-too-big-header">Upstream sent too big header</h3>
+<h2 id="common-errors">Common errors<a class="headerlink" href="#common-errors" title="Permanent link">&para;</a></h2>
+<h3 id="upstream-sent-too-big-header">Upstream sent too big header<a class="headerlink" href="#upstream-sent-too-big-header" title="Permanent link">&para;</a></h3>
 <p>If you see the following error <code>upstream sent too big header while reading response header from upstream</code> in the logs, you will need to tweak the various proxy buffers size using the following settings :</p>
 <ul>
 <li><code>PROXY_BUFFERS</code></li>
 <li><code>PROXY_BUFFER_SIZE</code></li>
 <li><code>PROXY_BUSY_BUFFERS_SIZE</code></li>
 </ul>
-<h3 id="could-not-build-server_names_hash">Could not build server_names_hash</h3>
+<h3 id="could-not-build-server_names_hash">Could not build server_names_hash<a class="headerlink" href="#could-not-build-server_names_hash" title="Permanent link">&para;</a></h3>
 <p>If you see the following error <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code> in the logs, you will need to tweak the <code>SERVER_NAMES_HASH_BUCKET_SIZE</code> setting.</p>
-<h2 id="timezone">Timezone</h2>
+<h2 id="timezone">Timezone<a class="headerlink" href="#timezone" title="Permanent link">&para;</a></h2>
 <p>When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the <code>TZ</code> environment variable to the timezone of your choice on your containers (e.g. <code>TZ=Europe/Paris</code>). You will find the list of timezone identifiers <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">here</a>.</p>
-<h2 id="clear-old-instances-db">Clear old instances from database</h2>
+<h2 id="clear-old-instances-db">Clear old instances from database<a class="headerlink" href="#clear-old-instances-db" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb stores known instances in the <code>bw_instances</code> table (primary key: <code>hostname</code>).
 If you frequently redeploy, old rows may remain (for example, instances that haven’t checked in for a long time) and you may want to purge them.</p>
 <div class="admonition warning">
@@ -1675,7 +1628,7 @@ If you frequently redeploy, old rows may remain (for example, instances that hav
 <p>To avoid races while deleting, stop (or scale down) components that can update instances
 (typically the scheduler / autoconf depending on your deployment), run the cleanup, then start them again.</p>
 </div>
-<h3 id="table-and-columns-reference">Table and columns (reference)</h3>
+<h3 id="table-and-columns-reference">Table and columns (reference)<a class="headerlink" href="#table-and-columns-reference" title="Permanent link">&para;</a></h3>
 <p>The instance model is defined as:</p>
 <ul>
 <li>Table: <code>bw_instances</code></li>
@@ -1686,12 +1639,12 @@ If you frequently redeploy, old rows may remain (for example, instances that hav
   <code>server_name</code>, <code>type</code>, <code>status</code>, <code>method</code>,
   <code>creation_date</code></li>
 </ul>
-<h3 id="1-connect-to-the-database">1 - Connect to the database</h3>
+<h3 id="1-connect-to-the-database">1 - Connect to the database<a class="headerlink" href="#1-connect-to-the-database" title="Permanent link">&para;</a></h3>
 <p>Use the existing <a href="#access-database">Access database</a> section to connect
 (SQLite / MariaDB / PostgreSQL).</p>
-<h3 id="2-dry-run-list-stale-instances">2 - Dry-run: list stale instances</h3>
+<h3 id="2-dry-run-list-stale-instances">2 - Dry-run: list stale instances<a class="headerlink" href="#2-dry-run-list-stale-instances" title="Permanent link">&para;</a></h3>
 <p>Pick a retention window (example: 90 days) and review what would be deleted.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label><label for="__tabbed_3_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MySQL/MariaDB</label><label for="__tabbed_3_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
@@ -1719,9 +1672,9 @@ If you frequently redeploy, old rows may remain (for example, instances that hav
 </div>
 </div>
 </div>
-<h3 id="3-delete-stale-instances">3 - Delete stale instances</h3>
+<h3 id="3-delete-stale-instances">3 - Delete stale instances<a class="headerlink" href="#3-delete-stale-instances" title="Permanent link">&para;</a></h3>
 <p>Once verified, delete the rows.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">SQLite</label><label for="__tabbed_4_2">MariaDB / MySQL</label><label for="__tabbed_4_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">SQLite</label><label for="__tabbed_4_2">MySQL/MariaDB</label><label for="__tabbed_4_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
@@ -1758,12 +1711,12 @@ If you frequently redeploy, old rows may remain (for example, instances that hav
 <div class="highlight"><pre><span></span><code><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'&lt;hostname&gt;'</span><span class="p">;</span>
 </code></pre></div>
 </div>
-<h3 id="4-mark-instances-as-changed-optional">4 - Mark instances as changed (optional)</h3>
+<h3 id="4-mark-instances-as-changed-optional">4 - Mark instances as changed (optional)<a class="headerlink" href="#4-mark-instances-as-changed-optional" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb tracks instance changes in the <code>bw_metadata</code> table
 (<code>instances_changed</code>, <code>last_instances_change</code>).</p>
 <p>If the UI does not refresh as expected after manual cleanup,
 you can force a “change marker” update:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite / PostgreSQL</label><label for="__tabbed_5_2">MariaDB / MySQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">SQLite / PostgreSQL</label><label for="__tabbed_5_2">MySQL/MariaDB</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_metadata</span>
@@ -1781,8 +1734,8 @@ you can force a “change marker” update:</p>
 </div>
 </div>
 </div>
-<h3 id="5-reclaim-space-optional">5 - Reclaim space (optional)</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">PostgreSQL</label><label for="__tabbed_6_3">MariaDB / MySQL</label></div>
+<h3 id="5-reclaim-space-optional">5 - Reclaim space (optional)<a class="headerlink" href="#5-reclaim-space-optional" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQLite</label><label for="__tabbed_6_2">PostgreSQL</label><label for="__tabbed_6_3">MySQL/MariaDB</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">VACUUM</span><span class="p">;</span>
@@ -1798,14 +1751,14 @@ you can force a “change marker” update:</p>
 </div>
 </div>
 </div>
-<h2 id="web-ui">Web UI</h2>
+<h2 id="web-ui">Web UI<a class="headerlink" href="#web-ui" title="Permanent link">&para;</a></h2>
 <p>In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.</p>
 <div class="admonition warning">
 <p class="admonition-title">2FA stopped working after recreating the container</p>
 <p>The keys that decrypt the TOTP secrets are stored in the UI container at <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>, which is <code>/data/lib</code> inside the image. Recreating the <code>bw-ui</code> container without a persistent volume on <code>/data</code> generates a new set of keys, so the secrets kept in the database can no longer be decrypted: the admin enrollment is dropped and the other accounts have to be reset with the SQL below. Mount a volume on <code>/data</code> (see the <a href="../web-ui/">Web UI documentation</a>) so the keys survive, or provide your own <code>TOTP_ENCRYPTION_KEYS</code>.</p>
 </div>
-<h3 id="access-database">Access database</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MariaDB / MySQL</label><label for="__tabbed_7_3">PostgreSQL</label></div>
+<h3 id="access-database">Access database<a class="headerlink" href="#access-database" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MySQL/MariaDB</label><label for="__tabbed_7_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Linux</label><label for="__tabbed_8_2">Docker</label><label for="__tabbed_8_3">All-in-one</label></div>
@@ -1948,7 +1901,7 @@ sqlite&gt;
 </div>
 </div>
 </div>
-<h3 id="troubleshooting-actions">Troubleshooting actions</h3>
+<h3 id="troubleshooting-actions">Troubleshooting actions<a class="headerlink" href="#troubleshooting-actions" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Tables schema</p>
 <p>The schema of the <code>bw_ui_users</code> table is the following:</p>
@@ -2180,7 +2133,7 @@ sqlite&gt;
 </div>
 </div>
 </div>
-<h3 id="upload-plugin">Upload plugin</h3>
+<h3 id="upload-plugin">Upload plugin<a class="headerlink" href="#upload-plugin" title="Permanent link">&para;</a></h3>
 <p>It may not be possible to upload a plugin from the UI in certain situations:</p>
 <ul>
 <li>Missing package to manage compressed files on your integration, in which case you will need to add the necessary packages</li>
@@ -2203,8 +2156,16 @@ sqlite&gt;
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
         
       </main>
       
@@ -2305,7 +2266,7 @@ sqlite&gt;
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>

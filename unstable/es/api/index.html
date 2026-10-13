@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Buscar en la documentaci\u00f3n");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 ¿Buscas BunkerWeb CLOUD, la versión PRO, asistencia técnica o servicios a medida? Visita el
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    para obtener más información sobre nuestras ofertas para empresas.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    No está viendo la documentación de la última versión.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Haga clic aquí para ver la última versión.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Guía de inicio rápido
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compilar desde el código fuente
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Guía de inicio rápido
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compilar desde el código fuente
   
 
     
@@ -1269,8 +1222,8 @@
   
 
 
-<h1 id="api">API</h1>
-<h2 id="rol-de-la-api">Rol de la API</h2>
+<h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
+<h2 id="rol-de-la-api">Rol de la API<a class="headerlink" href="#rol-de-la-api" title="Permanent link">&para;</a></h2>
 <p>La API de BunkerWeb es el plano de control para gestionar instancias, servicios, bloqueos, plugins, trabajos y configuraciones personalizadas. Se ejecuta como una app FastAPI detrás de Gunicorn y debe mantenerse en una red de confianza. Docs interactivas en <code>/docs</code> (o <code>&lt;API_ROOT_PATH&gt;/docs</code>); el esquema OpenAPI en <code>/openapi.json</code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Manténla privada</p>
@@ -1286,7 +1239,7 @@
 <li>Rate limiting activado por defecto; <code>/auth</code> siempre tiene su propio límite</li>
 </ul>
 </div>
-<h2 id="checklist-de-seguridad">Checklist de seguridad</h2>
+<h2 id="checklist-de-seguridad">Checklist de seguridad<a class="headerlink" href="#checklist-de-seguridad" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Red: mantén el tráfico interno; escucha en loopback o interfaz interna y restringe IPs de origen con <code>API_WHITELIST_IPS</code> (activo por defecto).</li>
 <li>Auth presente: define <code>API_USERNAME</code>/<code>API_PASSWORD</code> (admin) y, si hace falta, <code>API_ACL_BOOTSTRAP_FILE</code> para más usuarios/ACL; guarda un <code>API_TOKEN</code> solo para emergencias.</li>
@@ -1295,9 +1248,9 @@
 <li>Rate limiting: déjalo activado salvo que otra capa imponga límites equivalentes; <code>/auth</code> siempre está limitado.</li>
 <li>TLS: termina en el proxy o usa <code>API_SSL_ENABLED=yes</code> con rutas de cert/clave.</li>
 </ul>
-<h2 id="ejecucion">Ejecución</h2>
+<h2 id="ejecucion">Ejecución<a class="headerlink" href="#ejecucion" title="Permanent link">&para;</a></h2>
 <p>Elige el sabor que encaje con tu entorno.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-One</label><label for="__tabbed_1_3">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Todo en uno</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Layout Compose mínimo con la API detrás de BunkerWeb. Ajusta versiones y contraseñas antes de usar.</p>
@@ -1428,7 +1381,7 @@
 </div>
 </div>
 </div>
-<h2 id="autenticacion-y-autorizacion">Autenticación y autorización</h2>
+<h2 id="autenticacion-y-autorizacion">Autenticación y autorización<a class="headerlink" href="#autenticacion-y-autorizacion" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>/auth</code> emite tokens Biscuit. Las credenciales pueden venir por Basic auth, campos de formulario, cuerpo JSON o un header Bearer igual a <code>API_TOKEN</code> (override admin).</li>
 <li>Los administradores pueden llamar rutas protegidas directamente con HTTP Basic (sin Biscuit).</li>
@@ -1445,7 +1398,7 @@
 <li>Usa <code>Authorization: Bearer &lt;token&gt;</code> en las siguientes llamadas.</li>
 </ol>
 </div>
-<h2 id="permisos-y-acl">Permisos y ACL</h2>
+<h2 id="permisos-y-acl">Permisos y ACL<a class="headerlink" href="#permisos-y-acl" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Rol grueso: GET/HEAD/OPTIONS requieren <code>read</code>; verbos de escritura requieren <code>write</code>.</li>
 <li>ACL fina se aplica cuando las rutas declaran permisos; <code>admin(true)</code> omite chequeos.</li>
@@ -1463,8 +1416,8 @@
 <li>Inicializa usuarios no admin y permisos con <code>API_ACL_BOOTSTRAP_FILE</code> o un <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> montado. Cada usuario admite una <code>password</code> en texto plano o un <code>password_hash</code>/<code>password_bcrypt</code> pre-hasheado (ver el consejo a continuación).</li>
 </ul>
 <div class="admonition danger">
-<p class="admonition-title">These write permissions are admin-equivalent</p>
-<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the <code>API_TOKEN</code> admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:</p>
+<p class="admonition-title">Estos permisos de escritura equivalen a los de administrador</p>
+<p>Conceder cualquiera de los siguientes equivale a otorgar acceso administrativo completo. El contenido que escriben — configuraciones personalizadas, variables de servicio (p. ej., <code>REVERSE_PROXY_URL</code>), plugins subidos y ajustes globales — se representa <strong>literalmente</strong> como configuración NGINX / OpenResty Lua sin procesar, que se ejecuta en los workers y el scheduler de BunkerWeb. Un token que tenga uno de ellos puede ejecutar código arbitrario con los permisos del usuario del proceso de BunkerWeb. Los permisos de escritura de instancias equivalen a los de administrador por otro motivo: cada llamada a una instancia registrada incluye la excepción administrativa <code>API_TOKEN</code>, y el scheduler distribuye la configuración generada y la caché (incluidas las claves privadas TLS) a todas las instancias de la base de datos; por tanto, registrar un único endpoint permite recopilar todo ese contenido:</p>
 <ul>
 <li><code>instances</code>: <code>instances_create</code>, <code>instances_update</code></li>
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
@@ -1472,7 +1425,7 @@
 <li><code>plugins</code>: <code>plugin_create</code></li>
 <li><code>global_config</code>: <code>global_config_update</code></li>
 </ul>
-<p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
+<p>Trátalos como permisos de administrador: <strong>no los concedas nunca a alguien en quien no confiarías como administrador.</strong> Reserva los permisos de lectura (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) para tokens limitados o de automatización. Conceder uno de ellos a un usuario no administrador genera una advertencia en los registros de la API.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Contraseñas de arranque pre-hasheadas</p>
@@ -1500,7 +1453,7 @@
 <span class="p">}</span>
 </code></pre></div>
 </details>
-<h2 id="limitacion-de-velocidad">Limitación de velocidad</h2>
+<h2 id="limitacion-de-velocidad">Limitación de velocidad<a class="headerlink" href="#limitacion-de-velocidad" title="Permanent link">&para;</a></h2>
 <p>Activa por defecto con dos cadenas: <code>API_RATE_LIMIT</code> (global, por defecto <code>100r/m</code>) y <code>API_RATE_LIMIT_AUTH</code> (por defecto <code>10r/m</code> u <code>off</code>). Acepta notación estilo NGINX (<code>3r/s</code>, <code>40r/m</code>, <code>200r/h</code>) o formas verbosas (<code>100/minute</code>, <code>200 per 30 minutes</code>). Configura mediante:</p>
 <ul>
 <li><code>API_RATE_LIMIT</code>, <code>API_RATE_LIMIT_AUTH</code></li>
@@ -1534,7 +1487,7 @@
 <span class="w">    </span><span class="nt">rate</span><span class="p">:</span><span class="w"> </span><span class="s">"100r/m"</span>
 </code></pre></div>
 </details>
-<h2 id="fuentes-de-configuracion-y-prioridad">Fuentes de configuración y prioridad</h2>
+<h2 id="fuentes-de-configuracion-y-prioridad">Fuentes de configuración y prioridad<a class="headerlink" href="#fuentes-de-configuracion-y-prioridad" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Variables de entorno (incluyendo <code>environment:</code> de Docker/Compose)</li>
 <li>Secrets en <code>/run/secrets/&lt;VAR&gt;</code> (Docker)</li>
@@ -1542,7 +1495,7 @@
 <li>Archivo env en <code>/etc/bunkerweb/api.env</code></li>
 <li>Valores predeterminados</li>
 </ol>
-<h3 id="tiempo-de-ejecucion-y-zona-horaria">Tiempo de ejecución y zona horaria</h3>
+<h3 id="tiempo-de-ejecucion-y-zona-horaria">Tiempo de ejecución y zona horaria<a class="headerlink" href="#tiempo-de-ejecucion-y-zona-horaria" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1562,8 +1515,8 @@
 </tbody>
 </table>
 <p>Desactiva docs o esquema poniendo sus URLs en <code>off|disabled|none|false|0</code>. Define <code>API_SSL_ENABLED=yes</code> con <code>API_SSL_CERTFILE</code> y <code>API_SSL_KEYFILE</code> para terminar TLS en la API. Con reverse proxy, define <code>API_FORWARDED_ALLOW_IPS</code> a las IPs del proxy para que Gunicorn confíe en los <code>X-Forwarded-*</code>.</p>
-<h3 id="referencia-de-configuracion-power-users">Referencia de configuración (power users)</h3>
-<h4 id="superficie-y-docs">Superficie y docs</h4>
+<h3 id="referencia-de-configuracion-power-users">Referencia de configuración (power users)<a class="headerlink" href="#referencia-de-configuracion-power-users" title="Permanent link">&para;</a></h3>
+<h4 id="superficie-y-docs">Superficie y docs<a class="headerlink" href="#superficie-y-docs" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1600,7 +1553,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="auth-acl-biscuit">Auth, ACL, Biscuit</h4>
+<h4 id="auth-acl-biscuit">Auth, ACL, Biscuit<a class="headerlink" href="#auth-acl-biscuit" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1655,7 +1608,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="allowlist">Allowlist</h4>
+<h4 id="allowlist">Allowlist<a class="headerlink" href="#allowlist" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1680,7 +1633,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="limitacion">Limitación</h4>
+<h4 id="limitacion">Limitación<a class="headerlink" href="#limitacion" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1747,7 +1700,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="redisvalkey-para-rate-limits">Redis/Valkey (para rate limits)</h4>
+<h4 id="redisvalkey-para-rate-limits">Redis/Valkey (para rate limits)<a class="headerlink" href="#redisvalkey-para-rate-limits" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1818,7 +1771,7 @@
 <p class="admonition-title">Redis de la BD</p>
 <p>Si la config de la base de datos de BunkerWeb incluye Redis/Valkey, la API la reutiliza automáticamente para rate limiting incluso sin <code>USE_REDIS</code> en el entorno. Sobrescribe con variables de entorno cuando necesites otro backend.</p>
 </div>
-<h4 id="listener-y-tls">Listener y TLS</h4>
+<h4 id="listener-y-tls">Listener y TLS<a class="headerlink" href="#listener-y-tls" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1855,7 +1808,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="logging-y-runtime-defaults-de-paquete">Logging y runtime (defaults de paquete)</h4>
+<h4 id="logging-y-runtime-defaults-de-paquete">Logging y runtime (defaults de paquete)<a class="headerlink" href="#logging-y-runtime-defaults-de-paquete" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1916,7 +1869,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="superficie-de-la-api-mapa-de-capacidades">Superficie de la API (mapa de capacidades)</h2>
+<h2 id="superficie-de-la-api-mapa-de-capacidades">Superficie de la API (mapa de capacidades)<a class="headerlink" href="#superficie-de-la-api-mapa-de-capacidades" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Core</strong></li>
 <li><code>GET /ping</code>, <code>GET /health</code>: checks de vida de la propia API.</li>
@@ -1942,13 +1895,13 @@
 <li><code>GET /configs</code>: lista snippets (servicio por defecto <code>global</code>); <code>with_data=true</code> incrusta contenido imprimible.</li>
 <li><code>POST /configs</code>, <code>POST /configs/upload</code>: crea snippets vía JSON o subida de archivo.</li>
 <li><code>GET /configs/{service}/{type}/{name}</code>: obtiene snippet; <code>with_data=true</code> para el contenido.</li>
-<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: actualizar o mover snippets gestionados por la API.</li>
+<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: actualizar o mover snippets gestionados por la API. Mover exige además <code>config_update</code> en el servicio de destino (<code>global</code> cuenta como servicio); un cuerpo JSON sin <code>service</code> conserva el servicio actual.</li>
 <li><code>DELETE /configs</code> o <code>DELETE /configs/{service}/{type}/{name}</code>: eliminar snippets gestionados por la API; los gestionados por plantillas se omiten.</li>
 <li>Tipos soportados: <code>http</code>, <code>server_http</code>, <code>default_server_http</code>, <code>modsec</code>, <code>modsec_crs</code>, <code>stream</code>, <code>server_stream</code>, hooks de CRS/plug-in.</li>
 <li><strong>Bans</strong></li>
 <li><code>GET /bans</code>: agrega bans activos desde las instancias.</li>
 <li><code>POST /bans</code> o <code>/bans/ban</code>: aplica uno o varios bans; payload puede ser objeto, array o JSON como string.</li>
-<li><code>POST /bans/unban</code> o <code>DELETE /bans</code>: eliminar bans globalmente o por servicio.</li>
+<li><code>POST /bans/unban</code> o <code>DELETE /bans</code>: eliminar bans globalmente o por servicio. Para un ban de CrowdSec (<code>kind: "crowdsec_lease"</code>), envíe además <code>remove_crowdsec_decisions: true</code>, <code>confirmed: true</code> y <code>decision_keys</code> (las claves de la vista previa <code>409</code>) para eliminar las decisiones de CrowdSec que lo originan; la llamada requiere <code>crowdsec_delete</code> en cada conexión afectada, responde <code>409</code> si la selección cambió y <code>502</code> ante un resultado parcial.</li>
 <li><strong>Plugins (UI)</strong></li>
 <li><code>GET /plugins</code>: lista plugins; <code>with_data=true</code> incluye los bytes del paquete cuando están disponibles.</li>
 <li><code>POST /plugins/upload</code>: instala plugins de UI desde <code>.zip</code>, <code>.tar.gz</code>, <code>.tar.xz</code>.</li>
@@ -1956,12 +1909,12 @@
 <li><strong>Cache (artefactos de jobs)</strong></li>
 <li><code>GET /cache</code>: lista archivos de caché con filtros (<code>service</code>, <code>plugin</code>, <code>job_name</code>); <code>with_data=true</code> incrusta contenido imprimible.</li>
 <li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: obtiene/descarga un archivo de caché específico (<code>download=true</code>).</li>
-<li><code>DELETE /cache</code> o <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: borra archivos de caché y notifica al scheduler.</li>
+<li><code>DELETE /cache</code> o <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: borra archivos de caché. Solo se notifica al scheduler para un plugin cuya fila se borró de verdad; un <code>plugin</code> que no posee el job se rechaza y no se borra nada.</li>
 <li><strong>Jobs</strong></li>
 <li><code>GET /jobs</code>: lista jobs, horarios y resúmenes de caché.</li>
 <li><code>POST /jobs/run</code>: marca plugins como cambiados para disparar los jobs asociados.</li>
 </ul>
-<h2 id="comportamiento-operativo">Comportamiento operativo</h2>
+<h2 id="comportamiento-operativo">Comportamiento operativo<a class="headerlink" href="#comportamiento-operativo" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Respuestas de error normalizadas a <code>{"status": "error", "message": "..."}</code> con códigos HTTP adecuados.</li>
 <li>Las operaciones de escritura se persisten en la base de datos compartida; las instancias consumen cambios vía sincronización del scheduler o tras un reload.</li>
@@ -1985,8 +1938,16 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
         
       </main>
       
@@ -2087,7 +2048,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

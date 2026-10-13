@@ -136,7 +136,7 @@ Choose the flavor that matches your environment.
         name: bw-db
     ```
 
-=== "All-in-One"
+=== "All-in-one"
 
     ```bash
     docker run -d \
@@ -397,13 +397,13 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `GET /configs`: list snippets (default service `global`); `with_data=true` embeds printable content.
   - `POST /configs`, `POST /configs/upload`: create snippets via JSON or file upload.
   - `GET /configs/{service}/{type}/{name}`: fetch snippet; `with_data=true` for content.
-  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: update or move API-managed snippets.
+  - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: update or move API-managed snippets. A move needs `config_update` on the destination service as well (`global` counts as one); a JSON body without `service` keeps the current service.
   - `DELETE /configs` or `DELETE /configs/{service}/{type}/{name}`: remove API-managed snippets; template-managed entries are skipped.
   - Supported types: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, CRS/plugin hooks.
 - **Bans**
   - `GET /bans`: aggregate active bans from instances.
   - `POST /bans` or `/bans/ban`: apply one or more bans; payload can be object, array, or stringified JSON.
-  - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service.
+  - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service. For a CrowdSec ban (`kind: "crowdsec_lease"`), also send `remove_crowdsec_decisions: true`, `confirmed: true` and `decision_keys` (the keys listed in the `409` preview) to delete the CrowdSec decisions behind it; the call needs `crowdsec_delete` on every affected connection, answers `409` when the selection changed, and `502` on a partial result.
 - **Plugins (UI plugins)**
   - `GET /plugins`: list plugins; `with_data=true` includes packaged bytes when available.
   - `POST /plugins/upload`: install UI plugins from `.zip`, `.tar.gz`, `.tar.xz`.
@@ -411,7 +411,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 - **Cache (job artefacts)**
   - `GET /cache`: list cache files with filters (`service`, `plugin`, `job_name`); `with_data=true` embeds printable content.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: fetch/download a specific cache file (`download=true`).
-  - `DELETE /cache` or `DELETE /cache/{service}/{plugin}/{job}/{file}`: delete cache files and notify scheduler.
+  - `DELETE /cache` or `DELETE /cache/{service}/{plugin}/{job}/{file}`: delete cache files. The scheduler is notified only for a plugin whose row was really deleted; a `plugin` that does not own the job is refused and nothing is deleted.
 - **Jobs**
   - `GET /jobs`: list jobs, schedules, and cache summaries.
   - `POST /jobs/run`: mark plugins as changed to trigger associated jobs.

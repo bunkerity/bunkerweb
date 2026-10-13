@@ -86,9 +86,9 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,7 +205,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
@@ -222,8 +222,7 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    You&#39;re not viewing the documentation of the latest version.
     <a href="../..">
         <strong>Click here to view latest.</strong>
     </a>
@@ -449,25 +448,6 @@
     
   
   Quickstart guide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Building from source
 
       </a>
     </li>
@@ -981,33 +961,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Building from source
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1264,14 +1217,14 @@
   
 
 
-<h1 id="concepts">Concepts</h1>
-<h2 id="architecture">Architecture</h2>
+<h1 id="concepts">Concepts<a class="headerlink" href="#concepts" title="Permanent link">&para;</a></h1>
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Overview" src="../assets/img/concepts.svg" width="600" /></p>
 </figure>
 <p>Within your infrastructure, BunkerWeb acts as a reverse proxy in front of your web services. The typical architecture involves accessing BunkerWeb from the Internet, which then forwards requests to the appropriate application service on a secure network.</p>
 <p>Using BunkerWeb in this way (classical reverse proxy architecture) with TLS offloading and centralized security policies enhances performance by reducing encryption overhead on backend servers while ensuring consistent access control, threat mitigation, and compliance enforcement across all services.</p>
-<h2 id="integrations">Integrations</h2>
+<h2 id="integrations">Integrations<a class="headerlink" href="#integrations" title="Permanent link">&para;</a></h2>
 <p>The first concept is the integration of BunkerWeb into the target environment. We prefer to use the word "integration" instead of "installation" because one of BunkerWeb's goals is to integrate seamlessly into existing environments.</p>
 <p>The following integrations are officially supported:</p>
 <ul>
@@ -1286,7 +1239,7 @@
 <p class="admonition-title">Going further</p>
 <p>The technical details of all BunkerWeb integrations are available in the <a href="../integrations/">integrations section</a> of the documentation.</p>
 </div>
-<h2 id="settings">Settings</h2>
+<h2 id="settings">Settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO settings</p>
 <p>Some plugins are reserved for the <strong>PRO version</strong>. Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a>.</p>
@@ -1318,7 +1271,7 @@ USE_BROTLI=no
 <p class="admonition-title">Going further</p>
 <p>The complete list of available settings with descriptions and possible values is available in the <a href="../features/">feature section</a> of the documentation.</p>
 </div>
-<h2 id="multisite-mode">Multisite mode</h2>
+<h2 id="multisite-mode">Multisite mode<a class="headerlink" href="#multisite-mode" title="Permanent link">&para;</a></h2>
 <p>Understanding the multisite mode is essential when utilizing BunkerWeb. As our primary focus is safeguarding web applications, our solution is intricately linked to the concept of "virtual hosts" or "vhosts" (more info <a href="https://en.wikipedia.org/wiki/Virtual_hosting">here</a>). These virtual hosts enable the serving of multiple web applications from a single instance or cluster.</p>
 <p>By default, BunkerWeb has the multisite mode disabled. This means that only one web application will be served, and all settings will be applied to it. This setup is ideal when you have a single application to protect, as you don't need to concern yourself with multisite configurations.</p>
 <p>However, when the multisite mode is enabled, BunkerWeb becomes capable of serving and protecting multiple web applications. Each web application is identified by a unique server name and has its own set of settings. This mode proves beneficial when you have multiple applications to secure, and you prefer to utilize a single instance (or a cluster) of BunkerWeb.</p>
@@ -1347,7 +1300,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Going further</p>
 <p>You will find concrete examples of multisite mode in the <a href="../advanced/">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> directory of the repository.</p>
 </div>
-<h2 id="custom-configurations">Custom configurations</h2>
+<h2 id="custom-configurations">Custom configurations<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>To address unique challenges and cater to specific use cases, BunkerWeb offers the flexibility of custom configurations. While the provided settings and <a href="../plugins/">external plugins</a> cover a wide range of scenarios, there may be situations that require additional customization.</p>
 <p>BunkerWeb is built on the renowned NGINX web server, which provides a powerful configuration system. This means you can leverage NGINX's configuration capabilities to meet your specific needs. Custom NGINX configurations can be included in various <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">contexts</a> such as HTTP or server, allowing you to fine-tune the behavior of BunkerWeb according to your requirements. Whether you need to customize global settings or apply configurations to specific server blocks, BunkerWeb empowers you to optimize its behavior to align perfectly with your use case.</p>
 <p>Another integral component of BunkerWeb is the ModSecurity Web Application Firewall. With custom configurations, you have the flexibility to address false positives or add custom rules to further enhance the protection provided by ModSecurity. These custom configurations allow you to fine-tune the behavior of the firewall and ensure that it aligns with the specific requirements of your web applications.</p>
@@ -1362,7 +1315,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Going further</p>
 <p>You will find concrete examples of custom configurations in the <a href="../advanced/#custom-configurations">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> directory of the repository.</p>
 </div>
-<h2 id="database">Database</h2>
+<h2 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb securely stores its current configuration in a backend database, which contains essential data for smooth operation. The following information is stored in the database:</p>
 <ul>
 <li>
@@ -1399,7 +1352,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <li><strong>PostgreSQL</strong>: <code>postgresql://bunkerweb:changeme@bw-db:5432/db</code></li>
 </ul>
 <p>By specifying the appropriate database URI in the configuration, you can seamlessly integrate BunkerWeb with your preferred database backend, ensuring efficient and reliable storage of your configuration data.</p>
-<h3 id="database-compatibility-matrix">Database compatibility matrix</h3>
+<h3 id="database-compatibility-matrix">Database compatibility matrix<a class="headerlink" href="#database-compatibility-matrix" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1414,22 +1367,22 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v9</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v13</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v26</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v9</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v13</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v26</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v9</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v13</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v26</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
@@ -1445,6 +1398,8 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Notes</p>
 <ul>
 <li><strong>PostgreSQL</strong>: Alpine-based images, including all-in-one, now ship with the <code>v18</code> client, so <code>v18</code> and earlier are supported out of the box.</li>
+<li><strong>MariaDB</strong>: Alpine-based images ship the <code>v11.8</code> client, which works against MariaDB <code>v13</code> servers, including the built-in backup and restore.</li>
+<li><strong>MySQL</strong>: The Alpine-based images use the MariaDB client for backups, which works against MySQL <code>v9</code> (<code>9.7</code> LTS) and <code>26.x</code> (the new year-based Innovation releases), including the built-in backup and restore.</li>
 <li><strong>Linux</strong>: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).</li>
 <li><strong>SQLite</strong>: Ships with the packages and is ready to use.</li>
 </ul>
@@ -1461,7 +1416,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Database Schema</figcaption>
 </figure>
-<h2 id="scheduler">Scheduler</h2>
+<h2 id="scheduler">Scheduler<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h2>
 <p>For seamless coordination and automation, BunkerWeb employs a specialized service known as the scheduler. The scheduler plays a vital role in ensuring smooth operation by performing the following tasks:</p>
 <ul>
 <li>
@@ -1486,10 +1441,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Manage jobs from the web UI</figcaption>
 </figure>
-<h3 id="instances-health-check">Instances health check</h3>
+<h3 id="instances-health-check">Instances health check<a class="headerlink" href="#instances-health-check" title="Permanent link">&para;</a></h3>
 <p>Since version 1.6.0, the scheduler possesses a built-in health check system that monitors the health of instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will resume sending the configuration.</p>
 <p>The health check interval is set by the <code>HEALTHCHECK_INTERVAL</code> environment variable, with a default value of <code>30</code>, meaning the scheduler will check the health of the instances every 30 seconds.</p>
-<h2 id="templates">Templates</h2>
+<h2 id="templates">Templates<a class="headerlink" href="#templates" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb leverages the power of templates to simplify the configuration process and enhance flexibility. Templates provide a structured and standardized approach to defining settings and custom configurations, ensuring consistency and ease of use.</p>
 <ul>
 <li>
@@ -1616,8 +1571,16 @@ app3.example.com_USE_BAD_BEHAVIOR=no
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
         
       </main>
       
@@ -1718,7 +1681,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>

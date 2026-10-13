@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Rechercher dans la documentation");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBesoin d\u2019une assistance premium ou de conseils personnalis\u00e9s sur BunkerWeb ? D\u00e9couvrez nos \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservices professionnels\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eRejoignez la communaut\u00e9 Bunker en participant au \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003esalon Discord\u003c/a\u003e et en nous suivant sur \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Vous recherchez BunkerWeb CLOUD, la version PRO, une assistance technique ou des services sur mesure ? Consultez le
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    pour en savoir plus sur nos offres aux entreprises.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Vous ne consultez pas la documentation de la dernière version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Cliquez ici pour consulter la dernière version.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Guide de démarrage rapide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compiler depuis les sources
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Guide de démarrage rapide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compiler depuis les sources
   
 
     
@@ -1175,17 +1128,17 @@
   
 
 
-<h1 id="services-professionnels">Services professionnels</h1>
-<h2 id="pourquoi-devrais-je-obtenir-des-services-professionnels">Pourquoi devrais-je obtenir des services professionnels ?</h2>
+<h1 id="services-professionnels">Services professionnels<a class="headerlink" href="#services-professionnels" title="Permanent link">&para;</a></h1>
+<h2 id="pourquoi-devrais-je-obtenir-des-services-professionnels">Pourquoi devrais-je obtenir des services professionnels ?<a class="headerlink" href="#pourquoi-devrais-je-obtenir-des-services-professionnels" title="Permanent link">&para;</a></h2>
 <p>Étant donné que BunkerWeb est un logiciel libre (comme en liberté), vous avez le droit de l'utiliser librement tant que vous respectez la <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">licence AGPLv3</a>.</p>
 <p>Vous pouvez également mettre à niveau BunkerWeb vers la version PRO à tout moment. Ce faisant, vous bénéficierez d'une expérience améliorée pour vous aider dans la sécurité de vos services Web. Notre objectif est de vous aider à vous concentrer sur les besoins de votre entreprise. La version PRO est mise à jour régulièrement et nous faisons de notre mieux pour recueillir les commentaires des entreprises afin d'inclure les fonctionnalités nécessaires.</p>
 <p>Mais consacrer du temps à une technologie spécifique peut ne pas être facile en fonction des priorités de votre entreprise. Sans compter que la cybersécurité est un domaine complexe où il n'est pas recommandé d'être à la fois juge et jury.</p>
 <p>Obtenir des services professionnels en plus de la version open-source ou PRO est la solution idéale pour couvrir les besoins de votre entreprise. Vous pouvez vous concentrer sur vos principales priorités et compter sur un partenaire de confiance en matière de sécurité Web.</p>
 <p>Veuillez noter que les services professionnels sont directement offerts par <a href="https://www.bunkerity.com/?utm_campaign=self&amp;utm_source=doc">Bunkerity</a>, la société qui gère le projet BunkerWeb, par le biais de notre <a href="https://panel.bunkerweb.io/?language=french&amp;utm_campaign=self&amp;utm_source=doc"> plateforme en ligne</a> BunkerWeb Panel.</p>
-<h2 id="quels-services-professionnels-offrez-vous">Quels services professionnels offrez-vous ?</h2>
+<h2 id="quels-services-professionnels-offrez-vous">Quels services professionnels offrez-vous ?<a class="headerlink" href="#quels-services-professionnels-offrez-vous" title="Permanent link">&para;</a></h2>
 <p>Nous proposons un support technique et des conseils autour de la solution BunkerWeb. En faisant appel à ce service, nous vous assisterons sur les problèmes techniques (installation, configuration, faux positif, ...). Nous pouvons également proposer des SLA personnalisés en fonction de vos besoins.</p>
 <p>En fonction de vos besoins, vous avez le choix entre des offres « one time » et des offres d'abonnement.</p>
-<h2 id="comment-puis-je-obtenir-plus-dinformations">Comment puis-je obtenir plus d'informations ?</h2>
+<h2 id="comment-puis-je-obtenir-plus-dinformations">Comment puis-je obtenir plus d'informations ?<a class="headerlink" href="#comment-puis-je-obtenir-plus-dinformations" title="Permanent link">&para;</a></h2>
 <p>Vous trouverez plus d'informations en visitant le <a href="https://panel.bunkerweb.io/?language=french&amp;utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>, notre plateforme dédiée aux services professionnels.</p>
 <p>N'hésitez pas à <a href="https://panel.bunkerweb.io/contact.php?language=french&amp;utm_campaign=self&amp;utm_source=doc">nous contacter</a> si vous avez des questions, nous serons plus qu'heureux de répondre à vos besoins.</p>
 
@@ -1205,8 +1158,16 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Retour en haut de la page
+</button>
         
       </main>
       
@@ -1307,7 +1268,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copi\u00e9 dans le presse-papier", "clipboard.copy": "Copier dans le presse-papier", "search.result.more.one": "1 de plus sur cette page", "search.result.more.other": "# de plus sur cette page", "search.result.none": "Aucun document trouv\u00e9", "search.result.one": "1 document trouv\u00e9", "search.result.other": "# documents trouv\u00e9s", "search.result.placeholder": "Taper pour d\u00e9marrer la recherche", "search.result.term.missing": "Non trouv\u00e9", "select.version": "S\u00e9lectionner la version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

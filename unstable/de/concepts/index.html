@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -449,25 +448,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -981,33 +961,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1264,14 +1217,14 @@
   
 
 
-<h1 id="konzepte">Konzepte</h1>
-<h2 id="architektur">Architektur</h2>
+<h1 id="konzepte">Konzepte<a class="headerlink" href="#konzepte" title="Permanent link">&para;</a></h1>
+<h2 id="architektur">Architektur<a class="headerlink" href="#architektur" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/concepts.svg" width="600" /></p>
 </figure>
 <p>Innerhalb Ihrer Infrastruktur agiert BunkerWeb als Reverse-Proxy vor Ihren Webdiensten. Die typische Architektur beinhaltet den Zugriff auf BunkerWeb aus dem Internet, das dann Anfragen an den entsprechenden Anwendungsdienst in einem sicheren Netzwerk weiterleitet.</p>
 <p>Die Verwendung von BunkerWeb auf diese Weise (klassische Reverse-Proxy-Architektur) mit TLS-Offloading und zentralisierten Sicherheitsrichtlinien verbessert die Leistung durch Reduzierung des Verschlüsselungsaufwands auf den Backend-Servern und gewährleistet gleichzeitig eine konsistente Zugriffskontrolle, Bedrohungsabwehr und Einhaltung von Vorschriften für alle Dienste.</p>
-<h2 id="integrationen">Integrationen</h2>
+<h2 id="integrationen">Integrationen<a class="headerlink" href="#integrationen" title="Permanent link">&para;</a></h2>
 <p>Das erste Konzept ist die Integration von BunkerWeb in die Zielumgebung. Wir bevorzugen das Wort "Integration" anstelle von "Installation", da eines der Ziele von BunkerWeb darin besteht, sich nahtlos in bestehende Umgebungen zu integrieren.</p>
 <p>Die folgenden Integrationen werden offiziell unterstützt:</p>
 <ul>
@@ -1286,7 +1239,7 @@
 <p class="admonition-title">Weiterführende Informationen</p>
 <p>Die technischen Details aller BunkerWeb-Integrationen sind im <a href="../integrations/">Integrations-Abschnitt</a> der Dokumentation verfügbar.</p>
 </div>
-<h2 id="einstellungen">Einstellungen</h2>
+<h2 id="einstellungen">Einstellungen<a class="headerlink" href="#einstellungen" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO Einstellungen</p>
 <p>Einige Plugins sind der <strong>PRO-Version</strong> vorbehalten. Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>.</p>
@@ -1318,7 +1271,7 @@ USE_BROTLI=no
 <p class="admonition-title">Weiterführende Informationen</p>
 <p>Die vollständige Liste der verfügbaren Einstellungen mit Beschreibungen und möglichen Werten ist im <a href="../features/">Feature-Abschnitt</a> der Dokumentation verfügbar.</p>
 </div>
-<h2 id="multisite-mode">Multisite-Modus</h2>
+<h2 id="multisite-mode">Multisite-Modus<a class="headerlink" href="#multisite-mode" title="Permanent link">&para;</a></h2>
 <p>Das Verständnis des Multisite-Modus ist bei der Nutzung von BunkerWeb unerlässlich. Da unser Hauptaugenmerk auf dem Schutz von Webanwendungen liegt, ist unsere Lösung eng mit dem Konzept der "virtuellen Hosts" oder "vhosts" verbunden (weitere Informationen <a href="https://en.wikipedia.org/wiki/Virtual_hosting">hier</a>). Diese virtuellen Hosts ermöglichen die Bereitstellung mehrerer Webanwendungen von einer einzigen Instanz oder einem Cluster aus.</p>
 <p>Standardmäßig ist der Multisite-Modus in BunkerWeb deaktiviert. Das bedeutet, dass nur eine Webanwendung bereitgestellt wird und alle Einstellungen darauf angewendet werden. Diese Einrichtung ist ideal, wenn Sie eine einzelne Anwendung zu schützen haben, da Sie sich nicht um Multisite-Konfigurationen kümmern müssen.</p>
 <p>Wenn der Multisite-Modus jedoch aktiviert ist, kann BunkerWeb mehrere Webanwendungen bereitstellen und schützen. Jede Webanwendung wird durch einen eindeutigen Servernamen identifiziert und hat ihre eigenen Einstellungen. Dieser Modus ist vorteilhaft, wenn Sie mehrere Anwendungen zu sichern haben und eine einzige Instanz (oder einen Cluster) von BunkerWeb verwenden möchten.</p>
@@ -1347,7 +1300,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Weiterführende Informationen</p>
 <p>Konkrete Beispiele für den Multisite-Modus finden Sie in den <a href="../advanced/">fortgeschrittenen Nutzungen</a> der Dokumentation und im <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">Beispiele</a>-Verzeichnis des Repositorys.</p>
 </div>
-<h2 id="custom-configurations">Benutzerdefinierte Konfigurationen</h2>
+<h2 id="custom-configurations">Benutzerdefinierte Konfigurationen<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>Um einzigartige Herausforderungen zu bewältigen und spezifische Anwendungsfälle zu bedienen, bietet BunkerWeb die Flexibilität von benutzerdefinierten Konfigurationen. Während die bereitgestellten Einstellungen und <a href="../plugins/">externen Plugins</a> eine breite Palette von Szenarien abdecken, kann es Situationen geben, die zusätzliche Anpassungen erfordern.</p>
 <p>BunkerWeb basiert auf dem renommierten NGINX-Webserver, der ein leistungsstarkes Konfigurationssystem bietet. Das bedeutet, dass Sie die Konfigurationsmöglichkeiten von NGINX nutzen können, um Ihre spezifischen Anforderungen zu erfüllen. Benutzerdefinierte NGINX-Konfigurationen können in verschiedenen <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">Kontexten</a> wie HTTP oder Server eingebunden werden, sodass Sie das Verhalten von BunkerWeb entsprechend Ihren Anforderungen feinabstimmen können. Ob Sie globale Einstellungen anpassen oder Konfigurationen auf bestimmte Serverblöcke anwenden müssen, BunkerWeb ermöglicht es Ihnen, sein Verhalten zu optimieren, um es perfekt auf Ihren Anwendungsfall abzustimmen.</p>
 <p>Ein weiterer integraler Bestandteil von BunkerWeb ist die ModSecurity Web Application Firewall. Mit benutzerdefinierten Konfigurationen haben Sie die Flexibilität, auf Fehlalarme zu reagieren oder benutzerdefinierte Regeln hinzuzufügen, um den von ModSecurity bereitgestellten Schutz weiter zu verbessern. Diese benutzerdefinierten Konfigurationen ermöglichen es Ihnen, das Verhalten der Firewall feinabzustimmen und sicherzustellen, dass es den spezifischen Anforderungen Ihrer Webanwendungen entspricht.</p>
@@ -1362,7 +1315,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Weiterführende Informationen</p>
 <p>Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den <a href="../advanced/#custom-configurations">fortgeschrittenen Nutzungen</a> der Dokumentation und im <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">Beispiele</a>-Verzeichnis des Repositorys.</p>
 </div>
-<h2 id="datenbank">Datenbank</h2>
+<h2 id="datenbank">Datenbank<a class="headerlink" href="#datenbank" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb speichert seine aktuelle Konfiguration sicher in einer Backend-Datenbank, die wesentliche Daten für einen reibungslosen Betrieb enthält. Die folgenden Informationen werden in der Datenbank gespeichert:</p>
 <ul>
 <li>
@@ -1399,7 +1352,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <li><strong>PostgreSQL</strong>: <code>postgresql://bunkerweb:changeme@bw-db:5432/db</code></li>
 </ul>
 <p>Durch Angabe des entsprechenden Datenbank-URI in der Konfiguration können Sie BunkerWeb nahtlos in Ihr bevorzugtes Datenbank-Backend integrieren und so eine effiziente und zuverlässige Speicherung Ihrer Konfigurationsdaten gewährleisten.</p>
-<h3 id="datenbank-kompatibilitatsmatrix">Datenbank-Kompatibilitätsmatrix</h3>
+<h3 id="datenbank-kompatibilitatsmatrix">Datenbank-Kompatibilitätsmatrix<a class="headerlink" href="#datenbank-kompatibilitatsmatrix" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1461,7 +1414,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Datenbankschema</figcaption>
 </figure>
-<h2 id="scheduler">Scheduler</h2>
+<h2 id="scheduler">Scheduler<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h2>
 <p>Für eine nahtlose Koordination und Automatisierung verwendet BunkerWeb einen spezialisierten Dienst, der als Scheduler bekannt ist. Der Scheduler spielt eine entscheidende Rolle bei der Gewährleistung eines reibungslosen Betriebs, indem er die folgenden Aufgaben ausführt:</p>
 <ul>
 <li>
@@ -1486,10 +1439,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Jobs über die Web-UI verwalten</figcaption>
 </figure>
-<h3 id="zustandsprufung-der-instanzen">Zustandsprüfung der Instanzen</h3>
+<h3 id="zustandsprufung-der-instanzen">Zustandsprüfung der Instanzen<a class="headerlink" href="#zustandsprufung-der-instanzen" title="Permanent link">&para;</a></h3>
 <p>Seit Version 1.6.0 verfügt der Scheduler über ein integriertes System zur Zustandsprüfung, das den Zustand der Instanzen überwacht. Wenn eine Instanz ungesund wird, sendet der Scheduler die Konfiguration nicht mehr an sie. Wenn die Instanz wieder gesund wird, sendet der Scheduler die Konfiguration wieder.</p>
 <p>Das Intervall für die Zustandsprüfung wird durch die Umgebungsvariable <code>HEALTHCHECK_INTERVAL</code> festgelegt, mit einem Standardwert von <code>30</code>, was bedeutet, dass der Scheduler den Zustand der Instanzen alle 30 Sekunden überprüft.</p>
-<h2 id="templates">Vorlagen</h2>
+<h2 id="templates">Vorlagen<a class="headerlink" href="#templates" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb nutzt die Leistungsfähigkeit von Vorlagen, um den Konfigurationsprozess zu vereinfachen und die Flexibilität zu erhöhen. Vorlagen bieten einen strukturierten und standardisierten Ansatz zur Definition von Einstellungen und benutzerdefinierten Konfigurationen, der Konsistenz und Benutzerfreundlichkeit gewährleistet.</p>
 <ul>
 <li>
@@ -1616,8 +1569,16 @@ app3.example.com_USE_BAD_BEHAVIOR=no
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
         
       </main>
       
@@ -1718,7 +1679,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    ，了解我们的企业服务。
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    您当前查看的不是最新版本的文档。
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>点击此处查看最新版本。</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   快速入门指南
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  从源代码构建
 
       </a>
     </li>
@@ -812,33 +792,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    从源代码构建
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1014,6 +967,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#6-keepalived-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 使用 keepalived 实现浮动 IP（无负载均衡器）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        注意事项
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1153,7 +1128,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         日志配置选项
@@ -1165,7 +1140,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         服务日志
@@ -1176,7 +1151,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         访问与错误日志
@@ -1198,7 +1173,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         集成默认值与示例
@@ -1269,7 +1244,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         监控和报告
@@ -1319,7 +1294,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         备份和恢复
@@ -1359,7 +1334,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -1420,7 +1395,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         创建迁移文件
@@ -1431,7 +1406,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       
         初始化迁移
@@ -1459,7 +1434,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_17" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -1470,7 +1445,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置
@@ -1481,7 +1456,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_19" class="md-nav__link">
     <span class="md-ellipsis">
       
         最佳实践
@@ -1509,7 +1484,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_19" class="md-nav__link">
+  <a href="#_20" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -1520,7 +1495,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_20" class="md-nav__link">
+  <a href="#_21" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置
@@ -1548,7 +1523,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_21" class="md-nav__link">
+  <a href="#_22" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -1559,7 +1534,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_22" class="md-nav__link">
+  <a href="#_23" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置
@@ -1570,7 +1545,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_23" class="md-nav__link">
+  <a href="#_24" class="md-nav__link">
     <span class="md-ellipsis">
       
         快速开始
@@ -1581,7 +1556,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_24" class="md-nav__link">
+  <a href="#_25" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用提示
@@ -1609,7 +1584,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_25" class="md-nav__link">
+  <a href="#_26" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -1637,7 +1612,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_26" class="md-nav__link">
+  <a href="#_27" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -1648,7 +1623,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_27" class="md-nav__link">
+  <a href="#_28" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置
@@ -1659,7 +1634,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_28" class="md-nav__link">
+  <a href="#_29" class="md-nav__link">
     <span class="md-ellipsis">
       
         快速开始
@@ -1670,7 +1645,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_29" class="md-nav__link">
+  <a href="#_30" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用提示
@@ -1698,7 +1673,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_30" class="md-nav__link">
+  <a href="#_31" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -1709,7 +1684,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_31" class="md-nav__link">
+  <a href="#_32" class="md-nav__link">
     <span class="md-ellipsis">
       
         工作原理
@@ -1720,7 +1695,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_32" class="md-nav__link">
+  <a href="#_33" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置设置
@@ -1731,7 +1706,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_33" class="md-nav__link">
+  <a href="#_34" class="md-nav__link">
     <span class="md-ellipsis">
       
         模板变量参考
@@ -1742,7 +1717,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_37" class="md-nav__link">
+  <a href="#_38" class="md-nav__link">
     <span class="md-ellipsis">
       
         模板语法
@@ -1753,7 +1728,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_38" class="md-nav__link">
+  <a href="#_39" class="md-nav__link">
     <span class="md-ellipsis">
       
         示例
@@ -1764,7 +1739,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_39" class="md-nav__link">
+  <a href="#_40" class="md-nav__link">
     <span class="md-ellipsis">
       
         部署示例
@@ -1775,7 +1750,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_40" class="md-nav__link">
+  <a href="#_41" class="md-nav__link">
     <span class="md-ellipsis">
       
         注意事项和故障排除
@@ -1803,7 +1778,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_41" class="md-nav__link">
+  <a href="#_42" class="md-nav__link">
     <span class="md-ellipsis">
       
         启用并应用维护模式
@@ -1814,7 +1789,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_42" class="md-nav__link">
+  <a href="#_43" class="md-nav__link">
     <span class="md-ellipsis">
       
         请求行为和范围
@@ -1825,7 +1800,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_43" class="md-nav__link">
+  <a href="#_44" class="md-nav__link">
     <span class="md-ellipsis">
       
         自定义维护页面
@@ -1836,7 +1811,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_44" class="md-nav__link">
+  <a href="#_45" class="md-nav__link">
     <span class="md-ellipsis">
       
         维护故障排除
@@ -1864,7 +1839,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_45" class="md-nav__link">
+  <a href="#_46" class="md-nav__link">
     <span class="md-ellipsis">
       
         请求流程如何工作
@@ -1875,7 +1850,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_46" class="md-nav__link">
+  <a href="#_47" class="md-nav__link">
     <span class="md-ellipsis">
       
         设置（说明）
@@ -1908,7 +1883,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_54" class="md-nav__link">
+  <a href="#_55" class="md-nav__link">
     <span class="md-ellipsis">
       
         向上游传递用户身份
@@ -1919,7 +1894,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_55" class="md-nav__link">
+  <a href="#_56" class="md-nav__link">
     <span class="md-ellipsis">
       
         登出
@@ -1941,7 +1916,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_56" class="md-nav__link">
+  <a href="#_57" class="md-nav__link">
     <span class="md-ellipsis">
       
         最小配置示例
@@ -1952,7 +1927,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_57" class="md-nav__link">
+  <a href="#_58" class="md-nav__link">
     <span class="md-ellipsis">
       
         故障排除
@@ -1980,7 +1955,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_58" class="md-nav__link">
+  <a href="#_59" class="md-nav__link">
     <span class="md-ellipsis">
       
         前提条件和信任材料
@@ -2002,7 +1977,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_59" class="md-nav__link">
+  <a href="#_60" class="md-nav__link">
     <span class="md-ellipsis">
       
         浏览器请求流程
@@ -2013,7 +1988,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_60" class="md-nav__link">
+  <a href="#_61" class="md-nav__link">
     <span class="md-ellipsis">
       
         端点
@@ -2035,7 +2010,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_61" class="md-nav__link">
+  <a href="#_62" class="md-nav__link">
     <span class="md-ellipsis">
       
         设置（说明）
@@ -2046,7 +2021,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_65" class="md-nav__link">
+  <a href="#_66" class="md-nav__link">
     <span class="md-ellipsis">
       
         注销
@@ -2057,7 +2032,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_66" class="md-nav__link">
+  <a href="#_67" class="md-nav__link">
     <span class="md-ellipsis">
       
         限制和故障排除
@@ -2085,7 +2060,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_67" class="md-nav__link">
+  <a href="#_68" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -2096,7 +2071,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_68" class="md-nav__link">
+  <a href="#_69" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置
@@ -2107,7 +2082,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_69" class="md-nav__link">
+  <a href="#_70" class="md-nav__link">
     <span class="md-ellipsis">
       
         快速开始
@@ -2118,7 +2093,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_70" class="md-nav__link">
+  <a href="#_71" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用提示
@@ -2146,7 +2121,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_71" class="md-nav__link">
+  <a href="#_72" class="md-nav__link">
     <span class="md-ellipsis">
       
         工作原理
@@ -2157,7 +2132,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_72" class="md-nav__link">
+  <a href="#_73" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -2168,7 +2143,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_73" class="md-nav__link">
+  <a href="#_74" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置
@@ -2179,7 +2154,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_74" class="md-nav__link">
+  <a href="#_75" class="md-nav__link">
     <span class="md-ellipsis">
       
         行为说明
@@ -2190,7 +2165,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_75" class="md-nav__link">
+  <a href="#_76" class="md-nav__link">
     <span class="md-ellipsis">
       
         快速开始
@@ -2229,7 +2204,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_76" class="md-nav__link">
+  <a href="#_77" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -2240,7 +2215,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_77" class="md-nav__link">
+  <a href="#_78" class="md-nav__link">
     <span class="md-ellipsis">
       
         前提条件
@@ -2251,7 +2226,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_79" class="md-nav__link">
+  <a href="#_80" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置
@@ -2262,7 +2237,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_80" class="md-nav__link">
+  <a href="#_81" class="md-nav__link">
     <span class="md-ellipsis">
       
         快速开始
@@ -2273,7 +2248,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_81" class="md-nav__link">
+  <a href="#_82" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用提示
@@ -2295,7 +2270,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_82" class="md-nav__link">
+  <a href="#_83" class="md-nav__link">
     <span class="md-ellipsis">
       
         故障排除
@@ -2323,7 +2298,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_83" class="md-nav__link">
+  <a href="#_84" class="md-nav__link">
     <span class="md-ellipsis">
       
         工作原理
@@ -2334,7 +2309,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_84" class="md-nav__link">
+  <a href="#_85" class="md-nav__link">
     <span class="md-ellipsis">
       
         功能
@@ -2345,7 +2320,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_85" class="md-nav__link">
+  <a href="#_86" class="md-nav__link">
     <span class="md-ellipsis">
       
         配置
@@ -2356,7 +2331,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_86" class="md-nav__link">
+  <a href="#_87" class="md-nav__link">
     <span class="md-ellipsis">
       
         快速开始
@@ -2367,7 +2342,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_87" class="md-nav__link">
+  <a href="#_88" class="md-nav__link">
     <span class="md-ellipsis">
       
         示例
@@ -2378,7 +2353,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_88" class="md-nav__link">
+  <a href="#_89" class="md-nav__link">
     <span class="md-ellipsis">
       
         重要行为
@@ -2400,7 +2375,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_89" class="md-nav__link">
+  <a href="#_90" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用提示
@@ -2632,7 +2607,7 @@
   
 
 
-<h1 id="_1">高级用法</h1>
+<h1 id="_1">高级用法<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
 <p>GitHub 仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> 文件夹中提供了许多真实世界的用例示例。</p>
 <p>我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a> 文件夹中找到。</p>
 <p>本节仅关注高级用法和安全调整，请参阅文档的<a href="../features/">功能部分</a>以查看所有可用的设置。</p>
@@ -2645,7 +2620,7 @@
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: app1.example.com"</span><span class="w"> </span>--resolve<span class="w"> </span>example.com:443:ip-of-server<span class="w"> </span>https://example.com
 </code></pre></div></p>
 </div>
-<h2 id="behind-load-balancer-or-reverse-proxy">在负载均衡器或反向代理之后</h2>
+<h2 id="behind-load-balancer-or-reverse-proxy">在负载均衡器或反向代理之后<a class="headerlink" href="#behind-load-balancer-or-reverse-proxy" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">真实 IP</p>
 <p>当 BunkerWeb 本身位于负载均衡器或反向代理之后时，您需要对其进行配置，以便它可以获取客户端的真实 IP 地址。<strong>如果您不这样做，安全功能将阻止负载均衡器或反向代理的 IP 地址，而不是客户端的 IP 地址</strong>。</p>
@@ -2952,7 +2927,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h2 id="_2">高可用性和负载均衡</h2>
+<h2 id="_2">高可用性和负载均衡<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>为了确保即使某台服务器宕机，您的应用依然可用，可以将 BunkerWeb 部署成一个 <strong>HA 集群</strong>。该架构包含一个负责编排配置的 <strong>Manager</strong>（Scheduler）以及多个处理流量的 <strong>Worker</strong>（BunkerWeb 实例）。</p>
 <pre class="mermaid"><code>flowchart LR
 
@@ -3040,7 +3015,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>可选的 <strong>API 服务</strong>（<code>bunkerweb-api</code>）：为自动化工具（bwcli、CI/CD 等）提供公开的 REST 接口。Linux 安装默认禁用，与内部 Manager↔Worker 通信无关。</li>
 </ul>
 </div>
-<h3 id="_3">前提条件</h3>
+<h3 id="_3">前提条件<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>在搭建集群前，请确保：</p>
 <ul>
 <li><strong>至少 2 台 Linux 主机</strong>，可使用 root/sudo。</li>
@@ -3048,7 +3023,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>需要保护的 <strong>应用 IP 或主机名</strong>。</li>
 <li><em>(可选)</em> <strong>负载均衡器</strong>（例如 HAProxy）用于在 Worker 之间分发流量。</li>
 </ul>
-<h3 id="1-manager">1. 安装 Manager</h3>
+<h3 id="1-manager">1. 安装 Manager<a class="headerlink" href="#1-manager" title="Permanent link">&para;</a></h3>
 <p>Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界面。</p>
 <div class="admonition warning">
 <p class="admonition-title">Web 界面的安全性</p>
@@ -3118,7 +3093,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </li>
 </ol>
-<h4 id="ui">保护并暴露 UI</h4>
+<h4 id="ui">保护并暴露 UI<a class="headerlink" href="#ui" title="Permanent link">&para;</a></h4>
 <p>如果启用了 Web UI，需要妥善保护。可以部署在 Manager 上或单独的机器上。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">部署在 Manager 上</label><label for="__tabbed_5_2">独立主机</label></div>
 <div class="tabbed-content">
@@ -3273,7 +3248,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="2-worker">2. 安装 Worker</h3>
+<h3 id="2-worker">2. 安装 Worker<a class="headerlink" href="#2-worker" title="Permanent link">&para;</a></h3>
 <p>Worker 负责处理进入的流量。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Linux</label><label for="__tabbed_6_2">Docker</label></div>
 <div class="tabbed-content">
@@ -3326,7 +3301,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="3-worker">3. 管理 Worker</h3>
+<h3 id="3-worker">3. 管理 Worker<a class="headerlink" href="#3-worker" title="Permanent link">&para;</a></h3>
 <p>可以通过 Web UI 或 CLI 随时添加更多 Worker。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">通过 Web UI</label><label for="__tabbed_7_2">通过配置</label></div>
 <div class="tabbed-content">
@@ -3381,7 +3356,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="4">4. 验证部署</h3>
+<h3 id="4">4. 验证部署<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Linux</label><label for="__tabbed_9_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3398,7 +3373,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="5">5. 负载均衡</h3>
+<h3 id="5">5. 负载均衡<a class="headerlink" href="#5" title="Permanent link">&para;</a></h3>
 <p>要在 Worker 之间分发流量，使用负载均衡器。建议使用支持 <strong>PROXY protocol</strong> 的四层（TCP）负载均衡器以保留客户端 IP。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">HAProxy - 第 4 层 (TCP)</label><label for="__tabbed_10_2">HAProxy - 第 7 层 (HTTP)</label></div>
 <div class="tabbed-content">
@@ -3476,20 +3451,143 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>详见 <a href="#behind-load-balancer-or-reverse-proxy">在负载均衡器或反向代理之后</a> 章节，确保获取到正确的客户端 IP。</p>
 <p>在每个 Worker 上查看 <code>/var/log/bunkerweb/access.log</code>，确认请求来自 PROXY protocol 网段，且多个 Worker 分担流量。此时 BunkerWeb 集群即可以高可用方式保护生产业务。</p>
 </div>
-<h2 id="dns">使用自定义 DNS 解析机制</h2>
+<h3 id="6-keepalived-ip">6. 使用 keepalived 实现浮动 IP（无负载均衡器）<a class="headerlink" href="#6-keepalived-ip" title="Permanent link">&para;</a></h3>
+<p>如果没有负载均衡器，可以使用 <a href="https://www.keepalived.org/">keepalived</a> 让 Worker 以主备模式运行。虚拟 IP（VIP）通过 VRRP 在 Worker 之间漂移，DNS 指向 VIP，只有持有 VIP 的 Worker 才处理流量。这是 <a href="#5">第 5 节</a> 的替代方案：流量不会在 Worker 之间分担，但故障 Worker 会在数秒内由另一个 Worker 接替。</p>
+<p>以下示例使用 VIP <code>192.168.10.100</code>、<code>worker01</code>（<code>192.168.10.11</code>，主节点）和 <code>worker02</code>（<code>192.168.10.12</code>，备用节点）。</p>
+<p>在每个 Worker 上<strong>安装 keepalived</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Debian / Ubuntu</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>keepalived
+<span class="c1"># RHEL / Fedora</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>keepalived
+</code></pre></div>
+<p>调用 BunkerWeb 健康检查脚本并传入 <code>ok</code> 参数时，如果实例在 <code>http://127.0.0.1:6000/healthz</code> 上返回 <code>ok</code>，脚本就以 <code>0</code> 退出。<code>ok</code> 表示 NGINX 正在运行且实例已收到配置；即使正在应用新配置、同时仍提供旧配置服务时也是如此（testing 及更高版本）。实例仍处于 <code>loading</code> 状态或 NGINX 已停止时，脚本以 <code>1</code> 退出。不带参数调用时，脚本也会接受 <code>loading</code>；此处不要省略参数，否则刚启动的 Worker 会取得 VIP 并显示“Generating...”页面。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Linux</label><label for="__tabbed_11_2">Docker</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>/usr/share/bunkerweb/helpers/healthcheck.sh<span class="w"> </span>ok
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>/usr/bin/docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>/path/to/docker-compose.yml<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-T<span class="w"> </span>bunkerweb<span class="w"> </span>/usr/share/bunkerweb/helpers/healthcheck.sh<span class="w"> </span>ok
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><strong>配置 keepalived。</strong> 在每个 Worker 上创建 <code>/etc/keepalived/keepalived.conf</code>。将 <code>interface</code> 调整为实际网络接口（可用 <code>ip addr</code> 查看），并确保两个 Worker 使用相同的 <code>virtual_router_id</code> 和 <code>auth_pass</code>。对于 Docker 选项卡，将 <code>script</code> 行替换为上面的 <code>docker compose</code> 命令（如果未使用二进制文件的完整路径，keepalived 会发出警告）。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">worker01 (master)</label><label for="__tabbed_12_2">worker02 (backup)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">/etc/keepalived/keepalived.conf</span><pre><span></span><code><span class="na">global_defs {</span>
+<span class="w">    </span><span class="na">enable_script_security</span>
+<span class="w">    </span><span class="na">script_user root</span>
+<span class="na">}</span>
+
+<span class="na">vrrp_script chk_bunkerweb {</span>
+<span class="w">    </span><span class="na">script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"</span>
+<span class="w">    </span><span class="na">interval 2</span>
+<span class="w">    </span><span class="na">fall 2</span>
+<span class="w">    </span><span class="na">rise 2</span>
+<span class="na">}</span>
+
+<span class="na">vrrp_instance VI_BUNKERWEB {</span>
+<span class="w">    </span><span class="na">state MASTER</span>
+<span class="w">    </span><span class="na">interface eth0</span>
+<span class="w">    </span><span class="na">virtual_router_id 51</span>
+<span class="w">    </span><span class="na">priority 110</span>
+<span class="w">    </span><span class="na">advert_int 1</span>
+<span class="w">    </span><span class="na">authentication {</span>
+<span class="w">        </span><span class="na">auth_type PASS</span>
+<span class="w">        </span><span class="na">auth_pass changeme</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">virtual_ipaddress {</span>
+<span class="w">        </span><span class="na">192.168.10.100/24</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">track_script {</span>
+<span class="w">        </span><span class="na">chk_bunkerweb</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="na">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">/etc/keepalived/keepalived.conf</span><pre><span></span><code><span class="na">global_defs {</span>
+<span class="w">    </span><span class="na">enable_script_security</span>
+<span class="w">    </span><span class="na">script_user root</span>
+<span class="na">}</span>
+
+<span class="na">vrrp_script chk_bunkerweb {</span>
+<span class="w">    </span><span class="na">script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"</span>
+<span class="w">    </span><span class="na">interval 2</span>
+<span class="w">    </span><span class="na">fall 2</span>
+<span class="w">    </span><span class="na">rise 2</span>
+<span class="na">}</span>
+
+<span class="na">vrrp_instance VI_BUNKERWEB {</span>
+<span class="w">    </span><span class="na">state BACKUP</span>
+<span class="w">    </span><span class="na">interface eth0</span>
+<span class="w">    </span><span class="na">virtual_router_id 51</span>
+<span class="w">    </span><span class="na">priority 100</span>
+<span class="w">    </span><span class="na">advert_int 1</span>
+<span class="w">    </span><span class="na">authentication {</span>
+<span class="w">        </span><span class="na">auth_type PASS</span>
+<span class="w">        </span><span class="na">auth_pass changeme</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">virtual_ipaddress {</span>
+<span class="w">        </span><span class="na">192.168.10.100/24</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">track_script {</span>
+<span class="w">        </span><span class="na">chk_bunkerweb</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="na">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>检查脚本没有设置 <code>weight</code>，因此连续失败两次（约 4 秒）后，节点会进入 <code>FAULT</code> 状态并释放 VIP。运行 <code>docker compose exec</code> 需要 <code>script_user root</code>。<code>enable_script_security</code> 会接受此脚本，因为其他用户无法写入 BunkerWeb 文件。VRRP 的 <code>auth_pass</code> 以明文传输，只能防止配置错误，因此请让 Worker 保持在可信网络中。</p>
+<div class="admonition note">
+<p class="admonition-title">BunkerWeb 1.6.15</p>
+<p>在 1.6.15 中，每次重新加载时所有 Worker 的 <code>/healthz</code> 都会同时返回 <code>loading</code>，持续约 5 秒。请使用 <code>fall 4</code> 和 <code>interval 2</code>，替代 <code>fall 2</code>，以免重新加载使两个 Worker 同时进入 <code>FAULT</code> 状态。</p>
+</div>
+<p>在两个 Worker 上启动 keepalived：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>keepalived
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">防火墙</p>
+<p>VRRP 使用 IP 协议 <code>112</code>（不是 TCP 或 UDP 端口）。请允许 Worker 之间传输该协议，并允许面向客户端的 <code>80</code> 和 <code>443</code> 端口。</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">真实 IP</p>
+<p>客户端直接连接 VIP，因此无需配置 PROXY protocol 或 <code>X-Forwarded-For</code>。BunkerWeb 默认可以看到真实客户端 IP。</p>
+</div>
+<p><strong>验证故障转移：</strong></p>
+<ol>
+<li>在 <code>worker01</code> 上运行 <code>ip addr show eth0</code>。列表中应显示 VIP <code>192.168.10.100</code>。</li>
+<li>在 <code>worker01</code> 上停止 BunkerWeb：Linux 使用 <code>sudo systemctl stop bunkerweb</code>，Docker 使用 <code>docker compose stop bunkerweb</code>。</li>
+<li>几秒后，VIP 会从 <code>worker01</code> 消失并出现在 <code>worker02</code> 上。我们的测试中，停止容器后客户端约 4 秒恢复；仅健康检查失败时约 7 秒恢复。</li>
+<li>再次启动 BunkerWeb。只有检查通过后 <code>worker01</code> 才会重新取得 VIP，因此它在加载期间不会处理流量。</li>
+<li>使用 <code>sudo journalctl -u keepalived -f</code> 跟踪状态变化。</li>
+</ol>
+<h3 id="_4">注意事项<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Docker sidecar。</strong> 如果 keepalived 在配置了 <code>network_mode: "service:bunkerweb"</code> 的容器中运行，BunkerWeb 容器重启时它会丢失网络接口，并且无法重新取得 VIP。为 keepalived 服务添加 <code>depends_on: { bunkerweb: { condition: service_started, restart: true } }</code> 只覆盖通过 Compose 执行的重启（<code>docker compose restart</code> 或 <code>up</code>）。它不覆盖 Docker 重启策略触发的自动重启（崩溃、内存不足）或直接执行 <code>docker restart</code> 的情况。遇到这些情况时，请同时重启 keepalived 和 BunkerWeb 容器，或像上方 Docker 选项卡那样在主机上运行 keepalived。</li>
+<li><strong>Manager 不可用。</strong> 已获得配置的 Worker 会继续返回 <code>ok</code> 并持有 VIP。Manager 不可用时重启的 Worker 会停留在 <code>loading</code>，因此不会取得 VIP。如果两个 Worker 都重启，则没有符合条件的 Worker，服务会一直中断到 Manager 恢复。</li>
+<li><strong>配置。</strong> 无论 VIP 当前由谁持有，Manager 都会向两个 Worker 推送配置，因此备用 Worker 接管时已经拥有最新设置。</li>
+<li><strong>共享状态。</strong> 封禁、计数器和会话分别保存在各个 Worker 上。故障转移后，在 <code>worker01</code> 上被封禁的客户端不会在 <code>worker02</code> 上自动被封禁。启用 Redis（<code>USE_REDIS=yes</code>，参见 Redis/Valkey 设置），并让两个 Worker 使用同一 Redis 实例，以共享封禁和计数器。仅使用 Redis 仍不能让会话跨 Worker 保持有效：<code>SESSIONS_SECRET</code> 和 <code>SESSIONS_NAME</code> 默认值为 <code>random</code>，且每个实例分别生成。请在 Manager 上为两个 Worker 设置相同的固定值（这些是会推送给两个 Worker 的全局设置）。</li>
+<li><strong>Let's Encrypt。</strong> HTTP challenge token 会发送到 Manager 中注册的每个实例，因此两个 Worker 都可以响应。</li>
+</ul>
+<h2 id="dns">使用自定义 DNS 解析机制<a class="headerlink" href="#dns" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb 的 NGINX 配置可以根据您的需求定制，以使用不同的 DNS 解析器。这在各种场景中特别有用：</p>
 <ol>
 <li>为了遵循您本地 <code>/etc/hosts</code> 文件中的条目</li>
 <li>当您需要为某些域使用自定义 DNS 服务器时</li>
 <li>为了与本地 DNS 缓存解决方案集成</li>
 </ol>
-<h3 id="systemd-resolved">使用 systemd-resolved</h3>
+<h3 id="systemd-resolved">使用 systemd-resolved<a class="headerlink" href="#systemd-resolved" title="Permanent link">&para;</a></h3>
 <p>许多现代 Linux 系统使用 <code>systemd-resolved</code> 进行 DNS 解析。如果您希望 BunkerWeb 遵循您 <code>/etc/hosts</code> 文件的内容并使用系统的 DNS 解析机制，您可以将其配置为使用本地的 systemd-resolved DNS 服务。</p>
 <p>要验证 systemd-resolved 是否在您的系统上运行，您可以使用：</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>systemd-resolved
 </code></pre></div>
 <p>要在 BunkerWeb 中启用 systemd-resolved 作为您的 DNS 解析器，请将 <code>DNS_RESOLVERS</code> 设置为 <code>127.0.0.53</code>，这是 systemd-resolved 的默认监听地址：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Web UI</label><label for="__tabbed_11_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Web UI</label><label for="__tabbed_13_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>导航到<strong>全局设置</strong>页面，并将 DNS 解析器设置为 <code>127.0.0.53</code></p>
@@ -3507,13 +3605,13 @@ DNS_RESOLVERS=127.0.0.53
 </div>
 </div>
 </div>
-<h3 id="dnsmasq">使用 dnsmasq</h3>
+<h3 id="dnsmasq">使用 dnsmasq<a class="headerlink" href="#dnsmasq" title="Permanent link">&para;</a></h3>
 <p><a href="http://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> 是一个轻量级的 DNS、DHCP 和 TFTP 服务器，通常用于本地 DNS 缓存和定制。当您需要比 systemd-resolved 提供更多对 DNS 解析的控制时，它特别有用。</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label><label for="__tabbed_12_2">All-in-one</label><label for="__tabbed_12_3">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">All-in-one</label><label for="__tabbed_14_3">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>首先，在您的 Linux 系统上安装和配置 dnsmasq：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Debian/Ubuntu</label><label for="__tabbed_13_2">RHEL/Fedora</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Debian/Ubuntu</label><label for="__tabbed_15_2">RHEL/Fedora</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1"># 安装 dnsmasq</span>
@@ -3550,7 +3648,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 </div>
 </div>
 <p>然后配置 BunkerWeb 使用 dnsmasq，方法是将 <code>DNS_RESOLVERS</code> 设置为 <code>127.0.0.1</code>：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Web UI</label><label for="__tabbed_14_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Web UI</label><label for="__tabbed_16_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>导航到<strong>全局设置</strong>页面，选择 <strong>NGINX</strong> 插件并将 DNS 解析器设置为 <code>127.0.0.1</code>。</p>
@@ -3649,7 +3747,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h2 id="custom-configurations">自定义配置</h2>
+<h2 id="custom-configurations">自定义配置<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>要自定义并向 BunkerWeb 添加自定义配置，您可以利用其 NGINX 基础。自定义 NGINX 配置可以添加到不同的 NGINX 上下文中，包括 ModSecurity Web 应用程序防火墙 (WAF) 的配置，这是 BunkerWeb 的核心组件。有关 ModSecurity 配置的更多详细信息，请参见<a href="../features/#custom-configurations">此处</a>。</p>
 <p>以下是可用的自定义配置类型：</p>
 <ul>
@@ -3666,7 +3764,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <p>自定义配置可以全局应用，也可以针对特定服务器应用，具体取决于适用的上下文以及是否启用了<a href="../features/#multisite-mode">多站点模式</a>。</p>
 <p>应用自定义配置的方法取决于所使用的集成。然而，其底层过程涉及将带有 <code>.conf</code> 后缀的文件添加到特定文件夹中。要为特定服务器应用自定义配置，该文件应放置在以主服务器名称命名的子文件夹中。</p>
 <p>某些集成提供了更方便的应用配置方式，例如在 Docker Swarm 中使用 <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> 或在 Kubernetes 中使用 <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>。这些选项为管理和应用配置提供了更简单的方法。</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:7"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><input id="__tabbed_15_5" name="__tabbed_15" type="radio" /><input id="__tabbed_15_6" name="__tabbed_15" type="radio" /><input id="__tabbed_15_7" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Web UI</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">All-in-one</label><label for="__tabbed_15_4">Docker</label><label for="__tabbed_15_5">Docker autoconf</label><label for="__tabbed_15_6">Kubernetes</label><label for="__tabbed_15_7">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:7"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><input id="__tabbed_17_5" name="__tabbed_17" type="radio" /><input id="__tabbed_17_6" name="__tabbed_17" type="radio" /><input id="__tabbed_17_7" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Web UI</label><label for="__tabbed_17_2">Linux</label><label for="__tabbed_17_3">All-in-one</label><label for="__tabbed_17_4">Docker</label><label for="__tabbed_17_5">Docker autoconf</label><label for="__tabbed_17_6">Kubernetes</label><label for="__tabbed_17_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>导航到<strong>配置</strong>页面，点击<strong>创建新的自定义配置</strong>，然后您可以选择是全局设置还是特定于服务的配置，以及配置类型和配置名称：</p>
@@ -3946,8 +4044,8 @@ autoconf 的 Ingress 控制器会读取 <code>data</code> 下的每个键值对�
 </div>
 </div>
 </div>
-<h2 id="running-many-services-in-production">在生产环境中运行大量服务</h2>
-<h3 id="crs">全局 CRS</h3>
+<h2 id="running-many-services-in-production">在生产环境中运行大量服务<a class="headerlink" href="#running-many-services-in-production" title="Permanent link">&para;</a></h2>
+<h3 id="crs">全局 CRS<a class="headerlink" href="#crs" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">CRS 插件</p>
 <p>当 CRS 全局加载时，<strong>不支持 CRS 插件</strong>。如果您需要使用它们，则需要为每个服务加载 CRS。</p>
@@ -3958,7 +4056,7 @@ autoconf 的 Ingress 控制器会读取 <code>data</code> 下的每个键值对�
 SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 </code></pre></div>
 <p>您可以通过将 <code>USE_MODSECURITY_GLOBAL_CRS</code> 设置为 <code>yes</code> 来启用全局 CRS 加载。</p>
-<h3 id="mariadbmysql-max_allowed_packet">为 MariaDB/MySQL 调整 max_allowed_packet</h3>
+<h3 id="mariadbmysql-max_allowed_packet">为 MariaDB/MySQL 调整 max_allowed_packet<a class="headerlink" href="#mariadbmysql-max_allowed_packet" title="Permanent link">&para;</a></h3>
 <p>在使用 BunkerWeb 并有大量服务时，MariaDB 和 MySQL 数据库服务器中 <code>max_allowed_packet</code> 参数的默认值似乎不足。</p>
 <p>如果您遇到这样的错误，尤其是在调度程序上：</p>
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: 'db' user: 'bunkerweb' host: '172.20.0.4' (Got a packet bigger than 'max_allowed_packet' bytes)
@@ -3974,7 +4072,7 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 <div class="highlight"><pre><span></span><code><span class="k">[mysqld]</span>
 <span class="na">max_allowed_packet</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">64M</span>
 </code></pre></div>
-<h2 id="persistence-of-bans-and-reports">封禁和报告的持久化</h2>
+<h2 id="persistence-of-bans-and-reports">封禁和报告的持久化<a class="headerlink" href="#persistence-of-bans-and-reports" title="Permanent link">&para;</a></h2>
 <p>默认情况下，BunkerWeb 将封禁和报告存储在本地的 Lua 数据存储中。虽然这种设置简单高效，但意味着当实例重启时数据会丢失。为了确保封禁和报告在重启后仍然存在，您可以将 BunkerWeb 配置为使用远程的 <a href="https://redis.io/">Redis</a> 或 <a href="https://valkey.io/">Valkey</a> 服务器。</p>
 <p><strong>为什么使用 Redis/Valkey？</strong></p>
 <p>Redis 和 Valkey 是功能强大的内存数据存储，通常用作数据库、缓存和消息代理。它们具有高度可扩展性，并支持多种数据结构，包括：</p>
@@ -4007,7 +4105,7 @@ REDIS_DATABASE=0
 <li><strong><code>REDIS_DATABASE</code></strong>：指定要使用的 Redis/Valkey 数据库编号。默认为 <code>0</code>。</li>
 </ul>
 <p>如果您需要更高级的设置，例如身份验证、SSL/TLS 支持或 Sentinel 模式，请参阅 <a href="../features/#redis">Redis 插件设置文档</a>以获取详细指导。</p>
-<h2 id="udptcp">保护 UDP/TCP 应用程序</h2>
+<h2 id="udptcp">保护 UDP/TCP 应用程序<a class="headerlink" href="#udptcp" title="Permanent link">&para;</a></h2>
 <div class="admonition example">
 <p class="admonition-title">实验性功能</p>
 <p>此功能尚未准备好用于生产。欢迎您进行测试，并通过 GitHub 仓库中的 <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> 向我们报告任何错误。</p>
@@ -4035,7 +4133,7 @@ LISTEN_STREAM_PORT_SSL_1=4344
 ...
 </code></pre></div>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:6"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><input id="__tabbed_16_4" name="__tabbed_16" type="radio" /><input id="__tabbed_16_5" name="__tabbed_16" type="radio" /><input id="__tabbed_16_6" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">All-in-one</label><label for="__tabbed_16_2">Docker</label><label for="__tabbed_16_3">Docker autoconf</label><label for="__tabbed_16_4">Kubernetes</label><label for="__tabbed_16_5">Linux</label><label for="__tabbed_16_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:6"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><input id="__tabbed_18_4" name="__tabbed_18" type="radio" /><input id="__tabbed_18_5" name="__tabbed_18" type="radio" /><input id="__tabbed_18_6" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">All-in-one</label><label for="__tabbed_18_2">Docker</label><label for="__tabbed_18_3">Docker autoconf</label><label for="__tabbed_18_4">Kubernetes</label><label for="__tabbed_18_5">Linux</label><label for="__tabbed_18_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>在运行 All-in-one 容器时，您需要将设置添加到环境变量中。您还需要暴露流端口。</p>
@@ -4406,7 +4504,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 </div>
 </div>
 </div>
-<h2 id="php">PHP</h2>
+<h2 id="php">PHP<a class="headerlink" href="#php" title="Permanent link">&para;</a></h2>
 <div class="admonition example">
 <p class="admonition-title">实验性功能</p>
 <p>目前，BunkerWeb 对 PHP 的支持仍处于测试阶段，我们建议您如果可以的话，使用反向代理架构。顺便说一句，对于某些集成（如 Kubernetes），PHP 完全不受支持。</p>
@@ -4420,7 +4518,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 <li><code>LOCAL_PHP</code>：本地 PHP-FPM 实例的套接字文件路径。</li>
 <li><code>LOCAL_PHP_PATH</code>：本地 PHP-FPM 实例中包含文件的根文件夹。</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:6"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><input id="__tabbed_17_5" name="__tabbed_17" type="radio" /><input id="__tabbed_17_6" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">All-in-one</label><label for="__tabbed_17_2">Docker</label><label for="__tabbed_17_3">Docker autoconf</label><label for="__tabbed_17_4">Kubernetes</label><label for="__tabbed_17_5">Linux</label><label for="__tabbed_17_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:6"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><input id="__tabbed_19_5" name="__tabbed_19" type="radio" /><input id="__tabbed_19_6" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">All-in-one</label><label for="__tabbed_19_2">Docker</label><label for="__tabbed_19_3">Docker autoconf</label><label for="__tabbed_19_4">Kubernetes</label><label for="__tabbed_19_5">Linux</label><label for="__tabbed_19_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>当使用 <a href="../integrations/#all-in-one-aio-image">All-in-one 镜像</a>时，要支持 PHP 应用程序，您需要：</p>
@@ -4898,13 +4996,13 @@ find<span class="w"> </span>/shared/www<span class="w"> </span>-type<span class=
 </div>
 </div>
 </div>
-<h2 id="ipv6">IPv6</h2>
+<h2 id="ipv6">IPv6<a class="headerlink" href="#ipv6" title="Permanent link">&para;</a></h2>
 <div class="admonition example">
 <p class="admonition-title">实验性功能</p>
 <p>此功能尚未准备好用于生产。欢迎您进行测试，并通过 GitHub 仓库中的 <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> 向我们报告任何错误。</p>
 </div>
 <p>默认情况下，BunkerWeb 只会监听 IPv4 地址，不会使用 IPv6 进行网络通信。如果您想启用 IPv6 支持，需要将 <code>USE_IPV6=yes</code>。请注意，您的网络和环境的 IPv6 配置超出了本文档的范围。</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Docker / Autoconf / Swarm</label><label for="__tabbed_18_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Docker / Autoconf / Swarm</label><label for="__tabbed_20_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>首先，您需要配置您的 Docker 守护进程以启用容器的 IPv6 支持，并在需要时使用 ip6tables。这是您 <code>/etc/docker/daemon.json</code> 文件的示例配置：</p>
@@ -4957,14 +5055,14 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
-<h2 id="_4">日志配置选项</h2>
+<h2 id="_5">日志配置选项<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个目标（例如文件、stdout/stderr 或 syslog）。这对于将日志集成到外部收集器并同时在 Web UI 中保留本地日志非常有用。</p>
 <p>可以配置的日志主要分为两类：</p>
 <ol>
 <li><strong>服务日志（Service Logs）</strong>：由 BunkerWeb 的组件（Scheduler、UI、Autoconf 等）生成。每个服务按 <code>LOG_TYPES</code> 控制（可选地配合 <code>LOG_FILE_PATH</code>、<code>LOG_SYSLOG_ADDRESS</code>、<code>LOG_SYSLOG_TAG</code>）。</li>
 <li><strong>访问与错误日志（Access &amp; Error Logs）</strong>：由 NGINX 生成的 HTTP 访问日志和错误日志。仅由 <code>bunkerweb</code> 服务使用（<code>ACCESS_LOG</code> / <code>ERROR_LOG</code> / <code>LOG_LEVEL</code>）。</li>
 </ol>
-<h3 id="_5">服务日志</h3>
+<h3 id="_6">服务日志<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <p>服务日志由 <code>LOG_TYPES</code> 设置控制，支持以空格分隔的多个值（例如 <code>LOG_TYPES="stderr syslog"</code>）。</p>
 <table>
 <thead>
@@ -4997,7 +5095,7 @@ USE_IPV6=yes
 <li><code>LOG_SYSLOG_ADDRESS</code>：syslog 服务器地址（例如 <code>udp://bw-syslog:514</code> 或 <code>/dev/log</code>）。</li>
 <li><code>LOG_SYSLOG_TAG</code>：用于区分服务条目的唯一标签（例如 <code>bw-scheduler</code>）。</li>
 </ul>
-<h3 id="_6">访问与错误日志</h3>
+<h3 id="_7">访问与错误日志<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
 <p>这些是标准的 NGINX 日志，仅通过 <strong><code>bunkerweb</code> 服务</strong> 配置。它们支持通过在设置名称后添加编号后缀来配置多个目标（例如 <code>ACCESS_LOG</code>、<code>ACCESS_LOG_1</code> 与匹配的 <code>LOG_FORMAT</code> / <code>LOG_FORMAT_1</code>，或 <code>ERROR_LOG</code>、<code>ERROR_LOG_1</code> 与对应的 <code>LOG_LEVEL</code> / <code>LOG_LEVEL_1</code>）。</p>
 <ul>
 <li><code>ACCESS_LOG</code>：访问日志目标（默认：<code>/var/log/bunkerweb/access.log</code>）。接受文件路径、<code>syslog:server=host[:port][,param=value]</code>、共享缓冲 <code>memory:name:size</code> 或 <code>off</code>（禁用）。详见 NGINX 的 <a href="https://nginx.org/en/docs/http/ngx_http_log_module.html#access_log">access_log 文档</a>。</li>
@@ -5015,7 +5113,7 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
-<h3 id="log-file-retention">日志文件保留策略</h3>
+<h3 id="log-file-retention">日志文件保留策略<a class="headerlink" href="#log-file-retention" title="Permanent link">&para;</a></h3>
 <p>只有保留真实日志文件的集成方式才需要保留策略，且这两者都使用同一套机制：<code>logrotate</code>，配合 BunkerWeb 安装在 <code>/etc/logrotate.d/bunkerweb</code> 的策略文件。它会每天轮转任何匹配 <code>/var/log/bunkerweb/*.log</code> 的文件，若文件超过 100 MB 则提前轮转，保留十四个编号的历史版本（<code>modsec_audit.log.1</code>、<code>.2.gz</code> 等），并使用 <code>copytruncate</code>。</p>
 <ul>
 <li><strong>Linux</strong>：软件包依赖 <code>logrotate</code>，系统会按自身的定时器运行它，无需额外操作。</li>
@@ -5027,8 +5125,8 @@ LOG_LEVEL_1=error
 <p>其中有两条指令至关重要。<code>maxsize</code> 才能让 <code>daily</code> 生效：与之相似的 <code>size</code> 与所有时间间隔指令互斥，只会按大小轮转。而添加 <code>dateext</code> 会让每个归档以日期命名，于是同一日期上的第二次轮转会以 <code>destination ... already exists, skipping rotation</code> 失败，使正在写入的文件直到日期变化前都不会被轮转。</p>
 <p>审计日志的位置由 <code>MODSECURITY_SEC_AUDIT_LOG</code> 设置（multisite，默认 <code>/var/log/bunkerweb/modsec_audit.log</code>）；详见 <a href="../features/#modsecurity">ModSecurity 设置</a>。如果将其指向 <code>/var/log/bunkerweb</code> 之外，它就不再受上述策略约束；在容器集成方式下，这样做还会用一个不会被任何机制轮转的真实文件取代符号链接。如果您移动了它，请将其挂载到卷上并自行轮转。该设置只接受 <code>/var/log/bunkerweb</code> 下的路径，因此无法指向 <code>/data</code>：若要在重建容器后保留审计历史，请将卷挂载到 <code>/var/log/bunkerweb</code> 本身，这样保留的是整套日志，而不仅仅是审计日志。</p>
 <p>在 <code>MODSECURITY_SEC_AUDIT_LOG_PARTS</code> 的默认值 <code>BCFH</code> 下，部分 <code>C</code> 会把请求正文写入审计日志。在将该文件复制到其他地方之前，请将其视为敏感数据。</p>
-<h3 id="_7">集成默认值与示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">All-in-one</label><label for="__tabbed_19_4">Kubernetes</label></div>
+<h3 id="_8">集成默认值与示例<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker / Autoconf / Swarm</label><label for="__tabbed_21_3">All-in-one</label><label for="__tabbed_21_4">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>默认行为</strong>：<code>LOG_TYPES="file"</code>。日志写入 <code>/var/log/bunkerweb/*.log</code>。轮转由安装到 <code>/etc/logrotate.d/bunkerweb</code> 的系统 <code>logrotate</code> 配置负责（每日轮转或超过 100 MB 时轮转、保留十四个历史版本，并通过 <code>copytruncate</code> 压缩）。</p>
@@ -5203,7 +5301,7 @@ LOG_LEVEL_1=error
 </div>
 </div>
 </div>
-<h3 id="syslog-ng">Syslog-ng 配置</h3>
+<h3 id="syslog-ng">Syslog-ng 配置<a class="headerlink" href="#syslog-ng" title="Permanent link">&para;</a></h3>
 <p>下面是一个可将日志转发到文件的 <code>syslog-ng.conf</code> 示例：</p>
 <div class="highlight"><pre><span></span><code>@version: 4.10
 
@@ -5246,7 +5344,7 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h2 id="docker-logging-best-practices">Docker 日志记录最佳实践</h2>
+<h2 id="docker-logging-best-practices">Docker 日志记录最佳实践<a class="headerlink" href="#docker-logging-best-practices" title="Permanent link">&para;</a></h2>
 <p>使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 <code>json-file</code> 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。</p>
 <p>为避免这种情况，您可以配置日志轮换。这可以在您的 <code>docker-compose.yml</code> 文件中为特定服务配置，也可以为 Docker 守护进程全局设置。</p>
 <p><strong>按服务配置</strong></p>
@@ -5276,7 +5374,7 @@ log {
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
 <p>这些全局设置将由所有容器继承。但是，在 <code>docker-compose.yml</code> 文件中按服务定义的任何日志记录配置都将覆盖 <code>daemon.json</code> 中的全局设置。</p>
-<h2 id="security-tuning">安全性调整</h2>
+<h2 id="security-tuning">安全性调整<a class="headerlink" href="#security-tuning" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb 提供了许多安全功能，您可以通过<a href="../features/">功能</a>进行配置。尽管设置的默认值确保了最低限度的“默认安全”，我们强烈建议您对它们进行调整。这样做，您不仅能够确保您所选择的安全级别，还能管理误报。</p>
 <div class="admonition tip">
 <p class="admonition-title">其他功能</p>
@@ -5287,7 +5385,7 @@ log {
   </p>
 <figcaption>核心安全插件的概述和顺序</figcaption>
 </figure>
-<h2 id="crowdsec">CrowdSec 控制台集成</h2>
+<h2 id="crowdsec">CrowdSec 控制台集成<a class="headerlink" href="#crowdsec" title="Permanent link">&para;</a></h2>
 <p>如果您还不熟悉 CrowdSec 控制台集成，<a href="https://www.crowdsec.net/?utm_campaign=bunkerweb&amp;utm_source=doc">CrowdSec</a> 利用众包情报来对抗网络威胁。可以把它想象成“网络安全界的 Waze”——当一台服务器受到攻击时，全球其他系统都会收到警报，并受到保护，免受同一攻击者的侵害。您可以在<a href="https://www.crowdsec.net/about?utm_campaign=bunkerweb&amp;utm_source=blog">这里</a>了解更多信息。</p>
 <p><strong>恭喜，您的 BunkerWeb 实例现已注册到您的 CrowdSec 控制台！</strong></p>
 <p>专业提示：查看警报时，点击“列”选项并勾选“上下文”复选框，以访问 BunkerWeb 特定的数据。</p>
@@ -5296,7 +5394,7 @@ log {
   </p>
 <figcaption>在上下文列中显示的 BunkerWeb 数据</figcaption>
 </figure>
-<h2 id="forward-proxy-outgoing-traffic">出站流量的前向代理</h2>
+<h2 id="forward-proxy-outgoing-traffic">出站流量的前向代理<a class="headerlink" href="#forward-proxy-outgoing-traffic" title="Permanent link">&para;</a></h2>
 <p>如果你的环境需要将出站 HTTP(S) 流量通过前向代理（例如企业代理或 Squid），可以使用标准的代理环境变量。BunkerWeb 没有专用配置。</p>
 <p><strong>NGINX 本身不会使用这些变量来处理上游流量</strong>，因此前向代理配置只影响发起出站请求的组件。实际使用中，请将其设置在 <strong>Scheduler</strong> 上，因为它负责 Let's Encrypt 证书续期、外部 API 调用以及 Webhook 等周期性任务。</p>
 <p>常用变量如下：</p>
@@ -5309,7 +5407,7 @@ log {
 <p class="admonition-title">NO_PROXY 对内部流量是必需的</p>
 <p>如果省略内部网段或服务名，内部流量可能会走代理并失败。请根据集成调整列表（例如 Docker 服务名、Kubernetes 集群域名或 Linux 上仅 localhost）。</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:6"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><input id="__tabbed_20_6" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">All-in-one</label><label for="__tabbed_20_3">Docker</label><label for="__tabbed_20_4">Docker autoconf</label><label for="__tabbed_20_5">Kubernetes</label><label for="__tabbed_20_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:6"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><input id="__tabbed_22_5" name="__tabbed_22" type="radio" /><input id="__tabbed_22_6" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">All-in-one</label><label for="__tabbed_22_3">Docker</label><label for="__tabbed_22_4">Docker autoconf</label><label for="__tabbed_22_5">Kubernetes</label><label for="__tabbed_22_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>将变量添加到 <code>/etc/bunkerweb/variables.env</code>。该文件会被两个服务加载，但只有 Scheduler 会使用它们：</p>
@@ -5413,8 +5511,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h2 id="_8">监控和报告</h2>
-<h3 id="pro">监控 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h2 id="_9">监控和报告<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="pro">监控 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#pro" title="Permanent link">&para;</a></h3>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>监控插件让您可以收集和检索关于 BunkerWeb 的指标。启用它后，您的实例将开始收集与攻击、请求和性能相关的各种数据。然后，您可以通过定期调用 <code>/monitoring</code> API 端点或使用其他插件（如 Prometheus 导出器）来检索它们。</p>
 <p><strong>功能列表</strong></p>
@@ -5459,7 +5557,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="prometheus-pro">Prometheus 导出器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h3 id="prometheus-pro">Prometheus 导出器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#prometheus-pro" title="Permanent link">&para;</a></h3>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus 导出器插件在您的 BunkerWeb 实例上添加了一个 <a href="https://prometheus.io/docs/instrumenting/exporters/">Prometheus 导出器</a>。启用后，您可以配置您的 Prometheus 实例来抓取 BunkerWeb 上的特定端点并收集内部指标。</p>
 <p>我们还提供了一个 <a href="https://grafana.com/grafana/dashboards/20755-bunkerweb/">Grafana 仪表板</a>，您可以将其导入到自己的实例中，并连接到您自己的 Prometheus 数据源。</p>
@@ -5519,7 +5617,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h3 id="pro_1">报告 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h3 id="pro_1">报告 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#pro_1" title="Permanent link">&para;</a></h3>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <div class="admonition warning">
 <p class="admonition-title">需要监控插件</p>
@@ -5627,15 +5725,15 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>如果 Webhook 和 SMTP 都失败，发送将在下一次计划运行时重试。</li>
 <li>HTML 和 Markdown 模板位于 <code>reporting/files/</code>；自定义时请谨慎保留占位符。</li>
 </ul>
-<h2 id="_9">备份和恢复</h2>
-<h3 id="s3-pro">S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
+<h2 id="_10">备份和恢复<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h3 id="s3-pro">S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#s3-pro" title="Permanent link">&para;</a></h3>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>S3 备份工具可以无缝地自动化数据保护，类似于社区备份插件。然而，它的突出之处在于将备份直接安全地存储在 S3 存储桶中。</p>
 <p>通过激活此功能，您正在主动保护您的<strong>数据完整性</strong>。将备份<strong>远程</strong>存储可以保护关键信息免受<strong>硬件故障</strong>、<strong>网络攻击</strong>或<strong>自然灾害</strong>等威胁。这确保了<strong>安全</strong>和<strong>可用性</strong>，能够在<strong>意外事件</strong>期间快速恢复，维护<strong>运营连续性</strong>，并确保<strong>高枕无忧</strong>。</p>
 <details class="warning">
 <summary>给红帽企业 Linux (RHEL) 8.9 用户的信息</summary>
 <p>如果您正在使用 <strong>RHEL 8.9</strong> 并计划使用<strong>外部数据库</strong>，您需要安装 <code>mysql-community-client</code> 包以确保 <code>mysqldump</code> 命令可用。您可以通过执行以下命令来安装该包：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">MySQL/MariaDB</label><label for="__tabbed_21_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">MySQL/MariaDB</label><label for="__tabbed_23_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -5753,9 +5851,9 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </tr>
 </tbody>
 </table>
-<h4 id="_10">手动备份</h4>
+<h4 id="_11">手动备份<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h4>
 <p>要手动启动备份，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Linux</label><label for="__tabbed_24_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -5769,7 +5867,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>此命令将创建您的数据库备份，并将其存储在 <code>BACKUP_S3_BUCKET</code> 设置中指定的 S3 存储桶中。</p>
 <p>您还可以在执行命令时通过提供 <code>BACKUP_S3_BUCKET</code> 环境变量来为备份指定自定义 S3 存储桶：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Linux</label><label for="__tabbed_23_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
@@ -5785,9 +5883,9 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <p class="admonition-title">MariaDB/MySQL 客户端兼容性</p>
 <p>BunkerWeb 的 Docker 镜像包含 MySQL <code>caching_sha2_password</code> 所需的 MariaDB Connector/C 身份验证插件。在 Linux 上，如果客户端报告无法加载 <code>caching_sha2_password</code>，请安装发行版提供的 MariaDB Connector/C 身份验证插件或兼容的 MySQL 客户端。不要将数据库帐户降级为 <code>mysql_native_password</code>，因为 MySQL <code>v9</code> 已不再提供该插件。</p>
 </div>
-<h4 id="_11">手动恢复</h4>
+<h4 id="_12">手动恢复<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h4>
 <p>要手动启动恢复，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Linux</label><label for="__tabbed_24_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -5801,7 +5899,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 <p>此命令将在 <code>BACKUP_S3_BUCKET</code> 设置中指定的 S3 存储桶中创建您数据库的临时备份，并将您的数据库恢复到存储桶中可用的最新备份。</p>
 <p>您还可以在执行命令时通过提供备份文件的路径作为参数来为恢复指定自定义备份文件：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Linux</label><label for="__tabbed_25_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Linux</label><label for="__tabbed_27_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
@@ -5816,7 +5914,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <div class="admonition example">
 <p class="admonition-title">如果失败</p>
 <p>如果恢复失败，请不要担心，您可以随时通过再次执行命令将数据库恢复到先前的状态，因为在恢复之前会创建一个备份：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Linux</label><label for="__tabbed_26_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
@@ -5829,19 +5927,19 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
-<h2 id="mcp">MCP 服务器</h2>
+<h2 id="mcp">MCP 服务器<a class="headerlink" href="#mcp" title="Permanent link">&para;</a></h2>
 <p><strong>BunkerWeb MCP 服务器</strong>允许 <strong>Claude Code</strong> 和 <strong>Claude Desktop</strong> 等 AI 助手通过 <a href="https://modelcontextprotocol.io/">Model Context Protocol (MCP)</a> 管理您的 BunkerWeb 安装。</p>
 <div class="admonition warning">
 <p class="admonition-title">前提条件</p>
 <p>MCP 服务器需要部署 <strong>BunkerWeb 外部 API</strong>（<code>bunkerity/bunkerweb-api</code>）。它专门通过此 API 与 BunkerWeb 通信。</p>
 </div>
-<h3 id="_12">功能</h3>
+<h3 id="_13">功能<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>43 个工具</strong>用于管理实例、服务、配置、封禁、插件、任务和缓存</li>
 <li><strong>MCP 资源</strong>用于只读访问（<code>@config://global</code>、<code>@bans://active</code> 等）</li>
 <li><strong>多种传输方式</strong>：Stdio、HTTP、WebSocket</li>
 </ul>
-<h3 id="docker-compose">Docker Compose 示例</h3>
+<h3 id="docker-compose">Docker Compose 示例<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
 <p>完整示例可在 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples/mcp-stack"><code>examples/mcp-stack/</code></a> 中找到：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
@@ -5866,8 +5964,8 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-mcp</span>
 </code></pre></div>
-<h3 id="claude-code">在 Claude Code 中使用</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:1"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">项目配置</label></div>
+<h3 id="claude-code">在 Claude Code 中使用<a class="headerlink" href="#claude-code" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">项目配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>在项目根目录添加 <code>.mcp.json</code> 文件（或在 <code>~/.claude/.mcp.json</code> 中进行全局配置）：</p>
@@ -5888,9 +5986,9 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 &gt; 显示当前的封禁列表
 &gt; 分析 @config://global 并建议安全改进
 </code></pre></div>
-<h3 id="kubernetes">Kubernetes 集成</h3>
+<h3 id="kubernetes">Kubernetes 集成<a class="headerlink" href="#kubernetes" title="Permanent link">&para;</a></h3>
 <p>MCP 服务器可以使用官方 Helm chart 与 BunkerWeb 一起部署。完整示例可在 <a href="https://github.com/bunkerity/bunkerweb-helm/blob/main/examples/mcp-integration.yaml"><code>examples/mcp-integration.yaml</code></a> 中找到。</p>
-<h4 id="helm">Helm 配置值</h4>
+<h4 id="helm">Helm 配置值<a class="headerlink" href="#helm" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">mcp</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># 启用 MCP 服务器</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -5924,7 +6022,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <span class="w">      </span><span class="nt">bunkerweb.io/USE_WHITELIST</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="w">      </span><span class="nt">bunkerweb.io/WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"10.0.0.0/8</span><span class="nv"> </span><span class="s">192.168.0.0/16"</span>
 </code></pre></div>
-<h4 id="_13">部署</h4>
+<h4 id="_14">部署<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="c1"># 部署启用 MCP 的 BunkerWeb</span>
 helm<span class="w"> </span>install<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb/bunkerweb<span class="w"> </span>-f<span class="w"> </span>mcp-integration.yaml
 
@@ -5943,7 +6041,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </ul>
 </div>
 <p>完整文档请访问 <a href="https://github.com/bunkerity/bunkerweb-mcp">BunkerWeb MCP 仓库</a>。</p>
-<h2 id="migration-pro">迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="migration-pro">迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#migration-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>迁移插件通过其<strong>用户友好的 Web 界面</strong>，彻底改变了 BunkerWeb 实例之间的配置传输，简化了整个迁移过程。无论您是升级系统、扩展基础设施还是转换环境，此工具都能让您轻松自信地传输<strong>设置、首选项和数据</strong>。告别繁琐的手动流程，迎接<strong>无缝、无忧的迁移体验</strong>。</p>
 <p><strong>功能列表</strong></p>
@@ -5958,9 +6056,9 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <p><strong>跨数据库兼容性：</strong> 在各种数据库平台之间实现无缝迁移，包括 SQLite、MySQL、MariaDB 和 PostgreSQL，确保与您首选的数据库环境兼容。</p>
 </li>
 </ul>
-<h3 id="_14">创建迁移文件</h3>
+<h3 id="_15">创建迁移文件<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <p>要手动创建迁移文件，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Linux</label><label for="__tabbed_28_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:2"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Linux</label><label for="__tabbed_30_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
@@ -5987,9 +6085,9 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <p class="admonition-title">MariaDB/MySQL 客户端兼容性</p>
 <p>BunkerWeb 的 Docker 镜像包含 MySQL <code>caching_sha2_password</code> 所需的 MariaDB Connector/C 身份验证插件。在 Linux 上，如果客户端报告无法加载 <code>caching_sha2_password</code>，请安装发行版提供的 MariaDB Connector/C 身份验证插件或兼容的 MySQL 客户端。不要将数据库帐户降级为 <code>mysql_native_password</code>，因为 MySQL <code>v9</code> 已不再提供该插件。</p>
 </div>
-<h3 id="_15">初始化迁移</h3>
+<h3 id="_16">初始化迁移<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
 <p>要手动初始化迁移，请执行以下命令：</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:3"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Linux</label><label for="__tabbed_29_2">Docker</label><label for="__tabbed_29_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
@@ -6026,11 +6124,11 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 </div>
 <p>此命令将您的 BunkerWeb 数据无缝迁移，以精确匹配迁移文件中概述的配置。</p>
-<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#anti-ddos-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>Anti DDoS</strong> 插件通过实时监控、分析和过滤可疑流量，提供针对分布式拒绝服务 (DDoS) 攻击的高级保护。</p>
 <p>通过采用<strong>滑动窗口机制</strong>，该插件在内存中维护一个请求时间戳字典，以检测来自单个 IP 地址的异常流量峰值。根据配置的安全模式，它可以阻止违规连接或记录可疑活动以供进一步审查。</p>
-<h3 id="_16">功能</h3>
+<h3 id="_17">功能<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>实时流量分析：</strong> 持续监控传入请求以检测潜在的 DDoS 攻击。</li>
 <li><strong>滑动窗口机制：</strong> 在可配置的时间窗口内跟踪最近的请求活动。</li>
@@ -6040,7 +6138,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>优化的内存数据存储：</strong> 确保高速查找和高效的指标跟踪。</li>
 <li><strong>自动清理：</strong> 定期清除过时数据以保持最佳性能。</li>
 </ul>
-<h3 id="_17">配置</h3>
+<h3 id="_18">配置<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
 <p>使用以下设置自定义插件行为：</p>
 <table>
 <thead>
@@ -6097,13 +6195,13 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="_18">最佳实践</h3>
+<h3 id="_19">最佳实践<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>阈值调整：</strong> 根据您的典型流量模式调整 <code>ANTIDDOS_THRESHOLD</code> 和 <code>ANTIDDOS_WINDOW_TIME</code>。</li>
 <li><strong>状态码审查：</strong> 定期更新 <code>ANTIDDOS_STATUS_CODES</code> 以捕获新的或不断演变的可疑行为。</li>
 <li><strong>监控：</strong> 定期分析日志和指标以微调设置并提高整体保护。</li>
 </ul>
-<h2 id="user-manager-pro">用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="user-manager-pro">用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#user-manager-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -6111,7 +6209,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 
 <p><strong>用户管理器</strong>插件提供了一个强大的界面，用于管理系统内的用户帐户。</p>
 <p>借助此插件，管理员可以轻松创建、更新和禁用用户帐户，管理用户角色，切换双因素身份验证 (2FA)，并查看详细的用户信息，例如上次登录时间戳和帐户状态（活动或非活动）。该插件在设计时考虑了安全性和易用性，简化了常规的用户管理任务，同时确保了合规性和可审计性。</p>
-<h3 id="_19">功能</h3>
+<h3 id="_20">功能<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>用户帐户操作：</strong> 支持以 CSV/XLSX 格式导入，轻松创建、编辑和删除用户帐户。</li>
 <li><strong>基于角色的访问控制：</strong> 分配和修改用户角色以管理权限和访问级别。</li>
@@ -6119,7 +6217,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>全面的用户洞察：</strong> 监控关键用户数据，包括上次登录时间、帐户创建日期以及活动/非活动状态。</li>
 <li><strong>审计日志记录：</strong> 维护所有用户管理操作的审计跟踪，以增强安全性和合规性。</li>
 </ul>
-<h3 id="_20">配置</h3>
+<h3 id="_21">配置<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -6155,7 +6253,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
   </p>
 <figcaption>用户管理器 - 活动页面</figcaption>
 </figure>
-<h2 id="ui-single-sign-on-pro">UI 单点登录 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="ui-single-sign-on-pro">UI 单点登录 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#ui-single-sign-on-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>UI 单点登录</strong>插件通过读取放置在 Web UI 前方的外部认证代理（如 Authentik、Authelia、Keycloak 或 Traefik Forward Auth）设置的请求头，为 BunkerWeb Web 界面启用 SSO 认证。</p>
 <p>管理员无需为 BunkerWeb 单独管理凭据，可以将认证委托给现有的身份提供方。认证代理完成用户登录后，在将请求转发到 BunkerWeb Web UI 之前注入身份头信息。</p>
@@ -6164,7 +6262,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <p>SSO 请求头可以被任何客户端轻松伪造。您<strong>必须</strong>将 <code>UI_SSO_TRUSTED_IPS</code> 限制为认证代理的 IP 地址。如果此设置配置不正确，任何客户端都可以发送伪造的请求头并获取未授权访问——包括管理员权限。</p>
 <p>默认值 <code>127.0.0.1,::1</code> 仅信任本地回环地址。在 <strong>Docker、Swarm 或 Kubernetes</strong> 部署中，认证代理运行在具有独立 IP 的单独容器中。请将 <code>UI_SSO_TRUSTED_IPS</code> 设置为认证代理容器的实际 IP 或 CIDR（例如 <code>10.20.30.5</code> 或 <code>172.18.0.0/16</code>）。切勿设为 <code>0.0.0.0/0</code>。</p>
 </div>
-<h3 id="_21">功能</h3>
+<h3 id="_22">功能<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>基于请求头的认证：</strong> 从认证代理的请求头中读取用户名、邮箱、显示名称和分组信息。</li>
 <li><strong>分组到角色的映射：</strong> 将 IdP 的分组映射到 BunkerWeb 的角色（admin、writer、reader）。</li>
@@ -6174,7 +6272,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>回退到普通登录：</strong> 当 SSO 请求头不存在时，可选允许密码登录。</li>
 <li><strong>登出重定向：</strong> 本地登出后将用户重定向到 SSO 提供方的登出端点。</li>
 </ul>
-<h3 id="_22">配置</h3>
+<h3 id="_23">配置<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -6293,7 +6391,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="_23">快速开始</h3>
+<h3 id="_24">快速开始<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h3>
 <ol>
 <li>在 BunkerWeb Web UI 前放置认证代理（Authentik、Authelia、Keycloak 等）。</li>
 <li>启用插件：<code>USE_UI_SSO=yes</code>。</li>
@@ -6301,19 +6399,19 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li>限制可信来源：将 <code>UI_SSO_TRUSTED_IPS</code> 设置为认证代理的 IP 地址。</li>
 <li>映射分组到角色：将 <code>UI_SSO_GROUP_ADMIN</code>、<code>UI_SSO_GROUP_WRITER</code> 和 <code>UI_SSO_GROUP_READER</code> 设置为与 IdP 分组名称匹配。</li>
 </ol>
-<h3 id="_24">使用提示</h3>
+<h3 id="_25">使用提示<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h3>
 <ul>
 <li>在生产环境中设置 <code>UI_SSO_FALLBACK_TO_LOGIN=no</code> 以强制仅通过 SSO 访问。当保持默认值 <code>yes</code> 时，用户可以绕过 SSO 使用本地凭据登录，从而跳过身份提供方强制执行的 MFA 或会话策略。</li>
 <li>保持 <code>UI_SSO_UPDATE_USER_ON_LOGIN</code> 的默认值（<code>yes</code>），以确保角色与 IdP 分组变更保持同步。</li>
 <li>使用 <code>UI_SSO_ACCOUNT_LINKING=username_or_email</code> 时，首次 SSO 登录会自动关联用户名或邮箱匹配的现有本地帐户。如果您的 IdP 允许用户设置任意邮箱地址，请使用 <code>username_only</code> 以防止通过邮箱伪造接管帐户。</li>
 </ul>
-<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#easy-resolve-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/45vX0WJqjxo" title="Easy Resolve" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>轻松解决插件让您可以直接从报告页面快速修复误报和重复出现的问题。它将引导式的“解决”操作转化为安全、范围受限的配置更新——无需手动编辑。</p>
-<h3 id="_25">功能</h3>
+<h3 id="_26">功能<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h3>
 <ul>
 <li>从报告和报告详情中一键操作。</li>
 <li>针对 ModSecurity、黑名单、DNSBL、速率限制、允许的 HTTP 方法和白名单/黑名单国家的上下文感知建议。</li>
@@ -6326,13 +6424,13 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
   </p>
 <figcaption>报告页面 - 带有轻松解决功能</figcaption>
 </figure>
-<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#load-balancer-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p>Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一次声明上游池，将您的反向代理指向它们，并让健康感知平衡将用户保持在响应式后端上。粘性 cookie 模式自动发出 <code>BWLBID</code> cookie，以便会话保持在您想要的地方。</p>
-<h3 id="_26">功能</h3>
+<h3 id="_27">功能<a class="headerlink" href="#_27" title="Permanent link">&para;</a></h3>
 <ul>
 <li>每个上游块：命名池并在反向代理主机上重用。</li>
 <li>灵活平衡：默认 round-robin，或通过 IP 或签名 cookie 粘性。</li>
@@ -6340,7 +6438,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li>内置健康：HTTP/HTTPS 探测，具有自定义路径、间隔、状态代码和 SSL 检查。</li>
 <li>会话连续性：启用粘性 cookie 模式时自动 <code>BWLBID</code> cookie。</li>
 </ul>
-<h3 id="_27">配置</h3>
+<h3 id="_28">配置<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h3>
 <p><strong>上游定义</strong></p>
 <table>
 <thead>
@@ -6502,7 +6600,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="_28">快速开始</h3>
+<h3 id="_29">快速开始<a class="headerlink" href="#_29" title="Permanent link">&para;</a></h3>
 <ol>
 <li>定义您的池：设置 <code>LOADBALANCER_UPSTREAM_NAME=my-app</code> 并在 <code>LOADBALANCER_UPSTREAM_SERVERS</code> 中列出目标（例如 <code>10.0.0.1:8080 10.0.0.2:8080</code>）。</li>
 <li>指向流量：设置 <code>REVERSE_PROXY_HOST=http://my-app</code> 以便反向代理使用命名的上游。</li>
@@ -6510,17 +6608,17 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li>添加健康：保持 <code>/status</code> 或调整 URL、间隔和有效状态以反映您的应用行为。</li>
 <li>调整连接：配置 keepalive 值以重用后端连接并减少握手开销。</li>
 </ol>
-<h3 id="_29">使用提示</h3>
+<h3 id="_30">使用提示<a class="headerlink" href="#_30" title="Permanent link">&para;</a></h3>
 <ul>
 <li>使用粘性 cookie 时，将 <code>REVERSE_PROXY_HOST</code> 与 <code>LOADBALANCER_UPSTREAM_NAME</code> 匹配，以便客户端固定到正确的池。</li>
 <li>保持健康检查间隔和超时平衡，以避免在慢速链路上波动。</li>
 <li>当指向可能通过 DNS 更改的主机名时启用 <code>LOADBALANCER_UPSTREAM_RESOLVE</code>。</li>
 <li>调整 keepalive 值以反映后端容量和连接重用目标。</li>
 </ul>
-<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="custom-pages-pro">Custom Pages <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#custom-pages-pro" title="Permanent link">&para;</a></h2>
 <p>Custom Pages 插件允许您将 BunkerWeb 的内置页面（错误页面、默认服务器页面和反机器人挑战页面）替换为您自己的自定义 HTML 或 Lua 模板。这使您能够在 BunkerWeb 提供的所有面向用户的页面上保持一致的品牌形象。</p>
 <p>有关 Maintenance 行为和自定义的信息，请参阅<a href="./#maintenance-pro">Maintenance 高级指南</a>。</p>
-<h3 id="_30">功能</h3>
+<h3 id="_31">功能<a class="headerlink" href="#_31" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>每个服务的自定义错误页面</strong>和<strong>反机器人挑战页面</strong>（验证码、JavaScript 检查、reCAPTCHA、hCaptcha、Turnstile、mCaptcha、Cap.js）。</li>
 <li><strong>全局自定义默认服务器页面</strong>用于回退/默认虚拟主机。</li>
@@ -6528,14 +6626,14 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <li><strong>自动缓存</strong>到 <code>/var/cache/bunkerweb/custom_pages</code>，带有变更检测以触发重新加载。</li>
 <li><strong>每站点或全局配置</strong>通过设置/UI 或环境变量。</li>
 </ul>
-<h3 id="_31">工作原理</h3>
+<h3 id="_32">工作原理<a class="headerlink" href="#_32" title="Permanent link">&para;</a></h3>
 <ol>
 <li>在启动时（或当设置更改时），<code>custom-pages.py</code> 作业读取配置的模板路径。</li>
 <li>每个文件必须存在且可被调度器读取；作业验证 HTML 结构和平衡的 Lua 模板标签（<code>{% %}</code>、<code>{{ }}</code>、<code>{* *}</code>）。</li>
 <li>接受的文件缓存在 <code>/var/cache/bunkerweb/custom_pages/&lt;type&gt;.html</code> 下；缺失/空设置会删除缓存文件。</li>
 <li>当至少存在一个缓存页面时，NGINX 通过 <code>$template_root</code> 指向缓存目录，因此您的模板将替代默认页面提供服务。</li>
 </ol>
-<h3 id="_32">配置设置</h3>
+<h3 id="_33">配置设置<a class="headerlink" href="#_33" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -6608,9 +6706,9 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="_33">模板变量参考</h3>
+<h3 id="_34">模板变量参考<a class="headerlink" href="#_34" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb 模板使用 <a href="https://github.com/bungle/lua-resty-template">lua-resty-template</a> 引擎。以下变量根据页面类型可用：</p>
-<h4 id="_34">错误页面变量</h4>
+<h4 id="_35">错误页面变量<a class="headerlink" href="#_35" title="Permanent link">&para;</a></h4>
 <p>这些变量在自定义错误页面模板（<code>CUSTOM_ERROR_PAGE</code>）中可用：</p>
 <table>
 <thead>
@@ -6678,7 +6776,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h4 id="_35">默认服务器页面变量</h4>
+<h4 id="_36">默认服务器页面变量<a class="headerlink" href="#_36" title="Permanent link">&para;</a></h4>
 <p>这些变量在自定义默认服务器页面模板（<code>CUSTOM_DEFAULT_SERVER_PAGE</code>）中可用：</p>
 <table>
 <thead>
@@ -6696,7 +6794,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h4 id="_36">反机器人挑战页面变量</h4>
+<h4 id="_37">反机器人挑战页面变量<a class="headerlink" href="#_37" title="Permanent link">&para;</a></h4>
 <p>这些变量在反机器人挑战页面模板中可用：</p>
 <p><strong>通用变量（所有反机器人页面）：</strong></p>
 <table>
@@ -6859,7 +6957,7 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </tr>
 </tbody>
 </table>
-<h3 id="_37">模板语法</h3>
+<h3 id="_38">模板语法<a class="headerlink" href="#_38" title="Permanent link">&para;</a></h3>
 <p>模板使用 Lua 模板语法，具有以下分隔符：</p>
 <ul>
 <li><code>{{ variable }}</code> – 输出变量（HTML 转义）</li>
@@ -6875,8 +6973,8 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 <span class="w">  </span><span class="c1">// 您的 JavaScript</span>
 <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
 </code></pre></div>
-<h3 id="_38">示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">自定义错误页面</label><label for="__tabbed_30_2">自定义验证码页面</label><label for="__tabbed_30_3">自定义默认服务器页面</label></div>
+<h3 id="_39">示例<a class="headerlink" href="#_39" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:3"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">自定义错误页面</label><label for="__tabbed_32_2">自定义验证码页面</label><label for="__tabbed_32_3">自定义默认服务器页面</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>在 <code>/etc/bunkerweb/templates/error.html</code> 创建自定义错误页面模板：</p>
@@ -7066,8 +7164,8 @@ kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/mcp-bunke
 </div>
 </div>
 </div>
-<h3 id="_39">部署示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:3"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Linux</label><label for="__tabbed_31_2">Docker</label><label for="__tabbed_31_3">Kubernetes</label></div>
+<h3 id="_40">部署示例<a class="headerlink" href="#_40" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:3"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Linux</label><label for="__tabbed_33_2">Docker</label><label for="__tabbed_33_3">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -7242,7 +7340,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </div>
 </div>
 </div>
-<h3 id="_40">注意事项和故障排除</h3>
+<h3 id="_41">注意事项和故障排除<a class="headerlink" href="#_41" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>路径必须是绝对路径</strong>并以文件名结尾；空值会禁用相应的自定义页面并删除其缓存。</li>
 <li><strong>如果验证失败</strong>（错误的 HTML 或不平衡的 Lua 标签），模板将被跳过，默认页面保持活动状态。检查调度器日志以获取详细信息。</li>
@@ -7250,9 +7348,9 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>CSP 合规</strong>：始终对内联脚本和样式使用 <code>nonce_script</code> 和 <code>nonce_style</code> 变量，以确保正确的内容安全策略处理。</li>
 <li><strong>测试模板</strong>：您可以在部署到 BunkerWeb 之前使用 Lua 模板引擎在本地渲染测试您的模板。</li>
 </ul>
-<h2 id="maintenance-pro">维护 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="maintenance-pro">维护 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
 <p>当应用程序不可用时，维护功能会将标准反向代理位置的响应替换为维护页面。它按服务选择启用，返回 <code>503 Service Unavailable</code>，并且永远不会到达上游。多站点设置的默认值为 <code>no</code>。</p>
-<h3 id="_41">启用并应用维护模式</h3>
+<h3 id="_42">启用并应用维护模式<a class="headerlink" href="#_42" title="Permanent link">&para;</a></h3>
 <p>在使用标准反向代理的现有多站点服务上，将 <code>USE_MAINTENANCE</code> 设置为 <code>yes</code>。以下片段展示相关环境变量；请将其合并到调度器配置中，不要将其当作完整的 Compose 文件：</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 单个反向代理服务的调度器环境片段</span>
 <span class="nt">environment</span><span class="p">:</span>
@@ -7263,12 +7361,12 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p>请通过常规 BunkerWeb 集成应用。调度器会生成服务配置并重新加载 worker。将 <code>app.example.com_USE_MAINTENANCE</code> 设置为 <code>no</code> 并再次应用，即可恢复代理。如果反向代理设置已经存在，则只需要这一项设置。</p>
 <p>Web UI 提供两个快速开关：服务页面 <strong>Maintenance</strong> 列中的扳手图标按钮，以及服务编辑页面上的浮动扳手按钮。两者都会更新服务设置，并在不重新加载页面的情况下应用。编辑表单会保持同步，包括 Easy/Advanced 模式和原始编辑器；无关的未保存编辑仍会保留。</p>
 <p>这些开关需要可写数据库和服务写入权限。对于只读用户、只读数据库以及 <code>USE_UI=yes</code> 服务，开关会被禁用，以便内置 UI 保持可用。开关不会覆盖由外部管理的 <code>USE_MAINTENANCE</code> 值；请通过其所有者进行更改。应用正在进行时，开关会被拒绝。</p>
-<h3 id="_42">请求行为和范围</h3>
+<h3 id="_43">请求行为和范围<a class="headerlink" href="#_43" title="Permanent link">&para;</a></h3>
 <p>维护功能仅适用于由 BunkerWeb 标准反向代理配置生成的位置，包括 <code>REVERSE_PROXY_HOST</code> 及其编号变体。它不会添加代理位置、修改自定义位置，也不会接管手动 rewrite 处理程序。如果自定义配置替换了这些处理程序或后端变量，请自行集成维护响应。</p>
 <p>维护功能会保留现有 HTTPS 策略，因此启用的 HTTP 到 HTTPS 重定向会先发生。在实际的 HTTPS origin 上，它返回 <code>503</code>，并带有 <code>Cache-Control: no-store</code>、限制性 Content Security Policy 和 <code>X-Content-Type-Options: nosniff</code>。</p>
 <p>GET、POST、OPTIONS 和 WebSocket 握手会收到维护页面。BunkerWeb 会丢弃请求正文，因此 POST 正文不会被转发或重放。HEAD 会收到相同的状态和请求头，但不带正文。现有 WebSocket 不会被显式关闭；重新加载期间会执行正常的 worker 关闭。</p>
 <p>维护功能在身份验证、反机器人和其他访问检查之前运行，因此加入白名单的客户端和检测模式服务也会收到维护页面。本地 NGINX 位置、内部 API 和健康检查端点保持正常行为。<code>/.well-known/acme-challenge/</code> 以及已配置的 Let's Encrypt 透传也一样。维护功能保留此例外；它既不会签发证书，也不会创建 ACME 处理程序。</p>
-<h3 id="_43">自定义维护页面</h3>
+<h3 id="_44">自定义维护页面<a class="headerlink" href="#_44" title="Permanent link">&para;</a></h3>
 <p>随附页面无需 Custom Pages 即可工作。要使用 Custom Pages 自定义它，请打开 Custom Pages 编辑器并选择 <strong>Maintenance</strong>。<strong>Easy Mode</strong> 可以编辑维护标题和消息、favicon、页脚徽标/文本以及 SVG 插图。标题会更新浏览器标题和页面标题；空标题或空插图会保留默认值。请保留 SVG 插图的 <code>maintenance-top</code> 和 <code>maintenance-tool</code> 类，以维持插图动画。</p>
 <p>在 <strong>Advanced Mode</strong> 中编辑完整的 HTML/Lua 模板。可用变量如下：</p>
 <table>
@@ -7296,7 +7394,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p>在每个内联样式和脚本中使用 nonce 值，例如 <code>nonce="{* nonce_style *}"</code>。响应通过 <code>data:</code> URL 允许嵌入式图像、SVG 和字体，并阻止其他 origin。请将资源内联或作为数据 URL；应用资源 URL 也会收到维护页面，无法加载依赖项。</p>
 <p>对于文件管理的页面，将 <code>CUSTOM_MAINTENANCE_PAGE</code> 设置为调度器可读取的绝对路径。它优先于 UI 模板，并锁定编辑器中的该作用域。如果未设置，服务会使用自己的 UI 模板或继承全局模板。<strong>Delete</strong> 会删除服务覆盖并恢复继承。<strong>Reset</strong> 会删除 UI 模板并强制使用随附页面，即使存在全局自定义。保存新的服务覆盖会清除其重置标记。使用 <code>USE_MAINTENANCE</code> 单独启用或禁用维护功能。</p>
 <p>Custom Pages 作业会在缓存前验证 HTML，并防护已知的 Lua 模板编译风险。无效源文件会保留上一次接受的缓存。活动页面不可用或失败时，会回退到随附页面，然后回退到最小紧急页面。渲染失败绝不会恢复代理流量。</p>
-<h3 id="_44">维护故障排除</h3>
+<h3 id="_45">维护故障排除<a class="headerlink" href="#_45" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>开关被禁用或遭到拒绝：</strong>检查写入权限、<code>USE_UI</code> 以及 <code>USE_MAINTENANCE</code> 的外部所有权；通过其所有者更改由外部管理的值。</li>
 <li><strong>应用程序仍然响应：</strong>确认标准反向代理位置同时具有 <code>USE_REVERSE_PROXY=yes</code> 和 <code>USE_MAINTENANCE=yes</code>。本地和 ACME 路径是例外。</li>
@@ -7304,14 +7402,14 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>显示的是随附页面：</strong>检查调度器可读取的文件、模板验证和调度器日志；文件设置会锁定 UI 模板。</li>
 <li><strong>内联资源或脚本缺失：</strong>将其嵌入，并使用 <code>nonce_style</code> 或 <code>nonce_script</code>；应用 URL 不可用。</li>
 </ul>
-<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="openid-connect-pro">OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#openid-connect-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
   <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/0e4lcXTIIfs" title="OpenID Connect" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p><strong>OpenID Connect</strong> 插件（PRO）通过标准 OAuth 2.0 / OIDC <strong>Authorization Code</strong> 流程，在您的应用前增加单点登录（SSO）。</p>
 <p>该插件运行在 BunkerWeb（NGINX/Lua）内部，并在 <strong>access 阶段</strong>强制执行认证，因此未认证请求会在到达上游之前被拦截。</p>
-<h3 id="_45">请求流程如何工作</h3>
+<h3 id="_46">请求流程如何工作<a class="headerlink" href="#_46" title="Permanent link">&para;</a></h3>
 <p>当浏览器访问受保护的 URL 时：</p>
 <ol>
 <li>若没有有效会话，BunkerWeb 会将用户重定向到身份提供方（IdP）。</li>
@@ -7344,31 +7442,31 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p class="admonition-title">回调 URL 必须与 IdP 客户端配置一致</p>
 <p>请在 IdP 侧注册完整的回调 URL（协议 + 主机 + 路径）。例如默认配置下为：<code>https://app.example.com/callback</code>。</p>
 </div>
-<h3 id="_46">设置（说明）</h3>
+<h3 id="_47">设置（说明）<a class="headerlink" href="#_47" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">必需设置</p>
 <p>至少需要配置 <code>OPENIDC_DISCOVERY</code> 与 <code>OPENIDC_CLIENT_ID</code>，插件才能工作。</p>
 </div>
-<h4 id="_47">基础启用</h4>
+<h4 id="_48">基础启用<a class="headerlink" href="#_48" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>USE_OPENIDC</code>（默认：<code>no</code>）：启用/禁用该站点的 OpenID Connect 认证。</li>
 </ul>
-<h4 id="idp">身份提供方（IdP）+ 客户端注册</h4>
+<h4 id="idp">身份提供方（IdP）+ 客户端注册<a class="headerlink" href="#idp" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_DISCOVERY</code>：discovery URL（例如 <code>https://idp.example.com/.well-known/openid-configuration</code>）。</li>
 <li><code>OPENIDC_CLIENT_ID</code>：在 IdP 注册的 OAuth 2.0 客户端 ID。</li>
 <li><code>OPENIDC_CLIENT_SECRET</code>：OAuth 2.0 客户端密钥（<code>basic</code>、<code>post</code>、<code>secret_jwt</code> 使用）。</li>
 </ul>
-<h4 id="_48">回调 / 重定向</h4>
+<h4 id="_49">回调 / 重定向<a class="headerlink" href="#_49" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_REDIRECT_URI</code>（默认：<code>/callback</code>）：IdP 认证完成后回调的路径（必须在 IdP 注册）。</li>
 </ul>
-<h4 id="scope">Scope 与授权参数</h4>
+<h4 id="scope">Scope 与授权参数<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_SCOPE</code>（默认：<code>openid email profile</code>）：以空格分隔的 scope 列表。</li>
 <li><code>OPENIDC_AUTHORIZATION_PARAMS</code>：额外授权参数，使用逗号分隔 <code>key=value</code>。</li>
 </ul>
-<h4 id="_49">安全加固</h4>
+<h4 id="_50">安全加固<a class="headerlink" href="#_50" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_USE_NONCE</code>（默认：<code>yes</code>）：在授权请求中加入 nonce。</li>
 <li><code>OPENIDC_USE_PKCE</code>（默认：<code>no</code>）：为 Authorization Code 流程启用 PKCE。</li>
@@ -7376,7 +7474,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><code>OPENIDC_ACCEPT_UNSUPPORTED_ALG</code>（默认：<code>no</code>）：接受不支持算法签名的令牌（不推荐）。</li>
 <li><code>OPENIDC_FORCE_REAUTHORIZE</code>（默认：<code>no</code>）：每次请求都强制重新授权（仅调试）。</li>
 </ul>
-<h4 id="claim-acl">基于 claim 的访问控制（ACL）</h4>
+<h4 id="claim-acl">基于 claim 的访问控制（ACL）<a class="headerlink" href="#claim-acl" title="Permanent link">&para;</a></h4>
 <p>Claim 是 OIDC 令牌中描述用户属性的键值对（例如 <code>email</code>、<code>groups</code>、<code>sub</code>）。ACL 功能允许您根据特定的 claim 值限制访问。</p>
 <table>
 <thead>
@@ -7438,40 +7536,40 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </code></pre></div>
 <p>当 <code>OPENIDC_ACL_MATCH_MODE=any</code> 时，用户属于 <code>engineering</code> 分组<strong>或</strong>邮箱为 <code>admin@example.com</code> 即可获得访问权限。当设为 <code>all</code> 时，两个条件必须同时满足。</p>
 </div>
-<h4 id="_50">会话/令牌生命周期</h4>
+<h4 id="_51">会话/令牌生命周期<a class="headerlink" href="#_51" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_REFRESH_SESSION_INTERVAL</code>：静默重新认证/刷新会话的间隔（秒，空值禁用）。</li>
 <li><code>OPENIDC_ACCESS_TOKEN_EXPIRES_IN</code>（默认：<code>3600</code>）：当 IdP 未返回时使用的 access token 默认有效期。</li>
 <li><code>OPENIDC_RENEW_ACCESS_TOKEN_ON_EXPIRY</code>（默认：<code>yes</code>）：access token 过期时使用 refresh token 自动续期。</li>
 </ul>
-<h4 id="token-endpoint">Token endpoint 认证设置</h4>
+<h4 id="token-endpoint">Token endpoint 认证设置<a class="headerlink" href="#token-endpoint" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD</code>（默认：<code>basic</code>）：<code>basic</code>、<code>post</code>、<code>secret_jwt</code>、<code>private_key_jwt</code>。</li>
 <li><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code>：使用 <code>private_key_jwt</code> 时必需。</li>
 <li><code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code>：<code>private_key_jwt</code> 可选 <code>kid</code>。</li>
 <li><code>OPENIDC_CLIENT_JWT_ASSERTION_EXPIRES_IN</code>：JWT 断言有效期（秒）。</li>
 </ul>
-<h4 id="_51">登出行为</h4>
+<h4 id="_52">登出行为<a class="headerlink" href="#_52" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_LOGOUT_PATH</code>（默认：<code>/logout</code>）：由 BunkerWeb 处理的本地登出路径。</li>
 <li><code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT</code>（默认：<code>no</code>）：登出时在 IdP 侧吊销令牌。</li>
 <li><code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code>：本地登出后的跳转（空值使用 IdP 默认行为）。</li>
 <li><code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code>：IdP 登出完成后的跳转（若 IdP 支持）。</li>
 </ul>
-<h4 id="idp-tls">到 IdP 的连接与 TLS</h4>
+<h4 id="idp-tls">到 IdP 的连接与 TLS<a class="headerlink" href="#idp-tls" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_TIMEOUT_CONNECT|SEND|READ</code>（默认：每项 <code>10000</code> ms）：访问 IdP 的 HTTP 超时。</li>
 <li><code>OPENIDC_SSL_VERIFY</code>（默认：<code>yes</code>）：校验 IdP TLS 证书。</li>
 <li><code>OPENIDC_KEEPALIVE</code>（默认：<code>yes</code>）：IdP 连接 keepalive。</li>
 <li><code>OPENIDC_HTTP_PROXY</code> / <code>OPENIDC_HTTPS_PROXY</code>：访问 IdP 的代理配置。</li>
 </ul>
-<h4 id="_52">向上游传递身份</h4>
+<h4 id="_53">向上游传递身份<a class="headerlink" href="#_53" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_USER_HEADER</code>（默认：<code>X-User</code>）：传递到上游的身份 header（空值禁用）。</li>
 <li><code>OPENIDC_USER_HEADER_CLAIM</code>（默认：<code>sub</code>）：用于生成 header 值的 claim。</li>
 <li><code>OPENIDC_DISPLAY_CLAIM</code>（默认：<code>preferred_username</code>）：用于日志/指标展示的 claim。</li>
 </ul>
-<h4 id="_53">缓存</h4>
+<h4 id="_54">缓存<a class="headerlink" href="#_54" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>OPENIDC_DISCOVERY_DICT_SIZE</code>（默认：<code>1m</code>）：discovery 缓存的 shared dict 大小。</li>
 <li><code>OPENIDC_JWKS_DICT_SIZE</code>（默认：<code>1m</code>）：JWKS 缓存的 shared dict 大小。</li>
@@ -7480,17 +7578,17 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p class="admonition-title">Redis 会话存储</p>
 <p>当全局配置 <code>USE_REDIS=yes</code> 且 Redis 可用时，OpenIDC 插件会把会话存储到 Redis 而不是 Cookie（若 Redis 暂不可用会自动回退到 Cookie）。这是多实例/高可用部署的推荐模式。</p>
 </div>
-<h3 id="discovery-jwks">Discovery + JWKS 缓存</h3>
+<h3 id="discovery-jwks">Discovery + JWKS 缓存<a class="headerlink" href="#discovery-jwks" title="Permanent link">&para;</a></h3>
 <p>插件通过 <code>OPENIDC_DISCOVERY</code>（IdP 的 <code>.well-known/openid-configuration</code>）发现各端点，然后获取并缓存 JWKS，用于校验令牌签名。</p>
 <p>Discovery/JWKS 数据会缓存在 NGINX shared dict 中。如果您有很多租户/IdP 或非常大的密钥集合，可增大：</p>
 <ul>
 <li><code>OPENIDC_DISCOVERY_DICT_SIZE</code>（global）</li>
 <li><code>OPENIDC_JWKS_DICT_SIZE</code>（global）</li>
 </ul>
-<h3 id="cookie-vs-redis">会话（Cookie vs Redis）</h3>
+<h3 id="cookie-vs-redis">会话（Cookie vs Redis）<a class="headerlink" href="#cookie-vs-redis" title="Permanent link">&para;</a></h3>
 <p>默认情况下，会话以安全 Cookie 的形式存储，由 OpenID Connect 库管理。</p>
 <p>当 <code>USE_REDIS=yes</code> 且 Redis 配置正确时，插件会自动切换为 <strong>Redis 会话</strong>（Redis 临时不可用时会自动回退到 Cookie）。推荐用于负载均衡/高可用场景，并可避免令牌较大时的 Cookie 大小限制。</p>
-<h3 id="_54">向上游传递用户身份</h3>
+<h3 id="_55">向上游传递用户身份<a class="headerlink" href="#_55" title="Permanent link">&para;</a></h3>
 <p>如果设置了 <code>OPENIDC_USER_HEADER</code>（默认：<code>X-User</code>），插件会从某个 claim 中提取值注入到 header（默认：<code>OPENIDC_USER_HEADER_CLAIM=sub</code>）。</p>
 <p>重要的安全行为：</p>
 <ul>
@@ -7502,20 +7600,20 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p class="admonition-title">选择 claim</p>
 <p>优先使用令牌中稳定存在的标识（例如 <code>sub</code>、<code>email</code>、<code>preferred_username</code>）。claim 先从 ID token 读取，不存在时再从 userinfo 读取（若有）。</p>
 </div>
-<h3 id="_55">登出</h3>
+<h3 id="_56">登出<a class="headerlink" href="#_56" title="Permanent link">&para;</a></h3>
 <p>登出请求在 <code>OPENIDC_LOGOUT_PATH</code>（默认：<code>/logout</code>）处理。</p>
 <ul>
 <li>如需登出时在 IdP 侧吊销令牌，请设置 <code>OPENIDC_REVOKE_TOKENS_ON_LOGOUT=yes</code>。</li>
 <li>使用 <code>OPENIDC_REDIRECT_AFTER_LOGOUT_URI</code> 与 <code>OPENIDC_POST_LOGOUT_REDIRECT_URI</code> 控制登出后的跳转。</li>
 </ul>
-<h3 id="token-endpoint_1">Token endpoint 认证</h3>
+<h3 id="token-endpoint_1">Token endpoint 认证<a class="headerlink" href="#token-endpoint_1" title="Permanent link">&para;</a></h3>
 <p>大多数 IdP 使用默认的 <code>OPENIDC_TOKEN_ENDPOINT_AUTH_METHOD=basic</code>（HTTP Basic 携带 client secret）即可工作。也支持：</p>
 <ul>
 <li><code>post</code></li>
 <li><code>secret_jwt</code></li>
 <li><code>private_key_jwt</code>（需要 <code>OPENIDC_CLIENT_RSA_PRIVATE_KEY</code>，可选 <code>OPENIDC_CLIENT_RSA_PRIVATE_KEY_ID</code>）</li>
 </ul>
-<h3 id="_56">最小配置示例</h3>
+<h3 id="_57">最小配置示例<a class="headerlink" href="#_57" title="Permanent link">&para;</a></h3>
 <p>每个受保护服务至少需要：</p>
 <ul>
 <li><code>USE_OPENIDC=yes</code></li>
@@ -7531,16 +7629,16 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>根据 IdP 延迟调整 <code>OPENIDC_TIMEOUT_CONNECT|SEND|READ</code></li>
 <li><code>OPENIDC_SSL_VERIFY=yes</code>（默认）</li>
 </ul>
-<h3 id="_57">故障排除</h3>
+<h3 id="_58">故障排除<a class="headerlink" href="#_58" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>403 且显示 "Authentication failed"</strong>：常见原因是 discovery URL 错误、IdP 侧回调 URL 不匹配或 IdP 不可达。</li>
 <li><strong>时钟偏差 / "token not yet valid"</strong>：确保启用 NTP；必要时调整 <code>OPENIDC_IAT_SLACK</code>。</li>
 <li><strong>未注入用户 header</strong>：确认 <code>OPENIDC_USER_HEADER_CLAIM</code> 指定的 claim 在 ID token/userinfo 中存在。</li>
 <li><strong>多实例部署</strong>：启用 <code>USE_REDIS=yes</code> 并配置 <code>REDIS_HOST</code>（或 Sentinel）以共享会话。</li>
 </ul>
-<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="saml-pro">SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#saml-pro" title="Permanent link">&para;</a></h2>
 <p><strong>SAML</strong> 插件（PRO）使 BunkerWeb 成为用于浏览器 SSO 的 SAML 2.0 服务提供商（SP）。它接受断言由受信任签名覆盖的 IdP 响应，创建会话，并可将选定属性作为请求头暴露给受保护的上游。支持 BunkerWeb 1.6.14 及之后的 1.6.x 版本。</p>
-<h3 id="_58">前提条件和信任材料</h3>
+<h3 id="_59">前提条件和信任材料<a class="headerlink" href="#_59" title="Permanent link">&para;</a></h3>
 <p>为每个受保护服务使用公开 HTTPS origin，例如 <code>https://app.example.com</code>，且不带尾部斜杠、路径或查询字符串。允许使用非标准 HTTPS 端口。SAML 需要三份 PEM 材料：</p>
 <ul>
 <li>用于 SP 的<strong>未加密 RSA 私钥</strong>；</li>
@@ -7548,7 +7646,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>IdP 的 PEM 签名证书，BunkerWeb 在验证断言时信任该证书。</li>
 </ul>
 <p>SP 密钥和证书必须匹配，并且必须是至少 2048 位的 RSA 密钥。IdP SSO URL 以及（如果提供）IdP SLO URL 必须使用 HTTPS。请保密私钥；BunkerWeb 使用它来签署身份验证和注销请求。</p>
-<h3 id="ui-saml">在 UI 中配置 SAML</h3>
+<h3 id="ui-saml">在 UI 中配置 SAML<a class="headerlink" href="#ui-saml" title="Permanent link">&para;</a></h3>
 <p>为目标服务打开 <strong>SAML</strong> 并选择其作用域。表单将设置分为 IdP、SP、会话、身份请求头和 ACL 部分。按以下顺序操作：</p>
 <ol>
 <li>为服务启用 <code>USE_SAML</code>。</li>
@@ -7559,7 +7657,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>配置身份属性和 ACL 规则，然后再次保存并应用。</li>
 </ol>
 <p>BunkerWeb 会导出 SP 元数据，但不会导入或自动刷新 IdP 元数据。请先配置 IdP 字段和证书，然后导出元数据，以避免循环配置。</p>
-<h3 id="_59">浏览器请求流程</h3>
+<h3 id="_60">浏览器请求流程<a class="headerlink" href="#_60" title="Permanent link">&para;</a></h3>
 <p>SP 发起的登录使用 SP 私钥对 AuthnRequest 签名，并通过 HTTP-Redirect 发送给 IdP。IdP 通过 HTTP-POST 将断言由其签名覆盖的响应返回给 ACS。在创建会话之前，BunkerWeb 会验证关联关系、目标、签发者、断言时间戳、签名和重放状态。原始请求正文不会被重放。</p>
 <pre class="mermaid"><code>sequenceDiagram
   participant B as 浏览器
@@ -7578,7 +7676,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
   BW-&gt;&gt;Up: 请求及已配置的身份请求头
   Up--&gt;&gt;BW: 响应
   BW--&gt;&gt;B: 响应</code></pre>
-<h3 id="_60">端点</h3>
+<h3 id="_61">端点<a class="headerlink" href="#_61" title="Permanent link">&para;</a></h3>
 <p>所有端点路径都是公开 SP origin 上的本地路径。默认值是多站点设置，在服务允许时可以更改。</p>
 <table>
 <thead>
@@ -7617,7 +7715,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tbody>
 </table>
 <p><code>SAML_LOGOUT_REDIRECT</code>（默认值为 <code>/</code>）是注销后使用的本地路径。请保持四个端点路径互不相同，并且不包含查询字符串、片段、反斜杠、空白或路径遍历片段。</p>
-<h3 id="keycloak-2652">Keycloak 26.5.2 注册</h3>
+<h3 id="keycloak-2652">Keycloak 26.5.2 注册<a class="headerlink" href="#keycloak-2652" title="Permanent link">&para;</a></h3>
 <p><a href="https://github.com/keycloak/keycloak/blob/26.5.2/docs/documentation/server_admin/topics/clients/saml/proc-creating-saml-client.adoc">Keycloak 26.5.2 SAML 客户端指南</a>使用客户端的 <strong>Settings</strong>、<strong>Keys</strong> 和 <strong>Advanced</strong> 选项卡。对于 BunkerWeb 的默认端点布局，请使用以下值。将 <code>https://app.example.com</code> 替换为准确的 <code>SAML_SP_BASE_URL</code>。</p>
 <p>使用这些注册值创建已启用的 SAML 客户端。在 Keycloak UI 中，<strong>Enabled</strong> 和 <strong>Front channel logout</strong> 已开启（<code>true</code>）；客户端协议为 <code>SAML</code>。</p>
 <table>
@@ -7667,9 +7765,9 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <span class="nt">saml_single_logout_service_url_redirect</span><span class="p">:</span><span class="w"> </span><span class="s">"https://app.example.com/saml/sls"</span>
 </code></pre></div>
 <p>为 <code>email</code>、<code>groups</code> 和 <code>name</code> 添加协议映射器。对每个映射器，使用 <code>protocol: "saml"</code>、<code>protocolMapper: "saml-user-attribute-mapper"</code> 和 <code>consentRequired: false</code>；将 <code>config.user.attribute</code> 和 <code>config.attribute.name</code> 设置为同一属性，并将 <code>config.attribute.nameformat</code> 设置为 <code>Basic</code>。确保 IdP 用户确实具有这些属性；缺少声明时不会生成相应的上游请求头。</p>
-<h3 id="_61">设置（说明）</h3>
+<h3 id="_62">设置（说明）<a class="headerlink" href="#_62" title="Permanent link">&para;</a></h3>
 <p>以下默认值来自 SAML 插件设置。空默认值显示为 <code>empty</code>。</p>
-<h4 id="_62">启用、信任和路径</h4>
+<h4 id="_63">启用、信任和路径<a class="headerlink" href="#_63" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -7751,7 +7849,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tr>
 </tbody>
 </table>
-<h4 id="_63">会话和身份请求头</h4>
+<h4 id="_64">会话和身份请求头<a class="headerlink" href="#_64" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -7824,7 +7922,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tbody>
 </table>
 <p>在身份验证之前，BunkerWeb 会从传入请求中清除每个已配置的 SAML 身份请求头。只有在响应有效且映射属性存在时才添加请求头。请求头名称必须唯一、语法有效，且不能使用路由或安全敏感前缀，例如 <code>X-Forwarded-*</code>、<code>Proxy-*</code> 或 <code>Sec-*</code>。这些请求头会将身份传递给受保护的上游；它们不会让用户登录 BunkerWeb Web UI。</p>
-<h4 id="acl">属性 ACL</h4>
+<h4 id="acl">属性 ACL<a class="headerlink" href="#acl" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -7877,7 +7975,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <span class="nt">app.example.com_SAML_ACL_VALUE_2</span><span class="p">:</span><span class="w"> </span><span class="s">"admin@example.com"</span>
 </code></pre></div>
 <p>第一对为 <code>_1</code>，第二对为 <code>_2</code>；UI 从 1 开始为规则编号。显式计数为 <code>2</code> 时，两对都必须存在；属性缺失会拒绝访问，而配置的值为空也会拒绝访问。使用 <code>all</code> 时每条规则都必须匹配；使用 <code>any</code> 时匹配一条规则即可。没有规则时，所有已认证用户都可以访问。在服务作用域中，UI 会继承全局规则列表，直到您选择服务规则列表；保存服务规则列表会替换继承的列表，即使替换列表被明确设置为空。将 <code>SAML_ACL_RULE_COUNT</code> 留空可发现前 100 个槽位中的编号规则。将其设置为 <code>0</code> 可清除所有规则。无效模式或格式错误的显式列表会默认拒绝。设置 <code>SAML_ACL_DENIED_URL</code> 时会进行重定向；否则 BunkerWeb 返回其拒绝状态。</p>
-<h4 id="_64">重放防护</h4>
+<h4 id="_65">重放防护<a class="headerlink" href="#_65" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -7897,9 +7995,9 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tbody>
 </table>
 <p>每个已接受的断言 ID 都会以原子方式加入重放存储，并保留到它仍可能被接受的时间结束。待处理 AuthnRequest ID 是单独的会话关联值。在单个实例上，如果共享字典太小，请增大 <code>SAML_REPLAY_DICT_SIZE</code>。对于副本，启用核心的 <code>USE_REDIS=yes</code> 会话模式，并让每个实例指向同一个 Redis 服务，以便重放密钥使用共享存储。同时让每个副本的核心 <code>SESSIONS_SECRET</code> 保持一致；否则一个 worker 创建的会话无法被另一个 worker 读取。默认情况下，会话使用安全且仅限主机的 Cookie，并带有 <code>HttpOnly</code>、<code>Secure</code> 和 <code>SameSite=None</code>。启用 Redis 后，会话数据会转移到带命名空间的 Redis 存储，而不是 Cookie。IdP 的 <code>SessionNotOnOrAfter</code> 可能会让会话早于配置的超时结束。如果后续回调步骤失败，已消费的断言仍会保持已消费状态。</p>
-<h3 id="_65">注销</h3>
+<h3 id="_66">注销<a class="headerlink" href="#_66" title="Permanent link">&para;</a></h3>
 <p>请求 <code>SAML_LOGOUT_PATH</code> 会清除已认证状态，保存待处理的注销关联值，并启动前端 SLO。BunkerWeb 会发送已签名的 Redirect-binding 注销请求。收到有效且已签名的 LogoutResponse 后，它会销毁本地会话，并将浏览器重定向到 <code>SAML_LOGOUT_REDIRECT</code>。IdP 发起的 LogoutRequest 可以到达 <code>SAML_SLS_PATH</code>；SLS 会验证签发者、目标、NameID、会话索引和重放状态，销毁本地会话，并向 IdP 返回已签名响应。如果不存在本地会话，注销路由会销毁空会话并在本地重定向。</p>
-<h3 id="_66">限制和故障排除</h3>
+<h3 id="_67">限制和故障排除<a class="headerlink" href="#_67" title="Permanent link">&para;</a></h3>
 <p>SAML 目前支持 SP 发起的浏览器登录，使用已签名的 Redirect AuthnRequest 和 POST ACS 响应。它不支持 IdP 发起的登录、加密断言，也不支持自动导入和刷新 IdP 元数据。请让 IdP 配置为签署文档/断言，并使用 POST binding 发送响应。身份验证和注销 POST 正文限制为 256 KiB；超大请求会在处理前被拒绝。</p>
 <ul>
 <li><strong>UI 不会启用 SAML：</strong>检查 HTTPS origin、全部三个证书/密钥、匹配的 RSA 密钥和证书、IdP entity/SSO 值以及四个互不相同的本地路径。无效配置会被拒绝，且请求以 <code>503</code> 失败关闭；请求不会到达上游。</li>
@@ -7908,7 +8006,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>用户完成身份验证但收到拒绝：</strong>启用预期的 ACL 属性，确认编号对和 <code>SAML_ACL_RULE_COUNT</code>，并检查 <code>all</code> 与 <code>any</code>。属性值为空或声明缺失可能会按设计拒绝访问。</li>
 <li><strong>负载均衡器后会话消失：</strong>在每个副本上使用相同的 Redis 存储和核心会话密钥。当 <code>USE_REDIS=yes</code> 时 Redis 必须可用；重放防护和会话不会静默回退到每个 worker 的状态。</li>
 </ul>
-<h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="ldap-sso-pro">LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#ldap-sso-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>LDAP SSO</strong> 插件为 BunkerWeb 服务添加基于 LDAP 的单点登录功能。它提供登录表单、通过 LDAP 目录认证用户、创建会话，并可选地通过可配置的请求头将已认证的用户名传递给上游。</p>
 <p>该插件支持两种认证模式：</p>
@@ -7916,7 +8014,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>搜索后绑定模式</strong>（推荐，也称为"企业搜索模式"）：服务帐户在目录中搜索用户，然后以找到的 DN 绑定以验证密码。当设置了 <code>LDAP_USER_SEARCH_BASE_DN</code> 时启用。</li>
 <li><strong>直接绑定模式</strong>：通过模板（<code>LDAP_USER_DN_TEMPLATE</code>）构造用户 DN 并直接绑定。当未配置搜索模式时作为回退使用。</li>
 </ul>
-<h3 id="_67">功能</h3>
+<h3 id="_68">功能<a class="headerlink" href="#_68" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>LDAP/LDAPS/STARTTLS：</strong> 支持通过明文 LDAP、LDAPS（从连接开始即 TLS）或 STARTTLS 升级进行连接。</li>
 <li><strong>搜索后绑定模式：</strong> 服务帐户执行用户发现，支持可配置的搜索基础、过滤器、范围以及大小/时间限制。</li>
@@ -7931,7 +8029,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <p class="admonition-title">默认情况下凭据以明文传输</p>
 <p>使用默认设置（<code>LDAP_LDAPS=no</code>、<code>LDAP_STARTTLS=no</code>）时，用户密码会以明文传输到 LDAP 服务器。<strong>在生产环境中务必启用 <code>LDAP_LDAPS=yes</code>（配合 <code>LDAP_PORT=636</code>）或 <code>LDAP_STARTTLS=yes</code>。</strong> 保持 <code>LDAP_SSL_VERIFY=yes</code> 以防止 TLS 降级攻击。</p>
 </div>
-<h3 id="_68">配置</h3>
+<h3 id="_69">配置<a class="headerlink" href="#_69" title="Permanent link">&para;</a></h3>
 <p><strong>核心设置</strong></p>
 <table>
 <thead>
@@ -8219,7 +8317,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tr>
 </tbody>
 </table>
-<h3 id="_69">快速开始</h3>
+<h3 id="_70">快速开始<a class="headerlink" href="#_70" title="Permanent link">&para;</a></h3>
 <ol>
 <li>为每个受保护的服务设置最小值：<ul>
 <li><code>USE_LDAP=yes</code></li>
@@ -8235,7 +8333,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>对于直接绑定模式，请调整 <code>LDAP_USER_DN_TEMPLATE</code> 以匹配您的目录结构。</li>
 <li>可选地使用 <code>LDAP_AUTHZ_FILTER</code> 限制访问（例如 <code>(memberOf=cn=allowed,ou=groups,dc=example,dc=com)</code>）。</li>
 </ol>
-<h3 id="_70">使用提示</h3>
+<h3 id="_71">使用提示<a class="headerlink" href="#_71" title="Permanent link">&para;</a></h3>
 <ul>
 <li>优先使用搜索后绑定模式而非直接绑定——它支持跨多个属性（uid、mail、sAMAccountName、UPN）的灵活用户查找。</li>
 <li>在生产环境中使用 LDAPS（<code>LDAP_LDAPS=yes</code>）或 STARTTLS（<code>LDAP_STARTTLS=yes</code>）以加密传输中的凭据。</li>
@@ -8244,19 +8342,19 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>调整 <code>LDAP_KEEPALIVE_POOL_SIZE</code> 以匹配预期的并发用户量，减少 LDAP 连接开销。</li>
 <li>将 <code>LDAP_USER_HEADER</code> 设为空值可禁用向上游传递身份信息。</li>
 </ul>
-<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="openapi-validator-pro">OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#openapi-validator-pro" title="Permanent link">&para;</a></h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/3oZOO1XdSlc" title="OpenAPI Validator" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 <p><strong>OpenAPI Validator</strong> 插件通过根据 OpenAPI / Swagger 规范验证传入请求来执行您的 API 合约。它确保请求的路径存在，HTTP 方法是被允许的，并可选地根据架构定义验证查询、请求头、cookie 和路径参数。</p>
-<h3 id="_71">工作原理</h3>
+<h3 id="_72">工作原理<a class="headerlink" href="#_72" title="Permanent link">&para;</a></h3>
 <ol>
 <li>计划任务 (<code>openapi-download.py</code>) 从 URL 或文件获取 OpenAPI 文档并将其缓存到磁盘（默认每小时一次）。</li>
 <li>在 NGINX 初始化时，插件从缓存的规范中编译路由并将其存储在共享的内部存储中。</li>
 <li>在请求处理期间，插件将请求与编译的路由进行匹配并执行验证。</li>
 </ol>
-<h3 id="_72">功能</h3>
+<h3 id="_73">功能<a class="headerlink" href="#_73" title="Permanent link">&para;</a></h3>
 <ul>
 <li>路径和方法验证，当方法不被允许时返回 <code>405</code> 响应。</li>
 <li>可选的查询、请求头、cookie 和路径参数验证。</li>
@@ -8265,7 +8363,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>可配置的忽略列表，用于文档或规范文件等端点。</li>
 <li>缓存的规范每小时刷新一次，不会阻塞请求。</li>
 </ul>
-<h3 id="_73">配置</h3>
+<h3 id="_74">配置<a class="headerlink" href="#_74" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -8335,7 +8433,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 </tr>
 </tbody>
 </table>
-<h3 id="_74">行为说明</h3>
+<h3 id="_75">行为说明<a class="headerlink" href="#_75" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>OPENAPI_SPEC</code> 可以是本地文件或 HTTPS URL。除非 <code>OPENAPI_ALLOW_INSECURE_URL=yes</code>，否则 HTTP URL 将被屏蔽。</li>
 <li>如果 <code>OPENAPI_BASE_PATH</code> 为空，插件将从 <code>servers[*].url</code> (OpenAPI 3) 或 <code>basePath</code> (Swagger 2) 中推导基础路径（如果存在）。</li>
@@ -8343,7 +8441,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li>当规范中缺少某个路径且 <code>OPENAPI_ALLOW_UNSPECIFIED=no</code> 时，请求将被拒绝并返回配置的拒绝状态。</li>
 <li>参数验证失败将被拒绝，且仅记录第一个错误以保持日志简洁。</li>
 </ul>
-<h3 id="_75">快速开始</h3>
+<h3 id="_76">快速开始<a class="headerlink" href="#_76" title="Permanent link">&para;</a></h3>
 <p>为每个受保护的服务设置最小值：</p>
 <ul>
 <li><code>USE_OPENAPI_VALIDATOR=yes</code></li>
@@ -8353,7 +8451,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <ul>
 <li><code>OPENAPI_ALLOW_UNSPECIFIED=yes</code></li>
 </ul>
-<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="cache-pro">Cache <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#cache-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p>Cache PRO 插件使用 NGINX <code>proxy_cache*</code> 指令在反向代理层启用响应缓存。它适合用于吸收对可缓存内容的重复读取、在流量高峰期保护上游服务，以及在后端短暂故障期间提供陈旧缓存内容。</p>
 <p><strong>工作原理</strong></p>
@@ -8533,14 +8631,14 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><code>CACHE_LOCK=yes</code> 和 <code>CACHE_BACKGROUND_UPDATE=yes</code> 有助于减少对源站的瞬时冲击。</li>
 </ul>
 </div>
-<h2 id="acme">ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="acme">ACME <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#acme" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p><strong>ACME</strong> 插件通过 ACME 协议提供高级证书管理功能，支持自定义证书颁发机构（Step CA、Vault PKI、Sectigo、Google Trust Services 等）。它作为内置 Let's Encrypt 插件的补充，增加了自定义 CA 支持、DNS-01 和 TLS-ALPN-01 挑战、通配符证书、带过期告警的证书监控、证书透明度日志监控以及增强的 OCSP Stapling。</p>
 <div class="admonition tip">
 <p class="admonition-title">何时使用 ACME 而非内置 Let's Encrypt 插件</p>
 <p>如果您只需要使用 HTTP-01 挑战的 Let's Encrypt 证书，内置的 Let's Encrypt 插件（<code>AUTO_LETS_ENCRYPT=yes</code>）即可满足需求。当您需要自定义 CA、DNS-01 或 TLS-ALPN-01 挑战、通配符证书，或需要带告警的证书监控时，请使用 ACME 插件。</p>
 </div>
-<h3 id="_76">功能</h3>
+<h3 id="_77">功能<a class="headerlink" href="#_77" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>自定义 CA 支持：</strong> 使用任何兼容 ACME 的证书颁发机构，不限于 Let's Encrypt。</li>
 <li><strong>多种挑战类型：</strong> HTTP-01、DNS-01（通配符必需）和 TLS-ALPN-01。</li>
@@ -8553,16 +8651,16 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>t
 <li><strong>增强的 OCSP Stapling：</strong> 主动获取和缓存 OCSP 响应。</li>
 <li><strong>可配置的密钥类型：</strong> ECDSA（256/384）或 RSA（2048/4096）。</li>
 </ul>
-<h3 id="_77">前提条件</h3>
-<h4 id="http-01-lets_encrypt_passthroughyes">HTTP-01 挑战需要 <code>LETS_ENCRYPT_PASSTHROUGH=yes</code></h4>
+<h3 id="_78">前提条件<a class="headerlink" href="#_78" title="Permanent link">&para;</a></h3>
+<h4 id="http-01-lets_encrypt_passthroughyes">HTTP-01 挑战需要 <code>LETS_ENCRYPT_PASSTHROUGH=yes</code><a class="headerlink" href="#http-01-lets_encrypt_passthroughyes" title="Permanent link">&para;</a></h4>
 <p>当使用 <code>ACME_CHALLENGE=http</code>（默认值）时，您<strong>必须</strong>在同一服务上设置 <code>LETS_ENCRYPT_PASSTHROUGH=yes</code>。</p>
 <p>BunkerWeb 的核心 Let's Encrypt 插件包含一个 NGINX location 块和一个用于 <code>/.well-known/acme-challenge/</code> 的 Lua access 处理器。由于 NGINX location 块在任何 Lua 插件代码运行之前匹配，它会在 ACME PRO 能够处理之前拦截挑战请求。设置 <code>LETS_ENCRYPT_PASSTHROUGH=yes</code> 可以禁用这两个机制，使 ACME PRO 能够正确处理 HTTP-01 挑战令牌。</p>
 <p>此设置<strong>仅在 HTTP-01 时需要</strong>。DNS-01 和 TLS-ALPN-01 挑战不受影响。</p>
-<h4 id="acme-acme_passthrough">上游 ACME 透传（<code>ACME_PASSTHROUGH</code>）</h4>
+<h4 id="acme-acme_passthrough">上游 ACME 透传（<code>ACME_PASSTHROUGH</code>）<a class="headerlink" href="#acme-acme_passthrough" title="Permanent link">&para;</a></h4>
 <p>如果 BunkerWeb 背后的上游服务器已经运行自己的 ACME 客户端，并应由其自行处理 HTTP-01 验证，请在该服务上设置 <code>ACME_PASSTHROUGH=yes</code>。此时 ACME PRO 将不再渲染 <code>/.well-known/acme-challenge/</code> location 块，也不会在 <code>access</code> 阶段将挑战路径加入白名单，从而让上游提供的验证文件原样到达 CA。</p>
 <p>当您希望 ACME PRO 自行签发和续期证书时，请将 <code>ACME_PASSTHROUGH</code> 保持为 <code>no</code>（默认值）。ACME PRO 管理服务的标准 HTTP-01 组合是：<code>LETS_ENCRYPT_PASSTHROUGH=yes</code>（让 OSS 核心 Let's Encrypt 插件让出其挑战 location 块），再配合 <code>ACME_PASSTHROUGH=no</code>。仅当上游完全拥有证书生命周期时才将 <code>ACME_PASSTHROUGH</code> 设为 <code>yes</code> —— 在该模式下 BunkerWeb 不会尝试为该服务签发证书。</p>
 <p>此设置与 OSS 核心的 <code>LETS_ENCRYPT_PASSTHROUGH</code> 行为一致，并且仅影响 HTTP-01；DNS-01 和 TLS-ALPN-01 挑战不受影响。</p>
-<h4 id="_78">插件执行顺序</h4>
+<h4 id="_79">插件执行顺序<a class="headerlink" href="#_79" title="Permanent link">&para;</a></h4>
 <p>ACME 插件会自动将自身重新排序，以在 <code>ssl_certificate</code> NGINX 阶段最先执行，确保 TLS-ALPN-01 挑战证书在其他证书提供插件（selfsigned、letsencrypt、customcert）短路循环之前被提供。</p>
 <p>当 ACME 与其他依赖有效 TLS 的 PRO 插件（如 OpenID Connect、UI SSO）一起使用时，建议在相关的阶段排序设置中，将 <code>acme</code> 明确放在 <code>customcert</code> 之后：</p>
 <div class="highlight"><pre><span></span><code>PLUGINS_ORDER_SSL_CERTIFICATE=customcert acme letsencrypt selfsigned
@@ -8573,7 +8671,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <p class="admonition-title">不要在同一服务上同时启用 <code>USE_ACME</code> 和 <code>AUTO_LETS_ENCRYPT</code></p>
 <p>ACME 插件和内置 Let's Encrypt 插件使用各自独立的存储和挑战路径，但在同一服务上同时启用二者会导致冲突。请对每个服务只使用其中之一。在多站点模式下，不同服务可以使用不同的插件——例如 <code>app1.example.com_USE_ACME=yes</code> 和 <code>app2.example.com_AUTO_LETS_ENCRYPT=yes</code>。</p>
 </div>
-<h3 id="_79">配置</h3>
+<h3 id="_80">配置<a class="headerlink" href="#_80" title="Permanent link">&para;</a></h3>
 <p><strong>核心 ACME 设置</strong></p>
 <table>
 <thead>
@@ -8938,7 +9036,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </tr>
 </tbody>
 </table>
-<h3 id="_80">快速开始</h3>
+<h3 id="_81">快速开始<a class="headerlink" href="#_81" title="Permanent link">&para;</a></h3>
 <ol>
 <li>为每个受保护的服务设置最小值：<ul>
 <li><code>USE_ACME=yes</code></li>
@@ -8964,7 +9062,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </ul>
 </li>
 </ol>
-<h3 id="_81">使用提示</h3>
+<h3 id="_82">使用提示<a class="headerlink" href="#_82" title="Permanent link">&para;</a></h3>
 <ul>
 <li>证书监控（<code>USE_ACME_MONITORING</code>）默认启用，也会跟踪 OSS Let's Encrypt 证书。配置 <code>ACME_ALERT_DAYS</code> 阈值并至少配置一个告警渠道（webhook 或邮件）以接收过期警告。</li>
 <li>启用 CT 监控（<code>USE_ACME_CT_MONITORING=yes</code>）可通过证书透明度日志检测为您域名未授权签发的证书。</li>
@@ -8972,7 +9070,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li>使用 DNS-01 挑战时，如果您的 DNS 提供商传播记录较慢，请调整 <code>ACME_DNS_PROPAGATION</code>。</li>
 <li>设置 <code>ACME_MAX_RETRIES=0</code> 可禁用自动重试，适合需要手动排查故障的场景。</li>
 </ul>
-<h3 id="lets-encrypt">与内置 Let's Encrypt 共存</h3>
+<h3 id="lets-encrypt">与内置 Let's Encrypt 共存<a class="headerlink" href="#lets-encrypt" title="Permanent link">&para;</a></h3>
 <p>ACME PRO 与 OSS Let's Encrypt 插件使用完全独立的存储、API 端点和缓存键。在多站点模式下，二者可以同时在不同服务上运行：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"app1.example.com</span><span class="nv"> </span><span class="s">app2.example.com"</span>
@@ -8986,14 +9084,14 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <span class="c1"># 内置 Let's Encrypt 用于 app2</span>
 <span class="nt">app2.example.com_AUTO_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 </code></pre></div>
-<h3 id="_82">故障排除</h3>
+<h3 id="_83">故障排除<a class="headerlink" href="#_83" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>HTTP-01 挑战失败</strong>：确保设置了 <code>LETS_ENCRYPT_PASSTHROUGH=yes</code>——否则 BunkerWeb 的核心 location 块会在 ACME PRO 能够处理之前拦截挑战请求。同时确认 ACME 服务器可访问端口 80，且同一服务未同时启用 <code>AUTO_LETS_ENCRYPT</code>。</li>
 <li><strong>TLS-ALPN-01 挑战失败</strong>：确保 ACME 服务器可访问端口 443，且在 <code>ssl_certificate</code> 阶段没有其他插件在 ACME 之前提供证书。如有疑问，请检查 <code>PLUGINS_ORDER_SSL_CERTIFICATE</code>。</li>
 <li><strong>DNS-01 挑战失败</strong>：验证 <code>ACME_DNS_CREDENTIAL_ITEM</code> 中的 DNS 提供商凭据，如果您的提供商传播记录较慢，请调整 <code>ACME_DNS_PROPAGATION</code>。</li>
 <li><strong>证书未续期</strong>：检查 <code>ACME_RENEWAL_DAYS</code> 和调度器日志。<code>acme-renew</code> 作业每天运行，续期处于配置阈值内的证书。</li>
 </ul>
-<h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<h2 id="wildcard-pro">Wildcard <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)<a class="headerlink" href="#wildcard-pro" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>Wildcard</strong> 插件允许单个 BunkerWeb 服务响应：</p>
 <ul>
@@ -9017,7 +9115,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li>无 UI</li>
 </ul>
 <hr />
-<h3 id="_83">工作原理</h3>
+<h3 id="_84">工作原理<a class="headerlink" href="#_84" title="Permanent link">&para;</a></h3>
 <p>该插件从 <code>SERVER_NAME</code> 的<strong>第一个值</strong>推导出通配符主机名，并在生成配置时注入标准 NGINX 通配符服务器名。</p>
 <p>除主机名匹配外，它不会改变请求处理逻辑。</p>
 <div class="admonition info">
@@ -9031,7 +9129,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </ul>
 </div>
 <hr />
-<h3 id="_84">功能</h3>
+<h3 id="_85">功能<a class="headerlink" href="#_85" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>启用简单</strong>：通过 <code>USE_WILDCARD=yes</code> 启用通配符路由</li>
 <li><strong>自动推导</strong>：通配符主机基于 <code>SERVER_NAME</code> 的第一个条目构建</li>
@@ -9039,7 +9137,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><strong>支持多站点</strong>：每个服务都可以独立启用或禁用通配符路由</li>
 </ul>
 <hr />
-<h3 id="_85">配置</h3>
+<h3 id="_86">配置<a class="headerlink" href="#_86" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -9061,7 +9159,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </tbody>
 </table>
 <hr />
-<h3 id="_86">快速开始</h3>
+<h3 id="_87">快速开始<a class="headerlink" href="#_87" title="Permanent link">&para;</a></h3>
 <ol>
 <li>将您想要使用通配符的域名放在 <code>SERVER_NAME</code> 的<strong>第一位</strong></li>
 <li>设置 <code>USE_WILDCARD=yes</code></li>
@@ -9070,8 +9168,8 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li>重新加载或重启 BunkerWeb</li>
 </ol>
 <hr />
-<h3 id="_87">示例</h3>
-<h4 id="single-site">Single-site</h4>
+<h3 id="_88">示例<a class="headerlink" href="#_88" title="Permanent link">&para;</a></h3>
+<h4 id="single-site">Single-site<a class="headerlink" href="#single-site" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"example.com"</span>
 <span class="nt">USE_WILDCARD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 </code></pre></div>
@@ -9082,7 +9180,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><code>api.example.com</code></li>
 <li>任何其他解析到 BunkerWeb 的 <code>*.example.com</code> 主机名</li>
 </ul>
-<h4 id="multisite">Multisite</h4>
+<h4 id="multisite">Multisite<a class="headerlink" href="#multisite" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"app.example.com</span><span class="nv"> </span><span class="s">docs.example.org"</span>
 
@@ -9095,7 +9193,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <li><code>docs.example.org</code> 仍然只保留精确匹配</li>
 </ul>
 <hr />
-<h3 id="_88">重要行为</h3>
+<h3 id="_89">重要行为<a class="headerlink" href="#_89" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">只有第一个域名会被通配</p>
 <p>如果 <code>SERVER_NAME</code> 是：</p>
@@ -9121,7 +9219,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <p>如果另一个服务显式定义了 <code>foo.example.com</code>，NGINX 会优先将该主机名路由到精确匹配。</p>
 </div>
 <hr />
-<h3 id="lets-encrypt_1">与 Let's Encrypt 通配符证书配合时的推荐方式</h3>
+<h3 id="lets-encrypt_1">与 Let's Encrypt 通配符证书配合时的推荐方式<a class="headerlink" href="#lets-encrypt_1" title="Permanent link">&para;</a></h3>
 <p>如果您将此插件与 <code>USE_LETS_ENCRYPT_WILDCARD=yes</code> 一起使用，请采用以下模式：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;root_domain&gt;</span><span class="nv"> </span><span class="s">&lt;any_app&gt;.&lt;root_domain&gt;"</span>
 </code></pre></div>
@@ -9154,7 +9252,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 </li>
 </ul>
 </div>
-<h4 id="multisite-with-lets-encrypt-wildcard">Multisite with Let's Encrypt wildcard</h4>
+<h4 id="multisite-with-lets-encrypt-wildcard">Multisite with Let's Encrypt wildcard<a class="headerlink" href="#multisite-with-lets-encrypt-wildcard" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"example.com</span><span class="nv"> </span><span class="s">app.example.com"</span>
 <span class="nt">example.com_USE_WILDCARD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
@@ -9164,7 +9262,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
 <span class="nt">example.com_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</span><span class="p">:</span><span class="w"> </span><span class="s">"api_token</span><span class="nv"> </span><span class="s">YOUR_API_TOKEN"</span>
 </code></pre></div>
 <hr />
-<h3 id="_89">使用提示</h3>
+<h3 id="_90">使用提示<a class="headerlink" href="#_90" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
 <p><strong>请单独规划 TLS</strong>
@@ -9200,8 +9298,16 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
         
       </main>
       
@@ -9302,7 +9408,7 @@ PLUGINS_ORDER_INIT=sessions whitelist blacklist greylist bunkernet limit authbas
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

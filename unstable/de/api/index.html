@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Schnellstart
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
   
 
     
@@ -1269,8 +1222,8 @@
   
 
 
-<h1 id="api">API</h1>
-<h2 id="rolle-der-api">Rolle der API</h2>
+<h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
+<h2 id="rolle-der-api">Rolle der API<a class="headerlink" href="#rolle-der-api" title="Permanent link">&para;</a></h2>
 <p>Die BunkerWeb API ist die Steuerungsebene zum Verwalten von Instanzen, Diensten, Sperren, Plugins, Jobs und benutzerdefinierten Konfigurationen. Sie läuft als FastAPI-Anwendung hinter Gunicorn und sollte in einem vertrauenswürdigen Netz bleiben. Interaktive Doku unter <code>/docs</code> (oder <code>&lt;API_ROOT_PATH&gt;/docs</code>); das OpenAPI-Schema unter <code>/openapi.json</code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Privat halten</p>
@@ -1286,7 +1239,7 @@
 <li>Ratenbegrenzung standardmäßig an; <code>/auth</code> hat immer eigenes Limit</li>
 </ul>
 </div>
-<h2 id="sicherheits-checkliste">Sicherheits-Checkliste</h2>
+<h2 id="sicherheits-checkliste">Sicherheits-Checkliste<a class="headerlink" href="#sicherheits-checkliste" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Netzwerk: Traffic intern halten; an Loopback oder internes Interface binden und Quell-IPs per <code>API_WHITELIST_IPS</code> (standardmäßig aktiv) begrenzen.</li>
 <li>Auth vorhanden: <code>API_USERNAME</code>/<code>API_PASSWORD</code> (Admin) setzen und bei Bedarf <code>API_ACL_BOOTSTRAP_FILE</code> für weitere Nutzer/ACLs; ein Override <code>API_TOKEN</code> nur als Notfall behalten.</li>
@@ -1295,9 +1248,9 @@
 <li>Ratenbegrenzung: aktiviert lassen, außer eine andere Schicht erzwingt gleichwertige Limits; <code>/auth</code> ist immer begrenzt.</li>
 <li>TLS: am Proxy terminieren oder <code>API_SSL_ENABLED=yes</code> mit Zertifikat/Key setzen.</li>
 </ul>
-<h2 id="ausfuhren">Ausführen</h2>
+<h2 id="ausfuhren">Ausführen<a class="headerlink" href="#ausfuhren" title="Permanent link">&para;</a></h2>
 <p>Wählen Sie die Variante, die zu Ihrer Umgebung passt.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-One</label><label for="__tabbed_1_3">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">All-in-one</label><label for="__tabbed_1_3">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Minimaler Compose-ähnlicher Aufbau mit der API hinter BunkerWeb. Versionen und Passwörter vor Nutzung anpassen.</p>
@@ -1428,7 +1381,7 @@
 </div>
 </div>
 </div>
-<h2 id="authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</h2>
+<h2 id="authentifizierung-und-autorisierung">Authentifizierung und Autorisierung<a class="headerlink" href="#authentifizierung-und-autorisierung" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>/auth</code> gibt Biscuit-Tokens aus. Zugangsdaten können per Basic Auth, Formularfeldern, JSON-Body oder Bearer-Header gleich <code>API_TOKEN</code> (Admin-Override) kommen.</li>
 <li>Admins können geschützte Routen auch direkt mit HTTP Basic aufrufen (kein Biscuit nötig).</li>
@@ -1445,7 +1398,7 @@
 <li><code>Authorization: Bearer &lt;token&gt;</code> bei folgenden Aufrufen nutzen.</li>
 </ol>
 </div>
-<h2 id="berechtigungen-und-acl">Berechtigungen und ACL</h2>
+<h2 id="berechtigungen-und-acl">Berechtigungen und ACL<a class="headerlink" href="#berechtigungen-und-acl" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Grobe Rolle: GET/HEAD/OPTIONS brauchen <code>read</code>; schreibende Verben brauchen <code>write</code>.</li>
 <li>Feingranulare ACL greift, wenn Routen Berechtigungen deklarieren; <code>admin(true)</code> umgeht Checks.</li>
@@ -1463,8 +1416,8 @@
 <li>Nicht-Admin-Nutzer und Grants per <code>API_ACL_BOOTSTRAP_FILE</code> oder gemounteter <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> bootstrappen. Jeder Nutzer akzeptiert ein Klartext-<code>password</code> oder ein vorab gehashtes <code>password_hash</code>/<code>password_bcrypt</code> (siehe Tipp unten).</li>
 </ul>
 <div class="admonition danger">
-<p class="admonition-title">These write permissions are admin-equivalent</p>
-<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the <code>API_TOKEN</code> admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:</p>
+<p class="admonition-title">Diese Schreibberechtigungen entsprechen Administratorrechten</p>
+<p>Die Vergabe einer der folgenden Berechtigungen entspricht einer vollständigen Administratorberechtigung. Die damit geschriebenen Inhalte — benutzerdefinierte Konfigurationen, Dienstvariablen (z. B. <code>REVERSE_PROXY_URL</code>), hochgeladene Plugins und globale Einstellungen — werden <strong>unverändert</strong> in rohe NGINX / OpenResty Lua-Konfiguration umgewandelt und auf den BunkerWeb-Workern und dem Scheduler ausgeführt. Ein Token mit einer dieser Berechtigungen kann daher beliebigen Code mit den Rechten des BunkerWeb-Prozessbenutzers ausführen. Die Schreibberechtigungen für Instanzen entsprechen aus einem anderen Grund Administratorrechten: Jeder Aufruf einer registrierten Instanz enthält die <code>API_TOKEN</code>-Admin-Überschreibung, und der Scheduler verteilt die generierte Konfiguration und den Cache (einschließlich privater TLS-Schlüssel) an jede Instanz in der Datenbank. Durch die Registrierung eines einzelnen Endpunkts lassen sich daher all diese Daten erfassen:</p>
 <ul>
 <li><code>instances</code>: <code>instances_create</code>, <code>instances_update</code></li>
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
@@ -1472,7 +1425,7 @@
 <li><code>plugins</code>: <code>plugin_create</code></li>
 <li><code>global_config</code>: <code>global_config_update</code></li>
 </ul>
-<p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
+<p>Behandeln Sie diese Berechtigungen wie Administratorrechte: <strong>Vergeben Sie sie niemals an Personen, denen Sie nicht als Administrator vertrauen würden.</strong> Beschränken Sie Lese-Berechtigungen (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) auf eingeschränkte oder automatisierte Tokens. Wird eine dieser Berechtigungen an einen Nicht-Admin vergeben, erscheint eine Warnung in den API-Logs.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Vorab gehashte Bootstrap-Passwörter</p>
@@ -1500,7 +1453,7 @@
 <span class="p">}</span>
 </code></pre></div>
 </details>
-<h2 id="ratenbegrenzung">Ratenbegrenzung</h2>
+<h2 id="ratenbegrenzung">Ratenbegrenzung<a class="headerlink" href="#ratenbegrenzung" title="Permanent link">&para;</a></h2>
 <p>Standardmäßig aktiv mit zwei Strings: <code>API_RATE_LIMIT</code> (global, Standard <code>100r/m</code>) und <code>API_RATE_LIMIT_AUTH</code> (Standard <code>10r/m</code> oder <code>off</code>). Raten akzeptieren NGINX-Notation (<code>3r/s</code>, <code>40r/m</code>, <code>200r/h</code>) oder ausgeschriebene Formen (<code>100/minute</code>, <code>200 per 30 minutes</code>). Konfigurieren über:</p>
 <ul>
 <li><code>API_RATE_LIMIT</code>, <code>API_RATE_LIMIT_AUTH</code></li>
@@ -1534,7 +1487,7 @@
 <span class="w">    </span><span class="nt">rate</span><span class="p">:</span><span class="w"> </span><span class="s">"100r/m"</span>
 </code></pre></div>
 </details>
-<h2 id="konfigurationsquellen-und-prioritat">Konfigurationsquellen und Priorität</h2>
+<h2 id="konfigurationsquellen-und-prioritat">Konfigurationsquellen und Priorität<a class="headerlink" href="#konfigurationsquellen-und-prioritat" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Umgebungsvariablen (inkl. Docker/Compose <code>environment:</code>)</li>
 <li>Secrets in <code>/run/secrets/&lt;VAR&gt;</code> (Docker)</li>
@@ -1542,7 +1495,7 @@
 <li>Env-Datei unter <code>/etc/bunkerweb/api.env</code></li>
 <li>Eingebaute Defaults</li>
 </ol>
-<h3 id="laufzeit-zeitzone">Laufzeit &amp; Zeitzone</h3>
+<h3 id="laufzeit-zeitzone">Laufzeit &amp; Zeitzone<a class="headerlink" href="#laufzeit-zeitzone" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1562,8 +1515,8 @@
 </tbody>
 </table>
 <p>Docs oder Schema deaktivieren, indem die zugehörigen URLs auf <code>off|disabled|none|false|0</code> gesetzt werden. Setzen Sie <code>API_SSL_ENABLED=yes</code> mit <code>API_SSL_CERTFILE</code> und <code>API_SSL_KEYFILE</code>, um TLS direkt in der API zu terminieren. Beim Reverse-Proxy <code>API_FORWARDED_ALLOW_IPS</code> auf die Proxy-IPs setzen, damit Gunicorn <code>X-Forwarded-*</code> vertraut.</p>
-<h3 id="konfigurationsreferenz-power-user">Konfigurationsreferenz (Power User)</h3>
-<h4 id="oberflache-docs">Oberfläche &amp; Docs</h4>
+<h3 id="konfigurationsreferenz-power-user">Konfigurationsreferenz (Power User)<a class="headerlink" href="#konfigurationsreferenz-power-user" title="Permanent link">&para;</a></h3>
+<h4 id="oberflache-docs">Oberfläche &amp; Docs<a class="headerlink" href="#oberflache-docs" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1600,7 +1553,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="auth-acl-biscuit">Auth, ACL, Biscuit</h4>
+<h4 id="auth-acl-biscuit">Auth, ACL, Biscuit<a class="headerlink" href="#auth-acl-biscuit" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1655,7 +1608,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="allowlist">Allowlist</h4>
+<h4 id="allowlist">Allowlist<a class="headerlink" href="#allowlist" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1680,7 +1633,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="ratenbegrenzung_1">Ratenbegrenzung</h4>
+<h4 id="ratenbegrenzung_1">Ratenbegrenzung<a class="headerlink" href="#ratenbegrenzung_1" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1747,7 +1700,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="redisvalkey-fur-rate-limits">Redis/Valkey (für Rate Limits)</h4>
+<h4 id="redisvalkey-fur-rate-limits">Redis/Valkey (für Rate Limits)<a class="headerlink" href="#redisvalkey-fur-rate-limits" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1818,7 +1771,7 @@
 <p class="admonition-title">DB-Redis</p>
 <p>Wenn Redis/Valkey-Einstellungen in der BunkerWeb-Datenbank vorhanden sind, nutzt die API sie automatisch fürs Rate Limiting, auch ohne <code>USE_REDIS</code> in der Umgebung. Bei Bedarf per Umgebungsvariablen überschreiben.</p>
 </div>
-<h4 id="listener-tls">Listener &amp; TLS</h4>
+<h4 id="listener-tls">Listener &amp; TLS<a class="headerlink" href="#listener-tls" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1855,7 +1808,7 @@
 </tr>
 </tbody>
 </table>
-<h4 id="logging-laufzeit-package-defaults">Logging &amp; Laufzeit (Package-Defaults)</h4>
+<h4 id="logging-laufzeit-package-defaults">Logging &amp; Laufzeit (Package-Defaults)<a class="headerlink" href="#logging-laufzeit-package-defaults" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -1916,7 +1869,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="api-flache-capabilities">API-Fläche (Capabilities)</h2>
+<h2 id="api-flache-capabilities">API-Fläche (Capabilities)<a class="headerlink" href="#api-flache-capabilities" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Core</strong></li>
 <li><code>GET /ping</code>, <code>GET /health</code>: Liveness-Checks für die API selbst.</li>
@@ -1942,13 +1895,13 @@
 <li><code>GET /configs</code>: Snippets auflisten (Default-Service <code>global</code>); <code>with_data=true</code> bettet druckbaren Inhalt ein.</li>
 <li><code>POST /configs</code>, <code>POST /configs/upload</code>: Snippets via JSON oder File-Upload erstellen.</li>
 <li><code>GET /configs/{service}/{type}/{name}</code>: Snippet holen; <code>with_data=true</code> für Inhalt.</li>
-<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: API-gemanagte Snippets aktualisieren oder verschieben.</li>
+<li><code>PATCH /configs/{service}/{type}/{name}</code>, <code>PATCH .../upload</code>: API-gemanagte Snippets aktualisieren oder verschieben. Ein Verschieben verlangt zusätzlich <code>config_update</code> auf dem Zielservice (<code>global</code> zählt als Service); ein JSON-Body ohne <code>service</code> behält den aktuellen Service.</li>
 <li><code>DELETE /configs</code> oder <code>DELETE /configs/{service}/{type}/{name}</code>: API-gemanagte Snippets löschen; template-gemanagte werden übersprungen.</li>
 <li>Unterstützte Typen: <code>http</code>, <code>server_http</code>, <code>default_server_http</code>, <code>modsec</code>, <code>modsec_crs</code>, <code>stream</code>, <code>server_stream</code>, CRS/Plugin-Hooks.</li>
 <li><strong>Bans</strong></li>
 <li><code>GET /bans</code>: aktive Bans aus Instanzen aggregieren.</li>
 <li><code>POST /bans</code> oder <code>/bans/ban</code>: einen oder mehrere Bans anwenden; Payload darf Objekt, Array oder JSON-String sein.</li>
-<li><code>POST /bans/unban</code> oder <code>DELETE /bans</code>: Bans global oder pro Service entfernen.</li>
+<li><code>POST /bans/unban</code> oder <code>DELETE /bans</code>: Bans global oder pro Service entfernen. Bei einem CrowdSec-Ban (<code>kind: "crowdsec_lease"</code>) zusätzlich <code>remove_crowdsec_decisions: true</code>, <code>confirmed: true</code> und <code>decision_keys</code> (die Schlüssel aus der <code>409</code>-Vorschau) senden, um die zugrunde liegenden CrowdSec-Entscheidungen zu löschen; der Aufruf benötigt <code>crowdsec_delete</code> auf jeder betroffenen Verbindung, antwortet mit <code>409</code>, wenn sich die Auswahl geändert hat, und mit <code>502</code> bei einem Teilergebnis.</li>
 <li><strong>Plugins (UI-Plugins)</strong></li>
 <li><code>GET /plugins</code>: Plugins auflisten; <code>with_data=true</code> enthält Paket-Bytes, sofern verfügbar.</li>
 <li><code>POST /plugins/upload</code>: UI-Plugins aus <code>.zip</code>, <code>.tar.gz</code>, <code>.tar.xz</code> installieren.</li>
@@ -1956,12 +1909,12 @@
 <li><strong>Cache (Job-Artefakte)</strong></li>
 <li><code>GET /cache</code>: Cache-Dateien mit Filtern (<code>service</code>, <code>plugin</code>, <code>job_name</code>) auflisten; <code>with_data=true</code> bettet druckbaren Inhalt ein.</li>
 <li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: spezifische Cache-Datei holen/herunterladen (<code>download=true</code>).</li>
-<li><code>DELETE /cache</code> oder <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: Cache-Dateien löschen und Scheduler benachrichtigen.</li>
+<li><code>DELETE /cache</code> oder <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: Cache-Dateien löschen. Der Scheduler wird nur für ein Plugin benachrichtigt, dessen Zeile tatsächlich gelöscht wurde; ein <code>plugin</code>, dem der Job nicht gehört, wird abgelehnt und nichts wird gelöscht.</li>
 <li><strong>Jobs</strong></li>
 <li><code>GET /jobs</code>: Jobs, Zeitpläne und Cache-Zusammenfassungen auflisten.</li>
 <li><code>POST /jobs/run</code>: Plugins als geändert markieren, um zugehörige Jobs auszulösen.</li>
 </ul>
-<h2 id="betriebsverhalten">Betriebsverhalten</h2>
+<h2 id="betriebsverhalten">Betriebsverhalten<a class="headerlink" href="#betriebsverhalten" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Fehlermeldungen sind normalisiert zu <code>{"status": "error", "message": "..."}</code> mit passenden HTTP-Statuscodes.</li>
 <li>Schreiboperationen landen in der gemeinsamen Datenbank; Instanzen übernehmen Änderungen per Scheduler-Sync oder nach einem Reload.</li>
@@ -1985,8 +1938,16 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
         
       </main>
       
@@ -2087,7 +2048,7 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

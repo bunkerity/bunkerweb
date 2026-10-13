@@ -16,7 +16,7 @@
         <link rel="prev" href="../integrations/">
       
       
-        <link rel="next" href="../building/">
+        <link rel="next" href="../features/">
       
       
         
@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    ，了解我们的企业服务。
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    您当前查看的不是最新版本的文档。
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>点击此处查看最新版本。</strong>
     </a>
 
             </div>
@@ -449,25 +448,6 @@
     
   
   快速入门指南
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  从源代码构建
 
       </a>
     </li>
@@ -964,33 +944,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    从源代码构建
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1247,7 +1200,7 @@
   
 
 
-<h1 id="_1">快速入门指南</h1>
+<h1 id="_1">快速入门指南<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
 <div class="admonition info">
 <p class="admonition-title">先决条件</p>
 <p>我们希望您已经熟悉<a href="../concepts/">核心概念</a>并已按照<a href="../integrations/">集成说明</a>为您的环境进行了操作。</p>
@@ -1260,8 +1213,8 @@
 <p>本快速入门指南将帮助您快速安装 BunkerWeb 并使用 Web 用户界面保护 Web 服务。</p>
 <p>保护已经可以通过 HTTP(S) 协议访问的现有 Web 应用程序是 BunkerWeb 的主要目标：它将充当一个带有额外安全功能的经典<a href="https://en.wikipedia.org/wiki/Reverse_proxy">反向代理</a>。</p>
 <p>有关真实世界的示例，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples 文件夹</a>。</p>
-<h2 id="_2">基本设置</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">一体化</label><label for="__tabbed_1_2">Linux</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Docker autoconf</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Swarm</label></div>
+<h2 id="_2">基本设置<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">All-in-one</label><label for="__tabbed_1_2">Linux</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Docker autoconf</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>要部署一体化容器，请运行以下命令：</p>
@@ -1299,7 +1252,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">安全提示</p>
 <p>在执行脚本之前，请务必使用提供的校验和验证脚本的完整性。</p>
 </div>
-<h4 id="easy-install">Easy Install 亮点</h4>
+<h4 id="easy-install">Easy Install 亮点<a class="headerlink" href="#easy-install" title="Permanent link">&para;</a></h4>
 <ul>
 <li>在更改系统之前，会预先检测您的 Linux 发行版和 CPU 架构，并在超出支持矩阵时发出警告。</li>
 <li>交互提示采用由 <a href="https://github.com/charmbracelet/gum">gum</a> 提供的内联 TUI —— 支持方向键菜单（带 <code>❯</code> 光标）、掩码密码字段。首次进入交互模式时，脚本会从 <a href="https://github.com/charmbracelet/gum/releases">GitHub 发布页</a>下载官方 <code>gum</code> 二进制（SHA256 已固定校验；若已安装 cosign，则额外校验 cosign 签名），从临时目录运行，并在脚本退出时删除该临时目录 —— <strong>不会安装任何系统包，不会添加 apt/dnf 源，不会在系统上残留任何二进制</strong>。若无法获取 gum，安装器会使用系统中已存在的 <code>whiptail</code>；二者都不可用时退化到纯文本提示。</li>
@@ -1701,12 +1654,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h2 id="complete-the-setup-wizard">完成设置向导</h2>
+<h2 id="complete-the-setup-wizard">完成设置向导<a class="headerlink" href="#complete-the-setup-wizard" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">访问设置向导</p>
 <p>您可以通过浏览服务器的 <code>https://your-fqdn-or-ip-addresss/setup</code> URI 来访问设置向导。</p>
 </div>
-<h3 id="_3">创建一个管理员帐户</h3>
+<h3 id="_3">创建一个管理员帐户<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>您应该会看到一个像这样的设置页面：</p>
 <figure>
 <p><img align="center" alt="设置向导登录页面" src="../../assets/img/ui-wizard-step1.png" />
@@ -1714,7 +1667,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <figcaption>设置向导登录页面</figcaption>
 </figure>
 <p>进入设置页面后，您可以输入<strong>管理员用户名、电子邮件和密码</strong>，然后点击“下一步”按钮。</p>
-<h3 id="https">配置反向代理、HTTPS 和其他高级设置</h3>
+<h3 id="https">配置反向代理、HTTPS 和其他高级设置<a class="headerlink" href="#https" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">基本设置</label><label for="__tabbed_2_2">高级设置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1741,21 +1694,21 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="pro">PRO 激活</h3>
+<h3 id="pro">PRO 激活<a class="headerlink" href="#pro" title="Permanent link">&para;</a></h3>
 <p>如果您拥有 PRO 许可证，可以在 <code>升级到 PRO</code> 部分输入您的许可证密钥来激活它。这将启用 BunkerWeb 的 PRO 功能。</p>
 <figure>
 <p><img align="center" alt="设置向导 PRO 步骤" src="../../assets/img/ui-wizard-step3.png" />
   </p>
 <figcaption>设置向导 PRO 步骤</figcaption>
 </figure>
-<h3 id="_4">您的设置概览</h3>
+<h3 id="_4">您的设置概览<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <p>最后一步将为您提供您所输入设置的概览。您可以点击“设置”按钮来完成设置。</p>
 <figure>
 <p><img align="center" alt="设置向导最后一步" src="../../assets/img/ui-wizard-step4.png" />
   </p>
 <figcaption>设置向导最后一步</figcaption>
 </figure>
-<h2 id="web">访问 Web 界面</h2>
+<h2 id="web">访问 Web 界面<a class="headerlink" href="#web" title="Permanent link">&para;</a></h2>
 <p>您现在可以通过浏览您在上一步中配置的域以及如果您更改了 URI（默认为 <code>https://your-domain/</code>）来访问 Web 界面。</p>
 <figure>
 <p><img align="center" alt="Web 界面登录页面" src="../../assets/img/ui-login.png" />
@@ -1768,8 +1721,8 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
   </p>
 <figcaption>Web 界面主页</figcaption>
 </figure>
-<h2 id="_5">创建一个新服务</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web UI</label><label for="__tabbed_3_2">一体化</label><label for="__tabbed_3_3">Linux variables.env 文件</label><label for="__tabbed_3_4">Docker</label><label for="__tabbed_3_5">Docker autoconf 标签</label><label for="__tabbed_3_6">Kubernetes 注解</label><label for="__tabbed_3_7">Swarm 标签</label></div>
+<h2 id="_5">创建一个新服务<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web UI</label><label for="__tabbed_3_2">All-in-one</label><label for="__tabbed_3_3">Linux variables.env 文件</label><label for="__tabbed_3_4">Docker</label><label for="__tabbed_3_5">Docker autoconf 标签</label><label for="__tabbed_3_6">Kubernetes 注解</label><label for="__tabbed_3_7">Swarm 标签</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>您可以通过导航到 Web 界面的 <code>服务</code> 部分并点击 <code>➕ 创建新服务</code> 按钮来创建一个新服务。</p>
@@ -2031,7 +1984,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 </div>
 </div>
 </div>
-<h2 id="_6">更进一步</h2>
+<h2 id="_6">更进一步<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <p>恭喜！您刚刚安装了 BunkerWeb 并保护了您的第一个 Web 服务。请注意，BunkerWeb 在安全性和与其他系统和解决方案的集成方面提供了更多功能。以下是一些资源和行动，可以帮助您继续加深对该解决方案的了解：</p>
 <ul>
 <li>加入 Bunker 社区：<a href="https://discord.com/invite/fTf46FmtyD">Discord</a>、<a href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>、<a href="https://github.com/bunkerity">GitHub</a>、<a href="https://x.com/bunkerity">X (Formerly Twitter)</a></li>
@@ -2056,8 +2009,16 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
         
       </main>
       
@@ -2158,7 +2119,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

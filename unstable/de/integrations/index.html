@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -449,25 +448,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -1558,6 +1538,111 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#aus-dem-quellcode-bauen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aus dem Quellcode bauen
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Aus dem Quellcode bauen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#umfang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Umfang
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build-Standards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voraussetzungen_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voraussetzungen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#artefaktmatrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Artefaktmatrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-container-images-bauen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community-Container-Images bauen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-pakete-bauen-deb-rpm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux-Pakete bauen (.deb / .rpm)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-paritat-referenz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI-Parität (Referenz)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#artefakte-veroffentlichen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Artefakte veröffentlichen
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1581,33 +1666,6 @@
     
   
     Schnellstart
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
   
 
     
@@ -1883,15 +1941,15 @@
   
 
 
-<h1 id="integrationen">Integrationen</h1>
-<h2 id="bunkerweb-cloud">BunkerWeb Cloud</h2>
+<h1 id="integrationen">Integrationen<a class="headerlink" href="#integrationen" title="Permanent link">&para;</a></h1>
+<h2 id="bunkerweb-cloud">BunkerWeb Cloud<a class="headerlink" href="#bunkerweb-cloud" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/bunkerweb-cloud.png" width="600" />
   </p>
 <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
 <p>BunkerWeb Cloud ist eine verwaltete Web Application Firewall (WAF) und Reverse-Proxy-Lösung, mit der Sie Ihre Webanwendungen sichern können, ohne BunkerWeb in Ihrer Infrastruktur zu installieren. Wenn Sie BunkerWeb Cloud abonnieren, profitieren Sie von einem vollständigen BunkerWeb-Stack, der in der Cloud gehostet wird und über dedizierte Ressourcen verfügt (8 GB RAM, 2 CPU <strong>pro</strong> Instanz, repliziert auf 2 Instanzen für Hochverfügbarkeit, Standardangebot).</p>
-<h3 id="hauptvorteile">Hauptvorteile</h3>
+<h3 id="hauptvorteile">Hauptvorteile<a class="headerlink" href="#hauptvorteile" title="Permanent link">&para;</a></h3>
 <p>Bestellen Sie Ihre <a href="https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&amp;utm_source=doc">BunkerWeb Cloud-Instanz</a> und erhalten Sie Zugriff auf:</p>
 <ul>
 <li><strong>Sofortige Bereitstellung</strong>: Keine Installation in Ihrer Infrastruktur erforderlich</li>
@@ -1901,8 +1959,8 @@
 <li><strong>Erhöhte Sicherheit</strong>: Echtzeit-WAF-Schutz vor Webbedrohungen</li>
 </ul>
 <p>Wenn Sie am BunkerWeb Cloud-Angebot interessiert sind, zögern Sie nicht, uns zu <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">kontaktieren</a>, damit wir Ihre Bedürfnisse besprechen können.</p>
-<h3 id="architekturubersicht">Architekturübersicht</h3>
-<h4 id="einfache-architektur-einzelner-dienst">Einfache Architektur - Einzelner Dienst</h4>
+<h3 id="architekturubersicht">Architekturübersicht<a class="headerlink" href="#architekturubersicht" title="Permanent link">&para;</a></h3>
+<h4 id="einfache-architektur-einzelner-dienst">Einfache Architektur - Einzelner Dienst<a class="headerlink" href="#einfache-architektur-einzelner-dienst" title="Permanent link">&para;</a></h4>
 <pre class="mermaid"><code>graph LR
     A[Client] --&gt;|HTTPS| B[beispiel.de]
     B --&gt;|DNS-Auflösung| C[Load Balancer54984654.bunkerweb.cloud]
@@ -1912,7 +1970,7 @@
     style C fill:#e1f5fe,color:#222
     style D fill:#f3e5f5,color:#222
     style E fill:#e8f5e8,color:#222</code></pre>
-<h4 id="komplexe-architektur-multi-dienste">Komplexe Architektur - Multi-Dienste</h4>
+<h4 id="komplexe-architektur-multi-dienste">Komplexe Architektur - Multi-Dienste<a class="headerlink" href="#komplexe-architektur-multi-dienste" title="Permanent link">&para;</a></h4>
 <pre class="mermaid"><code>graph LR
     A[Clients] --&gt;|HTTPS| B[beispiel.deanderes-beispiel.deein-anderes-beispiel.de]
     B --&gt;|DNS-Auflösung| C[Load Balancer54984654.bunkerweb.cloud]
@@ -1928,8 +1986,8 @@
     style F fill:#e8f5e8,color:#222
     style G fill:#e8f5e8,color:#222
     style H fill:#e8f5e8,color:#222</code></pre>
-<h3 id="erstkonfiguration">Erstkonfiguration</h3>
-<h4 id="1-zugang-zur-verwaltungsoberflache">1. Zugang zur Verwaltungsoberfläche</h4>
+<h3 id="erstkonfiguration">Erstkonfiguration<a class="headerlink" href="#erstkonfiguration" title="Permanent link">&para;</a></h3>
+<h4 id="1-zugang-zur-verwaltungsoberflache">1. Zugang zur Verwaltungsoberfläche<a class="headerlink" href="#1-zugang-zur-verwaltungsoberflache" title="Permanent link">&para;</a></h4>
 <p>Nach dem Abonnement von BunkerWeb Cloud erhalten Sie:</p>
 <ul>
 <li><strong>URL für BunkerWeb-UI-Zugriff</strong>: Schnittstelle zur Konfiguration Ihrer Dienste</li>
@@ -1937,28 +1995,28 @@
 <li><strong>Grafana-Zugang</strong>: Überwachungsschnittstelle und Visualisierung von Metriken</li>
 <li><strong>Zugewiesene Ressourcen</strong>: 2 Instanzen mit je 8 GB RAM und 2 CPUs</li>
 </ul>
-<h4 id="2-erste-verbindung">2. Erste Verbindung</h4>
+<h4 id="2-erste-verbindung">2. Erste Verbindung<a class="headerlink" href="#2-erste-verbindung" title="Permanent link">&para;</a></h4>
 <ol>
 <li>Verbinden Sie sich mit der BunkerWeb Cloud-Schnittstelle</li>
 <li>Konfigurieren Sie Ihre zu schützenden Dienste</li>
 <li>Greifen Sie auf Grafana zu, um Ihre BunkerWeb-Protokolle und Metriken zu visualisieren</li>
 </ol>
-<h3 id="dns-konfiguration">DNS-Konfiguration</h3>
-<h4 id="verkehrsumleitung-zu-bunkerweb-cloud">Verkehrsumleitung zu BunkerWeb Cloud</h4>
+<h3 id="dns-konfiguration">DNS-Konfiguration<a class="headerlink" href="#dns-konfiguration" title="Permanent link">&para;</a></h3>
+<h4 id="verkehrsumleitung-zu-bunkerweb-cloud">Verkehrsumleitung zu BunkerWeb Cloud<a class="headerlink" href="#verkehrsumleitung-zu-bunkerweb-cloud" title="Permanent link">&para;</a></h4>
 <p>Damit der Datenverkehr Ihrer Domain von BunkerWeb Cloud verarbeitet wird, müssen Sie Ihre DNS-Einträge konfigurieren:</p>
 <p><strong>Erforderliche Konfiguration:</strong></p>
 <div class="highlight"><pre><span></span><code>beispiel.de.        IN  CNAME  54984654.bunkerweb.cloud.
 www.beispiel.de.    IN  CNAME  54984654.bunkerweb.cloud.
 </code></pre></div>
 <p><strong>Wichtig:</strong> Ersetzen Sie <code>54984654</code> durch Ihre Load Balancer-Kennung, die Sie beim Abonnement erhalten haben.</p>
-<h4 id="konfigurationsuberprufung">Konfigurationsüberprüfung</h4>
+<h4 id="konfigurationsuberprufung">Konfigurationsüberprüfung<a class="headerlink" href="#konfigurationsuberprufung" title="Permanent link">&para;</a></h4>
 <p>Überprüfen Sie die DNS-Auflösung:</p>
 <div class="highlight"><pre><span></span><code>dig<span class="w"> </span>beispiel.de
 nslookup<span class="w"> </span>beispiel.de
 </code></pre></div>
 <p>Das Ergebnis sollte auf Ihren BunkerWeb Cloud-Endpunkt verweisen.</p>
-<h3 id="dienstkonfiguration">Dienstkonfiguration</h3>
-<h4 id="einzelner-dienst">Einzelner Dienst</h4>
+<h3 id="dienstkonfiguration">Dienstkonfiguration<a class="headerlink" href="#dienstkonfiguration" title="Permanent link">&para;</a></h3>
+<h4 id="einzelner-dienst">Einzelner Dienst<a class="headerlink" href="#einzelner-dienst" title="Permanent link">&para;</a></h4>
 <p>Für einen einfachen Dienst, der auf Ihrer Infrastruktur gehostet wird:</p>
 <p><strong>Konfiguration in der BunkerWeb-UI:</strong></p>
 <ol>
@@ -1966,16 +2024,16 @@ nslookup<span class="w"> </span>beispiel.de
 <li><strong>Use Reverse Proxy</strong>: <code>yes</code></li>
 <li><strong>Reverse Proxy Host</strong>: <code>185.87.1.100:443</code> (Ihre Server-IP)</li>
 </ol>
-<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/latest/settings/#reverse-proxy">Reverse-Proxy-Dokumentation</a></p>
-<h4 id="multi-dienste-mit-sni">Multi-Dienste mit SNI</h4>
-<h5 id="warum-sni-aktivieren">Warum SNI aktivieren?</h5>
+<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/1.6/settings/#reverse-proxy">Reverse-Proxy-Dokumentation</a></p>
+<h4 id="multi-dienste-mit-sni">Multi-Dienste mit SNI<a class="headerlink" href="#multi-dienste-mit-sni" title="Permanent link">&para;</a></h4>
+<h5 id="warum-sni-aktivieren">Warum SNI aktivieren?<a class="headerlink" href="#warum-sni-aktivieren" title="Permanent link">&para;</a></h5>
 <p>Server Name Indication (SNI) ist <strong>essenziell</strong>, wenn:</p>
 <ul>
 <li>Mehrere Domains auf dieselbe Backend-Infrastruktur zeigen</li>
 <li>Ihre Infrastruktur mehrere Dienste mit unterschiedlichen SSL-Zertifikaten hostet</li>
 <li>Sie einen Reverse Proxy/Gateway auf Client-Seite verwenden</li>
 </ul>
-<h5 id="sni-konfiguration">SNI-Konfiguration</h5>
+<h5 id="sni-konfiguration">SNI-Konfiguration<a class="headerlink" href="#sni-konfiguration" title="Permanent link">&para;</a></h5>
 <p><strong>In der BunkerWeb-UI, für jeden Dienst:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Dienst 1</span>
 <span class="nt">SERVICE_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">beispiel-de</span>
@@ -1993,8 +2051,8 @@ nslookup<span class="w"> </span>beispiel.de
 <span class="nt">REVERSE_PROXY_SSL_SNI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
 <span class="nt">REVERSE_PROXY_SSL_SNI_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anderes-beispiel.de</span>
 </code></pre></div>
-<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/latest/settings/#reverse-proxy">Reverse-Proxy-Dokumentation</a></p>
-<h5 id="technische-details-zu-sni">Technische Details zu SNI</h5>
+<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/1.6/settings/#reverse-proxy">Reverse-Proxy-Dokumentation</a></p>
+<h5 id="technische-details-zu-sni">Technische Details zu SNI<a class="headerlink" href="#technische-details-zu-sni" title="Permanent link">&para;</a></h5>
 <p>SNI ermöglicht BunkerWeb Cloud:</p>
 <ol>
 <li><strong>Den Zieldienst zu identifizieren</strong> während der TLS-Verbindung</li>
@@ -2020,24 +2078,24 @@ nslookup<span class="w"> </span>beispiel.de
     style B fill:#f3e5f5,color:#222
     style C fill:#e8f5e8,color:#222
     style D fill:#e8f5e8,color:#222</code></pre>
-<h3 id="ssltls-und-sni-management">SSL/TLS- und SNI-Management</h3>
-<h4 id="ssl-zertifikate">SSL-Zertifikate</h4>
-<h5 id="auf-seite-von-bunkerweb-cloud">Auf Seite von BunkerWeb Cloud</h5>
+<h3 id="ssltls-und-sni-management">SSL/TLS- und SNI-Management<a class="headerlink" href="#ssltls-und-sni-management" title="Permanent link">&para;</a></h3>
+<h4 id="ssl-zertifikate">SSL-Zertifikate<a class="headerlink" href="#ssl-zertifikate" title="Permanent link">&para;</a></h4>
+<h5 id="auf-seite-von-bunkerweb-cloud">Auf Seite von BunkerWeb Cloud<a class="headerlink" href="#auf-seite-von-bunkerweb-cloud" title="Permanent link">&para;</a></h5>
 <p>BunkerWeb Cloud verwaltet automatisch:</p>
 <ul>
 <li>Let's Encrypt-Zertifikate für Ihre Domains</li>
 <li>Automatische Erneuerung</li>
 <li>Optimierte TLS-Konfiguration</li>
 </ul>
-<h5 id="auf-seite-der-client-infrastruktur">Auf Seite der Client-Infrastruktur</h5>
+<h5 id="auf-seite-der-client-infrastruktur">Auf Seite der Client-Infrastruktur<a class="headerlink" href="#auf-seite-der-client-infrastruktur" title="Permanent link">&para;</a></h5>
 <p><strong>Wichtige Empfehlungen:</strong></p>
 <ol>
 <li><strong>Verwenden Sie HTTPS</strong> für die Kommunikation zwischen BunkerWeb und Ihren Diensten</li>
 <li><strong>Verwalten Sie Ihre eigenen Zertifikate</strong> auf Ihrer Infrastruktur</li>
 <li><strong>Konfigurieren Sie SNI ordnungsgemäß</strong> auf Ihrem Gateway/Reverse Proxy</li>
 </ol>
-<h4 id="detaillierte-sni-konfiguration">Detaillierte SNI-Konfiguration</h4>
-<h5 id="anwendungsfall-infrastruktur-mit-gateway">Anwendungsfall: Infrastruktur mit Gateway</h5>
+<h4 id="detaillierte-sni-konfiguration">Detaillierte SNI-Konfiguration<a class="headerlink" href="#detaillierte-sni-konfiguration" title="Permanent link">&para;</a></h4>
+<h5 id="anwendungsfall-infrastruktur-mit-gateway">Anwendungsfall: Infrastruktur mit Gateway<a class="headerlink" href="#anwendungsfall-infrastruktur-mit-gateway" title="Permanent link">&para;</a></h5>
 <p>Wenn Ihre Architektur so aussieht:</p>
 <pre class="mermaid"><code>graph LR
     A[BunkerWeb Cloud] --&gt; B[Client Gateway]
@@ -2063,11 +2121,11 @@ nslookup<span class="w"> </span>beispiel.de
 <span class="nt">REVERSE_PROXY_SSL_VERIFY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no</span>
 <span class="nt">REVERSE_PROXY_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Host $host</span>
 </code></pre></div>
-<h3 id="client-gateway-konfiguration">Client-Gateway-Konfiguration</h3>
-<h4 id="ubersicht">Übersicht</h4>
+<h3 id="client-gateway-konfiguration">Client-Gateway-Konfiguration<a class="headerlink" href="#client-gateway-konfiguration" title="Permanent link">&para;</a></h3>
+<h4 id="ubersicht">Übersicht<a class="headerlink" href="#ubersicht" title="Permanent link">&para;</a></h4>
 <p>Wenn Ihre Architektur ein Gateway/Reverse Proxy auf der Client-Seite verwendet, um den Verkehr zu mehreren Diensten zu leiten, ist eine spezifische Konfiguration erforderlich, um SNI zu unterstützen und eine sichere Kommunikation mit BunkerWeb Cloud zu gewährleisten.</p>
-<h4 id="konfigurationen-nach-technologie">Konfigurationen nach Technologie</h4>
-<h5 id="nginx">Nginx</h5>
+<h4 id="konfigurationen-nach-technologie">Konfigurationen nach Technologie<a class="headerlink" href="#konfigurationen-nach-technologie" title="Permanent link">&para;</a></h4>
+<h5 id="nginx">Nginx<a class="headerlink" href="#nginx" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Nginx-Konfiguration</summary>
 
@@ -2129,7 +2187,7 @@ nslookup<span class="w"> </span>beispiel.de
 
 </details>
 
-<h5 id="traefik">Traefik</h5>
+<h5 id="traefik">Traefik<a class="headerlink" href="#traefik" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Traefik-Konfiguration</summary>
 
@@ -2238,7 +2296,7 @@ nslookup<span class="w"> </span>beispiel.de
 
 </details>
 
-<h5 id="apache">Apache</h5>
+<h5 id="apache">Apache<a class="headerlink" href="#apache" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Apache-Konfiguration</summary>
 
@@ -2309,7 +2367,7 @@ nslookup<span class="w"> </span>beispiel.de
 
 </details>
 
-<h5 id="haproxy">HAProxy</h5>
+<h5 id="haproxy">HAProxy<a class="headerlink" href="#haproxy" title="Permanent link">&para;</a></h5>
 <details>
 <summary>HAProxy-Konfiguration</summary>
 
@@ -2383,7 +2441,7 @@ listen stats
 
 </details>
 
-<h4 id="validierung-der-ssl-konfiguration">Validierung der SSL-Konfiguration</h4>
+<h4 id="validierung-der-ssl-konfiguration">Validierung der SSL-Konfiguration<a class="headerlink" href="#validierung-der-ssl-konfiguration" title="Permanent link">&para;</a></h4>
 <p>SSL-Konfiguration testen:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># SSL-Konnektivitätstest</span>
 openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>ihre-domain.de:443<span class="w"> </span>-servername<span class="w"> </span>ihre-domain.de
@@ -2394,7 +2452,7 @@ curl<span class="w"> </span>-I<span class="w"> </span>https://ihre-domain.de
 <span class="c1"># SNI-Test</span>
 curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: beispiel.de"</span><span class="w"> </span>https://54984654.bunkerweb.cloud
 </code></pre></div>
-<h4 id="best-practices-fur-gateways">Best Practices für Gateways</h4>
+<h4 id="best-practices-fur-gateways">Best Practices für Gateways<a class="headerlink" href="#best-practices-fur-gateways" title="Permanent link">&para;</a></h4>
 <ol>
 <li><strong>Health Checks</strong>: Konfigurieren Sie Integritätsprüfungen für Ihre Dienste</li>
 <li><strong>Lastenausgleich</strong>: Verwenden Sie mehrere Instanzen für Hochverfügbarkeit</li>
@@ -2402,19 +2460,19 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: be
 <li><strong>Sicherheits-Header</strong>: Fügen Sie geeignete Sicherheits-Header hinzu</li>
 <li><strong>Timeouts</strong>: Konfigurieren Sie angemessene Timeouts, um Blockierungen zu vermeiden</li>
 </ol>
-<h3 id="bunkerweb-cloud-ip-whitelist">BunkerWeb Cloud IP-Whitelist</h3>
-<h4 id="warum-eine-whitelist-konfigurieren">Warum eine Whitelist konfigurieren?</h4>
+<h3 id="bunkerweb-cloud-ip-whitelist">BunkerWeb Cloud IP-Whitelist<a class="headerlink" href="#bunkerweb-cloud-ip-whitelist" title="Permanent link">&para;</a></h3>
+<h4 id="warum-eine-whitelist-konfigurieren">Warum eine Whitelist konfigurieren?<a class="headerlink" href="#warum-eine-whitelist-konfigurieren" title="Permanent link">&para;</a></h4>
 <p>Um Ihre Infrastruktur weiter zu sichern, wird empfohlen, eine Whitelist von BunkerWeb Cloud-IP-Adressen auf der Seite der Client-Infrastruktur zu konfigurieren. Dadurch wird sichergestellt, dass nur Datenverkehr von BunkerWeb Cloud Ihre Backend-Dienste erreichen kann.</p>
 <p>Wir empfehlen das Whitelisting auf Firewall-Ebene (iptables usw.).</p>
-<h4 id="bunkerweb-cloud-ip-adressen-zur-whitelist-hinzufugen">BunkerWeb Cloud IP-Adressen zur Whitelist hinzufügen</h4>
+<h4 id="bunkerweb-cloud-ip-adressen-zur-whitelist-hinzufugen">BunkerWeb Cloud IP-Adressen zur Whitelist hinzufügen<a class="headerlink" href="#bunkerweb-cloud-ip-adressen-zur-whitelist-hinzufugen" title="Permanent link">&para;</a></h4>
 <p><strong>Liste der zuzulassenden IP-Adressen:</strong></p>
 <p>Aktualisierte Liste ist hier verfügbar: https://repo.bunkerweb.io/cloud/ips</p>
 <div class="highlight"><pre><span></span><code># BunkerWeb Cloud IP-Adressen
 4.233.128.18
 20.19.161.132
 </code></pre></div>
-<h4 id="whitelist-konfiguration-nach-technologie">Whitelist-Konfiguration nach Technologie</h4>
-<h5 id="nginx_1">Nginx</h5>
+<h4 id="whitelist-konfiguration-nach-technologie">Whitelist-Konfiguration nach Technologie<a class="headerlink" href="#whitelist-konfiguration-nach-technologie" title="Permanent link">&para;</a></h4>
+<h5 id="nginx_1">Nginx<a class="headerlink" href="#nginx_1" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Nginx-Konfiguration</summary>
 
@@ -2462,7 +2520,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: be
 
 </details>
 
-<h5 id="traefik_1">Traefik</h5>
+<h5 id="traefik_1">Traefik<a class="headerlink" href="#traefik_1" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Traefik-Konfiguration</summary>
 
@@ -2512,7 +2570,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: be
 
 </details>
 
-<h5 id="apache_1">Apache</h5>
+<h5 id="apache_1">Apache<a class="headerlink" href="#apache_1" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Apache-Konfiguration</summary>
 
@@ -2558,7 +2616,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: be
 
 </details>
 
-<h5 id="haproxy_1">HAProxy</h5>
+<h5 id="haproxy_1">HAProxy<a class="headerlink" href="#haproxy_1" title="Permanent link">&para;</a></h5>
 <details>
 <summary>HAProxy-Konfiguration</summary>
 
@@ -2598,7 +2656,7 @@ backend api_servers
 
 </details>
 
-<h5 id="system-firewall-iptables">System-Firewall (iptables)</h5>
+<h5 id="system-firewall-iptables">System-Firewall (iptables)<a class="headerlink" href="#system-firewall-iptables" title="Permanent link">&para;</a></h5>
 <details>
 <summary>iptables-Konfiguration</summary>
 
@@ -2642,7 +2700,7 @@ iptables-save<span class="w"> </span>&gt;<span class="w"> </span>/etc/iptables/r
 
 </details>
 
-<h4 id="whitelist-best-practices">Whitelist Best Practices</h4>
+<h4 id="whitelist-best-practices">Whitelist Best Practices<a class="headerlink" href="#whitelist-best-practices" title="Permanent link">&para;</a></h4>
 <ol>
 <li><strong>Ablehnungen überwachen</strong>: Überwachen Sie blockierte Zugriffsversuche</li>
 <li><strong>Regelmäßige Updates</strong>: Halten Sie die IP-Liste aktuell</li>
@@ -2651,10 +2709,10 @@ iptables-save<span class="w"> </span>&gt;<span class="w"> </span>/etc/iptables/r
 <li><strong>Alarmierung</strong>: Konfigurieren Sie Alarme für BunkerWeb-IP-Änderungen</li>
 <li><strong>Backup</strong>: Bewahren Sie eine Backup-Konfiguration für den Fall von Problemen auf</li>
 </ol>
-<h3 id="real_ip-konfiguration-und-client-adresswiederherstellung">REAL_IP-Konfiguration und Client-Adresswiederherstellung</h3>
-<h4 id="warum-real_ip-konfigurieren">Warum REAL_IP konfigurieren?</h4>
+<h3 id="real_ip-konfiguration-und-client-adresswiederherstellung">REAL_IP-Konfiguration und Client-Adresswiederherstellung<a class="headerlink" href="#real_ip-konfiguration-und-client-adresswiederherstellung" title="Permanent link">&para;</a></h3>
+<h4 id="warum-real_ip-konfigurieren">Warum REAL_IP konfigurieren?<a class="headerlink" href="#warum-real_ip-konfigurieren" title="Permanent link">&para;</a></h4>
 <p>Wenn Sie BunkerWeb Cloud als Reverse Proxy verwenden, sind die IP-Adressen, die Ihre Backend-Anwendungen sehen, die von BunkerWeb Cloud und nicht die der echten Clients. Um die echten Client-IP-Adressen abzurufen, ist eine spezifische Konfiguration erforderlich.</p>
-<h4 id="konfiguration-auf-seite-von-bunkerweb-cloud">Konfiguration auf Seite von BunkerWeb Cloud</h4>
+<h4 id="konfiguration-auf-seite-von-bunkerweb-cloud">Konfiguration auf Seite von BunkerWeb Cloud<a class="headerlink" href="#konfiguration-auf-seite-von-bunkerweb-cloud" title="Permanent link">&para;</a></h4>
 <p>In der BunkerWeb-UI konfigurieren Sie Real IP:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span><span class="w"> </span><span class="c1"># Standard ist no</span>
 <span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.0.0/16 172.16.0.0/12 10.0.0.0/8</span><span class="w"> </span><span class="c1"># Standard</span>
@@ -2663,9 +2721,9 @@ iptables-save<span class="w"> </span>&gt;<span class="w"> </span>/etc/iptables/r
 <span class="c1"># Beispiel, wenn Sie auch Cloudflare Proxy vor BunkerWeb verwenden</span>
 <span class="nt">REAL_IP_FROM_URLS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/</span>
 </code></pre></div>
-<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/latest/settings/#real-ip">Dokumentation Real Ip</a></p>
-<h4 id="konfiguration-auf-seite-der-client-infrastruktur">Konfiguration auf Seite der Client-Infrastruktur</h4>
-<h5 id="nginx_2">Nginx</h5>
+<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/1.6/settings/#real-ip">Dokumentation Real Ip</a></p>
+<h4 id="konfiguration-auf-seite-der-client-infrastruktur">Konfiguration auf Seite der Client-Infrastruktur<a class="headerlink" href="#konfiguration-auf-seite-der-client-infrastruktur" title="Permanent link">&para;</a></h4>
+<h5 id="nginx_2">Nginx<a class="headerlink" href="#nginx_2" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Nginx-Konfiguration für REAL_IP</summary>
 
@@ -2710,7 +2768,7 @@ iptables-save<span class="w"> </span>&gt;<span class="w"> </span>/etc/iptables/r
 
 </details>
 
-<h5 id="apache_2">Apache</h5>
+<h5 id="apache_2">Apache<a class="headerlink" href="#apache_2" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Apache-Konfiguration für REAL_IP</summary>
 
@@ -2751,7 +2809,7 @@ iptables-save<span class="w"> </span>&gt;<span class="w"> </span>/etc/iptables/r
 
 </details>
 
-<h5 id="haproxy_2">HAProxy</h5>
+<h5 id="haproxy_2">HAProxy<a class="headerlink" href="#haproxy_2" title="Permanent link">&para;</a></h5>
 <details>
 <summary>HAProxy-Konfiguration für REAL_IP</summary>
 
@@ -2798,7 +2856,7 @@ backend app_servers
 
 </details>
 
-<h5 id="traefik_2">Traefik</h5>
+<h5 id="traefik_2">Traefik<a class="headerlink" href="#traefik_2" title="Permanent link">&para;</a></h5>
 <details>
 <summary>Traefik-Konfiguration für REAL_IP</summary>
 
@@ -2858,8 +2916,8 @@ backend app_servers
 
 </details>
 
-<h4 id="tests-und-validierung">Tests und Validierung</h4>
-<h5 id="konfigurationsuberprufung_1">Konfigurationsüberprüfung</h5>
+<h4 id="tests-und-validierung">Tests und Validierung<a class="headerlink" href="#tests-und-validierung" title="Permanent link">&para;</a></h4>
+<h5 id="konfigurationsuberprufung_1">Konfigurationsüberprüfung<a class="headerlink" href="#konfigurationsuberprufung_1" title="Permanent link">&para;</a></h5>
 <div class="highlight"><pre><span></span><code><span class="c1"># Test 1: Empfangene Header prüfen</span>
 curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-Real-IP: 203.0.113.1"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">"X-Forwarded-For: 203.0.113.1, 192.168.1.100"</span><span class="w"> </span><span class="se">\</span>
@@ -2871,7 +2929,7 @@ tail<span class="w"> </span>-f<span class="w"> </span>/var/log/nginx/access.log<
 <span class="c1"># Test 3: Test von verschiedenen Quellen</span>
 curl<span class="w"> </span>-v<span class="w"> </span>https://beispiel.de/whatismyip
 </code></pre></div>
-<h4 id="real_ip-best-practices">REAL_IP Best Practices</h4>
+<h4 id="real_ip-best-practices">REAL_IP Best Practices<a class="headerlink" href="#real_ip-best-practices" title="Permanent link">&para;</a></h4>
 <ol>
 <li><strong>Sicherheit</strong>: Vertrauen Sie nur IP-Headern von bekannten Quellen (BunkerWeb Cloud)</li>
 <li><strong>Validierung</strong>: Validieren Sie immer die in Headern empfangenen IP-Adressen</li>
@@ -2880,22 +2938,22 @@ curl<span class="w"> </span>-v<span class="w"> </span>https://beispiel.de/whatis
 <li><strong>Tests</strong>: Testen Sie regelmäßig, ob die IP-Erkennung korrekt funktioniert</li>
 <li><strong>Überwachung</strong>: Überwachen Sie IP-Muster, um Anomalien zu erkennen</li>
 </ol>
-<h4 id="real_ip-fehlerbehebung">REAL_IP-Fehlerbehebung</h4>
-<h5 id="haufige-probleme">Häufige Probleme</h5>
+<h4 id="real_ip-fehlerbehebung">REAL_IP-Fehlerbehebung<a class="headerlink" href="#real_ip-fehlerbehebung" title="Permanent link">&para;</a></h4>
+<h5 id="haufige-probleme">Häufige Probleme<a class="headerlink" href="#haufige-probleme" title="Permanent link">&para;</a></h5>
 <ol>
 <li><strong>IP zeigt immer die von BunkerWeb</strong>: Überprüfen Sie die Konfiguration der vertrauenswürdigen Proxies</li>
 <li><strong>Fehlende Header</strong>: Überprüfen Sie die Konfiguration auf Seite von BunkerWeb Cloud</li>
 <li><strong>Ungültige IPs</strong>: Implementieren Sie eine strikte IP-Validierung</li>
 <li><strong>Falsche Protokolle</strong>: Überprüfen Sie das Protokollformat und die real_ip-Modulkonfiguration</li>
 </ol>
-<h5 id="diagnosebefehle">Diagnosebefehle</h5>
+<h5 id="diagnosebefehle">Diagnosebefehle<a class="headerlink" href="#diagnosebefehle" title="Permanent link">&para;</a></h5>
 <p><strong>IP-Erkennung testen</strong></p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"X-Real-IP: 1.2.3.4"</span><span class="w"> </span>https://ihre-domain.de/debug-headers
 </code></pre></div>
-<h3 id="uberwachung-und-observabilitat">Überwachung und Observabilität</h3>
-<h4 id="grafana-zugang">Grafana-Zugang</h4>
+<h3 id="uberwachung-und-observabilitat">Überwachung und Observabilität<a class="headerlink" href="#uberwachung-und-observabilitat" title="Permanent link">&para;</a></h3>
+<h4 id="grafana-zugang">Grafana-Zugang<a class="headerlink" href="#grafana-zugang" title="Permanent link">&para;</a></h4>
 <p>Ihre verwaltete Grafana-Instanz gibt Ihnen Zugriff auf:</p>
-<h5 id="verfugbare-metriken">Verfügbare Metriken</h5>
+<h5 id="verfugbare-metriken">Verfügbare Metriken<a class="headerlink" href="#verfugbare-metriken" title="Permanent link">&para;</a></h5>
 <ol>
 <li>
 <p><strong>Verkehrsübersicht</strong></p>
@@ -2922,13 +2980,13 @@ curl<span class="w"> </span>-v<span class="w"> </span>https://beispiel.de/whatis
 <li>Backend-Antwortzeit</li>
 <li>Ressourcennutzung</li>
 </ol>
-<h5 id="verfugbare-protokolle">Verfügbare Protokolle</h5>
+<h5 id="verfugbare-protokolle">Verfügbare Protokolle<a class="headerlink" href="#verfugbare-protokolle" title="Permanent link">&para;</a></h5>
 <ol>
 <li><strong>Access Logs</strong>: Alle HTTP/HTTPS-Anfragen</li>
 <li><strong>Security Logs</strong>: Sicherheitsereignisse und Blockierungen</li>
 <li><strong>Error Logs</strong>: Anwendungs- und Systemfehler</li>
 </ol>
-<h5 id="alarmkonfiguration">Alarmkonfiguration</h5>
+<h5 id="alarmkonfiguration">Alarmkonfiguration<a class="headerlink" href="#alarmkonfiguration" title="Permanent link">&para;</a></h5>
 <p>Konfigurieren Sie Grafana-Alarme für:</p>
 <ul>
 <li>Abnormale Verkehrsspitzen</li>
@@ -2936,24 +2994,24 @@ curl<span class="w"> </span>-v<span class="w"> </span>https://beispiel.de/whatis
 <li>Erkennung von DDoS-Angriffen</li>
 <li>Backend-Gesundheitsfehler</li>
 </ul>
-<h3 id="best-practices">Best Practices</h3>
-<h4 id="sicherheit">Sicherheit</h4>
+<h3 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h3>
+<h4 id="sicherheit">Sicherheit<a class="headerlink" href="#sicherheit" title="Permanent link">&para;</a></h4>
 <ol>
 <li><strong>Verwenden Sie HTTPS</strong> für die gesamte Backend-Kommunikation</li>
 <li><strong>Implementieren Sie eine IP-Whitelist</strong>, wenn möglich</li>
 <li><strong>Konfigurieren Sie angemessene Timeouts</strong></li>
 <li><strong>Aktivieren Sie Komprimierung</strong>, um die Leistung zu optimieren</li>
 </ol>
-<h4 id="leistung">Leistung</h4>
+<h4 id="leistung">Leistung<a class="headerlink" href="#leistung" title="Permanent link">&para;</a></h4>
 <ol>
 <li><strong>Optimieren Sie die Cache-Konfiguration</strong></li>
 <li><strong>Verwenden Sie HTTP/2</strong> auf Client-Seite</li>
 <li><strong>Konfigurieren Sie Health Checks</strong> für Ihre Backends</li>
 <li><strong>Überwachen Sie Metriken</strong> regelmäßig</li>
 </ol>
-<h3 id="fehlerbehebung">Fehlerbehebung</h3>
-<h4 id="haufige-probleme_1">Häufige Probleme</h4>
-<h5 id="1-ssltls-fehler">1. SSL/TLS-Fehler</h5>
+<h3 id="fehlerbehebung">Fehlerbehebung<a class="headerlink" href="#fehlerbehebung" title="Permanent link">&para;</a></h3>
+<h4 id="haufige-probleme_1">Häufige Probleme<a class="headerlink" href="#haufige-probleme_1" title="Permanent link">&para;</a></h4>
+<h5 id="1-ssltls-fehler">1. SSL/TLS-Fehler<a class="headerlink" href="#1-ssltls-fehler" title="Permanent link">&para;</a></h5>
 <p><strong>Symptom:</strong> SSL-Zertifikatsfehler</p>
 <p><strong>Lösungen:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># SNI-Konfiguration prüfen</span>
@@ -2962,7 +3020,7 @@ openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span cla
 <span class="c1"># Backend-Zertifikate prüfen</span>
 openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>certificate.crt<span class="w"> </span>-text<span class="w"> </span>-noout
 </code></pre></div>
-<h5 id="2-backend-timeout">2. Backend-Timeout</h5>
+<h5 id="2-backend-timeout">2. Backend-Timeout<a class="headerlink" href="#2-backend-timeout" title="Permanent link">&para;</a></h5>
 <p><strong>Symptom:</strong> 504 Gateway Timeout-Fehler</p>
 <p><strong>Lösungen:</strong></p>
 <ul>
@@ -2970,7 +3028,7 @@ openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> <
 <li>Überprüfen Sie die Backend-Gesundheit</li>
 <li>Optimieren Sie die Anwendungsleistung</li>
 </ul>
-<h5 id="3-routing-probleme">3. Routing-Probleme</h5>
+<h5 id="3-routing-probleme">3. Routing-Probleme<a class="headerlink" href="#3-routing-probleme" title="Permanent link">&para;</a></h5>
 <p><strong>Symptom:</strong> Falscher Dienst wird bereitgestellt</p>
 <p><strong>Lösungen:</strong></p>
 <ul>
@@ -2978,7 +3036,7 @@ openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> <
 <li>Validieren Sie die SNI-Konfiguration</li>
 <li>Überprüfen Sie die <code>Host</code>-Header</li>
 </ul>
-<h4 id="diagnosebefehle_1">Diagnosebefehle</h4>
+<h4 id="diagnosebefehle_1">Diagnosebefehle<a class="headerlink" href="#diagnosebefehle_1" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="c1"># Konnektivitätstest</span>
 curl<span class="w"> </span>-v<span class="w"> </span>https://ihre-domain.de
 
@@ -2991,20 +3049,20 @@ dig<span class="w"> </span>+trace<span class="w"> </span>beispiel.de
 <span class="c1"># SSL-Test</span>
 openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>beispiel.de:443<span class="w"> </span>-servername<span class="w"> </span>beispiel.de
 </code></pre></div>
-<h4 id="technischer-support">Technischer Support</h4>
+<h4 id="technischer-support">Technischer Support<a class="headerlink" href="#technischer-support" title="Permanent link">&para;</a></h4>
 <p>Für technische Unterstützung:</p>
 <ol>
 <li><strong>Überprüfen Sie die Protokolle</strong> in Grafana</li>
 <li><strong>Überprüfen Sie die Konfiguration</strong> in der BunkerWeb-UI</li>
 <li><strong>Kontaktieren Sie den Support</strong> mit Konfigurationsdetails und Fehlerprotokollen</li>
 </ol>
-<h2 id="all-in-one-aio-image">All-In-One (AIO) Image</h2>
+<h2 id="all-in-one-aio-image">All-In-One (AIO) Image<a class="headerlink" href="#all-in-one-aio-image" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="AIO Architekturdiagramm Platzhalter" src="../../assets/img/aio-graph-placeholder.png" width="600" />
   </p>
 <figcaption>BunkerWeb All-In-One Architektur (AIO)</figcaption>
 </figure>
-<h3 id="deployment">Bereitstellung</h3>
+<h3 id="deployment">Bereitstellung<a class="headerlink" href="#deployment" title="Permanent link">&para;</a></h3>
 <p>Um den All-in-One-Container bereitzustellen, müssen Sie nur den folgenden Befehl ausführen:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -3069,7 +3127,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><code>HIDE_SERVICE_LOGS=</code> (optional) - Kommagetrennte Liste von Diensten, deren Ausgaben in den Container-Logs unterdrückt werden. Unterstützte Werte: <code>api</code>, <code>autoconf</code>, <code>bunkerweb</code>, <code>crowdsec</code>, <code>redis</code>, <code>scheduler</code>, <code>ui</code>, <code>nginx.access</code>, <code>nginx.error</code>, <code>modsec</code>.</li>
 <li><strong>Protokollierung</strong>: Das All-In-One-Image leitet stdout und stderr aller Dienste an die Container-Ausgabe weiter. Verwenden Sie <code>docker logs bunkerweb-aio</code> (oder Ihren bevorzugten Container-Logging-Treiber), um Protokolle anzuzeigen und zu rotieren. Das Image schreibt für seine Python-Dienste keine Logdateien auf die Festplatte.</li>
 </ul>
-<h3 id="api-integration">API-Integration</h3>
+<h3 id="api-integration">API-Integration<a class="headerlink" href="#api-integration" title="Permanent link">&para;</a></h3>
 <p>Das All-In-One-Image enthält die BunkerWeb-API. Sie ist standardmäßig deaktiviert und kann durch Setzen von <code>SERVICE_API=yes</code> aktiviert werden.</p>
 <div class="admonition warning">
 <p class="admonition-title">Sicherheit</p>
@@ -3127,7 +3185,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 </code></pre></div>
 <p>Details zu Authentifizierung, Berechtigungen (ACL), Ratenbegrenzung, TLS und Konfigurationsoptionen finden Sie in der <a href="../api/">API-Dokumentation</a>.</p>
-<h3 id="zugriff-auf-den-einrichtungsassistenten">Zugriff auf den Einrichtungsassistenten</h3>
+<h3 id="zugriff-auf-den-einrichtungsassistenten">Zugriff auf den Einrichtungsassistenten<a class="headerlink" href="#zugriff-auf-den-einrichtungsassistenten" title="Permanent link">&para;</a></h3>
 <p>Standardmäßig wird der Einrichtungsassistent automatisch gestartet, wenn Sie den AIO-Container zum ersten Mal ausführen. Um darauf zuzugreifen, führen Sie die folgenden Schritte aus:</p>
 <ol>
 <li><strong>Starten Sie den AIO-Container</strong> wie <a href="#deployment">oben</a> beschrieben und stellen Sie sicher, dass <code>SERVICE_UI=yes</code> (Standard) ist.</li>
@@ -3136,7 +3194,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <blockquote>
 <p>Folgen Sie den nächsten Schritten im <a href="../quickstart-guide/#complete-the-setup-wizard">Schnellstart-Leitfaden</a>, um die Web-UI einzurichten.</p>
 </blockquote>
-<h3 id="redis-integration">Redis-Integration</h3>
+<h3 id="redis-integration">Redis-Integration<a class="headerlink" href="#redis-integration" title="Permanent link">&para;</a></h3>
 <p>Das BunkerWeb <strong>All-In-One</strong>-Image enthält standardmäßig Redis für die <a href="../advanced/#persistence-of-bans-and-reports">Persistenz von Sperren und Berichten</a>. Beachten Sie dabei:</p>
 <ul>
 <li>Der eingebettete Redis-Dienst startet nur, wenn <code>USE_REDIS=yes</code> <strong>und</strong> <code>REDIS_HOST</code> auf dem Standardwert (<code>127.0.0.1</code>/<code>localhost</code>) bleibt.</li>
@@ -3149,7 +3207,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><strong>Authentifizierung:</strong> Wird <code>REDIS_PASSWORD</code> gesetzt und die Konfigurationsdatei deklariert noch kein <code>requirepass</code>, startet das eingebettete Redis mit <code>requirepass</code>, sodass BunkerWeb-Client und -Server konsistent bleiben. Der eingebettete Server unterstützt nur den Default-Benutzer – setzen Sie <code>REDIS_USERNAME</code> ausschließlich beim Anbinden eines externen Redis mit ACLs.</li>
 <li>Redis-Protokolle erscheinen mit dem Präfix <code>[REDIS]</code> in den Docker-Protokollen sowie in <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
-<h3 id="aio-log-retention">Protokollaufbewahrung</h3>
+<h3 id="aio-log-retention">Protokollaufbewahrung<a class="headerlink" href="#aio-log-retention" title="Permanent link">&para;</a></h3>
 <p>Anders als die übrigen Docker-Images bewahrt das All-In-One <code>access.log</code>, <code>error.log</code> und <code>modsec_audit.log</code> als reale Dateien unter <code>/var/log/bunkerweb/</code> auf. Der Log-Stream liest sie, um jeder Zeile ein Präfix voranzustellen und <code>HIDE_SERVICE_LOGS</code> anzuwenden, und sowohl der mitgelieferte CrowdSec-Parser als auch der Protokollanzeiger der Web-UI lesen sie von der Festplatte.</p>
 <ul>
 <li>Das Image liefert <code>logrotate</code> mit und führt es stündlich unter supervisor aus. Ein Rotationsfehler wird mit dem Präfix <code>[LOGROTATE]</code> in den Container-Logs gemeldet.</li>
@@ -3158,7 +3216,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li>Um den Schwellenwert oder die Anzahl der Generationen zu ändern, mounten Sie Ihre eigene Datei über <code>/etc/logrotate.d/bunkerweb</code>. Um die Rotation vollständig zu deaktivieren und die Aufbewahrung selbst zu verwalten, mounten Sie eine leere Datei über denselben Pfad. Ein unter <code>/var/log/bunkerweb</code> gemountetes Volume ändert nur, wo die Daten liegen — es hindert das im Container laufende <code>logrotate</code> nicht daran, sie dort weiterhin zu rotieren.</li>
 </ul>
 <p>Siehe <a href="../advanced/#log-file-retention">Aufbewahrung der Protokolldateien</a> dazu, wie die anderen Integrationen damit umgehen.</p>
-<h3 id="crowdsec-integration">CrowdSec-Integration</h3>
+<h3 id="crowdsec-integration">CrowdSec-Integration<a class="headerlink" href="#crowdsec-integration" title="Permanent link">&para;</a></h3>
 <p>Das BunkerWeb <strong>All-In-One</strong>-Docker-Image wird mit vollständig integriertem CrowdSec geliefert – keine zusätzlichen Container oder manuelle Einrichtung erforderlich. Befolgen Sie die nachstehenden Schritte, um CrowdSec in Ihrer Bereitstellung zu aktivieren, zu konfigurieren und zu erweitern.</p>
 <p>Standardmäßig ist CrowdSec <strong>deaktiviert</strong>. Um es zu aktivieren, fügen Sie einfach die Umgebungsvariable <code>USE_CROWDSEC</code> hinzu:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
@@ -3212,7 +3270,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p>Wenn <code>cscli collections list</code> im Container <code>bunkerity/bunkerweb</code> weiterhin nicht anzeigt, führen Sie <code>docker exec -it bunkerweb-aio cscli hub update</code> aus und starten Sie anschließend den Container neu (<code>docker restart bunkerweb-aio</code>), um den lokalen Hub-Cache zu aktualisieren.</p>
 </div>
 <hr />
-<h4 id="hinzufugen-zusatzlicher-sammlungen">Hinzufügen zusätzlicher Sammlungen</h4>
+<h4 id="hinzufugen-zusatzlicher-sammlungen">Hinzufügen zusätzlicher Sammlungen<a class="headerlink" href="#hinzufugen-zusatzlicher-sammlungen" title="Permanent link">&para;</a></h4>
 <p>Benötigen Sie mehr Abdeckung? Definieren Sie <code>CROWDSEC_EXTRA_COLLECTIONS</code> mit einer durch Leerzeichen getrennten Liste von Hub-Sammlungen:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -3229,7 +3287,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p>Das Skript durchläuft jeden Namen und installiert oder aktualisiert ihn nach Bedarf – keine manuellen Schritte erforderlich.</p>
 </div>
 <hr />
-<h4 id="deaktivieren-bestimmter-parser">Deaktivieren bestimmter Parser</h4>
+<h4 id="deaktivieren-bestimmter-parser">Deaktivieren bestimmter Parser<a class="headerlink" href="#deaktivieren-bestimmter-parser" title="Permanent link">&para;</a></h4>
 <p>Wenn Sie die Standardeinrichtung beibehalten, aber einen oder mehrere Parser explizit deaktivieren möchten, geben Sie eine durch Leerzeichen getrennte Liste über <code>CROWDSEC_DISABLE_PARSERS</code> an:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -3245,7 +3303,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 - Die Liste wird angewendet, nachdem die erforderlichen Elemente installiert/aktualisiert wurden; nur die von Ihnen aufgelisteten Parser werden entfernt.
 - Verwenden Sie Hub-Slugs, wie sie von <code>cscli parsers list</code> angezeigt werden (z. B. <code>crowdsecurity/geoip-enrich</code>).</p>
 <hr />
-<h4 id="central-api-deaktivieren">Central API deaktivieren</h4>
+<h4 id="central-api-deaktivieren">Central API deaktivieren<a class="headerlink" href="#central-api-deaktivieren" title="Permanent link">&para;</a></h4>
 <p>Um die Registrierung bei der Central API und der Console zu deaktivieren, ohne dass Signale gesendet oder die Community-Blocklist abgerufen werden, setzen Sie <code>DISABLE_ONLINE_API</code> auf <code>true</code>. Dies stoppt keine Hub-Updates: Der Katalog für Collections und Parser wird unabhängig von dieser Einstellung weiterhin aus dem CrowdSec-Hub abgerufen.</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -3263,14 +3321,14 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 - Die Einstellung wird bei jedem Start gelesen, Sie können sie also später wieder aktivieren. War die Instanz bereits registriert, werden die gespeicherten Zugangsdaten beim Deaktivieren entfernt, und beim erneuten Aktivieren wird neu registriert.
 - Gilt nur, wenn CrowdSec im Container läuft. Zeigt <code>CROWDSEC_API</code> auf eine entfernte Instanz, zählt deren Central-API-Einstellung.</p>
 <hr />
-<h4 id="appsec-umschalter">AppSec-Umschalter</h4>
+<h4 id="appsec-umschalter">AppSec-Umschalter<a class="headerlink" href="#appsec-umschalter" title="Permanent link">&para;</a></h4>
 <p>CrowdSec <a href="https://docs.crowdsec.net/docs/appsec/intro/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">AppSec</a>-Funktionen – angetrieben durch die Sammlungen <code>appsec-virtual-patching</code> und <code>appsec-generic-rules</code> – sind <strong>standardmäßig aktiviert</strong>.</p>
 <p>Um alle AppSec-Funktionen (WAF/virtuelles Patchen) zu <strong>deaktivieren</strong>, setzen Sie:</p>
 <div class="highlight"><pre><span></span><code>-e<span class="w"> </span><span class="nv">CROWDSEC_APPSEC_URL</span><span class="o">=</span><span class="s2">""</span>
 </code></pre></div>
 <p>Dies schaltet den AppSec-Endpunkt effektiv aus, sodass keine Regeln angewendet werden.</p>
 <hr />
-<h4 id="externe-crowdsec-api">Externe CrowdSec-API</h4>
+<h4 id="externe-crowdsec-api">Externe CrowdSec-API<a class="headerlink" href="#externe-crowdsec-api" title="Permanent link">&para;</a></h4>
 <p>Wenn Sie eine entfernte CrowdSec-Instanz betreiben, verweisen Sie den Container auf Ihre API:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -3293,7 +3351,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p class="admonition-title">Weitere Optionen</p>
 <p>Eine vollständige Übersicht über alle CrowdSec-Optionen (benutzerdefinierte Szenarien, Protokolle, Fehlerbehebung und mehr) finden Sie in der <a href="../features/#crowdsec">BunkerWeb CrowdSec-Plugin-Dokumentation</a> oder besuchen Sie die <a href="https://www.crowdsec.net/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">offizielle CrowdSec-Website</a>.</p>
 </div>
-<h2 id="docker">Docker</h2>
+<h2 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/integration-docker.svg" width="600" />
   </p>
@@ -3323,7 +3381,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p class="admonition-title">Datenbank-Backend</p>
 <p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie SQLite als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Es werden jedoch auch andere Datenbank-Backends unterstützt. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a> des Repositorys.</p>
 </div>
-<h3 id="umgebungsvariablen">Umgebungsvariablen</h3>
+<h3 id="umgebungsvariablen">Umgebungsvariablen<a class="headerlink" href="#umgebungsvariablen" title="Permanent link">&para;</a></h3>
 <p>Einstellungen werden dem Scheduler über Docker-Umgebungsvariablen übergeben:</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
@@ -3348,7 +3406,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p class="admonition-title">KEEP_CONFIG_ON_RESTART</p>
 <p>Anders als die obigen Einstellungen wird <code>KEEP_CONFIG_ON_RESTART</code> direkt vom Entrypoint des <code>bunkerweb</code>-Containers aus dessen Prozessumgebung gelesen, nicht vom Scheduler oder der Datenbank, und muss daher am <code>bunkerweb</code>-Container selbst gesetzt werden. Auf <code>yes</code> setzen, um die zuvor generierte Konfiguration bei einem Container-Neustart beizubehalten, anstatt die Lade-Konfiguration zu rendern. Standard <code>no</code>.</p>
 </div>
-<h3 id="verwendung-von-docker-secrets">Verwendung von Docker-Secrets</h3>
+<h3 id="verwendung-von-docker-secrets">Verwendung von Docker-Secrets<a class="headerlink" href="#verwendung-von-docker-secrets" title="Permanent link">&para;</a></h3>
 <p>Anstatt sensible Einstellungen über Umgebungsvariablen zu übergeben, können Sie sie als Docker-Secrets speichern. Erstellen Sie für jede Einstellung, die Sie sichern möchten, ein Docker-Secret mit dem Namen, der dem Einstellungsschlüssel entspricht (in Großbuchstaben). Die Einstiegsskripte von BunkerWeb laden Secrets automatisch aus <code>/run/secrets</code> und exportieren sie als Umgebungsvariablen.</p>
 <p>Beispiel:
 <div class="highlight"><pre><span></span><code><span class="c1"># Ein Docker-Secret für ADMIN_PASSWORD erstellen</span>
@@ -3365,7 +3423,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div></p>
 <p>Dadurch wird sichergestellt, dass sensible Einstellungen aus der Umgebung und den Protokollen herausgehalten werden.</p>
-<h3 id="scheduler">Scheduler</h3>
+<h3 id="scheduler">Scheduler<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h3>
 <p>Der <a href="../concepts/#scheduler">Scheduler</a> läuft in seinem eigenen Container, der auch auf Docker Hub verfügbar ist:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-scheduler:testing
 </code></pre></div>
@@ -3442,16 +3500,16 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>b
 sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
 </div>
-<h3 id="scheduler-container-einstellungen">Scheduler-Container-Einstellungen</h3>
+<h3 id="scheduler-container-einstellungen">Scheduler-Container-Einstellungen<a class="headerlink" href="#scheduler-container-einstellungen" title="Permanent link">&para;</a></h3>
 <p>Der Scheduler ist der Control-Plane-Worker, der Einstellungen liest, Konfigurationen rendert und sie an BunkerWeb-Instanzen pusht. Die Einstellungen sind hier zentralisiert, inklusive Defaults und akzeptierter Werte.</p>
-<h4 id="konfigurationsquellen-und-prioritat">Konfigurationsquellen und Priorität</h4>
+<h4 id="konfigurationsquellen-und-prioritat">Konfigurationsquellen und Priorität<a class="headerlink" href="#konfigurationsquellen-und-prioritat" title="Permanent link">&para;</a></h4>
 <ol>
 <li>Umgebungsvariablen (inkl. Docker/Compose <code>environment:</code>)</li>
 <li>Secrets in <code>/run/secrets/&lt;VAR&gt;</code> (vom Entrypoint automatisch geladen)</li>
 <li>Eingebaute Defaults</li>
 </ol>
-<h4 id="konfigurationsreferenz-power-user">Konfigurationsreferenz (Power User)</h4>
-<h5 id="laufzeit-sicherheit">Laufzeit &amp; Sicherheit</h5>
+<h4 id="konfigurationsreferenz-power-user">Konfigurationsreferenz (Power User)<a class="headerlink" href="#konfigurationsreferenz-power-user" title="Permanent link">&para;</a></h4>
+<h5 id="laufzeit-sicherheit">Laufzeit &amp; Sicherheit<a class="headerlink" href="#laufzeit-sicherheit" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -3512,7 +3570,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 </tr>
 </tbody>
 </table>
-<h5 id="datenbank">Datenbank</h5>
+<h5 id="datenbank">Datenbank<a class="headerlink" href="#datenbank" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -3537,7 +3595,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 </tr>
 </tbody>
 </table>
-<h5 id="logging">Logging</h5>
+<h5 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -3586,7 +3644,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 </tr>
 </tbody>
 </table>
-<h3 id="ui-container-einstellungen">UI-Container-Einstellungen</h3>
+<h3 id="ui-container-einstellungen">UI-Container-Einstellungen<a class="headerlink" href="#ui-container-einstellungen" title="Permanent link">&para;</a></h3>
 <p>Der UI-Container respektiert ebenfalls <code>TZ</code>, um Logs und geplante Wartungsaufgaben (z. B. Cleanup-Jobs der UI) zu lokalisieren.</p>
 <table>
 <thead>
@@ -3606,7 +3664,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 </tr>
 </tbody>
 </table>
-<h4 id="logging_1">Logging</h4>
+<h4 id="logging_1">Logging<a class="headerlink" href="#logging_1" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
 <tr>
@@ -3655,7 +3713,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 </tr>
 </tbody>
 </table>
-<h3 id="netzwerke">Netzwerke</h3>
+<h3 id="netzwerke">Netzwerke<a class="headerlink" href="#netzwerke" title="Permanent link">&para;</a></h3>
 <p>Standardmäßig lauscht der BunkerWeb-Container (innerhalb des Containers) auf <strong>8080/tcp</strong> für <strong>HTTP</strong>, <strong>8443/tcp</strong> für <strong>HTTPS</strong> und <strong>8443/udp</strong> für <strong>QUIC</strong>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Privilegierte Ports im rootless-Modus oder bei Verwendung von Podman</p>
@@ -3723,7 +3781,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="vollstandige-compose-datei">Vollständige Compose-Datei</h3>
+<h3 id="vollstandige-compose-datei">Vollständige Compose-Datei<a class="headerlink" href="#vollstandige-compose-datei" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-api-env</span>
 <span class="w">  </span><span class="c1"># Wir verwenden einen Anker, um die Wiederholung derselben Einstellungen für beide Container zu vermeiden</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24"</span>
@@ -3769,7 +3827,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="aus-dem-quellcode-erstellen">Aus dem Quellcode erstellen</h3>
+<h3 id="aus-dem-quellcode-erstellen">Aus dem Quellcode erstellen<a class="headerlink" href="#aus-dem-quellcode-erstellen" title="Permanent link">&para;</a></h3>
 <p>Alternativ, wenn Sie einen praxisorientierteren Ansatz bevorzugen, haben Sie die Möglichkeit, das Docker-Image direkt aus dem <a href="https://github.com/bunkerity/bunkerweb">Quellcode</a> zu erstellen. Das Erstellen des Images aus dem Quellcode gibt Ihnen mehr Kontrolle und Anpassungsmöglichkeiten über den Bereitstellungsprozess. Bitte beachten Sie jedoch, dass diese Methode je nach Ihrer Hardwarekonfiguration einige Zeit in Anspruch nehmen kann (Sie können bei Bedarf einen Kaffee ☕ trinken).</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb.git<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="nb">cd</span><span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -3778,7 +3836,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bw-autoconf<span class="w"> </span>-f<span class="w"> </span>src/autoconf/Dockerfile<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>bw-ui<span class="w"> </span>-f<span class="w"> </span>src/ui/Dockerfile<span class="w"> </span>.
 </code></pre></div>
-<h2 id="linux">Linux</h2>
+<h2 id="linux">Linux<a class="headerlink" href="#linux" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/integration-linux.svg" width="600" />
   </p>
@@ -3794,9 +3852,9 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Fedora 43 und 44</li>
 <li>Red Hat Enterprise Linux (RHEL), CentOS, Rocky Linux und AlmaLinux 8, 9 und 10</li>
 </ul>
-<h3 id="einfaches-installationsskript">Einfaches Installationsskript</h3>
+<h3 id="einfaches-installationsskript">Einfaches Installationsskript<a class="headerlink" href="#einfaches-installationsskript" title="Permanent link">&para;</a></h3>
 <p>Für eine vereinfachte Installation bietet BunkerWeb ein einfaches Installationsskript, das den gesamten Einrichtungsprozess automatisch abwickelt, einschließlich NGINX-Installation, Repository-Konfiguration und Service-Setup.</p>
-<h4 id="schnellstart">Schnellstart</h4>
+<h4 id="schnellstart">Schnellstart<a class="headerlink" href="#schnellstart" title="Permanent link">&para;</a></h4>
 <p>Um zu beginnen, laden Sie das Installationsskript und seine Prüfsumme herunter und überprüfen Sie dann die Integrität des Skripts, bevor Sie es ausführen.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Skript und Prüfsumme herunterladen</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
@@ -3815,7 +3873,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>Laden Sie die Prüfsummendatei herunter und verwenden Sie ein Werkzeug wie <code>sha256sum</code>, um zu bestätigen, dass das Skript nicht verändert oder manipuliert wurde.</p>
 <p>Wenn die Überprüfung der Prüfsumme fehlschlägt, <strong>führen Sie das Skript nicht aus</strong> – es könnte unsicher sein.</p>
 </div>
-<h4 id="wie-es-funktioniert">Wie es funktioniert</h4>
+<h4 id="wie-es-funktioniert">Wie es funktioniert<a class="headerlink" href="#wie-es-funktioniert" title="Permanent link">&para;</a></h4>
 <p>Das einfache Installationsskript ist ein leistungsstarkes Werkzeug, das entwickelt wurde, um die Einrichtung von BunkerWeb auf einem frischen Linux-System zu optimieren. Es automatisiert die folgenden wichtigen Schritte:</p>
 <ol>
 <li><strong>Systemanalyse</strong>: Erkennt Ihr Betriebssystem und überprüft es anhand der Liste der unterstützten Distributionen.</li>
@@ -3826,7 +3884,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li><strong>Dienstkonfiguration</strong>: Richtet die <code>systemd</code>-Dienste entsprechend dem von Ihnen gewählten Installationstyp ein und aktiviert sie.</li>
 <li><strong>Anleitung nach der Installation</strong>: Bietet klare nächste Schritte, um Ihnen den Einstieg in Ihre neue BunkerWeb-Instanz zu erleichtern.</li>
 </ol>
-<h4 id="interaktive-installation">Interaktive Installation</h4>
+<h4 id="interaktive-installation">Interaktive Installation<a class="headerlink" href="#interaktive-installation" title="Permanent link">&para;</a></h4>
 <p>Wenn das Skript ohne Optionen ausgeführt wird, wechselt es in einen interaktiven Modus, der Sie durch den Einrichtungsprozess führt. Der interaktive Ablauf verwendet eine Inline-TUI via <a href="https://github.com/charmbracelet/gum">gum</a> — Pfeiltastenmenüs mit <code>❯</code>-Cursor und maskierte Passwortfelder.</p>
 <div class="admonition info">
 <p class="admonition-title">gum wird beim ersten interaktiven Lauf ephemer abgerufen</p>
@@ -3865,14 +3923,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Manager- und Scheduler-Installationen</p>
 <p>Wenn Sie den Installationstyp <strong>Manager</strong> oder <strong>Nur Scheduler</strong> wählen, werden Sie auch aufgefordert, die IP-Adressen oder Hostnamen Ihrer BunkerWeb-Worker-Instanzen anzugeben.</p>
 </div>
-<h4 id="lokale-web-ui-protokolle-mit-docker-compose">Lokale Web-UI-Protokolle mit Docker Compose</h4>
+<h4 id="lokale-web-ui-protokolle-mit-docker-compose">Lokale Web-UI-Protokolle mit Docker Compose<a class="headerlink" href="#lokale-web-ui-protokolle-mit-docker-compose" title="Permanent link">&para;</a></h4>
 <p>Bei <strong>vollständigen Docker-Installationen</strong> (Standard oder <code>--autoconf</code>) kann der Installer Protokolle lokal für die Web-UI sammeln. Bei neuen interaktiven Installationen ist <strong>Ja</strong> voreingestellt; bei unbeaufsichtigten Installationen wählen Sie ausdrücklich <code>--syslog</code> oder <code>--no-syslog</code>:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--docker<span class="w"> </span>--full<span class="w"> </span>--yes<span class="w"> </span>--syslog
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--docker<span class="w"> </span>--full<span class="w"> </span>--yes<span class="w"> </span>--no-syslog
 </code></pre></div>
 <p>Wenn aktiviert, ergänzt der erzeugte Stack einen <code>bw-syslog</code>-Collector im internen Netzwerk <code>bw-universe</code>, ohne dessen Syslog-Port auf dem Host zu veröffentlichen. Die Protokolle werden im persistenten Volume <code>bw-logs</code> gespeichert und in <code>bw-ui</code> eingebunden; <code>syslog-ng.conf</code> wird neben <code>docker-compose.yml</code> erzeugt. Die BunkerWeb-Komponenten protokollieren weiterhin auch nach Standardfehler, sodass <code>docker compose logs</code> verfügbar bleibt. Die erzeugte Konfiguration verwendet feste Dateinamen und eine begrenzte Rotation (etwa 100 MB pro Datei mit 7 Rotationen).</p>
 <p>Die Auswahl wird als <code>BW_INSTALL_SYSLOG=yes|no</code> in <code>.env</code> gespeichert und bei Upgrades und erneuten Ausführungen beibehalten, sofern sie nicht ausdrücklich überschrieben wird. Beim Deaktivieren wird nur der vom Installer verwaltete Collector entfernt, nachdem der aktualisierte Stack bereit ist; der Verlauf in <code>bw-logs</code> und die Konfigurationsdatei bleiben erhalten. Vom Betreiber bearbeitete Compose- und syslog-ng-Dateien werden nicht stillschweigend ersetzt.</p>
-<h4 id="befehlszeilenoptionen">Befehlszeilenoptionen</h4>
+<h4 id="befehlszeilenoptionen">Befehlszeilenoptionen<a class="headerlink" href="#befehlszeilenoptionen" title="Permanent link">&para;</a></h4>
 <p>Für nicht-interaktive oder automatisierte Setups kann das Skript mit Befehlszeilen-Flags gesteuert werden:</p>
 <p><strong>Allgemeine Optionen:</strong></p>
 <table>
@@ -4010,7 +4068,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dock
 <tbody>
 <tr>
 <td><code>--instances "IP1 IP2"</code></td>
-<td>Durch Leerzeichen getrennte Liste von BunkerWeb-Instanzen (erforderlich für Manager-/Scheduler-Modi).</td>
+<td>Optional für Manager-/Scheduler-Modi; Worker können später hinzugefügt werden.</td>
 </tr>
 <tr>
 <td><code>--manager-ip IPs</code></td>
@@ -4110,15 +4168,16 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 <span class="c1"># Fehler: CrowdSec kann nicht mit Worker-Installationen verwendet werden</span>
 <span class="c1"># sudo ./install-bunkerweb.sh --worker --crowdsec  # Dies schlägt fehl</span>
 
-<span class="c1"># Fehler: Instanzen für Manager im nicht-interaktiven Modus erforderlich</span>
-<span class="c1"># sudo ./install-bunkerweb.sh --manager --yes  # Dies schlägt ohne --instances fehl</span>
+<span class="c1"># Die Liste --instances ist optional: Ohne Worker gibt der Manager eine Warnung aus.</span>
+<span class="c1"># sudo ./install-bunkerweb.sh --manager --yes</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Wichtige Hinweise zur Optionskompatibilität</p>
 <p><strong>CrowdSec-Einschränkungen:</strong></p>
 <ul>
-<li>CrowdSec-Optionen (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) sind nur mit dem Installationstyp <code>--full</code> (Standard) kompatibel</li>
-<li>Sie können nicht mit <code>--manager</code>, <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> oder <code>--api-only</code> Installationen verwendet werden</li>
+<li>CrowdSec-Optionen (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) sind mit <code>--full</code> (Standard) und <code>--manager</code> kompatibel.</li>
+<li>Die interaktive CrowdSec-Abfrage erscheint nur bei Full Stack; verwenden Sie CLI-Optionen für Manager.</li>
+<li>Sie sind nicht mit <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> oder <code>--api-only</code> kompatibel.</li>
 </ul>
 <p><strong>Redis-Einschränkungen:</strong></p>
 <ul>
@@ -4133,13 +4192,13 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 </ul>
 <p><strong>Anforderungen für Instanzen:</strong>
 - Die Option <code>--instances</code> ist nur mit den Installationstypen <code>--manager</code> und <code>--scheduler-only</code> gültig
-- Bei Verwendung von <code>--manager</code> oder <code>--scheduler-only</code> mit <code>--yes</code> (nicht-interaktiver Modus) ist die Option <code>--instances</code> obligatorisch
+- Die Liste ist bei der Installation optional; ohne Einträge warnt der Installer und Worker können später hinzugefügt werden.
 - Format: <code>--instances "192.168.1.10 192.168.1.11 192.168.1.12"</code></p>
 <p><strong>Interaktiv vs. Nicht-interaktiv:</strong>
 - Der interaktive Modus (Standard) fordert zur Eingabe fehlender erforderlicher Werte auf
 - Der nicht-interaktive Modus (<code>--yes</code>) erfordert, dass alle erforderlichen Optionen über die Befehlszeile bereitgestellt werden</p>
 </div>
-<h4 id="crowdsec-integration-with-the-script">CrowdSec-Integration mit dem Skript</h4>
+<h4 id="crowdsec-integration-with-the-script">CrowdSec-Integration mit dem Skript<a class="headerlink" href="#crowdsec-integration-with-the-script" title="Permanent link">&para;</a></h4>
 <p>Wenn Sie sich für die Installation von CrowdSec während der interaktiven Einrichtung entscheiden, automatisiert das Skript die Integration mit BunkerWeb vollständig:</p>
 <ul>
 <li>Es fügt das offizielle CrowdSec-Repository hinzu und installiert den Agenten.</li>
@@ -4149,7 +4208,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 <li>Wenn Sie auch die <strong>AppSec-Komponente</strong> auswählen, installiert es die Sammlungen <code>appsec-virtual-patching</code> und <code>appsec-generic-rules</code> und konfiguriert den AppSec-Endpunkt für BunkerWeb.</li>
 </ul>
 <p>Dies bietet eine nahtlose, sofort einsatzbereite Integration für einen leistungsstarken Einbruchschutz.</p>
-<h4 id="rhel-uberlegungen">RHEL-Überlegungen</h4>
+<h4 id="rhel-uberlegungen">RHEL-Überlegungen<a class="headerlink" href="#rhel-uberlegungen" title="Permanent link">&para;</a></h4>
 <div class="admonition warning">
 <p class="admonition-title">Unterstützung externer Datenbanken auf RHEL-basierten Systemen</p>
 <p>Wenn Sie eine externe Datenbank verwenden möchten (empfohlen für die Produktion), müssen Sie das entsprechende Datenbank-Client-Paket installieren:</p>
@@ -4164,7 +4223,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 </code></pre></div>
 <p>Dies ist erforderlich, damit der BunkerWeb-Scheduler eine Verbindung zu Ihrer externen Datenbank herstellen kann.</p>
 </div>
-<h4 id="nach-der-installation">Nach der Installation</h4>
+<h4 id="nach-der-installation">Nach der Installation<a class="headerlink" href="#nach-der-installation" title="Permanent link">&para;</a></h4>
 <p>Abhängig von Ihren Entscheidungen während der Installation:</p>
 <p><strong>Mit aktiviertem Einrichtungsassistenten:</strong></p>
 <ol>
@@ -4178,7 +4237,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>Fügen Sie Ihre Servereinstellungen und geschützten Dienste hinzu</li>
 <li>Starten Sie den Scheduler neu: <code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
-<h3 id="installation-mit-dem-paketmanager">Installation mit dem Paketmanager</h3>
+<h3 id="installation-mit-dem-paketmanager">Installation mit dem Paketmanager<a class="headerlink" href="#installation-mit-dem-paketmanager" title="Permanent link">&para;</a></h3>
 <p>Bitte stellen Sie sicher, dass Sie <strong>NGINX 1.30.5 installiert haben, bevor Sie BunkerWeb installieren</strong>. Für alle Distributionen ist es zwingend erforderlich, vorgefertigte Pakete aus dem <a href="https://nginx.org/en/linux_packages.html">offiziellen NGINX-Repository</a> zu verwenden. Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
@@ -4257,10 +4316,6 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">Fedora 43 liefert NGINX 1.30.4</p>
-<p>Fedora 43 stellt NGINX 1.30.5 noch nicht bereit, daher ist das BunkerWeb-Paket für Fedora 43 gegen NGINX 1.30.4 gebaut und erwartet <code>nginx-1.30.4</code>. Installieren Sie auf Fedora 43 diese Version; die Vorgabe wechselt auf 1.30.5, sobald Fedora 43 es veröffentlicht. Fedora 44 stellt 1.30.5 bereits bereit.</p>
-</div>
 <p>Fedora stellt bereits NGINX 1.30.5 zur Verfügung, das wir unterstützen</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.30.5
 </code></pre></div>
@@ -4319,7 +4374,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </div>
 </div>
 </div>
-<h3 id="konfiguration-und-dienst">Konfiguration und Dienst</h3>
+<h3 id="konfiguration-und-dienst">Konfiguration und Dienst<a class="headerlink" href="#konfiguration-und-dienst" title="Permanent link">&para;</a></h3>
 <p>Die manuelle Konfiguration von BunkerWeb erfolgt durch Bearbeiten der Datei <code>/etc/bunkerweb/variables.env</code>:</p>
 <div class="highlight"><pre><span></span><code>MEINE_EINSTELLUNG_1=wert1
 MEINE_EINSTELLUNG_2=wert2
@@ -4331,9 +4386,9 @@ Wenn Sie die BunkerWeb-Konfiguration manuell über `/etc/bunkerweb/variables.env
 
 Der Entrypoint des `bunkerweb`-Dienstes liest außerdem direkt die folgende Variable, außerhalb des normalen Einstellungsflusses:
 
-| Einstellung               | Beschreibung                                                                                                                                                                                                                             | Zulässige Werte | Standard |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | -------- |
-| `KEEP_CONFIG_ON_RESTART`  | Behält beim Neustart des `bunkerweb`-Dienstes die zuvor generierte Konfiguration anstatt die Lade-Konfiguration zu rendern. Wird aus der Umgebung oder `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank.               | `yes` oder `no`  | `no`     |
+| Einstellung              | Beschreibung                                                                                                                                                                                                              | Zulässige Werte | Standard |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------- |
+| `KEEP_CONFIG_ON_RESTART` | Behält beim Neustart des `bunkerweb`-Dienstes die zuvor generierte Konfiguration anstatt die Lade-Konfiguration zu rendern. Wird aus der Umgebung oder `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank. | `yes` oder `no` | `no`     |
 
 ### Hochverfügbarkeit
 
@@ -4352,7 +4407,7 @@ export UI_WIZARD=no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_BUNKERWEB</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>no
 </code></pre></div>
-<h4 id="worker">Worker</h4>
+<h4 id="worker">Worker<a class="headerlink" href="#worker" title="Permanent link">&para;</a></h4>
 <p>Um nur BunkerWeb auf einem anderen Server zu installieren, können Sie die folgenden Variablen exportieren, bevor Sie die BunkerWeb-Installation ausführen:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">WORKER_MODE</span><span class="o">=</span>yes
 </code></pre></div>
@@ -4361,13 +4416,13 @@ export UI_WIZARD=no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_SCHEDULER</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>no
 </code></pre></div>
-<h4 id="web-ui">Web-UI</h4>
+<h4 id="web-ui">Web-UI<a class="headerlink" href="#web-ui" title="Permanent link">&para;</a></h4>
 <p>Die Web-UI kann auf einem separaten Server installiert werden, um eine dedizierte Schnittstelle zur Verwaltung von BunkerWeb-Instanzen bereitzustellen. Um nur die Web-UI zu installieren, können Sie die folgenden Variablen exportieren, bevor Sie die BunkerWeb-Installation ausführen:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_BUNKERWEB</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_SCHEDULER</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>yes
 </code></pre></div>
-<h2 id="docker-autoconf">Docker Autoconf</h2>
+<h2 id="docker-autoconf">Docker Autoconf<a class="headerlink" href="#docker-autoconf" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/integration-autoconf.svg" width="600" />
   </p>
@@ -4494,16 +4549,16 @@ export UI_WIZARD=no
 <p class="admonition-title">Verwendung von Docker im rootless-Modus</p>
 <p>Wenn Sie <a href="https://docs.docker.com/engine/security/rootless">Docker im rootless-Modus</a> verwenden, müssen Sie den Mount des Docker-Sockets durch den folgenden Wert ersetzen: <code>$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro</code>.</p>
 </div>
-<h3 id="autoconf-container-einstellungen">Autoconf-Container-Einstellungen</h3>
+<h3 id="autoconf-container-einstellungen">Autoconf-Container-Einstellungen<a class="headerlink" href="#autoconf-container-einstellungen" title="Permanent link">&para;</a></h3>
 <p>Der <code>bw-autoconf</code>-Controller überwacht Ihren Orchestrator und schreibt Änderungen in die gemeinsame Datenbank.</p>
-<h4 id="konfigurationsquellen-und-prioritat_1">Konfigurationsquellen und Priorität</h4>
+<h4 id="konfigurationsquellen-und-prioritat_1">Konfigurationsquellen und Priorität<a class="headerlink" href="#konfigurationsquellen-und-prioritat_1" title="Permanent link">&para;</a></h4>
 <ol>
 <li>Umgebungsvariablen (inkl. Docker/Compose <code>environment:</code>)</li>
 <li>Secrets in <code>/run/secrets/&lt;VAR&gt;</code> (vom Entrypoint automatisch geladen)</li>
 <li>Eingebaute Defaults</li>
 </ol>
-<h4 id="konfigurationsreferenz-power-user_1">Konfigurationsreferenz (Power User)</h4>
-<h5 id="modus-laufzeit">Modus &amp; Laufzeit</h5>
+<h4 id="konfigurationsreferenz-power-user_1">Konfigurationsreferenz (Power User)<a class="headerlink" href="#konfigurationsreferenz-power-user_1" title="Permanent link">&para;</a></h4>
+<h5 id="modus-laufzeit">Modus &amp; Laufzeit<a class="headerlink" href="#modus-laufzeit" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -4570,7 +4625,7 @@ export UI_WIZARD=no
 </tr>
 </tbody>
 </table>
-<h5 id="datenbank-validierung">Datenbank &amp; Validierung</h5>
+<h5 id="datenbank-validierung">Datenbank &amp; Validierung<a class="headerlink" href="#datenbank-validierung" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -4601,7 +4656,7 @@ export UI_WIZARD=no
 </tr>
 </tbody>
 </table>
-<h5 id="logging_2">Logging</h5>
+<h5 id="logging_2">Logging<a class="headerlink" href="#logging_2" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -4644,7 +4699,7 @@ export UI_WIZARD=no
 </tr>
 </tbody>
 </table>
-<h5 id="umfang-discovery-filter">Umfang &amp; Discovery-Filter</h5>
+<h5 id="umfang-discovery-filter">Umfang &amp; Discovery-Filter<a class="headerlink" href="#umfang-discovery-filter" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -4681,7 +4736,7 @@ export UI_WIZARD=no
 </tr>
 </tbody>
 </table>
-<h5 id="nur-kubernetes">Nur Kubernetes</h5>
+<h5 id="nur-kubernetes">Nur Kubernetes<a class="headerlink" href="#nur-kubernetes" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -4729,6 +4784,24 @@ export UI_WIZARD=no
 <td>unset (alle)</td>
 </tr>
 <tr>
+<td><code>KUBERNETES_SKIP_FOREIGN_CLASSES</code></td>
+<td>Wenn <code>yes</code> und kein Klassenfilter gesetzt ist, werden Ingresses und Gateways übersprungen, deren IngressClass oder GatewayClass einem anderen Controller gehört. Benötigt get/list/watch auf <code>ingressclasses</code> / <code>gatewayclasses</code></td>
+<td><code>yes</code> oder <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_INGRESS_CONTROLLER</code></td>
+<td>Controller-ID, die eine IngressClass als zu BunkerWeb gehörig markiert (<code>spec.controller</code>)</td>
+<td>String</td>
+<td><code>bunkerweb.io/ingress-controller</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_GATEWAY_CONTROLLER</code></td>
+<td>Controller-ID, die eine GatewayClass als zu BunkerWeb gehörig markiert (<code>spec.controllerName</code>)</td>
+<td>String</td>
+<td><code>bunkerweb.io/gateway-controller</code></td>
+</tr>
+<tr>
 <td><code>KUBERNETES_GATEWAY_API_VERSION</code></td>
 <td>Zu verwendende Gateway-API-Version (automatischer Fallback bei fehlender Version)</td>
 <td><code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code>, <code>v1alpha1</code></td>
@@ -4766,7 +4839,7 @@ export UI_WIZARD=no
 </tr>
 </tbody>
 </table>
-<h3 id="autoconf-dienste">Autoconf-Dienste</h3>
+<h3 id="autoconf-dienste">Autoconf-Dienste<a class="headerlink" href="#autoconf-dienste" title="Permanent link">&para;</a></h3>
 <p>Sobald der Stack eingerichtet ist, können Sie den Webanwendungs-Container erstellen und die Einstellungen als Labels mit dem Präfix "bunkerweb" hinzufügen, um BunkerWeb automatisch einzurichten:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -4782,7 +4855,7 @@ export UI_WIZARD=no
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h4 id="autoconf-disable-cleanup">Dienste bei Entfernung als Entwürfe beibehalten</h4>
+<h4 id="autoconf-disable-cleanup">Dienste bei Entfernung als Entwürfe beibehalten<a class="headerlink" href="#autoconf-disable-cleanup" title="Permanent link">&para;</a></h4>
 <p>Standardmäßig wird ein von Autoconf verwalteter Dienst (Container, Swarm-Service oder Ingress) sofort aus der gemeinsamen Datenbank gelöscht, sobald das zugehörige Orchestrator-Objekt verschwindet — zusammen mit allen zugehörigen <code>services_settings</code>-Einträgen und benutzerdefinierten Konfigurationen. Dieses Verhalten ist destruktiv: ein transienter Ausfall ist vom absichtlichen Abbau nicht zu unterscheiden, und eine Wiederherstellung erfordert das vollständige Neuerstellen der Dienstdefinition.</p>
 <p>Wenn <code>AUTOCONF_DISABLE_CLEANUP=yes</code> am <code>bw-autoconf</code>-Container gesetzt ist:</p>
 <ul>
@@ -4799,7 +4872,7 @@ export UI_WIZARD=no
 <span class="w">      </span><span class="nt">AUTOCONF_DISABLE_CLEANUP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span><span class="w"> </span><span class="c1"># entfernte Dienste als Entwürfe beibehalten</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"</span>
 </code></pre></div>
-<h3 id="namespaces">Namespaces</h3>
+<h3 id="namespaces">Namespaces<a class="headerlink" href="#namespaces" title="Permanent link">&para;</a></h3>
 <p>Ab Version <code>1.6.0</code> unterstützen die Autoconf-Stacks von BunkerWeb Namespaces. Mit dieser Funktion können Sie mehrere "<em>Cluster</em>" von BunkerWeb-Instanzen und -Diensten auf demselben Docker-Host verwalten. Um Namespaces zu nutzen, setzen Sie einfach das <code>NAMESPACE</code>-Label auf Ihre Dienste. Hier ist ein Beispiel:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -4841,7 +4914,7 @@ export UI_WIZARD=no
 <p>Es kann nur <strong>eine Datenbank</strong> und <strong>ein Scheduler</strong> pro Namespace geben. Wenn Sie versuchen, mehrere Datenbanken oder Scheduler im selben Namespace zu erstellen, kommt es zu Konfigurationskonflikten.</p>
 <p>Der Scheduler benötigt das <code>NAMESPACE</code>-Label nicht, um ordnungsgemäß zu funktionieren. Er benötigt nur die korrekt konfigurierte Einstellung <code>DATABASE_URI</code>, damit er auf dieselbe Datenbank wie der Autoconf-Dienst zugreifen kann.</p>
 </div>
-<h2 id="kubernetes">Kubernetes</h2>
+<h2 id="kubernetes">Kubernetes<a class="headerlink" href="#kubernetes" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/integration-kubernetes.svg" width="600" />
   </p>
@@ -4903,8 +4976,8 @@ dies keine Wirkung.</p>
 <p>Wenn Sie eine benutzerdefinierte CA für Ihre Kubernetes-API verwenden, können Sie eine Bundle-Datei mit Ihren Zwischen- und Stammzertifikaten auf dem Ingress-Controller mounten und den Umgebungswert <code>KUBERNETES_SSL_CA_CERT</code> auf den Pfad des Bundles im Container setzen. Alternativ können Sie, auch wenn es nicht empfohlen wird, die Zertifikatsüberprüfung deaktivieren, indem Sie die Umgebungsvariable <code>KUBERNETES_SSL_VERIFY</code> des Ingress-Controllers auf <code>no</code> setzen (Standard ist <code>yes</code>).</p>
 </div>
 <p>Darüber hinaus <strong>ist es entscheidend, die Umgebungsvariable <code>KUBERNETES_MODE</code> auf <code>yes</code> zu setzen, wenn die Kubernetes-Integration verwendet wird</strong>. Diese Variable ist für die ordnungsgemäße Funktionalität obligatorisch. Wenn Sie die Gateway API verwenden, setzen Sie zusätzlich <code>KUBERNETES_GATEWAY_MODE=yes</code>.</p>
-<h3 id="kubernetes-installation">Installationsmethoden</h3>
-<h4 id="verwendung-des-helm-charts-empfohlen">Verwendung des Helm-Charts (empfohlen)</h4>
+<h3 id="kubernetes-installation">Installationsmethoden<a class="headerlink" href="#kubernetes-installation" title="Permanent link">&para;</a></h3>
+<h4 id="verwendung-des-helm-charts-empfohlen">Verwendung des Helm-Charts (empfohlen)<a class="headerlink" href="#verwendung-des-helm-charts-empfohlen" title="Permanent link">&para;</a></h4>
 <p>Die empfohlene Methode zur Installation von Kubernetes ist die Verwendung des Helm-Charts, das unter <code>https://repo.bunkerweb.io/charts</code> verfügbar ist:</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span>https://repo.bunkerweb.io/charts
 </code></pre></div>
@@ -4912,9 +4985,9 @@ dies keine Wirkung.</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>-f<span class="w"> </span>myvalues.yaml<span class="w"> </span>mybunkerweb<span class="w"> </span>bunkerweb/bunkerweb
 </code></pre></div>
 <p>Die vollständige Liste der Werte ist in der Datei <a href="https://github.com/bunkerity/bunkerweb-helm/blob/main/charts/bunkerweb/values.yaml">charts/bunkerweb/values.yaml</a> des <a href="https://github.com/bunkerity/bunkerweb-helm">bunkerity/bunkerweb-helm-Repositorys</a> aufgeführt.</p>
-<h4 id="sidecar-container-helm">Sidecar Container + Helm</h4>
+<h4 id="sidecar-container-helm">Sidecar Container + Helm<a class="headerlink" href="#sidecar-container-helm" title="Permanent link">&para;</a></h4>
 <p>This documentation explains how to deploy BunkerWeb as a sidecar to protect your Kubernetes applications. In this architecture, each application has its own BunkerWeb container acting as a security reverse proxy.</p>
-<h5 id="architecture">Architecture</h5>
+<h5 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h5>
 <pre class="mermaid"><code>flowchart TB
 
   %% ---------- Stil ----------
@@ -4961,7 +5034,7 @@ dies keine Wirkung.</p>
   %% Platziere den Load Balancer unter der gesamten PODS-Gruppe
   PODS --&gt; LB
   linkStyle 6 stroke-width:0px,stroke:transparent;</code></pre>
-<h5 id="prerequisites">Prerequisites</h5>
+<h5 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h5>
 <ul>
 <li>A working Kubernetes cluster</li>
 <li>Helm 3.x installed</li>
@@ -4973,9 +5046,9 @@ dies keine Wirkung.</p>
 <li><code>controller</code> enabled (recommended for automatic sidecar discovery)</li>
 <li><code>bunkerweb.replicas: 0</code> (no standalone deployment)</li>
 </ul>
-<h5 id="sidecar-discovery-modes">Sidecar Discovery Modes</h5>
+<h5 id="sidecar-discovery-modes">Sidecar Discovery Modes<a class="headerlink" href="#sidecar-discovery-modes" title="Permanent link">&para;</a></h5>
 <p>BunkerWeb offers two modes for sidecar discovery:</p>
-<h6 id="mode-1-automatic-discovery-controller-recommended">Mode 1: Automatic Discovery (Controller - Recommended)</h6>
+<h6 id="mode-1-automatic-discovery-controller-recommended">Mode 1: Automatic Discovery (Controller - Recommended)<a class="headerlink" href="#mode-1-automatic-discovery-controller-recommended" title="Permanent link">&para;</a></h6>
 <p>The <strong>BunkerWeb controller</strong> automatically discovers pods with BunkerWeb sidecars without manual configuration.</p>
 <p><strong>Advantages:</strong>
 - ✅ Automatic discovery of new sidecars
@@ -5026,6 +5099,37 @@ dies keine Wirkung.</p>
 <span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
 </code></pre></div>
 <p>Narrow <code>API_WHITELIST_IP</code> to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.</p>
+<p>Die Whitelist und das Token sind die Schutzschichten, die jeder Cluster erhält. Wenn Ihre CNI <code>NetworkPolicy</code> durchsetzt, schließen Sie zusätzlich Port 5000 für alle außer den aufrufenden Pods und lassen die bereitgestellten Ports offen. Der untenstehende Sidecar-Pod wird über das <code>app: nginx-bw</code>-Label seines Deployments ausgewählt, nicht über die Annotation <code>bunkerweb.io/INSTANCE</code>; passen Sie den Selektor an das Label Ihres eigenen Deployments an. Erlauben Sie nur dem Scheduler und der Web-UI, die API aufzurufen; wenn Sie zusätzlich den API-Dienst betreiben, ergänzen Sie das <code>app</code>-Label seiner eigenen Pods, da dieses Beispiel keines definiert. Port 9113 bleibt offen, weil der Sidecar oben dort Metriken bereitstellt. Die Regel deckt die gesamte interne API ab, einschließlich der Plugin-Routen, da sie denselben <code>bwapi</code>-Server nutzen, dessen Access-Phase zuerst das Token prüft. Port 5443 ist für <code>API_LISTEN_HTTPS</code> vorgesehen, und 5000 bleibt dabei offen: das API-Zertifikat erreicht den Worker über den Cache-Push per HTTP-API, und NGINX aktiviert den TLS-Listener erst, wenn diese Datei angekommen ist.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-bw</span>
+<span class="w">  </span><span class="nt">policyTypes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">Ingress</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9113</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">matchExpressions</span><span class="p">:</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
+<span class="w">                </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">In</span>
+<span class="w">                </span><span class="nt">values</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bunkerweb-scheduler</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bunkerweb-ui</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5443</span>
+</code></pre></div>
 </div>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
@@ -5094,18 +5198,18 @@ dies keine Wirkung.</p>
 <p><strong>No need</strong> to manually configure the scheduler with <code>BUNKERWEB_INSTANCES</code> - the controller handles discovery</p>
 </li>
 </ol>
-<h6 id="mode-2-manual-configuration-bunkerweb_instances">Mode 2: Manual Configuration (BUNKERWEB_INSTANCES)</h6>
+<h6 id="mode-2-manual-configuration-bunkerweb_instances">Mode 2: Manual Configuration (BUNKERWEB_INSTANCES)<a class="headerlink" href="#mode-2-manual-configuration-bunkerweb_instances" title="Permanent link">&para;</a></h6>
 <p>Explicit configuration of each instance via the <code>BUNKERWEB_INSTANCES</code> environment variable.</p>
 <p><strong>Advantages:</strong>
 - ✅ Precise control over managed instances
 - ✅ Useful for complex multi-namespace environments</p>
 <p><strong>Configuration:</strong></p>
 <p>See the following sections for details.</p>
-<h5 id="step-1-scheduler-configuration">Step 1: Scheduler Configuration</h5>
+<h5 id="step-1-scheduler-configuration">Step 1: Scheduler Configuration<a class="headerlink" href="#step-1-scheduler-configuration" title="Permanent link">&para;</a></h5>
 <p>The BunkerWeb scheduler is the central component that distributes configurations to all sidecars.</p>
-<h6 id="option-a-with-controller-recommended">Option A: With Controller (Recommended)</h6>
+<h6 id="option-a-with-controller-recommended">Option A: With Controller (Recommended)<a class="headerlink" href="#option-a-with-controller-recommended" title="Permanent link">&para;</a></h6>
 <p>If you're using the controller for automatic discovery, <strong>no special configuration is needed</strong> for the scheduler. The controller will automatically detect pods with the <code>bunkerweb.io/INSTANCE: "yes"</code> annotation.</p>
-<h6 id="option-b-manual-configuration-with-bunkerweb_instances">Option B: Manual Configuration with <code>BUNKERWEB_INSTANCES</code></h6>
+<h6 id="option-b-manual-configuration-with-bunkerweb_instances">Option B: Manual Configuration with <code>BUNKERWEB_INSTANCES</code><a class="headerlink" href="#option-b-manual-configuration-with-bunkerweb_instances" title="Permanent link">&para;</a></h6>
 <p>In your BunkerWeb chart <code>values.yaml</code>, configure the <code>BUNKERWEB_INSTANCES</code> environment variable with the URLs of all your headless services:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">"testing"</span>
@@ -5117,8 +5221,8 @@ dies keine Wirkung.</p>
 - Separate URLs with spaces
 - Use port <strong>5000</strong> (BunkerWeb internal API)
 - Format: <code>http://&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local:5000</code></p>
-<h5 id="step-2-creating-the-deployment-with-sidecar">Step 2: Creating the Deployment with Sidecar</h5>
-<h6 id="deployment-structure-with-controller-automatic-mode-recommended">Deployment Structure with Controller (Automatic Mode - Recommended)</h6>
+<h5 id="step-2-creating-the-deployment-with-sidecar">Step 2: Creating the Deployment with Sidecar<a class="headerlink" href="#step-2-creating-the-deployment-with-sidecar" title="Permanent link">&para;</a></h5>
+<h6 id="deployment-structure-with-controller-automatic-mode-recommended">Deployment Structure with Controller (Automatic Mode - Recommended)<a class="headerlink" href="#deployment-structure-with-controller-automatic-mode-recommended" title="Permanent link">&para;</a></h6>
 <p><strong>Recommended configuration</strong> with automatic discovery:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
@@ -5172,7 +5276,7 @@ dies keine Wirkung.</p>
 - ✅ <strong>Mandatory environment variable</strong>: <code>KUBERNETES_MODE: "yes"</code>
 - ✅ <strong>No headless service needed</strong>: the controller communicates directly with pods via Kubernetes API
 - ✅ <strong>No need to manually configure</strong> <code>BUNKERWEB_INSTANCES</code></p>
-<h6 id="deployment-structure-without-controller-manual-mode">Deployment Structure without Controller (Manual Mode)</h6>
+<h6 id="deployment-structure-without-controller-manual-mode">Deployment Structure without Controller (Manual Mode)<a class="headerlink" href="#deployment-structure-without-controller-manual-mode" title="Permanent link">&para;</a></h6>
 <p>If you're not using the controller:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
@@ -5211,7 +5315,7 @@ dies keine Wirkung.</p>
 <span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-api</span>
 <span class="w">                  </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
 </code></pre></div>
-<h6 id="important-environment-variables">Important Environment Variables</h6>
+<h6 id="important-environment-variables">Important Environment Variables<a class="headerlink" href="#important-environment-variables" title="Permanent link">&para;</a></h6>
 <table>
 <thead>
 <tr>
@@ -5243,8 +5347,8 @@ dies keine Wirkung.</p>
 </tr>
 </tbody>
 </table>
-<h5 id="step-3-creating-services">Step 3: Creating Services</h5>
-<h6 id="clusterip-service-external-exposure">ClusterIP Service (external exposure)</h6>
+<h5 id="step-3-creating-services">Step 3: Creating Services<a class="headerlink" href="#step-3-creating-services" title="Permanent link">&para;</a></h5>
+<h6 id="clusterip-service-external-exposure">ClusterIP Service (external exposure)<a class="headerlink" href="#clusterip-service-external-exposure" title="Permanent link">&para;</a></h6>
 <p>Service to expose your application through BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
@@ -5260,7 +5364,7 @@ dies keine Wirkung.</p>
 <span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w">  </span><span class="c1"># BunkerWeb port</span>
 </code></pre></div>
-<h6 id="headless-service-internal-api-conditional">Headless Service (internal API) - Conditional</h6>
+<h6 id="headless-service-internal-api-conditional">Headless Service (internal API) - Conditional<a class="headerlink" href="#headless-service-internal-api-conditional" title="Permanent link">&para;</a></h6>
 <p><strong>Only required in manual mode (without controller)</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
@@ -5281,9 +5385,9 @@ dies keine Wirkung.</p>
 - ⚠️ <strong>Not required with controller</strong> - the controller communicates directly with pods via Kubernetes API
 - ✅ <strong>Mandatory without controller</strong> - this service name must be manually added to <code>BUNKERWEB_INSTANCES</code>
 - The <code>selector</code> must match your deployment labels</p>
-<h5 id="step-4-reverse-proxy-configuration">Step 4: Reverse Proxy Configuration</h5>
+<h5 id="step-4-reverse-proxy-configuration">Step 4: Reverse Proxy Configuration<a class="headerlink" href="#step-4-reverse-proxy-configuration" title="Permanent link">&para;</a></h5>
 <p>You have <strong>two options</strong> to configure the reverse proxy:</p>
-<h6 id="option-a-via-web-interface-ui">Option A: Via Web Interface (UI)</h6>
+<h6 id="option-a-via-web-interface-ui">Option A: Via Web Interface (UI)<a class="headerlink" href="#option-a-via-web-interface-ui" title="Permanent link">&para;</a></h6>
 <ol>
 <li>Access the BunkerWeb UI</li>
 <li>Go to the <strong>"Services"</strong></li>
@@ -5294,7 +5398,7 @@ dies keine Wirkung.</p>
 <li>Save</li>
 </ol>
 <p>The scheduler will automatically send the configuration to the sidecar via the API (port 5000).</p>
-<h6 id="option-b-via-environment-variables">Option B: Via Environment Variables</h6>
+<h6 id="option-b-via-environment-variables">Option B: Via Environment Variables<a class="headerlink" href="#option-b-via-environment-variables" title="Permanent link">&para;</a></h6>
 <p>Add these variables in the <code>bunkerweb</code> container:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">env</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE</span>
@@ -5309,8 +5413,8 @@ dies keine Wirkung.</p>
 <span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"/"</span>
 </code></pre></div>
 <p><strong>Note:</strong> The UI option is recommended for centralized and dynamic management.</p>
-<h5 id="step-5-deployment">Step 5: Deployment</h5>
-<h6 id="with-controller-automatic-mode-recommended">With Controller (Automatic Mode - Recommended)</h6>
+<h5 id="step-5-deployment">Step 5: Deployment<a class="headerlink" href="#step-5-deployment" title="Permanent link">&para;</a></h5>
+<h6 id="with-controller-automatic-mode-recommended">With Controller (Automatic Mode - Recommended)<a class="headerlink" href="#with-controller-automatic-mode-recommended" title="Permanent link">&para;</a></h6>
 <ol>
 <li><strong>Deploy your application with the sidecar</strong>:
    <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>my-app-deployment.yaml
@@ -5335,7 +5439,7 @@ dies keine Wirkung.</p>
 </code></pre></div></p>
 </li>
 </ol>
-<h6 id="without-controller-manual-mode">Without Controller (Manual Mode)</h6>
+<h6 id="without-controller-manual-mode">Without Controller (Manual Mode)<a class="headerlink" href="#without-controller-manual-mode" title="Permanent link">&para;</a></h6>
 <ol>
 <li>
 <p><strong>Deploy your application with the sidecar</strong>:
@@ -5363,7 +5467,7 @@ dies keine Wirkung.</p>
 </code></pre></div></p>
 </li>
 </ol>
-<h6 id="common-issues">Common Issues</h6>
+<h6 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h6>
 <table>
 <thead>
 <tr>
@@ -5395,8 +5499,8 @@ dies keine Wirkung.</p>
 </tr>
 </tbody>
 </table>
-<h5 id="adding-a-new-application">Adding a New Application</h5>
-<h6 id="with-controller-automatic-mode">With Controller (Automatic Mode)</h6>
+<h5 id="adding-a-new-application">Adding a New Application<a class="headerlink" href="#adding-a-new-application" title="Permanent link">&para;</a></h5>
+<h6 id="with-controller-automatic-mode">With Controller (Automatic Mode)<a class="headerlink" href="#with-controller-automatic-mode" title="Permanent link">&para;</a></h6>
 <p>To add a new application protected by BunkerWeb:</p>
 <ol>
 <li><strong>Create a new deployment</strong> with the BunkerWeb sidecar with:</li>
@@ -5419,7 +5523,7 @@ dies keine Wirkung.</p>
 <p><strong>Configure the reverse proxy</strong> in the UI</p>
 </li>
 </ol>
-<h6 id="without-controller-manual-mode_1">Without Controller (Manual Mode)</h6>
+<h6 id="without-controller-manual-mode_1">Without Controller (Manual Mode)<a class="headerlink" href="#without-controller-manual-mode_1" title="Permanent link">&para;</a></h6>
 <p>To add a new application protected by BunkerWeb:</p>
 <ol>
 <li>
@@ -5444,7 +5548,7 @@ dies keine Wirkung.</p>
 <p><strong>Configure the reverse proxy</strong> in the UI or via env vars</p>
 </li>
 </ol>
-<h5 id="best-practices_1">Best Practices</h5>
+<h5 id="best-practices_1">Best Practices<a class="headerlink" href="#best-practices_1" title="Permanent link">&para;</a></h5>
 <p>✅ <strong>Use the controller</strong> for automatic sidecar discovery (simpler, no headless service needed)
 ✅ <strong>Use a single centralized scheduler</strong> to manage all sidecars
 ✅ <strong>Always add the annotation</strong> <code>bunkerweb.io/INSTANCE: "yes"</code> and environment variable <code>KUBERNETES_MODE: "yes"</code> when using controller mode
@@ -5453,13 +5557,13 @@ dies keine Wirkung.</p>
 ✅ <strong>Define resource limits</strong> for containers
 ✅ <strong>Use Kubernetes secrets</strong> for sensitive configurations
 ✅ <strong>Check logs</strong> of scheduler and sidecars regularly</p>
-<h4 id="vollstandige-yaml-dateien">Vollständige YAML-Dateien</h4>
+<h4 id="vollstandige-yaml-dateien">Vollständige YAML-Dateien<a class="headerlink" href="#vollstandige-yaml-dateien" title="Permanent link">&para;</a></h4>
 <p>Anstatt das Helm-Chart zu verwenden, können Sie auch die YAML-Vorlagen im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a> des GitHub-Repositorys verwenden. Bitte beachten Sie, dass wir dringend empfehlen, stattdessen das Helm-Chart zu verwenden.</p>
 <div class="admonition warning">
 <p class="admonition-title">DNS_RESOLVERS muss den DNS-Service des Clusters benennen</p>
 <p>Geben Sie <code>DNS_RESOLVERS</code> den DNS-Service des Clusters an, dessen ClusterIP für die Lebensdauer des Service stabil bleibt, und niemals eine Pod-IP. nginx löst diesen Wert genau einmal auf, beim Parsen seiner Konfiguration, und verwendet die erhaltene Adresse bis zum nächsten Reload weiter: Etwas Pod-Bezogenes funktioniert also nur so lange, bis diese Pods umziehen, und ein rollierender Neustart von CoreDNS lässt danach jede Auflösung in einen Timeout laufen. Auf einem Standard-Cluster ist dieser Service <code>kube-dns.kube-system.svc.cluster.local</code>, auch wenn CoreDNS die Implementierung dahinter ist.</p>
 </div>
-<h3 id="ingress-ressourcen">Ingress-Ressourcen</h3>
+<h3 id="ingress-ressourcen">Ingress-Ressourcen<a class="headerlink" href="#ingress-ressourcen" title="Permanent link">&para;</a></h3>
 <p>Sobald der BunkerWeb-Kubernetes-Stack erfolgreich eingerichtet und betriebsbereit ist (weitere Informationen finden Sie in den Autoconf-Protokollen), können Sie mit der Bereitstellung von Webanwendungen im Cluster fortfahren und Ihre Ingress-Ressource deklarieren.</p>
 <p>Es ist wichtig zu beachten, dass die BunkerWeb-Einstellungen als Annotationen für die Ingress-Ressource angegeben werden müssen. Für den Domain-Teil verwenden Sie bitte den speziellen Wert <strong><code>bunkerweb.io</code></strong>. Durch das Einfügen der entsprechenden Annotationen können Sie BunkerWeb entsprechend für die Ingress-Ressource konfigurieren.</p>
 <div class="admonition tip">
@@ -5498,19 +5602,19 @@ dies keine Wirkung.</p>
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 <span class="nn">...</span>
 </code></pre></div>
-<h3 id="gateway-ressourcen">Gateway-Ressourcen</h3>
+<h3 id="gateway-ressourcen">Gateway-Ressourcen<a class="headerlink" href="#gateway-ressourcen" title="Permanent link">&para;</a></h3>
 <p>Wenn der Gateway-API-Modus aktiviert ist, können Sie <code>Gateway</code>-, <code>HTTPRoute</code>-, <code>GRPCRoute</code>-, <code>TLSRoute</code>-, <code>TCPRoute</code>- und <code>UDPRoute</code>-Ressourcen deklarieren.
 BunkerWeb-Einstellungen werden als <code>bunkerweb.io/&lt;SETTING&gt;</code>-Annotationen an der <code>HTTPRoute</code>/<code>GRPCRoute</code> angegeben; um eine Einstellung
 auf einen Host zu begrenzen, verwenden Sie <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code>. Das Feld <code>hostnames</code> steuert die Servernamen. Für <code>TCPRoute</code>/<code>UDPRoute</code> (und <code>TLSRoute</code> ohne <code>hostnames</code>) erzeugt BunkerWeb einen Servernamen wie <code>&lt;route&gt;.&lt;namespace&gt;.&lt;protocol&gt;</code>. Siehe <a href="#gateway-class">Gateway-Klasse</a>.
 Annotationen auf dem <code>Gateway</code> gelten für alle daran angehängten Routen, während Annotationen auf einer <code>HTTPRoute</code>/<code>GRPCRoute</code> nur für diese Route gelten.
 Sie können Gateway-Annotationen weiterhin auf einen bestimmten Servernamen einschränken, indem Sie <code>bunkerweb.io/&lt;hostname&gt;_&lt;SETTING&gt;</code> verwenden; sie werden nur angewendet, wenn diese Route bzw. dieser Servername existiert.</p>
-<h4 id="unterstutzte-ressourcen">Unterstützte Ressourcen</h4>
+<h4 id="unterstutzte-ressourcen">Unterstützte Ressourcen<a class="headerlink" href="#unterstutzte-ressourcen" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Ressourcen: <code>HTTPRoute</code>, <code>GRPCRoute</code> (experimentell), <code>TLSRoute</code>, <code>TCPRoute</code> und <code>UDPRoute</code>.</li>
 <li>Regeln: Für <code>TLSRoute</code>, <code>TCPRoute</code> und <code>UDPRoute</code> wird nur die erste Regel verwendet.</li>
 <li>Backends: nur <code>Service</code>, erste <code>backendRef</code> pro Regel.</li>
 </ul>
-<h4 id="protokolle-und-tls">Protokolle und TLS</h4>
+<h4 id="protokolle-und-tls">Protokolle und TLS<a class="headerlink" href="#protokolle-und-tls" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Listener-Protokolle: <code>HTTP</code>/<code>HTTPS</code> für <code>HTTPRoute</code> und <code>GRPCRoute</code>, <code>TLS</code> für <code>TLSRoute</code>, <code>TCP</code> für <code>TCPRoute</code> und <code>UDP</code> für <code>UDPRoute</code>.</li>
 <li>TLS: Zertifikate über Listener-<code>certificateRefs</code> mit <code>HTTPS</code> oder <code>TLS</code> + <code>mode: Terminate</code> (Passthrough wird für die Terminierung nicht unterstützt). <code>TLSRoute</code> läuft im Stream-Modus.</li>
@@ -5562,7 +5666,7 @@ Sie können Gateway-Annotationen weiterhin auf einen bestimmten Servernamen eins
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">svc-my-app</span>
 <span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 </code></pre></div>
-<h3 id="namespaces_1">Namespaces</h3>
+<h3 id="namespaces_1">Namespaces<a class="headerlink" href="#namespaces_1" title="Permanent link">&para;</a></h3>
 <p>Ab Version <code>1.6.0</code> unterstützen die Autoconf-Stacks von BunkerWeb Namespaces. Mit dieser Funktion können Sie mehrere Cluster von BunkerWeb-Instanzen und -Diensten auf demselben Kubernetes-Cluster verwalten. Um Namespaces zu nutzen, setzen Sie einfach das Metadatenfeld <code>namespace</code> auf Ihre BunkerWeb-Instanzen und -Dienste. Hier ist ein Beispiel:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
@@ -5610,7 +5714,7 @@ Sie können Gateway-Annotationen weiterhin auf einen bestimmten Servernamen eins
 <p>Es kann nur <strong>eine Datenbank</strong> und <strong>ein Scheduler</strong> pro Namespace geben. Wenn Sie versuchen, mehrere Datenbanken oder Scheduler im selben Namespace zu erstellen, kommt es zu Konfigurationskonflikten.</p>
 <p>Der Scheduler benötigt die <code>NAMESPACE</code>-Annotation nicht, um ordnungsgemäß zu funktionieren. Er benötigt nur die korrekt konfigurierte Einstellung <code>DATABASE_URI</code>, damit er auf dieselbe Datenbank wie der Autoconf-Dienst zugreifen kann.</p>
 </div>
-<h3 id="ingress-klasse">Ingress-Klasse</h3>
+<h3 id="ingress-klasse">Ingress-Klasse<a class="headerlink" href="#ingress-klasse" title="Permanent link">&para;</a></h3>
 <p>Bei der Installation mit den offiziellen Methoden in der Dokumentation wird BunkerWeb mit der folgenden <code>IngressClass</code>-Definition geliefert:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IngressClass</span>
@@ -5641,7 +5745,8 @@ Sie können Gateway-Annotationen weiterhin auf einen bestimmten Servernamen eins
 <span class="w">                </span><span class="nt">port</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 </code></pre></div>
-<h3 id="gateway-class">Gateway-Klasse</h3>
+<p>Wenn <code>KUBERNETES_INGRESS_CLASS</code> nicht gesetzt ist, setzen Sie <code>KUBERNETES_SKIP_FOREIGN_CLASSES=yes</code>, um Ingresses, die einem anderen Controller gehören, in Ruhe zu lassen, statt alle zu bedienen. Ein Ingress wird verarbeitet, wenn er keine Klasse hat, wenn seine Klasse ein nicht existierendes <code>IngressClass</code>-Objekt benennt, oder wenn der <code>spec.controller</code> dieses Objekts mit <code>KUBERNETES_INGRESS_CONTROLLER</code> übereinstimmt; er wird übersprungen, wenn das Objekt existiert und auf einen anderen Controller zeigt. Die veraltete Annotation <code>kubernetes.io/ingress.class</code> wird genauso gelesen, wenn <code>ingressClassName</code> nicht gesetzt ist. Dies erfordert <code>get</code>/<code>list</code>/<code>watch</code> auf <code>ingressclasses</code>; ohne dieses RBAC protokolliert der Controller eine einzige Warnung und verarbeitet jeden Ingress, als wäre die Einstellung <code>no</code>. Das Aktivieren kann dazu führen, dass ein Ingress mit veralteter Klasse (zum Beispiel eine verbliebene <code>IngressClass</code> <code>nginx</code> nach dem Entfernen von ingress-nginx) nicht mehr bedient wird: setzen Sie <code>ingressClassName: bunkerweb</code> darauf, oder löschen Sie die veraltete <code>IngressClass</code>.</p>
+<h3 id="gateway-class">Gateway-Klasse<a class="headerlink" href="#gateway-class" title="Permanent link">&para;</a></h3>
 <p>Bei Verwendung der Gateway API erwartet BunkerWeb eine <code>GatewayClass</code>, die auf den Controller verweist:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GatewayClass</span>
@@ -5664,14 +5769,15 @@ und verwenden den passenden <code>gatewayClassName</code> in Ihren <code>Gateway
 <span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">      </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
 </code></pre></div>
-<h3 id="benutzerdefinierter-domainname">Benutzerdefinierter Domainname</h3>
+<p>Die gleichen <code>KUBERNETES_SKIP_FOREIGN_CLASSES</code>-Regeln gelten für Gateways: Wenn <code>KUBERNETES_GATEWAY_CLASS</code> nicht gesetzt ist, wird ein Gateway übersprungen, wenn sein <code>gatewayClassName</code> eine <code>GatewayClass</code> benennt, deren <code>spec.controllerName</code> nicht <code>KUBERNETES_GATEWAY_CONTROLLER</code> ist. Ohne <code>get</code>/<code>list</code>/<code>watch</code> auf <code>gatewayclasses</code> protokolliert der Controller eine einzige Warnung und verarbeitet jedes Gateway.</p>
+<h3 id="benutzerdefinierter-domainname">Benutzerdefinierter Domainname<a class="headerlink" href="#benutzerdefinierter-domainname" title="Permanent link">&para;</a></h3>
 <p>Wenn Sie für Ihren Kubernetes-Cluster einen benutzerdefinierten Domainnamen anstelle des standardmäßigen <code>kubernetes.local</code> verwenden, können Sie den Wert über die Umgebungsvariable <code>KUBERNETES_DOMAIN_NAME</code> auf dem Scheduler-Container festlegen.</p>
-<h3 id="verwendung-mit-einem-vorhandenen-ingress-controller">Verwendung mit einem vorhandenen Ingress-Controller</h3>
+<h3 id="verwendung-mit-einem-vorhandenen-ingress-controller">Verwendung mit einem vorhandenen Ingress-Controller<a class="headerlink" href="#verwendung-mit-einem-vorhandenen-ingress-controller" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Beibehaltung des vorhandenen Ingress-Controllers und von BunkerWeb</p>
 <p>Dies ist ein Anwendungsfall, bei dem Sie einen vorhandenen Ingress-Controller wie den Nginx-Controller beibehalten möchten. Der typische Datenfluss wird sein: Load Balancer =&gt; Ingress Controller =&gt; BunkerWeb =&gt; Anwendung.</p>
 </div>
-<h4 id="nginx-ingress-controller-installation">Nginx-Ingress-Controller-Installation</h4>
+<h4 id="nginx-ingress-controller-installation">Nginx-Ingress-Controller-Installation<a class="headerlink" href="#nginx-ingress-controller-installation" title="Permanent link">&para;</a></h4>
 <p>Installieren Sie das Nginx-Ingress-Helm-Repo:</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>ingress-nginx<span class="w"> </span>https://kubernetes.github.io/ingress-nginx
 helm<span class="w"> </span>repo<span class="w"> </span>update
@@ -5832,11 +5938,11 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 </code></pre></div>
 <p>Sie können <code>http(s)://myapp.example.com</code> besuchen, das jetzt mit BunkerWeb geschützt ist 🛡️</p>
-<h3 id="migrate-from-nginx-ingress-controller">Migration vom nginx Ingress Controller</h3>
-<h4 id="einfuhrung">Einführung</h4>
+<h3 id="migrate-from-nginx-ingress-controller">Migration vom nginx Ingress Controller<a class="headerlink" href="#migrate-from-nginx-ingress-controller" title="Permanent link">&para;</a></h3>
+<h4 id="einfuhrung">Einführung<a class="headerlink" href="#einfuhrung" title="Permanent link">&para;</a></h4>
 <p>Dieser praktische Leitfaden führt Sie durch die Migration Ihrer <strong>NGINX Ingress</strong>-Ressourcen zu <strong>BunkerWeb</strong>. Er konzentriert sich auf die Konvertierung Ihrer vorhandenen Kubernetes-Manifeste mit Anwendungsbeispielen.</p>
 <p><strong>Voraussetzungen</strong>: BunkerWeb muss in Ihrem Cluster installiert sein (siehe <a href="#kubernetes-installation">Installationsmethoden</a>).</p>
-<h4 id="migrationsstrategie">Migrationsstrategie</h4>
+<h4 id="migrationsstrategie">Migrationsstrategie<a class="headerlink" href="#migrationsstrategie" title="Permanent link">&para;</a></h4>
 <p>Empfohlener Ansatz: <em>Koexistenz</em></p>
 <ol>
 <li><strong>Installieren Sie BunkerWeb parallel</strong> zu NGINX Ingress</li>
@@ -5845,7 +5951,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <li><strong>Wechseln Sie das DNS</strong> nach erfolgreicher Validierung</li>
 <li><strong>Löschen</strong> Sie die alten NGINX-Ingress-Ressourcen</li>
 </ol>
-<h4 id="migrations-workflow">Migrations-Workflow</h4>
+<h4 id="migrations-workflow">Migrations-Workflow<a class="headerlink" href="#migrations-workflow" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1. Sichern Sie Ihren aktuellen Ingress</span>
 kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>--all-namespaces<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span>&gt;<span class="w"> </span>nginx-ingress-backup.yaml
 
@@ -5860,8 +5966,8 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: ih
 kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class="w"> </span>&lt;alter-ingress&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <hr />
-<h4 id="beispiel-1-standard-ingress">Beispiel 1: Standard Ingress</h4>
-<h5 id="szenario">Szenario</h5>
+<h4 id="beispiel-1-standard-ingress">Beispiel 1: Standard Ingress<a class="headerlink" href="#beispiel-1-standard-ingress" title="Permanent link">&para;</a></h4>
+<h5 id="szenario">Szenario<a class="headerlink" href="#szenario" title="Permanent link">&para;</a></h5>
 <p>Eine einfache Webanwendung mit automatischem HTTPS über cert-manager.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">NGINX Ingress</label><label for="__tabbed_2_2">BunkerWeb Ingress</label></div>
 <div class="tabbed-content">
@@ -5926,7 +6032,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </div>
 </div>
 </div>
-<h5 id="hauptunterschiede">Hauptunterschiede</h5>
+<h5 id="hauptunterschiede">Hauptunterschiede<a class="headerlink" href="#hauptunterschiede" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -5954,8 +6060,8 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </tbody>
 </table>
 <hr />
-<h4 id="beispiel-2-ingress-mit-annotationen">Beispiel 2: Ingress mit Annotationen</h4>
-<h5 id="szenario_1">Szenario</h5>
+<h4 id="beispiel-2-ingress-mit-annotationen">Beispiel 2: Ingress mit Annotationen<a class="headerlink" href="#beispiel-2-ingress-mit-annotationen" title="Permanent link">&para;</a></h4>
+<h5 id="szenario_1">Szenario<a class="headerlink" href="#szenario_1" title="Permanent link">&para;</a></h5>
 <p>REST-API mit Rate Limiting, CORS, HTTPS-Weiterleitung und Timeout-Konfiguration.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">NGINX Ingress</label><label for="__tabbed_3_2">BunkerWeb Ingress</label></div>
 <div class="tabbed-content">
@@ -6069,7 +6175,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </div>
 </div>
 </div>
-<h5 id="annotation-konvertierung">Annotation-Konvertierung</h5>
+<h5 id="annotation-konvertierung">Annotation-Konvertierung<a class="headerlink" href="#annotation-konvertierung" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -6127,8 +6233,8 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </tbody>
 </table>
 <hr />
-<h4 id="beispiel-3-ingress-mit-benutzerdefinierter-nginx-konfiguration">Beispiel 3: Ingress mit benutzerdefinierter NGINX-Konfiguration</h4>
-<h5 id="szenario_2">Szenario</h5>
+<h4 id="beispiel-3-ingress-mit-benutzerdefinierter-nginx-konfiguration">Beispiel 3: Ingress mit benutzerdefinierter NGINX-Konfiguration<a class="headerlink" href="#beispiel-3-ingress-mit-benutzerdefinierter-nginx-konfiguration" title="Permanent link">&para;</a></h4>
+<h5 id="szenario_2">Szenario<a class="headerlink" href="#szenario_2" title="Permanent link">&para;</a></h5>
 <p>Anwendung mit benutzerdefinierten NGINX-Regeln über <code>configuration-snippet</code>: komplexe Rewrite-Regeln, Authentifizierung, spezielle Header.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">NGINX Ingress</label><label for="__tabbed_4_2">BunkerWeb Ingress</label><label for="__tabbed_4_3">BunkerWeb Ingress mit ConfigMap</label></div>
 <div class="tabbed-content">
@@ -6349,7 +6455,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </div>
 </div>
 </div>
-<h5 id="vergleich-native-funktionen-vs-configmap">Vergleich: Native Funktionen vs. ConfigMap</h5>
+<h5 id="vergleich-native-funktionen-vs-configmap">Vergleich: Native Funktionen vs. ConfigMap<a class="headerlink" href="#vergleich-native-funktionen-vs-configmap" title="Permanent link">&para;</a></h5>
 <table>
 <thead>
 <tr>
@@ -6392,7 +6498,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 </tr>
 </tbody>
 </table>
-<h2 id="swarm">Swarm</h2>
+<h2 id="swarm">Swarm<a class="headerlink" href="#swarm" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/integration-swarm.svg" width="600" />
   </p>
@@ -6574,7 +6680,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <p class="admonition-title">Beschriftete Dienste überspringen</p>
 <p>Müssen Sie einen Swarm-Dienst von autoconf ausschließen? Setzen Sie <code>SWARM_IGNORE_LABELS</code> auf dem Controller. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Label-Schlüsseln an (z.B. <code>bunkerweb.SERVER_NAME</code>) oder Suffixen (<code>SERVER_NAME</code>), und jeder Dienst mit diesen Labels wird bei der Erkennung ignoriert.</p>
 </div>
-<h3 id="swarm-dienste">Swarm-Dienste</h3>
+<h3 id="swarm-dienste">Swarm-Dienste<a class="headerlink" href="#swarm-dienste" title="Permanent link">&para;</a></h3>
 <p>Sobald der BunkerWeb-Swarm-Stack eingerichtet ist und läuft (weitere Informationen finden Sie in den Autoconf- und Scheduler-Protokollen), können Sie Webanwendungen im Cluster bereitstellen und Labels verwenden, um BunkerWeb dynamisch zu konfigurieren:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -6594,7 +6700,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="namespaces_2">Namespaces</h3>
+<h3 id="namespaces_2">Namespaces<a class="headerlink" href="#namespaces_2" title="Permanent link">&para;</a></h3>
 <p>Ab Version <code>1.6.0</code> unterstützen die Autoconf-Stacks von BunkerWeb Namespaces. Mit dieser Funktion können Sie mehrere "<em>Cluster</em>" von BunkerWeb-Instanzen und -Diensten auf demselben Docker-Host verwalten. Um Namespaces zu nutzen, setzen Sie einfach das <code>NAMESPACE</code>-Label auf Ihre Dienste. Hier ist ein Beispiel:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -6650,16 +6756,16 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <p>Es kann nur <strong>eine Datenbank</strong> und <strong>ein Scheduler</strong> pro Namespace geben. Wenn Sie versuchen, mehrere Datenbanken oder Scheduler im selben Namespace zu erstellen, kommt es zu Konfigurationskonflikten.</p>
 <p>Der Scheduler benötigt das <code>NAMESPACE</code>-Label nicht, um ordnungsgemäß zu funktionieren. Er benötigt nur die korrekt konfigurierte Einstellung <code>DATABASE_URI</code>, damit er auf dieselbe Datenbank wie der Autoconf-Dienst zugreifen kann.</p>
 </div>
-<h2 id="terraform">Terraform</h2>
-<h3 id="einfuhrung_1">Einführung</h3>
+<h2 id="terraform">Terraform<a class="headerlink" href="#terraform" title="Permanent link">&para;</a></h2>
+<h3 id="einfuhrung_1">Einführung<a class="headerlink" href="#einfuhrung_1" title="Permanent link">&para;</a></h3>
 <p>Der Terraform-Provider für BunkerWeb ermöglicht es Ihnen, Ihre BunkerWeb-Instanzen, -Dienste und -Konfigurationen über Infrastructure as Code (IaC) zu verwalten. Dieser Provider interagiert mit der BunkerWeb-API, um die Bereitstellung und Verwaltung Ihrer Sicherheitskonfigurationen zu automatisieren.</p>
-<h3 id="voraussetzungen">Voraussetzungen</h3>
+<h3 id="voraussetzungen">Voraussetzungen<a class="headerlink" href="#voraussetzungen" title="Permanent link">&para;</a></h3>
 <ul>
 <li><a href="https://developer.hashicorp.com/terraform/downloads">Terraform</a> &gt;= 1.12</li>
 <li>Eine BunkerWeb-Instanz mit aktivierter API</li>
 <li>Ein API-Token oder Basic-Authentication-Anmeldedaten</li>
 </ul>
-<h3 id="installation">Installation</h3>
+<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
 <p>Der Provider ist im <a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest">Terraform Registry</a> verfügbar. Fügen Sie ihn zu Ihrer Terraform-Konfiguration hinzu:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">terraform</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nb">required_providers</span><span class="w"> </span><span class="p">{</span>
@@ -6670,22 +6776,22 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="konfiguration">Konfiguration</h3>
-<h4 id="bearer-token-authentifizierung-empfohlen">Bearer-Token-Authentifizierung (empfohlen)</h4>
+<h3 id="konfiguration">Konfiguration<a class="headerlink" href="#konfiguration" title="Permanent link">&para;</a></h3>
+<h4 id="bearer-token-authentifizierung-empfohlen">Bearer-Token-Authentifizierung (empfohlen)<a class="headerlink" href="#bearer-token-authentifizierung-empfohlen" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kr">provider</span><span class="w"> </span><span class="nv">"bunkerweb"</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"https://bunkerweb.example.com:8888"</span>
 <span class="w">  </span><span class="na">api_token</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_token</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="basis-authentifizierung">Basis-Authentifizierung</h4>
+<h4 id="basis-authentifizierung">Basis-Authentifizierung<a class="headerlink" href="#basis-authentifizierung" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kr">provider</span><span class="w"> </span><span class="nv">"bunkerweb"</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">api_endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"https://bunkerweb.example.com:8888"</span>
 <span class="w">  </span><span class="na">api_username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_username</span>
 <span class="w">  </span><span class="na">api_password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">var.bunkerweb_password</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="verwendungsbeispiele">Verwendungsbeispiele</h3>
-<h4 id="einen-webdienst-erstellen">Einen Webdienst erstellen</h4>
+<h3 id="verwendungsbeispiele">Verwendungsbeispiele<a class="headerlink" href="#verwendungsbeispiele" title="Permanent link">&para;</a></h3>
+<h4 id="einen-webdienst-erstellen">Einen Webdienst erstellen<a class="headerlink" href="#einen-webdienst-erstellen" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">"bunkerweb_service"</span><span class="w"> </span><span class="nv">"app"</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">server_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"app.example.com"</span>
 
@@ -6695,7 +6801,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="eine-instanz-registrieren">Eine Instanz registrieren</h4>
+<h4 id="eine-instanz-registrieren">Eine Instanz registrieren<a class="headerlink" href="#eine-instanz-registrieren" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">"bunkerweb_instance"</span><span class="w"> </span><span class="nv">"worker1"</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">hostname</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">"worker-1.internal"</span>
 <span class="w">  </span><span class="na">name</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s2">"Worker 1"</span>
@@ -6706,20 +6812,20 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">method</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">"api"</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="eine-globale-einstellung-konfigurieren">Eine globale Einstellung konfigurieren</h4>
+<h4 id="eine-globale-einstellung-konfigurieren">Eine globale Einstellung konfigurieren<a class="headerlink" href="#eine-globale-einstellung-konfigurieren" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">"bunkerweb_global_config_setting"</span><span class="w"> </span><span class="nv">"retry"</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">key</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">"retry_limit"</span>
 <span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"10"</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="eine-ip-adresse-sperren">Eine IP-Adresse sperren</h4>
+<h4 id="eine-ip-adresse-sperren">Eine IP-Adresse sperren<a class="headerlink" href="#eine-ip-adresse-sperren" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">"bunkerweb_ban"</span><span class="w"> </span><span class="nv">"suspicious_ip"</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">ip</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">"192.0.2.100"</span>
 <span class="w">  </span><span class="na">reason</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">"Multiple failed login attempts"</span>
 <span class="w">  </span><span class="na">duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3600</span><span class="c1">  # 1 Stunde in Sekunden</span>
 <span class="p">}</span>
 </code></pre></div>
-<h4 id="benutzerdefinierte-konfiguration">Benutzerdefinierte Konfiguration</h4>
+<h4 id="benutzerdefinierte-konfiguration">Benutzerdefinierte Konfiguration<a class="headerlink" href="#benutzerdefinierte-konfiguration" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">"bunkerweb_config"</span><span class="w"> </span><span class="nv">"custom_rules"</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">service_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"app.example.com"</span>
 <span class="w">  </span><span class="na">type</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">"http"</span>
@@ -6727,7 +6833,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">content</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nf">file</span><span class="p">(</span><span class="s2">"${path.module}/configs/custom-rules.conf"</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="verfugbare-ressourcen">Verfügbare Ressourcen</h3>
+<h3 id="verfugbare-ressourcen">Verfügbare Ressourcen<a class="headerlink" href="#verfugbare-ressourcen" title="Permanent link">&para;</a></h3>
 <p>Der Provider stellt die folgenden Ressourcen bereit:</p>
 <ul>
 <li><strong>bunkerweb_service</strong>: Webdienst-Verwaltung</li>
@@ -6737,7 +6843,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_ban</strong>: IP-Sperrverwaltung</li>
 <li><strong>bunkerweb_plugin</strong>: Plugin-Installation und -Verwaltung</li>
 </ul>
-<h3 id="datenquellen">Datenquellen</h3>
+<h3 id="datenquellen">Datenquellen<a class="headerlink" href="#datenquellen" title="Permanent link">&para;</a></h3>
 <p>Datenquellen ermöglichen das Lesen vorhandener Informationen:</p>
 <ul>
 <li><strong>bunkerweb_service</strong>: Einen vorhandenen Dienst lesen</li>
@@ -6746,7 +6852,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_cache</strong>: Cache-Informationen</li>
 <li><strong>bunkerweb_jobs</strong>: Status geplanter Jobs</li>
 </ul>
-<h3 id="ephemere-ressourcen">Ephemere Ressourcen</h3>
+<h3 id="ephemere-ressourcen">Ephemere Ressourcen<a class="headerlink" href="#ephemere-ressourcen" title="Permanent link">&para;</a></h3>
 <p>Für einmalige Operationen:</p>
 <ul>
 <li><strong>bunkerweb_run_jobs</strong>: Jobs bei Bedarf auslösen</li>
@@ -6754,7 +6860,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><strong>bunkerweb_service_snapshot</strong>: Dienstzustand erfassen</li>
 <li><strong>bunkerweb_config_upload</strong>: Massen-Konfiguration hochladen</li>
 </ul>
-<h3 id="vollstandiges-beispiel">Vollständiges Beispiel</h3>
+<h3 id="vollstandiges-beispiel">Vollständiges Beispiel<a class="headerlink" href="#vollstandiges-beispiel" title="Permanent link">&para;</a></h3>
 <p>Hier ist ein Beispiel einer vollständigen Infrastruktur mit BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">terraform</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nb">required_providers</span><span class="w"> </span><span class="p">{</span>
@@ -6839,16 +6945,16 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">bunkerweb_service.api.id</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="zusatzliche-ressourcen">Zusätzliche Ressourcen</h3>
+<h3 id="zusatzliche-ressourcen">Zusätzliche Ressourcen<a class="headerlink" href="#zusatzliche-ressourcen" title="Permanent link">&para;</a></h3>
 <ul>
 <li><a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs">Vollständige Provider-Dokumentation</a></li>
 <li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb">GitHub-Repository</a></li>
 <li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples">Verwendungsbeispiele</a></li>
-<li><a href="https://docs.bunkerweb.io/latest/api/">BunkerWeb-API-Dokumentation</a></li>
+<li><a href="https://docs.bunkerweb.io/1.6/api/">BunkerWeb-API-Dokumentation</a></li>
 </ul>
-<h3 id="support-und-beitrage">Support und Beiträge</h3>
+<h3 id="support-und-beitrage">Support und Beiträge<a class="headerlink" href="#support-und-beitrage" title="Permanent link">&para;</a></h3>
 <p>Um Fehler zu melden oder Verbesserungen vorzuschlagen, besuchen Sie das <a href="https://github.com/bunkerity/terraform-provider-bunkerweb/issues">GitHub-Repository des Providers</a>.</p>
-<h2 id="microsoft-azure">Microsoft Azure</h2>
+<h2 id="microsoft-azure">Microsoft Azure<a class="headerlink" href="#microsoft-azure" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/integration-azure.webp" width="600" />
   </p>
@@ -6894,6 +7000,312 @@ Um eine virtuelle Maschine bereitzustellen, benötigen Sie die Berechtigungen Mi
 </div>
 </div>
 <p>Sie können auf den Einrichtungsassistenten zugreifen, indem Sie die URI <code>https://ihre-ip-adresse/setup</code> Ihrer virtuellen Maschine aufrufen.</p>
+<h2 id="aus-dem-quellcode-bauen">Aus dem Quellcode bauen<a class="headerlink" href="#aus-dem-quellcode-bauen" title="Permanent link">&para;</a></h2>
+<p>Diese Anleitung erklärt, wie BunkerWeb-Artefakte aus dem Quellcode gebaut werden.</p>
+<h3 id="umfang">Umfang<a class="headerlink" href="#umfang" title="Permanent link">&para;</a></h3>
+<p>Dieser Abschnitt behandelt:</p>
+<ul>
+<li>Community-Container-Images (<code>bunkerweb</code>, <code>scheduler</code>, <code>autoconf</code>, <code>ui</code>, <code>api</code>, <code>all-in-one</code>)</li>
+<li>Linux-Pakete (<code>.deb</code>, <code>.rpm</code>)</li>
+</ul>
+<p>Alle Befehle müssen im Stammverzeichnis des Repositorys ausgeführt werden.</p>
+<p>FreeBSD-Benutzer: BunkerWeb ist als offizieller Port verfügbar, siehe <a href="https://www.freshports.org/www/bunkerweb/">https://www.freshports.org/www/bunkerweb/</a>.</p>
+<h3 id="build-standards">Build-Standards<a class="headerlink" href="#build-standards" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Bauen Sie aus einem sauberen, aktuellen Working Tree.</li>
+<li>Verwenden Sie die Version aus <code>src/VERSION</code> (die Packaging-Skripte lesen sie automatisch).</li>
+<li>Halten Sie Artefakte reproduzierbar, indem Sie die bereitgestellten Skripte und Dockerfiles verwenden.</li>
+</ul>
+<h3 id="voraussetzungen_1">Voraussetzungen<a class="headerlink" href="#voraussetzungen_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Für Container und Linux-Pakete:</li>
+<li>Docker (Buildx empfohlen)</li>
+</ul>
+<h3 id="artefaktmatrix">Artefaktmatrix<a class="headerlink" href="#artefaktmatrix" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Artefakt</th>
+<th>Build-Pfad</th>
+<th>Hauptbefehl</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Community-Container-Images</td>
+<td><code>src/*/Dockerfile</code></td>
+<td><code>docker build -f &lt;Dockerfile&gt; -t &lt;tag&gt; .</code></td>
+</tr>
+<tr>
+<td>Linux-Pakete (<code>deb</code>/<code>rpm</code>)</td>
+<td><code>src/linux/Dockerfile-*</code> + <code>src/linux/package.sh</code></td>
+<td><code>./src/linux/package.sh &lt;linux&gt; &lt;arch&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="community-container-images-bauen">Community-Container-Images bauen<a class="headerlink" href="#community-container-images-bauen" title="Permanent link">&para;</a></h3>
+<h4 id="image-ziele">Image-Ziele<a class="headerlink" href="#image-ziele" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Image</th>
+<th>Dockerfile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bunkerweb</code></td>
+<td><code>src/bw/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>scheduler</code></td>
+<td><code>src/scheduler/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>autoconf</code></td>
+<td><code>src/autoconf/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>ui</code></td>
+<td><code>src/ui/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td><code>src/api/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>all-in-one</code></td>
+<td><code>src/all-in-one/Dockerfile</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="ein-image-bauen">Ein Image bauen<a class="headerlink" href="#ein-image-bauen" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/bw/Dockerfile<span class="w"> </span>-t<span class="w"> </span>local/bunkerweb:dev<span class="w"> </span>.
+</code></pre></div>
+<h4 id="alle-community-images-bauen">Alle Community-Images bauen<a class="headerlink" href="#alle-community-images-bauen" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nb">set</span><span class="w"> </span>-e
+
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span>bunkerweb<span class="w"> </span>scheduler<span class="w"> </span>autoconf<span class="w"> </span>ui<span class="w"> </span>api<span class="w"> </span>all-in-one<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="s2">"</span><span class="nv">$image</span><span class="s2">"</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span>bunkerweb<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/bw/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>scheduler<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/scheduler/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>autoconf<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/autoconf/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>ui<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/ui/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>api<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/api/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>all-in-one<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/all-in-one/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">  </span><span class="k">esac</span>
+<span class="w">  </span>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span><span class="s2">"</span><span class="nv">$dockerfile</span><span class="s2">"</span><span class="w"> </span>-t<span class="w"> </span><span class="s2">"local/</span><span class="nv">$image</span><span class="s2">:dev"</span><span class="w"> </span>.
+<span class="k">done</span>
+</code></pre></div>
+<h4 id="build-argument-nur-fur-die-entwicklung-nicht-fur-die-produktion">Build-Argument nur für die Entwicklung (nicht für die Produktion)<a class="headerlink" href="#build-argument-nur-fur-die-entwicklung-nicht-fur-die-produktion" title="Permanent link">&para;</a></h4>
+<p>Verwenden Sie dies nur für lokale Iterationen bei Images, die Minifizierungsargumente unterstützen (<code>bw</code>, <code>ui</code>, <code>all-in-one</code>).
+Dadurch wird die Build-Zeit verkürzt, weil die Minifizierung von Assets übersprungen wird; es entstehen jedoch keine produktionsreifen Artefakte.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/all-in-one/Dockerfile<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">SKIP_MINIFY</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>.
+</code></pre></div>
+<h3 id="linux-pakete-bauen-deb-rpm">Linux-Pakete bauen (<code>.deb</code> / <code>.rpm</code>)<a class="headerlink" href="#linux-pakete-bauen-deb-rpm" title="Permanent link">&para;</a></h3>
+<p>Linux-Pakete können direkt mit Docker in zwei Schritten erzeugt werden:</p>
+<ol>
+<li>Bauen Sie das Package-Builder-Image für Ihre Distribution.</li>
+<li>Führen Sie dieses Image mit einem Host-Ausgabeverzeichnis aus, das unter <code>/data</code> eingehängt ist.</li>
+</ol>
+<h4 id="unterstutzte-distributionsbezeichner">Unterstützte Distributionsbezeichner<a class="headerlink" href="#unterstutzte-distributionsbezeichner" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>ubuntu</code></li>
+<li><code>ubuntu-noble</code></li>
+<li><code>ubuntu-jammy</code></li>
+<li><code>debian-bookworm</code></li>
+<li><code>debian-trixie</code></li>
+<li><code>fedora-43</code></li>
+<li><code>fedora-44</code></li>
+<li><code>rhel-8</code></li>
+<li><code>rhel-9</code></li>
+<li><code>rhel-10</code></li>
+</ul>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Schnelle lokale Methode (empfohlen)</label><label for="__tabbed_6_2">Skriptbasierte Methode (<code>package.sh</code>)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Dies ist der einfachste Community-Workflow für lokale Paket-Builds.
+Bei <code>-v &lt;host-dir&gt;:/data</code> können Sie ein beliebiges Host-Verzeichnis auswählen.
+Die erzeugten Paketdateien werden vom Container in dasselbe Host-Verzeichnis exportiert.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Ein <code>.deb</code> bauen (Ubuntu-Beispiel)</label><label for="__tabbed_7_2">Ein <code>.rpm</code> bauen (Fedora-Beispiel)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>bunkerweb_ubuntu<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>src/linux/Dockerfile-ubuntu<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/out/deb:/data"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerweb_ubuntu
+</code></pre></div>
+<p>Ausgabe:</p>
+<ul>
+<li><code>&lt;your-chosen-host-dir&gt;/bunkerweb.deb</code> (für das obige Beispiel: <code>$(pwd)/out/deb/bunkerweb.deb</code>)</li>
+</ul>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>bunkerweb_fedora43<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>src/linux/Dockerfile-fedora-43<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/out/rpm:/data"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerweb_fedora43
+</code></pre></div>
+<p>Ausgabe:</p>
+<ul>
+<li><code>&lt;your-chosen-host-dir&gt;/bunkerweb.rpm</code> (für das obige Beispiel: <code>$(pwd)/out/rpm/bunkerweb.rpm</code>)</li>
+</ul>
+</div>
+</div>
+</div>
+<h5 id="entwicklungs-flags-nicht-fur-die-produktion">Entwicklungs-Flags (nicht für die Produktion)<a class="headerlink" href="#entwicklungs-flags-nicht-fur-die-produktion" title="Permanent link">&para;</a></h5>
+<p>Verwenden Sie diese nur für lokale Entwicklung und Fehlerbehebung:</p>
+<ul>
+<li><code>SKIP_MINIFY=yes</code> (<code>docker build --build-arg</code>): überspringt die Minifizierung statischer Assets, um Builds zu beschleunigen; die Ausgabe ist weniger optimiert.</li>
+<li><code>FPM_DEBUG=yes</code> (<code>docker run -e</code>): aktiviert ausführliche FPM-/Debug-Logs während der Paketerstellung.</li>
+<li><code>FPM_SKIP_COMPRESSION=yes</code> (<code>docker run -e</code>): deaktiviert die Paketkomprimierung, um das Packaging zu beschleunigen und die Prüfung zu vereinfachen; die Ausgabepakete sind größer.</li>
+</ul>
+<p>Verwenden Sie diese Flags nicht für Release-Artefakte, die für Benutzer bestimmt sind.</p>
+<div class="admonition example">
+<p class="admonition-title">Beispiel für Entwicklung / Fehlerbehebung</p>
+<p>Verwenden Sie dies nur beim Debuggen der Paketerzeugung (ausführliche FPM-Logs, keine Komprimierung). Sie können weiterhin ein beliebiges Host-Verzeichnis auswählen, das unter <code>/data</code> eingehängt ist; die Artefakte werden dort geschrieben.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">SKIP_MINIFY</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>bunkerweb_ubuntu<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>src/linux/Dockerfile-ubuntu<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">FPM_DEBUG</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">FPM_SKIP_COMPRESSION</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/out/deb:/data"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerweb_ubuntu
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>Verwenden Sie diese Methode, wenn Sie die Namenskonvention des Repositorys in <code>package-&lt;linux&gt;/</code> verwenden möchten.</p>
+<h4 id="schritt-1-builder-image-bauen">Schritt 1: Builder-Image bauen<a class="headerlink" href="#schritt-1-builder-image-bauen" title="Permanent link">&para;</a></h4>
+<p>Beispiel (<code>ubuntu</code>):</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/linux/Dockerfile-ubuntu<span class="w"> </span>-t<span class="w"> </span>local/bunkerweb-ubuntu:latest<span class="w"> </span>.
+</code></pre></div>
+<h4 id="schritt-2-paket-bauen">Schritt 2: Paket bauen<a class="headerlink" href="#schritt-2-paket-bauen" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>chmod<span class="w"> </span>+x<span class="w"> </span>src/linux/package.sh
+./src/linux/package.sh<span class="w"> </span>ubuntu<span class="w"> </span>amd64
+</code></pre></div>
+<p>Artefakte werden nach <code>package-&lt;linux&gt;/</code> geschrieben.</p>
+<p>Beispiele:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Debian/Ubuntu package</span>
+docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/linux/Dockerfile-debian-bookworm<span class="w"> </span>-t<span class="w"> </span>local/bunkerweb-debian-bookworm:latest<span class="w"> </span>.
+./src/linux/package.sh<span class="w"> </span>debian-bookworm<span class="w"> </span>amd64
+
+<span class="c1"># RPM package</span>
+docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/linux/Dockerfile-fedora-43<span class="w"> </span>-t<span class="w"> </span>local/bunkerweb-fedora-43:latest<span class="w"> </span>.
+./src/linux/package.sh<span class="w"> </span>fedora-43<span class="w"> </span>x86_64
+</code></pre></div>
+<div class="admonition abstract">
+<p class="admonition-title">Hinweise</p>
+<ul>
+<li>Verwenden Sie für RPM die Linux-Architekturbezeichnungen (<code>x86_64</code>, <code>aarch64</code>, ...).</li>
+<li>Verwenden Sie für DEB die Debian-Architekturbezeichnungen (<code>amd64</code>, <code>arm64</code>, ...).</li>
+<li><code>curl</code> ist eine Laufzeitanforderung für ACME-Integrationen des Schedulers (insbesondere ZeroSSL-/EAB-Abläufe).</li>
+<li>Dockerfiles für Linux-Paket-Builder sind mit ihrem Pakettyp vorkonfiguriert:</li>
+<li>Debian-/Ubuntu-Dockerfiles führen <code>fpm.sh deb</code> aus</li>
+<li>Fedora-/RHEL-Dockerfiles führen <code>fpm.sh rpm</code> aus</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<h3 id="ci-paritat-referenz">CI-Parität (Referenz)<a class="headerlink" href="#ci-paritat-referenz" title="Permanent link">&para;</a></h3>
+<p>Wenn lokale Builds dem CI-Verhalten entsprechen sollen, verwenden Sie diese Workflow-Referenzen:</p>
+<ul>
+<li>Container-Builds: <code>.github/workflows/container-build.yml</code></li>
+<li>Linux-Paket-Builds: <code>.github/workflows/linux-build.yml</code></li>
+</ul>
+<h3 id="artefakte-veroffentlichen">Artefakte veröffentlichen<a class="headerlink" href="#artefakte-veroffentlichen" title="Permanent link">&para;</a></h3>
+<p>Sicherheitsgrundlage:</p>
+<ul>
+<li>Fügen Sie echte Tokens/Passwörter niemals direkt in Befehlszeilen oder den Shell-Verlauf ein.</li>
+<li>Bevorzugen Sie interaktive Anmeldeaufforderungen für lokale/manuelle Veröffentlichungen.</li>
+<li>Verwenden Sie kurzlebige Tokens mit den minimal erforderlichen Berechtigungsumfängen.</li>
+<li>Verwenden Sie CI-Secret-Stores für die Automatisierung.</li>
+<li>Entfernen Sie sensible Umgebungsvariablen nach der Veröffentlichung.</li>
+</ul>
+<h4 id="docker-images-veroffentlichen-dockerio-und-ghcrio">Docker-Images veröffentlichen (<code>docker.io</code> und <code>ghcr.io</code>)<a class="headerlink" href="#docker-images-veroffentlichen-dockerio-und-ghcrio" title="Permanent link">&para;</a></h4>
+<p>Legen Sie die Image-Metadaten fest:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">VERSION</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>cat<span class="w"> </span>src/VERSION<span class="k">)</span><span class="s2">"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DOCKERHUB_ORG</span><span class="o">=</span><span class="s2">"&lt;dockerhub-org-or-user&gt;"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GHCR_ORG</span><span class="o">=</span><span class="s2">"&lt;github-org-or-user&gt;"</span>
+</code></pre></div>
+<p>Authentifizieren Sie sich bei den Registries:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>login<span class="w"> </span>docker.io
+docker<span class="w"> </span>login<span class="w"> </span>ghcr.io<span class="w"> </span>-u<span class="w"> </span><span class="s2">"&lt;github-user&gt;"</span>
+</code></pre></div>
+<div class="admonition abstract">
+<p class="admonition-title">Hinweise</p>
+<ul>
+<li>Die obigen <code>docker login</code>-Befehle fragen Anmeldedaten sicher ab (verdeckte Eingabe).</li>
+<li>Lesen Sie bei automatisierten Pipelines Anmeldedaten aus CI-Secrets und vermeiden Sie hartcodierte Werte.</li>
+</ul>
+</div>
+<p>Taggen und pushen Sie ein Image (Beispiel: <code>all-in-one</code>):</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>tag<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>docker.io/<span class="nv">$DOCKERHUB_ORG</span>/bunkerweb-all-in-one:<span class="nv">$VERSION</span>
+docker<span class="w"> </span>tag<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>ghcr.io/<span class="nv">$GHCR_ORG</span>/bunkerweb-all-in-one:<span class="nv">$VERSION</span>
+
+docker<span class="w"> </span>push<span class="w"> </span>docker.io/<span class="nv">$DOCKERHUB_ORG</span>/bunkerweb-all-in-one:<span class="nv">$VERSION</span>
+docker<span class="w"> </span>push<span class="w"> </span>ghcr.io/<span class="nv">$GHCR_ORG</span>/bunkerweb-all-in-one:<span class="nv">$VERSION</span>
+</code></pre></div>
+<p>Optionales fortlaufendes Tag (<code>latest</code>) nur für stabile Releases:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>tag<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>docker.io/<span class="nv">$DOCKERHUB_ORG</span>/bunkerweb-all-in-one:latest
+docker<span class="w"> </span>tag<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>ghcr.io/<span class="nv">$GHCR_ORG</span>/bunkerweb-all-in-one:latest
+
+docker<span class="w"> </span>push<span class="w"> </span>docker.io/<span class="nv">$DOCKERHUB_ORG</span>/bunkerweb-all-in-one:latest
+docker<span class="w"> </span>push<span class="w"> </span>ghcr.io/<span class="nv">$GHCR_ORG</span>/bunkerweb-all-in-one:latest
+</code></pre></div>
+<h4 id="linux-pakete-auf-packagecloud-veroffentlichen">Linux-Pakete auf Packagecloud veröffentlichen<a class="headerlink" href="#linux-pakete-auf-packagecloud-veroffentlichen" title="Permanent link">&para;</a></h4>
+<p>Installieren und authentifizieren Sie die <code>package_cloud</code>-CLI und laden Sie anschließend die erzeugten Pakete hoch.</p>
+<p>Installieren Sie zunächst die CLI:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Debian/Ubuntu</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>ruby-full<span class="w"> </span>build-essential
+sudo<span class="w"> </span>gem<span class="w"> </span>install<span class="w"> </span>package_cloud
+
+<span class="c1"># Fedora/RHEL</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>ruby<span class="w"> </span>rubygems<span class="w"> </span>gcc<span class="w"> </span>make
+sudo<span class="w"> </span>gem<span class="w"> </span>install<span class="w"> </span>package_cloud
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PACKAGECLOUD_REPO</span><span class="o">=</span><span class="s2">"&lt;owner&gt;/&lt;repo&gt;"</span>
+<span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>-s<span class="w"> </span>-p<span class="w"> </span><span class="s2">"Packagecloud token: "</span><span class="w"> </span>PACKAGECLOUD_TOKEN
+<span class="nb">echo</span>
+<span class="nb">export</span><span class="w"> </span>PACKAGECLOUD_TOKEN
+</code></pre></div>
+<p>Beispiele:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Ubuntu/Debian</span>
+package_cloud<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$PACKAGECLOUD_REPO</span><span class="s2">/ubuntu/jammy"</span><span class="w"> </span>package-ubuntu/*.deb
+package_cloud<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$PACKAGECLOUD_REPO</span><span class="s2">/debian/bookworm"</span><span class="w"> </span>package-debian-bookworm/*.deb
+
+<span class="c1"># Fedora/RHEL</span>
+package_cloud<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$PACKAGECLOUD_REPO</span><span class="s2">/fedora/43"</span><span class="w"> </span>package-fedora-43/*.rpm
+package_cloud<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$PACKAGECLOUD_REPO</span><span class="s2">/el/9"</span><span class="w"> </span>package-rhel-9/*.rpm
+</code></pre></div>
+<div class="admonition abstract">
+<p class="admonition-title">Hinweise</p>
+<ul>
+<li>Verwenden Sie den korrekten Distributionspfad, den Ihr Packagecloud-Repository erwartet.</li>
+<li>Laden Sie nur Release-Artefakte hoch; vermeiden Sie bei Veröffentlichungs-Builds Entwicklungs-Flags (<code>SKIP_MINIFY</code>, <code>FPM_DEBUG</code>, <code>FPM_SKIP_COMPRESSION</code>).</li>
+<li>Prüfen Sie vor der Veröffentlichung Aufbewahrung, Metadaten und Signaturrichtlinie des Repositorys.</li>
+<li>Führen Sie nach Abschluss der Uploads <code>unset PACKAGECLOUD_TOKEN</code> aus.</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Schnelle Validierung</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check generated package files</span>
+ls<span class="w"> </span>-lh<span class="w"> </span>package-*/*.<span class="o">{</span>deb,rpm<span class="o">}</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+ls<span class="w"> </span>-lh<span class="w"> </span>bunkerweb-*.pkg<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+
+<span class="c1"># Check local images</span>
+docker<span class="w"> </span>image<span class="w"> </span>ls<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'local/(bunkerweb|scheduler|autoconf|ui|api|all-in-one)'</span>
+</code></pre></div>
+</div>
 
 
 
@@ -6911,8 +7323,16 @@ Um eine virtuelle Maschine bereitzustellen, benötigen Sie die Berechtigungen Mi
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
         
       </main>
       
@@ -7013,7 +7433,7 @@ Um eine virtuelle Maschine bereitzustellen, benötigen Sie die Berechtigungen Mi
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

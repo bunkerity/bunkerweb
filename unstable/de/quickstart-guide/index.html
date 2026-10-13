@@ -16,7 +16,7 @@
         <link rel="prev" href="../integrations/">
       
       
-        <link rel="next" href="../building/">
+        <link rel="next" href="../features/">
       
       
         
@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -449,25 +448,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -964,33 +944,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1247,7 +1200,7 @@
   
 
 
-<h1 id="schnellstart-anleitung">Schnellstart-Anleitung</h1>
+<h1 id="schnellstart-anleitung">Schnellstart-Anleitung<a class="headerlink" href="#schnellstart-anleitung" title="Permanent link">&para;</a></h1>
 <div class="admonition info">
 <p class="admonition-title">Voraussetzungen</p>
 <p>Wir gehen davon aus, dass Sie bereits mit den <a href="../concepts/">Grundkonzepten</a> vertraut sind und die <a href="../integrations/">Integrationsanweisungen</a> für Ihre Umgebung befolgt haben.</p>
@@ -1260,8 +1213,8 @@
 <p>Diese Schnellstart-Anleitung hilft Ihnen, BunkerWeb schnell zu installieren und einen Webdienst über die Web-Benutzeroberfläche zu sichern.</p>
 <p>Der Schutz bestehender Webanwendungen, die bereits über das HTTP(S)-Protokoll erreichbar sind, ist das Hauptziel von BunkerWeb: Es fungiert als klassischer <a href="https://de.wikipedia.org/wiki/Reverse_Proxy">Reverse-Proxy</a> mit zusätzlichen Sicherheitsfunktionen.</p>
 <p>Im <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">Beispielordner</a> des Repositorys finden Sie Beispiele aus der Praxis.</p>
-<h2 id="grundlegende-einrichtung">Grundlegende Einrichtung</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">All-in-one</label><label for="__tabbed_1_2">Linux</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Docker Autoconf</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Swarm</label></div>
+<h2 id="grundlegende-einrichtung">Grundlegende Einrichtung<a class="headerlink" href="#grundlegende-einrichtung" title="Permanent link">&para;</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">All-in-one</label><label for="__tabbed_1_2">Linux</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Docker autoconf</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Um den All-in-One-Container bereitzustellen, führen Sie den folgenden Befehl aus:</p>
@@ -1299,7 +1252,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Sicherheitshinweis</p>
 <p>Überprüfen Sie immer die Integrität des Skripts mit der bereitgestellten Prüfsumme, bevor Sie es ausführen.</p>
 </div>
-<h4 id="highlights-des-easy-install-skripts">Highlights des Easy-Install-Skripts</h4>
+<h4 id="highlights-des-easy-install-skripts">Highlights des Easy-Install-Skripts<a class="headerlink" href="#highlights-des-easy-install-skripts" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Erkennt Ihre Linux-Distribution und CPU-Architektur im Voraus und warnt, wenn Sie sich außerhalb der unterstützten Matrix befinden, bevor Änderungen vorgenommen werden.</li>
 <li>Interaktive Eingabeaufforderungen verwenden eine Inline-TUI via <a href="https://github.com/charmbracelet/gum">gum</a> — Pfeiltastenmenüs mit <code>❯</code>-Cursor und maskierte Passwortfelder. Beim ersten interaktiven Lauf lädt das Skript das offizielle <code>gum</code>-Binary aus der <a href="https://github.com/charmbracelet/gum/releases">GitHub-Release</a> herunter (SHA256-gepinnt, optionale cosign-Signaturprüfung, sofern cosign installiert ist), führt es aus einem Temp-Verzeichnis aus und entfernt das Temp-Verzeichnis beim Beenden — <strong>es wird kein Systempaket installiert, keine apt/dnf-Quelle hinzugefügt und kein Binary auf dem System hinterlassen</strong>. Kann gum nicht bezogen werden, verwendet der Installer ein bereits vorhandenes <code>whiptail</code>; ist auch das nicht verfügbar, fällt er auf einfache Texteingaben zurück.</li>
@@ -1701,12 +1654,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h2 id="complete-the-setup-wizard">Den Einrichtungsassistenten abschließen</h2>
+<h2 id="complete-the-setup-wizard">Den Einrichtungsassistenten abschließen<a class="headerlink" href="#complete-the-setup-wizard" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">Zugriff auf den Einrichtungsassistenten</p>
 <p>Sie können auf den Einrichtungsassistenten zugreifen, indem Sie die URI <code>https://ihre-fqdn-oder-ip-adresse/setup</code> Ihres Servers aufrufen.</p>
 </div>
-<h3 id="ein-administratorkonto-erstellen">Ein Administratorkonto erstellen</h3>
+<h3 id="ein-administratorkonto-erstellen">Ein Administratorkonto erstellen<a class="headerlink" href="#ein-administratorkonto-erstellen" title="Permanent link">&para;</a></h3>
 <p>Sie sollten eine Einrichtungsseite wie diese sehen:</p>
 <figure>
 <p><img align="center" alt="Setup Wizard Landing Page" src="../../assets/img/ui-wizard-step1.png" />
@@ -1714,7 +1667,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <figcaption>Setup Wizard Landing Page</figcaption>
 </figure>
 <p>Sobald Sie auf der Einrichtungsseite sind, können Sie den <strong>Administrator-Benutzernamen, die E-Mail-Adresse und das Passwort</strong> eingeben und auf die Schaltfläche "Weiter" klicken.</p>
-<h3 id="den-reverse-proxy-https-und-andere-erweiterte-einstellungen-konfigurieren">Den Reverse-Proxy, HTTPS und andere erweiterte Einstellungen konfigurieren</h3>
+<h3 id="den-reverse-proxy-https-und-andere-erweiterte-einstellungen-konfigurieren">Den Reverse-Proxy, HTTPS und andere erweiterte Einstellungen konfigurieren<a class="headerlink" href="#den-reverse-proxy-https-und-andere-erweiterte-einstellungen-konfigurieren" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Grundlegende Einrichtung</label><label for="__tabbed_2_2">Erweiterte Einrichtung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1741,21 +1694,21 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h3 id="pro-aktivierung">PRO-Aktivierung</h3>
+<h3 id="pro-aktivierung">PRO-Aktivierung<a class="headerlink" href="#pro-aktivierung" title="Permanent link">&para;</a></h3>
 <p>Wenn Sie eine PRO-Lizenz haben, können Sie sie aktivieren, indem Sie Ihren Lizenzschlüssel im Abschnitt <code>Upgrade auf PRO</code> eingeben. Dadurch werden die PRO-Funktionen von BunkerWeb aktiviert.</p>
 <figure>
 <p><img align="center" alt="Setup Wizard PRO-Schritt" src="../../assets/img/ui-wizard-step3.png" />
   </p>
 <figcaption>Setup Wizard PRO-Schritt</figcaption>
 </figure>
-<h3 id="ubersicht-uber-ihre-einstellungen">Übersicht über Ihre Einstellungen</h3>
+<h3 id="ubersicht-uber-ihre-einstellungen">Übersicht über Ihre Einstellungen<a class="headerlink" href="#ubersicht-uber-ihre-einstellungen" title="Permanent link">&para;</a></h3>
 <p>Der letzte Schritt gibt Ihnen einen Überblick über die von Ihnen eingegebenen Einstellungen. Sie können auf die Schaltfläche "Einrichten" klicken, um die Einrichtung abzuschließen.</p>
 <figure>
 <p><img align="center" alt="Setup Wizard letzter Schritt" src="../../assets/img/ui-wizard-step4.png" />
   </p>
 <figcaption>Setup Wizard letzter Schritt</figcaption>
 </figure>
-<h2 id="zugriff-auf-die-weboberflache">Zugriff auf die Weboberfläche</h2>
+<h2 id="zugriff-auf-die-weboberflache">Zugriff auf die Weboberfläche<a class="headerlink" href="#zugriff-auf-die-weboberflache" title="Permanent link">&para;</a></h2>
 <p>Sie können nun auf die Weboberfläche zugreifen, indem Sie die im vorherigen Schritt konfigurierte Domain und die URI aufrufen, falls Sie sie geändert haben (Standard ist <code>https://ihre-domain/</code>).</p>
 <figure>
 <p><img align="center" alt="Weboberfläche Anmeldeseite" src="../../assets/img/ui-login.png" />
@@ -1768,7 +1721,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
   </p>
 <figcaption>Weboberfläche Startseite</figcaption>
 </figure>
-<h2 id="erstellen-eines-neuen-dienstes">Erstellen eines neuen Dienstes</h2>
+<h2 id="erstellen-eines-neuen-dienstes">Erstellen eines neuen Dienstes<a class="headerlink" href="#erstellen-eines-neuen-dienstes" title="Permanent link">&para;</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web-UI</label><label for="__tabbed_3_2">All-in-one</label><label for="__tabbed_3_3">Linux variables.env-Datei</label><label for="__tabbed_3_4">Docker</label><label for="__tabbed_3_5">Docker Autoconf-Labels</label><label for="__tabbed_3_6">Kubernetes-Annotationen</label><label for="__tabbed_3_7">Swarm-Labels</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2031,7 +1984,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 </div>
 </div>
 </div>
-<h2 id="weiterfuhrende-informationen">Weiterführende Informationen</h2>
+<h2 id="weiterfuhrende-informationen">Weiterführende Informationen<a class="headerlink" href="#weiterfuhrende-informationen" title="Permanent link">&para;</a></h2>
 <p>Herzlichen Glückwunsch! Sie haben gerade BunkerWeb installiert und Ihren ersten Webdienst gesichert. Bitte beachten Sie, dass BunkerWeb viel mehr bietet, sowohl in Bezug auf die Sicherheit als auch in Bezug auf die Integration mit anderen Systemen und Lösungen. Hier ist eine Liste von Ressourcen und Aktionen, die Ihnen helfen können, Ihr Wissen über die Lösung weiter zu vertiefen:</p>
 <ul>
 <li>Treten Sie der Bunker-Community bei: <a href="https://discord.com/invite/fTf46FmtyD">Discord</a>, <a href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>, <a href="https://github.com/bunkerity">GitHub</a>, <a href="https://x.com/bunkerity">X (ehemals Twitter)</a></li>
@@ -2056,8 +2009,16 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zurück zum Seitenanfang
+</button>
         
       </main>
       
@@ -2158,7 +2119,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>

@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    ，了解我们的企业服务。
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    您当前查看的不是最新版本的文档。
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>点击此处查看最新版本。</strong>
     </a>
 
             </div>
@@ -449,25 +448,6 @@
     
   
   快速入门指南
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  从源代码构建
 
       </a>
     </li>
@@ -981,33 +961,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    从源代码构建
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1264,14 +1217,14 @@
   
 
 
-<h1 id="_1">概念</h1>
-<h2 id="_2">架构</h2>
+<h1 id="_1">概念<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="_2">架构<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <figure>
 <p><img align="center," alt="概述" src="../../assets/img/concepts.svg" width="600" /></p>
 </figure>
 <p>在您的基础设施中，BunkerWeb 扮演着位于您 Web 服务之前的反向代理的角色。典型的架构是从互联网访问 BunkerWeb，然后 BunkerWeb 将请求转发到安全网络上的相应应用程序服务。</p>
 <p>以这种方式（经典的反向代理架构）使用 BunkerWeb，通过 TLS 卸载和集中式安全策略，可以降低后端服务器的加密开销，从而提高性能，同时确保所有服务的一致访问控制、威胁缓解和合规性强制执行。</p>
-<h2 id="_3">集成</h2>
+<h2 id="_3">集成<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p>第一个概念是将 BunkerWeb 集成到目标环境中。我们更喜欢使用“集成”这个词而不是“安装”，因为 BunkerWeb 的目标之一是无缝地集成到现有环境中。</p>
 <p>官方支持以下集成：</p>
 <ul>
@@ -1286,7 +1239,7 @@
 <p class="admonition-title">更进一步</p>
 <p>所有 BunkerWeb 集成的技术细节都可以在文档的<a href="../integrations/">集成部分</a>中找到。</p>
 </div>
-<h2 id="_4">设置</h2>
+<h2 id="_4">设置<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO 设置</p>
 <p>某些插件是为 <strong>PRO 版本</strong>保留的。通过 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>开始 BunkerWeb PRO 的 30 天免费试用。</p>
@@ -1318,7 +1271,7 @@ USE_BROTLI=no
 <p class="admonition-title">更进一步</p>
 <p>包含描述和可能值的可用设置的完整列表可在文档的<a href="../features/">功能部分</a>中找到。</p>
 </div>
-<h2 id="multisite-mode">多站点模式</h2>
+<h2 id="multisite-mode">多站点模式<a class="headerlink" href="#multisite-mode" title="Permanent link">&para;</a></h2>
 <p>在使用 BunkerWeb 时，理解多站点模式至关重要。由于我们的主要重点是保护 Web 应用程序，我们的解决方案与“虚拟主机”或“vhosts”的概念紧密相连（更多信息请参见<a href="https://en.wikipedia.org/wiki/Virtual_hosting">此处</a>）。这些虚拟主机使得可以从单个实例或集群中提供多个 Web 应用程序。</p>
 <p>默认情况下，BunkerWeb 禁用多站点模式。这意味着只提供一个 Web 应用程序，并且所有设置都将应用于它。当您只有一个应用程序需要保护时，这种设置是理想的，因为您不需要关心多站点配置。</p>
 <p>然而，当启用多站点模式时，BunkerWeb 能够提供和保护多个 Web 应用程序。每个 Web 应用程序由一个唯一的服务器名称标识，并有自己的一组设置。当您有多个应用程序需要保护，并且您更喜欢使用单个实例（或集群）的 BunkerWeb 时，此模式被证明是有益的。</p>
@@ -1347,7 +1300,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">更进一步</p>
 <p>您将在文档的<a href="../advanced/">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> 目录中找到多站点模式的具体示例。</p>
 </div>
-<h2 id="custom-configurations">自定义配置</h2>
+<h2 id="custom-configurations">自定义配置<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>为了应对独特的挑战并满足特定的用例，BunkerWeb 提供了自定义配置的灵活性。虽然提供的设置和<a href="../plugins/">外部插件</a>涵盖了广泛的场景，但可能存在需要额外定制的情况。</p>
 <p>BunkerWeb 基于著名的 NGINX Web 服务器构建，该服务器提供了一个强大的配置系统。这意味着您可以利用 NGINX 的配置功能来满足您的特定需求。自定义 NGINX 配置可以包含在各种<a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">上下文</a>中，例如 HTTP 或服务器，从而允许您根据您的要求微调 BunkerWeb 的行为。无论您需要自定义全局设置还是将配置应用于特定的服务器块，BunkerWeb 都能让您优化其行为，使其与您的用例完美对齐。</p>
 <p>BunkerWeb 的另一个不可或缺的组件是 ModSecurity Web 应用程序防火墙。通过自定义配置，您可以灵活地处理误报或添加自定义规则，以进一步增强 ModSecurity 提供的保护。这些自定义配置允许您微调防火墙的行为，并确保其与您的 Web 应用程序的特定要求保持一致。</p>
@@ -1362,7 +1315,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">更进一步</p>
 <p>您将在文档的<a href="../advanced/#custom-configurations">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples</a> 目录中找到自定义配置的具体示例。</p>
 </div>
-<h2 id="_5">数据库</h2>
+<h2 id="_5">数据库<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库包含平稳运行所需的基本数据。数据库中存储了以下信息：</p>
 <ul>
 <li>
@@ -1399,7 +1352,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <li><strong>PostgreSQL</strong>: <code>postgresql://bunkerweb:changeme@bw-db:5432/db</code></li>
 </ul>
 <p>通过在配置中指定适当的数据库 URI，您可以将 BunkerWeb 与您首选的数据库后端无缝集成，从而确保高效可靠地存储您的配置数据。</p>
-<h3 id="_6">数据库兼容性矩阵</h3>
+<h3 id="_6">数据库兼容性矩阵<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1461,7 +1414,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>数据库模式</figcaption>
 </figure>
-<h2 id="scheduler">调度器</h2>
+<h2 id="scheduler">调度器<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h2>
 <p>为了实现无缝协调和自动化，BunkerWeb 采用了一个名为调度器的专门服务。调度器通过执行以下任务，在确保平稳运行方面发挥着至关重要的作用：</p>
 <ul>
 <li>
@@ -1486,10 +1439,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>从 Web UI 管理作业</figcaption>
 </figure>
-<h3 id="_7">实例健康检查</h3>
+<h3 id="_7">实例健康检查<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
 <p>自 1.6.0 版本起，调度器内置了一个健康检查系统，用于监控实例的健康状况。如果一个实例变得不健康，调度器将停止向其发送配置。如果该实例恢复健康，调度器将恢复发送配置。</p>
 <p>健康检查间隔由 <code>HEALTHCHECK_INTERVAL</code> 环境变量设置，默认值为 <code>30</code>，这意味着调度器将每 30 秒检查一次实例的健康状况。</p>
-<h2 id="templates">模板</h2>
+<h2 id="templates">模板<a class="headerlink" href="#templates" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb 利用模板的强大功能来简化配置过程并增强灵活性。模板提供了一种结构化和标准化的方法来定义设置和自定义配置，确保了一致性和易用性。</p>
 <ul>
 <li>
@@ -1616,8 +1569,16 @@ app3.example.com_USE_BAD_BEHAVIOR=no
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
         
       </main>
       
@@ -1718,7 +1679,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "content.tabs.link", "toc.integrate", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
