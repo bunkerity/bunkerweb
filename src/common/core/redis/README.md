@@ -28,14 +28,15 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_DATABASE`          | `0`        | global  | no       | **Redis/Valkey Database:** Database number to use on the Redis/Valkey server (0-15).             |
 | `REDIS_SSL`               | `no`       | global  | no       | **Redis/Valkey SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis/Valkey connection. |
 | `REDIS_SSL_VERIFY`        | `no`       | global  | no       | **Redis/Valkey SSL Verify:** Set to `yes` to verify the Redis/Valkey server's SSL certificate.   |
-| `REDIS_TIMEOUT`           | `1000`     | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations. |
+| `REDIS_TIMEOUT`           | `1s`       | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds. |
 | `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                |
 | `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                             |
+| `REDIS_CLUSTER_NODES`     |            | global  | no       | **Cluster Nodes:** Seed nodes of a Redis Cluster, `host[:port]` separated by spaces, `[ipv6]:port` for IPv6. Enables cluster mode. |
 | `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).                |
 | `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                               |
 | `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                               |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                         |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection. |
+| `REDIS_SENTINEL_MASTER`   |            | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                         |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`      | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds. |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool, per NGINX worker. |
 
 !!! tip "High Availability with Redis Sentinel"
@@ -55,6 +56,18 @@ Follow these steps to configure and use the Redis plugin:
     - All BunkerWeb instances should connect to the same Redis or Valkey server or Sentinel cluster
     - Configure the same database number across all instances
     - Ensure network connectivity between all BunkerWeb instances and Redis/Valkey servers
+
+### Redis Cluster
+
+Set `REDIS_CLUSTER_NODES` to at least one reachable node; BunkerWeb discovers the rest of the cluster from there. This works with Redis 6.2+, Valkey, and managed cluster-mode services such as ElastiCache or MemoryDB through their configuration endpoint. Seeds accept `host`, `host:port` or `[ipv6]:port`, but the cluster itself must announce IPv4 addresses or hostnames (`cluster-announce-hostname` with `cluster-preferred-endpoint-type hostname`); clusters announcing IPv6 are not supported.
+
+Cluster mode uses database 0. Setting `REDIS_CLUSTER_NODES` together with `REDIS_SENTINEL_HOSTS`, or with `REDIS_DATABASE` other than 0, is a configuration error: BunkerWeb logs an error naming both settings and does not use Redis at all (falling back to local counters and cookie sessions) until one of them is removed.
+
+Switching an existing deployment to cluster mode starts from an empty keyspace: active and permanent bans, sessions and reports are not carried over. Re-apply permanent bans after the switch.
+
+Bans and bad behavior counters are spread across primaries by client IP. Blocked-request reports share one hash slot, so one primary stores all of them.
+
+With the default `cluster-require-full-coverage yes`, losing a primary without a replica stops the whole cluster; BunkerWeb then falls back to local counters and cookie sessions until it recovers. `cluster-require-full-coverage no` limits the impact to the keys of the lost shard.
 
 ### Example Configurations
 

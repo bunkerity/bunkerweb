@@ -31,6 +31,9 @@ namespace utils {
 
 bool urldecode_nonstrict_inplace(std::string &val,
     int &invalid_count);
+bool urldecode_nonstrict_inplace_ext(std::string &val,
+    bool plus_to_space,
+    int &invalid_count);
 std::string uri_decode(const std::string & sSrc);
 
 

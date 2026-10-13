@@ -285,6 +285,20 @@ function control.run(conf, _cache, action, params)
 		end
 		return items
 	end
+	-- What the bouncer does with a decision: nil when it ignores it, else the remediation it enforces
+	local function remediation(item)
+		local scope = item.scope:lower()
+		if scope ~= "ip" and scope ~= "range" then
+			return nil
+		end
+		if conf.BOUNCING_ON_TYPE ~= "all" and item.type ~= conf.BOUNCING_ON_TYPE then
+			return nil
+		end
+		if item.type == "ban" or item.type == "captcha" then
+			return item.type
+		end
+		return conf.FALLBACK_REMEDIATION ~= "" and conf.FALLBACK_REMEDIATION or nil
+	end
 	if action == "decisions" then
 		local limit, offset = params.limit or 50, params.offset or 0
 		if
@@ -321,6 +335,7 @@ function control.run(conf, _cache, action, params)
 		local page = list()
 		for i = offset + 1, math.min(#items, offset + limit) do
 			page[#page + 1] = items[i]
+			page[#page].remediation = remediation(items[i])
 		end
 		return { decisions = page, total = #items, offset = offset, limit = limit, observed_at = ngx.time() }, nil, 200
 	end
@@ -474,8 +489,27 @@ function control.run(conf, _cache, action, params)
 			match = item
 		end
 	end
+	local remaining_filters = { contains = "true" }
+	remaining_filters[params.scope:lower() == "ip" and "ip" or "range"] = params.value
 	if not match then
-		return nil, "The selected decision is no longer active; refresh the investigation", 409
+		-- Already gone is a success for a caller converging on "no such decision"; 409 keeps one meaning: it changed
+		local current = query(remaining_filters)
+		if not current then
+			return nil, "The decision is gone but verification failed; refresh the investigation", 502
+		end
+		return {
+			removed = false,
+			already_absent = true,
+			remaining_decisions = current,
+			observed_at = ngx.time(),
+			propagation = {
+				status = "pending",
+				mode = conf.MODE,
+				interval = conf.MODE == "stream" and conf.UPDATE_FREQUENCY or conf.CACHE_EXPIRATION,
+			},
+		},
+			nil,
+			200
 	end
 	local ok
 	ok, err = login()
@@ -490,8 +524,6 @@ function control.run(conf, _cache, action, params)
 	if type(result) ~= "table" or (tonumber(result.nbDeleted) ~= 1 and tonumber(result.nbDeleted) ~= 0) then
 		return nil, "CrowdSec did not confirm removal; refresh before retrying", 502
 	end
-	local remaining_filters = { contains = "true" }
-	remaining_filters[params.scope:lower() == "ip" and "ip" or "range"] = params.value
 	local remaining
 	remaining = query(remaining_filters)
 	if not remaining then

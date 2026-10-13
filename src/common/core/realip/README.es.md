@@ -34,6 +34,9 @@ Siga estos pasos para configurar y usar la función de IP Real:
 | `REAL_IP_FROM_URLS`  |                                           | multisite | no       | **URL de la Lista de IP:** URL que contienen las IP/redes de los proxies de confianza para descargar, separadas por espacios. Admite URL de tipo `file://`. |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | no       | **Protocolo PROXY:** Establezca en `yes` para habilitar el soporte del protocolo PROXY para la comunicación directa de proxy a BunkerWeb.                   |
 
+!!! info "Formatos de lista"
+    Las listas de URL pueden contener una entrada por línea (las líneas que empiezan por `#` o `;` son comentarios y solo se lee la primera palabra de cada línea), CSV, un documento JSON o JSON Lines. En las listas de IP, las comas también separan campos y las listas JSON conservan todas las cadenas que sean direcciones IP o redes. Añada un fragmento para conservar solo una parte de una lista JSON: `#key` conserva los valores bajo `key`, `#key=value` conserva los objetos cuya propiedad `key` es igual a `value` o contiene `value`, y `&` combina términos. Ejemplo: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Una URL con un fragmento conserva solo lo que este selecciona, por lo que no conserva nada si la lista no es JSON.
+
 !!! tip "Redes de Proveedores de la Nube"
     Si está utilizando un proveedor de la nube como AWS, GCP o Azure, considere agregar los rangos de IP de sus balanceadores de carga a su ajuste `REAL_IP_FROM` para garantizar la correcta identificación de la IP del cliente.
 
@@ -111,5 +114,17 @@ Siga estos pasos para configurar y usar la función de IP Real:
     REAL_IP_FROM: "" # Solo confiamos en las IPs de Cloudflare
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Descargar las IPs de Cloudflare automáticamente
     REAL_IP_HEADER: "CF-Connecting-IP"  # Encabezado de Cloudflare para la IP del cliente
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Detrás de AWS CloudFront"
+
+    Configuración para un sitio web detrás de AWS CloudFront:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```

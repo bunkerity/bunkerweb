@@ -1,6 +1,7 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local rediskeys = require "bunkerweb.rediskeys"
 local utils = require "bunkerweb.utils"
 
 local limit = class("limit", plugin)
@@ -13,6 +14,14 @@ local has_variable = utils.has_variable
 local get_multiple_variables = utils.get_multiple_variables
 local is_whitelisted = utils.is_whitelisted
 local regex_match = utils.regex_match
+
+-- The URI is client input: in cluster mode a {tag} in it would choose the hash slot.
+local function redis_limit_key(key)
+	if rediskeys.cluster_mode() then
+		return rediskeys.escape(key)
+	end
+	return key
+end
 local get_security_mode = utils.get_security_mode
 local time = os.time
 local date = os.date
@@ -413,7 +422,7 @@ function limit:limit_req_redis(rate_max, rate_time)
 		"eval",
 		redis_script,
 		1,
-		"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
+		redis_limit_key("plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri),
 		rate_max,
 		rate_time,
 		time(date("!*t"))
@@ -500,7 +509,7 @@ function limit:limit_req_global_redis(rate_time)
 	end
 	local delay = limit_global_delay(rate_time)
 	local window = math.floor(time(date("!*t")) / delay)
-	local key = "plugin_limit_global_" .. self.ctx.bw.server_name .. "_" .. tostring(window)
+	local key = redis_limit_key("plugin_limit_global_" .. self.ctx.bw.server_name .. "_" .. tostring(window))
 	-- Execute script
 	local count, err = self.clusterstore:call("eval", redis_script, 1, key, delay)
 	if not count then

@@ -643,7 +643,7 @@ MDBEnvProvider::MDBEnvProvider() : m_env(NULL), valid(false) {
     MDB_txn *txn;
     mdb_env_create(&m_env);
     rc = mdb_env_open(m_env, "./modsec-shared-collections",
-        MDB_WRITEMAP | MDB_NOSUBDIR, 0664);
+        MDB_NOSUBDIR, 0664);
 
     if (rc == 0) {
         valid = true;

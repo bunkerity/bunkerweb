@@ -10,6 +10,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import parse_duration_int  # type: ignore
 from logger import getLogger  # type: ignore
 from CLI import CLI
 
@@ -25,15 +26,16 @@ if __name__ == "__main__":
         parser_unban = subparsers.add_parser("unban", help="remove a ban from the cache")
         parser_unban.add_argument("ip", type=str, help="IP address to unban")
         parser_unban.add_argument("-service", type=str, help="service to unban from (default: unban globally)", default=None)
+        parser_unban.add_argument("-confirm", action="store_true", help="apply the unban of a CrowdSec ban after reviewing its preview")
 
         # Ban subparser
         parser_ban = subparsers.add_parser("ban", help="add a ban to the cache")
         parser_ban.add_argument("ip", type=str, help="IP address to ban")
 
-        ban_time = getenv("BAD_BEHAVIOR_BAN_TIME", "86400")
-        if not ban_time.isdigit():
-            ban_time = "86400"
-        ban_time = int(ban_time)
+        try:
+            ban_time = parse_duration_int(getenv("BAD_BEHAVIOR_BAN_TIME", "1d"), "s")
+        except ValueError:
+            ban_time = 86400
 
         parser_ban.add_argument(
             "-exp",
@@ -78,7 +80,7 @@ if __name__ == "__main__":
         # Execute command
         ret, err = False, "unknown command"
         if args.command == "unban":
-            ret, err = cli.unban(args.ip, args.service)
+            ret, err = cli.unban(args.ip, args.service, args.confirm)
         elif args.command == "ban":
             ret, err = cli.ban(args.ip, args.exp, args.reason, args.service)
         elif args.command == "bans":

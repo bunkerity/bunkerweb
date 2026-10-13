@@ -57,29 +57,6 @@ function write_tmp_env_file() {
     chmod 660 "$tmp_env_path"
 }
 
-function set_loading_state() {
-    local nginx_variables_path="$1"
-    if [ ! -f "$nginx_variables_path" ] ; then
-        return 1
-    fi
-
-    if grep -q "^IS_LOADING=" "$nginx_variables_path" ; then
-        sed -i "s/^IS_LOADING=.*/IS_LOADING=yes/" "$nginx_variables_path"
-    else
-        echo "IS_LOADING=yes" >> "$nginx_variables_path"
-    fi
-
-    # The scheduler skips a push whose archive digest matches the applied marker left by the
-    # previous one. That marker lives outside the tree it describes, keyed by destination path,
-    # so a push never archives its own bookkeeping. Editing variables.env here makes the tree
-    # differ from what the marker describes, so the push carrying IS_LOADING=no would be
-    # answered "already applied" and the instance would stay in the loading state, serving
-    # traffic with every Lua plugin disabled.
-    rm -f "/var/tmp/bunkerweb/pushswap/$(dirname "$nginx_variables_path" | sed 's/[^[:alnum:]][^[:alnum:]]*/_/g').applied"
-
-    return 0
-}
-
 # Start the bunkerweb service
 function start() {
 
@@ -195,15 +172,20 @@ function start() {
     if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
         regenerate_temp_config=true
     else
-        log "SYSTEMCTL" "ℹ️" "Preserving current config on restart, forcing loading state to receive latest config ..."
-        if ! set_loading_state "/etc/nginx/variables.env" ; then
-            log "SYSTEMCTL" "⚠️" "Couldn't set IS_LOADING=yes because /etc/nginx/variables.env is missing"
+        log "SYSTEMCTL" "ℹ️" "Preserving current config on restart, keeping it enforced and asking the scheduler for the latest one ..."
+        # Every access control keeps running on the preserved configuration. The scheduler sees this
+        # file through /health and pushes the latest configuration, which removes it. It is created
+        # as nginx: this script runs as root and /var/tmp is sticky, so a root-owned file could never
+        # be removed by the worker.
+        if ! run_as_nginx touch /var/tmp/bunkerweb_needs_config ; then
+            log "SYSTEMCTL" "⚠️" "Couldn't create /var/tmp/bunkerweb_needs_config, the preserved config stays in use until the next configuration change"
         fi
     fi
 
     write_tmp_env_file "$tmp_env_path" "$tmp_env_content"
 
     if [[ "$regenerate_temp_config" == "true" ]] ; then
+        rm -f /var/tmp/bunkerweb_needs_config
         if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
             --variables "$tmp_env_path"; then
             log "SYSTEMCTL" "❌" "Error while generating config from $tmp_env_path"

@@ -12,7 +12,7 @@ El complemento DNSBL (Domain Name System Blacklist) proporciona protección cont
 
 Siga estos pasos para configurar y usar la función DNSBL:
 
-1.  **Habilite la función:** La función DNSBL está deshabilitada de forma predeterminada. Establezca la configuración `USE_DNSBL` en `yes` para habilitarla.
+1.  **Controlar la función:** La función DNSBL está habilitada de forma predeterminada. Establezca `USE_DNSBL` en `no` para deshabilitarla.
 2.  **Configure los servidores DNSBL:** Agregue los nombres de dominio de los servicios DNSBL que desea usar a la configuración `DNSBL_LIST`.
 3.  **Aplique la configuración:** Una vez configurado, BunkerWeb verificará automáticamente las conexiones entrantes contra los servidores DNSBL especificados.
 4.  **Supervise la eficacia:** Consulte la [interfaz de usuario web](web-ui.md) para ver las estadísticas de las solicitudes bloqueadas por las verificaciones de DNSBL.
@@ -23,17 +23,17 @@ Siga estos pasos para configurar y usar la función DNSBL:
 
 | Ajuste       | Valor por defecto                                   | Contexto  | Múltiple | Descripción                                                                                                    |
 | ------------ | --------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | no       | Habilitar DNSBL: establezca en `yes` para habilitar las verificaciones de DNSBL para las conexiones entrantes. |
+| `USE_DNSBL`  | `yes`                                               | multisite | no       | DNSBL está habilitada de forma predeterminada; establezca `USE_DNSBL` en `no` para desactivar las comprobaciones de las conexiones entrantes. |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | Servidores DNSBL: lista de dominios de servidores DNSBL para verificar, separados por espacios.                |
 
 **Listas de Omisión**
 
 | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                        |
 | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DNSBL_IGNORE_IP`           | ``                | multisite | yes      | IPs/CIDRs separados por espacios para omitir las verificaciones de DNSBL (lista blanca).                                                                           |
+| `DNSBL_IGNORE_IP`           | ``                | multisite | no       | IPs/CIDRs separados por espacios para omitir las verificaciones de DNSBL (lista blanca).                                                                           |
 | `DNSBL_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir las comprobaciones DNSBL. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
 | `DNSBL_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                       |
-| `DNSBL_IGNORE_IP_URLS`      | ``                | multisite | yes      | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`.                                                   |
+| `DNSBL_IGNORE_IP_URLS`      | ``                | multisite | no       | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`.                                                   |
 
 !!! warning "Una regla de cabecera es un secreto compartido"
     Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.

@@ -222,6 +222,10 @@ try:
     if isinstance(all_domains, str):
         all_domains = all_domains.split()
 
+    # Single-site: only the first entry is a service, the other SERVER_NAME entries are its aliases.
+    if not multisite:
+        all_domains = all_domains[:1]
+
     # An empty SERVER_NAME is the documented autoconf/Kubernetes value: with no service list there
     # is nothing to compare the cache against, and purging it would drop every mTLS service to the
     # placeholder CA until the next successful daily run.

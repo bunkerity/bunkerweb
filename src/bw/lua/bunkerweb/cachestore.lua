@@ -3,6 +3,7 @@ local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local clusterstore = require "bunkerweb.clusterstore"
 local mlcache = require "resty.mlcache"
+local rediskeys = require "bunkerweb.rediskeys"
 local utils = require "bunkerweb.utils"
 local cachestore = class("cachestore")
 
@@ -14,6 +15,14 @@ local INFO = ngx.INFO
 local null = ngx.null
 local get_ctx_obj = utils.get_ctx_obj
 local is_cosocket_available = utils.is_cosocket_available
+
+-- Cache keys may embed untrusted text; in cluster mode a {tag} in it would choose the hash slot.
+local function redis_key(key)
+	if rediskeys.cluster_mode() then
+		return rediskeys.escape(key)
+	end
+	return key
+end
 
 -- Instantiate mlcache object at module level (which will be cached when running init phase)
 -- TODO : custom settings
@@ -81,7 +90,7 @@ function cachestore:get(key)
 			end
 			return {ret_get, ret_ttl}
 		]]
-		local ret, err = cs:call("eval", redis_script, 1, key)
+		local ret, err = cs:call("eval", redis_script, 1, redis_key(key))
 		if not ret then
 			cs:close()
 			return nil, err, nil
@@ -119,6 +128,17 @@ function cachestore:get(key)
 	return true, value
 end
 
+-- Worker LRU and shared dict only: no callback, no lock, no IPC, never yields (safe in ssl_client_hello)
+-- luacheck: push ignore 212 431
+function cachestore:get_local_nolock(key)
+	local value, err = cache:get(key, nil, nil)
+	if value == nil and err ~= nil then
+		return false, err
+	end
+	return true, value
+end
+-- luacheck: pop
+
 function cachestore:set(key, value, ex)
 	-- luacheck: ignore 431
 	local ok, err
@@ -150,7 +170,7 @@ function cachestore:set_redis(key, value, ex)
 	end
 	-- Set value with ttl
 	local default_ex = ex or 30
-	local _, err = self.clusterstore:call("set", key, value, "EX", default_ex)
+	local _, err = self.clusterstore:call("set", redis_key(key), value, "EX", default_ex)
 	if err then
 		self.clusterstore:close()
 		return false, "SET failed : " .. err
@@ -183,7 +203,7 @@ function cachestore:del_redis(key)
 		return false, "can't connect to redis : " .. err
 	end
 	-- Delete key
-	local _, err = self.clusterstore:call("del", key)
+	local _, err = self.clusterstore:call("del", redis_key(key))
 	if err then
 		self.clusterstore:close()
 		return false, "DEL failed : " .. err

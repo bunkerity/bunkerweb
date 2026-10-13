@@ -10,7 +10,9 @@ from shutil import rmtree
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from sys import path as sys_path
 from tarfile import open as tar_open
+from time import time
 from traceback import format_exc
+from typing import Optional
 
 BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
 GEN_PATH = BUNKERWEB_PATH.joinpath("gen").as_posix()
@@ -34,6 +36,9 @@ BW_INSTANCES_UTILS = InstancesUtils(DB)
 CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
+# A reload latch older than this is treated as free: the worker restart that clears it is sent ~3 s after the reload,
+# so a latch still held a minute later means that restart was throttled or lost. Re-extracting is idempotent (checksums).
+RELOAD_LATCH_TIMEOUT = 60
 plugin_validator = None
 
 # Shared thread pool executor for configuration tasks in routes
@@ -74,7 +79,13 @@ def invalid_plugin_json(plugin_path: Path) -> bool:
     return False
 
 
-def reload_plugins():
+def reload_plugins() -> str:
+    # Clear the flag before reading the plugins: an update committed while we extract raises it again instead of being erased
+    ret = DB.checked_changes(["ui_plugins"])
+    if ret:
+        DB.logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+
+    incomplete = False
     plugins = DB.get_plugins(_type="all", with_data=True)
     # Collect plugin ids from the database for cleanup later.
     known_plugin_ids = {plugin["id"] for plugin in plugins}
@@ -87,6 +98,12 @@ def reload_plugins():
         elif plugin["type"] == "pro":
             plugin_path = PRO_PLUGINS_PATH
         else:
+            continue
+
+        # The stored data could not be read back (incomplete chunks): keep the tree on disk and retry on the next request
+        if plugin.get("checksum") and not plugin["data"]:
+            DB.logger.error(f"Data of {plugin['type']} plugin \"{plugin['name']}\" cannot be loaded, keeping the current files")
+            incomplete = True
             continue
 
         target = plugin_path / plugin["id"]
@@ -141,10 +158,6 @@ def reload_plugins():
             DB.logger.debug(format_exc())
             DB.logger.error(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\": {e}")
 
-    ret = DB.checked_changes(["ui_plugins"])
-    if ret:
-        DB.logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-
     # Cleanup: Remove plugin folders that exist on the filesystem but are not in the database.
     for plugin_path in (EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH):
         if plugin_path.exists():
@@ -159,9 +172,18 @@ def reload_plugins():
                         elif item.is_dir():
                             rmtree(item, ignore_errors=True)
 
+    if incomplete and not ret:
+        # Raise the flag again so the next request retries, the caller does not restart the workers on an error
+        DB.checked_changes(["ui_plugins"], value=True)
+        return "some plugin data could not be loaded"
+    return ret
 
-def safe_reload_plugins(force: bool = False):
+
+def safe_reload_plugins(force: bool = False) -> Optional[str]:
+    """Return None when another reload already holds the latch (the flag stays set), else the reload error ("" on success)."""
     DATA.load_from_file()
-    if force or DATA.get("FORCE_RELOAD_PLUGIN", False) or not DATA.get("IS_RELOADING_PLUGINS", False):
-        DATA["IS_RELOADING_PLUGINS"] = True
-        reload_plugins()
+    held = DATA.get("IS_RELOADING_PLUGINS", False) and time() - DATA.get("RELOADING_PLUGINS_SINCE", 0) < RELOAD_LATCH_TIMEOUT
+    if force or DATA.get("FORCE_RELOAD_PLUGIN", False) or not held:
+        DATA.update({"IS_RELOADING_PLUGINS": True, "RELOADING_PLUGINS_SINCE": time()})
+        return reload_plugins()
+    return None

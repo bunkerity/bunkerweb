@@ -36,20 +36,20 @@
     },
     "ANTIBOT_TIME_RESOLVE": {
       "context": "multisite",
-      "default": "60",
-      "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
+      "default": "1m",
+      "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "antibot-time-resolve",
       "label": "Time to resolve",
-      "regex": "^[0-9]+$",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "ANTIBOT_TIME_VALID": {
       "context": "multisite",
-      "default": "86400",
-      "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
+      "default": "1d",
+      "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "antibot-time-valid",
       "label": "Time valid",
-      "regex": "^[0-9]+$",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "ANTIBOT_SUCCESS_URI": {
@@ -69,6 +69,15 @@
       "label": "Captcha alphabet",
       "regex": "^[a-zA-Z2-9+/=%\"'&_(),.;:?!§`^ÄÖÜßäöüé''‚\"\"„-]+$",
       "type": "text"
+    },
+    "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+      "context": "multisite",
+      "default": "16",
+      "help": "Proof-of-work difficulty of the JavaScript challenge, in leading zero bits (16 to 28). Each extra bit doubles the average solve time for clients. Regenerate custom JavaScript challenge pages before raising it.",
+      "id": "antibot-javascript-difficulty",
+      "label": "JavaScript difficulty",
+      "regex": "^(1[6-9]|2[0-8])$",
+      "type": "number"
     },
     "ANTIBOT_IGNORE_URI": {
       "context": "multisite",

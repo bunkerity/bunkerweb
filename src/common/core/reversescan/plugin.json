@@ -25,12 +25,12 @@
     },
     "REVERSE_SCAN_TIMEOUT": {
       "context": "multisite",
-      "default": "500",
-      "help": "Specify the maximum timeout (in ms) when scanning a port.",
+      "default": "500ms",
+      "help": "Specify the maximum timeout (in ms) when scanning a port. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "reverse-scan-timeout",
       "label": "Reverse scan timeout",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     }
   }
 }

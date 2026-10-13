@@ -2,17 +2,34 @@ from time import monotonic
 from typing import Any, Optional
 
 from cachelib.base import BaseCache
+from flask import g, has_app_context
 from flask_session.redis import RedisSessionInterface
-from redis.exceptions import ConnectionError as RedisConnectionError, RedisError, TimeoutError as RedisTimeoutError
+from redis.exceptions import (
+    ClusterDownError,
+    ClusterError,
+    ConnectionError as RedisConnectionError,
+    RedisClusterException,
+    RedisError,
+    TimeoutError as RedisTimeoutError,
+)
 
 # Only these are worth leaving Redis alone for. A command rejected because Redis is at
 # maxmemory comes back instantly and says nothing about the next one: reads and deletes are
 # still served, so skipping them would hide live sessions and leave logged-out ones behind.
-UNREACHABLE_ERRORS = (RedisConnectionError, RedisTimeoutError)
+# ClusterError (TTL exhausted after redirections) is Redis-unavailable the same as ClusterDownError.
+UNREACHABLE_ERRORS = (RedisConnectionError, RedisTimeoutError, ClusterDownError, ClusterError, RedisClusterException)
+
+# RedisClusterException (topology refresh failures, SlotNotCoveredError during a failover
+# window) does not derive from RedisError, so a bare "except RedisError" never sees it and it
+# escapes the interface as a 500. Every handler below catches this instead.
+REDIS_ERRORS = (RedisError, RedisClusterException)
 
 # Marks a fallback entry as a delete that has not reached Redis yet, so a read never resurrects
 # the stale copy Redis still holds. Reconciled (and dropped) the next time Redis is available.
 _TOMBSTONE_KEY = "__bw_deleted__"
+
+# Request-scoped note of the session id a cookie named when Redis could not be asked about it.
+_UNREADABLE_KEY = "_bw_unreadable_session_store_id"
 
 
 def _total_seconds(lifetime) -> int:
@@ -98,7 +115,7 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
             return False
         try:
             self.client.delete(store_id)
-        except RedisError as e:
+        except REDIS_ERRORS as e:
             self._handle_failure("delete", e)
             return False
         else:
@@ -137,7 +154,7 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
                     return local_session_data
                 try:
                     self.client.set(name=store_id, value=serialized, ex=_total_seconds(self.app.permanent_session_lifetime))
-                except RedisError as e:
+                except REDIS_ERRORS as e:
                     self._handle_failure("write", e)
                 else:
                     self._note_redis_answered()
@@ -150,10 +167,24 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
                 self._note_redis_answered()
                 if serialized_session_data:
                     return self.serializer.decode(serialized_session_data)
-            except RedisError as e:
+                return None
+            except REDIS_ERRORS as e:
                 self._handle_failure("read", e)
 
+        # Redis could not say whether it holds this id. The request goes on with a fresh,
+        # empty session, so remember the id for a logout to revoke: see save_session.
+        if has_app_context():
+            setattr(g, _UNREADABLE_KEY, store_id)
         return None
+
+    def save_session(self, app, session, response) -> None:
+        unreadable_store_id = getattr(g, _UNREADABLE_KEY, None) if has_app_context() else None
+        if unreadable_store_id and not session and session.modified:
+            # The session was cleared (logout), but what it was cleared from could not be
+            # read, so the base class would only delete the fresh id minted for this request
+            # and Redis would still honour the old cookie once it answers again.
+            self._delete_session(unreadable_store_id)
+        super().save_session(app, session, response)
 
     def _upsert_session(self, session_lifetime, session: Any, store_id: str) -> None:
         storage_time_to_live = _total_seconds(session_lifetime)
@@ -161,7 +192,7 @@ class ResilientRedisSessionInterface(RedisSessionInterface):
         if self.redis_available:
             try:
                 self.client.set(name=store_id, value=self.serializer.encode(session), ex=storage_time_to_live)
-            except RedisError as e:
+            except REDIS_ERRORS as e:
                 self._handle_failure("write", e)
             else:
                 self._note_redis_answered()

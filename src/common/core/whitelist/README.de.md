@@ -7,7 +7,7 @@ Das Whitelist-Plugin bietet einen umfassenden Ansatz, um den Zugriff auf Ihre We
 
 1.  Sie definieren Kriterien für Besucher, die auf die "Whitelist" gesetzt werden sollen (_IP-Adressen, Netzwerke, rDNS, ASN, User-Agent oder URI-Muster_).
 2.  Wenn ein Besucher versucht, auf Ihre Website zuzugreifen, prüft BunkerWeb, ob er einem dieser Whitelist-Kriterien entspricht.
-3.  Wenn ein Besucher einer Whitelist-Regel entspricht (und keiner Ignorier-Regel), wird ihm der Zugriff auf Ihre Website gewährt und er **umgeht alle anderen Sicherheitsprüfungen**.
+3.  Wenn ein Besucher einer Whitelist-Regel entspricht, wird ihm der Zugriff auf Ihre Website gewährt und er **umgeht alle anderen Sicherheitsprüfungen**.
 4.  Wenn ein Besucher keinem Whitelist-Kriterium entspricht, durchläuft er wie gewohnt alle normalen Sicherheitsprüfungen.
 5.  Whitelists können in regelmäßigen Abständen automatisch aus externen Quellen aktualisiert werden.
 
@@ -15,11 +15,10 @@ Das Whitelist-Plugin bietet einen umfassenden Ansatz, um den Zugriff auf Ihre We
 
 Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurieren und zu verwenden:
 
-1.  **Aktivieren Sie die Funktion:** Die Whitelist-Funktion ist standardmäßig deaktiviert. Setzen Sie die Einstellung `USE_WHITELIST` auf `yes`, um sie zu aktivieren.
+1. **Funktion aktivieren:** Die Whitelist ist standardmäßig aktiviert (`USE_WHITELIST=yes`), mit voreingestellten rDNS-Suffixen und ASN `32934`. Prüfen Sie diese vertrauenswürdigen Quellen; mit `USE_WHITELIST=no` deaktivieren Sie die Funktion.
 2.  **Erlaubnisregeln konfigurieren:** Definieren Sie, welche IPs, Netzwerke, rDNS-Muster, ASNs, User-Agents oder URIs auf die Whitelist gesetzt werden sollen.
-3.  **Ignorierregeln einrichten:** Geben Sie alle Ausnahmen an, die die Whitelist-Prüfungen umgehen sollen.
-4.  **Externe Quellen hinzufügen:** Konfigurieren Sie URLs zum automatischen Herunterladen und Aktualisieren von Whitelist-Daten.
-5.  **Zugriff überwachen:** Überprüfen Sie die [Web-Benutzeroberfläche](web-ui.md), um zu sehen, welchen Besuchern der Zugriff gewährt oder verweigert wird.
+3.  **Externe Quellen hinzufügen:** Konfigurieren Sie URLs zum automatischen Herunterladen und Aktualisieren von Whitelist-Daten.
+4.  **Zugriff überwachen:** Überprüfen Sie die [Web-Benutzeroberfläche](web-ui.md), um zu sehen, welchen Besuchern der Zugriff gewährt oder verweigert wird.
 
 !!! info "Stream-Modus"
     Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
@@ -30,7 +29,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
 
 | Einstellung     | Standard | Kontext   | Mehrfach | Beschreibung                                                                         |
 | --------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------ |
-| `USE_WHITELIST` | `no`     | multisite | nein     | **Whitelist aktivieren:** Auf `yes` setzen, um die Whitelist-Funktion zu aktivieren. |
+| `USE_WHITELIST` | `yes` | multisite | nein     | **Whitelist aktivieren:** Auf `yes` setzen, um die Whitelist-Funktion zu aktivieren. |
 
 === "IP-Adresse"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.
@@ -38,30 +37,27 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     | Einstellung                | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                              |
     | -------------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_IP`             |          | multisite | nein     | **IP-Whitelist:** Liste von IP-Adressen oder Netzwerken (CIDR-Notation), die erlaubt werden sollen, getrennt durch Leerzeichen.                           |
-    | `WHITELIST_IGNORE_IP`      |          | multisite | nein     | **IP-Ignorierliste:** Liste von IP-Adressen oder Netzwerken, die IP-Whitelist-Prüfungen umgehen sollen.                                                   |
     | `WHITELIST_IP_URLS`        |          | multisite | nein     | **IP-Whitelist-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen. |
-    | `WHITELIST_IGNORE_IP_URLS` |          | multisite | nein     | **IP-Ignorierlisten-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die ignoriert werden sollen.                                        |
+
+    !!! info "Listenformate"
+        URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit `#` oder `;` beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: `#key` behält die Werte unter `key`, `#key=value` behält Objekte, bei denen `key` gleich `value` ist oder `value` enthält, und `&` verbindet die Bedingungen. Beispiel: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.
 
 === "Reverse DNS"
     **Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Whitelist. Dies ist nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken den Zugriff nach ihrer Domain zu ermöglichen.
 
     | Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                         |
     | ---------------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_RDNS`             |          | multisite | nein     | **rDNS-Whitelist:** Liste von Reverse-DNS-Suffixen, die erlaubt werden sollen, getrennt durch Leerzeichen.                                           |
+    | `WHITELIST_RDNS`             | `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com` | multisite | nein     | **rDNS-Whitelist:** Liste von Reverse-DNS-Suffixen, die erlaubt werden sollen, getrennt durch Leerzeichen.                                           |
     | `WHITELIST_RDNS_GLOBAL`      | `yes`    | multisite | nein     | **Nur globales rDNS:** Führt rDNS-Whitelist-Prüfungen nur für globale IP-Adressen durch, wenn auf `yes` gesetzt.                                     |
-    | `WHITELIST_IGNORE_RDNS`      |          | multisite | nein     | **rDNS-Ignorierliste:** Liste von Reverse-DNS-Suffixen, die rDNS-Whitelist-Prüfungen umgehen sollen.                                                 |
     | `WHITELIST_RDNS_URLS`        |          | multisite | nein     | **rDNS-Whitelist-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen. |
-    | `WHITELIST_IGNORE_RDNS_URLS` |          | multisite | nein     | **rDNS-Ignorierlisten-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die ignoriert werden sollen.                                        |
 
 === "ASN"
     **Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Whitelist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
     | Einstellung                 | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                         |
     | --------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-    | `WHITELIST_ASN`             |          | multisite | nein     | **ASN-Whitelist:** Liste von Autonomen Systemnummern, die erlaubt werden sollen, getrennt durch Leerzeichen.                         |
-    | `WHITELIST_IGNORE_ASN`      |          | multisite | nein     | **ASN-Ignorierliste:** Liste von ASNs, die ASN-Whitelist-Prüfungen umgehen sollen.                                                   |
+    | `WHITELIST_ASN`             | `32934` | multisite | nein     | **ASN-Whitelist:** Liste von Autonomen Systemnummern, die erlaubt werden sollen, getrennt durch Leerzeichen.                         |
     | `WHITELIST_ASN_URLS`        |          | multisite | nein     | **ASN-Whitelist-URLs:** Liste von URLs, die ASNs enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen. |
-    | `WHITELIST_IGNORE_ASN_URLS` |          | multisite | nein     | **ASN-Ignorierlisten-URLs:** Liste von URLs, die ASNs enthalten, die ignoriert werden sollen.                                        |
 
 === "User-Agent"
     **Was dies bewirkt:** Setzt Besucher basierend darauf auf die Whitelist, welchen Browser oder welches Tool sie angeben zu verwenden. Dies ist effektiv, um den Zugriff auf bestimmte bekannte Tools oder Dienste zu ermöglichen.
@@ -69,9 +65,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     | Einstellung                        | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                 |
     | ---------------------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_USER_AGENT`             |          | multisite | nein     | **User-Agent-Whitelist:** Liste von User-Agent-Mustern (PCRE-Regex), die erlaubt werden sollen, getrennt durch Leerzeichen.  |
-    | `WHITELIST_IGNORE_USER_AGENT`      |          | multisite | nein     | **User-Agent-Ignorierliste:** Liste von User-Agent-Mustern, die User-Agent-Whitelist-Prüfungen umgehen sollen.               |
     | `WHITELIST_USER_AGENT_URLS`        |          | multisite | nein     | **User-Agent-Whitelist-URLs:** Liste von URLs, die User-Agent-Muster enthalten, die auf die Whitelist gesetzt werden sollen. |
-    | `WHITELIST_IGNORE_USER_AGENT_URLS` |          | multisite | nein     | **User-Agent-Ignorierlisten-URLs:** Liste von URLs, die User-Agent-Muster enthalten, die ignoriert werden sollen.            |
 
 === "URI"
     **Was dies bewirkt:** Setzt Anfragen an bestimmte URLs auf Ihrer Website auf die Whitelist. Dies ist hilfreich, um den Zugriff auf bestimmte Endpunkte unabhängig von anderen Faktoren zu ermöglichen.
@@ -79,9 +73,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     | Einstellung                 | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                               |
     | --------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
     | `WHITELIST_URI`             |          | multisite | nein     | **URI-Whitelist:** Liste von URI-Mustern (PCRE-Regex), die erlaubt werden sollen, getrennt durch Leerzeichen.                              |
-    | `WHITELIST_IGNORE_URI`      |          | multisite | nein     | **URI-Ignorierliste:** Liste von URI-Mustern, die URI-Whitelist-Prüfungen umgehen sollen.                                                  |
     | `WHITELIST_URI_URLS`        |          | multisite | nein     | **URI-Whitelist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen. |
-    | `WHITELIST_IGNORE_URI_URLS` |          | multisite | nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die URI-Muster enthalten, die ignoriert werden sollen.                                        |
 
     !!! tip "Verankern Sie ein Pfadmuster so, dass alles darunter erfasst wird"
         Schreiben Sie `^/admin(/|$)` statt `^/admin$`. Ein Muster, das auf genau einen Pfad verankert ist, trifft weder `/admin/` noch `/admin%2f` oder `/admin;foo`, während Ihre Anwendung dort dieselbe Ressource ausliefern kann. Abgeglichen wird der dekodierte und normalisierte Pfad, daher sind `/a/../admin` und `//admin` schon abgedeckt.

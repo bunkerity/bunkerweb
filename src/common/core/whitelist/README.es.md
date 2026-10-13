@@ -7,7 +7,7 @@ El complemento de Lista Blanca proporciona un enfoque integral para permitir exp
 
 1.  Usted define los criterios para los visitantes que deben estar en la "lista blanca" (_direcciones IP, redes, DNS inverso, ASN, User-Agent o patrones de URI_).
 2.  Cuando un visitante intenta acceder a su sitio, BunkerWeb comprueba si coincide con alguno de estos criterios de la lista blanca.
-3.  Si un visitante coincide con alguna regla de la lista blanca (y no coincide con ninguna regla de omisión), se le concede acceso a su sitio y **omite todos los demás controles de seguridad**.
+3.  Si un visitante coincide con alguna regla de la lista blanca, se le concede acceso a su sitio y **omite todos los demás controles de seguridad**.
 4.  Si un visitante no coincide con ningún criterio de la lista blanca, procede a través de todos los controles de seguridad normales como de costumbre.
 5.  Las listas blancas se pueden actualizar automáticamente desde fuentes externas de forma programada.
 
@@ -15,11 +15,10 @@ El complemento de Lista Blanca proporciona un enfoque integral para permitir exp
 
 Siga estos pasos para configurar y usar la función de Lista Blanca:
 
-1.  **Habilite la función:** La función de Lista Blanca está deshabilitada por defecto. Establezca el ajuste `USE_WHITELIST` en `yes` para habilitarla.
+1. **Habilitar la función:** La lista blanca está habilitada por defecto (`USE_WHITELIST=yes`), con sufijos rDNS predefinidos y el ASN `32934`. Revise estas fuentes de confianza; use `USE_WHITELIST=no` para deshabilitarla.
 2.  **Configure las reglas de permiso:** Defina qué IP, redes, patrones de DNS inverso, ASN, User-Agents o URI deben estar en la lista blanca.
-3.  **Configure las reglas de omisión:** Especifique cualquier excepción que deba omitir las comprobaciones de la lista blanca.
-4.  **Añada fuentes externas:** Configure URL para descargar y actualizar automáticamente los datos de la lista blanca.
-5.  **Supervise el acceso:** Consulte la [interfaz de usuario web](web-ui.md) para ver qué visitantes están siendo permitidos o denegados.
+3.  **Añada fuentes externas:** Configure URL para descargar y actualizar automáticamente los datos de la lista blanca.
+4.  **Supervise el acceso:** Consulte la [interfaz de usuario web](web-ui.md) para ver qué visitantes están siendo permitidos o denegados.
 
 !!! info "modo stream"
     Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
@@ -30,7 +29,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
 
 | Ajuste          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
 | --------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
-| `USE_WHITELIST` | `no`              | multisite | no       | **Habilitar Lista Blanca:** Establezca en `yes` para habilitar la función de lista blanca. |
+| `USE_WHITELIST` | `yes` | multisite | no       | **Habilitar Lista Blanca:** Establezca en `yes` para habilitar la función de lista blanca. |
 
 === "Dirección IP"
     **Qué hace esto:** Pone en la lista blanca a los visitantes según su dirección IP o red. Estos visitantes omitirán todos los controles de seguridad.
@@ -38,30 +37,27 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | Ajuste                     | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                               |
     | -------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_IP`             |                   | multisite | no       | **Lista Blanca de IP:** Lista de direcciones IP o redes (notación CIDR) para permitir, separadas por espacios.                            |
-    | `WHITELIST_IGNORE_IP`      |                   | multisite | no       | **Lista de Omisión de IP:** Lista de direcciones IP o redes que deben omitir las comprobaciones de la lista blanca de IP.                 |
     | `WHITELIST_IP_URLS`        |                   | multisite | no       | **URL de Lista Blanca de IP:** Lista de URL que contienen direcciones IP o redes para incluir en la lista blanca, separadas por espacios. |
-    | `WHITELIST_IGNORE_IP_URLS` |                   | multisite | no       | **URL de Lista de Omisión de IP:** Lista de URL que contienen direcciones IP o redes para ignorar.                                        |
+
+    !!! info "Formatos de lista"
+        Las listas de URL pueden contener una entrada por línea (las líneas que empiezan por `#` o `;` son comentarios y solo se lee la primera palabra de cada línea), CSV, un documento JSON o JSON Lines. En las listas de IP, las comas también separan campos y las listas JSON conservan todas las cadenas que sean direcciones IP o redes. Añada un fragmento para conservar solo una parte de una lista JSON: `#key` conserva los valores bajo `key`, `#key=value` conserva los objetos cuya propiedad `key` es igual a `value` o contiene `value`, y `&` combina términos. Ejemplo: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Una URL con un fragmento conserva solo lo que este selecciona, por lo que no conserva nada si la lista no es JSON.
 
 === "DNS Inverso"
     **Qué hace esto:** Pone en la lista blanca a los visitantes según su nombre de dominio (en inverso). Esto es útil para permitir el acceso a visitantes de organizaciones o redes específicas por su dominio.
 
     | Ajuste                       | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                 |
     | ---------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_RDNS`             |                   | multisite | no       | **Lista Blanca de rDNS:** Lista de sufijos de DNS inverso para permitir, separados por espacios.                                            |
+    | `WHITELIST_RDNS`             | `.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com` | multisite | no       | **Lista Blanca de rDNS:** Lista de sufijos de DNS inverso para permitir, separados por espacios.                                            |
     | `WHITELIST_RDNS_GLOBAL`      | `yes`             | multisite | no       | **Solo rDNS Global:** Realiza comprobaciones de la lista blanca de rDNS solo en direcciones IP globales cuando se establece en `yes`.       |
-    | `WHITELIST_IGNORE_RDNS`      |                   | multisite | no       | **Lista de Omisión de rDNS:** Lista de sufijos de DNS inverso que deben omitir las comprobaciones de la lista blanca de rDNS.               |
     | `WHITELIST_RDNS_URLS`        |                   | multisite | no       | **URL de Lista Blanca de rDNS:** Lista de URL que contienen sufijos de DNS inverso para incluir en la lista blanca, separadas por espacios. |
-    | `WHITELIST_IGNORE_RDNS_URLS` |                   | multisite | no       | **URL de Lista de Omisión de rDNS:** Lista de URL que contienen sufijos de DNS inverso para ignorar.                                        |
 
 === "ASN"
     **Qué hace esto:** Pone en la lista blanca a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
 
     | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                             |
     | --------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_ASN`             |                   | multisite | no       | **Lista Blanca de ASN:** Lista de Números de Sistema Autónomo para permitir, separados por espacios.                    |
-    | `WHITELIST_IGNORE_ASN`      |                   | multisite | no       | **Lista de Omisión de ASN:** Lista de ASN que deben omitir las comprobaciones de la lista blanca de ASN.                |
+    | `WHITELIST_ASN`             | `32934` | multisite | no       | **Lista Blanca de ASN:** Lista de Números de Sistema Autónomo para permitir, separados por espacios.                    |
     | `WHITELIST_ASN_URLS`        |                   | multisite | no       | **URL de Lista Blanca de ASN:** Lista de URL que contienen ASN para incluir en la lista blanca, separados por espacios. |
-    | `WHITELIST_IGNORE_ASN_URLS` |                   | multisite | no       | **URL de Lista de Omisión de ASN:** Lista de URL que contienen ASN para ignorar.                                        |
 
 === "User Agent"
     **Qué hace esto:** Pone en la lista blanca a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo para permitir el acceso a herramientas o servicios conocidos específicos.
@@ -69,9 +65,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | Ajuste                             | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                               |
     | ---------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_USER_AGENT`             |                   | multisite | no       | **Lista Blanca de User-Agent:** Lista de patrones de User-Agent (expresión regular PCRE) para permitir, separados por espacios.           |
-    | `WHITELIST_IGNORE_USER_AGENT`      |                   | multisite | no       | **Lista de Omisión de User-Agent:** Lista de patrones de User-Agent que deben omitir las comprobaciones de la lista blanca de User-Agent. |
     | `WHITELIST_USER_AGENT_URLS`        |                   | multisite | no       | **URL de Lista Blanca de User-Agent:** Lista de URL que contienen patrones de User-Agent para incluir en la lista blanca.                 |
-    | `WHITELIST_IGNORE_USER_AGENT_URLS` |                   | multisite | no       | **URL de Lista de Omisión de User-Agent:** Lista de URL que contienen patrones de User-Agent para ignorar.                                |
 
 === "URI"
     **Qué hace esto:** Pone en la lista blanca las solicitudes a URL específicas de su sitio. Esto es útil para permitir el acceso a puntos finales específicos independientemente de otros factores.
@@ -79,9 +73,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                         |
     | --------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
     | `WHITELIST_URI`             |                   | multisite | no       | **Lista Blanca de URI:** Lista de patrones de URI (expresión regular PCRE) para permitir, separados por espacios.                   |
-    | `WHITELIST_IGNORE_URI`      |                   | multisite | no       | **Lista de Omisión de URI:** Lista de patrones de URI que deben omitir las comprobaciones de la lista blanca de URI.                |
     | `WHITELIST_URI_URLS`        |                   | multisite | no       | **URL de Lista Blanca de URI:** Lista de URL que contienen patrones de URI para incluir en la lista blanca, separados por espacios. |
-    | `WHITELIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de Lista de Omisión de URI:** Lista de URL que contienen patrones de URI para ignorar.                                        |
 
     !!! tip "Ancle un patrón de ruta para cubrir todo lo que hay por debajo"
         Escriba `^/admin(/|$)` en lugar de `^/admin$`. Un patrón anclado a una única ruta exacta no coincide con `/admin/`, `/admin%2f` ni `/admin;foo`, mientras que su aplicación puede seguir sirviendo el mismo recurso en esas rutas. La coincidencia se hace sobre la ruta decodificada y normalizada, así que `/a/../admin` y `//admin` ya están cubiertos.

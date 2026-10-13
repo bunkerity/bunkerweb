@@ -10,11 +10,10 @@ local ngx = ngx
 local ERR = ngx.ERR
 local INFO = ngx.INFO
 local OK = ngx.OK
-local WARN = ngx.WARN
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
-local get_ips = utils.get_ips
 local get_rdns = utils.get_rdns
+local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
 local get_header_rules = utils.get_header_rules
@@ -353,35 +352,10 @@ function whitelist:is_whitelisted_ip()
 		local rdns_list, err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
 		-- Check if rDNS is in whitelist
 		if rdns_list then
-			local forward_check = nil
-			local rdns_suffix = nil
-			for _, rdns in ipairs(rdns_list) do
-				for _, suffix in ipairs(self.lists["RDNS"]) do
-					if rdns:sub(-#suffix) == suffix then
-						forward_check = rdns
-						rdns_suffix = suffix
-						break
-					end
-				end
-				if forward_check then
-					break
-				end
-			end
-			if forward_check then
-				local ip_list, err = get_ips(forward_check, nil, self.ctx, true)
-				if ip_list then
-					for _, ip in ipairs(ip_list) do
-						if ip == self.ctx.bw.remote_addr then
-							return true, "rDNS " .. rdns_suffix
-						end
-					end
-					self.logger:log(
-						WARN,
-						"IP " .. self.ctx.bw.remote_addr .. " may spoof reverse DNS " .. forward_check
-					)
-				else
-					self.logger:log(ERR, "error while getting rdns (forward check) : " .. err)
-				end
+			local rdns_suffix =
+				rdns_forward_confirmed(rdns_list, self.lists["RDNS"], self.ctx, self.ctx.bw.remote_addr, self.logger)
+			if rdns_suffix then
+				return true, "rDNS " .. rdns_suffix
 			end
 		else
 			self.logger:log(ERR, "error while getting rdns : " .. err)

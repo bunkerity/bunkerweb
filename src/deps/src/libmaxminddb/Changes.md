@@ -1,3 +1,9 @@
+## 1.14.1 - 2026-09-17
+
+- Fixed a `-Wsign-compare` warning in `MMDB_open()` that broke builds with
+  `-Werror` on platforms where `ssize_t` is 32 bits, such as i686. Pull request
+  by Robert Scheck. GitHub #487.
+
 ## 1.14.0 - 2026-09-08
 
 - Bounded the resources that `MMDB_get_entry_data_list()` spends decoding a

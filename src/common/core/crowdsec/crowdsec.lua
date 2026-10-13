@@ -1,3 +1,4 @@
+local banlease = require("bunkerweb.banlease")
 local cache_partition = require("crowdsec.cache_partition")
 local class = require("middleclass")
 local plugin = require("bunkerweb.plugin")
@@ -7,12 +8,16 @@ local crowdsec = class("crowdsec", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
+local INFO = ngx.INFO
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
 local has_variable = utils.has_variable
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local get_deny_status = utils.get_deny_status
+local get_security_mode = utils.get_security_mode
+local parse_duration = utils.parse_duration
+local get_country = utils.get_country
 local open = io.open
 local pairs = pairs
 local ipairs = ipairs
@@ -231,6 +236,61 @@ function crowdsec:init()
 	return self:ret(true, msg)
 end
 
+-- Whether a CrowdSec deny may become a short BunkerWeb ban. Pure, so the rules are testable on their own.
+-- A stream connection that stopped synchronizing never renews bans: its cached decisions may already be stale.
+local function should_promote(params)
+	if not params.refresh or params.refresh <= 0 then
+		return false, "CROWDSEC_BAN_REFRESH is 0"
+	end
+	if params.security_mode ~= "block" then
+		return false, "security mode is not block"
+	end
+	if params.exclude_location then
+		return false, "the service has excluded locations"
+	end
+	if params.mode == "stream" then
+		local last, frequency = params.last_successful_sync, params.update_frequency
+		if not last or not frequency or params.now - last > 2 * frequency then
+			return false, "the stream synchronization is stale"
+		end
+	end
+	return true
+end
+crowdsec._should_promote = should_promote
+
+function crowdsec:promote(bouncer, scope, evidence, refresh, lease_epoch)
+	local info = bouncer.ConnectionInfo()
+	local now = ngx.time()
+	local promote, why = should_promote({
+		refresh = refresh,
+		security_mode = get_security_mode(self.ctx),
+		exclude_location = bouncer.HasExcludedLocations(),
+		mode = info.mode,
+		last_successful_sync = info.last_successful_sync,
+		update_frequency = info.update_frequency,
+		now = now,
+	})
+	if not promote then
+		return self.logger:log(INFO, "no CrowdSec ban lease : " .. why)
+	end
+	local ttl, reason_data = banlease.build_lease(evidence, now, refresh)
+	if not ttl then
+		return self.logger:log(INFO, "no CrowdSec ban lease : " .. tostring(reason_data))
+	end
+	local country = get_country(self.ctx.bw.remote_addr) or "unknown"
+	local global = scope == GLOBAL_SCOPE
+	local ok, status = banlease.promote_lease(
+		self.ctx.bw.remote_addr,
+		not global and scope or nil,
+		global and "global" or "service",
+		ttl,
+		reason_data,
+		country,
+		{ lease_epoch = lease_epoch, redis_epoch = self.ctx.bw.cs_redis_epoch }
+	)
+	self.logger:log(INFO, "CrowdSec ban lease " .. (ok and "promoted" or "not promoted") .. " : " .. tostring(status))
+end
+
 function crowdsec:access()
 	-- Check if CS is activated
 	if not self:is_needed() then
@@ -243,16 +303,34 @@ function crowdsec:access()
 		-- init() already logged why. Fail open rather than take the service down.
 		return self:ret(true, "no CrowdSec bouncer loaded for this service")
 	end
+	-- The lease epoch is captured before the bouncer yields, so a refresh_ip or an unban that lands while this
+	-- request waits on the Local API or AppSec invalidates the lease this request may write afterwards.
+	local refresh = parse_duration(self.variables["CROWDSEC_BAN_REFRESH"], "s") or 0
+	local lease_epoch
+	if refresh > 0 then
+		lease_epoch = banlease.lease_epoch(self.ctx.bw.remote_addr, true)
+	end
 	-- Do the check
 	local ok, err, banned, evidence = bouncer.Allow(self.ctx.bw.remote_addr, challenge_prefixes[scope])
 	if not ok then
-		return self:ret(false, "Error while executing CrowdSec bouncer : " .. err)
+		if err == nil then
+			-- The bouncer sent its challenge page and returns nothing: the request is answered
+			return self:ret(true, "CrowdSec challenge served", HTTP_OK)
+		end
+		return self:ret(false, "Error while executing CrowdSec bouncer : " .. tostring(err))
 	end
 	if banned then
 		if type(evidence) == "table" then
 			evidence.connection = connection_id(scope, bouncer)
 			evidence.service_scope = scope
 			evidence.instance = ngx.var.hostname
+			-- Promotion never changes the deny: a failure only means no lease
+			if lease_epoch then
+				local promoted, promote_err = pcall(self.promote, self, bouncer, scope, evidence, refresh, lease_epoch)
+				if not promoted then
+					self.logger:log(ERR, "can't promote the CrowdSec ban to a lease : " .. tostring(promote_err))
+				end
+			end
 		end
 		return self:ret(true, "CrowdSec bouncer denied request", get_deny_status(), nil, evidence)
 	end
@@ -261,7 +339,7 @@ function crowdsec:access()
 end
 
 function crowdsec:api()
-	local operation = self.ctx.bw.uri:match("^/crowdsec/(%a+)$")
+	local operation = self.ctx.bw.uri:match("^/crowdsec/([%a_]+)$")
 	if
 		self.ctx.bw.request_method == "POST"
 		and (
@@ -271,6 +349,7 @@ function crowdsec:api()
 			or operation == "unban"
 			or operation == "allowlists"
 			or operation == "allowlistcheck"
+			or operation == "refresh_ip"
 		)
 	then
 		if operation == "connections" then
@@ -283,6 +362,7 @@ function crowdsec:api()
 			for scope, bouncer in pairs(bouncers) do
 				local info = bouncer.ConnectionInfo()
 				info.id = connection_id(scope, bouncer)
+				info.node = ngx.var.hostname
 				if not wanted or info.id == wanted then
 					info.services = { scope }
 					-- Configuration errors must not echo user information embedded in URLs.

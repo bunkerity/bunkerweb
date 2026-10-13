@@ -12,7 +12,7 @@ The DNSBL (Domain Name System Blacklist) plugin provides protection against know
 
 Follow these steps to configure and use the DNSBL feature:
 
-1. **Enable the feature:** The DNSBL feature is disabled by default. Set the `USE_DNSBL` setting to `yes` to enable it.
+1. **Control the feature:** DNSBL is enabled by default. Set `USE_DNSBL` to `no` to disable it.
 2. **Configure DNSBL servers:** Add the domain names of the DNSBL services you want to use to the `DNSBL_LIST` setting.
 3. **Apply settings:** Once configured, BunkerWeb will automatically check incoming connections against the specified DNSBL servers.
 4. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on requests blocked by DNSBL checks.
@@ -23,17 +23,17 @@ Follow these steps to configure and use the DNSBL feature:
 
 | Setting      | Default                                             | Context   | Multiple | Description                                                                 |
 | ------------ | --------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | no       | Enable DNSBL: set to `yes` to enable DNSBL checks for incoming connections. |
+| `USE_DNSBL`  | `yes`                                               | multisite | no       | DNSBL is enabled by default; set `USE_DNSBL` to `no` to disable checks for incoming connections. |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | DNSBL servers: list of DNSBL server domains to check, separated by spaces.  |
 
 **Ignore Lists**
 
 | Setting                     | Default | Context   | Multiple | Description                                                                                                                               |
 | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`           | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                                                           |
+| `DNSBL_IGNORE_IP`           | ``      | multisite | no       | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                                                           |
 | `DNSBL_IGNORE_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request bypass the DNSBL checks. Numbered pairs: `_NAME_1` goes with `_VALUE_1`. |
 | `DNSBL_IGNORE_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries.          |
-| `DNSBL_IGNORE_IP_URLS`      | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes.                                            |
+| `DNSBL_IGNORE_IP_URLS`      | ``      | multisite | no       | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes.                                            |
 
 !!! warning "A header rule is a shared secret"
     Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.

@@ -816,10 +816,10 @@ $(document).ready(function () {
       );
       return;
     }
-    const service = $(this).data("config-service");
+    const service = $(this).attr("data-config-service");
     const config = {
-      name: $(this).data("config-name"),
-      type: $(this).data("config-type"),
+      name: $(this).attr("data-config-name"),
+      type: $(this).attr("data-config-type"),
       service: service === "global" ? null : service,
     };
     setupDeletionModal([config]);
@@ -835,10 +835,10 @@ $(document).ready(function () {
       );
       return;
     }
-    const service = $(this).data("config-service");
+    const service = $(this).attr("data-config-service");
     const config = {
-      name: $(this).data("config-name"),
-      type: $(this).data("config-type"),
+      name: $(this).attr("data-config-name"),
+      type: $(this).attr("data-config-type"),
       service: service || "global",
     };
     const conversionType = $(this).data("value");

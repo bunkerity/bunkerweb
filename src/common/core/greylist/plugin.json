@@ -91,7 +91,7 @@
     "GREYLIST_IP_URLS": {
       "context": "multisite",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme. Accepts plain-text, CSV and JSON lists; add #key or #key=value to keep only part of a JSON list.",
       "id": "greylist-ip-urls",
       "label": "Greylist IP/network URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",

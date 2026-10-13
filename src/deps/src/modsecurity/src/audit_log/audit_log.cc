@@ -1,6 +1,7 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
  * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2026 OWASP Foundation (http://www.owasp.org/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -329,7 +330,8 @@ bool AuditLog::close() {
     return true;
 }
 
-
+// TODO(v4): make 'from' const
+// cppcheck-suppress constParameterPointer  -  keep the old signatures for ABI compatibility
 bool AuditLog::merge(AuditLog *from, std::string *error) {
     AL_MERGE_STRING_CONF(from->m_path1, m_path1);
     AL_MERGE_STRING_CONF(from->m_path2, m_path2);

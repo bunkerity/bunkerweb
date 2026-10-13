@@ -32,6 +32,9 @@ So funktioniert's:
 | `REAL_IP_FROM_URLS`  |                                           | multisite | nein     | URLs, die IPs/Netzwerke von vertrauenswürdigen Proxys bereitstellen (unterstützt `file://`). |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | nein     | Aktiviert die PROXY-Protokoll-Unterstützung für die direkte Proxy→BunkerWeb-Kommunikation.   |
 
+!!! info "Listenformate"
+    URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit `#` oder `;` beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: `#key` behält die Werte unter `key`, `#key=value` behält Objekte, bei denen `key` gleich `value` ist oder `value` enthält, und `&` verbindet die Bedingungen. Beispiel: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.
+
 !!! tip "Cloud-Anbieter"
     Fügen Sie die IPs Ihrer Load Balancer (AWS/GCP/Azure…) zu `REAL_IP_FROM` hinzu, um eine korrekte Identifizierung zu gewährleisten.
 
@@ -109,5 +112,17 @@ So funktioniert's:
     REAL_IP_FROM: "" # Wir vertrauen nur Cloudflare-IPs
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Cloudflare-IPs automatisch herunterladen
     REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare-Header für Client-IP
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Hinter AWS CloudFront"
+
+    Konfiguration für eine Website hinter AWS CloudFront:
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```

@@ -9,6 +9,12 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
     verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses/status"]
+    verbs: ["patch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingressclasses"]
+    verbs: ["get", "watch", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -108,7 +114,7 @@ spec:
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.15
+          image: bunkerity/bunkerweb:1.6.16
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -143,6 +149,7 @@ spec:
             exec:
               command:
                 - /usr/share/bunkerweb/helpers/healthcheck.sh
+                - ok
             initialDelaySeconds: 30
             periodSeconds: 1
             timeoutSeconds: 1
@@ -167,10 +174,12 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.6.15
+          image: bunkerity/bunkerweb-autoconf:1.6.16
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
+              value: "yes"
+            - name: KUBERNETES_SKIP_FOREIGN_CLASSES
               value: "yes"
             - name: "DATABASE_URI"
               value: "oracle://bunkerweb:changeme@svc-bunkerweb-db:1521?service_name=FREEPDB1"
@@ -202,7 +211,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.6.15
+          image: bunkerity/bunkerweb-scheduler:1.6.16
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -309,7 +318,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-ui
-          image: bunkerity/bunkerweb-ui:1.6.15
+          image: bunkerity/bunkerweb-ui:1.6.16
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -320,7 +329,7 @@ spec:
                   name: bunkerweb-api
                   key: token
             - name: DATABASE_URI
-              value: "mysql+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+              value: "oracle://bunkerweb:changeme@svc-bunkerweb-db:1521?service_name=FREEPDB1"
             - name: ADMIN_USERNAME
               value: "changeme"
             - name: ADMIN_PASSWORD
@@ -346,8 +355,8 @@ spec:
   ports:
     - name: sql
       protocol: TCP
-      port: 3306
-      targetPort: 3306
+      port: 1521
+      targetPort: 1521
 ---
 apiVersion: v1
 kind: Service

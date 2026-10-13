@@ -12,7 +12,7 @@ Le plugin DNSBL (Domain Name System Blacklist) protège contre les IP malveillan
 
 Suivez ces étapes pour configurer et utiliser la fonctionnalité DNSBL :
 
-1.  **Activer la fonction :** La fonction DNSBL est désactivée par défaut. Passez `USE_DNSBL` à `yes` pour l'activer.
+1.  **Contrôler la fonction :** La fonction DNSBL est activée par défaut. Passez `USE_DNSBL` à `no` pour la désactiver.
 2.  **Configurer les serveurs DNSBL :** Ajoutez les noms de domaine des services DNSBL que vous souhaitez utiliser dans le paramètre `DNSBL_LIST`.
 3.  **Appliquer les paramètres :** Une fois configuré, BunkerWeb vérifiera automatiquement les connexions entrantes auprès des serveurs DNSBL spécifiés.
 4.  **Surveiller l'efficacité :** Consultez la [web UI](web-ui.md) pour voir les statistiques des requêtes bloquées par les vérifications DNSBL.
@@ -23,17 +23,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité DNSBL :
 
 | Paramètre    | Défaut                                              | Contexte  | Multiple | Description                                                                                        |
 | ------------ | --------------------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | non      | Activer DNSBL : mettre à `yes` pour activer les vérifications DNSBL pour les connexions entrantes. |
+| `USE_DNSBL`  | `yes`                                               | multisite | non      | La fonction DNSBL est activée par défaut ; réglez `USE_DNSBL` sur `no` pour désactiver les vérifications des connexions entrantes. |
 | `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | non      | Serveurs DNSBL : liste des domaines de serveurs DNSBL à vérifier, séparés par des espaces.         |
 
 **Listes d’exception**
 
 | Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                                                                                  |
 | --------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DNSBL_IGNORE_IP`           | ``     | multisite | oui      | IP/CIDR séparés par des espaces pour lesquels ignorer les vérifications DNSBL (liste blanche).                                                               |
+| `DNSBL_IGNORE_IP`           | ``     | multisite | non      | IP/CIDR séparés par des espaces pour lesquels ignorer les vérifications DNSBL (liste blanche).                                                               |
 | `DNSBL_IGNORE_HEADER_NAME`  |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de contourner les vérifications DNSBL. Paires numérotées : `_NAME_1` va avec `_VALUE_1`. |
 | `DNSBL_IGNORE_HEADER_VALUE` |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.           |
-| `DNSBL_IGNORE_IP_URLS`      | ``     | multisite | oui      | URL séparées par des espaces fournissant des IP/CIDR à ignorer. Supporte `http(s)://` et `file://`.                                                          |
+| `DNSBL_IGNORE_IP_URLS`      | ``     | multisite | non      | URL séparées par des espaces fournissant des IP/CIDR à ignorer. Supporte `http(s)://` et `file://`.                                                          |
 
 !!! warning "Une règle d’en-tête est un secret partagé"
     N’importe quel client peut envoyer un en-tête : une règle d’en-tête est donc un jeton porteur, pas un contrôle réseau. À servir uniquement en HTTPS, avec une regex ancrée par `^` et `$` (la recherche n’est pas ancrée par défaut, `abc` correspond aussi à `xabcx`), et une valeur à faire tourner. Si BunkerWeb est derrière un proxy, ce proxy doit écraser toute copie de l’en-tête envoyée par le client. Ces règles ne valent qu’en HTTP : un service stream ne transporte aucun en-tête de requête, rien n’y correspond donc.

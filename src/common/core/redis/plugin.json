@@ -61,11 +61,11 @@
     },
     "REDIS_TIMEOUT": {
       "context": "global",
-      "default": "1000",
-      "help": "Redis server timeout (in ms) for connect, read and write.",
+      "default": "1s",
+      "help": "Redis server timeout (in ms) for connect, read and write. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "redis-timeout",
-      "label": "Redis timeout (ms)",
-      "regex": "^[0-9]+$",
+      "label": "Redis timeout",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "REDIS_USERNAME": {
@@ -122,13 +122,22 @@
       "regex": "^.*$",
       "type": "text"
     },
+    "REDIS_CLUSTER_NODES": {
+      "context": "global",
+      "default": "",
+      "help": "Redis Cluster seed nodes with format host[:port] separated with spaces ([ipv6]:port for IPv6). Enables Redis Cluster mode; cannot be combined with Sentinel or a non-zero database.",
+      "id": "redis-cluster-nodes",
+      "label": "Redis Cluster nodes",
+      "regex": "^ *(?:(?:[^\\s:\\[\\]]+|\\[[0-9A-Fa-f:.%]*:[0-9A-Fa-f:.%]+\\])(?::[0-9]{1,5})?(?: +(?:[^\\s:\\[\\]]+|\\[[0-9A-Fa-f:.%]*:[0-9A-Fa-f:.%]+\\])(?::[0-9]{1,5})?)*)? *$",
+      "type": "multivalue"
+    },
     "REDIS_KEEPALIVE_IDLE": {
       "context": "global",
-      "default": "30000",
-      "help": "Max idle time (in ms) before closing redis connection in the pool.",
+      "default": "30s",
+      "help": "Max idle time (in ms) before closing redis connection in the pool. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds.",
       "id": "redis-keepalive-idle",
-      "label": "Redis keepalive idle (ms)",
-      "regex": "^[0-9]+$",
+      "label": "Redis keepalive idle",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
       "type": "text"
     },
     "REDIS_KEEPALIVE_POOL": {

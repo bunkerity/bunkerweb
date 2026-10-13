@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List
 
+from ApiCaller import ApiCaller  # type: ignore
 from common_utils import parse_host  # type: ignore
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller, get_api_for_hostname
@@ -66,8 +67,8 @@ def reload_one(hostname: str, test: bool = True, api=Depends(get_api_for_hostnam
         test: If True, validate configuration without applying it (default: True)
     """
     test_arg = "yes" if test else "no"
-    sent, _err, status, _resp = api.request("POST", f"/reload?test={test_arg}")
-    ok = bool(sent and status == 200)
+    # Through ApiCaller for its retry on a busy instance (503), as the broadcast reload does.
+    ok, _ = ApiCaller([api]).send_to_apis("POST", f"/reload?test={test_arg}")
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 
 

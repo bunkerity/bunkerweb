@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from datetime import datetime
+from logging import Formatter
 from os import _exit
 from os.path import sep
 from pathlib import Path
@@ -18,12 +19,18 @@ from markupsafe import Markup, escape
 from regex import compile as re_compile, match
 from requests import get
 
-from logger import getLogger  # type: ignore
+from common_utils import fetch_bunkerweb_releases, get_version, pick_latest_line_release  # type: ignore
+from logger import DATE_FORMAT, LOG_FORMAT, getLogger  # type: ignore
+
+from app.support_bundle import RING_HANDLER
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 
 LOGGER = getLogger("UI")
+RING_HANDLER.setFormatter(Formatter(LOG_FORMAT, DATE_FORMAT))
+if RING_HANDLER not in LOGGER.handlers:
+    LOGGER.addHandler(RING_HANDLER)
 
 RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default server", ""})
 
@@ -57,6 +64,16 @@ BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
 RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
 MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed ADMIN_PASSWORD below this is refused
 MAX_PASSWORD_BYTES = 72  # bcrypt only consumes the first 72 bytes of a secret; 5.x raises ValueError on more
+
+
+def custom_config_data_matches(value: bytes, stored_value: bytes) -> bool:
+    return value == stored_value.replace(b"\r\n", b"\n").strip()
+
+
+def custom_config_needs_upsert(config: Dict[str, Any], original: Optional[Dict[str, Any]]) -> bool:
+    return original is None or any(config.get(field) != original.get(field) for field in ("data", "method", "is_draft"))
+
+
 # \Z, not $: a trailing newline would otherwise pass and become a directory name. The
 # ".bw-" prefix is the instance-side swap's own bookkeeping namespace: an entry carrying it
 # is exempt from the stale-entry sweep, so a plugin named that way survives its own deletion.
@@ -360,22 +377,13 @@ def get_printable_content(data: bytes) -> str:
 
 
 def get_latest_stable_release():
-    response = get("https://api.github.com/repos/bunkerity/bunkerweb/releases", headers={"User-Agent": "BunkerWeb"}, timeout=3)
-    response.raise_for_status()
-    releases = response.json()
-    latest_release = None
-
-    for release in reversed(releases):
-        if not release["prerelease"]:
-            latest_release = release
+    latest_release = pick_latest_line_release(fetch_bunkerweb_releases(get), get_version())
 
     if not latest_release:
         LOGGER.error("Failed to fetch latest release information")
-        latest_release = "unknown"
-    else:
-        latest_release = latest_release["tag_name"].removeprefix("v")
+        return "unknown"
 
-    return latest_release
+    return latest_release["tag_name"].removeprefix("v")
 
 
 def flash(message: Union[str, Markup], category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:

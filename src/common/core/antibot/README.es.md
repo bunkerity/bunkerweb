@@ -29,8 +29,8 @@ Las siguientes configuraciones son compartidas por todos los mecanismos de desaf
 | Configuración          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                            |
 | ---------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_URI`          | `/challenge`      | multisite | no       | **URL del desafío:** La URL a la que se redirigirá a los usuarios para completar el desafío. Asegúrese de que esta URL no se utilice para nada más en su sitio.        |
-| `ANTIBOT_TIME_RESOLVE` | `60`              | multisite | no       | **Límite de tiempo del desafío:** El tiempo máximo (en segundos) que un usuario tiene para completar el desafío. Después de este tiempo, se generará un nuevo desafío. |
-| `ANTIBOT_TIME_VALID`   | `86400`           | multisite | no       | **Validez del desafío:** Cuánto tiempo (en segundos) es válido un desafío completado. Después de este tiempo, los usuarios tendrán que resolver un nuevo desafío.      |
+| `ANTIBOT_TIME_RESOLVE` | `1m`              | multisite | no       | **Límite de tiempo del desafío:** El tiempo máximo (en segundos) que un usuario tiene para completar el desafío. Después de este tiempo, se generará un nuevo desafío. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
+| `ANTIBOT_TIME_VALID`   | `1d`              | multisite | no       | **Validez del desafío:** Cuánto tiempo (en segundos) es válido un desafío completado. Después de este tiempo, los usuarios tendrán que resolver un nuevo desafío. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `ANTIBOT_SUCCESS_URI`  |                   | multisite | no       | **URL de redirección tras el éxito:** Una URL fija a la que redirigir a los usuarios después de que resuelvan correctamente el desafío, en lugar de la página que solicitaron originalmente. Déjelo vacío para devolver a los usuarios a su destino original.      |
 
 ### Excluir tráfico de los desafíos
@@ -120,11 +120,14 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
     *   El desafío genera dinámicamente una tarea única para cada cliente.
     *   La tarea computacional implica hashing con condiciones específicas (p. ej., encontrar un hash con un prefijo determinado).
 
+    El coste del desafío se fija con `ANTIBOT_JAVASCRIPT_DIFFICULTY`, en bits ceros iniciales (16 a 28, por defecto 16); cada bit adicional duplica el tiempo medio de resolución. Si usa páginas de desafío JavaScript personalizadas PRO, regenérelas antes de subir este ajuste por encima del valor por defecto, o seguirán demostrando la dificultad antigua y más baja y serán rechazadas.
+
     **Ajustes de configuración:**
 
-    | Configuración | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
-    | ------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
-    | `USE_ANTIBOT` | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `javascript` para habilitar el desafío de JavaScript. |
+    | Configuración                       | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
+    | ------------------------------------ | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`                        | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `javascript` para habilitar el desafío de JavaScript. |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`      | `16`               | multisite | no       | **Dificultad JavaScript:** Dificultad de prueba de trabajo en bits ceros iniciales (16 a 28). |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 

@@ -1,0 +1,641 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME filename* expects charset (1/5)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "329",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule &MULTIPART_FILENAME_CHARSET \"@gt 0\"\"id:1,phase:2,deny,t:none,chain\"",
+      "SecRule MULTIPART_FILENAME_CHARSET \"!@within utf-8,iso-8859-1,us-ascii\" \"t:lowercase\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME filename* expects charset (2/5)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "358",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=f-8''03CB1664.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule &MULTIPART_FILENAME_CHARSET \"@gt 0\"\"id:1,phase:2,deny,t:none,chain\"",
+      "SecRule MULTIPART_FILENAME_CHARSET \"!@rx ^(?:utf-8|iso-8859-1|us-ascii)$\" \"t:lowercase\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME filename* expects charset (3/5)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "360",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=utf-8''03CB1664.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule &MULTIPART_FILENAME_CHARSET \"@gt 0\"\"id:1,phase:2,deny,t:none,chain\"",
+      "SecRule MULTIPART_FILENAME_CHARSET \"!@rx ^(?:utf-8|iso-8859-1|us-ascii)$\" \"t:lowercase\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME_CHARSET",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "145",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF-8''shell.php\r\n",
+        "Content-Type: image/jpeg\r\n",
+        "\r\n",
+        "<?php system($_GET['c']); ?>\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Target value: \"utf-8\" \\(Variable: MULTIPART_FILENAME_CHARSET:file\\)",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_FILENAME_CHARSET \"@strEq utf-8\" \"id:1,phase:2,pass,t:none,t:trim,t:lowercase\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME_CHARSET with lowercase",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "145",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=utf-8''shell.php\r\n",
+        "Content-Type: image/jpeg\r\n",
+        "\r\n",
+        "<?php system($_GET['c']); ?>\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Target value: \"utf-8\" \\(Variable: MULTIPART_FILENAME_CHARSET:file\\)",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_FILENAME_CHARSET \"@strEq utf-8\" \"id:1,phase:2,pass,t:none,t:trim,t:lowercase\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME_CHARSET with key",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "145",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF-8''shell.php\r\n",
+        "Content-Type: image/jpeg\r\n",
+        "\r\n",
+        "<?php system($_GET['c']); ?>\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Target value: \"utf-8\" \\(Variable: MULTIPART_FILENAME_CHARSET:file\\)",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_FILENAME_CHARSET:file \"@strEq utf-8\" \"id:1,phase:2,deny,t:none,t:trim,t:lowercase\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME_LANGUAGE",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "147",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF-8'en'shell.php\r\n",
+        "Content-Type: image/jpeg\r\n",
+        "\r\n",
+        "<?php system($_GET['c']); ?>\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Target value: \"en\" \\(Variable: MULTIPART_FILENAME_LANGUAGE:file\\)",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_FILENAME_LANGUAGE:file \"@strEq en\" \"id:1,phase:2,pass,t:none,t:trim,t:lowercase\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME_LANGUAGE with key",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "143",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF-8'fr'r%C3%A9sum%C3%A9.pdf\r\n",
+        "Content-Type: application/pdf\r\n",
+        "\r\n",
+        "%PDF-1.7\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Target value: \"fr\" \\(Variable: MULTIPART_FILENAME_LANGUAGE:file\\)",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_FILENAME_LANGUAGE:file \"@strEq fr\" \"id:1,phase:2,deny,t:none,t:trim,t:lowercase\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME with duplicate CD header",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "212",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF-8''shell.php\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n",
+        "Content-Type: image/jpeg\r\n",
+        "\r\n",
+        "<?php system($_GET['c']); ?>\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Multipart: Duplicate part header: Content-Disposition.",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"id:1,phase:2,deny,t:none,chain\"",
+      "SecRule MULTIPART_DUPLICATE_PART_HEADER \"@eq 1\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME with duplicate CT header",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "178",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF-8''shell.php\r\n",
+        "Content-Type: image/jpeg\r\n",
+        "Content-Type: application/x-php\r\n",
+        "\r\n",
+        "<?php system($_GET['c']); ?>\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Multipart: Duplicate part header: Content-Type.",
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"id:1,phase:2,deny,t:none,chain\"",
+      "SecRule MULTIPART_DUPLICATE_PART_HEADER \"@eq 1\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME filename* expects charset (4/5)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "360",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=UTF-8''03CB1664.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_FILENAME_CHARSET \"@strEq UTF-8\" \"id:1,phase:2,deny,t:trim\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME filename* expects charset (5/5)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "329",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule &MULTIPART_FILENAME_CHARSET \"&gt 0\" \"id:1,phase:2,deny,t:none,chain\"",
+      "SecRule MULTIPART_FILENAME_CHARSET \"!@rx ^(?:utf-8|iso-8859-1|us-ascii)$\" \"t:none,t:lowercase\""
+    ]
+  }
+]

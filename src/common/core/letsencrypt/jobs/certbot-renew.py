@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+from hashlib import sha256
 from os import getenv, sep
 from os.path import join
+from pathlib import Path
 from subprocess import DEVNULL, PIPE, Popen
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
+from typing import Dict
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -51,6 +54,34 @@ attach_job_log_file(LOGGER, "certbot-renew.log", LOGS_DIR)
 
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
 status = 0
+
+
+def certificate_digests(data_path: Path) -> Dict[str, str]:
+    """Return a digest of every lineage's live fullchain.pem, which follows the symlink into archive/."""
+    digests = {}
+    for fullchain in sorted(data_path.glob("live/*/fullchain.pem")):
+        try:
+            digests[fullchain.parent.name] = sha256(fullchain.read_bytes()).hexdigest()
+        except OSError:
+            continue
+    return digests
+
+
+def publication_status(status: int, before: Dict[str, str], after: Dict[str, str]) -> int:
+    """Return the job exit code once new certificate material is accounted for.
+
+    The scheduler reloads after a job that exits 1 or 3 and counts 2 and 3 as a failed run, so a run that
+    rotated some lineages is 1 when nothing failed and 3 when something did. The lineage that failed is
+    still due on the next run.
+    """
+    rotated = any(before.get(name) != digest for name, digest in after.items())
+    if not rotated or status not in (0, 2):
+        return status
+    return 1 if status == 0 else 3
+
+
+before_digests: Dict[str, str] = {}
+after_digests: Dict[str, str] = {}
 
 try:
     # Check if we're using let's encrypt
@@ -106,6 +137,8 @@ try:
     if acme_server == "zerossl" and certbot_bin != CERTBOT_BIN:
         LOGGER.info("Using zerossl-bot wrapper for certificate renewal.")
 
+    before_digests = certificate_digests(DATA_PATH)
+
     process = Popen(
         [
             certbot_bin,
@@ -156,6 +189,8 @@ try:
     if process.returncode and process.returncode != 0:
         status = 2
         LOGGER.error("Certificates renewal failed")
+
+    after_digests = certificate_digests(DATA_PATH)
 
     # Recover in this run, not the next one. The persist below refuses an inconsistent tree, so a
     # purge left unrepaired would never reach the DB row, the dead account would be restored from
@@ -214,4 +249,4 @@ except BaseException as e:
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running certbot-renew.py :\n{e}")
 
-sys_exit(status)
+sys_exit(publication_status(status, before_digests, after_digests))

@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from io import BytesIO
 from itertools import chain
 from json import dumps
-from time import time
 from typing import Dict, List, Optional, Tuple
 from flask import Blueprint, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
@@ -12,7 +11,7 @@ from regex import sub
 
 from certificate_validation import normalize_pem, uncovered_server_names, validate_certificate_pair  # type: ignore
 
-from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
+from app.dependencies import BW_CONFIG, DATA, DB
 from app.raw_drafts import (
     RAW_DRAFT_SETTINGS,
     RAW_PRESENT_SETTINGS,
@@ -23,8 +22,16 @@ from app.raw_drafts import (
 )
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
-from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
-from app.utils import LOGGER, can_delete_service, get_blacklisted_settings, is_editable_method, is_ui_api_method
+from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, submit_config_task, verify_data_in_form, wait_applying
+from app.utils import (
+    LOGGER,
+    can_delete_service,
+    custom_config_data_matches,
+    custom_config_needs_upsert,
+    get_blacklisted_settings,
+    is_editable_method,
+    is_ui_api_method,
+)
 
 services = Blueprint("services", __name__)
 
@@ -39,28 +46,6 @@ def _first_service_id(value: object) -> str:
 def _settings_catalog() -> dict:
     settings = BW_CONFIG.get_plugins_settings()
     return settings if isinstance(settings, dict) else {}
-
-
-def _submit_service_task(task, *args):
-    def completed(future):
-        try:
-            future.result()
-        except Exception:
-            LOGGER.exception("Service operation failed")
-            DATA["TO_FLASH"].append(
-                {"content": "An unexpected error occurred during the service operation. Please check the UI logs for more information.", "type": "error"}
-            )
-            DATA["CONFIG_CHANGED"] = False
-        finally:
-            DATA["RELOADING"] = False
-
-    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    try:
-        future = CONFIG_TASKS_EXECUTOR.submit(task, *args)
-    except Exception:
-        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
-        raise
-    future.add_done_callback(completed)
 
 
 def parse_services_export(content: str) -> Tuple[Dict[str, Dict[str, str]], List[str]]:
@@ -177,7 +162,7 @@ def services_convert():
             return
         DATA["TO_FLASH"].append({"content": f"Converted to \"{convert_to.title()}\" services: {', '.join(services_to_convert)}", "type": "success"})
 
-    _submit_service_task(convert_services, services, convert_to)
+    submit_config_task(convert_services, services, convert_to)
 
     return redirect(
         url_for(
@@ -264,7 +249,7 @@ def services_delete():
             return
         DATA["TO_FLASH"].append({"content": f"Deleted service{'s' if len(services_to_delete) > 1 else ''}: {', '.join(services_to_delete)}", "type": "success"})
 
-    _submit_service_task(delete_services, services)
+    submit_config_task(delete_services, services)
 
     return redirect(
         url_for(
@@ -453,7 +438,10 @@ def services_service_page(service: str):
 
             was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
 
-            old_server_name = variables.pop("OLD_SERVER_NAME", "")
+            # OLD_SERVER_NAME is a form field; use the database value so a
+            # forged hidden field cannot redirect this edit to another service.
+            variables.pop("OLD_SERVER_NAME", None)
+            old_server_name = db_config.get("SERVER_NAME", {}).get("value", service) if service != "new" else ""
 
             def _draft_setting_name(full_key: str) -> str:
                 setting = full_key
@@ -487,7 +475,6 @@ def services_service_page(service: str):
             configs_changed = False
 
             if mode == "easy":
-                db_templates = DB.get_templates()
                 db_custom_configs = all_custom_configs.copy()
 
                 for variable, value in variables.copy().items():
@@ -495,14 +482,13 @@ def services_service_page(service: str):
                     if conf_match:
                         del variables[variable]
                         key = f"{conf_match['type'].lower()}_{conf_match['name']}"
-                        if value == db_templates.get(f"{key}.conf"):
-                            if db_custom_configs.pop(f"{service}_{key}", None):
-                                configs_changed = True
-                            continue
                         value = value.replace("\r\n", "\n").strip().encode("utf-8")
 
                         new_configs.add(key)
                         db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method, "is_draft": False})
+
+                        if db_custom_config["data"] is not None and custom_config_data_matches(value, db_custom_config["data"]):
+                            continue
 
                         if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
                             DATA["TO_FLASH"].append(
@@ -514,9 +500,6 @@ def services_service_page(service: str):
                                 }
                             )
                             continue
-                        elif db_custom_config["data"] is not None and value == db_custom_config["data"].strip():
-                            continue
-
                         configs_changed = True
                         db_custom_configs[f"{service}_{key}"] = {
                             "service_id": variables.get("SERVER_NAME", old_server_name).split(" ")[0],
@@ -680,7 +663,8 @@ def services_service_page(service: str):
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 
-            if "SERVER_NAME" not in variables:
+            # A blank name can skip check_variables: on the first service it equals the empty global.
+            if not _first_service_id(variables.get("SERVER_NAME")):
                 if service == "new":
                     DATA["TO_FLASH"].append({"content": "The service was not created because the server name was not provided.", "type": "error"})
                     DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
@@ -702,7 +686,6 @@ def services_service_page(service: str):
                 if renamed_service and key.startswith(f"{old_server_id}_"):
                     new_key = key.replace(f"{old_server_id}_", f"{new_server_name}_", 1)
                     final_custom_configs[new_key] = data | {"service_id": new_server_name}
-                    configs_changed = True
                     continue
 
                 final_custom_configs[key] = data
@@ -714,8 +697,27 @@ def services_service_page(service: str):
                 if renamed_service and key.startswith(f"{service}_"):
                     target_key = key.replace(f"{service}_", f"{new_server_name}_", 1)
                     target_data = data | {"service_id": new_server_name}
-                    configs_changed = True
                 final_custom_configs[target_key] = target_data
+
+            custom_config_changes = []
+            if renamed_service and mode == "easy":
+                old_custom_configs = {
+                    (data["type"].replace("-", "_"), data["name"]): data for data in all_custom_configs.values() if data.get("service_id") == old_server_id
+                }
+                for config_name in new_configs:
+                    config = db_custom_configs.get(f"{service}_{config_name}")
+                    if config is None:
+                        continue
+                    original = old_custom_configs.get((config["type"].replace("-", "_"), config["name"]))
+                    if not custom_config_needs_upsert(config, original):
+                        continue
+                    custom_config_changes.append(
+                        {
+                            "type": config["type"],
+                            "name": config["name"],
+                            "config": config | {"service_id": new_server_name},
+                        }
+                    )
 
             save_draft_settings = dict(draft_settings) if draft_settings is not None else None
             if continuity_draft_settings and (renamed_service or (service == "new" and clone)):
@@ -725,6 +727,30 @@ def services_service_page(service: str):
                 else:
                     continuity.update(save_draft_settings)
                     save_draft_settings = continuity
+
+            if renamed_service:
+                # The rename moves the rows of old_server_id, so it must be the service being edited.
+                if old_server_id != service:
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": f"Service {service} has an inconsistent SERVER_NAME ({old_server_id}) and cannot be renamed from the Web UI.",
+                            "type": "error",
+                        }
+                    )
+                    DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                    return
+
+                service_metadata = next((item for item in DB.get_services(with_drafts=True) if item["id"] == service), None)
+                service_owner_method = service_metadata["method"] if service_metadata else service_method
+                if not is_editable_method(service_owner_method):
+                    DATA["TO_FLASH"].append(
+                        {
+                            "content": f"Service {old_server_id} is managed by the {service_owner_method} method and cannot be renamed from the Web UI.",
+                            "type": "error",
+                        }
+                    )
+                    DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+                    return
 
             if service == "new":
                 old_server_name = variables["SERVER_NAME"]
@@ -744,41 +770,23 @@ def services_service_page(service: str):
                     override_method=override_method,
                     file_name_map=file_setting_names,
                     draft_settings=save_draft_settings,
+                    custom_config_changes=custom_config_changes if renamed_service else None,
                 )
 
             if error:
-                DATA["TO_FLASH"].append({"content": operation, "type": "warning" if operation.endswith("already exists.") else "error"})
+                DATA["TO_FLASH"].append(
+                    {"content": operation, "type": "error" if renamed_service else ("warning" if operation.endswith("already exists.") else "error")}
+                )
                 DATA["CONFIG_CHANGED"] = False
                 return
 
-            # Save custom configs after the service edit so the new service id exists
-            if new_configs or configs_changed:
-                config_error = None
-                if renamed_service:
-                    # Use per-config upsert to avoid bulk delete when renaming services
-                    for custom_config in final_custom_configs.values():
-                        custom_conf_data = {
-                            "service_id": custom_config.get("service_id"),
-                            "type": custom_config.get("type"),
-                            "name": custom_config.get("name"),
-                            "data": custom_config.get("data"),
-                            "checksum": custom_config.get("checksum"),
-                            "method": custom_config.get("method"),
-                        }
-                        config_error = DB.upsert_custom_config(
-                            custom_conf_data["type"],
-                            custom_conf_data["name"],
-                            custom_conf_data,
-                            service_id=custom_conf_data["service_id"],
-                        )
-                        if config_error:
-                            break
-                else:
-                    config_error = DB.save_custom_configs(
-                        final_custom_configs.values(),
-                        override_method,
-                        changed=service != "new" and (was_draft != is_draft or not is_draft),
-                    )
+            # Save non-rename edits using the existing method-owned batch path.
+            if not renamed_service and (configs_changed or new_configs):
+                config_error = DB.save_custom_configs(
+                    final_custom_configs.values(),
+                    override_method,
+                    changed=service != "new" and (was_draft != is_draft or not is_draft),
+                )
                 if config_error:
                     DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {config_error}", "type": "error"})
                     DATA["CONFIG_CHANGED"] = False
@@ -790,14 +798,14 @@ def services_service_page(service: str):
                 DATA["TO_FLASH"].append({"content": "Draft settings remain unchanged; activate or edit them in Raw mode.", "type": "warning"})
             DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
 
-        _submit_service_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, draft_settings)
+        submit_config_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, draft_settings)
 
         new_service = False
         if service == "new":
-            if "SERVER_NAME" not in variables:
+            if not _first_service_id(variables.get("SERVER_NAME")):
                 return redirect(url_for("loading", next=url_for("services.services_page")))
             new_service = True
-            service = variables["SERVER_NAME"].split(" ")[0]
+            service = _first_service_id(variables["SERVER_NAME"])
 
         arguments = {}
         if mode != "easy":
@@ -1078,7 +1086,7 @@ def services_service_import():
         config_changed = bool(created) or bool(configs_results and (configs_results["created"] or configs_results["overwritten"]))
         DATA.update({"RELOADING": False, "CONFIG_CHANGED": config_changed})
 
-    _submit_service_task(
+    submit_config_task(
         import_services,
         services_map,
         parse_errors,

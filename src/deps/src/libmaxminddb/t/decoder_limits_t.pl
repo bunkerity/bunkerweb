@@ -21,14 +21,16 @@ if ($@) {
 my $root        = abs_path("$Bin/..");
 my $include_dir = "$root/include";
 my $src_dir     = "$root/src";
-my $cc          = $ENV{CC} || 'cc';
+
+# CC may carry flags, such as CC="gcc -m32".
+my @cc = split ' ', $ENV{CC} || 'cc';
 
 # The checks below rebuild the library with -Werror. Only gcc and clang are
 # known to compile it cleanly with the flags used here, so skip elsewhere
 # instead of failing on a missing compiler or an unrelated warning.
 my ( $cc_version, $cc_stderr ) = ( q{}, q{} );
 my $cc_status = eval {
-    run3( [ $cc, '--version' ], \undef, \$cc_version, \$cc_stderr );
+    run3( [ @cc, '--version' ], \undef, \$cc_version, \$cc_stderr );
     $?;
 };
 $cc_version .= $cc_stderr;
@@ -44,7 +46,7 @@ my @instrumentation = grep { /^-f/ }
     map { split ' ' } grep { defined } @ENV{ 'CFLAGS', 'LDFLAGS' };
 
 my @base = (
-    $cc,
+    @cc,
     @instrumentation,
     '-std=c99',
     '-Wall',

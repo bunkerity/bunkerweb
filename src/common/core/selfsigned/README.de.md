@@ -27,7 +27,7 @@ So funktioniert's:
 | :-------------------------- | :--------------------- | :-------- | :------- | :-------------------------------------------------------------------- |
 | `GENERATE_SELF_SIGNED_SSL`  | `no`                   | Multisite | nein     | Aktiviert die automatische Generierung selbstsignierter Zertifikate.  |
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | Multisite | nein     | Algorithmus: `ec-prime256v1`, `ec-secp384r1`, `rsa-2048`, `rsa-4096`. |
-| `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | Multisite | nein     | Gültigkeit (Tage).                                                    |
+| `SELF_SIGNED_SSL_EXPIRY`    | `1y`                   | Multisite | nein     | Gültigkeit (Tage). Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Tagen. |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | Multisite | nein     | Betreff des Zertifikats (identifiziert die Domain).                   |
 
 !!! tip "Entwicklungsumgebungen"

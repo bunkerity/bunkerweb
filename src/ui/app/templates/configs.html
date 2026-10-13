@@ -169,7 +169,7 @@
                                    data-bs-original-title="{% if is_readonly or config["template"] in ["low", "medium", "high", "ui", "api"] %}View{% else %}Edit{% endif %} template {{ config["template"] }}"><i class="bx bx-{% if is_readonly or config["template"] in ["low", "medium", "high", "ui", "api"] %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ config["template"] }}</a>
                             {% else %}
                                 <span class="badge rounded-pill bg-label-secondary"
-                                      data-i18n="badge.no_template">No template</span>
+                                      data-i18n="badge.no_template">No Template</span>
                             {% endif %}
                         </td>
                         <td>{{ config["checksum"] }}</td>
@@ -276,7 +276,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.confirm_conversion">Confirm conversion</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_conversion">Confirm Conversion</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
@@ -294,14 +294,14 @@
                             <div class="alert alert-danger text-center"
                                  role="alert"
                                  data-i18n="modal.body.confirm_configs_conversion">
-                                Are you sure you want to convert the selected configs?
+                                Are you sure you want to convert the selected custom configurations?
                             </div>
                             <div id="selected-configs-convert" class="mb-3"></div>
                         </div>
                         <div class="modal-footer justify-content-center">
                             <button type="submit"
                                     class="btn btn-outline-primary me-2"
-                                    data-i18n="button.convert_configs">Convert configs</button>
+                                    data-i18n="button.convert_configs">Convert Configs</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"
@@ -320,7 +320,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm Deletion</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
@@ -337,7 +337,7 @@
                             <div class="alert alert-danger text-center"
                                  role="alert"
                                  data-i18n="modal.body.confirm_configs_deletion_alert">
-                                Are you sure you want to delete the selected configs?
+                                Are you sure you want to delete the selected custom configuration?
                             </div>
                             <div id="selected-configs-delete" class="mb-3"></div>
                         </div>

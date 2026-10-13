@@ -4,5 +4,5 @@ Procedure :
 
 - Edit domains in the compose file
 - Edit variables in the .env file
-- Run setup.sh as root
+- From this example directory, run `./setup-docker.sh` as root
 - Start services with `docker-compose up -d`

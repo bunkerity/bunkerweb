@@ -109,3 +109,7 @@ maxminddb==3.2.0 \
     --hash=sha256:fd454af7ed67069aa76c0fa9119ec9440cfd7abe7cd7aa66373ecf1f46067295 \
     --hash=sha256:fe5ffcaf17210ec2a6c46cff418199f974ba034cb2e02452615c1184d2001cb8
     # via -r requirements-mmdb.in
+packaging==26.3 \
+    --hash=sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+    # via -r requirements-mmdb.in

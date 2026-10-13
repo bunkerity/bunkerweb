@@ -28,8 +28,9 @@ def decode_connection(connection_id: str) -> tuple[str, str]:
 
 
 class CrowdSecClient:
-    def __init__(self, db):
+    def __init__(self, db, token: str | None = None):
         self.db = db
+        self.token = token
 
     def _instances(self) -> list[dict]:
         try:
@@ -37,10 +38,9 @@ class CrowdSecClient:
         except Exception:
             raise CrowdSecError("Unable to read configured BunkerWeb instances") from None
 
-    @staticmethod
-    def _request(instance: dict, method: str, path: str, data: dict | None = None):
+    def _request(self, instance: dict, method: str, path: str, data: dict | None = None):
         try:
-            ok, _message, status, payload = API.from_instance(instance).request(method, path, data=data, timeout=(5, 30))
+            ok, _message, status, payload = API.from_instance(instance, token=self.token).request(method, path, data=data, timeout=(5, 30))
         except Exception:
             raise CrowdSecError("BunkerWeb instance is unavailable") from None
         if not ok or not isinstance(payload, dict):
@@ -57,6 +57,10 @@ class CrowdSecClient:
         if not isinstance(result, (dict, list)):
             raise CrowdSecError("BunkerWeb instance returned an unsupported response")
         return result
+
+    def instance_request(self, instance: dict, method: str, path: str, data: dict | None = None):
+        """One request to a specific instance, with the same error mapping as the CrowdSec routes (used for /bans, /lease_lookup, /remove_lease)."""
+        return self._request(instance, method, path, data)
 
     def _resolve(self, connection_id: str) -> tuple[dict, str]:
         instance_key, local_id = decode_connection(connection_id)
@@ -88,7 +92,7 @@ class CrowdSecClient:
         return {"connections": connections, "errors": errors, "observed_at": time()}
 
     def query(self, connection_id: str, action: str, params: dict | None = None) -> dict:
-        if action not in {"decisions", "alerts", "unban", "allowlists", "allowlistcheck"}:
+        if action not in {"decisions", "alerts", "unban", "allowlists", "allowlistcheck", "refresh_ip"}:
             raise CrowdSecError("Invalid CrowdSec operation", 400)
         instance, local_id = self._resolve(connection_id)
         result = self._request(instance, "POST", f"/crowdsec/{action}", {**(params or {}), "connection": local_id})

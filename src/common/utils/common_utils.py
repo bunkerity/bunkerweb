@@ -6,6 +6,7 @@ from hashlib import new as new_hash
 from ipaddress import ip_address
 from inspect import signature
 from io import BytesIO
+from json import loads as json_loads
 import os
 from os import (
     O_CREAT,
@@ -27,19 +28,47 @@ from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
 from re import compile as re_compile
+from redis_keys import cluster_config_error  # type: ignore
 import tarfile
 from tarfile import open as tar_open
 from stat import S_ISDIR, S_ISREG
 from threading import Lock
 from time import monotonic, sleep
-from typing import Dict, List, Optional, Tuple, Union, Any
-from urllib.parse import urlsplit
-from math import ceil
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
+from urllib.parse import unquote, urlsplit
+from math import ceil, isfinite
 import logging
 
 PLUGIN_TAR_COMPRESS_LEVEL: int = 3
 # Underscores are accepted because Docker/internal DNS commonly uses them in container names.
 _HOSTNAME_LABEL_RX = re_compile(r"^(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$")
+_DURATION_RX = re_compile(r"^(\d+(?:\.\d+)?)(ms|[smhdwMy])?$")
+_DURATION_UNITS_MS = {"ms": 1, "s": 1000, "m": 60000, "h": 3600000, "d": 86400000, "w": 604800000, "M": 2592000000, "y": 31536000000}
+
+
+def parse_duration(value: Any, default_unit: str = "s") -> Union[int, float]:
+    """Return a duration expressed in ``default_unit``.
+
+    Examples: ``parse_duration("2m") == 120`` and ``parse_duration("1500ms") == 1.5``.
+    """
+    if default_unit not in _DURATION_UNITS_MS:
+        raise ValueError(f"Unknown duration unit: {default_unit}")
+    match = _DURATION_RX.fullmatch(str(value).strip())
+    if not match:
+        raise ValueError(f"Invalid duration: {value}")
+    result = float(match.group(1)) * _DURATION_UNITS_MS[match.group(2) or default_unit] / _DURATION_UNITS_MS[default_unit]
+    if not isfinite(result):
+        raise ValueError(f"Duration out of range: {value}")
+    return int(result) if result.is_integer() else result
+
+
+def parse_duration_int(value: Any, default_unit: str = "s") -> int:
+    """Return a duration as a whole count of ``default_unit``, floored like the Lua parser.
+
+    0 means permanent or disabled to the callers, so a non-zero duration below the unit gives 1.
+    """
+    result = parse_duration(value, default_unit)
+    return max(1, int(result)) if result > 0 else 0
 
 
 def has_url_userinfo(value: Any) -> bool:
@@ -303,6 +332,21 @@ def plugin_tar_filter(tarinfo):
         return tarinfo
     except Exception:
         return None
+
+
+def strip_plugin_write_bits(plugin_path: Union[str, Path]) -> None:
+    """Drop group/other write from a plugin tree, so the modes it is hashed with survive a restore.
+
+    safe_tar_extractall() strips these bits when a plugin is restored from the database, so a tree that kept
+    them (zip extraction and plain file writes follow the umask) would hash differently after the restore.
+    """
+    root = Path(plugin_path)
+    for path in (root, *root.rglob("*")):
+        if path.is_symlink():
+            continue
+        mode = path.stat().st_mode & 0o7777
+        if mode & 0o022:
+            path.chmod(mode & ~0o022)
 
 
 def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Optional[str] = None):
@@ -663,6 +707,57 @@ def is_newer_version_available(current_version: str, latest_version: str) -> boo
         return False
 
 
+def fetch_bunkerweb_releases(http_get, max_pages: int = 10) -> List[Dict[str, Any]]:
+    """Every BunkerWeb GitHub release, newest first, following the API pagination.
+
+    ``http_get`` is ``requests.get`` (passed in so this module does not import requests).
+    Raises like ``requests`` does; a page shorter than 100 entries ends the listing.
+    """
+    releases: List[Dict[str, Any]] = []
+    for page in range(1, max_pages + 1):
+        response = http_get(
+            f"https://api.github.com/repos/bunkerity/bunkerweb/releases?per_page=100&page={page}", headers={"User-Agent": "BunkerWeb"}, timeout=3
+        )
+        response.raise_for_status()
+        batch = response.json()
+        if not isinstance(batch, list):  # an error object such as {"message": "API rate limit exceeded"}
+            break
+        releases.extend(batch)
+        if len(batch) < 100:
+            break
+    return releases
+
+
+def pick_latest_line_release(releases: List[Dict[str, Any]], current_version: str) -> Optional[Dict[str, Any]]:
+    """Return the highest stable GitHub release in the installed ``major.minor`` line.
+
+    Drafts, prereleases and unparsable tags are ignored. When ``current_version`` cannot be
+    parsed (``testing``, ``dev``...) or its line has no stable release yet (``1.7.0~rc1``),
+    the highest stable release overall is returned.
+    """
+    try:
+        current = Version(normalize_bunkerweb_version(current_version))
+        line = (current.major, current.minor)
+    except InvalidVersion:
+        line = None
+
+    best = best_version = overall = overall_version = None
+    for release in releases:
+        if release.get("prerelease") or release.get("draft"):
+            continue
+        try:
+            version = Version(normalize_bunkerweb_version(release["tag_name"]))
+        except (InvalidVersion, KeyError, TypeError, AttributeError):
+            continue
+        if version.is_prerelease:
+            continue
+        if overall_version is None or version > overall_version:
+            overall, overall_version = release, version
+        if line is not None and (version.major, version.minor) == line and (best_version is None or version > best_version):
+            best, best_version = release, version
+    return best or overall
+
+
 _REDIS_CLIENT_LOCK = Lock()
 # Single-entry, process-wide memo: (cache_key, client_or_None, negative_window_deadline).
 # A configuration change yields a different key and therefore a new client, so there is no
@@ -721,6 +816,7 @@ def get_redis_client(
     redis_sentinel_username: Optional[str] = None,
     redis_sentinel_password: Optional[str] = None,
     redis_sentinel_master: str = "",
+    redis_cluster_nodes: str = "",
     logger: Optional[logging.Logger] = None,
 ) -> Any:
     """
@@ -741,6 +837,7 @@ def get_redis_client(
         redis_sentinel_username: Redis Sentinel username
         redis_sentinel_password: Redis Sentinel password
         redis_sentinel_master: Redis Sentinel master name
+        redis_cluster_nodes: Redis Cluster seed nodes, space separated; enables cluster mode
         logger: Logger instance for logging errors
 
     Returns:
@@ -751,16 +848,15 @@ def get_redis_client(
     if not use_redis:
         return None
 
+    # A whitespace-only value must fall through to standalone/Sentinel, not be mistaken
+    # for a configured cluster with zero nodes.
+    redis_cluster_nodes = redis_cluster_nodes.strip()
+
     try:
         from redis import StrictRedis, Sentinel
     except ImportError:
         if logger:
             logger.error("Redis package is not installed")
-        return None
-
-    if not redis_host and not redis_sentinel_hosts:
-        if logger:
-            logger.error("Neither redis_host nor redis_sentinel_hosts is provided")
         return None
 
     # Convert string parameters to appropriate types
@@ -772,7 +868,7 @@ def get_redis_client(
             redis_db = int(redis_db)
 
         if isinstance(redis_timeout, str):
-            redis_timeout = float(redis_timeout)
+            redis_timeout = float(parse_duration(redis_timeout, "ms"))
 
         if isinstance(redis_keepalive_pool, str):
             redis_keepalive_pool = int(redis_keepalive_pool)
@@ -804,6 +900,7 @@ def get_redis_client(
         redis_sentinel_username,
         redis_sentinel_password,
         redis_sentinel_master,
+        redis_cluster_nodes,
     )
 
     entry = _REDIS_CLIENT_ENTRY
@@ -815,6 +912,23 @@ def get_redis_client(
         if monotonic() < entry[2]:
             return None
 
+    config_error = cluster_config_error(redis_cluster_nodes, redis_sentinel_hosts, redis_db)
+    if config_error:
+        if logger:
+            logger.error(f"Invalid Redis configuration, Redis is not used: {config_error}")
+        # Same negative-cache mechanism as an unreachable Redis, so a misconfiguration does
+        # not log an ERROR on every request: once per REDIS_NEGATIVE_CACHE_SECONDS instead.
+        with _REDIS_CLIENT_LOCK:
+            entry = _REDIS_CLIENT_ENTRY
+            if entry is None or entry[0] != cache_key or entry[1] is not None:
+                _REDIS_CLIENT_ENTRY = (cache_key, None, monotonic() + REDIS_NEGATIVE_CACHE_SECONDS)
+        return None
+
+    if not redis_host and not redis_sentinel_hosts and not redis_cluster_nodes:
+        if logger:
+            logger.error("Neither redis_host, redis_sentinel_hosts nor redis_cluster_nodes is provided")
+        return None
+
     # ssl_cert_reqs is only meaningful on a TLS connection, and the non-SSL Sentinel
     # connection class does not accept it at all.
     ssl_kwargs = {"ssl_cert_reqs": "required" if redis_ssl_verify else "none"} if redis_ssl else {}
@@ -822,8 +936,34 @@ def get_redis_client(
     redis_client = None
 
     try:
+        if redis_cluster_nodes:
+            from redis.cluster import ClusterNode, RedisCluster
+
+            if logger:
+                logger.info(f"Connecting to Redis Cluster: {redis_cluster_nodes}")
+            startup_nodes = []
+            for node in redis_cluster_nodes.split():
+                if node.startswith("[") and "]:" in node:
+                    host, _, port = node[1:].partition("]:")
+                elif node.count(":") == 1:
+                    host, _, port = node.partition(":")
+                else:
+                    host, port = node, "6379"
+                startup_nodes.append(ClusterNode(host, int(port)))
+            redis_client = RedisCluster(
+                startup_nodes=startup_nodes,
+                username=redis_username,
+                password=redis_password,
+                socket_timeout=redis_timeout / 1000,
+                socket_connect_timeout=redis_timeout / 1000,
+                socket_keepalive=True,
+                max_connections=shared_redis_pool_size(),
+                ssl=redis_ssl,
+                **ssl_kwargs,
+            )
+
         # Connect via Sentinel if sentinel hosts are provided
-        if redis_sentinel_hosts:
+        elif redis_sentinel_hosts:
             if logger:
                 logger.info(f"Connecting to Redis Sentinel cluster: {redis_sentinel_hosts}")
 
@@ -899,3 +1039,132 @@ def get_redis_client(
             if entry is None or entry[0] != cache_key or entry[1] is None:
                 _REDIS_CLIENT_ENTRY = (cache_key, None, monotonic() + REDIS_NEGATIVE_CACHE_SECONDS)
         return None
+
+
+LIST_JSON_MIME_SUFFIXES = ("json", "jsonl", "jsonlines")
+
+
+def split_list_url(url: str) -> Tuple[str, str]:
+    """Split a list URL into the URL to download and its JSON filter (the fragment, never sent to the server)."""
+    download_url, _, url_filter = url.partition("#")
+    return download_url, url_filter
+
+
+def _json_strings(node: Any) -> Iterator[str]:
+    if isinstance(node, str):
+        yield node
+    elif isinstance(node, dict):
+        for value in node.values():
+            yield from _json_strings(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _json_strings(value)
+
+
+def _json_matches(value: Any, wanted: str) -> bool:
+    if isinstance(value, list):
+        return any(_json_matches(item, wanted) for item in value)
+    return isinstance(value, (str, int)) and not isinstance(value, bool) and str(value) == wanted
+
+
+def _json_select(node: Any, conditions: List[Tuple[str, str]], keys: Set[str]) -> Iterator[str]:
+    if isinstance(node, list):
+        for item in node:
+            yield from _json_select(item, conditions, keys)
+        return
+    if not isinstance(node, dict):
+        return
+    matched = all(key in node and _json_matches(node[key], wanted) for key, wanted in conditions)
+    if matched and not keys:
+        yield from _json_strings(node)
+        return
+    for key, value in node.items():
+        if matched and key in keys:
+            yield from _json_strings(value)
+        else:
+            yield from _json_select(value, conditions, keys)
+
+
+def _json_filtered_strings(documents: List[Any], url_filter: str) -> Iterator[str]:
+    conditions: List[Tuple[str, str]] = []
+    keys: Set[str] = set()
+    for term in filter(None, url_filter.split("&")):
+        key, sep, wanted = term.partition("=")
+        if sep:
+            conditions.append((unquote(key), unquote(wanted)))
+        else:
+            keys.add(unquote(key))
+    if conditions or keys:
+        return _json_select(documents, conditions, keys)
+    return _json_strings(documents)
+
+
+def iter_list_entries(
+    data: bytes,
+    *,
+    content_type: str = "",
+    url_filter: str = "",
+    ip_list: bool = False,
+    whole_line: bool = False,
+    logger: Optional[logging.Logger] = None,
+) -> Iterator[bytes]:
+    """Yield the distinct candidate entries of a downloaded list, comments and blank lines dropped.
+
+    Each line yields its first whitespace-separated token, or the whole line when whole_line is set (user agents).
+    With ip_list, commas also separate tokens and JSON is understood: a JSON document or JSON lines are walked for
+    every string value, or only the part url_filter selects (key=value keeps matching objects, a bare key keeps
+    the values under that key, & combines terms). Validation stays with the caller.
+    """
+    data = data.removeprefix(b"\xef\xbb\xbf")
+    mime = content_type.partition(";")[0].strip().lower()
+    documents: List[Any] = []
+    lines = data.splitlines()
+
+    if ip_list and (mime.endswith(LIST_JSON_MIME_SUFFIXES) or data.lstrip()[:1] in (b"{", b"[")):
+        with suppress(ValueError):
+            documents.append(json_loads(data))
+            lines = []
+    elif mime.endswith(LIST_JSON_MIME_SUFFIXES) and logger:
+        logger.warning(f"Got a {mime} list, JSON is only parsed for IP lists: reading it line by line")
+
+    def token(entry: bytes) -> bytes:
+        if whole_line:
+            return entry
+        tokens = (entry.replace(b",", b" ") if ip_list else entry).split()
+        return tokens[0] if tokens else b""
+
+    line_entries: List[bytes] = []
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith((b"#", b";")):
+            continue
+        if ip_list and line[:1] in (b"{", b"["):
+            with suppress(ValueError):
+                documents.append(json_loads(line))
+            continue
+        line_entries.append(token(line))
+
+    if url_filter:
+        # A filter narrows a trust list: it only ever selects from JSON, and fails closed on anything else
+        if not documents:
+            if logger:
+                logger.warning(f"Filter #{url_filter} needs a JSON list, ignoring the {len(line_entries)} text entries")
+            return
+        line_entries = []
+
+    seen: Set[bytes] = set()
+    for entry in line_entries:
+        if entry and entry not in seen:
+            seen.add(entry)
+            yield entry
+
+    matched = False
+    for value in _json_filtered_strings(documents, url_filter):
+        matched = True
+        entry = token(value.strip().encode("utf-8"))
+        if entry and entry not in seen:
+            seen.add(entry)
+            yield entry
+
+    if url_filter and not matched and logger:
+        logger.warning(f"Filter #{url_filter} matched nothing in the JSON list")

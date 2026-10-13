@@ -1,3 +1,30 @@
+v3.0.17 - 2026-Sep-29
+---------------------
+
+  - [fix: t:htmlEntityDecode does not decode all ASCII named HTML entities]
+    [PR from private repo - @marcstern, @fzipi, @airween; fixed GHSA-cxqf-vgrr-xxrv]
+  - [fix: use secure value for host verification in case of remote rules download]
+    [PR from private repo - @amitu314, @airween; fixed GHSA-2vqc-36qp-ccmw]
+  - [fix: uninitialized pointer dereference in XML request body processor]
+    [PR from private repo - Tobias Klein (www.trapkit.de), @airween; fixed GHSA-jx3r-phvx-2jmj]
+  - [fix: response body inspection bypass with mixed case Content-Type value]
+    [PR from private repo - @zuesdevil, @airween; fixed GHSA-vmg8-j66p-vgvw]
+  - [fix: nullptr dereference if @rx/@rxGlobal pattern is invalid (at startup or after macro expansion)]
+    [PR from private repo - @AnnoyingTechnology, @fzipi, @airween; fixed GHSA-5m93-4h75-3p2w]
+  - [fix: t:removeComments behavior in case of adjacent comments]
+    [PR from private repo - @HEXER365, @airween; fixed GHSA-qrch-pjfr-9g47]
+  - [fix: t:base64DecodeExt does not handle '-' and '_' characters (URL-safe alphabet)]
+    [PR from private repo - @fzipi, @airween; fixed GHSA-4j47-8qcr-jf59]
+  - [fix: handle 'filename*' and duplicated 'filename' parameters in multipart Content-Disposition header;
+     add new variables MULTIPART_DUPLICATE_PART_HEADER, MULTIPART_FILENAME_CHARSET, MULTIPART_FILENAME_LANGUAGE]
+    [PR from private repo - @hnakamur, @fzipi, @theseion, @airween; fixed GHSA-5pww-8rfg-9crf]
+  - fix: align cppcheck 2.22.0 warnings
+    [PR #3645 - @airween]
+  - fix: seclang scanner mis-parsing escaped quotes right after a macro
+    [PR #3641 - @fzipi]
+  - fix: drop MDB_WRITEMAP to avoid LMDB freelist assertion crash
+    [PR #3639 - @fzipi]
+
 v3.0.16 - 2026-Jun-29
 ---------------------
 

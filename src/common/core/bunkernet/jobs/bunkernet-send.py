@@ -15,7 +15,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from bunkernet import send_reports
-from heapq import merge
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
@@ -26,6 +25,7 @@ LOGGER = getLogger("BUNKERNET.SEND")
 exit_status = 0
 
 BATCH_SIZE = 100
+MAX_CACHED_REPORTS = 10000
 
 try:
     # Check if at least a server has BunkerNet activated
@@ -88,8 +88,8 @@ try:
     if not cached_data:
         cached_data = {"created": datetime.now().astimezone().isoformat(), "reports": []}
 
-    # Merge reports and sort by the oldest first using heapq merge
-    reports = list(merge(cached_data.get("reports", []), instance_reports, key=lambda x: datetime.fromisoformat(x["date"])))
+    # Oldest first: batches send the oldest reports and the cap below keeps the newest ones.
+    reports = sorted(chain(cached_data.get("reports", []), instance_reports), key=lambda x: datetime.fromisoformat(x["date"]))
 
     # Check if forced send is needed due to time
     force_send = datetime.fromisoformat(cached_data["created"]) + timedelta(hours=24) < datetime.now().astimezone()
@@ -127,11 +127,15 @@ try:
             sleep(2)
 
     if reports:
+        if len(reports) > MAX_CACHED_REPORTS:
+            LOGGER.warning(f"Dropping the {len(reports) - MAX_CACHED_REPORTS} oldest unsent reports, keeping the newest {MAX_CACHED_REPORTS}")
+            reports = reports[-MAX_CACHED_REPORTS:]
+        remaining = len(reports)
         LOGGER.info(f"Caching {remaining} reports...")
         cached_data["reports"] = reports
 
         # Cache the remaining reports
-        cached, err = JOB.cache_file("reports.json", dumps(cached_data, indent=2).encode())
+        cached, err = JOB.cache_file("reports.json", dumps(cached_data).encode())
         if not cached:
             LOGGER.error(f"Failed to cache reports.json :\n{err}")
             status = 2

@@ -13,10 +13,11 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from packaging.version import Version
 from requests import get
 from requests.exceptions import ConnectionError, RequestException
 
-from common_utils import get_version, is_newer_version_available  # type: ignore
+from common_utils import fetch_bunkerweb_releases, get_version, is_newer_version_available, normalize_bunkerweb_version, pick_latest_line_release  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -39,9 +40,9 @@ try:
 
         max_retries = 3
         retry_count = 0
-        while retry_count < max_retries:
+        while True:
             try:
-                response = get("https://api.github.com/repos/bunkerity/bunkerweb/releases", headers={"User-Agent": "BunkerWeb"}, timeout=3)
+                releases = fetch_bunkerweb_releases(get)
                 break
             except ConnectionError as e:
                 retry_count += 1
@@ -49,23 +50,17 @@ try:
                     raise e
                 LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
                 sleep(3)
-        try:
-            response.raise_for_status()
-            releases = response.json()
-        except RequestException:
-            LOGGER.debug(format_exc())
-            # Best-effort fallback to cached info (may be stale)
-            if isinstance(job_cache, dict) and job_cache.get("data"):
-                LOGGER.warning("GitHub API error, falling back to cached release info")
-                with suppress(BaseException):
-                    return loads(job_cache.get("data") or b"{}")
-            raise
+            except RequestException:
+                LOGGER.debug(format_exc())
+                # Best-effort fallback to cached info (may be stale)
+                if isinstance(job_cache, dict) and job_cache.get("data"):
+                    LOGGER.warning("GitHub API error, falling back to cached release info")
+                    with suppress(BaseException):
+                        return loads(job_cache.get("data") or b"{}")
+                raise
 
-        latest = None
-        for release in releases:
-            if not release["prerelease"]:
-                latest = release
-                break
+        current_version = get_version()
+        latest = pick_latest_line_release(releases, current_version)
 
         # If no stable release found, fallback to cache if available
         if latest is None:
@@ -74,6 +69,16 @@ try:
                 with suppress(BaseException):
                     return loads(job_cache.get("data") or b"{}")
             return None
+
+        # A newer line (e.g. 1.7.x while on 1.6) is not an update: only point at the upgrade guide
+        with suppress(BaseException):
+            overall = pick_latest_line_release(releases, "unknown")
+            if overall and overall is not latest:
+                current_parsed = Version(normalize_bunkerweb_version(current_version))
+                LOGGER.info(
+                    f"BunkerWeb {overall['tag_name'].removeprefix('v')} is available on a newer release line, "
+                    f"see https://docs.bunkerweb.io/{current_parsed.major}.{current_parsed.minor}/upgrading/"
+                )
 
         # Cache the latest stable release for 1 hour to avoid rate limits
         with suppress(BaseException):

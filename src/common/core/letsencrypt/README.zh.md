@@ -36,6 +36,46 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 !!! info "配置文件可用性"
     请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。
 
+### IP 地址证书
+
+Let's Encrypt 可以为 IP 地址签发证书。在 `SERVER_NAME` 中把 IP 与主机名一起列出，BunkerWeb 会申请一张覆盖所有条目的证书。在单站点模式（`MULTISITE=no`）下，`SERVER_NAME` 的其余条目是第一个条目的别名，并且都包含在同一张证书中，因此主机名和 IP 地址可以一起使用。
+
+!!! info "要求"
+    只有同时满足以下所有条件，才会申请 IP 地址的证书。否则该 IP 会被跳过并给出警告，其余名称仍会正常签发：
+
+    - `LETS_ENCRYPT_SERVER` 为 `letsencrypt`
+    - `LETS_ENCRYPT_CHALLENGE` 为 `http`
+    - `LETS_ENCRYPT_PROFILE` 为 `shortlived`
+    - 该地址是公网 IPv4 地址（不支持 IPv6）
+    - 该地址的 80 端口可从互联网访问
+
+IP 地址证书的有效期为 160 小时，由每日续期任务自动续期。
+
+通过 IP 地址连接的客户端不会发送 SNI，因此 BunkerWeb 根据客户端所连接的地址选择证书：
+
+1. 如果本地地址与某张 IP 证书匹配，则使用该证书。
+2. 否则，如果只有一张 IP 证书，则使用该证书。
+3. 否则使用默认证书。
+
+!!! warning "Docker 与 NAT"
+    在 Docker 端口映射或 NAT 之后，BunkerWeb 看到的是私有本地地址，与任何公网 IP 都不匹配。存在多张 IP 证书时，它无法区分它们，会使用默认证书。
+
+将 `DISABLE_DEFAULT_SERVER_STRICT_SNI` 设为 `yes` 后，BunkerWeb 会拒绝通过 IP 地址连接的客户端，因此 IP 地址证书永远不会被使用。
+
+证书会列出该服务的所有名称，因此通过 IP 连接的客户端也能看到主机名。若要保持主机名私密，请将 IP 地址放在单独的服务中，该服务的 `SERVER_NAME` 只包含 IP 地址。
+
+向已有证书的服务添加名称（主机名或 IP 地址）时，BunkerWeb 会扩展该证书，并在新名称验证失败时保留当前证书。移除或替换名称仍会从头重新签发证书。之后如果某个 IP 地址不再通过验证（例如 80 端口无法访问），整张证书（包括主机名）的续期都会失败。这种情况下，请从 `SERVER_NAME` 中移除该 IP 地址。
+
+只有确实包含在证书中的 IP 地址，才会提供给不带 SNI 的客户端。
+
+```yaml
+AUTO_LETS_ENCRYPT: "yes"
+EMAIL_LETS_ENCRYPT: "admin@example.com"
+SERVER_NAME: "www.example.com 203.0.113.10"
+LETS_ENCRYPT_CHALLENGE: "http"
+LETS_ENCRYPT_PROFILE: "shortlived"
+```
+
 ### 配置设置
 
 | 设置                                        | 默认值        | 上下文    | 多选 | 描述                                                                                                                                                                                 |
@@ -46,12 +86,12 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | 否   | **证书颁发机构：** 选择用于签发证书的 ACME 服务器。可选值：`letsencrypt` 或 `zerossl`。                                                                                              |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | 否   | **ZeroSSL API 密钥：** 当 `LETS_ENCRYPT_SERVER=zerossl` 时由 `zerossl-bot` 使用的可选密钥。若为空，则使用 `EMAIL_LETS_ENCRYPT` 获取 EAB 凭据。                                       |
 | `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`           | multisite | 否   | **ZeroSSL API 重试次数：** `zerossl-bot` 发起 ZeroSSL API 请求时的重试次数（`0` 表示禁用重试）。                                                                                     |
-| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`           | multisite | 否   | **ZeroSSL API 重试延迟：** `zerossl-bot` 中 ZeroSSL API 重试之间的延迟秒数。                                                                                                         |
-| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`           | multisite | 否   | **ZeroSSL API 连接超时：** `zerossl-bot` 中 ZeroSSL API 调用的连接超时时间（秒）。                                                                                                   |
-| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`          | multisite | 否   | **ZeroSSL API 最大时长：** `zerossl-bot` 中每次 ZeroSSL API 调用允许的最大总时长（秒）。                                                                                             |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2s`          | multisite | 否   | **ZeroSSL API 重试延迟：** `zerossl-bot` 中 ZeroSSL API 重试之间的延迟秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                         |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5s`          | multisite | 否   | **ZeroSSL API 连接超时：** `zerossl-bot` 中 ZeroSSL API 调用的连接超时时间（秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                   |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20s`         | multisite | 否   | **ZeroSSL API 最大时长：** `zerossl-bot` 中每次 ZeroSSL API 调用允许的最大总时长（秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                             |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                     |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                    |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                                 |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                 |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。请依次写入键、空白字符和值，并且不要为键加引号。值可以是原始文本、base64 编码或 JSON 对象。                                                      |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | 否   | **自动解码 Base64 DNS 凭据：** 启用后自动解码 base64 编码的 DNS 提供商凭据（`rfc2136` 提供商除外）。如果凭据故意为 base64，请设置为 `no`。                                           |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                      |
@@ -60,6 +100,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | 否   | **并发请求：** 设置为 `yes` 时，certbot-new 将并发发起证书请求。请谨慎使用以避免速率限制。                                                                                           |
 | `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | 否   | **证书配置文件：** 选择要使用的证书配置文件。选项：`classic`（通用，最多 100 个名称）、`tlsserver`（针对 TLS 服务器优化，有效期 45 天，最多 25 个名称）或 `shortlived`（160 小时证书，最多 25 个名称）。 |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。                                         |
+| `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES`      | `yes`         | multisite | 否   | **禁用公共后缀检查：** 设为 `yes` 时，申请证书前不会将域名与公共后缀列表（Public Suffix List）比对。设为 `no` 时，将拒绝与公共后缀匹配的域名（例如 `co.uk`）的证书申请。 |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                                                            |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | 否   | **Certbot 日志备份上限：** Certbot 每个任务保留的轮转 `letsencrypt.log` 备份数量。Certbot 自带的默认值 `1000` 很容易迅速堆积；`50` 是一个更合理的上限。设置为 `0` 时仅保留当前日志。 |
 
@@ -68,7 +109,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
     - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
     - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
-    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。此时对 `/.well-known/acme-challenge/` 下单个令牌的 `GET` 或 `HEAD` 请求会被加入白名单并直达后端，不经过任何其他检查：antibot、黑名单、ModSecurity、请求速率限制、Basic Auth 以及封禁检查都会对该请求跳过（连接数限制仍然生效，由 nginx 强制执行），比本地处理的验证跳过得更多。更深的路径、其他方法以及不符合令牌形式的名称仍走正常检查。
+    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。此时对 `/.well-known/acme-challenge/` 下单个令牌的 `GET` 或 `HEAD` 请求会被加入白名单并直达后端，不经过任何其他检查：antibot、黑名单、ModSecurity、请求速率限制、Basic Auth 以及封禁检查都会对该请求跳过（连接数限制仍然生效，由 nginx 强制执行），比本地处理的验证跳过得更多。更深的路径、其他方法以及不符合令牌形式的名称仍走正常检查。即使 `REVERSE_PROXY_CUSTOM_HOST` 设置为固定名称，后端收到的仍是请求中的 `Host`，因为验证是针对该名称进行的（使用 nginx 变量的值仍然生效）。
 
 !!! tip "HTTP 与 DNS 验证"
     **HTTP 验证** 更容易设置，并且适用于大多数网站：

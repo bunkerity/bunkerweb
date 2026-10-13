@@ -11,12 +11,20 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from ApiCaller import ApiCaller  # type: ignore
 from Database import Database  # type: ignore
+from common_utils import parse_duration  # type: ignore
 from logger import getLogger  # type: ignore
 from API import API  # type: ignore
 
 LOGGER = getLogger("LETS-ENCRYPT.DEPLOY")
 status = 0
+
+
+def describe_api_error(http_status, resp) -> str:
+    detail = f"status = {resp.get('status')}, msg = {resp.get('msg')}" if isinstance(resp, dict) else f"body = {str(resp)[:200]!r}"
+    return f"HTTP {http_status}, {detail}"
+
 
 try:
     # Get env vars
@@ -39,39 +47,34 @@ try:
 
     reload_min_timeout = getenv("RELOAD_MIN_TIMEOUT", "5")
 
-    if not reload_min_timeout.isdigit():
-        LOGGER.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
+    try:
+        reload_min_timeout = parse_duration(reload_min_timeout, "s")
+    except ValueError:
+        LOGGER.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
         reload_min_timeout = 5
-
-    reload_min_timeout = int(reload_min_timeout)
 
     for instance in instances:
         api = API.from_instance(instance)
 
-        sent, err, status, resp = api.request("POST", "/lets-encrypt/certificates", files=files)
+        sent, err, http_status, resp = api.request("POST", "/lets-encrypt/certificates", files=files)
         if not sent:
             status = 1
             LOGGER.error(f"Can't send API request to {api.endpoint}/lets-encrypt/certificates : {err}")
-        elif status != 200:
+        elif http_status != 200:
             status = 1
-            LOGGER.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}")
+            LOGGER.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/certificates : {describe_api_error(http_status, resp)}")
         else:
             LOGGER.info(
                 f"Successfully sent API request to {api.endpoint}/lets-encrypt/certificates",
             )
-            sent, err, status, resp = api.request(
+            # Through ApiCaller for its retry on a busy instance (503), which a reload racing another one gets.
+            ok, _ = ApiCaller([api]).send_to_apis(
                 "POST",
                 f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
                 timeout=max(reload_min_timeout, 3 * len(services)),
             )
-            if not sent:
+            if not ok:
                 status = 1
-                LOGGER.error(f"Can't send API request to {api.endpoint}/reload : {err}")
-            elif status != 200:
-                status = 1
-                LOGGER.error(f"Error while sending API request to {api.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}")
-            else:
-                LOGGER.info(f"Successfully sent API request to {api.endpoint}/reload")
 except BaseException as e:
     status = 1
     LOGGER.debug(format_exc())

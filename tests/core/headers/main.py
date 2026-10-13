@@ -169,6 +169,26 @@ try:
         )
         exit(1)
 
+    # Check the SameSite value (Lax, Strict or None) or the value-less SameSite flag when the global flags request one
+    if not cookie_flags_1:
+        samesite_flag = next((flag for flag in cookie_flags.split() if flag.lower().split("=", 1)[0] == "samesite"), None)
+        if samesite_flag is not None:
+            # Inspect the raw Set-Cookie header, the parsed cookie hides duplicated attributes
+            set_cookie = response.headers.get("Set-Cookie", "")
+            samesite_attrs = [attr.strip() for attr in set_cookie.split(";")[1:] if attr.strip().lower().split("=", 1)[0] == "samesite"]
+            if len(samesite_attrs) != 1:
+                print(
+                    f"❌ Cookie {cookie.name} should have exactly one SameSite attribute, exiting ...\nSet-Cookie: {set_cookie}",
+                    flush=True,
+                )
+                exit(1)
+            elif samesite_attrs[0].lower() != samesite_flag.lower():
+                print(
+                    f"❌ Cookie {cookie.name} has {samesite_attrs[0]} but {samesite_flag} was expected, exiting ...\nSet-Cookie: {set_cookie}",
+                    flush=True,
+                )
+                exit(1)
+
     print("✅ Headers are working as expected ...", flush=True)
 except SystemExit:
     exit(1)

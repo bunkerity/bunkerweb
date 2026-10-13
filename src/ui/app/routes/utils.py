@@ -5,15 +5,16 @@ from functools import wraps
 from io import BytesIO
 from time import sleep, time
 from typing import Any, Dict, Optional, Tuple, Union
+from uuid import uuid4
 
 from flask import Response, g, has_request_context, redirect, request, url_for
 from qrcode.main import QRCode
 from regex import compile as re_compile
 
-from app.dependencies import BW_CONFIG, DB
+from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.utils import LOGGER, flash
 
-from common_utils import get_redis_client as get_common_redis_client, getenv_bool  # type: ignore
+from common_utils import get_redis_client as get_common_redis_client, getenv_bool, parse_duration_int  # type: ignore
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
@@ -22,6 +23,64 @@ CUSTOM_CONF_RX = re_compile(
     r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
 FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?$")
+
+
+CONFIG_TASK_TIMEOUT = 60  # same bound as the loading watchdog in check_reloading
+# one marker file per running task, next to the UIData file: UIData rewrites its whole dict on every set, so tasks cannot live in it
+CONFIG_TASKS_DIR = DATA.file_path.parent.joinpath("config_tasks")
+
+
+def active_config_tasks() -> int:
+    """Count config tasks still running. Markers older than the watchdog are dropped so a crashed worker cannot pin the loading screen."""
+    count = 0
+    for marker in CONFIG_TASKS_DIR.glob("*"):
+        try:
+            if marker.stat().st_mtime + CONFIG_TASK_TIMEOUT > time():
+                count += 1
+            else:
+                marker.unlink(missing_ok=True)
+        except OSError:  # another worker removed it first
+            continue
+    return count
+
+
+def _track_config_task(task_id: str, add: bool):
+    marker = CONFIG_TASKS_DIR.joinpath(task_id)
+    if add:
+        CONFIG_TASKS_DIR.mkdir(parents=True, exist_ok=True)
+        marker.touch()
+    else:
+        marker.unlink(missing_ok=True)
+
+
+def submit_config_task(task, *args):
+    """Run a config-changing task on the shared executor, with the loading screen state tied to its lifetime."""
+    task_id = uuid4().hex
+
+    def completed(future):
+        try:
+            future.result()
+        except Exception:
+            LOGGER.exception("Configuration task failed")
+            DATA["TO_FLASH"].append(
+                {"content": "An unexpected error occurred during the operation. Please check the UI logs for more information.", "type": "error"}
+            )
+            DATA["CONFIG_CHANGED"] = False
+        finally:
+            _track_config_task(task_id, False)
+            # task bodies clear RELOADING themselves, only the last active task may end the loading screen
+            if not active_config_tasks():
+                DATA["RELOADING"] = False
+
+    _track_config_task(task_id, True)
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
+    try:
+        future = CONFIG_TASKS_EXECUTOR.submit(task, *args)
+    except Exception:
+        _track_config_task(task_id, False)
+        DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
+        raise
+    future.add_done_callback(completed)
 
 
 def _sanitize_filename(name: str) -> str:
@@ -202,6 +261,7 @@ def get_redis_client():
             "REDIS_SENTINEL_USERNAME",
             "REDIS_SENTINEL_PASSWORD",
             "REDIS_SENTINEL_MASTER",
+            "REDIS_CLUSTER_NODES",
         ),
     )
 
@@ -225,6 +285,7 @@ def get_redis_client():
         redis_sentinel_username=db_config.get("REDIS_SENTINEL_USERNAME") or None,
         redis_sentinel_password=db_config.get("REDIS_SENTINEL_PASSWORD") or None,
         redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
+        redis_cluster_nodes=db_config.get("REDIS_CLUSTER_NODES", ""),
         logger=LOGGER,
     )
 
@@ -323,8 +384,8 @@ def get_default_ban_time(config: dict, server_name: str) -> int:
         if server_name and server_name not in ("_", ""):
             service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
             if service_key in config:
-                return int(config[service_key])
-        return int(config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
+                return parse_duration_int(config[service_key], "s")
+        return parse_duration_int(config.get("BAD_BEHAVIOR_BAN_TIME", "1d"), "s")
     except (AttributeError, TypeError, ValueError):
         return 86400
 

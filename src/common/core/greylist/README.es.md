@@ -43,6 +43,9 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_IP`      |                   | multisite | no       | **Lista Gris de IP:** Lista de direcciones IP o redes (en notación CIDR) para incluir en la lista gris, separadas por espacios.         |
     | `GREYLIST_IP_URLS` |                   | multisite | no       | **URLs de Lista Gris de IP:** Lista de URLs que contienen direcciones IP o redes para incluir en la lista gris, separadas por espacios. |
 
+    !!! info "Formatos de lista"
+        Las listas de URL pueden contener una entrada por línea (las líneas que empiezan por `#` o `;` son comentarios y solo se lee la primera palabra de cada línea), CSV, un documento JSON o JSON Lines. En las listas de IP, las comas también separan campos y las listas JSON conservan todas las cadenas que sean direcciones IP o redes. Añada un fragmento para conservar solo una parte de una lista JSON: `#key` conserva los valores bajo `key`, `#key=value` conserva los objetos cuya propiedad `key` es igual a `value` o contiene `value`, y `&` combina términos. Ejemplo: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Una URL con un fragmento conserva solo lo que este selecciona, por lo que no conserva nada si la lista no es JSON.
+
 === "DNS Inverso"
     **Qué hace esto:** Incluye en la lista gris a los visitantes según su nombre de dominio (en inverso). Útil para permitir el acceso condicional a visitantes de organizaciones o redes específicas.
 

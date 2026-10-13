@@ -72,6 +72,15 @@ def _persist_config(config: Dict[str, Any], rename: Optional[tuple[str, str]] = 
     return JSONResponse(status_code=200, content={"status": "success", "changed_plugins": sorted(list(ret))})
 
 
+def _server_name_conflict(conf: Dict[str, Any], server_name: str, ignore: Optional[str] = None) -> Optional[str]:
+    """Return the name of a service other than `ignore` that already uses one of the given server names."""
+    names = set(server_name.split())
+    for other in (conf.get("SERVER_NAME", "") or "").split():
+        if other != ignore and names & ({other} | set((conf.get(f"{other}_SERVER_NAME") or "").split())):
+            return other
+    return None
+
+
 def _service_method(service: str) -> Optional[str]:
     for item in get_db().get_services(with_drafts=True):
         if item.get("id") == service:
@@ -107,6 +116,13 @@ def create_service(req: ServiceCreateRequest) -> JSONResponse:
 
     if "SERVER_NAME" not in (req.variables or {}):
         conf[f"{name}_SERVER_NAME"] = name
+    # Only the global SERVER_NAME may be empty (no service yet): a service always needs a name.
+    elif not str(conf[f"{name}_SERVER_NAME"]).strip():
+        return JSONResponse(status_code=422, content={"status": "error", "message": "SERVER_NAME can't be empty"})
+
+    other = _server_name_conflict(conf, str(conf[f"{name}_SERVER_NAME"]))
+    if other:
+        return JSONResponse(status_code=400, content={"status": "error", "message": f"A server name of {name} is already used by service {other}"})
 
     conf["SERVER_NAME"] = " ".join(sorted(existing | {name}))
 
@@ -170,6 +186,10 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
                 conf[f"{target}_SERVER_NAME"] = " ".join(new_name if token == service else token for token in str(own.get("value") or "").split()) or new_name
             else:
                 conf[f"{target}_SERVER_NAME"] = new_name
+
+            other = _server_name_conflict(conf, str(conf[f"{target}_SERVER_NAME"]), ignore=target)
+            if other:
+                return JSONResponse(status_code=400, content={"status": "error", "message": f"A server name of {new_name} is already used by service {other}"})
 
     for key, value in (req.variables or {}).items():
         valid, reason = db.is_valid_setting(key, value=value, multisite=True)

@@ -43,6 +43,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
     | `GREYLIST_IP`      |        | multisite | non      | **Greylist IP :** Liste d'adresses IP ou de réseaux (notation CIDR) à placer en greylist, séparés par des espaces. |
     | `GREYLIST_IP_URLS` |        | multisite | non      | **URL de greylist IP :** Liste d'URL contenant des adresses IP ou des réseaux à placer en greylist, séparées par des espaces. |
 
+    !!! info "Formats des listes"
+        Les listes d’URL peuvent contenir une entrée par ligne (les lignes commençant par `#` ou `;` sont des commentaires et seul le premier mot de chaque ligne est lu), du CSV, un document JSON ou du JSON Lines. Dans les listes d’IP, les virgules séparent aussi les champs, et les listes JSON conservent chaque chaîne qui correspond à une adresse IP ou à un réseau. Ajoutez un fragment pour ne conserver qu’une partie d’une liste JSON : `#key` conserve les valeurs sous `key`, `#key=value` conserve les objets dont la propriété `key` est égale à `value` ou contient `value`, et `&` combine les termes. Exemple : `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Une URL avec un fragment ne conserve que les éléments sélectionnés par celui-ci ; si la liste n’est pas au format JSON, elle ne conserve rien.
+
 === "DNS inverse"
     **Ce que cela fait :** Place les visiteurs en greylist selon leur nom de domaine inversé. Utile pour autoriser conditionnellement l'accès aux visiteurs de certaines organisations ou de certains réseaux.
 

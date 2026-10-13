@@ -42,5 +42,50 @@
       "SecResponseBodyAccess On",
       "SecRule RESPONSE_BODY \"@contains denystring\" \"id:1,phase:4,deny\""
     ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: RESPONSE_BODY :: mixed case",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 0
+    },
+    "server": {
+      "ip": "",
+      "port": 0
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "Content-Length": "0"
+      },
+      "uri": "/foo",
+      "method": "",
+      "http_version": 1.1,
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "TeXt/PLaIn",
+        "Content-Length": "10"
+      },
+      "body": [
+        "denystring"
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecResponseBodyMimeType text/plain text/html text/xml",
+      "SecResponseBodyAccess On",
+      "SecRule RESPONSE_BODY \"@contains denystring\" \"id:1,phase:4,deny\""
+    ]
   }
 ]

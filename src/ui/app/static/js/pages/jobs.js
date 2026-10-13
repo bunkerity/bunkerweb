@@ -445,8 +445,8 @@ $(document).ready(function () {
       return;
     }
     const job = {
-      name: $(this).data("job"),
-      plugin: $(this).data("plugin"),
+      name: $(this).attr("data-job"),
+      plugin: $(this).attr("data-plugin"),
     };
     executeForm([job]);
   });

@@ -1,11 +1,10 @@
 from contextlib import suppress
-from time import time
 from typing import Dict, Optional
 
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
+from app.dependencies import BW_CONFIG, DATA, DB
 from app.raw_drafts import (
     RAW_DRAFT_SETTINGS,
     RAW_PRESENT_SETTINGS,
@@ -16,7 +15,7 @@ from app.raw_drafts import (
 )
 from app.utils import get_blacklisted_settings, is_editable_method
 
-from app.routes.utils import extract_file_setting_names, handle_error, wait_applying
+from app.routes.utils import extract_file_setting_names, handle_error, submit_config_task, wait_applying
 
 global_settings = Blueprint("global_settings", __name__)
 
@@ -234,8 +233,7 @@ def global_settings_page():
 
             DATA["RELOADING"] = False
 
-        DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables, override_non_global_services, file_setting_names, draft_settings, mode)
+        submit_config_task(update_global_config, variables, override_non_global_services, file_setting_names, draft_settings, mode)
 
         arguments = {}
         if request.args.get("mode", "advanced") != "advanced":

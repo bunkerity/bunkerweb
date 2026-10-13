@@ -105,21 +105,21 @@
     },
     "BAD_BEHAVIOR_COUNT_TIME": {
       "context": "multisite",
-      "default": "60",
-      "help": "Period of time (in seconds) during which we count 'bad' HTTP status codes.",
+      "default": "1m",
+      "help": "Period of time (in seconds) during which we count 'bad' HTTP status codes. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "bad-behavior-period",
       "label": "Period (in seconds)",
-      "regex": "^\\d+",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "BAD_BEHAVIOR_BAN_TIME": {
       "context": "multisite",
-      "default": "86400",
-      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold. (Set to 0 to ban permanently)",
+      "default": "1d",
+      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold. (Set to 0 to ban permanently) Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
       "id": "bad-behavior-ban-time",
       "label": "Ban duration (in seconds)",
-      "regex": "^\\d+$",
-      "type": "number"
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
     },
     "BAD_BEHAVIOR_BAN_SCOPE": {
       "context": "global",

@@ -60,8 +60,8 @@ $(document).ready(function () {
     // Use plural/singular i18n key for alert
     const alertTextKey =
       templates.length > 1
-        ? "modal.body.delete_confirmation_alert_plural"
-        : "modal.body.delete_confirmation_alert";
+        ? "modal.body.confirm_templates_deletion_alert_plural"
+        : "modal.body.confirm_templates_deletion_alert";
     const defaultAlertText = `Are you sure you want to delete the selected template${
       templates.length > 1 ? "s" : ""
     }?`;
@@ -489,7 +489,7 @@ $(document).ready(function () {
     if (actionLock) return; // Prevent overlapping actions
     actionLock = true; // Lock action
 
-    const template = $(this).data("template-id");
+    const template = $(this).attr("data-template-id");
     setupDeletionModal([template]);
     actionLock = false; // Unlock after modal setup
   });

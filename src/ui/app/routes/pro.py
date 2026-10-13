@@ -1,10 +1,9 @@
 from datetime import datetime, timezone
-from time import time
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
-from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
+from app.dependencies import BW_CONFIG, DATA, DB
+from app.routes.utils import get_remain, handle_error, submit_config_task, verify_data_in_form, wait_applying
 from app.utils import flash
 
 pro = Blueprint("pro", __name__)
@@ -98,16 +97,9 @@ def pro_key():
 
         DATA["RELOADING"] = False
 
-    DATA.update(
-        {
-            "RELOADING": True,
-            "LAST_RELOAD": time(),
-            "CONFIG_CHANGED": True,
-            "PRO_LOADING": True,
-        }
-    )
+    DATA["PRO_LOADING"] = True
     flash("Checking license key.")
-    CONFIG_TASKS_EXECUTOR.submit(update_license_key, variables)
+    submit_config_task(update_license_key, variables)
     return redirect(
         url_for(
             "loading",

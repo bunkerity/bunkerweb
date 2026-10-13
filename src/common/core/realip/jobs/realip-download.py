@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network
 from os import getenv, sep
 from os.path import join, normpath
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
@@ -17,7 +18,7 @@ from requests import get
 from requests.exceptions import ConnectionError
 
 from logger import getLogger  # type: ignore
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, iter_list_entries, split_list_url  # type: ignore
 from jobs import Job  # type: ignore
 
 
@@ -143,14 +144,15 @@ try:
                 else:
                     LOGGER.info(f"Downloading Real IP data from {url} ...")
                     failed = False
-                    if url.startswith("file://"):
+                    download_url, url_filter = split_list_url(url)
+                    content_type = ""
+                    if download_url.startswith("file://"):
                         try:
-                            with open(normpath(url[7:]), "rb") as f:
-                                iterable = f.readlines()
+                            body = Path(normpath(download_url[7:])).read_bytes()
                         except OSError as e:
                             status = 2
                             LOGGER.debug(format_exc())
-                            LOGGER.error(f"Error while opening file {url[7:]} : {e}")
+                            LOGGER.error(f"Error while opening file {download_url[7:]} : {e}")
                             failed_urls.add(url)
                             if url_file not in urls:
                                 aggregated_recap["failed_count"] += 1
@@ -160,7 +162,7 @@ try:
                         retry_count = 0
                         while retry_count < max_retries:
                             try:
-                                resp = get(url, stream=True, timeout=10)
+                                resp = get(download_url, stream=True, timeout=10)
                                 break
                             except ConnectionError as e:
                                 retry_count += 1
@@ -177,7 +179,8 @@ try:
                                 aggregated_recap["failed_count"] += 1
                             failed = True
                         else:
-                            iterable = resp.iter_lines()
+                            body = resp.content
+                            content_type = resp.headers.get("Content-Type", "")
 
                     if not failed:
                         if url not in processed_urls:
@@ -185,15 +188,14 @@ try:
 
                         url_content = b""
                         count_lines = 0
-                        for line in iterable:
-                            line = line.strip()
-                            if not line or line.startswith((b"#", b";")):
-                                continue
+                        for line in iter_list_entries(body, content_type=content_type, url_filter=url_filter, ip_list=True, logger=LOGGER):
                             ok, data = check_line(line)
                             if ok:
                                 unique_entries.add(data)
                                 url_content += data + b"\n"
                                 count_lines += 1
+                        if not count_lines:
+                            LOGGER.warning(f"No valid IP or network found in {url} (Content-Type: {content_type or 'unknown'})")
                         if url not in processed_urls:
                             aggregated_recap["total_lines"] += count_lines
 
@@ -203,7 +205,7 @@ try:
             except BaseException as e:
                 status = 2
                 LOGGER.debug(format_exc())
-                LOGGER.error(f"Exception while getting {service} greylist from {url} :\n{e}")
+                LOGGER.error(f"Exception while getting {service} realip from {url} :\n{e}")
                 failed_urls.add(url)
                 if url not in processed_urls:
                     aggregated_recap["failed_count"] += 1

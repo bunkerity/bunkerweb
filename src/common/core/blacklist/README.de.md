@@ -60,10 +60,13 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | :------------------------- | :------------------------------------ | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------- |
     | `BLACKLIST_IP`             |                                       | Multisite | Nein     | **IP-Blacklist:** Liste von IP-Adressen oder Netzwerken (CIDR-Notation) zum Blockieren, durch Leerzeichen getrennt.          |
     | `BLACKLIST_IGNORE_IP`      |                                       | Multisite | Nein     | **IP-Ignorierliste:** Liste von IP-Adressen oder Netzwerken, die IP-Blacklist-Überprüfungen umgehen sollen.                  |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | Multisite | Nein     | **IP-Blacklist-URLs:** Liste von URLs, die zu blockierende IP-Adressen oder Netzwerke enthalten, durch Leerzeichen getrennt. |
+    | `BLACKLIST_IP_URLS`        |                                       | Multisite | Nein     | **IP-Blacklist-URLs:** Liste von URLs, die zu blockierende IP-Adressen oder Netzwerke enthalten, durch Leerzeichen getrennt. |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | Multisite | Nein     | **IP-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende IP-Adressen oder Netzwerke enthalten.                        |
 
-    Der Standardparameter `BLACKLIST_IP_URLS` enthält eine URL, die eine **Liste bekannter Tor-Exit-Nodes** bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.
+    !!! info "Listenformate"
+        URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit `#` oder `;` beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: `#key` behält die Werte unter `key`, `#key=value` behält Objekte, bei denen `key` gleich `value` ist oder `value` enthält, und `&` verbindet die Bedingungen. Beispiel: `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.
+
+    Standardmäßig enthält `BLACKLIST_COMMUNITY_LISTS` `ip:danmeuk-tor-exit` und fügt damit die Tor-Exit-Node-Liste hinzu; `BLACKLIST_IP_URLS` bleibt leer, sofern Sie es nicht konfigurieren.
 
 === "Reverse DNS"
     **Was es bewirkt:** Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.
@@ -98,10 +101,10 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     | :--------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------- |
     | `BLACKLIST_USER_AGENT`             |                                                                                                                                | Multisite | Nein     | **User-Agent-Blacklist:** Liste von User-Agent-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt.    |
     | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | Multisite | Nein     | **User-Agent-Ignorierliste:** Liste von User-Agent-Mustern, die User-Agent-Blacklist-Überprüfungen umgehen sollen. |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | Multisite | Nein     | **User-Agent-Blacklist-URLs:** Liste von URLs, die zu blockierende User-Agent-Muster enthalten.                    |
+    | `BLACKLIST_USER_AGENT_URLS`        |                                                                                                                                | Multisite | Nein     | **User-Agent-Blacklist-URLs:** Liste von URLs, die zu blockierende User-Agent-Muster enthalten.                    |
     | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | Multisite | Nein     | **User-Agent-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende User-Agent-Muster enthalten.               |
 
-    Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **Liste bekannter bösartiger User-Agents** bereitstellt. Diese werden oft von bösartigen Bots und Scannern verwendet, um anfällige Websites zu identifizieren.
+    Standardmäßig enthält `BLACKLIST_COMMUNITY_LISTS` `ua:mitchellkrogza-bad-user-agents` und fügt damit die Liste schädlicher User-Agents hinzu; `BLACKLIST_USER_AGENT_URLS` bleibt leer, sofern Sie es nicht konfigurieren.
 
 === "URI"
     **Was es bewirkt:** Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.
