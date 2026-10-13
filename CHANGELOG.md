@@ -8,6 +8,7 @@
 - [BUGFIX] `ui`: setting help tooltips are wider and wrap long words, so long help text is no longer cut off. (Fixes #4026)
 - [BUGFIX] `ui`: with `USE_MODSECURITY_GLOBAL_CRS=yes`, the Web UI ModSecurity exclusions cover every name in the UI service's `SERVER_NAME`, not only the first.
 - [MISC] `headers`: the default `PERMISSIONS_POLICY` drops `shared-storage` and `shared-storage-select-url`, which Chromium removed.
+- [DEPS] Patch lua-nginx-module and lua-resty-core to expose the PROXY protocol client address during the TLS handshake (`ngx.ssl.proxy_protocol_addr()`).
 
 ## v1.6.16~rc4 - 2026/10/06
 

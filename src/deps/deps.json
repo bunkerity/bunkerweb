@@ -67,14 +67,14 @@
       "name": "lua-nginx-module v0.10.29R2",
       "url": "https://github.com/openresty/lua-nginx-module.git",
       "commit": "16612cb0a2eb71273fc5b50a4d98e3c05559178a",
-      "post_install": "rm -r src/deps/src/lua-nginx-module/t"
+      "post_install": "rm -r src/deps/src/lua-nginx-module/t && patch --forward src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c src/deps/misc/lua-nginx-module-proxy-protocol-addr.patch || rm src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c.orig src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c.rej"
     },
     {
       "id": "lua-resty-core",
       "name": "lua-resty-core v0.1.32R1",
       "url": "https://github.com/openresty/lua-resty-core.git",
       "commit": "3ad8ab4b01758c0a03b534026c31cbfa9fc203a5",
-      "post_install": "rm -r src/deps/src/lua-resty-core/t"
+      "post_install": "rm -r src/deps/src/lua-resty-core/t && patch --forward src/deps/src/lua-resty-core/lib/ngx/ssl.lua src/deps/misc/lua-resty-core-proxy-protocol-addr.patch || rm src/deps/src/lua-resty-core/lib/ngx/ssl.lua.orig src/deps/src/lua-resty-core/lib/ngx/ssl.lua.rej"
     },
     {
       "id": "lua-resty-dns",
