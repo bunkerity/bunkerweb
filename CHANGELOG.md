@@ -6,6 +6,7 @@
 - [BUGFIX] `pro`: plugin files drop group and other write before their checksum is stored, so a restore under a group-writable umask no longer reinstalls every PRO plugin on each check. (Fixes #4024)
 - [BUGFIX] `ui`: the Jobs page sorts the RELOAD and ASYNC columns by value. (Fixes #4023)
 - [BUGFIX] `ui`: setting help tooltips are wider and wrap long words, so long help text is no longer cut off. (Fixes #4026)
+- [BUGFIX] `ui`: with `USE_MODSECURITY_GLOBAL_CRS=yes`, the Web UI ModSecurity exclusions cover every name in the UI service's `SERVER_NAME`, not only the first.
 
 ## v1.6.16~rc4 - 2026/10/06
 
