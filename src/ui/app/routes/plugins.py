@@ -19,7 +19,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.routing import BuildError
 from werkzeug.utils import secure_filename
 
-from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall, safe_zip_extractall  # type: ignore
+from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall, safe_zip_extractall, strip_plugin_write_bits  # type: ignore
 
 from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
 from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
@@ -327,6 +327,7 @@ def plugins_refresh():
                 )
                 raise Exception
 
+            strip_plugin_write_bits(temp_folder_path)
             plugin_content = create_plugin_tar_gz(temp_folder_path, arc_root=temp_folder_name)
             value = plugin_content.getvalue()
 

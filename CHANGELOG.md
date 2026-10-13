@@ -3,6 +3,7 @@
 ## v1.6.16 - 2026/10/??
 
 - [BUGFIX] `misc`: the default server certificate and key are regenerated together when they no longer match, instead of failing every reload. (Fixes #4031)
+- [BUGFIX] `pro`: plugin files drop group and other write before their checksum is stored, so a restore under a group-writable umask no longer reinstalls every PRO plugin on each check. (Fixes #4024)
 
 ## v1.6.16~rc4 - 2026/10/06
 
