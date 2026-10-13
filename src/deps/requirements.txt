@@ -28,9 +28,9 @@ pip==26.2.1 \
     # via
     #   build
     #   wheel
-pip-tools==7.6.1 \
-    --hash=sha256:6111c8b4b07fd14b7223ca921485b0e96cf66e20bf94da95eeed9845f510cb8f \
-    --hash=sha256:695556edeb647eb94ee8345cc7108657fdb7fb16b3876623a399b4f61bbede01
+pip-tools==7.6.2 \
+    --hash=sha256:04dbe0e25f3b60fbdeee17d0590dac7fe20039876aa410a946fc54dc926c09ba \
+    --hash=sha256:f37eb4b736859c2c30230e50977312c61918b7ef931071ff7811fd067715c25f
     # via -r requirements.in
 pyproject-hooks==1.3.3 \
     --hash=sha256:5fc53fdac9f7bd63fbcdc868fb5f90b4784d78a53a3d3388cd738b807441a20b \
