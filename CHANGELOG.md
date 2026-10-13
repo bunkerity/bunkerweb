@@ -2,6 +2,8 @@
 
 ## v1.6.16 - 2026/10/??
 
+- [BUGFIX] `misc`: the default server certificate and key are regenerated together when they no longer match, instead of failing every reload. (Fixes #4031)
+
 ## v1.6.16~rc4 - 2026/10/06
 
 - [FEATURE] `BANS_TLS_DROP_REASONS` closes the TLS handshake of banned IPs for the listed ban reasons instead of serving the 403 page.
