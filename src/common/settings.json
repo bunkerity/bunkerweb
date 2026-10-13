@@ -450,7 +450,7 @@
   "BANS_TLS_DROP_REASONS": {
     "context": "multisite",
     "default": "",
-    "help": "Ban reasons whose banned IPs are dropped at the TLS ClientHello instead of getting the 403 page. Skipped behind PROXY protocol and header-based real IP.",
+    "help": "Ban reasons whose banned IPs are dropped at the TLS ClientHello instead of getting the 403 page. Skipped behind header-based real IP, and behind PROXY protocol unless real IP uses proxy_protocol.",
     "id": "bans-tls-drop-reasons",
     "label": "Bans dropped at TLS",
     "regex": "^((crowdsec|bad_behavior|manual|ui|api)( (crowdsec|bad_behavior|manual|ui|api))*)?$",

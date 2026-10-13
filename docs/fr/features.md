@@ -65,7 +65,7 @@ Un client banni termine normalement la négociation TLS puis reçoit la page de 
 La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `bad_behavior`, `manual`, `ui` et `api`. La valeur par défaut est vide, ce qui conserve la page 403 pour tous les bannissements. Nous suggérons `crowdsec`.
 
 - Seul le motif du bannissement qui s’applique compte. Pour une IP ayant un bannissement `manual` et un bannissement CrowdSec, indiquer seulement `crowdsec` n’abandonne rien et le client reçoit la page 403.
-- L’abandon est ignoré, et la page 403 reste, lorsque `USE_PROXY_PROTOCOL` vaut `yes` ou lorsque `USE_REAL_IP` vaut `yes` avec une source basée sur un en-tête, car l’adresse du client n’est pas connue à ce stade. Il est aussi ignoré pour les IP autorisées par une liste blanche locale.
+- L’abandon est ignoré, et la page 403 reste, lorsque `USE_REAL_IP` vaut `yes` avec une source basée sur un en-tête, ou lorsque `USE_PROXY_PROTOCOL` vaut `yes` sans que `USE_REAL_IP` vaille `yes` et `REAL_IP_HEADER` `proxy_protocol`, car l’adresse du client n’est pas connue à ce stade. Si les trois sont définis, l’abandon utilise l’adresse du protocole PROXY lorsque le pair qui se connecte figure dans `REAL_IP_FROM`, et l’adresse du pair sinon. Il est aussi ignoré pour les IP autorisées par une liste blanche locale.
 - Avec Redis activé, une négociation n’est abandonnée qu’après qu’une requête de l’IP bannie est passée par la vérification habituelle des bannissements ; la première requête reçoit donc encore la page 403.
 - Avec `SECURITY_MODE` sur `detect`, la négociation se poursuit et un avertissement est journalisé.
 - Les connexions HTTP/3 (QUIC) ne sont jamais abandonnées. Elles reçoivent la page 403.
@@ -82,7 +82,7 @@ La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Non      | **Instances BunkerWeb :** Liste des instances BunkerWeb séparées par des espaces.                        |
     | `MULTISITE`           | `no`              | global    | Non      | **Sites multiples :** Définir à `yes` pour héberger plusieurs sites avec des configurations différentes. |
     | `SECURITY_MODE`       | `block`           | multisite | Non      | **Niveau de sécurité :** `detect` ou `block` pour contrôler l’application de la sécurité.                |
-    | `BANS_TLS_DROP_REASONS` | | multisite | Non | **Bannissements abandonnés en TLS :** Motifs de bannissement (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, séparés par des espaces) dont les IP bannies sont abandonnées à la négociation TLS au lieu de recevoir la page 403. Ignoré derrière le protocole PROXY et avec une IP réelle basée sur un en-tête, et jamais appliqué à HTTP/3. |
+    | `BANS_TLS_DROP_REASONS` | | multisite | Non | **Bannissements abandonnés en TLS :** Motifs de bannissement (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, séparés par des espaces) dont les IP bannies sont abandonnées à la négociation TLS au lieu de recevoir la page 403. Ignoré avec une IP réelle basée sur un en-tête et derrière le protocole PROXY, sauf si `REAL_IP_HEADER` vaut `proxy_protocol`. Jamais appliqué à HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | Non      | **Type de serveur :** Définit si le serveur est de type `http` ou `stream`.                              |
 
 === "Paramètres API"

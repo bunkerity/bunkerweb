@@ -67,7 +67,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 该值是以空格分隔的原因列表，可选 `crowdsec`、`bad_behavior`、`manual`、`ui` 和 `api`。默认值为空，即所有封禁都保留 403 页面。我们建议使用 `crowdsec`。
 
 - 只有实际生效的封禁的原因才有意义。对于同时有 `manual` 封禁和 CrowdSec 封禁的 IP，只列出 `crowdsec` 不会丢弃任何连接，客户端会收到 403 页面。
-- 当 `USE_PROXY_PROTOCOL` 为 `yes`，或 `USE_REAL_IP` 为 `yes` 且来源基于请求头时，会跳过丢弃并保留 403 页面，因为此时无法得知客户端地址。被本地白名单放行的 IP 也会跳过。
+- 当 `USE_REAL_IP` 为 `yes` 且来源基于请求头时，或当 `USE_PROXY_PROTOCOL` 为 `yes` 但 `USE_REAL_IP` 不是 `yes` 或 `REAL_IP_HEADER` 不是 `proxy_protocol` 时，会跳过丢弃并保留 403 页面，因为此时无法得知客户端地址。三项都已设置时，如果连接的对端在 `REAL_IP_FROM` 中，丢弃使用 PROXY 协议提供的地址，否则使用对端地址。被本地白名单放行的 IP 也会跳过。
 - 启用 Redis 时，只有在被封禁 IP 的请求经过常规封禁检查之后，握手才会被丢弃，因此第一个请求仍会收到 403 页面。
 - 当 `SECURITY_MODE` 为 `detect` 时，握手会继续，并记录一条警告。
 - HTTP/3（QUIC）连接永远不会被丢弃，它们会收到 403 页面。
@@ -84,7 +84,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | 否   | **BunkerWeb 实例：** 以空格分隔的 BunkerWeb 实例列表。             |
     | `MULTISITE`           | `no`              | global    | 否   | **多站点：** 设置为 `yes` 以启用托管具有不同配置的多个网站。       |
     | `SECURITY_MODE`       | `block`           | multisite | 否   | **安全级别：** 控制安全强制执行的级别。选项：`detect` 或 `block`。 |
-    | `BANS_TLS_DROP_REASONS` | | multisite | 否 | **在 TLS 丢弃的封禁：** 其被封禁 IP 在 TLS 握手时被丢弃（而不是收到 403 页面）的封禁原因（`crowdsec`、`bad_behavior`、`manual`、`ui`、`api`，以空格分隔）。在 PROXY 协议之后以及基于请求头的真实 IP 下会跳过，且从不应用于 HTTP/3。 |
+    | `BANS_TLS_DROP_REASONS` | | multisite | 否 | **在 TLS 丢弃的封禁：** 其被封禁 IP 在 TLS 握手时被丢弃（而不是收到 403 页面）的封禁原因（`crowdsec`、`bad_behavior`、`manual`、`ui`、`api`，以空格分隔）。在基于请求头的真实 IP 下会跳过，在 PROXY 协议之后也会跳过，除非 `REAL_IP_HEADER` 为 `proxy_protocol`。从不应用于 HTTP/3。 |
     | `SERVER_TYPE`         | `http`            | multisite | 否   | **服务器类型：** 定义服务器是 `http` 还是 `stream` 类型。          |
 
 === "API 设置"

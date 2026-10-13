@@ -2,6 +2,7 @@
 
 ## v1.6.16 - 2026/10/??
 
+- [FEATURE] `BANS_TLS_DROP_REASONS` also drops banned clients at the TLS ClientHello behind PROXY protocol when real IP uses `proxy_protocol`, trusting the PROXY address only from proxies listed in `REAL_IP_FROM`.
 - [BUGFIX] `misc`: the default server certificate and key are regenerated together when they no longer match, instead of failing every reload. (Fixes #4031)
 - [BUGFIX] `pro`: plugin files drop group and other write before their checksum is stored, so a restore under a group-writable umask no longer reinstalls every PRO plugin on each check. (Fixes #4024)
 - [BUGFIX] `ui`: the Jobs page sorts the RELOAD and ASYNC columns by value. (Fixes #4023)
