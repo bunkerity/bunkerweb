@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.16 - 2026/10/??
+## v1.6.16 - 2026/10/13
 
 - [FEATURE] `BANS_TLS_DROP_REASONS` also drops banned clients at the TLS ClientHello behind PROXY protocol when real IP uses `proxy_protocol`, trusting the PROXY address only from proxies listed in `REAL_IP_FROM`.
 - [BUGFIX] `misc`: the default server certificate and key are regenerated together when they no longer match, instead of failing every reload. (Fixes #4031)
