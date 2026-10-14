@@ -427,7 +427,6 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 cmd.extend(
                     [
                         "--single-transaction",  # Consistent backup for InnoDB
-                        "--routines",  # Include stored procedures and functions
                         "--triggers",  # Include triggers
                         "--events",  # Include events
                         "--no-tablespaces",  # Avoid requiring the global PROCESS privilege
@@ -439,6 +438,10 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                         "--add-drop-table",  # Ensure DROP TABLE before CREATE
                     ]
                 )
+
+                # mariadb-dump reads mysql.proc for routines, which MySQL 8 no longer has.
+                if not mariadb_client or database == "mariadb":
+                    cmd.append("--routines")
 
                 # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
 

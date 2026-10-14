@@ -4,7 +4,7 @@ from datetime import datetime
 from sys import argv
 from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import delete, func, or_, select, update
+from sqlalchemy import case, delete, func, or_, select, update
 
 from model import Jobs, Jobs_cache, Jobs_runs  # type: ignore
 
@@ -264,46 +264,26 @@ class DatabaseJobsMixin(DatabaseMixinBase):
             ret_data["data"] = data.data
         return ret_data
 
-    def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "") -> List[Dict[str, Any]]:
-        """Get jobs cache files."""
+    def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "", data_job_name: str = "") -> List[Dict[str, Any]]:
+        """Get filtered cache rows; data_job_name keeps sibling metadata without their blobs."""
         with self._db_session() as session:
-            filters = {}
-            entities = [Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.last_update, Jobs_cache.checksum]
+            entities = [Jobs_cache.job_name, Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.last_update, Jobs_cache.checksum, Jobs.plugin_id]
             if with_data:
-                entities.append(Jobs_cache.data)
-            query = select(*entities)
+                # Paired files share one read; sibling rows are needed only for their paths.
+                data = Jobs_cache.data if not data_job_name else case((Jobs_cache.job_name == data_job_name, Jobs_cache.data), else_=None)
+                entities.append(data.label("data"))
+            query = select(*entities).join(Jobs, Jobs.name == Jobs_cache.job_name)
 
             if job_name:
-                query = query.filter_by(job_name=job_name)
-                filters["name"] = job_name
-
-            db_cache = session.execute(query).all()
-
-            if not db_cache:
-                return []
-
+                query = query.where(Jobs_cache.job_name == job_name)
             if plugin_id:
-                filters["plugin_id"] = plugin_id
-
-            query = select(Jobs.name, Jobs.plugin_id)
-
-            if filters:
-                query = query.filter_by(**filters)
-
-            jobs = {}
-            for job in session.execute(query):
-                jobs[job.name] = job.plugin_id
-
-            if not jobs:
-                return []
+                query = query.where(Jobs.plugin_id == plugin_id)
 
             cache_files = []
-            for cache in db_cache:
-                if cache.job_name not in jobs:
-                    continue
+            for cache in session.execute(query):
                 cache_files.append(
                     {
-                        "plugin_id": jobs[cache.job_name],
+                        "plugin_id": cache.plugin_id,
                         "job_name": cache.job_name,
                         "service_id": cache.service_id,
                         "file_name": cache.file_name,
@@ -311,7 +291,7 @@ class DatabaseJobsMixin(DatabaseMixinBase):
                         "checksum": cache.checksum,
                     }
                 )
-                if with_data:
+                if with_data and (not data_job_name or cache.job_name == data_job_name):
                     cache_files[-1]["data"] = cache.data
 
             return cache_files
