@@ -824,6 +824,19 @@ with app.app_context():
 
     app.before_request_funcs.setdefault(None, []).insert(0, lift_form_field_limit)
 
+    def reject_disallowed_host():
+        # Defense-in-depth: reject unexpected Host headers when an allowlist is configured. Registered after the
+        # hook above so it runs first: a hostile Host never reaches the session, the user loader or the CSRF parse.
+        # Static assets are still served (after_request supplies the nonce).
+        if is_static_path(request.path):
+            return
+        allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+        if allowed_hosts and not _host_allowed(request.host, allowed_hosts):
+            LOGGER.warning(f"Blocking UI request with disallowed Host header: {request.host!r}")
+            return make_response(jsonify({"message": "Invalid host"}), 400)
+
+    app.before_request_funcs[None].insert(0, reject_disallowed_host)
+
     # CrowdSec has its own `menu.html` entry (Overview group) like every other core page, so it
     # is not seeded into the generic Extra Pages fallback -- that would render it a second time.
     app.config["EXTRA_PAGES"] = []
@@ -1303,11 +1316,7 @@ def before_request():
     if is_static_path(request.path):
         return
 
-    # Defense-in-depth: reject unexpected Host headers when an allowlist is configured.
-    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
-    if allowed_hosts and not _host_allowed(request.host, allowed_hosts):
-        LOGGER.warning(f"Blocking UI request with disallowed Host header: {request.host!r}")
-        return make_response(jsonify({"message": "Invalid host"}), 400)
+    # The Host allowlist is enforced by `reject_disallowed_host`, registered first (see the CSRF setup).
 
     # Opened before anything else this request does, so the totals cover the whole render and
     # not just the part after the checks above. `token_hex(8)` rather than a uuid: it lands in

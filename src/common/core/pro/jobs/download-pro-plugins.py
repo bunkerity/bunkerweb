@@ -244,6 +244,21 @@ def invalid_key_already_checked(pro_license_key: str, db_metadata: dict, current
     return last_check.date() == current_date.astimezone(timezone.utc).date()
 
 
+def is_pro_api_verdict(resp) -> bool:
+    """Whether a 403 is the PRO API's own answer about the key, as opposed to the edge WAF page in front of it.
+
+    The API answers with its JSON envelope (`result: "ko"`, or the legacy `action` key); anything else on a 403
+    (BunkerWeb's HTML error page, a foreign JSON body, an unparsable one) says nothing about the key.
+    """
+    if resp.status_code != 403 or not resp.headers.get("Content-Type", "").lower().startswith("application/json"):
+        return False
+    try:
+        body = resp.json()
+    except ValueError:
+        return False
+    return isinstance(body, dict) and (body.get("result") == "ko" or "action" in body)
+
+
 def _billable_service_number(db=None) -> int:
     """Number of services that consume a PRO quota slot.
 
@@ -341,17 +356,22 @@ try:
             LOGGER.error(f"Access denied to {API_ENDPOINT}/pro-status - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
             error = True
             clean = False
-            if resp.headers.get("Content-Type", "") == "application/json":
-                resp_data = resp.json()
-                clean = db_metadata["is_pro"] and resp_data.get("action") == "clean"
+            verdict = is_pro_api_verdict(resp)
+            if verdict:
+                clean = db_metadata["is_pro"] and resp.json().get("action") == "clean"
 
             if clean:
                 clean_pro_plugins(db)
             else:
-                # The API answers a bad key with a 403 (JSON, or the edge's HTML page): for a key that never was
-                # PRO that is the verdict. A key that was PRO keeps its state (an access problem, not a verdict).
                 if not db_metadata["is_pro"]:
-                    err = db.set_metadata(default_metadata | metadata | {"last_pro_check": current_date})
+                    if verdict:
+                        # The API's own refusal: for a key that never was PRO that is the verdict. A key that was PRO keeps
+                        # its state (an access problem, not a verdict).
+                        update = default_metadata | metadata | {"last_pro_check": current_date}
+                    else:
+                        # The edge WAF answered, not the API: no verdict, only remember the attempt (as the 429 branch does)
+                        update = {"pro_license": pro_license_key, "last_pro_check": current_date}
+                    err = db.set_metadata(update)
                     if err:
                         LOGGER.error(f"Failed to record the refused BunkerWeb Pro license: {err}")
                         sys_exit(2)
