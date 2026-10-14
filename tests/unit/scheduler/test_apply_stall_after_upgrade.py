@@ -9,6 +9,9 @@ an unapplied configuration. The autoconf/mysql arm is the readable one, three lo
     16:49:16 [SCHEDULER]         Configuration changes are still pending 300s after the last
                                  dispatch; the job that should have applied them never completed.
 
+(That is the wording of the CI run; the scheduler now says "... so the apply has not been confirmed.
+ Dispatching again ...".)
+
 Two independent defects put those lines in that order, and this file pins both:
 
 1. **Ordering.** The scheduler refreshed the instances' ``status`` column *after* dispatching

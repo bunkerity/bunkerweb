@@ -36,6 +36,7 @@ from ApiCaller import ApiCaller  # type: ignore
 from common_utils import bytes_hash, effective_cpu_count, file_hash  # type: ignore
 from jobs import Job, cache_publication_lock, can_requeue, job_requeue_count, request_requeue  # type: ignore
 from logger import getLogger  # type: ignore
+from reload_outcome import record_reload_responses  # type: ignore
 
 from letsencrypt_utils import (
     CERTBOT_BIN,
@@ -1450,7 +1451,10 @@ try:
                                     test = "no" if getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
                                     # DEV-2b6. Explicit budget: send_to_apis' 10 s default is exactly the instance-side
                                     # swap wait, so the busy 503 would race the deadline. See RELOAD_TIMEOUT above.
-                                    sent = api_caller.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)[0]
+                                    sent, reload_responses = api_caller.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT, response=True)
+                                    # This reload's answers are the only verdict for it: a refusal raises the UI's failover banner, an
+                                    # accepted reload clears it. Best effort, never changes what this job reports.
+                                    record_reload_responses(JOB.db, reload_responses, fleet=True, logger=LOGGER)
                                     if not sent:
                                         LOGGER.error(
                                             "LE cache pushed but reload request failed on at least one instance; leaving worker reload path as fallback"

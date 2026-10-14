@@ -83,7 +83,7 @@ def test_no_push_in_flight_still_pushes_and_reloads():
         TASKS._request_reload_debounced(apis, BROKER, LOGGER)
 
     apis.send_files.assert_called_once_with("/var/cache/bunkerweb", "/cache", timeout=(5, 30))
-    apis.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30))
+    apis.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30), response=True)
 
 
 def test_a_broker_that_cannot_answer_does_not_hold_the_reload():

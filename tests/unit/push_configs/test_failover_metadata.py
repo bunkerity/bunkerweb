@@ -1,9 +1,10 @@
-"""push-configs is the only producer of the UI's NGINX failover banner.
+"""push-configs feeds the UI's NGINX failover banner from what each instance answered to the reload.
 
 The instance row's ``failover`` status lives one scheduler pass, and the scheduler loop no longer
-writes ``bw_metadata.failover``. push-configs sees the reload responses, so it records a refused
-reload (flag + NGINX output) and clears it on the next clean one. An unreachable instance answers
-nothing and is never a failover (M18); an outage must not erase an earlier real refusal either.
+writes ``bw_metadata.failover``. push-configs sees the reload responses and records them per host
+(`Database.record_reload_outcome`): a refusal raises that host's entry with the NGINX output, an
+accepted reload drops it. An unreachable or busy instance gives no verdict and is never a failover
+(M18); an outage must not erase an earlier real refusal either.
 """
 
 import ast
@@ -44,50 +45,57 @@ def _load_definitions():
 PUSH = _load_definitions()
 REFUSED = {"status": "error", "msg": 'config check failed: nginx: [emerg] unknown directive "bogus"'}
 OK = {"status": "success", "msg": "reloaded"}
-CLEARED = {"failover": False, "failover_message": ""}
+BUSY = {"status": "error", "msg": "a configuration swap is still in progress"}
 
 
-def _record(responses):
+def _record(responses, **kwargs):
     db = Mock()
-    db.set_metadata.return_value = ""
-    PUSH._record_failover(db, responses)
+    db.record_reload_outcome.return_value = ""
+    PUSH._record_failover(db, responses, **kwargs)
     return db
 
 
-def test_a_refused_reload_records_the_flag_and_the_nginx_output():
+def test_a_refused_reload_records_that_host_with_the_nginx_output():
     db = _record({"bw-1": REFUSED})
-    (payload,), _ = db.set_metadata.call_args
-    assert payload["failover"] is True
-    assert "bw-1" in payload["failover_message"] and "unknown directive" in payload["failover_message"]
+    db.record_reload_outcome.assert_called_once_with({"bw-1": REFUSED["msg"]}, fleet=True)
 
 
-def test_only_the_refusing_instance_is_named():
+def test_each_host_keeps_its_own_verdict():
     db = _record({"bw-1": OK, "bw-2": REFUSED})
-    (payload,), _ = db.set_metadata.call_args
-    assert payload["failover"] is True
-    assert "bw-2" in payload["failover_message"] and "bw-1" not in payload["failover_message"]
+    db.record_reload_outcome.assert_called_once_with({"bw-1": None, "bw-2": REFUSED["msg"]}, fleet=True)
 
 
-def test_a_clean_reload_clears_the_flag():
+def test_a_clean_reload_records_every_host_as_accepted():
     db = _record({"bw-1": OK, "bw-2": OK})
-    db.set_metadata.assert_called_once_with(CLEARED)
+    db.record_reload_outcome.assert_called_once_with({"bw-1": None, "bw-2": None}, fleet=True)
 
 
-def test_an_unreachable_instance_next_to_a_clean_one_clears_and_never_raises():
-    db = _record({"bw-1": OK})
-    db.set_metadata.assert_called_once_with(CLEARED)
+def test_a_targeted_push_is_not_a_fleet_reload():
+    db = _record({"bw-1": OK}, fleet=False)
+    db.record_reload_outcome.assert_called_once_with({"bw-1": None}, fleet=False)
 
 
 def test_an_outage_leaves_an_earlier_refusal_alone():
     db = _record({})
-    db.set_metadata.assert_not_called()
+    db.record_reload_outcome.assert_not_called()
+
+
+def test_a_busy_instance_is_not_a_verdict():
+    db = _record({"bw-1": BUSY})
+    db.record_reload_outcome.assert_not_called()
 
 
 def test_a_metadata_write_error_is_logged_not_raised():
     db = Mock()
-    db.set_metadata.return_value = "read-only"
+    db.record_reload_outcome.return_value = "boom"
     PUSH._record_failover(db, {"bw-1": REFUSED})
     PUSH.LOGGER.error.assert_called()
+
+
+def test_the_main_flow_tells_a_targeted_push_from_a_fleet_one():
+    """A push to a subset must not be able to end a fleet-wide legacy refusal."""
+    source = JOB_PATH.read_text(encoding="utf-8")
+    assert "_record_failover(db, reload_responses, fleet=not target_hostnames)" in source
 
 
 def test_the_reload_keeps_the_instance_answers():

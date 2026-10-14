@@ -40,6 +40,7 @@ from custom_configs_drift import (  # type: ignore
     write_projection,
 )
 from logger import setup_logger  # type: ignore
+from reload_outcome import record_reload_responses  # type: ignore
 from jobs import CachePublicationLockError, _write_atomic, cache_publication_lock, note_deferral  # type: ignore
 
 try:
@@ -519,23 +520,15 @@ def _trigger_reload(api_caller: ApiCaller) -> tuple[bool, dict]:
     return bool(sent), responses or {}
 
 
-def _record_failover(db: Database, responses: dict) -> None:
-    """Feed the UI's NGINX failover banner from what the instances answered to a reload.
+def _record_failover(db: Database, responses: dict, *, fleet: bool = True) -> None:
+    """Feed the UI's NGINX failover banner from what each instance answered to a reload.
 
-    A reachable instance that refused (config check failed, ...) raises the flag with NGINX's own
-    output. A clean answer clears it. No answer at all -- every instance unreachable -- leaves it
-    alone: an outage is not a failover (M18) and must not erase an earlier real refusal.
+    Per host and atomic (`Database.record_reload_outcome`): a refusal sets that host's entry with
+    NGINX's own output, an accepted reload drops it. Instances that did not answer, or answered
+    "busy", give no verdict and keep what they had -- an outage is not a failover (M18) and must not
+    erase an earlier real refusal. `fleet` is false for a push aimed at a subset of the instances.
     """
-    refused = {host: str((resp or {}).get("msg") or "reload refused") for host, resp in responses.items() if (resp or {}).get("status") != "success"}
-    if refused:
-        payload = {"failover": True, "failover_message": "\n".join(f"{host} - {msg}" for host, msg in sorted(refused.items()))}
-    elif responses:
-        payload = {"failover": False, "failover_message": ""}
-    else:
-        return
-    err = db.set_metadata(payload)
-    if err:
-        LOGGER.error(f"Failed to record the failover state: {err}")
+    record_reload_responses(db, responses, fleet=fleet, logger=LOGGER)
 
 
 def _snapshot_failover() -> Path | None:
@@ -667,7 +660,7 @@ try:
         LOGGER.error("One or more artifact pushes failed (see per-instance logs above)")
 
     reload_ok, reload_responses = _trigger_reload(api_caller)
-    _record_failover(db, reload_responses)
+    _record_failover(db, reload_responses, fleet=not target_hostnames)
     if reload_ok:
         LOGGER.info("Push and reload completed successfully")
         # Only here. Gating on the exit code instead would acknowledge four paths that reach

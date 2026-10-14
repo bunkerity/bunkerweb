@@ -144,7 +144,7 @@ def test_the_holder_pushes_the_cache_then_reloads():
     # DEV-2b3 (port of dev 462c1e851): the read budget is derived from the service count now,
     # and lands on the previous flat 30s for a single service.
     apis.send_files.assert_called_once_with("/var/cache/bunkerweb", "/cache", timeout=(5, 30))
-    apis.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30))
+    apis.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30), response=True)
     # Held for the next job to take, not left behind to block it for a minute.
     assert TASKS.RELOAD_LOCK_KEY not in client.keys
 

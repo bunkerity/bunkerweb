@@ -36,8 +36,6 @@ _HOME_AGG_CACHE_TTL = 30.0
 # Serializes cache misses so concurrent /home loads compute the aggregation once
 # (single-flight) instead of each running the full Redis scan in parallel.
 _HOME_AGG_LOCK = Lock()
-# Keep aligned with common/core/jobs/jobs/push-configs.py.
-RELOAD_TIMEOUT = (5, 30)
 
 
 def _copy_home_aggregates(agg: dict) -> dict:
@@ -80,6 +78,9 @@ class Instance:
     enrollment_state: str
     tls_mode: str
     credential_updated_at: Optional[str]
+    # The UI's API client, which `reload()` goes through (see there). Optional and last, like the
+    # fields above: callers that never reload do not pass it.
+    api_client: Optional[Any]
 
     def __init__(
         self,
@@ -94,6 +95,7 @@ class Instance:
         enrollment_state: str = "none",
         tls_mode: str = "off",
         credential_updated_at: Optional[str] = None,
+        api_client: Optional[Any] = None,
     ) -> None:
         self.hostname = hostname
         self.name = name
@@ -106,6 +108,7 @@ class Instance:
         self.enrollment_state = enrollment_state or "none"
         self.tls_mode = tls_mode or "off"
         self.credential_updated_at = credential_updated_at
+        self.api_client = api_client
 
     @staticmethod
     def from_hostname(hostname: str, db) -> Optional["Instance"]:
@@ -125,6 +128,7 @@ class Instance:
             instance.get("enrollment_state", "none"),
             instance.get("tls_mode", "off"),
             instance.get("credential_updated_at"),
+            db,
         )
 
     @property
@@ -132,16 +136,17 @@ class Instance:
         return self.hostname
 
     def reload(self) -> str:
+        # Through the API, not straight to the instance: the API route is what records the instance's
+        # verdict for the failover banner, so a reload the operator triggers by hand clears (or
+        # raises) it like every other reload, and the UI never writes the metadata itself.
+        if self.api_client is None:
+            return f"Can't reload instance {self.hostname}: no API client"
         try:
-            result = self.apiCaller.send_to_apis(
-                "POST", f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}", timeout=RELOAD_TIMEOUT
-            )[0]
+            self.api_client.reload_instance(self.hostname, test=getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() != "yes")
         except BaseException as e:
-            return f"Can't reload instance {self.hostname}: {e}"
+            return f"Can't reload instance {self.hostname}: {getattr(e, 'message', e)}"
 
-        if result:
-            return f"Instance {self.hostname} has been reloaded."
-        return f"Can't reload instance {self.hostname}"
+        return f"Instance {self.hostname} has been reloaded."
 
     def start(self) -> str:
         raise NotImplementedError("Method not implemented yet")
@@ -537,6 +542,7 @@ class InstancesUtils:
                 instance.get("enrollment_state", "none"),
                 instance.get("tls_mode", "off"),
                 instance.get("credential_updated_at"),
+                self.__api_client,
             )
             for instance in instances_data
             if not status or instance["status"] == status

@@ -232,6 +232,11 @@ RELOAD_OWED_FAST_RETRIES = 3
 RELOAD_OWED_SLOW_RETRY_EVERY = 20
 # Keep aligned with common/core/jobs/jobs/push-configs.py.
 RELOAD_TIMEOUT = (5, 30)
+# The job exit-code protocol. Success is 0 (nothing changed) or 1 (changed); 3 is a FAILED run that
+# changed material anyway -- certbot-renew rotating one lineage while another errors -- so it is
+# recorded failed but still published, where a plain failure (2) publishes nothing.
+SUCCESS_CODES = (0, 1)
+CHANGED_CODES = (1, 3)
 # Long enough to cover a push plus a reload with configuration testing on a slow instance. The
 # holder deletes the key when it is done, so this only matters when a worker dies mid-reload.
 # DEV-2b3 (port of dev 462c1e851): the push read budget is no longer flat -- `folder_push_timeout`
@@ -515,6 +520,7 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
     instances, with the job recorded as a success.
     """
     from ApiCaller import folder_push_timeout  # type: ignore  # DEV-2b3 (deps are on sys.path by now, like every other import here)
+    from reload_outcome import record_reload_responses  # type: ignore
 
     client = _broker_client(broker_url)
     test = "no" if os.getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
@@ -596,7 +602,12 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
                 if not apis.send_files("/var/cache/bunkerweb", "/cache", timeout=folder_push_timeout(30, _push_service_count(logger))):
                     raise RuntimeError("Failed to send /var/cache/bunkerweb to BunkerWeb instances")
 
-            if not apis.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)[0]:
+            # The answers, not just the verdict: a refusal raises the UI's failover banner and an
+            # accepted reload clears it (a busy instance is neither). Recording is best effort and
+            # runs before the raise, so a refused reload is both shown and still retried.
+            reloaded, reload_responses = apis.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT, response=True)
+            record_reload_responses(get_worker_db(), reload_responses, fleet=True, logger=logger)
+            if not reloaded:
                 raise RuntimeError("Failed to request BunkerWeb reload")
 
             # The material is on the instances and they have reloaded: now, and only now, is a
@@ -748,12 +759,12 @@ def execute_job(self, job_data: dict) -> dict:
             os.environ.update(job_env)
 
         ret = executor.run(job_data)
-        success = ret in (0, 1)
+        success = ret in SUCCESS_CODES
     except SystemExit as exc:
         ret = exc.code if isinstance(exc.code, int) else 1
-        success = ret in (0, 1)
+        success = ret in SUCCESS_CODES
         if not success:
-            error = f"Job exited with code {ret}"
+            error = f"Job exited with code {ret}" + (" (changed material, run failed)" if ret in CHANGED_CODES else "")
             logger.error(f"[{run_id}] Job {plugin}/{name} exited with code {ret}")
     except Exception as exc:
         error = f"Job crashed: {exc}"
@@ -790,7 +801,7 @@ def execute_job(self, job_data: dict) -> dict:
         apis = None
         resolution_failed = True
 
-    if ret == 1 and not apis:
+    if ret in CHANGED_CODES and not apis:
         # The job wrote its output and asked for it to be shipped, and there is nobody to ship it
         # to. Left silent (which it was), the cache stays on the worker, the instances keep serving
         # the previous configuration, and the run records as a plain success -- the operator has
@@ -844,7 +855,7 @@ def execute_job(self, job_data: dict) -> dict:
     # Declared per job in `plugin.json` (`"regenerate": true`), so an external or PRO plugin gets
     # the same behaviour. 1.6 hardcoded the two core jobs it knew about in the scheduler and
     # silently gave every other one a cache push with no re-render.
-    if ret == 1 and job_data.get("regenerate"):
+    if ret in CHANGED_CODES and job_data.get("regenerate"):
         if db:
             try:
                 err = db.checked_changes(["config"], plugins_changes=[plugin], value=True)
@@ -862,10 +873,12 @@ def execute_job(self, job_data: dict) -> dict:
     # `or _reload_is_owed(...)`: the push ships the whole /var/cache/bunkerweb tree, so any run
     # with a reachable instance can settle what an earlier one could not deliver -- it does not have
     # to be a run that changed something itself.
-    if apis and (ret == 1 or _reload_is_owed(broker_url, logger)):
+    if apis and (ret in CHANGED_CODES or _reload_is_owed(broker_url, logger)):
         try:
             logger.info(
-                f"[{run_id}] Job {plugin}/{name} requested reload" if ret == 1 else f"[{run_id}] Carrying a cache push an earlier job could not deliver"
+                f"[{run_id}] Job {plugin}/{name} requested reload"
+                if ret in CHANGED_CODES
+                else f"[{run_id}] Carrying a cache push an earlier job could not deliver"
             )
             _request_reload_debounced(apis, broker_url, logger)
         except Exception as exc:
@@ -876,7 +889,7 @@ def execute_job(self, job_data: dict) -> dict:
     return {
         "duration_seconds": duration,
         "name": name,
-        "needs_reload": ret == 1,
+        "needs_reload": ret in CHANGED_CODES,
         "plugin": plugin,
         "return_code": ret,
         "run_id": run_id,

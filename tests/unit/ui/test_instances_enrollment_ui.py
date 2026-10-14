@@ -295,3 +295,41 @@ class TestReloadAndStopFollowTheWritePermission:
         handler = re.search(r'\$\(document\)\.on\("click", "\.reload-instance, \.stop-instance", function \(\) \{(.*?)\n  \}\);', PAGE_JS, re.S)
         assert handler, "the reload/stop click handler is gone from instances.js"
         assert handler.group(1).index("isReadOnly") < handler.group(1).index("execForm(")
+
+
+class TestReloadStaysReachableOnAFailoverInstance:
+    """D1: an accepted per-instance reload is what clears that host's failover entry, and an
+    instance whose reload was refused reads `failover`. Gating Reload on `status == 'up'` left the
+    one UI path that clears the banner unreachable. Stop and a `down`/`loading` instance are
+    unchanged: nothing can answer a reload there."""
+
+    @staticmethod
+    def _reload(html):
+        found = re.search(r'original-title="([^"]*)">\s*<button type="button"\s*class="icon-btn reload-instance([^"]*)"', html)
+        assert found, "the reload button is gone"
+        return found.group(1), found.group(2)
+
+    def test_reload_is_enabled_on_a_failover_instance(self):
+        tooltip, classes = self._reload(_render([_instance(status="failover")]))
+        assert "disabled" not in classes
+        assert tooltip.startswith("tooltip.button.reload_instance")
+
+    @pytest.mark.parametrize("status", ("down", "loading"))
+    def test_reload_stays_disabled_when_nothing_can_answer(self, status):
+        tooltip, classes = self._reload(_render([_instance(status=status)]))
+        assert "disabled" in classes
+        assert tooltip.startswith("tooltip.instance_not_up")
+
+    def test_reload_stays_enabled_on_an_up_instance(self):
+        tooltip, classes = self._reload(_render([_instance(status="up")]))
+        assert "disabled" not in classes
+        assert tooltip.startswith("tooltip.button.reload_instance")
+
+    def test_a_reader_is_still_refused_on_a_failover_instance(self):
+        tooltip, classes = self._reload(_render([_instance(status="failover")], is_readonly=True, user_readonly=True))
+        assert "disabled" in classes
+        assert tooltip.startswith("tooltip.disabled_readonly")
+
+    def test_stop_is_left_alone_on_a_failover_instance(self):
+        html = _render([_instance(status="failover")])
+        assert "disabled" in TestReloadAndStopFollowTheWritePermission._button(html, "stop-instance")

@@ -2373,8 +2373,9 @@ function log_stack () {
                 # and clears the change flags the controller's readiness waits on -- runs there,
                 # so a stack that never turns healthy is diagnosed from these three, not from the
                 # scheduler. Run 32820557847 lost three Kubernetes jobs to exactly that gap: the
-                # scheduler said "the job that should have applied them never completed" and the
-                # dump had nothing to say who did not run it.
+                # scheduler said "the job that should have applied them never completed" (the wording
+                # then; it now says "the apply has not been confirmed") and the dump had nothing to
+                # say who did not run it.
                 log "UTILS" "ℹ️ " "🪪 Description of BunkerWeb API pods ..."
                 kubectl describe pods -n bunkerweb -l app=bunkerweb-api
 

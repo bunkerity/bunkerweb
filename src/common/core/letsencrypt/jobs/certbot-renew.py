@@ -15,6 +15,7 @@ from ApiCaller import ApiCaller  # type: ignore
 from common_utils import file_hash  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job, cache_publication_lock  # type: ignore
+from reload_outcome import record_reload_responses  # type: ignore
 from certbot_concurrency import ensure_accounts_for_orphans
 from letsencrypt_utils import (
     CERTBOT_BIN,
@@ -177,13 +178,19 @@ try:
     # detect a real renewal; only then signal a reload (status=1) so the renewed cert is delivered
     # to the instances. Without this, a successful renewal stayed status=0 and the new cert was
     # cached to the DB but never pushed to instances until an unrelated reload happened.
-    renewed = False
-    if status == 0:
-        after_hashes = _live_cert_hashes()
-        renewed = after_hashes != before_hashes
-        if renewed:
-            LOGGER.info("Detected renewed certificate(s); will deliver them to the instances.")
-            status = 1
+    #
+    # A run that failed can still have rotated a lineage (certbot renews each one on its own and
+    # exits non-zero when any failed). That material is on disk and must be published although the
+    # run is a failure: exit 3, "changed, run failed". Only a lineage whose fullchain is readable
+    # and differs from what it was, or is new, counts -- a vanished or unreadable one (hash "") is
+    # no new certificate to ship.
+    after_hashes = _live_cert_hashes()
+    partial = status == 2 and any(digest and before_hashes.get(name) != digest for name, digest in after_hashes.items())
+    if status == 0 and after_hashes != before_hashes:
+        LOGGER.info("Detected renewed certificate(s); will deliver them to the instances.")
+        status = 1
+    elif partial:
+        LOGGER.warning("certbot failed on some certificates but renewed others; the renewed ones are still delivered.")
 
     # Recover in this run, not the next one. The persist below refuses an inconsistent tree, so a
     # purge left unrepaired would never reach the DB row, the dead account would be restored from
@@ -204,6 +211,11 @@ try:
     # (rmtree runs before extraction in Job.restore_cache) and a blind cache_dir() call
     # would overwrite the good DB row with the empty post-rmtree state, losing the certs
     # from both disk and DB.
+    #
+    # A partial renewal is only publishable from a safe tree, hence the restore check: a failed
+    # restore stays a plain 2 whatever certbot rotated.
+    if partial and JOB.restore_ok:
+        status = 3
     if not JOB.restore_ok:
         LOGGER.error("Skipping db cache update: initial cache restore failed, refusing to overwrite good DB state with current disk state.")
         status = 2
@@ -241,14 +253,14 @@ try:
                         LOGGER.warning(f"Certificate inventory sync completed with errors: {import_summary['errors']}")
                 except Exception as exc:
                     LOGGER.warning(f"Unable to sync the certificate inventory: {exc}")
-                # Only when a cert was actually renewed this run (status==1): deliver the renewed LE
+                # Only when a cert was actually renewed this run (status==1, or 3 when another lineage failed): deliver the renewed LE
                 # cache to every live instance NOW, directly. Same whole-/var/cache push + /reload the
                 # worker's reload path performs on ret==1 (src/worker/tasks.py:81), issued here so it
                 # CANNOT be silently dropped by the shared 10s bw:reload_pending debounce that any other
                 # reload-flagged job finishing in the same window can steal. On any failure we leave
                 # status==1 so the worker's debounced reload path still runs as a fallback. We hold
                 # le_cache_write_lock around the read so push-configs cannot rmtree/rebuild the tree mid-send.
-                if status == 1:
+                if status in (1, 3):
                     try:
                         token = getenv("API_TOKEN") or None
                         instances = [i for i in JOB.db.get_instances(with_credential=True) if i.get("status") != "down"]
@@ -262,14 +274,19 @@ try:
                                 test = "no" if getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
                                 # DEV-2b6. Explicit budget: send_to_apis' 10 s default is exactly the instance-side
                                 # swap wait, so the busy 503 would race the deadline. See RELOAD_TIMEOUT above.
-                                sent = api_caller.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)[0]
+                                sent, reload_responses = api_caller.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT, response=True)
+                                # This reload's answers are the only verdict for it: a refusal raises the UI's failover banner, an
+                                # accepted reload clears it. Best effort, never changes what this job reports.
+                                record_reload_responses(JOB.db, reload_responses, fleet=True, logger=LOGGER)
                                 if not sent:
                                     LOGGER.error(
                                         "Renewed LE cache pushed but reload request failed on at least one instance; leaving worker reload path as fallback"
                                     )
                                 else:
                                     LOGGER.info("Successfully delivered renewed Let's Encrypt cache and reloaded instances")
-                                    status = 0  # delivered here; don't double-fire the debounced worker reload
+                                    # delivered here; don't double-fire the debounced worker reload. A partial
+                                    # renewal (3) falls back to 2 so the lineage that failed stays a failed run.
+                                    status = 0 if status == 1 else 2
                         else:
                             LOGGER.info("No live instances registered; leaving delivery to the reload path")
                     except BaseException as e:

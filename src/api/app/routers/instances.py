@@ -6,6 +6,7 @@ from typing import Optional, List
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from common_utils import parse_host  # type: ignore
+from reload_outcome import record_reload_responses  # type: ignore
 
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller, get_api_for_hostname
@@ -52,7 +53,9 @@ def reload_config(test: bool = True, api_caller=Depends(get_instances_api_caller
         test: If True, validate the configuration before applying it (default: True)
     """
     test_arg = "yes" if test else "no"
-    ok, _ = api_caller.send_to_apis("POST", f"/reload?test={test_arg}", timeout=RELOAD_TIMEOUT)
+    # The answers feed the UI's failover banner: a refusal raises it, an accepted reload clears it.
+    ok, responses = api_caller.send_to_apis("POST", f"/reload?test={test_arg}", timeout=RELOAD_TIMEOUT, response=True)
+    record_reload_responses(get_db(), responses, fleet=True, logger=LOGGER)
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 
 
@@ -300,7 +303,9 @@ def reload_one(hostname: str, test: bool = True, api=Depends(get_api_for_hostnam
     # wait rather than a 502. The fleet endpoint above already goes through it; this one did not, so
     # a reload issued during a routine cache push reported a healthy instance as failed. `ret` is
     # True only when the call was sent AND answered 200, which is what this returned before.
-    ok, _ = ApiCaller([api]).send_to_apis("POST", f"/reload?test={test_arg}", timeout=RELOAD_TIMEOUT)
+    ok, responses = ApiCaller([api]).send_to_apis("POST", f"/reload?test={test_arg}", timeout=RELOAD_TIMEOUT, response=True)
+    # Not a fleet reload: only this host's entry may move, another host's refusal stands.
+    record_reload_responses(get_db(), responses, fleet=False, logger=LOGGER)
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 
 

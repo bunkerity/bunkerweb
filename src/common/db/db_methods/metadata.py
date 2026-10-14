@@ -8,7 +8,8 @@ from typing import Any, Dict, List, Literal, Mapping, Optional, Sequence, Set, T
 
 from certificate_utils import ACTIVE_KEY_ENV, KEYS_ENV  # type: ignore
 from common_utils import merge_template_settings, split_templates  # type: ignore
-from model import Global_values, Metadata, Plugins, Template_settings  # type: ignore
+from model import Global_values, Instances, Metadata, Plugins, Template_settings  # type: ignore
+from reload_outcome import LEGACY_HOST, normalize_host, parse_failover_message, render_failover_message  # type: ignore
 
 from sqlalchemy import delete, or_, select, text, update
 
@@ -357,6 +358,69 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
                     setattr(metadata, key, value)
                 session.commit()
             except BaseException as e:
+                return str(e)
+
+        return ""
+
+    def record_reload_outcome(self, results: Mapping[str, Optional[str]], *, fleet: bool = False) -> str:
+        """Fold what instances answered to a reload into the failover banner, atomically.
+
+        `results` maps each host that ANSWERED to `None` (reload accepted) or its refusal message
+        (`reload_outcome.classify_reload_responses` builds it). The banner is a per-host map kept in
+        `failover_message`: an accepted host drops its entry, a refusing host sets it, and a host
+        that is not in `results` -- unreachable, or busy -- keeps whatever it had.
+
+        One transaction, and its FIRST statement writes the metadata row: that takes the row lock on
+        PostgreSQL/MariaDB/MySQL and SQLite's write lock before anything is read (SQLite has no
+        FOR UPDATE, and a deferred transaction that reads first can only fail to upgrade). Two
+        reloads finishing together therefore serialise instead of each overwriting the other's
+        verdict from a stale read.
+
+        `fleet=True` says the reload went to the whole fleet. Only then does the method also forget
+        refusals of hosts that are no longer instances (nothing will ever report on them again), and
+        end a legacy entry -- text from before the per-host format that could not be split into
+        hosts -- once EVERY known instance accepted. A per-host success never removes it.
+        """
+        if not results:
+            return ""
+        results = {normalize_host(host): message for host, message in results.items()}
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            try:
+                session.execute(update(Metadata).where(Metadata.id == 1).values(failover=Metadata.failover))
+                row = session.execute(select(Metadata.failover, Metadata.failover_message).where(Metadata.id == 1).with_for_update()).first()
+                if row is None:
+                    return "The metadata are not set yet, try again"
+
+                # A message under a cleared flag is not a state (and the old overwrite never left one).
+                stored = (row[1] or "") if row[0] else ""
+                entries = parse_failover_message(stored)
+                if entries is None:
+                    entries = {LEGACY_HOST: stored}
+                before = dict(entries)
+
+                for host, message in results.items():
+                    if message is None:
+                        entries.pop(host, None)
+                    else:
+                        entries[host] = message
+
+                if fleet:
+                    known = {normalize_host(hostname) for hostname in session.scalars(select(Instances.hostname))}
+                    if known:
+                        for host in [host for host in entries if host != LEGACY_HOST and host not in known]:
+                            del entries[host]
+                        if known.issubset(host for host, message in results.items() if message is None):
+                            entries.pop(LEGACY_HOST, None)
+
+                # Re-rendering only when something moved keeps an untouched legacy text byte for byte.
+                rendered = stored if entries == before else render_failover_message(entries)
+                session.execute(update(Metadata).where(Metadata.id == 1).values(failover=bool(entries), failover_message=rendered))
+                session.commit()
+            except Exception as e:
                 return str(e)
 
         return ""

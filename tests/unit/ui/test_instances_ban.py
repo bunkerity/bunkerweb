@@ -25,12 +25,15 @@ def test_instance_status_literal_includes_failover():
     assert "failover" in get_args(Instance.__annotations__["status"])
 
 
-def test_reload_allows_time_for_nginx_confirmation(monkeypatch):
+def test_reload_goes_through_the_api_not_straight_to_the_instance(monkeypatch):
+    """The reload budget moved with it: `ApiClient.reload_instance` carries the read timeout
+    (tests/unit/ui/test_instance_reload_via_api.py)."""
     monkeypatch.delenv("DISABLE_CONFIGURATION_TESTING", raising=False)
     api_caller = Mock()
-    api_caller.send_to_apis.return_value = (True, None)
+    api_client = Mock()
     timestamp = datetime(2026, 8, 27)
-    instance = Instance("bw-1", "bw-1", "ui", "up", "static", timestamp, timestamp, api_caller)
+    instance = Instance("bw-1", "bw-1", "ui", "up", "static", timestamp, timestamp, api_caller, api_client=api_client)
 
     assert instance.reload() == "Instance bw-1 has been reloaded."
-    api_caller.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30))
+    api_client.reload_instance.assert_called_once_with("bw-1", test=True)
+    api_caller.send_to_apis.assert_not_called()

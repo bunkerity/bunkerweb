@@ -1463,8 +1463,8 @@ if __name__ == "__main__":
                     # ponytail: fixed interval, no backoff -- add one only if flapping shows up.
                     if apply_rearm_due(changes, last_dispatch, datetime.now().astimezone()):
                         LOGGER.warning(
-                            f"Configuration changes are still pending {APPLY_RETRY_INTERVAL}s after the last dispatch; "
-                            "the job that should have applied them never completed. Dispatching again ..."
+                            f"Configuration changes are still pending {APPLY_RETRY_INTERVAL}s after the last dispatch, "
+                            "so the apply has not been confirmed. Dispatching again ..."
                         )
                         old_changes = {}
                         last_dispatch = None

@@ -123,6 +123,15 @@ class ApiClient(BaseApiClient):
     def reload_instances(self):
         return self._post("/instances/reload")
 
+    def reload_instance(self, hostname, *, test=True):
+        """Reload one instance through the API, which records the verdict for the failover banner.
+
+        The read budget covers the instance's `nginx -t` + swap and the API's own busy retries
+        (3 x 30s), and the HTTP session never retries it: a reload the API already forwarded must
+        not be sent twice.
+        """
+        return self._post(f"/instances/{hostname}/reload", params={"test": "true" if test else "false"}, timeout=(5, 100), retry=False)
+
     def stop_instances(self):
         return self._post("/instances/stop")
 

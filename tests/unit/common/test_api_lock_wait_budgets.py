@@ -29,8 +29,9 @@ API_LUA = ROOT / "src" / "bw" / "lua" / "bunkerweb" / "api.lua"
 RELOAD_CALLERS = (
     "src/worker/tasks.py",
     "src/api/app/routers/instances.py",
-    "src/ui/app/models/instance.py",
     "src/common/core/jobs/jobs/push-configs.py",
+    # (The UI no longer reloads an instance itself: `ApiClient.reload_instance` asks the API route above, with a
+    # read budget of its own, pinned in tests/unit/ui/test_instance_reload_via_api.py.)
     # These two used to pass no timeout at all and inherit `send_to_apis`' 10 s default, which is
     # exactly the instance-side wait: margin zero, and the 503 arrives as a status-less timeout the
     # busy retry cannot see. They declare their own budget since DEV-2b6.

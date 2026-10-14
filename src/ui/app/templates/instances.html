@@ -194,11 +194,13 @@
                                 </button>
                                 {# Reload and Stop change the instance: same write gate as Enroll and Delete (H16). #}
                                 {% set write_tooltip_key = ('tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly') if is_readonly else none %}
+                                {# A `failover` instance still answers: its reload is the one that clears the failover banner (D1), so only down/loading refuse it. #}
+                                {% set can_reload_instance = instance.status in ('up', 'failover') %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="{{ _(write_tooltip_key or ("tooltip.instance_not_up" if instance.status != 'up' else "tooltip.button.reload_instance"), hostname=instance['hostname']) }}">
+                                     data-bs-original-title="{{ _(write_tooltip_key or ("tooltip.instance_not_up" if not can_reload_instance else "tooltip.button.reload_instance"), hostname=instance['hostname']) }}">
                                     <button type="button"
-                                            class="icon-btn reload-instance{% if instance.status != 'up' or is_readonly %} disabled{% endif %}"
+                                            class="icon-btn reload-instance{% if not can_reload_instance or is_readonly %} disabled{% endif %}"
                                             aria-label="{{ _("tooltip.button.reload_instance", hostname=instance['hostname']) }}"
                                             data-instance="{{ instance['hostname'] }}">
                                         <i class="bx bx-refresh" aria-hidden="true"></i>

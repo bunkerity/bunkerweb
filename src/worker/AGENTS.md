@@ -18,7 +18,7 @@ The Worker executes plugin jobs. It replaces the in-process execution that used 
 - A Redis or Valkey broker is required. `CELERY_BROKER_URL` defaults to `redis://127.0.0.1:6379/0` — a literal IPv4 on purpose, because `localhost` is ambiguous on dual-stack hosts.
 - Queue routing has **one** source of truth: `HEAVY_JOBS` and `queue_for()` in `src/common/utils/job_queues.py`, imported by both `app.py` and `src/api/app/routers/jobs.py`. Do not reintroduce a local copy.
 - Job loading stays sandboxed under the core, external and pro plugin roots.
-- Return codes are a protocol: `0` success, `1` success plus debounced reload, anything else failure.
+- Return codes are a protocol: `0` success, `1` success plus debounced reload, `3` failure that changed material (recorded failed, still published), anything else failure.
 - The per-job environment must keep stripping the sensitive keys.
 
 ## Files
@@ -58,7 +58,10 @@ Hard and soft time limits are `task_time_limit` / `task_soft_time_limit`; concur
 
 - `0` — success, no reload
 - `1` — success, request a debounced reload of every instance
-- anything else, including unhandled exceptions — failure
+- `3` — **failure that changed material**: recorded as a failed run (`Job exited with code 3 (changed material, run failed)`), but published like a `1` — cache push, reload, `regenerate` flag, deferral when no instance is reachable. Only `certbot-renew` exits it (one lineage rotated while another failed); external and PRO jobs exiting `3` publish too
+- anything else, including unhandled exceptions — failure, nothing is published
+
+In `tasks.py` these are `SUCCESS_CODES = (0, 1)` (what makes a run a success) and `CHANGED_CODES = (1, 3)` (what publishes); every publish branch keys on `CHANGED_CODES`.
 
 **`JobExecutor.run` itself only ever returns `0` or `2`** (path outside `ALLOWED_ROOTS`, missing file, or any exception during load/execution). The `1` path is reachable **only** when the job script raises `SystemExit(1)` — i.e. calls `sys.exit(1)`. That is the convention every job in `src/common/core/*/jobs/` follows. A plain `return 1` from the job module does nothing: module return values are discarded and reported as `0`.
 
@@ -68,7 +71,7 @@ failure message and is `None` on success — a non-zero `SystemExit`, an excepti
 
 ### Reload broadcast
 
-On `ret == 1`, and on any run that finds a push still owed in `bw:reload_owed`, `_request_reload_debounced` takes a Redis SETNX lock (`bw:reload_pending`, TTL `RELOAD_LOCK_TTL`), then `send_files("/var/cache/bunkerweb", "/cache")` to every instance and `POST /reload?test=<yes|no>` (`no` only when `DISABLE_CONFIGURATION_TESTING=yes`). A job that loses the lock sets `bw:reload_dirty` and returns; the holder re-reads that flag after each reload and goes round again, up to `MAX_RELOAD_ROUNDS`, then deletes the lock. **The push is inside the loop** because `send_files` tars the tree as it stands — a job that wrote its cache after the holder's tar needs another push, not just another reload.
+On `ret in CHANGED_CODES`, and on any run that finds a push still owed in `bw:reload_owed`, `_request_reload_debounced` takes a Redis SETNX lock (`bw:reload_pending`, TTL `RELOAD_LOCK_TTL`), then `send_files("/var/cache/bunkerweb", "/cache")` to every instance and `POST /reload?test=<yes|no>` (`no` only when `DISABLE_CONFIGURATION_TESTING=yes`). A job that loses the lock sets `bw:reload_dirty` and returns; the holder re-reads that flag after each reload and goes round again, up to `MAX_RELOAD_ROUNDS`, then deletes the lock. **The push is inside the loop** because `send_files` tars the tree as it stands — a job that wrote its cache after the holder's tar needs another push, not just another reload.
 
 `_get_apis` resolves targets in two tiers: the database first (`db.get_instances()`, dropping hosts marked `down`), then `BUNKERWEB_INSTANCES` as a fallback. It runs **after** the job, so an instance that registers while the job is running still carries that job's push. If both tiers are empty it returns `None`, and a job that asked for a reload logs a warning naming it, records `deferred: no reachable instance yet` on its run, and leaves `bw:reload_owed` set in the broker — the next job that finishes with a reachable instance carries the push, since one push ships the whole cache tree. A push that fails or that gives up after `MAX_RELOAD_ROUNDS` leaves the same marker. It is retried on every job at first and then only every `RELOAD_OWED_SLOW_RETRY_EVERY` consultations, with an error saying an operator is needed: a push that keeps failing must not re-ship the whole tree twice a minute forever. The marker is kept until a push settles it, and settling is a compare-and-delete on the token it carries — a debt raised while a push was in flight is not erased by that push, which cannot have carried it.
 

@@ -9,6 +9,7 @@ from unittest.mock import Mock
 import pytest
 
 import jobs
+from reload_outcome import record_reload_responses
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -69,6 +70,7 @@ def test_delivery_locks_cache_before_send(script, unlockable, tmp_path, monkeypa
         "CACHE_PATH": tmp_path / "letsencrypt",
         "le_cache_write_lock": le_lock,
         "RELOAD_TIMEOUT": (5, 30),
+        "record_reload_responses": record_reload_responses,
     }
     exec(compile(ast.Module(body=[*imports, delivery], type_ignores=[]), str(path), "exec"), namespace)
 

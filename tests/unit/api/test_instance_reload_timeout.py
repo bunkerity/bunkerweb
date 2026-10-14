@@ -3,6 +3,8 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock
 
+from reload_outcome import record_reload_responses
+
 ROOT = Path(__file__).resolve().parents[3]
 ROUTER_PATH = ROOT / "src" / "api" / "app" / "routers" / "instances.py"
 
@@ -13,7 +15,7 @@ class _Response:
         self.content = content
 
 
-def _load_route(name, api_caller_class=None):
+def _load_route(name, api_caller_class=None, db=None):
     tree = ast.parse(ROUTER_PATH.read_text(encoding="utf-8"))
     timeout = next(
         node
@@ -29,6 +31,9 @@ def _load_route(name, api_caller_class=None):
         get_api_for_hostname=None,
         get_instances_api_caller=None,
         ApiCaller=api_caller_class,
+        get_db=lambda: db,
+        record_reload_responses=record_reload_responses,
+        LOGGER=Mock(),
     )
     exec(compile(ast.Module(body=[timeout, function], type_ignores=[]), str(ROUTER_PATH), "exec"), module.__dict__)  # noqa: S102
     return module.__dict__[name]
@@ -41,7 +46,7 @@ def test_broadcast_reload_allows_time_for_nginx_confirmation():
     response = _load_route("reload_config")(True, api_caller)
 
     assert response.status_code == 200
-    api_caller.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30))
+    api_caller.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30), response=True)
 
 
 def test_single_reload_allows_time_for_nginx_confirmation():
@@ -53,7 +58,7 @@ def test_single_reload_allows_time_for_nginx_confirmation():
     response = _load_route("reload_one", lambda apis: api_caller)("bw-1", True, api)
 
     assert response.status_code == 200
-    api_caller.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30))
+    api_caller.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30), response=True)
     api.request.assert_not_called()
 
 
