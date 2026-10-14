@@ -63,6 +63,10 @@ def jobs_run():
         url_for(
             "loading",
             next=url_for("jobs.jobs_page"),
-            message=f"Run selected job{'s' if len(jobs) > 1 else ''}'s plugins: {', '.join([job.get('plugin') + '/' + job.get('name') for job in jobs])}",
+            message=translated(
+                "loading.jobs.run_other" if len(jobs) > 1 else "loading.jobs.run_one",
+                jobs=", ".join([job.get("plugin") + "/" + job.get("name") for job in jobs]),
+            )
+            or f"Run selected job{'s' if len(jobs) > 1 else ''}'s plugins: {', '.join([job.get('plugin') + '/' + job.get('name') for job in jobs])}",
         )
     )

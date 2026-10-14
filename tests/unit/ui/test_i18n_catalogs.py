@@ -197,7 +197,10 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # 3,610 (+99 net) is FIX-SMOKE-UI and FIX-I18N-NOUNS: whole-sentence `_one`/`_other` and per-noun keys
     # (bulk-select banners, plugin/instance/config/service flashes, workflow announcements) replacing
     # the interpolated-word keys they retired.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 3610
+    # 3,683 (+73 net) is wave 24 L6: 81 new keys (whole-sentence CrowdSec/workflow reasons, the CrowdSec
+    # removal confirmation, workflow error announcements, 53 `loading.*` messages, the General plugin
+    # card, the home chart tooltips) minus 8 retired interpolated-word keys.
+    assert len(_catalog("en")) == len(english) - len(pairs) == 3683
 
 
 @pytest.mark.parametrize("code", CODES)

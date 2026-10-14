@@ -2509,20 +2509,29 @@ msgstr "لوحظ %(time)s"
 msgid "crowdsec.previous"
 msgstr "السابق"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "طلب محظور"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: طلب محظور"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "تحدي كابتشا"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: طلب محظور (السيناريو: «%(scenario)s»)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "تحدي كشف الروبوتات"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: تحدي كابتشا"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: تحدي كابتشا (السيناريو: «%(scenario)s»)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (السيناريو: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: تحدي كشف الروبوتات"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: تحدي كشف الروبوتات (السيناريو: «%(scenario)s»)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: إجراء غير معروف «%(action)s»"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: إجراء غير معروف «%(action)s» (السيناريو: «%(scenario)s»)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "تزيل هذه العملية القرار من محرك CrowdSec المشترك وتؤثر على كل bouncer متصل. ما زال بإمكان القرارات المخزنة مؤقتًا أو نطاق آخر أو عمليات الحظر المحلية أو AppSec حظر الهدف."
 
 msgid "crowdsec.remove.selection"
-msgstr "هل تريد إزالة %(scope)s %(value)s (%(type)s)، السيناريو %(scenario)s، المصدر %(origin)s، من %(source)s (%(engine)s)؟"
+msgstr "هل تريد إزالة القرار الخاص بـ «%(value)s» (النطاق: «%(scope)s»، النوع: «%(type)s»، المصدر: «%(origin)s»، السيناريو: «%(scenario)s») من %(source)s (%(engine)s)؟"
 
 msgid "crowdsec.remove.submit"
 msgstr "إزالة القرار"
 
-msgid "crowdsec.remove.success"
-msgstr "تمت الإزالة عند مصدر CrowdSec. حالة الانتشار: %(status)s (%(mode)s، الفاصل %(interval)s). القرارات المطابقة المتبقية: %(remaining)s. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر."
+msgid "crowdsec.remove.success_live_one"
+msgstr "تمت الإزالة عند مصدر CrowdSec. الانتشار قيد الانتظار (الوضع المباشر، الفاصل %(interval)s). يتبقى %(remaining)s قرار مطابق آخر. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر."
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "تمت الإزالة عند مصدر CrowdSec. الانتشار قيد الانتظار (الوضع المباشر، الفاصل %(interval)s). تتبقى %(remaining)s قرارات مطابقة أخرى. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر."
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "تمت الإزالة عند مصدر CrowdSec. الانتشار قيد الانتظار (الوضع «%(mode)s»، الفاصل %(interval)s). يتبقى %(remaining)s قرار مطابق آخر. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر."
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "تمت الإزالة عند مصدر CrowdSec. الانتشار قيد الانتظار (الوضع «%(mode)s»، الفاصل %(interval)s). تتبقى %(remaining)s قرارات مطابقة أخرى. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر."
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "تمت الإزالة عند مصدر CrowdSec. الانتشار قيد الانتظار (وضع البث، الفاصل %(interval)s). يتبقى %(remaining)s قرار مطابق آخر. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر."
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "تمت الإزالة عند مصدر CrowdSec. الانتشار قيد الانتظار (وضع البث، الفاصل %(interval)s). تتبقى %(remaining)s قرارات مطابقة أخرى. ما زال بإمكان عمليات الحظر المحلية أو AppSec الحظر."
 
 msgid "crowdsec.remove.title"
 msgstr "إزالة قرار CrowdSec"
@@ -2718,6 +2742,21 @@ msgstr "محظورة"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "الطلبات المحظورة بمرور الوقت (النطاق المحدد)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "تم حظر %(count)s"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "تم حظر %(count)s"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)s طلب"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)s طلبات"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "%(percent)s%% من أعلى 10"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "IP الأكثر حظرًا"
@@ -3721,6 +3760,12 @@ msgstr "يجب أن تحتوي كلمة المرور على حرف خاص واح
 msgid "form.validation.password_uppercase"
 msgstr "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل."
 
+msgid "general.meta.description"
+msgstr "الإعدادات العامة للخادم"
+
+msgid "general.meta.name"
+msgstr "عام"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "المسار المراد استخدامه لسجلات وصول NGINX (مسار ملف، أو syslog:server=host[:port][,param=value]، أو memory:name:size؛ اضبطه على off للتعطيل)."
 
@@ -4371,6 +4416,165 @@ msgstr "استخدم رمز المصادقة"
 
 msgid "link.use_recovery_code"
 msgstr "استخدم رمز الاسترداد"
+
+msgid "loading.bans.ban_one"
+msgstr "جارٍ حظر %(count)s عنوان IP"
+
+msgid "loading.bans.ban_other"
+msgstr "جارٍ حظر %(count)s عنوان IP"
+
+msgid "loading.bans.unban_one"
+msgstr "جارٍ رفع الحظر عن %(count)s عنوان IP"
+
+msgid "loading.bans.unban_other"
+msgstr "جارٍ رفع الحظر عن %(count)s عنوان IP"
+
+msgid "loading.bans.update_duration_one"
+msgstr "جارٍ تحديث مدة %(count)s حظر"
+
+msgid "loading.bans.update_duration_other"
+msgstr "جارٍ تحديث مدة %(count)s حظر"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "جارٍ تحويل %(count)s تكوين إلى مسودة"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "جارٍ تحويل %(count)s تكوين إلى مسودة"
+
+msgid "loading.configs.convert_online_one"
+msgstr "جارٍ تحويل %(count)s تكوين إلى متصل"
+
+msgid "loading.configs.convert_online_other"
+msgstr "جارٍ تحويل %(count)s تكوين إلى متصل"
+
+msgid "loading.configs.create"
+msgstr "جارٍ إنشاء التكوين المخصص %(config)s"
+
+msgid "loading.configs.create_for_service"
+msgstr "جارٍ إنشاء التكوين المخصص %(config)s للخدمة %(service)s"
+
+msgid "loading.configs.delete_one"
+msgstr "جارٍ حذف %(count)s تكوين محدد"
+
+msgid "loading.configs.delete_other"
+msgstr "جارٍ حذف %(count)s تكوين محدد"
+
+msgid "loading.configs.import"
+msgstr "جارٍ استيراد التكوينات المخصصة"
+
+msgid "loading.default"
+msgstr "جار التحميل..."
+
+msgid "loading.global_settings.save"
+msgstr "جارٍ حفظ الإعدادات العامة"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "جارٍ حفظ الإعدادات العامة لـ %(plugin)s"
+
+msgid "loading.instances.create"
+msgstr "جارٍ إنشاء المثيل الجديد %(instance)s"
+
+msgid "loading.instances.delete_one"
+msgstr "جارٍ حذف المثيل %(instances)s"
+
+msgid "loading.instances.delete_other"
+msgstr "جارٍ حذف المثيلات %(instances)s"
+
+msgid "loading.instances.reload_one"
+msgstr "جارٍ إعادة تحميل المثيل %(instances)s"
+
+msgid "loading.instances.reload_other"
+msgstr "جارٍ إعادة تحميل المثيلات %(instances)s"
+
+msgid "loading.instances.stop_one"
+msgstr "جارٍ إيقاف المثيل %(instances)s"
+
+msgid "loading.instances.stop_other"
+msgstr "جارٍ إيقاف المثيلات %(instances)s"
+
+msgid "loading.jobs.run_one"
+msgstr "جارٍ تشغيل إضافات المهمة المحددة: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "جارٍ تشغيل إضافات المهام المحددة: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "جارٍ حذف الإضافة: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "جارٍ حذف الإضافات: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "جارٍ تعطيل الإضافة: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "جارٍ تمكين الإضافة: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "جارٍ تثبيت الإضافة: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "جارٍ إعادة تحميل الإضافات"
+
+msgid "loading.plugins.update"
+msgstr "جارٍ تحديث الإضافة: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "جارٍ تحديث مفتاح الترخيص"
+
+msgid "loading.services.convert_draft_one"
+msgstr "جارٍ تحويل الخدمة %(services)s إلى مسودة"
+
+msgid "loading.services.convert_draft_other"
+msgstr "جارٍ تحويل الخدمات %(services)s إلى مسودة"
+
+msgid "loading.services.convert_online_one"
+msgstr "جارٍ تحويل الخدمة %(services)s إلى متصلة"
+
+msgid "loading.services.convert_online_other"
+msgstr "جارٍ تحويل الخدمات %(services)s إلى متصلة"
+
+msgid "loading.services.create_config"
+msgstr "جارٍ إنشاء تكوين للخدمة %(service)s"
+
+msgid "loading.services.create_config_draft"
+msgstr "جارٍ إنشاء تكوين لمسودة الخدمة %(service)s"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "جارٍ تعريف الخدمة %(service)s على أنها «إعادة توجيه فقط»"
+
+msgid "loading.services.declare_standard"
+msgstr "جارٍ تعريف الخدمة %(service)s على أنها قياسية"
+
+msgid "loading.services.delete_one"
+msgstr "جارٍ حذف الخدمة %(services)s"
+
+msgid "loading.services.delete_other"
+msgstr "جارٍ حذف الخدمات %(services)s"
+
+msgid "loading.services.import"
+msgstr "جارٍ استيراد الخدمات"
+
+msgid "loading.services.import_with_configs"
+msgstr "جارٍ استيراد الخدمات والتكوينات المخصصة"
+
+msgid "loading.services.save_config"
+msgstr "جارٍ حفظ تكوين الخدمة %(service)s"
+
+msgid "loading.services.save_config_draft"
+msgstr "جارٍ حفظ تكوين مسودة الخدمة %(service)s"
+
+msgid "loading.services.save_plugin"
+msgstr "جارٍ حفظ إعدادات %(plugin)s للخدمة %(service)s"
+
+msgid "loading.services.save_template"
+msgstr "جارٍ حفظ إعدادات القالب للخدمة %(service)s"
+
+msgid "loading.totp.security_key"
+msgstr "جارٍ التحقق من مفتاح الأمان."
+
+msgid "loading.totp.token"
+msgstr "جارٍ التحقق من رمز TOTP."
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "تعذّر تسجيل دخولك، يرجى المحاولة مرة أخرى"
@@ -6651,7 +6855,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "فصل مسار العمل هذا عن %(service)s؟"
 
 msgid "service.resources.conflict.inline"
-msgstr "الـ %(service)s بالفعل يقدم الخدمة %(path)s من خلال إعداداته الخاصة %(family)s. قم بإلغاء هذه الإعدادات لـ %(path)s، أو استخدم مسارًا مختلفًا."
+msgstr "تقدّم الخدمة %(service)s المسار %(path)s بالفعل من خلال إعداداتها الخاصة «%(family)s». أزل هذه الإعدادات للمسار %(path)s، أو استخدم مسارًا مختلفًا."
 
 msgid "service.resources.conflict.primary"
 msgstr "\"%(name)s\" هو الشهادة الرئيسية لهذه الخدمة وسوف يتم تخفيضها دون تحذير إضافي. الشهادة الرئيسية هي التي يتم نشرها بالفعل."
@@ -10544,8 +10748,17 @@ msgstr "يتم تقييم القواعد بالترتيب، والقاعدة ا�
 msgid "workflows.readonly"
 msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص سير العمل، ولكن لا يمكن تعديلها."
 
-msgid "workflows.reason.sentence"
-msgstr "سير عمل الأمان %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "سير عمل الأمان «%(workflow)s»: طلب محظور"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "سير عمل الأمان «%(workflow)s»: تم تحدي الطلب"
+
+msgid "workflows.reason.sentence_other"
+msgstr "سير عمل الأمان «%(workflow)s»: الإجراء «%(action)s»"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "سير عمل الأمان «%(workflow)s»: تمت إعادة توجيه الطلب"
 
 msgid "workflows.rule.disabled"
 msgstr "معطلة"
@@ -10598,8 +10811,14 @@ msgstr "تمت إضافة القاعدة في الموضع %(n)s من %(total)s.
 msgid "workflows.say.inspecting"
 msgstr "تعديل القاعدة %(n)s من %(total)s — %(name)s."
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "القاعدة %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "القاعدة %(n)s — «%(name)s»: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "سير العمل هذا: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "أُزيلت القيمة الأخيرة؛ لا يمكن حفظ هذا الشرط حتى يحتوي على قيمة."

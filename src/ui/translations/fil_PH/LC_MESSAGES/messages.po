@@ -2509,20 +2509,29 @@ msgstr "Naobserbahan %(time)s"
 msgid "crowdsec.previous"
 msgstr "Nakaraan"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "na-block ang request"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: na-block ang request"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "hamon ng captcha"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: na-block ang request (senaryo: “%(scenario)s”)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "hamon sa pagtukoy ng bot"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: captcha challenge"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: captcha challenge (senaryo: “%(scenario)s”)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (senaryo: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: challenge sa pag-detect ng bot"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: challenge sa pag-detect ng bot (senaryo: “%(scenario)s”)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: hindi nakikilalang aksyon na “%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: hindi nakikilalang aksyon na “%(action)s” (senaryo: “%(scenario)s”)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "Aalisin nito ang desisyon sa nakabahaging CrowdSec engine at maaapektuhan ang bawat nakakonektang bouncer. Maaari pa ring harangan ang target ng mga naka-cache na desisyon, ibang range, mga lokal na ban, o AppSec."
 
 msgid "crowdsec.remove.selection"
-msgstr "Alisin ang %(scope)s %(value)s (%(type)s), senaryo %(scenario)s, pinagmulan %(origin)s, mula sa %(source)s (%(engine)s)?"
+msgstr "Alisin ang desisyon para sa “%(value)s” (saklaw: “%(scope)s”, uri: “%(type)s”, pinagmulan: “%(origin)s”, senaryo: “%(scenario)s”) mula sa %(source)s (%(engine)s)?"
 
 msgid "crowdsec.remove.submit"
 msgstr "Alisin ang desisyon"
 
-msgid "crowdsec.remove.success"
-msgstr "Naalis sa pinagmulan ng CrowdSec. Ang propagation ay %(status)s (%(mode)s, agwat %(interval)s). Mga natirang tumutugmang desisyon: %(remaining)s. Maaari pa ring humarang ang mga lokal na ban o AppSec."
+msgid "crowdsec.remove.success_live_one"
+msgstr "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (live na mode, agwat na %(interval)s). Natitirang iba pang tumutugmang desisyon: %(remaining)s. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec."
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (live na mode, agwat na %(interval)s). Natitirang iba pang tumutugmang desisyon: %(remaining)s. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec."
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (mode na “%(mode)s”, agwat na %(interval)s). Natitirang iba pang tumutugmang desisyon: %(remaining)s. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec."
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (mode na “%(mode)s”, agwat na %(interval)s). Natitirang iba pang tumutugmang desisyon: %(remaining)s. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec."
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (mode ng pag-stream, agwat na %(interval)s). Natitirang iba pang tumutugmang desisyon: %(remaining)s. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec."
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (mode ng pag-stream, agwat na %(interval)s). Natitirang iba pang tumutugmang desisyon: %(remaining)s. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec."
 
 msgid "crowdsec.remove.title"
 msgstr "Alisin ang desisyon ng CrowdSec"
@@ -2718,6 +2742,21 @@ msgstr "Na-block"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "Mga na-block na request sa paglipas ng panahon (piniling saklaw)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "%(count)s ang na-block"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "%(count)s ang na-block"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)s request"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)s request"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "%(percent)s%% ng Top 10"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "Pinaka-block na IP"
@@ -3721,6 +3760,12 @@ msgstr "Ang password ay dapat may hindi bababa sa 1 espesyal na character."
 msgid "form.validation.password_uppercase"
 msgstr "Ang password ay dapat may hindi bababa sa 1 malaking titik."
 
+msgid "general.meta.description"
+msgstr "Ang mga pangkalahatang setting para sa server"
+
+msgid "general.meta.name"
+msgstr "Pangkalahatan"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "Landas na gagamitin para sa mga access log ng NGINX (file path, syslog:server=host[:port][,param=value], o memory:name:size; itakda sa off upang i-disable)."
 
@@ -4371,6 +4416,165 @@ msgstr "Gumamit ng code ng pag-authenticate"
 
 msgid "link.use_recovery_code"
 msgstr "Gumamit ng code ng pagbawi"
+
+msgid "loading.bans.ban_one"
+msgstr "Ibina-ban ang %(count)s IP"
+
+msgid "loading.bans.ban_other"
+msgstr "Ibina-ban ang %(count)s IP"
+
+msgid "loading.bans.unban_one"
+msgstr "Inaalis ang ban sa %(count)s IP"
+
+msgid "loading.bans.unban_other"
+msgstr "Inaalis ang ban sa %(count)s IP"
+
+msgid "loading.bans.update_duration_one"
+msgstr "Ina-update ang tagal para sa %(count)s ban"
+
+msgid "loading.bans.update_duration_other"
+msgstr "Ina-update ang tagal para sa %(count)s ban"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "Kino-convert ang %(count)s config sa burador"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "Kino-convert ang %(count)s config sa burador"
+
+msgid "loading.configs.convert_online_one"
+msgstr "Kino-convert ang %(count)s config sa online"
+
+msgid "loading.configs.convert_online_other"
+msgstr "Kino-convert ang %(count)s config sa online"
+
+msgid "loading.configs.create"
+msgstr "Ginagawa ang custom na configuration na %(config)s"
+
+msgid "loading.configs.create_for_service"
+msgstr "Ginagawa ang custom na configuration na %(config)s para sa serbisyong %(service)s"
+
+msgid "loading.configs.delete_one"
+msgstr "Dine-delete ang %(count)s napiling config"
+
+msgid "loading.configs.delete_other"
+msgstr "Dine-delete ang %(count)s napiling config"
+
+msgid "loading.configs.import"
+msgstr "Ini-import ang mga custom na configuration"
+
+msgid "loading.default"
+msgstr "Naglo-load..."
+
+msgid "loading.global_settings.save"
+msgstr "Sine-save ang mga pangkalahatang setting"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "Sine-save ang mga pangkalahatang setting ng %(plugin)s"
+
+msgid "loading.instances.create"
+msgstr "Ginagawa ang bagong instance na %(instance)s"
+
+msgid "loading.instances.delete_one"
+msgstr "Dine-delete ang instance na %(instances)s"
+
+msgid "loading.instances.delete_other"
+msgstr "Dine-delete ang mga instance na %(instances)s"
+
+msgid "loading.instances.reload_one"
+msgstr "Ni-re-reload ang instance na %(instances)s"
+
+msgid "loading.instances.reload_other"
+msgstr "Ni-re-reload ang mga instance na %(instances)s"
+
+msgid "loading.instances.stop_one"
+msgstr "Ihinihinto ang instance na %(instances)s"
+
+msgid "loading.instances.stop_other"
+msgstr "Ihinihinto ang mga instance na %(instances)s"
+
+msgid "loading.jobs.run_one"
+msgstr "Pinapatakbo ang mga plugin ng napiling gawain: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "Pinapatakbo ang mga plugin ng mga napiling gawain: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "Dine-delete ang plugin: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "Dine-delete ang mga plugin: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "Dini-disable ang plugin: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "Ine-enable ang plugin: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "Ini-install ang plugin: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "Ni-re-reload ang mga plugin"
+
+msgid "loading.plugins.update"
+msgstr "Ina-update ang plugin: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "Ina-update ang license key"
+
+msgid "loading.services.convert_draft_one"
+msgstr "Kino-convert ang serbisyong %(services)s sa burador"
+
+msgid "loading.services.convert_draft_other"
+msgstr "Kino-convert ang mga serbisyong %(services)s sa burador"
+
+msgid "loading.services.convert_online_one"
+msgstr "Kino-convert ang serbisyong %(services)s sa online"
+
+msgid "loading.services.convert_online_other"
+msgstr "Kino-convert ang mga serbisyong %(services)s sa online"
+
+msgid "loading.services.create_config"
+msgstr "Ginagawa ang configuration para sa serbisyong %(service)s"
+
+msgid "loading.services.create_config_draft"
+msgstr "Ginagawa ang configuration para sa burador na serbisyong %(service)s"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "Idinedeklara ang serbisyong %(service)s bilang redirect lamang"
+
+msgid "loading.services.declare_standard"
+msgstr "Idinedeklara ang serbisyong %(service)s bilang karaniwan"
+
+msgid "loading.services.delete_one"
+msgstr "Dine-delete ang serbisyong %(services)s"
+
+msgid "loading.services.delete_other"
+msgstr "Dine-delete ang mga serbisyong %(services)s"
+
+msgid "loading.services.import"
+msgstr "Ini-import ang mga serbisyo"
+
+msgid "loading.services.import_with_configs"
+msgstr "Ini-import ang mga serbisyo at custom na configuration"
+
+msgid "loading.services.save_config"
+msgstr "Sine-save ang configuration para sa serbisyong %(service)s"
+
+msgid "loading.services.save_config_draft"
+msgstr "Sine-save ang configuration para sa burador na serbisyong %(service)s"
+
+msgid "loading.services.save_plugin"
+msgstr "Sine-save ang mga setting ng %(plugin)s para sa serbisyong %(service)s"
+
+msgid "loading.services.save_template"
+msgstr "Sine-save ang mga setting ng template para sa serbisyong %(service)s"
+
+msgid "loading.totp.security_key"
+msgstr "Bine-verify ang security key."
+
+msgid "loading.totp.token"
+msgstr "Bine-verify ang TOTP token."
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "Hindi ka na-log in, subukan muli"
@@ -6611,7 +6815,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "Tanggalin ang daloy ng trabaho na ito mula sa %(service)s?"
 
 msgid "service.resources.conflict.inline"
-msgstr "Ang %(service)s ay nagsisilbi sa %(path)s sa pamamagitan ng sarili nitong mga setting na %(family)s. Linisin ang mga setting na ito para sa %(path)s, o gumamit ng ibang landas."
+msgstr "Ang %(service)s ay nagsisilbi na sa %(path)s sa pamamagitan ng sarili nitong mga setting na “%(family)s”. Linisin ang mga setting na ito para sa %(path)s, o gumamit ng ibang landas."
 
 msgid "service.resources.conflict.primary"
 msgstr "Ang “%(name)s” ang kasalukuyang primary certificate ng serbisyong ito at hindi na ito magiging primary nang walang karagdagang babala. Ang primary ang aktwal na naka-deploy."
@@ -10504,8 +10708,17 @@ msgstr "Ang mga panuntunan ay sinusuri sa pagkakasunod-sunod at ang unang na tum
 msgid "workflows.readonly"
 msgstr "Ang database ay hindi mababago. Maaaring suriin ang mga daloy ng trabaho ngunit hindi mababago."
 
-msgid "workflows.reason.sentence"
-msgstr "Workflow ng seguridad %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "Security workflow na “%(workflow)s”: na-block ang request"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "Security workflow na “%(workflow)s”: hinamon ang request"
+
+msgid "workflows.reason.sentence_other"
+msgstr "Security workflow na “%(workflow)s”: aksyon na “%(action)s”"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "Security workflow na “%(workflow)s”: na-redirect ang request"
 
 msgid "workflows.rule.disabled"
 msgstr "Naka-disable"
@@ -10558,8 +10771,14 @@ msgstr "Idinagdag ang patakaran sa posisyon %(n)s ng %(total)s. Ang bawat pataka
 msgid "workflows.say.inspecting"
 msgstr "I-edit ang patakaran %(n)s ng %(total)s — %(name)s."
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "Patakaran %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "Patakaran %(n)s — “%(name)s”: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "Ang workflow na ito: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "Inalis ang huling value — hindi mase-save ang kondisyong ito hangga't wala itong value."

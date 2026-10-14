@@ -2509,20 +2509,29 @@ msgstr "%(time)s zamanında gözlemlendi"
 msgid "crowdsec.previous"
 msgstr "Önceki"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "istek engellendi"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: istek engellendi"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "captcha doğrulaması"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: istek engellendi (senaryo: “%(scenario)s”)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "bot tespiti doğrulaması"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: captcha doğrulaması"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: captcha doğrulaması (senaryo: “%(scenario)s”)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (senaryo: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: bot algılama doğrulaması"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: bot algılama doğrulaması (senaryo: “%(scenario)s”)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: tanınmayan eylem “%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: tanınmayan eylem “%(action)s” (senaryo: “%(scenario)s”)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "Bu işlem kararı paylaşılan CrowdSec motorundan kaldırır ve bağlı her bouncer'ı etkiler. Önbelleğe alınmış kararlar, başka bir aralık, yerel yasaklar veya AppSec hedefi yine de engelleyebilir."
 
 msgid "crowdsec.remove.selection"
-msgstr "%(scope)s %(value)s (%(type)s), senaryo %(scenario)s, köken %(origin)s, %(source)s (%(engine)s) kaynağından kaldırılsın mı?"
+msgstr "“%(value)s” için kararı (kapsam: “%(scope)s”, tür: “%(type)s”, köken: “%(origin)s”, senaryo: “%(scenario)s”) %(source)s (%(engine)s) kaynağından kaldırmak istiyor musunuz?"
 
 msgid "crowdsec.remove.submit"
 msgstr "Kararı kaldır"
 
-msgid "crowdsec.remove.success"
-msgstr "CrowdSec kaynağında kaldırıldı. Yayılım durumu: %(status)s (%(mode)s, aralık %(interval)s). Kalan eşleşen kararlar: %(remaining)s. Yerel yasaklar veya AppSec yine de engelleyebilir."
+msgid "crowdsec.remove.success_live_one"
+msgstr "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (canlı mod, aralık %(interval)s). Eşleşen diğer karar sayısı: %(remaining)s. Yerel yasaklar veya AppSec yine de engelleyebilir."
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (canlı mod, aralık %(interval)s). Eşleşen diğer karar sayısı: %(remaining)s. Yerel yasaklar veya AppSec yine de engelleyebilir."
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (“%(mode)s” modu, aralık %(interval)s). Eşleşen diğer karar sayısı: %(remaining)s. Yerel yasaklar veya AppSec yine de engelleyebilir."
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (“%(mode)s” modu, aralık %(interval)s). Eşleşen diğer karar sayısı: %(remaining)s. Yerel yasaklar veya AppSec yine de engelleyebilir."
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (akış modu, aralık %(interval)s). Eşleşen diğer karar sayısı: %(remaining)s. Yerel yasaklar veya AppSec yine de engelleyebilir."
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (akış modu, aralık %(interval)s). Eşleşen diğer karar sayısı: %(remaining)s. Yerel yasaklar veya AppSec yine de engelleyebilir."
 
 msgid "crowdsec.remove.title"
 msgstr "CrowdSec kararını kaldır"
@@ -2718,6 +2742,21 @@ msgstr "Engellendi"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "Zaman içinde engellenen istekler (seçili aralık)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "%(count)s engellendi"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "%(count)s engellendi"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)s istek"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)s istek"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "İlk 10 içindeki pay: %%%(percent)s"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "En Çok Engellenen IP"
@@ -3721,6 +3760,12 @@ msgstr "Şifre en az 1 özel karakter içermelidir."
 msgid "form.validation.password_uppercase"
 msgstr "Şifre en az 1 büyük harf içermelidir."
 
+msgid "general.meta.description"
+msgstr "Sunucunun genel ayarları"
+
+msgid "general.meta.name"
+msgstr "Genel"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "NGINX erişim günlükleri için kullanılacak yol (dosya yolu, syslog:server=host[:port][,param=value] veya memory:name:size; devre dışı bırakmak için off olarak ayarlayın)."
 
@@ -4371,6 +4416,165 @@ msgstr "Bir kimlik doğrulama kodu kullan"
 
 msgid "link.use_recovery_code"
 msgstr "Bir kurtarma kodu kullan"
+
+msgid "loading.bans.ban_one"
+msgstr "%(count)s IP yasaklanıyor"
+
+msgid "loading.bans.ban_other"
+msgstr "%(count)s IP yasaklanıyor"
+
+msgid "loading.bans.unban_one"
+msgstr "%(count)s IP'nin yasağı kaldırılıyor"
+
+msgid "loading.bans.unban_other"
+msgstr "%(count)s IP'nin yasağı kaldırılıyor"
+
+msgid "loading.bans.update_duration_one"
+msgstr "%(count)s yasağın süresi güncelleniyor"
+
+msgid "loading.bans.update_duration_other"
+msgstr "%(count)s yasağın süresi güncelleniyor"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "%(count)s yapılandırma taslağa dönüştürülüyor"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "%(count)s yapılandırma taslağa dönüştürülüyor"
+
+msgid "loading.configs.convert_online_one"
+msgstr "%(count)s yapılandırma çevrimiçi duruma getiriliyor"
+
+msgid "loading.configs.convert_online_other"
+msgstr "%(count)s yapılandırma çevrimiçi duruma getiriliyor"
+
+msgid "loading.configs.create"
+msgstr "%(config)s özel yapılandırması oluşturuluyor"
+
+msgid "loading.configs.create_for_service"
+msgstr "%(service)s servisi için %(config)s özel yapılandırması oluşturuluyor"
+
+msgid "loading.configs.delete_one"
+msgstr "Seçilen %(count)s yapılandırma siliniyor"
+
+msgid "loading.configs.delete_other"
+msgstr "Seçilen %(count)s yapılandırma siliniyor"
+
+msgid "loading.configs.import"
+msgstr "Özel yapılandırmalar içe aktarılıyor"
+
+msgid "loading.default"
+msgstr "Yükleniyor..."
+
+msgid "loading.global_settings.save"
+msgstr "Genel ayarlar kaydediliyor"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "%(plugin)s genel ayarları kaydediliyor"
+
+msgid "loading.instances.create"
+msgstr "Yeni %(instance)s örneği oluşturuluyor"
+
+msgid "loading.instances.delete_one"
+msgstr "%(instances)s örneği siliniyor"
+
+msgid "loading.instances.delete_other"
+msgstr "%(instances)s örnekleri siliniyor"
+
+msgid "loading.instances.reload_one"
+msgstr "%(instances)s örneği yeniden yükleniyor"
+
+msgid "loading.instances.reload_other"
+msgstr "%(instances)s örnekleri yeniden yükleniyor"
+
+msgid "loading.instances.stop_one"
+msgstr "%(instances)s örneği durduruluyor"
+
+msgid "loading.instances.stop_other"
+msgstr "%(instances)s örnekleri durduruluyor"
+
+msgid "loading.jobs.run_one"
+msgstr "Seçilen işin eklentileri çalıştırılıyor: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "Seçilen işlerin eklentileri çalıştırılıyor: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "Eklenti siliniyor: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "Eklentiler siliniyor: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "Eklenti devre dışı bırakılıyor: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "Eklenti etkinleştiriliyor: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "Eklenti yükleniyor: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "Eklentiler yeniden yükleniyor"
+
+msgid "loading.plugins.update"
+msgstr "Eklenti güncelleniyor: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "Lisans anahtarı güncelleniyor"
+
+msgid "loading.services.convert_draft_one"
+msgstr "%(services)s servisi taslağa dönüştürülüyor"
+
+msgid "loading.services.convert_draft_other"
+msgstr "%(services)s servisleri taslağa dönüştürülüyor"
+
+msgid "loading.services.convert_online_one"
+msgstr "%(services)s servisi çevrimiçi duruma getiriliyor"
+
+msgid "loading.services.convert_online_other"
+msgstr "%(services)s servisleri çevrimiçi duruma getiriliyor"
+
+msgid "loading.services.create_config"
+msgstr "%(service)s servisi için yapılandırma oluşturuluyor"
+
+msgid "loading.services.create_config_draft"
+msgstr "%(service)s taslak servisi için yapılandırma oluşturuluyor"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "%(service)s servisi yalnızca yönlendirme olarak bildiriliyor"
+
+msgid "loading.services.declare_standard"
+msgstr "%(service)s servisi standart olarak bildiriliyor"
+
+msgid "loading.services.delete_one"
+msgstr "%(services)s servisi siliniyor"
+
+msgid "loading.services.delete_other"
+msgstr "%(services)s servisleri siliniyor"
+
+msgid "loading.services.import"
+msgstr "Servisler içe aktarılıyor"
+
+msgid "loading.services.import_with_configs"
+msgstr "Servisler ve özel yapılandırmalar içe aktarılıyor"
+
+msgid "loading.services.save_config"
+msgstr "%(service)s servisi için yapılandırma kaydediliyor"
+
+msgid "loading.services.save_config_draft"
+msgstr "%(service)s taslak servisi için yapılandırma kaydediliyor"
+
+msgid "loading.services.save_plugin"
+msgstr "%(service)s servisi için %(plugin)s ayarları kaydediliyor"
+
+msgid "loading.services.save_template"
+msgstr "%(service)s servisi için şablon ayarları kaydediliyor"
+
+msgid "loading.totp.security_key"
+msgstr "Güvenlik anahtarı doğrulanıyor."
+
+msgid "loading.totp.token"
+msgstr "TOTP belirteci doğrulanıyor."
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "Giriş yapılamadı, lütfen tekrar deneyin"
@@ -6601,7 +6805,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "Bu iş akışı %(service)s servisinden ayrılsın mı?"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s, %(path)s'i kendi %(family)s ayarlarıyla zaten sunmaktadır. %(path)s için bu ayarları temizleyin veya farklı bir yol kullanın."
+msgstr "%(service)s, %(path)s yolunu kendi “%(family)s” ayarlarıyla zaten sunmaktadır. %(path)s için bu ayarları temizleyin veya farklı bir yol kullanın."
 
 msgid "service.resources.conflict.primary"
 msgstr "\"%(name)s\", şu anda bu servis için ana sertifikadır ve daha fazla uyarı olmadan düşürülecektir. Ana, aslında dağıtılan sertifikadır."
@@ -10494,8 +10698,17 @@ msgstr "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir 
 msgid "workflows.readonly"
 msgstr "Veritabanı salt okunurdur. İş akışları incelenebilir, ancak değiştirilemez."
 
-msgid "workflows.reason.sentence"
-msgstr "Güvenlik iş akışı %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "“%(workflow)s” güvenlik iş akışı: istek engellendi"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "“%(workflow)s” güvenlik iş akışı: istek doğrulamaya yönlendirildi"
+
+msgid "workflows.reason.sentence_other"
+msgstr "“%(workflow)s” güvenlik iş akışı: “%(action)s” eylemi"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "“%(workflow)s” güvenlik iş akışı: istek yönlendirildi"
 
 msgid "workflows.rule.disabled"
 msgstr "Devre dışı"
@@ -10548,8 +10761,14 @@ msgstr "%(total)s'nun %(n)s konumuna bir kural eklendi. Bundan önceki tüm kura
 msgid "workflows.say.inspecting"
 msgstr "%(total)s'nun %(n)s kuralını düzenle — %(name)s."
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "Kural %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "Kural %(n)s — “%(name)s”: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "Bu iş akışı: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "Son değer kaldırıldı — bu koşul bir değer içermeden kaydedilemez."

@@ -93,7 +93,7 @@
       },
       "EXTERNAL_PLUGIN_URLS": {
         "label": "URL di plugin esterni",
-        "help": "Elenco di URL di plugin esterni (download diretto a un file .zip o .tar) da scaricare e installare (gli URL sono separati da spazi). Al massimo 50 MiB per URL. Aggiungi #sha256=<digest> a un URL per fissarne il contenuto. Il semplice http:// è deprecato e verrà rifiutato nella 1.7.0: usa https:// o file:///."
+        "help": "Elenco di URL di plugin esterni (download diretto a un file .zip o .tar) da scaricare e installare (gli URL sono separati da spazi). Al massimo 50 MiB per URL. Aggiungi #sha256=<digest> a un URL per fissarne il contenuto. Il semplice http:// è deprecato e verrà rifiutato nella 1.7.0: usa https:// o file:///. Rimuovere un URL disinstalla i plugin che forniva, insieme ai relativi valori salvati, una volta che tutti gli altri URL sono stati scaricati. I plugin aggiunti a mano o caricati nell'interfaccia web non vengono mai rimossi."
       },
       "DENY_HTTP_STATUS": {
         "label": "Stato HTTP di rifiuto",

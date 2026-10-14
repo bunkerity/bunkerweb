@@ -826,7 +826,14 @@ def bans_ban():
             LOGGER.info(f"Banned {ip}")
             flash(translated("bans.flash.ban_success", ip=ip) or f"Banned {ip} successfully.", "success")
 
-    return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Banning {len(bans)} IP{'s' if len(bans) > 1 else ''}"))
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("bans.bans_page"),
+            message=translated("loading.bans.ban_other" if len(bans) > 1 else "loading.bans.ban_one", count=len(bans))
+            or f"Banning {len(bans)} IP{'s' if len(bans) > 1 else ''}",
+        )
+    )
 
 
 @bans.route("/bans/unban", methods=["POST"])
@@ -895,7 +902,14 @@ def bans_unban():
             LOGGER.info(f"Unbanned {ip}")
             flash(translated("bans.flash.unban_success", ip=ip) or f"Unbanned {ip} successfully.", "success")
 
-    return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Unbanning {len(unbans)} IP{'s' if len(unbans) > 1 else ''}"))
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("bans.bans_page"),
+            message=translated("loading.bans.unban_other" if len(unbans) > 1 else "loading.bans.unban_one", count=len(unbans))
+            or f"Unbanning {len(unbans)} IP{'s' if len(unbans) > 1 else ''}",
+        )
+    )
 
 
 @bans.route("/bans/update_duration", methods=["POST"])
@@ -1041,4 +1055,11 @@ def bans_update_duration():
             LOGGER.info(f"Updated ban duration for {ip}")
             flash(translated("bans.flash.update_duration_success", ip=ip) or f"Updated ban duration for {ip} successfully.", "success")
 
-    return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Updating duration for {len(updates)} ban{'s' if len(updates) > 1 else ''}"))
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("bans.bans_page"),
+            message=translated("loading.bans.update_duration_other" if len(updates) > 1 else "loading.bans.update_duration_one", count=len(updates))
+            or f"Updating duration for {len(updates)} ban{'s' if len(updates) > 1 else ''}",
+        )
+    )

@@ -711,6 +711,13 @@
       "timeseries": {
         "series": "已封鎖",
         "title": "一段時間內的已封鎖請求（所選範圍）"
+      },
+      "tooltip": {
+        "blocked_one": "已封鎖 {{count}} 次",
+        "blocked_other": "已封鎖 {{count}} 次",
+        "requests_one": "{{count}} 個請求",
+        "requests_other": "{{count}} 個請求",
+        "top_share": "佔前 10 名的 {{percent}}%"
       }
     },
     "map": {
@@ -1230,6 +1237,79 @@
     "use_authenticator_code": "使用驗證碼",
     "use_recovery_code": "使用恢復碼",
     "get_support": "取得支援"
+  },
+  "loading": {
+    "default": "載入中...",
+    "bans": {
+      "ban_one": "正在封鎖 {{count}} 個 IP",
+      "ban_other": "正在封鎖 {{count}} 個 IP",
+      "unban_one": "正在解除封鎖 {{count}} 個 IP",
+      "unban_other": "正在解除封鎖 {{count}} 個 IP",
+      "update_duration_one": "正在更新 {{count}} 個封鎖的持續時間",
+      "update_duration_other": "正在更新 {{count}} 個封鎖的持續時間"
+    },
+    "configs": {
+      "convert_online_one": "正在將 {{count}} 個設定轉換為線上",
+      "convert_online_other": "正在將 {{count}} 個設定轉換為線上",
+      "convert_draft_one": "正在將 {{count}} 個設定轉換為草稿",
+      "convert_draft_other": "正在將 {{count}} 個設定轉換為草稿",
+      "delete_one": "正在刪除 {{count}} 個所選設定",
+      "delete_other": "正在刪除 {{count}} 個所選設定",
+      "create": "正在建立自訂設定 {{config}}",
+      "create_for_service": "正在為服務 {{service}} 建立自訂設定 {{config}}",
+      "import": "正在匯入自訂設定"
+    },
+    "global_settings": {
+      "save": "正在儲存全域設定",
+      "save_plugin": "正在儲存 {{plugin}} 全域設定"
+    },
+    "instances": {
+      "create": "正在建立新執行個體 {{instance}}",
+      "reload_one": "正在重新載入執行個體 {{instances}}",
+      "reload_other": "正在重新載入執行個體 {{instances}}",
+      "stop_one": "正在停止執行個體 {{instances}}",
+      "stop_other": "正在停止執行個體 {{instances}}",
+      "delete_one": "正在刪除執行個體 {{instances}}",
+      "delete_other": "正在刪除執行個體 {{instances}}"
+    },
+    "jobs": {
+      "run_one": "正在執行所選任務的外掛程式：{{jobs}}",
+      "run_other": "正在執行所選任務的外掛程式：{{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "正在刪除外掛程式：{{plugins}}",
+      "delete_other": "正在刪除外掛程式：{{plugins}}",
+      "enable": "正在啟用外掛程式：{{plugin}}",
+      "disable": "正在停用外掛程式：{{plugin}}",
+      "reload": "正在重新載入外掛程式",
+      "install": "正在安裝外掛程式：{{plugin}}",
+      "update": "正在更新外掛程式：{{plugin}}"
+    },
+    "pro": {
+      "update_license": "正在更新授權金鑰"
+    },
+    "services": {
+      "convert_online_one": "正在將服務 {{services}} 轉換為線上",
+      "convert_online_other": "正在將服務 {{services}} 轉換為線上",
+      "convert_draft_one": "正在將服務 {{services}} 轉換為草稿",
+      "convert_draft_other": "正在將服務 {{services}} 轉換為草稿",
+      "declare_standard": "正在將服務 {{service}} 宣告為標準",
+      "declare_redirect_only": "正在將服務 {{service}} 宣告為「僅重新導向」",
+      "delete_one": "正在刪除服務 {{services}}",
+      "delete_other": "正在刪除服務 {{services}}",
+      "import": "正在匯入服務",
+      "import_with_configs": "正在匯入服務與自訂設定",
+      "create_config": "正在為服務 {{service}} 建立設定",
+      "create_config_draft": "正在為草稿服務 {{service}} 建立設定",
+      "save_config": "正在儲存服務 {{service}} 的設定",
+      "save_config_draft": "正在儲存草稿服務 {{service}} 的設定",
+      "save_plugin": "正在儲存服務 {{service}} 的 {{plugin}} 設定",
+      "save_template": "正在儲存服務 {{service}} 的範本設定"
+    },
+    "totp": {
+      "token": "正在驗證 TOTP 權杖。",
+      "security_key": "正在驗證安全金鑰。"
+    }
   },
   "login": {
     "title": "登入",
@@ -3711,9 +3791,11 @@
       "deleted": "規則已刪除。還剩 {{count}} 條規則。",
       "duplicated": "副本已插入第 {{n}} 個位置。只要上方的原始規則保持啟用，它就永遠不會相符。",
       "gateAdded": "已為比對加入速率門檻。低於門檻時規則不相符，評估會繼續。",
+      "jumped_whole": "此工作流程：{{message}}",
+      "jumped_rule": "規則 {{n}}：{{message}}",
+      "jumped_ruleNamed": "規則 {{n}}（「{{name}}」）：{{message}}",
       "inserted": "在 {{total}} 的 {{n}} 位置新增規則。 檢查所有先前規則。",
       "inspecting": "編輯 {{total}} 的 {{n}} 規則 — {{name}}。",
-      "jumped": "{{where}}：{{message}}",
       "lastValueRemoved": "最後一個值已移除；此條件必須包含一個值才能儲存。",
       "moved": "{{name}} 已移至第 {{to}} 個位置，共 {{total}} 個。",
       "movedDrag": "{{name}} 已拖曳至第 {{to}} 個位置，共 {{total}} 個。",
@@ -3879,7 +3961,10 @@
       "service_list_not_read_reopen_page": "無法讀取服務清單；請重新開啟頁面並重試"
     },
     "reason": {
-      "sentence": "安全工作流程 {{workflow}}:{{action}}"
+      "sentence_block": "安全工作流程「{{workflow}}」：請求已封鎖",
+      "sentence_redirect": "安全工作流程「{{workflow}}」：請求已重新導向",
+      "sentence_challenge": "安全工作流程「{{workflow}}」：請求已被要求驗證挑戰",
+      "sentence_other": "安全工作流程「{{workflow}}」：動作「{{action}}」"
     }
   },
   "request_path": {
@@ -3898,7 +3983,7 @@
     "resources": {
       "attach": "連結",
       "conflict": {
-        "inline": "{{service}} 已經透過自己的 {{family}} 設定，服務 {{path}}。請清除 {{path}} 的設定，或使用不同的路徑。",
+        "inline": "{{service}} 已經透過自己的「{{family}}」設定，服務 {{path}}。請清除 {{path}} 的這些設定，或使用不同的路徑。",
         "primary": "「{{name}}」目前是此服務的主要憑證，且將在沒有警告的情況下被降級。主要的憑證是指實際部署的憑證。",
         "resource_redirect": "{{service}} 已經透過重導向「{{name}}」服務 {{path}}。請解除「{{name}}」，或為其中一個指定不同的路徑。",
         "resource_upstream": "{{service}} 已經透過上游「{{name}}」服務 {{path}}。請解除「{{name}}」，或為其中一個指定不同的路徑。",
@@ -4048,6 +4133,10 @@
     "rotate_credential": "要輪替此執行個體的憑證嗎?若執行個體無法連線則會失敗。"
   },
   "general": {
+    "meta": {
+      "name": "一般",
+      "description": "伺服器的一般設定"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "內部使用：載入中",
@@ -4380,13 +4469,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "請求已封鎖",
-        "captcha": "驗證碼挑戰",
-        "challenge": "機器人偵測挑戰"
-      },
-      "sentence": "{{source}}:{{action}}",
-      "sentence_scenario": "{{source}}:{{action}}(情境:{{scenario}})",
+      "sentence_ban": "{{source}}：請求已封鎖",
+      "sentence_ban_scenario": "{{source}}：請求已封鎖（情境：「{{scenario}}」）",
+      "sentence_captcha": "{{source}}：驗證碼挑戰",
+      "sentence_captcha_scenario": "{{source}}：驗證碼挑戰（情境：「{{scenario}}」）",
+      "sentence_challenge": "{{source}}：機器人偵測挑戰",
+      "sentence_challenge_scenario": "{{source}}：機器人偵測挑戰（情境：「{{scenario}}」）",
+      "sentence_other": "{{source}}：無法辨識的動作「{{action}}」",
+      "sentence_other_scenario": "{{source}}：無法辨識的動作「{{action}}」（情境：「{{scenario}}」）",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "CrowdSec AppSec 失敗原則",
@@ -4487,9 +4577,14 @@
       "action": "移除",
       "confirm": "我已了解，並希望移除此決策。",
       "impact": "這會在共用的 CrowdSec 引擎上移除該決策，並影響每個已連線的 bouncer。已快取的決策、其他範圍、本機封鎖或 AppSec 仍可能攔截該目標。",
-      "selection": "要從 {{source}}（{{engine}}）移除 {{scope}} {{value}}（{{type}}），情境 {{scenario}}，來源 {{origin}} 嗎？",
+      "selection": "要從 {{source}}（{{engine}}）移除「{{value}}」的決策（範圍：「{{scope}}」，類型：「{{type}}」，來源：「{{origin}}」，情境：「{{scenario}}」）嗎？",
       "submit": "移除決策",
-      "success": "已在 CrowdSec 來源端移除。傳播狀態為 {{status}}（{{mode}}，間隔 {{interval}}）。剩餘的相符決策：{{remaining}}。本機封鎖或 AppSec 仍可能攔截。",
+      "success_stream_one": "已在 CrowdSec 來源端移除。傳播待處理（串流模式，間隔 {{interval}}）。還剩 {{remaining}} 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。",
+      "success_stream_other": "已在 CrowdSec 來源端移除。傳播待處理（串流模式，間隔 {{interval}}）。還剩 {{remaining}} 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。",
+      "success_live_one": "已在 CrowdSec 來源端移除。傳播待處理（即時模式，間隔 {{interval}}）。還剩 {{remaining}} 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。",
+      "success_live_other": "已在 CrowdSec 來源端移除。傳播待處理（即時模式，間隔 {{interval}}）。還剩 {{remaining}} 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。",
+      "success_other_one": "已在 CrowdSec 來源端移除。傳播待處理（模式「{{mode}}」，間隔 {{interval}}）。還剩 {{remaining}} 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。",
+      "success_other_other": "已在 CrowdSec 來源端移除。傳播待處理（模式「{{mode}}」，間隔 {{interval}}）。還剩 {{remaining}} 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。",
       "title": "移除 CrowdSec 決策"
     },
     "report": {

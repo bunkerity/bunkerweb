@@ -790,7 +790,15 @@ def services_convert():
         url_for(
             "loading",
             next=url_for("services.services_page"),
-            message=f"Converting service{'s' if len(services) > 1 else ''} {', '.join(services)} to {convert_to}",
+            message=translated(
+                (
+                    ("loading.services.convert_draft_other" if len(services) > 1 else "loading.services.convert_draft_one")
+                    if convert_to == "draft"
+                    else ("loading.services.convert_online_other" if len(services) > 1 else "loading.services.convert_online_one")
+                ),
+                services=", ".join(services),
+            )
+            or f"Converting service{'s' if len(services) > 1 else ''} {', '.join(services)} to {convert_to}",
         )
     )
 
@@ -886,7 +894,11 @@ def services_mode_convert(service: str):
         url_for(
             "loading",
             next=url_for("services.services_service_page", service=service),
-            message=f"Declaring service {service} {mode}",
+            message=translated(
+                "loading.services.declare_redirect_only" if mode == MODE_REDIRECT_ONLY else "loading.services.declare_standard",
+                service=service,
+            )
+            or f"Declaring service {service} {mode}",
         )
     )
 
@@ -1007,7 +1019,11 @@ def services_delete():
         url_for(
             "loading",
             next=url_for("services.services_page"),
-            message=f"Deleting service{'s' if len(services) > 1 else ''} {', '.join(services)}",
+            message=translated(
+                "loading.services.delete_other" if len(services) > 1 else "loading.services.delete_one",
+                services=", ".join(services),
+            )
+            or f"Deleting service{'s' if len(services) > 1 else ''} {', '.join(services)}",
         )
     )
 
@@ -2216,7 +2232,15 @@ def services_service_page(service: str):
                     if new_service or variables.get("SERVER_NAME", "").split(" ")[0] == variables.get("OLD_SERVER_NAME", "").split(" ")[0]
                     else url_for("services.services_page")
                 ),
-                message=f"{'Saving' if service != 'new' else 'Creating'} configuration for {'draft ' if is_draft else ''}service {service}",
+                message=translated(
+                    (
+                        ("loading.services.create_config_draft" if is_draft else "loading.services.create_config")
+                        if service == "new"
+                        else ("loading.services.save_config_draft" if is_draft else "loading.services.save_config")
+                    ),
+                    service=service,
+                )
+                or f"{'Saving' if service != 'new' else 'Creating'} configuration for {'draft ' if is_draft else ''}service {service}",
             )
         )
 
@@ -2461,7 +2485,8 @@ def services_plugin_page(service: str, plugin: str):
                     if variables.get("SERVER_NAME", service).split(" ")[0] == service
                     else url_for("services.services_page")
                 ),
-                message=f"Saving {plugin_data['name']} settings for service {service}",
+                message=translated("loading.services.save_plugin", plugin=plugin_data["name"], service=service)
+                or f"Saving {plugin_data['name']} settings for service {service}",
             )
         )
 
@@ -2571,7 +2596,7 @@ def services_template_page(service: str, template: str):
                     if variables.get("SERVER_NAME", service).split(" ")[0] == service
                     else url_for("services.services_page")
                 ),
-                message=f"Saving template settings for service {service}",
+                message=translated("loading.services.save_template", service=service) or f"Saving template settings for service {service}",
             )
         )
 
@@ -2865,7 +2890,11 @@ def services_service_import():
         overwrite_configs,
     )
 
-    message = "Importing services and custom configurations" if parsed_configs or configs_parse_errors else "Importing services"
+    message = (
+        (translated("loading.services.import_with_configs") or "Importing services and custom configurations")
+        if parsed_configs or configs_parse_errors
+        else (translated("loading.services.import") or "Importing services")
+    )
     return redirect(
         url_for(
             "loading",

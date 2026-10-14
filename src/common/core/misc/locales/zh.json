@@ -93,7 +93,7 @@
       },
       "EXTERNAL_PLUGIN_URLS": {
         "label": "外部插件 URL",
-        "help": "要下载并安装的外部插件 URL 列表(直接指向 .zip 或 .tar 文件的下载链接;URL 之间以空格分隔)。每个 URL 最多 50 MiB。可在 URL 后附加 #sha256=<digest> 以锁定其内容。纯 http:// 已弃用,将在 1.7.0 中被拒绝:请使用 https:// 或 file:///。"
+        "help": "要下载并安装的外部插件 URL 列表(直接指向 .zip 或 .tar 文件的下载链接;URL 之间以空格分隔)。每个 URL 最多 50 MiB。可在 URL 后附加 #sha256=<digest> 以锁定其内容。纯 http:// 已弃用,将在 1.7.0 中被拒绝:请使用 https:// 或 file:///。 移除某个 URL 后,待所有其他 URL 下载完成,该 URL 所提供的插件将连同其已保存的值一并卸载。手动添加或在 Web UI 中上传的插件永远不会被移除。"
       },
       "DENY_HTTP_STATUS": {
         "label": "拒绝时的 HTTP 状态码",

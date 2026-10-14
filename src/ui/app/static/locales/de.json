@@ -732,6 +732,13 @@
         "series": "Blockiert",
         "title": "Blockierte Anfragen im Zeitverlauf (ausgewählter Bereich)"
       },
+      "tooltip": {
+        "blocked_one": "{{count}} blockiert",
+        "blocked_other": "{{count}} blockiert",
+        "requests_one": "{{count}} Anfrage",
+        "requests_other": "{{count}} Anfragen",
+        "top_share": "{{percent}} % der Top 10"
+      },
       "top_blocked_ips": {
         "most_blocked": "Meistblockierte IP",
         "title": "Top 10 blockierte IPs"
@@ -1254,6 +1261,79 @@
     "use_authenticator_code": "Verwenden Sie einen Authenticator-Code",
     "use_recovery_code": "Verwenden Sie einen Wiederherstellungs-Code",
     "get_support": "Support erhalten"
+  },
+  "loading": {
+    "default": "Wird geladen...",
+    "bans": {
+      "ban_one": "{{count}} IP-Adresse wird gesperrt",
+      "ban_other": "{{count}} IP-Adressen werden gesperrt",
+      "unban_one": "Sperre von {{count}} IP-Adresse wird aufgehoben",
+      "unban_other": "Sperren von {{count}} IP-Adressen werden aufgehoben",
+      "update_duration_one": "Dauer von {{count}} Sperre wird aktualisiert",
+      "update_duration_other": "Dauer von {{count}} Sperren wird aktualisiert"
+    },
+    "configs": {
+      "convert_online_one": "{{count}} Konfiguration wird in Online umgewandelt",
+      "convert_online_other": "{{count}} Konfigurationen werden in Online umgewandelt",
+      "convert_draft_one": "{{count}} Konfiguration wird in Entwurf umgewandelt",
+      "convert_draft_other": "{{count}} Konfigurationen werden in Entwurf umgewandelt",
+      "delete_one": "{{count}} ausgewählte Konfiguration wird gelöscht",
+      "delete_other": "{{count}} ausgewählte Konfigurationen werden gelöscht",
+      "create": "Benutzerdefinierte Konfiguration {{config}} wird erstellt",
+      "create_for_service": "Benutzerdefinierte Konfiguration {{config}} für den Dienst {{service}} wird erstellt",
+      "import": "Benutzerdefinierte Konfigurationen werden importiert"
+    },
+    "global_settings": {
+      "save": "Globale Einstellungen werden gespeichert",
+      "save_plugin": "Globale Einstellungen von {{plugin}} werden gespeichert"
+    },
+    "instances": {
+      "create": "Neue Instanz {{instance}} wird erstellt",
+      "reload_one": "Instanz {{instances}} wird neu geladen",
+      "reload_other": "Instanzen {{instances}} werden neu geladen",
+      "stop_one": "Instanz {{instances}} wird gestoppt",
+      "stop_other": "Instanzen {{instances}} werden gestoppt",
+      "delete_one": "Instanz {{instances}} wird gelöscht",
+      "delete_other": "Instanzen {{instances}} werden gelöscht"
+    },
+    "jobs": {
+      "run_one": "Die Plugins der ausgewählten Aufgabe werden ausgeführt: {{jobs}}",
+      "run_other": "Die Plugins der ausgewählten Aufgaben werden ausgeführt: {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "Plugin wird gelöscht: {{plugins}}",
+      "delete_other": "Plugins werden gelöscht: {{plugins}}",
+      "enable": "Plugin wird aktiviert: {{plugin}}",
+      "disable": "Plugin wird deaktiviert: {{plugin}}",
+      "reload": "Plugins werden neu geladen",
+      "install": "Plugin wird installiert: {{plugin}}",
+      "update": "Plugin wird aktualisiert: {{plugin}}"
+    },
+    "pro": {
+      "update_license": "Lizenzschlüssel wird aktualisiert"
+    },
+    "services": {
+      "convert_online_one": "Dienst {{services}} wird in Online umgewandelt",
+      "convert_online_other": "Dienste {{services}} werden in Online umgewandelt",
+      "convert_draft_one": "Dienst {{services}} wird in Entwurf umgewandelt",
+      "convert_draft_other": "Dienste {{services}} werden in Entwurf umgewandelt",
+      "declare_standard": "Dienst {{service}} wird als Standard deklariert",
+      "declare_redirect_only": "Dienst {{service}} wird als Nur Weiterleitung deklariert",
+      "delete_one": "Dienst {{services}} wird gelöscht",
+      "delete_other": "Dienste {{services}} werden gelöscht",
+      "import": "Dienste werden importiert",
+      "import_with_configs": "Dienste und benutzerdefinierte Konfigurationen werden importiert",
+      "create_config": "Konfiguration für den Dienst {{service}} wird erstellt",
+      "create_config_draft": "Konfiguration für den Dienst im Entwurf {{service}} wird erstellt",
+      "save_config": "Konfiguration für den Dienst {{service}} wird gespeichert",
+      "save_config_draft": "Konfiguration für den Dienst im Entwurf {{service}} wird gespeichert",
+      "save_plugin": "Einstellungen von {{plugin}} für den Dienst {{service}} werden gespeichert",
+      "save_template": "Vorlageneinstellungen für den Dienst {{service}} werden gespeichert"
+    },
+    "totp": {
+      "token": "TOTP-Token wird überprüft.",
+      "security_key": "Sicherheitsschlüssel wird überprüft."
+    }
   },
   "login": {
     "notice_password_changed": "Ihr Passwort wurde geändert. Melden Sie sich mit Ihrem neuen Passwort an.",
@@ -3606,7 +3686,9 @@
       "deleted": "Regel gelöscht. Verbleibende Regeln: {{count}}.",
       "duplicated": "Kopie an Position {{n}} eingefügt. Sie kann niemals übereinstimmen, solange das darüberliegende Original aktiviert ist.",
       "gateAdded": "Ratenschwellenwert zum Abgleich hinzugefügt. Darunter stimmt die Regel nicht überein und die Auswertung wird fortgesetzt.",
-      "jumped": "{{where}}: {{message}}",
+      "jumped_whole": "Dieser Workflow: {{message}}",
+      "jumped_rule": "Regel {{n}}: {{message}}",
+      "jumped_ruleNamed": "Regel {{n}} — „{{name}}“: {{message}}",
       "lastValueRemoved": "Letzten Wert entfernt – diese Bedingung kann erst gespeichert werden, wenn sie wieder einen Wert enthält.",
       "moved": "{{name}} an Position {{to}} von {{total}} verschoben.",
       "movedDrag": "{{name}} an Position {{to}} von {{total}} gezogen.",
@@ -3741,7 +3823,10 @@
       "regex": "entspricht dem regulären Ausdruck"
     },
     "reason": {
-      "sentence": "Sicherheits-Workflow {{workflow}}: {{action}}"
+      "sentence_block": "Sicherheits-Workflow „{{workflow}}“: Anfrage blockiert",
+      "sentence_redirect": "Sicherheits-Workflow „{{workflow}}“: Anfrage weitergeleitet",
+      "sentence_challenge": "Sicherheits-Workflow „{{workflow}}“: Anfrage herausgefordert",
+      "sentence_other": "Sicherheits-Workflow „{{workflow}}“: Aktion „{{action}}“"
     },
     "crowdsec_field": {
       "remediation": "die Abhilfe ist",
@@ -3957,7 +4042,7 @@
     "resources": {
       "attach": "Zuordnen",
       "conflict": {
-        "inline": "{{service}} dient bereits {{path}} über seine eigenen {{family}}-Einstellungen. Löschen Sie diese Einstellungen für {{path}} oder verwenden Sie einen anderen Pfad.",
+        "inline": "{{service}} liefert {{path}} bereits über die eigenen Einstellungen „{{family}}“ aus. Löschen Sie diese Einstellungen für {{path}} oder verwenden Sie einen anderen Pfad.",
         "primary": "„{{name}}“ ist derzeit das primäre Zertifikat für diesen Dienst und wird ohne weitere Warnung abgewertet. Das primäre Zertifikat ist das, das tatsächlich bereitgestellt wird.",
         "resource_redirect": "{{service}} liefert {{path}} bereits über die Weiterleitung „{{name}}“ aus. Trennen Sie „{{name}}“ oder geben Sie einer von beiden einen anderen Pfad.",
         "resource_upstream": "{{service}} liefert {{path}} bereits über den Upstream „{{name}}“ aus. Trennen Sie „{{name}}“ oder geben Sie einer von beiden einen anderen Pfad.",
@@ -4040,13 +4125,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "Anfrage blockiert",
-        "captcha": "Captcha-Herausforderung",
-        "challenge": "Bot-Erkennungs-Challenge"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (Szenario: {{scenario}})",
+      "sentence_ban": "{{source}}: Anfrage blockiert",
+      "sentence_ban_scenario": "{{source}}: Anfrage blockiert (Szenario: „{{scenario}}“)",
+      "sentence_captcha": "{{source}}: Captcha-Herausforderung",
+      "sentence_captcha_scenario": "{{source}}: Captcha-Herausforderung (Szenario: „{{scenario}}“)",
+      "sentence_challenge": "{{source}}: Bot-Erkennungs-Challenge",
+      "sentence_challenge_scenario": "{{source}}: Bot-Erkennungs-Challenge (Szenario: „{{scenario}}“)",
+      "sentence_other": "{{source}}: nicht erkannte Aktion „{{action}}“",
+      "sentence_other_scenario": "{{source}}: nicht erkannte Aktion „{{action}}“ (Szenario: „{{scenario}}“)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "CrowdSec-AppSec-Fehlerrichtlinie",
@@ -4147,9 +4233,14 @@
       "action": "Entfernen",
       "confirm": "Ich habe verstanden und möchte diese Entscheidung entfernen.",
       "impact": "Dies entfernt die Entscheidung auf der gemeinsam genutzten CrowdSec-Engine und betrifft jeden angebundenen Bouncer. Zwischengespeicherte Entscheidungen, ein anderer Bereich, lokale Banns oder AppSec können das Ziel weiterhin blockieren.",
-      "selection": "{{scope}} {{value}} ({{type}}), Szenario {{scenario}}, Herkunft {{origin}}, aus {{source}} ({{engine}}) entfernen?",
+      "selection": "Die Entscheidung zu „{{value}}“ (Geltungsbereich: „{{scope}}“, Typ: „{{type}}“, Herkunft: „{{origin}}“, Szenario: „{{scenario}}“) aus {{source}} ({{engine}}) entfernen?",
       "submit": "Entscheidung entfernen",
-      "success": "An der CrowdSec-Quelle entfernt. Die Verteilung ist {{status}} ({{mode}}, Intervall {{interval}}). Verbleibende passende Entscheidungen: {{remaining}}. Lokale Banns oder AppSec können weiterhin blockieren.",
+      "success_stream_one": "An der CrowdSec-Quelle entfernt. Die Verteilung steht noch aus (Stream-Modus, Intervall {{interval}}). Es bleibt {{remaining}} weitere passende Entscheidung. Lokale Banns oder AppSec können weiterhin blockieren.",
+      "success_stream_other": "An der CrowdSec-Quelle entfernt. Die Verteilung steht noch aus (Stream-Modus, Intervall {{interval}}). Es bleiben {{remaining}} weitere passende Entscheidungen. Lokale Banns oder AppSec können weiterhin blockieren.",
+      "success_live_one": "An der CrowdSec-Quelle entfernt. Die Verteilung steht noch aus (Live-Modus, Intervall {{interval}}). Es bleibt {{remaining}} weitere passende Entscheidung. Lokale Banns oder AppSec können weiterhin blockieren.",
+      "success_live_other": "An der CrowdSec-Quelle entfernt. Die Verteilung steht noch aus (Live-Modus, Intervall {{interval}}). Es bleiben {{remaining}} weitere passende Entscheidungen. Lokale Banns oder AppSec können weiterhin blockieren.",
+      "success_other_one": "An der CrowdSec-Quelle entfernt. Die Verteilung steht noch aus (Modus „{{mode}}“, Intervall {{interval}}). Es bleibt {{remaining}} weitere passende Entscheidung. Lokale Banns oder AppSec können weiterhin blockieren.",
+      "success_other_other": "An der CrowdSec-Quelle entfernt. Die Verteilung steht noch aus (Modus „{{mode}}“, Intervall {{interval}}). Es bleiben {{remaining}} weitere passende Entscheidungen. Lokale Banns oder AppSec können weiterhin blockieren.",
       "title": "CrowdSec-Entscheidung entfernen"
     },
     "report": {
@@ -4213,6 +4304,10 @@
     "rotate_credential": "Anmeldedaten dieser Instanz rotieren? Schlägt fehl, wenn die Instanz nicht erreichbar ist."
   },
   "general": {
+    "meta": {
+      "name": "Allgemein",
+      "description": "Die allgemeinen Einstellungen für den Server"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "interne Verwendung Laden",

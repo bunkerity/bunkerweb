@@ -53,8 +53,8 @@ def _status_banner_branch():
                     "JOB_DEFERRAL_PREFIX",
                 )
             ],
-            kwonlyargs=[],
-            kw_defaults=[],
+            kwonlyargs=[ast.arg(arg="is_cors")],
+            kw_defaults=[ast.Constant(value=False)],  # computed just above the branch in before_request
             defaults=[],
         ),
         body=[outer],
@@ -153,3 +153,35 @@ def test_deferred_run_flashes_a_distinct_warning(last_run, expect_deferred_flash
     # A deferred flash and a failed flash are mutually exclusive -- the crash row above must land
     # in "could not be applied" (already covered by the truth table), never in both.
     assert not (deferred_calls and failed_calls)
+
+
+@pytest.mark.parametrize("is_cors", (False, True))
+def test_a_background_request_raises_no_state_banner(is_cors):
+    """A fetch/XHR runs ``before_request`` too. Its flash is queued in the session and shown by the
+    next page render, so a banner raised during a failed apply outlived the state: the failover
+    cleared by a manual instance reload still showed "could not be applied" on the next page load.
+    Every full page load re-derives the banner, so skipping the background requests loses nothing."""
+    flashes = Mock()
+    api_client = Mock()
+    api_client.get_last_job_run.return_value = {"success": False}
+
+    _status_banner_branch()(
+        True,
+        {"failover": True, "failover_message": "nginx: [emerg] unknown directive"},
+        {"CONFIG_CHANGED": False},
+        SimpleNamespace(path="/instances"),
+        SimpleNamespace(is_authenticated=True),
+        flashes,
+        flashes,
+        lambda endpoint: f"/{endpoint}",
+        api_client,
+        RuntimeError,
+        ConnectionError,
+        Mock(),
+        lambda key: None,
+        JOB_DEFERRAL_PREFIX,
+        is_cors=is_cors,
+    )
+
+    assert bool(flashes.call_args_list) is (not is_cors)
+    assert api_client.get_last_job_run.called is (not is_cors)

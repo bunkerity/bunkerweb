@@ -180,7 +180,7 @@ def pro_key():
         url_for(
             "loading",
             next=url_for("pro.pro_page"),
-            message="Updating license key",
+            message=translated("loading.pro.update_license") or "Updating license key",
         )
     )
 

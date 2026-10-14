@@ -2509,20 +2509,29 @@ msgstr "%(time)s সময়ে পর্যবেক্ষণ করা হয
 msgid "crowdsec.previous"
 msgstr "পূর্ববর্তী"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "রিকোয়েস্ট ব্লক করা হয়েছে"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: রিকোয়েস্ট ব্লক করা হয়েছে"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "ক্যাপচা চ্যালেঞ্জ"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: রিকোয়েস্ট ব্লক করা হয়েছে (দৃশ্যকল্প: “%(scenario)s”)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "বট-সনাক্তকরণ চ্যালেঞ্জ"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: ক্যাপচা চ্যালেঞ্জ"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: ক্যাপচা চ্যালেঞ্জ (দৃশ্যকল্প: “%(scenario)s”)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (দৃশ্যকল্প: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: বট-সনাক্তকরণ চ্যালেঞ্জ"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: বট-সনাক্তকরণ চ্যালেঞ্জ (দৃশ্যকল্প: “%(scenario)s”)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: অচেনা অ্যাকশন “%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: অচেনা অ্যাকশন “%(action)s” (দৃশ্যকল্প: “%(scenario)s”)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "এটি শেয়ার করা CrowdSec ইঞ্জিনে সিদ্ধান্তটি সরিয়ে দেয় এবং সংযুক্ত প্রতিটি bouncer-কে প্রভাবিত করে। ক্যাশ করা সিদ্ধান্ত, অন্য কোনো রেঞ্জ, স্থানীয় নিষেধাজ্ঞা বা AppSec এখনও লক্ষ্যটিকে ব্লক করতে পারে।"
 
 msgid "crowdsec.remove.selection"
-msgstr "%(source)s (%(engine)s) থেকে %(scope)s %(value)s (%(type)s), দৃশ্যকল্প %(scenario)s, উৎস %(origin)s সরাবেন?"
+msgstr "%(source)s (%(engine)s) থেকে “%(value)s”-এর সিদ্ধান্ত সরাবেন (স্কোপ: “%(scope)s”, ধরন: “%(type)s”, উৎস: “%(origin)s”, দৃশ্যকল্প: “%(scenario)s”)?"
 
 msgid "crowdsec.remove.submit"
 msgstr "সিদ্ধান্ত সরান"
 
-msgid "crowdsec.remove.success"
-msgstr "CrowdSec উৎসে সরানো হয়েছে। প্রসারণের অবস্থা %(status)s (%(mode)s, ব্যবধান %(interval)s)। অবশিষ্ট মিলে যাওয়া সিদ্ধান্ত: %(remaining)s। স্থানীয় নিষেধাজ্ঞা বা AppSec এখনও ব্লক করতে পারে।"
+msgid "crowdsec.remove.success_live_one"
+msgstr "CrowdSec উৎসে সরানো হয়েছে। প্রসারণ মুলতুবি (লাইভ মোড, ব্যবধান %(interval)s)। আরও %(remaining)sটি মিলে যাওয়া সিদ্ধান্ত অবশিষ্ট আছে। স্থানীয় নিষেধাজ্ঞা বা AppSec এখনও ব্লক করতে পারে।"
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "CrowdSec উৎসে সরানো হয়েছে। প্রসারণ মুলতুবি (লাইভ মোড, ব্যবধান %(interval)s)। আরও %(remaining)sটি মিলে যাওয়া সিদ্ধান্ত অবশিষ্ট আছে। স্থানীয় নিষেধাজ্ঞা বা AppSec এখনও ব্লক করতে পারে।"
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "CrowdSec উৎসে সরানো হয়েছে। প্রসারণ মুলতুবি (মোড “%(mode)s”, ব্যবধান %(interval)s)। আরও %(remaining)sটি মিলে যাওয়া সিদ্ধান্ত অবশিষ্ট আছে। স্থানীয় নিষেধাজ্ঞা বা AppSec এখনও ব্লক করতে পারে।"
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "CrowdSec উৎসে সরানো হয়েছে। প্রসারণ মুলতুবি (মোড “%(mode)s”, ব্যবধান %(interval)s)। আরও %(remaining)sটি মিলে যাওয়া সিদ্ধান্ত অবশিষ্ট আছে। স্থানীয় নিষেধাজ্ঞা বা AppSec এখনও ব্লক করতে পারে।"
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "CrowdSec উৎসে সরানো হয়েছে। প্রসারণ মুলতুবি (স্ট্রিম মোড, ব্যবধান %(interval)s)। আরও %(remaining)sটি মিলে যাওয়া সিদ্ধান্ত অবশিষ্ট আছে। স্থানীয় নিষেধাজ্ঞা বা AppSec এখনও ব্লক করতে পারে।"
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "CrowdSec উৎসে সরানো হয়েছে। প্রসারণ মুলতুবি (স্ট্রিম মোড, ব্যবধান %(interval)s)। আরও %(remaining)sটি মিলে যাওয়া সিদ্ধান্ত অবশিষ্ট আছে। স্থানীয় নিষেধাজ্ঞা বা AppSec এখনও ব্লক করতে পারে।"
 
 msgid "crowdsec.remove.title"
 msgstr "CrowdSec সিদ্ধান্ত সরান"
@@ -2718,6 +2742,21 @@ msgstr "ব্লক করা"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "সময়ের সাথে ব্লক করা অনুরোধ (নির্বাচিত সীমা)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "%(count)sটি ব্লক করা হয়েছে"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "%(count)sটি ব্লক করা হয়েছে"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)sটি অনুরোধ"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)sটি অনুরোধ"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "শীর্ষ 10-এর %(percent)s%%"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "সবচেয়ে বেশি অবরুদ্ধ আইপি"
@@ -3721,6 +3760,12 @@ msgstr "পাসওয়ার্ডে অন্তত ১টি বিশে
 msgid "form.validation.password_uppercase"
 msgstr "পাসওয়ার্ডে অন্তত ১টি বড় হাতের অক্ষর থাকতে হবে।"
 
+msgid "general.meta.description"
+msgstr "সার্ভারের সাধারণ সেটিংস"
+
+msgid "general.meta.name"
+msgstr "সাধারণ"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "NGINX অ্যাক্সেস লগের জন্য ব্যবহৃত পাথ (ফাইল পাথ, syslog:server=host[:port][,param=value], অথবা memory:name:size; নিষ্ক্রিয় করতে off সেট করুন)।"
 
@@ -4371,6 +4416,165 @@ msgstr "একটি প্রমাণীকরণ কোড ব্যবহা
 
 msgid "link.use_recovery_code"
 msgstr "একটি পুনরুদ্ধার কোড ব্যবহার করুন"
+
+msgid "loading.bans.ban_one"
+msgstr "%(count)sটি IP নিষিদ্ধ করা হচ্ছে"
+
+msgid "loading.bans.ban_other"
+msgstr "%(count)sটি IP নিষিদ্ধ করা হচ্ছে"
+
+msgid "loading.bans.unban_one"
+msgstr "%(count)sটি IP-এর নিষেধাজ্ঞা সরানো হচ্ছে"
+
+msgid "loading.bans.unban_other"
+msgstr "%(count)sটি IP-এর নিষেধাজ্ঞা সরানো হচ্ছে"
+
+msgid "loading.bans.update_duration_one"
+msgstr "%(count)sটি নিষেধাজ্ঞার সময়কাল আপডেট করা হচ্ছে"
+
+msgid "loading.bans.update_duration_other"
+msgstr "%(count)sটি নিষেধাজ্ঞার সময়কাল আপডেট করা হচ্ছে"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "%(count)sটি কনফিগারেশন খসড়ায় রূপান্তর করা হচ্ছে"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "%(count)sটি কনফিগারেশন খসড়ায় রূপান্তর করা হচ্ছে"
+
+msgid "loading.configs.convert_online_one"
+msgstr "%(count)sটি কনফিগারেশন অনলাইনে রূপান্তর করা হচ্ছে"
+
+msgid "loading.configs.convert_online_other"
+msgstr "%(count)sটি কনফিগারেশন অনলাইনে রূপান্তর করা হচ্ছে"
+
+msgid "loading.configs.create"
+msgstr "কাস্টম কনফিগারেশন %(config)s তৈরি করা হচ্ছে"
+
+msgid "loading.configs.create_for_service"
+msgstr "পরিষেবা %(service)s-এর জন্য কাস্টম কনফিগারেশন %(config)s তৈরি করা হচ্ছে"
+
+msgid "loading.configs.delete_one"
+msgstr "নির্বাচিত %(count)sটি কনফিগারেশন মুছে ফেলা হচ্ছে"
+
+msgid "loading.configs.delete_other"
+msgstr "নির্বাচিত %(count)sটি কনফিগারেশন মুছে ফেলা হচ্ছে"
+
+msgid "loading.configs.import"
+msgstr "কাস্টম কনফিগারেশন আমদানি করা হচ্ছে"
+
+msgid "loading.default"
+msgstr "লোড হচ্ছে..."
+
+msgid "loading.global_settings.save"
+msgstr "গ্লোবাল সেটিংস সংরক্ষণ করা হচ্ছে"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "%(plugin)s গ্লোবাল সেটিংস সংরক্ষণ করা হচ্ছে"
+
+msgid "loading.instances.create"
+msgstr "নতুন ইনস্ট্যান্স %(instance)s তৈরি করা হচ্ছে"
+
+msgid "loading.instances.delete_one"
+msgstr "ইনস্ট্যান্স %(instances)s মুছে ফেলা হচ্ছে"
+
+msgid "loading.instances.delete_other"
+msgstr "ইনস্ট্যান্স %(instances)s মুছে ফেলা হচ্ছে"
+
+msgid "loading.instances.reload_one"
+msgstr "ইনস্ট্যান্স %(instances)s পুনরায় লোড করা হচ্ছে"
+
+msgid "loading.instances.reload_other"
+msgstr "ইনস্ট্যান্স %(instances)s পুনরায় লোড করা হচ্ছে"
+
+msgid "loading.instances.stop_one"
+msgstr "ইনস্ট্যান্স %(instances)s বন্ধ করা হচ্ছে"
+
+msgid "loading.instances.stop_other"
+msgstr "ইনস্ট্যান্স %(instances)s বন্ধ করা হচ্ছে"
+
+msgid "loading.jobs.run_one"
+msgstr "নির্বাচিত কার্যের প্লাগইন চালানো হচ্ছে: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "নির্বাচিত কার্যগুলোর প্লাগইন চালানো হচ্ছে: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "প্লাগইন মুছে ফেলা হচ্ছে: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "প্লাগইন মুছে ফেলা হচ্ছে: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "প্লাগইন নিষ্ক্রিয় করা হচ্ছে: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "প্লাগইন সক্ষম করা হচ্ছে: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "প্লাগইন ইনস্টল করা হচ্ছে: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "প্লাগইন পুনরায় লোড করা হচ্ছে"
+
+msgid "loading.plugins.update"
+msgstr "প্লাগইন আপডেট করা হচ্ছে: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "লাইসেন্স কী আপডেট করা হচ্ছে"
+
+msgid "loading.services.convert_draft_one"
+msgstr "পরিষেবা %(services)s খসড়ায় রূপান্তর করা হচ্ছে"
+
+msgid "loading.services.convert_draft_other"
+msgstr "পরিষেবা %(services)s খসড়ায় রূপান্তর করা হচ্ছে"
+
+msgid "loading.services.convert_online_one"
+msgstr "পরিষেবা %(services)s অনলাইনে রূপান্তর করা হচ্ছে"
+
+msgid "loading.services.convert_online_other"
+msgstr "পরিষেবা %(services)s অনলাইনে রূপান্তর করা হচ্ছে"
+
+msgid "loading.services.create_config"
+msgstr "পরিষেবা %(service)s-এর জন্য কনফিগারেশন তৈরি করা হচ্ছে"
+
+msgid "loading.services.create_config_draft"
+msgstr "খসড়া পরিষেবা %(service)s-এর জন্য কনফিগারেশন তৈরি করা হচ্ছে"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "পরিষেবা %(service)s-কে “শুধু রিডাইরেক্ট” হিসেবে ঘোষণা করা হচ্ছে"
+
+msgid "loading.services.declare_standard"
+msgstr "পরিষেবা %(service)s-কে স্ট্যান্ডার্ড হিসেবে ঘোষণা করা হচ্ছে"
+
+msgid "loading.services.delete_one"
+msgstr "পরিষেবা %(services)s মুছে ফেলা হচ্ছে"
+
+msgid "loading.services.delete_other"
+msgstr "পরিষেবা %(services)s মুছে ফেলা হচ্ছে"
+
+msgid "loading.services.import"
+msgstr "পরিষেবা আমদানি করা হচ্ছে"
+
+msgid "loading.services.import_with_configs"
+msgstr "পরিষেবা ও কাস্টম কনফিগারেশন আমদানি করা হচ্ছে"
+
+msgid "loading.services.save_config"
+msgstr "পরিষেবা %(service)s-এর কনফিগারেশন সংরক্ষণ করা হচ্ছে"
+
+msgid "loading.services.save_config_draft"
+msgstr "খসড়া পরিষেবা %(service)s-এর কনফিগারেশন সংরক্ষণ করা হচ্ছে"
+
+msgid "loading.services.save_plugin"
+msgstr "পরিষেবা %(service)s-এর জন্য %(plugin)s সেটিংস সংরক্ষণ করা হচ্ছে"
+
+msgid "loading.services.save_template"
+msgstr "পরিষেবা %(service)s-এর জন্য টেমপ্লেট সেটিংস সংরক্ষণ করা হচ্ছে"
+
+msgid "loading.totp.security_key"
+msgstr "সিকিউরিটি কী যাচাই করা হচ্ছে।"
+
+msgid "loading.totp.token"
+msgstr "TOTP টোকেন যাচাই করা হচ্ছে।"
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "আপনাকে লগ ইন করানো যায়নি, অনুগ্রহ করে আবার চেষ্টা করুন"
@@ -6611,7 +6815,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "এই ওয়ার্কফ্লোটি %(service)s থেকে আলাদা করবেন?"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s বর্তমানে %(path)s-কে তার নিজস্ব %(family)s সেটিংসের মাধ্যমে পরিবেশন করছে। %(path)s-এর জন্য এই সেটিংসগুলি পরিষ্কার করুন, অথবা অন্য কোনো পথ ব্যবহার করুন।"
+msgstr "%(service)s ইতিমধ্যে তার নিজস্ব “%(family)s” সেটিংসের মাধ্যমে %(path)s পরিবেশন করছে। %(path)s-এর জন্য এই সেটিংসগুলি পরিষ্কার করুন, অথবা অন্য কোনো পথ ব্যবহার করুন।"
 
 msgid "service.resources.conflict.primary"
 msgstr "\"%(name)s\" বর্তমানে এই পরিষেবার প্রাথমিক সার্টিফিকেট; আর কোনো সতর্কতা ছাড়াই এটি প্রাথমিক অবস্থান হারাবে। প্রাথমিক সার্টিফিকেটটিই আসলে ডিপ্লয় করা হয়।"
@@ -10504,8 +10708,17 @@ msgstr "নিয়মগুলি ক্রমানুসারে মূল্�
 msgid "workflows.readonly"
 msgstr "ডাটাবেসটি শুধুমাত্র পড়ার জন্য। ওয়ার্কফ্লোগুলি পরিদর্শন করা যেতে পারে কিন্তু পরিবর্তন করা যায় না।"
 
-msgid "workflows.reason.sentence"
-msgstr "সিকিউরিটি ওয়ার্কফ্লো %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "সিকিউরিটি ওয়ার্কফ্লো “%(workflow)s”: রিকোয়েস্ট ব্লক করা হয়েছে"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "সিকিউরিটি ওয়ার্কফ্লো “%(workflow)s”: রিকোয়েস্টে চ্যালেঞ্জ দেওয়া হয়েছে"
+
+msgid "workflows.reason.sentence_other"
+msgstr "সিকিউরিটি ওয়ার্কফ্লো “%(workflow)s”: অ্যাকশন “%(action)s”"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "সিকিউরিটি ওয়ার্কফ্লো “%(workflow)s”: রিকোয়েস্ট রিডাইরেক্ট করা হয়েছে"
 
 msgid "workflows.rule.disabled"
 msgstr "নিষ্ক্রিয়"
@@ -10558,8 +10771,14 @@ msgstr "%(total)sটির মধ্যে %(n)s নম্বর স্থান
 msgid "workflows.say.inspecting"
 msgstr "%(total)s এর %(n)s নিয়মটি সম্পাদনা করুন — %(name)s।"
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "নিয়ম %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "নিয়ম %(n)s — “%(name)s”: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "এই ওয়ার্কফ্লো: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "শেষ মান সরানো হয়েছে — একটি মান না থাকা পর্যন্ত এই শর্ত সংরক্ষণ করা যাবে না।"

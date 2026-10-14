@@ -41,7 +41,7 @@ REVIEWED_PASSTHROUGH_SITES = [
     ("src/ui/app/routes/instances.py", "message"),
     ("src/ui/app/routes/instances.py", "ret"),
     # reload/stop message is resolved by translated() before its explicit English fallback.
-    ("src/ui/app/routes/instances.py", "message or f'Instance {instance} {ACTIONS[action]['past']} s"),
+    ("src/ui/app/routes/instances.py", "message or f\"Instance {instance} {ACTIONS[action]['past']} s"),
     # jobs.py: `e.message` from ApiClientError/ApiUnavailableError -- the API's own error body.
     ("src/ui/app/routes/jobs.py", "e.message"),
     # login.py: already-translated message re-raised as `str(exc)`.
@@ -129,8 +129,18 @@ REVIEWED_PASSTHROUGH_SITES = [
 SITE_KEY_LENGTH = 60
 
 
+def _key_of(source):
+    # Quote style is not stable across CPython releases (3.12.x changed how `ast.unparse` quotes
+    # nested f-strings), so keys compare with every `"` read as `'`.
+    return source[:SITE_KEY_LENGTH].replace('"', "'")
+
+
 def _site_key(msgnode):
-    return ast.unparse(msgnode)[:SITE_KEY_LENGTH]
+    return _key_of(ast.unparse(msgnode))
+
+
+def _reviewed_counter():
+    return Counter((path, _key_of(key)) for path, key in REVIEWED_PASSTHROUGH_SITES)
 
 
 def _is_translated_call(node):
@@ -211,7 +221,7 @@ def test_every_non_literal_site_is_a_reviewed_passthrough():
             if not _is_bare_literal(msgnode):
                 found[(relpath, _site_key(msgnode))] += 1
 
-    reviewed = Counter(REVIEWED_PASSTHROUGH_SITES)
+    reviewed = _reviewed_counter()
     missing_from_allowlist = found - reviewed
     stale_in_allowlist = reviewed - found
 
@@ -224,3 +234,17 @@ def test_every_scanned_file_still_parses(path):
     """A syntax error in one of the owned files would silently empty that file's `_find_sites()`
     result and pass the two tests above for the wrong reason."""
     ast.parse(path.read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize(
+    "unparsed",
+    [
+        "message or f'Instance {instance} {ACTIONS[action]['past']} successfully.'",
+        "message or f\"Instance {instance} {ACTIONS[action]['past']} successfully.\"",
+    ],
+    ids=["single-quoted", "double-quoted"],
+)
+def test_the_instances_key_matches_whichever_quotes_unparse_prints(unparsed):
+    """`ast.unparse` quoted nested f-strings differently between 3.12.x releases; the allowlist must
+    not depend on which one the interpreter running the suite prints."""
+    assert ("src/ui/app/routes/instances.py", _key_of(unparsed)) in _reviewed_counter()

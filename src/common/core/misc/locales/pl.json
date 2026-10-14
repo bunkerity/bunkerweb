@@ -93,7 +93,7 @@
       },
       "EXTERNAL_PLUGIN_URLS": {
         "label": "Zewnętrzne URL-e wtyczek",
-        "help": "Lista URL-i zewnętrznych wtyczek (bezpośrednie pobranie pliku .zip lub .tar) do pobrania i instalacji (URL-e rozdzielone spacją). Maksymalnie 50 MiB na URL. Dodaj #sha256=<digest> do URL, aby przypiąć jego zawartość. Zwykłe http:// jest przestarzałe i zostanie odrzucone w 1.7.0: użyj https:// lub file:///."
+        "help": "Lista URL-i zewnętrznych wtyczek (bezpośrednie pobranie pliku .zip lub .tar) do pobrania i instalacji (URL-e rozdzielone spacją). Maksymalnie 50 MiB na URL. Dodaj #sha256=<digest> do URL, aby przypiąć jego zawartość. Zwykłe http:// jest przestarzałe i zostanie odrzucone w 1.7.0: użyj https:// lub file:///. Usunięcie URL odinstalowuje wtyczki, które dostarczał, wraz z ich zapisanymi wartościami, gdy wszystkie pozostałe URL-e zostaną pobrane. Wtyczki dodane ręcznie lub wgrane w interfejsie webowym nigdy nie są usuwane."
       },
       "DENY_HTTP_STATUS": {
         "label": "Status HTTP odmowy",

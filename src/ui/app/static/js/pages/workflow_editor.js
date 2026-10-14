@@ -2109,6 +2109,30 @@
       : translate("workflows.errors.rule", "Rule {{n}}", { n: index + 1 });
   }
 
+  // The spoken form of errorLocation(): one whole sentence per place, never a label spliced into one.
+  function errorAnnouncement(path, message) {
+    var index = ruleIndexOf(path);
+    if (index < 0 || !STATE.rules[index])
+      return translate(
+        "workflows.say.jumped_whole",
+        "This workflow: {{message}}",
+        {
+          message: message,
+        },
+      );
+    var name = STATE.rules[index].name && STATE.rules[index].name.trim();
+    return name
+      ? translate(
+          "workflows.say.jumped_ruleNamed",
+          "Rule {{n}} — “{{name}}”: {{message}}",
+          { n: index + 1, name: name, message: message },
+        )
+      : translate("workflows.say.jumped_rule", "Rule {{n}}: {{message}}", {
+          n: index + 1,
+          message: message,
+        });
+  }
+
   function warningsHtml() {
     if (!STATE.warnings.length) return "";
     return (
@@ -2293,12 +2317,7 @@
         : element.querySelector("input, select") || element;
       focusable.focus();
       // Never read the raw schema path aloud — announce where the operator now is.
-      say(
-        translate("workflows.say.jumped", "{{where}}: {{message}}", {
-          where: errorLocation(path),
-          message: STATE.errors[path] || "",
-        }),
-      );
+      say(errorAnnouncement(path, STATE.errors[path] || ""));
     }, 0);
   }
 

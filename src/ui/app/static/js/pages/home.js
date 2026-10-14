@@ -233,16 +233,34 @@ $(async function () {
   }
 
   const legendGrades = buildLegendGrades(blockedValues);
-  const numberFormatter = new Intl.NumberFormat();
-  const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+
+  // One whole sentence per kind and number: the noun is part of the translation, never spliced in.
+  function tooltipCount(kind, value) {
+    const count = formatNumber(value);
+    if (kind === "requests") {
+      return value === 1
+        ? t("dashboard.chart.tooltip.requests_one", {
+            count,
+            defaultValue: "{{count}} request",
+          })
+        : t("dashboard.chart.tooltip.requests_other", {
+            count,
+            defaultValue: "{{count}} requests",
+          });
+    }
+    return value === 1
+      ? t("dashboard.chart.tooltip.blocked_one", {
+          count,
+          defaultValue: "{{count}} blocked",
+        })
+      : t("dashboard.chart.tooltip.blocked_other", {
+          count,
+          defaultValue: "{{count}} blocked",
+        });
+  }
 
   function formatNumber(value) {
-    return numberFormatter.format(value);
+    return window.bwChartLocale.number(value);
   }
 
   function sanitizeDonutSliceEffects(chartSelector) {
@@ -369,7 +387,7 @@ $(async function () {
     const name = props?.ADMIN || props?.name || "—";
     const count = props?.blocked ?? 0;
     const countStr = Number.isFinite(count)
-      ? new Intl.NumberFormat().format(count)
+      ? window.bwChartLocale.number(count)
       : "0";
     return `
       <div class="bw-map-tooltip__name">${name}</div>
@@ -937,7 +955,7 @@ $(async function () {
                 <strong>${label}</strong>
               </div>
               <div class="home-chart-tooltip__metrics">
-                <span>${formatNumber(value)} requests</span>
+                <span>${tooltipCount("requests", value)}</span>
                 <span>${percent}%</span>
               </div>
             </div>
@@ -1136,8 +1154,11 @@ $(async function () {
                 <strong>${ipLabel}</strong>
               </div>
               <div class="home-chart-tooltip__metrics">
-                <span>${formatNumber(value)} blocked</span>
-                <span>${pct}% of Top 10</span>
+                <span>${tooltipCount("blocked", value)}</span>
+                <span>${t("dashboard.chart.tooltip.top_share", {
+                  percent: pct,
+                  defaultValue: "{{percent}}% of Top 10",
+                })}</span>
               </div>
             </div>
           `;
@@ -1247,7 +1268,7 @@ $(async function () {
           const timestamp =
             w?.globals?.seriesX?.[seriesIndex]?.[dataPointIndex];
           const dateLabel = timestamp
-            ? dateTimeFormatter.format(new Date(timestamp))
+            ? window.bwChartLocale.format(new Date(timestamp))
             : "";
 
           return `
@@ -1257,7 +1278,7 @@ $(async function () {
                 <strong>${dateLabel || t("dashboard.chart.blocking_status.time")}</strong>
               </div>
               <div class="home-chart-tooltip__metrics">
-                <span>${formatNumber(value)} blocked</span>
+                <span>${tooltipCount("blocked", value)}</span>
               </div>
             </div>
           `;
@@ -1287,6 +1308,8 @@ $(async function () {
         },
         labels: {
           datetimeUTC: false,
+          formatter: (_value, timestamp) =>
+            window.bwChartLocale.format(new Date(timestamp)),
           rotate: -30,
           style: {
             colors: headingColor,

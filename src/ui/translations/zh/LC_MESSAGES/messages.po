@@ -2509,20 +2509,29 @@ msgstr "观察于 %(time)s"
 msgid "crowdsec.previous"
 msgstr "上一页"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "请求已阻止"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s：请求已阻止"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "验证码质询"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s：请求已阻止（场景：“%(scenario)s”）"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "机器人检测质询"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s：验证码质询"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s:%(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s：验证码质询（场景：“%(scenario)s”）"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s:%(action)s(场景:%(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s：机器人检测质询"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s：机器人检测质询（场景：“%(scenario)s”）"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s：无法识别的操作“%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s：无法识别的操作“%(action)s”（场景：“%(scenario)s”）"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "这将在共享的 CrowdSec 引擎上移除该决策，并影响每个已连接的 bouncer。已缓存的决策、其他范围、本地封禁或 AppSec 仍可能拦截该目标。"
 
 msgid "crowdsec.remove.selection"
-msgstr "要从 %(source)s（%(engine)s）移除 %(scope)s %(value)s（%(type)s），场景 %(scenario)s，来源 %(origin)s 吗？"
+msgstr "要从 %(source)s（%(engine)s）移除“%(value)s”的决策（范围：“%(scope)s”，类型：“%(type)s”，来源：“%(origin)s”，场景：“%(scenario)s”）吗？"
 
 msgid "crowdsec.remove.submit"
 msgstr "移除决策"
 
-msgid "crowdsec.remove.success"
-msgstr "已在 CrowdSec 源端移除。传播状态为 %(status)s（%(mode)s，间隔 %(interval)s）。剩余的匹配决策：%(remaining)s。本地封禁或 AppSec 仍可能拦截。"
+msgid "crowdsec.remove.success_live_one"
+msgstr "已在 CrowdSec 源端移除。传播待处理（实时模式，间隔 %(interval)s）。还剩 %(remaining)s 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。"
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "已在 CrowdSec 源端移除。传播待处理（实时模式，间隔 %(interval)s）。还剩 %(remaining)s 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。"
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "已在 CrowdSec 源端移除。传播待处理（模式“%(mode)s”，间隔 %(interval)s）。还剩 %(remaining)s 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。"
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "已在 CrowdSec 源端移除。传播待处理（模式“%(mode)s”，间隔 %(interval)s）。还剩 %(remaining)s 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。"
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "已在 CrowdSec 源端移除。传播待处理（流模式，间隔 %(interval)s）。还剩 %(remaining)s 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。"
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "已在 CrowdSec 源端移除。传播待处理（流模式，间隔 %(interval)s）。还剩 %(remaining)s 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。"
 
 msgid "crowdsec.remove.title"
 msgstr "移除 CrowdSec 决策"
@@ -2718,6 +2742,21 @@ msgstr "已拦截"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "一段时间内的已拦截请求（所选范围）"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "已拦截 %(count)s 次"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "已拦截 %(count)s 次"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)s 个请求"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)s 个请求"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "占前 10 名的 %(percent)s%%"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "被阻止最多的 IP"
@@ -3721,6 +3760,12 @@ msgstr "密码必须至少包含 1 个特殊字符。"
 msgid "form.validation.password_uppercase"
 msgstr "密码必须至少包含 1 个大写字母。"
 
+msgid "general.meta.description"
+msgstr "服务器的常规设置"
+
+msgid "general.meta.name"
+msgstr "常规"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "NGINX 访问日志所使用的路径（文件路径、syslog:server=host[:port][,param=value]，或 memory:name:size；设为 off 可禁用）。"
 
@@ -4371,6 +4416,165 @@ msgstr "使用身份验证码"
 
 msgid "link.use_recovery_code"
 msgstr "使用恢复码"
+
+msgid "loading.bans.ban_one"
+msgstr "正在封禁 %(count)s 个 IP"
+
+msgid "loading.bans.ban_other"
+msgstr "正在封禁 %(count)s 个 IP"
+
+msgid "loading.bans.unban_one"
+msgstr "正在解封 %(count)s 个 IP"
+
+msgid "loading.bans.unban_other"
+msgstr "正在解封 %(count)s 个 IP"
+
+msgid "loading.bans.update_duration_one"
+msgstr "正在更新 %(count)s 个封禁的持续时间"
+
+msgid "loading.bans.update_duration_other"
+msgstr "正在更新 %(count)s 个封禁的持续时间"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "正在将 %(count)s 个配置转换为草稿"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "正在将 %(count)s 个配置转换为草稿"
+
+msgid "loading.configs.convert_online_one"
+msgstr "正在将 %(count)s 个配置转换为在线"
+
+msgid "loading.configs.convert_online_other"
+msgstr "正在将 %(count)s 个配置转换为在线"
+
+msgid "loading.configs.create"
+msgstr "正在创建自定义配置 %(config)s"
+
+msgid "loading.configs.create_for_service"
+msgstr "正在为服务 %(service)s 创建自定义配置 %(config)s"
+
+msgid "loading.configs.delete_one"
+msgstr "正在删除 %(count)s 个所选配置"
+
+msgid "loading.configs.delete_other"
+msgstr "正在删除 %(count)s 个所选配置"
+
+msgid "loading.configs.import"
+msgstr "正在导入自定义配置"
+
+msgid "loading.default"
+msgstr "加载中..."
+
+msgid "loading.global_settings.save"
+msgstr "正在保存全局设置"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "正在保存 %(plugin)s 全局设置"
+
+msgid "loading.instances.create"
+msgstr "正在创建新实例 %(instance)s"
+
+msgid "loading.instances.delete_one"
+msgstr "正在删除实例 %(instances)s"
+
+msgid "loading.instances.delete_other"
+msgstr "正在删除实例 %(instances)s"
+
+msgid "loading.instances.reload_one"
+msgstr "正在重新加载实例 %(instances)s"
+
+msgid "loading.instances.reload_other"
+msgstr "正在重新加载实例 %(instances)s"
+
+msgid "loading.instances.stop_one"
+msgstr "正在停止实例 %(instances)s"
+
+msgid "loading.instances.stop_other"
+msgstr "正在停止实例 %(instances)s"
+
+msgid "loading.jobs.run_one"
+msgstr "正在运行所选任务的插件：%(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "正在运行所选任务的插件：%(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "正在删除插件：%(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "正在删除插件：%(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "正在禁用插件：%(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "正在启用插件：%(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "正在安装插件：%(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "正在重新加载插件"
+
+msgid "loading.plugins.update"
+msgstr "正在更新插件：%(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "正在更新许可证密钥"
+
+msgid "loading.services.convert_draft_one"
+msgstr "正在将服务 %(services)s 转换为草稿"
+
+msgid "loading.services.convert_draft_other"
+msgstr "正在将服务 %(services)s 转换为草稿"
+
+msgid "loading.services.convert_online_one"
+msgstr "正在将服务 %(services)s 转换为在线"
+
+msgid "loading.services.convert_online_other"
+msgstr "正在将服务 %(services)s 转换为在线"
+
+msgid "loading.services.create_config"
+msgstr "正在为服务 %(service)s 创建配置"
+
+msgid "loading.services.create_config_draft"
+msgstr "正在为草稿服务 %(service)s 创建配置"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "正在将服务 %(service)s 声明为“仅重定向”"
+
+msgid "loading.services.declare_standard"
+msgstr "正在将服务 %(service)s 声明为标准"
+
+msgid "loading.services.delete_one"
+msgstr "正在删除服务 %(services)s"
+
+msgid "loading.services.delete_other"
+msgstr "正在删除服务 %(services)s"
+
+msgid "loading.services.import"
+msgstr "正在导入服务"
+
+msgid "loading.services.import_with_configs"
+msgstr "正在导入服务和自定义配置"
+
+msgid "loading.services.save_config"
+msgstr "正在保存服务 %(service)s 的配置"
+
+msgid "loading.services.save_config_draft"
+msgstr "正在保存草稿服务 %(service)s 的配置"
+
+msgid "loading.services.save_plugin"
+msgstr "正在保存服务 %(service)s 的 %(plugin)s 设置"
+
+msgid "loading.services.save_template"
+msgstr "正在保存服务 %(service)s 的模板设置"
+
+msgid "loading.totp.security_key"
+msgstr "正在验证安全密钥。"
+
+msgid "loading.totp.token"
+msgstr "正在验证 TOTP 令牌。"
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "无法为您登录，请重试"
@@ -6601,7 +6805,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "是否将此工作流程从 %(service)s 分离？"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s 已经通过自己的 %(family)s 设置为 %(path)s 提供服务。清除 %(path)s 的设置，或使用不同的路径。"
+msgstr "%(service)s 已经通过自己的“%(family)s”设置为 %(path)s 提供服务。请清除 %(path)s 的这些设置，或使用不同的路径。"
 
 msgid "service.resources.conflict.primary"
 msgstr "“%(name)s” 目前是此服务的首选证书，并且将不再使用，无需进一步警告。首选证书是指实际部署的证书。"
@@ -10494,8 +10698,17 @@ msgstr "规则按顺序评估，首个匹配的规则生效。带请求率阈值
 msgid "workflows.readonly"
 msgstr "数据库是只读的。可以查看工作流程，但不能修改。"
 
-msgid "workflows.reason.sentence"
-msgstr "安全工作流 %(workflow)s:%(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "安全工作流“%(workflow)s”：请求已阻止"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "安全工作流“%(workflow)s”：请求已被质询"
+
+msgid "workflows.reason.sentence_other"
+msgstr "安全工作流“%(workflow)s”：操作“%(action)s”"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "安全工作流“%(workflow)s”：请求已重定向"
 
 msgid "workflows.rule.disabled"
 msgstr "已禁用"
@@ -10548,8 +10761,14 @@ msgstr "在 %(total)s 的 %(n)s 位置添加规则。 检查所有之前的规�
 msgid "workflows.say.inspecting"
 msgstr "编辑 %(total)s 的 %(n)s 规则 — %(name)s。"
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s：%(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "规则 %(n)s：%(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "规则 %(n)s（“%(name)s”）：%(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "此工作流：%(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "最后一个值已删除；此条件必须包含一个值才能保存。"

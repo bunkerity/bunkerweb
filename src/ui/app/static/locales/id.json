@@ -732,6 +732,13 @@
         "series": "Diblokir",
         "title": "Permintaan yang diblokir seiring waktu (rentang yang dipilih)"
       },
+      "tooltip": {
+        "blocked_one": "{{count}} diblokir",
+        "blocked_other": "{{count}} diblokir",
+        "requests_one": "{{count}} permintaan",
+        "requests_other": "{{count}} permintaan",
+        "top_share": "{{percent}}% dari 10 Teratas"
+      },
       "top_blocked_ips": {
         "most_blocked": "IP Paling Sering Diblokir",
         "title": "10 IP Teratas yang Diblokir"
@@ -1254,6 +1261,79 @@
     "use_authenticator_code": "Gunakan kode autentikator",
     "use_recovery_code": "Gunakan kode pemulihan",
     "get_support": "Dapatkan dukungan"
+  },
+  "loading": {
+    "default": "Memuat...",
+    "bans": {
+      "ban_one": "Melarang {{count}} IP",
+      "ban_other": "Melarang {{count}} IP",
+      "unban_one": "Membatalkan larangan {{count}} IP",
+      "unban_other": "Membatalkan larangan {{count}} IP",
+      "update_duration_one": "Memperbarui durasi untuk {{count}} larangan",
+      "update_duration_other": "Memperbarui durasi untuk {{count}} larangan"
+    },
+    "configs": {
+      "convert_online_one": "Mengubah {{count}} konfigurasi menjadi online",
+      "convert_online_other": "Mengubah {{count}} konfigurasi menjadi online",
+      "convert_draft_one": "Mengubah {{count}} konfigurasi menjadi draf",
+      "convert_draft_other": "Mengubah {{count}} konfigurasi menjadi draf",
+      "delete_one": "Menghapus {{count}} konfigurasi yang dipilih",
+      "delete_other": "Menghapus {{count}} konfigurasi yang dipilih",
+      "create": "Membuat konfigurasi kustom {{config}}",
+      "create_for_service": "Membuat konfigurasi kustom {{config}} untuk layanan {{service}}",
+      "import": "Mengimpor konfigurasi kustom"
+    },
+    "global_settings": {
+      "save": "Menyimpan pengaturan global",
+      "save_plugin": "Menyimpan pengaturan global {{plugin}}"
+    },
+    "instances": {
+      "create": "Membuat instans baru {{instance}}",
+      "reload_one": "Memuat ulang instans {{instances}}",
+      "reload_other": "Memuat ulang instans {{instances}}",
+      "stop_one": "Menghentikan instans {{instances}}",
+      "stop_other": "Menghentikan instans {{instances}}",
+      "delete_one": "Menghapus instans {{instances}}",
+      "delete_other": "Menghapus instans {{instances}}"
+    },
+    "jobs": {
+      "run_one": "Menjalankan plugin dari pekerjaan yang dipilih: {{jobs}}",
+      "run_other": "Menjalankan plugin dari pekerjaan yang dipilih: {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "Menghapus plugin: {{plugins}}",
+      "delete_other": "Menghapus plugin: {{plugins}}",
+      "enable": "Mengaktifkan plugin: {{plugin}}",
+      "disable": "Menonaktifkan plugin: {{plugin}}",
+      "reload": "Memuat ulang plugin",
+      "install": "Memasang plugin: {{plugin}}",
+      "update": "Memperbarui plugin: {{plugin}}"
+    },
+    "pro": {
+      "update_license": "Memperbarui kunci lisensi"
+    },
+    "services": {
+      "convert_online_one": "Mengubah layanan {{services}} menjadi online",
+      "convert_online_other": "Mengubah layanan {{services}} menjadi online",
+      "convert_draft_one": "Mengubah layanan {{services}} menjadi draf",
+      "convert_draft_other": "Mengubah layanan {{services}} menjadi draf",
+      "declare_standard": "Mendeklarasikan layanan {{service}} sebagai standar",
+      "declare_redirect_only": "Mendeklarasikan layanan {{service}} sebagai hanya pengalihan",
+      "delete_one": "Menghapus layanan {{services}}",
+      "delete_other": "Menghapus layanan {{services}}",
+      "import": "Mengimpor layanan",
+      "import_with_configs": "Mengimpor layanan dan konfigurasi kustom",
+      "create_config": "Membuat konfigurasi untuk layanan {{service}}",
+      "create_config_draft": "Membuat konfigurasi untuk layanan draf {{service}}",
+      "save_config": "Menyimpan konfigurasi untuk layanan {{service}}",
+      "save_config_draft": "Menyimpan konfigurasi untuk layanan draf {{service}}",
+      "save_plugin": "Menyimpan pengaturan {{plugin}} untuk layanan {{service}}",
+      "save_template": "Menyimpan pengaturan template untuk layanan {{service}}"
+    },
+    "totp": {
+      "token": "Memvalidasi token TOTP.",
+      "security_key": "Memvalidasi kunci keamanan."
+    }
   },
   "login": {
     "notice_password_changed": "Kata sandi Anda telah diubah. Masuk dengan kata sandi baru Anda.",
@@ -1979,13 +2059,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "permintaan diblokir",
-        "captcha": "tantangan captcha",
-        "challenge": "tantangan deteksi bot"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (skenario: {{scenario}})",
+      "sentence_ban": "{{source}}: permintaan diblokir",
+      "sentence_ban_scenario": "{{source}}: permintaan diblokir (skenario: “{{scenario}}”)",
+      "sentence_captcha": "{{source}}: tantangan captcha",
+      "sentence_captcha_scenario": "{{source}}: tantangan captcha (skenario: “{{scenario}}”)",
+      "sentence_challenge": "{{source}}: tantangan deteksi bot",
+      "sentence_challenge_scenario": "{{source}}: tantangan deteksi bot (skenario: “{{scenario}}”)",
+      "sentence_other": "{{source}}: aksi tidak dikenali “{{action}}”",
+      "sentence_other_scenario": "{{source}}: aksi tidak dikenali “{{action}}” (skenario: “{{scenario}}”)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "Kebijakan kegagalan CrowdSec AppSec",
@@ -2086,9 +2167,14 @@
       "action": "Hapus",
       "confirm": "Saya mengerti dan ingin menghapus keputusan ini.",
       "impact": "Ini menghapus keputusan di mesin CrowdSec bersama dan memengaruhi setiap bouncer yang terhubung. Keputusan yang di-cache, rentang lain, pemblokiran lokal, atau AppSec masih dapat memblokir target.",
-      "selection": "Hapus {{scope}} {{value}} ({{type}}), skenario {{scenario}}, asal {{origin}}, dari {{source}} ({{engine}})?",
+      "selection": "Hapus keputusan untuk “{{value}}” (cakupan: “{{scope}}”, tipe: “{{type}}”, asal: “{{origin}}”, skenario: “{{scenario}}”) dari {{source}} ({{engine}})?",
       "submit": "Hapus keputusan",
-      "success": "Dihapus di sumber CrowdSec. Propagasi {{status}} ({{mode}}, interval {{interval}}). Keputusan cocok yang tersisa: {{remaining}}. Pemblokiran lokal atau AppSec masih dapat memblokir.",
+      "success_stream_one": "Dihapus di sumber CrowdSec. Propagasi tertunda (mode aliran, interval {{interval}}). Keputusan lain yang cocok: {{remaining}}. Larangan lokal atau AppSec mungkin masih memblokir.",
+      "success_stream_other": "Dihapus di sumber CrowdSec. Propagasi tertunda (mode aliran, interval {{interval}}). Keputusan lain yang cocok: {{remaining}}. Larangan lokal atau AppSec mungkin masih memblokir.",
+      "success_live_one": "Dihapus di sumber CrowdSec. Propagasi tertunda (mode langsung, interval {{interval}}). Keputusan lain yang cocok: {{remaining}}. Larangan lokal atau AppSec mungkin masih memblokir.",
+      "success_live_other": "Dihapus di sumber CrowdSec. Propagasi tertunda (mode langsung, interval {{interval}}). Keputusan lain yang cocok: {{remaining}}. Larangan lokal atau AppSec mungkin masih memblokir.",
+      "success_other_one": "Dihapus di sumber CrowdSec. Propagasi tertunda (mode “{{mode}}”, interval {{interval}}). Keputusan lain yang cocok: {{remaining}}. Larangan lokal atau AppSec mungkin masih memblokir.",
+      "success_other_other": "Dihapus di sumber CrowdSec. Propagasi tertunda (mode “{{mode}}”, interval {{interval}}). Keputusan lain yang cocok: {{remaining}}. Larangan lokal atau AppSec mungkin masih memblokir.",
       "title": "Hapus keputusan CrowdSec"
     },
     "report": {
@@ -2152,6 +2238,10 @@
     "rotate_credential": "Rotasi kredensial instans ini? Gagal jika instans tidak dapat dijangkau."
   },
   "general": {
+    "meta": {
+      "name": "Umum",
+      "description": "Pengaturan umum untuk server"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "penggunaan internal memuat",
@@ -4104,7 +4194,9 @@
       "deleted": "Aturan dihapus. Aturan tersisa: {{count}}.",
       "duplicated": "Salinan disisipkan pada posisi {{n}}. Salinan ini tidak akan pernah cocok selama yang asli di atasnya aktif.",
       "gateAdded": "Ambang laju ditambahkan ke kecocokan. Di bawahnya aturan tidak cocok dan evaluasi berlanjut.",
-      "jumped": "{{where}}: {{message}}",
+      "jumped_whole": "Alur kerja ini: {{message}}",
+      "jumped_rule": "Aturan {{n}}: {{message}}",
+      "jumped_ruleNamed": "Aturan {{n}} — “{{name}}”: {{message}}",
       "lastValueRemoved": "Nilai terakhir dihapus — kondisi ini tidak dapat disimpan sampai memiliki satu nilai.",
       "moved": "{{name}} dipindahkan ke posisi {{to}} dari {{total}}.",
       "movedDrag": "{{name}} diseret ke posisi {{to}} dari {{total}}.",
@@ -4239,7 +4331,10 @@
       "regex": "cocok dengan regex"
     },
     "reason": {
-      "sentence": "Workflow keamanan {{workflow}}: {{action}}"
+      "sentence_block": "Alur kerja keamanan “{{workflow}}”: permintaan diblokir",
+      "sentence_redirect": "Alur kerja keamanan “{{workflow}}”: permintaan dialihkan",
+      "sentence_challenge": "Alur kerja keamanan “{{workflow}}”: permintaan ditantang",
+      "sentence_other": "Alur kerja keamanan “{{workflow}}”: aksi “{{action}}”"
     },
     "crowdsec_field": {
       "remediation": "remediasi adalah",
@@ -4455,7 +4550,7 @@
     "resources": {
       "attach": "Lampirkan",
       "conflict": {
-        "inline": "{{service}} sudah melayani {{path}} melalui pengaturan {{family}}-nya sendiri. Hapus pengaturan tersebut untuk {{path}}, atau gunakan jalur yang berbeda.",
+        "inline": "{{service}} sudah melayani {{path}} melalui pengaturan “{{family}}” miliknya sendiri. Hapus pengaturan tersebut untuk {{path}}, atau gunakan jalur yang berbeda.",
         "primary": "“{{name}}” saat ini adalah sertifikat utama untuk layanan ini dan akan diturunkan tanpa peringatan lebih lanjut. Yang utama adalah yang benar-benar diterapkan.",
         "resource_redirect": "{{service}} sudah melayani {{path}} melalui pengalihan “{{name}}”. Lepaskan “{{name}}”, atau berikan salah satunya jalur yang berbeda.",
         "resource_upstream": "{{service}} sudah melayani {{path}} melalui upstream “{{name}}”. Lepaskan “{{name}}”, atau berikan salah satunya jalur yang berbeda.",

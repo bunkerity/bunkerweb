@@ -2509,20 +2509,29 @@ msgstr "觀察於 %(time)s"
 msgid "crowdsec.previous"
 msgstr "上一頁"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "請求已封鎖"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s：請求已封鎖"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "驗證碼挑戰"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s：請求已封鎖（情境：「%(scenario)s」）"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "機器人偵測挑戰"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s：驗證碼挑戰"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s:%(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s：驗證碼挑戰（情境：「%(scenario)s」）"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s:%(action)s(情境:%(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s：機器人偵測挑戰"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s：機器人偵測挑戰（情境：「%(scenario)s」）"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s：無法辨識的動作「%(action)s」"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s：無法辨識的動作「%(action)s」（情境：「%(scenario)s」）"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "這會在共用的 CrowdSec 引擎上移除該決策，並影響每個已連線的 bouncer。已快取的決策、其他範圍、本機封鎖或 AppSec 仍可能攔截該目標。"
 
 msgid "crowdsec.remove.selection"
-msgstr "要從 %(source)s（%(engine)s）移除 %(scope)s %(value)s（%(type)s），情境 %(scenario)s，來源 %(origin)s 嗎？"
+msgstr "要從 %(source)s（%(engine)s）移除「%(value)s」的決策（範圍：「%(scope)s」，類型：「%(type)s」，來源：「%(origin)s」，情境：「%(scenario)s」）嗎？"
 
 msgid "crowdsec.remove.submit"
 msgstr "移除決策"
 
-msgid "crowdsec.remove.success"
-msgstr "已在 CrowdSec 來源端移除。傳播狀態為 %(status)s（%(mode)s，間隔 %(interval)s）。剩餘的相符決策：%(remaining)s。本機封鎖或 AppSec 仍可能攔截。"
+msgid "crowdsec.remove.success_live_one"
+msgstr "已在 CrowdSec 來源端移除。傳播待處理（即時模式，間隔 %(interval)s）。還剩 %(remaining)s 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。"
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "已在 CrowdSec 來源端移除。傳播待處理（即時模式，間隔 %(interval)s）。還剩 %(remaining)s 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。"
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "已在 CrowdSec 來源端移除。傳播待處理（模式「%(mode)s」，間隔 %(interval)s）。還剩 %(remaining)s 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。"
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "已在 CrowdSec 來源端移除。傳播待處理（模式「%(mode)s」，間隔 %(interval)s）。還剩 %(remaining)s 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。"
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "已在 CrowdSec 來源端移除。傳播待處理（串流模式，間隔 %(interval)s）。還剩 %(remaining)s 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。"
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "已在 CrowdSec 來源端移除。傳播待處理（串流模式，間隔 %(interval)s）。還剩 %(remaining)s 個其他相符的決策。本機封鎖或 AppSec 仍可能攔截。"
 
 msgid "crowdsec.remove.title"
 msgstr "移除 CrowdSec 決策"
@@ -2718,6 +2742,21 @@ msgstr "已封鎖"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "一段時間內的已封鎖請求（所選範圍）"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "已封鎖 %(count)s 次"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "已封鎖 %(count)s 次"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)s 個請求"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)s 個請求"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "佔前 10 名的 %(percent)s%%"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "被封鎖最多的 IP"
@@ -3721,6 +3760,12 @@ msgstr "密碼必須至少包含 1 個特殊字元。"
 msgid "form.validation.password_uppercase"
 msgstr "密碼必須至少包含 1 個大寫字母。"
 
+msgid "general.meta.description"
+msgstr "伺服器的一般設定"
+
+msgid "general.meta.name"
+msgstr "一般"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "NGINX 存取記錄所使用的路徑（檔案路徑、syslog:server=host[:port][,param=value]，或 memory:name:size；設為 off 可停用）。"
 
@@ -4371,6 +4416,165 @@ msgstr "使用驗證碼"
 
 msgid "link.use_recovery_code"
 msgstr "使用恢復碼"
+
+msgid "loading.bans.ban_one"
+msgstr "正在封鎖 %(count)s 個 IP"
+
+msgid "loading.bans.ban_other"
+msgstr "正在封鎖 %(count)s 個 IP"
+
+msgid "loading.bans.unban_one"
+msgstr "正在解除封鎖 %(count)s 個 IP"
+
+msgid "loading.bans.unban_other"
+msgstr "正在解除封鎖 %(count)s 個 IP"
+
+msgid "loading.bans.update_duration_one"
+msgstr "正在更新 %(count)s 個封鎖的持續時間"
+
+msgid "loading.bans.update_duration_other"
+msgstr "正在更新 %(count)s 個封鎖的持續時間"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "正在將 %(count)s 個設定轉換為草稿"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "正在將 %(count)s 個設定轉換為草稿"
+
+msgid "loading.configs.convert_online_one"
+msgstr "正在將 %(count)s 個設定轉換為線上"
+
+msgid "loading.configs.convert_online_other"
+msgstr "正在將 %(count)s 個設定轉換為線上"
+
+msgid "loading.configs.create"
+msgstr "正在建立自訂設定 %(config)s"
+
+msgid "loading.configs.create_for_service"
+msgstr "正在為服務 %(service)s 建立自訂設定 %(config)s"
+
+msgid "loading.configs.delete_one"
+msgstr "正在刪除 %(count)s 個所選設定"
+
+msgid "loading.configs.delete_other"
+msgstr "正在刪除 %(count)s 個所選設定"
+
+msgid "loading.configs.import"
+msgstr "正在匯入自訂設定"
+
+msgid "loading.default"
+msgstr "載入中..."
+
+msgid "loading.global_settings.save"
+msgstr "正在儲存全域設定"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "正在儲存 %(plugin)s 全域設定"
+
+msgid "loading.instances.create"
+msgstr "正在建立新執行個體 %(instance)s"
+
+msgid "loading.instances.delete_one"
+msgstr "正在刪除執行個體 %(instances)s"
+
+msgid "loading.instances.delete_other"
+msgstr "正在刪除執行個體 %(instances)s"
+
+msgid "loading.instances.reload_one"
+msgstr "正在重新載入執行個體 %(instances)s"
+
+msgid "loading.instances.reload_other"
+msgstr "正在重新載入執行個體 %(instances)s"
+
+msgid "loading.instances.stop_one"
+msgstr "正在停止執行個體 %(instances)s"
+
+msgid "loading.instances.stop_other"
+msgstr "正在停止執行個體 %(instances)s"
+
+msgid "loading.jobs.run_one"
+msgstr "正在執行所選任務的外掛程式：%(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "正在執行所選任務的外掛程式：%(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "正在刪除外掛程式：%(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "正在刪除外掛程式：%(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "正在停用外掛程式：%(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "正在啟用外掛程式：%(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "正在安裝外掛程式：%(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "正在重新載入外掛程式"
+
+msgid "loading.plugins.update"
+msgstr "正在更新外掛程式：%(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "正在更新授權金鑰"
+
+msgid "loading.services.convert_draft_one"
+msgstr "正在將服務 %(services)s 轉換為草稿"
+
+msgid "loading.services.convert_draft_other"
+msgstr "正在將服務 %(services)s 轉換為草稿"
+
+msgid "loading.services.convert_online_one"
+msgstr "正在將服務 %(services)s 轉換為線上"
+
+msgid "loading.services.convert_online_other"
+msgstr "正在將服務 %(services)s 轉換為線上"
+
+msgid "loading.services.create_config"
+msgstr "正在為服務 %(service)s 建立設定"
+
+msgid "loading.services.create_config_draft"
+msgstr "正在為草稿服務 %(service)s 建立設定"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "正在將服務 %(service)s 宣告為「僅重新導向」"
+
+msgid "loading.services.declare_standard"
+msgstr "正在將服務 %(service)s 宣告為標準"
+
+msgid "loading.services.delete_one"
+msgstr "正在刪除服務 %(services)s"
+
+msgid "loading.services.delete_other"
+msgstr "正在刪除服務 %(services)s"
+
+msgid "loading.services.import"
+msgstr "正在匯入服務"
+
+msgid "loading.services.import_with_configs"
+msgstr "正在匯入服務與自訂設定"
+
+msgid "loading.services.save_config"
+msgstr "正在儲存服務 %(service)s 的設定"
+
+msgid "loading.services.save_config_draft"
+msgstr "正在儲存草稿服務 %(service)s 的設定"
+
+msgid "loading.services.save_plugin"
+msgstr "正在儲存服務 %(service)s 的 %(plugin)s 設定"
+
+msgid "loading.services.save_template"
+msgstr "正在儲存服務 %(service)s 的範本設定"
+
+msgid "loading.totp.security_key"
+msgstr "正在驗證安全金鑰。"
+
+msgid "loading.totp.token"
+msgstr "正在驗證 TOTP 權杖。"
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "無法為您登入，請再試一次"
@@ -6601,7 +6805,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "是否要將此工作流程從 %(service)s 取消連結？"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s 已經透過自己的 %(family)s 設定，服務 %(path)s。請清除 %(path)s 的設定，或使用不同的路徑。"
+msgstr "%(service)s 已經透過自己的「%(family)s」設定，服務 %(path)s。請清除 %(path)s 的這些設定，或使用不同的路徑。"
 
 msgid "service.resources.conflict.primary"
 msgstr "「%(name)s」目前是此服務的主要憑證，且將在沒有警告的情況下被降級。主要的憑證是指實際部署的憑證。"
@@ -10494,8 +10698,17 @@ msgstr "規則會按順序評估，且第一個匹配的規則會生效。具有
 msgid "workflows.readonly"
 msgstr "資料庫僅供讀取。可以檢視工作流程，但無法修改。"
 
-msgid "workflows.reason.sentence"
-msgstr "安全工作流程 %(workflow)s:%(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "安全工作流程「%(workflow)s」：請求已封鎖"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "安全工作流程「%(workflow)s」：請求已被要求驗證挑戰"
+
+msgid "workflows.reason.sentence_other"
+msgstr "安全工作流程「%(workflow)s」：動作「%(action)s」"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "安全工作流程「%(workflow)s」：請求已重新導向"
 
 msgid "workflows.rule.disabled"
 msgstr "已停用"
@@ -10548,8 +10761,14 @@ msgstr "在 %(total)s 的 %(n)s 位置新增規則。 檢查所有先前規則�
 msgid "workflows.say.inspecting"
 msgstr "編輯 %(total)s 的 %(n)s 規則 — %(name)s。"
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s：%(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "規則 %(n)s：%(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "規則 %(n)s（「%(name)s」）：%(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "此工作流程：%(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "最後一個值已移除；此條件必須包含一個值才能儲存。"

@@ -223,7 +223,14 @@ def delete_plugin():
 
     submit_config_task(update_plugins, plugins)
 
-    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("plugins.plugins_page"),
+            message=translated("loading.plugins.delete_other" if len(plugins) > 1 else "loading.plugins.delete_one", plugins=", ".join(plugins))
+            or f"Deleting plugins: {', '.join(plugins)}",
+        )
+    )
 
 
 @plugins.route("/plugins/enable", methods=["POST"])
@@ -295,8 +302,14 @@ def enable_plugin():
 
     submit_config_task(toggle_plugin, plugin, enabled)
 
-    action = "Enabling" if enabled else "Disabling"
-    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"{action} plugin: {plugin}"))
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("plugins.plugins_page"),
+            message=translated("loading.plugins.enable" if enabled else "loading.plugins.disable", plugin=plugin)
+            or f"{'Enabling' if enabled else 'Disabling'} plugin: {plugin}",
+        )
+    )
 
 
 def get_plugin_path(plugin_id: str) -> Optional[Path]:
@@ -758,7 +771,7 @@ def plugins_refresh():
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
     submit_config_task(update_plugins)
 
-    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message="Reloading plugins"))
+    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=translated("loading.plugins.reload") or "Reloading plugins"))
 
 
 @plugins.route("/plugins/upload", methods=["POST"])
@@ -1083,7 +1096,13 @@ def install_catalog_plugin():
         done=translated("plugins.flash.installed_successfully", plugin_id=plugin_id) or f"Plugin {plugin_id} installed successfully",
     )
 
-    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Installing plugin: {plugin_id}"))
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("plugins.plugins_page"),
+            message=translated("loading.plugins.install", plugin=plugin_id) or f"Installing plugin: {plugin_id}",
+        )
+    )
 
 
 @plugins.route("/plugins/catalog/update", methods=["POST"])
@@ -1160,7 +1179,11 @@ def update_catalog_plugin():
         done=translated("plugins.flash.updated_to_version", plugin_id=plugin_id, version=version) or f"Plugin {plugin_id} updated to version {version}",
     )
 
-    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Updating plugin: {plugin_id}"))
+    return redirect(
+        url_for(
+            "loading", next=url_for("plugins.plugins_page"), message=translated("loading.plugins.update", plugin=plugin_id) or f"Updating plugin: {plugin_id}"
+        )
+    )
 
 
 @plugins.route("/plugins/<string:plugin>", methods=["GET", "POST"])

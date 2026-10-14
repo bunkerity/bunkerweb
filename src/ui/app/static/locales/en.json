@@ -732,6 +732,13 @@
         "series": "Blocked",
         "title": "Blocked requests over time (selected range)"
       },
+      "tooltip": {
+        "blocked_one": "{{count}} blocked",
+        "blocked_other": "{{count}} blocked",
+        "requests_one": "{{count}} request",
+        "requests_other": "{{count}} requests",
+        "top_share": "{{percent}}% of Top 10"
+      },
       "top_blocked_ips": {
         "most_blocked": "Most Blocked IP",
         "title": "Top 10 Blocked IPs"
@@ -1254,6 +1261,79 @@
     "use_authenticator_code": "Use an authenticator code",
     "use_recovery_code": "Use a recovery code",
     "get_support": "Get support"
+  },
+  "loading": {
+    "default": "Loading...",
+    "bans": {
+      "ban_one": "Banning {{count}} IP",
+      "ban_other": "Banning {{count}} IPs",
+      "unban_one": "Unbanning {{count}} IP",
+      "unban_other": "Unbanning {{count}} IPs",
+      "update_duration_one": "Updating duration for {{count}} ban",
+      "update_duration_other": "Updating duration for {{count}} bans"
+    },
+    "configs": {
+      "convert_online_one": "Converting {{count}} config to online",
+      "convert_online_other": "Converting {{count}} configs to online",
+      "convert_draft_one": "Converting {{count}} config to draft",
+      "convert_draft_other": "Converting {{count}} configs to draft",
+      "delete_one": "Deleting {{count}} selected config",
+      "delete_other": "Deleting {{count}} selected configs",
+      "create": "Creating custom configuration {{config}}",
+      "create_for_service": "Creating custom configuration {{config}} for service {{service}}",
+      "import": "Importing custom configurations"
+    },
+    "global_settings": {
+      "save": "Saving global settings",
+      "save_plugin": "Saving {{plugin}} global settings"
+    },
+    "instances": {
+      "create": "Creating new instance {{instance}}",
+      "reload_one": "Reloading instance {{instances}}",
+      "reload_other": "Reloading instances {{instances}}",
+      "stop_one": "Stopping instance {{instances}}",
+      "stop_other": "Stopping instances {{instances}}",
+      "delete_one": "Deleting instance {{instances}}",
+      "delete_other": "Deleting instances {{instances}}"
+    },
+    "jobs": {
+      "run_one": "Running the plugins of the selected job: {{jobs}}",
+      "run_other": "Running the plugins of the selected jobs: {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "Deleting plugin: {{plugins}}",
+      "delete_other": "Deleting plugins: {{plugins}}",
+      "enable": "Enabling plugin: {{plugin}}",
+      "disable": "Disabling plugin: {{plugin}}",
+      "reload": "Reloading plugins",
+      "install": "Installing plugin: {{plugin}}",
+      "update": "Updating plugin: {{plugin}}"
+    },
+    "pro": {
+      "update_license": "Updating license key"
+    },
+    "services": {
+      "convert_online_one": "Converting service {{services}} to online",
+      "convert_online_other": "Converting services {{services}} to online",
+      "convert_draft_one": "Converting service {{services}} to draft",
+      "convert_draft_other": "Converting services {{services}} to draft",
+      "declare_standard": "Declaring service {{service}} as standard",
+      "declare_redirect_only": "Declaring service {{service}} as redirect only",
+      "delete_one": "Deleting service {{services}}",
+      "delete_other": "Deleting services {{services}}",
+      "import": "Importing services",
+      "import_with_configs": "Importing services and custom configurations",
+      "create_config": "Creating configuration for service {{service}}",
+      "create_config_draft": "Creating configuration for draft service {{service}}",
+      "save_config": "Saving configuration for service {{service}}",
+      "save_config_draft": "Saving configuration for draft service {{service}}",
+      "save_plugin": "Saving {{plugin}} settings for service {{service}}",
+      "save_template": "Saving template settings for service {{service}}"
+    },
+    "totp": {
+      "token": "Validating TOTP token.",
+      "security_key": "Validating security key."
+    }
   },
   "login": {
     "notice_password_changed": "Your password was changed. Log in with your new password.",
@@ -1979,13 +2059,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "request blocked",
-        "captcha": "captcha challenge",
-        "challenge": "bot-detection challenge"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (scenario: {{scenario}})",
+      "sentence_ban": "{{source}}: request blocked",
+      "sentence_ban_scenario": "{{source}}: request blocked (scenario: “{{scenario}}”)",
+      "sentence_captcha": "{{source}}: captcha challenge",
+      "sentence_captcha_scenario": "{{source}}: captcha challenge (scenario: “{{scenario}}”)",
+      "sentence_challenge": "{{source}}: bot-detection challenge",
+      "sentence_challenge_scenario": "{{source}}: bot-detection challenge (scenario: “{{scenario}}”)",
+      "sentence_other": "{{source}}: unrecognized action “{{action}}”",
+      "sentence_other_scenario": "{{source}}: unrecognized action “{{action}}” (scenario: “{{scenario}}”)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "CrowdSec AppSec failure policy",
@@ -2086,9 +2167,14 @@
       "action": "Remove",
       "confirm": "I understand and want to remove this decision.",
       "impact": "This removes the decision at the shared CrowdSec engine and affects every connected bouncer. Cached decisions, another range, local bans, or AppSec may still block the target.",
-      "selection": "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
+      "selection": "Remove the decision on “{{value}}” (scope: “{{scope}}”, type: “{{type}}”, origin: “{{origin}}”, scenario: “{{scenario}}”) from {{source}} ({{engine}})?",
       "submit": "Remove decision",
-      "success": "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). Matching decisions remaining: {{remaining}}. Local bans or AppSec may still block.",
+      "success_stream_one": "Removed at the CrowdSec source. Propagation is pending (stream mode, interval {{interval}}). {{remaining}} other matching decision remains. Local bans or AppSec may still block.",
+      "success_stream_other": "Removed at the CrowdSec source. Propagation is pending (stream mode, interval {{interval}}). {{remaining}} other matching decisions remain. Local bans or AppSec may still block.",
+      "success_live_one": "Removed at the CrowdSec source. Propagation is pending (live mode, interval {{interval}}). {{remaining}} other matching decision remains. Local bans or AppSec may still block.",
+      "success_live_other": "Removed at the CrowdSec source. Propagation is pending (live mode, interval {{interval}}). {{remaining}} other matching decisions remain. Local bans or AppSec may still block.",
+      "success_other_one": "Removed at the CrowdSec source. Propagation is pending (mode “{{mode}}”, interval {{interval}}). {{remaining}} other matching decision remains. Local bans or AppSec may still block.",
+      "success_other_other": "Removed at the CrowdSec source. Propagation is pending (mode “{{mode}}”, interval {{interval}}). {{remaining}} other matching decisions remain. Local bans or AppSec may still block.",
       "title": "Remove CrowdSec decision"
     },
     "report": {
@@ -2152,6 +2238,10 @@
     "rotate_credential": "Rotate this instance's credential? It fails if the instance is unreachable."
   },
   "general": {
+    "meta": {
+      "name": "General",
+      "description": "The general settings for the server"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "internal use loading",
@@ -4104,7 +4194,9 @@
       "deleted": "Rule deleted. Remaining rules: {{count}}.",
       "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
       "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
-      "jumped": "{{where}}: {{message}}",
+      "jumped_whole": "This workflow: {{message}}",
+      "jumped_rule": "Rule {{n}}: {{message}}",
+      "jumped_ruleNamed": "Rule {{n}} — “{{name}}”: {{message}}",
       "lastValueRemoved": "Last value removed — this condition cannot be saved until it holds one.",
       "moved": "{{name}} moved to position {{to}} of {{total}}.",
       "movedDrag": "{{name}} dragged to position {{to}} of {{total}}.",
@@ -4239,7 +4331,10 @@
       "regex": "matches the regex"
     },
     "reason": {
-      "sentence": "Security workflow {{workflow}}: {{action}}"
+      "sentence_block": "Security workflow “{{workflow}}”: request blocked",
+      "sentence_redirect": "Security workflow “{{workflow}}”: request redirected",
+      "sentence_challenge": "Security workflow “{{workflow}}”: request challenged",
+      "sentence_other": "Security workflow “{{workflow}}”: action “{{action}}”"
     },
     "crowdsec_field": {
       "remediation": "remediation is",
@@ -4455,7 +4550,7 @@
     "resources": {
       "attach": "Attach",
       "conflict": {
-        "inline": "{{service}} already serves {{path}} through its own {{family}} settings. Clear those settings for {{path}}, or use a different path.",
+        "inline": "{{service}} already serves {{path}} through its own “{{family}}” settings. Clear those settings for {{path}}, or use a different path.",
         "primary": "“{{name}}” is currently the primary certificate for this service and will be demoted without further warning. The primary is the one actually deployed.",
         "resource_redirect": "{{service}} already serves {{path}} through the redirect “{{name}}”. Detach “{{name}}”, or give one of them a different path.",
         "resource_upstream": "{{service}} already serves {{path}} through the upstream “{{name}}”. Detach “{{name}}”, or give one of them a different path.",

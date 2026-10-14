@@ -93,7 +93,7 @@
       },
       "EXTERNAL_PLUGIN_URLS": {
         "label": "Harici eklenti URL'leri",
-        "help": "İndirilip kurulacak harici eklenti URL'lerinin listesi (.zip veya .tar dosyasına doğrudan indirme) (URL'ler boşlukla ayrılmıştır). URL başına en fazla 50 MiB. İçeriğini sabitlemek için URL'ye #sha256=<digest> ekleyin. Düz http:// kullanımdan kaldırılmıştır ve 1.7.0'da reddedilecektir: https:// veya file:/// kullanın."
+        "help": "İndirilip kurulacak harici eklenti URL'lerinin listesi (.zip veya .tar dosyasına doğrudan indirme) (URL'ler boşlukla ayrılmıştır). URL başına en fazla 50 MiB. İçeriğini sabitlemek için URL'ye #sha256=<digest> ekleyin. Düz http:// kullanımdan kaldırılmıştır ve 1.7.0'da reddedilecektir: https:// veya file:/// kullanın. Bir URL'yi kaldırmak, diğer tüm URL'ler indirildiğinde, o URL'nin sağladığı eklentileri kayıtlı değerleriyle birlikte kaldırır. Elle eklenen veya web arayüzünden yüklenen eklentiler asla kaldırılmaz."
       },
       "DENY_HTTP_STATUS": {
         "label": "Reddetme HTTP durumu",

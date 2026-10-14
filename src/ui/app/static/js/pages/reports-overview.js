@@ -54,7 +54,9 @@ window.BWReportsDashboard = window.BWReportsDashboard || {};
     if (diffHour < 24) return `${diffHour}h ago`;
     const diffDay = Math.floor(diffHour / 24);
     if (diffDay < 7) return `${diffDay}d ago`;
-    return new Date(epochSeconds * 1000).toLocaleDateString();
+    return window.bwChartLocale.format(new Date(epochSeconds * 1000), {
+      dateStyle: "medium",
+    });
   }
 
   function renderOverview(data) {
@@ -109,7 +111,7 @@ window.BWReportsDashboard = window.BWReportsDashboard || {};
           },
         ];
         const categories = buckets.map((b) =>
-          new Date(b * 1000).toLocaleTimeString([], { hour: "2-digit" }),
+          window.bwChartLocale.format(new Date(b * 1000), { hour: "2-digit" }),
         );
         if (timeseriesChart) {
           timeseriesChart.updateOptions({ series, xaxis: { categories } });

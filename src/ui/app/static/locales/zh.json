@@ -711,6 +711,13 @@
       "timeseries": {
         "series": "已拦截",
         "title": "一段时间内的已拦截请求（所选范围）"
+      },
+      "tooltip": {
+        "blocked_one": "已拦截 {{count}} 次",
+        "blocked_other": "已拦截 {{count}} 次",
+        "requests_one": "{{count}} 个请求",
+        "requests_other": "{{count}} 个请求",
+        "top_share": "占前 10 名的 {{percent}}%"
       }
     },
     "map": {
@@ -1230,6 +1237,79 @@
     "use_authenticator_code": "使用身份验证码",
     "use_recovery_code": "使用恢复码",
     "get_support": "获取支持"
+  },
+  "loading": {
+    "default": "加载中...",
+    "bans": {
+      "ban_one": "正在封禁 {{count}} 个 IP",
+      "ban_other": "正在封禁 {{count}} 个 IP",
+      "unban_one": "正在解封 {{count}} 个 IP",
+      "unban_other": "正在解封 {{count}} 个 IP",
+      "update_duration_one": "正在更新 {{count}} 个封禁的持续时间",
+      "update_duration_other": "正在更新 {{count}} 个封禁的持续时间"
+    },
+    "configs": {
+      "convert_online_one": "正在将 {{count}} 个配置转换为在线",
+      "convert_online_other": "正在将 {{count}} 个配置转换为在线",
+      "convert_draft_one": "正在将 {{count}} 个配置转换为草稿",
+      "convert_draft_other": "正在将 {{count}} 个配置转换为草稿",
+      "delete_one": "正在删除 {{count}} 个所选配置",
+      "delete_other": "正在删除 {{count}} 个所选配置",
+      "create": "正在创建自定义配置 {{config}}",
+      "create_for_service": "正在为服务 {{service}} 创建自定义配置 {{config}}",
+      "import": "正在导入自定义配置"
+    },
+    "global_settings": {
+      "save": "正在保存全局设置",
+      "save_plugin": "正在保存 {{plugin}} 全局设置"
+    },
+    "instances": {
+      "create": "正在创建新实例 {{instance}}",
+      "reload_one": "正在重新加载实例 {{instances}}",
+      "reload_other": "正在重新加载实例 {{instances}}",
+      "stop_one": "正在停止实例 {{instances}}",
+      "stop_other": "正在停止实例 {{instances}}",
+      "delete_one": "正在删除实例 {{instances}}",
+      "delete_other": "正在删除实例 {{instances}}"
+    },
+    "jobs": {
+      "run_one": "正在运行所选任务的插件：{{jobs}}",
+      "run_other": "正在运行所选任务的插件：{{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "正在删除插件：{{plugins}}",
+      "delete_other": "正在删除插件：{{plugins}}",
+      "enable": "正在启用插件：{{plugin}}",
+      "disable": "正在禁用插件：{{plugin}}",
+      "reload": "正在重新加载插件",
+      "install": "正在安装插件：{{plugin}}",
+      "update": "正在更新插件：{{plugin}}"
+    },
+    "pro": {
+      "update_license": "正在更新许可证密钥"
+    },
+    "services": {
+      "convert_online_one": "正在将服务 {{services}} 转换为在线",
+      "convert_online_other": "正在将服务 {{services}} 转换为在线",
+      "convert_draft_one": "正在将服务 {{services}} 转换为草稿",
+      "convert_draft_other": "正在将服务 {{services}} 转换为草稿",
+      "declare_standard": "正在将服务 {{service}} 声明为标准",
+      "declare_redirect_only": "正在将服务 {{service}} 声明为“仅重定向”",
+      "delete_one": "正在删除服务 {{services}}",
+      "delete_other": "正在删除服务 {{services}}",
+      "import": "正在导入服务",
+      "import_with_configs": "正在导入服务和自定义配置",
+      "create_config": "正在为服务 {{service}} 创建配置",
+      "create_config_draft": "正在为草稿服务 {{service}} 创建配置",
+      "save_config": "正在保存服务 {{service}} 的配置",
+      "save_config_draft": "正在保存草稿服务 {{service}} 的配置",
+      "save_plugin": "正在保存服务 {{service}} 的 {{plugin}} 设置",
+      "save_template": "正在保存服务 {{service}} 的模板设置"
+    },
+    "totp": {
+      "token": "正在验证 TOTP 令牌。",
+      "security_key": "正在验证安全密钥。"
+    }
   },
   "login": {
     "title": "登录",
@@ -3711,9 +3791,11 @@
       "deleted": "规则已删除。还剩 {{count}} 条规则。",
       "duplicated": "副本已插入第 {{n}} 位。只要上方的原规则处于启用状态，它就永远无法匹配。",
       "gateAdded": "已向匹配添加速率阈值。低于阈值时规则不匹配，评估继续。",
+      "jumped_whole": "此工作流：{{message}}",
+      "jumped_rule": "规则 {{n}}：{{message}}",
+      "jumped_ruleNamed": "规则 {{n}}（“{{name}}”）：{{message}}",
       "inserted": "在 {{total}} 的 {{n}} 位置添加规则。 检查所有之前的规则。",
       "inspecting": "编辑 {{total}} 的 {{n}} 规则 — {{name}}。",
-      "jumped": "{{where}}：{{message}}",
       "lastValueRemoved": "最后一个值已删除；此条件必须包含一个值才能保存。",
       "moved": "{{name}} 已移至第 {{to}} 位，共 {{total}} 位。",
       "movedDrag": "{{name}} 已拖动至第 {{to}} 位，共 {{total}} 位。",
@@ -3879,7 +3961,10 @@
       "service_list_not_read_reopen_page": "无法读取服务列表；请重新打开页面并重试"
     },
     "reason": {
-      "sentence": "安全工作流 {{workflow}}:{{action}}"
+      "sentence_block": "安全工作流“{{workflow}}”：请求已阻止",
+      "sentence_redirect": "安全工作流“{{workflow}}”：请求已重定向",
+      "sentence_challenge": "安全工作流“{{workflow}}”：请求已被质询",
+      "sentence_other": "安全工作流“{{workflow}}”：操作“{{action}}”"
     }
   },
   "request_path": {
@@ -3898,7 +3983,7 @@
     "resources": {
       "attach": "附加",
       "conflict": {
-        "inline": "{{service}} 已经通过自己的 {{family}} 设置为 {{path}} 提供服务。清除 {{path}} 的设置，或使用不同的路径。",
+        "inline": "{{service}} 已经通过自己的“{{family}}”设置为 {{path}} 提供服务。请清除 {{path}} 的这些设置，或使用不同的路径。",
         "primary": "“{{name}}” 目前是此服务的首选证书，并且将不再使用，无需进一步警告。首选证书是指实际部署的证书。",
         "resource_redirect": "{{service}} 已经通过重定向“{{name}}”为 {{path}} 提供服务。分离“{{name}}”，或为其中一个指定不同的路径。",
         "resource_upstream": "{{service}} 已经通过上游“{{name}}”为 {{path}} 提供服务。分离“{{name}}”，或为其中一个指定不同的路径。",
@@ -4048,6 +4133,10 @@
     "rotate_credential": "轮换此实例的凭证?如果实例不可达,操作将失败。"
   },
   "general": {
+    "meta": {
+      "name": "常规",
+      "description": "服务器的常规设置"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "内部使用：加载中",
@@ -4380,13 +4469,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "请求已阻止",
-        "captcha": "验证码质询",
-        "challenge": "机器人检测质询"
-      },
-      "sentence": "{{source}}:{{action}}",
-      "sentence_scenario": "{{source}}:{{action}}(场景:{{scenario}})",
+      "sentence_ban": "{{source}}：请求已阻止",
+      "sentence_ban_scenario": "{{source}}：请求已阻止（场景：“{{scenario}}”）",
+      "sentence_captcha": "{{source}}：验证码质询",
+      "sentence_captcha_scenario": "{{source}}：验证码质询（场景：“{{scenario}}”）",
+      "sentence_challenge": "{{source}}：机器人检测质询",
+      "sentence_challenge_scenario": "{{source}}：机器人检测质询（场景：“{{scenario}}”）",
+      "sentence_other": "{{source}}：无法识别的操作“{{action}}”",
+      "sentence_other_scenario": "{{source}}：无法识别的操作“{{action}}”（场景：“{{scenario}}”）",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "CrowdSec AppSec 故障策略",
@@ -4487,9 +4577,14 @@
       "action": "移除",
       "confirm": "我已了解，并希望移除此决策。",
       "impact": "这将在共享的 CrowdSec 引擎上移除该决策，并影响每个已连接的 bouncer。已缓存的决策、其他范围、本地封禁或 AppSec 仍可能拦截该目标。",
-      "selection": "要从 {{source}}（{{engine}}）移除 {{scope}} {{value}}（{{type}}），场景 {{scenario}}，来源 {{origin}} 吗？",
+      "selection": "要从 {{source}}（{{engine}}）移除“{{value}}”的决策（范围：“{{scope}}”，类型：“{{type}}”，来源：“{{origin}}”，场景：“{{scenario}}”）吗？",
       "submit": "移除决策",
-      "success": "已在 CrowdSec 源端移除。传播状态为 {{status}}（{{mode}}，间隔 {{interval}}）。剩余的匹配决策：{{remaining}}。本地封禁或 AppSec 仍可能拦截。",
+      "success_stream_one": "已在 CrowdSec 源端移除。传播待处理（流模式，间隔 {{interval}}）。还剩 {{remaining}} 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。",
+      "success_stream_other": "已在 CrowdSec 源端移除。传播待处理（流模式，间隔 {{interval}}）。还剩 {{remaining}} 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。",
+      "success_live_one": "已在 CrowdSec 源端移除。传播待处理（实时模式，间隔 {{interval}}）。还剩 {{remaining}} 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。",
+      "success_live_other": "已在 CrowdSec 源端移除。传播待处理（实时模式，间隔 {{interval}}）。还剩 {{remaining}} 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。",
+      "success_other_one": "已在 CrowdSec 源端移除。传播待处理（模式“{{mode}}”，间隔 {{interval}}）。还剩 {{remaining}} 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。",
+      "success_other_other": "已在 CrowdSec 源端移除。传播待处理（模式“{{mode}}”，间隔 {{interval}}）。还剩 {{remaining}} 个其他匹配的决策。本地封禁或 AppSec 仍可能拦截。",
       "title": "移除 CrowdSec 决策"
     },
     "report": {

@@ -80,6 +80,9 @@ def _ban_one_invalid_ip(module, app, monkeypatch, translated_stub):
     calls = []
 
     def recording_translated(key, **variables):
+        if key.startswith("loading."):
+            # The loading page message after the flash: its own keys (test_i18n_no_interpolated_words.py).
+            return None
         calls.append((key, variables))
         return translated_stub(key, **variables)
 

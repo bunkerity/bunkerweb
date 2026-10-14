@@ -79,7 +79,7 @@ def totp_page():
             safe_next = _sanitize_internal_next(request.form.get("next"), url_for("home.home_page"))
         except ValueError:
             safe_next = url_for("home.home_page")
-        return redirect(url_for("loading", next=safe_next, message="Validating TOTP token."))
+        return redirect(url_for("loading", next=safe_next, message=translated("loading.totp.token") or "Validating TOTP token."))
 
     # Nothing to prove (no second factor at all), or already proven
     if (not bool(current_user.totp_secret) and not has_credentials) or session.get("mfa_validated", False):
@@ -155,4 +155,4 @@ def totp_webauthn_verify():
 
     LOGGER.info(f"User {username} completed two-factor authentication with a security key")
 
-    return jsonify({"redirect": url_for("loading", next=_mfa_next(), message="Validating security key.")})
+    return jsonify({"redirect": url_for("loading", next=_mfa_next(), message=translated("loading.totp.security_key") or "Validating security key.")})

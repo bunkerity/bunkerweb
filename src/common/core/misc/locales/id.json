@@ -93,7 +93,7 @@
       },
       "EXTERNAL_PLUGIN_URLS": {
         "label": "URL plugin eksternal",
-        "help": "Daftar URL plugin eksternal (unduhan langsung ke file .zip atau .tar) untuk diunduh dan dipasang (URL dipisahkan dengan spasi). Maksimal 50 MiB per URL. Tambahkan #sha256=<digest> ke URL untuk mengunci kontennya. http:// biasa sudah usang dan akan ditolak di 1.7.0: gunakan https:// atau file:///."
+        "help": "Daftar URL plugin eksternal (unduhan langsung ke file .zip atau .tar) untuk diunduh dan dipasang (URL dipisahkan dengan spasi). Maksimal 50 MiB per URL. Tambahkan #sha256=<digest> ke URL untuk mengunci kontennya. http:// biasa sudah usang dan akan ditolak di 1.7.0: gunakan https:// atau file:///. Menghapus sebuah URL akan mencopot pemasangan plugin yang disediakannya, beserta nilai tersimpannya, setelah semua URL lain berhasil diunduh. Plugin yang ditambahkan secara manual atau diunggah di antarmuka web tidak pernah dihapus."
       },
       "DENY_HTTP_STATUS": {
         "label": "Status HTTP penolakan",

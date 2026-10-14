@@ -732,6 +732,13 @@
         "series": "Bloqueadas",
         "title": "Solicitudes bloqueadas a lo largo del tiempo (intervalo seleccionado)"
       },
+      "tooltip": {
+        "blocked_one": "{{count}} bloqueada",
+        "blocked_other": "{{count}} bloqueadas",
+        "requests_one": "{{count}} solicitud",
+        "requests_other": "{{count}} solicitudes",
+        "top_share": "{{percent}} % del Top 10"
+      },
       "top_blocked_ips": {
         "most_blocked": "IP más bloqueada",
         "title": "Top 10 IP Bloqueadas"
@@ -1254,6 +1261,79 @@
     "use_authenticator_code": "Utilice un código de autenticación",
     "use_recovery_code": "Utilice un código de recuperación",
     "get_support": "Obtener asistencia"
+  },
+  "loading": {
+    "default": "Cargando...",
+    "bans": {
+      "ban_one": "Bloqueando {{count}} IP",
+      "ban_other": "Bloqueando {{count}} IP",
+      "unban_one": "Desbloqueando {{count}} IP",
+      "unban_other": "Desbloqueando {{count}} IP",
+      "update_duration_one": "Actualizando la duración de {{count}} bloqueo",
+      "update_duration_other": "Actualizando la duración de {{count}} bloqueos"
+    },
+    "configs": {
+      "convert_online_one": "Convirtiendo {{count}} configuración a en línea",
+      "convert_online_other": "Convirtiendo {{count}} configuraciones a en línea",
+      "convert_draft_one": "Convirtiendo {{count}} configuración a borrador",
+      "convert_draft_other": "Convirtiendo {{count}} configuraciones a borrador",
+      "delete_one": "Eliminando {{count}} configuración seleccionada",
+      "delete_other": "Eliminando {{count}} configuraciones seleccionadas",
+      "create": "Creando la configuración personalizada {{config}}",
+      "create_for_service": "Creando la configuración personalizada {{config}} para el servicio {{service}}",
+      "import": "Importando configuraciones personalizadas"
+    },
+    "global_settings": {
+      "save": "Guardando los ajustes globales",
+      "save_plugin": "Guardando los ajustes globales de {{plugin}}"
+    },
+    "instances": {
+      "create": "Creando la nueva instancia {{instance}}",
+      "reload_one": "Recargando la instancia {{instances}}",
+      "reload_other": "Recargando las instancias {{instances}}",
+      "stop_one": "Deteniendo la instancia {{instances}}",
+      "stop_other": "Deteniendo las instancias {{instances}}",
+      "delete_one": "Eliminando la instancia {{instances}}",
+      "delete_other": "Eliminando las instancias {{instances}}"
+    },
+    "jobs": {
+      "run_one": "Ejecutando los plugins de la tarea seleccionada: {{jobs}}",
+      "run_other": "Ejecutando los plugins de las tareas seleccionadas: {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "Eliminando el plugin: {{plugins}}",
+      "delete_other": "Eliminando los plugins: {{plugins}}",
+      "enable": "Activando el plugin: {{plugin}}",
+      "disable": "Desactivando el plugin: {{plugin}}",
+      "reload": "Recargando los plugins",
+      "install": "Instalando el plugin: {{plugin}}",
+      "update": "Actualizando el plugin: {{plugin}}"
+    },
+    "pro": {
+      "update_license": "Actualizando la clave de licencia"
+    },
+    "services": {
+      "convert_online_one": "Convirtiendo el servicio {{services}} a en línea",
+      "convert_online_other": "Convirtiendo los servicios {{services}} a en línea",
+      "convert_draft_one": "Convirtiendo el servicio {{services}} a borrador",
+      "convert_draft_other": "Convirtiendo los servicios {{services}} a borrador",
+      "declare_standard": "Declarando el servicio {{service}} como estándar",
+      "declare_redirect_only": "Declarando el servicio {{service}} como solo redirección",
+      "delete_one": "Eliminando el servicio {{services}}",
+      "delete_other": "Eliminando los servicios {{services}}",
+      "import": "Importando servicios",
+      "import_with_configs": "Importando servicios y configuraciones personalizadas",
+      "create_config": "Creando la configuración del servicio {{service}}",
+      "create_config_draft": "Creando la configuración del servicio en borrador {{service}}",
+      "save_config": "Guardando la configuración del servicio {{service}}",
+      "save_config_draft": "Guardando la configuración del servicio en borrador {{service}}",
+      "save_plugin": "Guardando los ajustes de {{plugin}} del servicio {{service}}",
+      "save_template": "Guardando los ajustes de la plantilla del servicio {{service}}"
+    },
+    "totp": {
+      "token": "Validando el token TOTP.",
+      "security_key": "Validando la llave de seguridad."
+    }
   },
   "login": {
     "notice_password_changed": "Se ha cambiado tu contraseña. Inicia sesión con la nueva contraseña.",
@@ -3606,7 +3686,9 @@
       "deleted": "Regla eliminada. Reglas restantes: {{count}}.",
       "duplicated": "Copia insertada en la posición {{n}}. Nunca puede coincidir mientras el original superior esté activado.",
       "gateAdded": "Se añadió un umbral de frecuencia a la coincidencia. Por debajo de él, la regla no coincide y la evaluación continúa.",
-      "jumped": "{{where}}: {{message}}",
+      "jumped_whole": "Este flujo de trabajo: {{message}}",
+      "jumped_rule": "Regla {{n}}: {{message}}",
+      "jumped_ruleNamed": "Regla {{n}} — “{{name}}”: {{message}}",
       "lastValueRemoved": "Se eliminó el último valor; esta condición no puede guardarse hasta que contenga uno.",
       "moved": "{{name}} se movió a la posición {{to}} de {{total}}.",
       "movedDrag": "{{name}} se arrastró a la posición {{to}} de {{total}}.",
@@ -3741,7 +3823,10 @@
       "regex": "coincide con la expresión regular"
     },
     "reason": {
-      "sentence": "Workflow de seguridad {{workflow}}: {{action}}"
+      "sentence_block": "Workflow de seguridad “{{workflow}}”: solicitud bloqueada",
+      "sentence_redirect": "Workflow de seguridad “{{workflow}}”: solicitud redirigida",
+      "sentence_challenge": "Workflow de seguridad “{{workflow}}”: solicitud sometida a un desafío",
+      "sentence_other": "Workflow de seguridad “{{workflow}}”: acción “{{action}}”"
     },
     "crowdsec_field": {
       "remediation": "la remediación es",
@@ -3957,7 +4042,7 @@
     "resources": {
       "attach": "Adjuntar",
       "conflict": {
-        "inline": "{{service}} ya sirve {{path}} a través de sus propias configuraciones {{family}}. Elimine esas configuraciones para {{path}}, o utilice una ruta diferente.",
+        "inline": "{{service}} ya sirve {{path}} a través de sus propios ajustes “{{family}}”. Borra esos ajustes para {{path}}, o usa una ruta diferente.",
         "primary": "“{{name}}” es actualmente el certificado principal para este servicio y será degradado sin ninguna advertencia adicional. El certificado principal es el que se ha desplegado realmente.",
         "resource_redirect": "{{service}} ya sirve {{path}} a través de la redirección “{{name}}”. Separa “{{name}}”, o asigna una ruta diferente a uno de ellos.",
         "resource_upstream": "{{service}} ya sirve {{path}} a través del servidor de origen “{{name}}”. Separa “{{name}}”, o asigna una ruta diferente a uno de ellos.",
@@ -4040,13 +4125,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "solicitud bloqueada",
-        "captcha": "desafío de captcha",
-        "challenge": "desafío de detección de bots"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (escenario: {{scenario}})",
+      "sentence_ban": "{{source}}: solicitud bloqueada",
+      "sentence_ban_scenario": "{{source}}: solicitud bloqueada (escenario: “{{scenario}}”)",
+      "sentence_captcha": "{{source}}: desafío de captcha",
+      "sentence_captcha_scenario": "{{source}}: desafío de captcha (escenario: “{{scenario}}”)",
+      "sentence_challenge": "{{source}}: desafío de detección de bots",
+      "sentence_challenge_scenario": "{{source}}: desafío de detección de bots (escenario: “{{scenario}}”)",
+      "sentence_other": "{{source}}: acción no reconocida “{{action}}”",
+      "sentence_other_scenario": "{{source}}: acción no reconocida “{{action}}” (escenario: “{{scenario}}”)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "Política de fallo de CrowdSec AppSec",
@@ -4147,9 +4233,14 @@
       "action": "Quitar",
       "confirm": "Lo entiendo y quiero quitar esta decisión.",
       "impact": "Esto quita la decisión en el motor de CrowdSec compartido y afecta a todos los bouncers conectados. Las decisiones en caché, otro rango, los bloqueos locales o AppSec aún pueden bloquear el objetivo.",
-      "selection": "¿Quitar {{scope}} {{value}} ({{type}}), escenario {{scenario}}, origen {{origin}}, de {{source}} ({{engine}})?",
+      "selection": "¿Quitar la decisión sobre “{{value}}” (ámbito: “{{scope}}”, tipo: “{{type}}”, origen: “{{origin}}”, escenario: “{{scenario}}”) de {{source}} ({{engine}})?",
       "submit": "Quitar decisión",
-      "success": "Quitada en el origen de CrowdSec. La propagación es {{status}} ({{mode}}, intervalo {{interval}}). Decisiones coincidentes restantes: {{remaining}}. Los bloqueos locales o AppSec aún pueden bloquear.",
+      "success_stream_one": "Quitada en el origen de CrowdSec. La propagación está pendiente (modo stream, intervalo {{interval}}). Queda {{remaining}} decisión coincidente más. Los bloqueos locales o AppSec aún pueden bloquear.",
+      "success_stream_other": "Quitada en el origen de CrowdSec. La propagación está pendiente (modo stream, intervalo {{interval}}). Quedan {{remaining}} decisiones coincidentes más. Los bloqueos locales o AppSec aún pueden bloquear.",
+      "success_live_one": "Quitada en el origen de CrowdSec. La propagación está pendiente (modo en vivo, intervalo {{interval}}). Queda {{remaining}} decisión coincidente más. Los bloqueos locales o AppSec aún pueden bloquear.",
+      "success_live_other": "Quitada en el origen de CrowdSec. La propagación está pendiente (modo en vivo, intervalo {{interval}}). Quedan {{remaining}} decisiones coincidentes más. Los bloqueos locales o AppSec aún pueden bloquear.",
+      "success_other_one": "Quitada en el origen de CrowdSec. La propagación está pendiente (modo “{{mode}}”, intervalo {{interval}}). Queda {{remaining}} decisión coincidente más. Los bloqueos locales o AppSec aún pueden bloquear.",
+      "success_other_other": "Quitada en el origen de CrowdSec. La propagación está pendiente (modo “{{mode}}”, intervalo {{interval}}). Quedan {{remaining}} decisiones coincidentes más. Los bloqueos locales o AppSec aún pueden bloquear.",
       "title": "Quitar decisión de CrowdSec"
     },
     "report": {
@@ -4213,6 +4304,10 @@
     "rotate_credential": "¿Rotar la credencial de esta instancia? Falla si la instancia no es accesible."
   },
   "general": {
+    "meta": {
+      "name": "General",
+      "description": "Los ajustes generales del servidor"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "uso interno cargando",

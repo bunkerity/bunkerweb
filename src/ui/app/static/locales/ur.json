@@ -711,6 +711,13 @@
       "timeseries": {
         "series": "بلاک شدہ",
         "title": "وقت کے ساتھ بلاک شدہ درخواستیں (منتخب حد)"
+      },
+      "tooltip": {
+        "blocked_one": "{{count}} بلاک",
+        "blocked_other": "{{count}} بلاک",
+        "requests_one": "{{count}} درخواست",
+        "requests_other": "{{count}} درخواستیں",
+        "top_share": "ٹاپ 10 کا {{percent}}%"
       }
     },
     "map": {
@@ -1230,6 +1237,79 @@
     "use_authenticator_code": "ایک تصدیق کوڈ استعمال کریں",
     "use_recovery_code": "ایک ریکووری کوڈ استعمال کریں",
     "get_support": "مدد حاصل کریں"
+  },
+  "loading": {
+    "default": "لوڈ ہو رہا ہے...",
+    "bans": {
+      "ban_one": "{{count}} IP پر پابندی لگائی جا رہی ہے",
+      "ban_other": "{{count}} IP پر پابندی لگائی جا رہی ہے",
+      "unban_one": "{{count}} IP سے پابندی ہٹائی جا رہی ہے",
+      "unban_other": "{{count}} IP سے پابندی ہٹائی جا رہی ہے",
+      "update_duration_one": "{{count}} پابندی کا دورانیہ اپ ڈیٹ کیا جا رہا ہے",
+      "update_duration_other": "{{count}} پابندیوں کا دورانیہ اپ ڈیٹ کیا جا رہا ہے"
+    },
+    "configs": {
+      "convert_online_one": "{{count}} کنفیگریشن کو آن لائن میں تبدیل کیا جا رہا ہے",
+      "convert_online_other": "{{count}} کنفیگریشن کو آن لائن میں تبدیل کیا جا رہا ہے",
+      "convert_draft_one": "{{count}} کنفیگریشن کو ڈرافٹ میں تبدیل کیا جا رہا ہے",
+      "convert_draft_other": "{{count}} کنفیگریشن کو ڈرافٹ میں تبدیل کیا جا رہا ہے",
+      "delete_one": "منتخب کردہ {{count}} کنفیگریشن حذف کی جا رہی ہے",
+      "delete_other": "منتخب کردہ {{count}} کنفیگریشن حذف کی جا رہی ہے",
+      "create": "کسٹم کنفیگریشن {{config}} بنائی جا رہی ہے",
+      "create_for_service": "سروس {{service}} کے لیے کسٹم کنفیگریشن {{config}} بنائی جا رہی ہے",
+      "import": "کسٹم کنفیگریشنز درآمد کی جا رہی ہیں"
+    },
+    "global_settings": {
+      "save": "عمومی ترتیبات محفوظ کی جا رہی ہیں",
+      "save_plugin": "{{plugin}} کی عمومی ترتیبات محفوظ کی جا رہی ہیں"
+    },
+    "instances": {
+      "create": "نیا انسٹینس {{instance}} بنایا جا رہا ہے",
+      "reload_one": "انسٹینس {{instances}} دوبارہ لوڈ کیا جا رہا ہے",
+      "reload_other": "انسٹینسز {{instances}} دوبارہ لوڈ کیے جا رہے ہیں",
+      "stop_one": "انسٹینس {{instances}} کو روکا جا رہا ہے",
+      "stop_other": "انسٹینسز {{instances}} کو روکا جا رہا ہے",
+      "delete_one": "انسٹینس {{instances}} کو حذف کیا جا رہا ہے",
+      "delete_other": "انسٹینسز {{instances}} کو حذف کیا جا رہا ہے"
+    },
+    "jobs": {
+      "run_one": "منتخب ٹاسک کے پلگ ان چلائے جا رہے ہیں: {{jobs}}",
+      "run_other": "منتخب ٹاسکس کے پلگ ان چلائے جا رہے ہیں: {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "پلگ ان حذف کیا جا رہا ہے: {{plugins}}",
+      "delete_other": "پلگ انز حذف کیے جا رہے ہیں: {{plugins}}",
+      "enable": "پلگ ان فعال کیا جا رہا ہے: {{plugin}}",
+      "disable": "پلگ ان غیر فعال کیا جا رہا ہے: {{plugin}}",
+      "reload": "پلگ انز دوبارہ لوڈ کیے جا رہے ہیں",
+      "install": "پلگ ان انسٹال کیا جا رہا ہے: {{plugin}}",
+      "update": "پلگ ان اپ ڈیٹ کیا جا رہا ہے: {{plugin}}"
+    },
+    "pro": {
+      "update_license": "لائسنس کی اپ ڈیٹ کی جا رہی ہے"
+    },
+    "services": {
+      "convert_online_one": "سروس {{services}} کو آن لائن میں تبدیل کیا جا رہا ہے",
+      "convert_online_other": "سروسز {{services}} کو آن لائن میں تبدیل کیا جا رہا ہے",
+      "convert_draft_one": "سروس {{services}} کو ڈرافٹ میں تبدیل کیا جا رہا ہے",
+      "convert_draft_other": "سروسز {{services}} کو ڈرافٹ میں تبدیل کیا جا رہا ہے",
+      "declare_standard": "سروس {{service}} کو معیاری قرار دیا جا رہا ہے",
+      "declare_redirect_only": "سروس {{service}} کو “صرف ری ڈائریکٹ” قرار دیا جا رہا ہے",
+      "delete_one": "سروس {{services}} حذف کی جا رہی ہے",
+      "delete_other": "سروسز {{services}} حذف کی جا رہی ہیں",
+      "import": "سروسز درآمد کی جا رہی ہیں",
+      "import_with_configs": "سروسز اور کسٹم کنفیگریشنز درآمد کی جا رہی ہیں",
+      "create_config": "سروس {{service}} کے لیے کنفیگریشن بنائی جا رہی ہے",
+      "create_config_draft": "ڈرافٹ سروس {{service}} کے لیے کنفیگریشن بنائی جا رہی ہے",
+      "save_config": "سروس {{service}} کی کنفیگریشن محفوظ کی جا رہی ہے",
+      "save_config_draft": "ڈرافٹ سروس {{service}} کی کنفیگریشن محفوظ کی جا رہی ہے",
+      "save_plugin": "سروس {{service}} کے لیے {{plugin}} کی ترتیبات محفوظ کی جا رہی ہیں",
+      "save_template": "سروس {{service}} کے لیے ٹیمپلیٹ کی ترتیبات محفوظ کی جا رہی ہیں"
+    },
+    "totp": {
+      "token": "TOTP ٹوکن کی تصدیق کی جا رہی ہے۔",
+      "security_key": "سیکیورٹی کلید کی تصدیق کی جا رہی ہے۔"
+    }
   },
   "login": {
     "title": "لاگ ان",
@@ -3711,9 +3791,11 @@
       "deleted": "اصول حذف ہو گیا۔ {{count}} اصول باقی ہیں۔",
       "duplicated": "نقل مقام {{n}} پر شامل ہوئی۔ اوپر اصل اصول فعال رہنے تک یہ کبھی مماثل نہیں ہو سکتی۔",
       "gateAdded": "مماثلت میں شرح کی حد شامل ہوئی۔ اس سے نیچے اصول مماثل نہیں ہوتا اور جانچ جاری رہتی ہے۔",
+      "jumped_whole": "یہ ورک فلو: {{message}}",
+      "jumped_rule": "اصول {{n}}: {{message}}",
+      "jumped_ruleNamed": "اصول {{n}} — “{{name}}”: {{message}}",
       "inserted": "اصول {{total}} میں سے مقام {{n}} پر شامل کیا گیا۔ اس سے پہلے موجود ہر اصول کو پہلے جانچا جاتا ہے۔",
       "inspecting": "{{total}} میں {{n}} قانون کی ترمیم کریں - {{name}}.",
-      "jumped": "{{where}}: {{message}}",
       "lastValueRemoved": "آخری قدر ہٹا دی گئی — کوئی قدر ہونے تک یہ شرط محفوظ نہیں ہو سکتی۔",
       "moved": "{{name}} کو {{total}} میں سے مقام {{to}} پر منتقل کیا گیا۔",
       "movedDrag": "{{name}} کو گھسیٹ کر {{total}} میں سے مقام {{to}} پر لایا گیا۔",
@@ -3879,7 +3961,10 @@
       "service_list_not_read_reopen_page": "سروس کی فہرست پڑھی نہیں جا سکی؛ صفحہ دوبارہ کھولیں اور دوبارہ کوشش کریں"
     },
     "reason": {
-      "sentence": "سیکیورٹی ورک فلو {{workflow}}: {{action}}"
+      "sentence_block": "سیکیورٹی ورک فلو “{{workflow}}”: درخواست بلاک کر دی گئی",
+      "sentence_redirect": "سیکیورٹی ورک فلو “{{workflow}}”: درخواست ری ڈائریکٹ کر دی گئی",
+      "sentence_challenge": "سیکیورٹی ورک فلو “{{workflow}}”: درخواست پر چیلنج لگایا گیا",
+      "sentence_other": "سیکیورٹی ورک فلو “{{workflow}}”: ایکشن “{{action}}”"
     }
   },
   "request_path": {
@@ -3898,7 +3983,7 @@
     "resources": {
       "attach": "منسلک کریں",
       "conflict": {
-        "inline": "{{service}} پہلے سے ہی {{path}} کو اپنے {{family}} سیٹنگز کے ذریعے سروس کر رہا ہے۔ {{path}} کے لیے ان سیٹنگز کو صاف کریں، یا ایک اور راستہ استعمال کریں۔",
+        "inline": "{{service}} پہلے سے ہی {{path}} کو اپنی “{{family}}” سیٹنگز کے ذریعے سروس کر رہا ہے۔ {{path}} کے لیے ان سیٹنگز کو صاف کریں، یا کوئی اور راستہ استعمال کریں۔",
         "primary": "\"{{name}}\" اس سروس کا موجودہ بنیادی سرٹیفکیٹ ہے اور مزید تنبیہ کے بغیر اس کا بنیادی درجہ ہٹا دیا جائے گا۔ بنیادی سرٹیفکیٹ ہی دراصل ڈپلائے کیا جاتا ہے۔",
         "resource_redirect": "{{service}} پہلے سے ہی {{path}} کو ری ڈائریکٹ \"{{name}}\" کے ذریعے سروس کر رہا ہے۔ \"{{name}}\" کو الگ کریں، یا ان میں سے کسی ایک کو دوسرا راستہ دیں۔",
         "resource_upstream": "{{service}} پہلے سے ہی {{path}} کو اپ اسٹریم \"{{name}}\" کے ذریعے سروس کر رہا ہے۔ \"{{name}}\" کو الگ کریں، یا ان میں سے کسی ایک کو دوسرا راستہ دیں۔",
@@ -4048,6 +4133,10 @@
     "rotate_credential": "اس انسٹینس کی کریڈینشل گھمائیں؟ اگر انسٹینس ناقابل رسائی ہو تو ناکام ہو جاتا ہے۔"
   },
   "general": {
+    "meta": {
+      "name": "عمومی",
+      "description": "سرور کی عمومی ترتیبات"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "اندرونی استعمال کے لیے لوڈنگ",
@@ -4380,13 +4469,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "درخواست بلاک کر دی گئی",
-        "captcha": "کیپچا چیلنج",
-        "challenge": "بوٹ کی نشاندہی کا چیلنج"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (منظرنامہ: {{scenario}})",
+      "sentence_ban": "{{source}}: درخواست بلاک کر دی گئی",
+      "sentence_ban_scenario": "{{source}}: درخواست بلاک کر دی گئی (منظرنامہ: “{{scenario}}”)",
+      "sentence_captcha": "{{source}}: کیپچا چیلنج",
+      "sentence_captcha_scenario": "{{source}}: کیپچا چیلنج (منظرنامہ: “{{scenario}}”)",
+      "sentence_challenge": "{{source}}: بوٹ کی نشاندہی کا چیلنج",
+      "sentence_challenge_scenario": "{{source}}: بوٹ کی نشاندہی کا چیلنج (منظرنامہ: “{{scenario}}”)",
+      "sentence_other": "{{source}}: نامعلوم ایکشن “{{action}}”",
+      "sentence_other_scenario": "{{source}}: نامعلوم ایکشن “{{action}}” (منظرنامہ: “{{scenario}}”)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "CrowdSec AppSec ناکامی کی پالیسی",
@@ -4487,9 +4577,14 @@
       "action": "ہٹائیں",
       "confirm": "میں سمجھتا/سمجھتی ہوں اور اس فیصلے کو ہٹانا چاہتا/چاہتی ہوں۔",
       "impact": "اس سے مشترکہ CrowdSec انجن پر فیصلہ ہٹ جاتا ہے اور ہر منسلک bouncer متاثر ہوتا ہے۔ کیش شدہ فیصلے، کوئی دوسری رینج، مقامی پابندیاں یا AppSec اب بھی ہدف کو بلاک کر سکتے ہیں۔",
-      "selection": "{{source}} ({{engine}}) سے {{scope}} {{value}} ({{type}})، منظرنامہ {{scenario}}، ماخذ {{origin}} ہٹائیں؟",
+      "selection": "{{source}} ({{engine}}) سے “{{value}}” کا فیصلہ ہٹائیں (دائرہ کار: “{{scope}}”، قسم: “{{type}}”، ماخذ: “{{origin}}”، منظرنامہ: “{{scenario}}”)؟",
       "submit": "فیصلہ ہٹائیں",
-      "success": "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ کی حالت {{status}} ہے ({{mode}}، وقفہ {{interval}})۔ باقی مطابقت رکھنے والے فیصلے: {{remaining}}۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔",
+      "success_stream_one": "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (اسٹریم موڈ، وقفہ {{interval}})۔ مزید {{remaining}} مطابقت رکھنے والا فیصلہ باقی ہے۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔",
+      "success_stream_other": "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (اسٹریم موڈ، وقفہ {{interval}})۔ مزید {{remaining}} مطابقت رکھنے والے فیصلے باقی ہیں۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔",
+      "success_live_one": "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (لائیو موڈ، وقفہ {{interval}})۔ مزید {{remaining}} مطابقت رکھنے والا فیصلہ باقی ہے۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔",
+      "success_live_other": "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (لائیو موڈ، وقفہ {{interval}})۔ مزید {{remaining}} مطابقت رکھنے والے فیصلے باقی ہیں۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔",
+      "success_other_one": "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (موڈ “{{mode}}”، وقفہ {{interval}})۔ مزید {{remaining}} مطابقت رکھنے والا فیصلہ باقی ہے۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔",
+      "success_other_other": "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (موڈ “{{mode}}”، وقفہ {{interval}})۔ مزید {{remaining}} مطابقت رکھنے والے فیصلے باقی ہیں۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔",
       "title": "CrowdSec فیصلہ ہٹائیں"
     },
     "report": {

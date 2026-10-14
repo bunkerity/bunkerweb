@@ -732,6 +732,13 @@
         "series": "Zablokowane",
         "title": "Zablokowane żądania w czasie (wybrany zakres)"
       },
+      "tooltip": {
+        "blocked_one": "Zablokowano: {{count}}",
+        "blocked_other": "Zablokowano: {{count}}",
+        "requests_one": "Żądań: {{count}}",
+        "requests_other": "Żądań: {{count}}",
+        "top_share": "{{percent}}% z Top 10"
+      },
       "top_blocked_ips": {
         "most_blocked": "Najczęściej blokowane IP",
         "title": "10 najczęściej blokowanych IP"
@@ -1254,6 +1261,79 @@
     "use_authenticator_code": "Użyj kodu uwierzytelniania",
     "use_recovery_code": "Użyj kodu odzyskiwania",
     "get_support": "Uzyskaj pomoc"
+  },
+  "loading": {
+    "default": "Ładowanie...",
+    "bans": {
+      "ban_one": "Blokowanie adresów IP: {{count}}",
+      "ban_other": "Blokowanie adresów IP: {{count}}",
+      "unban_one": "Odblokowywanie adresów IP: {{count}}",
+      "unban_other": "Odblokowywanie adresów IP: {{count}}",
+      "update_duration_one": "Aktualizowanie czasu trwania blokad: {{count}}",
+      "update_duration_other": "Aktualizowanie czasu trwania blokad: {{count}}"
+    },
+    "configs": {
+      "convert_online_one": "Przełączanie konfiguracji na online: {{count}}",
+      "convert_online_other": "Przełączanie konfiguracji na online: {{count}}",
+      "convert_draft_one": "Przełączanie konfiguracji na szkic: {{count}}",
+      "convert_draft_other": "Przełączanie konfiguracji na szkic: {{count}}",
+      "delete_one": "Usuwanie wybranych konfiguracji: {{count}}",
+      "delete_other": "Usuwanie wybranych konfiguracji: {{count}}",
+      "create": "Tworzenie konfiguracji niestandardowej {{config}}",
+      "create_for_service": "Tworzenie konfiguracji niestandardowej {{config}} dla usługi {{service}}",
+      "import": "Importowanie konfiguracji niestandardowych"
+    },
+    "global_settings": {
+      "save": "Zapisywanie ustawień globalnych",
+      "save_plugin": "Zapisywanie ustawień globalnych wtyczki {{plugin}}"
+    },
+    "instances": {
+      "create": "Tworzenie nowej instancji {{instance}}",
+      "reload_one": "Ponowne ładowanie instancji {{instances}}",
+      "reload_other": "Ponowne ładowanie instancji {{instances}}",
+      "stop_one": "Zatrzymywanie instancji {{instances}}",
+      "stop_other": "Zatrzymywanie instancji {{instances}}",
+      "delete_one": "Usuwanie instancji {{instances}}",
+      "delete_other": "Usuwanie instancji {{instances}}"
+    },
+    "jobs": {
+      "run_one": "Uruchamianie wtyczek wybranego zadania: {{jobs}}",
+      "run_other": "Uruchamianie wtyczek wybranych zadań: {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "Usuwanie wtyczki: {{plugins}}",
+      "delete_other": "Usuwanie wtyczek: {{plugins}}",
+      "enable": "Włączanie wtyczki: {{plugin}}",
+      "disable": "Wyłączanie wtyczki: {{plugin}}",
+      "reload": "Ponowne ładowanie wtyczek",
+      "install": "Instalowanie wtyczki: {{plugin}}",
+      "update": "Aktualizowanie wtyczki: {{plugin}}"
+    },
+    "pro": {
+      "update_license": "Aktualizowanie klucza licencyjnego"
+    },
+    "services": {
+      "convert_online_one": "Przełączanie usługi {{services}} na online",
+      "convert_online_other": "Przełączanie usług {{services}} na online",
+      "convert_draft_one": "Przełączanie usługi {{services}} na szkic",
+      "convert_draft_other": "Przełączanie usług {{services}} na szkic",
+      "declare_standard": "Deklarowanie usługi {{service}} jako standardowej",
+      "declare_redirect_only": "Deklarowanie usługi {{service}} jako tylko przekierowanie",
+      "delete_one": "Usuwanie usługi {{services}}",
+      "delete_other": "Usuwanie usług {{services}}",
+      "import": "Importowanie usług",
+      "import_with_configs": "Importowanie usług i konfiguracji niestandardowych",
+      "create_config": "Tworzenie konfiguracji dla usługi {{service}}",
+      "create_config_draft": "Tworzenie konfiguracji dla usługi w trybie szkicu {{service}}",
+      "save_config": "Zapisywanie konfiguracji dla usługi {{service}}",
+      "save_config_draft": "Zapisywanie konfiguracji dla usługi w trybie szkicu {{service}}",
+      "save_plugin": "Zapisywanie ustawień wtyczki {{plugin}} dla usługi {{service}}",
+      "save_template": "Zapisywanie ustawień szablonu dla usługi {{service}}"
+    },
+    "totp": {
+      "token": "Weryfikowanie tokenu TOTP.",
+      "security_key": "Weryfikowanie klucza bezpieczeństwa."
+    }
   },
   "login": {
     "notice_password_changed": "Twoje hasło zostało zmienione. Zaloguj się przy użyciu nowego hasła.",
@@ -1979,13 +2059,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "żądanie zablokowane",
-        "captcha": "wyzwanie captcha",
-        "challenge": "wyzwanie wykrywania botów"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (scenariusz: {{scenario}})",
+      "sentence_ban": "{{source}}: żądanie zablokowane",
+      "sentence_ban_scenario": "{{source}}: żądanie zablokowane (scenariusz: „{{scenario}}”)",
+      "sentence_captcha": "{{source}}: wyzwanie captcha",
+      "sentence_captcha_scenario": "{{source}}: wyzwanie captcha (scenariusz: „{{scenario}}”)",
+      "sentence_challenge": "{{source}}: wyzwanie wykrywania botów",
+      "sentence_challenge_scenario": "{{source}}: wyzwanie wykrywania botów (scenariusz: „{{scenario}}”)",
+      "sentence_other": "{{source}}: nierozpoznana akcja „{{action}}”",
+      "sentence_other_scenario": "{{source}}: nierozpoznana akcja „{{action}}” (scenariusz: „{{scenario}}”)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "Zasada awaryjna CrowdSec AppSec",
@@ -2086,9 +2167,14 @@
       "action": "Usuń",
       "confirm": "Rozumiem i chcę usunąć tę decyzję.",
       "impact": "Spowoduje to usunięcie decyzji na współdzielonym silniku CrowdSec i wpłynie na każdy połączony bouncer. Decyzje w pamięci podręcznej, inny zakres, lokalne blokady lub AppSec mogą nadal blokować cel.",
-      "selection": "Usunąć {{scope}} {{value}} ({{type}}), scenariusz {{scenario}}, pochodzenie {{origin}}, ze źródła {{source}} ({{engine}})?",
+      "selection": "Usunąć decyzję dotyczącą „{{value}}” (zakres: „{{scope}}”, typ: „{{type}}”, pochodzenie: „{{origin}}”, scenariusz: „{{scenario}}”) ze źródła {{source}} ({{engine}})?",
       "submit": "Usuń decyzję",
-      "success": "Usunięto w źródle CrowdSec. Propagacja: {{status}} ({{mode}}, interwał {{interval}}). Pozostałe pasujące decyzje: {{remaining}}. Lokalne blokady lub AppSec mogą nadal blokować.",
+      "success_stream_one": "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb strumieniowy, interwał {{interval}}). Pozostałe pasujące decyzje: {{remaining}}. Lokalne blokady lub AppSec mogą nadal blokować.",
+      "success_stream_other": "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb strumieniowy, interwał {{interval}}). Pozostałe pasujące decyzje: {{remaining}}. Lokalne blokady lub AppSec mogą nadal blokować.",
+      "success_live_one": "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb na żywo, interwał {{interval}}). Pozostałe pasujące decyzje: {{remaining}}. Lokalne blokady lub AppSec mogą nadal blokować.",
+      "success_live_other": "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb na żywo, interwał {{interval}}). Pozostałe pasujące decyzje: {{remaining}}. Lokalne blokady lub AppSec mogą nadal blokować.",
+      "success_other_one": "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb „{{mode}}”, interwał {{interval}}). Pozostałe pasujące decyzje: {{remaining}}. Lokalne blokady lub AppSec mogą nadal blokować.",
+      "success_other_other": "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb „{{mode}}”, interwał {{interval}}). Pozostałe pasujące decyzje: {{remaining}}. Lokalne blokady lub AppSec mogą nadal blokować.",
       "title": "Usuń decyzję CrowdSec"
     },
     "report": {
@@ -2152,6 +2238,10 @@
     "rotate_credential": "Obrócić dane uwierzytelniające tej instancji? Nie powiedzie się, jeśli instancja jest niedostępna."
   },
   "general": {
+    "meta": {
+      "name": "Ogólne",
+      "description": "Ustawienia ogólne serwera"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "wewnętrzne użycie: wczytywanie",
@@ -4104,7 +4194,9 @@
       "deleted": "Reguła usunięta. Pozostało reguł: {{count}}.",
       "duplicated": "Kopię wstawiono na pozycji {{n}}. Nie może pasować, dopóki oryginał powyżej jest włączony.",
       "gateAdded": "Do dopasowania dodano próg częstotliwości. Poniżej niego reguła nie pasuje i ocena trwa dalej.",
-      "jumped": "{{where}}: {{message}}",
+      "jumped_whole": "Ten przepływ pracy: {{message}}",
+      "jumped_rule": "Reguła {{n}}: {{message}}",
+      "jumped_ruleNamed": "Reguła {{n}} — „{{name}}”: {{message}}",
       "lastValueRemoved": "Usunięto ostatnią wartość — tego warunku nie można zapisać, dopóki nie będzie zawierał wartości.",
       "moved": "Regułę {{name}} przeniesiono na pozycję {{to}} z {{total}}.",
       "movedDrag": "Regułę {{name}} przeciągnięto na pozycję {{to}} z {{total}}.",
@@ -4239,7 +4331,10 @@
       "regex": "pasuje do wyrażenia regularnego"
     },
     "reason": {
-      "sentence": "Workflow bezpieczeństwa {{workflow}}: {{action}}"
+      "sentence_block": "Przepływ pracy zabezpieczeń „{{workflow}}”: żądanie zablokowane",
+      "sentence_redirect": "Przepływ pracy zabezpieczeń „{{workflow}}”: żądanie przekierowane",
+      "sentence_challenge": "Przepływ pracy zabezpieczeń „{{workflow}}”: żądanie poddane wyzwaniu",
+      "sentence_other": "Przepływ pracy zabezpieczeń „{{workflow}}”: akcja „{{action}}”"
     },
     "crowdsec_field": {
       "remediation": "sposób naprawy to",
@@ -4455,7 +4550,7 @@
     "resources": {
       "attach": "Dołącz",
       "conflict": {
-        "inline": "{{service}} już obsługuje {{path}} dzięki własnym ustawieniom {{family}}. Usuń te ustawienia dla {{path}}, lub użyj innej ścieżki.",
+        "inline": "{{service}} już obsługuje {{path}} dzięki własnym ustawieniom „{{family}}”. Usuń te ustawienia dla {{path}} lub użyj innej ścieżki.",
         "primary": "„{{name}}” jest obecnie głównym certyfikatem dla tej usługi i zostanie obniżony bez dalszych ostrzeżeń. Główny to ten, który faktycznie jest wdrożony.",
         "resource_redirect": "{{service}} już obsługuje {{path}} poprzez przekierowanie „{{name}}”. Odłącz „{{name}}” lub nadaj jednemu z nich inną ścieżkę.",
         "resource_upstream": "{{service}} już obsługuje {{path}} poprzez upstream „{{name}}”. Odłącz „{{name}}” lub nadaj jednemu z nich inną ścieżkę.",

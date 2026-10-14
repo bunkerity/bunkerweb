@@ -433,7 +433,7 @@ $(function () {
         path: path,
         family: claim.name,
         defaultValue:
-          "{{service}} already serves {{path}} through its own {{family}} settings. Clear those settings for {{path}}, or use a different path.",
+          "{{service}} already serves {{path}} through its own “{{family}}” settings. Clear those settings for {{path}}, or use a different path.",
       });
     }
     return t(

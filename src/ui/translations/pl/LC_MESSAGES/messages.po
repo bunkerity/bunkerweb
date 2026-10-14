@@ -2509,20 +2509,29 @@ msgstr "Zaobserwowano %(time)s"
 msgid "crowdsec.previous"
 msgstr "Wstecz"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "żądanie zablokowane"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: żądanie zablokowane"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "wyzwanie captcha"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: żądanie zablokowane (scenariusz: „%(scenario)s”)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "wyzwanie wykrywania botów"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: wyzwanie captcha"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: wyzwanie captcha (scenariusz: „%(scenario)s”)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (scenariusz: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: wyzwanie wykrywania botów"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: wyzwanie wykrywania botów (scenariusz: „%(scenario)s”)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: nierozpoznana akcja „%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: nierozpoznana akcja „%(action)s” (scenariusz: „%(scenario)s”)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "Spowoduje to usunięcie decyzji na współdzielonym silniku CrowdSec i wpłynie na każdy połączony bouncer. Decyzje w pamięci podręcznej, inny zakres, lokalne blokady lub AppSec mogą nadal blokować cel."
 
 msgid "crowdsec.remove.selection"
-msgstr "Usunąć %(scope)s %(value)s (%(type)s), scenariusz %(scenario)s, pochodzenie %(origin)s, ze źródła %(source)s (%(engine)s)?"
+msgstr "Usunąć decyzję dotyczącą „%(value)s” (zakres: „%(scope)s”, typ: „%(type)s”, pochodzenie: „%(origin)s”, scenariusz: „%(scenario)s”) ze źródła %(source)s (%(engine)s)?"
 
 msgid "crowdsec.remove.submit"
 msgstr "Usuń decyzję"
 
-msgid "crowdsec.remove.success"
-msgstr "Usunięto w źródle CrowdSec. Propagacja: %(status)s (%(mode)s, interwał %(interval)s). Pozostałe pasujące decyzje: %(remaining)s. Lokalne blokady lub AppSec mogą nadal blokować."
+msgid "crowdsec.remove.success_live_one"
+msgstr "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb na żywo, interwał %(interval)s). Pozostałe pasujące decyzje: %(remaining)s. Lokalne blokady lub AppSec mogą nadal blokować."
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb na żywo, interwał %(interval)s). Pozostałe pasujące decyzje: %(remaining)s. Lokalne blokady lub AppSec mogą nadal blokować."
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb „%(mode)s”, interwał %(interval)s). Pozostałe pasujące decyzje: %(remaining)s. Lokalne blokady lub AppSec mogą nadal blokować."
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb „%(mode)s”, interwał %(interval)s). Pozostałe pasujące decyzje: %(remaining)s. Lokalne blokady lub AppSec mogą nadal blokować."
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb strumieniowy, interwał %(interval)s). Pozostałe pasujące decyzje: %(remaining)s. Lokalne blokady lub AppSec mogą nadal blokować."
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "Usunięto w źródle CrowdSec. Propagacja oczekuje (tryb strumieniowy, interwał %(interval)s). Pozostałe pasujące decyzje: %(remaining)s. Lokalne blokady lub AppSec mogą nadal blokować."
 
 msgid "crowdsec.remove.title"
 msgstr "Usuń decyzję CrowdSec"
@@ -2718,6 +2742,21 @@ msgstr "Zablokowane"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "Zablokowane żądania w czasie (wybrany zakres)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "Zablokowano: %(count)s"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "Zablokowano: %(count)s"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "Żądań: %(count)s"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "Żądań: %(count)s"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "%(percent)s%% z Top 10"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "Najczęściej blokowane IP"
@@ -3721,6 +3760,12 @@ msgstr "Hasło musi zawierać co najmniej 1 znak specjalny."
 msgid "form.validation.password_uppercase"
 msgstr "Hasło musi zawierać co najmniej 1 wielką literę."
 
+msgid "general.meta.description"
+msgstr "Ustawienia ogólne serwera"
+
+msgid "general.meta.name"
+msgstr "Ogólne"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "Ścieżka używana dla logów dostępu NGINX (ścieżka pliku, syslog:server=host[:port][,param=value] lub memory:name:size; ustaw off, aby wyłączyć)."
 
@@ -4371,6 +4416,165 @@ msgstr "Użyj kodu uwierzytelniania"
 
 msgid "link.use_recovery_code"
 msgstr "Użyj kodu odzyskiwania"
+
+msgid "loading.bans.ban_one"
+msgstr "Blokowanie adresów IP: %(count)s"
+
+msgid "loading.bans.ban_other"
+msgstr "Blokowanie adresów IP: %(count)s"
+
+msgid "loading.bans.unban_one"
+msgstr "Odblokowywanie adresów IP: %(count)s"
+
+msgid "loading.bans.unban_other"
+msgstr "Odblokowywanie adresów IP: %(count)s"
+
+msgid "loading.bans.update_duration_one"
+msgstr "Aktualizowanie czasu trwania blokad: %(count)s"
+
+msgid "loading.bans.update_duration_other"
+msgstr "Aktualizowanie czasu trwania blokad: %(count)s"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "Przełączanie konfiguracji na szkic: %(count)s"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "Przełączanie konfiguracji na szkic: %(count)s"
+
+msgid "loading.configs.convert_online_one"
+msgstr "Przełączanie konfiguracji na online: %(count)s"
+
+msgid "loading.configs.convert_online_other"
+msgstr "Przełączanie konfiguracji na online: %(count)s"
+
+msgid "loading.configs.create"
+msgstr "Tworzenie konfiguracji niestandardowej %(config)s"
+
+msgid "loading.configs.create_for_service"
+msgstr "Tworzenie konfiguracji niestandardowej %(config)s dla usługi %(service)s"
+
+msgid "loading.configs.delete_one"
+msgstr "Usuwanie wybranych konfiguracji: %(count)s"
+
+msgid "loading.configs.delete_other"
+msgstr "Usuwanie wybranych konfiguracji: %(count)s"
+
+msgid "loading.configs.import"
+msgstr "Importowanie konfiguracji niestandardowych"
+
+msgid "loading.default"
+msgstr "Ładowanie..."
+
+msgid "loading.global_settings.save"
+msgstr "Zapisywanie ustawień globalnych"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "Zapisywanie ustawień globalnych wtyczki %(plugin)s"
+
+msgid "loading.instances.create"
+msgstr "Tworzenie nowej instancji %(instance)s"
+
+msgid "loading.instances.delete_one"
+msgstr "Usuwanie instancji %(instances)s"
+
+msgid "loading.instances.delete_other"
+msgstr "Usuwanie instancji %(instances)s"
+
+msgid "loading.instances.reload_one"
+msgstr "Ponowne ładowanie instancji %(instances)s"
+
+msgid "loading.instances.reload_other"
+msgstr "Ponowne ładowanie instancji %(instances)s"
+
+msgid "loading.instances.stop_one"
+msgstr "Zatrzymywanie instancji %(instances)s"
+
+msgid "loading.instances.stop_other"
+msgstr "Zatrzymywanie instancji %(instances)s"
+
+msgid "loading.jobs.run_one"
+msgstr "Uruchamianie wtyczek wybranego zadania: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "Uruchamianie wtyczek wybranych zadań: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "Usuwanie wtyczki: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "Usuwanie wtyczek: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "Wyłączanie wtyczki: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "Włączanie wtyczki: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "Instalowanie wtyczki: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "Ponowne ładowanie wtyczek"
+
+msgid "loading.plugins.update"
+msgstr "Aktualizowanie wtyczki: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "Aktualizowanie klucza licencyjnego"
+
+msgid "loading.services.convert_draft_one"
+msgstr "Przełączanie usługi %(services)s na szkic"
+
+msgid "loading.services.convert_draft_other"
+msgstr "Przełączanie usług %(services)s na szkic"
+
+msgid "loading.services.convert_online_one"
+msgstr "Przełączanie usługi %(services)s na online"
+
+msgid "loading.services.convert_online_other"
+msgstr "Przełączanie usług %(services)s na online"
+
+msgid "loading.services.create_config"
+msgstr "Tworzenie konfiguracji dla usługi %(service)s"
+
+msgid "loading.services.create_config_draft"
+msgstr "Tworzenie konfiguracji dla usługi w trybie szkicu %(service)s"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "Deklarowanie usługi %(service)s jako tylko przekierowanie"
+
+msgid "loading.services.declare_standard"
+msgstr "Deklarowanie usługi %(service)s jako standardowej"
+
+msgid "loading.services.delete_one"
+msgstr "Usuwanie usługi %(services)s"
+
+msgid "loading.services.delete_other"
+msgstr "Usuwanie usług %(services)s"
+
+msgid "loading.services.import"
+msgstr "Importowanie usług"
+
+msgid "loading.services.import_with_configs"
+msgstr "Importowanie usług i konfiguracji niestandardowych"
+
+msgid "loading.services.save_config"
+msgstr "Zapisywanie konfiguracji dla usługi %(service)s"
+
+msgid "loading.services.save_config_draft"
+msgstr "Zapisywanie konfiguracji dla usługi w trybie szkicu %(service)s"
+
+msgid "loading.services.save_plugin"
+msgstr "Zapisywanie ustawień wtyczki %(plugin)s dla usługi %(service)s"
+
+msgid "loading.services.save_template"
+msgstr "Zapisywanie ustawień szablonu dla usługi %(service)s"
+
+msgid "loading.totp.security_key"
+msgstr "Weryfikowanie klucza bezpieczeństwa."
+
+msgid "loading.totp.token"
+msgstr "Weryfikowanie tokenu TOTP."
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "Nie udało się zalogować, spróbuj ponownie"
@@ -6621,7 +6825,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "Odłączyć ten przepływ pracy od %(service)s?"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s już obsługuje %(path)s dzięki własnym ustawieniom %(family)s. Usuń te ustawienia dla %(path)s, lub użyj innej ścieżki."
+msgstr "%(service)s już obsługuje %(path)s dzięki własnym ustawieniom „%(family)s”. Usuń te ustawienia dla %(path)s lub użyj innej ścieżki."
 
 msgid "service.resources.conflict.primary"
 msgstr "„%(name)s” jest obecnie głównym certyfikatem dla tej usługi i zostanie obniżony bez dalszych ostrzeżeń. Główny to ten, który faktycznie jest wdrożony."
@@ -10514,8 +10718,17 @@ msgstr "Reguły są oceniane w kolejności i pierwsza, która pasuje, wygrywa. R
 msgid "workflows.readonly"
 msgstr "Baza danych jest tylko do odczytu. Przepływy pracy można przeglądać, ale nie można ich modyfikować."
 
-msgid "workflows.reason.sentence"
-msgstr "Workflow bezpieczeństwa %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "Przepływ pracy zabezpieczeń „%(workflow)s”: żądanie zablokowane"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "Przepływ pracy zabezpieczeń „%(workflow)s”: żądanie poddane wyzwaniu"
+
+msgid "workflows.reason.sentence_other"
+msgstr "Przepływ pracy zabezpieczeń „%(workflow)s”: akcja „%(action)s”"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "Przepływ pracy zabezpieczeń „%(workflow)s”: żądanie przekierowane"
 
 msgid "workflows.rule.disabled"
 msgstr "Wyłączona"
@@ -10568,8 +10781,14 @@ msgstr "Reguła dodana na pozycji %(n)s w %(total)s. Wszystkie reguły przed ni�
 msgid "workflows.say.inspecting"
 msgstr "Edytuj regułę %(n)s w %(total)s — %(name)s."
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "Reguła %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "Reguła %(n)s — „%(name)s”: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "Ten przepływ pracy: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "Usunięto ostatnią wartość — tego warunku nie można zapisać, dopóki nie będzie zawierał wartości."

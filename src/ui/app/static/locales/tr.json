@@ -732,6 +732,13 @@
         "series": "Engellendi",
         "title": "Zaman içinde engellenen istekler (seçili aralık)"
       },
+      "tooltip": {
+        "blocked_one": "{{count}} engellendi",
+        "blocked_other": "{{count}} engellendi",
+        "requests_one": "{{count}} istek",
+        "requests_other": "{{count}} istek",
+        "top_share": "İlk 10 içindeki pay: %{{percent}}"
+      },
       "top_blocked_ips": {
         "most_blocked": "En Çok Engellenen IP",
         "title": "En Çok Engellenen 10 IP"
@@ -1254,6 +1261,79 @@
     "use_authenticator_code": "Bir kimlik doğrulama kodu kullan",
     "use_recovery_code": "Bir kurtarma kodu kullan",
     "get_support": "Destek alın"
+  },
+  "loading": {
+    "default": "Yükleniyor...",
+    "bans": {
+      "ban_one": "{{count}} IP yasaklanıyor",
+      "ban_other": "{{count}} IP yasaklanıyor",
+      "unban_one": "{{count}} IP'nin yasağı kaldırılıyor",
+      "unban_other": "{{count}} IP'nin yasağı kaldırılıyor",
+      "update_duration_one": "{{count}} yasağın süresi güncelleniyor",
+      "update_duration_other": "{{count}} yasağın süresi güncelleniyor"
+    },
+    "configs": {
+      "convert_online_one": "{{count}} yapılandırma çevrimiçi duruma getiriliyor",
+      "convert_online_other": "{{count}} yapılandırma çevrimiçi duruma getiriliyor",
+      "convert_draft_one": "{{count}} yapılandırma taslağa dönüştürülüyor",
+      "convert_draft_other": "{{count}} yapılandırma taslağa dönüştürülüyor",
+      "delete_one": "Seçilen {{count}} yapılandırma siliniyor",
+      "delete_other": "Seçilen {{count}} yapılandırma siliniyor",
+      "create": "{{config}} özel yapılandırması oluşturuluyor",
+      "create_for_service": "{{service}} servisi için {{config}} özel yapılandırması oluşturuluyor",
+      "import": "Özel yapılandırmalar içe aktarılıyor"
+    },
+    "global_settings": {
+      "save": "Genel ayarlar kaydediliyor",
+      "save_plugin": "{{plugin}} genel ayarları kaydediliyor"
+    },
+    "instances": {
+      "create": "Yeni {{instance}} örneği oluşturuluyor",
+      "reload_one": "{{instances}} örneği yeniden yükleniyor",
+      "reload_other": "{{instances}} örnekleri yeniden yükleniyor",
+      "stop_one": "{{instances}} örneği durduruluyor",
+      "stop_other": "{{instances}} örnekleri durduruluyor",
+      "delete_one": "{{instances}} örneği siliniyor",
+      "delete_other": "{{instances}} örnekleri siliniyor"
+    },
+    "jobs": {
+      "run_one": "Seçilen işin eklentileri çalıştırılıyor: {{jobs}}",
+      "run_other": "Seçilen işlerin eklentileri çalıştırılıyor: {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "Eklenti siliniyor: {{plugins}}",
+      "delete_other": "Eklentiler siliniyor: {{plugins}}",
+      "enable": "Eklenti etkinleştiriliyor: {{plugin}}",
+      "disable": "Eklenti devre dışı bırakılıyor: {{plugin}}",
+      "reload": "Eklentiler yeniden yükleniyor",
+      "install": "Eklenti yükleniyor: {{plugin}}",
+      "update": "Eklenti güncelleniyor: {{plugin}}"
+    },
+    "pro": {
+      "update_license": "Lisans anahtarı güncelleniyor"
+    },
+    "services": {
+      "convert_online_one": "{{services}} servisi çevrimiçi duruma getiriliyor",
+      "convert_online_other": "{{services}} servisleri çevrimiçi duruma getiriliyor",
+      "convert_draft_one": "{{services}} servisi taslağa dönüştürülüyor",
+      "convert_draft_other": "{{services}} servisleri taslağa dönüştürülüyor",
+      "declare_standard": "{{service}} servisi standart olarak bildiriliyor",
+      "declare_redirect_only": "{{service}} servisi yalnızca yönlendirme olarak bildiriliyor",
+      "delete_one": "{{services}} servisi siliniyor",
+      "delete_other": "{{services}} servisleri siliniyor",
+      "import": "Servisler içe aktarılıyor",
+      "import_with_configs": "Servisler ve özel yapılandırmalar içe aktarılıyor",
+      "create_config": "{{service}} servisi için yapılandırma oluşturuluyor",
+      "create_config_draft": "{{service}} taslak servisi için yapılandırma oluşturuluyor",
+      "save_config": "{{service}} servisi için yapılandırma kaydediliyor",
+      "save_config_draft": "{{service}} taslak servisi için yapılandırma kaydediliyor",
+      "save_plugin": "{{service}} servisi için {{plugin}} ayarları kaydediliyor",
+      "save_template": "{{service}} servisi için şablon ayarları kaydediliyor"
+    },
+    "totp": {
+      "token": "TOTP belirteci doğrulanıyor.",
+      "security_key": "Güvenlik anahtarı doğrulanıyor."
+    }
   },
   "login": {
     "notice_password_changed": "Parolanız değiştirildi. Yeni parolanızla giriş yapın.",
@@ -1979,13 +2059,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "istek engellendi",
-        "captcha": "captcha doğrulaması",
-        "challenge": "bot tespiti doğrulaması"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (senaryo: {{scenario}})",
+      "sentence_ban": "{{source}}: istek engellendi",
+      "sentence_ban_scenario": "{{source}}: istek engellendi (senaryo: “{{scenario}}”)",
+      "sentence_captcha": "{{source}}: captcha doğrulaması",
+      "sentence_captcha_scenario": "{{source}}: captcha doğrulaması (senaryo: “{{scenario}}”)",
+      "sentence_challenge": "{{source}}: bot algılama doğrulaması",
+      "sentence_challenge_scenario": "{{source}}: bot algılama doğrulaması (senaryo: “{{scenario}}”)",
+      "sentence_other": "{{source}}: tanınmayan eylem “{{action}}”",
+      "sentence_other_scenario": "{{source}}: tanınmayan eylem “{{action}}” (senaryo: “{{scenario}}”)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "CrowdSec AppSec hata politikası",
@@ -2086,9 +2167,14 @@
       "action": "Kaldır",
       "confirm": "Anlıyorum ve bu kararı kaldırmak istiyorum.",
       "impact": "Bu işlem kararı paylaşılan CrowdSec motorundan kaldırır ve bağlı her bouncer'ı etkiler. Önbelleğe alınmış kararlar, başka bir aralık, yerel yasaklar veya AppSec hedefi yine de engelleyebilir.",
-      "selection": "{{scope}} {{value}} ({{type}}), senaryo {{scenario}}, köken {{origin}}, {{source}} ({{engine}}) kaynağından kaldırılsın mı?",
+      "selection": "“{{value}}” için kararı (kapsam: “{{scope}}”, tür: “{{type}}”, köken: “{{origin}}”, senaryo: “{{scenario}}”) {{source}} ({{engine}}) kaynağından kaldırmak istiyor musunuz?",
       "submit": "Kararı kaldır",
-      "success": "CrowdSec kaynağında kaldırıldı. Yayılım durumu: {{status}} ({{mode}}, aralık {{interval}}). Kalan eşleşen kararlar: {{remaining}}. Yerel yasaklar veya AppSec yine de engelleyebilir.",
+      "success_stream_one": "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (akış modu, aralık {{interval}}). Eşleşen diğer karar sayısı: {{remaining}}. Yerel yasaklar veya AppSec yine de engelleyebilir.",
+      "success_stream_other": "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (akış modu, aralık {{interval}}). Eşleşen diğer karar sayısı: {{remaining}}. Yerel yasaklar veya AppSec yine de engelleyebilir.",
+      "success_live_one": "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (canlı mod, aralık {{interval}}). Eşleşen diğer karar sayısı: {{remaining}}. Yerel yasaklar veya AppSec yine de engelleyebilir.",
+      "success_live_other": "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (canlı mod, aralık {{interval}}). Eşleşen diğer karar sayısı: {{remaining}}. Yerel yasaklar veya AppSec yine de engelleyebilir.",
+      "success_other_one": "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (“{{mode}}” modu, aralık {{interval}}). Eşleşen diğer karar sayısı: {{remaining}}. Yerel yasaklar veya AppSec yine de engelleyebilir.",
+      "success_other_other": "CrowdSec kaynağında kaldırıldı. Yayılma beklemede (“{{mode}}” modu, aralık {{interval}}). Eşleşen diğer karar sayısı: {{remaining}}. Yerel yasaklar veya AppSec yine de engelleyebilir.",
       "title": "CrowdSec kararını kaldır"
     },
     "report": {
@@ -2152,6 +2238,10 @@
     "rotate_credential": "Bu örneğin kimlik bilgisi döndürülsün mü? Örnek erişilemezse başarısız olur."
   },
   "general": {
+    "meta": {
+      "name": "Genel",
+      "description": "Sunucunun genel ayarları"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "dahili kullanım: yükleniyor",
@@ -4104,7 +4194,9 @@
       "deleted": "Kural silindi. {{count}} kural kaldı.",
       "duplicated": "Kopya {{n}} konumuna eklendi. Üstündeki özgün kural etkin olduğu sürece hiçbir zaman eşleşemez.",
       "gateAdded": "Eşleşmeye hız eşiği eklendi. Eşiğin altında kural eşleşmez ve değerlendirme devam eder.",
-      "jumped": "{{where}}: {{message}}",
+      "jumped_whole": "Bu iş akışı: {{message}}",
+      "jumped_rule": "Kural {{n}}: {{message}}",
+      "jumped_ruleNamed": "Kural {{n}} — “{{name}}”: {{message}}",
       "lastValueRemoved": "Son değer kaldırıldı — bu koşul bir değer içermeden kaydedilemez.",
       "moved": "{{name}}, {{total}} konumdan {{to}} konumuna taşındı.",
       "movedDrag": "{{name}}, {{total}} konumdan {{to}} konumuna sürüklendi.",
@@ -4239,7 +4331,10 @@
       "regex": "düzenli ifadeyle eşleşir"
     },
     "reason": {
-      "sentence": "Güvenlik iş akışı {{workflow}}: {{action}}"
+      "sentence_block": "“{{workflow}}” güvenlik iş akışı: istek engellendi",
+      "sentence_redirect": "“{{workflow}}” güvenlik iş akışı: istek yönlendirildi",
+      "sentence_challenge": "“{{workflow}}” güvenlik iş akışı: istek doğrulamaya yönlendirildi",
+      "sentence_other": "“{{workflow}}” güvenlik iş akışı: “{{action}}” eylemi"
     },
     "crowdsec_field": {
       "remediation": "iyileştirme şu",
@@ -4455,7 +4550,7 @@
     "resources": {
       "attach": "Bağla",
       "conflict": {
-        "inline": "{{service}}, {{path}}'i kendi {{family}} ayarlarıyla zaten sunmaktadır. {{path}} için bu ayarları temizleyin veya farklı bir yol kullanın.",
+        "inline": "{{service}}, {{path}} yolunu kendi “{{family}}” ayarlarıyla zaten sunmaktadır. {{path}} için bu ayarları temizleyin veya farklı bir yol kullanın.",
         "primary": "\"{{name}}\", şu anda bu servis için ana sertifikadır ve daha fazla uyarı olmadan düşürülecektir. Ana, aslında dağıtılan sertifikadır.",
         "resource_redirect": "{{service}}, {{path}} yolunu zaten “{{name}}” yönlendirmesi üzerinden sunuyor. “{{name}}” bağlantısını ayırın veya birine farklı bir yol verin.",
         "resource_upstream": "{{service}}, {{path}} yolunu zaten “{{name}}” upstream'i üzerinden sunuyor. “{{name}}” bağlantısını ayırın veya birine farklı bir yol verin.",

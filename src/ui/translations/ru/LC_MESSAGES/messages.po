@@ -2509,20 +2509,29 @@ msgstr "Наблюдалось %(time)s"
 msgid "crowdsec.previous"
 msgstr "Назад"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "запрос заблокирован"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: запрос заблокирован"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "проверка капчей"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: запрос заблокирован (сценарий: «%(scenario)s»)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "проверка на бота"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: проверка капчей"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: проверка капчей (сценарий: «%(scenario)s»)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (сценарий: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: проверка на ботов"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: проверка на ботов (сценарий: «%(scenario)s»)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: нераспознанное действие «%(action)s»"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: нераспознанное действие «%(action)s» (сценарий: «%(scenario)s»)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "Это удалит решение на общем движке CrowdSec и затронет каждый подключённый bouncer. Кэшированные решения, другой диапазон, локальные баны или AppSec по-прежнему могут блокировать цель."
 
 msgid "crowdsec.remove.selection"
-msgstr "Удалить %(scope)s %(value)s (%(type)s), сценарий %(scenario)s, происхождение %(origin)s, из %(source)s (%(engine)s)?"
+msgstr "Удалить решение для «%(value)s» (область: «%(scope)s», тип: «%(type)s», происхождение: «%(origin)s», сценарий: «%(scenario)s») из %(source)s (%(engine)s)?"
 
 msgid "crowdsec.remove.submit"
 msgstr "Удалить решение"
 
-msgid "crowdsec.remove.success"
-msgstr "Удалено в источнике CrowdSec. Распространение: %(status)s (%(mode)s, интервал %(interval)s). Оставшиеся подходящие решения: %(remaining)s. Локальные баны или AppSec по-прежнему могут блокировать."
+msgid "crowdsec.remove.success_live_one"
+msgstr "Удалено в источнике CrowdSec. Распространение ожидается (режим реального времени, интервал %(interval)s). Других подходящих решений: %(remaining)s. Локальные баны или AppSec по-прежнему могут блокировать."
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "Удалено в источнике CrowdSec. Распространение ожидается (режим реального времени, интервал %(interval)s). Других подходящих решений: %(remaining)s. Локальные баны или AppSec по-прежнему могут блокировать."
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "Удалено в источнике CrowdSec. Распространение ожидается (режим «%(mode)s», интервал %(interval)s). Других подходящих решений: %(remaining)s. Локальные баны или AppSec по-прежнему могут блокировать."
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "Удалено в источнике CrowdSec. Распространение ожидается (режим «%(mode)s», интервал %(interval)s). Других подходящих решений: %(remaining)s. Локальные баны или AppSec по-прежнему могут блокировать."
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "Удалено в источнике CrowdSec. Распространение ожидается (потоковый режим, интервал %(interval)s). Других подходящих решений: %(remaining)s. Локальные баны или AppSec по-прежнему могут блокировать."
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "Удалено в источнике CrowdSec. Распространение ожидается (потоковый режим, интервал %(interval)s). Других подходящих решений: %(remaining)s. Локальные баны или AppSec по-прежнему могут блокировать."
 
 msgid "crowdsec.remove.title"
 msgstr "Удалить решение CrowdSec"
@@ -2718,6 +2742,21 @@ msgstr "Заблокировано"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "Заблокированные запросы во времени (выбранный диапазон)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "Заблокировано: %(count)s"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "Заблокировано: %(count)s"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "Запросов: %(count)s"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "Запросов: %(count)s"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "%(percent)s%% от Топ-10"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "Самый блокируемый IP"
@@ -3721,6 +3760,12 @@ msgstr "Пароль должен содержать не менее 1 спец�
 msgid "form.validation.password_uppercase"
 msgstr "Пароль должен содержать не менее 1 заглавной буквы."
 
+msgid "general.meta.description"
+msgstr "Общие настройки сервера"
+
+msgid "general.meta.name"
+msgstr "Общие"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "Путь для журналов доступа NGINX (путь к файлу, syslog:server=host[:port][,param=value] или memory:name:size; установите off, чтобы отключить)."
 
@@ -4371,6 +4416,165 @@ msgstr "Используйте код аутентификатора"
 
 msgid "link.use_recovery_code"
 msgstr "Используйте код восстановления"
+
+msgid "loading.bans.ban_one"
+msgstr "Блокировка IP-адресов: %(count)s"
+
+msgid "loading.bans.ban_other"
+msgstr "Блокировка IP-адресов: %(count)s"
+
+msgid "loading.bans.unban_one"
+msgstr "Разблокировка IP-адресов: %(count)s"
+
+msgid "loading.bans.unban_other"
+msgstr "Разблокировка IP-адресов: %(count)s"
+
+msgid "loading.bans.update_duration_one"
+msgstr "Обновление срока действия банов: %(count)s"
+
+msgid "loading.bans.update_duration_other"
+msgstr "Обновление срока действия банов: %(count)s"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "Перевод конфигураций в статус «Черновик»: %(count)s"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "Перевод конфигураций в статус «Черновик»: %(count)s"
+
+msgid "loading.configs.convert_online_one"
+msgstr "Перевод конфигураций в статус «В сети»: %(count)s"
+
+msgid "loading.configs.convert_online_other"
+msgstr "Перевод конфигураций в статус «В сети»: %(count)s"
+
+msgid "loading.configs.create"
+msgstr "Создание пользовательской конфигурации %(config)s"
+
+msgid "loading.configs.create_for_service"
+msgstr "Создание пользовательской конфигурации %(config)s для сервиса %(service)s"
+
+msgid "loading.configs.delete_one"
+msgstr "Удаление выбранных конфигураций: %(count)s"
+
+msgid "loading.configs.delete_other"
+msgstr "Удаление выбранных конфигураций: %(count)s"
+
+msgid "loading.configs.import"
+msgstr "Импорт пользовательских конфигураций"
+
+msgid "loading.default"
+msgstr "Загрузка..."
+
+msgid "loading.global_settings.save"
+msgstr "Сохранение глобальных настроек"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "Сохранение глобальных настроек плагина %(plugin)s"
+
+msgid "loading.instances.create"
+msgstr "Создание нового экземпляра %(instance)s"
+
+msgid "loading.instances.delete_one"
+msgstr "Удаление экземпляра: %(instances)s"
+
+msgid "loading.instances.delete_other"
+msgstr "Удаление экземпляров: %(instances)s"
+
+msgid "loading.instances.reload_one"
+msgstr "Перезагрузка экземпляра: %(instances)s"
+
+msgid "loading.instances.reload_other"
+msgstr "Перезагрузка экземпляров: %(instances)s"
+
+msgid "loading.instances.stop_one"
+msgstr "Остановка экземпляра: %(instances)s"
+
+msgid "loading.instances.stop_other"
+msgstr "Остановка экземпляров: %(instances)s"
+
+msgid "loading.jobs.run_one"
+msgstr "Запуск плагинов выбранной задачи: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "Запуск плагинов выбранных задач: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "Удаление плагина: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "Удаление плагинов: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "Отключение плагина: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "Включение плагина: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "Установка плагина: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "Перезагрузка плагинов"
+
+msgid "loading.plugins.update"
+msgstr "Обновление плагина: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "Обновление лицензионного ключа"
+
+msgid "loading.services.convert_draft_one"
+msgstr "Перевод сервиса %(services)s в статус «Черновик»"
+
+msgid "loading.services.convert_draft_other"
+msgstr "Перевод сервисов %(services)s в статус «Черновик»"
+
+msgid "loading.services.convert_online_one"
+msgstr "Перевод сервиса %(services)s в статус «В сети»"
+
+msgid "loading.services.convert_online_other"
+msgstr "Перевод сервисов %(services)s в статус «В сети»"
+
+msgid "loading.services.create_config"
+msgstr "Создание конфигурации для сервиса %(service)s"
+
+msgid "loading.services.create_config_draft"
+msgstr "Создание конфигурации для сервиса-черновика %(service)s"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "Объявление сервиса %(service)s сервисом «только перенаправление»"
+
+msgid "loading.services.declare_standard"
+msgstr "Объявление сервиса %(service)s стандартным"
+
+msgid "loading.services.delete_one"
+msgstr "Удаление сервиса %(services)s"
+
+msgid "loading.services.delete_other"
+msgstr "Удаление сервисов %(services)s"
+
+msgid "loading.services.import"
+msgstr "Импорт сервисов"
+
+msgid "loading.services.import_with_configs"
+msgstr "Импорт сервисов и пользовательских конфигураций"
+
+msgid "loading.services.save_config"
+msgstr "Сохранение конфигурации для сервиса %(service)s"
+
+msgid "loading.services.save_config_draft"
+msgstr "Сохранение конфигурации для сервиса-черновика %(service)s"
+
+msgid "loading.services.save_plugin"
+msgstr "Сохранение настроек плагина %(plugin)s для сервиса %(service)s"
+
+msgid "loading.services.save_template"
+msgstr "Сохранение настроек шаблона для сервиса %(service)s"
+
+msgid "loading.totp.security_key"
+msgstr "Проверка ключа безопасности."
+
+msgid "loading.totp.token"
+msgstr "Проверка токена TOTP."
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "Не удалось выполнить вход, попробуйте ещё раз"
@@ -6621,7 +6825,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "Открепить этот рабочий процесс от %(service)s?"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s уже обслуживает %(path)s через свои собственные настройки %(family)s. Очистите эти настройки для %(path)s или используйте другой путь."
+msgstr "%(service)s уже обслуживает %(path)s через собственные настройки «%(family)s». Очистите эти настройки для %(path)s или используйте другой путь."
 
 msgid "service.resources.conflict.primary"
 msgstr "«%(name)s» в настоящее время является основным сертификатом для этого сервиса и будет понижен без дальнейших предупреждений. Основной — это тот, который фактически развернут."
@@ -10514,8 +10718,17 @@ msgstr "Правила оцениваются в порядке, и первое
 msgid "workflows.readonly"
 msgstr "База данных только для чтения. Рабочие процессы можно просматривать, но не изменять."
 
-msgid "workflows.reason.sentence"
-msgstr "Workflow безопасности %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "Рабочий процесс безопасности «%(workflow)s»: запрос заблокирован"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "Рабочий процесс безопасности «%(workflow)s»: запрос отправлен на проверку"
+
+msgid "workflows.reason.sentence_other"
+msgstr "Рабочий процесс безопасности «%(workflow)s»: действие «%(action)s»"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "Рабочий процесс безопасности «%(workflow)s»: запрос перенаправлен"
 
 msgid "workflows.rule.disabled"
 msgstr "Отключено"
@@ -10568,8 +10781,14 @@ msgstr "Правило добавлено в позицию %(n)s правила
 msgid "workflows.say.inspecting"
 msgstr "Редактирование правила %(n)s из %(total)s — %(name)s."
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "Правило %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "Правило %(n)s — «%(name)s»: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "Этот рабочий процесс: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "Последнее значение удалено — это условие нельзя сохранить, пока не будет добавлено значение."

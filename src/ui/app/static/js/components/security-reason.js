@@ -9,8 +9,8 @@
  *
  * This turns the `reason_data` a plugin records into a sentence a non-expert understands --
  * "CrowdSec AppSec: bot-detection challenge",
- * "CrowdSec LAPI: request blocked (scenario: crowdsecurity/http-probing)",
- * "Antibot challenge (captcha) served", "Security workflow api-shield: redirect" -- and returns
+ * "CrowdSec LAPI: request blocked (scenario: “crowdsecurity/http-probing”)",
+ * "Antibot challenge (captcha) served", "Security workflow “api-shield”: request redirected" -- and returns
  * null for every reason it has nothing better to say about, so the caller keeps its current
  * rendering untouched.
  *
@@ -93,11 +93,64 @@
       ),
     lapi: () => t("crowdsec.reason.source.lapi", "CrowdSec LAPI"),
   };
+  // One whole sentence per remediation, with and without a scenario: no word of the sentence is
+  // interpolated. The scenario (CrowdSec's own string) is quoted data.
   const ACTIONS = {
-    ban: () => t("crowdsec.reason.action.ban", "request blocked"),
-    captcha: () => t("crowdsec.reason.action.captcha", "captcha challenge"),
-    challenge: () =>
-      t("crowdsec.reason.action.challenge", "bot-detection challenge"),
+    ban: {
+      plain: (o) =>
+        t("crowdsec.reason.sentence_ban", "{{source}}: request blocked", o),
+      scenario: (o) =>
+        t(
+          "crowdsec.reason.sentence_ban_scenario",
+          "{{source}}: request blocked (scenario: “{{scenario}}”)",
+          o,
+        ),
+    },
+    captcha: {
+      plain: (o) =>
+        t(
+          "crowdsec.reason.sentence_captcha",
+          "{{source}}: captcha challenge",
+          o,
+        ),
+      scenario: (o) =>
+        t(
+          "crowdsec.reason.sentence_captcha_scenario",
+          "{{source}}: captcha challenge (scenario: “{{scenario}}”)",
+          o,
+        ),
+    },
+    challenge: {
+      plain: (o) =>
+        t(
+          "crowdsec.reason.sentence_challenge",
+          "{{source}}: bot-detection challenge",
+          o,
+        ),
+      scenario: (o) =>
+        t(
+          "crowdsec.reason.sentence_challenge_scenario",
+          "{{source}}: bot-detection challenge (scenario: “{{scenario}}”)",
+          o,
+        ),
+    },
+  };
+  // An action this build does not know about still reads as a sentence: its own name, quoted as data
+  // inside a generic one. Not a catalog lookup on `"crowdsec.reason.action." + action`: a key built
+  // by concatenation can never be in `en.json` -- the catalog scanner refuses to resolve one.
+  const OTHER_ACTION = {
+    plain: (o) =>
+      t(
+        "crowdsec.reason.sentence_other",
+        "{{source}}: unrecognized action “{{action}}”",
+        o,
+      ),
+    scenario: (o) =>
+      t(
+        "crowdsec.reason.sentence_other_scenario",
+        "{{source}}: unrecognized action “{{action}}” (scenario: “{{scenario}}”)",
+        o,
+      ),
   };
 
   function crowdsec(verdict) {
@@ -107,37 +160,18 @@
     const action = String(verdict.action || "").toLowerCase();
     if (!known(SOURCES, source) || !action) return null;
 
-    const sourceLabel = esc(SOURCES[source]());
-    // An action this build does not know about degrades to its own name rather than to nothing:
-    // a future CrowdSec remediation should still read as a sentence. Its own name and not a
-    // catalog lookup on `"crowdsec.reason.action." + action`: a key built by concatenation can
-    // never be in `en.json` -- the catalog scanner refuses to resolve one, so nobody would ever
-    // add it -- and the lookup could therefore only ever miss and fall back to this same string.
-    const actionLabel = esc(
-      known(ACTIONS, action) ? ACTIONS[action]() : String(verdict.action),
-    );
     const scenario = verdict.scenario ? esc(String(verdict.scenario)) : "";
+    const sentences = known(ACTIONS, action) ? ACTIONS[action] : OTHER_ACTION;
 
-    // escapeValue off: every value interpolated below was escaped once above, and the two
-    // templates are ours. Without this the scenario would come out as `&amp;lt;`.
-    const options = {
-      source: sourceLabel,
-      action: actionLabel,
+    // escapeValue off: every value interpolated below was escaped once here, and the templates are
+    // ours. Without this the scenario would come out as `&amp;lt;`.
+    const values = {
+      source: esc(SOURCES[source]()),
+      action: esc(String(verdict.action)),
       scenario: scenario,
       interpolation: { escapeValue: false },
     };
-    if (typeof window.t !== "function") {
-      return scenario
-        ? sourceLabel + ": " + actionLabel + " (scenario: " + scenario + ")"
-        : sourceLabel + ": " + actionLabel;
-    }
-    return scenario
-      ? t(
-          "crowdsec.reason.sentence_scenario",
-          "{{source}}: {{action}} (scenario: {{scenario}})",
-          options,
-        )
-      : t("crowdsec.reason.sentence", "{{source}}: {{action}}", options);
+    return fill(sentences[scenario ? "scenario" : "plain"](values), values);
   }
 
   // antibot records `{source, provider, action, http_status}` when it serves its challenge page
@@ -164,10 +198,31 @@
     );
   }
 
+  // One sentence per action of `ACTION_TYPES` (src/common/utils/workflow_schema.py); the workflow name
+  // is the operator's own string, quoted.
+  const WORKFLOW_SENTENCES = {
+    block: (v) =>
+      t(
+        "workflows.reason.sentence_block",
+        "Security workflow “{{workflow}}”: request blocked",
+        v,
+      ),
+    redirect: (v) =>
+      t(
+        "workflows.reason.sentence_redirect",
+        "Security workflow “{{workflow}}”: request redirected",
+        v,
+      ),
+    challenge: (v) =>
+      t(
+        "workflows.reason.sentence_challenge",
+        "Security workflow “{{workflow}}”: request challenged",
+        v,
+      ),
+  };
+
   // workflows records `{workflow, rule, action}` on its detect and redirect branches
-  // (`workflows:apply`). The action type is interpolated raw, the way the CrowdSec scenario is:
-  // it is config vocabulary out of the rule the operator wrote ("challenge", "block",
-  // "redirect"), and a key built by concatenation could never be in en.json anyway.
+  // (`workflows:apply`). A known action type picks its own sentence; an unknown one is quoted data.
   function workflows(verdict) {
     // A CrowdSec verdict the engine enforced because no rule overrode it
     // (`CROWDSEC_DEFER_TO_WORKFLOWS`, `workflows:enforce_deferred`). The row's reason is
@@ -185,12 +240,15 @@
       action: action,
       interpolation: { escapeValue: false },
     };
+    const kind = String(verdict.action).toLowerCase();
     return fill(
-      t(
-        "workflows.reason.sentence",
-        "Security workflow {{workflow}}: {{action}}",
-        values,
-      ),
+      known(WORKFLOW_SENTENCES, kind)
+        ? WORKFLOW_SENTENCES[kind](values)
+        : t(
+            "workflows.reason.sentence_other",
+            "Security workflow “{{workflow}}”: action “{{action}}”",
+            values,
+          ),
       values,
     );
   }

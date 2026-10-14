@@ -2509,20 +2509,29 @@ msgstr "Diamati %(time)s"
 msgid "crowdsec.previous"
 msgstr "Sebelumnya"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "permintaan diblokir"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: permintaan diblokir"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "tantangan captcha"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: permintaan diblokir (skenario: “%(scenario)s”)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "tantangan deteksi bot"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: tantangan captcha"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: tantangan captcha (skenario: “%(scenario)s”)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (skenario: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: tantangan deteksi bot"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: tantangan deteksi bot (skenario: “%(scenario)s”)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: aksi tidak dikenali “%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: aksi tidak dikenali “%(action)s” (skenario: “%(scenario)s”)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "Ini menghapus keputusan di mesin CrowdSec bersama dan memengaruhi setiap bouncer yang terhubung. Keputusan yang di-cache, rentang lain, pemblokiran lokal, atau AppSec masih dapat memblokir target."
 
 msgid "crowdsec.remove.selection"
-msgstr "Hapus %(scope)s %(value)s (%(type)s), skenario %(scenario)s, asal %(origin)s, dari %(source)s (%(engine)s)?"
+msgstr "Hapus keputusan untuk “%(value)s” (cakupan: “%(scope)s”, tipe: “%(type)s”, asal: “%(origin)s”, skenario: “%(scenario)s”) dari %(source)s (%(engine)s)?"
 
 msgid "crowdsec.remove.submit"
 msgstr "Hapus keputusan"
 
-msgid "crowdsec.remove.success"
-msgstr "Dihapus di sumber CrowdSec. Propagasi %(status)s (%(mode)s, interval %(interval)s). Keputusan cocok yang tersisa: %(remaining)s. Pemblokiran lokal atau AppSec masih dapat memblokir."
+msgid "crowdsec.remove.success_live_one"
+msgstr "Dihapus di sumber CrowdSec. Propagasi tertunda (mode langsung, interval %(interval)s). Keputusan lain yang cocok: %(remaining)s. Larangan lokal atau AppSec mungkin masih memblokir."
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "Dihapus di sumber CrowdSec. Propagasi tertunda (mode langsung, interval %(interval)s). Keputusan lain yang cocok: %(remaining)s. Larangan lokal atau AppSec mungkin masih memblokir."
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "Dihapus di sumber CrowdSec. Propagasi tertunda (mode “%(mode)s”, interval %(interval)s). Keputusan lain yang cocok: %(remaining)s. Larangan lokal atau AppSec mungkin masih memblokir."
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "Dihapus di sumber CrowdSec. Propagasi tertunda (mode “%(mode)s”, interval %(interval)s). Keputusan lain yang cocok: %(remaining)s. Larangan lokal atau AppSec mungkin masih memblokir."
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "Dihapus di sumber CrowdSec. Propagasi tertunda (mode aliran, interval %(interval)s). Keputusan lain yang cocok: %(remaining)s. Larangan lokal atau AppSec mungkin masih memblokir."
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "Dihapus di sumber CrowdSec. Propagasi tertunda (mode aliran, interval %(interval)s). Keputusan lain yang cocok: %(remaining)s. Larangan lokal atau AppSec mungkin masih memblokir."
 
 msgid "crowdsec.remove.title"
 msgstr "Hapus keputusan CrowdSec"
@@ -2718,6 +2742,21 @@ msgstr "Diblokir"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "Permintaan yang diblokir seiring waktu (rentang yang dipilih)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "%(count)s diblokir"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "%(count)s diblokir"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)s permintaan"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)s permintaan"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "%(percent)s%% dari 10 Teratas"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "IP Paling Sering Diblokir"
@@ -3721,6 +3760,12 @@ msgstr "Kata sandi harus memiliki minimal 1 karakter khusus."
 msgid "form.validation.password_uppercase"
 msgstr "Kata sandi harus memiliki minimal 1 huruf kapital."
 
+msgid "general.meta.description"
+msgstr "Pengaturan umum untuk server"
+
+msgid "general.meta.name"
+msgstr "Umum"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "Jalur yang digunakan untuk log akses NGINX (jalur file, syslog:server=host[:port][,param=value], atau memory:name:size; atur ke off untuk menonaktifkan)."
 
@@ -4371,6 +4416,165 @@ msgstr "Gunakan kode autentikator"
 
 msgid "link.use_recovery_code"
 msgstr "Gunakan kode pemulihan"
+
+msgid "loading.bans.ban_one"
+msgstr "Melarang %(count)s IP"
+
+msgid "loading.bans.ban_other"
+msgstr "Melarang %(count)s IP"
+
+msgid "loading.bans.unban_one"
+msgstr "Membatalkan larangan %(count)s IP"
+
+msgid "loading.bans.unban_other"
+msgstr "Membatalkan larangan %(count)s IP"
+
+msgid "loading.bans.update_duration_one"
+msgstr "Memperbarui durasi untuk %(count)s larangan"
+
+msgid "loading.bans.update_duration_other"
+msgstr "Memperbarui durasi untuk %(count)s larangan"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "Mengubah %(count)s konfigurasi menjadi draf"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "Mengubah %(count)s konfigurasi menjadi draf"
+
+msgid "loading.configs.convert_online_one"
+msgstr "Mengubah %(count)s konfigurasi menjadi online"
+
+msgid "loading.configs.convert_online_other"
+msgstr "Mengubah %(count)s konfigurasi menjadi online"
+
+msgid "loading.configs.create"
+msgstr "Membuat konfigurasi kustom %(config)s"
+
+msgid "loading.configs.create_for_service"
+msgstr "Membuat konfigurasi kustom %(config)s untuk layanan %(service)s"
+
+msgid "loading.configs.delete_one"
+msgstr "Menghapus %(count)s konfigurasi yang dipilih"
+
+msgid "loading.configs.delete_other"
+msgstr "Menghapus %(count)s konfigurasi yang dipilih"
+
+msgid "loading.configs.import"
+msgstr "Mengimpor konfigurasi kustom"
+
+msgid "loading.default"
+msgstr "Memuat..."
+
+msgid "loading.global_settings.save"
+msgstr "Menyimpan pengaturan global"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "Menyimpan pengaturan global %(plugin)s"
+
+msgid "loading.instances.create"
+msgstr "Membuat instans baru %(instance)s"
+
+msgid "loading.instances.delete_one"
+msgstr "Menghapus instans %(instances)s"
+
+msgid "loading.instances.delete_other"
+msgstr "Menghapus instans %(instances)s"
+
+msgid "loading.instances.reload_one"
+msgstr "Memuat ulang instans %(instances)s"
+
+msgid "loading.instances.reload_other"
+msgstr "Memuat ulang instans %(instances)s"
+
+msgid "loading.instances.stop_one"
+msgstr "Menghentikan instans %(instances)s"
+
+msgid "loading.instances.stop_other"
+msgstr "Menghentikan instans %(instances)s"
+
+msgid "loading.jobs.run_one"
+msgstr "Menjalankan plugin dari pekerjaan yang dipilih: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "Menjalankan plugin dari pekerjaan yang dipilih: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "Menghapus plugin: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "Menghapus plugin: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "Menonaktifkan plugin: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "Mengaktifkan plugin: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "Memasang plugin: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "Memuat ulang plugin"
+
+msgid "loading.plugins.update"
+msgstr "Memperbarui plugin: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "Memperbarui kunci lisensi"
+
+msgid "loading.services.convert_draft_one"
+msgstr "Mengubah layanan %(services)s menjadi draf"
+
+msgid "loading.services.convert_draft_other"
+msgstr "Mengubah layanan %(services)s menjadi draf"
+
+msgid "loading.services.convert_online_one"
+msgstr "Mengubah layanan %(services)s menjadi online"
+
+msgid "loading.services.convert_online_other"
+msgstr "Mengubah layanan %(services)s menjadi online"
+
+msgid "loading.services.create_config"
+msgstr "Membuat konfigurasi untuk layanan %(service)s"
+
+msgid "loading.services.create_config_draft"
+msgstr "Membuat konfigurasi untuk layanan draf %(service)s"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "Mendeklarasikan layanan %(service)s sebagai hanya pengalihan"
+
+msgid "loading.services.declare_standard"
+msgstr "Mendeklarasikan layanan %(service)s sebagai standar"
+
+msgid "loading.services.delete_one"
+msgstr "Menghapus layanan %(services)s"
+
+msgid "loading.services.delete_other"
+msgstr "Menghapus layanan %(services)s"
+
+msgid "loading.services.import"
+msgstr "Mengimpor layanan"
+
+msgid "loading.services.import_with_configs"
+msgstr "Mengimpor layanan dan konfigurasi kustom"
+
+msgid "loading.services.save_config"
+msgstr "Menyimpan konfigurasi untuk layanan %(service)s"
+
+msgid "loading.services.save_config_draft"
+msgstr "Menyimpan konfigurasi untuk layanan draf %(service)s"
+
+msgid "loading.services.save_plugin"
+msgstr "Menyimpan pengaturan %(plugin)s untuk layanan %(service)s"
+
+msgid "loading.services.save_template"
+msgstr "Menyimpan pengaturan template untuk layanan %(service)s"
+
+msgid "loading.totp.security_key"
+msgstr "Memvalidasi kunci keamanan."
+
+msgid "loading.totp.token"
+msgstr "Memvalidasi token TOTP."
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "Tidak dapat masuk, silakan coba lagi"
@@ -6611,7 +6815,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "Lepaskan alur kerja ini dari %(service)s?"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s sudah melayani %(path)s melalui pengaturan %(family)s-nya sendiri. Hapus pengaturan tersebut untuk %(path)s, atau gunakan jalur yang berbeda."
+msgstr "%(service)s sudah melayani %(path)s melalui pengaturan “%(family)s” miliknya sendiri. Hapus pengaturan tersebut untuk %(path)s, atau gunakan jalur yang berbeda."
 
 msgid "service.resources.conflict.primary"
 msgstr "“%(name)s” saat ini adalah sertifikat utama untuk layanan ini dan akan diturunkan tanpa peringatan lebih lanjut. Yang utama adalah yang benar-benar diterapkan."
@@ -10504,8 +10708,17 @@ msgstr "Aturan dievaluasi secara berurutan dan yang pertama cocok menang. Aturan
 msgid "workflows.readonly"
 msgstr "Basis data bersifat baca-saja. Alur kerja dapat diperiksa tetapi tidak dapat diubah."
 
-msgid "workflows.reason.sentence"
-msgstr "Workflow keamanan %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "Alur kerja keamanan “%(workflow)s”: permintaan diblokir"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "Alur kerja keamanan “%(workflow)s”: permintaan ditantang"
+
+msgid "workflows.reason.sentence_other"
+msgstr "Alur kerja keamanan “%(workflow)s”: aksi “%(action)s”"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "Alur kerja keamanan “%(workflow)s”: permintaan dialihkan"
 
 msgid "workflows.rule.disabled"
 msgstr "Dinonaktifkan"
@@ -10558,8 +10771,14 @@ msgstr "Aturan ditambahkan pada posisi %(n)s dari %(total)s. Setiap aturan sebel
 msgid "workflows.say.inspecting"
 msgstr "Mengedit aturan %(n)s dari %(total)s — %(name)s."
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "Aturan %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "Aturan %(n)s — “%(name)s”: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "Alur kerja ini: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "Nilai terakhir dihapus — kondisi ini tidak dapat disimpan sampai memiliki satu nilai."

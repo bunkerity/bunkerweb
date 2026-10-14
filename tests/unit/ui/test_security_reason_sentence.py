@@ -103,7 +103,7 @@ class TestTheSentence:
             node,
             [{"reason": "crowdsec", "data": {"source": "lapi", "action": "ban", "scenario": "crowdsecurity/http-probing"}}],
         )
-        assert sentence == "CrowdSec LAPI: request blocked (scenario: crowdsecurity/http-probing)"
+        assert sentence == "CrowdSec LAPI: request blocked (scenario: “crowdsecurity/http-probing”)"
 
     def test_a_captcha_reads_as_one(self, node):
         (sentence,) = render(node, [{"reason": "crowdsec", "data": {"source": "lapi", "action": "captcha"}}])
@@ -121,10 +121,18 @@ class TestTheSentence:
         (sentence,) = render(node, [{"reason": "crowdsec", "data": '{"source": "appsec", "action": "ban"}'}])
         assert sentence == "CrowdSec AppSec: request blocked"
 
-    def test_an_unknown_action_falls_back_to_its_own_name(self, node):
-        """A future CrowdSec remediation must degrade to something readable, not to nothing."""
-        (sentence,) = render(node, [{"reason": "crowdsec", "data": {"source": "lapi", "action": "throttle"}}])
-        assert sentence == "CrowdSec LAPI: throttle"
+    def test_an_unknown_action_is_quoted_data_in_a_generic_sentence(self, node):
+        """A future CrowdSec remediation must degrade to something readable, not to nothing -- and its raw name is
+        quoted data inside a whole sentence, never a word spliced into one."""
+        plain, scenario = render(
+            node,
+            [
+                {"reason": "crowdsec", "data": {"source": "lapi", "action": "throttle"}},
+                {"reason": "crowdsec", "data": {"source": "lapi", "action": "throttle", "scenario": "x/y"}},
+            ],
+        )
+        assert plain == "CrowdSec LAPI: unrecognized action “throttle”"
+        assert scenario == "CrowdSec LAPI: unrecognized action “throttle” (scenario: “x/y”)"
 
     def test_an_antibot_challenge_names_its_provider(self, node):
         """The reason antibot now records when it serves the challenge page
@@ -143,12 +151,12 @@ class TestTheSentence:
             node,
             [{"reason": "workflows", "data": {"workflow": "api-shield", "rule": "block-scanners", "action": "redirect"}}],
         )
-        assert sentence == "Security workflow api-shield: redirect"
+        assert sentence == "Security workflow “api-shield”: request redirected"
 
     def test_a_workflow_detection_reads_the_same_way(self, node):
         """The detect branch sets the same payload with the action it *would* have taken."""
         (sentence,) = render(node, [{"reason": "workflows", "data": {"workflow": "wp-guard", "rule": "r2", "action": "challenge"}}])
-        assert sentence == "Security workflow wp-guard: challenge"
+        assert sentence == "Security workflow “wp-guard”: request challenged"
 
     def test_a_deferred_crowdsec_verdict_reads_like_the_immediate_one(self, node):
         """``CROWDSEC_DEFER_TO_WORKFLOWS``: ``workflows:enforce_deferred`` returns the deny, so the
@@ -159,7 +167,11 @@ class TestTheSentence:
             node,
             [{"reason": "workflows", "data": {"source": "appsec", "action": "ban", "scenario": "crowdsecurity/http-probing"}}],
         )
-        assert sentence == "CrowdSec AppSec: request blocked (scenario: crowdsecurity/http-probing)"
+        assert sentence == "CrowdSec AppSec: request blocked (scenario: “crowdsecurity/http-probing”)"
+
+    def test_a_workflow_with_an_unknown_action_quotes_it(self, node):
+        (sentence,) = render(node, [{"reason": "workflows", "data": {"workflow": "w", "action": "tarpit"}}])
+        assert sentence == "Security workflow “w”: action “tarpit”"
 
     def test_the_reason_token_is_matched_case_insensitively(self, node):
         """Both halves of the report filter lowercase the reason; so does this."""
@@ -167,9 +179,7 @@ class TestTheSentence:
         assert sentence == "Antibot challenge (turnstile) served"
 
     def test_the_catalog_wins_over_the_english_fallback(self, node):
-        catalog = {
-            "crowdsec": {"reason": {"source": {"appsec": "CrowdSec AppSec"}, "action": {"challenge": "défi anti-bot"}, "sentence": "{{source}} : {{action}}"}}
-        }
+        catalog = {"crowdsec": {"reason": {"source": {"appsec": "CrowdSec AppSec"}, "sentence_challenge": "{{source}} : défi anti-bot"}}}
         (sentence,) = render(node, [{"reason": "crowdsec", "data": {"source": "appsec", "action": "challenge"}}], catalog=catalog)
         assert sentence == "CrowdSec AppSec : défi anti-bot"
 
@@ -246,7 +256,7 @@ class TestItSaysNothingRatherThanSomethingWrong:
                 {"reason": "crowdsec", "data": {"source": "appsec", "action": "__proto__"}},
                 {"reason": "crowdsec", "data": {"source": "appsec", "action": "constructor"}},
             ],
-        ) == ["CrowdSec AppSec: __proto__", "CrowdSec AppSec: constructor"]
+        ) == ["CrowdSec AppSec: unrecognized action “__proto__”", "CrowdSec AppSec: unrecognized action “constructor”"]
 
 
 class TestEscaping:
@@ -268,7 +278,7 @@ class TestEscaping:
             [{"reason": "workflows", "data": {"workflow": "<img src=x onerror=alert(1)>", "action": "redirect"}}],
         )
         assert "<img" not in sentence
-        assert sentence == "Security workflow &lt;img src=x onerror=alert(1)&gt;: redirect"
+        assert sentence == "Security workflow “&lt;img src=x onerror=alert(1)&gt;”: request redirected"
         assert "&amp;lt;" not in sentence
 
     def test_the_antibot_provider_is_escaped_exactly_once(self, node):
@@ -280,9 +290,9 @@ class TestEscaping:
         assert "&amp;lt;" not in sentence
 
     def test_a_translated_label_is_not_double_escaped(self, node):
-        catalog = {"crowdsec": {"reason": {"action": {"ban": "requête bloquée par l'IPS"}}}}
+        catalog = {"crowdsec": {"reason": {"source": {"lapi": "CrowdSec L'API"}}}}
         (sentence,) = render(node, [{"reason": "crowdsec", "data": {"source": "lapi", "action": "ban"}}], catalog=catalog)
-        assert sentence == "CrowdSec LAPI: requête bloquée par l&#39;IPS"
+        assert sentence == "CrowdSec L&#39;API: request blocked"
         assert "&amp;#39;" not in sentence
 
 
@@ -334,7 +344,7 @@ def test_it_still_renders_without_the_i18n_catalog(node):
     assert sentences == [
         "CrowdSec AppSec: bot-detection challenge",
         "Antibot challenge (captcha) served",
-        "Security workflow api-shield: redirect",
+        "Security workflow “api-shield”: request redirected",
     ]
 
 
@@ -350,7 +360,7 @@ class TestAValueIsNeverInterpolatedTwice:
             [{"reason": "workflows", "data": {"workflow": "{{action}}", "action": "redirect"}}],
             catalog={"__no_t__": True},
         )
-        assert with_catalog == "Security workflow {{action}}: redirect"
+        assert with_catalog == "Security workflow “{{action}}”: request redirected"
         assert without_catalog == with_catalog
 
     def test_an_inherited_property_name_is_not_a_placeholder(self, node):
@@ -361,4 +371,4 @@ class TestAValueIsNeverInterpolatedTwice:
             [{"reason": "workflows", "data": {"workflow": "{{constructor}}", "action": "redirect"}}],
             catalog={"__no_t__": True},
         )
-        assert sentence == "Security workflow {{constructor}}: redirect"
+        assert sentence == "Security workflow “{{constructor}}”: request redirected"

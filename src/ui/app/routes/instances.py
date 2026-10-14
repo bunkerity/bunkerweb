@@ -23,6 +23,11 @@ MISSING_PARAMETER_KEYS = {
     "stop": "instances.flash.missing_instances_parameter_instances_stop",
     "delete": "instances.flash.missing_instances_parameter_instances_delete",
 }
+LOADING_KEYS = {
+    "reload": ("loading.instances.reload_one", "loading.instances.reload_other"),
+    "stop": ("loading.instances.stop_one", "loading.instances.stop_other"),
+    "delete": ("loading.instances.delete_one", "loading.instances.delete_other"),
+}
 NO_METHOD_KEYS = {
     "reload": "instances.flash.instance_does_not_have_reload_method",
     "stop": "instances.flash.instance_does_not_have_stop_method",
@@ -135,7 +140,13 @@ def instances_new():
 
     flash(translated("instances.flash.instance_created_successfully", value=instance["hostname"]) or f"Instance {instance['hostname']} created successfully.")
 
-    return redirect(url_for("loading", next=url_for("instances.instances_page"), message=f"Creating new instance {instance['hostname']}"))
+    return redirect(
+        url_for(
+            "loading",
+            next=url_for("instances.instances_page"),
+            message=translated("loading.instances.create", instance=instance["hostname"]) or f"Creating new instance {instance['hostname']}",
+        )
+    )
 
 
 # Credential lifecycle. JSON rather than the form/redirect flow the other actions use: the
@@ -335,6 +346,7 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
         url_for(
             "loading",
             next=url_for("instances.instances_page"),
-            message=(f"{ACTIONS[action]['present']} instance{'s' if len(instances) > 1 else ''} {', '.join(instances)}"),
+            message=translated(LOADING_KEYS[action][len(instances) > 1], instances=", ".join(instances))
+            or f"{ACTIONS[action]['present']} instance{'s' if len(instances) > 1 else ''} {', '.join(instances)}",
         )
     )

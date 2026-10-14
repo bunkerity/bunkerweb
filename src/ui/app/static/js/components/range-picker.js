@@ -63,6 +63,9 @@ window.BWRangePicker = (function () {
               ...window.bwFlatpickr.options(),
               mode: "range",
               maxDate: "today",
+              // The input is visually hidden (absolutely positioned at the bar's start edge): anchor the
+              // calendar under the Custom button instead.
+              positionElement: btn,
               onClose: (dates) => {
                 if (dates.length === 2) {
                   // flatpickr's range mode returns both endpoints at local midnight. The DB

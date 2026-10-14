@@ -1488,7 +1488,14 @@ def before_request():
         if not changes_ongoing and DATA.get("PRO_LOADING"):
             DATA["PRO_LOADING"] = False
 
-        if not request.path.startswith("/loading") and current_user.is_authenticated:
+        # Determine if this is a CORS or AJAX request
+        fetch_mode = request.headers.get("Sec-Fetch-Mode")
+        x_requested_with = request.headers.get("X-Requested-With")
+        is_cors = fetch_mode == "cors" or (x_requested_with and x_requested_with.lower() == "xmlhttprequest")
+
+        # Not for a background request: its flash would sit in the session until the next page render and show a
+        # state that has cleared in the meantime (a failover cleared by a manual reload). Every page load re-derives it.
+        if not request.path.startswith("/loading") and current_user.is_authenticated and not is_cors:
             last_push_configs_failed = False
             last_push_configs_deferred = False
             if changes_ongoing:
@@ -1541,11 +1548,6 @@ def before_request():
             elif not changes_ongoing and not nginx_failover and DATA.get("CONFIG_CHANGED", False):
                 flash(translated("main.flash.last_changes_have_applied_successfully") or "The last changes have been applied successfully.")
                 DATA["CONFIG_CHANGED"] = False
-
-        # Determine if this is a CORS or AJAX request
-        fetch_mode = request.headers.get("Sec-Fetch-Mode")
-        x_requested_with = request.headers.get("X-Requested-With")
-        is_cors = fetch_mode == "cors" or (x_requested_with and x_requested_with.lower() == "xmlhttprequest")
 
         # Default to the scheduler-computed flag; refined to a live count below on real page requests.
         pro_overlapped = metadata["pro_overlapped"]
@@ -1892,7 +1894,8 @@ def loading():
     except ValueError:
         return Response(status=400)
 
-    return render_template("loading.html", message=request.values.get("message", "Loading..."), next=next_url)
+    # Callers pass the message already translated for this user; only the no-message default is resolved here.
+    return render_template("loading.html", message=request.values.get("message", translated("loading.default") or "Loading..."), next=next_url)
 
 
 @app.route("/check", methods=["GET"])

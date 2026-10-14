@@ -93,7 +93,7 @@
       },
       "EXTERNAL_PLUGIN_URLS": {
         "label": "External Plugin URLs",
-        "help": "Listahan ng external plugin URL (direktang download sa .zip o .tar file) na ida-download at i-install (pinaghihiwalay ng space ang mga URL). Hanggang 50 MiB kada URL. Idagdag ang #sha256=<digest> sa URL para i-pin ang content nito. Deprecated na ang plain http:// at tatanggihan sa 1.7.0: gamitin ang https:// o file:///."
+        "help": "Listahan ng external plugin URL (direktang download sa .zip o .tar file) na ida-download at i-install (pinaghihiwalay ng space ang mga URL). Hanggang 50 MiB kada URL. Idagdag ang #sha256=<digest> sa URL para i-pin ang content nito. Deprecated na ang plain http:// at tatanggihan sa 1.7.0: gamitin ang https:// o file:///. Ang pag-alis ng URL ay mag-a-uninstall sa mga plugin na ibinigay nito, kasama ang kanilang mga naka-save na value, kapag na-download na ang lahat ng iba pang URL. Ang mga plugin na idinagdag nang mano-mano o in-upload sa web UI ay hindi kailanman inaalis."
       },
       "DENY_HTTP_STATUS": {
         "label": "Deny HTTP Status",

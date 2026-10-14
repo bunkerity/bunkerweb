@@ -2509,20 +2509,29 @@ msgstr "%(time)s에 관찰됨"
 msgid "crowdsec.previous"
 msgstr "이전"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "요청 차단됨"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: 요청이 차단되었습니다"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "캡차 챌린지"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: 요청이 차단되었습니다 (시나리오: “%(scenario)s”)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "봇 탐지 챌린지"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: 캡차 챌린지"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: 캡차 챌린지 (시나리오: “%(scenario)s”)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (시나리오: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: 봇 탐지 챌린지"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: 봇 탐지 챌린지 (시나리오: “%(scenario)s”)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: 인식할 수 없는 동작 “%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: 인식할 수 없는 동작 “%(action)s” (시나리오: “%(scenario)s”)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "공유 CrowdSec 엔진에서 결정을 제거하며, 연결된 모든 bouncer에 영향을 줍니다. 캐시된 결정, 다른 범위, 로컬 차단 또는 AppSec이 여전히 대상을 차단할 수 있습니다."
 
 msgid "crowdsec.remove.selection"
-msgstr "%(source)s(%(engine)s)에서 %(scope)s %(value)s(%(type)s), 시나리오 %(scenario)s, 출처 %(origin)s을(를) 제거하시겠습니까?"
+msgstr "%(source)s(%(engine)s)에서 “%(value)s”에 대한 결정(범위: “%(scope)s”, 유형: “%(type)s”, 출처: “%(origin)s”, 시나리오: “%(scenario)s”)을 제거하시겠습니까?"
 
 msgid "crowdsec.remove.submit"
 msgstr "결정 제거"
 
-msgid "crowdsec.remove.success"
-msgstr "CrowdSec 소스에서 제거되었습니다. 전파 상태는 %(status)s입니다(%(mode)s, 간격 %(interval)s). 남은 일치 결정: %(remaining)s. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다."
+msgid "crowdsec.remove.success_live_one"
+msgstr "CrowdSec 소스에서 제거되었습니다. 전파가 대기 중입니다(라이브 모드, 간격 %(interval)s). 일치하는 다른 결정이 %(remaining)s개 남아 있습니다. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다."
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "CrowdSec 소스에서 제거되었습니다. 전파가 대기 중입니다(라이브 모드, 간격 %(interval)s). 일치하는 다른 결정이 %(remaining)s개 남아 있습니다. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다."
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "CrowdSec 소스에서 제거되었습니다. 전파가 대기 중입니다(“%(mode)s” 모드, 간격 %(interval)s). 일치하는 다른 결정이 %(remaining)s개 남아 있습니다. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다."
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "CrowdSec 소스에서 제거되었습니다. 전파가 대기 중입니다(“%(mode)s” 모드, 간격 %(interval)s). 일치하는 다른 결정이 %(remaining)s개 남아 있습니다. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다."
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "CrowdSec 소스에서 제거되었습니다. 전파가 대기 중입니다(스트림 모드, 간격 %(interval)s). 일치하는 다른 결정이 %(remaining)s개 남아 있습니다. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다."
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "CrowdSec 소스에서 제거되었습니다. 전파가 대기 중입니다(스트림 모드, 간격 %(interval)s). 일치하는 다른 결정이 %(remaining)s개 남아 있습니다. 로컬 차단 또는 AppSec이 여전히 차단할 수 있습니다."
 
 msgid "crowdsec.remove.title"
 msgstr "CrowdSec 결정 제거"
@@ -2718,6 +2742,21 @@ msgstr "차단됨"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "시간별 차단 요청(선택 범위)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "%(count)s개 차단됨"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "%(count)s개 차단됨"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "요청 %(count)s건"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "요청 %(count)s건"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "상위 10개 중 %(percent)s%%"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "최다 차단 IP"
@@ -3721,6 +3760,12 @@ msgstr "비밀번호에 특수 문자가 최소 1개 포함되어야 합니다."
 msgid "form.validation.password_uppercase"
 msgstr "비밀번호에 대문자가 최소 1개 포함되어야 합니다."
 
+msgid "general.meta.description"
+msgstr "서버의 일반 설정"
+
+msgid "general.meta.name"
+msgstr "일반"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "NGINX 액세스 로그에 사용할 경로(파일 경로, syslog:server=host[:port][,param=value], 또는 memory:name:size; 비활성화하려면 off로 설정)."
 
@@ -4371,6 +4416,165 @@ msgstr "인증 코드 사용"
 
 msgid "link.use_recovery_code"
 msgstr "복구 코드 사용"
+
+msgid "loading.bans.ban_one"
+msgstr "IP %(count)s개 차단 중"
+
+msgid "loading.bans.ban_other"
+msgstr "IP %(count)s개 차단 중"
+
+msgid "loading.bans.unban_one"
+msgstr "IP %(count)s개 차단 해제 중"
+
+msgid "loading.bans.unban_other"
+msgstr "IP %(count)s개 차단 해제 중"
+
+msgid "loading.bans.update_duration_one"
+msgstr "차단 %(count)s건의 기간 업데이트 중"
+
+msgid "loading.bans.update_duration_other"
+msgstr "차단 %(count)s건의 기간 업데이트 중"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "설정 %(count)s개를 초안으로 전환 중"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "설정 %(count)s개를 초안으로 전환 중"
+
+msgid "loading.configs.convert_online_one"
+msgstr "설정 %(count)s개를 온라인으로 전환 중"
+
+msgid "loading.configs.convert_online_other"
+msgstr "설정 %(count)s개를 온라인으로 전환 중"
+
+msgid "loading.configs.create"
+msgstr "사용자 지정 설정 %(config)s 생성 중"
+
+msgid "loading.configs.create_for_service"
+msgstr "서비스 %(service)s의 사용자 지정 설정 %(config)s 생성 중"
+
+msgid "loading.configs.delete_one"
+msgstr "선택한 설정 %(count)s개 삭제 중"
+
+msgid "loading.configs.delete_other"
+msgstr "선택한 설정 %(count)s개 삭제 중"
+
+msgid "loading.configs.import"
+msgstr "사용자 지정 설정 가져오는 중"
+
+msgid "loading.default"
+msgstr "로딩 중..."
+
+msgid "loading.global_settings.save"
+msgstr "전역 설정 저장 중"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "%(plugin)s 전역 설정 저장 중"
+
+msgid "loading.instances.create"
+msgstr "새 인스턴스 %(instance)s 생성 중"
+
+msgid "loading.instances.delete_one"
+msgstr "인스턴스 %(instances)s 삭제 중"
+
+msgid "loading.instances.delete_other"
+msgstr "인스턴스 %(instances)s 삭제 중"
+
+msgid "loading.instances.reload_one"
+msgstr "인스턴스 %(instances)s 다시 로드 중"
+
+msgid "loading.instances.reload_other"
+msgstr "인스턴스 %(instances)s 다시 로드 중"
+
+msgid "loading.instances.stop_one"
+msgstr "인스턴스 %(instances)s 중지 중"
+
+msgid "loading.instances.stop_other"
+msgstr "인스턴스 %(instances)s 중지 중"
+
+msgid "loading.jobs.run_one"
+msgstr "선택한 작업의 플러그인 실행 중: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "선택한 작업의 플러그인 실행 중: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "플러그인 삭제 중: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "플러그인 삭제 중: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "플러그인 비활성화 중: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "플러그인 활성화 중: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "플러그인 설치 중: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "플러그인 다시 로드 중"
+
+msgid "loading.plugins.update"
+msgstr "플러그인 업데이트 중: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "라이선스 키 업데이트 중"
+
+msgid "loading.services.convert_draft_one"
+msgstr "서비스 %(services)s을(를) 초안으로 전환 중"
+
+msgid "loading.services.convert_draft_other"
+msgstr "서비스 %(services)s을(를) 초안으로 전환 중"
+
+msgid "loading.services.convert_online_one"
+msgstr "서비스 %(services)s을(를) 온라인으로 전환 중"
+
+msgid "loading.services.convert_online_other"
+msgstr "서비스 %(services)s을(를) 온라인으로 전환 중"
+
+msgid "loading.services.create_config"
+msgstr "서비스 %(service)s의 설정 생성 중"
+
+msgid "loading.services.create_config_draft"
+msgstr "초안 서비스 %(service)s의 설정 생성 중"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "서비스 %(service)s을(를) 리디렉션 전용으로 선언 중"
+
+msgid "loading.services.declare_standard"
+msgstr "서비스 %(service)s을(를) 표준으로 선언 중"
+
+msgid "loading.services.delete_one"
+msgstr "서비스 %(services)s 삭제 중"
+
+msgid "loading.services.delete_other"
+msgstr "서비스 %(services)s 삭제 중"
+
+msgid "loading.services.import"
+msgstr "서비스 가져오는 중"
+
+msgid "loading.services.import_with_configs"
+msgstr "서비스 및 사용자 지정 설정 가져오는 중"
+
+msgid "loading.services.save_config"
+msgstr "서비스 %(service)s의 설정 저장 중"
+
+msgid "loading.services.save_config_draft"
+msgstr "초안 서비스 %(service)s의 설정 저장 중"
+
+msgid "loading.services.save_plugin"
+msgstr "서비스 %(service)s의 %(plugin)s 설정 저장 중"
+
+msgid "loading.services.save_template"
+msgstr "서비스 %(service)s의 템플릿 설정 저장 중"
+
+msgid "loading.totp.security_key"
+msgstr "보안 키 확인 중입니다."
+
+msgid "loading.totp.token"
+msgstr "TOTP 토큰 확인 중입니다."
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "로그인하지 못했습니다. 다시 시도해 주세요"
@@ -6601,7 +6805,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "%(service)s에서 이 워크플로우를 분리하시겠습니까?"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s은 자체 %(family)s 설정으로 %(path)s을 제공합니다. %(path)s에 대한 설정을 지우거나 다른 경로를 사용하십시오."
+msgstr "%(service)s은(는) 자체 “%(family)s” 설정으로 %(path)s을(를) 제공합니다. %(path)s에 대한 설정을 지우거나 다른 경로를 사용하십시오."
 
 msgid "service.resources.conflict.primary"
 msgstr "“%(name)s”는 현재 이 서비스의 주요 인증서이며, 추가 경고 없이 강등됩니다. 주요 인증서는 실제로 배포된 것입니다."
@@ -10494,8 +10698,17 @@ msgstr "규칙은 순서대로 평가되며 처음 일치한 규칙이 적용됩
 msgid "workflows.readonly"
 msgstr "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다."
 
-msgid "workflows.reason.sentence"
-msgstr "보안 워크플로 %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "보안 워크플로우 “%(workflow)s”: 요청이 차단되었습니다"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "보안 워크플로우 “%(workflow)s”: 요청에 챌린지가 적용되었습니다"
+
+msgid "workflows.reason.sentence_other"
+msgstr "보안 워크플로우 “%(workflow)s”: 동작 “%(action)s”"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "보안 워크플로우 “%(workflow)s”: 요청이 리디렉션되었습니다"
 
 msgid "workflows.rule.disabled"
 msgstr "비활성화됨"
@@ -10548,8 +10761,14 @@ msgstr "%(total)s의 %(n)s 위치에 규칙 추가됨. 이전에 있는 모든 �
 msgid "workflows.say.inspecting"
 msgstr "%(total)s의 %(n)s 규칙 편집 — %(name)s."
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "규칙 %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "규칙 %(n)s — “%(name)s”: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "이 워크플로우: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "마지막 값이 제거되었습니다. 값을 하나 추가하기 전에는 이 조건을 저장할 수 없습니다."

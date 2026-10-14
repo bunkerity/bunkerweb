@@ -93,7 +93,7 @@
       },
       "EXTERNAL_PLUGIN_URLS": {
         "label": "外部外掛程式 URL",
-        "help": "要下載並安裝的外部外掛程式 URL 清單(直接指向 .zip 或 .tar 檔案的下載連結;URL 之間以空格分隔)。每個 URL 最多 50 MiB。可在 URL 後附加 #sha256=<digest> 以鎖定其內容。純 http:// 已淘汰,將在 1.7.0 中被拒絕:請使用 https:// 或 file:///。"
+        "help": "要下載並安裝的外部外掛程式 URL 清單(直接指向 .zip 或 .tar 檔案的下載連結;URL 之間以空格分隔)。每個 URL 最多 50 MiB。可在 URL 後附加 #sha256=<digest> 以鎖定其內容。純 http:// 已淘汰,將在 1.7.0 中被拒絕:請使用 https:// 或 file:///。 移除某個 URL 後,在所有其他 URL 都下載完成時,該 URL 所提供的外掛程式會連同其已儲存的值一併解除安裝。手動新增或在網頁介面上傳的外掛程式不會被移除。"
       },
       "DENY_HTTP_STATUS": {
         "label": "拒絕時的 HTTP 狀態碼",

@@ -493,9 +493,10 @@ document.addEventListener("DOMContentLoaded", () => {
     modalTrigger = trigger;
     byId("crowdsec-unban-confirm").checked = false;
     byId("crowdsec-unban-submit").disabled = true;
+    // textContent, so no HTML escaping: an `&` of the API data must not show as `&amp;`.
     byId("crowdsec-unban-selection").textContent = t(
       "crowdsec.remove.selection",
-      "Remove {{scope}} {{value}} ({{type}}), scenario {{scenario}}, origin {{origin}}, from {{source}} ({{engine}})?",
+      "Remove the decision on “{{value}}” (scope: “{{scope}}”, type: “{{type}}”, origin: “{{origin}}”, scenario: “{{scenario}}”) from {{source}} ({{engine}})?",
       {
         scope: pendingRemoval.decision.scope || "-",
         value: pendingRemoval.decision.value || "-",
@@ -504,6 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
         origin: pendingRemoval.decision.origin || "-",
         source: connectionLabel(pendingRemoval.connection),
         engine: pendingRemoval.connection.lapi_url || "-",
+        interpolation: { escapeValue: false },
       },
     );
     bootstrap.Modal.getOrCreateInstance(byId("crowdsec-unban-modal")).show();
@@ -1467,6 +1469,52 @@ document.addEventListener("DOMContentLoaded", () => {
       bootstrap.Modal.getOrCreateInstance(byId("crowdsec-unban-modal")).hide();
     }
   });
+  // One whole sentence per propagation mode (`live`, `stream`; control.lua reports `conf.MODE`) and
+  // per remaining-decision count. The propagation status is always "pending" at this point, so it is
+  // part of the sentence, not a placeholder; a mode this build does not know is quoted data.
+  const removalSuccessMessage = (mode, interval, remaining) => {
+    const values = { interval, remaining, mode };
+    const one = remaining === 1;
+    if (mode === "stream") {
+      return one
+        ? t(
+            "crowdsec.remove.success_stream_one",
+            "Removed at the CrowdSec source. Propagation is pending (stream mode, interval {{interval}}). {{remaining}} other matching decision remains. Local bans or AppSec may still block.",
+            values,
+          )
+        : t(
+            "crowdsec.remove.success_stream_other",
+            "Removed at the CrowdSec source. Propagation is pending (stream mode, interval {{interval}}). {{remaining}} other matching decisions remain. Local bans or AppSec may still block.",
+            values,
+          );
+    }
+    if (mode === "live") {
+      return one
+        ? t(
+            "crowdsec.remove.success_live_one",
+            "Removed at the CrowdSec source. Propagation is pending (live mode, interval {{interval}}). {{remaining}} other matching decision remains. Local bans or AppSec may still block.",
+            values,
+          )
+        : t(
+            "crowdsec.remove.success_live_other",
+            "Removed at the CrowdSec source. Propagation is pending (live mode, interval {{interval}}). {{remaining}} other matching decisions remain. Local bans or AppSec may still block.",
+            values,
+          );
+    }
+    values.mode = mode || "-";
+    return one
+      ? t(
+          "crowdsec.remove.success_other_one",
+          "Removed at the CrowdSec source. Propagation is pending (mode “{{mode}}”, interval {{interval}}). {{remaining}} other matching decision remains. Local bans or AppSec may still block.",
+          values,
+        )
+      : t(
+          "crowdsec.remove.success_other_other",
+          "Removed at the CrowdSec source. Propagation is pending (mode “{{mode}}”, interval {{interval}}). {{remaining}} other matching decisions remain. Local bans or AppSec may still block.",
+          values,
+        );
+  };
+
   byId("crowdsec-unban-modal").addEventListener("hidden.bs.modal", () => {
     if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus();
     modalTrigger = null;
@@ -1506,17 +1554,12 @@ document.addEventListener("DOMContentLoaded", () => {
       pendingRemoval = null;
       const propagation = result.propagation || {};
       showMessage(
-        t(
-          "crowdsec.remove.success",
-          "Removed at the CrowdSec source. Propagation is {{status}} ({{mode}}, interval {{interval}}). {{remaining}} other matching decision(s) remain; local bans or AppSec may still block.",
-          {
-            status: propagation.status || "pending",
-            mode: propagation.mode || "-",
-            interval: propagation.interval || "-",
-            remaining: Array.isArray(result.remaining_decisions)
-              ? result.remaining_decisions.length
-              : 0,
-          },
+        removalSuccessMessage(
+          propagation.mode,
+          propagation.interval || "-",
+          Array.isArray(result.remaining_decisions)
+            ? result.remaining_decisions.length
+            : 0,
         ),
         "success",
       );

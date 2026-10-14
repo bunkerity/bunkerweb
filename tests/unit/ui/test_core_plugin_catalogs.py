@@ -140,6 +140,18 @@ def test_general_settings_in_the_core_catalogs_match_settings_json():
     assert {f"general.settings.{key}" for key, _ in _flatten(settings)} == set(general_keys())
 
 
+def test_the_general_card_text_the_database_seeds_is_translatable():
+    """`general` has no plugin directory: `initialization.py` seeds its card (`name`, `description`) and the Plugins
+    page looks both up as `general.meta.*` in the core catalogs. Without those keys the card stays English in every
+    language (smoke Q8, item 5a). The 18 other catalogs follow `en.json` through `test_i18n_catalogs.py`."""
+    english = loads((CORE_LOCALES / "en.json").read_text(encoding="utf-8"))
+    seed = (REPO / "src" / "common" / "db" / "db_methods" / "initialization.py").read_text(encoding="utf-8")
+
+    meta = (english.get("general") or {}).get("meta") or {}
+    assert set(meta) == {"name", "description"}
+    assert f'"id": "general",\n                        "name": "{meta["name"]}",\n                        "description": "{meta["description"]}",' in seed
+
+
 # --------------------------------------------------------------------------------------
 # The checker itself, on fixtures
 # --------------------------------------------------------------------------------------

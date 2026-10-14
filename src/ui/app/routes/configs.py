@@ -477,7 +477,15 @@ def configs_convert():
         url_for(
             "loading",
             next=url_for("configs.configs_page"),
-            message=f"Converting config{'s' if len(configs) > 1 else ''} to {convert_to}",
+            message=translated(
+                (
+                    ("loading.configs.convert_draft_other" if len(configs) > 1 else "loading.configs.convert_draft_one")
+                    if convert_to == "draft"
+                    else ("loading.configs.convert_online_other" if len(configs) > 1 else "loading.configs.convert_online_one")
+                ),
+                count=len(configs),
+            )
+            or f"Converting config{'s' if len(configs) > 1 else ''} to {convert_to}",
         )
     )
 
@@ -571,7 +579,8 @@ def configs_delete():
         url_for(
             "loading",
             next=url_for("configs.configs_page"),
-            message=f"Deleting selected config{'s' if len(configs) > 1 else ''}",
+            message=translated("loading.configs.delete_other" if len(configs) > 1 else "loading.configs.delete_one", count=len(configs))
+            or f"Deleting selected config{'s' if len(configs) > 1 else ''}",
         )
     )
 
@@ -706,7 +715,17 @@ def configs_new():
             url_for(
                 "loading",
                 next=url_for("configs.configs_edit", service="global" if service == "global" else service, config_type=config_type.lower(), name=config_name),
-                message=f"Creating custom configuration {config_type}/{config_name}{' for service' + service if service != 'global' else ''}",
+                message=(
+                    (
+                        translated("loading.configs.create_for_service", config=f"{config_type}/{config_name}", service=service)
+                        or f"Creating custom configuration {config_type}/{config_name} for service {service}"
+                    )
+                    if service != "global"
+                    else (
+                        translated("loading.configs.create", config=f"{config_type}/{config_name}")
+                        or f"Creating custom configuration {config_type}/{config_name}"
+                    )
+                ),
             )
         )
 
@@ -1051,6 +1070,6 @@ def configs_import():
         url_for(
             "loading",
             next=url_for("configs.configs_page"),
-            message="Importing custom configurations",
+            message=translated("loading.configs.import") or "Importing custom configurations",
         )
     )

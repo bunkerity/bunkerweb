@@ -732,6 +732,13 @@
         "series": "Na-block",
         "title": "Mga na-block na request sa paglipas ng panahon (piniling saklaw)"
       },
+      "tooltip": {
+        "blocked_one": "{{count}} ang na-block",
+        "blocked_other": "{{count}} ang na-block",
+        "requests_one": "{{count}} request",
+        "requests_other": "{{count}} request",
+        "top_share": "{{percent}}% ng Top 10"
+      },
       "top_blocked_ips": {
         "most_blocked": "Pinaka-block na IP",
         "title": "Nangungunang 10 Na-block na IP"
@@ -1254,6 +1261,79 @@
     "use_authenticator_code": "Gumamit ng code ng pag-authenticate",
     "use_recovery_code": "Gumamit ng code ng pagbawi",
     "get_support": "Humingi ng suporta"
+  },
+  "loading": {
+    "default": "Naglo-load...",
+    "bans": {
+      "ban_one": "Ibina-ban ang {{count}} IP",
+      "ban_other": "Ibina-ban ang {{count}} IP",
+      "unban_one": "Inaalis ang ban sa {{count}} IP",
+      "unban_other": "Inaalis ang ban sa {{count}} IP",
+      "update_duration_one": "Ina-update ang tagal para sa {{count}} ban",
+      "update_duration_other": "Ina-update ang tagal para sa {{count}} ban"
+    },
+    "configs": {
+      "convert_online_one": "Kino-convert ang {{count}} config sa online",
+      "convert_online_other": "Kino-convert ang {{count}} config sa online",
+      "convert_draft_one": "Kino-convert ang {{count}} config sa burador",
+      "convert_draft_other": "Kino-convert ang {{count}} config sa burador",
+      "delete_one": "Dine-delete ang {{count}} napiling config",
+      "delete_other": "Dine-delete ang {{count}} napiling config",
+      "create": "Ginagawa ang custom na configuration na {{config}}",
+      "create_for_service": "Ginagawa ang custom na configuration na {{config}} para sa serbisyong {{service}}",
+      "import": "Ini-import ang mga custom na configuration"
+    },
+    "global_settings": {
+      "save": "Sine-save ang mga pangkalahatang setting",
+      "save_plugin": "Sine-save ang mga pangkalahatang setting ng {{plugin}}"
+    },
+    "instances": {
+      "create": "Ginagawa ang bagong instance na {{instance}}",
+      "reload_one": "Ni-re-reload ang instance na {{instances}}",
+      "reload_other": "Ni-re-reload ang mga instance na {{instances}}",
+      "stop_one": "Ihinihinto ang instance na {{instances}}",
+      "stop_other": "Ihinihinto ang mga instance na {{instances}}",
+      "delete_one": "Dine-delete ang instance na {{instances}}",
+      "delete_other": "Dine-delete ang mga instance na {{instances}}"
+    },
+    "jobs": {
+      "run_one": "Pinapatakbo ang mga plugin ng napiling gawain: {{jobs}}",
+      "run_other": "Pinapatakbo ang mga plugin ng mga napiling gawain: {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "Dine-delete ang plugin: {{plugins}}",
+      "delete_other": "Dine-delete ang mga plugin: {{plugins}}",
+      "enable": "Ine-enable ang plugin: {{plugin}}",
+      "disable": "Dini-disable ang plugin: {{plugin}}",
+      "reload": "Ni-re-reload ang mga plugin",
+      "install": "Ini-install ang plugin: {{plugin}}",
+      "update": "Ina-update ang plugin: {{plugin}}"
+    },
+    "pro": {
+      "update_license": "Ina-update ang license key"
+    },
+    "services": {
+      "convert_online_one": "Kino-convert ang serbisyong {{services}} sa online",
+      "convert_online_other": "Kino-convert ang mga serbisyong {{services}} sa online",
+      "convert_draft_one": "Kino-convert ang serbisyong {{services}} sa burador",
+      "convert_draft_other": "Kino-convert ang mga serbisyong {{services}} sa burador",
+      "declare_standard": "Idinedeklara ang serbisyong {{service}} bilang karaniwan",
+      "declare_redirect_only": "Idinedeklara ang serbisyong {{service}} bilang redirect lamang",
+      "delete_one": "Dine-delete ang serbisyong {{services}}",
+      "delete_other": "Dine-delete ang mga serbisyong {{services}}",
+      "import": "Ini-import ang mga serbisyo",
+      "import_with_configs": "Ini-import ang mga serbisyo at custom na configuration",
+      "create_config": "Ginagawa ang configuration para sa serbisyong {{service}}",
+      "create_config_draft": "Ginagawa ang configuration para sa burador na serbisyong {{service}}",
+      "save_config": "Sine-save ang configuration para sa serbisyong {{service}}",
+      "save_config_draft": "Sine-save ang configuration para sa burador na serbisyong {{service}}",
+      "save_plugin": "Sine-save ang mga setting ng {{plugin}} para sa serbisyong {{service}}",
+      "save_template": "Sine-save ang mga setting ng template para sa serbisyong {{service}}"
+    },
+    "totp": {
+      "token": "Bine-verify ang TOTP token.",
+      "security_key": "Bine-verify ang security key."
+    }
   },
   "login": {
     "notice_password_changed": "Nabago na ang iyong password. Mag-log in gamit ang bagong password.",
@@ -1979,13 +2059,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "na-block ang request",
-        "captcha": "hamon ng captcha",
-        "challenge": "hamon sa pagtukoy ng bot"
-      },
-      "sentence": "{{source}}: {{action}}",
-      "sentence_scenario": "{{source}}: {{action}} (senaryo: {{scenario}})",
+      "sentence_ban": "{{source}}: na-block ang request",
+      "sentence_ban_scenario": "{{source}}: na-block ang request (senaryo: “{{scenario}}”)",
+      "sentence_captcha": "{{source}}: captcha challenge",
+      "sentence_captcha_scenario": "{{source}}: captcha challenge (senaryo: “{{scenario}}”)",
+      "sentence_challenge": "{{source}}: challenge sa pag-detect ng bot",
+      "sentence_challenge_scenario": "{{source}}: challenge sa pag-detect ng bot (senaryo: “{{scenario}}”)",
+      "sentence_other": "{{source}}: hindi nakikilalang aksyon na “{{action}}”",
+      "sentence_other_scenario": "{{source}}: hindi nakikilalang aksyon na “{{action}}” (senaryo: “{{scenario}}”)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "Failure policy ng CrowdSec AppSec",
@@ -2086,9 +2167,14 @@
       "action": "Alisin",
       "confirm": "Naiintindihan ko at nais kong alisin ang desisyong ito.",
       "impact": "Aalisin nito ang desisyon sa nakabahaging CrowdSec engine at maaapektuhan ang bawat nakakonektang bouncer. Maaari pa ring harangan ang target ng mga naka-cache na desisyon, ibang range, mga lokal na ban, o AppSec.",
-      "selection": "Alisin ang {{scope}} {{value}} ({{type}}), senaryo {{scenario}}, pinagmulan {{origin}}, mula sa {{source}} ({{engine}})?",
+      "selection": "Alisin ang desisyon para sa “{{value}}” (saklaw: “{{scope}}”, uri: “{{type}}”, pinagmulan: “{{origin}}”, senaryo: “{{scenario}}”) mula sa {{source}} ({{engine}})?",
       "submit": "Alisin ang desisyon",
-      "success": "Naalis sa pinagmulan ng CrowdSec. Ang propagation ay {{status}} ({{mode}}, agwat {{interval}}). Mga natirang tumutugmang desisyon: {{remaining}}. Maaari pa ring humarang ang mga lokal na ban o AppSec.",
+      "success_stream_one": "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (mode ng pag-stream, agwat na {{interval}}). Natitirang iba pang tumutugmang desisyon: {{remaining}}. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec.",
+      "success_stream_other": "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (mode ng pag-stream, agwat na {{interval}}). Natitirang iba pang tumutugmang desisyon: {{remaining}}. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec.",
+      "success_live_one": "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (live na mode, agwat na {{interval}}). Natitirang iba pang tumutugmang desisyon: {{remaining}}. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec.",
+      "success_live_other": "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (live na mode, agwat na {{interval}}). Natitirang iba pang tumutugmang desisyon: {{remaining}}. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec.",
+      "success_other_one": "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (mode na “{{mode}}”, agwat na {{interval}}). Natitirang iba pang tumutugmang desisyon: {{remaining}}. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec.",
+      "success_other_other": "Naalis na sa pinagmulan ng CrowdSec. Nakabinbin ang propagation (mode na “{{mode}}”, agwat na {{interval}}). Natitirang iba pang tumutugmang desisyon: {{remaining}}. Maaari pa ring mag-block ang mga lokal na ban o ang AppSec.",
       "title": "Alisin ang desisyon ng CrowdSec"
     },
     "report": {
@@ -2152,6 +2238,10 @@
     "rotate_credential": "I-rotate ang credential ng instance na ito? Mabibigo kung hindi maabot ang instance."
   },
   "general": {
+    "meta": {
+      "name": "Pangkalahatan",
+      "description": "Ang mga pangkalahatang setting para sa server"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "internal na gamit loading",
@@ -4104,7 +4194,9 @@
       "deleted": "Binura ang patakaran. {{count}} patakaran ang natitira.",
       "duplicated": "Ipinasok ang kopya sa puwestong {{n}}. Hindi ito tutugma habang naka-enable ang orihinal sa itaas.",
       "gateAdded": "Nagdagdag ng rate threshold sa tugma. Sa ibaba nito, hindi tutugma ang patakaran at magpapatuloy ang pagsusuri.",
-      "jumped": "{{where}}: {{message}}",
+      "jumped_whole": "Ang workflow na ito: {{message}}",
+      "jumped_rule": "Patakaran {{n}}: {{message}}",
+      "jumped_ruleNamed": "Patakaran {{n}} — “{{name}}”: {{message}}",
       "lastValueRemoved": "Inalis ang huling value — hindi mase-save ang kondisyong ito hangga't wala itong value.",
       "moved": "Inilipat ang {{name}} sa puwestong {{to}} sa {{total}}.",
       "movedDrag": "Na-drag ang {{name}} sa puwestong {{to}} sa {{total}}.",
@@ -4239,7 +4331,10 @@
       "regex": "tumutugma sa regex"
     },
     "reason": {
-      "sentence": "Workflow ng seguridad {{workflow}}: {{action}}"
+      "sentence_block": "Security workflow na “{{workflow}}”: na-block ang request",
+      "sentence_redirect": "Security workflow na “{{workflow}}”: na-redirect ang request",
+      "sentence_challenge": "Security workflow na “{{workflow}}”: hinamon ang request",
+      "sentence_other": "Security workflow na “{{workflow}}”: aksyon na “{{action}}”"
     },
     "crowdsec_field": {
       "remediation": "ang remediyasyon ay",
@@ -4455,7 +4550,7 @@
     "resources": {
       "attach": "Ikabit",
       "conflict": {
-        "inline": "Ang {{service}} ay nagsisilbi sa {{path}} sa pamamagitan ng sarili nitong mga setting na {{family}}. Linisin ang mga setting na ito para sa {{path}}, o gumamit ng ibang landas.",
+        "inline": "Ang {{service}} ay nagsisilbi na sa {{path}} sa pamamagitan ng sarili nitong mga setting na “{{family}}”. Linisin ang mga setting na ito para sa {{path}}, o gumamit ng ibang landas.",
         "primary": "Ang “{{name}}” ang kasalukuyang primary certificate ng serbisyong ito at hindi na ito magiging primary nang walang karagdagang babala. Ang primary ang aktwal na naka-deploy.",
         "resource_redirect": "Ang {{service}} ay nagsisilbi na sa {{path}} sa pamamagitan ng redirect na “{{name}}”. Tanggalin ang “{{name}}”, o bigyan ang isa sa kanila ng ibang landas.",
         "resource_upstream": "Ang {{service}} ay nagsisilbi na sa {{path}} sa pamamagitan ng upstream na “{{name}}”. Tanggalin ang “{{name}}”, o bigyan ang isa sa kanila ng ibang landas.",

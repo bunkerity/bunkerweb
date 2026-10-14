@@ -307,7 +307,7 @@ def global_settings_page():
             url_for(
                 "loading",
                 next=url_for("global_settings.global_settings_page") + f"?{'&'.join([f'{k}={v}' for k, v in arguments.items()])}",
-                message="Saving global settings",
+                message=translated("loading.global_settings.save") or "Saving global settings",
             )
         )
 
@@ -426,7 +426,7 @@ def global_settings_plugin_page(plugin: str):
             url_for(
                 "loading",
                 next=url_for("global_settings.global_settings_plugin_page", plugin=plugin),
-                message=f"Saving {plugin_data['name']} global settings",
+                message=translated("loading.global_settings.save_plugin", plugin=plugin_data["name"]) or f"Saving {plugin_data['name']} global settings",
             )
         )
 

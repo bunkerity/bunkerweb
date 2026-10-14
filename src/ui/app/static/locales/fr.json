@@ -732,6 +732,13 @@
         "series": "Bloquées",
         "title": "Requêtes bloquées au fil du temps (plage sélectionnée)"
       },
+      "tooltip": {
+        "blocked_one": "{{count}} bloquée",
+        "blocked_other": "{{count}} bloquées",
+        "requests_one": "{{count}} requête",
+        "requests_other": "{{count}} requêtes",
+        "top_share": "{{percent}} % du Top 10"
+      },
       "top_blocked_ips": {
         "most_blocked": "IP la plus bloquée",
         "title": "10 adresses IP les plus bloquées"
@@ -1254,6 +1261,79 @@
     "use_authenticator_code": "Utiliser un code d'authentification",
     "use_recovery_code": "Utiliser un code de récupération",
     "get_support": "Obtenir de l’aide"
+  },
+  "loading": {
+    "default": "Chargement...",
+    "bans": {
+      "ban_one": "Bannissement de {{count}} IP",
+      "ban_other": "Bannissement de {{count}} IP",
+      "unban_one": "Débannissement de {{count}} IP",
+      "unban_other": "Débannissement de {{count}} IP",
+      "update_duration_one": "Mise à jour de la durée de {{count}} bannissement",
+      "update_duration_other": "Mise à jour de la durée de {{count}} bannissements"
+    },
+    "configs": {
+      "convert_online_one": "Passage de {{count}} configuration en ligne",
+      "convert_online_other": "Passage de {{count}} configurations en ligne",
+      "convert_draft_one": "Passage de {{count}} configuration en brouillon",
+      "convert_draft_other": "Passage de {{count}} configurations en brouillon",
+      "delete_one": "Suppression de {{count}} configuration sélectionnée",
+      "delete_other": "Suppression de {{count}} configurations sélectionnées",
+      "create": "Création de la configuration personnalisée {{config}}",
+      "create_for_service": "Création de la configuration personnalisée {{config}} pour le service {{service}}",
+      "import": "Importation des configurations personnalisées"
+    },
+    "global_settings": {
+      "save": "Enregistrement des paramètres globaux",
+      "save_plugin": "Enregistrement des paramètres globaux de {{plugin}}"
+    },
+    "instances": {
+      "create": "Création de la nouvelle instance {{instance}}",
+      "reload_one": "Rechargement de l’instance {{instances}}",
+      "reload_other": "Rechargement des instances {{instances}}",
+      "stop_one": "Arrêt de l’instance {{instances}}",
+      "stop_other": "Arrêt des instances {{instances}}",
+      "delete_one": "Suppression de l’instance {{instances}}",
+      "delete_other": "Suppression des instances {{instances}}"
+    },
+    "jobs": {
+      "run_one": "Exécution des plugins de la tâche sélectionnée : {{jobs}}",
+      "run_other": "Exécution des plugins des tâches sélectionnées : {{jobs}}"
+    },
+    "plugins": {
+      "delete_one": "Suppression du plugin : {{plugins}}",
+      "delete_other": "Suppression des plugins : {{plugins}}",
+      "enable": "Activation du plugin : {{plugin}}",
+      "disable": "Désactivation du plugin : {{plugin}}",
+      "reload": "Rechargement des plugins",
+      "install": "Installation du plugin : {{plugin}}",
+      "update": "Mise à jour du plugin : {{plugin}}"
+    },
+    "pro": {
+      "update_license": "Mise à jour de la clé de licence"
+    },
+    "services": {
+      "convert_online_one": "Passage du service {{services}} en ligne",
+      "convert_online_other": "Passage des services {{services}} en ligne",
+      "convert_draft_one": "Passage du service {{services}} en brouillon",
+      "convert_draft_other": "Passage des services {{services}} en brouillon",
+      "declare_standard": "Déclaration du service {{service}} comme standard",
+      "declare_redirect_only": "Déclaration du service {{service}} comme redirection seule",
+      "delete_one": "Suppression du service {{services}}",
+      "delete_other": "Suppression des services {{services}}",
+      "import": "Importation des services",
+      "import_with_configs": "Importation des services et des configurations personnalisées",
+      "create_config": "Création de la configuration du service {{service}}",
+      "create_config_draft": "Création de la configuration du service en brouillon {{service}}",
+      "save_config": "Enregistrement de la configuration du service {{service}}",
+      "save_config_draft": "Enregistrement de la configuration du service en brouillon {{service}}",
+      "save_plugin": "Enregistrement des paramètres {{plugin}} du service {{service}}",
+      "save_template": "Enregistrement des paramètres du modèle du service {{service}}"
+    },
+    "totp": {
+      "token": "Validation du jeton TOTP.",
+      "security_key": "Validation de la clé de sécurité."
+    }
   },
   "login": {
     "notice_password_changed": "Votre mot de passe a été modifié. Connectez-vous avec votre nouveau mot de passe.",
@@ -3606,7 +3686,9 @@
       "deleted": "Règle supprimée. Règles restantes : {{count}}.",
       "duplicated": "Copie insérée en position {{n}}. Elle ne peut jamais correspondre tant que l’original au-dessus est activé.",
       "gateAdded": "Seuil de fréquence ajouté à la correspondance. Sous ce seuil, la règle ne correspond pas et l’évaluation continue.",
-      "jumped": "{{where}} : {{message}}",
+      "jumped_whole": "Ce flux de travail : {{message}}",
+      "jumped_rule": "Règle {{n}} : {{message}}",
+      "jumped_ruleNamed": "Règle {{n}} — « {{name}} » : {{message}}",
       "lastValueRemoved": "Dernière valeur supprimée : cette condition ne peut pas être enregistrée tant qu’elle n’en contient pas une.",
       "moved": "{{name}} déplacée en position {{to}} sur {{total}}.",
       "movedDrag": "{{name}} glissée en position {{to}} sur {{total}}.",
@@ -3741,7 +3823,10 @@
       "regex": "correspond à l’expression régulière"
     },
     "reason": {
-      "sentence": "Workflow de sécurité {{workflow}} : {{action}}"
+      "sentence_block": "Workflow de sécurité « {{workflow}} » : requête bloquée",
+      "sentence_redirect": "Workflow de sécurité « {{workflow}} » : requête redirigée",
+      "sentence_challenge": "Workflow de sécurité « {{workflow}} » : requête soumise à un défi",
+      "sentence_other": "Workflow de sécurité « {{workflow}} » : action « {{action}} »"
     },
     "crowdsec_field": {
       "remediation": "la remédiation est",
@@ -3957,7 +4042,7 @@
     "resources": {
       "attach": "Associer",
       "conflict": {
-        "inline": "{{service}} sert déjà {{path}} grâce à ses propres paramètres {{family}}. Supprimez ces paramètres pour {{path}}, ou utilisez un autre chemin.",
+        "inline": "{{service}} sert déjà {{path}} grâce à ses propres paramètres « {{family}} ». Supprimez ces paramètres pour {{path}}, ou utilisez un autre chemin.",
         "primary": "« {{name}} » est actuellement le certificat principal de ce service et perdra ce statut sans autre avertissement. Le certificat principal est celui qui est réellement déployé.",
         "resource_redirect": "{{service}} sert déjà {{path}} via la redirection « {{name}} ». Dissociez « {{name}} », ou attribuez un chemin différent à l’un des deux.",
         "resource_upstream": "{{service}} sert déjà {{path}} via l’upstream « {{name}} ». Dissociez « {{name}} », ou attribuez un chemin différent à l’un des deux.",
@@ -4040,13 +4125,14 @@
   },
   "crowdsec": {
     "reason": {
-      "action": {
-        "ban": "requête bloquée",
-        "captcha": "défi captcha",
-        "challenge": "défi anti-bot"
-      },
-      "sentence": "{{source}} : {{action}}",
-      "sentence_scenario": "{{source}} : {{action}} (scénario : {{scenario}})",
+      "sentence_ban": "{{source}} : requête bloquée",
+      "sentence_ban_scenario": "{{source}} : requête bloquée (scénario : « {{scenario}} »)",
+      "sentence_captcha": "{{source}} : défi captcha",
+      "sentence_captcha_scenario": "{{source}} : défi captcha (scénario : « {{scenario}} »)",
+      "sentence_challenge": "{{source}} : défi anti-bot",
+      "sentence_challenge_scenario": "{{source}} : défi anti-bot (scénario : « {{scenario}} »)",
+      "sentence_other": "{{source}} : action non reconnue « {{action}} »",
+      "sentence_other_scenario": "{{source}} : action non reconnue « {{action}} » (scénario : « {{scenario}} »)",
       "source": {
         "appsec": "CrowdSec AppSec",
         "failure_policy": "Politique d’échec AppSec",
@@ -4147,9 +4233,14 @@
       "action": "Retirer",
       "confirm": "Je comprends et souhaite retirer cette décision.",
       "impact": "Cette action retire la décision du moteur CrowdSec partagé et affecte tous les bouncers connectés. Des décisions en cache, une autre plage, des bannissements locaux ou AppSec peuvent encore bloquer la cible.",
-      "selection": "Retirer {{scope}} {{value}} ({{type}}), scénario {{scenario}}, origine {{origin}}, depuis {{source}} ({{engine}}) ?",
+      "selection": "Retirer la décision sur « {{value}} » (périmètre : « {{scope}} », type : « {{type}} », origine : « {{origin}} », scénario : « {{scenario}} ») depuis {{source}} ({{engine}}) ?",
       "submit": "Retirer la décision",
-      "success": "Décision retirée à la source CrowdSec. La propagation est {{status}} ({{mode}}, intervalle {{interval}}). Décisions correspondantes restantes : {{remaining}} ; les bannissements locaux ou AppSec peuvent encore bloquer.",
+      "success_stream_one": "Décision retirée à la source CrowdSec. La propagation est en attente (mode flux, intervalle {{interval}}). {{remaining}} autre décision correspondante subsiste. Des bannissements locaux ou AppSec peuvent encore bloquer.",
+      "success_stream_other": "Décision retirée à la source CrowdSec. La propagation est en attente (mode flux, intervalle {{interval}}). {{remaining}} autres décisions correspondantes subsistent. Des bannissements locaux ou AppSec peuvent encore bloquer.",
+      "success_live_one": "Décision retirée à la source CrowdSec. La propagation est en attente (mode direct, intervalle {{interval}}). {{remaining}} autre décision correspondante subsiste. Des bannissements locaux ou AppSec peuvent encore bloquer.",
+      "success_live_other": "Décision retirée à la source CrowdSec. La propagation est en attente (mode direct, intervalle {{interval}}). {{remaining}} autres décisions correspondantes subsistent. Des bannissements locaux ou AppSec peuvent encore bloquer.",
+      "success_other_one": "Décision retirée à la source CrowdSec. La propagation est en attente (mode « {{mode}} », intervalle {{interval}}). {{remaining}} autre décision correspondante subsiste. Des bannissements locaux ou AppSec peuvent encore bloquer.",
+      "success_other_other": "Décision retirée à la source CrowdSec. La propagation est en attente (mode « {{mode}} », intervalle {{interval}}). {{remaining}} autres décisions correspondantes subsistent. Des bannissements locaux ou AppSec peuvent encore bloquer.",
       "title": "Retirer une décision CrowdSec"
     },
     "report": {
@@ -4213,6 +4304,10 @@
     "rotate_credential": "Faire pivoter l'identifiant de cette instance ? Échoue si l'instance est inaccessible."
   },
   "general": {
+    "meta": {
+      "name": "Général",
+      "description": "Les paramètres généraux du serveur"
+    },
     "settings": {
       "IS_LOADING": {
         "label": "usage interne chargement",

@@ -23,21 +23,23 @@ FORBIDDEN = {"entity", "verb", "state", "noun", "separatorNote", "how", "convert
 # Allowed only where the value is a name, an identifier, a formatted value or a server message. Each entry
 # says why; a new entry is a review decision, not a way to silence this test.
 ALLOWED = {
-    ("crowdsec.reason.sentence", "action"): "label: detail line, both halves stand alone",
-    ("crowdsec.reason.sentence_scenario", "action"): "label: detail line, both halves stand alone",
-    ("workflows.reason.sentence", "action"): "rule action id out of the operator's own config",
-    ("crowdsec.reason.sentence", "source"): "label of the decision source",
-    ("crowdsec.reason.sentence_scenario", "source"): "label of the decision source",
+    ("crowdsec.reason.sentence_other", "action"): "quoted raw remediation name this build does not know",
+    ("crowdsec.reason.sentence_other_scenario", "action"): "quoted raw remediation name this build does not know",
+    ("workflows.reason.sentence_other", "action"): "quoted raw rule action id this build does not know",
+    **{
+        (f"crowdsec.reason.sentence_{action}{suffix}", "source"): "label of the decision source"
+        for action in ("ban", "captcha", "challenge", "other")
+        for suffix in ("", "_scenario")
+    },
     ("crowdsec.remove.selection", "source"): "name of the CrowdSec connection",
-    ("crowdsec.remove.selection", "scope"): "CrowdSec API data value",
-    ("crowdsec.remove.selection", "type"): "CrowdSec API data value",
-    ("crowdsec.remove.selection", "origin"): "CrowdSec API data value",
-    ("crowdsec.remove.success", "status"): "propagation status value returned by the API",
-    ("crowdsec.remove.success", "mode"): "propagation mode value returned by the API",
+    ("crowdsec.remove.selection", "scope"): "quoted CrowdSec API data value",
+    ("crowdsec.remove.selection", "type"): "quoted CrowdSec API data value",
+    ("crowdsec.remove.selection", "origin"): "quoted CrowdSec API data value",
+    ("crowdsec.remove.success_other_one", "mode"): "quoted propagation mode this build does not know",
+    ("crowdsec.remove.success_other_other", "mode"): "quoted propagation mode this build does not know",
     ("tooltip.readonly_user_action_disabled", "action"): "caption of the disabled button, quoted",
-    ("workflows.say.jumped", "where"): "rule label: message line",
     ("workflows.test.detail_status", "status"): "HTTP status code",
-    ("service.resources.conflict.inline", "family"): "setting family id of the inline claim",
+    ("service.resources.conflict.inline", "family"): "quoted setting family label (four families, too many for one key each)",
     ("request_path.source", "phase"): "nginx phase id",
     ("request_path.unordered", "phase"): "nginx phase id",
     ("tooltip.toggle_level", "level"): "log level id",
@@ -196,6 +198,12 @@ def test_the_bulk_select_banner_no_longer_passes_the_entity():
         "workflows.say.via",
         "service.resources.family_singular",
         "redirects.flash.message",
+        "crowdsec.reason.action",
+        "crowdsec.reason.sentence",
+        "crowdsec.reason.sentence_scenario",
+        "workflows.reason.sentence",
+        "crowdsec.remove.success",
+        "workflows.say.jumped",
     ],
 )
 def test_a_catalog_key_nothing_reads_is_removed(key):
@@ -219,3 +227,155 @@ def test_the_instance_flashes_have_one_sentence_per_action():
         assert flash[f"missing_instances_parameter_instances_{action}"].endswith(f"/instances/{action}.")
     for action in ("reload", "stop"):
         assert f"a {action} method" in flash[f"instance_does_not_have_{action}_method"]
+
+
+# --- D5: whole-sentence detail lines and loading messages -------------------------------------------------------------------------------
+
+
+def _js(name):
+    return (APP / "static" / "js" / name).read_text(encoding="utf-8")
+
+
+def _default_of(source, key):
+    """The English default literal of a `t("<key>", "<default>"`, `translate(...)` or `t("<key>", { defaultValue: "<default>" })` call site."""
+    literal = r'"((?:[^"\\]|\\.)*)"'
+    match = re.search(r"\b(?:t|translate)\(\s*\"" + re.escape(key) + r"\",\s*" + literal, source) or re.search(
+        r"\b(?:t|translate)\(\s*\"" + re.escape(key) + r"\",\s*\{[^}]*?defaultValue:\s*" + literal, source, re.S
+    )
+    assert match, f"no t({key!r}, ...) call site with a literal default"
+    return match.group(1)
+
+
+NEW_SENTENCE_KEYS = {
+    "components/security-reason.js": [
+        *(f"crowdsec.reason.sentence_{a}{s}" for a in ("ban", "captcha", "challenge", "other") for s in ("", "_scenario")),
+        *(f"workflows.reason.sentence_{a}" for a in ("block", "redirect", "challenge", "other")),
+    ],
+    "pages/crowdsec.js": ["crowdsec.remove.selection", *(f"crowdsec.remove.success_{m}_{n}" for m in ("stream", "live", "other") for n in ("one", "other"))],
+    "pages/workflow_editor.js": [f"workflows.say.jumped_{w}" for w in ("whole", "rule", "ruleNamed")],
+    "pages/service-resources.js": ["service.resources.conflict.inline"],
+    "pages/home.js": [
+        *(f"dashboard.chart.tooltip.{word}_{form}" for word in ("requests", "blocked") for form in ("one", "other")),
+        "dashboard.chart.tooltip.top_share",
+    ],
+}
+
+
+@pytest.mark.parametrize("script, key", [(script, key) for script, keys in NEW_SENTENCE_KEYS.items() for key in keys])
+def test_a_detail_line_is_a_whole_sentence_whose_js_default_is_the_catalog_text(script, key):
+    assert _default_of(_js(script), key) == _key(key)
+
+
+def test_the_catalog_text_of_the_detail_lines_quotes_its_data():
+    assert _key("crowdsec.reason.sentence_ban_scenario") == "{{source}}: request blocked (scenario: “{{scenario}}”)"
+    assert _key("workflows.reason.sentence_redirect") == "Security workflow “{{workflow}}”: request redirected"
+    assert "“{{value}}”" in _key("crowdsec.remove.selection")
+    assert "“{{family}}”" in _key("service.resources.conflict.inline")
+    for form in ("one", "other"):
+        for mode in ("stream", "live"):
+            text = _key(f"crowdsec.remove.success_{mode}_{form}")
+            assert f"{mode} mode" in text and "{{status}}" not in text and "{{mode}}" not in text
+
+
+def _loading_message_problems(text):
+    """Every `url_for("loading", ..., message=...)` whose message is English typed into the route."""
+    found = []
+    for node in ast.walk(ast.parse(text)):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "url_for"):
+            continue
+        if not (node.args and isinstance(node.args[0], ast.Constant) and node.args[0].value == "loading"):
+            continue
+        for keyword in node.keywords:
+            if keyword.arg != "message":
+                continue
+            value = keyword.value
+            if _is_typed_english(value):
+                found.append(f"{node.lineno}: message={ast.unparse(value)[:60]}")
+    return found
+
+
+def _is_typed_english(value):
+    """A message that is a literal, an f-string, a concatenation, or a fallback with no `translated()` in front of it."""
+    if isinstance(value, ast.IfExp):
+        return _is_typed_english(value.body) or _is_typed_english(value.orelse)
+    if isinstance(value, ast.BoolOp):
+        return not _calls_translated(value.values[0])
+    return isinstance(value, (ast.Constant, ast.JoinedStr, ast.BinOp))
+
+
+def _calls_translated(node):
+    if isinstance(node, ast.IfExp):
+        return _calls_translated(node.body) and _calls_translated(node.orelse)
+    return isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "translated"
+
+
+@pytest.mark.parametrize("path", sorted(ROUTES.glob("*.py")), ids=lambda path: path.name)
+def test_no_route_hands_the_loading_page_a_literal_english_message(path):
+    assert _loading_message_problems(path.read_text(encoding="utf-8")) == []
+
+
+def test_the_loading_guard_flags_a_literal_an_fstring_and_an_untranslated_fallback():
+    flagged = _loading_message_problems(
+        'url_for("loading", message="Saving")\n'
+        'url_for("loading", message=f"Saving {x}")\n'
+        'url_for("loading", message=f"Saving {x}" or "y")\n'
+        'url_for("loading", message=translated("loading.a") or "Saving")\n'
+        'url_for("loading", message=translated("loading.a") if a else translated("loading.b"))\n'
+        'url_for("loading", message=(translated("loading.a") or "x") if a else "Saving")\n'
+    )
+
+    assert len(flagged) == 4
+
+
+def _constant_arms(node):
+    """The string constants a key expression can evaluate to: a literal, or the arms of (nested) ternaries."""
+    if isinstance(node, ast.IfExp):
+        return _constant_arms(node.body) + _constant_arms(node.orelse)
+    return [node] if isinstance(node, ast.Constant) else []
+
+
+def _loading_keys_used():
+    """``{key: set of kwarg names}`` for every `translated("loading....")` call of the routes (ternary arms included)."""
+    used = {}
+    for path in ROUTES.glob("*.py"):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "translated" and node.args):
+                continue
+            for name in _constant_arms(node.args[0]):
+                if isinstance(name, ast.Constant) and isinstance(name.value, str) and name.value.startswith("loading."):
+                    used.setdefault(name.value, set()).update(k.arg for k in node.keywords)
+    return used
+
+
+def test_every_loading_key_a_route_names_exists_with_the_placeholders_it_passes():
+    used = _loading_keys_used()
+
+    assert used, "no route translates a loading message"
+    for key, passed in sorted(used.items()):
+        placeholders = {a or b or c for a, b, c in PLACEHOLDER.findall(_key(key))}
+        assert placeholders == passed, f"{key}: catalog placeholders {sorted(placeholders)} != kwargs {sorted(passed)}"
+
+
+def _loading_key_literals():
+    """Every `"loading.…"` string constant of the routes, wherever it sits (a module-level key table counts)."""
+    return {
+        node.value
+        for path in ROUTES.glob("*.py")
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+        if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value.startswith("loading.")
+    }
+
+
+def test_every_loading_catalog_key_is_read_by_a_route():
+    named = _loading_key_literals()
+    unused = sorted(f"loading.{key}" for key, _ in _leaves(CATALOG["loading"]) if f"loading.{key}" not in named and key != "default")
+
+    assert unused == []
+
+
+def test_the_loading_page_default_message_is_translated():
+    main = (REPO / "src" / "ui" / "main.py").read_text(encoding="utf-8")
+
+    assert 'request.values.get("message", "Loading...")' not in main
+    assert 'translated("loading.default")' in main
+    assert CATALOG["loading"]["default"] == "Loading..."

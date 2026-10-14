@@ -2509,20 +2509,29 @@ msgstr "مشاہدہ کیا گیا %(time)s"
 msgid "crowdsec.previous"
 msgstr "پچھلا"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "درخواست بلاک کر دی گئی"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: درخواست بلاک کر دی گئی"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "کیپچا چیلنج"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: درخواست بلاک کر دی گئی (منظرنامہ: “%(scenario)s”)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "بوٹ کی نشاندہی کا چیلنج"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: کیپچا چیلنج"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: کیپچا چیلنج (منظرنامہ: “%(scenario)s”)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (منظرنامہ: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: بوٹ کی نشاندہی کا چیلنج"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: بوٹ کی نشاندہی کا چیلنج (منظرنامہ: “%(scenario)s”)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: نامعلوم ایکشن “%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: نامعلوم ایکشن “%(action)s” (منظرنامہ: “%(scenario)s”)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "اس سے مشترکہ CrowdSec انجن پر فیصلہ ہٹ جاتا ہے اور ہر منسلک bouncer متاثر ہوتا ہے۔ کیش شدہ فیصلے، کوئی دوسری رینج، مقامی پابندیاں یا AppSec اب بھی ہدف کو بلاک کر سکتے ہیں۔"
 
 msgid "crowdsec.remove.selection"
-msgstr "%(source)s (%(engine)s) سے %(scope)s %(value)s (%(type)s)، منظرنامہ %(scenario)s، ماخذ %(origin)s ہٹائیں؟"
+msgstr "%(source)s (%(engine)s) سے “%(value)s” کا فیصلہ ہٹائیں (دائرہ کار: “%(scope)s”، قسم: “%(type)s”، ماخذ: “%(origin)s”، منظرنامہ: “%(scenario)s”)؟"
 
 msgid "crowdsec.remove.submit"
 msgstr "فیصلہ ہٹائیں"
 
-msgid "crowdsec.remove.success"
-msgstr "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ کی حالت %(status)s ہے (%(mode)s، وقفہ %(interval)s)۔ باقی مطابقت رکھنے والے فیصلے: %(remaining)s۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔"
+msgid "crowdsec.remove.success_live_one"
+msgstr "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (لائیو موڈ، وقفہ %(interval)s)۔ مزید %(remaining)s مطابقت رکھنے والا فیصلہ باقی ہے۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔"
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (لائیو موڈ، وقفہ %(interval)s)۔ مزید %(remaining)s مطابقت رکھنے والے فیصلے باقی ہیں۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔"
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (موڈ “%(mode)s”، وقفہ %(interval)s)۔ مزید %(remaining)s مطابقت رکھنے والا فیصلہ باقی ہے۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔"
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (موڈ “%(mode)s”، وقفہ %(interval)s)۔ مزید %(remaining)s مطابقت رکھنے والے فیصلے باقی ہیں۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔"
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (اسٹریم موڈ، وقفہ %(interval)s)۔ مزید %(remaining)s مطابقت رکھنے والا فیصلہ باقی ہے۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔"
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "CrowdSec کے ماخذ پر ہٹا دیا گیا۔ پھیلاؤ زیرِ التوا ہے (اسٹریم موڈ، وقفہ %(interval)s)۔ مزید %(remaining)s مطابقت رکھنے والے فیصلے باقی ہیں۔ مقامی پابندیاں یا AppSec اب بھی بلاک کر سکتے ہیں۔"
 
 msgid "crowdsec.remove.title"
 msgstr "CrowdSec فیصلہ ہٹائیں"
@@ -2718,6 +2742,21 @@ msgstr "بلاک شدہ"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "وقت کے ساتھ بلاک شدہ درخواستیں (منتخب حد)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "%(count)s بلاک"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "%(count)s بلاک"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)s درخواست"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)s درخواستیں"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "ٹاپ 10 کا %(percent)s%%"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "سب سے زیادہ روکا گیا IP"
@@ -3721,6 +3760,12 @@ msgstr "پاس ورڈ میں کم از کم 1 خصوصی حرف ہونا چاہ�
 msgid "form.validation.password_uppercase"
 msgstr "پاس ورڈ میں کم از کم 1 بڑا حرف ہونا چاہیے۔"
 
+msgid "general.meta.description"
+msgstr "سرور کی عمومی ترتیبات"
+
+msgid "general.meta.name"
+msgstr "عمومی"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "NGINX ایکسیس لاگز کے لیے استعمال ہونے والا پاتھ (فائل پاتھ، syslog:server=host[:port][,param=value]، یا memory:name:size؛ غیر فعال کرنے کے لیے off سیٹ کریں)۔"
 
@@ -4371,6 +4416,165 @@ msgstr "ایک تصدیق کوڈ استعمال کریں"
 
 msgid "link.use_recovery_code"
 msgstr "ایک ریکووری کوڈ استعمال کریں"
+
+msgid "loading.bans.ban_one"
+msgstr "%(count)s IP پر پابندی لگائی جا رہی ہے"
+
+msgid "loading.bans.ban_other"
+msgstr "%(count)s IP پر پابندی لگائی جا رہی ہے"
+
+msgid "loading.bans.unban_one"
+msgstr "%(count)s IP سے پابندی ہٹائی جا رہی ہے"
+
+msgid "loading.bans.unban_other"
+msgstr "%(count)s IP سے پابندی ہٹائی جا رہی ہے"
+
+msgid "loading.bans.update_duration_one"
+msgstr "%(count)s پابندی کا دورانیہ اپ ڈیٹ کیا جا رہا ہے"
+
+msgid "loading.bans.update_duration_other"
+msgstr "%(count)s پابندیوں کا دورانیہ اپ ڈیٹ کیا جا رہا ہے"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "%(count)s کنفیگریشن کو ڈرافٹ میں تبدیل کیا جا رہا ہے"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "%(count)s کنفیگریشن کو ڈرافٹ میں تبدیل کیا جا رہا ہے"
+
+msgid "loading.configs.convert_online_one"
+msgstr "%(count)s کنفیگریشن کو آن لائن میں تبدیل کیا جا رہا ہے"
+
+msgid "loading.configs.convert_online_other"
+msgstr "%(count)s کنفیگریشن کو آن لائن میں تبدیل کیا جا رہا ہے"
+
+msgid "loading.configs.create"
+msgstr "کسٹم کنفیگریشن %(config)s بنائی جا رہی ہے"
+
+msgid "loading.configs.create_for_service"
+msgstr "سروس %(service)s کے لیے کسٹم کنفیگریشن %(config)s بنائی جا رہی ہے"
+
+msgid "loading.configs.delete_one"
+msgstr "منتخب کردہ %(count)s کنفیگریشن حذف کی جا رہی ہے"
+
+msgid "loading.configs.delete_other"
+msgstr "منتخب کردہ %(count)s کنفیگریشن حذف کی جا رہی ہے"
+
+msgid "loading.configs.import"
+msgstr "کسٹم کنفیگریشنز درآمد کی جا رہی ہیں"
+
+msgid "loading.default"
+msgstr "لوڈ ہو رہا ہے..."
+
+msgid "loading.global_settings.save"
+msgstr "عمومی ترتیبات محفوظ کی جا رہی ہیں"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "%(plugin)s کی عمومی ترتیبات محفوظ کی جا رہی ہیں"
+
+msgid "loading.instances.create"
+msgstr "نیا انسٹینس %(instance)s بنایا جا رہا ہے"
+
+msgid "loading.instances.delete_one"
+msgstr "انسٹینس %(instances)s کو حذف کیا جا رہا ہے"
+
+msgid "loading.instances.delete_other"
+msgstr "انسٹینسز %(instances)s کو حذف کیا جا رہا ہے"
+
+msgid "loading.instances.reload_one"
+msgstr "انسٹینس %(instances)s دوبارہ لوڈ کیا جا رہا ہے"
+
+msgid "loading.instances.reload_other"
+msgstr "انسٹینسز %(instances)s دوبارہ لوڈ کیے جا رہے ہیں"
+
+msgid "loading.instances.stop_one"
+msgstr "انسٹینس %(instances)s کو روکا جا رہا ہے"
+
+msgid "loading.instances.stop_other"
+msgstr "انسٹینسز %(instances)s کو روکا جا رہا ہے"
+
+msgid "loading.jobs.run_one"
+msgstr "منتخب ٹاسک کے پلگ ان چلائے جا رہے ہیں: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "منتخب ٹاسکس کے پلگ ان چلائے جا رہے ہیں: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "پلگ ان حذف کیا جا رہا ہے: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "پلگ انز حذف کیے جا رہے ہیں: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "پلگ ان غیر فعال کیا جا رہا ہے: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "پلگ ان فعال کیا جا رہا ہے: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "پلگ ان انسٹال کیا جا رہا ہے: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "پلگ انز دوبارہ لوڈ کیے جا رہے ہیں"
+
+msgid "loading.plugins.update"
+msgstr "پلگ ان اپ ڈیٹ کیا جا رہا ہے: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "لائسنس کی اپ ڈیٹ کی جا رہی ہے"
+
+msgid "loading.services.convert_draft_one"
+msgstr "سروس %(services)s کو ڈرافٹ میں تبدیل کیا جا رہا ہے"
+
+msgid "loading.services.convert_draft_other"
+msgstr "سروسز %(services)s کو ڈرافٹ میں تبدیل کیا جا رہا ہے"
+
+msgid "loading.services.convert_online_one"
+msgstr "سروس %(services)s کو آن لائن میں تبدیل کیا جا رہا ہے"
+
+msgid "loading.services.convert_online_other"
+msgstr "سروسز %(services)s کو آن لائن میں تبدیل کیا جا رہا ہے"
+
+msgid "loading.services.create_config"
+msgstr "سروس %(service)s کے لیے کنفیگریشن بنائی جا رہی ہے"
+
+msgid "loading.services.create_config_draft"
+msgstr "ڈرافٹ سروس %(service)s کے لیے کنفیگریشن بنائی جا رہی ہے"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "سروس %(service)s کو “صرف ری ڈائریکٹ” قرار دیا جا رہا ہے"
+
+msgid "loading.services.declare_standard"
+msgstr "سروس %(service)s کو معیاری قرار دیا جا رہا ہے"
+
+msgid "loading.services.delete_one"
+msgstr "سروس %(services)s حذف کی جا رہی ہے"
+
+msgid "loading.services.delete_other"
+msgstr "سروسز %(services)s حذف کی جا رہی ہیں"
+
+msgid "loading.services.import"
+msgstr "سروسز درآمد کی جا رہی ہیں"
+
+msgid "loading.services.import_with_configs"
+msgstr "سروسز اور کسٹم کنفیگریشنز درآمد کی جا رہی ہیں"
+
+msgid "loading.services.save_config"
+msgstr "سروس %(service)s کی کنفیگریشن محفوظ کی جا رہی ہے"
+
+msgid "loading.services.save_config_draft"
+msgstr "ڈرافٹ سروس %(service)s کی کنفیگریشن محفوظ کی جا رہی ہے"
+
+msgid "loading.services.save_plugin"
+msgstr "سروس %(service)s کے لیے %(plugin)s کی ترتیبات محفوظ کی جا رہی ہیں"
+
+msgid "loading.services.save_template"
+msgstr "سروس %(service)s کے لیے ٹیمپلیٹ کی ترتیبات محفوظ کی جا رہی ہیں"
+
+msgid "loading.totp.security_key"
+msgstr "سیکیورٹی کلید کی تصدیق کی جا رہی ہے۔"
+
+msgid "loading.totp.token"
+msgstr "TOTP ٹوکن کی تصدیق کی جا رہی ہے۔"
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "آپ کو لاگ ان نہیں کیا جا سکا، براہ کرم دوبارہ کوشش کریں"
@@ -6611,7 +6815,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "اس ورک فلو کو %(service)s سے الگ کریں؟"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s پہلے سے ہی %(path)s کو اپنے %(family)s سیٹنگز کے ذریعے سروس کر رہا ہے۔ %(path)s کے لیے ان سیٹنگز کو صاف کریں، یا ایک اور راستہ استعمال کریں۔"
+msgstr "%(service)s پہلے سے ہی %(path)s کو اپنی “%(family)s” سیٹنگز کے ذریعے سروس کر رہا ہے۔ %(path)s کے لیے ان سیٹنگز کو صاف کریں، یا کوئی اور راستہ استعمال کریں۔"
 
 msgid "service.resources.conflict.primary"
 msgstr "\"%(name)s\" اس سروس کا موجودہ بنیادی سرٹیفکیٹ ہے اور مزید تنبیہ کے بغیر اس کا بنیادی درجہ ہٹا دیا جائے گا۔ بنیادی سرٹیفکیٹ ہی دراصل ڈپلائے کیا جاتا ہے۔"
@@ -10504,8 +10708,17 @@ msgstr "اصولوں کی ترتیب سے جانچ ہوتی ہے اور پہلا
 msgid "workflows.readonly"
 msgstr "ڈیٹا بیسreadonly ہے۔ ورک فلو کا جائزہ لیا جا سکتا ہے لیکن تبدیل نہیں کیا جا سکتا۔"
 
-msgid "workflows.reason.sentence"
-msgstr "سیکیورٹی ورک فلو %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "سیکیورٹی ورک فلو “%(workflow)s”: درخواست بلاک کر دی گئی"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "سیکیورٹی ورک فلو “%(workflow)s”: درخواست پر چیلنج لگایا گیا"
+
+msgid "workflows.reason.sentence_other"
+msgstr "سیکیورٹی ورک فلو “%(workflow)s”: ایکشن “%(action)s”"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "سیکیورٹی ورک فلو “%(workflow)s”: درخواست ری ڈائریکٹ کر دی گئی"
 
 msgid "workflows.rule.disabled"
 msgstr "غیر فعال"
@@ -10558,8 +10771,14 @@ msgstr "اصول %(total)s میں سے مقام %(n)s پر شامل کیا گی�
 msgid "workflows.say.inspecting"
 msgstr "%(total)s میں %(n)s قانون کی ترمیم کریں - %(name)s."
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "اصول %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "اصول %(n)s — “%(name)s”: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "یہ ورک فلو: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "آخری قدر ہٹا دی گئی — کوئی قدر ہونے تک یہ شرط محفوظ نہیں ہو سکتی۔"

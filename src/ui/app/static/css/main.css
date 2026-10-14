@@ -142,3 +142,21 @@
   text-align: center;
   margin-top: 1rem;
 }
+
+/*
+* Detached navbar, full width below the desktop breakpoints
+******************************************************************************/
+
+/* core.css sets `width: calc(100% - 1.625rem * 2) !important` (and `1rem * 2` below 992px) on
+   `.layout-navbar-fixed .layout-navbar.navbar-detached`; theme-default's own full-width rule has one class
+   less, so it loses and the bar stops short of the right edge. Same selector, loaded later, wins. */
+@media (max-width: 1199.98px) {
+  .layout-navbar-fixed .layout-navbar.navbar-detached {
+    width: 100% !important;
+  }
+}
+@media (max-width: 991.98px) {
+  .layout-navbar-fixed .layout-navbar.navbar-detached {
+    width: 100% !important;
+  }
+}

@@ -2509,20 +2509,29 @@ msgstr "%(time)s पर देखा गया"
 msgid "crowdsec.previous"
 msgstr "पिछला"
 
-msgid "crowdsec.reason.action.ban"
-msgstr "अनुरोध अवरोधित"
+msgid "crowdsec.reason.sentence_ban"
+msgstr "%(source)s: अनुरोध अवरोधित"
 
-msgid "crowdsec.reason.action.captcha"
-msgstr "कैप्चा चुनौती"
+msgid "crowdsec.reason.sentence_ban_scenario"
+msgstr "%(source)s: अनुरोध अवरोधित (परिदृश्य: “%(scenario)s”)"
 
-msgid "crowdsec.reason.action.challenge"
-msgstr "बॉट-पहचान चुनौती"
+msgid "crowdsec.reason.sentence_captcha"
+msgstr "%(source)s: कैप्चा चुनौती"
 
-msgid "crowdsec.reason.sentence"
-msgstr "%(source)s: %(action)s"
+msgid "crowdsec.reason.sentence_captcha_scenario"
+msgstr "%(source)s: कैप्चा चुनौती (परिदृश्य: “%(scenario)s”)"
 
-msgid "crowdsec.reason.sentence_scenario"
-msgstr "%(source)s: %(action)s (परिदृश्य: %(scenario)s)"
+msgid "crowdsec.reason.sentence_challenge"
+msgstr "%(source)s: बॉट-पहचान चुनौती"
+
+msgid "crowdsec.reason.sentence_challenge_scenario"
+msgstr "%(source)s: बॉट-पहचान चुनौती (परिदृश्य: “%(scenario)s”)"
+
+msgid "crowdsec.reason.sentence_other"
+msgstr "%(source)s: अपरिचित कार्रवाई “%(action)s”"
+
+msgid "crowdsec.reason.sentence_other_scenario"
+msgstr "%(source)s: अपरिचित कार्रवाई “%(action)s” (परिदृश्य: “%(scenario)s”)"
 
 msgid "crowdsec.reason.source.appsec"
 msgstr "CrowdSec AppSec"
@@ -2546,13 +2555,28 @@ msgid "crowdsec.remove.impact"
 msgstr "यह साझा CrowdSec इंजन पर निर्णय को हटा देता है और हर जुड़े हुए bouncer को प्रभावित करता है। कैश किए गए निर्णय, कोई अन्य रेंज, स्थानीय प्रतिबंध या AppSec अब भी लक्ष्य को ब्लॉक कर सकते हैं।"
 
 msgid "crowdsec.remove.selection"
-msgstr "%(source)s (%(engine)s) से %(scope)s %(value)s (%(type)s), परिदृश्य %(scenario)s, मूल %(origin)s हटाएँ?"
+msgstr "%(source)s (%(engine)s) से “%(value)s” का निर्णय हटाएँ (स्कोप: “%(scope)s”, प्रकार: “%(type)s”, मूल: “%(origin)s”, परिदृश्य: “%(scenario)s”)?"
 
 msgid "crowdsec.remove.submit"
 msgstr "निर्णय हटाएँ"
 
-msgid "crowdsec.remove.success"
-msgstr "CrowdSec स्रोत पर हटा दिया गया। प्रसार की स्थिति %(status)s है (%(mode)s, अंतराल %(interval)s)। शेष मेल खाते निर्णय: %(remaining)s। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।"
+msgid "crowdsec.remove.success_live_one"
+msgstr "CrowdSec स्रोत पर हटा दिया गया। प्रसार लंबित है (लाइव मोड, अंतराल %(interval)s)। %(remaining)s अन्य मेल खाता निर्णय शेष है। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।"
+
+msgid "crowdsec.remove.success_live_other"
+msgstr "CrowdSec स्रोत पर हटा दिया गया। प्रसार लंबित है (लाइव मोड, अंतराल %(interval)s)। %(remaining)s अन्य मेल खाते निर्णय शेष हैं। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।"
+
+msgid "crowdsec.remove.success_other_one"
+msgstr "CrowdSec स्रोत पर हटा दिया गया। प्रसार लंबित है (मोड “%(mode)s”, अंतराल %(interval)s)। %(remaining)s अन्य मेल खाता निर्णय शेष है। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।"
+
+msgid "crowdsec.remove.success_other_other"
+msgstr "CrowdSec स्रोत पर हटा दिया गया। प्रसार लंबित है (मोड “%(mode)s”, अंतराल %(interval)s)। %(remaining)s अन्य मेल खाते निर्णय शेष हैं। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।"
+
+msgid "crowdsec.remove.success_stream_one"
+msgstr "CrowdSec स्रोत पर हटा दिया गया। प्रसार लंबित है (स्ट्रीम मोड, अंतराल %(interval)s)। %(remaining)s अन्य मेल खाता निर्णय शेष है। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।"
+
+msgid "crowdsec.remove.success_stream_other"
+msgstr "CrowdSec स्रोत पर हटा दिया गया। प्रसार लंबित है (स्ट्रीम मोड, अंतराल %(interval)s)। %(remaining)s अन्य मेल खाते निर्णय शेष हैं। स्थानीय प्रतिबंध या AppSec अब भी ब्लॉक कर सकते हैं।"
 
 msgid "crowdsec.remove.title"
 msgstr "CrowdSec निर्णय हटाएँ"
@@ -2718,6 +2742,21 @@ msgstr "ब्लॉक किए गए"
 
 msgid "dashboard.chart.timeseries.title"
 msgstr "समय के साथ ब्लॉक किए गए अनुरोध (चयनित सीमा)"
+
+msgid "dashboard.chart.tooltip.blocked_one"
+msgstr "%(count)s अवरुद्ध"
+
+msgid "dashboard.chart.tooltip.blocked_other"
+msgstr "%(count)s अवरुद्ध"
+
+msgid "dashboard.chart.tooltip.requests_one"
+msgstr "%(count)s अनुरोध"
+
+msgid "dashboard.chart.tooltip.requests_other"
+msgstr "%(count)s अनुरोध"
+
+msgid "dashboard.chart.tooltip.top_share"
+msgstr "शीर्ष 10 का %(percent)s%%"
 
 msgid "dashboard.chart.top_blocked_ips.most_blocked"
 msgstr "सर्वाधिक अवरुद्ध आईपी"
@@ -3721,6 +3760,12 @@ msgstr "पासवर्ड में कम से कम 1 विशेष �
 msgid "form.validation.password_uppercase"
 msgstr "पासवर्ड में कम से कम 1 बड़ा अक्षर होना चाहिए।"
 
+msgid "general.meta.description"
+msgstr "सर्वर की सामान्य सेटिंग्स"
+
+msgid "general.meta.name"
+msgstr "सामान्य"
+
 msgid "general.settings.ACCESS_LOG.help"
 msgstr "NGINX एक्सेस लॉग के लिए उपयोग किया जाने वाला पथ (फ़ाइल पथ, syslog:server=host[:port][,param=value], या memory:name:size; अक्षम करने के लिए off सेट करें)।"
 
@@ -4371,6 +4416,165 @@ msgstr "एक प्रमाणीकरण कोड का उपयोग �
 
 msgid "link.use_recovery_code"
 msgstr "एक रिकवरी कोड का उपयोग करें"
+
+msgid "loading.bans.ban_one"
+msgstr "%(count)s IP को प्रतिबंधित किया जा रहा है"
+
+msgid "loading.bans.ban_other"
+msgstr "%(count)s IP को प्रतिबंधित किया जा रहा है"
+
+msgid "loading.bans.unban_one"
+msgstr "%(count)s IP का प्रतिबंध हटाया जा रहा है"
+
+msgid "loading.bans.unban_other"
+msgstr "%(count)s IP का प्रतिबंध हटाया जा रहा है"
+
+msgid "loading.bans.update_duration_one"
+msgstr "%(count)s प्रतिबंध की अवधि अपडेट की जा रही है"
+
+msgid "loading.bans.update_duration_other"
+msgstr "%(count)s प्रतिबंधों की अवधि अपडेट की जा रही है"
+
+msgid "loading.configs.convert_draft_one"
+msgstr "%(count)s कॉन्फ़िगरेशन को ड्राफ़्ट में बदला जा रहा है"
+
+msgid "loading.configs.convert_draft_other"
+msgstr "%(count)s कॉन्फ़िगरेशन को ड्राफ़्ट में बदला जा रहा है"
+
+msgid "loading.configs.convert_online_one"
+msgstr "%(count)s कॉन्फ़िगरेशन को ऑनलाइन में बदला जा रहा है"
+
+msgid "loading.configs.convert_online_other"
+msgstr "%(count)s कॉन्फ़िगरेशन को ऑनलाइन में बदला जा रहा है"
+
+msgid "loading.configs.create"
+msgstr "कस्टम कॉन्फ़िगरेशन %(config)s बनाया जा रहा है"
+
+msgid "loading.configs.create_for_service"
+msgstr "सेवा %(service)s के लिए कस्टम कॉन्फ़िगरेशन %(config)s बनाया जा रहा है"
+
+msgid "loading.configs.delete_one"
+msgstr "चयनित %(count)s कॉन्फ़िगरेशन हटाया जा रहा है"
+
+msgid "loading.configs.delete_other"
+msgstr "चयनित %(count)s कॉन्फ़िगरेशन हटाया जा रहा है"
+
+msgid "loading.configs.import"
+msgstr "कस्टम कॉन्फ़िगरेशन आयात किए जा रहे हैं"
+
+msgid "loading.default"
+msgstr "लोड हो रहा है..."
+
+msgid "loading.global_settings.save"
+msgstr "वैश्विक सेटिंग्स सहेजी जा रही हैं"
+
+msgid "loading.global_settings.save_plugin"
+msgstr "%(plugin)s की वैश्विक सेटिंग्स सहेजी जा रही हैं"
+
+msgid "loading.instances.create"
+msgstr "नया इंस्टेंस %(instance)s बनाया जा रहा है"
+
+msgid "loading.instances.delete_one"
+msgstr "इंस्टेंस %(instances)s को हटाया जा रहा है"
+
+msgid "loading.instances.delete_other"
+msgstr "इंस्टेंस %(instances)s को हटाया जा रहा है"
+
+msgid "loading.instances.reload_one"
+msgstr "इंस्टेंस %(instances)s को पुनः लोड किया जा रहा है"
+
+msgid "loading.instances.reload_other"
+msgstr "इंस्टेंस %(instances)s को पुनः लोड किया जा रहा है"
+
+msgid "loading.instances.stop_one"
+msgstr "इंस्टेंस %(instances)s को रोका जा रहा है"
+
+msgid "loading.instances.stop_other"
+msgstr "इंस्टेंस %(instances)s को रोका जा रहा है"
+
+msgid "loading.jobs.run_one"
+msgstr "चयनित कार्य के प्लगइन चलाए जा रहे हैं: %(jobs)s"
+
+msgid "loading.jobs.run_other"
+msgstr "चयनित कार्यों के प्लगइन चलाए जा रहे हैं: %(jobs)s"
+
+msgid "loading.plugins.delete_one"
+msgstr "प्लगइन हटाया जा रहा है: %(plugins)s"
+
+msgid "loading.plugins.delete_other"
+msgstr "प्लगइन हटाए जा रहे हैं: %(plugins)s"
+
+msgid "loading.plugins.disable"
+msgstr "प्लगइन अक्षम किया जा रहा है: %(plugin)s"
+
+msgid "loading.plugins.enable"
+msgstr "प्लगइन सक्षम किया जा रहा है: %(plugin)s"
+
+msgid "loading.plugins.install"
+msgstr "प्लगइन इंस्टॉल किया जा रहा है: %(plugin)s"
+
+msgid "loading.plugins.reload"
+msgstr "प्लगइन पुनः लोड किए जा रहे हैं"
+
+msgid "loading.plugins.update"
+msgstr "प्लगइन अपडेट किया जा रहा है: %(plugin)s"
+
+msgid "loading.pro.update_license"
+msgstr "लाइसेंस कुंजी अपडेट की जा रही है"
+
+msgid "loading.services.convert_draft_one"
+msgstr "सेवा %(services)s को ड्राफ़्ट में बदला जा रहा है"
+
+msgid "loading.services.convert_draft_other"
+msgstr "सेवाओं %(services)s को ड्राफ़्ट में बदला जा रहा है"
+
+msgid "loading.services.convert_online_one"
+msgstr "सेवा %(services)s को ऑनलाइन में बदला जा रहा है"
+
+msgid "loading.services.convert_online_other"
+msgstr "सेवाओं %(services)s को ऑनलाइन में बदला जा रहा है"
+
+msgid "loading.services.create_config"
+msgstr "सेवा %(service)s के लिए कॉन्फ़िगरेशन बनाया जा रहा है"
+
+msgid "loading.services.create_config_draft"
+msgstr "ड्राफ़्ट सेवा %(service)s के लिए कॉन्फ़िगरेशन बनाया जा रहा है"
+
+msgid "loading.services.declare_redirect_only"
+msgstr "सेवा %(service)s को “केवल रीडायरेक्ट” घोषित किया जा रहा है"
+
+msgid "loading.services.declare_standard"
+msgstr "सेवा %(service)s को मानक घोषित किया जा रहा है"
+
+msgid "loading.services.delete_one"
+msgstr "सेवा %(services)s हटाई जा रही है"
+
+msgid "loading.services.delete_other"
+msgstr "सेवाएँ %(services)s हटाई जा रही हैं"
+
+msgid "loading.services.import"
+msgstr "सेवाएँ आयात की जा रही हैं"
+
+msgid "loading.services.import_with_configs"
+msgstr "सेवाएँ और कस्टम कॉन्फ़िगरेशन आयात किए जा रहे हैं"
+
+msgid "loading.services.save_config"
+msgstr "सेवा %(service)s का कॉन्फ़िगरेशन सहेजा जा रहा है"
+
+msgid "loading.services.save_config_draft"
+msgstr "ड्राफ़्ट सेवा %(service)s का कॉन्फ़िगरेशन सहेजा जा रहा है"
+
+msgid "loading.services.save_plugin"
+msgstr "सेवा %(service)s के लिए %(plugin)s सेटिंग्स सहेजी जा रही हैं"
+
+msgid "loading.services.save_template"
+msgstr "सेवा %(service)s के लिए टेम्पलेट सेटिंग्स सहेजी जा रही हैं"
+
+msgid "loading.totp.security_key"
+msgstr "सुरक्षा कुंजी सत्यापित की जा रही है।"
+
+msgid "loading.totp.token"
+msgstr "TOTP टोकन सत्यापित किया जा रहा है।"
 
 msgid "login.flash.couldn_t_log_please_try_again"
 msgstr "आपको लॉग इन नहीं किया जा सका, कृपया पुनः प्रयास करें"
@@ -6611,7 +6815,7 @@ msgid "service.resources.confirm_detach_workflow"
 msgstr "इस कार्यप्रवाह को %(service)s से अलग करें?"
 
 msgid "service.resources.conflict.inline"
-msgstr "%(service)s पहले से ही %(path)s को %(family)s सेटिंग्स के माध्यम से सेवा प्रदान कर रहा है। %(path)s के लिए इन सेटिंग्स को साफ़ करें, या एक अलग पथ का उपयोग करें।"
+msgstr "%(service)s पहले से ही %(path)s को अपनी “%(family)s” सेटिंग्स के माध्यम से सेवा प्रदान कर रहा है। %(path)s के लिए इन सेटिंग्स को साफ़ करें, या कोई अलग पथ उपयोग करें।"
 
 msgid "service.resources.conflict.primary"
 msgstr "“%(name)s” अभी इस सेवा का प्राथमिक प्रमाणपत्र है और बिना अतिरिक्त चेतावनी के इसका प्राथमिक दर्जा हटा दिया जाएगा। वास्तव में डिप्लॉय किया गया प्रमाणपत्र ही प्राथमिक होता है।"
@@ -10504,8 +10708,17 @@ msgstr "नियमों का मूल्यांकन क्रम म�
 msgid "workflows.readonly"
 msgstr "डेटाबेस केवल पढ़ने के लिए है। वर्कफ़्लो देखे जा सकते हैं लेकिन नहीं बदले जा सकते।"
 
-msgid "workflows.reason.sentence"
-msgstr "सुरक्षा वर्कफ़्लो %(workflow)s: %(action)s"
+msgid "workflows.reason.sentence_block"
+msgstr "सुरक्षा वर्कफ़्लो “%(workflow)s”: अनुरोध अवरोधित"
+
+msgid "workflows.reason.sentence_challenge"
+msgstr "सुरक्षा वर्कफ़्लो “%(workflow)s”: अनुरोध पर चुनौती लगाई गई"
+
+msgid "workflows.reason.sentence_other"
+msgstr "सुरक्षा वर्कफ़्लो “%(workflow)s”: कार्रवाई “%(action)s”"
+
+msgid "workflows.reason.sentence_redirect"
+msgstr "सुरक्षा वर्कफ़्लो “%(workflow)s”: अनुरोध रीडायरेक्ट किया गया"
 
 msgid "workflows.rule.disabled"
 msgstr "अक्षम"
@@ -10558,8 +10771,14 @@ msgstr "%(total)s में से %(n)s स्थान पर नियम ज
 msgid "workflows.say.inspecting"
 msgstr "%(total)s के %(n)s नियम संपादित करें — %(name)s।"
 
-msgid "workflows.say.jumped"
-msgstr "%(where)s: %(message)s"
+msgid "workflows.say.jumped_rule"
+msgstr "नियम %(n)s: %(message)s"
+
+msgid "workflows.say.jumped_ruleNamed"
+msgstr "नियम %(n)s — “%(name)s”: %(message)s"
+
+msgid "workflows.say.jumped_whole"
+msgstr "यह वर्कफ़्लो: %(message)s"
 
 msgid "workflows.say.lastValueRemoved"
 msgstr "अंतिम मान हटाया गया — कोई मान होने तक यह शर्त सहेजी नहीं जा सकती।"

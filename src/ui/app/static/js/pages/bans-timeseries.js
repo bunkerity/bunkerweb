@@ -42,7 +42,7 @@
       },
     ];
     const categories = (timeseries.buckets || []).map((bucketEpoch) =>
-      new Date(bucketEpoch * 1000).toLocaleDateString([], {
+      window.bwChartLocale.format(new Date(bucketEpoch * 1000), {
         month: "short",
         day: "numeric",
         hour: "2-digit",
