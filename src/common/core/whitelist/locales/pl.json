@@ -31,7 +31,7 @@
       },
       "WHITELIST_IP_URLS": {
         "label": "Whitelist IP/sieć URL-e",
-        "help": "Lista URL-i, rozdzielonych spacjami, zawierających dobre IP/sieć do umieszczenia na whiteliście. Obsługuje również URL-e file:// oraz auth basic w formacie http://user:pass@url."
+        "help": "Lista URL-i, rozdzielonych spacjami, zawierających dobre IP/sieć do umieszczenia na whiteliście. Obsługuje również URL-e file:// oraz auth basic w formacie http://user:pass@url. Obsługuje listy zwykłego tekstu, CSV i JSON; dodaj #key lub #key=value, aby wybrać część listy JSON."
       },
       "WHITELIST_RDNS": {
         "label": "Whitelist reverse DNS",

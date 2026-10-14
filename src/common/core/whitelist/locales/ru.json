@@ -31,7 +31,7 @@
       },
       "WHITELIST_IP_URLS": {
         "label": "Whitelist IP/сеть URL",
-        "help": "Список URL, разделённых пробелами, содержащих хорошие IP/сети для помещения в белый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+        "help": "Список URL, разделённых пробелами, содержащих хорошие IP/сети для помещения в белый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url. Поддерживает списки в виде обычного текста, CSV и JSON; добавьте #key или #key=value для выбора части списка JSON."
       },
       "WHITELIST_RDNS": {
         "label": "Whitelist reverse DNS",

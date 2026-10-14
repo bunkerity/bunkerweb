@@ -53,7 +53,7 @@
       },
       "GREYLIST_IP_URLS": {
         "label": "IP/Netzwerk der grauen Liste (URLs)",
-        "help": "Liste von URLs, durch Leerzeichen getrennt, die vertrauenswürdige IPs/Netzwerke enthalten, die in die graue Liste aufgenommen werden. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die vertrauenswürdige IPs/Netzwerke enthalten, die in die graue Liste aufgenommen werden. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url. Unterstützt Klartext-, CSV- und JSON-Listen; mit #key oder #key=value wählen Sie einen Teil einer JSON-Liste aus."
       },
       "GREYLIST_RDNS_URLS": {
         "label": "Reverse-DNS der grauen Liste (URLs)",

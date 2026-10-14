@@ -53,7 +53,7 @@
       },
       "WHITELIST_IP_URLS": {
         "label": "IP/Netzwerk der Positivliste (URLs)",
-        "help": "Liste von URLs, durch Leerzeichen getrennt, die vertrauenswürdige IPs/Netzwerke für die Positivliste enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+        "help": "Liste von URLs, durch Leerzeichen getrennt, die vertrauenswürdige IPs/Netzwerke für die Positivliste enthalten. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url. Unterstützt Klartext-, CSV- und JSON-Listen; mit #key oder #key=value wählen Sie einen Teil einer JSON-Liste aus."
       },
       "WHITELIST_RDNS_URLS": {
         "label": "Reverse-DNS der Positivliste (URLs)",

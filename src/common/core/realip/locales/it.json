@@ -27,7 +27,7 @@
       },
       "REAL_IP_FROM_URLS": {
         "label": "IP reale da URL",
-        "help": "Elenco di URL contenenti IP/reti affidabili, separati da spazi, da cui provengono le richieste con proxy. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+        "help": "Elenco di URL contenenti IP/reti affidabili, separati da spazi, da cui provengono le richieste con proxy. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url. Accetta elenchi di testo semplice, CSV e JSON; aggiungere #key o #key=value per selezionare parte di un elenco JSON."
       }
     }
   }

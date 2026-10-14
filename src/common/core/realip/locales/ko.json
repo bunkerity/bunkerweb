@@ -27,7 +27,7 @@
       },
       "REAL_IP_FROM_URLS": {
         "label": "실제 IP 출처 URL",
-        "help": "프록시된 요청이 유입되는, 신뢰할 수 있는 IP/네트워크가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다."
+        "help": "프록시된 요청이 유입되는, 신뢰할 수 있는 IP/네트워크가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다. 일반 텍스트, CSV 및 JSON 목록을 지원합니다. JSON 목록의 일부를 선택하려면 #key 또는 #key=value를 추가하세요."
       }
     }
   }

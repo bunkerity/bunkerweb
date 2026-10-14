@@ -27,7 +27,7 @@
       },
       "REAL_IP_FROM_URLS": {
         "label": "IP réelle depuis des URL",
-        "help": "Liste d'URL contenant des IP/réseaux fiables, séparées par des espaces, d'où proviennent les requêtes proxifiées. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url."
+        "help": "Liste d'URL contenant des IP/réseaux fiables, séparées par des espaces, d'où proviennent les requêtes proxifiées. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url. Accepte les listes en texte brut, CSV et JSON ; ajoutez #key ou #key=value pour sélectionner une partie d’une liste JSON."
       }
     }
   }

@@ -53,7 +53,7 @@
       },
       "GREYLIST_IP_URLS": {
         "label": "URLs de IP/rede da lista cinza",
-        "help": "Lista de URLs, separadas por espaços, contendo IP/rede confiáveis a colocar na lista cinza. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url."
+        "help": "Lista de URLs, separadas por espaços, contendo IP/rede confiáveis a colocar na lista cinza. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url. Aceita listas de texto simples, CSV e JSON; adicione #key ou #key=value para selecionar parte de uma lista JSON."
       },
       "GREYLIST_RDNS_URLS": {
         "label": "URLs de DNS reverso da lista cinza",

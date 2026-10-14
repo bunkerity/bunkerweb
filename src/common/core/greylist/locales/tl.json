@@ -27,7 +27,7 @@
       },
       "GREYLIST_IP_URLS": {
         "label": "Greylist IP/Network URLs",
-        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng mabuting IP/network na ilalagay sa greylist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url."
+        "help": "Listahan ng mga URL, na pinaghihiwalay ng space, na naglalaman ng mabuting IP/network na ilalagay sa greylist. Suportado rin ang mga file:// URL at auth basic gamit ang format na http://user:pass@url. Tumatanggap ng mga listahang plain text, CSV at JSON; idagdag ang #key o #key=value upang pumili ng bahagi ng listahang JSON."
       },
       "GREYLIST_RDNS": {
         "label": "Greylist Reverse DNS",

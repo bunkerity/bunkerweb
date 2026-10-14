@@ -27,7 +27,7 @@
       },
       "GREYLIST_IP_URLS": {
         "label": "Greylist IP/сеть URL",
-        "help": "Список URL, разделённых пробелами, содержащих хорошие IP/сети для помещения в серый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+        "help": "Список URL, разделённых пробелами, содержащих хорошие IP/сети для помещения в серый список. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url. Поддерживает списки в виде обычного текста, CSV и JSON; добавьте #key или #key=value для выбора части списка JSON."
       },
       "GREYLIST_RDNS": {
         "label": "Greylist reverse DNS",

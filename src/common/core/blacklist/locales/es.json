@@ -101,7 +101,7 @@
       },
       "BLACKLIST_IP_URLS": {
         "label": "IP/red de la lista negra (URL)",
-        "help": "Lista de URL, separadas por espacios, que contienen IP/redes maliciosas para bloquear. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url."
+        "help": "Lista de URL, separadas por espacios, que contienen IP/redes maliciosas para bloquear. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url. Admite listas de texto plano, CSV y JSON; añada #key o #key=value para seleccionar parte de una lista JSON."
       },
       "BLACKLIST_RDNS_URLS": {
         "label": "DNS inverso de la lista negra (URL)",
@@ -121,7 +121,7 @@
       },
       "BLACKLIST_IGNORE_IP_URLS": {
         "label": "IP/red ignorada de la lista negra (URL)",
-        "help": "Lista de URL, separadas por espacios, que contienen IP/redes que se ignorarán en la lista negra. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url."
+        "help": "Lista de URL, separadas por espacios, que contienen IP/redes que se ignorarán en la lista negra. También admite URL file:// y autenticación básica mediante el esquema http://user:pass@url. Admite listas de texto plano, CSV y JSON; añada #key o #key=value para seleccionar parte de una lista JSON."
       },
       "BLACKLIST_IGNORE_RDNS_URLS": {
         "label": "DNS inverso ignorado de la lista negra (URL)",

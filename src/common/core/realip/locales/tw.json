@@ -27,7 +27,7 @@
       },
       "REAL_IP_FROM_URLS": {
         "label": "真實 IP 來源 URL 清單",
-        "help": "以空格分隔的 URL 清單,其中包含代理請求來源的可信 IP / 網段。同時支援 file:// URL,以及使用 http://user:pass@url 形式的基本驗證。"
+        "help": "以空格分隔的 URL 清單,其中包含代理請求來源的可信 IP / 網段。同時支援 file:// URL,以及使用 http://user:pass@url 形式的基本驗證。 支援純文字、CSV 和 JSON 清單；加上 #key 或 #key=value 可選取 JSON 清單的一部分。"
       }
     }
   }

@@ -27,7 +27,7 @@
       },
       "GREYLIST_IP_URLS": {
         "label": "Greylist IP/ağ URL'leri",
-        "help": "Gri listeye alınacak iyi IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+        "help": "Gri listeye alınacak iyi IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler. Düz metin, CSV ve JSON listelerini destekler; JSON listesinin bir bölümünü seçmek için #key veya #key=value ekleyin."
       },
       "GREYLIST_RDNS": {
         "label": "Greylist reverse DNS",

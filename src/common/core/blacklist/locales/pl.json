@@ -47,7 +47,7 @@
       },
       "BLACKLIST_IGNORE_IP_URLS": {
         "label": "Blacklist – ignorowane IP/sieć URL-e",
-        "help": "Lista URL-i, rozdzielonych spacjami, zawierających IP/sieć ignorowane na blackliście. Obsługuje również URL-e file:// oraz auth basic w formacie http://user:pass@url."
+        "help": "Lista URL-i, rozdzielonych spacjami, zawierających IP/sieć ignorowane na blackliście. Obsługuje również URL-e file:// oraz auth basic w formacie http://user:pass@url. Obsługuje listy zwykłego tekstu, CSV i JSON; dodaj #key lub #key=value, aby wybrać część listy JSON."
       },
       "BLACKLIST_IGNORE_RDNS": {
         "label": "Blacklist – ignorowany reverse DNS",
@@ -79,7 +79,7 @@
       },
       "BLACKLIST_IP_URLS": {
         "label": "Blacklist IP/sieć URL-e",
-        "help": "Lista URL-i, rozdzielonych spacjami, zawierających złe IP/sieć do zablokowania. Obsługuje również URL-e file:// oraz auth basic w formacie http://user:pass@url."
+        "help": "Lista URL-i, rozdzielonych spacjami, zawierających złe IP/sieć do zablokowania. Obsługuje również URL-e file:// oraz auth basic w formacie http://user:pass@url. Obsługuje listy zwykłego tekstu, CSV i JSON; dodaj #key lub #key=value, aby wybrać część listy JSON."
       },
       "BLACKLIST_RDNS": {
         "label": "Blacklist reverse DNS",

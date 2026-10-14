@@ -53,7 +53,7 @@
       },
       "WHITELIST_IP_URLS": {
         "label": "IP/réseau de la liste blanche (URL)",
-        "help": "Liste d'URL, séparées par des espaces, contenant des IP/réseaux fiables à mettre en liste blanche. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url."
+        "help": "Liste d'URL, séparées par des espaces, contenant des IP/réseaux fiables à mettre en liste blanche. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url. Accepte les listes en texte brut, CSV et JSON ; ajoutez #key ou #key=value pour sélectionner une partie d’une liste JSON."
       },
       "WHITELIST_RDNS_URLS": {
         "label": "DNS inversé de la liste blanche (URL)",

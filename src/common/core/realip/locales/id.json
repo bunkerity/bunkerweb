@@ -27,7 +27,7 @@
       },
       "REAL_IP_FROM_URLS": {
         "label": "IP asli dari URL",
-        "help": "Daftar URL berisi IP/jaringan tepercaya, dipisahkan dengan spasi, tempat asal permintaan yang di-proxy. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+        "help": "Daftar URL berisi IP/jaringan tepercaya, dipisahkan dengan spasi, tempat asal permintaan yang di-proxy. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url. Mendukung daftar teks biasa, CSV, dan JSON; tambahkan #key atau #key=value untuk memilih sebagian daftar JSON."
       }
     }
   }

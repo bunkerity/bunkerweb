@@ -27,7 +27,7 @@
       },
       "REAL_IP_FROM_URLS": {
         "label": "Echte IP von URLs",
-        "help": "Liste von URLs, die vertrauenswürdige IPs/Netzwerke enthalten, durch Leerzeichen getrennt, von denen weitergeleitete Anfragen stammen. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url."
+        "help": "Liste von URLs, die vertrauenswürdige IPs/Netzwerke enthalten, durch Leerzeichen getrennt, von denen weitergeleitete Anfragen stammen. Unterstützt auch file://-URLs und HTTP-Basic-Auth über das Schema http://user:pass@url. Unterstützt Klartext-, CSV- und JSON-Listen; mit #key oder #key=value wählen Sie einen Teil einer JSON-Liste aus."
       }
     }
   }

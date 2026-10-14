@@ -53,7 +53,7 @@
       },
       "GREYLIST_IP_URLS": {
         "label": "IP/rete della lista grigia (URL)",
-        "help": "Elenco di URL, separati da spazi, contenenti IP/reti affidabili da inserire nella lista grigia. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url."
+        "help": "Elenco di URL, separati da spazi, contenenti IP/reti affidabili da inserire nella lista grigia. Supporta anche URL file:// e l'autenticazione basic tramite lo schema http://user:pass@url. Accetta elenchi di testo semplice, CSV e JSON; aggiungere #key o #key=value per selezionare parte di un elenco JSON."
       },
       "GREYLIST_RDNS_URLS": {
         "label": "DNS inverso della lista grigia (URL)",

@@ -53,7 +53,7 @@
       },
       "WHITELIST_IP_URLS": {
         "label": "화이트리스트 IP/네트워크 URL",
-        "help": "화이트리스트에 추가할 신뢰 IP/네트워크가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다."
+        "help": "화이트리스트에 추가할 신뢰 IP/네트워크가 담긴 URL 목록입니다(공백으로 구분). file:// URL과 http://user:pass@url 형식의 기본 인증도 지원합니다. 일반 텍스트, CSV 및 JSON 목록을 지원합니다. JSON 목록의 일부를 선택하려면 #key 또는 #key=value를 추가하세요."
       },
       "WHITELIST_RDNS_URLS": {
         "label": "화이트리스트 역방향 DNS URL",

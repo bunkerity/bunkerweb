@@ -47,7 +47,7 @@
       },
       "BLACKLIST_IGNORE_IP_URLS": {
         "label": "URL Blacklist – IP/jaringan yang diabaikan",
-        "help": "Daftar URL, dipisahkan dengan spasi, berisi IP/jaringan yang diabaikan dalam blacklist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi IP/jaringan yang diabaikan dalam blacklist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url. Mendukung daftar teks biasa, CSV, dan JSON; tambahkan #key atau #key=value untuk memilih sebagian daftar JSON."
       },
       "BLACKLIST_IGNORE_RDNS": {
         "label": "Blacklist – Reverse DNS yang diabaikan",
@@ -79,7 +79,7 @@
       },
       "BLACKLIST_IP_URLS": {
         "label": "URL Blacklist IP/jaringan",
-        "help": "Daftar URL, dipisahkan dengan spasi, berisi IP/jaringan buruk untuk diblokir. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi IP/jaringan buruk untuk diblokir. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url. Mendukung daftar teks biasa, CSV, dan JSON; tambahkan #key atau #key=value untuk memilih sebagian daftar JSON."
       },
       "BLACKLIST_RDNS": {
         "label": "Blacklist reverse DNS",

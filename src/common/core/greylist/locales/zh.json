@@ -53,7 +53,7 @@
       },
       "GREYLIST_IP_URLS": {
         "label": "灰名单 IP/网段 URL 列表",
-        "help": "以空格分隔的 URL 列表,其中包含要加入灰名单的可信 IP/网段。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。"
+        "help": "以空格分隔的 URL 列表,其中包含要加入灰名单的可信 IP/网段。同时支持 file:// URL,以及使用 http://user:pass@url 形式的基本认证。 支持纯文本、CSV 和 JSON 列表；添加 #key 或 #key=value 可选择 JSON 列表的一部分。"
       },
       "GREYLIST_RDNS_URLS": {
         "label": "灰名单反向 DNS URL 列表",

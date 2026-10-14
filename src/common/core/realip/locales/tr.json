@@ -27,7 +27,7 @@
       },
       "REAL_IP_FROM_URLS": {
         "label": "URL'lerden gerçek IP",
-        "help": "Proxy edilen isteklerin geldiği güvenilir IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+        "help": "Proxy edilen isteklerin geldiği güvenilir IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler. Düz metin, CSV ve JSON listelerini destekler; JSON listesinin bir bölümünü seçmek için #key veya #key=value ekleyin."
       }
     }
   }

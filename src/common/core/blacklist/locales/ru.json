@@ -47,7 +47,7 @@
       },
       "BLACKLIST_IGNORE_IP_URLS": {
         "label": "Blacklist — игнорируемые IP/сеть URL",
-        "help": "Список URL, разделённых пробелами, содержащих IP/сети, игнорируемые в чёрном списке. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+        "help": "Список URL, разделённых пробелами, содержащих IP/сети, игнорируемые в чёрном списке. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url. Поддерживает списки в виде обычного текста, CSV и JSON; добавьте #key или #key=value для выбора части списка JSON."
       },
       "BLACKLIST_IGNORE_RDNS": {
         "label": "Blacklist — игнорируемый reverse DNS",
@@ -79,7 +79,7 @@
       },
       "BLACKLIST_IP_URLS": {
         "label": "Blacklist IP/сеть URL",
-        "help": "Список URL, разделённых пробелами, содержащих вредоносные IP/сети для блокировки. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url."
+        "help": "Список URL, разделённых пробелами, содержащих вредоносные IP/сети для блокировки. Также поддерживаются URL file:// и auth basic в формате http://user:pass@url. Поддерживает списки в виде обычного текста, CSV и JSON; добавьте #key или #key=value для выбора части списка JSON."
       },
       "BLACKLIST_RDNS": {
         "label": "Blacklist reverse DNS",

@@ -31,7 +31,7 @@
       },
       "WHITELIST_IP_URLS": {
         "label": "URL Whitelist IP/jaringan",
-        "help": "Daftar URL, dipisahkan dengan spasi, berisi IP/jaringan baik untuk dimasukkan ke dalam whitelist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url."
+        "help": "Daftar URL, dipisahkan dengan spasi, berisi IP/jaringan baik untuk dimasukkan ke dalam whitelist. Juga mendukung URL file:// dan auth basic dengan format http://user:pass@url. Mendukung daftar teks biasa, CSV, dan JSON; tambahkan #key atau #key=value untuk memilih sebagian daftar JSON."
       },
       "WHITELIST_RDNS": {
         "label": "Whitelist reverse DNS",

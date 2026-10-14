@@ -47,7 +47,7 @@
       },
       "BLACKLIST_IGNORE_IP_URLS": {
         "label": "Blacklist yoksayılan IP/ağ URL'leri",
-        "help": "Kara listede yoksayılacak IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+        "help": "Kara listede yoksayılacak IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler. Düz metin, CSV ve JSON listelerini destekler; JSON listesinin bir bölümünü seçmek için #key veya #key=value ekleyin."
       },
       "BLACKLIST_IGNORE_RDNS": {
         "label": "Blacklist yoksayılan reverse DNS",
@@ -79,7 +79,7 @@
       },
       "BLACKLIST_IP_URLS": {
         "label": "Blacklist IP/ağ URL'leri",
-        "help": "Engellenecek kötü amaçlı IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler."
+        "help": "Engellenecek kötü amaçlı IP/ağları içeren, boşluklarla ayrılmış URL listesi. Ayrıca file:// URL'lerini ve http://user:pass@url biçiminde auth basic'i de destekler. Düz metin, CSV ve JSON listelerini destekler; JSON listesinin bir bölümünü seçmek için #key veya #key=value ekleyin."
       },
       "BLACKLIST_RDNS": {
         "label": "Blacklist reverse DNS",
