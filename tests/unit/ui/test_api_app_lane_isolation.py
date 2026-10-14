@@ -75,9 +75,10 @@ def _collect(*args, lane=False, execute=False):
     return pytest.ExitCode(proc.returncode), ids, out
 
 
-# The two tests that RUN the lane need the lane's own dependencies, and those are opt-in by design:
-# `biscuit-python` needs a Rust toolchain, so it is pinned in `tests/unit/api_app/requirements.txt`
-# and deliberately kept out of `tests/unit/requirements.txt` (see `api_app/README.md`).
+# The two tests that collect the lane need ALL its separately pinned dependencies.
+# Biscuit is also installed by the ordinary UI suite, so its presence alone does not establish
+# readiness: biscuit.py imports config -> yaml_base_settings -> pydantic_settings as well.
+# See api_app/requirements.in and api_app/README.md; the lane remains opt-in and exclusive.
 #
 # RULE 21 -- this gate exists because the failure was wearing this guard's verdict. Without it, a
 # host that never installed the lane sees `AssertionError: the flagged tree run did not collect
@@ -86,13 +87,18 @@ def _collect(*args, lane=False, execute=False):
 # missing wheel as a misdiagnosis of an unrelated `app`-package collision. A missing dependency is
 # neither "isolation held" nor "isolation broke", so it must produce neither.
 #
-# The skip is loud on purpose: it names the wheel and the exact install line. It is also a real
-# coverage hole rather than a tidy-up -- CI installs `tests/unit/requirements.txt` only, so these
-# two never run there. Recorded for the PO, not closed here.
-_LANE_DEPS = find_spec("biscuit_auth") is not None
+# The skip names missing packages and the exact lane install line. A complete lane environment
+# executes both checks; the main unit requirements alone do not qualify that environment.
+_LANE_IMPORTS = {
+    "biscuit-python": "biscuit_auth",
+    "fastapi": "fastapi",
+    "pydantic-settings": "pydantic_settings",
+}
+_MISSING_LANE_DEPS = tuple(package for package, module in _LANE_IMPORTS.items() if find_spec(module) is None)
+_LANE_DEPS = not _MISSING_LANE_DEPS
 _needs_lane_deps = pytest.mark.skipif(
     not _LANE_DEPS,
-    reason="the api_app lane's own dependencies are not installed: .venv-unit/bin/pip install --require-hashes -r tests/unit/api_app/requirements.txt",
+    reason=f"the api_app lane is missing {', '.join(_MISSING_LANE_DEPS)}: .venv-unit/bin/pip install --require-hashes -r tests/unit/api_app/requirements.txt",
 )
 
 
@@ -101,7 +107,8 @@ def test_the_skip_condition_above_matches_what_the_lane_actually_declares():
     is still true, and two of the five tests here hang off this one boolean."""
     declared = (UNIT / "api_app" / "requirements.in").read_text(encoding="utf-8")
 
-    assert "biscuit-python" in declared, "the lane no longer pins biscuit-python; the skip above is gating on the wrong module"
+    packages = {line.split("==", 1)[0] for line in declared.splitlines() if line and not line.startswith("#")}
+    assert packages == set(_LANE_IMPORTS), "the lane dependency gate must match every package declared in api_app/requirements.in"
     assert [p for p in (UNIT / "api_app").glob("test_*.py")], "the api_app lane has no test files -- the two tests below would prove nothing even unskipped"
 
 

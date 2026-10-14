@@ -17,6 +17,7 @@ from urllib.parse import quote
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
+from redis_keys import facet_key, is_cluster, requests_key  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES
@@ -322,7 +323,7 @@ class InstancesUtils:
         the iterator's signal to fall back to chunk-based termination.
         """
         try:
-            total = int(redis_client.llen("requests") or 0)
+            total = int(redis_client.llen(requests_key(is_cluster(redis_client))) or 0)
         except Exception:
             return 0, None
         if max_requests <= 0:
@@ -394,7 +395,7 @@ class InstancesUtils:
             top_heap: list[tuple[int, str]] = []
 
             try:
-                for raw_value, raw_count in self._iter_redis_hash(redis_client, f"requests:facet:{field}"):
+                for raw_value, raw_count in self._iter_redis_hash(redis_client, facet_key(is_cluster(redis_client), field)):
                     value = self._decode_redis_text(raw_value) or "N/A"
                     try:
                         count = int(self._decode_redis_text(raw_count))
@@ -490,7 +491,7 @@ class InstancesUtils:
                 start_idx = end_idx - fetch_count + 1
                 next_idx = start_idx - 1
 
-            raw_chunk = redis_client.lrange("requests", start_idx, end_idx)
+            raw_chunk = redis_client.lrange(requests_key(is_cluster(redis_client)), start_idx, end_idx)
             if not raw_chunk:
                 break
             if order_dir == "desc":
@@ -966,7 +967,7 @@ class InstancesUtils:
         # termination (the original contract).
         if total is None:
             try:
-                total = int(redis_client.llen("requests") or 0)
+                total = int(redis_client.llen(requests_key(is_cluster(redis_client))) or 0)
             except Exception:
                 total = None
 
@@ -980,7 +981,7 @@ class InstancesUtils:
             for _ in range(pipeline_batch):
                 if total is not None and s >= total:
                     break
-                pipe.lrange("requests", s, s + chunk_size - 1)
+                pipe.lrange(requests_key(is_cluster(redis_client)), s, s + chunk_size - 1)
                 issued += 1
                 s += chunk_size
             if issued == 0:
@@ -1391,7 +1392,7 @@ class InstancesUtils:
                     error_counters = {}
                     if not keys:
                         return error_counters
-                    values = redis_client.mget(keys)
+                    values = redis_client.mget_nonatomic(keys) if is_cluster(redis_client) else redis_client.mget(keys)
                     for key, value in zip(keys, values):
                         try:
                             if value is None:

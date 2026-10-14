@@ -1054,9 +1054,9 @@ $(document).ready(function () {
     const currentServerName =
       rowData && rowData.server_name ? decodeHtml(rowData.server_name) : "";
     const reportId =
-      button.data("report-id") ||
+      button.attr("data-report-id") ||
       (rowData ? rowData.request_id || rowData.id : "");
-    const hostname = button.data("hostname") || "";
+    const hostname = button.attr("data-hostname") || "";
 
     const baseTitle = `
       <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(

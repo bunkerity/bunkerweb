@@ -142,9 +142,9 @@ $(document).ready(() => {
     "#templates-dropdown-menu button[data-template-id], [data-template-id][data-template-dom-id]",
   ).each(function () {
     const $element = $(this);
-    const templateId = normalizeTemplateId($element.data("template-id"));
+    const templateId = normalizeTemplateId($element.attr("data-template-id"));
     if (!templateId || templateDomIdMap[templateId]) return;
-    const domId = normalizeTemplateId($element.data("template-dom-id"));
+    const domId = normalizeTemplateId($element.attr("data-template-dom-id"));
     registerDomId(templateId, domId);
   });
 
@@ -320,7 +320,7 @@ $(document).ready(() => {
     // Get step number and template from container
     const stepNumber = currentStepContainer.data("step");
     const template =
-      normalizeTemplateId(currentStepContainer.data("templateId")) ||
+      normalizeTemplateId(currentStepContainer.attr("data-template-id")) ||
       currentTemplate;
 
     // Find the nav item for this step
@@ -720,7 +720,7 @@ $(document).ready(() => {
         );
 
         // Show the first step content with proper fade transition
-        const stepId = firstStep.data("step-id");
+        const stepId = firstStep.attr("data-step-id");
         // Find all active panes and remove show first
         const $activePanes = templateContainer.find(
           ".template-steps-content .tab-pane.active",
@@ -781,12 +781,12 @@ $(document).ready(() => {
 
       if (isDirectStepClick) {
         targetStep = parseInt($(this).data("step"));
-        template = normalizeTemplateId($(this).data("template"));
+        template = normalizeTemplateId($(this).attr("data-template"));
 
         // Don't proceed if already on this step
         if (targetStep === currentStep) return;
       } else {
-        template = normalizeTemplateId($(this).data("template"));
+        template = normalizeTemplateId($(this).attr("data-template"));
         targetStep = isNextButton ? currentStep + 1 : currentStep - 1;
       }
 
@@ -829,7 +829,7 @@ $(document).ready(() => {
     debounce(() => {
       // Get the template and step number
       const template =
-        normalizeTemplateId(stepContainer.data("templateId")) ||
+        normalizeTemplateId(stepContainer.attr("data-template-id")) ||
         currentTemplate;
       const step = parseInt(stepContainer.data("step"));
 

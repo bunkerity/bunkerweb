@@ -92,7 +92,7 @@ def route_app(monkeypatch):
     monkeypatch.setattr(MODULE, "API_CLIENT", api)
     monkeypatch.setattr(MODULE, "BW_CONFIG", bw_config)
     monkeypatch.setattr(MODULE, "DATA", _FakeData(TO_FLASH=[]))
-    monkeypatch.setattr(MODULE, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(MODULE, "submit_config_task", executor.submit)
     monkeypatch.setattr(MODULE, "is_readonly_request", lambda api_readonly: api_readonly)
     app = Flask(__name__)
     app.secret_key = "test"

@@ -49,6 +49,7 @@ def configs_route():
     module = importlib.util.module_from_spec(spec)
     with patch.dict(sys.modules, {"app.dependencies": dependencies, "qrcode": qrcode, "qrcode.main": qrcode_main, module_name: module}):
         spec.loader.exec_module(module)
+        module.submit_config_task = dependencies.CONFIG_TASKS_EXECUTOR.submit
         yield module
 
 
@@ -69,7 +70,7 @@ def route_app(configs_route, monkeypatch):
     monkeypatch.setattr(configs_route, "DATA", _Data(TO_FLASH=[]))
     # Run the submitted closure inline: without this an unfixed route would "pass" simply because
     # the write never left the executor stub.
-    configs_route.CONFIG_TASKS_EXECUTOR.submit.side_effect = lambda function, *args: function(*args)
+    configs_route.submit_config_task.side_effect = lambda function, *args: function(*args)
 
     configs_route.API_CLIENT.readonly = False
     configs_route.API_CLIENT.get_configs.return_value = [{"service": SERVICE, "type": "server_http", "name": "test", "method": "ui", "is_draft": False}]

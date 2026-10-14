@@ -15,6 +15,18 @@ from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import flash, get_blacklisted_settings, is_editable_method
 
 
+def server_name_conflict(services: list[dict], server_name: str, ignore: Optional[str] = None) -> Optional[str]:
+    """Check every declared name, identifying a service only by its primary name."""
+    names = server_name.split()
+    for service in services:
+        used = service["SERVER_NAME"].split()
+        if not used or used[0] == ignore:
+            continue
+        if any(name in used for name in names):
+            return f"Service {used[0]} already exists."
+    return None
+
+
 class Config:
     def __init__(self, db=None, *, data, api_client) -> None:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
@@ -432,14 +444,13 @@ class Config:
             raise this if the service already exists
         """
         services = self.get_services(methods=False, with_drafts=True)
-        server_name_splitted = variables["SERVER_NAME"].split()
-        for service in services:
-            if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
-                return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
+        conflict = server_name_conflict(services, variables["SERVER_NAME"])
+        if conflict:
+            return conflict, 1
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
         ret = self.gen_conf(
-            self.get_config(methods=False),
+            self.get_config(global_only=True, methods=False),
             services,
             check_changes=False if not check_changes else not is_draft,
             override_method=override_method,
@@ -479,21 +490,17 @@ class Config:
         changed_server_name = old_server_name != variables["SERVER_NAME"]
         server_name_splitted = variables["SERVER_NAME"].split()
         old_server_name_splitted = old_server_name.split()
-        for i in range(len(services) - 1, -1, -1):
-            service = services[i]
-            if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
-                if changed_server_name and service["SERVER_NAME"].split(" ")[0] != old_server_name_splitted[0]:
-                    return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
-                services.pop(i)
-            elif changed_server_name and (service["SERVER_NAME"] == old_server_name or service["SERVER_NAME"] in old_server_name_splitted):
-                services.pop(i)
+        conflict = server_name_conflict(services, variables["SERVER_NAME"], ignore=old_server_name_splitted[0])
+        if conflict:
+            return conflict, 1
+        services = [service for service in services if service["SERVER_NAME"].split()[0] != old_server_name_splitted[0]]
 
         services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
         config = self.get_config(global_only=True, methods=False)
 
         if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
             for k in config.copy():
-                if k.startswith(old_server_name_splitted[0]):
+                if k.startswith(f"{old_server_name_splitted[0]}_"):
                     config.pop(k)
 
         ret = self.gen_conf(
@@ -561,7 +568,7 @@ class Config:
             raises this if the service_name given isn't found
         """
         service_name = service_name.split(" ")[0]
-        full_env = self.get_config(methods=False)
+        full_env = self.get_config(global_only=True, methods=False)
         services = self.get_services(methods=False, with_drafts=True)
         new_services = []
         found = False
@@ -580,7 +587,7 @@ class Config:
         new_env = full_env.copy()
 
         for k in full_env:
-            if k.startswith(service_name):
+            if k.startswith(f"{service_name}_"):
                 new_env.pop(k)
 
                 for service in new_services:

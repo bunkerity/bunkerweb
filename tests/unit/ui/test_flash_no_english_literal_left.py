@@ -104,6 +104,8 @@ REVIEWED_PASSTHROUGH_SITES = [
     # `errors` list (each entry translated at its own `.append(...)` site).
     ("src/ui/app/routes/templates.py", "permission['message']"),
     ("src/ui/app/routes/templates.py", "' '.join(errors)"),
+    # submit_config_task resolves the error in the request locale before the callback.
+    ("src/ui/app/routes/utils.py", "error_message"),
     # utils.py: `verify_data_in_form`/`handle_error`'s own internal calls -- the shared helpers
     # forward whatever their caller already resolved (every caller's own literal is converted at
     # its call site, not here).

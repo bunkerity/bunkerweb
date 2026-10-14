@@ -347,7 +347,7 @@ def _post_plugin_page(module, app, monkeypatch, *, db_config=None, form=None, pl
     executor = Mock()
     monkeypatch.setattr(module, "API_CLIENT", api)
     monkeypatch.setattr(module, "BW_CONFIG", bw_config)
-    monkeypatch.setattr(module, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(module, "submit_config_task", executor.submit)
     monkeypatch.setattr(module, "DATA", _FakeData(TO_FLASH=[]))
     monkeypatch.setattr("app.utils.current_user", SimpleNamespace(list_permissions=list(permissions)))
 

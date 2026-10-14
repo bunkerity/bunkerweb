@@ -192,7 +192,7 @@ def _post_global_page(monkeypatch, *, query="", form=None, permissions=("read", 
     executor = Mock()
     monkeypatch.setattr(_MODULE, "API_CLIENT", api)
     monkeypatch.setattr(_MODULE, "BW_CONFIG", bw_config)
-    monkeypatch.setattr(_MODULE, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(_MODULE, "submit_config_task", executor.submit)
     monkeypatch.setattr(_MODULE, "DATA", _FakeData(TO_FLASH=[]))
 
     app = Flask(__name__)
@@ -258,7 +258,7 @@ def _post_global_plugin_page(monkeypatch, *, plugin="antibot", form=None, permis
     executor = Mock()
     monkeypatch.setattr(_MODULE, "API_CLIENT", api)
     monkeypatch.setattr(_MODULE, "BW_CONFIG", bw_config)
-    monkeypatch.setattr(_MODULE, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(_MODULE, "submit_config_task", executor.submit)
     monkeypatch.setattr(_MODULE, "DATA", _FakeData(TO_FLASH=[]))
 
     app = Flask(__name__)

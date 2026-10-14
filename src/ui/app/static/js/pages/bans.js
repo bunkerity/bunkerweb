@@ -1747,9 +1747,9 @@ $(document).ready(function () {
     if (actionLock) return;
     actionLock = true;
 
-    const ip = $(this).data("ip");
+    const ip = $(this).attr("data-ip");
     const scope = $(this).data("scope");
-    const service = $(this).data("service");
+    const service = $(this).attr("data-service");
 
     const ban = {
       ip: ip,
@@ -1775,9 +1775,9 @@ $(document).ready(function () {
     if (actionLock) return;
     actionLock = true;
 
-    const ip = $(this).data("ip");
+    const ip = $(this).attr("data-ip");
     const scope = $(this).data("scope");
-    const service = $(this).data("service");
+    const service = $(this).attr("data-service");
 
     const ban = {
       ip: ip,

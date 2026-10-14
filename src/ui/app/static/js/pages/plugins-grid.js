@@ -169,7 +169,7 @@ $(document).ready(function () {
       );
       return;
     }
-    setupDeletionModal($(this).data("plugin-id"));
+    setupDeletionModal($(this).attr("data-plugin-id"));
   });
 
   // --------------------------------------------------------------------------

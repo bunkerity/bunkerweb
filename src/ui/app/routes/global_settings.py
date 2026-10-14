@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Set
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
+from app.dependencies import API_CLIENT, BW_CONFIG, DATA
 from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.models.save_scope import control_keys, restore_unowned_settings
@@ -26,7 +26,7 @@ from app.raw_drafts import (
 from app.routes.services import postable_scope, postable_shelf_scope, resolve_plugin, resolve_save_mode, shelf_plugin_scope
 from app.utils import LOGGER, flash, get_activation_map, get_blacklisted_settings, is_readonly_request, plugin_settings_body, plugin_settings_body_script
 
-from app.routes.utils import extract_file_setting_names, handle_error, wait_applying
+from app.routes.utils import extract_file_setting_names, handle_error, wait_applying, submit_config_task
 
 global_settings = Blueprint("global_settings", __name__)
 
@@ -292,9 +292,7 @@ def global_settings_page():
             )
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(
-            update_global_config, variables, override_non_global_services, file_setting_names, scope=scope, draft_settings=draft_settings
-        )
+        submit_config_task(update_global_config, variables, override_non_global_services, file_setting_names, scope=scope, draft_settings=draft_settings)
 
         arguments = {}
         # Compared against this page's GET default (compose), not against the SAVE fallback
@@ -409,7 +407,7 @@ def global_settings_plugin_page(plugin: str):
         is_readonly = is_readonly_request(API_CLIENT.readonly)
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(
+        submit_config_task(
             update_global_config,
             variables,
             False,

@@ -410,8 +410,8 @@ $(document).ready(function () {
   initializeDataTable(jobs_config);
   $(document).on("click", ".show-history", function () {
     const historyModal = $("#modal-job-history");
-    const job = $(this).data("job");
-    const plugin = $(this).data("plugin");
+    const job = $(this).attr("data-job");
+    const plugin = $(this).attr("data-plugin");
 
     const history = $(`#job-${job}-${plugin}-history`).clone();
     const historyCount = history.find("ul").length - 1;
@@ -446,8 +446,8 @@ $(document).ready(function () {
       return;
     }
     const job = {
-      name: $(this).data("job"),
-      plugin: $(this).data("plugin"),
+      name: $(this).attr("data-job"),
+      plugin: $(this).attr("data-plugin"),
     };
     executeForm([job]);
   });

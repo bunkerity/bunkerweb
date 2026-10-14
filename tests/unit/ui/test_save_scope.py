@@ -847,7 +847,7 @@ def _post_service_page(app, monkeypatch, *, service="app.example.com", query="",
     executor = Mock()
     monkeypatch.setattr(module, "API_CLIENT", api)
     monkeypatch.setattr(module, "BW_CONFIG", bw_config)
-    monkeypatch.setattr(module, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(module, "submit_config_task", executor.submit)
     monkeypatch.setattr(module, "DATA", _FakeData(TO_FLASH=[]))
     data = {"csrf_token": "x"} | (form or {})
     with app.test_request_context(f"/services/{service}{query}", method="POST", data=data), _with_permissions(*permissions):

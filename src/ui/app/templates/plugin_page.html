@@ -14,9 +14,9 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    {% if plugin['type'] == 'core' %}
+    {% if plugin['type'] in ('core', 'pro') %}
         {% set plugin_endpoint = "/features" %}
-        {% set plugin_fragment = '#' + ('global-settings' if plugin['id'] == 'general' else plugin['id']) %}
+        {% set plugin_fragment = '#' + ('global-settings' if plugin['id'] == 'general' else plugin['name'] | lower | replace("'", '') | replace('.', '') | replace(' ', '-')) + ('-pro' if plugin['type'] == 'pro' else '') %}
     {% else %}
         {% set plugin_endpoint = "/plugins" %}
         {% set plugin_fragment = "" %}

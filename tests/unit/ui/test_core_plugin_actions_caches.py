@@ -78,8 +78,9 @@ FOLDER_NAME = "folder:/var/cache/bunkerweb/letsencrypt/etc.tgz"
 ENCODED_NAME = "folder:_var_cache_bunkerweb_letsencrypt_etc.tgz"
 
 
-def test_letsencrypt_pre_render_downloads_and_extracts_the_real_archive(monkeypatch):
+def test_letsencrypt_pre_render_downloads_and_extracts_the_real_archive(monkeypatch, tmp_path):
     actions = _actions("letsencrypt")
+    monkeypatch.setattr(actions, "sep", str(tmp_path))
     archive = _tgz({"live/example.com/fullchain.pem": b"dummy-cert-bytes"})
     client = _FakeClient(
         cache_files=[{"file_name": FOLDER_NAME}],
@@ -103,10 +104,11 @@ def test_letsencrypt_pre_render_downloads_and_extracts_the_real_archive(monkeypa
     assert client.get_cache_file_calls == [(None, "letsencrypt", "certbot-renew", ENCODED_NAME, True)]
 
 
-def test_letsencrypt_pre_render_skips_a_folder_entry_whose_archive_is_gone(monkeypatch):
+def test_letsencrypt_pre_render_skips_a_folder_entry_whose_archive_is_gone(monkeypatch, tmp_path):
     """The archive listed but 404ing on download (purged between the list and the fetch) must not
     crash `extract_cache`'s `BytesIO(cache_file["data"])` -- it degrades to no certificates."""
     actions = _actions("letsencrypt")
+    monkeypatch.setattr(actions, "sep", str(tmp_path))
     client = _FakeClient(cache_files=[{"file_name": FOLDER_NAME}], files={})
     monkeypatch.setattr(actions, "retrieve_certificates_info", lambda folder_paths: {"domain": []})
 

@@ -58,7 +58,7 @@ $(document).ready(function () {
   }
 
   const method = editorElement.data("method");
-  const template = editorElement.data("template");
+  const template = editorElement.attr("data-template");
   if (method !== "ui" && template === "") {
     editor.setReadOnly(true);
   }
@@ -145,7 +145,7 @@ $(document).ready(function () {
     $serviceDropdownItems.each(function () {
       const item = $(this);
       const isActive =
-        String(item.data("service")).toLowerCase() === serviceName;
+        String(item.attr("data-service")).toLowerCase() === serviceName;
       item.toggleClass("active", isActive);
       item.attr("aria-selected", isActive ? "true" : "false");
     });
@@ -167,7 +167,7 @@ $(document).ready(function () {
         : $serviceDropdownItems
             .filter((_, item) => {
               return (
-                String($(item).data("service")).toLowerCase() ===
+                String($(item).attr("data-service")).toLowerCase() ===
                 serviceName.toLowerCase()
               );
             })
@@ -234,7 +234,7 @@ $(document).ready(function () {
 
   $serviceDropdownItems.on("click", function () {
     const previousService = selectedService;
-    const requestedService = String($(this).data("service"));
+    const requestedService = String($(this).attr("data-service"));
     setSelectedService(requestedService);
     if (enforceGlobalServiceForModsecCrs()) {
       return;

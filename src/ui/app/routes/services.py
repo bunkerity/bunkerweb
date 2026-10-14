@@ -29,7 +29,7 @@ from default_server import (  # type: ignore
 from ports import collect_ports  # type: ignore
 from service_classification import MODE_REDIRECT_ONLY, MODE_STANDARD, SERVICE_MODE_SETTING  # type: ignore
 
-from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, CORE_PLUGINS_PATH, DATA
+from app.dependencies import API_CLIENT, BW_CONFIG, CORE_PLUGINS_PATH, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.i18n import translated
 from app.models.secret_settings import redact_secrets, restore_secrets, secret_setting_names
@@ -65,6 +65,7 @@ from app.routes.utils import (
     parse_search_panes_dict,
     verify_data_in_form,
     wait_applying,
+    submit_config_task,
 )
 from app.utils import (
     LOGGER,
@@ -783,7 +784,7 @@ def services_convert():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(convert_services, services, convert_to)
+    submit_config_task(convert_services, services, convert_to)
 
     return redirect(
         url_for(
@@ -879,7 +880,7 @@ def services_mode_convert(service: str):
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(convert_mode, service, mode)
+    submit_config_task(convert_mode, service, mode)
 
     return redirect(
         url_for(
@@ -1000,7 +1001,7 @@ def services_delete():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(delete_services, services)
+    submit_config_task(delete_services, services)
 
     return redirect(
         url_for(
@@ -2183,9 +2184,7 @@ def services_service_page(service: str):
                 return handle_error(refusal, "services")
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(
-            update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, scope=scope, draft_settings=draft_settings
-        )
+        submit_config_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, scope=scope, draft_settings=draft_settings)
 
         new_service = False
         if service == "new":
@@ -2433,7 +2432,7 @@ def services_plugin_page(service: str, plugin: str):
         is_readonly = is_readonly_request(API_CLIENT.readonly)
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(
+        submit_config_task(
             update_service,
             service,
             variables.copy(),
@@ -2544,7 +2543,7 @@ def services_template_page(service: str, template: str):
         is_readonly = is_readonly_request(API_CLIENT.readonly)
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(
+        submit_config_task(
             update_service,
             service,
             variables.copy(),
@@ -2857,7 +2856,7 @@ def services_service_import():
         DATA.update({"RELOADING": False, "CONFIG_CHANGED": config_changed})
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(
+    submit_config_task(
         import_services,
         services_map,
         parse_errors,

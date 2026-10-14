@@ -5,14 +5,14 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 from flask_login import login_required
 
 from common_utils import parse_host  # type: ignore
-from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA
+from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS, DATA
 from app.i18n import LocaleThreadPoolExecutor, translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.form_retry import keep_form, take_form_retry
 from app.utils import flash, is_readonly_request, is_ui_api_method
 
 from app.models.instance import Instance
-from app.routes.utils import handle_error, verify_data_in_form
+from app.routes.utils import handle_error, verify_data_in_form, submit_config_task
 
 instances = Blueprint("instances", __name__)
 
@@ -329,7 +329,7 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
                 executor.map(execute_action, instances)
             DATA["RELOADING"] = False
 
-        CONFIG_TASKS_EXECUTOR.submit(execute_actions, instances)
+        submit_config_task(execute_actions, instances)
 
     return redirect(
         url_for(

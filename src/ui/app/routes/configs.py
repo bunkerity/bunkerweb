@@ -12,11 +12,11 @@ from werkzeug.utils import secure_filename
 from common_utils import bytes_hash  # type: ignore
 from custom_configs_validation import NAME_RX  # type: ignore
 
-from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
+from app.dependencies import API_CLIENT, BW_CONFIG, DATA
 from app.i18n import translated
 from app.utils import flash, is_editable_method, is_readonly_request
 
-from app.routes.utils import handle_error, verify_data_in_form, wait_applying
+from app.routes.utils import handle_error, verify_data_in_form, wait_applying, submit_config_task
 
 configs = Blueprint("configs", __name__)
 
@@ -48,6 +48,21 @@ CONFIG_TYPES = {
     "CRS_PLUGINS_BEFORE": {"context": "multisite", "description": "Configurations applied before the OWASP Core Rule Set plugins are loaded."},
     "CRS_PLUGINS_AFTER": {"context": "multisite", "description": "Configurations applied after the OWASP Core Rule Set plugins are loaded."},
 }
+
+
+def _valid_config_selection(configs: object) -> bool:
+    if not isinstance(configs, list) or not configs:
+        return False
+    allowed_types = {config_type.lower() for config_type in CONFIG_TYPES}
+    return all(
+        isinstance(config, dict)
+        and isinstance(config.get("name"), str)
+        and match(CONFIG_NAME_RX, config["name"])
+        and isinstance(config.get("type"), str)
+        and config["type"].strip().replace("-", "_").lower() in allowed_types
+        and (config.get("service") is None or isinstance(config.get("service"), str))
+        for config in configs
+    )
 
 
 def parse_configs_export(content: str) -> Tuple[List[Dict], List[str]]:
@@ -331,6 +346,10 @@ def configs_convert():
         return handle_error(
             translated("configs.flash.invalid_configs_parameter_configs_convert") or "Invalid configs parameter on /configs/convert.", "configs", True
         )
+    if not _valid_config_selection(configs):
+        return handle_error(
+            translated("configs.flash.invalid_configs_parameter_configs_convert") or "Invalid configs parameter on /configs/convert.", "configs", True
+        )
 
     convert_to = request.form["convert_to"]
     if convert_to not in ("online", "draft"):
@@ -452,7 +471,7 @@ def configs_convert():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(convert_configs, configs, convert_to)
+    submit_config_task(convert_configs, configs, convert_to)
 
     return redirect(
         url_for(
@@ -483,6 +502,10 @@ def configs_delete():
     try:
         configs = loads(configs)
     except JSONDecodeError:
+        return handle_error(
+            translated("configs.flash.invalid_configs_parameter_configs_delete") or "Invalid configs parameter on /configs/delete.", "configs", True
+        )
+    if not _valid_config_selection(configs):
         return handle_error(
             translated("configs.flash.invalid_configs_parameter_configs_delete") or "Invalid configs parameter on /configs/delete.", "configs", True
         )
@@ -542,7 +565,7 @@ def configs_delete():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(delete_configs, configs)
+    submit_config_task(delete_configs, configs)
 
     return redirect(
         url_for(
@@ -677,7 +700,7 @@ def configs_new():
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        CONFIG_TASKS_EXECUTOR.submit(create_config, service if service != "global" else None, config_type, config_name, config_value, is_draft)
+        submit_config_task(create_config, service if service != "global" else None, config_type, config_name, config_value, is_draft)
 
         return redirect(
             url_for(
@@ -1022,7 +1045,7 @@ def configs_import():
         DATA.update({"RELOADING": False, "CONFIG_CHANGED": bool(results["created"] or results["overwritten"])})
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    CONFIG_TASKS_EXECUTOR.submit(import_configs, parsed_configs, parse_errors, overwrite)
+    submit_config_task(import_configs, parsed_configs, parse_errors, overwrite)
 
     return redirect(
         url_for(

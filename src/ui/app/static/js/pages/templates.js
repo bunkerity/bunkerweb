@@ -68,7 +68,7 @@ $(document).ready(function () {
     if (actionLock) return; // Prevent overlapping actions
     actionLock = true; // Lock action
 
-    const templateId = $(this).data("template-id");
+    const templateId = $(this).attr("data-template-id");
     setupDeletionModal([templateId]);
     actionLock = false; // Unlock after modal setup
   });
@@ -84,7 +84,7 @@ $(document).ready(function () {
   const getSelectedTemplates = () =>
     $(".template-checkbox:checked")
       .map(function () {
-        return $(this).data("template-id");
+        return $(this).attr("data-template-id");
       })
       .get();
 

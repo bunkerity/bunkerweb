@@ -39,6 +39,7 @@ def route_app(monkeypatch):
     module = importlib.util.module_from_spec(spec)
     with patch.dict(sys.modules, {"app.dependencies": dependencies, "qrcode": qrcode, "qrcode.main": qrcode_main, module_name: module}):
         spec.loader.exec_module(module)
+        module.submit_config_task = dependencies.CONFIG_TASKS_EXECUTOR.submit
 
         monkeypatch.setattr(module, "handle_error", lambda message, *_args, **_kwargs: (message, 403))
         monkeypatch.setattr(module, "verify_data_in_form", lambda **_kwargs: True)
@@ -77,4 +78,4 @@ def test_a_session_without_write_cannot_mutate_instances(route_app, action):
     assert response.status_code == 403
     assert b"write permission" in response.data
     assert not route_app.module.API_CLIENT.delete_instances.called
-    assert not route_app.module.CONFIG_TASKS_EXECUTOR.submit.called
+    assert not route_app.module.submit_config_task.called

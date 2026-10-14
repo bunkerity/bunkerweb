@@ -388,6 +388,7 @@ def plugins_route():
     }
     with patch.dict(sys.modules, stubs):
         spec.loader.exec_module(module)
+        module.submit_config_task = dependencies.CONFIG_TASKS_EXECUTOR.submit
         yield module
 
 

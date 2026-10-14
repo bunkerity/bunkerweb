@@ -120,6 +120,7 @@ from app.routes.templates import templates as templates_bp
 from app.routes.upstreams import upstreams
 from app.routes.workflows import workflows
 from app.routes.utils import (
+    active_config_tasks,
     bind_session_cookie_per_request,
     cap_anonymous_session_lifetime,
     chain_session_fallback,
@@ -810,6 +811,14 @@ with app.app_context():
     app.config["WTF_CSRF_SSL_STRICT"] = False
     csrf = CSRFProtect()
     csrf.init_app(app)
+
+    def lift_form_field_limit():
+        # CSRF parses the form first; signed-in POSTs may use the total upload cap.
+        # Login and anonymous requests retain Flask's smaller form-field limit.
+        if request.method == "POST" and current_user.is_authenticated:
+            request.max_form_memory_size = app.config["MAX_CONTENT_LENGTH"]
+
+    app.before_request_funcs.setdefault(None, []).insert(0, lift_form_field_limit)
 
     # CrowdSec has its own `menu.html` entry (Overview group) like every other core page, so it
     # is not seeded into the generic Extra Pages fallback -- that would render it a second time.
@@ -1936,6 +1945,7 @@ if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
 def check_reloading():
     DATA.load_from_file()
     current_time = time()
+    tasks_active = active_config_tasks() > 0
 
     try:
         db_metadata = API_CLIENT.get_metadata()
@@ -1949,10 +1959,13 @@ def check_reloading():
             if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
         )
         and DATA.get("LAST_RELOAD", 0) + 2 < current_time
+        and not tasks_active
     ):
         DATA["RELOADING"] = False
+    elif tasks_active and not DATA.get("RELOADING", False):
+        DATA["RELOADING"] = True
 
-    if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
+    if not tasks_active and (not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time):
         if DATA.get("RELOADING", False):
             LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
             flash(translated("main.flash.forced_status_reloaded") or "Forced the status to be reloaded", "error", save=False)

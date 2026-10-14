@@ -49,6 +49,7 @@ def services_route():
     stubs = {"app.dependencies": dependencies, "qrcode": qrcode, "qrcode.main": qrcode_main, module_name: module}
     with patch.dict(sys.modules, stubs):
         spec.loader.exec_module(module)
+        module.submit_config_task = dependencies.CONFIG_TASKS_EXECUTOR.submit
         yield module
 
 
@@ -188,7 +189,7 @@ def route_app(services_route, monkeypatch):
     monkeypatch.setattr(services_route, "is_readonly_request", lambda api_readonly: api_readonly)
     services_route.API_CLIENT.convert_service.reset_mock()
     services_route.API_CLIENT.convert_service.side_effect = None
-    services_route.CONFIG_TASKS_EXECUTOR.submit.side_effect = lambda function, *args: function(*args)
+    services_route.submit_config_task.side_effect = lambda function, *args: function(*args)
 
     app.add_url_rule("/services/<string:service>/mode", view_func=services_route.services_mode_convert.__wrapped__, methods=["POST"])
     app.add_url_rule("/loading", view_func=lambda: "loading", endpoint="loading")

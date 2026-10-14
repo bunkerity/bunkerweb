@@ -664,7 +664,7 @@ $(document).ready(function () {
   $(document).on("click", ".ping-instance", function () {
     if (actionLock) return;
     actionLock = true;
-    const instance = $(this).data("instance");
+    const instance = $(this).attr("data-instance");
     pingInstances([instance]);
   });
 
@@ -683,7 +683,7 @@ $(document).ready(function () {
     if (actionLock) return;
     actionLock = true; // Lock action
 
-    const instance = $(this).data("instance");
+    const instance = $(this).attr("data-instance");
     const action = $(this).hasClass("reload-instance") ? "reload" : "stop";
     execForm([instance], action);
     // actionLock released by page navigation
@@ -709,7 +709,7 @@ $(document).ready(function () {
     }
     if (actionLock) return;
     actionLock = true;
-    const instance = $(this).data("instance");
+    const instance = $(this).attr("data-instance");
     credentialAction(instance, "enroll")
       .done(function (data) {
         const code = data.code || "";
@@ -768,7 +768,7 @@ $(document).ready(function () {
       )
         return;
       actionLock = true;
-      const instance = $(this).data("instance");
+      const instance = $(this).attr("data-instance");
       credentialAction(instance, action)
         .done(function () {
           window.location.reload();
@@ -796,7 +796,7 @@ $(document).ready(function () {
     if (actionLock) return; // Prevent overlapping actions
     actionLock = true; // Lock action
 
-    const instance = $(this).data("instance");
+    const instance = $(this).attr("data-instance");
     setupDeletionModal([instance]);
     actionLock = false; // Unlock after modal setup
   });

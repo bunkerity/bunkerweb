@@ -29,7 +29,6 @@ from app.dependencies import (
     CORE_PLUGINS_PATH,
     BW_CONFIG,
     BW_INSTANCES_UTILS,
-    CONFIG_TASKS_EXECUTOR,
     DATA,
     DB,
     EXTERNAL_PLUGINS_PATH,
@@ -54,7 +53,7 @@ from app.models.plugin_catalog import (
 )
 from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR, get_activation_map, is_plugin_active
 
-from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
+from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying, submit_config_task
 
 plugins = Blueprint("plugins", __name__)
 
@@ -217,14 +216,12 @@ def delete_plugin():
                     API_CLIENT.checked_changes(["config"], plugins_changes=deleted_plugins.copy(), value=True)
         finally:
             # Always clear the loading-page flag, even if something above raised unexpectedly.
-            # This runs on a bare ThreadPoolExecutor whose futures are never retrieved (see
-            # toggle_plugin below), so an uncaught exception here would otherwise strand the
-            # user on /loading until the 60s watchdog in main.py clears RELOADING.
+            # submit_config_task restores this flag if another queued task remains.
             DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
 
-    CONFIG_TASKS_EXECUTOR.submit(update_plugins, plugins)
+    submit_config_task(update_plugins, plugins)
 
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
 
@@ -283,10 +280,7 @@ def enable_plugin():
                 }
             )
         except Exception as e:
-            # Deliberately broad, and it must stay: this runs on a bare ThreadPoolExecutor whose
-            # futures are never retrieved, so anything uncaught here vanishes with no log and no
-            # flash while the user waits on /loading for the 60s watchdog in main.py. The `finally`
-            # below clears RELOADING, but only this arm tells the operator what went wrong.
+            # Keep the plugin-specific error; submit_config_task handles uncaught failures.
             LOGGER.exception(f"Failed to toggle plugin {plugin!r}")
             DATA["TO_FLASH"].append(
                 {
@@ -299,7 +293,7 @@ def enable_plugin():
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
 
-    CONFIG_TASKS_EXECUTOR.submit(toggle_plugin, plugin, enabled)
+    submit_config_task(toggle_plugin, plugin, enabled)
 
     action = "Enabling" if enabled else "Disabling"
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"{action} plugin: {plugin}"))
@@ -762,7 +756,7 @@ def plugins_refresh():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
-    CONFIG_TASKS_EXECUTOR.submit(update_plugins)
+    submit_config_task(update_plugins)
 
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message="Reloading plugins"))
 
@@ -1028,9 +1022,7 @@ def _catalog_job(plugin_id: str, tag: str, digest: str, *, replace: bool, done: 
             }
         )
     except Exception as e:
-        # Deliberately broad, and it must stay: this runs on a bare ThreadPoolExecutor whose
-        # futures are never retrieved, so anything uncaught here vanishes with no log and no
-        # flash while the user waits on /loading for the 60s watchdog in main.py.
+        # Keep the catalogue-specific error; submit_config_task handles uncaught failures.
         LOGGER.exception(f"Failed to {action} catalogue plugin {plugin_id!r}")
         DATA["TO_FLASH"].append(
             {
@@ -1082,7 +1074,7 @@ def install_catalog_plugin():
         return handle_error(str(e), "plugins", True)
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
-    CONFIG_TASKS_EXECUTOR.submit(
+    submit_config_task(
         _catalog_job,
         plugin_id,
         tag,
@@ -1159,7 +1151,7 @@ def update_catalog_plugin():
         return handle_error(str(e), "plugins", True)
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
-    CONFIG_TASKS_EXECUTOR.submit(
+    submit_config_task(
         _catalog_job,
         plugin_id,
         tag,

@@ -110,6 +110,7 @@ def route_module():
     stubs = {"app.dependencies": dependencies, "qrcode": qrcode, "qrcode.main": qrcode_main, module_name: module}
     with patch.dict(sys.modules, stubs):
         spec.loader.exec_module(module)
+        module.submit_config_task = dependencies.CONFIG_TASKS_EXECUTOR.submit
         yield module, client, config, data
 
 

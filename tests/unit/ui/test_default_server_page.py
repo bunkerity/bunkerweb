@@ -267,7 +267,7 @@ class TestTheOtherTwoWritePaths:
         bw_config.get_config.return_value = {"SERVER_NAME": f"{DEFAULT_SERVER_ID} app.example.com"}
         monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
         executor = Mock()
-        monkeypatch.setattr(_services, "CONFIG_TASKS_EXECUTOR", executor)
+        monkeypatch.setattr(_services, "submit_config_task", executor.submit)
 
         with route_app.test_request_context(
             "/services/convert", method="POST", data={"services": f"{DEFAULT_SERVER_ID},app.example.com", "convert_to": "draft", "csrf_token": "x"}
@@ -311,7 +311,7 @@ class TestTheOtherTwoWritePaths:
         executor = Mock()
         monkeypatch.setattr(_services, "API_CLIENT", api)
         monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
-        monkeypatch.setattr(_services, "CONFIG_TASKS_EXECUTOR", executor)
+        monkeypatch.setattr(_services, "submit_config_task", executor.submit)
         monkeypatch.setattr(_services, "DATA", _FakeData(TO_FLASH=[]))
         monkeypatch.setattr(_services, "resolve_save_mode", lambda *args, **kwargs: "easy")
 
@@ -352,7 +352,7 @@ class TestTheOtherTwoWritePaths:
         executor = Mock()
         monkeypatch.setattr(_services, "API_CLIENT", api)
         monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
-        monkeypatch.setattr(_services, "CONFIG_TASKS_EXECUTOR", executor)
+        monkeypatch.setattr(_services, "submit_config_task", executor.submit)
         monkeypatch.setattr(_services, "DATA", _FakeData(TO_FLASH=[]))
         monkeypatch.setattr(_services, "resolve_save_mode", lambda *args, **kwargs: "easy")
         with route_app.test_request_context(f"/services/{DEFAULT_SERVER_ID}", method="POST", data={"csrf_token": "x"} | data):
@@ -405,7 +405,7 @@ class TestTheOtherTwoWritePaths:
         executor = Mock()
         monkeypatch.setattr(_services, "API_CLIENT", api)
         monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
-        monkeypatch.setattr(_services, "CONFIG_TASKS_EXECUTOR", executor)
+        monkeypatch.setattr(_services, "submit_config_task", executor.submit)
         monkeypatch.setattr(_services, "DATA", _FakeData(TO_FLASH=[]))
         monkeypatch.setattr(_services, "resolve_save_mode", lambda *args, **kwargs: "easy")
 
@@ -494,7 +494,7 @@ def _post_service_page(app, monkeypatch, service, data, *, services_rows=None):
     monkeypatch.setattr(_services, "BW_CONFIG", bw_config)
     monkeypatch.setattr(_services, "DATA", _FakeData())
     executor = Mock()
-    monkeypatch.setattr(_services, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(_services, "submit_config_task", executor.submit)
     flashed = []
     # `handle_error`, not `flash`: the route refuses through it, and it is what turns a refusal into
     # a redirect the operator can see.

@@ -681,7 +681,7 @@ $(document).ready(function () {
   };
 
   $(document).on("click", ".export-service", function () {
-    const serviceId = $(this).data("service-id");
+    const serviceId = $(this).attr("data-service-id");
     if (!serviceId) return;
     openExportModal([String(serviceId)]);
   });
@@ -920,7 +920,7 @@ $(document).ready(function () {
       );
       return;
     }
-    const service = $(this).data("service-id");
+    const service = $(this).attr("data-service-id");
     setupDeletionModal([service]);
   });
 
@@ -934,7 +934,7 @@ $(document).ready(function () {
       );
       return;
     }
-    const service = $(this).data("service-id");
+    const service = $(this).attr("data-service-id");
     const conversionType = $(this).data("value");
     setupConversionModal([service], conversionType);
   });

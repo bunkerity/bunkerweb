@@ -53,6 +53,7 @@ def pro_route():
     route_utils.handle_error = Mock()
     route_utils.verify_data_in_form = Mock()
     route_utils.wait_applying = Mock()
+    route_utils.submit_config_task = dependencies.CONFIG_TASKS_EXECUTOR.submit
     app_utils = ModuleType("app.utils")
     app_utils.flash = Mock()
     # The route now also refuses a session without the `write` permission

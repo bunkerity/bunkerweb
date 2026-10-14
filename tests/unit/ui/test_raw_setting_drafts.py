@@ -303,7 +303,7 @@ def _post_global(query, form):
     with (
         patch.object(GLOBAL, "API_CLIENT", api),
         patch.object(GLOBAL, "BW_CONFIG", bw_config),
-        patch.object(GLOBAL, "CONFIG_TASKS_EXECUTOR", executor),
+        patch.object(GLOBAL, "submit_config_task", executor.submit),
         patch.object(GLOBAL, "DATA", _FakeData(TO_FLASH=[])),
         app.test_request_context(f"/global-settings{query}", method="POST", data={"csrf_token": "x"} | form),
         patch("app.utils.current_user", SimpleNamespace(list_permissions=["read", "write"])),

@@ -6,11 +6,11 @@ from flask_login import login_required
 
 from default_server import is_reserved_default_server  # type: ignore
 
-from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
+from app.dependencies import API_CLIENT, BW_CONFIG, DATA
 from app.i18n import translated
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.models.secret_settings import SECRET_PLACEHOLDER
-from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
+from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying, submit_config_task
 from app.utils import billable_service_count, flash, is_readonly_request
 
 pro = Blueprint("pro", __name__)
@@ -175,7 +175,7 @@ def pro_key():
         }
     )
     flash(translated("pro.flash.checking_license_key") or "Checking license key.")
-    CONFIG_TASKS_EXECUTOR.submit(update_license_key, variables, refused_count)
+    submit_config_task(update_license_key, variables, refused_count)
     return redirect(
         url_for(
             "loading",

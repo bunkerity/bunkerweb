@@ -582,7 +582,7 @@ def _post_template_page(module, app, monkeypatch, *, db_config, form=None, permi
     api.get_service.return_value = db_config
     executor = Mock()
     monkeypatch.setattr(module, "API_CLIENT", api)
-    monkeypatch.setattr(module, "CONFIG_TASKS_EXECUTOR", executor)
+    monkeypatch.setattr(module, "submit_config_task", executor.submit)
     monkeypatch.setattr(module, "DATA", _FakeData(TO_FLASH=[]))
     monkeypatch.setattr("app.utils.current_user", SimpleNamespace(list_permissions=list(permissions)))
 

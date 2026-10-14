@@ -4,7 +4,7 @@ $(function () {
   const band = $("#service-resources-band");
   if (!band.length) return;
 
-  const serviceId = band.data("service-id");
+  const serviceId = band.attr("data-service-id");
   const csrf = $("#csrf_token").val();
 
   // i18next is loaded by base.html but is not guaranteed to be (components/copy-button.js
@@ -70,14 +70,14 @@ $(function () {
         $("<input>", {
           type: "hidden",
           name: "resource_id",
-          value: button.data("resource-id"),
+          value: button.attr("data-resource-id"),
         }),
       )
       .append(
         $("<input>", {
           type: "hidden",
           name: "match_path",
-          value: button.closest(".resource-chip").data("match-path") || "",
+          value: button.closest(".resource-chip").attr("data-match-path") || "",
         }),
       )
       .appendTo("body")

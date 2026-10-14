@@ -72,7 +72,7 @@ def _run_action(language: str, action: str) -> list:
         with (
             patch.object(MODULE, "API_CLIENT", api_client),
             patch.object(MODULE, "DATA", data),
-            patch.object(MODULE, "CONFIG_TASKS_EXECUTOR", executor),
+            patch.object(MODULE, "submit_config_task", executor.submit),
             patch.object(MODULE, "is_readonly_request", lambda readonly: False),
             patch.object(MODULE.Instance, "from_hostname", lambda hostname, client: instance),
         ):

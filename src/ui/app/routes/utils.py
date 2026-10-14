@@ -1,11 +1,13 @@
 from base64 import b64encode
 from collections import defaultdict
 from datetime import datetime, timedelta
+from fcntl import LOCK_EX, LOCK_NB, flock
 from functools import wraps
 from io import BytesIO
 from time import sleep, time
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Tuple, Union
+from uuid import uuid4
 
 from flask import Response, g, has_request_context, redirect, request, url_for
 from qrcode.main import QRCode
@@ -39,6 +41,73 @@ CUSTOM_CONF_RX = build_env_style_key_rx(with_service_prefix=False)
 # Same aliasing as `CUSTOM_CONF_RX`: with `$`, `SETTING__FILE_NAME\n` matches and
 # `extract_file_setting_names` derives the same `SETTING` key as the clean field.
 FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?\Z")
+
+
+CONFIG_TASK_TIMEOUT = 60
+
+
+def active_config_tasks() -> int:
+    """Cross-worker task count; abandoned markers expire, live tasks never expire."""
+    from app.dependencies import DATA
+
+    count = 0
+    for marker in DATA.file_path.parent.joinpath("config_tasks").glob("*"):
+        try:
+            with marker.open("r") as handle:
+                try:
+                    flock(handle, LOCK_EX | LOCK_NB)
+                except BlockingIOError:
+                    count += 1
+                    continue
+                if marker.stat().st_mtime + CONFIG_TASK_TIMEOUT > time():
+                    count += 1
+                else:
+                    marker.unlink(missing_ok=True)
+        except FileNotFoundError:  # a completing task removed it
+            continue
+    return count
+
+
+def submit_config_task(task, *args, **kwargs):
+    """Tie loading state to a future on the existing, locale-aware executor."""
+    from app.dependencies import CONFIG_TASKS_EXECUTOR, DATA
+
+    directory = DATA.file_path.parent.joinpath("config_tasks")
+    directory.mkdir(parents=True, exist_ok=True)
+    marker = directory.joinpath(uuid4().hex)
+    handle = marker.open("x")
+    # Hold the marker lock even while queued. Kernel release on worker exit lets
+    # stale markers expire without timing out live saves (wait_applying takes 120s).
+    flock(handle, LOCK_EX)
+    error_message = translated("error.5xx.message") or "An unexpected server error occurred."
+
+    def finished(future):
+        try:
+            future.result()
+        except Exception:
+            LOGGER.exception("Configuration task failed")
+            DATA.load_from_file()
+            DATA["TO_FLASH"].append({"content": error_message, "type": "error"})
+        finally:
+            try:
+                marker.unlink(missing_ok=True)
+            finally:
+                handle.close()
+            DATA.load_from_file()
+            DATA["RELOADING"] = active_config_tasks() > 0
+
+    try:
+        DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
+        future = CONFIG_TASKS_EXECUTOR.submit(task, *args, **kwargs)
+    except Exception:
+        try:
+            marker.unlink(missing_ok=True)
+        finally:
+            handle.close()
+        DATA["RELOADING"] = active_config_tasks() > 0
+        raise
+    future.add_done_callback(finished)
+    return future
 
 
 def _sanitize_filename(name: str) -> str:
