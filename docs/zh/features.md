@@ -472,11 +472,14 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     -   该挑战为每个客户端动态生成一个独特的任务。
     -   计算任务涉及具有特定条件的哈希（例如，找到具有某个前缀的哈希）。
 
+    挑战的成本由 `ANTIBOT_JAVASCRIPT_DIFFICULTY` 设置，单位是前导零比特数（16 到 28，默认 16）；每多一比特，平均求解时间翻倍。如果你使用 PRO 自定义 JavaScript 挑战页面，请在把此设置提高到默认值以上之前重新生成它们，否则它们仍会证明旧的、更低的难度，从而被拒绝。
+
     **配置设置：**
 
     | 设置          | 默认值 | 上下文    | 多个 | 描述                                                            |
     | ------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | no   | **启用 Antibot：** 设置为 `javascript` 以启用 JavaScript 挑战。 |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY`  | `16`   | multisite | no   | **JavaScript 难度：** 工作量证明难度，单位为前导零比特数（16 到 28）。 |
 
     有关其他配置选项，请参阅[通用设置](#通用设置)。
 
@@ -1226,6 +1229,9 @@ STREAM 支持 :warning:
     | `BLACKLIST_IGNORE_IP`      |                                       | multisite | 否   | **IP 忽略列表：** 应绕过 IP 黑名单检查的 IP 地址或网络列表。            |
     | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | 否   | **IP 黑名单 URL：** 包含要阻止的 IP 地址或网络的 URL 列表，以空格分隔。 |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | 否   | **IP 忽略列表 URL：** 包含要忽略的 IP 地址或网络的 URL 列表。           |
+    !!! info "列表格式"
+        URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
 
     默认的 `BLACKLIST_IP_URLS` 设置包含一个提供**已知 Tor 出口节点列表**的 URL。这是恶意流量的常见来源，对于许多网站来说是一个很好的起点。
 
@@ -3106,6 +3112,9 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
     | ------------------ | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
     | `GREYLIST_IP`      |        | multisite | 否   | **IP 灰名单：** 要列入灰名单的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。 |
     | `GREYLIST_IP_URLS` |        | multisite | 否   | **IP 灰名单 URL：** 包含要列入灰名单的 IP 地址或网络的 URL 列表，以空格分隔。 |
+    !!! info "列表格式"
+        URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
 
 === "反向 DNS"
     **这是做什么的：** 根据访问者的域名（反向）将访问者列入灰名单。对于允许来自特定组织或网络的访问者有条件地访问非常有用。
@@ -3585,8 +3594,16 @@ STREAM 支持 :x:
 
     !!! tip "最佳实践"
         -   对敏感 cookie 使用 `SameSite=Strict` 以防止跨源访问。
+        -   仅在 cookie 必须在跨站场景中发送时（例如 SSO 回调或嵌入内容）使用 `SameSite=None`；浏览器要求同时设置 `Secure` 标志，因此请保持 `COOKIE_AUTO_SECURE_FLAG` 启用或显式添加 `Secure`。
+        -   如果上游响应已设置了不同的 `SameSite` 值，BunkerWeb 会追加配置的值而不是替换它；浏览器以最后一个 `SameSite` 属性为准，因此 `COOKIE_FLAGS` 中的值生效。
         -   定期审计您的 cookie 设置，以确保符合安全和隐私法规。
         -   避免在生产环境中设置没有 Secure 标志的 cookie。
+
+    !!! example "跨站 cookie 使用 SameSite=None"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "自定义头"
 
@@ -4006,6 +4023,21 @@ Let's Encrypt 插件通过 [certbot-dns-multi](https://github.com/alexzorin/cert
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_6: "client_x509_cert_url your-cert-url"
     ```
 
+### 公网 IPv4 证书
+
+SERVER_NAME 中的公网 IPv4 地址需要 LETS_ENCRYPT_SERVER=letsencrypt、LETS_ENCRYPT_CHALLENGE=http 和 LETS_ENCRYPT_PROFILE=shortlived；不接受 IPv6 或非公网地址。
+
+IP 标识符无需 DNS 记录。HTTP-01 要求端口 80 直接到达 BunkerWeb。请保持 DISABLE_DEFAULT_SERVER_STRICT_SNI=no，因为 IP 客户端通常不发送 SNI。无 SNI 时，仅当本地 IPv4 目标地址在 SERVER_NAME 中明确配置且包含于证书的 IP SAN 中，才选择该证书。不会回退到缓存中唯一的 IP 证书：在 NAT 后，本地地址必须匹配配置的公网地址。HTTP Host 无法选择证书。默认服务器自定义证书仍保持优先级。DNS 证书行为和账户存储权限保持不变。
+
+```env
+SERVER_NAME=<PUBLIC_IPV4>
+AUTO_LETS_ENCRYPT=yes
+LETS_ENCRYPT_SERVER=letsencrypt
+LETS_ENCRYPT_CHALLENGE=http
+LETS_ENCRYPT_PROFILE=shortlived
+DISABLE_DEFAULT_SERVER_STRICT_SNI=no
+```
+
 ## Limit
 
 STREAM 支持 :warning:
@@ -4243,6 +4275,10 @@ STREAM 支持 :warning:
 - 存储有关被阻止请求的详细信息，包括客户端 IP 地址、国家/地区、时间戳、请求详情和阻止原因
 - 通过通用的指标收集接口支持插件特定的指标
 - 提供用于查询收集到的指标的 API 端点
+
+Redis 中的插件计数器和历史记录按实例主机名、子系统和工作进程隔离。共享 Redis 的每个实例必须使用不同且稳定的主机名。如果无法确定主机名，这些指标将保留在本地。未改变的历史记录不会被重写；响应丢失后重试追加批次不会产生重复记录。
+
+旧计数器仍可读取，不会被复制到每个实例中。当 `METRICS_REDIS_TTL` 大于零时，保留旧计数器现有的过期时间，并为永久旧计数器设置一次该 TTL；升级后的工作进程不会持续续期。设置为 `0` 时，旧计数器按要求永久保留。
 
 ### 如何使用
 
@@ -5420,6 +5456,10 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
 | `REAL_IP_FROM_URLS`  |                                           | multisite | 否   | **IP 列表 URL：** 包含要下载的受信任代理 IP/网络的 URL，以空格分隔。支持 file:// URL。   |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | 否   | **PROXY 协议：** 设置为 `yes` 以启用 PROXY 协议支持，用于直接的代理到 BunkerWeb 的通信。 |
 
+!!! info "列表格式"
+    URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
+
 !!! tip "云提供商网络"
     如果您正在使用像 AWS、GCP 或 Azure 这样的云提供商，请考虑将其负载均衡器的 IP 范围添加到您的 `REAL_IP_FROM` 设置中，以确保正确的客户端 IP 识别。
 
@@ -5497,6 +5537,18 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
     REAL_IP_FROM: "" # 我们只信任 Cloudflare 的 IP
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # 自动下载 Cloudflare IP
     REAL_IP_HEADER: "CF-Connecting-IP"  # Cloudflare 用于客户端 IP 的标头
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "位于 AWS CloudFront 后面"
+
+    用于位于 AWS CloudFront 后面的网站的配置：
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```
 
@@ -5646,6 +5698,8 @@ STREAM 支持 :white_check_mark:
 
 Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集成到 BunkerWeb 中，用于缓存和快速数据检索。此功能对于在需要跨多个节点访问会话数据、指标和其他共享信息的高可用性环境中部署 BunkerWeb 至关重要。
 
+启用 `REDIS_SSL=yes` 和 `REDIS_SSL_VERIFY=yes` 时，按 IP 验证的 TLS 端点必须在 IP 类型的主题备用名称（SAN）中包含该地址。仅有 DNS SAN 或数字形式的通用名称不足以通过验证。这同样适用于独立 Redis 和 Sentinel 端点。升级前，请为受影响的证书重新签发正确的 IP SAN，或使用与证书匹配的 DNS 名称；请保持证书验证开启。
+
 **工作原理：**
 
 1.  启用后，BunkerWeb 会与您配置的 Redis 或 Valkey 服务器建立连接。
@@ -5678,6 +5732,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。      |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。      |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                       |
+| `REDIS_CLUSTER_NODES` | | global | 否 | 以空格分隔的 `host:port` 初始节点（IPv6 使用 `[ipv6]:port`）。留空保留独立或 Sentinel 模式。 |
 | `REDIS_SENTINEL_HOSTS`    |            | global | 否   | **Sentinel 主机：** Redis Sentinel 主机的空格分隔列表 (hostname:port)。          |
 | `REDIS_SENTINEL_USERNAME` |            | global | 否   | **Sentinel 用户名：** 用于 Redis Sentinel 身份验证的用户名。                     |
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
@@ -5712,6 +5767,14 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
     -   所有 BunkerWeb 实例都应连接到相同的 Redis 或 Valkey 服务器或 Sentinel 集群
     -   在所有实例中配置相同的数据库编号
     -   确保所有 BunkerWeb 实例与 Redis/Valkey 服务器之间的网络连接
+
+### Redis Cluster
+
+设置 `USE_REDIS=yes` 和 `REDIS_CLUSTER_NODES="redis1:7000 redis2:7001 redis3:7002"`。每个初始节点必须明确指定 1 至 65535 的端口。默认留空，保留独立或 Sentinel 模式。集群要求数值 `REDIS_DATABASE=0`；同时设置 Sentinel、无效节点或非零数据库时会记录错误并使用现有的本地回退机制。身份验证与 TLS 验证使用现有 Redis 设置。
+
+封禁与 Bad Behavior 计数器按客户端 IP 共用一个槽；被阻止请求的报告及其分面共用一个槽。枚举封禁与分布式指标时会扫描所有主节点。集群必须宣告可访问的 IPv4 地址或主机名；不支持 IPv6 宣告与重定向。
+
+切换模式会更改 Redis 键：会话与报告不会迁移。持久封禁保留在数据库中，调度器将有效封禁投影到新的 Redis 存储。Celery 消息代理独立配置；请单独配置独立或 Sentinel 代理（或明确指定 `CELERY_BROKER_URL`）。
 
 ### 配置示例
 
@@ -7121,6 +7184,9 @@ STREAM 支持 :warning:
     | `WHITELIST_IGNORE_IP`      |        | multisite | 否   | **IP 忽略列表：** 应绕过 IP 白名单检查的 IP 地址或网络列表。                  |
     | `WHITELIST_IP_URLS`        |        | multisite | 否   | **IP 白名单 URL：** 包含要列入白名单的 IP 地址或网络的 URL 列表，以空格分隔。 |
     | `WHITELIST_IGNORE_IP_URLS` |        | multisite | 否   | **IP 忽略列表 URL：** 包含要忽略的 IP 地址或网络的 URL 列表。                 |
+    !!! info "列表格式"
+        URL 列表可以包含每行一个条目（以 `#` 或 `;` 开头的行是注释，每行只读取第一个词）、CSV、JSON 文档或 JSON Lines。IP 列表中，逗号也用于分隔字段；JSON 列表会保留每个值为 IP 地址或网络的字符串。添加片段可筛选 JSON 列表的一部分：`#key` 保留 `key` 下的值，`#key=value` 保留 `key` 等于或包含 `value` 的对象，`&` 用于组合条件。例如：`https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`。URL 带有片段时只保留片段选中的内容；如果列表不是 JSON 格式，则不会保留任何内容。
+
 
 === "反向 DNS"
     **功能说明：** 根据访问者的域名（反向）将其列入白名单。这对于允许来自特定组织或网络的访问者按其域名访问非常有用。

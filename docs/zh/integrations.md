@@ -3022,6 +3022,9 @@ networks:
 | `KUBERNETES_INGRESS_CLASS`              | 仅处理该类的 ingress                                                        | 字符串                                             | unset（全部）   |
 | `KUBERNETES_GATEWAY_MODE`               | 使用 Gateway API 控制器而非 Ingress                                         | `yes` 或 `no`                                      | `no`            |
 | `KUBERNETES_GATEWAY_CLASS`              | 仅处理该类的 Gateway                                                        | 字符串                                             | unset（全部）   |
+| `KUBERNETES_SKIP_FOREIGN_CLASSES`       | 为 `yes` 且未设置类过滤器时，跳过其 IngressClass 或 GatewayClass 属于其他控制器的 Ingress 和 Gateway。需要对 `ingressclasses` / `gatewayclasses` 的 get/list/watch 权限 | `yes` 或 `no`                                      | `no`            |
+| `KUBERNETES_INGRESS_CONTROLLER`         | 标记某个 IngressClass 属于 BunkerWeb 的控制器 id（`spec.controller`）      | 字符串                                             | `bunkerweb.io/ingress-controller` |
+| `KUBERNETES_GATEWAY_CONTROLLER`         | 标记某个 GatewayClass 属于 BunkerWeb 的控制器 id（`spec.controllerName`）  | 字符串                                             | `bunkerweb.io/gateway-controller` |
 | `KUBERNETES_GATEWAY_API_VERSION`        | 使用的 Gateway API 版本（缺失时自动回退）                                   | `v1`、`v1beta1`、`v1beta2`、`v1alpha2`、`v1alpha1` | `v1`            |
 | `KUBERNETES_DOMAIN_NAME`                | 构建上游主机时使用的集群域名后缀                                            | 字符串                                             | `cluster.local` |
 | `KUBERNETES_SERVICE_PROTOCOL`           | 生成的反向代理主机所用的协议                                                | `http` 或 `https`                                  | `http`          |
@@ -3908,6 +3911,8 @@ spec:
                   number: 8000
 ```
 
+未设置显式类过滤器时，`KUBERNETES_SKIP_FOREIGN_CLASSES=yes` 会跳过其现有类属于其他控制器的资源。没有类或对应 `IngressClass` 对象不存在的 Ingress 仍会被处理；现有类的 `spec.controller` 必须等于 `KUBERNETES_INGRESS_CONTROLLER`。仅在未设置 `ingressClassName` 时使用旧注解 `kubernetes.io/ingress.class`。请授予对 `ingressclasses` 的 `get`/`list`/`watch` 权限。如果类查询失败，将暂停协调和状态更新，保留上次应用的配置，直到查询恢复成功。默认值 `no` 继续处理所有类；显式设置的 `KUBERNETES_INGRESS_CLASS` 过滤器保持原有行为。
+
 ### Gateway 类 {#gateway-class}
 
 当使用 Gateway API 时，BunkerWeb 需要一个指向其控制器的 `GatewayClass`：
@@ -3937,6 +3942,8 @@ spec:
       port: 80
       hostname: www.example.com
 ```
+
+当 `KUBERNETES_SKIP_FOREIGN_CLASSES=yes` 且未设置 `KUBERNETES_GATEWAY_CLASS` 过滤器时，现有 `GatewayClass` 的 `spec.controllerName` 必须等于 `KUBERNETES_GATEWAY_CONTROLLER`。类对象不存在时仍会接受该资源。请授予对 `gatewayclasses` 的 `get`/`list`/`watch` 权限；查询失败时暂停协调和状态更新，并保留上次应用的配置。
 
 ### 自定义域名
 

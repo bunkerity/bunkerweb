@@ -470,11 +470,14 @@ Exemples :
     - Le défi génère dynamiquement une tâche unique pour chaque client.
     - La tâche de calcul implique un hachage avec des conditions spécifiques (par exemple, trouver un hachage avec un certain préfixe).
 
+    Le coût du défi se règle avec `ANTIBOT_JAVASCRIPT_DIFFICULTY`, en bits de zéros de poids fort (16 à 28, défaut 16) ; chaque bit supplémentaire double le temps moyen de résolution. Si vous utilisez des pages de défi JavaScript personnalisées PRO, régénérez-les avant d'augmenter ce réglage au-dessus de la valeur par défaut, sinon elles continuent de prouver l'ancienne difficulté, plus basse, et sont rejetées.
+
     **Paramètres :**
 
     | Paramètre     | Défaut | Contexte  | Multiple | Description                                                           |
     | ------------- | ------ | --------- | -------- | --------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | non      | Activer Antibot : définir sur `javascript` pour activer ce mécanisme. |
+    | `ANTIBOT_JAVASCRIPT_DIFFICULTY` | `16`   | multisite | non      | Difficulté JavaScript : difficulté de preuve de travail en bits de zéros de poids fort (16 à 28). |
 
     Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
@@ -1251,6 +1254,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | `BLACKLIST_IGNORE_IP`      |                                       | multisite | non      | **Liste d’ignorance d’IP :** Liste d’adresses IP ou de réseaux qui doivent contourner les vérifications de la liste noire d’IP. |
     | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | non      | **URL de listes noires d’IP :** Liste d’URL contenant des adresses IP ou des réseaux à bloquer, séparés par des espaces.        |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | non      | **URL de listes d’ignorance d’IP :** Liste d’URL contenant des adresses IP ou des réseaux à ignorer.                            |
+    !!! info "Formats des listes"
+        Les listes d’URL peuvent contenir une entrée par ligne (les lignes commençant par `#` ou `;` sont des commentaires et seul le premier mot de chaque ligne est lu), du CSV, un document JSON ou du JSON Lines. Dans les listes d’IP, les virgules séparent aussi les champs, et les listes JSON conservent chaque chaîne qui correspond à une adresse IP ou à un réseau. Ajoutez un fragment pour ne conserver qu’une partie d’une liste JSON : `#key` conserve les valeurs sous `key`, `#key=value` conserve les objets dont la propriété `key` est égale à `value` ou contient `value`, et `&` combine les termes. Exemple : `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Une URL avec un fragment ne conserve que les éléments sélectionnés par celui-ci ; si la liste n’est pas au format JSON, elle ne conserve rien.
+
 
     Le paramètre par défaut `BLACKLIST_IP_URLS` inclut une URL qui fournit une **liste des nœuds de sortie Tor connus**. C’est une source courante de trafic malveillant et un bon point de départ pour de nombreux sites.
 
@@ -3074,6 +3080,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
     | ------------------ | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------ |
     | `GREYLIST_IP`      |        | multisite | non      | **Greylist IP :** Liste d'adresses IP ou de réseaux (notation CIDR) à placer en greylist, séparés par des espaces. |
     | `GREYLIST_IP_URLS` |        | multisite | non      | **URL de greylist IP :** Liste d'URL contenant des adresses IP ou des réseaux à placer en greylist, séparées par des espaces. |
+    !!! info "Formats des listes"
+        Les listes d’URL peuvent contenir une entrée par ligne (les lignes commençant par `#` ou `;` sont des commentaires et seul le premier mot de chaque ligne est lu), du CSV, un document JSON ou du JSON Lines. Dans les listes d’IP, les virgules séparent aussi les champs, et les listes JSON conservent chaque chaîne qui correspond à une adresse IP ou à un réseau. Ajoutez un fragment pour ne conserver qu’une partie d’une liste JSON : `#key` conserve les valeurs sous `key`, `#key=value` conserve les objets dont la propriété `key` est égale à `value` ou contient `value`, et `&` combine les termes. Exemple : `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Une URL avec un fragment ne conserve que les éléments sélectionnés par celui-ci ; si la liste n’est pas au format JSON, elle ne conserve rien.
+
 
 === "DNS inverse"
     **Ce que cela fait :** Place les visiteurs en greylist selon leur nom de domaine inversé. Utile pour autoriser conditionnellement l'accès aux visiteurs de certaines organisations ou de certains réseaux.
@@ -3544,8 +3553,16 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Headers :
 
     !!! tip "Bonnes pratiques"
         - Utilisez `SameSite=Strict` pour les cookies sensibles afin d'empêcher l'accès inter-origines.
+        - Utilisez `SameSite=None` uniquement lorsque les cookies doivent être envoyés dans un contexte intersite (par ex. callbacks SSO ou contenu intégré) ; les navigateurs exigent alors l'attribut `Secure`, gardez donc `COOKIE_AUTO_SECURE_FLAG` activé ou ajoutez `Secure` explicitement.
+        - Si la réponse de l'upstream définit déjà une autre valeur `SameSite`, BunkerWeb ajoute la valeur configurée au lieu de la remplacer ; les navigateurs appliquent le dernier attribut `SameSite`, c'est donc la valeur de `COOKIE_FLAGS` qui s'applique.
         - Auditez régulièrement vos paramètres de cookies pour assurer la conformité avec les réglementations de sécurité et de confidentialité.
         - Évitez de définir des cookies sans l'attribut Secure dans les environnements de production.
+
+    !!! example "SameSite=None pour les cookies intersites"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "En-têtes personnalisés"
 
@@ -3955,6 +3972,21 @@ Les noms historiques de BunkerWeb restent acceptés, tout comme les noms natifs 
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_6: "client_x509_cert_url votre-url-cert"
     ```
 
+### Certificats pour les IPv4 publiques
+
+Les adresses IPv4 publiques dans SERVER_NAME nécessitent LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http et LETS_ENCRYPT_PROFILE=shortlived ; IPv6 et les adresses non publiques sont refusées.
+
+Un identifiant IP ne nécessite pas de DNS. Le port 80 doit atteindre BunkerWeb directement pour HTTP-01. Gardez DISABLE_DEFAULT_SERVER_STRICT_SNI=no, car les clients IP omettent généralement le SNI. Sans SNI, le certificat est sélectionné uniquement si l’adresse IPv4 locale de destination est configurée dans SERVER_NAME et présente dans ses SAN IP. Aucun repli vers le seul certificat IP en cache : derrière un NAT, l’adresse locale doit correspondre à l’adresse publique configurée. HTTP Host ne sélectionne pas le certificat. Le certificat personnalisé du serveur par défaut garde la priorité. Le comportement des certificats DNS et les permissions des comptes restent inchangés.
+
+```env
+SERVER_NAME=<PUBLIC_IPV4>
+AUTO_LETS_ENCRYPT=yes
+LETS_ENCRYPT_SERVER=letsencrypt
+LETS_ENCRYPT_CHALLENGE=http
+LETS_ENCRYPT_PROFILE=shortlived
+DISABLE_DEFAULT_SERVER_STRICT_SNI=no
+```
+
 ## Limit
 
 Prise en charge STREAM :warning:
@@ -4192,6 +4224,10 @@ Le plugin Metrics fonctionne en :
 - stockant des informations détaillées sur les requêtes bloquées, notamment l'adresse IP du client, le pays, l'horodatage, les détails de la requête et le motif du blocage ;
 - prenant en charge des métriques spécifiques aux plugins via une interface commune de collecte de métriques ;
 - fournissant des points d'accès API pour interroger les métriques collectées.
+
+Les compteurs et historiques des plugins dans Redis sont isolés par nom d’hôte de l’instance, sous-système et worker. Chaque instance partageant Redis doit utiliser un nom d’hôte distinct et stable. Si aucun nom d’hôte ne peut être déterminé, ces métriques restent locales. Les historiques inchangés ne sont pas réécrits et les lots ajoutés peuvent être rejoués sans duplication après la perte d’une réponse.
+
+Les anciens compteurs restent lisibles sans être copiés dans chaque instance. Lorsque `METRICS_REDIS_TTL` est supérieur à zéro, leur expiration existante est conservée et les compteurs permanents reçoivent ce TTL une seule fois ; les workers mis à jour ne le renouvellent pas continuellement. Avec `0`, les anciens compteurs sont conservés indéfiniment, conformément au paramètre.
 
 ### Utilisation
 
@@ -5352,6 +5388,10 @@ Comment ça marche :
 | `REAL_IP_FROM_URLS`  |                                           | multisite | non      | URLs fournissant des IPs/réseaux de proxys de confiance (supporte `file://`).    |
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | non      | Activer le support PROXY protocol pour la communication directe proxy→BunkerWeb. |
 
+!!! info "Formats des listes"
+    Les listes d’URL peuvent contenir une entrée par ligne (les lignes commençant par `#` ou `;` sont des commentaires et seul le premier mot de chaque ligne est lu), du CSV, un document JSON ou du JSON Lines. Dans les listes d’IP, les virgules séparent aussi les champs, et les listes JSON conservent chaque chaîne qui correspond à une adresse IP ou à un réseau. Ajoutez un fragment pour ne conserver qu’une partie d’une liste JSON : `#key` conserve les valeurs sous `key`, `#key=value` conserve les objets dont la propriété `key` est égale à `value` ou contient `value`, et `&` combine les termes. Exemple : `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Une URL avec un fragment ne conserve que les éléments sélectionnés par celui-ci ; si la liste n’est pas au format JSON, elle ne conserve rien.
+
+
 !!! tip "Fournisseurs cloud"
     Ajoutez les IP de vos load balancers (AWS/GCP/Azure…) à `REAL_IP_FROM` pour une identification correcte.
 
@@ -5429,6 +5469,18 @@ Comment ça marche :
     REAL_IP_FROM: "" # Nous faisons uniquement confiance aux IP Cloudflare
     REAL_IP_FROM_URLS: "https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/" # Télécharge automatiquement les IP Cloudflare
     REAL_IP_HEADER: "CF-Connecting-IP"  # En-tête Cloudflare pour l'IP client
+    REAL_IP_RECURSIVE: "yes"
+    ```
+
+=== "Derrière AWS CloudFront"
+
+    Configuration pour un site web derrière AWS CloudFront :
+
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "" # We only trust CloudFront IPs
+    REAL_IP_FROM_URLS: "https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT" # IPv4 and IPv6 CloudFront edges
+    REAL_IP_HEADER: "X-Forwarded-For"
     REAL_IP_RECURSIVE: "yes"
     ```
 
@@ -5559,6 +5611,8 @@ Prise en charge STREAM :white_check_mark:
 
 Le plugin Redis intègre [Redis](https://redis.io/) ou [Valkey](https://valkey.io/) à BunkerWeb pour la mise en cache et l’accès rapide aux données. Essentiel en haute disponibilité pour partager sessions, métriques et autres informations entre plusieurs nœuds.
 
+Avec `REDIS_SSL=yes` et `REDIS_SSL_VERIFY=yes`, un point de terminaison TLS vérifié par IP doit présenter cette adresse dans un Subject Alternative Name (SAN) de type IP. Un SAN DNS ou un nom commun numérique seul ne suffit pas. Cela concerne aussi Redis autonome et les points de terminaison Sentinel. Avant la mise à niveau, réémettez les certificats concernés avec le SAN IP correct ou utilisez un nom DNS correspondant ; gardez la vérification des certificats activée.
+
 Comment ça marche :
 
 1. Activé, BunkerWeb se connecte au serveur Redis/Valkey configuré.
@@ -5589,6 +5643,7 @@ Comment ça marche :
 | `REDIS_TIMEOUT`           | `1000`     | global   | non      | Timeout (ms) pour connexion/lecture/écriture.                  |
 | `REDIS_USERNAME`          |            | global   | non      | Nom d’utilisateur (Redis ≥ 6.0).                               |
 | `REDIS_PASSWORD`          |            | global   | non      | Mot de passe.                                                  |
+| `REDIS_CLUSTER_NODES` | | global | non | Nœuds de départ `host:port` séparés par des espaces (`[ipv6]:port` pour IPv6). Vide conserve le mode autonome ou Sentinel. |
 | `REDIS_SENTINEL_HOSTS`    |            | global   | non      | Hôtes Sentinel (séparés par espaces, `hôte:port`).             |
 | `REDIS_SENTINEL_USERNAME` |            | global   | non      | Utilisateur Sentinel.                                          |
 | `REDIS_SENTINEL_PASSWORD` |            | global   | non      | Mot de passe Sentinel.                                         |
@@ -5621,6 +5676,14 @@ Comment ça marche :
     - Toutes les instances BunkerWeb doivent se connecter au même serveur Redis/Valkey ou cluster Sentinel
     - Configurez le même numéro de base de données sur toutes les instances
     - Assurez-vous de la connectivité réseau entre toutes les instances BunkerWeb et les serveurs Redis/Valkey
+
+### Cluster Redis
+
+Définissez `USE_REDIS=yes` et `REDIS_CLUSTER_NODES="redis1:7000 redis2:7001 redis3:7002"`. Chaque nœud nécessite un port explicite de 1 à 65535. Vide est la valeur par défaut et conserve le mode autonome ou Sentinel. Le cluster exige une valeur numérique `REDIS_DATABASE=0` ; une combinaison avec Sentinel, un nœud invalide ou une autre base produit une erreur et utilise le repli local existant. L’authentification et TLS vérifié utilisent les paramètres Redis existants.
+
+Les bannissements et compteurs Bad Behavior partagent un slot par IP client ; les rapports de requêtes bloquées et leurs facettes partagent un slot. Tous les primaires sont parcourus pour énumérer les bannissements et métriques distribuées. Le cluster doit annoncer des adresses IPv4 ou noms d’hôte joignables ; les annonces et redirections IPv6 ne sont pas prises en charge.
+
+Changer de mode change les clés Redis : sessions et rapports ne sont pas migrés. Les bannissements durables restent en base et le scheduler projette les bannissements actifs dans le nouveau stockage Redis. Le broker Celery reste indépendant ; configurez séparément un broker autonome ou Sentinel (ou un `CELERY_BROKER_URL` explicite).
 
 ### Exemples
 
@@ -6989,6 +7052,9 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
     | `WHITELIST_IGNORE_IP`      |        | multisite | non      | **Liste d'ignore IP :** Liste d'adresses IP ou de réseaux qui doivent contourner les contrôles de whitelist IP. |
     | `WHITELIST_IP_URLS`        |        | multisite | non      | **URL de whitelist IP :** Liste d'URL contenant des adresses IP ou réseaux à placer en whitelist, séparées par des espaces. |
     | `WHITELIST_IGNORE_IP_URLS` |        | multisite | non      | **URL de liste d'ignore IP :** Liste d'URL contenant des adresses IP ou réseaux à ignorer.                    |
+    !!! info "Formats des listes"
+        Les listes d’URL peuvent contenir une entrée par ligne (les lignes commençant par `#` ou `;` sont des commentaires et seul le premier mot de chaque ligne est lu), du CSV, un document JSON ou du JSON Lines. Dans les listes d’IP, les virgules séparent aussi les champs, et les listes JSON conservent chaque chaîne qui correspond à une adresse IP ou à un réseau. Ajoutez un fragment pour ne conserver qu’une partie d’une liste JSON : `#key` conserve les valeurs sous `key`, `#key=value` conserve les objets dont la propriété `key` est égale à `value` ou contient `value`, et `&` combine les termes. Exemple : `https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT`. Une URL avec un fragment ne conserve que les éléments sélectionnés par celui-ci ; si la liste n’est pas au format JSON, elle ne conserve rien.
+
 
 === "DNS inverse"
     **Ce que cela fait :** Place les visiteurs en whitelist selon leur nom de domaine inversé. C'est utile pour autoriser l'accès à des visiteurs de certaines organisations ou de certains réseaux via leur domaine.
