@@ -103,8 +103,6 @@ actions:
     verify_ssl: false
     ssl_expiration: 3650
     ssl_subject: "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/"
-    All-in-one:
-      url: "https://localhost/setup"
     config:
       DEFAULT_SERVER_SSL_CERT_DATA: "${CUSTOM_SSL_CERT_DATA}"
       DEFAULT_SERVER_SSL_KEY_DATA: "${CUSTOM_SSL_KEY_DATA}"
@@ -130,9 +128,8 @@ actions:
   # without SNI, so the runner returns without calling `set_cert` and NGINX falls back to that same
   # directive either way -- single-site vs. multisite changes which template renders it, not which
   # certificate comes back, so it is not a distinguishing precondition for this assertion. Not
-  # All-in-one: its default answer is the `/setup` wizard page (see the sibling
-  # `default_server_override_refused_unknown_sni`'s `All-in-one:` override above), which this
-  # action has no override for.
+  # run on All-in-one (never measured there; the `/setup` URL override its siblings used to carry
+  # is gone, since the default server only answers `/` now).
   default_server_override_refused_without_sni:
     type: ssl
     integrations:
@@ -165,8 +162,6 @@ actions:
     verify_ssl: false
     ssl_expiration: 365
     ssl_subject: "/CN=unknown.test/"
-    All-in-one:
-      url: "https://localhost/setup"
     config:
       DEFAULT_SERVER_SSL_CERT_DATA: "${DEFAULT_SERVER_SSL_CERT_DATA}"
       DEFAULT_SERVER_SSL_KEY_DATA: "${DEFAULT_SERVER_SSL_KEY_DATA}"

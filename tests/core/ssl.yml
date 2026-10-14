@@ -7,8 +7,6 @@ actions:
     verify_ssl: false
     ssl_expiration: 3650
     ssl_subject: "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/"
-    All-in-one:
-      url: "https://localhost/setup"
   redirect_http_https:
     type: status
     url: "http://www.example.com"
