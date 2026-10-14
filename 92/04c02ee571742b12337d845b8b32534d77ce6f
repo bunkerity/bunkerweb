@@ -1,0 +1,140 @@
+src/common/core/letsencrypt/locales/pl.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/locales/tl.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/locales/bn.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/order.json
+  s_607210143ce683::t_19d99d7bf006b6 37
+src/common/core/letsencrypt/locales/ur.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+tests/unit/letsencrypt/test_public_ip_port.py
+  s_de3e9c41d396f4::t_63f952d5601af7 90-93,101-104
+  s_de3e9c41d396f4::t_50266a16fcdc64 2,19-21,26-34,37-44,59-68,79-87
+  s_de3e9c41d396f4::t_d87f9e70fa162f 77-78,88-89
+  s_e09c0124348d70::t_a1ef81b345de6a 94-100
+  s_5ed44e89c01807::t_357bb9d750e98a 1,3-18,22-25,35-36,45-58,69-76
+src/common/core/letsencrypt/locales/zh.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/locales/it.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+tests/unit/common/test_certificate_utils.py
+  s_de3e9c41d396f4::t_265a4686b4dce5 107-108,112-140
+  s_de3e9c41d396f4::t_fc09953826bda4 109-111
+src/common/core/letsencrypt/locales/br.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/README.zh.md
+  s_de3e9c41d396f4::t_d8382f4dff042f 222
+  s_de3e9c41d396f4::t_c8096217b23ed3 214-221,223-228
+src/common/core/letsencrypt/locales/hi.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/README.md
+  s_de3e9c41d396f4::t_c8096217b23ed3 215-222,224-229
+  s_de3e9c41d396f4::t_d8382f4dff042f 223
+src/common/core/letsencrypt/locales/id.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/jobs/certbot-new.py
+  s_de3e9c41d396f4::t_63f952d5601af7 189-197
+  s_de3e9c41d396f4::t_7add29ea5b12c5 127,130-131,137,142-144,148-159,161-172,174-180,182-186,560-575,608,796,1207,1241-1244,1250
+  s_de3e9c41d396f4::t_50266a16fcdc64 160,173,181
+  s_de3e9c41d396f4::t_1f4ed1ebbab58e 17,1206
+  s_de3e9c41d396f4::t_1fc086d3e33093 1045
+  s_f8d3259134401e::t_9005ff30eb0526 187-188,198-199
+src/common/core/letsencrypt/locales/tw.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/locales/tr.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/README.fr.md
+  s_de3e9c41d396f4::t_c8096217b23ed3 214-221,223-228
+  s_de3e9c41d396f4::t_d8382f4dff042f 222
+src/common/core/letsencrypt/locales/ar.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/locales/ru.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/locales/pt.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/plugin.json
+  s_de3e9c41d396f4::t_1fc086d3e33093 392
+src/common/core/letsencrypt/locales/ko.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+tests/unit/common/test_public_ip_port_lua.py
+  s_de3e9c41d396f4::t_027f88f16f45ac 44-48,71-80
+  s_de3e9c41d396f4::t_d87f9e70fa162f 20-21,23,39,41-43
+  s_5ed44e89c01807::t_357bb9d750e98a 1,3-12,15-19,24-35,49,51-52,54-56,67-70,107-108
+  s_e09c0124348d70::t_3564a414ac8718 14,22,40
+  s_e09c0124348d70::t_af1f18b2ca7f3d 36,87,89-96,99,103
+  s_e09c0124348d70::t_05262b7a774f63 38,50,81-86,88,97-98,100-102,104-106
+  s_de3e9c41d396f4::t_69218dafc001ee 37
+  s_de3e9c41d396f4::t_50266a16fcdc64 2,13,53,57-66
+src/common/utils/certificate_utils.py
+  s_de3e9c41d396f4::t_70ee51632b2ed3 278-279
+src/common/core/letsencrypt/letsencrypt.lua
+  s_e09c0124348d70::t_af1f18b2ca7f3d 589-593
+  s_de3e9c41d396f4::t_d8382f4dff042f 37,256
+  s_e09c0124348d70::t_97a746348caaa0 586-588,594-595
+  s_607210143ce683::t_19d99d7bf006b6 20,38-39,218-226,228-255,257-258,525-535,539-560,576,578,653-659,661-668,671-674
+  s_de3e9c41d396f4::t_b78eb998772677 563-568,669-670
+  s_de3e9c41d396f4::t_027f88f16f45ac 561-562,569-575,577
+  s_de3e9c41d396f4::t_9400d8db306b01 227
+  s_e09c0124348d70::t_0b43ea1ceec979 579
+src/common/core/letsencrypt/locales/de.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/locales/fr.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/locales/es.json
+  s_de3e9c41d396f4::t_c8096217b23ed3 78
+src/common/core/letsencrypt/README.de.md
+  s_de3e9c41d396f4::t_c8096217b23ed3 224-231,233-238
+  s_de3e9c41d396f4::t_d8382f4dff042f 232
+src/common/core/letsencrypt/README.es.md
+  s_de3e9c41d396f4::t_d8382f4dff042f 233
+  s_de3e9c41d396f4::t_c8096217b23ed3 225-232,234-239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9204c02ee571742b12337d845b8b32534d77ce6f",
+  "prompts": {},
+  "sessions": {
+    "s_5ed44e89c01807": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-19c9-7443-8e03-b1ddcd646022",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_607210143ce683": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb81-ff5e-7eb2-af5a-2746fba1ce58",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_de3e9c41d396f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-4500-7a43-9ff5-813414303d75",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e09c0124348d70": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb76-a92b-7eb0-a387-9649f9567afc",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f8d3259134401e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a5e2c22a-aff1-4202-9b18-d73656f0fc4c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
