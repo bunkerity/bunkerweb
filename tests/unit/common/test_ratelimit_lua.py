@@ -19,6 +19,7 @@ MODULE = ROOT / "src" / "bw" / "lua" / "bunkerweb" / "ratelimit.lua"
 pytestmark = pytest.mark.skipif(shutil.which("lua") is None, reason="the lua interpreter is not installed")
 
 HARNESS = """
+package.path = "%s/?.lua;" .. package.path
 ngx = { ERR = 1 }
 local ratelimit = dofile("%s")
 
@@ -81,6 +82,6 @@ print("OK")
 
 
 def test_the_counter_key_and_fallback_are_unchanged():
-    result = subprocess.run(["lua", "-e", HARNESS % MODULE.as_posix()], capture_output=True, text=True)
+    result = subprocess.run(["lua", "-e", HARNESS % (MODULE.parent.parent.as_posix(), MODULE.as_posix())], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     assert result.stdout.strip() == "OK"

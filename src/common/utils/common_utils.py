@@ -815,6 +815,7 @@ def get_redis_client(
     redis_sentinel_password: Optional[str] = None,
     redis_sentinel_master: str = "",
     logger: Optional[logging.Logger] = None,
+    redis_cluster_nodes: str = "",
 ) -> Any:
     """
     Get a Redis client using provided configuration parameters.
@@ -847,6 +848,15 @@ def get_redis_client(
     if not use_redis:
         return None
 
+    from redis_keys import cluster_config_error, parse_nodes
+
+    config_error = cluster_config_error(redis_cluster_nodes, redis_sentinel_hosts, redis_db)
+    if config_error:
+        if logger:
+            logger.error(config_error)
+        return None
+    cluster_nodes = parse_nodes(redis_cluster_nodes)
+
     try:
         from redis import StrictRedis, Sentinel
     except ImportError:
@@ -854,7 +864,7 @@ def get_redis_client(
             logger.error("Redis package is not installed")
         return None
 
-    if not redis_host and not redis_sentinel_hosts:
+    if not redis_host and not redis_sentinel_hosts and not cluster_nodes:
         if logger:
             logger.error("Neither redis_host nor redis_sentinel_hosts is provided")
         return None
@@ -906,6 +916,7 @@ def get_redis_client(
         redis_sentinel_username,
         redis_sentinel_password,
         redis_sentinel_master,
+        tuple(cluster_nodes),
     )
 
     entry = _REDIS_CLIENT_ENTRY
@@ -921,7 +932,21 @@ def get_redis_client(
 
     try:
         # Connect via Sentinel if sentinel hosts are provided
-        if redis_sentinel_hosts:
+        if cluster_nodes:
+            from redis.cluster import ClusterNode, RedisCluster
+
+            redis_client = RedisCluster(
+                startup_nodes=list(starmap(ClusterNode, cluster_nodes)),
+                username=redis_username,
+                password=redis_password,
+                socket_timeout=redis_timeout / 1000,
+                socket_connect_timeout=redis_timeout / 1000,
+                socket_keepalive=True,
+                max_connections=shared_redis_pool_size(),
+                ssl=redis_ssl,
+                **ssl_kwargs,
+            )
+        elif redis_sentinel_hosts:
             if logger:
                 logger.info(f"Connecting to Redis Sentinel cluster: {redis_sentinel_hosts}")
 

@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis-Keepalive-Pool",
         "help": "Maximale Anzahl an Redis-Verbindungen, die pro NGINX-Worker im Pool gehalten werden. Im stationären Zustand betragen die Verbindungen ungefähr nginx_workers x pool x instances und müssen innerhalb des maxclients-Limits von Redis/Valkey bleiben."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Redis-Cluster-Knoten",
+        "help": "Startknoten als durch Leerzeichen getrennte host:port-Paare ([ipv6]:port für IPv6). Leer behält den Einzelserver- oder Sentinel-Modus bei. Erfordert Datenbank 0 und kann nicht mit Sentinel kombiniert werden."
       }
     }
   }

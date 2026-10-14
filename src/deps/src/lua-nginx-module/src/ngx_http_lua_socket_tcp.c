@@ -1927,6 +1927,50 @@ new_ssl_name:
 }
 
 
+/* BW: numeric identities require iPAddress SANs, not DNS/CN matching. */
+static ngx_int_t
+ngx_http_lua_ssl_check_host(ngx_connection_t *c, ngx_str_t *name)
+{
+#ifdef X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT
+    u_char     text[NGX_INET6_ADDRSTRLEN + 1], address[16];
+    size_t     length;
+    int        matched;
+    X509      *cert;
+
+    if (name->len > NGX_INET6_ADDRSTRLEN) {
+        return ngx_ssl_check_host(c, name);
+    }
+
+    ngx_memcpy(text, name->data, name->len);
+    text[name->len] = '\0';
+    if (ngx_strlen(text) != name->len) {
+        return NGX_ERROR;
+    }
+
+    if (inet_pton(AF_INET, (char *) text, address) == 1) {
+        length = 4;
+
+    } else if (inet_pton(AF_INET6, (char *) text, address) == 1) {
+        length = 16;
+
+    } else {
+        return ngx_ssl_check_host(c, name);
+    }
+
+    cert = SSL_get_peer_certificate(c->ssl->connection);
+    if (cert == NULL) {
+        return NGX_ERROR;
+    }
+
+    matched = X509_check_ip(cert, address, length, 0);
+    X509_free(cert);
+    return matched == 1 ? NGX_OK : NGX_ERROR;
+#else
+    return ngx_ssl_check_host(c, name);
+#endif
+}
+
+
 static void
 ngx_http_lua_ssl_handshake_handler(ngx_connection_t *c)
 {
@@ -1984,7 +2028,7 @@ ngx_http_lua_ssl_handshake_handler(ngx_connection_t *c)
 #if (nginx_version >= 1007000)
 
             if (u->ssl_name.len
-                && ngx_ssl_check_host(c, &u->ssl_name) != NGX_OK)
+                && ngx_http_lua_ssl_check_host(c, &u->ssl_name) != NGX_OK)
             {
                 u->error_ret = "certificate host mismatch";
 

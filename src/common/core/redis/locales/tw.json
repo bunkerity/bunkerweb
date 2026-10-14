@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis keepalive 連線池",
         "help": "每個 NGINX worker 的連線池中保留的最大 Redis 連線數。穩態連線數大致等於 nginx_workers x pool x instances,必須保持在 Redis/Valkey 的 maxclients 限制以內。"
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Redis Cluster 節點",
+        "help": "以空格分隔的 host:port 初始節點（IPv6 使用 [ipv6]:port）。留空保留獨立或 Sentinel 模式。必須使用資料庫 0，且不可與 Sentinel 同時設定。"
       }
     }
   }

@@ -21,6 +21,8 @@ RATE_LIMIT = Path(__file__).resolve().parents[3] / "src" / "api" / "app" / "rate
 
 
 def test_the_limiter_keeps_serving_when_its_storage_is_unreachable():
-    limiter_call = search(r"_limiter = Limiter\((.*?)\n    \)", RATE_LIMIT.read_text(encoding="utf-8"), DOTALL)
+    limiter_call = search(r"return Limiter\((.*?)\n        \)", RATE_LIMIT.read_text(encoding="utf-8"), DOTALL)
     assert limiter_call, "Limiter(...) construction not found in rate_limit.py"
     assert "in_memory_fallback_enabled=True" in limiter_call.group(1)
+    assert "_limiter = _make_limiter(" in RATE_LIMIT.read_text()
+    assert RATE_LIMIT.read_text().count("in_memory_fallback_enabled=True") == 2

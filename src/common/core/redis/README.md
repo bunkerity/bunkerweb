@@ -1,5 +1,7 @@
 The Redis plugin integrates [Redis](https://redis.io/) or [Valkey](https://valkey.io/) into BunkerWeb for caching and fast data retrieval. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
 
+With `REDIS_SSL=yes` and `REDIS_SSL_VERIFY=yes`, a TLS endpoint verified by IP must present that address in an IP Subject Alternative Name (SAN). A DNS SAN or numeric common name alone is insufficient. This also applies to standalone Redis and Sentinel endpoints. Before upgrading, reissue affected certificates with the correct IP SAN or use a matching DNS name; keep certificate verification enabled.
+
 **How it works:**
 
 1. When enabled, BunkerWeb establishes a connection to your configured Redis or Valkey server.
@@ -32,6 +34,7 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_TIMEOUT`           | `1000`     | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations. |
 | `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                |
 | `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                             |
+| `REDIS_CLUSTER_NODES` | | global | no | Seed nodes as space-separated `host:port` pairs (`[ipv6]:port` for IPv6). Empty keeps standalone or Sentinel mode. |
 | `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).                |
 | `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                               |
 | `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                               |
@@ -66,6 +69,14 @@ Follow these steps to configure and use the Redis plugin:
     - All BunkerWeb instances should connect to the same Redis or Valkey server or Sentinel cluster
     - Configure the same database number across all instances
     - Ensure network connectivity between all BunkerWeb instances and Redis/Valkey servers
+
+### Redis Cluster
+
+Set `USE_REDIS=yes` and `REDIS_CLUSTER_NODES="redis1:7000 redis2:7001 redis3:7002"`. Every seed needs an explicit port from 1 to 65535. Empty is the default and preserves standalone or Sentinel behavior. Cluster mode requires numeric `REDIS_DATABASE=0`; combining it with Sentinel, an invalid seed or a nonzero database logs an error and uses the existing local fallback. Authentication and verified TLS use the existing Redis settings.
+
+Bans and Bad Behavior counters share a slot per client IP; blocked-request reports and their facets share one slot. All primaries are scanned when enumerating bans and distributed metrics. The cluster must announce reachable IPv4 addresses or hostnames; IPv6 announcement/redirects are not supported.
+
+Switching modes changes Redis keys: sessions and reports are not migrated. Durable bans remain in the database and the scheduler projects active bans into the new Redis store. The Celery broker is independent; configure a standalone or Sentinel broker separately (or an explicit `CELERY_BROKER_URL`).
 
 ### Example Configurations
 

@@ -27,6 +27,7 @@ from logger import getLogger  # type: ignore
 
 from common_utils import bytes_hash, get_redis_client, handle_docker_secrets, parse_host  # type: ignore
 from env_file import parse_env_file  # type: ignore
+from redis_keys import ban_ip, is_cluster, unescape  # type: ignore
 
 # bwcli has to resolve the database the running scheduler resolved, so it reads the operator's
 # files the way the scheduler's unit exports them: variables.env then the per-service file, later
@@ -318,6 +319,7 @@ class CLI(ApiCaller):
             redis_sentinel_username=self.__get_variable("REDIS_SENTINEL_USERNAME", None) or None,
             redis_sentinel_password=self.__get_variable("REDIS_SENTINEL_PASSWORD", None) or None,
             redis_sentinel_master=self.__get_variable("REDIS_SENTINEL_MASTER", ""),
+            redis_cluster_nodes=self.__get_variable("REDIS_CLUSTER_NODES", ""),
             logger=self.__logger,
         )
 
@@ -569,6 +571,9 @@ class CLI(ApiCaller):
                 service = "unknown"
             else:
                 service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
+
+            if is_cluster(self.__redis):
+                service, ip = unescape(service), ban_ip(ip)
 
             try:
                 ban_data = loads(raw_value)

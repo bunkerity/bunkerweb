@@ -20,6 +20,10 @@ El complemento de métricas funciona mediante:
 - El soporte para métricas específicas de complementos a través de una interfaz común de recolección de métricas
 - La provisión de puntos finales de API para consultar las métricas recopiladas
 
+Los contadores e historiales de los complementos en Redis se aíslan por nombre de host de la instancia, subsistema y worker. Cada instancia que comparta Redis debe usar un nombre de host distinto y estable. Si no se puede determinar un nombre de host, estas métricas permanecen locales. Los historiales sin cambios no se reescriben y los lotes añadidos pueden repetirse sin duplicación tras perder una respuesta.
+
+Los contadores antiguos siguen siendo legibles sin copiarse en cada instancia. Cuando `METRICS_REDIS_TTL` es mayor que cero, se conserva su caducidad existente y los contadores permanentes reciben ese TTL una sola vez; los workers actualizados no lo renuevan continuamente. Con `0`, los contadores antiguos se conservan indefinidamente, según el ajuste.
+
 ### Cómo usar
 
 Siga estos pasos para configurar y usar la función de Métricas:

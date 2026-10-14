@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis keepalive havuzu",
         "help": "NGINX worker başına havuzda tutulan maksimum Redis bağlantısı. Kararlı durum bağlantıları yaklaşık nginx_workers x pool x instances kadardır ve Redis/Valkey maxclients limiti içinde kalmalıdır."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Redis Cluster düğümleri",
+        "help": "Boşlukla ayrılmış host:port başlangıç düğümleri (IPv6 için [ipv6]:port). Boş değer bağımsız veya Sentinel modunu korur. Veritabanı 0 gerekir ve Sentinel ile birlikte kullanılamaz."
       }
     }
   }

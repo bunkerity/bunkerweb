@@ -42,7 +42,9 @@ def _extract(name: str) -> str:
     source = METRICS_LUA.read_text(encoding="utf-8")
     match = re.search(rf"^local function {name}\(.*?^end$", source, re.S | re.M)
     assert match, f"{name} not found in metrics.lua — did it get renamed?"
-    return match.group(0)
+    helper = re.search(r"^local function request_redis_key\(.*?^end$", source, re.S | re.M)
+    assert helper, "request_redis_key missing"
+    return helper.group(0) + "\n" + match.group(0)
 
 
 def _extract_method(name: str) -> str:
@@ -984,7 +986,7 @@ def test_the_redis_id_index_is_trimmed_rebuilt_and_expired_with_requests():
     assert "redis.pcall('SADD', KEYS[2], tostring(id))" in _extract_script("REBUILD_SCRIPT")
     # Port of dev 9520495e4: expire/persist is now behind the touch() helper (ttl<=0 -> PERSIST,
     # ttl>0 -> EXPIRE) so requests:ids is asserted through that call site, not a bare :call("expire", ...).
-    assert 'touch("requests:ids")' in source
+    assert 'touch(request_redis_key(self, ":ids"))' in source
 
 
 @needs_lua

@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis keepalive 풀",
         "help": "NGINX 워커당 풀에 유지되는 최대 Redis 연결 수입니다. 정상 상태 연결 수는 대략 nginx_workers x pool x instances이며 Redis/Valkey의 maxclients 제한 이내여야 합니다."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Redis Cluster 노드",
+        "help": "공백으로 구분된 host:port 초기 노드(IPv6는 [ipv6]:port). 비워 두면 독립형 또는 Sentinel 모드를 유지합니다. 데이터베이스 0이 필요하며 Sentinel과 함께 사용할 수 없습니다."
       }
     }
   }

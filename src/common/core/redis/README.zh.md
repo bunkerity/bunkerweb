@@ -1,5 +1,7 @@
 Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集成到 BunkerWeb 中，用于缓存和快速数据检索。此功能对于在需要跨多个节点访问会话数据、指标和其他共享信息的高可用性环境中部署 BunkerWeb 至关重要。
 
+启用 `REDIS_SSL=yes` 和 `REDIS_SSL_VERIFY=yes` 时，按 IP 验证的 TLS 端点必须在 IP 类型的主题备用名称（SAN）中包含该地址。仅有 DNS SAN 或数字形式的通用名称不足以通过验证。这同样适用于独立 Redis 和 Sentinel 端点。升级前，请为受影响的证书重新签发正确的 IP SAN，或使用与证书匹配的 DNS 名称；请保持证书验证开启。
+
 **工作原理：**
 
 1.  启用后，BunkerWeb 会与您配置的 Redis 或 Valkey 服务器建立连接。
@@ -32,6 +34,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。      |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。      |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                       |
+| `REDIS_CLUSTER_NODES` | | global | 否 | 以空格分隔的 `host:port` 初始节点（IPv6 使用 `[ipv6]:port`）。留空保留独立或 Sentinel 模式。 |
 | `REDIS_SENTINEL_HOSTS`    |            | global | 否   | **Sentinel 主机：** Redis Sentinel 主机的空格分隔列表 (hostname:port)。          |
 | `REDIS_SENTINEL_USERNAME` |            | global | 否   | **Sentinel 用户名：** 用于 Redis Sentinel 身份验证的用户名。                     |
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
@@ -66,6 +69,14 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
     -   所有 BunkerWeb 实例都应连接到相同的 Redis 或 Valkey 服务器或 Sentinel 集群
     -   在所有实例中配置相同的数据库编号
     -   确保所有 BunkerWeb 实例与 Redis/Valkey 服务器之间的网络连接
+
+### Redis Cluster
+
+设置 `USE_REDIS=yes` 和 `REDIS_CLUSTER_NODES="redis1:7000 redis2:7001 redis3:7002"`。每个初始节点必须明确指定 1 至 65535 的端口。默认留空，保留独立或 Sentinel 模式。集群要求数值 `REDIS_DATABASE=0`；同时设置 Sentinel、无效节点或非零数据库时会记录错误并使用现有的本地回退机制。身份验证与 TLS 验证使用现有 Redis 设置。
+
+封禁与 Bad Behavior 计数器按客户端 IP 共用一个槽；被阻止请求的报告及其分面共用一个槽。枚举封禁与分布式指标时会扫描所有主节点。集群必须宣告可访问的 IPv4 地址或主机名；不支持 IPv6 宣告与重定向。
+
+切换模式会更改 Redis 键：会话与报告不会迁移。持久封禁保留在数据库中，调度器将有效封禁投影到新的 Redis 存储。Celery 消息代理独立配置；请单独配置独立或 Sentinel 代理（或明确指定 `CELERY_BROKER_URL`）。
 
 ### 配置示例
 

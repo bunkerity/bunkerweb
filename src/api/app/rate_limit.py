@@ -4,6 +4,7 @@ from ipaddress import IPv4Network, IPv6Network, ip_address, ip_network
 from json import dumps, loads
 from typing import Iterable, List, Optional, Set, Tuple, Dict, Any, Union
 from io import StringIO
+from itertools import starmap
 from pathlib import Path
 
 from fastapi import Depends, Request
@@ -15,6 +16,8 @@ from slowapi.errors import RateLimitExceeded
 from yaml import safe_load
 
 from .auth.common import parse_bearer_token, tokens_equal
+from redis_keys import cluster_config_error, parse_nodes  # type: ignore
+
 from .config import api_config
 from os import getenv
 from .utils import LOGGER, get_db
@@ -456,7 +459,25 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             if redis_ssl_ca:
                 storage_options.setdefault("ssl_ca_certs", redis_ssl_ca)
 
-        if sentinels and sentinel_master:
+        cluster_nodes = str(_env_or_cfg("REDIS_CLUSTER_NODES", "") or "").strip()
+        config_error = cluster_config_error(cluster_nodes, sentinels, _env_or_cfg("REDIS_DATABASE", "0"))
+        if config_error:
+            LOGGER.error(f"Invalid Redis configuration, API rate limiting uses local memory: {config_error}")
+            return "memory://", {}
+        if cluster_nodes:
+            from redis.cluster import ClusterNode
+
+            startup_nodes = list(starmap(ClusterNode, parse_nodes(cluster_nodes)))
+            first = startup_nodes[0]
+            host = f"[{first.host}]" if ":" in first.host else first.host
+            storage = f"redis+cluster://{host}:{first.port}"
+            storage_options["startup_nodes"] = startup_nodes
+            storage_options.setdefault("ssl", redis_ssl)
+            if username:
+                storage_options.setdefault("username", username)
+            if password:
+                storage_options.setdefault("password", password)
+        elif sentinels and sentinel_master:
             # redis sentinel URI must not embed master auth, otherwise limits applies
             # these credentials to Sentinel too. Keep Sentinel and Redis auth separate.
             # ensure ports on sentinels (default 26379)
@@ -510,6 +531,36 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         storage = "memory://"
 
     return storage, storage_options
+
+
+def _make_limiter(storage: str, storage_options: Dict[str, Any], *, key_func, default_limits: List[str], strategy: str, headers_enabled: bool) -> Limiter:
+    """Construct the Limiter, falling back to local memory if the storage backend cannot be reached.
+
+    Standalone and Sentinel storages connect lazily, so this except path is only ever taken
+    for a Redis Cluster that is down or still forming when the API starts.
+    """
+    try:
+        return Limiter(
+            key_func=key_func,
+            default_limits=default_limits,  # type: ignore[arg-type]
+            storage_uri=storage,
+            storage_options=storage_options,
+            strategy=strategy,
+            headers_enabled=headers_enabled,
+            key_prefix="bwapi-rl-",
+            in_memory_fallback_enabled=True,
+        )
+    except Exception as exc:
+        LOGGER.error(f"Could not reach Redis storage ({storage}), API rate limiting uses local memory: {exc}")
+        return Limiter(
+            key_func=key_func,
+            default_limits=default_limits,  # type: ignore[arg-type]
+            storage_uri="memory://",
+            strategy=strategy,
+            headers_enabled=headers_enabled,
+            key_prefix="bwapi-rl-",
+            in_memory_fallback_enabled=True,
+        )
 
 
 def _path_variants(path: str) -> List[str]:
@@ -618,6 +669,7 @@ def setup_rate_limiter(app) -> None:
                 "REDIS_SENTINEL_USERNAME",
                 "REDIS_SENTINEL_PASSWORD",
                 "REDIS_SENTINEL_MASTER",
+                "REDIS_CLUSTER_NODES",
             ),
         )
     except Exception:
@@ -641,21 +693,13 @@ def setup_rate_limiter(app) -> None:
         strategy = "fixed-window"
         LOGGER.warning(f"Unknown API rate limit strategy '{orig_strategy}'; falling back to '{strategy}'")
 
-    _limiter = Limiter(
+    _limiter = _make_limiter(
+        storage,
+        storage_options,
         key_func=_build_key_func(),
-        default_limits=_base_limits,  # type: ignore[arg-type]
-        storage_uri=storage,
-        storage_options=storage_options,
+        default_limits=_base_limits,
         strategy=strategy,
         headers_enabled=api_config.rate_limit_headers_enabled,
-        key_prefix="bwapi-rl-",
-        # Without this, a storage error propagates out of `_check_request_limit` and every
-        # endpoint answers 500 -- including /ping and /health, which is how the scheduler
-        # decides the API is reachable. An unreachable Redis would therefore stop config
-        # pushes to the whole fleet, on a service nginx does not even need to serve traffic.
-        # slowapi instead logs "Rate limit storage unreachable", keeps enforcing the same
-        # limits in process memory, and re-checks the backend until it comes back.
-        in_memory_fallback_enabled=True,
     )
     app.state.limiter = _limiter
 

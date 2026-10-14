@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Пул keepalive Redis",
         "help": "Максимальное количество соединений Redis, удерживаемых в пуле на один воркер NGINX. Количество соединений в установившемся режиме составляет примерно nginx_workers x pool x instances и должно оставаться в пределах лимита maxclients Redis/Valkey."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Узлы Redis Cluster",
+        "help": "Начальные узлы host:port через пробел ([ipv6]:port для IPv6). Пустое значение сохраняет автономный режим или Sentinel. Требуется база 0; совместное использование с Sentinel запрещено."
       }
     }
   }

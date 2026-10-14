@@ -20,6 +20,10 @@ Das Metrics-Plugin funktioniert durch:
 - Unterstützung von Plugin-spezifischen Metriken über eine gemeinsame Schnittstelle zur Metrikerfassung
 - Bereitstellung von API-Endpunkten zur Abfrage erfasster Metriken
 
+Redis-Zähler und Verlaufsdaten der Plugins werden nach Instanz-Hostname, Subsystem und Worker getrennt. Jede Instanz mit gemeinsamem Redis muss einen eindeutigen, stabilen Hostnamen verwenden. Ist kein Hostname verfügbar, bleiben diese Metriken lokal. Unveränderte Verlaufsdaten werden nicht neu geschrieben; angehängte Stapel können nach einer verlorenen Antwort ohne Duplikate wiederholt werden.
+
+Alte Zähler bleiben lesbar, ohne in jede Instanz kopiert zu werden. Bei `METRICS_REDIS_TTL` größer als null bleibt ihre vorhandene Ablaufzeit erhalten; permanente alte Zähler erhalten diese TTL einmalig. Aktualisierte Worker verlängern sie nicht ständig. Bei `0` bleiben alte Zähler gemäß der Einstellung dauerhaft erhalten.
+
 ### Wie man es benutzt
 
 Führen Sie die folgenden Schritte aus, um die Metrics-Funktion zu konfigurieren und zu verwenden:

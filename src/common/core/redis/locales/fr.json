@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pool keepalive Redis",
         "help": "Nombre maximal de connexions Redis conservées dans le pool par worker NGINX. En régime stable, les connexions sont environ nginx_workers x pool x instances et doivent rester dans la limite maxclients de Redis/Valkey."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Nœuds du cluster Redis",
+        "help": "Nœuds de départ host:port séparés par des espaces ([ipv6]:port pour IPv6). Vide conserve le mode autonome ou Sentinel. Nécessite la base 0 et ne peut pas être combiné avec Sentinel."
       }
     }
   }

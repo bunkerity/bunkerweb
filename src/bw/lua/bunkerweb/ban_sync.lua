@@ -1,6 +1,7 @@
 local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
 local internal_api = require "bunkerweb.internal_api"
+local rediskeys = require "bunkerweb.rediskeys"
 local resty_lock = require "resty.lock"
 
 local ngx = ngx
@@ -52,6 +53,8 @@ local function build_snapshot(payload)
 			end
 			key = "bans_service_" .. ban.service .. "_ip_" .. ban.ip
 		end
+		-- Snapshots belong to the local datastore, even when Redis uses tagged keys.
+		key = rediskeys.ban(key, false)
 		if bans[key] ~= nil then
 			return nil, "duplicate ban in /bans response"
 		end

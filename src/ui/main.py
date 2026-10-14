@@ -34,6 +34,7 @@ from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
 from common_utils import is_newer_version_available  # type: ignore
+from redis_keys import is_cluster  # type: ignore
 from jobs import JOB_DEFERRAL_PREFIX  # type: ignore
 from resource_group_resolver import kind_for_key as resource_kind_for_setting  # type: ignore
 
@@ -776,6 +777,9 @@ with app.app_context():
     sess = Session()
     sess.init_app(app)
     if redis_client:
+        # flask-session's Redis type check substitutes localhost for RedisCluster.
+        if is_cluster(redis_client):
+            app.session_interface.client = redis_client
         # Sessions written by a file-backed worker -- an install upgraded from file sessions, or a
         # worker that booted before the scheduler stored USE_REDIS (H18) -- are read from the files
         # and moved to Redis on their next write, instead of every user being logged out at once.

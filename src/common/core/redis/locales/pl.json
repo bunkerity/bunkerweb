@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pula keepalive Redis",
         "help": "Maksymalna liczba połączeń Redis utrzymywanych w puli na proces roboczy NGINX. Liczba połączeń w stanie ustalonym wynosi w przybliżeniu nginx_workers x pool x instances i musi mieścić się w limicie maxclients Redis/Valkey."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Węzły Redis Cluster",
+        "help": "Węzły początkowe host:port oddzielone spacjami ([ipv6]:port dla IPv6). Pusta wartość zachowuje tryb samodzielny lub Sentinel. Wymaga bazy 0 i nie można łączyć z Sentinel."
       }
     }
   }

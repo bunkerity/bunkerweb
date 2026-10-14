@@ -2,6 +2,7 @@ local ngx = ngx
 local cdatastore = require "bunkerweb.datastore"
 local clogger = require "bunkerweb.logger"
 local mmdb = require "bunkerweb.mmdb"
+local rediskeys = require "bunkerweb.rediskeys"
 
 local cjson = require "cjson"
 local ipmatcher = require "resty.ipmatcher"
@@ -95,7 +96,6 @@ end
 -- next hit. Closing it for the no-Redis case needs an HTTP -> Stream channel, or the counter
 -- deleted by its owner (badbehavior.lua) at ban time instead of here.
 local BADBEHAVIOR_LOCAL_COUNTER_PREFIX = "plugin_badbehavior_count_"
-local BADBEHAVIOR_REDIS_COUNTER_PREFIX = "plugin_bad_behavior_"
 
 local utils = {}
 
@@ -1059,18 +1059,28 @@ utils.get_rdns = function(ip, ctx, pool)
 	return ptrs, ret_err
 end
 
-utils.get_ips = function(fqdn, ipv6, ctx, pool)
-	-- Check cache
+utils.get_ips = function(fqdn, ipv6, ctx, pool, force_ipv6)
+	-- Ordinary lookups retain USE_IPV6 semantics; FCrDNS can request AAAA for an IPv6 client.
+	if ipv6 == nil then
+		ipv6 = true
+	end
+	local query_aaaa = force_ipv6 == true
+	if ipv6 and not query_aaaa then
+		local use_ipv6, err = utils.get_variable("USE_IPV6", false)
+		if not use_ipv6 then
+			logger:log(ERR, "can't get USE_IPV6 variable " .. err)
+		else
+			query_aaaa = use_ipv6 == "yes"
+		end
+	end
+	-- Cache entries must match the query families, including negative results.
+	local cache_key = "dns_" .. (query_aaaa and "46_" or "4_") .. fqdn
 	local cachestore = utils.new_cachestore(ctx, pool)
-	local ok, value = cachestore:get("dns_" .. fqdn)
+	local ok, value = cachestore:get(cache_key)
 	if not ok then
 		logger:log(ERR, "can't get dns from cachestore : " .. value)
 	elseif value then
 		return decode(value), "success"
-	end
-	-- By default perform ipv6 lookups (only if USE_IPV6=yes)
-	if ipv6 == nil then
-		ipv6 = true
 	end
 	-- Get resolvers
 	local resolvers, err = utils.get_resolvers()
@@ -1088,14 +1098,8 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool)
 	end
 	-- Get query types : AAAA and A if using IPv6 / only A if not using IPv6
 	local qtypes = {}
-	if ipv6 then
-		-- luacheck: ignore 421
-		local use_ipv6, err = utils.get_variable("USE_IPV6", false)
-		if not use_ipv6 then
-			logger:log(ERR, "can't get USE_IPV6 variable " .. err)
-		elseif use_ipv6 == "yes" then
-			table.insert(qtypes, res.TYPE_AAAA)
-		end
+	if query_aaaa then
+		table.insert(qtypes, res.TYPE_AAAA)
 	end
 	table.insert(qtypes, res.TYPE_A)
 	-- Loop on qtypes
@@ -1129,7 +1133,7 @@ utils.get_ips = function(fqdn, ipv6, ctx, pool)
 		end
 	end
 	-- Save to cache
-	ok, err = cachestore:set("dns_" .. fqdn, encode(ips), 3600)
+	ok, err = cachestore:set(cache_key, encode(ips), 3600)
 	if not ok then
 		logger:log(ERR, "can't set dns into cachestore : " .. err)
 	end
@@ -1141,27 +1145,34 @@ end
 -- (A/AAAA via get_ips) and each result compared to remote_addr. Returns (matched_suffix, matched_rdns)
 -- only when a suffix match is forward-confirmed; returns nil otherwise.
 -- Fail-closed: a suffix match that cannot be confirmed (resolver error, or empty/non-matching forward
--- result) returns nil and is logged as a possible spoof. An empty get_ips table needs no special case:
--- the inner loop runs zero times, so no match occurs and execution falls to the spoof branch.
+-- result) returns nil and is logged as a possible spoof. IP matching accepts equivalent IPv6 spellings.
 utils.rdns_forward_confirmed = function(rdns_list, suffix_list, ctx, remote_addr, plugin_logger)
 	if not rdns_list or not suffix_list then
 		return nil
 	end
+	local log_logger = plugin_logger or logger
 	for _, rdns in ipairs(rdns_list) do
 		for _, suffix in ipairs(suffix_list) do
 			if rdns:sub(-#suffix) == suffix then
-				local ip_list, err = utils.get_ips(rdns, nil, ctx, true)
+				local force_ipv6 = remote_addr:find(":", 1, true) ~= nil
+				local ip_list, err = utils.get_ips(rdns, nil, ctx, true, force_ipv6)
 				if ip_list then
-					for _, ip in ipairs(ip_list) do
-						if ip == remote_addr then
+					local matcher, matcher_err = ipmatcher_new(ip_list)
+					if not matcher then
+						log_logger:log(ERR, "can't build rdns forward matcher : " .. matcher_err)
+					else
+						local matched, match_err = matcher:match(remote_addr)
+						if match_err then
+							log_logger:log(ERR, "can't match IP in rdns forward check : " .. match_err)
+						elseif matched then
 							return suffix, rdns
 						end
 					end
 					if plugin_logger then
 						plugin_logger:log(WARN, "IP " .. remote_addr .. " may spoof reverse DNS " .. rdns)
 					end
-				elseif plugin_logger then
-					plugin_logger:log(ERR, "error while getting rdns (forward check) : " .. err)
+				else
+					log_logger:log(ERR, "error while getting rdns (forward check) : " .. err)
 				end
 			end
 		end
@@ -1482,7 +1493,11 @@ utils.is_banned = function(ip, server_name)
 		end
 		return {false, -2, 0}
 	]]
-	local data, script_err = clusterstore:call("eval", redis_script, #keys, unpack(keys))
+	local redis_keys = {}
+	for i, key in ipairs(keys) do
+		redis_keys[i] = rediskeys.ban(key, rediskeys.cluster_mode())
+	end
+	local data, script_err = clusterstore:call("eval", redis_script, #redis_keys, unpack(redis_keys))
 	clusterstore:close()
 	if not data then
 		return nil, "redis call error: " .. script_err, nil, nil
@@ -1596,9 +1611,9 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 		return false, "can't connect to redis server : " .. err
 	end
 	if not ttl or ttl == 0 then
-		ok, err = clusterstore:call("set", ban_key, ban_data)
+		ok, err = clusterstore:call("set", rediskeys.ban(ban_key, rediskeys.cluster_mode()), ban_data)
 	else
-		ok, err = clusterstore:call("set", ban_key, ban_data, "EX", ttl)
+		ok, err = clusterstore:call("set", rediskeys.ban(ban_key, rediskeys.cluster_mode()), ban_data, "EX", ttl)
 	end
 	if not ok then
 		clusterstore:close()
@@ -1681,7 +1696,17 @@ utils.remove_ban = function(ip, service, ban_scope, not_after)
 			return false, "can't connect to redis for unban : " .. connect_err
 		else
 			local delete_err
-			if ban_scope == "global" then
+			local cluster = rediskeys.cluster_mode()
+			if ban_scope == "global" and cluster then
+				local found, scan_err = clusterstore:scan_primaries("bans_service_*_ip_{" .. ip .. "}", 100000)
+				if not found then
+					delete_err = "redis SCAN failed : " .. tostring(scan_err)
+				else
+					for _, key in ipairs(found) do
+						keys_to_delete[#keys_to_delete + 1] = rediskeys.local_ban(key)
+					end
+				end
+			elseif ban_scope == "global" then
 				local cursor = "0"
 				local seen_cursors = {}
 				while true do
@@ -1720,9 +1745,9 @@ utils.remove_ban = function(ip, service, ban_scope, not_after)
 			-- because it walks the zone rather than the ban keys.
 			local ban_key_count = #keys_to_delete
 			if ban_scope == "service" then
-				keys_to_delete[#keys_to_delete + 1] = BADBEHAVIOR_REDIS_COUNTER_PREFIX .. service .. "_" .. ip
+				keys_to_delete[#keys_to_delete + 1] = rediskeys.badbehavior(ip, service, cluster)
 			else
-				keys_to_delete[#keys_to_delete + 1] = BADBEHAVIOR_REDIS_COUNTER_PREFIX .. ip
+				keys_to_delete[#keys_to_delete + 1] = rediskeys.badbehavior(ip, nil, cluster)
 				local ban_suffix = "_ip_" .. ip
 				local seen_services = {}
 				for index = 1, ban_key_count do
@@ -1732,10 +1757,13 @@ utils.remove_ban = function(ip, service, ban_scope, not_after)
 						local name = key:sub(14, #key - #ban_suffix)
 						if name ~= "" and not seen_services[name] then
 							seen_services[name] = true
-							keys_to_delete[#keys_to_delete + 1] = BADBEHAVIOR_REDIS_COUNTER_PREFIX .. name .. "_" .. ip
+							keys_to_delete[#keys_to_delete + 1] = rediskeys.badbehavior(ip, name, cluster)
 						end
 					end
 				end
+			end
+			for index = 1, ban_key_count do
+				keys_to_delete[index] = rediskeys.ban(keys_to_delete[index], cluster)
 			end
 			-- One DEL for the whole key set instead of one round-trip per key. Per-key
 			-- error attribution is lost, but it never worked : DEL on a missing key

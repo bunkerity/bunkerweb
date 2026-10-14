@@ -31,7 +31,9 @@ def _source() -> str:
 def _extract(name: str) -> str:
     match = re.search(rf"^local function {name}\(.*?^end$", _source(), re.S | re.M)
     assert match, f"{name} not found in metrics.lua — did it get renamed?"
-    return match.group(0)
+    helper = re.search(r"^local function request_redis_key\(.*?^end$", _source(), re.S | re.M)
+    assert helper, "request_redis_key missing"
+    return helper.group(0) + "\n" + match.group(0)
 
 
 def _ceiling() -> int:
@@ -60,7 +62,11 @@ def _run(body: str, *, llen, cap='"10k"') -> subprocess.CompletedProcess:
         end,
         log_throttled = function(_, _, id, msg) table.insert(logs, id .. "|" .. msg) end,
     }
-    """ % (_ceiling(), cap, llen)
+    """ % (
+        _ceiling(),
+        cap,
+        llen,
+    )
     source = prelude + _extract("parse_count") + "\n" + _extract("reclaim_wiped_requests") + "\n" + body
     return subprocess.run([LUA, "-"], input=source, capture_output=True, text=True)
 

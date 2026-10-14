@@ -20,6 +20,10 @@ Le plugin Metrics fonctionne en :
 - prenant en charge des métriques spécifiques aux plugins via une interface commune de collecte de métriques ;
 - fournissant des points d'accès API pour interroger les métriques collectées.
 
+Les compteurs et historiques des plugins dans Redis sont isolés par nom d’hôte de l’instance, sous-système et worker. Chaque instance partageant Redis doit utiliser un nom d’hôte distinct et stable. Si aucun nom d’hôte ne peut être déterminé, ces métriques restent locales. Les historiques inchangés ne sont pas réécrits et les lots ajoutés peuvent être rejoués sans duplication après la perte d’une réponse.
+
+Les anciens compteurs restent lisibles sans être copiés dans chaque instance. Lorsque `METRICS_REDIS_TTL` est supérieur à zéro, leur expiration existante est conservée et les compteurs permanents reçoivent ce TTL une seule fois ; les workers mis à jour ne le renouvellent pas continuellement. Avec `0`, les anciens compteurs sont conservés indéfiniment, conformément au paramètre.
+
 ### Utilisation
 
 Suivez ces étapes pour configurer et utiliser la fonctionnalité Metrics :

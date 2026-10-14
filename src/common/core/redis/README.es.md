@@ -1,5 +1,7 @@
 El complemento Redis integra [Redis](https://redis.io/) o [Valkey](https://valkey.io/) en BunkerWeb para el almacenamiento en caché y la recuperación rápida de datos. Esta función es esencial para implementar BunkerWeb en entornos de alta disponibilidad donde los datos de sesión, las métricas y otra información compartida deben ser accesibles a través de múltiples nodos.
 
+Con `REDIS_SSL=yes` y `REDIS_SSL_VERIFY=yes`, un extremo TLS verificado por IP debe presentar esa dirección en un Subject Alternative Name (SAN) de tipo IP. Un SAN DNS o un nombre común numérico por sí solo no basta. Esto también se aplica a Redis independiente y a los extremos Sentinel. Antes de actualizar, vuelva a emitir los certificados afectados con el SAN IP correcto o use un nombre DNS coincidente; mantenga activada la verificación de certificados.
+
 **Cómo funciona:**
 
 1.  Cuando está habilitado, BunkerWeb establece una conexión con su servidor Redis o Valkey configurado.
@@ -32,6 +34,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_TIMEOUT`           | `1000`            | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey. |
 | `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).            |
 | `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                       |
+| `REDIS_CLUSTER_NODES` | | global | no | Nodos iniciales `host:port` separados por espacios (`[ipv6]:port` para IPv6). Vacío conserva el modo independiente o Sentinel. |
 | `REDIS_SENTINEL_HOSTS`    |                   | global   | no       | **Hosts de Sentinel:** Lista de hosts de Redis Sentinel separados por espacios (nombredehost:puerto).                   |
 | `REDIS_SENTINEL_USERNAME` |                   | global   | no       | **Nombre de usuario de Sentinel:** Nombre de usuario para la autenticación de Redis Sentinel.                           |
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                         |
@@ -79,6 +82,14 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     -   Todas las instancias de BunkerWeb deben conectarse al mismo servidor Redis o Valkey o al clúster de Sentinel
     -   Configure el mismo número de base de datos en todas las instancias
     -   Asegúrese de que haya conectividad de red entre todas las instancias de BunkerWeb y los servidores Redis/Valkey
+
+### Redis Cluster
+
+Establezca `USE_REDIS=yes` y `REDIS_CLUSTER_NODES="redis1:7000 redis2:7001 redis3:7002"`. Cada nodo requiere un puerto explícito entre 1 y 65535. Vacío es el valor predeterminado y conserva el modo independiente o Sentinel. El clúster requiere el valor numérico `REDIS_DATABASE=0`; Sentinel, nodos inválidos u otra base generan un error y usan la alternativa local existente. La autenticación y TLS verificado usan los ajustes Redis existentes.
+
+Los baneos y contadores Bad Behavior comparten un slot por IP; los informes de peticiones bloqueadas y sus facetas comparten un slot. Se recorren todos los primarios para enumerar baneos y métricas distribuidas. El clúster debe anunciar direcciones IPv4 o nombres de host accesibles; no se admiten anuncios ni redirecciones IPv6.
+
+Cambiar de modo cambia las claves Redis: sesiones e informes no se migran. Los baneos duraderos permanecen en la base y el scheduler proyecta los activos al nuevo almacén Redis. El broker Celery es independiente; configure por separado un broker independiente o Sentinel (o un `CELERY_BROKER_URL` explícito).
 
 ### Configuraciones de Ejemplo
 

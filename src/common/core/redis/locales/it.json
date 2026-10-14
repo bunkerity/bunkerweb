@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pool keepalive Redis",
         "help": "Numero massimo di connessioni Redis mantenute nel pool per worker NGINX. A regime, le connessioni sono all'incirca nginx_workers x pool x instances e devono rimanere entro il limite maxclients di Redis/Valkey."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Nodi Redis Cluster",
+        "help": "Nodi iniziali host:port separati da spazi ([ipv6]:port per IPv6). Vuoto mantiene la modalità autonoma o Sentinel. Richiede il database 0 e non può essere combinato con Sentinel."
       }
     }
   }

@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis कीपअलाइव पूल",
         "help": "प्रति NGINX वर्कर पूल में रखे जाने वाले अधिकतम Redis कनेक्शन। स्थिर-स्थिति कनेक्शन लगभग nginx_workers × pool × instances होते हैं और इन्हें Redis/Valkey की maxclients सीमा के भीतर रहना चाहिए।"
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Redis Cluster नोड",
+        "help": "स्पेस से अलग किए गए host:port प्रारंभिक नोड ([ipv6]:port IPv6 के लिए)। खाली मान स्टैंडअलोन या Sentinel मोड बनाए रखता है। डेटाबेस 0 आवश्यक है और Sentinel के साथ संयोजन नहीं किया जा सकता।"
       }
     }
   }

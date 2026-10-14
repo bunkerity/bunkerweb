@@ -40,6 +40,7 @@ SYNC_BANS = ROOT.joinpath("src", "common", "core", "jobs", "jobs", "sync-bans.py
 sys.path.append(ROOT.joinpath("src", "common", "utils").as_posix())
 
 from common_utils import get_redis_client  # noqa: E402
+from redis_keys import cluster_config_error  # noqa: E402
 
 # --------------------------------------------------------------------------------------
 # common_utils.get_redis_client
@@ -201,6 +202,7 @@ def _build_storage(cfg: Dict[str, Any], env: Optional[Dict[str, str]] = None) ->
         "loads": loads,
         "getenv": lambda name, default=None: env.get(name, default),
         "api_config": _ApiConfig,
+        "cluster_config_error": cluster_config_error,
     }
     exec(compile(sliced, "rate_limit-slice", "exec"), namespace)  # noqa: S102
     return namespace["_build_storage"](cfg)

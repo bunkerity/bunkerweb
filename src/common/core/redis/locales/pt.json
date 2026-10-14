@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pool keepalive Redis",
         "help": "Número máximo de ligações Redis mantidas no pool por worker do NGINX. Em regime estável, as ligações são aproximadamente nginx_workers x pool x instances e têm de permanecer dentro do limite maxclients do Redis/Valkey."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Nós do Redis Cluster",
+        "help": "Nós iniciais host:port separados por espaços ([ipv6]:port para IPv6). Vazio mantém o modo autónomo ou Sentinel. Requer a base de dados 0 e não pode ser combinado com Sentinel."
       }
     }
   }

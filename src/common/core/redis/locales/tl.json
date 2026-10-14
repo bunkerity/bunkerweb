@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis Keepalive Pool",
         "help": "Pinakamataas na bilang ng Redis connection na itinatago sa pool kada NGINX worker. Humigit-kumulang nginx_workers x pool x instances ang steady-state connection at dapat manatili sa loob ng limit ng maxclients ng Redis/Valkey."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Mga node ng Redis Cluster",
+        "help": "Mga panimulang node na host:port na pinaghihiwalay ng mga espasyo ([ipv6]:port para sa IPv6). Kapag walang laman, nananatili ang standalone o Sentinel mode. Kailangan ang database 0 at hindi maaaring isabay sa Sentinel."
       }
     }
   }

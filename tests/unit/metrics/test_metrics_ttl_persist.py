@@ -28,7 +28,9 @@ def _source() -> str:
 def _extract(name: str) -> str:
     match = re.search(rf"^local function {name}\(.*?^end$", _source(), re.S | re.M)
     assert match, f"{name} not found in metrics.lua — did it get renamed?"
-    return match.group(0)
+    helper = re.search(r"^local function request_redis_key\(.*?^end$", _source(), re.S | re.M)
+    assert helper, "request_redis_key missing"
+    return helper.group(0) + "\n" + match.group(0)
 
 
 # `refresh_request_ttls` batches its touches through init_pipeline/commit_pipeline, so the

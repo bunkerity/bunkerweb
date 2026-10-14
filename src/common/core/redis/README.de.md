@@ -1,5 +1,7 @@
 Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://valkey.io/) in BunkerWeb zur Zwischenspeicherung und für schnellen Datenzugriff. Dies ist unerlässlich in Hochverfügbarkeitsumgebungen, um Sitzungen, Metriken und andere Informationen zwischen mehreren Knoten zu teilen.
 
+Mit `REDIS_SSL=yes` und `REDIS_SSL_VERIFY=yes` muss ein per IP geprüfter TLS-Endpunkt diese Adresse in einem Subject Alternative Name (SAN) vom Typ IP enthalten. Ein DNS-SAN oder ein rein numerischer Common Name genügt nicht. Dies gilt auch für eigenständige Redis-Server und Sentinel-Endpunkte. Stellen Sie betroffene Zertifikate vor dem Upgrade mit dem richtigen IP-SAN neu aus oder verwenden Sie einen passenden DNS-Namen; lassen Sie die Zertifikatsprüfung aktiviert.
+
 **Funktionsweise:**
 
 1.  Nach der Aktivierung verbindet sich BunkerWeb mit dem konfigurierten Redis-/Valkey-Server.
@@ -30,6 +32,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_TIMEOUT`           | `1000`     | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben.                 |
 | `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                   |
 | `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                     |
+| `REDIS_CLUSTER_NODES` | | global | nein | Startknoten als durch Leerzeichen getrennte `host:port`-Paare (`[ipv6]:port` für IPv6). Leer behält den Einzelserver- oder Sentinel-Modus bei. |
 | `REDIS_SENTINEL_HOSTS`    |            | global  | nein     | Sentinel-Hosts (durch Leerzeichen getrennt, `host:port`).     |
 | `REDIS_SENTINEL_USERNAME` |            | global  | nein     | Sentinel-Benutzer.                                            |
 | `REDIS_SENTINEL_PASSWORD` |            | global  | nein     | Sentinel-Passwort.                                            |
@@ -83,6 +86,14 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     - Alle BunkerWeb-Instanzen sollten sich mit demselben Redis- oder Valkey-Server oder Sentinel-Cluster verbinden
     - Konfigurieren Sie dieselbe Datenbanknummer auf allen Instanzen
     - Stellen Sie die Netzwerkkonnektivität zwischen allen BunkerWeb-Instanzen und den Redis-/Valkey-Servern sicher
+
+### Redis Cluster
+
+Setzen Sie `USE_REDIS=yes` und `REDIS_CLUSTER_NODES="redis1:7000 redis2:7001 redis3:7002"`. Jeder Startknoten benötigt einen expliziten Port von 1 bis 65535. Leer ist der Standard und behält den Einzelserver- oder Sentinel-Modus bei. Cluster erfordert den numerischen Wert `REDIS_DATABASE=0`; Sentinel, ungültige Startknoten oder eine andere Datenbank führen zu einer Fehlermeldung und zum bestehenden lokalen Rückfall. Authentifizierung und geprüftes TLS verwenden die bisherigen Redis-Einstellungen.
+
+Sperren und Bad-Behavior-Zähler teilen einen Slot je Client-IP; Berichte blockierter Anfragen und ihre Facetten teilen einen Slot. Zur Auflistung von Sperren und verteilten Metriken werden alle Primaries durchsucht. Der Cluster muss erreichbare IPv4-Adressen oder Hostnamen ankündigen; IPv6-Ankündigungen und -Weiterleitungen werden nicht unterstützt.
+
+Ein Moduswechsel ändert die Redis-Schlüssel: Sitzungen und Berichte werden nicht migriert. Dauerhafte Sperren bleiben in der Datenbank; der Scheduler projiziert aktive Sperren in den neuen Redis-Speicher. Der Celery-Broker bleibt unabhängig; konfigurieren Sie einen separaten Einzelserver- oder Sentinel-Broker (oder eine explizite `CELERY_BROKER_URL`).
 
 ### Beispiele
 

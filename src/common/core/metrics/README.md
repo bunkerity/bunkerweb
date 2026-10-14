@@ -20,6 +20,10 @@ The metrics plugin works by:
 - Supporting plugin-specific metrics through a common metrics collection interface
 - Providing API endpoints for querying collected metrics
 
+Redis plugin counters and histories are isolated by instance hostname, subsystem and worker. Use a distinct, stable hostname for each instance sharing Redis. If no hostname can be resolved, these metrics stay local instead of overwriting another instance. Unchanged histories are not rewritten; appended batches are safe to replay after a lost reply.
+
+Legacy counters remain readable without being copied into every instance. With `METRICS_REDIS_TTL` greater than zero, their existing expiry is preserved and permanent legacy counters receive that TTL once; upgraded workers do not keep renewing them. With `0`, legacy counters are kept permanently, as requested by the setting.
+
 ### How to Use
 
 Follow these steps to configure and use the Metrics feature:

@@ -3,6 +3,7 @@ local ERR = ngx.ERR
 local time = os.time
 local date = os.date
 local floor = math.floor
+local rediskeys = require "bunkerweb.rediskeys"
 
 -- Fixed-window request counter over an arbitrary key, shared by the plugins that need to
 -- count requests without the per-IP timestamp log Limit keeps for LIMIT_REQ. The log is
@@ -61,7 +62,11 @@ ratelimit.incr_redis = function(owner, prefix, window)
 		return nil, err
 	end
 	local count
-	count, err = owner.clusterstore:call("eval", redis_script, 1, window_key(prefix, window), window)
+	local key = window_key(prefix, window)
+	if rediskeys.cluster_mode() then
+		key = rediskeys.escape(key)
+	end
+	count, err = owner.clusterstore:call("eval", redis_script, 1, key, window)
 	if not count then
 		owner.clusterstore:close()
 		return nil, err

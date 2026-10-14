@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis কিপঅ্যালাইভ পুল",
         "help": "প্রতি NGINX ওয়ার্কারে পুলে রাখা সর্বোচ্চ Redis কানেকশন। স্থিতিশীল-অবস্থার কানেকশন প্রায় nginx_workers × pool × instances এবং এগুলোকে Redis/Valkey-এর maxclients সীমার মধ্যে থাকতে হবে।"
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Redis Cluster নোড",
+        "help": "স্পেস দিয়ে পৃথক host:port প্রাথমিক নোড; IPv6-এর জন্য [ipv6]:port। খালি থাকলে স্বতন্ত্র বা Sentinel মোড বজায় থাকে। ডেটাবেস 0 প্রয়োজন এবং Sentinel-এর সঙ্গে ব্যবহার করা যায় না।"
       }
     }
   }

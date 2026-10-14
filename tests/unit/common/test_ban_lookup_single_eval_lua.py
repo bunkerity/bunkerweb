@@ -118,13 +118,18 @@ local clusterstore_stub = {
 package.loaded["bunkerweb.clusterstore"] = { new = function() return clusterstore_stub end }
 
 local USE_REDIS = "yes"
-local utils = { get_variable = function() return USE_REDIS, nil end }
+local utils = { get_variable = function(name)
+    return name == "USE_REDIS" and USE_REDIS or "", nil
+end }
+package.loaded["bunkerweb.utils"] = utils
+local rediskeys = require "bunkerweb.rediskeys"
 """
 
 
 def _run(body: str) -> subprocess.CompletedProcess:
     source = (
-        HARNESS
+        f'package.path = "{ROOT / "src/bw/lua"}/?.lua;" .. package.path\n'
+        + HARNESS
         + "\n"
         + _extract(r"^local function local_ban_key\(.*?^end$", "local_ban_key")
         + "\n"

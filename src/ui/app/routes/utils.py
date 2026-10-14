@@ -270,6 +270,7 @@ def get_redis_client():
         filtered_settings=(
             "USE_REDIS",
             "REDIS_HOST",
+            "REDIS_CLUSTER_NODES",
             "REDIS_PORT",
             "REDIS_DATABASE",
             "REDIS_TIMEOUT",
@@ -291,6 +292,7 @@ def get_redis_client():
     redis_client = get_common_redis_client(
         use_redis=use_redis,
         redis_host=db_config.get("REDIS_HOST"),
+        redis_cluster_nodes=db_config.get("REDIS_CLUSTER_NODES", ""),
         redis_port=db_config.get("REDIS_PORT", "6379"),
         redis_db=db_config.get("REDIS_DATABASE", "0"),
         redis_timeout=db_config.get("REDIS_TIMEOUT", "1000.0"),

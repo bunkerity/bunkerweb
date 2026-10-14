@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pool keepalive Redis",
         "help": "Koneksi Redis maksimum yang disimpan dalam pool per worker NGINX. Koneksi steady-state kira-kira nginx_workers x pool x instances dan harus tetap dalam batas maxclients Redis/Valkey."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Node Redis Cluster",
+        "help": "Node awal berupa pasangan host:port dipisahkan spasi ([ipv6]:port untuk IPv6). Kosong mempertahankan mode mandiri atau Sentinel. Memerlukan basis data 0 dan tidak dapat digabungkan dengan Sentinel."
       }
     }
   }

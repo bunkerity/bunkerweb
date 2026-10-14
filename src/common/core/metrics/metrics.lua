@@ -220,6 +220,238 @@ local tostring = tostring
 local table_insert = table.insert
 local table_remove = table.remove
 
+-- Hostname is stable across worker reloads. Include the subsystem too: HTTP and
+-- stream worker zero have independent LRUs even within the same instance.
+local instance_id
+local function get_instance_id()
+	if not instance_id then
+		local file = io.open("/proc/sys/kernel/hostname", "r") or io.open("/etc/hostname", "r")
+		local name = file and file:read("*l")
+		if file then
+			file:close()
+		end
+		if not name or name == "" then
+			name = os.getenv("HOSTNAME")
+		end
+		if not name or name == "" then
+			-- gethostname exposed by NGINX; unlike "unknown", this does not merge
+			-- every instance whose procfs is unavailable into one Redis writer.
+			local ok, hostname = pcall(function()
+				return ngx.var.hostname
+			end)
+			name = ok and hostname or nil
+		end
+		if not name or name == "" then
+			return nil
+		end
+		instance_id = name:find("[^%w%.%-_]") and "~" .. ngx.md5(name) or name
+	end
+	return instance_id
+end
+
+local function metric_redis_key(key, wid)
+	local id = get_instance_id()
+	return id and "metrics:" .. key .. ":" .. wid .. "@" .. id .. "~" .. subsystem
+end
+
+local synced_tables, synced_counters = {}, {}
+local legacy_cursor, legacy_due, legacy_failures = "0", 0, 0
+local legacy_done = false
+local REDIS_BATCH = 500
+
+-- A lost reply may replay the append. Accept that exact batch at the expected
+-- offset instead of appending it again; a lost/changed list forces a full sync.
+local APPEND_METRIC_SCRIPT = [==[
+local expected = tonumber(ARGV[1])
+local size = redis.call('LLEN', KEYS[1])
+local count = #ARGV - 1
+if size == expected + count then
+  local items = redis.call('LRANGE', KEYS[1], expected, -1)
+  for i = 1, count do
+    if items[i] ~= ARGV[i + 1] then return -1 end
+  end
+  return size
+end
+if size ~= expected then return -1 end
+return redis.call('RPUSH', KEYS[1], unpack(ARGV, 2))
+]==]
+
+-- Frozen legacy counters keep their current expiry. Give permanent legacy keys
+-- one expiry in finite-retention mode; never extend them on every new-worker tick.
+local LEGACY_TTL_SCRIPT = [==[
+local ttl = tonumber(ARGV[1])
+if ttl == 0 then return redis.call('PERSIST', KEYS[1]) end
+if redis.call('TTL', KEYS[1]) == -1 then
+  return redis.call('EXPIRE', KEYS[1], ttl)
+end
+return 0
+]==]
+
+local function refresh_legacy_counters(self, wid, ttl)
+	if legacy_done or ngx_now() < legacy_due then
+		return
+	end
+	for _ = 1, 10 do
+		local page = self:redis_call("scan", legacy_cursor, "MATCH", "metrics:*_counter_*:" .. wid, "COUNT", 1000)
+		local ok = type(page) == "table" and type(page[1]) == "string" and type(page[2]) == "table"
+		if ok then
+			for _, key in ipairs(page[2]) do
+				-- MATCH is a glob, not a parser. Reject malformed and namespaced keys.
+				if key:match("^metrics:[^:]+_counter_[^:]+:" .. wid .. "$") then
+					ok = self:redis_call("eval", LEGACY_TTL_SCRIPT, 1, key, ttl)
+					if not ok then
+						break
+					end
+				end
+			end
+		end
+		if not ok then
+			legacy_failures = legacy_failures + 1
+			legacy_due = ngx_now() + math.min(60 * 2 ^ math.min(legacy_failures - 1, 6), 3600)
+			self:log_throttled(ERR, "legacy_metrics", "Can't normalize legacy metrics retention; retrying later")
+			return
+		end
+		legacy_failures = 0
+		legacy_cursor = page[1]
+		if legacy_cursor == "0" then
+			legacy_done = true
+			return
+		end
+	end
+end
+
+local function sync_table(self, key, redis_key, value)
+	-- Capture before the first yield: log() can shift the live array in place.
+	local items = {}
+	for i, item in ipairs(value) do
+		items[i] = type(item) == "table" and encode(item) or tostring(item)
+	end
+	local state = synced_tables[key]
+	local first, dropped = 1, 0
+	if state then
+		local unchanged = #state == #items
+		for i = 1, #items do
+			if state[i] ~= items[i] then
+				unchanged = false
+				break
+			end
+		end
+		if unchanged then
+			return true
+		end
+		-- Last retained item identifies a possible suffix. Verify the whole
+		-- overlap as well, so repeated values cannot silently drop history.
+		for i = #items, 1, -1 do
+			if items[i] == state[#state] and i <= #state then
+				dropped = #state - i
+				local overlap = true
+				for j = 1, i do
+					if items[j] ~= state[dropped + j] then
+						overlap = false
+						break
+					end
+				end
+				if overlap then
+					first = i + 1
+				end
+				break
+			end
+		end
+	end
+	synced_tables[key] = nil
+	local size = first > 1 and #state or 0
+	if first == 1 then
+		local ok, err = self:redis_call("del", redis_key)
+		if not ok then
+			return false, err
+		end
+	end
+	for i = first, #items, REDIS_BATCH do
+		local last = math_min(i + REDIS_BATCH - 1, #items)
+		local pushed, err = self:redis_call("eval", APPEND_METRIC_SCRIPT, 1, redis_key, size, unpack(items, i, last))
+		if pushed == -1 and first > 1 then
+			return sync_table(self, key, redis_key, value) -- state is cleared: one full fallback
+		end
+		if pushed ~= size + last - i + 1 then
+			return false, err or "unexpected metric list length"
+		end
+		size = pushed
+	end
+	if first > 1 and dropped > 0 then
+		local ok, err = self:redis_call("ltrim", redis_key, -#items, -1)
+		if not ok then
+			return false, err
+		end
+	end
+	synced_tables[key] = items
+	return true
+end
+
+local function sync_counter(self, key, redis_key, value, wid)
+	local state = synced_counters[key]
+	if not state then
+		-- Keep local/API totals intact while publishing only post-upgrade counts.
+		-- The origin lives in SHM so reloads do not count the frozen legacy total twice.
+		local origin_key = "__metrics_redis_origin:" .. key .. ":" .. wid
+		local origin = tonumber((self.metrics_datastore:get(origin_key)))
+		local baseline = tonumber((self.metrics_datastore:get(key .. "_" .. wid))) or 0
+		local stored, err = self:redis_call("get", redis_key)
+		if stored == false or stored == nil then
+			return false, err or "can't restore metric counter"
+		end
+		if origin == nil then
+			local legacy, legacy_err = self:redis_call("get", "metrics:" .. key .. ":" .. wid)
+			if legacy == false or legacy == nil then
+				return false, legacy_err or "can't check legacy metric counter"
+			end
+			origin = legacy ~= null and baseline or 0
+		end
+		-- Redis may outlive SHM (restart), or have accepted the previous SET
+		-- before the worker could persist its local total. Preserve that baseline.
+		origin = math_min(origin, baseline - (tonumber(stored) or 0))
+		local ok, origin_err = self.metrics_datastore:set(origin_key, origin)
+		if not ok then
+			return false, origin_err or "can't persist metric counter origin"
+		end
+		state = { origin = origin }
+		synced_counters[key] = state
+	end
+	local total = value - state.origin
+	if state.value == total then
+		return true
+	end
+	local ok, err = self:redis_call("set", redis_key, total)
+	if ok then
+		state.value = total
+	end
+	return ok, err
+end
+
+local function check_synced_keys(self, wid)
+	local live = {}
+	for _, name in ipairs(lru:get_keys()) do
+		live[name] = true
+	end
+	for key, state in pairs(synced_tables) do
+		if not live[key] then
+			if self:redis_call("del", metric_redis_key(key, wid)) then
+				synced_tables[key] = nil
+			end
+		elseif #state > 0 and self:redis_call("exists", metric_redis_key(key, wid)) == 0 then
+			synced_tables[key] = nil
+		end
+	end
+	for key, state in pairs(synced_counters) do
+		if not live[key] then
+			if self:redis_call("del", metric_redis_key(key, wid)) then
+				synced_counters[key] = nil
+			end
+		elseif self:redis_call("exists", metric_redis_key(key, wid)) == 0 then
+			state.value = nil -- retain the origin when Redis loses this key
+		end
+	end
+end
+
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 
 -- Stripping the TTL is a one-shot migration: in persist mode nothing re-adds one, since
@@ -249,8 +481,12 @@ local CACHE_STATUS_VALUES = {
 -- the tail. Facet OOM invalidates every derived index for a clean rebuild next cycle; unlike
 -- HINCRBY rollback, DEL/RPOP/SREM are safe while Redis rejects memory-growing commands.
 -- ARGV[1]=json, ARGV[2]=request id, ARGV[3..10]=facet values.
+local function request_redis_key(self, suffix)
+	return (self.clusterstore and self.clusterstore.cluster_mode and "{requests}" or "requests") .. (suffix or "")
+end
+
 local PUSH_SCRIPT = [==[
-  if redis.call('GET', 'requests:facets:initialized') ~= '1' then
+  if redis.call('GET', (KEYS[1] .. ':facets:initialized')) ~= '1' then
     return {err = 'request indexes need rebuild'}
   end
   if redis.call('SISMEMBER', KEYS[2], ARGV[2]) == 1 then
@@ -267,12 +503,12 @@ local PUSH_SCRIPT = [==[
   end
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   for i = 1, #fields do
-    local facet = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], ARGV[2 + i], 1)
+    local facet = redis.pcall('HINCRBY', (KEYS[1] .. ':facet:') .. fields[i], ARGV[2 + i], 1)
     if type(facet) == 'table' and facet.err then
       redis.call('RPOP', KEYS[1])
       redis.call('SREM', KEYS[2], ARGV[2])
-      redis.call('DEL', 'requests:facets:initialized')
-      for j = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[j]) end
+      redis.call('DEL', (KEYS[1] .. ':facets:initialized'))
+      for j = 1, #fields do redis.call('DEL', (KEYS[1] .. ':facet:') .. fields[j]) end
       return facet
     end
   end
@@ -286,9 +522,9 @@ local TRIM_SCRIPT = [==[
   if not max or max < 0 then max = 0 end
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   local function clear_indexes()
-    redis.call('DEL', 'requests:facets:initialized')
+    redis.call('DEL', (KEYS[1] .. ':facets:initialized'))
     redis.call('DEL', KEYS[2])
-    for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+    for i = 1, #fields do redis.call('DEL', (KEYS[1] .. ':facet:') .. fields[i]) end
   end
   if max == 0 then
     -- ARGV[2]='1' asks for the wipe only while the list is still empty. self_heal's probes are
@@ -305,17 +541,17 @@ local TRIM_SCRIPT = [==[
     end
     redis.call('DEL', KEYS[1])
     clear_indexes()
-    local marked = redis.pcall('SET', 'requests:facets:initialized', '1')
+    local marked = redis.pcall('SET', (KEYS[1] .. ':facets:initialized'), '1')
     if type(marked) == 'table' and marked.err then return marked end
     return 0
   end
   local nb = redis.call('LLEN', KEYS[1])
   if nb <= max then return 0 end
-  local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
+  local probe = redis.pcall('SET', (KEYS[1] .. ':facets:oomprobe'), '1', 'PX', 1)
   if type(probe) == 'table' and probe.err then
     return probe
   end
-  redis.call('DEL', 'requests:facets:initialized')
+  redis.call('DEL', (KEYS[1] .. ':facets:initialized'))
   local to_remove = nb - max
   local items = redis.call('LRANGE', KEYS[1], 0, to_remove - 1)
   for _, raw in ipairs(items) do
@@ -336,13 +572,13 @@ local TRIM_SCRIPT = [==[
     for i = 1, #fields do
       local v = req[fields[i]]
       if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-      local n = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, -1)
+      local n = redis.pcall('HINCRBY', (KEYS[1] .. ':facet:') .. fields[i], v, -1)
       if type(n) == 'table' and n.err then
         clear_indexes()
         return n
       end
       if n <= 0 then
-        local deleted = redis.pcall('HDEL', 'requests:facet:' .. fields[i], v)
+        local deleted = redis.pcall('HDEL', (KEYS[1] .. ':facet:') .. fields[i], v)
         if type(deleted) == 'table' and deleted.err then
           clear_indexes()
           return deleted
@@ -355,7 +591,7 @@ local TRIM_SCRIPT = [==[
     clear_indexes()
     return trimmed
   end
-  local marked = redis.pcall('SET', 'requests:facets:initialized', '1')
+  local marked = redis.pcall('SET', (KEYS[1] .. ':facets:initialized'), '1')
   if type(marked) == 'table' and marked.err then
     clear_indexes()
     return marked
@@ -371,11 +607,11 @@ local REBUILD_SCRIPT = [==[
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   local function clear_indexes()
     redis.call('DEL', KEYS[2])
-    for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+    for i = 1, #fields do redis.call('DEL', (KEYS[1] .. ':facet:') .. fields[i]) end
   end
-  local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
+  local probe = redis.pcall('SET', (KEYS[1] .. ':facets:oomprobe'), '1', 'PX', 1)
   if type(probe) == 'table' and probe.err then return probe end
-  redis.call('DEL', 'requests:facets:initialized')
+  redis.call('DEL', (KEYS[1] .. ':facets:initialized'))
   clear_indexes()
   local items = redis.call('LRANGE', KEYS[1], 0, -1)
   local kept = 0
@@ -398,7 +634,7 @@ local REBUILD_SCRIPT = [==[
         for i = 1, #fields do
           local v = req[fields[i]]
           if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-          local r = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, 1)
+          local r = redis.pcall('HINCRBY', (KEYS[1] .. ':facet:') .. fields[i], v, 1)
           if type(r) == 'table' and r.err then
             clear_indexes()
             return r
@@ -407,7 +643,7 @@ local REBUILD_SCRIPT = [==[
       end
     end
   end
-  redis.call('SET', 'requests:facets:initialized', '1')
+  redis.call('SET', (KEYS[1] .. ':facets:initialized'), '1')
   return kept
 ]==]
 
@@ -448,7 +684,14 @@ local function enforce_redis_requests_cap(self)
 		-- Unparsable cap must not become 0: cap 0 wipes the list and facets.
 		return
 	end
-	local _, err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", tostring(max_requests))
+	local _, err = self:redis_call(
+		"eval",
+		TRIM_SCRIPT,
+		2,
+		request_redis_key(self),
+		request_redis_key(self, ":ids"),
+		tostring(max_requests)
+	)
 	if err then
 		self:log_throttled(ERR, "cap_enforce", "Can't enforce Redis requests cap: " .. err)
 	end
@@ -474,7 +717,7 @@ local function reclaim_wiped_requests(self, requests)
 	end
 	-- Captured before tonumber: redis_call also returns an error string, which would land
 	-- in tonumber's base argument.
-	local raw = self:redis_call("llen", "requests")
+	local raw = self:redis_call("llen", request_redis_key(self))
 	local llen = tonumber(raw)
 	if llen ~= 0 then
 		-- Only a list seen alive clears the ceiling; an unreadable reply proves nothing.
@@ -521,13 +764,13 @@ local function self_heal_request_facets(self)
 	-- heal from reads that did not happen. On a connection/protocol/OOM error redis_call has
 	-- already condemned the socket for the rest of the cycle so the later probes would no-op
 	-- anyway; a generic error (e.g. WRONGTYPE) does not, which is the other reason to bail here.
-	local nb_raw, probe_err = self:redis_call("llen", "requests")
+	local nb_raw, probe_err = self:redis_call("llen", request_redis_key(self))
 	if probe_err then
 		return
 	end
 	local nb = tonumber(nb_raw) or 0
 	local marker
-	marker, probe_err = self:redis_call("get", "requests:facets:initialized")
+	marker, probe_err = self:redis_call("get", request_redis_key(self, ":facets:initialized"))
 	if probe_err then
 		return
 	end
@@ -536,7 +779,7 @@ local function self_heal_request_facets(self)
 	local facets_complete = true
 	for _, field in ipairs(REQUEST_FACET_FIELDS) do
 		local facet_len_raw
-		facet_len_raw, probe_err = self:redis_call("hlen", "requests:facet:" .. field)
+		facet_len_raw, probe_err = self:redis_call("hlen", request_redis_key(self, ":facet:") .. field)
 		if probe_err then
 			return
 		end
@@ -548,7 +791,7 @@ local function self_heal_request_facets(self)
 		end
 	end
 	local ids_len_raw
-	ids_len_raw, probe_err = self:redis_call("scard", "requests:ids")
+	ids_len_raw, probe_err = self:redis_call("scard", request_redis_key(self, ":ids"))
 	if probe_err then
 		return
 	end
@@ -557,13 +800,29 @@ local function self_heal_request_facets(self)
 		-- "1" is the guard: wipe only if the list is still empty when the script runs. The
 		-- probes above yield, so nb == 0 is a snapshot, not a promise.
 		if not marked then
-			local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", "0", "1")
+			local _, clear_err = self:redis_call(
+				"eval",
+				TRIM_SCRIPT,
+				2,
+				request_redis_key(self),
+				request_redis_key(self, ":ids"),
+				"0",
+				"1"
+			)
 			if clear_err then
 				self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
 			end
 		else
 			if facets_present or ids_len > 0 then
-				local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", "0", "1")
+				local _, clear_err = self:redis_call(
+					"eval",
+					TRIM_SCRIPT,
+					2,
+					request_redis_key(self),
+					request_redis_key(self, ":ids"),
+					"0",
+					"1"
+				)
 				if clear_err then
 					self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
 				end
@@ -572,7 +831,8 @@ local function self_heal_request_facets(self)
 		return
 	end
 	if not facets_complete or ids_len ~= nb or not marked then
-		local _, err = self:redis_call("eval", REBUILD_SCRIPT, 2, "requests", "requests:ids")
+		local _, err =
+			self:redis_call("eval", REBUILD_SCRIPT, 2, request_redis_key(self), request_redis_key(self, ":ids"))
 		if err then
 			self:log_throttled(ERR, "facet_rebuild", "Can't rebuild request facets: " .. err)
 		end
@@ -606,17 +866,22 @@ local function refresh_request_ttls(self, ttl, wid)
 			self.clusterstore:call("expire", key, ttl)
 		end
 	end
-	touch("requests:ids")
-	touch("requests")
+	touch(request_redis_key(self, ":ids"))
+	touch(request_redis_key(self))
 	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		touch("requests:facet:" .. field)
+		touch(request_redis_key(self, ":facet:") .. field)
 	end
-	touch("requests:facets:initialized")
+	touch(request_redis_key(self, ":facets:initialized"))
 	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 		for _, key in ipairs(lru:get_keys()) do
 			if key ~= "setup" and key ~= "requests" and key ~= "baseline" then
 				if key ~= "stream_requests" then
-					touch("metrics:" .. key .. ":" .. wid)
+					if not key:match("_timer_") then
+						local redis_key = metric_redis_key(key, wid)
+						if redis_key then
+							touch(redis_key)
+						end
+					end
 				end
 			end
 		end
@@ -986,6 +1251,7 @@ function metrics:log(bypass_checks)
 	if cache_status and CACHE_STATUS_VALUES[cache_status] then
 		local lru_key = "reverseproxy_counter_cache_status_" .. cache_status
 		local counter = lru:get(lru_key)
+			or tonumber((self.metrics_datastore:get(lru_key .. "_" .. tostring(worker_id()))))
 		lru:set(lru_key, (counter or 0) + 1)
 	end
 	-- Sampled baseline of NORMAL traffic. The record above only ever exists when a plugin set
@@ -1060,6 +1326,7 @@ function metrics:log(bypass_checks)
 					for metric_key, metric_value in pairs(kind_metrics) do
 						local lru_key = plugin_id .. "_counter_" .. metric_key
 						local metric_counter = lru:get(lru_key)
+							or tonumber((self.metrics_datastore:get(lru_key .. "_" .. tostring(worker_id()))))
 						if not metric_counter then
 							metric_counter = metric_value
 						else
@@ -1207,8 +1474,8 @@ local function sync_request_buffer(self, value)
 					"eval",
 					PUSH_SCRIPT,
 					2,
-					"requests",
-					"requests:ids",
+					request_redis_key(self),
+					request_redis_key(self, ":ids"),
 					encode(request),
 					request.id,
 					facets[1],
@@ -1252,6 +1519,10 @@ function metrics:timer()
 	if not setup then
 		for _, key in ipairs(self.metrics_datastore:keys()) do
 			if key:match("_" .. wid .. "$") and key ~= "stream_requests_" .. wid then
+				local name = key:gsub("_" .. wid .. "$", "")
+				-- log() recovers a counter's SHM baseline on a cache miss. A
+				-- request before this first tick has already added new increments.
+				local live_counter = name:find("_counter_", 1, true) and lru:get(name)
 				local value
 				value, err = self.metrics_datastore:get(key)
 				if not value and err ~= "not found" then
@@ -1259,7 +1530,7 @@ function metrics:timer()
 					ret_err = err
 					self.logger:log(ERR, "error while checking " .. key .. " : " .. err)
 				end
-				if value then
+				if value and not live_counter then
 					local ok, decoded = pcall(decode, value)
 					if ok then
 						value = decoded
@@ -1290,6 +1561,10 @@ function metrics:timer()
 			)
 		else
 			redis_connected = true
+			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and get_instance_id() then
+				refresh_legacy_counters(self, wid, ttl or 0)
+				check_synced_keys(self, wid)
+			end
 			self_heal_request_facets(self)
 		end
 	end
@@ -1329,66 +1604,25 @@ function metrics:timer()
 				-- consumer ever needs it.
 				elseif key == "baseline" or key:match("_timer_") then -- luacheck: ignore 542
 				elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-					-- Sync other metrics (counters and tables) to Redis with optimized data structures
-					local redis_key = "metrics:" .. key .. ":" .. wid
+					local redis_key = metric_redis_key(key, wid)
 					local ok
-					if type(value) == "table" then
-						-- Use Redis list for table values
-						ok, err = self:redis_call("del", redis_key)
-						if ok then
-							-- One RPUSH per chunk instead of one per item. Per-item error
-							-- attribution is lost, but the only actionable failure was the
-							-- socket one and the chunk result still reports that.
-							-- ponytail: 512 items per call -- LuaJIT's unpack() argument
-							-- ceiling is ~8000 and MAX_LRU_HISTORY accepts values like "1m".
-							-- ponytail: at-least-once. redis_call retries a chunk on a desync or a
-							-- dropped socket, so a reply lost after Redis applied the RPUSH duplicates
-							-- up to 512 items. Self-heals on the next cycle -- the del above rewrites
-							-- the whole key -- and the same hazard already existed for a connection
-							-- error. Make the chunk idempotent (eval with a DEL-then-RPUSH head) if a
-							-- consumer ever reads this key mid-cycle.
-							local items = {}
-							for _, item in ipairs(value) do
-								items[#items + 1] = type(item) == "table" and encode(item) or tostring(item)
-							end
-							local total = #items
-							local first = 1
-							while first <= total do
-								local last = math_min(first + 511, total)
-								ok, err = self:redis_call("rpush", redis_key, unpack(items, first, last))
-								if not ok then
-									self:log_throttled(
-										ERR,
-										"sync_table_items",
-										"Can't push metric table items " .. key .. " to Redis: " .. err
-									)
-									break
-								end
-								first = last + 1
-							end
+					if redis_key then
+						if type(value) == "table" then
+							ok, err = sync_table(self, key, redis_key, value)
+						elseif type(value) == "number" then
+							ok, err = sync_counter(self, key, redis_key, value, wid)
 						else
-							self:log_throttled(
-								ERR,
-								"sync_table_clear",
-								"Can't clear metric table " .. key .. " in Redis: " .. err
-							)
-						end
-					elseif type(value) == "number" then
-						-- Use Redis string for numeric counters
-						ok, err = self:redis_call("set", redis_key, value)
-						if not ok then
-							self:log_throttled(
-								ERR,
-								"sync_counter",
-								"Can't sync metric counter " .. key .. " to Redis: " .. err
-							)
+							ok, err = self:redis_call("set", redis_key, tostring(value))
 						end
 					else
-						-- Use Redis string for other types
-						ok, err = self:redis_call("set", redis_key, tostring(value))
-						if not ok then
-							self:log_throttled(ERR, "sync_other", "Can't sync metric " .. key .. " to Redis: " .. err)
-						end
+						ok, err = false, "instance hostname unavailable; keeping metrics local"
+					end
+					if not ok then
+						self:log_throttled(
+							ERR,
+							"sync_metric",
+							"Can't sync metric " .. key .. ": " .. (err or "unknown error")
+						)
 					end
 				end
 			end

@@ -25,6 +25,7 @@ from ApiCaller import ApiCaller  # type: ignore
 from common_utils import get_redis_client  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
+from redis_keys import ban_ip, ban_key as redis_ban_key, is_cluster, unescape  # type: ignore
 
 LOGGER = getLogger("JOBS.SYNC-BANS")
 exit_status = 0
@@ -75,6 +76,8 @@ def records_from_redis(redis_client):
                 service, ip = "", key_str.replace("bans_ip_", "")
             else:
                 service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
+            if is_cluster(redis_client):
+                service, ip = unescape(service), ban_ip(ip)
             data = redis_client.get(key)
             if not data:
                 continue
@@ -114,10 +117,11 @@ def project_bans(active, callers, reported, redis_client, now):
     if redis_client:
         for ban in active:
             ttl = exp_for_wire(ban["expires_at"], now)
+            key = redis_ban_key(ban_key(ban), is_cluster(redis_client))
             if ttl:
-                redis_client.set(ban_key(ban), redis_value(ban), ex=ttl)
+                redis_client.set(key, redis_value(ban), ex=ttl)
             else:
-                redis_client.set(ban_key(ban), redis_value(ban))
+                redis_client.set(key, redis_value(ban))
             projected += 1
         return projected, failures
 
@@ -179,6 +183,7 @@ try:
             redis_sentinel_username=getenv("REDIS_SENTINEL_USERNAME") or None,
             redis_sentinel_password=getenv("REDIS_SENTINEL_PASSWORD") or None,
             redis_sentinel_master=getenv("REDIS_SENTINEL_MASTER", ""),
+            redis_cluster_nodes=getenv("REDIS_CLUSTER_NODES", ""),
             logger=LOGGER,
         )
         if not redis_client:
@@ -223,7 +228,7 @@ try:
         inserted, tombstoned = JOB.db.learn_bans(redis_records)
         learned += len(inserted)
         for identity in tombstoned:
-            redis_client.delete(ban_key(identity))
+            redis_client.delete(redis_ban_key(ban_key(identity), is_cluster(redis_client)))
 
     # ── 3. Project ──────────────────────────────────────────────────────────────────────────────
     now = datetime.now(timezone.utc).timestamp()

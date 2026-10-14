@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis کیپ الائیو پول",
         "help": "فی NGINX ورکر پول میں رکھے جانے والے زیادہ سے زیادہ Redis کنکشنز۔ مستحکم حالت کے کنکشنز تقریباً nginx_workers × pool × instances کے برابر ہوتے ہیں اور انہیں Redis/Valkey کی maxclients حد کے اندر رہنا چاہیے۔"
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "Redis Cluster نوڈز",
+        "help": "خالی جگہوں سے الگ host:port ابتدائی نوڈز (IPv6 کے لیے [ipv6]:port)۔ خالی قدر اسٹینڈ الون یا Sentinel موڈ برقرار رکھتی ہے۔ ڈیٹابیس 0 ضروری ہے اور Sentinel کے ساتھ استعمال نہیں کیا جا سکتا۔"
       }
     }
   }

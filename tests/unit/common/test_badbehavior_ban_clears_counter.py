@@ -148,6 +148,7 @@ local banned = {}
 local whitelisted = {}
 package.preload["bunkerweb.utils"] = function()
     return {
+        get_variable = function() return "" end,
         add_ban = function(ip, reason, ban_time, server_name, country, ban_scope, reason_data)
             add_ban_calls[#add_ban_calls + 1] = {
                 ip = ip,
@@ -241,7 +242,7 @@ def _run(body: str, subsystem: str = "http") -> None:
     assert LUA is not None
     result = subprocess.run(
         [LUA, "-", str(BADBEHAVIOR_LUA), str(MIDDLECLASS_LUA), subsystem],
-        input=PREAMBLE + body,
+        input=f'package.path = "{ROOT / "src/bw/lua"}/?.lua;" .. package.path\n' + PREAMBLE + body,
         capture_output=True,
         text=True,
         check=False,
@@ -615,8 +616,11 @@ def test_both_counter_key_spellings_are_covered_by_the_ban_time_delete():
 
     assert '"plugin_badbehavior_count_"' in delete_counter, "the local counter spelling is not deleted"
     assert "self:redis_delete_counter(" in delete_counter, "the Redis half was dropped"
-    assert '"plugin_bad_behavior_"' in redis_delete, "the Redis counter spelling is not deleted"
+    assert "rediskeys.badbehavior(" in redis_delete, "the Redis counter key helper is not used"
+    key_source = (ROOT / "src/bw/lua/bunkerweb/rediskeys.lua").read_text()
+    assert '"plugin_bad_behavior_"' in key_source, "the Redis counter spelling changed"
     assert '"del"' in redis_delete, "redis_delete_counter issues no DEL"
     # Same scope split as `increase()` builds (`:400-403` / `:519-522`), in both spellings.
     assert delete_counter.count('server_name .. "_" .. ip') == 1
-    assert redis_delete.count('server_name .. "_" .. ip') == 1
+    assert 'ban_scope == "service" and server_name or nil' in redis_delete
+    assert key_source.count('server_name .. "_" .. ip') == 1

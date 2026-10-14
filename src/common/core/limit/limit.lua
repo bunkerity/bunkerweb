@@ -2,6 +2,7 @@ local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
 local ratelimit = require "bunkerweb.ratelimit"
+local rediskeys = require "bunkerweb.rediskeys"
 local utils = require "bunkerweb.utils"
 
 local limit = class("limit", plugin)
@@ -473,7 +474,11 @@ function limit:limit_req_redis(rate_max, rate_time)
 		"eval",
 		redis_script,
 		1,
-		"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
+		rediskeys.cluster_mode()
+				and rediskeys.escape(
+					"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri
+				)
+			or ("plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri),
 		rate_max,
 		rate_time,
 		time(date("!*t"))

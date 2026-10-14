@@ -293,4 +293,7 @@ def test_both_counter_key_shapes_are_named_in_one_place():
     # only fixes half the deployments. Both must be reachable from `remove_ban`.
     source = UTILS_LUA.read_text()
     assert source.count('"plugin_badbehavior_count_"') == 1
-    assert source.count('"plugin_bad_behavior_"') == 1
+    # Redis names are shared with the Cluster writers; remove_ban must use that formatter.
+    assert '"plugin_bad_behavior_' not in source
+    assert "rediskeys.badbehavior(" in _remove_ban_body()
+    assert '"plugin_bad_behavior_"' in (UTILS_LUA.parent / "rediskeys.lua").read_text()

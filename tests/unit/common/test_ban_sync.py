@@ -318,7 +318,7 @@ def _run_lua(preamble: str, body: str, *args: str) -> None:
     assert LUA is not None
     result = subprocess.run(
         [LUA, "-", *args],
-        input=preamble + body,
+        input=f'package.path = "{ROOT / "src/bw/lua"}/?.lua;" .. package.path\n' + preamble + body,
         capture_output=True,
         text=True,
         check=False,

@@ -67,7 +67,7 @@
       "name": "lua-nginx-module v0.10.29",
       "url": "https://github.com/openresty/lua-nginx-module.git",
       "commit": "a1ec138e98801400832fee6030120777bf9bb435",
-      "post_install": "rm -r src/deps/src/lua-nginx-module/t"
+      "post_install": "(rm -r src/deps/src/lua-nginx-module/t) && if patch --forward --dry-run --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch >/dev/null 2>&1; then patch --forward --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch; else patch --reverse --dry-run --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch; fi"
     },
     {
       "id": "lua-resty-core",
@@ -150,6 +150,13 @@
       "url": "https://github.com/ledgetech/lua-resty-redis-connector.git",
       "commit": "02a29f93253d1f6ad392c5ac2b643c57e62b5979",
       "post_install": "rm -r src/deps/src/lua-resty-redis-connector/t && patch --forward src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua src/deps/misc/lua-resty-redis-connector.patch || rm src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.orig src/deps/src/lua-resty-redis-connector/lib/resty/redis/connector.lua.rej"
+    },
+    {
+      "id": "resty-redis-cluster",
+      "name": "resty-redis-cluster v1.6.1",
+      "url": "https://github.com/Kong/resty-redis-cluster.git",
+      "commit": "09ab3295db2e42b144a3a8c67117a1c55c052409",
+      "post_install": "rm -rf src/deps/src/resty-redis-cluster/t src/deps/src/resty-redis-cluster/.github src/deps/src/resty-redis-cluster/rockspec && if patch --forward --dry-run --batch src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch >/dev/null 2>&1; then patch --forward --batch src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch; else patch --reverse --dry-run --batch src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch; fi"
     },
     {
       "id": "lua-resty-session",
@@ -288,7 +295,7 @@
       "name": "stream-lua-nginx-module v0.0.17",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
       "commit": "86cf76e3b62a5dea50813b3a00ff87b628c41aa4",
-      "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t && patch --forward src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c src/deps/misc/stream-lua-nginx-module.patch || rm src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.orig src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.rej"
+      "post_install": "(rm -r src/deps/src/stream-lua-nginx-module/t && patch --forward src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c src/deps/misc/stream-lua-nginx-module.patch || rm src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.orig src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.rej) && if patch --forward --dry-run --batch src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_socket_tcp.c src/deps/misc/stream-lua-nginx-module-ip-san.patch >/dev/null 2>&1; then patch --forward --batch src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_socket_tcp.c src/deps/misc/stream-lua-nginx-module-ip-san.patch; else patch --reverse --dry-run --batch src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_socket_tcp.c src/deps/misc/stream-lua-nginx-module-ip-san.patch; fi"
     },
     {
       "id": "zlib",

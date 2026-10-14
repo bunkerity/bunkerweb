@@ -1,6 +1,7 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local rediskeys = require "bunkerweb.rediskeys"
 local utils = require "bunkerweb.utils"
 
 local badbehavior = class("badbehavior", plugin)
@@ -547,10 +548,8 @@ end
 
 function badbehavior:redis_increase(ip, count_time, server_name, ban_scope)
 	-- Determine key based on ban scope
-	local counter_key = "plugin_bad_behavior_" .. ip
-	if ban_scope == "service" then
-		counter_key = "plugin_bad_behavior_" .. server_name .. "_" .. ip
-	end
+	local counter_key =
+		rediskeys.badbehavior(ip, ban_scope == "service" and server_name or nil, rediskeys.cluster_mode())
 
 	-- Our LUA script to execute on redis
 	local redis_script = [[
@@ -584,10 +583,8 @@ end
 
 function badbehavior:redis_decrease(ip, count_time, server_name, ban_scope)
 	-- Determine key based on ban scope
-	local counter_key = "plugin_bad_behavior_" .. ip
-	if ban_scope == "service" then
-		counter_key = "plugin_bad_behavior_" .. server_name .. "_" .. ip
-	end
+	local counter_key =
+		rediskeys.badbehavior(ip, ban_scope == "service" and server_name or nil, rediskeys.cluster_mode())
 
 	-- Our LUA script to execute on redis
 	local redis_script = [[
@@ -626,10 +623,8 @@ end
 
 function badbehavior:redis_delete_counter(ip, server_name, ban_scope)
 	-- Determine key based on ban scope
-	local counter_key = "plugin_bad_behavior_" .. ip
-	if ban_scope == "service" then
-		counter_key = "plugin_bad_behavior_" .. server_name .. "_" .. ip
-	end
+	local counter_key =
+		rediskeys.badbehavior(ip, ban_scope == "service" and server_name or nil, rediskeys.cluster_mode())
 
 	-- Connect to server
 	local ok, err = self.clusterstore:connect()

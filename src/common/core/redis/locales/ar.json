@@ -77,6 +77,10 @@
       "REDIS_KEEPALIVE_POOL": {
         "label": "تجمع keepalive في Redis",
         "help": "الحد الأقصى لاتصالات Redis المحفوظة في التجمع لكل عامل NGINX. الاتصالات في الحالة المستقرة تساوي تقريبًا nginx_workers × pool × instances ويجب أن تبقى ضمن حد maxclients لـ Redis/Valkey."
+      },
+      "REDIS_CLUSTER_NODES": {
+        "label": "عقد Redis Cluster",
+        "help": "عقد البداية بصيغة host:port مفصولة بمسافات؛ استخدم [ipv6]:port لعناوين IPv6. القيمة الفارغة تبقي الوضع المستقل أو Sentinel. يتطلب قاعدة البيانات 0 ولا يمكن دمجه مع Sentinel."
       }
     }
   }
