@@ -124,7 +124,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 &&
 #   perl-base 5.40.1-6 -> 5.40.1-6+deb13u1: CVE-2026-13221 CVE-2026-42496 CVE-2026-8376
 #     CVE-2026-42497 CVE-2026-12087 CVE-2026-48959 CVE-2026-48961 CVE-2026-48962 CVE-2026-57432
 #     CVE-2026-57433 CVE-2025-15649 CVE-2026-7010 CVE-2026-7017
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 libsqlite3-0 perl-base && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
+#   libpng (libpng16-16t64, pulled in by libgd3/libfreetype6) 1.6.48-1+deb13u5 -> +deb13u6: CVE-2026-46675
+#   xz-utils (liblzma5) 5.8.1-1+deb13u1 -> +deb13u2: DSA-6549-1 TEMP-1147318-639065
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 libsqlite3-0 perl-base libpng16-16t64 liblzma5 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

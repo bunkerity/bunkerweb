@@ -229,7 +229,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 &&
 #     carried 2.7.1-2 / CVE-2025-59375; refreshing the base moved it to the newer pair)
 #   gzip 1.13-1 -> 1.13-1+deb13u1: CVE-2026-41992 CVE-2026-41991
 #   glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4: CVE-2026-5450 CVE-2026-5928
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
+#   libpng (libpng16-16t64, pulled in by libgd3/libfreetype6) 1.6.48-1+deb13u5 -> +deb13u6: CVE-2026-46675
+#   xz-utils (liblzma5) 5.8.1-1+deb13u1 -> +deb13u2: DSA-6549-1 TEMP-1147318-639065
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 gzip libc-bin libc6 libpng16-16t64 liblzma5 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

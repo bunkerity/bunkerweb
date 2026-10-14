@@ -67,7 +67,8 @@ RUN . /etc/os-release && \
 # of this image's own pre-fix Trivy scan:
 #   gzip 1.13-1 -> 1.13-1+deb13u1: CVE-2026-41992 CVE-2026-41991
 #   glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4: CVE-2026-5450 CVE-2026-5928
-RUN apt-get update && apt-get install -y --no-install-recommends gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/*
+#   xz-utils (liblzma5) 5.8.1-1+deb13u1 -> +deb13u2: DSA-6549-1 TEMP-1147318-639065
+RUN apt-get update && apt-get install -y --no-install-recommends gzip libc-bin libc6 liblzma5 && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
@@ -130,7 +131,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 &&
 # own pre-fix Trivy scan:
 #   CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
 #   CVE-2026-41992 CVE-2026-41991 (gzip) CVE-2026-5450 CVE-2026-5928 (glibc)
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/*
+#   xz-utils (liblzma5) 5.8.1-1+deb13u1 -> +deb13u2: DSA-6549-1 TEMP-1147318-639065
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux gzip libc-bin libc6 liblzma5 && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

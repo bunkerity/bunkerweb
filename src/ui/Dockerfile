@@ -125,7 +125,8 @@ RUN . /etc/os-release && \
   useradd -u 101 -g ui -d /usr/share/bunkerweb/ui -s /usr/sbin/nologin -M ui
 
 # Fix CVEs
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount openssl util-linux gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1 and openssl 3.5.6-1~deb13u2 -> 3.5.7-1~deb13u2 (openssl drags libssl3t64 + openssl-provider-legacy with it) and gzip 1.13-1 -> 1.13-1+deb13u1 and glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4, all still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615 CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803 CVE-2026-41992 CVE-2026-41991 CVE-2026-5450 CVE-2026-5928
+#   xz-utils (liblzma5) 5.8.1-1+deb13u1 -> +deb13u2: DSA-6549-1 TEMP-1147318-639065
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount openssl util-linux gzip libc-bin libc6 liblzma5 && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1 and openssl 3.5.6-1~deb13u2 -> 3.5.7-1~deb13u2 (openssl drags libssl3t64 + openssl-provider-legacy with it) and gzip 1.13-1 -> 1.13-1+deb13u1 and glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4, all still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615 CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803 CVE-2026-41992 CVE-2026-41991 CVE-2026-5450 CVE-2026-5928
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

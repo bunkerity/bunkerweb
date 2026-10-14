@@ -79,7 +79,8 @@ RUN . /etc/os-release && \
   useradd -u 101 -g worker -d /usr/share/bunkerweb/worker -s /usr/sbin/nologin -M worker
 
 # Fix CVEs
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux gzip libc-bin libc6 && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1 and gzip 1.13-1 -> 1.13-1+deb13u1 and glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4, still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615 CVE-2026-41992 CVE-2026-41991 CVE-2026-5450 CVE-2026-5928
+#   xz-utils (liblzma5) 5.8.1-1+deb13u1 -> +deb13u2: DSA-6549-1 TEMP-1147318-639065
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux gzip libc-bin libc6 liblzma5 && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1 and gzip 1.13-1 -> 1.13-1+deb13u1 and glibc (libc6/libc-bin) 2.41-12+deb13u3 -> +deb13u4, still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615 CVE-2026-41992 CVE-2026-41991 CVE-2026-5450 CVE-2026-5928
 
 # 101:101, the same ids the scheduler, API and UI images use, so a stack backed by SQLite can
 # hand all of them the one /data volume holding the database file. The all-in-one image already
