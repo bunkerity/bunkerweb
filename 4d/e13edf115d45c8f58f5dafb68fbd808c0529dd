@@ -1,0 +1,248 @@
+src/common/core/blacklist/locales/ur.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/whitelist/locales/de.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/locales/br.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/realip/locales/zh.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/plugin.json
+  s_607210143ce683::t_f4f1665dad6974 104
+src/common/core/blacklist/locales/tw.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/realip/locales/ru.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/greylist/locales/ru.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/realip/locales/hi.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/locales/bn.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/greylist/locales/br.json
+  s_607210143ce683::t_09da3ab927b455 56
+tests/unit/common/test_lists_port_parser.py
+  s_607210143ce683::t_4107adf8af4ee4 1-63
+src/common/core/realip/locales/de.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/blacklist/locales/zh.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/blacklist/locales/it.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+tests/unit/jobs/test_lists_port_download.py
+  s_607210143ce683::t_ccec8c3a6090aa 5,16,59
+  s_607210143ce683::t_a7a84b97f55d4c 90,95,98,109
+  s_607210143ce683::t_52c491a6ff6baf 1-4,6-15,17-58,60-89,91-94,96-97,99-108,110-116
+src/common/core/greylist/locales/ar.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/blacklist/locales/tr.json
+  s_607210143ce683::t_09da3ab927b455 50,82
+src/common/core/realip/locales/tr.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/README.zh.md
+  s_607210143ce683::t_f4f1665dad6974 44-46
+src/common/core/greylist/locales/bn.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/whitelist/locales/it.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/locales/pt.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/locales/tl.json
+  s_607210143ce683::t_09da3ab927b455 34
+src/common/core/whitelist/README.fr.md
+  s_607210143ce683::t_f4f1665dad6974 44-46
+src/common/core/blacklist/locales/br.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/whitelist/locales/tw.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/whitelist/README.de.md
+  s_607210143ce683::t_f4f1665dad6974 44-46
+src/common/core/realip/locales/tw.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/locales/id.json
+  s_607210143ce683::t_09da3ab927b455 34
+src/common/core/realip/locales/es.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/blacklist/locales/tl.json
+  s_607210143ce683::t_09da3ab927b455 50,82
+src/common/core/realip/locales/tl.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/utils/common_utils.py
+  s_607210143ce683::t_75d9d8c4631974 7,17-18,1000-1137
+  s_907d7453b529ef::t_a321edc9931c5d 6
+  s_dd5d0180289cec::t_5d59cd368bf66d 1138-1139
+src/common/core/blacklist/locales/ru.json
+  s_607210143ce683::t_09da3ab927b455 50,82
+src/common/core/blacklist/locales/ar.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/blacklist/locales/id.json
+  s_607210143ce683::t_09da3ab927b455 50,82
+src/common/core/realip/README.fr.md
+  s_607210143ce683::t_f4f1665dad6974 35-38,118-127
+  s_607210143ce683::t_29e7656b349cf8 128-129
+src/common/core/blacklist/locales/pl.json
+  s_607210143ce683::t_09da3ab927b455 50,82
+src/common/core/blacklist/locales/bn.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/realip/README.de.md
+  s_607210143ce683::t_f4f1665dad6974 35-38,118-127
+  s_607210143ce683::t_24de60d10c0442 128-129
+src/common/core/whitelist/jobs/whitelist-download.py
+  s_607210143ce683::t_75d9d8c4631974 8,22,192-194,196,200,210,227-228,236-243,249-250
+src/common/core/greylist/plugin.json
+  s_607210143ce683::t_f4f1665dad6974 104
+src/common/core/whitelist/locales/hi.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/greylist/locales/pt.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/README.es.md
+  s_607210143ce683::t_f4f1665dad6974 37-40,120-129
+  s_607210143ce683::t_cbdda8cafacd3f 130-131
+src/common/core/blacklist/locales/hi.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/whitelist/locales/tr.json
+  s_607210143ce683::t_09da3ab927b455 34
+src/common/core/greylist/locales/hi.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/plugin.json
+  s_607210143ce683::t_f4f1665dad6974 56
+src/common/core/greylist/locales/fr.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/greylist/locales/tl.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/README.es.md
+  s_607210143ce683::t_f4f1665dad6974 44-46
+src/common/core/whitelist/locales/ko.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/whitelist/locales/ar.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/greylist/jobs/greylist-download.py
+  s_607210143ce683::t_75d9d8c4631974 8,22,192-194,196,200,210,227-228,236-243,249-250
+src/common/core/greylist/locales/it.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/blacklist/locales/ko.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/greylist/locales/de.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/greylist/locales/tr.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/realip/locales/id.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/realip/README.zh.md
+  s_607210143ce683::t_f4f1665dad6974 37-40,120-129
+  s_607210143ce683::t_8faf9d9b5f2a10 130-131
+src/common/core/whitelist/locales/pt.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/locales/bn.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/blacklist/locales/es.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/greylist/locales/id.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/locales/ur.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/blacklist/locales/de.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/whitelist/locales/ru.json
+  s_607210143ce683::t_09da3ab927b455 34
+src/common/core/greylist/locales/ur.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/locales/ko.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/realip/locales/it.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/locales/pl.json
+  s_607210143ce683::t_09da3ab927b455 34
+src/common/core/greylist/locales/es.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/blacklist/locales/pt.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/blacklist/locales/fr.json
+  s_607210143ce683::t_09da3ab927b455 104,124
+src/common/core/whitelist/locales/br.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/locales/pl.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/blacklist/jobs/blacklist-download.py
+  s_607210143ce683::t_75d9d8c4631974 8,22,248-250,252,256,266,283-284,292-299,305-306
+src/common/core/whitelist/locales/es.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/README.md
+  s_607210143ce683::t_f4f1665dad6974 37-40,120-129
+  s_607210143ce683::t_e2415501631a57 130-131
+src/common/core/realip/jobs/realip-download.py
+  s_607210143ce683::t_75d9d8c4631974 8,21,147-149,151,155,165,182-183,191,197-198
+src/common/core/greylist/locales/ko.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/whitelist/locales/zh.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/realip/locales/fr.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/realip/locales/ar.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/greylist/locales/zh.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/whitelist/README.md
+  s_607210143ce683::t_f4f1665dad6974 44-46
+src/common/core/realip/locales/ur.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/greylist/locales/tw.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/greylist/locales/pl.json
+  s_607210143ce683::t_09da3ab927b455 30
+src/common/core/whitelist/locales/fr.json
+  s_607210143ce683::t_09da3ab927b455 56
+src/common/core/blacklist/README.de.md
+  s_607210143ce683::t_3ef3e957683b1b 65-67
+src/common/core/blacklist/README.es.md
+  s_607210143ce683::t_16a5efe3676e80 65-67
+src/common/core/blacklist/README.fr.md
+  s_607210143ce683::t_65359fb5bda2eb 65-67
+src/common/core/blacklist/README.md
+  s_607210143ce683::t_a3a3f9085a359e 65-67
+src/common/core/blacklist/README.zh.md
+  s_607210143ce683::t_973b7e57e3b9dc 65-67
+src/common/core/blacklist/plugin.json
+  s_607210143ce683::t_1e0872954e8ed1 200,245
+src/common/core/greylist/README.de.md
+  s_607210143ce683::t_b05e7e4d2217ec 45-47
+src/common/core/greylist/README.es.md
+  s_607210143ce683::t_4c5ca7636d9d5d 45-47
+src/common/core/greylist/README.fr.md
+  s_607210143ce683::t_2b72fb82d9e6ef 45-47
+src/common/core/greylist/README.md
+  s_607210143ce683::t_56529b27de1c1c 45-47
+src/common/core/greylist/README.zh.md
+  s_607210143ce683::t_25f2eda6defa30 45-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4de13edf115d45c8f58f5dafb68fbd808c0529dd",
+  "prompts": {},
+  "sessions": {
+    "s_607210143ce683": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb81-ff5e-7eb2-af5a-2746fba1ce58",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_907d7453b529ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-349b-7603-8990-c626d3e902dc",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dd5d0180289cec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-27e2-7611-baac-5a040932de5a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,210 @@
+src/ui/main.py
+  s_8789970f3bdadb::t_22e426afcef101 123
+  s_08b0035c05a1ba::t_889f05ecf69ebb 815-822,1948,1962,1965-1966,1968
+src/ui/app/routes/plugins.py
+  s_8789970f3bdadb::t_dc3d9e6d27e0c1 219
+  s_8789970f3bdadb::t_fed4f37c8c46de 56,224
+  s_29c133fb874634::t_28c3466c821bef 283,296,759,1025,1077,1154
+src/ui/app/static/js/pages/config_edit.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 61,148,170,237
+tests/unit/ui/test_plugin_catalog_routes.py
+  s_8789970f3bdadb::t_327823665ca136 113
+src/ui/app/routes/instances.py
+  s_8789970f3bdadb::t_fed4f37c8c46de 8,15
+  s_29c133fb874634::t_9b005eb4d2bc15 332
+src/ui/app/static/js/pages/services.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 684,923,937
+tests/unit/ui/test_pro_key_save_flash_type.py
+  s_8789970f3bdadb::t_327823665ca136 56
+tests/unit/ui/test_instances_write_permission.py
+  s_8789970f3bdadb::t_327823665ca136 42,81
+src/ui/app/static/js/pages/configs.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 788,790-791,807,809-810
+tests/unit/ui/test_pro_refresh.py
+  s_8789970f3bdadb::t_327823665ca136 28
+tests/unit/ui/test_service_new_name_feedback.py
+  s_8789970f3bdadb::t_327823665ca136 95
+src/ui/app/static/js/pages/plugins-grid.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 172
+src/ui/app/static/js/pages/reports.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 1057,1059
+src/ui/app/templates/plugin_page.html
+  s_e09c0124348d70::t_107f3ee50cb6eb 17,19
+src/ui/app/routes/configs.py
+  s_8789970f3bdadb::t_fed4f37c8c46de 15,19,474
+  s_8789970f3bdadb::t_22e426afcef101 53-67,349
+  s_29c133fb874634::t_4a467485d0d982 350-352,508-511,568,703,1048
+src/ui/app/static/js/pages/instances.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 667,686,712,771,799
+tests/unit/ui/test_service_mode_ui.py
+  s_8789970f3bdadb::t_327823665ca136 52,192
+tests/unit/ui/test_plugins_marketplace.py
+  s_8789970f3bdadb::t_327823665ca136 391
+src/ui/app/routes/pro.py
+  s_8789970f3bdadb::t_fed4f37c8c46de 9,13,178
+src/ui/app/models/instance.py
+  s_907d7453b529ef::t_7f374ca954ebe5 20
+  s_f8d3259134401e::t_0a5d3b8a7521b7 326,398,494,970,984,1395
+tests/unit/ui/test_resume_task_lifecycle.py
+  s_8789970f3bdadb::t_a461fabc32184a 23-25
+  s_8789970f3bdadb::t_6774192d10441d 36-45
+  s_8789970f3bdadb::t_c564c3678ae35f 7-8,109-134
+  s_8789970f3bdadb::t_6bddb01508961b 1-6,9-22,26-35,46-108,135-147
+tests/unit/ui/test_resume_service_integrity.py
+  s_8789970f3bdadb::t_b203617622ddef 25
+  s_8789970f3bdadb::t_6774192d10441d 70-74
+  s_8789970f3bdadb::t_0950c481de42a9 64,67-69,75,77
+  s_8789970f3bdadb::t_6bddb01508961b 62-63,65-66,76
+  s_8789970f3bdadb::t_2633e5e60aa3f5 1-24,26-61
+src/ui/app/static/js/pages/templates.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 71,87
+tests/unit/ui/test_core_plugin_actions_caches.py
+  s_de3e9c41d396f4::t_07a6aadfdc9f07 81,83,107,111
+src/ui/app/routes/global_settings.py
+  s_8789970f3bdadb::t_fed4f37c8c46de 7,29
+  s_8789970f3bdadb::t_6774192d10441d 295
+  s_29c133fb874634::t_585b0bf28a1a5a 410
+tests/unit/ui/test_instance_action_flash_locale.py
+  s_8789970f3bdadb::t_327823665ca136 75
+src/ui/app/models/config.py
+  s_8789970f3bdadb::t_0950c481de42a9 25
+  s_a80692ccb4af3b::t_bd67748739baeb 18-24,26-29,447-449,453,493-496,503,571,590
+tests/unit/ui/test_save_scope.py
+  s_8789970f3bdadb::t_327823665ca136 850
+tests/unit/ui/test_pro_online_services_count.py
+  s_8789970f3bdadb::t_327823665ca136 32
+src/ui/app/routes/services.py
+  s_8789970f3bdadb::t_fed4f37c8c46de 32,68,787
+  s_29c133fb874634::t_185afac25b8b8c 883,1004,2187,2435,2546,2859
+src/ui/app/static/js/pages/bans.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 1750,1752,1778,1780
+src/ui/app/routes/utils.py
+  s_8789970f3bdadb::t_0ead3f77a4a8f8 4,10,46-50,53-72,75-81,83-110
+  s_8789970f3bdadb::t_76823d3ed7cd49 82
+  s_8789970f3bdadb::t_a461fabc32184a 51-52,73-74
+  s_e09c0124348d70::t_64a2bb191352f7 111-112
+tests/unit/ui/test_flash_no_english_literal_left.py
+  s_8789970f3bdadb::t_327823665ca136 107
+  s_98230608a60229::t_53b698b276e62f 108
+tests/unit/ui/test_resume_identifier_strings.py
+  s_8789970f3bdadb::t_76823d3ed7cd49 19
+  s_8789970f3bdadb::t_03a773f550d9c7 1-12,17-18,20-30
+  s_8789970f3bdadb::t_6774192d10441d 13-16
+tests/unit/ui/test_raw_setting_drafts.py
+  s_8789970f3bdadb::t_327823665ca136 306
+tests/unit/ui/test_template_settings_page.py
+  s_8789970f3bdadb::t_327823665ca136 585
+src/ui/app/static/js/pages/jobs.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 413-414,449-450
+tests/unit/ui/test_default_server_page.py
+  s_8789970f3bdadb::t_327823665ca136 270,314,355,408,497
+tests/unit/ui/test_plugin_settings_page.py
+  s_8789970f3bdadb::t_327823665ca136 350
+tests/unit/ui/test_resume_form_tasks.py
+  s_8789970f3bdadb::t_405a1e7b886cbd 27-28
+  s_8789970f3bdadb::t_6774192d10441d 50-57
+  s_8789970f3bdadb::t_2633e5e60aa3f5 1-26,29-41,44-48,59-62
+  s_8789970f3bdadb::t_c564c3678ae35f 42-43,49,58
+tests/unit/ui/test_resume_config_selection.py
+  s_8789970f3bdadb::t_53aa3eb192b3d7 27,51
+  s_8789970f3bdadb::t_b203617622ddef 1-26,28-50
+tests/unit/ui/test_global_settings_propagation.py
+  s_8789970f3bdadb::t_327823665ca136 195,261
+src/ui/app/static/js/pages/template-settings-page.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 145,147,323
+  s_9b655631338812::t_6eab1268bab24f 723,784,789,832
+tests/unit/ui/test_configs_write_permission.py
+  s_8789970f3bdadb::t_327823665ca136 52,73
+tests/unit/ui/test_api_app_lane_isolation.py
+  s_a80692ccb4af3b::t_b304d875996d8e 78-81,90-98,101,110-111
+src/ui/app/static/js/pages/service-resources.js
+  s_907d7453b529ef::t_26e0ff56f3fa96 7,73,80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1eda53410702c99adc09e6da9fdcdc3a38ea88cd",
+  "prompts": {},
+  "sessions": {
+    "s_08b0035c05a1ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32ec59f4-fa8b-487a-bd84-a92535b2bbab",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_29c133fb874634": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "772cc5c5-b94c-45d2-a53e-ad4c01185bfb",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8789970f3bdadb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-0c5d-7c90-897c-c1fa3a2bf3fa",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_907d7453b529ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-349b-7603-8990-c626d3e902dc",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_98230608a60229": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "720cc063-16a9-411e-bac1-577f285263a8",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_9b655631338812": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a631cc79-03df-49a1-a540-3d082a47586d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a80692ccb4af3b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb81-f402-70d0-9a75-db3a35fa77a8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_de3e9c41d396f4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-4500-7a43-9ff5-813414303d75",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e09c0124348d70": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb76-a92b-7eb0-a387-9649f9567afc",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_f8d3259134401e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a5e2c22a-aff1-4202-9b18-d73656f0fc4c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
