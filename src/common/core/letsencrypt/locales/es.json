@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "Perfil de certificado",
-        "help": "Seleccione el perfil de certificado a utilizar con Let's Encrypt. 'classic' es un certificado de propósito general con una vida útil de 90 días y amplia compatibilidad. 'tlsserver' está optimizado para la autenticación de servidor TLS, con una vida útil de 90 días y una carga útil más pequeña. 'shortlived' ofrece certificados de 7 días para mayor seguridad en entornos automatizados."
+        "help": "Seleccione el perfil de certificado a utilizar con Let's Encrypt. 'classic' es un certificado de propósito general con una vida útil de 90 días y amplia compatibilidad. 'tlsserver' está optimizado para la autenticación de servidor TLS, con una vida útil de 90 días y una carga útil más pequeña. 'shortlived' ofrece certificados de 7 días para mayor seguridad en entornos automatizados. Las direcciones IPv4 públicas en SERVER_NAME requieren LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http y LETS_ENCRYPT_PROFILE=shortlived; se rechazan IPv6 y las direcciones no públicas."
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "Perfil de certificado personalizado (ACME)",

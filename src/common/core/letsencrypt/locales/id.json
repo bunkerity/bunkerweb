@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "Profil Sertifikat",
-        "help": "Pilih profil sertifikat untuk digunakan dengan Let's Encrypt. 'classic' adalah sertifikat serbaguna dengan masa berlaku 90 hari dan kompatibilitas luas. 'tlsserver' dioptimalkan untuk autentikasi server TLS dengan masa berlaku 90 hari dan payload lebih kecil. 'shortlived' menawarkan sertifikat 7 hari untuk keamanan yang ditingkatkan di lingkungan otomatis."
+        "help": "Pilih profil sertifikat untuk digunakan dengan Let's Encrypt. 'classic' adalah sertifikat serbaguna dengan masa berlaku 90 hari dan kompatibilitas luas. 'tlsserver' dioptimalkan untuk autentikasi server TLS dengan masa berlaku 90 hari dan payload lebih kecil. 'shortlived' menawarkan sertifikat 7 hari untuk keamanan yang ditingkatkan di lingkungan otomatis. Alamat IPv4 publik di SERVER_NAME memerlukan LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http dan LETS_ENCRYPT_PROFILE=shortlived; IPv6 dan alamat nonpublik ditolak."
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "Profil Sertifikat Kustom (ACME)",

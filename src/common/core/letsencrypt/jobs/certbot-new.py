@@ -14,7 +14,7 @@ from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from threading import Event, Lock, Thread
 from traceback import format_exc
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union, cast
 from certbot_concurrency import (
     CertbotPaths,
     ensure_accounts,
@@ -124,22 +124,77 @@ def normalize_server_names(server_names: str) -> Set[str]:
 
 
 def unissuable_names(names: List[str]) -> List[str]:
-    """Return the names no public ACME CA can issue for: IP literals and single-label hosts.
+    """Return the names no public ACME CA can issue for: IPv6, non-public IPv4 and single-label hosts.
 
     Nothing else rejects them, so they reach certbot, fail on every run and keep the whole job
-    red even when every other service got its certificate.
+    red even when every other service got its certificate. Public IPv4 addresses are issuable
+    depending on the service settings, see `ip_requirement_problems`.
     """
     unissuable = []
     for name in names:
         candidate = name.strip().lower().removeprefix("*.")
         try:
-            ip_address(candidate)
+            ip = ip_address(candidate)
         except ValueError:
             if "." not in candidate.rstrip("."):
                 unissuable.append(name)
         else:
-            unissuable.append(name)
+            # is_global already rejects loopback, link-local, unspecified, reserved and broadcast, but not multicast.
+            if ip.version != 4 or not ip.is_global or ip.is_multicast or name.strip().startswith("*."):
+                unissuable.append(name)
     return unissuable
+
+
+def split_ip_names(names: Iterable[str]) -> Tuple[List[str], List[str]]:
+    """Split server names into (hostnames, IP literals)."""
+    hostnames: List[str] = []
+    ips: List[str] = []
+    for name in names:
+        try:
+            ip_address(name.strip())
+        except ValueError:
+            hostnames.append(name)
+        else:
+            ips.append(name)
+    return hostnames, ips
+
+
+def ip_requirement_problems(acme_server: str, challenge: str, profile: str) -> List[str]:
+    """Return the settings that keep a service from getting a certificate for an IP address."""
+    problems = []
+    if acme_server != "letsencrypt":
+        problems.append("LETS_ENCRYPT_SERVER=letsencrypt (only Let's Encrypt issues IP certificates)")
+    if challenge != "http":
+        problems.append("LETS_ENCRYPT_CHALLENGE=http (an IP address cannot be validated with the dns challenge)")
+    if profile != "shortlived":
+        problems.append("LETS_ENCRYPT_PROFILE=shortlived (Let's Encrypt only issues IP certificates with that profile)")
+    return problems
+
+
+def certbot_name_args(server_names: str) -> List[str]:
+    """Return the certbot arguments for the names: hostnames go to a single -d, each IP to its own --ip-address."""
+    hostnames, ips = split_ip_names(name for name in server_names.split(",") if name)
+    args = ["-d", ",".join(hostnames)] if hostnames else []
+    for ip in ips:
+        args.extend(["--ip-address", ip])
+    return args
+
+
+def ips_only_added(config_names: Set[str], existing_names: Set[str]) -> bool:
+    """Return True when the configured names are the existing ones plus IP addresses and nothing else."""
+    added = config_names - existing_names
+    return bool(existing_names) and existing_names < config_names and not split_ip_names(added)[0]
+
+
+def warn_strict_sni_for_ips(services: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]) -> None:
+    """Warn once when strict SNI would refuse the clients that connect to an IP certificate by address."""
+    if getenv("DISABLE_DEFAULT_SERVER_STRICT_SNI", "no").lower() != "yes":
+        return
+    if any(config["activated"] and split_ip_names(normalize_server_names(str(config["server_names"])))[1] for config in services.values()):
+        LOGGER.warning(
+            "DISABLE_DEFAULT_SERVER_STRICT_SNI=yes refuses TLS connections without SNI, and clients that connect to an IP address send none, "
+            "so they will not be able to reach the IP certificate(s)."
+        )
 
 
 def filter_wildcard_names(names: Set[str]) -> Set[str]:
@@ -502,19 +557,22 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     server_names = server_names_val.split()
 
     unissuable = unissuable_names(server_names)
-    if unissuable:
-        issuable = [name for name in server_names if name not in unissuable]
-        if activated:
-            LOGGER.warning(
-                f"[Service: {service}] No public CA issues certificates for {', '.join(unissuable)}"
-                + (", requesting one for the remaining server names." if issuable else ", skipping generation.")
-            )
-        if issuable:
-            server_names = issuable
-        else:
-            # dev also raises its `misconfigured` flag here. 1.7 has no such concept -- the flag and
-            # its `list_misconfigured` reporter come from a commit outside this series and were never
-            # ported -- so deactivation plus the warning above is the whole signal here.
+    issuable = [name for name in server_names if name not in unissuable]
+    ip_problems = ip_requirement_problems(acme_server, challenge_val, profile_val)
+    skipped_ips = split_ip_names(issuable)[1] if ip_problems else []
+    if unissuable or skipped_ips:
+        issuable = [name for name in issuable if name not in skipped_ips]
+        if env("AUTO_LETS_ENCRYPT", "no").lower() == "yes":
+            if unissuable:
+                LOGGER.warning(
+                    f"[Service: {service}] No public CA issues certificates for {', '.join(unissuable)}"
+                    + (", requesting one for the remaining server names." if issuable else ", skipping generation.")
+                )
+            for ip in skipped_ips:
+                for problem in ip_problems:
+                    LOGGER.warning(f"[Service: {service}] {ip} needs {problem}, skipping it.")
+        server_names = issuable
+        if not issuable:
             activated = False
 
     return server_names, {
@@ -547,6 +605,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         "retries": retries_int,
         "exists": False,
         "force_renew": False,
+        "expand_ips": False,
     }
 
 
@@ -734,8 +793,7 @@ def certbot_new(
         "-n",
         "--cert-name",
         service,
-        "-d",
-        config["server_names"],
+        *certbot_name_args(str(config["server_names"])),
         "--preferred-profile",
         config["profile"],
         "--agree-tos",
@@ -984,6 +1042,7 @@ try:
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
         sys_exit(0)
 
+    warn_strict_sni_for_ips(services)
     prepare_logs_dir(LOGS_DIR, LOGGER)
 
     JOB = Job(LOGGER, __file__.replace("new", "renew"))
@@ -1144,7 +1203,8 @@ try:
             config_server_names = filter_wildcard_names(config_server_names)
             existing_server_names = filter_wildcard_names(existing_server_names)
 
-        if config_server_names != existing_server_names:
+        expand_ips = ips_only_added(config_server_names, cast(Set[str], existing_server_names))
+        if config_server_names != existing_server_names and not expand_ips:
             LOGGER.warning(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["challenge"] != existing_cert["challenge"]:
@@ -1178,12 +1238,16 @@ try:
             LOGGER.warning(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
             config["force_renew"] = True
 
+        if expand_ips and not config["force_renew"]:
+            LOGGER.warning(f"[Service: {server_name}] Expanding the existing certificate with IP addresses; the current certificate stays if issuance fails.")
+            config["expand_ips"] = True
+
     # ? generate new certificates and renew existing ones if needed
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
     pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
 
     for service, config in services.items():
-        if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
+        if existing_certificates.get(service, {}).get("active") and not config["force_renew"] and not config["expand_ips"]:
             LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue

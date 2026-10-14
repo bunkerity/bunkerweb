@@ -221,3 +221,18 @@ werden. Die vollständige Liste und die genauen Variablen stehen in der
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_5: "client_id ihre-client-id"
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_6: "client_x509_cert_url ihre-zertifikats-url"
     ```
+
+### Zertifikate für öffentliche IPv4-Adressen
+
+Öffentliche IPv4-Adressen in SERVER_NAME erfordern LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http und LETS_ENCRYPT_PROFILE=shortlived; IPv6 und nicht öffentliche Adressen werden abgelehnt.
+
+Für eine IP-Kennung ist kein DNS-Eintrag nötig. Port 80 muss BunkerWeb für HTTP-01 direkt erreichen. Lassen Sie DISABLE_DEFAULT_SERVER_STRICT_SNI=no, da IP-Clients normalerweise kein SNI senden. Ohne SNI wird ein Zertifikat nur ausgewählt, wenn die lokale IPv4-Zieladresse in SERVER_NAME konfiguriert und in seinen IP-SANs enthalten ist. Kein Rückgriff auf das einzige zwischengespeicherte IP-Zertifikat: Hinter NAT muss die lokale Adresse der konfigurierten öffentlichen Adresse entsprechen. HTTP Host wählt kein Zertifikat aus. Das benutzerdefinierte Zertifikat des Standardservers behält Vorrang. DNS-Zertifikate und Kontoberechtigungen bleiben unverändert.
+
+```env
+SERVER_NAME=<PUBLIC_IPV4>
+AUTO_LETS_ENCRYPT=yes
+LETS_ENCRYPT_SERVER=letsencrypt
+LETS_ENCRYPT_CHALLENGE=http
+LETS_ENCRYPT_PROFILE=shortlived
+DISABLE_DEFAULT_SERVER_STRICT_SNI=no
+```

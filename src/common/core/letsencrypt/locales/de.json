@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "Zertifikatsprofil",
-        "help": "Wählen Sie das mit Let's Encrypt zu verwendende Zertifikatsprofil. 'classic' ist ein universelles Zertifikat mit 90-tägiger Lebensdauer und breiter Kompatibilität. 'tlsserver' ist für die TLS-Serverauthentifizierung optimiert, mit 90-tägiger Lebensdauer und kleinerer Nutzlast. 'shortlived' bietet 7-tägige Zertifikate für erhöhte Sicherheit in automatisierten Umgebungen."
+        "help": "Wählen Sie das mit Let's Encrypt zu verwendende Zertifikatsprofil. 'classic' ist ein universelles Zertifikat mit 90-tägiger Lebensdauer und breiter Kompatibilität. 'tlsserver' ist für die TLS-Serverauthentifizierung optimiert, mit 90-tägiger Lebensdauer und kleinerer Nutzlast. 'shortlived' bietet 7-tägige Zertifikate für erhöhte Sicherheit in automatisierten Umgebungen. Öffentliche IPv4-Adressen in SERVER_NAME erfordern LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http und LETS_ENCRYPT_PROFILE=shortlived; IPv6 und nicht öffentliche Adressen werden abgelehnt."
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "Benutzerdefiniertes Zertifikatsprofil (ACME)",

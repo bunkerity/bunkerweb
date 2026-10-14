@@ -104,3 +104,37 @@ def test_certbot_cache_reader_rejects_traversal():
         _tar_member(archive, "../../escape", b"bad")
     with pytest.raises(ValueError, match="path traversal"):
         read_certbot_cache(output.getvalue())
+
+
+@pytest.mark.parametrize(
+    "preamble", [b"", b"version = 5.8.0\narchive_dir = /etc/letsencrypt/archive/example.com\ncert = /etc/letsencrypt/live/example.com/cert.pem\n"]
+)
+def test_certbot_cache_reader_preserves_renewal_metadata(preamble):
+    output = BytesIO()
+    with tar_open(fileobj=output, mode="w:gz") as archive:
+        _tar_member(archive, "live/example.com/fullchain.pem", b"certificate")
+        _tar_member(archive, "live/example.com/privkey.pem", b"private key")
+        _tar_member(
+            archive,
+            "renewal/example.com.conf",
+            preamble + b"[renewalparams]\nserver = https://acme.example/dir%20test\nauthenticator = manual\npreferred_profile = shortlived\n",
+        )
+    assert read_certbot_cache(output.getvalue())[0]["renewal_metadata"] == {
+        "legacy": True,
+        "server": "https://acme.example/dir%20test",
+        "authenticator": "manual",
+        "preferred_profile": "shortlived",
+    }
+
+
+@pytest.mark.parametrize("renewal", [b"[renewalparams]\ninvalid line\n", b"[renewalparams]\nserver = \xff\n"])
+def test_certbot_cache_reader_ignores_malformed_renewal_metadata(renewal):
+    output = BytesIO()
+    with tar_open(fileobj=output, mode="w:gz") as archive:
+        _tar_member(archive, "live/example.com/fullchain.pem", b"certificate")
+        _tar_member(archive, "live/example.com/privkey.pem", b"private key")
+        _tar_member(archive, "renewal/example.com.conf", renewal)
+    record = read_certbot_cache(output.getvalue())[0]
+    assert record["renewal_metadata"] == {"legacy": True}
+    assert record["certificate_pem"] == b"certificate"
+    assert record["private_key_pem"] == b"private key"

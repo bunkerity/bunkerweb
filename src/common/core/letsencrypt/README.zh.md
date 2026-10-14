@@ -211,3 +211,18 @@ Let's Encrypt 插件通过 [certbot-dns-multi](https://github.com/alexzorin/cert
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_5: "client_id your-client-id"
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_6: "client_x509_cert_url your-cert-url"
     ```
+
+### 公网 IPv4 证书
+
+SERVER_NAME 中的公网 IPv4 地址需要 LETS_ENCRYPT_SERVER=letsencrypt、LETS_ENCRYPT_CHALLENGE=http 和 LETS_ENCRYPT_PROFILE=shortlived；不接受 IPv6 或非公网地址。
+
+IP 标识符无需 DNS 记录。HTTP-01 要求端口 80 直接到达 BunkerWeb。请保持 DISABLE_DEFAULT_SERVER_STRICT_SNI=no，因为 IP 客户端通常不发送 SNI。无 SNI 时，仅当本地 IPv4 目标地址在 SERVER_NAME 中明确配置且包含于证书的 IP SAN 中，才选择该证书。不会回退到缓存中唯一的 IP 证书：在 NAT 后，本地地址必须匹配配置的公网地址。HTTP Host 无法选择证书。默认服务器自定义证书仍保持优先级。DNS 证书行为和账户存储权限保持不变。
+
+```env
+SERVER_NAME=<PUBLIC_IPV4>
+AUTO_LETS_ENCRYPT=yes
+LETS_ENCRYPT_SERVER=letsencrypt
+LETS_ENCRYPT_CHALLENGE=http
+LETS_ENCRYPT_PROFILE=shortlived
+DISABLE_DEFAULT_SERVER_STRICT_SNI=no
+```

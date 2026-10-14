@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "Sertifika Profili",
-        "help": "Let's Encrypt ile kullanılacak sertifika profilini seçin. 'classic', 90 günlük ömre ve geniş uyumluluğa sahip genel amaçlı bir sertifikadır. 'tlsserver', 90 günlük ömür ve daha küçük yükle TLS sunucu kimlik doğrulaması için optimize edilmiştir. 'shortlived', otomatikleştirilmiş ortamlarda gelişmiş güvenlik için 7 günlük sertifikalar sunar."
+        "help": "Let's Encrypt ile kullanılacak sertifika profilini seçin. 'classic', 90 günlük ömre ve geniş uyumluluğa sahip genel amaçlı bir sertifikadır. 'tlsserver', 90 günlük ömür ve daha küçük yükle TLS sunucu kimlik doğrulaması için optimize edilmiştir. 'shortlived', otomatikleştirilmiş ortamlarda gelişmiş güvenlik için 7 günlük sertifikalar sunar. SERVER_NAME içindeki genel IPv4 adresleri LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http ve LETS_ENCRYPT_PROFILE=shortlived gerektirir; IPv6 ve genel olmayan adresler reddedilir."
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "Özel Sertifika Profili (ACME)",

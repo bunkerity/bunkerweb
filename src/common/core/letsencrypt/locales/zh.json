@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "证书配置(profile)",
-        "help": "选择用于 Let's Encrypt 的证书配置(profile)。'classic' 是通用证书,有效期 90 天,兼容性广泛。'tlsserver' 针对 TLS 服务器认证做了优化,有效期 90 天,负载更小。'shortlived' 提供有效期 7 天的证书,适合在自动化环境中增强安全性。"
+        "help": "选择用于 Let's Encrypt 的证书配置(profile)。'classic' 是通用证书,有效期 90 天,兼容性广泛。'tlsserver' 针对 TLS 服务器认证做了优化,有效期 90 天,负载更小。'shortlived' 提供有效期 7 天的证书,适合在自动化环境中增强安全性。 SERVER_NAME 中的公网 IPv4 地址需要 LETS_ENCRYPT_SERVER=letsencrypt、LETS_ENCRYPT_CHALLENGE=http 和 LETS_ENCRYPT_PROFILE=shortlived；不接受 IPv6 或非公网地址。"
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "自定义证书配置(ACME)",

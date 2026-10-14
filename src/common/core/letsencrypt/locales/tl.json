@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "Certificate Profile",
-        "help": "Piliin ang certificate profile na gagamitin kasama ang Let's Encrypt. Pangkalahatang gamit na certificate ang 'classic' na may 90-araw na lifetime at malawak na compatibility. Naka-optimize ang 'tlsserver' para sa TLS server authentication na may 90-araw na lifetime at mas maliit na payload. Nag-aalok ang 'shortlived' ng 7-araw na certificate para sa pinahusay na seguridad sa mga automated environment."
+        "help": "Piliin ang certificate profile na gagamitin kasama ang Let's Encrypt. Pangkalahatang gamit na certificate ang 'classic' na may 90-araw na lifetime at malawak na compatibility. Naka-optimize ang 'tlsserver' para sa TLS server authentication na may 90-araw na lifetime at mas maliit na payload. Nag-aalok ang 'shortlived' ng 7-araw na certificate para sa pinahusay na seguridad sa mga automated environment. Ang mga pampublikong IPv4 address sa SERVER_NAME ay nangangailangan ng LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http at LETS_ENCRYPT_PROFILE=shortlived; tinatanggihan ang IPv6 at mga hindi pampublikong address."
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "Custom Certificate Profile (ACME)",

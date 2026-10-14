@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "인증서 프로필",
-        "help": "Let's Encrypt와 함께 사용할 인증서 프로필을 선택합니다. 'classic'은 90일 수명과 폭넓은 호환성을 가진 범용 인증서입니다. 'tlsserver'는 TLS 서버 인증에 최적화되어 있으며 수명은 90일이고 페이로드가 더 작습니다. 'shortlived'는 자동화된 환경에서 보안을 강화하기 위한 7일짜리 인증서를 제공합니다."
+        "help": "Let's Encrypt와 함께 사용할 인증서 프로필을 선택합니다. 'classic'은 90일 수명과 폭넓은 호환성을 가진 범용 인증서입니다. 'tlsserver'는 TLS 서버 인증에 최적화되어 있으며 수명은 90일이고 페이로드가 더 작습니다. 'shortlived'는 자동화된 환경에서 보안을 강화하기 위한 7일짜리 인증서를 제공합니다. SERVER_NAME의 공인 IPv4 주소에는 LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http 및 LETS_ENCRYPT_PROFILE=shortlived가 필요합니다. IPv6 및 비공인 주소는 거부됩니다."
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "사용자 지정 인증서 프로필(ACME)",

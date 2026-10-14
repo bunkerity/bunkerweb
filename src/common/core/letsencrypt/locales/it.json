@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "Profilo certificato",
-        "help": "Seleziona il profilo del certificato da utilizzare con Let's Encrypt. 'classic' è un certificato di uso generale con durata di 90 giorni e ampia compatibilità. 'tlsserver' è ottimizzato per l'autenticazione del server TLS con durata di 90 giorni e payload più piccolo. 'shortlived' offre certificati di 7 giorni per una maggiore sicurezza negli ambienti automatizzati."
+        "help": "Seleziona il profilo del certificato da utilizzare con Let's Encrypt. 'classic' è un certificato di uso generale con durata di 90 giorni e ampia compatibilità. 'tlsserver' è ottimizzato per l'autenticazione del server TLS con durata di 90 giorni e payload più piccolo. 'shortlived' offre certificati di 7 giorni per una maggiore sicurezza negli ambienti automatizzati. Gli indirizzi IPv4 pubblici in SERVER_NAME richiedono LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http e LETS_ENCRYPT_PROFILE=shortlived; IPv6 e gli indirizzi non pubblici vengono rifiutati."
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "Profilo certificato personalizzato (ACME)",

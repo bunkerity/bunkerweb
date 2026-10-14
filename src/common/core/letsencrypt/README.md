@@ -212,3 +212,18 @@ Credentials may be given either with BunkerWeb's historical key names (shown in 
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_5: "client_id your-client-id"
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_6: "client_x509_cert_url your-cert-url"
     ```
+
+### Public IPv4 certificates
+
+Public IPv4 addresses in SERVER_NAME require LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http and LETS_ENCRYPT_PROFILE=shortlived; IPv6 and non-public addresses are rejected.
+
+No DNS record is needed for an IP identifier. Port 80 must reach BunkerWeb directly for HTTP-01. Keep DISABLE_DEFAULT_SERVER_STRICT_SNI=no because IP clients normally omit SNI. TLS without SNI selects a certificate only when the local IPv4 destination is explicitly configured in SERVER_NAME and is present in its IP SANs. There is no fallback to the only cached IP certificate: behind NAT, the local address must match the configured public address. HTTP Host cannot select a certificate. The default-server custom certificate override retains priority. DNS certificate behavior and account storage permissions remain unchanged.
+
+```env
+SERVER_NAME=<PUBLIC_IPV4>
+AUTO_LETS_ENCRYPT=yes
+LETS_ENCRYPT_SERVER=letsencrypt
+LETS_ENCRYPT_CHALLENGE=http
+LETS_ENCRYPT_PROFILE=shortlived
+DISABLE_DEFAULT_SERVER_STRICT_SNI=no
+```

@@ -275,7 +275,8 @@ def read_certbot_cache(data: bytes) -> list[dict]:
             if renewal_name in members:
                 config = ConfigParser(interpolation=None)
                 with suppress(ConfigParserError, UnicodeDecodeError, ValueError):
-                    config.read_string(_tar_member_bytes(archive, members, renewal_name).decode("utf-8"))
+                    # Certbot writes unsectioned lineage fields before [renewalparams].
+                    config.read_string("[certbot]\n" + _tar_member_bytes(archive, members, renewal_name).decode("utf-8"))
                     params = config["renewalparams"] if config.has_section("renewalparams") else {}
                     for key in ("server", "authenticator", "pref_challs", "key_type", "preferred_profile"):
                         if params.get(key):

@@ -34,7 +34,7 @@
     "letsencrypt",
     "selfsigned"
   ],
-  "ssl_certificate_default": ["customcert"],
+  "ssl_certificate_default": ["customcert", "letsencrypt"],
   "access": [
     "ssl",
     "whitelist",

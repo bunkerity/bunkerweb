@@ -75,7 +75,7 @@
       },
       "LETS_ENCRYPT_PROFILE": {
         "label": "ملف تعريف الشهادة",
-        "help": "اختر ملف تعريف الشهادة المراد استخدامه مع Let's Encrypt. 'classic' شهادة عامة الغرض بمدة صلاحية 90 يومًا وتوافق واسع. 'tlsserver' مُحسَّنة لمصادقة خادم TLS بمدة صلاحية 90 يومًا وحمولة أصغر. 'shortlived' توفر شهادات لمدة 7 أيام لأمان معزز في البيئات الآلية."
+        "help": "اختر ملف تعريف الشهادة المراد استخدامه مع Let's Encrypt. 'classic' شهادة عامة الغرض بمدة صلاحية 90 يومًا وتوافق واسع. 'tlsserver' مُحسَّنة لمصادقة خادم TLS بمدة صلاحية 90 يومًا وحمولة أصغر. 'shortlived' توفر شهادات لمدة 7 أيام لأمان معزز في البيئات الآلية. عناوين IPv4 العامة في SERVER_NAME تتطلب LETS_ENCRYPT_SERVER=letsencrypt وLETS_ENCRYPT_CHALLENGE=http وLETS_ENCRYPT_PROFILE=shortlived؛ لا تُقبل عناوين IPv6 أو العناوين غير العامة."
       },
       "LETS_ENCRYPT_CUSTOM_PROFILE": {
         "label": "ملف تعريف شهادة مخصص (ACME)",

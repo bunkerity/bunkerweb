@@ -222,3 +222,18 @@ variables exactas en [la documentación DNS de lego](https://go-acme.github.io/l
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_5: "client_id su-id-de-cliente"
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_6: "client_x509_cert_url su-url-de-certificado"
     ```
+
+### Certificados para IPv4 públicas
+
+Las direcciones IPv4 públicas en SERVER_NAME requieren LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http y LETS_ENCRYPT_PROFILE=shortlived; se rechazan IPv6 y las direcciones no públicas.
+
+Un identificador IP no necesita DNS. El puerto 80 debe llegar directamente a BunkerWeb para HTTP-01. Mantenga DISABLE_DEFAULT_SERVER_STRICT_SNI=no, ya que los clientes IP normalmente omiten SNI. Sin SNI, solo se selecciona un certificado si la dirección IPv4 local de destino está configurada en SERVER_NAME y aparece en sus SAN de IP. No se usa como alternativa el único certificado IP en caché: detrás de NAT, la dirección local debe coincidir con la dirección pública configurada. HTTP Host no selecciona el certificado. El certificado personalizado del servidor predeterminado conserva la prioridad. El comportamiento de los certificados DNS y los permisos de las cuentas no cambian.
+
+```env
+SERVER_NAME=<PUBLIC_IPV4>
+AUTO_LETS_ENCRYPT=yes
+LETS_ENCRYPT_SERVER=letsencrypt
+LETS_ENCRYPT_CHALLENGE=http
+LETS_ENCRYPT_PROFILE=shortlived
+DISABLE_DEFAULT_SERVER_STRICT_SNI=no
+```

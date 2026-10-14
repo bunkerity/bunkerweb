@@ -17,6 +17,7 @@ local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local parse_pem_cert = ssl.parse_pem_cert
 local parse_pem_priv_key = ssl.parse_pem_priv_key
 local ssl_server_name = ssl.server_name
+local raw_server_addr = ssl.raw_server_addr
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local has_variable = utils.has_variable
@@ -33,6 +34,9 @@ local pairs = pairs
 local sort = table.sort
 local lower = string.lower
 local gsub = string.gsub
+local string_byte = string.byte
+local format = string.format
+local tonumber = tonumber
 
 -- The one spelling of the challenge prefix and of the directory it is served from. `api()` used
 -- to carry its own copy of the folder path; `ssl.lua` still carries its own copy of the prefix
@@ -209,6 +213,47 @@ local function resolve_wildcard_base(host, bases)
 		end
 	end
 	return nil
+end
+
+local function is_ipv4(name)
+	local a, b, c, d = match(name, "^(%d%d?%d?)%.(%d%d?%d?)%.(%d%d?%d?)%.(%d%d?%d?)$")
+	if not a then
+		return false
+	end
+	return tonumber(a) <= 255 and tonumber(b) <= 255 and tonumber(c) <= 255 and tonumber(d) <= 255
+end
+
+local function get_cert_ip_sans(cert_pem)
+	local x509 = require "resty.openssl.x509"
+	local ips = {}
+	local ok, err = pcall(function()
+		local cert, new_err = x509.new(cert_pem)
+		if not cert then
+			error(new_err, 0)
+		end
+		local sans, san_err = cert:get_subject_alt_name()
+		if san_err then
+			error(san_err, 0)
+		end
+		if sans then
+			for name_type, value in sans:each() do
+				if name_type == "IP" and is_ipv4(value) then
+					ips[value] = true
+				end
+			end
+		end
+	end)
+	if not ok then
+		return nil, tostring(err)
+	end
+	return ips
+end
+
+local function ipv4_from_raw(raw)
+	if not raw or #raw ~= 4 then
+		return nil
+	end
+	return format("%d.%d.%d.%d", string_byte(raw, 1, 4))
 end
 
 function letsencrypt:initialize(ctx)
@@ -477,7 +522,59 @@ function letsencrypt:init()
 		return self:ret(false, "error while setting wildcard servers into internalstore : " .. err)
 	end
 
+	local ip_names = {}
+	for name, alias in pairs(wildcard_servers) do
+		if alias == name and is_ipv4(name) then
+			ip_names[name] = true
+		end
+	end
+	ok, err = self.internalstore:set("plugin_letsencrypt_ip_names", ip_names, nil, true)
+	if not ok then
+		return self:ret(false, "error while setting IP names into internalstore : " .. err)
+	end
+
 	return self:ret(ret_ok, ret_err)
+end
+
+-- No-SNI selection is confined to an exact, configured local destination. A single
+-- cached IP is not a safe NAT fallback: it could expose a different tenant's certificate.
+function letsencrypt:ssl_certificate_default()
+	local sni, err = ssl_server_name()
+	if sni then
+		return self:ret(true, "SNI present, nothing to do")
+	elseif err then
+		return self:ret(false, "can't get server_name : " .. err)
+	end
+	local raw, family = raw_server_addr()
+	local addr = family == "inet" and ipv4_from_raw(raw) or nil
+	if not addr then
+		return self:ret(true, "no IPv4 local destination")
+	end
+	local names
+	names, err = self.internalstore:get("plugin_letsencrypt_ip_names", true)
+	if not names then
+		return self:ret(false, "can't get IP names : " .. err)
+	end
+	if not names[addr] then
+		return self:ret(true, "no configured IP certificate for " .. addr)
+	end
+	-- Keep the service provider priorities for this configured destination, including
+	-- inventory attachments and operator-supplied custom certificates.
+	for _, prefix in ipairs({
+		"plugin_certificates_",
+		"plugin_customcert_",
+		"plugin_letsencrypt_ipcert_",
+		"plugin_selfsigned_",
+	}) do
+		local data
+		data, err = self.internalstore:get(prefix .. addr, true)
+		if data then
+			return self:ret(true, "IP destination certificate found in " .. prefix, data)
+		elseif err ~= "not found" then
+			return self:ret(false, "can't get IP destination certificate : " .. err)
+		end
+	end
+	return self:ret(true, "no IP SAN certificate")
 end
 
 function letsencrypt:ssl_certificate()
@@ -485,6 +582,16 @@ function letsencrypt:ssl_certificate()
 	if not server_name then
 		if err then
 			return self:ret(false, "can't get server_name : " .. err)
+		end
+		-- In single-site mode this service is the implicit default server, so its
+		-- certificate phase must resolve the destination without enabling customcert's
+		-- dedicated-default override. Explicit default blocks keep their phase order.
+		if
+			not self.is_loading
+			and get_variable("MULTISITE", false) == "no"
+			and get_variable("DISABLE_DEFAULT_SERVER", false) == "no"
+		then
+			return self:ssl_certificate_default()
 		end
 		return self:ret(true, "no SNI provided")
 	end
@@ -543,13 +650,28 @@ function letsencrypt:load_data(data, server_name)
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	-- Cache data
+	local ip_sans
+	ip_sans, err = get_cert_ip_sans(data[1])
+	if not ip_sans then
+		self.logger:log(ERR, "can't read certificate IP SANs : " .. err)
+		ip_sans = {}
+	end
+	-- An IP alias on a DNS-only certificate must not become an IP certificate.
 	for key in server_name:gmatch("%S+") do
-		local cache_key = "plugin_letsencrypt_" .. normalize_hostname(key)
-		local ok
-		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
-		if not ok then
-			return false, "error while setting data into internalstore : " .. err
+		local host = normalize_hostname(key)
+		if not is_ipv4(host) or ip_sans[host] then
+			local ok
+			ok, err = self.internalstore:set("plugin_letsencrypt_" .. host, { cert_chain, priv_key }, nil, true)
+			if not ok then
+				return false, "error while setting data into internalstore : " .. err
+			end
+			if ip_sans[host] then
+				ok, err =
+					self.internalstore:set("plugin_letsencrypt_ipcert_" .. host, { cert_chain, priv_key }, nil, true)
+				if not ok then
+					return false, "error while setting IP data into internalstore : " .. err
+				end
+			end
 		end
 	end
 	return true
