@@ -1,0 +1,320 @@
+src/bw/lua/bunkerweb/utils.lua
+  s_907d7453b529ef::t_7e499620209816 5,1496-1500,1614,1616,1699-1709,1748,1750,1760,1765-1766
+  s_dd5d0180289cec::t_77e5ab67368296 1062-1077,1079,1101-1102,1136,1148,1153,1157-1158,1160-1167,1174-1175
+  s_907d7453b529ef::t_62c438c894d94f 1767
+tests/unit/common/test_redis_cluster_port.py
+  s_e09c0124348d70::t_01de0b698edf28 159,167,172
+  s_907d7453b529ef::t_6b9c1b85c5b814 1-152
+  s_907d7453b529ef::t_b8f95fd37286df 174
+  s_907d7453b529ef::t_47d82c6230907f 153-158,160-166,168-171,173,175-176
+tests/unit/api/test_redis_cluster_api_port.py
+  s_dd5d0180289cec::t_24d222e19da62a 6,32
+  s_e09c0124348d70::t_01de0b698edf28 1-5,7-31,33-87
+src/deps/src/resty-redis-cluster/kong-redis-cluster-1.6.1-0.rockspec
+  s_907d7453b529ef::t_37bb0d04233643 1-30
+src/deps/src/resty-redis-cluster/README.md
+  s_907d7453b529ef::t_37bb0d04233643 1-420
+src/deps/src/resty-redis-cluster/LICENSE
+  s_907d7453b529ef::t_37bb0d04233643 1-201
+tests/unit/common/test_badbehavior_ban_clears_counter.py
+  s_907d7453b529ef::t_e91ba89f38d443 625-626
+  s_907d7453b529ef::t_fe430cf50f421f 151,245
+  s_907d7453b529ef::t_1c6dbf9a1d5837 619-621
+tests/unit/common/test_redis_cluster_tls_identity.py
+  s_907d7453b529ef::t_e33fa024b33d8f 3,5,112-130
+  s_907d7453b529ef::t_06a3f3bcb01f9f 1-2,4,6-47,49-75,77-78,80,84-91,95-111,131-134
+  s_907d7453b529ef::t_7e5b46ee10a949 76,79,81-83,92-94
+  s_907d7453b529ef::t_e2707a90c312bb 48
+src/deps/src/resty-redis-cluster/SECURITY.md
+  s_907d7453b529ef::t_37bb0d04233643 1-32
+src/deps/src/resty-redis-cluster/.gitignore
+  s_907d7453b529ef::t_37bb0d04233643 1-43
+src/deps/install.sh
+  s_907d7453b529ef::t_7715c65c0b7535 197-201
+src/common/core/redis/locales/id.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/common/cli/CLI.py
+  s_907d7453b529ef::t_ea55feab1d349d 30,322,575-576
+  s_607210143ce683::t_5a5b0a0e3ad3e8 577
+src/common/core/metrics/metrics.lua
+  s_5ed44e89c01807::t_ea466925d75378 1621-1625
+  s_5ed44e89c01807::t_6a3176d7a41338 1522-1525,1533
+  s_5ed44e89c01807::t_8173987b728ea7 228,239-242
+  s_8789970f3bdadb::t_3d988de2a91877 396-397,1254,1329
+  s_5ed44e89c01807::t_2ca5b2b7be93f9 223-227,229-238,243-395,398-430,435,440-444,449-454,879-884
+  s_5ed44e89c01807::t_8440292564adb8 431,434,436,445
+  s_907d7453b529ef::t_ca9d4c66f83cda 485
+  s_907d7453b529ef::t_7f374ca954ebe5 484,486-487,489,506,510-511,525,527,544,550,554,575,581,594,610,612,614,637,646,720,767,773,782,794,869-870,872,874,1477-1478
+  s_5ed44e89c01807::t_33e9e69556412e 432-433
+  s_907d7453b529ef::t_23fc7df45e6cf6 687-694,803-811,817-825,834-835
+  s_5ed44e89c01807::t_8ea3519ff1aa76 1564-1567,1607,1609-1613,1615,1618-1620
+  s_e09c0124348d70::t_b92b9481e87f04 437-439,446-448
+src/common/core/metrics/README.es.md
+  s_5ed44e89c01807::t_bb8d4d89dcff7f 23-26
+src/common/core/redis/locales/pt.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/common/core/redis/redis.lua
+  s_907d7453b529ef::t_7715c65c0b7535 35-37
+src/deps/misc/stream-lua-nginx-module-ip-san.patch
+  s_907d7453b529ef::t_017cccb0a3d826 1-2,4-22,26-53,55-62
+  s_907d7453b529ef::t_a15f9ac5360547 3,23-25,54
+src/common/core/redis/README.es.md
+  s_e09c0124348d70::t_912dab7071037d 3-4
+  s_907d7453b529ef::t_353cd704262084 37,86-92
+  s_e09c0124348d70::t_c1a0400fb75dbe 93
+tests/unit/ui/test_redis_cluster_session_port.py
+  s_e09c0124348d70::t_01de0b698edf28 2-42
+  s_e09c0124348d70::t_27c1876b882973 1,43-44
+tests/unit/metrics/test_metrics_ttl_persist.py
+  s_907d7453b529ef::t_ca9d4c66f83cda 31-33
+src/common/core/redis/locales/fr.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/bw/lua/bunkerweb/ban_sync.lua
+  s_907d7453b529ef::t_ea55feab1d349d 4,56-57
+src/bw/lua/bunkerweb/cachestore.lua
+  s_907d7453b529ef::t_7715c65c0b7535 6,19-26,93,162,195
+src/common/core/limit/limit.lua
+  s_907d7453b529ef::t_ea55feab1d349d 5,481
+  s_907d7453b529ef::t_23fc7df45e6cf6 477-480
+src/common/utils/common_utils.py
+  s_907d7453b529ef::t_9f95b30b3684dd 818,851-859,867,919,935-938,940-949
+  s_907d7453b529ef::t_a321edc9931c5d 939
+src/common/core/metrics/README.fr.md
+  s_5ed44e89c01807::t_bb8d4d89dcff7f 23-26
+src/common/core/metrics/README.md
+  s_5ed44e89c01807::t_bb8d4d89dcff7f 23-26
+src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua
+  s_907d7453b529ef::t_aee0e69b642c97 499-508,555-604
+  s_907d7453b529ef::t_37bb0d04233643 1-120,122-146,151-498,509-554,605-1006,1008-1395
+  s_dd5d0180289cec::t_24d222e19da62a 121,147-150
+  s_907d7453b529ef::t_4a460bf2dc3763 1007
+src/common/core/redis/locales/ko.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+tests/unit/common/test_redis_cluster_port_lua.py
+  s_907d7453b529ef::t_21c77e1862f12a 276-278
+  s_907d7453b529ef::t_0cad8f0d716c74 1-20,22-59,61-73,76
+  s_907d7453b529ef::t_f6a72e12725ec0 78-80,82-99
+  s_907d7453b529ef::t_b6456437092364 74-75
+  s_907d7453b529ef::t_c58a54214266e0 146-149,151-153,156-169,173-176
+  s_907d7453b529ef::t_1bb952ecc79ee6 192
+  s_e09c0124348d70::t_01de0b698edf28 105,108-109,134-136,144-145,150,154-155,170-172,177-178
+  s_907d7453b529ef::t_5c7d28915e1ee8 101-104,106-107,110-133,137-143
+  s_907d7453b529ef::t_4ffa3278d5f520 21,60,81,182,217,220-221,224-226,237-238
+  s_907d7453b529ef::t_b7186e47af46d1 239-275,279-317
+  s_907d7453b529ef::t_a96f3f2f06b744 213-216,218-219,222-223,227-236
+  s_907d7453b529ef::t_db16b8e97d0fd0 179-181,183-191,193-211
+  s_e09c0124348d70::t_67a430b8b6c17a 77,100,212
+tests/unit/metrics/test_metrics_stream.py
+  s_907d7453b529ef::t_ca9d4c66f83cda 45-47,989
+tests/unit/metrics/test_metrics_reclaim_wiped.py
+  s_907d7453b529ef::t_ca9d4c66f83cda 34-36
+  s_e09c0124348d70::t_01de0b698edf28 65-69
+src/common/core/redis/locales/tw.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+tests/unit/lua/test_resume_rdns.py
+  s_e09c0124348d70::t_db10d57bb9154d 110-112,120-121,125-127,133-134,137-139,145-147,161-162,166-168,173-174,177-179,183-185,197-198,221-223,233-234
+  s_dd5d0180289cec::t_81c81192c8af96 102-104,204-206,215-216
+  s_dd5d0180289cec::t_e270dc1a5d9de1 100-101,156-160,195-196,199-203,207-214
+  s_dd5d0180289cec::t_de23f94fce5988 1-99,105-109,113-119,122-124,128-132,135-136,140-144,148-155,163-165,169-172,175-176,180-182,186-194,217-220,224-232
+src/common/core/redis/locales/br.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/common/core/redis/locales/ru.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/api/app/rate_limit.py
+  s_907d7453b529ef::t_a321edc9931c5d 7,470
+  s_907d7453b529ef::t_077a04ef14b092 19-20,462-469,471-480,536-565,672,696-698,700
+src/common/core/jobs/jobs/sync-bans.py
+  s_907d7453b529ef::t_ea55feab1d349d 231
+  s_907d7453b529ef::t_1d04678b43d825 28,79-80,120,122,124,186
+src/common/confs/stream.conf
+  s_907d7453b529ef::t_7715c65c0b7535 61
+src/deps/src/resty-redis-cluster/lib/resty/xmodem.lua
+  s_907d7453b529ef::t_37bb0d04233643 1-79
+src/bw/lua/bunkerweb/ratelimit.lua
+  s_907d7453b529ef::t_2b3f317982d3f2 6,65-69
+src/common/core/redis/locales/hi.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+tests/unit/metrics/test_metrics_instance_sync.py
+  s_5ed44e89c01807::t_f7f08d21be7f75 34
+  s_5ed44e89c01807::t_e77bd00e7f626e 3,11,36-89,95-96,98-100,102,106-108,113-117,119,121,125,128-133,138-142,156-163,212
+  s_5ed44e89c01807::t_db4e17bd4a3f42 15,149
+  s_5ed44e89c01807::t_43d9d9205e01a2 127
+  s_5ed44e89c01807::t_11ebb86de521d3 1-2,4-10,12-14,16-33,35,90-94,97,101,103-105,109-112,118,120,122-124,134-137,143-148,150,152,154-155,164-172,174-182,184-186,188-191,193-195,197-204,206-208,210-211
+  s_e09c0124348d70::t_8b51533c14a07e 173,183,187,192,196,205,209,213,217,226,230,238,242,251,255,262,266,274,278,289,293,298,302,308,312,318,322,327,331,337,341,356,360,371,376,386,390,396,400,406,410,420
+  s_5ed44e89c01807::t_a89c0687c328f6 407-409,411-419
+  s_5ed44e89c01807::t_024ae0a639c5dd 126,387-389,391-395,397-399,401-405
+  s_5ed44e89c01807::t_d65e69ae9bcfac 153
+  s_5ed44e89c01807::t_33b406fdd212e7 214-216,218-225,227-229,231-237,239-241,243-250,252-254,256-261,263-265,267-273,275-277,279-288,290-292,294-297,299-301,303-307,309-311,313-317,319-321,323-326,328-330,332-336,338-340,342-355,357-359,361-370,372-375,377-385
+  s_5ed44e89c01807::t_ea466925d75378 151
+src/common/core/redis/README.zh.md
+  s_e09c0124348d70::t_912dab7071037d 3-4
+  s_907d7453b529ef::t_353cd704262084 37,73-79
+  s_e09c0124348d70::t_d6341ef7efe1d7 80
+src/common/core/sessions/sessions.lua
+  s_907d7453b529ef::t_7715c65c0b7535 4,80,93-101,149-159
+src/common/core/redis/locales/ar.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/common/core/redis/locales/ur.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/deps/deps.json
+  s_607210143ce683::t_5c3afb5724d7d5 154-159
+  s_d1c1096e35b63b::t_7f77d23c224294 70,160,298
+src/deps/src/resty-redis-cluster/.editorconfig
+  s_907d7453b529ef::t_37bb0d04233643 1-23
+src/bw/lua/bunkerweb/rediskeys.lua
+  s_907d7453b529ef::t_32b0160b8381bd 122-124,128
+  s_907d7453b529ef::t_74a9065b51b781 39,42,56-65,111-112,115,131-134
+  s_907d7453b529ef::t_23fc7df45e6cf6 12-21,43-55
+  s_907d7453b529ef::t_6fd624be354f4f 1-11,22-38,40-41,66-110,113-114,116-121,125-127,129-130,135-141
+src/common/core/redis/locales/zh.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+tests/unit/common/test_redis_ssl_ca_wiring.py
+  s_e09c0124348d70::t_483ed2ccb15f90 43,205
+src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c
+  s_907d7453b529ef::t_a15f9ac5360547 1946-1948
+  s_907d7453b529ef::t_017cccb0a3d826 1930-1945,1949-1973,2031
+tests/unit/common/test_ratelimit_lua.py
+  s_e09c0124348d70::t_e015bee4ddb94c 22,85
+src/common/confs/http.conf
+  s_907d7453b529ef::t_7715c65c0b7535 83
+src/bw/lua/bunkerweb/clusterstore.lua
+  s_907d7453b529ef::t_da0ac08c53062b 357,372-373,377-398,446,451-453,470
+  s_907d7453b529ef::t_a321edc9931c5d 336
+  s_907d7453b529ef::t_23fc7df45e6cf6 374-376,471-473
+  s_907d7453b529ef::t_10c7fe54c01377 5,7,39,147-186,225-241,294-297,328-335,337-356,358-371,399-445,447-450,454-457,467-469,474-476
+src/common/core/redis/locales/pl.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/common/core/redis/plugin.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 151-159
+src/deps/misc/lua-nginx-module-ip-san.patch
+  s_907d7453b529ef::t_017cccb0a3d826 1-2,4-22,26-53,55-62
+  s_907d7453b529ef::t_a15f9ac5360547 3,23-25,54
+src/deps/src/resty-redis-cluster/.luacheckrc
+  s_907d7453b529ef::t_37bb0d04233643 1-28
+src/ui/app/routes/utils.py
+  s_907d7453b529ef::t_2b3f317982d3f2 273,295
+src/common/utils/redis_keys.py
+  s_907d7453b529ef::t_32b0160b8381bd 12
+  s_907d7453b529ef::t_6fd624be354f4f 1-8,10-11,13-23,27-29,48-52,57-77,82-98
+  s_907d7453b529ef::t_a321edc9931c5d 38
+  s_907d7453b529ef::t_cac3f860777a22 53-56
+  s_907d7453b529ef::t_74a9065b51b781 9,24-26,30-37,39-47,78-81
+tests/unit/common/test_ban_lookup_single_eval_lua.py
+  s_e09c0124348d70::t_07cfecfbcb92f3 121-125,131-132
+src/common/core/redis/README.md
+  s_e09c0124348d70::t_912dab7071037d 3-4
+  s_907d7453b529ef::t_353cd704262084 37,73-79
+  s_e09c0124348d70::t_7786d5af2707da 80
+src/deps/misc/resty-redis-cluster.patch
+  s_907d7453b529ef::t_4a460bf2dc3763 1-2,33-37,56-58,256,260,265,269-270,279-286,335,359,373-374,378
+  s_dd5d0180289cec::t_24d222e19da62a 3,17-32
+  s_907d7453b529ef::t_0719df3fdb632d 59-77,93-197,208,218,241,250,261,278,287,304,314,362
+  s_907d7453b529ef::t_37bb0d04233643 4-16,38-55,78-92,198-207,209-217,219-240,242-249,251-255,257-259,262-264,266-268,271-277,288-303,305-313,315-334,336-358,360-361,363-372,375-377,379-381
+src/common/core/redis/locales/es.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/common/core/redis/README.de.md
+  s_907d7453b529ef::t_353cd704262084 35,90-96
+  s_e09c0124348d70::t_912dab7071037d 3-4
+  s_e09c0124348d70::t_f9212192f5365e 97
+src/common/core/redis/locales/it.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/ui/main.py
+  s_907d7453b529ef::t_395e338ca66a58 37,780-782
+src/common/core/redis/locales/bn.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+tests/unit/api/test_rate_limit_fallback.py
+  s_e09c0124348d70::t_01de0b698edf28 27-28
+  s_907d7453b529ef::t_ca9d4c66f83cda 24
+src/common/core/redis/locales/tl.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/common/core/badbehavior/badbehavior.lua
+  s_907d7453b529ef::t_ea55feab1d349d 4
+  s_907d7453b529ef::t_23fc7df45e6cf6 551-552,586-587,626-627
+src/common/core/whitelist/whitelist.lua
+  s_dd5d0180289cec::t_77e5ab67368296 18,460-463
+src/common/core/redis/locales/de.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+src/common/core/metrics/README.zh.md
+  s_5ed44e89c01807::t_bb8d4d89dcff7f 23-26
+src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_socket_tcp.c
+  s_907d7453b529ef::t_017cccb0a3d826 1892-1907,1911-1935,1999
+  s_907d7453b529ef::t_a15f9ac5360547 1908-1910
+src/deps/src/resty-redis-cluster/Makefile
+  s_907d7453b529ef::t_37bb0d04233643 1-18
+src/common/core/redis/locales/tr.json
+  s_907d7453b529ef::t_4e67b2a6cf5131 80-83
+tests/unit/common/test_remove_ban_clears_badbehavior_state.py
+  s_e09c0124348d70::t_d24e16bdb84279 296-299
+src/common/core/metrics/README.de.md
+  s_5ed44e89c01807::t_bb8d4d89dcff7f 23-26
+src/common/core/redis/README.fr.md
+  s_907d7453b529ef::t_353cd704262084 35,69-75
+  s_e09c0124348d70::t_912dab7071037d 3-4
+  s_e09c0124348d70::t_790583cb218b5a 76
+tests/unit/common/test_ban_sync.py
+  s_e09c0124348d70::t_327f2513c916d0 321
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c9f779a82c9540645bc636c0ae88949069727e71",
+  "prompts": {},
+  "sessions": {
+    "s_5ed44e89c01807": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-19c9-7443-8e03-b1ddcd646022",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_607210143ce683": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb81-ff5e-7eb2-af5a-2746fba1ce58",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8789970f3bdadb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-0c5d-7c90-897c-c1fa3a2bf3fa",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_907d7453b529ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-349b-7603-8990-c626d3e902dc",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d1c1096e35b63b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3401481d-a660-470c-9b1c-0a9192bd691c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dd5d0180289cec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb82-27e2-7611-baac-5a040932de5a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e09c0124348d70": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fb76-a92b-7eb0-a387-9649f9567afc",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
