@@ -7,6 +7,8 @@ alembic==1.18.5
 # UI-layer import deps: importing UIDatabase pulls app.utils + app.models.models,
 # which require Flask/bcrypt/etc. Pinned to src/ui/requirements.txt.
 bcrypt==5.0.0
+# Real Biscuit middleware tests need the same implementation shipped by the UI.
+https://github.com/eclipse-biscuit/biscuit-python/archive/c0fa69824a3e601da86cf5cecde09f75ea8df4d7.zip#egg=biscuit-python # 0.4.1
 cryptography==49.0.0
 defusedcsv==3.0.0
 # tests/unit/backup/test_downgrade_hold.py imports src/api/app/routers/system.py, which pulls
