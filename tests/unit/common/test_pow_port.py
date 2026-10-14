@@ -99,13 +99,20 @@ def test_setting_rejects_invalid_difficulty():
         assert not re.fullmatch(setting["regex"], value)
 
 
+def test_form_carries_prefix_in_data_random():
+    # The script reads the prefix from the DOM: a string literal lets the image minifier fold its .length to the placeholder's
+    page = (PLUGIN / "files/javascript.html").read_text()
+    form = re.search(r"<form\b[^>]*\bid=\"form\"[^>]*>", page, re.S).group()
+    assert 'data-random="{*random*}"' in form
+
+
 @pytest.mark.skipif(not shutil.which("node"), reason="Node required")
 @pytest.mark.parametrize("difficulty", [16, 17])
 @pytest.mark.parametrize("worker", ["undefined", "class { constructor() { throw new Error('blocked'); } }"])
 def test_solver_fallback_meets_target_and_yields(difficulty, worker):
     page = (PLUGIN / "files/javascript.html").read_text()
     script = re.search(r"<script[^>]*>(.*?)</script>", page, re.S).group(1)
-    script = script.replace("{*random*}", "test-prefix").replace("{*antibot_difficulty*}", str(difficulty))
+    script = script.replace("{*antibot_difficulty*}", str(difficulty))
     harness = """
 const crypto = require('crypto');
 global.window = global; global.Worker = WORKER;
@@ -113,7 +120,7 @@ global.navigator = {hardwareConcurrency:2};
 global.requestAnimationFrame = cb => setTimeout(cb, 0);
 let ticks=0; const timer=setInterval(()=>ticks++,0);
 const input={value:''};
-global.document={getElementById:id=>id==='challenge'?input:id==='form'?{submit(){
+global.document={getElementById:id=>id==='challenge'?input:id==='form'?{getAttribute:name=>name==='data-random'?'test-prefix':null,submit(){
  clearInterval(timer); const hash=crypto.createHash('sha256').update('test-prefix'+input.value).digest();
  const bits=256-BigInt('0x'+hash.toString('hex')).toString(2).length;
  console.log(JSON.stringify({bits,ticks}));
