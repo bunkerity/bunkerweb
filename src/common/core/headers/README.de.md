@@ -71,8 +71,16 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
 
     !!! tip "Bewährte Praktiken"
         - Verwenden Sie `SameSite=Strict` für sensible Cookies, um den Zugriff über verschiedene Ursprünge hinweg zu verhindern.
+        - Verwenden Sie `SameSite=None` nur, wenn Cookies in Cross-Site-Kontexten gesendet werden müssen (z. B. SSO-Callbacks oder eingebettete Inhalte); Browser verlangen dafür zusätzlich das `Secure`-Flag, lassen Sie daher `COOKIE_AUTO_SECURE_FLAG` aktiviert oder fügen Sie `Secure` explizit hinzu.
+        - Setzt die Upstream-Antwort bereits einen anderen `SameSite`-Wert, hängt BunkerWeb den konfigurierten Wert an, statt ihn zu ersetzen; Browser verwenden das letzte `SameSite`-Attribut, sodass der Wert aus `COOKIE_FLAGS` greift.
         - Überprüfen Sie Ihre Cookie-Einstellungen regelmäßig, um die Einhaltung der Sicherheits- und Datenschutzbestimmungen sicherzustellen.
         - Vermeiden Sie es, Cookies ohne das Secure-Flag in Produktionsumgebungen zu setzen.
+
+    !!! example "SameSite=None für Cross-Site-Cookies"
+        ```yaml
+        COOKIE_FLAGS: "* HttpOnly SameSite=None"
+        COOKIE_AUTO_SECURE_FLAG: "yes"
+        ```
 
 === "Benutzerdefinierte Header"
 
