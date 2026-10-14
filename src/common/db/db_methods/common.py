@@ -39,6 +39,8 @@ from model import (  # type: ignore
     Templates,
 )
 
+from .blobs import blob_sweep
+
 from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
@@ -124,6 +126,8 @@ def delete_service_rows(session: Any, service_ids: List[str]) -> None:
     for model in (ResourceAttachments, Services_settings, Custom_configs, Jobs_cache):
         session.execute(delete(model).where(model.service_id.in_(service_ids)), execution_options={"synchronize_session": False})
     session.execute(delete(Services).where(Services.id.in_(service_ids)), execution_options={"synchronize_session": False})
+    # bw_blob_chunks has no foreign key: the deleted services' chunked job caches are swept here, once, for every caller.
+    blob_sweep(session)
 
 
 def bulk_add_in_fk_order(session: Any, items: List[Any]) -> None:
@@ -211,8 +215,11 @@ def bulk_add_in_fk_order(session: Any, items: List[Any]) -> None:
 
     if buckets["jobs"]:
         session.add_all(buckets["jobs"])
-    if buckets["plugin_pages"]:
-        session.add_all(buckets["plugin_pages"])
+    # One page per flush: MariaDB's INSERT ... RETURNING otherwise batches every page into one statement,
+    # which defeats the packet limit that bw_blob_chunks exists to respect.
+    for page in buckets["plugin_pages"]:
+        session.add(page)
+        session.flush()
     if buckets["cli_commands"]:
         session.add_all(buckets["cli_commands"])
     if buckets["other"]:

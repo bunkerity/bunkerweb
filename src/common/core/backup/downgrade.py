@@ -358,6 +358,31 @@ def check_setting_drafts(counts: Dict[str, Optional[int]], row: Optional[dict], 
     )
 
 
+def check_download_plugins(count: Optional[int]) -> Check:
+    """Plugins installed from `EXTERNAL_PLUGIN_URLS` (`bw_plugins.method = 'download'`).
+
+    No earlier release has that label: SQLAlchemy raises `LookupError` on an unknown stored enum
+    value, and the MariaDB/MySQL narrowing `MODIFY` fails with error 1265 while such a row exists.
+    There is no conversion on offer, so the only way back is a restore from a backup.
+    """
+    data = {"count": count}
+    if count is None:
+        return Check(
+            "download_plugins",
+            RESTORE_ONLY,
+            "Could not count the plugins installed from EXTERNAL_PLUGIN_URLS: whether the target can read them is unknown",
+            data,
+        )
+    if count:
+        return Check(
+            "download_plugins",
+            RESTORE_ONLY,
+            f"{count} plugin(s) installed from EXTERNAL_PLUGIN_URLS carry the `download` method, which the target version does not know: restore from a backup instead",
+            data,
+        )
+    return Check("download_plugins", IN_PLACE, "No plugin installed from EXTERNAL_PLUGIN_URLS", data)
+
+
 def check_plugins(plugins: List[dict]) -> Check:
     """Plugins whose declared API range excludes the target, and plugins with no manifest.
 
@@ -435,7 +460,15 @@ def _human(size: Optional[int]) -> str:
 # NOT here -- they are observability rather than configuration and are never empty, so counting
 # them would pin every installation to restore_only forever (`not_counted_by_the_preflight` in
 # the manifest records that as a decision rather than an oversight).
-IRREPRESENTABLE_TABLES = ("bw_upstreams", "bw_redirects", "bw_workflows", "bw_bans", "bw_certificates", "bw_ui_user_webauthn_credentials")
+IRREPRESENTABLE_TABLES = (
+    "bw_upstreams",
+    "bw_redirects",
+    "bw_workflows",
+    "bw_bans",
+    "bw_certificates",
+    "bw_ui_user_webauthn_credentials",
+    "bw_blob_chunks",
+)
 # `bw_resources` also holds certificates, which 1.6.x does have somewhere to put, so it is
 # counted per type rather than wholesale.
 IRREPRESENTABLE_RESOURCE_TYPES = ("redirect", "upstream", "workflow")
@@ -585,6 +618,16 @@ def count_setting_drafts(db) -> Dict[str, Optional[int]]:
         for table in SETTING_DRAFT_TABLES:
             counts.setdefault(table, None)
     return counts
+
+
+def count_download_plugins(db) -> Optional[int]:
+    """Rows of `bw_plugins` labelled `download`; None when the count fails. Read-only."""
+    try:
+        with db.sql_engine.connect() as conn:
+            return int(conn.execute(sa.text("SELECT COUNT(*) FROM bw_plugins WHERE method = :method"), {"method": "download"}).scalar_one())
+    except BaseException as e:
+        LOGGER.debug(f"Could not count the download plugins: {e}")
+        return None
 
 
 def scan_plugins(
@@ -952,6 +995,7 @@ def _preflight(target: str, db, backup_dir: Path, now: datetime, client) -> dict
         check_backup(newest, now),
         check_irrepresentable(count_irrepresentable(db), loss_classes(manifest)),
         check_setting_drafts(count_setting_drafts(db), manifest_row(manifest, installed, target, engine), target),
+        check_download_plugins(count_download_plugins(db)),
         check_plugins(scan_plugins(target)),
         check_writers(broker_state(client=client)),
     ]

@@ -901,3 +901,22 @@ class TestTheUndeclaredServerDefaultClass:
         declared = [pair for pair in sorted(env["_UNDECLARED_SERVER_DEFAULTS"]) if tables[pair[0]].columns[pair[1]].server_default is not None]
 
         assert not declared, f"the model declares a default for these, so they converge on their own: {declared}"
+
+
+class TestLongBlobRoundTripNoise:
+    """MySQL/MariaDB report a `LargeBinary(2**32-1)` column as `LONGBLOB`, and autogenerate treats the
+    two as different types. The emitted `alter_column` is a `MODIFY` that restates the whole column,
+    so a revision full of them is not just noise: any `existing_*` attribute it misses silently
+    changes the column. A column that an earlier revision already created therefore has to be on
+    `_IGNORED_ALTER_COLUMNS`, and `bw_blob_chunks.data` (created by 1.6.16~rc3) was the one that was not (the first regen after the table landed emitted
+    it on MariaDB and MySQL)."""
+
+    def test_the_chunk_table_payload_is_ignored(self, env):
+        assert ("bw_blob_chunks", "data") in env["_IGNORED_ALTER_COLUMNS"]
+
+    def test_the_filter_drops_its_alter_column(self, env):
+        noise = AlterColumnOp("bw_blob_chunks", "data", existing_type=sa.LargeBinary(length=4294967295), existing_nullable=False)
+        kept = AlterColumnOp("bw_blob_chunks", "idx", existing_type=sa.Integer(), existing_nullable=False)
+        container = ModifyTableOps("bw_blob_chunks", [noise, kept])
+        env["_strip_ignored_ops"](container)
+        assert container.ops == [kept]

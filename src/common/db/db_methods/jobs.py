@@ -8,6 +8,7 @@ from sqlalchemy import case, delete, func, or_, select, update
 
 from model import Jobs, Jobs_cache, Jobs_runs  # type: ignore
 
+from .blobs import blob_load, blob_store, blob_sweep
 from .common import DatabaseMixinBase
 
 # 4 KiB, well under the 64 KiB TEXT of MySQL/MariaDB (the tightest of the four engines): a
@@ -119,6 +120,7 @@ class DatabaseJobsMixin(DatabaseMixinBase):
                 # whole batch instead of reporting one file, and push-configs aborted the entire
                 # configuration push over a cache row.
                 session.execute(delete(Jobs_cache).filter_by(**filters), execution_options={"synchronize_session": False})
+                blob_sweep(session)
                 session.commit()
             except BaseException as e:
                 # Swallowing the error here means _db_session never sees it and never rolls back,
@@ -148,29 +150,35 @@ class DatabaseJobsMixin(DatabaseMixinBase):
 
             cache = session.scalars(select(Jobs_cache).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).limit(1)).first()
 
-            if not cache:
-                session.add(
-                    Jobs_cache(
+            try:
+                if not cache:
+                    cache = Jobs_cache(
                         job_name=job_name,
                         service_id=service_id,
                         file_name=file_name,
-                        data=data,
+                        data=b"",
                         last_update=datetime.now().astimezone(),
                         checksum=checksum,
                     )
-                )
-            else:
-                if checksum is None or cache.checksum != checksum:
-                    cache.data = data
-                    cache.last_update = datetime.now().astimezone()
-                    cache.checksum = checksum
+                    session.add(cache)
+                    # Flushed empty first: a chunked blob is keyed by the row id, which only exists now.
+                    session.flush()
+                    cache.data = blob_store(session, f"bw_jobs_cache:{cache.id}", data)
                 else:
-                    # Data unchanged — refresh timestamp to reset expiry window
-                    cache.last_update = datetime.now().astimezone()
+                    if checksum is None or cache.checksum != checksum:
+                        cache.data = blob_store(session, f"bw_jobs_cache:{cache.id}", data)
+                        cache.last_update = datetime.now().astimezone()
+                        cache.checksum = checksum
+                    else:
+                        # Data unchanged — refresh timestamp to reset expiry window
+                        cache.last_update = datetime.now().astimezone()
 
-            try:
                 session.commit()
             except BaseException as e:
+                # The chunk inserts run before the commit now, so a failure here leaves a failed
+                # transaction on the scoped session: roll back, as delete_job_cache does.
+                with suppress(Exception):
+                    session.rollback()
                 return str(e)
 
         return ""
@@ -240,7 +248,7 @@ class DatabaseJobsMixin(DatabaseMixinBase):
         if with_info:
             entities.extend([Jobs_cache.last_update, Jobs_cache.checksum])
         if with_data:
-            entities.append(Jobs_cache.data)
+            entities.extend([Jobs_cache.id, Jobs_cache.data])
 
         filters = {"job_name": job_name, "file_name": file_name, "service_id": service_id or None}
 
@@ -250,18 +258,28 @@ class DatabaseJobsMixin(DatabaseMixinBase):
                 if not job:
                     return None
             data = session.execute(select(*entities).filter_by(**filters).limit(1)).first()
+            blob = None
+            if data and with_data:
+                # Resolved inside the session: a chunked blob is read back from bw_blob_chunks.
+                blob = blob_load(
+                    session,
+                    f"bw_jobs_cache:{data.id}",
+                    data.data,
+                    self.logger,
+                    lambda: session.scalar(select(Jobs_cache.data).filter_by(id=data.id)),
+                )
 
         if not data:
             return None
         elif with_data and not with_info:
-            return data.data
+            return blob
 
         ret_data = {}
         if with_info:
             ret_data["last_update"] = data.last_update.timestamp() if data.last_update is not None else "Never"
             ret_data["checksum"] = data.checksum
         if with_data:
-            ret_data["data"] = data.data
+            ret_data["data"] = blob
         return ret_data
 
     def get_jobs_cache_files(self, *, with_data: bool = True, job_name: str = "", plugin_id: str = "", data_job_name: str = "") -> List[Dict[str, Any]]:
@@ -271,7 +289,7 @@ class DatabaseJobsMixin(DatabaseMixinBase):
             if with_data:
                 # Paired files share one read; sibling rows are needed only for their paths.
                 data = Jobs_cache.data if not data_job_name else case((Jobs_cache.job_name == data_job_name, Jobs_cache.data), else_=None)
-                entities.append(data.label("data"))
+                entities.extend([Jobs_cache.id, data.label("data")])
             query = select(*entities).join(Jobs, Jobs.name == Jobs_cache.job_name)
 
             if job_name:
@@ -280,7 +298,8 @@ class DatabaseJobsMixin(DatabaseMixinBase):
                 query = query.where(Jobs.plugin_id == plugin_id)
 
             cache_files = []
-            for cache in session.execute(query):
+            # .all(): the session must not be iterated while the chunk queries of blob_load run on it.
+            for cache in session.execute(query).all():
                 cache_files.append(
                     {
                         "plugin_id": cache.plugin_id,
@@ -292,6 +311,12 @@ class DatabaseJobsMixin(DatabaseMixinBase):
                     }
                 )
                 if with_data and (not data_job_name or cache.job_name == data_job_name):
-                    cache_files[-1]["data"] = cache.data
+                    cache_files[-1]["data"] = blob_load(
+                        session,
+                        f"bw_jobs_cache:{cache.id}",
+                        cache.data,
+                        self.logger,
+                        lambda cache_id=cache.id: session.scalar(select(Jobs_cache.data).filter_by(id=cache_id)),
+                    )
 
             return cache_files

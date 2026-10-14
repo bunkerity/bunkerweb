@@ -76,6 +76,7 @@ from db.alembic_baseline import (
     RC3_TAG,
     RC3_VERSION,
     baseline_metadata,
+    chain,
     product_uri,
     revision_for,
     wipe,
@@ -674,7 +675,7 @@ def test_enum_labels_match_between_an_upgraded_and_a_fresh_database(upgraded_and
     constraint or a VARCHAR, so a value the model added has to be migrated in with
     `ALTER TYPE ... ADD VALUE` and can be forgotten.
 
-    `postgresql_versions/7b979831b042_..._1_7_0_alpha.py` does exactly that for `web_cache`,
+    `postgresql_versions/a7c60e38d32a_..._1_7_0_alpha.py` does exactly that for `web_cache`,
     `resource_groups` and `certificates`. The migration *not raising* is only half the answer; this
     is the other half. Note the label check passing here says nothing about PostgreSQL 11 or older,
     where `ADD VALUE` cannot run inside a transaction at all — the compose pins `postgres:16`.
@@ -733,3 +734,26 @@ def test_the_1_6_16_rc1_prerelease_is_resolvable_for_every_engine(engine):
     revision = revision_for("1.6.16~rc1", engine)
 
     assert revision
+
+
+@pytest.mark.parametrize("version", ("1.6.16~rc2", "1.6.16~rc3", "1.6.16~rc4", "1.6.16"))
+@pytest.mark.parametrize("engine", ("sqlite", "mariadb", "mysql", "postgresql"))
+def test_every_1_6_16_release_after_rc1_is_resolvable_for_every_engine(engine, version):
+    """A database stamped by 1.6.16~rc2, ~rc3, ~rc4 or the final 1.6.16 must have an entry into the 1.7 chain.
+
+    `entrypoint.sh` resolves the stamped version by filename and exits 1 when none matches, so a chain that
+    stops short leaves every installation stamped later unable to start. rc3 also creates `bw_blob_chunks`;
+    rc4 and the final release only bump `bw_metadata.version`.
+    """
+    assert revision_for(version, engine)
+
+
+@pytest.mark.parametrize("engine", ("sqlite", "mariadb", "mysql", "postgresql"))
+def test_the_chain_has_one_head_and_it_sits_on_the_final_1_6_16(engine):
+    """One head per engine, and it is the 1.7.0~alpha revision parented on the final 1.6.16 (never a second branch beside rc3 or rc4)."""
+    graph = chain(engine)
+    parents = {down for down, _path in graph.values()}
+    heads = sorted(revision for revision in graph if revision not in parents)
+
+    assert heads == [revision_for("1.7.0~alpha", engine)], f"{engine}: expected exactly the 1.7.0~alpha head, got {heads}"
+    assert graph[heads[0]][0] == revision_for("1.6.16", engine)

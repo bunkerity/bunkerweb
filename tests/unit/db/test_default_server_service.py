@@ -9,10 +9,14 @@ three lists in ``config_save.py`` that would otherwise delete it, or abort an un
 because of it.
 """
 
+from datetime import datetime
+
 import pytest
+from sqlalchemy.orm import Session
 
 from default_server import DEFAULT_SERVER_ID, DEFAULT_SERVER_METHOD, DEFAULT_SERVER_SEEDED_SETTINGS  # type: ignore
 from fixtures.seed import make_core_plugin, make_general_settings
+from model import Services  # type: ignore
 
 pytestmark = pytest.mark.slow
 
@@ -193,6 +197,52 @@ class TestSeeding:
         finally:
             seeded.readonly = False
         assert DEFAULT_SERVER_ID not in _ids(seeded)
+
+
+class TestSeedingLosesTheRace:
+    """Several API workers run the lifespan seeding at once on a fresh install: all of them see "no
+    row", one INSERT wins, the others fail on the primary key. The row exists then, which is what
+    the caller asked for, so a lost race is a success and not a warning on every first boot."""
+
+    @staticmethod
+    def _a_sibling_wins(db, monkeypatch, method=DEFAULT_SERVER_METHOD):
+        """Insert the row through another connection after the existence check and before our own
+        INSERT -- the window the race lives in."""
+        real = db._default_server_is_wanted
+
+        def wanted(session):
+            answer = real(session)
+            now = datetime.now().astimezone()
+            with Session(db.sql_engine) as other:
+                other.add(Services(id=DEFAULT_SERVER_ID, method=method, is_draft=False, creation_date=now, last_update=now))
+                other.commit()
+            return answer
+
+        monkeypatch.setattr(db, "_default_server_is_wanted", wanted)
+
+    def test_a_lost_race_is_a_success(self, seeded, monkeypatch):
+        self._a_sibling_wins(seeded, monkeypatch)
+
+        assert seeded.seed_default_server_service() == ""
+
+        rows = [s for s in seeded.get_services(with_drafts=True) if s["id"] == DEFAULT_SERVER_ID]
+        assert [row["method"] for row in rows] == [DEFAULT_SERVER_METHOD]
+
+    def test_a_lost_race_leaves_the_session_usable(self, seeded, monkeypatch):
+        self._a_sibling_wins(seeded, monkeypatch)
+        assert seeded.seed_default_server_service() == ""
+        monkeypatch.undo()
+
+        # A rolled-back, still-poisoned session would fail the very next call.
+        assert seeded.seed_default_server_service() == ""
+        assert DEFAULT_SERVER_ID in _ids(seeded)
+
+    def test_a_row_the_winner_does_not_hold_as_reserved_is_still_an_error(self, seeded, monkeypatch):
+        """The id is taken, but not by the reserved default server: that is no "someone else seeded
+        it", so the failure keeps its message."""
+        self._a_sibling_wins(seeded, monkeypatch, method="ui")
+
+        assert seeded.seed_default_server_service() != ""
 
 
 class TestReconciliationGuards:

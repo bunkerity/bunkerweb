@@ -30,7 +30,7 @@ LargeText = Text().with_variant(MEDIUMTEXT, "mysql").with_variant(MEDIUMTEXT, "m
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
 SETTINGS_TYPES_ENUM = Enum("password", "text", "number", "file", "check", "select", "multiselect", "multivalue", "size", "duration", name="settings_types_enum")
-METHODS_ENUM = Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum")
+METHODS_ENUM = Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", "download", name="methods_enum")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "http",
@@ -251,6 +251,19 @@ class Plugin_pages(Base):
     checksum: Mapped[str] = mapped_column(String(128), nullable=False)
 
     plugin: Mapped["Plugins"] = relationship("Plugins", back_populates="pages")
+
+
+class Blob_chunks(Base):
+    """Pieces of a blob too large for one MySQL/MariaDB statement; the owner row's data column holds a marker instead.
+
+    ``owner`` is ``<table>:<key>`` and has no foreign key, so nothing cascades here: see ``db_methods/blobs.py``."""
+
+    __tablename__ = "bw_blob_chunks"
+
+    owner: Mapped[str] = mapped_column(String(128), primary_key=True)
+    checksum: Mapped[str] = mapped_column(String(64), primary_key=True)
+    idx: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    data: Mapped[bytes] = mapped_column(LargeBinary(length=(2**32) - 1), nullable=False)
 
 
 class Jobs_cache(Base):

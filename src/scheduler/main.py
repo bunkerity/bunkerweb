@@ -1068,6 +1068,10 @@ if __name__ == "__main__":
             db_plugins = API_CLIENT.get_plugins(_type=_type)
             external_plugins = []
             tmp_external_plugins = []
+            # delete_missing reads the list below as "everything else is gone", but it only holds what is new or changed
+            # on disk. Every plugin the scan does not own is named so it is spared: the ones the download job (or the
+            # pro job) installed, which are never `manual`, and below the manual ones whose files did not change.
+            preserve_ids = {plugin["id"] for plugin in db_plugins if plugin["method"] != "manual"}
             for file in plugin_path.glob("*/plugin.json"):
                 plugin_content = create_plugin_tar_gz(file.parent, arc_root=file.parent.name)
 
@@ -1089,6 +1093,7 @@ if __name__ == "__main__":
                     index = next(i for i, plugin in enumerate(db_plugins) if plugin["id"] == common_data["id"])
 
                     if checksum == db_plugins[index]["checksum"] or db_plugins[index]["method"] != "manual":
+                        preserve_ids.add(common_data["id"])
                         continue
 
                 tmp_external_plugins.append(common_data.copy())
@@ -1110,7 +1115,7 @@ if __name__ == "__main__":
 
                 if changes:
                     try:
-                        err = API_CLIENT.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
+                        err = API_CLIENT.update_external_plugins(external_plugins, _type=_type, delete_missing=True, preserve_ids=preserve_ids)
                         if err:
                             LOGGER.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
                     except BaseException as e:

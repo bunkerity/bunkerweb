@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 from model import Global_values, Metadata, Plugins, Services, Services_settings, Settings  # type: ignore
 
 from sqlalchemy import select, update
-from sqlalchemy.exc import OperationalError, ProgrammingError
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 from sqlalchemy.orm import aliased
 
 from default_server import DEFAULT_SERVER_ID, DEFAULT_SERVER_METHOD, DEFAULT_SERVER_SEEDED_SETTINGS  # type: ignore
@@ -278,6 +278,22 @@ class DatabaseServicesMixin(DatabaseMixinBase):
 
             now = datetime.now().astimezone()
             session.add(Services(id=DEFAULT_SERVER_ID, method=DEFAULT_SERVER_METHOD, is_draft=False, creation_date=now, last_update=now))
+            try:
+                session.flush()
+            except (IntegrityError, OperationalError) as e:
+                # Lost the race: on a fresh install every API worker seeds, each sees no row, and one
+                # INSERT wins the primary key. The row exists, which is all this call is for.
+                # MariaDB reports the loss as OperationalError 1020 ("Record has changed since last
+                # read") when the winner committed after our snapshot, so that class is read too --
+                # but only the row's presence turns it into a success, anything else keeps propagating
+                # to the readonly/transient-retry handling.
+                session.rollback()
+                winner = session.get(Services, DEFAULT_SERVER_ID)
+                if winner is not None and winner.method == DEFAULT_SERVER_METHOD:
+                    return ""
+                if winner is None and not isinstance(e, IntegrityError):
+                    raise
+                return str(e)
 
             # Only the settings the database already knows: the FK is on `bw_settings.id`, which the
             # scheduler populates, and a missing one means "too early" rather than "unknown".

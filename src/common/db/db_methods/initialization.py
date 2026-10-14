@@ -13,6 +13,7 @@ from resource_validation import validate_resource_value  # type: ignore
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import SQLAlchemyError
 
+from .blobs import blob_matches, blob_store, blob_sweep
 from .common import DatabaseMixinBase, bulk_add_in_fk_order, canonicalize_setting_value
 
 # Each entry must change the setting id (and therefore its unique name): both
@@ -90,6 +91,7 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
             # APPLY CHANGES
             try:
                 self._it_apply_deletes(session, to_delete)
+                self._it_store_blobs(session, to_put, to_update)
                 # Insert parents before children to avoid FK errors on some DBs.
                 bulk_add_in_fk_order(session, to_put)
                 # Only renamed settings defer deletion: both parent rows must exist
@@ -99,6 +101,8 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                         session.execute(update(model).filter_by(setting_id=old_id).values(setting_id=new_id))
                     session.execute(delete(Settings).filter_by(plugin_id=plugin_id, id=old_id))
                 self._it_apply_updates(session, to_update)
+                # Deleted plugins and pages may have left chunk sets behind (no FK cascades into bw_blob_chunks).
+                blob_sweep(session)
                 session.commit()
             except SQLAlchemyError as e:
                 self.logger.debug(format_exc())
@@ -787,9 +791,13 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
         for pid in old_plugin_ids & new_plugin_ids:
             old_p = old_plugins[pid]
             new_p = desired_plugins[pid]
-            attrs_to_check = ("name", "description", "version", "stream", "type", "method", "data", "checksum", "icon")
-            if any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check) and old_p.method == new_p.get("method", "manual"):
-                to_update.append({"type": "plugin", "filter": {"id": pid}, "data": {k: new_p[k] for k in attrs_to_check if k in new_p}})
+            attrs_to_check = ("name", "description", "version", "stream", "type", "method", "checksum", "icon")
+            # The stored column may be a chunk marker: compare through it so an unchanged archive is not rewritten on every boot.
+            data_changed = not blob_matches(getattr(old_p, "data", None), new_p.get("data"))
+            if (data_changed or any(getattr(old_p, attr, None) != new_p.get(attr) for attr in attrs_to_check)) and old_p.method == new_p.get(
+                "method", "manual"
+            ):
+                to_update.append({"type": "plugin", "filter": {"id": pid}, "data": {k: new_p[k] for k in (*attrs_to_check, "data") if k in new_p}})
 
         # Plugins to delete. Disabled plugins that are absent from the desired (FS-derived) set
         # are never reached here: `_it_freeze_disabled_plugins` removed them (and every child
@@ -1156,6 +1164,22 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
         for ek in old_keys - new_keys:
             group_id, kind, value, order = ek
             to_delete.append({"type": "resource_group_entry", "filter": {"group_id": group_id, "kind": kind, "value": value, "order": order}})
+
+    def _it_store_blobs(self, session, to_put: list, to_update: list) -> None:
+        """Replace the plugin and page archives queued by the diff with what their ``data`` column must hold.
+
+        A blob above one MySQL/MariaDB statement goes to ``bw_blob_chunks`` and the column gets a marker;
+        the diff stays pure and works on the plain bytes."""
+        for item in to_put:
+            if isinstance(item, Plugins):
+                item.data = blob_store(session, f"bw_plugins:{item.id}", item.data)
+            elif isinstance(item, Plugin_pages):
+                item.data = blob_store(session, f"bw_plugin_pages:{item.plugin_id}", item.data)
+        for update_op in to_update:
+            if update_op["type"] == "plugin" and "data" in update_op["data"]:
+                update_op["data"]["data"] = blob_store(session, f"bw_plugins:{update_op['filter']['id']}", update_op["data"]["data"])
+            elif update_op["type"] == "plugin_page":
+                update_op["data"]["data"] = blob_store(session, f"bw_plugin_pages:{update_op['filter']['plugin_id']}", update_op["data"]["data"])
 
     def _it_apply_deletes(self, session, to_delete: list) -> None:
         """Apply the queued deletes on the given session."""

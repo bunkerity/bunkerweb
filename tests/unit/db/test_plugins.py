@@ -2,6 +2,8 @@
 
 from datetime import datetime, timezone
 
+import pytest
+
 from fixtures.seed import add_plugin, add_plugin_page, seed_minimal
 
 DT = datetime(2024, 1, 1, tzinfo=timezone.utc)
@@ -103,6 +105,49 @@ class TestDeletePlugin:
     def test_delete_not_found(self, db):
         seed_minimal(db)
         assert db.delete_plugin("general", "ui") == "Plugin with id general and method ui not found"
+
+    @pytest.mark.parametrize(
+        "plugin_type, method, flag",
+        [
+            ("external", "download", "external_plugins_changed"),
+            ("external", "manual", "external_plugins_changed"),
+            ("ui", "ui", "external_plugins_changed"),
+            ("pro", "scheduler", "pro_plugins_changed"),
+        ],
+    )
+    def test_the_change_flags_follow_the_plugin_type_not_the_method(self, db, plugin_type, method, flag):
+        """The scheduler regenerates the plugin dir (and the UI reloads its plugins) from these flags.
+
+        They were keyed on the *method* argument, which only worked while "ui" happened to be both a
+        method and a type: a plugin installed from EXTERNAL_PLUGIN_URLS (method "download") was deleted
+        from the database and kept on disk and in the UI.
+        """
+        seed_minimal(db)
+        add_plugin(db, "urlplug", type=plugin_type, method=method)
+        before = db.get_metadata()
+        assert before[flag] is False and before["reload_ui_plugins"] is False
+
+        assert db.delete_plugin("urlplug", method) == ""
+
+        after = db.get_metadata()
+        assert after[flag] is True
+        assert after["reload_ui_plugins"] is True
+        other = "pro_plugins_changed" if flag == "external_plugins_changed" else "external_plugins_changed"
+        assert after[other] is False
+
+    def test_a_core_plugin_deletion_raises_no_plugin_change_flag(self, db):
+        seed_minimal(db)
+        assert db.delete_plugin("general", "manual") == ""
+        after = db.get_metadata()
+        assert after["external_plugins_changed"] is False and after["pro_plugins_changed"] is False
+
+    def test_a_wrong_method_deletes_nothing_and_flags_nothing(self, db):
+        seed_minimal(db)
+        add_plugin(db, "urlplug", type="external", method="download")
+        assert db.delete_plugin("urlplug", "ui") == "Plugin with id urlplug and method ui not found"
+        assert db.delete_plugin("urlplug", "manual") == "Plugin with id urlplug and method manual not found"
+        assert [p["id"] for p in db.get_plugins(_type="external")] == ["urlplug"]
+        assert db.get_metadata()["external_plugins_changed"] is False
 
 
 class TestPluginPageAndErrors:

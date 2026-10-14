@@ -774,6 +774,8 @@ class UpdateExternalPluginsRequest(BaseModel):
     plugins: list = Field(..., min_length=0)
     plugin_type: str = Field("external", alias="_type", pattern="^(external|pro)$")
     delete_missing: bool = True
+    # Ids the caller did not list but that must survive ``delete_missing`` (the scheduler lists only what changed on disk).
+    preserve_ids: List[str] = Field(default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True)
 

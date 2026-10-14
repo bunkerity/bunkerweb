@@ -44,6 +44,15 @@ Four engines are supported: SQLite (WAL mode), MariaDB, MySQL and PostgreSQL, al
 
 **`_db_session` is not reentrant.** It yields the shared scoped session and its `finally` calls `session.remove()`, so a nested `with self._db_session()` closes the session the outer block holds: everything it loaded becomes detached and anything pending is discarded. Never call another session-opening method from inside a session — resolve the value first and pass it in, or pass `session=` where the callee accepts one.
 
+## Large blobs
+
+**`bw_blob_chunks` has no foreign key.** Plugin archives, plugin pages and job caches (`bw_plugins`, `bw_plugin_pages`, `bw_jobs_cache`) are stored in chunks (#3965) on MySQL/MariaDB when larger than `max_allowed_packet`, and on every engine, PostgreSQL and SQLite included, when their content starts with `BLOB_CHUNK_MARKER` (`blobs.py` forces such content onto the chunk path so it is never mistaken for a reference). Nothing cascades, so:
+
+- every path that deletes a `bw_plugins`, `bw_plugin_pages` or `bw_jobs_cache` row must call `blob_sweep(session)` before its commit, or the chunks are orphaned;
+- readers of those three columns must call `blob_load` inside their session;
+- any new writer of those columns must go through `blob_store`;
+- the helpers take the caller's session and never open their own (see Sessions above).
+
 ## Migrations
 
 **Rule: no revision is written, generated or sketched without an explicit request.**

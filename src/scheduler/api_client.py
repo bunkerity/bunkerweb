@@ -1,5 +1,5 @@
 from base64 import b64decode
-from typing import Optional, Tuple, Union
+from typing import Iterable, Optional, Tuple, Union
 
 from base_api_client import BaseApiClient, ApiClientError, ApiUnavailableError  # type: ignore  # noqa: F401
 
@@ -158,10 +158,16 @@ class SchedulerApiClient(BaseApiClient):
                         p["data"] = d.encode("utf-8")
         return plugins
 
-    def update_external_plugins(self, plugins: list, _type: str = "external", delete_missing: bool = True) -> str:
-        """Bulk update external/pro plugins. Returns empty string on success."""
+    def update_external_plugins(self, plugins: list, _type: str = "external", delete_missing: bool = True, preserve_ids: Optional[Iterable[str]] = None) -> str:
+        """Bulk update external/pro plugins. Returns empty string on success.
+
+        ``preserve_ids`` names the plugins ``plugins`` leaves out on purpose, so ``delete_missing`` spares them.
+        """
+        body = {"plugins": plugins, "_type": _type, "delete_missing": delete_missing}
+        if preserve_ids:
+            body["preserve_ids"] = sorted(preserve_ids)
         try:
-            self._put("/plugins/external", json={"plugins": plugins, "_type": _type, "delete_missing": delete_missing})
+            self._put("/plugins/external", json=body)
             return ""
         except (ApiClientError, ApiUnavailableError) as e:
             return e.message

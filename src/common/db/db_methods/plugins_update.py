@@ -4,9 +4,9 @@ from datetime import datetime
 from json import JSONDecodeError, loads
 from os import sep
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Set, Tuple
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple
 
-from model import Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Metadata, Multiselects, Plugin_pages, Plugins, Selects, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
+from model import Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, Metadata, Multiselects, Plugin_pages, Plugins, ResourceGroups, Selects, Services_settings, Settings, Template_custom_configs, Template_settings, Template_steps, Templates  # type: ignore
 
 from common_utils import bytes_hash, create_plugin_tar_gz, resolve_plugin_icon  # type: ignore
 
@@ -14,6 +14,7 @@ from sqlalchemy import delete, select, update
 
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
+from .blobs import blob_store, blob_sweep
 from .common import DatabaseMixinBase, bulk_add_in_fk_order
 
 
@@ -28,21 +29,28 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
         delete_missing: bool = True,
         only_clear_metadata: bool = False,
         per_plugin_commit: bool = True,
+        preserve_ids: Optional[Set[str]] = None,
     ) -> str:
-        """Update external plugins from the database"""
+        """Update external plugins from the database.
+
+        ``delete_missing`` removes every ``_type`` row absent from ``plugins``. A caller that only lists
+        what changed (the scheduler's scan of hand-mounted plugins) names the ids it did not list in
+        ``preserve_ids`` so they are neither deleted nor mistaken for removed ones.
+        """
         to_put = []
         changes = False
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            deleted, abort = self._uep_delete_missing_plugins(session, plugins, _type, delete_missing, only_clear_metadata)
+            deleted, abort = self._uep_delete_missing_plugins(session, plugins, _type, delete_missing, only_clear_metadata, preserve_ids or set())
             if abort:
                 return ""
             if deleted:
                 changes = True
                 if per_plugin_commit:
                     try:
+                        blob_sweep(session)
                         session.commit()
                     except BaseException as e:
                         return str(e)
@@ -111,7 +119,8 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                             if local_to_put:
                                 bulk_add_in_fk_order(session, local_to_put)
                             self._it_validate_template_settings(session)
-                            # Commit also captures any .update() / .delete() executed above.
+                            # Commit also captures any .update() / .delete() executed above, which may have orphaned chunk sets.
+                            blob_sweep(session)
                             session.commit()
                         else:
                             to_put.extend(local_to_put)
@@ -136,6 +145,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                             bulk_add_in_fk_order(session, local_to_put)
                         self._it_validate_template_settings(session)
                         # Commit also captures any .update() / .delete() executed above.
+                        blob_sweep(session)
                         session.commit()
                     else:
                         to_put.extend(local_to_put)
@@ -151,6 +161,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                     bulk_add_in_fk_order(session, to_put)
                 if not per_plugin_commit:
                     self._it_validate_template_settings(session)
+                blob_sweep(session)
                 session.commit()
             except BaseException as e:
                 session.rollback()
@@ -159,7 +170,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
         return ""
 
     def _uep_delete_missing_plugins(
-        self, session, plugins: List[Dict[str, Any]], _type: str, delete_missing: bool, only_clear_metadata: bool
+        self, session, plugins: List[Dict[str, Any]], _type: str, delete_missing: bool, only_clear_metadata: bool, preserve_ids: Set[str]
     ) -> Tuple[bool, bool]:
         """Remove (or metadata-clear) plugins of ``_type`` that are absent from ``plugins``.
 
@@ -180,7 +191,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
             # intact so re-enabling restores the plugin with its stored configuration.
             disabled_ids = {plugin.id for plugin in db_plugins if not plugin.enabled}
             ids = [plugin["id"] for plugin in plugins]
-            missing_ids = [plugin for plugin in db_ids if plugin not in ids and plugin not in disabled_ids]
+            missing_ids = [plugin for plugin in db_ids if plugin not in ids and plugin not in disabled_ids and plugin not in preserve_ids]
 
             if missing_ids:
                 # Data-loss guard: refuse the destructive plugin-wide cascade (Settings +
@@ -262,7 +273,12 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
         entirely (method mismatch or forbidden type — the caller ``continue``s).
         Never commits.
         """
-        if plugin["method"] not in (db_plugin.method, "autoconf"):
+        # The one method change this path allows: the download job claiming a plugin it just installed from
+        # EXTERNAL_PLUGIN_URLS, which an earlier version had written as "scheduler". Nothing else may take a
+        # plugin over (a hand-mounted "manual" one least of all), and nothing may take "download" back.
+        claimed_by_download = db_plugin.method == "scheduler" and plugin["method"] == "download" and db_plugin.type == "external"
+
+        if plugin["method"] not in (db_plugin.method, "autoconf") and not claimed_by_download:
             self.logger.warning(f'Plugin "{plugin["id"]}" already exists, but the method is different, skipping update')
             return True, False
 
@@ -289,9 +305,15 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
         if plugin["method"] != db_plugin.method:
             updates[Plugins.method] = plugin["method"]
 
+        if claimed_by_download:
+            # Templates and resource groups copy their plugin's method (template_owner() reads it): a mixed set
+            # would make the plugin's own rows look hand-made. Only the rows that carried the old label move.
+            for child in (Templates, ResourceGroups):
+                session.execute(update(child).where(child.plugin_id == plugin["id"], child.method == "scheduler").values(method="download"))
+
         if plugin.get("checksum") != db_plugin.checksum:
             updates[Plugins.checksum] = plugin.get("checksum")
-            updates[Plugins.data] = plugin.get("data")
+            updates[Plugins.data] = blob_store(session, f"bw_plugins:{plugin['id']}", plugin.get("data"))
 
         if plugin.get("type") != db_plugin.type:
             updates[Plugins.type] = plugin.get("type")
@@ -594,10 +616,12 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
             if not db_plugin_page:
                 changed = True
+                content = blob_store(session, f"bw_plugin_pages:{plugin['id']}", content)
                 local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
                 remove = False
             elif checksum != db_plugin_page.checksum:
                 changed = True
+                content = blob_store(session, f"bw_plugin_pages:{plugin['id']}", content)
                 session.execute(
                     update(Plugin_pages).where(Plugin_pages.plugin_id == plugin["id"]).values({Plugin_pages.data: content, Plugin_pages.checksum: checksum})
                 )
@@ -975,7 +999,7 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                 stream=plugin["stream"],
                 type=_type,
                 method=plugin["method"],
-                data=plugin.get("data"),
+                data=blob_store(session, f"bw_plugins:{plugin['id']}", plugin.get("data")),
                 checksum=plugin.get("checksum"),
                 icon=plugin.get("icon"),
             )
@@ -1034,7 +1058,8 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                 try:
                     plugin_page_content = create_plugin_tar_gz(path_ui)
                     checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-                    local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+                    content = blob_store(session, f"bw_plugin_pages:{plugin['id']}", plugin_page_content.getvalue())
+                    local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
                 except (FileNotFoundError, OSError) as e:
                     self.logger.warning(f"Some files in {path_ui} could not be archived: {e}")
 

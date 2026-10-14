@@ -6,13 +6,15 @@ skipped (page=False) so no real tar extraction is needed. Marked `slow`.
 """
 
 import tempfile
+from datetime import datetime
 from json import dumps
 from pathlib import Path
 
 import pytest
 
 from common_utils import create_plugin_tar_gz  # type: ignore
-from fixtures.seed import make_external_plugin
+from fixtures.seed import make_external_plugin, session
+from model import ResourceGroups, Templates  # type: ignore
 
 pytestmark = pytest.mark.slow
 
@@ -269,3 +271,121 @@ class TestCaseInsensitiveFlag:
         p2["settings"] = {"EVOLVE_PICK": _select_setting("evolve-pick", ["modern", "old"], case_insensitive=True)}
         db.update_external_plugins([p2], _type="external")
         assert next(pl for pl in db.get_plugins(_type="external") if pl["id"] == "evolve")["settings"]["EVOLVE_PICK"]["case_insensitive"] is True
+
+
+def _ids(db):
+    return sorted(plugin["id"] for plugin in db.get_plugins(_type="external"))
+
+
+def _methods(db):
+    return {plugin["id"]: plugin["method"] for plugin in db.get_plugins(_type="external")}
+
+
+class TestPreserveIds:
+    """``delete_missing`` deletes every row of the type that is absent from the incoming list. The
+    scheduler's scan only lists what changed on disk, so it names what it did not list in
+    ``preserve_ids`` (dev #3303)."""
+
+    @staticmethod
+    def _seed(db):
+        rows = [
+            make_external_plugin("changed", method="manual"),
+            make_external_plugin("quiet", method="manual"),
+            make_external_plugin("url", method="scheduler"),
+        ]
+        assert db.update_external_plugins(rows, _type="external", delete_missing=False) == ""
+        assert _ids(db) == ["changed", "quiet", "url"]
+
+    def test_without_it_a_partial_list_deletes_the_rest(self, db):
+        """T0 at the database layer: the hazard the argument exists for."""
+        self._seed(db)
+        assert db.update_external_plugins([make_external_plugin("changed", version="2.0", checksum="new")], _type="external", delete_missing=True) == ""
+        assert _ids(db) == ["changed"]
+
+    def test_the_named_ids_survive_with_their_settings(self, db):
+        self._seed(db)
+        incoming = [make_external_plugin("changed", version="2.0", checksum="new")]
+        assert db.update_external_plugins(incoming, _type="external", delete_missing=True, preserve_ids={"quiet", "url"}) == ""
+        assert _ids(db) == ["changed", "quiet", "url"]
+        assert "QUIET_GLOBAL" in next(p for p in db.get_plugins(_type="external") if p["id"] == "quiet")["settings"]
+
+    def test_an_id_that_is_neither_listed_nor_preserved_is_still_deleted(self, db):
+        self._seed(db)
+        incoming = [make_external_plugin("changed", version="2.0", checksum="new")]
+        assert db.update_external_plugins(incoming, _type="external", delete_missing=True, preserve_ids={"url"}) == ""
+        assert _ids(db) == ["changed", "url"]
+
+    def test_preserved_ids_do_not_weaken_the_empty_list_guard(self, db):
+        self._seed(db)
+        assert db.update_external_plugins([], _type="external", delete_missing=True, preserve_ids={"url"}) == ""
+        assert _ids(db) == ["changed", "quiet", "url"]
+
+    def test_an_unknown_preserved_id_is_harmless(self, db):
+        self._seed(db)
+        assert (
+            db.update_external_plugins([make_external_plugin("changed")], _type="external", delete_missing=True, preserve_ids={"quiet", "url", "ghost"}) == ""
+        )
+        assert _ids(db) == ["changed", "quiet", "url"]
+
+
+class TestSchedulerToDownloadTransition:
+    """The download job relabels a plugin it just installed from ``scheduler`` to ``download`` -- and
+    nothing else may change a plugin's method through this path (T7)."""
+
+    @staticmethod
+    def _seed(db, method):
+        assert db.update_external_plugins([make_external_plugin("urlplug", method=method)], _type="external", delete_missing=False) == ""
+        assert _methods(db) == {"urlplug": method}
+
+    def _sync(self, db, method, **kwargs):
+        plugin = make_external_plugin("urlplug", method=method, **kwargs)
+        assert db.update_external_plugins([plugin], _type="external", delete_missing=False) == ""
+
+    def test_scheduler_to_download_is_accepted(self, db):
+        self._seed(db, "scheduler")
+        self._sync(db, "download")
+        assert _methods(db) == {"urlplug": "download"}
+
+    @pytest.mark.parametrize("current", ["manual", "ui", "wizard", "api", "autoconf"])
+    def test_any_other_method_cannot_be_taken_over(self, db, current):
+        self._seed(db, current)
+        self._sync(db, "download")
+        assert _methods(db) == {"urlplug": current}
+
+    def test_download_back_to_scheduler_is_refused(self, db):
+        self._seed(db, "download")
+        self._sync(db, "scheduler")
+        assert _methods(db) == {"urlplug": "download"}
+
+    def test_a_download_row_keeps_updating_through_its_own_method(self, db):
+        self._seed(db, "download")
+        self._sync(db, "download", version="2.0", checksum="new")
+        assert next(p for p in db.get_plugins(_type="external") if p["id"] == "urlplug")["version"] == "2.0"
+
+    def test_the_plugins_templates_and_resource_groups_follow(self, db, monkeypatch, tmp_path):
+        monkeypatch.setattr(type(db), "_uep_resolve_plugin_dir", lambda self, plugin_id, _type: tmp_path)
+        (tmp_path / "templates").mkdir()
+        (tmp_path / "templates" / "flag.json").write_text(dumps({"name": "Flag", "settings": {}, "steps": []}))
+        self._seed(db, "scheduler")
+        now = datetime.now().astimezone()
+        with session(db) as s:
+            s.add(ResourceGroups(id="urlgroup", name="urlgroup", method="scheduler", plugin_id="urlplug", creation_date=now, last_update=now))
+            s.add(ResourceGroups(id="hand", name="hand", method="ui", plugin_id="urlplug", creation_date=now, last_update=now))
+        with session(db) as s:
+            assert s.get(Templates, "flag").method == "scheduler"
+
+        self._sync(db, "download")
+
+        with session(db) as s:
+            assert s.get(Templates, "flag").method == "download"
+            assert s.get(ResourceGroups, "urlgroup").method == "download"
+            assert s.get(ResourceGroups, "hand").method == "ui"  # the operator's own group is not the plugin's
+
+    def test_a_refused_transition_leaves_the_children_alone(self, db, monkeypatch, tmp_path):
+        monkeypatch.setattr(type(db), "_uep_resolve_plugin_dir", lambda self, plugin_id, _type: tmp_path)
+        (tmp_path / "templates").mkdir()
+        (tmp_path / "templates" / "flag.json").write_text(dumps({"name": "Flag", "settings": {}, "steps": []}))
+        self._seed(db, "manual")
+        self._sync(db, "download")
+        with session(db) as s:
+            assert s.get(Templates, "flag").method == "manual"

@@ -6,6 +6,7 @@ from mimetypes import guess_type
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
+from re import compile as re_compile
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -40,6 +41,8 @@ LOGGER = getLogger("DOWNLOAD-EXTERNAL-PLUGINS")
 # One URL's download, whatever it holds. The web UI's upload limit (UI_MAX_CONTENT_LENGTH) defaults
 # to the same 50 MiB, so an archive that installs through one path installs through the other.
 PLUGIN_DOWNLOAD_MAX = 50 * 1024 * 1024
+# The id names a directory under EXTERNAL_PLUGINS_DIR and comes from an archive: one path component, no leading dot.
+SAFE_PLUGIN_ID = re_compile(r"[\w-][\w.-]{0,63}")
 status = 0
 
 
@@ -145,6 +148,10 @@ def install_plugin(plugin_path: Path, db) -> bool:
         LOGGER.error(f"Skipping installation of plugin {plugin_path.name} (plugin.json is not valid) :\n{e}")
         return False
 
+    if not isinstance(metadata.get("id"), str) or not SAFE_PLUGIN_ID.fullmatch(metadata["id"]):
+        LOGGER.error(f"Skipping installation of plugin {plugin_path.name} (its id {metadata.get('id')!r} is not a valid plugin id)")
+        return False
+
     new_plugin_path = EXTERNAL_PLUGINS_DIR.joinpath(metadata["id"])
 
     # Don't go further if plugin is already installed
@@ -161,7 +168,8 @@ def install_plugin(plugin_path: Path, db) -> bool:
                 break
 
         if old_version == metadata["version"]:
-            if old_method != "scheduler":
+            # "scheduler" is how an earlier version labelled the plugins this job installed.
+            if old_method not in ("scheduler", "download"):
                 LOGGER.warning(
                     f"Skipping installation of plugin {metadata['id']} (version {metadata['version']} already installed by method {old_method or 'unknown'})"
                 )
@@ -182,20 +190,78 @@ def install_plugin(plugin_path: Path, db) -> bool:
     return True
 
 
+def _plugin_row(plugin_path: Path) -> dict:
+    """The ``update_external_plugins`` entry for an installed plugin directory, labelled as this job's."""
+    plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
+
+    with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
+        plugin_data = json_load(f)
+
+    plugin_data.update(
+        {
+            "type": "external",
+            "page": plugin_path.joinpath("ui").is_dir(),
+            "method": "download",
+            "data": plugin_content.getvalue(),
+            "checksum": bytes_hash(plugin_content, algorithm="sha256"),
+        }
+    )
+    return plugin_data
+
+
+def _prune_removed_plugins(db, seen_ids: set, *, allowed: bool) -> int:
+    """Uninstall the plugins this job installed whose URL is no longer in ``EXTERNAL_PLUGIN_URLS``.
+
+    Only rows the job itself labelled (type ``external`` AND method ``download``) are candidates, so a
+    hand-mounted ("manual"), UI-uploaded ("ui") or legacy ("scheduler") plugin is never touched; the
+    deletion is filtered on that method as well. With ``allowed`` false (a URL could not be read) the
+    candidates are only reported. Returns the number of plugins removed, or -1 when one could not be.
+    """
+    candidates = [
+        plugin["id"]
+        for plugin in db.get_plugins(_type="external", with_settings=False)
+        if plugin["type"] == "external" and plugin["method"] == "download" and plugin["id"] not in seen_ids
+    ]
+    if candidates and not allowed:
+        LOGGER.warning(
+            f"Plugin(s) {', '.join(candidates)} are not in EXTERNAL_PLUGIN_URLS anymore but are not removed: "
+            "a URL could not be read this run, so which plugins it carries is unknown. Fix the URL, or remove the plugin from the web UI."
+        )
+        return 0
+
+    removed = 0
+    failed = False
+    for plugin_id in candidates:
+        err = db.delete_plugin(plugin_id, "download")
+        if err:
+            LOGGER.error(f"Couldn't remove plugin {plugin_id}, its URL is no longer in EXTERNAL_PLUGIN_URLS: {err}")
+            failed = True
+            continue
+
+        if SAFE_PLUGIN_ID.fullmatch(plugin_id):
+            rmtree(EXTERNAL_PLUGINS_DIR.joinpath(plugin_id), ignore_errors=True)
+        LOGGER.info(f"Plugin {plugin_id} was removed: it was installed from an URL that is no longer in EXTERNAL_PLUGIN_URLS")
+        removed += 1
+    return -1 if failed else removed
+
+
 try:
     _cleanup_stale_plugin_dirs()
 
-    # Check if we have plugins to download
     plugin_urls = getenv("EXTERNAL_PLUGIN_URLS", "").strip()
     if not plugin_urls:
         LOGGER.info("No external plugins to download")
-        sys_exit(0)
 
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     plugin_nbr = 0
+    # Every plugin id found in an archive downloaded by this run, installed now or already there.
+    seen_ids = set()
+    # False when an archive could not be read as a list of plugins: what it carried is then unknown.
+    archives_readable = True
 
     # Loop on URLs
-    LOGGER.info(f"Downloading external plugins from {plugin_urls}...")
+    if plugin_urls:
+        LOGGER.info(f"Downloading external plugins from {plugin_urls}...")
     for plugin_url in plugin_urls.split():
         with BytesIO() as content:
             # Download Plugin file
@@ -278,7 +344,18 @@ try:
 
         # Install plugins
         try:
-            for plugin_path in list(temp_dir.rglob("**/plugin.json")):
+            found = list(temp_dir.rglob("**/plugin.json"))
+            if not found:
+                LOGGER.warning(f"No plugin.json found in {plugin_url}")
+                archives_readable = False
+            for plugin_path in found:
+                try:
+                    plugin_id = loads(plugin_path.read_text(encoding="utf-8"))["id"]
+                    if not isinstance(plugin_id, str) or not SAFE_PLUGIN_ID.fullmatch(plugin_id):
+                        raise ValueError(plugin_id)
+                    seen_ids.add(plugin_id)
+                except (OSError, ValueError, KeyError, TypeError):
+                    archives_readable = False
                 try:
                     if install_plugin(plugin_path.parent, db):
                         plugin_nbr += 1
@@ -289,47 +366,42 @@ try:
             LOGGER.error(f"Exception while installing plugin(s) from {plugin_url} :\n{e}")
             status = 2
 
-    if not plugin_nbr:
+    if plugin_nbr:
+        for plugin_path in EXTERNAL_PLUGINS_DIR.glob("*"):
+            if not plugin_path.joinpath("plugin.json").is_file():
+                LOGGER.warning(f"Plugin {plugin_path.name} is not valid, deleting it...")
+                rmtree(plugin_path, ignore_errors=True)
+
+    # Record what this run fetched, and nothing else: a plugin someone else installed ("manual", "ui") is not ours to
+    # write, and the ones nobody fetched are left to the scheduler's scan. When nothing was installed only the plugins
+    # that still need their label ("scheduler" rows from before the "download" method existed) or their row are synced.
+    stored = {plugin["id"]: plugin["method"] for plugin in db.get_plugins(_type="external", with_settings=False) if plugin["type"] == "external"}
+    external_plugins = [
+        _plugin_row(EXTERNAL_PLUGINS_DIR.joinpath(plugin_id))
+        for plugin_id in sorted(seen_ids)
+        if stored.get(plugin_id, "scheduler") in ("scheduler", "download")
+        and (plugin_nbr or stored.get(plugin_id) != "download")
+        and EXTERNAL_PLUGINS_DIR.joinpath(plugin_id, "plugin.json").is_file()
+    ]
+
+    if external_plugins:
+        # Not delete_missing: the rows to remove are chosen below, by method, not by absence from this list.
+        err = db.update_external_plugins(external_plugins, delete_missing=False, per_plugin_commit=False)
+
+        if err:
+            LOGGER.error(f"Couldn't update external plugins to database: {err}")
+            status = 2
+
+    # An URL that failed, or an archive that held no readable plugin, says nothing about which plugins its URL carries.
+    pruned = _prune_removed_plugins(db, seen_ids, allowed=status != 2 and archives_readable)
+    if pruned < 0:
+        status = 2
+        pruned = 0
+
+    if not (plugin_nbr or external_plugins or pruned):
         LOGGER.info("No external plugins to update to database")
         # `status`, not 0: a URL that failed above must still fail the job when nothing else installed.
         sys_exit(status)
-
-    external_plugins = []
-    external_plugins_ids = []
-    for plugin_path in EXTERNAL_PLUGINS_DIR.glob("*"):
-        if not plugin_path.joinpath("plugin.json").is_file():
-            LOGGER.warning(f"Plugin {plugin_path.name} is not valid, deleting it...")
-            rmtree(plugin_path, ignore_errors=True)
-            continue
-
-        plugin_content = create_plugin_tar_gz(plugin_path, arc_root=plugin_path.name)
-
-        with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
-            plugin_data = json_load(f)
-
-        checksum = bytes_hash(plugin_content, algorithm="sha256")
-        plugin_data.update(
-            {
-                "type": "external",
-                "page": plugin_path.joinpath("ui").is_dir(),
-                "method": "scheduler",
-                "data": plugin_content.getvalue(),
-                "checksum": checksum,
-            }
-        )
-
-        external_plugins.append(plugin_data)
-        external_plugins_ids.append(plugin_data["id"])
-
-    for plugin in db.get_plugins(_type="external", with_data=True):
-        if plugin["method"] != "scheduler" and plugin["id"] not in external_plugins_ids:
-            external_plugins.append(plugin)
-
-    err = db.update_external_plugins(external_plugins, per_plugin_commit=False)
-
-    if err:
-        LOGGER.error(f"Couldn't update external plugins to database: {err}")
-        status = 2
 
     status = max(status, 1)
     LOGGER.info("External plugins downloaded and installed")

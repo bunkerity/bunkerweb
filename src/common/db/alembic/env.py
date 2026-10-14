@@ -68,6 +68,7 @@ _VERSION_MESSAGE_RE = re.compile(r"Upgrade to version (\S+)")
 #   leaving PG as TIMESTAMP keeps schemas symmetric across backends
 _IGNORED_ALTER_COLUMNS = frozenset(
     {
+        ("bw_blob_chunks", "data"),
         ("bw_custom_configs", "data"),
         ("bw_jobs_cache", "data"),
         ("bw_plugin_pages", "data"),

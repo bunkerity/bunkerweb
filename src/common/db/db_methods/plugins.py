@@ -8,6 +8,7 @@ from model import Bw_cli_commands, Global_values, Jobs, Jobs_cache, Jobs_runs, M
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
+from .blobs import blob_load, blob_sweep
 from .common import DatabaseMixinBase, retry_on_transient_db_errors
 
 
@@ -21,6 +22,7 @@ class DatabasePluginsMixin(DatabaseMixinBase):
             if not plugin:
                 return f"Plugin with id {plugin_id} and method {method} not found"
 
+            plugin_type = plugin.type
             session.execute(delete(Plugins).filter_by(id=plugin_id, method=method))
             for db_setting in session.scalars(select(Settings).filter_by(plugin_id=plugin_id)).all():
                 session.execute(delete(Selects).filter_by(setting_id=db_setting.id))
@@ -44,15 +46,19 @@ class DatabasePluginsMixin(DatabaseMixinBase):
                 session.execute(delete(Template_custom_configs).filter_by(template_id=db_template.id))
                 session.execute(delete(Templates).filter_by(id=db_template.id))
 
+            # The plugin's archive, page and job caches may live in bw_blob_chunks, which no FK cascades into.
+            blob_sweep(session)
+
             if changes:
                 with suppress(ProgrammingError, OperationalError):
                     metadata = session.get(Metadata, 1)
                     if metadata is not None:
-                        if method in ("external", "ui"):
+                        # The plugin's type decides what to regenerate: its method (ui, manual, download ...) only says who installed it.
+                        if plugin_type in ("external", "ui"):
                             metadata.external_plugins_changed = True
                             metadata.last_external_plugins_change = datetime.now().astimezone()
                             metadata.reload_ui_plugins = True
-                        elif method == "pro":
+                        elif plugin_type == "pro":
                             metadata.pro_plugins_changed = True
                             metadata.last_pro_plugins_change = datetime.now().astimezone()
                             metadata.reload_ui_plugins = True
@@ -207,7 +213,13 @@ class DatabasePluginsMixin(DatabaseMixinBase):
                     "icon": plugin.icon,
                 }
                 if with_data:
-                    plugin_data["data"] = plugin.data
+                    plugin_data["data"] = blob_load(
+                        session,
+                        f"bw_plugins:{plugin.id}",
+                        plugin.data,
+                        self.logger,
+                        lambda plugin_id=plugin.id: session.scalar(select(Plugins.data).filter_by(id=plugin_id)),
+                    )
 
                 for setting in settings_map.get(plugin.id, []):
                     setting_data = {
@@ -267,7 +279,13 @@ class DatabasePluginsMixin(DatabaseMixinBase):
             if not page:
                 return None
 
-            return page.data
+            return blob_load(
+                session,
+                f"bw_plugin_pages:{plugin_id}",
+                page.data,
+                self.logger,
+                lambda: session.scalar(select(Plugin_pages.data).filter_by(plugin_id=plugin_id)),
+            )
 
     def get_plugin_icon(self, plugin_id: str) -> Optional[Tuple[str, Optional[str], Optional[bytes]]]:
         """Return ``(type, icon, data)`` for one plugin, or None when the plugin does not exist.
@@ -281,4 +299,11 @@ class DatabasePluginsMixin(DatabaseMixinBase):
             row = session.execute(select(Plugins.type, Plugins.icon, Plugins.data).filter_by(id=plugin_id).limit(1)).first()
             if row is None:
                 return None
-            return row.type, row.icon, row.data
+            data = blob_load(
+                session,
+                f"bw_plugins:{plugin_id}",
+                row.data,
+                self.logger,
+                lambda: session.scalar(select(Plugins.data).filter_by(id=plugin_id)),
+            )
+            return row.type, row.icon, data

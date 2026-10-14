@@ -134,7 +134,7 @@ def update_external_plugins(payload: UpdateExternalPluginsRequest) -> JSONRespon
     """Bulk update external/pro plugins in the database.
 
     Args:
-        payload: Plugin list, type, and delete_missing flag
+        payload: Plugin list, type, delete_missing flag and the ids delete_missing must spare
     """
     # Plugin archive bytes arrive base64-encoded over JSON (the DB layer expects raw bytes).
     for plugin in payload.plugins:
@@ -144,7 +144,9 @@ def update_external_plugins(payload: UpdateExternalPluginsRequest) -> JSONRespon
                 plugin["data"] = b64decode(data)
             except (BinasciiError, ValueError):
                 return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid base64 data for plugin {plugin.get('id', '?')!r}"})
-    ret = get_db().update_external_plugins(payload.plugins, _type=payload.plugin_type, delete_missing=payload.delete_missing)
+    ret = get_db().update_external_plugins(
+        payload.plugins, _type=payload.plugin_type, delete_missing=payload.delete_missing, preserve_ids=set(payload.preserve_ids)
+    )
     if ret:
         return JSONResponse(status_code=500, content={"status": "error", "message": str(ret)})
     return JSONResponse(status_code=200, content={"status": "success"})

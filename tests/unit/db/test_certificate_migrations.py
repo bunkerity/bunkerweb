@@ -14,10 +14,10 @@ from db.alembic_baseline import ALEMBIC, BASELINE_VERSION, baseline_metadata, re
 
 FIXED_DT = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
 HEADS = {
-    "sqlite": "bebc25cf5351",
-    "mariadb": "b1393796d0e8",
-    "mysql": "6b5c00e7b293",
-    "postgresql": "7b979831b042",
+    "sqlite": "bf57ee41c5e5",
+    "mariadb": "26f3603e4293",
+    "mysql": "b9e22ee1783a",
+    "postgresql": "a7c60e38d32a",
 }
 
 

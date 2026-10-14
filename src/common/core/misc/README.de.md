@@ -256,7 +256,7 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
     | Einstellung             | Standard | Kontext | Mehrfach | Beschreibung                                                                                  |
     | ----------------------- | -------- | ------- | -------- | --------------------------------------------------------------------------------------------- |
     | `SEND_ANONYMOUS_REPORT` | `yes`    | global  | nein     | **Anonyme Berichte:** Senden Sie anonyme Nutzungsberichte an die BunkerWeb-Maintainer.        |
-    | `EXTERNAL_PLUGIN_URLS`  |          | global  | nein     | **Externe Plugins:** URLs für externe Plugins zum Herunterladen (durch Leerzeichen getrennt). Höchstens 50 MiB pro URL; `#sha256=<digest>` anhängen, um den Inhalt zu pinnen; einfaches `http://` ist veraltet und wird ab 1.7.0 final abgelehnt. |
+    | `EXTERNAL_PLUGIN_URLS`  |          | global  | nein     | **Externe Plugins:** URLs für externe Plugins zum Herunterladen (durch Leerzeichen getrennt). Höchstens 50 MiB pro URL; `#sha256=<digest>` anhängen, um den Inhalt zu pinnen; einfaches `http://` ist veraltet und wird ab 1.7.0 final abgelehnt. Das Entfernen einer URL deinstalliert die davon stammenden Plugins samt ihren gespeicherten Werten, sobald alle übrigen URLs heruntergeladen werden; von Hand hinzugefügte oder in der Web-Oberfläche hochgeladene Plugins werden nie entfernt. |
 
 === "Datei-Caching"
 
