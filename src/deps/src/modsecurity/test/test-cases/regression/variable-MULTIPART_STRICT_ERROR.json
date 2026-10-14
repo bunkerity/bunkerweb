@@ -16,28 +16,28 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "508",
+        "Content-Length": "523",
         "Content-Type": "multipart/form-data; boundary= ------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "--------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "--------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "--------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is another very small test file..\n",
-        "--------------------------756b6d74fa1a8ee2--\n"
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is another very small test file..\r\n",
+        "--------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {
@@ -475,6 +475,388 @@
       "SecRuleEngine On",
       "SecRule MULTIPART_INVALID_QUOTING \"!@eq 0\" \"id:1,phase:2,deny,status:403\"",
       "SecRule MULTIPART_STRICT_ERROR \"!@eq 0\" \"id:2,phase:2,pass\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_STRICT_ERROR with duplicate CT header",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "178",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF-8''shell.php\r\n",
+        "Content-Type: image/jpeg\r\n",
+        "Content-Type: application/x-php\r\n",
+        "\r\n",
+        "<?php system($_GET['c']); ?>\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Multipart: Duplicate part header: Content-Type.",
+      "error_log": "Multipart request body failed strict validation: DH 1",
+      "http_code": 400
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_STRICT_ERROR \"!@eq 0\" \"id:'200003',phase:2,t:none,log,deny,status:400,msg:'Multipart request body failed strict validation: DH %{MULTIPART_DUPLICATE_PART_HEADER}'\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "multipart Content-Disposition filename* invalid syntax",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "349",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\n",
+        "Content-Disposition: form-data; name=\"name\"\n",
+        "\n",
+        "test\n",
+        "----------------------------756b6d74fa1a8ee2\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=UTF-8'03CB1664.txt\n",
+        "Content-Type: text/plain\n",
+        "\n",
+        "This is a very small test file..\n",
+        "----------------------------756b6d74fa1a8ee2--\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": "Multipart: Invalid Content-Disposition header \\(-17",
+      "error_log": "Multipart request body failed strict validation: IQ 1",
+      "http_code": 400
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule MULTIPART_STRICT_ERROR \"!@eq 0\" \"id:'200003',phase:2,t:none,log,deny,status:400,msg:'Multipart request body failed strict validation: IQ %{MULTIPART_INVALID_QUOTING}'\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "multipart Content-Disposition duplicate filename",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "157",
+        "Content-Type": "multipart/form-data; boundary=AaB03x",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--AaB03x\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename=\"safe.jpg\"; filename=\"safe.php\"\r\n",
+        "Content-Type: application/octet-stream\r\n",
+        "\r\n",
+        "test\r\n",
+        "--AaB03x--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": "Multipart: Invalid Content-Disposition header \\(\\-15\\): form-data; name=\"file\"; filename=\"safe.jpg\"; filename=\"safe.php\"",
+      "error_log": "data \"PE 1, BQ 0, BW 0, DB 0, DA 0, DH 1, HF 0, LF 0, SM 0, IQ 0, IP 1",
+      "http_code": 400
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecAction \"id:990100,phase:2,pass,log,t:none,msg:'PARSER_STATE',logdata:'PE %{REQBODY_PROCESSOR_ERROR}, BQ %{MULTIPART_BOUNDARY_QUOTED}, BW %{MULTIPART_BOUNDARY_WHITESPACE}, DB %{MULTIPART_DATA_BEFORE}, DA %{MULTIPART_DATA_AFTER}, DH %{MULTIPART_DUPLICATE_PART_HEADER}, HF %{MULTIPART_HEADER_FOLDING}, LF %{MULTIPART_LF_LINE}, SM %{MULTIPART_MISSING_SEMICOLON}, IQ %{MULTIPART_INVALID_QUOTING}, IP %{MULTIPART_INVALID_PART}, IH %{MULTIPART_INVALID_HEADER_FOLDING}, FL %{MULTIPART_FILE_LIMIT_EXCEEDED}'\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:990101,phase:2,deny,status:400,log,t:none\"",
+      "SecRule MULTIPART_STRICT_ERROR \"!@eq 0\" \"id:990102,phase:2,deny,status:400,log,t:none\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "multipart Content-Disposition duplicate filename*",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "167",
+        "Content-Type": "multipart/form-data; boundary=AaB03x",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--AaB03x\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF8''safe.jpg; filename*=UTF8''safe.php\r\n",
+        "Content-Type: application/octet-stream\r\n",
+        "\r\n",
+        "test\r\n",
+        "--AaB03x--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": "Multipart: Invalid Content-Disposition header \\(\\-15\\): form-data; name=\"file\"; filename\\*=UTF8''safe.jpg; filename\\*=UTF8''safe.php",
+      "error_log": "data \"PE 1, BQ 0, BW 0, DB 0, DA 0, DH 1, HF 0, LF 0, SM 0, IQ 0, IP 1",
+      "http_code": 400
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecAction \"id:990100,phase:2,pass,log,t:none,msg:'PARSER_STATE',logdata:'PE %{REQBODY_PROCESSOR_ERROR}, BQ %{MULTIPART_BOUNDARY_QUOTED}, BW %{MULTIPART_BOUNDARY_WHITESPACE}, DB %{MULTIPART_DATA_BEFORE}, DA %{MULTIPART_DATA_AFTER}, DH %{MULTIPART_DUPLICATE_PART_HEADER}, HF %{MULTIPART_HEADER_FOLDING}, LF %{MULTIPART_LF_LINE}, SM %{MULTIPART_MISSING_SEMICOLON}, IQ %{MULTIPART_INVALID_QUOTING}, IP %{MULTIPART_INVALID_PART}, IH %{MULTIPART_INVALID_HEADER_FOLDING}, FL %{MULTIPART_FILE_LIMIT_EXCEEDED}'\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:990101,phase:2,deny,status:400,log,t:none\"",
+      "SecRule MULTIPART_STRICT_ERROR \"!@eq 0\" \"id:990102,phase:2,deny,status:400,log,t:none\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "multipart Content-Disposition duplicate filename after filename*",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "183",
+        "Content-Type": "multipart/form-data; boundary=AaB03x",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--AaB03x\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF8''safe.jpg; filename=\"safe.jpg\"; filename=\"safe.php\"\r\n",
+        "Content-Type: application/octet-stream\r\n",
+        "\r\n",
+        "test\r\n",
+        "--AaB03x--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "debug_log": "Multipart: Invalid Content-Disposition header \\(\\-15\\): form-data; name=\"file\"; filename\\*=UTF8''safe.jpg; filename=\"safe.jpg\"; filename=\"safe.php\"",
+      "error_log": "data \"PE 1, BQ 0, BW 0, DB 0, DA 0, DH 1, HF 0, LF 0, SM 0, IQ 0, IP 1",
+      "http_code": 400
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecAction \"id:990100,phase:2,pass,log,t:none,msg:'PARSER_STATE',logdata:'PE %{REQBODY_PROCESSOR_ERROR}, BQ %{MULTIPART_BOUNDARY_QUOTED}, BW %{MULTIPART_BOUNDARY_WHITESPACE}, DB %{MULTIPART_DATA_BEFORE}, DA %{MULTIPART_DATA_AFTER}, DH %{MULTIPART_DUPLICATE_PART_HEADER}, HF %{MULTIPART_HEADER_FOLDING}, LF %{MULTIPART_LF_LINE}, SM %{MULTIPART_MISSING_SEMICOLON}, IQ %{MULTIPART_INVALID_QUOTING}, IP %{MULTIPART_INVALID_PART}, IH %{MULTIPART_INVALID_HEADER_FOLDING}, FL %{MULTIPART_FILE_LIMIT_EXCEEDED}'\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:990101,phase:2,deny,status:400,log,t:none\"",
+      "SecRule MULTIPART_STRICT_ERROR \"!@eq 0\" \"id:990102,phase:2,deny,status:400,log,t:none\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME* with invalid encoded name",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "145",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=UTF-8''Math+physics%20v1.pdf%ZZ\r\n",
+        "Content-Type: application/pdf\r\n",
+        "\r\n",
+        "%PDF-1.7\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Invalid Content-Disposition header \\(-18\\): form-data; name=\"file\"; filename\\*=UTF-8''Math\\+physics%20v1\\.pdf%ZZ",
+      "error_log": "data \"PE 1, BQ 0, BW 0, DB 0, DA 0, DH 1, HF 0, LF 0, SM 0, IQ 0, IP 1",
+      "http_code": 400
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecAction \"id:990100,phase:2,pass,log,t:none,msg:'PARSER_STATE',logdata:'PE %{REQBODY_PROCESSOR_ERROR}, BQ %{MULTIPART_BOUNDARY_QUOTED}, BW %{MULTIPART_BOUNDARY_WHITESPACE}, DB %{MULTIPART_DATA_BEFORE}, DA %{MULTIPART_DATA_AFTER}, DH %{MULTIPART_DUPLICATE_PART_HEADER}, HF %{MULTIPART_HEADER_FOLDING}, LF %{MULTIPART_LF_LINE}, SM %{MULTIPART_MISSING_SEMICOLON}, IQ %{MULTIPART_INVALID_QUOTING}, IP %{MULTIPART_INVALID_PART}, IH %{MULTIPART_INVALID_HEADER_FOLDING}, FL %{MULTIPART_FILE_LIMIT_EXCEEDED}'\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:990101,phase:2,deny,status:400,log,t:none\"",
+      "SecRule MULTIPART_STRICT_ERROR \"!@eq 0\" \"id:990102,phase:2,deny,status:400,log,t:none\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: MULTIPART_FILENAME* with invalid quoted name",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "144",
+        "Content-Type": "multipart/form-data; boundary=b",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "--b\r\n",
+        "Content-Disposition: form-data; name=\"file\"; filename*=\"UTF-8''Math+physics%20v1.pdf\"\r\n",
+        "Content-Type: application/pdf\r\n",
+        "\r\n",
+        "%PDF-1.7\r\n",
+        "\r\n",
+        "--b--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "debug_log": "Invalid Content-Disposition header \\(-16\\): form-data; name=\"file\"; filename\\*=\"UTF-8''Math\\+physics%20v1\\.pdf\"",
+      "error_log": "data \"PE 1, BQ 0, BW 0, DB 0, DA 0, DH 1, HF 0, LF 0, SM 0, IQ 0, IP 1",
+      "http_code": 400
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecAction \"id:990100,phase:2,pass,log,t:none,msg:'PARSER_STATE',logdata:'PE %{REQBODY_PROCESSOR_ERROR}, BQ %{MULTIPART_BOUNDARY_QUOTED}, BW %{MULTIPART_BOUNDARY_WHITESPACE}, DB %{MULTIPART_DATA_BEFORE}, DA %{MULTIPART_DATA_AFTER}, DH %{MULTIPART_DUPLICATE_PART_HEADER}, HF %{MULTIPART_HEADER_FOLDING}, LF %{MULTIPART_LF_LINE}, SM %{MULTIPART_MISSING_SEMICOLON}, IQ %{MULTIPART_INVALID_QUOTING}, IP %{MULTIPART_INVALID_PART}, IH %{MULTIPART_INVALID_HEADER_FOLDING}, FL %{MULTIPART_FILE_LIMIT_EXCEEDED}'\"",
+      "SecRule REQBODY_ERROR \"!@eq 0\" \"id:990101,phase:2,deny,status:400,log,t:none\"",
+      "SecRule MULTIPART_STRICT_ERROR \"!@eq 0\" \"id:990102,phase:2,deny,status:400,log,t:none\""
     ]
   }
 ]

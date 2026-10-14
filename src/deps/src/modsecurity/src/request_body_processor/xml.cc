@@ -43,7 +43,8 @@ XMLNodes::XMLNodes(Transaction *transaction)
     currpath(""),
     currval(""),
     currval_is_set(false),
-    m_transaction(transaction)
+    m_transaction(transaction),
+    parsing_ctx_arg(NULL)
     {}
 
 XMLNodes::~XMLNodes() {};
@@ -87,7 +88,8 @@ class MSCSAXHandler {
                 // check the return value
                 // if false, then stop parsing
                 // this means the number of arguments reached the limit
-                if (xml_data->m_transaction->addArgument("XML", xml_data->currpath, xml_data->currval, 0) == false) {
+                if (xml_data->m_transaction->addArgument("XML", xml_data->currpath, xml_data->currval, 0) == false
+		        && xml_data->parsing_ctx_arg != NULL) {
                     xmlStopParser(xml_data->parsing_ctx_arg);
                 }
             }
@@ -269,6 +271,10 @@ bool XML::processChunk(const char *buf, unsigned int size,
             }
             // disable parser errors being printed to stderr
             m_data.parsing_ctx_arg->options |= XML_PARSE_NOWARNING | XML_PARSE_NOERROR;
+            // the SAX callback (onEndElement) stops parsing through this
+            // context when SecArgumentsLimit is hit; it must be set here,
+            // not only in the multi-chunk branch below.
+            m_data.xml_parser_state->parsing_ctx_arg = m_data.parsing_ctx_arg;
         }
 
         return true;

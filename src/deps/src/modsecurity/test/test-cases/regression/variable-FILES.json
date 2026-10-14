@@ -2,7 +2,7 @@
   {
     "enabled": 1,
     "version_min": 300000,
-    "title": "Testing Variables :: FILES (1/2)",
+    "title": "Testing Variables :: FILES (1/5)",
     "client": {
       "ip": "200.249.12.31",
       "port": 123
@@ -16,28 +16,28 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "516",
+        "Content-Length": "531",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is another very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2--\n"
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is another very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {
@@ -63,7 +63,7 @@
   {
     "enabled": 1,
     "version_min": 300000,
-    "title": "Testing Variables :: FILES (2/2)",
+    "title": "Testing Variables :: FILES (2/5)",
     "client": {
       "ip": "200.249.12.31",
       "port": 123
@@ -77,28 +77,28 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "502",
+        "Content-Length": "517",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata1\"; filename=\"myfile.txt\"\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata2\"; filename=\"nextfile.txt\"\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is another very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2--\n"
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata1\"; filename=\"myfile.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata2\"; filename=\"nextfile.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is another very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {
@@ -118,6 +118,166 @@
     "rules": [
       "SecRuleEngine On",
       "SecRule FILES:filedata1 \"@contains myfile.txt\" \"id:1,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: FILES (3/5)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "515",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"myfile.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"nextfile.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is another very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule FILES:filedata \"@contains myfile.txt\" \"id:1,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: FILES (4/5)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "198",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"upload\"; filename=\"safe.jpg\"; filename*=UTF-8''shell.php\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule FILES \"@rx .*\\.ph(?:p\\d*|tml|ar|ps|t|pt)\\.*$\" \"id:1,phase:2,deny,status:403\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "Testing Variables :: FILES (5/5)",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 123
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "200",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect": "100-continue"
+      },
+      "uri": "/",
+      "method": "POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"upload\"; filename=\"safe.jpg\"; filename*=UTF-8''shell.%70hp\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
+      ]
+    },
+    "response": {
+      "headers": {
+        "Date": "Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified": "Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type": "text/html",
+        "Content-Length": "8"
+      },
+      "body": [
+        "no need."
+      ]
+    },
+    "expected": {
+      "http_code": 403
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule FILES \"@rx .*\\.ph(?:p\\d*|tml|ar|ps|t|pt)\\.*$\" \"id:1,phase:2,deny,status:403\""
     ]
   }
 ]

@@ -34,7 +34,7 @@ $ cmake --build . -j$(nproc)
 
 ```shell
 $ mkdir -p fuzz_mmdb_seed fuzz_mmdb_seed_corpus
-$ find ../t/maxmind-db/test-data/ -type f -size -4k -exec cp {} ./fuzz_mmdb_seed_corpus/ \;
+$ find ../t/maxmind-db/test-data/ -type f -size -256k -exec cp {} ./fuzz_mmdb_seed_corpus/ \;
 $ ./t/fuzz_mmdb fuzz_mmdb_seed/ fuzz_mmdb_seed_corpus/
 ```
 

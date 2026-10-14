@@ -16,23 +16,23 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "350",
+        "Content-Length": "360",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=utf-8''03CB1664.txt\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2--\n"
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=utf-8''03CB1664.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {
@@ -69,23 +69,23 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "354",
+        "Content-Length": "364",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename*= ISO-8859-1''ab0-_xy.txt; filename=\"ab0-_xy.txt\"\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2--\n"
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename*= ISO-8859-1''ab0-_xy.txt; filename=\"ab0-_xy.txt\"\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {
@@ -122,22 +122,22 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "326",
+        "Content-Length": "335",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename*=utf-8''03CB1664.txt\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename*=utf-8''03CB1664.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
         "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
@@ -150,18 +150,18 @@
       ]
     },
     "expected": {
-      "debug_log": "Warning: no filename= but filename*",
-      "http_code": 200
+      "debug_log": "Target value: \"03CB1664.txt\" \\(Variable: MULTIPART_FILENAME:filedata\\)",
+      "http_code": 403
     },
     "rules": [
       "SecRuleEngine On",
-      "SecRule MULTIPART_FILENAME \"@contains 0\" \"id:1,phase:2,pass,t:trim\""
+      "SecRule MULTIPART_FILENAME \"@eq 03CB1664.txt\" \"id:1,phase:2,deny,t:trim\""
     ]
   },
   {
     "enabled": 1,
     "version_min": 300000,
-    "title": "multipart Content-Disposition should allow filename* field (4/7)",
+    "title": "multipart Content-Disposition filename* field expects charset (4/7)",
     "client": {
       "ip": "200.249.12.31",
       "port": 123
@@ -175,23 +175,23 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "345",
+        "Content-Length": "355",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=''03CB1664.txt\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2--\n"
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=''03CB1664.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {
@@ -214,7 +214,7 @@
   {
     "enabled": 1,
     "version_min": 300000,
-    "title": "multipart Content-Disposition should allow filename* field (5/7)",
+    "title": "multipart Content-Disposition filename* invalid syntax (5/7)",
     "client": {
       "ip": "200.249.12.31",
       "port": 123
@@ -228,23 +228,23 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "349",
+        "Content-Length": "359",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=UTF-8'03CB1664.txt\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2--\n"
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=UTF-8'03CB1664.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {
@@ -267,7 +267,7 @@
   {
     "enabled": 1,
     "version_min": 300000,
-    "title": "multipart Content-Disposition should allow filename* field (6/7)",
+    "title": "multipart Content-Disposition filename* value can contain hexa chars (6/7)",
     "client": {
       "ip": "200.249.12.31",
       "port": 123
@@ -281,23 +281,23 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "348",
+        "Content-Length": "358",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=utf-8''%61%4G.txt\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2--\n"
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=utf-8''%61%4G.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {
@@ -334,23 +334,23 @@
         "Host": "localhost",
         "User-Agent": "curl/7.38.0",
         "Accept": "*/*",
-        "Content-Length": "348",
+        "Content-Length": "358",
         "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
         "Expect": "100-continue"
       },
       "uri": "/",
       "method": "POST",
       "body": [
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"name\"\n",
-        "\n",
-        "test\n",
-        "----------------------------756b6d74fa1a8ee2\n",
-        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=utf-8''%61%62.txt\n",
-        "Content-Type: text/plain\n",
-        "\n",
-        "This is a very small test file..\n",
-        "----------------------------756b6d74fa1a8ee2--\n"
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"name\"\r\n",
+        "\r\n",
+        "test\r\n",
+        "----------------------------756b6d74fa1a8ee2\r\n",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"03CB1664.txt\"; filename*=utf-8''%61%62.txt\r\n",
+        "Content-Type: text/plain\r\n",
+        "\r\n",
+        "This is a very small test file..\r\n",
+        "----------------------------756b6d74fa1a8ee2--\r\n"
       ]
     },
     "response": {

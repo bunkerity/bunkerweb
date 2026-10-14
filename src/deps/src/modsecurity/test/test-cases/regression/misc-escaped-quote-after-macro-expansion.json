@@ -1,0 +1,222 @@
+[
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "logdata: escaped single quote immediately after a %{macro} does not truncate the action value",
+    "url": "https://github.com/coreruleset/traffic-observation-plugin/actions/runs/35602944525/job/106343176175",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
+      },
+      "uri": "/test",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "error_log": "\\\\x5c'Method\\\\x5c' : \\\\x5c'GET\\\\x5c', \\\\x5c'Protocol\\\\x5c' : \\\\x5c'HTTP/1\\.1\\\\x5c'",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_METHOD \"@unconditionalMatch\" \"phase:1,id:10003,log,pass,msg:'test',logdata:'\\'Method\\' : \\'%{REQUEST_METHOD}\\', \\'Protocol\\' : \\'%{REQUEST_PROTOCOL}\\''\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "action value: escaped double quote immediately after a %{macro} does not truncate the action value",
+    "url": "https://github.com/coreruleset/traffic-observation-plugin/actions/runs/35602944525/job/106343176175",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
+      },
+      "uri": "/test",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "error_log": "\\\\x5c\\\\x22Method\\\\x5c\\\\x22 : \\\\x5c\\\\x22GET\\\\x5c\\\\x22, \\\\x5c\\\\x22Protocol\\\\x5c\\\\x22 : \\\\x5c\\\\x22HTTP/1\\.1\\\\x5c\\\\x22",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_METHOD \"@unconditionalMatch\" \"phase:1,id:10004,log,pass,msg:'test',logdata:\"\\\"Method\\\" : \\\"%{REQUEST_METHOD}\\\", \\\"Protocol\\\" : \\\"%{REQUEST_PROTOCOL}\\\"\"\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "logdata: an odd-length backslash run (3) before the quote right after a %{macro} is still an escaped quote, not a terminator",
+    "url": "https://github.com/owasp-modsecurity/ModSecurity/pull/3641#pullrequestreview",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
+      },
+      "uri": "/test",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "error_log": "value=GET\\\\x5c\\\\x5c\\\\x5c'end",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_METHOD \"@unconditionalMatch\" \"phase:1,id:10005,log,pass,logdata:'value=%{REQUEST_METHOD}\\\\\\'end'\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "action value: an odd-length backslash run (3) before the double quote right after a %{macro} is still an escaped quote, not a terminator",
+    "url": "https://github.com/owasp-modsecurity/ModSecurity/pull/3641#pullrequestreview",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
+      },
+      "uri": "/test",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "error_log": "value=GET\\\\x5c\\\\x5c\\\\x5c\\\\x22end",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_METHOD \"@unconditionalMatch\" \"phase:1,id:10006,log,pass,logdata:\"value=%{REQUEST_METHOD}\\\\\\\"end\"\""
+    ]
+  },
+  {
+    "enabled": 1,
+    "version_min": 300000,
+    "title": "msg (unquoted action value): escaped double quote immediately after a %{macro} does not truncate the action value",
+    "url": "https://github.com/owasp-modsecurity/ModSecurity/pull/3641#pullrequestreview",
+    "client": {
+      "ip": "200.249.12.31",
+      "port": 2313
+    },
+    "server": {
+      "ip": "200.249.12.31",
+      "port": 80
+    },
+    "request": {
+      "headers": {
+        "Host": "localhost",
+        "User-Agent": "curl/7.38.0",
+        "Accept": "*/*",
+        "Content-Length": "0"
+      },
+      "uri": "/test",
+      "method": "GET",
+      "http_version": 1.1,
+      "body": [
+        ""
+      ]
+    },
+    "response": {
+      "headers": {
+        "Content-Length": "0"
+      },
+      "body": [
+        ""
+      ]
+    },
+    "expected": {
+      "error_log": "prefixGET\\\\\"suffix",
+      "http_code": 200
+    },
+    "rules": [
+      "SecRuleEngine On",
+      "SecRule REQUEST_METHOD \"@unconditionalMatch\" \"phase:1,id:10007,log,pass,msg:prefix%{REQUEST_METHOD}\\\"suffix\""
+    ]
+  }
+]

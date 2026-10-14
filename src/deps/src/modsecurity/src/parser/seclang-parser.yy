@@ -193,8 +193,11 @@ class Driver;
 #include "src/variables/multipart_crlf_lf_lines.h"
 #include "src/variables/multipart_data_after.h"
 #include "src/variables/multipart_data_before.h"
+#include "src/variables/multipart_duplicate_part_header.h"
 #include "src/variables/multipart_file_limit_exceeded.h"
 #include "src/variables/multipart_file_name.h"
+#include "src/variables/multipart_file_name_charset.h"
+#include "src/variables/multipart_file_name_language.h"
 #include "src/variables/multipart_header_folding.h"
 #include "src/variables/multipart_invalid_header_folding.h"
 #include "src/variables/multipart_invalid_part.h"
@@ -349,6 +352,8 @@ using namespace modsecurity::operators;
   VARIABLE_FILES_NAMES
   VARIABLE_FILES_TMP_CONTENT
   VARIABLE_MULTIPART_FILENAME
+  VARIABLE_MULTIPART_FILENAME_CHARSET
+  VARIABLE_MULTIPART_FILENAME_LANGUAGE
   VARIABLE_MULTIPART_NAME
   VARIABLE_MATCHED_VARS_NAMES
   VARIABLE_MATCHED_VARS
@@ -379,6 +384,7 @@ using namespace modsecurity::operators;
   VARIABLE_MULTIPART_CRLF_LF_LINES    "MULTIPART_CRLF_LF_LINES"
   VARIABLE_MULTIPART_DATA_AFTER "MULTIPART_DATA_AFTER"
   VARIABLE_MULTIPART_DATA_BEFORE
+  VARIABLE_MULTIPART_DUPLICATE_PART_HEADER "MULTIPART_DUPLICATE_PART_HEADER"
   VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED       "MULTIPART_FILE_LIMIT_EXCEEDED"
   VARIABLE_MULTIPART_HEADER_FOLDING            "MULTIPART_HEADER_FOLDING"
   VARIABLE_MULTIPART_INVALID_HEADER_FOLDING    "MULTIPART_INVALID_HEADER_FOLDING"
@@ -2017,6 +2023,30 @@ var:
       {
         VARIABLE_CONTAINER($$, new variables::MultiPartFileName_NoDictElement());
       }
+    | VARIABLE_MULTIPART_FILENAME_CHARSET DICT_ELEMENT
+      {
+        VARIABLE_CONTAINER($$, new variables::MultiPartFileNameCharset_DictElement($2));
+      }
+    | VARIABLE_MULTIPART_FILENAME_CHARSET DICT_ELEMENT_REGEXP
+      {
+        VARIABLE_CONTAINER($$, new variables::MultiPartFileNameCharset_DictElementRegexp($2));
+      }
+    | VARIABLE_MULTIPART_FILENAME_CHARSET
+      {
+        VARIABLE_CONTAINER($$, new variables::MultiPartFileNameCharset_NoDictElement());
+      }
+    | VARIABLE_MULTIPART_FILENAME_LANGUAGE DICT_ELEMENT
+      {
+        VARIABLE_CONTAINER($$, new variables::MultiPartFileNameLanguage_DictElement($2));
+      }
+    | VARIABLE_MULTIPART_FILENAME_LANGUAGE DICT_ELEMENT_REGEXP
+      {
+        VARIABLE_CONTAINER($$, new variables::MultiPartFileNameLanguage_DictElementRegexp($2));
+      }
+    | VARIABLE_MULTIPART_FILENAME_LANGUAGE
+      {
+        VARIABLE_CONTAINER($$, new variables::MultiPartFileNameLanguage_NoDictElement());
+      }
     | VARIABLE_MULTIPART_NAME DICT_ELEMENT
       {
         VARIABLE_CONTAINER($$, new variables::MultiPartName_DictElement($2));
@@ -2408,6 +2438,10 @@ var:
     | VARIABLE_MULTIPART_DATA_BEFORE
       {
         VARIABLE_CONTAINER($$, new variables::MultipartDateBefore());
+      }
+    | VARIABLE_MULTIPART_DUPLICATE_PART_HEADER
+      {
+        VARIABLE_CONTAINER($$, new variables::MultipartDuplicatePartHeader());
       }
     | VARIABLE_MULTIPART_FILE_LIMIT_EXCEEDED
       {

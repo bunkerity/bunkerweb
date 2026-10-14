@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {{- $title := or .Title .File.BaseFileName -}}
+    <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ $title }} | {{ .Site.Title }}{{ end }}</title>
+    {{- $css := resources.Get "css/main.css" | fingerprint -}}
+    <link
+      rel="stylesheet"
+      href="{{ $css.RelPermalink }}"
+      integrity="{{ $css.Data.Integrity }}"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <nav class="page-nav">
+      <a href="{{ .Site.Home.RelPermalink }}"{{ if .IsHome }} class="active" aria-current="page"{{ end }}>{{ .Site.Title }}</a>
+      {{ range .Site.RegularPages }}
+      <a href="{{ .RelPermalink }}"{{ if eq $.RelPermalink .RelPermalink }} class="active" aria-current="page"{{ end }}>{{ or .Title .File.BaseFileName }}</a>
+      {{ end }}
+    </nav>
+    <main>
+      {{ .Content }}
+    </main>
+  </body>
+</html>
