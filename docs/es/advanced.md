@@ -1068,6 +1068,9 @@ Estos son los tipos de configuraciones personalizadas disponibles:
 - **stream**: Configuraciones a nivel de Stream de NGINX.
 - **server-stream**: Configuraciones a nivel de Stream/Servidor de NGINX.
 
+!!! note "ModSecurity 3.0.17: claves de `MULTIPART_FILENAME`"
+    Desde ModSecurity v3.0.17, las entradas de `MULTIPART_FILENAME` se indexan por el **nombre del campo del formulario**, no por el nombre del archivo. Una regla personalizada `modsec`, `modsec-crs`, `crs-plugins-before` o `crs-plugins-after` que seleccionaba el nombre de un archivo subido por su propia clave debe ahora seleccionarlo por el nombre del campo (por ejemplo `MULTIPART_FILENAME:upload` para `<input type="file" name="upload">`).
+
 Las configuraciones personalizadas se pueden aplicar globalmente o específicamente para un servidor en particular, dependiendo del contexto aplicable y de si el [modo multisitio](features.md#multisite-mode) está habilitado.
 
 El método para aplicar configuraciones personalizadas depende de la integración que se esté utilizando. Sin embargo, el proceso subyacente implica añadir archivos con el sufijo `.conf` a carpetas específicas. Para aplicar una configuración personalizada para un servidor específico, el archivo debe colocarse en una subcarpeta con el nombre del servidor principal.

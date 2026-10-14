@@ -589,6 +589,10 @@ The **Jobs** page can show a third run outcome besides the ordinary green Succes
 
 The first deferral after a successful run also raises a dismissible warning banner at the top of every page, distinct from the existing (and more serious) "push failed" banner, so a fleet that is merely waiting for an instance to restart does not read as broken.
 
+### NGINX failover banner
+
+The web UI shows a banner when an instance rejected its configuration and NGINX fell back to the previous one (failover). The banner is tracked **per instance**: a refused reload raises it, whether it came from the worker's cache push, the API or the web UI, and an accepted reload of that same instance clears it. An instance that is busy or unreachable leaves it unchanged, so it is never reported as a failover. A banner raised by an older release keeps its text until a reload succeeds across the whole fleet.
+
 ## Guided walkthrough
 
 A new install opens a **Getting started** drawer from the rocket icon in the top bar. It lists what

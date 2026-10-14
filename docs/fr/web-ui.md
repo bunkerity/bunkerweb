@@ -577,6 +577,10 @@ La page **Jobs** peut afficher un troisième résultat d'exécution en plus des 
 
 Le premier différé suivant une exécution réussie déclenche aussi une bannière d'avertissement masquable en haut de chaque page, distincte de la bannière existante (et plus grave) « push échoué », afin qu'une flotte simplement en attente qu'une instance redémarre ne paraisse pas cassée.
 
+### Bannière de basculement NGINX
+
+L'interface web affiche une bannière lorsqu'une instance a refusé sa configuration et que NGINX est revenu à la précédente (basculement). La bannière est suivie **par instance** : un rechargement refusé la déclenche, qu'il vienne du push de cache du worker, de l'API ou de l'interface web, et un rechargement accepté de cette même instance l'efface. Une instance occupée ou injoignable ne la modifie pas : elle n'est donc jamais signalée comme un basculement. Une bannière levée par une version antérieure garde son texte jusqu'à ce qu'un rechargement réussisse sur toute la flotte.
+
 ## Parcours guidé
 
 Une nouvelle installation ouvre un tiroir **Premiers pas** depuis l'icône fusée dans la barre supérieure. Il liste ce qu'il reste à faire, coche chaque élément de lui-même, et disparaît une fois tout terminé — ou dès que vous le fermez.

@@ -1068,6 +1068,9 @@ Hier sind die verfügbaren Typen von benutzerdefinierten Konfigurationen:
 -   **stream**: Konfigurationen auf der Stream-Ebene von NGINX.
 -   **server-stream**: Konfigurationen auf der Stream/Server-Ebene von NGINX.
 
+!!! note "ModSecurity 3.0.17: Schlüssel von `MULTIPART_FILENAME`"
+    Seit ModSecurity v3.0.17 sind die Einträge von `MULTIPART_FILENAME` nach dem **Namen des Formularfelds** indiziert, nicht nach dem Dateinamen. Eine eigene `modsec`-, `modsec-crs`-, `crs-plugins-before`- oder `crs-plugins-after`-Regel, die einen hochgeladenen Dateinamen über dessen eigenen Schlüssel auswählte, muss ihn jetzt über den Namen des Formularfelds auswählen (zum Beispiel `MULTIPART_FILENAME:upload` für `<input type="file" name="upload">`).
+
 Benutzerdefinierte Konfigurationen können global oder spezifisch für einen bestimmten Server angewendet werden, abhängig vom anwendbaren Kontext und ob der [Multisite-Modus](features.md#multisite-mode) aktiviert ist.
 
 Die Methode zum Anwenden benutzerdefinierter Konfigurationen hängt von der verwendeten Integration ab. Der zugrunde liegende Prozess besteht jedoch darin, Dateien mit der `.conf`-Endung zu bestimmten Ordnern hinzuzufügen. Um eine benutzerdefinierte Konfiguration für einen bestimmten Server anzuwenden, sollte die Datei in einem Unterordner platziert werden, der nach dem primären Servernamen benannt ist.

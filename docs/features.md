@@ -1024,6 +1024,13 @@ stays available.
     1.6.14 has no draft flag and would apply them, so its migration refuses while any exists, and the
     preflight refuses first. Activate or delete them before going back, or target 1.6.15, which keeps them.
 
+    Two more things are answered with *restore from a backup* instead of an in-place downgrade, because no
+    earlier release can read them: plugins installed from `EXTERNAL_PLUGIN_URLS` (they carry the `download`
+    method, a label 1.6.x does not know) and plugin archives, plugin pages or job caches stored in chunks
+    (the `bw_blob_chunks` table: on MySQL and MariaDB when they are larger than one statement can carry, and
+    on every engine in the rare case where their content begins with the bytes BunkerWeb uses to flag a
+    chunked value). The preflight refuses while either exists and no conversion is offered.
+
 !!! tip "Every failure leaves something startable"
     `downgrade --execute` refuses unless a quiescence hold is in place for that same target, the
     preflight it re-runs itself comes back clean, and the manifest marks the pair as tested. That re-run
@@ -4861,7 +4868,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     | Setting                 | Default | Context | Multiple | Description                                                                    |
     | ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
     | `SEND_ANONYMOUS_REPORT` | `yes`   | global  | no       | **Anonymous Reports:** Send anonymous usage reports to BunkerWeb maintainers.  |
-    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). At most 50 MiB per URL; append `#sha256=<digest>` to pin content; plain `http://` is deprecated and will be refused in 1.7.0. |
+    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). At most 50 MiB per URL; append `#sha256=<digest>` to pin content; plain `http://` is deprecated and will be refused in 1.7.0. Removing a URL uninstalls the plugins it provided, with their saved values, once every other URL downloads; plugins added by hand or uploaded in the web UI are never removed. |
 
 === "File Caching"
 

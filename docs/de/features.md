@@ -944,6 +944,15 @@ sind, die Wiederherstellung aus einem Backup nicht — und sie bleibt verfügbar
     solange einer existiert, und der Preflight verweigert schon vorher. Aktivieren oder löschen Sie sie
     vor dem Downgrade, oder wählen Sie 1.6.15 als Ziel, das sie behält.
 
+    Zwei weitere Fälle werden mit *Wiederherstellung aus einem Backup* statt mit einem Downgrade an Ort und
+    Stelle beantwortet, weil keine frühere Version sie lesen kann: Plugins, die aus `EXTERNAL_PLUGIN_URLS`
+    installiert wurden (sie tragen die Methode `download`, ein Wert, den 1.6.x nicht kennt), sowie
+    Plugin-Archive, Plugin-Seiten oder Job-Caches, die in Stücken gespeichert sind (Tabelle
+    `bw_blob_chunks`: bei MySQL und MariaDB, wenn sie größer sind, als eine Anweisung tragen kann, und bei
+    jeder Engine im seltenen Fall, dass ihr Inhalt mit den Bytes beginnt, mit denen BunkerWeb einen in
+    Teile zerlegten Wert kennzeichnet). Der Preflight verweigert, solange eines von beiden existiert, und
+    bietet keine Umwandlung an.
+
 !!! tip "Jeder Fehlschlag hinterlässt einen startfähigen Zustand"
     `downgrade --execute` verweigert den Dienst, solange nicht für dasselbe Ziel eine Stilllegung aktiv
     ist, der selbst erneut ausgeführte Preflight sauber zurückkommt und das Manifest das Paar als
@@ -4761,7 +4770,7 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
     | Einstellung             | Standard | Kontext | Mehrfach | Beschreibung                                                                                  |
     | ----------------------- | -------- | ------- | -------- | --------------------------------------------------------------------------------------------- |
     | `SEND_ANONYMOUS_REPORT` | `yes`    | global  | nein     | **Anonyme Berichte:** Senden Sie anonyme Nutzungsberichte an die BunkerWeb-Maintainer.        |
-    | `EXTERNAL_PLUGIN_URLS`  |          | global  | nein     | **Externe Plugins:** URLs für externe Plugins zum Herunterladen (durch Leerzeichen getrennt). Höchstens 50 MiB pro URL; `#sha256=<digest>` anhängen, um den Inhalt zu pinnen; einfaches `http://` ist veraltet und wird ab 1.7.0 final abgelehnt. |
+    | `EXTERNAL_PLUGIN_URLS`  |          | global  | nein     | **Externe Plugins:** URLs für externe Plugins zum Herunterladen (durch Leerzeichen getrennt). Höchstens 50 MiB pro URL; `#sha256=<digest>` anhängen, um den Inhalt zu pinnen; einfaches `http://` ist veraltet und wird ab 1.7.0 final abgelehnt. Das Entfernen einer URL deinstalliert die davon stammenden Plugins samt ihren gespeicherten Werten, sobald alle übrigen URLs heruntergeladen werden; von Hand hinzugefügte oder in der Web-Oberfläche hochgeladene Plugins werden nie entfernt. |
 
 === "Datei-Caching"
 

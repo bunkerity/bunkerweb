@@ -1068,6 +1068,9 @@ systemctl status systemd-resolved
 - **stream**：NGINX 的 Stream 级别的配置。
 - **server-stream**：NGINX 的 Stream/服务器级别的配置。
 
+!!! note "ModSecurity 3.0.17：`MULTIPART_FILENAME` 的键"
+    自 ModSecurity v3.0.17 起，`MULTIPART_FILENAME` 的条目以**表单字段名**作为键，而不再是文件名。此前按文件名自身的键选择已上传文件名的自定义 `modsec`、`modsec-crs`、`crs-plugins-before` 或 `crs-plugins-after` 规则，现在必须按表单字段名选择（例如对 `<input type="file" name="upload">` 使用 `MULTIPART_FILENAME:upload`）。
+
 自定义配置可以全局应用，也可以针对特定服务器应用，具体取决于适用的上下文以及是否启用了[多站点模式](features.md#multisite-mode)。
 
 应用自定义配置的方法取决于所使用的集成。然而，其底层过程涉及将带有 `.conf` 后缀的文件添加到特定文件夹中。要为特定服务器应用自定义配置，该文件应放置在以主服务器名称命名的子文件夹中。

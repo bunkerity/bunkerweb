@@ -633,6 +633,10 @@ La página **Jobs** puede mostrar un tercer resultado de ejecución además de l
 
 El primer diferimiento tras una ejecución exitosa también genera un banner de advertencia descartable en la parte superior de cada página, distinto del banner existente (y más grave) de "push fallido", para que una flota que simplemente espera a que una instancia reinicie no parezca averiada.
 
+### Banner de conmutación por error de NGINX
+
+La interfaz web muestra un banner cuando una instancia rechazó su configuración y NGINX volvió a la anterior (failover). El banner se rastrea **por instancia**: una recarga rechazada lo activa, venga del push de caché del worker, de la API o de la interfaz web, y una recarga aceptada de esa misma instancia lo borra. Una instancia ocupada o inalcanzable lo deja sin cambios, por lo que nunca se informa como failover. Un banner generado por una versión anterior conserva su texto hasta que una recarga tenga éxito en toda la flota.
+
 ## Recorrido guiado
 
 Una instalación nueva abre un panel **Primeros pasos** desde el icono del cohete en la barra superior. Enumera lo que queda por hacer, marca cada elemento por su cuenta y desaparece en cuanto todo está listo, o en cuanto lo cierras.

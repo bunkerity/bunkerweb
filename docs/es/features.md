@@ -953,6 +953,15 @@ una copia de seguridad no, y sigue disponible.
     mientras quede alguno, y la comprobación previa rechaza antes. Actívalos o bórralos antes de volver
     atrás, o apunta a 1.6.15, que los conserva.
 
+    Otros dos casos se responden con *restaurar desde una copia de seguridad* en lugar de un retroceso
+    in situ, porque ninguna versión anterior puede leerlos: los plugins instalados desde
+    `EXTERNAL_PLUGIN_URLS` (llevan el método `download`, una etiqueta que 1.6.x no conoce) y los archivos
+    de plugin, páginas de plugin o cachés de trabajos guardados en fragmentos (tabla `bw_blob_chunks`: en
+    MySQL y MariaDB cuando superan lo que cabe en una sentencia, y en cualquier motor en el caso poco
+    frecuente de que su contenido empiece por los bytes que BunkerWeb usa para marcar un valor
+    fragmentado). La comprobación previa rechaza mientras exista cualquiera de los dos y no se ofrece
+    ninguna conversión.
+
 !!! tip "Cada fallo deja algo que puede arrancar"
     `downgrade --execute` rechaza mientras no haya un bloqueo activo para ese mismo destino, el
     preflight que él mismo vuelve a ejecutar no esté limpio, y el manifiesto no marque el par como
@@ -4797,7 +4806,7 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 | Ajuste                  | Valor por defecto | Contexto | Múltiple | Descripción                                                                                   |
 | ----------------------- | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------- |
 | `SEND_ANONYMOUS_REPORT` | `yes`             | global   | no       | **Informes Anónimos:** Envíe informes de uso anónimos a los mantenedores de BunkerWeb.        |
-| `EXTERNAL_PLUGIN_URLS`  |                   | global   | no       | **Complementos Externos:** URL para descargar complementos externos (separados por espacios). Como máximo 50 MiB por URL; añade `#sha256=<digest>` para fijar el contenido; el `http://` simple está obsoleto y se rechazará en la versión final de 1.7.0. |
+| `EXTERNAL_PLUGIN_URLS`  |                   | global   | no       | **Complementos Externos:** URL para descargar complementos externos (separados por espacios). Como máximo 50 MiB por URL; añade `#sha256=<digest>` para fijar el contenido; el `http://` simple está obsoleto y se rechazará en la versión final de 1.7.0. Quitar una URL desinstala los complementos que proporcionaba, con sus valores guardados, cuando todas las demás URL se descargan; los complementos añadidos a mano o subidos desde la interfaz web nunca se eliminan. |
 
 === "Almacenamiento en Caché de Archivos"
 

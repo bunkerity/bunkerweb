@@ -5,6 +5,10 @@
 
 ## Upgrade von 1.6.X
 
+!!! info "Welche 1.6-Datenbanken aktualisiert werden können"
+
+    Eine Datenbank, die von 1.6.16 oder einem seiner Release Candidates (1.6.16~rc1 bis 1.6.16~rc4) geschrieben wurde, lässt sich wie jede andere 1.6-Datenbank auf 1.7 aktualisieren: Die Migrationskette enthält jede dieser Revisionen, und die Migrationen laufen beim ersten Start. 1.6.16 ist die Version, von der aus aktualisiert wird.
+
 ### Wichtige Änderungen {#breaking-changes}
 
 !!! warning "`REDIS_SSL_VERIFY` jetzt standardmäßig `yes`"
@@ -251,6 +255,7 @@ Die folgenden Änderungen verhindern das Upgrade nicht und verlangen keine Schri
     - **`underscores_in_headers` wird nur noch einmal ausgegeben**: `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` und `GRPC_UNDERSCORES_IN_HEADERS` teilen sich jetzt eine serverweite `underscores_in_headers`-Direktive, die vom misc-Plugin gerendert wird. Fordert eine der beiden Familien sie an, gilt sie für den gesamten Dienst; benutzerdefinierte Konfigurationen, die dieselbe Direktive ausgeben, sollten überprüft werden. Reverse-Proxy-Dienste erzwingen die Direktive außerdem nicht mehr ab, sodass eine benutzerdefinierte `http`-Konfiguration mit `underscores_in_headers on;` nun auch für sie gilt.
     - **Upstream-Client-Zertifikatseinstellungen wurden in beiden Familien umbenannt**: `REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` heißen jetzt `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`, und `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` heißen jetzt `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`. Gespeicherte globale und dienstbezogene Werte werden automatisch migriert; die Umbenennung ist **einseitig** — ein kontrolliertes Downgrade auf 1.6.15 hat keine Rückabbildung, sodass die `CLIENT_*`-Werte kaskadiert gelöscht werden.
     - **Ein dedizierter Heavy-Worker-Prozess**: `WORKER_QUEUES` ist jetzt standardmäßig `default`; lange Jobs laufen in einem zweiten Prozess, der über die neuen `WORKER_HEAVY_*`-Einstellungen gesteuert wird. Ein explizites `WORKER_QUEUES=default,heavy`-Override behält das bisherige Einzelprozess-Layout bei — ändern Sie es auf `default`, um Isolation zu erhalten, oder setzen Sie `WORKER_HEAVY_QUEUES=`, um bewusst bei einem Prozess zu bleiben. Starten Sie nach diesen Änderungen den Worker-Container, den All-In-One-Container oder beide Linux-Units `bunkerweb-worker` und `bunkerweb-worker-heavy` neu.
+    - **`EXTERNAL_PLUGIN_URLS` entfernt jetzt, was es installiert hat**: Über die Einstellung heruntergeladene Plugins tragen die neue Methode `download`, und das Entfernen einer URL deinstalliert die von ihr bereitgestellten Plugins samt ihren gespeicherten Einstellungen, sobald alle verbleibenden URLs heruntergeladen werden. Von Hand hinzugefügte oder in der Web-Oberfläche hochgeladene Plugins werden nie entfernt. Vor dem Upgrade installierte Plugins werden beim ersten Verarbeiten ihrer URL umgekennzeichnet; ein Plugin, dessen URL Sie vor dem Upgrade entfernt haben, wird nicht automatisch entfernt.
 
 !!! info "Ein reservierter Dienst `default-server` erscheint bei Multisite-Installationen"
 
@@ -375,6 +380,15 @@ nicht blockiert.
 Custom Configs, `www`-Inhalte, Let's-Encrypt-Status und Backup-Archive bleiben zwischen den beiden
 Versionen unverändert. Externe Plugins, die eine 1.7-API benötigen, sind unter 1.6.x unbrauchbar
 und müssen entfernt oder ebenfalls zurückgestuft werden.
+
+!!! warning "Wann der Weg zurück immer eine Wiederherstellung aus einem Backup ist"
+
+    Unabhängig von der Datenbank-Engine antwortet die Vorabprüfung mit *aus einem Backup wiederherstellen*, statt eine Zurückstufung vor Ort anzubieten, solange eines dieser Elemente existiert, weil keine frühere Version sie lesen kann:
+
+    - Plugins, die über `EXTERNAL_PLUGIN_URLS` installiert wurden und die neue Methode `download` tragen;
+    - Plugin-Archive, Plugin-Seiten oder Job-Caches, die in Teilen gespeichert sind: bei MySQL und MariaDB, wenn sie größer als `max_allowed_packet` sind, und bei jeder Engine im seltenen Fall, dass ihr Inhalt mit den Bytes beginnt, mit denen BunkerWeb einen in Teile zerlegten Wert kennzeichnet.
+
+    In beiden Fällen wird keine Konvertierung versucht.
 
 ### Vorgehensweise
 

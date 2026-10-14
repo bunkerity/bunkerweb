@@ -5,6 +5,10 @@
 
 ## 从 1.6.X 升级
 
+!!! info "哪些 1.6 数据库可以升级"
+
+    由 1.6.16 或其任一候选版本（1.6.16~rc1 至 1.6.16~rc4）写入的数据库，可以像其他 1.6 数据库一样升级到 1.7：迁移链包含上述每一个修订版本，迁移会在首次启动时运行。升级的起点版本为 1.6.16。
+
 ### 重大变更 {#breaking-changes}
 
 !!! warning "`REDIS_SSL_VERIFY` 现在默认改为 `yes`"
@@ -165,6 +169,7 @@
     - **`underscores_in_headers` 现在只下发一次**：`REVERSE_PROXY_UNDERSCORES_IN_HEADERS` 和 `GRPC_UNDERSCORES_IN_HEADERS` 现在共享由 misc 插件渲染的同一条服务器级 `underscores_in_headers` 指令。只要有一个插件族请求启用，就会对整个服务生效；请检查是否有自定义配置也下发了同一指令。反向代理服务也不再强制关闭该指令，因此 `http` 级别的自定义配置 `underscores_in_headers on;` 现在同样会对它们生效。
     - **两组上游客户端证书设置均已重命名**：`REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` 现更名为 `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`，而 `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` 现更名为 `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`。已保存的全局和服务级值会自动迁移；此重命名是**单向的**——受控降级到 1.6.15 没有反向映射，因此 `CLIENT_*` 的值会被级联删除。
     - **新增专用的 heavy worker 进程**：`WORKER_QUEUES` 现在默认值为 `default`；长任务改由新的 `WORKER_HEAVY_*` 设置控制的第二个进程运行。显式设置 `WORKER_QUEUES=default,heavy` 会保留此前的单进程布局——改为 `default` 以获得隔离效果，或设置 `WORKER_HEAVY_QUEUES=` 以有意保留单进程。更改这些设置后，请重启 worker 容器、All-In-One 容器，或 Linux 上的 `bunkerweb-worker` 和 `bunkerweb-worker-heavy` 两个单元。
+    - **`EXTERNAL_PLUGIN_URLS` 现在会移除它所安装的内容**：通过该设置下载的插件带有新的 `download` 方法，移除某个 URL 会卸载它提供的插件及其已保存的设置，前提是其余所有 URL 都能下载。手动添加或在 Web 界面上传的插件不会被移除。升级前已安装的插件会在其 URL 首次被处理时重新标记；升级前已移除 URL 的插件不会被自动移除。
 
 !!! info "多站点安装新增保留服务 `default-server`"
 
@@ -248,6 +253,15 @@ bwcli plugin backup downgrade 1.6.15 --execute  # 请求确认后再执行迁移
 **数据库之外。** Job 缓存和 PRO 插件会在下一次运行时重新构建。自定义配置、`www` 内容、Let's
 Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 版 API 的外部插件在 1.6.x 上无法使用，
 必须移除或一并降级。
+
+!!! warning "何时回退一律只能从备份恢复"
+
+    无论使用哪种数据库引擎，只要存在以下任一项，预检都会回答*从备份恢复*，而不会提供原地降级，因为更早的版本无法读取它们：
+
+    - 通过 `EXTERNAL_PLUGIN_URLS` 安装的插件，它们带有新的 `download` 方法；
+    - 以分块方式存储的插件归档、插件页面或任务缓存：在 MySQL 和 MariaDB 上超过 `max_allowed_packet` 时；在所有引擎上，当其内容恰好以 BunkerWeb 用来标记分块值的字节开头时（这种情况很少见）。
+
+    两种情况下都不会尝试转换。
 
 ### 步骤
 

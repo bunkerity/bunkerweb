@@ -5,6 +5,10 @@
 
 ## Mise à niveau à partir de la version 1.6.X
 
+!!! info "Quelles bases 1.6 peuvent être mises à niveau"
+
+    Une base écrite par la 1.6.16, ou par l'une de ses versions candidates (1.6.16~rc1 à 1.6.16~rc4), passe en 1.7 comme n'importe quelle base 1.6 : la chaîne de migration contient chacune de ces révisions, et les migrations s'exécutent au premier démarrage. La 1.6.16 est la version depuis laquelle mettre à niveau.
+
 ### Changements majeurs {#breaking-changes}
 
 !!! warning "`REDIS_SSL_VERIFY` vaut désormais `yes` par défaut"
@@ -198,6 +202,7 @@ Ces changements ne bloquent pas la mise à niveau et n'exigent aucune action pou
     - **`underscores_in_headers` n'est émis qu'une seule fois** : `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` et `GRPC_UNDERSCORES_IN_HEADERS` partagent désormais une seule directive `underscores_in_headers` à l'échelle du serveur, rendue par le plugin misc. Si l'une des deux familles la demande, elle s'applique à tout le service ; vérifiez les configurations personnalisées qui émettent la même directive. Les services reverse proxy ne forcent plus non plus la directive à désactivée, si bien qu'une configuration personnalisée `http` définissant `underscores_in_headers on;` s'applique désormais aussi à eux.
     - **Les paramètres de certificat client amont ont été renommés dans les deux familles** : `REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` deviennent `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`, et `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` deviennent `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`. Les valeurs globales et de service enregistrées migrent automatiquement ; le renommage est **à sens unique** — un downgrade contrôlé vers 1.6.15 n'a pas de correspondance inverse, les valeurs `CLIENT_*` sont donc supprimées en cascade.
     - **Un processus worker heavy dédié** : `WORKER_QUEUES` vaut désormais `default` par défaut ; les jobs longs s'exécutent dans un second processus contrôlé par les nouveaux paramètres `WORKER_HEAVY_*`. Une surcharge explicite `WORKER_QUEUES=default,heavy` conserve l'ancienne disposition à processus unique — changez-la en `default` pour obtenir l'isolation, ou définissez `WORKER_HEAVY_QUEUES=` pour conserver délibérément un seul processus. Redémarrez le conteneur worker, le conteneur All-In-One, ou les deux unités Linux `bunkerweb-worker` et `bunkerweb-worker-heavy` après avoir modifié ces paramètres.
+    - **`EXTERNAL_PLUGIN_URLS` supprime désormais ce qu'il a installé** : les plugins téléchargés depuis ce paramètre portent une nouvelle méthode `download`, et retirer une URL désinstalle les plugins qu'elle fournissait, avec leurs paramètres enregistrés, dès que toutes les URL restantes se téléchargent. Les plugins ajoutés à la main ou téléversés dans l'interface web ne sont jamais supprimés. Les plugins installés avant la mise à niveau sont réétiquetés la première fois que leur URL est traitée ; un plugin dont vous aviez retiré l'URL avant la mise à niveau n'est pas supprimé automatiquement.
 
 !!! info "Un service réservé `default-server` apparaît en multisite"
 
@@ -300,6 +305,15 @@ prochaine exécution. Les configurations personnalisées, le contenu `www`, l'é
 les archives de sauvegarde restent inchangés entre les deux versions. Les plugins externes qui
 nécessitent une API 1.7 sont inutilisables sous 1.6.x et doivent être supprimés ou rétrogradés eux
 aussi.
+
+!!! warning "Quand le retour arrière passe toujours par une restauration"
+
+    Quel que soit le moteur de base de données, le contrôle préalable répond *restaurez depuis une sauvegarde* au lieu de proposer une rétrogradation sur place tant que l'un de ces éléments existe, car aucune version antérieure ne sait les lire :
+
+    - les plugins installés depuis `EXTERNAL_PLUGIN_URLS`, qui portent la nouvelle méthode `download` ;
+    - les archives de plugins, pages de plugins ou caches de jobs stockés en morceaux : sous MySQL et MariaDB au-delà de `max_allowed_packet`, et sur tous les moteurs dans le cas rare où leur contenu commence par les octets que BunkerWeb utilise pour signaler une valeur découpée en morceaux.
+
+    Aucune conversion n'est tentée dans ces deux cas.
 
 ### Procédure
 

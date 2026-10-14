@@ -694,6 +694,10 @@ Die Seite **Jobs** kann neben den gewöhnlichen grünen Erfolgs- und roten Fehle
 
 Die erste Verzögerung nach einem erfolgreichen Lauf löst zudem ein schließbares Warnbanner am oberen Rand jeder Seite aus, getrennt vom bestehenden (und schwerwiegenderen) „Push fehlgeschlagen"-Banner, damit eine Flotte, die lediglich auf den Neustart einer Instanz wartet, nicht als defekt erscheint.
 
+### NGINX-Failover-Banner
+
+Die Web-Oberfläche zeigt ein Banner, wenn eine Instanz ihre Konfiguration abgelehnt hat und NGINX auf die vorherige zurückgefallen ist (Failover). Das Banner wird **pro Instanz** verfolgt: Ein abgelehnter Reload löst es aus, egal ob er vom Cache-Push des Workers, von der API oder von der Web-Oberfläche kam, und ein akzeptierter Reload derselben Instanz löscht es. Eine ausgelastete oder nicht erreichbare Instanz lässt es unverändert, sodass sie nie als Failover gemeldet wird. Ein Banner einer älteren Version behält seinen Text, bis ein Reload flottenweit erfolgreich war.
+
 ## Geführte Einführung
 
 Eine neue Installation öffnet über das Raketensymbol in der oberen Leiste eine **Erste Schritte**-Schublade. Sie listet auf, was noch zu tun ist, hakt jeden Punkt eigenständig ab und verschwindet, sobald alles erledigt ist – oder sobald Sie sie schließen.

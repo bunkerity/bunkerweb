@@ -1070,6 +1070,9 @@ Here are the available types of custom configurations:
 - **stream**: Configurations at the Stream level of NGINX.
 - **server-stream**: Configurations at the Stream/Server level of NGINX.
 
+!!! note "ModSecurity 3.0.17: `MULTIPART_FILENAME` keying"
+    Since ModSecurity v3.0.17, the entries of `MULTIPART_FILENAME` are keyed by the **form field name**, not by the file name. A custom `modsec`, `modsec-crs`, `crs-plugins-before` or `crs-plugins-after` rule that selects an uploaded file name by its own key must now select it by the name of the form field (for example `MULTIPART_FILENAME:upload` for `<input type="file" name="upload">`).
+
 Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](features.md#multisite-mode) is enabled.
 
 The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.

@@ -5,6 +5,10 @@
 
 ## Actualización desde 1.6.X
 
+!!! info "Qué bases de datos 1.6 pueden actualizarse"
+
+    Una base de datos escrita por 1.6.16, o por cualquiera de sus candidatas a versión (1.6.16~rc1 a 1.6.16~rc4), se actualiza a 1.7 como cualquier otra base 1.6: la cadena de migraciones contiene cada una de esas revisiones, y las migraciones se ejecutan en el primer arranque. 1.6.16 es la versión desde la que se actualiza.
+
 ### Cambios importantes {#breaking-changes}
 
 !!! warning "`REDIS_SSL_VERIFY` ahora tiene por defecto `yes`"
@@ -264,6 +268,7 @@ que verás con 1.7 en ejecución.
     - **`underscores_in_headers` se emite una sola vez**: `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` y `GRPC_UNDERSCORES_IN_HEADERS` ahora comparten una única directiva `underscores_in_headers` a nivel de servidor, renderizada por el plugin misc. Si cualquiera de las dos familias la solicita, se habilita para todo el servicio; revise las configuraciones personalizadas que emitan la misma directiva. Los servicios reverse proxy tampoco fuerzan ya la directiva a desactivada, por lo que una configuración personalizada a nivel `http` con `underscores_in_headers on;` ahora también se les aplica.
     - **Los ajustes del certificado de cliente del upstream fueron renombrados en ambas familias**: `REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` ahora son `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`, y `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` ahora son `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`. Los valores globales y de servicio guardados se migran automáticamente; el renombrado es de **una sola dirección** — un downgrade controlado a 1.6.15 no tiene mapeo inverso, por lo que los valores `CLIENT_*` se eliminan en cascada.
     - **Un proceso worker pesado dedicado**: `WORKER_QUEUES` ahora tiene por defecto `default`; los jobs largos se ejecutan en un segundo proceso controlado por los nuevos ajustes `WORKER_HEAVY_*`. Un override explícito `WORKER_QUEUES=default,heavy` mantiene el diseño de proceso único anterior — cámbielo a `default` para obtener aislamiento, o establezca `WORKER_HEAVY_QUEUES=` para conservar deliberadamente un solo proceso. Reinicie el contenedor worker, el contenedor All-In-One, o ambas unidades Linux `bunkerweb-worker` y `bunkerweb-worker-heavy` tras cambiar estos ajustes.
+    - **`EXTERNAL_PLUGIN_URLS` ahora elimina lo que instaló**: los plugins descargados desde este ajuste llevan un nuevo método `download`, y quitar una URL desinstala los plugins que proporcionaba, junto con sus ajustes guardados, cuando todas las URL restantes se descargan. Los plugins añadidos a mano o subidos en la interfaz web nunca se eliminan. Los plugins instalados antes de la actualización se reetiquetan la primera vez que se procesa su URL; un plugin cuya URL quitó antes de actualizar no se elimina automáticamente.
 
 !!! info "Un servicio reservado `default-server` aparece en instalaciones multisitio"
 
@@ -387,6 +392,15 @@ siguiente ejecución. Las configuraciones personalizadas, el contenido de `www`,
 Encrypt y los archivos de copia de seguridad no cambian entre ambas versiones. Los plugins
 externos que necesitan una API de 1.7 no funcionan en 1.6.x y deben eliminarse o revertirse
 también.
+
+!!! warning "Cuándo volver atrás es siempre restaurar desde una copia de seguridad"
+
+    Sea cual sea el motor de base de datos, la comprobación previa responde *restaure desde una copia de seguridad* en lugar de ofrecer una reversión sin restauración mientras exista cualquiera de estos elementos, porque ninguna versión anterior puede leerlos:
+
+    - los plugins instalados desde `EXTERNAL_PLUGIN_URLS`, que llevan el nuevo método `download`;
+    - los archivos de plugins, las páginas de plugins o las cachés de trabajos almacenados en fragmentos: en MySQL y MariaDB cuando superan `max_allowed_packet`, y en cualquier motor en el caso poco frecuente de que su contenido empiece por los bytes que BunkerWeb usa para marcar un valor fragmentado.
+
+    En ambos casos no se intenta ninguna conversión.
 
 ### Procedimiento
 

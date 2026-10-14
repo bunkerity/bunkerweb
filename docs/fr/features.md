@@ -935,6 +935,15 @@ depuis une sauvegarde non, et elle reste disponible.
     refuse tant qu'il en reste un, et la pré-vérification refuse avant elle. Activez-les ou supprimez-les
     avant de revenir en arrière, ou visez 1.6.15, qui les conserve.
 
+    Deux autres cas appellent une *restauration depuis une sauvegarde* plutôt qu'un retour en arrière sur
+    place, car aucune version antérieure ne sait les lire : les plugins installés depuis
+    `EXTERNAL_PLUGIN_URLS` (ils portent la méthode `download`, un libellé que 1.6.x ne connaît pas) et les
+    archives de plugin, pages de plugin ou caches de jobs stockés par morceaux (table `bw_blob_chunks` :
+    sous MySQL et MariaDB quand ils dépassent ce qu'une requête peut transporter, et sur tous les moteurs
+    dans le cas rare où leur contenu commence par les octets que BunkerWeb utilise pour signaler une valeur
+    découpée en morceaux). La pré-vérification refuse tant que l'un des deux existe et aucune conversion
+    n'est proposée.
+
 !!! tip "Chaque échec laisse un état démarrable"
     `downgrade --execute` refuse tant qu'un gel n'est pas en place pour cette même cible, que le
     preflight qu'il relance lui-même n'est pas au vert, et que le manifeste ne marque pas le couple
@@ -4636,7 +4645,7 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
     | Paramètre               | Défaut | Contexte | Multiple | Description                                                                                       |
     | ----------------------- | ------ | -------- | -------- | ------------------------------------------------------------------------------------------------- |
     | `SEND_ANONYMOUS_REPORT` | `yes`  | global   | no       | **Rapports anonymes :** Envoyer des rapports d'utilisation anonymes aux mainteneurs de BunkerWeb. |
-    | `EXTERNAL_PLUGIN_URLS`  |        | global   | no       | **Plugins externes :** URL pour télécharger des plugins externes (séparées par des espaces). Au maximum 50 Mio par URL ; ajoutez `#sha256=<digest>` pour épingler le contenu ; le simple `http://` est déprécié et sera refusé en 1.7.0.      |
+    | `EXTERNAL_PLUGIN_URLS`  |        | global   | no       | **Plugins externes :** URL pour télécharger des plugins externes (séparées par des espaces). Au maximum 50 Mio par URL ; ajoutez `#sha256=<digest>` pour épingler le contenu ; le simple `http://` est déprécié et sera refusé en 1.7.0. Retirer une URL désinstalle les plugins qu'elle fournissait, avec leurs valeurs enregistrées, dès que toutes les autres URL se téléchargent ; les plugins ajoutés à la main ou téléversés dans l'interface web ne sont jamais supprimés. |
 
 === "Mise en cache des fichiers"
 

@@ -5,6 +5,10 @@
 
 ## Upgrade from 1.6.X
 
+!!! info "Which 1.6 databases can upgrade"
+
+    A database written by 1.6.16, or by any of its release candidates (1.6.16~rc1 to 1.6.16~rc4), upgrades to 1.7 like any other 1.6 database: the migration chain contains every one of those revisions, and the migrations run at the first start. 1.6.16 is the release to upgrade from.
+
 ### Breaking changes
 
 !!! warning "`REDIS_SSL_VERIFY` now defaults to `yes`"
@@ -255,6 +259,7 @@ you see once 1.7 is running.
     - **`underscores_in_headers` is emitted once**: `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` and `GRPC_UNDERSCORES_IN_HEADERS` now share one server-wide `underscores_in_headers` directive, rendered by the misc plugin. Either family requesting it enables it for the whole service; custom configs emitting the same directive should be reviewed. Reverse-proxy services also no longer force the directive off, so an `http`-level custom config setting `underscores_in_headers on;` now applies to them too.
     - **Upstream client-certificate settings were renamed in both families**: `REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` are now `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`, and `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` are now `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`. Saved global and service values migrate automatically; the rename is **one-way** — a controlled downgrade to 1.6.15 has no reverse mapping, so the `CLIENT_*` values are cascade-deleted.
     - **A dedicated heavy worker process**: `WORKER_QUEUES` now defaults to `default`; long jobs run in a second process controlled by the new `WORKER_HEAVY_*` settings. An explicit `WORKER_QUEUES=default,heavy` override keeps the previous single-process layout — change it to `default` to gain isolation, or set `WORKER_HEAVY_QUEUES=` to retain one process deliberately. Restart the worker container, the All-In-One container, or both `bunkerweb-worker` and `bunkerweb-worker-heavy` Linux units after changing these settings.
+    - **`EXTERNAL_PLUGIN_URLS` now removes what it installed**: plugins downloaded from the setting carry a new `download` method, and removing a URL uninstalls the plugins it provided together with their saved settings, once every remaining URL downloads. Plugins added by hand or uploaded in the web UI are never removed. Plugins installed before the upgrade are relabelled the first time their URL is processed; a plugin whose URL you removed before upgrading is not removed automatically.
 
 !!! info "A reserved `default-server` service appears in multisite installs"
 
@@ -352,6 +357,15 @@ Before starting, stop or firewall anything that writes to the API directly. The 
     The preflight counts what your installation actually holds and refuses an in-place downgrade while anything irreplaceable is still there, so the answer you get is about your data rather than about the release in the abstract.
 
 **Outside the database.** Job caches and PRO plugins are rebuilt on the next run. Custom configs, `www` content, Let's Encrypt state and backup archives are unchanged between the two versions. External plugins that need a 1.7 API are unusable on 1.6.x and must be removed or downgraded too.
+
+!!! warning "When going back is always a restore from a backup"
+
+    Whatever the database engine, the preflight answers *restore from a backup* instead of offering an in-place downgrade while either of these exists, because no earlier release can read them:
+
+    - plugins installed from `EXTERNAL_PLUGIN_URLS`, which carry the new `download` method;
+    - plugin archives, plugin pages or job caches stored in chunks: on MySQL and MariaDB when they are larger than `max_allowed_packet`, and on every engine in the rare case where their content begins with the bytes BunkerWeb uses to flag a chunked value.
+
+    No conversion is attempted in either case.
 
 ### Procedure
 
