@@ -57,6 +57,10 @@
         "label": "Reverse DNS yang diabaikan",
         "help": "Daftar akhiran reverse DNS, dipisahkan dengan spasi, yang mengabaikan tantangan antibot."
       },
+      "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+        "label": "Kesulitan JavaScript",
+        "help": "Kesulitan bukti kerja tantangan JavaScript dalam bit nol awal (16 hingga 28). Setiap bit tambahan menggandakan waktu penyelesaian rata-rata. Perbarui halaman tantangan khusus sebelum menaikkannya."
+      },
       "ANTIBOT_IGNORE_URI": {
         "label": "URI yang diabaikan",
         "help": "Daftar pola regex PCRE (dipisahkan dengan spasi) untuk URI yang harus dikecualikan dari tantangan antibot. Pola dicocokkan terhadap path dan URI permintaan lengkap beserta query string."

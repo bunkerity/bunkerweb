@@ -57,6 +57,10 @@
         "label": "Hindi Papansinin na Reverse DNS",
         "help": "Listahan ng mga reverse DNS suffix, na pinaghihiwalay ng space, na hindi papansinin ng hamon ng antibot."
       },
+      "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+        "label": "Hirap ng JavaScript",
+        "help": "Hirap ng proof-of-work ng JavaScript challenge sa mga paunang zero bit (16 hanggang 28). Dinodoble ng bawat dagdag na bit ang karaniwang oras ng paglutas. I-update ang mga pasadyang challenge page bago ito taasan."
+      },
       "ANTIBOT_IGNORE_URI": {
         "label": "Hindi Papansinin na URI",
         "help": "Listahan ng mga pattern ng PCRE regex (pinaghihiwalay ng space) para sa mga URI na dapat ihiwalay sa hamon ng antibot. Sinusuri ang mga pattern laban sa path at sa buong request URI kasama ang query string."

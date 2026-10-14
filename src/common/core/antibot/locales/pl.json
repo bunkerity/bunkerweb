@@ -57,6 +57,10 @@
         "label": "Ignorowany reverse DNS",
         "help": "Lista sufiksów reverse DNS, rozdzielonych spacjami, dla których wyzwanie antibot jest ignorowane."
       },
+      "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+        "label": "Trudność JavaScript",
+        "help": "Trudność dowodu pracy wyzwania JavaScript w początkowych bitach zerowych (od 16 do 28). Każdy dodatkowy bit podwaja średni czas rozwiązania. Przed zwiększeniem zaktualizuj własne strony wyzwania."
+      },
       "ANTIBOT_IGNORE_URI": {
         "label": "Ignorowany URI",
         "help": "Lista wzorców wyrażeń regularnych PCRE (rozdzielonych spacjami) dla URI, które mają być wykluczone z wyzwania antibot. Wzorce są sprawdzane zarówno względem ścieżki, jak i pełnego URI żądania wraz z query string."

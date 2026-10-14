@@ -59,6 +59,8 @@
 {%- set groups = [
     {"id": "mode", "title": "settings.antibot.mode.title", "hint": "settings.antibot.mode.description",
      "settings": ["USE_ANTIBOT"], "col": "col-12 col-sm-8 col-lg-5 pb-3"},
+    {"id": "javascript", "title": setting_text("ANTIBOT_JAVASCRIPT_DIFFICULTY", "label", antibot_settings["ANTIBOT_JAVASCRIPT_DIFFICULTY"]["label"]),
+     "modes": ["javascript"], "settings": ["ANTIBOT_JAVASCRIPT_DIFFICULTY"], "col": "col-12 col-sm-6 col-lg-4 pb-3"},
     {"id": "captcha", "title": "settings.antibot.captcha.title", "hint": "settings.antibot.captcha.hint",
      "modes": ["captcha"], "settings": ["ANTIBOT_CAPTCHA_ALPHABET"], "col": "col-12 col-lg-8 pb-3"},
     {"id": "recaptcha", "title": "settings.antibot.recaptcha.title", "hint": "settings.antibot.recaptcha.hint",

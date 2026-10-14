@@ -35,6 +35,10 @@
         "label": "Captcha-Alphabet",
         "help": "Benutzerdefiniertes Alphabet für die Captcha-Erzeugung. Das Captcha besteht aus zufälligen Zeichen dieser Zeichenkette. Unterstützte Zeichen: alle Buchstaben (a-z, A-Z), Zahlen 2-9 und unterstützte Sonderzeichen (vollständige Liste siehe Dokumentation)."
       },
+      "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+        "label": "JavaScript-Schwierigkeit",
+        "help": "Schwierigkeit des Arbeitsnachweises der JavaScript-Prüfung in führenden Nullbits (16 bis 28). Jedes zusätzliche Bit verdoppelt die durchschnittliche Lösungszeit. Aktualisieren Sie eigene Prüfungsseiten vor einer Erhöhung."
+      },
       "ANTIBOT_IGNORE_URI": {
         "label": "Ignorierte URI",
         "help": "Liste von PCRE-Regex-Mustern (durch Leerzeichen getrennt) für URIs, die von der Antibot-Challenge ausgeschlossen werden sollen. Die Muster werden mit dem Pfad und der vollständigen Anfrage-URI samt Query-String abgeglichen."

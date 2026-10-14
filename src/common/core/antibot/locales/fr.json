@@ -35,6 +35,10 @@
         "label": "Alphabet du captcha",
         "help": "Alphabet personnalisé à utiliser pour la génération du captcha. Le captcha sera composé de caractères aléatoires issus de cette chaîne. Caractères pris en charge : toutes les lettres (a-z, A-Z), les chiffres 2-9, et les caractères spéciaux pris en charge (voir la documentation pour la liste complète)."
       },
+      "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+        "label": "Difficulté JavaScript",
+        "help": "Difficulté de la preuve de travail du défi JavaScript, en bits nuls initiaux (16 à 28). Chaque bit supplémentaire double le temps moyen de résolution. Mettez à jour les pages de défi personnalisées avant de l’augmenter."
+      },
       "ANTIBOT_IGNORE_URI": {
         "label": "URI ignorée",
         "help": "Liste de motifs regex PCRE (séparés par des espaces) pour les URI à exclure du défi antibot. Les motifs sont vérifiés par rapport au chemin et à l'URI complète de la requête avec la chaîne de requête."

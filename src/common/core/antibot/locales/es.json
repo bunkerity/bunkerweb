@@ -35,6 +35,10 @@
         "label": "Alfabeto del captcha",
         "help": "Alfabeto personalizado que se usará para generar el captcha. El captcha se compondrá de caracteres aleatorios de esta cadena. Caracteres admitidos: todas las letras (a-z, A-Z), números 2-9 y los caracteres especiales admitidos (consulte la documentación para la lista completa)."
       },
+      "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+        "label": "Dificultad de JavaScript",
+        "help": "Dificultad de la prueba de trabajo del desafío JavaScript en bits cero iniciales (16 a 28). Cada bit adicional duplica el tiempo medio de resolución. Actualice las páginas personalizadas del desafío antes de aumentarla."
+      },
       "ANTIBOT_IGNORE_URI": {
         "label": "URI ignorada",
         "help": "Lista de patrones regex PCRE (separados por espacios) para las URI que deben excluirse del desafío antibot. Los patrones se comprueban contra la ruta y la URI completa de la solicitud con la cadena de consulta."

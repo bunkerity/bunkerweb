@@ -57,6 +57,10 @@
         "label": "Yoksayılan reverse DNS",
         "help": "Antibot sorgusunun yoksayılacağı, boşluklarla ayrılmış reverse DNS soneklerinin listesi."
       },
+      "ANTIBOT_JAVASCRIPT_DIFFICULTY": {
+        "label": "JavaScript zorluğu",
+        "help": "JavaScript doğrulamasının iş ispatı zorluğu, baştaki sıfır bit sayısıdır (16 ile 28). Her ek bit ortalama çözüm süresini iki katına çıkarır. Artırmadan önce özel doğrulama sayfalarını güncelleyin."
+      },
       "ANTIBOT_IGNORE_URI": {
         "label": "Yoksayılan URI",
         "help": "Antibot sorgusundan hariç tutulacak URI'ler için (boşluklarla ayrılmış) PCRE normal ifade kalıplarının listesi. Kalıplar hem yol hem de sorgu dizesiyle birlikte tam istek URI'sine göre kontrol edilir."
