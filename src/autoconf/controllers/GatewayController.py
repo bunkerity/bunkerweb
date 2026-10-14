@@ -3,7 +3,7 @@
 from fnmatch import fnmatchcase
 from os import getenv
 from traceback import format_exc
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from kubernetes import client
 from kubernetes.client.exceptions import ApiException
@@ -23,6 +23,9 @@ class GatewayController(KubernetesController):
         if self._gateway_class:
             self._logger.info(f"Using Gateway class: {self._gateway_class}")
 
+        self._skip_foreign_classes = getenv("KUBERNETES_SKIP_FOREIGN_CLASSES", "no").strip().lower() == "yes"
+        self._gateway_controller = getenv("KUBERNETES_GATEWAY_CONTROLLER", "bunkerweb.io/gateway-controller").strip()
+
         self._gateway_api_group = "gateway.networking.k8s.io"
         self._gateway_api_version = getenv("KUBERNETES_GATEWAY_API_VERSION", "v1").strip().lower()
         if self._gateway_api_version not in GATEWAY_API_VERSIONS:
@@ -30,6 +33,9 @@ class GatewayController(KubernetesController):
             self._gateway_api_version = "v1"
 
         self._resource_versions = self._detect_resource_versions()
+        self._gateway_classes_readable = bool(self._skip_foreign_classes and not self._gateway_class)
+        if self._gateway_classes_readable:
+            self._logger.info(f"Skipping Gateways whose GatewayClass does not use controller {self._gateway_controller}")
         self._gateway_api_available = "gateways" in self._resource_versions
         if self._gateway_api_available:
             self._gateway_api_version = self._resource_versions["gateways"]
@@ -56,7 +62,9 @@ class GatewayController(KubernetesController):
     def _detect_resource_versions(self) -> Dict[str, str]:
         resource_versions: Dict[str, str] = {}
         versions = self._candidate_gateway_api_versions()
-        resources = ("gateways", "httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes")
+        resources: Tuple[str, ...] = ("gateways", "httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes")
+        if self._skip_foreign_classes and not self._gateway_class:
+            resources += ("gatewayclasses",)
 
         for plural in resources:
             for version in versions:
@@ -81,6 +89,25 @@ class GatewayController(KubernetesController):
                     break
 
         return resource_versions
+
+    def _foreign_gateway_classes(self) -> Optional[Set[str]]:
+        """Abort rather than turn an unreadable class list into an empty foreign set."""
+        if not self._gateway_classes_readable:
+            return None
+        try:
+            # GatewayClass is cluster-scoped and required for isolation even if the
+            # startup CRD/RBAC probe failed. A successful later lookup recovers it.
+            version = self._resource_versions.get("gatewayclasses", self._gateway_api_version)
+            items = self._custom_objects.list_cluster_custom_object(self._gateway_api_group, version, "gatewayclasses")["items"]
+        except Exception as e:
+            message = f"Cannot verify GatewayClass ownership ({e}); reconciliation and status publication aborted. Grant get/list/watch on gatewayclasses."
+            self._logger.error(message)
+            raise RuntimeError(message) from e
+        return {
+            name
+            for item in items
+            if (item.get("spec") or {}).get("controllerName") != self._gateway_controller and (name := (item.get("metadata") or {}).get("name"))
+        }
 
     def _hostname_matches(self, hostname: str, pattern: Optional[str]) -> bool:
         if not pattern:
@@ -110,6 +137,7 @@ class GatewayController(KubernetesController):
 
     def _get_gateways(self) -> Dict[Tuple[str, str], Dict[str, Any]]:
         gateways: Dict[Tuple[str, str], Dict[str, Any]] = {}
+        foreign = self._foreign_gateway_classes()
         for gateway in self._list_custom_objects("gateways"):
             metadata = gateway.get("metadata") or {}
             namespace = metadata.get("namespace")
@@ -131,6 +159,9 @@ class GatewayController(KubernetesController):
                 if spec.get("gatewayClassName") != self._gateway_class:
                     self._logger.debug(f"Skipping gateway {namespace}/{name} because its gatewayClassName is not allowed")
                     continue
+            elif foreign and (gateway.get("spec") or {}).get("gatewayClassName") in foreign:
+                self._logger.debug(f"Skipping gateway {namespace}/{name} because its GatewayClass belongs to another controller")
+                continue
 
             gateways[(namespace, name)] = gateway
         return gateways
@@ -747,6 +778,8 @@ class GatewayController(KubernetesController):
         return services
 
     def _is_custom_event(self, kind, obj, annotations, namespace, name) -> bool:
+        if kind == "GatewayClass":
+            return self._gateway_classes_readable
         return kind in ("HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute", "Gateway")
 
     def _get_watchers(self):
@@ -783,6 +816,9 @@ class GatewayController(KubernetesController):
             "tcproute": make_list("tcproutes"),
             "udproute": make_list("udproutes"),
         }
+        if self._gateway_classes_readable:
+            self._resource_versions.setdefault("gatewayclasses", self._gateway_api_version)
+            watchers_map["gatewayclass"] = make_list("gatewayclasses")
 
         watchers.update({key: handler for key, handler in watchers_map.items() if handler})
 
@@ -842,5 +878,6 @@ class GatewayController(KubernetesController):
             return False
 
     def _patch_controller_status(self, ips: List[str]) -> None:
-        for gateway in self._gateways_cache.values():
+        # Relist before publishing: a cached Gateway may have changed class since discovery.
+        for gateway in self._get_gateways().values():
             self._patch_gateway_status(gateway, ips)

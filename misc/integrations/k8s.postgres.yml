@@ -18,7 +18,7 @@ rules:
     resources: ["services", "pods", "configmaps", "secrets"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses"]
+    resources: ["ingresses", "ingressclasses"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses/status"]
