@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Rechercher dans la documentation");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBesoin d\u2019une assistance premium ou de conseils personnalis\u00e9s sur BunkerWeb ? D\u00e9couvrez nos \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservices professionnels\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eRejoignez la communaut\u00e9 Bunker en participant au \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003esalon Discord\u003c/a\u003e et en nous suivant sur \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Vous recherchez BunkerWeb CLOUD, la version PRO, une assistance technique ou des services sur mesure ? Consultez le
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    pour en savoir plus sur nos offres aux entreprises.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Vous ne consultez pas la documentation de la dernière version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Cliquez ici pour consulter la dernière version.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Guide de démarrage rapide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compiler depuis les sources
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Guide de démarrage rapide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compiler depuis les sources
   
 
     
@@ -1404,7 +1357,7 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Utilisez les images publiées et le layout du <a href="../quickstart-guide/#__tabbed_1_3">guide de démarrage rapide</a> pour monter la stack, puis terminez la configuration dans le navigateur.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.16-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>Ouvrez le nom d’hôte du scheduler (par ex. <code>https://www.example.com/changeme</code>) et lancez l’assistant <code>/setup</code> pour configurer l’UI, le scheduler et l’instance.</p>
 </div>
@@ -1417,7 +1370,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -1428,7 +1381,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span>
@@ -1448,7 +1401,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">"admin"</span>
@@ -1529,7 +1482,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </code></pre></div>
 <p>Les codes de récupération sont affichés une seule fois dans l’UI ; perdre les clés de chiffrement supprime les secrets TOTP stockés.
 - Sessions : durée d’inactivité par défaut 12 h (<code>SESSION_LIFETIME_HOURS</code>), rafraîchie à chaque requête. Un plafond absolu est imposé par <code>SESSION_ABSOLUTE_HOURS</code> (par défaut <code>168</code> = 7 jours) — au-delà, les utilisateurs sont déconnectés quelle que soit leur activité. Rotation optionnelle de l’identifiant de session (<code>SESSION_ROLLING_HOURS</code>, par défaut <code>0</code> = désactivée) régénère le SID à cet intervalle. Sessions liées à l’IP et au User-Agent ; <code>CHECK_PRIVATE_IP=no</code> relâche le contrôle d’IP pour les plages privées uniquement. <code>ALWAYS_REMEMBER=yes</code> force les cookies persistants.
-- Stockage des sessions : les sessions vivent dans Redis quand <code>USE_REDIS=yes</code>, sinon dans un cache local sous <code>/var/lib/bunkerweb</code>. Un Redis qui cesse de répondre, ou qui refuse les écritures parce qu'il a atteint <code>maxmemory</code>, ne casse plus l'interface : les sessions concernées basculent sur ce cache local, lu avant Redis afin qu'une modification ou une suppression jamais parvenue à Redis ne soit pas masquée par l'ancienne copie que Redis détient encore, et sont réconciliées vers Redis dès qu'il répond de nouveau. Une déconnexion ou une rotation de l'identifiant de session pendant l'indisponibilité n'est pas non plus annulée par la reprise. Chaque révocation est enregistrée dans les deux stockages afin de s'appliquer dans les deux cas. Une éviction n'est pas couverte, Redis signalant un succès et cessant simplement de détenir la clé, donc dimensionnez <code>maxmemory</code> pour les clés que vous conservez. Quand Redis refuse une mise à jour, la session concernée passe au stockage local et la copie que Redis détenait encore est supprimée immédiatement, afin que la modification ne soit pas masquée par l'ancienne version et qu'un parcours en plusieurs étapes comme la 2FA ne boucle pas sur son état antérieur. Ce cache local est propre à chaque hôte, ce qui compte si vous exécutez plusieurs réplicas de l'interface : les autres réplicas cessent de voir une session passée dans le cache local d'un réplica tant que ce réplica ne l'a pas réconciliée vers Redis, une révocation émise pendant une indisponibilité de Redis n'est appliquée que par le réplica qui l'a émise, et un réplica qui sert déjà une session depuis son propre cache local peut continuer à le faire jusqu'à <code>SESSION_LIFETIME_HOURS</code> après qu'un autre réplica a supprimé cette session via Redis. <code>UI_USE_REDIS=no</code> retire l'interface de Redis à elle seule, contrairement au <code>USE_REDIS</code> global qui cesse aussi de partager les bannissements et les rapports entre instances.
+- Stockage des sessions : les sessions vivent dans Redis quand <code>USE_REDIS=yes</code>, sinon dans un cache local sous <code>/var/lib/bunkerweb</code>. Un Redis qui cesse de répondre, ou qui refuse les écritures parce qu'il a atteint <code>maxmemory</code>, ne casse plus l'interface : les sessions concernées basculent sur ce cache local, lu avant Redis afin qu'une modification ou une suppression jamais parvenue à Redis ne soit pas masquée par l'ancienne copie que Redis détient encore, et sont réconciliées vers Redis dès qu'il répond de nouveau. Une déconnexion ou une rotation de l'identifiant de session pendant l'indisponibilité n'est pas non plus annulée par la reprise, même si la session elle-même n'a pas pu être lue pendant que Redis était indisponible. Chaque révocation est enregistrée dans les deux stockages afin de s'appliquer dans les deux cas. Une éviction n'est pas couverte, Redis signalant un succès et cessant simplement de détenir la clé, donc dimensionnez <code>maxmemory</code> pour les clés que vous conservez. Quand Redis refuse une mise à jour, la session concernée passe au stockage local et la copie que Redis détenait encore est supprimée immédiatement, afin que la modification ne soit pas masquée par l'ancienne version et qu'un parcours en plusieurs étapes comme la 2FA ne boucle pas sur son état antérieur. Ce cache local est propre à chaque hôte, ce qui compte si vous exécutez plusieurs réplicas de l'interface : les autres réplicas cessent de voir une session passée dans le cache local d'un réplica tant que ce réplica ne l'a pas réconciliée vers Redis, une révocation émise pendant une indisponibilité de Redis n'est appliquée que par le réplica qui l'a émise, et un réplica qui sert déjà une session depuis son propre cache local peut continuer à le faire jusqu'à <code>SESSION_LIFETIME_HOURS</code> après qu'un autre réplica a supprimé cette session via Redis. <code>UI_USE_REDIS=no</code> retire l'interface de Redis à elle seule, contrairement au <code>USE_REDIS</code> global qui cesse aussi de partager les bannissements et les rapports entre instances.
 - Pensez à régler <code>PROXY_NUMBERS</code> si plusieurs proxies ajoutent des <code>X-Forwarded-*</code>.</p>
 </li>
 </ul>

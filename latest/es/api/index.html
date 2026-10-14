@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Buscar en la documentaci\u00f3n");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eInicia una prueba gratuita de 30 d\u00edas de BunkerWeb PRO desde el \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u00bfNecesitas asistencia pr\u00e9mium o asesoramiento personalizado sobre BunkerWeb? Consulta nuestros \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservicios profesionales\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eForma parte de la comunidad de Bunker uni\u00e9ndote al \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003echat de Discord\u003c/a\u003e y s\u00edguenos en \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 ¿Buscas BunkerWeb CLOUD, la versión PRO, asistencia técnica o servicios a medida? Visita el
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    para obtener más información sobre nuestras ofertas para empresas.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    No está viendo la documentación de la última versión.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Haga clic aquí para ver la última versión.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Guía de inicio rápido
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compilar desde el código fuente
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     Guía de inicio rápido
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compilar desde el código fuente
   
 
     
@@ -1311,7 +1264,7 @@
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Nombre que usará el scheduler para identificar la instancia</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -1324,7 +1277,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Asegúrate de poner el nombre de instancia correcto</span>
@@ -1346,7 +1299,7 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">API_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">"admin"</span>
@@ -1411,7 +1364,7 @@
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">SERVICE_API</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">API_WHITELIST_IPS</span><span class="o">=</span><span class="s2">"127.0.0.0/8"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.15
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -1463,8 +1416,8 @@
 <li>Inicializa usuarios no admin y permisos con <code>API_ACL_BOOTSTRAP_FILE</code> o un <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code> montado. Cada usuario admite una <code>password</code> en texto plano o un <code>password_hash</code>/<code>password_bcrypt</code> pre-hasheado (ver el consejo a continuación).</li>
 </ul>
 <div class="admonition danger">
-<p class="admonition-title">These write permissions are admin-equivalent</p>
-<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the <code>API_TOKEN</code> admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:</p>
+<p class="admonition-title">Estos permisos de escritura equivalen a los de administrador</p>
+<p>Conceder cualquiera de los siguientes equivale a otorgar acceso administrativo completo. El contenido que escriben — configuraciones personalizadas, variables de servicio (p. ej., <code>REVERSE_PROXY_URL</code>), plugins subidos y ajustes globales — se representa <strong>literalmente</strong> como configuración NGINX / OpenResty Lua sin procesar, que se ejecuta en los workers y el scheduler de BunkerWeb. Un token que tenga uno de ellos puede ejecutar código arbitrario con los permisos del usuario del proceso de BunkerWeb. Los permisos de escritura de instancias equivalen a los de administrador por otro motivo: cada llamada a una instancia registrada incluye la excepción administrativa <code>API_TOKEN</code>, y el scheduler distribuye la configuración generada y la caché (incluidas las claves privadas TLS) a todas las instancias de la base de datos; por tanto, registrar un único endpoint permite recopilar todo ese contenido:</p>
 <ul>
 <li><code>instances</code>: <code>instances_create</code>, <code>instances_update</code></li>
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
@@ -1472,7 +1425,7 @@
 <li><code>plugins</code>: <code>plugin_create</code></li>
 <li><code>global_config</code>: <code>global_config_update</code></li>
 </ul>
-<p>Treat these exactly like admin: <strong>never grant them to a party you would not trust as an administrator.</strong> Reserve read scopes (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.</p>
+<p>Trátalos como permisos de administrador: <strong>no los concedas nunca a alguien en quien no confiarías como administrador.</strong> Reserva los permisos de lectura (<code>*_read</code>, <code>service_export</code>, <code>cache_read</code>, …) para tokens limitados o de automatización. Conceder uno de ellos a un usuario no administrador genera una advertencia en los registros de la API.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Contraseñas de arranque pre-hasheadas</p>
@@ -1948,7 +1901,7 @@
 <li><strong>Bans</strong></li>
 <li><code>GET /bans</code>: agrega bans activos desde las instancias.</li>
 <li><code>POST /bans</code> o <code>/bans/ban</code>: aplica uno o varios bans; payload puede ser objeto, array o JSON como string.</li>
-<li><code>POST /bans/unban</code> o <code>DELETE /bans</code>: eliminar bans globalmente o por servicio.</li>
+<li><code>POST /bans/unban</code> o <code>DELETE /bans</code>: eliminar bans globalmente o por servicio. Para un ban de CrowdSec (<code>kind: "crowdsec_lease"</code>), envíe además <code>remove_crowdsec_decisions: true</code>, <code>confirmed: true</code> y <code>decision_keys</code> (las claves de la vista previa <code>409</code>) para eliminar las decisiones de CrowdSec que lo originan; la llamada requiere <code>crowdsec_delete</code> en cada conexión afectada, responde <code>409</code> si la selección cambió y <code>502</code> ante un resultado parcial.</li>
 <li><strong>Plugins (UI)</strong></li>
 <li><code>GET /plugins</code>: lista plugins; <code>with_data=true</code> incluye los bytes del paquete cuando están disponibles.</li>
 <li><code>POST /plugins/upload</code>: instala plugins de UI desde <code>.zip</code>, <code>.tar.gz</code>, <code>.tar.xz</code>.</li>

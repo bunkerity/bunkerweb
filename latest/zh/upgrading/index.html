@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    ，了解我们的企业服务。
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    您当前查看的不是最新版本的文档。
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>点击此处查看最新版本。</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   快速入门指南
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  从源代码构建
 
       </a>
     </li>
@@ -812,33 +792,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    从源代码构建
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1041,7 +994,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#rollback" class="md-nav__link">
     <span class="md-ellipsis">
       
         回滚
@@ -1069,7 +1022,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         有什么变化？
@@ -1080,7 +1033,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         步骤
@@ -1091,7 +1044,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         回滚
@@ -1289,7 +1242,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dock
 <li>检测<ul>
 <li>从 <code>.env</code> 中读回安装类型（full、manager、worker、scheduler、ui、api），因此您无需重新声明拓扑结构。</li>
 <li>从 <code>.env</code> 中恢复密钥、主机端口、worker 列表和 Compose 项目名称，因此升级不会轮换数据库密码、使已保存的 2FA 密钥失效，也不会改动您已发布的端口。同一键重复出现时以最后一次赋值为准；可选的 <code>export</code> 前缀会被接受，而命令行中显式给出的值仍然优先。引号、变量插值、转义以及其他不受支持的 dotenv 语法会在重写文件之前被拒绝；对于这类文件请使用手动升级方式。</li>
-<li>从容器中读取实际运行的版本，而不是信任镜像标签，因此浮动标签（<code>latest</code>、<code>testing</code>）和上一次中断的升级都能被正确识别。</li>
+<li>从容器中读取实际运行的版本，而不是信任镜像标签，因此浮动标签（<code>latest</code>、<code>testing</code> 或 <code>1.6</code>，即最新的 1.6.x 版本，1.7 发布后仍保持在 1.6）和上一次中断的升级都能被正确识别。</li>
 </ul>
 </li>
 <li>升级决策<ul>
@@ -1395,16 +1348,16 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dock
 <li><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版本的 BunkerWeb 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></li>
 </ol>
@@ -1472,7 +1425,7 @@ docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
 </li>
 <li>
 <p><strong>拉取新镜像</strong>：
-    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:1.6.15
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div></p>
 </li>
 <li>
@@ -1483,7 +1436,7 @@ docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
 -p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 -p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 -p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-bunkerity/bunkerweb-all-in-one:1.6.15
+bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div></p>
 </li>
 </ol>
@@ -1494,7 +1447,7 @@ bunkerity/bunkerweb-all-in-one:1.6.15
 <p><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版 All-In-One 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -1673,20 +1626,20 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># 交互式升级到 1.6.15（会提示备份）</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.15
+<div class="highlight"><pre><span></span><code><span class="c1"># 交互式升级到 1.6.16（会提示备份）</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.16
 
 <span class="c1"># 使用自动备份到自定义目录的非交互式升级</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.15<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.16<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
 
 <span class="c1"># 静默无人值守升级（抑制日志）– 依赖默认的自动备份</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.15<span class="w"> </span>-y<span class="w"> </span>-q
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.16<span class="w"> </span>-y<span class="w"> </span>-q
 
 <span class="c1"># 执行一次空运行（计划）而不应用更改</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.15<span class="w"> </span>--dry-run
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.16<span class="w"> </span>--dry-run
 
 <span class="c1"># 跳过自动备份进行升级（不推荐）</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.15<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.16<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">跳过备份</p>
@@ -1771,7 +1724,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.15
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.16
 </code></pre></div>
 <p>为了防止在执行 <code>apt upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -1786,7 +1739,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.15
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.16
 </code></pre></div>
 <p>为了防止在执行 <code>dnf upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1826,7 +1779,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </div>
 </div>
 </div>
-<h3 id="_4">回滚<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<h3 id="rollback">回滚<a class="headerlink" href="#rollback" title="Permanent link">&para;</a></h3>
 <div class="admonition failure">
 <p class="admonition-title">如果出现问题</p>
 <p>如果您在升级过程中遇到任何问题，您可以通过恢复在<a href="#__tabbed_1_1">步骤 1</a>中创建的备份来回滚到数据库的先前版本。</p>
@@ -2093,8 +2046,8 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <h2 id="15x">从 1.5.X 升级<a class="headerlink" href="#15x" title="Permanent link">&para;</a></h2>
-<h3 id="_5">有什么变化？<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
-<h4 id="_6">调度器<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<h3 id="_4">有什么变化？<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<h4 id="_5">调度器<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
 <p>与 1.5.X 版本不同，调度器服务<strong>不再使用<em>docker 套接字代理</em>来获取 BunkerWeb 的实例</strong>。相反，它使用了新的 <code>BUNKERWEB_INSTANCES</code> 环境变量。</p>
 <div class="admonition info">
 <p class="admonition-title">关于 <code>BUNKERWEB_INSTANCES</code> 环境变量</p>
@@ -2119,9 +2072,9 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p class="admonition-title">BunkerWeb 的容器设置</p>
 <p>您在 BunkerWeb 容器上声明的每个与 API 相关的设置<strong>都必须在调度器容器上镜像</strong>，以便它能继续工作，因为配置将被调度器生成的配置覆盖。</p>
 </div>
-<h4 id="_7">默认值和新设置<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<h4 id="_6">默认值和新设置<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
 <p>我们尽力不更改默认值，但我们添加了许多其他设置。强烈建议阅读文档的<a href="../advanced/#security-tuning">安全调整</a>和<a href="../features/">设置</a>部分。</p>
-<h4 id="_8">模板<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<h4 id="_7">模板<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
 <p>我们添加了一个名为<strong>模板</strong>的新功能。模板提供了一种结构化和标准化的方法来定义设置和自定义配置，有关更多信息，请查看<a href="../concepts/#templates">概念/模板</a>部分。</p>
 <h4 id="autoconf">Autoconf 命名空间<a class="headerlink" href="#autoconf" title="Permanent link">&para;</a></h4>
 <p>我们向自动配置集成添加了<strong>命名空间</strong>功能。命名空间允许您对实例进行分组，并仅对它们应用设置。根据您的集成，查看以下部分以获取更多信息：</p>
@@ -2130,7 +2083,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <li><a href="../integrations/#namespaces_1">Kubernetes/namespaces</a></li>
 <li><a href="../integrations/#namespaces_2">Swarm/namespaces</a></li>
 </ul>
-<h3 id="_9">步骤<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<h3 id="_8">步骤<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
 <p><strong>备份数据库</strong>：</p>
@@ -2279,16 +2232,16 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版本的 BunkerWeb 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.15</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.16</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -2320,7 +2273,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.15
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.16
 </code></pre></div>
 <p>为了防止在执行 <code>apt upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -2335,7 +2288,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.15
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.16
 </code></pre></div>
 <p>为了防止在执行 <code>dnf upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2382,7 +2335,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 <p><strong>验证数据库</strong>：通过检查新数据库容器中的数据和配置来验证数据库升级是否成功。</p>
 </li>
 </ol>
-<h3 id="_10">回滚<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<h3 id="_9">回滚<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
 <div class="admonition failure">
 <p class="admonition-title">如果出现问题</p>
 <p>如果您在升级过程中遇到任何问题，您可以通过恢复在<a href="#__tabbed_1_1">步骤 1</a>中创建的备份来回滚到数据库的先前版本。</p>

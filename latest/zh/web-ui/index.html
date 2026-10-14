@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "\u5728\u6587\u6863\u4e2d\u641c\u7d22");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003e\u901a\u8fc7 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e\u5f00\u542f BunkerWeb PRO 30 \u5929\u514d\u8d39\u8bd5\u7528\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u9700\u8981 BunkerWeb \u9ad8\u7ea7\u652f\u6301\u6216\u5b9a\u5236\u54a8\u8be2\uff1f\u8bf7\u67e5\u770b\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003e\u4e13\u4e1a\u670d\u52a1\u003c/a\u003e\u3002\u003c/p\u003e" },
+        { "content" : "\u003cp\u003e\u52a0\u5165 Bunker \u793e\u533a\uff0c\u53c2\u4e0e \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord \u804a\u5929\u003c/a\u003e \u5e76\u5173\u6ce8\u6211\u4eec\u7684 \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e\u3002\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 想了解 BunkerWeb CLOUD、PRO 版本、技术支持或定制服务？请访问
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    ，了解我们的企业服务。
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    您当前查看的不是最新版本的文档。
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>点击此处查看最新版本。</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   快速入门指南
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  从源代码构建
 
       </a>
     </li>
@@ -793,33 +773,6 @@
     
   
     快速入门指南
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    从源代码构建
   
 
     
@@ -1404,7 +1357,7 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>使用已发布镜像与<a href="../quickstart-guide/#__tabbed_1_3">快速入门</a>的布局启动栈，然后在浏览器完成向导。</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.16-rc1/misc/integrations/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>访问 scheduler 主机名（如 <code>https://www.example.com/changeme</code>），运行 <code>/setup</code> 向导以配置 UI、scheduler 与实例。</p>
 </div>
@@ -1417,7 +1370,7 @@
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -1428,7 +1381,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span>
@@ -1448,7 +1401,7 @@
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">"admin"</span>
@@ -1529,7 +1482,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </code></pre></div>
 <p>恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
 - 会话：默认空闲时长 12 小时（<code>SESSION_LIFETIME_HOURS</code>），每次请求刷新。<code>SESSION_ABSOLUTE_HOURS</code>（默认 <code>168</code> = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（<code>SESSION_ROLLING_HOURS</code>，默认 <code>0</code> = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；<code>CHECK_PRIVATE_IP=no</code> 仅对私网放宽 IP 检查。<code>ALWAYS_REMEMBER=yes</code> 始终启用持久 Cookie。
-- 会话存储：当 <code>USE_REDIS=yes</code> 时会话存放在 Redis 中，否则存放在 <code>/var/lib/bunkerweb</code> 下的本地缓存中。Redis 停止响应，或因达到 <code>maxmemory</code> 而拒绝写入，都不再导致 Web UI 不可用：受影响的会话会转入该本地缓存；该缓存先于 Redis 读取，因此从未写入 Redis 的修改或删除不会被 Redis 仍持有的旧副本遮蔽，并会在 Redis 恢复响应后回写到 Redis。停机期间的登出或会话 ID 轮换也不会被恢复过程撤销。每次吊销都会同时写入两个存储，因此在两种情况下都持续生效。逐出不在覆盖范围内，因为 Redis 会报告成功，只是不再持有该键，所以请按你要保留的键来设置 <code>maxmemory</code>。当 Redis 拒绝一次更新时，该会话转入本地存储，并立即删除 Redis 中仍持有的副本，使该修改不会被旧版本遮蔽，也使 2FA 这类多步流程不会停留在此前状态上循环。该本地缓存按主机隔离，这在运行多个 Web UI 副本时很重要：其他副本在该副本把已转入其本地缓存的会话回写到 Redis 之前将看不到该会话，Redis 不可用期间发出的吊销仅由发出它的副本执行，而已经从自身本地缓存提供某个会话的副本，在另一个副本通过 Redis 删除该会话后，仍可能继续提供它长达 <code>SESSION_LIFETIME_HOURS</code>。<code>UI_USE_REDIS=no</code> 只让 Web UI 停用 Redis，而全局的 <code>USE_REDIS</code> 还会停止在各实例之间共享封禁与报告。
+- 会话存储：当 <code>USE_REDIS=yes</code> 时会话存放在 Redis 中，否则存放在 <code>/var/lib/bunkerweb</code> 下的本地缓存中。Redis 停止响应，或因达到 <code>maxmemory</code> 而拒绝写入，都不再导致 Web UI 不可用：受影响的会话会转入该本地缓存；该缓存先于 Redis 读取，因此从未写入 Redis 的修改或删除不会被 Redis 仍持有的旧副本遮蔽，并会在 Redis 恢复响应后回写到 Redis。停机期间的登出或会话 ID 轮换也不会被恢复过程撤销，即使 Redis 停机时无法读取该会话本身。每次吊销都会同时写入两个存储，因此在两种情况下都持续生效。逐出不在覆盖范围内，因为 Redis 会报告成功，只是不再持有该键，所以请按你要保留的键来设置 <code>maxmemory</code>。当 Redis 拒绝一次更新时，该会话转入本地存储，并立即删除 Redis 中仍持有的副本，使该修改不会被旧版本遮蔽，也使 2FA 这类多步流程不会停留在此前状态上循环。该本地缓存按主机隔离，这在运行多个 Web UI 副本时很重要：其他副本在该副本把已转入其本地缓存的会话回写到 Redis 之前将看不到该会话，Redis 不可用期间发出的吊销仅由发出它的副本执行，而已经从自身本地缓存提供某个会话的副本，在另一个副本通过 Redis 删除该会话后，仍可能继续提供它长达 <code>SESSION_LIFETIME_HOURS</code>。<code>UI_USE_REDIS=no</code> 只让 Web UI 停用 Redis，而全局的 <code>USE_REDIS</code> 还会停止在各实例之间共享封禁与报告。
 - 若多级代理附加 <code>X-Forwarded-*</code>，请设置 <code>PROXY_NUMBERS</code>。</p>
 </li>
 </ul>

@@ -86,9 +86,9 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStart a 30-day BunkerWeb PRO free trial from the \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eNeed premium support or tailored consulting around BunkerWeb? Check out our \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessional services\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBe part of the Bunker community by joining the \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord chat\u003c/a\u003e and following us on \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,7 +205,7 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services? Visit the
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
@@ -222,8 +222,7 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    You&#39;re not viewing the documentation of the latest version.
     <a href="../..">
         <strong>Click here to view latest.</strong>
     </a>
@@ -449,25 +448,6 @@
     
   
   Quickstart guide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Building from source
 
       </a>
     </li>
@@ -981,33 +961,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Building from source
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../features/" class="md-nav__link">
         
   
@@ -1345,7 +1298,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>You will find concrete examples of multisite mode in the <a href="../advanced/">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/examples">examples</a> directory of the repository.</p>
+<p>You will find concrete examples of multisite mode in the <a href="../advanced/">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="custom-configurations">Custom configurations<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>To address unique challenges and cater to specific use cases, BunkerWeb offers the flexibility of custom configurations. While the provided settings and <a href="../plugins/">external plugins</a> cover a wide range of scenarios, there may be situations that require additional customization.</p>
@@ -1360,7 +1313,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>You will find concrete examples of custom configurations in the <a href="../advanced/#custom-configurations">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/examples">examples</a> directory of the repository.</p>
+<p>You will find concrete examples of custom configurations in the <a href="../advanced/#custom-configurations">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb securely stores its current configuration in a backend database, which contains essential data for smooth operation. The following information is stored in the database:</p>
@@ -1414,22 +1367,22 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <tr>
 <td style="text-align: left;"><strong>Docker</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v9</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v13</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v26</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Kubernetes</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v9</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v13</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v26</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Autoconf</strong></td>
 <td style="text-align: left;">✅ <code>v18</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v12</code> and earlier</td>
-<td style="text-align: left;">✅ <code>v9</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v13</code> and earlier</td>
+<td style="text-align: left;">✅ <code>v26</code> and earlier</td>
 <td style="text-align: left;">✅ Supported</td>
 </tr>
 <tr>
@@ -1445,6 +1398,8 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Notes</p>
 <ul>
 <li><strong>PostgreSQL</strong>: Alpine-based images, including all-in-one, now ship with the <code>v18</code> client, so <code>v18</code> and earlier are supported out of the box.</li>
+<li><strong>MariaDB</strong>: Alpine-based images ship the <code>v11.8</code> client, which works against MariaDB <code>v13</code> servers, including the built-in backup and restore.</li>
+<li><strong>MySQL</strong>: The Alpine-based images use the MariaDB client for backups, which works against MySQL <code>v9</code> (<code>9.7</code> LTS) and <code>26.x</code> (the new year-based Innovation releases), including the built-in backup and restore.</li>
 <li><strong>Linux</strong>: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).</li>
 <li><strong>SQLite</strong>: Ships with the packages and is ready to use.</li>
 </ul>

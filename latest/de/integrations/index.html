@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -449,25 +448,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -1558,6 +1538,111 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#aus-dem-quellcode-bauen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aus dem Quellcode bauen
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Aus dem Quellcode bauen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#umfang" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Umfang
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build-Standards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voraussetzungen_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Voraussetzungen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#artefaktmatrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Artefaktmatrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-container-images-bauen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community-Container-Images bauen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-pakete-bauen-deb-rpm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux-Pakete bauen (.deb / .rpm)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-paritat-referenz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI-Parität (Referenz)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#artefakte-veroffentlichen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Artefakte veröffentlichen
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1581,33 +1666,6 @@
     
   
     Schnellstart
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
   
 
     
@@ -1966,7 +2024,7 @@ nslookup<span class="w"> </span>beispiel.de
 <li><strong>Use Reverse Proxy</strong>: <code>yes</code></li>
 <li><strong>Reverse Proxy Host</strong>: <code>185.87.1.100:443</code> (Ihre Server-IP)</li>
 </ol>
-<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/latest/settings/#reverse-proxy">Reverse-Proxy-Dokumentation</a></p>
+<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/1.6/settings/#reverse-proxy">Reverse-Proxy-Dokumentation</a></p>
 <h4 id="multi-dienste-mit-sni">Multi-Dienste mit SNI<a class="headerlink" href="#multi-dienste-mit-sni" title="Permanent link">&para;</a></h4>
 <h5 id="warum-sni-aktivieren">Warum SNI aktivieren?<a class="headerlink" href="#warum-sni-aktivieren" title="Permanent link">&para;</a></h5>
 <p>Server Name Indication (SNI) ist <strong>essenziell</strong>, wenn:</p>
@@ -1993,7 +2051,7 @@ nslookup<span class="w"> </span>beispiel.de
 <span class="nt">REVERSE_PROXY_SSL_SNI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
 <span class="nt">REVERSE_PROXY_SSL_SNI_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anderes-beispiel.de</span>
 </code></pre></div>
-<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/latest/settings/#reverse-proxy">Reverse-Proxy-Dokumentation</a></p>
+<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/1.6/settings/#reverse-proxy">Reverse-Proxy-Dokumentation</a></p>
 <h5 id="technische-details-zu-sni">Technische Details zu SNI<a class="headerlink" href="#technische-details-zu-sni" title="Permanent link">&para;</a></h5>
 <p>SNI ermöglicht BunkerWeb Cloud:</p>
 <ol>
@@ -2663,7 +2721,7 @@ iptables-save<span class="w"> </span>&gt;<span class="w"> </span>/etc/iptables/r
 <span class="c1"># Beispiel, wenn Sie auch Cloudflare Proxy vor BunkerWeb verwenden</span>
 <span class="nt">REAL_IP_FROM_URLS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://www.cloudflare.com/ips-v4/ https://www.cloudflare.com/ips-v6/</span>
 </code></pre></div>
-<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/latest/settings/#real-ip">Dokumentation Real Ip</a></p>
+<p>Sie finden alle Konfigurationsoptionen in der <a href="https://docs.bunkerweb.io/1.6/settings/#real-ip">Dokumentation Real Ip</a></p>
 <h4 id="konfiguration-auf-seite-der-client-infrastruktur">Konfiguration auf Seite der Client-Infrastruktur<a class="headerlink" href="#konfiguration-auf-seite-der-client-infrastruktur" title="Permanent link">&para;</a></h4>
 <h5 id="nginx_2">Nginx<a class="headerlink" href="#nginx_2" title="Permanent link">&para;</a></h5>
 <details>
@@ -3012,7 +3070,7 @@ openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span cla
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.15
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div>
 <p>Standardmäßig stellt der Container Folgendes bereit:</p>
 <ul>
@@ -3025,7 +3083,7 @@ openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span cla
 <p>Ein benanntes Volume (oder Bind-Mount) ist erforderlich, um die unter <code>/data</code> gespeicherten SQLite-Datenbanken, Caches und Backups zu persistieren:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.16</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
 <span class="nn">...</span>
@@ -3085,12 +3143,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">API_PASSWORD</span><span class="o">=</span>StrongP@ssw0rd<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">8888</span>:8888/tcp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.15
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div>
 <p>Empfohlen (hinter BunkerWeb) — veröffentlichen Sie <code>8888</code> nicht; verwenden Sie stattdessen einen Reverse-Proxy:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.16</span>
 <span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-aio</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
@@ -3168,7 +3226,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.15<span class="sb">```</span>
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.16<span class="sb">```</span>
 
 *<span class="w"> </span>Der<span class="w"> </span>**eingebettete<span class="w"> </span>CrowdSec-Agent<span class="w"> </span>startet<span class="w"> </span>nur**,<span class="w"> </span>wenn<span class="w"> </span>der<span class="w"> </span>Container<span class="w"> </span>die<span class="w"> </span>Umgebungsvariable<span class="w"> </span><span class="sb">`</span><span class="nv">USE_CROWDSEC</span><span class="o">=</span>yes<span class="sb">`</span><span class="w"> </span>ohne<span class="w"> </span>Präfix<span class="w"> </span>und<span class="w"> </span>eine<span class="w"> </span>lokale<span class="w"> </span><span class="sb">`</span>CROWDSEC_API<span class="sb">`</span><span class="w"> </span>hat.<span class="w"> </span>CrowdSec<span class="w"> </span>nur<span class="w"> </span>für<span class="w"> </span>einen<span class="w"> </span>einzelnen<span class="w"> </span>Dienst<span class="w"> </span>zu<span class="w"> </span>aktivieren<span class="w"> </span><span class="o">(</span><span class="sb">`</span>www.example.com_USE_CROWDSEC<span class="o">=</span>yes<span class="sb">`</span><span class="o">)</span><span class="w"> </span>startet<span class="w"> </span>ihn<span class="w"> </span>nicht.
 *<span class="w"> </span>Wenn<span class="w"> </span><span class="sb">`</span><span class="nv">USE_CROWDSEC</span><span class="o">=</span>yes<span class="sb">`</span>,<span class="w"> </span>wird<span class="w"> </span>das<span class="w"> </span>Einstiegsskript:
@@ -3222,7 +3280,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.15
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Wie es intern funktioniert</p>
@@ -3239,7 +3297,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.15
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div>
 <p>Hinweise:
 - Die Liste wird angewendet, nachdem die erforderlichen Elemente installiert/aktualisiert wurden; nur die von Ihnen aufgelisteten Parser werden entfernt.
@@ -3255,7 +3313,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.15
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div>
 <p>Es ist derselbe Variablenname wie in den offiziellen CrowdSec-Images, eine bestehende Konfiguration lässt sich also übernehmen.</p>
 <p>Hinweise:
@@ -3280,7 +3338,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.15
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.16
 </code></pre></div>
 <ul>
 <li>Die <strong>lokale Registrierung</strong> wird übersprungen, wenn <code>CROWDSEC_API</code> nicht <code>127.0.0.1</code> oder <code>localhost</code> ist.</li>
@@ -3308,10 +3366,10 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <li>armv7 (ARM 32-Bit)</li>
 </ul>
 <p>Durch den Zugriff auf diese vorgefertigten Images von Docker Hub können Sie BunkerWeb schnell in Ihrer Docker-Umgebung ziehen und ausführen, wodurch umfangreiche Konfigurations- oder Einrichtungsprozesse entfallen. Dieser optimierte Ansatz ermöglicht es Ihnen, sich auf die Nutzung der Funktionen von BunkerWeb zu konzentrieren, ohne unnötige Komplexität.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb:1.6.15
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb:1.6.16
 </code></pre></div>
 <p>Docker-Images sind auch auf <a href="https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb">GitHub-Paketen</a> verfügbar und können über die Repository-Adresse <code>ghcr.io</code> heruntergeladen werden:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/bunkerity/bunkerweb:1.6.15
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/bunkerity/bunkerweb:1.6.16
 </code></pre></div>
 <p>Schlüsselkonzepte für die Docker-Integration sind:</p>
 <ul>
@@ -3321,14 +3379,14 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </ul>
 <div class="admonition info">
 <p class="admonition-title">Datenbank-Backend</p>
-<p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie SQLite als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Es werden jedoch auch andere Datenbank-Backends unterstützt. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/misc/integrations">misc/integrations</a> des Repositorys.</p>
+<p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie SQLite als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Es werden jedoch auch andere Datenbank-Backends unterstützt. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/misc/integrations">misc/integrations</a> des Repositorys.</p>
 </div>
 <h3 id="umgebungsvariablen">Umgebungsvariablen<a class="headerlink" href="#umgebungsvariablen" title="Permanent link">&para;</a></h3>
 <p>Einstellungen werden dem Scheduler über Docker-Umgebungsvariablen übergeben:</p>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MY_SETTING=value</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ANOTHER_SETTING=another value</span>
@@ -3367,7 +3425,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <p>Dadurch wird sichergestellt, dass sensible Einstellungen aus der Umgebung und den Protokollen herausgehalten werden.</p>
 <h3 id="scheduler">Scheduler<a class="headerlink" href="#scheduler" title="Permanent link">&para;</a></h3>
 <p>Der <a href="../concepts/#scheduler">Scheduler</a> läuft in seinem eigenen Container, der auch auf Docker Hub verfügbar ist:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-scheduler:1.6.15
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-scheduler:1.6.16
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb-Einstellungen</p>
@@ -3384,7 +3442,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Dies setzt die API-Einstellungen für den BunkerWeb-Container</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
@@ -3393,7 +3451,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Dies setzt die API-Einstellungen für den Scheduler-Container</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
@@ -3409,7 +3467,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
 <span class="nn">...</span>
@@ -3687,7 +3745,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -3700,7 +3758,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben</span>
@@ -3730,7 +3788,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -3743,7 +3801,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -3799,8 +3857,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <h4 id="schnellstart">Schnellstart<a class="headerlink" href="#schnellstart" title="Permanent link">&para;</a></h4>
 <p>Um zu beginnen, laden Sie das Installationsskript und seine Prüfsumme herunter und überprüfen Sie dann die Integrität des Skripts, bevor Sie es ausführen.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Skript und Prüfsumme herunterladen</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16/install-bunkerweb.sh.sha256
 
 <span class="c1"># Prüfsumme überprüfen</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -3885,7 +3943,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dock
 <tbody>
 <tr>
 <td><code>-v, --version VERSION</code></td>
-<td>Gibt die zu installierende BunkerWeb-Version an (z. B. <code>1.6.15</code>).</td>
+<td>Gibt die zu installierende BunkerWeb-Version an (z. B. <code>1.6.16</code>).</td>
 </tr>
 <tr>
 <td><code>-w, --enable-wizard</code></td>
@@ -4010,7 +4068,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dock
 <tbody>
 <tr>
 <td><code>--instances "IP1 IP2"</code></td>
-<td>Durch Leerzeichen getrennte Liste von BunkerWeb-Instanzen (erforderlich für Manager-/Scheduler-Modi).</td>
+<td>Optional für Manager-/Scheduler-Modi; Worker können später hinzugefügt werden.</td>
 </tr>
 <tr>
 <td><code>--manager-ip IPs</code></td>
@@ -4081,7 +4139,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--worker<span class="w"> </span>--no-wizard
 
 <span class="c1"># Eine bestimmte Version installieren</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.15
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.16
 
 <span class="c1"># Manager-Setup mit entfernten Worker-Instanzen (Instanzen erforderlich)</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--manager<span class="w"> </span>--instances<span class="w"> </span><span class="s2">"192.168.1.10 192.168.1.11"</span>
@@ -4110,15 +4168,16 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 <span class="c1"># Fehler: CrowdSec kann nicht mit Worker-Installationen verwendet werden</span>
 <span class="c1"># sudo ./install-bunkerweb.sh --worker --crowdsec  # Dies schlägt fehl</span>
 
-<span class="c1"># Fehler: Instanzen für Manager im nicht-interaktiven Modus erforderlich</span>
-<span class="c1"># sudo ./install-bunkerweb.sh --manager --yes  # Dies schlägt ohne --instances fehl</span>
+<span class="c1"># Die Liste --instances ist optional: Ohne Worker gibt der Manager eine Warnung aus.</span>
+<span class="c1"># sudo ./install-bunkerweb.sh --manager --yes</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Wichtige Hinweise zur Optionskompatibilität</p>
 <p><strong>CrowdSec-Einschränkungen:</strong></p>
 <ul>
-<li>CrowdSec-Optionen (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) sind nur mit dem Installationstyp <code>--full</code> (Standard) kompatibel</li>
-<li>Sie können nicht mit <code>--manager</code>, <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> oder <code>--api-only</code> Installationen verwendet werden</li>
+<li>CrowdSec-Optionen (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) sind mit <code>--full</code> (Standard) und <code>--manager</code> kompatibel.</li>
+<li>Die interaktive CrowdSec-Abfrage erscheint nur bei Full Stack; verwenden Sie CLI-Optionen für Manager.</li>
+<li>Sie sind nicht mit <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> oder <code>--api-only</code> kompatibel.</li>
 </ul>
 <p><strong>Redis-Einschränkungen:</strong></p>
 <ul>
@@ -4133,7 +4192,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 </ul>
 <p><strong>Anforderungen für Instanzen:</strong>
 - Die Option <code>--instances</code> ist nur mit den Installationstypen <code>--manager</code> und <code>--scheduler-only</code> gültig
-- Bei Verwendung von <code>--manager</code> oder <code>--scheduler-only</code> mit <code>--yes</code> (nicht-interaktiver Modus) ist die Option <code>--instances</code> obligatorisch
+- Die Liste ist bei der Installation optional; ohne Einträge warnt der Installer und Worker können später hinzugefügt werden.
 - Format: <code>--instances "192.168.1.10 192.168.1.11 192.168.1.12"</code></p>
 <p><strong>Interaktiv vs. Nicht-interaktiv:</strong>
 - Der interaktive Modus (Standard) fordert zur Eingabe fehlender erforderlicher Werte auf
@@ -4207,10 +4266,10 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>Und installieren Sie schließlich BunkerWeb 1.6.15:</p>
+<p>Und installieren Sie schließlich BunkerWeb 1.6.16:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.15
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.16
 </code></pre></div>
 <p>Um ein Upgrade der NGINX- und/oder BunkerWeb-Pakete bei der Ausführung von <code>apt upgrade</code> zu verhindern, können Sie den folgenden Befehl verwenden:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -4241,10 +4300,10 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>Und installieren Sie schließlich BunkerWeb 1.6.15:</p>
+<p>Und installieren Sie schließlich BunkerWeb 1.6.16:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.15
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.16
 </code></pre></div>
 <p>Um ein Upgrade der NGINX- und/oder BunkerWeb-Pakete bei der Ausführung von <code>apt upgrade</code> zu verhindern, können Sie den folgenden Befehl verwenden:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -4266,10 +4325,10 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>Und installieren Sie schließlich BunkerWeb 1.6.15:</p>
+<p>Und installieren Sie schließlich BunkerWeb 1.6.16:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.15
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.16
 </code></pre></div>
 <p>Um ein Upgrade der NGINX- und/oder BunkerWeb-Pakete bei der Ausführung von <code>dnf upgrade</code> zu verhindern, können Sie den folgenden Befehl verwenden:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -4303,10 +4362,10 @@ module_hotfixes=true
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>Und installieren Sie schließlich BunkerWeb 1.6.15:</p>
+<p>Und installieren Sie schließlich BunkerWeb 1.6.16:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.15
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.16
 </code></pre></div>
 <p>Um ein Upgrade der NGINX- und/oder BunkerWeb-Pakete bei der Ausführung von <code>dnf upgrade</code> zu verhindern, können Sie den folgenden Befehl verwenden:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -4327,9 +4386,9 @@ Wenn Sie die BunkerWeb-Konfiguration manuell über `/etc/bunkerweb/variables.env
 
 Der Entrypoint des `bunkerweb`-Dienstes liest außerdem direkt die folgende Variable, außerhalb des normalen Einstellungsflusses:
 
-| Einstellung               | Beschreibung                                                                                                                                                                                                                             | Zulässige Werte | Standard |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | -------- |
-| `KEEP_CONFIG_ON_RESTART`  | Behält beim Neustart des `bunkerweb`-Dienstes die zuvor generierte Konfiguration anstatt die Lade-Konfiguration zu rendern. Wird aus der Umgebung oder `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank.               | `yes` oder `no`  | `no`     |
+| Einstellung              | Beschreibung                                                                                                                                                                                                              | Zulässige Werte | Standard |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------- |
+| `KEEP_CONFIG_ON_RESTART` | Behält beim Neustart des `bunkerweb`-Dienstes die zuvor generierte Konfiguration anstatt die Lade-Konfiguration zu rendern. Wird aus der Umgebung oder `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank. | `yes` oder `no` | `no`     |
 
 ### Hochverfügbarkeit
 
@@ -4383,7 +4442,7 @@ export UI_WIZARD=no
 </div>
 <div class="admonition info">
 <p class="admonition-title">Datenbank-Backend</p>
-<p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie MariaDB als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Wir verstehen jedoch, dass Sie möglicherweise alternative Backends für Ihre Docker-Integration bevorzugen. In diesem Fall können Sie sicher sein, dass auch andere Datenbank-Backends möglich sind. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/misc/integrations">misc/integrations</a> des Repositorys.</p>
+<p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie MariaDB als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Wir verstehen jedoch, dass Sie möglicherweise alternative Backends für Ihre Docker-Integration bevorzugen. In diesem Fall können Sie sicher sein, dass auch andere Datenbank-Backends möglich sind. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/misc/integrations">misc/integrations</a> des Repositorys.</p>
 </div>
 <p>Um automatisierte Konfigurationsupdates zu ermöglichen, fügen Sie einen zusätzlichen Container namens <code>bw-autoconf</code> zum Stack hinzu. Dieser Container hostet den Autoconf-Dienst, der dynamische Konfigurationsänderungen für BunkerWeb verwaltet.</p>
 <p>Um diese Funktionalität zu unterstützen, verwenden Sie ein dediziertes "echtes" Datenbank-Backend (z. B. MariaDB, MySQL oder PostgreSQL) zur synchronisierten Konfigurationsspeicherung. Durch die Integration von <code>bw-autoconf</code> und einem geeigneten Datenbank-Backend schaffen Sie die Infrastruktur für eine nahtlose automatisierte Konfigurationsverwaltung in BunkerWeb.</p>
@@ -4394,7 +4453,7 @@ export UI_WIZARD=no
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -4409,7 +4468,7 @@ export UI_WIZARD=no
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># Wir müssen die BunkerWeb-Instanz hier nicht angeben, da sie automatisch vom Autoconf-Dienst erkannt werden</span>
@@ -4424,7 +4483,7 @@ export UI_WIZARD=no
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.16</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
@@ -4725,6 +4784,24 @@ export UI_WIZARD=no
 <td>unset (alle)</td>
 </tr>
 <tr>
+<td><code>KUBERNETES_SKIP_FOREIGN_CLASSES</code></td>
+<td>Wenn <code>yes</code> und kein Klassenfilter gesetzt ist, werden Ingresses und Gateways übersprungen, deren IngressClass oder GatewayClass einem anderen Controller gehört. Benötigt get/list/watch auf <code>ingressclasses</code> / <code>gatewayclasses</code></td>
+<td><code>yes</code> oder <code>no</code></td>
+<td><code>no</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_INGRESS_CONTROLLER</code></td>
+<td>Controller-ID, die eine IngressClass als zu BunkerWeb gehörig markiert (<code>spec.controller</code>)</td>
+<td>String</td>
+<td><code>bunkerweb.io/ingress-controller</code></td>
+</tr>
+<tr>
+<td><code>KUBERNETES_GATEWAY_CONTROLLER</code></td>
+<td>Controller-ID, die eine GatewayClass als zu BunkerWeb gehörig markiert (<code>spec.controllerName</code>)</td>
+<td>String</td>
+<td><code>bunkerweb.io/gateway-controller</code></td>
+</tr>
+<tr>
 <td><code>KUBERNETES_GATEWAY_API_VERSION</code></td>
 <td>Zu verwendende Gateway-API-Version (automatischer Fallback bei fehlender Version)</td>
 <td><code>v1</code>, <code>v1beta1</code>, <code>v1beta2</code>, <code>v1alpha2</code>, <code>v1alpha1</code></td>
@@ -4789,7 +4866,7 @@ export UI_WIZARD=no
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">AUTOCONF_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="w">      </span><span class="nt">AUTOCONF_DISABLE_CLEANUP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span><span class="w"> </span><span class="c1"># entfernte Dienste als Entwürfe beibehalten</span>
@@ -4818,13 +4895,13 @@ export UI_WIZARD=no
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"bunkerweb.INSTANCE=yes"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"bunkerweb.NAMESPACE=my-namespace"</span><span class="w"> </span><span class="c1"># Setzen Sie den Namespace für die BunkerWeb-Instanz, damit der Autoconf-Dienst sie erkennen kann</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">NAMESPACES</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">"my-namespace</span><span class="nv"> </span><span class="s">my-other-namespace"</span><span class="w"> </span><span class="c1"># Lauschen Sie nur auf diese Namespaces</span>
@@ -4890,7 +4967,7 @@ dies keine Wirkung.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Datenbank-Backend</p>
-<p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie MariaDB als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Wir verstehen jedoch, dass Sie möglicherweise alternative Backends für Ihre Docker-Integration bevorzugen. In diesem Fall können Sie sicher sein, dass auch andere Datenbank-Backends möglich sind. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/misc/integrations">misc/integrations</a> des Repositorys.</p>
+<p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie MariaDB als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Wir verstehen jedoch, dass Sie möglicherweise alternative Backends für Ihre Docker-Integration bevorzugen. In diesem Fall können Sie sicher sein, dass auch andere Datenbank-Backends möglich sind. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/misc/integrations">misc/integrations</a> des Repositorys.</p>
 <p>Die Einrichtung von geclusterten Datenbank-Backends liegt außerhalb des Geltungsbereichs dieser Dokumentation.</p>
 </div>
 <p>Bitte stellen Sie sicher, dass die Autoconf-Dienste Zugriff auf die Kubernetes-API haben. Es wird empfohlen, hierfür die <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">RBAC-Autorisierung</a> zu verwenden.</p>
@@ -4983,7 +5060,7 @@ dies keine Wirkung.</p>
 <p>Enable the controller in <code>values.yaml</code>:
 <div class="highlight"><pre><span></span><code><span class="nt">controller</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">"1.6.15"</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">"1.6.16"</span>
 </code></pre></div></p>
 </li>
 <li>
@@ -5135,7 +5212,7 @@ dies keine Wirkung.</p>
 <h6 id="option-b-manual-configuration-with-bunkerweb_instances">Option B: Manual Configuration with <code>BUNKERWEB_INSTANCES</code><a class="headerlink" href="#option-b-manual-configuration-with-bunkerweb_instances" title="Permanent link">&para;</a></h6>
 <p>In your BunkerWeb chart <code>values.yaml</code>, configure the <code>BUNKERWEB_INSTANCES</code> environment variable with the URLs of all your headless services:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">"1.6.15"</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">"1.6.16"</span>
 <span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUNKERWEB_INSTANCES</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000</span><span class="nv"> </span><span class="s">http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"</span>
@@ -5173,7 +5250,7 @@ dies keine Wirkung.</p>
 
 <span class="w">        </span><span class="c1"># BunkerWeb Sidecar</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w">  </span><span class="c1"># Exposed HTTP port</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span><span class="w">  </span><span class="c1"># Internal API (mandatory)</span>
@@ -5481,7 +5558,7 @@ dies keine Wirkung.</p>
 ✅ <strong>Use Kubernetes secrets</strong> for sensitive configurations
 ✅ <strong>Check logs</strong> of scheduler and sidecars regularly</p>
 <h4 id="vollstandige-yaml-dateien">Vollständige YAML-Dateien<a class="headerlink" href="#vollstandige-yaml-dateien" title="Permanent link">&para;</a></h4>
-<p>Anstatt das Helm-Chart zu verwenden, können Sie auch die YAML-Vorlagen im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/misc/integrations">misc/integrations</a> des GitHub-Repositorys verwenden. Bitte beachten Sie, dass wir dringend empfehlen, stattdessen das Helm-Chart zu verwenden.</p>
+<p>Anstatt das Helm-Chart zu verwenden, können Sie auch die YAML-Vorlagen im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/misc/integrations">misc/integrations</a> des GitHub-Repositorys verwenden. Bitte beachten Sie, dass wir dringend empfehlen, stattdessen das Helm-Chart zu verwenden.</p>
 <div class="admonition warning">
 <p class="admonition-title">DNS_RESOLVERS muss den DNS-Service des Clusters benennen</p>
 <p>Geben Sie <code>DNS_RESOLVERS</code> den DNS-Service des Clusters an, dessen ClusterIP für die Lebensdauer des Service stabil bleibt, und niemals eine Pod-IP. nginx löst diesen Wert genau einmal auf, beim Parsen seiner Konfiguration, und verwendet die erhaltene Adresse bis zum nächsten Reload weiter: Etwas Pod-Bezogenes funktioniert also nur so lange, bis diese Pods umziehen, und ein rollierender Neustart von CoreDNS lässt danach jede Auflösung in einen Timeout laufen. Auf einem Standard-Cluster ist dieser Service <code>kube-dns.kube-system.svc.cluster.local</code>, auch wenn CoreDNS die Implementierung dahinter ist.</p>
@@ -5622,7 +5699,7 @@ Sie können Gateway-Annotationen weiterhin auf einen bestimmten Servernamen eins
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.15</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.16</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NAMESPACES</span>
@@ -5668,6 +5745,7 @@ Sie können Gateway-Annotationen weiterhin auf einen bestimmten Servernamen eins
 <span class="w">                </span><span class="nt">port</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 </code></pre></div>
+<p>Wenn <code>KUBERNETES_INGRESS_CLASS</code> nicht gesetzt ist, setzen Sie <code>KUBERNETES_SKIP_FOREIGN_CLASSES=yes</code>, um Ingresses, die einem anderen Controller gehören, in Ruhe zu lassen, statt alle zu bedienen. Ein Ingress wird verarbeitet, wenn er keine Klasse hat, wenn seine Klasse ein nicht existierendes <code>IngressClass</code>-Objekt benennt, oder wenn der <code>spec.controller</code> dieses Objekts mit <code>KUBERNETES_INGRESS_CONTROLLER</code> übereinstimmt; er wird übersprungen, wenn das Objekt existiert und auf einen anderen Controller zeigt. Die veraltete Annotation <code>kubernetes.io/ingress.class</code> wird genauso gelesen, wenn <code>ingressClassName</code> nicht gesetzt ist. Dies erfordert <code>get</code>/<code>list</code>/<code>watch</code> auf <code>ingressclasses</code>; ohne dieses RBAC protokolliert der Controller eine einzige Warnung und verarbeitet jeden Ingress, als wäre die Einstellung <code>no</code>. Das Aktivieren kann dazu führen, dass ein Ingress mit veralteter Klasse (zum Beispiel eine verbliebene <code>IngressClass</code> <code>nginx</code> nach dem Entfernen von ingress-nginx) nicht mehr bedient wird: setzen Sie <code>ingressClassName: bunkerweb</code> darauf, oder löschen Sie die veraltete <code>IngressClass</code>.</p>
 <h3 id="gateway-class">Gateway-Klasse<a class="headerlink" href="#gateway-class" title="Permanent link">&para;</a></h3>
 <p>Bei Verwendung der Gateway API erwartet BunkerWeb eine <code>GatewayClass</code>, die auf den Controller verweist:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
@@ -5691,6 +5769,7 @@ und verwenden den passenden <code>gatewayClassName</code> in Ihren <code>Gateway
 <span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">      </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">www.example.com</span>
 </code></pre></div>
+<p>Die gleichen <code>KUBERNETES_SKIP_FOREIGN_CLASSES</code>-Regeln gelten für Gateways: Wenn <code>KUBERNETES_GATEWAY_CLASS</code> nicht gesetzt ist, wird ein Gateway übersprungen, wenn sein <code>gatewayClassName</code> eine <code>GatewayClass</code> benennt, deren <code>spec.controllerName</code> nicht <code>KUBERNETES_GATEWAY_CONTROLLER</code> ist. Ohne <code>get</code>/<code>list</code>/<code>watch</code> auf <code>gatewayclasses</code> protokolliert der Controller eine einzige Warnung und verarbeitet jedes Gateway.</p>
 <h3 id="benutzerdefinierter-domainname">Benutzerdefinierter Domainname<a class="headerlink" href="#benutzerdefinierter-domainname" title="Permanent link">&para;</a></h3>
 <p>Wenn Sie für Ihren Kubernetes-Cluster einen benutzerdefinierten Domainnamen anstelle des standardmäßigen <code>kubernetes.local</code> verwenden, können Sie den Wert über die Umgebungsvariable <code>KUBERNETES_DOMAIN_NAME</code> auf dem Scheduler-Container festlegen.</p>
 <h3 id="verwendung-mit-einem-vorhandenen-ingress-controller">Verwendung mit einem vorhandenen Ingress-Controller<a class="headerlink" href="#verwendung-mit-einem-vorhandenen-ingress-controller" title="Permanent link">&para;</a></h3>
@@ -5759,11 +5838,11 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="c1"># BunkerWeb-Einstellungen</span>
 <span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.15</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.16</span>
 
 <span class="c1"># Scheduler-Einstellungen</span>
 <span class="nt">scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.15</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.16</span>
 <span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Aktivieren Sie das Real-IP-Modul, um die echte IP der Clients zu erhalten</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span>
@@ -5771,11 +5850,11 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="c1"># Controller-Einstellungen</span>
 <span class="nt">controller</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.15</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.16</span>
 
 <span class="c1"># UI-Einstellungen</span>
 <span class="nt">ui</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.15</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.16</span>
 </code></pre></div>
 <p>Installieren Sie BunkerWeb mit benutzerdefinierten Werten:</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>--namespace<span class="w"> </span>bunkerweb<span class="w"> </span>--create-namespace<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb/bunkerweb
@@ -6444,7 +6523,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <p>Was das Datenbank-Volume betrifft, so gibt die Dokumentation keinen spezifischen Ansatz vor. Die Wahl eines freigegebenen Ordners oder eines bestimmten Treibers für das Datenbank-Volume hängt von Ihrem einzigartigen Anwendungsfall ab und bleibt dem Leser als Übung überlassen.</p>
 <div class="admonition info">
 <p class="admonition-title">Datenbank-Backend</p>
-<p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie MariaDB als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Wir verstehen jedoch, dass Sie möglicherweise alternative Backends für Ihre Docker-Integration bevorzugen. In diesem Fall können Sie sicher sein, dass auch andere Datenbank-Backends möglich sind. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/misc/integrations">misc/integrations</a> des Repositorys.</p>
+<p>Bitte beachten Sie, dass unsere Anweisungen davon ausgehen, dass Sie MariaDB als Standard-Datenbank-Backend verwenden, wie durch die Einstellung <code>DATABASE_URI</code> konfiguriert. Wir verstehen jedoch, dass Sie möglicherweise alternative Backends für Ihre Docker-Integration bevorzugen. In diesem Fall können Sie sicher sein, dass auch andere Datenbank-Backends möglich sind. Weitere Informationen finden Sie in den docker-compose-Dateien im Ordner <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/misc/integrations">misc/integrations</a> des Repositorys.</p>
 <p>Die Einrichtung von geclusterten Datenbank-Backends liegt außerhalb des Geltungsbereichs dieser Dokumentation.</p>
 </div>
 <p>Hier ist die Stack-Vorlage, die Sie mit <code>docker stack deploy</code> bereitstellen können:</p>
@@ -6455,7 +6534,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
@@ -6484,7 +6563,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"bunkerweb.INSTANCE=yes"</span><span class="w"> </span><span class="c1"># Obligatorisches Label für den Autoconf-Dienst, um die BunkerWeb-Instanz zu identifizieren</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># Wir müssen die BunkerWeb-Instanz hier nicht angeben, da sie automatisch vom Autoconf-Dienst erkannt werden</span>
@@ -6505,7 +6584,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">worker"</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">SWARM_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"</span><span class="w"> </span><span class="c1"># Denken Sie daran, ein stärkeres Passwort für die Datenbank festzulegen</span>
@@ -6648,7 +6727,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">deploy</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span>
@@ -6660,7 +6739,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"bunkerweb.NAMESPACE=my-namespace"</span><span class="w"> </span><span class="c1"># Setzen Sie den Namespace für die BunkerWeb-Instanz</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">NAMESPACES</span><span class="p">:</span><span class="w"> </span><span class="s">"my-namespace</span><span class="nv"> </span><span class="s">my-other-namespace"</span><span class="w"> </span><span class="c1"># Lauschen Sie nur auf diese Namespaces</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -6871,7 +6950,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <li><a href="https://registry.terraform.io/providers/bunkerity/bunkerweb/latest/docs">Vollständige Provider-Dokumentation</a></li>
 <li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb">GitHub-Repository</a></li>
 <li><a href="https://github.com/bunkerity/terraform-provider-bunkerweb/tree/main/examples">Verwendungsbeispiele</a></li>
-<li><a href="https://docs.bunkerweb.io/latest/api/">BunkerWeb-API-Dokumentation</a></li>
+<li><a href="https://docs.bunkerweb.io/1.6/api/">BunkerWeb-API-Dokumentation</a></li>
 </ul>
 <h3 id="support-und-beitrage">Support und Beiträge<a class="headerlink" href="#support-und-beitrage" title="Permanent link">&para;</a></h3>
 <p>Um Fehler zu melden oder Verbesserungen vorzuschlagen, besuchen Sie das <a href="https://github.com/bunkerity/terraform-provider-bunkerweb/issues">GitHub-Repository des Providers</a>.</p>
@@ -6921,6 +7000,312 @@ Um eine virtuelle Maschine bereitzustellen, benötigen Sie die Berechtigungen Mi
 </div>
 </div>
 <p>Sie können auf den Einrichtungsassistenten zugreifen, indem Sie die URI <code>https://ihre-ip-adresse/setup</code> Ihrer virtuellen Maschine aufrufen.</p>
+<h2 id="aus-dem-quellcode-bauen">Aus dem Quellcode bauen<a class="headerlink" href="#aus-dem-quellcode-bauen" title="Permanent link">&para;</a></h2>
+<p>Diese Anleitung erklärt, wie BunkerWeb-Artefakte aus dem Quellcode gebaut werden.</p>
+<h3 id="umfang">Umfang<a class="headerlink" href="#umfang" title="Permanent link">&para;</a></h3>
+<p>Dieser Abschnitt behandelt:</p>
+<ul>
+<li>Community-Container-Images (<code>bunkerweb</code>, <code>scheduler</code>, <code>autoconf</code>, <code>ui</code>, <code>api</code>, <code>all-in-one</code>)</li>
+<li>Linux-Pakete (<code>.deb</code>, <code>.rpm</code>)</li>
+</ul>
+<p>Alle Befehle müssen im Stammverzeichnis des Repositorys ausgeführt werden.</p>
+<p>FreeBSD-Benutzer: BunkerWeb ist als offizieller Port verfügbar, siehe <a href="https://www.freshports.org/www/bunkerweb/">https://www.freshports.org/www/bunkerweb/</a>.</p>
+<h3 id="build-standards">Build-Standards<a class="headerlink" href="#build-standards" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Bauen Sie aus einem sauberen, aktuellen Working Tree.</li>
+<li>Verwenden Sie die Version aus <code>src/VERSION</code> (die Packaging-Skripte lesen sie automatisch).</li>
+<li>Halten Sie Artefakte reproduzierbar, indem Sie die bereitgestellten Skripte und Dockerfiles verwenden.</li>
+</ul>
+<h3 id="voraussetzungen_1">Voraussetzungen<a class="headerlink" href="#voraussetzungen_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Für Container und Linux-Pakete:</li>
+<li>Docker (Buildx empfohlen)</li>
+</ul>
+<h3 id="artefaktmatrix">Artefaktmatrix<a class="headerlink" href="#artefaktmatrix" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Artefakt</th>
+<th>Build-Pfad</th>
+<th>Hauptbefehl</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Community-Container-Images</td>
+<td><code>src/*/Dockerfile</code></td>
+<td><code>docker build -f &lt;Dockerfile&gt; -t &lt;tag&gt; .</code></td>
+</tr>
+<tr>
+<td>Linux-Pakete (<code>deb</code>/<code>rpm</code>)</td>
+<td><code>src/linux/Dockerfile-*</code> + <code>src/linux/package.sh</code></td>
+<td><code>./src/linux/package.sh &lt;linux&gt; &lt;arch&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="community-container-images-bauen">Community-Container-Images bauen<a class="headerlink" href="#community-container-images-bauen" title="Permanent link">&para;</a></h3>
+<h4 id="image-ziele">Image-Ziele<a class="headerlink" href="#image-ziele" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Image</th>
+<th>Dockerfile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bunkerweb</code></td>
+<td><code>src/bw/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>scheduler</code></td>
+<td><code>src/scheduler/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>autoconf</code></td>
+<td><code>src/autoconf/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>ui</code></td>
+<td><code>src/ui/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td><code>src/api/Dockerfile</code></td>
+</tr>
+<tr>
+<td><code>all-in-one</code></td>
+<td><code>src/all-in-one/Dockerfile</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="ein-image-bauen">Ein Image bauen<a class="headerlink" href="#ein-image-bauen" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/bw/Dockerfile<span class="w"> </span>-t<span class="w"> </span>local/bunkerweb:dev<span class="w"> </span>.
+</code></pre></div>
+<h4 id="alle-community-images-bauen">Alle Community-Images bauen<a class="headerlink" href="#alle-community-images-bauen" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nb">set</span><span class="w"> </span>-e
+
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span>bunkerweb<span class="w"> </span>scheduler<span class="w"> </span>autoconf<span class="w"> </span>ui<span class="w"> </span>api<span class="w"> </span>all-in-one<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="s2">"</span><span class="nv">$image</span><span class="s2">"</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span>bunkerweb<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/bw/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>scheduler<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/scheduler/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>autoconf<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/autoconf/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>ui<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/ui/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>api<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/api/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">    </span>all-in-one<span class="o">)</span><span class="w"> </span><span class="nv">dockerfile</span><span class="o">=</span><span class="s2">"src/all-in-one/Dockerfile"</span><span class="w"> </span><span class="p">;;</span>
+<span class="w">  </span><span class="k">esac</span>
+<span class="w">  </span>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span><span class="s2">"</span><span class="nv">$dockerfile</span><span class="s2">"</span><span class="w"> </span>-t<span class="w"> </span><span class="s2">"local/</span><span class="nv">$image</span><span class="s2">:dev"</span><span class="w"> </span>.
+<span class="k">done</span>
+</code></pre></div>
+<h4 id="build-argument-nur-fur-die-entwicklung-nicht-fur-die-produktion">Build-Argument nur für die Entwicklung (nicht für die Produktion)<a class="headerlink" href="#build-argument-nur-fur-die-entwicklung-nicht-fur-die-produktion" title="Permanent link">&para;</a></h4>
+<p>Verwenden Sie dies nur für lokale Iterationen bei Images, die Minifizierungsargumente unterstützen (<code>bw</code>, <code>ui</code>, <code>all-in-one</code>).
+Dadurch wird die Build-Zeit verkürzt, weil die Minifizierung von Assets übersprungen wird; es entstehen jedoch keine produktionsreifen Artefakte.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/all-in-one/Dockerfile<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">SKIP_MINIFY</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>.
+</code></pre></div>
+<h3 id="linux-pakete-bauen-deb-rpm">Linux-Pakete bauen (<code>.deb</code> / <code>.rpm</code>)<a class="headerlink" href="#linux-pakete-bauen-deb-rpm" title="Permanent link">&para;</a></h3>
+<p>Linux-Pakete können direkt mit Docker in zwei Schritten erzeugt werden:</p>
+<ol>
+<li>Bauen Sie das Package-Builder-Image für Ihre Distribution.</li>
+<li>Führen Sie dieses Image mit einem Host-Ausgabeverzeichnis aus, das unter <code>/data</code> eingehängt ist.</li>
+</ol>
+<h4 id="unterstutzte-distributionsbezeichner">Unterstützte Distributionsbezeichner<a class="headerlink" href="#unterstutzte-distributionsbezeichner" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>ubuntu</code></li>
+<li><code>ubuntu-noble</code></li>
+<li><code>ubuntu-jammy</code></li>
+<li><code>debian-bookworm</code></li>
+<li><code>debian-trixie</code></li>
+<li><code>fedora-43</code></li>
+<li><code>fedora-44</code></li>
+<li><code>rhel-8</code></li>
+<li><code>rhel-9</code></li>
+<li><code>rhel-10</code></li>
+</ul>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Schnelle lokale Methode (empfohlen)</label><label for="__tabbed_6_2">Skriptbasierte Methode (<code>package.sh</code>)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Dies ist der einfachste Community-Workflow für lokale Paket-Builds.
+Bei <code>-v &lt;host-dir&gt;:/data</code> können Sie ein beliebiges Host-Verzeichnis auswählen.
+Die erzeugten Paketdateien werden vom Container in dasselbe Host-Verzeichnis exportiert.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Ein <code>.deb</code> bauen (Ubuntu-Beispiel)</label><label for="__tabbed_7_2">Ein <code>.rpm</code> bauen (Fedora-Beispiel)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>bunkerweb_ubuntu<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>src/linux/Dockerfile-ubuntu<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/out/deb:/data"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerweb_ubuntu
+</code></pre></div>
+<p>Ausgabe:</p>
+<ul>
+<li><code>&lt;your-chosen-host-dir&gt;/bunkerweb.deb</code> (für das obige Beispiel: <code>$(pwd)/out/deb/bunkerweb.deb</code>)</li>
+</ul>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>bunkerweb_fedora43<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>src/linux/Dockerfile-fedora-43<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/out/rpm:/data"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerweb_fedora43
+</code></pre></div>
+<p>Ausgabe:</p>
+<ul>
+<li><code>&lt;your-chosen-host-dir&gt;/bunkerweb.rpm</code> (für das obige Beispiel: <code>$(pwd)/out/rpm/bunkerweb.rpm</code>)</li>
+</ul>
+</div>
+</div>
+</div>
+<h5 id="entwicklungs-flags-nicht-fur-die-produktion">Entwicklungs-Flags (nicht für die Produktion)<a class="headerlink" href="#entwicklungs-flags-nicht-fur-die-produktion" title="Permanent link">&para;</a></h5>
+<p>Verwenden Sie diese nur für lokale Entwicklung und Fehlerbehebung:</p>
+<ul>
+<li><code>SKIP_MINIFY=yes</code> (<code>docker build --build-arg</code>): überspringt die Minifizierung statischer Assets, um Builds zu beschleunigen; die Ausgabe ist weniger optimiert.</li>
+<li><code>FPM_DEBUG=yes</code> (<code>docker run -e</code>): aktiviert ausführliche FPM-/Debug-Logs während der Paketerstellung.</li>
+<li><code>FPM_SKIP_COMPRESSION=yes</code> (<code>docker run -e</code>): deaktiviert die Paketkomprimierung, um das Packaging zu beschleunigen und die Prüfung zu vereinfachen; die Ausgabepakete sind größer.</li>
+</ul>
+<p>Verwenden Sie diese Flags nicht für Release-Artefakte, die für Benutzer bestimmt sind.</p>
+<div class="admonition example">
+<p class="admonition-title">Beispiel für Entwicklung / Fehlerbehebung</p>
+<p>Verwenden Sie dies nur beim Debuggen der Paketerzeugung (ausführliche FPM-Logs, keine Komprimierung). Sie können weiterhin ein beliebiges Host-Verzeichnis auswählen, das unter <code>/data</code> eingehängt ist; die Artefakte werden dort geschrieben.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">SKIP_MINIFY</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>bunkerweb_ubuntu<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>src/linux/Dockerfile-ubuntu<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">FPM_DEBUG</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">FPM_SKIP_COMPRESSION</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/out/deb:/data"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerweb_ubuntu
+</code></pre></div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>Verwenden Sie diese Methode, wenn Sie die Namenskonvention des Repositorys in <code>package-&lt;linux&gt;/</code> verwenden möchten.</p>
+<h4 id="schritt-1-builder-image-bauen">Schritt 1: Builder-Image bauen<a class="headerlink" href="#schritt-1-builder-image-bauen" title="Permanent link">&para;</a></h4>
+<p>Beispiel (<code>ubuntu</code>):</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/linux/Dockerfile-ubuntu<span class="w"> </span>-t<span class="w"> </span>local/bunkerweb-ubuntu:latest<span class="w"> </span>.
+</code></pre></div>
+<h4 id="schritt-2-paket-bauen">Schritt 2: Paket bauen<a class="headerlink" href="#schritt-2-paket-bauen" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>chmod<span class="w"> </span>+x<span class="w"> </span>src/linux/package.sh
+./src/linux/package.sh<span class="w"> </span>ubuntu<span class="w"> </span>amd64
+</code></pre></div>
+<p>Artefakte werden nach <code>package-&lt;linux&gt;/</code> geschrieben.</p>
+<p>Beispiele:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Debian/Ubuntu package</span>
+docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/linux/Dockerfile-debian-bookworm<span class="w"> </span>-t<span class="w"> </span>local/bunkerweb-debian-bookworm:latest<span class="w"> </span>.
+./src/linux/package.sh<span class="w"> </span>debian-bookworm<span class="w"> </span>amd64
+
+<span class="c1"># RPM package</span>
+docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>src/linux/Dockerfile-fedora-43<span class="w"> </span>-t<span class="w"> </span>local/bunkerweb-fedora-43:latest<span class="w"> </span>.
+./src/linux/package.sh<span class="w"> </span>fedora-43<span class="w"> </span>x86_64
+</code></pre></div>
+<div class="admonition abstract">
+<p class="admonition-title">Hinweise</p>
+<ul>
+<li>Verwenden Sie für RPM die Linux-Architekturbezeichnungen (<code>x86_64</code>, <code>aarch64</code>, ...).</li>
+<li>Verwenden Sie für DEB die Debian-Architekturbezeichnungen (<code>amd64</code>, <code>arm64</code>, ...).</li>
+<li><code>curl</code> ist eine Laufzeitanforderung für ACME-Integrationen des Schedulers (insbesondere ZeroSSL-/EAB-Abläufe).</li>
+<li>Dockerfiles für Linux-Paket-Builder sind mit ihrem Pakettyp vorkonfiguriert:</li>
+<li>Debian-/Ubuntu-Dockerfiles führen <code>fpm.sh deb</code> aus</li>
+<li>Fedora-/RHEL-Dockerfiles führen <code>fpm.sh rpm</code> aus</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<h3 id="ci-paritat-referenz">CI-Parität (Referenz)<a class="headerlink" href="#ci-paritat-referenz" title="Permanent link">&para;</a></h3>
+<p>Wenn lokale Builds dem CI-Verhalten entsprechen sollen, verwenden Sie diese Workflow-Referenzen:</p>
+<ul>
+<li>Container-Builds: <code>.github/workflows/container-build.yml</code></li>
+<li>Linux-Paket-Builds: <code>.github/workflows/linux-build.yml</code></li>
+</ul>
+<h3 id="artefakte-veroffentlichen">Artefakte veröffentlichen<a class="headerlink" href="#artefakte-veroffentlichen" title="Permanent link">&para;</a></h3>
+<p>Sicherheitsgrundlage:</p>
+<ul>
+<li>Fügen Sie echte Tokens/Passwörter niemals direkt in Befehlszeilen oder den Shell-Verlauf ein.</li>
+<li>Bevorzugen Sie interaktive Anmeldeaufforderungen für lokale/manuelle Veröffentlichungen.</li>
+<li>Verwenden Sie kurzlebige Tokens mit den minimal erforderlichen Berechtigungsumfängen.</li>
+<li>Verwenden Sie CI-Secret-Stores für die Automatisierung.</li>
+<li>Entfernen Sie sensible Umgebungsvariablen nach der Veröffentlichung.</li>
+</ul>
+<h4 id="docker-images-veroffentlichen-dockerio-und-ghcrio">Docker-Images veröffentlichen (<code>docker.io</code> und <code>ghcr.io</code>)<a class="headerlink" href="#docker-images-veroffentlichen-dockerio-und-ghcrio" title="Permanent link">&para;</a></h4>
+<p>Legen Sie die Image-Metadaten fest:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">VERSION</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>cat<span class="w"> </span>src/VERSION<span class="k">)</span><span class="s2">"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DOCKERHUB_ORG</span><span class="o">=</span><span class="s2">"&lt;dockerhub-org-or-user&gt;"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GHCR_ORG</span><span class="o">=</span><span class="s2">"&lt;github-org-or-user&gt;"</span>
+</code></pre></div>
+<p>Authentifizieren Sie sich bei den Registries:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>login<span class="w"> </span>docker.io
+docker<span class="w"> </span>login<span class="w"> </span>ghcr.io<span class="w"> </span>-u<span class="w"> </span><span class="s2">"&lt;github-user&gt;"</span>
+</code></pre></div>
+<div class="admonition abstract">
+<p class="admonition-title">Hinweise</p>
+<ul>
+<li>Die obigen <code>docker login</code>-Befehle fragen Anmeldedaten sicher ab (verdeckte Eingabe).</li>
+<li>Lesen Sie bei automatisierten Pipelines Anmeldedaten aus CI-Secrets und vermeiden Sie hartcodierte Werte.</li>
+</ul>
+</div>
+<p>Taggen und pushen Sie ein Image (Beispiel: <code>all-in-one</code>):</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>tag<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>docker.io/<span class="nv">$DOCKERHUB_ORG</span>/bunkerweb-all-in-one:<span class="nv">$VERSION</span>
+docker<span class="w"> </span>tag<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>ghcr.io/<span class="nv">$GHCR_ORG</span>/bunkerweb-all-in-one:<span class="nv">$VERSION</span>
+
+docker<span class="w"> </span>push<span class="w"> </span>docker.io/<span class="nv">$DOCKERHUB_ORG</span>/bunkerweb-all-in-one:<span class="nv">$VERSION</span>
+docker<span class="w"> </span>push<span class="w"> </span>ghcr.io/<span class="nv">$GHCR_ORG</span>/bunkerweb-all-in-one:<span class="nv">$VERSION</span>
+</code></pre></div>
+<p>Optionales fortlaufendes Tag (<code>latest</code>) nur für stabile Releases:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>tag<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>docker.io/<span class="nv">$DOCKERHUB_ORG</span>/bunkerweb-all-in-one:latest
+docker<span class="w"> </span>tag<span class="w"> </span>local/all-in-one:dev<span class="w"> </span>ghcr.io/<span class="nv">$GHCR_ORG</span>/bunkerweb-all-in-one:latest
+
+docker<span class="w"> </span>push<span class="w"> </span>docker.io/<span class="nv">$DOCKERHUB_ORG</span>/bunkerweb-all-in-one:latest
+docker<span class="w"> </span>push<span class="w"> </span>ghcr.io/<span class="nv">$GHCR_ORG</span>/bunkerweb-all-in-one:latest
+</code></pre></div>
+<h4 id="linux-pakete-auf-packagecloud-veroffentlichen">Linux-Pakete auf Packagecloud veröffentlichen<a class="headerlink" href="#linux-pakete-auf-packagecloud-veroffentlichen" title="Permanent link">&para;</a></h4>
+<p>Installieren und authentifizieren Sie die <code>package_cloud</code>-CLI und laden Sie anschließend die erzeugten Pakete hoch.</p>
+<p>Installieren Sie zunächst die CLI:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Debian/Ubuntu</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>ruby-full<span class="w"> </span>build-essential
+sudo<span class="w"> </span>gem<span class="w"> </span>install<span class="w"> </span>package_cloud
+
+<span class="c1"># Fedora/RHEL</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>ruby<span class="w"> </span>rubygems<span class="w"> </span>gcc<span class="w"> </span>make
+sudo<span class="w"> </span>gem<span class="w"> </span>install<span class="w"> </span>package_cloud
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PACKAGECLOUD_REPO</span><span class="o">=</span><span class="s2">"&lt;owner&gt;/&lt;repo&gt;"</span>
+<span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>-s<span class="w"> </span>-p<span class="w"> </span><span class="s2">"Packagecloud token: "</span><span class="w"> </span>PACKAGECLOUD_TOKEN
+<span class="nb">echo</span>
+<span class="nb">export</span><span class="w"> </span>PACKAGECLOUD_TOKEN
+</code></pre></div>
+<p>Beispiele:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Ubuntu/Debian</span>
+package_cloud<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$PACKAGECLOUD_REPO</span><span class="s2">/ubuntu/jammy"</span><span class="w"> </span>package-ubuntu/*.deb
+package_cloud<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$PACKAGECLOUD_REPO</span><span class="s2">/debian/bookworm"</span><span class="w"> </span>package-debian-bookworm/*.deb
+
+<span class="c1"># Fedora/RHEL</span>
+package_cloud<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$PACKAGECLOUD_REPO</span><span class="s2">/fedora/43"</span><span class="w"> </span>package-fedora-43/*.rpm
+package_cloud<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$PACKAGECLOUD_REPO</span><span class="s2">/el/9"</span><span class="w"> </span>package-rhel-9/*.rpm
+</code></pre></div>
+<div class="admonition abstract">
+<p class="admonition-title">Hinweise</p>
+<ul>
+<li>Verwenden Sie den korrekten Distributionspfad, den Ihr Packagecloud-Repository erwartet.</li>
+<li>Laden Sie nur Release-Artefakte hoch; vermeiden Sie bei Veröffentlichungs-Builds Entwicklungs-Flags (<code>SKIP_MINIFY</code>, <code>FPM_DEBUG</code>, <code>FPM_SKIP_COMPRESSION</code>).</li>
+<li>Prüfen Sie vor der Veröffentlichung Aufbewahrung, Metadaten und Signaturrichtlinie des Repositorys.</li>
+<li>Führen Sie nach Abschluss der Uploads <code>unset PACKAGECLOUD_TOKEN</code> aus.</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Schnelle Validierung</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check generated package files</span>
+ls<span class="w"> </span>-lh<span class="w"> </span>package-*/*.<span class="o">{</span>deb,rpm<span class="o">}</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+ls<span class="w"> </span>-lh<span class="w"> </span>bunkerweb-*.pkg<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+
+<span class="c1"># Check local images</span>
+docker<span class="w"> </span>image<span class="w"> </span>ls<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'local/(bunkerweb|scheduler|autoconf|ui|api|all-in-one)'</span>
+</code></pre></div>
+</div>
 
 
 

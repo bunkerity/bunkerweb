@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://docs.bunkerweb.io/latest/de/features/">
       
       
-        <link rel="prev" href="../building/">
+        <link rel="prev" href="../quickstart-guide/">
       
       
         <link rel="next" href="../advanced/">
@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "In der Dokumentation suchen");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eStarten Sie \u00fcber das \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e eine kostenlose 30-t\u00e4gige Testversion von BunkerWeb PRO.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBen\u00f6tigen Sie Premium-Support oder eine individuelle Beratung zu BunkerWeb? Informieren Sie sich \u00fcber unsere \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eprofessionellen Dienstleistungen\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eWerden Sie Teil der Bunker-Community und treten Sie dem \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003eDiscord-Chat\u003c/a\u003e bei. Folgen Sie uns auch auf \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Suchen Sie BunkerWeb CLOUD, die PRO-Version, technischen Support oder maßgeschneiderte Dienstleistungen? Besuchen Sie das
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    und erfahren Sie mehr über unsere Angebote für Unternehmen.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Sie sehen nicht die Dokumentation der neuesten Version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Hier klicken, um die neueste Version aufzurufen.</strong>
     </a>
 
             </div>
@@ -447,25 +446,6 @@
     
   
   Schnellstart
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Aus dem Quellcode erstellen
 
       </a>
     </li>
@@ -809,33 +789,6 @@
       
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aus dem Quellcode erstellen
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
@@ -948,6 +901,17 @@
     <span class="md-ellipsis">
       
         Sicherheitsmodi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bans-tls-drop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sperren beim TLS-Handshake verwerfen
       
     </span>
   </a>
@@ -1630,6 +1594,17 @@
     <span class="md-ellipsis">
       
         Untersuchung und Entfernen von Entscheidungen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crowdsec-sperren" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CrowdSec-Sperren
       
     </span>
   </a>
@@ -2890,6 +2865,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#redis-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Redis Cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#beispiele_6" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3706,6 +3692,18 @@
 <li><strong><code>block</code></strong> (Standard): Blockiert aktiv erkannte Bedrohungen und protokolliert Vorfälle, um unbefugten Zugriff zu verhindern und Ihre Anwendung zu schützen.</li>
 </ul>
 <p>Das Umschalten in den <code>detect</code>-Modus kann Ihnen helfen, potenzielle Falsch-Positive zu identifizieren und zu beheben, ohne legitime Clients zu stören. Sobald diese Probleme behoben sind, können Sie für vollen Schutz getrost in den <code>block</code>-Modus zurückwechseln.</p>
+<h3 id="bans-tls-drop">Sperren beim TLS-Handshake verwerfen<a class="headerlink" href="#bans-tls-drop" title="Permanent link">&para;</a></h3>
+<p>Ein gesperrter Client schließt normalerweise den TLS-Handshake ab und erhält dann die Sperrseite (403). <code>BANS_TLS_DROP_REASONS</code> listet die Sperrgründe auf, für die BunkerWeb die Verbindung stattdessen gleich zu Beginn des Handshakes schließt, noch vor jeder Zertifikats- oder Schlüsselaustauscharbeit. Der Client sieht einen TLS-Fehler, keine Seite. Das spart CPU, wenn gesperrte Adressen sich immer wieder verbinden.</p>
+<p>Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus <code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code> und <code>api</code>. Der Standardwert ist leer, wodurch jede Sperre die 403-Seite behält. Wir empfehlen <code>crowdsec</code>.</p>
+<ul>
+<li>Nur der Grund der tatsächlich geltenden Sperre zählt. Hat eine IP eine <code>manual</code>-Sperre und eine CrowdSec-Sperre, verwirft die alleinige Angabe von <code>crowdsec</code> nichts, und der Client erhält die 403-Seite.</li>
+<li>Das Verwerfen entfällt, und die 403-Seite bleibt, wenn <code>USE_REAL_IP</code> auf <code>yes</code> steht mit einer headerbasierten Quelle oder wenn <code>USE_PROXY_PROTOCOL</code> auf <code>yes</code> steht, ohne dass <code>USE_REAL_IP</code> auf <code>yes</code> und <code>REAL_IP_HEADER</code> auf <code>proxy_protocol</code> gesetzt sind, da die Client-Adresse zu diesem Zeitpunkt nicht bekannt ist. Sind alle drei gesetzt, verwendet das Verwerfen die Adresse aus dem PROXY-Protokoll, wenn der verbundene Peer in <code>REAL_IP_FROM</code> steht, sonst die Adresse des Peers. Es entfällt auch für IPs, die eine lokale Whitelist zulässt.</li>
+<li>Bei aktiviertem Redis wird ein Handshake erst verworfen, nachdem eine Anfrage der gesperrten IP die reguläre Sperrprüfung durchlaufen hat; die erste Anfrage erhält also weiterhin die 403-Seite.</li>
+<li>Steht <code>SECURITY_MODE</code> auf <code>detect</code>, wird der Handshake fortgesetzt und eine Warnung protokolliert.</li>
+<li>HTTP/3-Verbindungen (QUIC) werden nie verworfen. Sie erhalten die 403-Seite.</li>
+<li>Jedes Verwerfen wird pro Grund in den Metriken gezählt.</li>
+<li>Der Zustand dieser Funktion und der CrowdSec-Sperren liegt in der Shared-Memory-Zone <code>bans_meta</code>. Sie ist immer mit 10 MiB deklariert, ihr Speicher wird aber erst belegt, wenn <code>BANS_TLS_DROP_REASONS</code> oder <code>CROWDSEC_BAN_REFRESH</code> gesetzt ist.</li>
+</ul>
 <h3 id="konfigurationseinstellungen">Konfigurationseinstellungen<a class="headerlink" href="#konfigurationseinstellungen" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:9"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><input id="__tabbed_1_8" name="__tabbed_1" type="radio" /><input id="__tabbed_1_9" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Kerneinstellungen</label><label for="__tabbed_1_2">API-Einstellungen</label><label for="__tabbed_1_3">Netzwerk- &amp; Port-Einstellungen</label><label for="__tabbed_1_4">Stream-Server-Einstellungen</label><label for="__tabbed_1_5">Worker-Einstellungen</label><label for="__tabbed_1_6">Speichereinstellungen</label><label for="__tabbed_1_7">Protokollierungseinstellungen</label><label for="__tabbed_1_8">Integrationseinstellungen</label><label for="__tabbed_1_9">Nginx-Einstellungen</label></div>
 <div class="tabbed-content">
@@ -3748,6 +3746,13 @@
 <td>multisite</td>
 <td>Nein</td>
 <td><strong>Sicherheitsstufe:</strong> Steuert die Stufe der Sicherheitsdurchsetzung. Optionen: <code>detect</code> oder <code>block</code>.</td>
+</tr>
+<tr>
+<td><code>BANS_TLS_DROP_REASONS</code></td>
+<td></td>
+<td>multisite</td>
+<td>Nein</td>
+<td><strong>Beim TLS verworfene Sperren:</strong> Sperrgründe (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, durch Leerzeichen getrennt), deren gesperrte IPs beim TLS-Handshake verworfen werden, statt die 403-Seite zu erhalten. Entfällt bei headerbasierter echter IP und hinter dem PROXY-Protokoll, außer <code>REAL_IP_HEADER</code> steht auf <code>proxy_protocol</code>. Gilt nie für HTTP/3.</td>
 </tr>
 <tr>
 <td><code>SERVER_TYPE</code></td>
@@ -4665,17 +4670,17 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 </tr>
 <tr>
 <td style="text-align: left;"><code>ANTIBOT_TIME_RESOLVE</code></td>
-<td style="text-align: left;"><code>60</code></td>
+<td style="text-align: left;"><code>1m</code></td>
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">Herausforderungs-Timeout: Maximale Zeit (in Sekunden) zum Abschließen der Herausforderung. Danach wird eine neue Herausforderung generiert.</td>
+<td style="text-align: left;">Herausforderungs-Timeout: Maximale Zeit (in Sekunden) zum Abschließen der Herausforderung. Danach wird eine neue Herausforderung generiert. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>ANTIBOT_TIME_VALID</code></td>
-<td style="text-align: left;"><code>86400</code></td>
+<td style="text-align: left;"><code>1d</code></td>
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">Herausforderungs-Gültigkeit: Dauer (in Sekunden), für die eine erfolgreiche Herausforderung gültig bleibt. Nach dieser Zeit wird eine neue Herausforderung erforderlich sein.</td>
+<td style="text-align: left;">Herausforderungs-Gültigkeit: Dauer (in Sekunden), für die eine erfolgreiche Herausforderung gültig bleibt. Nach dieser Zeit wird eine neue Herausforderung erforderlich sein. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>ANTIBOT_SUCCESS_URI</code></td>
@@ -4874,6 +4879,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <li>Die Herausforderung generiert dynamisch eine einzigartige Aufgabe für jeden Client.</li>
 <li>Die Rechenaufgabe beinhaltet ein Hashing mit spezifischen Bedingungen (z. B. das Finden eines Hashes mit einem bestimmten Präfix).</li>
 </ul>
+<p>Die Kosten der Herausforderung werden über <code>ANTIBOT_JAVASCRIPT_DIFFICULTY</code> festgelegt, in führenden Null-Bits (16 bis 28, Standard 16); jedes zusätzliche Bit verdoppelt die durchschnittliche Lösungszeit. Wenn Sie PRO-eigene JavaScript-Herausforderungsseiten verwenden, regenerieren Sie diese, bevor Sie diese Einstellung über den Standardwert hinaus erhöhen, sonst belegen sie weiterhin die alte, niedrigere Schwierigkeit und werden abgelehnt.</p>
 <p><strong>Parameter:</strong></p>
 <table>
 <thead>
@@ -4892,6 +4898,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">nein</td>
 <td style="text-align: left;">Antibot aktivieren: Auf <code>javascript</code> setzen, um diesen Mechanismus zu aktivieren.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ANTIBOT_JAVASCRIPT_DIFFICULTY</code></td>
+<td style="text-align: left;"><code>16</code></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">nein</td>
+<td style="text-align: left;">JavaScript-Schwierigkeit: Proof-of-Work-Schwierigkeit in führenden Null-Bits (16 bis 28).</td>
 </tr>
 </tbody>
 </table>
@@ -5718,17 +5731,17 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 <tr>
 <td><code>BAD_BEHAVIOR_COUNT_TIME</code></td>
-<td><code>60</code></td>
+<td><code>1m</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Zählzeitraum:</strong> Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden.</td>
+<td><strong>Zählzeitraum:</strong> Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>BAD_BEHAVIOR_BAN_TIME</code></td>
-<td><code>86400</code></td>
+<td><code>1d</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Sperrdauer:</strong> Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). <code>0</code> für permanente Sperren.</td>
+<td><strong>Sperrdauer:</strong> Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). <code>0</code> für permanente Sperren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>BAD_BEHAVIOR_BAN_SCOPE</code></td>
@@ -5922,7 +5935,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 <tr>
 <td style="text-align: left;"><code>BLACKLIST_IP_URLS</code></td>
-<td style="text-align: left;"><code>https://www.dan.me.uk/torlist/?exit</code></td>
+<td style="text-align: left;"></td>
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">Nein</td>
 <td style="text-align: left;"><strong>IP-Blacklist-URLs:</strong> Liste von URLs, die zu blockierende IP-Adressen oder Netzwerke enthalten, durch Leerzeichen getrennt.</td>
@@ -5936,7 +5949,11 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 </tbody>
 </table>
-<p>Der Standardparameter <code>BLACKLIST_IP_URLS</code> enthält eine URL, die eine <strong>Liste bekannter Tor-Exit-Nodes</strong> bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.</p>
+<div class="admonition info">
+<p class="admonition-title">Listenformate</p>
+<p>URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit <code>#</code> oder <code>;</code> beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: <code>#key</code> behält die Werte unter <code>key</code>, <code>#key=value</code> behält Objekte, bei denen <code>key</code> gleich <code>value</code> ist oder <code>value</code> enthält, und <code>&amp;</code> verbindet die Bedingungen. Beispiel: <code>https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT</code>. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.</p>
+</div>
+<p>Standardmäßig enthält <code>BLACKLIST_COMMUNITY_LISTS</code> <code>ip:danmeuk-tor-exit</code> und fügt damit die Tor-Exit-Node-Liste hinzu; <code>BLACKLIST_IP_URLS</code> bleibt leer, sofern Sie es nicht konfigurieren.</p>
 </div>
 <div class="tabbed-block">
 <p><strong>Was es bewirkt:</strong> Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.</p>
@@ -6067,7 +6084,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 <tr>
 <td style="text-align: left;"><code>BLACKLIST_USER_AGENT_URLS</code></td>
-<td style="text-align: left;"><code>https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list</code></td>
+<td style="text-align: left;"></td>
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">Nein</td>
 <td style="text-align: left;"><strong>User-Agent-Blacklist-URLs:</strong> Liste von URLs, die zu blockierende User-Agent-Muster enthalten.</td>
@@ -6081,7 +6098,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 </tbody>
 </table>
-<p>Der Standardparameter <code>BLACKLIST_USER_AGENT_URLS</code> enthält eine URL, die eine <strong>Liste bekannter bösartiger User-Agents</strong> bereitstellt. Diese werden oft von bösartigen Bots und Scannern verwendet, um anfällige Websites zu identifizieren.</p>
+<p>Standardmäßig enthält <code>BLACKLIST_COMMUNITY_LISTS</code> <code>ua:mitchellkrogza-bad-user-agents</code> und fügt damit die Liste schädlicher User-Agents hinzu; <code>BLACKLIST_USER_AGENT_URLS</code> bleibt leer, sofern Sie es nicht konfigurieren.</p>
 </div>
 <div class="tabbed-block">
 <p><strong>Was es bewirkt:</strong> Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.</p>
@@ -6442,7 +6459,7 @@ TrustedMonitor/\d+\.\d+
 <h3 id="integration-der-crowdsec-konsole">Integration der CrowdSec-Konsole<a class="headerlink" href="#integration-der-crowdsec-konsole" title="Permanent link">&para;</a></h3>
 <p>Falls Sie noch nicht mit der CrowdSec-Konsolenintegration vertraut sind: <a href="https://www.crowdsec.net/?utm_campaign=bunkerweb&amp;utm_source=doc">CrowdSec</a> nutzt crowdsourced Intelligence zur Bekämpfung von Cyber-Bedrohungen. Stellen Sie es sich als das „Waze der Cybersicherheit“ vor – wenn ein Server angegriffen wird, werden andere Systeme weltweit alarmiert und vor denselben Angreifern geschützt. Mehr darüber erfahren Sie <a href="https://www.crowdsec.net/about?utm_campaign=bunkerweb&amp;utm_source=blog">hier</a>.</p>
 <p>Durch unsere Partnerschaft mit CrowdSec können Sie Ihre BunkerWeb-Instanzen in Ihre <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec-Konsole</a> eintragen. Das bedeutet, dass von BunkerWeb blockierte Angriffe in Ihrer CrowdSec-Konsole neben den von CrowdSec Security Engines blockierten Angriffen sichtbar sind, was Ihnen einen einheitlichen Überblick über Bedrohungen gibt.</p>
-<p>Wichtig ist, dass CrowdSec für diese Integration nicht installiert sein muss (obwohl wir dringend empfehlen, es mit dem <a href="https://docs.bunkerweb.io/latest/features/#crowdsec">CrowdSec-Plugin für BunkerWeb</a> auszuprobieren, um die Sicherheit Ihrer Webdienste weiter zu erhöhen). Zusätzlich können Sie Ihre CrowdSec Security Engines in dasselbe Konsolenkonto eintragen, um eine noch größere Synergie zu erzielen.</p>
+<p>Wichtig ist, dass CrowdSec für diese Integration nicht installiert sein muss (obwohl wir dringend empfehlen, es mit dem <a href="https://docs.bunkerweb.io/1.6/features/#crowdsec">CrowdSec-Plugin für BunkerWeb</a> auszuprobieren, um die Sicherheit Ihrer Webdienste weiter zu erhöhen). Zusätzlich können Sie Ihre CrowdSec Security Engines in dasselbe Konsolenkonto eintragen, um eine noch größere Synergie zu erzielen.</p>
 <p><strong>Schritt 1: Erstellen Sie Ihr CrowdSec-Konsolenkonto</strong></p>
 <p>Gehen Sie zur <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec-Konsole</a> und registrieren Sie sich, falls Sie noch kein Konto haben. Notieren Sie sich anschließend den Anmeldeschlüssel, den Sie unter „Security Engines“ finden, nachdem Sie auf „Add Security Engine“ geklickt haben:</p>
 <figure>
@@ -6752,28 +6769,28 @@ TrustedMonitor/\d+\.\d+
 <td><code>same-origin</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Cross-Origin-Opener-Policy:</strong> Steuert die Kommunikation zwischen Browser-Kontexten.</td>
+<td><strong>Cross-Origin-Opener-Policy:</strong> Steuert die Kommunikation zwischen Browser-Kontexten. Zulässige Werte: <code>unsafe-none</code>, <code>same-origin-allow-popups</code>, <code>same-origin</code>; leer lassen, um diesen Header nicht zu senden.</td>
 </tr>
 <tr>
 <td><code>CROSS_ORIGIN_EMBEDDER_POLICY</code></td>
 <td><code>require-corp</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Cross-Origin-Embedder-Policy:</strong> Steuert, ob ein Dokument Ressourcen von anderen Ursprüngen laden kann.</td>
+<td><strong>Cross-Origin-Embedder-Policy:</strong> Steuert, ob ein Dokument Ressourcen von anderen Ursprüngen laden kann. Zulässige Werte: <code>unsafe-none</code>, <code>require-corp</code>, <code>credentialless</code>; leer lassen, um diesen Header nicht zu senden.</td>
 </tr>
 <tr>
 <td><code>CROSS_ORIGIN_RESOURCE_POLICY</code></td>
 <td><code>same-site</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Cross-Origin-Resource-Policy:</strong> Steuert, welche Websites Ihre Ressourcen einbetten dürfen.</td>
+<td><strong>Cross-Origin-Resource-Policy:</strong> Steuert, welche Websites Ihre Ressourcen einbetten dürfen. Zulässige Werte: <code>same-site</code>, <code>same-origin</code>, <code>cross-origin</code>; leer lassen, um diesen Header nicht zu senden.</td>
 </tr>
 <tr>
 <td><code>CORS_MAX_AGE</code></td>
-<td><code>86400</code></td>
+<td><code>1d</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Cache-Dauer für Preflight:</strong> Wie lange (in Sekunden) Browser die Preflight-Antwort zwischenspeichern sollen.</td>
+<td><strong>Cache-Dauer für Preflight:</strong> Wie lange (in Sekunden) Browser die Preflight-Antwort zwischenspeichern sollen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>CORS_DENY_REQUEST</code></td>
@@ -7058,6 +7075,26 @@ TrustedMonitor/\d+\.\d+
 </ul>
 <p>Verwenden Sie die zurückgegebene Verbindungs-ID unverändert. Sie enthält die Identität der Instanz, damit identische localhost-URLs auf verschiedenen Instanzen getrennt bleiben. API-Administratoren können diese Operationen nutzen. Delegierte API-Benutzer benötigen die unabhängige Berechtigung <code>crowdsec_read</code> oder <code>crowdsec_delete</code> unter der bestehenden Ressource <code>bans</code>, entweder für eine zurückgegebene Verbindungs-ID oder für <code>*</code>. Eine gewöhnliche <code>ban_delete</code>-Berechtigung erlaubt keine CrowdSec-Entfernung. Eine Datenbankmigration ist nicht erforderlich.</p>
 <p>Die Laufzeit speichert einzelne Entscheidungen je Ziel, sodass das Entfernen einer Entscheidung keine andere Sperre für dieselbe IP oder denselben Bereich löschen kann. Optionale Berichtsmetadaten verwenden einen separaten Cache mit 5 MiB und können keine Einträge für die Durchsetzung von Sperren verdrängen. Stream-Aktualisierungen verwenden eine nicht blockierende Prozesssperre in <code>/var/run/bunkerweb</code>, die bis zur Veröffentlichung der Aktualisierung gehalten und beim Beenden des Workers automatisch freigegeben wird.</p>
+<h3 id="crowdsec-sperren">CrowdSec-Sperren<a class="headerlink" href="#crowdsec-sperren" title="Permanent link">&para;</a></h3>
+<p>Standardmäßig fragt BunkerWeb bei jeder Anfrage CrowdSec ab. Setzen Sie <code>CROWDSEC_BAN_REFRESH</code> auf eine Dauer, zum Beispiel <code>5m</code>, um einen CrowdSec-Block in eine <strong>CrowdSec-Sperre</strong> umzuwandeln: eine kurze BunkerWeb-Sperre, die erneuert wird, solange die CrowdSec-Entscheidung gilt. Weitere Anfragen der IP werden bei der Sperrprüfung gestoppt, noch vor den anderen Plugins und vor der CrowdSec-Abfrage. Die Sperre erscheint auf der Seite „Sperren“ als eigene Zeile, mit der Aktion <strong>IP untersuchen</strong>. Der Standardwert <code>0</code> behält das bisherige Verhalten bei und erzeugt keine Sperre.</p>
+<ul>
+<li><strong>Wann eine Sperre entsteht:</strong> nur wenn BunkerWeb die Anfrage selbst wegen einer <code>ban</code>-Entscheidung der Local API blockiert hat, <code>SECURITY_MODE</code> auf <code>block</code> steht und die Entscheidung noch nicht abgelaufen ist. AppSec-Ablehnungen und andere Gegenmaßnahmen, etwa ein Captcha, erzeugen nie eine Sperre.</li>
+<li><strong>Wie lange sie gilt:</strong> der kürzere Wert aus <code>CROWDSEC_BAN_REFRESH</code> und der Restlaufzeit der Entscheidung. Nach Ablauf der Sperre wird die nächste Anfrage erneut mit CrowdSec abgeglichen, und eine neue Sperre entsteht, wenn die Entscheidung weiterhin gilt.</li>
+<li><strong>Aktualität:</strong> Wird eine Entscheidung direkt in CrowdSec entfernt (mit <code>cscli</code>, in der Console, durch eine Listenaktualisierung oder durch eine Zulassungsliste), wird die IP spätestens nach der Summe aus <code>CROWDSEC_BAN_REFRESH</code>, der CrowdSec-Cache-Verzögerung (<code>CROWDSEC_UPDATE_FREQUENCY</code> im Stream-Modus, <code>CROWDSEC_CACHE_EXPIRATION</code> im Live-Modus) und, wenn Redis aktiviert ist, bis zu 30 Sekunden für die lokalen Kopien auf den anderen Instanzen durchgelassen. Im Stream-Modus entsteht keine neue Sperre, solange die letzte erfolgreiche Synchronisierung länger als das Doppelte von <code>CROWDSEC_UPDATE_FREQUENCY</code> zurückliegt.</li>
+<li><strong>Ausgeschlossene Pfade:</strong> Jedes <code>CROWDSEC_EXCLUDE_LOCATION</code> an einem Dienst schaltet CrowdSec-Sperren für diesen Dienst ab, weil eine Sperre auch die ausgeschlossenen Pfade blockieren würde. CrowdSec prüft dort weiterhin jede Anfrage. Dasselbe gilt, wenn das Plugin seinen eigenen Challenge-Pfad ausschließt.</li>
+<li><strong>Geltungsbereich:</strong> Eine Sperre aus der eigenen CrowdSec-Verbindung eines Dienstes gilt nur für diesen Dienst, eine Sperre aus einer globalen Verbindung gilt für alle Dienste. Eine globale CrowdSec-Sperre gilt auch für TCP/UDP-Dienste, aber nur bei aktiviertem Redis, über eine lokale Kopie, die höchstens 30 Sekunden gültig ist. Ohne Redis sehen TCP/UDP-Dienste nie CrowdSec-Sperren.</li>
+<li><strong>Speicher:</strong> Die Sperren nutzen die Shared-Memory-Zone <code>bans_meta</code>, die immer mit 10 MiB deklariert ist. Ihr Speicher wird erst belegt, wenn <code>CROWDSEC_BAN_REFRESH</code> oder <code>BANS_TLS_DROP_REASONS</code> gesetzt ist.</li>
+</ul>
+<p><strong>Entsperren und CrowdSec.</strong> Das Aufheben einer CrowdSec-Sperre entfernt auch die dahinterstehenden CrowdSec-Entscheidungen, da die IP sonst bei der nächsten Prüfung erneut gesperrt würde. Die Weboberfläche, die API und <code>bwcli unban</code> folgen demselben Ablauf:</p>
+<ul>
+<li>Er benötigt die Verwaltungszugangsdaten (<code>CROWDSEC_MANAGEMENT_LOGIN</code> und <code>CROWDSEC_MANAGEMENT_PASSWORD</code>) für jede Verbindung, in der eine ausgewählte Entscheidung liegt. Bei der API ist zusätzlich zu <code>ban_delete</code> die Berechtigung <code>crowdsec_delete</code> für jede beteiligte Verbindung erforderlich.</li>
+<li>Sie müssen die Liste der Entscheidungen (IP oder Bereich, Typ, Ursprung und Szenario) bestätigen, bevor eine CrowdSec-Entscheidung entfernt wird. <code>bwcli unban</code> verwendet dafür <code>-confirm</code>: Ohne diese Option gibt der Befehl nur die Liste aus und ändert nichts in CrowdSec. Die explizite Sperre derselben IP gehört nicht zu dieser Bestätigung: <code>bwcli unban</code> entfernt sie zuerst, vor der Vorschau und auch ohne <code>-confirm</code>. Der Befehl funktioniert nur auf einem Host mit Zugriff auf die Datenbank, in der Regel dem Scheduler-Host. Verwenden Sie andernfalls die Weboberfläche oder die API.</li>
+<li>Ist die Instanz, die den Block gesehen hat, nicht erreichbar, wird das Entsperren abgelehnt. Die Sperre läuft innerhalb von <code>CROWDSEC_BAN_REFRESH</code> von selbst ab.</li>
+<li>Lässt sich eine Entscheidung nicht entfernen, werden die übrigen ausgewählten Entscheidungen trotzdem gelöscht, die weiteren Schritte entfallen jedoch und die BunkerWeb-Sperre bleibt bestehen. Das Ergebnis wird als teilweise gemeldet und nennt die gelöschten und die fehlgeschlagenen Entscheidungen. Die IP bleibt gesperrt, bis die fehlgeschlagenen Entscheidungen entfernt sind. Lassen sich einzelne CrowdSec-Verbindungen nicht prüfen, wird das Entsperren auf den Verbindungen, die geantwortet haben, trotzdem ausgeführt: Deren Entscheidungen werden gelöscht und die BunkerWeb-Sperre wird auf den erreichbaren Instanzen entfernt. Das Ergebnis wird dann als teilweise gemeldet und nennt, was nicht geprüft werden konnte; die IP kann von diesen Verbindungen weiter blockiert werden, bis deren Entscheidungen enden. Ein erneuter Versuch ist sicher.</li>
+<li>Entscheidungen der Central API oder aus Listen (die Ursprünge <code>CAPI</code> und <code>lists</code>) können bei der nächsten Aktualisierung zurückkehren. Legen Sie für eine dauerhafte Ausnahme eine CrowdSec-Zulassungsliste an.</li>
+<li>Das Entfernen einer Bereichsentscheidung betrifft den gesamten Bereich. CrowdSec-Sperren, die bereits für andere IPs dieses Bereichs erstellt wurden, bleiben bis zum Ende ihrer Dauer bestehen, höchstens <code>CROWDSEC_BAN_REFRESH</code>.</li>
+<li>Eine CrowdSec-Sperre und eine explizite Sperre derselben IP sind zwei getrennte Zeilen und werden jeweils einzeln aufgehoben. Die Dauer einer CrowdSec-Sperre kann nicht bearbeitet werden.</li>
+</ul>
 <h3 id="schritt-1-crowdsec-auf-das-einlesen-von-bunkerweb-protokollen-vorbereiten">Schritt&nbsp;1 – CrowdSec auf das Einlesen von BunkerWeb-Protokollen vorbereiten<a class="headerlink" href="#schritt-1-crowdsec-auf-das-einlesen-von-bunkerweb-protokollen-vorbereiten" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">All-in-one</label></div>
 <div class="tabbed-content">
@@ -7111,7 +7148,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7128,7 +7165,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># Die IP-Adresse des syslog-Dienstes</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.15</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen</span>
@@ -7318,10 +7355,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>CROWDSEC_REQUEST_TIMEOUT</code></td>
-<td><code>1000</code></td>
+<td><code>1s</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Anfrage-Timeout:</strong> Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus.</td>
+<td><strong>Anfrage-Timeout:</strong> Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_EXCLUDE_LOCATION</code></td>
@@ -7332,17 +7369,24 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
-<td><code>1</code></td>
+<td><code>1s</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Cache-Ablauf:</strong> Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus.</td>
+<td><strong>Cache-Ablauf:</strong> Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_UPDATE_FREQUENCY</code></td>
-<td><code>10</code></td>
+<td><code>10s</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Update-Frequenz:</strong> Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen.</td>
+<td><strong>Update-Frequenz:</strong> Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_BAN_REFRESH</code></td>
+<td><code>0</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Sperrerneuerung:</strong> Wandelt CrowdSec-Blocks in kurze BunkerWeb-Sperren um, die erneuert werden, solange die CrowdSec-Entscheidung gilt. Der Wert ist die längste Dauer einer Sperre, bevor CrowdSec erneut gefragt wird. <code>0</code> deaktiviert die Funktion. Ein Dienst mit <code>CROWDSEC_EXCLUDE_LOCATION</code> erhält nie CrowdSec-Sperren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine reine Zahl bedeutet Sekunden.</td>
 </tr>
 </tbody>
 </table>
@@ -7374,24 +7418,24 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_CONNECT_TIMEOUT</code></td>
-<td><code>100</code></td>
+<td><code>100ms</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Verbindungs-Timeout:</strong> Das Timeout in Millisekunden für die Verbindung zur AppSec-Komponente.</td>
+<td><strong>Verbindungs-Timeout:</strong> Das Timeout in Millisekunden für die Verbindung zur AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SEND_TIMEOUT</code></td>
-<td><code>100</code></td>
+<td><code>100ms</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Sende-Timeout:</strong> Das Timeout in Millisekunden für das Senden von Daten an die AppSec-Komponente.</td>
+<td><strong>Sende-Timeout:</strong> Das Timeout in Millisekunden für das Senden von Daten an die AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_PROCESS_TIMEOUT</code></td>
-<td><code>500</code></td>
+<td><code>500ms</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Verarbeitungs-Timeout:</strong> Das Timeout in Millisekunden für die Verarbeitung der Anfrage in der AppSec-Komponente.</td>
+<td><strong>Verarbeitungs-Timeout:</strong> Das Timeout in Millisekunden für die Verarbeitung der Anfrage in der AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ALWAYS_SEND_TO_APPSEC</code></td>
@@ -7776,10 +7820,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>DATABASE_MAX_SESSION_AGE_DAYS</code></td>
-<td><code>14</code></td>
+<td><code>14d</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Sitzungsaufbewahrung:</strong> Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.</td>
+<td><strong>Sitzungsaufbewahrung:</strong> Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Tagen.</td>
 </tr>
 <tr>
 <td><code>DATABASE_POOL_SIZE</code></td>
@@ -7797,17 +7841,17 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>DATABASE_POOL_TIMEOUT</code></td>
-<td><code>5</code></td>
+<td><code>5s</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Pool-Zeitlimit:</strong> Die Anzahl der Sekunden, die auf eine Verbindung aus dem Pool gewartet wird.</td>
+<td><strong>Pool-Zeitlimit:</strong> Die Anzahl der Sekunden, die auf eine Verbindung aus dem Pool gewartet wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>DATABASE_POOL_RECYCLE</code></td>
-<td><code>1800</code></td>
+<td><code>30m</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Pool-Recycling:</strong> Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. <code>-1</code> zum Deaktivieren.</td>
+<td><strong>Pool-Recycling:</strong> Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. <code>-1</code> zum Deaktivieren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>DATABASE_POOL_PRE_PING</code></td>
@@ -7825,10 +7869,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>DATABASE_RETRY_TIMEOUT</code></td>
-<td><code>60</code></td>
+<td><code>1m</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Wiederholungs-Zeitlimit:</strong> Die maximale Wartezeit in Sekunden auf die Verfügbarkeit der Datenbank beim Start.</td>
+<td><strong>Wiederholungs-Zeitlimit:</strong> Die maximale Wartezeit in Sekunden auf die Verfügbarkeit der Datenbank beim Start. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>DATABASE_REQUEST_RETRY_ATTEMPTS</code></td>
@@ -7839,10 +7883,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>DATABASE_REQUEST_RETRY_DELAY</code></td>
-<td><code>0.25</code></td>
+<td><code>250ms</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Wiederholungsverzögerung:</strong> Die Verzögerung in Sekunden zwischen Wiederholungsversuchen bei vorübergehenden Datenbankfehlern.</td>
+<td><strong>Wiederholungsverzögerung:</strong> Die Verzögerung in Sekunden zwischen Wiederholungsversuchen bei vorübergehenden Datenbankfehlern. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 </tbody>
 </table>
@@ -7888,7 +7932,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <h3 id="wie-man-es-benutzt_7">Wie man es benutzt<a class="headerlink" href="#wie-man-es-benutzt_7" title="Permanent link">&para;</a></h3>
 <p>Führen Sie die folgenden Schritte aus, um die DNSBL-Funktion zu konfigurieren und zu verwenden:</p>
 <ol>
-<li><strong>Aktivieren Sie die Funktion:</strong> Die DNSBL-Funktion ist standardmäßig deaktiviert. Setzen Sie die Einstellung <code>USE_DNSBL</code> auf <code>yes</code>, um sie zu aktivieren.</li>
+<li><strong>Funktion steuern:</strong> Die DNSBL-Funktion ist standardmäßig aktiviert. Setzen Sie <code>USE_DNSBL</code> auf <code>no</code>, um sie zu deaktivieren.</li>
 <li><strong>DNSBL-Server konfigurieren:</strong> Fügen Sie die Domainnamen der DNSBL-Dienste, die Sie verwenden möchten, zur Einstellung <code>DNSBL_LIST</code> hinzu.</li>
 <li><strong>Einstellungen anwenden:</strong> Nach der Konfiguration überprüft BunkerWeb eingehende Verbindungen automatisch mit den angegebenen DNSBL-Servern.</li>
 <li><strong>Wirksamkeit überwachen:</strong> Überprüfen Sie die <a href="../web-ui/">Web-Benutzeroberfläche</a>, um Statistiken über Anfragen zu sehen, die durch DNSBL-Prüfungen blockiert wurden.</li>
@@ -7908,10 +7952,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tbody>
 <tr>
 <td><code>USE_DNSBL</code></td>
-<td><code>no</code></td>
+<td><code>yes</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td>DNSBL aktivieren: auf <code>yes</code> setzen, um DNSBL-Prüfungen für eingehende Verbindungen zu aktivieren.</td>
+<td>DNSBL ist standardmäßig aktiviert; setzen Sie <code>USE_DNSBL</code> auf <code>no</code>, um Prüfungen eingehender Verbindungen zu deaktivieren.</td>
 </tr>
 <tr>
 <td><code>DNSBL_LIST</code></td>
@@ -7938,7 +7982,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td><code>DNSBL_IGNORE_IP</code></td>
 <td>``</td>
 <td>multisite</td>
-<td>ja</td>
+<td>nein</td>
 <td>Durch Leerzeichen getrennte IPs/CIDRs, für die DNSBL-Prüfungen übersprungen werden sollen (Whitelist).</td>
 </tr>
 <tr>
@@ -7959,7 +8003,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td><code>DNSBL_IGNORE_IP_URLS</code></td>
 <td>``</td>
 <td>multisite</td>
-<td>ja</td>
+<td>nein</td>
 <td>Durch Leerzeichen getrennte URLs, die IPs/CIDRs zum Überspringen bereitstellen. Unterstützt <code>http(s)://</code> und <code>file://</code>.</td>
 </tr>
 </tbody>
@@ -8211,6 +8255,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Listenformate</p>
+<p>URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit <code>#</code> oder <code>;</code> beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: <code>#key</code> behält die Werte unter <code>key</code>, <code>#key=value</code> behält Objekte, bei denen <code>key</code> gleich <code>value</code> ist oder <code>value</code> enthält, und <code>&amp;</code> verbindet die Bedingungen. Beispiel: <code>https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT</code>. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Greylist. Nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken bedingten Zugriff zu gewähren.</p>
@@ -9051,21 +9099,21 @@ TrustedMonitor/\d+\.\d+
 <td><code>SAMEORIGIN</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>X-Frame-Options:</strong> Verhindert Clickjacking, indem es steuert, ob Ihre Website in einem Frame dargestellt werden kann.</td>
+<td><strong>X-Frame-Options:</strong> Verhindert Clickjacking, indem es steuert, ob Ihre Website in einem Frame dargestellt werden kann. Zulässige Werte: <code>DENY</code>, <code>SAMEORIGIN</code>; ein leerer Wert entfernt diesen Header.</td>
 </tr>
 <tr>
 <td><code>X_CONTENT_TYPE_OPTIONS</code></td>
 <td><code>nosniff</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>X-Content-Type-Options:</strong> Verhindert, dass Browser MIME-Sniffing betreiben, und schützt so vor Drive-by-Download-Angriffen.</td>
+<td><strong>X-Content-Type-Options:</strong> Verhindert, dass Browser MIME-Sniffing betreiben, und schützt so vor Drive-by-Download-Angriffen. Zulässige Werte: <code>nosniff</code>; ein leerer Wert entfernt diesen Header.</td>
 </tr>
 <tr>
 <td><code>X_DNS_PREFETCH_CONTROL</code></td>
 <td><code>off</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>X-DNS-Prefetch-Control:</strong> Reguliert das DNS-Prefetching, um unbeabsichtigte Netzwerkanfragen zu reduzieren und die Privatsphäre zu verbessern.</td>
+<td><strong>X-DNS-Prefetch-Control:</strong> Reguliert das DNS-Prefetching, um unbeabsichtigte Netzwerkanfragen zu reduzieren und die Privatsphäre zu verbessern. Zulässige Werte: <code>on</code>, <code>off</code>.</td>
 </tr>
 <tr>
 <td><code>REFERRER_POLICY</code></td>
@@ -9143,9 +9191,17 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">Bewährte Praktiken</p>
 <ul>
 <li>Verwenden Sie <code>SameSite=Strict</code> für sensible Cookies, um den Zugriff über verschiedene Ursprünge hinweg zu verhindern.</li>
+<li>Verwenden Sie <code>SameSite=None</code> nur, wenn Cookies in Cross-Site-Kontexten gesendet werden müssen (z. B. SSO-Callbacks oder eingebettete Inhalte); Browser verlangen dafür zusätzlich das <code>Secure</code>-Flag, lassen Sie daher <code>COOKIE_AUTO_SECURE_FLAG</code> aktiviert oder fügen Sie <code>Secure</code> explizit hinzu.</li>
+<li>Setzt die Upstream-Antwort bereits einen anderen <code>SameSite</code>-Wert, hängt BunkerWeb den konfigurierten Wert an, statt ihn zu ersetzen; Browser verwenden das letzte <code>SameSite</code>-Attribut, sodass der Wert aus <code>COOKIE_FLAGS</code> greift.</li>
 <li>Überprüfen Sie Ihre Cookie-Einstellungen regelmäßig, um die Einhaltung der Sicherheits- und Datenschutzbestimmungen sicherzustellen.</li>
 <li>Vermeiden Sie es, Cookies ohne das Secure-Flag in Produktionsumgebungen zu setzen.</li>
 </ul>
+</div>
+<div class="admonition example">
+<p class="admonition-title">SameSite=None für Cross-Site-Cookies</p>
+<div class="highlight"><pre><span></span><code><span class="nt">COOKIE_FLAGS</span><span class="p">:</span><span class="w"> </span><span class="s">"*</span><span class="nv"> </span><span class="s">HttpOnly</span><span class="nv"> </span><span class="s">SameSite=None"</span>
+<span class="nt">COOKIE_AUTO_SECURE_FLAG</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+</code></pre></div>
 </div>
 </div>
 <div class="tabbed-block">
@@ -9219,7 +9275,7 @@ TrustedMonitor/\d+\.\d+
 <p>Konfiguration mit robusten Cookie-Sicherheitseinstellungen:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">COOKIE_FLAGS</span><span class="p">:</span><span class="w"> </span><span class="s">"*</span><span class="nv"> </span><span class="s">HttpOnly</span><span class="nv"> </span><span class="s">SameSite=Strict"</span>
 <span class="nt">COOKIE_FLAGS_2</span><span class="p">:</span><span class="w"> </span><span class="s">"session_cookie</span><span class="nv"> </span><span class="s">Secure</span><span class="nv"> </span><span class="s">HttpOnly</span><span class="nv"> </span><span class="s">SameSite=Strict"</span>
-<span class="nt">COOKIE_FLAGS_3</span><span class="p">:</span><span class="w"> </span><span class="s">"auth_cookie</span><span class="nv"> </span><span class="s">Secure</span><span class="nv"> </span><span class="s">HttpOnly</span><span class="nv"> </span><span class="s">SameSite=Strict</span><span class="nv"> </span><span class="s">Max-Age=3600"</span>
+<span class="nt">COOKIE_FLAGS_3</span><span class="p">:</span><span class="w"> </span><span class="s">"auth_cookie</span><span class="nv"> </span><span class="s">Secure</span><span class="nv"> </span><span class="s">HttpOnly</span><span class="nv"> </span><span class="s">SameSite=Strict"</span>
 <span class="nt">COOKIE_AUTO_SECURE_FLAG</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 </code></pre></div>
 </div>
@@ -9721,24 +9777,24 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY</code></td>
-<td><code>2</code></td>
+<td><code>2s</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>ZeroSSL-API-Wiederholungsverzögerung:</strong> Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen in <code>zerossl-bot</code>.</td>
+<td><strong>ZeroSSL-API-Wiederholungsverzögerung:</strong> Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen in <code>zerossl-bot</code>. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT</code></td>
-<td><code>5</code></td>
+<td><code>5s</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>ZeroSSL-API-Verbindungs-Timeout:</strong> Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe in <code>zerossl-bot</code>.</td>
+<td><strong>ZeroSSL-API-Verbindungs-Timeout:</strong> Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe in <code>zerossl-bot</code>. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_ZEROSSL_API_MAX_TIME</code></td>
-<td><code>20</code></td>
+<td><code>20s</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>ZeroSSL-API-Maximalzeit:</strong> Maximale Gesamtzeit in Sekunden für jeden ZeroSSL-API-Aufruf in <code>zerossl-bot</code>.</td>
+<td><strong>ZeroSSL-API-Maximalzeit:</strong> Maximale Gesamtzeit in Sekunden für jeden ZeroSSL-API-Aufruf in <code>zerossl-bot</code>. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_CHALLENGE</code></td>
@@ -9759,7 +9815,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>default</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>DNS-Propagation:</strong> Die Wartezeit für die DNS-Propagation in Sekunden. Wenn kein Wert angegeben wird, wird die Standard-Propagationszeit des Anbieters verwendet.</td>
+<td><strong>DNS-Propagation:</strong> Die Wartezeit für die DNS-Propagation in Sekunden. Wenn kein Wert angegeben wird, wird die Standard-Propagationszeit des Anbieters verwendet. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code></td>
@@ -9818,6 +9874,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>Benutzerdefiniertes Zertifikatsprofil:</strong> Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt <code>LETS_ENCRYPT_PROFILE</code>, falls gesetzt.</td>
 </tr>
 <tr>
+<td><code>LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Prüfung öffentlicher Suffixe deaktivieren:</strong> Bei <code>yes</code> werden Domains vor der Zertifikatsanforderung nicht gegen die Public Suffix List geprüft. Bei <code>no</code> werden Anforderungen für Domains abgelehnt, die einem öffentlichen Suffix entsprechen (z. B. <code>co.uk</code>).</td>
+</tr>
+<tr>
 <td><code>LETS_ENCRYPT_MAX_RETRIES</code></td>
 <td><code>0</code></td>
 <td>multisite</td>
@@ -9840,7 +9903,7 @@ TrustedMonitor/\d+\.\d+
 <li>Die Einstellung <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.</li>
 <li>Wenn keine <code>LETS_ENCRYPT_DNS_PROPAGATION</code>-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet.</li>
 <li>Die vollständige Let's Encrypt-Automatisierung mit der <code>http</code>-Challenge funktioniert im Stream-Modus, solange Sie den Port <code>80/tcp</code> von außen öffnen. Verwenden Sie die Einstellung <code>LISTEN_STREAM_PORT_SSL</code>, um Ihren SSL/TLS-Listening-Port zu wählen.</li>
-<li>Wenn <code>LETS_ENCRYPT_PASSTHROUGH</code> auf <code>yes</code> gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist. Ein <code>GET</code> oder <code>HEAD</code> eines einzelnen Tokens unter <code>/.well-known/acme-challenge/</code> wird dann auf die Whitelist gesetzt und erreicht das Backend ohne weitere Prüfung: Antibot, Blacklist, ModSecurity, Anfragen-Limits, Basic Auth und die Sperrprüfung werden für diese Anfrage übersprungen (Verbindungslimits gelten weiterhin, nginx setzt sie durch), mehr als bei einer lokal beantworteten Challenge. Tiefere Pfade, andere Methoden und nicht tokenförmige Namen durchlaufen die normalen Prüfungen.</li>
+<li>Wenn <code>LETS_ENCRYPT_PASSTHROUGH</code> auf <code>yes</code> gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist. Ein <code>GET</code> oder <code>HEAD</code> eines einzelnen Tokens unter <code>/.well-known/acme-challenge/</code> wird dann auf die Whitelist gesetzt und erreicht das Backend ohne weitere Prüfung: Antibot, Blacklist, ModSecurity, Anfragen-Limits, Basic Auth und die Sperrprüfung werden für diese Anfrage übersprungen (Verbindungslimits gelten weiterhin, nginx setzt sie durch), mehr als bei einer lokal beantworteten Challenge. Tiefere Pfade, andere Methoden und nicht tokenförmige Namen durchlaufen die normalen Prüfungen. Das Backend erhält außerdem den angefragten <code>Host</code>, auch wenn <code>REVERSE_PROXY_CUSTOM_HOST</code> auf einen festen Namen gesetzt ist, da die Challenge für diesen Namen validiert wird (ein Wert mit nginx-Variablen gilt weiterhin).</li>
 </ul>
 </div>
 <div class="admonition tip">
@@ -10716,10 +10779,10 @@ TrustedMonitor/\d+\.\d+
 </tr>
 <tr>
 <td><code>METRICS_REDIS_TTL</code></td>
-<td><code>2592000</code></td>
+<td><code>30d</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Metrics-Redis-TTL:</strong> Sekunden bis Redis-Metrik-Schlüssel ablaufen (<code>0</code> = dauerhaft); wird bei jeder Synchronisierung erneuert, sodass aktive Daten nie ablaufen, während verwaiste Daten unter <code>volatile-lru</code> evictable werden, damit sich Redis von Speicherdruck (maxmemory) erholt. Akzeptiert die Kurzschreibweise <code>k</code>/<code>m</code>.</td>
+<td><strong>Metrics-Redis-TTL:</strong> Sekunden bis Redis-Metrik-Schlüssel ablaufen (<code>0</code> = dauerhaft); wird bei jeder Synchronisierung erneuert, sodass aktive Daten nie ablaufen, während verwaiste Daten unter <code>volatile-lru</code> evictable werden, damit sich Redis von Speicherdruck (maxmemory) erholt. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>MAX_LRU_HISTORY</code></td>
@@ -11404,6 +11467,34 @@ TrustedMonitor/\d+\.\d+
 <td>multisite</td>
 <td>nein</td>
 <td><strong>Audit-Protokoll-Pfad:</strong> Pfad der Datei, in die ModSecurity Audit-Einträge schreibt. Muss eine reguläre Datei sein: Der serielle Audit-Writer sperrt sie, was bei einer Pipe oder einem Stream nicht möglich ist. Der Pfad muss auf <code>.log</code> enden. Die Rotation über diese Endung gilt nur dort, wo logrotate installiert ist (die Linux-Pakete und das All-In-One-Image); bei Docker, Swarm und Kubernetes wird ein abweichender Name weder gestreamt noch rotiert und wächst unbegrenzt im Container, da nur <code>modsec_audit.log</code> in den Log-Stream des Containers verlinkt ist.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_TYPE</code></td>
+<td><code>Serial</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Schreibmodus: <code>Serial</code> (Standard) oder <code>Concurrent</code>.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Standardmäßig leer; für <code>Concurrent</code> ist ein absoluter Speicherpfad erforderlich.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_REQUEST_BODY_LIMIT</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td>Maximale Größe des geprüften Anforderungskörpers, in Bytes oder mit <code>k</code>/<code>m</code>/<code>g</code>. Leer: aus <code>MAX_CLIENT_SIZE</code> abgeleitet; NGINX erzwingt dieses Limit zuerst. <code>REVERSE_PROXY_MAX_CLIENT_SIZE</code> überschreibt den Wert für seine Location. <code>0</code> hebt das Prüflimit auf und kann den Speicher erschöpfen.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION</code></td>
+<td><code>Reject</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><code>Reject</code> gibt oberhalb des Prüflimits HTTP 413 zurück. <code>ProcessPartial</code> prüft nur den Teil innerhalb des Limits und leitet den vollständigen Körper weiter, wodurch die WAF-Abdeckung sinkt. Das separate Limit ohne Dateien gilt weiterhin.</td>
 </tr>
 <tr>
 <td><code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code></td>
@@ -12624,6 +12715,10 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Listenformate</p>
+<p>URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit <code>#</code> oder <code>;</code> beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: <code>#key</code> behält die Werte unter <code>key</code>, <code>#key=value</code> behält Objekte, bei denen <code>key</code> gleich <code>value</code> ist oder <code>value</code> enthält, und <code>&amp;</code> verbindet die Bedingungen. Beispiel: <code>https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT</code>. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Cloud-Anbieter</p>
 <p>Fügen Sie die IPs Ihrer Load Balancer (AWS/GCP/Azure…) zu <code>REAL_IP_FROM</code> hinzu, um eine korrekte Identifizierung zu gewährleisten.</p>
@@ -12637,7 +12732,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <p>Mit <code>REAL_IP_RECURSIVE</code> wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.</p>
 </div>
 <h3 id="beispiele_5">Beispiele<a class="headerlink" href="#beispiele_5" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:6"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Basis (hinter Reverse Proxy)</label><label for="__tabbed_36_2">Cloud Load Balancer</label><label for="__tabbed_36_3">PROXY-Protokoll</label><label for="__tabbed_36_4">Mehrere Proxy-Quellen mit URLs</label><label for="__tabbed_36_5">CDN-Konfiguration</label><label for="__tabbed_36_6">Hinter Cloudflare</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:7"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><input id="__tabbed_36_7" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Basis (hinter Reverse Proxy)</label><label for="__tabbed_36_2">Cloud Load Balancer</label><label for="__tabbed_36_3">PROXY-Protokoll</label><label for="__tabbed_36_4">Mehrere Proxy-Quellen mit URLs</label><label for="__tabbed_36_5">CDN-Konfiguration</label><label for="__tabbed_36_6">Hinter Cloudflare</label><label for="__tabbed_36_7">Hinter AWS CloudFront</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Einfache Konfiguration für eine Website hinter einem Reverse Proxy:</p>
@@ -12687,6 +12782,15 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># Wir vertrauen nur Cloudflare-IPs</span>
 <span class="nt">REAL_IP_FROM_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">"https://www.cloudflare.com/ips-v4/</span><span class="nv"> </span><span class="s">https://www.cloudflare.com/ips-v6/"</span><span class="w"> </span><span class="c1"># Cloudflare-IPs automatisch herunterladen</span>
 <span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">"CF-Connecting-IP"</span><span class="w">  </span><span class="c1"># Cloudflare-Header für Client-IP</span>
+<span class="nt">REAL_IP_RECURSIVE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Konfiguration für eine Website hinter AWS CloudFront:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">REAL_IP_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># We only trust CloudFront IPs</span>
+<span class="nt">REAL_IP_FROM_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">"https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT"</span><span class="w"> </span><span class="c1"># IPv4 and IPv6 CloudFront edges</span>
+<span class="nt">REAL_IP_HEADER</span><span class="p">:</span><span class="w"> </span><span class="s">"X-Forwarded-For"</span>
 <span class="nt">REAL_IP_RECURSIVE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 </code></pre></div>
 </div>
@@ -12912,10 +13016,10 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_TIMEOUT</code></td>
-<td style="text-align: left;"><code>1000</code></td>
+<td style="text-align: left;"><code>1s</code></td>
 <td style="text-align: left;">global</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">Timeout (ms) für Verbindung/Lesen/Schreiben.</td>
+<td style="text-align: left;">Timeout (ms) für Verbindung/Lesen/Schreiben. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_USERNAME</code></td>
@@ -12930,6 +13034,13 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <td style="text-align: left;">global</td>
 <td style="text-align: left;">nein</td>
 <td style="text-align: left;">Passwort.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>REDIS_CLUSTER_NODES</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">global</td>
+<td style="text-align: left;">nein</td>
+<td style="text-align: left;">Seed-Knoten eines Redis-Clusters, <code>host[:port]</code> durch Leerzeichen getrennt, <code>[ipv6]:port</code> für IPv6. Aktiviert den Cluster-Modus.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_SENTINEL_HOSTS</code></td>
@@ -12954,17 +13065,17 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_SENTINEL_MASTER</code></td>
-<td style="text-align: left;"><code>mymaster</code></td>
+<td style="text-align: left;"></td>
 <td style="text-align: left;">global</td>
 <td style="text-align: left;">nein</td>
 <td style="text-align: left;">Name des Sentinel-Masters.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_KEEPALIVE_IDLE</code></td>
-<td style="text-align: left;"><code>30000</code></td>
+<td style="text-align: left;"><code>30s</code></td>
 <td style="text-align: left;">global</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird.</td>
+<td style="text-align: left;">Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>REDIS_KEEPALIVE_POOL</code></td>
@@ -12997,6 +13108,12 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 <li>Stellen Sie die Netzwerkkonnektivität zwischen allen BunkerWeb-Instanzen und den Redis-/Valkey-Servern sicher</li>
 </ul>
 </div>
+<h3 id="redis-cluster">Redis Cluster<a class="headerlink" href="#redis-cluster" title="Permanent link">&para;</a></h3>
+<p>Setzen Sie <code>REDIS_CLUSTER_NODES</code> auf mindestens einen erreichbaren Knoten; BunkerWeb ermittelt den Rest des Clusters von dort aus. Dies funktioniert mit Redis 6.2+, Valkey und verwalteten Cluster-Diensten wie ElastiCache oder MemoryDB über deren Konfigurations-Endpunkt. Seed-Knoten akzeptieren <code>host</code>, <code>host:port</code> oder <code>[ipv6]:port</code>, aber der Cluster selbst muss IPv4-Adressen oder Hostnamen ankündigen (<code>cluster-announce-hostname</code> mit <code>cluster-preferred-endpoint-type hostname</code>); Cluster, die IPv6 ankündigen, werden nicht unterstützt.</p>
+<p>Der Cluster-Modus verwendet Datenbank 0. Wird <code>REDIS_CLUSTER_NODES</code> zusammen mit <code>REDIS_SENTINEL_HOSTS</code> oder mit <code>REDIS_DATABASE</code> ungleich 0 gesetzt, ist das ein Konfigurationsfehler: BunkerWeb protokolliert einen Fehler, der beide Einstellungen nennt, und verwendet Redis überhaupt nicht (Rückfall auf lokale Zähler und Cookie-Sitzungen), bis eine der beiden entfernt wird.</p>
+<p>Die Umstellung einer bestehenden Bereitstellung auf den Cluster-Modus beginnt mit einem leeren Schlüsselraum: aktive und dauerhafte Sperren, Sitzungen und Berichte werden nicht übernommen. Wenden Sie dauerhafte Sperren nach der Umstellung erneut an.</p>
+<p>Sperren und Bad-Behavior-Zähler werden nach Client-IP auf die Primaries verteilt. Berichte zu blockierten Anfragen teilen sich einen einzigen Hash-Slot, sodass ein Primary alle davon speichert.</p>
+<p>Mit der Standardeinstellung <code>cluster-require-full-coverage yes</code> stoppt der Verlust eines Primary ohne Replica den gesamten Cluster; BunkerWeb fällt dann bis zur Wiederherstellung auf lokale Zähler und Cookie-Sitzungen zurück. <code>cluster-require-full-coverage no</code> begrenzt die Auswirkung auf die Schlüssel der verlorenen Shard.</p>
 <h3 id="beispiele_6">Beispiele<a class="headerlink" href="#beispiele_6" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="38:4"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Basiskonfiguration</label><label for="__tabbed_38_2">Sichere Konfiguration</label><label for="__tabbed_38_3">Redis Sentinel</label><label for="__tabbed_38_4">Erweitertes Tuning</label></div>
 <div class="tabbed-content">
@@ -14024,10 +14141,10 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 </tr>
 <tr>
 <td><code>REVERSE_SCAN_TIMEOUT</code></td>
-<td><code>500</code></td>
+<td><code>500ms</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Scan-Timeout:</strong> Maximale Zeit in Millisekunden, die für das Scannen eines Ports zulässig ist.</td>
+<td><strong>Scan-Timeout:</strong> Maximale Zeit in Millisekunden, die für das Scannen eines Ports zulässig ist. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden.</td>
 </tr>
 </tbody>
 </table>
@@ -14687,10 +14804,10 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><code>SELF_SIGNED_SSL_EXPIRY</code></td>
-<td style="text-align: left;"><code>365</code></td>
+<td style="text-align: left;"><code>1y</code></td>
 <td style="text-align: left;">Multisite</td>
 <td style="text-align: left;">nein</td>
-<td style="text-align: left;">Gültigkeit (Tage).</td>
+<td style="text-align: left;">Gültigkeit (Tage). Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Tagen.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>SELF_SIGNED_SSL_SUBJ</code></td>
@@ -14793,24 +14910,24 @@ gesetzt, hat dies <strong>keine Wirkung</strong>.</p>
 </tr>
 <tr>
 <td><code>SESSIONS_IDLING_TIMEOUT</code></td>
-<td><code>1800</code></td>
+<td><code>30m</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Leerlauf-Timeout:</strong> Maximale Zeit (in Sekunden) der Inaktivität, bevor die Sitzung ungültig wird.</td>
+<td><strong>Leerlauf-Timeout:</strong> Maximale Zeit (in Sekunden) der Inaktivität, bevor die Sitzung ungültig wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>SESSIONS_ROLLING_TIMEOUT</code></td>
-<td><code>3600</code></td>
+<td><code>1h</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Rollierendes Timeout:</strong> Maximale Zeit (in Sekunden), bevor eine Sitzung erneuert werden muss.</td>
+<td><strong>Rollierendes Timeout:</strong> Maximale Zeit (in Sekunden), bevor eine Sitzung erneuert werden muss. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>SESSIONS_ABSOLUTE_TIMEOUT</code></td>
-<td><code>86400</code></td>
+<td><code>1d</code></td>
 <td>global</td>
 <td>nein</td>
-<td><strong>Absolutes Timeout:</strong> Maximale Zeit (in Sekunden), bevor eine Sitzung unabhängig von der Aktivität zerstört wird.</td>
+<td><strong>Absolutes Timeout:</strong> Maximale Zeit (in Sekunden), bevor eine Sitzung unabhängig von der Aktivität zerstört wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden.</td>
 </tr>
 <tr>
 <td><code>SESSIONS_CHECK_IP</code></td>
@@ -15268,16 +15385,15 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <ol>
 <li>Sie definieren Kriterien für Besucher, die auf die "Whitelist" gesetzt werden sollen (<em>IP-Adressen, Netzwerke, rDNS, ASN, User-Agent oder URI-Muster</em>).</li>
 <li>Wenn ein Besucher versucht, auf Ihre Website zuzugreifen, prüft BunkerWeb, ob er einem dieser Whitelist-Kriterien entspricht.</li>
-<li>Wenn ein Besucher einer Whitelist-Regel entspricht (und keiner Ignorier-Regel), wird ihm der Zugriff auf Ihre Website gewährt und er <strong>umgeht alle anderen Sicherheitsprüfungen</strong>.</li>
+<li>Wenn ein Besucher einer Whitelist-Regel entspricht, wird ihm der Zugriff auf Ihre Website gewährt und er <strong>umgeht alle anderen Sicherheitsprüfungen</strong>.</li>
 <li>Wenn ein Besucher keinem Whitelist-Kriterium entspricht, durchläuft er wie gewohnt alle normalen Sicherheitsprüfungen.</li>
 <li>Whitelists können in regelmäßigen Abständen automatisch aus externen Quellen aktualisiert werden.</li>
 </ol>
 <h3 id="wie-man-es-benutzt_22">Wie man es benutzt<a class="headerlink" href="#wie-man-es-benutzt_22" title="Permanent link">&para;</a></h3>
 <p>Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurieren und zu verwenden:</p>
 <ol>
-<li><strong>Aktivieren Sie die Funktion:</strong> Die Whitelist-Funktion ist standardmäßig deaktiviert. Setzen Sie die Einstellung <code>USE_WHITELIST</code> auf <code>yes</code>, um sie zu aktivieren.</li>
+<li><strong>Funktion aktivieren:</strong> Die Whitelist ist standardmäßig aktiviert (<code>USE_WHITELIST=yes</code>), mit voreingestellten rDNS-Suffixen und ASN <code>32934</code>. Prüfen Sie diese vertrauenswürdigen Quellen; mit <code>USE_WHITELIST=no</code> deaktivieren Sie die Funktion.</li>
 <li><strong>Erlaubnisregeln konfigurieren:</strong> Definieren Sie, welche IPs, Netzwerke, rDNS-Muster, ASNs, User-Agents oder URIs auf die Whitelist gesetzt werden sollen.</li>
-<li><strong>Ignorierregeln einrichten:</strong> Geben Sie alle Ausnahmen an, die die Whitelist-Prüfungen umgehen sollen.</li>
 <li><strong>Externe Quellen hinzufügen:</strong> Konfigurieren Sie URLs zum automatischen Herunterladen und Aktualisieren von Whitelist-Daten.</li>
 <li><strong>Zugriff überwachen:</strong> Überprüfen Sie die <a href="../web-ui/">Web-Benutzeroberfläche</a>, um zu sehen, welchen Besuchern der Zugriff gewährt oder verweigert wird.</li>
 </ol>
@@ -15300,7 +15416,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <tbody>
 <tr>
 <td><code>USE_WHITELIST</code></td>
-<td><code>no</code></td>
+<td><code>yes</code></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>Whitelist aktivieren:</strong> Auf <code>yes</code> setzen, um die Whitelist-Funktion zu aktivieren.</td>
@@ -15330,28 +15446,18 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <td><strong>IP-Whitelist:</strong> Liste von IP-Adressen oder Netzwerken (CIDR-Notation), die erlaubt werden sollen, getrennt durch Leerzeichen.</td>
 </tr>
 <tr>
-<td><code>WHITELIST_IGNORE_IP</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>IP-Ignorierliste:</strong> Liste von IP-Adressen oder Netzwerken, die IP-Whitelist-Prüfungen umgehen sollen.</td>
-</tr>
-<tr>
 <td><code>WHITELIST_IP_URLS</code></td>
 <td></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>IP-Whitelist-URLs:</strong> Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen.</td>
 </tr>
-<tr>
-<td><code>WHITELIST_IGNORE_IP_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>IP-Ignorierlisten-URLs:</strong> Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die ignoriert werden sollen.</td>
-</tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Listenformate</p>
+<p>URL-Listen können einen Eintrag pro Zeile enthalten (Zeilen, die mit <code>#</code> oder <code>;</code> beginnen, sind Kommentare; von jeder Zeile wird nur das erste Wort gelesen), CSV, ein JSON-Dokument oder JSON Lines. In IP-Listen trennen Kommas ebenfalls Felder, und JSON-Listen behalten jede Zeichenfolge bei, die eine IP-Adresse oder ein Netzwerk darstellt. Fügen Sie ein Fragment hinzu, um nur einen Teil einer JSON-Liste zu behalten: <code>#key</code> behält die Werte unter <code>key</code>, <code>#key=value</code> behält Objekte, bei denen <code>key</code> gleich <code>value</code> ist oder <code>value</code> enthält, und <code>&amp;</code> verbindet die Bedingungen. Beispiel: <code>https://ip-ranges.amazonaws.com/ip-ranges.json#service=CLOUDFRONT</code>. Eine URL mit Fragment behält nur die ausgewählten Einträge; ist die Liste kein JSON, bleibt sie leer.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Whitelist. Dies ist nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken den Zugriff nach ihrer Domain zu ermöglichen.</p>
@@ -15368,7 +15474,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <tbody>
 <tr>
 <td><code>WHITELIST_RDNS</code></td>
-<td></td>
+<td><code>.google.com .googlebot.com .yandex.ru .yandex.net .yandex.com .search.msn.com .baidu.com .baidu.jp .crawl.yahoo.net .fwd.linkedin.com .twitter.com .twttr.com .discord.com</code></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>rDNS-Whitelist:</strong> Liste von Reverse-DNS-Suffixen, die erlaubt werden sollen, getrennt durch Leerzeichen.</td>
@@ -15381,25 +15487,11 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <td><strong>Nur globales rDNS:</strong> Führt rDNS-Whitelist-Prüfungen nur für globale IP-Adressen durch, wenn auf <code>yes</code> gesetzt.</td>
 </tr>
 <tr>
-<td><code>WHITELIST_IGNORE_RDNS</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>rDNS-Ignorierliste:</strong> Liste von Reverse-DNS-Suffixen, die rDNS-Whitelist-Prüfungen umgehen sollen.</td>
-</tr>
-<tr>
 <td><code>WHITELIST_RDNS_URLS</code></td>
 <td></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>rDNS-Whitelist-URLs:</strong> Liste von URLs, die Reverse-DNS-Suffixe enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen.</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_RDNS_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>rDNS-Ignorierlisten-URLs:</strong> Liste von URLs, die Reverse-DNS-Suffixe enthalten, die ignoriert werden sollen.</td>
 </tr>
 </tbody>
 </table>
@@ -15419,17 +15511,10 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <tbody>
 <tr>
 <td><code>WHITELIST_ASN</code></td>
-<td></td>
+<td><code>32934</code></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>ASN-Whitelist:</strong> Liste von Autonomen Systemnummern, die erlaubt werden sollen, getrennt durch Leerzeichen.</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_ASN</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>ASN-Ignorierliste:</strong> Liste von ASNs, die ASN-Whitelist-Prüfungen umgehen sollen.</td>
 </tr>
 <tr>
 <td><code>WHITELIST_ASN_URLS</code></td>
@@ -15437,13 +15522,6 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <td>multisite</td>
 <td>nein</td>
 <td><strong>ASN-Whitelist-URLs:</strong> Liste von URLs, die ASNs enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen.</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_ASN_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>ASN-Ignorierlisten-URLs:</strong> Liste von URLs, die ASNs enthalten, die ignoriert werden sollen.</td>
 </tr>
 </tbody>
 </table>
@@ -15469,25 +15547,11 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <td><strong>User-Agent-Whitelist:</strong> Liste von User-Agent-Mustern (PCRE-Regex), die erlaubt werden sollen, getrennt durch Leerzeichen.</td>
 </tr>
 <tr>
-<td><code>WHITELIST_IGNORE_USER_AGENT</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>User-Agent-Ignorierliste:</strong> Liste von User-Agent-Mustern, die User-Agent-Whitelist-Prüfungen umgehen sollen.</td>
-</tr>
-<tr>
 <td><code>WHITELIST_USER_AGENT_URLS</code></td>
 <td></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>User-Agent-Whitelist-URLs:</strong> Liste von URLs, die User-Agent-Muster enthalten, die auf die Whitelist gesetzt werden sollen.</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_USER_AGENT_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>User-Agent-Ignorierlisten-URLs:</strong> Liste von URLs, die User-Agent-Muster enthalten, die ignoriert werden sollen.</td>
 </tr>
 </tbody>
 </table>
@@ -15513,25 +15577,11 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <td><strong>URI-Whitelist:</strong> Liste von URI-Mustern (PCRE-Regex), die erlaubt werden sollen, getrennt durch Leerzeichen.</td>
 </tr>
 <tr>
-<td><code>WHITELIST_IGNORE_URI</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>URI-Ignorierliste:</strong> Liste von URI-Mustern, die URI-Whitelist-Prüfungen umgehen sollen.</td>
-</tr>
-<tr>
 <td><code>WHITELIST_URI_URLS</code></td>
 <td></td>
 <td>multisite</td>
 <td>nein</td>
 <td><strong>URI-Whitelist-URLs:</strong> Liste von URLs, die URI-Muster enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen.</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_URI_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>nein</td>
-<td><strong>URI-Ignorierlisten-URLs:</strong> Liste von URLs, die URI-Muster enthalten, die ignoriert werden sollen.</td>
 </tr>
 </tbody>
 </table>

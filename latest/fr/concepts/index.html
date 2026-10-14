@@ -79,16 +79,16 @@
   try {
     document
       .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
-      .setAttribute("aria-label", "Search in documentation");
+      .setAttribute("aria-label", "Rechercher dans la documentation");
   } catch (err) {}
     </script>
 
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Start a 30-day BunkerWeb PRO free trial from the <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">BunkerWeb Panel</a>.</p>'},
-        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
-        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        let defaultContent = [{ "content" : "\u003cp\u003eProfitez d\u2019un essai gratuit de 30 jours de BunkerWeb PRO depuis le \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self\u0026utm_source=doc\"\u003eBunkerWeb Panel\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eBesoin d\u2019une assistance premium ou de conseils personnalis\u00e9s sur BunkerWeb ? D\u00e9couvrez nos \u003ca style=\"text-decoration:underline; color :  white;\" href=\"https://panel.bunkerweb.io/?utm_campaign=self\u0026utm_source=doc#services\"\u003eservices professionnels\u003c/a\u003e.\u003c/p\u003e" },
+        { "content" : "\u003cp\u003eRejoignez la communaut\u00e9 Bunker en participant au \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://discord.bunkerweb.io\"\u003esalon Discord\u003c/a\u003e et en nous suivant sur \u003ca style=\"text-decoration:underline; color: white;\" href=\"https://www.linkedin.com/company/bunkerity/\"\u003eLinkedIn\u003c/a\u003e.\u003c/p\u003e" }
         ]
 
       function setBannerStyle() {
@@ -205,11 +205,11 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    📢 Vous recherchez BunkerWeb CLOUD, la version PRO, une assistance technique ou des services sur mesure ? Consultez le
     <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
        style="color: #3f6ec6;
               text-decoration: underline">BunkerWeb Panel</a>
-    for more information on our enterprise offers.
+    pour en savoir plus sur nos offres aux entreprises.
 
           </div>
           
@@ -222,10 +222,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-    You're not viewing the
-    documentation of the latest version.
+    Vous ne consultez pas la documentation de la dernière version.
     <a href="../../..">
-        <strong>Click here to view latest.</strong>
+        <strong>Cliquez ici pour consulter la dernière version.</strong>
     </a>
 
             </div>
@@ -449,25 +448,6 @@
     
   
   Guide de démarrage rapide
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../building/" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Compiler depuis les sources
 
       </a>
     </li>
@@ -882,6 +862,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Programmateur">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verification-de-letat-des-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vérification de l'état des instances
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -945,33 +942,6 @@
     
   
     Guide de démarrage rapide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../building/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compiler depuis les sources
   
 
     
@@ -1328,7 +1298,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Aller plus loin</p>
-<p>Vous trouverez des exemples concrets du mode multisite dans la section <a href="../advanced/">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/examples">examples</a> du dépôt.</p>
+<p>Vous trouverez des exemples concrets du mode multisite dans la section <a href="../advanced/">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples">examples</a> du dépôt.</p>
 </div>
 <h2 id="custom-configurations">Configurations personnalisées<a class="headerlink" href="#custom-configurations" title="Permanent link">&para;</a></h2>
 <p>Pour relever des défis uniques et répondre à des cas d'utilisation spécifiques, BunkerWeb offre la flexibilité de configurations personnalisées. Bien que les paramètres fournis et les <a href="../plugins/">plug-ins externes</a> couvrent un large éventail de scénarios, il peut y avoir des situations qui nécessitent une personnalisation supplémentaire.</p>
@@ -1343,7 +1313,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Aller plus loin</p>
-<p>Vous trouverez des exemples concrets de configurations personnalisées dans la section <a href="../advanced/#custom-configurations">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.15/examples">examples</a> du dépôt.</p>
+<p>Vous trouverez des exemples concrets de configurations personnalisées dans la section <a href="../advanced/#custom-configurations">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples">examples</a> du dépôt.</p>
 </div>
 <h2 id="base-de-donnees">Base de données<a class="headerlink" href="#base-de-donnees" title="Permanent link">&para;</a></h2>
 <p>BunkerWeb stocke en toute sécurité sa configuration actuelle dans une base de données backend, qui contient des données essentielles pour un fonctionnement sans faille. Les informations suivantes sont stockées dans la base de données:</p>
@@ -1469,7 +1439,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Gérer les tâches à partir de l'interface utilisateur web</figcaption>
 </figure>
-<p><strong>Vérification de l'état des instances</strong></p>
+<h3 id="verification-de-letat-des-instances">Vérification de l'état des instances<a class="headerlink" href="#verification-de-letat-des-instances" title="Permanent link">&para;</a></h3>
 <p>Depuis la version 1.6.0, le planificateur dispose d'un système de vérification de l'état intégré qui surveille l'état des instances. Si une instance devient défectueuse, le planificateur cessera de lui envoyer la configuration. Si l'instance redevient saine, le planificateur reprend l'envoi de la configuration.</p>
 <p>L'intervalle de vérification de l'état est défini par la <code>HEALTHCHECK_INTERVAL</code> variable d'environnement, avec une valeur par défaut de <code>30</code>, ce qui signifie que le planificateur vérifiera l'état des instances toutes les 30 secondes.</p>
 <h2 id="templates">Modèles<a class="headerlink" href="#templates" title="Permanent link">&para;</a></h2>
