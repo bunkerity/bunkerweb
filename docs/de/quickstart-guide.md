@@ -20,6 +20,22 @@ Der Schutz bestehender Webanwendungen, die bereits über das HTTP(S)-Protokoll e
 
 Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples) des Repositorys finden Sie Beispiele aus der Praxis.
 
+## Einen KI-Agenten verwenden
+
+### BunkerWeb-Skills auf skills.sh
+
+Wenn Sie einen KI-Programmieragenten verwenden, installieren Sie den offiziellen [BunkerWeb-Skill auf skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb) für Unterstützung bei Bereitstellung und Konfiguration. Folgen Sie den [Installationsanweisungen](https://github.com/bunkerity/bunkerweb-skills#installation) für Ihren Agenten.
+
+### BunkerWeb-Dokumentation mit Context7
+
+Sie können Ihren Agenten auch mit [Context7](https://context7.com/docs) verbinden, um während der Einrichtung die [BunkerWeb-Dokumentation](https://context7.com/bunkerity/bunkerweb) abzurufen. Geben Sie Ihre BunkerWeb-Version und Integration in Ihrer Anfrage an, damit der Agent die passenden Einstellungen und Beispiele verwendet.
+
+Beispielanfrage:
+
+```text
+Helfen Sie mir, BunkerWeb <Version> mit <Integration> zum Schutz meiner Anwendung zu konfigurieren. use context7
+```
+
 ## Grundlegende Einrichtung
 
 === "All-in-one"

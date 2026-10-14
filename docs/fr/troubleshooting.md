@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     Si vous n'êtes pas en mesure de résoudre votre problème, vous pouvez [nous contacter directement via notre panel](https://panel.bunkerweb.io/?language=french&utm_campaign=self&utm_source=doc). Celle-ci centralise toutes les demandes liées à la solution BunkerWeb.
 
+## Dépanner avec un agent IA
+
+### Skills BunkerWeb sur skills.sh
+
+La [skill officielle de dépannage BunkerWeb sur skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) aide les agents de programmation IA à diagnostiquer les requêtes bloquées, les bannissements, les erreurs du serveur en amont et les problèmes de certificats ou de configuration. Suivez les [instructions d'installation](https://github.com/bunkerity/bunkerweb-skills#installation) pour votre agent.
+
+### Documentation BunkerWeb avec Context7
+
+Si votre agent prend en charge [Context7](https://context7.com/docs), connectez-le pour consulter la [documentation BunkerWeb](https://context7.com/bunkerity/bunkerweb). Précisez votre version de BunkerWeb, votre intégration, les paramètres et les journaux pertinents dans votre demande, et retirez les mots de passe, jetons d'API et autres secrets avant de les partager.
+
+Exemple de demande :
+
+```text
+Aide-moi à diagnostiquer ce problème avec BunkerWeb <version> sur <intégration>. Voici les paramètres et les journaux pertinents, sans secrets : <détails>. use context7
+```
+
 ## Journaux
 
 Lors du dépannage, les journaux sont vos meilleurs amis. Nous faisons de notre mieux pour fournir des journaux conviviaux pour vous aider à comprendre ce qui se passe.

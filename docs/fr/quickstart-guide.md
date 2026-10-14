@@ -20,6 +20,22 @@ Protéger les applications web existantes déjà accessibles avec le protocole H
 
 Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples) du dépôt pour obtenir des exemples concrets.
 
+## Utiliser un agent IA
+
+### Skills BunkerWeb sur skills.sh
+
+Si vous utilisez un agent de programmation IA, installez la [skill officielle BunkerWeb sur skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb) pour vous aider à déployer et configurer BunkerWeb. Suivez les [instructions d'installation](https://github.com/bunkerity/bunkerweb-skills#installation) pour votre agent.
+
+### Documentation BunkerWeb avec Context7
+
+Vous pouvez aussi connecter votre agent à [Context7](https://context7.com/docs) pour consulter la [documentation BunkerWeb](https://context7.com/bunkerity/bunkerweb) pendant la configuration. Précisez votre version de BunkerWeb et votre intégration dans votre demande pour que l'agent utilise les paramètres et exemples adaptés.
+
+Exemple de demande :
+
+```text
+Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mon application. use context7
+```
+
 ## Configuration de base
 
 === "Tout-en-un"
