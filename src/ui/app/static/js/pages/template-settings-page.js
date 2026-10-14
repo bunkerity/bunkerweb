@@ -469,7 +469,7 @@ $(document).ready(() => {
   // moves, and it runs on the native submit instead.
   //
   // Why it has to exist: template_settings_page.html carries `novalidate` (it must — a
-  // `pattern` failure on a step pane hidden by `overrides.css:1637`'s
+  // `pattern` failure on a step pane hidden by `overrides/modals-steps.css`'s
   // `display: none !important` is a control the browser refuses to submit AND refuses to
   // focus, which silently kills Save with no message). That removes the browser's gate, and
   // nothing replaced it. An invalid value then POSTs, and the server does NOT reject the edit

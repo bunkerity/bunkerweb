@@ -1,0 +1,84 @@
+:root,
+[data-bs-theme="light"] {
+  --bs-bw-green: #2eac68;
+  /* H5/M5: white text on the raw brand green fails AA (2.91:1, both themes -- --bs-bw-green
+     is not redefined per theme). Darkened variant for any fill that carries white/light text;
+     plain green-on-page text usages keep --bs-bw-green unchanged. Literal hex, not
+     color-mix(): Chromium serializes a color-mix() computed value as a CSS Color 4 color()
+     function, which qa-ui/audit.js's rgb()-only parser cannot read for verification. */
+  --bs-bw-green-contrast: #22814e; /* var(--bs-bw-green) mixed 25% toward black */
+  --bs-bw-blue: #0b5577;
+  --bs-primary: #0b354a;
+  --bs-secondary: #35728e;
+  --bs-bw-green-rgb: 46, 172, 104;
+  --bs-primary-rgb: 11, 53, 74;
+  --bs-secondary-rgb: 53, 114, 142;
+  --bs-primary-text-emphasis: #07354a;
+  --bs-secondary-text-emphasis: #395d6e;
+  --bs-link-color: #0b354a;
+  --bs-link-color-rgb: 11, 53, 74;
+  --bs-link-hover-color: #2eac68;
+  --bs-link-hover-color-rgb: 46, 172, 104;
+  --bs-body-line-height: 1.47;
+  --bw-fg-1: #384551;
+  --bw-fg-2: #646e78;
+  /* M4: light theme -- #8b9197 measured 2.93-3.18:1 across the ~65 uses of this token
+     (sidebar footer, breadcrumb parents/subtitles, /home status-band eyebrows/meta,
+     and .text-muted/.text-body-secondary below, which duplicated this exact hex). Dark's
+     --bw-fg-3 (#9caeb7, further down) already passes and is untouched. */
+  --bw-fg-3: #686d71;
+  --bw-fg-4: #aeb4b9;
+  --bw-bg-card: #ffffff;
+  --bw-bg-subtle: #eef0f3;
+  --bw-border: #dbdee2;
+  --bw-shadow-sm: 0 0.125rem 0.375rem rgba(145, 152, 159, 0.12);
+  --bw-shadow-md: 0 0 0.375rem 0.25rem rgba(145, 152, 159, 0.15);
+
+  /* Country-choropleth palette — derived from --bs-primary / --bs-bw-blue.
+     Consumed by static/js/pages/home.js via getComputedStyle().
+     Steps 1–2 and --bw-map-land-border target ≥3:1 vs --bw-map-ocean
+     (WCAG 1.4.11); --bw-map-land stays subtle because the land-border hairline
+     carries the shape cue. */
+  --bw-map-ocean: #eef3f6;
+  --bw-map-land: #d9dfe4;
+  --bw-map-land-border: #7c8890;
+  --bw-map-border: #ffffff;
+  --bw-map-step-1: #6a8999;
+  --bw-map-step-2: #3f6c88;
+  --bw-map-step-3: #215778;
+  --bw-map-step-4: #114360;
+  --bw-map-step-5: #0b354a;
+}
+
+[data-bs-theme="dark"] {
+  /* FIX-E sweep: core.css's --bs-code-color (#e83e8c) is not redefined per theme, so <code>
+     text measures 3.58-4.02:1 on the dark card (--bw-bg-card #133044). Lightened variant
+     passes AA (5.85:1) while staying recognisably the same pink. */
+  --bs-code-color: #ff7fb8;
+  --bw-fg-1: #d7dee3;
+  --bw-fg-2: #b1c0ca;
+  --bw-fg-3: #9caeb7;
+  --bw-fg-4: #7e8f98;
+  --bw-bg-card: #133044;
+  --bw-bg-subtle: #102a3d;
+  --bw-border: #29485a;
+  --bw-shadow-sm: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.28);
+  --bw-shadow-md: 0 0 0.375rem 0.25rem rgba(0, 0, 0, 0.34);
+  --bw-map-ocean: #08141c;
+  --bw-map-land: #1b2e3a;
+  --bw-map-land-border: #4e6a7a;
+  --bw-map-border: #0a1a24;
+  --bw-map-step-1: #537185;
+  --bw-map-step-2: #6a92ab;
+  --bw-map-step-3: #87b2cc;
+  --bw-map-step-4: #abcde3;
+  --bw-map-step-5: #d1e6f3;
+}
+
+body {
+  font-family:
+    var(--bs-body-font-family), "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Heiti SC",
+    "WenQuanYi Micro Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+}

@@ -1053,8 +1053,8 @@ def test_form_carries_the_native_submit_marker(render_template_page):
 
 
 def test_form_is_novalidate(render_template_page):
-    """models/input_setting.html emits `pattern=` unconditionally and overrides.css:1637 hides
-    non-active step panes with `display: none !important`. A browser refuses to submit a form
+    """models/input_setting.html emits `pattern=` unconditionally and overrides/modals-steps.css
+    hides non-active step panes with `display: none !important`. A browser refuses to submit a form
     containing an invalid NON-FOCUSABLE control and never dispatches `submit` at all -- so an
     invalid value left on step 7 makes Save do nothing, with no message and no flash, and
     settings-widgets.js's normalisation never runs either. js/pages/template-settings-page.js's

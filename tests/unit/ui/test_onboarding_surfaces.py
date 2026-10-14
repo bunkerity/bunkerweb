@@ -8,6 +8,7 @@ story, so it is asserted in both directions.
 from pathlib import Path
 from types import SimpleNamespace
 
+from _css import overrides_css
 from conftest import english  # what a converted template renders for a key
 import re
 
@@ -244,7 +245,7 @@ def test_the_spotlight_respects_reduced_motion():
 
 def test_the_highlight_cannot_shift_the_chrome_it_highlights():
     """A border would resize the nav entry and push everything below it down."""
-    css = (Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "static" / "css" / "overrides.css").read_text()
+    css = overrides_css()
     rule = css.split(".bw-tour-target {", 1)[1].split("}", 1)[0]
 
     assert "outline:" in rule
@@ -279,7 +280,7 @@ def test_an_optional_step_says_so_while_it_is_still_pending():
 def test_both_floating_surfaces_follow_the_theme():
     """Sneat pins popover and toast backgrounds to white in both themes while the text colour
     follows the theme: dark mode rendered white on white, twice."""
-    css = (Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "static" / "css" / "overrides.css").read_text()
+    css = overrides_css()
     source = JS.read_text()
 
     toast = css.split("#onboarding-hint .toast {", 1)[1].split("}", 1)[0]

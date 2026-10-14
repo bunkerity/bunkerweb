@@ -21,7 +21,7 @@
    can end up unable to post.
 
    `novalidate` is load-bearing, not a style choice. models/input_setting.html emits `pattern=`
-   on every text input unconditionally and overrides.css:1637 hides non-active step panes with
+   on every text input unconditionally and overrides/modals-steps.css hides non-active step panes with
    `display: none !important`; a browser refuses to submit a form containing an invalid
    NON-FOCUSABLE control and never dispatches the `submit` event, so settings-widgets.js's
    normalisation would not run either. Without it, an invalid value left on step 7 makes Save do

@@ -1,0 +1,360 @@
+table.table.dataTable > tbody > tr.selected > * {
+  color: initial !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-secondary {
+  color: var(--bs-secondary) !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-primary {
+  color: var(--bs-primary) !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-secondary:hover {
+  color: #fff !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-outline-primary:hover {
+  color: #fff !important;
+}
+
+table.table.dataTable > tbody > tr.selected a.btn-primary {
+  color: #fff !important;
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}
+
+.text-white-80 {
+  --bs-text-opacity: 1;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+a.text-white-80:hover {
+  color: rgba(255, 255, 255, 1) !important;
+  text-decoration: underline;
+}
+
+[role="button"].card:hover {
+  color: var(--bs-secondary) !important;
+}
+
+[role="button"].card.text-color-hover-danger:hover {
+  color: var(--bs-danger) !important;
+}
+
+.mt-0_5 {
+  margin-top: 0.125rem !important;
+}
+
+.slide-out {
+  transition: transform 0.7s ease-in-out !important;
+  transform: translateX(-100%) !important;
+}
+
+#banner-text {
+  transition: none;
+  transform: translateX(100%); /* Start off-screen to the right */
+}
+
+#banner-text.slide-in {
+  transition: transform 0.7s ease-in-out;
+  transform: translateX(0);
+}
+
+.light-href:hover {
+  color: var(--bs-primary) !important;
+  text-decoration: underline;
+}
+
+.authentication-wrapper.authentication-basic .authentication-inner.w-100 {
+  max-width: 90% !important;
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown),
+.form-floating > .form-control-plaintext:focus,
+.form-floating > .form-control-plaintext:not(:placeholder-shown) {
+  padding-top: 1.625rem !important;
+  padding-bottom: 0.625rem !important;
+}
+
+.footer-container .footer-link:hover,
+a.courier-prime:hover {
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.w-70 {
+  width: 70% !important;
+}
+
+.don-jose {
+  font-family: var(--font-don-jose);
+}
+
+/* Don Jose is an all-caps display face: its lowercase codepoints carry capital
+   letterforms, so pairing it with a button label renders ALL-CAPS (verified in-browser:
+   text-transform is "none", yet lowercase glyph widths match uppercase). The kit reads
+   sentence case only because it never loads the display font (body-font fallback). Match
+   the kit on primary CTAs -- keep the tracking accent (admin.css:155), drop the all-caps
+   face on button labels only. Numeric values elsewhere keep Don Jose (digits unaffected). */
+.btn.don-jose {
+  font-family: var(--bs-body-font-family);
+  letter-spacing: 0.06em;
+}
+
+.courier-prime {
+  font-family: var(--font-courier-prime);
+}
+
+.warning-tooltip {
+  --bs-tooltip-bg: var(--bs-warning);
+  --bs-tooltip-color: var(--bs-white);
+}
+
+.login-background {
+  background-image: url("../../img/login-background.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* H5/M23: this extended named-colour palette is used only via the `subtitle_color`/
+   `svg_color` fields of core plugins' ui/actions.py (rendered as `text-<name>` by
+   plugin_page.html), so it is fixed here rather than in every plugin file. None of these
+   were redefined per theme; several pass in one theme and fail badly in the other against
+   the plugin metric card background (#fff light / #133044 dark -- see the [data-bs-theme]
+   overrides below `.text-teal`). orange/amber/emerald fail light (1.7-2.5:1), pass dark:
+   darken the light default, restore the vivid shade for dark. */
+.text-orange {
+  color: #a65334;
+}
+
+.text-amber {
+  color: #806000;
+}
+
+.text-emerald {
+  color: #308048;
+}
+
+.text-pink {
+  color: #ff69b4;
+}
+
+/* purple/maroon pass light (9.4-11:1), fail dark (1.25-1.45:1): lightened dark-only
+   variants below `.text-teal`, base stays the light-safe vivid shade. */
+.text-purple {
+  color: #800080;
+}
+
+.text-sky {
+  color: #87ceeb;
+}
+
+.text-turquoise {
+  color: #40e0d0;
+}
+
+.text-violet {
+  color: #ee82ee;
+}
+
+.text-rose {
+  color: #ff007f;
+}
+
+/* olive fails both themes (4.2:1 light, 3.3:1 dark): darken the light default too, lighten
+   further for dark below `.text-teal`. */
+.text-olive {
+  color: #6d6d00;
+}
+
+.text-lime {
+  color: #00ff00;
+}
+
+.text-gold {
+  color: #ffd700;
+}
+
+.text-cyan {
+  color: #00ffff;
+}
+
+.text-aqua {
+  color: #00ffff;
+}
+
+.text-indigo {
+  color: #4b0082;
+}
+
+.text-maroon {
+  color: #800000;
+}
+/* dark-only lightened variant for maroon is below `.text-teal`, with purple/olive. */
+
+.text-teal {
+  color: #20c997;
+}
+
+/* Per-theme restores/fixes for the extended palette above (H5/M23). */
+.dark-style .text-orange,
+[data-bs-theme="dark"] .text-orange {
+  color: #ff7f50;
+}
+.dark-style .text-amber,
+[data-bs-theme="dark"] .text-amber {
+  color: #ffbf00;
+}
+.dark-style .text-emerald,
+[data-bs-theme="dark"] .text-emerald {
+  color: #50c878;
+}
+.dark-style .text-olive,
+[data-bs-theme="dark"] .text-olive {
+  color: #a6a640;
+}
+.dark-style .text-purple,
+[data-bs-theme="dark"] .text-purple {
+  color: #c680c6;
+}
+.dark-style .text-maroon,
+[data-bs-theme="dark"] .text-maroon {
+  color: #cc9999;
+}
+
+.blur-overlay {
+  position: relative;
+}
+
+.blur-overlay .card-body,
+.blur-overlay .card-header {
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+.blur-overlay .blur-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bs-bw-green);
+  color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  z-index: 1000;
+}
+
+.blur-overlay .blur-message a:hover {
+  font-style: italic;
+}
+
+.layout-page::before {
+  display: none;
+}
+
+table.table.dataTable > tbody > tr.selected > * {
+  box-shadow: inset 0 0 0 9999px rgb(var(--bs-primary-rgb), 0.06) !important;
+  color: var(--bs-body-color) !important;
+}
+
+table.table.dataTable > tbody > tr.selected a {
+  color: var(--bs-link-color) !important;
+}
+
+div.dtsp-panesContainer {
+  width: 100%;
+}
+
+table.dataTable input.dt-select-checkbox {
+  width: 14px;
+  height: 14px;
+  margin-bottom: 3.3px;
+}
+
+table.dataTable input.dt-select-checkbox:indeterminate:after {
+  top: 4px;
+  left: 4px;
+}
+
+table.dataTable input.dt-select-checkbox:checked:after {
+  margin-top: -5px;
+}
+
+:not(.btn-group):not(.input-group)
+  > .btn-group.dt-buttons
+  > .btn:not([class*="btn-outline-"]):first-child.disabled {
+  border-left-color: var(--bs-btn-disabled-border-color) !important;
+}
+
+.dtsp-searchPanes
+  :not(.btn-group):not(.input-group)
+  > .btn-group
+  > .btn:not([class*="btn-outline-"]):last-of-type {
+  border-left-color: rgb(206, 212, 218) !important;
+  border-right-color: rgb(206, 212, 218) !important;
+}
+
+.dtsp-nameCont,
+.dtsp-name {
+  display: flex !important;
+  align-items: center !important;
+}
+
+div.dtsp-panesContainer
+  div.dtsp-searchPane
+  div.dt-container
+  div.dtsp-nameCont
+  span.badge {
+  margin-top: 0;
+}
+
+.dt-scroll-body {
+  height: 150px !important;
+  max-height: 150px !important;
+}
+
+#plugins-dropdown-menu .input-group-text,
+#plugins-dropdown-menu .form-control,
+#services-dropdown-menu .input-group-text,
+#services-dropdown-menu .form-control,
+#templates-dropdown-menu .input-group-text,
+#templates-dropdown-menu .form-control,
+#language-dropdown-menu .input-group-text,
+#language-dropdown-menu .form-control {
+  border-radius: 0;
+}
+
+#plugins-dropdown-menu .input-group:focus-within,
+#services-dropdown-menu .input-group:focus-within,
+#templates-dropdown-menu .input-group:focus-within,
+#language-dropdown-menu .input-group:focus-within {
+  box-shadow: none;
+}
+
+#language-dropdown-menu,
+#services-dropdown-menu,
+#templates-dropdown-menu,
+#plugins-dropdown-menu,
+#types-dropdown-menu,
+#pages-dropdown-menu {
+  overflow-y: auto !important;
+}
+
+.bg-dropdown-custom {
+  background-color: var(--bs-dropdown-bg) !important;
+}
+
+@media (min-width: 992px) {
+  .w-lg-70 {
+    width: 70% !important;
+  }
+}

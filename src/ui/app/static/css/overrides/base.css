@@ -1,0 +1,702 @@
+/* Keep localized sidebar section titles readable and premium-looking when they need two lines */
+.layout-menu .menu-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.layout-menu .menu-header span.menu-header-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.layout-menu .menu-header button.menu-header-text {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  color: inherit;
+}
+
+/* M4: core.css's `.menu-header-text` color (#a7acb2, sidebar section labels: Overview/
+   Configure/Operate/System/Plugins Pages) measures 2.29:1 on white. This app never sets
+   `data-bs-theme="light"` (light is the unscoped default, `data-bs-theme="dark"` is the only
+   attribute value it ever writes), so darken unconditionally here and restore the original
+   value -- already AA on navy (6.09:1) -- for dark specifically below. */
+.menu-header .menu-header-text {
+  color: #6d7074;
+}
+.dark-style .menu-header .menu-header-text,
+[data-bs-theme="dark"] .menu-header .menu-header-text {
+  color: #a7acb2;
+}
+
+.tooltip {
+  --bs-tooltip-zindex: 1101;
+}
+
+.offcanvas,
+.offcanvas-xxl,
+.offcanvas-xl,
+.offcanvas-lg,
+.offcanvas-md,
+.offcanvas-sm {
+  --bs-offcanvas-zindex: 1090;
+  --bs-offcanvas-width: 400px;
+}
+
+.btn-secondary {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+.btn-secondary:hover {
+  background-color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+}
+
+/* M4: DataTables Buttons stamps its own default .btn-secondary on every toolbar button as soon
+   as it renders, before the app's own cleanup runs (dataTableInit.js's post-init pass only
+   catches .toggle-filters; the auto-refresh button's own cleanup is a draw.dt handler that
+   waits for the first AJAX load, e.g. bans.js:1256) -- .btn-secondary's filled bg stacks under
+   .btn-outline-primary's own (already theme-aware) border/text colour for as long as that
+   takes, 2.43:1 in light mode. Neutralise the fill whenever both land on one element so the
+   intended outline-primary look always wins, cleanup race or not. */
+.btn-outline-primary.btn-secondary {
+  background-color: transparent;
+  border-color: var(--bs-primary);
+}
+.btn-check:focus + .btn-secondary,
+.btn-secondary:focus,
+.btn-secondary.focus {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+.btn-check:checked + .btn-secondary,
+.btn-check:active + .btn-secondary,
+.btn-secondary:active,
+.btn-secondary.active,
+.btn-secondary.show.dropdown-toggle,
+.show > .btn-secondary.dropdown-toggle {
+  background-color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+}
+.btn-secondary.disabled,
+.btn-secondary:disabled {
+  background-color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+}
+
+.btn-group .btn-secondary,
+.input-group .btn-secondary {
+  border-right: var(--bs-border-width) solid var(--bs-secondary);
+  border-left: var(--bs-border-width) solid var(--bs-secondary);
+}
+
+.btn-group-vertical .btn-secondary {
+  border-top-color: var(--bs-secondary);
+  border-bottom-color: var(--bs-secondary);
+}
+
+.btn-outline-secondary {
+  color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
+/* M2: `--bs-secondary` (#35728e) is not redefined for dark theme -- it stays tuned for a
+   white background, so any plain-text/outline use (this button's rest state, `.text-secondary`)
+   drops to ~2.6:1 on the navy body. `--bs-secondary-text-emphasis` IS redefined per theme
+   (further down in this file) and exists for exactly this text-vs-fill split; every fill use
+   of `--bs-secondary` (solid buttons, badges, this button's own hover/active state) is
+   untouched, since white text on the raw colour still passes there. */
+.dark-style .btn-outline-secondary,
+[data-bs-theme="dark"] .btn-outline-secondary {
+  color: var(--bs-secondary-text-emphasis);
+  border-color: var(--bs-secondary-text-emphasis);
+}
+.dark-style .text-secondary,
+[data-bs-theme="dark"] .text-secondary {
+  color: var(--bs-secondary-text-emphasis) !important;
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+}
+.btn-check:focus + .btn-outline-secondary,
+.btn-outline-secondary:focus {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+.btn-check:checked + .btn-outline-secondary,
+.btn-check:active + .btn-outline-secondary,
+.btn-outline-secondary:active,
+.btn-outline-secondary.active,
+.btn-outline-secondary.dropdown-toggle.show {
+  background-color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+}
+.btn-outline-secondary.disabled,
+.btn-outline-secondary:disabled {
+  color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+}
+
+.btn-outline-secondary .badge {
+  background: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
+.btn-outline-secondary:hover .badge,
+.btn-outline-secondary:focus:hover .badge,
+.btn-outline-secondary:active .badge,
+.btn-outline-secondary.active .badge,
+.show > .btn-outline-secondary.dropdown-toggle .badge {
+  color: var(--bs-secondary);
+}
+
+.alert-secondary {
+  color: var(--bs-secondary);
+}
+.alert-secondary .btn-close {
+  background-image: url("data:image/svg+xml,%3Csvg width='150px' height='151px' viewBox='0 0 150 151' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cdefs%3E%3Cpolygon id='path-1' points='131.251657 0 74.9933705 56.25 18.7483426 0 0 18.75 56.2450278 75 0 131.25 18.7483426 150 74.9933705 93.75 131.251657 150 150 131.25 93.7549722 75 150 18.75'%3E%3C/polygon%3E%3C/defs%3E%3Cg id='🎨-%5BSetup%5D:-Colors-&amp;-Shadows' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'%3E%3Cg id='Artboard' transform='translate(-225.000000, -250.000000)'%3E%3Cg id='Icon-Color' transform='translate(225.000000, 250.500000)'%3E%3Cuse fill='%2335728e' xlink:href='%23path-1'%3E%3C/use%3E%3Cuse fill-opacity='0.5' fill='%2335728e' xlink:href='%23path-1'%3E%3C/use%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.alert-secondary .alert-link {
+  color: var(--bs-secondary);
+}
+
+.alert-secondary hr {
+  color: var(--bs-secondary) !important;
+}
+.alert-secondary .alert-icon {
+  background-color: var(--bs-secondary);
+}
+
+/* H4: core.css defines two `.alert-success/-info/-warning/-danger` blocks -- an earlier one
+   driven by the theme-aware `--bs-alert-color`/`--bs-alert-bg` vars (already correct: they
+   resolve to the `-text-emphasis`/`-bg-subtle` pair, which IS redefined per theme, further up
+   in this file), and a later one that hardcodes the raw bg-label palette as flat
+   background-color/color/border-color. Equal specificity, later wins, so every alert() render
+   used the raw pastel-on-vivid pair (1.7-1.9:1) in both themes, since that pastel bg never
+   changes per theme either. Redeclare the literal properties (loaded after core.css) to hand
+   the win back to the var-driven, theme-aware pair; alert-icon/btn-close/hr keep the vivid
+   accent, they are decorative, not text. */
+.alert-success,
+.alert-info,
+.alert-warning,
+.alert-danger {
+  color: var(--bs-alert-color);
+  background-color: var(--bs-alert-bg);
+  border-color: var(--bs-alert-border-color);
+}
+
+/* H5: this custom Bootstrap build ships no `.text-<variant>-emphasis` utilities (only the
+   `-text-emphasis` CSS vars survive, used above for alerts). The plugin metric cards
+   (plugin_page.html, driven by each plugin's ui/actions.py subtitle_color/svg_color fields)
+   render `.text-danger`/`.text-success`/`.text-warning`/`.text-info` directly -- the RAW
+   variant colour, which fails AA against the card background in one theme or the other (e.g.
+   danger 3.5-3.9:1 in both; success/warning/info ~1.7-2.1:1 in light). Add the emphasis
+   utilities so the actions.py colour fields can opt into the already-theme-aware pair instead. */
+.text-danger-emphasis {
+  color: var(--bs-danger-text-emphasis) !important;
+}
+.text-success-emphasis {
+  color: var(--bs-success-text-emphasis) !important;
+}
+.text-warning-emphasis {
+  color: var(--bs-warning-text-emphasis) !important;
+}
+.text-info-emphasis {
+  color: var(--bs-info-text-emphasis) !important;
+}
+
+.list-group-item-secondary {
+  border-color: var(--bs-secondary);
+  color: var(--bs-secondary) !important;
+}
+
+a.list-group-item-secondary,
+button.list-group-item-secondary {
+  color: var(--bs-secondary);
+}
+a.list-group-item-secondary:hover,
+a.list-group-item-secondary:focus,
+button.list-group-item-secondary:hover,
+button.list-group-item-secondary:focus {
+  border-color: var(--bs-secondary);
+  color: var(--bs-secondary);
+}
+a.list-group-item-secondary.active,
+button.list-group-item-secondary.active {
+  border-color: var(--bs-secondary) !important;
+  background-color: var(--bs-secondary) !important;
+}
+
+.bg-secondary.toast .toast-header .btn-close,
+.bg-secondary.bs-toast .toast-header .btn-close {
+  background-color: var(--bs-secondary) !important;
+}
+
+.bg-label-secondary {
+  color: var(--bs-secondary) !important;
+}
+
+/* M3: core.css's `.bg-label-success/-info/-warning/-danger` pair the vivid variant colour
+   (text) with its own pale tint (background) -- 1.58-1.83:1, in both themes, since that
+   background never changes per theme. Reuse core.css's own light `-text-emphasis` hex
+   directly (not the CSS var: it flips to a pale, dark-bg-tuned shade in dark mode, which
+   would fail against this bg just as badly). */
+.bg-label-success {
+  color: #2d5816 !important;
+}
+.bg-label-info {
+  color: #014e5e !important;
+}
+.bg-label-warning {
+  color: #664400 !important;
+}
+.bg-label-danger {
+  color: #66190c !important;
+}
+
+@keyframes colorPhase {
+  0% {
+    box-shadow: 0 1px 20px 1px var(--bs-primary); /* Primary shadow */
+  }
+  50% {
+    box-shadow: 0 1px 20px 1px var(--bs-bw-green); /* Secondary shadow */
+  }
+  100% {
+    box-shadow: 0 1px 20px 1px var(--bs-primary); /* Primary shadow */
+  }
+}
+
+.btn-close {
+  background: transparent var(--bs-btn-close-bg) center/1em auto no-repeat;
+}
+
+/* M4: light theme only -- was a hardcoded #8b9197 (2.93-3.18:1 against white/off-white:
+   sidebar footer, breadcrumb parents, card subtitles, timestamps), which duplicated --bw-fg-3
+   above instead of referencing it; both are fixed together now. Dark's `.dark-style` override
+   further down (#9caeb7 on navy) already passes. */
+.text-muted {
+  color: var(--bw-fg-3) !important;
+}
+
+/* Bootstrap 5.3 utility missing from the bundled core.css build: without it the
+   toast timestamps ("just now") inherit the header's category color (e.g. danger
+   red) instead of rendering muted */
+.text-body-secondary {
+  color: var(--bw-fg-3) !important;
+}
+
+.raw-template-editor {
+  min-height: 420px;
+}
+
+.raw-template-editor-wrapper {
+  position: relative;
+  border-radius: var(--bs-border-radius-lg);
+  overflow: hidden;
+}
+
+.raw-template-drop-target {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed transparent;
+  border-radius: inherit;
+  pointer-events: none;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.raw-template-drop-target.is-dragover {
+  border-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  pointer-events: none;
+}
+
+.raw-template-drop-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--bs-primary);
+  background-color: rgba(var(--bs-body-bg-rgb, 255, 255, 255), 0.65);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.raw-template-drop-target.is-dragover .raw-template-drop-label {
+  opacity: 1;
+}
+
+.raw-config-dropzone {
+  border: 2px dashed var(--bs-primary);
+  border-radius: var(--bs-border-radius-lg);
+  background-color: var(--bs-body-bg);
+  padding: 2.5rem 1.5rem;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.raw-config-dropzone:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.raw-config-dropzone.is-dragover {
+  background-color: rgba(var(--bs-primary-rgb), 0.06);
+  border-color: var(--bs-primary);
+  box-shadow: 0 0.5rem 1.5rem rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.raw-config-dropzone.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: rgba(var(--bs-primary-rgb), 0.2);
+}
+
+.raw-config-dropzone.is-disabled .raw-config-browse-btn {
+  pointer-events: none;
+}
+
+.raw-config-dropzone .bx {
+  color: var(--bs-primary);
+}
+
+.raw-configs-upload-list .list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.raw-config-dropzone.highlight-pulse {
+  animation: highlightPulse 2s ease-in-out;
+}
+
+.raw-config-container {
+  border-radius: var(--bs-border-radius-xl);
+  background-color: var(--bs-card-bg);
+  overflow: hidden;
+  box-shadow: 0 1.5rem 3rem -1.5rem rgba(15, 23, 42, 0.35);
+}
+
+.raw-config-toolbar {
+  --raw-toolbar-base: color-mix(
+    in srgb,
+    rgba(var(--bs-primary-rgb), 1) 72%,
+    #06162a 28%
+  );
+  background-color: var(--raw-toolbar-base, rgba(6, 22, 42, 0.92));
+  color: #fff;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1rem 1.5rem -1.25rem rgba(15, 23, 42, 0.4);
+}
+
+.raw-config-toolbar__title h5 {
+  color: inherit;
+  letter-spacing: 0.01em;
+}
+
+.raw-config-toolbar__actions {
+  gap: 0.75rem;
+}
+
+.raw-config-toolbar__action {
+  display: inline-flex;
+}
+
+.raw-config-toolbar__action .btn {
+  font-weight: 600;
+  border-width: 1.5px;
+  border-radius: var(--bs-border-radius);
+  box-shadow: 0 0.5rem 1.25rem -1rem rgba(15, 23, 42, 0.35);
+}
+
+.raw-config-toolbar__legend {
+  opacity: 0.9;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.raw-config-legend-chip {
+  width: 0.9rem;
+  height: 0.9rem;
+  display: inline-block;
+  border-radius: 50%;
+  background: rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.3);
+  border: 1px solid rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.45);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.raw-config-action-btn {
+  min-width: 5.5rem;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.72);
+  background-color: rgba(255, 255, 255, 0.12);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.raw-config-action-btn:hover,
+.raw-config-action-btn:focus {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.88);
+}
+
+.raw-config-action-btn.disabled,
+.raw-config-action-btn:disabled {
+  color: rgba(255, 255, 255, 0.62);
+  border-color: rgba(255, 255, 255, 0.28);
+  background-color: rgba(255, 255, 255, 0.12);
+  opacity: 0.85;
+}
+
+.raw-config-editor-shell {
+  padding: 1.5rem;
+  background-color: rgba(var(--bs-primary-rgb), 0.04);
+  border-top: 1px solid rgba(var(--bs-primary-rgb), 0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(30rem, 70vh, 54rem);
+}
+
+.raw-config-editor-shell .raw-config-editor {
+  flex: 1 1 auto;
+  min-height: clamp(26rem, 68vh, 50rem);
+  height: 100%;
+}
+
+.ace_marker-layer .raw-disabled-line {
+  position: absolute;
+  background: rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.12);
+  border-left: 0.25rem solid rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.55);
+}
+
+/* RAW setting drafts stay editable and read distinct from method-locked rows: muted, with a
+   `#` drawn in the padding settings-raw.js reserves (never written into the text). */
+.raw-config-editor .ace_marker-layer .raw-draft-line {
+  position: absolute;
+  backdrop-filter: grayscale(0.65);
+}
+
+.raw-config-editor .ace_marker-layer .raw-draft-line::before {
+  content: "#";
+  position: absolute;
+  left: 4px;
+  color: var(--bs-secondary-color);
+}
+
+.ace_gutter-cell.raw-disabled-gutter {
+  color: rgba(var(--bs-secondary-rgb, 102, 112, 133), 0.9) !important;
+  font-weight: 600;
+  padding-left: 1rem;
+}
+
+.ace_gutter-cell.raw-disabled-annotation .ace_gutter_annotation,
+.ace_gutter-cell.raw-disabled-annotation .ace_icon {
+  display: none !important;
+}
+
+.dark-style .raw-config-container {
+  background-color: rgba(var(--bs-body-bg-rgb, 17, 24, 39), 0.82);
+  box-shadow: 0 1.5rem 3.5rem -1.7rem rgba(15, 23, 42, 0.65);
+}
+
+.dark-style .raw-config-toolbar {
+  background-color: color-mix(
+    in srgb,
+    rgba(14, 25, 40, 0.94) 80%,
+    rgba(var(--bs-primary-rgb), 1) 20%
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1.1rem 2.2rem -1.35rem rgba(5, 12, 22, 0.85);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.dark-style .raw-config-editor-shell {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.dark-style .raw-config-toolbar__action .btn {
+  box-shadow: 0 0.5rem 1.35rem -1.1rem rgba(5, 12, 22, 0.9);
+}
+
+.dark-style .raw-config-action-btn {
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.dark-style .raw-config-action-btn:hover,
+.dark-style .raw-config-action-btn:focus {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.26);
+  border-color: rgba(255, 255, 255, 0.85);
+}
+
+.dark-style .raw-config-action-btn.disabled,
+.dark-style .raw-config-action-btn:disabled {
+  color: rgba(255, 255, 255, 0.58);
+  border-color: rgba(255, 255, 255, 0.35);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.dark-style .raw-config-save-btn {
+  color: #fff;
+  border-color: rgba(7, 182, 157, 0.65);
+}
+
+.dark-style .raw-config-save-btn:hover,
+.dark-style .raw-config-save-btn:focus {
+  color: #fff;
+  border-color: rgba(7, 182, 157, 0.85);
+}
+
+.dark-style .ace_marker-layer .raw-disabled-line {
+  background: rgba(88, 103, 132, 0.18);
+  border-left-color: rgba(88, 103, 132, 0.7);
+}
+
+.dark-style .ace_gutter-cell.raw-disabled-gutter {
+  color: rgba(226, 232, 240, 0.88) !important;
+}
+
+@keyframes highlightPulse {
+  0%,
+  100% {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-primary);
+  }
+  50% {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0.5rem 1.5rem rgba(var(--bs-primary-rgb), 0.2);
+  }
+}
+
+.missing-configs-dropzone {
+  border: 2px dashed var(--bs-gray-400);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-light);
+  padding: 2rem 1rem;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.missing-configs-dropzone:hover {
+  border-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.03);
+}
+
+.missing-configs-dropzone:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.missing-configs-dropzone.is-dragover {
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+  border-color: var(--bs-primary);
+  box-shadow: 0 0.25rem 0.75rem rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.missing-configs-dropzone .bx {
+  color: var(--bs-primary);
+}
+
+#missing-configs-upload-feedback.success {
+  color: var(--bs-success);
+}
+
+#missing-configs-upload-feedback.warning {
+  color: var(--bs-warning);
+}
+
+#missing-configs-upload-feedback.error {
+  color: var(--bs-danger);
+}
+
+.buy-now .btn-buy-now {
+  position: unset;
+  box-shadow: 0 1px 20px 1px var(--bs-primary); /* Initial shadow */
+  background-color: var(--bs-bw-green); /* Initial background color */
+  color: #fff;
+  animation: colorPhase 3s infinite; /* Apply the color phasing animation */
+  transition:
+    background-color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out; /* Smooth transitions */
+}
+
+.buy-now .btn-buy-now:hover {
+  background-color: var(
+    --bs-bw-green
+  ) !important; /* Keep the primary color on hover */
+}
+
+.btn-pro-now {
+  background-color: var(
+    --bs-bw-green-contrast
+  ); /* Initial background color; M5 AA fix */
+  color: #fff;
+}
+
+.btn-pro-now:hover {
+  background-color: var(
+    --bs-bw-green-contrast
+  ) !important; /* Keep the primary color on hover */
+}
+
+.avatar.avatar-offline:after {
+  background-color: var(--bs-secondary);
+}
+
+.navbar.bg-secondary .search-input-wrapper .search-input,
+.navbar.bg-secondary .search-input-wrapper .search-toggler {
+  background-color: var(--bs-secondary) !important;
+}
+
+.toast-container {
+  z-index: 1089;
+}
+
+#feedback-toast-container .toast-body {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* templates/flash.html size variant -- "md" is the pre-existing default (no class, no
+   override needed). Targets .bs-toast by descendant selector so page-owned toasts that get
+   cloned into #feedback-toast-container (static/js/pages/settings-raw.js) size the same way. */
+.toast-container-sm .bs-toast {
+  --bs-toast-max-width: 280px;
+  font-size: 0.8125rem;
+}
+
+.toast-container-lg .bs-toast {
+  --bs-toast-max-width: 420px;
+  font-size: 1rem;
+}

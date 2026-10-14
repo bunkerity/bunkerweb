@@ -37,6 +37,9 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY CHANGELOG.md CHANGELOG.md
 COPY src/ui ui
+COPY misc/build/merge_css_imports.py /tmp/merge_css_imports.py
+RUN python3 /tmp/merge_css_imports.py /usr/share/bunkerweb/ui/app/static/css/overrides.css && \
+  rm -f /tmp/merge_css_imports.py
 
 WORKDIR /tmp
 

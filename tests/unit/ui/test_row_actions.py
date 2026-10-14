@@ -16,13 +16,13 @@ this pass.
 import re
 from pathlib import Path
 
+from _css import overrides_css
 from conftest import english  # what a converted template renders for a key
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 from app.utils import can_delete_service, is_editable_method, is_enrollable_method, is_ui_api_method  # type: ignore
 
 TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
-CSS = TEMPLATES.parent / "static" / "css" / "overrides.css"
 
 
 def _render_dashboard_page(template, **context):
@@ -51,7 +51,7 @@ def _render_dashboard_page(template, **context):
 # overrides.css -- the ported .icon-btn/.row-actions rules exist and are theme-aware
 # --------------------------------------------------------------------------------------
 def test_overrides_css_defines_icon_btn_and_row_actions():
-    css = CSS.read_text(encoding="utf-8")
+    css = overrides_css()
 
     assert ".icon-btn {" in css
     assert ".icon-btn:hover {" in css

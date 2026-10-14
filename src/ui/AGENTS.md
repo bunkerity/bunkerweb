@@ -58,7 +58,7 @@ A plugin extends the UI with `ui/hooks.py` and `ui/blueprints/`. Hook types: `be
 ### Frontend
 
 - **JS**: vanilla + jQuery, page scripts in `app/static/js/pages/`, no modules, no bundling. Libraries are vendored in `app/static/libs/`.
-- **CSS**: Bootstrap with custom variables in `overrides.css`; dark mode via `data-bs-theme`.
+- **CSS**: Bootstrap with custom variables in `app/static/css/overrides.css`, an `@import` index over `css/overrides/*.css`; the file order is the cascade, so a rule goes in the part it belongs to and a new part needs its `@import` line. Image builds inline the parts with `misc/build/merge_css_imports.py`; `misc/dev/build-rtl-css.sh` builds the ar/ur twin from the merged text, so rerun it after any part edit (`test_rtl_stylesheets.py` goes red otherwise). Dark mode via `data-bs-theme`.
 - **Minification** happens only in the Docker build (UglifyJS, cssnano); skip with `SKIP_MINIFY=yes`.
 
 ### i18n

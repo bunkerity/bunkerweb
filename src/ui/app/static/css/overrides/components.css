@@ -1,0 +1,624 @@
+/* Keyboard focus ring for the import dropzones (role=button divs).
+   Bootstrap does not add a focus style to these; make it visible for a11y. */
+#configs-drag-area:focus-visible,
+#services-drag-area:focus-visible,
+#drag-area:focus-visible {
+  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25);
+  outline-offset: 2px;
+}
+
+/* Admin component library */
+.card {
+  border: 1px solid var(--bw-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--bw-shadow-sm);
+}
+
+.card-header {
+  background: transparent;
+  border-bottom-color: var(--bw-border);
+  padding: 1rem 1.25rem;
+}
+
+.card-header .card-title {
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.modal-content,
+.dropdown-menu,
+.offcanvas {
+  border-color: var(--bw-border);
+  box-shadow: var(--bw-shadow-md);
+}
+
+.modal-content {
+  border-radius: 0.75rem;
+}
+
+.btn,
+.form-control,
+.form-select,
+.input-group-text {
+  border-radius: 0.5rem;
+}
+
+.table > :not(caption) > * > * {
+  border-bottom-color: var(--bw-border);
+}
+
+.table > thead > tr > th {
+  color: var(--bw-fg-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Row-action icon buttons -- small, neutral by default, colored on hover/variant
+   for the action's intent (danger/success/info/ban). Ported from the design-system
+   kit (ui_kits/admin/app.css:372-397) and adapted to this app's shipped tokens
+   (kit's --bw-theme -> --bs-primary, kit's :root[data-theme="dark"] ->
+   [data-bs-theme="dark"], the attribute this app's theme toggle actually sets). */
+.icon-btn {
+  align-items: center;
+  background: var(--bw-bg-card);
+  border: 1px solid var(--bw-border);
+  border-radius: 6px;
+  color: var(--bw-fg-2);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 16px;
+  height: 34px;
+  justify-content: center;
+  transition: all 0.15s;
+  width: 34px;
+}
+
+.icon-btn:hover {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+/* Not part of the kit port (its static mockup never renders a disabled row-action) --
+   added so the draft/readonly-gated actions this app already has (Access while
+   draft, Clone/Convert/Delete while readonly) keep behaving once they lose the
+   `.btn` class that used to carry Bootstrap's `.btn.disabled` pointer-events rule. */
+.icon-btn.disabled,
+.icon-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+[data-bs-theme="dark"] .icon-btn {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* .icon-btn.primary -- solid CTA treatment (not used by the row-actions swapped
+   in this pass, which all map to the neutral default per the kit's own
+   tables.js row-actions examples; kept available for future callers). */
+.icon-btn.primary {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
+
+.icon-btn.primary:hover {
+  background: var(--bs-bw-green);
+  border-color: var(--bs-bw-green);
+}
+
+[data-bs-theme="dark"] .icon-btn.primary {
+  background: #2c5d78;
+  border-color: #2c5d78;
+  color: #d6ecf5;
+}
+
+[data-bs-theme="dark"] .icon-btn.primary:hover {
+  background: #36748f;
+  border-color: #36748f;
+  color: #ecf6fb;
+}
+
+.icon-btn.danger {
+  border-color: var(--bs-danger);
+  color: var(--bs-danger);
+}
+
+.icon-btn.danger:hover {
+  background: var(--bs-danger);
+  border-color: var(--bs-danger);
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .icon-btn.danger {
+  border-color: var(--bs-danger);
+}
+
+/* .icon-btn.ban -- Ban action: a distinct deeper crimson, so it reads apart
+   from the bright delete/trash red. */
+.icon-btn.ban {
+  border-color: #a11043;
+  color: #a11043;
+}
+
+.icon-btn.ban:hover {
+  background: #a11043;
+  border-color: #a11043;
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .icon-btn.ban {
+  border-color: rgba(255, 125, 166, 0.5);
+  color: #ff7da6;
+}
+
+[data-bs-theme="dark"] .icon-btn.ban:hover {
+  background: #a11043;
+  border-color: #a11043;
+  color: #fff;
+}
+
+/* .icon-btn.success -- green action (e.g. Reload/Run) */
+.icon-btn.success {
+  border-color: color-mix(in srgb, #137a4c 55%, var(--bw-border));
+  color: #137a4c;
+}
+
+.icon-btn.success:hover {
+  background: #137a4c;
+  border-color: #137a4c;
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .icon-btn.success {
+  border-color: rgba(140, 224, 168, 0.45);
+  color: #8ce0a8;
+}
+
+[data-bs-theme="dark"] .icon-btn.success:hover {
+  background: #137a4c;
+  border-color: #137a4c;
+  color: #fff;
+}
+
+/* .icon-btn.info -- blue action (e.g. Download/Export) */
+.icon-btn.info {
+  border-color: color-mix(in srgb, var(--bs-primary) 55%, var(--bw-border));
+  color: var(--bs-primary);
+}
+
+.icon-btn.info:hover {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .icon-btn.info {
+  border-color: rgba(125, 196, 230, 0.45);
+  color: #7dc4e6;
+}
+
+[data-bs-theme="dark"] .icon-btn.info:hover {
+  background: #2c5d78;
+  border-color: #2c5d78;
+  color: #ecf6fb;
+}
+
+/* Unified row-actions cell layout (used in every table with an "Actions" column) --
+   ported from kit app.css:1218. */
+.table .row-actions {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.table th.actions-col,
+.table td.actions-col {
+  text-align: right;
+}
+
+.table td.actions-col {
+  white-space: nowrap;
+}
+
+/* KPI tile -- kit .mini-tile anatomy (app.css:259-262): uppercase muted label, plain
+   navy Don Jose value, muted caption. The round-2 accent top-border + colour-coded
+   value are gone; the bw-kpi-tile-<color> modifier classes the macro still emits are
+   now inert hooks (kept for backward-compatible callers). */
+.bw-kpi-tile {
+  background: var(--bw-bg-card);
+  overflow: hidden;
+}
+
+.bw-kpi-label {
+  align-items: center;
+  color: var(--bw-fg-3);
+  display: flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  gap: 0.375rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.bw-kpi-label .bx {
+  font-size: 0.95rem;
+}
+
+.bw-kpi-value {
+  color: var(--bs-primary);
+  font-size: 1.75rem;
+  line-height: 1.05;
+}
+
+.bw-kpi-caption {
+  color: var(--bw-fg-3);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+[data-bs-theme="dark"] .bw-kpi-value {
+  color: #6fa8c4;
+}
+
+.bw-stat-pct {
+  color: var(--bw-fg-2);
+  white-space: nowrap;
+}
+
+.bw-stat-sm .progress {
+  --bs-progress-height: 0.25rem;
+}
+
+.bw-stat-sm .bw-stat-label,
+.bw-stat-sm .bw-stat-pct {
+  font-size: 0.75rem;
+}
+
+.bw-stat-lg .progress {
+  --bs-progress-height: 0.625rem;
+}
+
+.bw-stat-lg .bw-stat-label,
+.bw-stat-lg .bw-stat-pct {
+  font-size: 1rem;
+}
+
+[data-bw-file-upload="dropzone"] {
+  align-items: center;
+  background: rgba(var(--bs-primary-rgb), 0.025);
+  border: 1px dashed var(--bw-border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 11rem;
+  padding: 1.5rem;
+}
+
+[data-bw-file-upload="dropzone"]:hover,
+[data-bw-file-upload="dropzone"]:focus-visible {
+  border-color: var(--bs-primary);
+}
+
+[data-bw-file-upload="dropzone"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.25);
+  outline: none;
+}
+
+[data-bw-file-upload="dropzone"].is-disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.bw-selected-list {
+  background: rgba(var(--bs-primary-rgb), 0.025);
+  border: 1px solid var(--bw-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.bw-selected-list [data-selected-list] {
+  max-height: 15rem;
+}
+
+.bw-selected-list-cell {
+  flex: 1 1 0;
+}
+
+/* components/select.html -- combobox listbox sized to match its trigger + scrollable for
+   long option lists; .dropdown-item's white-space: nowrap (core.css) is relaxed so a
+   two-line option (label + description) can wrap instead of being clipped mid-word. */
+.bw-select-list {
+  max-height: 16rem;
+  min-width: 100%;
+  overflow-y: auto;
+}
+
+.bw-select-list .dropdown-item {
+  white-space: normal;
+}
+
+.bw-code-editor-sm {
+  height: 10rem;
+}
+
+.bw-code-editor-md {
+  height: 13.75rem;
+}
+
+.bw-code-editor-lg {
+  height: 24rem;
+}
+
+.bw-lottie {
+  display: block;
+}
+
+.bw-lottie-sm {
+  height: 8rem;
+  width: 8rem;
+}
+
+.bw-lottie-md {
+  height: 12rem;
+  width: 12rem;
+}
+
+.bw-lottie-lg {
+  height: 18.75rem;
+  width: 18.75rem;
+}
+
+/* components/anchor.html -- text-link sizes/underline behaviour this repo has no existing
+   utility class for (color comes from the plain .text-<color> utilities instead). */
+.bw-anchor {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.25rem;
+  text-decoration: none;
+}
+
+.bw-anchor-xs {
+  font-size: 0.75rem;
+}
+
+.bw-anchor-sm {
+  font-size: 0.8125rem;
+}
+
+.bw-anchor-md {
+  font-size: 0.9375rem;
+}
+
+.bw-anchor-lg {
+  font-size: 1.0625rem;
+}
+
+.bw-anchor-u-always {
+  text-decoration: underline;
+}
+
+.bw-anchor-u-hover:hover,
+.bw-anchor-u-hover:focus-visible {
+  text-decoration: underline;
+}
+
+.bw-anchor.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+/* components/cron.html -- monospace cron-expression chip with optional tooltip */
+.bw-cron {
+  background: var(--bw-bg-subtle);
+  border: 1px solid var(--bw-border);
+  border-radius: 0.375rem;
+  color: var(--bw-fg-1);
+  display: inline-block;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  padding: 0.15rem 0.5rem;
+}
+
+.bw-cron-sm {
+  font-size: 0.6875rem;
+  padding: 0.1rem 0.375rem;
+}
+
+.bw-cron-lg {
+  font-size: 0.9375rem;
+  padding: 0.25rem 0.625rem;
+}
+
+.bw-cron:focus-visible {
+  outline: 3px solid rgba(var(--bs-primary-rgb), 0.25);
+  outline-offset: 2px;
+}
+
+/* components/timeline.html -- vertical event list: a coloured dot per item (colour set via
+   the --bw-timeline-accent custom property, same accent-var idiom as .bw-kpi-tile) joined
+   by a single connecting rule. */
+.bw-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bw-timeline-item {
+  padding: 0 0 1.25rem 1.5rem;
+  position: relative;
+}
+
+.bw-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.bw-timeline-item::before {
+  background-color: var(--bw-timeline-accent, var(--bw-fg-4));
+  border-radius: 50%;
+  content: "";
+  height: 0.5rem;
+  left: 0;
+  position: absolute;
+  top: 0.3rem;
+  width: 0.5rem;
+}
+
+.bw-timeline-item::after {
+  background-color: var(--bw-border);
+  bottom: 0;
+  content: "";
+  left: 0.1875rem;
+  position: absolute;
+  top: 0.9rem;
+  width: 1px;
+}
+
+.bw-timeline-item:last-child::after {
+  content: none;
+}
+
+.bw-timeline-item-primary {
+  --bw-timeline-accent: var(--bs-primary);
+}
+
+.bw-timeline-item-secondary {
+  --bw-timeline-accent: var(--bs-secondary);
+}
+
+.bw-timeline-item-success {
+  --bw-timeline-accent: var(--bs-success);
+}
+
+.bw-timeline-item-danger {
+  --bw-timeline-accent: var(--bs-danger);
+}
+
+.bw-timeline-item-warning {
+  --bw-timeline-accent: var(--bs-warning);
+}
+
+.bw-timeline-item-info {
+  --bw-timeline-accent: var(--bs-info);
+}
+
+.bw-timeline-ringed .bw-timeline-item::before {
+  background-color: var(--bw-bg-card);
+  border: 2px solid var(--bw-timeline-accent, var(--bw-fg-4));
+  height: 0.625rem;
+  top: 0.25rem;
+  width: 0.625rem;
+}
+
+.bw-timeline-time {
+  color: var(--bw-fg-3);
+  display: block;
+  font-size: 0.8125rem;
+}
+
+.bw-timeline-title {
+  color: var(--bw-fg-1);
+  font-weight: 600;
+}
+
+.bw-timeline-subtitle {
+  color: var(--bw-fg-2);
+  font-size: 0.875rem;
+}
+
+/* models/multiselect_setting.html -- trigger-chips row + "view selected" modal shown
+   when a caller opts into multiselect_chips. Chips reuse the .badge/rounded-pill/
+   bg-label-* utilities already used everywhere else; only the close icon needed
+   shrinking down from Bootstrap's default .btn-close size to fit inside a small pill. */
+.multiselect-chip .btn-close {
+  width: 0.5em;
+  height: 0.5em;
+  padding: 0.2em;
+}
+
+.multiselect-eye {
+  flex-shrink: 0;
+}
+
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .modal-content,
+[data-bs-theme="dark"] .dropdown-menu,
+[data-bs-theme="dark"] .offcanvas {
+  background-color: var(--bw-bg-card);
+  border-color: var(--bw-border);
+}
+
+/* /whats-new: the accordion component (release notes panel) never got a dark theme -- it
+   ships hardcoded light-mode hex on --bs-accordion-* (core.css's own light --bw-fg-1/2
+   values, copied verbatim), so the panel stays white while its .text-muted dates already
+   read dark-tuned --bs-secondary-text-emphasis, 2.29:1 on the still-white bg. */
+[data-bs-theme="dark"] .accordion {
+  --bs-accordion-color: var(--bw-fg-2);
+  --bs-accordion-bg: var(--bw-bg-card);
+  --bs-accordion-border-color: var(--bw-border);
+  --bs-accordion-btn-color: var(--bw-fg-1);
+  --bs-accordion-active-color: var(--bw-fg-1);
+  --bs-accordion-active-bg: var(--bw-bg-card);
+}
+
+[data-bs-theme="dark"] .card-header .card-title {
+  color: var(--bw-fg-1);
+}
+
+[data-bs-theme="dark"] .bw-kpi-tile-primary {
+  --bw-kpi-accent: var(--bs-info);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* components/input-list.html -- scrollable Name/Value settings recap + "view all" modal */
+.bw-input-list-scroll {
+  overflow-y: auto;
+}
+
+.bw-input-list-sm {
+  max-height: 8rem;
+}
+
+.bw-input-list-md {
+  max-height: 12.5rem;
+}
+
+.bw-input-list-lg {
+  max-height: 18.75rem;
+}
+
+.bw-input-list-subtle {
+  background: var(--bw-bg-subtle);
+  border: 1px solid var(--bw-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.bw-input-list-modal-scroll {
+  max-height: 60vh;
+}

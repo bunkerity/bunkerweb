@@ -1,0 +1,624 @@
+/*
+* Dark mode overrides
+******************************************************************************/
+
+.dark-style body {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  color-scheme: dark;
+}
+
+.dark-style,
+[data-bs-theme="dark"] {
+  --bs-primary: #fff;
+  --bs-primary-rgb: 255, 255, 255;
+  --bs-primary-text-emphasis: #fff;
+  --bs-link-color: #fff;
+  --bs-link-color-rgb: 255, 255, 255;
+  --bs-breadcrumb-divider-color: #fff;
+  --bs-body-color-rgb: 255, 255, 255;
+  --dt-row-selected: 31, 31, 31;
+  --bs-breadcrumb-item-active-color: #fff;
+  --bw-dark-surface: #0c283a;
+  color-scheme: dark;
+
+  /* Core surfaces & text */
+  --bs-body-bg: #0d2f45;
+  --bs-body-bg-rgb: 13, 47, 69;
+  --bs-body-color: #fff;
+  --bs-emphasis-color: #fff;
+  --bs-emphasis-color-rgb: 255, 255, 255;
+  --bs-heading-color: #fff;
+  --bs-secondary-color: rgba(255, 255, 255, 0.7);
+  --bs-secondary-color-rgb: 255, 255, 255;
+  --bs-secondary-bg: #0c283a;
+  --bs-secondary-bg-rgb: 12, 40, 58;
+  --bs-tertiary-color: rgba(255, 255, 255, 0.55);
+  --bs-tertiary-color-rgb: 255, 255, 255;
+  --bs-tertiary-bg: #0a2233;
+  --bs-tertiary-bg-rgb: 10, 34, 51;
+
+  /* Borders */
+  --bs-border-color: rgba(255, 255, 255, 0.18);
+  --bs-border-color-translucent: rgba(255, 255, 255, 0.15);
+
+  /* Links */
+  --bs-link-hover-color: #2eac68;
+  --bs-link-hover-color-rgb: 46, 172, 104;
+
+  /* Semantic emphasis / subtle families (dark-derived, navy-tinted) */
+  --bs-secondary-text-emphasis: #9caeb7;
+  --bs-success-text-emphasis: #74d6a2;
+  --bs-info-text-emphasis: #6fb6db;
+  --bs-warning-text-emphasis: #e0c074;
+  --bs-danger-text-emphasis: #e88f96;
+  --bs-light-text-emphasis: #e6edf1;
+  --bs-dark-text-emphasis: #9caeb7;
+  --bs-primary-bg-subtle: #11212c;
+  --bs-secondary-bg-subtle: #14242c;
+  --bs-success-bg-subtle: #0e2a1c;
+  --bs-info-bg-subtle: #0c2533;
+  --bs-warning-bg-subtle: #2e2410;
+  --bs-danger-bg-subtle: #2e1416;
+  --bs-light-bg-subtle: #14242c;
+  --bs-dark-bg-subtle: #0a1e2b;
+  --bs-primary-border-subtle: #1d3a4d;
+  --bs-secondary-border-subtle: #2a4753;
+  --bs-success-border-subtle: #1c553a;
+  --bs-info-border-subtle: #1c5577;
+  --bs-warning-border-subtle: #6a541c;
+  --bs-danger-border-subtle: #6a1c22;
+  --bs-light-border-subtle: #2a4753;
+  --bs-dark-border-subtle: #18313f;
+
+  /* Form validation */
+  --bs-form-valid-color: #74d6a2;
+  --bs-form-valid-border-color: #2eac68;
+  --bs-form-invalid-color: #e88f96;
+  --bs-form-invalid-border-color: #dc3545;
+}
+
+/* core's `.text-dark` (near-black) on a now-dark `*-subtle` pill is invisible
+   (e.g. help "?" badges). Restore contrast in dark only; solid
+   `bg-warning.text-dark` is intentionally excluded. */
+.dark-style .bg-primary-subtle.text-dark,
+.dark-style .bg-secondary-subtle.text-dark,
+.dark-style .bg-success-subtle.text-dark,
+.dark-style .bg-info-subtle.text-dark,
+.dark-style .bg-warning-subtle.text-dark,
+.dark-style .bg-danger-subtle.text-dark,
+.dark-style .bg-light-subtle.text-dark {
+  color: var(--bs-emphasis-color) !important;
+}
+
+/* H3: `--bs-primary` is remapped to #fff in dark mode (this file's dark [data-bs-theme]
+   block above), so Bootstrap's `.text-bg-primary` utility (white text + primary-colour fill)
+   renders white-on-white. logs.html's "All sources (live)" pill is the only user today. */
+.dark-style .text-bg-primary,
+[data-bs-theme="dark"] .text-bg-primary {
+  background-color: var(--bs-bw-blue) !important;
+  color: #fff !important;
+}
+
+/* The `.border-*-subtle` utility group was dropped from this custom Bootstrap
+   build (only the `--bs-*-border-subtle` tokens survived). Restore the one
+   variant the ported pages use, mirroring core.css's `.bg-light-subtle`
+   pattern; the underlying var is already theme-aware (see override above). */
+.border-light-subtle {
+  border-color: var(--bs-light-border-subtle) !important;
+}
+
+.dark-style .list-group {
+  --bs-list-group-color: #fff;
+}
+
+.dark-style .btn {
+  --bs-btn-color: #fff;
+}
+
+.dark-style .btn:hover {
+  --bs-btn-hover-color: #fff;
+}
+
+.dark-style .card {
+  --bs-card-title-color: #fff;
+}
+
+.dark-style .dropdown-menu {
+  --bs-dropdown-bg: var(--bw-dark-surface);
+}
+
+/* Flash toasts: the bundled core.css paints .bg-dark toasts with Sneat's
+   semi-transparent purple (rgba(43, 44, 64, 0.85)), which clashes with the
+   navy dark theme and lets the page content bleed through the message.
+   Use the same opaque surface as the dark dropdowns instead. */
+.dark-style .toast.bg-dark,
+.dark-style .bs-toast.bg-dark {
+  background-color: var(--bw-dark-surface) !important;
+}
+
+.dark-style .toast.bg-dark .toast-header .btn-close,
+.dark-style .bs-toast.bg-dark .toast-header .btn-close {
+  background-color: var(--bw-dark-surface) !important;
+}
+
+.dark-style div.dt-button-collection,
+.dark-style .dt-button-collection.dropdown-menu,
+[data-bs-theme="dark"] div.dt-button-collection,
+[data-bs-theme="dark"] .dt-button-collection.dropdown-menu {
+  background-color: #0c283a !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+}
+
+.dark-style div.dt-button-collection .dt-button,
+.dark-style div.dt-button-collection .dropdown-item,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button,
+[data-bs-theme="dark"] div.dt-button-collection .dropdown-item {
+  color: #fff !important;
+}
+
+.dark-style
+  div.dt-button-collection
+  .dt-button:not(.disabled):not(:disabled):hover,
+.dark-style
+  div.dt-button-collection
+  .dropdown-item:not(.disabled):not(:disabled):hover,
+[data-bs-theme="dark"]
+  div.dt-button-collection
+  .dt-button:not(.disabled):not(:disabled):hover,
+[data-bs-theme="dark"]
+  div.dt-button-collection
+  .dropdown-item:not(.disabled):not(:disabled):hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-style div.dt-button-collection .dt-button.disabled,
+.dark-style div.dt-button-collection .dt-button:disabled,
+.dark-style div.dt-button-collection .dropdown-item.disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button.disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dt-button:disabled,
+[data-bs-theme="dark"] div.dt-button-collection .dropdown-item.disabled {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+div.dt-button-collection .dt-button.text-danger:not(.disabled):not(:disabled),
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled) {
+  color: var(--bs-danger) !important;
+}
+
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  span,
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item
+  span,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled)
+  span,
+div.dt-button-collection .dt-button.text-danger:not(.disabled):not(:disabled) i,
+div.dt-button-collection
+  .dt-button.text-danger:not(.disabled):not(:disabled)
+  > a.dropdown-item
+  i,
+div.dt-button-collection
+  .dropdown-item.text-danger:not(.disabled):not(:disabled)
+  i {
+  color: inherit !important;
+}
+
+div.dt-button-background {
+  background: rgba(0, 0, 0, 0.45) !important;
+}
+
+.dark-style .offcanvas,
+.dark-style .offcanvas-xxl,
+.dark-style .offcanvas-xl,
+.dark-style .offcanvas-lg,
+.dark-style .offcanvas-md,
+.dark-style .offcanvas-sm {
+  --bs-offcanvas-bg: #0d2f45;
+}
+
+.dark-style .nav-link,
+.dark-style .breadcrumb-item.active,
+.dark-style .card .card-header,
+.dark-style .card .card-body,
+.dark-style .form-label,
+.dark-style .form-control,
+.dark-style .form-select,
+.dark-style .input-group-text {
+  color: #fff !important;
+}
+
+.dark-style .breadcrumb-item,
+.dark-style .breadcrumb-item a {
+  color: #9caeb7;
+}
+
+.dark-style .breadcrumb-item:hover,
+.dark-style .breadcrumb-item:focus,
+.dark-style .breadcrumb-item a:hover,
+.dark-style .breadcrumb-item a:focus {
+  color: #fff;
+}
+
+.dark-style .nav-pills .nav-link.active,
+.dark-style .nav-pills .nav-link.active:hover,
+.dark-style .nav-pills .nav-link.active:focus {
+  background-color: #0a4b69;
+}
+
+.dark-style .breadcrumb-item + .breadcrumb-item::before {
+  color: #9caeb7;
+}
+
+.dark-style .btn-primary:hover {
+  color: #07354a !important;
+}
+
+.dark-style .btn-light {
+  background-color: #fff;
+  border-color: #fff;
+  box-shadow: none;
+  color: #000;
+}
+
+.dark-style .card {
+  background-color: #0c283a;
+  border-color: #0c283a;
+  color: #fff;
+}
+
+.dark-style .modal {
+  --bs-modal-color: #fff;
+  --bs-modal-bg: #0c283a;
+}
+
+.dark-style .input-group:focus-within .form-control,
+.dark-style .input-group:focus-within .input-group-text {
+  border-color: #fff !important;
+}
+
+.dark-style .text-body {
+  color: #fff !important;
+}
+
+.dark-style .bg-footer-theme .footer-link {
+  color: #cdd7db;
+}
+
+.dark-style h6,
+.dark-style .h6,
+.dark-style h5,
+.dark-style .h5,
+.dark-style h4,
+.dark-style .h4,
+.dark-style h3,
+.dark-style .h3,
+.dark-style h2,
+.dark-style .h2,
+.dark-style h1,
+.dark-style .h1 {
+  color: #fff;
+}
+
+.dark-style .x-logo {
+  filter: brightness(0) invert(1);
+}
+
+.dark-style .text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.dark-style .text-primary.shine {
+  color: rgba(var(--bs-primary-rgb), 0.1) !important;
+  background-color: var(--bs-primary) !important;
+}
+
+.dark-style .text-muted {
+  color: #9caeb7 !important;
+}
+
+.dark-style .text-body-secondary {
+  color: #9caeb7 !important;
+}
+
+/* M23: core.css's `.form-text` help-text colour (#646e78) is theme-invariant -- 5.19:1 on
+   white, 2.64:1 on the dark card (e.g. #service-template-note on /services/<svc>). --bw-fg-2's
+   own dark value already passes here (7.3:1). */
+.dark-style .form-text,
+[data-bs-theme="dark"] .form-text {
+  color: var(--bw-fg-2);
+}
+
+.dark-style .sticky-card {
+  background-color: rgba(12, 40, 58, 0.95) !important;
+}
+
+.dark-style .layout-navbar,
+.dark-style .layout-menu {
+  background-color: #0c283a !important;
+  color: #fff !important;
+}
+
+.dark-style .bg-menu-theme .menu-link,
+.dark-style .bg-menu-theme .menu-horizontal-prev,
+.dark-style .bg-menu-theme .menu-horizontal-next {
+  color: #fff;
+}
+
+.dark-style .bg-menu-theme .menu-inner > .menu-item.active > .menu-link {
+  /* H1: this color was tuned for the solid #fff fill below, but kit-fidelity.css's
+     later, higher-specificity rule (`[data-bs-theme="dark"] ... .menu-link:not(.menu-toggle)`)
+     now wins for background-color and paints a translucent navy-tinted wash instead --
+     leaving this near-navy text at 1.04:1 on it. Match the other dark sidebar links (#fff). */
+  color: #fff !important;
+  background-color: #fff !important;
+}
+
+.dark-style .bg-menu-theme .menu-inner > .menu-item.active:before {
+  background-color: #fff !important;
+}
+
+.dark-style .btn-outline-primary {
+  color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+/* Q6 LOW: theme-default.css's active fill (#0b354a) is nearly the same dark navy as the page
+   background in dark mode, so an active outline button (the range-picker preset, for example)
+   read as unstyled. #0a4b69 is the same brighter accent .nav-pills/.dropdown-item already use
+   for "active" in dark mode. */
+.dark-style .btn-check:checked + .btn-outline-primary,
+.dark-style .btn-check:active + .btn-outline-primary,
+.dark-style .btn-outline-primary:active,
+.dark-style .btn-outline-primary.active,
+.dark-style .btn-outline-primary.dropdown-toggle.show {
+  color: #fff !important;
+  background-color: #0a4b69 !important;
+  border-color: #0a4b69 !important;
+}
+
+html:not([dir="rtl"]).dark-style .border-primary,
+html[dir="rtl"].dark-style .border-primary {
+  border-color: var(--bs-primary) !important;
+}
+
+.dark-style .form-floating > .form-control:focus ~ label,
+.dark-style
+  .form-floating
+  > .form-control:focus:not(:placeholder-shown)
+  ~ label,
+.dark-style .form-floating > .form-select:focus ~ label,
+.dark-style
+  .form-floating
+  > .form-select:focus:not(:placeholder-shown)
+  ~ label {
+  color: #fff;
+}
+
+.dark-style .form-select {
+  --bs-form-select-bg-img: url('data:image/svg+xml,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 22" fill="none"%3e%3cpath d="M10.9999 12.0743L15.5374 7.53676L16.8336 8.83292L10.9999 14.6666L5.16626 8.83292L6.46243 7.53676L10.9999 12.0743Z" fill="%23ffffff" fill-opacity="0.9"/%3e%3c/svg%3e');
+  background-color: #0c283a;
+}
+
+.dark-style .dropdown-item {
+  color: #fff;
+}
+
+.dark-style .dropdown-item:not(.disabled).active,
+.dark-style .dropdown-item:not(.disabled):active {
+  color: #fff !important;
+  background-color: #0a4b69;
+}
+
+.dark-style .bg-secondary {
+  color: #fff;
+}
+
+.dark-style .table th {
+  color: #fff;
+}
+
+.dark-style .table > :not(caption) > * > * {
+  color: #fff;
+}
+
+.dark-style .form-control:focus,
+.dark-style .form-select:focus {
+  border-color: #fff !important;
+}
+
+.dark-style .btn-outline-primary.disabled,
+.dark-style .btn-outline-primary:disabled {
+  color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.dark-style .form-check-label {
+  color: #fff;
+}
+
+.dark-style a {
+  color: #cdd7db;
+}
+
+.dark-style a:hover {
+  color: #fff;
+}
+
+.dark-style .bg-label-secondary {
+  color: #000 !important;
+}
+
+.dark-style .apexcharts-text {
+  fill: #fff;
+}
+.dark-style .apexcharts-tooltip,
+.dark-style .apexcharts-tooltip-title {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+.dark-style .apexcharts-legend-text {
+  color: #fff;
+  border: 1px solid #555;
+}
+
+.dark-style .btn-check:checked + .btn-primary,
+.dark-style .btn-check:active + .btn-primary,
+.dark-style .btn-primary:active,
+.dark-style .btn-primary.active,
+.dark-style .btn-primary.show.dropdown-toggle,
+.dark-style .show > .btn-primary.dropdown-toggle {
+  color: #07354a !important;
+}
+
+.dark-style .leaflet-container {
+  background: #000;
+}
+
+.dark-style .leaflet-layer,
+.dark-style .leaflet-control-zoom-in,
+.dark-style .leaflet-control-zoom-out {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+.dark-style .was-validated .input-group .form-control:invalid:focus,
+.input-group .form-control.is-invalid:focus {
+  border-color: var(--bs-form-invalid-color) !important;
+}
+
+.dark-style
+  .was-validated
+  .input-group
+  .form-control:invalid:focus
+  ~ .input-group-text,
+.dark-style .input-group .form-control.is-invalid:focus ~ .input-group-text {
+  border-color: var(--bs-form-invalid-color) !important;
+}
+
+.dark-style .was-validated .input-group .form-control:valid:focus,
+.dark-style .input-group .form-control.is-valid:focus {
+  border-color: var(--bs-form-valid-color) !important;
+}
+
+.dark-style div.dts div.dt-scroll-body table,
+.dark-style div.dts div.dataTables_scrollBody table {
+  background-color: #0c283a;
+}
+
+.dark-style .form-floating > :disabled ~ label,
+.dark-style .form-floating > .form-control:disabled ~ label {
+  color: #9caeb7;
+}
+
+.dark-style .form-switch .form-check-input {
+  background-color: #484d50;
+}
+
+.dark-style .form-check-input:checked {
+  background-color: #186285;
+}
+
+@keyframes darkColorPhase {
+  0% {
+    box-shadow: 0 1px 20px 1px var(--bs-secondary); /* Primary shadow */
+  }
+  50% {
+    box-shadow: 0 1px 20px 1px var(--bs-bw-green); /* Secondary shadow */
+  }
+  100% {
+    box-shadow: 0 1px 20px 1px var(--bs-secondary); /* Primary shadow */
+  }
+}
+
+.dark-style .buy-now .btn-buy-now {
+  animation: darkColorPhase 3s infinite; /* Apply the color phasing animation */
+}
+
+html:not(.layout-menu-collapsed).dark-style
+  .bg-menu-theme
+  .menu-inner
+  .menu-item.open
+  > .menu-link,
+.layout-menu-hover.layout-menu-collapsed.dark-style
+  .bg-menu-theme
+  .menu-inner
+  .menu-item.open
+  > .menu-link,
+html:not(.layout-menu-collapsed).dark-style
+  .bg-menu-theme
+  .menu-inner
+  .menu-item
+  .menu-link:not(.active):hover,
+.layout-menu-hover.layout-menu-collapsed.dark-style
+  .bg-menu-theme
+  .menu-inner
+  .menu-item
+  .menu-link:not(.active):hover {
+  background-color: #0b394e;
+}
+
+html.dark-style div.dts div.dt-scroll-body table,
+html.dark-style div.dts div.dataTables_scrollBody table {
+  background-color: #0c283a;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected > * {
+  color: #fff !important;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected a {
+  color: #fff !important;
+}
+
+.dark-style table.table.dataTable > tbody > tr.selected a.btn-primary {
+  color: #0b354a !important;
+}
+
+.dark-style .pagination {
+  --bs-pagination-color: #fff;
+  --bs-pagination-bg: rgba(34, 48, 62, 0.06);
+  --bs-pagination-border-color: #ced1d5;
+  --bs-pagination-hover-color: #fff;
+  --bs-pagination-hover-bg: rgba(145, 155, 165, 0.06);
+  --bs-pagination-hover-border-color: #ced1d5;
+  --bs-pagination-hover-color: #fff;
+  --bs-pagination-hover-bg: rgba(145, 155, 165, 0.06);
+  --bs-pagination-active-color: #fff;
+  --bs-pagination-active-bg: #696cff;
+  --bs-pagination-active-border-color: #696cff;
+  --bs-pagination-disabled-color: #384551;
+  --bs-pagination-disabled-bg: rgba(34, 48, 62, 0.06);
+  --bs-pagination-disabled-border-color: #ced1d5;
+}
+
+.dark-style thead,
+.dark-style tbody,
+.dark-style tfoot,
+.dark-style tr,
+.dark-style td,
+.dark-style th {
+  border-color: #384551;
+}
+
+.dark-style .btn-primary {
+  background-color: #fff;
+  border-color: #fff;
+  color: #000;
+}
+
+.dark-style div.dt-processing > div:last-child > div {
+  background-color: #fff;
+}
+
+.dark-style .form-control:disabled {
+  background-color: #133044;
+}

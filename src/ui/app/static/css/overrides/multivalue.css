@@ -1,0 +1,172 @@
+/* Multivalue setting styles -- chip/tag row (models/multivalue_setting.html:
+   type + Enter adds a chip, click the x removes one; JS in
+   components/settings-widgets.js's multivalue block keeps rows/hidden input in sync) */
+.multivalue-container {
+  width: 100%;
+}
+
+.multivalue-inputs {
+  width: 100%;
+}
+
+.multivalue-input-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  padding: 0.15rem 0.15rem 0.15rem 0.65rem;
+  border: 1px solid var(--bw-border);
+  border-radius: var(--bs-border-radius-pill);
+  background-color: var(--bw-bg-subtle);
+  animation: fadeInUp 0.2s ease-in-out;
+}
+
+.multivalue-input-group:not(.has-value) {
+  border-style: dashed;
+  background-color: transparent;
+}
+
+.multivalue-input-group:focus-within {
+  border-color: var(--bs-primary);
+  border-style: solid;
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.multivalue-input-group .multivalue-input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 6ch;
+  max-width: 22ch;
+  padding: 0.2rem 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--bw-fg-1);
+  box-shadow: none !important;
+}
+
+.multivalue-container .multivalue-input:disabled {
+  color: var(--bw-fg-3);
+  background-color: transparent;
+  opacity: 1;
+}
+
+/* Remove (x) button -- hidden on the empty trailing chip via .has-value,
+   nothing to remove there */
+.multivalue-chip-remove {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background-color: transparent;
+  color: var(--bw-fg-3);
+}
+
+.multivalue-input-group.has-value .multivalue-chip-remove {
+  display: inline-flex;
+}
+
+.multivalue-chip-remove:hover,
+.multivalue-chip-remove:focus-visible {
+  background-color: var(--bs-danger);
+  color: #fff;
+  outline: none;
+}
+
+.multivalue-chip-remove i {
+  font-size: 14px;
+}
+
+/* Animation for adding/removing chips */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Help text styling */
+.multivalue-container .text-muted {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.multivalue-container .text-muted code {
+  background-color: var(--bs-gray-100);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.8em;
+}
+
+/* Multivalue toggle button */
+.multivalue-toggle {
+  text-align: center;
+}
+
+.multivalue-toggle-btn {
+  transition: all 0.2s ease;
+  border-radius: 0.375rem;
+}
+
+.multivalue-toggle-btn:hover {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+  color: white;
+}
+
+.multivalue-toggle-btn .bx {
+  transition: transform 0.2s ease-in-out !important;
+}
+
+.advanced-settings-toggle {
+  cursor: pointer;
+}
+
+.advanced-settings-toggle i {
+  transition: transform 0.3s ease;
+}
+
+.multivalue-toggle-btn.expanded .bx {
+  transform: rotate(180deg);
+}
+
+/* Hide overflow when collapsed */
+.multivalue-inputs {
+  position: relative;
+}
+
+.pro-alert {
+  background: none;
+  border: 1px solid var(--bs-primary);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pro-alert .alert-link {
+  font-weight: bold !important;
+  text-decoration: underline !important;
+}
+
+.pro-card {
+  background: #0b354a;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.5s ease,
+    border-color 0.5s ease;
+  border: 2px solid transparent;
+}
+
+.pro-card h6,
+.pro-card .list-group-item {
+  color: #fff;
+}

@@ -1,0 +1,409 @@
+/* ============================================================================
+   Design-kit fidelity pass — sidebar + templates page
+   Ports component rules from ui_kits/admin/{admin.css,app.css}, remapped to this
+   app's shipped tokens (kit --bw-theme -> --bs-primary, kit :root[data-theme=dark]
+   -> [data-bs-theme="dark"], the attribute this app's theme toggle actually sets).
+   ============================================================================ */
+
+/* --- Sidebar active item: kit treatment (admin.css:56-62). The 3px navy
+   left accent + padding compensation already ship in theme-default.css:1069;
+   here we only align the fill + weight to the kit (bg rgba(11,53,74,.08),
+   font-weight 600). Extra .bg-menu-theme on .layout-menu (same element) lifts
+   specificity above theme-default's !important fill. */
+.layout-menu.bg-menu-theme
+  .menu-inner
+  > .menu-item.active
+  > .menu-link:not(.menu-toggle) {
+  background-color: rgba(11, 53, 74, 0.08) !important;
+  font-weight: 600;
+}
+[data-bs-theme="dark"]
+  .layout-menu.bg-menu-theme
+  .menu-inner
+  > .menu-item.active
+  > .menu-link:not(.menu-toggle) {
+  background-color: rgba(106, 193, 224, 0.1) !important;
+}
+
+/* --- Sidebar footer: version + edition line (kit .menu-footer, admin.css:99-104).
+   Pinned to the bottom of the flex-column aside (menu-inner is flex:1). */
+.layout-menu .menu-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 12px 20px;
+  border-top: 1px solid var(--bw-border);
+  font-size: 11px;
+  color: var(--bw-fg-3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.layout-menu .menu-footer .bx {
+  font-size: 15px;
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] .layout-menu .menu-footer .bx {
+  color: #6fa8c4;
+}
+
+/* --- Page-head band (kit .page-head, admin.css:138-142): breadcrumb + H1. */
+.bw-page-head-crumbs {
+  font-size: 12px;
+  color: var(--bw-fg-3);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.bw-page-head-crumbs .sep {
+  opacity: 0.6;
+}
+.bw-page-head-crumbs .is-current {
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+.bw-page-head-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] .bw-page-head-title,
+[data-bs-theme="dark"] .bw-page-head-crumbs .is-current {
+  color: #6fa8c4;
+}
+.bw-page-head-crumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+.bw-page-head-crumbs a:hover {
+  color: var(--bs-primary);
+  text-decoration: underline;
+}
+[data-bs-theme="dark"] .bw-page-head-crumbs a:hover {
+  color: #6fa8c4;
+}
+
+/* --- Panel/chart header (kit .chart-card h3 + .sub, app.css:336-339): opt-in via the
+   card() macro's uppercase=true. Small UPPERCASE muted label + muted subtitle line. */
+.bw-panel-title {
+  color: var(--bw-fg-3);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.bw-panel-sub {
+  color: var(--bw-fg-3);
+  font-size: 0.75rem;
+}
+[data-bs-theme="dark"] .bw-panel-title {
+  color: #d6dee5;
+  font-weight: 600;
+}
+[data-bs-theme="dark"] .bw-panel-sub {
+  color: #8fa0ad;
+}
+
+/* --- Plugin marketplace identity marks (curated Tabler-derived set, src/ui/app/static/img/plugins/).
+   Two <img> ship per card: the navy mark shows in light theme, the -white mark in dark. Mirrors the
+   bw-logo-light/dark pattern, hooked on [data-bs-theme="dark"] like the rest of this fidelity block. */
+.plugin-mark {
+  flex-shrink: 0;
+}
+.plugin-mark-dark {
+  display: none;
+}
+[data-bs-theme="dark"] .plugin-mark-light {
+  display: none;
+}
+[data-bs-theme="dark"] .plugin-mark-dark {
+  display: inline-block;
+}
+
+/* --- Topbar icon buttons (kit .topbar-btn, admin.css:127-133): compact ghost square
+   used by the help "?" dropdown, notifications bell and news icon in navbar.html. */
+.bw-topbar-btn {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0.5rem;
+  color: var(--bw-fg-2);
+  cursor: pointer;
+  display: inline-flex;
+  height: 2rem;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  width: 2rem;
+}
+.bw-topbar-btn:hover,
+.bw-topbar-btn:focus-visible,
+.bw-topbar-btn.show {
+  background: rgba(11, 53, 74, 0.06);
+  color: var(--bs-primary);
+}
+.bw-topbar-btn .bx {
+  font-size: 1.35rem;
+}
+[data-bs-theme="dark"] .bw-topbar-btn {
+  color: var(--bw-fg-2);
+}
+[data-bs-theme="dark"] .bw-topbar-btn:hover,
+[data-bs-theme="dark"] .bw-topbar-btn:focus-visible,
+[data-bs-theme="dark"] .bw-topbar-btn.show {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cfe3ee;
+}
+
+/* --- Upgrade-to-PRO chip (subtle green accent per brand rule: green only for PRO/link
+   accents, never generic primary). Replaces the loud buy-now pill in the topbar. */
+.bw-pro-chip {
+  align-items: center;
+  background: rgba(46, 172, 104, 0.1);
+  border: 1px solid rgba(46, 172, 104, 0.32);
+  border-radius: 999px;
+  color: var(--bs-bw-green);
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 600;
+  gap: 0.35rem;
+  line-height: 1.3;
+  padding: 0.25rem 0.7rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.bw-pro-chip:hover,
+.bw-pro-chip:focus-visible {
+  background: rgba(46, 172, 104, 0.18);
+  color: var(--bs-bw-green);
+}
+[data-bs-theme="dark"] .bw-pro-chip {
+  color: #8ce0a8;
+}
+
+/* --- H9: at phone width the icon row (PRO chip, help, notifications, onboarding, news,
+   language, theme, user menu) is wider than #layout-navbar itself; nothing clips or
+   scrolls it, so Profile/Logout become permanently off-screen. Make the row its own
+   horizontally-scrollable strip instead, so every control stays reachable by a swipe. */
+@media (max-width: 575.98px) {
+  #navbar-collapse {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #navbar-collapse::-webkit-scrollbar {
+    display: none;
+  }
+  #navbar-collapse > ul.navbar-nav {
+    flex-shrink: 0;
+  }
+}
+
+/* N-M1: .range-picker is a Bootstrap .btn-group (display: inline-flex, no wrap), so its 4-5
+   preset buttons stay on one rigid line -- translated labels (fr "Personnalisé") push that
+   line past 390px width, scrolling the whole page-head-actions row sideways. Let the group
+   wrap its own buttons at phone width instead of overflowing the viewport. */
+@media (max-width: 575.98px) {
+  .range-picker.btn-group {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .range-picker.btn-group > .btn {
+    flex: 0 0 auto;
+    /* Q6 LOW: Bootstrap's .btn-group border-collapse (-1px margin-left, square radius except on
+       the group's true first/last child) assumes one row. Wrapped onto several, the button that
+       starts each new row still carries that negative margin and a missing radius -- pulled
+       under the row above and square where a row edge should be rounded. Every button gets its
+       own full radius and margin back so each wrapped row reads as a clean, separate group. */
+    margin-left: 0 !important;
+    border-radius: var(--bs-btn-border-radius, 0.375rem) !important;
+  }
+}
+
+/* --- Template card presentation (kit tplCard, configure.js:1317-1333). */
+.bw-tpl-icon {
+  font-size: 22px;
+  color: var(--bs-primary);
+  line-height: 1.3;
+}
+[data-bs-theme="dark"] .bw-tpl-icon {
+  color: #6fa8c4;
+}
+.bw-tpl-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--bw-fg-1);
+  line-height: 1.3;
+  word-break: break-word;
+}
+.bw-tpl-desc {
+  font-size: 13px;
+  color: var(--bw-fg-3);
+  min-height: 40px;
+  margin-top: 2px;
+}
+
+/* --- Typed template tag badges (kit .tpl-badge, app.css:2007-2032). */
+.tpl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  border: 1px solid var(--bw-border);
+  background: var(--bw-bg-subtle);
+  color: var(--bw-fg-2);
+  cursor: default;
+}
+.tpl-badge .bx {
+  font-size: 13px;
+}
+.tpl-badge-config {
+  color: var(--bs-primary);
+  border-color: rgba(11, 53, 74, 0.3);
+  background: rgba(11, 53, 74, 0.08);
+}
+.tpl-badge-plugin {
+  /* M4: raw --bs-bw-green on its own pale tint is 2.64:1. --bs-bw-green-contrast (25% toward
+     black, M5's fix elsewhere) only clears 4.41:1 against this badge's paler bg -- one-off
+     mix at 35% (matching the sibling badges' own bespoke hex, not a shared token) for margin. */
+  color: #1e7044;
+  border-color: rgba(46, 172, 104, 0.32);
+  background: rgba(46, 172, 104, 0.1);
+}
+.tpl-badge-feature {
+  /* M4: #a86400 on its own pale tint is 4.26:1 -- the app's own warning-text-emphasis token
+     already passes here and already flips per theme, replacing this one-off hex. */
+  color: var(--bs-warning-text-emphasis);
+  border-color: rgba(255, 171, 0, 0.45);
+  background: rgba(255, 171, 0, 0.14);
+}
+[data-bs-theme="dark"] .tpl-badge-config {
+  color: #8fc4e2;
+}
+[data-bs-theme="dark"] .tpl-badge-plugin {
+  color: #8ce0a8;
+}
+[data-bs-theme="dark"] .tpl-badge-feature {
+  color: #ffcd6b;
+}
+
+/* --- Tag chips: navy outline, uppercase (kit .tag-chip, admin.css:265-268).
+   Used for the "N svc" usage chip and the "+N" badge-overflow chip. */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--bs-primary);
+  color: var(--bs-primary);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--bw-bg-card);
+}
+.tag-chip.green {
+  border-color: var(--bs-bw-green);
+  color: var(--bs-bw-green);
+}
+.tag-chip.muted {
+  border-color: var(--bw-border);
+  color: var(--bw-fg-3);
+}
+.tag-chip .bx {
+  font-size: 12px;
+}
+[data-bs-theme="dark"] .tag-chip {
+  color: #8fc4e2;
+  border-color: rgba(143, 196, 226, 0.5);
+}
+[data-bs-theme="dark"] .tag-chip.muted {
+  color: var(--bw-fg-3);
+  border-color: var(--bw-border);
+}
+
+/* --- Kit btn-light (admin.css:152-153), scoped to the templates grid so the
+   card "Edit"/"View" action reads as a subtle navy-tinted button without
+   touching Bootstrap's global .btn-light. */
+#templates-grid .btn-light {
+  background: rgba(11, 53, 74, 0.05);
+  color: var(--bs-primary);
+  border-color: rgba(11, 53, 74, 0.1);
+}
+#templates-grid .btn-light:hover {
+  background: rgba(11, 53, 74, 0.1);
+  color: var(--bs-primary);
+}
+[data-bs-theme="dark"] #templates-grid .btn-light {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cfe3ee;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+[data-bs-theme="dark"] #templates-grid .btn-light:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #eaf4fa;
+}
+
+/* --- Card anatomy: header band (icon + short title + SVC chip) split from the body
+   by a divider, then a padded body (kit tplCard .card-header / .card-body,
+   configure.js:1318-1332). The card() macro renders content flush inside .card, so
+   padding lives on these two children. */
+.bw-tpl-card {
+  display: flex;
+  flex-direction: column;
+}
+.bw-tpl-header {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--bw-border);
+}
+.bw-tpl-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding: 1rem;
+}
+/* Description grows so the action row sits flush at the card bottom across the grid. */
+.bw-tpl-body .bw-tpl-desc {
+  flex: 1 0 auto;
+}
+
+/* --- Neutral card icon buttons (clone / delete): muted ghost at rest, tinted on
+   hover, delete goes danger-red only on hover -- replaces the loud red/blue outlined
+   boxes that broke the kit look. */
+#templates-grid .bw-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.32rem 0.5rem;
+  border: 1px solid var(--bw-border);
+  background: transparent;
+  color: var(--bw-fg-3);
+  line-height: 1;
+}
+#templates-grid .bw-icon-btn:hover {
+  background: rgba(11, 53, 74, 0.06);
+  color: var(--bs-primary);
+  border-color: rgba(11, 53, 74, 0.22);
+}
+#templates-grid .bw-icon-btn-danger:hover {
+  background: rgba(214, 57, 57, 0.08);
+  color: var(--bs-danger);
+  border-color: rgba(214, 57, 57, 0.35);
+}
+[data-bs-theme="dark"] #templates-grid .bw-icon-btn {
+  color: var(--bw-fg-3);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+[data-bs-theme="dark"] #templates-grid .bw-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cfe3ee;
+  border-color: rgba(255, 255, 255, 0.24);
+}
+[data-bs-theme="dark"] #templates-grid .bw-icon-btn-danger:hover {
+  background: rgba(255, 99, 99, 0.14);
+  color: #ff8a8a;
+  border-color: rgba(255, 99, 99, 0.4);
+}

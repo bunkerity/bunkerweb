@@ -1,8 +1,12 @@
 /*
-* Core overrides
-******************************************************************************/
+* Core overrides: index only.
+* Rules live in overrides/<part>.css. Browsers follow these imports in dev;
+* misc/build/merge_css_imports.py inlines them into this file in every image build.
+*/
 
 @charset "UTF-8";
+
+/* tokens.css */
 :root,
 [data-bs-theme="light"] {
   --bs-bw-green: #2eac68;
@@ -88,6 +92,7 @@ body {
     "Segoe UI Symbol";
 }
 
+/* base.css */
 /* Keep localized sidebar section titles readable and premium-looking when they need two lines */
 .layout-menu .menu-header {
   display: flex;
@@ -791,6 +796,7 @@ button.list-group-item-secondary.active {
   font-size: 1rem;
 }
 
+/* main.css */
 /*
 * Main overrides
 ******************************************************************************/
@@ -1214,7 +1220,7 @@ html[dir="rtl"] #language-dropdown.dropdown-toggle::after {
 }
 
 .template-steps-container {
-  --bs-breadcrumb-divider: url("../img/bxs-chevron-right.svg");
+  --bs-breadcrumb-divider: url("../../img/bxs-chevron-right.svg");
 }
 
 .template-steps-container .breadcrumb-item + .breadcrumb-item::before {
@@ -1261,6 +1267,7 @@ nav.bw-breadcrumbs .breadcrumb-item + .breadcrumb-item::before {
   height: 40vh;
 }
 
+/* editors.css */
 /* Base styles for the ModSecurity mode */
 .ace-modsecurity .ace_editor {
   font-family: monospace;
@@ -1405,6 +1412,7 @@ nav.bw-breadcrumbs .breadcrumb-item + .breadcrumb-item::before {
   font-style: italic;
 }
 
+/* utilities.css */
 table.table.dataTable > tbody > tr.selected > * {
   color: initial !important;
 }
@@ -1522,7 +1530,7 @@ a.courier-prime:hover {
 }
 
 .login-background {
-  background-image: url("../img/login-background.svg");
+  background-image: url("../../img/login-background.svg");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -1766,6 +1774,7 @@ div.dtsp-panesContainer
   }
 }
 
+/* modals-steps.css */
 /* Align and style the modal content */
 .modal-dialog {
   max-width: 600px; /* Restrict modal width */
@@ -2055,6 +2064,7 @@ span.cursor-pointer ~ .reset-setting {
   z-index: 1;
 }
 
+/* news.css */
 /******************************************************************************
  * News cards styling
  *****************************************************************************/
@@ -2231,6 +2241,7 @@ span.cursor-pointer ~ .reset-setting {
   }
 }
 
+/* multiselect.css */
 /*
 * Multiselect dropdown styling to match form-select
 ******************************************************************************/
@@ -2296,6 +2307,7 @@ span.cursor-pointer ~ .reset-setting {
   background-color: #133044;
 }
 
+/* multivalue.css */
 /* Multivalue setting styles -- chip/tag row (models/multivalue_setting.html:
    type + Enter adds a chip, click the x removes one; JS in
    components/settings-widgets.js's multivalue block keeps rows/hidden input in sync) */
@@ -2469,6 +2481,7 @@ span.cursor-pointer ~ .reset-setting {
   color: #fff;
 }
 
+/* pro.css */
 /* PRO License Key unlock effect — input glow */
 #PRO_LICENSE_KEY {
   transition:
@@ -2585,6 +2598,7 @@ span.cursor-pointer ~ .reset-setting {
   }
 }
 
+/* multiselect-menu.css */
 /*
 * Improved Multiselect Styling
 ******************************************************************************/
@@ -2941,6 +2955,7 @@ span.cursor-pointer ~ .reset-setting {
   color: #999;
 }
 
+/* dark-mode.css */
 /*
 * Dark mode overrides
 ******************************************************************************/
@@ -3297,7 +3312,7 @@ div.dt-button-background {
 }
 
 .dark-style .bg-menu-theme .menu-inner > .menu-item.active > .menu-link {
-  /* H1: this color was tuned for the solid #fff fill below, but overrides.css:4390-4398's
+  /* H1: this color was tuned for the solid #fff fill below, but kit-fidelity.css's
      later, higher-specificity rule (`[data-bs-theme="dark"] ... .menu-link:not(.menu-toggle)`)
      now wins for background-color and paints a translucent navy-tinted wash instead --
      leaving this near-navy text at 1.04:1 on it. Match the other dark sidebar links (#fff). */
@@ -3566,6 +3581,7 @@ html.dark-style div.dts div.dataTables_scrollBody table {
   background-color: #133044;
 }
 
+/* settings-modals.css */
 /* Ban modal scrollability improvements */
 #modal-ban-ips .modal-body {
   max-height: 60vh;
@@ -4046,6 +4062,7 @@ code.bad-behavior-event__value {
   }
 }
 
+/* components.css */
 /* Keyboard focus ring for the import dropzones (role=button divs).
    Bootstrap does not add a focus style to these; make it visible for a11y. */
 #configs-drag-area:focus-visible,
@@ -4671,6 +4688,7 @@ code.bad-behavior-event__value {
   max-height: 60vh;
 }
 
+/* kit-fidelity.css */
 /* ============================================================================
    Design-kit fidelity pass — sidebar + templates page
    Ports component rules from ui_kits/admin/{admin.css,app.css}, remapped to this
@@ -5080,6 +5098,8 @@ code.bad-behavior-event__value {
   color: #ff8a8a;
   border-color: rgba(255, 99, 99, 0.4);
 }
+
+/* walkthrough-rtl.css */
 /* Guided walkthrough: the element a "Show me" is pointing at.
    Outline rather than border so the chrome does not shift while it pulses. */
 .bw-tour-target {
@@ -5162,4 +5182,4 @@ code.bad-behavior-event__value {
   transform: scaleX(-1);
 }
 
-/* rtlcss@4.3.0 source=css/overrides.css sha256=8124c624b0def1c677aea3255c9ff1171ea553c30e2d3a1127284d4417ff50cc */
+/* rtlcss@4.3.0 source=css/overrides.css sha256=af50a85c4d1e8b62024f64b2e8010e1a8c3ec70dc992874eb774363acb5a51d9 */

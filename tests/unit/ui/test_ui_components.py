@@ -3,6 +3,7 @@ import re
 from html.parser import HTMLParser
 from pathlib import Path
 
+from _css import overrides_css
 from conftest import english  # what a converted template renders for a key
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
@@ -726,7 +727,7 @@ def test_admin_shell_uses_design_system_fonts_theme_and_boxicons():
 
 
 def test_admin_theme_has_accessible_focus_motion_and_dark_surface_contracts():
-    overrides = (STATIC / "css" / "overrides.css").read_text(encoding="utf-8")
+    overrides = overrides_css()
     theme = (STATIC / "css" / "theme-default.css").read_text(encoding="utf-8")
     home = (STATIC / "css" / "pages" / "home.css").read_text(encoding="utf-8")
 

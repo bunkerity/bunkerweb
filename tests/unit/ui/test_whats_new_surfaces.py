@@ -8,6 +8,7 @@ neither the markup nor the script.
 from pathlib import Path
 from types import SimpleNamespace
 
+from _css import overrides_css
 from conftest import english  # what a converted template renders for a key
 from jinja2 import ChainableUndefined, ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
@@ -168,7 +169,7 @@ def test_a_long_recap_scrolls_inside_the_dialog():
 
 def test_long_setting_names_wrap_instead_of_widening_the_dialog():
     """`METRICS_BASELINE_RETENTION_MAX_ROWS` in a `code` span made the modal scroll sideways."""
-    css = (Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "static" / "css" / "overrides.css").read_text()
+    css = overrides_css()
     html = _render("models/whats_new_modal.html", whatsnew_releases=RELEASES)
 
     assert "release-notes" in html
