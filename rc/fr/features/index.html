@@ -3725,7 +3725,7 @@
 <p>La valeur est une liste de motifs séparés par des espaces, parmi <code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code> et <code>api</code>. La valeur par défaut est vide, ce qui conserve la page 403 pour tous les bannissements. Nous suggérons <code>crowdsec</code>.</p>
 <ul>
 <li>Seul le motif du bannissement qui s’applique compte. Pour une IP ayant un bannissement <code>manual</code> et un bannissement CrowdSec, indiquer seulement <code>crowdsec</code> n’abandonne rien et le client reçoit la page 403.</li>
-<li>L’abandon est ignoré, et la page 403 reste, lorsque <code>USE_PROXY_PROTOCOL</code> vaut <code>yes</code> ou lorsque <code>USE_REAL_IP</code> vaut <code>yes</code> avec une source basée sur un en-tête, car l’adresse du client n’est pas connue à ce stade. Il est aussi ignoré pour les IP autorisées par une liste blanche locale.</li>
+<li>L’abandon est ignoré, et la page 403 reste, lorsque <code>USE_REAL_IP</code> vaut <code>yes</code> avec une source basée sur un en-tête, ou lorsque <code>USE_PROXY_PROTOCOL</code> vaut <code>yes</code> sans que <code>USE_REAL_IP</code> vaille <code>yes</code> et <code>REAL_IP_HEADER</code> <code>proxy_protocol</code>, car l’adresse du client n’est pas connue à ce stade. Si les trois sont définis, l’abandon utilise l’adresse du protocole PROXY lorsque le pair qui se connecte figure dans <code>REAL_IP_FROM</code>, et l’adresse du pair sinon. Il est aussi ignoré pour les IP autorisées par une liste blanche locale.</li>
 <li>Avec Redis activé, une négociation n’est abandonnée qu’après qu’une requête de l’IP bannie est passée par la vérification habituelle des bannissements ; la première requête reçoit donc encore la page 403.</li>
 <li>Avec <code>SECURITY_MODE</code> sur <code>detect</code>, la négociation se poursuit et un avertissement est journalisé.</li>
 <li>Les connexions HTTP/3 (QUIC) ne sont jamais abandonnées. Elles reçoivent la page 403.</li>
@@ -3780,7 +3780,7 @@
 <td></td>
 <td>multisite</td>
 <td>Non</td>
-<td><strong>Bannissements abandonnés en TLS :</strong> Motifs de bannissement (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, séparés par des espaces) dont les IP bannies sont abandonnées à la négociation TLS au lieu de recevoir la page 403. Ignoré derrière le protocole PROXY et avec une IP réelle basée sur un en-tête, et jamais appliqué à HTTP/3.</td>
+<td><strong>Bannissements abandonnés en TLS :</strong> Motifs de bannissement (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, séparés par des espaces) dont les IP bannies sont abandonnées à la négociation TLS au lieu de recevoir la page 403. Ignoré avec une IP réelle basée sur un en-tête et derrière le protocole PROXY, sauf si <code>REAL_IP_HEADER</code> vaut <code>proxy_protocol</code>. Jamais appliqué à HTTP/3.</td>
 </tr>
 <tr>
 <td><code>SERVER_TYPE</code></td>
@@ -7192,7 +7192,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7209,7 +7209,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># L'adresse IP du service syslog</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Assurez-vous de définir le nom correct de l'instance</span>

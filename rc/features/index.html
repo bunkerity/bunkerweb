@@ -3725,7 +3725,7 @@
 <p>The value is a list of reasons separated by spaces, among <code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code> and <code>api</code>. The default is empty, which keeps the 403 page for every ban. We suggest <code>crowdsec</code>.</p>
 <ul>
 <li>Only the reason of the ban that applies counts. For an IP that has a <code>manual</code> ban and a CrowdSec ban, listing only <code>crowdsec</code> drops nothing, and the client gets the 403 page.</li>
-<li>The drop is skipped, and the 403 page stays, when <code>USE_PROXY_PROTOCOL</code> is <code>yes</code> or when <code>USE_REAL_IP</code> is <code>yes</code> with a header-based source, because the client address is not known at that point. It is also skipped for IPs allowed by a local whitelist.</li>
+<li>The drop is skipped, and the 403 page stays, when <code>USE_REAL_IP</code> is <code>yes</code> with a header-based source, or when <code>USE_PROXY_PROTOCOL</code> is <code>yes</code> without <code>USE_REAL_IP</code> set to <code>yes</code> and <code>REAL_IP_HEADER</code> set to <code>proxy_protocol</code>, because the client address is not known at that point. With all three set, the drop uses the PROXY protocol address when the connecting peer is in <code>REAL_IP_FROM</code>, and the peer address otherwise. It is also skipped for IPs allowed by a local whitelist.</li>
 <li>With Redis enabled, a handshake is dropped only after a request from the banned IP has gone through the regular ban check, so the first request still gets the 403 page.</li>
 <li>With <code>SECURITY_MODE</code> set to <code>detect</code>, the handshake continues and a warning is logged.</li>
 <li>HTTP/3 (QUIC) connections are never dropped. They get the 403 page.</li>
@@ -3780,7 +3780,7 @@
 <td></td>
 <td>multisite</td>
 <td>No</td>
-<td><strong>Bans Dropped at TLS:</strong> Ban reasons (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, separated by spaces) whose banned IPs are dropped at the TLS handshake instead of getting the 403 page. Skipped behind PROXY protocol and header-based real IP, and never applied to HTTP/3.</td>
+<td><strong>Bans Dropped at TLS:</strong> Ban reasons (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, separated by spaces) whose banned IPs are dropped at the TLS handshake instead of getting the 403 page. Skipped behind header-based real IP, and behind PROXY protocol unless <code>REAL_IP_HEADER</code> is <code>proxy_protocol</code>. Never applied to HTTP/3.</td>
 </tr>
 <tr>
 <td><code>SERVER_TYPE</code></td>
@@ -7229,7 +7229,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7246,7 +7246,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>

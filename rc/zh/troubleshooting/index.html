@@ -987,6 +987,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        使用 AI 智能体排查问题
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="使用 AI 智能体排查问题">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skillssh-bunkerweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skills.sh 上的 BunkerWeb 技能
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#context7-bunkerweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        通过 Context7 获取 BunkerWeb 文档
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1377,6 +1416,14 @@
 <p class="admonition-title">BunkerWeb 面板</p>
 <p>如果您无法解决您的问题，您可以通过我们的面板<a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">直接联系我们</a>。这里集中了与 BunkerWeb 解决方案相关的所有请求。</p>
 </div>
+<h2 id="ai">使用 AI 智能体排查问题<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h3 id="skillssh-bunkerweb">skills.sh 上的 BunkerWeb 技能<a class="headerlink" href="#skillssh-bunkerweb" title="Permanent link">&para;</a></h3>
+<p><a href="https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting">skills.sh 上的官方 BunkerWeb 故障排除技能</a>可以帮助 AI 编程智能体诊断请求被拦截、IP 被封禁、上游错误、证书问题和配置问题。请按照适用于您所用智能体的<a href="https://github.com/bunkerity/bunkerweb-skills#installation">安装说明</a>操作。</p>
+<h3 id="context7-bunkerweb">通过 Context7 获取 BunkerWeb 文档<a class="headerlink" href="#context7-bunkerweb" title="Permanent link">&para;</a></h3>
+<p>如果您的智能体支持 <a href="https://context7.com/docs">Context7</a>，可以连接它来获取 <a href="https://context7.com/bunkerity/bunkerweb">BunkerWeb 文档</a>。请在提示中注明您的 BunkerWeb 版本、集成方式、相关设置和日志，并在分享前删除密码、API 令牌和其他敏感信息。</p>
+<p>提示示例：</p>
+<div class="highlight"><pre><span></span><code>请帮我诊断使用 &lt;集成方式&gt; 的 BunkerWeb &lt;版本&gt; 中的这个问题。以下是相关设置和已删除敏感信息的日志：&lt;详细信息&gt;。use context7
+</code></pre></div>
 <h2 id="_2">日志<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>在进行故障排除时，日志是您最好的朋友。我们尽力提供用户友好的日志，以帮助您了解正在发生的事情。</p>
 <p>请注意，您可以将 <code>LOG_LEVEL</code> 设置为 <code>info</code>（默认值为 <code>notice</code>），以增加 BunkerWeb 的详细程度。</p>

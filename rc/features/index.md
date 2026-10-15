@@ -64,7 +64,7 @@ A banned client normally completes the TLS handshake and then receives the ban p
 The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behavior`, `manual`, `ui` and `api`. The default is empty, which keeps the 403 page for every ban. We suggest `crowdsec`.
 
 - Only the reason of the ban that applies counts. For an IP that has a `manual` ban and a CrowdSec ban, listing only `crowdsec` drops nothing, and the client gets the 403 page.
-- The drop is skipped, and the 403 page stays, when `USE_PROXY_PROTOCOL` is `yes` or when `USE_REAL_IP` is `yes` with a header-based source, because the client address is not known at that point. It is also skipped for IPs allowed by a local whitelist.
+- The drop is skipped, and the 403 page stays, when `USE_REAL_IP` is `yes` with a header-based source, or when `USE_PROXY_PROTOCOL` is `yes` without `USE_REAL_IP` set to `yes` and `REAL_IP_HEADER` set to `proxy_protocol`, because the client address is not known at that point. With all three set, the drop uses the PROXY protocol address when the connecting peer is in `REAL_IP_FROM`, and the peer address otherwise. It is also skipped for IPs allowed by a local whitelist.
 - With Redis enabled, a handshake is dropped only after a request from the banned IP has gone through the regular ban check, so the first request still gets the 403 page.
 - With `SECURITY_MODE` set to `detect`, the handshake continues and a warning is logged.
 - HTTP/3 (QUIC) connections are never dropped. They get the 403 page.
@@ -81,7 +81,7 @@ The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behav
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **BunkerWeb Instances:** List of BunkerWeb instances separated with spaces.                         |
     | `MULTISITE`           | `no`              | global    | No       | **Multiple Sites:** Set to `yes` to enable hosting multiple websites with different configurations. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Security Level:** Controls the level of security enforcement. Options: `detect` or `block`.       |
-    | `BANS_TLS_DROP_REASONS` | | multisite | No | **Bans Dropped at TLS:** Ban reasons (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separated by spaces) whose banned IPs are dropped at the TLS handshake instead of getting the 403 page. Skipped behind PROXY protocol and header-based real IP, and never applied to HTTP/3. |
+    | `BANS_TLS_DROP_REASONS` | | multisite | No | **Bans Dropped at TLS:** Ban reasons (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separated by spaces) whose banned IPs are dropped at the TLS handshake instead of getting the 403 page. Skipped behind header-based real IP, and behind PROXY protocol unless `REAL_IP_HEADER` is `proxy_protocol`. Never applied to HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | No       | **Server Type:** Defines if the server is `http` or `stream` type.                                  |
 
 === "API Settings"
@@ -1962,7 +1962,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.16-rc4
+        image: bunkerity/bunkerweb:1.6.17-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1979,7 +1979,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name

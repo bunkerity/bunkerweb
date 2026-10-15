@@ -3725,7 +3725,7 @@
 <p>El valor es una lista de motivos separados por espacios, entre <code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code> y <code>api</code>. El valor por defecto está vacío, lo que mantiene la página 403 para todos los baneos. Recomendamos <code>crowdsec</code>.</p>
 <ul>
 <li>Solo cuenta el motivo del baneo que se aplica. Para una IP con un baneo <code>manual</code> y un baneo de CrowdSec, indicar solo <code>crowdsec</code> no descarta nada y el cliente recibe la página 403.</li>
-<li>El descarte se omite, y la página 403 se mantiene, cuando <code>USE_PROXY_PROTOCOL</code> es <code>yes</code> o cuando <code>USE_REAL_IP</code> es <code>yes</code> con un origen basado en cabecera, porque en ese momento no se conoce la dirección del cliente. También se omite para las IP permitidas por una whitelist local.</li>
+<li>El descarte se omite, y la página 403 se mantiene, cuando <code>USE_REAL_IP</code> es <code>yes</code> con un origen basado en cabecera, o cuando <code>USE_PROXY_PROTOCOL</code> es <code>yes</code> sin que <code>USE_REAL_IP</code> sea <code>yes</code> y <code>REAL_IP_HEADER</code> sea <code>proxy_protocol</code>, porque en ese momento no se conoce la dirección del cliente. Con los tres definidos, el descarte usa la dirección del protocolo PROXY cuando el par que se conecta está en <code>REAL_IP_FROM</code>, y la dirección del par en caso contrario. También se omite para las IP permitidas por una whitelist local.</li>
 <li>Con Redis activado, un handshake se descarta solo después de que una solicitud de la IP baneada haya pasado por la comprobación de baneos habitual, por lo que la primera solicitud sigue recibiendo la página 403.</li>
 <li>Con <code>SECURITY_MODE</code> en <code>detect</code>, el handshake continúa y se registra una advertencia.</li>
 <li>Las conexiones HTTP/3 (QUIC) nunca se descartan. Reciben la página 403.</li>
@@ -3780,7 +3780,7 @@
 <td></td>
 <td>multisite</td>
 <td>No</td>
-<td><strong>Baneos descartados en TLS:</strong> Motivos de baneo (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, separados por espacios) cuyas IP baneadas se descartan en el handshake TLS en lugar de recibir la página 403. Se omite tras el protocolo PROXY y con IP real basada en cabecera, y nunca se aplica a HTTP/3.</td>
+<td><strong>Baneos descartados en TLS:</strong> Motivos de baneo (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, separados por espacios) cuyas IP baneadas se descartan en el handshake TLS en lugar de recibir la página 403. Se omite con IP real basada en cabecera y tras el protocolo PROXY, salvo que <code>REAL_IP_HEADER</code> sea <code>proxy_protocol</code>. Nunca se aplica a HTTP/3.</td>
 </tr>
 <tr>
 <td><code>SERVER_TYPE</code></td>
@@ -7215,7 +7215,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Este es el nombre que se utilizará para identificar la instancia en el Planificador</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7232,7 +7232,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># La dirección IP del servicio syslog</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Asegúrese de establecer el nombre de instancia correcto</span>

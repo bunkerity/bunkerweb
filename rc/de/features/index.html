@@ -3725,7 +3725,7 @@
 <p>Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus <code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code> und <code>api</code>. Der Standardwert ist leer, wodurch jede Sperre die 403-Seite behält. Wir empfehlen <code>crowdsec</code>.</p>
 <ul>
 <li>Nur der Grund der tatsächlich geltenden Sperre zählt. Hat eine IP eine <code>manual</code>-Sperre und eine CrowdSec-Sperre, verwirft die alleinige Angabe von <code>crowdsec</code> nichts, und der Client erhält die 403-Seite.</li>
-<li>Das Verwerfen entfällt, und die 403-Seite bleibt, wenn <code>USE_PROXY_PROTOCOL</code> auf <code>yes</code> steht oder <code>USE_REAL_IP</code> auf <code>yes</code> mit einer headerbasierten Quelle, da die Client-Adresse zu diesem Zeitpunkt nicht bekannt ist. Es entfällt auch für IPs, die eine lokale Whitelist zulässt.</li>
+<li>Das Verwerfen entfällt, und die 403-Seite bleibt, wenn <code>USE_REAL_IP</code> auf <code>yes</code> steht mit einer headerbasierten Quelle oder wenn <code>USE_PROXY_PROTOCOL</code> auf <code>yes</code> steht, ohne dass <code>USE_REAL_IP</code> auf <code>yes</code> und <code>REAL_IP_HEADER</code> auf <code>proxy_protocol</code> gesetzt sind, da die Client-Adresse zu diesem Zeitpunkt nicht bekannt ist. Sind alle drei gesetzt, verwendet das Verwerfen die Adresse aus dem PROXY-Protokoll, wenn der verbundene Peer in <code>REAL_IP_FROM</code> steht, sonst die Adresse des Peers. Es entfällt auch für IPs, die eine lokale Whitelist zulässt.</li>
 <li>Bei aktiviertem Redis wird ein Handshake erst verworfen, nachdem eine Anfrage der gesperrten IP die reguläre Sperrprüfung durchlaufen hat; die erste Anfrage erhält also weiterhin die 403-Seite.</li>
 <li>Steht <code>SECURITY_MODE</code> auf <code>detect</code>, wird der Handshake fortgesetzt und eine Warnung protokolliert.</li>
 <li>HTTP/3-Verbindungen (QUIC) werden nie verworfen. Sie erhalten die 403-Seite.</li>
@@ -3780,7 +3780,7 @@
 <td></td>
 <td>multisite</td>
 <td>Nein</td>
-<td><strong>Beim TLS verworfene Sperren:</strong> Sperrgründe (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, durch Leerzeichen getrennt), deren gesperrte IPs beim TLS-Handshake verworfen werden, statt die 403-Seite zu erhalten. Entfällt hinter dem PROXY-Protokoll und bei headerbasierter echter IP und gilt nie für HTTP/3.</td>
+<td><strong>Beim TLS verworfene Sperren:</strong> Sperrgründe (<code>crowdsec</code>, <code>bad_behavior</code>, <code>manual</code>, <code>ui</code>, <code>api</code>, durch Leerzeichen getrennt), deren gesperrte IPs beim TLS-Handshake verworfen werden, statt die 403-Seite zu erhalten. Entfällt bei headerbasierter echter IP und hinter dem PROXY-Protokoll, außer <code>REAL_IP_HEADER</code> steht auf <code>proxy_protocol</code>. Gilt nie für HTTP/3.</td>
 </tr>
 <tr>
 <td><code>SERVER_TYPE</code></td>
@@ -7176,7 +7176,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7193,7 +7193,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># Die IP-Adresse des syslog-Dienstes</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen</span>

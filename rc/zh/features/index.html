@@ -3727,7 +3727,7 @@
 <p>该值是以空格分隔的原因列表，可选 <code>crowdsec</code>、<code>bad_behavior</code>、<code>manual</code>、<code>ui</code> 和 <code>api</code>。默认值为空，即所有封禁都保留 403 页面。我们建议使用 <code>crowdsec</code>。</p>
 <ul>
 <li>只有实际生效的封禁的原因才有意义。对于同时有 <code>manual</code> 封禁和 CrowdSec 封禁的 IP，只列出 <code>crowdsec</code> 不会丢弃任何连接，客户端会收到 403 页面。</li>
-<li>当 <code>USE_PROXY_PROTOCOL</code> 为 <code>yes</code>，或 <code>USE_REAL_IP</code> 为 <code>yes</code> 且来源基于请求头时，会跳过丢弃并保留 403 页面，因为此时无法得知客户端地址。被本地白名单放行的 IP 也会跳过。</li>
+<li>当 <code>USE_REAL_IP</code> 为 <code>yes</code> 且来源基于请求头时，或当 <code>USE_PROXY_PROTOCOL</code> 为 <code>yes</code> 但 <code>USE_REAL_IP</code> 不是 <code>yes</code> 或 <code>REAL_IP_HEADER</code> 不是 <code>proxy_protocol</code> 时，会跳过丢弃并保留 403 页面，因为此时无法得知客户端地址。三项都已设置时，如果连接的对端在 <code>REAL_IP_FROM</code> 中，丢弃使用 PROXY 协议提供的地址，否则使用对端地址。被本地白名单放行的 IP 也会跳过。</li>
 <li>启用 Redis 时，只有在被封禁 IP 的请求经过常规封禁检查之后，握手才会被丢弃，因此第一个请求仍会收到 403 页面。</li>
 <li>当 <code>SECURITY_MODE</code> 为 <code>detect</code> 时，握手会继续，并记录一条警告。</li>
 <li>HTTP/3（QUIC）连接永远不会被丢弃，它们会收到 403 页面。</li>
@@ -3782,7 +3782,7 @@
 <td></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>在 TLS 丢弃的封禁：</strong> 其被封禁 IP 在 TLS 握手时被丢弃（而不是收到 403 页面）的封禁原因（<code>crowdsec</code>、<code>bad_behavior</code>、<code>manual</code>、<code>ui</code>、<code>api</code>，以空格分隔）。在 PROXY 协议之后以及基于请求头的真实 IP 下会跳过，且从不应用于 HTTP/3。</td>
+<td><strong>在 TLS 丢弃的封禁：</strong> 其被封禁 IP 在 TLS 握手时被丢弃（而不是收到 403 页面）的封禁原因（<code>crowdsec</code>、<code>bad_behavior</code>、<code>manual</code>、<code>ui</code>、<code>api</code>，以空格分隔）。在基于请求头的真实 IP 下会跳过，在 PROXY 协议之后也会跳过，除非 <code>REAL_IP_HEADER</code> 为 <code>proxy_protocol</code>。从不应用于 HTTP/3。</td>
 </tr>
 <tr>
 <td><code>SERVER_TYPE</code></td>
@@ -7229,7 +7229,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># 这是将用于在调度器中识别实例的名称</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7246,7 +7246,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># syslog 服务的 IP 地址</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># 确保设置正确的实例名称</span>
