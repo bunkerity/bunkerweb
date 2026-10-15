@@ -18,7 +18,7 @@
 
 保护已经可以通过 HTTP(S) 协议访问的现有 Web 应用程序是 BunkerWeb 的主要目标：它将充当一个带有额外安全功能的经典[反向代理](https://en.wikipedia.org/wiki/Reverse_proxy)。
 
-有关真实世界的示例，请参阅仓库的 [examples 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples)。
+有关真实世界的示例，请参阅仓库的 [examples 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc1/examples)。
 
 ## 使用 AI 智能体
 
@@ -49,7 +49,7 @@
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.16
+      bunkerity/bunkerweb-all-in-one:1.6.17-rc1
     ```
 
     默认情况下，容器暴露：
@@ -67,8 +67,8 @@
 
     ```bash
     # 下载脚本及其校验和
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh.sha256
 
     # 验证校验和
     sha256sum -c install-bunkerweb.sh.sha256
@@ -109,7 +109,7 @@
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.16
+        image: bunkerity/bunkerweb:1.6.17-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -122,7 +122,7 @@
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -139,7 +139,7 @@
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.16
+        image: bunkerity/bunkerweb-ui:1.6.17-rc1
         environment:
           <<: *bw-env
         volumes:
@@ -209,7 +209,7 @@
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.16
+        image: bunkerity/bunkerweb:1.6.17-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -225,7 +225,7 @@
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -243,7 +243,7 @@
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.16
+        image: bunkerity/bunkerweb-autoconf:1.6.17-rc1
         depends_on:
           - bw-docker
         environment:
@@ -266,7 +266,7 @@
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.16
+        image: bunkerity/bunkerweb-ui:1.6.17-rc1
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度为 43 个字符
@@ -364,7 +364,7 @@
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.16
+        image: bunkerity/bunkerweb:1.6.17-rc1
         ports:
           - published: 80
             target: 8080
@@ -394,7 +394,7 @@
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -412,7 +412,7 @@
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.16
+        image: bunkerity/bunkerweb-autoconf:1.6.17-rc1
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -441,7 +441,7 @@
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.16
+        image: bunkerity/bunkerweb-ui:1.6.17-rc1
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度为 43 个字符
@@ -668,7 +668,7 @@
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- 包括任何其他现有的用于 UI、Redis、CrowdSec 等的环境变量 ---
-      bunkerity/bunkerweb-all-in-one:1.6.16
+      bunkerity/bunkerweb-all-in-one:1.6.17-rc1
     ```
 
     您的应用程序容器 (`myapp`) 和 `bunkerweb-aio` 容器必须在同一个 Docker 网络上，以便 BunkerWeb 能够使用主机名 `myapp` 访问它。
@@ -690,7 +690,7 @@
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... （如上主示例所示的所有其他相关环境变量）...
-      bunkerity/bunkerweb-all-in-one:1.6.16
+      bunkerity/bunkerweb-all-in-one:1.6.17-rc1
     ```
 
     请确保将 `myapp` 替换为您的应用程序容器的实际名称或 IP，并将 `http://myapp:8080` 替换为其正确的地址和端口。

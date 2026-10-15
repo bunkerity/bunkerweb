@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.17~rc1 - 2026/10/15
+
+- [DEPS] `bunkerweb`: update NGINX to 1.30.6 (CVE-2026-15176, CVE-2026-93479, CVE-2026-95101, CVE-2026-97629, CVE-2026-97205). Fedora 43 and 44 have no 1.30.6 package yet, so their BunkerWeb packages keep building their modules against 1.30.5 and stay exposed until Fedora ships 1.30.6.
+- [DEPS] Updated LuaJIT version to v2.1-20261015
+
 ## v1.6.16 - 2026/10/13
 
 - [FEATURE] `BANS_TLS_DROP_REASONS` also drops banned clients at the TLS ClientHello behind PROXY protocol when real IP uses `proxy_protocol`, trusting the PROXY address only from proxies listed in `REAL_IP_FROM`.
