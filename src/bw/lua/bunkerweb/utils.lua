@@ -574,7 +574,7 @@ utils.get_reason = function(ctx)
 	local upstream_status = var.upstream_status
 	local upstream_denied = upstream_status and tonumber(upstream_status:match("(%d%d%d)%s*$")) == ngx.status
 	if ngx.status == utils.get_deny_status() and not upstream_denied then
-		return "unknown", {}
+		return "unknown", {}, security_mode
 	end
 	return nil
 end
