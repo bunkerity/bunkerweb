@@ -4,6 +4,7 @@ ngx = {
 	ERR = 1,
 	INFO = 2,
 	OK = 0,
+	config = { subsystem = "stream" },
 	get_phase = function()
 		return "access"
 	end,
@@ -29,6 +30,11 @@ package.preload["resty.ipmatcher"] = function()
 end
 package.preload["bunkerweb.plugin"] = function()
 	return {}
+end
+for _, module in ipairs({ "base64", "antibot.captcha", "cjson", "resty.http", "resty.sha256", "resty.string" }) do
+	package.preload[module] = function()
+		return {}
+	end
 end
 
 local lookups = 0
@@ -80,4 +86,27 @@ for _, name in ipairs({ "whitelist", "blacklist", "greylist" }) do
 	plugin[method](instance)
 	assert(lookups == before + 1, name .. ": global IP with rDNS entries skipped the lookup")
 end
-print("empty and populated rDNS list checks passed for whitelist, blacklist, greylist")
+local antibot = assert(loadfile("src/common/core/antibot/antibot.lua"))()
+local instance = {
+	lists = { IGNORE_IP = {}, IGNORE_RDNS = {}, IGNORE_ASN = {} },
+	variables = { ANTIBOT_RDNS_GLOBAL = "no" },
+	ctx = { bw = { remote_addr = "203.0.113.1", ip_is_global = false } },
+	logger = { log = function() end },
+}
+local before = lookups
+local match = antibot.is_ignored_ip(instance)
+assert(match == false, "antibot: empty rDNS list changed ignore result")
+assert(lookups == before, "antibot: empty rDNS list triggered a DNS lookup")
+
+instance.lists.IGNORE_RDNS = { "example.org" }
+match = antibot.is_ignored_ip(instance)
+assert(lookups == before + 1, "antibot: configured rDNS list skipped the lookup")
+assert(match == true, "antibot: configured rDNS match was lost")
+instance.variables.ANTIBOT_RDNS_GLOBAL = "yes"
+before = lookups
+antibot.is_ignored_ip(instance)
+assert(lookups == before, "antibot: non-global IP triggered a DNS lookup")
+instance.ctx.bw.ip_is_global = true
+antibot.is_ignored_ip(instance)
+assert(lookups == before + 1, "antibot: global IP with rDNS entries skipped the lookup")
+print("empty and populated rDNS list checks passed for whitelist, blacklist, greylist, antibot")

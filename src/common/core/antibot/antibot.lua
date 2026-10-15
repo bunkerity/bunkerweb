@@ -1237,7 +1237,7 @@ function antibot:is_ignored_ip()
 	end
 
 	-- Check if rDNS is needed
-	local check_rdns = true
+	local check_rdns = #self.lists["IGNORE_RDNS"] > 0
 	if self.variables["ANTIBOT_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
 	end
