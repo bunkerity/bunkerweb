@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.6.17~rc1 - 2026/10/15
+
+- [DEPS] `bunkerweb`: update NGINX to 1.30.6 (CVE-2026-15176, CVE-2026-93479, CVE-2026-95101, CVE-2026-97629, CVE-2026-97205). Fedora 43 and 44 have no 1.30.6 package yet, so their BunkerWeb packages keep building their modules against 1.30.5 and stay exposed until Fedora ships 1.30.6.
+- [DEPS] Updated LuaJIT version to v2.1-20261015
+
+## v1.6.16 - 2026/10/13
+
+- [FEATURE] `BANS_TLS_DROP_REASONS` also drops banned clients at the TLS ClientHello behind PROXY protocol when real IP uses `proxy_protocol`, trusting the PROXY address only from proxies listed in `REAL_IP_FROM`.
+- [BUGFIX] `misc`: the default server certificate and key are regenerated together when they no longer match, instead of failing every reload. (Fixes #4031)
+- [BUGFIX] `pro`: plugin files drop group and other write before their checksum is stored, so a restore under a group-writable umask no longer reinstalls every PRO plugin on each check. (Fixes #4024)
+- [BUGFIX] `ui`: the Jobs page sorts the RELOAD and ASYNC columns by value. (Fixes #4023)
+- [BUGFIX] `ui`: setting help tooltips are wider and wrap long words, so long help text is no longer cut off. (Fixes #4026)
+- [BUGFIX] `ui`: with `USE_MODSECURITY_GLOBAL_CRS=yes`, the Web UI ModSecurity exclusions cover every name in the UI service's `SERVER_NAME`, not only the first.
+- [MISC] `headers`: the default `PERMISSIONS_POLICY` drops `shared-storage` and `shared-storage-select-url`, which Chromium removed.
+- [DEPS] Patch lua-nginx-module and lua-resty-core to expose the PROXY protocol client address during the TLS handshake (`ngx.ssl.proxy_protocol_addr()`).
+
 ## v1.6.16~rc4 - 2026/10/06
 
 - [FEATURE] `BANS_TLS_DROP_REASONS` closes the TLS handshake of banned IPs for the listed ban reasons instead of serving the 403 page.

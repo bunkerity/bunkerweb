@@ -56,7 +56,7 @@ Ein gesperrter Client schließt normalerweise den TLS-Handshake ab und erhält d
 Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus `crowdsec`, `bad_behavior`, `manual`, `ui` und `api`. Der Standardwert ist leer, wodurch jede Sperre die 403-Seite behält. Wir empfehlen `crowdsec`.
 
 - Nur der Grund der tatsächlich geltenden Sperre zählt. Hat eine IP eine `manual`-Sperre und eine CrowdSec-Sperre, verwirft die alleinige Angabe von `crowdsec` nichts, und der Client erhält die 403-Seite.
-- Das Verwerfen entfällt, und die 403-Seite bleibt, wenn `USE_PROXY_PROTOCOL` auf `yes` steht oder `USE_REAL_IP` auf `yes` mit einer headerbasierten Quelle, da die Client-Adresse zu diesem Zeitpunkt nicht bekannt ist. Es entfällt auch für IPs, die eine lokale Whitelist zulässt.
+- Das Verwerfen entfällt, und die 403-Seite bleibt, wenn `USE_REAL_IP` auf `yes` steht mit einer headerbasierten Quelle oder wenn `USE_PROXY_PROTOCOL` auf `yes` steht, ohne dass `USE_REAL_IP` auf `yes` und `REAL_IP_HEADER` auf `proxy_protocol` gesetzt sind, da die Client-Adresse zu diesem Zeitpunkt nicht bekannt ist. Sind alle drei gesetzt, verwendet das Verwerfen die Adresse aus dem PROXY-Protokoll, wenn der verbundene Peer in `REAL_IP_FROM` steht, sonst die Adresse des Peers. Es entfällt auch für IPs, die eine lokale Whitelist zulässt.
 - Bei aktiviertem Redis wird ein Handshake erst verworfen, nachdem eine Anfrage der gesperrten IP die reguläre Sperrprüfung durchlaufen hat; die erste Anfrage erhält also weiterhin die 403-Seite.
 - Steht `SECURITY_MODE` auf `detect`, wird der Handshake fortgesetzt und eine Warnung protokolliert.
 - HTTP/3-Verbindungen (QUIC) werden nie verworfen. Sie erhalten die 403-Seite.
@@ -73,7 +73,7 @@ Der Wert ist eine durch Leerzeichen getrennte Liste von Gründen aus `crowdsec`,
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Nein     | **BunkerWeb-Instanzen:** Liste der BunkerWeb-Instanzen, durch Leerzeichen getrennt.                                           |
     | `MULTISITE`           | `no`              | global    | Nein     | **Mehrere Websites:** Auf `yes` setzen, um das Hosten mehrerer Websites mit unterschiedlichen Konfigurationen zu ermöglichen. |
     | `SECURITY_MODE`       | `block`           | multisite | Nein     | **Sicherheitsstufe:** Steuert die Stufe der Sicherheitsdurchsetzung. Optionen: `detect` oder `block`.                         |
-    | `BANS_TLS_DROP_REASONS` | | multisite | Nein | **Beim TLS verworfene Sperren:** Sperrgründe (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, durch Leerzeichen getrennt), deren gesperrte IPs beim TLS-Handshake verworfen werden, statt die 403-Seite zu erhalten. Entfällt hinter dem PROXY-Protokoll und bei headerbasierter echter IP und gilt nie für HTTP/3. |
+    | `BANS_TLS_DROP_REASONS` | | multisite | Nein | **Beim TLS verworfene Sperren:** Sperrgründe (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, durch Leerzeichen getrennt), deren gesperrte IPs beim TLS-Handshake verworfen werden, statt die 403-Seite zu erhalten. Entfällt bei headerbasierter echter IP und hinter dem PROXY-Protokoll, außer `REAL_IP_HEADER` steht auf `proxy_protocol`. Gilt nie für HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | Nein     | **Servertyp:** Definiert, ob der Server vom Typ `http` oder `stream` ist.                                                     |
 
 === "API-Einstellungen"

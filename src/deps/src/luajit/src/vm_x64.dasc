@@ -1774,7 +1774,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  jmp ->vm_return
   |
   |.macro math_round, func
-  |  .ffunc math_ .. func
+  |  .ffunc_1 math_ .. func
   |.if DUALNUM
   |  mov RB, [BASE]
   |  checknumx RB, ->fff_resRB, je

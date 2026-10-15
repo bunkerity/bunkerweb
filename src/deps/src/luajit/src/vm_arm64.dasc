@@ -1103,7 +1103,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  movk CARG1, #(LJ_TTAB>>1)&0xffff, lsl #48
   |  b ->fff_restv
   |5:
-  |  cmp_nil TMP0
+  |  cmp_nil CARG1
   |  bne ->fff_restv
   |  b <4
   |
@@ -3939,6 +3939,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     if (op == BC_FORI) {
       |  csel PC, RC, PC, hi
     } else if (op == BC_JFORI) {
+      |  mov PC, RC
       |  ldrh RCw, [RC, #-4+OFS_RD]
       |  bls =>BC_JLOOP
     } else if (op == BC_IFORL) {

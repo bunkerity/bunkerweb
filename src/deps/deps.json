@@ -67,14 +67,14 @@
       "name": "lua-nginx-module v0.10.29R2",
       "url": "https://github.com/openresty/lua-nginx-module.git",
       "commit": "16612cb0a2eb71273fc5b50a4d98e3c05559178a",
-      "post_install": "rm -r src/deps/src/lua-nginx-module/t"
+      "post_install": "rm -r src/deps/src/lua-nginx-module/t && patch --forward src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c src/deps/misc/lua-nginx-module-proxy-protocol-addr.patch || rm src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c.orig src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c.rej"
     },
     {
       "id": "lua-resty-core",
       "name": "lua-resty-core v0.1.32R1",
       "url": "https://github.com/openresty/lua-resty-core.git",
       "commit": "3ad8ab4b01758c0a03b534026c31cbfa9fc203a5",
-      "post_install": "rm -r src/deps/src/lua-resty-core/t"
+      "post_install": "rm -r src/deps/src/lua-resty-core/t && patch --forward src/deps/src/lua-resty-core/lib/ngx/ssl.lua src/deps/misc/lua-resty-core-proxy-protocol-addr.patch || rm src/deps/src/lua-resty-core/lib/ngx/ssl.lua.orig src/deps/src/lua-resty-core/lib/ngx/ssl.lua.rej"
     },
     {
       "id": "lua-resty-dns",
@@ -201,9 +201,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260914",
+      "name": "LuaJIT v2.1-20261015",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "ae3d1eecfdbe70b54040779f7b4655e132b9d875",
+      "commit": "f6a9b2a6f0386bac736655703e90f1ef534bfbdc",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -257,10 +257,17 @@
     },
     {
       "id": "nginx",
+      "name": "Nginx v1.30.6",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "fb0e979c6dd63c018958b41eeb844947c5c21264",
+      "post_install": "rm -r src/deps/src/nginx/docs"
+    },
+    {
+      "id": "nginx-1.30.5",
       "name": "Nginx v1.30.5",
       "url": "https://github.com/nginx/nginx.git",
       "commit": "4556c714d1cfa587f92c7c0365c09209d42d148b",
-      "post_install": "rm -r src/deps/src/nginx/docs"
+      "post_install": "rm -r src/deps/src/nginx-1.30.5/docs"
     },
     {
       "id": "nginx_cookie_flag_module",

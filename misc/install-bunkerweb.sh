@@ -105,7 +105,7 @@ fi
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.16~rc4"
+DEFAULT_BUNKERWEB_VERSION="1.6.17~rc1"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 BUNKERWEB_VERSION_EXPLICIT="no"
@@ -114,7 +114,7 @@ NGINX_VERSION=""
 # NGINX bundled with the default BunkerWeb version; also the fallback for any
 # BunkerWeb version absent from the dictionary below (pre-1.6, the current-default
 # line, or newer-than-this-script). KEEP IN SYNC with src/linux/Dockerfile-*.
-DEFAULT_NGINX_VERSION="1.30.5"
+DEFAULT_NGINX_VERSION="1.30.6"
 
 # BunkerWeb release (X.Y.Z) -> NGINX version its packages were compiled against.
 # Each BunkerWeb Linux package ships NGINX dynamic modules built for one specific
@@ -132,12 +132,15 @@ declare -A _NGINX_VERSION_BY_BW=(
     [1.6.11]="1.30.2"
     [1.6.12]="1.30.3"
     [1.6.13]="1.30.4" [1.6.14]="1.30.4"
+    [1.6.15]="1.30.5" [1.6.16]="1.30.5"
 )
 # Fedora lagged the common pin on these releases only (Fedora repo timing).
 declare -A _NGINX_VERSION_BY_BW_FEDORA=(
     [1.6.2]="1.26.3" [1.6.8]="1.28.1" [1.6.11]="1.30.1"
     # 1.6.13: Fedora 43/44 still lack 1.30.4, so they ship 1.30.3.
     [1.6.13]="1.30.3"
+    # 1.6.17: Fedora 43/44 still lack 1.30.6, so they ship 1.30.5.
+    [1.6.17]="1.30.5"
 )
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"

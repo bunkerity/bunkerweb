@@ -1329,6 +1329,7 @@ static void LJ_FASTCALL recff_buffer_method_put(jit_State *J, RecordFFData *rd)
       trbuf = lj_ir_call(J, IRCALL_lj_buf_putmem, trbuf, trr, len);
     } else {
       recff_nyiu(J, rd);
+      return;
     }
   }
   emitir(IRT(IR_USE, IRT_NIL), trbuf, 0);

@@ -334,6 +334,21 @@ def plugin_tar_filter(tarinfo):
         return None
 
 
+def strip_plugin_write_bits(plugin_path: Union[str, Path]) -> None:
+    """Drop group/other write from a plugin tree, so the modes it is hashed with survive a restore.
+
+    safe_tar_extractall() strips these bits when a plugin is restored from the database, so a tree that kept
+    them (zip extraction and plain file writes follow the umask) would hash differently after the restore.
+    """
+    root = Path(plugin_path)
+    for path in (root, *root.rglob("*")):
+        if path.is_symlink():
+            continue
+        mode = path.stat().st_mode & 0o7777
+        if mode & 0o022:
+            path.chmod(mode & ~0o022)
+
+
 def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Optional[str] = None):
     """Recursively add a directory to an open TarFile, safely.
 

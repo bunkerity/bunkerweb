@@ -299,13 +299,13 @@ LJLIB_ASM(tonumber)		LJLIB_REC(.)
     const char *p = strdata(lj_lib_checkstr(L, 1));
     char *ep;
     unsigned int neg = 0;
-    unsigned long ul;
+    unsigned long long ul;
     if (base < 2 || base > 36)
       lj_err_arg(L, 2, LJ_ERR_BASERNG);
     while (lj_char_isspace((unsigned char)(*p))) p++;
     if (*p == '-') { p++; neg = 1; } else if (*p == '+') { p++; }
     if (lj_char_isalnum((unsigned char)(*p))) {
-      ul = strtoul(p, &ep, base);
+      ul = strtoull(p, &ep, base);
       if (p != ep) {
 	while (lj_char_isspace((unsigned char)(*ep))) ep++;
 	if (*ep == '\0') {

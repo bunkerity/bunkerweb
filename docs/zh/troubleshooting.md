@@ -3,6 +3,22 @@
 !!! info "BunkerWeb 面板"
     如果您无法解决您的问题，您可以通过我们的面板[直接联系我们](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)。这里集中了与 BunkerWeb 解决方案相关的所有请求。
 
+## 使用 AI 智能体排查问题
+
+### skills.sh 上的 BunkerWeb 技能
+
+[skills.sh 上的官方 BunkerWeb 故障排除技能](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting)可以帮助 AI 编程智能体诊断请求被拦截、IP 被封禁、上游错误、证书问题和配置问题。请按照适用于您所用智能体的[安装说明](https://github.com/bunkerity/bunkerweb-skills#installation)操作。
+
+### 通过 Context7 获取 BunkerWeb 文档
+
+如果您的智能体支持 [Context7](https://context7.com/docs)，可以连接它来获取 [BunkerWeb 文档](https://context7.com/bunkerity/bunkerweb)。请在提示中注明您的 BunkerWeb 版本、集成方式、相关设置和日志，并在分享前删除密码、API 令牌和其他敏感信息。
+
+提示示例：
+
+```text
+请帮我诊断使用 <集成方式> 的 BunkerWeb <版本> 中的这个问题。以下是相关设置和已删除敏感信息的日志：<详细信息>。use context7
+```
+
 ## 日志
 
 在进行故障排除时，日志是您最好的朋友。我们尽力提供用户友好的日志，以帮助您了解正在发生的事情。

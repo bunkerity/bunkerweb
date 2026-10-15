@@ -22,7 +22,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash, get_os_info, get_integration, get_version, create_plugin_tar_gz, safe_zip_extractall  # type: ignore
+from common_utils import bytes_hash, get_os_info, get_integration, get_version, create_plugin_tar_gz, safe_zip_extractall, strip_plugin_write_bits  # type: ignore
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 
@@ -52,6 +52,7 @@ def _set_plugin_permissions(plugin_path: Path) -> None:
         for executable_file in plugin_path.joinpath(subdir).rglob(pattern):
             if executable_file.stat().st_mode & 0o777 != desired_perms:
                 executable_file.chmod(desired_perms)
+    strip_plugin_write_bits(plugin_path)
 
 
 def _plugin_checksum_matches_database(plugin_path: Path, checksum: str) -> bool:

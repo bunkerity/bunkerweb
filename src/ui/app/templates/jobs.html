@@ -90,10 +90,10 @@
                                 <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;<span data-i18n="interval.{{ job_data['every'] }}">{{ {"once": "Once", "hour": "Hourly", "day": "Daily", "week": "Weekly"}.get(job_data["every"], job_data["every"]) }}</span>
                             </div>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" data-order="{{ 1 if job_data['reload'] else 0 }}">
                             <i class="bx bx-sm bx-{% if job_data['reload'] %}check text-success{% else %}x text-danger{% endif %}"></i>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" data-order="{{ 1 if job_data['async'] else 0 }}">
                             <i class="bx bx-sm bx-{% if job_data['async'] %}check text-success{% else %}x text-danger{% endif %}"></i>
                         </td>
                         <td class="text-center">

@@ -56,7 +56,7 @@ Un cliente baneado normalmente completa el handshake TLS y después recibe la p�
 El valor es una lista de motivos separados por espacios, entre `crowdsec`, `bad_behavior`, `manual`, `ui` y `api`. El valor por defecto está vacío, lo que mantiene la página 403 para todos los baneos. Recomendamos `crowdsec`.
 
 - Solo cuenta el motivo del baneo que se aplica. Para una IP con un baneo `manual` y un baneo de CrowdSec, indicar solo `crowdsec` no descarta nada y el cliente recibe la página 403.
-- El descarte se omite, y la página 403 se mantiene, cuando `USE_PROXY_PROTOCOL` es `yes` o cuando `USE_REAL_IP` es `yes` con un origen basado en cabecera, porque en ese momento no se conoce la dirección del cliente. También se omite para las IP permitidas por una whitelist local.
+- El descarte se omite, y la página 403 se mantiene, cuando `USE_REAL_IP` es `yes` con un origen basado en cabecera, o cuando `USE_PROXY_PROTOCOL` es `yes` sin que `USE_REAL_IP` sea `yes` y `REAL_IP_HEADER` sea `proxy_protocol`, porque en ese momento no se conoce la dirección del cliente. Con los tres definidos, el descarte usa la dirección del protocolo PROXY cuando el par que se conecta está en `REAL_IP_FROM`, y la dirección del par en caso contrario. También se omite para las IP permitidas por una whitelist local.
 - Con Redis activado, un handshake se descarta solo después de que una solicitud de la IP baneada haya pasado por la comprobación de baneos habitual, por lo que la primera solicitud sigue recibiendo la página 403.
 - Con `SECURITY_MODE` en `detect`, el handshake continúa y se registra una advertencia.
 - Las conexiones HTTP/3 (QUIC) nunca se descartan. Reciben la página 403.
@@ -73,7 +73,7 @@ El valor es una lista de motivos separados por espacios, entre `crowdsec`, `bad_
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **Instancias de BunkerWeb:** Lista de instancias de BunkerWeb separadas por espacios.                                           |
     | `MULTISITE`           | `no`              | global    | No       | **Múltiples Sitios:** Establécelo en `yes` para permitir el alojamiento de múltiples sitios web con diferentes configuraciones. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Nivel de Seguridad:** Controla el nivel de aplicación de la seguridad. Opciones: `detect` o `block`.                          |
-    | `BANS_TLS_DROP_REASONS` | | multisite | No | **Baneos descartados en TLS:** Motivos de baneo (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separados por espacios) cuyas IP baneadas se descartan en el handshake TLS en lugar de recibir la página 403. Se omite tras el protocolo PROXY y con IP real basada en cabecera, y nunca se aplica a HTTP/3. |
+    | `BANS_TLS_DROP_REASONS` | | multisite | No | **Baneos descartados en TLS:** Motivos de baneo (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separados por espacios) cuyas IP baneadas se descartan en el handshake TLS en lugar de recibir la página 403. Se omite con IP real basada en cabecera y tras el protocolo PROXY, salvo que `REAL_IP_HEADER` sea `proxy_protocol`. Nunca se aplica a HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | No       | **Tipo de Servidor:** Define si el servidor es de tipo `http` o `stream`.                                                       |
 
 === "Ajustes de la API"
