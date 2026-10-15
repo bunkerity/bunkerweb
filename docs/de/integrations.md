@@ -2292,7 +2292,7 @@ Abhängig von Ihren Entscheidungen während der Installation:
 
 ### Installation mit dem Paketmanager
 
-Bitte stellen Sie sicher, dass Sie **NGINX 1.30.5 installiert haben, bevor Sie BunkerWeb installieren**. Für alle Distributionen ist es zwingend erforderlich, vorgefertigte Pakete aus dem [offiziellen NGINX-Repository](https://nginx.org/en/linux_packages.html) zu verwenden. Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.
+Bitte stellen Sie sicher, dass Sie **NGINX 1.30.6 installiert haben, bevor Sie BunkerWeb installieren**. Für alle Distributionen ist es zwingend erforderlich, vorgefertigte Pakete aus dem [offiziellen NGINX-Repository](https://nginx.org/en/linux_packages.html) zu verwenden. Das Kompilieren von NGINX aus dem Quellcode oder die Verwendung von Paketen aus verschiedenen Repositories funktioniert nicht mit den offiziellen vorgefertigten Paketen von BunkerWeb. Sie haben jedoch die Möglichkeit, BunkerWeb aus dem Quellcode zu erstellen.
 
 === "Debian Bookworm/Trixie"
 
@@ -2307,11 +2307,11 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.5 installiert haben, bevor Sie B
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Sie sollten jetzt NGINX 1.30.5 installieren können:
+    Sie sollten jetzt NGINX 1.30.6 installieren können:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev-Version"
@@ -2355,11 +2355,11 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.5 installiert haben, bevor Sie B
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    Sie sollten jetzt NGINX 1.30.5 installieren können:
+    Sie sollten jetzt NGINX 1.30.6 installieren können:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev-Version"
@@ -2398,6 +2398,9 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.5 installiert haben, bevor Sie B
         ```shell
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
+
+    !!! warning "Fedora liefert NGINX 1.30.5"
+        Fedora 43 und 44 stellen NGINX 1.30.6 noch nicht bereit, daher sind die BunkerWeb-Pakete für Fedora gegen NGINX 1.30.5 gebaut und erwarten `nginx-1.30.5`. Installieren Sie auf Fedora diese Version; die Vorgabe wechselt auf 1.30.6, sobald Fedora es veröffentlicht.
 
     Fedora stellt bereits NGINX 1.30.5 zur Verfügung, das wir unterstützen
 
@@ -2449,10 +2452,10 @@ Bitte stellen Sie sicher, dass Sie **NGINX 1.30.5 installiert haben, bevor Sie B
     module_hotfixes=true
     ```
 
-    Sie sollten jetzt NGINX 1.30.5 installieren können:
+    Sie sollten jetzt NGINX 1.30.6 installieren können:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.5
+    sudo dnf install --allowerasing nginx-1.30.6
     ```
 
     !!! example "Einrichtungsassistenten deaktivieren"

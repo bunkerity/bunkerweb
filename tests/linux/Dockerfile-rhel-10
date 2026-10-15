@@ -1,6 +1,6 @@
-FROM redhat/ubi10-init:10.2@sha256:2355a89a09e86c954e05a196060706dadabaaba6cf02d1f0205bdb493b81975d
+FROM redhat/ubi10-init:10.2@sha256:8a43d7a3358300d8d0e0ed3e5bc4d599bd6ffbfab883bab3c72db556665a9fa5
 
-ENV NGINX_VERSION=1.30.5
+ENV NGINX_VERSION=1.30.6
 
 # Copy rocky repo
 COPY src/linux/rocky-10.repo /etc/yum.repos.d/rocky.repo

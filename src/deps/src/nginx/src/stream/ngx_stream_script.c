@@ -157,7 +157,9 @@ ngx_stream_compile_complex_value(ngx_stream_compile_complex_value_t *ccv)
 
     for (i = 0; i < v->len; i++) {
         if (v->data[i] == '$') {
-            if (v->data[i + 1] >= '1' && v->data[i + 1] <= '9') {
+            if (i + 1 < v->len
+                && v->data[i + 1] >= '1' && v->data[i + 1] <= '9')
+            {
                 nc++;
 
             } else {
@@ -519,7 +521,7 @@ ngx_stream_script_run(ngx_stream_session_t *s, ngx_str_t *value,
     e.session = s;
     e.flushed = 1;
 
-    n = len;
+    n = 0;
 
     while (*(uintptr_t *) e.ip) {
         lcode = *(ngx_stream_script_len_code_pt *) e.ip;
@@ -527,8 +529,8 @@ ngx_stream_script_run(ngx_stream_session_t *s, ngx_str_t *value,
     }
 
 
-    value->len = n;
-    value->data = ngx_pnalloc(s->connection->pool, n);
+    value->len = n + len;
+    value->data = ngx_pnalloc(s->connection->pool, n + len);
     if (value->data == NULL) {
         return NULL;
     }

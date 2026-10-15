@@ -2136,7 +2136,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |
   |.macro math_round, func
-  |  .ffunc math_ .. func
+  |  .ffunc_1 math_ .. func
   |.if DUALNUM
   |  cmp dword [BASE+4], LJ_TISNUM; jne >1
   |  mov RB, dword [BASE]; jmp ->fff_resi
