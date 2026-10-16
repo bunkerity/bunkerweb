@@ -16,7 +16,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError, RequestException
 
-from common_utils import get_version, is_newer_version_available  # type: ignore
+from common_utils import fetch_bunkerweb_releases, get_version, is_newer_version_available, pick_latest_line_release  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -25,23 +25,25 @@ status = 0
 
 try:
     JOB = Job(LOGGER, __file__)
+    current_version = get_version()
 
     def get_latest_stable_release():
         # Try cache first to respect a 1-hour cooldown with metadata, similar to mmdb-asn job
         job_cache = JOB.get_cache("latest_release.json", with_info=True, with_data=True)
+        cached = None
         if isinstance(job_cache, dict):
+            with suppress(BaseException):
+                cached = pick_latest_line_release([loads(job_cache.get("data") or b"{}")], current_version)
             last_update = job_cache.get("last_update")
-            if last_update and datetime.now().astimezone().timestamp() - last_update < timedelta(hours=1).total_seconds():
+            if cached and last_update and datetime.now().astimezone().timestamp() - last_update < timedelta(hours=1).total_seconds():
                 LOGGER.info("Using cached GitHub release (fresh < 1h)")
-                data = job_cache.get("data") or b"{}"
-                with suppress(BaseException):
-                    return loads(data)
+                return cached
 
         max_retries = 3
         retry_count = 0
-        while retry_count < max_retries:
+        while True:
             try:
-                response = get("https://api.github.com/repos/bunkerity/bunkerweb/releases", headers={"User-Agent": "BunkerWeb"}, timeout=3)
+                releases = fetch_bunkerweb_releases(get)
                 break
             except ConnectionError as e:
                 retry_count += 1
@@ -49,33 +51,31 @@ try:
                     raise e
                 LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
                 sleep(3)
-        try:
-            response.raise_for_status()
-            releases = response.json()
-        except RequestException:
-            LOGGER.debug(format_exc())
-            # Best-effort fallback to cached info (may be stale)
-            if isinstance(job_cache, dict) and job_cache.get("data"):
-                LOGGER.warning("GitHub API error, falling back to cached release info")
-                with suppress(BaseException):
-                    return loads(job_cache.get("data") or b"{}")
-            raise
+            except RequestException:
+                LOGGER.debug(format_exc())
+                # Best-effort fallback to eligible cached info (may be stale)
+                if cached:
+                    LOGGER.warning("GitHub API error, falling back to cached release info")
+                    return cached
+                raise
 
-        latest = None
-        for release in releases:
-            if not release["prerelease"]:
-                latest = release
-                break
+        latest = pick_latest_line_release(releases, current_version)
 
-        # If no stable release found, fallback to cache if available
+        # If no eligible release is listed, fall back to eligible cache if available
         if latest is None:
-            if isinstance(job_cache, dict) and job_cache.get("data"):
-                LOGGER.warning("No stable release found from API, using cached info")
-                with suppress(BaseException):
-                    return loads(job_cache.get("data") or b"{}")
+            if cached:
+                LOGGER.warning("No eligible release found from API, using cached info")
+                return cached
             return None
 
-        # Cache the latest stable release for 1 hour to avoid rate limits
+        overall = pick_latest_line_release(releases, "unknown")
+        if overall and pick_latest_line_release([overall], current_version) is None and is_newer_version_available(current_version, overall["tag_name"]):
+            line = ".".join(current_version.strip().lower().removeprefix("v").split(".")[:2])
+            LOGGER.info(
+                f"BunkerWeb {overall['tag_name'].removeprefix('v')} is available on a newer release line, " f"see https://docs.bunkerweb.io/{line}/upgrading/"
+            )
+
+        # Cache the selected release for 1 hour to avoid rate limits
         with suppress(BaseException):
             JOB.cache_file("latest_release.json", dumps(latest).encode())
 
@@ -98,7 +98,6 @@ try:
         LOGGER.error("Failed to fetch latest release information")
         sys_exit(status)
 
-    current_version = get_version()
     latest_version = latest_release["tag_name"].removeprefix("v")
 
     if is_newer_version_available(current_version, latest_version):
@@ -141,7 +140,7 @@ try:
             )
         )
     else:
-        LOGGER.info(f"No newer stable version available (current: {current_version}, latest stable: {latest_version})")
+        LOGGER.info(f"No newer eligible version available (current: {current_version}, latest eligible: {latest_version})")
 except SystemExit:
     # sys_exit inside the try block must exit with its own code, not be relabeled a crash.
     raise

@@ -19,6 +19,7 @@ from markupsafe import Markup, escape
 from regex import compile as re_compile, match
 from requests import get
 
+from common_utils import fetch_bunkerweb_releases, get_version, pick_latest_line_release  # type: ignore
 from logger import getLogger  # type: ignore
 from default_server import is_reserved_default_server  # type: ignore
 from service_classification import count_snapshot  # type: ignore
@@ -437,22 +438,13 @@ def get_printable_content(data: bytes) -> str:
 
 
 def get_latest_stable_release():
-    response = get("https://api.github.com/repos/bunkerity/bunkerweb/releases", headers={"User-Agent": "BunkerWeb"}, timeout=3)
-    response.raise_for_status()
-    releases = response.json()
-    latest_release = None
-
-    for release in reversed(releases):
-        if not release["prerelease"]:
-            latest_release = release
+    latest_release = pick_latest_line_release(fetch_bunkerweb_releases(get), get_version())
 
     if not latest_release:
         LOGGER.error("Failed to fetch latest release information")
-        latest_release = "unknown"
-    else:
-        latest_release = latest_release["tag_name"].removeprefix("v")
+        return "unknown"
 
-    return latest_release
+    return latest_release["tag_name"].removeprefix("v")
 
 
 def get_github_stars():

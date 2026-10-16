@@ -19,6 +19,8 @@ from pathlib import Path
 
 import pytest
 
+from common_utils import fetch_bunkerweb_releases, pick_latest_line_release
+
 ROOT = Path(__file__).resolve().parents[3]
 JOB_FILE = ROOT / "src" / "common" / "core" / "jobs" / "jobs" / "update-check.py"
 
@@ -65,6 +67,8 @@ def _run(monkeypatch, get_behavior):
     common_utils_mod = types.ModuleType("common_utils")
     common_utils_mod.get_version = lambda: "1.7.0"
     common_utils_mod.is_newer_version_available = lambda cur, latest: False
+    common_utils_mod.fetch_bunkerweb_releases = fetch_bunkerweb_releases
+    common_utils_mod.pick_latest_line_release = pick_latest_line_release
 
     import requests
 

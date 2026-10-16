@@ -786,6 +786,54 @@ def is_newer_version_available(current_version: str, latest_version: str) -> boo
         return False
 
 
+def fetch_bunkerweb_releases(http_get, max_pages: int = 10) -> List[Dict[str, Any]]:
+    """Fetch up to ten 100-entry GitHub release pages, stopping on a short page.
+
+    ``http_get`` is ``requests.get``; HTTP and decoding errors propagate to the caller.
+    """
+    releases: List[Dict[str, Any]] = []
+    for page in range(1, max_pages + 1):
+        response = http_get(
+            f"https://api.github.com/repos/bunkerity/bunkerweb/releases?per_page=100&page={page}", headers={"User-Agent": "BunkerWeb"}, timeout=3
+        )
+        response.raise_for_status()
+        batch = response.json()
+        if not isinstance(batch, list):
+            raise ValueError("Expected a GitHub release list")
+        releases.extend(batch)
+        if len(batch) < 100:
+            break
+    return releases
+
+
+def pick_latest_line_release(releases: List[Dict[str, Any]], current_version: str) -> Optional[Dict[str, Any]]:
+    """Pick the highest version in the installed major.minor line, ignoring drafts.
+
+    Prerelease installs also receive prereleases. A known line with no eligible release
+    returns None; an unparsable install (dev/testing) receives the highest stable overall.
+    """
+    try:
+        current = Version(normalize_bunkerweb_version(current_version))
+    except InvalidVersion:
+        current = None
+
+    best = best_version = None
+    for release in releases:
+        if not isinstance(release, dict) or release.get("draft"):
+            continue
+        try:
+            version = Version(normalize_bunkerweb_version(release["tag_name"]))
+        except (InvalidVersion, KeyError, TypeError, AttributeError):
+            continue
+        if current is not None and (version.major, version.minor) != (current.major, current.minor):
+            continue
+        if (current is None or not current.is_prerelease) and (release.get("prerelease") or version.is_prerelease):
+            continue
+        if best_version is None or version > best_version:
+            best, best_version = release, version
+    return best
+
+
 _REDIS_CLIENT_LOCK = Lock()
 # Single-entry, process-wide memo: (cache_key, client_or_None, negative_window_deadline).
 # A configuration change yields a different key and therefore a new client, so there is no
