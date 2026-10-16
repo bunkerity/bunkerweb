@@ -176,6 +176,10 @@
             "subtitle": "Hız sınırlama ayarlarını yapılandırın - API'nin de dahili bir hız sınırlaması olduğunu unutmayın"
           },
           "3": {
+            "title": "Güvenlik - Beyaz listeleme",
+            "subtitle": "Harici beyaz listelerle ilgili ayarları yapılandırın."
+          },
+          "4": {
             "title": "API - Çeşitli ayarlar",
             "subtitle": "API'nin düzgün çalışması için diğer önemli ayarlar"
           }

@@ -312,7 +312,8 @@ def test_postable_template_scope_never_claims_custom_conf_keys():
     """`update_service` deletes CUSTOM_CONF_* from `variables` (services.py:600) before
     `restore_unowned_settings` runs, and they have no db_config rows -- so a scope built from a
     step's `configs` list rather than its `settings` list would claim keys that can never be
-    posted. `api` step 4 is the one that carries configs.
+    posted. The `api` step that carries `configs` is found by content, not by position: a step
+    inserted before it must not turn this test vacuous or point it at the wrong step.
 
     Note on what this does and does not catch: a scope built from a step's `configs` list would
     yield `modsec/api.conf`-shaped keys, which do not start with `CUSTOM_CONF` -- that mutant dies
@@ -320,7 +321,7 @@ def test_postable_template_scope_never_claims_custom_conf_keys():
     this pins is the stronger, format-independent property: nothing outside the step-named key set
     gets in, whatever a future derivation does to the names."""
     scope = postable_template_scope(API_TPL, {}, blacklisted=BLACKLISTED)
-    assert API_TPL["steps"][3]["configs"], "the api fixture lost its configs -- this test is now vacuous"
+    assert any(step.get("configs") for step in API_TPL["steps"]), "the api fixture lost its configs -- this test is now vacuous"
     assert not [key for key in scope if key.startswith("CUSTOM_CONF")]
     assert scope == _step_named(API_TPL) - BLACKLISTED
 

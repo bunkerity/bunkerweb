@@ -176,6 +176,10 @@
             "subtitle": "Skonfiguruj ustawienia ograniczania liczby żądań - pamiętaj, że API również posiada wewnętrzne ograniczanie liczby żądań"
           },
           "3": {
+            "title": "Bezpieczeństwo - Biała lista",
+            "subtitle": "Skonfiguruj ustawienia związane z zewnętrznymi białymi listami."
+          },
+          "4": {
             "title": "API - Ustawienia różne",
             "subtitle": "Inne ważne ustawienia dla prawidłowego działania API"
           }

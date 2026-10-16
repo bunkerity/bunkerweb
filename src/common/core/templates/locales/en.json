@@ -16,6 +16,10 @@
             "subtitle": "Configure rate limiting settings - keep in mind that the API has internal rate limiting as well"
           },
           "3": {
+            "title": "Security - Whitelisting",
+            "subtitle": "Configure the settings related to the external whitelists."
+          },
+          "4": {
             "title": "API - Miscellaneous settings",
             "subtitle": "Other important settings for proper API functioning"
           }

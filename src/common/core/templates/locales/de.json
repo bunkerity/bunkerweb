@@ -176,6 +176,10 @@
             "subtitle": "Konfigurieren Sie die Ratenbegrenzungseinstellungen - beachten Sie, dass die API ebenfalls eine interne Ratenbegrenzung hat"
           },
           "3": {
+            "title": "Sicherheit - Positivliste",
+            "subtitle": "Konfigurieren Sie die Einstellungen zu den externen Positivlisten."
+          },
+          "4": {
             "title": "API - Sonstige Einstellungen",
             "subtitle": "Weitere wichtige Einstellungen für die ordnungsgemäße Funktion der API"
           }

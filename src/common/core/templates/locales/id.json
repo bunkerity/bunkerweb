@@ -176,6 +176,10 @@
             "subtitle": "Konfigurasikan pengaturan pembatasan laju - perlu diingat bahwa API juga memiliki pembatasan laju internal"
           },
           "3": {
+            "title": "Keamanan - Daftar putih",
+            "subtitle": "Konfigurasikan pengaturan yang terkait dengan daftar putih eksternal."
+          },
+          "4": {
             "title": "API - Pengaturan lain-lain",
             "subtitle": "Pengaturan penting lainnya agar API berfungsi dengan baik"
           }

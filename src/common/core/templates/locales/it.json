@@ -176,6 +176,10 @@
             "subtitle": "Configura le impostazioni di limitazione della frequenza: tieni presente che anche l'API dispone di una limitazione interna"
           },
           "3": {
+            "title": "Sicurezza - Lista bianca",
+            "subtitle": "Configura le impostazioni relative alle liste bianche esterne."
+          },
+          "4": {
             "title": "API - Impostazioni varie",
             "subtitle": "Altre impostazioni importanti per il corretto funzionamento dell'API"
           }

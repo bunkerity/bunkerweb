@@ -176,6 +176,10 @@
             "subtitle": "Configure los ajustes de limitación de tasa; tenga en cuenta que la API también dispone de limitación de tasa interna"
           },
           "3": {
+            "title": "Seguridad - Lista blanca",
+            "subtitle": "Configure los ajustes relacionados con las listas blancas externas."
+          },
+          "4": {
             "title": "API - Ajustes varios",
             "subtitle": "Otros ajustes importantes para el correcto funcionamiento de la API"
           }

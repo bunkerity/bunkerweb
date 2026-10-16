@@ -176,6 +176,10 @@
             "subtitle": "Configure as configurações de limitação de taxa - lembre-se de que a API também tem limitação de taxa interna"
           },
           "3": {
+            "title": "Segurança - Lista branca",
+            "subtitle": "Configure as configurações relacionadas às listas brancas externas."
+          },
+          "4": {
             "title": "API - Configurações diversas",
             "subtitle": "Outras configurações importantes para o funcionamento adequado da API"
           }

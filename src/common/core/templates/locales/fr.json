@@ -176,6 +176,10 @@
             "subtitle": "Configurez les paramètres de limitation de débit - notez que l'API dispose aussi d'une limitation de débit interne"
           },
           "3": {
+            "title": "Sécurité - Liste blanche",
+            "subtitle": "Configurez les paramètres liés aux listes blanches externes."
+          },
+          "4": {
             "title": "API - Paramètres divers",
             "subtitle": "Autres paramètres importants pour le bon fonctionnement de l'API"
           }
