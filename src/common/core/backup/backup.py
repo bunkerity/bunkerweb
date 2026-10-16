@@ -10,7 +10,6 @@ from pathlib import Path
 from subprocess import PIPE, run
 from shutil import which
 from sys import exit as sys_exit, path as sys_path
-from time import monotonic, sleep, time
 from typing import Literal
 from zipfile import ZIP_DEFLATED, ZipFile
 
@@ -21,7 +20,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from sqlalchemy import MetaData
 from sqlalchemy.engine.url import make_url
 
-from common_utils import bytes_hash, safe_zip_extractall  # type: ignore
+from common_utils import acquire_db_lock as _acquire_db_lock, bytes_hash, DatabaseLockBusy, release_db_lock, safe_zip_extractall  # type: ignore  # noqa: F401
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from model import Base  # type: ignore
@@ -123,21 +122,15 @@ def mysql_connection_args(query_args, mariadb_client: bool) -> list[str]:
     return args
 
 
-def acquire_db_lock():
-    """Acquire the database lock to prevent concurrent access to the database."""
-    try:
-        # A lock is stale 30s after its creation, whatever happened to its holder.
-        # The deadline is monotonic so that an NTP step can't extend the wait.
-        deadline = monotonic() + DB_LOCK_FILE.stat().st_ctime + 30 - time()
-    except OSError:
-        deadline = monotonic()
+def acquire_db_lock(timeout: float = 30.0) -> int:
+    """Take the database lock (`flock`, see common_utils) to prevent concurrent access to the database.
 
-    while DB_LOCK_FILE.is_file() and monotonic() < deadline:
-        LOGGER.warning("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
-        sleep(1)
-
-    DB_LOCK_FILE.unlink(missing_ok=True)
-    DB_LOCK_FILE.touch()
+    Returns the handle to pass to release_db_lock(); raises DatabaseLockBusy when another process
+    still holds the lock after `timeout` seconds.
+    """
+    return _acquire_db_lock(
+        DB_LOCK_FILE, timeout=timeout, on_wait=lambda: LOGGER.warning(f"Database is locked, waiting for it to be unlocked (timeout: {timeout:g}s) ...")
+    )
 
 
 def sorted_backups(backup_dir: Path = BACKUP_DIR) -> list:

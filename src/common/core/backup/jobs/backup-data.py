@@ -15,14 +15,20 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
-from backup import backup_database, update_cache_file, acquire_db_lock, ensure_backup_dir, rotate_backups, sorted_backups, DB_LOCK_FILE
+from backup import backup_database, update_cache_file, acquire_db_lock, ensure_backup_dir, release_db_lock, rotate_backups, sorted_backups, DatabaseLockBusy
 
 LOGGER = getLogger("BACKUP")
 status = 0
+db_lock = None
 
 try:
     # Prevent concurrent DB access with other backup plugins
-    acquire_db_lock()
+    try:
+        db_lock = acquire_db_lock()
+    except DatabaseLockBusy as e:
+        LOGGER.error(str(e))
+        sys_exit(2)
+
     backup_dir = ensure_backup_dir(Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups")))
 
     # A run killed mid-archive leaves the partial file `backup_database` was building. It is
@@ -103,7 +109,8 @@ except BaseException as e:
     LOGGER.error(f"Exception while running backup-data.py :\n{e}")
 
 finally:
-    # Always release DB lock
-    DB_LOCK_FILE.unlink(missing_ok=True)
+    # Always release DB lock (nothing to release when it was never acquired)
+    if db_lock is not None:
+        release_db_lock(db_lock)
 
 sys_exit(status)

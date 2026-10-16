@@ -222,7 +222,7 @@ def test_a_stale_symlink_is_unlinked_without_touching_its_target(job, tmp_path):
 
 def test_a_symlink_carried_by_the_archive_survives_the_restore(job):
     """Let's Encrypt ships `live/* -> archive/*` INSIDE the archive: the staged extraction has to
-    keep the link (that is what `tar_filter="auto"` is for) and the sweep must not then remove it."""
+    keep the link (that is what `links="contained"` is for) and the sweep must not then remove it."""
     job.db.get_jobs_cache_files.return_value = [
         {
             "service_id": "example.com",

@@ -1,8 +1,12 @@
 from contextlib import suppress
+from copy import copy
+import fcntl
 from gzip import GzipFile
 from hashlib import new as new_hash
 from ipaddress import ip_address
+from inspect import signature
 from io import BytesIO
+import os
 from itertools import starmap
 from json import loads as json_loads
 from os import getenv, sched_getaffinity, sep, access, R_OK, cpu_count
@@ -11,9 +15,11 @@ from packaging.version import InvalidVersion, Version
 from pathlib import Path
 from platform import machine
 from re import compile as re_compile
+from stat import S_ISDIR, S_ISREG
+import tarfile
 from tarfile import open as tar_open
 from threading import Lock
-from time import monotonic
+from time import monotonic, sleep
 from typing import Dict, List, Optional, Tuple, Union, Any, Iterator, Set
 from urllib.parse import unquote, urlsplit
 from math import ceil, isfinite
@@ -677,7 +683,10 @@ def _validate_tar_members(members, *, allow_symlinks=False):
             if Path(member.linkname).is_absolute():
                 raise ValueError(f"Tar member {member.name!r} links to absolute path {member.linkname!r}")
             # Normalize to collapse valid .. segments, then check if any remain (= escaping)
-            normalized = normpath(path_join(str(Path(member.name).parent), member.linkname))
+            # TarFile resolves a symlink target from the member's parent but a hardlink target
+            # from the extraction root.
+            link_parent = Path(member.name).parent if member.issym() else Path()
+            normalized = normpath(path_join(str(link_parent), member.linkname))
             if ".." in Path(normalized).parts:
                 raise ValueError(f"Tar member {member.name!r} links outside target directory")
 
@@ -704,24 +713,109 @@ def _enforce_archive_budget(kind: str, sizes) -> None:
             raise ValueError(f"{kind} archive expands to more than {MAX_ARCHIVE_EXTRACTED_BYTES} bytes")
 
 
-def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
-    """Extract a tar archive safely with pre-validation and Python 3.12+ filter.
+def _supports_tar_filter(tar) -> bool:
+    try:
+        return "filter" in signature(tar.extract).parameters
+    except (TypeError, ValueError):
+        return False
 
-    Pre-validates all members before extraction to defend against CVE-2025-4517
-    (PATH_MAX symlink chain bypass of tarfile filters). Then applies the filter
-    as additional defense-in-depth.
 
-    Use tar_filter="tar" instead of "data" when symlinks must be preserved
-    (e.g. Let's Encrypt certs). Use tar_filter="auto" to let the helper pick
-    "tar" only when the archive actually contains symlink/hardlink members,
-    and fall back to the stricter "data" filter otherwise — useful for
-    restoring trusted cache archives that may or may not contain links
-    depending on the plugin.
+def _is_contained(candidate, destination):
+    return os.path.commonpath([candidate, destination]) == destination
+
+
+def _has_symlinked_parent(parent, path):
+    relative = os.path.relpath(parent, path)
+    if relative == os.curdir:
+        return False
+    current = path
+    for part in Path(relative).parts:
+        current = os.path.join(current, part)
+        if os.path.islink(current):
+            return True
+    return False
+
+
+def _resolve_path(path):
+    """Resolve links component by component, so a link followed by '..' cannot hide an escape."""
+    path = os.fspath(path)
+    if not os.path.isabs(path):
+        path = os.path.join(Path.cwd(), path)
+    pending = list(Path(path).parts)
+    resolved = []
+    link_count = 0
+    while pending:
+        part = pending.pop(0)
+        if part in (os.curdir, os.sep):
+            if part == os.sep:
+                resolved = [os.sep]
+            continue
+        if part == os.pardir:
+            if len(resolved) > 1:
+                resolved.pop()
+            continue
+        candidate = os.path.join(*resolved, part)
+        if os.path.islink(candidate):
+            link_count += 1
+            if link_count > 40:
+                raise OSError("too many symbolic links")
+            target = os.readlink(candidate)
+            if os.path.isabs(target):
+                resolved = [os.sep]
+            pending = list(Path(target).parts) + pending
+            continue
+        resolved.append(part)
+    return os.path.join(*resolved) if resolved != [os.sep] else os.sep
+
+
+def _verify_tar_tree(path, destination, members):
+    """Check on disk, once every member is written, that each link still ends inside `destination`."""
+    relative = "."
+    try:
+        for member in members:
+            relative = member.name
+            entry = os.path.join(path, member.name)
+            mode = os.lstat(entry).st_mode
+            if os.path.islink(entry):
+                target = os.path.join(path, os.path.dirname(member.name), member.linkname)
+            elif member.islnk():
+                target = os.path.join(path, member.linkname)
+            elif S_ISDIR(mode) or S_ISREG(mode):
+                continue
+            else:
+                raise ValueError(f"Tar member {relative!r} is an unexpected entry type")
+            if not _is_contained(_resolve_path(target), destination):
+                raise ValueError(f"Tar member {relative!r} links outside target directory")
+    except (OSError, ValueError) as error:
+        if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+            raise
+        raise ValueError(f"Tar member {relative!r} could not be verified: {error}") from error
+
+
+def safe_tar_extractall(tar, path, *, links="none", **kwargs):
+    """Extract a tar archive with runtime-independent path and link containment checks.
+
+    `links="none"` refuses every symlink and hardlink member; `links="contained"` keeps the ones
+    whose target stays inside `path` (the Let's Encrypt `live/` links, a folder cache). Only
+    `members` and `numeric_owner` are accepted as extra keywords.
+
+    The members are pre-validated from the archive metadata (CVE-2025-4517: a PATH_MAX symlink
+    chain defeats tarfile's own filters), then extracted one at a time. Before each one its parent
+    and its link target are resolved on disk, and once all are written the tree is verified again,
+    because a later member can turn an earlier link hostile. The first failed check raises
+    ValueError and the caller discards the whole extraction. The data filter is used when the
+    runtime has it; Python 3.9 on RHEL 9 does not, and relies on these checks alone. A `TypeError`
+    from the extraction itself is never answered by extracting again without the filter.
     """
-    members_to_check = kwargs.get("members")
+    if links not in ("none", "contained"):
+        raise ValueError(f"Unsupported links policy: {links!r}")
+    members_to_check = kwargs.pop("members", None)
+    numeric_owner = kwargs.pop("numeric_owner", False)
+    if kwargs:
+        raise TypeError(f"safe_tar_extractall() got an unexpected keyword argument {next(iter(kwargs))!r}")
     if members_to_check is None:
         # Read the member list lazily so a bomb is refused before the rest of a compressed stream
-        # is inflated; extractall() then reuses the members already loaded.
+        # is inflated.
         members_to_check = []
 
         def _collect():
@@ -731,14 +825,76 @@ def safe_tar_extractall(tar, path, *, tar_filter="data", **kwargs):
 
         _enforce_archive_budget("Tar", _collect())
     else:
+        members_to_check = list(members_to_check)
         _enforce_archive_budget("Tar", (member.size if member.isreg() else 0 for member in members_to_check))
-    if tar_filter == "auto":
-        tar_filter = "tar" if any(m.issym() or m.islnk() for m in members_to_check) else "data"
-    _validate_tar_members(members_to_check, allow_symlinks=(tar_filter != "data"))
-    try:
-        tar.extractall(path, filter=tar_filter, **kwargs)
-    except TypeError:
-        tar.extractall(path, **kwargs)
+    _validate_tar_members(members_to_check, allow_symlinks=(links != "none"))
+
+    destination = os.path.realpath(path)
+    native_filter = getattr(tarfile, "data_filter", None) if _supports_tar_filter(tar) else None
+    extract_kwargs = {}
+    if "numeric_owner" in signature(tar.extract).parameters:
+        extract_kwargs["numeric_owner"] = numeric_owner
+    if native_filter is not None:
+        extract_kwargs["filter"] = native_filter
+
+    directories = []
+    for member in members_to_check:
+        try:
+            member_path = os.path.join(path, member.name)
+            member_parent = os.path.join(path, os.path.dirname(member.name))
+            if not _is_contained(os.path.realpath(member_parent), destination):
+                raise ValueError(f"Tar member {member.name!r} parent escapes target directory")
+            if _has_symlinked_parent(member_parent, path):
+                raise ValueError(f"Tar member {member.name!r} writes through a symlinked parent")
+            if os.path.islink(member_path):
+                raise ValueError(f"Tar member {member.name!r} replaces an existing symlink")
+            if member.issym():
+                link_target = os.path.join(path, os.path.dirname(member.name), member.linkname)
+            elif member.islnk():
+                link_target = os.path.join(path, member.linkname)
+            else:
+                link_target = None
+            if link_target is not None and not _is_contained(os.path.realpath(link_target), destination):
+                raise ValueError(f"Tar member {member.name!r} links outside target directory")
+            extract_member = member
+            if member.isdir():
+                # Writable while the tree is filled; the archive's own mode is applied below.
+                extract_member = copy(member)
+                extract_member.mode = 0o700
+                directories.append((member, member_path))
+            tar.extract(extract_member, path, **extract_kwargs)
+        except (OSError, ValueError, tarfile.TarError, KeyError) as error:
+            if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+                raise
+            raise ValueError(f"Tar member {member.name!r} could not be extracted: {error}") from error
+
+    _verify_tar_tree(path, destination, members_to_check)
+    for member, member_path in sorted(directories, key=lambda item: item[0].name, reverse=True):
+        try:
+            if not S_ISDIR(os.lstat(member_path).st_mode):
+                continue
+            # Keep the archive's directory mode (0o700 on the certbot key directories) minus
+            # setuid/setgid/sticky and group/other write: the data filter drops directory modes
+            # and the runtimes without it would apply the raw mode.
+            directory_mode = member.mode & 0o755 if member.mode is not None else None
+            if native_filter is not None:
+                attributes = native_filter(member, path)
+                if attributes is None:
+                    continue
+                if attributes.mode is None and directory_mode is not None:
+                    attributes = attributes.replace(mode=directory_mode, deep=False)
+            else:
+                attributes = copy(member)
+                attributes.mode = directory_mode
+            tar.chown(attributes, member_path, numeric_owner)
+            tar.utime(attributes, member_path)
+            tar.chmod(attributes, member_path)
+        except FileNotFoundError:
+            continue
+        except (OSError, ValueError, tarfile.TarError, KeyError) as error:
+            if isinstance(error, ValueError) and str(error).startswith("Tar member "):
+                raise
+            raise ValueError(f"Tar member {member.name!r} could not be finalized: {error}") from error
 
 
 def safe_zip_extractall(zf, path, *, capped=True):
@@ -763,6 +919,62 @@ def safe_zip_extractall(zf, path, *, capped=True):
         if not contained:
             raise ValueError(f"Zip member {member!r} would escape target directory")
     zf.extractall(path)
+
+
+class DatabaseLockBusy(Exception):
+    """Raised by acquire_db_lock() when another process still holds the lock after the timeout."""
+
+
+def acquire_db_lock(path: Path, timeout: float = 30.0, on_wait=None) -> int:
+    """Take an exclusive `fcntl.flock` on `path` and return the descriptor to hand to release_db_lock().
+
+    The kernel is the lock: it drops it when its holder dies, so a file left by a dead process
+    blocks nobody, and a live holder is never displaced. The file is never truncated nor
+    unlinked, and holds the pid of the last holder for the busy message. It must sit on one local
+    filesystem shared by every caller (the scheduler, its jobs and bwcli on the same host or
+    container); flock is not a lock across NFS or hosts.
+
+    Retries once a second until `timeout` seconds (monotonic) have passed, calling `on_wait()`
+    before each wait, then raises DatabaseLockBusy and leaves the holder alone.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o644)
+    except PermissionError:
+        # Created by another user (bwcli as root, the job as nginx): flock needs no write access.
+        fd = os.open(path, os.O_RDONLY)
+    try:
+        deadline = monotonic() + timeout
+        while True:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if monotonic() >= deadline:
+                    holder = ""
+                    with suppress(OSError):
+                        holder = path.read_text().strip()
+                    raise DatabaseLockBusy(f"database is locked by pid {holder}, try again later" if holder else "database is locked, try again later")
+                if on_wait is not None:
+                    on_wait()
+                sleep(1)
+    except BaseException:
+        os.close(fd)
+        raise
+
+    with suppress(OSError):  # informational only; a read-only descriptor cannot write it
+        os.ftruncate(fd, 0)
+        os.write(fd, str(os.getpid()).encode())
+    return fd
+
+
+def release_db_lock(fd: int) -> None:
+    """Release a descriptor from acquire_db_lock(), exactly once: it unlocks and closes only that
+    descriptor, and the file stays. The number is the kernel's to reuse after the close."""
+    with suppress(OSError):
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    with suppress(OSError):
+        os.close(fd)
 
 
 def normalize_bunkerweb_version(version: str) -> str:

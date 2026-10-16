@@ -18,7 +18,7 @@ from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import executable as sys_executable, path as sys_path
 from tarfile import open as tar_open
 from threading import Event, Lock
-from time import monotonic, sleep, time
+from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Set, Union
 
@@ -30,7 +30,17 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, parse_duration_int, plugin_tar_exclude  # type: ignore
+from common_utils import (  # type: ignore
+    acquire_db_lock,
+    bytes_hash,
+    create_plugin_tar_gz,
+    DatabaseLockBusy,
+    dict_to_frozenset,
+    handle_docker_secrets,
+    parse_duration_int,
+    plugin_tar_exclude,
+    release_db_lock,
+)
 from custom_configs_drift import (  # type: ignore
     DRIFT_SETTING,
     custom_config_path,
@@ -1406,20 +1416,21 @@ if __name__ == "__main__":
                     if _gc_counter >= 60:
                         collect()
                         _gc_counter = 0
+                    # The lock is only a barrier against a running backup or restore: take it, read the
+                    # metadata, release it right away (never held across the loop body).
                     try:
-                        # A lock is stale 30s after its creation, whatever happened to its holder.
-                        # The deadline is monotonic so that an NTP step can't extend the wait.
-                        lock_deadline = monotonic() + DB_LOCK_FILE.stat().st_ctime + 30 - time()
-                    except OSError:
-                        lock_deadline = monotonic()
+                        db_lock = acquire_db_lock(DB_LOCK_FILE, timeout=30.0)
+                    except DatabaseLockBusy as e:
+                        LOGGER.warning(f"{e}, skipping this scheduler tick")
+                        # Same reason as the other early exits: `continue` skips the `else`, and a
+                        # skipped tick is no failure.
+                        errors = 0
+                        continue
 
-                    while DB_LOCK_FILE.is_file() and monotonic() < lock_deadline:
-                        LOGGER.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
-                        sleep(1)
-
-                    DB_LOCK_FILE.unlink(missing_ok=True)
-
-                    db_metadata = API_CLIENT.get_metadata()
+                    try:
+                        db_metadata = API_CLIENT.get_metadata()
+                    finally:
+                        release_db_lock(db_lock)
 
                     if isinstance(db_metadata, str):
                         raise Exception(f"An error occurred when checking for changes in the database : {db_metadata}")

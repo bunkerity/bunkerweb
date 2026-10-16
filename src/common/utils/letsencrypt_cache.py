@@ -31,7 +31,7 @@ def _restored_cache(db, scratch_root: Path | None = None) -> Iterator[tuple[Path
         scratch = Path(directory)
         data, checksum = _cache_snapshot(db)
         with tar_open(fileobj=BytesIO(data), mode="r:gz") as archive:
-            safe_tar_extractall(archive, scratch, tar_filter="auto")
+            safe_tar_extractall(archive, scratch, links="contained")
         yield scratch, checksum
 
 

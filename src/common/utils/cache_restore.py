@@ -266,11 +266,12 @@ class StagedDirectory:
 def restore_directory(target: Path, data: bytes, companion: Path = None, companion_data: bytes = None) -> None:
     with StagedDirectory(target, companion) as staged:
         with tar_open(fileobj=BytesIO(data), mode="r:gz") as tar:
-            # tar_filter="auto" keeps 1.7's behaviour: symlinks survive when the archive carries
-            # them (Let's Encrypt live/* -> archive/*) and the stricter "data" filter applies to
-            # every link-free archive. `safe_tar_extractall` pre-validates every member either way
-            # (CVE-2025-4517), which the code this replaces did not.
-            safe_tar_extractall(tar, staged.path, tar_filter="auto")
+            # links="contained" keeps the symlinks and hardlinks an archive carries (Let's Encrypt
+            # live/* -> archive/*) as long as they end inside the staging directory.
+            # `safe_tar_extractall` pre-validates every member, resolves each link on disk while
+            # extracting and verifies the finished tree (CVE-2025-4517), whatever the runtime's
+            # tarfile filters are.
+            safe_tar_extractall(tar, staged.path, links="contained")
         staged.publish(companion_data)
         staged.commit()
 
