@@ -14,6 +14,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import bytes_hash  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -134,17 +135,25 @@ DNS.1 = www.example.org
                     LOGGER.error(f"Error setting permissions on default-server-cert.key: {e}")
                 status = 1
 
-                cached, err = JOB.cache_file("default-server-cert.pem", cert_path.joinpath("default-server-cert.pem"), overwrite_file=False)
-                if not cached:
-                    LOGGER.error(f"Error while saving default-server-cert default-server-cert.pem file to db cache : {err}")
+                # One transaction: two separate ones can leave the database with a certificate and a key from different generations.
+                entries = [
+                    {
+                        "job_name": JOB.job_name,
+                        "service_id": "",
+                        "file_name": name,
+                        "data": data,
+                        "checksum": bytes_hash(data),
+                    }
+                    for name, data in (
+                        ("default-server-cert.pem", cert_path.joinpath("default-server-cert.pem").read_bytes()),
+                        ("default-server-cert.key", cert_path.joinpath("default-server-cert.key").read_bytes()),
+                    )
+                ]
+                err = JOB.db.upsert_job_caches(entries)
+                if err:
+                    LOGGER.error(f"Error while saving default-server-cert pem and key files to db cache : {err}")
                 else:
-                    LOGGER.info("Successfully saved default-server-cert default-server-cert.pem file to db cache")
-
-                cached, err = JOB.cache_file("default-server-cert.key", cert_path.joinpath("default-server-cert.key"), overwrite_file=False)
-                if not cached:
-                    LOGGER.error(f"Error while saving default-server-cert default-server-cert.key file to db cache : {err}")
-                else:
-                    LOGGER.info("Successfully saved default-server-cert default-server-cert.key file to db cache")
+                    LOGGER.info("Successfully saved default-server-cert pem and key files to db cache")
         finally:
             # Clean up the temporary config file
             try:

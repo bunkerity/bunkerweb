@@ -15,6 +15,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DB
+from app.models.instance import encode_search_panes
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flash
 
 from app.routes.utils import (
@@ -23,7 +24,6 @@ from app.routes.utils import (
     get_redis_client,
     get_remain,
     handle_error,
-    parse_search_panes,
     parse_search_panes_dict,
 )
 from CrowdSec import CrowdSecClient, CrowdSecError  # type: ignore
@@ -375,7 +375,7 @@ def _get_filtered_report_bans(source):
         search=source.get("search", "").lower(),
         order_column="date",
         order_dir="desc",
-        search_panes=parse_search_panes(source),
+        search_panes=encode_search_panes(parse_search_panes_dict(source)),
         count_only=False,
         include_pane_counts=False,
     )
@@ -544,7 +544,7 @@ def bans_fetch():
         search_panes_options["service"].append(
             {
                 "label": display_name,
-                "value": escape(str(name)),
+                "value": str(name),
                 "total": counts["total"],
                 "count": counts["count"],
             }
@@ -590,7 +590,7 @@ def bans_fetch():
             search_panes_options[field] = [
                 {
                     "label": escape(str(value)),
-                    "value": escape(str(value)),
+                    "value": str(value),
                     "total": counts["total"],
                     "count": counts["count"],
                 }

@@ -18,7 +18,7 @@ Ce guide de démarrage rapide vous aidera à installer rapidement BunkerWeb et �
 
 Protéger les applications web existantes déjà accessibles avec le protocole HTTP(S) est l'objectif principal de BunkerWeb : il agira comme un [proxy inverse classique](https://en.wikipedia.org/wiki/Reverse_proxy) avec des fonctionnalités de sécurité supplémentaires.
 
-Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc1/examples) du dépôt pour obtenir des exemples concrets.
+Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc2/examples) du dépôt pour obtenir des exemples concrets.
 
 ## Utiliser un agent IA
 
@@ -49,7 +49,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.17-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.17-rc2
     ```
 
     Par défaut, le conteneur expose :
@@ -67,8 +67,8 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
 
     ```bash
     # Download the script and its checksum
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc2/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc2/install-bunkerweb.sh.sha256
 
     # Verify the checksum
     sha256sum -c install-bunkerweb.sh.sha256
@@ -109,7 +109,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.17-rc1
+        image: bunkerity/bunkerweb:1.6.17-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -122,7 +122,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -139,7 +139,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.17-rc1
+        image: bunkerity/bunkerweb-ui:1.6.17-rc2
         environment:
           <<: *bw-env
         volumes:
@@ -209,7 +209,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17-rc1
+        image: bunkerity/bunkerweb:1.6.17-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -225,7 +225,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -243,7 +243,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.17-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.17-rc2
         depends_on:
           - bw-docker
         environment:
@@ -266,7 +266,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.17-rc1
+        image: bunkerity/bunkerweb-ui:1.6.17-rc2
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # Optionnel : générée dans le volume bw-ui-data si absente ; une clé fait 43 caractères
@@ -344,7 +344,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
     Une fois installé, vous pouvez obtenir l'adresse IP du `LoadBalancer` pour configurer vos domaines :
 
     ```shell
-    kubectl -n bunkerweb get svc mybw-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    kubectl -n bunkerweb get svc mybw-bunkerweb-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
     ```
 
 === "Swarm"
@@ -364,7 +364,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.17-rc1
+        image: bunkerity/bunkerweb:1.6.17-rc2
         ports:
           - published: 80
             target: 8080
@@ -394,7 +394,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -412,7 +412,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.17-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.17-rc2
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -441,7 +441,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.17-rc1
+        image: bunkerity/bunkerweb-ui:1.6.17-rc2
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # Optionnel : générée dans le volume bw-ui-data si absente ; une clé fait 43 caractères
@@ -668,7 +668,7 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---
-      bunkerity/bunkerweb-all-in-one:1.6.17-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.17-rc2
     ```
 
     Votre conteneur d'application (`myapp`) et le conteneur `bunkerweb-aio` doivent être sur le même réseau Docker pour que BunkerWeb puisse y accéder en utilisant le nom d'hôte `myapp`.
@@ -690,7 +690,7 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (all other relevant environment variables as shown in the main example above) ...
-      bunkerity/bunkerweb-all-in-one:1.6.17-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.17-rc2
     ```
 
     Assurez-vous de remplacer `myapp` par le nom réel ou l'adresse IP de votre conteneur d'application et `http://myapp:8080` par son adresse et son port corrects.

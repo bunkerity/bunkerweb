@@ -7,13 +7,13 @@ from typing import List, Optional, Set, Tuple
 from kubernetes import client
 from kubernetes.client.exceptions import ApiException
 
-from controllers.KubernetesController import KubernetesController
+from controllers.KubernetesController import API_REQUEST_TIMEOUT, KubernetesController
 
 
 class IngressController(KubernetesController):
     def __init__(self):
         super().__init__()
-        self._networkingv1 = client.NetworkingV1Api()
+        self._networkingv1 = client.NetworkingV1Api(api_client=self._api_client)
 
         self._ingress_class = getenv("KUBERNETES_INGRESS_CLASS", "")
         if self._ingress_class:
@@ -37,7 +37,7 @@ class IngressController(KubernetesController):
 
     def _probe_ingress_classes(self) -> bool:
         try:
-            self._networkingv1.list_ingress_class(limit=1)
+            self._networkingv1.list_ingress_class(limit=1, _request_timeout=API_REQUEST_TIMEOUT)
             return True
         except ApiException as e:
             self._warn_ingress_classes(f"{e.status} - {e.reason}")
@@ -58,7 +58,7 @@ class IngressController(KubernetesController):
         if not self._ingress_classes_readable:
             return None
         try:
-            classes = self._networkingv1.list_ingress_class().items
+            classes = self._networkingv1.list_ingress_class(_request_timeout=API_REQUEST_TIMEOUT).items
         except Exception as e:
             self._logger.error(f"Can't list ingressclasses: {e}")
             return self._last_foreign_ingress_classes
@@ -72,7 +72,7 @@ class IngressController(KubernetesController):
 
     def _get_controller_services(self) -> list:
         services = []
-        ingresses = self._networkingv1.list_ingress_for_all_namespaces(watch=False).items
+        ingresses = self._networkingv1.list_ingress_for_all_namespaces(watch=False, _request_timeout=API_REQUEST_TIMEOUT).items
         foreign = self._foreign_ingress_classes()
         self._last_foreign_ingress_classes = foreign
         for ingress in ingresses:
@@ -137,6 +137,7 @@ class IngressController(KubernetesController):
                     namespace,
                     watch=False,
                     field_selector=f"metadata.name={path.backend.service.name}",
+                    _request_timeout=API_REQUEST_TIMEOUT,
                 ).items
 
                 if not service_list:
@@ -220,6 +221,7 @@ class IngressController(KubernetesController):
                                     namespace,
                                     watch=False,
                                     field_selector=f"metadata.name={tls.secret_name}",
+                                    _request_timeout=API_REQUEST_TIMEOUT,
                                 ).items
 
                                 if not secrets_tls:
@@ -288,7 +290,9 @@ class IngressController(KubernetesController):
                 patch_body["status"]["loadBalancer"]["ingress"].append({"hostname": ip})
 
         try:
-            self._networkingv1.patch_namespaced_ingress_status(name=ingress_name, namespace=ingress_namespace, body=patch_body)
+            self._networkingv1.patch_namespaced_ingress_status(
+                name=ingress_name, namespace=ingress_namespace, body=patch_body, _request_timeout=API_REQUEST_TIMEOUT
+            )
             self._logger.info(f"Successfully patched status of ingress {ingress_name} in namespace {ingress_namespace} with {len(ips)} address(es)")
             return True
         except ApiException as e:

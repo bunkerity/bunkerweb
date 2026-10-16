@@ -581,7 +581,9 @@ function csmod.Allow(ip, challengePrefix)
     return true, "disabled"
   end
 
-  if runtime.conf["ENABLE_INTERNAL"] == "false" and ngx.req.is_internal() then
+  -- A request that was only rewritten is internal too, but it is the original request and is marked by the access phase
+  local bw_ctx = ngx.ctx.bw
+  if runtime.conf["ENABLE_INTERNAL"] == "false" and ngx.req.is_internal() and not (bw_ctx and bw_ctx.rewritten) then
     return true, "internal"
   end
 

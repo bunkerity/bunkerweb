@@ -47,7 +47,7 @@ from werkzeug.routing.exceptions import BuildError
 
 from common_utils import get_version, is_newer_version_available  # type: ignore
 
-from app.models.biscuit import BiscuitMiddleware
+from app.models.biscuit import BiscuitMiddleware, _internal_error_response
 from app.models.reverse_proxied import ReverseProxied
 from app.models.session_cookie import use_per_request_cookie
 
@@ -410,6 +410,18 @@ def register_plugin_blueprints(app, blueprint_registry):
     app.jinja_env.loader = app.create_global_jinja_loader()
 
 
+def deny_plugin_requests(module_name):
+    """When a plugin's hooks fail to load, deny every request instead of serving without them: they may be an authorization check."""
+
+    def fail_closed_before_request():
+        LOGGER.error(f"Hooks of plugin module {module_name} failed to load, denying the request")
+        return _internal_error_response()
+
+    # Distinct module name so the dedupe of refresh_app_context keeps one stub per plugin
+    fail_closed_before_request.__module__ = module_name
+    app.config.setdefault(HOOKS["before_request"]["key"], []).append(fail_closed_before_request)
+
+
 def refresh_app_context():
     """Refresh Flask app context by loading hooks and blueprints from plugins."""
     worker_pid = str(getpid())
@@ -478,6 +490,7 @@ def refresh_app_context():
                 # Restore any prior 'hooks' module
                 if prev_hooks_mod is not None:
                     sys_modules["hooks"] = prev_hooks_mod
+                deny_plugin_requests(module_name)
                 continue
 
             hook_module = module_from_spec(spec)
@@ -491,6 +504,7 @@ def refresh_app_context():
                 else:
                     # Ensure we don't keep a plugin-specific 'hooks' leaked
                     sys_modules.pop("hooks", None)
+                deny_plugin_requests(module_name)
                 continue
 
             # Restore any prior 'hooks' module (avoid leaking current plugin 'hooks' globally)
@@ -511,6 +525,7 @@ def refresh_app_context():
                 app.hook_sys_paths.pop(module_name, None)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+            deny_plugin_requests(module_name)
             # Best-effort cleanup of 'hooks'
             with suppress(Exception):
                 if "hooks" in sys_modules:
@@ -1456,13 +1471,15 @@ def before_request():
 
         g._env = data
 
+    # A hook that raises denies the request: it may be an authorization check
     for hook in app.config["BEFORE_REQUEST_HOOKS"]:
         try:
             resp = hook()
-            if resp:
-                return resp
         except Exception:
             LOGGER.exception("Error in before_request hook")
+            return _internal_error_response()
+        if resp:
+            return resp
 
 
 def mark_user_access(user, session_id):

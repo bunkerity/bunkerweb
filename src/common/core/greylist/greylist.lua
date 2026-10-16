@@ -259,7 +259,7 @@ function greylist:is_greylisted_ip()
 	end
 
 	-- Check if rDNS is needed
-	local check_rdns = true
+	local check_rdns = self.lists["RDNS"] and #self.lists["RDNS"] > 0
 	if self.variables["GREYLIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
 	end

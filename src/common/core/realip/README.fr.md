@@ -42,7 +42,7 @@ Comment ça marche :
     N’ajoutez que des sources de confiance, sinon risque d’usurpation d’IP via en‑têtes manipulés.
 
 !!! info "Multiples adresses"
-    Avec `REAL_IP_RECURSIVE`, si l’en‑tête contient plusieurs IPs, la première non listée comme proxy de confiance est retenue comme IP client.
+    Avec `REAL_IP_RECURSIVE`, si l’en‑tête contient plusieurs IPs, la dernière (la plus à droite) non listée comme proxy de confiance est retenue comme IP client.
 
 ### Exemples
 

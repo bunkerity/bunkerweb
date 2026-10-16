@@ -2,6 +2,7 @@
   "name": "load-balancer",
   "kinds": ["docker"],
   "timeout": 120,
+  "delay": 60,
   "no_copy_container": true,
   "tests": [
     {

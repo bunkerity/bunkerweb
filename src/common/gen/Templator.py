@@ -445,15 +445,19 @@ class Templator:
 
         self._server_env_cache: Dict[str, Environment] = {}
 
-    def render(self) -> None:
-        """Render the templates based on the provided configuration."""
+    def render(self) -> List[str]:
+        """Render the templates based on the provided configuration.
+
+        Returns:
+            List[str]: What failed to render. An empty list means the output is complete.
+        """
         global _ssl_ecdh_curve_resolution_logged
 
         _ensure_fork_start_method()
         _ssl_ecdh_curve_resolution_logged = False
         if self._uses_auto_ssl_ecdh_curve():
             resolve_ssl_ecdh_curve("auto")
-        self._render_global()
+        failures = self._render_global()
         server_name = self._config.get("SERVER_NAME", "www.example.com").strip()
         # an empty SERVER_NAME renders no server at all, like multisite already does, instead of an empty server_name directive
         servers = [server_name] if server_name else []
@@ -479,12 +483,14 @@ class Templator:
             completed_servers = 0
             show_progress = len(servers) >= 100
             for future in as_completed(future_to_batch):
-                future.result()  # Raise any exceptions
+                failures.extend(future.result())
                 completed_servers += future_to_batch[future]
                 if show_progress:
                     progress_pct = (completed_servers / len(servers)) * 100
                     elapsed = perf_counter() - server_start
                     logger.info(f"Progress: {completed_servers}/{len(servers)} servers ({progress_pct:.1f}%) in {elapsed:.1f}s")
+
+        return failures
 
     def __getstate__(self) -> Dict[str, Any]:
         state = self.__dict__.copy()
@@ -622,8 +628,8 @@ class Templator:
         self._template_path_cache[cache_key] = result
         return result
 
-    def _write_config(self) -> None:
-        """Write the configuration to a variables.env file."""
+    def _write_config(self) -> bool:
+        """Write the configuration to a variables.env file. Returns whether it was written."""
         real_path = self._output / "variables.env"
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
@@ -635,6 +641,8 @@ class Templator:
             real_path.write_text("".join(config_lines))
         except IOError as e:
             logger.error(f"Error writing configuration to {real_path}: {e}")
+            return False
+        return True
 
     def _get_server_config(self, server: str, global_only_config: Dict[str, Any], server_specific_config: Dict[str, Any]) -> Dict[str, Any]:
         """Get the configuration for a specific server.
@@ -658,11 +666,11 @@ class Templator:
 
         return filtered_config
 
-    def _render_global(self) -> None:
-        """Render global templates."""
+    def _render_global(self) -> List[str]:
+        """Render global templates. Returns what failed."""
         global_start = perf_counter()
 
-        self._write_config()
+        failures = [] if self._write_config() else ["variables.env"]
         templates = self._find_templates(
             [
                 "global",
@@ -677,20 +685,24 @@ class Templator:
         template_vars.update(self._config)
 
         for template in templates:
-            self._render_template(template, template_vars)
+            if not self._render_template(template, template_vars):
+                failures.append(template)
         logger.debug(f"Global rendering completed in {perf_counter() - global_start:.3f}s")
+        return failures
 
-    def _render_server_batch(self, servers: List[str]) -> None:
-        """Render templates for a batch of servers.
+    def _render_server_batch(self, servers: List[str]) -> List[str]:
+        """Render templates for a batch of servers. Returns what failed.
 
         Args:
             servers (List[str]): List of server names to render.
         """
+        failures = []
         for server in servers:
-            self._render_server(server)
+            failures.extend(self._render_server(server))
+        return failures
 
-    def _render_server(self, server: str) -> None:
-        """Render templates for a specific server.
+    def _render_server(self, server: str) -> List[str]:
+        """Render templates for a specific server. Returns what failed.
 
         Args:
             server (str): Server name.
@@ -722,9 +734,12 @@ class Templator:
         template_vars["all"] = full_config
         template_vars.update(config)
 
+        failures = []
         for template in templates:
             name = basename(template) if any(template.endswith(root_conf) for root_conf in self._global_templates) else None
-            self._render_template(template, template_vars, subpath=subpath, name=name, custom_undefined=server_custom_undefined)
+            if not self._render_template(template, template_vars, subpath=subpath, name=name, custom_undefined=server_custom_undefined):
+                failures.append(join(server, template))
+        return failures
 
     def _render_template(
         self,
@@ -733,8 +748,8 @@ class Templator:
         subpath: Optional[str] = None,
         name: Optional[str] = None,
         custom_undefined: Optional[Type[Undefined]] = None,
-    ) -> None:
-        """Render a single template.
+    ) -> bool:
+        """Render a single template. Returns whether it was rendered.
 
         Args:
             template (str): Template name.
@@ -769,6 +784,8 @@ class Templator:
             real_path.write_text(rendered_content)
         except Exception as e:
             logger.error(f"Error rendering template {template}: {e}")
+            return False
+        return True
 
     @staticmethod
     def is_custom_conf(path: str) -> bool:

@@ -331,6 +331,36 @@ function initializeDataTable(config) {
   const dataTable = new DataTable(tableSelector, safeDataTableOptions);
   applyTranslations();
 
+  // Headers given as `columns[].title` markup would otherwise be read out as that markup in the
+  // sort button's accessible name: use the rendered header text instead.
+  const markupHeaderColumns = new Set(
+    dataTable
+      .settings()[0]
+      .aoColumns.filter((column) => /</.test(column.ariaTitle || "")),
+  );
+  const syncHeaderAriaTitles = () => {
+    dataTable.settings()[0].aoColumns.forEach((column, index) => {
+      if (!markupHeaderColumns.has(column)) return;
+      const text = $(dataTable.column(index).header())
+        .find(".dt-column-title")
+        .text()
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!text) return;
+      const sortButton = $(dataTable.column(index).header()).find(
+        ".dt-column-order[aria-label]",
+      );
+      if (sortButton.length) {
+        sortButton.attr(
+          "aria-label",
+          sortButton.attr("aria-label").replace(column.ariaTitle, () => text),
+        );
+      }
+      column.ariaTitle = text;
+    });
+  };
+  syncHeaderAriaTitles();
+
   // Rows are rebuilt on every draw, so per-trigger instances would be disposed and
   // recreated (and leaked) each time. One delegated tooltip builds an instance on
   // first hover instead; the row instances are dropped with the rows.
@@ -528,6 +558,8 @@ function initializeDataTable(config) {
             }
           });
         }
+
+        syncHeaderAriaTitles();
 
         const searchPanesContainer = dataTable.searchPanes.container();
         if (searchPanesContainer && $(searchPanesContainer).length) {

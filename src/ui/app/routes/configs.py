@@ -41,6 +41,8 @@ CONFIG_TYPES = {
 
 
 def _valid_config_selection(configs: object) -> bool:
+    # The selection only names existing rows, which the database matches exactly: file and env based configs can carry names
+    # CONFIG_NAME_RX rejects (a dot, for one), and those must reach the protected-config report instead of failing the whole batch.
     if not isinstance(configs, list) or not configs:
         return False
 
@@ -48,7 +50,8 @@ def _valid_config_selection(configs: object) -> bool:
     return all(
         isinstance(config, dict)
         and isinstance(config.get("name"), str)
-        and match(CONFIG_NAME_RX, config["name"])
+        and 0 < len(config["name"]) <= 255
+        and config["name"].isprintable()
         and isinstance(config.get("type"), str)
         and config["type"].strip().replace("-", "_").lower() in allowed_types
         and (config.get("service") is None or isinstance(config.get("service"), str))
