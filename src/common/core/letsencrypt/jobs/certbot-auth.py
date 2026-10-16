@@ -21,6 +21,12 @@ LOGGER = getLogger("LETS-ENCRYPT.AUTH")
 # and made a real failure indistinguishable from a success at the one place that reports it.
 status = 0
 
+
+def describe_api_error(http_status, resp) -> str:
+    detail = f"status = {resp.get('status')}, msg = {resp.get('msg')}" if isinstance(resp, dict) else f"body = {str(resp)[:200]!r}"
+    return f"HTTP {http_status}, {detail}"
+
+
 try:
     # Get env vars
     token = getenv("CERTBOT_TOKEN", "")
@@ -38,7 +44,7 @@ try:
             LOGGER.error(f"Can't send API request to {api.endpoint}/lets-encrypt/challenge : {err}")
         elif resp_status != 200:
             status = 1
-            LOGGER.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/challenge : status = {resp['status']}, msg = {resp['msg']}")
+            LOGGER.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/challenge : {describe_api_error(resp_status, resp)}")
         else:
             LOGGER.info(f"Successfully sent API request to {api.endpoint}/lets-encrypt/challenge")
 except BaseException as e:
