@@ -825,6 +825,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-an-ai-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using an AI agent
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using an AI agent">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-skills-on-skillssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BunkerWeb skills on skills.sh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-documentation-with-context7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BunkerWeb documentation with Context7
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#basic-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1213,6 +1252,14 @@
 <p>This quickstart guide will help you to quickly install BunkerWeb and secure a web service using the web User Interface.</p>
 <p>Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb: it will act as a classical <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> with extra security features.</p>
 <p>See the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples folder</a> of the repository to get real-world examples.</p>
+<h2 id="using-an-ai-agent">Using an AI agent<a class="headerlink" href="#using-an-ai-agent" title="Permanent link">&para;</a></h2>
+<h3 id="bunkerweb-skills-on-skillssh">BunkerWeb skills on skills.sh<a class="headerlink" href="#bunkerweb-skills-on-skillssh" title="Permanent link">&para;</a></h3>
+<p>If you use an AI coding agent, install the official <a href="https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb">BunkerWeb skill on skills.sh</a> for deployment and configuration guidance. Follow the <a href="https://github.com/bunkerity/bunkerweb-skills#installation">installation instructions</a> for your agent.</p>
+<h3 id="bunkerweb-documentation-with-context7">BunkerWeb documentation with Context7<a class="headerlink" href="#bunkerweb-documentation-with-context7" title="Permanent link">&para;</a></h3>
+<p>You can also connect your agent to <a href="https://context7.com/docs">Context7</a> to fetch <a href="https://context7.com/bunkerity/bunkerweb">BunkerWeb documentation</a> during setup. Include your BunkerWeb version and integration in your prompt so the agent uses the relevant settings and examples.</p>
+<p>Example prompt:</p>
+<div class="highlight"><pre><span></span><code>Help me configure BunkerWeb &lt;version&gt; with &lt;integration&gt; to protect my application. use context7
+</code></pre></div>
 <h2 id="basic-setup">Basic setup<a class="headerlink" href="#basic-setup" title="Permanent link">&para;</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">All-in-one</label><label for="__tabbed_1_2">Linux</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Docker autoconf</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Swarm</label></div>
 <div class="tabbed-content">
@@ -1500,7 +1547,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>mybw<span class="w"> </span>bunkerweb/bunkerweb<span class="w"> </span>--namespace<span class="w"> </span>bunkerweb<span class="w"> </span>--create-namespace
 </code></pre></div>
 <p>Once installed, you can get the IP address of the <code>LoadBalancer</code> to set up your domains:</p>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>bunkerweb<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>mybw-external<span class="w"> </span>-o<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.status.loadBalancer.ingress[0].ip}'</span>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>bunkerweb<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>mybw-bunkerweb-external<span class="w"> </span>-o<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.status.loadBalancer.ingress[0].ip}'</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">

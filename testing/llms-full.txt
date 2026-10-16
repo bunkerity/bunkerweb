@@ -442,6 +442,22 @@ Protecting existing web applications already accessible with the HTTP(S) protoco
 
 See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/examples) of the repository to get real-world examples.
 
+## Using an AI agent
+
+### BunkerWeb skills on skills.sh
+
+If you use an AI coding agent, install the official [BunkerWeb skill on skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb) for deployment and configuration guidance. Follow the [installation instructions](https://github.com/bunkerity/bunkerweb-skills#installation) for your agent.
+
+### BunkerWeb documentation with Context7
+
+You can also connect your agent to [Context7](https://context7.com/docs) to fetch [BunkerWeb documentation](https://context7.com/bunkerity/bunkerweb) during setup. Include your BunkerWeb version and integration in your prompt so the agent uses the relevant settings and examples.
+
+Example prompt:
+
+```text
+Help me configure BunkerWeb <version> with <integration> to protect my application. use context7
+```
+
 ## Basic setup
 
 === "All-in-one"
@@ -750,7 +766,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
     Once installed, you can get the IP address of the `LoadBalancer` to set up your domains:
 
     ```shell
-    kubectl -n bunkerweb get svc mybw-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    kubectl -n bunkerweb get svc mybw-bunkerweb-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
     ```
 
 === "Swarm"
@@ -2936,7 +2952,7 @@ services:
     When a container should be ignored by autoconf, set `DOCKER_IGNORE_LABELS` on the controller. Provide a space- or comma-separated list of label keys (for example `bunkerweb.SERVER_NAME`) or just the suffix (`SERVER_NAME`). Any container or custom-config source carrying a matching label is skipped during discovery, and the label is ignored when translating settings.
 
 !!! info "KEEP_CONFIG_ON_RESTART"
-    Unlike the settings above, `KEEP_CONFIG_ON_RESTART` is read directly by the `bunkerweb` container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the `bunkerweb` container itself. Set to `yes` to keep the previously generated configuration across a container restart instead of rendering the loading configuration. With `yes`, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. Default `no`.
+    Unlike the settings above, `KEEP_CONFIG_ON_RESTART` is read directly by the `bunkerweb` container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the `bunkerweb` container itself. Set to `yes` to keep the previously generated configuration across a container restart instead of rendering the loading configuration. With `yes`, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. A configuration install that was cut short (container kill, out of memory) is never kept: the next start renders the loading configuration instead. Default `no`.
 
 ### Using Docker secrets
 
@@ -3650,7 +3666,7 @@ Depending on your installation type:
 
 ### Installation using package manager
 
-Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.30.6 installed before installing BunkerWeb**. For all distributions, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 === "Debian Bookworm/Trixie"
 
@@ -3665,11 +3681,11 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.5:
+    You should now be able to install NGINX 1.30.6:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -3713,11 +3729,11 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.30.5:
+    You should now be able to install NGINX 1.30.6:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -3756,6 +3772,9 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
         ```shell
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
+
+    !!! warning "Fedora ships NGINX 1.30.5"
+        Fedora 43 and 44 do not provide NGINX 1.30.6 yet, so the BunkerWeb packages for Fedora are built against NGINX 1.30.5 and expect `nginx-1.30.5`. Install that version on Fedora; the pin moves to 1.30.6 as soon as Fedora publishes it.
 
     Fedora already provides NGINX 1.30.5 that we support
 
@@ -3807,10 +3826,10 @@ Please ensure that you have **NGINX 1.30.5 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.30.5:
+    You should now be able to install NGINX 1.30.6:
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.5
+    sudo dnf install --allowerasing nginx-1.30.6
     ```
 
     !!! example "Disable the setup wizard"
@@ -5103,6 +5122,8 @@ spec:
 ```
 
 The same `KUBERNETES_SKIP_FOREIGN_CLASSES` rules apply to Gateways: with `KUBERNETES_GATEWAY_CLASS` unset, a Gateway is skipped when its `gatewayClassName` names a `GatewayClass` whose `spec.controllerName` is not `KUBERNETES_GATEWAY_CONTROLLER`. Without `get`/`list`/`watch` on `gatewayclasses`, the controller logs one warning and processes every Gateway.
+
+BunkerWeb also writes the status of the `GatewayClass`, `Gateway` and route resources it owns (`Accepted`, `Programmed`, listeners and route parents), so tools such as `kubectl wait` and Argo CD see them as ready. Installs that do not use the Helm chart must grant `get`, `list` and `watch` on `gatewayclasses`, and `patch` on the `status` subresource of `gateways`, `gatewayclasses` and the route kinds (`httproutes`, `grpcroutes`, `tlsroutes`, `tcproutes`, `udproutes`). Without them the controller still applies the configuration, logs a warning and writes no status.
 
 ### Custom domain name
 
@@ -13585,7 +13606,7 @@ You will find more settings about real IP in the [features section](https://docs
             -e USE_REAL_IP="yes" \
             -e USE_PROXY_PROTOCOL="yes" \
             -e REAL_IP_FROM="1.2.3.0/24 100.64.0.0/10" \
-            -e REAL_IP_HEADER="X-Forwarded-For" \
+            -e REAL_IP_HEADER="proxy_protocol" \
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
@@ -14209,7 +14230,7 @@ sudo apt install keepalived
 sudo dnf install keepalived
 ```
 
-**Health check.** The BunkerWeb healthcheck script, called with the `ok` argument, exits with `0` when the instance answers `ok` on `http://127.0.0.1:6000/healthz`. `ok` means NGINX is running and the instance has received its configuration, including while it applies a new configuration and still serves the previous one (testing and later). The script exits with `1` while the instance is still `loading` or when NGINX is stopped. Called without an argument, the script also accepts `loading`, so do not use that form here: a worker that has just booted would take the VIP and answer with the "Generating..." page.
+**Health check.** The BunkerWeb healthcheck script, called with the `ok` argument, exits with `0` when the instance answers `ok` on `http://127.0.0.1:6000/healthz`. `ok` means NGINX is running and the instance has received its configuration, including while it applies a new configuration and still serves the previous one (1.6.16 and later). The script exits with `1` while the instance is still `loading` or when NGINX is stopped. Called without an argument, the script also accepts `loading`, so do not use that form here: a worker that has just booted would take the VIP and answer with the "Generating..." page.
 
 === "Linux"
 
@@ -20385,6 +20406,8 @@ This documentation outlines the lifecycle hooks used for managing different stag
 
     If the hook returns a response object, Flask will skip the request handling and return the response directly. This can be useful for short-circuiting the request processing pipeline.
 
+    If a hook raises an exception, or the hooks of a plugin cannot be loaded, the web UI answers 500 on every page, including the plugins page, while static files are still served. To recover, fix or remove the plugin files on disk and restart the UI (or send HUP to the gunicorn master), or remove the plugin from the database.
+
     **Example:**
 
     ```python
@@ -20561,11 +20584,9 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
         and `.env` (or point it there with `--compose-dir`):
 
         ```bash
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
         # Download the script and its checksum
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
         # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
@@ -20771,11 +20792,9 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
             To get started, download the installation script and its checksum, then verify the script's integrity before running it.
 
             ```bash
-            LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -21737,6 +21756,22 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
 !!! info "BunkerWeb Panel"
     If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
+
+## Troubleshooting with an AI agent
+
+### BunkerWeb skills on skills.sh
+
+The official [BunkerWeb troubleshooting skill on skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) helps AI coding agents diagnose blocked requests, bans, upstream errors, certificate issues and configuration problems. Follow the [installation instructions](https://github.com/bunkerity/bunkerweb-skills#installation) for your agent.
+
+### BunkerWeb documentation with Context7
+
+If your agent supports [Context7](https://context7.com/docs), connect it to fetch [BunkerWeb documentation](https://context7.com/bunkerity/bunkerweb). Include your BunkerWeb version, integration, relevant settings and logs in your prompt, and remove passwords, API tokens and other secrets before sharing them.
+
+Example prompt:
+
+```text
+Help me diagnose this issue with BunkerWeb <version> on <integration>. Here are the relevant settings and redacted logs: <details>. use context7
+```
 
 ## Logs
 

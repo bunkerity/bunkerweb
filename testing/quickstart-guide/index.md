@@ -20,6 +20,22 @@ Protecting existing web applications already accessible with the HTTP(S) protoco
 
 See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/examples) of the repository to get real-world examples.
 
+## Using an AI agent
+
+### BunkerWeb skills on skills.sh
+
+If you use an AI coding agent, install the official [BunkerWeb skill on skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb) for deployment and configuration guidance. Follow the [installation instructions](https://github.com/bunkerity/bunkerweb-skills#installation) for your agent.
+
+### BunkerWeb documentation with Context7
+
+You can also connect your agent to [Context7](https://context7.com/docs) to fetch [BunkerWeb documentation](https://context7.com/bunkerity/bunkerweb) during setup. Include your BunkerWeb version and integration in your prompt so the agent uses the relevant settings and examples.
+
+Example prompt:
+
+```text
+Help me configure BunkerWeb <version> with <integration> to protect my application. use context7
+```
+
 ## Basic setup
 
 === "All-in-one"
@@ -328,7 +344,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
     Once installed, you can get the IP address of the `LoadBalancer` to set up your domains:
 
     ```shell
-    kubectl -n bunkerweb get svc mybw-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    kubectl -n bunkerweb get svc mybw-bunkerweb-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
     ```
 
 === "Swarm"

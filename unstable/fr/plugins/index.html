@@ -2101,6 +2101,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="tabbed-block">
 <p>Ces hooks sont exécutés <strong>avant</strong> le traitement d'une requête entrante. Ils sont généralement utilisés pour des tâches de prétraitement telles que l'authentification, la validation ou la journalisation.</p>
 <p>Si le hook retourne un objet de réponse, Flask ignorera le traitement de la requête et retournera la réponse directement. Cela peut être utile pour court-circuiter le pipeline de traitement des requêtes.</p>
+<p>Si un hook lève une exception, ou si les hooks d'un plugin ne peuvent pas être chargés, l'interface web répond 500 sur chaque page, y compris la page des plugins, tandis que les fichiers statiques restent servis. Pour récupérer, corrigez ou supprimez les fichiers du plugin sur le disque puis redémarrez l'interface (ou envoyez HUP au processus maître de gunicorn), ou supprimez le plugin de la base de données.</p>
 <p><strong>Exemple :</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">Response</span>
 

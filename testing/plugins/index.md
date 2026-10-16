@@ -719,6 +719,8 @@ This documentation outlines the lifecycle hooks used for managing different stag
 
     If the hook returns a response object, Flask will skip the request handling and return the response directly. This can be useful for short-circuiting the request processing pipeline.
 
+    If a hook raises an exception, or the hooks of a plugin cannot be loaded, the web UI answers 500 on every page, including the plugins page, while static files are still served. To recover, fix or remove the plugin files on disk and restart the UI (or send HUP to the gunicorn master), or remove the plugin from the database.
+
     **Example:**
 
     ```python

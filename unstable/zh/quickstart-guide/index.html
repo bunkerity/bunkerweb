@@ -825,6 +825,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        使用 AI 智能体
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="使用 AI 智能体">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skillssh-bunkerweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        skills.sh 上的 BunkerWeb 技能
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#context7-bunkerweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        通过 Context7 获取 BunkerWeb 文档
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1213,6 +1252,14 @@
 <p>本快速入门指南将帮助您快速安装 BunkerWeb 并使用 Web 用户界面保护 Web 服务。</p>
 <p>保护已经可以通过 HTTP(S) 协议访问的现有 Web 应用程序是 BunkerWeb 的主要目标：它将充当一个带有额外安全功能的经典<a href="https://en.wikipedia.org/wiki/Reverse_proxy">反向代理</a>。</p>
 <p>有关真实世界的示例，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples 文件夹</a>。</p>
+<h2 id="ai">使用 AI 智能体<a class="headerlink" href="#ai" title="Permanent link">&para;</a></h2>
+<h3 id="skillssh-bunkerweb">skills.sh 上的 BunkerWeb 技能<a class="headerlink" href="#skillssh-bunkerweb" title="Permanent link">&para;</a></h3>
+<p>如果您使用 AI 编程智能体，可以安装 <a href="https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb">skills.sh 上的官方 BunkerWeb 技能</a>，获取部署和配置指导。请按照适用于您所用智能体的<a href="https://github.com/bunkerity/bunkerweb-skills#installation">安装说明</a>操作。</p>
+<h3 id="context7-bunkerweb">通过 Context7 获取 BunkerWeb 文档<a class="headerlink" href="#context7-bunkerweb" title="Permanent link">&para;</a></h3>
+<p>您还可以将智能体连接到 <a href="https://context7.com/docs">Context7</a>，在配置过程中获取 <a href="https://context7.com/bunkerity/bunkerweb">BunkerWeb 文档</a>。请在提示中注明您的 BunkerWeb 版本和集成方式，以便智能体使用适用的设置和示例。</p>
+<p>提示示例：</p>
+<div class="highlight"><pre><span></span><code>请帮我配置使用 &lt;集成方式&gt; 的 BunkerWeb &lt;版本&gt;，以保护我的应用。use context7
+</code></pre></div>
 <h2 id="_2">基本设置<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">All-in-one</label><label for="__tabbed_1_2">Linux</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Docker autoconf</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Swarm</label></div>
 <div class="tabbed-content">
@@ -1500,7 +1547,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>mybw<span class="w"> </span>bunkerweb/bunkerweb<span class="w"> </span>--namespace<span class="w"> </span>bunkerweb<span class="w"> </span>--create-namespace
 </code></pre></div>
 <p>安装后，您可以获取 <code>LoadBalancer</code> 的 IP 地址来设置您的域：</p>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>bunkerweb<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>mybw-external<span class="w"> </span>-o<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.status.loadBalancer.ingress[0].ip}'</span>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>bunkerweb<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>mybw-bunkerweb-external<span class="w"> </span>-o<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.status.loadBalancer.ingress[0].ip}'</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">

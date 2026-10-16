@@ -987,6 +987,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#troubleshooting-with-an-ai-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting with an AI agent
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting with an AI agent">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-skills-on-skillssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BunkerWeb skills on skills.sh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-documentation-with-context7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BunkerWeb documentation with Context7
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#logs" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1377,6 +1416,14 @@
 <p class="admonition-title">BunkerWeb Panel</p>
 <p>If you are unable to resolve your issue, you can <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">contact us directly via our panel</a>. This centralizes all requests related to the BunkerWeb solution.</p>
 </div>
+<h2 id="troubleshooting-with-an-ai-agent">Troubleshooting with an AI agent<a class="headerlink" href="#troubleshooting-with-an-ai-agent" title="Permanent link">&para;</a></h2>
+<h3 id="bunkerweb-skills-on-skillssh">BunkerWeb skills on skills.sh<a class="headerlink" href="#bunkerweb-skills-on-skillssh" title="Permanent link">&para;</a></h3>
+<p>The official <a href="https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting">BunkerWeb troubleshooting skill on skills.sh</a> helps AI coding agents diagnose blocked requests, bans, upstream errors, certificate issues and configuration problems. Follow the <a href="https://github.com/bunkerity/bunkerweb-skills#installation">installation instructions</a> for your agent.</p>
+<h3 id="bunkerweb-documentation-with-context7">BunkerWeb documentation with Context7<a class="headerlink" href="#bunkerweb-documentation-with-context7" title="Permanent link">&para;</a></h3>
+<p>If your agent supports <a href="https://context7.com/docs">Context7</a>, connect it to fetch <a href="https://context7.com/bunkerity/bunkerweb">BunkerWeb documentation</a>. Include your BunkerWeb version, integration, relevant settings and logs in your prompt, and remove passwords, API tokens and other secrets before sharing them.</p>
+<p>Example prompt:</p>
+<div class="highlight"><pre><span></span><code>Help me diagnose this issue with BunkerWeb &lt;version&gt; on &lt;integration&gt;. Here are the relevant settings and redacted logs: &lt;details&gt;. use context7
+</code></pre></div>
 <h2 id="logs">Logs<a class="headerlink" href="#logs" title="Permanent link">&para;</a></h2>
 <p>When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.</p>
 <p>Please note that you can set the <code>LOG_LEVEL</code> to <code>info</code> (default: <code>notice</code>) to increase BunkerWeb’s verbosity.</p>

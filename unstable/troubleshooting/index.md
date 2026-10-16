@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
 
+## Troubleshooting with an AI agent
+
+### BunkerWeb skills on skills.sh
+
+The official [BunkerWeb troubleshooting skill on skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) helps AI coding agents diagnose blocked requests, bans, upstream errors, certificate issues and configuration problems. Follow the [installation instructions](https://github.com/bunkerity/bunkerweb-skills#installation) for your agent.
+
+### BunkerWeb documentation with Context7
+
+If your agent supports [Context7](https://context7.com/docs), connect it to fetch [BunkerWeb documentation](https://context7.com/bunkerity/bunkerweb). Include your BunkerWeb version, integration, relevant settings and logs in your prompt, and remove passwords, API tokens and other secrets before sharing them.
+
+Example prompt:
+
+```text
+Help me diagnose this issue with BunkerWeb <version> on <integration>. Here are the relevant settings and redacted logs: <details>. use context7
+```
+
 ## Logs
 
 When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.

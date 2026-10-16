@@ -245,7 +245,7 @@ You will find more settings about real IP in the [features section](https://docs
             -e USE_REAL_IP="yes" \
             -e USE_PROXY_PROTOCOL="yes" \
             -e REAL_IP_FROM="1.2.3.0/24 100.64.0.0/10" \
-            -e REAL_IP_HEADER="X-Forwarded-For" \
+            -e REAL_IP_HEADER="proxy_protocol" \
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
@@ -869,7 +869,7 @@ sudo apt install keepalived
 sudo dnf install keepalived
 ```
 
-**Health check.** The BunkerWeb healthcheck script, called with the `ok` argument, exits with `0` when the instance answers `ok` on `http://127.0.0.1:6000/healthz`. `ok` means NGINX is running and the instance has received its configuration, including while it applies a new configuration and still serves the previous one (testing and later). The script exits with `1` while the instance is still `loading` or when NGINX is stopped. Called without an argument, the script also accepts `loading`, so do not use that form here: a worker that has just booted would take the VIP and answer with the "Generating..." page.
+**Health check.** The BunkerWeb healthcheck script, called with the `ok` argument, exits with `0` when the instance answers `ok` on `http://127.0.0.1:6000/healthz`. `ok` means NGINX is running and the instance has received its configuration, including while it applies a new configuration and still serves the previous one (1.6.16 and later). The script exits with `1` while the instance is still `loading` or when NGINX is stopped. Called without an argument, the script also accepts `loading`, so do not use that form here: a worker that has just booted would take the VIP and answer with the "Generating..." page.
 
 === "Linux"
 

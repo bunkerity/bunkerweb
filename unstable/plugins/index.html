@@ -2105,6 +2105,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="tabbed-block">
 <p>These hooks are executed <strong>before</strong> processing an incoming request. They are typically used for pre-processing tasks such as authentication, validation, or logging.</p>
 <p>If the hook returns a response object, Flask will skip the request handling and return the response directly. This can be useful for short-circuiting the request processing pipeline.</p>
+<p>If a hook raises an exception, or the hooks of a plugin cannot be loaded, the web UI answers 500 on every page, including the plugins page, while static files are still served. To recover, fix or remove the plugin files on disk and restart the UI (or send HUP to the gunicorn master), or remove the plugin from the database.</p>
 <p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">Response</span>
 
