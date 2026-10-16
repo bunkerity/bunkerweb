@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import closing
 from datetime import datetime
 import re
 from json import dumps, loads
@@ -8,7 +9,9 @@ from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, run
 from shutil import which
+from sqlite3 import connect as sqlite_connect
 from sys import exit as sys_exit, path as sys_path
+from tempfile import TemporaryDirectory
 from typing import Literal
 from zipfile import ZIP_DEFLATED, ZipFile
 
@@ -16,6 +19,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from sqlalchemy import inspect
 from sqlalchemy.engine.url import make_url
 
 from common_utils import acquire_db_lock as _acquire_db_lock, bytes_hash, DatabaseLockBusy, release_db_lock, safe_zip_extractall  # type: ignore  # noqa: F401
@@ -26,6 +30,11 @@ from model import Base  # type: ignore
 LOGGER = getLogger("BACKUP")
 
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
+# Write probes (Database.py) create and drop test_<uuid4 hex>; they are not user data and can vanish or linger mid-dump
+TEST_TABLE_PATTERN = re.compile(r"test_[0-9a-f]{32}")
+# The same shape as a psql pattern, so a user table with a 32-character name after "test_" is still dumped
+POSTGRESQL_TEST_TABLE_PATTERN = "test_" + "[0-9a-f]" * 32
+DUMP_ATTEMPTS = 5
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 
 
@@ -93,27 +102,33 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
     backup_file = backup_dir.joinpath(f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip")
     LOGGER.debug(f"Backup file path: {backup_file}")
-    stderr = "Table 'db.test_"
-    current_time = datetime.now().astimezone()
 
     # Get table names from the SQLAlchemy model
     model_tables = list(Base.metadata.tables.keys())
     LOGGER.info(f"Backing up {len(model_tables)} tables defined in the model")
 
-    while "Table 'db.test_" in stderr and (datetime.now().astimezone() - current_time).total_seconds() < 10:
+    for attempt in range(1, DUMP_ATTEMPTS + 1):
         if database == "sqlite":
             db_path = Path(database_url.database)
 
             LOGGER.info("Creating a backup for the SQLite database ...")
 
-            # Full SQLite database dump
-            proc = run(
-                ["sqlite3", db_path.as_posix()],
-                input=".dump\n".encode(),
-                stdout=PIPE,
-                stderr=PIPE,
-                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-            )
+            # sqlite3 .dump takes no exclusion and a table list drops indexes, views, triggers and sequences:
+            # dump a consistent snapshot of the whole database after removing the write probes from it
+            with TemporaryDirectory() as tmp_dir:
+                snapshot = Path(tmp_dir, "snapshot.sqlite3")
+                with closing(sqlite_connect(db_path.as_posix())) as source, closing(sqlite_connect(snapshot.as_posix())) as copy:
+                    source.backup(copy)
+                    for (table,) in copy.execute("SELECT name FROM sqlite_master WHERE type = 'table'").fetchall():
+                        if TEST_TABLE_PATTERN.fullmatch(table):
+                            copy.execute(f'DROP TABLE "{table}"')
+                    copy.commit()
+                proc = run(
+                    ["sqlite3", snapshot.as_posix(), ".dump"],
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                )
         else:
             url = make_url(db.database_uri)
             db_user = url.username or ""
@@ -127,6 +142,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
                 dump_bin, mariadb_client = mysql_client_command("dump")
+                inspector = inspect(db.sql_engine)
                 cmd = [
                     dump_bin,
                     "-h",
@@ -134,6 +150,9 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                     "-u",
                     db_user,
                     db_database_name,
+                    # Name the tables and views to dump: a write probe listed by the server can be dropped before the dump reads it.
+                    # Triggers, and routines and events where requested below, are still dumped with them.
+                    *(name for name in (*inspector.get_table_names(), *inspector.get_view_names()) if not TEST_TABLE_PATTERN.fullmatch(name)),
                 ]
                 if db_port:
                     cmd.extend(["-P", db_port])
@@ -191,6 +210,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                         "--no-owner",  # Skip ownership commands
                         "--no-privileges",  # Skip privilege commands
                         "--format=plain",  # Plain text format
+                        f"--exclude-table={POSTGRESQL_TEST_TABLE_PATTERN}",  # Skip the write probes
                         "--verbose",  # Verbose output for debugging
                     ]
                 )
@@ -212,14 +232,14 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.warning("Creating a database backup for Oracle is not supported")
                 return db
 
-        stderr = proc.stderr.decode() if hasattr(proc, "stderr") and proc.stderr else ""
-        if "Table 'db.test_" not in stderr and proc.returncode != 0:
+        if proc.returncode == 0:
+            break
+
+        # A write probe dropped between the table listing and its dump is the only transient failure worth retrying
+        stderr = proc.stderr.decode(errors="replace") if proc.stderr else ""
+        if attempt == DUMP_ATTEMPTS or not TEST_TABLE_PATTERN.search(stderr):
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
-
-    if (datetime.now().astimezone() - current_time).total_seconds() >= 10:
-        LOGGER.error("Failed to dump the database: Timeout reached")
-        sys_exit(1)
 
     with ZipFile(backup_file, "w", compression=ZIP_DEFLATED) as zipf:
         zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
