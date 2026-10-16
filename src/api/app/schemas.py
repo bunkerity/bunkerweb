@@ -90,6 +90,9 @@ class BanRequest(BaseModel):
 class UnbanRequest(BaseModel):
     ip: str
     service: Optional[str] = Field(None, description="Service name if service-specific unban")
+    remove_crowdsec_decisions: bool = Field(False, description="CrowdSec lease only: also delete the CrowdSec decisions behind the ban")
+    confirmed: bool = Field(False, description="CrowdSec lease only: the caller reviewed the decisions that will be deleted")
+    decision_keys: Optional[List[str]] = Field(None, description="CrowdSec lease only: keys of the reviewed decisions, as returned by the preview")
 
     @field_validator("ip")
     @classmethod

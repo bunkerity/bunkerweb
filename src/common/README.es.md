@@ -49,6 +49,25 @@ El ajuste `SECURITY_MODE` determina cómo BunkerWeb maneja las amenazas detectad
 
 Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos positivos sin interrumpir a los clientes legítimos. Una vez que estos problemas se resuelvan, puedes volver con confianza al modo `block` para una protección completa.
 
+### Descartar bloqueos durante el handshake TLS {#bans-tls-drop}
+
+Un cliente bloqueado normalmente completa el handshake TLS y luego recibe la página de bloqueo (403). `BANS_TLS_DROP_REASONS` lista los motivos de bloqueo para los que BunkerWeb cierra la conexión desde el mismo inicio del handshake, antes de cualquier trabajo de certificado o de intercambio de claves. El cliente ve un error TLS, no una página. Esto ahorra CPU cuando las direcciones bloqueadas se reconectan sin parar.
+
+El valor es una lista de motivos separados por espacios, entre `crowdsec`, `bad_behavior`, `manual`, `ui` y `api`. El valor por defecto está vacío, lo que mantiene la página 403 para todos los bloqueos. Sugerimos `crowdsec`.
+
+- Solo cuenta el motivo del bloqueo que se aplica. Para una IP que tiene un bloqueo `manual` y un bloqueo de CrowdSec, un bloqueo explícito se juzga antes que un bloqueo de CrowdSec: si solo se lista `crowdsec`, no se descarta nada y el cliente recibe la página 403.
+- El descarte se omite, y la página 403 se mantiene, cuando `USE_REAL_IP` es `yes` con una fuente basada en cabecera, o cuando `USE_PROXY_PROTOCOL` es `yes` sin que `USE_REAL_IP` esté en `yes` y `REAL_IP_HEADER` en `proxy_protocol`, porque en ese momento no se conoce la dirección del cliente. Con los tres definidos, el descarte usa la dirección del protocolo PROXY cuando el par que se conecta está en `REAL_IP_FROM`, y la dirección del par en caso contrario.
+- Las IP permitidas por una lista blanca de direcciones IP o de redes no se descartan. Los demás tipos de lista blanca (DNS inverso, ASN, user-agent) no se pueden evaluar en ese momento y se ignoran.
+- Con Redis habilitado, un handshake solo se descarta mientras la instancia tiene una copia local del bloqueo. Una instancia guarda en caché un bloqueo de Redis hasta 30 segundos después de una petición de la IP, por lo que la primera petición sigue recibiendo la página 403 y los handshakes se descartan durante los 30 segundos siguientes como máximo.
+- Con `SECURITY_MODE` en `detect`, el handshake continúa y se registra una advertencia.
+- Las conexiones HTTP/3 (QUIC) nunca se descartan. Reciben la página 403.
+
+Límites que conviene conocer:
+
+- El servidor por defecto lee únicamente el `BANS_TLS_DROP_REASONS` global y el bloqueo global.
+- Los servicios TCP y UDP (stream) no tienen un punto de enganche para el handshake TLS: el ajuste no se les aplica.
+- La advertencia se registra como máximo una vez por minuto para cada IP y cada proceso worker, no una vez por minuto para toda la flota.
+
 ### Ajustes de Configuración
 
 === "Ajustes Principales"
@@ -59,6 +78,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **Instancias de BunkerWeb:** Lista de instancias de BunkerWeb separadas por espacios.                                           |
     | `MULTISITE`           | `no`              | global    | No       | **Múltiples Sitios:** Establécelo en `yes` para permitir el alojamiento de múltiples sitios web con diferentes configuraciones. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Nivel de Seguridad:** Controla el nivel de aplicación de la seguridad. Opciones: `detect` o `block`.                          |
+    | `BANS_TLS_DROP_REASONS` |  | multisite | No | **Bloqueos descartados en TLS:** Motivos de bloqueo (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separados por espacios) cuyas IP bloqueadas se descartan en el handshake TLS en lugar de recibir la página 403. Se omite con IP real basada en cabecera y con el protocolo PROXY, salvo que la IP real use `proxy_protocol`. Nunca se aplica a HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | No       | **Tipo de Servidor:** Define si el servidor es de tipo `http` o `stream`.                                                       |
 
 === "Ajustes de la API"

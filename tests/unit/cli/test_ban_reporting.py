@@ -31,6 +31,7 @@ def _cli(*, db=None, apis=(), push_ok=True):
     """A CLI without __init__ -- __init__ opens a database, Redis and a terminal."""
     cli = object.__new__(CLI)
     cli._CLI__db = db
+    cli._CLI__redis = None
     cli._CLI__logger = Mock()
     cli._CLI__terminal_width = 80
     cli.apis = list(apis)
@@ -42,6 +43,7 @@ def _db(*, upsert_error=None, revoke_error=None):
     db = Mock()
     db.upsert_ban.return_value = upsert_error
     db.revoke_ban.return_value = revoke_error
+    db.get_instances.return_value = []  # no instance to ask for a CrowdSec ban: the unban is the explicit one
     return db
 
 

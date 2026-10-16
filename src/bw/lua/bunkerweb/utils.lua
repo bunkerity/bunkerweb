@@ -69,6 +69,38 @@ local INTERNAL_API_TIMEOUT = 1000
 -- Short TTL for locally cached HTTP bans so unbans propagate from Redis.
 local BAN_LOCAL_CACHE_TTL = 30
 
+-- A CrowdSec lease is an ordinary ban: reason "crowdsec" plus reason_data.lease. It is a short,
+-- renewed block, never a decision of the operator, so any explicit ban ranks before it.
+local function is_lease(reason, reason_data)
+	return reason == "crowdsec" and type(reason_data) == "table" and reason_data.lease == true
+end
+
+-- Precedence of the four places a ban can sit, lowest wins. Shared by is_banned and the
+-- ClientHello selector (is_banned_local), so the reason shown and the handshake verdict agree.
+local BAN_RANK = { explicit_service = 1, explicit_global = 2, lease_service = 3, lease_global = 4 }
+
+-- Compare-and-delete of one lease key. Twin of the Python replay in sync-bans (job side): keep
+-- the two scripts identical, a test pins them.
+-- Replies "removed", "absent" or "changed" (the key now holds another lease or an explicit ban).
+local REMOVE_LEASE_SCRIPT = [[
+	local raw = redis.call("GET", KEYS[1])
+	if not raw then
+		return "absent"
+	end
+	local ok, data = pcall(cjson.decode, raw)
+	if
+		ok
+		and type(data) == "table"
+		and data.reason == "crowdsec"
+		and type(data.reason_data) == "table"
+		and data.reason_data.lease_id == ARGV[1]
+	then
+		redis.call("DEL", KEYS[1])
+		return "removed"
+	end
+	return "changed"
+]]
+
 -- Stream reads its own bans from a snapshot, so a Redis fallback hit must not be written
 -- back under the bare bans_* name: those entries are the legacy shared-memory ones a live
 -- upgrade leaves behind. Keep the fallback cache in its own bounded namespace.
@@ -98,7 +130,9 @@ end
 local BADBEHAVIOR_LOCAL_COUNTER_PREFIX = "plugin_badbehavior_count_"
 
 local utils = {}
+
 utils.parse_duration = require("bunkerweb.duration").parse_duration
+utils.REMOVE_LEASE_SCRIPT = REMOVE_LEASE_SCRIPT
 
 local function ensure_ban_epoch()
 	if not ban_epoch_store then
@@ -873,12 +907,15 @@ utils.is_whitelisted = function(ctx)
 	return false
 end
 
-utils.is_ip_whitelisted = function(ip, server_name)
+-- opts.local_only is the ClientHello-safe mode: worker LRU and shared dict reads only, no ngx.var,
+-- and every error is returned instead of falling through to the next step.
+utils.is_ip_whitelisted = function(ip, server_name, opts)
+	local local_only = opts and opts.local_only
 	if not ip then
 		return nil, "ip is nil"
 	end
 	-- Allow caller to provide service name; otherwise use current server_name
-	if not server_name or server_name == "" then
+	if not local_only and (not server_name or server_name == "") then
 		server_name = var.server_name
 	end
 
@@ -910,7 +947,12 @@ utils.is_ip_whitelisted = function(ip, server_name)
 		end
 		-- Fast path: check whitelist cache for the service
 		local cache = require("bunkerweb.cachestore"):new(false)
-		local ok_cache, cached = cache:get("plugin_whitelist_" .. name .. "ip" .. ip)
+		local ok_cache, cached
+		if local_only then
+			ok_cache, cached = cache:get_local_nolock("plugin_whitelist_" .. name .. "ip" .. ip)
+		else
+			ok_cache, cached = cache:get("plugin_whitelist_" .. name .. "ip" .. ip)
+		end
 		if not ok_cache then
 			return nil, "can't check whitelist cache : " .. cached
 		end
@@ -945,7 +987,7 @@ utils.is_ip_whitelisted = function(ip, server_name)
 	-- First try the current service (except default placeholder "_")
 	if server_name and server_name ~= "" and server_name ~= "_" then
 		local ok, info = check_service(server_name)
-		if ok ~= nil then
+		if ok ~= nil or local_only then
 			return ok, info
 		end
 	end
@@ -956,6 +998,8 @@ utils.is_ip_whitelisted = function(ip, server_name)
 		local ok, info = check_service(srv)
 		if ok then
 			return true, info
+		elseif ok == nil and local_only then
+			return nil, info
 		end
 	end
 
@@ -1399,6 +1443,13 @@ utils.is_banned = function(ip, server_name)
 
 		if server_name then
 			local banned, reason, ttl, reason_data = check_snapshot("bans_service_" .. server_name .. "_ip_" .. ip)
+			if banned and is_lease(reason, reason_data) then
+				-- An explicit global ban outranks a service lease.
+				local g_banned, g_reason, g_ttl, g_reason_data = check_snapshot("bans_ip_" .. ip)
+				if g_banned and not is_lease(g_reason, g_reason_data) then
+					return g_banned, g_reason, g_ttl, g_reason_data
+				end
+			end
 			if banned or banned == nil then
 				return banned, reason, ttl, reason_data
 			end
@@ -1461,6 +1512,14 @@ utils.is_banned = function(ip, server_name)
 		end
 		local_misses = local_misses + 1
 	end
+	-- A lease on the service key does not hide an explicit global ban: one more shm read, paid only
+	-- when that first key holds a lease.
+	if banned and server_name and local_misses == 0 and is_lease(local_reason, local_reason_data) then
+		local g_banned, g_reason, g_ttl, g_reason_data = check_ban("bans_ip_" .. ip)
+		if g_banned and not is_lease(g_reason, g_reason_data) then
+			banned, local_reason, ttl, local_reason_data = g_banned, g_reason, g_ttl, g_reason_data
+		end
+	end
 	-- Redis is consulted only when no scope answered locally at all. Deliberately narrower
 	-- than dev's ordering, which asks Redis for the higher-priority scopes even after a
 	-- lower-priority local hit: here a cached ban stays authoritative through a Redis
@@ -1470,15 +1529,26 @@ utils.is_banned = function(ip, server_name)
 		return banned, local_reason, ttl, local_reason_data
 	end
 
+	local function decode_ban(raw)
+		local reason, reason_data = raw, nil
+		local ok, ban_data = pcall(decode, raw)
+		if ok and type(ban_data) == "table" then
+			reason = ban_data.reason or reason
+			reason_data = ban_data.reason_data
+		end
+		return reason, reason_data
+	end
+
 	local clusterstore = require "bunkerweb.clusterstore":new()
 	local connected, connect_err = clusterstore:connect(true)
 	if not connected then
 		return nil, "can't connect to redis: " .. connect_err, nil, nil
 	end
-	-- One EVAL for both scopes instead of one per key: the service ban wins because the
-	-- script walks KEYS in the order they were given, which is the same priority order the
-	-- local pass above used.
+	-- One EVAL for both scopes instead of one per key. It reports every key that holds a value as a
+	-- (value, ttl, key index) triple, in the order the keys were given; the ranking happens below, in
+	-- Lua, with the same is_lease helper as the local pass.
 	local redis_script = [[
+		local out = {}
 		for i, key in ipairs(KEYS) do
 			local ret_get = redis.pcall("GET", key)
 			if type(ret_get) == "table" and ret_get["err"] ~= nil then
@@ -1489,10 +1559,15 @@ utils.is_banned = function(ip, server_name)
 				return {err = ret_ttl["err"]}
 			end
 			if ret_get ~= false then
-				return {ret_get, ret_ttl, i}
+				out[#out + 1] = ret_get
+				out[#out + 1] = ret_ttl
+				out[#out + 1] = i
 			end
 		end
-		return {false, -2, 0}
+		if #out == 0 then
+			return {false, -2, 0}
+		end
+		return out
 	]]
 	local redis_keys = {}
 	for i, key in ipairs(keys) do
@@ -1505,6 +1580,17 @@ utils.is_banned = function(ip, server_name)
 	elseif data.err then
 		return nil, "redis script error: " .. data.err, nil, nil
 	elseif data[1] ~= null then
+		-- Explicit bans rank before leases, as in the local pass: keep the first hit (service before
+		-- global) unless it is a lease and a later hit is not.
+		local reason, reason_data = decode_ban(data[1])
+		local pick = 1
+		for n = 4, #data, 3 do
+			local next_reason, next_reason_data = decode_ban(data[n])
+			if is_lease(reason, reason_data) and not is_lease(next_reason, next_reason_data) then
+				pick, reason, reason_data = n, next_reason, next_reason_data
+			end
+		end
+		data = { data[pick], data[pick + 1], data[pick + 2] }
 		-- Cache locally with a short TTL so unbans propagate within BAN_LOCAL_CACHE_TTL seconds.
 		-- For permanent bans (redis_ttl <= 0), also use BAN_LOCAL_CACHE_TTL to re-validate periodically.
 		local redis_ttl = data[2]
@@ -1521,20 +1607,64 @@ utils.is_banned = function(ip, server_name)
 			logger:log(WARN, "ban script returned an unknown key index: " .. tostring(data[3]))
 		end
 
-		local reason = data[1]
-		local reason_data
-		local ok, ban_data = pcall(decode, data[1])
-		if ok and type(ban_data) == "table" then
-			reason = ban_data.reason or reason
-			reason_data = ban_data.reason_data
-		end
 		return true, reason, math_max(redis_ttl, 0), reason_data
 	end
 
 	return banned, local_reason, ttl, local_reason_data
 end
 
-utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data, not_after)
+-- Local-only twin of the local half of is_banned, for the TLS ClientHello: shared dict reads
+-- only (no Redis, no lock, no ngx.var), the same precedence. HTTP subsystem only.
+-- Returns banned, reason, rank. banned is nil on a dict error, reason then holds the error.
+utils.is_banned_local = function(ip, service)
+	local function read(key)
+		local value, err = datastore:get(key)
+		if value and err ~= "not found" then
+			local reason, reason_data = value, nil
+			local ok, ban_data = pcall(decode, value)
+			if ok and type(ban_data) == "table" then
+				reason = ban_data.reason or reason
+				reason_data = ban_data.reason_data
+			end
+			return true, reason, reason_data
+		elseif err ~= "not found" then
+			return nil, "datastore:get() error: " .. tostring(err)
+		end
+		return false
+	end
+
+	local global_banned, global_reason, global_data = read("bans_ip_" .. ip)
+	if global_banned == nil then
+		return nil, global_reason, nil
+	end
+	local global_rank
+	if global_banned then
+		global_rank = is_lease(global_reason, global_data) and BAN_RANK.lease_global or BAN_RANK.explicit_global
+	end
+	if service then
+		local banned, reason, reason_data = read("bans_service_" .. service .. "_ip_" .. ip)
+		if banned == nil then
+			return nil, reason, nil
+		end
+		if banned then
+			local rank = is_lease(reason, reason_data) and BAN_RANK.lease_service or BAN_RANK.explicit_service
+			if not global_rank or rank < global_rank then
+				return true, reason, rank
+			end
+		end
+	end
+	if global_banned then
+		return true, global_reason, global_rank
+	end
+	return false, "not banned", nil
+end
+
+utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data, not_after, opts)
+	-- add_ban(..., reason_data, { keep_existing = true }): a table in the deadline slot is the options.
+	if type(not_after) == "table" then
+		opts, not_after = not_after, nil
+	end
+	local keep_existing = type(opts) == "table" and opts.keep_existing == true
 	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
 		return false, "invalid IP address"
 	end
@@ -1567,6 +1697,13 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 		if not_after and wall_time() > not_after then
 			return false, "ban mutation deadline expired"
 		end
+		if keep_existing then
+			-- Cheap early exit that also keeps the ban epoch still; the NX add below is what is atomic.
+			local existing, existing_err = datastore:get(ban_key)
+			if existing and existing_err ~= "not found" then
+				return true, "exists"
+			end
+		end
 		local now = os.time()
 		local expires_at = (not ttl or ttl == 0) and 0 or wall_time() + ttl
 		local encoded_ok
@@ -1588,6 +1725,24 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 			return false, epoch_err
 		end
 		local effective_ttl = (not ttl or ttl == 0) and nil or ttl
+		if keep_existing then
+			-- SET NX in the shared dict: an explicit ban written meanwhile by a writer that does not take
+			-- this lock (the Redis cache fill of is_banned) still wins.
+			local ok, err
+			for _ = 1, 5 do
+				ok, err = datastore.dict:add(ban_key, ban_data, effective_ttl)
+				if ok or err ~= "no memory" then
+					break
+				end
+			end
+			if not ok then
+				if err == "exists" then
+					return true, "exists"
+				end
+				return false, "datastore.dict:add() error : " .. tostring(err)
+			end
+			return true, "success"
+		end
 		local ok, err = datastore:set_with_retries(ban_key, ban_data, effective_ttl)
 		if not ok then
 			return false, "datastore:set_with_retries() error : " .. tostring(err)
@@ -1596,6 +1751,9 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 	end)
 	if not local_ok then
 		return false, local_err
+	end
+	if local_err == "exists" then
+		return true, "exists"
 	end
 
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
@@ -1611,16 +1769,35 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_da
 	if not ok then
 		return false, "can't connect to redis server : " .. err
 	end
+	local redis_key = rediskeys.ban(ban_key, rediskeys.cluster_mode())
 	if not ttl or ttl == 0 then
-		ok, err = clusterstore:call("set", rediskeys.ban(ban_key, rediskeys.cluster_mode()), ban_data)
+		if keep_existing then
+			ok, err = clusterstore:call("set", redis_key, ban_data, "NX")
+		else
+			ok, err = clusterstore:call("set", redis_key, ban_data)
+		end
+	elseif keep_existing then
+		ok, err = clusterstore:call("set", redis_key, ban_data, "NX", "EX", ttl)
 	else
-		ok, err = clusterstore:call("set", rediskeys.ban(ban_key, rediskeys.cluster_mode()), ban_data, "EX", ttl)
+		ok, err = clusterstore:call("set", redis_key, ban_data, "EX", ttl)
 	end
 	if not ok then
 		clusterstore:close()
 		return false, "redis SET failed : " .. tostring(err)
 	end
 	clusterstore:close()
+	if keep_existing and ok == null then
+		-- Redis already holds a ban for this key (another instance's, or an explicit one): it stands.
+		-- Take back the copy just written here, unless something replaced it meanwhile.
+		with_ban_snapshot_lock(function()
+			local current = datastore:get(ban_key)
+			if current == ban_data and advance_ban_epoch() then
+				datastore:delete(ban_key)
+			end
+			return true
+		end)
+		return true, "exists"
+	end
 	return true, "success"
 end
 
@@ -1790,6 +1967,102 @@ utils.remove_ban = function(ip, service, ban_scope, not_after)
 		end
 	end
 	return true, "success"
+end
+
+-- Removes one CrowdSec lease, and only while the key still holds that lease: reason "crowdsec" and
+-- reason_data.lease_id equal to lease_id. It reads and deletes ONE key (bans_ip_<ip> for a global lease,
+-- bans_service_<svc>_ip_<ip> for a service one), never the other scope, so a manual service ban on the
+-- same IP survives a global lease removal -- remove_ban would take it along.
+-- Returns "removed", "absent" or "changed" (the key now holds a newer lease or an explicit ban), or nil
+-- and an error. Redis goes first, in one compare-and-delete EVAL (also valid in cluster mode: a single
+-- key): deleting the shared copy before the local one means a request landing in between cannot cache
+-- it back. The shared dict check runs under the ban snapshot lock like every ban mutation.
+-- HTTP only: the stream VM has no lease keys to read and no reply channel for the three outcomes.
+utils.remove_lease = function(ip, ban_scope, service, lease_id, not_after)
+	if subsystem ~= "http" then
+		return nil, "remove_lease is only available in the HTTP subsystem"
+	end
+	if not ip or (not utils.is_ipv4(ip) and not utils.is_ipv6(ip)) then
+		return nil, "invalid IP address"
+	end
+	if type(lease_id) ~= "string" or #lease_id > 64 or not lease_id:match("^[%w_-]+$") then
+		return nil, "invalid lease_id"
+	end
+	ban_scope = ban_scope == "service" and "service" or "global"
+	if ban_scope == "service" and (type(service) ~= "string" or service == "") then
+		return nil, "a service lease needs a service"
+	end
+	if not_after and wall_time() > not_after then
+		return nil, "unban mutation deadline expired"
+	end
+	local ban_key = ban_scope == "service" and ("bans_service_" .. service .. "_ip_" .. ip) or ("bans_ip_" .. ip)
+
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		return nil, "can't get USE_REDIS variable : " .. tostring(err)
+	end
+	local redis_status, redis_err
+	if use_redis == "yes" then
+		local clusterstore = require "bunkerweb.clusterstore":new()
+		local connected, connect_err = clusterstore:connect()
+		if not connected then
+			redis_err = "can't connect to redis for lease removal : " .. tostring(connect_err)
+		else
+			local reply, call_err = clusterstore:call(
+				"eval",
+				REMOVE_LEASE_SCRIPT,
+				1,
+				rediskeys.ban(ban_key, rediskeys.cluster_mode()),
+				lease_id
+			)
+			clusterstore:close()
+			if reply == "removed" or reply == "absent" or reply == "changed" then
+				redis_status = reply
+			else
+				redis_err = "redis EVAL failed : " .. tostring(call_err or reply)
+			end
+		end
+	end
+
+	local shm_status, shm_err = with_ban_snapshot_lock(function()
+		if not_after and wall_time() > not_after then
+			return false, "unban mutation deadline expired"
+		end
+		local value, get_err = datastore:get(ban_key)
+		if value and get_err ~= "not found" then
+			local ok, data = pcall(decode, value)
+			if
+				ok
+				and type(data) == "table"
+				and data.reason == "crowdsec"
+				and type(data.reason_data) == "table"
+				and data.reason_data.lease_id == lease_id
+			then
+				local epoch, epoch_err = advance_ban_epoch()
+				if not epoch then
+					return false, epoch_err
+				end
+				datastore:delete(ban_key)
+				return "removed"
+			end
+			return "changed"
+		elseif get_err ~= "not found" then
+			return false, "datastore:get() error : " .. tostring(get_err)
+		end
+		return "absent"
+	end)
+	if not shm_status then
+		return nil, shm_err
+	end
+	if redis_err then
+		return nil, redis_err
+	end
+	if shm_status == "changed" or redis_status == "changed" then
+		return "changed"
+	elseif shm_status == "removed" or redis_status == "removed" then
+		return "removed"
+	end
+	return "absent"
 end
 
 utils.new_cachestore = function(ctx, pool)

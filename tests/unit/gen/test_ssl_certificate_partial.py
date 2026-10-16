@@ -50,6 +50,11 @@ DEFAULTS = {
     "HTTP3": "no",
     "HTTP3_ALT_SVC_PORT": "443",
     "USE_PROXY_PROTOCOL": "no",
+    # The TLS drop hook of the client hello block (lane X1C) reads these.
+    "SERVER_NAME": "app1.example.com",
+    "USE_REAL_IP": "no",
+    "REAL_IP_HEADER": "X-Forwarded-For",
+    "REAL_IP_FROM": "",
     "USE_IPV6": "no",
     "MULTISITE": "yes",
     "DISABLE_DEFAULT_SERVER": "no",

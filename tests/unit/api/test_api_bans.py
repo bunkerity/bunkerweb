@@ -32,7 +32,9 @@ class _Response:
         self.content = content
 
 
-DB = SimpleNamespace(get_bans=lambda **_kwargs: [])
+# No instance is configured, so the lease lookup of an unban finds nothing and the explicit path runs.
+DB = SimpleNamespace(get_bans=lambda **_kwargs: [], get_instances=lambda **_kwargs: [], get_config=lambda **_kwargs: {})
+REQUEST = SimpleNamespace(state=SimpleNamespace(auth_admin=True))
 
 
 def _load_router():
@@ -43,21 +45,24 @@ def _load_router():
         "bw_bans.routers": ModuleType("bw_bans.routers"),
         "bw_bans.auth": ModuleType("bw_bans.auth"),
         "bw_bans.auth.guard": ModuleType("bw_bans.auth.guard"),
+        "bw_bans.auth.biscuit": ModuleType("bw_bans.auth.biscuit"),
         "bw_bans.deps": ModuleType("bw_bans.deps"),
         "bw_bans.schemas": ModuleType("bw_bans.schemas"),
         "bw_bans.utils": ModuleType("bw_bans.utils"),
     }
     names["fastapi"].APIRouter = _Router
     names["fastapi"].Depends = lambda dependency: dependency
+    names["fastapi"].Request = object
     names["fastapi.responses"].JSONResponse = _Response
     names["bw_bans"].__path__ = []
     names["bw_bans.routers"].__path__ = []
     names["bw_bans.auth"].__path__ = []
     names["bw_bans.auth.guard"].guard = object()
+    names["bw_bans.auth.biscuit"].authorize_resource = lambda *_args: None
     names["bw_bans.deps"].get_instances_api_caller = object()
     names["bw_bans.schemas"].BanRequest = object()
     names["bw_bans.schemas"].UnbanRequest = object()
-    names["bw_bans.utils"].get_db = lambda: DB
+    names["bw_bans.utils"].get_db = lambda **_kwargs: DB
     names["bw_bans.utils"].LOGGER = Mock()
     with patch.dict(sys.modules, names):
         path = ROOT / "src" / "api" / "app" / "routers" / "bans.py"
@@ -124,7 +129,7 @@ def test_instance_view_reports_502_when_an_instance_fails():
 
 
 def _payload(**over):
-    return SimpleNamespace(model_dump=lambda: {"ip": "1.2.3.4", "exp": 3600, "reason": "api", "service": None} | over)
+    return SimpleNamespace(model_dump=lambda **_kwargs: {"ip": "1.2.3.4", "exp": 3600, "reason": "api", "service": None} | over)
 
 
 def _caller(ok=True):
@@ -171,7 +176,7 @@ def test_unban_is_refused_when_the_revoke_cannot_be_persisted():
     DB.revoke_ban = Mock(return_value="database is read-only")
     caller = _caller()
 
-    response = ROUTER.unban([_payload()], caller)
+    response = ROUTER.unban([_payload()], REQUEST, caller)
 
     assert response.status_code == 502
     caller.send_to_apis.assert_not_called()
@@ -181,7 +186,7 @@ def test_unban_revokes_then_fans_out():
     DB.revoke_ban = Mock(return_value="")
     caller = _caller()
 
-    response = ROUTER.unban([_payload()], caller)
+    response = ROUTER.unban([_payload()], REQUEST, caller)
 
     assert response.status_code == 200
     assert DB.revoke_ban.call_args.kwargs["ban_scope"] == "global"

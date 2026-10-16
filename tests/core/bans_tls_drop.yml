@@ -1,0 +1,74 @@
+# BANS_TLS_DROP_REASONS: a banned client whose ban reason is listed gets its TLS handshake reset in
+# ssl_client_hello_by_lua instead of the 403 page. Every case is a script because the outcome is the
+# handshake itself (a reset is not an HTTP status, so no `status` action can assert it) and because
+# each case needs the client IP to be banned and unbanned between two probes. The asserting code is
+# `tests/core/bans_tls_drop/test.sh`; the PROXY protocol cases use `probe.py` next to it, which
+# sends the header by hand: curl cannot pick the source address it announces.
+#
+# One action per configuration. The framework applies a configuration by restarting the stack
+# before the NEXT action, so each case below leaves `restart_stack` at its default `true` and names
+# the setting it needs on itself.
+#
+# Docker only: the scripts ban through `bwcli` in the scheduler container, read the instance view on
+# 127.0.0.1:8888 and tell the address BunkerWeb sees from the instance's own /proc/net/tcp.
+integrations:
+  - "Docker"
+
+config:
+  GENERATE_SELF_SIGNED_SSL: "yes"
+  # Redis off on purpose: a ban that only Redis holds never drops a handshake (the instance has no
+  # local copy until a request from the IP reaches it), and this spec asserts the local-copy path.
+  USE_REDIS: "no"
+  # Nothing but the manual ban may act on the runner's address: a bad behavior ban on the 403 pages
+  # the cases provoke would add a second reason to the same identity.
+  USE_BAD_BEHAVIOR: "no"
+  USE_LIMIT_REQ: "no"
+  USE_LIMIT_CONN: "no"
+  USE_MODSECURITY: "no"
+
+# `bwcli` runs in the scheduler, but the script reads the instance view over HTTP Basic.
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+
+actions:
+  setting_empty_changes_nothing:
+    type: script
+    script: ["./tests/core/bans_tls_drop/test.sh", "docker", "off"]
+    result: "bans_tls_drop off: all checks passed"
+
+  manual_ban_resets_the_handshake_until_it_is_lifted:
+    type: script
+    script: ["./tests/core/bans_tls_drop/test.sh", "docker", "drop"]
+    result: "bans_tls_drop drop: all checks passed"
+    config:
+      BANS_TLS_DROP_REASONS: "manual"
+
+  detect_mode_logs_the_drop_and_serves:
+    type: script
+    script: ["./tests/core/bans_tls_drop/test.sh", "docker", "detect"]
+    result: "bans_tls_drop detect: all checks passed"
+    config:
+      BANS_TLS_DROP_REASONS: "manual"
+      SECURITY_MODE: "detect"
+
+  proxy_protocol_judges_the_source_of_a_trusted_peer:
+    type: script
+    script: ["./tests/core/bans_tls_drop/test.sh", "docker", "proxy-trusted"]
+    result: "bans_tls_drop proxy-trusted: all checks passed"
+    config: &proxy_protocol_config
+      BANS_TLS_DROP_REASONS: "manual"
+      USE_PROXY_PROTOCOL: "yes"
+      USE_REAL_IP: "yes"
+      REAL_IP_HEADER: "proxy_protocol"
+      # The Docker gateway the runner connects from is in one of these.
+      REAL_IP_FROM: "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+
+  proxy_protocol_ignores_the_claim_of_an_untrusted_peer:
+    type: script
+    script: ["./tests/core/bans_tls_drop/test.sh", "docker", "proxy-untrusted"]
+    result: "bans_tls_drop proxy-untrusted: all checks passed"
+    config:
+      <<: *proxy_protocol_config
+      # A network the runner is not in: the header is still parsed, never believed.
+      REAL_IP_FROM: "203.0.113.0/24"

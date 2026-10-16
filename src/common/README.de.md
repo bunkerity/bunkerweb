@@ -49,6 +49,25 @@ Die Einstellung `SECURITY_MODE` bestimmt, wie BunkerWeb erkannte Bedrohungen beh
 
 Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Positive zu identifizieren und zu beheben, ohne legitime Clients zu stören. Sobald diese Probleme behoben sind, können Sie für vollen Schutz getrost in den `block`-Modus zurückwechseln.
 
+### Gesperrte Clients beim TLS-Handshake abweisen {#bans-tls-drop}
+
+Ein gesperrter Client schließt den TLS-Handshake normalerweise ab und erhält dann die Sperrseite (403). `BANS_TLS_DROP_REASONS` listet die Sperrgründe auf, für die BunkerWeb stattdessen gleich zu Beginn des Handshakes die Verbindung schließt, noch vor jeder Zertifikats- oder Schlüsselaustauscharbeit. Der Client sieht einen TLS-Fehler, keine Seite. Das spart CPU, wenn gesperrte Adressen sich ständig neu verbinden.
+
+Der Wert ist eine Liste von Gründen, durch Leerzeichen getrennt, aus `crowdsec`, `bad_behavior`, `manual`, `ui` und `api`. Der Standardwert ist leer, was für jede Sperre die 403-Seite beibehält. Wir empfehlen `crowdsec`.
+
+- Es zählt nur der Grund der Sperre, die gilt. Für eine IP mit einer `manual`-Sperre und einer CrowdSec-Sperre wird eine explizite Sperre vor einer CrowdSec-Sperre beurteilt; wenn nur `crowdsec` gelistet ist, wird also nichts abgewiesen, und der Client erhält die 403-Seite.
+- Das Abweisen entfällt, und die 403-Seite bleibt, wenn `USE_REAL_IP` auf `yes` steht mit einer headerbasierten Quelle, oder wenn `USE_PROXY_PROTOCOL` auf `yes` steht, ohne dass `USE_REAL_IP` auf `yes` und `REAL_IP_HEADER` auf `proxy_protocol` stehen, weil die Client-Adresse zu diesem Zeitpunkt nicht bekannt ist. Sind alle drei gesetzt, verwendet das Abweisen die PROXY-Protokoll-Adresse, wenn der verbindende Peer in `REAL_IP_FROM` steht, und sonst die Adresse des Peers.
+- IPs, die durch eine Whitelist aus IP-Adressen oder Netzwerken erlaubt sind, werden nicht abgewiesen. Die anderen Whitelist-Typen (Reverse-DNS, ASN, User-Agent) lassen sich zu diesem Zeitpunkt nicht auswerten und werden ignoriert.
+- Mit aktiviertem Redis wird ein Handshake nur abgewiesen, solange die Instanz eine lokale Kopie der Sperre hält. Eine Instanz hält eine Redis-Sperre bis zu 30 Sekunden nach einer Anfrage der IP im Cache, sodass die erste Anfrage noch die 403-Seite erhält und die Handshakes danach höchstens 30 Sekunden lang abgewiesen werden.
+- Steht `SECURITY_MODE` auf `detect`, läuft der Handshake weiter und eine Warnung wird protokolliert.
+- HTTP/3-Verbindungen (QUIC) werden nie abgewiesen. Sie erhalten die 403-Seite.
+
+Zu beachtende Grenzen:
+
+- Der Standardserver liest nur das globale `BANS_TLS_DROP_REASONS` und die globale Sperre.
+- TCP- und UDP-Dienste (Stream) haben keinen Hook für den TLS-Handshake: Die Einstellung gilt für sie nicht.
+- Die Warnung wird höchstens einmal pro Minute für jede IP und jeden Worker-Prozess protokolliert, nicht einmal pro Minute für die gesamte Flotte.
+
 ### Konfigurationseinstellungen
 
 === "Kerneinstellungen"
@@ -59,6 +78,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Nein     | **BunkerWeb-Instanzen:** Liste der BunkerWeb-Instanzen, durch Leerzeichen getrennt.                                           |
     | `MULTISITE`           | `no`              | global    | Nein     | **Mehrere Websites:** Auf `yes` setzen, um das Hosten mehrerer Websites mit unterschiedlichen Konfigurationen zu ermöglichen. |
     | `SECURITY_MODE`       | `block`           | multisite | Nein     | **Sicherheitsstufe:** Steuert die Stufe der Sicherheitsdurchsetzung. Optionen: `detect` oder `block`.                         |
+    | `BANS_TLS_DROP_REASONS` |  | multisite | Nein | **Sperren beim TLS-Handshake verwerfen:** Sperrgründe (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, durch Leerzeichen getrennt), deren gesperrte IPs beim TLS-Handshake verworfen werden, statt die 403-Seite zu erhalten. Wird bei headerbasierter Real-IP übersprungen und beim PROXY-Protokoll, außer die Real-IP verwendet `proxy_protocol`. Wird nie auf HTTP/3 angewendet. |
     | `SERVER_TYPE`         | `http`            | multisite | Nein     | **Servertyp:** Definiert, ob der Server vom Typ `http` oder `stream` ist.                                                     |
 
 === "API-Einstellungen"

@@ -433,6 +433,409 @@ actions:
     delay: 10
     retries: 3
 
+  # --- CrowdSec bans as short BunkerWeb leases (CROWDSEC_BAN_REFRESH) -------------------------
+  # Docker only, like the deferral arm: the script drives the API on 127.0.0.1:8888 and `cscli` in
+  # the `crowdsec` container, and the Linux and Autoconf arms of this file publish neither.
+  #
+  # One script, because the property is a sequence: a deny writes a lease, the lease keeps denying
+  # after CrowdSec forgot the decision, and it lapses by itself. `restart_stack` stays at its
+  # default `true` on the action above, which is what applies the setting below before this
+  # script runs.
+  crowdsec_ban_becomes_a_short_lease_that_outlives_the_decision:
+    integrations: ["Docker"]
+    config:
+      CROWDSEC_BAN_REFRESH: "30s"
+    type: script
+    script:
+      - "python3"
+      - "-c"
+      - |
+        import base64
+        import json
+        import sys
+        import time
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+        from subprocess import run
+
+        REFRESH = 30
+        AUTH = "Basic " + base64.b64encode(b"admin:P@ssw0rd").decode()
+        PATHS = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+        started = time.monotonic()
+
+        def say(message):
+            print(f"[{time.monotonic() - started:6.1f}s] {message}", flush=True)
+
+        def fail(message):
+            say(f"FAILED: {message}")
+            sys.exit(1)
+
+        def cscli(*args, check=True):
+            return run(["docker", "exec", "crowdsec", "cscli", *args], capture_output=True, text=True, check=check).stdout
+
+        def decisions():
+            alerts = json.loads(cscli("decisions", "list", "-o", "json") or "null") or []
+            return [d for alert in alerts for d in (alert.get("decisions") or [])]
+
+        def api(path):
+            connection = HTTPConnection("127.0.0.1", 8888, timeout=30)
+            try:
+                connection.request("GET", path, headers={"Authorization": AUTH})
+                response = connection.getresponse()
+                body = response.read()
+                return response.status, json.loads(body or "null")
+            finally:
+                connection.close()
+
+        def get(path="/"):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                response.read()
+                return response.status
+            finally:
+                connection.close()
+
+        def rows(node):
+            if isinstance(node, dict):
+                if "ip" in node and "reason" in node:
+                    yield node
+                for value in node.values():
+                    yield from rows(value)
+            elif isinstance(node, list):
+                for value in node:
+                    yield from rows(value)
+
+        def leases(path, ip):
+            status, body = api(path)
+            if status != 200:
+                return None
+            return [r for r in rows(body) if r.get("ip") == ip and r.get("reason") == "crowdsec" and (r.get("reason_data") or {}).get("lease") is True]
+
+        # A clean slate: an earlier action left a decision for this address. The cache that holds
+        # it for the bouncer lives one second (CROWDSEC_CACHE_EXPIRATION), so it is gone by the time
+        # the probe below runs.
+        cscli("decisions", "delete", "--all", check=False)
+        time.sleep(3)
+
+        def probe(path):
+            assert get(path) in (403, 404), path
+
+        with ThreadPoolExecutor(max_workers=len(PATHS)) as executor:
+            list(executor.map(probe, PATHS))
+        say("six-path provocation sent")
+
+        # The decision lands asynchronously after the third event; the first deny it causes is the
+        # one that writes the lease.
+        for _ in range(40):
+            if get() == 403:
+                break
+            time.sleep(3)
+        else:
+            fail("CrowdSec never denied the request")
+        say("CrowdSec denied the request")
+
+        addresses = {d["value"] for d in decisions() if d.get("scope") == "Ip"}
+        if len(addresses) != 1:
+            fail(f"expected one banned address, got {addresses}")
+        ip = addresses.pop()
+
+        # Instance view first, and until the lease is fresh: the request below must be denied by the
+        # lease alone, so it needs most of its 30 s left once the decision is deleted. A request
+        # that lands after a lease lapsed asks CrowdSec again and renews it, which is also why
+        # polling here keeps the lease alive for `sync-bans` to learn.
+        fresh = None
+        for _ in range(40):
+            get()
+            found = leases("/bans/instances", ip)
+            if found:
+                fresh = found[0]
+                if fresh["exp"] >= REFRESH // 2:
+                    break
+            time.sleep(1)
+        else:
+            fail(f"no fresh crowdsec lease for {ip} on the instance (last row: {fresh})")
+        say(f"instance holds the lease: exp={fresh['exp']} scope={fresh.get('ban_scope')} service={fresh.get('service')}")
+        if not 0 < fresh["exp"] <= REFRESH:
+            fail(f"lease TTL {fresh['exp']} is not within 1..{REFRESH}")
+        if fresh.get("permanent"):
+            fail("a lease must never be permanent")
+        if get() != 403:
+            fail("the request was not denied while the lease lives")
+
+        # The database view: `sync-bans` learns the instance's bans once a minute. The lease lives
+        # 30 s, so the request in the loop is what keeps one alive for the job to see.
+        row = None
+        for _ in range(60):
+            get()
+            status, body = api("/bans")
+            if status == 200:
+                found = [r for r in (body.get("data") or []) if r.get("ip") == ip and r.get("reason") == "crowdsec" and r.get("kind") == "crowdsec_lease"]
+                if found:
+                    row = found[0]
+                    break
+            time.sleep(3)
+        else:
+            fail(f"GET /bans never listed the lease of {ip}")
+        say(f"GET /bans lists the lease: exp={row['exp']} kind={row['kind']} reason_data.lease={row['reason_data'].get('lease')}")
+        if row["reason_data"].get("lease") is not True:
+            fail(f"reason_data.lease is not true: {row['reason_data']}")
+        if not 0 < row["exp"] <= REFRESH:
+            fail(f"database lease TTL {row['exp']} is not within 1..{REFRESH}")
+        if row.get("permanent"):
+            fail("the database row of a lease must not be permanent")
+
+        # Same lease generation as the instance holds? Take a fresh one so the deny below is
+        # attributable to the lease and not to a lease about to lapse.
+        for _ in range(40):
+            get()
+            found = leases("/bans/instances", ip)
+            if found and found[0]["exp"] >= REFRESH // 2:
+                break
+            time.sleep(1)
+        else:
+            fail("could not get a fresh lease before deleting the decision")
+
+        cscli("decisions", "delete", "--ip", ip)
+        if decisions():
+            fail(f"decisions remain after the delete: {decisions()}")
+        deleted_at = time.monotonic()
+        say(f"decision of {ip} deleted from CrowdSec")
+
+        # CrowdSec no longer knows the IP, the lease does: still denied.
+        if get() != 403:
+            fail("the lease did not keep denying after the decision was deleted")
+        say("still denied by the lease alone")
+
+        # And then it lapses by itself: the lease TTL plus one `sync-bans` pass is the whole budget.
+        budget = REFRESH + 60 + 15
+        while time.monotonic() - deleted_at < budget:
+            if get() == 200:
+                break
+            time.sleep(2)
+        else:
+            fail(f"{ip} still denied {budget}s after the decision was deleted")
+        elapsed = time.monotonic() - deleted_at
+        say(f"served again {elapsed:.1f}s after the decision was deleted")
+        if elapsed > REFRESH + 5:
+            say(f"note: {elapsed:.1f}s is more than one lease ({REFRESH}s); a sync-bans pass took part")
+
+        # Nothing may have re-created the ban: the lease row expired with its TTL and `sync-bans`
+        # does not project leases.
+        time.sleep(5)
+        if get() != 200:
+            fail("the IP was denied again after the lease lapsed")
+        if leases("/bans/instances", ip):
+            fail("the instance still lists a lease after it lapsed")
+        print("crowdsec lease: all checks passed")
+    result: "crowdsec lease: all checks passed"
+    # Not `delay`/`retries`: the script retries on its own clocks, and a re-run would start from
+    # the leftover state of the first.
+
+  # Unbanning a lease has to delete the CrowdSec decision behind it, or the ban is back on the next
+  # request. The API refuses the plain unban with a 409 and a preview, applies it once the caller
+  # sends the decisions back, and `bwcli unban` does the same behind `-confirm`. The setting is
+  # left as the previous action applied it: the restart before this one is the previous action's
+  # `restart_stack`, and the config below is identical, so nothing changes.
+  unbanning_a_lease_removes_the_crowdsec_decision:
+    integrations: ["Docker"]
+    config:
+      CROWDSEC_BAN_REFRESH: "30s"
+      # Deleting a decision needs a CrowdSec machine account; the bouncer key can only read. The
+      # account is registered by the script below, the credentials are what the API logs in with.
+      CROWDSEC_MANAGEMENT_LOGIN: "bw-unban-spec"
+      CROWDSEC_MANAGEMENT_PASSWORD: "unban-Spec-Passw0rd-1"
+    type: script
+    script:
+      - "python3"
+      - "-c"
+      - |
+        import base64
+        import json
+        import sys
+        import time
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+        from subprocess import run
+
+        REFRESH = 30
+        AUTH = "Basic " + base64.b64encode(b"admin:P@ssw0rd").decode()
+        PATHS = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+        started = time.monotonic()
+
+        def say(message):
+            print(f"[{time.monotonic() - started:6.1f}s] {message}", flush=True)
+
+        def fail(message):
+            say(f"FAILED: {message}")
+            sys.exit(1)
+
+        def docker_exec(container, *args, check=True):
+            return run(["docker", "exec", container, *args], capture_output=True, text=True, check=check)
+
+        def cscli(*args, check=True):
+            return docker_exec("crowdsec", "cscli", *args, check=check).stdout
+
+        def decisions():
+            alerts = json.loads(cscli("decisions", "list", "-o", "json") or "null") or []
+            return [d for alert in alerts for d in (alert.get("decisions") or [])]
+
+        def api(method, path, body=None):
+            connection = HTTPConnection("127.0.0.1", 8888, timeout=60)
+            headers = {"Authorization": AUTH}
+            payload = None
+            if body is not None:
+                payload = json.dumps(body)
+                headers["Content-Type"] = "application/json"
+            try:
+                connection.request(method, path, body=payload, headers=headers)
+                response = connection.getresponse()
+                raw = response.read()
+                try:
+                    return response.status, json.loads(raw or "null")
+                except ValueError:
+                    return response.status, raw.decode("utf-8", "replace")
+            finally:
+                connection.close()
+
+        def get(path="/"):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                response.read()
+                return response.status
+            finally:
+                connection.close()
+
+        def rows(node):
+            if isinstance(node, dict):
+                if "ip" in node and "reason" in node:
+                    yield node
+                for value in node.values():
+                    yield from rows(value)
+            elif isinstance(node, list):
+                for value in node:
+                    yield from rows(value)
+
+        def leases(path, ip):
+            status, body = api("GET", path)
+            if status != 200:
+                return None
+            return [r for r in rows(body) if r.get("ip") == ip and r.get("reason") == "crowdsec" and (r.get("reason_data") or {}).get("lease") is True]
+
+        def revoked_rows(ip):
+            query = f"select count(*) from bw_bans where ip='{ip}' and reason='crowdsec' and revoked_at is not null"
+            return int(docker_exec("bw-api", "sqlite3", "-readonly", "/var/lib/bunkerweb/db.sqlite3", query).stdout.strip() or 0)
+
+        def earn_lease(label):
+            """A live decision, a fresh lease on the instance, and that lease learned by the database."""
+            cscli("decisions", "delete", "--all", check=False)
+            time.sleep(3)
+
+            def probe(path):
+                assert get(path) in (403, 404), path
+
+            # Resent until the ban lands: the scenario blackholes an address for a minute after an
+            # overflow, so the provocation of a second case right behind the first is swallowed.
+            for _ in range(40):
+                with ThreadPoolExecutor(max_workers=len(PATHS)) as executor:
+                    list(executor.map(probe, PATHS))
+                if get() == 403:
+                    break
+                time.sleep(3)
+            else:
+                fail(f"{label}: CrowdSec never denied the request")
+            addresses = {d["value"] for d in decisions() if d.get("scope") == "Ip"}
+            if len(addresses) != 1:
+                fail(f"{label}: expected one banned address, got {addresses}")
+            ip = addresses.pop()
+            # The database must hold the lease the instance holds NOW, or the unban revokes a lease id
+            # the row does not carry yet and the row only lapses by itself. `sync-bans` learns once a
+            # minute and a lease lives 30 s, so the two meet only some of the time: keep asking.
+            deadline = time.monotonic() + 240
+            while time.monotonic() < deadline:
+                get()
+                found = leases("/bans/instances", ip)
+                status, body = api("GET", "/bans")
+                learned = [r for r in (body.get("data") or []) if r.get("ip") == ip and r.get("kind") == "crowdsec_lease"] if status == 200 else []
+                if found and learned and found[0]["exp"] >= 10 and learned[0]["reason_data"].get("lease_id") == found[0]["reason_data"].get("lease_id"):
+                    say(f"{label}: lease on {ip} learned (exp={found[0]['exp']}, scope={found[0].get('ban_scope')}, service={found[0].get('service')})")
+                    return ip, found[0]
+                if int(time.monotonic() - started) % 15 == 0:
+                    say(f"{label}: waiting; instance={[(r['exp'], (r.get('reason_data') or {}).get('lease_id')) for r in found or []]} database={[(r['exp'], r['reason_data'].get('lease_id')) for r in learned]}")
+                time.sleep(1)
+            fail(f"{label}: the database never held the instance's current lease for {ip}")
+
+        def identity(ip, lease):
+            body = {"ip": ip}
+            if lease.get("ban_scope") == "service":
+                body["service"] = lease.get("service")
+            return body
+
+        def assert_gone(label, ip):
+            if decisions():
+                fail(f"{label}: CrowdSec still has decisions: {decisions()}")
+            # The decision is gone and so is the lease: served right away, not after the lease lapses.
+            for _ in range(10):
+                if get() == 200:
+                    break
+                time.sleep(1)
+            else:
+                fail(f"{label}: {ip} is still denied after the unban")
+            if leases("/bans/instances", ip):
+                fail(f"{label}: an instance still lists the lease")
+            status, body = api("GET", "/bans")
+            if any(r.get("ip") == ip and r.get("kind") == "crowdsec_lease" for r in body.get("data") or []):
+                fail(f"{label}: GET /bans still lists the lease as active")
+            if revoked_rows(ip) < 1:
+                fail(f"{label}: the database row of the lease is not revoked")
+
+        cscli("machines", "add", "bw-unban-spec", "--password", "unban-Spec-Passw0rd-1", "--force", "-f", "-")
+        say("management machine registered")
+
+        # --- API -------------------------------------------------------------------------------
+        ip, lease = earn_lease("api")
+        status, body = api("POST", "/bans/unban", identity(ip, lease))
+        if status != 409:
+            fail(f"the plain unban answered {status}, expected 409: {body}")
+        preview = body.get("preview") or {}
+        listed = preview.get("decisions") or []
+        if not any(d.get("value") == ip and d.get("type") == "ban" for d in listed):
+            fail(f"the preview does not name the decision of {ip}: {preview}")
+        keys = [d["key"] for d in listed]
+        say(f"409 with a preview naming {len(listed)} decision(s)")
+        # Nothing changed behind the 409.
+        if not decisions() or get() != 403 or not leases("/bans/instances", ip):
+            fail("the 409 changed something")
+
+        status, body = api("POST", "/bans/unban", {**identity(ip, lease), "remove_crowdsec_decisions": True, "confirmed": True, "decision_keys": keys})
+        if status != 200:
+            fail(f"the confirmed unban answered {status}, expected 200: {body}")
+        say("confirmed unban answered 200")
+        assert_gone("api", ip)
+        say("api: served, decision deleted, lease revoked")
+
+        # --- bwcli -----------------------------------------------------------------------------
+        ip, lease = earn_lease("cli")
+        command = ["bwcli", "unban", ip]
+        if lease.get("ban_scope") == "service":
+            command += ["-service", lease.get("service")]
+        preview = docker_exec("bw-scheduler", *command, check=False)
+        if preview.returncode == 0:
+            fail(f"bwcli unban without -confirm exited 0: {preview.stdout} {preview.stderr}")
+        if not decisions() or get() != 403:
+            fail("bwcli unban without -confirm changed something")
+        say("bwcli unban without -confirm previewed and changed nothing")
+        applied = docker_exec("bw-scheduler", *command, "-confirm", check=False)
+        if applied.returncode != 0:
+            fail(f"bwcli unban -confirm failed: {applied.stdout} {applied.stderr}")
+        assert_gone("cli", ip)
+        say("cli: served, decision deleted, lease revoked")
+        print("crowdsec lease unban: all checks passed")
+    result: "crowdsec lease unban: all checks passed"
+
 config:
   USE_MODSECURITY: "no"
   USE_BAD_BEHAVIOR: "no"

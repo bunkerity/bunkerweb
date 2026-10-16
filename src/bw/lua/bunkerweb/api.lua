@@ -989,6 +989,23 @@ api.global.POST["^/unban$"] = function(self)
 		end
 	end
 
+	-- A CrowdSec lease is removed through its lease_id, one key and only while it is still that
+	-- lease: the generic unban below would also take the manual service bans of the IP.
+	if ip["lease_id"] ~= nil then
+		local lease_id = ip["lease_id"]
+		if type(lease_id) ~= "string" or lease_id == "" then
+			return self:response(HTTP_BAD_REQUEST, "error", "invalid lease_id")
+		end
+		local result, lease_err = utils.remove_lease(ip["ip"], ban_scope, service, lease_id, not_after)
+		if not result then
+			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "failed to remove lease: " .. tostring(lease_err))
+		end
+		-- result is removed, absent or changed: the caller decides what each means for its flow
+		local lease_status, lease_response = self:response(HTTP_OK, "success", "lease " .. result)
+		lease_response.result = result
+		return lease_status, lease_response
+	end
+
 	-- Use utils.remove_ban to remove the ban(s)
 	local ok, err = utils.remove_ban(ip["ip"], service, ban_scope, not_after)
 	if not ok then

@@ -49,6 +49,25 @@ The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. T
 
 Switching to `detect` mode can help you identify and resolve potential false positives without disrupting legitimate clients. Once these issues are addressed, you can confidently switch back to `block` mode for full protection.
 
+### Dropping Bans at the TLS Handshake {#bans-tls-drop}
+
+A banned client normally completes the TLS handshake and then receives the ban page (403). `BANS_TLS_DROP_REASONS` lists the ban reasons for which BunkerWeb closes the connection at the very start of the handshake instead, before any certificate or key exchange work. The client sees a TLS error, not a page. This saves CPU when banned addresses keep reconnecting.
+
+The value is a list of reasons separated by spaces, among `crowdsec`, `bad_behavior`, `manual`, `ui` and `api`. The default is empty, which keeps the 403 page for every ban. We suggest `crowdsec`.
+
+- Only the reason of the ban that applies counts. For an IP that has a `manual` ban and a CrowdSec ban, an explicit ban is judged before a CrowdSec ban, so listing only `crowdsec` drops nothing, and the client gets the 403 page.
+- The drop is skipped, and the 403 page stays, when `USE_REAL_IP` is `yes` with a header-based source, or when `USE_PROXY_PROTOCOL` is `yes` without `USE_REAL_IP` set to `yes` and `REAL_IP_HEADER` set to `proxy_protocol`, because the client address is not known at that point. With all three set, the drop uses the PROXY protocol address when the connecting peer is in `REAL_IP_FROM`, and the peer address otherwise.
+- IPs allowed by a whitelist of IP addresses or networks are not dropped. The other types of whitelist (reverse DNS, ASN, user agent) cannot be evaluated at that point and are ignored.
+- With Redis enabled, a handshake is dropped only while the instance holds a local copy of the ban. An instance caches a Redis ban for up to 30 seconds after a request from the IP, so the first request still gets the 403 page, and the handshakes are dropped for the next 30 seconds at most.
+- With `SECURITY_MODE` set to `detect`, the handshake continues and a warning is logged.
+- HTTP/3 (QUIC) connections are never dropped. They get the 403 page.
+
+Limits to know:
+
+- The default server reads the global `BANS_TLS_DROP_REASONS` and the global ban only.
+- TCP and UDP (stream) services have no TLS handshake hook: the setting does not apply to them.
+- The warning is logged at most once a minute for each IP and each worker process, not once a minute for the whole fleet.
+
 ### Configuration Settings
 
 === "Core Settings"
@@ -59,6 +78,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **BunkerWeb Instances:** List of BunkerWeb instances separated with spaces.                         |
     | `MULTISITE`           | `no`              | global    | No       | **Multiple Sites:** Set to `yes` to enable hosting multiple websites with different configurations. |
     | `SECURITY_MODE`       | `block`           | multisite | No       | **Security Level:** Controls the level of security enforcement. Options: `detect` or `block`.       |
+    | `BANS_TLS_DROP_REASONS` |  | multisite | No | **Bans Dropped at TLS:** Ban reasons (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, separated by spaces) whose banned IPs are dropped at the TLS handshake instead of getting the 403 page. Skipped behind header-based real IP, and behind PROXY protocol unless real IP uses `proxy_protocol`. Never applied to HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | No       | **Server Type:** Defines if the server is `http` or `stream` type.                                  |
 
 === "API Settings"
@@ -251,7 +271,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
     | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
     | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
-    | `KEEP_CONFIG_ON_RESTART` | `no`    | global    | No       | **Keep Config on Restart:** Keep the configuration on restart. Set to 'yes' to prevent config reset on restart. |
+    | `KEEP_CONFIG_ON_RESTART` | `yes`   | global    | No       | **Keep Config on Restart:** Keep the current configuration when the instance restarts, instead of falling back to the temporary startup configuration until the Scheduler sends a new one. The instance keeps enforcing while it waits. Set to `no` to regenerate the temporary configuration on every restart. |
     | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
 
 === "Nginx Settings"

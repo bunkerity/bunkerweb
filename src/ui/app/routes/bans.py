@@ -12,6 +12,9 @@ from html import escape, unescape
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 
+from common_utils import parse_duration_int  # type: ignore
+from db_methods.bans import KIND_BAN, KIND_LEASE, ban_kind  # type: ignore
+
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
 from app.i18n import translated
@@ -49,9 +52,62 @@ _BAN_COLUMNS = (
 )
 
 
-def _collect_all_bans():
+def _identity(ban):
+    """(ip, scope, service): the key a ban lives under. A global ban has no service."""
+    scope = ban.get("ban_scope") or "global"
+    return str(ban.get("ip", "")), scope, (ban.get("service") or "") if scope == "service" else ""
+
+
+def _merge_runtime_leases(bans_list):
+    """Add the CrowdSec leases the instances enforce and the database has not learned yet.
+
+    `sync-bans` learns once a minute, so a 30-second lease can live and expire before it is a row. The
+    runtime view (`GET /bans/instances`) is the only place such a lease exists. Only leases are added:
+    an explicit ban is the operator's decision and always starts in the database. A lease the database
+    already holds keeps its durable row. Returns the merged list and how many leases were added.
+    """
+    try:
+        view = API_CLIENT.get_instance_bans()
+    except (ApiClientError, ApiUnavailableError) as e:
+        LOGGER.debug(format_exc())
+        LOGGER.warning(f"Couldn't get the live bans from the instances: {e}")
+        return bans_list, 0
+
+    known = {_identity(ban) for ban in bans_list}
+    added = {}
+    for reply in (view or {}).values():
+        rows = reply.get("data") if isinstance(reply, dict) else None
+        for row in rows if isinstance(rows, list) else []:
+            if not isinstance(row, dict) or ban_kind(row) != KIND_LEASE or _identity(row) in known:
+                continue
+            key = _identity(row)
+            # Instances promote on their own: the same lease can be on several, keep the longest-lived
+            if key not in added or (row.get("exp") or 0) > (added[key].get("exp") or 0):
+                added[key] = {**row, "kind": KIND_LEASE}
+    return bans_list + list(added.values()), len(added)
+
+
+def _lease_refresh_enabled():
+    """Whether any service turns CrowdSec bans into leases (`CROWDSEC_BAN_REFRESH` above 0)."""
+    try:
+        config = BW_CONFIG.get_config(global_only=False, methods=False, full=True, filtered_settings=("CROWDSEC_BAN_REFRESH",))
+    except (ApiClientError, ApiUnavailableError, KeyError):
+        LOGGER.debug(format_exc())
+        return False
+    for key, value in config.items():
+        if key == "CROWDSEC_BAN_REFRESH" or key.endswith("_CROWDSEC_BAN_REFRESH"):
+            with suppress(ValueError, TypeError):
+                if parse_duration_int(value) > 0:
+                    return True
+    return False
+
+
+def _collect_all_bans(runtime_leases=False):
     """Every ban the operator has decided on, enriched with `remain`/`start_date`/`end_date` for
     display. Returns the raw (unfiltered) list.
+
+    `runtime_leases` also merges the CrowdSec leases only the instances know yet
+    (`_merge_runtime_leases`); it costs one call per instance, so it is asked for, never assumed.
 
     Read from the database through the API. It used to scan Redis and fan out to the instances,
     dedup the two, and hope one of them still had the ban: a restarted instance enumerates an empty
@@ -64,9 +120,13 @@ def _collect_all_bans():
         LOGGER.error(f"Couldn't get bans from the API: {e}")
         return []
 
+    if runtime_leases:
+        bans_list, _ = _merge_runtime_leases(bans_list)
+
     timestamp_now = time()
 
     for ban in bans_list:
+        ban["kind"] = ban.get("kind") or ban_kind(ban)
         exp = ban.pop("exp", 0)
         if exp == 0 or ban.get("permanent", False):
             ban["remain"] = "permanent"
@@ -74,7 +134,9 @@ def _collect_all_bans():
             ban["end_date"] = "permanent"
         else:
             remain = ("unknown", "unknown") if exp <= 0 else get_remain(exp)
-            ban["remain"] = remain[0]
+            # get_remain counts minutes upward: a ban under one minute left, which every 30-second
+            # CrowdSec lease is, came back as "" and the Time Left cell was empty
+            ban["remain"] = remain[0] or "less than a minute"
             ban["start_date"] = datetime.fromtimestamp(floor(ban["date"])).astimezone().isoformat()
             ban["end_date"] = datetime.fromtimestamp(floor(timestamp_now + exp)).astimezone().isoformat()
         # Preserve `exp` for end_date pane filters that still need it
@@ -346,7 +408,7 @@ def bans_timeseries():
 @cors_required
 def bans_fetch():
     try:
-        bans = _collect_all_bans()
+        bans = _collect_all_bans(runtime_leases=True) if request.form.get("runtime_leases") == "1" else _collect_all_bans()
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.error(f"Couldn't get bans from redis: {e}")
@@ -390,6 +452,7 @@ def bans_fetch():
             # badbehavior ban's reason_data is the whole per-IP increment list — shipping that on
             # every draw, for up to 1000 rows a page, would be payload nothing reads.
             "reason_data": (ban.get("reason_data") or {}) if str(ban.get("reason") or "").lower() in _SENTENCE_REASONS else {},
+            "kind": KIND_LEASE if ban.get("kind") == KIND_LEASE else KIND_BAN,
             "scope": escape(str(ban.get("ban_scope", "global"))),
             "service": escape(str(ban.get("service") or "_")),
             "end_date": "permanent" if ban.get("permanent", False) else escape(str(ban.get("end_date", "N/A"))),
@@ -578,7 +641,7 @@ def bans_fetch():
 def _bans_export_rows():
     """Collect, filter, and sort bans using the request's search/searchPanes/order
     parameters and return them as plain dict rows ready to be written to CSV/XLSX."""
-    bans = _collect_all_bans()
+    bans = _collect_all_bans(runtime_leases=True) if request.args.get("runtime_leases") == "1" else _collect_all_bans()
 
     search_value = request.args.get("search", "").lower()
     order_column = request.args.get("order_column", "date").strip().lower()
@@ -623,6 +686,7 @@ def _bans_export_rows():
                 "service": service,
                 "end_date": end_date,
                 "time_left": time_left,
+                "kind": KIND_LEASE if ban.get("kind") == KIND_LEASE else KIND_BAN,
             }
         )
     return rows
@@ -637,8 +701,9 @@ _BAN_EXPORT_HEADERS = (
     "Service",
     "End Date",
     "Time Left",
+    "Kind",
 )
-_BAN_EXPORT_FIELDS = ("date", "ip", "country", "reason", "scope", "service", "end_date", "time_left")
+_BAN_EXPORT_FIELDS = ("date", "ip", "country", "reason", "scope", "service", "end_date", "time_left", "kind")
 
 
 @bans.route("/bans/export/csv", methods=["GET"])
@@ -746,7 +811,14 @@ def _api_unban(ip: str, service, ban_scope: str) -> str:
         payload["service"] = service
     try:
         API_CLIENT.unban([payload])
-    except (ApiClientError, ApiUnavailableError) as e:
+    except ApiClientError as e:
+        if e.status_code == 409:
+            # The API answers a CrowdSec ban with its preview, which this form flow cannot show
+            return translated("bans.flash.unban_crowdsec_needs_review") or (
+                "this IP is blocked by a CrowdSec ban. Unban it from its row in the table, which shows the CrowdSec decisions that will be deleted."
+            )
+        return str(e)
+    except ApiUnavailableError as e:
         return str(e)
     return ""
 
@@ -910,6 +982,108 @@ def bans_unban():
             or f"Unbanning {len(unbans)} IP{'s' if len(unbans) > 1 else ''}",
         )
     )
+
+
+@bans.route("/bans/runtime_leases", methods=["POST"])
+@login_required
+@cors_required
+def bans_runtime_leases():
+    """Once the page is up: do the instances hold CrowdSec leases the table does not show yet?
+
+    A separate request so the page itself never waits for the instances. `enabled` tells the script to merge
+    the runtime view into every later draw; `count` is how many leases that would add right now.
+    """
+    if not _lease_refresh_enabled():
+        return jsonify({"status": "success", "enabled": False, "count": 0})
+    try:
+        stored = API_CLIENT.get_bans()
+    except (ApiClientError, ApiUnavailableError) as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Couldn't get bans from the API: {e}")
+        stored = []
+    _, count = _merge_runtime_leases(stored)
+    return jsonify({"status": "success", "enabled": True, "count": count})
+
+
+def _json(body, status):
+    response = jsonify(body)
+    response.status_code = status
+    return response
+
+
+def _json_error(message, status):
+    return _json({"status": "error", "message": message}, status)
+
+
+@bans.route("/bans/crowdsec_unban", methods=["POST"])
+@login_required
+@cors_required
+def bans_crowdsec_unban():
+    """Unban through the API and hand the answer to the browser as it is.
+
+    A CrowdSec ban cannot be removed in one step: the API answers 409 with the decisions it is about to
+    delete, and the same request is sent again with `remove_crowdsec_decisions`, `confirmed` and
+    `decision_keys` once the operator reviewed them. The body of 409, 403 and 502 is the point, so the
+    status is kept. Explicit bans keep the form route (`/bans/unban`).
+    """
+    if API_CLIENT.readonly:
+        return _json_error(translated("flash.database_read_only_mode") or "Database is in read-only mode", 403)
+    if is_readonly_request(API_CLIENT.readonly):
+        return _json_error(translated("flash.do_not_have_write_permission") or "You do not have the write permission", 403)
+
+    body = request.get_json(silent=True)
+    items = body.get("unbans") if isinstance(body, dict) else None
+    if not isinstance(items, list) or not items:
+        return _json_error(translated("bans.flash.no_bans") or "No bans.", 400)
+
+    payloads = []
+    for item in items:
+        if not isinstance(item, dict) or "ip" not in item:
+            return _json_error(translated("bans.flash.invalid_ips_parameter_bans_unban") or "Invalid ips parameter on /bans/unban.", 400)
+        ip = item["ip"]
+        try:
+            validate_ip_address(ip)
+        except ValueError:
+            return _json_error(translated("bans.flash.invalid_ip", ip=str(ip)) or f"Invalid IP address: {ip}", 400)
+        payload = {"ip": ip}
+        service = item.get("service")
+        if item.get("ban_scope") == "service" and service and service not in RESERVED_SERVICE_NAMES:
+            payload["service"] = service
+        for flag in ("remove_crowdsec_decisions", "confirmed"):
+            if flag in item:
+                payload[flag] = bool(item[flag])
+        if "decision_keys" in item:
+            keys = item["decision_keys"]
+            if not isinstance(keys, list) or not all(isinstance(key, str) for key in keys):
+                return _json_error(translated("bans.flash.invalid_ips_parameter_bans_unban") or "Invalid ips parameter on /bans/unban.", 400)
+            payload["decision_keys"] = keys
+        payloads.append(payload)
+
+    try:
+        status, answer = API_CLIENT.unban_crowdsec(payloads)
+    except ApiClientError as e:
+        return _json_error(str(e), e.status_code or 400)
+    except ApiUnavailableError as e:
+        return _json_error(str(e), 502)
+
+    message = answer.get("message") if isinstance(answer.get("message"), str) else ""
+    if status == 200:
+        return jsonify({"status": "success", "results": answer.get("results", [])})
+    if status == 403:
+        return _json(
+            {
+                "status": "error",
+                "missing_permission": "crowdsec_delete",
+                "message": translated("bans.flash.unban_crowdsec_forbidden")
+                or "Permission denied. Unbanning a CrowdSec ban needs ban_delete and crowdsec_delete on every CrowdSec connection involved.",
+            },
+            403,
+        )
+    reply = {"status": "error", "message": message}
+    for key in ("preview", "previews", "results"):
+        if key in answer:
+            reply[key] = answer[key]
+    return _json(reply, status)
 
 
 @bans.route("/bans/update_duration", methods=["POST"])

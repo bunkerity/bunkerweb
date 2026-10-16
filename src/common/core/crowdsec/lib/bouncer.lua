@@ -407,7 +407,7 @@ local function live_query(ip)
       local candidate = decision.type
       if candidate ~= "ban" and candidate ~= "captcha" then candidate = runtime.fallback end
       if not remediation or candidate == "ban" then remediation = candidate end
-      local captured = {expires_at = ngx.time() + decision_cache.duration(decision.duration)}
+      local captured = {expires_at = ngx.time() + decision_cache.duration(decision.duration), remediation = candidate}
       for _, name in ipairs({"id", "origin", "scenario", "type", "scope", "value"}) do
         local value = decision[name]
         if type(value) == "string" then captured[name] = value:sub(1, 512)
@@ -474,6 +474,20 @@ function csmod.SetupStream()
   end
 end
 
+-- One key per range that can cover the IP, widest netmask last: the keys allowIp reads
+local function covering_keys(key)
+  local key_type, _, address = key:match("^([^_]+)_([^_]+)_(.+)$")
+  local keys = {}
+  for _, mask in ipairs(iputils.netmasks_by_key_type[key_type]) do
+    if key_type == "ipv4" then
+      keys[#keys + 1] = key_type .. "_" .. mask .. "_" .. iputils.ipv4_band(address, mask)
+    else
+      keys[#keys + 1] = key_type .. "_" .. table.concat(mask, ":") .. "_" .. iputils.ipv6_band(address, mask)
+    end
+  end
+  return keys
+end
+
 function csmod.allowIp(ip)
   if runtime.conf == nil then
     return true, nil, "Configuration is bad, cannot run properly"
@@ -489,15 +503,8 @@ function csmod.allowIp(ip)
   if key == nil then
     return true, nil, "Check failed '" .. ip .. "' has no valid IP address"
   end
-  local key_type, _, address = key:match("^([^_]+)_([^_]+)_(.+)$")
   local selected, evidence
-  for _, mask in ipairs(iputils.netmasks_by_key_type[key_type]) do
-    local target
-    if key_type == "ipv4" then
-      target = key_type .. "_" .. mask .. "_" .. iputils.ipv4_band(address, mask)
-    else
-      target = key_type .. "_" .. table.concat(mask, ":") .. "_" .. iputils.ipv6_band(address, mask)
-    end
+  for _, target in ipairs(covering_keys(key)) do
     local remediation, matched = runtime.decisions.get(target)
     if remediation then
       if not selected or remediation == "ban" then selected = remediation end
@@ -921,7 +928,99 @@ function csmod.Allow(ip, no_render, antibot_provider, challengePrefix)
 end
 
 
+-- True when the effective exclude list (including a redirect location the plugin appended) is not empty
+function csmod.HasExcludedLocations()
+  local locations = runtime.conf and runtime.conf["EXCLUDE_LOCATION"]
+  return type(locations) == "table" and #locations > 0
+end
+
+-- Run fn while holding the stream poller's lock. The lock is non-blocking, so retry for up to two seconds.
+local function with_stream_lock(fn)
+  local deadline = ngx.now() + 2
+  while true do
+    local locked, err = stream_lock.run(runtime.stream_lock_path, fn)
+    if locked then return true end
+    if err ~= "busy" then return nil, err end
+    if ngx.now() >= deadline then return nil, "busy" end
+    ngx.sleep(0.05)
+  end
+end
+
+-- Read the decisions of one IP again from the Local API and replace this instance's cached entries for it,
+-- with the lifetime rules the live query and the stream poller apply. Used after a decision was removed.
+function csmod.RefreshIp(params)
+  local ip = type(params) == "table" and params.ip
+  local ip_key = type(ip) == "string" and item_to_string(ip, "ip")
+  if not ip_key then return nil, "invalid ip", 400 end
+  local live = runtime.conf["MODE"] == "live"
+  local fetched, fetch_err, fetch_status
+  local function fetch()
+    if runtime.conf["API_URL"] == "" then
+      fetched = decision_cache.array()
+      return
+    end
+    local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions?ip=" .. ip .. "&contains=true")
+    if err or not res then
+      fetch_err, fetch_status = "Local API request failed", 502
+    elseif res.status ~= 200 then
+      fetch_err, fetch_status = "Local API returned HTTP " .. tostring(res.status), 502
+    else
+      fetched = decode_decisions(res.body, false)
+      if not fetched then fetch_err, fetch_status = "Invalid Local API response", 502 end
+    end
+    if not fetched then return end
+    -- Replace every entry that can cover this IP, then apply what the Local API reports now
+    local keys, seen = {}, {}
+    local function add(item)
+      if item and not seen[item] then seen[item] = true; keys[#keys + 1] = item end
+    end
+    for _, target in ipairs(covering_keys(ip_key)) do add(target) end
+    for _, decision in ipairs(fetched) do add(item_to_string(decision.value, decision.scope)) end
+    for _, item in ipairs(keys) do runtime.decisions.clear(item) end
+    for _, decision in ipairs(fetched) do
+      local scope = decision.scope:lower()
+      if (scope == "ip" or scope == "range") and (runtime.conf["BOUNCING_ON_TYPE"] == "all" or runtime.conf["BOUNCING_ON_TYPE"] == decision.type) then
+        local applied
+        if live then
+          applied = apply_decision(decision, false, ip_key, runtime.conf["CACHE_EXPIRATION"])
+        else
+          applied = apply_decision(decision, false)
+        end
+        if not applied then
+          fetched, fetch_err, fetch_status = nil, "Local decision cache is full", 502
+          return
+        end
+      end
+    end
+    runtime.cache:delete("v2_allowed_" .. ip_key)
+  end
+  if live then
+    fetch()
+  else
+    -- Taken before the request: a poll that finishes first can never write older state over this one
+    local locked, lock_err = with_stream_lock(fetch)
+    if not locked then
+      if lock_err == "busy" then return nil, "busy", 503 end
+      return nil, lock_err, 502
+    end
+  end
+  if not fetched then return nil, fetch_err, fetch_status end
+  local remediation
+  local ids = decision_cache.array()
+  for _, decision in ipairs(fetched) do
+    local scope = decision.scope:lower()
+    if (scope == "ip" or scope == "range") and (runtime.conf["BOUNCING_ON_TYPE"] == "all" or runtime.conf["BOUNCING_ON_TYPE"] == decision.type) then
+      local candidate = decision.type
+      if candidate ~= "ban" and candidate ~= "captcha" then candidate = runtime.fallback end
+      if not remediation or candidate == "ban" then remediation = candidate end
+      ids[#ids + 1] = decision.id
+    end
+  end
+  return {ip = ip, remediation = remediation, decision_ids = ids, observed_at = ngx.time()}, nil, 200
+end
+
 function csmod.Control(action, params)
+  if action == "refresh_ip" then return csmod.RefreshIp(params) end
   return require("crowdsec.control").run(runtime.conf, runtime.cache, action, params)
 end
 

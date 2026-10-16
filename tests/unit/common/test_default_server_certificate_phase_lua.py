@@ -41,6 +41,11 @@ TEMPLATE_VARS = {
     "import": import_module,
     "LISTEN_HTTP": "yes",
     "USE_PROXY_PROTOCOL": "no",
+    # The TLS drop hook the client hello block renders (lane X1C) reads these.
+    "SERVER_NAME": "app1.example.com",
+    "USE_REAL_IP": "no",
+    "REAL_IP_HEADER": "X-Forwarded-For",
+    "REAL_IP_FROM": "",
     "ALL_HTTP_PORTS": ["80"],
     "ALL_HTTPS_PORTS": ["443"],
     "USE_IPV6": "no",

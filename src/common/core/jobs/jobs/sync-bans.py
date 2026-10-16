@@ -25,6 +25,7 @@ from ApiCaller import ApiCaller  # type: ignore
 from common_utils import get_redis_client  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
+from redis.exceptions import RedisError
 from redis_keys import ban_ip, ban_key as redis_ban_key, is_cluster, unescape  # type: ignore
 
 LOGGER = getLogger("JOBS.SYNC-BANS")
@@ -98,7 +99,69 @@ def identity_payload(identity):
     payload = {"ip": identity["ip"], "ban_scope": identity["ban_scope"]}
     if identity["ban_scope"] == "service" and identity["service"]:
         payload["service"] = identity["service"]
+    if identity.get("lease_id"):
+        # A lease tombstone is replayed as `POST /unban` with `lease_id`: the instance removes that
+        # lease from that one key and leaves an explicit ban (or a renewed lease) alone.
+        payload["lease_id"] = identity["lease_id"]
     return payload
+
+
+# Compare-and-delete of one CrowdSec lease key, in one EVAL: GET, decode, compare `lease_id`, then DEL.
+# One key, so it is valid in cluster mode too. Returns `removed`, `absent` or `changed` (the key now
+# holds an explicit ban or another lease). Mirrors REMOVE_LEASE_SCRIPT in bw/lua/bunkerweb/utils.lua
+# (`utils.remove_lease`, lane C); tests/unit/common/test_ban_lease_replay.py pins the two texts equal.
+REMOVE_LEASE_SCRIPT = """local raw = redis.call("GET", KEYS[1])
+if not raw then
+    return "absent"
+end
+local ok, data = pcall(cjson.decode, raw)
+if
+    ok
+    and type(data) == "table"
+    and data.reason == "crowdsec"
+    and type(data.reason_data) == "table"
+    and data.reason_data.lease_id == ARGV[1]
+then
+    redis.call("DEL", KEYS[1])
+    return "removed"
+end
+return "changed"
+"""
+
+
+def remove_lease_from_redis(redis_client, key, lease_id):
+    """Delete ``key`` only while it still holds the lease ``lease_id``. Returns the script verdict."""
+    result = redis_client.eval(REMOVE_LEASE_SCRIPT, 1, key, lease_id)
+    return result.decode("utf-8", "replace") if isinstance(result, bytes) else result
+
+
+def replay_instance_tombstones(caller, hostname, tombstoned):
+    """Replay the tombstones this instance still enforces as `POST /unban`. Returns the failure count."""
+    failures = 0
+    for identity in tombstoned:
+        unban_ok, _ = caller.send_to_apis("POST", "/unban", data=identity_payload(identity))
+        if not unban_ok:
+            LOGGER.error(f"Couldn't replay the unban of {identity['ip']} on {hostname}")
+            failures += 1
+    return failures
+
+
+def replay_redis_tombstones(redis_client, tombstoned):
+    """Remove the tombstoned bans from Redis: a lease only by compare-and-delete on its `lease_id`
+    (a key that now holds an explicit ban or a newer lease survives), an explicit ban unconditionally.
+    Returns the failure count."""
+    failures = 0
+    for identity in tombstoned:
+        key = redis_ban_key(ban_key(identity), is_cluster(redis_client))
+        try:
+            if identity.get("lease_id"):
+                remove_lease_from_redis(redis_client, key, identity["lease_id"])
+            else:
+                redis_client.delete(key)
+        except RedisError as e:
+            LOGGER.error(f"Couldn't replay the unban of {identity['ip']} on Redis: {e}")
+            failures += 1
+    return failures
 
 
 def project_bans(active, callers, reported, redis_client, now):
@@ -113,6 +176,11 @@ def project_bans(active, callers, reported, redis_client, now):
     """
     projected = 0
     failures = 0
+
+    # A lease is instance-local enforcement that the instance renews itself: projecting the DB's
+    # older copy would clobber a renewed lease with its stale expiry (and, in Redis, its lease_id).
+    # The DB still learns leases, for the Bans page and for unban.
+    active = [ban for ban in active if ban.get("kind") != "crowdsec_lease"]
 
     if redis_client:
         for ban in active:
@@ -217,18 +285,15 @@ try:
         # This instance still enforces a ban the operator revoked: its API path was down when the
         # unban went out, and NGINX kept serving. Without this, the ban would be re-learned and
         # re-pushed to the whole fleet for the rest of its lifetime.
-        for identity in tombstoned:
-            unban_ok, _ = caller.send_to_apis("POST", "/unban", data=identity_payload(identity))
-            if not unban_ok:
-                LOGGER.error(f"Couldn't replay the unban of {identity['ip']} on {hostname}")
-                exit_status = 2
+        if replay_instance_tombstones(caller, hostname, tombstoned):
+            exit_status = 2
 
     if redis_client:
         redis_records = records_from_redis(redis_client)
         inserted, tombstoned = JOB.db.learn_bans(redis_records)
         learned += len(inserted)
-        for identity in tombstoned:
-            redis_client.delete(redis_ban_key(ban_key(identity), is_cluster(redis_client)))
+        if replay_redis_tombstones(redis_client, tombstoned):
+            exit_status = 2
 
     # ── 3. Project ──────────────────────────────────────────────────────────────────────────────
     now = datetime.now(timezone.utc).timestamp()

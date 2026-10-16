@@ -73,12 +73,97 @@ def _scope_key(ip: str, ban_scope: str, service_id: str) -> Tuple[str, str, str]
     return (ip, scope, service_id if scope == "service" else "")
 
 
+# The fields that identify a CrowdSec lease and let it be matched, unbanned and told apart from an
+# explicit ban. They are never shortened or dropped to make a payload fit (X1 amendment 2, R3b):
+# promotion refuses to create a lease whose identity set alone does not fit.
+LEASE_IDENTITY_KEYS = ("lease", "version", "lease_id", "instance", "connection", "service_scope", "remediation", "source")
+# Dropped whole (never cut mid-value), in this order, once the decisions and the unknown keys are gone.
+_DEGRADABLE_KEYS = ("scenario", "origin", "action")
+
+KIND_LEASE = "crowdsec_lease"
+KIND_BAN = "ban"
+
+# A reported expiry within this of the stored one is rounding, not a renewal: the instance counts
+# whole seconds, MariaDB/MySQL store whole seconds, and a push takes time. Without the slack every
+# pushed ban would "renew" itself on the next learn pass.
+RENEWAL_SLACK = timedelta(seconds=5)
+
+
+def _reason_data_obj(value: Any) -> Any:
+    """``reason_data`` as an object, whether it arrives as one (runtime row, API) or as the stored
+    JSON text. Unparsable text yields None."""
+    if isinstance(value, str):
+        with suppress(ValueError, TypeError):
+            return loads(value)
+        return None
+    return value
+
+
+def ban_kind(ban: Any) -> str:
+    """Classify a ban row: ``crowdsec_lease`` when ``reason == "crowdsec"`` and ``reason_data.lease``
+    is true, else ``ban``. Works on any mapping with ``reason`` and ``reason_data``, so DB rows and
+    runtime rows (``GET /bans`` from an instance, a Redis value) share one definition."""
+    if not isinstance(ban, dict) or ban.get("reason") != "crowdsec":
+        return KIND_BAN
+    data = _reason_data_obj(ban.get("reason_data"))
+    return KIND_LEASE if isinstance(data, dict) and data.get("lease") is True else KIND_BAN
+
+
+def lease_id_of(ban: Any) -> str:
+    """The ``reason_data.lease_id`` of a ban row ("" when it carries none)."""
+    data = _reason_data_obj(ban.get("reason_data")) if isinstance(ban, dict) else None
+    value = data.get("lease_id") if isinstance(data, dict) else None
+    return value if isinstance(value, str) else ""
+
+
 def _reason_data_text(value: Any) -> Optional[str]:
-    """Serialize reason_data to bounded JSON text; drop it entirely when it does not fit."""
+    """Serialize reason_data to bounded JSON text (the text the column stores is what is measured).
+
+    Over the limit it degrades instead of dropping: ``decisions`` shrink from the end, then unknown
+    keys go (largest first), then ``scenario``, ``origin`` and ``action`` go whole. The lease
+    identity set is never touched; when even it does not fit, the payload is dropped.
+    """
     if value in (None, "", {}, []):
         return None
     text = value if isinstance(value, str) else dumps(value, default=str)
-    return text if len(text) <= MAX_REASON_DATA else None
+    if len(text) <= MAX_REASON_DATA:
+        return text
+    data = _reason_data_obj(value)
+    if not isinstance(data, dict):
+        return None
+    data = dict(data)
+
+    def fits() -> bool:
+        return bool(data) and len(dumps(data, default=str)) <= MAX_REASON_DATA
+
+    decisions = data.get("decisions")
+    if isinstance(decisions, list):
+        # ponytail: bisect on how many decisions to keep (the stored length only grows with the
+        # count), so a hostile 20k-entry list costs ~15 serializations, not 20k.
+        low, high = 0, len(decisions)
+        while low < high:
+            mid = (low + high + 1) // 2
+            data["decisions"] = decisions[:mid]
+            if fits():
+                low = mid
+            else:
+                high = mid - 1
+        if low:
+            data["decisions"] = decisions[:low]
+        else:
+            data.pop("decisions")
+    else:
+        data.pop("decisions", None)
+    if fits():
+        return dumps(data, default=str)
+
+    extras = sorted(
+        (k for k in data if k not in LEASE_IDENTITY_KEYS and k not in _DEGRADABLE_KEYS), key=lambda k: len(dumps(data[k], default=str)), reverse=True
+    )
+    for key in (*extras, *_DEGRADABLE_KEYS):
+        if data.pop(key, None) is not None and fits():
+            return dumps(data, default=str)
+    return None  # even the bare identity set does not fit
 
 
 def _row_to_dict(row: Bans, now: datetime) -> Dict[str, Any]:
@@ -105,7 +190,36 @@ def _row_to_dict(row: Bans, now: datetime) -> Dict[str, Any]:
         "expires_at": expires_at,
         "permanent": permanent,
         "reason_data": reason_data,
+        "kind": ban_kind({"reason": row.reason, "reason_data": reason_data}),
     }
+
+
+def _is_lease_row(row: Bans) -> bool:
+    return ban_kind({"reason": row.reason, "reason_data": row.reason_data}) == KIND_LEASE
+
+
+def _later(new: Optional[datetime], old: Optional[datetime], slack: timedelta = timedelta(0)) -> bool:
+    """``new`` ends later than ``old`` by more than ``slack``; None is "never expires"."""
+    if old is None:
+        return False
+    return True if new is None else new > old + slack
+
+
+def _covers(row: Bans, seen_at: datetime, reported_reason: str, reported_lease_id: str) -> bool:
+    """Does a revoked row cover (tombstone) a record the instance recorded at ``seen_at``?
+
+    A revoked global ban covers service-scoped records too: the Lua unban wiped both. A revoked
+    *lease* is the exception: ``remove_lease`` touches the one key of one scope, so it covers only
+    the very same lease and never an explicit ban or another lease.
+    """
+    revoked_at = _utc(row.revoked_at)
+    if row.ban_scope != "global" or revoked_at is None or revoked_at < seen_at:
+        return False
+    return _same_lease(row, reported_reason, reported_lease_id) if _is_lease_row(row) else True
+
+
+def _same_lease(row: Bans, reported_reason: str, reported_lease_id: str) -> bool:
+    return reported_reason == "crowdsec" and lease_id_of({"reason_data": row.reason_data}) == reported_lease_id
 
 
 def _active_clause(now: datetime):
@@ -203,6 +317,49 @@ class DatabaseBansMixin(DatabaseMixinBase):
                 conditions += [Bans.ban_scope == "service", Bans.service_id == service]
             try:
                 session.execute(update(Bans).where(*conditions).values(revoked_at=now, revoked_by=revoked_by))
+                session.commit()
+            except BaseException as e:
+                session.rollback()
+                return str(e)
+        return ""
+
+    @retry_on_transient_db_errors
+    def revoke_lease(self, ip: str, *, ban_scope: str = "global", service_id: str = "", lease_id: str = "", revoked_by: str = "") -> str:
+        """Tombstone one CrowdSec lease, and only that one. Returns "" on success.
+
+        Matches the row of this exact ``(ip, scope, service)`` whose ``reason`` is ``crowdsec`` and
+        whose ``reason_data.lease_id`` is ``lease_id``. It never widens: not to the other scope of
+        the IP (``revoke_ban`` does, because the Lua unban wipes both), not to an explicit ban that
+        happens to hold the same identity, and not to a lease that was renewed under a new id.
+        No matching row is success, not an error: the lease may not have been learned yet, or was
+        renewed since the caller looked, and the instances are the ones that decide ``changed``.
+        """
+        ip = normalize_ip(ip)
+        if not ip:
+            return "invalid IP address"
+        if not lease_id:
+            return "lease_id is required"
+        ip, scope, service = _scope_key(ip, ban_scope, service_id)
+        now = _now()
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            row = session.execute(
+                select(Bans).where(Bans.ip == ip, Bans.ban_scope == scope, Bans.service_id == service, Bans.revoked_at.is_(None), Bans.reason == "crowdsec")
+            ).scalar_one_or_none()
+            if row is None or lease_id_of({"reason_data": row.reason_data}) != lease_id:
+                return ""
+            try:
+                # reason_data in the guard: a renewal that lands between the read and this UPDATE
+                # carries a new lease_id, so it must not be revoked on the old one's say-so.
+                session.execute(
+                    update(Bans)
+                    .where(Bans.id == row.id, Bans.revoked_at.is_(None), Bans.reason_data == row.reason_data)
+                    .values(revoked_at=now, revoked_by=revoked_by)
+                    .execution_options(synchronize_session=False)
+                )
                 session.commit()
             except BaseException as e:
                 session.rollback()
@@ -329,27 +486,72 @@ class DatabaseBansMixin(DatabaseMixinBase):
                 seen_at = _aware(record.get("date")) or now
                 expires = None if record.get("permanent") else _aware(record.get("expires_at"))
                 identity = {"ip": ip, "ban_scope": scope, "service": service}
+                reported = {"reason": record.get("reason") or "", "reason_data": record.get("reason_data")}
+                reported_lease = ban_kind(reported) == KIND_LEASE
+                reported_lease_id = lease_id_of(reported)
+                # A tombstone produced from a lease names it, so the replay removes that lease only.
+                tombstone = identity | {"lease_id": reported_lease_id} if reported_lease and reported_lease_id else identity
 
                 rows = session.scalars(select(Bans).where(Bans.ip == ip, or_(Bans.ban_scope == "global", Bans.service_id == service))).all()
                 own = next((r for r in rows if r.ban_scope == scope and r.service_id == service), None)
-                # A revoked global ban also covers service-scoped records: the Lua unban wiped both.
-                covering = next((r for r in rows if r.ban_scope == "global" and _utc(r.revoked_at) is not None and _utc(r.revoked_at) >= seen_at), None)
+                covering = next((r for r in rows if _covers(r, seen_at, reported["reason"], reported_lease_id)), None)
 
                 if covering is not None and own is not covering:
-                    tombstoned.append(identity)
+                    tombstoned.append(tombstone)
                     continue
                 if own is not None:
                     own_revoked_at = _utc(own.revoked_at)
+                    own_lease = _is_lease_row(own)
                     if own_revoked_at is None:
-                        continue  # already known and active
-                    if own_revoked_at >= seen_at:
-                        tombstoned.append(identity)
+                        own_expires = _utc(own.expires_at)
+                        own_live = own_expires is None or own_expires > now
+                        if own_live and reported_lease and not own_lease:
+                            continue  # an explicit ban outranks a lease, as keep_existing does on the instance
+                        renewed = (
+                            _later(expires, own_expires, RENEWAL_SLACK)
+                            # A renewed lease must hand its new id over even when its expiry barely moves, or
+                            # revoke_lease(new id) would match nothing. ponytail: equal expiries on two
+                            # instances holding different ids flip the row each pass; harmless, same ban.
+                            or (
+                                own_lease
+                                and reported_lease
+                                and reported_lease_id != lease_id_of({"reason_data": own.reason_data})
+                                and not _later(own_expires, expires)
+                            )
+                            # The explicit ban that replaced the lease on the instance is what is enforced now.
+                            or (own_live and own_lease and not reported_lease)
+                        )
+                        if not renewed:
+                            continue  # already known and active
+                        values = {
+                            "expires_at": expires,
+                            "reason": reported["reason"] or own.reason,
+                            "reason_data": _reason_data_text(record.get("reason_data")),
+                            "country": record.get("country") or own.country,
+                        }
+                        if not own_lease and not reported_lease and not values["reason_data"]:
+                            del values["reason_data"]  # a plain extension must not blank what the row already knows
+                        if not own_live:  # re-ban after a natural expiry: a new ban, not a renewal
+                            values |= {"created_at": seen_at, "origin": record.get("origin") or "instance"}
+                        result = session.execute(
+                            update(Bans).where(Bans.id == own.id, Bans.revoked_at.is_(None)).values(**values).execution_options(synchronize_session=False)
+                        )
+                        if not result.rowcount:
+                            tombstoned.append(tombstone)  # revoked while we were looking
+                        elif not own_live:
+                            inserted.append(identity)
+                        continue
+                    # A revoked lease followed by a different record (another lease id, or an explicit
+                    # ban) is not what the revoke named: reactivate whatever the timestamps say.
+                    foreign = own_lease and not _same_lease(own, reported["reason"], reported_lease_id)
+                    if own_revoked_at >= seen_at and not foreign:
+                        tombstoned.append(tombstone)
                         continue
                     # Revoked before the instance recorded this ban → a genuine re-ban. The guard
                     # makes the reactivation a no-op if the row was revoked again meanwhile.
                     result = session.execute(
                         update(Bans)
-                        .where(Bans.id == own.id, Bans.revoked_at.is_not(None), Bans.revoked_at < seen_at)
+                        .where(Bans.id == own.id, Bans.revoked_at.is_not(None), Bans.revoked_at == own.revoked_at if foreign else Bans.revoked_at < seen_at)
                         .values(
                             revoked_at=None,
                             revoked_by=None,
@@ -365,7 +567,7 @@ class DatabaseBansMixin(DatabaseMixinBase):
                     if result.rowcount:
                         inserted.append(identity)
                     else:
-                        tombstoned.append(identity)
+                        tombstoned.append(tombstone)
                     continue
 
                 try:
@@ -393,7 +595,7 @@ class DatabaseBansMixin(DatabaseMixinBase):
                     existing = session.execute(select(Bans).where(Bans.ip == ip, Bans.ban_scope == scope, Bans.service_id == service)).scalar_one_or_none()
                     existing_revoked_at = _utc(existing.revoked_at) if existing is not None else None
                     if existing_revoked_at is not None and existing_revoked_at >= seen_at:
-                        tombstoned.append(identity)
+                        tombstoned.append(tombstone)
 
             try:
                 session.commit()

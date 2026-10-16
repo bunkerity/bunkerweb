@@ -133,6 +133,8 @@ def _run(body: str) -> subprocess.CompletedProcess:
         + "\n"
         + _extract(r"^local function local_ban_key\(.*?^end$", "local_ban_key")
         + "\n"
+        + _extract(r"^local function is_lease\(.*?^end$", "is_lease")
+        + "\n"
         + _extract(r"^utils\.is_banned = function\(.*?^end$", "utils.is_banned")
         + "\n"
         + body

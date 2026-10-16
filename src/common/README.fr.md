@@ -49,6 +49,25 @@ Le paramètre `SECURITY_MODE` détermine la façon dont BunkerWeb gère les mena
 
 Passer en mode `detect` aide à identifier et corriger les faux positifs sans impacter les clients légitimes. Une fois ces problèmes résolus, repassez en mode `block` pour une protection complète.
 
+### Rejeter les bannis dès la négociation TLS {#bans-tls-drop}
+
+Un client banni termine normalement la négociation TLS puis reçoit la page de bannissement (403). `BANS_TLS_DROP_REASONS` liste les motifs de bannissement pour lesquels BunkerWeb ferme à la place la connexion tout au début de la négociation, avant tout travail de certificat ou d'échange de clés. Le client voit une erreur TLS, pas une page. Cela économise du CPU lorsque des adresses bannies se reconnectent sans cesse.
+
+La valeur est une liste de motifs séparés par des espaces, parmi `crowdsec`, `bad_behavior`, `manual`, `ui` et `api`. La valeur par défaut est vide, ce qui conserve la page 403 pour tous les bannissements. Nous suggérons `crowdsec`.
+
+- Seul compte le motif du bannissement qui s'applique. Pour une IP qui a un bannissement `manual` et un bannissement CrowdSec, un bannissement explicite est jugé avant un bannissement CrowdSec : lister seulement `crowdsec` ne rejette donc rien, et le client reçoit la page 403.
+- Le rejet est ignoré, et la page 403 reste, lorsque `USE_REAL_IP` vaut `yes` avec une source basée sur un en-tête, ou lorsque `USE_PROXY_PROTOCOL` vaut `yes` sans que `USE_REAL_IP` soit à `yes` et `REAL_IP_HEADER` à `proxy_protocol`, car l'adresse du client n'est pas connue à ce stade. Avec les trois réglés, le rejet utilise l'adresse du protocole PROXY lorsque le pair qui se connecte figure dans `REAL_IP_FROM`, et l'adresse du pair sinon.
+- Les IP autorisées par une liste blanche d'adresses IP ou de réseaux ne sont pas rejetées. Les autres types de liste blanche (DNS inverse, ASN, user-agent) ne peuvent pas être évalués à ce stade et sont ignorés.
+- Avec Redis activé, une négociation n'est rejetée que tant que l'instance détient une copie locale du bannissement. Une instance met en cache un bannissement Redis jusqu'à 30 secondes après une requête de l'IP : la première requête reçoit donc encore la page 403, et les négociations sont rejetées pendant les 30 secondes suivantes au plus.
+- Avec `SECURITY_MODE` réglé sur `detect`, la négociation se poursuit et un avertissement est journalisé.
+- Les connexions HTTP/3 (QUIC) ne sont jamais rejetées. Elles reçoivent la page 403.
+
+Limites à connaître :
+
+- Le serveur par défaut lit uniquement le `BANS_TLS_DROP_REASONS` global et le bannissement global.
+- Les services TCP et UDP (stream) n'ont pas de point d'accroche pour la négociation TLS : le paramètre ne s'y applique pas.
+- L'avertissement est journalisé au plus une fois par minute pour chaque IP et chaque processus worker, et non une fois par minute pour toute la flotte.
+
 ### Paramètres de configuration
 
 === "Paramètres principaux"
@@ -59,6 +78,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Non      | **Instances BunkerWeb :** Liste des instances BunkerWeb séparées par des espaces.                        |
     | `MULTISITE`           | `no`              | global    | Non      | **Sites multiples :** Définir à `yes` pour héberger plusieurs sites avec des configurations différentes. |
     | `SECURITY_MODE`       | `block`           | multisite | Non      | **Niveau de sécurité :** `detect` ou `block` pour contrôler l’application de la sécurité.                |
+    | `BANS_TLS_DROP_REASONS` |  | multisite | Non | **Bannissements coupés en TLS :** Motifs de bannissement (`crowdsec`, `bad_behavior`, `manual`, `ui`, `api`, séparés par des espaces) dont les IP bannies sont coupées lors de la négociation TLS au lieu de recevoir la page 403. Ignoré avec une IP réelle fondée sur un en-tête, et avec le protocole PROXY sauf si l’IP réelle utilise `proxy_protocol`. Jamais appliqué à HTTP/3. |
     | `SERVER_TYPE`         | `http`            | multisite | Non      | **Type de serveur :** Définit si le serveur est de type `http` ou `stream`.                              |
 
 === "Paramètres API"

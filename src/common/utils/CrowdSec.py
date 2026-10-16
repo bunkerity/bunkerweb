@@ -39,7 +39,7 @@ class CrowdSecClient:
             raise CrowdSecError("Unable to read configured BunkerWeb instances") from None
 
     @staticmethod
-    def _request(instance: dict, method: str, path: str, data: dict | None = None):
+    def _request(instance: dict, method: str, path: str, data: dict | None = None, *, raw: bool = False):
         try:
             ok, _message, status, payload = API.from_instance(instance, token=getenv("API_TOKEN") or None).request(method, path, data=data, timeout=(5, 30))
         except Exception:
@@ -52,12 +52,34 @@ class CrowdSecClient:
             if not path.startswith("/crowdsec/") or not isinstance(message, str):
                 message = "BunkerWeb instance could not complete the request"
             raise CrowdSecError(message[:1024], status if status in (400, 403, 404, 409) else 502)
+        if raw:
+            return payload
         result = payload.get("data", payload.get("msg"))
         if path == "/bans" and result == "":
             return []
         if not isinstance(result, (dict, list)):
             raise CrowdSecError("BunkerWeb instance returned an unsupported response")
         return result
+
+    def instance_request(self, instance: dict, method: str, path: str, data: dict | None = None):
+        """One request to a specific instance, with the error mapping of the CrowdSec routes (the runtime ``GET /bans``)."""
+        return self._request(instance, method, path, data)
+
+    def remove_lease(self, instance: dict, ip: str, ban_scope: str, service: str | None, lease_id: str) -> str:
+        """Remove one CrowdSec lease on one instance: ``removed``, ``absent`` or ``changed`` (the key now holds another ban).
+
+        The instance answers ``POST /unban`` with ``lease_id`` through ``remove_lease`` and never through the generic
+        unban. A reply that is not one of the three outcomes is refused, so an instance that ignored ``lease_id`` is
+        never read as a success.
+        """
+        payload = {"ip": ip, "ban_scope": ban_scope, "lease_id": lease_id}
+        if ban_scope == "service" and service:
+            payload["service"] = service
+        # The instance puts the outcome at the top level of its reply, next to the usual `msg`
+        outcome = self._request(instance, "POST", "/unban", payload, raw=True).get("result")
+        if outcome not in ("removed", "absent", "changed"):
+            raise CrowdSecError("BunkerWeb instance returned an invalid lease removal result")
+        return outcome
 
     def _resolve(self, connection_id: str) -> tuple[dict, str]:
         instance_key, local_id = decode_connection(connection_id)
@@ -94,7 +116,7 @@ class CrowdSecClient:
         return {"connections": connections, "errors": errors, "observed_at": time()}
 
     def query(self, connection_id: str, action: str, params: dict | None = None) -> dict:
-        if action not in {"decisions", "alerts", "unban", "allowlists", "allowlistcheck"}:
+        if action not in {"decisions", "alerts", "unban", "allowlists", "allowlistcheck", "refresh_ip"}:
             raise CrowdSecError("Invalid CrowdSec operation", 400)
         instance, local_id = self._resolve(connection_id)
         result = self._request(instance, "POST", f"/crowdsec/{action}", {**(params or {}), "connection": local_id})

@@ -8,6 +8,7 @@ local crowdsec = class("crowdsec", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local WARN = ngx.WARN
+local INFO = ngx.INFO
 local OK = ngx.OK
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
@@ -16,6 +17,7 @@ local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local get_deny_status = utils.get_deny_status
 local get_security_mode = utils.get_security_mode
+local parse_duration = utils.parse_duration
 local set_reason = utils.set_reason
 local open = io.open
 local pairs = pairs
@@ -23,6 +25,9 @@ local ipairs = ipairs
 local insert = table.insert
 local sort = table.sort
 local concat = table.concat
+local floor = math.floor
+local format = string.format
+local byte = string.byte
 local json = require("cjson.safe")
 
 local USER_AGENT = "crowdsec-bunkerweb-bouncer/v1.8"
@@ -298,6 +303,338 @@ function crowdsec:init()
 	return self:ret(true, msg)
 end
 
+-- ---- ban leases (CROWDSEC_BAN_REFRESH) -------------------------------------------------------
+-- A CrowdSec `ban` that denies a request is also written as a short BunkerWeb ban, a lease: an ordinary
+-- ban (reason "crowdsec") that the early ban check enforces without asking CrowdSec, and that the next
+-- request after it lapses renews for as long as the decision lasts.
+
+local MAX_DECISIONS = 10
+-- The limit of db_methods/bans.py (MAX_REASON_DATA), measured on the text the database stores.
+local MAX_REASON_DATA = 4096
+-- Promotion refuses a lease whose identity set alone is longer, so the cap below can always keep it.
+local MAX_IDENTITY = 1024
+local MAX_RECENT = 1024
+local PROVENANCE_FIELDS = { "id", "origin", "scenario", "type", "scope", "value", "expires_at", "remediation" }
+local IDENTITY_FIELDS =
+	{ "lease", "version", "lease_id", "instance", "connection", "service_scope", "remediation", "source" }
+local KEPT_FIELDS = {}
+for _, field in ipairs(IDENTITY_FIELDS) do
+	KEPT_FIELDS[field] = true
+end
+local DROPPABLE_FIELDS = { "scenario", "origin", "action" }
+for _, field in ipairs(DROPPABLE_FIELDS) do
+	KEPT_FIELDS[field] = true
+end
+
+local function continuation_bytes(value, from, to)
+	for j = from, to do
+		local continuation = byte(value, j)
+		if not continuation or continuation < 0x80 or continuation > 0xBF then
+			return false
+		end
+	end
+	return true
+end
+
+-- Characters Python's json.dumps writes for a string: non-ASCII is escaped (\uXXXX, a surrogate pair
+-- outside the BMP), which is what the database stores and what the 4096 limit counts.
+-- ponytail: invalid UTF-8 counts 6 per byte, a pessimistic guess; nothing validates overlong forms.
+local function string_length(value)
+	local length, i, size = 2, 1, #value
+	while i <= size do
+		local b = byte(value, i)
+		if b < 0x80 then
+			if b == 34 or b == 92 or b == 8 or b == 9 or b == 10 or b == 12 or b == 13 then
+				length = length + 2
+			elseif b < 32 or b == 127 then
+				length = length + 6
+			else
+				length = length + 1
+			end
+			i = i + 1
+		else
+			local width, cost
+			if b >= 0xC2 and b <= 0xDF then
+				width, cost = 2, 6
+			elseif b >= 0xE0 and b <= 0xEF then
+				width, cost = 3, 6
+			elseif b >= 0xF0 and b <= 0xF4 then
+				width, cost = 4, 12
+			end
+			if width and not continuation_bytes(value, i + 1, i + width - 1) then
+				width = nil
+			end
+			if width then
+				length, i = length + cost, i + width
+			else
+				length, i = length + 6, i + 1
+			end
+		end
+	end
+	return length
+end
+
+-- Length of json.dumps(value): ", " between items, ": " between a key and its value.
+local function stored_length(value)
+	local kind = type(value)
+	if kind == "string" then
+		return string_length(value)
+	elseif kind == "boolean" then
+		return value and 4 or 5
+	elseif kind == "number" then
+		local integral = value == floor(value) and value > -2 ^ 53 and value < 2 ^ 53
+		return #(integral and format("%d", value) or format("%.14g", value))
+	elseif kind ~= "table" then
+		return 4
+	end
+	local length, count = 2, 0
+	if value[1] ~= nil then
+		for _, item in ipairs(value) do
+			length, count = length + stored_length(item) + (count > 0 and 2 or 0), count + 1
+		end
+	else
+		for key, item in pairs(value) do
+			length = length + string_length(tostring(key)) + 2 + stored_length(item) + (count > 0 and 2 or 0)
+			count = count + 1
+		end
+	end
+	return length
+end
+crowdsec._stored_length = stored_length
+
+local function identity_fits(reason_data)
+	local identity = {}
+	for _, field in ipairs(IDENTITY_FIELDS) do
+		identity[field] = reason_data[field]
+	end
+	return stored_length(identity) <= MAX_IDENTITY
+end
+crowdsec._identity_fits = identity_fits
+
+-- Same rule and order as db_methods/bans.py `_reason_data_text`: the last decisions go first, then the
+-- keys outside the identity set (largest first), then scenario, origin and action, one by one. A value is
+-- dropped, never cut, and the identity set is never shortened.
+local function cap_reason_data(reason_data)
+	local function fits()
+		return stored_length(reason_data) <= MAX_REASON_DATA
+	end
+	if fits() then
+		return reason_data
+	end
+	local decisions = reason_data.decisions
+	while type(decisions) == "table" and #decisions > 0 and not fits() do
+		decisions[#decisions] = nil
+	end
+	if type(decisions) ~= "table" or #decisions == 0 then
+		reason_data.decisions = nil
+	end
+	if fits() then
+		return reason_data
+	end
+	local extras = {}
+	for key, value in pairs(reason_data) do
+		if not KEPT_FIELDS[key] then
+			extras[#extras + 1] = { key = key, size = stored_length(value) }
+		end
+	end
+	sort(extras, function(a, b)
+		return a.size > b.size or (a.size == b.size and a.key < b.key)
+	end)
+	for _, extra in ipairs(extras) do
+		reason_data[extra.key] = nil
+		if fits() then
+			return reason_data
+		end
+	end
+	for _, key in ipairs(DROPPABLE_FIELDS) do
+		reason_data[key] = nil
+		if fits() then
+			return reason_data
+		end
+	end
+	return reason_data
+end
+crowdsec._cap_reason_data = cap_reason_data
+
+local function new_lease_id()
+	local random = require("resty.random")
+	local raw = random.bytes(8, true) or random.bytes(8)
+	if not raw then
+		return nil
+	end
+	return (raw:gsub(".", function(char)
+		return format("%02x", byte(char))
+	end))
+end
+
+-- The TTL and the reason_data of the lease for this deny. The TTL is the longest live ban decision's
+-- remaining time capped at the refresh, and never 0: add_ban reads 0 as permanent.
+local function build_lease(verdict, evidence, now, refresh)
+	if type(evidence) ~= "table" or evidence.source ~= "lapi" or verdict.action ~= "ban" then
+		return nil, "not a Local API ban"
+	end
+	local decisions = type(evidence.decisions) == "table" and evidence.decisions or {}
+	local ban_expires
+	for _, decision in ipairs(decisions) do
+		if
+			decision.remediation == "ban"
+			and decision.id ~= nil
+			and type(decision.expires_at) == "number"
+			and decision.expires_at > now
+			and (not ban_expires or decision.expires_at > ban_expires)
+		then
+			ban_expires = decision.expires_at
+		end
+	end
+	if not ban_expires then
+		return nil, "no live ban decision"
+	end
+	local lease_id = new_lease_id()
+	if not lease_id then
+		return nil, "no random bytes for the lease id"
+	end
+	local provenance = {}
+	for i = 1, math.min(#decisions, MAX_DECISIONS) do
+		local row = {}
+		for _, field in ipairs(PROVENANCE_FIELDS) do
+			row[field] = decisions[i][field]
+		end
+		provenance[i] = row
+	end
+	return math.max(1, floor(math.min(ban_expires - now, refresh))),
+		{
+			lease = true,
+			version = 1,
+			lease_id = lease_id,
+			instance = evidence.instance,
+			connection = evidence.connection,
+			service_scope = evidence.service_scope,
+			remediation = "ban",
+			source = "lapi",
+			action = verdict.action,
+			scenario = verdict.scenario,
+			origin = verdict.origin,
+			duration = verdict.duration,
+			captured_at = evidence.captured_at,
+			decisions = provenance,
+		}
+end
+crowdsec._build_lease = build_lease
+
+-- Whether a CrowdSec deny may become a lease. Pure, so each refusal is testable on its own.
+-- A stream connection that stopped synchronizing never renews bans: its cached decisions may be stale.
+local function should_promote(params)
+	if not params.refresh or params.refresh <= 0 then
+		return false, "CROWDSEC_BAN_REFRESH is 0"
+	end
+	if params.security_mode ~= "block" then
+		return false, "security mode is not block"
+	end
+	if params.deferred then
+		return false, "the verdict is deferred to the security workflows"
+	end
+	if params.served then
+		return false, "the response was already served"
+	end
+	if params.source ~= "lapi" then
+		return false, "the verdict is not from the Local API"
+	end
+	if params.action ~= "ban" then
+		return false, "the remediation is not a ban"
+	end
+	if params.exclude_location then
+		return false, "the service has excluded locations"
+	end
+	if params.mode == "stream" then
+		local last, frequency = params.last_successful_sync, params.update_frequency
+		if not last or not frequency or params.now - last > 2 * frequency then
+			return false, "the stream synchronization is stale"
+		end
+	end
+	return true
+end
+crowdsec._should_promote = should_promote
+
+-- One promotion per scope and IP per second per worker: a burst from one attacker is one ban write.
+local recent, recent_count = {}, 0
+
+local function seen_recently(key, now)
+	local at = recent[key]
+	if at and now - at < 1 then
+		return true
+	end
+	if recent_count >= MAX_RECENT then
+		recent, recent_count = {}, 0
+		at = nil
+	end
+	if not at then
+		recent_count = recent_count + 1
+	end
+	recent[key] = now
+	return false
+end
+crowdsec._dedupe_size = function()
+	return recent_count
+end
+
+-- Promotion never changes the deny: every refusal and every failure only means no lease.
+function crowdsec:promote(bouncer, scope, verdict, evidence, refresh)
+	local ip = self.ctx.bw.remote_addr
+	local info = bouncer.ConnectionInfo()
+	local now = ngx.time()
+	local promote, why = should_promote({
+		refresh = refresh,
+		security_mode = get_security_mode(self.ctx),
+		source = verdict.source,
+		action = verdict.action,
+		exclude_location = bouncer.HasExcludedLocations(),
+		mode = info.mode,
+		last_successful_sync = info.last_successful_sync,
+		update_frequency = info.update_frequency,
+		now = now,
+	})
+	if not promote then
+		return self.logger:log(INFO, "no CrowdSec ban lease : " .. why)
+	end
+	if seen_recently(scope .. "|" .. ip, ngx.now()) then
+		return
+	end
+	local ttl, reason_data = build_lease(verdict, evidence, now, refresh)
+	if not ttl then
+		return self.logger:log(INFO, "no CrowdSec ban lease : " .. tostring(reason_data))
+	end
+	if not identity_fits(reason_data) then
+		return self:log_throttled(
+			WARN,
+			"lease_identity_bound",
+			"no CrowdSec ban lease for service "
+				.. scope
+				.. " : its identity (instance, connection, service) is over "
+				.. MAX_IDENTITY
+				.. " characters, the request is still denied"
+		)
+	end
+	local country = utils.get_country(ip)
+	if type(country) ~= "string" then
+		country = "unknown"
+	end
+	-- Service-scoped in multisite, so one attacked service does not block the others (some of which may
+	-- not use CrowdSec at all); global only in single-site, where the one scope is "global".
+	local global = scope == GLOBAL_SCOPE
+	local ok, status = utils.add_ban(
+		ip,
+		"crowdsec",
+		ttl,
+		not global and scope or nil,
+		country,
+		global and "global" or "service",
+		cap_reason_data(reason_data),
+		nil,
+		{ keep_existing = true }
+	)
+	self.logger:log(INFO, "CrowdSec ban lease " .. (ok and "written" or "not written") .. " : " .. tostring(status))
+end
+
 function crowdsec:access()
 	-- Check if CS is activated
 	if not self:is_needed() then
@@ -458,6 +795,15 @@ function crowdsec:access()
 			-- a Reports row for a request that may end up allowed by an explicit workflow rule.
 			return self:ret(true, "CrowdSec verdict deferred to the security workflows : " .. tostring(err))
 		end
+		-- CROWDSEC_BAN_REFRESH in seconds, 0 when off; a service without leases pays one string read
+		local setting = self.variables["CROWDSEC_BAN_REFRESH"]
+		local refresh = setting and setting ~= "" and setting ~= "0" and parse_duration(setting, "s") or 0
+		if refresh > 0 then
+			local promoted, promote_err = pcall(self.promote, self, bouncer, scope, verdict, evidence, refresh)
+			if not promoted then
+				self.logger:log(ERR, "can't promote the CrowdSec ban to a lease : " .. tostring(promote_err))
+			end
+		end
 		return self:ret(true, "CrowdSec bouncer denied request : " .. tostring(err), get_deny_status(), nil, verdict)
 	end
 
@@ -529,7 +875,7 @@ function crowdsec:defer_verdict(verdict, detect)
 end
 
 function crowdsec:api()
-	local operation = self.ctx.bw.uri:match("^/crowdsec/(%a+)$")
+	local operation = self.ctx.bw.uri:match("^/crowdsec/([%a_]+)$")
 	if
 		self.ctx.bw.request_method == "POST"
 		and (
@@ -539,6 +885,7 @@ function crowdsec:api()
 			or operation == "unban"
 			or operation == "allowlists"
 			or operation == "allowlistcheck"
+			or operation == "refresh_ip"
 		)
 	then
 		if operation == "connections" then

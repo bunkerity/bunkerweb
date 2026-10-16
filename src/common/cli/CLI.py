@@ -414,10 +414,139 @@ class CLI(ApiCaller):
         output += f"{self.RED}{'─' * width}{self.RESET}\n"
         return output
 
-    def unban(self, ip: str, service: Optional[str] = None) -> Tuple[bool, str]:
-        """Unban an IP address globally or from a specific service"""
-        # Always use API as the source of truth for unban
+    @staticmethod
+    def __lease_tools():
+        """The modules that classify and unban CrowdSec leases, or None where they are not installed.
+
+        The bunkerweb image ships no database package (`db_methods` carries the one definition of a lease), so
+        the import is attempted when needed and its absence is not an error.
+        """
+        try:
+            import crowdsec_unban  # type: ignore
+            from CrowdSec import CrowdSecClient, CrowdSecError  # type: ignore
+        except ImportError:
+            return None
+        return CrowdSecClient, CrowdSecError, crowdsec_unban
+
+    def __find_leases(self, tools, ip: str, ban_scope: str, service: Optional[str]):
+        """(client, runtime, leases, failures): the live CrowdSec leases of one identity, found where the router finds them.
+
+        Runtime first (every instance's `GET /bans`, plus the Redis key), never the database alone: `sync-bans` learns once a
+        minute. Without a database the instances are asked through bwcli's own connections and there is no client, so a
+        lease can be recognised but not removed. `failures` lists what could not be checked.
+        """
+        client_class, crowdsec_error, module = tools
+        client = None
+        if self.__db:
+            try:
+                client = client_class(self.__db)
+                runtime = module.collect_runtime(client)
+            except crowdsec_error as e:
+                return None, None, [], [str(e)]
+        elif not self.apis:
+            return None, None, [], []
+        else:
+            ok, responses = self.send_to_apis("GET", "/bans", response=True)
+            rows = {host: reply.get("data") for host, reply in (responses or {}).items() if isinstance(reply, dict)}
+            runtime = {"rows": {host: data for host, data in rows.items() if isinstance(data, list)}, "failures": [] if ok else ["instances"]}
+        leases, failures = module.find_leases(runtime, ip, ban_scope, service, self.__redis)
+        return client, runtime, leases, failures
+
+    def __format_lease_preview(self, ip: str, current: dict) -> str:
+        lines = [f"IP {ip} is banned by CrowdSec. Unbanning it deletes these CrowdSec decisions first, then removes the BunkerWeb ban:"]
+        for decision in current["decisions"]:
+            lines.append(
+                f"  {decision.get('scope')} {decision.get('value')}: {decision.get('type')}, origin {decision.get('origin')}, "
+                f"scenario {decision.get('scenario')} (connection {decision.get('connection_id')})"
+            )
+        if not current["decisions"]:
+            lines.append("  no active CrowdSec ban decision, only the BunkerWeb ban is removed")
+        if current["unavailable"]:
+            lines.append(f"{self.ICON_WARNING} Unavailable, the result will be partial: {', '.join(current['unavailable'])}")
+        if current["warnings"]["list_origin"]:
+            lines.append(
+                f"{self.ICON_WARNING} Some decisions come from a CrowdSec list or the community blocklist and may come back: add the IP to a CrowdSec allowlist"
+            )
+        if current["warnings"]["range"]:
+            lines.append(f"{self.ICON_WARNING} A decision covers a range: deleting it unblocks every IP of that range")
+        if current["management_missing"]:
+            lines.append(f"{self.ICON_WARNING} CrowdSec management credentials are missing on: {', '.join(current['management_missing'])}")
+        lines.append("Nothing was changed. Run the command again with -confirm to apply.")
+        return "\n".join(lines)
+
+    def __unban_lease(self, tools, client, runtime, ip: str, ban_scope: str, service: Optional[str], confirm: bool) -> Tuple[bool, str]:
+        """Preview, then with `confirm` apply, through the module the API router uses. Never `revoke_ban`, never the generic `/unban`."""
+        _, crowdsec_error, module = tools
+        if client is None:
+            return False, self.__format_error(
+                f"IP {ip} is banned by CrowdSec. Removing a CrowdSec ban needs the database (run bwcli from the scheduler host): use the Web UI or the API instead"
+            )
+        try:
+            current = module.preview(client, ip, ban_scope, service, runtime, self.__redis)
+            if not confirm:
+                return False, self.__format_lease_preview(ip, current)
+            result = module.execute(
+                client,
+                ip,
+                ban_scope,
+                service,
+                [decision["key"] for decision in current["decisions"]],
+                None,
+                db=self.__db,
+                redis_client=self.__redis,
+                actor="bwcli",
+            )
+        except crowdsec_error as e:
+            return False, self.__format_error(f"Failed to unban {ip} from CrowdSec: {e}")
+        if result["status"] == "changed":
+            return False, self.__format_error(
+                f"The CrowdSec ban of {ip} or its decisions changed since the preview, nothing was removed: run the command again"
+            )
+        if result["status"] != "success":
+            lines = [f"Partial CrowdSec result for {ip}: run the command again to finish"]
+            lines += [f"failed {failure.get('key') or failure.get('connection_id')}: {failure['error']}" for failure in result["failed"]]
+            lines += [f"ban not removed on {failure['instance']}: {failure['error']}" for failure in result["lease_failed"]]
+            lines += [f"database not updated: {failure['error']}" for failure in result["db_failed"]]
+            lines += [f"instance down, its ban ends on its own: {host}" for host in result["down"]]
+            lines += [f"unavailable: {name}" for name in result["unavailable"]]
+            return False, self.__format_error("\n".join(lines))
+        return True, self.__format_success(
+            f"{self.ICON_UNLOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been unbanned from CrowdSec\n"
+            f"CrowdSec decisions deleted: {len(result['deleted'])}, already absent: {len(result['already_absent'])}"
+        )
+
+    def unban(self, ip: str, service: Optional[str] = None, confirm: bool = False) -> Tuple[bool, str]:
+        """Unban an IP address globally or from a specific service.
+
+        A CrowdSec ban (a lease) also has CrowdSec decisions behind it: without `confirm` the CLI prints what would be
+        deleted and changes nothing; with it, the unban is applied through `crowdsec_unban`, like the API does.
+        """
         ban_scope = "service" if service else "global"
+        failures = []
+        tools = self.__lease_tools()
+        if tools:
+            try:
+                client, runtime, leases, failures = self.__find_leases(tools, ip, ban_scope, service)
+                if leases:
+                    return self.__unban_lease(tools, client, runtime, ip, ban_scope, service, confirm)
+            except BaseException as e:
+                return False, self.__format_error(f"Failed to unban {ip}: {e}")
+        ok, text = self.__unban_explicit(ip, ban_scope, service)
+        if failures:
+            # Same as the router: the unban ran, but a lease on a connection that could not be asked would come back
+            note = (
+                f"Could not check every BunkerWeb instance for a CrowdSec ban of {ip}: {'; '.join(failures)}. "
+                "If one blocks it, the ban comes back: run the command again once they answer."
+            )
+            if not ok:
+                return False, text + self.__format_error(note)
+            # The revoke persisted, so the command succeeded: the incomplete check is a warning, not a failure
+            return True, f"{text}{self.YELLOW}{self.ICON_WARNING} {note}{self.RESET}\n"
+        return ok, text
+
+    def __unban_explicit(self, ip: str, ban_scope: str, service: Optional[str]) -> Tuple[bool, str]:
+        """The unban of an explicit ban: revoke in the database, then push to the instances."""
+        # Always use API as the source of truth for unban
         try:
             data = {"ip": ip, "ban_scope": ban_scope}
             if service:
@@ -594,6 +723,21 @@ class CLI(ApiCaller):
             bans.append(ban_data)
         return bans
 
+    def __kind_line(self, ban: dict) -> str:
+        """The `Kind:` line of a listed ban, or nothing where the kind cannot be told.
+
+        Database rows carry `kind`; instance and Redis rows do not and are classified with the helper the API uses. An
+        install without the database package (the bunkerweb image) has no such helper and shows no kind rather than a guess.
+        """
+        kind = ban.get("kind")
+        if kind is None:
+            try:
+                from db_methods.bans import ban_kind  # type: ignore
+            except ImportError:
+                return ""
+            kind = ban_kind(ban)
+        return f"     {self.ICON_INFO} Kind: {'CrowdSec lease' if kind == 'crowdsec_lease' else 'ban'}\n"
+
     def bans(self) -> Tuple[bool, str]:
         """Get all bans from the system"""
         servers = {}
@@ -664,6 +808,7 @@ class CLI(ApiCaller):
                     cli_str += f"  {self.ICON_LOCK} {ip_info}\n"
                     cli_str += f"     {self.ICON_CLOCK} Banned {banned_date}{remaining}\n"
                     cli_str += f"     {self.ICON_INFO} Reason: {ban.get('reason', 'no reason given')}\n"
+                    cli_str += self.__kind_line(ban)
 
                     # Add separator between bans except after the last one
                     if ban != global_bans[-1]:
@@ -698,6 +843,7 @@ class CLI(ApiCaller):
                     cli_str += f"  {self.ICON_LOCK} {ip_info} - {service_info}\n"
                     cli_str += f"     {self.ICON_CLOCK} Banned {banned_date}{remaining}\n"
                     cli_str += f"     {self.ICON_INFO} Reason: {ban.get('reason', 'no reason given')}\n"
+                    cli_str += self.__kind_line(ban)
 
                     if ban != service_bans[-1]:
                         cli_str += f"  {self.BLUE}· · · · · · · · · · · · · · · · · · · · · · ·{self.RESET}\n"

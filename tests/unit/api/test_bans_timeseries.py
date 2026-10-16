@@ -47,16 +47,19 @@ def _load_router():
         "bw_bans.routers": ModuleType("bw_bans.routers"),
         "bw_bans.auth": ModuleType("bw_bans.auth"),
         "bw_bans.auth.guard": ModuleType("bw_bans.auth.guard"),
+        "bw_bans.auth.biscuit": ModuleType("bw_bans.auth.biscuit"),
         "bw_bans.deps": ModuleType("bw_bans.deps"),
         "bw_bans.schemas": ModuleType("bw_bans.schemas"),
         "bw_bans.utils": ModuleType("bw_bans.utils"),
     }
     names["fastapi"].APIRouter = _Router
     names["fastapi"].Depends = lambda dependency: dependency
+    names["fastapi"].Request = object
     names["fastapi.responses"].JSONResponse = _Response
     for package in ("bw_bans", "bw_bans.routers", "bw_bans.auth"):
         names[package].__path__ = []
     names["bw_bans.auth.guard"].guard = object()
+    names["bw_bans.auth.biscuit"].authorize_resource = lambda *_args: None
     names["bw_bans.deps"].get_instances_api_caller = object()
     names["bw_bans.schemas"].BanRequest = object
     names["bw_bans.schemas"].UnbanRequest = object

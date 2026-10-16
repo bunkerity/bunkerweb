@@ -133,7 +133,8 @@ class TestGetBans:
     def test_emits_the_runtime_ban_shape(self, db):
         db.upsert_ban("1.2.3.4", ban_scope="service", service_id="app.example.com", reason="manual", country="FR", reason_data={"n": 1}, expires_at=_in(3600))
         (ban,) = db.get_bans()
-        assert set(ban) == {"ip", "reason", "service", "date", "country", "ban_scope", "exp", "expires_at", "permanent", "reason_data"}
+        assert set(ban) == {"ip", "reason", "service", "date", "country", "ban_scope", "exp", "expires_at", "permanent", "reason_data", "kind"}
+        assert ban["kind"] == "ban"
         assert (ban["service"], ban["ban_scope"], ban["reason_data"], ban["permanent"]) == ("app.example.com", "service", {"n": 1}, False)
         assert 3500 < ban["exp"] <= 3600
 
@@ -197,6 +198,69 @@ class TestLearn:
     def test_bad_ip_is_skipped_without_killing_the_batch(self, db):
         inserted, _ = db.learn_bans([_record("nonsense"), _record("1.2.3.4")])
         assert [i["ip"] for i in inserted] == ["1.2.3.4"]
+
+
+class TestLearnRenewal:
+    """A renewal (same identity, later expiry) must reach the row, and a re-ban after a natural
+    expiry must reactivate it. Promoted from proofs/W25-X1D/repro_learn_renewal.py: before the fix
+    ``learn_bans`` returned at "already known and active" and a CrowdSec lease renewed every
+    ``CROWDSEC_BAN_REFRESH`` seconds showed in the DB only until its first expiry."""
+
+    def test_renewal_of_active_row_extends_the_expiry(self, db):
+        db.learn_bans([_record("9.9.9.9", expires_at=_in(60).timestamp())])
+        inserted, tombstoned = db.learn_bans([_record("9.9.9.9", expires_at=_in(600).timestamp())])
+        assert (inserted, tombstoned) == ([], [])
+        (row,) = _rows(db)
+        left = (row.expires_at.replace(tzinfo=timezone.utc) if row.expires_at.tzinfo is None else row.expires_at) - datetime.now(timezone.utc)
+        assert left.total_seconds() > 300
+
+    def test_reban_after_natural_expiry_reactivates_the_row(self, db):
+        db.upsert_ban("9.9.9.9", reason="badbehavior", expires_at=_in(3600))
+        with db._db_session() as session:
+            session.query(Bans).update({"expires_at": datetime.now(timezone.utc) - timedelta(seconds=30)})
+            session.commit()
+        assert db.get_bans() == []
+        inserted, tombstoned = db.learn_bans([_record("9.9.9.9", expires_at=_in(60).timestamp())])
+        assert tombstoned == []
+        assert len(inserted) == 1
+        (ban,) = db.get_bans()
+        assert 30 < ban["exp"] <= 60
+        assert len(_rows(db)) == 1
+
+    def test_expiry_jitter_is_not_a_renewal(self, db):
+        # An instance re-reports a pushed ban up to a second or two off the DB expiry (int seconds).
+        db.upsert_ban("1.2.3.4", reason="manual", created_by="admin", expires_at=_in(3600))
+        (before,) = _rows(db)
+        db.learn_bans([_record("1.2.3.4", expires_at=_in(3601.5).timestamp())])
+        (after,) = _rows(db)
+        assert after.expires_at == before.expires_at and after.reason == "manual"
+
+    def test_a_shorter_report_never_shortens_the_row(self, db):
+        db.learn_bans([_record("1.2.3.4", expires_at=_in(3600).timestamp())])
+        (before,) = _rows(db)
+        db.learn_bans([_record("1.2.3.4", expires_at=_in(60).timestamp())])
+        (after,) = _rows(db)
+        assert after.expires_at == before.expires_at
+
+    def test_permanent_row_stays_permanent(self, db):
+        db.upsert_ban("1.2.3.4", reason="manual")
+        db.learn_bans([_record("1.2.3.4", expires_at=_in(60).timestamp())])
+        (row,) = _rows(db)
+        assert row.expires_at is None
+
+    def test_renewal_keeps_the_original_creation_date(self, db):
+        db.learn_bans([_record("1.2.3.4", date=_in(-100).timestamp(), expires_at=_in(60).timestamp())])
+        db.learn_bans([_record("1.2.3.4", date=_in(-5).timestamp(), expires_at=_in(600).timestamp())])
+        (row,) = _rows(db)
+        created = row.created_at.replace(tzinfo=timezone.utc) if row.created_at.tzinfo is None else row.created_at
+        assert (datetime.now(timezone.utc) - created).total_seconds() > 50
+
+    def test_renewal_of_a_revoked_row_is_not_resurrected_by_the_renewal_path(self, db):
+        db.upsert_ban("1.2.3.4", expires_at=_in(60))
+        db.revoke_ban("1.2.3.4", revoked_by="admin")
+        _, tombstoned = db.learn_bans([_record("1.2.3.4", date=_in(-300).timestamp(), expires_at=_in(600).timestamp())])
+        assert len(tombstoned) == 1
+        assert db.get_bans() == []
 
 
 class TestPurge:

@@ -1,5 +1,7 @@
 from urllib.parse import quote
 
+from requests.exceptions import ConnectionError as RequestsConnectionError, Timeout
+
 from base_api_client import ApiClientError, ApiUnavailableError, BaseApiClient  # type: ignore  # noqa: F401
 
 # Re-export for backwards compatibility — other UI modules import these from here
@@ -152,6 +154,38 @@ class ApiClient(BaseApiClient):
 
     def unban(self, unbans: list):
         return self._post("/bans/unban", json=unbans)
+
+    def get_instance_bans(self):
+        """Runtime view: ``{hostname: {"data": [ban rows]}}``, what each instance enforces right now."""
+        return self._get("/bans/instances")
+
+    # Statuses of ``POST /bans/unban`` that carry a result the caller needs: 409 the preview of a CrowdSec
+    # ban, 502 the per-item ``results``, 403 a refused permission. ``_request`` raises on all but 200 and
+    # keeps only the message, so these four are read here, body included.
+    _UNBAN_RESULT_STATUSES = (200, 403, 409, 502)
+
+    def unban_crowdsec(self, unbans: list) -> tuple[int, dict]:
+        """``POST /bans/unban`` returning ``(status, body)`` for the statuses that carry a result.
+
+        A CrowdSec unban deletes decisions on the engine, then refreshes it, then removes the ban on every
+        instance: it outlives the usual read budget, and a repeated request would redo the deletions, so
+        the session never retries it.
+        """
+        try:
+            resp = self._no_retry_session.request("POST", f"{self.base_url}/bans/unban", json=unbans, timeout=(5, 100))
+        except (RequestsConnectionError, Timeout) as e:
+            raise ApiUnavailableError(f"Cannot reach API at {self.base_url}: {e}") from e
+        try:
+            body = resp.json()
+        except Exception:
+            body = {}
+        if resp.status_code in self._UNBAN_RESULT_STATUSES:
+            return resp.status_code, body if isinstance(body, dict) else {}
+        detail = (body.get("message") or body.get("msg") or body.get("detail")) if isinstance(body, dict) else None
+        message = detail if isinstance(detail, str) and detail else f"HTTP {resp.status_code}"
+        if resp.status_code >= 500:
+            raise ApiUnavailableError(f"API returned {resp.status_code}: {message}")
+        raise ApiClientError(message, status_code=resp.status_code)
 
     # ── CrowdSec ───────────────────────────────────────────────────────
 

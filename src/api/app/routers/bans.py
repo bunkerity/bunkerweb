@@ -1,9 +1,15 @@
+from contextlib import suppress
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
+from os import environ
 from typing import List, Optional, Union
 import json
 
+from CrowdSec import CrowdSecClient, CrowdSecError  # type: ignore
+from crowdsec_unban import apply, collect_runtime, find_leases, involved, preview, redis_client_from, revalidate  # type: ignore
+
+from ..auth.biscuit import authorize_resource
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller
 from ..schemas import BanRequest, UnbanRequest
@@ -115,13 +121,72 @@ def ban(req: Union[List[BanRequest], BanRequest, str], api_caller=Depends(get_in
     return JSONResponse(status_code=200 if all_ok else 502, content={"status": "success" if all_ok else "error"})
 
 
+LEASE_FIELDS = frozenset({"remove_crowdsec_decisions", "confirmed", "decision_keys"})
+LEASE_FLAGS_MESSAGE = (
+    "This IP is blocked by a CrowdSec ban. Unbanning it also deletes the CrowdSec decisions behind it: review the preview, "
+    "then resend with remove_crowdsec_decisions=true, confirmed=true and decision_keys set to the keys of the preview."
+)
+
+
+def _error(status_code: int, message: str, **extra) -> JSONResponse:
+    return JSONResponse(status_code=status_code, content={"status": "error", "message": message} | extra)
+
+
+def _redis_client():
+    """The Redis client for the ban keys: the environment over the global configuration, None when Redis is off or unreachable."""
+    try:
+        settings = (get_db(log=False).get_config(global_only=True) or {}) | {k: v for k, v in environ.items() if k.startswith("REDIS_") or k == "USE_REDIS"}
+        return redis_client_from(settings)
+    except Exception as exc:
+        LOGGER.warning(f"Couldn't open Redis to look for CrowdSec bans: {exc}")
+        return None
+
+
+def _prepare_lease(request: Request, client, entry: dict, admin: bool, runtime: dict, redis_client) -> Optional[JSONResponse]:
+    """Compute the preview internally, then authorize crowdsec_delete on every connection it names, failed ones included.
+
+    Nothing leaves the server before this returns. Returns an error response, or None with entry["preview"] and
+    entry["allowed"] (None for an admin) set.
+    """
+    try:
+        entry["preview"] = preview(client, entry["ip"], entry["ban_scope"], entry["service"], runtime, redis_client)
+    except CrowdSecError as exc:
+        if not admin:
+            # The connections are unknown: only a caller allowed on every connection may learn why it failed
+            authorize_resource(request, "bans", "crowdsec_delete", "*")
+        return _error(exc.status, str(exc))
+    entry["allowed"] = None
+    if not admin:
+        connections, wildcard = involved(entry["preview"])
+        if wildcard:
+            # An unavailable entry with no connection id cannot be matched to a grant
+            authorize_resource(request, "bans", "crowdsec_delete", "*")
+            connections.add("*")
+        for connection_id in sorted(connections - {"*"}):
+            authorize_resource(request, "bans", "crowdsec_delete", connection_id)
+        entry["allowed"] = connections
+    return None
+
+
+def _lease_flags_missing(entry: dict) -> bool:
+    item = entry["item"]
+    return not (item.remove_crowdsec_decisions and item.confirmed and item.decision_keys is not None)
+
+
 @router.post("/unban", dependencies=[Depends(guard)])
 @router.delete("", dependencies=[Depends(guard)])
-def unban(req: Union[List[UnbanRequest], UnbanRequest, str], api_caller=Depends(get_instances_api_caller)) -> JSONResponse:
+def unban(req: Union[List[UnbanRequest], UnbanRequest, str], request: Request, api_caller=Depends(get_instances_api_caller)) -> JSONResponse:
     """Remove one or multiple bans across all BunkerWeb instances.
 
+    Explicit bans are removed on every instance. A CrowdSec lease also deletes the CrowdSec decisions behind it, after
+    the caller confirmed the preview; a plain unban of a lease answers 409 with that preview. Leases are found in the
+    runtime view of the instances (and Redis), never taken from the request. A lease is removed and revoked by its
+    ``lease_id`` only, so an explicit ban on the same IP is never touched. Nothing is changed until every lease passed
+    authorization and revalidation, and the database revoke of a lease is the last step.
+
     Args:
-        req: Unban request(s) containing IP and optional service
+        req: Unban request(s) containing IP and optional service. For a lease: remove_crowdsec_decisions, confirmed
+            and decision_keys.
     """
     if isinstance(req, str):
         try:
@@ -137,18 +202,88 @@ def unban(req: Union[List[UnbanRequest], UnbanRequest, str], api_caller=Depends(
     else:
         items = req if isinstance(req, list) else [req]
 
-    all_ok = True
+    admin = bool(getattr(request.state, "auth_admin", False))
+    actor = getattr(request.state, "auth_subject", "biscuit")
+    entries = []
     for it in items:
-        payload = it.model_dump()
+        payload = it.model_dump(exclude=LEASE_FIELDS)
         _derive_scope(payload)
+        entries.append({"item": it, "payload": payload, "ip": payload["ip"], "ban_scope": payload["ban_scope"], "service": payload.get("service")})
+
+    # Prepare: find the leases in the runtime view (one snapshot for the whole request), then authorize. Nothing here mutates.
+    client = runtime = None
+    redis_client = _redis_client()
+    with suppress(CrowdSecError):
+        client = CrowdSecClient(get_db(log=False))
+        runtime = collect_runtime(client)
+    for entry in entries:
+        if runtime is None:
+            entry["lease_check"] = "incomplete"
+            continue
+        leases, failures = find_leases(runtime, entry["ip"], entry["ban_scope"], entry["service"], redis_client)
+        if not leases:
+            if failures:
+                entry["lease_check"] = "incomplete"
+            continue
+        entry["lease_item"] = True
+        failure = _prepare_lease(request, client, entry, admin, runtime, redis_client)
+        if failure is not None:
+            return failure
+
+    blocking = [entry for entry in entries if entry.get("lease_item") and _lease_flags_missing(entry)]
+    if blocking:
+        shown = [{"ip": e["ip"], "ban_scope": e["ban_scope"], "service": e["service"], "preview": e["preview"]} for e in blocking]
+        return _error(409, LEASE_FLAGS_MESSAGE, preview=shown[0]["preview"], previews=shown)
+
+    # Prepare barrier: every lease is revalidated against a fresh snapshot before the first mutation
+    leased = [entry for entry in entries if entry.get("lease_item")]
+    fresh = collect_runtime(client) if leased else None
+    for entry in leased:
+        try:
+            checked = revalidate(client, entry["ip"], entry["ban_scope"], entry["service"], entry["item"].decision_keys, entry["allowed"], fresh, redis_client)
+        except CrowdSecError as exc:
+            return _error(exc.status, str(exc))
+        if checked["status"] != "ready":
+            body = {"preview": checked["preview"]} if "preview" in checked else {}
+            return _error(409, "The CrowdSec bans for this IP changed since the preview; review it again.", **body)
+        entry["preview"] = checked["preview"]
+
+    # Apply: failures from here on are operational, never selection changes
+    all_ok = True
+    results = []
+    for entry in entries:
+        if entry.get("lease_item"):
+            outcome = apply(client, entry["ip"], entry["ban_scope"], entry["service"], entry["preview"], db=get_db(), actor=str(actor))
+            ok = outcome.get("status") == "success"
+            (LOGGER.info if ok else LOGGER.warning)(
+                "CrowdSec unban actor=%r ip=%s scope=%s service=%r outcome=%s deleted=%d failed=%d",
+                actor,
+                entry["ip"],
+                entry["ban_scope"],
+                entry["service"],
+                outcome.get("status"),
+                len(outcome.get("deleted", [])) + len(outcome.get("already_absent", [])),
+                len(outcome.get("failed", [])) + len(outcome.get("lease_failed", [])) + len(outcome.get("db_failed", [])),
+            )
+            results.append({"kind": "crowdsec_lease", "ip": entry["ip"], "ban_scope": entry["ban_scope"], "service": entry["service"], **outcome})
+            all_ok = all_ok and ok
+            continue
         # Unlike ban, a revoke that is not durable is refused. Without the tombstone the next
         # convergence pass re-learns the ban from an instance that missed this unban and re-pushes
         # it to the whole fleet — the operator's unban would be silently undone.
-        db_error = get_db().revoke_ban(payload["ip"], ban_scope=payload["ban_scope"], service_id=payload.get("service") or "")
+        db_error = get_db().revoke_ban(entry["ip"], ban_scope=entry["ban_scope"], service_id=entry["service"] or "")
         if db_error:
-            LOGGER.error(f"Refusing to unban {payload['ip']}: {db_error}")
+            LOGGER.error(f"Refusing to unban {entry['ip']}: {db_error}")
             all_ok = False
             continue
-        ok, _ = api_caller.send_to_apis("POST", "/unban", data=payload)
+        ok, _ = api_caller.send_to_apis("POST", "/unban", data=entry["payload"])
+        if entry.get("lease_check") == "incomplete":
+            ok = False
+            results.append(
+                {"kind": "ban", "ip": entry["ip"], "ban_scope": entry["ban_scope"], "service": entry["service"], "status": "error", "lease_check": "incomplete"}
+            )
         all_ok = all_ok and ok
-    return JSONResponse(status_code=200 if all_ok else 502, content={"status": "success" if all_ok else "error"})
+    content = {"status": "success" if all_ok else "error"}
+    if results:
+        content["results"] = results
+    return JSONResponse(status_code=200 if all_ok else 502, content=content)
