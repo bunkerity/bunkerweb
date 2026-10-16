@@ -423,6 +423,9 @@ def plugin_tar_filter(tarinfo):
         # Group/other write never counts: safe_tar_extractall() drops it on restore (and leaves directory modes to
         # the umask), so a tree written under a group-writable umask would otherwise hash differently once restored.
         tarinfo.mode &= ~0o022
+        # Restore ignores directory modes, so they must not affect the checksum.
+        if tarinfo.isdir():
+            tarinfo.mode = 0o755
         tarinfo.uid = 0
         tarinfo.gid = 0
         tarinfo.uname = "root"

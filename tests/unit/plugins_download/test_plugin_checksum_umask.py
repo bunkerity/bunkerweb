@@ -70,3 +70,21 @@ def test_the_executable_bit_still_counts(tmp_path):
     (plugin / "jobs" / "run.py").chmod(0o640)
 
     assert _checksum(plugin) != before
+
+
+@pytest.mark.parametrize("dir_mode, restore_umask", [(0o750, 0o022), (0o700, 0o022), (0o750, 0o027), (0o700, 0o027), (0o755, 0o027)])
+def test_checksum_survives_restore_whatever_the_directory_modes(tmp_path, dir_mode, restore_umask):
+    plugin = _build(tmp_path / "src", 0o022)
+    for sub in (plugin / "jobs" / "sub", plugin / "jobs"):
+        sub.chmod(dir_mode)
+    restored = _restore(plugin, tmp_path / "out", restore_umask)
+
+    assert _checksum(plugin) == _checksum(restored)
+
+
+def test_directory_mode_is_not_part_of_the_checksum(tmp_path):
+    a = _build(tmp_path / "a", 0o022)
+    b = _build(tmp_path / "b", 0o022)
+    (b / "jobs" / "sub").chmod(0o700)
+
+    assert _checksum(a) == _checksum(b)

@@ -21,10 +21,12 @@ Runs the shipped file through node with a stub ``window``, the way ``test_export
 runs ``dataTableInit.js``.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 from json import dumps, loads
 from pathlib import Path
 from shutil import which
 from subprocess import run
+from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -79,18 +81,25 @@ def node():
 
 
 def render(node, cases, catalog=None):
-    harness = Path(__file__).resolve().parent / ".security_reason_harness.js"
-    harness.write_text(HARNESS, encoding="utf-8")
-    try:
+    with TemporaryDirectory() as tmp:
+        harness = Path(tmp) / "harness.js"
+        harness.write_text(HARNESS, encoding="utf-8")
         result = run(
             [node, str(harness), str(COMPONENT), dumps(catalog or {}), dumps(cases)],
             capture_output=True,
             text=True,
         )
-        assert result.returncode == 0, result.stderr
-        return loads(result.stdout)
-    finally:
-        harness.unlink(missing_ok=True)
+    assert result.returncode == 0, result.stderr
+    return loads(result.stdout)
+
+
+def test_concurrent_renders_do_not_share_a_harness_file(node):
+    case = [{"reason": "crowdsec", "data": {"source": "lapi", "action": "captcha"}}]
+    with ThreadPoolExecutor(8) as pool:
+        results = list(pool.map(lambda _: render(node, case), range(32)))
+
+    assert all(result == ["CrowdSec LAPI: captcha challenge"] for result in results)
+    assert not (Path(__file__).resolve().parent / ".security_reason_harness.js").exists()
 
 
 class TestTheSentence:
