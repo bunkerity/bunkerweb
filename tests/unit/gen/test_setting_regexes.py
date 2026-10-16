@@ -60,6 +60,10 @@ _URL_OLD = r"[\-\w@:%.+~#=]+[\-\w\(\)!@:%+.~#?&\/=$]*"
 # The first class is a subset of the second, so `A+B*` is `AB*` without the quadratic split.
 _URL_NEW = r"[\-\w@:%.+~#=][\-\w\(\)!@:%+.~#?&\/=$]*"
 _COOKIE_FLAG = r"(([Ee]xpires)=[^\s;]+|([Dd]omain)=[^\s;]+|([Pp]ath)=[^\s;]+|[Hh]ttp[Oo]nly|[Ss]ame[Ss]ite(=([Ll]ax|[Ss]trict|[Nn]one))?|[Ss]ecure)"
+# COOKIE_FLAGS as 1.7 shipped it before it was tightened to what nginx_cookie_flag_module accepts.
+_COOKIE_FLAGS_OLD = rf"^(\*|[^\s;]+)?(\s+{_COOKIE_FLAG})*$"
+# COOKIE_FLAGS now: a cookie name (or `*`) and at least one of HttpOnly, Secure, SameSite[=Lax|Strict|None].
+_COOKIE_FLAGS_NEW = r"""^((\*|[^\s;{}"'\\]+)(\s+([Hh]ttp[Oo]nly|[Ss]ecure|[Ss]ame[Ss]ite(=([Ll]ax|[Ss]trict|[Nn]one))?))+)?$"""
 _HEADER_ITEM = r"[\w\-]+\s+[^;\s{}#][^;{}#\r\n]*"
 _SET_ITEM = r"\$[a-z_\-]+\s+[^;\s{}#][^;{}#\r\n]*"
 
@@ -81,7 +85,7 @@ def _token(item: str) -> str:
     return rf"(?={item}(?: |$))[^ \n]+"
 
 
-# old regex -> (new regex, kind, item regex for the "glued" kind)
+# old regex -> (new regex, kind or tuple of kinds, item regex for the "glued" kind)
 REWRITES: dict[str, tuple[str, str, str | None]] = {
     # No end anchor: `re.search` accepted any suffix.
     r"^[\w\-]+": (r"^[^:]+$", "rfc7617", None),
@@ -133,7 +137,13 @@ REWRITES: dict[str, tuple[str, str, str | None]] = {
         "embedded-newline",
         None,
     ),
-    rf"^(\*|[^\s;]+)?(\s*{_COOKIE_FLAG})*$": (rf"^(\*|[^\s;]+)?(\s+{_COOKIE_FLAG})*$", "glued-after-head", _COOKIE_FLAG),
+    # COOKIE_FLAGS, both generations, to the current regex. The module refuses what the old ones accepted and the reload fails.
+    rf"^(\*|[^\s;]+)?(\s*{_COOKIE_FLAG})*$": (
+        _COOKIE_FLAGS_NEW,
+        ("glued-after-head", "cookie-attribute", "cookie-no-flag", "cookie-no-name", "cookie-name-chars"),
+        _COOKIE_FLAG,
+    ),
+    _COOKIE_FLAGS_OLD: (_COOKIE_FLAGS_NEW, ("cookie-attribute", "cookie-no-flag", "cookie-no-name", "cookie-name-chars"), None),
     # The token must be whole (`(?![^ ])`) so it is not re-split; \2 captured its leading spaces
     # and \1 still does.
     r"^(?! )(( *[^ ]+)(?!.*\2))*$": (r"^(?! )(?:( *[^ ]+)(?![^ ])(?!.*\1))*$", "same", None),
@@ -169,6 +179,15 @@ def _glued(item: str, value: str, skip_head: bool = False) -> bool:
     return any(not re.fullmatch(item, field) for field in fields)
 
 
+_COOKIE_ATTRIBUTE = re.compile(r"(?:expires|domain|path)=[^\s;]+", re.IGNORECASE)
+
+
+def _cookie_entries(value: str) -> tuple[str, list[str]]:
+    """The cookie name (a leading run of non-space, empty when the value starts with a space) and the flags after it."""
+    tokens = value.split()
+    return ("" if value[:1].isspace() else (tokens[0] if tokens else "")), (tokens if value[:1].isspace() else tokens[1:])
+
+
 # kind -> (reason, predicate(old_accepts, new_accepts, value, item))
 _EXPLAINED = {
     "same": ("no verdict may change", lambda old, new, value, item: False),
@@ -187,6 +206,22 @@ _EXPLAINED = {
     "embedded-newline": (
         "GRPC/REVERSE_PROXY_HEADERS and *_AUTH_REQUEST_SET: a value with a newline inside it, which the Configurator refuses anyway",
         lambda old, new, value, item: old and not new and bool(re.search(r"[\r\n].", value, re.DOTALL)),
+    ),
+    "cookie-attribute": (
+        "COOKIE_FLAGS: an Expires=, Domain= or Path= entry, which nginx_cookie_flag_module rejects (the reload fails)",
+        lambda old, new, value, item: old and not new and any(_COOKIE_ATTRIBUTE.fullmatch(flag) for flag in _cookie_entries(value)[1]),
+    ),
+    "cookie-no-flag": (
+        "COOKIE_FLAGS: a cookie name (or `*`) with no flag after it, which the module rejects",
+        lambda old, new, value, item: old and not new and value[:1] and not value[:1].isspace() and len(value.split()) == 1,
+    ),
+    "cookie-no-name": (
+        "COOKIE_FLAGS: flags with no cookie name or `*` in front of them",
+        lambda old, new, value, item: old and not new and value[:1].isspace() and bool(value.split()),
+    ),
+    "cookie-name-chars": (
+        "COOKIE_FLAGS: a cookie name holding a brace, quote or backslash, which would break out of the generated directive",
+        lambda old, new, value, item: old and not new and bool(re.search(r'[{}"\'\\]', _cookie_entries(value)[0])),
     ),
     "glued-after-head": (
         "COOKIE_FLAGS: two flags with no whitespace between them ('HttpOnlySecure') after the cookie name",
@@ -420,7 +455,11 @@ def test_the_rewritten_regexes_are_the_shipped_ones():
 @pytest.mark.parametrize("old", sorted(REWRITES), ids=lambda old: old[:40])
 def test_a_rewrite_keeps_the_verdict_of_the_old_regex(old):
     new, kind, item = REWRITES[old]
-    _, explains = _EXPLAINED[kind]
+    kinds = (kind,) if isinstance(kind, str) else kind
+
+    def explains(before, after, value, item):
+        return any(_EXPLAINED[k][1](before, after, value, item) for k in kinds)
+
     values = SHIPPED.get(new, {}).get("values", set())
     corpus = _corpus(old, new, values)
     unexplained, accepted = [], 0
