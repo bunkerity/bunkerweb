@@ -93,7 +93,7 @@ def test_initial_cluster_failure_constructs_memory_limiter():
             raise ConnectionError("cluster not yet formed")
         return "memory-limiter"
 
-    make = load("_make_limiter", Limiter=limiter)
+    make = load("_make_limiter", Limiter=limiter, _redact_storage=load("_redact_storage"))
     assert (
         make("redis+cluster://r1:7000", {}, key_func=lambda: "ip", default_limits=["1/minute"], strategy="fixed-window", headers_enabled=True)
         == "memory-limiter"

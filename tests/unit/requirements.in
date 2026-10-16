@@ -9,6 +9,10 @@ alembic==1.18.5
 bcrypt==5.0.0
 # Real Biscuit middleware tests need the same implementation shipped by the UI.
 https://github.com/eclipse-biscuit/biscuit-python/archive/c0fa69824a3e601da86cf5cecde09f75ea8df4d7.zip#egg=biscuit-python # 0.4.1
+# app.models.resilient_session (tests/unit/ui/test_resilient_redis_session.py) drives the real
+# Flask-Session interface, its cachelib fallback store and the msgspec serializer. Pinned to
+# src/ui/requirements.txt.
+cachelib==0.17.0
 cryptography==49.0.0
 defusedcsv==3.0.0
 # tests/unit/backup/test_downgrade_hold.py imports src/api/app/routers/system.py, which pulls
@@ -18,8 +22,15 @@ fastapi==0.141.1
 flask==3.1.3
 flask-babel==4.0.0
 flask-login==0.6.3
+flask-session==0.8.0
+# fastapi's TestClient (tests/unit/api/test_rate_limit_once.py) needs httpx. It is not an API
+# dependency, so it is pinned to the current release.
+httpx==0.28.1
 # gen/Templator import (jinja2) + scheduler/JobScheduler import (schedule). Pinned to src.
 jinja2==3.1.6
+# slowapi + limits: the real rate limiter that test_rate_limit_once.py drives. Pinned to src/api/requirements.in.
+limits==5.8.0
+msgspec==0.21.1
 psycopg[binary,pool]==3.3.4
 pydantic==2.13.4
 PyMySQL==1.2.0
@@ -35,9 +46,13 @@ python-dotenv==1.1.1
 # tests/unit/integrations/test_spec_default_expectations.py reads tests/core/*.yml at test
 # time (the anti-drift guard) — module-level `import yaml`, so the CI venv needs it too.
 pyyaml==6.0.3
+# The redis client the resilient session test (and flask-session's Redis interface) uses. Pinned to
+# src/common/gen/requirements.in.
+redis==8.1.0
 regex==2026.5.9
 requests==2.34.2
 schedule==1.2.2
+slowapi==0.1.10
 SQLAlchemy==2.0.50
 # WebAuthn ceremonies (app.models.webauthn). Pinned to src/ui/requirements.in.
 webauthn==3.0.0
