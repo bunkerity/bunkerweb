@@ -618,6 +618,15 @@ def test_the_script_asks_the_runtime_view_after_the_page_loaded():
     assert "runtime_leases" in script.split("ajax: {", 1)[1].split("error:", 1)[0], "every later draw carries the flag"
 
 
+def test_the_stats_script_carries_the_runtime_leases_flag_and_refreshes_after_the_check():
+    stats = (STATIC / "js" / "pages" / "bans-stats.js").read_text(encoding="utf-8")
+    page = (STATIC / "js" / "pages" / "bans.js").read_text(encoding="utf-8")
+
+    assert "runtime_leases" in stats.split("function fetchStats", 1)[1].split("function emptyStateNode", 1)[0]
+    assert "BWBansStats.runtimeLeases = true" in page
+    assert "BWBansStats.refresh()" in page.split("/runtime_leases", 1)[1][:600]
+
+
 def test_the_script_sends_a_lease_through_the_json_route_with_the_csrf_header():
     script = (STATIC / "js" / "pages" / "bans.js").read_text(encoding="utf-8")
 

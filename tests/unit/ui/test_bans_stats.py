@@ -138,6 +138,38 @@ def test_stats_empty_when_no_bans(route_app, monkeypatch):
     }
 
 
+def _stats_with_form(module, app, monkeypatch, collect, **form):
+    monkeypatch.setattr(module, "_collect_all_bans", collect)
+    with app.test_request_context("/bans/stats", method="POST", data=form):
+        return module.bans_stats.__wrapped__.__wrapped__().get_json()
+
+
+def test_stats_merge_runtime_leases_only_when_asked(route_app, monkeypatch):
+    module, app = route_app
+    seen = []
+
+    def collect(**kwargs):
+        seen.append(bool(kwargs.get("runtime_leases")))
+        return []
+
+    _stats_with_form(module, app, monkeypatch, collect)
+    _stats_with_form(module, app, monkeypatch, collect, runtime_leases="1")
+    assert seen == [False, True]
+
+
+def test_a_runtime_only_lease_is_counted_by_the_tiles_and_the_reason_card(route_app, monkeypatch):
+    module, app = route_app
+    stored = {"reason": "manual", "exp": 0, "permanent": True, "country": "US"}
+    lease = {"reason": "crowdsec", "exp": 20, "permanent": False, "country": "FR", "kind": "lease"}
+
+    def collect(**kwargs):
+        return [stored, lease] if kwargs.get("runtime_leases") else [stored]
+
+    body = _stats_with_form(module, app, monkeypatch, collect, runtime_leases="1")
+    assert body["active"] == 2 and body["countries"] == 2 and body["expiring_1h"] == 1
+    assert {r["reason"] for r in body["reason_breakdown"]} == {"manual", "crowdsec"}
+
+
 def test_stats_collect_all_bans_exception_returns_empty_not_500(route_app, monkeypatch):
     module, app = route_app
 

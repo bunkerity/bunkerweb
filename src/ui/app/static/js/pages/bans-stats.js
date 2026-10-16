@@ -12,6 +12,8 @@ window.BWBansStats = window.BWBansStats || {};
       type: "POST",
       data: {
         csrf_token: $("#csrf_token").val(),
+        // Set by bans.js once the instances report CrowdSec leases the database does not hold yet.
+        ...(window.BWBansStats.runtimeLeases ? { runtime_leases: "1" } : {}),
       },
     });
   }

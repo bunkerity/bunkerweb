@@ -78,9 +78,28 @@ $(document).ready(function () {
     },
   ];
 
-  // Country-flag cell rendering + tooltip retranslation now live in the shared
-  // components/country-flag.html / static/js/components/country-flag.js helper
-  // (window.BWCountryFlag) -- see that file's doc comment.
+  // Country-flag cell rendering lives in the shared components/country-flag.html /
+  // static/js/components/country-flag.js helper (window.BWCountryFlag) -- see that
+  // file's doc comment.
+
+  // The delegated tooltip reads data-bs-original-title when it opens, so the country
+  // titles are rewritten in place: BWCountryFlag.updateTooltips() would also dispose
+  // and rebuild every tooltip of the page.
+  const updateCountryTitles = () => {
+    $("#bans [data-country]").each(function () {
+      const $elem = $(this);
+      const countryCode = $elem.attr("data-country");
+      const countryName = t(
+        countryCode === "unknown"
+          ? "country.not_applicable"
+          : `country.${countryCode}`,
+        "Unknown",
+      );
+      if (countryName && countryName !== "country.not_applicable") {
+        $elem.attr("data-bs-original-title", countryName);
+      }
+    });
+  };
 
   // Utility functions
   function addDays(date, days) {
@@ -970,6 +989,7 @@ $(document).ready(function () {
   const bans_config = {
     tableSelector: "#bans",
     tableName: "bans",
+    delegatedTooltips: true,
     columnVisibilityCondition: (column) => column > 2 && column < 11,
     dataTableOptions: {
       columnDefs: [
@@ -1303,10 +1323,9 @@ $(document).ready(function () {
             .attr("data-bs-placement", "right")
             .tooltip();
         }
-        throttle(window.BWCountryFlag.updateTooltips, 200);
       },
       headerCallback: function (thead) {
-        throttle(updateHeaderTooltips, 200, thead, headers);
+        updateHeaderTooltips(thead, headers);
       },
     },
   };
@@ -1329,9 +1348,10 @@ $(document).ready(function () {
 
   const dt = initializeDataTable(bans_config);
   dt.on("draw.dt", function () {
-    throttle(window.BWCountryFlag.updateTooltips, 200);
-    throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-    $(".tooltip").remove();
+    // The rows are new: translate their [data-i18n] (country names)
+    applyTranslations();
+    updateCountryTitles();
+    updateHeaderTooltips(dt.table().header(), headers);
     // Hide waiting message and show table
     $("#bans-waiting").addClass("visually-hidden");
     $("#bans").removeClass("d-none");
@@ -1346,24 +1366,29 @@ $(document).ready(function () {
     }).done((answer) => {
       if (!answer || !answer.enabled) return;
       runtimeLeases = true;
-      if (answer.count > 0) dt.ajax.reload(null, false);
+      if (window.BWBansStats) window.BWBansStats.runtimeLeases = true;
+      if (answer.count > 0) {
+        dt.ajax.reload(null, false);
+        if (window.BWBansStats) window.BWBansStats.refresh();
+      }
     });
   });
   dt.on("column-visibility.dt", function (e, settings, column, state) {
-    throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-    $(".tooltip").remove();
+    updateHeaderTooltips(dt.table().header(), headers);
   });
   // Ensure tooltips are set after initialization
-  throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
+  updateHeaderTooltips(dt.table().header(), headers);
   // Hide waiting message and show table
   $("#bans-waiting").addClass("visually-hidden");
   $("#bans").removeClass("d-none");
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
+    let changed = false;
     $(selector)
       .find("th")
       .each((index, element) => {
         const $th = $(element);
+        if ($th.attr("data-bs-toggle") === "tooltip") return;
         // Try to get the data-i18n attribute from the header's span
         const i18nKey =
           $th.find("[data-i18n]").data("i18n") || $th.data("i18n");
@@ -1378,13 +1403,13 @@ $(document).ready(function () {
               "data-bs-toggle": "tooltip",
               "data-bs-placement": "bottom",
               "data-i18n": header.i18n,
-              title: header.tooltip,
+              "data-bs-original-title": header.tooltip,
             });
+            changed = true;
           }
         }
       });
-    applyTranslations();
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
+    if (changed) applyTranslations();
   }
 
   $("#add-ban").on("click", function () {

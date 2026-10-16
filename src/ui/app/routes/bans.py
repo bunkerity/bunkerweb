@@ -342,8 +342,10 @@ _BANS_STATS_TOP_REASONS = 5
 @cors_required
 def bans_stats():
     """Summary tiles + "bans by reason" breakdown for the bans dashboard header."""
+    # Same flag as bans_fetch: the tiles must count what the table shows, runtime-only CrowdSec leases included.
+    runtime = request.form.get("runtime_leases") == "1"
     try:
-        all_bans = _collect_all_bans()
+        all_bans = _collect_all_bans(runtime_leases=True) if runtime else _collect_all_bans()
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.error(f"Couldn't get bans from redis: {e}")

@@ -186,9 +186,28 @@ $(document).ready(function () {
     },
   ];
 
-  // Country-flag cell rendering + tooltip retranslation now live in the shared
-  // components/country-flag.html / static/js/components/country-flag.js helper
-  // (window.BWCountryFlag) -- see that file's doc comment.
+  // Country-flag cell rendering lives in the shared components/country-flag.html /
+  // static/js/components/country-flag.js helper (window.BWCountryFlag) -- see that
+  // file's doc comment.
+
+  // The delegated tooltip reads data-bs-original-title when it opens, so the country
+  // titles are rewritten in place: BWCountryFlag.updateTooltips() would also dispose
+  // and rebuild every tooltip of the page.
+  const updateCountryTitles = () => {
+    $("#reports [data-country]").each(function () {
+      const $elem = $(this);
+      const countryCode = $elem.attr("data-country");
+      const countryName = t(
+        countryCode === "unknown"
+          ? "country.not_applicable"
+          : `country.${countryCode}`,
+        "Unknown",
+      );
+      if (countryName && countryName !== "country.not_applicable") {
+        $elem.attr("data-bs-original-title", countryName);
+      }
+    });
+  };
 
   // Configure DataTable layout
   const layout = {
@@ -485,6 +504,7 @@ $(document).ready(function () {
   const reports_config = {
     tableSelector: "#reports",
     tableName: "reports",
+    delegatedTooltips: true,
     columnVisibilityCondition: (column) => column > 1 && column < 21,
     dataTableOptions: {
       columnDefs: [
@@ -651,14 +671,8 @@ $(document).ready(function () {
                 String(row.ip || ""),
               )}`;
               return `
-                <div class="d-flex justify-content-center">
-                  <a class="btn btn-outline-primary btn-sm me-1"
-                     href="${escapeHtmlAttribute(investigateUrl)}">
-                    <i class="bx bx-search-alt bx-xs me-1" aria-hidden="true"></i>${t(
-                      "crowdsec.investigation.submit",
-                      "Investigate",
-                    )}
-                  </a>
+                <div class="d-flex justify-content-center align-items-center">
+                  ${investigateLink}
                   <button type="button"
                           class="btn btn-outline-danger btn-sm me-1 ban-single${readOnlyClass}"
                           data-ip="${row.ip}"
@@ -1900,14 +1914,12 @@ $(document).ready(function () {
   const dt = initializeDataTable(reports_config);
   dt.on("column-visibility.dt", function (e, settings, column, state) {
     updateHeaderTooltips(dt.table().header(), headers);
-    $(".tooltip").remove();
   });
   dt.on("draw.dt", function () {
-    window.BWCountryFlag.updateTooltips();
+    // The rows are new: translate their [data-i18n] (country names, URL hints)
+    applyTranslations();
+    updateCountryTitles();
     updateHeaderTooltips(dt.table().header(), headers);
-    // Re-init tooltips for dynamic elements
-    $(".tooltip").remove();
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
     // Hide waiting message and show table
     $("#reports-waiting").addClass("visually-hidden");
     $("#reports").removeClass("d-none");
@@ -1958,10 +1970,12 @@ $(document).ready(function () {
 
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
+    let changed = false;
     $(selector)
       .find("th")
       .each((index, element) => {
         const $th = $(element);
+        if ($th.attr("data-bs-toggle") === "tooltip") return;
         // Try to get the data-i18n attribute from the header's span
         const i18nKey =
           $th.find("[data-i18n]").data("i18n") || $th.data("i18n");
@@ -1976,13 +1990,13 @@ $(document).ready(function () {
               "data-bs-toggle": "tooltip",
               "data-bs-placement": "bottom",
               "data-i18n": header.i18n,
-              title: header.tooltip,
+              "data-bs-original-title": header.tooltip,
             });
+            changed = true;
           }
         }
       });
-    applyTranslations();
-    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
+    if (changed) applyTranslations();
   }
 
   // Quick ban action from reports table

@@ -190,6 +190,7 @@ function initializeDataTable(config) {
     tableSelector,
     tableName,
     columnVisibilityCondition,
+    delegatedTooltips,
     dataTableOptions,
   } = config;
 
@@ -337,6 +338,31 @@ function initializeDataTable(config) {
   const dataTable = new DataTable(tableSelector, safeDataTableOptions);
   applyTranslations();
 
+  // Rows are rebuilt on every draw, so per-trigger instances would be disposed and
+  // recreated (and leaked) each time. One delegated tooltip builds an instance on
+  // first hover instead; the row instances are dropped with the rows.
+  if (delegatedTooltips && typeof bootstrap !== "undefined") {
+    new bootstrap.Tooltip(dataTable.table().container(), {
+      selector: '[data-bs-toggle="tooltip"]',
+    });
+    const disposeTooltips = (root) => () => {
+      $(root())
+        .find('[data-bs-toggle="tooltip"]')
+        .each(function () {
+          const instance = bootstrap.Tooltip.getInstance(this);
+          if (instance) instance.dispose();
+        });
+    };
+    dataTable.on(
+      "preDraw.dt",
+      disposeTooltips(() => dataTable.table().body()),
+    );
+    dataTable.on(
+      "column-visibility.dt",
+      disposeTooltips(() => dataTable.table().node()),
+    );
+  }
+
   // Ensure toggle filter buttons keep the outline-primary styling
   const buttonsContainer = dataTable.buttons().container();
   if (buttonsContainer && $(buttonsContainer).length) {
@@ -413,8 +439,10 @@ function initializeDataTable(config) {
       columnVisibility = JSON.parse(columnVisibility);
     }
 
+    // Without the second argument every call re-measures the whole table; the
+    // adjust() at the end of this function does it once.
     Object.entries(columnVisibility).forEach(([key, value]) => {
-      dataTable.column(key).visible(value);
+      dataTable.column(key).visible(value, false);
     });
 
     // Save column preferences. The debounce batches a run of column toggles, so a pending
@@ -607,8 +635,6 @@ function initializeDataTable(config) {
       }, 100);
     }
   });
-
-  if (dataTable.responsive) dataTable.responsive.recalc();
 
   dataTable.on("select", function (e, dt, type, indexes) {
     const actionButton = $(".action-button");
