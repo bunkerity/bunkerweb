@@ -6,10 +6,12 @@ from os import getenv, sep
 from pathlib import Path
 from shutil import rmtree
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
+from sys import path as sys_path
 from tarfile import open as tar_open
 from traceback import format_exc
 
 from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall  # type: ignore
+from manual_plugins import read_manual_plugin  # type: ignore
 
 from app.api_client import ApiClient
 from app.i18n import LocaleThreadPoolExecutor
@@ -60,6 +62,37 @@ PAGE_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-u
 
 LOGGER = getLogger("UI")
 
+PLUGIN_VALIDATOR = None
+
+
+def invalid_plugin_json(plugin_path: Path, known_plugins: list) -> bool:
+    """Whether ``plugin_path`` holds a hand-mounted manifest the scheduler would refuse.
+
+    Such a directory is the operator's only copy: the scheduler keeps it and the database has no row to
+    restore it from, so the reload must neither overwrite it nor sweep it away.
+    """
+    global PLUGIN_VALIDATOR
+
+    if plugin_path.is_symlink() or not plugin_path.joinpath("plugin.json").is_file():
+        return False
+
+    try:
+        if PLUGIN_VALIDATOR is None:
+            gen_path = CORE_PLUGINS_PATH.parent.joinpath("gen").as_posix()
+            if gen_path not in sys_path:
+                sys_path.append(gen_path)
+            from Configurator import Configurator  # type: ignore
+
+            PLUGIN_VALIDATOR = Configurator(CORE_PLUGINS_PATH.parent / "settings.json", CORE_PLUGINS_PATH, [], [], {}, LOGGER)
+    except Exception as e:  # without a validator nothing can be called valid, so nothing is replaced or removed
+        LOGGER.error(f"Keeping manual plugin {plugin_path.name}: its manifest cannot be validated ({e})")
+        return True
+
+    _, problem = read_manual_plugin(plugin_path, PLUGIN_VALIDATOR, known_plugins)
+    if problem:
+        LOGGER.error(f"Keeping invalid manual plugin {plugin_path.name}: {problem}")
+    return bool(problem)
+
 
 def reload_plugins():
     plugins = API_CLIENT.get_plugins(type="all", with_data=True)
@@ -77,6 +110,8 @@ def reload_plugins():
             continue
 
         target = plugin_path / plugin["id"]
+        if plugin["method"] == "manual" and target.is_dir() and invalid_plugin_json(target, plugins):
+            continue
 
         # If the target exists, compare its checksum.
         if target.exists():
@@ -96,7 +131,16 @@ def reload_plugins():
         try:
             if plugin["data"]:
                 with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
+                    # The archive root is the directory name, which need not be the plugin id.
+                    roots = {
+                        Path(name).parts[0] for name in tar.getnames() if Path(name).parts and not Path(name).is_absolute() and ".." not in Path(name).parts
+                    }
+                    if plugin["method"] == "manual" and any(
+                        (plugin_path / root).is_dir() and invalid_plugin_json(plugin_path / root, plugins) for root in roots
+                    ):
+                        continue
                     safe_tar_extractall(tar, plugin_path)
+                    known_plugin_ids.update(roots)
 
                 plugin_folder = plugin_path / plugin["id"]
                 # Add u+x permissions to executable files
@@ -127,6 +171,8 @@ def reload_plugins():
         if plugin_path.exists():
             for item in plugin_path.iterdir():
                 if item.name not in known_plugin_ids:
+                    if item.is_dir() and invalid_plugin_json(item, plugins):
+                        continue
                     LOGGER.debug(f"Plugin {item.name} not found in database, removing it...")
                     with suppress(OSError):
                         if item.is_symlink() or item.is_file():

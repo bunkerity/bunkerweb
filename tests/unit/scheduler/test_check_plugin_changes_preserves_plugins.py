@@ -13,6 +13,8 @@ forwards exactly what the scheduler sent.
 
 import ast
 import json
+import logging
+import sys
 from base64 import b64decode, b64encode
 from contextlib import suppress
 from pathlib import Path
@@ -22,8 +24,14 @@ import pytest
 
 from common_utils import bytes_hash, create_plugin_tar_gz, dict_to_frozenset  # type: ignore
 from fixtures.seed import make_external_plugin
+from manual_plugins import read_manual_plugin  # type: ignore
 
-MAIN = Path(__file__).resolve().parents[3] / "src" / "scheduler" / "main.py"
+ROOT = Path(__file__).resolve().parents[3]
+MAIN = ROOT / "src" / "scheduler" / "main.py"
+if str(ROOT / "src" / "common" / "gen") not in sys.path:
+    sys.path.append(str(ROOT / "src" / "common" / "gen"))
+
+from Configurator import Configurator  # type: ignore  # noqa: E402
 
 
 def _nested_function(name):
@@ -55,8 +63,13 @@ class _ApiClient:
         return self.db.update_external_plugins(plugins, _type=_type, **kwargs)
 
 
+@pytest.fixture(scope="module")
+def validator():
+    return Configurator(str(ROOT / "src" / "common" / "settings.json"), str(ROOT / "src" / "common" / "core"), [], [], {}, logging.getLogger("preserve"))
+
+
 @pytest.fixture
-def scan(db, tmp_path, monkeypatch):
+def scan(db, tmp_path, monkeypatch, validator):
     plugins_dir = tmp_path / "plugins"
     plugins_dir.mkdir()
     monkeypatch.setattr(type(db), "_uep_resolve_plugin_dir", lambda self, plugin_id, _type: plugins_dir / plugin_id)
@@ -68,7 +81,8 @@ def scan(db, tmp_path, monkeypatch):
         "PRO_PLUGINS_PATH": tmp_path / "pro",
         "Literal": Literal,
         "suppress": suppress,
-        "json_load": json.load,
+        "read_manual_plugin": read_manual_plugin,
+        "get_plugin_validator": lambda: validator,
         "b64encode": b64encode,
         "bytes_hash": bytes_hash,
         "create_plugin_tar_gz": create_plugin_tar_gz,

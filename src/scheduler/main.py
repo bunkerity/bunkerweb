@@ -8,7 +8,6 @@ from copy import deepcopy
 from datetime import datetime
 from gc import collect
 from io import BytesIO
-from json import load as json_load
 from os import _exit, environ, getenv, getpid, sep
 from os.path import join
 from pathlib import Path
@@ -16,7 +15,7 @@ from shutil import rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
-from sys import path as sys_path
+from sys import executable as sys_executable, path as sys_path
 from tarfile import open as tar_open
 from threading import Event, Lock
 from time import monotonic, sleep, time
@@ -25,7 +24,7 @@ from typing import Any, Dict, List, Literal, Optional, Set, Union
 
 BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
 
-for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("deps", "python"), ("utils",))]:
+for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("deps", "python"), ("utils",), ("gen",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -44,6 +43,7 @@ from custom_configs_drift import (  # type: ignore
 from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import _write_atomic  # type: ignore
+from manual_plugins import read_manual_plugin  # type: ignore
 from cache_restore import (  # type: ignore
     cache_tree,
     checked_cache_path,
@@ -314,6 +314,7 @@ def handle_reload(signum, frame):
 
             proc = subprocess_run(
                 [
+                    sys_executable,
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -429,6 +430,20 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
     write_projection(original_path)
 
 
+PLUGIN_VALIDATOR: Any = None
+
+
+def get_plugin_validator() -> Any:
+    """The ``Configurator`` hand-mounted plugins are validated with, built on first use (it loads the core plugins)."""
+    global PLUGIN_VALIDATOR
+
+    if PLUGIN_VALIDATOR is None:
+        from Configurator import Configurator  # type: ignore
+
+        PLUGIN_VALIDATOR = Configurator(BUNKERWEB_PATH / "settings.json", BUNKERWEB_PATH / "core", [], [], {}, LOGGER)
+    return PLUGIN_VALIDATOR
+
+
 def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
@@ -445,6 +460,7 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
     # Remove old external/pro plugins files
     LOGGER.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
     ignored_plugins = set()
+    known_plugins: Optional[List[Dict[str, Any]]] = None
     if original_path.is_dir():
         for file in original_path.glob("*"):
             with suppress(StopIteration, IndexError, FileNotFoundError):
@@ -464,6 +480,21 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                     continue
                 LOGGER.debug(f"Checksum of {file} has changed, removing it ...")
 
+            # A hand-mounted plugin the scan refused (or has not registered yet because its manifest is broken) has no
+            # usable database row, so the sweep below would delete the only copy of the operator's work.
+            if file.is_dir() and not file.is_symlink() and file.joinpath("plugin.json").is_file():
+                if known_plugins is None:
+                    known_plugins = API_CLIENT.get_plugins(_type="all")
+                manifest, problem = read_manual_plugin(file, get_plugin_validator(), known_plugins)
+                manifest_id = manifest.get("id") if manifest else None
+                stored_plugin = next((plugin for plugin in plugins if plugin["id"] in (file.name, manifest_id)), None)
+                if problem and (stored_plugin is None or stored_plugin["method"] == "manual"):
+                    ignored_plugins.add(file.name)
+                    if isinstance(manifest_id, str):
+                        ignored_plugins.add(manifest_id)
+                    LOGGER.warning(f"Preserving invalid manual plugin {file.name} during generation: {problem}")
+                    continue
+
             if file.is_symlink() or file.is_file():
                 with suppress(OSError):
                     file.unlink()
@@ -480,6 +511,9 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
             try:
                 if plugin["data"]:
                     with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
+                        # The archive root is the directory name, which need not be the plugin id.
+                        if plugin["method"] == "manual" and any(Path(name).parts and Path(name).parts[0] in ignored_plugins for name in tar.getnames()):
+                            continue
                         try:
                             tar.extractall(original_path, filter="fully_trusted")
                         except TypeError:
@@ -895,6 +929,7 @@ if __name__ == "__main__":
             # run the config saver (first-run stays in scheduler per spec)
             proc = subprocess_run(
                 [
+                    sys_executable,
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -963,6 +998,7 @@ if __name__ == "__main__":
 
             proc = subprocess_run(
                 [
+                    sys_executable,
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
@@ -1068,14 +1104,27 @@ if __name__ == "__main__":
             # on disk. Every plugin the scan does not own is named so it is spared: the ones the download job (or the
             # pro job) installed, which are never `manual`, and below the manual ones whose files did not change.
             preserve_ids = {plugin["id"] for plugin in db_plugins if plugin["method"] != "manual"}
-            for file in plugin_path.glob("*/plugin.json"):
-                plugin_content = create_plugin_tar_gz(file.parent, arc_root=file.parent.name)
+            # Every plugin the database holds, so a setting id one of them owns is refused here with a sentence
+            # instead of by the database with a bare duplicate-key error; the ones accepted below join the list.
+            known_plugins = API_CLIENT.get_plugins(_type="all")
+            validator = get_plugin_validator()
+            for file in sorted(plugin_path.glob("*/plugin.json")):
+                plugin_data, problem = read_manual_plugin(file.parent, validator, known_plugins)
 
-                with file.open("r", encoding="utf-8") as f:
-                    plugin_data = json_load(f)
-
-                if plugin_data["id"] == "letsencrypt_dns":
+                if plugin_data and plugin_data.get("id") == "letsencrypt_dns":
                     continue
+
+                if problem:
+                    # A broken manifest is the operator's to fix: report it, keep the directory and any row it already
+                    # has (a name that may differ from the id when the manifest is unreadable).
+                    LOGGER.error(f"Ignoring invalid {_type} plugin {file.parent.name}: {problem}")
+                    preserve_ids.add(file.parent.name)
+                    if plugin_data and isinstance(plugin_data.get("id"), str):
+                        preserve_ids.add(plugin_data["id"])
+                    continue
+
+                known_plugins = [plugin for plugin in known_plugins if plugin["id"] != plugin_data["id"]] + [plugin_data]
+                plugin_content = create_plugin_tar_gz(file.parent, arc_root=file.parent.name)
 
                 checksum = bytes_hash(plugin_content, algorithm="sha256")
                 common_data = plugin_data | {
@@ -1125,12 +1174,17 @@ if __name__ == "__main__":
 
         check_configs_changes()
         plugins_refreshed = []
-        task_futures.extend(
-            [
-                SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "external"),
-                SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "pro"),
-            ]
-        )
+        try:
+            get_plugin_validator()
+        except Exception as e:
+            LOGGER.error(f"Skipping the scan of manually added plugins because their validation is unavailable: {e}")
+        else:
+            task_futures.extend(
+                [
+                    SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "external"),
+                    SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "pro"),
+                ]
+            )
 
         for future in task_futures:
             plugins_refreshed.append(bool(future.result()))

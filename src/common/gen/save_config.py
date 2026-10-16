@@ -90,6 +90,15 @@ if __name__ == "__main__":
                 LOGGER.error(f"Missing RX rights on directory : {path}")
                 sys_exit(1)
 
+        db = Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
+        db_metadata = db.get_metadata()
+        db_initialized = not isinstance(db_metadata, str) and db_metadata["is_initialized"]
+        registered_plugin_ids = (
+            {plugin["id"] for plugin_type in ("external", "pro") for plugin in db.get_plugins(_type=plugin_type, with_settings=False)}
+            if db_initialized
+            else set()
+        )
+
         # Compute the config
         LOGGER.info("Computing config ...")
         config = Configurator(
@@ -99,6 +108,7 @@ if __name__ == "__main__":
             pro_plugins,
             variables_path.as_posix() if args.variables else environ.copy(),
             LOGGER,
+            registered_plugin_ids=registered_plugin_ids,
         )
 
         custom_confs = []
@@ -127,11 +137,6 @@ if __name__ == "__main__":
                 if result.warning:
                     LOGGER.warning(result.warning)
                 continue
-
-        db = Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)))
-
-        db_metadata = db.get_metadata()
-        db_initialized = not isinstance(db_metadata, str) and db_metadata["is_initialized"]
 
         if not db_initialized:
             LOGGER.info("Database not initialized, initializing ...")

@@ -11,7 +11,7 @@ from os.path import join
 from pathlib import Path
 from re import ASCII, DOTALL, compile as re_compile, error as RegexError, search as re_search
 from sys import path as sys_path
-from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Literal, Optional, Set, Tuple, Union
 
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
@@ -86,8 +86,10 @@ class Configurator:
         pro_plugins: Union[str, List[Dict[str, str]]],
         variables: Union[str, Dict[str, str]],
         logger: Logger,
+        registered_plugin_ids: Iterable[str] = (),
     ):
         self.__logger = logger
+        self.__registered_plugin_ids = frozenset(registered_plugin_ids)
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
         # id/version/stream/setting shape below is mirrored by hand in helpers.load_plugin (Lua) --
         # see MANIFEST_CAPS above this class for why. re.ASCII + \Z (not $) so these agree with
@@ -233,6 +235,49 @@ class Configurator:
     def get_plugins_settings(self, _type: Literal["core", "external", "pro"]) -> Dict[str, str]:
         return {k: v for plugin in self.get_plugins(_type) for k, v in plugin.get("settings", {}).items()}
 
+    def validate_manual_plugin(self, plugin: Dict[str, Any], others: Iterable[Dict[str, Any]] = ()) -> Tuple[bool, str]:
+        """Validate a hand-mounted ``plugin.json`` the way the scheduler is about to store it.
+
+        ``__validate_plugin`` plus what the database needs on top: a setting is stored under its key
+        (primary key) and its ``id`` field (unique ``name``), so a key or an ``id`` that another
+        plugin already holds, or that the plugin repeats, fails the whole save with a bare
+        ``1062 Duplicate entry`` and the plugin is gone. ``others`` are the plugins already known
+        (core and the global settings are always checked); a plugin never conflicts with itself.
+        """
+        plugin = deepcopy(plugin)
+        valid, message = self.__validate_plugin(plugin)
+        if not valid:
+            return valid, message
+        return self.__check_setting_ids(plugin, others)
+
+    def __check_setting_ids(self, plugin: Dict[str, Any], others: Iterable[Dict[str, Any]]) -> Tuple[bool, str]:
+        """Setting key / ``id`` uniqueness of a manifest ``__validate_plugin`` already accepted."""
+        pid = plugin["id"]
+        key_owners: Dict[str, str] = {}
+        id_owners: Dict[str, Tuple[str, str]] = {}
+        for other in ({"id": "general", "settings": self.__settings}, *self.__core_plugins, *others):
+            if other.get("id") == pid or not isinstance(other.get("settings"), dict):
+                continue
+            for key, data in other["settings"].items():
+                key_owners.setdefault(key, other["id"])
+                if isinstance(data, dict) and isinstance(data.get("id"), str):
+                    id_owners.setdefault(data["id"], (key, other["id"]))
+
+        own_ids: Dict[str, str] = {}
+        for key, data in plugin["settings"].items():
+            setting_id = data["id"]
+            if not isinstance(setting_id, str):
+                return False, f"id of setting {key} of plugin {pid} must be a string"
+            if key in key_owners:
+                return False, f"setting {key} of plugin {pid} is already declared by plugin {key_owners[key]}"
+            if setting_id in own_ids:
+                return False, f"id {setting_id!r} is used by both settings {own_ids[setting_id]} and {key} of plugin {pid}, each setting needs its own"
+            if setting_id in id_owners:
+                other_key, other_plugin = id_owners[setting_id]
+                return False, f"id {setting_id!r} of setting {key} of plugin {pid} is already used by setting {other_key} of plugin {other_plugin}"
+            own_ids[setting_id] = key
+        return True, "ok"
+
     @staticmethod
     def _redact_value(value: str) -> str:
         """Return a redacted summary safe for log output.
@@ -304,8 +349,34 @@ class Configurator:
                 except Exception as e:
                     self.__logger.error(f"Failed to load plugin {file}: {e}")
 
+        if _type != "core":
+            self.__drop_conflicting_plugins(_type)
+
         count = len(plugin_files)
         self.__logger.info(f"Computed {count} {_type} plugin{'s' if count > 1 else ''}")
+
+    def __drop_conflicting_plugins(self, _type: Literal["external", "pro"]):
+        """Refuse the loaded plugins whose setting keys or ids another plugin already holds.
+
+        The database stores a setting under its key and a unique ``id``, so two plugins sharing either
+        make every ``init_tables`` fail with a bare duplicate-key error and nothing is saved. The files
+        are loaded concurrently, hence the sort: the plugin refused must not depend on which thread won.
+        Core always wins, then registered plugins, then external over pro, then the lower plugin id.
+        """
+        loaded = self.__pro_plugins if _type == "pro" else self.__external_plugins
+        accepted = self.__external_plugins if _type == "pro" else []
+        # A registered pro plugin must also beat a new external plugin loaded in the earlier pass.
+        if _type == "pro" and any(plugin["id"] in self.__registered_plugin_ids for plugin in loaded):
+            loaded = [*self.__external_plugins, *loaded]
+            accepted = []
+        for plugin in sorted(loaded, key=lambda plugin: (plugin["id"] not in self.__registered_plugin_ids, plugin.get("type") == "pro", plugin["id"])):
+            valid, message = self.__check_setting_ids(plugin, accepted)
+            if valid:
+                accepted = [*accepted, plugin]
+                continue
+            plugin_type = plugin.get("type", _type)
+            self.__logger.error(f"Refusing {plugin_type} plugin {plugin['id']} : {message}")
+            (self.__pro_plugins if plugin_type == "pro" else self.__external_plugins).remove(plugin)
 
     def __load_plugin(self, file: Path, _type: Literal["core", "external", "pro"] = "core"):
         try:
