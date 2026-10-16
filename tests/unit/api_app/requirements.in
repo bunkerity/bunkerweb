@@ -16,6 +16,6 @@
 # the one-patch drift does not touch what is under test -- and it keeps the lane installable on a
 # runner with no compiler.
 biscuit-python==0.4.0
-fastapi==0.141.1
-pydantic-settings==2.13.0
+fastapi==0.143.2
+pydantic-settings==2.16.0
 python-multipart==0.0.32

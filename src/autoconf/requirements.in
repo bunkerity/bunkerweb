@@ -1,5 +1,6 @@
 docker==7.2.0
-kubernetes==36.0.3
+# Kubernetes 37 needs a live watch and custom-object compatibility proof.
+kubernetes<37
 packaging==26.3
-pytz==2026.3
+pytz==2026.5
 redis[hiredis]==8.1.0
