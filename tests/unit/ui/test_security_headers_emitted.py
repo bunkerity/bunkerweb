@@ -120,7 +120,8 @@ def test_the_chromium_sync_is_present_and_not_silently_shrunk():
 
     assert len(names) >= 81, f"only {len(names)} directives -- did the Chromium sync get reverted?"
     assert "ch-ua-wow64" in names, "the digit-bearing name the setting's regex had to be widened for"
-    assert "unload" in names and "shared-storage" in names
+    assert "unload" in names and "storage-access" in names
+    assert not {"shared-storage", "shared-storage-select-url"} & names, "Chromium removed these; the browser logs Unrecognized feature"
 
 
 def test_the_handler_is_still_registered_as_an_after_request_hook():
