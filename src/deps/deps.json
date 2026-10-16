@@ -67,14 +67,14 @@
       "name": "lua-nginx-module v0.10.29",
       "url": "https://github.com/openresty/lua-nginx-module.git",
       "commit": "a1ec138e98801400832fee6030120777bf9bb435",
-      "post_install": "(rm -r src/deps/src/lua-nginx-module/t) && if patch --forward --dry-run --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch >/dev/null 2>&1; then patch --forward --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch; else patch --reverse --dry-run --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch; fi"
+      "post_install": "(rm -rf src/deps/src/lua-nginx-module/t) && if patch --forward --dry-run --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch >/dev/null 2>&1; then patch --forward --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch; else patch --reverse --dry-run --batch src/deps/src/lua-nginx-module/src/ngx_http_lua_socket_tcp.c src/deps/misc/lua-nginx-module-ip-san.patch; fi"
     },
     {
       "id": "lua-resty-core",
       "name": "lua-resty-core v0.1.32",
       "url": "https://github.com/openresty/lua-resty-core.git",
       "commit": "768ce9631dd91f864ba454af9615a81847c3230c",
-      "post_install": "rm -r src/deps/src/lua-resty-core/t"
+      "post_install": "set -e; rm -rf src/deps/src/lua-resty-core/t; c=src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c; lua=src/deps/src/lua-resty-core/lib/ngx/ssl.lua; stage=$(mktemp -d); trap 'rm -rf \"$stage\"' EXIT; cp \"$c\" \"$stage/c\"; cp \"$lua\" \"$stage/lua\"; apply_patch() { if grep -q ngx_http_lua_ffi_ssl_proxy_protocol_addr \"$1\"; then patch --reverse --dry-run --batch \"$1\" \"$2\"; else patch --forward --batch \"$1\" \"$2\"; fi; }; apply_patch \"$stage/c\" src/deps/misc/lua-nginx-module-proxy-protocol-addr.patch; apply_patch \"$stage/lua\" src/deps/misc/lua-resty-core-proxy-protocol-addr.patch; if ! cmp -s \"$stage/c\" \"$c\"; then cat \"$stage/c\" > \"$c\"; fi; if ! cmp -s \"$stage/lua\" \"$lua\"; then cat \"$stage/lua\" > \"$lua\"; fi"
     },
     {
       "id": "lua-resty-dns",

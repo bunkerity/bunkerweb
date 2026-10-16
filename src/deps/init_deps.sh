@@ -17,7 +17,7 @@ do
   id="$(echo "$url" | sed 's/.*\/\([^\/]*\)\.tar\.gz/\1/')"
   name="$(echo "$download" | jq -r .name)"
   sha512="$(echo "$download" | jq -r .sha512)"
-  post_install="$(echo "$repo" | jq -r .post_install)"
+  post_install="$(echo "$download" | jq -r .post_install)"
 
   echo "ℹ️ Downloading ${name} from $url"
 
@@ -38,9 +38,13 @@ do
 
   if [ "$post_install" != "null" ]; then
     echo "ℹ️ Running post install script for ${name}"
-    bash -c "$post_install"
+    bash -c "$post_install" || {
+      ret=$?
+      echo "❌ Post install failed for ${name} (${id})"
+      exit "$ret"
+    }
   fi
-done
+done || exit $?
 
 jq -c .git_repository[] src/deps/deps.json | while read -r repo
 do
@@ -85,6 +89,10 @@ do
 
   if [ "$post_install" != "null" ]; then
     echo "ℹ️ Running post install script for ${name}"
-    bash -c "$post_install"
+    bash -c "$post_install" || {
+      ret=$?
+      echo "❌ Post install failed for ${name} (${id})"
+      exit "$ret"
+    }
   fi
-done
+done || exit $?
