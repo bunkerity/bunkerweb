@@ -13,6 +13,7 @@
 - [BUGFIX] `metrics`: a retried report push scans only the newest reports, so a large Redis list no longer pins Redis at 100% CPU.
 - [BUGFIX] `misc`: the default server certificate and key are saved to the database together, and an instance starting with a missing or mismatched pair replaces it with a temporary one until the scheduler pushes the real pair, instead of crash-looping. (Refs #4031)
 - [BUGFIX] `modsecurity`: multipart strict-validation and `filename*` denials (HTTP 400) are reported, and the matched request data stored per report is bounded. (Fixes #4012)
+- [BUGFIX] `scheduler`: a configuration that fails to generate is no longer reported as applied: the previous configuration keeps serving, the failure is shown, and the generation is retried after 30 s, 1 m, 2 m, then every 5 minutes.
 - [BUGFIX] `ui`: a `before_request` plugin hook that raises, or whose plugin hooks fail to load, answers 500 on every page instead of serving the request without its check. Static files stay served.
 - [BUGFIX] `ui`: the bulk delete and convert of configs works for file-managed configs whose names contain a dot.
 - [BUGFIX] `ui`: the Reports and Bans filters match values containing `&`, `<`, `>`, quotes, `,` or `;`. (Refs #4013)
