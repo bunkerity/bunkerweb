@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.17~rc2 - ????/??/??
+## v1.6.17~rc2 - 2026/10/16
 
 - [FEATURE] `db`: `DATABASE_CONNECT_TIMEOUT` (default `10s`) and `DATABASE_READ_TIMEOUT` (default `5m`) bound MySQL and MariaDB calls, and PostgreSQL gets the connect timeout and TCP keepalives but no query deadline, so a database that vanishes without a reset no longer blocks the scheduler, UI or API forever.
 - [BUGFIX] `all-in-one`: a reload signal (`docker kill -s HUP`) waits for a configuration install in progress before it restarts the services, instead of starting them on a half-written configuration.
