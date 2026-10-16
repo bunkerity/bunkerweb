@@ -17,11 +17,9 @@
         指定该目录）：
 
         ```bash
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
         # 下载脚本及其校验和
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh.sha256
 
         # 验证校验和
         sha256sum -c install-bunkerweb.sh.sha256
@@ -227,11 +225,9 @@
             要开始使用，请下载安装脚本及其校验和，然后在运行前验证脚本的完整性。
 
             ```bash
-            LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256

@@ -17,11 +17,9 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
         `docker-compose.yml` et `.env` (ou indiquez-le avec `--compose-dir`) :
 
         ```bash
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
         # Téléchargez le script et sa somme de contrôle
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh.sha256
 
         # Vérifiez la somme de contrôle
         sha256sum -c install-bunkerweb.sh.sha256
@@ -228,11 +226,9 @@ Mettez à niveau toutes les répliques de l'interface web en même temps : la pr
             Pour commencer, téléchargez le script d'installation et sa somme de contrôle, puis vérifiez l'intégrité du script avant de l'exécuter.
 
             ```bash
-            LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256

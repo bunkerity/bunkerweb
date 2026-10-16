@@ -18,11 +18,9 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
         `--compose-dir` an):
 
         ```bash
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
         # Skript und Prüfsumme herunterladen
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh.sha256
 
         # Prüfsumme überprüfen
         sha256sum -c install-bunkerweb.sh.sha256
@@ -229,11 +227,9 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
             Um zu beginnen, laden Sie das Installationsskript und seine Prüfsumme herunter und überprüfen Sie dann die Integrität des Skripts, bevor Sie es ausführen.
 
             ```bash
-            LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc1/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
