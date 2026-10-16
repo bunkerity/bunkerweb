@@ -344,7 +344,7 @@
     安装后，您可以获取 `LoadBalancer` 的 IP 地址来设置您的域：
 
     ```shell
-    kubectl -n bunkerweb get svc mybw-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    kubectl -n bunkerweb get svc mybw-bunkerweb-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
     ```
 
 === "Swarm"

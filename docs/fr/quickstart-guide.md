@@ -344,7 +344,7 @@ Aide-moi à configurer BunkerWeb <version> avec <intégration> pour protéger mo
     Une fois installé, vous pouvez obtenir l'adresse IP du `LoadBalancer` pour configurer vos domaines :
 
     ```shell
-    kubectl -n bunkerweb get svc mybw-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    kubectl -n bunkerweb get svc mybw-bunkerweb-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
     ```
 
 === "Swarm"
