@@ -89,6 +89,39 @@ KEEP_CONFIG_ON_RESTART=${KEEP_CONFIG_ON_RESTART:-no}
 EOF
 }
 
+# The scheduler pushes the default server pair and nginx refuses to start on a half or mismatched one.
+# The scheduler can only reach this instance through nginx, so a bad pair is replaced here with a
+# throwaway one and the next push installs the real one.
+function default_pair_is_valid() {
+	local cert_pub key_pub
+	cert_pub="$(openssl x509 -noout -pubkey -in "$1" 2>/dev/null)" || return 1
+	key_pub="$(openssl pkey -pubout -in "$2" 2>/dev/null)" || return 1
+	[ -n "$cert_pub" ] && [ "$cert_pub" == "$key_pub" ]
+}
+
+default_cert_dir="/var/cache/bunkerweb/misc"
+default_cert="$default_cert_dir/default-server-cert.pem"
+default_key="$default_cert_dir/default-server-cert.key"
+if [ -e "$default_cert" ] || [ -e "$default_key" ] ; then
+	if ! default_pair_is_valid "$default_cert" "$default_key" ; then
+		log "ENTRYPOINT" "⚠️" "The default server certificate and its private key are missing or do not match, replacing them with a temporary pair until the scheduler pushes the real one"
+		tmp_cert="$(mktemp "$default_cert_dir/default-server-cert.XXXXXX")"
+		tmp_key="$(mktemp "$default_cert_dir/default-server-cert.XXXXXX")"
+		if openssl req -nodes -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -keyout "$tmp_key" -out "$tmp_cert" -days 30 -subj "/CN=www.example.org" >/dev/null 2>&1 && default_pair_is_valid "$tmp_cert" "$tmp_key" ; then
+			chmod 600 "$tmp_key"
+			chmod 644 "$tmp_cert"
+			mv -f "$tmp_key" "$default_key"
+			mv -f "$tmp_cert" "$default_cert"
+			# The cache push is skipped while its applied digest matches the scheduler's archive,
+			# so forget it: the next push must reinstall the real pair.
+			rm -f /var/tmp/bunkerweb/pushswap/_var_cache_bunkerweb.applied
+		else
+			rm -f "$tmp_cert" "$tmp_key"
+			log "ENTRYPOINT" "❌" "Couldn't generate a temporary default server certificate, nginx may fail to start"
+		fi
+	fi
+fi
+
 # generate "temp" config
 tmp_env_path="/tmp/variables.env"
 tmp_env_content="$(generate_tmp_env_content)"
