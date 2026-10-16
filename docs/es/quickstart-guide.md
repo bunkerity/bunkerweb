@@ -20,6 +20,22 @@ Proteger las aplicaciones web existentes que ya son accesibles con el protocolo 
 
 Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/examples) del repositorio para obtener ejemplos del mundo real.
 
+## Usar un agente de IA
+
+### Habilidades de BunkerWeb en skills.sh
+
+Si utilizas un agente de programación con IA, instala la [habilidad oficial de BunkerWeb en skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb) para obtener ayuda con el despliegue y la configuración. Sigue las [instrucciones de instalación](https://github.com/bunkerity/bunkerweb-skills#installation) de tu agente.
+
+### Documentación de BunkerWeb con Context7
+
+También puedes conectar tu agente a [Context7](https://context7.com/docs) para consultar la [documentación de BunkerWeb](https://context7.com/bunkerity/bunkerweb) durante la configuración. Incluye tu versión de BunkerWeb y la integración en tu consulta para que el agente utilice los ajustes y ejemplos adecuados.
+
+Ejemplo de consulta:
+
+```text
+Ayúdame a configurar BunkerWeb <versión> con <integración> para proteger mi aplicación. use context7
+```
+
 ## Configuración básica
 
 === "Todo en uno"

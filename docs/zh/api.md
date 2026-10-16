@@ -191,6 +191,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
   - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`，另加用于 `/crowdsec` 路由的 `crowdsec_read` 和 `crowdsec_delete`（可用连接的 id 作为 `resource_id`，把授权限制到单个 CrowdSec 连接）
   - `jobs`: `job_read`, `job_run`
 - `resource_id` 通常是第二个路径段（如 `/services/{id}`）；"*" 表示全局访问。
+- 更改资源所在位置时，还需要拥有目标位置的权限。带有不同 `service` 的 `PATCH /configs/{service}/{type}/{name}`（以及 `.../upload`）除了源服务外，还需要目标服务上的 `config_update`；请求体不带 `service` 时，配置保留在当前服务中。附加或分离重定向、上游池、证书或工作流，以及在创建它们时指定目标服务（`service_ids`、`services`），除了资源本身的权限外，还需要每个目标服务上的 `service_update`。没有该权限的调用方会收到 `403`。
 - 通过 `API_ACL_BOOTSTRAP_FILE` 或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` 启动非管理员用户和权限。每个用户可使用明文 `password` 或预先哈希的 `password_hash`/`password_bcrypt`（参见下面的提示）。
 
 !!! danger "这些写权限等同于管理员权限"
@@ -451,10 +452,10 @@ TLS 信任也按实例存储：
   - 支持类型：`http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`，以及 CRS/插件钩子。
   - `PUT /configs/bulk`：一次替换带指定 `method` 的全部自定义配置（autoconf 同步使用）。仅建议性质的失败（行已提交，只有消息）仍返回 `200`；实际拒绝返回 `400`，不返回 `500`，因为调用方 HTTP 客户端会丢弃 `5xx` 响应体。
 - **Bans**
-  - `GET /bans`: 从数据库列出活动封禁（持久列表）。**1.7 中已变更**：过去会汇总实例内存中的封禁，实例重启后可能少报。
+  - `GET /bans`: 从数据库列出活动封禁（持久列表）。**1.7 中已变更**：过去会汇总实例内存中的封禁，实例重启后可能少报。 每一行都带有 `kind`：BunkerWeb 根据 CrowdSec 决策创建的封禁为 `crowdsec_lease`（原因为 `crowdsec`，参见[解除 CrowdSec 封禁](#unbanning-a-crowdsec-ban)），其他封禁为 `ban`。
   - `GET /bans/instances`: 在独立端点保留旧行为，显示每个实例当前实际执行的封禁。
   - `POST /bans` 或 `/bans/ban`: 应用一个或多个封禁；负载可为对象、数组或字符串化 JSON。封禁会先持久化，再发送给实例。
-  - `POST /bans/unban` 或 `DELETE /bans`: 全局或按服务解除封禁。如果撤销无法持久化，API 会拒绝操作，因为未收到撤销的实例之后可能把该封禁重新带回集群。
+  - `POST /bans/unban` 或 `DELETE /bans`: 全局或按服务解除封禁。如果撤销无法持久化，API 会拒绝操作，因为未收到撤销的实例之后可能把该封禁重新带回集群。 解除 CrowdSec 封禁需要经过预览和确认，参见[解除 CrowdSec 封禁](#unbanning-a-crowdsec-ban)。
   - `GET /bans/timeseries?start=...&end=...&bucket=hour`：`[start, end)` 各区间的活动封禁占用数量。`bw_bans` 对每个 `(ip, ban_scope, service_id)` 只保留一行，再次封禁会改写 `created_at`；因此这是时点占用计数，不是事件或创建历史。
 - **CrowdSec**（调查与决策管理，通过已注册实例的 `crowdsec` 插件转发）
   - `GET /crowdsec`（需要 `crowdsec_read`）：已注册实例报告的每个 CrowdSec 连接，各带一个不透明的 `id`、其 `instance` 及所覆盖的服务，另加一个 `errors` 映射，列出无法读取的实例。标记为 `down` 的实例会在这里报告，而不会被查询。
@@ -524,6 +525,36 @@ TLS 信任也按实例存储：
   - `GET/PUT /workflows/{id}/definition`：读取或替换已编译规则定义。
   - `POST /workflows/validate`、`POST /workflows/{id}/test`：验证定义，或保存前针对样例请求试运行。
   - `POST /workflows/{id}/attachments`、`DELETE /workflows/{id}/attachments/{service}`：向服务附加或移除工作流。
+
+## 解除 CrowdSec 封禁 {#unbanning-a-crowdsec-ban}
+
+由 BunkerWeb 根据 CrowdSec 决策创建的封禁（原因为 `crowdsec`，在 `GET /bans` 中显示为 `kind: "crowdsec_lease"`），如果只移除封禁本身，会在下一次请求时重新出现，因为其背后的 CrowdSec 决策仍然有效。因此，解除封禁时在审核后还会一并删除这些决策。BunkerWeb 会在运行中的实例（启用 Redis 时还包括 Redis）上查找此类封禁：请求本身不会说明该封禁是否属于此类。
+
+`POST /bans/unban` 和 `DELETE /bans` 接受一个对象或对象列表。`ip`（字符串，必填）和 `service`（字符串，可选）保持不变。三个可选字段用于控制 CrowdSec 的情形：
+
+| 字段 | 类型 | 含义 |
+| --- | --- | --- |
+| `remove_crowdsec_decisions` | 布尔值，默认 `false` | 在为该 IP 提供服务的每个 CrowdSec 连接上，删除该 IP 的 CrowdSec 封禁决策。 |
+| `confirmed` | 布尔值，默认 `false` | 调用方已审核将要删除的决策。 |
+| `decision_keys` | 字符串数组 | 预览中每条决策的 `key`，与 `409` 响应返回的一致。只有它们仍与当前有效的决策匹配时，才会执行解除封禁。 |
+
+**409 Conflict。** 针对 CrowdSec 封禁的请求如果没有同时带上这三个字段，或者其 `decision_keys` 已与当前有效的决策不匹配，则不会更改任何内容，并返回 `409`：
+
+```json
+{"status": "error", "message": "…", "preview": {"lease": {"ip": "203.0.113.7", "ban_scope": "global", "service": null, "exp": 25},
+  "leases": [{"lease_id": "…", "source": "bw-1", "exp": 25}],
+  "decisions": [{"key": "<connection>:<id>", "connection_id": "…", "id": 7, "scope": "Ip", "value": "203.0.113.7", "type": "ban", "origin": "crowdsec", "scenario": "crowdsecurity/ssh-bf", "remediation": "ban"}],
+  "warnings": {"list_origin": false, "range": false}, "unavailable": [], "connections": ["…"]},
+ "previews": [{"ip": "…", "ban_scope": "…", "service": null, "preview": {}}]}
+```
+
+请带上 `remove_crowdsec_decisions: true`、`confirmed: true` 以及设置为预览中各键的 `decision_keys`，再次发送请求。当某条决策来自社区或列表来源时（列表刷新时它会重新出现），会设置 `warnings.list_origin`；当某条决策覆盖一个网络时，会设置 `warnings.range`。包含多个条目时，只要其中任何一个需要确认，就返回 `409`，且不会更改任何内容。
+
+**权限。** 除了 `ban_delete`，调用方还需要在预览中列出的**每一个** CrowdSec 连接上拥有 `crowdsec_delete`（或使用 `*` 覆盖全部）；否则返回 `403`，且不返回预览。因此，仅凭 `ban_delete` 无法解除 CrowdSec 封禁。
+
+**结果。** 全部成功时返回 `200`，内容为 `{"status": "success", "results": [{"kind": "crowdsec_lease", "ip": …, "status": "success", "deleted": […], "already_absent": […], "refreshed": […], "lease_removed": ["bw-1"], …}]}`。返回 `502` 时带有相同的 `results`，且 `status` 为 `"partial"`（某一步失败：先删除决策，然后从每个实例移除该封禁，最后撤销其数据库记录）或 `"changed"`（请求执行期间，该封禁被续期或被显式封禁替换：未移除任何内容，请重试）。只会移除 CrowdSec 封禁：同一 IP 上任何范围的显式封禁都保持不变。每次调用都会连同调用方一起写入 API 日志。
+
+**相关变更。** 当决策已不存在时，`DELETE /crowdsec/{connection}/decisions/{id}` 返回 `200`，并带有 `"already_absent": true` 和 `"removed": false`（此前返回 `409`）。`/crowdsec/{connection}/decisions` 列出的决策带有 `remediation`（`ban`、`captcha`，或在 bouncer 忽略该决策时缺省）。
 
 ## 运行行为
 

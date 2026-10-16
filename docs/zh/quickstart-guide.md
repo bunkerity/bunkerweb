@@ -20,6 +20,22 @@
 
 有关真实世界的示例，请参阅仓库的 [examples 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-alpha/examples)。
 
+## 使用 AI 智能体
+
+### skills.sh 上的 BunkerWeb 技能
+
+如果您使用 AI 编程智能体，可以安装 [skills.sh 上的官方 BunkerWeb 技能](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb)，获取部署和配置指导。请按照适用于您所用智能体的[安装说明](https://github.com/bunkerity/bunkerweb-skills#installation)操作。
+
+### 通过 Context7 获取 BunkerWeb 文档
+
+您还可以将智能体连接到 [Context7](https://context7.com/docs)，在配置过程中获取 [BunkerWeb 文档](https://context7.com/bunkerity/bunkerweb)。请在提示中注明您的 BunkerWeb 版本和集成方式，以便智能体使用适用的设置和示例。
+
+提示示例：
+
+```text
+请帮我配置使用 <集成方式> 的 BunkerWeb <版本>，以保护我的应用。use context7
+```
+
 ## 基本设置
 
 === "一体化"

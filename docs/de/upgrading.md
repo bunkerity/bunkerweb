@@ -7,7 +7,7 @@
 
 !!! info "Welche 1.6-Datenbanken aktualisiert werden können"
 
-    Eine Datenbank, die von 1.6.16 oder einem seiner Release Candidates (1.6.16~rc1 bis 1.6.16~rc4) geschrieben wurde, lässt sich wie jede andere 1.6-Datenbank auf 1.7 aktualisieren: Die Migrationskette enthält jede dieser Revisionen, und die Migrationen laufen beim ersten Start. 1.6.16 ist die Version, von der aus aktualisiert wird.
+    Eine Datenbank, die von 1.6.16, einem seiner Release Candidates (1.6.16~rc1 bis 1.6.16~rc4) oder von 1.6.17~rc1 geschrieben wurde, lässt sich wie jede andere 1.6-Datenbank auf 1.7 aktualisieren: Die Migrationskette enthält jede dieser Revisionen, und die Migrationen laufen beim ersten Start. 1.6.16 ist die stabile Version, von der aus aktualisiert wird.
 
 ### Wichtige Änderungen {#breaking-changes}
 

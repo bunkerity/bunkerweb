@@ -68,6 +68,12 @@ Service-Vorlagen verwenden denselben Mechanismus, mit `EXTERNAL_TEMPLATE_URLS`. 
 
 Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dateien in den entsprechenden Datenordner `plugins` legen. Das Verfahren hängt von Ihrer Integration ab:
 
+!!! warning "Manuelle Plugins vor dem Start des Schedulers installieren"
+    Ein Plugin-Verzeichnis, das in `/data/plugins` (unter Linux `/etc/bunkerweb/plugins`) kopiert wird, während der Scheduler läuft, wird beim nächsten Neuerzeugen der externen Plugin-Dateien durch den Scheduler entfernt, da das Plugin nicht in der Datenbank registriert ist. Installieren Sie das Plugin über die Web-Oberfläche oder die API, oder stellen Sie sicher, dass es beim Start des Schedulers im eingebundenen Ordner vorhanden ist.
+
+!!! info "Ungültige manuelle Plugins werden übersprungen, nicht gelöscht"
+    Ein manuelles Plugin, dessen `plugin.json` nicht gelesen werden kann oder die Validierung nicht besteht, wird nicht installiert: Der Scheduler protokolliert den Grund, lässt die Dateien unangetastet auf der Platte und läuft weiter. Ein Plugin, das einen Einstellungsschlüssel oder eine Einstellungs-`id` deklariert, die bereits ein Core-Plugin oder ein bereits registriertes Plugin verwendet, wird auf dieselbe Weise abgelehnt, und die Meldung nennt beide Plugins; ein registriertes Plugin behält stets seine Einstellungen. Beheben Sie das gemeldete Problem: Das Plugin wird beim nächsten Mal erneut geprüft, wenn der Scheduler den Plugin-Ordner untersucht.
+
 === "Docker"
 
     Bei Verwendung der [Docker-Integration](integrations.md#docker) müssen Plugins in das Volume gemountet werden, das auf `/data/plugins` im Scheduler-Container verweist.

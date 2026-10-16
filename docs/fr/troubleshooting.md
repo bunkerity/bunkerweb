@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     Si vous n'êtes pas en mesure de résoudre votre problème, vous pouvez [nous contacter directement via notre panel](https://panel.bunkerweb.io/?language=french&utm_campaign=self&utm_source=doc). Celle-ci centralise toutes les demandes liées à la solution BunkerWeb.
 
+## Dépanner avec un agent IA
+
+### Skills BunkerWeb sur skills.sh
+
+La [skill officielle de dépannage BunkerWeb sur skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) aide les agents de programmation IA à diagnostiquer les requêtes bloquées, les bannissements, les erreurs du serveur en amont et les problèmes de certificats ou de configuration. Suivez les [instructions d'installation](https://github.com/bunkerity/bunkerweb-skills#installation) pour votre agent.
+
+### Documentation BunkerWeb avec Context7
+
+Si votre agent prend en charge [Context7](https://context7.com/docs), connectez-le pour consulter la [documentation BunkerWeb](https://context7.com/bunkerity/bunkerweb). Précisez votre version de BunkerWeb, votre intégration, les paramètres et les journaux pertinents dans votre demande, et retirez les mots de passe, jetons d'API et autres secrets avant de les partager.
+
+Exemple de demande :
+
+```text
+Aide-moi à diagnostiquer ce problème avec BunkerWeb <version> sur <intégration>. Voici les paramètres et les journaux pertinents, sans secrets : <détails>. use context7
+```
+
 ## Journaux
 
 Lors du dépannage, les journaux sont vos meilleurs amis. Nous faisons de notre mieux pour fournir des journaux conviviaux pour vous aider à comprendre ce qui se passe.
@@ -150,6 +166,9 @@ Vous pouvez débannir manuellement une IP, ce qui est utile lors de la réalisat
     ```shell
     sudo bwcli unban 1.2.3.4
     ```
+
+!!! note "Bannissements CrowdSec"
+    Un bannissement créé par BunkerWeb à partir d'une décision CrowdSec (`CROWDSEC_BAN_REFRESH` supérieur à 0) revient à la requête suivante, sauf si les décisions CrowdSec qui le fondent sont aussi supprimées. Pour un tel bannissement, `bwcli unban <ip> [-service <nom>] [-confirm]` affiche les décisions qu'il supprimerait, les avertissements et les connexions indisponibles, ne change rien et se termine par une erreur ; relancez-le avec `-confirm` pour supprimer les décisions et retirer le bannissement. Il a besoin de la base de données (lancez-le depuis l'hôte du scheduler) ; ailleurs, utilisez l'interface web ou l'API. `bwcli bans` affiche `Kind: CrowdSec lease` ou `Kind: ban` pour chaque bannissement.
 
 ## Faux positifs
 
@@ -805,7 +824,8 @@ Si vous avez oublié vos informations d'identification de l'interface utilisateu
     - Ouvrez l’interface Web et allez à la page Support.
     - Choisissez la portée : exporter les paramètres globaux ou sélectionner un Service spécifique.
     - Cliquez pour télécharger l’archive de configuration pour la portée choisie.
-    - Vous pouvez également télécharger les journaux : les journaux exportés sont automatiquement anonymisés (toutes les adresses IP et les domaines sont masqués).
+    - Vous pouvez également télécharger les journaux : les journaux exportés sont automatiquement anonymisés (les adresses IPv4 et IPv6, les domaines, les jetons, les mots de passe et les identifiants contenus dans les URL sont masqués).
+    - Réservé aux administrateurs : la carte **Diagnostic de la Web UI** télécharge un paquet contenant les journaux récents de la Web UI, les versions des plugins vues par la base de données, le disque et la Web UI en cours d’exécution, l’environnement et les dernières erreurs. La même anonymisation s’applique ; la clé de licence et l’URI de la base de données ne sont jamais collectées.
 
 ### Téléversement de plugin
 

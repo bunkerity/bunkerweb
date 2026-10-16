@@ -3,6 +3,22 @@
 !!! info "Panel de BunkerWeb"
     Si no puedes resolver tu problema, puedes [contactarnos directamente a través de nuestro panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). Esto centraliza todas las solicitudes relacionadas con la solución BunkerWeb.
 
+## Solucionar problemas con un agente de IA
+
+### Habilidades de BunkerWeb en skills.sh
+
+La [habilidad oficial de solución de problemas de BunkerWeb en skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) ayuda a los agentes de programación con IA a diagnosticar solicitudes bloqueadas, bloqueos de IP, errores del servidor de origen y problemas de certificados o configuración. Sigue las [instrucciones de instalación](https://github.com/bunkerity/bunkerweb-skills#installation) de tu agente.
+
+### Documentación de BunkerWeb con Context7
+
+Si tu agente admite [Context7](https://context7.com/docs), conéctalo para consultar la [documentación de BunkerWeb](https://context7.com/bunkerity/bunkerweb). Incluye tu versión de BunkerWeb, la integración, los ajustes y los registros relevantes en tu consulta, y elimina contraseñas, tokens de API y otros secretos antes de compartirlos.
+
+Ejemplo de consulta:
+
+```text
+Ayúdame a diagnosticar este problema con BunkerWeb <versión> en <integración>. Estos son los ajustes y los registros relevantes sin secretos: <detalles>. use context7
+```
+
 ## Registros
 
 Al solucionar problemas, los registros son tus mejores amigos. Hacemos nuestro mejor esfuerzo para proporcionar registros fáciles de usar para ayudarte a entender lo que está sucediendo.
@@ -150,6 +166,9 @@ Puedes desbloquear manualmente una IP, lo cual es útil al realizar pruebas para
     ```shell
     sudo bwcli unban 1.2.3.4
     ```
+
+!!! note "Bloqueos de CrowdSec"
+    Un bloqueo que BunkerWeb creó a partir de una decisión de CrowdSec (`CROWDSEC_BAN_REFRESH` mayor que 0) vuelve en la siguiente petición salvo que también se eliminen las decisiones de CrowdSec que lo respaldan. Para un bloqueo así, `bwcli unban <ip> [-service <nombre>] [-confirm]` muestra las decisiones que eliminaría, las advertencias y las conexiones no disponibles, no cambia nada y termina con un error; vuelva a ejecutarlo con `-confirm` para eliminar las decisiones y quitar el bloqueo. Necesita la base de datos (ejecútelo desde el host del scheduler); en otros lugares, use la interfaz web o la API. `bwcli bans` muestra `Kind: CrowdSec lease` o `Kind: ban` para cada bloqueo.
 
 ## Falsos positivos
 
@@ -893,7 +912,8 @@ En caso de que hayas olvidado tus credenciales de la interfaz de usuario o esté
     - Abre la Interfaz de Usuario Web y ve a la página de Soporte.
     - Elige el alcance: exporta los ajustes globales o selecciona un Servicio específico.
     - Haz clic para descargar el archivo de configuración para el alcance elegido.
-    - Opcionalmente descarga los registros: los registros exportados se anonimizan automáticamente (todas las direcciones IP y dominios están enmascarados).
+    - Opcionalmente descarga los registros: los registros exportados se anonimizan automáticamente (las direcciones IPv4 e IPv6, los dominios, los tokens, las contraseñas y las credenciales dentro de las URL están enmascarados).
+    - Solo para administradores: la tarjeta **Diagnóstico de la Web UI** descarga un paquete con los registros recientes de la Web UI, las versiones de los plugins según la base de datos, el disco y la Web UI en ejecución, el entorno y los últimos errores. Se aplica la misma anonimización; la clave de licencia y la URI de la base de datos nunca se recopilan.
 
 ### Cargar plugin
 

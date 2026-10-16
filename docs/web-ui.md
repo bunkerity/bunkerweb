@@ -260,6 +260,7 @@ The UI reaches BunkerWeb through the API. Run it with the Scheduler, Worker, ded
 
     A passkey is an *alternative* way in, not an extra hurdle: registering one does **not** start demanding it after a password, because passkeys have no recovery codes and a lost device would otherwise lock the account permanently. Password and TOTP keep working exactly as before, and accounts without a passkey see no change at all. Use TOTP (with its recovery codes) when you want to *require* a second factor.
 - Sessions: default idling lifetime is 12h (`SESSION_LIFETIME_HOURS`), refreshed on every request. A hard absolute cap is enforced by `SESSION_ABSOLUTE_HOURS` (default `168` = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (`SESSION_ROLLING_HOURS`, default `0` = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; `CHECK_PRIVATE_IP=no` relaxes the IP check for private ranges only. `ALWAYS_REMEMBER=yes` always sets persistent cookies.
+- Session storage: sessions live in Redis when `USE_REDIS` is `yes` and Redis answers, and in a local file store otherwise. If Redis stops answering or refuses writes after the Web UI started, the sessions it affects fall back to the local store of that host and return to Redis once it recovers, instead of failing every request until the workers restart. With several Web UI replicas, the others stop seeing a session that moved to a local store and ask for a login. A silent eviction by Redis is not covered. A session revoked while Redis is down stays revoked: the marker is also kept in the local store. Set `UI_USE_REDIS=no` in the Web UI environment (for the Linux install, `/etc/bunkerweb/ui.env`) to keep the Web UI sessions off Redis on that instance only; `USE_REDIS` still applies to everything else. Default `yes`.
 - Remember to set `PROXY_NUMBERS` if multiple proxies append `X-Forwarded-*` headers.
 
 !!! tip "Pre-hashed admin password"
@@ -329,6 +330,7 @@ Drafts created with 1.6.15 stay drafts after the upgrade. If the drafts cannot b
 | `SESSION_ROLLING_HOURS`                     | Session ID rotation interval (`0` disables rotation)                                                     | Number (hours)           | `0`                       |
 | `ALWAYS_REMEMBER`                           | Always enable "remember me" cookies                                                                      | `yes` or `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Enforce IP pinning (skips change inside private ranges when `no`)                                        | `yes` or `no`            | `yes`                     |
+| `UI_USE_REDIS` | Keep the Web UI sessions off Redis on this instance only (`USE_REDIS` still applies to everything else) | `yes` or `no` | `yes` |
 | `PROXY_NUMBERS`                             | Number of proxy hops to trust for `X-Forwarded-*`                                                        | Integer                  | `1`                       |
 | `UI_WEBAUTHN_RP_ID`                         | WebAuthn Relying Party ID (bare domain, no scheme or port). Defaults to the single non-wildcard `UI_ALLOWED_HOSTS` entry | Domain name              | derived, else disabled    |
 | `UI_WEBAUTHN_ORIGINS`                       | Exact origins accepted during a ceremony                                                                 | Space/comma-separated URLs | `https://<RP ID>`       |
@@ -547,7 +549,9 @@ The **Bans** page lists every active ban. The list is read from the database, th
 - **Add bans** takes one or more IP addresses, an end date or **Permanent**, a reason (`ui` by default) and a scope: every service, or one service picked from the list.
 - **Unban** removes the selected bans, each in its own scope. **Update duration** switches a ban to permanent, 1 hour, 24 hours, 1 week or a custom end date, and keeps its original reason.
 - Unban and duration changes apply to the rows you select, or to every ban matching the current filters.
-- Each row carries an **Investigate** button that opens the [CrowdSec](#crowdsec-investigation) page for that IP.
+- Each row of a CrowdSec ban (reason `crowdsec`) carries an **Investigate** button that opens the [CrowdSec](#crowdsec-investigation) page for that IP.
+- A ban created from a CrowdSec decision (`CROWDSEC_BAN_REFRESH` above 0) is shown with a **CrowdSec lease** badge, and the CSV and Excel exports gain a `Kind` column. A lease younger than one minute is shown from the instances even before the database has learned it.
+- When you unban a CrowdSec ban, BunkerWeb first lists the CrowdSec decisions behind it, with a warning for decisions that come from a community or list source (they return when the list refreshes) and for decisions that cover a network range. Confirm to delete those decisions and remove the ban; without deleting them the ban would come back on the next request. This needs the `crowdsec_delete` permission on every CrowdSec connection involved.
 
 Adding, removing and changing bans needs the write permission and a writable database; in read-only mode the buttons are disabled. The **Reports** page can also ban the offenders it lists.
 

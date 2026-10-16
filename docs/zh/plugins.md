@@ -68,6 +68,12 @@ EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs
 
 第一步是通过将其文件放置在相应的 `plugins` 数据文件夹中来安装插件。该过程取决于您的集成：
 
+!!! warning "请在调度器启动前安装手动插件"
+    在调度器运行期间复制到 `/data/plugins`（Linux 上为 `/etc/bunkerweb/plugins`） 的插件目录，会在调度器下次重新生成外部插件文件时被删除，因为该插件未在数据库中注册。请通过 Web UI 或 API 安装插件，或确保调度器启动时该插件已存在于挂载的文件夹中。
+
+!!! info "无效的手动插件会被跳过，而不是被删除"
+    如果手动插件的 `plugin.json` 无法读取或未通过校验，该插件不会被安装：调度器会记录原因，保持磁盘上的文件不变并继续运行。如果某个插件声明的设置键或设置 `id` 已被核心插件或已注册的插件使用，也会以同样的方式被拒绝，消息中会指出这两个插件；已注册的插件始终保留其设置。请修复所报告的问题：调度器下次检查插件文件夹时会重新检查该插件。
+
 === "Docker"
 
     当使用 [Docker 集成](integrations.md#docker)时，插件必须放置在调度器容器中挂载在 `/data/plugins` 的卷中。

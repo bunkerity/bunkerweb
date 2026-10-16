@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
 
+## Troubleshooting with an AI agent
+
+### BunkerWeb skills on skills.sh
+
+The official [BunkerWeb troubleshooting skill on skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) helps AI coding agents diagnose blocked requests, bans, upstream errors, certificate issues and configuration problems. Follow the [installation instructions](https://github.com/bunkerity/bunkerweb-skills#installation) for your agent.
+
+### BunkerWeb documentation with Context7
+
+If your agent supports [Context7](https://context7.com/docs), connect it to fetch [BunkerWeb documentation](https://context7.com/bunkerity/bunkerweb). Include your BunkerWeb version, integration, relevant settings and logs in your prompt, and remove passwords, API tokens and other secrets before sharing them.
+
+Example prompt:
+
+```text
+Help me diagnose this issue with BunkerWeb <version> on <integration>. Here are the relevant settings and redacted logs: <details>. use context7
+```
+
 ## Logs
 
 When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.
@@ -150,6 +166,9 @@ You can manually unban an IP, which is useful when performing tests so that you 
     ```shell
     sudo bwcli unban 1.2.3.4
     ```
+
+!!! note "CrowdSec bans"
+    A ban that BunkerWeb created from a CrowdSec decision (`CROWDSEC_BAN_REFRESH` above 0) comes back at the next request unless the CrowdSec decisions behind it are deleted too. For such a ban, `bwcli unban <ip> [-service <name>] [-confirm]` prints the decisions it would delete, the warnings and the unavailable connections, changes nothing and exits with an error; run it again with `-confirm` to delete the decisions and remove the ban. It needs the database (run it from the scheduler host); elsewhere, use the Web UI or the API. `bwcli bans` prints `Kind: CrowdSec lease` or `Kind: ban` for each ban.
 
 ## False positives
 
@@ -803,7 +822,8 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
     - Open the Web UI and go to the Support page.
     - Choose the scope: export the global settings or select a specific Service.
     - Click to download the configuration archive for the chosen scope.
-    - Optionally download logs: the exported logs are automatically anonymized (all IP addresses and domains are masked).
+    - Optionally download logs: the exported logs are automatically anonymized (IPv4 and IPv6 addresses, domains, tokens, passwords and the credentials inside URLs are masked).
+    - Administrators only: the **Web UI Diagnostics** card downloads a bundle with the recent Web UI logs, the plugin versions as the database, the disk and the running Web UI see them, the environment and the latest errors. The same anonymization applies; the license key and the database URI are never collected.
 
 ### Upload plugin
 

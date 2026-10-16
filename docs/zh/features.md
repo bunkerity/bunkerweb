@@ -60,6 +60,25 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 切换到 `detect` 模式可以帮助您识别和解决潜在的误报，而不会干扰合法客户端。一旦这些问题得到解决，您就可以自信地切换回 `block` 模式以获得全面保护。
 
+### 在 TLS 握手阶段丢弃被封禁的连接 {#bans-tls-drop}
+
+被封禁的客户端通常会完成 TLS 握手，然后收到封禁页面（403）。`BANS_TLS_DROP_REASONS` 列出了一些封禁原因，对于这些原因，BunkerWeb 会在握手一开始就关闭连接，早于任何证书或密钥交换工作。客户端看到的是 TLS 错误，而不是页面。当被封禁的地址不断重新连接时，这样可以节省 CPU。
+
+该值是以空格分隔的原因列表，可取 `crowdsec`、`bad_behavior`、`manual`、`ui` 和 `api`。默认值为空，即所有封禁都保持返回 403 页面。我们建议设置为 `crowdsec`。
+
+- 只有实际生效的那条封禁的原因才会计入。对于同时有 `manual` 封禁和 CrowdSec 封禁的 IP，显式封禁先于 CrowdSec 封禁被判定，因此只列出 `crowdsec` 时不会丢弃任何连接，客户端会收到 403 页面。
+- 当 `USE_REAL_IP` 为 `yes` 且来源基于请求头时，或者当 `USE_PROXY_PROTOCOL` 为 `yes` 但 `USE_REAL_IP` 未设为 `yes` 且 `REAL_IP_HEADER` 未设为 `proxy_protocol` 时，会跳过丢弃并保留 403 页面，因为此时还不知道客户端地址。三者都设置后，当发起连接的对端位于 `REAL_IP_FROM` 中时，丢弃使用 PROXY 协议地址，否则使用对端地址。
+- 被 IP 地址或网络白名单放行的 IP 不会被丢弃。其他类型的白名单（反向 DNS、ASN、User-Agent）此时无法求值，会被忽略。
+- 启用 Redis 时，只有在实例持有该封禁的本地副本期间才会丢弃握手。实例会在收到该 IP 的请求后将 Redis 中的封禁缓存最多 30 秒，因此第一个请求仍会收到 403 页面，随后最多 30 秒内的握手会被丢弃。
+- 当 `SECURITY_MODE` 设为 `detect` 时，握手继续进行，并记录一条警告。
+- HTTP/3（QUIC）连接绝不会被丢弃，它们会收到 403 页面。
+
+需要了解的限制：
+
+- 默认服务器只读取全局的 `BANS_TLS_DROP_REASONS` 和全局封禁。
+- TCP 和 UDP（stream）服务没有 TLS 握手钩子：该设置不适用于它们。
+- 警告对每个 IP 和每个 worker 进程最多每分钟记录一次，而不是整个集群每分钟一次。
+
 ### 配置设置
 
 === "核心设置"
@@ -70,6 +89,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | 否   | **BunkerWeb 实例：** 以空格分隔的 BunkerWeb 实例列表。             |
     | `MULTISITE`           | `no`              | global    | 否   | **多站点：** 设置为 `yes` 以启用托管具有不同配置的多个网站。       |
     | `SECURITY_MODE`       | `block`           | multisite | 否   | **安全级别：** 控制安全强制执行的级别。选项：`detect` 或 `block`。 |
+    | `BANS_TLS_DROP_REASONS` |  | multisite | 否 | **在 TLS 握手时丢弃封禁：** 封禁原因（`crowdsec`、`bad_behavior`、`manual`、`ui`、`api`，以空格分隔），其被封禁的 IP 会在 TLS 握手阶段被丢弃，而不是收到 403 页面。使用基于请求头的真实 IP 时会跳过；使用 PROXY 协议时也会跳过，除非真实 IP 使用 `proxy_protocol`。从不应用于 HTTP/3。 |
     | `SERVER_TYPE`         | `http`            | multisite | 否   | **服务器类型：** 定义服务器是 `http` 还是 `stream` 类型。          |
 
 === "API 设置"
@@ -137,16 +157,16 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "内存设置"
 
-    | 设置                           | 默认值 | 上下文 | 多个 | 描述                                                                                                             |
-    | ------------------------------ | ------ | ------ | ---- | ---------------------------------------------------------------------------------------------------------------- |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`  | global | 否   | **工作锁内存大小：** 用于初始化工作进程的 lua_shared_dict 大小。                                                 |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`  | global | 否   | **数据存储内存大小：** 内部数据存储的大小。                                                                      |
+    | 设置                           | 默认值 | 上下文 | 多个 | 描述                                                             |
+    | ------------------------------ | ------ | ------ | ---- | ---------------------------------------------------------------- |
+    | `WORKERLOCK_MEMORY_SIZE`       | `48k`  | global | 否   | **工作锁内存大小：** 用于初始化工作进程的 lua_shared_dict 大小。 |
+    | `DATASTORE_MEMORY_SIZE`        | `64m`  | global | 否   | **数据存储内存大小：** 内部数据存储的大小。                      |
     | `DATASTORE_LRU_SIZE`           | `1k`   | global | 否   | **数据存储 LRU 大小：** 每个工作进程共享数据存储 LRU 的槽数。接受整数或 `k`/`m` 简写（例如 `1k`、`10k`、`1m`）。 |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`  | global | 否   | **缓存存储内存大小：** 内部缓存存储的大小。                                                                      |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。                                                          |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。                                                      |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。                                                              |
-    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global | 否 | **会话吊销内存大小：** 存放已吊销 Cookie 会话标识符的存储大小（例如 `8192`、`16k`、`16m`）。 |
+    | `CACHESTORE_MEMORY_SIZE`       | `64m`  | global | 否   | **缓存存储内存大小：** 内部缓存存储的大小。                      |
+    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。          |
+    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。      |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。              |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global | 否   | **会话吊销内存大小：** 存放已吊销 Cookie 会话标识符的存储大小。   |
 
 === "日志设置"
 
@@ -377,8 +397,8 @@ STREAM 支持 :x:
 | 设置                   | 默认值       | 上下文    | 多个 | 描述                                                                                        |
 | ---------------------- | ------------ | --------- | ---- | ------------------------------------------------------------------------------------------- |
 | `ANTIBOT_URI`          | `/challenge` | multisite | 否   | **挑战 URL：** 用户将被重定向到以完成挑战的 URL。确保此 URL 未用于您网站上的任何其他内容。  |
-| `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | 否   | **挑战时间限制：** 用户完成挑战的最长时间（以秒为单位）。此时间过后，将生成新的挑战。       |
-| `ANTIBOT_TIME_VALID`   | `86400`      | multisite | 否   | **挑战有效期：** 已完成的挑战的有效时间（以秒为单位）。此时间过后，用户将必须解决新的挑战。 |
+| `ANTIBOT_TIME_RESOLVE` | `1m`         | multisite | 否   | **挑战时间限制：** 用户完成挑战的最长时间（以秒为单位）。此时间过后，将生成新的挑战。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `ANTIBOT_TIME_VALID`   | `1d`         | multisite | 否   | **挑战有效期：** 已完成的挑战的有效时间（以秒为单位）。此时间过后，用户将必须解决新的挑战。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `ANTIBOT_SUCCESS_URI`  |              | multisite | 否   | **成功后重定向 URL：** 用户成功解决挑战后重定向到的固定 URL，而不是他们最初请求的页面。留空则将用户返回其原始目标页面。 |
 
 ### 从挑战中排除流量
@@ -1101,8 +1121,8 @@ STREAM 支持 :white_check_mark:
 | `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | 否   | **启用不良行为检测：** 设置为 `yes` 以启用不良行为检测和封禁功能。                                                                 |
 | `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | 否   | **不良状态码：** 当返回给客户端时，将被计为“不良”行为的 HTTP 状态码列表。                                                          |
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | 否   | **阈值：** 一个 IP 在计数周期内可以生成的“不良”状态码的数量，超过该数量将被封禁。                                                  |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。                                                                  |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。  |
+| `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。          |
 
 !!! warning "误报"
@@ -1782,7 +1802,7 @@ CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | 否   | **跨源打开器策略：** 控制浏览上下文之间的通信。                                                  |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | 否   | **跨源嵌入器策略：** 控制文档是否可以加载来自其他来源的资源。                                    |
 | `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | 否   | **跨源资源策略：** 控制哪些网站可以嵌入您的资源。                                                |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | 否   | **预检缓存持续时间：** 浏览器应缓存预检响应的时间（以秒为单位）。                                |
+| `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | 否   | **预检缓存持续时间：** 浏览器应缓存预检响应的时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | 否   | **拒绝未经授权的来源：** 当为 `yes` 时，来自未经授权来源的请求将被拒绝并返回错误代码。           |
 
 !!! tip "优化预检请求"
@@ -2053,6 +2073,39 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
 
+### CrowdSec 封禁
+
+默认情况下，BunkerWeb 会针对每个请求询问 CrowdSec。将 `CROWDSEC_BAN_REFRESH` 设置为一个时长（例如 `5m`），即可把 CrowdSec 的拦截转换为 **CrowdSec 封禁**：一种短期的 BunkerWeb 封禁，称为租约（lease），只要 CrowdSec 决策持续有效，它就会被续期。该 IP 之后的请求会在封禁检查处被拦下，先于其他插件，也先于对 CrowdSec 的查询。该封禁会显示在“封禁”页面，带有 **CrowdSec 租约**徽章和**调查**操作。默认值 `0` 保持原有行为，不创建任何封禁。
+
+租约是一种普通的 BunkerWeb 封禁：其原因为 `crowdsec`，与其他封禁存放在同一张数据库表中，API 将其报告为 `kind: "crowdsec_lease"`。没有需要单独规划容量的存储，也没有架构变更。拦截请求的实例会创建租约，每分钟运行一次的 `sync-bans` 任务会将其学习到数据库中。租约在重启后不会被恢复到实例上：下一个被拦截的请求会重新创建它。
+
+- **何时创建租约：** 仅当 BunkerWeb 自身因本地 API 的 `ban` 决策拦截了请求时才会创建，要求 `SECURITY_MODE` 为 `block`，且决策尚未过期。AppSec 拒绝、失败策略以及验证码或质询等其他处置，都不会创建租约。
+- **持续多久：** 取 `CROWDSEC_BAN_REFRESH` 与最长的有效封禁决策的剩余时间中较短者，最少一秒。租约结束后，下一个请求会再次向 CrowdSec 检查，如果仍有决策适用，则创建新的租约。
+- **显式封禁优先：** 租约绝不会替换由手动、Web UI、API、Bad behavior 或其他插件添加的有效封禁，并且这些类型的封禁会先于同一 IP 的租约被报告。
+- **时效性：** 当决策直接在 CrowdSec 中被移除（通过 `cscli`、在 Console 中、通过列表刷新或通过 allowlist）时，该 IP 最迟在以下各项之和之后被放行：`CROWDSEC_BAN_REFRESH`、CrowdSec 缓存延迟（stream 模式为 `CROWDSEC_UPDATE_FREQUENCY`，live 模式为 `CROWDSEC_CACHE_EXPIRATION`），以及启用 Redis 时其他实例上本地副本最多 30 秒。在 stream 模式下，只要最近一次成功同步早于 `CROWDSEC_UPDATE_FREQUENCY` 的两倍，就不会创建新的租约。
+- **排除的位置：** 服务上的任何 `CROWDSEC_EXCLUDE_LOCATION` 都会关闭该服务的 CrowdSec 封禁，因为封禁同样会拦截被排除的路径。CrowdSec 仍会在那里检查每个请求。当插件排除其自身的质询位置时，同样如此。
+- **范围：** 在多站点模式下，租约仅适用于请求被拦截的那个服务；在单站点模式下，租约全局适用。默认服务器从不询问 CrowdSec，因此从不创建租约。
+- **TLS 握手：** 在 `BANS_TLS_DROP_REASONS` 中列出 `crowdsec`，即可在 TLS 握手开始时关闭持有租约的 IP 的连接，而不是返回 403 页面（参见[在 TLS 握手阶段丢弃被封禁的连接](#bans-tls-drop)）。
+
+**解除封禁与 CrowdSec。** 移除 CrowdSec 封禁时也会移除其背后的 CrowdSec 决策，否则该 IP 会在下一次检查时再次被封禁。Web UI、API 和 `bwcli unban` 遵循相同的流程：
+
+- 它需要为每个包含所选决策的连接提供管理凭据（`CROWDSEC_MANAGEMENT_LOGIN` 和 `CROWDSEC_MANAGEMENT_PASSWORD`）。使用 API 时，除了 `ban_delete`，还需要在每个相关连接上拥有 `crowdsec_delete` 权限。
+- 在移除任何 CrowdSec 决策之前，您必须确认决策列表（IP 或网段、类型、来源和场景）。`bwcli unban` 为此提供 `-confirm`：不带它时，该命令只打印列表，不会更改任何内容，无论是 CrowdSec 还是 BunkerWeb。该命令只能在能够访问数据库的主机上运行，通常是调度器主机。其他位置请使用 Web UI 或 API。
+- 如果发现该拦截的连接已宕机或已消失，则拒绝解除封禁。租约会在 `CROWDSEC_BAN_REFRESH` 内自行过期。
+- 首先删除决策。然后 BunkerWeb 请求每个为该 IP 提供服务的连接刷新它，从每个实例和 Redis 中移除租约，最后撤销数据库记录。如果某个决策无法移除，其余所选决策仍会被删除，但会跳过后续步骤并保留租约。结果会报告为部分完成，并列出已删除和失败的决策。在失败的决策被移除之前，该 IP 仍处于被拦截状态。重试是安全的：已经不存在的决策视为已移除。
+- 如果在移除租约期间某个实例宕机，结果会报告为部分完成，但数据库记录会被撤销，并且在该实例恢复时，会通过租约标识符在该实例上重放这次移除。
+- 如果在解除封禁期间租约被续期，或被显式封禁替换，则不会移除任何内容，结果会报告为已更改。请重试。
+- 来自中央 API 或列表的决策（来源为 `CAPI` 和 `lists`）可能会在下次刷新时回来。如需永久例外，请创建 CrowdSec allowlist。
+- 移除网段决策会影响整个网段。已为该网段内其他 IP 创建的租约会保留到其时长结束，最长为 `CROWDSEC_BAN_REFRESH`。
+- 只会移除租约。同一 IP 上任何范围的显式封禁都是单独的一行：它会保留，并需单独解除。
+
+**可接受的限制。**
+
+- 租约是根据请求被拦截时的决策状态构建的，因此在同一秒内被移除的决策仍可能产生租约。它最长持续 `CROWDSEC_BAN_REFRESH`，且绝不会超过当时该决策剩余的时间。
+- 当租约的标识数据（实例、连接、服务范围）存储后超过 1024 个字符时，不会创建租约，请求像以前一样被拒绝。随租约保存的详细信息仅限于前十条决策和 4096 个存储字符；会先丢弃可选的详细信息，绝不会丢弃标识数据。
+- 没有 Redis 时，每个实例各自创建并保留自己的租约。“封禁”页面只显示一次由多个实例执行的租约，解除封禁会将其从每个实例中移除。
+- “封禁”页面的统计磁贴统计存储在数据库中的封禁。存在时间不足一分钟的租约会先从实例显示在表格中，之后才会被计入统计。
+
 ### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
 === "Docker"
@@ -2322,10 +2375,11 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_API_KEY`          |                        | multisite    | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
 | `CROWDSEC_MODE`             | `live`                 | multisite    | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
 | `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite    | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite    | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1s`                   | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite    | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite    | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
+| `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `CROWDSEC_BAN_REFRESH` | `0`                    | multisite | 否   | **CrowdSec 封禁续期：** 将 CrowdSec 的拦截转为短期 BunkerWeb 封禁，并在 CrowdSec 决策持续期间续期。该值是再次询问 CrowdSec 之前封禁最长持续的时间。0 表示禁用。设置了 `CROWDSEC_EXCLUDE_LOCATION` 的服务不会获得 CrowdSec 封禁。支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 
 !!! info "`CROWDSEC_EXCLUDE_LOCATION` 的匹配方式"
     每个以逗号分隔的条目都会排除该 URI **及其下的所有内容**：`/health` 会跳过 `/health` 和 `/health/live`，但不会跳过 `/healthcheck`——路径其余部分之前始终需要一个分隔符。排除是彻底的：被排除的请求既不会到达 Local API，也不会到达 AppSec 组件，因此不要排除仍希望被检查的路径。尤其不要排除 `/crowdsec-internal`：机器人检测从该路径提供其质询资源，排除它会静默地禁用质询。
@@ -2336,9 +2390,9 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | --------------------------------- | ------------- | ------ | ---- | --------------------------------------------------------------------------------- |
 | `CROWDSEC_APPSEC_URL`             |               | multisite | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
 | `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100ms`       | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100ms`       | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500ms`       | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
 
@@ -2711,16 +2765,16 @@ STREAM 支持 :white_check_mark:
 | `DATABASE_URI_READONLY`           |                                           | global | 否   | **只读数据库 URI：** 用于只读操作或在主数据库宕机时作为故障转移的可选数据库。                                                                   |
 | `DATABASE_LOG_LEVEL`              | `warning`                                 | global | 否   | **日志级别：** 数据库日志的详细程度。选项：`debug`、`info`、`warn`、`warning` 或 `error`。                                                      |
 | `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global | 否   | **最大作业运行次数：** 在自动清理之前，数据库中保留的作业执行记录的最大数量。                                                                   |
-| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global | 否   | **会话保留：** UI 用户会话在自动清理前允许存在的最大天数。                                                                                      |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14d`                                     | global | 否   | **会话保留：** UI 用户会话在自动清理前允许存在的最大天数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为天。 |
 | `DATABASE_POOL_SIZE`              | `40`                                      | global | 否   | **连接池大小：** 数据库连接池中保持的连接数。                                                                                                   |
 | `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global | 否   | **连接池最大溢出：** 超出连接池大小可创建的最大额外连接数。设为 `-1` 表示无限制。                                                               |
-| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global | 否   | **连接池超时：** 从连接池获取连接前等待的最大秒数。                                                                                             |
-| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global | 否   | **连接池回收：** 连接自动回收的时间间隔（秒）。设为 `-1` 禁用。                                                                                 |
+| `DATABASE_POOL_TIMEOUT`         | `5s`                                      | global | 否   | **连接池超时：** 从连接池获取连接前等待的最大秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `DATABASE_POOL_RECYCLE`         | `30m`                                     | global | 否   | **连接池回收：** 连接自动回收的时间间隔（秒）。设为 `-1` 禁用。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `DATABASE_POOL_PRE_PING`          | `yes`                                     | global | 否   | **连接池预检测：** 每次从连接池取出连接时是否测试其活性。                                                                                       |
 | `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global | 否   | **归还时重置：** 连接归还连接池时的重置方式。留空为自动（MySQL/MariaDB 用 `none`，其他用 `rollback`）。选项：`rollback`、`commit`、`none`。       |
-| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global | 否   | **重试超时：** 启动时等待数据库可用的最大秒数。                                                                                                 |
+| `DATABASE_RETRY_TIMEOUT`        | `1m`                                      | global | 否   | **重试超时：** 启动时等待数据库可用的最大秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global | 否   | **请求重试次数：** 操作中遇到瞬态数据库错误时的重试次数。                                                                                       |
-| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global | 否   | **请求重试延迟：** 瞬态数据库错误重试之间的延迟秒数。                                                                                           |
+| `DATABASE_REQUEST_RETRY_DELAY`  | `250ms`                                   | global | 否   | **请求重试延迟：** 瞬态数据库错误重试之间的延迟秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 
 !!! tip "数据库选择"
     - **SQLite**（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。
@@ -3862,12 +3916,12 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | 否   | **证书颁发机构：** 选择用于签发证书的 ACME 服务器。可选值：`letsencrypt` 或 `zerossl`。                                                                                              |
 | `LETS_ENCRYPT_ZEROSSL_API_KEY`              |               | multisite | 否   | **ZeroSSL API 密钥：** 当 `LETS_ENCRYPT_SERVER=zerossl` 时由 `zerossl-bot` 使用的可选密钥。若为空，则使用 `EMAIL_LETS_ENCRYPT` 获取 EAB 凭据。                                       |
 | `LETS_ENCRYPT_ZEROSSL_API_RETRY`            | `3`           | multisite | 否   | **ZeroSSL API 重试次数：** `zerossl-bot` 发起 ZeroSSL API 请求时的重试次数（`0` 表示禁用重试）。                                                                                     |
-| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2`           | multisite | 否   | **ZeroSSL API 重试延迟：** `zerossl-bot` 中 ZeroSSL API 重试之间的延迟秒数。                                                                                                         |
-| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5`           | multisite | 否   | **ZeroSSL API 连接超时：** `zerossl-bot` 中 ZeroSSL API 调用的连接超时时间（秒）。                                                                                                   |
-| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20`          | multisite | 否   | **ZeroSSL API 最大时长：** `zerossl-bot` 中每次 ZeroSSL API 调用允许的最大总时长（秒）。                                                                                             |
+| `LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY`      | `2s`          | multisite | 否   | **ZeroSSL API 重试延迟：** `zerossl-bot` 中 ZeroSSL API 重试之间的延迟秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                         |
+| `LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT`  | `5s`          | multisite | 否   | **ZeroSSL API 连接超时：** `zerossl-bot` 中 ZeroSSL API 调用的连接超时时间（秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                   |
+| `LETS_ENCRYPT_ZEROSSL_API_MAX_TIME`         | `20s`         | multisite | 否   | **ZeroSSL API 最大时长：** `zerossl-bot` 中每次 ZeroSSL API 调用允许的最大总时长（秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                             |
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                     |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                    |
-| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                                 |
+| `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                 |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。请依次写入键、空白字符和值，并且不要为键加引号。值可以是原始文本、base64 编码或 JSON 对象。                                                      |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | 否   | **自动解码 Base64 DNS 凭据：** 启用后自动解码 base64 编码的 DNS 提供商凭据（`rfc2136` 提供商除外）。如果凭据故意为 base64，请设置为 `no`。                                           |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                      |
@@ -4357,7 +4411,7 @@ Redis 中的插件计数器和历史记录按实例主机名、子系统和工�
 | `METRICS_MEMORY_SIZE`                | `16m`    | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                 |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。            |
-| `METRICS_REDIS_TTL` | `2592000` | global | 否 | **指标 Redis TTL：** Redis 中指标键过期前的秒数（`0` 表示永不过期）；每次同步都会刷新，因此活跃数据永不过期，而被弃用的数据则可在 `volatile-lru` 策略下被淘汰，使 Redis 能从 `maxmemory` 中恢复。支持 `k`/`m` 简写。 |
+| `METRICS_REDIS_TTL` | `30d` | global | 否 | **指标 Redis TTL：** Redis 中指标键过期前的秒数（`0` 表示永不过期）；每次同步都会刷新，因此活跃数据永不过期，而被弃用的数据则可在 `volatile-lru` 策略下被淘汰，使 Redis 能从 `maxmemory` 中恢复。支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `MAX_LRU_HISTORY`                    | `1k`     | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。 |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。 |
 | `METRICS_COLLECT_TIMINGS` | `yes` | global | 否 | **采集插件耗时：** 按 (插件, 阶段) 以 count/sum/max 聚合的形式，测量每个插件在每个请求阶段所花的时间。它需要在每次插件调用前后强制刷新 NGINX 的时间，在完整插件链上约合每请求一微秒；设为 `no` 可完全去掉这项开销。整个请求的耗时始终会被采集。 |
@@ -5733,15 +5787,15 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_SSL`               | `no`       | global | 否   | **Redis/Valkey SSL：** 设置为 `yes` 以启用 Redis/Valkey 连接的 SSL/TLS 加密。    |
 | `REDIS_SSL_VERIFY`        | `yes`      | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。 |
 | `REDIS_SSL_CA`            |            | global | 否   | **Redis/Valkey SSL CA 包：** 用于验证服务器证书（私有 CA）的 PEM CA 包路径。Python 客户端使用它，并通过生成的信任包供请求路径使用。文件缺失或无效会导致配置生成失败。 |
-| `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。      |
+| `REDIS_TIMEOUT`           | `1s`       | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。      |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                       |
-| `REDIS_CLUSTER_NODES` | | global | 否 | 以空格分隔的 `host:port` 初始节点（IPv6 使用 `[ipv6]:port`）。留空保留独立或 Sentinel 模式。 |
+| `REDIS_CLUSTER_NODES` | | global | 否 | 以空格分隔的 `host[:port]` 初始节点（省略端口时默认为 `6379`；IPv6 使用 `[ipv6]:port`）。留空保留独立或 Sentinel 模式。 |
 | `REDIS_SENTINEL_HOSTS`    |            | global | 否   | **Sentinel 主机：** Redis Sentinel 主机的空格分隔列表 (hostname:port)。          |
 | `REDIS_SENTINEL_USERNAME` |            | global | 否   | **Sentinel 用户名：** 用于 Redis Sentinel 身份验证的用户名。                     |
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                        |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。    |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`      | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global | 否   | **Keepalive 池：** 每个 NGINX worker 在池中保留的最大 Redis/Valkey 连接数。 |
 
 !!! info "私有 CA：`REDIS_SSL_CA` 如何受信任"
@@ -6335,7 +6389,7 @@ STREAM 支持 :white_check_mark:
 | ---------------------- | -------------------------- | --------- | ---- | ------------------------------------------------------- |
 | `USE_REVERSE_SCAN`     | `no`                       | multisite | 否   | **启用反向扫描：** 设置为 `yes` 以启用客户端端口扫描。  |
 | `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | 否   | **要扫描的端口：** 要在客户端检查的端口的空格分隔列表。 |
-| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | 否   | **扫描超时：** 允许扫描端口的最长时间（毫秒）。         |
+| `REVERSE_SCAN_TIMEOUT` | `500ms`                    | multisite | 否   | **扫描超时：** 允许扫描端口的最长时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 
 !!! warning "性能注意事项"
     扫描多个端口会增加客户端连接的延迟。请使用适当的超时值并限制扫描的端口数量以保持良好的性能。
@@ -6787,7 +6841,7 @@ STREAM 支持 :white_check_mark:
 | --------------------------- | ---------------------- | --------- | ---- | ---------------------------------------------------------------------------------------------- |
 | `GENERATE_SELF_SIGNED_SSL`  | `no`                   | multisite | 否   | **启用自签名：** 设置为 `yes` 以启用自动自签名证书生成。                                       |
 | `SELF_SIGNED_SSL_ALGORITHM` | `ec-prime256v1`        | multisite | 否   | **证书算法：** 用于证书生成的算法：`ec-prime256v1`、`ec-secp384r1`、`rsa-2048` 或 `rsa-4096`。 |
-| `SELF_SIGNED_SSL_EXPIRY`    | `365`                  | multisite | 否   | **证书有效期：** 自签名证书的有效天数（默认为 1 年）。                                         |
+| `SELF_SIGNED_SSL_EXPIRY`    | `1y`                   | multisite | 否   | **证书有效期：** 自签名证书的有效天数（默认为 1 年）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为天。 |
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | 否   | **证书主题：** 证书的主题字段，用于标识域名。                                                  |
 
 !!! tip "开发环境"
@@ -6865,9 +6919,9 @@ STREAM 支持 :white_check_mark:
 | `SESSIONS_SECRET`           | `random` | global    | 否   | **会话密钥：** 用于签署会话 Cookie 的加密密钥。应该是一个强大的、随机的、对您的站点唯一的字符串。                                                                                                                   |
 | `SESSIONS_NAME`             | `random` | global    | 否   | **Cookie 名称：** 将存储会话标识符的 Cookie 的名称。                                                                                                                                                                  |
 | `SESSIONS_DOMAIN`           |          | multisite | 否   | **Cookie 域：** 应用于会话 Cookie 的可选 `Domain` 属性（例如 `example.com`）。留空则保持 Cookie 仅作用于主机。按服务器配置它，以便在同一可注册域名下的同级子域之间共享会话状态（反机器人、挑战等）。             |
-| `SESSIONS_IDLING_TIMEOUT`   | `1800`   | global    | 否   | **空闲超时：** 会话在失效前允许保持不活动的最长时间（以秒为单位）。                                                                                                                                                   |
-| `SESSIONS_ROLLING_TIMEOUT`  | `3600`   | global    | 否   | **滚动超时：** 会话在必须续订之前允许存在的最长时间（以秒为单位）。                                                                                                                                                   |
-| `SESSIONS_ABSOLUTE_TIMEOUT` | `86400`  | global    | 否   | **绝对超时：** 无论活动情况如何，会话在被销毁前允许存在的最长时间（以秒为单位）。                                                                                                                                     |
+| `SESSIONS_IDLING_TIMEOUT`   | `30m`    | global    | 否   | **空闲超时：** 会话在失效前允许保持不活动的最长时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                                   |
+| `SESSIONS_ROLLING_TIMEOUT`  | `1h`     | global    | 否   | **滚动超时：** 会话在必须续订之前允许存在的最长时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                                   |
+| `SESSIONS_ABSOLUTE_TIMEOUT` | `1d`     | global    | 否   | **绝对超时：** 无论活动情况如何，会话在被销毁前允许存在的最长时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。                                                                     |
 | `SESSIONS_CHECK_IP`         | `yes`    | global    | 否   | **检查 IP：** 设置为 `yes` 时，如果客户端 IP 地址发生变化，则销毁会话。                                                                                                                                               |
 | `SESSIONS_CHECK_USER_AGENT` | `yes`    | global    | 否   | **检查 User-Agent：** 设置为 `yes` 时，如果客户端 User-Agent 发生变化，则销毁会话。                                                                                                                                   |
 

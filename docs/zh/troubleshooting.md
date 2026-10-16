@@ -3,6 +3,22 @@
 !!! info "BunkerWeb 面板"
     如果您无法解决您的问题，您可以通过我们的面板[直接联系我们](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)。这里集中了与 BunkerWeb 解决方案相关的所有请求。
 
+## 使用 AI 智能体排查问题
+
+### skills.sh 上的 BunkerWeb 技能
+
+[skills.sh 上的官方 BunkerWeb 故障排除技能](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting)可以帮助 AI 编程智能体诊断请求被拦截、IP 被封禁、上游错误、证书问题和配置问题。请按照适用于您所用智能体的[安装说明](https://github.com/bunkerity/bunkerweb-skills#installation)操作。
+
+### 通过 Context7 获取 BunkerWeb 文档
+
+如果您的智能体支持 [Context7](https://context7.com/docs)，可以连接它来获取 [BunkerWeb 文档](https://context7.com/bunkerity/bunkerweb)。请在提示中注明您的 BunkerWeb 版本、集成方式、相关设置和日志，并在分享前删除密码、API 令牌和其他敏感信息。
+
+提示示例：
+
+```text
+请帮我诊断使用 <集成方式> 的 BunkerWeb <版本> 中的这个问题。以下是相关设置和已删除敏感信息的日志：<详细信息>。use context7
+```
+
 ## 日志
 
 在进行故障排除时，日志是您最好的朋友。我们尽力提供用户友好的日志，以帮助您了解正在发生的事情。
@@ -150,6 +166,9 @@
     ```shell
     sudo bwcli unban 1.2.3.4
     ```
+
+!!! note "CrowdSec 封禁"
+    由 BunkerWeb 根据 CrowdSec 决策创建的封禁（`CROWDSEC_BAN_REFRESH` 大于 0），除非同时删除其背后的 CrowdSec 决策，否则会在下一次请求时重新出现。对于这类封禁，`bwcli unban <ip> [-service <名称>] [-confirm]` 会打印它将要删除的决策、警告和不可用的连接，不做任何更改并以错误退出；加上 `-confirm` 再次运行，即可删除这些决策并移除封禁。它需要数据库（请在调度器主机上运行）；在其他位置请使用 Web UI 或 API。`bwcli bans` 会为每条封禁打印 `Kind: CrowdSec lease` 或 `Kind: ban`。
 
 ## 误报
 
@@ -800,7 +819,8 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
     - 打开 Web UI 并转到支持页面。
     - 选择范围：导出全局设置或选择特定服务。
     - 点击下载所选范围的配置存档。
-    - 可选地下载日志：导出的日志会自动匿名化（所有 IP 地址和域名都被屏蔽）。
+    - 可选地下载日志：导出的日志会自动匿名化（IPv4 和 IPv6 地址、域名、令牌、密码以及 URL 中的凭据都会被屏蔽）。
+    - 仅限管理员：**Web UI 诊断**卡片会下载一个包，其中包含最近的 Web UI 日志、数据库、磁盘和正在运行的 Web UI 各自看到的插件版本、运行环境以及最近的错误。适用相同的匿名化规则；许可证密钥和数据库 URI 绝不会被收集。
 
 ### 上传插件
 

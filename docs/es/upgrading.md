@@ -7,7 +7,7 @@
 
 !!! info "Qué bases de datos 1.6 pueden actualizarse"
 
-    Una base de datos escrita por 1.6.16, o por cualquiera de sus candidatas a versión (1.6.16~rc1 a 1.6.16~rc4), se actualiza a 1.7 como cualquier otra base 1.6: la cadena de migraciones contiene cada una de esas revisiones, y las migraciones se ejecutan en el primer arranque. 1.6.16 es la versión desde la que se actualiza.
+    Una base de datos escrita por 1.6.16, por cualquiera de sus candidatas a versión (1.6.16~rc1 a 1.6.16~rc4) o por 1.6.17~rc1, se actualiza a 1.7 como cualquier otra base 1.6: la cadena de migraciones contiene cada una de esas revisiones, y las migraciones se ejecutan en el primer arranque. 1.6.16 es la versión estable desde la que se actualiza.
 
 ### Cambios importantes {#breaking-changes}
 

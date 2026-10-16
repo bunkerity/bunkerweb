@@ -7,7 +7,7 @@
 
 !!! info "Which 1.6 databases can upgrade"
 
-    A database written by 1.6.16, or by any of its release candidates (1.6.16~rc1 to 1.6.16~rc4), upgrades to 1.7 like any other 1.6 database: the migration chain contains every one of those revisions, and the migrations run at the first start. 1.6.16 is the release to upgrade from.
+    A database written by 1.6.16, by any of its release candidates (1.6.16~rc1 to 1.6.16~rc4), or by 1.6.17~rc1, upgrades to 1.7 like any other 1.6 database: the migration chain contains every one of those revisions, and the migrations run at the first start. 1.6.16 is the stable release to upgrade from.
 
 ### Breaking changes
 

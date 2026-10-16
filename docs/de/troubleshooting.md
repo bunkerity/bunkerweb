@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     Wenn Sie Ihr Problem nicht lösen können, können Sie [uns direkt über unser Panel kontaktieren](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). Dies zentralisiert alle Anfragen zur BunkerWeb-Lösung.
 
+## Fehlerbehebung mit einem KI-Agenten
+
+### BunkerWeb-Skills auf skills.sh
+
+Der offizielle [BunkerWeb-Skill zur Fehlerbehebung auf skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) hilft KI-Programmieragenten bei der Diagnose blockierter Anfragen, IP-Sperren, Upstream-Fehler, Zertifikats- und Konfigurationsprobleme. Folgen Sie den [Installationsanweisungen](https://github.com/bunkerity/bunkerweb-skills#installation) für Ihren Agenten.
+
+### BunkerWeb-Dokumentation mit Context7
+
+Wenn Ihr Agent [Context7](https://context7.com/docs) unterstützt, verbinden Sie ihn damit, um die [BunkerWeb-Dokumentation](https://context7.com/bunkerity/bunkerweb) abzurufen. Geben Sie Ihre BunkerWeb-Version, Integration, relevante Einstellungen und Protokolle in Ihrer Anfrage an und entfernen Sie Passwörter, API-Tokens und andere Geheimnisse, bevor Sie diese teilen.
+
+Beispielanfrage:
+
+```text
+Helfen Sie mir, dieses Problem mit BunkerWeb <Version> unter <Integration> zu diagnostizieren. Hier sind die relevanten Einstellungen und bereinigten Protokolle: <Details>. use context7
+```
+
 ## Protokolle
 
 Bei der Fehlerbehebung sind Protokolle Ihre besten Freunde. Wir geben unser Bestes, um benutzerfreundliche Protokolle bereitzustellen, damit Sie verstehen, was passiert.
@@ -150,6 +166,9 @@ Sie können eine IP manuell entsperren, was bei Tests nützlich ist, damit Sie d
     ```shell
     sudo bwcli unban 1.2.3.4
     ```
+
+!!! note "CrowdSec-Sperren"
+    Eine Sperre, die BunkerWeb aus einer CrowdSec-Entscheidung erzeugt hat (`CROWDSEC_BAN_REFRESH` größer als 0), kommt bei der nächsten Anfrage zurück, wenn nicht auch die CrowdSec-Entscheidungen dahinter gelöscht werden. Für eine solche Sperre gibt `bwcli unban <ip> [-service <name>] [-confirm]` die Entscheidungen aus, die es löschen würde, dazu die Warnungen und die nicht verfügbaren Verbindungen, ändert nichts und endet mit einem Fehler; führen Sie es erneut mit `-confirm` aus, um die Entscheidungen zu löschen und die Sperre zu entfernen. Es benötigt die Datenbank (führen Sie es auf dem Scheduler-Host aus); anderswo nutzen Sie die Web-Oberfläche oder die API. `bwcli bans` gibt für jede Sperre `Kind: CrowdSec lease` oder `Kind: ban` aus.
 
 ## Falschmeldungen
 
@@ -904,7 +923,8 @@ Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA hab
     - Öffnen Sie die Web-UI und gehen Sie zur Support-Seite.
     - Wählen Sie den Geltungsbereich: Exportieren Sie die globalen Einstellungen oder wählen Sie einen bestimmten Dienst aus.
     - Klicken Sie, um das Konfigurationsarchiv für den ausgewählten Geltungsbereich herunterzuladen.
-    - Laden Sie optional Protokolle herunter: Die exportierten Protokolle werden automatisch anonymisiert (alle IP-Adressen und Domains werden maskiert).
+    - Laden Sie optional Protokolle herunter: Die exportierten Protokolle werden automatisch anonymisiert (IPv4- und IPv6-Adressen, Domains, Token, Passwörter und die Zugangsdaten in URLs werden maskiert).
+    - Nur für Administratoren: Die Karte **Web-UI-Diagnose** lädt ein Paket mit den letzten Web-UI-Protokollen, den Plugin-Versionen aus Sicht der Datenbank, des Datenträgers und der laufenden Web-UI, der Umgebung und den letzten Fehlern herunter. Es gilt dieselbe Anonymisierung; der Lizenzschlüssel und die Datenbank-URI werden nie erfasst.
 
 ### Plugin hochladen
 

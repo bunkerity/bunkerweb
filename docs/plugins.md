@@ -71,6 +71,12 @@ Service templates have the same mechanism, with `EXTERNAL_TEMPLATE_URLS`. Each U
 
 The first step is to install the plugin by placing its files inside the corresponding `plugins` data folder. The procedure depends on your integration :
 
+!!! warning "Install a manual plugin before the scheduler starts"
+    A plugin directory copied into `/data/plugins` (`/etc/bunkerweb/plugins` on Linux) while the scheduler is running is removed the next time the scheduler regenerates the external plugin files, because the plugin is not registered in the database. Install the plugin through the Web UI or the API, or make sure it is present in the mounted folder when the scheduler starts.
+
+!!! info "Invalid manual plugins are skipped, not deleted"
+    A manual plugin whose `plugin.json` cannot be read or fails validation is not installed: the scheduler logs the reason, leaves the files on disk untouched and keeps running. A plugin that declares a setting key, or a setting `id`, already used by a core plugin or by a plugin that is already registered is refused the same way, and the message names both plugins; a registered plugin always keeps its settings. Fix the reported problem: the plugin is checked again the next time the scheduler looks at the plugins folder.
+
 === "Docker"
 
     When using the [Docker integration](integrations.md#docker), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.

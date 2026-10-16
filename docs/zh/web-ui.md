@@ -259,6 +259,7 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
 
     通行密钥是替代登录方式，不是额外关卡。注册后不会要求密码登录再提供通行密钥，因为它没有恢复代码，丢失设备可能永久锁定帐户。密码和 TOTP 保持原有行为；需要强制第二因素时，请使用带恢复代码的 TOTP。
 - 会话：默认空闲时长 12 小时（`SESSION_LIFETIME_HOURS`），每次请求刷新。`SESSION_ABSOLUTE_HOURS`（默认 `168` = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（`SESSION_ROLLING_HOURS`，默认 `0` = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；`CHECK_PRIVATE_IP=no` 仅对私网放宽 IP 检查。`ALWAYS_REMEMBER=yes` 始终启用持久 Cookie。
+- 会话存储：当 `USE_REDIS` 为 `yes` 且 Redis 有响应时，会话保存在 Redis 中，否则保存在本地文件存储中。如果 Web UI 启动后 Redis 停止响应或拒绝写入，受影响的会话会回退到该主机的本地存储，并在 Redis 恢复后回到 Redis，而不是让每个请求一直失败直到 worker 重启。存在多个 Web UI 副本时，其他副本看不到已转移到本地存储的会话，并会要求重新登录。Redis 的静默淘汰不在覆盖范围内。在 Redis 不可用期间被撤销的会话仍保持撤销状态：撤销标记同时保存在本地存储中。在 Web UI 的环境中设置 `UI_USE_REDIS=no`（Linux 安装为 `/etc/bunkerweb/ui.env`），即可仅在该实例上让 Web UI 的会话不使用 Redis；`USE_REDIS` 仍然适用于其他所有组件。默认 `yes`。
 - 若多级代理附加 `X-Forwarded-*`，请设置 `PROXY_NUMBERS`。
 
 !!! tip "预哈希管理员密码"
@@ -322,6 +323,7 @@ UI 需要能够访问 BunkerWeb API；控制平面堆栈还需要调度器、任
 | `SESSION_ROLLING_HOURS`                     | 会话 ID 轮换间隔（`0` 关闭轮换）                                                  | 数值（小时）                 | `0`            |
 | `ALWAYS_REMEMBER`                           | 总是启用 “remember me”                                                            | `yes` 或 `no`                | `no`           |
 | `CHECK_PRIVATE_IP`                          | 绑定会话到 IP（`no` 时放宽私网变更）                                              | `yes` 或 `no`                | `yes`          |
+| `UI_USE_REDIS` | 仅在该实例上让 Web UI 会话不使用 Redis（`USE_REDIS` 仍适用于其他所有组件） | `yes` 或 `no` | `yes` |
 | `PROXY_NUMBERS`                             | 信任的 `X-Forwarded-*` 代理层数                                                   | 整数                         | `1`            |
 | `UI_WEBAUTHN_RP_ID` | WebAuthn 依赖方 ID，不带协议或端口；默认取唯一非通配 `UI_ALLOWED_HOSTS` 条目 | 域名 | 可推导则使用，否则关闭 |
 | `UI_WEBAUTHN_ORIGINS` | 认证流程接受的精确来源 | 空格或逗号分隔的 URL | `https://<RP ID>` |
@@ -529,7 +531,9 @@ log {
 - **添加封禁**接受一个或多个 IP 地址、一个结束日期或**永久**、一个原因（默认 `ui`）以及一个范围：所有服务，或从列表中选择的某个服务。
 - **解除封禁**会移除所选的封禁，每一条都在各自的范围内生效。**更新时长**可将封禁切换为永久、1 小时、24 小时、1 周或自定义结束日期，并保留其原始原因。
 - 解除封禁和时长修改会应用于您所选的行，或应用于符合当前筛选条件的所有封禁。
-- 每一行都带有一个**调查**按钮，可打开该 IP 的 [CrowdSec](#crowdsec-investigation) 页面。
+- 每一条 CrowdSec 封禁（原因为 `crowdsec`）所在的行都带有一个**调查**按钮，可打开该 IP 的 [CrowdSec](#crowdsec-investigation) 页面。
+- 由 CrowdSec 决策创建的封禁（`CROWDSEC_BAN_REFRESH` 大于 0）会显示 **CrowdSec 租约**徽章，CSV 和 Excel 导出也会增加一个 `Kind` 列。存在时间不足一分钟的租约会直接从实例显示，即使数据库尚未获知它。
+- 解除 CrowdSec 封禁时，BunkerWeb 会先列出其背后的 CrowdSec 决策，并对来自社区或列表来源的决策（列表刷新时它们会重新出现）以及覆盖网络范围的决策给出警告。确认后会删除这些决策并移除封禁；如果不删除决策，封禁会在下一次请求时重新出现。这需要在每个相关的 CrowdSec 连接上拥有 `crowdsec_delete` 权限。
 
 添加、移除和修改封禁需要写入权限，并要求数据库可写；在只读模式下按钮会被禁用。**报告**页面同样可以封禁其中列出的违规者。
 

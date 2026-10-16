@@ -191,6 +191,7 @@ Choisissez la saveur adaptée à votre environnement.
   - `bans` : `ban_read`, `ban_update`, `ban_delete`, `ban_created`, plus `crowdsec_read` et `crowdsec_delete` pour les routes `/crowdsec` (une permission peut être limitée à une seule connexion CrowdSec via son id comme `resource_id`)
   - `jobs` : `job_read`, `job_run`
 - `resource_id` est généralement le deuxième composant de chemin (ex. `/services/{id}`) ; "*" donne un accès global.
+- Changer l'emplacement d'une ressource exige aussi une permission sur la destination. `PATCH /configs/{service}/{type}/{name}` (et `.../upload`) avec un `service` différent exige `config_update` sur le service de destination en plus du service source, et un corps sans `service` laisse la configuration dans son service actuel. Rattacher ou détacher une redirection, un pool d'upstream, un certificat ou un workflow, et nommer des services cibles lors de la création de l'un d'eux (`service_ids`, `services`), exige `service_update` sur chaque service cible, en plus de la permission sur la ressource elle-même. Un appelant qui ne l'a pas reçoit `403`.
 - Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Chaque utilisateur prend un `password` en clair ou un `password_hash`/`password_bcrypt` pré-haché (voir l'astuce ci-dessous).
 
 !!! danger "Ces permissions d’écriture sont équivalentes à celles d’un administrateur"
@@ -451,10 +452,10 @@ Quand ce paramètre est défini, une requête dont l’en-tête `Host` n’est p
   - Types supportés : `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks CRS/plugin.
   - `PUT /configs/bulk` : remplacer toutes les configurations portant un même `method` (synchronisation autoconf). Un simple avertissement après enregistrement renvoie `200` ; un véritable refus renvoie `400`, jamais `500`, dont le client HTTP supprimerait le corps.
 - **Bans**
-  - `GET /bans` : lister les bans actifs de la base de données, qui constitue la liste durable. **Changement en 1.7** : cette route agrégeait auparavant les bans en mémoire des instances, ce qui sous-estimait la liste après un redémarrage.
+  - `GET /bans` : lister les bans actifs de la base de données, qui constitue la liste durable. **Changement en 1.7** : cette route agrégeait auparavant les bans en mémoire des instances, ce qui sous-estimait la liste après un redémarrage. Chaque ligne porte un `kind` : `crowdsec_lease` pour un ban créé par BunkerWeb à partir d'une décision CrowdSec (motif `crowdsec`, voir [Débannir un ban CrowdSec](#unbanning-a-crowdsec-ban)), `ban` pour tous les autres bans.
   - `GET /bans/instances` : conserver l’ancien comportement dans un endpoint distinct et montrer ce que chaque instance applique actuellement.
   - `POST /bans` ou `/bans/ban` : appliquer un ou plusieurs bans ; le payload peut être un objet, un tableau ou du JSON sérialisé. Le ban est stocké puis envoyé aux instances.
-  - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service. Une révocation qui ne peut pas être stockée est refusée, car une instance qui ne l’a pas reçue pourrait réintroduire le ban dans la flotte.
+  - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service. Une révocation qui ne peut pas être stockée est refusée, car une instance qui ne l’a pas reçue pourrait réintroduire le ban dans la flotte. Débannir un ban CrowdSec passe par un aperçu et une confirmation, voir [Débannir un ban CrowdSec](#unbanning-a-crowdsec-ban).
   - `GET /bans/timeseries?start=...&end=...&bucket=hour` : nombre de bannissements actifs par intervalle sur `[start, end)`. `bw_bans` conserve une ligne par `(ip, ban_scope, service_id)` et un nouveau bannissement réécrit `created_at` : il s'agit d'un comptage à un instant donné, pas d'un historique de créations ou d'événements.
 - **CrowdSec** (enquête et gestion des décisions, relayées via le plugin `crowdsec` des instances enregistrées)
   - `GET /crowdsec` (nécessite `crowdsec_read`) : chaque connexion CrowdSec signalée par les instances enregistrées, avec un `id` opaque, son `instance` et les services couverts, plus une map `errors` nommant chaque instance illisible. Une instance marquée `down` est signalée ici plutôt qu'interrogée.
@@ -524,6 +525,36 @@ Quand ce paramètre est défini, une requête dont l’en-tête `Host` n’est p
   - `GET/PUT /workflows/{id}/definition` : lire/remplacer la définition compilée d'un workflow.
   - `POST /workflows/validate`, `POST /workflows/{id}/test` : valider ou simuler une définition sur une requête avant enregistrement.
   - `POST /workflows/{id}/attachments`, `DELETE /workflows/{id}/attachments/{service}` : attacher/détacher un workflow.
+
+## Débannir un ban CrowdSec {#unbanning-a-crowdsec-ban}
+
+Un ban créé par BunkerWeb à partir d'une décision CrowdSec (motif `crowdsec`, affiché comme `kind: "crowdsec_lease"` dans `GET /bans`) revient à la requête suivante si seul le ban est retiré, car les décisions CrowdSec qui le fondent s'appliquent toujours. Le débannir supprime donc aussi ces décisions, après une revue. BunkerWeb cherche un tel ban sur les instances en cours d'exécution (et dans Redis lorsqu'il est activé) : la requête n'indique pas si le ban en est un.
+
+`POST /bans/unban` et `DELETE /bans` acceptent un objet ou une liste d'objets. `ip` (chaîne, obligatoire) et `service` (chaîne, facultatif) restent inchangés. Trois champs facultatifs pilotent le cas CrowdSec :
+
+| Champ | Type | Signification |
+| --- | --- | --- |
+| `remove_crowdsec_decisions` | booléen, `false` par défaut | Supprimer les décisions de ban CrowdSec de cette IP sur chaque connexion CrowdSec qui la dessert. |
+| `confirmed` | booléen, `false` par défaut | L'appelant a examiné les décisions qui seront supprimées. |
+| `decision_keys` | tableau de chaînes | La `key` de chaque décision de l'aperçu, telle que renvoyée par la réponse `409`. Le débannissement ne s'exécute que si elles correspondent toujours aux décisions actives. |
+
+**409 Conflict.** Une requête portant sur un ban CrowdSec qui ne contient pas les trois champs, ou dont les `decision_keys` ne correspondent plus aux décisions actives, ne change rien et répond `409` :
+
+```json
+{"status": "error", "message": "…", "preview": {"lease": {"ip": "203.0.113.7", "ban_scope": "global", "service": null, "exp": 25},
+  "leases": [{"lease_id": "…", "source": "bw-1", "exp": 25}],
+  "decisions": [{"key": "<connection>:<id>", "connection_id": "…", "id": 7, "scope": "Ip", "value": "203.0.113.7", "type": "ban", "origin": "crowdsec", "scenario": "crowdsecurity/ssh-bf", "remediation": "ban"}],
+  "warnings": {"list_origin": false, "range": false}, "unavailable": [], "connections": ["…"]},
+ "previews": [{"ip": "…", "ban_scope": "…", "service": null, "preview": {}}]}
+```
+
+Renvoyez la requête avec `remove_crowdsec_decisions: true`, `confirmed: true` et `decision_keys` réglé sur les clés de l'aperçu. `warnings.list_origin` est positionné lorsqu'une décision provient d'une source communautaire ou d'une liste (elle reviendra à l'actualisation de la liste) ; `warnings.range` lorsqu'une décision couvre un réseau. Avec plusieurs éléments, `409` est renvoyé dès que l'un d'eux demande une confirmation, et rien n'est modifié.
+
+**Permissions.** En plus de `ban_delete`, l'appelant a besoin de `crowdsec_delete` sur **chaque** connexion CrowdSec que l'aperçu nomme (ou sur toutes, avec `*`) ; sans cela, la réponse est `403` et aucun aperçu n'est renvoyé. Débannir un ban CrowdSec avec le seul `ban_delete` n'est donc pas possible.
+
+**Résultat.** `200` avec `{"status": "success", "results": [{"kind": "crowdsec_lease", "ip": …, "status": "success", "deleted": […], "already_absent": […], "refreshed": […], "lease_removed": ["bw-1"], …}]}` lorsque tout a réussi. `502` avec les mêmes `results` et `status: "partial"` (une étape a échoué : les décisions sont supprimées en premier, le ban est ensuite retiré de chaque instance, et son enregistrement en base de données est révoqué en dernier) ou `"changed"` (le ban a été renouvelé, ou remplacé par un ban explicite, pendant la requête : rien n'a été retiré, recommencez). Seul le ban CrowdSec est retiré : un ban explicite sur la même IP, quelle que soit sa portée, reste intact. Chaque appel est écrit dans le journal de l'API avec l'appelant.
+
+**Changements associés.** `DELETE /crowdsec/{connection}/decisions/{id}` répond `200` avec `"already_absent": true` et `"removed": false` lorsque la décision n'existe plus (elle répondait auparavant `409`). Les décisions listées par `/crowdsec/{connection}/decisions` portent `remediation` (`ban`, `captcha`, ou absent lorsque le bouncer ignore la décision).
 
 ## Comportement opérationnel
 

@@ -191,6 +191,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
   - `bans`: `ban_read`, `ban_update`, `ban_delete`, `ban_created`, plus `crowdsec_read` und `crowdsec_delete` für die `/crowdsec`-Routen (eine Berechtigung kann über die id als `resource_id` auf eine einzelne CrowdSec-Verbindung beschränkt werden)
   - `jobs`: `job_read`, `job_run`
 - `resource_id` ist meist die zweite Pfadkomponente (z. B. `/services/{id}`); "*" gewährt globalen Zugriff.
+- Wer den Ort einer Ressource ändert, braucht auch eine Berechtigung für das Ziel. `PATCH /configs/{service}/{type}/{name}` (und `.../upload`) mit einem anderen `service` erfordert `config_update` auf dem Zieldienst und auf dem Quelldienst, und ein Body ohne `service` lässt die Konfiguration in ihrem aktuellen Dienst. Das Anhängen oder Lösen einer Weiterleitung, eines Upstream-Pools, eines Zertifikats oder eines Workflows sowie die Angabe von Zieldiensten beim Anlegen einer dieser Ressourcen (`service_ids`, `services`) erfordert `service_update` auf jedem Zieldienst, zusätzlich zur Berechtigung für die Ressource selbst. Ein Aufrufer ohne diese Berechtigung erhält `403`.
 - Nicht-Admin-Nutzer und Grants per `API_ACL_BOOTSTRAP_FILE` oder gemounteter `/var/lib/bunkerweb/api_acl_bootstrap.json` bootstrappen. Jeder Nutzer akzeptiert ein Klartext-`password` oder ein vorab gehashtes `password_hash`/`password_bcrypt` (siehe Tipp unten).
 
 !!! danger "Diese Schreibberechtigungen entsprechen einem Administratorzugriff"
@@ -453,12 +454,12 @@ Ist dieser Wert gesetzt, erhält eine Anfrage, deren `Host`-Header nicht in der 
 
   - Unterstützte Typen: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, CRS/Plugin-Hooks.
 - **Bans**
-  - `GET /bans`: aktive Sperren aus der Datenbank auflisten (die dauerhafte Liste). **Geändert in 1.7**: Zuvor wurden die In-Memory-Sperren der Instanzen zusammengeführt, was nach einem Neustart zu wenige Einträge zeigte.
+  - `GET /bans`: aktive Sperren aus der Datenbank auflisten (die dauerhafte Liste). **Geändert in 1.7**: Zuvor wurden die In-Memory-Sperren der Instanzen zusammengeführt, was nach einem Neustart zu wenige Einträge zeigte. Jede Zeile trägt ein `kind`: `crowdsec_lease` für eine Sperre, die BunkerWeb aus einer CrowdSec-Entscheidung erzeugt hat (Grund `crowdsec`, siehe [Eine CrowdSec-Sperre aufheben](#unbanning-a-crowdsec-ban)), `ban` für jede andere Sperre.
   - `GET /bans/instances`: das frühere Verhalten als eigener Endpunkt; er zeigt, was jede Instanz gerade durchsetzt.
   - `GET /bans/timeseries?start=...&end=...&bucket=hour`: Anzahl aktiver Sperren pro Intervall über `[start, end)`. `bw_bans` hält eine Zeile je `(ip, ban_scope, service_id)`; eine erneute Sperre überschreibt `created_at`. Dies zählt den Bestand zu einem Zeitpunkt, keine Ereignis- oder Erstellungshistorie.
 
   - `POST /bans` oder `/bans/ban`: eine oder mehrere Sperren anwenden; die Nutzlast kann ein Objekt, Array oder JSON-String sein. Die Sperre wird gespeichert und danach an die Instanzen gesendet.
-  - `POST /bans/unban` oder `DELETE /bans`: Sperren global oder pro Service entfernen. Eine Aufhebung, die nicht gespeichert werden kann, wird abgelehnt, weil eine Instanz sie sonst später erneut in die Flotte eintragen könnte.
+  - `POST /bans/unban` oder `DELETE /bans`: Sperren global oder pro Service entfernen. Eine Aufhebung, die nicht gespeichert werden kann, wird abgelehnt, weil eine Instanz sie sonst später erneut in die Flotte eintragen könnte. Das Aufheben einer CrowdSec-Sperre läuft über eine Vorschau und eine Bestätigung, siehe [Eine CrowdSec-Sperre aufheben](#unbanning-a-crowdsec-ban).
 - **CrowdSec** (Untersuchung und Entscheidungsverwaltung, über das `crowdsec`-Plugin der registrierten Instanzen weitergereicht)
   - `GET /crowdsec` (benötigt `crowdsec_read`): jede von den registrierten Instanzen gemeldete CrowdSec-Verbindung, jeweils mit opaker `id`, ihrer `instance` und den abgedeckten Diensten, sowie eine `errors`-Map mit jeder nicht lesbaren Instanz. Eine als `down` markierte Instanz wird dort gemeldet statt abgefragt.
   - `GET /crowdsec/{connection}/decisions?ip=&origin=&scenario=&offset=&limit=` (benötigt `crowdsec_read`): die aktiven Entscheidungen, direkt von dieser CrowdSec-Engine gelesen, standardmäßig 50 pro Seite und höchstens 200.
@@ -530,6 +531,36 @@ Ist dieser Wert gesetzt, erhält eine Anfrage, deren `Host`-Header nicht in der 
   - `GET/PUT /workflows/{id}/definition`: kompilierte Regeldefinition lesen oder ersetzen.
   - `POST /workflows/validate`, `POST /workflows/{id}/test`: Definition validieren oder vor dem Speichern mit einer Beispielanfrage testen.
   - `POST /workflows/{id}/attachments`, `DELETE /workflows/{id}/attachments/{service}`: Workflow einem Dienst zuweisen oder Zuordnung lösen.
+
+## Eine CrowdSec-Sperre aufheben {#unbanning-a-crowdsec-ban}
+
+Eine Sperre, die BunkerWeb aus einer CrowdSec-Entscheidung erzeugt hat (Grund `crowdsec`, in `GET /bans` als `kind: "crowdsec_lease"` angezeigt), kommt bei der nächsten Anfrage zurück, wenn nur die Sperre entfernt wird, weil die CrowdSec-Entscheidungen dahinter weiterhin gelten. Das Aufheben löscht deshalb nach einer Prüfung auch diese Entscheidungen. BunkerWeb sucht eine solche Sperre auf den laufenden Instanzen (und in Redis, wenn aktiviert): Die Anfrage gibt nicht an, ob die Sperre eine ist.
+
+`POST /bans/unban` und `DELETE /bans` nehmen ein Objekt oder eine Liste von Objekten entgegen. `ip` (String, erforderlich) und `service` (String, optional) bleiben unverändert. Drei optionale Felder steuern den CrowdSec-Fall:
+
+| Feld | Typ | Bedeutung |
+| --- | --- | --- |
+| `remove_crowdsec_decisions` | Boolean, Standard `false` | Löscht die CrowdSec-Sperrentscheidungen für diese IP auf jeder CrowdSec-Verbindung, die sie bedient. |
+| `confirmed` | Boolean, Standard `false` | Der Aufrufer hat die Entscheidungen geprüft, die gelöscht werden. |
+| `decision_keys` | Array von Strings | Der `key` jeder Entscheidung der Vorschau, wie ihn die Antwort `409` liefert. Das Aufheben läuft nur, wenn sie noch zu den aktuellen Entscheidungen passen. |
+
+**409 Conflict.** Eine Anfrage für eine CrowdSec-Sperre, die nicht alle drei Felder enthält oder deren `decision_keys` nicht mehr zu den aktuellen Entscheidungen passen, ändert nichts und antwortet mit `409`:
+
+```json
+{"status": "error", "message": "…", "preview": {"lease": {"ip": "203.0.113.7", "ban_scope": "global", "service": null, "exp": 25},
+  "leases": [{"lease_id": "…", "source": "bw-1", "exp": 25}],
+  "decisions": [{"key": "<connection>:<id>", "connection_id": "…", "id": 7, "scope": "Ip", "value": "203.0.113.7", "type": "ban", "origin": "crowdsec", "scenario": "crowdsecurity/ssh-bf", "remediation": "ban"}],
+  "warnings": {"list_origin": false, "range": false}, "unavailable": [], "connections": ["…"]},
+ "previews": [{"ip": "…", "ban_scope": "…", "service": null, "preview": {}}]}
+```
+
+Senden Sie die Anfrage erneut mit `remove_crowdsec_decisions: true`, `confirmed: true` und `decision_keys` auf den Schlüsseln der Vorschau. `warnings.list_origin` wird gesetzt, wenn eine Entscheidung aus einer Community- oder Listenquelle stammt (sie kehrt bei der Aktualisierung der Liste zurück); `warnings.range`, wenn eine Entscheidung ein Netzwerk abdeckt. Bei mehreren Einträgen wird `409` zurückgegeben, sobald einer davon eine Bestätigung braucht, und nichts wird geändert.
+
+**Berechtigungen.** Neben `ban_delete` braucht der Aufrufer `crowdsec_delete` auf **jeder** CrowdSec-Verbindung, die die Vorschau nennt (oder auf allen, mit `*`); ohne sie lautet die Antwort `403` und es wird keine Vorschau zurückgegeben. Eine CrowdSec-Sperre mit nur `ban_delete` aufzuheben ist daher nicht möglich.
+
+**Ergebnis.** `200` mit `{"status": "success", "results": [{"kind": "crowdsec_lease", "ip": …, "status": "success", "deleted": […], "already_absent": […], "refreshed": […], "lease_removed": ["bw-1"], …}]}`, wenn alles gelungen ist. `502` mit denselben `results` und `status: "partial"` (ein Schritt ist fehlgeschlagen: Die Entscheidungen werden zuerst gelöscht, danach wird die Sperre von jeder Instanz entfernt, und ihr Datenbankeintrag wird zuletzt widerrufen) oder `"changed"` (die Sperre wurde während der Anfrage erneuert oder durch eine explizite Sperre ersetzt: Nichts wurde entfernt, versuchen Sie es erneut). Nur die CrowdSec-Sperre wird entfernt: Eine explizite Sperre auf derselben IP bleibt in jedem Geltungsbereich unberührt. Jeder Aufruf wird mit dem Aufrufer im API-Protokoll festgehalten.
+
+**Zugehörige Änderungen.** `DELETE /crowdsec/{connection}/decisions/{id}` antwortet mit `200` und `"already_absent": true` sowie `"removed": false`, wenn die Entscheidung nicht mehr existiert (früher `409`). Die von `/crowdsec/{connection}/decisions` aufgelisteten Entscheidungen tragen `remediation` (`ban`, `captcha` oder nicht vorhanden, wenn der Bouncer die Entscheidung ignoriert).
 
 ## Betriebsverhalten
 

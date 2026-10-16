@@ -70,6 +70,39 @@ Use the returned connection ID verbatim. It includes instance identity, so ident
 
 The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
 
+### CrowdSec bans
+
+By default, BunkerWeb asks CrowdSec about every request. Set `CROWDSEC_BAN_REFRESH` to a duration, for example `5m`, to turn a CrowdSec block into a **CrowdSec ban**: a short BunkerWeb ban, called a lease, that is renewed while the CrowdSec decision lasts. Later requests from the IP are stopped at the ban check, before the other plugins and before the CrowdSec lookup. The ban appears on the Bans page with a **CrowdSec lease** badge and the **Investigate** action. The default `0` keeps the previous behavior and creates no ban.
+
+A lease is an ordinary BunkerWeb ban: it has the reason `crowdsec`, it is stored in the same database table as every other ban, and it is reported as `kind: "crowdsec_lease"` by the API. There is no separate store to size and no schema change. The instance that blocked the request creates the lease, and the one-minute `sync-bans` job learns it into the database. A lease is never restored to an instance after a restart: the next blocked request creates it again.
+
+- **When a lease is created:** only when BunkerWeb itself blocked the request because of a `ban` decision from the Local API, with `SECURITY_MODE` set to `block` and a decision that has not expired. AppSec rejections, failure policies and other remediations, such as a captcha or a challenge, never create a lease.
+- **How long it lasts:** the shorter of `CROWDSEC_BAN_REFRESH` and the remaining life of the longest live ban decision, with a minimum of one second. When the lease ends, the next request is checked against CrowdSec again, and a new lease is created if a decision still applies.
+- **Explicit bans win:** a lease never replaces a live ban added by hand, from the Web UI, from the API, by Bad behavior or by another plugin, and a ban of one of those kinds is reported before a lease for the same IP.
+- **Freshness:** when a decision is removed directly in CrowdSec (with `cscli`, in the Console, by a list refresh or by an allowlist), the IP is let through after at most the sum of `CROWDSEC_BAN_REFRESH`, the CrowdSec cache delay (`CROWDSEC_UPDATE_FREQUENCY` in stream mode, `CROWDSEC_CACHE_EXPIRATION` in live mode) and, when Redis is enabled, up to 30 seconds for the local copies on the other instances. In stream mode, no new lease is created while the last successful synchronization is older than twice `CROWDSEC_UPDATE_FREQUENCY`.
+- **Excluded locations:** any `CROWDSEC_EXCLUDE_LOCATION` on a service turns CrowdSec bans off for that service, because a ban would also block the excluded paths. CrowdSec keeps checking each request there. The same applies when the plugin excludes its own challenge location.
+- **Scope:** in multisite mode, a lease applies to the service whose request was blocked only; in single-site mode, it applies globally. The default server never asks CrowdSec, so it never creates a lease.
+- **TLS handshake:** list `crowdsec` in `BANS_TLS_DROP_REASONS` to close the connection of an IP that holds a lease at the start of the TLS handshake instead of serving the 403 page (see [Dropping Bans at the TLS Handshake](#bans-tls-drop)).
+
+**Unban and CrowdSec.** Removing a CrowdSec ban also removes the CrowdSec decisions behind it, because the IP would otherwise be banned again at the next check. The Web UI, the API and `bwcli unban` follow the same flow:
+
+- It needs the management credentials (`CROWDSEC_MANAGEMENT_LOGIN` and `CROWDSEC_MANAGEMENT_PASSWORD`) for every connection where a selected decision lives. With the API, it also needs the `crowdsec_delete` permission on every connection involved, in addition to `ban_delete`.
+- You must confirm the list of decisions (IP or range, type, origin and scenario) before any CrowdSec decision is removed. `bwcli unban` takes `-confirm` for this: without it, the command only prints the list and changes nothing, in CrowdSec or in BunkerWeb. The command works only on a host that has access to the database, usually the scheduler host. Elsewhere, use the Web UI or the API.
+- If the connection that saw the block is down or gone, the unban is refused. The lease expires by itself within `CROWDSEC_BAN_REFRESH`.
+- The decisions are deleted first. BunkerWeb then asks each connection that serves the IP to refresh it, removes the lease from every instance and from Redis, and revokes the database record last. If a decision cannot be removed, the other selected decisions are still deleted, but the remaining steps are skipped and the lease is kept. The result is reported as partial and lists the decisions that were deleted and the ones that failed. The IP stays blocked until the failed decisions are removed. Retrying is safe: a decision that is already gone counts as removed.
+- If an instance is down while the lease is removed, the result is reported as partial, but the database record is revoked, and the removal is replayed on that instance by its lease identifier when it returns.
+- If the lease is renewed, or replaced by an explicit ban, while the unban runs, nothing is removed and the result is reported as changed. Retry.
+- Decisions that come from the Central API or from lists (the `CAPI` and `lists` origins) may come back at the next refresh. Create a CrowdSec allowlist for a permanent exception.
+- Removing a range decision affects the whole range. Leases already created for other IPs of that range stay until their duration ends, at most `CROWDSEC_BAN_REFRESH`.
+- Only the lease is removed. An explicit ban on the same IP, in any scope, is a separate row: it stays, and it is unbanned on its own.
+
+**Accepted limits.**
+
+- A lease is built from the decision as it stood when the request was blocked, so a decision removed in the same second can still produce a lease. It lasts at most `CROWDSEC_BAN_REFRESH`, and never longer than the decision had left at that moment.
+- When the identifying data of a lease (instance, connection, service scope) is longer than 1024 characters once stored, no lease is created and the request is denied as before. The details kept with a lease are limited to the ten first decisions and 4096 stored characters; the optional details are dropped first, never the identifying data.
+- Without Redis, each instance creates and keeps its own lease. The Bans page shows a lease enforced by several instances once, and an unban removes it from each of them.
+- The statistics tiles of the Bans page count the bans stored in the database. A lease younger than one minute shows in the table, from the instances, before it is counted there.
+
 ### Step&nbsp;1 – Prepare CrowdSec to ingest BunkerWeb logs
 
 Follow one of the environment-specific guides below so the CrowdSec agent ingests BunkerWeb access, error, and ModSecurity audit logs. This is what drives the remediation decisions that the plugin will later enforce.

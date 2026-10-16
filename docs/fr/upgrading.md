@@ -7,7 +7,7 @@
 
 !!! info "Quelles bases 1.6 peuvent être mises à niveau"
 
-    Une base écrite par la 1.6.16, ou par l'une de ses versions candidates (1.6.16~rc1 à 1.6.16~rc4), passe en 1.7 comme n'importe quelle base 1.6 : la chaîne de migration contient chacune de ces révisions, et les migrations s'exécutent au premier démarrage. La 1.6.16 est la version depuis laquelle mettre à niveau.
+    Une base écrite par la 1.6.16, par l'une de ses versions candidates (1.6.16~rc1 à 1.6.16~rc4) ou par la 1.6.17~rc1, passe en 1.7 comme n'importe quelle base 1.6 : la chaîne de migration contient chacune de ces révisions, et les migrations s'exécutent au premier démarrage. La 1.6.16 est la version stable depuis laquelle mettre à niveau.
 
 ### Changements majeurs {#breaking-changes}
 
