@@ -25,6 +25,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from app.models.plugin_activation import is_plugin_active_for_service
 from app.models.safe_session_cache import SafeFileSystemCache
 from flask import Blueprint, Flask, Response, g, jsonify, make_response, redirect, render_template, request, session, url_for
+from flask_compress import Compress
 from flask_login import current_user, LoginManager, login_required, logout_user
 from markupsafe import Markup
 from flask_session import Session
@@ -686,6 +687,31 @@ def refresh_app_context():
 app = DynamicFlask(__name__, static_url_path="/", static_folder="app/static", template_folder="app/templates")
 app.logger = LOGGER
 version_static_urls(app)
+
+app.config.update(
+    COMPRESS_ALGORITHM=["br", "gzip"],
+    # Static files are streamed responses and use this list; its default has no gzip.
+    COMPRESS_ALGORITHM_STREAMING=["br", "gzip"],
+    COMPRESS_BR_LEVEL=4,
+    COMPRESS_LEVEL=6,
+    COMPRESS_MIN_SIZE=1024,
+    # Never text/html: every page carries a stable CSRF secret and reflects query values into the
+    # same response, the BREACH precondition. Anything a plugin serves as HTML stays plain too.
+    COMPRESS_MIMETYPES=[
+        "text/css",
+        "text/javascript",
+        "application/javascript",
+        "application/json",
+        "application/geo+json",
+        "image/svg+xml",
+        "font/woff",
+        "font/woff2",
+        "font/ttf",
+        "application/vnd.ms-fontobject",
+        "text/plain",
+    ],
+)
+Compress(app)
 
 with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))

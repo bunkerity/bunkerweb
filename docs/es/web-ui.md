@@ -390,6 +390,8 @@ eliminar el estado ACME todavía no elimina automáticamente su registro del inv
 | `IGNORE_REGEX_CHECK`            | Omitir validación regex de ajustes                                            | `yes` o `no`                                | `no`                                                  |
 | `MAX_CONTENT_LENGTH`            | Tamaño máximo de subida (Flask `MAX_CONTENT_LENGTH`)                          | Tamaño con unidad (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
+La interfaz web comprime sus recursos estáticos (CSS, JavaScript, JSON, SVG, fuentes) y sus respuestas JSON de más de 1 KiB con Brotli o gzip, según lo que acepte el navegador. Nunca comprime las páginas HTML: contienen el token CSRF y reflejan valores de la petición, lo que las expondría a ataques del tipo BREACH. La API comprime con gzip, de la misma forma, sus respuestas JSON de más de 1 KiB. Cuando BunkerWeb está delante de la interfaz, sus propios ajustes `USE_GZIP` y `USE_BROTLI` siguen decidiendo qué comprime para ese servicio.
+
 ## Acceso a logs
 
 La UI lee logs de NGINX/servicios desde `/var/log/bunkerweb`. Alimenta ese directorio con un demonio syslog o un volumen:

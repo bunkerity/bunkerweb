@@ -374,6 +374,8 @@ Ces deux variables sont requises pour créer/importer des certificats et renouve
 | `IGNORE_REGEX_CHECK`            | Ignorer la validation regex des paramètres                           | `yes` ou `no`                               | `no`                                                  |
 | `MAX_CONTENT_LENGTH`            | Taille maximale d'upload (Flask `MAX_CONTENT_LENGTH`)                | Taille avec unité (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
+L'interface web compresse ses ressources statiques (CSS, JavaScript, JSON, SVG, polices) et ses réponses JSON de plus de 1 Kio avec Brotli ou gzip, selon ce que le navigateur accepte. Elle ne compresse jamais les pages HTML : elles contiennent le jeton CSRF et reprennent des valeurs de la requête, ce qui les exposerait à des attaques de type BREACH. L'API compresse de la même façon en gzip ses réponses JSON de plus de 1 Kio. Lorsque BunkerWeb est placé devant l'interface, ses propres paramètres `USE_GZIP` et `USE_BROTLI` continuent de déterminer ce qu'il compresse pour ce service.
+
 ## Accès aux journaux
 
 L’UI lit les journaux NGINX/services depuis `/var/log/bunkerweb`. Alimentez ce répertoire via un démon syslog ou un volume :

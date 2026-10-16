@@ -8,6 +8,7 @@ from sys import path as sys_path
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
+from starlette.middleware.gzip import GZipMiddleware
 from traceback import format_exc
 from ipaddress import ip_address, ip_network, IPv4Network, IPv6Network
 
@@ -159,6 +160,10 @@ def create_app() -> FastAPI:
         if request_id:
             response.headers["X-Request-ID"] = request_id
         return response
+
+    # Starlette's default exclusions already skip text/event-stream, application/gzip and other
+    # already-compressed types, and anything that sets its own Content-Encoding.
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
 
     # Rate limiter (optional, safe if disabled)
     setup_rate_limiter(app)

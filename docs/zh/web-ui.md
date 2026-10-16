@@ -372,6 +372,8 @@ Let's Encrypt 清单从 certbot 缓存同步。在证书 Worker 能持久确认�
 | `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验                              | `yes` 或 `no`                           | `no`                                                  |
 | `MAX_CONTENT_LENGTH`            | 最大上传大小（Flask `MAX_CONTENT_LENGTH`）      | 带单位的大小（`50M`、`1G`、`52428800`） | `50MB`                                                |
 
+Web UI 会根据浏览器支持的编码，使用 Brotli 或 gzip 压缩其静态资源（CSS、JavaScript、JSON、SVG、字体）以及超过 1 KiB 的 JSON 响应。它从不压缩 HTML 页面：这些页面包含 CSRF 令牌并回显请求中的值，压缩会使其暴露于 BREACH 类攻击。API 同样使用 gzip 压缩超过 1 KiB 的 JSON 响应。当 BunkerWeb 位于 UI 前方时，它对该服务压缩什么仍由其自身的 `USE_GZIP` 和 `USE_BROTLI` 设置决定。
+
 ## 日志访问
 
 UI 从 `/var/log/bunkerweb` 读取 NGINX/服务日志。通过 syslog 守护或卷填充该目录：

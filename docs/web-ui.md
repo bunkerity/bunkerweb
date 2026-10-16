@@ -391,6 +391,8 @@ Let's Encrypt inventory records are synchronized from the certbot cache. Provide
 | `IGNORE_REGEX_CHECK`            | Skip regex validation on settings                                     | `yes` or `no`                            | `no`                                                  |
 | `MAX_CONTENT_LENGTH`            | Maximum upload size (Flask `MAX_CONTENT_LENGTH`)                      | Size with unit (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
+The Web UI compresses its static assets (CSS, JavaScript, JSON, SVG, fonts) and JSON replies above 1 KiB with Brotli or gzip, depending on what the browser accepts. It never compresses HTML pages: they carry the CSRF token and echo request values, which would expose them to BREACH-style attacks. The API gzips JSON replies above 1 KiB the same way. When BunkerWeb sits in front of the UI, its own `USE_GZIP` and `USE_BROTLI` settings stay in charge of what it compresses for that service.
+
 ## Log access
 
 The UI reads NGINX/service logs from `/var/log/bunkerweb`. Feed that directory from a syslog daemon or volume:

@@ -402,6 +402,8 @@ noch nicht automatisch.
 | `IGNORE_REGEX_CHECK`            | Regex-Validierung der Settings überspringen                       | `yes` oder `no`                             | `no`                                                  |
 | `MAX_CONTENT_LENGTH`            | Maximale Upload-Größe (Flask `MAX_CONTENT_LENGTH`)                | Größe mit Einheit (`50M`, `1G`, `52428800`) | `50MB`                                                |
 
+Die Web-Oberfläche komprimiert ihre statischen Assets (CSS, JavaScript, JSON, SVG, Schriften) und JSON-Antworten über 1 KiB mit Brotli oder gzip, je nachdem, was der Browser akzeptiert. HTML-Seiten komprimiert sie nie: Sie enthalten das CSRF-Token und geben Werte der Anfrage wieder, was sie BREACH-artigen Angriffen aussetzen würde. Die API komprimiert JSON-Antworten über 1 KiB auf dieselbe Weise mit gzip. Steht BunkerWeb vor der Oberfläche, bestimmen weiterhin seine eigenen Einstellungen `USE_GZIP` und `USE_BROTLI`, was es für diesen Dienst komprimiert.
+
 ## Log-Zugriff
 
 Die UI liest NGINX/Service-Logs aus `/var/log/bunkerweb`. Speisen Sie das Verzeichnis per Syslog-Daemon oder Volume:
