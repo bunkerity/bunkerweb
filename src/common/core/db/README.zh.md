@@ -34,6 +34,8 @@
 | `DATABASE_POOL_PRE_PING`          | `yes`                                     | global | 否   | **连接池预检测：** 每次从连接池取出连接时是否测试其活性。                                                                                       |
 | `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global | 否   | **归还时重置：** 连接归还连接池时的重置方式。留空为自动（MySQL/MariaDB 用 `none`，其他用 `rollback`）。选项：`rollback`、`commit`、`none`。       |
 | `DATABASE_RETRY_TIMEOUT`        | `1m`                                      | global | 否   | **重试超时：** 启动时等待数据库可用的最大秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `DATABASE_CONNECT_TIMEOUT` | `10s` | global | 否   | **连接超时：** 打开到 MySQL、MariaDB 或 PostgreSQL 服务器的连接时的最长等待时间。 必须大于 `0`：驱动程序不能没有该超时，`0` 会发出警告并回退到默认值。 `DATABASE_URI` 查询字符串中设置的超时优先。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `DATABASE_READ_TIMEOUT` | `5m` | global | 否   | **读取超时：** 等待 MySQL 或 MariaDB 服务器响应或接收数据的最长时间，超时后调用失败，避免对端消失导致永久阻塞。 PostgreSQL 改用 TCP keepalive。 `0` 表示禁用。 `DATABASE_URI` 查询字符串中设置的超时优先。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global | 否   | **请求重试次数：** 操作中遇到瞬态数据库错误时的重试次数。                                                                                       |
 | `DATABASE_REQUEST_RETRY_DELAY`  | `250ms`                                   | global | 否   | **请求重试延迟：** 瞬态数据库错误重试之间的延迟秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 
