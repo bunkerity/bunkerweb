@@ -1,3 +1,30 @@
+// Inline markup an in-page message may carry (a <code> name, a list of errors). Everything else -
+// images, scripts, event handlers, forms - is dropped by DOMPurify before the text is inserted,
+// because these messages echo template ids, config names and other values a user typed.
+const INLINE_ALLOWED_TAGS = [
+  "b",
+  "br",
+  "code",
+  "em",
+  "i",
+  "li",
+  "p",
+  "span",
+  "strong",
+  "ul",
+];
+
+function setInlineHtml(element, html) {
+  if (typeof DOMPurify === "undefined") {
+    element.textContent = html;
+    return;
+  }
+  element.innerHTML = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: INLINE_ALLOWED_TAGS,
+    ALLOWED_ATTR: ["class"],
+  });
+}
+
 function throttle(func, limit, ...throttleArgs) {
   let inThrottle;
   return function (...args) {

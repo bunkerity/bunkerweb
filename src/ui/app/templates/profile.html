@@ -490,13 +490,13 @@
                             {% call card(classes=card_classes ~ " shadow-sm mb-4 card-transition", icon=card_icon, title="Session", title_key="profile.session.title", header_right=session_badge) %}
                                 <div class="list-group list-group-flush">
                                     <div class="list-group-item">
-                                        {{ text_group(top="Browser", top_i18n="profile.session.browser", bottom=session["browser"]|safe, icon="bx-window-alt", classes=items_classes) }}
+                                        {{ text_group(top="Browser", top_i18n="profile.session.browser", bottom=session["browser"], icon="bx-window-alt", classes=items_classes) }}
                                     </div>
                                     <div class="list-group-item">
-                                        {{ text_group(top="Operating System", top_i18n="profile.session.os", bottom=session["os"]|safe, icon="bx-layer", classes=items_classes) }}
+                                        {{ text_group(top="Operating System", top_i18n="profile.session.os", bottom=session["os"], icon="bx-layer", classes=items_classes) }}
                                     </div>
                                     <div class="list-group-item">
-                                        {{ text_group(top="Device", top_i18n="profile.session.device", bottom=session["device"]|safe, icon="bx-devices", classes=items_classes) }}
+                                        {{ text_group(top="Device", top_i18n="profile.session.device", bottom=session["device"], icon="bx-devices", classes=items_classes) }}
                                     </div>
                                     <div class="list-group-item d-flex align-items-center gap-2">
                                         <strong class="d-flex align-items-center gap-1 {{ items_classes }}">

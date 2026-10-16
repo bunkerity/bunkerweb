@@ -413,11 +413,18 @@ const showMissingConfigsModal = (missingConfigs, templateData = null) => {
       const li = document.createElement("li");
       li.className = "list-group-item d-flex align-items-center gap-2";
       li.setAttribute("data-config-ref", config);
-      li.innerHTML = `
-        <i class="bx bx-file text-muted"></i>
-        <code class="flex-grow-1">${config}</code>
-        <span class="badge bg-warning text-dark">Missing</span>
-      `;
+      const icon = document.createElement("i");
+      icon.className = "bx bx-file text-muted";
+      const code = document.createElement("code");
+      code.className = "flex-grow-1";
+      code.textContent = config;
+      const missingBadge = document.createElement("span");
+      missingBadge.className = "badge bg-warning text-dark";
+      missingBadge.textContent = translate(
+        "template.editor.missing_config_status_missing",
+        "Missing",
+      );
+      li.replaceChildren(icon, code, missingBadge);
       dom.missingConfigsList.appendChild(li);
     });
   }
@@ -589,7 +596,12 @@ const handleMissingConfigsUpload = async (files) => {
         const item = document.createElement("li");
         item.className =
           "list-group-item d-flex justify-content-between align-items-center";
-        item.innerHTML = `<span>${name}</span><span class="badge bg-label-primary text-uppercase">${type}</span>`;
+        const nameEl = document.createElement("span");
+        nameEl.textContent = name;
+        const typeEl = document.createElement("span");
+        typeEl.className = "badge bg-label-primary text-uppercase";
+        typeEl.textContent = type;
+        item.replaceChildren(nameEl, typeEl);
         dom.rawConfigsUploadList.prepend(item);
       });
     }
@@ -2499,11 +2511,12 @@ const showFeedback = (type, messages) => {
   const list = Array.isArray(messages) ? messages : [messages];
   dom.feedback.className = `alert alert-${type}`;
   if (list.length > 1) {
-    dom.feedback.innerHTML = `<ul class="mb-0">${list
-      .map((msg) => `<li>${msg}</li>`)
-      .join("")}</ul>`;
+    setInlineHtml(
+      dom.feedback,
+      `<ul class="mb-0">${list.map((msg) => `<li>${msg}</li>`).join("")}</ul>`,
+    );
   } else {
-    dom.feedback.innerHTML = list[0];
+    setInlineHtml(dom.feedback, list[0]);
   }
   dom.feedback.classList.remove("d-none");
   dom.feedback.scrollIntoView({
@@ -4526,7 +4539,12 @@ const importRawConfigFiles = (files) => {
           const item = document.createElement("li");
           item.className =
             "list-group-item d-flex justify-content-between align-items-center";
-          item.innerHTML = `<span>${name}</span><span class="badge bg-label-primary text-uppercase">${type}</span>`;
+          const nameEl = document.createElement("span");
+          nameEl.textContent = name;
+          const typeEl = document.createElement("span");
+          typeEl.className = "badge bg-label-primary text-uppercase";
+          typeEl.textContent = type;
+          item.replaceChildren(nameEl, typeEl);
           dom.rawConfigsUploadList.prepend(item);
         });
       }

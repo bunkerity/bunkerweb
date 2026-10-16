@@ -21,6 +21,7 @@ JS is covered by `node --check` plus assertions on its source text.
 """
 
 import importlib.util
+from html import unescape
 import json
 import re
 import shutil
@@ -901,21 +902,15 @@ def test_current_endpoint_is_reasserted_to_the_service_id(render_template_page):
     assert "DECOY" not in html
 
 
-def test_stored_config_bytes_reach_the_mirror_textarea_verbatim(render_template_page):
-    """The `-value` mirror is rendered with `|safe` (models/template_steps_body.html:248) while
-    `-default` is escaped, and that asymmetry is deliberate rather than accidental: the editor and
-    settings-widgets.js's submit handler both read `textarea.value`, so escaping here would be
-    inert for correctness -- but removing `|safe` is still not free, and this test says why in both
-    directions.
-
-    Cost, recorded on purpose rather than discovered later: stored bytes are interpolated raw into
-    the page, so a config containing `</textarea><script>` closes the element. Inherited verbatim
-    from models/plugins_settings_easy.html:321 (confirmed against HEAD), reachable only by someone
-    who can already write custom configs, and defanged by main.py's `'strict-dynamic'` CSP, which
-    makes a modern browser ignore the sibling `'unsafe-inline'`. Not a blocker and not this
-    slice's to change -- but now a decision on record with a test that fails if it moves."""
+def test_stored_config_bytes_reach_the_mirror_textarea_escaped_and_round_trip(render_template_page):
+    """The `-value` mirror is escaped like `-default`. It used to be rendered with `|safe`, so a
+    stored config containing `</textarea><script>` closed the element and the rest ran as page
+    markup (dev acb6b8804, wave 26 U3). Escaping is inert for correctness: the editor and
+    settings-widgets.js's submit handler both read `textarea.value`, and the browser decodes the
+    entities, so the bytes the operator stored come back verbatim."""
     html = render_template_page(configs={"app.example.com_modsec_anomaly_score": {"method": "ui", "data": b'SecRule ARGS "@rx <script>" "id:1"'}})
-    assert 'SecRule ARGS "@rx <script>" "id:1"' in html
+    assert 'SecRule ARGS "@rx <script>" "id:1"' not in html
+    assert unescape(html).count('SecRule ARGS "@rx <script>" "id:1"') >= 1
 
 
 def test_page_renders_one_pane_per_step_and_one_nav_item_per_step(render_template_page):
