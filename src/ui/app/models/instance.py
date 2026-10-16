@@ -13,7 +13,7 @@ from time import monotonic
 from traceback import format_exc
 from typing import Any, List, Literal, Optional, Tuple, Union
 
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
@@ -34,6 +34,23 @@ _HOME_AGG_CACHE_TTL = 30.0
 # Serializes cache misses so concurrent /home loads compute the aggregation once
 # (single-flight) instead of each running the full Redis scan in parallel.
 _HOME_AGG_LOCK = Lock()
+
+
+def encode_search_panes(panes: dict[str, list[str]]) -> str:
+    """Serialize pane selections as `field1:v1,v2;field2:v3`, percent-encoding each value so `,` and `;` inside a value cannot split it."""
+    return ";".join(f"{field}:{','.join(quote(value, safe='') for value in values)}" for field, values in panes.items())
+
+
+def decode_search_panes(search_panes: str) -> dict[str, list[str]]:
+    """Inverse of `encode_search_panes`."""
+    pane_filters: dict[str, list[str]] = {}
+    if not search_panes:
+        return pane_filters
+    for field_filter in search_panes.split(";"):
+        if ":" in field_filter:
+            field, values = field_filter.split(":", 1)
+            pane_filters[field] = [unquote(value) for value in values.split(",")]
+    return pane_filters
 
 
 def _copy_home_aggregates(agg: dict) -> dict:
@@ -784,16 +801,6 @@ class InstancesUtils:
 
         redis_client = get_redis_client()
 
-        def parse_search_panes(search_panes_value: str) -> dict[str, list[str]]:
-            pane_filters: dict[str, list[str]] = {}
-            if not search_panes_value:
-                return pane_filters
-            for field_filter in search_panes_value.split(";"):
-                if ":" in field_filter:
-                    field, values = field_filter.split(":", 1)
-                    pane_filters[field] = values.split(",")
-            return pane_filters
-
         def matches_filters(report: dict[str, Any], search_value: str, pane_filters: dict[str, list[str]]) -> bool:
             if search_value:
                 search_lower = search_value.lower()
@@ -817,7 +824,7 @@ class InstancesUtils:
         # If Redis is available, use it for optimized queries
         if redis_client and max_redis_requests > 0 and not hostname:
             try:
-                pane_filters = parse_search_panes(search_panes)
+                pane_filters = decode_search_panes(search_panes)
                 pane_fields = self._REPORT_PANE_FIELDS
                 selected_pane_values = {field: set(values) for field, values in pane_filters.items()}
                 max_pane_values = max(0, self._REPORT_PANE_MAX_VALUES)
@@ -1009,13 +1016,7 @@ class InstancesUtils:
 
         # Search panes filters (format: field1:value1,value2;field2:value3)
         if search_panes:
-            pane_filters = {}
-            for field_filter in search_panes.split(";"):
-                if ":" in field_filter:
-                    field, values = field_filter.split(":", 1)
-                    pane_filters[field] = values.split(",")
-
-            for field, allowed_values in pane_filters.items():
+            for field, allowed_values in decode_search_panes(search_panes).items():
                 filtered = [r for r in filtered if str(r.get(field, "N/A")) in allowed_values]
 
         return filtered

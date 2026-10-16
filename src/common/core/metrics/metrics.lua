@@ -1336,14 +1336,15 @@ function metrics:api_requests_query()
 
 	-- Parse search panes filters (format: field1:value1,value2;field2:value3)
 	local search_panes = {}
-	local search_panes_raw = unescape_uri(args.search_panes or "")
-	if search_panes_raw and search_panes_raw ~= "" then
+	-- Values arrive percent-encoded: split on the separators first, decode each value after
+	local search_panes_raw = args.search_panes or ""
+	if search_panes_raw ~= "" then
 		for field_filter in search_panes_raw:gmatch("[^;]+") do
 			local field, values = field_filter:match("^([^:]+):(.+)$")
 			if field and values then
 				search_panes[field] = {}
 				for value in values:gmatch("[^,]+") do
-					table_insert(search_panes[field], value)
+					table_insert(search_panes[field], unescape_uri(value))
 				end
 			end
 		end

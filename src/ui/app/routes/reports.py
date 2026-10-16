@@ -16,7 +16,8 @@ from openpyxl.styles import Font, PatternFill
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
 from app.utils import LOGGER, csv_safe, csv_writer
 
-from app.routes.utils import cors_required, get_default_ban_time, parse_search_panes
+from app.models.instance import encode_search_panes
+from app.routes.utils import cors_required, get_default_ban_time, parse_search_panes_dict
 
 reports = Blueprint("reports", __name__)
 REPORTS_FILTERS_CACHE_TTL_SECONDS = 5.0
@@ -69,7 +70,7 @@ def build_search_panes_options(pane_counts_backend: dict) -> dict:
                 search_panes_options["server_name"].append(
                     {
                         "label": f'<code class="language-dns">{escape("default server" if name == "_" else name)}</code>',
-                        "value": escape(name),
+                        "value": name,
                         "total": counts["total"],
                         "count": counts["count"],
                     }
@@ -78,7 +79,7 @@ def build_search_panes_options(pane_counts_backend: dict) -> dict:
             search_panes_options[field] = [
                 {
                     "label": escape(str(value)),
-                    "value": escape(str(value)),
+                    "value": str(value),
                     "total": counts["total"],
                     "count": counts["count"],
                 }
@@ -150,8 +151,8 @@ def reports_fetch():
         "actions",  # actions column for row buttons
     ]
 
-    # Build search panes string for backend (format: field1:value1,value2;field2:value3)
-    search_panes_str = ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items()) if search_panes else ""
+    # Build search panes string for backend (format: field1:value1,value2;field2:value3, values percent-encoded)
+    search_panes_str = encode_search_panes(search_panes)
     include_pane_counts = False
 
     # Determine order column name
@@ -275,7 +276,7 @@ def reports_filters():
             field = key.split("[")[1].split("]")[0]
             search_panes[field].append(value)
 
-    search_panes_str = ";".join(f"{field}:{','.join(sorted(values))}" for field, values in sorted(search_panes.items())) if search_panes else ""
+    search_panes_str = encode_search_panes({field: sorted(values) for field, values in sorted(search_panes.items())})
     has_active_panes = any(values for values in search_panes.values())
 
     force_refresh = request.form.get("force", "").strip().lower() in ("1", "true", "yes")
@@ -376,7 +377,7 @@ def reports_export_csv():
         search_value = request.args.get("search", "").lower()
         order_column = request.args.get("order_column", "date")
         order_dir = request.args.get("order_dir", "desc")
-        search_panes_str = parse_search_panes(request.args)
+        search_panes_str = encode_search_panes(parse_search_panes_dict(request.args))
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
@@ -469,7 +470,7 @@ def reports_export_excel():
         search_value = request.args.get("search", "").lower()
         order_column = request.args.get("order_column", "date")
         order_dir = request.args.get("order_dir", "desc")
-        search_panes_str = parse_search_panes(request.args)
+        search_panes_str = encode_search_panes(parse_search_panes_dict(request.args))
 
         # Get all reports (no pagination)
         if BW_INSTANCES_UTILS:
