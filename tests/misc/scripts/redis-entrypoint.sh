@@ -37,6 +37,22 @@ if [ "$REPLICATION_MODE" = "slave" ]; then
   fi
 fi
 
+# Redis Cluster node: the announce IP is the node's fixed address on bw-universe, which is what
+# CLUSTER SLOTS hands back to every client. The cluster itself is formed by redis-cluster-init.sh.
+cluster_flag=$(printf '%s' "${REDIS_CLUSTER_ENABLED:-no}" | tr '[:upper:]' '[:lower:]')
+if [ "$cluster_flag" = "yes" ]; then
+  : "${REDIS_CLUSTER_ANNOUNCE_IP:?Missing REDIS_CLUSTER_ANNOUNCE_IP for cluster mode}"
+  set -- "$@" \
+    "--cluster-enabled" "yes" \
+    "--cluster-config-file" "$DATA_DIR/nodes.conf" \
+    "--cluster-node-timeout" "5000" \
+    "--cluster-announce-ip" "$REDIS_CLUSTER_ANNOUNCE_IP" \
+    "--save" ""
+  if [ -n "${REDIS_PASSWORD:-}" ]; then
+    set -- "$@" "--masterauth" "$REDIS_PASSWORD"
+  fi
+fi
+
 tls_flag=$(printf '%s' "$TLS_ENABLED" | tr '[:upper:]' '[:lower:]')
 if [ "$tls_flag" = "yes" ]; then
   : "${REDIS_TLS_CERT_FILE:?Missing REDIS_TLS_CERT_FILE}"

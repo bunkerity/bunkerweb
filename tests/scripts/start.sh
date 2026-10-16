@@ -121,7 +121,52 @@ fi
 
 if [ -n "$redis_type" ] ; then
     if [ "$integration" != "Kubernetes" ] ; then
-        if [ "$redis_type" != "valkey" ] ; then
+        if [ "$redis_type" == "cluster" ] ; then
+            if ! docker ps -a --format "{{.Names}}" | grep -qx "redis-cluster-1" ; then
+                robust_docker_pull "tests/misc/docker/redis-cluster.yml" "redis cluster"
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    log "START" "❌" "🐳 Pull failed for redis cluster after multiple attempts"
+                    exit 1
+                fi
+
+                docker compose -f tests/misc/docker/redis-cluster.yml up -d
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    log "START" "⚠️" "🐳 Up failed for redis cluster, retrying ..."
+                    docker compose -f tests/misc/docker/redis-cluster.yml down -v
+                    # shellcheck disable=SC2181
+                    if [ $? -ne 0 ] ; then
+                        log "START" "❌" "🐳 Down failed for redis cluster"
+                        exit 1
+                    fi
+                    docker compose -f tests/misc/docker/redis-cluster.yml up -d
+                    # shellcheck disable=SC2181
+                    if [ $? -ne 0 ] ; then
+                        log "START" "❌" "🐳 Up failed for redis cluster"
+                        exit 1
+                    fi
+                fi
+
+                # redis-cluster-init forms the cluster and exits; a half-formed cluster would only
+                # show later as a MOVED/CLUSTERDOWN error on an unrelated action.
+                log "START" "ℹ️ " "🐳 Waiting for the redis cluster to be ready ..."
+                cluster_ready=0
+                for _ in $(seq 1 60) ; do
+                    if docker exec redis-cluster-1 sh -c 'redis-cli ${REDIS_PASSWORD:+-a "$REDIS_PASSWORD" --no-auth-warning} cluster info' 2>/dev/null | grep -q "cluster_state:ok" ; then
+                        cluster_ready=1
+                        break
+                    fi
+                    sleep 1
+                done
+                if [ "$cluster_ready" -ne 1 ] ; then
+                    log "START" "❌" "🐳 Redis cluster is not ready after 60 seconds"
+                    docker logs redis-cluster-init 2>&1 | tail -n 20
+                    exit 1
+                fi
+                log "START" "ℹ️ " "🐳 Redis cluster is ready ✅"
+            fi
+        elif [ "$redis_type" != "valkey" ] ; then
             if ! docker ps -a --format "{{.Names}}" | grep -qx "redis-master" ; then
                 robust_docker_pull "tests/misc/docker/redis-master.yml" "redis-master"
                 # shellcheck disable=SC2181

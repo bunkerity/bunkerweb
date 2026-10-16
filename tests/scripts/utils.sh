@@ -819,6 +819,15 @@ function cleanup_stack () {
             fi
         fi
 
+        if echo "$containers" | grep -qx "redis-cluster-1" ; then
+            docker compose -f tests/misc/docker/redis-cluster.yml down -v
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "🧰 Failed to stop redis cluster"
+                return 1
+            fi
+        fi
+
         if echo "$containers" | grep -qx "redis-master" ; then
             docker compose -f tests/misc/docker/redis-master.yml down -v
             # shellcheck disable=SC2181

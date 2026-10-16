@@ -409,6 +409,223 @@ actions:
     sentinel_type: "master"
     full_clean: true
 
+  # Redis Cluster: three masters (tests/misc/docker/redis-cluster.yml) on the Docker-network arms.
+  # Linux, Swarm and Kubernetes are not covered: the cluster stack has no manifest for them.
+
+  # host:port nodes
+  cluster_check:
+    type: redis
+    cluster: true
+    query: "PING"
+    result: "True"
+    config:
+      REDIS_DATABASE: "0"
+      REDIS_CLUSTER_NODES: "redis-cluster-1:6379 redis-cluster-2:6379 redis-cluster-3:6379"
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  bad_request_cluster:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  cluster:
+    type: redis
+    cluster: true
+    query: "keys *"
+    # In cluster mode every key of an IP carries the IP as a hash tag. 192.168.0.254 hashes to slot
+    # 14506, which redis-cli --cluster create assigns to the third node, so the key must not be
+    # on the first node the client dialled.
+    keys:
+      - "plugin_bad_behavior_www.example.com_{192.168.0.254}"
+    cluster_owner: 3
+    delay: 6
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  clear_keys_cluster:
+    type: redis
+    cluster: true
+    query: "FLUSHALL"
+    result: "True"
+    full_clean: true
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+
+  # first seed refuses connections: the client must fall through to the next node
+  cluster_dead_seed_check:
+    type: redis
+    cluster: true
+    query: "PING"
+    result: "True"
+    config:
+      REDIS_DATABASE: "0"
+      REDIS_CLUSTER_NODES: "redis-cluster-1:6399 redis-cluster-1:6379 redis-cluster-2:6379 redis-cluster-3:6379"
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  bad_request_cluster_dead_seed:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    # The refused seed is tried first; the log line proves it was, not just that the cluster worked.
+    log: "unable to connect ip:port redis-cluster-1:6399"
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  cluster_dead_seed:
+    type: redis
+    cluster: true
+    query: "keys *"
+    # In cluster mode every key of an IP carries the IP as a hash tag. 192.168.0.254 hashes to slot
+    # 14506, which redis-cli --cluster create assigns to the third node, so the key must not be
+    # on the first node the client dialled.
+    keys:
+      - "plugin_bad_behavior_www.example.com_{192.168.0.254}"
+    cluster_owner: 3
+    delay: 6
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  clear_keys_cluster_dead_seed:
+    type: redis
+    cluster: true
+    query: "FLUSHALL"
+    result: "True"
+    full_clean: true
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+
+  # authenticated cluster
+  cluster_password_check:
+    type: redis
+    cluster: true
+    query: "PING"
+    result: "True"
+    password: "secret"
+    config:
+      REDIS_DATABASE: "0"
+      REDIS_PASSWORD: "secret"
+      REDIS_CLUSTER_NODES: "redis-cluster-1:6379 redis-cluster-2:6379 redis-cluster-3:6379"
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  bad_request_cluster_password:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  cluster_password:
+    type: redis
+    cluster: true
+    query: "keys *"
+    # In cluster mode every key of an IP carries the IP as a hash tag. 192.168.0.254 hashes to slot
+    # 14506, which redis-cli --cluster create assigns to the third node, so the key must not be
+    # on the first node the client dialled.
+    keys:
+      - "plugin_bad_behavior_www.example.com_{192.168.0.254}"
+    cluster_owner: 3
+    password: "secret"
+    delay: 6
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  clear_keys_cluster_password:
+    type: redis
+    cluster: true
+    query: "FLUSHALL"
+    result: "True"
+    password: "secret"
+    full_clean: true
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+
+  # port-less nodes: the port defaults to 6379 (1.6.16 behaviour); last, so a failure leaves the other actions run
+  cluster_portless_check:
+    type: redis
+    cluster: true
+    query: "PING"
+    result: "True"
+    config:
+      REDIS_DATABASE: "0"
+      REDIS_CLUSTER_NODES: "redis-cluster-1 redis-cluster-2 redis-cluster-3"
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  bad_request_cluster_portless:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    headers:
+      X-Forwarded-For: "192.168.0.254"
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  cluster_portless:
+    type: redis
+    cluster: true
+    query: "keys *"
+    # In cluster mode every key of an IP carries the IP as a hash tag. 192.168.0.254 hashes to slot
+    # 14506, which redis-cli --cluster create assigns to the third node, so the key must not be
+    # on the first node the client dialled.
+    keys:
+      - "plugin_bad_behavior_www.example.com_{192.168.0.254}"
+    cluster_owner: 3
+    delay: 6
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+    restart_stack: false
+  clear_keys_cluster_portless:
+    type: redis
+    cluster: true
+    query: "FLUSHALL"
+    result: "True"
+    full_clean: true
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "All-in-one"
+
 config:
   USE_LIMIT_REQ: "no"
   USE_LIMIT_CONN: "no"

@@ -621,7 +621,20 @@ for file in valkey_acl_path.glob("*"):
 
 redis_client.delete("redis_type")
 
-if action.type == "redis" and (
+if action.type == "redis" and action.cluster:
+    # Three-master cluster, started by start.sh from tests/misc/docker/redis-cluster.yml. Docker-based
+    # arms only: the nodes sit on bw-universe at fixed addresses (see dnsmasq.hosts).
+    assert ARGS.integration != "Kubernetes", "The Redis Cluster stack has no Kubernetes manifest"
+    cluster_env = {"REDIS_CLUSTER_ENABLED": "yes", "REDIS_PORT_NUMBER": "6379"}
+    if action.password:
+        cluster_env["REDIS_PASSWORD"] = action.password
+
+    LOGGER.info("📝 Writing /tmp/redis-cluster.env")
+    cluster_env_file = Path(sep, "tmp", "redis-cluster.env")
+    cluster_env_file.write_text("\n".join(f"{key}={value}" for key, value in cluster_env.items()))
+    cluster_env_file.chmod(0o777)
+    redis_client.set("redis_type", "cluster")
+elif action.type == "redis" and (
     any(
         (
             action.port != 6379,

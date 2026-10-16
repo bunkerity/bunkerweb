@@ -5,10 +5,66 @@ from logging import Logger
 from typing import Any
 
 from redis import Redis, Sentinel
+from redis.cluster import RedisCluster
 from valkey import Valkey
 
 
+def handle_cluster(LOGGER: Logger, action: Any) -> None:
+    # CLUSTER SLOTS returns the nodes' bw-universe addresses (10.20.30.81-83:6379); the runner reaches
+    # them through the published ports instead, so it does not depend on routing into the bridge.
+    remap = {(f"10.20.30.8{n}", 6379): ("127.0.0.1", action.cluster_port + n - 1) for n in (1, 2, 3)}
+    client = RedisCluster(
+        host="127.0.0.1",
+        port=action.cluster_port,
+        password=action.password,
+        socket_timeout=10,
+        decode_responses=True,
+        address_remap=lambda address: remap.get(address, address),
+    )
+    LOGGER.info("🔗 Connecting to Redis Cluster ...")
+    if not client.ping():
+        LOGGER.error("🔗 Redis Cluster is not running, exiting ...")
+        exit(1)
+
+    primaries = sorted(client.get_primaries(), key=lambda node: node.port)
+    if len(primaries) != 3:
+        LOGGER.error(f"🔗 Expected 3 Redis Cluster primaries, got {[node.name for node in primaries]}, exiting ...")
+        exit(1)
+
+    LOGGER.info(f"🔗 Running Redis Cluster query {action.query!r} on every primary ...")
+    parts = action.query.split()
+    per_node = {}
+    for index, node in enumerate(primaries, start=1):
+        per_node[index] = client.execute_command(*parts, target_nodes=node)
+    LOGGER.debug(f"🔗 Redis Cluster query output by node: {per_node}")
+
+    if action.result is not None:
+        if not any(action.result in str(ret) for ret in per_node.values()):
+            LOGGER.error(f"🔗 Result {action.result!r} not found in any node, exiting ...")
+            LOGGER.error(f"🔗 Redis Cluster query output: {per_node}")
+            exit(1)
+        LOGGER.info(f"🔗 Result {action.result!r} found in Redis Cluster query output")
+    else:
+        found = {key for ret in per_node.values() for key in ret}
+        if not all(key in found for key in action.keys):
+            LOGGER.error(f"🔗 Not all keys {action.keys} found in the cluster, exiting ...")
+            LOGGER.error(f"🔗 Redis Cluster query output: {per_node}")
+            exit(1)
+        if action.cluster_owner is not None:
+            if not all(key in per_node[action.cluster_owner] for key in action.keys):
+                LOGGER.error(f"🔗 Keys {action.keys} are not all held by cluster node {action.cluster_owner}, exiting ...")
+                LOGGER.error(f"🔗 Redis Cluster query output: {per_node}")
+                exit(1)
+            LOGGER.info(f"🔗 Keys {action.keys} held by cluster node {action.cluster_owner}")
+        LOGGER.info(f"🔗 All keys {action.keys} found in Redis Cluster query output")
+
+    LOGGER.info("🔗 All Redis Cluster queries ran successfully")
+
+
 def handle(LOGGER: Logger, action: Any) -> None:
+    if action.cluster:
+        return handle_cluster(LOGGER, action)
+
     library_name = "Valkey" if action.valkey else "Redis"
     LOGGER.info(f"🔗 Connecting to {library_name} server ...")
 

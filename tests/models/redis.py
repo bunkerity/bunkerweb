@@ -26,6 +26,13 @@ class RedisData(ActionData):
 
     valkey: bool = False
 
+    # Redis Cluster (tests/misc/docker/redis-cluster.yml): three masters published on
+    # 127.0.0.1:cluster_port .. cluster_port + 2. cluster_owner is the 1-based node expected to hold
+    # every key of `keys`; checking it proves the keys were routed by slot, not just written somewhere.
+    cluster: bool = False
+    cluster_port: int = 7001
+    cluster_owner: Optional[int] = None
+
     @field_validator("url")
     @classmethod
     def check_url(cls, v: str) -> str:
@@ -44,6 +51,15 @@ class RedisData(ActionData):
 
             if self.sentinel_port is None:
                 self.sentinel_port = 26479 if self.valkey else 26379
+
+        if self.cluster:
+            assert not any((self.sentinel, self.tls, self.user, self.valkey)), "Cluster cannot be combined with sentinel, tls, user or valkey"
+            assert self.cluster_owner is None or (self.keys and 1 <= self.cluster_owner <= 3), "cluster_owner needs keys and a node between 1 and 3"
+            # A cluster has no database 1, REDIS_CLUSTER_NODES requires 0.
+            if self.db is None:
+                self.db = 0
+        elif self.cluster_owner is not None:
+            raise ValueError("cluster_owner requires cluster")
 
         if not any((self.result, self.keys)):
             raise ValueError("At least one of result or keys is required")

@@ -15,6 +15,9 @@
 10.20.30.54 redis-sentinel-1
 10.20.30.55 redis-sentinel-2
 10.20.30.56 redis-sentinel-3
+10.20.30.81 redis-cluster-1
+10.20.30.82 redis-cluster-2
+10.20.30.83 redis-cluster-3
 10.20.30.60 crowdsec
 10.20.30.70 valkey
 10.20.30.254 syslog

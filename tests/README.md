@@ -305,6 +305,16 @@ and writes the ACL file only for an action that declares a `user:`, so the entry
 recreate the container without a user aborts valkey at startup and nothing listens on either
 port.
 
+A `redis` action with `cluster: true` runs against a three-master Redis Cluster
+(`misc/docker/redis-cluster.yml`, no replicas). The nodes sit on `bw-universe` at fixed addresses
+(`10.20.30.81-83`, named `redis-cluster-1..3` in `dnsmasq.hosts`) and announce those addresses, which
+is what `CLUSTER SLOTS` returns to BunkerWeb. `redis-cluster-init` forms the cluster and exits;
+`start.sh` waits for `cluster_state:ok`. The runner reaches the nodes through the published ports
+`127.0.0.1:7001-7003` (`cluster_port` is the first), remapped from the announced addresses, runs the
+query on every primary, and `cluster_owner: N` asserts that node N holds every key of `keys`. A cluster
+needs `REDIS_DATABASE: "0"`. The stack exists on the Docker-network arms only (Docker, Autoconf,
+All-in-one); Linux, Swarm and Kubernetes have no cluster manifest.
+
 `bw-api` publishes `127.0.0.1:8888`, which the nine `api/*.yml` specs address directly. Anything
 else that wants a host port has to avoid it — CrowdSec used to take 8888 and now publishes 8889
 (`misc/docker/crowdsec.yml`, with the Linux `CROWDSEC_API` override following it), because docker
