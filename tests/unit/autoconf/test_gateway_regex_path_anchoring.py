@@ -59,6 +59,7 @@ def _controller():
     # `Config.__init__` always sets this; `_to_services` reads it to validate cluster paths.
     controller._settings = {}
     controller._domain_name = "cluster.local"
+    controller._service_protocol = "http"
     controller._reverse_proxy_suffix_start = 1
     controller._get_gateway_annotations = lambda svc: {}
     controller._get_listener_hostnames = lambda svc, protocols=None: []
@@ -104,6 +105,15 @@ def test_a_prefix_path_is_never_anchored():
     """Anti-vacuity in the other direction: anchoring everything would turn every plain
     `PathPrefix` route into a regex location and change matching precedence fleet-wide."""
     assert _url("PathPrefix", "/api") == "/api", "a PathPrefix route must stay a prefix location"
+
+
+@pytest.mark.parametrize("listener,backend", [("HTTPS", "http"), ("HTTP", "https"), ("HTTPS", "https"), ("HTTP", "http")])
+def test_backend_scheme_uses_service_protocol(listener, backend):
+    controller = _controller()
+    controller._service_protocol = backend
+    controller._get_listener_protocol = lambda *a, **kw: listener
+    service = controller._to_services(_route("PathPrefix", "/"))[0]
+    assert service["REVERSE_PROXY_HOST_1"] == f"{backend}://backend.default.svc.cluster.local:8080"
 
 
 def test_the_case_table_is_populated_and_still_covers_both_directions():
