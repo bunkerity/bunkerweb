@@ -447,9 +447,9 @@ static void rec_for_check(jit_State *J, IRType t, int dir,
 			  TRef stop, TRef step, int init)
 {
   if (!tref_isk(step)) {
-    /* Non-constant step: need a guard for the direction. */
+    /* Non-constant step: need a guard for the direction (excluding +-0). */
     TRef zero = (t == IRT_INT) ? lj_ir_kint(J, 0) : lj_ir_knum_zero(J);
-    emitir(IRTG(dir ? IR_GE : IR_LT, t), step, zero);
+    emitir(IRTG(dir ? IR_GT : IR_LT, t), step, zero);
     /* Add hoistable overflow checks for a narrowed FORL index. */
     if (init && t == IRT_INT) {
       if (tref_isk(stop)) {
@@ -530,8 +530,9 @@ static LoopEvent rec_for(jit_State *J, const BCIns *fori, int isforl)
   /* Avoid semantic mismatches and always failing guards. */
   if ((tvisnum(&tv[FORL_IDX]) && tvisnan(&tv[FORL_IDX])) ||
       (tvisnum(&tv[FORL_STOP]) && tvisnan(&tv[FORL_STOP])) ||
-      (tvisnum(&tv[FORL_STEP]) && tvisnan(&tv[FORL_STEP])) ||
-      tvismzero(&tv[FORL_STEP]))
+      (tvisnum(&tv[FORL_STEP]) &&
+       (tvisnan(&tv[FORL_STEP]) || tviszero(&tv[FORL_STEP]))) ||
+      (tvisint(&tv[FORL_STEP]) && intV(&tv[FORL_STEP]) == 0))
     lj_trace_err(J, LJ_TRERR_GFAIL);
   if (isforl) {  /* Handle FORL/JFORL opcodes. */
     TRef idx = tr[FORL_IDX];

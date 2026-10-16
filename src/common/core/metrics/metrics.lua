@@ -134,17 +134,21 @@ end
 
 -- The list is authoritative. Facet failures invalidate its derived cache without
 -- retrying an already inserted report. ARGV[10] marks an uncertain transport retry;
--- only that rare path scans by request ID or exact payload before inserting again.
+-- only that rare path scans the newest rows by request ID or exact payload before inserting again.
 local PUSH_SCRIPT = [==[
   local decoded, request = pcall(cjson.decode, ARGV[1])
   local id = decoded and type(request) == 'table' and type(request.id) == 'string' and request.id ~= '' and request.id
   if ARGV[10] == '1' then
-    for start = 0, redis.call('LLEN', KEYS[1]) - 1, 256 do
-      for i, stored in ipairs(redis.call('LRANGE', KEYS[1], start, start + 255)) do
-        if stored == ARGV[1] then return {start + i, 1} end
-        if id then
-          local ok, old = pcall(cjson.decode, stored)
-          if ok and type(old) == 'table' and old.id == id then return {start + i, 1} end
+    -- The original row was pushed last, so look newest-first and only 4 slices deep: a
+    -- full head-first scan inside one EVAL outlasts the client timeout and feeds itself.
+    local needle = id and ('"id":' .. cjson.encode(id))
+    local len = redis.call('LLEN', KEYS[1])
+    for back = 0, math.min(len, 1024) - 1, 256 do
+      local rows = redis.call('LRANGE', KEYS[1], -(back + 256), -(back + 1))
+      for i = #rows, 1, -1 do
+        local stored = rows[i]
+        if stored == ARGV[1] or (needle and string.find(stored, needle, 1, true)) then
+          return {len - back - (#rows - i), 1}
         end
       end
     end
@@ -168,7 +172,8 @@ local PUSH_SCRIPT = [==[
   -- REBUILD_SCRIPT's own predicate, applied to the row just pushed: a row the rebuild
   -- would reject must not bump valid nor the facets, or the certificate and the facets
   -- drift together and no later check can see it. Duplicate ids are the accepted
-  -- ceiling here -- only a full list scan could detect one.
+  -- ceiling here: a retry whose original row sits more than 1024 rows back is not found
+  -- and is pushed again.
   local object = decoded and type(request) == 'table' and string.match(ARGV[1], '^%s*{')
   local rid = object and request.id
   if rid == cjson.null then rid = nil end
@@ -1331,14 +1336,15 @@ function metrics:api_requests_query()
 
 	-- Parse search panes filters (format: field1:value1,value2;field2:value3)
 	local search_panes = {}
-	local search_panes_raw = unescape_uri(args.search_panes or "")
-	if search_panes_raw and search_panes_raw ~= "" then
+	-- Values arrive percent-encoded: split on the separators first, decode each value after
+	local search_panes_raw = args.search_panes or ""
+	if search_panes_raw ~= "" then
 		for field_filter in search_panes_raw:gmatch("[^;]+") do
 			local field, values = field_filter:match("^([^:]+):(.+)$")
 			if field and values then
 				search_panes[field] = {}
 				for value in values:gmatch("[^,]+") do
-					table_insert(search_panes[field], value)
+					table_insert(search_panes[field], unescape_uri(value))
 				end
 			end
 		end

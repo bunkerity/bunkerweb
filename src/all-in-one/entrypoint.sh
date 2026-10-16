@@ -94,6 +94,39 @@ function trap_exit() {
 }
 trap trap_exit TERM INT QUIT
 
+# Longest a reload waits for a generator that installs, in seconds
+reload_lock_timeout=300
+
+# Updates the supervisord configuration and stops every service while holding the lock a generator
+# takes for its install (/var/tmp/bunkerweb/generating), so no generator is killed part way through
+# an install and a generator that starts meanwhile waits instead. The lock sits on a descriptor of
+# this subshell only and is dropped when it exits, before the services start again: nothing is left
+# to kill by then, and a first generation of the restarted services waits for that lock for 30 s at
+# most, so holding it through their start could only make it give up. The busybox flock has no wait
+# option, hence the polling.
+# Returns 0 when the services are stopped, 1 when the lock stayed held for the whole timeout, 2 when
+# the lock file cannot be opened, 3 when the supervisord configuration update failed.
+# shellcheck disable=SC2329
+function stop_services_between_installs() {
+	local lock_file="/var/tmp/bunkerweb/generating"
+	# shellcheck disable=SC2317
+	[ -e "$lock_file" ] || ( umask 022 ; : >> "$lock_file" ) 2>/dev/null
+	# shellcheck disable=SC2317
+	(
+		exec 9< "$lock_file" || exit 2
+		waited=0
+		until flock -n -x 9 ; do
+			# A missing flock or an unusable descriptor never succeeds either
+			[ "$waited" -ge "$reload_lock_timeout" ] && exit 1
+			sleep 1
+			waited=$((waited+1))
+		done
+		supervisorctl update all || exit 3
+		supervisorctl stop all
+		exit 0
+	)
+}
+
 # trap SIGHUP
 # shellcheck disable=SC2329
 function trap_reload() {
@@ -103,18 +136,31 @@ function trap_reload() {
 	# Check if supervisord is running before attempting reload
 	# shellcheck disable=SC2317
 	if pgrep -f "supervisord" > /dev/null; then
-		# Reload supervisord configuration
+		# Reload the supervisord configuration and stop the services once no generator installs
 		# shellcheck disable=SC2317
-		if supervisorctl update all; then
-			# Restart all services to apply changes
-			# shellcheck disable=SC2317
-			supervisorctl restart all
-			# shellcheck disable=SC2317
-			log "ENTRYPOINT" "✅" "Reload successful"
-		else
-			# shellcheck disable=SC2317
-			log "ENTRYPOINT" "❌" "Failed to update supervisord configuration"
-		fi
+		stop_services_between_installs
+		# shellcheck disable=SC2317
+		case $? in
+			0)
+				# Start the services again to apply changes
+				# shellcheck disable=SC2317
+				supervisorctl start all
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "✅" "Reload successful"
+				;;
+			1)
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "❌" "A configuration generation is still installing after ${reload_lock_timeout} seconds, keeping the running services"
+				;;
+			2)
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "❌" "Couldn't open /var/tmp/bunkerweb/generating, keeping the running services"
+				;;
+			*)
+				# shellcheck disable=SC2317
+				log "ENTRYPOINT" "❌" "Failed to update supervisord configuration"
+				;;
+		esac
 	else
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "❌" "Supervisord is not running"

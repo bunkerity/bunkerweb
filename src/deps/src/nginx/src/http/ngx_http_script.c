@@ -156,7 +156,9 @@ ngx_http_compile_complex_value(ngx_http_compile_complex_value_t *ccv)
 
     for (i = 0; i < v->len; i++) {
         if (v->data[i] == '$') {
-            if (v->data[i + 1] >= '1' && v->data[i + 1] <= '9') {
+            if (i + 1 < v->len
+                && v->data[i + 1] >= '1' && v->data[i + 1] <= '9')
+            {
                 nc++;
 
             } else {
@@ -643,7 +645,7 @@ ngx_http_script_run(ngx_http_request_t *r, ngx_str_t *value,
     e.request = r;
     e.flushed = 1;
 
-    n = len;
+    n = 0;
 
     while (*(uintptr_t *) e.ip) {
         lcode = *(ngx_http_script_len_code_pt *) e.ip;
@@ -651,8 +653,8 @@ ngx_http_script_run(ngx_http_request_t *r, ngx_str_t *value,
     }
 
 
-    value->len = n;
-    value->data = ngx_pnalloc(r->pool, n);
+    value->len = n + len;
+    value->data = ngx_pnalloc(r->pool, n + len);
     if (value->data == NULL) {
         return NULL;
     }
@@ -1234,6 +1236,7 @@ ngx_http_script_regex_start_code(ngx_http_script_engine_t *e)
         return;
     }
 
+    e->is_args = 0;
     e->quote = code->redirect;
 
     e->pos = e->buf.data;
@@ -1847,6 +1850,7 @@ ngx_http_script_complex_value_code(ngx_http_script_engine_t *e)
     le.ip = code->lengths->elts;
     le.line = e->line;
     le.request = e->request;
+    le.is_args = e->is_args;
     le.quote = e->quote;
 
     for (len = 0; *(uintptr_t *) le.ip; len += lcode(&le)) {
@@ -1863,20 +1867,28 @@ ngx_http_script_complex_value_code(ngx_http_script_engine_t *e)
 
     e->pos = e->buf.data;
     e->end = e->buf.data + len;
+
+    e->sp->len = e->buf.len;
+    e->sp->data = e->buf.data;
+    e->sp++;
 }
 
 
 void
 ngx_http_script_complex_value_end_code(ngx_http_script_engine_t *e)
 {
+    ngx_http_variable_value_t  *val;
+
+    val = e->sp - 1;
+
     e->ip += sizeof(ngx_http_script_complex_value_end_code_t);
 
     ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0,
                    "http script complex value end");
 
-    e->sp->len = e->pos - e->buf.data;
-    e->sp->data = e->buf.data;
-    e->sp++;
+    if (val->data == e->buf.data) {
+        val->len = e->pos - e->buf.data;
+    }
 }
 
 

@@ -67,6 +67,36 @@ GOTDEF(GOTENUM)
 };
 #endif
 
+#if LJ_TARGET_PPC && LJ_32
+/* Call libm/libgcc helpers via our own GOT instead of the PLT. A PLT call
+** from the VM assembler forces the obsolete BSS-PLT for the whole link,
+** which fails against secure-PLT objects emitted by GCC 12 and newer.
+*/
+#if LJ_SOFTFP
+#ifndef _LJ_IRCALL_H
+extern double __ledf2(double a, double b);
+extern double __adddf3(double a, double b);
+extern double __subdf3(double a, double b);
+extern double __muldf3(double a, double b);
+extern double __divdf3(double a, double b);
+#endif
+#define SFGOTDEF(_)	_(__ledf2) _(__adddf3) _(__subdf3) _(__muldf3) _(__divdf3)
+#else
+#define SFGOTDEF(_)
+#endif
+#define GOTDEF(_) \
+  _(floor) _(ceil) _(trunc) _(log) _(log10) _(exp) _(sin) _(cos) _(tan) \
+  _(asin) _(acos) _(atan) _(sinh) _(cosh) _(tanh) _(frexp) _(modf) _(atan2) \
+  _(pow) _(fmod) _(ldexp) _(sqrt) SFGOTDEF(_)
+
+enum {
+#define GOTENUM(name) LJ_GOT_##name,
+GOTDEF(GOTENUM)
+#undef GOTENUM
+  LJ_GOT__MAX
+};
+#endif
+
 /* Type of hot counter. Must match the code in the assembler VM. */
 /* 16 bits are sufficient. Only 0.0015% overhead with maximum slot penalty. */
 typedef uint16_t HotCount;
@@ -94,7 +124,7 @@ typedef struct GG_State {
   /* Make g reachable via K12 encoded DISPATCH-relative addressing. */
   uint8_t align1[(16-sizeof(global_State))&15];
 #endif
-#if LJ_TARGET_MIPS
+#if LJ_TARGET_MIPS || (LJ_TARGET_PPC && LJ_32)
   ASMFunction got[LJ_GOT__MAX];		/* Global offset table. */
 #endif
 #if LJ_HASJIT

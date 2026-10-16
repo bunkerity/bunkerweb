@@ -95,7 +95,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         volumes:
           - ./bw-data:/data
     ...
@@ -131,7 +131,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         volumes:
           - ./bw-data:/data
     ...
@@ -174,7 +174,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -221,7 +221,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.16
+              image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -261,7 +261,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 !!! tip "现有插件"
 
-    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
+    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc2/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
 
 插件结构如下所示：
 ```
@@ -566,7 +566,7 @@ end
 
 !!! tip "更多示例"
 
-    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/src/bw/lua/bunkerweb)中存在的文件。
+    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc2/src/bw/lua/bunkerweb)中存在的文件。
 
 ### 作业
 
@@ -718,6 +718,8 @@ def pre_render(**kwargs) :
     这些钩子在处理传入请求**之前**执行。它们通常用于预处理任务，例如身份验证、验证或日志记录。
 
     如果钩子返回一个响应对象，Flask 将跳过请求处理并直接返回该响应。这对于短路请求处理管道很有用。
+
+    如果钩子抛出异常，或插件的钩子无法加载，Web UI 的每个页面（包括插件页面）都会返回 500，静态文件仍会正常提供。恢复方法：修复或删除磁盘上的插件文件，然后重启 UI（或向 gunicorn 主进程发送 HUP），也可以从数据库中删除该插件。
 
     **示例：**
 

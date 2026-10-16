@@ -2162,7 +2162,7 @@ static BCPos expr_primary_nav(LexState *ls, ExpDesc *v, int eflags)
       expr_str(ls, &key);
       bcemit_method(fs, v, &key);
       nav = 0;
-      if (lex_opt(ls, TK_nav)) {
+      if (!(eflags & EXPR_F_NONAV) && lex_opt(ls, TK_nav)) {
 	nav = 1;
 	bcemit_INS(fs, BCINS_AD(BC_ISEQP, v->u.s.info, VKNIL));
 	jmp_append(fs, &xpc, bcemit_jmp(fs));
@@ -2197,6 +2197,7 @@ static void expr_primary(LexState *ls, ExpDesc *v, int eflags)
   if (xpc != NO_JMP) {
     FuncState *fs = ls->fs;
     BCPos around;
+    if (v->k == VINDEXED) expr_tonextreg(fs, v);
     around = bcemit_jmp(fs);
     jmp_tohere(fs, xpc);
     if (v->k == VCALL) {  /* Change to VCALLNAV. Still points to CALL/CALLM. */
@@ -2741,13 +2742,13 @@ static void parse_label(LexState *ls)
     lj_lex_error(ls, 0, LJ_ERR_XLDUP, strdata(name));
   idx = gola_new(ls, name, VSTACK_LABEL, fs->pc);
   lex_check(ls, TK_label);
-  /* Recursively parse trailing statements: labels and ';' (Lua 5.2 only). */
+  /* Recursively parse trailing statements: labels and ';'. */
   for (;;) {
     if (ls->tok == TK_label) {
       synlevel_begin(ls);
       parse_label(ls);
       synlevel_end(ls);
-    } else if (LJ_52 && ls->tok == ';') {
+    } else if (ls->tok == ';') {
       lj_lex_next(ls);
     } else {
       break;
@@ -3034,16 +3035,17 @@ static int parse_stmt(LexState *ls)
     lj_lex_next(ls);
     parse_break(ls);
     return !LJ_52;  /* Must be last in Lua 5.1. */
-  case TK_continue:
-    if (!parse_isend(lj_lex_lookahead(ls))) goto assign;  /* Soft keyword. */
+  case TK_continue: {
+    LexToken tokx = lj_lex_lookahead(ls);
+    if (!(parse_isend(tokx) || tokx == ';'))
+      goto assign;  /* Soft keyword. */
     lj_lex_next(ls);
     parse_continue(ls);
     return 1;  /* Must be last. */
-#if LJ_52
+  }
   case ';':
     lj_lex_next(ls);
     break;
-#endif
   case TK_label:
     parse_label(ls);
     break;
@@ -3069,7 +3071,7 @@ static void parse_chunk(LexState *ls)
   synlevel_begin(ls);
   while (!islast && !parse_isend(ls->tok)) {
     islast = parse_stmt(ls);
-    lex_opt(ls, ';');
+    while (ls->tok == ';') lj_lex_next(ls);
     lj_assertLS(ls->fs->framesize >= ls->fs->freereg &&
 		ls->fs->freereg >= ls->fs->nactvar,
 		"bad regalloc");

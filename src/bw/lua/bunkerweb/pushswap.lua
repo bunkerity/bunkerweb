@@ -19,6 +19,15 @@ local pushswap = {}
 -- refuse it as a plugin name.
 pushswap.RESERVED_PREFIX = ".bw-"
 
+-- A swap replaces the top-level entries one rename at a time, so a push cut short (SIGKILL, OOM,
+-- container restart) leaves entries of two generations side by side. For the destination nginx
+-- reads its configuration from, the swap keeps this sentinel in the destination from before its
+-- first move until after its last one, and the startup scripts regenerate instead of keeping a tree
+-- that carries it. It has the reserved prefix, so the sweep skips it and it is never placed from
+-- an archive. Keep the name in step with sync_tree.INSTALL_SENTINEL.
+pushswap.INSTALL_SENTINEL = pushswap.RESERVED_PREFIX .. "install-incomplete"
+pushswap.SENTINEL_DESTINATION = "/etc/nginx"
+
 -- The applied digest describes a destination, it is never part of one. On Linux and
 -- all-in-one the archived source directory and the receiver destination are the same
 -- path, so a marker written inside would become a member of the next archive and no
@@ -159,6 +168,24 @@ function pushswap.swap(destination, staging)
 	-- applied" for a tree that was only half replaced; the caller rewrites it on success.
 	invalidate_applied(destination)
 
+	-- Created before the first move. One that is already there (a cut-short install, by the
+	-- generator or an earlier push) is not ours to clear when this swap is rolled back.
+	local sentinel, sentinel_is_ours
+	if destination == pushswap.SENTINEL_DESTINATION then
+		sentinel = destination .. "/" .. pushswap.INSTALL_SENTINEL
+		local present = open(sentinel, "r")
+		if present then
+			present:close()
+		else
+			local created, err = open(sentinel, "w")
+			if not created then
+				return false, "cannot create " .. sentinel .. ": " .. tostring(err)
+			end
+			created:close()
+			sentinel_is_ours = true
+		end
+	end
+
 	local existing = {}
 	for _, name in ipairs(list_entries(destination)) do
 		existing[name] = true
@@ -224,6 +251,10 @@ function pushswap.swap(destination, staging)
 		if incomplete then
 			return false, message .. " (" .. incomplete .. ")"
 		end
+		-- The old tree is back in full, so it is as consistent as it was before this swap.
+		if sentinel_is_ours then
+			os.remove(sentinel)
+		end
 		-- A complete rollback put every entry back, so staging holds nothing anyone still needs
 		-- and nothing else refers to it. Left behind it is a reserved name the sweep never
 		-- clears, and where the archived source is the destination it comes back in the next
@@ -269,6 +300,10 @@ function pushswap.swap(destination, staging)
 		end
 	end
 
+	-- Every entry is in place.
+	if sentinel then
+		os.remove(sentinel)
+	end
 	execute("rm -rf " .. quote(trash) .. " " .. quote(staging))
 	return true
 end

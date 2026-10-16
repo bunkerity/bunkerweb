@@ -971,6 +971,22 @@ static void build_subroutines(BuildCtx *ctx)
   |  j ->vmeta_binop			// Binop call for compatibility.
 #endif
   |
+  |//-- Bit operator metamethods -------------------------------------------
+  |
+  |->vmeta_bnot:
+  |  lgr RB, RC
+  |
+  |->vmeta_bitop:
+  |  la CARG2, 0(RA, BASE)
+  |  la CARG3, 0(RB, BASE)
+  |  la CARG4, 0(RC, BASE)
+  |  lgr CARG5, OP
+  |  lg L:CARG1, SAVE_L
+  |  stg BASE, L:CARG1->base
+  |  stg PC, SAVE_PC
+  |  brasl r14, extern lj_meta_bitop	// (lua_State *L, TValue *ra,*rb,*rc, BCReg op)
+  |  j ->cont_nop
+  |
   |//-- Call metamethod ----------------------------------------------------
   |
   |->vmeta_call_ra:
@@ -2614,15 +2630,18 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  sllg RA, RA, 3
     |  sllg RD, RD, 3
     |  lg RB, 0(RD, BASE)
-    |  checkint RB, >3
-    |  lcr RB, RB; jo >2
+    |  checkint RB, >4
+    |  lcr RB, RB; je >2; jo >3
     |1:
     |  stg RB, 0(RA, BASE)
     |  ins_next
     |2:
-    |  llihh RB, 0x41e0 // (double)2^31
+    |  llihh RB, 0x8000 // (double)-0
     |  j <1
     |3:
+    |  llihh RB, 0x41e0 // (double)2^31
+    |  j <1
+    |4:
     |  jh ->vmeta_unm
     |  // Toggle sign bit.
     |  llihh TMPR0, 0x8000
@@ -2846,6 +2865,57 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  lg RC, 0(RB, BASE)
     |  stg RC, 0(RA, BASE)
     |  ins_next
+    break;
+
+  /* -- Bit ops ----------------------------------------------------------- */
+
+  case BC_BNOT:
+    |  ins_A_C  // RA = dst, RC = src
+    |  sllg RA, RA, 3
+    |  sllg RC, RC, 3
+    |  lg TMPR0, 0(RC, BASE)
+    |  checkint TMPR0, ->vmeta_bnot
+    |  xilf TMPR0, -1
+    |  stg CARG1, 0(RA, BASE)
+    |  ins_next
+    break;
+
+    |.macro ins_bitop, ins, shop
+    |  ins_ABC  // RA = dst, RB = src1, RC = src2
+    |  sllg RA, RA, 3
+    |  sllg RB, RB, 3
+    |  sllg RC, RC, 3
+    |  lg TMPR0, 0(RB, BASE)
+    |  checkint TMPR0, ->vmeta_bitop
+    |  lg TMPR1, 0(RC, BASE)
+    |  checkint TMPR1, ->vmeta_bitop
+    |.if shop == 1
+    |  nill TMPR1, 0x1f
+    |  ins TMPR0, 0(TMPR1)
+    |.else
+    |  ins TMPR0, TMPR1
+    |.endif
+    |  stg TMPR0, 0(RA, BASE)
+    |  ins_next
+    |.endmacro
+
+  case BC_BAND:
+    |  ins_bitop nr, 0
+    break;
+  case BC_BOR:
+    |  ins_bitop or, 0
+    break;
+  case BC_BXOR:
+    |  ins_bitop xr, 0
+    break;
+  case BC_BSHL:
+    |  ins_bitop sll, 1
+    break;
+  case BC_BSHR:
+    |  ins_bitop srl, 1
+    break;
+  case BC_BSAR:
+    |  ins_bitop sra, 1
     break;
 
   /* -- Constant ops ------------------------------------------------------ */

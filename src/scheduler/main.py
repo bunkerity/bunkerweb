@@ -169,6 +169,10 @@ PENDING_RETRY_DELAY = 30
 # jobs, so the deferral is bounded and then gives way.
 PRE_PUSH_MAX_DEFERRALS = 3
 
+# Wait before the next attempt after the 1st, 2nd, 3rd ... consecutive failed generation, then
+# every 5 minutes: a generator that keeps failing must not be run in a tight loop.
+GENERATION_RETRY_DELAYS = (30, 60, 120, 300)
+
 # Backoff ceiling for the pending custom-config rescan: a database that stays broken must not keep
 # rescanning the folder every PENDING_RETRY_DELAY seconds for the life of the process.
 PENDING_RETRY_MAX_DELAY = 600
@@ -809,25 +813,28 @@ def generate_configs_for_jobs() -> bool:
     return SCHEDULER_TASKS_EXECUTOR.submit(_render_holding_applying_changes).result()
 
 
-def pre_push_configuration(env: Dict[str, Any], first_start: bool) -> Tuple[bool, bool]:
+def pre_push_configuration(env: Dict[str, Any], first_start: bool) -> Tuple[bool, bool, bool]:
     """Generate and push the configuration the once-jobs are about to validate against.
 
-    Returns (took_it, rendered). The second half matters to the caller: a render that happened here
-    must not happen again in the same iteration. Plugins need their API endpoints loaded on the
-    instances and jobs validate against the running configuration; certbot-new is the expensive
-    case, since a service added now has no server{} on the instance yet, so an ACME probe falls to
-    the default server, and the job is "once", so nothing retries it until the next change. On the
-    first start the instance may still be booting, hence the wait, which also repopulates
-    SCHEDULER.apis after the startup sends emptied it; later it is already known.
+    Returns (took_it, rendered, generation_failed). The second one matters to the caller: a render that
+    happened here must not happen again in the same iteration. The third one keeps a failed generation
+    apart from a push that reached no instance, since only the first is retried on a backoff.
+
+    Plugins need their API endpoints loaded on the instances and jobs validate against the running
+    configuration; certbot-new is the expensive case, since a service added now has no server{} on
+    the instance yet, so an ACME probe falls to the default server, and the job is "once", so nothing
+    retries it until the next change. On the first start the instance may still be booting, hence the
+    wait, which also repopulates SCHEDULER.apis after the startup sends emptied it; later it is
+    already known.
     """
     assert SCHEDULER is not None
 
     if not (wait_for_reachable_instance() if first_start else SCHEDULER.apis):
-        return False, False
+        return False, False, False
 
     LOGGER.info("Generating and sending the configuration before running jobs ...")
     if not generate_configs():
-        return False, False
+        return False, False, True
 
     futures = [
         SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"),
@@ -858,8 +865,13 @@ def pre_push_configuration(env: Dict[str, Any], first_start: bool) -> Tuple[bool
     # An empty API list answers True, so the reload result on its own does not say the configuration
     # reached anything. IGNORE_FAIL_SENDING_CONFIG is the operator saying to proceed regardless.
     if not SCHEDULER.apis:
-        return False, True
-    return IGNORE_FAIL_SENDING_CONFIG or (took_it and not push_failed), True
+        return False, True, False
+    return IGNORE_FAIL_SENDING_CONFIG or (took_it and not push_failed), True, False
+
+
+def generation_retry_delay(failures: int) -> int:
+    """Seconds to wait before generating again, given the number of consecutive failed generations (at least 1)."""
+    return GENERATION_RETRY_DELAYS[min(failures, len(GENERATION_RETRY_DELAYS)) - 1]
 
 
 def pre_push_deferral(pushed: bool, deferrals: int) -> Tuple[bool, int]:
@@ -1464,8 +1476,10 @@ if __name__ == "__main__":
         changes = {}
         old_changes = {}
         healthcheck_job_run = False
-        pre_push_retry_at = None
+        pending_retry_at = None
         pre_push_deferrals = 0
+        generation_failures = 0
+        jobs_ran_stale = False
         configs_rescan_at = None
         configs_rescan_delay = PENDING_RETRY_DELAY
 
@@ -1481,11 +1495,12 @@ if __name__ == "__main__":
             pre_push_done = False
             pre_push_failed = False
             pre_push_rendered = False
+            generation_failed = False
             if CONFIG_NEED_GENERATION and RUN_JOBS_ONCE:
                 # A fault in here is a failed push, not a reason to leave: uncaught it reaches the
                 # outer handler, which turns it into stop(1).
                 try:
-                    pre_push_done, pre_push_rendered = pre_push_configuration(env, FIRST_START)
+                    pre_push_done, pre_push_rendered, generation_failed = pre_push_configuration(env, FIRST_START)
                 except BaseException as e:
                     LOGGER.error(f"Exception while pushing the configuration before running jobs : {e}")
                     pre_push_done, pre_push_rendered = False, False
@@ -1496,7 +1511,16 @@ if __name__ == "__main__":
                     CONFIG_NEED_GENERATION = False
 
                 pre_push_failed, pre_push_deferrals = pre_push_deferral(pre_push_done, pre_push_deferrals)
-                if pre_push_failed:
+                # The deferral gave way while the generator was failing: the jobs run against the old
+                # configuration and have to run again once a generation finally succeeds.
+                if generation_failed and not pre_push_failed:
+                    jobs_ran_stale = True
+                if pre_push_failed and generation_failed:
+                    LOGGER.error(
+                        f"The configuration the once-jobs depend on could not be generated, deferring them "
+                        f"({pre_push_deferrals}/{PRE_PUSH_MAX_DEFERRALS}) rather than running them against a configuration nothing received ..."
+                    )
+                elif pre_push_failed:
                     LOGGER.error(
                         "The configuration the once-jobs depend on reached no instance, deferring them for "
                         f"{PENDING_RETRY_DELAY}s ({pre_push_deferrals}/{PRE_PUSH_MAX_DEFERRALS}) rather than running them "
@@ -1555,17 +1579,33 @@ if __name__ == "__main__":
                     LOGGER.info("Regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
                     CONFIG_NEED_GENERATION = True
 
-            if CONFIG_NEED_GENERATION:
-                ret = generate_configs()
-                if ret and SCHEDULER.apis:
+            # A generation that just failed in the pre-push, with the once-jobs held back, has nothing new
+            # to try: the same inputs would only fail the same way a second time in this iteration.
+            if CONFIG_NEED_GENERATION and not (generation_failed and pre_push_failed):
+                generation_failed = not generate_configs()
+                if not generation_failed and SCHEDULER.apis:
                     # send nginx configs
                     task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"))
 
+            retry_delay = PENDING_RETRY_DELAY if pre_push_failed else None
             failover_message = ""
+            if generation_failed:
+                generation_failures += 1
+                retry_delay = generation_retry_delay(generation_failures)
+                failover_message = (
+                    f"The configuration could not be generated, the previous configuration is still in use. Retrying in {retry_delay}s "
+                    f"(failed attempt {generation_failures}), check the scheduler's logs for the cause.\n"
+                )
+            else:
+                generation_failures = 0
             try:
                 success = True
                 reachable = True
-                if SCHEDULER.apis:
+                if generation_failed:
+                    # Nothing new reached the instances: a reload now would load the plugins and custom
+                    # configs already pushed against the previous configuration, and report it as applied.
+                    success = False
+                elif SCHEDULER.apis:
                     # send cache
                     task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"))
 
@@ -1651,7 +1691,9 @@ if __name__ == "__main__":
                 LOGGER.error(f"Error while setting failover to true in the database: {e}")
 
             try:
-                if not success and reachable:
+                if generation_failed:
+                    LOGGER.error(f"The configuration was not applied, the previous one keeps serving. Retrying the generation in {retry_delay}s ...")
+                elif not success and reachable:
                     LOGGER.error("Error while reloading bunkerweb, failing over to last working configuration ...")
                     if (
                         not FAILOVER_PATH.joinpath("config").is_dir()
@@ -1702,7 +1744,13 @@ if __name__ == "__main__":
             FIRST_START = FIRST_START and pre_push_failed
             NEED_RELOAD = False
             RUN_JOBS_ONCE = pre_push_failed
-            CONFIG_NEED_GENERATION = pre_push_failed
+            CONFIG_NEED_GENERATION = pre_push_failed or generation_failed
+            if jobs_ran_stale and not generation_failed:
+                # Back after a failed streak: run the once-jobs against the configuration now served,
+                # one second from now (certbot-new needs the new server{} for its ACME challenge).
+                jobs_ran_stale = False
+                RUN_JOBS_ONCE = CONFIG_NEED_GENERATION = True
+                retry_delay = 1
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
             PRO_PLUGINS_NEED_GENERATION = False
@@ -1733,7 +1781,7 @@ if __name__ == "__main__":
 
             # infinite schedule for the jobs
             LOGGER.info("Executing job scheduler ...")
-            pre_push_retry_at = monotonic() + PENDING_RETRY_DELAY if pre_push_failed else None
+            pending_retry_at = monotonic() + retry_delay if retry_delay else None
             errors = 0
             _gc_counter = 0
             while RUN and not NEED_RELOAD:
@@ -1762,9 +1810,9 @@ if __name__ == "__main__":
                                     NEED_RELOAD = True
                                     continue
 
-                    if pre_push_retry_at is not None and monotonic() >= pre_push_retry_at:
-                        pre_push_retry_at = None
-                        LOGGER.info("Retrying the configuration push the once-jobs are waiting for ...")
+                    if pending_retry_at is not None and monotonic() >= pending_retry_at:
+                        pending_retry_at = None
+                        LOGGER.info("Retrying the pending configuration ...")
                         NEED_RELOAD = True
                         continue
 

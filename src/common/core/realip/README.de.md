@@ -42,7 +42,7 @@ So funktioniert's:
     Fügen Sie nur vertrauenswürdige Quellen hinzu, da sonst die Gefahr der IP-Spoofing über manipulierte Header besteht.
 
 !!! info "Mehrere Adressen"
-    Mit `REAL_IP_RECURSIVE` wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.
+    Mit `REAL_IP_RECURSIVE` wird, wenn der Header mehrere IPs enthält, die letzte (am weitesten rechts stehende) IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.
 
 ### Beispiele
 

@@ -1,5 +1,39 @@
 # Changelog
 
+## v1.6.17~rc2 - 2026/10/16
+
+- [FEATURE] `db`: `DATABASE_CONNECT_TIMEOUT` (default `10s`) and `DATABASE_READ_TIMEOUT` (default `5m`) bound MySQL and MariaDB calls, and PostgreSQL gets the connect timeout and TCP keepalives but no query deadline, so a database that vanishes without a reset no longer blocks the scheduler, UI or API forever.
+- [BUGFIX] `all-in-one`: a reload signal (`docker kill -s HUP`) waits for a configuration install in progress before it restarts the services, instead of starting them on a half-written configuration.
+- [BUGFIX] `autoconf`: Kubernetes API calls time out and use TCP keepalives, and a controller stalled on its internal lock marks itself unhealthy, so a configured liveness probe restarts it instead of leaving it frozen on a dead API connection.
+- [BUGFIX] `autoconf`: in Gateway API mode, the status of the GatewayClass, Gateways and routes that BunkerWeb owns is written (`Accepted`, `Programmed`, listeners, route parents), so `kubectl wait` and Argo CD health checks complete. This needs `get`, `list` and `watch` on `gatewayclasses` and `patch` on the `status` of the Gateway API kinds; resources of other controllers are left alone. (Fixes #4058)
+- [BUGFIX] `backup`: the pre-upgrade backup no longer fails on leftover `test_*` write-check tables, and a slow but successful dump is no longer reported as a timeout.
+- [BUGFIX] `bans`: the ban check at the TLS ClientHello uses the same address as nginx for IPv4-mapped IPv6 clients and for IPv6 addresses ending in an IPv4 tail.
+- [BUGFIX] `core`: a URI `rewrite` in a custom config no longer skips the access checks (bans, lists, rate limit, antibot, authentication, ModSecurity). With `ENABLE_INTERNAL=false`, CrowdSec still checks rewritten requests.
+- [BUGFIX] `core`: on the all-in-one image and on Linux, the generator renders aside and installs under a lock, and a reload or a configuration push waits for it and for any reload in flight, so a reload no longer loads a half-written `/etc/nginx` and leaves BunkerWeb without its settings until a restart. An orphaned reload marker is cleared once its monotonic stamp shows it is more than five minutes old; a marker whose age cannot be established keeps blocking until a restart.
+- [BUGFIX] `core`: a configuration generation in which any template fails to render is refused and the running configuration is kept, in every integration; fix or remove the failing template to apply changes again.
+- [BUGFIX] `core`: a reload whose initialization fails (settings that cannot be loaded, a plugin that fails to load) is rejected and the running configuration is kept, and later reloads are not blocked.
+- [BUGFIX] `core`: a reload with an unreadable or invalid `plugin.json` is rejected before anything changes, so the running configuration keeps its protections, and the error names the file instead of `attempt to concatenate a nil value`. Directories without a `plugin.json` are still skipped.
+- [BUGFIX] `core`: an interrupted configuration install (container kill, out of memory) is no longer kept on restart with `KEEP_CONFIG_ON_RESTART=yes`: the next start renders the temporary configuration instead of serving a mix of two generations. This covers the generator and the configuration push to an instance.
+- [BUGFIX] `core`: the `bunkerweb` container exits with an error when its first configuration cannot be generated, instead of starting nginx without one.
+- [BUGFIX] `core`: the whitelist, blacklist, greylist and antibot checks skip the reverse DNS lookup when no rDNS entry is configured. (Fixes #4057)
+- [BUGFIX] `metrics`: a retried report push scans only the newest reports, so a large Redis list no longer pins Redis at 100% CPU.
+- [BUGFIX] `misc`: the default server certificate and key are saved to the database together, and an instance starting with a missing or mismatched pair replaces it with a temporary one until the scheduler pushes the real pair, instead of crash-looping. (Refs #4031)
+- [BUGFIX] `modsecurity`: multipart strict-validation and `filename*` denials (HTTP 400) are reported, and the matched request data stored per report is bounded. (Fixes #4012)
+- [BUGFIX] `scheduler`: a configuration that fails to generate is no longer reported as applied: the previous configuration keeps serving, the failure is shown, and the generation is retried after 30 s, 1 m, 2 m, then every 5 minutes.
+- [BUGFIX] `ui`: a `before_request` plugin hook that raises, or whose plugin hooks fail to load, answers 500 on every page instead of serving the request without its check. Static files stay served.
+- [BUGFIX] `ui`: the bulk delete and convert of configs works for file-managed configs whose names contain a dot.
+- [BUGFIX] `ui`: the Reports and Bans filters match values containing `&`, `<`, `>`, quotes, `,` or `;`. (Refs #4013)
+- [BUGFIX] `ui`: DataTables sort buttons are named after the header text, not its HTML.
+- [BUGFIX] `ui`: the jobs page finishes loading again, its filter panes broke when the reload and async columns became sortable by value.
+- [MISC] `templates`: the `low` template sets `CROSS_ORIGIN_EMBEDDER_POLICY` to `unsafe-none`.
+- [DOCS] `kubernetes`: the quickstart reads the LoadBalancer address from the `mybw-bunkerweb-external` Service.
+- [DOCS] `realip`: with `REAL_IP_RECURSIVE`, the rightmost address not in the trusted list is the client, and the PROXY protocol example sets `REAL_IP_HEADER=proxy_protocol`.
+
+## v1.6.17~rc1 - 2026/10/15
+
+- [DEPS] `bunkerweb`: update NGINX to 1.30.6 (CVE-2026-15176, CVE-2026-93479, CVE-2026-95101, CVE-2026-97629, CVE-2026-97205). Fedora 43 and 44 have no 1.30.6 package yet, so their BunkerWeb packages keep building their modules against 1.30.5 and stay exposed until Fedora ships 1.30.6.
+- [DEPS] Updated LuaJIT version to v2.1-20261015
+
 ## v1.6.16 - 2026/10/13
 
 - [FEATURE] `BANS_TLS_DROP_REASONS` also drops banned clients at the TLS ClientHello behind PROXY protocol when real IP uses `proxy_protocol`, trusting the PROXY address only from proxies listed in `REAL_IP_FROM`.

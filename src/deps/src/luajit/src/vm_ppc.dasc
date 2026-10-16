@@ -50,7 +50,13 @@
 |.macro blex, target; bl extern target; nop; .endmacro
 |.macro .toc, a, b; a, b; .endmacro
 |.else
-|.macro blex, target; bl extern target@plt; .endmacro
+|// Call via our own GOT to avoid PLT relocations, which force the obsolete
+|// BSS-PLT on PPC32 and break linking against secure-PLT objects.
+|.macro blex, target
+|  lwz TMP0, DISPATCH_GOT(target)(DISPATCH)
+|  mtctr TMP0
+|  bctrl
+|.endmacro
 |.macro .toc, a, b; .endmacro
 |.endif
 |.if OPD
@@ -577,6 +583,10 @@
 |// Assumes DISPATCH is relative to GL.
 #define DISPATCH_GL(field)	(GG_DISP2G + (int)offsetof(global_State, field))
 #define DISPATCH_J(field)	(GG_DISP2J + (int)offsetof(jit_State, field))
+#if LJ_TARGET_PPC && LJ_32
+#define GG_DISP2GOT		(GG_OFS(got) - GG_OFS(dispatch))
+#define DISPATCH_GOT(name)	(GG_DISP2GOT + 4*LJ_GOT_##name)
+#endif
 |
 #define PC2PROTO(field)  ((int)offsetof(GCproto, field)-(int)sizeof(GCproto))
 |
@@ -1852,7 +1862,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  lwz TMP2, WORD_HI(TMP1)
   |.else
   |  lwzux TMP2, TMP1, TMP3
-  |  lwz TMP3, WORD_HI(TMP1)
+  |  lwz TMP3, 4(TMP1)
   |.endif
   |1:
   |  checknil TMP2
@@ -5903,6 +5913,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  lwz RB, WORD_HI(TMP3)
     |.else
     |  add CARG3, TMP2, TMP3
+    |  lwz RB, WORD_HI(CARG3)
     |  lwz CARG1, 0(CARG3)
     |  lwz CARG2, 4(CARG3)
     |   add NODE:TMP3, TMP2, TMP3

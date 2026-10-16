@@ -1,4 +1,4 @@
-FROM ubuntu:jammy@sha256:829f6df217bcbae2b371026e81711d1a787c61b2967ad09d015063663ebafbf7 AS builder
+FROM ubuntu:jammy@sha256:5ec03bb3441e8b0bf3b4f9cd4629a1ae763010dc3035bb8da3ae6cf026486401 AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -11,7 +11,7 @@ RUN update-alternatives --install /usr/bin/cargo cargo /usr/bin/cargo-1.85 100 &
     cargo --version && rustc --version
 
 ENV OS=ubuntu
-ENV NGINX_VERSION=1.30.5
+ENV NGINX_VERSION=1.30.6
 ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
 # Install Nginx
@@ -148,7 +148,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM ubuntu:jammy@sha256:829f6df217bcbae2b371026e81711d1a787c61b2967ad09d015063663ebafbf7
+FROM ubuntu:jammy@sha256:5ec03bb3441e8b0bf3b4f9cd4629a1ae763010dc3035bb8da3ae6cf026486401
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

@@ -44,7 +44,7 @@ Follow these steps to configure and use the Real IP feature:
     Only include trusted proxy IPs in your configuration. Adding untrusted sources could allow IP spoofing attacks, where malicious actors could forge the client IP by manipulating headers.
 
 !!! info "Multiple IP Addresses"
-    When `REAL_IP_RECURSIVE` is enabled and a header contains multiple IPs (e.g., `X-Forwarded-For: client, proxy1, proxy2`), BunkerWeb will identify the leftmost IP not in your trusted proxy list as the client IP.
+    When `REAL_IP_RECURSIVE` is enabled and a header contains multiple IPs (e.g., `X-Forwarded-For: client, proxy1, proxy2`), BunkerWeb will identify the rightmost IP not in your trusted proxy list as the client IP.
 
 ### Example Configurations
 

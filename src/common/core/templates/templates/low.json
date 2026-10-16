@@ -42,6 +42,7 @@
     "REFERRER_POLICY": "no-referrer-when-downgrade",
     "USE_CORS": "yes",
     "CORS_ALLOW_ORIGIN": "*",
+    "CROSS_ORIGIN_EMBEDDER_POLICY": "unsafe-none",
     "USE_BAD_BEHAVIOR": "yes",
     "BAD_BEHAVIOR_STATUS_CODES": "400 401 403 404 405 429 444",
     "BAD_BEHAVIOR_BAN_TIME": "3600",
@@ -151,6 +152,7 @@
         "PERMISSIONS_POLICY",
         "USE_CORS",
         "CORS_ALLOW_ORIGIN",
+        "CROSS_ORIGIN_EMBEDDER_POLICY",
         "KEEP_UPSTREAM_HEADERS",
         "REFERRER_POLICY"
       ]

@@ -3,6 +3,22 @@
 !!! info "Panel de BunkerWeb"
     Si no puedes resolver tu problema, puedes [contactarnos directamente a través de nuestro panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). Esto centraliza todas las solicitudes relacionadas con la solución BunkerWeb.
 
+## Solucionar problemas con un agente de IA
+
+### Habilidades de BunkerWeb en skills.sh
+
+La [habilidad oficial de solución de problemas de BunkerWeb en skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) ayuda a los agentes de programación con IA a diagnosticar solicitudes bloqueadas, bloqueos de IP, errores del servidor de origen y problemas de certificados o configuración. Sigue las [instrucciones de instalación](https://github.com/bunkerity/bunkerweb-skills#installation) de tu agente.
+
+### Documentación de BunkerWeb con Context7
+
+Si tu agente admite [Context7](https://context7.com/docs), conéctalo para consultar la [documentación de BunkerWeb](https://context7.com/bunkerity/bunkerweb). Incluye tu versión de BunkerWeb, la integración, los ajustes y los registros relevantes en tu consulta, y elimina contraseñas, tokens de API y otros secretos antes de compartirlos.
+
+Ejemplo de consulta:
+
+```text
+Ayúdame a diagnosticar este problema con BunkerWeb <versión> en <integración>. Estos son los ajustes y los registros relevantes sin secretos: <detalles>. use context7
+```
+
 ## Registros
 
 Al solucionar problemas, los registros son tus mejores amigos. Hacemos nuestro mejor esfuerzo para proporcionar registros fáciles de usar para ayudarte a entender lo que está sucediendo.
