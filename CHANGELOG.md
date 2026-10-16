@@ -6,6 +6,7 @@
 - [BUGFIX] `autoconf`: Kubernetes API calls time out and use TCP keepalives, and a controller stalled on its internal lock marks itself unhealthy, so a configured liveness probe restarts it instead of leaving it frozen on a dead API connection.
 - [BUGFIX] `backup`: the pre-upgrade backup no longer fails on leftover `test_*` write-check tables, and a slow but successful dump is no longer reported as a timeout.
 - [BUGFIX] `bans`: the ban check at the TLS ClientHello uses the same address as nginx for IPv4-mapped IPv6 clients and for IPv6 addresses ending in an IPv4 tail.
+- [BUGFIX] `core`: a URI `rewrite` in a custom config no longer skips the access checks (bans, lists, rate limit, antibot, authentication, ModSecurity). With `ENABLE_INTERNAL=false`, CrowdSec still checks rewritten requests.
 - [BUGFIX] `metrics`: a retried report push scans only the newest reports, so a large Redis list no longer pins Redis at 100% CPU.
 - [BUGFIX] `misc`: the default server certificate and key are saved to the database together, and an instance starting with a missing or mismatched pair replaces it with a temporary one until the scheduler pushes the real pair, instead of crash-looping. (Refs #4031)
 - [BUGFIX] `modsecurity`: multipart strict-validation and `filename*` denials (HTTP 400) are reported, and the matched request data stored per report is bounded. (Fixes #4012)
