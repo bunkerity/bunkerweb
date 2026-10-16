@@ -155,7 +155,8 @@
         border-color: var(--color-bw);
         box-shadow: 0 0 4px rgba(11, 85, 119, 0.5);
       }
-      article div.content form button {
+      article div.content form button,
+      #challenge-retry {
         background-color: var(--color-bw-green);
         color: #fff;
         padding: 0.75rem 1.5rem;
@@ -165,7 +166,8 @@
         cursor: pointer;
         transition: background-color 0.3s ease;
       }
-      article div.content form button:hover {
+      article div.content form button:hover,
+      #challenge-retry:hover {
         background-color: #27a060;
       }
       footer {
@@ -249,6 +251,13 @@
     <article>
       <div class="content">
         <h3>Please prove that you are Human before accessing this website</h3>
+        <p id="challenge-error" role="alert"></p>
+        <p class="subtitle">
+          Having trouble? Check your connection and allow this site's challenge
+          to load.
+          <button type="button" id="challenge-retry">Reload challenge</button>
+          If the problem continues, contact the website administrator.
+        </p>
         {-raw-}
         <form method="POST" action="{*antibot_uri*}" id="form">
           <label
@@ -321,7 +330,31 @@
       </p>
     </footer>
     {-raw-}
+    <script nonce="{*nonce_script*}">
+      function challenge_error() {
+        document.getElementById("challenge-error").textContent =
+          "Verification could not complete. Reload the challenge to try again.";
+      }
+      document
+        .getElementById("challenge-retry")
+        .addEventListener("click", function () {
+          window.location.reload();
+        });
+      document.addEventListener(
+        "error",
+        function (event) {
+          if (
+            event.target.tagName === "SCRIPT" &&
+            event.target.hasAttribute("data-challenge-script")
+          ) {
+            challenge_error();
+          }
+        },
+        true,
+      );
+    </script>
     <script
+      data-challenge-script
       src="https://unpkg.com/@mcaptcha/vanilla-glue@0.1.0-rc2/dist/index.js"
       nonce="{*nonce_script*}"
     ></script>
