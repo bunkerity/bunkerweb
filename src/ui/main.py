@@ -921,6 +921,8 @@ with app.app_context():
     # CSRF protection
     app.config["WTF_CSRF_METHODS"] = ("POST",)
     app.config["WTF_CSRF_SSL_STRICT"] = False
+    # Align the CSRF token lifetime with the session (SESSION_LIFETIME_HOURS): Flask-WTF's default is 1 h, so a form left open longer was refused
+    app.config["WTF_CSRF_TIME_LIMIT"] = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
     csrf = CSRFProtect()
     csrf.init_app(app)
 
@@ -1459,15 +1461,13 @@ def before_request():
             if API_CLIENT.readonly:
                 LOGGER.warning("reload_ui_plugins is set but database is read-only, skipping plugin reload to prevent infinite loop")
             else:
-                safe_reload_plugins()
-                # Reset the flag BEFORE sending SIGHUP so new workers see it cleared. The API client
-                # raises on failure and returns the response body on success: testing that body for
-                # truth read every success as an error and never restarted the workers.
-                try:
-                    API_CLIENT.checked_changes(changes=["ui_plugins"], value=False)
-                except Exception as err:
-                    LOGGER.error(f"Couldn't reset reload_ui_plugins flag: {err}, skipping worker restart to prevent loop")
-                else:
+                # reload_plugins clears the flag before it reads the plugins, so workers started by the restart see it
+                # cleared and an update committed during the extraction keeps it raised. "" is a clean reload, an error
+                # string a failed one (flag raised again) and None means another worker is mid-reload (nothing to restart).
+                err = safe_reload_plugins()
+                if err:
+                    LOGGER.error(f"Plugin reload failed: {err}, skipping worker restart to prevent loop")
+                elif err is not None:
                     schedule_restart_workers()
 
         # Stamped before the fetch is submitted, not after: a slow or failing refresh must not let

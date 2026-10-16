@@ -9,6 +9,7 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from sys import path as sys_path
 from tarfile import open as tar_open
 from traceback import format_exc
+from typing import Optional
 
 from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall  # type: ignore
 from manual_plugins import read_manual_plugin  # type: ignore
@@ -94,8 +95,33 @@ def invalid_plugin_json(plugin_path: Path, known_plugins: list) -> bool:
     return bool(problem)
 
 
-def reload_plugins():
-    plugins = API_CLIENT.get_plugins(type="all", with_data=True)
+def _rearm_plugin_reload(error: str) -> str:
+    """Raise the ``ui_plugins`` flag again so the next request retries, and hand ``error`` back to the caller."""
+    try:
+        API_CLIENT.checked_changes(["ui_plugins"], value=True)
+    except Exception as e:
+        LOGGER.error(f"Couldn't raise the reload_ui_plugins flag again: {e}")
+    return error
+
+
+def reload_plugins() -> str:
+    """Extract the stored plugins; return "" on success, else the error (the flag is then raised again and the caller must not restart the workers)."""
+    # Clear the flag before reading the plugins: an update committed while we extract raises it again instead of being erased.
+    error = ""
+    try:
+        API_CLIENT.checked_changes(["ui_plugins"], value=False)
+    except Exception as e:
+        LOGGER.error(f"An error occurred when setting the changes to checked: {e}")
+        error = f"couldn't clear the reload_ui_plugins flag: {e}"
+
+    try:
+        plugins = API_CLIENT.get_plugins(type="all", with_data=True)
+    except Exception as e:
+        LOGGER.error(f"Couldn't read the plugins to extract: {e}")
+        return _rearm_plugin_reload(f"couldn't read the plugins: {e}")
+
+    # No "incomplete data" guard as in dev: 1.7 stores every archive whole, a row never has a checksum and an empty `data`.
+    failed = []
     # Collect plugin ids from the database for cleanup later.
     known_plugin_ids = {plugin["id"] for plugin in plugins}
 
@@ -157,14 +183,11 @@ def reload_plugins():
             LOGGER.debug(format_exc())
             if plugin["method"] != "manual":
                 LOGGER.error(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\": {e}")
+                failed.append(plugin["name"])
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\": {e}")
-
-    try:
-        API_CLIENT.checked_changes(["ui_plugins"])
-    except Exception as e:
-        LOGGER.error(f"An error occurred when setting the changes to checked: {e}")
+            failed.append(plugin["name"])
 
     # Cleanup: Remove plugin folders that exist on the filesystem but are not in the database.
     for plugin_path in (EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH):
@@ -180,8 +203,13 @@ def reload_plugins():
                         elif item.is_dir():
                             rmtree(item, ignore_errors=True)
 
+    if failed:
+        error = f"couldn't extract {', '.join(failed)}"
+    return _rearm_plugin_reload(error) if error else ""
 
-def safe_reload_plugins(force: bool = False):
+
+def safe_reload_plugins(force: bool = False) -> Optional[str]:
+    """Return None when another worker already holds the latch (nothing was done), else the result of ``reload_plugins``."""
     DATA.load_from_file()
     if force or DATA.get("FORCE_RELOAD_PLUGIN", False) or not DATA.get("IS_RELOADING_PLUGINS", False):
         DATA["IS_RELOADING_PLUGINS"] = True
@@ -189,7 +217,7 @@ def safe_reload_plugins(force: bool = False):
         # import alone, so once a UI had reloaded, the next plugin change (a delete after an update)
         # was consumed without re-extracting. Re-read first: the file is shared by every worker.
         try:
-            reload_plugins()
+            return reload_plugins()
         finally:
             DATA.load_from_file()
             DATA["IS_RELOADING_PLUGINS"] = False
