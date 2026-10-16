@@ -350,7 +350,7 @@ def check_setting_drafts(counts: Dict[str, Optional[int]], row: Optional[dict], 
             "setting_drafts",
             REFUSE,
             f"{total} individual setting draft(s) ({summary}) that {target} has no draft flag for: its migration refuses rather than activate them."
-            " Activate or delete them in the RAW editor first, or downgrade to 1.6.15, which keeps them",
+            " Activate or delete them in the RAW editor first, or downgrade to 1.6.16 or 1.6.15, which keep them",
             data,
         )
     return Check(

@@ -525,7 +525,8 @@ class TestSettingDrafts:
     def test_drafts_refuse_a_target_that_drops_the_flag(self):
         check = downgrade.check_setting_drafts(self.SOME, self.REFUSED, "1.6.14")
         assert check.verdict == REFUSE
-        assert "3" in check.detail and "1.6.15" in check.detail, "the operator must be told how many, and the target that keeps them"
+        assert "3" in check.detail, "the operator must be told how many"
+        assert "downgrade to 1.6.16 or 1.6.15, which keep them" in check.detail, "the operator must be told every target that keeps them, the shortest first"
 
     def test_drafts_survive_a_target_that_keeps_the_flag(self):
         assert downgrade.check_setting_drafts(self.SOME, self.KEPT, "1.6.15").verdict == IN_PLACE

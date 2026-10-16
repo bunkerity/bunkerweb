@@ -112,8 +112,8 @@ class TestAgainstARealDatabase:
         assert all(s.strip().split()[0].upper() == "SELECT" for s in seen), seen
 
 
-@pytest.mark.parametrize("target", ["1.6.14", "1.6.15"])
-def test_the_report_names_the_check_for_both_manifest_targets(db, tmp_path, monkeypatch, target):
+@pytest.mark.parametrize("target", ["1.6.14", "1.6.15", "1.6.16"])
+def test_the_report_names_the_check_for_every_manifest_target(db, tmp_path, monkeypatch, target):
     monkeypatch.setenv("CELERY_BROKER_URL", "")
     names = [c["name"] for c in downgrade.preflight(target, db=db, backup_dir=tmp_path, now=NOW)["checks"]]
     assert "download_plugins" in names

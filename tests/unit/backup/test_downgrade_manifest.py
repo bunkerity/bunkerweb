@@ -165,14 +165,15 @@ class TestItTracksTheProduct:
         assert row["alembic"]["to_revision"] in seen, f"{row['engine']}: to_revision is not an ancestor of the head"
 
 
-class TestBothTargetsAreOffered:
-    """1.6.15 is the release immediately preceding 1.7, so it is the rollback an operator reaches
-    for first; 1.6.14 stays offered because it was measured too. Two targets in one file is a new
-    shape for this manifest, and `manifest_row` returns the FIRST match on (from, to, engine) --
-    so the rows have to be distinguishable by more than the order they happen to be written in.
+class TestEveryTargetIsOffered:
+    """1.6.16 is the newest stable release 1.7 can go back to, so it is the rollback an operator
+    reaches for first; 1.6.15 and 1.6.14 stay offered because they were measured too. Several
+    targets in one file is a new shape for this manifest, and `manifest_row` returns the FIRST
+    match on (from, to, engine) -- so the rows have to be distinguishable by more than the order
+    they happen to be written in.
     """
 
-    TARGETS = ("1.6.15", "1.6.14")
+    TARGETS = ("1.6.16", "1.6.15", "1.6.14")
 
     @pytest.mark.parametrize("target", TARGETS)
     @pytest.mark.parametrize("engine", SUPPORTED_ENGINES)
@@ -183,19 +184,19 @@ class TestBothTargetsAreOffered:
         assert row["to"] == target and row["engine"] == engine
 
     @pytest.mark.parametrize("engine", SUPPORTED_ENGINES)
-    def test_the_two_targets_do_not_land_on_the_same_revision(self, engine):
+    def test_the_targets_do_not_land_on_the_same_revision(self, engine):
         """The copy-paste failure: a 1.6.15 row carrying 1.6.14's `to_revision` reads as a correct
         manifest and sends `alembic downgrade` four revisions too far, silently."""
         installed = (_REPO_ROOT / "src" / "VERSION").read_text(encoding="utf-8").strip()
         revisions = {target: target_revision(manifest_row(MANIFEST, installed, target, engine)) for target in self.TARGETS}
         assert all(revisions.values()), f"{engine}: a target names no revision to land on: {revisions}"
-        assert len(set(revisions.values())) == len(self.TARGETS), f"{engine}: two targets land on the same revision: {revisions}"
+        assert len(set(revisions.values())) == len(self.TARGETS), f"{engine}: targets land on the same revision: {revisions}"
 
     @pytest.mark.parametrize("row", [r for r in ROWS if r["mode"] == "in_place_tested"], ids=lambda r: f"{r['to']}-{r['engine']}")
     def test_the_fingerprint_landed_where_the_row_says_it_would(self, row):
         """The fingerprint is the audit trail, so it has to be THIS row's measurement.
 
-        Of the 13 fingerprint fields, 9 are byte-identical between the two targets because they were
+        Of the 13 fingerprint fields, 9 are byte-identical between the targets because they were
         measured identical (29/28/29 rows, 15 -> 0 tables, one SELECT failure), so the counts cannot
         discriminate them at all. This asserts on the two that name where the downgrade LANDED, which
         is the pair a copy from the neighbouring target gets wrong."""
