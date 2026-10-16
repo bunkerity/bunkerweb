@@ -420,6 +420,9 @@ def plugin_tar_filter(tarinfo):
         if p.name in _EXCLUDED_FILE_NAMES:
             return None
         tarinfo.mtime = 0
+        # Group/other write never counts: safe_tar_extractall() drops it on restore (and leaves directory modes to
+        # the umask), so a tree written under a group-writable umask would otherwise hash differently once restored.
+        tarinfo.mode &= ~0o022
         tarinfo.uid = 0
         tarinfo.gid = 0
         tarinfo.uname = "root"
