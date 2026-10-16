@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.17~rc3 - ????/??/??
+
+- [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `unbounded-element`.
+
 ## v1.6.17~rc2 - 2026/10/16
 
 - [FEATURE] `db`: `DATABASE_CONNECT_TIMEOUT` (default `10s`) and `DATABASE_READ_TIMEOUT` (default `5m`) bound MySQL and MariaDB calls, and PostgreSQL gets the connect timeout and TCP keepalives but no query deadline, so a database that vanishes without a reset no longer blocks the scheduler, UI or API forever.
