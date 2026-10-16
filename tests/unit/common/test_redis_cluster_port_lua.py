@@ -27,6 +27,7 @@ local settings = {USE_REDIS = "yes", REDIS_CLUSTER_NODES = "r1:7000 r2:7001",
     REDIS_USERNAME = "bunkerweb", REDIS_PASSWORD = "secret",
     REDIS_SSL = "yes", REDIS_SSL_VERIFY = "yes", TIMERS_LOG_LEVEL = "INFO"}
 package.loaded["bunkerweb.utils"] = {
+    parse_duration = require("bunkerweb.duration").parse_duration,
     get_variable = function(name) return settings[name] or "" end,
     is_cosocket_available = function() return can_connect end,
     is_connection_error = function() return false end,

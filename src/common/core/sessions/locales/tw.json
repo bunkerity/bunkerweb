@@ -19,15 +19,15 @@
       },
       "SESSIONS_IDLING_TIMEOUT": {
         "label": "工作階段閒置逾時",
-        "help": "工作階段失效前允許的最長閒置時間(秒)。"
+        "help": "工作階段失效前允許的最長閒置時間(秒)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "SESSIONS_ROLLING_TIMEOUT": {
         "label": "工作階段滾動逾時",
-        "help": "工作階段必須續期前的最長時間(秒)。"
+        "help": "工作階段必須續期前的最長時間(秒)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "SESSIONS_ABSOLUTE_TIMEOUT": {
         "label": "工作階段絕對逾時",
-        "help": "工作階段被銷毀前的最長時間(秒)。"
+        "help": "工作階段被銷毀前的最長時間(秒)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "SESSIONS_CHECK_IP": {
         "label": "工作階段檢查 IP",

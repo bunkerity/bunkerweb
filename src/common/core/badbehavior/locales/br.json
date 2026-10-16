@@ -19,11 +19,11 @@
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Período (em segundos)",
-        "help": "Período de tempo (em segundos) durante o qual contamos os códigos de status HTTP \"ruins\"."
+        "help": "Período de tempo (em segundos) durante o qual contamos os códigos de status HTTP \"ruins\". Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Duração do banimento (em segundos)",
-        "help": "Duração (em segundos) do banimento quando o IP correspondente atingir o limite. (Defina como 0 para banir permanentemente)"
+        "help": "Duração (em segundos) do banimento quando o IP correspondente atingir o limite. (Defina como 0 para banir permanentemente) Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Escopo do banimento",

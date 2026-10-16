@@ -23,7 +23,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "La antigüedad máxima en días para las sesiones de usuario de la UI",
-        "help": "La antigüedad máxima en días para las sesiones de usuario de la UI antes de que se purguen."
+        "help": "La antigüedad máxima en días para las sesiones de usuario de la UI antes de que se purguen. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en días."
       },
       "DATABASE_POOL_SIZE": {
         "label": "Tamaño del pool de la base de datos",
@@ -35,11 +35,11 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Tiempo de espera del pool de la base de datos",
-        "help": "El número de segundos que se esperará antes de desistir de obtener una conexión del pool."
+        "help": "El número de segundos que se esperará antes de desistir de obtener una conexión del pool. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Reciclaje del pool de la base de datos",
-        "help": "El número de segundos tras los cuales una conexión se recicla automáticamente. Establecer en -1 para desactivar."
+        "help": "El número de segundos tras los cuales una conexión se recicla automáticamente. Establecer en -1 para desactivar. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "DATABASE_POOL_PRE_PING": {
         "label": "Pre-ping del pool de la base de datos",
@@ -51,7 +51,7 @@
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Tiempo de espera de reintento de la base de datos",
-        "help": "El número máximo de segundos que se esperará a que la base de datos esté disponible al iniciar."
+        "help": "El número máximo de segundos que se esperará a que la base de datos esté disponible al iniciar. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Intentos de reintento de solicitudes de la base de datos",
@@ -59,7 +59,7 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Retraso de reintento de solicitudes de la base de datos",
-        "help": "El retraso en segundos entre los intentos de reintento para errores transitorios de la base de datos."
+        "help": "El retraso en segundos entre los intentos de reintento para errores transitorios de la base de datos. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       }
     }
   }

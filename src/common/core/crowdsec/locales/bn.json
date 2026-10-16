@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "CrowdSec লাইভ অনুরোধ টাইমআউট",
-        "help": "bouncer দ্বারা CrowdSec local API-তে কোয়েরি করার জন্য করা HTTP অনুরোধের টাইমআউট মিলিসেকেন্ডে।"
+        "help": "bouncer দ্বারা CrowdSec local API-তে কোয়েরি করার জন্য করা HTTP অনুরোধের টাইমআউট মিলিসেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি মিলিসেকেন্ড হিসেবে ধরা হয়।"
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "CrowdSec বাদ দেওয়া লোকেশন",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "CrowdSec ক্যাশ মেয়াদ",
-        "help": "লাইভ মোডে bouncer যেসব IP ক্যাশে রাখে তাদের ক্যাশের মেয়াদ, সেকেন্ডে।"
+        "help": "লাইভ মোডে bouncer যেসব IP ক্যাশে রাখে তাদের ক্যাশের মেয়াদ, সেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি সেকেন্ড হিসেবে ধরা হয়।"
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec অনুরোধ টাইমআউট",
-        "help": "CrowdSec local API থেকে নতুন/পুরনো IP আনার আপডেটের ফ্রিকোয়েন্সি, সেকেন্ডে।"
+        "help": "CrowdSec local API থেকে নতুন/পুরনো IP আনার আপডেটের ফ্রিকোয়েন্সি, সেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি সেকেন্ড হিসেবে ধরা হয়।"
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "CrowdSec ব্যান রিফ্রেশ",
+        "help": "CrowdSec-এর ব্লককে ছোট BunkerWeb ব্যানে পরিণত করে, যা CrowdSec সিদ্ধান্ত বহাল থাকা পর্যন্ত নবায়ন হয়। মানটি হলো CrowdSec-কে আবার জিজ্ঞাসা করার আগে একটি ব্যান সর্বোচ্চ কতক্ষণ থাকবে। 0 হলে এটি বন্ধ থাকে। CROWDSEC_EXCLUDE_LOCATION সেট থাকা সার্ভিস কখনো CrowdSec ব্যান পায় না। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি সেকেন্ড হিসেবে ধরা হয়।"
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "AppSec URL",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "AppSec কানেক্ট টাইমআউট",
-        "help": "remediation component এবং AppSec Component-এর মধ্যে কানেকশনের টাইমআউট মিলিসেকেন্ডে।"
+        "help": "remediation component এবং AppSec Component-এর মধ্যে কানেকশনের টাইমআউট মিলিসেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি মিলিসেকেন্ড হিসেবে ধরা হয়।"
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "AppSec পাঠানোর টাইমআউট",
-        "help": "remediation component থেকে AppSec Component-এ ডেটা পাঠানোর টাইমআউট মিলিসেকেন্ডে।"
+        "help": "remediation component থেকে AppSec Component-এ ডেটা পাঠানোর টাইমআউট মিলিসেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি মিলিসেকেন্ড হিসেবে ধরা হয়।"
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "AppSec প্রসেস টাইমআউট",
-        "help": "remediation component থেকে AppSec Component পর্যন্ত অনুরোধ প্রসেস করার টাইমআউট মিলিসেকেন্ডে।"
+        "help": "remediation component থেকে AppSec Component পর্যন্ত অনুরোধ প্রসেস করার টাইমআউট মিলিসেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি মিলিসেকেন্ড হিসেবে ধরা হয়।"
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "সবসময় AppSec-এ পাঠান",

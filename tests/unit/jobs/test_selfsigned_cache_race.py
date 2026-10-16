@@ -7,6 +7,8 @@ from tempfile import TemporaryDirectory as _TemporaryDirectory
 from types import SimpleNamespace
 from typing import List, Tuple
 
+from common_utils import parse_duration_int
+
 ROOT = Path(__file__).resolve().parents[3]
 JOB_SOURCE = ROOT / "src" / "common" / "core" / "selfsigned" / "jobs" / "self-signed.py"
 
@@ -62,6 +64,7 @@ def test_generated_files_are_cached_even_if_the_cache_tree_is_swapped(tmp_path):
         "multisite": False,
         "run": fake_run,
         "x509": SimpleNamespace(Certificate=object),
+        "parse_duration_int": parse_duration_int,
     }
     exec(compile(source[start:end], str(JOB_SOURCE), "exec"), env)  # noqa: S102
 
@@ -122,6 +125,7 @@ def test_regenerated_files_replace_existing_cache_files(tmp_path):
         "multisite": False,
         "run": fake_run,
         "x509": SimpleNamespace(Certificate=object),
+        "parse_duration_int": parse_duration_int,
     }
     exec(compile(source[start:end], str(JOB_SOURCE), "exec"), env)  # noqa: S102
 

@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "Задержка повторов API ZeroSSL",
-        "help": "Задержка в секундах между повторами API ZeroSSL в zerossl-bot."
+        "help": "Задержка в секундах между повторами API ZeroSSL в zerossl-bot. Принимает суффикс времени (ms, s, m, h, d, w, M, y); число без суффикса считается в секундах."
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "Тайм-аут подключения API ZeroSSL",
-        "help": "Тайм-аут подключения в секундах для запросов API ZeroSSL в zerossl-bot."
+        "help": "Тайм-аут подключения в секундах для запросов API ZeroSSL в zerossl-bot. Принимает суффикс времени (ms, s, m, h, d, w, M, y); число без суффикса считается в секундах."
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "Максимальное время API ZeroSSL",
-        "help": "Максимальное общее время в секундах для каждого запроса API ZeroSSL в zerossl-bot."
+        "help": "Максимальное общее время в секундах для каждого запроса API ZeroSSL в zerossl-bot. Принимает суффикс времени (ms, s, m, h, d, w, M, y); число без суффикса считается в секундах."
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "Тип проверки",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "Распространение DNS",
-        "help": "Время ожидания распространения DNS в секундах для проверок DNS."
+        "help": "Время ожидания распространения DNS в секундах для проверок DNS. Принимает суффикс времени (ms, s, m, h, d, w, M, y); число без суффикса считается в секундах."
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "Элемент учётных данных",

@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Access-Control-Max-Age 的值",
-        "help": "Access-Control-Max-Age 標頭的值。"
+        "help": "Access-Control-Max-Age 標頭的值。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "CORS_DENY_REQUEST": {
         "label": "拒絕請求",

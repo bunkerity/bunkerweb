@@ -19,7 +19,7 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "AppSec Connect Timeout",
-        "help": "Ang timeout sa milliseconds ng koneksyon sa pagitan ng remediation component at AppSec Component."
+        "help": "Ang timeout sa milliseconds ng koneksyon sa pagitan ng remediation component at AppSec Component. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na millisecond."
       },
       "CROWDSEC_APPSEC_FAILURE_ACTION": {
         "label": "AppSec Failure Action",
@@ -27,11 +27,11 @@
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "AppSec Process Timeout",
-        "help": "Ang timeout sa milliseconds para iproseso ang request mula sa remediation component papunta sa AppSec Component."
+        "help": "Ang timeout sa milliseconds para iproseso ang request mula sa remediation component papunta sa AppSec Component. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na millisecond."
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "AppSec Send Timeout",
-        "help": "Ang timeout sa milliseconds para ipadala ang data mula sa remediation component papunta sa AppSec Component."
+        "help": "Ang timeout sa milliseconds para ipadala ang data mula sa remediation component papunta sa AppSec Component. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na millisecond."
       },
       "CROWDSEC_APPSEC_SSL_VERIFY": {
         "label": "AppSec SSL Verify",
@@ -43,7 +43,7 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "Pag-expire ng Cache ng CrowdSec",
-        "help": "Ang pag-expire ng cache, sa segundo, para sa mga IP na iniimbak ng bouncer sa cache sa live mode."
+        "help": "Ang pag-expire ng cache, sa segundo, para sa mga IP na iniimbak ng bouncer sa cache sa live mode. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "CROWDSEC_CAPTCHA_PROVIDER": {
         "label": "Hamon na Captcha ng CrowdSec",
@@ -75,11 +75,15 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "Live Request Timeout ng CrowdSec",
-        "help": "Timeout sa milliseconds para sa mga HTTP request na ginagawa ng bouncer para mag-query sa local API ng CrowdSec."
+        "help": "Timeout sa milliseconds para sa mga HTTP request na ginagawa ng bouncer para mag-query sa local API ng CrowdSec. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na millisecond."
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "Request Timeout ng CrowdSec",
-        "help": "Ang dalas ng update, sa segundo, para kunin ang bago/lumang IP mula sa local API ng CrowdSec."
+        "help": "Ang dalas ng update, sa segundo, para kunin ang bago/lumang IP mula sa local API ng CrowdSec. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "Pag-renew ng ban ng CrowdSec",
+        "help": "Ginagawang maiikling ban ng BunkerWeb ang mga block ng CrowdSec, na nire-renew habang tumatagal ang desisyon ng CrowdSec. Ang halaga ay ang pinakamahabang tagal ng ban bago muling tanungin ang CrowdSec. Hindi ito pinapagana ng 0. Ang serbisyong may CROWDSEC_EXCLUDE_LOCATION ay hindi kailanman nakakakuha ng ban ng CrowdSec. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "USE_CROWDSEC": {
         "label": "Gamitin ang CrowdSec",

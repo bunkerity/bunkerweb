@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Wert von Access-Control-Max-Age",
-        "help": "Wert des Headers Access-Control-Max-Age."
+        "help": "Wert des Headers Access-Control-Max-Age. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "CORS_DENY_REQUEST": {
         "label": "Anfrage ablehnen",

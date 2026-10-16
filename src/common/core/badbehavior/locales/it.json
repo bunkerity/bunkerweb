@@ -19,11 +19,11 @@
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Periodo (in secondi)",
-        "help": "Periodo di tempo (in secondi) durante il quale vengono contati i codici di stato HTTP «negativi»."
+        "help": "Periodo di tempo (in secondi) durante il quale vengono contati i codici di stato HTTP «negativi». Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Durata del blocco (in secondi)",
-        "help": "Durata (in secondi) di un blocco quando l'IP corrispondente ha raggiunto la soglia. (Impostare su 0 per bloccare in modo permanente)"
+        "help": "Durata (in secondi) di un blocco quando l'IP corrispondente ha raggiunto la soglia. (Impostare su 0 per bloccare in modo permanente) Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Ambito del blocco",

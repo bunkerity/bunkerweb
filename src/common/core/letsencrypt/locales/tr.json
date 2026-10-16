@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "ZeroSSL API Yeniden Deneme Gecikmesi",
-        "help": "zerossl-bot'ta ZeroSSL API yeniden denemeleri arasındaki gecikme (saniye cinsinden)."
+        "help": "zerossl-bot'ta ZeroSSL API yeniden denemeleri arasındaki gecikme (saniye cinsinden). Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "ZeroSSL API Bağlantı Zaman Aşımı",
-        "help": "zerossl-bot'ta ZeroSSL API istekleri için bağlantı zaman aşımı (saniye cinsinden)."
+        "help": "zerossl-bot'ta ZeroSSL API istekleri için bağlantı zaman aşımı (saniye cinsinden). Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "ZeroSSL API Maksimum Süresi",
-        "help": "zerossl-bot'ta her bir ZeroSSL API isteği için maksimum toplam süre (saniye cinsinden)."
+        "help": "zerossl-bot'ta her bir ZeroSSL API isteği için maksimum toplam süre (saniye cinsinden). Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "Sorgu Türü",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "DNS Yayılımı",
-        "help": "DNS sorguları için DNS yayılımının bekleneceği süre (saniye cinsinden)."
+        "help": "DNS sorguları için DNS yayılımının bekleneceği süre (saniye cinsinden). Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "Kimlik Bilgisi Öğesi",

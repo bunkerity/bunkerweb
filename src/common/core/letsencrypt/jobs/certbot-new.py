@@ -33,7 +33,7 @@ from requests import get
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-from common_utils import bytes_hash, effective_cpu_count, file_hash  # type: ignore
+from common_utils import bytes_hash, effective_cpu_count, file_hash, parse_duration_int  # type: ignore
 from jobs import Job, cache_publication_lock, can_requeue, job_requeue_count, request_requeue  # type: ignore
 from logger import getLogger  # type: ignore
 from reload_outcome import record_reload_responses  # type: ignore
@@ -426,7 +426,10 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
     profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
     custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
-    dns_propagation_val = env("LETS_ENCRYPT_DNS_PROPAGATION", DNS_PROPAGATION_DEFAULT).lower()
+    # not lowercased: the unit is case sensitive (m is a minute, M a month)
+    dns_propagation_val = env("LETS_ENCRYPT_DNS_PROPAGATION", DNS_PROPAGATION_DEFAULT).strip()
+    if dns_propagation_val.lower() == DNS_PROPAGATION_DEFAULT:
+        dns_propagation_val = DNS_PROPAGATION_DEFAULT
     decode_base64 = env("LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64", "yes").lower() == "yes"
     wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
     activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
@@ -480,7 +483,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         zerossl_api_retry_int = 3
 
     try:
-        zerossl_api_retry_delay_int = int(zerossl_api_retry_delay_val)
+        zerossl_api_retry_delay_int = parse_duration_int(zerossl_api_retry_delay_val, "s")
         if zerossl_api_retry_delay_int < 0:
             raise ValueError("negative")
     except Exception:
@@ -489,7 +492,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         zerossl_api_retry_delay_int = 2
 
     try:
-        zerossl_api_connect_timeout_int = int(zerossl_api_connect_timeout_val)
+        zerossl_api_connect_timeout_int = parse_duration_int(zerossl_api_connect_timeout_val, "s")
         if zerossl_api_connect_timeout_int <= 0:
             raise ValueError("non-positive")
     except Exception:
@@ -498,7 +501,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         zerossl_api_connect_timeout_int = 5
 
     try:
-        zerossl_api_max_time_int = int(zerossl_api_max_time_val)
+        zerossl_api_max_time_int = parse_duration_int(zerossl_api_max_time_val, "s")
         if zerossl_api_max_time_int <= 0:
             raise ValueError("non-positive")
     except Exception:
@@ -520,17 +523,19 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     # Validate dns_propagation
     if dns_propagation_val != DNS_PROPAGATION_DEFAULT:
         try:
-            dns_propagation_int = int(dns_propagation_val)
+            dns_propagation_int = parse_duration_int(dns_propagation_val, "s")
             if dns_propagation_int <= 0:
                 if activated:
                     LOGGER.warning(
-                        f"[Service: {service}] LETS_ENCRYPT_DNS_PROPAGATION must be a positive integer or '{DNS_PROPAGATION_DEFAULT}'. Defaulting to '{DNS_PROPAGATION_DEFAULT}'."
+                        f"[Service: {service}] LETS_ENCRYPT_DNS_PROPAGATION must be a positive duration or '{DNS_PROPAGATION_DEFAULT}'. Defaulting to '{DNS_PROPAGATION_DEFAULT}'."
                     )
                 dns_propagation_val = DNS_PROPAGATION_DEFAULT
+            else:
+                dns_propagation_val = str(dns_propagation_int)
         except Exception:
             if activated:
                 LOGGER.warning(
-                    f"[Service: {service}] LETS_ENCRYPT_DNS_PROPAGATION is not a valid integer or '{DNS_PROPAGATION_DEFAULT}'. Defaulting to '{DNS_PROPAGATION_DEFAULT}'."
+                    f"[Service: {service}] LETS_ENCRYPT_DNS_PROPAGATION is not a valid duration or '{DNS_PROPAGATION_DEFAULT}'. Defaulting to '{DNS_PROPAGATION_DEFAULT}'."
                 )
             dns_propagation_val = DNS_PROPAGATION_DEFAULT
 

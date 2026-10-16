@@ -11,11 +11,11 @@
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Tagal ng Ban (sa Segundo)",
-        "help": "Ang tagal (sa segundo) ng ban kapag naabot na ng kaukulang IP ang threshold. (I-set sa 0 para permanenteng i-ban)"
+        "help": "Ang tagal (sa segundo) ng ban kapag naabot na ng kaukulang IP ang threshold. (I-set sa 0 para permanenteng i-ban) Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Panahon (sa Segundo)",
-        "help": "Panahon (sa segundo) kung saan binibilang namin ang 'masamang' HTTP status code."
+        "help": "Panahon (sa segundo) kung saan binibilang namin ang 'masamang' HTTP status code. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "BAD_BEHAVIOR_STATUS_CODES": {
         "label": "Masasamang Status Code",

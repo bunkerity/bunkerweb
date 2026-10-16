@@ -28,7 +28,7 @@ Comment ça marche :
 | ---------------------- | -------------------------- | --------- | -------- | ------------------------------------------- |
 | `USE_REVERSE_SCAN`     | `no`                       | multisite | non      | Activer l’analyse des ports côté client.    |
 | `REVERSE_SCAN_PORTS`   | `22 80 443 3128 8000 8080` | multisite | non      | Ports à vérifier (séparés par des espaces). |
-| `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | non      | Délai max par port en millisecondes.        |
+| `REVERSE_SCAN_TIMEOUT` | `500ms`                    | multisite | non      | Délai max par port en millisecondes. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
 
 !!! warning "Performance"
     Scanner de nombreux ports ajoute de la latence. Limitez la liste et adaptez le timeout.

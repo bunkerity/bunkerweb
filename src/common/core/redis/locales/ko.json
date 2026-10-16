@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Redis 제한 시간(ms)",
-        "help": "연결, 읽기, 쓰기에 대한 Redis 서버 제한 시간(ms)입니다."
+        "help": "연결, 읽기, 쓰기에 대한 Redis 서버 제한 시간(ms)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 밀리초 단위입니다."
       },
       "REDIS_USERNAME": {
         "label": "Redis 사용자 이름",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Redis keepalive 유휴 시간(ms)",
-        "help": "풀 안의 Redis 연결이 닫히기 전까지의 최대 유휴 시간(ms)입니다."
+        "help": "풀 안의 Redis 연결이 닫히기 전까지의 최대 유휴 시간(ms)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 밀리초 단위입니다."
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis keepalive 풀",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Redis Cluster 노드",
-        "help": "공백으로 구분된 host:port 초기 노드(IPv6는 [ipv6]:port). 비워 두면 독립형 또는 Sentinel 모드를 유지합니다. 데이터베이스 0이 필요하며 Sentinel과 함께 사용할 수 없습니다."
+        "help": "공백으로 구분된 host[:port] 초기 노드(기본 포트 `6379`, IPv6는 [ipv6]:port). 비워 두면 독립형 또는 Sentinel 모드를 유지합니다. 데이터베이스 0이 필요하며 Sentinel과 함께 사용할 수 없습니다."
       }
     }
   }

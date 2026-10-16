@@ -29,15 +29,15 @@ Mit `REDIS_SSL=yes` und `REDIS_SSL_VERIFY=yes` muss ein per IP geprüfter TLS-En
 | `REDIS_SSL`               | `no`       | global  | nein     | Aktiviert SSL/TLS.                                            |
 | `REDIS_SSL_VERIFY`        | `yes`      | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                     |
 | `REDIS_SSL_CA`            |            | global  | nein     | PEM-CA-Bundle zur Überprüfung des Serverzertifikats (private CA). Wird von den Python-Clients und, über das generierte Trust-Bundle, vom Request-Pfad genutzt. Eine fehlende oder ungültige Datei lässt die Konfigurationsgenerierung fehlschlagen. |
-| `REDIS_TIMEOUT`           | `1000`     | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben.                 |
+| `REDIS_TIMEOUT`           | `1s`       | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
 | `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                   |
 | `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                     |
-| `REDIS_CLUSTER_NODES` | | global | nein | Startknoten als durch Leerzeichen getrennte `host:port`-Paare (`[ipv6]:port` für IPv6). Leer behält den Einzelserver- oder Sentinel-Modus bei. |
+| `REDIS_CLUSTER_NODES` | | global | nein | Startknoten als durch Leerzeichen getrennte `host[:port]`-Einträge (der Port ist standardmäßig `6379`; `[ipv6]:port` für IPv6). Leer behält den Einzelserver- oder Sentinel-Modus bei. |
 | `REDIS_SENTINEL_HOSTS`    |            | global  | nein     | Sentinel-Hosts (durch Leerzeichen getrennt, `host:port`).     |
 | `REDIS_SENTINEL_USERNAME` |            | global  | nein     | Sentinel-Benutzer.                                            |
 | `REDIS_SENTINEL_PASSWORD` |            | global  | nein     | Sentinel-Passwort.                                            |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | nein     | Name des Sentinel-Masters.                                    |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | nein     | Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird. |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`      | global  | nein     | Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden. |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen, pro NGINX-Worker. |
 
 !!! info "Private CA: So wird `REDIS_SSL_CA` vertraut"

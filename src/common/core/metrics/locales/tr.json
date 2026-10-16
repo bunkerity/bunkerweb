@@ -27,7 +27,7 @@
       },
       "METRICS_REDIS_TTL": {
         "label": "Metrik Redis TTL",
-        "help": "Redis'te depolanan metrik anahtarları için saniye cinsinden yaşam süresi (varsayılan `2592000`, 30 gün; `0` anahtarları kalıcı tutar). Her senkronizasyonda yenilenir, böylece etkin veriler asla süresi dolmaz; `volatile-lru` tahliye politikasıyla bu, terk edilmiş metrik verilerinin tahliye edilebilir hale gelmesini sağlar, böylece Redis yazmaları sonsuza dek reddetmek yerine maxmemory'den kurtulur. Düz bir tam sayı veya `k`/`m` kısayolunu kabul eder."
+        "help": "Redis'te depolanan metrik anahtarları için saniye cinsinden yaşam süresi (varsayılan `30d`, 30 gün; `0` anahtarları kalıcı tutar). Her senkronizasyonda yenilenir, böylece etkin veriler asla süresi dolmaz; `volatile-lru` tahliye politikasıyla bu, terk edilmiş metrik verilerinin tahliye edilebilir hale gelmesini sağlar, böylece Redis yazmaları sonsuza dek reddetmek yerine maxmemory'den kurtulur. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "MAX_LRU_HISTORY": {
         "label": "Maksimum LRU geçmişi",

@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "CrowdSec لائیو درخواست ٹائم آؤٹ",
-        "help": "bouncer کے ذریعے CrowdSec local API سے استفسار کے لیے کی جانے والی HTTP درخواستوں کے لیے ٹائم آؤٹ ملی سیکنڈز میں۔"
+        "help": "bouncer کے ذریعے CrowdSec local API سے استفسار کے لیے کی جانے والی HTTP درخواستوں کے لیے ٹائم آؤٹ ملی سیکنڈز میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد ملی سیکنڈ میں شمار ہوتا ہے۔"
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "CrowdSec خارج کردہ لوکیشنز",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "CrowdSec کیش ختم ہونا",
-        "help": "لائیو موڈ میں bouncer کیش کرنے والے IPs کے لیے کیش کی معیاد، سیکنڈوں میں۔"
+        "help": "لائیو موڈ میں bouncer کیش کرنے والے IPs کے لیے کیش کی معیاد، سیکنڈوں میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد سیکنڈ میں شمار ہوتا ہے۔"
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec درخواست ٹائم آؤٹ",
-        "help": "CrowdSec local API سے نئے/پرانے IPs حاصل کرنے کے لیے اپ ڈیٹ کی تعدد، سیکنڈوں میں۔"
+        "help": "CrowdSec local API سے نئے/پرانے IPs حاصل کرنے کے لیے اپ ڈیٹ کی تعدد، سیکنڈوں میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد سیکنڈ میں شمار ہوتا ہے۔"
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "CrowdSec پابندی کی تجدید",
+        "help": "CrowdSec کی بلاکنگ کو مختصر BunkerWeb پابندیوں میں بدلتا ہے جو CrowdSec کا فیصلہ برقرار رہنے تک تجدید ہوتی رہتی ہیں۔ قدر وہ زیادہ سے زیادہ مدت ہے جس کے بعد CrowdSec سے دوبارہ پوچھا جاتا ہے۔ 0 اسے بند کر دیتا ہے۔ CROWDSEC_EXCLUDE_LOCATION والی سروس کو کبھی CrowdSec پابندی نہیں ملتی۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد سیکنڈ میں شمار ہوتا ہے۔"
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "AppSec یو آر ایل",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "AppSec کنیکٹ ٹائم آؤٹ",
-        "help": "remediation component اور AppSec Component کے درمیان کنکشن کا ٹائم آؤٹ ملی سیکنڈز میں۔"
+        "help": "remediation component اور AppSec Component کے درمیان کنکشن کا ٹائم آؤٹ ملی سیکنڈز میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد ملی سیکنڈ میں شمار ہوتا ہے۔"
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "AppSec سینڈ ٹائم آؤٹ",
-        "help": "remediation component سے AppSec Component کو ڈیٹا بھیجنے کا ٹائم آؤٹ ملی سیکنڈز میں۔"
+        "help": "remediation component سے AppSec Component کو ڈیٹا بھیجنے کا ٹائم آؤٹ ملی سیکنڈز میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد ملی سیکنڈ میں شمار ہوتا ہے۔"
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "AppSec پروسیس ٹائم آؤٹ",
-        "help": "remediation component سے AppSec Component تک درخواست پر کارروائی کا ٹائم آؤٹ ملی سیکنڈز میں۔"
+        "help": "remediation component سے AppSec Component تک درخواست پر کارروائی کا ٹائم آؤٹ ملی سیکنڈز میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد ملی سیکنڈ میں شمار ہوتا ہے۔"
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "ہمیشہ AppSec کو بھیجیں",

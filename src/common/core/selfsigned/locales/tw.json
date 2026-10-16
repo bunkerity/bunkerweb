@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "憑證有效期限",
-        "help": "自簽憑證的有效期限(以天為單位)。"
+        "help": "自簽憑證的有效期限(以天為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為天。"
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "憑證主體",

@@ -23,7 +23,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "Idade máxima em dias das sessões de usuário da UI",
-        "help": "Idade máxima em dias das sessões de usuário da UI antes de serem eliminadas."
+        "help": "Idade máxima em dias das sessões de usuário da UI antes de serem eliminadas. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em dias."
       },
       "DATABASE_POOL_SIZE": {
         "label": "Tamanho do pool do banco de dados",
@@ -35,11 +35,11 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Tempo limite do pool do banco de dados",
-        "help": "Número de segundos a esperar antes de desistir de obter uma conexão do pool."
+        "help": "Número de segundos a esperar antes de desistir de obter uma conexão do pool. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Reciclagem do pool do banco de dados",
-        "help": "Número de segundos após os quais uma conexão é reciclada automaticamente. Defina como -1 para desativar."
+        "help": "Número de segundos após os quais uma conexão é reciclada automaticamente. Defina como -1 para desativar. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "DATABASE_POOL_PRE_PING": {
         "label": "Pre-ping do pool do banco de dados",
@@ -51,7 +51,7 @@
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Tempo limite de nova tentativa do banco de dados",
-        "help": "Número máximo de segundos a esperar para que o banco de dados fique disponível na inicialização."
+        "help": "Número máximo de segundos a esperar para que o banco de dados fique disponível na inicialização. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Tentativas de repetição de requisição do banco de dados",
@@ -59,7 +59,7 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Atraso de repetição de requisição do banco de dados",
-        "help": "O atraso em segundos entre as tentativas de repetição para erros transitórios do banco de dados."
+        "help": "O atraso em segundos entre as tentativas de repetição para erros transitórios do banco de dados. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       }
     }
   }

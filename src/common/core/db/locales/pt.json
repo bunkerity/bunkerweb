@@ -23,7 +23,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "A idade máxima em dias para as sessões de utilizador da UI",
-        "help": "A idade máxima em dias para as sessões de utilizador da UI antes de serem purgadas."
+        "help": "A idade máxima em dias para as sessões de utilizador da UI antes de serem purgadas. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em dias."
       },
       "DATABASE_POOL_SIZE": {
         "label": "Tamanho do pool da base de dados",
@@ -35,11 +35,11 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Tempo limite do pool da base de dados",
-        "help": "O número de segundos a aguardar antes de desistir de obter uma ligação do pool."
+        "help": "O número de segundos a aguardar antes de desistir de obter uma ligação do pool. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Reciclagem do pool da base de dados",
-        "help": "O número de segundos após os quais uma ligação é reciclada automaticamente. Definir como -1 para desativar."
+        "help": "O número de segundos após os quais uma ligação é reciclada automaticamente. Definir como -1 para desativar. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "DATABASE_POOL_PRE_PING": {
         "label": "Pre-ping do pool da base de dados",
@@ -51,7 +51,7 @@
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Tempo limite de nova tentativa da base de dados",
-        "help": "O número máximo de segundos a aguardar até a base de dados estar disponível no arranque."
+        "help": "O número máximo de segundos a aguardar até a base de dados estar disponível no arranque. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Tentativas de nova tentativa de pedidos à base de dados",
@@ -59,7 +59,7 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Atraso de nova tentativa de pedidos à base de dados",
-        "help": "O atraso em segundos entre as tentativas para erros transitórios da base de dados."
+        "help": "O atraso em segundos entre as tentativas para erros transitórios da base de dados. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       }
     }
   }

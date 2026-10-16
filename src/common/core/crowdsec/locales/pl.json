@@ -19,7 +19,7 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "Limit czasu połączenia AppSec",
-        "help": "Limit czasu (w milisekundach) połączenia między komponentem remediacji a komponentem AppSec."
+        "help": "Limit czasu (w milisekundach) połączenia między komponentem remediacji a komponentem AppSec. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza milisekundy."
       },
       "CROWDSEC_APPSEC_FAILURE_ACTION": {
         "label": "Działanie przy awarii AppSec",
@@ -27,11 +27,11 @@
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "Limit czasu przetwarzania AppSec",
-        "help": "Limit czasu (w milisekundach) na przetworzenie żądania od komponentu remediacji do komponentu AppSec."
+        "help": "Limit czasu (w milisekundach) na przetworzenie żądania od komponentu remediacji do komponentu AppSec. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza milisekundy."
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "Limit czasu wysyłania AppSec",
-        "help": "Limit czasu (w milisekundach) na wysłanie danych od komponentu remediacji do komponentu AppSec."
+        "help": "Limit czasu (w milisekundach) na wysłanie danych od komponentu remediacji do komponentu AppSec. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza milisekundy."
       },
       "CROWDSEC_APPSEC_SSL_VERIFY": {
         "label": "Weryfikacja SSL AppSec",
@@ -43,7 +43,7 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "Wygaśnięcie cache CrowdSec",
-        "help": "Czas wygaśnięcia cache (w sekundach) dla adresów IP, które bouncer przechowuje w cache w trybie live."
+        "help": "Czas wygaśnięcia cache (w sekundach) dla adresów IP, które bouncer przechowuje w cache w trybie live. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "CROWDSEC_CAPTCHA_PROVIDER": {
         "label": "Wyzwanie captcha CrowdSec",
@@ -75,11 +75,15 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "Limit czasu żądania live CrowdSec",
-        "help": "Limit czasu (w milisekundach) dla żądań HTTP wykonywanych przez bouncera do lokalnego API CrowdSec."
+        "help": "Limit czasu (w milisekundach) dla żądań HTTP wykonywanych przez bouncera do lokalnego API CrowdSec. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza milisekundy."
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "Limit czasu żądania CrowdSec",
-        "help": "Częstotliwość aktualizacji (w sekundach) do pobierania nowych/starych adresów IP z lokalnego API CrowdSec."
+        "help": "Częstotliwość aktualizacji (w sekundach) do pobierania nowych/starych adresów IP z lokalnego API CrowdSec. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "Odnawianie blokad CrowdSec",
+        "help": "Zamienia blokady CrowdSec w krótkie blokady BunkerWeb, odnawiane, dopóki trwa decyzja CrowdSec. Wartość to najdłuższy czas blokady przed ponownym zapytaniem CrowdSec. 0 wyłącza funkcję. Usługa z CROWDSEC_EXCLUDE_LOCATION nigdy nie otrzymuje blokad CrowdSec. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "USE_CROWDSEC": {
         "label": "Użyj CrowdSec",

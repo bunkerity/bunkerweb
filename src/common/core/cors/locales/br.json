@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Valor de Access-Control-Max-Age",
-        "help": "Valor do cabeçalho Access-Control-Max-Age."
+        "help": "Valor do cabeçalho Access-Control-Max-Age. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "CORS_DENY_REQUEST": {
         "label": "Negar requisição",

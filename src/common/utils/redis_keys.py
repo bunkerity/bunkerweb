@@ -9,7 +9,7 @@ from re import compile as re_compile
 from ipaddress import IPv6Address
 
 _BAN = re_compile(r"^(.*_ip_)(.+)$")
-_NODE = re_compile(r"^(\[[0-9a-fA-F:.]+\]|[\w.-]+):([0-9]+)$")
+_NODE = re_compile(r"^(\[[0-9a-fA-F:.]+\]|[\w.-]+)(?::([0-9]+))?$")
 
 
 def is_cluster(client) -> bool:
@@ -33,17 +33,18 @@ def unescape(text: str) -> str:
 
 
 def parse_nodes(value: str) -> list:
-    """Explicit host:port seeds; bracket IPv6 to keep the port unambiguous."""
+    """Seeds as ``host``, ``host:port`` or ``[ipv6]:port`` (port 6379 when absent), as in 1.6.16."""
     nodes = []
     for node in value.split():
         match = _NODE.fullmatch(node)
-        if not match or not 1 <= int(match[2]) <= 65535:
-            raise ValueError(f"REDIS_CLUSTER_NODES requires host:port with port 1-65535 (got {node})")
+        port = int(match[2]) if match and match[2] else 6379
+        if not match or not 1 <= port <= 65535:
+            raise ValueError(f"REDIS_CLUSTER_NODES requires host[:port] with port 1-65535 (got {node})")
         host = match[1]
         if host.startswith("["):
             IPv6Address(host[1:-1])
             host = host[1:-1]
-        nodes.append((host, int(match[2])))
+        nodes.append((host, port))
     return nodes
 
 

@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Access-Control-Max-Age মান",
-        "help": "Access-Control-Max-Age হেডারের মান।"
+        "help": "Access-Control-Max-Age হেডারের মান। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি সেকেন্ড হিসেবে ধরা হয়।"
       },
       "CORS_DENY_REQUEST": {
         "label": "অনুরোধ প্রত্যাখ্যান করুন",

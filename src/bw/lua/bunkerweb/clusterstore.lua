@@ -11,6 +11,7 @@ local clusterstore = class("clusterstore")
 local logger = clogger:new("CLUSTERSTORE")
 
 local get_variable = utils.get_variable
+local parse_duration = utils.parse_duration
 local is_cosocket_available = utils.is_cosocket_available
 local is_connection_error = utils.is_connection_error
 local is_protocol_error = utils.is_protocol_error
@@ -84,10 +85,10 @@ end
 
 local function build_options(variables, pool)
 	local options = {
-		connect_timeout = tonumber(variables["REDIS_TIMEOUT"]),
-		read_timeout = tonumber(variables["REDIS_TIMEOUT"]),
-		send_timeout = tonumber(variables["REDIS_TIMEOUT"]),
-		keepalive_timeout = tonumber(variables["REDIS_KEEPALIVE_IDLE"]),
+		connect_timeout = parse_duration(variables["REDIS_TIMEOUT"], "ms"),
+		read_timeout = parse_duration(variables["REDIS_TIMEOUT"], "ms"),
+		send_timeout = parse_duration(variables["REDIS_TIMEOUT"], "ms"),
+		keepalive_timeout = parse_duration(variables["REDIS_KEEPALIVE_IDLE"], "ms"),
 		keepalive_poolsize = tonumber(variables["REDIS_KEEPALIVE_POOL"]),
 		-- REDIS_SSL_CA is absent here because it cannot be passed per connection: the handshake
 		-- ends in `sock:sslhandshake(false, server_name, ssl_verify)` (lua-resty-redis) and an
@@ -154,7 +155,8 @@ function clusterstore:initialize(pool)
 		return
 	end
 	if rediskeys.nodes_value(self.variables["REDIS_CLUSTER_NODES"]) then
-		local timeout = tonumber(self.variables["REDIS_TIMEOUT"])
+		-- a stale unparsable value falls back to the 1 s default instead of failing every client creation
+		local timeout = parse_duration(self.variables["REDIS_TIMEOUT"], "ms") or 1000
 		self.pool = pool == nil or pool
 		self.cluster_mode = true
 		self.options = {
@@ -166,7 +168,7 @@ function clusterstore:initialize(pool)
 			connect_timeout = timeout,
 			send_timeout = timeout,
 			read_timeout = timeout,
-			keepalive_timeout = tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
+			keepalive_timeout = parse_duration(self.variables["REDIS_KEEPALIVE_IDLE"], "ms"),
 			keepalive_cons = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
 			max_redirection = 2,
 			max_connection_attempts = 1,

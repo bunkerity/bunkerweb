@@ -112,28 +112,34 @@ function rediskeys.cluster_config_error(cluster_nodes, sentinel_hosts, database)
 	return err
 end
 
--- Explicit host:port or [ipv6]:port, space separated.
+-- "host", "host:port" or "[ipv6]:port", space separated. Port 6379 when absent, as in 1.6.16.
 -- The brackets stay in ip: tcpsock:connect() rejects a bare IPv6 literal.
 function rediskeys.parse_nodes(value)
 	local nodes = {}
 	for node in (value or ""):gmatch("%S+") do
 		local host, port = match(node, "^%[(.+)%]:(%d+)$")
+		if not host then
+			host = match(node, "^%[(.+)%]$")
+		end
 		if host then
 			if not host:match("^[%x:.]+$") or not require("bunkerweb.utils").is_ipv6(host) then
 				return nil, "REDIS_CLUSTER_NODES requires a valid bracketed IPv6 address (got " .. node .. ")"
 			end
 			host = "[" .. host .. "]"
-		end
-		if not host then
+		else
 			host, port = match(node, "^([%w._-]+):(%d+)$")
+			if not host then
+				host = match(node, "^([%w._-]+)$")
+			end
 		end
 		if not host then
-			return nil, "REDIS_CLUSTER_NODES requires host:port (got " .. node .. ")"
+			return nil, "REDIS_CLUSTER_NODES requires host[:port] (got " .. node .. ")"
 		end
-		if not tonumber(port) or tonumber(port) < 1 or tonumber(port) > 65535 then
+		port = tonumber(port) or 6379
+		if port < 1 or port > 65535 then
 			return nil, "REDIS_CLUSTER_NODES requires port 1-65535 (got " .. node .. ")"
 		end
-		nodes[#nodes + 1] = { ip = host, port = tonumber(port) }
+		nodes[#nodes + 1] = { ip = host, port = port }
 	end
 	return nodes
 end

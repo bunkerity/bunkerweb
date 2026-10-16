@@ -31,15 +31,15 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_SSL`               | `no`       | global  | no       | **Redis/Valkey SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis/Valkey connection. |
 | `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis/Valkey SSL Verify:** Set to `yes` to verify the Redis/Valkey server's SSL certificate.   |
 | `REDIS_SSL_CA`            |            | global  | no       | **Redis/Valkey SSL CA bundle:** Path to a PEM CA bundle used to verify the server certificate (private CA). Trusted by the Python clients and, via the generated trust bundle, by the request path — see the note below. |
-| `REDIS_TIMEOUT`           | `1000`     | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations. |
+| `REDIS_TIMEOUT`           | `1s`       | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds. |
 | `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                |
 | `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                             |
-| `REDIS_CLUSTER_NODES` | | global | no | Seed nodes as space-separated `host:port` pairs (`[ipv6]:port` for IPv6). Empty keeps standalone or Sentinel mode. |
+| `REDIS_CLUSTER_NODES` | | global | no | Seed nodes as space-separated `host[:port]` entries (the port defaults to `6379`; `[ipv6]:port` for IPv6). Empty keeps standalone or Sentinel mode. |
 | `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).                |
 | `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                               |
 | `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                               |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                         |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection. |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`      | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is milliseconds. |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool, per NGINX worker. |
 
 !!! info "Private CA: how `REDIS_SSL_CA` is trusted"

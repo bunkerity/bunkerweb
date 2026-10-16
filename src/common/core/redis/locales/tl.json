@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Redis Timeout (ms)",
-        "help": "Timeout ng Redis server (sa ms) para sa connect, read, at write."
+        "help": "Timeout ng Redis server (sa ms) para sa connect, read, at write. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na millisecond."
       },
       "REDIS_USERNAME": {
         "label": "Redis Username",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Redis Keepalive Idle (ms)",
-        "help": "Pinakamataas na idle time (sa ms) bago isara ang koneksyon ng redis sa pool."
+        "help": "Pinakamataas na idle time (sa ms) bago isara ang koneksyon ng redis sa pool. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na millisecond."
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis Keepalive Pool",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Mga node ng Redis Cluster",
-        "help": "Mga panimulang node na host:port na pinaghihiwalay ng mga espasyo ([ipv6]:port para sa IPv6). Kapag walang laman, nananatili ang standalone o Sentinel mode. Kailangan ang database 0 at hindi maaaring isabay sa Sentinel."
+        "help": "Mga panimulang node na host[:port] na pinaghihiwalay ng mga espasyo (default na port `6379`; [ipv6]:port para sa IPv6). Kapag walang laman, nananatili ang standalone o Sentinel mode. Kailangan ang database 0 at hindi maaaring isabay sa Sentinel."
       }
     }
   }

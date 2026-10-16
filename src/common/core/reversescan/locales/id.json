@@ -11,7 +11,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Timeout reverse scan",
-        "help": "Tentukan timeout maksimum (dalam md) saat memindai sebuah port."
+        "help": "Tentukan timeout maksimum (dalam md) saat memindai sebuah port. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam milidetik."
       },
       "USE_REVERSE_SCAN": {
         "label": "Reverse scan",

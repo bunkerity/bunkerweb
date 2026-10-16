@@ -15,7 +15,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Tempo limite da varredura reversa",
-        "help": "Especifica o tempo limite máximo (em ms) ao varrer uma porta."
+        "help": "Especifica o tempo limite máximo (em ms) ao varrer uma porta. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em milissegundos."
       }
     }
   }

@@ -19,15 +19,15 @@
       },
       "SESSIONS_IDLING_TIMEOUT": {
         "label": "Sessions Idling Timeout",
-        "help": "Pinakamataas na oras (sa segundo) ng inactivity bago mag-invalid ang session."
+        "help": "Pinakamataas na oras (sa segundo) ng inactivity bago mag-invalid ang session. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "SESSIONS_ROLLING_TIMEOUT": {
         "label": "Sessions Rolling Timeout",
-        "help": "Pinakamataas na oras (sa segundo) bago kailanganing i-renew ang session."
+        "help": "Pinakamataas na oras (sa segundo) bago kailanganing i-renew ang session. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "SESSIONS_ABSOLUTE_TIMEOUT": {
         "label": "Sessions Absolute Timeout",
-        "help": "Pinakamataas na oras (sa segundo) bago sirain ang session."
+        "help": "Pinakamataas na oras (sa segundo) bago sirain ang session. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "SESSIONS_CHECK_IP": {
         "label": "Sessions Check IP",

@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "Pag-expire ng Certificate",
-        "help": "Pag-expire ng self-signed na certificate, sa araw."
+        "help": "Pag-expire ng self-signed na certificate, sa araw. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na araw."
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "Subject ng Certificate",

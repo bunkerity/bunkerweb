@@ -23,7 +23,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "L'età massima in giorni per le sessioni utente dell'UI",
-        "help": "L'età massima in giorni per le sessioni utente dell'UI prima che vengano eliminate."
+        "help": "L'età massima in giorni per le sessioni utente dell'UI prima che vengano eliminate. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in giorni."
       },
       "DATABASE_POOL_SIZE": {
         "label": "Dimensione del pool del database",
@@ -35,11 +35,11 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Timeout del pool del database",
-        "help": "Il numero di secondi di attesa prima di rinunciare a ottenere una connessione dal pool."
+        "help": "Il numero di secondi di attesa prima di rinunciare a ottenere una connessione dal pool. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Riciclo del pool del database",
-        "help": "Il numero di secondi dopo i quali una connessione viene riciclata automaticamente. Impostare su -1 per disattivare."
+        "help": "Il numero di secondi dopo i quali una connessione viene riciclata automaticamente. Impostare su -1 per disattivare. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "DATABASE_POOL_PRE_PING": {
         "label": "Pre-ping del pool del database",
@@ -51,7 +51,7 @@
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Timeout di ritentativo del database",
-        "help": "Il numero massimo di secondi di attesa affinché il database sia disponibile all'avvio."
+        "help": "Il numero massimo di secondi di attesa affinché il database sia disponibile all'avvio. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Tentativi di ritentativo delle richieste del database",
@@ -59,7 +59,7 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Ritardo di ritentativo delle richieste del database",
-        "help": "Il ritardo in secondi tra i tentativi di ritentativo per gli errori transitori del database."
+        "help": "Il ritardo in secondi tra i tentativi di ritentativo per gli errori transitori del database. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       }
     }
   }

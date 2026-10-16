@@ -21,11 +21,11 @@
       },
       "ANTIBOT_TIME_RESOLVE": {
         "label": "Tempo para resolver",
-        "help": "Tempo máximo (em segundos) que os clientes têm para resolver o desafio. Após este tempo, será gerado um novo desafio."
+        "help": "Tempo máximo (em segundos) que os clientes têm para resolver o desafio. Após este tempo, será gerado um novo desafio. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "ANTIBOT_TIME_VALID": {
         "label": "Tempo de validade",
-        "help": "Tempo máximo de validade dos desafios resolvidos. Após este tempo, os clientes terão de resolver um novo."
+        "help": "Tempo máximo de validade dos desafios resolvidos. Após este tempo, os clientes terão de resolver um novo. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "ANTIBOT_SUCCESS_URI": {
         "label": "URL de redirecionamento após sucesso",

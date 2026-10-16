@@ -69,3 +69,59 @@ actions:
       - "admin"
       - "P@ssw0rd"
     string: '"status":403'
+
+  # --- METRICS_REDIS_TTL in the 1.6.16 suffixed form ---------------------------------------------
+  # `1h` must reach Redis as 3600 seconds. The plugin used to read the value with its count parser,
+  # where a trailing `m` meant millions and `h` did not parse; now it goes through the duration
+  # parser. REDIS_TIMEOUT and REDIS_KEEPALIVE_IDLE carry a suffix too (`5s`, `30s`): the WAF
+  # clusterstore reads them in milliseconds, and a misread value would leave Redis unreachable, so
+  # the key below would never appear.
+  #
+  # The `redis` action matches a substring of the reply and the TTL keeps moving, so the key is
+  # probed with EXPIRE ... LT (Redis 7+, sets the TTL only when the new one is SHORTER than the
+  # current one, replies 1 if it did, 0 if not -- a key with no TTL counts as infinite):
+  #   LT 3601 -> 0 : the TTL is already at most 3601 s, so it is not the 30 day default and not
+  #                  permanent (a missing key also answers 0, hence the second probe);
+  #   LT 3000 -> 1 : the TTL is above 3000 s, which also proves the key exists. It rewrites the TTL
+  #                  to 3000 s; the next metrics cycle puts it back to 3600 s.
+  # `requests:facets:initialized` is one of the keys `refresh_request_ttls` touches on every cycle.
+  suffixed_ttl_blocked_request:
+    type: status
+    url: "http://www.example.com/"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.8.4.4"
+    restart_stack: false
+    config:
+      BLACKLIST_COUNTRY: "US"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      REDIS_DATABASE: "1"
+      REDIS_SSL: "no"
+      REDIS_TIMEOUT: "5s"
+      REDIS_KEEPALIVE_IDLE: "30s"
+      METRICS_REDIS_TTL: "1h"
+  suffixed_ttl_is_not_the_default:
+    type: redis
+    Docker:
+      port: 6390
+    query: "EXPIRE requests:facets:initialized 3601 LT"
+    result: "0"
+    delay: 20
+    restart_stack: false
+  suffixed_ttl_is_about_one_hour:
+    type: redis
+    Docker:
+      port: 6390
+    query: "EXPIRE requests:facets:initialized 3000 LT"
+    result: "1"
+    restart_stack: false
+  # Leaves nothing behind for the next category: the product and the harness share this Redis.
+  suffixed_ttl_cleanup:
+    type: redis
+    Docker:
+      port: 6390
+    query: "FLUSHALL"
+    result: "True"
+    full_clean: true

@@ -15,7 +15,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Délai d'expiration de l'analyse inversée",
-        "help": "Spécifie le délai d'expiration maximal (en ms) lors de l'analyse d'un port."
+        "help": "Spécifie le délai d'expiration maximal (en ms) lors de l'analyse d'un port. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes."
       }
     }
   }

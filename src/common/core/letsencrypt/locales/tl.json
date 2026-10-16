@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "ZeroSSL API Retry Delay",
-        "help": "Delay sa segundo sa pagitan ng mga ZeroSSL API retry sa zerossl-bot."
+        "help": "Delay sa segundo sa pagitan ng mga ZeroSSL API retry sa zerossl-bot. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "ZeroSSL API Connect Timeout",
-        "help": "Connection timeout sa segundo para sa mga ZeroSSL API request sa zerossl-bot."
+        "help": "Connection timeout sa segundo para sa mga ZeroSSL API request sa zerossl-bot. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "ZeroSSL API Max Time",
-        "help": "Pinakamataas na kabuuang oras sa segundo para sa bawat ZeroSSL API request sa zerossl-bot."
+        "help": "Pinakamataas na kabuuang oras sa segundo para sa bawat ZeroSSL API request sa zerossl-bot. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "Challenge Type",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "DNS Propagation",
-        "help": "Ang oras na hihintayin para sa DNS propagation sa segundo para sa mga DNS challenge."
+        "help": "Ang oras na hihintayin para sa DNS propagation sa segundo para sa mga DNS challenge. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "Credential Item",

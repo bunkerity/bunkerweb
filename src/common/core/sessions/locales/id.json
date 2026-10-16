@@ -19,15 +19,15 @@
       },
       "SESSIONS_IDLING_TIMEOUT": {
         "label": "Batas waktu idle sesi",
-        "help": "Waktu maksimum (dalam detik) ketidakaktifan sebelum sesi dibatalkan."
+        "help": "Waktu maksimum (dalam detik) ketidakaktifan sebelum sesi dibatalkan. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "SESSIONS_ROLLING_TIMEOUT": {
         "label": "Batas waktu rolling sesi",
-        "help": "Waktu maksimum (dalam detik) sebelum sesi harus diperbarui."
+        "help": "Waktu maksimum (dalam detik) sebelum sesi harus diperbarui. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "SESSIONS_ABSOLUTE_TIMEOUT": {
         "label": "Batas waktu absolut sesi",
-        "help": "Waktu maksimum (dalam detik) sebelum sesi dihancurkan."
+        "help": "Waktu maksimum (dalam detik) sebelum sesi dihancurkan. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "SESSIONS_CHECK_IP": {
         "label": "Periksa IP sesi",

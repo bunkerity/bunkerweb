@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "Retraso de reintentos de API ZeroSSL",
-        "help": "Retraso en segundos entre reintentos de la API ZeroSSL en zerossl-bot."
+        "help": "Retraso en segundos entre reintentos de la API ZeroSSL en zerossl-bot. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "Tiempo de espera de conexión de API ZeroSSL",
-        "help": "Tiempo de espera de conexión en segundos para las solicitudes de API ZeroSSL en zerossl-bot."
+        "help": "Tiempo de espera de conexión en segundos para las solicitudes de API ZeroSSL en zerossl-bot. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "Tiempo máximo de API ZeroSSL",
-        "help": "Tiempo total máximo en segundos para cada solicitud de API ZeroSSL en zerossl-bot."
+        "help": "Tiempo total máximo en segundos para cada solicitud de API ZeroSSL en zerossl-bot. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "Tipo de desafío",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "Propagación DNS",
-        "help": "El tiempo de espera para la propagación DNS, en segundos, para los desafíos DNS."
+        "help": "El tiempo de espera para la propagación DNS, en segundos, para los desafíos DNS. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "Elemento de credencial",

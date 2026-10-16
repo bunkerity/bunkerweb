@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Access-Control-Max-Age ویلیو",
-        "help": "Access-Control-Max-Age ہیڈر کی ویلیو۔"
+        "help": "Access-Control-Max-Age ہیڈر کی ویلیو۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد سیکنڈ میں شمار ہوتا ہے۔"
       },
       "CORS_DENY_REQUEST": {
         "label": "درخواست مسترد کریں",

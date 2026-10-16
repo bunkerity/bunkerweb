@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "Zertifikatsablauf",
-        "help": "Ablauf des selbstsignierten Zertifikats in Tagen."
+        "help": "Ablauf des selbstsignierten Zertifikats in Tagen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Tagen."
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "Zertifikatsbetreff",

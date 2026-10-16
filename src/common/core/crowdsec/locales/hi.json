@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "CrowdSec लाइव अनुरोध टाइमआउट",
-        "help": "bouncer द्वारा CrowdSec local API से पूछताछ के लिए किए गए HTTP अनुरोधों के लिए टाइमआउट मिलीसेकंड में।"
+        "help": "bouncer द्वारा CrowdSec local API से पूछताछ के लिए किए गए HTTP अनुरोधों के लिए टाइमआउट मिलीसेकंड में। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या मिलीसेकंड में मानी जाती है।"
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "CrowdSec बहिष्कृत स्थान",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "CrowdSec कैश समाप्ति",
-        "help": "लाइव मोड में bouncer द्वारा कैश किए गए IP के लिए कैश की समाप्ति, सेकंड में।"
+        "help": "लाइव मोड में bouncer द्वारा कैश किए गए IP के लिए कैश की समाप्ति, सेकंड में। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या सेकंड में मानी जाती है।"
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec अनुरोध टाइमआउट",
-        "help": "CrowdSec local API से नए/पुराने IP लाने के लिए अद्यतन की आवृत्ति, सेकंड में।"
+        "help": "CrowdSec local API से नए/पुराने IP लाने के लिए अद्यतन की आवृत्ति, सेकंड में। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या सेकंड में मानी जाती है।"
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "CrowdSec प्रतिबंध नवीनीकरण",
+        "help": "CrowdSec के ब्लॉक को छोटे BunkerWeb प्रतिबंधों में बदलता है, जो CrowdSec का निर्णय रहने तक नवीनीकृत होते रहते हैं। मान वह अधिकतम अवधि है जिसके बाद CrowdSec से दोबारा पूछा जाता है। 0 इसे बंद कर देता है। CROWDSEC_EXCLUDE_LOCATION वाली सेवा को कभी CrowdSec प्रतिबंध नहीं मिलता। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या सेकंड में मानी जाती है।"
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "AppSec URL",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "AppSec कनेक्ट टाइमआउट",
-        "help": "remediation component और AppSec Component के बीच कनेक्शन का टाइमआउट मिलीसेकंड में।"
+        "help": "remediation component और AppSec Component के बीच कनेक्शन का टाइमआउट मिलीसेकंड में। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या मिलीसेकंड में मानी जाती है।"
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "AppSec भेजने का टाइमआउट",
-        "help": "remediation component से AppSec Component को डेटा भेजने का टाइमआउट मिलीसेकंड में।"
+        "help": "remediation component से AppSec Component को डेटा भेजने का टाइमआउट मिलीसेकंड में। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या मिलीसेकंड में मानी जाती है।"
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "AppSec प्रोसेस टाइमआउट",
-        "help": "remediation component से AppSec Component तक अनुरोध को संसाधित करने का टाइमआउट मिलीसेकंड में।"
+        "help": "remediation component से AppSec Component तक अनुरोध को संसाधित करने का टाइमआउट मिलीसेकंड में। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या मिलीसेकंड में मानी जाती है।"
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "हमेशा AppSec को भेजें",

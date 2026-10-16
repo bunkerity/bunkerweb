@@ -15,7 +15,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Timeout della scansione inversa",
-        "help": "Specifica il timeout massimo (in ms) durante la scansione di una porta."
+        "help": "Specifica il timeout massimo (in ms) durante la scansione di una porta. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in millisecondi."
       }
     }
   }

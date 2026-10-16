@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Tiempo de espera Redis (ms)",
-        "help": "Tiempo de espera del servidor Redis (en ms) para conexión, lectura y escritura."
+        "help": "Tiempo de espera del servidor Redis (en ms) para conexión, lectura y escritura. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos."
       },
       "REDIS_USERNAME": {
         "label": "Nombre de usuario Redis",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Inactividad keepalive Redis (ms)",
-        "help": "Tiempo de inactividad máximo (en ms) antes de cerrar una conexión Redis en el pool."
+        "help": "Tiempo de inactividad máximo (en ms) antes de cerrar una conexión Redis en el pool. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos."
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pool keepalive Redis",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Nodos de Redis Cluster",
-        "help": "Nodos iniciales host:port separados por espacios ([ipv6]:port para IPv6). Vacío conserva el modo independiente o Sentinel. Requiere la base de datos 0 y no se puede combinar con Sentinel."
+        "help": "Nodos iniciales host[:port] separados por espacios (el puerto por defecto es `6379`; [ipv6]:port para IPv6). Vacío conserva el modo independiente o Sentinel. Requiere la base de datos 0 y no se puede combinar con Sentinel."
       }
     }
   }

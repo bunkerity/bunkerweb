@@ -21,11 +21,11 @@
       },
       "ANTIBOT_TIME_RESOLVE": {
         "label": "Zeit zum Lösen",
-        "help": "Maximale Zeit (in Sekunden), die Clients zum Lösen der Challenge haben. Nach Ablauf dieser Zeit wird eine neue Challenge erzeugt."
+        "help": "Maximale Zeit (in Sekunden), die Clients zum Lösen der Challenge haben. Nach Ablauf dieser Zeit wird eine neue Challenge erzeugt. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "ANTIBOT_TIME_VALID": {
         "label": "Gültigkeitsdauer",
-        "help": "Maximale Gültigkeitsdauer gelöster Challenges. Nach Ablauf dieser Zeit müssen Clients eine neue lösen."
+        "help": "Maximale Gültigkeitsdauer gelöster Challenges. Nach Ablauf dieser Zeit müssen Clients eine neue lösen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "ANTIBOT_SUCCESS_URI": {
         "label": "Erfolgs-Weiterleitungs-URL",

@@ -27,7 +27,7 @@
       },
       "METRICS_REDIS_TTL": {
         "label": "TTL Redis das métricas",
-        "help": "Tempo de vida em segundos para as chaves de métricas armazenadas no Redis (predefinição `2592000`, 30 dias; `0` mantém as chaves permanentes). É atualizado em cada sincronização, pelo que os dados ativos nunca expiram; com uma política de evição `volatile-lru`, isto permite que os dados de métricas abandonados se tornem elegíveis para evição, para que o Redis recupere de um maxmemory em vez de rejeitar escritas para sempre. Aceita um número inteiro simples ou uma abreviatura `k`/`m`."
+        "help": "Tempo de vida em segundos para as chaves de métricas armazenadas no Redis (predefinição `30d`, 30 dias; `0` mantém as chaves permanentes). É atualizado em cada sincronização, pelo que os dados ativos nunca expiram; com uma política de evição `volatile-lru`, isto permite que os dados de métricas abandonados se tornem elegíveis para evição, para que o Redis recupere de um maxmemory em vez de rejeitar escritas para sempre. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em segundos."
       },
       "MAX_LRU_HISTORY": {
         "label": "Histórico LRU máximo",

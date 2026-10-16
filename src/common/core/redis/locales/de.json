@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Redis-Timeout (ms)",
-        "help": "Timeout des Redis-Servers (in ms) für Verbindung, Lesen und Schreiben."
+        "help": "Timeout des Redis-Servers (in ms) für Verbindung, Lesen und Schreiben. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden."
       },
       "REDIS_USERNAME": {
         "label": "Redis-Benutzername",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Redis-Keepalive-Leerlauf (ms)",
-        "help": "Maximale Leerlaufzeit (in ms), bevor eine Redis-Verbindung im Pool geschlossen wird."
+        "help": "Maximale Leerlaufzeit (in ms), bevor eine Redis-Verbindung im Pool geschlossen wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden."
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis-Keepalive-Pool",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Redis-Cluster-Knoten",
-        "help": "Startknoten als durch Leerzeichen getrennte host:port-Paare ([ipv6]:port für IPv6). Leer behält den Einzelserver- oder Sentinel-Modus bei. Erfordert Datenbank 0 und kann nicht mit Sentinel kombiniert werden."
+        "help": "Startknoten als durch Leerzeichen getrennte host[:port]-Einträge (Standardport `6379`; [ipv6]:port für IPv6). Leer behält den Einzelserver- oder Sentinel-Modus bei. Erfordert Datenbank 0 und kann nicht mit Sentinel kombiniert werden."
       }
     }
   }

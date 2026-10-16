@@ -15,7 +15,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "Usia maksimum sesi pengguna UI dalam hari",
-        "help": "Usia maksimum dalam hari untuk sesi pengguna UI sebelum dihapus."
+        "help": "Usia maksimum dalam hari untuk sesi pengguna UI sebelum dihapus. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam hari."
       },
       "DATABASE_POOL_MAX_OVERFLOW": {
         "label": "Overflow maksimum pool database",
@@ -27,7 +27,7 @@
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Daur ulang pool database",
-        "help": "Jumlah detik setelah koneksi didaur ulang secara otomatis. Atur ke -1 untuk menonaktifkan."
+        "help": "Jumlah detik setelah koneksi didaur ulang secara otomatis. Atur ke -1 untuk menonaktifkan. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "DATABASE_POOL_RESET_ON_RETURN": {
         "label": "Reset pool database saat dikembalikan",
@@ -39,7 +39,7 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Timeout pool database",
-        "help": "Jumlah detik untuk menunggu sebelum menyerah mendapatkan koneksi dari pool."
+        "help": "Jumlah detik untuk menunggu sebelum menyerah mendapatkan koneksi dari pool. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Jumlah percobaan ulang permintaan database",
@@ -47,11 +47,11 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Penundaan percobaan ulang permintaan database",
-        "help": "Penundaan dalam detik antar percobaan ulang untuk kesalahan database sementara."
+        "help": "Penundaan dalam detik antar percobaan ulang untuk kesalahan database sementara. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Timeout percobaan ulang database",
-        "help": "Jumlah detik maksimum untuk menunggu database tersedia saat startup."
+        "help": "Jumlah detik maksimum untuk menunggu database tersedia saat startup. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "DATABASE_URI": {
         "label": "URI database",

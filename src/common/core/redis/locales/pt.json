@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Tempo limite Redis (ms)",
-        "help": "Tempo limite do servidor Redis (em ms) para ligação, leitura e escrita."
+        "help": "Tempo limite do servidor Redis (em ms) para ligação, leitura e escrita. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em milissegundos."
       },
       "REDIS_USERNAME": {
         "label": "Nome de utilizador Redis",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Inatividade keepalive Redis (ms)",
-        "help": "Tempo de inatividade máximo (em ms) antes de fechar uma ligação Redis no pool."
+        "help": "Tempo de inatividade máximo (em ms) antes de fechar uma ligação Redis no pool. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em milissegundos."
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pool keepalive Redis",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Nós do Redis Cluster",
-        "help": "Nós iniciais host:port separados por espaços ([ipv6]:port para IPv6). Vazio mantém o modo autónomo ou Sentinel. Requer a base de dados 0 e não pode ser combinado com Sentinel."
+        "help": "Nós iniciais host[:port] separados por espaços (porta predefinida `6379`; [ipv6]:port para IPv6). Vazio mantém o modo autónomo ou Sentinel. Requer a base de dados 0 e não pode ser combinado com Sentinel."
       }
     }
   }

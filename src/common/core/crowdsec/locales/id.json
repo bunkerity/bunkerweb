@@ -19,7 +19,7 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "Timeout koneksi AppSec",
-        "help": "Timeout dalam milidetik untuk koneksi antara komponen remediasi dan Komponen AppSec."
+        "help": "Timeout dalam milidetik untuk koneksi antara komponen remediasi dan Komponen AppSec. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam milidetik."
       },
       "CROWDSEC_APPSEC_FAILURE_ACTION": {
         "label": "Aksi kegagalan AppSec",
@@ -27,11 +27,11 @@
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "Timeout pemrosesan AppSec",
-        "help": "Timeout dalam milidetik untuk memproses permintaan dari komponen remediasi ke Komponen AppSec."
+        "help": "Timeout dalam milidetik untuk memproses permintaan dari komponen remediasi ke Komponen AppSec. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam milidetik."
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "Timeout pengiriman AppSec",
-        "help": "Timeout dalam milidetik untuk mengirim data dari komponen remediasi ke Komponen AppSec."
+        "help": "Timeout dalam milidetik untuk mengirim data dari komponen remediasi ke Komponen AppSec. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam milidetik."
       },
       "CROWDSEC_APPSEC_SSL_VERIFY": {
         "label": "Verifikasi SSL AppSec",
@@ -43,7 +43,7 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "Kedaluwarsa cache CrowdSec",
-        "help": "Waktu kedaluwarsa cache, dalam detik, untuk IP yang disimpan bouncer dalam cache pada mode live."
+        "help": "Waktu kedaluwarsa cache, dalam detik, untuk IP yang disimpan bouncer dalam cache pada mode live. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "CROWDSEC_CAPTCHA_PROVIDER": {
         "label": "Tantangan captcha CrowdSec",
@@ -75,11 +75,15 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "Timeout permintaan live CrowdSec",
-        "help": "Timeout dalam milidetik untuk permintaan HTTP yang dilakukan bouncer untuk meminta API lokal CrowdSec."
+        "help": "Timeout dalam milidetik untuk permintaan HTTP yang dilakukan bouncer untuk meminta API lokal CrowdSec. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam milidetik."
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "Timeout permintaan CrowdSec",
-        "help": "Frekuensi pembaruan, dalam detik, untuk menarik IP baru/lama dari API lokal CrowdSec."
+        "help": "Frekuensi pembaruan, dalam detik, untuk menarik IP baru/lama dari API lokal CrowdSec. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "Penyegaran blokir CrowdSec",
+        "help": "Mengubah pemblokiran CrowdSec menjadi blokir singkat BunkerWeb yang diperbarui selama keputusan CrowdSec berlaku. Nilainya adalah durasi terlama sebuah blokir sebelum CrowdSec ditanya lagi. 0 menonaktifkannya. Layanan dengan CROWDSEC_EXCLUDE_LOCATION tidak pernah mendapat blokir CrowdSec. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "USE_CROWDSEC": {
         "label": "Gunakan CrowdSec",

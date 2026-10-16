@@ -23,7 +23,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "L'âge maximal en jours des sessions utilisateur de l'UI",
-        "help": "L'âge maximal en jours des sessions utilisateur de l'UI avant leur purge."
+        "help": "L'âge maximal en jours des sessions utilisateur de l'UI avant leur purge. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en jours."
       },
       "DATABASE_POOL_SIZE": {
         "label": "Taille du pool de la base de données",
@@ -35,11 +35,11 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Délai d'attente du pool de la base de données",
-        "help": "Le nombre de secondes à attendre avant d'abandonner l'obtention d'une connexion depuis le pool."
+        "help": "Le nombre de secondes à attendre avant d'abandonner l'obtention d'une connexion depuis le pool. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Recyclage du pool de la base de données",
-        "help": "Le nombre de secondes après lequel une connexion est automatiquement recyclée. Mettre à -1 pour désactiver."
+        "help": "Le nombre de secondes après lequel une connexion est automatiquement recyclée. Mettre à -1 pour désactiver. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       },
       "DATABASE_POOL_PRE_PING": {
         "label": "Pré-ping du pool de la base de données",
@@ -51,7 +51,7 @@
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Délai d'attente de nouvelle tentative de la base de données",
-        "help": "Le nombre maximal de secondes à attendre que la base de données soit disponible au démarrage."
+        "help": "Le nombre maximal de secondes à attendre que la base de données soit disponible au démarrage. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Tentatives de nouvelle tentative des requêtes de la base de données",
@@ -59,7 +59,7 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Délai entre les nouvelles tentatives des requêtes de la base de données",
-        "help": "Le délai en secondes entre les tentatives pour les erreurs transitoires de la base de données."
+        "help": "Le délai en secondes entre les tentatives pour les erreurs transitoires de la base de données. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       }
     }
   }

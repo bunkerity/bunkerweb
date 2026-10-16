@@ -95,6 +95,7 @@ package.loaded["resty.redis.connector"] = { new = function() return {}, nil end 
 -- One table serves both modules: reversescan needs the first two, clusterstore the rest.
 -- is_connection_error is the real predicate, verbatim, so case 5 cannot pass by weakening it.
 package.loaded["bunkerweb.utils"] = {
+    parse_duration = require("bunkerweb.duration").parse_duration,
     kill_all_threads = function() end,
     get_deny_status = function() return 403 end,
     get_variable = function() return "", nil end,

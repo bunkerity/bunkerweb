@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "Ważność certyfikatu",
-        "help": "Ważność certyfikatu samopodpisanego w dniach."
+        "help": "Ważność certyfikatu samopodpisanego w dniach. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza dni."
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "Temat certyfikatu",

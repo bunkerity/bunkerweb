@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "인증서 만료",
-        "help": "자체 서명 인증서의 만료 기간(일)입니다."
+        "help": "자체 서명 인증서의 만료 기간(일)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 일 단위입니다."
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "인증서 주체",

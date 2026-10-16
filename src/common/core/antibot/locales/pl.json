@@ -127,11 +127,11 @@
       },
       "ANTIBOT_TIME_RESOLVE": {
         "label": "Czas na rozwiązanie",
-        "help": "Maksymalny czas (w sekundach), jaki klienci mają na rozwiązanie wyzwania. Po jego upływie zostanie wygenerowane nowe wyzwanie."
+        "help": "Maksymalny czas (w sekundach), jaki klienci mają na rozwiązanie wyzwania. Po jego upływie zostanie wygenerowane nowe wyzwanie. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "ANTIBOT_TIME_VALID": {
         "label": "Czas ważności",
-        "help": "Maksymalny czas ważności rozwiązanych wyzwań. Po jego upływie klienci będą musieli rozwiązać nowe."
+        "help": "Maksymalny czas ważności rozwiązanych wyzwań. Po jego upływie klienci będą musieli rozwiązać nowe. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "ANTIBOT_TURNSTILE_SECRET": {
         "label": "Sekret Turnstile",

@@ -11,7 +11,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Reverse scan zaman aşımı",
-        "help": "Bir bağlantı noktası taranırken izin verilen maksimum zaman aşımını (ms) belirtin."
+        "help": "Bir bağlantı noktası taranırken izin verilen maksimum zaman aşımını (ms) belirtin. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı milisaniye olarak yorumlanır."
       },
       "USE_REVERSE_SCAN": {
         "label": "Reverse scan",

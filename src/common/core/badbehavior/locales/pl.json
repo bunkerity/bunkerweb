@@ -11,11 +11,11 @@
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Czas trwania bana (w sekundach)",
-        "help": "Czas trwania (w sekundach) bana, gdy dany adres IP osiągnie próg. (Ustaw 0, aby zbanować na stałe)"
+        "help": "Czas trwania (w sekundach) bana, gdy dany adres IP osiągnie próg. (Ustaw 0, aby zbanować na stałe) Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Okres (w sekundach)",
-        "help": "Okres czasu (w sekundach), w którym liczymy 'złe' kody statusu HTTP."
+        "help": "Okres czasu (w sekundach), w którym liczymy 'złe' kody statusu HTTP. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "BAD_BEHAVIOR_STATUS_CODES": {
         "label": "Złe kody statusu",

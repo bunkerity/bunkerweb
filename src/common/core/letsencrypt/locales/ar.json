@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "تأخير إعادة محاولة API لـ ZeroSSL",
-        "help": "التأخير بالثواني بين محاولات إعادة المحاولة لـ API الخاصة بـ ZeroSSL في zerossl-bot."
+        "help": "التأخير بالثواني بين محاولات إعادة المحاولة لـ API الخاصة بـ ZeroSSL في zerossl-bot. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالثواني."
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "مهلة اتصال API لـ ZeroSSL",
-        "help": "مهلة الاتصال بالثواني لطلبات API الخاصة بـ ZeroSSL في zerossl-bot."
+        "help": "مهلة الاتصال بالثواني لطلبات API الخاصة بـ ZeroSSL في zerossl-bot. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالثواني."
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "الحد الأقصى لوقت API لـ ZeroSSL",
-        "help": "الحد الأقصى للوقت الإجمالي بالثواني لكل طلب API الخاص بـ ZeroSSL في zerossl-bot."
+        "help": "الحد الأقصى للوقت الإجمالي بالثواني لكل طلب API الخاص بـ ZeroSSL في zerossl-bot. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالثواني."
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "نوع التحدي",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "انتشار DNS",
-        "help": "الوقت المراد الانتظار لانتشار DNS بالثواني لتحديات DNS."
+        "help": "الوقت المراد الانتظار لانتشار DNS بالثواني لتحديات DNS. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالثواني."
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "عنصر بيانات الاعتماد",

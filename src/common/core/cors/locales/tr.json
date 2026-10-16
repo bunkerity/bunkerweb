@@ -31,7 +31,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Access-Control-Max-Age değeri",
-        "help": "Access-Control-Max-Age üstbilgisinin değeri."
+        "help": "Access-Control-Max-Age üstbilgisinin değeri. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "CROSS_ORIGIN_EMBEDDER_POLICY": {
         "label": "Cross-Origin-Embedder-Policy",

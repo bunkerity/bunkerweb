@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "CrowdSec Live-Anfrage-Timeout",
-        "help": "Timeout in Millisekunden für die HTTP-Anfragen, die der Bouncer zur Abfrage der lokalen CrowdSec-API stellt."
+        "help": "Timeout in Millisekunden für die HTTP-Anfragen, die der Bouncer zur Abfrage der lokalen CrowdSec-API stellt. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden."
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "CrowdSec ausgeschlossene Orte",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "CrowdSec-Cache-Ablauf",
-        "help": "Der Cache-Ablauf in Sekunden für IPs, die der Bouncer im Live-Modus im Cache speichert."
+        "help": "Der Cache-Ablauf in Sekunden für IPs, die der Bouncer im Live-Modus im Cache speichert. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec-Anfrage-Timeout",
-        "help": "Die Aktualisierungshäufigkeit in Sekunden, um neue/alte IPs von der lokalen CrowdSec-API abzurufen."
+        "help": "Die Aktualisierungshäufigkeit in Sekunden, um neue/alte IPs von der lokalen CrowdSec-API abzurufen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "CrowdSec-Sperren erneuern",
+        "help": "Wandelt CrowdSec-Blockierungen in kurze BunkerWeb-Sperren um, die erneuert werden, solange die CrowdSec-Entscheidung gilt. Der Wert ist die längste Dauer einer Sperre, bevor CrowdSec erneut gefragt wird. 0 deaktiviert die Funktion. Ein Dienst mit CROWDSEC_EXCLUDE_LOCATION erhält nie CrowdSec-Sperren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "AppSec-URL",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "AppSec-Verbindungs-Timeout",
-        "help": "Der Timeout in Millisekunden für die Verbindung zwischen der Remediation-Komponente und der AppSec-Komponente."
+        "help": "Der Timeout in Millisekunden für die Verbindung zwischen der Remediation-Komponente und der AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden."
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "AppSec-Sende-Timeout",
-        "help": "Der Timeout in Millisekunden zum Senden von Daten von der Remediation-Komponente an die AppSec-Komponente."
+        "help": "Der Timeout in Millisekunden zum Senden von Daten von der Remediation-Komponente an die AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden."
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "AppSec-Verarbeitungs-Timeout",
-        "help": "Der Timeout in Millisekunden zur Verarbeitung der Anfrage von der Remediation-Komponente an die AppSec-Komponente."
+        "help": "Der Timeout in Millisekunden zur Verarbeitung der Anfrage von der Remediation-Komponente an die AppSec-Komponente. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden."
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "Immer an AppSec senden",

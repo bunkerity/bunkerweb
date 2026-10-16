@@ -19,11 +19,11 @@
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Période (en secondes)",
-        "help": "Période (en secondes) pendant laquelle les codes de statut HTTP « mauvais » sont comptabilisés."
+        "help": "Période (en secondes) pendant laquelle les codes de statut HTTP « mauvais » sont comptabilisés. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Durée du bannissement (en secondes)",
-        "help": "Durée (en secondes) d'un bannissement lorsque l'IP correspondante a atteint le seuil. (Mettre à 0 pour bannir de façon permanente)"
+        "help": "Durée (en secondes) d'un bannissement lorsque l'IP correspondante a atteint le seuil. (Mettre à 0 pour bannir de façon permanente) Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Portée du bannissement",

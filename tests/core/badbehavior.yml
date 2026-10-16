@@ -32,6 +32,55 @@ actions:
     status: 200
     delay: 20
 
+  # --- a suffixed BAD_BEHAVIOR_BAN_TIME (1.6.16 duration syntax) --------------------------------
+  # `1h` must read as 3600 seconds. Lua used to `tonumber()` the value: a suffix gave nil, and a nil
+  # ban time is a PERMANENT ban. So the two halves asserted here are "banned" and "not forever",
+  # and the second is the one that fails on the old reader.
+  #
+  # Placed before the groups below on purpose: the only other bans alive at this point are the
+  # 20 s ones above, which have lapsed (`unbanned` waited them out), so `bwcli bans` lists this
+  # address alone and its remaining time cannot be mistaken for another ban's. The ban is lifted
+  # again at the end of the block, and that last action restarts the stack, so the unban groups start from an empty list and their own config.
+  # `remaining` is the time left when `bans` runs, roughly 10 to 60 s after the ban was placed, so it
+  # reads "59 minutes"; "1 hour" would mean the clock had not started and "permanent" is the bug.
+  suffixed_ban_time_reaches_the_threshold:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 5
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.45"
+    config:
+      SERVER_NAME: "www.example.com app1.example.com"
+      MULTISITE: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      BAD_BEHAVIOR_THRESHOLD: "5"
+      BAD_BEHAVIOR_BAN_TIME: "1h"
+      BAD_BEHAVIOR_COUNT_TIME: "10m"
+      BAD_BEHAVIOR_BAN_SCOPE: "service"
+  suffixed_ban_time_is_banned:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.45"
+  suffixed_ban_time_is_one_hour_not_permanent:
+    type: bwcli
+    command: "bans"
+    result: "59 minutes"
+    not_result: "permanent"
+    restart_stack: false
+  suffixed_ban_time_lifted:
+    type: bwcli
+    command: "unban 203.0.113.45 -service www.example.com"
+    result: "has been unbanned"
+
   # Issue #3818, the reporter's scenario, run twice: once unbanning the service, once with the bare
   # `bwcli unban <ip>` the issue actually reports. The unban used to lift the ban and leave the
   # counter at the threshold, so the next watched status re-banned on the spot. What is asserted is

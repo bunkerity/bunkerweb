@@ -18,7 +18,7 @@ from app.dependencies import API_CLIENT, BW_CONFIG
 from app.i18n import translated
 from app.utils import LOGGER, flash
 
-from common_utils import get_redis_client as get_common_redis_client  # type: ignore
+from common_utils import get_redis_client as get_common_redis_client, parse_duration_int  # type: ignore
 from custom_configs_validation import build_env_style_key_rx  # type: ignore
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
@@ -490,8 +490,8 @@ def get_default_ban_time(config: dict, server_name: str) -> int:
         if server_name and server_name not in ("_", ""):
             service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
             if service_key in config:
-                return int(config[service_key])
-        return int(config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
+                return parse_duration_int(config[service_key], "s")
+        return parse_duration_int(config.get("BAD_BEHAVIOR_BAN_TIME", "1d"), "s")
     except (AttributeError, TypeError, ValueError):
         return 86400
 

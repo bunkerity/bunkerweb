@@ -31,7 +31,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Nilai Access-Control-Max-Age",
-        "help": "Nilai header Access-Control-Max-Age."
+        "help": "Nilai header Access-Control-Max-Age. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "CROSS_ORIGIN_EMBEDDER_POLICY": {
         "label": "Cross-Origin-Embedder-Policy",

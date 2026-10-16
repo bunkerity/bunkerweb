@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "CrowdSec live 요청 제한 시간",
-        "help": "bouncer가 CrowdSec 로컬 API를 조회할 때 사용하는 HTTP 요청의 제한 시간(밀리초)입니다."
+        "help": "bouncer가 CrowdSec 로컬 API를 조회할 때 사용하는 HTTP 요청의 제한 시간(밀리초)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 밀리초 단위입니다."
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "CrowdSec 제외 위치",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "CrowdSec 캐시 만료 시간",
-        "help": "bouncer가 live 모드에서 IP를 캐시할 때의 캐시 만료 시간(초)입니다."
+        "help": "bouncer가 live 모드에서 IP를 캐시할 때의 캐시 만료 시간(초)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 초 단위입니다."
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec 요청 제한 시간",
-        "help": "CrowdSec 로컬 API에서 신규/만료 IP를 가져오는 갱신 빈도(초)입니다."
+        "help": "CrowdSec 로컬 API에서 신규/만료 IP를 가져오는 갱신 빈도(초)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 초 단위입니다."
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "CrowdSec 차단 갱신",
+        "help": "CrowdSec 차단을 CrowdSec 결정이 유지되는 동안 갱신되는 짧은 BunkerWeb 차단으로 바꿉니다. 값은 CrowdSec에 다시 묻기 전까지 차단이 유지되는 최대 시간입니다. 0이면 비활성화됩니다. CROWDSEC_EXCLUDE_LOCATION이 설정된 서비스는 CrowdSec 차단을 받지 않습니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 초 단위입니다."
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "AppSec URL",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "AppSec 연결 제한 시간",
-        "help": "처리 구성 요소와 AppSec 구성 요소 간 연결의 제한 시간(밀리초)입니다."
+        "help": "처리 구성 요소와 AppSec 구성 요소 간 연결의 제한 시간(밀리초)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 밀리초 단위입니다."
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "AppSec 전송 제한 시간",
-        "help": "처리 구성 요소에서 AppSec 구성 요소로 데이터를 전송하는 제한 시간(밀리초)입니다."
+        "help": "처리 구성 요소에서 AppSec 구성 요소로 데이터를 전송하는 제한 시간(밀리초)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 밀리초 단위입니다."
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "AppSec 처리 제한 시간",
-        "help": "처리 구성 요소에서 AppSec 구성 요소로 보낸 요청을 처리하는 제한 시간(밀리초)입니다."
+        "help": "처리 구성 요소에서 AppSec 구성 요소로 보낸 요청을 처리하는 제한 시간(밀리초)입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 밀리초 단위입니다."
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "항상 AppSec으로 전송",

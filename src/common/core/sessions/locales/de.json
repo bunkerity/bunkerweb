@@ -19,15 +19,15 @@
       },
       "SESSIONS_IDLING_TIMEOUT": {
         "label": "Sitzungs-Leerlauf-Timeout",
-        "help": "Maximale Zeit (in Sekunden) der Inaktivität, bevor die Sitzung ungültig wird."
+        "help": "Maximale Zeit (in Sekunden) der Inaktivität, bevor die Sitzung ungültig wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "SESSIONS_ROLLING_TIMEOUT": {
         "label": "Sitzungs-Rolling-Timeout",
-        "help": "Maximale Zeit (in Sekunden), bevor eine Sitzung erneuert werden muss."
+        "help": "Maximale Zeit (in Sekunden), bevor eine Sitzung erneuert werden muss. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "SESSIONS_ABSOLUTE_TIMEOUT": {
         "label": "Sitzungs-Absolut-Timeout",
-        "help": "Maximale Zeit (in Sekunden), bevor eine Sitzung zerstört wird."
+        "help": "Maximale Zeit (in Sekunden), bevor eine Sitzung zerstört wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "SESSIONS_CHECK_IP": {
         "label": "Sitzungs-IP-Prüfung",

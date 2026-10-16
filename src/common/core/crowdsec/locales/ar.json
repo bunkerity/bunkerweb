@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "مهلة طلب CrowdSec المباشر",
-        "help": "المهلة بالمللي ثانية لطلبات HTTP التي يقوم بها bouncer للاستعلام عن CrowdSec local API."
+        "help": "المهلة بالمللي ثانية لطلبات HTTP التي يقوم بها bouncer للاستعلام عن CrowdSec local API. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالمللي ثانية."
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "استثناء مواقع CrowdSec",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "انتهاء صلاحية ذاكرة تخزين CrowdSec المؤقتة",
-        "help": "مدة انتهاء صلاحية ذاكرة التخزين المؤقت، بالثواني، لعناوين IP التي يخزّنها bouncer في وضع live."
+        "help": "مدة انتهاء صلاحية ذاكرة التخزين المؤقت، بالثواني، لعناوين IP التي يخزّنها bouncer في وضع live. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالثواني."
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "مهلة طلب CrowdSec",
-        "help": "وتيرة التحديث، بالثواني، لسحب عناوين IP الجديدة/القديمة من CrowdSec local API."
+        "help": "وتيرة التحديث، بالثواني، لسحب عناوين IP الجديدة/القديمة من CrowdSec local API. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالثواني."
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "تحديث حظر CrowdSec",
+        "help": "يحوّل حظر CrowdSec إلى حظر قصير في BunkerWeb يُجدَّد ما دام قرار CrowdSec ساريًا. القيمة هي أطول مدة يستمر فيها الحظر قبل سؤال CrowdSec من جديد. القيمة 0 تعطّله. لا تحصل أي خدمة تحدد CROWDSEC_EXCLUDE_LOCATION على حظر CrowdSec. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالثواني."
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "رابط AppSec",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "مهلة اتصال AppSec",
-        "help": "المهلة بالمللي ثانية للاتصال بين مكوّن المعالجة (remediation component) ومكوّن AppSec."
+        "help": "المهلة بالمللي ثانية للاتصال بين مكوّن المعالجة (remediation component) ومكوّن AppSec. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالمللي ثانية."
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "مهلة إرسال AppSec",
-        "help": "المهلة بالمللي ثانية لإرسال البيانات من مكوّن المعالجة إلى مكوّن AppSec."
+        "help": "المهلة بالمللي ثانية لإرسال البيانات من مكوّن المعالجة إلى مكوّن AppSec. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالمللي ثانية."
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "مهلة معالجة AppSec",
-        "help": "المهلة بالمللي ثانية لمعالجة الطلب من مكوّن المعالجة إلى مكوّن AppSec."
+        "help": "المهلة بالمللي ثانية لمعالجة الطلب من مكوّن المعالجة إلى مكوّن AppSec. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالمللي ثانية."
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "الإرسال دائمًا إلى AppSec",

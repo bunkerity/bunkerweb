@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Timeout Redis (ms)",
-        "help": "Timeout server Redis (dalam md) untuk connect, read, dan write."
+        "help": "Timeout server Redis (dalam md) untuk connect, read, dan write. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam milidetik."
       },
       "REDIS_USERNAME": {
         "label": "Username Redis",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Idle keepalive Redis (ms)",
-        "help": "Waktu idle maksimum (dalam md) sebelum menutup koneksi redis di pool."
+        "help": "Waktu idle maksimum (dalam md) sebelum menutup koneksi redis di pool. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam milidetik."
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pool keepalive Redis",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Node Redis Cluster",
-        "help": "Node awal berupa pasangan host:port dipisahkan spasi ([ipv6]:port untuk IPv6). Kosong mempertahankan mode mandiri atau Sentinel. Memerlukan basis data 0 dan tidak dapat digabungkan dengan Sentinel."
+        "help": "Node awal berupa entri host[:port] dipisahkan spasi (port bawaan `6379`; [ipv6]:port untuk IPv6). Kosong mempertahankan mode mandiri atau Sentinel. Memerlukan basis data 0 dan tidak dapat digabungkan dengan Sentinel."
       }
     }
   }

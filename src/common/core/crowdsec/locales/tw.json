@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "CrowdSec live 請求逾時",
-        "help": "bouncer 查詢 CrowdSec 本地 API 時,HTTP 請求的逾時時間(以毫秒為單位)。"
+        "help": "bouncer 查詢 CrowdSec 本地 API 時,HTTP 請求的逾時時間(以毫秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為毫秒。"
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "CrowdSec 排除的位置",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "CrowdSec 快取過期時間",
-        "help": "bouncer 在 live 模式下快取 IP 的快取過期時間(以秒為單位)。"
+        "help": "bouncer 在 live 模式下快取 IP 的快取過期時間(以秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec 請求逾時",
-        "help": "從 CrowdSec 本地 API 拉取新增/失效 IP 的更新頻率(以秒為單位)。"
+        "help": "從 CrowdSec 本地 API 拉取新增/失效 IP 的更新頻率(以秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "CrowdSec 封鎖續期",
+        "help": "將 CrowdSec 的封鎖轉為短期 BunkerWeb 封鎖,並在 CrowdSec 決策持續期間續期。此值是再次詢問 CrowdSec 之前封鎖最長持續的時間。0 表示停用。設有 CROWDSEC_EXCLUDE_LOCATION 的服務不會取得 CrowdSec 封鎖。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "AppSec URL",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "AppSec 連線逾時",
-        "help": "處理元件與 AppSec 元件之間連線的逾時時間(以毫秒為單位)。"
+        "help": "處理元件與 AppSec 元件之間連線的逾時時間(以毫秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為毫秒。"
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "AppSec 傳送逾時",
-        "help": "從處理元件向 AppSec 元件傳送資料的逾時時間(以毫秒為單位)。"
+        "help": "從處理元件向 AppSec 元件傳送資料的逾時時間(以毫秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為毫秒。"
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "AppSec 處理逾時",
-        "help": "處理元件向 AppSec 元件發出的請求的處理逾時時間(以毫秒為單位)。"
+        "help": "處理元件向 AppSec 元件發出的請求的處理逾時時間(以毫秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為毫秒。"
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "永遠傳送至 AppSec",

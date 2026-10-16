@@ -19,11 +19,11 @@
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "统计周期(秒)",
-        "help": "统计“不良” HTTP 状态码的时间段(以秒为单位)。"
+        "help": "统计“不良” HTTP 状态码的时间段(以秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "封禁时长(秒)",
-        "help": "当对应 IP 达到阈值时的封禁持续时间(以秒为单位)。(设为 0 表示永久封禁)"
+        "help": "当对应 IP 达到阈值时的封禁持续时间(以秒为单位)。(设为 0 表示永久封禁)支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "封禁范围",

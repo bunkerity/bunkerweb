@@ -31,15 +31,15 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_SSL`               | `no`       | global | 否   | **Redis/Valkey SSL：** 设置为 `yes` 以启用 Redis/Valkey 连接的 SSL/TLS 加密。    |
 | `REDIS_SSL_VERIFY`        | `yes`      | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。 |
 | `REDIS_SSL_CA`            |            | global | 否   | **Redis/Valkey SSL CA 包：** 用于验证服务器证书（私有 CA）的 PEM CA 包路径。Python 客户端使用它，并通过生成的信任包供请求路径使用。文件缺失或无效会导致配置生成失败。 |
-| `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。      |
+| `REDIS_TIMEOUT`           | `1s`       | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。      |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                       |
-| `REDIS_CLUSTER_NODES` | | global | 否 | 以空格分隔的 `host:port` 初始节点（IPv6 使用 `[ipv6]:port`）。留空保留独立或 Sentinel 模式。 |
+| `REDIS_CLUSTER_NODES` | | global | 否 | 以空格分隔的 `host[:port]` 初始节点（省略端口时默认为 `6379`；IPv6 使用 `[ipv6]:port`）。留空保留独立或 Sentinel 模式。 |
 | `REDIS_SENTINEL_HOSTS`    |            | global | 否   | **Sentinel 主机：** Redis Sentinel 主机的空格分隔列表 (hostname:port)。          |
 | `REDIS_SENTINEL_USERNAME` |            | global | 否   | **Sentinel 用户名：** 用于 Redis Sentinel 身份验证的用户名。                     |
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                        |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。    |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`      | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global | 否   | **Keepalive 池：** 每个 NGINX worker 在池中保留的最大 Redis/Valkey 连接数。 |
 
 !!! info "私有 CA：`REDIS_SSL_CA` 如何受信任"

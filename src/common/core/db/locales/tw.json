@@ -23,7 +23,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "UI 使用者工作階段的最長保留天數",
-        "help": "UI 使用者工作階段在被清除之前的最長保留天數。"
+        "help": "UI 使用者工作階段在被清除之前的最長保留天數。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為天。"
       },
       "DATABASE_POOL_SIZE": {
         "label": "資料庫連線池大小",
@@ -35,11 +35,11 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "資料庫連線池逾時",
-        "help": "在放棄從連線池取得連線之前要等待的秒數。"
+        "help": "在放棄從連線池取得連線之前要等待的秒數。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "資料庫連線池回收週期",
-        "help": "連線被自動回收前經過的秒數。設為 -1 表示停用。"
+        "help": "連線被自動回收前經過的秒數。設為 -1 表示停用。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "DATABASE_POOL_PRE_PING": {
         "label": "資料庫連線池預先檢測(pre-ping)",
@@ -51,7 +51,7 @@
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "資料庫重試逾時",
-        "help": "啟動時等待資料庫可用的最長秒數。"
+        "help": "啟動時等待資料庫可用的最長秒數。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "資料庫請求重試次數",
@@ -59,7 +59,7 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "資料庫請求重試延遲",
-        "help": "針對暫時性資料庫錯誤進行重試之間的延遲時間(以秒為單位)。"
+        "help": "針對暫時性資料庫錯誤進行重試之間的延遲時間(以秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       }
     }
   }

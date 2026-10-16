@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Redis 逾時(毫秒)",
-        "help": "Redis 伺服器連線、讀取和寫入的逾時時間(毫秒)。"
+        "help": "Redis 伺服器連線、讀取和寫入的逾時時間(毫秒)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為毫秒。"
       },
       "REDIS_USERNAME": {
         "label": "Redis 使用者名稱",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Redis keepalive 閒置時間(毫秒)",
-        "help": "連線池中 Redis 連線在被關閉前的最大閒置時間(毫秒)。"
+        "help": "連線池中 Redis 連線在被關閉前的最大閒置時間(毫秒)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為毫秒。"
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Redis keepalive 連線池",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Redis Cluster 節點",
-        "help": "以空格分隔的 host:port 初始節點（IPv6 使用 [ipv6]:port）。留空保留獨立或 Sentinel 模式。必須使用資料庫 0，且不可與 Sentinel 同時設定。"
+        "help": "以空格分隔的 host[:port] 初始節點（預設連接埠為 `6379`；IPv6 使用 [ipv6]:port）。留空保留獨立或 Sentinel 模式。必須使用資料庫 0，且不可與 Sentinel 同時設定。"
       }
     }
   }

@@ -198,6 +198,7 @@ local crc32_short = ngx.crc32_short
 local ngx_now = ngx.now
 local get_reason = utils.get_reason
 local has_variable = utils.has_variable
+local parse_duration = utils.parse_duration
 local is_connection_error = utils.is_connection_error
 local is_protocol_error = utils.is_protocol_error
 local is_oom_error = utils.is_oom_error
@@ -1546,7 +1547,7 @@ function metrics:timer()
 	end
 
 	self.redis_ok = nil
-	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"])
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
 	-- Stays true after the OOM breaker trips redis_ok, so the TTL refresh still runs.
 	local redis_connected = false
 	if self.use_redis then

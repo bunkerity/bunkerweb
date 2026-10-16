@@ -27,7 +27,7 @@
       },
       "METRICS_REDIS_TTL": {
         "label": "Metriken-Redis-TTL",
-        "help": "Time-to-live in Sekunden für die in Redis gespeicherten Metriken-Schlüssel (Standard `2592000`, 30 Tage; `0` hält die Schlüssel dauerhaft). Wird bei jeder Synchronisierung aufgefrischt, sodass aktive Daten nie ablaufen; mit einer `volatile-lru`-Verdrängungsrichtlinie können dadurch verwaiste Metrikdaten verdrängbar werden, sodass sich Redis nach einem maxmemory-Zustand erholt, anstatt Schreibvorgänge dauerhaft abzulehnen. Akzeptiert eine einfache Ganzzahl oder eine `k`/`m`-Kurzform."
+        "help": "Time-to-live in Sekunden für die in Redis gespeicherten Metriken-Schlüssel (Standard `30d`, 30 Tage; `0` hält die Schlüssel dauerhaft). Wird bei jeder Synchronisierung aufgefrischt, sodass aktive Daten nie ablaufen; mit einer `volatile-lru`-Verdrängungsrichtlinie können dadurch verwaiste Metrikdaten verdrängbar werden, sodass sich Redis nach einem maxmemory-Zustand erholt, anstatt Schreibvorgänge dauerhaft abzulehnen. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "MAX_LRU_HISTORY": {
         "label": "Maximale LRU-Historie",

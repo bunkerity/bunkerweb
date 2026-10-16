@@ -19,11 +19,11 @@
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Período (en segundos)",
-        "help": "Período de tiempo (en segundos) durante el cual se cuentan los códigos de estado HTTP «malos»."
+        "help": "Período de tiempo (en segundos) durante el cual se cuentan los códigos de estado HTTP «malos». Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Duración del bloqueo (en segundos)",
-        "help": "Duración (en segundos) de un bloqueo cuando la IP correspondiente ha alcanzado el umbral. (Establecer en 0 para bloquear de forma permanente)"
+        "help": "Duración (en segundos) de un bloqueo cuando la IP correspondiente ha alcanzado el umbral. (Establecer en 0 para bloquear de forma permanente) Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos."
       },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Alcance del bloqueo",

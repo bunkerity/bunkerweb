@@ -19,15 +19,15 @@
       },
       "SESSIONS_IDLING_TIMEOUT": {
         "label": "Timeout di inattività delle sessioni",
-        "help": "Tempo massimo (in secondi) di inattività prima che la sessione venga invalidata."
+        "help": "Tempo massimo (in secondi) di inattività prima che la sessione venga invalidata. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "SESSIONS_ROLLING_TIMEOUT": {
         "label": "Timeout scorrevole delle sessioni",
-        "help": "Tempo massimo (in secondi) prima che una sessione debba essere rinnovata."
+        "help": "Tempo massimo (in secondi) prima che una sessione debba essere rinnovata. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "SESSIONS_ABSOLUTE_TIMEOUT": {
         "label": "Timeout assoluto delle sessioni",
-        "help": "Tempo massimo (in secondi) prima che una sessione venga distrutta."
+        "help": "Tempo massimo (in secondi) prima che una sessione venga distrutta. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "SESSIONS_CHECK_IP": {
         "label": "Verifica IP delle sessioni",

@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "Expiration du certificat",
-        "help": "Expiration du certificat auto-signé, en jours."
+        "help": "Expiration du certificat auto-signé, en jours. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en jours."
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "Sujet du certificat",

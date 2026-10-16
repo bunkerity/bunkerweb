@@ -23,7 +23,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "Das maximale Alter in Tagen für UI-Benutzersitzungen",
-        "help": "Das maximale Alter in Tagen für UI-Benutzersitzungen, bevor sie bereinigt werden."
+        "help": "Das maximale Alter in Tagen für UI-Benutzersitzungen, bevor sie bereinigt werden. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Tagen."
       },
       "DATABASE_POOL_SIZE": {
         "label": "Datenbank-Pool-Größe",
@@ -35,11 +35,11 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Datenbank-Pool-Timeout",
-        "help": "Die Anzahl der Sekunden, die gewartet wird, bevor der Versuch, eine Verbindung aus dem Pool zu erhalten, aufgegeben wird."
+        "help": "Die Anzahl der Sekunden, die gewartet wird, bevor der Versuch, eine Verbindung aus dem Pool zu erhalten, aufgegeben wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Datenbank-Pool-Recycling",
-        "help": "Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. Auf -1 setzen, um zu deaktivieren."
+        "help": "Die Anzahl der Sekunden, nach denen eine Verbindung automatisch recycelt wird. Auf -1 setzen, um zu deaktivieren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "DATABASE_POOL_PRE_PING": {
         "label": "Datenbank-Pool-Pre-Ping",
@@ -51,7 +51,7 @@
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Datenbank-Wiederholungs-Timeout",
-        "help": "Die maximale Anzahl an Sekunden, die beim Start auf die Verfügbarkeit der Datenbank gewartet wird."
+        "help": "Die maximale Anzahl an Sekunden, die beim Start auf die Verfügbarkeit der Datenbank gewartet wird. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Wiederholungsversuche für Datenbankanfragen",
@@ -59,7 +59,7 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Verzögerung zwischen Wiederholungsversuchen für Datenbankanfragen",
-        "help": "Die Verzögerung in Sekunden zwischen den Wiederholungsversuchen für vorübergehende Datenbankfehler."
+        "help": "Die Verzögerung in Sekunden zwischen den Wiederholungsversuchen für vorübergehende Datenbankfehler. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       }
     }
   }

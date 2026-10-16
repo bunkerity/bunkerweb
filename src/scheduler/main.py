@@ -31,7 +31,7 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, plugin_tar_exclude  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, parse_duration_int, plugin_tar_exclude  # type: ignore
 from custom_configs_drift import (  # type: ignore
     DRIFT_SETTING,
     custom_config_path,
@@ -115,13 +115,11 @@ HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 LOGGER = getLogger("SCHEDULER")
 
-HEALTHCHECK_INTERVAL = getenv("HEALTHCHECK_INTERVAL", "30")
-
-if not HEALTHCHECK_INTERVAL.isdigit():
-    LOGGER.error("HEALTHCHECK_INTERVAL must be an integer, defaulting to 30")
+try:
+    HEALTHCHECK_INTERVAL = parse_duration_int(getenv("HEALTHCHECK_INTERVAL", "30"), "s")
+except ValueError:
+    LOGGER.error("HEALTHCHECK_INTERVAL must be a duration like 30 or 30s, defaulting to 30")
     HEALTHCHECK_INTERVAL = 30
-
-HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 
 # A change flag is now cleared by the job that applies it, not by us on dispatch. So a flag
 # still set this long after our last dispatch means that dispatch never landed, and nothing
@@ -158,13 +156,11 @@ FAILED_PUSH_FINGERPRINT = None
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
 
-RELOAD_MIN_TIMEOUT = getenv("RELOAD_MIN_TIMEOUT", "5")
-
-if not RELOAD_MIN_TIMEOUT.isdigit():
-    LOGGER.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
+try:
+    RELOAD_MIN_TIMEOUT = parse_duration_int(getenv("RELOAD_MIN_TIMEOUT", "5"), "s")
+except ValueError:
+    LOGGER.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
     RELOAD_MIN_TIMEOUT = 5
-
-RELOAD_MIN_TIMEOUT = int(RELOAD_MIN_TIMEOUT)
 
 DISABLE_CONFIGURATION_TESTING = getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes"
 

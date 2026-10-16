@@ -79,12 +79,17 @@ def test_cluster_and_sentinel_are_rejected_before_connect(clients):
     assert "REDIS_SENTINEL_HOSTS" in str(logger.error.call_args_list)
 
 
-@pytest.mark.parametrize("nodes", ["r1", "r1:", "r1:0", "r1:65536", "r1:abc", "r1:7000 garbage", "::1:7000"])
-def test_seed_nodes_require_explicit_valid_host_port(clients, nodes):
+@pytest.mark.parametrize("nodes", ["r1:", "r1:0", "r1:65536", "r1:abc", "r1:7000 g@rbage", "::1:7000"])
+def test_seed_nodes_reject_an_invalid_host_or_port(clients, nodes):
     logger = Mock()
     assert common_utils.get_redis_client(use_redis=True, redis_cluster_nodes=nodes, logger=logger) is None
     assert not _FakeRedis.instances
     assert "REDIS_CLUSTER_NODES" in str(logger.error.call_args_list)
+
+
+def test_seed_node_without_a_port_uses_6379(clients):
+    client = common_utils.get_redis_client(use_redis=True, redis_cluster_nodes="r1 r2:7001 [::1]")
+    assert [(node.host, node.port) for node in client.kwargs["startup_nodes"]] == [("r1", 6379), ("r2", 7001), ("::1", 6379)]
 
 
 def test_bracketed_ipv6_seed_is_accepted(clients):

@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "证书有效期",
-        "help": "自签名证书的有效期(以天为单位)。"
+        "help": "自签名证书的有效期(以天为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为天。"
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "证书主体",

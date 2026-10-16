@@ -19,15 +19,15 @@
       },
       "SESSIONS_IDLING_TIMEOUT": {
         "label": "会话空闲超时",
-        "help": "会话失效前允许的最长不活动时间(秒)。"
+        "help": "会话失效前允许的最长不活动时间(秒)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "SESSIONS_ROLLING_TIMEOUT": {
         "label": "会话滚动超时",
-        "help": "会话必须续期前的最长时间(秒)。"
+        "help": "会话必须续期前的最长时间(秒)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "SESSIONS_ABSOLUTE_TIMEOUT": {
         "label": "会话绝对超时",
-        "help": "会话被销毁前的最长时间(秒)。"
+        "help": "会话被销毁前的最长时间(秒)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "SESSIONS_CHECK_IP": {
         "label": "会话检查 IP",

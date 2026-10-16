@@ -264,6 +264,41 @@ actions:
     delay: 11.0
     string: "Please wait while we check if you are a Human"
     follow_redirects: true
+  # The same pair with the 1.6.16 suffixed form. antibot.lua used to `tonumber()` both values: "10s" gave
+  # nil, the challenge cookie was built with a nil lifetime and the page came back as an error instead
+  # of the protected content, so the first action is the one that fails on the old reader.
+  # `validity_time_suffix_2` only checks that a request carrying no session still meets the challenge
+  # (as `validity_time_2` does: `type: string` keeps no cookie between actions, so neither can see the
+  # cookie expire). ANTIBOT_TIME_RESOLVE takes a suffix too.
+  validity_time_suffix_1:
+    type: xpath
+    url: "http://www.example.com"
+    xpath: "//h1[contains(text(),'Hello World!')]"
+    follow_redirects: true
+    restart_stack: false
+    config:
+      USE_ANTIBOT: "javascript"
+      ANTIBOT_TIME_VALID: "10s"
+      ANTIBOT_TIME_RESOLVE: "2m"
+      REMOTE_PHP: "php-fpm"
+      REMOTE_PHP_PATH: "/var/www/html"
+    Linux:
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
+    Kubernetes:
+      xpath: "//title[contains(text(),'Hello World')]"
+      config:
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+  validity_time_suffix_2:
+    type: string
+    url: "http://www.example.com"
+    delay: 11.0
+    string: "Please wait while we check if you are a Human"
+    follow_redirects: true
   javascript_query_original_uri:
     type: xpath
     url: "http://www.example.com/?a=b&c=d"

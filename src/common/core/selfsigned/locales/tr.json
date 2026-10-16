@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "Sertifika süresi",
-        "help": "Kendinden imzalı sertifikanın gün cinsinden geçerlilik süresi."
+        "help": "Kendinden imzalı sertifikanın gün cinsinden geçerlilik süresi. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı gün olarak yorumlanır."
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "Sertifika konusu",

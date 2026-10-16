@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Access-Control-Max-Age 的值",
-        "help": "Access-Control-Max-Age 标头的值。"
+        "help": "Access-Control-Max-Age 标头的值。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "CORS_DENY_REQUEST": {
         "label": "拒绝请求",

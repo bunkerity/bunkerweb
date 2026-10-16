@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "Opóźnienie ponowień API ZeroSSL",
-        "help": "Opóźnienie w sekundach między ponowieniami API ZeroSSL w zerossl-bot."
+        "help": "Opóźnienie w sekundach między ponowieniami API ZeroSSL w zerossl-bot. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "Limit czasu połączenia API ZeroSSL",
-        "help": "Limit czasu połączenia w sekundach dla żądań API ZeroSSL w zerossl-bot."
+        "help": "Limit czasu połączenia w sekundach dla żądań API ZeroSSL w zerossl-bot. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "Maksymalny czas API ZeroSSL",
-        "help": "Maksymalny całkowity czas w sekundach dla każdego żądania API ZeroSSL w zerossl-bot."
+        "help": "Maksymalny całkowity czas w sekundach dla każdego żądania API ZeroSSL w zerossl-bot. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "Typ wyzwania",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "Propagacja DNS",
-        "help": "Czas oczekiwania na propagację DNS w sekundach dla wyzwań DNS."
+        "help": "Czas oczekiwania na propagację DNS w sekundach dla wyzwań DNS. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "Element danych uwierzytelniających",

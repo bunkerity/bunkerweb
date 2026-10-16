@@ -15,7 +15,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "UI kullanıcı oturumları için maksimum yaş (gün)",
-        "help": "UI kullanıcı oturumlarının temizlenmeden önceki maksimum yaşı (gün)."
+        "help": "UI kullanıcı oturumlarının temizlenmeden önceki maksimum yaşı (gün). Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı gün olarak yorumlanır."
       },
       "DATABASE_POOL_MAX_OVERFLOW": {
         "label": "Veritabanı havuzu maksimum taşması",
@@ -27,7 +27,7 @@
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Veritabanı havuzu geri dönüşümü",
-        "help": "Bir bağlantının otomatik olarak yenilenmesinden önce geçecek saniye sayısı. Devre dışı bırakmak için -1 olarak ayarlayın."
+        "help": "Bir bağlantının otomatik olarak yenilenmesinden önce geçecek saniye sayısı. Devre dışı bırakmak için -1 olarak ayarlayın. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "DATABASE_POOL_RESET_ON_RETURN": {
         "label": "Havuza dönüşte veritabanı havuzu sıfırlama",
@@ -39,7 +39,7 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Veritabanı havuzu zaman aşımı",
-        "help": "Havuzdan bağlantı almaktan vazgeçmeden önce beklenecek saniye sayısı."
+        "help": "Havuzdan bağlantı almaktan vazgeçmeden önce beklenecek saniye sayısı. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Veritabanı isteği yeniden deneme sayısı",
@@ -47,11 +47,11 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Veritabanı isteği yeniden deneme gecikmesi",
-        "help": "Geçici veritabanı hataları için yeniden denemeler arasındaki gecikme (saniye)."
+        "help": "Geçici veritabanı hataları için yeniden denemeler arasındaki gecikme (saniye). Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Veritabanı yeniden deneme zaman aşımı",
-        "help": "Başlangıçta veritabanının kullanılabilir olmasını beklemek için maksimum saniye sayısı."
+        "help": "Başlangıçta veritabanının kullanılabilir olmasını beklemek için maksimum saniye sayısı. Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "DATABASE_URI": {
         "label": "Veritabanı URI'si",

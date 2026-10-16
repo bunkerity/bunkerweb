@@ -19,11 +19,11 @@
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "統計週期(秒)",
-        "help": "統計「不良」HTTP 狀態碼的時間段(以秒為單位)。"
+        "help": "統計「不良」HTTP 狀態碼的時間段(以秒為單位)。支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "封鎖時長(秒)",
-        "help": "當對應 IP 達到閾值時的封鎖持續時間(以秒為單位)。(設為 0 表示永久封鎖)"
+        "help": "當對應 IP 達到閾值時的封鎖持續時間(以秒為單位)。(設為 0 表示永久封鎖)支援時間後綴(ms、s、m、h、d、w、M、y);無後綴的數字單位為秒。"
       },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "封鎖範圍",

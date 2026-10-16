@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "Expiração do certificado",
-        "help": "Expiração do certificado autoassinado, em dias."
+        "help": "Expiração do certificado autoassinado, em dias. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em dias."
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "Assunto do certificado",

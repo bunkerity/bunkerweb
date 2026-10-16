@@ -15,7 +15,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Rückwärts-Scan-Timeout",
-        "help": "Legt das maximale Timeout (in ms) beim Scannen eines Ports fest."
+        "help": "Legt das maximale Timeout (in ms) beim Scannen eines Ports fest. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Millisekunden."
       }
     }
   }

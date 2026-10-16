@@ -27,7 +27,7 @@
       },
       "METRICS_REDIS_TTL": {
         "label": "TTL Redis Metrik",
-        "help": "Time-to-live dalam detik untuk key metrik yang disimpan di Redis (default `2592000`, 30 hari; `0` membuat key permanen). Diperbarui pada setiap sinkronisasi sehingga data aktif tidak pernah kedaluwarsa; dengan kebijakan eviction `volatile-lru`, ini memungkinkan data metrik yang ditinggalkan menjadi dapat dievict sehingga Redis pulih dari maxmemory alih-alih menolak penulisan selamanya. Menerima bilangan bulat biasa atau singkatan `k`/`m`."
+        "help": "Time-to-live dalam detik untuk key metrik yang disimpan di Redis (default `30d`, 30 hari; `0` membuat key permanen). Diperbarui pada setiap sinkronisasi sehingga data aktif tidak pernah kedaluwarsa; dengan kebijakan eviction `volatile-lru`, ini memungkinkan data metrik yang ditinggalkan menjadi dapat dievict sehingga Redis pulih dari maxmemory alih-alih menolak penulisan selamanya. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "MAX_LRU_HISTORY": {
         "label": "Riwayat LRU maksimum",

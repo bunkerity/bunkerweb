@@ -11,11 +11,11 @@
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Durasi ban (dalam detik)",
-        "help": "Durasi (dalam detik) ban ketika IP terkait telah mencapai ambang batas. (Atur ke 0 untuk mem-ban secara permanen)"
+        "help": "Durasi (dalam detik) ban ketika IP terkait telah mencapai ambang batas. (Atur ke 0 untuk mem-ban secara permanen) Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Periode (dalam detik)",
-        "help": "Periode waktu (dalam detik) saat kami menghitung kode status HTTP yang 'buruk'."
+        "help": "Periode waktu (dalam detik) saat kami menghitung kode status HTTP yang 'buruk'. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "BAD_BEHAVIOR_STATUS_CODES": {
         "label": "Kode status buruk",

@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Access-Control-Max-Age 값",
-        "help": "Access-Control-Max-Age 헤더의 값입니다."
+        "help": "Access-Control-Max-Age 헤더의 값입니다. 시간 접미사 (ms, s, m, h, d, w, M, y)를 사용할 수 있으며, 접미사가 없는 숫자는 초 단위입니다."
       },
       "CORS_DENY_REQUEST": {
         "label": "요청 거부",

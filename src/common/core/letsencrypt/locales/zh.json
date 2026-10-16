@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "ZeroSSL API 重试延迟",
-        "help": "zerossl-bot 中 ZeroSSL API 重试之间的延迟秒数。"
+        "help": "zerossl-bot 中 ZeroSSL API 重试之间的延迟秒数。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "ZeroSSL API 连接超时",
-        "help": "zerossl-bot 中 ZeroSSL API 请求的连接超时秒数。"
+        "help": "zerossl-bot 中 ZeroSSL API 请求的连接超时秒数。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "ZeroSSL API 最长耗时",
-        "help": "zerossl-bot 中每个 ZeroSSL API 请求的最长总耗时秒数。"
+        "help": "zerossl-bot 中每个 ZeroSSL API 请求的最长总耗时秒数。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "验证方式",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "DNS 传播等待时间",
-        "help": "在 DNS 验证中等待 DNS 传播的秒数。"
+        "help": "在 DNS 验证中等待 DNS 传播的秒数。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "凭据条目",

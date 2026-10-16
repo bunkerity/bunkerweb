@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "ZeroSSL API पुनः प्रयास विलंब",
-        "help": "zerossl-bot में ZeroSSL API पुनः प्रयासों के बीच विलंब (सेकंड में)।"
+        "help": "zerossl-bot में ZeroSSL API पुनः प्रयासों के बीच विलंब (सेकंड में)। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या सेकंड में मानी जाती है।"
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "ZeroSSL API कनेक्ट टाइमआउट",
-        "help": "zerossl-bot में ZeroSSL API अनुरोधों के लिए कनेक्शन टाइमआउट (सेकंड में)।"
+        "help": "zerossl-bot में ZeroSSL API अनुरोधों के लिए कनेक्शन टाइमआउट (सेकंड में)। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या सेकंड में मानी जाती है।"
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "ZeroSSL API अधिकतम समय",
-        "help": "zerossl-bot में प्रत्येक ZeroSSL API अनुरोध के लिए अधिकतम कुल समय (सेकंड में)।"
+        "help": "zerossl-bot में प्रत्येक ZeroSSL API अनुरोध के लिए अधिकतम कुल समय (सेकंड में)। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या सेकंड में मानी जाती है।"
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "चुनौती का प्रकार",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "DNS प्रसार",
-        "help": "DNS चुनौतियों के लिए DNS प्रसार की प्रतीक्षा करने का समय (सेकंड में)।"
+        "help": "DNS चुनौतियों के लिए DNS प्रसार की प्रतीक्षा करने का समय (सेकंड में)। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या सेकंड में मानी जाती है।"
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "क्रेडेंशियल आइटम",

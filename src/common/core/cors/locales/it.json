@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Valore di Access-Control-Max-Age",
-        "help": "Valore dell'intestazione Access-Control-Max-Age."
+        "help": "Valore dell'intestazione Access-Control-Max-Age. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "CORS_DENY_REQUEST": {
         "label": "Nega la richiesta",

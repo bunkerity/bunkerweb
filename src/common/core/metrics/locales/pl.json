@@ -27,7 +27,7 @@
       },
       "METRICS_REDIS_TTL": {
         "label": "TTL Redis metryk",
-        "help": "Czas życia w sekundach dla kluczy metryk przechowywanych w Redis (domyślnie `2592000`, 30 dni; `0` sprawia, że klucze są trwałe). Odświeżany przy każdej synchronizacji, więc aktywne dane nigdy nie wygasają; przy polityce usuwania `volatile-lru` pozwala to, aby porzucone dane metryk stały się usuwalne, dzięki czemu Redis wychodzi z maxmemory zamiast na zawsze odrzucać zapisy. Akceptuje zwykłą liczbę całkowitą lub skrót `k`/`m`."
+        "help": "Czas życia w sekundach dla kluczy metryk przechowywanych w Redis (domyślnie `30d`, 30 dni; `0` sprawia, że klucze są trwałe). Odświeżany przy każdej synchronizacji, więc aktywne dane nigdy nie wygasają; przy polityce usuwania `volatile-lru` pozwala to, aby porzucone dane metryk stały się usuwalne, dzięki czemu Redis wychodzi z maxmemory zamiast na zawsze odrzucać zapisy. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "MAX_LRU_HISTORY": {
         "label": "Maksymalna historia LRU",

@@ -11,11 +11,11 @@
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Yasaklama süresi (saniye)",
-        "help": "İlgili IP eşiğe ulaştığında uygulanan yasaklamanın süresi (saniye). (Kalıcı olarak yasaklamak için 0 olarak ayarlayın)"
+        "help": "İlgili IP eşiğe ulaştığında uygulanan yasaklamanın süresi (saniye). (Kalıcı olarak yasaklamak için 0 olarak ayarlayın) Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Süre (saniye)",
-        "help": "'Kötü' HTTP durum kodlarını saydığımız süre (saniye)."
+        "help": "'Kötü' HTTP durum kodlarını saydığımız süre (saniye). Zaman son eki kabul eder (ms, s, m, h, d, w, M, y); son eksiz sayı saniye olarak yorumlanır."
       },
       "BAD_BEHAVIOR_STATUS_CODES": {
         "label": "Kötü durum kodları",

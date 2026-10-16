@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "Jeda Percobaan Ulang API ZeroSSL",
-        "help": "Jeda dalam detik antara percobaan ulang API ZeroSSL di zerossl-bot."
+        "help": "Jeda dalam detik antara percobaan ulang API ZeroSSL di zerossl-bot. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "Timeout Koneksi API ZeroSSL",
-        "help": "Timeout koneksi dalam detik untuk permintaan API ZeroSSL di zerossl-bot."
+        "help": "Timeout koneksi dalam detik untuk permintaan API ZeroSSL di zerossl-bot. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "Waktu Maksimum API ZeroSSL",
-        "help": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL di zerossl-bot."
+        "help": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL di zerossl-bot. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "Jenis Tantangan",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "Propagasi DNS",
-        "help": "Waktu tunggu propagasi DNS dalam detik untuk tantangan DNS."
+        "help": "Waktu tunggu propagasi DNS dalam detik untuk tantangan DNS. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam detik."
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "Item Kredensial",

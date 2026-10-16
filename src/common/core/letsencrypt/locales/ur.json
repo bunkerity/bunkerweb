@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "ZeroSSL API دوبارہ کوشش تاخیر",
-        "help": "zerossl-bot میں ZeroSSL API دوبارہ کوششوں کے درمیان تاخیر سیکنڈوں میں۔"
+        "help": "zerossl-bot میں ZeroSSL API دوبارہ کوششوں کے درمیان تاخیر سیکنڈوں میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد سیکنڈ میں شمار ہوتا ہے۔"
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "ZeroSSL API کنیکٹ ٹائم آؤٹ",
-        "help": "zerossl-bot میں ZeroSSL API درخواستوں کے لیے کنکشن ٹائم آؤٹ سیکنڈوں میں۔"
+        "help": "zerossl-bot میں ZeroSSL API درخواستوں کے لیے کنکشن ٹائم آؤٹ سیکنڈوں میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد سیکنڈ میں شمار ہوتا ہے۔"
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "ZeroSSL API زیادہ سے زیادہ وقت",
-        "help": "zerossl-bot میں ہر ZeroSSL API درخواست کے لیے زیادہ سے زیادہ کل وقت سیکنڈوں میں۔"
+        "help": "zerossl-bot میں ہر ZeroSSL API درخواست کے لیے زیادہ سے زیادہ کل وقت سیکنڈوں میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد سیکنڈ میں شمار ہوتا ہے۔"
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "چیلنج کی قسم",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "DNS پھیلاؤ",
-        "help": "DNS چیلنجز کے لیے DNS پھیلاؤ کا انتظار کرنے کا وقت سیکنڈوں میں۔"
+        "help": "DNS چیلنجز کے لیے DNS پھیلاؤ کا انتظار کرنے کا وقت سیکنڈوں میں۔ وقت کا لاحقہ (ms, s, m, h, d, w, M, y) قبول کیا جاتا ہے؛ لاحقے کے بغیر عدد سیکنڈ میں شمار ہوتا ہے۔"
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "کریڈینشل آئٹم",

@@ -11,7 +11,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Reverse Scan Timeout",
-        "help": "Tukuyin ang maximum na timeout (sa ms) kapag sinisiyasat ang isang port."
+        "help": "Tukuyin ang maximum na timeout (sa ms) kapag sinisiyasat ang isang port. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na millisecond."
       },
       "USE_REVERSE_SCAN": {
         "label": "Reverse Scan",

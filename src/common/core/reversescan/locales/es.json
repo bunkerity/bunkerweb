@@ -15,7 +15,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Tiempo de espera del escaneo inverso",
-        "help": "Especifica el tiempo de espera máximo (en ms) al escanear un puerto."
+        "help": "Especifica el tiempo de espera máximo (en ms) al escanear un puerto. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en milisegundos."
       }
     }
   }

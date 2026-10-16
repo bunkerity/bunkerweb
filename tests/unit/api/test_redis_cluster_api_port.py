@@ -10,6 +10,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from common_utils import parse_duration
 from redis_keys import cluster_config_error, parse_nodes
 
 SOURCE = Path(__file__).resolve().parents[3] / "src/api/app/rate_limit.py"
@@ -29,6 +30,7 @@ def load(name, **extra):
         LOGGER=Mock(),
         cluster_config_error=cluster_config_error,
         parse_nodes=parse_nodes,
+        parse_duration=parse_duration,
         starmap=starmap,
     )
     namespace.update(extra)
@@ -63,11 +65,23 @@ def test_cluster_storage_includes_every_seed_acl_and_private_ca(storage):
 
 
 @pytest.mark.parametrize(
-    "extra", [{"REDIS_DATABASE": "3"}, {"REDIS_DATABASE": "bad"}, {"REDIS_SENTINEL_HOSTS": "s1:26379"}, {"REDIS_CLUSTER_NODES": "missing-port"}]
+    "extra", [{"REDIS_DATABASE": "3"}, {"REDIS_DATABASE": "bad"}, {"REDIS_SENTINEL_HOSTS": "s1:26379"}, {"REDIS_CLUSTER_NODES": "bad-port:99999"}]
 )
 def test_invalid_cluster_config_uses_memory_instead_of_standalone(storage, extra):
     uri, _ = storage(dict(USE_REDIS="yes", REDIS_HOST="standalone", REDIS_CLUSTER_NODES="r1:7000") | extra)
     assert uri == "memory://"
+
+
+def test_cluster_seed_without_a_port_uses_6379(storage):
+    uri, options = storage(dict(USE_REDIS="yes", REDIS_CLUSTER_NODES="r1 r2:7001"))
+    assert uri == "redis+cluster://r1:6379"
+    assert [(node.host, node.port) for node in options["startup_nodes"]] == [("r1", 6379), ("r2", 7001)]
+
+
+@pytest.mark.parametrize(("value", "seconds"), [("1000", 1.0), ("2s", 2.0), ("500ms", 0.5), ("1m", 60.0), ("soon", 1.0)])
+def test_redis_timeout_accepts_suffixes(storage, value, seconds):
+    _, options = storage(dict(USE_REDIS="yes", REDIS_HOST="r", REDIS_TIMEOUT=value))
+    assert options["socket_timeout"] == seconds and options["socket_connect_timeout"] == seconds
 
 
 def test_initial_cluster_failure_constructs_memory_limiter():

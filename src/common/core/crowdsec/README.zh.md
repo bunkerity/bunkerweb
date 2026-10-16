@@ -339,10 +339,11 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_API_KEY`          |                        | multisite    | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
 | `CROWDSEC_MODE`             | `live`                 | multisite    | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
 | `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite    | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite    | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1s`                   | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite    | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite    | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
+| `CROWDSEC_CACHE_EXPIRATION` | `1s`                   | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10s`                  | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
+| `CROWDSEC_BAN_REFRESH` | `0`                    | multisite | 否   | **CrowdSec 封禁续期：** 将 CrowdSec 的拦截转为短期 BunkerWeb 封禁，并在 CrowdSec 决策持续期间续期。该值是再次询问 CrowdSec 之前封禁最长持续的时间。0 表示禁用。设置了 `CROWDSEC_EXCLUDE_LOCATION` 的服务不会获得 CrowdSec 封禁。支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 
 !!! info "`CROWDSEC_EXCLUDE_LOCATION` 的匹配方式"
     每个以逗号分隔的条目都会排除该 URI **及其下的所有内容**：`/health` 会跳过 `/health` 和 `/health/live`，但不会跳过 `/healthcheck`——路径其余部分之前始终需要一个分隔符。排除是彻底的：被排除的请求既不会到达 Local API，也不会到达 AppSec 组件，因此不要排除仍希望被检查的路径。尤其不要排除 `/crowdsec-internal`：机器人检测从该路径提供其质询资源，排除它会静默地禁用质询。
@@ -353,9 +354,9 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | --------------------------------- | ------------- | ------ | ---- | --------------------------------------------------------------------------------- |
 | `CROWDSEC_APPSEC_URL`             |               | multisite | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
 | `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100ms`       | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100ms`       | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500ms`       | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为毫秒。 |
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
 

@@ -27,7 +27,7 @@
       },
       "METRICS_REDIS_TTL": {
         "label": "Metrics Redis TTL",
-        "help": "Time-to-live sa segundo para sa mga metrics key na nakaimbak sa Redis (default `2592000`, 30 araw; pinapanatiling permanente ang key kung `0`). Nire-refresh sa bawat sync kaya hindi na-e-expire ang aktibong data; sa `volatile-lru` na eviction policy, nagagawa nitong evictable ang mga naabandunang metrics data kaya nakaka-recover ang Redis mula sa maxmemory sa halip na tanggihan ang mga writes magpakailanman. Tumatanggap ng plain integer o `k`/`m` shorthand."
+        "help": "Time-to-live sa segundo para sa mga metrics key na nakaimbak sa Redis (default `30d`, 30 araw; pinapanatiling permanente ang key kung `0`). Nire-refresh sa bawat sync kaya hindi na-e-expire ang aktibong data; sa `volatile-lru` na eviction policy, nagagawa nitong evictable ang mga naabandunang metrics data kaya nakaka-recover ang Redis mula sa maxmemory sa halip na tanggihan ang mga writes magpakailanman. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "MAX_LRU_HISTORY": {
         "label": "Max LRU History",

@@ -29,7 +29,7 @@ Comment ça marche :
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | non      | Politique COOP.                                                               |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | non      | Politique COEP.                                                               |
 | `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | non      | Politique CORP.                                                               |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | non      | Durée de cache du preflight (secondes).                                       |
+| `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | non      | Durée de cache du preflight (secondes). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | non      | Refuser les origines non autorisées avec un code d’erreur.                    |
 
 !!! tip "Optimiser le preflight"

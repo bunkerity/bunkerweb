@@ -29,8 +29,8 @@ The following settings are shared across all challenge mechanisms:
 | Setting                | Default      | Context   | Multiple | Description                                                                                                                                         |
 | ---------------------- | ------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_URI`          | `/challenge` | multisite | no       | **Challenge URL:** The URL where users will be redirected to complete the challenge. Make sure this URL is not used for anything else on your site. |
-| `ANTIBOT_TIME_RESOLVE` | `60`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated.   |
-| `ANTIBOT_TIME_VALID`   | `86400`      | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge.            |
+| `ANTIBOT_TIME_RESOLVE` | `1m`         | multisite | no       | **Challenge Time Limit:** The maximum time (in seconds) a user has to complete the challenge. After this time, a new challenge will be generated. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
+| `ANTIBOT_TIME_VALID`   | `1d`         | multisite | no       | **Challenge Validity:** How long (in seconds) a completed challenge is valid. After this time, users will have to solve a new challenge. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
 | `ANTIBOT_SUCCESS_URI`  |              | multisite | no       | **Success Redirect URL:** A fixed URL to redirect users to after they successfully solve the challenge, instead of the page they originally requested. Leave empty to return users to their original destination. |
 
 ### Excluding Traffic from Challenges

@@ -19,15 +19,15 @@
       },
       "SESSIONS_IDLING_TIMEOUT": {
         "label": "Limit czasu bezczynności sesji",
-        "help": "Maksymalny czas (w sekundach) bezczynności, zanim sesja zostanie unieważniona."
+        "help": "Maksymalny czas (w sekundach) bezczynności, zanim sesja zostanie unieważniona. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "SESSIONS_ROLLING_TIMEOUT": {
         "label": "Limit czasu odnawiania sesji",
-        "help": "Maksymalny czas (w sekundach), po którym sesja musi zostać odnowiona."
+        "help": "Maksymalny czas (w sekundach), po którym sesja musi zostać odnowiona. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "SESSIONS_ABSOLUTE_TIMEOUT": {
         "label": "Bezwzględny limit czasu sesji",
-        "help": "Maksymalny czas (w sekundach), po którym sesja zostaje zniszczona."
+        "help": "Maksymalny czas (w sekundach), po którym sesja zostaje zniszczona. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza sekundy."
       },
       "SESSIONS_CHECK_IP": {
         "label": "Sprawdzanie IP sesji",

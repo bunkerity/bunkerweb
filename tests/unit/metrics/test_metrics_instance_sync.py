@@ -20,6 +20,7 @@ local stream_requests, stream_restore_pending = {}, false
 local worker_id = function() return 0 end
 local has_variable = function() return true end
 local parse_count = tonumber
+local parse_duration = function(value) return tonumber(value) end
 local encode = function(v)
   if type(v) == "table" then return v.id or "[]" end
   return tostring(v)

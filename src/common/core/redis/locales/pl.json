@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Limit czasu Redis (ms)",
-        "help": "Limit czasu serwera Redis (w ms) dla połączenia, odczytu i zapisu."
+        "help": "Limit czasu serwera Redis (w ms) dla połączenia, odczytu i zapisu. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza milisekundy."
       },
       "REDIS_USERNAME": {
         "label": "Nazwa użytkownika Redis",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Bezczynność keepalive Redis (ms)",
-        "help": "Maksymalny czas bezczynności (w ms) przed zamknięciem połączenia redis w puli."
+        "help": "Maksymalny czas bezczynności (w ms) przed zamknięciem połączenia redis w puli. Akceptuje przyrostek czasu (ms, s, m, h, d, w, M, y); liczba bez przyrostka oznacza milisekundy."
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pula keepalive Redis",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Węzły Redis Cluster",
-        "help": "Węzły początkowe host:port oddzielone spacjami ([ipv6]:port dla IPv6). Pusta wartość zachowuje tryb samodzielny lub Sentinel. Wymaga bazy 0 i nie można łączyć z Sentinel."
+        "help": "Węzły początkowe host[:port] oddzielone spacjami (domyślny port `6379`; [ipv6]:port dla IPv6). Pusta wartość zachowuje tryb samodzielny lub Sentinel. Wymaga bazy 0 i nie można łączyć z Sentinel."
       }
     }
   }

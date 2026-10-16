@@ -19,11 +19,11 @@
       },
       "BAD_BEHAVIOR_COUNT_TIME": {
         "label": "Zeitraum (in Sekunden)",
-        "help": "Zeitraum (in Sekunden), in dem „schlechte“ HTTP-Statuscodes gezählt werden."
+        "help": "Zeitraum (in Sekunden), in dem „schlechte“ HTTP-Statuscodes gezählt werden. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "BAD_BEHAVIOR_BAN_TIME": {
         "label": "Sperrdauer (in Sekunden)",
-        "help": "Dauer (in Sekunden) einer Sperre, wenn die entsprechende IP den Schwellenwert erreicht hat. (Auf 0 setzen, um dauerhaft zu sperren)"
+        "help": "Dauer (in Sekunden) einer Sperre, wenn die entsprechende IP den Schwellenwert erreicht hat. (Auf 0 setzen, um dauerhaft zu sperren) Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden."
       },
       "BAD_BEHAVIOR_BAN_SCOPE": {
         "label": "Sperrbereich",

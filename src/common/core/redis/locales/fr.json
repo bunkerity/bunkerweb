@@ -44,7 +44,7 @@
       },
       "REDIS_TIMEOUT": {
         "label": "Délai d'expiration Redis (ms)",
-        "help": "Délai d'expiration du serveur Redis (en ms) pour la connexion, la lecture et l'écriture."
+        "help": "Délai d'expiration du serveur Redis (en ms) pour la connexion, la lecture et l'écriture. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes."
       },
       "REDIS_USERNAME": {
         "label": "Nom d'utilisateur Redis",
@@ -72,7 +72,7 @@
       },
       "REDIS_KEEPALIVE_IDLE": {
         "label": "Idle keepalive Redis (ms)",
-        "help": "Temps d'inactivité maximal (en ms) avant la fermeture d'une connexion Redis dans le pool."
+        "help": "Temps d'inactivité maximal (en ms) avant la fermeture d'une connexion Redis dans le pool. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes."
       },
       "REDIS_KEEPALIVE_POOL": {
         "label": "Pool keepalive Redis",
@@ -80,7 +80,7 @@
       },
       "REDIS_CLUSTER_NODES": {
         "label": "Nœuds du cluster Redis",
-        "help": "Nœuds de départ host:port séparés par des espaces ([ipv6]:port pour IPv6). Vide conserve le mode autonome ou Sentinel. Nécessite la base 0 et ne peut pas être combiné avec Sentinel."
+        "help": "Nœuds de départ host[:port] séparés par des espaces (port par défaut `6379` ; [ipv6]:port pour IPv6). Vide conserve le mode autonome ou Sentinel. Nécessite la base 0 et ne peut pas être combiné avec Sentinel."
       }
     }
   }

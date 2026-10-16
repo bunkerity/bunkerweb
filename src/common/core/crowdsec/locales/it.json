@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "Timeout richieste live CrowdSec",
-        "help": "Timeout in millisecondi per le richieste HTTP effettuate dal bouncer per interrogare l'API locale di CrowdSec."
+        "help": "Timeout in millisecondi per le richieste HTTP effettuate dal bouncer per interrogare l'API locale di CrowdSec. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in millisecondi."
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "Posizioni escluse CrowdSec",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "Scadenza cache CrowdSec",
-        "help": "La scadenza della cache, in secondi, per gli IP che il bouncer memorizza nella cache in modalità live."
+        "help": "La scadenza della cache, in secondi, per gli IP che il bouncer memorizza nella cache in modalità live. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "Timeout richiesta CrowdSec",
-        "help": "La frequenza di aggiornamento, in secondi, per recuperare IP nuovi/vecchi dall'API locale di CrowdSec."
+        "help": "La frequenza di aggiornamento, in secondi, per recuperare IP nuovi/vecchi dall'API locale di CrowdSec. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "Rinnovo dei ban CrowdSec",
+        "help": "Trasforma i blocchi di CrowdSec in ban brevi di BunkerWeb, rinnovati finché la decisione di CrowdSec resta valida. Il valore è la durata massima di un ban prima di interrogare di nuovo CrowdSec. 0 lo disattiva. Un servizio con CROWDSEC_EXCLUDE_LOCATION non riceve mai ban CrowdSec. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in secondi."
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "URL AppSec",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "Timeout di connessione AppSec",
-        "help": "Il timeout in millisecondi della connessione tra il componente di remediation e il componente AppSec."
+        "help": "Il timeout in millisecondi della connessione tra il componente di remediation e il componente AppSec. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in millisecondi."
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "Timeout di invio AppSec",
-        "help": "Il timeout in millisecondi per inviare dati dal componente di remediation al componente AppSec."
+        "help": "Il timeout in millisecondi per inviare dati dal componente di remediation al componente AppSec. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in millisecondi."
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "Timeout di elaborazione AppSec",
-        "help": "Il timeout in millisecondi per elaborare la richiesta dal componente di remediation al componente AppSec."
+        "help": "Il timeout in millisecondi per elaborare la richiesta dal componente di remediation al componente AppSec. Accetta un suffisso di tempo (ms, s, m, h, d, w, M, y); un numero senza suffisso è espresso in millisecondi."
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "Invia sempre ad AppSec",

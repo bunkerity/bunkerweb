@@ -98,6 +98,7 @@ end
 local BADBEHAVIOR_LOCAL_COUNTER_PREFIX = "plugin_badbehavior_count_"
 
 local utils = {}
+utils.parse_duration = require("bunkerweb.duration").parse_duration
 
 local function ensure_ban_epoch()
 	if not ban_epoch_store then

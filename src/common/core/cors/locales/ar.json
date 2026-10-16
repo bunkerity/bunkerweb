@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "قيمة Access-Control-Max-Age",
-        "help": "قيمة رأس Access-Control-Max-Age."
+        "help": "قيمة رأس Access-Control-Max-Age. يقبل لاحقة زمنية (ms, s, m, h, d, w, M, y)؛ الرقم بدون لاحقة يُحتسب بالثواني."
       },
       "CORS_DENY_REQUEST": {
         "label": "رفض الطلب",

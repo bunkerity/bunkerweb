@@ -15,7 +15,7 @@
       },
       "DATABASE_MAX_SESSION_AGE_DAYS": {
         "label": "Maximum na Edad sa Araw para sa mga UI User Session",
-        "help": "Maximum na edad sa araw para sa mga UI user session bago ito burahin."
+        "help": "Maximum na edad sa araw para sa mga UI user session bago ito burahin. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na araw."
       },
       "DATABASE_POOL_MAX_OVERFLOW": {
         "label": "Maximum na Overflow ng Database Pool",
@@ -27,7 +27,7 @@
       },
       "DATABASE_POOL_RECYCLE": {
         "label": "Pag-recycle ng Database Pool",
-        "help": "Bilang ng segundo bago awtomatikong ma-recycle ang isang koneksyon. I-set sa -1 para i-disable."
+        "help": "Bilang ng segundo bago awtomatikong ma-recycle ang isang koneksyon. I-set sa -1 para i-disable. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "DATABASE_POOL_RESET_ON_RETURN": {
         "label": "Pag-reset ng Database Pool sa Pagbalik",
@@ -39,7 +39,7 @@
       },
       "DATABASE_POOL_TIMEOUT": {
         "label": "Timeout ng Database Pool",
-        "help": "Bilang ng segundong hihintayin bago sumuko sa pagkuha ng koneksyon mula sa pool."
+        "help": "Bilang ng segundong hihintayin bago sumuko sa pagkuha ng koneksyon mula sa pool. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "DATABASE_REQUEST_RETRY_ATTEMPTS": {
         "label": "Bilang ng Pagsubok Muli ng Database Request",
@@ -47,11 +47,11 @@
       },
       "DATABASE_REQUEST_RETRY_DELAY": {
         "label": "Pagkaantala ng Pagsubok Muli ng Database Request",
-        "help": "Pagkaantala sa segundo sa pagitan ng mga pagsubok muli para sa mga pansamantalang error ng database."
+        "help": "Pagkaantala sa segundo sa pagitan ng mga pagsubok muli para sa mga pansamantalang error ng database. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "DATABASE_RETRY_TIMEOUT": {
         "label": "Timeout ng Pagsubok Muli ng Database",
-        "help": "Maximum na bilang ng segundong hihintayin para maging available ang database sa startup."
+        "help": "Maximum na bilang ng segundong hihintayin para maging available ang database sa startup. Tumatanggap ng suffix ng oras (ms, s, m, h, d, w, M, y); ang numerong walang suffix ay itinuturing na segundo."
       },
       "DATABASE_URI": {
         "label": "URI ng Database",

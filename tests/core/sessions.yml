@@ -22,6 +22,26 @@ actions:
     config:
       SESSIONS_NAME: "test"
 
+  # The three timeouts in the 1.6.16 suffixed form. sessions.lua used to `tonumber()` them: a suffix gave
+  # nil, which lua-resty-session silently replaces by its own defaults, so the cookie is still issued
+  # and this action cannot tell a read value from an ignored one. It does prove the suffixed values
+  # are accepted by the schema and that the session still starts with them. That they are READ (30m,
+  # 1h and 1d, in seconds) is asserted by tests/unit/common/test_duration_readers_lua.py; observing
+  # it here would need the cookie's lifetime, which lua-resty-session does not put in the cookie
+  # and `type: cookie` does not expose, so it is a framework change and is left out.
+  suffixed_timeouts:
+    type: "cookie"
+    url: "http://www.example.com"
+    cookie_name: "test"
+    cookie_rx: "^[A-Za-z0-9_-]{110,}$"
+    cookie_http_only_flag: true
+    cookie_same_site_flag: "Lax"
+    config:
+      SESSIONS_NAME: "test"
+      SESSIONS_IDLING_TIMEOUT: "30m"
+      SESSIONS_ROLLING_TIMEOUT: "1h"
+      SESSIONS_ABSOLUTE_TIMEOUT: "1d"
+
 config:
   USE_ANTIBOT: "cookie"
   REMOTE_PHP: "php-fpm"

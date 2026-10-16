@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Access-Control-Max-Age मान",
-        "help": "Access-Control-Max-Age हेडर का मान।"
+        "help": "Access-Control-Max-Age हेडर का मान। समय प्रत्यय (ms, s, m, h, d, w, M, y) स्वीकार किया जाता है; प्रत्यय के बिना संख्या सेकंड में मानी जाती है।"
       },
       "CORS_DENY_REQUEST": {
         "label": "अनुरोध अस्वीकार करें",

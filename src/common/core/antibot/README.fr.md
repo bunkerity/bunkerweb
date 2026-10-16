@@ -29,8 +29,8 @@ Les paramètres suivants sont partagés par tous les mécanismes de défi :
 | Paramètre              | Valeur par défaut | Contexte  | Multiple | Description                                                                                                                                                 |
 | ---------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_URI`          | `/challenge`      | multisite | non      | URL du défi : l’URL vers laquelle les utilisateurs sont redirigés pour compléter le défi. Veillez à ce que cette URL ne soit pas utilisée pour autre chose. |
-| `ANTIBOT_TIME_RESOLVE` | `60`              | multisite | non      | Délai du défi : temps maximum (en secondes) pour compléter le défi. Au‑delà, un nouveau défi est généré.                                                    |
-| `ANTIBOT_TIME_VALID`   | `86400`           | multisite | non      | Validité du défi : durée (en secondes) pendant laquelle un défi réussi reste valide. Passé ce délai, un nouveau défi sera requis.                           |
+| `ANTIBOT_TIME_RESOLVE` | `1m`              | multisite | non      | Délai du défi : temps maximum (en secondes) pour compléter le défi. Au‑delà, un nouveau défi est généré. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
+| `ANTIBOT_TIME_VALID`   | `1d`              | multisite | non      | Validité du défi : durée (en secondes) pendant laquelle un défi réussi reste valide. Passé ce délai, un nouveau défi sera requis. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `ANTIBOT_SUCCESS_URI`  |                   | multisite | non      | URL de redirection après succès : une URL fixe vers laquelle rediriger les utilisateurs après qu’ils ont résolu le défi, au lieu de la page initialement demandée. Laissez vide pour renvoyer les utilisateurs vers leur destination d’origine.                           |
 
 ### Exclure du trafic des défis

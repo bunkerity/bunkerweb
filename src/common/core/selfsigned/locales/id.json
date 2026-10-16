@@ -15,7 +15,7 @@
       },
       "SELF_SIGNED_SSL_EXPIRY": {
         "label": "Masa berlaku sertifikat",
-        "help": "Masa berlaku sertifikat self-signed dalam hari."
+        "help": "Masa berlaku sertifikat self-signed dalam hari. Menerima akhiran waktu (ms, s, m, h, d, w, M, y); angka tanpa akhiran dihitung dalam hari."
       },
       "SELF_SIGNED_SSL_SUBJ": {
         "label": "Subjek sertifikat",

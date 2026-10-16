@@ -15,7 +15,7 @@
       },
       "REVERSE_SCAN_TIMEOUT": {
         "label": "Tempo limite da análise inversa",
-        "help": "Especifica o tempo limite máximo (em ms) ao analisar uma porta."
+        "help": "Especifica o tempo limite máximo (em ms) ao analisar uma porta. Aceita um sufixo de tempo (ms, s, m, h, d, w, M, y); um número sem sufixo é interpretado em milissegundos."
       }
     }
   }

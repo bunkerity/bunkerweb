@@ -31,15 +31,15 @@
       },
       "LETS_ENCRYPT_ZEROSSL_API_RETRY_DELAY": {
         "label": "ZeroSSL API পুনঃচেষ্টা বিলম্ব",
-        "help": "zerossl-bot-এ ZeroSSL API পুনঃচেষ্টার মধ্যে বিলম্ব সেকেন্ডে।"
+        "help": "zerossl-bot-এ ZeroSSL API পুনঃচেষ্টার মধ্যে বিলম্ব সেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি সেকেন্ড হিসেবে ধরা হয়।"
       },
       "LETS_ENCRYPT_ZEROSSL_API_CONNECT_TIMEOUT": {
         "label": "ZeroSSL API কানেক্ট টাইমআউট",
-        "help": "zerossl-bot-এ ZeroSSL API অনুরোধের জন্য কানেকশন টাইমআউট সেকেন্ডে।"
+        "help": "zerossl-bot-এ ZeroSSL API অনুরোধের জন্য কানেকশন টাইমআউট সেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি সেকেন্ড হিসেবে ধরা হয়।"
       },
       "LETS_ENCRYPT_ZEROSSL_API_MAX_TIME": {
         "label": "ZeroSSL API সর্বোচ্চ সময়",
-        "help": "zerossl-bot-এ প্রতিটি ZeroSSL API অনুরোধের জন্য সর্বোচ্চ মোট সময় সেকেন্ডে।"
+        "help": "zerossl-bot-এ প্রতিটি ZeroSSL API অনুরোধের জন্য সর্বোচ্চ মোট সময় সেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি সেকেন্ড হিসেবে ধরা হয়।"
       },
       "LETS_ENCRYPT_CHALLENGE": {
         "label": "চ্যালেঞ্জের ধরন",
@@ -51,7 +51,7 @@
       },
       "LETS_ENCRYPT_DNS_PROPAGATION": {
         "label": "DNS প্রসার",
-        "help": "DNS চ্যালেঞ্জের জন্য DNS প্রসারের জন্য অপেক্ষা করার সময় সেকেন্ডে।"
+        "help": "DNS চ্যালেঞ্জের জন্য DNS প্রসারের জন্য অপেক্ষা করার সময় সেকেন্ডে। সময়ের প্রত্যয় (ms, s, m, h, d, w, M, y) গ্রহণ করে; প্রত্যয় ছাড়া সংখ্যাটি সেকেন্ড হিসেবে ধরা হয়।"
       },
       "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": {
         "label": "ক্রেডেনশিয়াল আইটেম",

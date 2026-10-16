@@ -40,7 +40,7 @@
       },
       "CROWDSEC_REQUEST_TIMEOUT": {
         "label": "CrowdSec live 请求超时",
-        "help": "bouncer 查询 CrowdSec 本地 API 时,HTTP 请求的超时时间(以毫秒为单位)。"
+        "help": "bouncer 查询 CrowdSec 本地 API 时,HTTP 请求的超时时间(以毫秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为毫秒。"
       },
       "CROWDSEC_EXCLUDE_LOCATION": {
         "label": "CrowdSec 排除的位置",
@@ -56,11 +56,15 @@
       },
       "CROWDSEC_CACHE_EXPIRATION": {
         "label": "CrowdSec 缓存过期时间",
-        "help": "bouncer 在 live 模式下缓存 IP 的缓存过期时间(以秒为单位)。"
+        "help": "bouncer 在 live 模式下缓存 IP 的缓存过期时间(以秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "CROWDSEC_UPDATE_FREQUENCY": {
         "label": "CrowdSec 请求超时",
-        "help": "从 CrowdSec 本地 API 拉取新增/失效 IP 的更新频率(以秒为单位)。"
+        "help": "从 CrowdSec 本地 API 拉取新增/失效 IP 的更新频率(以秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
+      },
+      "CROWDSEC_BAN_REFRESH": {
+        "label": "CrowdSec 封禁续期",
+        "help": "将 CrowdSec 的拦截转为短期 BunkerWeb 封禁,并在 CrowdSec 决策持续期间续期。该值是再次询问 CrowdSec 之前封禁最长持续的时间。0 表示禁用。设置了 CROWDSEC_EXCLUDE_LOCATION 的服务不会获得 CrowdSec 封禁。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为秒。"
       },
       "CROWDSEC_APPSEC_URL": {
         "label": "AppSec URL",
@@ -72,15 +76,15 @@
       },
       "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
         "label": "AppSec 连接超时",
-        "help": "处理组件与 AppSec 组件之间连接的超时时间(以毫秒为单位)。"
+        "help": "处理组件与 AppSec 组件之间连接的超时时间(以毫秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为毫秒。"
       },
       "CROWDSEC_APPSEC_SEND_TIMEOUT": {
         "label": "AppSec 发送超时",
-        "help": "从处理组件向 AppSec 组件发送数据的超时时间(以毫秒为单位)。"
+        "help": "从处理组件向 AppSec 组件发送数据的超时时间(以毫秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为毫秒。"
       },
       "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
         "label": "AppSec 处理超时",
-        "help": "处理组件向 AppSec 组件发出的请求的处理超时时间(以毫秒为单位)。"
+        "help": "处理组件向 AppSec 组件发出的请求的处理超时时间(以毫秒为单位)。支持时间后缀(ms、s、m、h、d、w、M、y);无后缀的数字单位为毫秒。"
       },
       "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
         "label": "始终发送到 AppSec",

@@ -49,7 +49,7 @@
       },
       "CORS_MAX_AGE": {
         "label": "Valeur d'Access-Control-Max-Age",
-        "help": "Valeur de l'en-tête Access-Control-Max-Age."
+        "help": "Valeur de l'en-tête Access-Control-Max-Age. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes."
       },
       "CORS_DENY_REQUEST": {
         "label": "Refuser la requête",

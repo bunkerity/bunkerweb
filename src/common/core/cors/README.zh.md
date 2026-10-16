@@ -31,7 +31,7 @@ CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地
 | `CROSS_ORIGIN_OPENER_POLICY`   | `same-origin`                                                                        | multisite | 否   | **跨源打开器策略：** 控制浏览上下文之间的通信。                                                  |
 | `CROSS_ORIGIN_EMBEDDER_POLICY` | `require-corp`                                                                       | multisite | 否   | **跨源嵌入器策略：** 控制文档是否可以加载来自其他来源的资源。                                    |
 | `CROSS_ORIGIN_RESOURCE_POLICY` | `same-site`                                                                          | multisite | 否   | **跨源资源策略：** 控制哪些网站可以嵌入您的资源。                                                |
-| `CORS_MAX_AGE`                 | `86400`                                                                              | multisite | 否   | **预检缓存持续时间：** 浏览器应缓存预检响应的时间（以秒为单位）。                                |
+| `CORS_MAX_AGE`                 | `1d`                                                                                 | multisite | 否   | **预检缓存持续时间：** 浏览器应缓存预检响应的时间（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | 否   | **拒绝未经授权的来源：** 当为 `yes` 时，来自未经授权来源的请求将被拒绝并返回错误代码。           |
 
 !!! tip "优化预检请求"

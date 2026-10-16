@@ -19,6 +19,7 @@ local is_whitelisted = utils.is_whitelisted
 local is_ip_whitelisted = utils.is_ip_whitelisted
 local is_banned = utils.is_banned
 local get_security_mode = utils.get_security_mode
+local parse_duration = utils.parse_duration
 local tostring = tostring
 local time = os.time
 local date = os.date
@@ -77,13 +78,13 @@ function badbehavior:log()
 	if self.ctx.bw.server_name == "_" then
 		ban_scope = "global"
 	end
-	local ban_time = tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]) or 0
+	local ban_time = parse_duration(self.variables["BAD_BEHAVIOR_BAN_TIME"], "s") or 0
 
 	local ok, err = self.datastore.dict:rpush(
 		"plugin_badbehavior_incr",
 		encode({
 			ip = self.ctx.bw.remote_addr,
-			count_time = tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]),
+			count_time = parse_duration(self.variables["BAD_BEHAVIOR_COUNT_TIME"], "s"),
 			ban_time = ban_time,
 			threshold = tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]),
 			use_redis = self.use_redis,
@@ -117,7 +118,7 @@ function badbehavior:log()
 		ban_scope = ban_scope,
 		ban_time = ban_time,
 		threshold = tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]) or 0,
-		count_time = tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]) or 0,
+		count_time = parse_duration(self.variables["BAD_BEHAVIOR_COUNT_TIME"], "s") or 0,
 	})
 	return self:ret(true, "success")
 end

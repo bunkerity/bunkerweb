@@ -29,15 +29,15 @@ Comment ça marche :
 | `REDIS_SSL`               | `no`       | global   | non      | Activer SSL/TLS.                                               |
 | `REDIS_SSL_VERIFY`        | `yes`      | global   | non      | Vérifier le certificat SSL du serveur.                         |
 | `REDIS_SSL_CA`            |            | global   | non      | Bundle d’AC (PEM) pour vérifier le certificat du serveur (AC privée). Utilisé par les clients Python et, via le bundle de confiance généré, par le chemin de requête. Un fichier absent ou invalide fait échouer la génération de configuration. |
-| `REDIS_TIMEOUT`           | `1000`     | global   | non      | Timeout (ms) pour connexion/lecture/écriture.                  |
+| `REDIS_TIMEOUT`           | `1s`       | global   | non      | Timeout (ms) pour connexion/lecture/écriture. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
 | `REDIS_USERNAME`          |            | global   | non      | Nom d’utilisateur (Redis ≥ 6.0).                               |
 | `REDIS_PASSWORD`          |            | global   | non      | Mot de passe.                                                  |
-| `REDIS_CLUSTER_NODES` | | global | non | Nœuds de départ `host:port` séparés par des espaces (`[ipv6]:port` pour IPv6). Vide conserve le mode autonome ou Sentinel. |
+| `REDIS_CLUSTER_NODES` | | global | non | Nœuds de départ `host[:port]` séparés par des espaces (le port par défaut est `6379` ; `[ipv6]:port` pour IPv6). Vide conserve le mode autonome ou Sentinel. |
 | `REDIS_SENTINEL_HOSTS`    |            | global   | non      | Hôtes Sentinel (séparés par espaces, `hôte:port`).             |
 | `REDIS_SENTINEL_USERNAME` |            | global   | non      | Utilisateur Sentinel.                                          |
 | `REDIS_SENTINEL_PASSWORD` |            | global   | non      | Mot de passe Sentinel.                                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global   | non      | Nom du master Sentinel.                                        |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`    | global   | non      | Temps d’inactivité max (ms) avant fermeture d’une connexion du pool. |
+| `REDIS_KEEPALIVE_IDLE`    | `30s`      | global   | non      | Temps d’inactivité max (ms) avant fermeture d’une connexion du pool. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en millisecondes. |
 | `REDIS_KEEPALIVE_POOL`    | `64`       | global   | non      | Nb max de connexions conservées dans le pool, par worker NGINX. |
 
 !!! info "Autorité privée : comment `REDIS_SSL_CA` est approuvée"

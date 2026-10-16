@@ -19,6 +19,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, load_pem_private_key
 
+from common_utils import parse_duration_int  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -122,6 +123,11 @@ def key_matches_certificate(key_path: Path, certificate: x509.Certificate) -> bo
 
 def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path, server_names: List[str]) -> Tuple[bool, int]:
     subj, sans = certificate_identity(subj, server_names or [first_server])
+    try:
+        days = str(parse_duration_int(days, "d"))
+    except ValueError:
+        LOGGER.warning(f"Invalid SELF_SIGNED_SSL_EXPIRY value: {days}, using default value (365)")
+        days = "365"
     server_path = self_signed_path.joinpath(first_server)
     cert_path = server_path.joinpath("cert.pem")
     key_path = server_path.joinpath("key.pem")
