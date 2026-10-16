@@ -49,7 +49,7 @@ Route -> DATA["RELOADING"] = True -> CONFIG_TASKS_EXECUTOR.submit(task)
 
 ### Authentication
 
-Flask-Login with `session_protection = "strong"` (IP + User-Agent validated per request). Sessions live in Redis when available, otherwise `SafeFileSystemCache`. Proxied mode uses `__Host-bw_ui_session` (Secure, HttpOnly, SameSite=Lax); direct HTTP falls back to the non-Secure `bw_ui_session`, while retaining HttpOnly and SameSite=Lax. Biscuit tokens carry RBAC; TOTP 2FA with recovery codes; CSRF via Flask-WTF on every POST.
+Flask-Login with `session_protection = "strong"` (IP + User-Agent validated per request). Sessions live in Redis when available, otherwise `SafeFileSystemCache`; a Redis that fails after startup falls back to it per host (`ResilientRedisSessionInterface`), revocation markers are mirrored there too (`revoke_sessions`), and `UI_USE_REDIS=no` keeps the UI on it without touching `USE_REDIS`. The gunicorn master decides the backend once at start and publishes it as `UI_SESSION_BACKEND` for every worker, recycled ones included, so a `USE_REDIS` toggle takes effect at the next `bw-ui` restart. Proxied mode uses `__Host-bw_ui_session` (Secure, HttpOnly, SameSite=Lax); direct HTTP falls back to the non-Secure `bw_ui_session`, while retaining HttpOnly and SameSite=Lax. Biscuit tokens carry RBAC; TOTP 2FA with recovery codes; CSRF via Flask-WTF on every POST.
 
 ### Plugin hooks
 

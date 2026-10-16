@@ -18,7 +18,7 @@ from app.dependencies import API_CLIENT, BW_CONFIG
 from app.i18n import translated
 from app.utils import LOGGER, flash
 
-from common_utils import get_redis_client as get_common_redis_client, parse_duration_int  # type: ignore
+from common_utils import get_redis_client as get_common_redis_client, getenv_bool, parse_duration_int  # type: ignore
 from custom_configs_validation import build_env_style_key_rx  # type: ignore
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
@@ -249,9 +249,14 @@ def cors_required(f):
     return decorated_function
 
 
-def get_redis_client():
+def get_redis_client(master_chose_redis: bool = False):
     """
     Get a Redis client using configuration from BW_CONFIG.
+
+    ``master_chose_redis`` is for a worker booting its session backend after the gunicorn master
+    picked Redis (``UI_SESSION_BACKEND=redis``): the worker never re-reads ``USE_REDIS`` and keeps
+    the client when Redis is unreachable, so the resilient session falls back by itself instead of
+    the worker switching backends. Nothing is cached on ``g`` and nothing is flashed.
 
     The client itself is memoised process-wide by ``common_utils.get_redis_client``,
     keyed on the connection parameters, so background executor threads share the
@@ -261,8 +266,17 @@ def get_redis_client():
     request context (e.g. background executor threads, CLI) nothing is cached on
     ``g`` and ``flash`` is skipped.
     """
-    if has_request_context() and "bw_redis_client" in g:
+    if not master_chose_redis and has_request_context() and "bw_redis_client" in g:
         return g.bw_redis_client
+
+    # Per-container opt-out, read from the environment so it works when the shared Redis is
+    # the thing that is broken: sessions go to the local store and every other Redis branch
+    # falls back to the instances API, without taking Redis away from the rest of the stack
+    # the way the global USE_REDIS setting does.
+    if not getenv_bool("UI_USE_REDIS", "yes"):
+        if has_request_context():
+            g.bw_redis_client = None
+        return None
 
     db_config = BW_CONFIG.get_config(
         global_only=True,
@@ -287,7 +301,7 @@ def get_redis_client():
         ),
     )
 
-    use_redis = db_config.get("USE_REDIS", "no") == "yes"
+    use_redis = master_chose_redis or db_config.get("USE_REDIS", "no") == "yes"
 
     redis_client = get_common_redis_client(
         use_redis=use_redis,
@@ -307,7 +321,11 @@ def get_redis_client():
         redis_sentinel_password=db_config.get("REDIS_SENTINEL_PASSWORD") or None,
         redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
         logger=LOGGER,
+        keep_unreachable=master_chose_redis,
     )
+
+    if master_chose_redis:
+        return redis_client
 
     if use_redis and not redis_client and has_request_context():
         flash(translated("utils.flash.couldn_t_connect_redis") or "Couldn't connect to redis", "error")

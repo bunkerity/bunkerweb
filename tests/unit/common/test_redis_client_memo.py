@@ -137,6 +137,23 @@ def test_the_window_expires_and_another_connect_is_tried(monkeypatch):
     assert len(_FakeRedis.instances) > attempts
 
 
+def test_keep_unreachable_hands_back_the_client_and_still_arms_the_window(monkeypatch):
+    clock = [1000.0]
+    monkeypatch.setattr(common_utils, "monotonic", lambda: clock[0])
+
+    kept = _connect(redis_host="down", keep_unreachable=True)
+    assert kept is not None and kept.pings == 1
+    assert _connect(redis_host="down") is None, "everyone else keeps seeing a down Redis as None"
+    # Inside the window the session still gets its client: it must not depend on who probed first.
+    assert _connect(redis_host="down", keep_unreachable=True) is not None
+
+
+def test_keep_unreachable_covers_a_down_sentinel():
+    assert _connect(redis_host=None, redis_sentinel_hosts=[("s", 26379)], redis_sentinel_master="unreachable") is None
+    kept = _connect(redis_host=None, redis_sentinel_hosts=[("s", 26379)], redis_sentinel_master="unreachable", keep_unreachable=True)
+    assert kept is not None
+
+
 def test_a_sentinel_failure_arms_the_window_too(monkeypatch):
     """The inner handler this replaces returned early, so the outer `except` never ran and
     every request paid a full `discover_master` timeout against a down Sentinel."""
@@ -203,3 +220,74 @@ def test_the_floor_is_never_below_the_two_ui_executors(monkeypatch):
     monkeypatch.setenv("MAX_THREADS", "0")
 
     assert common_utils.shared_redis_pool_size() >= 32
+
+
+# --------------------------------------------------------------------------------------
+# Redis Cluster that cannot be reached when the client is built
+# --------------------------------------------------------------------------------------
+class _ClusterDown(Exception):
+    """Stands in for redis.exceptions.ConnectionError."""
+
+
+class _FakeClusterNode:
+    def __init__(self, host, port):
+        self.host, self.port = host, port
+
+
+class _FakeRedisCluster:
+    reachable = False
+    built = 0
+
+    def __init__(self, **kwargs):
+        type(self).built += 1
+        if not type(self).reachable:
+            raise RuntimeError("Redis Cluster cannot be connected. Please provide at least one reachable node.")
+
+    def ping(self):
+        return True
+
+    def get(self, key):
+        return b"value"
+
+
+@pytest.fixture
+def _fake_cluster(monkeypatch):
+    cluster = types.ModuleType("redis.cluster")
+    cluster.RedisCluster, cluster.ClusterNode = _FakeRedisCluster, _FakeClusterNode
+    exceptions = types.ModuleType("redis.exceptions")
+    exceptions.ConnectionError = _ClusterDown
+    monkeypatch.setitem(sys.modules, "redis.cluster", cluster)
+    monkeypatch.setitem(sys.modules, "redis.exceptions", exceptions)
+    _FakeRedisCluster.reachable, _FakeRedisCluster.built = False, 0
+
+
+def _connect_cluster(**overrides):
+    return common_utils.get_redis_client(use_redis=True, redis_cluster_nodes="r1:7000 r2:7001", redis_timeout="300", **overrides)
+
+
+def test_an_unreachable_cluster_is_still_none_for_everyone_else(_fake_cluster):
+    assert _connect_cluster() is None
+
+
+def test_keep_unreachable_hands_back_a_client_when_no_cluster_node_answers(_fake_cluster):
+    kept = _connect_cluster(keep_unreachable=True)
+    assert kept is not None
+    with pytest.raises(_ClusterDown):
+        kept.get("k")
+
+
+def test_the_lazy_cluster_client_builds_the_real_one_once_the_window_has_passed(monkeypatch, _fake_cluster):
+    clock = [1000.0]
+    monkeypatch.setattr(common_utils, "monotonic", lambda: clock[0])
+    kept = _connect_cluster(keep_unreachable=True)
+    built = _FakeRedisCluster.built
+
+    _FakeRedisCluster.reachable = True
+    with pytest.raises(_ClusterDown):
+        kept.get("k")  # still inside the negative window: no new connect attempt
+    assert _FakeRedisCluster.built == built
+
+    clock[0] += common_utils.REDIS_NEGATIVE_CACHE_SECONDS + 1
+    assert kept.get("k") == b"value"
+    assert kept.get("k") == b"value"
+    assert _FakeRedisCluster.built == built + 1, "the real client is built once and then reused"

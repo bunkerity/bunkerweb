@@ -1,13 +1,14 @@
 """Exercise the actual UI session initialization statements."""
 
 import ast
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[3]
 
 
-def test_ui_keeps_selected_cluster_client_after_session_initialization():
+def test_ui_keeps_selected_cluster_client_after_session_initialization(monkeypatch):
     source = (ROOT / "src/ui/main.py").read_text()
     tree = ast.parse(source)
     nodes = next(
@@ -25,7 +26,16 @@ def test_ui_keeps_selected_cluster_client_after_session_initialization():
         and nodes[i].value.func.id == "bind_session_cookie_per_request"
     )
     cluster = object()
-    app = SimpleNamespace(config={"SESSION_CACHELIB": object()})
+    app = SimpleNamespace(config={"SESSION_CACHELIB": object(), "SESSION_KEY_PREFIX": "p:", "SESSION_ID_LENGTH": 64})
+
+    class Resilient:
+        """Stands in for the real interface, which needs flask-session and cachelib."""
+
+        def __init__(self, app, *, client, **kwargs):
+            # flask-session's Redis type check substitutes localhost for RedisCluster.
+            self.client = object()
+
+    monkeypatch.setitem(sys.modules, "app.models.resilient_session", SimpleNamespace(ResilientRedisSessionInterface=Resilient))
 
     class Session:
         def init_app(self, app):
@@ -37,6 +47,7 @@ def test_ui_keeps_selected_cluster_client_after_session_initialization():
         redis_client=cluster,
         Session=Session,
         is_cluster=lambda c: c is cluster,
+        LOGGER=object(),
         CacheLibSessionInterface=lambda **kw: object(),
         chain_session_fallback=lambda *a: None,
     )

@@ -202,6 +202,26 @@ def _wait_for_first_config(api_client, logger, max_retries=30, delay=2) -> bool:
     return False
 
 
+def ui_wants_redis_sessions(api_client, logger) -> bool:
+    """Whether the UI should keep its sessions in Redis: USE_REDIS from the environment or the API.
+
+    `UI_USE_REDIS=no` is a per-container opt-out that wins over USE_REDIS (see
+    `get_redis_client` in app/routes/utils.py) and skips the API lookup.
+    """
+    if not getenv_bool("UI_USE_REDIS", "yes"):
+        return False
+
+    use_redis = getenv("USE_REDIS", "no").lower() == "yes"
+    if not use_redis:
+        try:
+            settings_resp = api_client._get("/global_settings", params={"filtered_settings": ["USE_REDIS"], "global_only": "true"})
+            db_config = settings_resp.get("settings", {})
+            use_redis = db_config.get("USE_REDIS", "no") == "yes"
+        except (ApiClientError, ApiUnavailableError) as e:
+            logger.warning(f"Could not check USE_REDIS via API: {e}, defaulting to environment value")
+    return use_redis
+
+
 def on_starting(server):
     TMP_DIR.mkdir(parents=True, exist_ok=True)
     TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
@@ -731,15 +751,9 @@ def on_starting(server):
     if not _wait_for_first_config(api_client, LOGGER):
         LOGGER.warning("The scheduler has not saved its first configuration yet, starting anyway: the workers may pick a different session backend later")
 
-    # Check if Redis is enabled via environment variable or API global settings
-    use_redis = getenv("USE_REDIS", "no").lower() == "yes"
-    if not use_redis:
-        try:
-            settings_resp = api_client._get("/global_settings", params={"filtered_settings": ["USE_REDIS"], "global_only": "true"})
-            db_config = settings_resp.get("settings", {})
-            use_redis = db_config.get("USE_REDIS", "no") == "yes"
-        except (ApiClientError, ApiUnavailableError) as e:
-            LOGGER.warning(f"Could not check USE_REDIS via API: {e}, defaulting to environment value")
+    use_redis = ui_wants_redis_sessions(api_client, LOGGER)
+    # Workers are forked from this process, recycled ones included, so one decision here keeps the pool uniform.
+    environ["UI_SESSION_BACKEND"] = "redis" if use_redis else "filesystem"
 
     LOGGER.info(
         "UI will disconnect users that have their IP address changed during a session"
@@ -749,7 +763,10 @@ def on_starting(server):
     UI_SESSIONS_CACHE.mkdir(parents=True, exist_ok=True)
 
     if not use_redis:
-        LOGGER.warning("Using filesystem session backend — consider enabling Redis (USE_REDIS=yes) for better multi-worker stability")
+        if getenv_bool("UI_USE_REDIS", "yes"):
+            LOGGER.warning("Using filesystem session backend — consider enabling Redis (USE_REDIS=yes) for better multi-worker stability")
+        else:
+            LOGGER.info("UI_USE_REDIS=no: the UI keeps its sessions on the local filesystem")
 
     if TMP_PID_FILE.is_file():
         LOGGER.info("Stopping temporary UI...")

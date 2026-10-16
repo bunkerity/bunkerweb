@@ -798,6 +798,40 @@ _REDIS_CLIENT_ENTRY: Optional[Tuple[tuple, Any, float]] = None
 REDIS_NEGATIVE_CACHE_SECONDS = 10.0
 
 
+class _LazyRedisCluster:
+    """Stand-in for a RedisCluster that could not be built because no seed node answered.
+
+    RedisCluster() needs a reachable node, so a cluster that is down at boot leaves no client to
+    hand out. This one builds the real client on first use, retries after the negative window, and
+    until then raises redis' ConnectionError, which is the error callers already treat as an outage.
+    ponytail: attribute access only; redis_keys.is_cluster() sees a plain object, fine for the one
+    caller that asks for it (session storage), widen if another does.
+    """
+
+    def __init__(self, build):
+        self._build = build
+        self._client = None
+        self._retry_at = monotonic() + REDIS_NEGATIVE_CACHE_SECONDS
+        self._lock = Lock()
+
+    def __getattr__(self, name):
+        client = self._client
+        if client is None:
+            from redis.exceptions import ConnectionError as RedisConnectionError
+
+            with self._lock:
+                client = self._client
+                if client is None:
+                    if monotonic() < self._retry_at:
+                        raise RedisConnectionError("Redis Cluster is unreachable")
+                    try:
+                        client = self._client = self._build()
+                    except Exception as e:
+                        self._retry_at = monotonic() + REDIS_NEGATIVE_CACHE_SECONDS
+                        raise RedisConnectionError(f"Redis Cluster is unreachable: {e}") from e
+        return getattr(client, name)
+
+
 def shared_redis_pool_size() -> int:
     """Upper bound on connections in the process-wide Redis pool.
 
@@ -844,6 +878,7 @@ def get_redis_client(
     redis_sentinel_master: str = "",
     logger: Optional[logging.Logger] = None,
     redis_cluster_nodes: str = "",
+    keep_unreachable: bool = False,
 ) -> Any:
     """
     Get a Redis client using provided configuration parameters.
@@ -867,6 +902,11 @@ def get_redis_client(
         redis_sentinel_password: Redis Sentinel password
         redis_sentinel_master: Redis Sentinel master name
         logger: Logger instance for logging errors
+        keep_unreachable: return the client even when the first ping fails (it connects lazily, so
+            it works once Redis is back). The failure is still logged and still arms the negative
+            window, so every other caller keeps getting ``None``. A cluster client cannot be built
+            without a reachable node, so that topology returns a lazy stand-in that builds it once
+            a node answers.
 
     Returns:
         Redis client instance or None if connection fails
@@ -953,7 +993,7 @@ def get_redis_client(
             # No ping on a cache hit: it never proved anything about the next command, and
             # every Redis branch in the Web UI already falls back to the instance HTTP APIs.
             return entry[1]
-        if monotonic() < entry[2]:
+        if monotonic() < entry[2] and not keep_unreachable:
             return None
 
     redis_client = None
@@ -963,17 +1003,26 @@ def get_redis_client(
         if cluster_nodes:
             from redis.cluster import ClusterNode, RedisCluster
 
-            redis_client = RedisCluster(
-                startup_nodes=list(starmap(ClusterNode, cluster_nodes)),
-                username=redis_username,
-                password=redis_password,
-                socket_timeout=redis_timeout / 1000,
-                socket_connect_timeout=redis_timeout / 1000,
-                socket_keepalive=True,
-                max_connections=shared_redis_pool_size(),
-                ssl=redis_ssl,
-                **ssl_kwargs,
-            )
+            def build_cluster():
+                return RedisCluster(
+                    startup_nodes=list(starmap(ClusterNode, cluster_nodes)),
+                    username=redis_username,
+                    password=redis_password,
+                    socket_timeout=redis_timeout / 1000,
+                    socket_connect_timeout=redis_timeout / 1000,
+                    socket_keepalive=True,
+                    max_connections=shared_redis_pool_size(),
+                    ssl=redis_ssl,
+                    **ssl_kwargs,
+                )
+
+            try:
+                redis_client = build_cluster()
+            except Exception:
+                if keep_unreachable:
+                    # The outer handler logs, arms the window and returns this client.
+                    redis_client = _LazyRedisCluster(build_cluster)
+                raise
         elif redis_sentinel_hosts:
             if logger:
                 logger.info(f"Connecting to Redis Sentinel cluster: {redis_sentinel_hosts}")
@@ -990,18 +1039,18 @@ def get_redis_client(
                 **ssl_kwargs,
             )
 
-            # Test the connection. No inner handler: a Sentinel failure must reach the outer
-            # except below, which is what arms the negative window. Returning early here left
-            # every request paying a full discover_master timeout against a down Sentinel.
-            sentinel.discover_master(redis_sentinel_master)
-
-            # Get master connection
+            # Get master connection. Lazy, so it exists before the discovery below can fail.
             redis_client = sentinel.master_for(
                 redis_sentinel_master,
                 db=redis_db,
                 username=redis_username,
                 password=redis_password,
             )
+
+            # Test the connection. No inner handler: a Sentinel failure must reach the outer
+            # except below, which is what arms the negative window. Returning early here left
+            # every request paying a full discover_master timeout against a down Sentinel.
+            sentinel.discover_master(redis_sentinel_master)
 
         # Direct connection to Redis
         else:
@@ -1049,7 +1098,7 @@ def get_redis_client(
             entry = _REDIS_CLIENT_ENTRY
             if entry is None or entry[0] != cache_key or entry[1] is None:
                 _REDIS_CLIENT_ENTRY = (cache_key, None, monotonic() + REDIS_NEGATIVE_CACHE_SECONDS)
-        return None
+        return redis_client if keep_unreachable else None
 
 
 LIST_JSON_MIME_SUFFIXES = ("json", "jsonl", "jsonlines")

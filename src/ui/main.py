@@ -33,7 +33,7 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import is_newer_version_available  # type: ignore
+from common_utils import getenv_bool, is_newer_version_available  # type: ignore
 from redis_keys import is_cluster  # type: ignore
 from jobs import JOB_DEFERRAL_PREFIX  # type: ignore
 from resource_group_resolver import kind_for_key as resource_kind_for_setting  # type: ignore
@@ -761,22 +761,51 @@ with app.app_context():
 
     # Same helper the routes use, so the worker ends up with one memoised client and one
     # connection pool instead of a session pool plus a per-request one.
-    redis_client = get_ui_redis_client()
+    # The gunicorn master decides once (UI_SESSION_BACKEND) so a recycled worker cannot disagree with its siblings; unset keeps the per-worker choice.
+    # "redis" is final too: the worker neither re-reads USE_REDIS nor drops to files when Redis is down at boot, the resilient session covers the outage.
+    session_backend = getenv("UI_SESSION_BACKEND")
+    if session_backend == "filesystem":
+        redis_client = None
+    elif session_backend == "redis":
+        redis_client = get_ui_redis_client(master_chose_redis=True)
+    else:
+        redis_client = get_ui_redis_client()
     if redis_client:
         LOGGER.debug("Using Redis as session backend")
         app.config["SESSION_TYPE"] = "redis"
         app.config["SESSION_REDIS"] = redis_client
         app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
     else:
-        # get_redis_client returns None for both "disabled" and "unreachable"; only the second
+        # get_redis_client returns None for "disabled", "opted out" and "unreachable"; only the last
         # is worth a WARNING, because this worker is now pinned to file sessions for its life.
-        if BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",)).get("USE_REDIS", "no") == "yes":
+        if not getenv_bool("UI_USE_REDIS", "yes") or getenv("UI_SESSION_BACKEND") == "filesystem":
+            LOGGER.info("Sessions use the filesystem by choice (UI_USE_REDIS is off, or the master picked it at start)")
+        elif BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",)).get("USE_REDIS", "no") == "yes":
             LOGGER.warning("Redis configured but unavailable for sessions, falling back to FileSystemCache")
         LOGGER.debug("Using FileSystemCache as session backend")
         app.config["SESSION_TYPE"] = "cachelib"
     sess = Session()
     sess.init_app(app)
     if redis_client:
+        # Flask-Session picks the backend from SESSION_TYPE and never revisits it, so a Redis that
+        # dies or fills up after this point made every request carrying a session raise. Same
+        # parameters as the interface it replaces, plus the file store it falls back to meanwhile;
+        # it is the one the cleanup in before_request already prunes.
+        # Imported here rather than at module scope so booting the UI never hard-depends on the
+        # redis package, the same way common_utils treats it.
+        from app.models.resilient_session import ResilientRedisSessionInterface
+
+        app.session_interface = ResilientRedisSessionInterface(
+            app,
+            client=redis_client,
+            fallback=app.config["SESSION_CACHELIB"],
+            logger=LOGGER,
+            key_prefix=app.config["SESSION_KEY_PREFIX"],
+            use_signer=app.config.get("SESSION_USE_SIGNER", False),
+            permanent=app.config.get("SESSION_PERMANENT", True),
+            sid_length=app.config["SESSION_ID_LENGTH"],
+            serialization_format=app.config.get("SESSION_SERIALIZATION_FORMAT", "msgpack"),
+        )
         # flask-session's Redis type check substitutes localhost for RedisCluster.
         if is_cluster(redis_client):
             app.session_interface.client = redis_client
