@@ -274,6 +274,39 @@ msgstr "選取的範圍"
 msgid "bans.chart.timeseries.title"
 msgstr "每區間啟用中的封鎖"
 
+msgid "bans.crowdsec.confirm"
+msgstr "刪除決策並解除封鎖"
+
+msgid "bans.crowdsec.error"
+msgstr "解除封鎖失敗：%(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "解除 CrowdSec 封鎖分兩步：先從 CrowdSec 刪除下方列出的決策，再移除 BunkerWeb 封鎖。沒有第一步，封鎖會在下一次請求時重新出現。"
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "沒有生效的 CrowdSec 封鎖決策：只會移除 BunkerWeb 封鎖。"
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s：封鎖在請求期間被續期或取代，未移除任何內容。請再次解除封鎖。"
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s：部分完成。請再次執行解除封鎖以完成：%(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s：已解除封鎖，已刪除的 CrowdSec 決策：%(count)s。"
+
+msgid "bans.crowdsec.title"
+msgstr "解除 CrowdSec 封鎖"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "部分決策來自 CrowdSec 清單或社群封鎖清單，清單重新整理後可能會再次出現。請將該 IP 加入 CrowdSec 允許清單以保持放行。"
+
+msgid "bans.crowdsec.warning.range"
+msgstr "某個決策涵蓋整個網段：刪除它會解除該網段內所有 IP 的封鎖。"
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "無法使用，結果將不完整：%(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "封鎖 %(ip)s 失敗：%(error)s"
 
@@ -343,6 +376,12 @@ msgstr "無法從 Redis 取得封鎖紀錄，詳情請查看日誌。"
 msgid "bans.flash.skipped_challenged"
 msgstr "已略過 %(count)s 筆報告，其用戶端遭到質詢或重新導向而非封鎖。"
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "權限被拒絕。解除 CrowdSec 封鎖需要在每個相關的 CrowdSec 連線上擁有 ban_delete 與 crowdsec_delete 權限。"
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "此 IP 被 CrowdSec 封鎖攔截。請在表格中該 IP 所在列解除封鎖，該列會顯示將被刪除的 CrowdSec 決策。"
+
 msgid "bans.flash.unban_failed"
 msgstr "解除封鎖 %(ip)s 失敗：%(error)s"
 
@@ -354,6 +393,9 @@ msgstr "更新 %(ip)s 的封鎖時長失敗：%(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "已成功更新 %(ip)s 的封鎖時長。"
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec 租約"
 
 msgid "bans.stats.card.by_reason"
 msgstr "依原因統計封鎖"
@@ -3825,6 +3867,12 @@ msgstr "啟用 Docker Autoconf 整合。"
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf 模式"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "封鎖原因清單：因這些原因被封鎖的 IP 會在 TLS ClientHello 階段被捨棄，而不是收到 403 頁面。使用依標頭取得的真實 IP 時會略過；使用 PROXY 協定時也會略過，除非真實 IP 使用 proxy_protocol。"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "在 TLS 階段捨棄的封鎖"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "以空格分隔的 BunkerWeb 執行個體清單（格式：fqdn-or-ip:5000 http://fqdn-or-ip:5000）"
@@ -7901,6 +7949,18 @@ msgstr "擷取設定"
 
 msgid "support.card.support_link.title"
 msgstr "支援連結"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Web UI 診斷套件僅限管理員使用。"
+
+msgid "support.card.ui_bundle.button"
+msgstr "下載診斷包"
+
+msgid "support.card.ui_bundle.help"
+msgstr "日誌、外掛版本、環境及近期錯誤。私人資料將被匿名化。"
+
+msgid "support.card.ui_bundle.title"
+msgstr "Web UI 診斷"
 
 msgid "support.subtitle"
 msgstr "下載偵錯記錄、提取您的設定，並向 BunkerWeb 團隊尋求協助。"

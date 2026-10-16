@@ -152,7 +152,29 @@
       "no_matching_reports": "Keine passenden Meldungen.",
       "invalid_ban_selection_mode": "Ungültiger Auswahlmodus für Sperrungen.",
       "invalid_bans_parameter_bans_ban": "Ungültiger bans-Parameter auf /bans/ban.",
-      "invalid_filtered_ban_source": "Ungültige gefilterte Sperrquelle."
+      "invalid_filtered_ban_source": "Ungültige gefilterte Sperrquelle.",
+      "unban_crowdsec_needs_review": "Diese IP ist durch eine CrowdSec-Sperre blockiert. Heben Sie sie in ihrer Tabellenzeile auf, die die zu löschenden CrowdSec-Entscheidungen anzeigt.",
+      "unban_crowdsec_forbidden": "Zugriff verweigert. Zum Aufheben einer CrowdSec-Sperre sind ban_delete und crowdsec_delete für jede betroffene CrowdSec-Verbindung erforderlich."
+    },
+    "kind": {
+      "crowdsec_lease": "CrowdSec-Lease"
+    },
+    "crowdsec": {
+      "title": "CrowdSec-Sperre aufheben",
+      "intro": "Eine CrowdSec-Sperre wird in zwei Schritten aufgehoben: Die unten aufgeführten Entscheidungen werden aus CrowdSec gelöscht, danach wird die BunkerWeb-Sperre entfernt. Ohne den ersten Schritt kehrt die Sperre bei der nächsten Anfrage zurück.",
+      "no_decisions": "Keine aktive CrowdSec-Sperrentscheidung: Es wird nur die BunkerWeb-Sperre entfernt.",
+      "confirm": "Entscheidungen löschen und entsperren",
+      "error": "Die Aufhebung der Sperre ist fehlgeschlagen: {{error}}",
+      "warning": {
+        "list_origin": "Einige Entscheidungen stammen aus einer CrowdSec-Liste oder der Community-Blocklist und können bei der nächsten Aktualisierung der Liste zurückkehren. Fügen Sie die IP einer CrowdSec-Allowlist hinzu, damit sie entsperrt bleibt.",
+        "range": "Eine Entscheidung deckt einen ganzen Bereich ab: Ihr Löschen entsperrt jede IP dieses Bereichs.",
+        "unavailable": "Nicht verfügbar, das Ergebnis wird unvollständig sein: {{list}}"
+      },
+      "result": {
+        "success": "{{ip}}: entsperrt, gelöschte CrowdSec-Entscheidungen: {{count}}.",
+        "changed": "{{ip}}: Die Sperre wurde während der Anfrage erneuert oder ersetzt, es wurde nichts entfernt. Heben Sie sie erneut auf.",
+        "partial": "{{ip}}: teilweise ausgeführt. Führen Sie die Aufhebung erneut aus, um sie abzuschließen: {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2560,6 +2582,12 @@
       },
       "support_link": {
         "title": "Support-Link"
+      },
+      "ui_bundle": {
+        "admin_only": "Das Web-UI-Diagnosepaket ist Administratoren vorbehalten.",
+        "button": "Paket herunterladen",
+        "help": "Logs, Plugin-Versionen, Umgebung und aktuelle Fehler. Private Daten werden anonymisiert.",
+        "title": "Web-UI-Diagnose"
       }
     },
     "subtitle": "Laden Sie Debug-Logs herunter, extrahieren Sie Ihre Konfiguration und holen Sie sich Hilfe vom BunkerWeb-Team.",
@@ -4508,6 +4536,10 @@
       "SECURITY_MODE": {
         "label": "Sicherheitsmodus",
         "help": "Definiert die Reaktion auf Bedrohungen: \"detect\", um zu überwachen und zu protokollieren, oder \"block\", um den Zugriff zu verhindern und Vorfälle zu protokollieren."
+      },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "Sperren beim TLS verwerfen",
+        "help": "Sperrgründe, deren gesperrte IPs beim TLS-ClientHello verworfen werden, statt die 403-Seite zu erhalten. Wird bei headerbasierter Real-IP übersprungen und beim PROXY-Protokoll, außer die Real-IP verwendet proxy_protocol."
       },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "Hash-Bucket-Größe der Servernamen",

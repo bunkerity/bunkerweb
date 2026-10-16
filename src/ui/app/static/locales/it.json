@@ -152,7 +152,29 @@
       "no_matching_reports": "Nessuna segnalazione corrispondente.",
       "invalid_ban_selection_mode": "Modalità di selezione dei ban non valida.",
       "invalid_bans_parameter_bans_ban": "Parametro bans non valido su /bans/ban.",
-      "invalid_filtered_ban_source": "Origine ban filtrata non valida."
+      "invalid_filtered_ban_source": "Origine ban filtrata non valida.",
+      "unban_crowdsec_needs_review": "questo IP è bloccato da un blocco CrowdSec. Sbannalo dalla sua riga della tabella, che mostra le decisioni CrowdSec che verranno eliminate.",
+      "unban_crowdsec_forbidden": "Permesso negato. Sbannare un blocco CrowdSec richiede ban_delete e crowdsec_delete su ogni connessione CrowdSec coinvolta."
+    },
+    "kind": {
+      "crowdsec_lease": "Lease CrowdSec"
+    },
+    "crowdsec": {
+      "title": "Sbanna un blocco CrowdSec",
+      "intro": "Un blocco CrowdSec si rimuove in due passaggi: le decisioni elencate sotto vengono eliminate da CrowdSec, poi viene rimosso il ban di BunkerWeb. Senza il primo passaggio, il blocco torna alla richiesta successiva.",
+      "no_decisions": "Nessuna decisione di blocco CrowdSec attiva: viene rimosso solo il ban di BunkerWeb.",
+      "confirm": "Elimina le decisioni e sbanna",
+      "error": "Lo sban non è riuscito: {{error}}",
+      "warning": {
+        "list_origin": "Alcune decisioni provengono da una lista CrowdSec o dalla blocklist della community e possono tornare quando la lista si aggiorna. Aggiungi l'IP a una allowlist CrowdSec per mantenerlo sbloccato.",
+        "range": "Una decisione copre un intero intervallo: eliminarla sblocca ogni IP di quell'intervallo.",
+        "unavailable": "Non disponibile, il risultato sarà parziale: {{list}}"
+      },
+      "result": {
+        "success": "{{ip}}: sbannato, decisioni CrowdSec eliminate: {{count}}.",
+        "changed": "{{ip}}: il ban è stato rinnovato o sostituito durante la richiesta, non è stato rimosso nulla. Sbannalo di nuovo.",
+        "partial": "{{ip}}: eseguito in parte. Esegui di nuovo lo sban per completare: {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2560,6 +2582,12 @@
       },
       "support_link": {
         "title": "Link Supporto"
+      },
+      "ui_bundle": {
+        "admin_only": "Il pacchetto di diagnostica della Web UI è riservato agli amministratori.",
+        "button": "Scarica pacchetto",
+        "help": "Log, versioni dei plugin, ambiente ed errori recenti. I dati privati vengono anonimizzati.",
+        "title": "Diagnostica della Web UI"
       }
     },
     "subtitle": "Scarica i log di debug, estrai la tua configurazione e richiedi assistenza al team BunkerWeb.",
@@ -4508,6 +4536,10 @@
       "SECURITY_MODE": {
         "label": "Modalità di sicurezza",
         "help": "Definisce la risposta alle minacce: \"detect\" per monitorare e registrare, oppure \"block\" per impedire l'accesso e registrare gli incidenti."
+      },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "Ban scartati in TLS",
+        "help": "Motivi di ban per cui gli IP bannati vengono scartati al ClientHello TLS invece di ricevere la pagina 403. Ignorato con IP reale basato su header e con il protocollo PROXY, a meno che l’IP reale usi proxy_protocol."
       },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "Dimensione bucket hash dei nomi server",

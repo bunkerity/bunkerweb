@@ -274,6 +274,39 @@ msgstr "Intervalo selecionado"
 msgid "bans.chart.timeseries.title"
 msgstr "Banimentos ativos por intervalo"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Excluir decisões e desbanir"
+
+msgid "bans.crowdsec.error"
+msgstr "O desbanimento falhou: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Um bloqueio do CrowdSec é removido em duas etapas: as decisões listadas abaixo são excluídas do CrowdSec e depois o banimento do BunkerWeb é removido. Sem a primeira etapa, o bloqueio volta na próxima requisição."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Nenhuma decisão de bloqueio do CrowdSec ativa: apenas o banimento do BunkerWeb é removido."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: o banimento foi renovado ou substituído durante a requisição, nada foi removido. Desbana-o novamente."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: feito parcialmente. Execute o desbanimento novamente para concluir: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: desbanido, decisões do CrowdSec excluídas: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Desbanir um bloqueio do CrowdSec"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Algumas decisões vêm de uma lista do CrowdSec ou da lista de bloqueio da comunidade e podem voltar quando a lista for atualizada. Adicione o IP a uma lista de permissões do CrowdSec para mantê-lo desbloqueado."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Uma decisão abrange um intervalo inteiro: excluí-la desbloqueia todos os IPs desse intervalo."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Indisponível, o resultado será parcial: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "Falha ao banir %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Falha ao buscar os banimentos no Redis, consulte os logs para mais infor
 msgid "bans.flash.skipped_challenged"
 msgstr "Relatórios ignorados porque o cliente recebeu um desafio ou foi redirecionado em vez de bloqueado: %(count)s."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Permissão negada. Desbanir um bloqueio do CrowdSec exige ban_delete e crowdsec_delete em cada conexão CrowdSec envolvida."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "este IP está bloqueado por um bloqueio do CrowdSec. Desbana-o pela linha dele na tabela, que mostra as decisões do CrowdSec que serão excluídas."
+
 msgid "bans.flash.unban_failed"
 msgstr "Falha ao desbanir %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Falha ao atualizar a duração do banimento de %(ip)s: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "Duração do banimento de %(ip)s atualizada com sucesso."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "Concessão CrowdSec"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Banimentos por motivo"
@@ -3825,6 +3867,12 @@ msgstr "Ativar a integração com o Docker Autoconf."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Modo Autoconf"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Motivos de banimento cujos IPs banidos são descartados no ClientHello TLS em vez de receberem a página 403. Ignorado com IP real baseado em cabeçalho e com o protocolo PROXY, a menos que o IP real use proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Banimentos descartados no TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Lista de instâncias do BunkerWeb separadas por espaços (formato: fqdn-ou-ip:5000 http://fqdn-ou-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "Extrair Configuração"
 
 msgid "support.card.support_link.title"
 msgstr "Link de Suporte"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "O pacote de diagnóstico da Web UI é restrito a administradores."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Baixar pacote"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Logs, versões dos plugins, ambiente e erros recentes. Os dados privados são anonimizados."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Diagnóstico da Web UI"
 
 msgid "support.subtitle"
 msgstr "Baixe os logs de depuração, extraia sua configuração e obtenha ajuda da equipe do BunkerWeb."

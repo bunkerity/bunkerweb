@@ -152,7 +152,29 @@
       "no_matching_reports": "Brak pasujących raportów.",
       "invalid_ban_selection_mode": "Nieprawidłowy tryb wyboru blokad.",
       "invalid_bans_parameter_bans_ban": "Nieprawidłowy parametr bans w /bans/ban.",
-      "invalid_filtered_ban_source": "Nieprawidłowe filtrowane źródło blokady."
+      "invalid_filtered_ban_source": "Nieprawidłowe filtrowane źródło blokady.",
+      "unban_crowdsec_needs_review": "ten adres IP jest zablokowany przez blokadę CrowdSec. Odbanuj go z jego wiersza w tabeli, który pokazuje decyzje CrowdSec do usunięcia.",
+      "unban_crowdsec_forbidden": "Odmowa dostępu. Odbanowanie blokady CrowdSec wymaga ban_delete i crowdsec_delete w każdym zaangażowanym połączeniu CrowdSec."
+    },
+    "kind": {
+      "crowdsec_lease": "Dzierżawa CrowdSec"
+    },
+    "crowdsec": {
+      "title": "Odbanuj blokadę CrowdSec",
+      "intro": "Blokada CrowdSec jest usuwana w dwóch krokach: wymienione poniżej decyzje są usuwane z CrowdSec, a następnie usuwany jest ban BunkerWeb. Bez pierwszego kroku blokada wraca przy następnym żądaniu.",
+      "no_decisions": "Brak aktywnej decyzji blokującej CrowdSec: usuwany jest tylko ban BunkerWeb.",
+      "confirm": "Usuń decyzje i odbanuj",
+      "error": "Odbanowanie nie powiodło się: {{error}}",
+      "warning": {
+        "list_origin": "Niektóre decyzje pochodzą z listy CrowdSec lub społecznościowej listy blokad i mogą wrócić po odświeżeniu listy. Dodaj adres IP do listy dozwolonych CrowdSec, aby pozostał odblokowany.",
+        "range": "Decyzja obejmuje cały zakres: jej usunięcie odblokowuje każdy adres IP z tego zakresu.",
+        "unavailable": "Niedostępne, wynik będzie częściowy: {{list}}"
+      },
+      "result": {
+        "success": "{{ip}}: odbanowano, usunięte decyzje CrowdSec: {{count}}.",
+        "changed": "{{ip}}: ban został odnowiony lub zastąpiony w trakcie żądania, nic nie usunięto. Odbanuj go ponownie.",
+        "partial": "{{ip}}: wykonano częściowo. Uruchom odbanowanie ponownie, aby dokończyć: {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2443,6 +2465,10 @@
         "label": "Tryb bezpieczeństwa",
         "help": "Określa reakcję na zagrożenia: \"detect\", aby monitorować i rejestrować, lub \"block\", aby blokować dostęp i rejestrować incydenty."
       },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "Blokady odrzucane w TLS",
+        "help": "Powody blokad, dla których zablokowane adresy IP są odrzucane już w ClientHello TLS, zamiast otrzymać stronę 403. Pomijane przy prawdziwym IP opartym na nagłówku oraz przy protokole PROXY, chyba że prawdziwe IP używa proxy_protocol."
+      },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "Rozmiar kubełka hash nazw serwerów",
         "help": "Wartość dla dyrektywy server_names_hash_bucket_size."
@@ -3200,6 +3226,12 @@
       },
       "support_link": {
         "title": "Link pomocy technicznej"
+      },
+      "ui_bundle": {
+        "admin_only": "Pakiet diagnostyczny Web UI jest dostępny tylko dla administratorów.",
+        "button": "Pobierz pakiet",
+        "help": "Logi, wersje wtyczek, środowisko i ostatnie błędy. Dane prywatne są anonimizowane.",
+        "title": "Diagnostyka Web UI"
       }
     },
     "subtitle": "Pobierz pliki dziennika debugowania, wyodrębnij swoją konfigurację i skontaktuj się z zespołem BunkerWeb.",

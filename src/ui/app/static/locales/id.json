@@ -152,7 +152,29 @@
       "no_matching_reports": "Tidak ada laporan yang cocok.",
       "invalid_ban_selection_mode": "Mode pemilihan larangan tidak valid.",
       "invalid_bans_parameter_bans_ban": "Parameter bans tidak valid pada /bans/ban.",
-      "invalid_filtered_ban_source": "Sumber larangan terfilter tidak valid."
+      "invalid_filtered_ban_source": "Sumber larangan terfilter tidak valid.",
+      "unban_crowdsec_needs_review": "IP ini diblokir oleh blokir CrowdSec. Batalkan dari barisnya di tabel, yang menampilkan keputusan CrowdSec yang akan dihapus.",
+      "unban_crowdsec_forbidden": "Izin ditolak. Membatalkan blokir CrowdSec memerlukan ban_delete dan crowdsec_delete pada setiap koneksi CrowdSec yang terlibat."
+    },
+    "kind": {
+      "crowdsec_lease": "Lease CrowdSec"
+    },
+    "crowdsec": {
+      "title": "Batalkan blokir CrowdSec",
+      "intro": "Blokir CrowdSec dihapus dalam dua langkah: keputusan yang tercantum di bawah dihapus dari CrowdSec, lalu blokir BunkerWeb dihapus. Tanpa langkah pertama, blokir akan kembali pada permintaan berikutnya.",
+      "no_decisions": "Tidak ada keputusan blokir CrowdSec yang aktif: hanya blokir BunkerWeb yang dihapus.",
+      "confirm": "Hapus keputusan dan batalkan blokir",
+      "error": "Pembatalan blokir gagal: {{error}}",
+      "warning": {
+        "list_origin": "Beberapa keputusan berasal dari daftar CrowdSec atau daftar blokir komunitas dan dapat kembali saat daftar diperbarui. Tambahkan IP ke allowlist CrowdSec agar tetap tidak diblokir.",
+        "range": "Satu keputusan mencakup seluruh rentang: menghapusnya membuka blokir setiap IP dalam rentang itu.",
+        "unavailable": "Tidak tersedia, hasilnya akan sebagian: {{list}}"
+      },
+      "result": {
+        "success": "{{ip}}: blokir dibatalkan, keputusan CrowdSec dihapus: {{count}}.",
+        "changed": "{{ip}}: blokir diperbarui atau diganti saat permintaan berjalan, tidak ada yang dihapus. Batalkan blokirnya lagi.",
+        "partial": "{{ip}}: sebagian selesai. Jalankan lagi pembatalan blokir untuk menyelesaikan: {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2443,6 +2465,10 @@
         "label": "Mode Keamanan",
         "help": "Menentukan respons terhadap ancaman: \"detect\" untuk memantau dan mencatat, atau \"block\" untuk mencegah akses dan mencatat insiden."
       },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "Ban yang diputus di TLS",
+        "help": "Alasan ban yang IP-nya diputus pada ClientHello TLS alih-alih mendapat halaman 403. Dilewati jika IP asli berbasis header, dan pada protokol PROXY kecuali IP asli memakai proxy_protocol."
+      },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "Ukuran Bucket Hash Nama Server",
         "help": "Nilai untuk direktif server_names_hash_bucket_size."
@@ -3200,6 +3226,12 @@
       },
       "support_link": {
         "title": "Tautan Dukungan"
+      },
+      "ui_bundle": {
+        "admin_only": "Paket diagnostik Web UI dibatasi untuk administrator.",
+        "button": "Unduh Paket",
+        "help": "Log, versi plugin, lingkungan, dan error terbaru. Data pribadi akan dianonimkan.",
+        "title": "Diagnostik Web UI"
       }
     },
     "subtitle": "Unduh log debug, ekstrak konfigurasi Anda, dan dapatkan bantuan dari tim BunkerWeb.",

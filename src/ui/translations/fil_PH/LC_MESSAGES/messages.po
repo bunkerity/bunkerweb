@@ -274,6 +274,39 @@ msgstr "Napiling saklaw"
 msgid "bans.chart.timeseries.title"
 msgstr "Mga aktibong ban kada interval"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Burahin ang mga desisyon at alisin ang ban"
+
+msgid "bans.crowdsec.error"
+msgstr "Nabigo ang pag-alis ng ban: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Dalawang hakbang ang pag-alis ng CrowdSec block: buburahin sa CrowdSec ang mga desisyong nakalista sa ibaba, saka aalisin ang BunkerWeb ban. Kung wala ang unang hakbang, babalik ang block sa susunod na request."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Walang aktibong desisyon ng CrowdSec block: BunkerWeb ban lang ang aalisin."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: na-renew o napalitan ang ban habang tumatakbo ang request, walang naalis. Alisin muli ang ban."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: bahagyang natapos. Patakbuhin muli ang pag-alis ng ban para tapusin: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: naalis ang ban, mga nabura na desisyon ng CrowdSec: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Alisin ang CrowdSec block"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "May mga desisyong galing sa listahan ng CrowdSec o sa community blocklist at maaaring bumalik kapag nag-refresh ang listahan. Idagdag ang IP sa allowlist ng CrowdSec para manatili itong hindi naka-block."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Sakop ng isang desisyon ang buong range: ang pagbura nito ay nag-a-unblock sa bawat IP sa range na iyon."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Hindi available, bahagya lang ang magiging resulta: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "Nabigong i-ban ang %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Nabigong kunin ang mga ban mula sa Redis, tingnan ang mga log para sa ka
 msgid "bans.flash.skipped_challenged"
 msgstr "Nilaktawan ang %(count)s ulat na ang kliyente ay hinamon o na-redirect sa halip na hinarang."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Tinanggihan ang pahintulot. Kailangan ng ban_delete at crowdsec_delete sa bawat kasangkot na CrowdSec connection para alisin ang CrowdSec block."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "naka-block ang IP na ito ng isang CrowdSec block. Alisin ang ban mula sa row nito sa talahanayan, na nagpapakita ng mga desisyon ng CrowdSec na buburahin."
+
 msgid "bans.flash.unban_failed"
 msgstr "Nabigong i-unban ang %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Nabigong i-update ang tagal ng ban para sa %(ip)s: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "Matagumpay na na-update ang tagal ng ban para sa %(ip)s."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec lease"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Mga ban ayon sa dahilan"
@@ -3825,6 +3867,12 @@ msgstr "I-enable ang Autoconf Docker integration."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf Mode"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Mga dahilan ng ban kung saan ang mga naka-ban na IP ay ibinabagsak sa TLS ClientHello sa halip na makuha ang 403 page. Nilalaktawan kapag header-based ang real IP, at sa likod ng PROXY protocol maliban kung proxy_protocol ang gamit ng real IP."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Mga ban na ibinabagsak sa TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Listahan ng mga instance ng BunkerWeb na pinaghihiwalay ng espasyo (format: fqdn-o-ip:5000 http://fqdn-o-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "Kunin ang Configuration"
 
 msgid "support.card.support_link.title"
 msgstr "Link ng Suporta"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Ang Web UI diagnostics bundle ay limitado sa mga administrator."
+
+msgid "support.card.ui_bundle.button"
+msgstr "I-download ang Bundle"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Mga log, bersyon ng plugin, environment, at kamakailang error. Ina-anonymize ang pribadong data."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Diagnostics ng Web UI"
 
 msgid "support.subtitle"
 msgstr "I-download ang mga log ng debug, i-extract ang iyong configuration, at humingi ng tulong sa team ng BunkerWeb."

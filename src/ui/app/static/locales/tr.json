@@ -152,7 +152,29 @@
       "no_matching_reports": "Eşleşen rapor yok.",
       "invalid_ban_selection_mode": "Geçersiz yasaklama seçim modu.",
       "invalid_bans_parameter_bans_ban": "/bans/ban üzerinde geçersiz bans parametresi.",
-      "invalid_filtered_ban_source": "Geçersiz filtrelenmiş yasaklama kaynağı."
+      "invalid_filtered_ban_source": "Geçersiz filtrelenmiş yasaklama kaynağı.",
+      "unban_crowdsec_needs_review": "bu IP bir CrowdSec engeli tarafından engelleniyor. Silinecek CrowdSec kararlarını gösteren tablodaki satırından yasağı kaldırın.",
+      "unban_crowdsec_forbidden": "İzin reddedildi. Bir CrowdSec engelini kaldırmak, ilgili her CrowdSec bağlantısında ban_delete ve crowdsec_delete gerektirir."
+    },
+    "kind": {
+      "crowdsec_lease": "CrowdSec kirası"
+    },
+    "crowdsec": {
+      "title": "Bir CrowdSec engelini kaldır",
+      "intro": "Bir CrowdSec engeli iki adımda kaldırılır: aşağıda listelenen kararlar CrowdSec'ten silinir, ardından BunkerWeb yasağı kaldırılır. İlk adım olmadan engel bir sonraki istekte geri gelir.",
+      "no_decisions": "Etkin CrowdSec engel kararı yok: yalnızca BunkerWeb yasağı kaldırılır.",
+      "confirm": "Kararları sil ve yasağı kaldır",
+      "error": "Yasak kaldırma başarısız oldu: {{error}}",
+      "warning": {
+        "list_origin": "Bazı kararlar bir CrowdSec listesinden veya topluluk engel listesinden geliyor ve liste yenilendiğinde geri gelebilir. Engelsiz kalması için IP'yi bir CrowdSec izin listesine ekleyin.",
+        "range": "Bir karar tüm bir aralığı kapsıyor: silmek o aralıktaki her IP'nin engelini kaldırır.",
+        "unavailable": "Kullanılamıyor, sonuç kısmi olacak: {{list}}"
+      },
+      "result": {
+        "success": "{{ip}}: yasağı kaldırıldı, silinen CrowdSec kararları: {{count}}.",
+        "changed": "{{ip}}: yasak istek sırasında yenilendi veya değiştirildi, hiçbir şey kaldırılmadı. Yasağı yeniden kaldırın.",
+        "partial": "{{ip}}: kısmen tamamlandı. Bitirmek için yasak kaldırmayı yeniden çalıştırın: {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2443,6 +2465,10 @@
         "label": "Güvenlik Modu",
         "help": "Tehditlere verilecek yanıtı tanımlar: izlemek ve günlüğe kaydetmek için \"detect\", erişimi engellemek ve olayları günlüğe kaydetmek için \"block\"."
       },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "TLS'de düşürülen yasaklar",
+        "help": "Yasaklı IP'lerin 403 sayfası almak yerine TLS ClientHello aşamasında düşürüldüğü yasak nedenleri. Başlık tabanlı gerçek IP kullanılırken ve gerçek IP proxy_protocol kullanmadıkça PROXY protokolünde atlanır."
+      },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "Sunucu Adları Hash Kova Boyutu",
         "help": "server_names_hash_bucket_size direktifi için değer."
@@ -3200,6 +3226,12 @@
       },
       "support_link": {
         "title": "Destek Bağlantısı"
+      },
+      "ui_bundle": {
+        "admin_only": "Web UI tanılama paketi yalnızca yöneticilere açıktır.",
+        "button": "Paketi İndir",
+        "help": "Günlükler, eklenti sürümleri, ortam ve son hatalar. Özel veriler anonimleştirilir.",
+        "title": "Web UI Tanılaması"
       }
     },
     "subtitle": "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın.",

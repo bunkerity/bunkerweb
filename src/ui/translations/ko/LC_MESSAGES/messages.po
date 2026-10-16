@@ -274,6 +274,39 @@ msgstr "선택한 기간"
 msgid "bans.chart.timeseries.title"
 msgstr "구간별 활성 차단"
 
+msgid "bans.crowdsec.confirm"
+msgstr "결정 삭제 및 차단 해제"
+
+msgid "bans.crowdsec.error"
+msgstr "차단 해제에 실패했습니다: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "CrowdSec 차단은 두 단계로 해제됩니다. 아래에 나열된 결정을 CrowdSec에서 삭제한 다음 BunkerWeb 차단을 제거합니다. 첫 단계가 없으면 다음 요청에서 차단이 다시 생깁니다."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "활성 CrowdSec 차단 결정이 없습니다. BunkerWeb 차단만 제거됩니다."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: 요청 중에 차단이 갱신되거나 교체되어 아무것도 제거되지 않았습니다. 다시 차단 해제하세요."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: 일부만 완료되었습니다. 차단 해제를 다시 실행해 마무리하세요: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: 차단 해제됨, 삭제된 CrowdSec 결정: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "CrowdSec 차단 해제"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "일부 결정은 CrowdSec 목록 또는 커뮤니티 차단 목록에서 온 것이며 목록이 갱신되면 다시 나타날 수 있습니다. 차단되지 않도록 IP를 CrowdSec 허용 목록에 추가하세요."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "결정 하나가 범위 전체를 포함합니다. 삭제하면 해당 범위의 모든 IP 차단이 해제됩니다."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "사용할 수 없음, 결과가 일부만 반영됩니다: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "%(ip)s 차단에 실패했습니다: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Redis에서 차단 목록을 가져오지 못했습니다. 자세한 내
 msgid "bans.flash.skipped_challenged"
 msgstr "클라이언트가 차단되지 않고 검증 또는 리디렉션된 보고서 %(count)s건을 건너뛰었습니다."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "권한이 거부되었습니다. CrowdSec 차단을 해제하려면 관련된 모든 CrowdSec 연결에 ban_delete 및 crowdsec_delete 권한이 필요합니다."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "이 IP는 CrowdSec 차단으로 막혀 있습니다. 삭제될 CrowdSec 결정을 보여 주는 표의 해당 행에서 차단을 해제하세요."
+
 msgid "bans.flash.unban_failed"
 msgstr "%(ip)s 차단 해제에 실패했습니다: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "%(ip)s의 차단 기간 업데이트에 실패했습니다: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s의 차단 기간을 업데이트했습니다."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec 임대"
 
 msgid "bans.stats.card.by_reason"
 msgstr "사유별 차단"
@@ -3825,6 +3867,12 @@ msgstr "Autoconf Docker 통합을 활성화합니다."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf 모드"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "차단된 IP가 403 페이지 대신 TLS ClientHello 단계에서 연결이 끊기는 차단 사유입니다. 헤더 기반 실제 IP를 사용할 때와, 실제 IP가 proxy_protocol을 쓰지 않는 한 PROXY 프로토콜 뒤에서는 건너뜁니다."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "TLS에서 끊는 차단"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "공백으로 구분된 BunkerWeb 인스턴스 목록(형식: fqdn-또는-ip:5000 http://fqdn-또는-ip:5000)"
@@ -7901,6 +7949,18 @@ msgstr "설정 추출"
 
 msgid "support.card.support_link.title"
 msgstr "기술 지원 링크"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Web UI 진단 번들은 관리자만 사용할 수 있습니다."
+
+msgid "support.card.ui_bundle.button"
+msgstr "번들 다운로드"
+
+msgid "support.card.ui_bundle.help"
+msgstr "로그, 플러그인 버전, 환경 및 최근 오류. 개인 정보는 익명 처리됩니다."
+
+msgid "support.card.ui_bundle.title"
+msgstr "웹 UI 진단"
 
 msgid "support.subtitle"
 msgstr "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요."

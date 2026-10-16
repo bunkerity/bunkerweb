@@ -274,6 +274,39 @@ msgstr "Selected range"
 msgid "bans.chart.timeseries.title"
 msgstr "Active bans per interval"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Delete decisions and unban"
+
+msgid "bans.crowdsec.error"
+msgstr "The unban failed: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "A CrowdSec ban is removed in two steps: the decisions listed below are deleted from CrowdSec, then the BunkerWeb ban is removed. Without the first step, the ban comes back on the next request."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "No active CrowdSec ban decision: only the BunkerWeb ban is removed."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: the ban was renewed or replaced while the request ran, nothing was removed. Unban it again."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: partly done. Run the unban again to finish: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: unbanned, CrowdSec decisions deleted: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Unban a CrowdSec ban"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Some decisions come from a CrowdSec list or the community blocklist and may come back when the list refreshes. Add the IP to a CrowdSec allowlist to keep it unblocked."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "A decision covers a whole range: deleting it unblocks every IP of that range."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Unavailable, the result will be partial: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "Failed to ban %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Failed to fetch bans from Redis, see logs for more information."
 msgid "bans.flash.skipped_challenged"
 msgstr "Reports skipped because their client was challenged or redirected rather than blocked: %(count)s."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Permission denied. Unbanning a CrowdSec ban needs ban_delete and crowdsec_delete on every CrowdSec connection involved."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "this IP is blocked by a CrowdSec ban. Unban it from its row in the table, which shows the CrowdSec decisions that will be deleted."
+
 msgid "bans.flash.unban_failed"
 msgstr "Failed to unban %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Failed to update ban duration for %(ip)s: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "Updated ban duration for %(ip)s successfully."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec lease"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Bans by reason"
@@ -3825,6 +3867,12 @@ msgstr "Enable Autoconf Docker integration."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf mode"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Ban reasons whose banned IPs are dropped at the TLS ClientHello instead of getting the 403 page. Skipped behind header-based real IP, and behind PROXY protocol unless real IP uses proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Bans dropped at TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "List of BunkerWeb instances separated with spaces (format : fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "Extract Configuration"
 
 msgid "support.card.support_link.title"
 msgstr "Support Link"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "The Web UI diagnostics bundle is restricted to administrators."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Download Bundle"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Logs, plugin versions, environment and recent errors. Private data is anonymized."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Web UI Diagnostics"
 
 msgid "support.subtitle"
 msgstr "Download debug logs, extract your configuration, and get help from the BunkerWeb team."

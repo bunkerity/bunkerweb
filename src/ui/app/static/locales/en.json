@@ -152,7 +152,29 @@
       "no_matching_reports": "No matching reports.",
       "invalid_ban_selection_mode": "Invalid ban selection mode.",
       "invalid_bans_parameter_bans_ban": "Invalid bans parameter on /bans/ban.",
-      "invalid_filtered_ban_source": "Invalid filtered ban source."
+      "invalid_filtered_ban_source": "Invalid filtered ban source.",
+      "unban_crowdsec_needs_review": "this IP is blocked by a CrowdSec ban. Unban it from its row in the table, which shows the CrowdSec decisions that will be deleted.",
+      "unban_crowdsec_forbidden": "Permission denied. Unbanning a CrowdSec ban needs ban_delete and crowdsec_delete on every CrowdSec connection involved."
+    },
+    "kind": {
+      "crowdsec_lease": "CrowdSec lease"
+    },
+    "crowdsec": {
+      "title": "Unban a CrowdSec ban",
+      "intro": "A CrowdSec ban is removed in two steps: the decisions listed below are deleted from CrowdSec, then the BunkerWeb ban is removed. Without the first step, the ban comes back on the next request.",
+      "no_decisions": "No active CrowdSec ban decision: only the BunkerWeb ban is removed.",
+      "confirm": "Delete decisions and unban",
+      "error": "The unban failed: {{error}}",
+      "warning": {
+        "list_origin": "Some decisions come from a CrowdSec list or the community blocklist and may come back when the list refreshes. Add the IP to a CrowdSec allowlist to keep it unblocked.",
+        "range": "A decision covers a whole range: deleting it unblocks every IP of that range.",
+        "unavailable": "Unavailable, the result will be partial: {{list}}"
+      },
+      "result": {
+        "success": "{{ip}}: unbanned, CrowdSec decisions deleted: {{count}}.",
+        "changed": "{{ip}}: the ban was renewed or replaced while the request ran, nothing was removed. Unban it again.",
+        "partial": "{{ip}}: partly done. Run the unban again to finish: {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2443,6 +2465,10 @@
         "label": "Security mode",
         "help": "Defines the response to threats: \"detect\" to monitor and log, or \"block\" to prevent access and log incidents."
       },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "Bans dropped at TLS",
+        "help": "Ban reasons whose banned IPs are dropped at the TLS ClientHello instead of getting the 403 page. Skipped behind header-based real IP, and behind PROXY protocol unless real IP uses proxy_protocol."
+      },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "Server names hash bucket size",
         "help": "Value for the server_names_hash_bucket_size directive."
@@ -3200,6 +3226,12 @@
       },
       "support_link": {
         "title": "Support Link"
+      },
+      "ui_bundle": {
+        "admin_only": "The Web UI diagnostics bundle is restricted to administrators.",
+        "button": "Download Bundle",
+        "help": "Logs, plugin versions, environment and recent errors. Private data is anonymized.",
+        "title": "Web UI Diagnostics"
       }
     },
     "subtitle": "Download debug logs, extract your configuration, and get help from the BunkerWeb team.",

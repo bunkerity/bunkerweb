@@ -200,7 +200,11 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # 3,683 (+73 net) is wave 24 L6: 81 new keys (whole-sentence CrowdSec/workflow reasons, the CrowdSec
     # removal confirmation, workflow error announcements, 53 `loading.*` messages, the General plugin
     # card, the home chart tooltips) minus 8 retired interpolated-word keys.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 3683
+    # 3,687 adds the 4 `support.card.ui_bundle.*` keys of the Web UI diagnostics bundle (W25-X2, port of dev d363779b2).
+    # 3,689 adds the 2 `general.settings.BANS_TLS_DROP_REASONS` keys (label, help) of W25-X1C.
+    # 3,703 adds the 14 `bans.kind.*`, `bans.crowdsec.*` and `bans.flash.unban_crowdsec_*` keys of the
+    # CrowdSec lease unban on the bans page (W25-X1F).
+    assert len(_catalog("en")) == len(english) - len(pairs) == 3703
 
 
 @pytest.mark.parametrize("code", CODES)

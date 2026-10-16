@@ -274,6 +274,39 @@ msgstr "النطاق المحدد"
 msgid "bans.chart.timeseries.title"
 msgstr "الحظورات النشطة لكل فترة"
 
+msgid "bans.crowdsec.confirm"
+msgstr "حذف القرارات وإلغاء الحظر"
+
+msgid "bans.crowdsec.error"
+msgstr "فشل إلغاء الحظر: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "تتم إزالة حظر CrowdSec على خطوتين: تُحذف القرارات المدرجة أدناه من CrowdSec، ثم يُزال حظر BunkerWeb. بدون الخطوة الأولى يعود الحظر عند الطلب التالي."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "لا يوجد قرار حظر نشط في CrowdSec: يُزال حظر BunkerWeb فقط."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: جُدّد الحظر أو استُبدل أثناء تنفيذ الطلب ولم تتم إزالة أي شيء. ألغِ حظره مرة أخرى."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: اكتمل جزئيًا. شغّل إلغاء الحظر مرة أخرى لإكماله: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: أُلغي الحظر، قرارات CrowdSec المحذوفة: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "إلغاء حظر CrowdSec"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "بعض القرارات تأتي من قائمة CrowdSec أو من قائمة الحظر المجتمعية وقد تعود عند تحديث القائمة. أضف عنوان IP إلى قائمة السماح في CrowdSec لإبقائه غير محظور."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "قرار واحد يغطي نطاقًا كاملًا: حذفه يرفع الحظر عن كل عنوان IP في ذلك النطاق."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "غير متاح، ستكون النتيجة جزئية: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "تعذر حظر %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "تعذر جلب عمليات الحظر من Redis، راجع السجل
 msgid "bans.flash.skipped_challenged"
 msgstr "البلاغات التي تم تخطيها لأن عميلها خضع للتحدي أو أُعيد توجيهه بدلاً من حظره: %(count)s."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "تم رفض الإذن. يتطلب إلغاء حظر CrowdSec الصلاحيتين ban_delete وcrowdsec_delete على كل اتصال CrowdSec معني."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "عنوان IP هذا محظور بحظر CrowdSec. ألغِ حظره من صفه في الجدول، الذي يعرض قرارات CrowdSec التي ستُحذف."
+
 msgid "bans.flash.unban_failed"
 msgstr "تعذر رفع الحظر عن %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "تعذر تحديث مدة الحظر لـ %(ip)s: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "تم تحديث مدة الحظر لـ %(ip)s بنجاح."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "إيجار CrowdSec"
 
 msgid "bans.stats.card.by_reason"
 msgstr "عمليات الحظر حسب السبب"
@@ -3825,6 +3867,12 @@ msgstr "تفعيل تكامل Docker Autoconf."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "وضع Autoconf"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "أسباب الحظر التي تُسقَط عناوين IP المحظورة بسببها عند TLS ClientHello بدلًا من عرض صفحة 403. يُتجاوز ذلك عند استخدام عنوان IP حقيقي مبني على ترويسة، وعند بروتوكول PROXY ما لم يستخدم عنوان IP الحقيقي proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "الحظر المُسقَط عند TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "قائمة مثيلات BunkerWeb مفصولة بمسافات (الصيغة: fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
@@ -7951,6 +7999,18 @@ msgstr "استخراج التكوين"
 
 msgid "support.card.support_link.title"
 msgstr "رابط الدعم"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "حزمة تشخيصات واجهة الويب مقتصرة على المسؤولين."
+
+msgid "support.card.ui_bundle.button"
+msgstr "تنزيل الحزمة"
+
+msgid "support.card.ui_bundle.help"
+msgstr "السجلات وإصدارات الإضافات والبيئة والأخطاء الأخيرة. يتم إخفاء هوية البيانات الخاصة."
+
+msgid "support.card.ui_bundle.title"
+msgstr "تشخيصات واجهة الويب"
 
 msgid "support.subtitle"
 msgstr "تنزيل سجلات التصحيح، واستخراج تكوينك، والحصول على المساعدة من فريق BunkerWeb."

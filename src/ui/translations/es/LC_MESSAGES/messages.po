@@ -274,6 +274,39 @@ msgstr "Rango seleccionado"
 msgid "bans.chart.timeseries.title"
 msgstr "Baneos activos por intervalo"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Eliminar decisiones y desbanear"
+
+msgid "bans.crowdsec.error"
+msgstr "El desbaneo ha fallado: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Un bloqueo de CrowdSec se retira en dos pasos: las decisiones listadas abajo se eliminan de CrowdSec y después se retira el baneo de BunkerWeb. Sin el primer paso, el bloqueo vuelve en la siguiente petición."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "No hay ninguna decisión de bloqueo de CrowdSec activa: solo se retira el baneo de BunkerWeb."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: el baneo se renovó o se sustituyó durante la petición, no se retiró nada. Vuelva a desbanearla."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: realizado parcialmente. Ejecute de nuevo el desbaneo para terminar: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: desbaneada, decisiones de CrowdSec eliminadas: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Desbloquear un bloqueo de CrowdSec"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Algunas decisiones proceden de una lista de CrowdSec o de la lista de bloqueo de la comunidad y pueden volver cuando la lista se actualice. Añada la IP a una lista de permitidos de CrowdSec para mantenerla desbloqueada."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Una decisión cubre un rango completo: eliminarla desbloquea todas las IP de ese rango."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "No disponible, el resultado será parcial: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "No se pudo banear %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "No se pudieron obtener los baneos desde Redis, consulte los registros pa
 msgid "bans.flash.skipped_challenged"
 msgstr "Informes omitidos porque su cliente fue desafiado o redirigido en lugar de bloqueado: %(count)s."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Permiso denegado. Desbanear un bloqueo de CrowdSec requiere ban_delete y crowdsec_delete en cada conexión de CrowdSec implicada."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "esta IP está bloqueada por un bloqueo de CrowdSec. Desbanéela desde su fila de la tabla, que muestra las decisiones de CrowdSec que se eliminarán."
+
 msgid "bans.flash.unban_failed"
 msgstr "No se pudo desbanear %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "No se pudo actualizar la duración del baneo de %(ip)s: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "Duración del baneo de %(ip)s actualizada correctamente."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "Concesión CrowdSec"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Bloqueos por motivo"
@@ -3825,6 +3867,12 @@ msgstr "Activar la integración de Docker Autoconf."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Modo Autoconf"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Motivos de bloqueo cuyas IP bloqueadas se descartan en el ClientHello TLS en lugar de recibir la página 403. Se omite con IP real basada en cabecera y con el protocolo PROXY, salvo que la IP real use proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Bloqueos descartados en TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Lista de instancias de BunkerWeb separadas por espacios (formato: fqdn-o-ip:5000 http://fqdn-o-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "Extraer Configuración"
 
 msgid "support.card.support_link.title"
 msgstr "Enlace de Soporte"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "El paquete de diagnóstico de la Web UI está restringido a los administradores."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Descargar paquete"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Registros, versiones de plugins, entorno y errores recientes. Los datos privados se anonimizan."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Diagnóstico de la Web UI"
 
 msgid "support.subtitle"
 msgstr "Descargar los registros de depuración, extraer su configuración y obtener ayuda del equipo de BunkerWeb."

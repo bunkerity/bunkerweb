@@ -274,6 +274,39 @@ msgstr "منتخب حد"
 msgid "bans.chart.timeseries.title"
 msgstr "ہر وقفے میں فعال پابندیاں"
 
+msgid "bans.crowdsec.confirm"
+msgstr "فیصلے حذف کریں اور پابندی ہٹائیں"
+
+msgid "bans.crowdsec.error"
+msgstr "پابندی ہٹانا ناکام رہا: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "CrowdSec بلاک دو مراحل میں ہٹتا ہے: نیچے درج فیصلے CrowdSec سے حذف کیے جاتے ہیں، پھر BunkerWeb کی پابندی ہٹائی جاتی ہے۔ پہلے مرحلے کے بغیر بلاک اگلی درخواست پر واپس آ جاتا ہے۔"
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "کوئی فعال CrowdSec بلاک فیصلہ نہیں ہے: صرف BunkerWeb کی پابندی ہٹائی جائے گی۔"
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: درخواست کے دوران پابندی کی تجدید یا تبدیلی ہو گئی، کچھ نہیں ہٹایا گیا۔ اسے دوبارہ ان بین کریں۔"
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: جزوی طور پر مکمل ہوا۔ مکمل کرنے کے لیے ان بین دوبارہ چلائیں: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: پابندی ہٹا دی گئی، حذف شدہ CrowdSec فیصلے: %(count)s۔"
+
+msgid "bans.crowdsec.title"
+msgstr "CrowdSec بلاک ہٹائیں"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "کچھ فیصلے CrowdSec فہرست یا کمیونٹی بلاک لسٹ سے آتے ہیں اور فہرست تازہ ہونے پر واپس آ سکتے ہیں۔ IP کو بلاک سے آزاد رکھنے کے لیے اسے CrowdSec کی اجازت فہرست میں شامل کریں۔"
+
+msgid "bans.crowdsec.warning.range"
+msgstr "ایک فیصلہ پوری رینج کو شامل کرتا ہے: اسے حذف کرنے سے اس رینج کے ہر IP کا بلاک ہٹ جاتا ہے۔"
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "دستیاب نہیں، نتیجہ جزوی ہوگا: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "%(ip)s پر پابندی لگانے میں ناکامی: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Redis سے پابندیاں حاصل کرنے میں ناکامی، مز
 msgid "bans.flash.skipped_challenged"
 msgstr "نظر انداز کی گئی رپورٹیں جن کے کلائنٹ کو بلاک کرنے کے بجائے چیلنج یا ری ڈائریکٹ کیا گیا: %(count)s۔"
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "اجازت مسترد۔ CrowdSec بلاک ہٹانے کے لیے متعلقہ ہر CrowdSec کنکشن پر ban_delete اور crowdsec_delete درکار ہیں۔"
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "یہ IP CrowdSec بلاک کی وجہ سے رکا ہوا ہے۔ اسے جدول میں اس کی قطار سے ان بین کریں، جو حذف ہونے والے CrowdSec فیصلے دکھاتی ہے۔"
+
 msgid "bans.flash.unban_failed"
 msgstr "%(ip)s سے پابندی ہٹانے میں ناکامی: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "%(ip)s کے لیے پابندی کی مدت اپ ڈیٹ کرنے میں 
 
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s کے لیے پابندی کی مدت کامیابی سے اپ ڈیٹ ہو گئی۔"
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec لیز"
 
 msgid "bans.stats.card.by_reason"
 msgstr "وجہ کے لحاظ سے پابندیاں"
@@ -3825,6 +3867,12 @@ msgstr "Docker Autoconf انضمام فعال کریں۔"
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf موڈ"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "پابندی کی وہ وجوہات جن کے لیے ممنوع IP کو 403 صفحہ دینے کے بجائے TLS ClientHello پر ہی منقطع کر دیا جاتا ہے۔ ہیڈر پر مبنی اصل IP کی صورت میں، اور PROXY پروٹوکول کے پیچھے (جب تک اصل IP proxy_protocol استعمال نہ کرے) اسے چھوڑ دیا جاتا ہے۔"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "TLS پر منقطع کی جانے والی پابندیاں"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "اسپیسز سے الگ کردہ BunkerWeb انسٹینسز کی فہرست (فارمیٹ: fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "کنفیگریشن نکالیں"
 
 msgid "support.card.support_link.title"
 msgstr "سپورٹ لنک"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "ویب UI تشخیصی بنڈل صرف منتظمین کے لیے محدود ہے۔"
+
+msgid "support.card.ui_bundle.button"
+msgstr "بنڈل ڈاؤن لوڈ کریں"
+
+msgid "support.card.ui_bundle.help"
+msgstr "لاگز، پلگ ان ورژنز، ماحول اور حالیہ خرابیاں۔ نجی ڈیٹا کو گمنام کر دیا جاتا ہے۔"
+
+msgid "support.card.ui_bundle.title"
+msgstr "ویب UI تشخیص"
 
 msgid "support.subtitle"
 msgstr "ڈیبگ لاگ ڈاؤن لوڈ کریں، اپنے کنفیگریشن کو استخراج کریں، اور BunkerWeb ٹیم سے مدد حاصل کریں۔"

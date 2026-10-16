@@ -274,6 +274,39 @@ msgstr "Plage sélectionnée"
 msgid "bans.chart.timeseries.title"
 msgstr "Bannissements actifs par intervalle"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Supprimer les décisions et débannir"
+
+msgid "bans.crowdsec.error"
+msgstr "Le débannissement a échoué : %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Un blocage CrowdSec se retire en deux étapes : les décisions listées ci-dessous sont supprimées de CrowdSec, puis le bannissement BunkerWeb est retiré. Sans la première étape, le blocage revient à la requête suivante."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Aucune décision de blocage CrowdSec active : seul le bannissement BunkerWeb est retiré."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s : le bannissement a été renouvelé ou remplacé pendant la requête, rien n'a été retiré. Débannissez-la à nouveau."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s : partiellement effectué. Relancez le débannissement pour terminer : %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s : débannie, décisions CrowdSec supprimées : %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Débannir un blocage CrowdSec"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Certaines décisions proviennent d'une liste CrowdSec ou de la liste de blocage communautaire et peuvent revenir à l'actualisation de la liste. Ajoutez l'IP à une liste d'autorisation CrowdSec pour qu'elle reste débloquée."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Une décision couvre toute une plage : la supprimer débloque chaque IP de cette plage."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Indisponible, le résultat sera partiel : %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "Échec du bannissement de %(ip)s : %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Échec de la récupération des bannissements depuis Redis, consultez le
 msgid "bans.flash.skipped_challenged"
 msgstr "Signalements ignorés, leur client ayant été soumis à un défi ou redirigé plutôt que bloqué : %(count)s."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Permission refusée. Débannir un blocage CrowdSec exige ban_delete et crowdsec_delete sur chaque connexion CrowdSec concernée."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "cette IP est bloquée par un blocage CrowdSec. Débannissez-la depuis sa ligne du tableau, qui affiche les décisions CrowdSec qui seront supprimées."
+
 msgid "bans.flash.unban_failed"
 msgstr "Échec du débannissement de %(ip)s : %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Échec de la mise à jour de la durée de bannissement pour %(ip)s : %(e
 
 msgid "bans.flash.update_duration_success"
 msgstr "Durée de bannissement mise à jour pour %(ip)s avec succès."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "Bail CrowdSec"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Bannissements par motif"
@@ -3825,6 +3867,12 @@ msgstr "Activer l'intégration Docker Autoconf."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Mode Autoconf"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Motifs de bannissement dont les IP bannies sont coupées dès le ClientHello TLS au lieu de recevoir la page 403. Ignoré avec une IP réelle fondée sur un en-tête, et avec le protocole PROXY sauf si l’IP réelle utilise proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Bannissements coupés en TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Liste des instances BunkerWeb séparées par des espaces (format : fqdn-ou-ip:5000 http://fqdn-ou-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "Extraire la Configuration"
 
 msgid "support.card.support_link.title"
 msgstr "Lien de Support"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Le paquet de diagnostic de la Web UI est réservé aux administrateurs."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Télécharger le paquet"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Journaux, versions des plugins, environnement et erreurs récentes. Les données privées sont anonymisées."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Diagnostic de la Web UI"
 
 msgid "support.subtitle"
 msgstr "Télécharger les journaux de débogage, extraire votre configuration et obtenir de l'aide de l'équipe BunkerWeb."

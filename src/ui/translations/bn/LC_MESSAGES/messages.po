@@ -274,6 +274,39 @@ msgstr "নির্বাচিত পরিসর"
 msgid "bans.chart.timeseries.title"
 msgstr "প্রতি ইন্টারভালে সক্রিয় নিষেধাজ্ঞা"
 
+msgid "bans.crowdsec.confirm"
+msgstr "সিদ্ধান্ত মুছুন এবং নিষেধাজ্ঞা তুলুন"
+
+msgid "bans.crowdsec.error"
+msgstr "নিষেধাজ্ঞা তোলা ব্যর্থ হয়েছে: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "CrowdSec ব্লক দুই ধাপে তোলা হয়: নিচে তালিকাভুক্ত সিদ্ধান্তগুলো CrowdSec থেকে মুছে ফেলা হয়, তারপর BunkerWeb নিষেধাজ্ঞা সরানো হয়। প্রথম ধাপ ছাড়া পরের অনুরোধেই ব্লক ফিরে আসে।"
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "কোনো সক্রিয় CrowdSec ব্লক সিদ্ধান্ত নেই: শুধু BunkerWeb নিষেধাজ্ঞা সরানো হবে।"
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: অনুরোধ চলাকালে নিষেধাজ্ঞা নবায়ন বা প্রতিস্থাপিত হয়েছে, কিছুই সরানো হয়নি। আবার নিষেধাজ্ঞা তুলুন।"
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: আংশিকভাবে সম্পন্ন। শেষ করতে আবার নিষেধাজ্ঞা তোলা চালান: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: নিষেধাজ্ঞা তোলা হয়েছে, মুছে ফেলা CrowdSec সিদ্ধান্ত: %(count)s।"
+
+msgid "bans.crowdsec.title"
+msgstr "CrowdSec ব্লক তুলে নিন"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "কিছু সিদ্ধান্ত CrowdSec তালিকা বা কমিউনিটি ব্লকলিস্ট থেকে আসে এবং তালিকা হালনাগাদ হলে ফিরে আসতে পারে। IP ব্লকমুক্ত রাখতে এটি CrowdSec অনুমোদনতালিকায় যোগ করুন।"
+
+msgid "bans.crowdsec.warning.range"
+msgstr "একটি সিদ্ধান্ত পুরো রেঞ্জ জুড়ে: এটি মুছলে ওই রেঞ্জের প্রতিটি IP ব্লকমুক্ত হয়।"
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "পাওয়া যাচ্ছে না, ফলাফল আংশিক হবে: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "%(ip)s নিষিদ্ধ করা যায়নি: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Redis থেকে নিষেধাজ্ঞা আনা যায়
 msgid "bans.flash.skipped_challenged"
 msgstr "%(count)s টি প্রতিবেদন বাদ দেওয়া হয়েছে যাদের ক্লায়েন্টকে ব্লক না করে চ্যালেঞ্জ বা রিডাইরেক্ট করা হয়েছে।"
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "অনুমতি প্রত্যাখ্যাত। CrowdSec ব্লক তুলতে সংশ্লিষ্ট প্রতিটি CrowdSec সংযোগে ban_delete ও crowdsec_delete প্রয়োজন।"
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "এই IP একটি CrowdSec ব্লকের কারণে আটকানো। টেবিলে এর সারি থেকে নিষেধাজ্ঞা তুলুন, যেখানে মুছে ফেলা হবে এমন CrowdSec সিদ্ধান্ত দেখানো হয়।"
+
 msgid "bans.flash.unban_failed"
 msgstr "%(ip)s এর নিষেধাজ্ঞা তোলা যায়নি: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "%(ip)s এর নিষেধাজ্ঞার মেয়াদ হ�
 
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s এর নিষেধাজ্ঞার মেয়াদ সফলভাবে হালনাগাদ করা হয়েছে।"
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec লিজ"
 
 msgid "bans.stats.card.by_reason"
 msgstr "কারণ অনুযায়ী ব্লক"
@@ -3825,6 +3867,12 @@ msgstr "Docker Autoconf ইন্টিগ্রেশন সক্ষম কর
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf মোড"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "যেসব ব্যান কারণের জন্য নিষিদ্ধ আইপিগুলিকে ৪০৩ পৃষ্ঠা দেওয়ার বদলে TLS ClientHello-তে বাদ দেওয়া হয়। হেডারভিত্তিক রিয়েল আইপি থাকলে, এবং রিয়েল আইপি proxy_protocol ব্যবহার না করলে PROXY প্রোটোকলের পেছনেও এটি এড়িয়ে যাওয়া হয়।"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "TLS-এ বাদ দেওয়া ব্যান"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "স্পেস দিয়ে পৃথক করা BunkerWeb ইনস্ট্যান্সের তালিকা (ফরম্যাট: fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "কনফিগারেশন এক্সট্র্যাক্ট �
 
 msgid "support.card.support_link.title"
 msgstr "সমর্থন লিঙ্ক"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "ওয়েব UI ডায়াগনস্টিক বান্ডেল শুধুমাত্র প্রশাসকদের জন্য সীমাবদ্ধ।"
+
+msgid "support.card.ui_bundle.button"
+msgstr "বান্ডেল ডাউনলোড করুন"
+
+msgid "support.card.ui_bundle.help"
+msgstr "লগ, প্লাগইনের সংস্করণ, পরিবেশ এবং সাম্প্রতিক ত্রুটি। ব্যক্তিগত ডেটা বেনামী করা হয়।"
+
+msgid "support.card.ui_bundle.title"
+msgstr "ওয়েব UI ডায়াগনস্টিক্স"
 
 msgid "support.subtitle"
 msgstr "ডিবাগ লগ ডাউনলোড করুন, আপনার কনফিগারেশন নিষ্কাশন করুন এবং BunkerWeb টিমের কাছ থেকে সহায়তা নিন।"

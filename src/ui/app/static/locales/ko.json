@@ -152,7 +152,29 @@
       "no_matching_reports": "일치하는 보고서가 없습니다.",
       "invalid_ban_selection_mode": "잘못된 차단 선택 모드입니다.",
       "invalid_bans_parameter_bans_ban": "/bans/ban의 bans 매개변수가 잘못되었습니다.",
-      "invalid_filtered_ban_source": "잘못된 필터링된 차단 소스입니다."
+      "invalid_filtered_ban_source": "잘못된 필터링된 차단 소스입니다.",
+      "unban_crowdsec_needs_review": "이 IP는 CrowdSec 차단으로 막혀 있습니다. 삭제될 CrowdSec 결정을 보여 주는 표의 해당 행에서 차단을 해제하세요.",
+      "unban_crowdsec_forbidden": "권한이 거부되었습니다. CrowdSec 차단을 해제하려면 관련된 모든 CrowdSec 연결에 ban_delete 및 crowdsec_delete 권한이 필요합니다."
+    },
+    "kind": {
+      "crowdsec_lease": "CrowdSec 임대"
+    },
+    "crowdsec": {
+      "title": "CrowdSec 차단 해제",
+      "intro": "CrowdSec 차단은 두 단계로 해제됩니다. 아래에 나열된 결정을 CrowdSec에서 삭제한 다음 BunkerWeb 차단을 제거합니다. 첫 단계가 없으면 다음 요청에서 차단이 다시 생깁니다.",
+      "no_decisions": "활성 CrowdSec 차단 결정이 없습니다. BunkerWeb 차단만 제거됩니다.",
+      "confirm": "결정 삭제 및 차단 해제",
+      "error": "차단 해제에 실패했습니다: {{error}}",
+      "warning": {
+        "list_origin": "일부 결정은 CrowdSec 목록 또는 커뮤니티 차단 목록에서 온 것이며 목록이 갱신되면 다시 나타날 수 있습니다. 차단되지 않도록 IP를 CrowdSec 허용 목록에 추가하세요.",
+        "range": "결정 하나가 범위 전체를 포함합니다. 삭제하면 해당 범위의 모든 IP 차단이 해제됩니다.",
+        "unavailable": "사용할 수 없음, 결과가 일부만 반영됩니다: {{list}}"
+      },
+      "result": {
+        "success": "{{ip}}: 차단 해제됨, 삭제된 CrowdSec 결정: {{count}}.",
+        "changed": "{{ip}}: 요청 중에 차단이 갱신되거나 교체되어 아무것도 제거되지 않았습니다. 다시 차단 해제하세요.",
+        "partial": "{{ip}}: 일부만 완료되었습니다. 차단 해제를 다시 실행해 마무리하세요: {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2443,6 +2465,10 @@
         "label": "보안 모드",
         "help": "위협에 대한 대응을 정의합니다: 모니터링하고 기록하려면 \"detect\", 액세스를 차단하고 사건을 기록하려면 \"block\"."
       },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "TLS에서 끊는 차단",
+        "help": "차단된 IP가 403 페이지 대신 TLS ClientHello 단계에서 연결이 끊기는 차단 사유입니다. 헤더 기반 실제 IP를 사용할 때와, 실제 IP가 proxy_protocol을 쓰지 않는 한 PROXY 프로토콜 뒤에서는 건너뜁니다."
+      },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "서버 이름 해시 버킷 크기",
         "help": "server_names_hash_bucket_size 지시어의 값."
@@ -3200,6 +3226,12 @@
       },
       "support_link": {
         "title": "기술 지원 링크"
+      },
+      "ui_bundle": {
+        "admin_only": "Web UI 진단 번들은 관리자만 사용할 수 있습니다.",
+        "button": "번들 다운로드",
+        "help": "로그, 플러그인 버전, 환경 및 최근 오류. 개인 정보는 익명 처리됩니다.",
+        "title": "웹 UI 진단"
       }
     },
     "subtitle": "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요.",

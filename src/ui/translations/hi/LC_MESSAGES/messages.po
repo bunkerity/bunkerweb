@@ -274,6 +274,39 @@ msgstr "चयनित सीमा"
 msgid "bans.chart.timeseries.title"
 msgstr "प्रति इंटरवल सक्रिय प्रतिबंध"
 
+msgid "bans.crowdsec.confirm"
+msgstr "निर्णय हटाएँ और प्रतिबंध हटाएँ"
+
+msgid "bans.crowdsec.error"
+msgstr "प्रतिबंध हटाना विफल रहा: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "CrowdSec ब्लॉक दो चरणों में हटता है: नीचे सूचीबद्ध निर्णय CrowdSec से हटाए जाते हैं, फिर BunkerWeb प्रतिबंध हटाया जाता है। पहले चरण के बिना अगले अनुरोध पर ब्लॉक वापस आ जाता है।"
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "कोई सक्रिय CrowdSec ब्लॉक निर्णय नहीं है: केवल BunkerWeb प्रतिबंध हटाया जाएगा।"
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: अनुरोध के दौरान प्रतिबंध नवीनीकृत या बदल दिया गया, कुछ भी नहीं हटाया गया। इसे फिर से अनबैन करें।"
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: आंशिक रूप से पूरा हुआ। पूरा करने के लिए अनबैन फिर चलाएँ: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: प्रतिबंध हटाया गया, हटाए गए CrowdSec निर्णय: %(count)s।"
+
+msgid "bans.crowdsec.title"
+msgstr "CrowdSec ब्लॉक हटाएँ"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "कुछ निर्णय CrowdSec सूची या समुदाय ब्लॉकलिस्ट से आते हैं और सूची ताज़ा होने पर वापस आ सकते हैं। IP को अनब्लॉक रखने के लिए उसे CrowdSec की अनुमति सूची में जोड़ें।"
+
+msgid "bans.crowdsec.warning.range"
+msgstr "एक निर्णय पूरी रेंज को कवर करता है: इसे हटाने से उस रेंज के हर IP का ब्लॉक हट जाता है।"
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "उपलब्ध नहीं, परिणाम आंशिक होगा: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "%(ip)s को प्रतिबंधित करने में विफल: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Redis से प्रतिबंध प्राप्त करने
 msgid "bans.flash.skipped_challenged"
 msgstr "%(count)s रिपोर्ट छोड़ दी गईं जिनके क्लाइंट को अवरुद्ध करने के बजाय चुनौती दी गई या पुनर्निर्देशित किया गया।"
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "अनुमति अस्वीकृत। CrowdSec ब्लॉक हटाने के लिए संबंधित हर CrowdSec कनेक्शन पर ban_delete और crowdsec_delete चाहिए।"
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "यह IP CrowdSec ब्लॉक से रोका गया है। इसे तालिका में उसकी पंक्ति से अनबैन करें, जो हटाए जाने वाले CrowdSec निर्णय दिखाती है।"
+
 msgid "bans.flash.unban_failed"
 msgstr "%(ip)s से प्रतिबंध हटाने में विफल: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "%(ip)s के लिए प्रतिबंध अवधि अपड�
 
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s के लिए प्रतिबंध अवधि सफलतापूर्वक अपडेट की गई।"
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec लीज़"
 
 msgid "bans.stats.card.by_reason"
 msgstr "कारण के अनुसार प्रतिबंध"
@@ -3825,6 +3867,12 @@ msgstr "Docker Autoconf एकीकरण सक्षम करें।"
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf मोड"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "बैन के वे कारण जिनके लिए प्रतिबंधित IP को 403 पेज देने के बजाय TLS ClientHello पर ही छोड़ दिया जाता है। हेडर-आधारित वास्तविक IP होने पर, और PROXY प्रोटोकॉल के पीछे (जब तक वास्तविक IP proxy_protocol का उपयोग न करे) इसे छोड़ दिया जाता है।"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "TLS पर छोड़े गए बैन"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "स्पेस से अलग किए गए BunkerWeb इंस्टेंस की सूची (प्रारूप: fqdn-or-ip:5000 http://fqdn-or-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "कॉन्फ़िगरेशन निकालें"
 
 msgid "support.card.support_link.title"
 msgstr "समर्थन लिंक"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "वेब UI डायग्नोस्टिक बंडल केवल प्रशासकों के लिए सीमित है।"
+
+msgid "support.card.ui_bundle.button"
+msgstr "बंडल डाउनलोड करें"
+
+msgid "support.card.ui_bundle.help"
+msgstr "लॉग, प्लगइन संस्करण, परिवेश और हाल की त्रुटियाँ। निजी डेटा को गुमनाम किया जाता है।"
+
+msgid "support.card.ui_bundle.title"
+msgstr "वेब UI डायग्नोस्टिक्स"
 
 msgid "support.subtitle"
 msgstr "डीबग लॉग डाउनलोड करें, अपने कॉन्फ़िगरेशन निकालें, और BunkerWeb टीम से सहायता प्राप्त करें।"

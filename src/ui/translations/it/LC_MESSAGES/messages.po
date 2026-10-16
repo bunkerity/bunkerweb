@@ -274,6 +274,39 @@ msgstr "Intervallo selezionato"
 msgid "bans.chart.timeseries.title"
 msgstr "Ban attivi per intervallo"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Elimina le decisioni e sbanna"
+
+msgid "bans.crowdsec.error"
+msgstr "Lo sban non è riuscito: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Un blocco CrowdSec si rimuove in due passaggi: le decisioni elencate sotto vengono eliminate da CrowdSec, poi viene rimosso il ban di BunkerWeb. Senza il primo passaggio, il blocco torna alla richiesta successiva."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Nessuna decisione di blocco CrowdSec attiva: viene rimosso solo il ban di BunkerWeb."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: il ban è stato rinnovato o sostituito durante la richiesta, non è stato rimosso nulla. Sbannalo di nuovo."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: eseguito in parte. Esegui di nuovo lo sban per completare: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: sbannato, decisioni CrowdSec eliminate: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Sbanna un blocco CrowdSec"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Alcune decisioni provengono da una lista CrowdSec o dalla blocklist della community e possono tornare quando la lista si aggiorna. Aggiungi l'IP a una allowlist CrowdSec per mantenerlo sbloccato."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Una decisione copre un intero intervallo: eliminarla sblocca ogni IP di quell'intervallo."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Non disponibile, il risultato sarà parziale: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "Impossibile bannare %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Impossibile recuperare i ban da Redis, consulta i log per maggiori infor
 msgid "bans.flash.skipped_challenged"
 msgstr "Segnalazioni ignorate perché il client è stato sfidato o reindirizzato anziché bloccato: %(count)s."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Permesso negato. Sbannare un blocco CrowdSec richiede ban_delete e crowdsec_delete su ogni connessione CrowdSec coinvolta."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "questo IP è bloccato da un blocco CrowdSec. Sbannalo dalla sua riga della tabella, che mostra le decisioni CrowdSec che verranno eliminate."
+
 msgid "bans.flash.unban_failed"
 msgstr "Impossibile rimuovere il ban di %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Impossibile aggiornare la durata del ban per %(ip)s: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "Durata del ban per %(ip)s aggiornata con successo."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "Lease CrowdSec"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Ban per motivo"
@@ -3825,6 +3867,12 @@ msgstr "Abilita l'integrazione Docker Autoconf."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Modalità Autoconf"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Motivi di ban per cui gli IP bannati vengono scartati al ClientHello TLS invece di ricevere la pagina 403. Ignorato con IP reale basato su header e con il protocollo PROXY, a meno che l’IP reale usi proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Ban scartati in TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Elenco delle istanze BunkerWeb separate da spazi (formato: fqdn-o-ip:5000 http://fqdn-o-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "Estrai Configurazione"
 
 msgid "support.card.support_link.title"
 msgstr "Link Supporto"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Il pacchetto di diagnostica della Web UI è riservato agli amministratori."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Scarica pacchetto"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Log, versioni dei plugin, ambiente ed errori recenti. I dati privati vengono anonimizzati."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Diagnostica della Web UI"
 
 msgid "support.subtitle"
 msgstr "Scarica i log di debug, estrai la tua configurazione e richiedi assistenza al team BunkerWeb."

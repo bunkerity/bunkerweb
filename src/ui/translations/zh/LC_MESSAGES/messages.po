@@ -274,6 +274,39 @@ msgstr "所选范围"
 msgid "bans.chart.timeseries.title"
 msgstr "每区间的活跃封禁"
 
+msgid "bans.crowdsec.confirm"
+msgstr "删除决策并解除封禁"
+
+msgid "bans.crowdsec.error"
+msgstr "解除封禁失败：%(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "解除 CrowdSec 封禁分两步：先从 CrowdSec 删除下方列出的决策，再移除 BunkerWeb 封禁。没有第一步，封禁会在下一次请求时重新出现。"
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "没有生效的 CrowdSec 封禁决策：只会移除 BunkerWeb 封禁。"
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s：封禁在请求期间被续期或替换，未移除任何内容。请再次解除封禁。"
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s：部分完成。请再次运行解除封禁以完成：%(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s：已解除封禁，已删除的 CrowdSec 决策：%(count)s。"
+
+msgid "bans.crowdsec.title"
+msgstr "解除 CrowdSec 封禁"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "部分决策来自 CrowdSec 列表或社区封禁列表，列表刷新后可能会重新出现。请将该 IP 加入 CrowdSec 允许列表以保持放行。"
+
+msgid "bans.crowdsec.warning.range"
+msgstr "某个决策覆盖了整个网段：删除它会解除该网段内所有 IP 的封禁。"
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "不可用，结果将不完整：%(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "封禁 %(ip)s 失败：%(error)s"
 
@@ -343,6 +376,12 @@ msgstr "无法从 Redis 获取封禁记录，详情请查看日志。"
 msgid "bans.flash.skipped_challenged"
 msgstr "已跳过 %(count)s 条报告，其客户端被质询或重定向而非被拦截。"
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "权限被拒绝。解除 CrowdSec 封禁需要在每个相关的 CrowdSec 连接上拥有 ban_delete 和 crowdsec_delete 权限。"
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "此 IP 被 CrowdSec 封禁拦截。请在表格中该 IP 所在行解除封禁，该行会显示将被删除的 CrowdSec 决策。"
+
 msgid "bans.flash.unban_failed"
 msgstr "解封 %(ip)s 失败：%(error)s"
 
@@ -354,6 +393,9 @@ msgstr "更新 %(ip)s 的封禁时长失败：%(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "已成功更新 %(ip)s 的封禁时长。"
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec 租约"
 
 msgid "bans.stats.card.by_reason"
 msgstr "按原因统计封禁"
@@ -3825,6 +3867,12 @@ msgstr "启用 Docker Autoconf 集成。"
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf 模式"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "封禁原因列表：因这些原因被封禁的 IP 会在 TLS ClientHello 阶段被丢弃，而不是收到 403 页面。使用基于请求头的真实 IP 时跳过；使用 PROXY 协议时也跳过，除非真实 IP 使用 proxy_protocol。"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "在 TLS 阶段丢弃的封禁"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "以空格分隔的 BunkerWeb 实例列表（格式：fqdn-or-ip:5000 http://fqdn-or-ip:5000）"
@@ -7901,6 +7949,18 @@ msgstr "提取配置"
 
 msgid "support.card.support_link.title"
 msgstr "支持链接"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Web UI 诊断包仅限管理员使用。"
+
+msgid "support.card.ui_bundle.button"
+msgstr "下载诊断包"
+
+msgid "support.card.ui_bundle.help"
+msgstr "日志、插件版本、环境和近期错误。私有数据将被匿名化。"
+
+msgid "support.card.ui_bundle.title"
+msgstr "Web UI 诊断"
 
 msgid "support.subtitle"
 msgstr "下载调试日志，提取您的配置，并向 BunkerWeb 团队寻求帮助。"

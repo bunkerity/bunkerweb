@@ -274,6 +274,39 @@ msgstr "Ausgewählter Zeitraum"
 msgid "bans.chart.timeseries.title"
 msgstr "Aktive Sperren pro Intervall"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Entscheidungen löschen und entsperren"
+
+msgid "bans.crowdsec.error"
+msgstr "Die Aufhebung der Sperre ist fehlgeschlagen: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Eine CrowdSec-Sperre wird in zwei Schritten aufgehoben: Die unten aufgeführten Entscheidungen werden aus CrowdSec gelöscht, danach wird die BunkerWeb-Sperre entfernt. Ohne den ersten Schritt kehrt die Sperre bei der nächsten Anfrage zurück."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Keine aktive CrowdSec-Sperrentscheidung: Es wird nur die BunkerWeb-Sperre entfernt."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: Die Sperre wurde während der Anfrage erneuert oder ersetzt, es wurde nichts entfernt. Heben Sie sie erneut auf."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: teilweise ausgeführt. Führen Sie die Aufhebung erneut aus, um sie abzuschließen: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: entsperrt, gelöschte CrowdSec-Entscheidungen: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "CrowdSec-Sperre aufheben"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Einige Entscheidungen stammen aus einer CrowdSec-Liste oder der Community-Blocklist und können bei der nächsten Aktualisierung der Liste zurückkehren. Fügen Sie die IP einer CrowdSec-Allowlist hinzu, damit sie entsperrt bleibt."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Eine Entscheidung deckt einen ganzen Bereich ab: Ihr Löschen entsperrt jede IP dieses Bereichs."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Nicht verfügbar, das Ergebnis wird unvollständig sein: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "%(ip)s konnte nicht gesperrt werden: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Bans konnten nicht aus Redis geladen werden, weitere Informationen finde
 msgid "bans.flash.skipped_challenged"
 msgstr "Übersprungene Meldungen, deren Client geprüft oder umgeleitet statt blockiert wurde: %(count)s."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Zugriff verweigert. Zum Aufheben einer CrowdSec-Sperre sind ban_delete und crowdsec_delete für jede betroffene CrowdSec-Verbindung erforderlich."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "Diese IP ist durch eine CrowdSec-Sperre blockiert. Heben Sie sie in ihrer Tabellenzeile auf, die die zu löschenden CrowdSec-Entscheidungen anzeigt."
+
 msgid "bans.flash.unban_failed"
 msgstr "Sperre für %(ip)s konnte nicht aufgehoben werden: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Sperrdauer für %(ip)s konnte nicht aktualisiert werden: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "Sperrdauer für %(ip)s erfolgreich aktualisiert."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec-Lease"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Sperren nach Grund"
@@ -3825,6 +3867,12 @@ msgstr "Autoconf-Docker-Integration aktivieren."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf-Modus"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Sperrgründe, deren gesperrte IPs beim TLS-ClientHello verworfen werden, statt die 403-Seite zu erhalten. Wird bei headerbasierter Real-IP übersprungen und beim PROXY-Protokoll, außer die Real-IP verwendet proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Sperren beim TLS verwerfen"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Liste der BunkerWeb-Instanzen, getrennt durch Leerzeichen (Format: fqdn-oder-ip:5000 http://fqdn-oder-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "Konfiguration extrahieren"
 
 msgid "support.card.support_link.title"
 msgstr "Support-Link"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Das Web-UI-Diagnosepaket ist Administratoren vorbehalten."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Paket herunterladen"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Logs, Plugin-Versionen, Umgebung und aktuelle Fehler. Private Daten werden anonymisiert."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Web-UI-Diagnose"
 
 msgid "support.subtitle"
 msgstr "Laden Sie Debug-Logs herunter, extrahieren Sie Ihre Konfiguration und holen Sie sich Hilfe vom BunkerWeb-Team."

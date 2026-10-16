@@ -274,6 +274,39 @@ msgstr "Выбранный диапазон"
 msgid "bans.chart.timeseries.title"
 msgstr "Активные блокировки по интервалам"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Удалить решения и разбанить"
+
+msgid "bans.crowdsec.error"
+msgstr "Не удалось разбанить: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Блокировка CrowdSec снимается в два шага: перечисленные ниже решения удаляются из CrowdSec, затем снимается бан BunkerWeb. Без первого шага блокировка вернётся при следующем запросе."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Нет активных решений CrowdSec о блокировке: снимается только бан BunkerWeb."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: бан был продлён или заменён во время запроса, ничего не удалено. Разбаньте его снова."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: выполнено частично. Повторите разбан, чтобы завершить: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: разбанен, удалено решений CrowdSec: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Снять блокировку CrowdSec"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Некоторые решения взяты из списка CrowdSec или общего списка блокировок и могут вернуться при обновлении списка. Добавьте IP в список разрешённых CrowdSec, чтобы он оставался разблокированным."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Решение охватывает весь диапазон: его удаление разблокирует каждый IP этого диапазона."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Недоступно, результат будет частичным: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "Не удалось заблокировать %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Не удалось получить блокировки из Redis, п
 msgid "bans.flash.skipped_challenged"
 msgstr "Пропущено отчётов: %(count)s — их клиент прошёл проверку или был перенаправлен, а не заблокирован."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Доступ запрещён. Для снятия блокировки CrowdSec нужны ban_delete и crowdsec_delete для каждого затронутого подключения CrowdSec."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "этот IP заблокирован блокировкой CrowdSec. Разбаньте его из его строки в таблице, где показаны решения CrowdSec, которые будут удалены."
+
 msgid "bans.flash.unban_failed"
 msgstr "Не удалось разблокировать %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Не удалось обновить срок блокировки дл�
 
 msgid "bans.flash.update_duration_success"
 msgstr "Срок блокировки для %(ip)s успешно обновлён."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "Аренда CrowdSec"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Блокировки по причине"
@@ -3825,6 +3867,12 @@ msgstr "Включить интеграцию Autoconf Docker."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Режим Autoconf"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Причины блокировок, для которых заблокированные IP обрываются на TLS ClientHello вместо показа страницы 403. Пропускается при реальном IP из заголовка и при протоколе PROXY, если реальный IP не использует proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Блокировки, обрываемые на TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Список экземпляров BunkerWeb, разделённых пробелами (формат: fqdn-или-ip:5000 http://fqdn-или-ip:5000)"
@@ -7921,6 +7969,18 @@ msgstr "Извлечь конфигурацию"
 
 msgid "support.card.support_link.title"
 msgstr "Ссылка на поддержку"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Пакет диагностики Web UI доступен только администраторам."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Скачать пакет"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Журналы, версии плагинов, окружение и недавние ошибки. Личные данные анонимизируются."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Диагностика Web UI"
 
 msgid "support.subtitle"
 msgstr "Скачать логи отладки, извлечь конфигурацию и получить помощь от команды BunkerWeb."

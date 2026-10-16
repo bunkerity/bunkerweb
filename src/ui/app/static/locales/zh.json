@@ -152,7 +152,29 @@
       "no_matching_reports": "没有匹配的报告。",
       "invalid_ban_selection_mode": "封禁选择模式无效。",
       "invalid_bans_parameter_bans_ban": "/bans/ban 上的 bans 参数无效。",
-      "invalid_filtered_ban_source": "已筛选的封禁来源无效。"
+      "invalid_filtered_ban_source": "已筛选的封禁来源无效。",
+      "unban_crowdsec_needs_review": "此 IP 被 CrowdSec 封禁拦截。请在表格中该 IP 所在行解除封禁，该行会显示将被删除的 CrowdSec 决策。",
+      "unban_crowdsec_forbidden": "权限被拒绝。解除 CrowdSec 封禁需要在每个相关的 CrowdSec 连接上拥有 ban_delete 和 crowdsec_delete 权限。"
+    },
+    "kind": {
+      "crowdsec_lease": "CrowdSec 租约"
+    },
+    "crowdsec": {
+      "title": "解除 CrowdSec 封禁",
+      "intro": "解除 CrowdSec 封禁分两步：先从 CrowdSec 删除下方列出的决策，再移除 BunkerWeb 封禁。没有第一步，封禁会在下一次请求时重新出现。",
+      "no_decisions": "没有生效的 CrowdSec 封禁决策：只会移除 BunkerWeb 封禁。",
+      "confirm": "删除决策并解除封禁",
+      "error": "解除封禁失败：{{error}}",
+      "warning": {
+        "list_origin": "部分决策来自 CrowdSec 列表或社区封禁列表，列表刷新后可能会重新出现。请将该 IP 加入 CrowdSec 允许列表以保持放行。",
+        "range": "某个决策覆盖了整个网段：删除它会解除该网段内所有 IP 的封禁。",
+        "unavailable": "不可用，结果将不完整：{{list}}"
+      },
+      "result": {
+        "success": "{{ip}}：已解除封禁，已删除的 CrowdSec 决策：{{count}}。",
+        "changed": "{{ip}}：封禁在请求期间被续期或替换，未移除任何内容。请再次解除封禁。",
+        "partial": "{{ip}}：部分完成。请再次运行解除封禁以完成：{{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2493,6 +2515,12 @@
       },
       "support_link": {
         "title": "支持链接"
+      },
+      "ui_bundle": {
+        "admin_only": "Web UI 诊断包仅限管理员使用。",
+        "button": "下载诊断包",
+        "help": "日志、插件版本、环境和近期错误。私有数据将被匿名化。",
+        "title": "Web UI 诊断"
       }
     },
     "subtitle": "下载调试日志，提取您的配置，并向 BunkerWeb 团队寻求帮助。",
@@ -4337,6 +4365,10 @@
       "SECURITY_MODE": {
         "label": "安全模式",
         "help": "定义对威胁的响应方式：\"detect\" 表示仅监控并记录，\"block\" 表示阻止访问并记录事件。"
+      },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "在 TLS 阶段丢弃的封禁",
+        "help": "封禁原因列表：因这些原因被封禁的 IP 会在 TLS ClientHello 阶段被丢弃，而不是收到 403 页面。使用基于请求头的真实 IP 时跳过；使用 PROXY 协议时也跳过，除非真实 IP 使用 proxy_protocol。"
       },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "服务器名称哈希桶大小",

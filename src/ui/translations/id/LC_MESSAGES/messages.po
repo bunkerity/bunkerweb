@@ -274,6 +274,39 @@ msgstr "Rentang yang dipilih"
 msgid "bans.chart.timeseries.title"
 msgstr "Larangan aktif per interval"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Hapus keputusan dan batalkan blokir"
+
+msgid "bans.crowdsec.error"
+msgstr "Pembatalan blokir gagal: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Blokir CrowdSec dihapus dalam dua langkah: keputusan yang tercantum di bawah dihapus dari CrowdSec, lalu blokir BunkerWeb dihapus. Tanpa langkah pertama, blokir akan kembali pada permintaan berikutnya."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Tidak ada keputusan blokir CrowdSec yang aktif: hanya blokir BunkerWeb yang dihapus."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: blokir diperbarui atau diganti saat permintaan berjalan, tidak ada yang dihapus. Batalkan blokirnya lagi."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: sebagian selesai. Jalankan lagi pembatalan blokir untuk menyelesaikan: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: blokir dibatalkan, keputusan CrowdSec dihapus: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Batalkan blokir CrowdSec"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Beberapa keputusan berasal dari daftar CrowdSec atau daftar blokir komunitas dan dapat kembali saat daftar diperbarui. Tambahkan IP ke allowlist CrowdSec agar tetap tidak diblokir."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Satu keputusan mencakup seluruh rentang: menghapusnya membuka blokir setiap IP dalam rentang itu."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Tidak tersedia, hasilnya akan sebagian: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "Gagal memblokir %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Gagal mengambil daftar blokir dari Redis, lihat log untuk informasi lebi
 msgid "bans.flash.skipped_challenged"
 msgstr "Melewati %(count)s laporan yang kliennya ditantang atau dialihkan alih-alih diblokir."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Izin ditolak. Membatalkan blokir CrowdSec memerlukan ban_delete dan crowdsec_delete pada setiap koneksi CrowdSec yang terlibat."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "IP ini diblokir oleh blokir CrowdSec. Batalkan dari barisnya di tabel, yang menampilkan keputusan CrowdSec yang akan dihapus."
+
 msgid "bans.flash.unban_failed"
 msgstr "Gagal membuka blokir %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Gagal memperbarui durasi blokir untuk %(ip)s: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "Durasi blokir untuk %(ip)s berhasil diperbarui."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "Lease CrowdSec"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Larangan berdasarkan alasan"
@@ -3825,6 +3867,12 @@ msgstr "Aktifkan integrasi Autoconf Docker."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Mode Autoconf"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Alasan ban yang IP-nya diputus pada ClientHello TLS alih-alih mendapat halaman 403. Dilewati jika IP asli berbasis header, dan pada protokol PROXY kecuali IP asli memakai proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Ban yang diputus di TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Daftar instans BunkerWeb dipisahkan spasi (format: fqdn-atau-ip:5000 http://fqdn-atau-ip:5000)"
@@ -7911,6 +7959,18 @@ msgstr "Ekstrak Konfigurasi"
 
 msgid "support.card.support_link.title"
 msgstr "Tautan Dukungan"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Paket diagnostik Web UI dibatasi untuk administrator."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Unduh Paket"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Log, versi plugin, lingkungan, dan error terbaru. Data pribadi akan dianonimkan."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Diagnostik Web UI"
 
 msgid "support.subtitle"
 msgstr "Unduh log debug, ekstrak konfigurasi Anda, dan dapatkan bantuan dari tim BunkerWeb."

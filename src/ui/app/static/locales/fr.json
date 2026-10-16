@@ -152,7 +152,29 @@
       "no_matching_reports": "Aucun signalement correspondant.",
       "invalid_ban_selection_mode": "Mode de sélection des bannissements invalide.",
       "invalid_bans_parameter_bans_ban": "Paramètre bans invalide sur /bans/ban.",
-      "invalid_filtered_ban_source": "Source de bannissement filtrée invalide."
+      "invalid_filtered_ban_source": "Source de bannissement filtrée invalide.",
+      "unban_crowdsec_needs_review": "cette IP est bloquée par un blocage CrowdSec. Débannissez-la depuis sa ligne du tableau, qui affiche les décisions CrowdSec qui seront supprimées.",
+      "unban_crowdsec_forbidden": "Permission refusée. Débannir un blocage CrowdSec exige ban_delete et crowdsec_delete sur chaque connexion CrowdSec concernée."
+    },
+    "kind": {
+      "crowdsec_lease": "Bail CrowdSec"
+    },
+    "crowdsec": {
+      "title": "Débannir un blocage CrowdSec",
+      "intro": "Un blocage CrowdSec se retire en deux étapes : les décisions listées ci-dessous sont supprimées de CrowdSec, puis le bannissement BunkerWeb est retiré. Sans la première étape, le blocage revient à la requête suivante.",
+      "no_decisions": "Aucune décision de blocage CrowdSec active : seul le bannissement BunkerWeb est retiré.",
+      "confirm": "Supprimer les décisions et débannir",
+      "error": "Le débannissement a échoué : {{error}}",
+      "warning": {
+        "list_origin": "Certaines décisions proviennent d'une liste CrowdSec ou de la liste de blocage communautaire et peuvent revenir à l'actualisation de la liste. Ajoutez l'IP à une liste d'autorisation CrowdSec pour qu'elle reste débloquée.",
+        "range": "Une décision couvre toute une plage : la supprimer débloque chaque IP de cette plage.",
+        "unavailable": "Indisponible, le résultat sera partiel : {{list}}"
+      },
+      "result": {
+        "success": "{{ip}} : débannie, décisions CrowdSec supprimées : {{count}}.",
+        "changed": "{{ip}} : le bannissement a été renouvelé ou remplacé pendant la requête, rien n'a été retiré. Débannissez-la à nouveau.",
+        "partial": "{{ip}} : partiellement effectué. Relancez le débannissement pour terminer : {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2560,6 +2582,12 @@
       },
       "support_link": {
         "title": "Lien de Support"
+      },
+      "ui_bundle": {
+        "admin_only": "Le paquet de diagnostic de la Web UI est réservé aux administrateurs.",
+        "button": "Télécharger le paquet",
+        "help": "Journaux, versions des plugins, environnement et erreurs récentes. Les données privées sont anonymisées.",
+        "title": "Diagnostic de la Web UI"
       }
     },
     "subtitle": "Télécharger les journaux de débogage, extraire votre configuration et obtenir de l'aide de l'équipe BunkerWeb.",
@@ -4508,6 +4536,10 @@
       "SECURITY_MODE": {
         "label": "Mode de sécurité",
         "help": "Définit la réponse aux menaces : \"detect\" pour surveiller et journaliser, ou \"block\" pour empêcher l'accès et journaliser les incidents."
+      },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "Bannissements coupés en TLS",
+        "help": "Motifs de bannissement dont les IP bannies sont coupées dès le ClientHello TLS au lieu de recevoir la page 403. Ignoré avec une IP réelle fondée sur un en-tête, et avec le protocole PROXY sauf si l’IP réelle utilise proxy_protocol."
       },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "Taille de bucket de hachage des noms de serveur",

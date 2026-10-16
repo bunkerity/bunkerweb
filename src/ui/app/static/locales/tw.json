@@ -152,7 +152,29 @@
       "no_matching_reports": "沒有相符的報告。",
       "invalid_ban_selection_mode": "封鎖選取模式無效。",
       "invalid_bans_parameter_bans_ban": "/bans/ban 上的 bans 參數無效。",
-      "invalid_filtered_ban_source": "已篩選的封鎖來源無效。"
+      "invalid_filtered_ban_source": "已篩選的封鎖來源無效。",
+      "unban_crowdsec_needs_review": "此 IP 被 CrowdSec 封鎖攔截。請在表格中該 IP 所在列解除封鎖，該列會顯示將被刪除的 CrowdSec 決策。",
+      "unban_crowdsec_forbidden": "權限被拒絕。解除 CrowdSec 封鎖需要在每個相關的 CrowdSec 連線上擁有 ban_delete 與 crowdsec_delete 權限。"
+    },
+    "kind": {
+      "crowdsec_lease": "CrowdSec 租約"
+    },
+    "crowdsec": {
+      "title": "解除 CrowdSec 封鎖",
+      "intro": "解除 CrowdSec 封鎖分兩步：先從 CrowdSec 刪除下方列出的決策，再移除 BunkerWeb 封鎖。沒有第一步，封鎖會在下一次請求時重新出現。",
+      "no_decisions": "沒有生效的 CrowdSec 封鎖決策：只會移除 BunkerWeb 封鎖。",
+      "confirm": "刪除決策並解除封鎖",
+      "error": "解除封鎖失敗：{{error}}",
+      "warning": {
+        "list_origin": "部分決策來自 CrowdSec 清單或社群封鎖清單，清單重新整理後可能會再次出現。請將該 IP 加入 CrowdSec 允許清單以保持放行。",
+        "range": "某個決策涵蓋整個網段：刪除它會解除該網段內所有 IP 的封鎖。",
+        "unavailable": "無法使用，結果將不完整：{{list}}"
+      },
+      "result": {
+        "success": "{{ip}}：已解除封鎖，已刪除的 CrowdSec 決策：{{count}}。",
+        "changed": "{{ip}}：封鎖在請求期間被續期或取代，未移除任何內容。請再次解除封鎖。",
+        "partial": "{{ip}}：部分完成。請再次執行解除封鎖以完成：{{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2493,6 +2515,12 @@
       },
       "support_link": {
         "title": "支援連結"
+      },
+      "ui_bundle": {
+        "admin_only": "Web UI 診斷套件僅限管理員使用。",
+        "button": "下載診斷包",
+        "help": "日誌、外掛版本、環境及近期錯誤。私人資料將被匿名化。",
+        "title": "Web UI 診斷"
       }
     },
     "subtitle": "下載偵錯記錄、提取您的設定，並向 BunkerWeb 團隊尋求協助。",
@@ -4337,6 +4365,10 @@
       "SECURITY_MODE": {
         "label": "安全性模式",
         "help": "定義對威脅的回應方式：「detect」僅監控並記錄，或「block」封鎖存取並記錄事件。"
+      },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "在 TLS 階段捨棄的封鎖",
+        "help": "封鎖原因清單：因這些原因被封鎖的 IP 會在 TLS ClientHello 階段被捨棄，而不是收到 403 頁面。使用依標頭取得的真實 IP 時會略過；使用 PROXY 協定時也會略過，除非真實 IP 使用 proxy_protocol。"
       },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "伺服器名稱雜湊值儲存桶大小",

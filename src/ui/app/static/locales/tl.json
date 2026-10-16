@@ -152,7 +152,29 @@
       "no_matching_reports": "Walang tumutugmang mga report.",
       "invalid_ban_selection_mode": "Hindi wastong mode ng pagpili ng ban.",
       "invalid_bans_parameter_bans_ban": "Hindi wastong parameter na bans sa /bans/ban.",
-      "invalid_filtered_ban_source": "Hindi wastong pinaghalungkat na pinagmulan ng ban."
+      "invalid_filtered_ban_source": "Hindi wastong pinaghalungkat na pinagmulan ng ban.",
+      "unban_crowdsec_needs_review": "naka-block ang IP na ito ng isang CrowdSec block. Alisin ang ban mula sa row nito sa talahanayan, na nagpapakita ng mga desisyon ng CrowdSec na buburahin.",
+      "unban_crowdsec_forbidden": "Tinanggihan ang pahintulot. Kailangan ng ban_delete at crowdsec_delete sa bawat kasangkot na CrowdSec connection para alisin ang CrowdSec block."
+    },
+    "kind": {
+      "crowdsec_lease": "CrowdSec lease"
+    },
+    "crowdsec": {
+      "title": "Alisin ang CrowdSec block",
+      "intro": "Dalawang hakbang ang pag-alis ng CrowdSec block: buburahin sa CrowdSec ang mga desisyong nakalista sa ibaba, saka aalisin ang BunkerWeb ban. Kung wala ang unang hakbang, babalik ang block sa susunod na request.",
+      "no_decisions": "Walang aktibong desisyon ng CrowdSec block: BunkerWeb ban lang ang aalisin.",
+      "confirm": "Burahin ang mga desisyon at alisin ang ban",
+      "error": "Nabigo ang pag-alis ng ban: {{error}}",
+      "warning": {
+        "list_origin": "May mga desisyong galing sa listahan ng CrowdSec o sa community blocklist at maaaring bumalik kapag nag-refresh ang listahan. Idagdag ang IP sa allowlist ng CrowdSec para manatili itong hindi naka-block.",
+        "range": "Sakop ng isang desisyon ang buong range: ang pagbura nito ay nag-a-unblock sa bawat IP sa range na iyon.",
+        "unavailable": "Hindi available, bahagya lang ang magiging resulta: {{list}}"
+      },
+      "result": {
+        "success": "{{ip}}: naalis ang ban, mga nabura na desisyon ng CrowdSec: {{count}}.",
+        "changed": "{{ip}}: na-renew o napalitan ang ban habang tumatakbo ang request, walang naalis. Alisin muli ang ban.",
+        "partial": "{{ip}}: bahagyang natapos. Patakbuhin muli ang pag-alis ng ban para tapusin: {{details}}"
+      }
     }
   },
   "breadcrumb": {
@@ -2443,6 +2465,10 @@
         "label": "Security Mode",
         "help": "Tinutukoy ang tugon sa mga banta: \"detect\" upang mag-monitor at mag-log, o \"block\" upang harangan ang access at i-log ang mga insidente."
       },
+      "BANS_TLS_DROP_REASONS": {
+        "label": "Mga ban na ibinabagsak sa TLS",
+        "help": "Mga dahilan ng ban kung saan ang mga naka-ban na IP ay ibinabagsak sa TLS ClientHello sa halip na makuha ang 403 page. Nilalaktawan kapag header-based ang real IP, at sa likod ng PROXY protocol maliban kung proxy_protocol ang gamit ng real IP."
+      },
       "SERVER_NAMES_HASH_BUCKET_SIZE": {
         "label": "Server Names Hash Bucket Size",
         "help": "Halaga para sa server_names_hash_bucket_size directive."
@@ -3200,6 +3226,12 @@
       },
       "support_link": {
         "title": "Link ng Suporta"
+      },
+      "ui_bundle": {
+        "admin_only": "Ang Web UI diagnostics bundle ay limitado sa mga administrator.",
+        "button": "I-download ang Bundle",
+        "help": "Mga log, bersyon ng plugin, environment, at kamakailang error. Ina-anonymize ang pribadong data.",
+        "title": "Diagnostics ng Web UI"
       }
     },
     "subtitle": "I-download ang mga log ng debug, i-extract ang iyong configuration, at humingi ng tulong sa team ng BunkerWeb.",

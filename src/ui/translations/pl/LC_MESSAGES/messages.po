@@ -274,6 +274,39 @@ msgstr "Wybrany zakres"
 msgid "bans.chart.timeseries.title"
 msgstr "Aktywne blokady w danym przedziale"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Usuń decyzje i odbanuj"
+
+msgid "bans.crowdsec.error"
+msgstr "Odbanowanie nie powiodło się: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Blokada CrowdSec jest usuwana w dwóch krokach: wymienione poniżej decyzje są usuwane z CrowdSec, a następnie usuwany jest ban BunkerWeb. Bez pierwszego kroku blokada wraca przy następnym żądaniu."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Brak aktywnej decyzji blokującej CrowdSec: usuwany jest tylko ban BunkerWeb."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: ban został odnowiony lub zastąpiony w trakcie żądania, nic nie usunięto. Odbanuj go ponownie."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: wykonano częściowo. Uruchom odbanowanie ponownie, aby dokończyć: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: odbanowano, usunięte decyzje CrowdSec: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Odbanuj blokadę CrowdSec"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Niektóre decyzje pochodzą z listy CrowdSec lub społecznościowej listy blokad i mogą wrócić po odświeżeniu listy. Dodaj adres IP do listy dozwolonych CrowdSec, aby pozostał odblokowany."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Decyzja obejmuje cały zakres: jej usunięcie odblokowuje każdy adres IP z tego zakresu."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Niedostępne, wynik będzie częściowy: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "Nie udało się zablokować %(ip)s: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Nie udało się pobrać blokad z Redis, więcej informacji znajdziesz w 
 msgid "bans.flash.skipped_challenged"
 msgstr "Pominięto %(count)s zgłoszenie/zgłoszeń, których klient został zweryfikowany lub przekierowany zamiast zablokowany."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "Odmowa dostępu. Odbanowanie blokady CrowdSec wymaga ban_delete i crowdsec_delete w każdym zaangażowanym połączeniu CrowdSec."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "ten adres IP jest zablokowany przez blokadę CrowdSec. Odbanuj go z jego wiersza w tabeli, który pokazuje decyzje CrowdSec do usunięcia."
+
 msgid "bans.flash.unban_failed"
 msgstr "Nie udało się odblokować %(ip)s: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "Nie udało się zaktualizować czasu blokady dla %(ip)s: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "Pomyślnie zaktualizowano czas blokady dla %(ip)s."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "Dzierżawa CrowdSec"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Blokady według przyczyny"
@@ -3825,6 +3867,12 @@ msgstr "Włącz integrację Autoconf Docker."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Tryb Autoconf"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Powody blokad, dla których zablokowane adresy IP są odrzucane już w ClientHello TLS, zamiast otrzymać stronę 403. Pomijane przy prawdziwym IP opartym na nagłówku oraz przy protokole PROXY, chyba że prawdziwe IP używa proxy_protocol."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "Blokady odrzucane w TLS"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Lista instancji BunkerWeb oddzielonych spacjami (format: fqdn-lub-ip:5000 http://fqdn-lub-ip:5000)"
@@ -7921,6 +7969,18 @@ msgstr "Wyodrębnij konfigurację"
 
 msgid "support.card.support_link.title"
 msgstr "Link pomocy technicznej"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Pakiet diagnostyczny Web UI jest dostępny tylko dla administratorów."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Pobierz pakiet"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Logi, wersje wtyczek, środowisko i ostatnie błędy. Dane prywatne są anonimizowane."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Diagnostyka Web UI"
 
 msgid "support.subtitle"
 msgstr "Pobierz pliki dziennika debugowania, wyodrębnij swoją konfigurację i skontaktuj się z zespołem BunkerWeb."

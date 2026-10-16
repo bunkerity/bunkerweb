@@ -274,6 +274,39 @@ msgstr "Seçilen aralık"
 msgid "bans.chart.timeseries.title"
 msgstr "Aralık başına aktif yasaklamalar"
 
+msgid "bans.crowdsec.confirm"
+msgstr "Kararları sil ve yasağı kaldır"
+
+msgid "bans.crowdsec.error"
+msgstr "Yasak kaldırma başarısız oldu: %(error)s"
+
+msgid "bans.crowdsec.intro"
+msgstr "Bir CrowdSec engeli iki adımda kaldırılır: aşağıda listelenen kararlar CrowdSec'ten silinir, ardından BunkerWeb yasağı kaldırılır. İlk adım olmadan engel bir sonraki istekte geri gelir."
+
+msgid "bans.crowdsec.no_decisions"
+msgstr "Etkin CrowdSec engel kararı yok: yalnızca BunkerWeb yasağı kaldırılır."
+
+msgid "bans.crowdsec.result.changed"
+msgstr "%(ip)s: yasak istek sırasında yenilendi veya değiştirildi, hiçbir şey kaldırılmadı. Yasağı yeniden kaldırın."
+
+msgid "bans.crowdsec.result.partial"
+msgstr "%(ip)s: kısmen tamamlandı. Bitirmek için yasak kaldırmayı yeniden çalıştırın: %(details)s"
+
+msgid "bans.crowdsec.result.success"
+msgstr "%(ip)s: yasağı kaldırıldı, silinen CrowdSec kararları: %(count)s."
+
+msgid "bans.crowdsec.title"
+msgstr "Bir CrowdSec engelini kaldır"
+
+msgid "bans.crowdsec.warning.list_origin"
+msgstr "Bazı kararlar bir CrowdSec listesinden veya topluluk engel listesinden geliyor ve liste yenilendiğinde geri gelebilir. Engelsiz kalması için IP'yi bir CrowdSec izin listesine ekleyin."
+
+msgid "bans.crowdsec.warning.range"
+msgstr "Bir karar tüm bir aralığı kapsıyor: silmek o aralıktaki her IP'nin engelini kaldırır."
+
+msgid "bans.crowdsec.warning.unavailable"
+msgstr "Kullanılamıyor, sonuç kısmi olacak: %(list)s"
+
 msgid "bans.flash.ban_failed"
 msgstr "%(ip)s yasaklanamadı: %(error)s"
 
@@ -343,6 +376,12 @@ msgstr "Yasaklar Redis'ten alınamadı, daha fazla bilgi için günlüklere bak�
 msgid "bans.flash.skipped_challenged"
 msgstr "İstemcisi engellenmek yerine doğrulamaya tabi tutulan veya yönlendirilen %(count)s rapor atlandı."
 
+msgid "bans.flash.unban_crowdsec_forbidden"
+msgstr "İzin reddedildi. Bir CrowdSec engelini kaldırmak, ilgili her CrowdSec bağlantısında ban_delete ve crowdsec_delete gerektirir."
+
+msgid "bans.flash.unban_crowdsec_needs_review"
+msgstr "bu IP bir CrowdSec engeli tarafından engelleniyor. Silinecek CrowdSec kararlarını gösteren tablodaki satırından yasağı kaldırın."
+
 msgid "bans.flash.unban_failed"
 msgstr "%(ip)s yasağı kaldırılamadı: %(error)s"
 
@@ -354,6 +393,9 @@ msgstr "%(ip)s için yasak süresi güncellenemedi: %(error)s"
 
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s için yasak süresi başarıyla güncellendi."
+
+msgid "bans.kind.crowdsec_lease"
+msgstr "CrowdSec kirası"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Nedene göre yasaklar"
@@ -3825,6 +3867,12 @@ msgstr "Autoconf Docker entegrasyonunu etkinleştir."
 
 msgid "general.settings.AUTOCONF_MODE.label"
 msgstr "Autoconf Modu"
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.help"
+msgstr "Yasaklı IP'lerin 403 sayfası almak yerine TLS ClientHello aşamasında düşürüldüğü yasak nedenleri. Başlık tabanlı gerçek IP kullanılırken ve gerçek IP proxy_protocol kullanmadıkça PROXY protokolünde atlanır."
+
+msgid "general.settings.BANS_TLS_DROP_REASONS.label"
+msgstr "TLS'de düşürülen yasaklar"
 
 msgid "general.settings.BUNKERWEB_INSTANCES.help"
 msgstr "Boşluklarla ayrılmış BunkerWeb örnekleri listesi (biçim: fqdn-veya-ip:5000 http://fqdn-veya-ip:5000)"
@@ -7901,6 +7949,18 @@ msgstr "Yapılandırmayı Çıkar"
 
 msgid "support.card.support_link.title"
 msgstr "Destek Bağlantısı"
+
+msgid "support.card.ui_bundle.admin_only"
+msgstr "Web UI tanılama paketi yalnızca yöneticilere açıktır."
+
+msgid "support.card.ui_bundle.button"
+msgstr "Paketi İndir"
+
+msgid "support.card.ui_bundle.help"
+msgstr "Günlükler, eklenti sürümleri, ortam ve son hatalar. Özel veriler anonimleştirilir."
+
+msgid "support.card.ui_bundle.title"
+msgstr "Web UI Tanılaması"
 
 msgid "support.subtitle"
 msgstr "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın."
