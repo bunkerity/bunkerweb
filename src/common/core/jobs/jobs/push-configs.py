@@ -350,54 +350,94 @@ def _purge_retired_caches(db: Database) -> None:
         LOGGER.warning(f"Could not purge some retired cache rows from the database: {'; '.join(errors)}")
 
 
-def _materialize_caches(db: Database) -> None:
+def _cache_row_usable(cache: dict) -> bool:
+    plugin_id = cache.get("plugin_id")
+    file_name = cache.get("file_name") or ""
+    if not plugin_id or not file_name:
+        return False
+    return (cache.get("job_name"), file_name) not in RETIRED_CACHE_ROWS and (plugin_id, file_name) not in RETIRED_CACHE_PATHS
+
+
+def _is_letsencrypt_tree(cache: dict) -> bool:
+    return cache.get("plugin_id") == "letsencrypt" and (cache.get("file_name") or "").endswith(".tgz")
+
+
+def _materialize_cache_row(cache: dict) -> None:
+    """Write one job-cache row to disk. The caller holds the locks (see `_materialize_caches`)."""
+    plugin_id = cache["plugin_id"]
+    file_name = cache["file_name"]
+    cache_dir = CACHE_PATH.joinpath(plugin_id, cache.get("service_id") or "")
+    cache_path = cache_dir.joinpath(file_name)
+    desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
+    try:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        if file_name.endswith(".tgz"):
+            extract_path = cache_dir
+            if file_name.startswith("folder:"):
+                extract_path = Path(file_name.split("folder:", 1)[1].rsplit(".tgz", 1)[0])
+            # Open once to inspect membership before any destructive rmtree.
+            with tar_open(fileobj=BytesIO(cache["data"]), mode="r:gz") as tar:
+                members = tar.getmembers()
+                if plugin_id == "letsencrypt" and not any(
+                    m.name.replace("\\", "/").endswith("fullchain.pem") and "/live/" in ("/" + m.name.replace("\\", "/")) for m in members
+                ):
+                    # Empty/skeleton LE row: never wipe a possibly-good on-disk tree
+                    # (certbot may be mid-issuance or already delivered a real cert).
+                    LOGGER.warning("Skipping rebuild of Let's Encrypt cache tree: DB row contains no live/*/fullchain.pem (empty/skeleton row)")
+                    return
+                rmtree(extract_path, ignore_errors=True)
+                extract_path.mkdir(parents=True, exist_ok=True)
+                try:
+                    tar.extractall(extract_path, members=members, filter="fully_trusted")
+                except TypeError:
+                    tar.extractall(extract_path, members=members)
+            return
+        _write_atomic(cache_path, cache["data"])
+        if cache_path.stat().st_mode & 0o777 != desired_perms:
+            cache_path.chmod(desired_perms)
+    except BaseException as e:
+        LOGGER.error(f"Failed to materialize cache {file_name!r}: {e}")
+
+
+def _materialize_caches(db: Database) -> bool:
+    """Rewrite the job-cache tree from the DB. False when the publication lock could not be taken.
+
+    `Job.cache_file` writes the disk copy and then the DB row under `cache_publication_lock`. Reading
+    the rows and writing them out under the same lock makes a job's write either wholly before the
+    read (the read sees it) or wholly after the write-out (it lands on top); without it a stale blob
+    overwrote a fresh certificate on disk, and the disk is what gets pushed (BW-214).
+
+    The Let's Encrypt trees are rebuilt in a second pass, `le_cache_write_lock` THEN
+    `cache_publication_lock`, the order `certbot-new.py` and `certbot-renew.py` take them in: taking
+    the LE lock while holding the publication lock would deadlock against them. The row is re-read
+    inside the locks so the rebuild cannot restore a stale archive either.
+
+    A `CachePublicationLockError` (600 s wait) leaves the cache untouched and returns False: the
+    caller must not acknowledge the changes, so the next run redoes it.
+    """
     LOGGER.info("Materializing job caches from DB ...")
     CACHE_PATH.mkdir(parents=True, exist_ok=True)
 
-    cache_files = db.get_jobs_cache_files()
-    desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
+    has_letsencrypt_tree = False
+    try:
+        with cache_publication_lock(LOGGER):
+            for cache in db.get_jobs_cache_files():
+                if not _cache_row_usable(cache):
+                    continue
+                if _is_letsencrypt_tree(cache):
+                    has_letsencrypt_tree = True
+                    continue
+                _materialize_cache_row(cache)
 
-    for cache in cache_files:
-        plugin_id = cache.get("plugin_id")
-        file_name = cache.get("file_name") or ""
-        if not plugin_id or not file_name:
-            continue
-        if (cache.get("job_name"), file_name) in RETIRED_CACHE_ROWS or (plugin_id, file_name) in RETIRED_CACHE_PATHS:
-            continue
-        cache_dir = CACHE_PATH.joinpath(plugin_id, cache.get("service_id") or "")
-        cache_path = cache_dir.joinpath(file_name)
-        try:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            if file_name.endswith(".tgz"):
-                extract_path = cache_dir
-                if file_name.startswith("folder:"):
-                    extract_path = Path(file_name.split("folder:", 1)[1].rsplit(".tgz", 1)[0])
-                is_letsencrypt = plugin_id == "letsencrypt"
-                # Open once to inspect membership before any destructive rmtree.
-                with tar_open(fileobj=BytesIO(cache["data"]), mode="r:gz") as tar:
-                    members = tar.getmembers()
-                    if is_letsencrypt and not any(
-                        m.name.replace("\\", "/").endswith("fullchain.pem") and "/live/" in ("/" + m.name.replace("\\", "/")) for m in members
-                    ):
-                        # Empty/skeleton LE row: never wipe a possibly-good on-disk tree
-                        # (certbot may be mid-issuance or already delivered a real cert).
-                        LOGGER.warning("Skipping rebuild of Let's Encrypt cache tree: DB row contains no live/*/fullchain.pem (empty/skeleton row)")
-                        continue
-                    # Serialize the LE-tree rebuild against certbot-new's direct /cache push.
-                    lock_cm = le_cache_write_lock() if (is_letsencrypt and le_cache_write_lock is not None) else nullcontext()
-                    with lock_cm:
-                        rmtree(extract_path, ignore_errors=True)
-                        extract_path.mkdir(parents=True, exist_ok=True)
-                        try:
-                            tar.extractall(extract_path, members=members, filter="fully_trusted")
-                        except TypeError:
-                            tar.extractall(extract_path, members=members)
-                continue
-            _write_atomic(cache_path, cache["data"])
-            if cache_path.stat().st_mode & 0o777 != desired_perms:
-                cache_path.chmod(desired_perms)
-        except BaseException as e:
-            LOGGER.error(f"Failed to materialize cache {file_name!r}: {e}")
+        if has_letsencrypt_tree:
+            # Serialize the LE-tree rebuild against certbot-new's direct /cache push.
+            with le_cache_write_lock() if le_cache_write_lock is not None else nullcontext(), cache_publication_lock(LOGGER):
+                for cache in db.get_jobs_cache_files(plugin_id="letsencrypt"):
+                    if _cache_row_usable(cache) and _is_letsencrypt_tree(cache):
+                        _materialize_cache_row(cache)
+    except CachePublicationLockError:
+        return False
+    return True
 
 
 def _render_nginx_configs() -> bool:
@@ -540,7 +580,10 @@ def _snapshot_failover() -> Path | None:
         snapshot.mkdir(parents=True, exist_ok=True)
         copytree(CONFIG_PATH, snapshot.joinpath("nginx"), dirs_exist_ok=True, symlinks=True)
         if CACHE_PATH.is_dir():
-            copytree(CACHE_PATH, snapshot.joinpath("cache"), dirs_exist_ok=True, symlinks=True)
+            # A job's `cache_file` writes through a temporary file that vanishes on rename, which a
+            # concurrent copy trips over (and then the whole snapshot is lost): copy under the lock.
+            with cache_publication_lock(LOGGER):
+                copytree(CACHE_PATH, snapshot.joinpath("cache"), dirs_exist_ok=True, symlinks=True)
     except BaseException as e:
         LOGGER.warning(f"Failover snapshot failed: {e}")
         return None
@@ -647,7 +690,7 @@ try:
     custom_configs_materialized = _materialize_custom_configs(db)
     _materialize_plugins(db, EXTERNAL_PLUGINS_PATH, pro=False)
     _materialize_plugins(db, PRO_PLUGINS_PATH, pro=True)
-    _materialize_caches(db)
+    caches_materialized = _materialize_caches(db)
 
     if not _render_nginx_configs():
         LOGGER.error("Aborting push: NGINX config rendering failed")
@@ -669,6 +712,13 @@ try:
         # for all of them -- neither is a statement that instances took the new configuration.
         if not push_ok:
             LOGGER.warning("Not acknowledging the changes: at least one artifact push failed, so a re-push is still owed")
+        elif not caches_materialized:
+            # The cache publication lock was not free within its budget, so the cache pushed above is
+            # the previous disk tree, not the database's. Acknowledging would clear the flag with
+            # nothing left to re-raise it; leave it raised so the next run rewrites the cache.
+            reason = "the job cache could not be rewritten (cache publication lock unavailable); a re-push is still owed"
+            LOGGER.warning(f"Not acknowledging the changes: {reason}")
+            note_deferral(reason)
         elif not custom_configs_materialized:
             # CUSTOM_CONFIGS_DRIFT=refuse wrote NOTHING from the database into the custom configs
             # folder -- not merely the drifted file -- so whatever raised `custom_configs_changed`

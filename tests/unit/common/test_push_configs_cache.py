@@ -1,5 +1,8 @@
 import ast
+from contextlib import nullcontext
 from pathlib import Path
+from shutil import rmtree
+from tarfile import open as tar_open
 
 import pytest
 
@@ -7,17 +10,22 @@ SOURCE = Path(__file__).resolve().parents[3] / "src" / "common" / "core" / "jobs
 
 
 WARNINGS = []
+MATERIALIZED = []
 
 
 def _load_cache_functions(cache_path, failover_path):
     WARNINGS.clear()
+    MATERIALIZED.clear()
     tree = ast.parse(SOURCE.read_text())
     names = {"RETIRED_CACHE_ROWS", "RETIRED_CACHE_PATHS"}
     body = [
         node
         for node in tree.body
         if (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id in names for target in node.targets))
-        or (isinstance(node, ast.FunctionDef) and node.name in {"_purge_retired_caches", "_materialize_caches"})
+        or (
+            isinstance(node, ast.FunctionDef)
+            and node.name in {"_purge_retired_caches", "_cache_row_usable", "_is_letsencrypt_tree", "_materialize_cache_row", "_materialize_caches"}
+        )
     ]
 
     class Logger:
@@ -30,8 +38,12 @@ def _load_cache_functions(cache_path, failover_path):
         def warning(self, message):
             WARNINGS.append(message)
 
+    class CachePublicationLockError(Exception):
+        pass
+
     namespace = {
         "BytesIO": __import__("io").BytesIO,
+        "CachePublicationLockError": CachePublicationLockError,
         "CACHE_PATH": cache_path,
         "Database": object,
         "FAILOVER_PATH": failover_path,
@@ -40,7 +52,15 @@ def _load_cache_functions(cache_path, failover_path):
         "S_IRGRP": 0o040,
         "S_IRUSR": 0o400,
         "S_IWUSR": 0o200,
-        "_write_atomic": lambda *_args: pytest.fail("retired cache was materialized"),
+        # `_materialize_cache_row` swallows every exception (it logs and goes on), so raising here is not
+        # enough to fail the test: the call is also recorded and asserted on below.
+        "_write_atomic": lambda *args: MATERIALIZED.append(args),
+        # the publication and Let's Encrypt write locks are real file locks in the job; a no-op here
+        "cache_publication_lock": lambda _logger: nullcontext(),
+        "le_cache_write_lock": None,
+        "nullcontext": nullcontext,
+        "rmtree": rmtree,
+        "tar_open": tar_open,
     }
     exec(compile(ast.Module(body=body, type_ignores=[]), str(SOURCE), "exec"), namespace)
     return namespace["_purge_retired_caches"], namespace["_materialize_caches"]
@@ -88,6 +108,7 @@ def test_retired_certificate_caches_are_deleted_and_never_materialized(tmp_path)
     purge(db)
     materialize(db)
 
+    assert MATERIALIZED == [], "a retired cache row was materialized"
     assert set(db.deleted) == {
         ("api-server-cert", "api-server-cert.key"),
         ("api-server-cert", "api-server-cert.pem"),
