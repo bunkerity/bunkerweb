@@ -1202,6 +1202,11 @@ function metrics:log(bypass_checks)
 		}
 		if subsystem == "http" then
 			request.method = self.ctx.bw.request_method
+			-- Early request-body parser denials (ModSecurity 200002/200005) can redirect to an error
+			-- page before the context saves its request method, so read it off the request line.
+			if reason == "modsecurity-body" and ngx.var.request then
+				request.method = ngx.var.request:match("^(%S+)") or request.method
+			end
 			request.url = bound(self.ctx.bw.request_uri, MAX_STORED_URL)
 			request.user_agent = bound(self.ctx.bw.http_user_agent or "", MAX_STORED_USER_AGENT)
 		else
