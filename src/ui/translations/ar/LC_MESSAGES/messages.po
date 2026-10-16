@@ -7664,6 +7664,9 @@ msgstr "تعذّر تحرير الخدمة الجديدة: %(operation)s"
 msgid "setup.flash.hostname_already_use"
 msgstr "اسم المضيف %(value)s قيد الاستخدام بالفعل."
 
+msgid "setup.flash.hostname_empty"
+msgstr "لا يمكن أن يكون اسم المضيف فارغًا."
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "اسم المضيف غير صالح."
 

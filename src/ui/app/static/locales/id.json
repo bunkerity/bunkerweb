@@ -3126,6 +3126,7 @@
       "couldn_t_create_new_service": "Tidak dapat membuat layanan baru: {{operation}}",
       "when_using_custom_ssl_certificate_must": "Saat menggunakan sertifikat SSL kustom, Anda harus mengatur sertifikat dan kunci.",
       "hostname_not_valid": "Hostname tidak valid.",
+      "hostname_empty": "Hostname tidak boleh kosong.",
       "hostname_already_use": "Hostname {{value}} sudah digunakan.",
       "admin_user_created_successfully": "Pengguna admin berhasil dibuat",
       "couldn_t_create_admin_user": "Tidak dapat membuat pengguna admin: {{message}}",

@@ -257,6 +257,10 @@ try:
     if isinstance(all_domains, str):
         all_domains = all_domains.split()
 
+    # Single-site: the remaining names are aliases of the first service.
+    if not multisite:
+        all_domains = all_domains[:1]
+
     if not all_domains:
         LOGGER.info("No services found, exiting ...")
         sys_exit(0)

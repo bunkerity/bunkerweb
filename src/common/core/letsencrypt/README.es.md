@@ -229,6 +229,8 @@ Las direcciones IPv4 públicas en SERVER_NAME requieren LETS_ENCRYPT_SERVER=lets
 
 Un identificador IP no necesita DNS. El puerto 80 debe llegar directamente a BunkerWeb para HTTP-01. Mantenga DISABLE_DEFAULT_SERVER_STRICT_SNI=no, ya que los clientes IP normalmente omiten SNI. Sin SNI, solo se selecciona un certificado si la dirección IPv4 local de destino está configurada en SERVER_NAME y aparece en sus SAN de IP. No se usa como alternativa el único certificado IP en caché: detrás de NAT, la dirección local debe coincidir con la dirección pública configurada. HTTP Host no selecciona el certificado. El certificado personalizado del servidor predeterminado conserva la prioridad. El comportamiento de los certificados DNS y los permisos de las cuentas no cambian.
 
+En modo de un solo sitio (`MULTISITE=no`), las demás entradas de `SERVER_NAME` son alias de la primera y todas van al mismo certificado. Cuando se añaden nombres (nombres de host o direcciones IP) a un servicio que ya tiene un certificado, BunkerWeb lo amplía y conserva el certificado actual si falla la validación de un nombre nuevo. Quitar o sustituir un nombre sigue reemitiendo el certificado desde cero.
+
 ```env
 SERVER_NAME=<PUBLIC_IPV4>
 AUTO_LETS_ENCRYPT=yes

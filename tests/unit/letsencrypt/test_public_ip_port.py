@@ -80,13 +80,13 @@ def test_actual_issuance_command(module, tmp_path):
     ("configured", "existing", "expected"),
     [
         ({"example.com", "8.8.8.8"}, {"example.com"}, True),
-        ({"example.com", "other.example"}, {"example.com"}, False),
+        ({"example.com", "other.example"}, {"example.com"}, True),
         ({"8.8.8.8"}, set(), False),
         ({"8.8.8.8"}, {"example.com"}, False),
     ],
 )
-def test_only_ip_additions_expand_in_place(module, configured, existing, expected):
-    assert module.ips_only_added(configured, existing) is expected
+def test_added_names_expand_in_place(module, configured, existing, expected):
+    assert module.names_only_added(configured, existing) is expected
 
 
 def test_incompatible_ip_does_not_block_dns_names(module, monkeypatch):

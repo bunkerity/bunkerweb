@@ -7624,6 +7624,9 @@ msgstr "नई सेवा संपादित नहीं की जा स
 msgid "setup.flash.hostname_already_use"
 msgstr "होस्टनाम %(value)s पहले से उपयोग में है।"
 
+msgid "setup.flash.hostname_empty"
+msgstr "होस्टनाम खाली नहीं हो सकता।"
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "होस्टनाम मान्य नहीं है।"
 

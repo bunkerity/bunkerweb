@@ -198,10 +198,9 @@ def certbot_name_args(server_names: str) -> List[str]:
     return args
 
 
-def ips_only_added(config_names: Set[str], existing_names: Set[str]) -> bool:
-    """Return True when the configured names are the existing ones plus IP addresses and nothing else."""
-    added = config_names - existing_names
-    return bool(existing_names) and existing_names < config_names and not split_ip_names(added)[0]
+def names_only_added(config_names: Set[str], existing_names: Set[str]) -> bool:
+    """Return True when the configured names are the existing ones plus added names and no removal."""
+    return bool(existing_names) and existing_names < config_names
 
 
 def warn_strict_sni_for_ips(services: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]) -> None:
@@ -628,7 +627,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
         "retries": retries_int,
         "exists": False,
         "force_renew": False,
-        "expand_ips": False,
+        "expand_names": False,
     }
 
 
@@ -716,6 +715,26 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
     config["server_names"] = format_server_names(unique_names)
     entries[service] = config
     return entries
+
+
+def load_services(server_names: str) -> Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+    """Return the certificate lineages to handle, keyed by lineage name, for the SERVER_NAME setting."""
+    services: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
+    # Single-site: the other SERVER_NAME entries are aliases of the first, which names the lineage.
+    for service in server_names.split() if IS_MULTISITE else server_names.split()[:1]:
+        if not service.strip():
+            continue
+
+        for cert_name, config in build_service_entries(service).items():
+            if cert_name in services:
+                if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
+                    merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
+                    services[cert_name]["server_names"] = format_server_names(merged)
+                    continue
+                LOGGER.warning(f"[Service: {cert_name}] Certificate configuration conflict detected, keeping first occurrence.")
+                continue
+            services[cert_name] = config
+    return services
 
 
 def _determine_wildcard_bases(labels_list: List[List[str]], service: str) -> Set[str]:
@@ -1055,20 +1074,7 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    services = {}
-    for service in server_names.split():
-        if not service.strip():
-            continue
-
-        for cert_name, config in build_service_entries(service).items():
-            if cert_name in services:
-                if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
-                    merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
-                    services[cert_name]["server_names"] = format_server_names(merged)
-                    continue
-                LOGGER.warning(f"[Service: {cert_name}] Certificate configuration conflict detected, keeping first occurrence.")
-                continue
-            services[cert_name] = config
+    services = load_services(server_names)
 
     if not any(service["activated"] for service in services.values()):
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
@@ -1235,8 +1241,8 @@ try:
             config_server_names = filter_wildcard_names(config_server_names)
             existing_server_names = filter_wildcard_names(existing_server_names)
 
-        expand_ips = ips_only_added(config_server_names, cast(Set[str], existing_server_names))
-        if config_server_names != existing_server_names and not expand_ips:
+        expand_names = names_only_added(config_server_names, cast(Set[str], existing_server_names))
+        if config_server_names != existing_server_names and not expand_names:
             LOGGER.warning(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["challenge"] != existing_cert["challenge"]:
@@ -1270,16 +1276,18 @@ try:
             LOGGER.warning(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
             config["force_renew"] = True
 
-        if expand_ips and not config["force_renew"]:
-            LOGGER.warning(f"[Service: {server_name}] Expanding the existing certificate with IP addresses; the current certificate stays if issuance fails.")
-            config["expand_ips"] = True
+        if expand_names and not config["force_renew"]:
+            LOGGER.warning(
+                f"[Service: {server_name}] Expanding the existing certificate with the added names; the current certificate stays if issuance fails."
+            )
+            config["expand_names"] = True
 
     # ? generate new certificates and renew existing ones if needed
     concurrent_requests = getenv("LETS_ENCRYPT_CONCURRENT_REQUESTS", "no").lower() == "yes"
     pending_services: List[Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]] = []
 
     for service, config in services.items():
-        if existing_certificates.get(service, {}).get("active") and not config["force_renew"] and not config["expand_ips"]:
+        if existing_certificates.get(service, {}).get("active") and not config["force_renew"] and not config["expand_names"]:
             LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue

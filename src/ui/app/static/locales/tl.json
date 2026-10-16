@@ -3126,6 +3126,7 @@
       "couldn_t_create_new_service": "Hindi nagawa ang bagong serbisyo: {{operation}}",
       "when_using_custom_ssl_certificate_must": "Kapag gumagamit ng custom SSL certificate, kailangan mong itakda ang parehong certificate at key.",
       "hostname_not_valid": "Hindi wasto ang hostname.",
+      "hostname_empty": "Hindi maaaring walang laman ang hostname.",
       "hostname_already_use": "Ginagamit na ang hostname na {{value}}.",
       "admin_user_created_successfully": "Matagumpay na nagawa ang admin user",
       "couldn_t_create_admin_user": "Hindi nagawa ang admin user: {{message}}",

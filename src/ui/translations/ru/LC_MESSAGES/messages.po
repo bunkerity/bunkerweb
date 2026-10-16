@@ -7634,6 +7634,9 @@ msgstr "Не удалось изменить новый сервис: %(operatio
 msgid "setup.flash.hostname_already_use"
 msgstr "Имя хоста %(value)s уже используется."
 
+msgid "setup.flash.hostname_empty"
+msgstr "Имя хоста не может быть пустым."
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "Имя хоста недействительно."
 

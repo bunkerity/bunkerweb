@@ -7624,6 +7624,9 @@ msgstr "Impossible de modifier le nouveau service : %(operation)s"
 msgid "setup.flash.hostname_already_use"
 msgstr "Le nom d'hôte %(value)s est déjà utilisé."
 
+msgid "setup.flash.hostname_empty"
+msgstr "Le nom d'hôte ne peut pas être vide."
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "Le nom d'hôte n'est pas valide."
 

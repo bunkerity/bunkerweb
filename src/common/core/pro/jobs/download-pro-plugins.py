@@ -274,10 +274,15 @@ def _billable_service_number(db=None) -> int:
     env-based count rather than taking the PRO check down with it.
     """
     fallback = len(getenv("SERVER_NAME", "www.example.com").split())
+    if getenv("MULTISITE", "no") != "yes":
+        fallback = min(fallback, 1)
     try:
         snapshot = (db or Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))).get_non_default_settings(
             global_only=False, methods=False, with_drafts=False
         )
+        if snapshot.get("MULTISITE", "no") != "yes":
+            # Keep the classifier, but give it one service rather than its aliases.
+            snapshot = {**snapshot, "SERVER_NAME": " ".join(snapshot.get("SERVER_NAME", "").split()[:1])}
         counts = count_snapshot(snapshot)
         LOGGER.debug(
             f"Quota count (algorithm v{counts.algorithm_version}/allowlist v{counts.allowlist_version}): "

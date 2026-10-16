@@ -319,6 +319,20 @@ def _invalid_server_name(name: str) -> Optional[str]:
     return None if ok else err
 
 
+def _server_name_conflict(conf: Dict[str, Any], server_name: str, ignore: Optional[str] = None) -> Optional[str]:
+    """Return the id of a service other than `ignore` that already uses one of the given server names.
+
+    nginx serves a name for one server block only, and the Web UI deletes the sibling when it saves
+    either service of a pair that shares one. Only the names handed in are judged, never the whole
+    roster: two siblings that already clash must not block an unrelated save.
+    """
+    names = set(server_name.split())
+    for other in (conf.get("SERVER_NAME", "") or "").split():
+        if other != ignore and names & ({other} | set((conf.get(f"{other}_SERVER_NAME") or "").split())):
+            return other
+    return None
+
+
 def _service_method(service: str) -> Optional[str]:
     for item in get_db().get_services(with_drafts=True):
         if item.get("id") == service:
@@ -400,6 +414,13 @@ def create_service(req: ServiceCreateRequest) -> JSONResponse:
 
     if "SERVER_NAME" not in (req.variables or {}):
         conf[f"{name}_SERVER_NAME"] = name
+    # Only the global SERVER_NAME may be empty (no service yet): a service always needs a name.
+    elif not str(conf[f"{name}_SERVER_NAME"]).strip():
+        return JSONResponse(status_code=422, content={"status": "error", "message": "SERVER_NAME can't be empty"})
+
+    other = _server_name_conflict(conf, str(conf[f"{name}_SERVER_NAME"]))
+    if other:
+        return JSONResponse(status_code=400, content={"status": "error", "message": f"A server name of {name} is already used by service {other}"})
 
     conf["SERVER_NAME"] = " ".join(sorted(existing | {name}))
 
@@ -451,6 +472,9 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
             return _reserved_refusal()
         if new_name != service and new_name in services_list:
             return JSONResponse(status_code=400, content={"status": "error", "message": f"Service {new_name} already exists"})
+        other = _server_name_conflict(conf, new_name, ignore=service) if new_name != service else None
+        if other:
+            return JSONResponse(status_code=400, content={"status": "error", "message": f"A server name of {new_name} is already used by service {other}"})
 
         # Replace in SERVER_NAME and prefix keys
         services_list = [new_name if s == service else s for s in services_list]

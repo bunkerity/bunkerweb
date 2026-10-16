@@ -599,6 +599,11 @@ class Configurator:
             return False, f"variable name {variable} doesn't exist", value
         elif prefixed and where[real_var]["context"] != "multisite":
             return False, f"context of {variable} isn't multisite", value
+        # Only the global SERVER_NAME may be empty (no service yet, QAR Q4): a service always needs a
+        # name, and an empty one renders `server_name ;`, which makes nginx refuse the whole configuration.
+        # Refused here, the service keeps the id it is named by (see `get_config`).
+        elif prefixed and real_var == "SERVER_NAME" and not value.strip():
+            return False, f"{variable} can't be empty", value
 
         ok, value = self.__normalize_value(where[real_var], value)
         if not ok and not self.__ignore_regex_check:

@@ -3126,6 +3126,7 @@
       "couldn_t_create_new_service": "Не удалось создать новый сервис: {{operation}}",
       "when_using_custom_ssl_certificate_must": "При использовании пользовательского SSL-сертификата необходимо указать как сертификат, так и ключ.",
       "hostname_not_valid": "Имя хоста недействительно.",
+      "hostname_empty": "Имя хоста не может быть пустым.",
       "hostname_already_use": "Имя хоста {{value}} уже используется.",
       "admin_user_created_successfully": "Пользователь администратора успешно создан",
       "couldn_t_create_admin_user": "Не удалось создать пользователя администратора: {{message}}",

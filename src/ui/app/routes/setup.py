@@ -248,6 +248,10 @@ def setup_page():
             flash(translated("setup.flash.admin_user_created_successfully") or "The admin user was created successfully", save=False)
 
         if not ui_reverse_proxy:
+            # A blank name would create the service with an empty `server_name`, which nginx refuses the whole configuration for.
+            if not request.form["server_name"].strip():
+                return handle_error(translated("setup.flash.hostname_empty") or "The hostname can't be empty.", "setup")
+
             # Third create surface with no reserved-id refusal (routes/services.py and the API's
             # POST /services both have one -- DS-B4 handoff item 1). The "already in use" check
             # right below catches the collision only incidentally, and only once the reserved row

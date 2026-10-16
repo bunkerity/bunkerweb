@@ -3126,6 +3126,7 @@
       "couldn_t_create_new_service": "Couldn't create the new service: {{operation}}",
       "when_using_custom_ssl_certificate_must": "When using a custom SSL certificate, you must set both the certificate and the key.",
       "hostname_not_valid": "The hostname is not valid.",
+      "hostname_empty": "The hostname can't be empty.",
       "hostname_already_use": "The hostname {{value}} is already in use.",
       "admin_user_created_successfully": "The admin user was created successfully",
       "couldn_t_create_admin_user": "Couldn't create the admin user: {{message}}",

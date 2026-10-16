@@ -218,6 +218,8 @@ SERVER_NAME 中的公网 IPv4 地址需要 LETS_ENCRYPT_SERVER=letsencrypt、LET
 
 IP 标识符无需 DNS 记录。HTTP-01 要求端口 80 直接到达 BunkerWeb。请保持 DISABLE_DEFAULT_SERVER_STRICT_SNI=no，因为 IP 客户端通常不发送 SNI。无 SNI 时，仅当本地 IPv4 目标地址在 SERVER_NAME 中明确配置且包含于证书的 IP SAN 中，才选择该证书。不会回退到缓存中唯一的 IP 证书：在 NAT 后，本地地址必须匹配配置的公网地址。HTTP Host 无法选择证书。默认服务器自定义证书仍保持优先级。DNS 证书行为和账户存储权限保持不变。
 
+在单站点模式（`MULTISITE=no`）下，`SERVER_NAME` 的其余条目是第一个条目的别名，并且都包含在同一张证书中。向已有证书的服务添加名称（主机名或 IP 地址）时，BunkerWeb 会扩展该证书，并在新名称验证失败时保留当前证书。移除或替换名称仍会从头重新签发证书。
+
 ```env
 SERVER_NAME=<PUBLIC_IPV4>
 AUTO_LETS_ENCRYPT=yes

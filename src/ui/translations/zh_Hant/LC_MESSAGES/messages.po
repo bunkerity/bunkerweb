@@ -7614,6 +7614,9 @@ msgstr "無法編輯新服務：%(operation)s"
 msgid "setup.flash.hostname_already_use"
 msgstr "主機名稱 %(value)s 已被使用。"
 
+msgid "setup.flash.hostname_empty"
+msgstr "主機名稱不能為空。"
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "主機名稱無效。"
 

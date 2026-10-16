@@ -2482,6 +2482,7 @@
       "couldn_t_create_new_service": "Impossible de créer le nouveau service : {{operation}}",
       "when_using_custom_ssl_certificate_must": "Lors de l'utilisation d'un certificat SSL personnalisé, vous devez définir à la fois le certificat et la clé.",
       "hostname_not_valid": "Le nom d'hôte n'est pas valide.",
+      "hostname_empty": "Le nom d'hôte ne peut pas être vide.",
       "hostname_already_use": "Le nom d'hôte {{value}} est déjà utilisé.",
       "admin_user_created_successfully": "L'utilisateur administrateur a été créé avec succès",
       "couldn_t_create_admin_user": "Impossible de créer l'utilisateur administrateur : {{message}}",

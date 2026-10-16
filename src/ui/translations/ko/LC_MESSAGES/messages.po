@@ -7614,6 +7614,9 @@ msgstr "새 서비스를 편집하지 못했습니다: %(operation)s"
 msgid "setup.flash.hostname_already_use"
 msgstr "호스트 이름 %(value)s은(는) 이미 사용 중입니다."
 
+msgid "setup.flash.hostname_empty"
+msgstr "호스트 이름은 비워 둘 수 없습니다."
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "호스트 이름이 잘못되었습니다."
 

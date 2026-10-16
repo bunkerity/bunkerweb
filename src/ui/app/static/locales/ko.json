@@ -3126,6 +3126,7 @@
       "couldn_t_create_new_service": "새 서비스를 생성하지 못했습니다: {{operation}}",
       "when_using_custom_ssl_certificate_must": "사용자 지정 SSL 인증서를 사용할 때는 인증서와 키를 모두 설정해야 합니다.",
       "hostname_not_valid": "호스트 이름이 잘못되었습니다.",
+      "hostname_empty": "호스트 이름은 비워 둘 수 없습니다.",
       "hostname_already_use": "호스트 이름 {{value}}은(는) 이미 사용 중입니다.",
       "admin_user_created_successfully": "관리자 사용자를 성공적으로 생성했습니다",
       "couldn_t_create_admin_user": "관리자 사용자를 생성하지 못했습니다: {{message}}",

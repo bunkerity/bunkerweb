@@ -492,6 +492,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
             self.logger.debug(f"Saving config for method {method}")
 
+            # The Web UI and the API refuse a shared name before they save; the other writers cannot be refused.
+            if method not in ("ui", "api") and not skip_service_management:
+                self._warn_shared_server_names(config)
+
             service_ids = set(str(config.get("SERVER_NAME", "")).split())
             service_ids.update(session.scalars(select(Services.id)).all())
             # Only values this save actually changes. Callers hand us the MERGED config (autoconf

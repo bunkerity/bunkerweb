@@ -7624,6 +7624,9 @@ msgstr "Hindi na-edit ang bagong serbisyo: %(operation)s"
 msgid "setup.flash.hostname_already_use"
 msgstr "Ginagamit na ang hostname na %(value)s."
 
+msgid "setup.flash.hostname_empty"
+msgstr "Hindi maaaring walang laman ang hostname."
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "Hindi wasto ang hostname."
 

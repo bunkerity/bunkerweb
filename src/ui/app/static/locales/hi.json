@@ -2415,6 +2415,7 @@
       "couldn_t_create_new_service": "नई सेवा नहीं बनाई जा सकी: {{operation}}",
       "when_using_custom_ssl_certificate_must": "कस्टम SSL प्रमाणपत्र का उपयोग करते समय, आपको प्रमाणपत्र और कुंजी दोनों सेट करने होंगे।",
       "hostname_not_valid": "होस्टनाम मान्य नहीं है।",
+      "hostname_empty": "होस्टनाम खाली नहीं हो सकता।",
       "hostname_already_use": "होस्टनाम {{value}} पहले से उपयोग में है।",
       "admin_user_created_successfully": "व्यवस्थापक उपयोगकर्ता सफलतापूर्वक बनाया गया",
       "couldn_t_create_admin_user": "व्यवस्थापक उपयोगकर्ता नहीं बनाया जा सका: {{message}}",

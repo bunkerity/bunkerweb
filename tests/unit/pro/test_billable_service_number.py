@@ -48,6 +48,7 @@ def _load_definitions():
 PRO = _load_definitions()
 
 SNAPSHOT = {
+    "MULTISITE": "yes",
     "SERVER_NAME": "app.example.com old.example.com mixed.example.com",
     "app.example.com_USE_REVERSE_PROXY": "yes",
     "old.example.com_SERVICE_MODE": "redirect_only",
@@ -97,14 +98,14 @@ def test_a_database_failure_falls_back_to_the_historical_count():
     """The PRO check must not go down because the quota count could not be computed."""
     db = Mock()
     db.get_non_default_settings.side_effect = RuntimeError("database is gone")
-    with patch.dict("os.environ", {"SERVER_NAME": "a.example.com b.example.com"}):
+    with patch.dict("os.environ", {"MULTISITE": "yes", "SERVER_NAME": "a.example.com b.example.com"}):
         assert PRO._billable_service_number(db) == 2
 
 
 def test_the_fallback_is_used_when_the_snapshot_is_unusable():
     db = Mock()
     db.get_non_default_settings.return_value = None  # not a mapping
-    with patch.dict("os.environ", {"SERVER_NAME": "a.example.com b.example.com c.example.com"}):
+    with patch.dict("os.environ", {"MULTISITE": "yes", "SERVER_NAME": "a.example.com b.example.com c.example.com"}):
         assert PRO._billable_service_number(db) == 3
 
 

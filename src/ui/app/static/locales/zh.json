@@ -2415,6 +2415,7 @@
       "couldn_t_create_new_service": "无法创建新服务：{{operation}}",
       "when_using_custom_ssl_certificate_must": "使用自定义 SSL 证书时，必须同时设置证书和密钥。",
       "hostname_not_valid": "主机名无效。",
+      "hostname_empty": "主机名不能为空。",
       "hostname_already_use": "主机名 {{value}} 已被使用。",
       "admin_user_created_successfully": "管理员用户已成功创建",
       "couldn_t_create_admin_user": "无法创建管理员用户：{{message}}",

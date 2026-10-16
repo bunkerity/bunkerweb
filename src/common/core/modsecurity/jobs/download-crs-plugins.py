@@ -291,6 +291,8 @@ try:
         sys_exit(0)
 
     services = services.split()
+    if getenv("MULTISITE", "no") != "yes":
+        services = services[:1]
     services_plugins = {}
 
     if getenv("MULTISITE", "no") == "yes":

@@ -2482,6 +2482,7 @@
       "couldn_t_create_new_service": "Der neue Dienst konnte nicht erstellt werden: {{operation}}",
       "when_using_custom_ssl_certificate_must": "Bei Verwendung eines benutzerdefinierten SSL-Zertifikats müssen Sie sowohl das Zertifikat als auch den Schlüssel festlegen.",
       "hostname_not_valid": "Der Hostname ist ungültig.",
+      "hostname_empty": "Der Hostname darf nicht leer sein.",
       "hostname_already_use": "Der Hostname {{value}} wird bereits verwendet.",
       "admin_user_created_successfully": "Der Administratorbenutzer wurde erfolgreich erstellt",
       "couldn_t_create_admin_user": "Der Administratorbenutzer konnte nicht erstellt werden: {{message}}",

@@ -316,6 +316,13 @@ class Config:
                 variables.pop(key, None)
                 continue
 
+            # Only the global SERVER_NAME may be empty (no service yet): a service always needs a name, and an
+            # empty one renders `server_name ;`, which makes nginx refuse the whole configuration.
+            if setting == "SERVER_NAME" and not global_config and not str(value).strip():
+                report_error("The server name of a service can't be empty.")
+                variables.pop(key, None)
+                continue
+
             # Canonicalize the value to its stored form (trim, boolean aliases -> yes/no,
             # size/duration -> NGINX unit form, list items trimmed) so it validates and
             # the value persisted via the API is canonical. Trim/canonicalization are

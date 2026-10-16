@@ -7614,6 +7614,9 @@ msgstr "Yeni servis düzenlenemedi: %(operation)s"
 msgid "setup.flash.hostname_already_use"
 msgstr "%(value)s ana bilgisayar adı zaten kullanımda."
 
+msgid "setup.flash.hostname_empty"
+msgstr "Ana bilgisayar adı boş olamaz."
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "Ana bilgisayar adı geçerli değil."
 

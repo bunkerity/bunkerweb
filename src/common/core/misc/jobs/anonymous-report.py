@@ -49,6 +49,8 @@ try:
     ui_config = JOB.db.get_config(with_drafts=True, filtered_settings=("USE_UI",))
     services = db_config.get("SERVER_NAME", {"value": ""})["value"].split()
     multisite = db_config.get("MULTISITE", {"value": "no"})["value"] == "yes"
+    if not multisite:
+        services = services[:1]
 
     # Extract and simplify the database version using a regex.
     DATABASE_VERSION_REGEX = re_compile(r"(\d+(?:\.\d+)*)")

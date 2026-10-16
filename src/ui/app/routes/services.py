@@ -109,6 +109,23 @@ CLONE_EXCLUDED_SETTINGS = frozenset(
 )
 
 
+def _submit_service_task(task, *args, **kwargs):
+    """`submit_config_task`, plus: a task that raises does not leave `CONFIG_CHANGED` set.
+
+    `submit_config_task` already flashes the error and clears the loading state, but `main.py` reads a set
+    `CONFIG_CHANGED` as "The last changes have been applied successfully." on the next page, which
+    announced a failed service operation as applied.
+    """
+
+    def failed(done):
+        if done.cancelled() or done.exception():
+            DATA.update({"CONFIG_CHANGED": False})
+
+    future = submit_config_task(task, *args, **kwargs)
+    future.add_done_callback(failed)
+    return future
+
+
 def _configs_list_to_dict(configs_list):
     result = {}
     for c in configs_list:
@@ -784,7 +801,7 @@ def services_convert():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    submit_config_task(convert_services, services, convert_to)
+    _submit_service_task(convert_services, services, convert_to)
 
     return redirect(
         url_for(
@@ -888,7 +905,7 @@ def services_mode_convert(service: str):
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    submit_config_task(convert_mode, service, mode)
+    _submit_service_task(convert_mode, service, mode)
 
     return redirect(
         url_for(
@@ -1013,7 +1030,7 @@ def services_delete():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    submit_config_task(delete_services, services)
+    _submit_service_task(delete_services, services)
 
     return redirect(
         url_for(
@@ -1876,6 +1893,7 @@ def update_service(
     # somebody else's service. The gate is deliberately narrow: a failed NON-rename edit still
     # saves its configs, exactly as it always has, and its payload only ever names services that
     # exist.
+    config_save_failed = False
     if (new_configs or configs_changed) and not (renamed_service and error):
         # One path for every submission, rename included. The rename used to take a private
         # per-config create/update loop here, to work around `save_config` hard-deleting the
@@ -1904,6 +1922,7 @@ def update_service(
             if message := (saved or {}).get("message"):
                 DATA["TO_FLASH"].append({"content": message, "type": "warning"})
         except Exception as e:
+            config_save_failed = True
             DATA["TO_FLASH"].append(
                 {
                     "content": translated("flash.error_occurred_while_saving_custom_configs", e=e) or f"An error occurred while saving the custom configs: {e}",
@@ -1925,6 +1944,11 @@ def update_service(
         clash = operation.removeprefix("Service ").removesuffix(" already exists.")
         DATA["TO_FLASH"].append({"content": translated("services.flash.service_already_exists", service=clash) or operation, "type": "warning"})
         operation = None
+    elif config_save_failed and not error:
+        # The error is flashed already. The service edit stands, but its custom configs did not land: neither
+        # "saved" nor "applied" is true, so say neither.
+        operation = None
+        DATA["CONFIG_CHANGED"] = False
     elif not error:
         server_name = variables["SERVER_NAME"].split(" ")[0]
         if refused_count:
@@ -2200,7 +2224,7 @@ def services_service_page(service: str):
                 return handle_error(refusal, "services")
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        submit_config_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, scope=scope, draft_settings=draft_settings)
+        _submit_service_task(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, scope=scope, draft_settings=draft_settings)
 
         new_service = False
         if service == "new":
@@ -2235,12 +2259,12 @@ def services_service_page(service: str):
                 message=translated(
                     (
                         ("loading.services.create_config_draft" if is_draft else "loading.services.create_config")
-                        if service == "new"
+                        if new_service
                         else ("loading.services.save_config_draft" if is_draft else "loading.services.save_config")
                     ),
                     service=service,
                 )
-                or f"{'Saving' if service != 'new' else 'Creating'} configuration for {'draft ' if is_draft else ''}service {service}",
+                or f"{'Creating' if new_service else 'Saving'} configuration for {'draft ' if is_draft else ''}service {service}",
             )
         )
 
@@ -2456,7 +2480,7 @@ def services_plugin_page(service: str, plugin: str):
         is_readonly = is_readonly_request(API_CLIENT.readonly)
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        submit_config_task(
+        _submit_service_task(
             update_service,
             service,
             variables.copy(),
@@ -2568,7 +2592,7 @@ def services_template_page(service: str, template: str):
         is_readonly = is_readonly_request(API_CLIENT.readonly)
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        submit_config_task(
+        _submit_service_task(
             update_service,
             service,
             variables.copy(),
@@ -2881,7 +2905,7 @@ def services_service_import():
         DATA.update({"RELOADING": False, "CONFIG_CHANGED": config_changed})
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    submit_config_task(
+    _submit_service_task(
         import_services,
         services_map,
         parse_errors,

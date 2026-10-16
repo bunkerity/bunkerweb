@@ -2415,6 +2415,7 @@
       "couldn_t_create_new_service": "نئی سروس نہیں بنائی جا سکی: {{operation}}",
       "when_using_custom_ssl_certificate_must": "حسب ضرورت SSL سرٹیفکیٹ استعمال کرتے وقت، آپ کو سرٹیفکیٹ اور کلید دونوں سیٹ کرنا ہوں گی۔",
       "hostname_not_valid": "ہوسٹ نام درست نہیں ہے۔",
+      "hostname_empty": "ہوسٹ نام خالی نہیں ہو سکتا۔",
       "hostname_already_use": "ہوسٹ نام {{value}} پہلے سے استعمال میں ہے۔",
       "admin_user_created_successfully": "ایڈمن صارف کامیابی سے بنا دیا گیا",
       "couldn_t_create_admin_user": "ایڈمن صارف نہیں بنایا جا سکا: {{message}}",

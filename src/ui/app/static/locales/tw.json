@@ -2415,6 +2415,7 @@
       "couldn_t_create_new_service": "無法建立新服務：{{operation}}",
       "when_using_custom_ssl_certificate_must": "使用自訂 SSL 憑證時，必須同時設定憑證與金鑰。",
       "hostname_not_valid": "主機名稱無效。",
+      "hostname_empty": "主機名稱不能為空。",
       "hostname_already_use": "主機名稱 {{value}} 已被使用。",
       "admin_user_created_successfully": "管理員使用者已成功建立",
       "couldn_t_create_admin_user": "無法建立管理員使用者：{{message}}",

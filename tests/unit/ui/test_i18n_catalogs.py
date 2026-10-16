@@ -204,7 +204,8 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # 3,689 adds the 2 `general.settings.BANS_TLS_DROP_REASONS` keys (label, help) of W25-X1C.
     # 3,703 adds the 14 `bans.kind.*`, `bans.crowdsec.*` and `bans.flash.unban_crowdsec_*` keys of the
     # CrowdSec lease unban on the bans page (W25-X1F).
-    assert len(_catalog("en")) == len(english) - len(pairs) == 3703
+    # 3,704 adds `setup.flash.hostname_empty`, the setup wizard's blank-hostname refusal (W26-U1).
+    assert len(_catalog("en")) == len(english) - len(pairs) == 3704
 
 
 @pytest.mark.parametrize("code", CODES)

@@ -3126,6 +3126,7 @@
       "couldn_t_create_new_service": "Yeni servis oluşturulamadı: {{operation}}",
       "when_using_custom_ssl_certificate_must": "Özel bir SSL sertifikası kullanırken hem sertifikayı hem de anahtarı ayarlamalısınız.",
       "hostname_not_valid": "Ana bilgisayar adı geçerli değil.",
+      "hostname_empty": "Ana bilgisayar adı boş olamaz.",
       "hostname_already_use": "{{value}} ana bilgisayar adı zaten kullanımda.",
       "admin_user_created_successfully": "Yönetici kullanıcısı başarıyla oluşturuldu",
       "couldn_t_create_admin_user": "Yönetici kullanıcısı oluşturulamadı: {{message}}",

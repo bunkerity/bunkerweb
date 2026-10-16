@@ -7624,6 +7624,9 @@ msgstr "নতুন পরিষেবা সম্পাদনা করা �
 msgid "setup.flash.hostname_already_use"
 msgstr "হোস্টনাম %(value)s ইতিমধ্যে ব্যবহৃত হচ্ছে।"
 
+msgid "setup.flash.hostname_empty"
+msgstr "হোস্টনাম খালি হতে পারে না।"
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "হোস্টনাম বৈধ নয়।"
 

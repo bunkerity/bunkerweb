@@ -3126,6 +3126,7 @@
       "couldn_t_create_new_service": "Nie udało się utworzyć nowej usługi: {{operation}}",
       "when_using_custom_ssl_certificate_must": "Podczas korzystania z niestandardowego certyfikatu SSL musisz ustawić zarówno certyfikat, jak i klucz.",
       "hostname_not_valid": "Nazwa hosta jest nieprawidłowa.",
+      "hostname_empty": "Nazwa hosta nie może być pusta.",
       "hostname_already_use": "Nazwa hosta {{value}} jest już używana.",
       "admin_user_created_successfully": "Użytkownik administracyjny został pomyślnie utworzony",
       "couldn_t_create_admin_user": "Nie udało się utworzyć użytkownika administracyjnego: {{message}}",

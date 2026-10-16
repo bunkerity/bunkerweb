@@ -2415,6 +2415,7 @@
       "couldn_t_create_new_service": "تعذّر إنشاء الخدمة الجديدة: {{operation}}",
       "when_using_custom_ssl_certificate_must": "عند استخدام شهادة SSL مخصصة، يجب تعيين كل من الشهادة والمفتاح.",
       "hostname_not_valid": "اسم المضيف غير صالح.",
+      "hostname_empty": "لا يمكن أن يكون اسم المضيف فارغًا.",
       "hostname_already_use": "اسم المضيف {{value}} قيد الاستخدام بالفعل.",
       "admin_user_created_successfully": "تم إنشاء مستخدم المسؤول بنجاح",
       "couldn_t_create_admin_user": "تعذّر إنشاء مستخدم المسؤول: {{message}}",

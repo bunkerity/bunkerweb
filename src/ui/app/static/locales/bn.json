@@ -2415,6 +2415,7 @@
       "couldn_t_create_new_service": "নতুন পরিষেবা তৈরি করা যায়নি: {{operation}}",
       "when_using_custom_ssl_certificate_must": "কাস্টম SSL সার্টিফিকেট ব্যবহার করার সময়, আপনাকে সার্টিফিকেট এবং কী উভয়ই সেট করতে হবে।",
       "hostname_not_valid": "হোস্টনাম বৈধ নয়।",
+      "hostname_empty": "হোস্টনাম খালি হতে পারে না।",
       "hostname_already_use": "হোস্টনাম {{value}} ইতিমধ্যে ব্যবহৃত হচ্ছে।",
       "admin_user_created_successfully": "অ্যাডমিন ব্যবহারকারী সফলভাবে তৈরি করা হয়েছে",
       "couldn_t_create_admin_user": "অ্যাডমিন ব্যবহারকারী তৈরি করা যায়নি: {{message}}",

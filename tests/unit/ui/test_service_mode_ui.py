@@ -18,6 +18,7 @@ state at import time.
 import importlib.util
 import re
 import sys
+from concurrent.futures import Future
 from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
@@ -189,7 +190,15 @@ def route_app(services_route, monkeypatch):
     monkeypatch.setattr(services_route, "is_readonly_request", lambda api_readonly: api_readonly)
     services_route.API_CLIENT.convert_service.reset_mock()
     services_route.API_CLIENT.convert_service.side_effect = None
-    services_route.submit_config_task.side_effect = lambda function, *args: function(*args)
+
+    def run_inline(function, *args):
+        # The real `submit_config_task` returns the task's future, which the route now hangs a callback on.
+        function(*args)
+        future = Future()
+        future.set_result(None)
+        return future
+
+    services_route.submit_config_task.side_effect = run_inline
 
     app.add_url_rule("/services/<string:service>/mode", view_func=services_route.services_mode_convert.__wrapped__, methods=["POST"])
     app.add_url_rule("/loading", view_func=lambda: "loading", endpoint="loading")

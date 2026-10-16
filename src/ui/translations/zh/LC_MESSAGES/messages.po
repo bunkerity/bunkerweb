@@ -7614,6 +7614,9 @@ msgstr "无法编辑新服务：%(operation)s"
 msgid "setup.flash.hostname_already_use"
 msgstr "主机名 %(value)s 已被使用。"
 
+msgid "setup.flash.hostname_empty"
+msgstr "主机名不能为空。"
+
 msgid "setup.flash.hostname_not_valid"
 msgstr "主机名无效。"
 

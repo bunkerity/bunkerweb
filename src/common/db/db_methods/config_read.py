@@ -97,6 +97,49 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
             return check_setting(session, setting, value, multisite)
 
     @retry_on_transient_db_errors
+    def _stored_server_names(self, session: scoped_session, effective_global_config: Dict[str, Any]) -> List[str]:
+        """The global SERVER_NAME entries as stored, else the ones a global template provides, else ``[]``.
+
+        ``effective_global_config`` is what the caller already read: a setting it holds with a non-default
+        method is a stored row. The tables answer for the rest, because a filtered read leaves settings out.
+        """
+
+        def stored(setting_id: str) -> Optional[str]:
+            entry = effective_global_config.get(setting_id)
+            if entry and entry.get("method", "default") != "default":
+                return self._empty_if_none(entry["value"])
+            row = select(Global_values.value).where(Global_values.setting_id == setting_id, Global_values.suffix == 0)
+            value = session.scalar(row.where(Global_values.is_draft == False))  # noqa: E712
+            return None if value is None else self._empty_if_none(value)
+
+        names = stored("SERVER_NAME")
+        if names is not None:
+            return names.split()
+
+        # USE_TEMPLATE is an ordered list: the last layer that supplies a value wins.
+        for template_id in reversed(split_templates(stored("USE_TEMPLATE") or "")):
+            default = session.scalar(
+                select(Template_settings.default).where(
+                    Template_settings.template_id == template_id, Template_settings.setting_id == "SERVER_NAME", Template_settings.suffix == 0
+                )
+            )
+            if default is not None:
+                return self._empty_if_none(default).split()
+        return []
+
+    def _warn_shared_server_names(self, config: Dict[str, Any]) -> None:
+        """Warn when two services of the incoming config declare the same server name (nginx serves only the first)."""
+        services = config.get("SERVER_NAME", "")
+        if isinstance(services, str):
+            services = services.split()
+        owners: Dict[str, str] = {}
+        for service in dict.fromkeys(s for s in services if s):
+            names = config.get(f"{service}_SERVER_NAME") or service
+            for name in dict.fromkeys(names.split() if isinstance(names, str) else names):
+                owner = owners.setdefault(name, service)
+                if owner != service:
+                    self.logger.warning(f"Server name {name} is used by both services {owner} and {service}, nginx will only serve it for one of them")
+
     def get_non_default_settings(
         self,
         global_only: bool = False,
@@ -238,6 +281,17 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                             continue
                         # Keep already-materialized service values (notably *_IS_DRAFT from bw_services).
                         config.setdefault(f"{service_id}_{key}", value)
+                    # A service without a SERVER_NAME row of its own is named by its id. Inheriting the global
+                    # value instead renders `server_name ;` when it is empty (the Linux variables.env ships
+                    # `SERVER_NAME=`), and nginx then refuses the whole configuration. A row read below replaces this.
+                    config[f"{service_id}_SERVER_NAME"] = {
+                        "value": service_id,
+                        "file_name": "",
+                        "global": False,
+                        "method": "default",
+                        "default": service_id,
+                        "template": None,
+                    }
 
                 # Define the join operation
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
@@ -334,6 +388,13 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                 # this reader as the one that keeps the name.
                 roster = [row.id for row in rows]
                 servers = " ".join(strip_default_server_unless_alone(roster) if strip else roster)
+
+                # Single-site keys its one service by the FIRST SERVER_NAME entry and the others are aliases of it.
+                # Rebuilt from the service ids alone, the roster kept the first and nginx never saw the rest.
+                if servers and " " not in servers and not is_multisite:
+                    names = self._stored_server_names(session, effective_global_config)
+                    if len(names) > 1 and names[0] == servers and self._stored_multisite(session) != "yes":
+                        servers = " ".join(names)
 
             config["SERVER_NAME"] = {
                 "value": servers,
@@ -496,6 +557,9 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                     for service_id, layer_ids in service_template_ids.items():
                         for tmpl_id in layer_ids:
                             for setting in template_settings_map.get(tmpl_id, []):
+                                # A template cannot name a service: its placeholder would replace the service's id.
+                                if setting.setting_id == "SERVER_NAME":
+                                    continue
                                 key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
                                 if key in config and config[key]["method"] != "default" and not config[key]["global"]:
                                     continue

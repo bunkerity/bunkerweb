@@ -228,6 +228,8 @@ werden. Die vollständige Liste und die genauen Variablen stehen in der
 
 Für eine IP-Kennung ist kein DNS-Eintrag nötig. Port 80 muss BunkerWeb für HTTP-01 direkt erreichen. Lassen Sie DISABLE_DEFAULT_SERVER_STRICT_SNI=no, da IP-Clients normalerweise kein SNI senden. Ohne SNI wird ein Zertifikat nur ausgewählt, wenn die lokale IPv4-Zieladresse in SERVER_NAME konfiguriert und in seinen IP-SANs enthalten ist. Kein Rückgriff auf das einzige zwischengespeicherte IP-Zertifikat: Hinter NAT muss die lokale Adresse der konfigurierten öffentlichen Adresse entsprechen. HTTP Host wählt kein Zertifikat aus. Das benutzerdefinierte Zertifikat des Standardservers behält Vorrang. DNS-Zertifikate und Kontoberechtigungen bleiben unverändert.
 
+Im Single-Site-Modus (`MULTISITE=no`) sind die weiteren `SERVER_NAME`-Einträge Aliase des ersten und landen alle im selben Zertifikat. Werden Namen (Hostnamen oder IP-Adressen) zu einem Dienst hinzugefügt, der bereits ein Zertifikat hat, erweitert BunkerWeb es und behält das aktuelle Zertifikat, falls die Validierung eines neuen Namens fehlschlägt. Das Entfernen oder Austauschen eines Namens stellt das Zertifikat weiterhin komplett neu aus.
+
 ```env
 SERVER_NAME=<PUBLIC_IPV4>
 AUTO_LETS_ENCRYPT=yes

@@ -219,6 +219,8 @@ Public IPv4 addresses in SERVER_NAME require LETS_ENCRYPT_SERVER=letsencrypt, LE
 
 No DNS record is needed for an IP identifier. Port 80 must reach BunkerWeb directly for HTTP-01. Keep DISABLE_DEFAULT_SERVER_STRICT_SNI=no because IP clients normally omit SNI. TLS without SNI selects a certificate only when the local IPv4 destination is explicitly configured in SERVER_NAME and is present in its IP SANs. There is no fallback to the only cached IP certificate: behind NAT, the local address must match the configured public address. HTTP Host cannot select a certificate. The default-server custom certificate override retains priority. DNS certificate behavior and account storage permissions remain unchanged.
 
+In single-site mode (`MULTISITE=no`) the other `SERVER_NAME` entries are aliases of the first one and all of them go into the same certificate. When names (hostnames or IP addresses) are added to a service that already has a certificate, BunkerWeb expands it and keeps the current certificate if the validation of a new name fails. Removing or swapping a name still reissues the certificate from scratch.
+
 ```env
 SERVER_NAME=<PUBLIC_IPV4>
 AUTO_LETS_ENCRYPT=yes
