@@ -1,0 +1,47 @@
+src/common/core/headers/plugin.json
+  s_ca0205ac1993a0::t_abbd99b282d64b 93
+src/common/core/misc/confs/default-server-http/page.conf
+  s_ca0205ac1993a0::t_abbd99b282d64b 49
+tests/unit/ui/test_security_headers_emitted.py
+  s_ca0205ac1993a0::t_abbd99b282d64b 123-124
+src/common/confs/default-server-http.conf
+  s_ca0205ac1993a0::t_abbd99b282d64b 302
+src/common/core/templates/templates/high.json
+  s_ca0205ac1993a0::t_abbd99b282d64b 40
+tests/core/headers.yml
+  s_ca0205ac1993a0::t_abbd99b282d64b 13
+src/common/core/templates/templates/medium.json
+  s_ca0205ac1993a0::t_abbd99b282d64b 40
+src/common/core/errors/errors.lua
+  s_ca0205ac1993a0::t_abbd99b282d64b 162
+src/ui/main.py
+  s_ca0205ac1993a0::t_abbd99b282d64b 1878
+tests/unit/ui/test_permissions_policy_defaults.py
+  s_ca0205ac1993a0::t_e453bd28a2b1e2 57-59
+  s_ca0205ac1993a0::t_12add32c0059ad 1-56
+  s_20b7a5ed3d719b::t_e5fe1648da0a33 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c443729c21ca3738492c73295adc01b8a258c3fe",
+  "prompts": {},
+  "sessions": {
+    "s_20b7a5ed3d719b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1ff5f57f-70c6-42de-a484-47b9c5ced9ac",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ca0205ac1993a0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef330e5c-e0cf-4ad9-8d06-c7217b905097",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
