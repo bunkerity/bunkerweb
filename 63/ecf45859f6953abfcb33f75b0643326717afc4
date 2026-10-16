@@ -1,0 +1,19 @@
+.pre-commit-config.yaml
+  s_22c4a24690923f::t_72e76d8f5da44c 33-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "63ecf45859f6953abfcb33f75b0643326717afc4",
+  "prompts": {},
+  "sessions": {
+    "s_22c4a24690923f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a143ea-a72f-75e0-a7dd-74ef8472a5d5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
