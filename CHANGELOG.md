@@ -2,6 +2,7 @@
 
 ## v1.6.17~rc2 - ????/??/??
 
+- [BUGFIX] `bans`: the ban check at the TLS ClientHello uses the same address as nginx for IPv4-mapped IPv6 clients and for IPv6 addresses ending in an IPv4 tail.
 - [BUGFIX] `modsecurity`: multipart strict-validation and `filename*` denials (HTTP 400) are reported, and the matched request data stored per report is bounded. (Fixes #4012)
 - [BUGFIX] `ui`: a `before_request` plugin hook that raises, or whose plugin hooks fail to load, answers 500 on every page instead of serving the request without its check. Static files stay served.
 
