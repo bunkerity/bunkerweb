@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+from datetime import datetime, timezone
 from fnmatch import fnmatchcase
 from os import getenv
+from threading import Event, Lock, Thread
 from traceback import format_exc
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from kubernetes import client
 from kubernetes.client.exceptions import ApiException
@@ -11,13 +13,228 @@ from kubernetes.client.exceptions import ApiException
 from controllers.KubernetesController import API_REQUEST_TIMEOUT, KubernetesController
 
 GATEWAY_API_VERSIONS = ("v1", "v1alpha2", "v1alpha3", "v1beta1", "v1alpha1")
+GATEWAY_API_GROUP = "gateway.networking.k8s.io"
+ROUTE_PLURALS = ("httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes")
+# Kinds whose spec changes bump metadata.generation; any other kind (Pod, Service, ConfigMap, Secret) changes without it.
+GATEWAY_API_KINDS = frozenset({"GatewayClass", "Gateway", "HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute"})
+
+# Route kinds a listener of each protocol can carry.
+LISTENER_ROUTE_KINDS = {
+    "HTTP": ("HTTPRoute", "GRPCRoute"),
+    "HTTPS": ("HTTPRoute", "GRPCRoute"),
+    "TLS": ("TLSRoute",),
+    "TCP": ("TCPRoute",),
+    "UDP": ("UDPRoute",),
+}
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def merge_conditions(existing: Optional[list], desired: Iterable[Tuple[str, bool, str, str]], generation: Optional[int], now: str) -> List[Dict[str, Any]]:
+    """Conditions to store: `desired` is (type, ok, reason, message).
+
+    lastTransitionTime only moves when a condition's status flips, and conditions of other types stay as they are."""
+    previous = {c.get("type"): c for c in existing or [] if isinstance(c, dict)}
+    merged = []
+    desired_types = set()
+    for condition_type, ok, reason, message in desired:
+        desired_types.add(condition_type)
+        status = "True" if ok else "False"
+        old = previous.get(condition_type) or {}
+        condition = {
+            "type": condition_type,
+            "status": status,
+            "reason": reason,
+            "message": message,
+            "lastTransitionTime": old["lastTransitionTime"] if old.get("status") == status and old.get("lastTransitionTime") else now,
+        }
+        if isinstance(generation, int):
+            condition["observedGeneration"] = generation
+        merged.append(condition)
+    merged.extend(condition for condition_type, condition in previous.items() if condition_type not in desired_types)
+    return sorted(merged, key=lambda condition: condition.get("type") or "")
+
+
+def normalize_parent_ref(parent_ref: Any, route_namespace: Optional[str]) -> Optional[Dict[str, Any]]:
+    """A parentRef pointing at a Gateway, with the defaults filled in, or None for any other parent kind."""
+    if not isinstance(parent_ref, dict) or not parent_ref.get("name"):
+        return None
+    if (parent_ref.get("group") or GATEWAY_API_GROUP) != GATEWAY_API_GROUP or (parent_ref.get("kind") or "Gateway") != "Gateway":
+        return None
+    namespace = parent_ref.get("namespace") or route_namespace
+    if not namespace:
+        return None
+    normalized = {"group": GATEWAY_API_GROUP, "kind": "Gateway", "namespace": namespace, "name": parent_ref["name"]}
+    for key in ("sectionName", "port"):
+        if parent_ref.get(key) is not None:
+            normalized[key] = parent_ref[key]
+    return normalized
+
+
+def _parent_key(parent_ref: Dict[str, Any]) -> Tuple[Any, ...]:
+    return (parent_ref["namespace"], parent_ref["name"], parent_ref.get("sectionName"), parent_ref.get("port"))
+
+
+def build_class_conditions(gateway_class: Dict[str, Any], now: str) -> List[Dict[str, Any]]:
+    metadata = gateway_class.get("metadata") or {}
+    return merge_conditions(
+        (gateway_class.get("status") or {}).get("conditions"),
+        [("Accepted", True, "Accepted", "Accepted by the BunkerWeb controller")],
+        metadata.get("generation"),
+        now,
+    )
+
+
+def count_attached_routes(gateway: Dict[str, Any], routes: List[Dict[str, Any]]) -> Dict[str, int]:
+    metadata = gateway.get("metadata") or {}
+    namespace, name = metadata.get("namespace"), metadata.get("name")
+    listeners = (gateway.get("spec") or {}).get("listeners") or []
+    counts = {listener.get("name"): 0 for listener in listeners}
+    for route in routes:
+        route_namespace = (route.get("metadata") or {}).get("namespace")
+        attached = set()
+        for raw_ref in (route.get("spec") or {}).get("parentRefs") or []:
+            parent_ref = normalize_parent_ref(raw_ref, route_namespace)
+            if not parent_ref or (parent_ref["namespace"], parent_ref["name"]) != (namespace, name):
+                continue
+            for listener in listeners:
+                if parent_ref.get("sectionName") not in (None, listener.get("name")):
+                    continue
+                if parent_ref.get("port") not in (None, listener.get("port")):
+                    continue
+                attached.add(listener.get("name"))
+        for listener_name in attached:
+            counts[listener_name] += 1
+    return counts
+
+
+def build_gateway_status(gateway: Dict[str, Any], routes: List[Dict[str, Any]], applied: bool, now: str) -> Dict[str, Any]:
+    """The `conditions` and `listeners` BunkerWeb owns on a Gateway. `addresses` is written separately."""
+    metadata = gateway.get("metadata") or {}
+    generation = metadata.get("generation")
+    status = gateway.get("status") or {}
+    if applied:
+        programmed = ("Programmed", True, "Programmed", "The configuration was applied to BunkerWeb")
+    else:
+        programmed = ("Programmed", False, "Pending", "BunkerWeb could not apply the configuration, see the controller logs")
+    attached = count_attached_routes(gateway, routes)
+    previous_listeners = {listener.get("name"): listener for listener in status.get("listeners") or [] if isinstance(listener, dict)}
+    listeners = []
+    for listener in (gateway.get("spec") or {}).get("listeners") or []:
+        listener_name = listener.get("name")
+        kinds = LISTENER_ROUTE_KINDS.get((listener.get("protocol") or "").upper(), ())
+        listeners.append(
+            {
+                "name": listener_name,
+                "supportedKinds": [{"group": GATEWAY_API_GROUP, "kind": kind} for kind in kinds],
+                "attachedRoutes": attached.get(listener_name, 0),
+                "conditions": merge_conditions(
+                    (previous_listeners.get(listener_name) or {}).get("conditions"),
+                    [("Accepted", True, "Accepted", "Listener accepted"), programmed, ("ResolvedRefs", True, "ResolvedRefs", "References resolved")],
+                    generation,
+                    now,
+                ),
+            }
+        )
+    return {
+        "conditions": merge_conditions(
+            status.get("conditions"), [("Accepted", True, "Accepted", "Accepted by the BunkerWeb controller"), programmed], generation, now
+        ),
+        "listeners": listeners,
+    }
+
+
+def build_route_parents(
+    route: Dict[str, Any], owned_gateways: Dict[Tuple[str, str], Dict[str, Any]], controller_name: str, now: str
+) -> Optional[List[Dict[str, Any]]]:
+    """The full `status.parents` list to store, or None when the route has no parent this controller owns.
+
+    Entries of other controllers are kept untouched, in place; ours are matched on controllerName and parentRef."""
+    metadata = route.get("metadata") or {}
+    spec = route.get("spec") or {}
+    route_namespace = metadata.get("namespace")
+    generation = metadata.get("generation")
+
+    bad_backend = next(
+        (
+            backend
+            for rule in spec.get("rules") or []
+            for backend in rule.get("backendRefs") or []
+            if isinstance(backend, dict) and (backend.get("kind") or "Service") != "Service"
+        ),
+        None,
+    )
+
+    ours: Dict[Tuple[Any, ...], Dict[str, Any]] = {}
+    for raw_ref in spec.get("parentRefs") or []:
+        parent_ref = normalize_parent_ref(raw_ref, route_namespace)
+        if not parent_ref:
+            continue
+        gateway = owned_gateways.get((parent_ref["namespace"], parent_ref["name"]))
+        if gateway is None:
+            continue
+        section = parent_ref.get("sectionName")
+        listener_names = [listener.get("name") for listener in (gateway.get("spec") or {}).get("listeners") or []]
+        if section and section not in listener_names:
+            accepted = ("Accepted", False, "NoMatchingParent", f"Listener {section} does not exist on the Gateway")
+        else:
+            accepted = ("Accepted", True, "Accepted", "Route accepted by the BunkerWeb controller")
+        if bad_backend is not None:
+            resolved = ("ResolvedRefs", False, "InvalidKind", f"Unsupported backendRef kind {bad_backend.get('kind')}, only Service is supported")
+        else:
+            resolved = ("ResolvedRefs", True, "ResolvedRefs", "References resolved")
+        ours.setdefault(_parent_key(parent_ref), {"parentRef": parent_ref, "desired": [accepted, resolved]})
+    if not ours:
+        return None
+
+    parents = []
+    used = set()
+    for entry in (route.get("status") or {}).get("parents") or []:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("controllerName") != controller_name:
+            parents.append(entry)
+            continue
+        old_ref = normalize_parent_ref(entry.get("parentRef"), route_namespace)
+        key = _parent_key(old_ref) if old_ref else None
+        if key in ours and key not in used:
+            used.add(key)
+            wanted = ours[key]
+            parents.append(
+                {
+                    "parentRef": wanted["parentRef"],
+                    "controllerName": controller_name,
+                    "conditions": merge_conditions(entry.get("conditions"), wanted["desired"], generation, now),
+                }
+            )
+    for key, wanted in ours.items():
+        if key not in used:
+            parents.append(
+                {
+                    "parentRef": wanted["parentRef"],
+                    "controllerName": controller_name,
+                    "conditions": merge_conditions(None, wanted["desired"], generation, now),
+                }
+            )
+    return parents
 
 
 class GatewayController(KubernetesController):
+    _status_enabled = False
+
     def __init__(self):
         super().__init__()
         self._custom_objects = client.CustomObjectsApi(api_client=self._api_client)
         self._gateways_cache: Dict[Tuple[str, str], Dict[str, Any]] = {}
+        self._routes_cache: List[Dict[str, Any]] = []
+        self._seen_specs: Dict[str, Tuple[Any, ...]] = {}
+        self._status_lock = Lock()
+        self._status_wakeup = Event()
+        self._status_snapshot: Optional[Tuple[bool, Dict[Tuple[str, str], Dict[str, Any]], List[Dict[str, Any]]]] = None
+        self._status_thread: Optional[Thread] = None
+        self._status_warned: Set[Tuple[str, str, str]] = set()
 
         self._gateway_class = getenv("KUBERNETES_GATEWAY_CLASS", "").strip()
         if self._gateway_class:
@@ -38,6 +255,7 @@ class GatewayController(KubernetesController):
         if self._gateway_classes_readable:
             self._logger.info(f"Skipping Gateways whose GatewayClass does not use controller {self._gateway_controller}")
         self._gateway_api_available = "gateways" in self._resource_versions
+        self._status_enabled = self._gateway_api_available and "gatewayclasses" in self._resource_versions
         if self._gateway_api_available:
             self._gateway_api_version = self._resource_versions["gateways"]
             missing = [plural for plural in ("httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes") if plural not in self._resource_versions]
@@ -87,7 +305,7 @@ class GatewayController(KubernetesController):
                     self._logger.debug(format_exc())
                     break
 
-        if self._skip_foreign_classes and not self._gateway_class:
+        if (self._skip_foreign_classes and not self._gateway_class) or "gateways" in resource_versions:
             found = False
             last_error = ""
             for version in versions:
@@ -103,7 +321,12 @@ class GatewayController(KubernetesController):
                 except Exception as e:
                     last_error = str(e)
             if not found:
-                self._warn_gateway_classes(last_error)
+                if self._skip_foreign_classes and not self._gateway_class:
+                    self._warn_gateway_classes(last_error)
+                else:
+                    self._logger.warning(
+                        f"Can't list gatewayclasses ({last_error}), Gateway API status will not be written: grant get/list/watch on gatewayclasses"
+                    )
 
         return resource_versions
 
@@ -205,7 +428,7 @@ class GatewayController(KubernetesController):
     def _get_controller_routes(self) -> List[Dict[str, Any]]:
         routes = []
         gateways = self._get_gateways()
-        for plural in ("httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes"):
+        for plural in ROUTE_PLURALS:
             for route in self._list_custom_objects(plural):
                 metadata = route.get("metadata") or {}
                 namespace = metadata.get("namespace")
@@ -232,6 +455,7 @@ class GatewayController(KubernetesController):
 
         routes.sort(key=lambda r: ((r.get("metadata") or {}).get("namespace", ""), (r.get("metadata") or {}).get("name", "")))
         self._gateways_cache = gateways
+        self._routes_cache = routes
         return routes
 
     def _get_controller_services(self) -> list:
@@ -797,7 +1021,7 @@ class GatewayController(KubernetesController):
 
     def _is_custom_event(self, kind, obj, annotations, namespace, name) -> bool:
         if kind == "GatewayClass":
-            return self._gateway_classes_readable
+            return self._gateway_classes_readable or self._status_enabled
         return kind in ("HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute", "Gateway")
 
     def _get_watchers(self):
@@ -834,7 +1058,7 @@ class GatewayController(KubernetesController):
             "tcproute": make_list("tcproutes"),
             "udproute": make_list("udproutes"),
         }
-        if self._gateway_classes_readable:
+        if self._status_enabled:
             watchers_map["gatewayclass"] = make_list("gatewayclasses")
 
         watchers.update({key: handler for key, handler in watchers_map.items() if handler})
@@ -895,6 +1119,143 @@ class GatewayController(KubernetesController):
             self._logger.debug(format_exc())
             return False
 
+    def _owned_class_names(self, classes: List[Dict[str, Any]]) -> Set[str]:
+        """GatewayClasses whose controllerName is ours, narrowed to KUBERNETES_GATEWAY_CLASS when it is set."""
+        return {
+            name
+            for name in (
+                (gateway_class.get("metadata") or {}).get("name")
+                for gateway_class in classes
+                if (gateway_class.get("spec") or {}).get("controllerName") == self._gateway_controller
+            )
+            if name and (not self._gateway_class or name == self._gateway_class)
+        }
+
     def _patch_controller_status(self, ips: List[str]) -> None:
+        # Addresses follow the same ownership as the conditions: never write on a Gateway of another controller.
+        owned_classes = self._owned_class_names(self._list_custom_objects("gatewayclasses"))
         for gateway in self._gateways_cache.values():
-            self._patch_gateway_status(gateway, ips)
+            if (gateway.get("spec") or {}).get("gatewayClassName") in owned_classes:
+                self._patch_gateway_status(gateway, ips)
+
+    def _is_status_only_event(self, event) -> bool:
+        """True for a watch event that carries nothing BunkerWeb reacts to, typically the echo of a status write.
+
+        A Gateway API object changes what BunkerWeb serves through its spec (generation) and its annotations."""
+        obj = event.get("object")
+        if not isinstance(obj, dict) or obj.get("kind") not in GATEWAY_API_KINDS:
+            return False
+        metadata = obj.get("metadata") or {}
+        key = metadata.get("uid") or f"{obj.get('kind')}/{metadata.get('namespace')}/{metadata.get('name')}"
+        if event.get("type") == "DELETED":
+            self._seen_specs.pop(key, None)
+            return False
+        signature = (
+            metadata.get("generation"),
+            tuple(sorted((metadata.get("annotations") or {}).items())),
+            tuple(sorted((metadata.get("labels") or {}).items())),
+        )
+        previous = self._seen_specs.get(key)
+        self._seen_specs[key] = signature
+        return previous == signature
+
+    def _sync_status(self, applied: Optional[bool] = None) -> None:
+        if not self._status_enabled:
+            return
+        with self._status_lock:
+            self._status_snapshot = (self._last_apply_ok if applied is None else applied, self._gateways_cache.copy(), self._routes_cache.copy())
+        if self._status_thread is None:
+            self._status_thread = Thread(target=self._status_worker, daemon=True)
+            self._status_thread.start()
+        self._status_wakeup.set()
+
+    def _status_worker(self) -> None:
+        # Status writes run outside the internal lock, so a slow or refused write never delays a configuration.
+        while True:
+            self._status_wakeup.wait()
+            self._status_wakeup.clear()
+            with self._status_lock:
+                snapshot, self._status_snapshot = self._status_snapshot, None
+            if snapshot:
+                try:
+                    self._reconcile_status(*snapshot)
+                except BaseException as e:
+                    self._logger.debug(format_exc())
+                    self._logger.warning(f"Unexpected error while writing Gateway API status: {e}")
+
+    def _reconcile_status(self, applied: bool, gateways: Dict[Tuple[str, str], Dict[str, Any]], routes: List[Dict[str, Any]]) -> None:
+        # Ownership comes from the GatewayClass controllerName alone: whatever else BunkerWeb serves, it only reports on what it owns.
+        classes = self._list_custom_objects("gatewayclasses")
+        owned_classes = self._owned_class_names(classes)
+        for gateway_class in classes:
+            name = (gateway_class.get("metadata") or {}).get("name")
+            if name not in owned_classes:
+                continue
+            conditions = build_class_conditions(gateway_class, utc_now())
+            if conditions != (gateway_class.get("status") or {}).get("conditions"):
+                self._patch_status("gatewayclasses", None, name, {"status": {"conditions": conditions}}, "GatewayClass")
+
+        owned_gateways = {key: gateway for key, gateway in gateways.items() if (gateway.get("spec") or {}).get("gatewayClassName") in owned_classes}
+        for (namespace, name), gateway in owned_gateways.items():
+            status = build_gateway_status(gateway, routes, applied, utc_now())
+            current = gateway.get("status") or {}
+            if status["conditions"] != current.get("conditions") or status["listeners"] != current.get("listeners"):
+                self._patch_status("gateways", namespace, name, {"status": status}, "Gateway")
+
+        for route in routes:
+            self._reconcile_route_status(route, owned_gateways)
+
+    def _reconcile_route_status(self, route: Dict[str, Any], owned_gateways: Dict[Tuple[str, str], Dict[str, Any]], retry: bool = True) -> None:
+        metadata = route.get("metadata") or {}
+        namespace, name = metadata.get("namespace"), metadata.get("name")
+        plural = (route.get("kind") or "").lower() + "s"
+        if plural not in ROUTE_PLURALS:
+            return
+        parents = build_route_parents(route, owned_gateways, self._gateway_controller, utc_now())
+        if parents is None or parents == (route.get("status") or {}).get("parents"):
+            return
+        body: Dict[str, Any] = {"status": {"parents": parents}}
+        if metadata.get("resourceVersion"):
+            body["metadata"] = {"resourceVersion": metadata["resourceVersion"]}
+        if self._patch_status(plural, namespace, name, body, route.get("kind"), conflict_ok=retry) is None and retry:
+            # The route changed since it was listed: merge into the fresh object instead of overwriting another controller's entry.
+            try:
+                fresh = self._custom_objects.get_namespaced_custom_object(
+                    GATEWAY_API_GROUP, self._resource_versions[plural], namespace, plural, name, _request_timeout=API_REQUEST_TIMEOUT
+                )
+            except Exception as e:
+                self._logger.debug(f"Cannot refresh {route.get('kind')} {namespace}/{name} after a conflict: {e}")
+                return
+            if isinstance(fresh, dict):
+                fresh.setdefault("kind", route.get("kind"))
+                self._reconcile_route_status(fresh, owned_gateways, retry=False)
+
+    def _patch_status(
+        self, plural: str, namespace: Optional[str], name: str, body: Dict[str, Any], kind: Optional[str], conflict_ok: bool = False
+    ) -> Optional[bool]:
+        """Patch a status subresource. True on success, False on a failure already reported, None on a conflict the caller may retry."""
+        version = self._resource_versions.get(plural)
+        key = (plural, namespace or "", name)
+        try:
+            if namespace is None:
+                self._custom_objects.patch_cluster_custom_object_status(GATEWAY_API_GROUP, version, plural, name, body, _request_timeout=API_REQUEST_TIMEOUT)
+            else:
+                self._custom_objects.patch_namespaced_custom_object_status(
+                    GATEWAY_API_GROUP, version, namespace, plural, name, body, _request_timeout=API_REQUEST_TIMEOUT
+                )
+            self._status_warned.discard(key)
+            self._logger.debug(f"Wrote status of {kind} {namespace + '/' if namespace else ''}{name}")
+            return True
+        except ApiException as e:
+            if e.status == 409 and conflict_ok:
+                return None
+            if e.status == 404:
+                self._logger.debug(f"{kind} {namespace}/{name} disappeared before its status could be written")
+                return False
+            reason = f"{e.status} {e.reason}"
+        except Exception as e:
+            reason = str(e)
+        if key not in self._status_warned:
+            self._status_warned.add(key)
+            self._logger.warning(f"Cannot write status of {kind} {namespace + '/' if namespace else ''}{name} ({reason}), configuration is not affected")
+        return False

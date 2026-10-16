@@ -3748,6 +3748,8 @@ spec:
 
 相同的 `KUBERNETES_SKIP_FOREIGN_CLASSES` 规则也适用于 Gateway：未设置 `KUBERNETES_GATEWAY_CLASS` 时，若 Gateway 的 `gatewayClassName` 指向的 `GatewayClass` 的 `spec.controllerName` 不是 `KUBERNETES_GATEWAY_CONTROLLER`，该 Gateway 会被跳过。若缺少对 `gatewayclasses` 的 `get`/`list`/`watch` 权限，控制器只记录一条警告并处理所有 Gateway。
 
+BunkerWeb 还会写入其所管理的 `GatewayClass`、`Gateway` 和路由资源的状态（`Accepted`、`Programmed`、监听器和路由 parents），使 `kubectl wait` 和 Argo CD 等工具将其视为就绪。不使用 Helm chart 的安装必须授予 `gatewayclasses` 的 `get`、`list` 和 `watch` 权限，以及 `gateways`、`gatewayclasses` 和各路由类型（`httproutes`、`grpcroutes`、`tlsroutes`、`tcproutes`、`udproutes`）的 `status` 子资源的 `patch` 权限。缺少这些权限时，控制器仍会应用配置，记录一条警告，但不会写入状态。
+
 ### 自定义域名
 
 如果您为您的 Kubernetes 集群使用不同于默认 `kubernetes.local` 的自定义域名，您可以在调度器容器上使用 `KUBERNETES_DOMAIN_NAME` 环境变量来设置该值。

@@ -3752,6 +3752,8 @@ spec:
 
 Las mismas reglas de `KUBERNETES_SKIP_FOREIGN_CLASSES` se aplican a los Gateways: con `KUBERNETES_GATEWAY_CLASS` sin definir, un Gateway se omite cuando su `gatewayClassName` nombra una `GatewayClass` cuyo `spec.controllerName` no es `KUBERNETES_GATEWAY_CONTROLLER`. Sin `get`/`list`/`watch` sobre `gatewayclasses`, el controlador registra una única advertencia y procesa todos los Gateways.
 
+BunkerWeb también escribe el estado de los recursos `GatewayClass`, `Gateway` y de ruta que gestiona (`Accepted`, `Programmed`, listeners y parents de las rutas), de modo que herramientas como `kubectl wait` y Argo CD los vean como listos. Las instalaciones que no usan el chart de Helm deben conceder `get`, `list` y `watch` sobre `gatewayclasses`, y `patch` sobre el subrecurso `status` de `gateways`, `gatewayclasses` y los tipos de ruta (`httproutes`, `grpcroutes`, `tlsroutes`, `tcproutes`, `udproutes`). Sin ellos, el controlador sigue aplicando la configuración, registra una advertencia y no escribe ningún estado.
+
 ### Nombre de dominio personalizado
 
 Si usas un nombre de dominio personalizado para tu clúster de Kubernetes diferente al predeterminado `kubernetes.local`, puedes establecer el valor usando la variable de entorno `KUBERNETES_DOMAIN_NAME` en el contenedor del programador.

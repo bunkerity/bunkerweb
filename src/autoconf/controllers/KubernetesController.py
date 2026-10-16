@@ -67,6 +67,8 @@ def _dead_peer_socket_options() -> list:
 
 
 class KubernetesController(Controller):
+    _last_apply_ok = True
+
     def __init__(self):
         self._internal_lock = HoldTimeLock()
         self._pending_apply = False
@@ -536,7 +538,14 @@ class KubernetesController(Controller):
     def _is_custom_event(self, kind, obj, annotations, namespace, name) -> bool:
         return False
 
+    def _is_status_only_event(self, event) -> bool:
+        """True when the event only reflects a status write, not a change BunkerWeb has to apply."""
+        return False
+
     def _process_event(self, event):
+        if self._is_status_only_event(event):
+            return False
+
         if self._first_start:
             return True
 
@@ -756,6 +765,7 @@ class KubernetesController(Controller):
                         self._extra_config, self._configs = self.get_configs()
 
                         if not self.update_needed(self._instances, self._services, self._configs, self._extra_config):
+                            self._sync_status()
                             if locked:
                                 self._internal_lock.release()
                                 locked = False
@@ -925,6 +935,7 @@ class KubernetesController(Controller):
                 self._extra_config, self._configs = self.get_configs()
                 if not self.update_needed(self._instances, self._services, self._configs, self._extra_config):
                     self._logger.debug("Backend retry worker: no config change detected, skipping apply")
+                    self._sync_status()
                     return
                 if self.have_to_wait():
                     # Let the normal watch loop retry — don't busy-wait here.
@@ -1069,8 +1080,20 @@ class KubernetesController(Controller):
 
         self._patch_controller_status(ips)
 
+    def _sync_status(self, applied: Optional[bool] = None) -> None:
+        """Report the outcome of the last configuration on the resources this controller owns.
+
+        `applied` is None when nothing had to be applied: the last known outcome stands."""
+
     def apply_config(self, force: bool = False) -> bool:
-        result = self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config, force=force)
+        try:
+            result = self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config, force=force)
+        except BaseException:
+            self._last_apply_ok = False
+            self._sync_status(False)
+            raise
+        self._last_apply_ok = bool(result)
         if result:
             self._maybe_patch_status()
+        self._sync_status(self._last_apply_ok)
         return result
