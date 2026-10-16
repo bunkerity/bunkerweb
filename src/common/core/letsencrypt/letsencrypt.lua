@@ -261,10 +261,68 @@ function letsencrypt:initialize(ctx)
 	plugin.initialize(self, "letsencrypt", ctx)
 end
 
+-- A passed-through ACME challenge belongs to the backend that answers it, so no other check runs
+-- on it: it is whitelisted, which also skips the ban check and ModSecurity, more than the locally
+-- served token gets (see access()). That is why the exemption is limited to ONE token-shaped
+-- segment (base64url, RFC 8555 section 8.3) fetched with GET or HEAD, never a deeper backend
+-- route. `ctx.bw.uri` is `$uri`: decoded, normalised and without the query, so an encoded slash
+-- is already a second segment and a query can not reach the match. Decided in the set phase
+-- because the ModSecurity kill switch reads ENV:is_whitelisted in phase 1.
+function letsencrypt:is_passthrough_challenge()
+	if self.variables["LETS_ENCRYPT_PASSTHROUGH"] ~= "yes" then
+		return false
+	end
+	local bw = self.ctx.bw
+	local method = bw.request_method
+	local uri = bw.uri
+	-- The prefix comparison rejects the general path before any pattern runs, and a stream
+	-- request has no uri at all.
+	if (method ~= "GET" and method ~= "HEAD") or type(uri) ~= "string" then
+		return false
+	end
+	return sub(uri, 1, #ACME_CHALLENGE_PREFIX) == ACME_CHALLENGE_PREFIX
+		and match(sub(uri, #ACME_CHALLENGE_PREFIX + 1), ACME_TOKEN_PATTERN) ~= nil
+end
+
 function letsencrypt:set()
 	local https_configured = self.variables["AUTO_LETS_ENCRYPT"]
 	if https_configured == "yes" then
 		self.ctx.bw.https_configured = "yes"
+	end
+	if self:is_passthrough_challenge() then
+		local ngx_var = ngx.var
+		ngx_var.is_whitelisted = "yes"
+		self.ctx.bw.is_whitelisted = "yes"
+		require("resty.env").set("is_whitelisted", "yes")
+		-- The backend solver validates the challenge against the requested name, so a literal
+		-- REVERSE_PROXY_CUSTOM_HOST must not replace it. Same condition as the reverseproxy
+		-- template that declares $bw_reverse_proxy_host (literal hosts only): reading the variable
+		-- itself would log an "uninitialized variable" warning on a service that does not declare
+		-- it, and writing it where no server declares it raises.
+		local custom_host = get_variable("REVERSE_PROXY_CUSTOM_HOST", true, self.ctx)
+		if
+			custom_host
+			and custom_host ~= ""
+			and not custom_host:find("$", 1, true)
+			and get_variable("USE_REVERSE_PROXY", true, self.ctx) == "yes"
+		then
+			-- During a reload a worker still running the previous configuration may not declare
+			-- the variable yet: that request keeps the configured host.
+			local ok, err = pcall(function()
+				ngx_var.bw_reverse_proxy_host = ngx_var.host
+			end)
+			if not ok then
+				if tostring(err):find("not found for writing", 1, true) then
+					self.logger:log(
+						NOTICE,
+						"$bw_reverse_proxy_host not declared by this configuration, keeping REVERSE_PROXY_CUSTOM_HOST"
+					)
+				else
+					self.logger:log(ERR, "can't override $bw_reverse_proxy_host : " .. tostring(err))
+				end
+			end
+		end
+		return self:ret(true, "ACME challenge passed through, whitelisted")
 	end
 	return self:ret(true, "set https_configured to " .. https_configured)
 end
@@ -678,6 +736,10 @@ function letsencrypt:load_data(data, server_name)
 end
 
 function letsencrypt:access()
+	if self:is_passthrough_challenge() then
+		self.logger:log(NOTICE, "ACME challenge passed through to the backend, skipping the other checks")
+		return self:ret(true, "ACME challenge passed through", OK)
+	end
 	-- ARMED only for a service that is really going to be validated over http-01. It used to be
 	-- armed for every service whose LETS_ENCRYPT_PASSTHROUGH was "no" -- the default -- so on a
 	-- fleet that never asked for a certificate, and on every service using the dns challenge, any

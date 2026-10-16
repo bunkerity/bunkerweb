@@ -68,7 +68,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
     - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
     - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
-    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
+    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。此时，`/.well-known/acme-challenge/` 下单个令牌的 `GET` 或 `HEAD` 请求会被加入白名单，并且不经任何其他检查直接到达后端：该请求会跳过反机器人（antibot）、黑名单、请求速率限制、Basic Auth 和封禁检查（连接数限制仍然生效，由 NGINX 执行），这比本地提供的验证请求跳过的检查更多。只有在 `USE_WHITELIST` 为 `yes`（默认值）时，ModSecurity 才会同样被跳过，因为对白名单客户端关闭它的规则只在此时才会生成。更深的路径、其他方法以及不符合令牌格式的名称仍会接受常规检查。后端还会收到所请求的 `Host`，即使 `REVERSE_PROXY_CUSTOM_HOST` 设置为固定名称也是如此，因为验证是针对该名称进行的（使用 NGINX 变量的值仍然适用）。
 
 !!! tip "HTTP 与 DNS 验证"
     **HTTP 验证** 更容易设置，并且适用于大多数网站：
