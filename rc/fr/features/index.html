@@ -7192,7 +7192,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc2</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7209,7 +7209,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># L'adresse IP du service syslog</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Assurez-vous de définir le nom correct de l'instance</span>

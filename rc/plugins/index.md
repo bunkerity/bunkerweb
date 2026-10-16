@@ -95,7 +95,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         volumes:
           - ./bw-data:/data
     ...
@@ -130,7 +130,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         volumes:
           - ./bw-data:/data
     ...
@@ -173,7 +173,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -220,7 +220,7 @@ The first step is to install the plugin by placing its files inside the correspo
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.17-rc1
+              image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -260,7 +260,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc1/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc2/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 What a plugin structure looks like:
 ```
@@ -566,7 +566,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc1/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc2/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 
@@ -718,6 +718,8 @@ This documentation outlines the lifecycle hooks used for managing different stag
     These hooks are executed **before** processing an incoming request. They are typically used for pre-processing tasks such as authentication, validation, or logging.
 
     If the hook returns a response object, Flask will skip the request handling and return the response directly. This can be useful for short-circuiting the request processing pipeline.
+
+    If a hook raises an exception, or the hooks of a plugin cannot be loaded, the web UI answers 500 on every page, including the plugins page, while static files are still served. To recover, fix or remove the plugin files on disk and restart the UI (or send HUP to the gunicorn master), or remove the plugin from the database.
 
     **Example:**
 

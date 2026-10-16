@@ -1209,11 +1209,9 @@
 <p>创建 Docker 安装的同一个脚本也可以升级由它生成的堆栈。请在包含
 <code>docker-compose.yml</code> 和 <code>.env</code> 的目录中运行它（或使用 <code>--compose-dir</code>
 指定该目录）：</p>
-<div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-oP<span class="w"> </span><span class="s1">'"tag_name": "\K(.*)(?=")'</span><span class="k">)</span>
-
-<span class="c1"># 下载脚本及其校验和</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
+<div class="highlight"><pre><span></span><code><span class="c1"># 下载脚本及其校验和</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc2/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc2/install-bunkerweb.sh.sha256
 
 <span class="c1"># 验证校验和</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1348,16 +1346,16 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dock
 <li><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版本的 BunkerWeb 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></li>
 </ol>
@@ -1425,7 +1423,7 @@ docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
 </li>
 <li>
 <p><strong>拉取新镜像</strong>：
-    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:1.6.17-rc1
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-all-in-one:1.6.17-rc2
 </code></pre></div></p>
 </li>
 <li>
@@ -1436,7 +1434,7 @@ docker<span class="w"> </span>rm<span class="w"> </span>bunkerweb-aio
 -p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 -p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 -p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-bunkerity/bunkerweb-all-in-one:1.6.17-rc1
+bunkerity/bunkerweb-all-in-one:1.6.17-rc2
 </code></pre></div></p>
 </li>
 </ol>
@@ -1447,7 +1445,7 @@ bunkerity/bunkerweb-all-in-one:1.6.17-rc1
 <p><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版 All-In-One 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -1491,11 +1489,9 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <li>
 <p><strong>快速开始</strong>：</p>
 <p>要开始使用，请下载安装脚本及其校验和，然后在运行前验证脚本的完整性。</p>
-<div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-oP<span class="w"> </span><span class="s1">'"tag_name": "\K(.*)(?=")'</span><span class="k">)</span>
-
-<span class="c1"># Download the script and its checksum</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
-curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
+<div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc2/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17-rc2/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1626,20 +1622,20 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tbody>
 </table>
 <p>示例：</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># 交互式升级到 1.6.17~rc1（会提示备份）</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.17~rc1
+<div class="highlight"><pre><span></span><code><span class="c1"># 交互式升级到 1.6.17~rc2（会提示备份）</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.17~rc2
 
 <span class="c1"># 使用自动备份到自定义目录的非交互式升级</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.17~rc1<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.17~rc2<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
 
 <span class="c1"># 静默无人值守升级（抑制日志）– 依赖默认的自动备份</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.17~rc1<span class="w"> </span>-y<span class="w"> </span>-q
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.17~rc2<span class="w"> </span>-y<span class="w"> </span>-q
 
 <span class="c1"># 执行一次空运行（计划）而不应用更改</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.17~rc1<span class="w"> </span>--dry-run
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.17~rc2<span class="w"> </span>--dry-run
 
 <span class="c1"># 跳过自动备份进行升级（不推荐）</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.17~rc1<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.17~rc2<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">跳过备份</p>
@@ -1724,7 +1720,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.17~rc1
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.17~rc2
 </code></pre></div>
 <p>为了防止在执行 <code>apt upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -1739,7 +1735,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.17~rc1
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.17~rc2
 </code></pre></div>
 <p>为了防止在执行 <code>dnf upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2232,16 +2228,16 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p><strong>更新 Docker Compose 文件</strong>：更新 Docker Compose 文件以使用新版本的 BunkerWeb 镜像。
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.17-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.17-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -2273,7 +2269,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.17~rc1
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.17~rc2
 </code></pre></div>
 <p>为了防止在执行 <code>apt upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -2288,7 +2284,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>然后，您可以更新 BunkerWeb 软件包：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.17~rc1
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.17~rc2
 </code></pre></div>
 <p>为了防止在执行 <code>dnf upgrade</code> 时升级 BunkerWeb 软件包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
