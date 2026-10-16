@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "ModSecurity کی SecAuditLogParts ڈائریکٹو۔ حصے A اور Z ہمیشہ بطور سابقہ اور لاحقہ خودکار طور پر شامل ہوتے ہیں۔"
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "آڈٹ لکھنے کا موڈ: Serial ایک فائل استعمال کرتا ہے؛ Concurrent ہر ٹرانزیکشن کے لیے الگ فائل لکھتا ہے اور SecAuditLog کو انڈیکس کے طور پر رکھتا ہے۔ عالمی CRS موڈ میں اسے عالمی سطح پر سیٹ کریں۔"
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Concurrent آڈٹ اسٹوریج: ہر BunkerWeb انسٹنس پر ایک مطلق ڈائریکٹری۔ اگر موجود نہ ہو تو یہ nginx ورکر کے لیے بنائی جاتی ہے (موڈ 0750)؛ آپ کی اپنی تیار کردہ ڈائریکٹری پر nginx ورکر کا لکھنا اور تلاش کرنا ممکن ہونا چاہیے۔ پائیداری اور بار بار دہرائی جانے والی برقراری آپریٹر سنبھالتا ہے۔ عالمی CRS موڈ میں اسے عالمی سطح پر سیٹ کریں۔"
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "وہ فائل کا پاتھ جہاں ModSecurity آڈٹ اندراجات لکھتا ہے۔ ایک عام فائل ہونی چاہیے: Serial آڈٹ رائٹر اسے لاک کرتا ہے، جو پائپ یا سٹریم پر ممکن نہیں۔ /var/log/bunkerweb/ کے تحت .log پر ختم ہونی چاہیے۔"
+        "help": "Serial کے لیے آڈٹ فائل، Concurrent کے لیے انڈیکس فائل۔ یہ عام فائل ہونی چاہیے کیونکہ رائٹر اسے لاک کرتا ہے، جو پائپ یا اسٹریم پر ممکن نہیں۔ اسے .log پر ختم ہونا چاہیے اور /var/log/bunkerweb/ کے تحت ہونا چاہیے۔"
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

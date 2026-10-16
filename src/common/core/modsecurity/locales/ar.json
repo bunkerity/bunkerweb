@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "توجيه SecAuditLogParts الخاص بـ ModSecurity. يتم تضمين الجزأين A وZ دائمًا تلقائيًا كبادئة ولاحقة."
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "وضع كتابة التدقيق: يستخدم Serial ملفًا واحدًا؛ ويكتب Concurrent ملفًا لكل معاملة ويُبقي SecAuditLog كفهرس. في وضع CRS العام، اضبطه على المستوى العام."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "تخزين تدقيق Concurrent: مسار دليل مطلق على كل نسخة BunkerWeb. يُنشأ لعامل nginx (الوضع 0750) إذا كان مفقودًا؛ ويجب أن يكون الدليل الذي تجهزه بنفسك قابلًا للكتابة والبحث من قبل عامل nginx. يتولى المشغّل الاستمرارية والاحتفاظ التكراري. في وضع CRS العام، اضبطه على المستوى العام."
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "مسار الملف الذي يكتب فيه ModSecurity إدخالات التدقيق. يجب أن يكون ملفًا عاديًا: يقوم كاتب التدقيق Serial بقفله، وهو أمر غير ممكن على أنبوب أو تدفق. يجب أن ينتهي بـ .log، تحت /var/log/bunkerweb/."
+        "help": "ملف التدقيق لـ Serial وملف الفهرس لـ Concurrent. يجب أن يكون ملفًا عاديًا لأن الكاتب يقفله، وهو غير ممكن على أنبوب أو تدفق. يجب أن ينتهي بـ .log وأن يكون ضمن /var/log/bunkerweb/."
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

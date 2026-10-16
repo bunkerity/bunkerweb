@@ -22,6 +22,7 @@ from resource_group_resolver import expand_config_groups  # type: ignore
 from redirect_resolver import expand_service_redirects  # type: ignore
 from upstream_resolver import expand_service_upstreams  # type: ignore
 from plugin_extensions import run_config_extensions  # type: ignore
+from modsecurity_audit import validate_audit_log_settings  # type: ignore
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
@@ -229,6 +230,9 @@ if __name__ == "__main__":
             full_config = db.get_config(methods=True) | {"DATABASE_URI": {"default": "sqlite:////var/lib/bunkerweb/db.sqlite3", "value": db.database_uri}}
             default_config = {setting: data["default"] for setting, data in full_config.items()}
             full_config = {setting: data["value"] for setting, data in full_config.items()}
+
+        # Database-backed candidates bypass Configurator. Reject them before removing working files.
+        validate_audit_log_settings(full_config)
 
         # Expand @resource-group tokens in list settings to flat values just before rendering,
         # so NGINX/Lua only ever see literal values (the @name tokens stay stored in the DB).

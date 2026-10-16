@@ -17,6 +17,7 @@ if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
 from env_file import make_key_predicate, parse_env_file  # type: ignore
+from modsecurity_audit import validate_audit_log_settings  # type: ignore
 
 from common_utils import (  # type: ignore
     bytes_hash,
@@ -447,6 +448,10 @@ class Configurator:
                     if server_id and server_id not in self.__servers:
                         self.__servers[server_id] = [server_id]
 
+        # Reject known audit candidates before regex fallbacks, including DB-supplemented service scopes.
+        audit_variables = self.__variables | {"SERVER_NAME": " ".join(self.__servers)} if self.__multisite else self.__variables
+        validate_audit_log_settings(audit_variables, partial=True)
+
         config = {}
         template = self.__variables.get("USE_TEMPLATE", "")
 
@@ -548,6 +553,7 @@ class Configurator:
         # is the one object both paths build, and it holds the merged per-service views the check
         # needs (`_service_configs`, after `drop_inherited_ports`).
 
+        validate_audit_log_settings(config)
         return config
 
     @staticmethod

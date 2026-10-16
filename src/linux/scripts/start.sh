@@ -254,7 +254,12 @@ function start() {
         rm -f /var/run/bunkerweb/api-internal.sock
     fi
 
-    # Start nginx
+    # Start nginx. The ModSecurity Concurrent audit storage is validated, and created when missing, by the
+    # user that runs the nginx worker: a directory root made would be one the worker cannot write.
+    if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/utils/modsecurity_audit.py "$NGINX_CONF_DIR/variables.env"; then
+        log "SYSTEMCTL" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+        exit 1
+    fi
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
     if [ "$(uname)" = "FreeBSD" ]; then
         "$NGINX_BIN" -e /var/log/bunkerweb/error.log
@@ -369,6 +374,10 @@ function reload()
     if [ -f "$pid_file" ] ; then
         pid="$(cat "$pid_file" 2>/dev/null)"
         if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
+            if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/utils/modsecurity_audit.py "$NGINX_CONF_DIR/variables.env"; then
+                log "SYSTEMCTL" "❌" "Invalid ModSecurity audit storage, keeping running configuration"
+                return 1
+            fi
             log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
             "$NGINX_BIN" -s reload
             # shellcheck disable=SC2181

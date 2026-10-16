@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "ModSecurity'nin SecAuditLogParts yönergesi. A ve Z bölümleri her zaman önek ve sonek olarak otomatik dahil edilir."
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "Denetim yazma modu: Serial tek bir dosya kullanır; Concurrent işlem başına dosya yazar ve SecAuditLog'u indeks olarak tutar. Genel CRS modunda genel olarak ayarlayın."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Concurrent denetim depolaması: her BunkerWeb örneğinde mutlak bir dizin. Eksikse nginx çalışanı için oluşturulur (mod 0750); kendiniz hazırladığınız dizin nginx çalışanı tarafından yazılabilir ve aranabilir olmalıdır. Kalıcılığı ve özyinelemeli saklamayı operatör yönetir. Genel CRS modunda genel olarak ayarlayın."
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "ModSecurity'nin denetim girdilerini yazdığı dosyanın yolu. Normal bir dosya olmalıdır: Serial denetim yazıcısı onu kilitler, bu da bir pipe veya stream üzerinde mümkün değildir. .log ile bitmeli, /var/log/bunkerweb/ altında olmalıdır."
+        "help": "Serial için denetim dosyası, Concurrent için indeks dosyası. Yazan bileşen onu kilitlediği ve bu bir boru veya akışta mümkün olmadığı için normal bir dosya olmalıdır. .log ile bitmeli ve /var/log/bunkerweb/ altında olmalıdır."
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "ModSecurity का SecAuditLogParts निर्देश। भाग A और Z हमेशा उपसर्ग और प्रत्यय के रूप में स्वतः शामिल किए जाते हैं।"
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "ऑडिट लेखन मोड: Serial एक ही फ़ाइल का उपयोग करता है; Concurrent प्रति-लेनदेन फ़ाइलें लिखता है और SecAuditLog को इंडेक्स के रूप में रखता है। वैश्विक CRS मोड में इसे वैश्विक रूप से सेट करें।"
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Concurrent ऑडिट संग्रहण: प्रत्येक BunkerWeb इंस्टेंस पर एक निरपेक्ष डायरेक्टरी। यह न होने पर nginx वर्कर के लिए बनाई जाती है (मोड 0750); आपकी स्वयं की बनाई डायरेक्टरी nginx वर्कर द्वारा लिखने योग्य और खोजने योग्य होनी चाहिए। स्थायित्व और पुनरावर्ती प्रतिधारण ऑपरेटर संभालता है। वैश्विक CRS मोड में इसे वैश्विक रूप से सेट करें।"
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "वह फ़ाइल पथ जहाँ ModSecurity ऑडिट प्रविष्टियाँ लिखता है। एक सामान्य फ़ाइल होनी चाहिए: Serial ऑडिट राइटर इसे लॉक करता है, जो पाइप या स्ट्रीम पर संभव नहीं है। /var/log/bunkerweb/ के अंतर्गत .log पर समाप्त होनी चाहिए।"
+        "help": "Serial के लिए ऑडिट फ़ाइल, Concurrent के लिए इंडेक्स फ़ाइल। यह सामान्य फ़ाइल होनी चाहिए क्योंकि राइटर इसे लॉक करता है, जो पाइप या स्ट्रीम पर संभव नहीं है। यह .log पर समाप्त होनी चाहिए और /var/log/bunkerweb/ के अंतर्गत होनी चाहिए।"
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "ModSecurity-এর SecAuditLogParts নির্দেশিকা। অংশ A এবং Z সবসময় স্বয়ংক্রিয়ভাবে প্রিফিক্স ও সাফিক্স হিসেবে অন্তর্ভুক্ত থাকে।"
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "অডিট লেখার মোড: Serial একটি ফাইল ব্যবহার করে; Concurrent প্রতি লেনদেনে আলাদা ফাইল লেখে এবং SecAuditLog-কে সূচি হিসেবে রাখে। গ্লোবাল CRS মোডে এটি গ্লোবালভাবে সেট করুন।"
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Concurrent অডিট সংরক্ষণ: প্রতিটি BunkerWeb ইনস্ট্যান্সে একটি পূর্ণ পাথের ডিরেক্টরি। না থাকলে এটি nginx ওয়ার্কারের জন্য তৈরি হয় (মোড 0750); আপনার নিজে তৈরি করা ডিরেক্টরি nginx ওয়ার্কারের জন্য লেখা ও অনুসন্ধানযোগ্য হতে হবে। স্থায়িত্ব ও পুনরাবৃত্তিমূলক সংরক্ষণ অপারেটর পরিচালনা করেন। গ্লোবাল CRS মোডে এটি গ্লোবালভাবে সেট করুন।"
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "যে ফাইলে ModSecurity অডিট এন্ট্রি লেখে তার পাথ। এটি একটি সাধারণ ফাইল হতে হবে: Serial অডিট রাইটার এটি লক করে, যা পাইপ বা স্ট্রিমে সম্ভব নয়। /var/log/bunkerweb/-এর অধীনে .log দিয়ে শেষ হতে হবে।"
+        "help": "Serial-এর জন্য অডিট ফাইল, Concurrent-এর জন্য সূচি ফাইল। এটি সাধারণ ফাইল হতে হবে, কারণ রাইটার এটি লক করে, যা পাইপ বা স্ট্রিমে সম্ভব নয়। এটি .log দিয়ে শেষ হতে হবে এবং /var/log/bunkerweb/ এর অধীনে থাকতে হবে।"
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

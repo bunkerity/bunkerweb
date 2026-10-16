@@ -66,6 +66,7 @@ local rollback_stuck   = %s  -- ... whose ordered undo could NOT put the tree ba
 local clear_raises     = %s  -- pushswap.clear() throws instead of returning false
 local clear_returns_ok = %s  -- ... or returns cleanly, so the cp -R decides
 local restore_fails    = %s  -- the cp -R from the backup fails
+local audit_fails      = %s  -- the ModSecurity audit preflight refuses the staged variables.env
 
 ngx = {
     now = function() return 1000 end,
@@ -100,6 +101,14 @@ execute = function(cmd)
 end
 open = function() return { write = function() end, flush = function() end, close = function() end } end
 remove = function() return true end
+
+-- The ModSecurity audit preflight (a python3 subprocess) is pinned on its own in
+-- test_api_audit_preflight_lua.py; here only its verdict matters. Valid unless a case says otherwise.
+check_audit_storage = function(path)
+    log_lines[#log_lines + 1] = "audit:" .. path
+    if audit_fails then return false, "audit storage refused" end
+    return true
+end
 
 pushswap = {
     RESERVED_PREFIX = ".bw-",
@@ -158,6 +167,7 @@ def run_push(
     clear_raises: bool = False,
     clear_returns_ok: bool = True,
     restore_fails: bool = False,
+    audit_fails: bool = False,
 ):
     script = HARNESS % (
         str(zone_full).lower(),
@@ -166,6 +176,7 @@ def run_push(
         str(clear_raises).lower(),
         str(clear_returns_ok).lower(),
         str(restore_fails).lower(),
+        str(audit_fails).lower(),
         _primitives(),
         _confs_handler(),
     )
@@ -193,6 +204,22 @@ class TestTheHappyPath:
         assert out["status"] == 200
         assert (out["released"], out["key_value"]) == (1, None)
         assert out["clear_calls"] == 0, "the restore path must not run when the swap succeeded"
+
+
+class TestTheAuditPreflight:
+    """A push naming an unusable ModSecurity audit storage is refused BEFORE it replaces the running tree."""
+
+    def test_the_staged_variables_are_what_gets_checked(self):
+        assert "audit:/etc/nginx/.bw-staging/variables.env" in run_push()["logs"]
+
+    def test_a_refusal_answers_500_with_the_reason_and_never_swaps(self):
+        out = run_push(audit_fails=True)
+
+        assert out["status"] == 500
+        assert out["message"] == "audit storage refused"
+        assert (out["released"], out["key_value"]) == (1, None), "a refused push must release the swap key"
+        assert out["swept"] == 0, "the swap (and the sweep that follows a clean one) must not run"
+        assert out["clear_calls"] == 0
 
 
 class TestTheRescueSweep:

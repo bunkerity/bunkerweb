@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "SecAuditLogParts directive ng ModSecurity. Lagi namang awtomatikong isinasama ang Parts A at Z bilang prefix at suffix."
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "Paraan ng pagsulat ng audit: gumagamit ng iisang file ang Serial; sumusulat ang Concurrent ng mga file bawat transaksyon at pinananatili ang SecAuditLog bilang index. Sa pandaigdigang CRS mode, itakda ito nang pandaigdig."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Imbakan ng Concurrent audit: isang ganap na direktoryo sa bawat BunkerWeb instance. Ginagawa ito para sa nginx worker (mode 0750) kung wala; ang direktoryong inihanda mo mismo ay dapat masulatan at mapaghanap ng nginx worker. Ang operator ang namamahala ng pananatili at recursive na pagpapanatili. Sa pandaigdigang CRS mode, itakda ito nang pandaigdig."
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "Path ng file kung saan isinusulat ng ModSecurity ang mga audit entry. Dapat itong regular na file: ni-lock ito ng Serial audit writer, na hindi posible sa pipe o stream. Dapat magtapos sa .log, sa ilalim ng /var/log/bunkerweb/."
+        "help": "File ng audit para sa Serial, index file para sa Concurrent. Dapat itong karaniwang file dahil ni-lock ito ng writer, na hindi posible sa pipe o stream. Dapat magtapos sa .log, sa ilalim ng /var/log/bunkerweb/."
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

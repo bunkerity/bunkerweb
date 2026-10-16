@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "Директива SecAuditLogParts ModSecurity. Части A и Z всегда автоматически включаются как префикс и суффикс."
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "Режим записи аудита: Serial использует один файл; Concurrent записывает файлы по транзакциям и сохраняет SecAuditLog как индекс. В глобальном режиме CRS задавайте глобально."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Хранилище аудита Concurrent: абсолютный каталог на каждом экземпляре BunkerWeb. Если его нет, он создаётся для рабочего процесса nginx (режим 0750); каталог, который вы создаёте сами, должен быть доступен nginx для записи и обхода. Сохранность и рекурсивное хранение записей остаются на операторе. В глобальном режиме CRS задавайте глобально."
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "Путь к файлу, в который ModSecurity записывает записи аудита. Должен быть обычным файлом: writer аудита Serial блокирует его, что невозможно для канала (pipe) или потока. Должен заканчиваться на .log, в каталоге /var/log/bunkerweb/."
+        "help": "Файл аудита для Serial, индексный файл для Concurrent. Должен быть обычным файлом, так как записывающий компонент блокирует его, что невозможно для канала или потока. Должен заканчиваться на .log и находиться в /var/log/bunkerweb/."
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

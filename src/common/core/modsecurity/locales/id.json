@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "Direktif SecAuditLogParts dari ModSecurity. Bagian A dan Z selalu otomatis disertakan sebagai prefix dan suffix."
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "Mode penulisan audit: Serial memakai satu berkas; Concurrent menulis berkas per transaksi dan mempertahankan SecAuditLog sebagai indeks. Pada mode CRS global, atur secara global."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Penyimpanan audit Concurrent: direktori absolut di setiap instance BunkerWeb. Direktori dibuat untuk worker nginx (mode 0750) jika belum ada; direktori yang Anda siapkan sendiri harus dapat ditulis dan ditelusuri oleh worker nginx. Operator mengelola persistensi dan retensi rekursif. Pada mode CRS global, atur secara global."
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "Path file tempat ModSecurity menulis entri audit. Harus berupa file biasa: penulis audit Serial menguncinya, yang tidak mungkin dilakukan pada pipe atau stream. Harus diakhiri dengan .log, di bawah /var/log/bunkerweb/."
+        "help": "Berkas audit untuk Serial, berkas indeks untuk Concurrent. Harus berupa berkas biasa karena penulis menguncinya, yang tidak mungkin pada pipe atau stream. Harus berakhiran .log, di bawah /var/log/bunkerweb/."
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

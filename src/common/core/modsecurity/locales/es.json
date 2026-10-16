@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "Directiva SecAuditLogParts de ModSecurity. Las partes A y Z se incluyen siempre automáticamente como prefijo y sufijo."
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "Modo de escritura de auditoría: Serial usa un solo archivo; Concurrent escribe archivos por transacción y mantiene SecAuditLog como índice. En modo CRS global, configúrelo globalmente."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Almacenamiento de auditoría Concurrent: un directorio absoluto en cada instancia de BunkerWeb. Se crea para el worker nginx (modo 0750) si falta; un directorio que usted aprovisione debe permitir escritura y acceso al worker nginx. El operador gestiona la persistencia y la retención recursiva. En modo CRS global, configúrelo globalmente."
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, lo cual no es posible en una tubería (pipe) o un flujo. Debe terminar en .log, bajo /var/log/bunkerweb/."
+        "help": "Archivo de auditoría para Serial, archivo de índice para Concurrent. Debe ser un archivo regular porque el escritor lo bloquea, algo imposible en una tubería o un flujo. Debe terminar en .log, dentro de /var/log/bunkerweb/."
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

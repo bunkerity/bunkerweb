@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "ModSecurity 的 SecAuditLogParts 指令。A 部分和 Z 部分始终会作为前缀和后缀自动包含在内。"
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "审计写入模式：Serial 使用单个文件；Concurrent 为每个事务写入单独文件，并将 SecAuditLog 保留为索引。在全局 CRS 模式下请全局设置。"
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Concurrent 审计存储：每个 BunkerWeb 实例上的绝对目录。目录缺失时会为 nginx worker 创建（权限 0750）；您自行提供的目录必须允许 nginx worker 写入和搜索。持久化和递归保留由操作员管理。在全局 CRS 模式下请全局设置。"
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "ModSecurity 写入审计条目的文件路径。必须是常规文件:Serial 审计写入器会对其加锁,这在管道或流上是无法实现的。必须以 .log 结尾,并位于 /var/log/bunkerweb/ 目录下。"
+        "help": "Serial 的审计文件，Concurrent 的索引文件。必须是普通文件，因为写入器会对其加锁，而管道或流无法加锁。必须以 .log 结尾，位于 /var/log/bunkerweb/ 下。"
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

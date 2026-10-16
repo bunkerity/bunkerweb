@@ -552,10 +552,29 @@ api.global.GET["^/health$"] = function(self)
 	return self:response(HTTP_OK, "success", "ok")
 end
 
+-- Runs the ModSecurity audit preflight (utils/modsecurity_audit.py) against a variables.env: it
+-- refuses an invalid Concurrent audit configuration and creates the missing storage directory as
+-- this user, which is the user the nginx workers run as. Only valid when the script prints exactly
+-- its success line: an empty read or a traceback must never read as "go ahead".
+-- Only called with VARIABLES_PATH or the staging path built from a fixed destination.
+local function check_audit_storage(variables_path)
+	local handle = io.popen("python3 /usr/share/bunkerweb/utils/modsecurity_audit.py '" .. variables_path .. "' 2>&1")
+	if not handle then
+		return false, "cannot run ModSecurity audit preflight"
+	end
+	local result = handle:read("*a")
+	handle:close()
+	return result == "ModSecurity audit preflight successful\n", result
+end
+
 -- The body returns the response triple instead of sending it, so the wrapper below has ONE place
 -- to release the swap lock whichever way the reload ends (dev 32a2985ab's `reload_locked` split,
 -- on this tree's primitive).
 local function reload_locked(test_arg)
+	local valid, validation_error = check_audit_storage(VARIABLES_PATH)
+	if not valid then
+		return HTTP_INTERNAL_SERVER_ERROR, "error", validation_error
+	end
 	if test_arg ~= "no" then
 		-- Check Nginx configuration
 		logger:log(NOTICE, "Checking Nginx configuration")
@@ -769,6 +788,15 @@ api.global.POST["^/confs$"] = function(self)
 		execute("rm -rf " .. staging .. " && mkdir -p " .. staging .. " && tar xzf " .. tmp .. " -C " .. staging) ~= 0
 	then
 		return fail("cannot extract archive")
+	end
+
+	-- The staged variables.env is what the NEXT reload will run on: judge it before it replaces the live
+	-- one, so a push naming an unusable audit storage is refused and the running configuration stays.
+	if destination == "/etc/nginx" then
+		local ran_check, audit_valid, audit_error = pcall(check_audit_storage, staging .. "/variables.env")
+		if not ran_check or not audit_valid then
+			return fail(ran_check and audit_error or tostring(audit_valid))
+		end
 	end
 
 	-- pcall so an error inside the swap still reaches `fail()`, which releases the key: with a

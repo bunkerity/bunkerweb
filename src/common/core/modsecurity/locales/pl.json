@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "Dyrektywa SecAuditLogParts ModSecurity. Części A i Z są zawsze automatycznie dołączane jako prefiks i sufiks."
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "Tryb zapisu audytu: Serial używa jednego pliku; Concurrent zapisuje pliki dla każdej transakcji i zachowuje SecAuditLog jako indeks. W globalnym trybie CRS ustaw globalnie."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Magazyn audytu Concurrent: bezwzględny katalog na każdej instancji BunkerWeb. Jeśli go brakuje, jest tworzony dla procesu roboczego nginx (tryb 0750); katalog przygotowany samodzielnie musi umożliwiać procesowi nginx zapis i przeszukiwanie. Trwałość i rekursywne przechowywanie zapewnia operator. W globalnym trybie CRS ustaw globalnie."
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "Ścieżka pliku, do którego ModSecurity zapisuje wpisy audytu. Musi być zwykłym plikiem: writer audytu Serial blokuje go, co nie jest możliwe w przypadku potoku ani strumienia. Musi kończyć się na .log, w katalogu /var/log/bunkerweb/."
+        "help": "Plik audytu dla Serial, plik indeksu dla Concurrent. Musi być zwykłym plikiem, ponieważ moduł zapisu go blokuje, co nie jest możliwe w potoku ani strumieniu. Musi kończyć się na .log i znajdować się w /var/log/bunkerweb/."
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",

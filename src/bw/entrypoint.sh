@@ -46,6 +46,14 @@ function trap_reload() {
 	log "ENTRYPOINT" "ℹ️" "Caught reload operation"
 	# shellcheck disable=SC2317
 	if [ -f /var/run/bunkerweb/nginx.pid ] ; then
+		# Validates (and creates, as this user) the ModSecurity Concurrent audit storage the new configuration names.
+		# shellcheck disable=SC2317
+		if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
+			# shellcheck disable=SC2317
+			log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, keeping running configuration"
+			# shellcheck disable=SC2317
+			return 1
+		fi
 		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "ℹ️" "Reloading nginx ..."
 		nginx -s reload
@@ -165,6 +173,10 @@ done
 rm -f /var/run/bunkerweb/api-internal.sock
 
 # start nginx
+if ! python3 /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env ; then
+	log "ENTRYPOINT" "❌" "Invalid ModSecurity audit storage, refusing to start nginx"
+	exit 1
+fi
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
 nginx -g "daemon off;" &
 pid="$!"

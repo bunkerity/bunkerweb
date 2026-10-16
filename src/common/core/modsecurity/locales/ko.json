@@ -41,9 +41,17 @@
         "label": "SecAuditLogParts",
         "help": "ModSecurity의 SecAuditLogParts 지시어입니다. A 파트와 Z 파트는 항상 접두사와 접미사로 자동 포함됩니다."
       },
+      "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+        "label": "SecAuditLogType",
+        "help": "감사 기록 방식: Serial은 하나의 파일을 사용하고, Concurrent는 트랜잭션별 파일을 쓰며 SecAuditLog를 인덱스로 유지합니다. 전역 CRS 모드에서는 전역으로 설정하십시오."
+      },
+      "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+        "label": "SecAuditLogStorageDir",
+        "help": "Concurrent 감사 저장소: 각 BunkerWeb 인스턴스의 절대 경로 디렉터리입니다. 없으면 nginx 워커용으로 생성되며(모드 0750), 직접 준비한 디렉터리는 nginx 워커가 쓰고 탐색할 수 있어야 합니다. 영속성과 재귀적 보존은 운영자가 관리합니다. 전역 CRS 모드에서는 전역으로 설정하십시오."
+      },
       "MODSECURITY_SEC_AUDIT_LOG": {
         "label": "SecAuditLog",
-        "help": "ModSecurity가 감사 항목을 기록하는 파일의 경로입니다. 일반 파일이어야 합니다: Serial 감사 작성기가 이를 잠그는데, 이는 파이프나 스트림에서는 불가능합니다. .log로 끝나야 하며 /var/log/bunkerweb/ 아래에 있어야 합니다."
+        "help": "Serial용 감사 파일이자 Concurrent용 인덱스 파일입니다. 기록기가 파일을 잠그며 파이프나 스트림에서는 불가능하므로 일반 파일이어야 합니다. .log로 끝나야 하며 /var/log/bunkerweb/ 아래에 있어야 합니다."
       },
       "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
         "label": "SecRequestBodyNoFilesLimit",
