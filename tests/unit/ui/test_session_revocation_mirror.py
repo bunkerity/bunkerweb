@@ -10,12 +10,17 @@ Same harness as test_resilient_redis_session.py: a real `redis-server` the test 
 with its keys kept (AOF), the real Flask-Session interface and main.py's own session statements.
 """
 
+import shutil
 from time import monotonic
 from unittest.mock import patch
+
+import pytest
 
 from test_resilient_redis_session import _reopen_breaker, redis_server, stack  # noqa: F401  (fixtures)
 
 from app.utils import is_session_revoked, revoke_sessions  # noqa: E402
+
+pytestmark = pytest.mark.skipif(shutil.which("redis-server") is None, reason="needs the redis-server binary")
 
 
 def test_a_session_revoked_while_redis_is_down_reads_as_revoked_during_and_after_the_outage(stack):  # noqa: F811
