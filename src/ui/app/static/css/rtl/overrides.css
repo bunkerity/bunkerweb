@@ -136,6 +136,10 @@ body {
 
 .tooltip {
   --bs-tooltip-zindex: 1101;
+  --bs-tooltip-max-width: 320px;
+}
+.tooltip-inner {
+  overflow-wrap: anywhere;
 }
 
 .offcanvas,
@@ -5182,4 +5186,4 @@ code.bad-behavior-event__value {
   transform: scaleX(-1);
 }
 
-/* rtlcss@4.3.0 source=css/overrides.css sha256=af50a85c4d1e8b62024f64b2e8010e1a8c3ec70dc992874eb774363acb5a51d9 */
+/* rtlcss@4.3.0 source=css/overrides.css sha256=fe35cf47d43156f0eedcb08800febba64fd0072f593ae984f005a81a9d934708 */

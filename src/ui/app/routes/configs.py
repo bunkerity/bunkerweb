@@ -7,7 +7,6 @@ from typing import Dict, List, Literal, Optional, Tuple
 
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
-from werkzeug.utils import secure_filename
 
 from common_utils import bytes_hash  # type: ignore
 from custom_configs_validation import NAME_RX  # type: ignore
@@ -768,7 +767,8 @@ def configs_new():
 def configs_edit(service: str, config_type: str, name: str):
     if service == "global":
         service = None
-    name = secure_filename(name)
+    # The name is looked up exactly as stored, never rewritten: file and env based configs may carry names
+    # CONFIG_NAME_RX rejects, so only create and rename gate on the pattern.
 
     db_config = API_CLIENT.get_config_item(service, config_type, name, with_data=True)
     if not db_config:
@@ -844,7 +844,7 @@ def configs_edit(service: str, config_type: str, name: str):
             redirect_url="configs.configs_new",
             next=True,
         )
-        new_name = secure_filename(request.form["name"])
+        new_name = request.form["name"]
         if not match(CONFIG_NAME_RX, new_name):
             return handle_error(
                 translated("configs.flash.invalid_name_parameter_configs_new") or "Invalid name parameter on /configs/new.", "configs.configs_new", True

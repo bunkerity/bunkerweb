@@ -41,6 +41,10 @@
 
 .tooltip {
   --bs-tooltip-zindex: 1101;
+  --bs-tooltip-max-width: 320px;
+}
+.tooltip-inner {
+  overflow-wrap: anywhere;
 }
 
 .offcanvas,

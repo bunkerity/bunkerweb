@@ -301,7 +301,7 @@
                 <div class="modal-body">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <input type="hidden" id="force-delete-input" name="force" value="false" />
-                    {{ alert(message="Are you sure you want to delete the selected templates?", message_key="modal.body.delete_confirmation_alert", variant="danger", classes="text-center") }}
+                    {{ alert(message="Are you sure you want to delete the selected template?", message_key="modal.body.confirm_templates_deletion_alert", variant="danger", classes="text-center") }}
                     {{ selected_list(id="selected-templates", name="templates", items=[], entity="templates", columns=[{"key": "id", "i18n": "table.header.id", "label": "ID", "bold": true}], hidden_mode="csv", id_key="id", classes="mb-3") }}
                 </div>
                 <div class="modal-footer justify-content-center">

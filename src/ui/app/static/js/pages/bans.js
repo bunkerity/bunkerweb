@@ -1134,15 +1134,24 @@ $(document).ready(function () {
                 String(row.ip || ""),
               )}`;
 
-              return `
-                <div class="d-flex justify-content-evenly">
-                  <a class="btn btn-outline-primary btn-sm me-1"
+              // Only a CrowdSec ban has CrowdSec evidence to investigate
+              const isCrowdsecBan =
+                String(row.reason || "")
+                  .trim()
+                  .toLowerCase() === "crowdsec";
+              const investigateLink = isCrowdsecBan
+                ? `<a class="btn btn-outline-primary btn-sm me-1"
                      href="${investigateUrl}">
                     <i class="bx bx-search-alt bx-xs me-1" aria-hidden="true"></i>${t(
                       "crowdsec.investigation.submit",
                       "Investigate",
                     )}
-                  </a>
+                  </a>`
+                : "";
+
+              return `
+                <div class="d-flex justify-content-evenly">
+                  ${investigateLink}
                   <button type="button"
                           class="btn btn-outline-danger btn-sm me-1 unban-single${readOnlyClass}"
                           data-ip="${row.ip}"
