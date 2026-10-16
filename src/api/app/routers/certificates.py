@@ -1,9 +1,10 @@
 from typing import Literal
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse, Response
 
+from ..auth.biscuit import authorize_resource
 from ..auth.guard import guard
 from ..schemas import CertificateAttachmentRequest, CertificateUpdateRequest
 from ..utils import LOGGER, get_db
@@ -96,14 +97,17 @@ def delete_certificate(certificate_id: str) -> JSONResponse:
 
 
 @router.post("/{certificate_id}/attachments", dependencies=[Depends(guard)])
-def attach_certificate(certificate_id: str, payload: CertificateAttachmentRequest) -> JSONResponse:
+def attach_certificate(request: Request, certificate_id: str, payload: CertificateAttachmentRequest) -> JSONResponse:
+    # The guard checked certificate_assign on the certificate; the service it lands on is authorized here, before any lookup.
+    authorize_resource(request, "services", "service_update", payload.service_id)
     if error := get_db().attach_certificate(certificate_id, payload.service_id, primary=payload.primary):
         return _error(error)
     return JSONResponse(status_code=200, content={"status": "success", "certificate": get_db().get_certificate_details(certificate_id)})
 
 
 @router.delete("/{certificate_id}/attachments/{service_id}", dependencies=[Depends(guard)])
-def detach_certificate(certificate_id: str, service_id: str) -> JSONResponse:
+def detach_certificate(request: Request, certificate_id: str, service_id: str) -> JSONResponse:
+    authorize_resource(request, "services", "service_update", service_id)
     if error := get_db().detach_certificate(certificate_id, service_id):
         return _error(error)
     return JSONResponse(status_code=200, content={"status": "success", "certificate": get_db().get_certificate_details(certificate_id)})

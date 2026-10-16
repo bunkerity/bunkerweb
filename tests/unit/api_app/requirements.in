@@ -18,3 +18,4 @@
 biscuit-python==0.4.0
 fastapi==0.141.1
 pydantic-settings==2.13.0
+python-multipart==0.0.32

@@ -3,9 +3,10 @@
 
 from json import JSONDecodeError, loads
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, File, Form, Request, UploadFile
 from fastapi.responses import JSONResponse
 
+from app.auth.biscuit import authorize_resource  # type: ignore
 from app.schemas import CertificateAttachmentRequest, CertificateUpdateRequest  # type: ignore
 from app.utils import get_db  # type: ignore
 from certificate_utils import MAX_PEM_SIZE  # type: ignore
@@ -25,6 +26,7 @@ def _error(message: str, status_code: int = 400) -> JSONResponse:
 
 @router.post("/certificates/upload")
 async def upload_certificate(
+    request: Request,
     certificate: UploadFile = File(...),
     private_key: UploadFile = File(...),
     name: str = Form(...),
@@ -47,6 +49,10 @@ async def upload_certificate(
         validated = CertificateUpdateRequest(name=name, description=description, renewal_metadata=parsed_metadata)
     except (JSONDecodeError, TypeError, ValueError) as exc:
         return _error(str(exc), 422)
+
+    # The guard saw no service: the certificate lands on each one, so each is authorized here, before anything is written.
+    for service_id in normalized_service_ids:
+        authorize_resource(request, "services", "service_update", service_id)
 
     db = get_db()
     error, certificate_id = db.create_certificate(

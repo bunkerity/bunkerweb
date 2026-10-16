@@ -93,6 +93,7 @@ _LANE_IMPORTS = {
     "biscuit-python": "biscuit_auth",
     "fastapi": "fastapi",
     "pydantic-settings": "pydantic_settings",
+    "python-multipart": "python_multipart",
 }
 _MISSING_LANE_DEPS = tuple(package for package, module in _LANE_IMPORTS.items() if find_spec(module) is None)
 _LANE_DEPS = not _MISSING_LANE_DEPS

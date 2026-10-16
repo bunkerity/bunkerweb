@@ -3,9 +3,10 @@
 
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
+from app.auth.biscuit import authorize_resource  # type: ignore
 from app.schemas import CertificateCreateRequest, CertificateRenewRequest  # type: ignore
 from app.utils import get_db  # type: ignore
 from certificate_utils import generate_self_signed  # type: ignore
@@ -28,7 +29,10 @@ def _error(message: str, status_code: int = 400) -> JSONResponse:
 
 
 @router.post("/certificates")
-def create_certificate(payload: SelfSignedCreateRequest) -> JSONResponse:
+def create_certificate(request: Request, payload: SelfSignedCreateRequest) -> JSONResponse:
+    # The guard saw no service: the certificate lands on each one, so each is authorized here, before anything is written.
+    for service_id in payload.service_ids:
+        authorize_resource(request, "services", "service_update", service_id)
     try:
         certificate_pem, private_key_pem = generate_self_signed(
             payload.common_name,

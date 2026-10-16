@@ -12,8 +12,12 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[3]
 PLUGIN = ROOT / "src" / "common" / "core" / "workflows"
+# Handlers take the request only to hand it to authorize_resource, which these tests stub.
+REQUEST = object()
 
 
 class _Router:
@@ -41,10 +45,15 @@ def _load_router():
         "fastapi.responses": ModuleType("fastapi.responses"),
         "app": ModuleType("app"),
         "app.utils": ModuleType("app.utils"),
+        "app.auth": ModuleType("app.auth"),
+        "app.auth.biscuit": ModuleType("app.auth.biscuit"),
         "bw_workflows": ModuleType("bw_workflows"),
         "bw_workflows.api": ModuleType("bw_workflows.api"),
     }
     modules["app"].__path__ = []
+    modules["app.auth"].__path__ = []
+    modules["app.auth.biscuit"].authorize_resource = Mock()
+    modules["fastapi"].Request = object
     modules["bw_workflows"].__path__ = [str(PLUGIN)]
     # Real path, so ``from .schemas import ...`` loads the plugin's own Pydantic models.
     modules["bw_workflows.api"].__path__ = [str(PLUGIN / "api")]
@@ -121,7 +130,7 @@ def test_create_attaches_every_requested_service(monkeypatch):
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     payload = SCHEMAS.WorkflowCreateRequest(name="login-protection", service_ids=["a.example.com", "b.example.com"])
-    response = ROUTER.create_workflow(payload)
+    response = ROUTER.create_workflow(REQUEST, payload)
 
     assert response.status_code == 201
     assert db.attach_workflow.call_count == 2
@@ -135,7 +144,7 @@ def test_create_rolls_back_when_an_attachment_is_refused(monkeypatch):
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     payload = SCHEMAS.WorkflowCreateRequest(name="login-protection", service_ids=["a.example.com", "b.example.com"])
-    response = ROUTER.create_workflow(payload)
+    response = ROUTER.create_workflow(REQUEST, payload)
 
     assert response.status_code == 400
     assert db.delete_workflow.called
@@ -398,3 +407,20 @@ def test_testing_a_workflow_that_does_not_exist_is_a_404(monkeypatch):
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     assert ROUTER.test_workflow("ghost", _test_request()).status_code == 404
+
+
+def test_attaching_authorizes_every_target_service_before_touching_the_database(monkeypatch):
+    db = Mock()
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+    refuse = Mock(side_effect=PermissionError)
+    monkeypatch.setattr(ROUTER, "authorize_resource", refuse)
+
+    for call in (
+        lambda: ROUTER.create_workflow(REQUEST, SCHEMAS.WorkflowCreateRequest(name="policy", service_ids=["a.example.com"])),
+        lambda: ROUTER.attach_workflow(REQUEST, "wf-1", SCHEMAS.WorkflowAttachmentRequest(service_id="a.example.com")),
+        lambda: ROUTER.detach_workflow(REQUEST, "wf-1", "a.example.com"),
+    ):
+        with pytest.raises(PermissionError):
+            call()
+        refuse.assert_called_with(REQUEST, "services", "service_update", "a.example.com")
+    assert db.method_calls == []

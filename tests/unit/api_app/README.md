@@ -32,7 +32,7 @@ A separate interpreter is the honest answer. `tests/unit/conftest.py` enforces i
 
 ## Why the dependencies are pinned here and not in `tests/unit/requirements.in`
 
-`biscuit-python`, `fastapi` and `pydantic-settings` are needed by this lane alone. Keeping them in
+`biscuit-python`, `fastapi`, `pydantic-settings` and `python-multipart` (FastAPI refuses to build a route with a `Form`/`File` parameter without it) are needed by this lane alone. Keeping them in
 `tests/unit/api_app/requirements.txt` means a runner that never invokes the lane never installs
 them, and the main suite's install is unchanged.
 
@@ -52,3 +52,11 @@ guard: that only `max_time` is raised, that genuine denials still return 401/403
 that a token attenuated offline to blow the fact/iteration limits is **denied** rather than reported
 as a transient busy-host error. Biscuit attenuation needs no private key, so a run-limit abort is a
 hostile credential, not a slow machine.
+
+`test_attachments_authz.py` proves that attaching or detaching reusable resources requires permission on each target service.
+
+`test_bans_unban_authz.py` proves that unbanning a CrowdSec lease requires `crowdsec_delete` on every affected connection.
+
+`test_certificate_plugin_authz.py` proves that certificate creation requires permission on each target service before writing or scheduling.
+
+`test_configs_move_authz.py` proves that moving a custom config requires permission on the destination service or global scope.

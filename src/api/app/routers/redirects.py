@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
 
+from ..auth.biscuit import authorize_resource
 from ..auth.guard import guard
 from ..schemas import RedirectAttachmentRequest, RedirectCreateRequest, RedirectUpdateRequest
 from ..utils import get_db
@@ -32,10 +33,13 @@ def list_redirects(
 
 
 @router.post("", dependencies=[Depends(guard)])
-def create_redirect(payload: RedirectCreateRequest) -> JSONResponse:
+def create_redirect(request: Request, payload: RedirectCreateRequest) -> JSONResponse:
     db = get_db()
     values = payload.model_dump()
     service_ids = values.pop("service_ids")
+    # The guard saw no service: attaching on creation edits each one, so each is authorized here.
+    for service_id in service_ids:
+        authorize_resource(request, "services", "service_update", service_id)
     resource_id, error = db.create_redirect(**values)
     if error:
         return _error(error)
@@ -77,7 +81,9 @@ def delete_redirect(redirect_id: str) -> JSONResponse:
 
 
 @router.post("/{redirect_id}/attachments", dependencies=[Depends(guard)])
-def attach_redirect(redirect_id: str, payload: RedirectAttachmentRequest) -> JSONResponse:
+def attach_redirect(request: Request, redirect_id: str, payload: RedirectAttachmentRequest) -> JSONResponse:
+    # The guard checked redirect_assign on the rule; the service it lands on is authorized here, before any lookup.
+    authorize_resource(request, "services", "service_update", payload.service_id)
     db = get_db()
     if error := db.attach_redirect(redirect_id, payload.service_id):
         return _error(error)
@@ -85,7 +91,8 @@ def attach_redirect(redirect_id: str, payload: RedirectAttachmentRequest) -> JSO
 
 
 @router.delete("/{redirect_id}/attachments/{service_id}", dependencies=[Depends(guard)])
-def detach_redirect(redirect_id: str, service_id: str) -> JSONResponse:
+def detach_redirect(request: Request, redirect_id: str, service_id: str) -> JSONResponse:
+    authorize_resource(request, "services", "service_update", service_id)
     db = get_db()
     if error := db.detach_redirect(redirect_id, service_id):
         return _error(error)

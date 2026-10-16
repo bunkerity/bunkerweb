@@ -67,16 +67,19 @@ def _load_router():
         "bw_configs.routers": ModuleType("bw_configs.routers"),
         "bw_configs.auth": ModuleType("bw_configs.auth"),
         "bw_configs.auth.guard": ModuleType("bw_configs.auth.guard"),
+        "bw_configs.auth.biscuit": ModuleType("bw_configs.auth.biscuit"),
         "bw_configs.schemas": schemas,
         "bw_configs.utils": ModuleType("bw_configs.utils"),
     }
     for name in ("bw_configs", "bw_configs.routers", "bw_configs.auth", "bw_configs.auth.guard"):
         modules[name].__path__ = []
     modules["bw_configs.auth.guard"].guard = lambda: None
+    modules["bw_configs.auth.biscuit"].authorize_resource = Mock()
     modules["fastapi"].APIRouter = _Router
     modules["fastapi"].Depends = lambda dependency: dependency
     modules["fastapi"].File = lambda default=..., **_kwargs: default
     modules["fastapi"].Form = lambda default=..., **_kwargs: default
+    modules["fastapi"].Request = object
     modules["fastapi"].Query = lambda default=..., **_kwargs: default
     modules["fastapi"].Path = lambda default=..., **_kwargs: default
     modules["fastapi"].UploadFile = object

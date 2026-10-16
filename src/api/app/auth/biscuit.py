@@ -575,6 +575,14 @@ def _extract_resource_id(path: str, rtype: Optional[str]) -> Optional[str]:
     return None
 
 
+def _add_fine_grained_policies(az: AuthorizerBuilder) -> None:
+    az.add_policy(Policy("allow if admin(true)"))
+    # Global grant (resource_id == "*")
+    az.add_policy(Policy('allow if api_perm($rt, "*", $perm), required_perm($perm), resource_type($rt)'))
+    # Specific resource grant
+    az.add_policy(Policy("allow if api_perm($rt, $rid, $perm), required_perm($perm), resource_type($rt), resource_id($rid)"))
+
+
 class BiscuitGuard:
     def __init__(self) -> None:
         from ..utils import LOGGER  # local import to avoid cycles
@@ -676,6 +684,11 @@ class BiscuitGuard:
             self._logger.debug(f"Biscuit phase1: authorization failed (unexpected error):\n{format_exc()}")
             raise HTTPException(status_code=401, detail="Unauthorized")
 
+        # Keep the verified token for authorize_resource(): a handler that acts on a second
+        # resource (the destination of a move) than the one in the path has to ask again.
+        if hasattr(request, "state"):
+            request.state.biscuit_token = token
+
         # Phase 2: route authorization (coarse and fine-grained)
         try:
             az = AuthorizerBuilder()
@@ -698,11 +711,7 @@ class BiscuitGuard:
                 self._logger.debug(f"Biscuit phase2: rtype={rtype}, required_perm={req_perm}, resource_id={rid if rid is not None else '*none*'}")
 
                 # Enforce fine-grained authorization
-                az.add_policy(Policy("allow if admin(true)"))
-                # Global grant (resource_id == "*")
-                az.add_policy(Policy('allow if api_perm($rt, "*", $perm), required_perm($perm), resource_type($rt)'))
-                # Specific resource grant
-                az.add_policy(Policy("allow if api_perm($rt, $rid, $perm), required_perm($perm), resource_type($rt), resource_id($rid)"))
+                _add_fine_grained_policies(az)
             else:
                 # Fallback to coarse role-based authorization when no fine-grained mapping exists
                 az.add_policy(Policy("allow if role($role, $perms), operation($op), $perms.contains($op)"))
@@ -726,6 +735,37 @@ class BiscuitGuard:
         except Exception:
             self._logger.debug(f"Biscuit phase2: authorization failed (unexpected error):\n{format_exc()}")
             raise HTTPException(status_code=403, detail="Forbidden")
+
+
+def authorize_resource(request: Request, resource_type: str, permission: str, resource_id: str) -> None:
+    """Authorize a resource other than the one in the path, with the route guard's own policies.
+
+    The guard only sees the first path segment after the resource type, so a handler that reads a
+    second resource out of the body (a move's destination, one CrowdSec connection among several)
+    must call this once per resource. Raises 403; returns for an admin or a matching grant.
+    """
+    if getattr(request.state, "auth_admin", False):
+        return
+
+    token = getattr(request.state, "biscuit_token", None)
+    if token is None:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    try:
+        az = AuthorizerBuilder()
+        az.add_fact(Fact("resource_type({resource_type})", {"resource_type": resource_type}))
+        az.add_fact(Fact("required_perm({required_perm})", {"required_perm": permission}))
+        az.add_fact(Fact("resource_id({resource_id})", {"resource_id": resource_id}))
+        _add_fine_grained_policies(az)
+        _raise_time_budget(az)
+        az.build(token).authorize()
+    except AuthorizationError:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    except Exception:
+        from ..utils import LOGGER  # local import to avoid cycles
+
+        LOGGER.debug(f"Biscuit destination check failed unexpectedly for {resource_type}/{resource_id}:\n{format_exc()}")
+        raise HTTPException(status_code=403, detail="Forbidden")
 
 
 guard = BiscuitGuard()

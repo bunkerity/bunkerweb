@@ -7,9 +7,12 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
 
+import pytest
 import schemas  # type: ignore
 
 ROOT = Path(__file__).resolve().parents[3]
+# Handlers take the request only to hand it to authorize_resource, which these tests stub.
+REQUEST = object()
 
 
 class _Router:
@@ -45,6 +48,7 @@ def _load_router():
         "bw_certificates.routers": ModuleType("bw_certificates.routers"),
         "bw_certificates.auth": ModuleType("bw_certificates.auth"),
         "bw_certificates.auth.guard": ModuleType("bw_certificates.auth.guard"),
+        "bw_certificates.auth.biscuit": ModuleType("bw_certificates.auth.biscuit"),
         "bw_certificates.schemas": schemas,
         "bw_certificates.utils": ModuleType("bw_certificates.utils"),
     }
@@ -52,6 +56,8 @@ def _load_router():
     modules["bw_certificates.routers"].__path__ = []
     modules["bw_certificates.auth"].__path__ = []
     modules["bw_certificates.auth.guard"].guard = lambda: None
+    modules["bw_certificates.auth.biscuit"].authorize_resource = Mock()
+    modules["fastapi"].Request = object
     modules["fastapi"].APIRouter = _Router
     modules["fastapi"].Depends = lambda dependency: dependency
     modules["fastapi"].File = lambda default=..., **_kwargs: default
@@ -130,7 +136,7 @@ def test_attach_and_delete_guard(monkeypatch):
     db.get_certificate_details.return_value = _certificate(attachments=[{"service_id": "example.com", "is_primary": True}])
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
-    attached = ROUTER.attach_certificate("cert-1", schemas.CertificateAttachmentRequest(service_id="example.com"))
+    attached = ROUTER.attach_certificate(REQUEST, "cert-1", schemas.CertificateAttachmentRequest(service_id="example.com"))
     blocked = ROUTER.delete_certificate("cert-1")
 
     assert attached.status_code == 200
@@ -198,3 +204,19 @@ def test_list_accepts_a_plugin_declared_source(monkeypatch):
 
     assert response.status_code == 200
     assert db.get_certificates.call_args.kwargs["source"] == "acme"
+
+
+def test_attaching_authorizes_the_target_service_before_touching_the_database(monkeypatch):
+    db = Mock()
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+    refuse = Mock(side_effect=PermissionError)
+    monkeypatch.setattr(ROUTER, "authorize_resource", refuse)
+
+    for call in (
+        lambda: ROUTER.attach_certificate(REQUEST, "cert-1", schemas.CertificateAttachmentRequest(service_id="example.com")),
+        lambda: ROUTER.detach_certificate(REQUEST, "cert-1", "example.com"),
+    ):
+        with pytest.raises(PermissionError):
+            call()
+        refuse.assert_called_with(REQUEST, "services", "service_update", "example.com")
+    assert db.method_calls == []

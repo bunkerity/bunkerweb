@@ -11,6 +11,8 @@ import pytest
 import schemas  # type: ignore
 
 ROOT = Path(__file__).resolve().parents[3]
+# Handlers take the request only to hand it to authorize_resource, which these tests stub.
+REQUEST = object()
 
 
 class _Router:
@@ -46,6 +48,7 @@ def _load_router():
         "bw_upstreams.routers": ModuleType("bw_upstreams.routers"),
         "bw_upstreams.auth": ModuleType("bw_upstreams.auth"),
         "bw_upstreams.auth.guard": ModuleType("bw_upstreams.auth.guard"),
+        "bw_upstreams.auth.biscuit": ModuleType("bw_upstreams.auth.biscuit"),
         "bw_upstreams.schemas": schemas,
         "bw_upstreams.utils": ModuleType("bw_upstreams.utils"),
     }
@@ -53,6 +56,8 @@ def _load_router():
     modules["bw_upstreams.routers"].__path__ = []
     modules["bw_upstreams.auth"].__path__ = []
     modules["bw_upstreams.auth.guard"].guard = lambda: None
+    modules["bw_upstreams.auth.biscuit"].authorize_resource = Mock()
+    modules["fastapi"].Request = object
     modules["fastapi"].APIRouter = _Router
     modules["fastapi"].Depends = lambda dependency: dependency
     modules["fastapi"].Query = lambda default=..., **_kwargs: default
@@ -112,7 +117,7 @@ def test_create_attaches_every_requested_service(monkeypatch):
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     payload = _create_payload(services=[{"service_id": "a.example.com"}, {"service_id": "b.example.com", "match_path": "/api"}])
-    response = ROUTER.create_upstream(payload)
+    response = ROUTER.create_upstream(REQUEST, payload)
 
     assert response.status_code == 201
     assert db.attach_upstream.call_count == 2
@@ -129,7 +134,7 @@ def test_create_rolls_back_when_an_attachment_is_refused(monkeypatch):
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
     payload = _create_payload(services=[{"service_id": "a.example.com"}, {"service_id": "b.example.com"}])
-    response = ROUTER.create_upstream(payload)
+    response = ROUTER.create_upstream(REQUEST, payload)
 
     assert response.status_code == 409
     assert db.detach_upstream.call_count == 2
@@ -141,7 +146,7 @@ def test_create_reports_a_database_error_without_attaching(monkeypatch):
     db.create_upstream.return_value = ("", "Upstream name web_pool already exists")
     monkeypatch.setattr(ROUTER, "get_db", lambda: db)
 
-    response = ROUTER.create_upstream(_create_payload())
+    response = ROUTER.create_upstream(REQUEST, _create_payload())
 
     assert response.status_code == 409
     db.attach_upstream.assert_not_called()
@@ -187,10 +192,10 @@ def test_error_status_codes(monkeypatch):
     assert ROUTER.delete_upstream("up-1").status_code == 404
 
     db.attach_upstream.return_value = "The database is read-only, the changes will not be saved"
-    assert ROUTER.attach_upstream("up-1", schemas.UpstreamAttachmentRequest(service_id="a.example.com")).status_code == 409
+    assert ROUTER.attach_upstream(REQUEST, "up-1", schemas.UpstreamAttachmentRequest(service_id="a.example.com")).status_code == 409
 
     db.detach_upstream.return_value = "Upstream attachment not found"
-    assert ROUTER.detach_upstream("up-1", "a.example.com").status_code == 404
+    assert ROUTER.detach_upstream(REQUEST, "up-1", "a.example.com").status_code == 404
 
 
 def test_schema_rejects_bad_payloads():
@@ -211,3 +216,22 @@ def test_schema_rejects_bad_payloads():
 
     # An unset field must stay unset so PATCH never overwrites what was not submitted.
     assert schemas.UpstreamUpdateRequest(method="ip_hash").model_dump(exclude_unset=True) == {"method": "ip_hash"}
+
+
+def test_attaching_authorizes_every_target_service_before_touching_the_database(monkeypatch):
+    db = Mock()
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+    refuse = Mock(side_effect=PermissionError)
+    monkeypatch.setattr(ROUTER, "authorize_resource", refuse)
+
+    for call in (
+        lambda: ROUTER.attach_upstream(REQUEST, "up-1", schemas.UpstreamAttachmentRequest(service_id="a.example.com")),
+        lambda: ROUTER.detach_upstream(REQUEST, "up-1", "a.example.com"),
+        lambda: ROUTER.create_upstream(
+            REQUEST, schemas.UpstreamCreateRequest(name="pool", servers=[{"host": "10.0.0.1:80"}], services=[{"service_id": "a.example.com"}])
+        ),
+    ):
+        with pytest.raises(PermissionError):
+            call()
+        refuse.assert_called_with(REQUEST, "services", "service_update", "a.example.com")
+    assert db.method_calls == []

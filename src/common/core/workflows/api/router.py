@@ -6,9 +6,10 @@ is locked to ``/<plugin_id>``: naming the plugin ``workflows`` is what gives thi
 ``/workflows`` path the design calls for, with no core router to keep in sync.
 """
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 
+from app.auth.biscuit import authorize_resource  # type: ignore
 from app.utils import get_db  # type: ignore
 from workflow_eval import assumptions, evaluate, prepare_ladder, request_from_input  # type: ignore
 from workflow_schema import service_setting, summarize_rule, uses_crowdsec  # type: ignore
@@ -180,7 +181,10 @@ def test_workflow(workflow_id: str, payload: WorkflowTestRequest) -> JSONRespons
 
 
 @router.post("")
-def create_workflow(payload: WorkflowCreateRequest) -> JSONResponse:
+def create_workflow(request: Request, payload: WorkflowCreateRequest) -> JSONResponse:
+    # The guard saw no service: attaching on creation edits each one, so each is authorized here.
+    for service_id in payload.service_ids:
+        authorize_resource(request, "services", "service_update", service_id)
     db = get_db()
     resource_id, error = db.create_workflow(name=payload.name, description=payload.description, definition=payload.definition)
     if error:
@@ -255,7 +259,9 @@ def clone_workflow(workflow_id: str, payload: WorkflowCloneRequest) -> JSONRespo
 
 
 @router.post("/{workflow_id}/attachments")
-def attach_workflow(workflow_id: str, payload: WorkflowAttachmentRequest) -> JSONResponse:
+def attach_workflow(request: Request, workflow_id: str, payload: WorkflowAttachmentRequest) -> JSONResponse:
+    # The guard checked workflow_assign on the policy; the service it lands on is authorized here, before any lookup.
+    authorize_resource(request, "services", "service_update", payload.service_id)
     db = get_db()
     if error := db.attach_workflow(workflow_id, payload.service_id):
         return _error(error)
@@ -263,7 +269,8 @@ def attach_workflow(workflow_id: str, payload: WorkflowAttachmentRequest) -> JSO
 
 
 @router.delete("/{workflow_id}/attachments/{service_id}")
-def detach_workflow(workflow_id: str, service_id: str) -> JSONResponse:
+def detach_workflow(request: Request, workflow_id: str, service_id: str) -> JSONResponse:
+    authorize_resource(request, "services", "service_update", service_id)
     db = get_db()
     if error := db.detach_workflow(workflow_id, service_id):
         return _error(error)

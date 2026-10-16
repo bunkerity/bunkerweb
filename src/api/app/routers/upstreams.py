@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
 
+from ..auth.biscuit import authorize_resource
 from ..auth.guard import guard
 from ..schemas import UpstreamAttachmentRequest, UpstreamCreateRequest, UpstreamUpdateRequest
 from ..utils import get_db
@@ -32,10 +33,13 @@ def list_upstreams(
 
 
 @router.post("", dependencies=[Depends(guard)])
-def create_upstream(payload: UpstreamCreateRequest) -> JSONResponse:
+def create_upstream(request: Request, payload: UpstreamCreateRequest) -> JSONResponse:
     db = get_db()
     values = payload.model_dump()
     services = values.pop("services")
+    # The guard saw no service: attaching on creation edits each one, so each is authorized here.
+    for attachment in services:
+        authorize_resource(request, "services", "service_update", attachment["service_id"])
     resource_id, error = db.create_upstream(**values)
     if error:
         return _error(error)
@@ -83,7 +87,9 @@ def delete_upstream(upstream_id: str) -> JSONResponse:
 
 
 @router.post("/{upstream_id}/attachments", dependencies=[Depends(guard)])
-def attach_upstream(upstream_id: str, payload: UpstreamAttachmentRequest) -> JSONResponse:
+def attach_upstream(request: Request, upstream_id: str, payload: UpstreamAttachmentRequest) -> JSONResponse:
+    # The guard checked upstream_assign on the pool; the service it lands on is authorized here, before any lookup.
+    authorize_resource(request, "services", "service_update", payload.service_id)
     db = get_db()
     if error := db.attach_upstream(upstream_id, payload.service_id, match_path=payload.match_path):
         return _error(error)
@@ -91,8 +97,9 @@ def attach_upstream(upstream_id: str, payload: UpstreamAttachmentRequest) -> JSO
 
 
 @router.delete("/{upstream_id}/attachments/{service_id}", dependencies=[Depends(guard)])
-def detach_upstream(upstream_id: str, service_id: str, match_path: str = "") -> JSONResponse:
+def detach_upstream(request: Request, upstream_id: str, service_id: str, match_path: str = "") -> JSONResponse:
     """Detach a pool from a service. Without ``match_path`` every path is detached."""
+    authorize_resource(request, "services", "service_update", service_id)
     db = get_db()
     if error := db.detach_upstream(upstream_id, service_id, match_path=match_path):
         return _error(error)

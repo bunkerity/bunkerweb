@@ -8,9 +8,12 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
 
+import pytest
+
 import schemas  # type: ignore
 
 ROOT = Path(__file__).resolve().parents[3]
+REQUEST = object()
 
 
 class _Router:
@@ -46,6 +49,10 @@ def _load_provider(provider):
     app_schemas.CertificateCreateRequest = schemas.CertificateCreateRequest
     app_schemas.CertificateRenewRequest = schemas.CertificateRenewRequest
     app_schemas.CertificateUpdateRequest = schemas.CertificateUpdateRequest
+    app_auth = ModuleType("app.auth")
+    app_auth.__path__ = []
+    app_biscuit = ModuleType("app.auth.biscuit")
+    app_biscuit.authorize_resource = Mock()
     app_utils = ModuleType("app.utils")
     app_utils.get_db = Mock()
     fastapi = ModuleType("fastapi")
@@ -53,6 +60,7 @@ def _load_provider(provider):
     fastapi.File = lambda default=..., **_kwargs: default
     fastapi.Form = lambda default=..., **_kwargs: default
     fastapi.UploadFile = object
+    fastapi.Request = object
     responses = ModuleType("fastapi.responses")
     responses.JSONResponse = _JSONResponse
     certificate_utils = ModuleType("certificate_utils")
@@ -60,6 +68,8 @@ def _load_provider(provider):
     certificate_utils.generate_self_signed = Mock(return_value=(b"certificate", b"private-key"))
     modules = {
         "app": app,
+        "app.auth": app_auth,
+        "app.auth.biscuit": app_biscuit,
         "app.schemas": app_schemas,
         "app.utils": app_utils,
         "fastapi": fastapi,
@@ -117,7 +127,7 @@ def test_selfsigned_create_uses_shared_encrypted_db_boundary():
     module.get_db = lambda: db
     payload = module.SelfSignedCreateRequest(name="example", common_name="example.com")
 
-    response = module.create_certificate(payload)
+    response = module.create_certificate(REQUEST, payload)
 
     assert response.status_code == 201
     assert db.create_certificate.call_args.kwargs["source"] == "selfsigned"
@@ -142,6 +152,7 @@ def test_customcert_upload_validates_then_uses_shared_db_boundary():
 
     response = asyncio.run(
         module.upload_certificate(
+            REQUEST,
             certificate=_Upload(b"certificate"),
             private_key=_Upload(b"private-key"),
             name="example",
@@ -165,6 +176,7 @@ def test_customcert_upload_reports_cross_provider_owner_as_conflict():
 
     response = asyncio.run(
         module.upload_certificate(
+            REQUEST,
             certificate=_Upload(b"certificate"),
             private_key=_Upload(b"private-key"),
             name="example",
@@ -187,7 +199,7 @@ def test_letsencrypt_issuance_reads_service_settings_and_only_schedules():
     db.checked_changes.return_value = ""
     module.get_db = lambda: db
 
-    response = module.issue_certificate(module.LetsEncryptCreateRequest(service_ids=["example.com"]))
+    response = module.issue_certificate(REQUEST, module.LetsEncryptCreateRequest(service_ids=["example.com"]))
 
     assert response.status_code == 202
     db.checked_changes.assert_called_once_with(["config"], plugins_changes=["letsencrypt"], value=True)
@@ -202,7 +214,7 @@ def test_letsencrypt_issuance_falls_back_to_global_single_site_setting():
     db.checked_changes.return_value = ""
     module.get_db = lambda: db
 
-    response = module.issue_certificate(module.LetsEncryptCreateRequest(service_ids=["example.com"]))
+    response = module.issue_certificate(REQUEST, module.LetsEncryptCreateRequest(service_ids=["example.com"]))
 
     assert response.status_code == 202
 
@@ -266,3 +278,56 @@ def test_selfsigned_renew_due_paginates_and_uses_shared_contract():
         "message": "Renewed 1 due self-signed certificate",
     }
     assert db.get_certificates.call_args_list[1].kwargs["offset"] == 1
+
+
+def _refuse(module):
+    module.authorize_resource = Mock(side_effect=PermissionError("403"))
+    return module.authorize_resource
+
+
+def test_selfsigned_create_authorizes_each_service_before_the_db():
+    module = _load_provider("selfsigned")
+    module.get_db = Mock()
+    authorize = _refuse(module)
+    payload = module.SelfSignedCreateRequest(name="example", common_name="example.com", service_ids=["a.example.com"])
+
+    with pytest.raises(PermissionError):
+        module.create_certificate(REQUEST, payload)
+
+    authorize.assert_called_once_with(REQUEST, "services", "service_update", "a.example.com")
+    module.get_db.assert_not_called()
+
+
+def test_customcert_upload_authorizes_each_service_before_the_db():
+    module = _load_provider("customcert")
+    module.get_db = Mock()
+    authorize = _refuse(module)
+
+    with pytest.raises(PermissionError):
+        asyncio.run(
+            module.upload_certificate(
+                REQUEST,
+                certificate=_Upload(b"certificate"),
+                private_key=_Upload(b"private-key"),
+                name="example",
+                description="",
+                service_ids='["a.example.com", "b.example.com"]',
+                primary=True,
+                renewal_metadata="{}",
+            )
+        )
+
+    authorize.assert_called_once_with(REQUEST, "services", "service_update", "a.example.com")
+    module.get_db.assert_not_called()
+
+
+def test_letsencrypt_issuance_authorizes_each_service_before_the_db():
+    module = _load_provider("letsencrypt")
+    module.get_db = Mock()
+    authorize = _refuse(module)
+
+    with pytest.raises(PermissionError):
+        module.issue_certificate(REQUEST, module.LetsEncryptCreateRequest(service_ids=["a.example.com"]))
+
+    authorize.assert_called_once_with(REQUEST, "services", "service_update", "a.example.com")
+    module.get_db.assert_not_called()

@@ -3,10 +3,11 @@
 
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 
+from app.auth.biscuit import authorize_resource  # type: ignore
 from app.utils import get_db  # type: ignore
 from letsencrypt_cache import list_letsencrypt_orphans  # type: ignore
 
@@ -48,7 +49,10 @@ def _certificates(db):
 
 
 @router.post("/certificates")
-def issue_certificate(payload: LetsEncryptCreateRequest) -> JSONResponse:
+def issue_certificate(request: Request, payload: LetsEncryptCreateRequest) -> JSONResponse:
+    # The guard saw no service: issuance targets each one, so each is authorized here, before anything is scheduled.
+    for service_id in payload.service_ids:
+        authorize_resource(request, "services", "service_update", service_id)
     db = get_db()
     known_services = {service["id"] for service in db.get_services(with_drafts=True)}
     unknown = [service_id for service_id in payload.service_ids if service_id not in known_services]
