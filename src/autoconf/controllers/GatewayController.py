@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from kubernetes import client
 from kubernetes.client.exceptions import ApiException
 
-from controllers.KubernetesController import KubernetesController
+from controllers.KubernetesController import API_REQUEST_TIMEOUT, KubernetesController
 
 GATEWAY_API_VERSIONS = ("v1", "v1alpha2", "v1alpha3", "v1beta1", "v1alpha1")
 
@@ -16,7 +16,7 @@ GATEWAY_API_VERSIONS = ("v1", "v1alpha2", "v1alpha3", "v1beta1", "v1alpha1")
 class GatewayController(KubernetesController):
     def __init__(self):
         super().__init__()
-        self._custom_objects = client.CustomObjectsApi()
+        self._custom_objects = client.CustomObjectsApi(api_client=self._api_client)
         self._gateways_cache: Dict[Tuple[str, str], Dict[str, Any]] = {}
 
         self._gateway_class = getenv("KUBERNETES_GATEWAY_CLASS", "").strip()
@@ -68,7 +68,7 @@ class GatewayController(KubernetesController):
         for plural in resources:
             for version in versions:
                 try:
-                    self._custom_objects.list_cluster_custom_object(self._gateway_api_group, version, plural, limit=1)
+                    self._custom_objects.list_cluster_custom_object(self._gateway_api_group, version, plural, limit=1, _request_timeout=API_REQUEST_TIMEOUT)
                     resource_versions[plural] = version
                     if plural == "gateways" and version != self._gateway_api_version:
                         self._logger.info(f"Gateway API {self._gateway_api_version} not available, falling back to {version}")
@@ -92,7 +92,9 @@ class GatewayController(KubernetesController):
             last_error = ""
             for version in versions:
                 try:
-                    self._custom_objects.list_cluster_custom_object(self._gateway_api_group, version, "gatewayclasses", limit=1)
+                    self._custom_objects.list_cluster_custom_object(
+                        self._gateway_api_group, version, "gatewayclasses", limit=1, _request_timeout=API_REQUEST_TIMEOUT
+                    )
                     resource_versions["gatewayclasses"] = version
                     found = True
                     break
@@ -139,6 +141,7 @@ class GatewayController(KubernetesController):
                 self._gateway_api_group,
                 version,
                 plural,
+                _request_timeout=API_REQUEST_TIMEOUT,
             )
             return data.get("items", []) if isinstance(data, dict) else []
         except ApiException as e:
@@ -343,7 +346,7 @@ class GatewayController(KubernetesController):
 
     def _read_secret(self, name: str, namespace: str):
         try:
-            return self._corev1.read_namespaced_secret(name=name, namespace=namespace)
+            return self._corev1.read_namespaced_secret(name=name, namespace=namespace, _request_timeout=API_REQUEST_TIMEOUT)
         except ApiException as e:
             if e.status == 404:
                 self._logger.warning(f"Secret {name} not found in namespace {namespace}")
@@ -871,6 +874,7 @@ class GatewayController(KubernetesController):
                 "gateways",
                 gateway_name,
                 patch_body,
+                _request_timeout=API_REQUEST_TIMEOUT,
             )
             self._logger.info(f"Successfully patched status of gateway {gateway_name} in namespace {gateway_namespace} with {len(ips)} address(es)")
             return True

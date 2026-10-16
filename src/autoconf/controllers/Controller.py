@@ -1,14 +1,67 @@
 #!/usr/bin/env python3
 
 from abc import abstractmethod
+from contextlib import suppress
 from os import getenv
-from threading import Thread
-from time import sleep
+from pathlib import Path
+from threading import Lock, Thread, get_ident
+from time import monotonic, sleep
 from traceback import format_exc
 
 from Config import Config
+from Database import DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+from sqlalchemy.engine.url import make_url
 
 from logger import getLogger  # type: ignore
+
+# Minimum stall budget; the runtime budget also covers the effective database timeouts.
+LOCK_WATCHDOG_INTERVAL = 30
+LOCK_MAX_HOLD = 600
+
+
+class HoldTimeLock:
+    """A Lock that remembers when it was taken, so a watchdog can spot a holder stuck on a dead connection."""
+
+    def __init__(self):
+        self._lock = Lock()
+        self._acquired_at = None
+        self._last_progress_at = None
+        self._owner = None
+
+    def acquire(self, *args, **kwargs) -> bool:
+        acquired = self._lock.acquire(*args, **kwargs)
+        if acquired:
+            self._acquired_at = monotonic()
+            self._last_progress_at = self._acquired_at
+            self._owner = get_ident()
+        return acquired
+
+    def release(self) -> None:
+        self._acquired_at = None
+        self._last_progress_at = None
+        self._owner = None
+        self._lock.release()
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, *_):
+        self.release()
+
+    def held_for(self) -> float:
+        acquired_at = self._acquired_at
+        return 0.0 if acquired_at is None else monotonic() - acquired_at
+
+    def progress(self, *, database: bool = False):
+        if self._owner is not None and (database or self._owner == get_ident()):
+            self._last_progress_at = monotonic()
+
+    def stalled_for(self) -> float:
+        last_progress_at = self._last_progress_at
+        return 0.0 if last_progress_at is None else monotonic() - last_progress_at
 
 
 class Controller(Config):
@@ -191,6 +244,71 @@ class Controller(Config):
                         self._logger.error("Error while re-applying autoconf configuration after settings change")
             except BaseException:
                 self._logger.error(f"Exception in settings recheck worker:\n{format_exc()}")
+
+    def _configure_lock_watchdog(self):
+        db = self._db
+        request_budget = 0
+        for uri in (db.database_uri, db.database_uri_readonly):
+            if not uri:
+                continue
+            options = (
+                {
+                    "connect_timeout": db._connect_timeout,
+                    "read_timeout": db._read_timeout,
+                    "write_timeout": db._read_timeout,
+                }
+                | dict(make_url(uri).query)
+                | db._engine_kwargs.get("connect_args", {})
+            )
+            # Disabled driver timeouts still need a finite watchdog fallback.
+            request_budget = max(
+                request_budget,
+                sum(
+                    float(options.get(key) or default)
+                    for key, default in (
+                        ("connect_timeout", DEFAULT_CONNECT_TIMEOUT),
+                        ("read_timeout", DEFAULT_READ_TIMEOUT),
+                        ("write_timeout", DEFAULT_READ_TIMEOUT),
+                    )
+                ),
+            )
+        # Three pool pre-ping attempts plus one statement per retry, pool waits, retry sleeps and a scheduling margin.
+        attempts = db._request_retry_attempts
+        self._lock_max_hold = max(
+            LOCK_MAX_HOLD, attempts * (4 * request_budget + db._engine_kwargs["pool_timeout"]) + (attempts - 1) * db._request_retry_delay + 60
+        )
+        # Class listener also covers replacement engines after a read-only fallback.
+        if not event.contains(Engine, "after_cursor_execute", self._database_progress):
+            event.listen(Engine, "after_cursor_execute", self._database_progress)
+
+    def _database_progress(self, connection, *_):
+        # save_config also queries from its executor workers; other engines must not hide a stuck apply.
+        if connection.engine is self._db.sql_engine:
+            self._internal_lock.progress(database=True)
+
+    def _check_lock_hold(self, healthy_path: Path, max_hold: float = None) -> bool:
+        """Remove the healthy marker after a lock holder stops making progress, allowing a liveness probe to restart it."""
+        if max_hold is None:
+            max_hold = self._lock_max_hold
+        held = self._internal_lock.stalled_for()
+        if held <= max_hold:
+            return False
+        if healthy_path.exists():
+            self._logger.error(
+                f"The internal lock holder has made no progress for {int(held)}s (limit {int(max_hold)}s), a call is likely stuck: marking autoconf unhealthy"
+            )
+            with suppress(OSError):
+                healthy_path.unlink(missing_ok=True)
+        return True
+
+    def _lock_watchdog(self, healthy_path: Path):
+        while True:
+            sleep(LOCK_WATCHDOG_INTERVAL)
+            self._check_lock_hold(healthy_path)
+
+    def _start_lock_watchdog(self, healthy_path: Path):
+        self._configure_lock_watchdog()
+        Thread(target=self._lock_watchdog, args=(healthy_path,), daemon=True).start()
 
     @abstractmethod
     def process_events(self):

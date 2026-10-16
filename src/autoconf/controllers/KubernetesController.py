@@ -6,6 +6,7 @@ from logging import DEBUG
 from os import getenv, sep
 from pathlib import Path
 from re import match as re_match, split as re_split, sub as re_sub
+from socket import IPPROTO_TCP, SO_KEEPALIVE, SOL_SOCKET, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_NODELAY, TCP_USER_TIMEOUT
 from threading import Lock, Thread
 from time import sleep, time
 from traceback import format_exc
@@ -15,7 +16,7 @@ from kubernetes import client, config, watch
 from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
 
-from controllers.Controller import Controller
+from controllers.Controller import Controller, HoldTimeLock
 
 # Written by main.py once the controller starts and checked by healthcheck-autoconf.sh.
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
@@ -31,10 +32,43 @@ HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
 # in seconds, same as before.
 WATCH_ESTABLISHED_SECONDS = 60
 
+# (connect, read) timeouts, in seconds, passed as `_request_timeout` to every non-streaming Kubernetes
+# API call (watch streams are long-lived and are bounded by the socket options below instead). All
+# watch threads share `_internal_lock` and the thread applying a configuration holds it across these
+# calls: a connection the network dropped without a RST would block that thread, and with it every
+# other watch, forever. A timed-out call raises, the lock is released and the watch restarts.
+API_REQUEST_TIMEOUT = (10, 60)
+
+
+class ProgressApiClient(client.ApiClient):
+    def __init__(self, lock):
+        super().__init__()
+        self._lock = lock
+
+    def call_api(self, *args, **kwargs):
+        result = super().call_api(*args, **kwargs)
+        self._lock.progress()
+        return result
+
+
+def _dead_peer_socket_options() -> list:
+    """Socket options that make a silently dead API server connection fail instead of hang.
+
+    Keepalive probes cover an idle watch stream; TCP_USER_TIMEOUT covers a request already written
+    into the void, where keepalive never fires because data is still unacknowledged."""
+    return [
+        (IPPROTO_TCP, TCP_NODELAY, 1),
+        (SOL_SOCKET, SO_KEEPALIVE, 1),
+        (IPPROTO_TCP, TCP_KEEPIDLE, 30),
+        (IPPROTO_TCP, TCP_KEEPINTVL, 10),
+        (IPPROTO_TCP, TCP_KEEPCNT, 3),
+        (IPPROTO_TCP, TCP_USER_TIMEOUT, 60000),
+    ]
+
 
 class KubernetesController(Controller):
     def __init__(self):
-        self._internal_lock = Lock()
+        self._internal_lock = HoldTimeLock()
         self._pending_apply = False
         self._last_event_time = 0.0
         self._debounce_delay = 2  # seconds
@@ -63,7 +97,10 @@ class KubernetesController(Controller):
             Configuration._default.ssl_ca_cert = ssl_ca_cert
             self._logger.info("Using custom SSL CA certificate")
 
-        self._corev1 = client.CoreV1Api()
+        Configuration._default.socket_options = _dead_peer_socket_options()
+
+        self._api_client = ProgressApiClient(self._internal_lock)
+        self._corev1 = client.CoreV1Api(api_client=self._api_client)
 
         self._use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower().strip() == "yes"
         self._logger.info(f"Using Pod {'FQDN' if self._use_fqdn else 'IP'} as hostname")
@@ -344,7 +381,7 @@ class KubernetesController(Controller):
 
     def _get_controller_instances(self) -> list:
         instances = []
-        pods = self._corev1.list_pod_for_all_namespaces(watch=False).items
+        pods = self._corev1.list_pod_for_all_namespaces(watch=False, _request_timeout=API_REQUEST_TIMEOUT).items
         for pod in pods:
             metadata = pod.metadata
             if not metadata:
@@ -420,7 +457,7 @@ class KubernetesController(Controller):
         configs = {config_type: {} for config_type in self._supported_config_types}
         config = {}
         managed_configmaps = set()
-        for configmap in self._corev1.list_config_map_for_all_namespaces(watch=False).items:
+        for configmap in self._corev1.list_config_map_for_all_namespaces(watch=False, _request_timeout=API_REQUEST_TIMEOUT).items:
             if not configmap.metadata.annotations or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations:
                 continue
 
@@ -768,6 +805,7 @@ class KubernetesController(Controller):
 
     def process_events(self):
         self._start_settings_recheck_worker()
+        self._start_lock_watchdog(HEALTHY_PATH)
         watchers = self._get_watchers()
         self._write_expected_watch_types(watchers.keys())
         threads = [Thread(target=self._watch, args=(watch_type, watcher)) for watch_type, watcher in watchers.items()]
@@ -823,6 +861,7 @@ class KubernetesController(Controller):
                             namespace,
                             watch=False,
                             field_selector=f"metadata.name={service_name}",
+                            _request_timeout=API_REQUEST_TIMEOUT,
                         ).items
                     except BaseException as e:
                         self._logger.debug(f"Error polling for pending backend {namespace}/{service_name}: {e}")
@@ -913,7 +952,7 @@ class KubernetesController(Controller):
                 self._logger.warning("Service name or namespace is empty, cannot retrieve LoadBalancer IP")
                 return None
 
-            service = self._corev1.read_namespaced_service(name=name, namespace=namespace)
+            service = self._corev1.read_namespaced_service(name=name, namespace=namespace, _request_timeout=API_REQUEST_TIMEOUT)
 
             if not service.spec:
                 self._logger.warning(f"Service {name} in {namespace} has no spec")
@@ -925,7 +964,7 @@ class KubernetesController(Controller):
             if service_type == "NodePort":
                 self._logger.debug(f"Service {name} in {namespace} is of type NodePort, retrieving node IPs")
                 try:
-                    nodes = self._corev1.list_node(watch=False).items
+                    nodes = self._corev1.list_node(watch=False, _request_timeout=API_REQUEST_TIMEOUT).items
                     if not nodes:
                         self._logger.warning("No nodes found in the cluster")
                         return None
