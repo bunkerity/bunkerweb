@@ -13,6 +13,7 @@ from test_grpc_upstream_tls import render
         "X-Forwarded-For",
         "X-Real-IP",
         "X-Forwarded-Proto",
+        "X-Forwarded-Protocol",
         "X-Forwarded-Host",
         "X-Forwarded-Prefix",
         "X-SSL-Client-Verify",
@@ -47,6 +48,7 @@ def test_generated_header_is_replaced(plugin, prefix, directive, header):
     "plugin,prefix,header",
     [
         ("grpc", "GRPC", "TE"),
+        ("grpc", "GRPC", "X-Forwarded-Protocol"),
         ("reverseproxy", "REVERSE_PROXY", "X-Forwarded-Protocol"),
         ("reverseproxy", "REVERSE_PROXY", "Upgrade"),
         ("reverseproxy", "REVERSE_PROXY", "Connection"),

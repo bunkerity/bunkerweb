@@ -168,6 +168,12 @@
     - **自定义标头现在会替换生成的默认标头（#3936）**：与生成标头（Host、转发的客户端信息、转发的 mTLS 标头、gRPC 的 `TE`、反向代理的 `Upgrade`/`Connection`）同名的 `REVERSE_PROXY_HEADERS` 或 `GRPC_HEADERS` 条目，现在会不区分大小写地替换该标头，而不是重复添加；显式设为空值会抑制该标头。请检查那些原本只想补充、而非替换生成值的覆盖项。
     - **`underscores_in_headers` 现在只下发一次**：`REVERSE_PROXY_UNDERSCORES_IN_HEADERS` 和 `GRPC_UNDERSCORES_IN_HEADERS` 现在共享由 misc 插件渲染的同一条服务器级 `underscores_in_headers` 指令。只要有一个插件族请求启用，就会对整个服务生效；请检查是否有自定义配置也下发了同一指令。反向代理服务也不再强制关闭该指令，因此 `http` 级别的自定义配置 `underscores_in_headers on;` 现在同样会对它们生效。
     - **两组上游客户端证书设置均已重命名**：`REVERSE_PROXY_SSL_CERT[_DATA/_PRIORITY]` / `REVERSE_PROXY_SSL_KEY[_DATA]` 现更名为 `REVERSE_PROXY_SSL_CLIENT_CERT*` / `REVERSE_PROXY_SSL_CLIENT_KEY*`，而 `GRPC_SSL_CERT[_DATA/_PRIORITY]` / `GRPC_SSL_KEY[_DATA]` 现更名为 `GRPC_SSL_CLIENT_CERT*` / `GRPC_SSL_CLIENT_KEY*`。已保存的全局和服务级值会自动迁移；此重命名是**单向的**——受控降级到 1.6.15 没有反向映射，因此 `CLIENT_*` 的值会被级联删除。
+
+      在其他位置设置的值——Compose 文件、`variables.env`、容器标签、Kubernetes 注解——**不会**被迁移：BunkerWeb 会带着警告忽略它们，上游随后将不再收到客户端证书。请在升级前重命名；可用下面的命令找出旧名称：
+
+      ```bash
+      grep -rInE '(REVERSE_PROXY|GRPC)_SSL_(CERT|KEY)(_DATA|_PRIORITY)?[:=]' .
+      ```
     - **新增专用的 heavy worker 进程**：`WORKER_QUEUES` 现在默认值为 `default`；长任务改由新的 `WORKER_HEAVY_*` 设置控制的第二个进程运行。显式设置 `WORKER_QUEUES=default,heavy` 会保留此前的单进程布局——改为 `default` 以获得隔离效果，或设置 `WORKER_HEAVY_QUEUES=` 以有意保留单进程。更改这些设置后，请重启 worker 容器、All-In-One 容器，或 Linux 上的 `bunkerweb-worker` 和 `bunkerweb-worker-heavy` 两个单元。
     - **`EXTERNAL_PLUGIN_URLS` 现在会移除它所安装的内容**：通过该设置下载的插件带有新的 `download` 方法，移除某个 URL 会卸载它提供的插件及其已保存的设置，前提是其余所有 URL 都能下载。手动添加或在 Web 界面上传的插件不会被移除。升级前已安装的插件会在其 URL 首次被处理时重新标记；升级前已移除 URL 的插件不会被自动移除。
 

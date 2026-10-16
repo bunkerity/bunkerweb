@@ -183,8 +183,13 @@ def test_tls_directives_each_have_their_own_line():
     assert all(line.count(";") == 1 and line.endswith(";") for line in lines)
 
 
+def test_forwarded_protocol_is_sent_like_the_reverse_proxy():
+    assert "\tgrpc_set_header X-Forwarded-Protocol $scheme;\n" in render()
+    assert "\tproxy_set_header X-Forwarded-Protocol $scheme;\n" in render("reverseproxy")
+
+
 def test_default_render_unchanged():
     assert render() == BASELINE_RENDER
 
 
-BASELINE_RENDER = 'grpc_ssl_server_name off;\n\ngrpc_intercept_errors on;\n\nlocation "/" {\n\tset $grpc_backend0 "grpc://backend:50051";\n\tgrpc_pass $grpc_backend0;\n\tgrpc_set_header Host $host;\n\tgrpc_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\tgrpc_set_header X-Real-IP $remote_addr;\n\tgrpc_set_header X-Forwarded-Proto $scheme;\n\tgrpc_set_header X-Forwarded-Host $http_host;\n\tgrpc_set_header TE trailers;\n\tgrpc_set_header X-Forwarded-Prefix "/";\n\tgrpc_connect_timeout 60s;\n\tgrpc_read_timeout 60s;\n\tgrpc_send_timeout 60s;\n\tgrpc_socket_keepalive off;\n}\n\n'
+BASELINE_RENDER = 'grpc_ssl_server_name off;\n\ngrpc_intercept_errors on;\n\nlocation "/" {\n\tset $grpc_backend0 "grpc://backend:50051";\n\tgrpc_pass $grpc_backend0;\n\tgrpc_set_header Host $host;\n\tgrpc_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\tgrpc_set_header X-Real-IP $remote_addr;\n\tgrpc_set_header X-Forwarded-Proto $scheme;\n\tgrpc_set_header X-Forwarded-Protocol $scheme;\n\tgrpc_set_header X-Forwarded-Host $http_host;\n\tgrpc_set_header TE trailers;\n\tgrpc_set_header X-Forwarded-Prefix "/";\n\tgrpc_connect_timeout 60s;\n\tgrpc_read_timeout 60s;\n\tgrpc_send_timeout 60s;\n\tgrpc_socket_keepalive off;\n}\n\n'

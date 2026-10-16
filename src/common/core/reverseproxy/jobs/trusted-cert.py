@@ -36,6 +36,40 @@ def process_ca_data(data: str, file_path: Optional[str], server_name: str) -> Un
     return process_pem_data(data, file_path, server_name)
 
 
+def validate_pem(pem_file: bytes, *, openssl_cmd: str = "x509", label: str = "trusted certificate") -> str:
+    """Return an error message for invalid PEM material, "" when it is valid. A bundle failure raises."""
+    if openssl_cmd == "x509":
+        validate_certificate_bundle(pem_file)
+        return ""
+    with NamedTemporaryFile(delete=False) as pem_temp:
+        try:
+            pem_temp.write(pem_file)
+            pem_temp.flush()
+            result = run(
+                ["openssl", openssl_cmd, "-noout", "-in", pem_temp.name],
+                stdin=DEVNULL,
+                stderr=DEVNULL,
+                check=False,
+                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+            )
+        finally:
+            Path(pem_temp.name).unlink(missing_ok=True)
+    return f"{label.capitalize()} is invalid." if result.returncode != 0 else ""
+
+
+def keep_last_good(first_server: str, *cache_names: str) -> bool:
+    """Tell whether the last good copy of every named artifact is still cached, and say so loudly.
+
+    An invalid replacement must not purge the cached material: without it the next render drops
+    ``proxy_ssl_verify`` and the identity, a silent downgrade, while the old copy still verifies.
+    """
+    paths = [JOB.job_path.joinpath(first_server, name) for name in cache_names]
+    if not all(path.is_file() for path in paths):
+        return False
+    LOGGER.error(f"Replacement TLS material for {first_server} is invalid, keeping the last good {', '.join(map(str, paths))}")
+    return True
+
+
 def check_pem(
     pem_file: Union[Path, bytes],
     first_server: str,
@@ -48,25 +82,9 @@ def check_pem(
     if isinstance(pem_file, Path):
         pem_file = pem_file.read_bytes()
     try:
-
-        if openssl_cmd == "x509":
-            validate_certificate_bundle(pem_file)
-        else:
-            with NamedTemporaryFile(delete=False) as pem_temp:
-                try:
-                    pem_temp.write(pem_file)
-                    pem_temp.flush()
-                    result = run(
-                        ["openssl", openssl_cmd, "-noout", "-in", pem_temp.name],
-                        stdin=DEVNULL,
-                        stderr=DEVNULL,
-                        check=False,
-                        env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-                    )
-                    if result.returncode != 0:
-                        return False, f"{label.capitalize()} is invalid."
-                finally:
-                    Path(pem_temp.name).unlink(missing_ok=True)
+        err = validate_pem(pem_file, openssl_cmd=openssl_cmd, label=label)
+        if err:
+            return False, err
 
         pem_hash = bytes_hash(pem_file)
         old_hash = JOB.cache_hash(cache_name, service_id=first_server)
@@ -111,6 +129,9 @@ def handle_client_material(
         LOGGER.error(f"Service {first_server} sets only one half of the upstream client certificate pair, ignoring it")
         return False, True, False
 
+    def invalid() -> Tuple[bool, bool, bool]:
+        return False, True, keep_last_good(first_server, cert_cache_name, key_cache_name)
+
     materials = []
     for cache_name, setting, kind, openssl_cmd, label in pairs:
         path_value = get(first_server, setting)
@@ -118,8 +139,8 @@ def handle_client_material(
         use_file = priority == "file" and path_value
         material = process_pem_data(data_value if not use_file else "", path_value if use_file else None, first_server, kind=kind, label=label)
         if not material:
-            LOGGER.warning(f"No valid {label} for {first_server}; mutual TLS with the upstream will be disabled for that server")
-            return False, True, False
+            LOGGER.warning(f"No valid {label} for {first_server}")
+            return invalid()
 
         materials.append(material.read_bytes() if isinstance(material, Path) else material)
 
@@ -127,7 +148,17 @@ def handle_client_material(
         validate_certificate_pair(*materials)
     except ValueError as err:
         LOGGER.warning(f"Invalid {prefix} client certificate pair for {first_server}: {err}")
-        return False, True, False
+        return invalid()
+
+    # Validate both halves before caching either, so a failure never leaves a half-replaced pair.
+    for (_, _, _, openssl_cmd, label), material in zip(pairs, materials):
+        try:
+            err = validate_pem(material, openssl_cmd=openssl_cmd, label=label)
+        except Exception as exc:
+            err = str(exc)
+        if err:
+            LOGGER.warning(f"Error while checking {first_server}'s {label} : {err}")
+            return invalid()
 
     need_reload = False
     for (cache_name, _, _, openssl_cmd, label), material in zip(pairs, materials):
@@ -158,12 +189,13 @@ def handle_trusted_certificate(first_server: str, get, *, prefix: str, cache_nam
     use_file = priority == "file" and ca_path
     ca_file = process_ca_data(ca_data if not use_file else "", ca_path if use_file else None, first_server)
     if not ca_file:
-        LOGGER.warning(f"No valid {prefix} trusted certificate for {first_server}; upstream verification will be disabled")
-        return False, True, False
+        LOGGER.warning(f"No valid {prefix} trusted certificate for {first_server}")
+        return False, True, keep_last_good(first_server, cache_name)
     changed, err = check_pem(ca_file, first_server, cache_name=cache_name)
     if err:
         LOGGER.warning(f"Error while checking {first_server}'s {prefix} trusted certificate: {err}")
-    return changed, bool(err), not bool(err)
+        return False, True, keep_last_good(first_server, cache_name)
+    return changed, False, True
 
 
 def handle_crl(first_server: str, get, *, prefix: str = "REVERSE_PROXY", cache_name: str = CRL_CACHE_NAME) -> Tuple[bool, bool, bool]:
@@ -177,11 +209,12 @@ def handle_crl(first_server: str, get, *, prefix: str = "REVERSE_PROXY", cache_n
         return False, False, False
     material = process_pem_data("" if crl_path else crl_data, crl_path or None, first_server, kind="crl", label="CRL")
     if not material:
-        return False, True, False
+        return False, True, keep_last_good(first_server, cache_name)
     changed, err = check_pem(material, first_server, cache_name=cache_name, openssl_cmd="crl", label="CRL")
     if err:
         LOGGER.warning(f"Error while checking {first_server}'s {prefix} CRL: {err}")
-    return changed, bool(err), not bool(err)
+        return False, True, keep_last_good(first_server, cache_name)
+    return changed, False, True
 
 
 def handle_material(handler, first_server, get, **kwargs) -> Tuple[bool, bool, bool]:
@@ -191,6 +224,28 @@ def handle_material(handler, first_server, get, **kwargs) -> Tuple[bool, bool, b
     except OSError as err:
         LOGGER.error(f"Could not read {kwargs['prefix']} TLS material for {first_server}; keeping cached material: {err}")
         return False, True, True
+
+
+# Pool protocol -> the proxy family whose upstream TLS settings apply to it.
+POOL_FAMILIES = {"http": "REVERSE_PROXY", "stream": "REVERSE_PROXY", "grpc": "GRPC"}
+
+
+def attached_families() -> Optional[dict]:
+    """Return ``{service: {prefix, ...}}`` for services whose backend is an attached upstream pool.
+
+    The ``USE_<prefix>`` flag of such a service is only set at render time (see ``upstream_resolver``),
+    so the job env says ``no`` while the template does render the proxy block. Returns ``None`` when
+    the pools cannot be listed: the job then cannot tell a pool-only service from a disabled one.
+    """
+    try:
+        service_upstreams = JOB.db.get_service_upstreams()
+    except Exception as err:
+        LOGGER.warning(f"Could not list attached upstream pools, keeping the cached upstream TLS material of services with the proxy off: {err}")
+        return None
+    return {
+        service: {POOL_FAMILIES[pool.get("protocol") or "http"] for pool in pools if (pool.get("protocol") or "http") in POOL_FAMILIES}
+        for service, pools in service_upstreams.items()
+    }
 
 
 status = 0
@@ -209,6 +264,7 @@ try:
     def _get(server: str, key: str, default: str = "") -> str:
         return getenv(f"{server}_{key}", default) if multisite else getenv(key, default)
 
+    attached = attached_families()
     skipped_servers = []
     skipped_client_servers = []
     skipped_crl_servers = []
@@ -239,7 +295,11 @@ try:
                 skipped_grpc_crl_servers,
             ),
         ):
-            if _get(first_server, f"USE_{prefix}", "no") != "yes":
+            if _get(first_server, f"USE_{prefix}", "no") != "yes" and prefix not in (attached or {}).get(first_server, ()):
+                if attached is None:
+                    # Pool lookup failed: this may be a pool-only service, so dropping its cache would
+                    # ship the deletion and render the proxy without verification or mutual TLS.
+                    continue
                 skipped_ca.append(first_server)
                 skipped_client.append(first_server)
                 skipped_crl.append(first_server)
