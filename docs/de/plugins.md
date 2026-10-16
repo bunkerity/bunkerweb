@@ -718,6 +718,8 @@ Diese Dokumentation beschreibt die Lebenszyklus-Hooks, die zur Verwaltung versch
 
     Wenn der Hook ein Antwortobjekt zurückgibt, überspringt Flask die Anforderungsbehandlung und gibt die Antwort direkt zurück. Dies kann nützlich sein, um die Anforderungsverarbeitungspipeline kurzzuschließen.
 
+    Wenn ein Hook eine Ausnahme auslöst oder die Hooks eines Plugins nicht geladen werden können, antwortet die Web-Oberfläche auf jeder Seite mit 500, auch auf der Plugin-Seite, während statische Dateien weiterhin ausgeliefert werden. Zur Wiederherstellung die Plugin-Dateien auf dem Datenträger korrigieren oder entfernen und die Oberfläche neu starten (oder HUP an den gunicorn-Master senden), oder das Plugin aus der Datenbank entfernen.
+
     **Beispiel:**
 
     ```python

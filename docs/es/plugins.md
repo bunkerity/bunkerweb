@@ -717,6 +717,8 @@ Esta documentación describe los ganchos de ciclo de vida utilizados para gestio
 
     Si el gancho devuelve un objeto de respuesta, Flask omitirá el manejo de la solicitud y devolverá la respuesta directamente. Esto puede ser útil para cortocircuitar el pipeline de procesamiento de la solicitud.
 
+    Si un gancho lanza una excepción, o los ganchos de un plugin no se pueden cargar, la interfaz web responde 500 en todas las páginas, incluida la página de plugins, mientras que los archivos estáticos se siguen sirviendo. Para recuperarse, corrija o elimine los archivos del plugin en disco y reinicie la interfaz (o envíe HUP al proceso maestro de gunicorn), o elimine el plugin de la base de datos.
+
     **Ejemplo:**
 
     ```python

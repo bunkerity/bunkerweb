@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.17~rc2 - ????/??/??
+
+- [BUGFIX] `ui`: a `before_request` plugin hook that raises, or whose plugin hooks fail to load, answers 500 on every page instead of serving the request without its check. Static files stay served.
+
 ## v1.6.17~rc1 - 2026/10/15
 
 - [DEPS] `bunkerweb`: update NGINX to 1.30.6 (CVE-2026-15176, CVE-2026-93479, CVE-2026-95101, CVE-2026-97629, CVE-2026-97205). Fedora 43 and 44 have no 1.30.6 package yet, so their BunkerWeb packages keep building their modules against 1.30.5 and stay exposed until Fedora ships 1.30.6.

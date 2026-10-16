@@ -720,6 +720,8 @@ Cette documentation décrit les hooks de cycle de vie utilisés pour gérer les 
 
     Si le hook retourne un objet de réponse, Flask ignorera le traitement de la requête et retournera la réponse directement. Cela peut être utile pour court-circuiter le pipeline de traitement des requêtes.
 
+    Si un hook lève une exception, ou si les hooks d'un plugin ne peuvent pas être chargés, l'interface web répond 500 sur chaque page, y compris la page des plugins, tandis que les fichiers statiques restent servis. Pour récupérer, corrigez ou supprimez les fichiers du plugin sur le disque puis redémarrez l'interface (ou envoyez HUP au processus maître de gunicorn), ou supprimez le plugin de la base de données.
+
     **Exemple :**
 
     ```python
