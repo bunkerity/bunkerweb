@@ -728,7 +728,7 @@ def templates_create():
     try:
         API_CLIENT.create_template(template_id, **create_kwargs)
     except (ApiClientError, ApiUnavailableError) as e:
-        return jsonify({"status": "error", "message": e.message}), getattr(e, "status_code", None) or 400
+        return jsonify({"status": "error", "message": str(escape(e.message))}), getattr(e, "status_code", None) or 400
 
     flash(translated("templates.flash.template_created_successfully", template_id=template_id) or f"Template {template_id} created successfully.", "success")
     return jsonify({"status": "success"})
@@ -907,17 +907,17 @@ def templates_catalog_update():
         except (ApiClientError, ApiUnavailableError) as e:
             return jsonify({"status": "error", "message": f"Couldn't list templates: {e.message}"}), 503
         if row is None:
-            message = translated("templates.catalog.update_not_installed", template=escape(template_id))
-            return jsonify({"status": "error", "message": message or f"Template {escape(template_id)} is not installed: install it instead"}), 409
+            message = translated("templates.catalog.update_not_installed", template=template_id)
+            return jsonify({"status": "error", "message": message or f"Template {template_id} is not installed: install it instead"}), 409
         # The listing's own ownership rule, so the card and the route cannot disagree.
         owner = template_state({}, row)
         if owner["state"] == "managed":
-            message = translated("templates.catalog.update_managed", template=escape(template_id), owner=escape(owner["managed_by"]))
+            message = translated("templates.catalog.update_managed", template=template_id, owner=owner["managed_by"])
             return (
                 jsonify(
                     {
                         "status": "error",
-                        "message": message or f"Template {escape(template_id)} is managed by {escape(owner['managed_by'])}: the catalogue does not change it",
+                        "message": message or f"Template {template_id} is managed by {owner['managed_by']}: the catalogue does not change it",
                     }
                 ),
                 409,
@@ -928,15 +928,15 @@ def templates_catalog_update():
 
     listed, installed = template_fingerprint(data), template_fingerprint(row)
     if listed == installed:
-        message = translated("templates.catalog.update_up_to_date", template=escape(template_id))
-        return jsonify({"status": "error", "message": message or f"Template {escape(template_id)} already matches the catalogue"}), 409
+        message = translated("templates.catalog.update_up_to_date", template=template_id)
+        return jsonify({"status": "error", "message": message or f"Template {template_id} already matches the catalogue"}), 409
     if not compare_digest(str(request.form.get("confirm") or ""), update_token(listed, installed)):
-        message = translated("templates.catalog.update_changed", template=escape(template_id))
+        message = translated("templates.catalog.update_changed", template=template_id)
         return (
             jsonify(
                 {
                     "status": "error",
-                    "message": message or f"Template {escape(template_id)} or the catalogue changed since the preview; reload the page and review it again",
+                    "message": message or f"Template {template_id} or the catalogue changed since the preview; reload the page and review it again",
                 }
             ),
             409,
@@ -986,7 +986,7 @@ def templates_update(template_id: str):
     try:
         API_CLIENT.update_template(template_id, **update_kwargs)
     except (ApiClientError, ApiUnavailableError) as e:
-        return jsonify({"status": "error", "message": e.message}), getattr(e, "status_code", None) or 400
+        return jsonify({"status": "error", "message": str(escape(e.message))}), getattr(e, "status_code", None) or 400
 
     flash(translated("templates.flash.template_updated_successfully", template_id=template_id) or f"Template {template_id} updated successfully.", "success")
     return jsonify({"status": "success"})
