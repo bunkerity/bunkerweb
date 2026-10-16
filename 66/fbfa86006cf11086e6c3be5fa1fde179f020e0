@@ -1,0 +1,31 @@
+src/deps/init_deps.sh
+  s_df722c705ff933::t_0112b610dfab2d 20,41-45,47,92-96,98
+src/deps/misc/lua-nginx-module-proxy-protocol-addr.patch
+  s_df722c705ff933::t_d12363a60c952a 1-42
+src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c
+  s_df722c705ff933::t_d12363a60c952a 1061-1092
+  s_df722c705ff933::t_0ebe631bcfc70a 1060
+src/deps/misc/lua-resty-core-proxy-protocol-addr.patch
+  s_df722c705ff933::t_d12363a60c952a 1-61
+src/deps/src/lua-resty-core/lib/ngx/ssl.lua
+  s_df722c705ff933::t_d12363a60c952a 31,73-75,138-139,424-445
+  s_df722c705ff933::t_1817c8b84ae3d6 446-448
+src/deps/deps.json
+  s_df722c705ff933::t_d12363a60c952a 70,77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "66fbfa86006cf11086e6c3be5fa1fde179f020e0",
+  "prompts": {},
+  "sessions": {
+    "s_df722c705ff933": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a13eea-64d9-7e03-97d7-4bf92f5401c4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
