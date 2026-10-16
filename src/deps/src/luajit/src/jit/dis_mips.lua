@@ -15,8 +15,7 @@ local byte, format = string.byte, string.format
 local match, gmatch = string.match, string.gmatch
 local concat = table.concat
 local bit = require("bit")
-local band, bor, tohex = bit.band, bit.bor, bit.tohex
-local lshift, rshift, arshift = bit.lshift, bit.rshift, bit.arshift
+local tohex = bit.tohex
 
 ------------------------------------------------------------------------------
 -- Extended opcode maps common to all MIPS releases
@@ -477,13 +476,13 @@ end
 local function get_be(ctx)
   local pos = ctx.pos
   local b0, b1, b2, b3 = byte(ctx.code, pos+1, pos+4)
-  return bor(lshift(b0, 24), lshift(b1, 16), lshift(b2, 8), b3)
+  return (b0 << 24) | (b1 << 16) | (b2 << 8) | b3
 end
 
 local function get_le(ctx)
   local pos = ctx.pos
   local b0, b1, b2, b3 = byte(ctx.code, pos+1, pos+4)
-  return bor(lshift(b3, 24), lshift(b2, 16), lshift(b1, 8), b0)
+  return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0
 end
 
 -- Disassemble a single instruction.
@@ -494,13 +493,13 @@ local function disass_ins(ctx)
   ctx.op = op
   ctx.rel = nil
 
-  local opat = ctx.map_pri[rshift(op, 26)]
-  while type(opat) ~= "string" do
+  local opat = ctx.map_pri[op >> 26]
+  while type(opat) != "string" do
     if not opat then return unknown(ctx) end
     if opat.maprs then
-      opat = opat[opat.maprs(band(rshift(op,21),31), band(rshift(op,16),31))]
+      opat = opat[opat.maprs((op >> 21) & 31, (op >> 16) & 31)]
     else
-      opat = opat[band(rshift(op, opat.shift), opat.mask)] or opat._
+      opat = opat[(op >> opat.shift) & opat.mask] or opat._
     end
   end
   local name, pat = match(opat, "^([a-z0-9_.]*)(.*)")
@@ -510,82 +509,82 @@ local function disass_ins(ctx)
   for p in gmatch(pat, ".") do
     local x = nil
     if p == "S" then
-      x = map_gpr[band(rshift(op, 21), 31)]
+      x = map_gpr[(op >> 21) & 31]
     elseif p == "T" then
-      x = map_gpr[band(rshift(op, 16), 31)]
+      x = map_gpr[(op >> 16) & 31]
     elseif p == "D" then
-      x = map_gpr[band(rshift(op, 11), 31)]
+      x = map_gpr[(op >> 11) & 31]
     elseif p == "F" then
-      x = "f"..band(rshift(op, 6), 31)
+      x = "f"..((op >> 6) & 31)
     elseif p == "G" then
-      x = "f"..band(rshift(op, 11), 31)
+      x = "f"..((op >> 11) & 31)
     elseif p == "H" then
-      x = "f"..band(rshift(op, 16), 31)
+      x = "f"..((op >> 16) & 31)
     elseif p == "R" then
-      x = "f"..band(rshift(op, 21), 31)
+      x = "f"..((op >> 21) & 31)
     elseif p == "A" then
-      x = band(rshift(op, 6), 31)
+      x = (op >> 6) & 31
     elseif p == "a" then
-      x = band(rshift(op, 6), 7)
+      x = (op >> 6) & 7
     elseif p == "E" then
-      x = band(rshift(op, 6), 31) + 32
+      x = ((op >> 6) & 31) + 32
     elseif p == "M" then
-      x = band(rshift(op, 11), 31)
+      x = (op >> 11) & 31
     elseif p == "N" then
-      x = band(rshift(op, 16), 31)
+      x = (op >> 16) & 31
     elseif p == "C" then
-      x = band(rshift(op, 18), 7)
+      x = (op >> 18) & 7
       if x == 0 then x = nil end
     elseif p == "K" then
-      x = band(rshift(op, 11), 31) + 1
+      x = ((op >> 11) & 31) + 1
     elseif p == "P" then
-      x = band(rshift(op, 11), 31) + 33
+      x = ((op >> 11) & 31) + 33
     elseif p == "L" then
-      x = band(rshift(op, 11), 31) - last + 1
+      x = ((op >> 11) & 31) - last + 1
     elseif p == "Q" then
-      x = band(rshift(op, 11), 31) - last + 33
+      x = ((op >> 11) & 31) - last + 33
     elseif p == "I" then
-      x = arshift(lshift(op, 16), 16)
+      x = (op << 16) ~>> 16
     elseif p == "2" then
-      x = arshift(lshift(op, 13), 11)
+      x = (op << 13) ~>> 11
     elseif p == "3" then
-      x = arshift(lshift(op, 14), 11)
+      x = (op << 14) ~>> 11
     elseif p == "U" then
-      x = band(op, 0xffff)
+      x = op & 0xffff
     elseif p == "O" then
-      local disp = arshift(lshift(op, 16), 16)
+      local disp = (op << 16) ~>> 16
       operands[#operands] = format("%d(%s)", disp, last)
     elseif p == "X" then
-      local index = map_gpr[band(rshift(op, 16), 31)]
+      local index = map_gpr[(op >> 16) & 31]
       operands[#operands] = format("%s(%s)", index, last)
     elseif p == "B" then
-      x = ctx.addr + ctx.pos + arshift(lshift(op, 16), 14) + 4
+      x = ctx.addr + ctx.pos + ((op << 16) ~>> 14) + 4
       ctx.rel = x
       x = format("0x%08x", x)
     elseif p == "b" then
-      x = ctx.addr + ctx.pos + arshift(lshift(op, 11), 9) + 4
+      x = ctx.addr + ctx.pos + ((op << 11) ~>> 9) + 4
       ctx.rel = x
       x = format("0x%08x", x)
     elseif p == "#" then
-      x = ctx.addr + ctx.pos + arshift(lshift(op, 6), 4) + 4
+      x = ctx.addr + ctx.pos + ((op << 6) ~>> 4) + 4
       ctx.rel = x
       x = format("0x%08x", x)
     elseif p == "J" then
       local a = ctx.addr + ctx.pos
-      x = a - band(a, 0x0fffffff) + band(op, 0x03ffffff)*4
+      x = a - (a & 0x0fffffff) + ((op & 0x03ffffff) << 2)
       ctx.rel = x
       x = format("0x%08x", x)
     elseif p == "V" then
-      x = band(rshift(op, 8), 7)
+      x = (op >> 8) & 7
       if x == 0 then x = nil end
     elseif p == "W" then
-      x = band(op, 7)
+      x = op & 7
       if x == 0 then x = nil end
     elseif p == "Y" then
-      x = band(rshift(op, 6), 0x000fffff)
+      x = (op >> 6) & 0x000fffff
       if x == 0 then x = nil end
     elseif p == "Z" then
-      x = band(rshift(op, 6), 1023)
+      x = (op >> 6) & 1023
       if x == 0 then x = nil end
     elseif p == "0" then
       if last == "r0" or last == 0 then
@@ -616,9 +615,9 @@ end
 -- Disassemble a block of code.
 local function disass_block(ctx, ofs, len)
   if not ofs then ofs = 0 end
-  local stop = len and ofs+len or #ctx.code
-  stop = stop - stop % 4
-  ctx.pos = ofs - ofs % 4
+  local stop = len ? ofs+len : #ctx.code
+  stop &= -4
+  ctx.pos = ofs & -4
   ctx.rel = nil
   while ctx.pos < stop do disass_ins(ctx) end
 end

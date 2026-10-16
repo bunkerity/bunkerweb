@@ -723,6 +723,12 @@ static uint32_t jit_cpudetect(void)
   uint32_t features[4];
   if (lj_vm_cpuid(0, vendor) && lj_vm_cpuid(1, features)) {
     flags |= ((features[2] >> 0)&1) * JIT_F_SSE3;
+#if LJ_TARGET_X86
+    if (flags) {
+      lj_vm_num2i64_ptr = lj_vm_num2i64_sse3;
+      lj_vm_num2u64_ptr = lj_vm_num2u64_sse3;
+    }
+#endif
     flags |= ((features[2] >> 19)&1) * JIT_F_SSE4_1;
     if (vendor[0] >= 7) {
       uint32_t xfeatures[4];

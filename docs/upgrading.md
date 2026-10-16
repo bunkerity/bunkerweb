@@ -623,7 +623,7 @@ Before starting, stop or firewall anything that writes to the API directly. The 
             5. Package locks removal
                 * Temporarily removes `apt-mark hold` / `dnf versionlock` on `bunkerweb` and `nginx` so the targeted version can be installed.
             6. Upgrade execution
-                * Installs the new BunkerWeb package version. NGINX is reinstalled only when the target BunkerWeb pins a different version: 1.6.13 and 1.6.14 pin NGINX 1.30.4 while 1.7.0 requires 1.30.5, so that upgrade does bump NGINX and restart it. Coming from 1.6.15, which already pins 1.30.5, NGINX is left alone.
+                * Installs the new BunkerWeb package version. NGINX is reinstalled only when the target BunkerWeb pins a different version: 1.6.13 and 1.6.14 pin NGINX 1.30.4, and 1.6.15 and 1.6.16 pin 1.30.5, while 1.7.0 requires 1.30.6 (1.30.5 on Fedora 43/44). Upgrading from any of those releases therefore bumps NGINX and restarts it, except from 1.6.15 or 1.6.16 on Fedora 43/44, where NGINX stays at 1.30.5.
                 * Re‑applies holds/versionlocks to freeze the upgraded versions.
             7. Finalization & status
                 * Displays systemd status for core services and next steps.

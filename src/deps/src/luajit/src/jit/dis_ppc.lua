@@ -17,8 +17,7 @@ local byte, format = string.byte, string.format
 local match, gmatch, gsub = string.match, string.gmatch, string.gsub
 local concat = table.concat
 local bit = require("bit")
-local band, bor, tohex = bit.band, bit.bor, bit.tohex
-local lshift, rshift, arshift = bit.lshift, bit.rshift, bit.arshift
+local tohex = bit.tohex
 
 ------------------------------------------------------------------------------
 -- Primary and extended opcode maps
@@ -39,9 +38,9 @@ local map_rlwinm = setmetatable({
   shift = 0, mask = -1,
 },
 { __index = function(t, x)
-    local rot = band(rshift(x, 11), 31)
-    local mb = band(rshift(x, 6), 31)
-    local me = band(rshift(x, 1), 31)
+    local rot = (x >> 11) & 31
+    local mb = (x >> 6) & 31
+    local me = (x >> 1) & 31
     if mb == 0 and me == 31-rot then
       return "slwiRR~A."
     elseif me == 31 and mb == 32-rot then
@@ -167,7 +166,7 @@ local map_ext = setmetatable({
   [539] = "srdRR~R.",
 },
 { __index = function(t, x)
-    if band(x, 31) == 15 then return "iselRRRC" end
+    if x & 31 == 15 then return "iselRRRC" end
   end
 })
 
@@ -386,9 +385,9 @@ local map_cond = { [0] = "lt", "gt", "eq", "so", "ge", "le", "ne", "ns", }
 -- Format a condition bit.
 local function condfmt(cond)
   if cond <= 3 then
-    return map_cond[band(cond, 3)]
+    return map_cond[cond & 3]
   else
-    return format("4*cr%d+%s", rshift(cond, 2), map_cond[band(cond, 3)])
+    return format("4*cr%d+%s", cond >> 2, map_cond[cond & 3])
   end
 end
 
@@ -421,17 +420,17 @@ end
 local function disass_ins(ctx)
   local pos = ctx.pos
   local b0, b1, b2, b3 = byte(ctx.code, pos+1, pos+4)
-  local op = bor(lshift(b0, 24), lshift(b1, 16), lshift(b2, 8), b3)
+  local op = (b0 << 24) | (b1 << 16) | (b2 << 8) | b3
   local operands = {}
   local last = nil
   local rs = 21
   ctx.op = op
   ctx.rel = nil
 
-  local opat = map_pri[rshift(b0, 2)]
-  while type(opat) ~= "string" do
+  local opat = map_pri[b0 >> 2]
+  while type(opat) != "string" do
     if not opat then return unknown(ctx) end
-    opat = opat[band(rshift(op, opat.shift), opat.mask)]
+    opat = opat[(op >> opat.shift) & opat.mask]
   end
   local name, pat = match(opat, "^([a-z0-9_.]*)(.*)")
   local altname, pat2 = match(pat, "|([a-z0-9_.]*)(.*)")
@@ -440,84 +439,84 @@ local function disass_ins(ctx)
   for p in gmatch(pat, ".") do
     local x = nil
     if p == "R" then
-      x = map_gpr[band(rshift(op, rs), 31)]
-      rs = rs - 5
+      x = map_gpr[(op >> rs) & 31]
+      rs -= 5
     elseif p == "F" then
-      x = "f"..band(rshift(op, rs), 31)
-      rs = rs - 5
+      x = "f"..((op >> rs) & 31)
+      rs -= 5
     elseif p == "A" then
-      x = band(rshift(op, rs), 31)
-      rs = rs - 5
+      x = (op >> rs) & 31
+      rs -= 5
     elseif p == "S" then
-      x = arshift(lshift(op, 27-rs), 27)
-      rs = rs - 5
+      x = (op << 27-rs) ~>> 27
+      rs -= 5
     elseif p == "I" then
-      x = arshift(lshift(op, 16), 16)
+      x = (op << 16) ~>> 16
     elseif p == "U" then
-      x = band(op, 0xffff)
+      x = op & 0xffff
     elseif p == "D" or p == "E" then
-      local disp = arshift(lshift(op, 16), 16)
-      if p == "E" then disp = band(disp, -4) end
+      local disp = (op << 16) ~>> 16
+      if p == "E" then disp &= -4 end
       if last == "r0" then last = "0" end
       operands[#operands] = format("%d(%s)", disp, last)
     elseif p >= "2" and p <= "8" then
-      local disp = band(rshift(op, rs), 31) * p
+      local disp = ((op >> rs) & 31) * (byte(p) - 0x30)
       if last == "r0" then last = "0" end
       operands[#operands] = format("%d(%s)", disp, last)
     elseif p == "H" then
-      x = band(rshift(op, rs), 31) + lshift(band(op, 2), 4)
-      rs = rs - 5
+      x = ((op >> rs) & 31) | ((op & 2) << 4)
+      rs -= 5
     elseif p == "M" then
-      x = band(rshift(op, rs), 31) + band(op, 0x20)
+      x = ((op >> rs) & 31) | (op & 0x20)
     elseif p == "C" then
-      x = condfmt(band(rshift(op, rs), 31))
-      rs = rs - 5
+      x = condfmt((op >> rs) & 31)
+      rs -= 5
     elseif p == "B" then
-      local bo = rshift(op, 21)
-      local cond = band(rshift(op, 16), 31)
+      local bo = op >> 21
+      local cond = (op >> 16) & 31
       local cn = ""
-      rs = rs - 10
-      if band(bo, 4) == 0 then
-	cn = band(bo, 2) == 0 and "dnz" or "dz"
-	if band(bo, 0x10) == 0 then
-	  cn = cn..(band(bo, 8) == 0 and "f" or "t")
+      rs -= 10
+      if bo & 4 == 0 then
+	cn = bo & 2 == 0 ? "dnz" : "dz"
+	if bo & 0x10 == 0 then
+	  cn ..= bo & 8 == 0 ? "f" : "t"
+	  x = condfmt(cond)
 	end
-	if band(bo, 0x10) == 0 then x = condfmt(cond) end
-	name = name..(band(bo, 1) == band(rshift(op, 15), 1) and "-" or "+")
-      elseif band(bo, 0x10) == 0 then
-	cn = map_cond[band(cond, 3) + (band(bo, 8) == 0 and 4 or 0)]
-	if cond > 3 then x = "cr"..rshift(cond, 2) end
-	name = name..(band(bo, 1) == band(rshift(op, 15), 1) and "-" or "+")
+	name ..= bo & 1 == (op >> 15) & 1 ? "-" : "+"
+      elseif bo & 0x10 == 0 then
+	cn = map_cond[(cond & 3) | ((bo >> 1) & 4)]
+	if cond > 3 then x = "cr"..(cond >> 2) end
+	name ..= bo & 1 == (op >> 15) & 1 ? "-" : "+"
       end
       name = gsub(name, "_", cn)
     elseif p == "J" then
-      x = arshift(lshift(op, 27-rs), 29-rs)*4
-      if band(op, 2) == 0 then x = ctx.addr + pos + x end
+      x = ((op << 27-rs) ~>> 29-rs) << 2
+      if op & 2 == 0 then x = ctx.addr + pos + x end
       ctx.rel = x
       x = "0x"..tohex(x)
     elseif p == "K" then
-      if band(op, 1) ~= 0 then name = name.."l" end
-      if band(op, 2) ~= 0 then name = name.."a" end
+      if op & 1 != 0 then name ..= "l" end
+      if op & 2 != 0 then name ..= "a" end
     elseif p == "X" or p == "Y" then
-      x = band(rshift(op, rs+2), 7)
-      if x == 0 and p == "Y" then x = nil else x = "cr"..x end
-      rs = rs - 5
+      x = (op >> rs+2) & 7
+      x = x == 0 and p == "Y" ? nil : "cr"..x
+      rs -= 5
     elseif p == "W" then
-      x = "cr"..band(op, 7)
+      x = "cr"..(op & 7)
     elseif p == "Z" then
-      x = band(rshift(op, rs-4), 255)
-      rs = rs - 10
+      x = (op >> rs-4) & 0xff
+      rs -= 10
     elseif p == ">" then
-      operands[#operands] = rshift(operands[#operands], 1)
+      operands[#operands] >>= 1
     elseif p == "0" then
       if last == "r0" then
 	operands[#operands] = nil
 	if altname then name = altname end
       end
     elseif p == "L" then
-      name = gsub(name, "_", band(op, 0x00200000) ~= 0 and "d" or "w")
+      name = gsub(name, "_", op & 0x00200000 != 0 ? "d" : "w")
     elseif p == "." then
-      if band(op, 1) == 1 then name = name.."." end
+      if op & 1 == 1 then name ..= "." end
     elseif p == "N" then
       if op == 0x60000000 then name = "nop"; break end
     elseif p == "~" then
@@ -537,7 +536,7 @@ local function disass_ins(ctx)
 	name = altname
       end
     elseif p == "-" then
-      rs = rs - 5
+      rs -= 5
     else
       assert(false)
     end
@@ -553,8 +552,8 @@ end
 local function disass_block(ctx, ofs, len)
   if not ofs then ofs = 0 end
   local stop = len and ofs+len or #ctx.code
-  stop = stop - stop % 4
-  ctx.pos = ofs - ofs % 4
+  stop &= -4
+  ctx.pos = ofs & -4
   ctx.rel = nil
   while ctx.pos < stop do disass_ins(ctx) end
 end

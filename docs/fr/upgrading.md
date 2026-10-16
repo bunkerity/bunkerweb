@@ -569,7 +569,7 @@ aussi.
             5. Suppression des verrous de colis
                 * Supprime temporairement `apt-mark hold` / `dnf versionlock` active `bunkerweb` et `nginx` permet ainsi d'installer la version ciblée.
             6. Exécution de la mise à niveau
-                * Installe la nouvelle version du package BunkerWeb. NGINX n'est réinstallé que si la version de BunkerWeb visée épingle une version différente : 1.6.13 et 1.6.14 épinglent NGINX 1.30.4 alors que 1.7.0 exige 1.30.5, donc cette mise à niveau fait bien évoluer NGINX et le redémarre. Depuis 1.6.15, qui épingle déjà 1.30.5, NGINX n'est pas touché.
+                * Installe la nouvelle version du package BunkerWeb. NGINX n'est réinstallé que si la version de BunkerWeb visée épingle une version différente : 1.6.13 et 1.6.14 épinglent NGINX 1.30.4, et 1.6.15 et 1.6.16 épinglent 1.30.5, alors que 1.7.0 exige 1.30.6 (1.30.5 sur Fedora 43/44). Depuis chacune de ces versions, la mise à niveau fait donc évoluer NGINX et le redémarre, sauf depuis 1.6.15 ou 1.6.16 sur Fedora 43/44, où NGINX reste en 1.30.5.
                 * Réapplique les blocages/verrous de version pour geler les versions mises à niveau.
             7. Finalisation et état d'avancement
                 * Affiche l'état de systemd pour les services principaux et les étapes suivantes.

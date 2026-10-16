@@ -353,6 +353,37 @@ uint64_t lj_carith_check64(lua_State *L, int narg, CTypeID *id)
   }
 }
 
+/* Check bit operator arguments. No coercion from strings. */
+uint64_t lj_carith_checkbit64(lua_State *L, cTValue *o, CTypeID *id)
+{
+  if (tviscdata(o)) {
+    CTState *cts = ctype_cts(L);
+    uint8_t *sp = (uint8_t *)cdataptr(cdataV(o));
+    CTypeID sid = cdataV(o)->ctypeid;
+    CType *s = ctype_get(cts, sid);
+    uint64_t x;
+    if (ctype_isref(s->info)) {
+      sp = *(void **)sp;
+      sid = ctype_cid(s->info);
+    }
+    s = ctype_raw(cts, sid);
+    if (ctype_isenum(s->info)) s = ctype_child(cts, s);
+    if ((s->info & (CTMASK_NUM|CTF_BOOL|CTF_FP|CTF_UNSIGNED)) ==
+	CTINFO(CT_NUM, CTF_UNSIGNED) && s->size == 8)
+      *id = CTID_UINT64;  /* Use uint64_t, since it has the highest rank. */
+    else if (!*id)
+      *id = CTID_INT64;  /* Use int64_t, unless already set. */
+    lj_cconv_ct_ct(cts, ctype_get(cts, *id), s,
+		   (uint8_t *)&x, sp, 0);
+    return x;
+  } else if (LJ_LIKELY(tvisint(o))) {
+    return (uint64_t)intV(o);  /* Sign-extended. */
+  } else {
+    if (!tvisnum(o)) lj_err_optype(L, o, LJ_ERR_OPARITH);
+    return (uint64_t)lj_num2bit(numV(o));  /* Sign-extended. */
+  }
+}
+
 /* -- 64 bit integer arithmetic helpers ----------------------------------- */
 
 #if LJ_32 && LJ_HASJIT

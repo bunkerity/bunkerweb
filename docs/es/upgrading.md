@@ -656,7 +656,7 @@ también.
             5. Eliminación de bloqueos de paquetes
                 * Elimina temporalmente `apt-mark hold` / `dnf versionlock` en `bunkerweb` y `nginx` para que se pueda instalar la versión de destino.
             6. Ejecución de la actualización
-                * Instala la nueva versión del paquete de BunkerWeb. NGINX solo se reinstala cuando la versión de BunkerWeb de destino ancla una versión distinta: 1.6.13 y 1.6.14 anclan NGINX 1.30.4 mientras que 1.7.0 exige 1.30.5, así que esa actualización sí sube NGINX y lo reinicia. Viniendo de 1.6.15, que ya ancla 1.30.5, NGINX no se toca.
+                * Instala la nueva versión del paquete de BunkerWeb. NGINX solo se reinstala cuando la versión de BunkerWeb de destino ancla una versión distinta: 1.6.13 y 1.6.14 anclan NGINX 1.30.4, y 1.6.15 y 1.6.16 anclan 1.30.5, mientras que 1.7.0 exige 1.30.6 (1.30.5 en Fedora 43/44). Actualizar desde cualquiera de esas versiones sube NGINX y lo reinicia, salvo desde 1.6.15 o 1.6.16 en Fedora 43/44, donde NGINX permanece en 1.30.5.
                 * Vuelve a aplicar los bloqueos/versionlocks para congelar las versiones actualizadas.
             7. Finalización y estado
                 * Muestra el estado de systemd para los servicios principales y los próximos pasos.

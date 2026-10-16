@@ -1099,7 +1099,7 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
             }
         }
 
-#elif (NGX_HAVE_IP_DONTFRAG)
+#elif (NGX_HAVE_IPV6_DONTFRAG)
 
         if (ls[i].quic && ls[i].sockaddr->sa_family == AF_INET6) {
             value = 1;
@@ -1164,6 +1164,10 @@ ngx_close_listening_sockets(ngx_cycle_t *cycle)
                 } else {
                     ngx_del_event(c->read, NGX_READ_EVENT, NGX_CLOSE_EVENT);
                 }
+            }
+
+            if (c->read->timer_set) {
+                ngx_del_timer(c->read);
             }
 
             ngx_free_connection(c);

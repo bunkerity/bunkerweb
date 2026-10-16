@@ -647,7 +647,7 @@ und müssen entfernt oder ebenfalls zurückgestuft werden.
             5. Entfernen von Paketsperren
                 * Entfernt vorübergehend `apt-mark hold` / `dnf versionlock` für `bunkerweb` und `nginx`, damit die Zielversion installiert werden kann.
             6. Upgrade-Ausführung
-                * Installiert die neue BunkerWeb-Paketversion. NGINX wird nur dann neu installiert, wenn die Ziel-BunkerWeb-Version eine andere Version fixiert: 1.6.13 und 1.6.14 fixieren NGINX 1.30.4, während 1.7.0 1.30.5 verlangt — dieses Upgrade hebt NGINX also an und startet es neu. Von 1.6.15 aus, das bereits 1.30.5 fixiert, bleibt NGINX unangetastet.
+                * Installiert die neue BunkerWeb-Paketversion. NGINX wird nur dann neu installiert, wenn die Ziel-BunkerWeb-Version eine andere Version fixiert: 1.6.13 und 1.6.14 fixieren NGINX 1.30.4, und 1.6.15 und 1.6.16 fixieren 1.30.5, während 1.7.0 1.30.6 verlangt (1.30.5 auf Fedora 43/44). Das Upgrade von jeder dieser Versionen hebt NGINX daher an und startet es neu, außer von 1.6.15 oder 1.6.16 auf Fedora 43/44, wo NGINX bei 1.30.5 bleibt.
                 * Wendet Holds/Versionlocks erneut an, um die aktualisierten Versionen einzufrieren.
             7. Abschluss & Status
                 * Zeigt den systemd-Status für Kerndienste und die nächsten Schritte an.

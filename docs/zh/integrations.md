@@ -2513,7 +2513,7 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
 
 ### 使用软件包管理器安装
 
-请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.30.5**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
+请确保在安装 BunkerWeb 之前**已经安装了 NGINX 1.30.6**。对于所有发行版，强制要求使用来自[官方 NGINX 仓库](https://nginx.org/en/linux_packages.html)的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。
 
 === "Debian Bookworm/Trixie"
 
@@ -2528,11 +2528,11 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.30.5：
+    您现在应该能够安装 NGINX 1.30.6：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2576,11 +2576,11 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    您现在应该能够安装 NGINX 1.30.5：
+    您现在应该能够安装 NGINX 1.30.6：
 
     ```shell
     sudo apt update && \
-    sudo apt install -y --allow-downgrades nginx=1.30.5-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.30.6-1~$(lsb_release -cs)
     ```
 
     !!! warning "测试/开发版本"
@@ -2612,6 +2612,9 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
     ```
 
 === "Fedora"
+
+    !!! warning "Fedora 提供的是 NGINX 1.30.5"
+        Fedora 43 和 44 尚未提供 NGINX 1.30.6，因此 Fedora 的 BunkerWeb 软件包基于 NGINX 1.30.5 构建并依赖 `nginx-1.30.5`。请在 Fedora 上安装该版本；Fedora 发布 1.30.6 后，依赖将随之更新。
 
     !!! info "Fedora 更新测试"
         如果您在稳定仓库中找不到列出的 NGINX 版本，可以启用 `updates-testing` 仓库：
@@ -2670,10 +2673,10 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
     module_hotfixes=true
     ```
 
-    您现在应该能够安装 NGINX 1.30.5：
+    您现在应该能够安装 NGINX 1.30.6：
 
     ```shell
-    sudo dnf install --allowerasing nginx-1.30.5
+    sudo dnf install --allowerasing nginx-1.30.6
     ```
 
     !!! example "禁用设置向导"
