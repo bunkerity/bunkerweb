@@ -40,7 +40,7 @@ REAL_OPEN_READ_ONLY = downgrade.open_read_only
 NOW = datetime(2026, 9, 6, 12, 0, 0).astimezone()
 TARGET = "1.6.14"
 REVISION = "a526ccfe44b4"
-HEAD = "bf57ee41c5e5"
+HEAD = "66114d1192c5"
 
 
 class FakeClient:

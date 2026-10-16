@@ -3,8 +3,8 @@
 `test_upgrade_replay_with_blobs.py` starts at 1.6.15 and crosses rc1..rc4 on its way. This one starts
 where an operator on 1.6.16 really is: the real `v1.6.16` model, `bw_blob_chunks` already there and
 holding rows, stamped at the 1.6.16 revision the way `entrypoint.sh` does it (it resolves the stamped
-`bw_metadata.version` by filename, so the lookup is part of what is proved). The single revision
-between that stamp and the head is the 1.7.0~alpha one; what must come out is every row and every
+`bw_metadata.version` by filename, so the lookup is part of what is proved). The revisions
+between that stamp and the head are the 1.6.17~rc1 bump and the 1.7.0~alpha one; what must come out is every row and every
 chunk unchanged, the readers returning the same bytes, a second upgrade that does nothing, and a
 recorded version of 1.7.0~alpha.
 """
