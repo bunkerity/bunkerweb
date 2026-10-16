@@ -209,7 +209,7 @@ Límites que conviene conocer:
     | `AUTOCONF_MODE`          | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                                                                       |
     | `SWARM_MODE`             | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                                                             |
     | `KUBERNETES_MODE`        | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                                                          |
-    | `KEEP_CONFIG_ON_RESTART` | `no`              | global    | No       | **Mantener Configuración al Reiniciar:** Mantener la configuración al reiniciar. Establecer a 'yes' para evitar el restablecimiento de la configuración al reiniciar. |
+    | `KEEP_CONFIG_ON_RESTART` | `yes`             | global    | No       | **Mantener Configuración al Reiniciar:** Mantener la configuración actual cuando la instancia se reinicia, en lugar de volver a la configuración temporal de arranque hasta que el Scheduler envíe una nueva. La instancia sigue aplicando la protección mientras espera. Establecer a `no` para regenerar la configuración temporal en cada reinicio. |
     | `USE_TEMPLATE`           |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración a usar que sobrescribirá los valores predeterminados de ajustes específicos.                                           |
 
 === "Ajustes de Nginx"
@@ -3803,7 +3803,7 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 
@@ -3992,9 +3992,9 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 !!! tip "Perfiles de Certificado"
     Let's Encrypt proporciona diferentes perfiles de certificado para diferentes casos de uso:
 
-    - **classic**: Certificados de propósito general con una validez de 90 días (predeterminado)
-    - **tlsserver**: Optimizado para la autenticación de servidores TLS con una validez de 90 días y una carga útil más pequeña
-    - **shortlived**: Seguridad mejorada con una validez de 7 días para entornos automatizados
+    - **classic**: Certificados de propósito general con una validez de 90 días y hasta 100 nombres (predeterminado)
+    - **tlsserver**: Optimizado para la autenticación de servidores TLS con una validez de 45 días, hasta 25 nombres y una carga útil más pequeña
+    - **shortlived**: Seguridad mejorada con una validez de 160 horas para hasta 25 nombres en entornos automatizados
     - **custom**: Si su servidor ACME admite un perfil diferente, configúrelo usando `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Disponibilidad del Perfil"
@@ -4023,7 +4023,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`              | multisite | no       | **Usar entorno de prueba:** Cuando se establece en `yes`, utiliza el entorno de prueba de Let's Encrypt para realizar pruebas. El entorno de prueba tiene límites de velocidad más altos pero produce certificados que no son de confianza para los navegadores.                                                                                                            |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`              | global    | no       | **Limpiar certificados antiguos:** Cuando se establece en `yes`, elimina los certificados antiguos que ya no son necesarios durante la renovación.                                                                                                                                                                                                                          |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`              | global    | no       | **Solicitudes concurrentes:** Cuando se establece en `yes`, certbot-new emite solicitudes de certificados de forma concurrente. Úselo con precaución para evitar límites de tasa.                                                                                                                                                                                           |
-| `LETS_ENCRYPT_PROFILE`                      | `classic`         | multisite | no       | **Perfil de certificado:** Seleccione el perfil de certificado a utilizar. Opciones: `classic` (propósito general), `tlsserver` (optimizado para servidores TLS) o `shortlived` (certificados de 7 días).                                                                                                                                                                   |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`         | multisite | no       | **Perfil de certificado:** Seleccione el perfil de certificado a utilizar. Opciones: `classic` (propósito general), `tlsserver` (optimizado para servidores TLS) o `shortlived` (certificados de 160 horas).                                                                                                                                                                   |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |                   | multisite | no       | **Perfil de certificado personalizado:** Ingrese un perfil de certificado personalizado si su servidor ACME admite perfiles no estándar. Esto anula `LETS_ENCRYPT_PROFILE` si está configurado.                                                                                                                                                                             |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`               | multisite | no       | **Máximo de reintentos:** Número de veces que se reintentará la generación de certificados en caso de fallo. Establezca en `0` para deshabilitar los reintentos. Útil para manejar problemas de red temporales o límites de velocidad de la API.                                                                                                                            |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`              | global    | no       | **Máximo de copias de seguridad de logs de Certbot:** Número de copias rotadas de `letsencrypt.log` que Certbot conserva por trabajo. El valor predeterminado de Certbot, `1000`, se acumula rápidamente; `50` es un límite razonable. Establece `0` para conservar solo el log activo.                                                                                     |
@@ -4032,7 +4032,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
     - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él.
     - Si no se proporciona ningún ajuste `LETS_ENCRYPT_DNS_PROPAGATION`, se utiliza el tiempo de propagación predeterminado del proveedor.
     - La automatización completa de Let's Encrypt utilizando el desafío `http` funciona en modo de flujo (stream) siempre que abra el puerto `80/tcp` desde el exterior. Utilice el ajuste `LISTEN_STREAM_PORT_SSL` para elegir su puerto de escucha SSL/TLS.
-    - Si `LETS_ENCRYPT_PASSTHROUGH` se establece en `yes`, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt.
+    - Si `LETS_ENCRYPT_PASSTHROUGH` se establece en `yes`, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt. Un `GET` o `HEAD` de un único token bajo `/.well-known/acme-challenge/` se añade entonces a la lista blanca y llega al backend sin ninguna otra comprobación: antibot, lista negra, limitación de la tasa de solicitudes, Basic Auth y la comprobación de baneos se omiten para esa solicitud (los límites de conexión se siguen aplicando, los aplica NGINX), lo que es más de lo que omite un desafío servido localmente. ModSecurity también se omite, pero solo mientras `USE_WHITELIST` sea `yes` (el valor por defecto), porque la regla que lo desactiva para los clientes en lista blanca solo se genera en ese caso. Las rutas más profundas, otros métodos y los nombres que no tienen forma de token reciben las comprobaciones normales. El backend también recibe el `Host` solicitado, incluso cuando `REVERSE_PROXY_CUSTOM_HOST` se establece en un nombre fijo, ya que el desafío se valida contra ese nombre (un valor que usa variables de NGINX sigue aplicándose).
 
 !!! tip "Desafíos HTTP vs. DNS"
     **Los desafíos HTTP** son más fáciles de configurar y funcionan bien para la mayoría de los sitios web:
@@ -4192,6 +4192,8 @@ variables exactas en [la documentación DNS de lego](https://go-acme.github.io/l
 Las direcciones IPv4 públicas en SERVER_NAME requieren LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http y LETS_ENCRYPT_PROFILE=shortlived; se rechazan IPv6 y las direcciones no públicas.
 
 Un identificador IP no necesita DNS. El puerto 80 debe llegar directamente a BunkerWeb para HTTP-01. Mantenga DISABLE_DEFAULT_SERVER_STRICT_SNI=no, ya que los clientes IP normalmente omiten SNI. Sin SNI, solo se selecciona un certificado si la dirección IPv4 local de destino está configurada en SERVER_NAME y aparece en sus SAN de IP. No se usa como alternativa el único certificado IP en caché: detrás de NAT, la dirección local debe coincidir con la dirección pública configurada. HTTP Host no selecciona el certificado. El certificado personalizado del servidor predeterminado conserva la prioridad. El comportamiento de los certificados DNS y los permisos de las cuentas no cambian.
+
+En modo de un solo sitio (`MULTISITE=no`), las demás entradas de `SERVER_NAME` son alias de la primera y todas van al mismo certificado. Cuando se añaden nombres (nombres de host o direcciones IP) a un servicio que ya tiene un certificado, BunkerWeb lo amplía y conserva el certificado actual si falla la validación de un nombre nuevo. Quitar o sustituir un nombre sigue reemitiendo el certificado desde cero.
 
 ```env
 SERVER_NAME=<PUBLIC_IPV4>
@@ -5185,6 +5187,19 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
 
 !!! note "Valores de tamaño legibles por humanos"
     Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+### Registros de auditoría Concurrent
+
+| Ajuste | Predeterminado | Descripción |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Modo: `Serial` (predeterminado) o `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Vacío por defecto; `Concurrent` requiere un directorio de almacenamiento absoluto. |
+
+Configure `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` y `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. BunkerWeb crea el directorio si falta en cada instancia al arrancar y antes de cada recarga, con el usuario nginx como propietario y modo `0750` (nunca accesible para otros). Un directorio que usted mismo aprovisione, por ejemplo un volumen persistente, se conserva tal cual y debe permitir escritura y acceso al worker nginx. Use un volumen persistente para conservar los registros. BunkerWeb rechaza las configuraciones inválidas antes de aplicarlas: se rechaza un arranque o una recarga que no pueda crear o usar el directorio, y la configuración en ejecución se mantiene. En modo CRS global (`USE_MODSECURITY_GLOBAL_CRS=yes`), configure ambos ajustes globalmente; los valores por servicio no seleccionan otro modo de escritura.
+
+`MODSECURITY_SEC_AUDIT_LOG` sigue siendo un archivo `.log` normal que admite bloqueo: contiene registros completos con `Serial` y un índice de archivos por transacción con `Concurrent`. La ruta del índice y sus reglas de rotación no cambian. El operador debe gestionar el espacio, los permisos y la retención recursiva de los subdirectorios fechados. Rotar el índice no elimina los archivos de transacción. Compruebe la compatibilidad de los lectores que esperan registros Serial antes de cambiar.
+
+Concurrent cambia cómo se almacenan los registros; no muestrea las solicitudes ni reduce los datos seleccionados por `MODSECURITY_SEC_AUDIT_LOG_PARTS`. Dimensione el almacenamiento según la tasa de solicitudes, las partes seleccionadas y el período de retención; mida el tamaño de los registros con tráfico representativo en lugar de asumir un coste fijo por solicitud bloqueada.
 
 ## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -6803,95 +6818,6 @@ Se gestionan desde **Workflows** en la interfaz o los endpoints `/workflows`. La
 centralmente y se compilan en un único artefacto distribuido a todas las instancias con el envío
 habitual de configuración.
 
-## Security workflows
-
-Compatibilidad con STREAM :x:
-
-El plugin Workflows añade una capa de políticas entre los ajustes individuales y las protecciones
-Lua: reglas reutilizables y ordenadas que se adjuntan a servicios, cada una con un árbol de
-condiciones y una acción.
-
-Una regla responde a una pregunta que los ajustes individuales no pueden expresar por sí solos:
-
-> **Si** la petición viene de Francia **y** apunta a `/login` **y** supera 10 peticiones por minuto,
-> **entonces** muestra un desafío hCaptcha.
-
-Los workflows **coordinan** las protecciones existentes. La acción `challenge` entrega la petición
-a Antibot y un umbral de frecuencia usa el mismo contador que Limit. Los ajustes existentes siguen funcionando.
-
-### Cómo se evalúa una regla
-
-En cada servicio se evalúan los workflows en el orden de asociación, y sus reglas en el orden
-configurado. **Gana la primera regla que coincide efectivamente**: ejecuta su única acción y no
-se evalúa nada posterior.
-
-Una condición es un árbol de nodos `ALL` / `ANY` / `NOT` sobre:
-
-| Condición | Dato comparado |
-| --------- | -------------- |
-| IP / CIDR | IP efectiva del cliente, tras la resolución Real IP |
-| País | País ISO resuelto desde la base GeoIP |
-| ASN | Número de sistema autónomo de la IP del cliente |
-| URI | Ruta normalizada: exacta, prefijo o expresión regular |
-| Método HTTP | Método de la petición |
-| Grupo de recursos | Grupo de IP, países o ASN mantenido aparte y referenciado por ID |
-| Veredicto CrowdSec | Decisión de CrowdSec: fuente (`appsec` o `lapi`) y acción solicitada (`ban` o `captcha`) |
-
-Las condiciones tienen **tres valores**: verdadero, falso o *desconocido* cuando falta el dato,
-por ejemplo la base GeoIP. Una regla solo coincide si el árbol resulta verdadero: una base averiada
-hace que deje de coincidir, no que coincida por accidente.
-
-Una condición de **veredicto CrowdSec** es indeterminada si CrowdSec no evaluó el servicio, y falsa
-si lo evaluó y no encontró nada: son casos distintos y ninguno coincide. Para que un workflow
-responda *en lugar de* CrowdSec, establece `CROWDSEC_DEFER_TO_WORKFLOWS` en `yes` en el servicio.
-CrowdSec entrega su veredicto sin aplicarlo; si ninguna regla coincide, se aplica sin cambios.
-
-### Los umbrales de frecuencia son una condición, no una acción
-
-Una regla puede tener un umbral que decide **si coincide**, no una acción de limitación. Por debajo
-del umbral se continúa con la siguiente regla.
-
-Así se expresa «por encima de 10 peticiones por minuto responde 429; si no, muestra un desafío»
-con dos reglas ordenadas con las mismas condiciones: la primera con umbral y bloqueo, la segunda sin umbral.
-
-El contador se limita a servicio + regla + IP del cliente y no interfiere con `LIMIT_REQ_*`.
-
-### Acciones
-
-- **challenge**: muestra un proveedor Antibot concreto (`captcha`, `hcaptcha`, `turnstile`, …).
-  Funciona incluso con `USE_ANTIBOT` en `no` y prevalece sobre sus listas de exclusión: expresa las
-  exclusiones en las condiciones de la regla. El servicio debe tener las credenciales del proveedor.
-- **block**: responde con el estado de denegación de la instancia o `429` para una regla de frecuencia.
-- **redirect**: envía al cliente a una URL fija con 301/302/303/307/308.
-
-### Modo de detección
-
-`SECURITY_MODE=detect` ejecuta los mismos árboles en el mismo orden y con los mismos contadores,
-pero no aplica acciones. Los informes registran lo que *habría* ocurrido para medir la política
-con tráfico real antes de activarla.
-
-### Comportamiento ante fallos
-
-Una instancia sin política compilada — primer arranque o envío no recibido — registra un error y
-sirve tráfico con sus protecciones habituales. Una política que el plano de control no puede
-compilar no se distribuye: se abandona el envío y las instancias conservan la anterior. No se
-puede eliminar un grupo de recursos mientras una regla lo referencie.
-
-### Presupuesto de expresiones regulares
-
-| Ajuste | Predeterminado | Contexto | Múltiple | Descripción |
-| ------ | -------------- | -------- | -------- | ----------- |
-| `WORKFLOWS_REGEX_BUDGET` | `512` | global | no | **Presupuesto regex:** Máximo de expresiones regulares distintas compiladas entre todas las reglas. NGINX comparte una caché regex entre plugins; las reglas que superan este límite se deshabilitan para evitar degradar silenciosamente toda la instancia. |
-
-La compilación recorre los workflows por ID ordenado y consume el presupuesto a medida que avanza.
-Si se agota durante un artefacto, desactiva las reglas restantes de forma determinista: dos
-instancias con el mismo artefacto desactivan las mismas reglas.
-
-### Gestión de workflows
-
-Se gestionan desde **Workflows** en la interfaz o los endpoints `/workflows`. Las reglas se guardan
-centralmente y se compilan en un único artefacto distribuido a todas las instancias con el envío
-habitual de configuración.
 ## Security.txt
 
 Compatibilidad con STREAM :white_check_mark:

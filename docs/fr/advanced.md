@@ -851,6 +851,135 @@ Pour plus d'informations, consultez la [documentation officielle HAProxy](http:/
 
     Consultez `/var/log/bunkerweb/access.log` sur chaque worker pour confirmer que les requêtes proviennent du réseau PROXY protocol et que les deux workers se partagent la charge. Votre cluster BunkerWeb est maintenant prêt pour la production avec haute disponibilité.
 
+### 6. IP flottante avec keepalived (sans répartiteur de charge)
+
+Sans répartiteur de charge, vous pouvez utiliser les instances WAF en mode actif/passif avec [keepalived](https://www.keepalived.org/). Une IP virtuelle (VIP) passe d'une instance à l'autre via VRRP ; le DNS pointe vers cette VIP et seule l'instance qui la détient reçoit le trafic. Cette solution remplace la répartition de charge de la section 5 : une instance défaillante libère la VIP pour le secours. Le réseau doit autoriser VRRP et le déplacement de la VIP ; vérifiez-le auprès de votre hébergeur.
+
+Les exemples utilisent la VIP `192.168.10.100`, `worker01` (`192.168.10.11`, principal) et `worker02` (`192.168.10.12`, secours).
+
+**Installez keepalived** sur chaque instance WAF :
+
+```bash
+# Debian / Ubuntu
+sudo apt install keepalived
+# RHEL / Fedora
+sudo dnf install keepalived
+```
+
+**Contrôle de santé.** Avec l'argument `ok`, le script BunkerWeb termine avec le code `0` lorsque l'instance répond `ok` sur `http://127.0.0.1:6000/healthz`. Cela indique que NGINX fonctionne et dispose de sa configuration, y compris pendant un rechargement gracieux où l'ancienne politique reste appliquée. Le code est `1` si l'instance est encore `loading` ou si NGINX est arrêté. Ce contrôle concerne le WAF local, pas l'application, le manager, l'API, les workers de tâches Celery ni le broker Redis/Valkey ajoutés en 1.7 ; surveillez-les séparément. Sans argument, le script accepte aussi `loading` : ne l'utilisez pas ainsi, car une instance venant de démarrer pourrait prendre la VIP et afficher « Generating... ».
+
+=== "Linux"
+
+    ```bash
+    /usr/share/bunkerweb/helpers/healthcheck.sh ok
+    ```
+
+=== "Docker"
+
+    ```bash
+    /usr/bin/docker compose -f /path/to/docker-compose.yml exec -T bunkerweb /usr/share/bunkerweb/helpers/healthcheck.sh ok
+    ```
+
+**Configurez keepalived.** Créez `/etc/keepalived/keepalived.conf` sur chaque instance. Adaptez `interface` à votre interface réseau (voir `ip addr`) et utilisez les mêmes `virtual_router_id` et `auth_pass` des deux côtés. Pour Docker, remplacez la ligne `script` par la commande `docker compose` ci-dessus (keepalived avertit si le chemin du binaire n'est pas absolu).
+
+=== "worker01 (principal)"
+
+    ```cfg title="/etc/keepalived/keepalived.conf"
+    global_defs {
+        enable_script_security
+        script_user root
+    }
+
+    vrrp_script chk_bunkerweb {
+        script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"
+        interval 2
+        fall 2
+        rise 2
+    }
+
+    vrrp_instance VI_BUNKERWEB {
+        state MASTER
+        interface eth0
+        virtual_router_id 51
+        priority 110
+        advert_int 1
+        authentication {
+            auth_type PASS
+            auth_pass changeme
+        }
+        virtual_ipaddress {
+            192.168.10.100/24
+        }
+        track_script {
+            chk_bunkerweb
+        }
+    }
+    ```
+
+=== "worker02 (secours)"
+
+    ```cfg title="/etc/keepalived/keepalived.conf"
+    global_defs {
+        enable_script_security
+        script_user root
+    }
+
+    vrrp_script chk_bunkerweb {
+        script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"
+        interval 2
+        fall 2
+        rise 2
+    }
+
+    vrrp_instance VI_BUNKERWEB {
+        state BACKUP
+        interface eth0
+        virtual_router_id 51
+        priority 100
+        advert_int 1
+        authentication {
+            auth_type PASS
+            auth_pass changeme
+        }
+        virtual_ipaddress {
+            192.168.10.100/24
+        }
+        track_script {
+            chk_bunkerweb
+        }
+    }
+    ```
+
+Le contrôle n'a pas de `weight` : deux échecs consécutifs (environ 4 secondes) placent le nœud en état `FAULT` et libèrent la VIP. `script_user root` permet d'exécuter `docker compose exec` ; `enable_script_security` exige que le script et son chemin soient protégés contre les écritures des autres utilisateurs. Vérifiez les propriétaires et permissions, y compris ceux du fichier Compose utilisé. Le `auth_pass` VRRP circule en clair et protège seulement contre les erreurs de configuration ; gardez les instances sur un réseau de confiance.
+
+Démarrez keepalived sur les deux instances :
+
+```bash
+sudo systemctl enable --now keepalived
+```
+
+!!! info "Pare-feu"
+    VRRP utilise le protocole IP `112` (pas un port TCP ou UDP). Autorisez-le entre les instances, ainsi que les ports `80` et `443` depuis les clients.
+
+!!! tip "IP réelle"
+    Les clients se connectent directement à la VIP : aucun PROXY protocol ni `X-Forwarded-For` n'est nécessaire. BunkerWeb voit leur IP réelle par défaut.
+
+**Vérifiez le basculement :**
+
+1. Sur `worker01`, exécutez `ip addr show eth0`. La VIP `192.168.10.100` doit apparaître.
+2. Arrêtez BunkerWeb sur `worker01` : `sudo systemctl stop bunkerweb` (Linux) ou `docker compose stop bunkerweb` (Docker).
+3. Vérifiez que la VIP quitte `worker01` et apparaît sur `worker02`, puis mesurez le rétablissement côté client. L'intervalle de contrôle et l'élection VRRP influencent ce délai ; ces exemples ne garantissent pas un temps mesuré en 1.7.
+4. Redémarrez BunkerWeb. Avec ces priorités, `worker01` reprend la VIP une fois le contrôle réussi ; une instance encore `loading` reste inéligible.
+5. Suivez les transitions avec `sudo journalctl -u keepalived -f`.
+
+### Points d'attention
+
+- **Sidecar Docker.** Avec `network_mode: "service:bunkerweb"`, le conteneur keepalived perd son interface réseau au redémarrage du conteneur BunkerWeb et ne récupère plus la VIP. Ajouter `depends_on: { bunkerweb: { condition: service_started, restart: true } }` ne couvre que les redémarrages via Compose (`docker compose restart` ou `up`), pas ceux de la politique Docker (plantage, mémoire épuisée) ni un simple `docker restart`. Redémarrez alors les deux conteneurs ensemble ou utilisez keepalived sur l'hôte comme ci-dessus.
+- **Manager indisponible.** Les instances déjà configurées continuent à répondre `ok` et à conserver la VIP. En 1.7, un redémarrage conservant la configuration (`KEEP_CONFIG_ON_RESTART=yes`, valeur par défaut, avec une configuration existante) peut continuer à appliquer cette politique et rester éligible. Une instance neuve, ou qui régénère sa configuration, reste `loading` jusqu'à réception de celle-ci. Sans configuration utilisable sur les deux instances, aucune VIP n'est disponible. Une panne de l'API, des workers de tâches ou du broker peut empêcher les mises à jour et les tâches de certificats malgré un WAF sain.
+- **Configuration.** Le manager distribue la configuration aux deux instances WAF indépendamment de la VIP. Vérifiez que les deux ont reçu la dernière configuration valide avant le test ; le contrôle de VIP ne prouve pas leur synchronisation.
+- **État partagé.** Sans Redis partagé, les bannissements et compteurs d'exécution sont locaux, et les sessions WAF utilisent par défaut des cookies. En 1.7, la tâche périodique `sync-bans` fait aussi converger les bannissements persistants via la base et les API internes sans Redis ; cette synchronisation n’est pas instantanée lors du basculement, et les baux CrowdSec restent gérés par chaque instance. Activez Redis (`USE_REDIS=yes`, voir les paramètres Redis/Valkey) avec le même serveur pour partager l'état pris en charge et le stockage des sessions. Ce Redis WAF est distinct du broker Celery. Redis seul ne préserve pas les sessions entre instances : `SESSIONS_SECRET` et `SESSIONS_NAME` valent `random` par défaut et sont générés par instance. Fixez des valeurs identiques sur le manager (paramètres globaux distribués aux deux instances).
+- **Let's Encrypt.** Le hook de challenge HTTP tente d'envoyer le jeton à chaque instance enregistrée. Les deux instances WAF doivent être joignables par leur API interne et recevoir le jeton pour répondre au challenge après un basculement.
+
 ## Utilisation de mécanismes de résolution DNS personnalisés
 
 La configuration NGINX de BunkerWeb peut être personnalisée pour utiliser différents résolveurs DNS en fonction de vos besoins. Cela peut être particulièrement utile dans divers scénarios :

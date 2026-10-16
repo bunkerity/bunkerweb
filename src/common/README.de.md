@@ -201,7 +201,7 @@ Zu beachtende Grenzen:
     | `AUTOCONF_MODE`          | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                                                                           |
     | `SWARM_MODE`             | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                                                                                 |
     | `KUBERNETES_MODE`        | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                                                                              |
-    | `KEEP_CONFIG_ON_RESTART` | `no`     | global    | Nein     | **Konfiguration bei Neustart behalten:** Konfiguration bei Neustart beibehalten. Auf 'yes' setzen, um das Zurücksetzen der Konfiguration beim Neustart zu verhindern. |
+    | `KEEP_CONFIG_ON_RESTART` | `yes`    | global    | Nein     | **Konfiguration bei Neustart behalten:** Die aktuelle Konfiguration beibehalten, wenn die Instanz neu startet, statt auf die temporäre Startkonfiguration zurückzufallen, bis der Scheduler eine neue sendet. Die Instanz setzt den Schutz währenddessen weiter durch. Auf `no` setzen, um die temporäre Konfiguration bei jedem Neustart neu zu erzeugen. |
     | `USE_TEMPLATE`           |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt.                                                            |
 
 === "Nginx-Einstellungen"

@@ -200,7 +200,7 @@ Limites à connaître :
     | `AUTOCONF_MODE`          | `no`              | global    | Non      | **Mode Autoconf :** Active l’intégration Docker Autoconf.                                                                                                           |
     | `SWARM_MODE`             | `no`              | global    | Non      | **Mode Swarm :** Active l’intégration Docker Swarm.                                                                                                                 |
     | `KUBERNETES_MODE`        | `no`              | global    | Non      | **Mode Kubernetes :** Active l’intégration Kubernetes.                                                                                                              |
-    | `KEEP_CONFIG_ON_RESTART` | `no`              | global    | Non      | **Garder la configuration au redémarrage :** Conserver la configuration au redémarrage. Mettre à 'yes' pour éviter la réinitialisation de la config au redémarrage. |
+    | `KEEP_CONFIG_ON_RESTART` | `yes`             | global    | Non      | **Garder la configuration au redémarrage :** Conserver la configuration actuelle lorsque l'instance redémarre, au lieu de revenir à la configuration temporaire de démarrage jusqu'à ce que le Scheduler en envoie une nouvelle. L'instance continue d'appliquer la protection pendant l'attente. Mettre à `no` pour régénérer la configuration temporaire à chaque redémarrage. |
     | `USE_TEMPLATE`           |                   | multisite | Non      | **Utiliser un template :** Modèle de configuration qui surcharge les valeurs par défaut de certains paramètres.                                                     |
 
 === "Paramètres Nginx"

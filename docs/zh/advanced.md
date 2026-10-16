@@ -851,6 +851,135 @@ sudo systemctl restart haproxy
 
     在每个 Worker 上查看 `/var/log/bunkerweb/access.log`，确认请求来自 PROXY protocol 网段，且多个 Worker 分担流量。此时 BunkerWeb 集群即可以高可用方式保护生产业务。
 
+### 6. 使用 keepalived 的浮动 IP（无负载均衡器）
+
+如果没有负载均衡器，可以通过 [keepalived](https://www.keepalived.org/) 以主备模式运行 WAF 实例。虚拟 IP（VIP）通过 VRRP 在实例之间漂移，DNS 指向 VIP，只有持有 VIP 的实例接收流量。这是第 5 节负载均衡的替代方案：不健康的实例释放 VIP，由备用实例接管。网络必须支持 VRRP 和 VIP 迁移，请向托管服务商确认。
+
+以下示例使用 VIP `192.168.10.100`、主实例 `worker01`（`192.168.10.11`）和备用实例 `worker02`（`192.168.10.12`）。
+
+在每个 WAF 实例上**安装 keepalived**：
+
+```bash
+# Debian / Ubuntu
+sudo apt install keepalived
+# RHEL / Fedora
+sudo dnf install keepalived
+```
+
+**健康检查。** 使用 `ok` 参数调用 BunkerWeb 健康检查脚本时，只有实例在 `http://127.0.0.1:6000/healthz` 返回 `ok`，脚本才以 `0` 退出。这表示 NGINX 正在运行且已收到配置；平滑重载期间继续执行旧策略时也会返回 `ok`。如果实例仍为 `loading` 或 NGINX 已停止，则退出码为 `1`。该检查仅针对本地 WAF，不检查应用可达性、管理端、API，以及 1.7 引入的 Celery 任务工作进程和 Redis/Valkey 消息代理，请分别监控它们。不带参数时脚本也接受 `loading`，因此不要在这里省略参数，否则刚启动的实例可能接管 VIP 并显示“Generating...”页面。
+
+=== "Linux"
+
+    ```bash
+    /usr/share/bunkerweb/helpers/healthcheck.sh ok
+    ```
+
+=== "Docker"
+
+    ```bash
+    /usr/bin/docker compose -f /path/to/docker-compose.yml exec -T bunkerweb /usr/share/bunkerweb/helpers/healthcheck.sh ok
+    ```
+
+**配置 keepalived。** 在每个实例上创建 `/etc/keepalived/keepalived.conf`。根据实际网卡调整 `interface`（参见 `ip addr`），两个实例使用相同的 `virtual_router_id` 和 `auth_pass`。使用 Docker 时，将 `script` 行替换为上面的 `docker compose` 命令（未使用可执行文件绝对路径时，keepalived 会发出警告）。
+
+=== "worker01（主）"
+
+    ```cfg title="/etc/keepalived/keepalived.conf"
+    global_defs {
+        enable_script_security
+        script_user root
+    }
+
+    vrrp_script chk_bunkerweb {
+        script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"
+        interval 2
+        fall 2
+        rise 2
+    }
+
+    vrrp_instance VI_BUNKERWEB {
+        state MASTER
+        interface eth0
+        virtual_router_id 51
+        priority 110
+        advert_int 1
+        authentication {
+            auth_type PASS
+            auth_pass changeme
+        }
+        virtual_ipaddress {
+            192.168.10.100/24
+        }
+        track_script {
+            chk_bunkerweb
+        }
+    }
+    ```
+
+=== "worker02（备）"
+
+    ```cfg title="/etc/keepalived/keepalived.conf"
+    global_defs {
+        enable_script_security
+        script_user root
+    }
+
+    vrrp_script chk_bunkerweb {
+        script "/usr/share/bunkerweb/helpers/healthcheck.sh ok"
+        interval 2
+        fall 2
+        rise 2
+    }
+
+    vrrp_instance VI_BUNKERWEB {
+        state BACKUP
+        interface eth0
+        virtual_router_id 51
+        priority 100
+        advert_int 1
+        authentication {
+            auth_type PASS
+            auth_pass changeme
+        }
+        virtual_ipaddress {
+            192.168.10.100/24
+        }
+        track_script {
+            chk_bunkerweb
+        }
+    }
+    ```
+
+检查未设置 `weight`，连续两次失败（约 4 秒）会使节点进入 `FAULT` 状态并释放 VIP。`script_user root` 用于执行 `docker compose exec`；`enable_script_security` 要求脚本及其路径不能被其他用户写入。请检查所有者和权限，包括 Docker 命令使用的 Compose 文件。VRRP 的 `auth_pass` 以明文传输，仅用于防止配置错误，因此实例应处于可信网络中。
+
+在两个实例上启动 keepalived：
+
+```bash
+sudo systemctl enable --now keepalived
+```
+
+!!! info "防火墙"
+    VRRP 使用 IP 协议 `112`（不是 TCP 或 UDP 端口）。请允许实例之间的该协议流量，并向客户端开放 `80` 和 `443` 端口。
+
+!!! tip "真实 IP"
+    客户端直接连接 VIP，因此无需配置 PROXY protocol 或 `X-Forwarded-For`。BunkerWeb 默认看到真实客户端 IP。
+
+**验证故障转移：**
+
+1. 在 `worker01` 上执行 `ip addr show eth0`，应能看到 VIP `192.168.10.100`。
+2. 停止 `worker01` 上的 BunkerWeb：Linux 使用 `sudo systemctl stop bunkerweb`，Docker 使用 `docker compose stop bunkerweb`。
+3. 确认 VIP 从 `worker01` 消失并出现在 `worker02`，然后测量实际环境中的客户端恢复时间。检查间隔和 VRRP 选举都会影响耗时；这些示例不保证经过 1.7 实测的切换时间。
+4. 再次启动 BunkerWeb。按上述优先级，`worker01` 在检查通过后重新获得 VIP；仍返回 `loading` 的实例不能接管。
+5. 使用 `sudo journalctl -u keepalived -f` 跟踪状态变化。
+
+### 注意事项
+
+- **Docker 边车。** 如果 keepalived 容器使用 `network_mode: "service:bunkerweb"`，BunkerWeb 容器重启后它会丢失网络接口，无法重新获得 VIP。添加 `depends_on: { bunkerweb: { condition: service_started, restart: true } }` 仅覆盖通过 Compose 发起的重启（`docker compose restart` 或 `up`），不覆盖 Docker 重启策略引起的自动重启（崩溃、内存不足）或普通 `docker restart`。这些情况下应同时重启两个容器，或像上面的 Docker 示例一样在宿主机运行 keepalived。
+- **管理端不可用。** 已有配置的实例继续返回 `ok` 并保留 VIP。在 1.7 中，如果重启时保留现有配置（`KEEP_CONFIG_ON_RESTART=yes`，默认值，且已有配置），实例可以继续执行该策略并保持接管资格。全新实例或重新生成配置的实例会保持 `loading`，直到收到配置。如果两个实例都没有可用配置，就没有可用 VIP。即使 WAF 检查正常，API、任务工作进程或消息代理故障仍可能阻止更新和证书任务。
+- **配置。** 管理端独立于 VIP 状态向两个 WAF 实例分发配置。测试前请确认两个实例均已收到最新的有效配置；VIP 检查本身不能证明配置已同步。
+- **共享状态。** 没有共享 Redis 时，运行时封禁和计数器保存在各实例本地，WAF 会话默认使用 Cookie 存储。在 1.7 中，周期性任务 `sync-bans` 还会通过数据库和内部 API 同步持久化封禁，无需 Redis；这并非故障切换时的即时同步，CrowdSec 租约仍由各实例管理。启用 Redis（`USE_REDIS=yes`，参见 Redis/Valkey 设置），让两个 WAF 实例连接同一 Redis，以共享支持的运行时状态和会话存储。此 WAF Redis 与 Celery 任务消息代理不同。仅有 Redis 不能保证跨实例会话有效：`SESSIONS_SECRET` 和 `SESSIONS_NAME` 默认为 `random`，由各实例分别生成。请在管理端为两者设置相同的固定值（全局设置，会分发给两个实例）。
+- **Let's Encrypt。** HTTP 验证钩子尝试向每个已注册实例发送令牌。两个 WAF 实例都必须能通过内部 API 访问并收到令牌，才能在故障转移后响应验证请求。
+
 ## 使用自定义 DNS 解析机制
 
 BunkerWeb 的 NGINX 配置可以根据您的需求定制，以使用不同的 DNS 解析器。这在各种场景中特别有用：

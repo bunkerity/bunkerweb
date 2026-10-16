@@ -3882,7 +3882,7 @@ Follow these steps to configure and use the Headers feature:
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 
@@ -4071,9 +4071,9 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! tip "Certificate Profiles"
     Let's Encrypt provides different certificate profiles for different use cases:
 
-    - **classic**: General-purpose certificates with 90-day validity (default)
-    - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
-    - **shortlived**: Enhanced security with 7-day validity for automated environments
+    - **classic**: General-purpose certificates with 90-day validity and up to 100 names (default)
+    - **tlsserver**: Optimized for TLS server authentication with 45-day validity, up to 25 names, and smaller payload
+    - **shortlived**: Enhanced security with 160-hour validity and up to 25 names for automated environments
     - **custom**: If your ACME server supports a different profile, set it using `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Profile Availability"
@@ -4102,7 +4102,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`          | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                                                                                                              |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | no       | **Concurrent Requests:** When set to `yes`, certbot-new issues certificate requests concurrently. Use with caution to avoid rate limits.                                                                                                                                       |
-| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates).                                                                                           |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (160-hour certificates).                                                                                           |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                                                                                                           |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | no       | **Maximum Retries:** Number of times to retry certificate generation on failure. Set to `0` to disable retries. Useful for handling temporary network issues or API rate limits.                                                                                               |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | no       | **Maximum Certbot Log Backups:** Number of rotated `letsencrypt.log` backups certbot keeps per job. Certbot's own default of 1000 piles up quickly; `50` is a sensible cap. Set to `0` to keep only the live log.                                                              |
@@ -4111,7 +4111,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
     - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is provided, the provider's default propagation time is used.
     - Full Let's Encrypt automation using the `http` challenge works in stream mode as long as you open the `80/tcp` port from the outside. Use the `LISTEN_STREAM_PORT_SSL` setting to choose your listening SSL/TLS port.
-    - If `LETS_ENCRYPT_PASSTHROUGH` is set to `yes`, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges
+    - If `LETS_ENCRYPT_PASSTHROUGH` is set to `yes`, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges. A `GET` or `HEAD` of a single token under `/.well-known/acme-challenge/` is then whitelisted and reaches the backend without any other check: antibot, blacklist, request rate limiting, Basic Auth and the ban check are all skipped for that request (connection limits still apply, nginx enforces them), which is more than a locally served challenge skips. ModSecurity is skipped too, but only while `USE_WHITELIST` is `yes` (the default), because the rule that turns it off for whitelisted clients is rendered only then. Deeper paths, other methods and non token-shaped names get the normal checks. The backend also receives the requested `Host`, even when `REVERSE_PROXY_CUSTOM_HOST` is set to a fixed name, since the challenge is validated against that name (a value using nginx variables still applies).
 
 !!! tip "HTTP vs. DNS Challenges"
     **HTTP Challenges** are easier to set up and work well for most websites:
@@ -4261,6 +4261,8 @@ Credentials may be given either with BunkerWeb's historical key names (shown in 
 Public IPv4 addresses in SERVER_NAME require LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http and LETS_ENCRYPT_PROFILE=shortlived; IPv6 and non-public addresses are rejected.
 
 No DNS record is needed for an IP identifier. Port 80 must reach BunkerWeb directly for HTTP-01. Keep DISABLE_DEFAULT_SERVER_STRICT_SNI=no because IP clients normally omit SNI. TLS without SNI selects a certificate only when the local IPv4 destination is explicitly configured in SERVER_NAME and is present in its IP SANs. There is no fallback to the only cached IP certificate: behind NAT, the local address must match the configured public address. HTTP Host cannot select a certificate. The default-server custom certificate override retains priority. DNS certificate behavior and account storage permissions remain unchanged.
+
+In single-site mode (`MULTISITE=no`) the other `SERVER_NAME` entries are aliases of the first one and all of them go into the same certificate. When names (hostnames or IP addresses) are added to a service that already has a certificate, BunkerWeb expands it and keeps the current certificate if the validation of a new name fails. Removing or swapping a name still reissues the certificate from scratch.
 
 ```env
 SERVER_NAME=<PUBLIC_IPV4>
@@ -5247,6 +5249,19 @@ The OWASP Core Rule Set also supports a range of **plugins** designed to extend 
 
 !!! note "Human-readable size values"
     For size settings like `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, the suffixes `k`, `m`, and `g` (case-insensitive) are supported and represent kibibytes, mebibytes, and gibibytes (multiples of 1024). Examples: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+### Concurrent audit logs
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Writer: `Serial` (default) or `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Empty by default; required absolute storage directory for `Concurrent`. |
+
+Set `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` and `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. BunkerWeb creates a missing directory on every instance when it starts and before each reload, owned by the nginx user with mode `0750` (never world-accessible). A directory you provision yourself, for example a persistent mount, is kept as it is and must be writable and searchable by the nginx worker. Use a persistent mount for retained records. BunkerWeb rejects invalid candidates before applying them: a start or reload that cannot create or use the directory is refused, and the running configuration stays in place. In global CRS mode (`USE_MODSECURITY_GLOBAL_CRS=yes`), configure both settings globally; service overrides do not select a separate writer.
+
+`MODSECURITY_SEC_AUDIT_LOG` stays the regular, lockable `.log` file: it contains complete records with `Serial`, and an index pointing to per-transaction files with `Concurrent`. The existing index path and its rotation rules are unchanged. The operator must manage disk capacity, access permissions and recursive retention of the dated subdirectories. Rotating the index does not remove transaction files. Check compatibility of log readers that expect Serial records before switching.
+
+Concurrent changes how records are stored; it does not sample requests or reduce the audit data selected by `MODSECURITY_SEC_AUDIT_LOG_PARTS`. Size storage for your request rate, selected parts and retention period; measure record sizes with representative traffic instead of assuming a fixed cost per blocked request.
 
 ## Monitoring <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

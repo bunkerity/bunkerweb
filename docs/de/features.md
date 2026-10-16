@@ -210,7 +210,7 @@ Zu beachtende Grenzen:
     | `AUTOCONF_MODE`          | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                                                                           |
     | `SWARM_MODE`             | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                                                                                 |
     | `KUBERNETES_MODE`        | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                                                                              |
-    | `KEEP_CONFIG_ON_RESTART` | `no`     | global    | Nein     | **Konfiguration bei Neustart behalten:** Konfiguration bei Neustart beibehalten. Auf 'yes' setzen, um das Zurücksetzen der Konfiguration beim Neustart zu verhindern. |
+    | `KEEP_CONFIG_ON_RESTART` | `yes`    | global    | Nein     | **Konfiguration bei Neustart behalten:** Die aktuelle Konfiguration beibehalten, wenn die Instanz neu startet, statt auf die temporäre Startkonfiguration zurückzufallen, bis der Scheduler eine neue sendet. Die Instanz setzt den Schutz währenddessen weiter durch. Auf `no` setzen, um die temporäre Konfiguration bei jedem Neustart neu zu erzeugen. |
     | `USE_TEMPLATE`           |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt.                                                            |
 
 === "Nginx-Einstellungen"
@@ -3765,7 +3765,7 @@ Führen Sie die folgenden Schritte aus, um die Headers-Funktion zu konfigurieren
     ```yaml
     COOKIE_FLAGS: "* HttpOnly SameSite=Strict"
     COOKIE_FLAGS_2: "session_cookie Secure HttpOnly SameSite=Strict"
-    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict Max-Age=3600"
+    COOKIE_FLAGS_3: "auth_cookie Secure HttpOnly SameSite=Strict"
     COOKIE_AUTO_SECURE_FLAG: "yes"
     ```
 
@@ -3954,9 +3954,9 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 !!! tip "Zertifikatsprofile"
     Let's Encrypt bietet verschiedene Zertifikatsprofile für unterschiedliche Anwendungsfälle:
 
-    - **classic**: Allzweck-Zertifikate mit 90-tägiger Gültigkeit (Standard)
-    - **tlsserver**: Optimiert für die TLS-Server-Authentifizierung mit 90-tägiger Gültigkeit und kleinerem Payload
-    - **shortlived**: Erhöhte Sicherheit mit 7-tägiger Gültigkeit für automatisierte Umgebungen
+    - **classic**: Allzweck-Zertifikate mit 90-tägiger Gültigkeit und bis zu 100 Namen (Standard)
+    - **tlsserver**: Optimiert für die TLS-Server-Authentifizierung mit 45-tägiger Gültigkeit, bis zu 25 Namen und kleinerem Payload
+    - **shortlived**: Erhöhte Sicherheit mit 160-stündiger Gültigkeit für bis zu 25 Namen in automatisierten Umgebungen
     - **custom**: Wenn Ihr ACME-Server ein anderes Profil unterstützt, legen Sie es mit `LETS_ENCRYPT_CUSTOM_PROFILE` fest.
 
 !!! info "Profilverfügbarkeit"
@@ -3985,7 +3985,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | nein     | **Staging verwenden:** Wenn auf `yes` gesetzt, wird die Staging-Umgebung von Let's Encrypt zum Testen verwendet. Staging hat höhere Ratenbegrenzungen, aber die Zertifikate sind nicht vertrauenswürdig.                                                                                                                                                               |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`              | `no`          | global    | nein     | **Alte Zertifikate löschen:** Wenn auf `yes` gesetzt, werden alte Zertifikate, die bei der Erneuerung nicht mehr benötigt werden, entfernt.                                                                                                                                                                                                                            |
 | `LETS_ENCRYPT_CONCURRENT_REQUESTS`          | `no`          | global    | nein     | **Parallele Anfragen:** Wenn auf `yes` gesetzt, stellt certbot-new Zertifikatsanfragen parallel. Vorsicht wegen Rate-Limits.                                                                                                                                                                                                                                           |
-| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (7-Tage-Zertifikate).                                                                                                                                                                             |
+| `LETS_ENCRYPT_PROFILE`                      | `classic`     | multisite | nein     | **Zertifikatsprofil:** Wählen Sie das zu verwendende Zertifikatsprofil aus. Optionen: `classic` (Allzweck), `tlsserver` (optimiert für TLS-Server) oder `shortlived` (160-Stunden-Zertifikate).                                                                                                                                                                             |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`               |               | multisite | nein     | **Benutzerdefiniertes Zertifikatsprofil:** Geben Sie ein benutzerdefiniertes Zertifikatsprofil ein, wenn Ihr ACME-Server nicht standardmäßige Profile unterstützt. Dies überschreibt `LETS_ENCRYPT_PROFILE`, falls gesetzt.                                                                                                                                            |
 | `LETS_ENCRYPT_MAX_RETRIES`                  | `0`           | multisite | nein     | **Maximale Wiederholungen:** Anzahl der Wiederholungsversuche bei der Zertifikatserstellung bei einem Fehler. Auf `0` setzen, um Wiederholungen zu deaktivieren. Nützlich bei temporären Netzwerkproblemen.                                                                                                                                                            |
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | nein     | **Maximale Certbot-Log-Backups:** Anzahl rotierter `letsencrypt.log`-Backups, die Certbot pro Job behält. Certbots eigener Standardwert von 1000 sammelt sich schnell an; `50` ist ein sinnvoller Grenzwert. Setzen Sie `0`, um nur das aktuelle Log zu behalten.                                                                                                      |
@@ -3994,7 +3994,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
     - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.
     - Wenn keine `LETS_ENCRYPT_DNS_PROPAGATION`-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet.
     - Die vollständige Let's Encrypt-Automatisierung mit der `http`-Challenge funktioniert im Stream-Modus, solange Sie den Port `80/tcp` von außen öffnen. Verwenden Sie die Einstellung `LISTEN_STREAM_PORT_SSL`, um Ihren SSL/TLS-Listening-Port zu wählen.
-    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist.
+    - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist. Ein `GET` oder `HEAD` eines einzelnen Tokens unter `/.well-known/acme-challenge/` wird dann auf die Whitelist gesetzt und erreicht das Backend ohne jede weitere Prüfung: Antibot, Blacklist, Ratenbegrenzung von Anfragen, Basic Auth und die Ban-Prüfung werden für diese Anfrage übersprungen (Verbindungslimits gelten weiterhin, NGINX setzt sie durch), mehr als bei einer lokal bereitgestellten Challenge übersprungen wird. ModSecurity wird ebenfalls übersprungen, aber nur, solange `USE_WHITELIST` auf `yes` steht (Standard), da die Regel, die es für Clients auf der Whitelist abschaltet, nur dann erzeugt wird. Tiefere Pfade, andere Methoden und Namen ohne Token-Form unterliegen den normalen Prüfungen. Das Backend erhält außerdem den angefragten `Host`, auch wenn `REVERSE_PROXY_CUSTOM_HOST` auf einen festen Namen gesetzt ist, da die Challenge gegen diesen Namen validiert wird (ein Wert mit NGINX-Variablen gilt weiterhin).
 
 !!! tip "HTTP- vs. DNS-Challenges"
     **HTTP-Challenges** sind einfacher einzurichten und funktionieren für die meisten Websites gut:
@@ -4153,6 +4153,8 @@ werden. Die vollständige Liste und die genauen Variablen stehen in der
 Öffentliche IPv4-Adressen in SERVER_NAME erfordern LETS_ENCRYPT_SERVER=letsencrypt, LETS_ENCRYPT_CHALLENGE=http und LETS_ENCRYPT_PROFILE=shortlived; IPv6 und nicht öffentliche Adressen werden abgelehnt.
 
 Für eine IP-Kennung ist kein DNS-Eintrag nötig. Port 80 muss BunkerWeb für HTTP-01 direkt erreichen. Lassen Sie DISABLE_DEFAULT_SERVER_STRICT_SNI=no, da IP-Clients normalerweise kein SNI senden. Ohne SNI wird ein Zertifikat nur ausgewählt, wenn die lokale IPv4-Zieladresse in SERVER_NAME konfiguriert und in seinen IP-SANs enthalten ist. Kein Rückgriff auf das einzige zwischengespeicherte IP-Zertifikat: Hinter NAT muss die lokale Adresse der konfigurierten öffentlichen Adresse entsprechen. HTTP Host wählt kein Zertifikat aus. Das benutzerdefinierte Zertifikat des Standardservers behält Vorrang. DNS-Zertifikate und Kontoberechtigungen bleiben unverändert.
+
+Im Single-Site-Modus (`MULTISITE=no`) sind die weiteren `SERVER_NAME`-Einträge Aliase des ersten und landen alle im selben Zertifikat. Werden Namen (Hostnamen oder IP-Adressen) zu einem Dienst hinzugefügt, der bereits ein Zertifikat hat, erweitert BunkerWeb es und behält das aktuelle Zertifikat, falls die Validierung eines neuen Namens fehlschlägt. Das Entfernen oder Austauschen eines Namens stellt das Zertifikat weiterhin komplett neu aus.
 
 ```env
 SERVER_NAME=<PUBLIC_IPV4>
@@ -5149,6 +5151,19 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
 
 !!! note "Menschenlesbare Größenwerte"
     Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+### Concurrent-Auditprotokolle
+
+| Einstellung | Standard | Beschreibung |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Schreibmodus: `Serial` (Standard) oder `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Standardmäßig leer; für `Concurrent` ist ein absoluter Speicherpfad erforderlich. |
+
+Setzen Sie `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` und `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. BunkerWeb erstellt ein fehlendes Verzeichnis auf jeder Instanz beim Start und vor jedem Reload, mit dem Benutzer nginx als Eigentümer und Modus `0750` (nie für andere zugänglich). Ein selbst bereitgestelltes Verzeichnis, etwa ein persistentes Volume, bleibt unverändert und muss für den nginx-Worker beschreibbar und durchsuchbar sein. Verwenden Sie für aufzubewahrende Daten ein persistentes Volume. BunkerWeb lehnt ungültige Konfigurationen vor der Anwendung ab: Ein Start oder Reload, der das Verzeichnis nicht erstellen oder verwenden kann, wird abgelehnt, und die laufende Konfiguration bleibt bestehen. Im globalen CRS-Modus (`USE_MODSECURITY_GLOBAL_CRS=yes`) müssen beide Einstellungen global gesetzt werden; Dienstüberschreibungen wählen keinen eigenen Schreibmodus.
+
+`MODSECURITY_SEC_AUDIT_LOG` bleibt eine normale, sperrbare `.log`-Datei: Bei `Serial` enthält sie vollständige Datensätze, bei `Concurrent` einen Index zu den Transaktionsdateien. Indexpfad und Rotationsregeln bleiben unverändert. Der Betreiber verwaltet Speicherplatz, Zugriffsrechte und die rekursive Aufbewahrung der datierten Unterverzeichnisse. Die Rotation des Index entfernt keine Transaktionsdateien. Prüfen Sie vor dem Wechsel die Kompatibilität der Protokollleser, die Serial-Datensätze erwarten.
+
+Concurrent ändert die Speicherung der Einträge; es führt keine Stichprobenauswahl von Anfragen durch und reduziert nicht die mit `MODSECURITY_SEC_AUDIT_LOG_PARTS` ausgewählten Auditdaten. Planen Sie den Speicher anhand der Anfragerate, der ausgewählten Teile und der Aufbewahrungsdauer. Messen Sie die Eintragsgrößen mit repräsentativem Datenverkehr, statt einen festen Aufwand pro blockierter Anfrage anzunehmen.
 
 ## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -6769,98 +6784,6 @@ Die Verwaltung erfolgt auf der **Workflows**-Seite der Web-UI oder über die API
 Regeln werden zentral gespeichert, in ein gemeinsames Artefakt kompiliert und mit dem üblichen
 Konfigurations-Push an alle Instanzen verteilt.
 
-## Security workflows
-
-STREAM-Unterstützung :x:
-
-Das Workflows-Plugin ergänzt eine Richtlinienebene zwischen einzelnen Einstellungen und Lua-Schutzfunktionen:
-wiederverwendbare, geordnete Regeln, die Sie Diensten zuweisen. Jede verbindet einen Bedingungsbaum
-mit genau einer Aktion.
-
-Eine Regel beantwortet Fragen, die einzelne Einstellungen allein nicht ausdrücken können:
-
-> **Wenn** eine Anfrage aus Frankreich kommt **und** `/login` aufruft **und** 10 Anfragen pro Minute
-> überschreitet, **dann** eine hCaptcha-Challenge anzeigen.
-
-Workflows **koordinieren** bestehende Schutzfunktionen. `challenge` übergibt die Anfrage an Antibot;
-ein Ratenschwellwert verwendet denselben Zählmechanismus wie Limit. Bestehende Einstellungen bleiben wirksam.
-
-### Auswertung einer Regel
-
-Für jeden Dienst werden Workflows in Zuordnungsreihenfolge ausgewertet, ihre Regeln in der von Ihnen
-festgelegten Reihenfolge. **Die erste tatsächlich zutreffende Regel gewinnt**, führt ihre einzelne
-Aktion aus und beendet die Auswertung.
-
-Bedingungen bilden einen Baum aus `ALL` / `ANY` / `NOT` über:
-
-| Bedingung | Prüft |
-| --------- | ----- |
-| IP / CIDR | Effektive Client-IP nach Real-IP-Auflösung |
-| Land | ISO-Land aus der GeoIP-Datenbank |
-| ASN | Nummer des autonomen Systems der Client-IP |
-| URI | Normalisierten Pfad: exakt, Präfix oder regulärer Ausdruck |
-| HTTP-Methode | Methode der Anfrage |
-| Ressourcengruppe | Anderswo gepflegte IP-, Länder- oder ASN-Gruppe, per ID referenziert |
-| CrowdSec-Urteil | Entscheidung über die Anfrage: Quelle (`appsec` oder `lapi`) und verlangte Maßnahme (`ban` oder `captcha`) |
-
-Bedingungen sind **dreiwertig**: wahr, falsch oder *unbekannt*, wenn benötigte Informationen fehlen,
-etwa eine GeoIP-Datenbank. Eine Regel trifft nur bei einem insgesamt wahren Baum zu. Ein Datenbankfehler
-lässt sie damit nicht mehr zutreffen, statt sie versehentlich passend zu machen.
-
-Eine **CrowdSec-Urteil**-Bedingung ist unentschieden, wenn CrowdSec den Dienst nicht bewertet hat,
-und falsch, wenn CrowdSec die Anfrage bewertet und nichts beanstandet hat. Das sind unterschiedliche
-Fälle; keiner trifft zu. Damit ein Workflow *anstelle* von CrowdSec antwortet, setzen Sie
-`CROWDSEC_DEFER_TO_WORKFLOWS=yes` auf dem Dienst. CrowdSec übergibt dann sein Urteil, statt es selbst
-anzuwenden; trifft keine Regel zu, wird es unverändert durchgesetzt.
-
-### Ratenschwellwerte entscheiden über den Treffer
-
-Eine Regel kann einen Schwellwert tragen. Dieser ist keine Aktion „Rate begrenzen“, sondern entscheidet,
-**ob die Regel überhaupt zutrifft**. Unterhalb des Schwellwerts wird die nächste Regel geprüft.
-
-Damit lässt sich „über 10 Anfragen pro Minute mit 429 antworten, sonst eine Challenge anzeigen“
-als zwei geordnete Regeln mit gleichen Bedingungen ausdrücken: zuerst mit Schwellwert und Blockierung,
-danach ohne Schwellwert.
-
-Der Zähler gilt je Dienst + Regel + Client-IP und beeinflusst die `LIMIT_REQ_*`-Zähler nicht.
-
-### Aktionen
-
-- **challenge** — einen bestimmten Antibot-Provider anzeigen (`captcha`, `hcaptcha`, `turnstile`, …).
-  Dies funktioniert auch bei `USE_ANTIBOT=no` und übergeht Antibots Ignorierlisten. Gewünschte
-  Ausnahmen gehören in die Regelbedingungen. Die Zugangsdaten des Providers müssen bereits im Dienst vorliegen.
-- **block** — mit dem Ablehnungsstatus der Instanz antworten, beziehungsweise `429` bei einer Regel zur Ratenbegrenzung.
-- **redirect** — den Client mit 301/302/303/307/308 an eine feste URL weiterleiten.
-
-### Erkennungsmodus
-
-`SECURITY_MODE=detect` verwendet dieselben Bäume, dieselbe Reihenfolge und dieselben Ratenzähler,
-setzt jedoch nichts durch. Die Aktion, die erfolgt *wäre*, wird in den Berichten gespeichert,
-sodass Sie eine Richtlinie vor der Aktivierung mit echtem Verkehr prüfen können.
-
-### Fehlerverhalten
-
-Hat eine Instanz noch keine kompilierte Richtlinie erhalten — beim ersten Start oder nach einem
-fehlgeschlagenen Push —, protokolliert sie einen Fehler und bedient den Verkehr mit ihren üblichen
-Schutzfunktionen. Eine auf der Control Plane nicht kompilierbare Richtlinie wird dagegen überhaupt
-nicht verteilt: Der Push wird abgebrochen und alle Instanzen behalten ihre bisherige Richtlinie.
-Das Löschen einer referenzierten Ressourcengruppe wird abgelehnt, solange die Regel existiert.
-
-### Regex-Budget
-
-| Einstellung | Standard | Kontext | Mehrfach | Beschreibung |
-| ----------- | -------- | ------- | -------- | ------------ |
-| `WORKFLOWS_REGEX_BUDGET` | `512` | global | nein | **Regex-Budget:** Maximale Anzahl verschiedener kompilierter regulärer Ausdrücke über alle Workflow-Regeln. NGINX teilt einen Regex-Cache zwischen allen Plugins. Regeln oberhalb dieses Budgets werden deaktiviert, statt unbemerkt die gesamte Instanz zu verlangsamen. |
-
-Die Kompilierung verarbeitet Workflows nach ID sortiert und verbraucht das Budget schrittweise.
-Wird es innerhalb eines Artefakts erschöpft, deaktiviert die Instanz die restlichen Regeln, nicht
-sich selbst. Durch die feste Reihenfolge deaktivieren zwei Instanzen mit demselben Artefakt dieselben Regeln.
-
-### Workflows verwalten
-
-Die Verwaltung erfolgt auf der **Workflows**-Seite der Web-UI oder über die API-Endpunkte `/workflows`.
-Regeln werden zentral gespeichert, in ein gemeinsames Artefakt kompiliert und mit dem üblichen
-Konfigurations-Push an alle Instanzen verteilt.
 ## Security.txt
 
 STREAM-Unterstützung :white_check_mark:
