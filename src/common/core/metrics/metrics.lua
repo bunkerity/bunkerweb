@@ -554,39 +554,43 @@ local TRIM_SCRIPT = [==[
   end
   redis.call('DEL', (KEYS[1] .. ':facets:initialized'))
   local to_remove = nb - max
-  local items = redis.call('LRANGE', KEYS[1], 0, to_remove - 1)
-  for _, raw in ipairs(items) do
-    local ok, req = pcall(cjson.decode, raw)
-    if not ok or type(req) ~= 'table' then
-      clear_indexes()
-      local trimmed = redis.pcall('LTRIM', KEYS[1], to_remove, -1)
-      if type(trimmed) == 'table' and trimmed.err then return trimmed end
-      return {err = 'invalid request payload while trimming'}
-    end
-    if req.id ~= nil and req.id ~= cjson.null and req.id ~= '' then
-      local removed = redis.pcall('SREM', KEYS[2], tostring(req.id))
-      if type(removed) == 'table' and removed.err then
+  -- Keep the decoded payloads bounded even when a lowered cap removes most reports.
+  for start = 0, to_remove - 1, 256 do
+    for _, raw in ipairs(redis.call('LRANGE', KEYS[1], start, math.min(start + 255, to_remove - 1))) do
+      local ok, req = pcall(cjson.decode, raw)
+      if not ok or type(req) ~= 'table' then
         clear_indexes()
-        return removed
+        local trimmed = redis.pcall('LTRIM', KEYS[1], to_remove, -1)
+        if type(trimmed) == 'table' and trimmed.err then return trimmed end
+        return {err = 'invalid request payload while trimming'}
       end
-    end
-    for i = 1, #fields do
-      local v = req[fields[i]]
-      if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-      local n = redis.pcall('HINCRBY', (KEYS[1] .. ':facet:') .. fields[i], v, -1)
-      if type(n) == 'table' and n.err then
-        clear_indexes()
-        return n
-      end
-      if n <= 0 then
-        local deleted = redis.pcall('HDEL', (KEYS[1] .. ':facet:') .. fields[i], v)
-        if type(deleted) == 'table' and deleted.err then
+      if req.id ~= nil and req.id ~= cjson.null and req.id ~= '' then
+        local removed = redis.pcall('SREM', KEYS[2], tostring(req.id))
+        if type(removed) == 'table' and removed.err then
           clear_indexes()
-          return deleted
+          return removed
+        end
+      end
+      for i = 1, #fields do
+        local v = req[fields[i]]
+        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+        local n = redis.pcall('HINCRBY', (KEYS[1] .. ':facet:') .. fields[i], v, -1)
+        if type(n) == 'table' and n.err then
+          clear_indexes()
+          return n
+        end
+        if n <= 0 then
+          local deleted = redis.pcall('HDEL', (KEYS[1] .. ':facet:') .. fields[i], v)
+          if type(deleted) == 'table' and deleted.err then
+            clear_indexes()
+            return deleted
+          end
         end
       end
     end
+    collectgarbage('collect')
   end
+
   local trimmed = redis.pcall('LTRIM', KEYS[1], to_remove, -1)
   if type(trimmed) == 'table' and trimmed.err then
     clear_indexes()
@@ -602,8 +606,7 @@ local TRIM_SCRIPT = [==[
 
 -- Marker invalidated up-front so an OOM-aborted rebuild retries next cycle instead
 -- of latching a partial result.
--- ponytail: one atomic LRANGE + 8xN HINCRBY blocks Redis; fine as it only fires on
--- rare facet desync, and chunking would break atomicity.
+-- shortcut: one EVAL blocks Redis during facet repair; split EVALs only with concurrency protection.
 local REBUILD_SCRIPT = [==[
   local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
   local function clear_indexes()
@@ -614,36 +617,43 @@ local REBUILD_SCRIPT = [==[
   if type(probe) == 'table' and probe.err then return probe end
   redis.call('DEL', (KEYS[1] .. ':facets:initialized'))
   clear_indexes()
-  local items = redis.call('LRANGE', KEYS[1], 0, -1)
   local kept = 0
-  for _, raw in ipairs(items) do
-    local ok, req = pcall(cjson.decode, raw)
-    local id
-    if ok and type(req) == 'table' then id = req.id end
-    if type(id) ~= 'string' or id == '' then
-      redis.call('LREM', KEYS[1], 1, raw)
-    else
-      local r = redis.pcall('SADD', KEYS[2], tostring(id))
-      if type(r) == 'table' and r.err then
-        clear_indexes()
-        return r
-      end
-      if r == 0 then
+  local size
+  repeat
+    -- Removed rows shift the list left, so the next slice starts after the retained rows.
+    local items = redis.call('LRANGE', KEYS[1], kept, kept + 255)
+    size = #items
+    for _, raw in ipairs(items) do
+      local ok, req = pcall(cjson.decode, raw)
+      local id
+      if ok and type(req) == 'table' then id = req.id end
+      if type(id) ~= 'string' or id == '' then
         redis.call('LREM', KEYS[1], 1, raw)
       else
-        kept = kept + 1
-        for i = 1, #fields do
-          local v = req[fields[i]]
-          if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
-          local r = redis.pcall('HINCRBY', (KEYS[1] .. ':facet:') .. fields[i], v, 1)
-          if type(r) == 'table' and r.err then
-            clear_indexes()
-            return r
+        local r = redis.pcall('SADD', KEYS[2], tostring(id))
+        if type(r) == 'table' and r.err then
+          clear_indexes()
+          return r
+        end
+        if r == 0 then
+          redis.call('LREM', KEYS[1], 1, raw)
+        else
+          kept = kept + 1
+          for i = 1, #fields do
+            local v = req[fields[i]]
+            if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+            local r = redis.pcall('HINCRBY', (KEYS[1] .. ':facet:') .. fields[i], v, 1)
+            if type(r) == 'table' and r.err then
+              clear_indexes()
+              return r
+            end
           end
         end
       end
     end
-  end
+    items = nil
+    collectgarbage('collect')
+  until size < 256
   redis.call('SET', (KEYS[1] .. ':facets:initialized'), '1')
   return kept
 ]==]
