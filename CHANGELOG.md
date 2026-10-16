@@ -3,6 +3,7 @@
 ## v1.6.17~rc2 - ????/??/??
 
 - [FEATURE] `db`: `DATABASE_CONNECT_TIMEOUT` (default `10s`) and `DATABASE_READ_TIMEOUT` (default `5m`) bound MySQL and MariaDB calls, and PostgreSQL gets the connect timeout and TCP keepalives but no query deadline, so a database that vanishes without a reset no longer blocks the scheduler, UI or API forever.
+- [BUGFIX] `all-in-one`: a reload signal (`docker kill -s HUP`) waits for a configuration install in progress before it restarts the services, instead of starting them on a half-written configuration.
 - [BUGFIX] `autoconf`: Kubernetes API calls time out and use TCP keepalives, and a controller stalled on its internal lock marks itself unhealthy, so a configured liveness probe restarts it instead of leaving it frozen on a dead API connection.
 - [BUGFIX] `backup`: the pre-upgrade backup no longer fails on leftover `test_*` write-check tables, and a slow but successful dump is no longer reported as a timeout.
 - [BUGFIX] `bans`: the ban check at the TLS ClientHello uses the same address as nginx for IPv4-mapped IPv6 clients and for IPv6 addresses ending in an IPv4 tail.
