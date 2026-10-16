@@ -245,7 +245,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -e USE_REAL_IP="yes" \
             -e USE_PROXY_PROTOCOL="yes" \
             -e REAL_IP_FROM="1.2.3.0/24 100.64.0.0/10" \
-            -e REAL_IP_HEADER="X-Forwarded-For" \
+            -e REAL_IP_HEADER="proxy_protocol" \
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \

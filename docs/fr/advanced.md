@@ -245,7 +245,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -e USE_REAL_IP="yes" \
             -e USE_PROXY_PROTOCOL="yes" \
             -e REAL_IP_FROM="1.2.3.0/24 100.64.0.0/10" \
-            -e REAL_IP_HEADER="X-Forwarded-For" \
+            -e REAL_IP_HEADER="proxy_protocol" \
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \

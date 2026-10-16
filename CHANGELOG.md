@@ -18,6 +18,7 @@
 - [BUGFIX] `ui`: the Reports and Bans filters match values containing `&`, `<`, `>`, quotes, `,` or `;`. (Refs #4013)
 - [BUGFIX] `ui`: DataTables sort buttons are named after the header text, not its HTML.
 - [MISC] `templates`: the `low` template sets `CROSS_ORIGIN_EMBEDDER_POLICY` to `unsafe-none`.
+- [DOCS] `realip`: with `REAL_IP_RECURSIVE`, the rightmost address not in the trusted list is the client, and the PROXY protocol example sets `REAL_IP_HEADER=proxy_protocol`.
 
 ## v1.6.17~rc1 - 2026/10/15
 
