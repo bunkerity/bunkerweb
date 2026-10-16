@@ -1674,7 +1674,7 @@ services:
     Cuando un contenedor debe ser ignorado por autoconf, establece `DOCKER_IGNORE_LABELS` en el controlador. Proporciona una lista de claves de etiquetas separadas por espacios o comas (por ejemplo `bunkerweb.SERVER_NAME`) o solo el sufijo (`SERVER_NAME`). Cualquier contenedor o fuente de configuración personalizada que lleve una etiqueta coincidente se omite durante el descubrimiento, y la etiqueta se ignora al traducir las configuraciones.
 
 !!! info "KEEP_CONFIG_ON_RESTART"
-    A diferencia de los ajustes anteriores, `KEEP_CONFIG_ON_RESTART` es leído directamente por el propio entrypoint del contenedor `bunkerweb` desde su entorno de proceso, no desde el scheduler ni la base de datos, por lo que debe establecerse en el propio contenedor `bunkerweb`. Establézcalo en `yes` para mantener la configuración generada previamente al reiniciar el contenedor en lugar de renderizar la configuración de carga. Predeterminado `no`.
+    A diferencia de los ajustes anteriores, `KEEP_CONFIG_ON_RESTART` es leído directamente por el propio entrypoint del contenedor `bunkerweb` desde su entorno de proceso, no desde el scheduler ni la base de datos, por lo que debe establecerse en el propio contenedor `bunkerweb`. Establézcalo en `yes` para mantener la configuración generada previamente al reiniciar el contenedor en lugar de renderizar la configuración de carga. Una instalación de la configuración interrumpida (contenedor detenido a la fuerza, falta de memoria) nunca se conserva: el siguiente arranque renderiza en su lugar la configuración de carga. Predeterminado `no`.
 
 ### Usando secretos de Docker
 

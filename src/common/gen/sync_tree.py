@@ -16,6 +16,13 @@ from typing import Callable, Iterator, Optional
 # Keep the prefix in step with pushswap.RESERVED_PREFIX.
 RESERVED_PREFIX = ".bw-"
 
+# Present in the destination from just before the first change of an install until just after the last
+# one. Each file is swapped atomically but the tree as a whole is not: an install cut short (SIGKILL, OOM,
+# container restart) leaves files of two generations side by side, and the sentinel is what tells the next
+# start not to serve that mix. It sits in the tree so it survives exactly what the tree survives, and its
+# name matches no include of nginx. Keep the name in step with the startup scripts.
+INSTALL_SENTINEL = f"{RESERVED_PREFIX}install-incomplete"
+
 # Created by the reload handler of the API before it signals nginx, removed by the new workers once
 # they are up (or by the init phase when it rejects the reload). A reader of the shared output must not
 # see it change while the marker exists.
@@ -57,15 +64,20 @@ def sync_tree(source: Path, destination: Path, before_change: Optional[Callable[
     Stale entries are only removed once every new one is in place. Source and destination must
     be on one filesystem.
 
+    The sentinel is created ahead of the first modification and removed once the last one is in place.
+    Nothing removes it when the install is cut short or raises, which is the point.
+
     before_change runs once, ahead of the first modification. Returns whether anything changed.
     """
     changed = False
+    sentinel = destination / INSTALL_SENTINEL
 
     def touch() -> None:
         nonlocal changed
         if not changed:
             changed = True
             destination.mkdir(parents=True, exist_ok=True)
+            sentinel.touch()
             if before_change:
                 before_change()
 
@@ -99,6 +111,8 @@ def sync_tree(source: Path, destination: Path, before_change: Optional[Callable[
             _remove(existing)
 
     walk(source, destination, True)
+    # A complete install leaves the tree equal to the render, whatever a cut-short one left behind.
+    sentinel.unlink(missing_ok=True)
     return changed
 
 

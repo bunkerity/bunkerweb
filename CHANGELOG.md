@@ -13,6 +13,8 @@
 - [BUGFIX] `core`: a configuration generation in which any template fails to render is refused and the running configuration is kept, in every integration; fix or remove the failing template to apply changes again.
 - [BUGFIX] `core`: a reload whose initialization fails (settings that cannot be loaded, a plugin that fails to load) is rejected and the running configuration is kept, and later reloads are not blocked.
 - [BUGFIX] `core`: a reload with an unreadable or invalid `plugin.json` is rejected before anything changes, so the running configuration keeps its protections, and the error names the file instead of `attempt to concatenate a nil value`. Directories without a `plugin.json` are still skipped.
+- [BUGFIX] `core`: an interrupted configuration install (container kill, out of memory) is no longer kept on restart with `KEEP_CONFIG_ON_RESTART=yes`: the next start renders the temporary configuration instead of serving a mix of two generations. This covers the generator and the configuration push to an instance.
+- [BUGFIX] `core`: the `bunkerweb` container exits with an error when its first configuration cannot be generated, instead of starting nginx without one.
 - [BUGFIX] `core`: the whitelist, blacklist, greylist and antibot checks skip the reverse DNS lookup when no rDNS entry is configured. (Fixes #4057)
 - [BUGFIX] `metrics`: a retried report push scans only the newest reports, so a large Redis list no longer pins Redis at 100% CPU.
 - [BUGFIX] `misc`: the default server certificate and key are saved to the database together, and an instance starting with a missing or mismatched pair replaces it with a temporary one until the scheduler pushes the real pair, instead of crash-looping. (Refs #4031)

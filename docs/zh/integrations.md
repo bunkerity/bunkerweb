@@ -1673,7 +1673,7 @@ services:
     有关环境变量的完整列表，请参阅文档的[设置部分](features.md)。
 
 !!! info "KEEP_CONFIG_ON_RESTART"
-    与上述设置不同，`KEEP_CONFIG_ON_RESTART` 由 `bunkerweb` 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 `bunkerweb` 容器本身上设置。设置为 `yes` 可在容器重启时保留之前生成的配置，而不是渲染加载配置。默认值为 `no`。
+    与上述设置不同，`KEEP_CONFIG_ON_RESTART` 由 `bunkerweb` 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 `bunkerweb` 容器本身上设置。设置为 `yes` 可在容器重启时保留之前生成的配置，而不是渲染加载配置。被中断的配置安装（容器被终止、内存不足）不会被保留：下次启动时会改为渲染加载配置。默认值为 `no`。
 
 ### 使用 Docker secrets
 

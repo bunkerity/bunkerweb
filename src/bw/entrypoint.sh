@@ -259,7 +259,14 @@ regenerate_temp_config=false
 # kept the writable layer, which is the opposite of the documented default.
 KEEP_CONFIG_ON_RESTART="${KEEP_CONFIG_ON_RESTART:-no}"
 
+# Present when an install into /etc/nginx was cut short. Each file lands atomically but the tree does
+# not, so what is there is a mix of two generations. Keep the name in step with sync_tree.INSTALL_SENTINEL.
+install_sentinel="/etc/nginx/.bw-install-incomplete"
+
 if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
+	regenerate_temp_config=true
+elif [ -e "$install_sentinel" ] ; then
+	log "ENTRYPOINT" "⚠️" "The previous configuration install was interrupted, so the preserved config may mix two generations: regenerating the temporary config instead of keeping it"
 	regenerate_temp_config=true
 else
 	log "ENTRYPOINT" "ℹ️" "Preserving current config on restart, keeping it enforced and asking the scheduler for the latest one ..."
@@ -283,7 +290,11 @@ rm -f /var/tmp/bunkerweb_reloading 2>/dev/null || true
 
 if [[ "$regenerate_temp_config" == "true" ]] ; then
   rm -f /var/tmp/bunkerweb_needs_config
-  python3 /usr/share/bunkerweb/gen/main.py --variables "$tmp_env_path"
+  if ! python3 /usr/share/bunkerweb/gen/main.py --variables "$tmp_env_path" ; then
+    log "ENTRYPOINT" "❌" "Error while generating config from $tmp_env_path, refusing to start nginx"
+    exit 1
+  fi
+  rm -f "$install_sentinel"
 fi
 
 # Clean orphaned NGINX temp files from previous runs

@@ -169,7 +169,14 @@ function start() {
 
     tmp_env_path="/var/tmp/bunkerweb/tmp.env"
 
+    # Present when an install into /etc/nginx was cut short. Each file lands atomically but the tree does
+    # not, so what is there is a mix of two generations. Keep the name in step with sync_tree.INSTALL_SENTINEL.
+    install_sentinel="/etc/nginx/.bw-install-incomplete"
+
     if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
+        regenerate_temp_config=true
+    elif [ -e "$install_sentinel" ] ; then
+        log "SYSTEMCTL" "⚠️" "The previous configuration install was interrupted, so the preserved config may mix two generations: regenerating the temporary config instead of keeping it"
         regenerate_temp_config=true
     else
         log "SYSTEMCTL" "ℹ️" "Preserving current config on restart, keeping it enforced and asking the scheduler for the latest one ..."
@@ -200,6 +207,7 @@ function start() {
             log "SYSTEMCTL" "❌" "Error while generating config from $tmp_env_path"
             exit 1
         fi
+        rm -f "$install_sentinel"
     fi
 
     # Clean orphaned NGINX temp files from previous runs
