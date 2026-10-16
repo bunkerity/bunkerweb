@@ -1,0 +1,45 @@
+src/autoconf/controllers/KubernetesController.py
+  s_16645a6f74fab1::t_7c016013c209ba 43-67,71,100-103
+  s_16645a6f74fab1::t_99a3cb30f93e9c 40-42
+CHANGELOG.md
+  s_280faf029c25ed::t_baa5ab502512a7 6
+src/autoconf/controllers/Controller.py
+  s_16645a6f74fab1::t_7c016013c209ba 7-8,12-15,19-44,60-65,248-274,288-310
+  s_16645a6f74fab1::t_581d5e1d831bb4 58-59,275-287
+  s_c6bba207c02674::t_88df4ea0f2023c 4,6,45-57,311-312
+src/autoconf/controllers/IngressController.py
+  s_16645a6f74fab1::t_7c016013c209ba 16
+  s_c6bba207c02674::t_2f97ae53f658e6 10,40,61,75,140,224,293-295
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0999f7eb45015be96a98f71edd0c778cfb7a2f11",
+  "prompts": {},
+  "sessions": {
+    "s_16645a6f74fab1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1401c-1cc6-7ff3-b18d-bb7d731b980d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_280faf029c25ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ac450d0-131f-4a1e-81b9-f04c2a982d5a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c6bba207c02674": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d2b794cd-ffb2-4321-a0ae-c06dc35288df",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

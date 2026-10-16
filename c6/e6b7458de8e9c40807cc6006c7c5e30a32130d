@@ -1,0 +1,55 @@
+src/bw/lua/bunkerweb/pushswap.lua
+  s_e19883d3e95947::t_2e887af221a32e 22-30,171-188,254-257,303-306
+docs/es/integrations.md
+  s_280faf029c25ed::t_ddc2795c75c36e 1677
+src/bw/entrypoint.sh
+  s_e19883d3e95947::t_8f2ace3cc12477 262-265,268-269,297
+  s_36ceb38f7cd3fb::t_523e1016dba301 293-296
+  s_e19883d3e95947::t_2bc751603c4024 270
+docs/integrations.md
+  s_280faf029c25ed::t_ddc2795c75c36e 1691
+src/common/gen/sync_tree.py
+  s_e19883d3e95947::t_87ca3ffac03b87 19-25,67-69,73,80,114-115
+docs/zh/integrations.md
+  s_280faf029c25ed::t_ddc2795c75c36e 1676
+CHANGELOG.md
+  s_280faf029c25ed::t_baa5ab502512a7 16-17
+src/linux/scripts/start.sh
+  s_e19883d3e95947::t_8f2ace3cc12477 172-175,178-180,210
+docs/de/integrations.md
+  s_280faf029c25ed::t_ddc2795c75c36e 1676
+docs/fr/integrations.md
+  s_280faf029c25ed::t_ddc2795c75c36e 1685
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c6e6b7458de8e9c40807cc6006c7c5e30a32130d",
+  "prompts": {},
+  "sessions": {
+    "s_280faf029c25ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ac450d0-131f-4a1e-81b9-f04c2a982d5a",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_36ceb38f7cd3fb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "233b55ec-dd47-4f3d-b588-87ce0db4f288",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e19883d3e95947": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c14219c8-a282-40cd-8ca7-2c07e5d6005e",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+src/ui/app/models/biscuit.py
+  s_2a07f82d42899f::t_c2742478d18c8f 53-57,59,68,72,194,228
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a292b8d3d2eaed0328dff16fb9a16d9eaa9212d6",
+  "prompts": {},
+  "sessions": {
+    "s_2a07f82d42899f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "406396a9-a669-4d0c-b86c-c8194e4e6824",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
