@@ -17,6 +17,7 @@
 - [BUGFIX] `ui`: the bulk delete and convert of configs works for file-managed configs whose names contain a dot.
 - [BUGFIX] `ui`: the Reports and Bans filters match values containing `&`, `<`, `>`, quotes, `,` or `;`. (Refs #4013)
 - [BUGFIX] `ui`: DataTables sort buttons are named after the header text, not its HTML.
+- [MISC] `templates`: the `low` template sets `CROSS_ORIGIN_EMBEDDER_POLICY` to `unsafe-none`.
 
 ## v1.6.17~rc1 - 2026/10/15
 
