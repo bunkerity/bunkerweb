@@ -77,7 +77,11 @@
             <div class="text-center text-primary">
                 <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
                   >
-                    {{ _("plugin.page.status.dedicated_page_unavailable") }}
+                    {% if blueprint_loaded %}
+                        {{ _("plugin.page.status.no_content") }}
+                    {% else %}
+                        {{ _("plugin.page.status.dedicated_page_unavailable") }}
+                    {% endif %}
                 </p>
             </div>
         </div>

@@ -19,7 +19,7 @@ from unittest.mock import Mock, patch
 from conftest import english  # what a converted template renders for a key
 import pytest
 
-from flask import Flask
+from flask import Blueprint, Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 import plugin_extensions  # type: ignore  # noqa: E402 -- on sys.path via the root conftest
@@ -752,6 +752,68 @@ def test_the_restricted_notice_is_distinct_from_the_no_page_one():
     assert markup.index("{% elif restricted %}") < markup.index("{% elif no_page %}")
     locales = json.loads((LOCALES / "en.json").read_text(encoding="utf-8"))
     assert "restricted_to_admins" in locales["plugin"]["page"]["status"]
+
+
+def _render_no_page(**context):
+    """Render `plugin_page.html` down its `no_page` branch, the way the route reaches it for a plugin with no page."""
+    env = Environment(
+        loader=ChoiceLoader([DictLoader({"dashboard.html": "{% block content %}{% endblock %}"}), FileSystemLoader(TEMPLATES)]),
+        autoescape=True,
+    )
+    env.globals.update(url_for=lambda *a, **k: "/plugins")
+    return env.get_template("plugin_page.html").render(
+        plugin={"id": "maintenance", "name": "Maintenance", "type": "pro", "version": "1"},
+        plugin_types={"pro": {}},
+        plugin_text=lambda _id, _key, fallback: fallback,
+        bw_version="1.7.0~alpha",
+        language="en",
+        pro_diamond_url="/pro.svg",
+        is_used=True,
+        is_metrics=True,
+        plugin_page="",
+        pre_render={},
+        no_page=True,
+        **context,
+    )
+
+
+def test_a_loaded_blueprint_without_a_page_does_not_ask_for_a_restart():
+    """A registered blueprint that has no page endpoint never gets one: telling the reader to restart the web UI sends them chasing a fault that does not exist."""
+    rendered = _render_no_page(blueprint_loaded=True)
+    assert english("plugin.page.status.no_content") in rendered
+    assert english("plugin.page.status.dedicated_page_unavailable") not in rendered
+
+
+def test_a_blueprint_not_loaded_yet_still_asks_for_a_restart():
+    rendered = _render_no_page(blueprint_loaded=False)
+    assert english("plugin.page.status.dedicated_page_unavailable") in rendered
+    assert english("plugin.page.status.no_content") not in rendered
+
+
+@pytest.mark.parametrize("registered", [True, False])
+def test_the_route_tells_the_template_whether_the_blueprint_is_loaded(route_app, monkeypatch, tmp_path, registered):
+    module, app = route_app
+    plugin = "myext"
+    module.API_CLIENT.reset_mock()
+    monkeypatch.setattr(module, "TMP_DIR", tmp_path / "tmp")
+    monkeypatch.setattr(module, "current_user", SimpleNamespace(admin=True))
+    module.BW_CONFIG.get_plugins.return_value = {plugin: {"name": "My Ext", "type": "pro", "settings": {}}}
+    module.BW_CONFIG.get_config.return_value = {"USE_METRICS": "yes", "SERVER_NAME": "www.example.com"}
+    plugin_root = tmp_path / "plugins" / plugin
+    (plugin_root / "ui").mkdir(parents=True)  # neither template.html nor actions.py: a blueprint-only plugin
+    monkeypatch.setattr(module, "get_plugin_path", lambda _: plugin_root)
+    captured = {}
+    monkeypatch.setattr(module, "render_template", lambda name, **context: captured.update(context) or "")
+    if registered:
+        app.blueprints.pop(plugin, None)
+        app.register_blueprint(Blueprint(plugin, __name__))
+    try:
+        with app.test_request_context(f"/plugins/{plugin}", method="GET"):
+            module.custom_plugin_page.__wrapped__(plugin)
+    finally:
+        app.blueprints.pop(plugin, None)
+    assert captured.get("no_page") is True
+    assert captured.get("blueprint_loaded") is registered
 
 
 # --------------------------------------------------------------------------------------

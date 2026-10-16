@@ -174,6 +174,23 @@ def test_asking_whether_an_endpoint_exists_does_not_warn_about_it(probe):
     logger.warning.assert_not_called()
 
 
+def test_probing_a_pageless_plugin_does_not_log_at_any_level(probe):
+    """`menu.html` and `breadcrumb.html` probe every pageless plugin on every render. The warning was
+    moved off the probe, but `_build_url` still logged a DEBUG line per candidate (`plugin` and
+    `plugin.plugin_page`): 576 lines in one session's log, 32 names x 18 renders, all noise. A real
+    miss through `custom_url_for` keeps its diagnostics."""
+    custom_url_for, logger, endpoint_exists = probe
+
+    assert endpoint_exists("antibot") is False
+    assert endpoint_exists("nope.nope_page") is False
+    logger.debug.assert_not_called()
+    logger.warning.assert_not_called()
+
+    assert custom_url_for("antibot") == "#"
+    assert logger.debug.called, "a real miss must still leave its DEBUG trail"
+    assert logger.warning.called
+
+
 def test_the_probe_and_the_url_agree_on_what_resolves(probe):
     """Two callers, one notion of resolvable — or the menu links one thing and the href says
     another."""

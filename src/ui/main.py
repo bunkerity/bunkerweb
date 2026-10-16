@@ -965,8 +965,11 @@ with app.app_context():
     # blueprint that failed to register, and it is invisible in the rendered page.
     ENDPOINTS_WITHOUT_A_PAGE_SUFFIX = ("static", "index", "loading", "check", "check_reloading", "i18n_catalog")
 
-    def _build_url(endpoint, **values):
-        """The URL for `endpoint` under the page convention, or None when nothing matches."""
+    def _build_url(endpoint, *, _log=True, **values):
+        """The URL for `endpoint` under the page convention, or None when nothing matches.
+
+        `_log=False` is for a probe (`endpoint_exists`): a miss there is an answer, not a diagnostic.
+        """
         if not endpoint:
             return None
 
@@ -979,7 +982,8 @@ with app.app_context():
             try:
                 return url_for(candidate, **values)
             except BuildError as e:
-                LOGGER.debug(f"Couldn't build the URL for {candidate}: {e}")
+                if _log:
+                    LOGGER.debug(f"Couldn't build the URL for {candidate}: {e}")
         return None
 
     def custom_url_for(endpoint, **values):
@@ -999,7 +1003,7 @@ with app.app_context():
         that makes the real warnings unfindable. The warning is right for an *unintended* miss and
         wrong for a deliberate probe, so the probe gets its own door.
         """
-        return _build_url(endpoint) is not None
+        return _build_url(endpoint, _log=False) is not None
 
     # Declare functions for jinja2
     def to_iso(val):

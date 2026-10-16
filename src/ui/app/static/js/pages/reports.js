@@ -6,6 +6,7 @@ $(document).ready(function () {
       : (key, fallback) => fallback || key; // Fallback
   const baseFlagsUrl = $("#base_flags_url").val().trim();
   const crowdsecUrl = $("#crowdsec-url").val().trim();
+  const crowdsecLogoUrl = ($("#crowdsec-logo-url").val() || "").trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
   const filtersStateCache = new Map();
@@ -670,6 +671,33 @@ $(document).ready(function () {
               const investigateUrl = `${crowdsecUrl}?ip=${encodeURIComponent(
                 String(row.ip || ""),
               )}`;
+              // The investigation page only knows about CrowdSec decisions.
+              const isCrowdsecReport =
+                String(row.reason || "")
+                  .trim()
+                  .toLowerCase() === "crowdsec";
+              const investigateLabel = `${t(
+                "crowdsec.investigation.submit",
+                "Investigate",
+              )} · CrowdSec`;
+              const investigateLink = isCrowdsecReport
+                ? `<a class="btn btn-outline-crowdsec btn-sm d-inline-flex align-items-center me-1"
+                       href="${escapeHtmlAttribute(investigateUrl)}"
+                       aria-label="${escapeHtmlAttribute(investigateLabel)}"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="bottom"
+                       data-bs-original-title="${escapeHtmlAttribute(
+                         investigateLabel,
+                       )}">
+                      ${
+                        crowdsecLogoUrl
+                          ? `<img src="${escapeHtmlAttribute(
+                              crowdsecLogoUrl,
+                            )}" width="16" height="16" alt="" aria-hidden="true" />`
+                          : `<i class="bx bx-search-alt bx-xs" aria-hidden="true"></i>`
+                      }
+                    </a>`
+                : "";
               return `
                 <div class="d-flex justify-content-center align-items-center">
                   ${investigateLink}

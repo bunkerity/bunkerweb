@@ -179,6 +179,55 @@ table.table.dataTable > tbody > tr.selected:hover > td {
   background-color: rgba(var(--bs-primary-rgb), 0.16);
 }
 
+/* DataTables toolbars: the start group (actions) and the end group (search,
+   filters) wrap as whole units. When both do not fit, the end group drops to
+   its own row aligned with the first one, instead of floating right under an
+   action group that split itself. Independent of label length. */
+.dt-container > .row {
+  row-gap: 0.5rem;
+}
+
+.dt-container > .row > .dt-layout-start + .dt-layout-end {
+  margin-left: 0 !important;
+}
+
+.dt-container > .row > .dt-layout-start .dt-buttons,
+.dt-container > .row > .dt-layout-end .dt-buttons {
+  row-gap: 0.5rem;
+}
+
+/* CrowdSec brand palette, taken from their logo: #4e4a99 purple, #3e3978 for
+   the pressed state. */
+.btn-outline-crowdsec {
+  --bs-btn-color: #4e4a99;
+  --bs-btn-border-color: #4e4a99;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #4e4a99;
+  --bs-btn-hover-border-color: #4e4a99;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #3e3978;
+  --bs-btn-active-border-color: #3e3978;
+  --bs-btn-disabled-color: #4e4a99;
+  --bs-btn-disabled-border-color: #4e4a99;
+  --bs-btn-focus-shadow-rgb: 78, 74, 153;
+}
+
+/* The logo keeps its own colours, so the outline is lightened instead of the
+   mark for readability on the dark theme. */
+[data-bs-theme="dark"] .btn-outline-crowdsec {
+  --bs-btn-color: #9b97d8;
+  --bs-btn-border-color: #9b97d8;
+  --bs-btn-hover-color: #1b1b28;
+  --bs-btn-hover-bg: #9b97d8;
+  --bs-btn-hover-border-color: #9b97d8;
+  --bs-btn-active-color: #1b1b28;
+  --bs-btn-active-bg: #b6b3e4;
+  --bs-btn-active-border-color: #b6b3e4;
+  --bs-btn-disabled-color: #9b97d8;
+  --bs-btn-disabled-border-color: #9b97d8;
+  --bs-btn-focus-shadow-rgb: 155, 151, 216;
+}
+
 .text-bw-green {
   color: var(--bs-bw-green) !important;
 }

@@ -23,10 +23,11 @@ MARKER_RE = re.compile(r"/\* [a-z0-9-]+\.css \*/")
 # The 1.7 overrides.css as it was before the split (HEAD b1b3cc27e): its non-blank lines, after the
 # leading banner comment (the index rewrites it), hashed in file order. A part cut that drops, duplicates
 # or reorders a line changes this; blank lines and the per-part `/* name.css */` markers do not.
-# Re-pinned for the four tooltip lines of dev 890d8777c (`--bs-tooltip-max-width`, `.tooltip-inner { overflow-wrap }`);
+# Re-pinned for the four tooltip lines of dev 890d8777c (`--bs-tooltip-max-width`, `.tooltip-inner { overflow-wrap }`)
+# and for the 44 lines of dev 83462ec57 (DataTables toolbar wrap) and 04330f635 (`.btn-outline-crowdsec`) in main.css;
 # the next edit to any part re-pins it the same way.
-PRE_SPLIT_LINES = 4433
-PRE_SPLIT_SHA256 = "1acb60c0ba488f5bc81226ea59b7e763f76f796d3193b1b5911620d75a573e70"
+PRE_SPLIT_LINES = 4477
+PRE_SPLIT_SHA256 = "27400c7c47ea89f6357f2d2d7f53e4669ef1dbb7e6126865544541e0aec34dcf"
 # The one line the split rewrote on purpose: a comment citing `overrides.css:4390-4398`, a line range that no longer exists.
 REFRESHED_COMMENT = ("but kit-fidelity.css's", "but overrides.css:4390-4398's")
 
