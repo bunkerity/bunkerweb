@@ -24,6 +24,7 @@
 - [BUGFIX] `ui`: the bulk delete and convert of configs works for file-managed configs whose names contain a dot.
 - [BUGFIX] `ui`: the Reports and Bans filters match values containing `&`, `<`, `>`, quotes, `,` or `;`. (Refs #4013)
 - [BUGFIX] `ui`: DataTables sort buttons are named after the header text, not its HTML.
+- [BUGFIX] `ui`: the jobs page finishes loading again, its filter panes broke when the reload and async columns became sortable by value.
 - [MISC] `templates`: the `low` template sets `CROSS_ORIGIN_EMBEDDER_POLICY` to `unsafe-none`.
 - [DOCS] `kubernetes`: the quickstart reads the LoadBalancer address from the `mybw-bunkerweb-external` Service.
 - [DOCS] `realip`: with `REAL_IP_RECURSIVE`, the rightmost address not in the trusted list is the client, and the PROXY protocol example sets `REAL_IP_HEADER=proxy_protocol`.
