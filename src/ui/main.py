@@ -75,6 +75,7 @@ from app.utils import (
 )
 from app.i18n import browser_catalog, init_i18n, plugin_catalog_fingerprint, resolve_page_title, translated
 from app.lang_config import SUPPORTED_LANGUAGES
+from app.support_bundle import read_plugin_version
 
 from app.routes.about import about
 from app.routes.bans import bans
@@ -533,6 +534,7 @@ def refresh_app_context():
                         plugin_blueprints.add(bp_name)
 
                         bp.plugin_priority = priority
+                        bp.plugin_version = read_plugin_version(plugin_root)
                         bp.import_path = blueprint_dir
                         app.plugin_sys_paths[bp_name] = blueprint_dir
 

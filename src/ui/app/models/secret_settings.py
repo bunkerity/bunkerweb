@@ -13,11 +13,25 @@ The placeholder matches every shipped password setting's regex, so neither the b
 `pattern=` nor the Configurator refuses a form that merely carries it through.
 """
 
-from re import sub
+from re import VERBOSE as re_X, compile as re_compile, sub
 from typing import Any, Dict, FrozenSet, Mapping, Optional
 
 SECRET_PLACEHOLDER = "__BW_SECRET_UNCHANGED__"
 REDACTED = "[REDACTED]"
+
+# The database URIs are `type: text` yet carry a password: the support export masks that part only.
+URI_SETTINGS = ("DATABASE_URI", "DATABASE_URI_READONLY")
+# Scheme and userinfo part of sqlalchemy.engine.url._parse_url, so the password span is the one SQLAlchemy parses
+URL_USERINFO = re_compile(
+    r"""
+    (?P<name>[\w\+]+)://
+    (?:
+        (?P<username>[^:/]*)
+        (?::(?P<password>[^@]*))?
+    @)
+    """,
+    re_X,
+)
 
 
 def secret_setting_names(plugins_settings: Mapping[str, Mapping[str, Any]]) -> FrozenSet[str]:
@@ -65,3 +79,25 @@ def restore_secrets(
             value = _value(entry) or ""
         restored[key] = value
     return restored
+
+
+def mask_uri(uri: str) -> str:
+    """Redact the password of a SQLAlchemy URL, keeping every other character as is."""
+    match = URL_USERINFO.match(uri)
+    if not match or not match["password"]:
+        return uri
+    # SQLAlchemy ends the password at the first "@", the host part may still hold some, so redact up to the last one before the path or query
+    authority_end = min((i for i in (uri.find("/", match.end()), uri.find("?", match.end())) if i >= 0), default=len(uri))
+    end = max(match.end(), uri.rfind("@", match.end() - 1, authority_end) + 1)
+    return f"{uri[: match.start('password')]}{REDACTED}{uri[end - 1 :]}"  # noqa: E203
+
+
+def mask_uri_settings(config: Mapping[str, Any]) -> Dict[str, Any]:
+    """Copy of `config` with the password of every database URI masked; keys may carry a service prefix."""
+    masked = {}
+    for key, entry in config.items():
+        value = _value(entry)
+        if isinstance(value, str) and any(key == name or key.endswith(f"_{name}") for name in URI_SETTINGS):
+            entry = {**entry, "value": mask_uri(value)} if isinstance(entry, Mapping) else mask_uri(value)
+        masked[key] = entry
+    return masked

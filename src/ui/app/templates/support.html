@@ -78,6 +78,25 @@
                 </div>
             {% endcall %}
         </div>
+        {% if user_admin %}
+            {# Owner only (the route checks current_user.admin): plugin inventory and recent errors of this Web UI. #}
+            <div class="col-6 col-xl-4">
+                {% call card(classes="p-4 h-100", icon="bx-package", title="Web UI Diagnostics", title_key="support.card.ui_bundle.title") %}
+                    <div class="d-flex flex-column align-items-center justify-content-center text-center gap-2 h-100">
+                        <a href="{{ support_url }}/ui_bundle"
+                           role="button"
+                           aria-pressed="true"
+                           class="btn btn-outline-secondary"
+                           target="_blank"
+                           rel="noopener">
+                            <span class="bx bx-download me-0 me-md-2" aria-hidden="true"></span>
+                            <span class="d-none d-md-inline">{{ _("support.card.ui_bundle.button") }}</span>
+                        </a>
+                        <small class="text-muted">{{ _("support.card.ui_bundle.help") }}</small>
+                    </div>
+                {% endcall %}
+            </div>
+        {% endif %}
     </div>
     <!--/ Content -->
 {% endblock %}
