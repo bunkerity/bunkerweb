@@ -55,6 +55,7 @@ start() {
             echo "PROXY_ALLOW_IPS=127.0.0.1,::1"
             echo "# ENABLE_HEALTHCHECK=no"
             echo "# UI_USE_REDIS=yes"
+            echo "# API_URL=http://127.0.0.1:8888"
             echo "LOG_LEVEL=info"
             echo "LOG_TYPES=file"
             echo "# LOG_FILE_PATH=/var/log/bunkerweb/ui.log"
@@ -130,6 +131,13 @@ start() {
     # But we keep the above explicit exports to ensure defaults are properly set
     export_env_file /etc/bunkerweb/variables.env
     export_env_file /etc/bunkerweb/ui.env
+
+    # The UI reads everything through the API. On Linux the API binds 127.0.0.1:8888
+    # (see bunkerweb-api.sh); the bw-api:5000 default baked into the UI is container-only.
+    # A value from ui.env or variables.env (exported above) wins. API_TOKEN comes from
+    # variables.env, where postinstall.sh provisions it.
+    : "${API_URL:=http://127.0.0.1:8888}"
+    export API_URL
 
 
     if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
