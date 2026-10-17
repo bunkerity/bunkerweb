@@ -375,7 +375,7 @@ jobs:
           python3 .github/scripts/release_artifacts.py assemble --directory receipts
           sha256sum release-manifest.json > release-manifest.json.sha256
           echo "sha256=$(cut -d ' ' -f 1 release-manifest.json.sha256)" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-manifest
           path: release-manifest.json*
