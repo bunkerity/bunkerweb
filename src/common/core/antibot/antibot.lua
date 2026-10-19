@@ -1076,10 +1076,11 @@ function antibot:get_original_uri()
 	local antibot_uri = self.variables["ANTIBOT_URI"]
 	if self.ctx.bw.uri == antibot_uri then
 		-- Prepared at the challenge endpoint: recover the target from the ?next= hint.
-		local args = ngx.req.get_uri_args()
-		local next_arg = args and args["next"]
-		if type(next_arg) == "table" then
-			next_arg = next_arg[1]
+		local next_arg = first_value(ngx.req.get_uri_args()["next"])
+		-- The challenge form POSTs without ?next=, so a re-prepare on a failed solve reads the hidden field.
+		if not next_arg and self.ctx.bw.request_method == "POST" then
+			ngx.req.read_body()
+			next_arg = first_value((ngx.req.get_post_args(8) or {})["next"])
 		end
 		return is_safe_relative_path(next_arg, antibot_uri) or "/"
 	end
