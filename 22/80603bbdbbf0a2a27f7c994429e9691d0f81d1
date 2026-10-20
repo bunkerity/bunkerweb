@@ -1,0 +1,25 @@
+src/api/app/routers/configs.py
+  s_907bc88363a6b7::t_fd27445e68049e 104
+tests/unit/api_app/test_openapi_schema.py
+  s_907bc88363a6b7::t_070f04e59dd4b1 14-15,20
+  s_907bc88363a6b7::t_80046e7e44ebed 44
+  s_907bc88363a6b7::t_0b1c023e5e499b 46-48
+  s_907bc88363a6b7::t_c81d6ebcb5ef30 1-4,7-13,16-19,21-34,38-42,45
+  s_907bc88363a6b7::t_9fda1d22e4db9f 5-6,35-37,43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2280603bbdbbf0a2a27f7c994429e9691d0f81d1",
+  "prompts": {},
+  "sessions": {
+    "s_907bc88363a6b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4e91d7d-cf22-4014-b907-2966164380fb",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
