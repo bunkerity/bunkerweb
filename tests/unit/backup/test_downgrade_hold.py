@@ -271,7 +271,9 @@ class TestBrokerStateAndDrain:
         assert state["reachable"] is False
         assert "sup3rsecret" not in state["error"]
 
-    def test_no_broker_url_is_reported_not_raised(self):
+    def test_no_broker_url_is_reported_not_raised(self, monkeypatch):
+        # `broker_url()` falls back to the default address, which answers on any host running Redis.
+        monkeypatch.setattr(downgrade, "broker_url", lambda: "")
         state = broker_state(client=None, url="")
         assert state["reachable"] is False and state["error"]
 
