@@ -101,7 +101,7 @@ def list_configs(
 def upload_configs(
     files: List[UploadFile] = File(..., description="One or more config files to create"),
     service: Optional[str] = Form(None, description='Service id; use "global" or leave empty for global'),
-    type: Annotated[ConfigType, Form(description="Config type")] = ...,  # noqa: A002
+    type: ConfigType = Form(..., description="Config type"),  # noqa: A002
     is_draft: bool = Form(False, description="Mark uploaded custom configs as draft"),
 ) -> JSONResponse:
     """Create new custom configs from uploaded files (method="api").
