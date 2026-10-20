@@ -3,6 +3,7 @@
 ## v1.6.17~rc3 - ????/??/??
 
 - [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `unbounded-element`.
+- [BUGFIX] `core`: the local cache's IPC events expire after 5 minutes and a worker skips expired ones without waiting, so the `CACHESTORE_IPC_MEMORY_SIZE` zone no longer fills up and requests stop stalling 0.3 s with `could not poll ipc events: timeout`.
 
 ## v1.6.17~rc2 - 2026/10/16
 
