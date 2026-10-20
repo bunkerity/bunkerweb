@@ -1,0 +1,28 @@
+src/autoconf/controllers/KubernetesController.py
+  s_541384a53eb643::t_80b77716620e80 673,675-681
+  s_64f7165edc727a::t_86a3715e165cbe 24-28,666,674,685,701-702
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "257ee147f294c660661d5e2e63b7f30cfacf9a31",
+  "prompts": {},
+  "sessions": {
+    "s_541384a53eb643": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a158af-b565-7121-b4ec-ab5b4cbd798a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_64f7165edc727a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15870-1980-7771-a8f5-ab57e43809eb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
