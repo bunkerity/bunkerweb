@@ -21,19 +21,11 @@ from controllers.Controller import Controller, HoldTimeLock
 # Written by main.py once the controller starts and checked by healthcheck-autoconf.sh.
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
 
-# A watch.Watch().stream() call that ran at least this long before returning without an
-# exception is treated as a healthy, established connection the Kubernetes API server closed
-# on its own (a randomized idle-connection timeout, commonly on the order of 30-60+ minutes),
-# not a failure -- this is the only way a watch for a resource kind with zero objects (a fresh
-# cluster with no Ingress yet, an optional Gateway API route kind with no instances) ever gets
-# a signal at all, since it never receives a single event. A connection that returns cleanly
-# before this threshold (typically instantly, e.g. an immediately-refused connection) still
-# counts as a failed attempt, so a watch that cannot connect at all still exhausts its retries
-# in seconds, same as before.
-WATCH_ESTABLISHED_SECONDS = 60
+# Request a clean server-side watch close before common 60-second infrastructure idle cutoffs.
+# The client read timeout below must remain longer than this server-side timeout.
+WATCH_TIMEOUT_SECONDS = 45
 
-# (connect, read) timeouts, in seconds, passed as `_request_timeout` to every non-streaming Kubernetes
-# API call (watch streams are long-lived and are bounded by the socket options below instead). All
+# (connect, read) timeouts, in seconds, passed as `_request_timeout` to Kubernetes API calls. All
 # watch threads share `_internal_lock` and the thread applying a configuration holds it across these
 # calls: a connection the network dropped without a RST would block that thread, and with it every
 # other watch, forever. A timed-out call raises, the lock is released and the watch restarts.
@@ -671,16 +663,26 @@ class KubernetesController(Controller):
     def _get_stream_with_retries(self, watch_type, what, retries=5):
         attempt = 0
         ignored = False
+        stream = watch.Watch()
         while attempt < retries:
             started = time()
             try:
                 if not ignored:
                     self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
                 ignored = False
-                yield from watch.Watch().stream(what)
+                for event in stream.stream(
+                    what, resource_version=stream.resource_version, timeout_seconds=WATCH_TIMEOUT_SECONDS, _request_timeout=API_REQUEST_TIMEOUT
+                ):
+                    # Gateway API wrappers lack the return-type metadata Watch needs to track versions.
+                    raw_object = event.get("raw_object") if isinstance(event, dict) else None
+                    metadata = raw_object.get("metadata") if isinstance(raw_object, dict) else None
+                    if isinstance(metadata, dict) and metadata.get("resourceVersion"):
+                        stream.resource_version = metadata["resourceVersion"]
+                    yield event
             except ApiException as e:
                 if e.status == 410 and "Expired: too old resource version: " in e.reason:
                     self._logger.debug(f"{e.reason} while watching {watch_type}, resetting watch stream")
+                    stream.resource_version = None
                     ignored = True
                     attempt += 1
                     continue
@@ -696,10 +698,8 @@ class KubernetesController(Controller):
                 self._logger.debug(format_exc())
                 self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
             else:
-                # The stream ended without raising. If it had been running a while, this is
-                # the API server closing an established, healthy connection on its own idle
-                # timeout, not a failure: reconnect immediately and reset the retry budget.
-                if time() - started >= WATCH_ESTABLISHED_SECONDS:
+                # Brief clean closes can be broken connections; keep their retry backoff and health failure.
+                if time() - started >= WATCH_TIMEOUT_SECONDS // 2:
                     self._mark_healthy(watch_type)
                     attempt = 0
                     continue

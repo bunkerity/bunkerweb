@@ -3,6 +3,7 @@
 ## v1.6.17~rc3 - ????/??/??
 
 - [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `unbounded-element`.
+- [BUGFIX] `autoconf`: quiet Kubernetes watches reconnect without restarting the controller, while repeated short closures still fail health checks. (Fixes #4064)
 - [BUGFIX] `badbehavior`: a ban keeps only its newest events as evidence, at most `BAD_BEHAVIOR_REPORT_MAX_EVENTS` (default `100`, never more than the threshold), with URLs and methods cut at `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` (default `512` bytes), so the report written for every request rejected during the ban no longer fills Redis. The Reports page shows the real request count.
 - [BUGFIX] `core`: the local cache's IPC events expire after 5 minutes and a worker skips expired ones without waiting, so the `CACHESTORE_IPC_MEMORY_SIZE` zone no longer fills up and requests stop stalling 0.3 s with `could not poll ipc events: timeout`.
 
