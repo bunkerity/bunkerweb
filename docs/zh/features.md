@@ -989,7 +989,11 @@ STREAM 支持 :white_check_mark:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | 否   | **阈值：** 一个 IP 在计数周期内可以生成的“不良”状态码的数量，超过该数量将被封禁。                                                  |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | 否   | **计数周期：** 计算不良状态码以达到阈值的时间窗口（以秒为单位）。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。  |
 | `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | 否   | **封禁持续时间：** 一个 IP 超过阈值后将被封禁的时间（以秒为单位）。默认为 24 小时（86400 秒）。设置为 `0` 表示永不解封的永久封禁。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。 |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。           |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | 否   | **封禁范围：** 决定封禁是仅适用于当前服务 (`service`) 还是所有服务 (`global`)。命中默认服务器（`_`）时，封禁始终为全局。          |
+| `BAD_BEHAVIOR_REPORT_MAX_EVENTS` | `100` | multisite | 否 | 报告中作为封禁依据保留的最近事件数量上限，同时受 `BAD_BEHAVIOR_THRESHOLD` 限制。 范围：`1` 至 `10000`。 |
+| `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` | `512` | multisite | 否 | 报告依据中每个 URL 或方法的最大字节数，包含 `...` 标记。范围：`4` 至 `65536`。 |
+
+封禁依据保留最新的匹配事件。这些限制仅影响复制到每份报告中的依据，不改变封禁逻辑或 `MAX_LRU_HISTORY`。截断时不会拆分 UTF-8 字符。提高任一限制都会增加报告的存储占用。即使保留的事件较少，请求总数仍显示实际封禁计数器的值。
 
 !!! warning "误报"
     在设置阈值和计数时间时要小心。将这些值设置得太低可能会无意中封禁在浏览您网站时遇到错误的合法用户。

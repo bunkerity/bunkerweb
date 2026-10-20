@@ -967,14 +967,18 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 
 ### Konfigurationseinstellungen
 
-| Einstellung                 | Standard                      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                      |
-| --------------------------- | ----------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                                 |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                              |
-| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                       |
+| Einstellung                 | Standard                      | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                 |
+| --------------------------- | ----------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | nein     | **Bad Behavior aktivieren:** Auf `yes` setzen, um die Funktion zur Erkennung und Sperrung von schlechtem Verhalten zu aktivieren.                                            |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | nein     | **Schlechte Statuscodes:** Liste der HTTP-Statuscodes, die als „schlechtes“ Verhalten gezählt werden, wenn sie an einen Client zurückgegeben werden.                         |
+| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | nein     | **Schwellenwert:** Die Anzahl der „schlechten“ Statuscodes, die eine IP innerhalb des Zählzeitraums erzeugen kann, bevor sie gesperrt wird.                                  |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | nein     | **Zählzeitraum:** Das Zeitfenster (in Sekunden), in dem schlechte Statuscodes auf den Schwellenwert angerechnet werden. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 | `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | nein     | **Sperrdauer:** Wie lange (in Sekunden) eine IP nach Überschreiten des Schwellenwerts gesperrt bleibt. Standard ist 24 Stunden (86400 Sekunden). `0` für permanente Sperren. Akzeptiert ein Zeitsuffix (ms, s, m, h, d, w, M, y); eine Zahl ohne Suffix gilt in Sekunden. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten. Auf dem Standardserver (`_`) sind Sperren immer global. |
+| `BAD_BEHAVIOR_REPORT_MAX_EVENTS` | `100` | multisite | nein | Maximale Anzahl neuer Ereignisse als Sperrnachweis in Berichten, zusätzlich durch `BAD_BEHAVIOR_THRESHOLD` begrenzt. Bereich: `1` bis `10000`. |
+| `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` | `512` | multisite | nein | Maximale Bytezahl je URL oder Methode im Bericht, einschließlich der Markierung `...`. Bereich: `4` bis `65536`. |
+
+Der Sperrnachweis enthält die neuesten passenden Ereignisse. Diese Grenzen betreffen nur die in jeden Bericht kopierten Nachweise, nicht die Sperrlogik oder `MAX_LRU_HISTORY`. UTF-8-Zeichen werden beim Kürzen nicht geteilt. Höhere Grenzen erhöhen den Speicherbedarf der Berichte. Die Gesamtzahl der Anfragen bleibt der tatsächliche Sperrzähler, auch wenn weniger Ereignisse gespeichert werden.
 
 !!! warning "Falsch-Positive"
     Seien Sie vorsichtig bei der Einstellung des Schwellenwerts und der Zählzeit. Zu niedrige Werte können versehentlich legitime Benutzer sperren, die beim Surfen auf Ihrer Website auf Fehler stoßen.
