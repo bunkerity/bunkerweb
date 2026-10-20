@@ -358,6 +358,14 @@ function badbehavior:timer()
 				-- banned with none of its own events left in it. Fall back to the counter that
 				-- triggered the ban so the report still carries why it happened.
 				local reason_data = increments_by_ip[data.ip]
+				if data.ban_scope == "service" then
+					reason_data = {}
+					for _, increment in ipairs(increments_by_ip[data.ip] or {}) do
+						if increment.server_name == data.server_name then
+							reason_data[#reason_data + 1] = increment
+						end
+					end
+				end
 				if not reason_data or #reason_data == 0 then
 					reason_data = {
 						{
