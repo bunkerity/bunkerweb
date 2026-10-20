@@ -166,8 +166,9 @@ jobs:
           output: trivy-results.sarif
           exit-code: "0"
         env:
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
-          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+          # Priority list: Trivy falls back to the next repository on 429/5xx. Setting it overrides the defaults, so they are repeated here; ECR comes last (it was pinned alone in 2024 and now rate-limits the parallel image jobs).
+          TRIVY_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db:2
+          TRIVY_JAVA_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-java-db:1,ghcr.io/aquasecurity/trivy-java-db:1,public.ecr.aws/aquasecurity/trivy-java-db:1
       - name: Upload Trivy SARIF report
         if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
         continue-on-error: true # don't let a missing/partial SARIF mask the real scan error (the gate is the source of truth)
@@ -193,8 +194,9 @@ jobs:
           output: trivy-summary.md
           exit-code: "1"
         env:
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
-          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+          # Priority list: Trivy falls back to the next repository on 429/5xx. Setting it overrides the defaults, so they are repeated here; ECR comes last (it was pinned alone in 2024 and now rate-limits the parallel image jobs).
+          TRIVY_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db:2
+          TRIVY_JAVA_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-java-db:1,ghcr.io/aquasecurity/trivy-java-db:1,public.ecr.aws/aquasecurity/trivy-java-db:1
       # Publish the Trivy results to the GitHub Actions run summary
       - name: Trivy summary
         if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
