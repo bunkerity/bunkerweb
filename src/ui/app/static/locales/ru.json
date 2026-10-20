@@ -85,6 +85,7 @@
     "add_ban_plural": "Добавить бан(ы)",
     "add_plugin_plural": "Добавить плагин(ы)",
     "add_plugins": "Добавить плагины",
+    "apply_all_services": "Применить ко всем сервисам",
     "auto_refresh": "Автообновление",
     "ban": "Забанить",
     "ban_selected": "Забанить выбранные",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Перетащите архив плагина сюда или нажмите, чтобы выбрать файлы.",
+      "apply_all_services": "Глобальные настройки, изменённые при этом сохранении, заменят значения, заданные каждым сервисом или его шаблоном. Неизменённые настройки сохранятся.",
+      "apply_all_services_count": "Все известные сервисы ({{count}}), которые могут быть обновлены:",
       "confirm_cache_deletion_alert": "Вы уверены, что хотите удалить выбранный файл кэша?",
       "confirm_cache_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные файлы кэша?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Добавить бан(ы)",
       "add_plugins": "Добавить плагины",
+      "apply_all_services": "Применить ко всем сервисам?",
       "confirm_conversion": "Подтвердить конвертацию",
       "confirm_deletion": "Подтвердить удаление",
       "confirm_unban": "Подтвердить разбан",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "IP-адрес успешно разбанен!"
   },
   "tooltip": {
+    "apply_all_services": "Применяет ко всем сервисам только глобальные настройки, изменённые при этом сохранении, заменяя значения, заданные сервисом или его шаблоном.",
     "auto_lets_encrypt": "Автоматически запрашивать сертификат Let's Encrypt.",
     "button": {
       "ban_ip": "Забанить этот IP-адрес",

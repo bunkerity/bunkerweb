@@ -988,6 +988,10 @@ Follow these steps to configure and use the Bad Behavior feature:
 | `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | no       | **Count Period:** The time window (in seconds) during which bad status codes are counted toward the threshold. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
 | `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | no       | **Ban Duration:** How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). Set to `0` for permanent bans that never expire. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`). Bans triggered on the default server (`_`) are always global.     |
+| `BAD_BEHAVIOR_REPORT_MAX_EVENTS` | `100` | multisite | no | Maximum recent events kept as ban evidence in reports, also limited by `BAD_BEHAVIOR_THRESHOLD`. Range: `1` to `10000`. |
+| `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` | `512` | multisite | no | Maximum bytes per URL or method in report evidence, including the `...` marker. Range: `4` to `65536`. |
+
+Ban evidence keeps the newest matching events. These limits affect only the evidence copied into each report, not ban enforcement or `MAX_LRU_HISTORY`. UTF-8 strings are truncated without splitting a character. Raising either limit increases report storage use. The total request count remains the actual ban counter, even when fewer events are retained.
 
 !!! warning "False Positives"
     Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.
@@ -1991,7 +1995,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.17-rc2
+        image: bunkerity/bunkerweb:1.6.17
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2008,7 +2012,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.17
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name

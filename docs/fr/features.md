@@ -956,14 +956,18 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre                   | Défaut                        | Contexte  | Multiple | Description                                                                                                                     |
-| --------------------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | non      | Activer la détection et le bannissement.                                                                                        |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | non      | Codes HTTP considérés « mauvais ».                                                                                              |
-| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | non      | Seuil de réponses « mauvaises » avant bannissement.                                                                             |
+| Paramètre                   | Défaut                        | Contexte  | Multiple | Description                                                    |
+| --------------------------- | ----------------------------- | --------- | -------- | -------------------------------------------------------------- |
+| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | non      | Activer la détection et le bannissement.                       |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | non      | Codes HTTP considérés « mauvais ».                             |
+| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | non      | Seuil de réponses « mauvaises » avant bannissement.            |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | non      | Fenêtre de comptage (secondes). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | non      | Durée du ban en secondes (`0` = permanent). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). Sur le serveur par défaut (`_`), les bans sont toujours globaux. |
+| `BAD_BEHAVIOR_REPORT_MAX_EVENTS` | `100` | multisite | non | Nombre maximal d’événements récents conservés dans les rapports comme preuves du ban, également limité par `BAD_BEHAVIOR_THRESHOLD`. Plage : de `1` à `10000`. |
+| `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` | `512` | multisite | non | Nombre maximal d’octets par URL ou méthode dans les preuves du rapport, marqueur `...` compris. Plage : de `4` à `65536`. |
+
+Les preuves du ban conservent les événements correspondants les plus récents. Ces limites concernent uniquement les preuves copiées dans chaque rapport, sans modifier le bannissement ni `MAX_LRU_HISTORY`. La troncature ne coupe pas les caractères UTF-8. Augmenter une limite accroît le stockage des rapports. Le total des requêtes reste le compteur réel du ban, même si moins d’événements sont conservés.
 
 !!! warning "Faux positifs"
     Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.
@@ -1916,7 +1920,7 @@ Par défaut, BunkerWeb interroge CrowdSec à chaque requête. Définissez `CROWD
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.17-rc2
+        image: bunkerity/bunkerweb:1.6.17
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1933,7 +1937,7 @@ Par défaut, BunkerWeb interroge CrowdSec à chaque requête. Définissez `CROWD
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.17
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance

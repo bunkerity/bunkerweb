@@ -85,6 +85,7 @@
     "add_ban_plural": "Yasaklama(lar) Ekle",
     "add_plugin_plural": "Eklenti(ler) Ekle",
     "add_plugins": "Eklenti Ekle",
+    "apply_all_services": "Tüm hizmetlere uygula",
     "auto_refresh": "Otomatik Yenile",
     "ban": "Yasakla",
     "ban_selected": "Seçilenleri yasakla",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
+      "apply_all_services": "Bu kayıtta değiştirilen genel ayarlar, her hizmetin veya şablonunun belirlediği değerlerin yerini alacak. Değiştirilmeyen ayarlar korunacak.",
+      "apply_all_services_count": "Güncellenebilecek bilinen tüm hizmetler ({{count}}):",
       "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
       "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Yasaklama(lar) Ekle",
       "add_plugins": "Eklenti Ekle",
+      "apply_all_services": "Tüm hizmetlere uygulansın mı?",
       "confirm_conversion": "Dönüştürmeyi Onayla",
       "confirm_deletion": "Silme İşlemini Onayla",
       "confirm_unban": "Yasağı Kaldırmayı Onayla",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!"
   },
   "tooltip": {
+    "apply_all_services": "Yalnızca bu kayıtta değiştirilen genel ayarları tüm hizmetlere uygular; hizmetin veya şablonunun belirlediği değerleri değiştirir.",
     "auto_lets_encrypt": "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği.",
     "button": {
       "ban_ip": "Bu IP adresini yasakla",

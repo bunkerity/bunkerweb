@@ -85,6 +85,7 @@
     "add_ban_plural": "إضافة حظر (ق)",
     "add_plugin_plural": "إضافة إضافة (إضافات)",
     "add_plugins": "إضافة الإضافات",
+    "apply_all_services": "تطبيق على جميع الخدمات",
     "auto_refresh": "تحديث تلقائي",
     "ban": "حظر",
     "ban_selected": "حظر المحدد",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "اسحب وأفلت أرشيف الإضافة الخاص بك هنا أو انقر لتحديد الملفات.",
+      "apply_all_services": "ستستبدل الإعدادات العامة التي تغيّرت في عملية الحفظ هذه القيم التي تحددها كل خدمة أو قالبها. ستبقى الإعدادات التي لم تتغيّر كما هي.",
+      "apply_all_services_count": "جميع الخدمات المعروفة ({{count}}) التي قد يتم تحديثها:",
       "confirm_cache_deletion_alert": "هل أنت متأكد أنك تريد حذف ملف الذاكرة المؤقتة المحدد؟",
       "confirm_cache_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "إضافة حظر (ق)",
       "add_plugins": "إضافة الإضافات",
+      "apply_all_services": "تطبيق على جميع الخدمات؟",
       "confirm_conversion": "تأكيد التحويل",
       "confirm_deletion": "تأكيد الحذف",
       "confirm_unban": "تأكيد رفع الحظر",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "تم رفع الحظر عن عنوان IP بنجاح!"
   },
   "tooltip": {
+    "apply_all_services": "يطبّق على جميع الخدمات الإعدادات العامة التي تغيّرت في عملية الحفظ هذه فقط، ويستبدل القيم التي تحددها الخدمة أو قالبها.",
     "auto_lets_encrypt": "هل يجب طلب شهادة Let's Encrypt تلقائيًا.",
     "button": {
       "ban_ip": "حظر عنوان الـIP هذا",

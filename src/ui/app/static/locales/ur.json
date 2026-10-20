@@ -85,6 +85,7 @@
     "add_ban_plural": "پابندی(ها) شامل کریں",
     "add_plugin_plural": "پلگ ان(ز) شامل کریں",
     "add_plugins": "پلگ ان شامل کریں",
+    "apply_all_services": "تمام سروسز پر لاگو کریں",
     "auto_refresh": "آٹو ریفریش",
     "ban": "پابندی لگائیں",
     "ban_selected": "Ban selected",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "اپنا پلگ ان آرکائیو یہاں ڈریگ اور ڈراپ کریں یا فائلیں منتخب کرنے کے لیے کلک کریں۔",
+      "apply_all_services": "اس بار محفوظ کرتے وقت تبدیل کی گئی عالمی ترتیبات ہر سروس یا اس کے ٹیمپلیٹ کی مقرر کردہ قدروں کی جگہ لے لیں گی۔ جن ترتیبات میں تبدیلی نہیں کی گئی وہ برقرار رہیں گی۔",
+      "apply_all_services_count": "تمام معلوم سروسز ({{count}}) جنہیں اپ ڈیٹ کیا جا سکتا ہے:",
       "confirm_cache_deletion_alert": "کیا آپ واقعی منتخب کردہ کیشے فائل حذف کرنا چاہتے ہیں؟",
       "confirm_cache_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کیشے فائلیں حذف کرنا چاہتے ہیں؟",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "پابندی(ها) شامل کریں",
       "add_plugins": "پلگ ان شامل کریں",
+      "apply_all_services": "تمام سروسز پر لاگو کریں؟",
       "confirm_conversion": "تبدیلی کی تصدیق کریں",
       "confirm_deletion": "حذف کرنے کی تصدیق کریں",
       "confirm_unban": "پابندی ہٹانے کی تصدیق کریں",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "IP ایڈریس سے پابندی کامیابی سے ہٹا دی گئی!"
   },
   "tooltip": {
+    "apply_all_services": "صرف اس بار محفوظ کرتے وقت تبدیل کی گئی عالمی ترتیبات تمام سروسز پر لاگو ہوتی ہیں اور سروس یا اس کے ٹیمپلیٹ کی مقرر کردہ قدروں کو بدل دیتی ہیں۔",
     "auto_lets_encrypt": "کیا خود بخود Let's Encrypt سرٹیفکیٹ کی درخواست کرنی ہے۔",
     "button": {
       "ban_ip": "Ban this IP address",

@@ -85,6 +85,7 @@
     "add_ban_plural": "Sperre(n) hinzufügen",
     "add_plugin_plural": "Plugin(s) hinzufügen",
     "add_plugins": "Plugins hinzufügen",
+    "apply_all_services": "Auf alle Dienste anwenden",
     "auto_refresh": "Auto-Aktualisierung",
     "ban": "Sperren",
     "ban_selected": "Ausgewählte sperren",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Ziehen Sie Ihr Plugin-Archiv hierher oder klicken Sie, um Dateien auszuwählen.",
+      "apply_all_services": "Die beim aktuellen Speichern geänderten globalen Einstellungen ersetzen die Werte, die im jeweiligen Dienst oder seiner Vorlage festgelegt sind. Unveränderte Einstellungen bleiben erhalten.",
+      "apply_all_services_count": "Alle bekannten Dienste ({{count}}), die aktualisiert werden können:",
       "confirm_cache_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte Cache-Datei löschen möchten?",
       "confirm_cache_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten Cache-Dateien löschen möchten?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Sperre(n) hinzufügen",
       "add_plugins": "Plugins hinzufügen",
+      "apply_all_services": "Auf alle Dienste anwenden?",
       "confirm_conversion": "Konvertierung bestätigen",
       "confirm_deletion": "Löschung bestätigen",
       "confirm_unban": "Entsperrung bestätigen",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "IP-Adresse erfolgreich entsperrt!"
   },
   "tooltip": {
+    "apply_all_services": "Wendet nur die beim aktuellen Speichern geänderten globalen Einstellungen auf alle Dienste an und ersetzt dabei Werte aus dem Dienst oder seiner Vorlage.",
     "auto_lets_encrypt": "Ob automatisch ein Let's Encrypt-Zertifikat angefordert werden soll.",
     "button": {
       "ban_ip": "Diese IP-Adresse sperren",

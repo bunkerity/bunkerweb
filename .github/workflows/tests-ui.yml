@@ -15,7 +15,7 @@ on:
         type: string
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # Prepare
       - name: Checkout source code

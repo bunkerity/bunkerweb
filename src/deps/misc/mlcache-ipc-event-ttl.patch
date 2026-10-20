@@ -1,0 +1,116 @@
+@@ -6,6 +6,9 @@
+ local sleep        = ngx.sleep
+ local shared       = ngx.shared
+ local worker_pid   = ngx.worker.pid
++local worker_count = ngx.worker.count
++local now          = ngx.now
++local update_time  = ngx.update_time
+ local ngx_log      = ngx.log
+ local fmt          = string.format
+ local sub          = string.sub
+@@ -21,8 +24,11 @@
+ 
+ local INDEX_KEY        = "lua-resty-ipc:index"
+ local FORCIBLE_KEY     = "lua-resty-ipc:forcible"
++local LAST_BROADCAST_KEY = "lua-resty-ipc:last_broadcast"
+ local POLL_SLEEP_RATIO = 2
+ local MAX_HOLE_SCAN    = 1000
++-- ponytail: 100 x 256-byte events/s for 5m fit in 8MiB; use worker acknowledgements above this ceiling.
++local EVENT_TTL        = 300
+ 
+ 
+ local function marshall(worker_pid, channel, data)
+@@ -101,12 +107,18 @@
+ 
+     local marshalled_event = marshall(worker_pid(), channel, data)
+ 
++    update_time()
++    local ok, err = self.dict:set(LAST_BROADCAST_KEY, now())
++    if not ok then
++        return nil, "failed to set last broadcast time in shm: " .. err
++    end
++
+     local idx, err = self.dict:incr(INDEX_KEY, 1, 0)
+     if not idx then
+         return nil, "failed to increment index: " .. err
+     end
+ 
+-    local ok, err, forcible = self.dict:set(idx, marshalled_event)
++    local ok, err, forcible = self.dict:set(idx, marshalled_event, EVENT_TTL)
+     if not ok then
+         return nil, "failed to insert event in shm: " .. err
+     end
+@@ -166,6 +178,9 @@
+             -- skip indexes that may have been evicted and resume current
+             -- polling idx
+             self.idx = shm_idx - 1
++            if self.idx > 0 then
++                self.events_lost = true
++            end
+         end
+ 
+     else
+@@ -174,6 +189,17 @@
+     end
+ 
+     local elapsed = 0
++    local hole_budget = MAX_HOLE_SCAN
++    local last_broadcast, err = self.dict:get(LAST_BROADCAST_KEY)
++    if err then
++        return nil, "failed to get last broadcast time from shm: " .. err
++    end
++
++    update_time()
++    -- ponytail: inactivity beyond timeout already exceeds the existing late-writer wait.
++    local idle = type(last_broadcast) == "number" and now() - last_broadcast > timeout
++    -- ponytail: two worker generations plus their agents is a gap heuristic; paused writers can be skipped sooner.
++    local recent_indexes = 2 * (worker_count() + 1)
+ 
+     for _ = self.idx, shm_idx - 1 do
+         -- fetch event from shm with a retry policy in case
+@@ -194,6 +220,10 @@
+                     break
+                 end
+ 
++                if idle or shm_idx - idx > recent_indexes then
++                    break
++                end
++
+                 if pok then
+                     log(INFO, "no event data at index '", idx, "', ",
+                               "retrying in: ", sleep_step, "s")
+@@ -221,6 +251,10 @@
+         -- on an event that might have been evicted from the shm.
+         self.idx = idx
+ 
++        if v == nil then
++            self.events_lost = true
++        end
++
+         if elapsed >= timeout then
+             -- this index is never going to arrive: broadcast() consumes an
+             -- index at incr() before it stores anything, so a hole is left
+@@ -232,7 +266,7 @@
+             -- of lost events costs one timeout in total and the events that
+             -- survived it are still delivered on the next poll().
+             local probe  = idx + 1
+-            local budget = MAX_HOLE_SCAN
++            local budget = hole_budget
+ 
+             while probe <= shm_idx and budget > 0 do
+                 if self.dict:get(probe) ~= nil then
+@@ -263,7 +297,13 @@
+             return nil, "timeout"
+         end
+ 
+-        if err then
++        if v == nil and not err then
++            hole_budget = hole_budget - 1
++            if hole_budget == 0 then
++                return true
++            end
++
++        elseif err then
+             log(ERR, "could not get event at index '", self.idx, "': ", err)
+ 
+         elseif type(v) ~= "string" then

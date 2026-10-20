@@ -85,6 +85,7 @@
     "add_ban_plural": "Tambahkan Larangan",
     "add_plugin_plural": "Tambahkan Plugin",
     "add_plugins": "Tambahkan Plugin",
+    "apply_all_services": "Terapkan ke semua layanan",
     "auto_refresh": "Perbarui Otomatis",
     "ban": "Larang",
     "ban_selected": "Larang yang dipilih",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Seret dan lepaskan arsip plugin Anda di sini atau klik untuk memilih file.",
+      "apply_all_services": "Pengaturan global yang diubah saat penyimpanan ini akan menggantikan nilai yang ditetapkan oleh setiap layanan atau templatnya. Pengaturan yang tidak diubah tetap dipertahankan.",
+      "apply_all_services_count": "Semua layanan yang diketahui ({{count}}) yang mungkin diperbarui:",
       "confirm_cache_deletion_alert": "Apakah Anda yakin ingin menghapus file cache yang dipilih?",
       "confirm_cache_deletion_alert_plural": "Apakah Anda yakin ingin menghapus file cache yang dipilih?",
       "confirm_configs_conversion": "Apakah Anda yakin ingin mengkonversi konfigurasi kustom yang dipilih?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Tambahkan Larangan",
       "add_plugins": "Tambahkan Plugin",
+      "apply_all_services": "Terapkan ke semua layanan?",
       "confirm_conversion": "Konfirmasi Konversi",
       "confirm_deletion": "Konfirmasi Penghapusan",
       "confirm_unban": "Konfirmasi Pembatalan Larangan",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "Alamat IP berhasil dibatalkan larangannya!"
   },
   "tooltip": {
+    "apply_all_services": "Menerapkan hanya pengaturan global yang diubah saat penyimpanan ini ke semua layanan, menggantikan nilai yang ditetapkan oleh layanan atau templatnya.",
     "auto_lets_encrypt": "Apakah akan secara otomatis meminta sertifikat Let's Encrypt.",
     "button": {
       "ban_ip": "Larang alamat IP ini",

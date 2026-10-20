@@ -85,6 +85,7 @@
     "add_ban_plural": "Dodaj blokadę (blokady)",
     "add_plugin_plural": "Dodaj wtyczkę (wtyczki)",
     "add_plugins": "Dodaj wtyczki",
+    "apply_all_services": "Zastosuj do wszystkich usług",
     "auto_refresh": "Automatyczne odświeżanie",
     "ban": "Blokada",
     "ban_selected": "Zablokuj wybrane",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Przeciągnij i upuść tutaj archiwum wtyczki lub kliknij, aby wybrać pliki.",
+      "apply_all_services": "Ustawienia globalne zmienione przy tym zapisie zastąpią wartości określone przez każdą usługę lub jej szablon. Niezmienione ustawienia zostaną zachowane.",
+      "apply_all_services_count": "Wszystkie znane usługi ({{count}}), które mogą zostać zaktualizowane:",
       "confirm_cache_deletion_alert": "Czy na pewno chcesz usunąć wybrany plik pamięci podręcznej?",
       "confirm_cache_deletion_alert_plural": "Czy na pewno chcesz usunąć wybrane pliki pamięci podręcznej?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Dodaj blokadę (blokady)",
       "add_plugins": "Dodaj wtyczki",
+      "apply_all_services": "Zastosować do wszystkich usług?",
       "confirm_conversion": "Potwierdź konwersję",
       "confirm_deletion": "Potwierdź usunięcie",
       "confirm_unban": "Potwierdź odblokowanie",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "IP został pomyślnie odblokowany!"
   },
   "tooltip": {
+    "apply_all_services": "Stosuje do wszystkich usług tylko ustawienia globalne zmienione przy tym zapisie, zastępując wartości określone przez usługę lub jej szablon.",
     "auto_lets_encrypt": "Czy automatycznie żądać certyfikatu Let's Encrypt.",
     "button": {
       "ban_ip": "Zablokuj ten adres IP",

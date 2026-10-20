@@ -85,6 +85,7 @@
     "add_ban_plural": "Add Ban(s)",
     "add_plugin_plural": "Add Plugin(s)",
     "add_plugins": "Add Plugins",
+    "apply_all_services": "Apply to all services",
     "auto_refresh": "Auto Refresh",
     "ban": "Ban",
     "ban_all_filtered": "Ban all matching reports",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Drag and drop your plugin archive here or click to select files.",
+      "apply_all_services": "The global settings changed in this save will replace values set by each service or its template. Unchanged settings are kept.",
+      "apply_all_services_count": "All known services ({{count}}) that may be updated:",
       "confirm_cache_deletion_alert": "Are you sure you want to delete the selected cache file?",
       "confirm_cache_deletion_alert_plural": "Are you sure you want to delete the selected cache files?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Add Ban(s)",
       "add_plugins": "Add Plugins",
+      "apply_all_services": "Apply to all services?",
       "confirm_conversion": "Confirm Conversion",
       "confirm_deletion": "Confirm Deletion",
       "confirm_unban": "Confirm Unban",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "IP address unbanned successfully!"
   },
   "tooltip": {
+    "apply_all_services": "Applies only the global settings changed in this save to all services, replacing values set by a service or its template.",
     "auto_lets_encrypt": "Whether to automatically request a Let's Encrypt certificate.",
     "button": {
       "ban_ip": "Ban this IP address",

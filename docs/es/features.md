@@ -983,7 +983,11 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Umbral:** El número de códigos de estado "malos" que una IP puede generar dentro del período de conteo antes de ser bloqueada.                                                                                                      |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | no       | **Período de conteo:** La ventana de tiempo (en segundos) durante la cual se cuentan los códigos de estado malos para alcanzar el umbral. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
 | `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | no       | **Duración del bloqueo:** Cuánto tiempo (en segundos) permanecerá bloqueada una IP después de exceder el umbral. El valor por defecto es de 24 horas (86400 segundos). Establezca en `0` para bloqueos permanentes que nunca expiran. Acepta un sufijo de tiempo (ms, s, m, h, d, w, M, y); un número sin sufijo se interpreta en segundos. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`). En el servidor predeterminado (`_`), los bloqueos son siempre globales.                          |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`). En el servidor predeterminado (`_`), los bloqueos son siempre globales.                                                              |
+| `BAD_BEHAVIOR_REPORT_MAX_EVENTS` | `100` | multisite | no | Número máximo de eventos recientes conservados como evidencia del bloqueo en los informes, también limitado por `BAD_BEHAVIOR_THRESHOLD`. Rango: de `1` a `10000`. |
+| `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` | `512` | multisite | no | Máximo de bytes por URL o método en la evidencia del informe, incluido el marcador `...`. Rango: de `4` a `65536`. |
+
+La evidencia del bloqueo conserva los eventos coincidentes más recientes. Estos límites solo afectan a la evidencia copiada en cada informe, sin cambiar los bloqueos ni `MAX_LRU_HISTORY`. Las cadenas UTF-8 se truncan sin dividir caracteres. Aumentar cualquiera de los límites incrementa el almacenamiento de los informes. El total de solicitudes sigue siendo el contador real del bloqueo, aunque se conserven menos eventos.
 
 !!! warning "Falsos positivos"
     Tenga cuidado al establecer el umbral y el tiempo de conteo. Establecer estos valores demasiado bajos puede bloquear inadvertidamente a usuarios legítimos que encuentren errores mientras navegan por su sitio.
@@ -1979,7 +1983,7 @@ Por defecto, BunkerWeb consulta a CrowdSec en cada solicitud. Establezca `CROWDS
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.17-rc2
+        image: bunkerity/bunkerweb:1.6.17
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1996,7 +2000,7 @@ Por defecto, BunkerWeb consulta a CrowdSec en cada solicitud. Establezca `CROWDS
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.17-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.17
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto

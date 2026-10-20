@@ -39,6 +39,10 @@ Comment ça marche :
 | `BAD_BEHAVIOR_COUNT_TIME`   | `1m`                          | multisite | non      | Fenêtre de comptage (secondes). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `BAD_BEHAVIOR_BAN_TIME`     | `1d`                          | multisite | non      | Durée du ban en secondes (`0` = permanent). Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes. |
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). Sur le serveur par défaut (`_`), les bans sont toujours globaux. |
+| `BAD_BEHAVIOR_REPORT_MAX_EVENTS` | `100` | multisite | non | Nombre maximal d’événements récents conservés dans les rapports comme preuves du ban, également limité par `BAD_BEHAVIOR_THRESHOLD`. Plage : de `1` à `10000`. |
+| `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` | `512` | multisite | non | Nombre maximal d’octets par URL ou méthode dans les preuves du rapport, marqueur `...` compris. Plage : de `4` à `65536`. |
+
+Les preuves du ban conservent les événements correspondants les plus récents. Ces limites concernent uniquement les preuves copiées dans chaque rapport, sans modifier le bannissement ni `MAX_LRU_HISTORY`. La troncature ne coupe pas les caractères UTF-8. Augmenter une limite accroît le stockage des rapports. Le total des requêtes reste le compteur réel du ban, même si moins d’événements sont conservés.
 
 !!! warning "Faux positifs"
     Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.

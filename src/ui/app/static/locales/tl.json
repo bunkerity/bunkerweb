@@ -85,6 +85,7 @@
     "add_ban_plural": "Magdagdag ng Ban(s)",
     "add_plugin_plural": "Magdagdag ng Plugin(s)",
     "add_plugins": "Magdagdag ng Mga Plugin",
+    "apply_all_services": "Ilapat sa lahat ng serbisyo",
     "auto_refresh": "Awtomatikong I-refresh",
     "ban": "I-ban",
     "ban_selected": "I-ban ang mga napili",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "I-drag at i-drop ang iyong plugin archive dito o mag-click upang pumili ng mga file.",
+      "apply_all_services": "Papalitan ng mga pandaigdigang setting na binago sa pag-save na ito ang mga halagang itinakda ng bawat serbisyo o ng template nito. Mananatili ang mga setting na hindi binago.",
+      "apply_all_services_count": "Lahat ng kilalang serbisyo ({{count}}) na maaaring ma-update:",
       "confirm_cache_deletion_alert": "Sigurado ka bang gusto mong burahin ang napiling cache file?",
       "confirm_cache_deletion_alert_plural": "Sigurado ka bang gusto mong burahin ang mga napiling cache file?",
       "confirm_configs_conversion": "Sigurado ka bang gusto mong i-convert ang mga napiling custom na configuration?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Magdagdag ng Ban(s)",
       "add_plugins": "Magdagdag ng Mga Plugin",
+      "apply_all_services": "Ilapat sa lahat ng serbisyo?",
       "confirm_conversion": "Kumpirmahin ang Conversion",
       "confirm_deletion": "Kumpirmahin ang Pagbubura",
       "confirm_unban": "Kumpirmahin ang Pag-unban",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "Matagumpay na na-unban ang IP address!"
   },
   "tooltip": {
+    "apply_all_services": "Inilalapat sa lahat ng serbisyo ang mga pandaigdigang setting na binago lamang sa pag-save na ito, na papalit sa mga halagang itinakda ng serbisyo o ng template nito.",
     "auto_lets_encrypt": "Kung awtomatikong hihilingin ang isang Let's Encrypt certificate.",
     "button": {
       "ban_ip": "I-ban ang IP address na ito",

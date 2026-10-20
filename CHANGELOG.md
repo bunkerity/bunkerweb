@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.6.17 - 2026/10/20
+
+- [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `unbounded-element`.
+- [BUGFIX] `autoconf`: quiet Kubernetes watches reconnect without restarting the controller, while repeated short closures still fail health checks. (Fixes #4064)
+- [BUGFIX] `badbehavior`: a ban keeps only its newest events as evidence, at most `BAD_BEHAVIOR_REPORT_MAX_EVENTS` (default `100`, never more than the threshold), with URLs and methods cut at `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` (default `512` bytes), so the report written for every request rejected during the ban no longer fills Redis. The Reports page shows the real request count.
+- [BUGFIX] `core`: the local cache's IPC events expire after 5 minutes, and a worker that falls behind skips the events evicted from a full `CACHESTORE_IPC_MEMORY_SIZE` zone instead of waiting 0.3 s on each one (`could not poll ipc events: timeout`), then clears its local cache so it never serves a value whose invalidation it missed.
+- [UI] `Web UI`: clarify applying changed global settings to all services and confirm service overrides before saving.
+
 ## v1.6.17~rc2 - 2026/10/16
 
 - [FEATURE] `db`: `DATABASE_CONNECT_TIMEOUT` (default `10s`) and `DATABASE_READ_TIMEOUT` (default `5m`) bound MySQL and MariaDB calls, and PostgreSQL gets the connect timeout and TCP keepalives but no query deadline, so a database that vanishes without a reset no longer blocks the scheduler, UI or API forever.

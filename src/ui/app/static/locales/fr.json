@@ -85,6 +85,7 @@
     "add_ban_plural": "Ajouter Bannissement(s)",
     "add_plugin_plural": "Ajouter Plugin(s)",
     "add_plugins": "Ajouter les Plugins",
+    "apply_all_services": "Appliquer à tous les services",
     "auto_refresh": "Actualisation Auto",
     "ban": "Bannir",
     "ban_selected": "Bannir la sélection",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Glissez-déposez votre archive de plugin ici ou cliquez pour sélectionner des fichiers.",
+      "apply_all_services": "Les paramètres globaux modifiés lors de cet enregistrement remplaceront les valeurs définies par chaque service ou son modèle. Les paramètres non modifiés seront conservés.",
+      "apply_all_services_count": "Tous les services connus ({{count}}) susceptibles d’être mis à jour :",
       "confirm_cache_deletion_alert": "Êtes-vous sûr de vouloir supprimer le fichier cache sélectionné ?",
       "confirm_cache_deletion_alert_plural": "Êtes-vous sûr de vouloir supprimer les fichiers cache sélectionnés ?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Ajouter Bannissement(s)",
       "add_plugins": "Ajouter des Plugins",
+      "apply_all_services": "Appliquer à tous les services ?",
       "confirm_conversion": "Confirmer la Conversion",
       "confirm_deletion": "Confirmer la Suppression",
       "confirm_unban": "Confirmer le Débannissement",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "Adresse IP débannie avec succès !"
   },
   "tooltip": {
+    "apply_all_services": "Applique à tous les services uniquement les paramètres globaux modifiés lors de cet enregistrement, en remplaçant les valeurs définies par un service ou son modèle.",
     "auto_lets_encrypt": "Indique s'il faut demander automatiquement un certificat Let's Encrypt.",
     "button": {
       "ban_ip": "Bannir cette adresse IP",
