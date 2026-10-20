@@ -85,6 +85,7 @@
     "add_ban_plural": "Adicionar Bloqueio(s)",
     "add_plugin_plural": "Adicionar Plugin(s)",
     "add_plugins": "Adicionar Plugins",
+    "apply_all_services": "Aplicar a todos os serviços",
     "auto_refresh": "Atualização Automática",
     "ban": "Bloquear",
     "ban_selected": "Bloquear selecionados",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Arraste e solte o arquivo do seu plugin aqui ou clique para selecionar arquivos.",
+      "apply_all_services": "As configurações globais alteradas neste salvamento substituirão os valores definidos por cada serviço ou por seu modelo. As configurações não alteradas serão mantidas.",
+      "apply_all_services_count": "Todos os serviços conhecidos ({{count}}) que podem ser atualizados:",
       "confirm_cache_deletion_alert": "Tem certeza de que deseja excluir o arquivo de cache selecionado?",
       "confirm_cache_deletion_alert_plural": "Tem certeza de que deseja excluir os arquivos de cache selecionados?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Adicionar Bloqueio(s)",
       "add_plugins": "Adicionar Plugins",
+      "apply_all_services": "Aplicar a todos os serviços?",
       "confirm_conversion": "Confirmar Conversão",
       "confirm_deletion": "Confirmar Exclusão",
       "confirm_unban": "Confirmar Desbloqueio",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "Endereço IP desbloqueado com sucesso!"
   },
   "tooltip": {
+    "apply_all_services": "Aplica a todos os serviços apenas as configurações globais alteradas neste salvamento, substituindo os valores definidos pelo serviço ou por seu modelo.",
     "auto_lets_encrypt": "Se deve solicitar automaticamente um certificado Let's Encrypt.",
     "button": {
       "ban_ip": "Bloquear este endereço IP",

@@ -85,6 +85,7 @@
     "add_ban_plural": "新增封鎖",
     "add_plugin_plural": "新增外掛程式",
     "add_plugins": "新增外掛程式",
+    "apply_all_services": "套用至所有服務",
     "auto_refresh": "自動重新整理",
     "ban": "封鎖",
     "ban_selected": "封鎖所選",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "將您的外掛程式封存拖放到此處或點擊以選取檔案。",
+      "apply_all_services": "此次儲存時變更的全域設定將取代各服務或其範本所設定的值。未變更的設定將予以保留。",
+      "apply_all_services_count": "可能更新的所有已知服務（{{count}}）：",
       "confirm_cache_deletion_alert": "您確定要刪除選定的快取檔案嗎？",
       "confirm_cache_deletion_alert_plural": "您確定要刪除選定的快取檔案嗎？",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "新增封鎖",
       "add_plugins": "新增外掛程式",
+      "apply_all_services": "要套用至所有服務嗎？",
       "confirm_conversion": "確認轉換",
       "confirm_deletion": "確認刪除",
       "confirm_unban": "確認解除封鎖",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "IP 位址已成功解除封鎖！"
   },
   "tooltip": {
+    "apply_all_services": "僅將此次儲存時變更的全域設定套用至所有服務，取代服務或其範本所設定的值。",
     "auto_lets_encrypt": "是否自動請求 Let's Encrypt 憑證。",
     "button": {
       "ban_ip": "封鎖此 IP 位址",

@@ -427,6 +427,14 @@ $(document).ready(() => {
     setOverrideNonGlobalEnabled(!isOverrideNonGlobalEnabled());
   });
 
+  const originalGlobalValues = new Map();
+  $("#navs-modes-advanced .plugin-setting[data-original]").each(function () {
+    originalGlobalValues.set(this.name, $(this).attr("data-original"));
+  });
+  const savedGlobalDrafts = new Set(
+    JSON.parse($("#raw-draft-settings").val() || "[]"),
+  );
+
   if (!currentTemplate) currentTemplate = usedTemplate;
   if (!currentMode) currentMode = "easy";
   if (!currentType) currentType = "all";
@@ -1373,6 +1381,51 @@ $(document).ready(() => {
     return form;
   };
 
+  const hasChangedGlobalSettings = (form) => {
+    const predicates = makeRawKeyPredicates();
+    const originals =
+      currentMode === "raw"
+        ? new Map(
+            parseRawSettings($("#raw-entire-config").val(), predicates).map(
+              ({ key, value }) => [key, value],
+            ),
+          )
+        : originalGlobalValues;
+
+    return form
+      .find("input, textarea")
+      .toArray()
+      .some(({ name, value }) => {
+        if (
+          !predicates.isKnownSettingKey(name) ||
+          name === "OVERRIDE_NON_GLOBAL_SERVICES"
+        )
+          return false;
+        if (currentMode === "raw") {
+          if (rawDraftSettings.has(name)) return false;
+          if (savedGlobalDrafts.has(name)) return true;
+        } else if (savedGlobalDrafts.has(name)) return false;
+        return originals.get(name) !== value;
+      });
+  };
+
+  const confirmGlobalOverride = ($trigger) =>
+    new Promise((resolve) => {
+      const $modal = $("#modal-apply-all-services").appendTo("body");
+      const $confirm = $modal.find("#confirm-apply-all-services");
+      let confirmed = false;
+      $confirm.one("click", () => {
+        confirmed = true;
+        $modal.modal("hide");
+      });
+      $modal.one("hidden.bs.modal", () => {
+        $confirm.off("click");
+        $trigger.trigger("focus");
+        resolve(confirmed);
+      });
+      $modal.modal("show");
+    });
+
   $("#select-template").on("click", () => $templateSearch.focus());
 
   $("#template-search").on(
@@ -2233,6 +2286,13 @@ $(document).ready(() => {
         return;
       }
     }
+
+    if (
+      isOverrideNonGlobalEnabled() &&
+      hasChangedGlobalSettings(form) &&
+      !(await confirmGlobalOverride($(this)))
+    )
+      return;
 
     form.appendTo("body").submit();
   });

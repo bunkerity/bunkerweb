@@ -85,6 +85,7 @@
     "add_ban_plural": "Añadir Bloqueo(s)",
     "add_plugin_plural": "Añadir Plugin(s)",
     "add_plugins": "Añadir Plugins",
+    "apply_all_services": "Aplicar a todos los servicios",
     "auto_refresh": "Actualización Automática",
     "ban": "Bloquear",
     "ban_selected": "Bloquear seleccionados",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Arrastra y suelta tu archivo de plugin aquí o haz clic para seleccionar archivos.",
+      "apply_all_services": "Los ajustes globales modificados al guardar esta vez sustituirán los valores definidos por cada servicio o su plantilla. Los ajustes sin cambios se conservarán.",
+      "apply_all_services_count": "Todos los servicios conocidos ({{count}}) que pueden actualizarse:",
       "confirm_cache_deletion_alert": "¿Estás seguro de que quieres eliminar el archivo de caché seleccionado?",
       "confirm_cache_deletion_alert_plural": "¿Estás seguro de que quieres eliminar los archivos de caché seleccionados?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "Añadir Bloqueo(s)",
       "add_plugins": "Añadir Plugins",
+      "apply_all_services": "¿Aplicar a todos los servicios?",
       "confirm_conversion": "Confirmar Conversión",
       "confirm_deletion": "Confirmar Eliminación",
       "confirm_unban": "Confirmar Desbloqueo",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "¡Dirección IP desbloqueada con éxito!"
   },
   "tooltip": {
+    "apply_all_services": "Aplica a todos los servicios solo los ajustes globales modificados al guardar esta vez, sustituyendo los valores definidos por el servicio o su plantilla.",
     "auto_lets_encrypt": "Si se debe solicitar automáticamente un certificado Let's Encrypt.",
     "button": {
       "ban_ip": "Bloquear esta dirección IP",
