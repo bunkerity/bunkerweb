@@ -1,0 +1,102 @@
+src/common/core/letsencrypt/ui/actions.py
+  s_5eb947fde43cf2::t_473b2b72f841b1 43
+src/common/core/backup/bwcli/save.py
+  s_5eb947fde43cf2::t_847e301699aecc 68-69
+  s_5eb947fde43cf2::t_a62ce31fff0efc 13,16,19-23
+src/common/utils/common_utils.py
+  s_b4d92303adbe4a::t_cfde090c5a9403 943-945
+  s_b6f88e446f5df4::t_97550d69da6ee2 857-858
+  s_5eb947fde43cf2::t_8698bbb765f6d0 3,22,924-942,946-952,954-971,974-977
+  s_5eb947fde43cf2::t_33beee73ca1a2c 787
+  s_5eb947fde43cf2::t_bbf222ada6951b 972-973
+  s_5eb947fde43cf2::t_6c77b47b7461eb 716-717,719-720
+  s_5eb947fde43cf2::t_adcc0e0fd99b09 2,9,18,718,721-724,727-786,788-808,810-815,818,828,830-856,859-897
+  s_5eb947fde43cf2::t_7b11b49da4ff59 686-689
+  s_5eb947fde43cf2::t_442e7fcc6a7ac1 7
+  s_5eb947fde43cf2::t_262ccbb0c7df4d 19
+  s_22c4a24690923f::t_8a009f4fb8acad 953
+  s_5eb947fde43cf2::t_8f376339c9677c 978-979
+tests/unit/common/test_tar_link_validation.py
+  s_5eb947fde43cf2::t_1aaa2c2c40980c 1-139
+tests/unit/backup/test_db_lock_processes.py
+  s_5eb947fde43cf2::t_0d5066f0848995 25
+  s_5eb947fde43cf2::t_cf4d276ba2ccc8 1-24,26-226
+src/scheduler/main.py
+  s_5eb947fde43cf2::t_5cf244409eda3c 1428
+  s_5eb947fde43cf2::t_e752c5860475f8 1425-1427
+  s_5eb947fde43cf2::t_cb425e0ba6836b 21,33-43,1419-1420,1422-1424,1431-1433
+  s_b6f88e446f5df4::t_76bf1b9ea6bbcc 1430
+src/common/core/backup/backup.py
+  s_5eb947fde43cf2::t_8698bbb765f6d0 23,125-133
+tests/unit/common/test_cache_restore_transaction.py
+  s_5eb947fde43cf2::t_9a08df3ec625eb 225
+src/common/utils/letsencrypt_cache.py
+  s_5eb947fde43cf2::t_473b2b72f841b1 34
+tests/unit/common/test_tar_link_verification.py
+  s_5eb947fde43cf2::t_04615a16747be3 1-173
+tests/unit/scheduler/test_tick_db_lock.py
+  s_5eb947fde43cf2::t_651e008ff38819 1-69,74-98,101-173
+  s_5eb947fde43cf2::t_5a6bfbe2337ab4 70-73,99-100
+tests/unit/backup/test_db_lock_deadline.py
+  s_5eb947fde43cf2::t_0d5066f0848995 30
+  s_5eb947fde43cf2::t_2d4547a5924bee 1-14,17,28,45-49,60-61,63-64,66-67,70-72,74-75,77,79-90,94,97-98,101,105-117
+  s_5eb947fde43cf2::t_2822a7a8e38cd2 100
+  s_5eb947fde43cf2::t_47158292e56a55 29
+src/common/core/backup/jobs/backup-data.py
+  s_5eb947fde43cf2::t_a2cf6d0725405d 18,22,26-31
+  s_5eb947fde43cf2::t_2e91fad4d7615f 112-114
+src/common/utils/cache_restore.py
+  s_5eb947fde43cf2::t_42116b7c4cbc21 269-274
+src/common/core/backup/bwcli/restore.py
+  s_5eb947fde43cf2::t_97d691e52c7f33 70-71
+  s_b1a8411c08a190::t_6b999c11ebf6d9 24
+  s_5eb947fde43cf2::t_48f92c524f3a52 14,17,20-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1186dd66ccc95a9c0bfc5d645cec95fe8c7b06db",
+  "prompts": {},
+  "sessions": {
+    "s_22c4a24690923f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a143ea-a72f-75e0-a7dd-74ef8472a5d5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5eb947fde43cf2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36376efb-e32a-4a9d-8826-419d54136ca2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b1a8411c08a190": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1ea583f-1a26-451c-ab8c-64d0ec4cec22",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b4d92303adbe4a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee8e9e24-a1c8-48b4-8b3d-ce516a01ff2c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b6f88e446f5df4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "92798179-02f4-4f26-b193-3b177a4f7333",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

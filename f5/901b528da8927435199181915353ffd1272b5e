@@ -1,0 +1,127 @@
+src/common/core/modsecurity/locales/pt.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/tr.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51
+  s_78010ae9d8b28f::t_537695ce37f1b2 54
+src/linux/scripts/start.sh
+  s_78010ae9d8b28f::t_320912905642e4 257-262,377-380
+src/common/utils/modsecurity_audit.py
+  s_e8917a61014dbb::t_388ff5b3626052 3,38,41
+  s_78010ae9d8b28f::t_320872f4af97f2 1-2,4-30,32-37,39-40,42-111
+  s_78010ae9d8b28f::t_cedbaf3986440d 31
+tests/unit/gen/test_modsecurity_audit_render.py
+  s_613118063b2844::t_519d75e4529381 77,83-85
+  s_78010ae9d8b28f::t_2bcb994a4844c2 1-13,15,18-76,78-82,86-217
+  s_78010ae9d8b28f::t_4cfa520c44d0ec 14,16-17,218-253
+src/common/core/modsecurity/confs/http/modsecurity.conf
+  s_78010ae9d8b28f::t_3638a3fb2522a9 1
+src/common/core/modsecurity/locales/zh.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/pl.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/gen/Configurator.py
+  s_0d52c14c910021::t_c0d839f520ec35 20,451-454,556
+src/common/core/modsecurity/locales/tl.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/ar.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+tests/unit/common/test_pushswap_confs_recovery_lua.py
+  s_78010ae9d8b28f::t_2252922414a2fa 69,105-112,170,179,209-222
+  s_78010ae9d8b28f::t_5db7712254a137 223-224
+src/common/core/modsecurity/confs/server-http/modsecurity-rules.conf.modsec
+  s_78010ae9d8b28f::t_3638a3fb2522a9 131-134
+src/common/core/modsecurity/README.fr.md
+  s_78010ae9d8b28f::t_d944c411746313 221-233
+src/common/core/modsecurity/README.zh.md
+  s_78010ae9d8b28f::t_d944c411746313 222-234
+src/common/core/modsecurity/locales/ru.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+tests/unit/modsecurity/test_audit_concurrent.py
+  s_78010ae9d8b28f::t_2d912c005788cf 339
+  s_78010ae9d8b28f::t_e76065dbb9c215 208,210-213
+  s_78010ae9d8b28f::t_83429811e6a6b6 1-207,209,214-338,340-353
+src/bw/entrypoint.sh
+  s_78010ae9d8b28f::t_320912905642e4 49-56,176-179
+src/common/gen/main.py
+  s_0d52c14c910021::t_c0d839f520ec35 25,234-235
+  s_78010ae9d8b28f::t_db08e82e9af060 236
+src/common/core/modsecurity/locales/es.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/bn.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/ko.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/fr.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/hi.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/ur.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+tests/unit/common/test_api_audit_preflight_lua.py
+  s_78010ae9d8b28f::t_237567d9cf0104 1-74
+src/common/core/modsecurity/locales/id.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/README.md
+  s_78010ae9d8b28f::t_d944c411746313 222-234
+src/common/core/modsecurity/plugin.json
+  s_78010ae9d8b28f::t_981a4d8c29ab04 109-127,131
+src/common/core/modsecurity/locales/it.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/README.es.md
+  s_78010ae9d8b28f::t_d944c411746313 222-234
+src/bw/lua/bunkerweb/api.lua
+  s_78010ae9d8b28f::t_b3a94c1f74cbdf 555-569,574-577,793-800
+  s_78010ae9d8b28f::t_00139ed0d2d0b2 801
+src/common/core/modsecurity/confs/http/modsecurity-rules-global-crs.conf.modsec
+  s_78010ae9d8b28f::t_3638a3fb2522a9 69-72
+src/common/core/modsecurity/README.de.md
+  s_78010ae9d8b28f::t_d944c411746313 222-234
+src/common/core/modsecurity/locales/br.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/tw.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/common/core/modsecurity/locales/de.json
+  s_78010ae9d8b28f::t_4daae84fca41a0 44-51,54
+src/ui/app/templates/plugin_bodies/modsecurity.html
+  s_78010ae9d8b28f::t_03bf3154ddd689 81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f5901b528da8927435199181915353ffd1272b5e",
+  "prompts": {},
+  "sessions": {
+    "s_0d52c14c910021": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a14400-a72a-7493-b168-5212046470b5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_613118063b2844": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "41ba75dd-235f-4ecd-b053-758224c145c3",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_78010ae9d8b28f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4328f5d7-e404-4e39-9b3c-55daa5aa1cff",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e8917a61014dbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff350ad-bc0b-4556-8679-17b87e179e57",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+src/linux/scripts/bunkerweb-ui.sh
+  s_154a17acafcd6f::t_84a73fac1167e1 58
+  s_154a17acafcd6f::t_e3cbbb13bd1e80 135-140
+  s_736db84d0d6b0d::t_f80954cbc4f3e0 141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d6e83d0a2018497b45989527b60ec06445ebfe68",
+  "prompts": {},
+  "sessions": {
+    "s_154a17acafcd6f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7cdc590c-6e96-4789-8ad3-6d5f195e2773",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_736db84d0d6b0d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "11594968-6d39-4ef1-9c13-1f78c5a630d0",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

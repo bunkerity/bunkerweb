@@ -1,0 +1,39 @@
+tests/unit/bunkernet/test_registration_retry.py
+  s_22c4a24690923f::t_cfe1f7f456c290 62-64
+  s_22c4a24690923f::t_9efca8f9b1373f 1-61,65-96
+src/autoconf/controllers/KubernetesController.py
+  s_22c4a24690923f::t_e69ef398e868a7 377-378,399-411
+tests/unit/autoconf/test_kubernetes_instance_health.py
+  s_22c4a24690923f::t_7737f45e2caf72 1-69
+tests/unit/autoconf/test_gateway_regex_path_anchoring.py
+  s_22c4a24690923f::t_7737f45e2caf72 62,110-116
+  s_97829bd3b546d8::t_01106469999aaf 117-118
+src/common/core/bunkernet/jobs/bunkernet-register.py
+  s_22c4a24690923f::t_369397eaf1693f 3-5,43-53,56-67,73,77,81,88,94,98,101-102,114,121
+src/autoconf/controllers/GatewayController.py
+  s_22c4a24690923f::t_e69ef398e868a7 533-534
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d44b83b776fc00b901a9cc7a2c3ef038c92600b6",
+  "prompts": {},
+  "sessions": {
+    "s_22c4a24690923f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a143ea-a72f-75e0-a7dd-74ef8472a5d5",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_97829bd3b546d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2517ec2-7793-439c-a7d8-ce741cb4a2fd",
+        "model": "unknown"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
