@@ -1,0 +1,62 @@
+src/ui/app/static/locales/tr.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/ru.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/bn.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/hi.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/ko.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/ar.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/id.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/de.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/fr.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/br.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/zh.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/pl.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/ur.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/it.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/es.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/templates/global_settings.html
+  s_64f7165edc727a::t_86a3715e165cbe 21-63
+src/ui/app/static/js/plugins-settings.js
+  s_64f7165edc727a::t_86a3715e165cbe 430-437,1384-1428,2290-2295
+  s_64f7165edc727a::t_d237294f148e71 2296
+src/ui/app/static/locales/pt.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/tw.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/tl.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/static/locales/en.json
+  s_64f7165edc727a::t_86a3715e165cbe 88,971-972,1038,1698
+src/ui/app/templates/models/plugins_settings.html
+  s_64f7165edc727a::t_86a3715e165cbe 54-57,97-100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9b75d80c49437b8ec0ae309f114a83c552352322",
+  "prompts": {},
+  "sessions": {
+    "s_64f7165edc727a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15870-1980-7771-a8f5-ab57e43809eb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
