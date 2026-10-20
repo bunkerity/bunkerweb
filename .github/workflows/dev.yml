@@ -179,7 +179,7 @@ jobs:
   push-dev:
     # needs: [tests-ui, tests-core] # TODO: Uncomment when tests are back
     needs: [plumber, build-containers]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
