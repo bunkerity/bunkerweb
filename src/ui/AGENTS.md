@@ -4,7 +4,7 @@ Agent guide for the BunkerWeb Flask web UI in `src/ui/`. This is the canonical g
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - API guide: [../api/AGENTS.md](../api/AGENTS.md) — the UI's only data source
 
 ## What This Is

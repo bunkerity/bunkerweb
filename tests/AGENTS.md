@@ -4,7 +4,7 @@ Agent guide for `tests/`. This is the canonical guide for this directory; `CLAUD
 
 ## Read First
 
-- Root: [../AGENTS.md](../AGENTS.md) (short) and [../CLAUDE.md](../CLAUDE.md) (architecture)
+- Root: [quick guide](../AGENTS.md#fast-start) and [architecture](../ARCHITECTURE.md#architecture)
 - **[README.md](README.md)** — the full integration-framework manual: writing specs, per-integration overrides, running locally, stack shape, CI. This guide orients; that one explains.
 - **[unit/README.md](unit/README.md)** — the pytest suite: venv setup, the engine matrix, the `api_app` lane, the coverage gate.
 

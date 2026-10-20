@@ -4,10 +4,13 @@ Primary instruction file for AI coding agents in this repository.
 
 ## Fast Start
 
-- Read [CLAUDE.md](CLAUDE.md) for architecture and component boundaries.
+@ARCHITECTURE.md
+
+Read [ARCHITECTURE.md](ARCHITECTURE.md) for architecture and component boundaries.
+
 - Read [BUILD.md](BUILD.md) for reproducible artifact builds.
 - Read [README.md](README.md) and [docs/quickstart-guide.md](docs/quickstart-guide.md) for integration context.
-- Open the guide of the directory you are about to touch (list at the bottom) — it holds the traps.
+- Open the guide of the directory you are about to touch (list below) — it holds the traps.
 - Run `pre-commit run --all-files` before finishing code changes.
 
 ## Repository Map

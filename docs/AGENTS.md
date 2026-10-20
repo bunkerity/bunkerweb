@@ -4,7 +4,7 @@ Agent guide for the user-facing documentation in `docs/`. This is the canonical 
 
 ## Read First
 
-- Root: [../AGENTS.md](../AGENTS.md) (short) and [../CLAUDE.md](../CLAUDE.md) (architecture)
+- Root: [quick guide](../AGENTS.md#fast-start) and [architecture](../ARCHITECTURE.md#architecture)
 - Plugin contract: [../src/common/core/AGENTS.md](../src/common/core/AGENTS.md)
 
 ## What This Is

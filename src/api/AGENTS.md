@@ -4,7 +4,7 @@ Agent guide for the BunkerWeb FastAPI control plane in `src/api/`. This is the c
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - Shared code: [../common/AGENTS.md](../common/AGENTS.md)
 
 ## What This Is

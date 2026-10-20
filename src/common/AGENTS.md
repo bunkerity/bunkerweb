@@ -4,7 +4,7 @@ Agent guide for the BunkerWeb shared library layer in `src/common/`. This is the
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - Database layer: [db/AGENTS.md](db/AGENTS.md)
 - Plugin contract: [core/AGENTS.md](core/AGENTS.md)
 - Plugin reference (user-facing): [../../docs/plugins.md](../../docs/plugins.md)

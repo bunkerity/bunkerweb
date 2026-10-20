@@ -2,6 +2,10 @@
 
 Agent guide for vendored build dependencies in `src/deps/`. `CLAUDE.md` here is a pointer to this guide.
 
+## Read First
+
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
+
 ## Dependency Boundary
 
 - `src/` is vendored third-party source: do not edit it directly. Keep durable BunkerWeb changes as patches under `misc/`, wired through the existing manifests and update flow.

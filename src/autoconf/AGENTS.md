@@ -4,7 +4,7 @@ Agent guide for BunkerWeb Autoconf in `src/autoconf/`. This is the canonical gui
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - API guide: [../api/AGENTS.md](../api/AGENTS.md) — Autoconf's only write path
 
 ## What This Is

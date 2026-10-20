@@ -2,6 +2,10 @@
 
 Agent guide for development and maintenance tooling in `misc/`. `CLAUDE.md` here is a pointer to this guide.
 
+## Read First
+
+- Root: [quick guide](../AGENTS.md#fast-start) and [architecture](../ARCHITECTURE.md#architecture)
+
 ## What Lives Here
 
 - `dev/` holds local Compose variants, environment examples, and development helpers; `integrations/` holds deployment manifests.

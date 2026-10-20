@@ -2,6 +2,10 @@
 
 Agent guide for user-facing deployment recipes in `examples/`. `CLAUDE.md` here is a pointer to this guide.
 
+## Read First
+
+- Root: [quick guide](../AGENTS.md#fast-start) and [architecture](../ARCHITECTURE.md#architecture)
+
 ## Recipe Rules
 
 - Examples are documentation-quality deployment recipes. Keep commands, service names, environment variables, and setup steps reproducible for users.

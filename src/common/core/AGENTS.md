@@ -5,7 +5,7 @@ Agent guide for the BunkerWeb core plugins in `src/common/core/`. This is the ca
 ## Read First
 
 - Shared layer: [../AGENTS.md](../AGENTS.md)
-- Root: [../../../AGENTS.md](../../../AGENTS.md) (short) and [../../../CLAUDE.md](../../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../../AGENTS.md#fast-start) and [architecture](../../../ARCHITECTURE.md#architecture)
 - User-facing plugin reference: [../../../docs/plugins.md](../../../docs/plugins.md)
 
 ## The Plugin Contract

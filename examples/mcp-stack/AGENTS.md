@@ -4,7 +4,7 @@ Agent guide for the BunkerWeb MCP stack example in `examples/mcp-stack/`. This i
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - Main docs: <https://docs.bunkerweb.io>
 
 ## What This Is
@@ -17,7 +17,7 @@ docker compose up -d
 
 That brings up BunkerWeb, the scheduler, the API, the MCP server, the database, Redis and a Celery **worker**. The worker is required: the scheduler dispatches jobs through the API to the worker queue, so without it `jobs_run` requests are accepted and never execute.
 
-Then point the assistant at the MCP server — for Claude Code, copy `.mcp.json` to the project root, or to `~/.claude/.mcp.json` for global access. Configure the assistant **after** the stack is running.
+Then point the assistant at the MCP server. Configure the assistant **after** the stack is running.
 
 ## Critical Rules
 
@@ -74,3 +74,7 @@ Read-only and confirm-first classifications take precedence over a mutating subs
 - **Rotate `BUNKERWEB_API_TOKEN`** regularly in production.
 - **DNS rebinding protection is disabled here** (`MCP_ENABLE_DNS_REBINDING_PROTECTION=False`). Enable it in production and set `MCP_ALLOWED_HOSTS` explicitly.
 - **Always provide a `reason`** when banning an IP — it creates the audit trail.
+
+## Tool-specific notes
+
+Claude Code: Copy `.mcp.json` to the project root, or to `~/.claude/.mcp.json` for global access.

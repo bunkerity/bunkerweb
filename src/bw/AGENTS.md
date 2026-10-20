@@ -4,7 +4,7 @@ Agent guide for the BunkerWeb NGINX/Lua runtime in `src/bw/`. This is the canoni
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - Shared code: [../common/AGENTS.md](../common/AGENTS.md)
 
 ## What This Is

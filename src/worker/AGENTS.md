@@ -4,7 +4,7 @@ Agent guide for the BunkerWeb Celery job executor in `src/worker/`. This is the 
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - Scheduler guide: [../scheduler/AGENTS.md](../scheduler/AGENTS.md) — the dispatch side
 - Shared code: [../common/AGENTS.md](../common/AGENTS.md)
 

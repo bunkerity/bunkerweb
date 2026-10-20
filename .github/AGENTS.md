@@ -2,6 +2,10 @@
 
 Agent guide for GitHub metadata and automation in `.github/`. `CLAUDE.md` here is a pointer to this guide.
 
+## Read First
+
+- Root: [quick guide](../AGENTS.md#fast-start) and [architecture](../ARCHITECTURE.md#architecture)
+
 ## Workflow Boundaries
 
 - Event and manual orchestrator workflows call local reusable build, test, or publish workflows. Reusable workflows declare `workflow_call` contracts; when one changes, inspect and update every caller.

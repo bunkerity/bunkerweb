@@ -4,7 +4,7 @@ Agent guide for the BunkerWeb Scheduler in `src/scheduler/`. This is the canonic
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - Worker guide: [../worker/AGENTS.md](../worker/AGENTS.md) — where jobs actually run
 - Shared code: [../common/AGENTS.md](../common/AGENTS.md)
 

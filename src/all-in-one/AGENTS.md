@@ -4,7 +4,7 @@ Agent guide for the BunkerWeb all-in-one (AIO) Docker image in `src/all-in-one/`
 
 ## Read First
 
-- Root: [../../AGENTS.md](../../AGENTS.md) (short) and [../../CLAUDE.md](../../CLAUDE.md) (architecture)
+- Root: [quick guide](../../AGENTS.md#fast-start) and [architecture](../../ARCHITECTURE.md#architecture)
 - Build reference: [../../BUILD.md](../../BUILD.md)
 
 ## What This Is
