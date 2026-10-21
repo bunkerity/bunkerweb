@@ -114,7 +114,7 @@ if [ "$current_version" != "$installed_version" ]; then
 			fi
 
 			# Stamp the database with the determined revision
-			if python3 -m alembic stamp "$REVISION"; then
+			if python3 -m alembic stamp --purge "$REVISION"; then
 				# Run database migration
 				log "ENTRYPOINT" "ℹ️" "Running database migration..."
 				if ! python3 -m alembic upgrade head; then

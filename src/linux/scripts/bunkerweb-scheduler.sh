@@ -212,7 +212,7 @@ EOL
                 fi
 
                 # Stamp the database with the determined revision
-                if $PYTHON_BIN -m alembic stamp "$REVISION"; then
+                if $PYTHON_BIN -m alembic stamp --purge "$REVISION"; then
                     # Run database migration
                     log "SYSTEMCTL" "ℹ️" "Running database migration..."
                     if ! $PYTHON_BIN -m alembic upgrade head; then
