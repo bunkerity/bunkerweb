@@ -27,13 +27,24 @@ helpers.load_plugin = function(json)
 	-- Open file
 	local file, err, nb = open(json, "r")
 	if not file then
+		-- A directory without plugin.json is not a plugin; other I/O errors must reject the reload.
+		if nb == 2 then
+			return nil, "no plugin.json at " .. json
+		end
 		return false, "can't load JSON at " .. json .. " : " .. err .. " (nb = " .. tostring(nb) .. ")"
 	end
-	-- Decode JSON
-	local ok, plugin = pcall(decode, file:read("*a"))
+	local content, read_err = file:read("*a")
 	file:close()
+	if not content then
+		return false, "can't read JSON at " .. json .. " : " .. tostring(read_err)
+	end
+	-- Decode JSON
+	local ok, plugin = pcall(decode, content)
 	if not ok then
-		return false, "invalid JSON at " .. json .. " : " .. err
+		return false, "invalid JSON at " .. json .. " : " .. tostring(plugin)
+	end
+	if type(plugin) ~= "table" then
+		return false, "invalid JSON at " .. json .. " : expected an object"
 	end
 	-- Check fields
 	local missing_fields = {}
@@ -87,7 +98,7 @@ helpers.order_plugins = function(plugins, variables)
 	local ok, orders = pcall(decode, file:read("*a"))
 	file:close()
 	if not ok then
-		return false, "invalid order.json : " .. err
+		return false, "invalid order.json : " .. tostring(orders)
 	end
 
 	-- Map legacy keys to phases

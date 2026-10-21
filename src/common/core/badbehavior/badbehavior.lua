@@ -26,6 +26,18 @@ local date = os.date
 local encode = cjson.encode
 local decode = cjson.decode
 
+-- ponytail: old queued increments use the default evidence limits of 100 events and 512 bytes.
+local DEFAULT_REASON_MAX_EVENTS = 100
+local DEFAULT_REASON_MAX_STRING_SIZE = 512
+
+local function normalize_report_limit(value, minimum, maximum, default)
+	value = tonumber(value)
+	if not value or value ~= value or value < minimum or value > maximum then
+		return default
+	end
+	return math.floor(value)
+end
+
 function badbehavior:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "badbehavior", ctx)
@@ -93,6 +105,18 @@ function badbehavior:log()
 			count_time = parse_duration(self.variables["BAD_BEHAVIOR_COUNT_TIME"], "s"),
 			ban_time = ban_time,
 			threshold = tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]),
+			report_max_events = normalize_report_limit(
+				self.variables["BAD_BEHAVIOR_REPORT_MAX_EVENTS"],
+				1,
+				10000,
+				DEFAULT_REASON_MAX_EVENTS
+			),
+			report_max_string_size = normalize_report_limit(
+				self.variables["BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE"],
+				4,
+				65536,
+				DEFAULT_REASON_MAX_STRING_SIZE
+			),
 			use_redis = self.use_redis,
 			server_name = self.ctx.bw.server_name,
 			security_mode = security_mode,
@@ -266,6 +290,18 @@ function badbehavior:timer()
 					count_time = count_time,
 					ban_time = ban_time,
 					threshold = threshold,
+					report_max_events = normalize_report_limit(
+						incr.report_max_events,
+						1,
+						10000,
+						DEFAULT_REASON_MAX_EVENTS
+					),
+					report_max_string_size = normalize_report_limit(
+						incr.report_max_string_size,
+						4,
+						65536,
+						DEFAULT_REASON_MAX_STRING_SIZE
+					),
 					use_redis = use_redis,
 					server_name = server_name,
 					security_mode = security_mode,
@@ -322,6 +358,14 @@ function badbehavior:timer()
 				-- banned with none of its own events left in it. Fall back to the counter that
 				-- triggered the ban so the report still carries why it happened.
 				local reason_data = increments_by_ip[data.ip]
+				if data.ban_scope == "service" then
+					reason_data = {}
+					for _, increment in ipairs(increments_by_ip[data.ip] or {}) do
+						if increment.server_name == data.server_name then
+							reason_data[#reason_data + 1] = increment
+						end
+					end
+				end
 				if not reason_data or #reason_data == 0 then
 					reason_data = {
 						{
@@ -338,6 +382,32 @@ function badbehavior:timer()
 						},
 					}
 				end
+				table.sort(reason_data, function(a, b)
+					return (tonumber(a.date) or 0) > (tonumber(b.date) or 0)
+				end)
+				local bounded_reason_data = {}
+				local max_events = data.report_max_events
+				local max_string_size = data.report_max_string_size
+				for i = 1, math.min(data.threshold, max_events, #reason_data) do
+					local event = {}
+					for key, value in pairs(reason_data[i]) do
+						if
+							(key == "url" or key == "method")
+							and type(value) == "string"
+							and #value > max_string_size
+						then
+							local cut = max_string_size - 3
+							-- Keep valid UTF-8 intact when appending the truncation marker.
+							while cut > 0 and value:byte(cut + 1) >= 0x80 and value:byte(cut + 1) < 0xC0 do
+								cut = cut - 1
+							end
+							value = value:sub(1, cut) .. "..."
+						end
+						event[key] = value
+					end
+					event.counter = data.counter
+					bounded_reason_data[#bounded_reason_data + 1] = event
+				end
 				local ok, err = add_ban(
 					data.ip,
 					"bad behavior",
@@ -345,7 +415,7 @@ function badbehavior:timer()
 					data.server_name,
 					data.country,
 					data.ban_scope,
-					reason_data
+					bounded_reason_data
 				)
 				if not ok then
 					ret = false

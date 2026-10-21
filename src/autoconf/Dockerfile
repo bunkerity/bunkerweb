@@ -1,4 +1,4 @@
-FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc AS builder
+FROM python:3.14-alpine@sha256:f6a589d43c42b9e7f7dc67a12d37132491f362859a5d750607710cc56da3bc72 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -32,7 +32,7 @@ COPY src/common/utils utils
 COPY src/autoconf autoconf
 COPY src/VERSION VERSION
 
-FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc
+FROM python:3.14-alpine@sha256:f6a589d43c42b9e7f7dc67a12d37132491f362859a5d750607710cc56da3bc72
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -43,8 +43,7 @@ RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite pos
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
-RUN apk add --no-cache "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
-RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-76642 CVE-2026-78408 CVE-2026-78409 CVE-2026-78410
+RUN apk add --no-cache "mariadb-client>=11.8.9-r0" "mariadb-common>=11.8.9-r0" # CVE-2026-47023 CVE-2026-60184 CVE-2026-60331 CVE-2026-60585 CVE-2026-60747 CVE-2026-61081
 RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
 RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
 
@@ -69,7 +68,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.16"
+LABEL version="1.6.17"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="autoconf"
 

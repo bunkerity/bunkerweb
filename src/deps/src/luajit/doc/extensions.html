@@ -370,8 +370,7 @@ Other features are only enabled, if LuaJIT is built with
 </p>
 <ul>
 <li><tt>goto</tt> is a keyword and not a valid variable name anymore.</li>
-<li><tt>break</tt> can be placed anywhere. Empty statements (<tt>;;</tt>)
-are allowed.</li>
+<li><tt>break</tt> can be placed anywhere.</li>
 <li><tt>__lt</tt>, <tt>__le</tt> are invoked for mixed types.</li>
 <li><tt>__len</tt> for tables. <tt>rawlen()</tt> library function.</li>
 <li><tt>pairs()</tt> and <tt>ipairs()</tt> check for <tt>__pairs</tt> and
@@ -427,6 +426,8 @@ LuaJIT 2.1 supports some
   <li><tt>const</tt> Declaration</li>
   <li>Short Function Expression</li>
   <li>Underscores in Number Literals</li>
+  <li>Empty Statements / Semicolons Anywhere</li>
+  <li>Line Number Directive</li>
 </ul>
 <p>
 Not backported are:

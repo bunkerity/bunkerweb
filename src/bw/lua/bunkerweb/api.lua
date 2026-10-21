@@ -7,6 +7,7 @@ local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
+local ffi = require "ffi"
 local helpers = require "bunkerweb.helpers"
 local process = require "ngx.process"
 local pushswap = require "bunkerweb.pushswap"
@@ -191,7 +192,7 @@ api.global.GET["^/health$"] = function(self)
 	end
 
 	-- Check if reload indicator file exists
-	local f = open("/var/tmp/bunkerweb_reloading", "r")
+	local f = open("/var/tmp/bunkerweb/reloading", "r")
 	if f then
 		f:close()
 		return self:response(HTTP_OK, "success", "reloading")
@@ -287,9 +288,236 @@ local function check_audit_storage(variables_path)
 	return result == "ModSecurity audit preflight successful\n", result
 end
 
--- The body returns the response triple instead of sending it, so the wrapper has one
--- place to release the swap lock whichever way the reload ends.
-local function reload_locked(test_arg)
+-- The generator installs a rendered configuration into /etc/nginx file by file, and a reload
+-- reads the routing and the variables at different moments, so a reload that starts part way
+-- through an install loads a mix of two generations. The two take turns, and each publishes its
+-- own flag before it looks for the other's: the generator locks /var/tmp/bunkerweb/generating
+-- (flock, so the kernel drops it with the process) and then looks for the reloading marker, the
+-- reload creates the marker and then probes the lock. Whoever goes second sees the other one and
+-- backs off. A reload that cannot publish its marker, or cannot tell whether a generator is
+-- installing, does not go on. Keep the paths in step with gen/sync_tree.py.
+--
+-- One reload is in flight at a time, from its signal to the moment its new workers are up. The
+-- marker is created exclusively and holds a token; the master keeps the token of the reload that
+-- signalled it (init-lua.conf), and only the workers of that reload remove the marker (and only
+-- while it still holds their token). A reload that finds a marker waits for it to go instead of
+-- sharing it: the master takes signals one after another, so a second reload's parse would
+-- otherwise run after the first one's workers had cleared the marker. A marker that never goes
+-- belongs to a reload the master rejected after it parsed the configuration, and then reloads and
+-- generations wait for it to clear; an orphan with a monotonic stamp is removed after five minutes.
+local RELOADING_PATH = "/var/tmp/bunkerweb/reloading"
+local GENERATING_PATH = "/var/tmp/bunkerweb/generating"
+-- How long, from the start of the request, a reload waits for the previous reload or for a
+-- generator before it answers 503. A normal reload clears its marker about five seconds after the
+-- signal (the new workers do it from a timer they start with a five second delay). The callers
+-- (scheduler, API, UI) read for max(RELOAD_MIN_TIMEOUT, 3 * services) seconds, five by default, and
+-- retry a 503 twice, two seconds apart, but a read that times out is a failed reload that is not
+-- retried. So the wait stays under that default: a reload that arrives while another one runs is
+-- given up after four seconds, comes back two seconds later and finds the marker gone.
+local RELOAD_WAIT = 4
+local RELOAD_POLL = 0.1
+local RELOAD_MARKER_MAX_AGE = 300
+
+ffi.cdef [[
+typedef struct _IO_FILE FILE;
+FILE *fopen(const char *pathname, const char *mode);
+int fileno(FILE *stream);
+int fclose(FILE *stream);
+int fputs(const char *s, FILE *stream);
+int flock(int fd, int operation);
+int fchmod(int fd, unsigned int mode);
+]]
+local ENOENT = 2
+-- errno of a lock held by someone else: EAGAIN is 11 on Linux and 35 on the BSDs and macOS
+local EWOULDBLOCK = (ffi.os == "BSD" or ffi.os == "OSX") and 35 or 11
+local EEXIST = 17
+local LOCK_SH_NB = 5 -- LOCK_SH | LOCK_NB
+local LOCK_EX_NB = 6 -- LOCK_EX | LOCK_NB
+local LOCK_UN = 8
+
+-- Whether a generator holds its lock: true or false, or nil and a message when that cannot be told.
+-- A shared lock that is taken and given back at once, so the generator never waits on this probe
+-- for longer than it takes to run.
+local function generator_running()
+	-- Close-on-exec ("e"): the file must not leak into the processes this worker starts
+	local file = ffi.C.fopen(GENERATING_PATH, "re")
+	if file == nil then
+		local errno = ffi.errno()
+		if errno == ENOENT then
+			return false
+		end
+		return nil, "cannot open " .. GENERATING_PATH .. " (errno " .. errno .. ")"
+	end
+	local fd = ffi.C.fileno(file)
+	local running, err
+	if ffi.C.flock(fd, LOCK_SH_NB) == 0 then
+		ffi.C.flock(fd, LOCK_UN)
+		running = false
+	else
+		local errno = ffi.errno()
+		if errno == EWOULDBLOCK then
+			running = true
+		else
+			err = "cannot lock " .. GENERATING_PATH .. " (errno " .. errno .. ")"
+		end
+	end
+	ffi.C.fclose(file)
+	return running, err
+end
+
+-- AIO and Linux generate and receive pushes into the same tree. Both writers must hold this
+-- flock; the swap lock is always taken first, as it is for the reload's flock probe.
+local function acquire_generating_lock()
+	local file = ffi.C.fopen(GENERATING_PATH, "re")
+	if file == nil and ffi.errno() == ENOENT then
+		file = ffi.C.fopen(GENERATING_PATH, "wxe")
+		if file ~= nil then
+			-- Match the generator's 0644 creation mode, independent of this worker's umask.
+			ffi.C.fchmod(ffi.C.fileno(file), 420)
+		elseif ffi.errno() == EEXIST then
+			-- Another user may have created it meanwhile; open without O_CREAT.
+			file = ffi.C.fopen(GENERATING_PATH, "re")
+		end
+	end
+	if file == nil then
+		return nil, HTTP_INTERNAL_SERVER_ERROR, "cannot open " .. GENERATING_PATH .. " (errno " .. ffi.errno() .. ")"
+	end
+	local deadline = ngx.now() + PUSH_LOCK_WAIT
+	while ffi.C.flock(ffi.C.fileno(file), LOCK_EX_NB) ~= 0 do
+		local errno = ffi.errno()
+		if errno ~= EWOULDBLOCK then
+			ffi.C.fclose(file)
+			return nil, HTTP_INTERNAL_SERVER_ERROR, "cannot lock " .. GENERATING_PATH .. " (errno " .. errno .. ")"
+		end
+		if ngx.now() >= deadline then
+			ffi.C.fclose(file)
+			return nil, HTTP_SERVICE_UNAVAILABLE, "a configuration generation is in progress"
+		end
+		ngx.sleep(RELOAD_POLL)
+	end
+	return file
+end
+
+-- Creates the reloading marker, which must not exist, holding token. "wx" is O_CREAT | O_EXCL, "e"
+-- keeps the file out of the processes this worker starts. Returns true, or nil and the reason: the
+-- boolean false when the marker is already there.
+local function create_marker(token)
+	local file = ffi.C.fopen(RELOADING_PATH, "wxe")
+	if file == nil then
+		local errno = ffi.errno()
+		if errno == EEXIST then
+			return nil, false
+		end
+		return nil, "cannot create " .. RELOADING_PATH .. " (errno " .. errno .. ")"
+	end
+	local written = ffi.C.fputs(token, file)
+	if ffi.C.fclose(file) ~= 0 or written < 0 then
+		os.remove(RELOADING_PATH)
+		return nil, "cannot write " .. RELOADING_PATH
+	end
+	return true
+end
+
+-- A directory opens for reading but is no marker: reading it fails
+local function marker_is_file()
+	local existing = open(RELOADING_PATH, "r")
+	if not existing then
+		return true
+	end
+	local _, read_err = existing:read(0)
+	existing:close()
+	return not read_err
+end
+
+local function read_reload_uptime()
+	local file = open("/proc/uptime", "r")
+	if not file then
+		return nil
+	end
+	local content = file:read("*l")
+	file:close()
+	return content and tonumber(content:match("^(%d+)%.%d+%s"))
+end
+
+local function read_marker()
+	local marker = open(RELOADING_PATH, "r")
+	if not marker then
+		return nil
+	end
+	local token = marker:read("*a")
+	marker:close()
+	return token
+end
+
+-- Called under the reload's existing swap lock.
+local function clear_stale_reload_marker()
+	local token = read_marker()
+	if not token then
+		return
+	end
+	local created = tonumber(token:match("^%d+%.%d+%.(%d+)$"))
+	local now = read_reload_uptime()
+	if not created or not now or now - created <= RELOAD_MARKER_MAX_AGE then
+		return
+	end
+	-- ponytail: two removers and a fresh publisher can still race between this comparison and unlink.
+	if read_marker() == token and os.remove(RELOADING_PATH) then
+		logger:log(ngx.WARN, "Removing orphaned reload marker " .. RELOADING_PATH .. " older than 5 minutes")
+	end
+end
+
+-- Creates the reloading marker and returns its token when no reload is in flight and no generator
+-- is installing. Otherwise nil, an HTTP status and a message: 503 after RELOAD_WAIT seconds of
+-- either, 500 when the marker cannot be published or the lock cannot be probed, in which case nginx
+-- must not be signalled. A marker is only ever created here, so the one that exists after a
+-- success is ours.
+local function begin_reload()
+	local token = string.format("%d.%d", os.time(), math.random(1, 2147483647))
+	local uptime = read_reload_uptime()
+	if uptime then
+		token = token .. string.format(".%d", uptime)
+	end
+	local deadline = ngx.req.start_time() + RELOAD_WAIT
+	local blocker
+	while true do
+		clear_stale_reload_marker()
+		local created, err = create_marker(token)
+		if created then
+			local running, probe_err = generator_running()
+			if running == false then
+				return token
+			end
+			os.remove(RELOADING_PATH)
+			if running == nil then
+				logger:log(ERR, probe_err)
+				return nil, HTTP_INTERNAL_SERVER_ERROR, "reload refused: " .. probe_err
+			end
+			blocker = "a configuration generation is in progress"
+		elseif err == false then
+			if not marker_is_file() then
+				-- Without a marker a generator cannot know a reload is coming
+				logger:log(ERR, "Failed to create reload indicator file: " .. RELOADING_PATH .. " is not a file")
+				return nil, HTTP_INTERNAL_SERVER_ERROR, "reload refused: " .. RELOADING_PATH .. " is not a file"
+			end
+			blocker = "a reload is in progress ("
+				.. RELOADING_PATH
+				.. " exists). If none is running, the last one was rejected after its configuration was parsed:"
+				.. " a marker with a monotonic stamp is cleared automatically once it is older than 5 minutes;"
+				.. " restart BunkerWeb or remove that file to clear it sooner"
+		else
+			-- Without the marker a generator cannot know a reload is coming
+			logger:log(ERR, "Failed to create reload indicator file: " .. err)
+			return nil, HTTP_INTERNAL_SERVER_ERROR, "reload refused: " .. err
+		end
+		if ngx.now() >= deadline then
+			logger:log(ERR, "reload not started: " .. blocker)
+			return nil, HTTP_SERVICE_UNAVAILABLE, blocker
+		end
+		ngx.sleep(RELOAD_POLL)
+	end
+end
+
+local function reload_checked(test_arg)
 	local valid, validation_error = check_audit_storage("/etc/nginx/variables.env")
 	if not valid then
 		return HTTP_INTERNAL_SERVER_ERROR, "error", validation_error
@@ -333,16 +561,26 @@ local function reload_locked(test_arg)
 		return HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err
 	end
 
-	-- Create temporary file to indicate reconfiguration
-	local file, err = open("/var/tmp/bunkerweb_reloading", "w")
-	if file then
-		file:write(tostring(os.time()))
-		file:close()
-	else
-		logger:log(ERR, "Failed to create reload indicator file: " .. err)
-	end
-
 	return HTTP_OK, "success", "reload successful"
+end
+
+-- The body returns the response triple instead of sending it, so the wrapper has one
+-- place to release the swap lock whichever way the reload ends.
+local function reload_locked(test_arg)
+	local started, status, failure = begin_reload()
+	if not started then
+		-- begin_reload took back what it published; the values are then the HTTP status and the message
+		return status, "error", failure
+	end
+	local ran, code, level, message = pcall(reload_checked, test_arg)
+	-- The marker stands for a reload that signalled nginx; the new workers remove it.
+	if not ran or level ~= "success" then
+		os.remove(RELOADING_PATH)
+	end
+	if not ran then
+		error(code, 0)
+	end
+	return code, level, message
 end
 
 api.global.POST["^/reload"] = function(self)
@@ -477,16 +715,36 @@ api.global.POST["^/confs$"] = function(self)
 		os.remove(tmp)
 		return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "another push swap is in progress")
 	end
+	local generating
+	if destination == "/etc/nginx" then
+		local status, failure
+		generating, status, failure = acquire_generating_lock()
+		if not generating then
+			lock:unlock()
+			execute("rm -rf '" .. staging .. "'")
+			os.remove(tmp)
+			return self:response(status, "error", failure)
+		end
+	end
 
 	-- pcall so an error inside the section still releases the lock: leaving it held costs every
 	-- later push and reload until it expires.
 	local ran, ok, err = pcall(pushswap.swap, destination, staging)
 	if ran and ok and digest then
-		local written, write_err = pushswap.write_applied(destination, digest)
-		if not written then
+		local recorded, written, write_err = pcall(pushswap.write_applied, destination, digest)
+		if not recorded or not written then
 			-- Only costs a redundant push next loop, but it is invisible otherwise.
-			logger:log(ERR, "cannot record the applied digest for " .. destination .. ": " .. tostring(write_err))
+			logger:log(
+				ERR,
+				"cannot record the applied digest for "
+					.. destination
+					.. ": "
+					.. tostring(recorded and write_err or written)
+			)
 		end
+	end
+	if generating then
+		ffi.C.fclose(generating)
 	end
 	lock:unlock()
 	os.remove(tmp)

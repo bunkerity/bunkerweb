@@ -18,7 +18,23 @@ Esta guía de inicio rápido te ayudará a instalar rápidamente BunkerWeb y a p
 
 Proteger las aplicaciones web existentes que ya son accesibles con el protocolo HTTP(S) es el objetivo principal de BunkerWeb: actuará como un [proxy inverso](https://es.wikipedia.org/wiki/Proxy_inverso) clásico con características de seguridad adicionales.
 
-Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples) del repositorio para obtener ejemplos del mundo real.
+Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples) del repositorio para obtener ejemplos del mundo real.
+
+## Usar un agente de IA
+
+### Habilidades de BunkerWeb en skills.sh
+
+Si utilizas un agente de programación con IA, instala la [habilidad oficial de BunkerWeb en skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb) para obtener ayuda con el despliegue y la configuración. Sigue las [instrucciones de instalación](https://github.com/bunkerity/bunkerweb-skills#installation) de tu agente.
+
+### Documentación de BunkerWeb con Context7
+
+También puedes conectar tu agente a [Context7](https://context7.com/docs) para consultar la [documentación de BunkerWeb](https://context7.com/bunkerity/bunkerweb) durante la configuración. Incluye tu versión de BunkerWeb y la integración en tu consulta para que el agente utilice los ajustes y ejemplos adecuados.
+
+Ejemplo de consulta:
+
+```text
+Ayúdame a configurar BunkerWeb <versión> con <integración> para proteger mi aplicación. use context7
+```
 
 ## Configuración básica
 
@@ -33,7 +49,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.16
+      bunkerity/bunkerweb-all-in-one:1.6.17
     ```
 
     Por defecto, el contenedor expone:
@@ -51,8 +67,8 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
 
     ```bash
     # Download the script and its checksum
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16/install-bunkerweb.sh
-    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.16/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh.sha256
 
     # Verify the checksum
     sha256sum -c install-bunkerweb.sh.sha256
@@ -93,7 +109,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     services:
       bunkerweb:
         # Este es el nombre que se usará para identificar la instancia en el Programador
-        image: bunkerity/bunkerweb:1.6.16
+        image: bunkerity/bunkerweb:1.6.17
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -106,7 +122,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de establecer el nombre de instancia correcto
@@ -123,7 +139,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.16
+        image: bunkerity/bunkerweb-ui:1.6.17
         environment:
           <<: *bw-env
         volumes:
@@ -193,7 +209,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.16
+        image: bunkerity/bunkerweb:1.6.17
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -209,7 +225,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -227,7 +243,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.16
+        image: bunkerity/bunkerweb-autoconf:1.6.17
         depends_on:
           - bw-docker
         environment:
@@ -250,7 +266,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.16
+        image: bunkerity/bunkerweb-ui:1.6.17
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres
@@ -328,7 +344,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     Una vez instalado, puedes obtener la dirección IP del `LoadBalancer` para configurar tus dominios:
 
     ```shell
-    kubectl -n bunkerweb get svc mybw-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    kubectl -n bunkerweb get svc mybw-bunkerweb-external -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
     ```
 
 === "Swarm"
@@ -348,7 +364,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.16
+        image: bunkerity/bunkerweb:1.6.17
         ports:
           - published: 80
             target: 8080
@@ -378,7 +394,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -396,7 +412,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.16
+        image: bunkerity/bunkerweb-autoconf:1.6.17
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -425,7 +441,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.16
+        image: bunkerity/bunkerweb-ui:1.6.17
         environment:
           <<: *bw-ui-env
           # TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres
@@ -652,7 +668,7 @@ Ahora puedes iniciar sesión con la cuenta de administrador que creaste durante 
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Incluye cualquier otra variable de entorno existente para la UI, Redis, CrowdSec, etc. ---
-      bunkerity/bunkerweb-all-in-one:1.6.16
+      bunkerity/bunkerweb-all-in-one:1.6.17
     ```
 
     Tu contenedor de aplicación (`myapp`) y el contenedor `bunkerweb-aio` deben estar en la misma red de Docker para que BunkerWeb pueda alcanzarlo usando el nombre de host `myapp`.
@@ -674,7 +690,7 @@ Ahora puedes iniciar sesión con la cuenta de administrador que creaste durante 
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (todas las demás variables de entorno relevantes como se muestra en el ejemplo principal anterior) ...
-      bunkerity/bunkerweb-all-in-one:1.6.16
+      bunkerity/bunkerweb-all-in-one:1.6.17
     ```
 
     Asegúrate de reemplazar `myapp` con el nombre o IP real de tu contenedor de aplicación y `http://myapp:8080` con su dirección y puerto correctos.

@@ -169,7 +169,14 @@ function start() {
 
     tmp_env_path="/var/tmp/bunkerweb/tmp.env"
 
+    # Present when an install into /etc/nginx was cut short. Each file lands atomically but the tree does
+    # not, so what is there is a mix of two generations. Keep the name in step with sync_tree.INSTALL_SENTINEL.
+    install_sentinel="/etc/nginx/.bw-install-incomplete"
+
     if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
+        regenerate_temp_config=true
+    elif [ -e "$install_sentinel" ] ; then
+        log "SYSTEMCTL" "⚠️" "The previous configuration install was interrupted, so the preserved config may mix two generations: regenerating the temporary config instead of keeping it"
         regenerate_temp_config=true
     else
         log "SYSTEMCTL" "ℹ️" "Preserving current config on restart, keeping it enforced and asking the scheduler for the latest one ..."
@@ -184,6 +191,15 @@ function start() {
 
     write_tmp_env_file "$tmp_env_path" "$tmp_env_content"
 
+    # A marker left by the previous run stands for no reload: no nginx runs yet. The generator waits for
+    # it, and refuses to install while it exists, so it has to go first. This also lets the health
+    # endpoint report "loading" and not a stale "reloading".
+    if [ -f /var/tmp/bunkerweb/reloading ] ; then
+        rm -f /var/tmp/bunkerweb/reloading
+    fi
+    # Remove the previous marker location on upgraded hosts; /var/tmp may be read-only.
+    rm -f /var/tmp/bunkerweb_reloading 2>/dev/null || true
+
     if [[ "$regenerate_temp_config" == "true" ]] ; then
         rm -f /var/tmp/bunkerweb_needs_config
         if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
@@ -191,11 +207,7 @@ function start() {
             log "SYSTEMCTL" "❌" "Error while generating config from $tmp_env_path"
             exit 1
         fi
-    fi
-
-    # Ensure health endpoint can report "loading" (not stale "reloading")
-    if [ -f /var/tmp/bunkerweb_reloading ] ; then
-        rm -f /var/tmp/bunkerweb_reloading
+        rm -f "$install_sentinel"
     fi
 
     # Clean orphaned NGINX temp files from previous runs
@@ -320,6 +332,114 @@ function stop() {
     log "SYSTEMCTL" "ℹ️" "BunkerWeb service stopped"
 }
 
+# The generator installs a rendered configuration into /etc/nginx file by file, and nginx reads the
+# routing and the variables at different moments of a reload. The API reload handler and the generator
+# take turns through two files (see api.lua and gen/sync_tree.py): the generator locks
+# /var/tmp/bunkerweb/generating and then looks for the reloading marker, the reload writes the marker
+# and then probes the lock, so whoever comes second sees the other and backs off. This does the same.
+# Succeeds while a generator holds its lock, and also when that cannot be told: the reload then does
+# not go on.
+function generator_installing() {
+    local rc
+    [ -e /var/tmp/bunkerweb/generating ] || return 1
+    if command -v flock >/dev/null 2>&1 ; then
+        # Opened for reading only, so this never creates the file. The shared lock is taken without
+        # waiting and given back when the subshell exits; 99 says the generator holds it.
+        ( exec 9< /var/tmp/bunkerweb/generating && flock -n -s -E 99 9 ) 2>/dev/null
+        rc=$?
+    elif command -v lockf >/dev/null 2>&1 ; then
+        # FreeBSD has no flock(1). lockf(1) takes the same flock(2) lock, but only an exclusive one:
+        # -n never creates the file, -k never removes it, -t 0 never waits, and the lock is given back
+        # when the command ends. Anything but success, 75 (held) included, says a generator installs.
+        lockf -k -n -s -t 0 /var/tmp/bunkerweb/generating true 2>/dev/null
+        rc=$?
+    else
+        return 0
+    fi
+    [ "$rc" -ne 0 ]
+}
+
+# Integer seconds since boot, shared with the API and generator and unaffected by wall-clock steps.
+function read_reload_uptime() {
+    local uptime
+    IFS=' ' read -r uptime _ 2>/dev/null < /proc/uptime || return 1
+    [[ "$uptime" =~ ^([0-9]+)\.[0-9]+$ ]] || return 1
+    printf '%s' "${BASH_REMATCH[1]}"
+}
+
+# Removes a rejected reload's orphan only when its monotonic stamp proves it is over five minutes old.
+function clear_stale_reload_marker() {
+    local -r RELOAD_MARKER_MAX_AGE=300
+    local token current created now
+    [ -f /var/tmp/bunkerweb/reloading ] || return 1
+    # The suffix preserves trailing newlines so the second read compares the complete content.
+    token="$(cat /var/tmp/bunkerweb/reloading && printf '.')" || return 1
+    token="${token%.}"
+    [[ "$token" =~ ^[0-9]+\.[0-9]+\.([0-9]+)$ ]] || return 1
+    created="${BASH_REMATCH[1]}"
+    now="$(read_reload_uptime)" || return 1
+    awk -v now="$now" -v created="$created" -v age="$RELOAD_MARKER_MAX_AGE" 'BEGIN { exit !(now - created > age) }' || return 1
+    current="$(cat /var/tmp/bunkerweb/reloading && printf '.')" || return 1
+    # ponytail: two removers and a fresh publisher can still race between this comparison and unlink.
+    [ "${current%.}" = "$token" ] || return 1
+    rm -f /var/tmp/bunkerweb/reloading || return 1
+    log "$1" "⚠️" "Removing orphaned reload marker /var/tmp/bunkerweb/reloading older than 5 minutes"
+}
+
+# One reload is in flight at a time, from its signal to the moment its new workers are up: they remove
+# the marker, and only while it holds the token of the reload they belong to (see api.lua and
+# init-lua.conf). The token is written to a file of its own and hard linked to the marker, which fails
+# while the marker exists, so the marker is either absent or complete. It is done as nginx, since the
+# workers remove it and /var/tmp is sticky, and a reload that finds one waits for it to go. A marker that never goes
+# belongs to a reload the master rejected after it parsed the configuration and is cleared after five minutes when its monotonic stamp proves its age.
+# Returns 1 while a generator installs, 2 when the marker cannot be published, 3 while another reload
+# is in flight: in each case the reload must not go on. Waits reload_wait_ticks tenths of a second.
+function begin_reload() {
+    local rc=1 publish_misses=0 uptime
+    reload_token="$(date +%s).$RANDOM"
+    if uptime="$(read_reload_uptime)" ; then
+        reload_token="$reload_token.$uptime"
+    fi
+    for _ in $(seq 1 "${reload_wait_ticks:-200}") ; do
+        clear_stale_reload_marker "SYSTEMCTL"
+        # Something that is not a file in the marker's place is no marker, and nothing can take its place
+        if [ -e /var/tmp/bunkerweb/reloading ] && [ ! -f /var/tmp/bunkerweb/reloading ] ; then
+            return 2
+        fi
+        # The script is for the shell run as nginx: $1 is its argument, not ours. Exit 2 says the token could
+        # not be written (the write runs in a subshell because a file size limit kills the writer), 1 that
+        # the marker exists.
+        # shellcheck disable=SC2016
+        run_as_nginx sh -c 'tmp="/var/tmp/bunkerweb/reloading.$$"; ( printf "%s" "$1" > "$tmp" ) || { rm -f "$tmp"; exit 2; }; ln "$tmp" /var/tmp/bunkerweb/reloading; rc=$?; rm -f "$tmp"; exit $rc' sh "$reload_token" 2>/dev/null
+        case $? in
+            0)
+                publish_misses=0
+                generator_installing || return 0
+                rm -f /var/tmp/bunkerweb/reloading
+                rc=1
+                ;;
+            1)
+                if [ -e /var/tmp/bunkerweb/reloading ] ; then
+                    publish_misses=0
+                else
+                    publish_misses=$((publish_misses + 1))
+                    [ "$publish_misses" -lt 2 ] || return 2
+                fi
+                rc=3
+                ;;
+            *) return 2 ;;
+        esac
+        sleep 0.1
+    done
+    return $rc
+}
+
+# The marker is ours until the signal went out: nothing else removes it before then
+function abort_reload() {
+    rm -f /var/tmp/bunkerweb/reloading
+    return 1
+}
+
 function reload()
 {
     log "SYSTEMCTL" "ℹ️" "Reloading BunkerWeb service ..."
@@ -328,8 +448,25 @@ function reload()
     if [ -f "$pid_file" ] ; then
         pid="$(cat "$pid_file" 2>/dev/null)"
         if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
+            begin_reload
+            case $? in
+                0) ;;
+                2)
+                    log "SYSTEMCTL" "❌" "Couldn't create /var/tmp/bunkerweb/reloading, keeping running configuration"
+                    return 1
+                    ;;
+                3)
+                    log "SYSTEMCTL" "❌" "A reload is in progress (/var/tmp/bunkerweb/reloading exists), keeping running configuration. If none is running, the last one was rejected after its configuration was parsed: a marker with a monotonic stamp is cleared automatically once it is older than 5 minutes; restart BunkerWeb or remove that file to clear it sooner"
+                    return 1
+                    ;;
+                *)
+                    log "SYSTEMCTL" "❌" "A configuration generation is in progress, keeping running configuration"
+                    return 1
+                    ;;
+            esac
             if ! run_as_nginx env PYTHONPATH="$BW_PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/utils/modsecurity_audit.py /etc/nginx/variables.env; then
                 log "SYSTEMCTL" "❌" "Invalid ModSecurity audit storage, keeping running configuration"
+                abort_reload
                 return 1
             fi
             log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
@@ -342,6 +479,7 @@ function reload()
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
                     log "SYSTEMCTL" "❌" "Error while sending hup signal to nginx"
+                    abort_reload
                 fi
             fi
         else

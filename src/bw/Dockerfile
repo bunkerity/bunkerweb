@@ -1,4 +1,4 @@
-FROM nginx:1.30.5-alpine-slim@sha256:6d9f34e1499384d1c8c72c149a0868ea547083d37943044efe7cf07b5c51bcd7 AS builder
+FROM nginx:1.30.6-alpine-slim@sha256:3028fc1419f99b95c1c69f844bbaf49dc1b881750c51b497fc721ac4f02a14e6 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre2-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev cargo lmdb-dev libfuzzy2-dev pkgconfig ca-certificates coreutils libc-dev
@@ -69,7 +69,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.30.5-alpine-slim@sha256:6d9f34e1499384d1c8c72c149a0868ea547083d37943044efe7cf07b5c51bcd7
+FROM nginx:1.30.6-alpine-slim@sha256:3028fc1419f99b95c1c69f844bbaf49dc1b881750c51b497fc721ac4f02a14e6
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -79,11 +79,11 @@ RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl 
 
 # Fix CVEs
 RUN apk add --no-cache "python3>=3.14.8-r0" "pyc>=3.14.8-r0" # CVE-2026-15310 CVE-2026-15806 CVE-2026-17084 CVE-2026-19445 CVE-2026-19553 CVE-2026-19672 CVE-2026-82049
-RUN apk add --no-cache "openssl>=3.5.8-r0" "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
-RUN apk add --no-cache "expat>=2.8.5-r0" "libexpat>=2.8.5-r0" # CVE-2026-66046 CVE-2026-76641 CVE-2026-76956 CVE-2026-76957 CVE-2026-93990
+RUN apk add --no-cache "openssl>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
+RUN apk add --no-cache "expat>=2.9.0-r0" "libexpat>=2.9.0-r0" # CVE-2026-66046 CVE-2026-76641 CVE-2026-76956 CVE-2026-76957 CVE-2026-93990 CVE-2026-77214 CVE-2026-102633
+RUN apk add --no-cache "libx11>=1.8.14-r0" "libxpm>=3.5.20-r0" # CVE-2026-88806 CVE-2026-94283 CVE-2026-94284 CVE-2026-94285 CVE-2026-94287
 RUN apk add --no-cache "curl>=8.22.0-r0" "libcurl>=8.22.0-r0" # CVE-2026-13608 CVE-2026-18924 CVE-2026-19931 CVE-2026-80229 CVE-2026-80230 CVE-2026-80231 CVE-2026-80255 CVE-2026-80256 CVE-2026-82208 CVE-2026-82209
 RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-76642 CVE-2026-78408 CVE-2026-78409 CVE-2026-78410
-RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
 RUN apk add --no-cache "nghttp2-libs>=1.70.0-r0" # CVE-2026-58055
 RUN apk add --no-cache "libpng>=1.6.59-r0" # CVE-2026-46675
 RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
@@ -117,7 +117,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.16"
+LABEL version="1.6.17"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

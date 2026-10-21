@@ -401,13 +401,16 @@ TRef LJ_FASTCALL lj_opt_fwd_alen(jit_State *J)
   IRRef ref;
   IROp op;
 
-  /* Search for conflicting HSTORE with numeric key. */
+  /* Search for conflicting HSTORE or NEWREF with numeric key. */
   ref = J->chain[IR_HSTORE];
   while (ref > lim) {
     IRIns *store = IR(ref);
-    IRIns *href = IR(store->op1);
-    IRIns *key = IR(href->op2);
-    if (irt_isnum(key->o == IR_KSLOT ? IR(key->op1)->t : key->t)) {
+    IRIns *xref = IR(store->op1);
+    IRIns *key = IR(xref->op2);
+    IRRef htab = xref->o == IR_HREFK ? IR(xref->op1)->op1 : xref->op1;
+    if ((tab == htab || aa_table(J, tab, htab) != ALIAS_NO) &&
+	(xref->o == IR_NEWREF ||
+	 irt_isnum(key->o == IR_KSLOT ? IR(key->op1)->t : key->t))) {
       lim = ref;  /* Conflicting store found, limits search for ALEN. */
       break;
     }

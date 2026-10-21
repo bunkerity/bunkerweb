@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     Wenn Sie Ihr Problem nicht lösen können, können Sie [uns direkt über unser Panel kontaktieren](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). Dies zentralisiert alle Anfragen zur BunkerWeb-Lösung.
 
+## Fehlerbehebung mit einem KI-Agenten
+
+### BunkerWeb-Skills auf skills.sh
+
+Der offizielle [BunkerWeb-Skill zur Fehlerbehebung auf skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) hilft KI-Programmieragenten bei der Diagnose blockierter Anfragen, IP-Sperren, Upstream-Fehler, Zertifikats- und Konfigurationsprobleme. Folgen Sie den [Installationsanweisungen](https://github.com/bunkerity/bunkerweb-skills#installation) für Ihren Agenten.
+
+### BunkerWeb-Dokumentation mit Context7
+
+Wenn Ihr Agent [Context7](https://context7.com/docs) unterstützt, verbinden Sie ihn damit, um die [BunkerWeb-Dokumentation](https://context7.com/bunkerity/bunkerweb) abzurufen. Geben Sie Ihre BunkerWeb-Version, Integration, relevante Einstellungen und Protokolle in Ihrer Anfrage an und entfernen Sie Passwörter, API-Tokens und andere Geheimnisse, bevor Sie diese teilen.
+
+Beispielanfrage:
+
+```text
+Helfen Sie mir, dieses Problem mit BunkerWeb <Version> unter <Integration> zu diagnostizieren. Hier sind die relevanten Einstellungen und bereinigten Protokolle: <Details>. use context7
+```
+
 ## Protokolle
 
 Bei der Fehlerbehebung sind Protokolle Ihre besten Freunde. Wir geben unser Bestes, um benutzerfreundliche Protokolle bereitzustellen, damit Sie verstehen, was passiert.

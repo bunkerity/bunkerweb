@@ -115,6 +115,24 @@
       "regex": "^\\d+(ms?|[shdwMy])?$",
       "type": "text"
     },
+    "DATABASE_CONNECT_TIMEOUT": {
+      "context": "global",
+      "default": "10s",
+      "help": "The maximum time to wait when opening a connection to a MySQL, MariaDB or PostgreSQL server. It must be greater than 0: the drivers cannot run without one, and 0 falls back to the default with a warning. A timeout set in the DATABASE_URI query string takes precedence. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "database-connect-timeout",
+      "label": "Database connect timeout",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
+    "DATABASE_READ_TIMEOUT": {
+      "context": "global",
+      "default": "5m",
+      "help": "The maximum time to wait for a MySQL or MariaDB server to answer or accept data before the call fails, so that a vanished peer cannot block forever. PostgreSQL relies on TCP keepalives instead. Set to 0 to disable. A timeout set in the DATABASE_URI query string takes precedence. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.",
+      "id": "database-read-timeout",
+      "label": "Database read timeout",
+      "regex": "^\\d+(ms?|[shdwMy])?$",
+      "type": "text"
+    },
     "DATABASE_REQUEST_RETRY_ATTEMPTS": {
       "context": "global",
       "default": "2",

@@ -18,6 +18,49 @@
              id="navs-modes-raw"
              role="tabpanel">{% include "models/plugins_settings_raw.html" %}</div>
     </div>
+    {% set override_services = raw_draft_config.get('SERVER_NAME', {}).get('value', '').split() %}
+    <div class="modal fade"
+         id="modal-apply-all-services"
+         tabindex="-1"
+         aria-hidden="true"
+         aria-labelledby="apply-all-services-title"
+         aria-describedby="apply-all-services-description">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="apply-all-services-title"
+                        data-i18n="modal.title.apply_all_services">Apply to all services?</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            data-i18n="aria.label.close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="apply-all-services-description"
+                       data-i18n="modal.body.apply_all_services">
+                        The global settings changed in this save will replace values set by each service or its template. Unchanged settings are kept.
+                    </p>
+                    <p data-i18n="modal.body.apply_all_services_count"
+                       data-i18n-options='{{ {"count": override_services|length}|tojson }}'>All known services ({{ override_services|length }}) that may be updated:</p>
+                    <ul class="text-break">
+                        {% for service in override_services %}<li>{{ service }}</li>{% endfor %}
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"
+                            data-i18n="button.cancel">Cancel</button>
+                    <button type="button"
+                            class="btn btn-primary don-jose"
+                            id="confirm-apply-all-services"
+                            data-i18n="button.save">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}

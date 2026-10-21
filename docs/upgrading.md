@@ -17,11 +17,9 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
         and `.env` (or point it there with `--compose-dir`):
 
         ```bash
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
         # Download the script and its checksum
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh.sha256
 
         # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
@@ -104,16 +102,16 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.16
+                            image: bunkerity/bunkerweb:1.6.17
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.16
+                            image: bunkerity/bunkerweb-scheduler:1.6.17
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.16
+                            image: bunkerity/bunkerweb-autoconf:1.6.17
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.16
+                            image: bunkerity/bunkerweb-ui:1.6.17
                             ...
                     ```
 
@@ -169,7 +167,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
             4. **Pull the new image**:
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.16
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.17
                 ```
 
             5. **Re-create the container** with the same options, reusing the same `/data` volume, ports and environment variables as before:
@@ -180,7 +178,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.16
+                bunkerity/bunkerweb-all-in-one:1.6.17
                 ```
 
         === "Docker Compose"
@@ -189,7 +187,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.16
+                        image: bunkerity/bunkerweb-all-in-one:1.6.17
                         ...
                 ```
 
@@ -227,11 +225,9 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
             To get started, download the installation script and its checksum, then verify the script's integrity before running it.
 
             ```bash
-            LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-
             # Download the script and its checksum
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh
+            curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.17/install-bunkerweb.sh.sha256
 
             # Verify the checksum
             sha256sum -c install-bunkerweb.sh.sha256
@@ -312,20 +308,20 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
             Examples:
 
             ```bash
-            # Upgrade to 1.6.16 interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.6.16
+            # Upgrade to 1.6.17 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.17
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.6.16 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.17 --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.6.16 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.17 -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.6.16 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.17 --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.6.16 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.17 --no-auto-backup -y
             ```
 
             !!! warning "Skipping backups"
@@ -405,7 +401,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.16
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.17
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -431,7 +427,7 @@ Upgrade every Web UI replica together: replay protection for two-factor codes is
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.16
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.17
                         ```
 
                         To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -904,16 +900,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.16
+                        image: bunkerity/bunkerweb:1.6.17
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.16
+                        image: bunkerity/bunkerweb-scheduler:1.6.17
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.16
+                        image: bunkerity/bunkerweb-autoconf:1.6.17
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.16
+                        image: bunkerity/bunkerweb-ui:1.6.17
                         ...
                 ```
 
@@ -948,7 +944,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.16
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.17
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -974,7 +970,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.16
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.17
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :

@@ -95,7 +95,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.16
+      image: bunkerity/bunkerweb-scheduler:1.6.17
       volumes:
         - ./bw-data:/data
     ...
@@ -131,7 +131,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17
         volumes:
           - ./bw-data:/data
     ...
@@ -174,7 +174,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.16
+        image: bunkerity/bunkerweb-scheduler:1.6.17
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -221,7 +221,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.16
+              image: bunkerity/bunkerweb-scheduler:1.6.17
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -261,7 +261,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
 
 !!! tip "Plugins existants"
 
-    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
+    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
 
 À quoi ressemble la structure d'un plugin :
 ```
@@ -566,7 +566,7 @@ end
 
 !!! tip "Plus d'exemples"
 
-    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/src/bw/lua/bunkerweb) du dépôt.
+    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/bw/lua/bunkerweb) du dépôt.
 
 ### Emplois
 
@@ -719,6 +719,8 @@ Cette documentation décrit les hooks de cycle de vie utilisés pour gérer les 
     Ces hooks sont exécutés **avant** le traitement d'une requête entrante. Ils sont généralement utilisés pour des tâches de prétraitement telles que l'authentification, la validation ou la journalisation.
 
     Si le hook retourne un objet de réponse, Flask ignorera le traitement de la requête et retournera la réponse directement. Cela peut être utile pour court-circuiter le pipeline de traitement des requêtes.
+
+    Si un hook lève une exception, ou si les hooks d'un plugin ne peuvent pas être chargés, l'interface web répond 500 sur chaque page, y compris la page des plugins, tandis que les fichiers statiques restent servis. Pour récupérer, corrigez ou supprimez les fichiers du plugin sur le disque puis redémarrez l'interface (ou envoyez HUP au processus maître de gunicorn), ou supprimez le plugin de la base de données.
 
     **Exemple :**
 

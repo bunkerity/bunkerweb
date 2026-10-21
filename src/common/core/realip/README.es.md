@@ -44,7 +44,7 @@ Siga estos pasos para configurar y usar la función de IP Real:
     Solo incluya las IP de los proxies de confianza en su configuración. Agregar fuentes no confiables podría permitir ataques de suplantación de IP, donde los actores maliciosos podrían falsificar la IP del cliente manipulando los encabezados.
 
 !!! info "Múltiples Direcciones IP"
-    Cuando `REAL_IP_RECURSIVE` está habilitado y un encabezado contiene múltiples IP (p. ej., `X-Forwarded-For: cliente, proxy1, proxy2`), BunkerWeb identificará como la IP del cliente la IP más a la izquierda que no esté en su lista de proxies de confianza.
+    Cuando `REAL_IP_RECURSIVE` está habilitado y un encabezado contiene múltiples IP (p. ej., `X-Forwarded-For: cliente, proxy1, proxy2`), BunkerWeb identificará como la IP del cliente la IP más a la derecha que no esté en su lista de proxies de confianza.
 
 ### Configuraciones de Ejemplo
 

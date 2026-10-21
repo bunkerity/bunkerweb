@@ -232,10 +232,7 @@ function banlease.format_raw_addr(packed, family)
 	if family ~= "inet6" or #packed ~= 16 then
 		return nil, "unsupported address family"
 	end
-	-- a socket address from a dual-stack listener: judged as its IPv4 client
-	if packed:sub(1, 12) == string.rep("\0", 10) .. "\255\255" then
-		return format("%d.%d.%d.%d", byte(packed, 13, 16))
-	end
+	-- an IPv4-mapped peer of a dual-stack listener stays IPv6 in $remote_addr (::ffff:a.b.c.d)
 	return inet6_ntop(packed)
 end
 
@@ -277,6 +274,15 @@ local function canonical_addr(text)
 	end
 	if text:find("[", 1, true) then
 		return nil -- resty.ipmatcher strips brackets, nginx does not
+	end
+	-- ngx_inet6_addr reads an embedded IPv4 tail with ngx_inet_addr (leading zeros, empty octets), inet_pton does not
+	local head, tail = text:match("^(.*:)(%d%d?%d?%d?%.[%d%.]*)$")
+	if head then
+		tail = inet_addr(tail)
+		if not tail then
+			return nil
+		end
+		text = head .. tail
 	end
 	local v6 = require("resty.ipmatcher").parse_ipv6(text)
 	if not v6 then

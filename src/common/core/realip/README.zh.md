@@ -44,7 +44,7 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
     仅在您的配置中包含受信任的代理 IP。添加不受信任的源可能会允许 IP 欺骗攻击，恶意行为者可以通过操纵标头来伪造客户端 IP。
 
 !!! info "多个 IP 地址"
-    当 `REAL_IP_RECURSIVE` 启用并且标头包含多个 IP（例如，`X-Forwarded-For: client, proxy1, proxy2`）时，BunkerWeb 会将不在您受信任代理列表中的最左侧 IP 识别为客户端 IP。
+    当 `REAL_IP_RECURSIVE` 启用并且标头包含多个 IP（例如，`X-Forwarded-For: client, proxy1, proxy2`）时，BunkerWeb 会将不在您受信任代理列表中的最右侧 IP 识别为客户端 IP。
 
 ### 配置示例
 

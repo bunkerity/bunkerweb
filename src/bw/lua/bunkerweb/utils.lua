@@ -468,6 +468,27 @@ utils.get_version = function(ctx)
 	return version
 end
 
+-- Matched request data comes straight from the request, so one report can carry the whole body
+-- several times over. Bound each item and the item count to keep the metrics stores small.
+local REASON_MAX_ITEM_SIZE = 512
+local REASON_MAX_ITEMS = 32
+
+local function bound_reason_item(item)
+	if #item <= REASON_MAX_ITEM_SIZE then
+		return item
+	end
+	local cut = REASON_MAX_ITEM_SIZE
+	-- Step back to a character boundary: a UTF-8 continuation byte is 10xxxxxx.
+	while cut > 0 do
+		local byte = item:byte(cut + 1)
+		if byte < 0x80 or byte >= 0xC0 then
+			break
+		end
+		cut = cut - 1
+	end
+	return item:sub(1, cut) .. "..."
+end
+
 utils.get_reason = function(ctx)
 	-- ngx.ctx
 	local security_mode
@@ -495,7 +516,7 @@ utils.get_reason = function(ctx)
 	local modsecurity_reason = ngx.var.modsecurity_reason
 	-- Keep parser IDs separate from CRS's accumulated IDs and matched request data.
 	-- A later CRS summary takes precedence in DetectionOnly without mixing metadata.
-	local body_rule_id = modsecurity_reason and modsecurity_reason:match("^modsecurity%-body%-(20000[25])$")
+	local body_rule_id = modsecurity_reason and modsecurity_reason:match("^modsecurity%-body%-(20000[2-6])$")
 	if body_rule_id then
 		return "modsecurity-body", { ids = { body_rule_id } }, security_mode
 	end
@@ -538,14 +559,14 @@ utils.get_reason = function(ctx)
 					local separator_pos = remaining:find("|" .. env_unique_id_separator .. "|", 1, true)
 					if separator_pos then
 						local item = remaining:sub(1, separator_pos - 1)
-						if item and item ~= "" then
-							table.insert(reason_data[data_type.key], item)
+						if item and item ~= "" and #reason_data[data_type.key] < REASON_MAX_ITEMS then
+							table.insert(reason_data[data_type.key], bound_reason_item(item))
 						end
 						remaining = remaining:sub(separator_pos + #separator_pattern)
 					else
 						-- Last item (no separator after)
-						if remaining and remaining ~= "" then
-							table.insert(reason_data[data_type.key], remaining)
+						if remaining and remaining ~= "" and #reason_data[data_type.key] < REASON_MAX_ITEMS then
+							table.insert(reason_data[data_type.key], bound_reason_item(remaining))
 						end
 						break
 					end

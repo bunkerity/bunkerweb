@@ -74,6 +74,7 @@ typedef struct LexState {
   BCLine linenumber;	/* Input line counter. */
   BCLine lastline;	/* Line of last token. */
   GCstr *chunkname;	/* Current chunk name (interned string). */
+  ptrdiff_t chunkslot;	/* Stack slot anchoring the chunk name. */
   const char *chunkarg;	/* Chunk name argument. */
   const char *mode;	/* Allow loading bytecode (b) and/or source text (t). */
   VarInfo *vstack;	/* Stack for names and extents of local variables. */

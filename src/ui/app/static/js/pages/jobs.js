@@ -312,14 +312,14 @@ $(document).ready(function () {
                   "status.no",
                   "No",
                 )}</span>`,
-                value: (rowData) => rowData[5].includes("bx-x"),
+                value: (rowData) => rowData[5]["@data-order"] === "0",
               },
               {
                 label: `<i class=\"bx bx-xs bx-check text-success\"></i>&nbsp;<span data-i18n="status.yes">${t(
                   "status.yes",
                   "Yes",
                 )}</span>`,
-                value: (rowData) => rowData[5].includes("bx-check"),
+                value: (rowData) => rowData[5]["@data-order"] === "1",
               },
             ],
             combiner: "or",
@@ -337,14 +337,14 @@ $(document).ready(function () {
                   "status.no",
                   "No",
                 )}</span>`,
-                value: (rowData) => rowData[6].includes("bx-x"),
+                value: (rowData) => rowData[6]["@data-order"] === "0",
               },
               {
                 label: `<i class=\"bx bx-xs bx-check text-success\"></i>&nbsp;<span data-i18n="status.yes">${t(
                   "status.yes",
                   "Yes",
                 )}</span>`,
-                value: (rowData) => rowData[6].includes("bx-check"),
+                value: (rowData) => rowData[6]["@data-order"] === "1",
               },
             ],
             combiner: "or",

@@ -1608,6 +1608,11 @@ $(document).ready(function () {
       return '<div class="alert alert-info" data-i18n="status.no_data">No bad behavior activity recorded</div>';
     }
 
+    const totalRequests = entries.reduce(
+      (total, entry) =>
+        Number.isFinite(entry.counter) ? Math.max(total, entry.counter) : total,
+      entries.length,
+    );
     const title = escapeHtml(
       t(
         "reports.bad_behavior_activity_detected",
@@ -1676,7 +1681,7 @@ $(document).ready(function () {
           </div>
           <span class="bad-behavior-summary__total badge bg-label-warning text-warning">
             <span class="bad-behavior-summary__total-count">${escapeHtml(
-              String(entries.length),
+              String(totalRequests),
             )}</span>
             <span class="bad-behavior-summary__total-label">${totalLabel}</span>
           </span>

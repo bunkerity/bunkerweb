@@ -6,6 +6,7 @@ from logging import DEBUG
 from os import getenv, sep
 from pathlib import Path
 from re import match as re_match, split as re_split, sub as re_sub
+from socket import IPPROTO_TCP, SO_KEEPALIVE, SOL_SOCKET, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_NODELAY, TCP_USER_TIMEOUT
 from threading import Lock, Thread
 from time import sleep, time
 from traceback import format_exc
@@ -15,26 +16,53 @@ from kubernetes import client, config, watch
 from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
 
-from controllers.Controller import Controller
+from controllers.Controller import Controller, HoldTimeLock
 
 # Written by main.py once the controller starts and checked by healthcheck-autoconf.sh.
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
 
-# A watch.Watch().stream() call that ran at least this long before returning without an
-# exception is treated as a healthy, established connection the Kubernetes API server closed
-# on its own (a randomized idle-connection timeout, commonly on the order of 30-60+ minutes),
-# not a failure -- this is the only way a watch for a resource kind with zero objects (a fresh
-# cluster with no Ingress yet, an optional Gateway API route kind with no instances) ever gets
-# a signal at all, since it never receives a single event. A connection that returns cleanly
-# before this threshold (typically instantly, e.g. an immediately-refused connection) still
-# counts as a failed attempt, so a watch that cannot connect at all still exhausts its retries
-# in seconds, same as before.
-WATCH_ESTABLISHED_SECONDS = 60
+# Request a clean server-side watch close before common 60-second infrastructure idle cutoffs.
+# The client read timeout below must remain longer than this server-side timeout.
+WATCH_TIMEOUT_SECONDS = 45
+
+# (connect, read) timeouts, in seconds, passed as `_request_timeout` to Kubernetes API calls. All
+# watch threads share `_internal_lock` and the thread applying a configuration holds it across these
+# calls: a connection the network dropped without a RST would block that thread, and with it every
+# other watch, forever. A timed-out call raises, the lock is released and the watch restarts.
+API_REQUEST_TIMEOUT = (10, 60)
+
+
+class ProgressApiClient(client.ApiClient):
+    def __init__(self, lock):
+        super().__init__()
+        self._lock = lock
+
+    def call_api(self, *args, **kwargs):
+        result = super().call_api(*args, **kwargs)
+        self._lock.progress()
+        return result
+
+
+def _dead_peer_socket_options() -> list:
+    """Socket options that make a silently dead API server connection fail instead of hang.
+
+    Keepalive probes cover an idle watch stream; TCP_USER_TIMEOUT covers a request already written
+    into the void, where keepalive never fires because data is still unacknowledged."""
+    return [
+        (IPPROTO_TCP, TCP_NODELAY, 1),
+        (SOL_SOCKET, SO_KEEPALIVE, 1),
+        (IPPROTO_TCP, TCP_KEEPIDLE, 30),
+        (IPPROTO_TCP, TCP_KEEPINTVL, 10),
+        (IPPROTO_TCP, TCP_KEEPCNT, 3),
+        (IPPROTO_TCP, TCP_USER_TIMEOUT, 60000),
+    ]
 
 
 class KubernetesController(Controller):
+    _last_apply_ok = True
+
     def __init__(self):
-        self._internal_lock = Lock()
+        self._internal_lock = HoldTimeLock()
         self._pending_apply = False
         self._last_event_time = 0.0
         self._debounce_delay = 2  # seconds
@@ -63,7 +91,10 @@ class KubernetesController(Controller):
             Configuration._default.ssl_ca_cert = ssl_ca_cert
             self._logger.info("Using custom SSL CA certificate")
 
-        self._corev1 = client.CoreV1Api()
+        Configuration._default.socket_options = _dead_peer_socket_options()
+
+        self._api_client = ProgressApiClient(self._internal_lock)
+        self._corev1 = client.CoreV1Api(api_client=self._api_client)
 
         self._use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower().strip() == "yes"
         self._logger.info(f"Using Pod {'FQDN' if self._use_fqdn else 'IP'} as hostname")
@@ -344,7 +375,7 @@ class KubernetesController(Controller):
 
     def _get_controller_instances(self) -> list:
         instances = []
-        pods = self._corev1.list_pod_for_all_namespaces(watch=False).items
+        pods = self._corev1.list_pod_for_all_namespaces(watch=False, _request_timeout=API_REQUEST_TIMEOUT).items
         for pod in pods:
             metadata = pod.metadata
             if not metadata:
@@ -420,7 +451,7 @@ class KubernetesController(Controller):
         configs = {config_type: {} for config_type in self._supported_config_types}
         config = {}
         managed_configmaps = set()
-        for configmap in self._corev1.list_config_map_for_all_namespaces(watch=False).items:
+        for configmap in self._corev1.list_config_map_for_all_namespaces(watch=False, _request_timeout=API_REQUEST_TIMEOUT).items:
             if not configmap.metadata.annotations or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations:
                 continue
 
@@ -499,7 +530,14 @@ class KubernetesController(Controller):
     def _is_custom_event(self, kind, obj, annotations, namespace, name) -> bool:
         return False
 
+    def _is_status_only_event(self, event) -> bool:
+        """True when the event only reflects a status write, not a change BunkerWeb has to apply."""
+        return False
+
     def _process_event(self, event):
+        if self._is_status_only_event(event):
+            return False
+
         if self._first_start:
             return True
 
@@ -625,16 +663,26 @@ class KubernetesController(Controller):
     def _get_stream_with_retries(self, watch_type, what, retries=5):
         attempt = 0
         ignored = False
+        stream = watch.Watch()
         while attempt < retries:
             started = time()
             try:
                 if not ignored:
                     self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
                 ignored = False
-                yield from watch.Watch().stream(what)
+                for event in stream.stream(
+                    what, resource_version=stream.resource_version, timeout_seconds=WATCH_TIMEOUT_SECONDS, _request_timeout=API_REQUEST_TIMEOUT
+                ):
+                    # Gateway API wrappers lack the return-type metadata Watch needs to track versions.
+                    raw_object = event.get("raw_object") if isinstance(event, dict) else None
+                    metadata = raw_object.get("metadata") if isinstance(raw_object, dict) else None
+                    if isinstance(metadata, dict) and metadata.get("resourceVersion"):
+                        stream.resource_version = metadata["resourceVersion"]
+                    yield event
             except ApiException as e:
                 if e.status == 410 and "Expired: too old resource version: " in e.reason:
                     self._logger.debug(f"{e.reason} while watching {watch_type}, resetting watch stream")
+                    stream.resource_version = None
                     ignored = True
                     attempt += 1
                     continue
@@ -650,10 +698,8 @@ class KubernetesController(Controller):
                 self._logger.debug(format_exc())
                 self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
             else:
-                # The stream ended without raising. If it had been running a while, this is
-                # the API server closing an established, healthy connection on its own idle
-                # timeout, not a failure: reconnect immediately and reset the retry budget.
-                if time() - started >= WATCH_ESTABLISHED_SECONDS:
+                # Brief clean closes can be broken connections; keep their retry backoff and health failure.
+                if time() - started >= WATCH_TIMEOUT_SECONDS // 2:
                     self._mark_healthy(watch_type)
                     attempt = 0
                     continue
@@ -719,6 +765,7 @@ class KubernetesController(Controller):
                         self._extra_config, self._configs = self.get_configs()
 
                         if not self.update_needed(self._instances, self._services, self._configs, self._extra_config):
+                            self._sync_status()
                             if locked:
                                 self._internal_lock.release()
                                 locked = False
@@ -768,6 +815,7 @@ class KubernetesController(Controller):
 
     def process_events(self):
         self._start_settings_recheck_worker()
+        self._start_lock_watchdog(HEALTHY_PATH)
         watchers = self._get_watchers()
         self._write_expected_watch_types(watchers.keys())
         threads = [Thread(target=self._watch, args=(watch_type, watcher)) for watch_type, watcher in watchers.items()]
@@ -823,6 +871,7 @@ class KubernetesController(Controller):
                             namespace,
                             watch=False,
                             field_selector=f"metadata.name={service_name}",
+                            _request_timeout=API_REQUEST_TIMEOUT,
                         ).items
                     except BaseException as e:
                         self._logger.debug(f"Error polling for pending backend {namespace}/{service_name}: {e}")
@@ -886,6 +935,7 @@ class KubernetesController(Controller):
                 self._extra_config, self._configs = self.get_configs()
                 if not self.update_needed(self._instances, self._services, self._configs, self._extra_config):
                     self._logger.debug("Backend retry worker: no config change detected, skipping apply")
+                    self._sync_status()
                     return
                 if self.have_to_wait():
                     # Let the normal watch loop retry — don't busy-wait here.
@@ -913,7 +963,7 @@ class KubernetesController(Controller):
                 self._logger.warning("Service name or namespace is empty, cannot retrieve LoadBalancer IP")
                 return None
 
-            service = self._corev1.read_namespaced_service(name=name, namespace=namespace)
+            service = self._corev1.read_namespaced_service(name=name, namespace=namespace, _request_timeout=API_REQUEST_TIMEOUT)
 
             if not service.spec:
                 self._logger.warning(f"Service {name} in {namespace} has no spec")
@@ -925,7 +975,7 @@ class KubernetesController(Controller):
             if service_type == "NodePort":
                 self._logger.debug(f"Service {name} in {namespace} is of type NodePort, retrieving node IPs")
                 try:
-                    nodes = self._corev1.list_node(watch=False).items
+                    nodes = self._corev1.list_node(watch=False, _request_timeout=API_REQUEST_TIMEOUT).items
                     if not nodes:
                         self._logger.warning("No nodes found in the cluster")
                         return None
@@ -1030,8 +1080,20 @@ class KubernetesController(Controller):
 
         self._patch_controller_status(ips)
 
+    def _sync_status(self, applied: Optional[bool] = None) -> None:
+        """Report the outcome of the last configuration on the resources this controller owns.
+
+        `applied` is None when nothing had to be applied: the last known outcome stands."""
+
     def apply_config(self, force: bool = False) -> bool:
-        result = self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config, force=force)
+        try:
+            result = self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config, force=force)
+        except BaseException:
+            self._last_apply_ok = False
+            self._sync_status(False)
+            raise
+        self._last_apply_ok = bool(result)
         if result:
             self._maybe_patch_status()
+        self._sync_status(self._last_apply_ok)
         return result

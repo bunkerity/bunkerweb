@@ -85,6 +85,7 @@
     "add_ban_plural": "प्रतिबंध जोड़ें",
     "add_plugin_plural": "प्लगइन जोड़ें",
     "add_plugins": "प्लगइन्स जोड़ें",
+    "apply_all_services": "सभी सेवाओं पर लागू करें",
     "auto_refresh": "स्वतः ताज़ा करें",
     "ban": "प्रतिबंधित करें",
     "ban_selected": "चयनित को प्रतिबंधित करें",
@@ -967,6 +968,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।",
+      "apply_all_services": "इस बार सहेजते समय बदली गई ग्लोबल सेटिंग्स हर सेवा या उसके टेम्पलेट में तय मानों को बदल देंगी। जिन सेटिंग्स में बदलाव नहीं हुआ है, वे बनी रहेंगी।",
+      "apply_all_services_count": "सभी ज्ञात सेवाएँ ({{count}}) जिन्हें अपडेट किया जा सकता है:",
       "confirm_cache_deletion_alert": "क्या आप वाकई चयनित कैश फ़ाइल हटाना चाहते हैं?",
       "confirm_cache_deletion_alert_plural": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
       "confirm_configs_conversion": "Are you sure you want to convert the selected custom configurations?",
@@ -1032,6 +1035,7 @@
     "title": {
       "add_bans": "प्रतिबंध जोड़ें",
       "add_plugins": "प्लगइन्स जोड़ें",
+      "apply_all_services": "सभी सेवाओं पर लागू करें?",
       "confirm_conversion": "रूपांतरण की पुष्टि करें",
       "confirm_deletion": "हटाने की पुष्टि करें",
       "confirm_unban": "प्रतिबंध हटाने की पुष्टि करें",
@@ -1691,6 +1695,7 @@
     "ip_unbanned": "आईपी पते का प्रतिबंध सफलतापूर्वक हटाया गया!"
   },
   "tooltip": {
+    "apply_all_services": "इस बार सहेजते समय बदली गई ग्लोबल सेटिंग्स ही सभी सेवाओं पर लागू होती हैं और सेवा या उसके टेम्पलेट में तय मानों को बदल देती हैं।",
     "auto_lets_encrypt": "क्या स्वचालित रूप से Let's Encrypt प्रमाणपत्र का अनुरोध करना है।",
     "button": {
       "ban_ip": "इस IP पते को प्रतिबंधित करें",

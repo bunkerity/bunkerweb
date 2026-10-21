@@ -2,6 +2,7 @@
   "name": "php-singlesite",
   "kinds": ["docker"],
   "timeout": 120,
+  "delay": 60,
   "tests": [
     {
       "type": "string",

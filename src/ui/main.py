@@ -47,7 +47,7 @@ from werkzeug.routing.exceptions import BuildError
 
 from common_utils import get_version, is_newer_version_available  # type: ignore
 
-from app.models.biscuit import BiscuitMiddleware
+from app.models.biscuit import BiscuitMiddleware, _internal_error_response
 from app.models.reverse_proxied import ReverseProxied
 from app.models.session_cookie import use_per_request_cookie
 
@@ -410,6 +410,18 @@ def register_plugin_blueprints(app, blueprint_registry):
     app.jinja_env.loader = app.create_global_jinja_loader()
 
 
+def deny_plugin_requests(module_name):
+    """When a plugin's hooks fail to load, deny every request instead of serving without them: they may be an authorization check."""
+
+    def fail_closed_before_request():
+        LOGGER.error(f"Hooks of plugin module {module_name} failed to load, denying the request")
+        return _internal_error_response()
+
+    # Distinct module name so the dedupe of refresh_app_context keeps one stub per plugin
+    fail_closed_before_request.__module__ = module_name
+    app.config.setdefault(HOOKS["before_request"]["key"], []).append(fail_closed_before_request)
+
+
 def refresh_app_context():
     """Refresh Flask app context by loading hooks and blueprints from plugins."""
     worker_pid = str(getpid())
@@ -478,6 +490,7 @@ def refresh_app_context():
                 # Restore any prior 'hooks' module
                 if prev_hooks_mod is not None:
                     sys_modules["hooks"] = prev_hooks_mod
+                deny_plugin_requests(module_name)
                 continue
 
             hook_module = module_from_spec(spec)
@@ -491,6 +504,7 @@ def refresh_app_context():
                 else:
                     # Ensure we don't keep a plugin-specific 'hooks' leaked
                     sys_modules.pop("hooks", None)
+                deny_plugin_requests(module_name)
                 continue
 
             # Restore any prior 'hooks' module (avoid leaking current plugin 'hooks' globally)
@@ -511,6 +525,7 @@ def refresh_app_context():
                 app.hook_sys_paths.pop(module_name, None)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+            deny_plugin_requests(module_name)
             # Best-effort cleanup of 'hooks'
             with suppress(Exception):
                 if "hooks" in sys_modules:
@@ -1456,13 +1471,15 @@ def before_request():
 
         g._env = data
 
+    # A hook that raises denies the request: it may be an authorization check
     for hook in app.config["BEFORE_REQUEST_HOOKS"]:
         try:
             resp = hook()
-            if resp:
-                return resp
         except Exception:
             LOGGER.exception("Error in before_request hook")
+            return _internal_error_response()
+        if resp:
+            return resp
 
 
 def mark_user_access(user, session_id):
@@ -1519,7 +1536,7 @@ def set_security_headers(response):
     # * Permissions-Policy header to prevent unwanted behavior
     # Must stay byte-identical to the PERMISSIONS_POLICY default in src/common/core/headers/plugin.json.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), publickey-credentials-remote-client-data-json=(), rewriter=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
+        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), publickey-credentials-remote-client-data-json=(), rewriter=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unbounded-element=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
 
     # * X-Robots-Tag header to stay out of search indexes: robots.txt stops crawling, not the

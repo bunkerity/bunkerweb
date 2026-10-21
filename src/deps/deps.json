@@ -122,7 +122,7 @@
       "name": "lua-resty-mlcache v2.7.0",
       "url": "https://github.com/thibaultcha/lua-resty-mlcache.git",
       "commit": "b4d0aed5adf74b118238efdcd971224278ec7d26",
-      "post_install": "rm -r src/deps/src/lua-resty-mlcache/t && patch --forward src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua src/deps/misc/mlcache-ipc-skip-evicted.patch || rm src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.orig src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.rej"
+      "post_install": "rm -r src/deps/src/lua-resty-mlcache/t && patch --forward src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua src/deps/misc/mlcache-ipc-skip-evicted.patch || rm src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.orig src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.rej && patch --forward src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua src/deps/misc/mlcache-ipc-event-ttl.patch || rm src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.orig src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.rej && patch --forward src/deps/src/lua-resty-mlcache/lib/resty/mlcache.lua src/deps/misc/mlcache-l1-flush-on-ipc-loss.patch || rm src/deps/src/lua-resty-mlcache/lib/resty/mlcache.lua.orig src/deps/src/lua-resty-mlcache/lib/resty/mlcache.lua.rej"
     },
     {
       "id": "lua-resty-openssl",
@@ -156,7 +156,7 @@
       "name": "resty-redis-cluster v1.6.1",
       "url": "https://github.com/Kong/resty-redis-cluster.git",
       "commit": "09ab3295db2e42b144a3a8c67117a1c55c052409",
-      "post_install": "rm -r src/deps/src/resty-redis-cluster/t src/deps/src/resty-redis-cluster/.github src/deps/src/resty-redis-cluster/rockspec && patch --forward src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch || rm src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.orig src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.rej"
+      "post_install": "rm -rf src/deps/src/resty-redis-cluster/t src/deps/src/resty-redis-cluster/.github src/deps/src/resty-redis-cluster/rockspec && patch --forward src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch || rm src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.orig src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.rej"
     },
     {
       "id": "lua-resty-session",
@@ -201,9 +201,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260914",
+      "name": "LuaJIT v2.1-20261021",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "ae3d1eecfdbe70b54040779f7b4655e132b9d875",
+      "commit": "12379eb4fd2e3718387b421048307b4771fef79b",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -257,10 +257,17 @@
     },
     {
       "id": "nginx",
+      "name": "Nginx v1.30.6",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "fb0e979c6dd63c018958b41eeb844947c5c21264",
+      "post_install": "rm -r src/deps/src/nginx/docs"
+    },
+    {
+      "id": "nginx-1.30.5",
       "name": "Nginx v1.30.5",
       "url": "https://github.com/nginx/nginx.git",
       "commit": "4556c714d1cfa587f92c7c0365c09209d42d148b",
-      "post_install": "rm -r src/deps/src/nginx/docs"
+      "post_install": "rm -r src/deps/src/nginx-1.30.5/docs"
     },
     {
       "id": "nginx_cookie_flag_module",
