@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "可疑请求",
+    "bad_behavior_stored_events": "已存储的事件",
+    "bad_behavior_evidence_missing": "封禁依据已无法获取。",
     "crowdsec": {
       "source_lapi": "本地 API 决策",
       "source_appsec": "AppSec 检查",

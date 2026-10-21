@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Подозрительные запросы",
+    "bad_behavior_stored_events": "Сохранённые события",
+    "bad_behavior_evidence_missing": "Данные, послужившие основанием для блокировки, больше недоступны.",
     "crowdsec": {
       "source_lapi": "Решение локального API",
       "source_appsec": "Проверка AppSec",

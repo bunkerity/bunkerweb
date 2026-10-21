@@ -408,15 +408,16 @@ function badbehavior:timer()
 					event.counter = data.counter
 					bounded_reason_data[#bounded_reason_data + 1] = event
 				end
-				local ok, err = add_ban(
-					data.ip,
-					"bad behavior",
-					ban_time,
-					data.server_name,
-					data.country,
-					data.ban_scope,
-					bounded_reason_data
-				)
+				local summary = require("metrics/metrics"):new():store_ban_evidence(bounded_reason_data, {
+					counter = data.counter,
+					threshold = data.threshold,
+					count_time = data.count_time,
+					ban_time = ban_time,
+					ban_scope = data.ban_scope,
+					server_name = data.server_name,
+				})
+				local ok, err =
+					add_ban(data.ip, "bad behavior", ban_time, data.server_name, data.country, data.ban_scope, summary)
 				if not ok then
 					ret = false
 					ret_err = "can't save ban : " .. err

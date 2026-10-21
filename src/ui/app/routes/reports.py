@@ -206,6 +206,14 @@ def reports_fetch():
             else:
                 has_data = data_field is not None
 
+            summary = None
+            if isinstance(data_field, dict) and data_field.get("ban_id"):
+                summary = {
+                    key: data_field[key]
+                    for key in ("ban_id", "counter", "threshold", "count_time", "ban_time", "event_count", "ban_scope", "server_name")
+                    if key in data_field
+                }
+
             request_id = str(report.get("id", "N/A"))
             server_name = str(report.get("server_name", "N/A"))
 
@@ -222,7 +230,7 @@ def reports_fetch():
                 "reason": escape(str(report.get("reason", "N/A"))),
                 "server_name": escape(server_name),
                 # Keep payloads light; details are lazy-loaded by request_id.
-                "data": "available" if has_data else "",
+                "data": summary if summary is not None else "available" if has_data else "",
                 "has_data": has_data,
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
                 # default ban duration in seconds for quick-ban action

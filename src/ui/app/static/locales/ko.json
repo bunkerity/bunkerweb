@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "의심스러운 요청",
+    "bad_behavior_stored_events": "저장된 이벤트",
+    "bad_behavior_evidence_missing": "차단 근거를 더 이상 사용할 수 없습니다.",
     "crowdsec": {
       "source_lapi": "로컬 API 결정",
       "source_appsec": "AppSec 검사",

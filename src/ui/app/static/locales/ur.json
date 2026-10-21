@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "مشکوک درخواستیں",
+    "bad_behavior_stored_events": "محفوظ واقعات",
+    "bad_behavior_evidence_missing": "پابندی کے شواہد اب دستیاب نہیں ہیں۔",
     "crowdsec": {
       "source_lapi": "مقامی API کا فیصلہ",
       "source_appsec": "AppSec معائنہ",

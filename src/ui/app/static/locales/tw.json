@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "可疑請求",
+    "bad_behavior_stored_events": "已儲存的事件",
+    "bad_behavior_evidence_missing": "封鎖依據已無法取得。",
     "crowdsec": {
       "source_lapi": "本機 API 決策",
       "source_appsec": "AppSec 檢查",

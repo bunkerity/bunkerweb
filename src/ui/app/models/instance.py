@@ -697,7 +697,7 @@ class InstancesUtils:
                 # full O(N) scan the forward loop needed to pick the max-date match.
                 for report in self._iter_redis_requests_reverse(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
                     if str(report.get("id", "")) == report_id:
-                        return report.get("data", {})
+                        return self._resolve_ban_evidence(report.get("data", {}), redis_client, instances=instances)
             except Exception as e:
                 LOGGER.warning(f"Failed to fetch report data from Redis: {e}")
 
@@ -736,7 +736,46 @@ class InstancesUtils:
 
         if best_match is None:
             return None
-        return best_match.get("data", {})
+        return self._resolve_ban_evidence(best_match.get("data", {}), redis_client, instances=instances or target_instances)
+
+    def _resolve_ban_evidence(self, data: Any, redis_client, *, instances: Optional[List[Instance]] = None) -> Any:
+        if not isinstance(data, dict) or "ban_id" not in data:
+            return data
+        ban_id = data["ban_id"]
+        missing = {**data, "evidence_missing": True}
+        if not isinstance(ban_id, str) or not fullmatch(r"[A-Za-z0-9:_.@~-]{1,256}", ban_id):
+            return missing
+
+        def resolved(evidence):
+            if (
+                not isinstance(evidence, dict)
+                or evidence.get("ban_id") != ban_id
+                or not isinstance(evidence.get("events"), list)
+                or not evidence["events"]
+                or any(not isinstance(event, dict) for event in evidence["events"])
+            ):
+                return None
+            # Keep PRO's list contract and the historical settings on every event.
+            summary = {key: value for key, value in evidence.items() if key not in ("events", "server_name")}
+            return [{**event, **summary} for event in evidence["events"]]
+
+        if redis_client:
+            try:
+                payload = redis_client.get(f"{requests_key(is_cluster(redis_client))}:ban_evidence:{ban_id}")
+                result = resolved(loads(payload)) if payload else None
+                if result is not None:
+                    return result
+            except Exception as e:
+                LOGGER.warning(f"Failed to fetch ban evidence from Redis: {e}")
+        for instance in instances or self.get_instances(status="up"):
+            try:
+                ok, response = instance.metrics(f"badbehavior/ban/{quote(ban_id, safe='')}")
+                result = resolved(response.get(instance.hostname, {}).get("msg")) if ok else None
+                if result is not None:
+                    return result
+            except Exception as e:
+                LOGGER.warning(f"Failed to fetch ban evidence from {instance.hostname}: {e}")
+        return missing
 
     def get_reports_pane_counts(
         self,

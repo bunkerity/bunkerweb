@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Mga kahina-hinalang kahilingan",
+    "bad_behavior_stored_events": "Mga nakaimbak na kaganapan",
+    "bad_behavior_evidence_missing": "Hindi na available ang ebidensya ng pag-ban.",
     "crowdsec": {
       "source_lapi": "Desisyon ng lokal na API",
       "source_appsec": "Inspeksiyon ng AppSec",

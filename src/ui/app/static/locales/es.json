@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Solicitudes sospechosas",
+    "bad_behavior_stored_events": "Eventos almacenados",
+    "bad_behavior_evidence_missing": "Las pruebas del bloqueo ya no están disponibles.",
     "crowdsec": {
       "source_lapi": "Decisión de la API local",
       "source_appsec": "Inspección AppSec",

@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Şüpheli istekler",
+    "bad_behavior_stored_events": "Saklanan olaylar",
+    "bad_behavior_evidence_missing": "Engelleme kanıtları artık mevcut değil.",
     "crowdsec": {
       "source_lapi": "Yerel API kararı",
       "source_appsec": "AppSec denetimi",

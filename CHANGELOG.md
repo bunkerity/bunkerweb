@@ -6,6 +6,7 @@
 - [FEATURE] `installer`: the easy install script sends its downloads through `HTTP_PROXY`/`HTTPS_PROXY` and honours `NO_PROXY`. (Fixes #4040)
 - [BUGFIX] `antibot`: a failed challenge attempt keeps its destination, with its query when the session survives. Thanks to @Explotacionweb for the fix.
 - [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
+- [BUGFIX] `badbehavior`: a ban's evidence is stored once and the requests rejected during it only reference it, so reports stay small; the Reports page loads the events on demand.
 - [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
 - [BUGFIX] `ui`: the dashboard blocking chart, country map and top IPs count blocked reports of any HTTP status and leave out detect-mode events. Thanks to @MageInt for the fix.
 

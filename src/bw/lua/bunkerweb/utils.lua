@@ -1449,6 +1449,7 @@ local function add_ban(ip, reason, ttl, service, country, ban_scope, reason_data
 	-- Set on local datastore
 	local ban_data = encode({
 		reason = reason,
+		ban_id = reason == "bad behavior" and type(reason_data) == "table" and reason_data.ban_id or nil,
 		service = service or "unknown",
 		date = os.time(),
 		country = country or "local",
