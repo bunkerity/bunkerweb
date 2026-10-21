@@ -7,6 +7,7 @@
 - [BUGFIX] `badbehavior`: a ban keeps only its newest events as evidence, at most `BAD_BEHAVIOR_REPORT_MAX_EVENTS` (default `100`, never more than the threshold), with URLs and methods cut at `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` (default `512` bytes), so the report written for every request rejected during the ban no longer fills Redis. The Reports page shows the real request count.
 - [BUGFIX] `core`: the local cache's IPC events expire after 5 minutes, and a worker that falls behind skips the events evicted from a full `CACHESTORE_IPC_MEMORY_SIZE` zone instead of waiting 0.3 s on each one (`could not poll ipc events: timeout`), then clears its local cache so it never serves a value whose invalidation it missed.
 - [UI] `Web UI`: clarify applying changed global settings to all services and confirm service overrides before saving.
+- [DOCS] Pin llms.txt and llms-full.txt links to their docs version, publish per-plugin settings JSON and register read-only WebMCP tools on docs pages.
 
 ## v1.6.17~rc2 - 2026/10/16
 

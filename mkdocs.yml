@@ -53,6 +53,7 @@ extra_javascript:
   - https://chatbot.bunkerweb.io/static/js/chatbot.js
   - assets/preserve-version-on-language-switch.js
   - assets/toc-dropdown.js
+  - assets/webmcp.js
 
 markdown_extensions:
   - attr_list
@@ -77,6 +78,8 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra:
+  # Chrome origin-trials console supplies this token; empty emits no tag.
+  webmcp_origin_trial_token: ""
   version:
     provider: mike
     version: latest
