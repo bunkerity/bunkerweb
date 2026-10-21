@@ -124,9 +124,11 @@ if [ "$current_version" != "$installed_version" ]; then
 				log "ENTRYPOINT" "✅" "Database migration completed successfully"
 			else
 				log "ENTRYPOINT" "❌" "Failed to stamp database with revision: $REVISION, migration aborted"
+				exit 1
 			fi
 		else
 			log "ENTRYPOINT" "❌" "Failed to update version locations in configuration, migration aborted"
+			exit 1
 		fi
 	else
 		python3 -c "

@@ -222,9 +222,11 @@ EOL
                     log "SYSTEMCTL" "✅" "Database migration completed successfully"
                 else
                     log "SYSTEMCTL" "❌" "Failed to stamp database with revision: $REVISION, migration aborted"
+                    exit 1
                 fi
             else
                 log "SYSTEMCTL" "❌" "Failed to update version locations in configuration, migration aborted"
+                exit 1
             fi
         else
             # Create temporary Python script to update version
