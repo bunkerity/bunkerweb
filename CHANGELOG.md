@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.17 - 2026/10/20
+## v1.6.17 - 2026/10/21
 
 - [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `unbounded-element`.
 - [BUGFIX] `autoconf`: quiet Kubernetes watches reconnect without restarting the controller, while repeated short closures still fail health checks. (Fixes #4064)
