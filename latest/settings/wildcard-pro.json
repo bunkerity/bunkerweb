@@ -1,0 +1,1 @@
+{"version": "1.6.17", "plugin": "Wildcard", "pro": true, "url": "https://docs.bunkerweb.io/1.6.17/features/#wildcard-pro", "settings": [{"name": "USE_WILDCARD", "default": "no", "context": "multisite", "multiple": false, "description": "Enable wildcard server_name for this service (adds *.domain for the first domain in SERVER_NAME)."}]}

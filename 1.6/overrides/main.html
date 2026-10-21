@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% block extrahead %}
+    {{ super() }}
+    {% if config.extra.webmcp_origin_trial_token %}
+        <meta http-equiv="origin-trial" content="{{ config.extra.webmcp_origin_trial_token }}">
+    {% endif %}
+{% endblock %}
 {% set translations = {
     "en": {
         "outdated": "You're not viewing the documentation of the latest version.",

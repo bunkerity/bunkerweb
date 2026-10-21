@@ -1,0 +1,1 @@
+{"version": "1.6.17", "plugin": "UI", "pro": false, "url": "https://docs.bunkerweb.io/1.6.17/features/#ui", "settings": [{"name": "USE_UI", "default": "no", "context": "multisite", "multiple": false, "description": "Use UI"}, {"name": "UI_HOST", "default": "", "context": "global", "multiple": false, "description": "Address of the web UI used for initial setup"}]}

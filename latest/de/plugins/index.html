@@ -169,6 +169,9 @@
 
     
     
+    
+    
+
   
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Plugins - BunkerWeb Dokumentation" />
@@ -1418,7 +1421,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1440,7 +1443,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1471,7 +1474,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1511,7 +1514,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1548,7 +1551,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="struktur">Struktur<a class="headerlink" href="#struktur" title="Permanent link">&para;</a></h3>
 <div class="admonition tip">
 <p class="admonition-title">Bestehende Plugins</p>
-<p>Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der <a href="https://github.com/bunkerity/bunkerweb-plugins">offiziellen Plugins</a> und der <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/src/common/core">Kern-Plugins</a> ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).</p>
+<p>Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der <a href="https://github.com/bunkerity/bunkerweb-plugins">offiziellen Plugins</a> und der <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/common/core">Kern-Plugins</a> ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).</p>
 </div>
 <p>Wie eine Plugin-Struktur aussieht:
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1922,7 +1925,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tbody>
 </table>
 <h4 id="bibliotheken">Bibliotheken<a class="headerlink" href="#bibliotheken" title="Permanent link">&para;</a></h4>
-<p>Alle Direktiven aus dem <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA-Modul</a> und dem <a href="https://github.com/openresty/stream-lua-nginx-module">NGINX Stream LUA-Modul</a> sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe <a href="https://github.com/bunkerity/bunkerweb/blob/v1.6.16/src/deps/clone.sh">dieses Skript</a> für die vollständige Liste.</p>
+<p>Alle Direktiven aus dem <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA-Modul</a> und dem <a href="https://github.com/openresty/stream-lua-nginx-module">NGINX Stream LUA-Modul</a> sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe <a href="https://github.com/bunkerity/bunkerweb/blob/v1.6.17/src/deps/clone.sh">dieses Skript</a> für die vollständige Liste.</p>
 <p>Wenn Sie zusätzliche Bibliotheken benötigen, können Sie diese in den Stammordner des Plugins legen und darauf zugreifen, indem Sie ihnen Ihre Plugin-ID voranstellen. Hier ist ein Beispiel für eine Datei namens <strong>mylibrary.lua</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">_M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{}</span>
 
@@ -1983,7 +1986,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Weitere Beispiele</p>
-<p>Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.16/src/bw/lua/bunkerweb">lua-Verzeichnis</a> des Repositorys ansehen.</p>
+<p>Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.17/src/bw/lua/bunkerweb">lua-Verzeichnis</a> des Repositorys ansehen.</p>
 </div>
 <h3 id="jobs">Jobs<a class="headerlink" href="#jobs" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb verwendet einen internen Job-Scheduler für periodische Aufgaben wie die Erneuerung von Zertifikaten mit Certbot, das Herunterladen von Blacklists, das Herunterladen von MMDB-Dateien usw. Sie können Aufgaben Ihrer Wahl hinzufügen, indem Sie sie in einen Unterordner namens <strong>jobs</strong> legen und sie in der Metadatendatei <strong>plugin.json</strong> auflisten. Vergessen Sie nicht, die Ausführungsberechtigungen für alle hinzuzufügen, um Probleme zu vermeiden, wenn ein Benutzer Ihr Plugin klont und installiert.</p>
@@ -2101,6 +2104,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="tabbed-block">
 <p>Diese Hooks werden <strong>vor</strong> der Verarbeitung einer eingehenden Anfrage ausgeführt. Sie werden normalerweise für Vorverarbeitungsaufgaben wie Authentifizierung, Validierung oder Protokollierung verwendet.</p>
 <p>Wenn der Hook ein Antwortobjekt zurückgibt, überspringt Flask die Anforderungsbehandlung und gibt die Antwort direkt zurück. Dies kann nützlich sein, um die Anforderungsverarbeitungspipeline kurzzuschließen.</p>
+<p>Wenn ein Hook eine Ausnahme auslöst oder die Hooks eines Plugins nicht geladen werden können, antwortet die Web-Oberfläche auf jeder Seite mit 500, auch auf der Plugin-Seite, während statische Dateien weiterhin ausgeliefert werden. Zur Wiederherstellung die Plugin-Dateien auf dem Datenträger korrigieren oder entfernen und die Oberfläche neu starten (oder HUP an den gunicorn-Master senden), oder das Plugin aus der Datenbank entfernen.</p>
 <p><strong>Beispiel:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">Response</span>
 
@@ -2370,6 +2374,8 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
       
         <script src="../../assets/toc-dropdown.js"></script>
+      
+        <script src="../../assets/webmcp.js"></script>
       
     
   </body>

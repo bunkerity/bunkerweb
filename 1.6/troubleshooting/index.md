@@ -3,6 +3,22 @@
 !!! info "BunkerWeb Panel"
     If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
 
+## Troubleshooting with an AI agent
+
+### BunkerWeb skills on skills.sh
+
+The official [BunkerWeb troubleshooting skill on skills.sh](https://skills.sh/bunkerity/bunkerweb-skills/bunkerweb-troubleshooting) helps AI coding agents diagnose blocked requests, bans, upstream errors, certificate issues and configuration problems. Follow the [installation instructions](https://github.com/bunkerity/bunkerweb-skills#installation) for your agent.
+
+### BunkerWeb documentation with Context7
+
+If your agent supports [Context7](https://context7.com/docs), connect it to fetch [BunkerWeb documentation](https://context7.com/bunkerity/bunkerweb). Include your BunkerWeb version, integration, relevant settings and logs in your prompt, and remove passwords, API tokens and other secrets before sharing them.
+
+Example prompt:
+
+```text
+Help me diagnose this issue with BunkerWeb <version> on <integration>. Here are the relevant settings and redacted logs: <details>. use context7
+```
+
 ## Logs
 
 When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.
@@ -62,9 +78,9 @@ Here is how you can access the logs, depending on your integration :
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.17/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/1.6.17/integrations/#swarm).**
 
     !!! tip "List services"
         To list the services, you can use the following command :
@@ -107,7 +123,7 @@ Here is how you can access the logs, depending on your integration :
 
 ## Permissions
 
-Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](https://docs.bunkerweb.io/latest/advanced/#custom-configurations)). You will need to set at least **_RW_** rights on files and **_RWX_** on folders.
+Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](https://docs.bunkerweb.io/1.6.17/advanced/#custom-configurations)). You will need to set at least **_RW_** rights on files and **_RWX_** on folders.
 
 ## IP unban
 
@@ -138,9 +154,9 @@ You can manually unban an IP, which is useful when performing tests so that you 
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/1.6.17/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/1.6.17/integrations/#swarm).**
 
     You can use the `docker exec` command (replace `bw-scheduler` with the name of your service) :
     ```shell
@@ -165,7 +181,7 @@ You can manually unban an IP, which is useful when performing tests so that you 
 
 ### Detect only mode
 
-For debugging/test purposes, you can set BunkerWeb in [detect only mode](https://docs.bunkerweb.io/latest/features/#security-modes) so it won't block request and will act as a classical reverse proxy.
+For debugging/test purposes, you can set BunkerWeb in [detect only mode](https://docs.bunkerweb.io/1.6.17/features/#security-modes) so it won't block request and will act as a classical reverse proxy.
 
 ### ModSecurity
 
@@ -256,15 +272,15 @@ As we can see, there are 3 different logs :
 
 One important thing to understand is that rule **949110** is not a "real" one : it's the one that will deny the request because the anomaly threshold is reached (which is **10** in this example). You should never remove the **949110** rule !
 
-If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](https://docs.bunkerweb.io/latest/advanced/#custom-configurations)).
+If it's a false-positive, you should then focus on both **930120** and **932160** rules. ModSecurity and/or CRS tuning is out of the scope of this documentation but don't forget that you can apply custom configurations before and after the CRS is loaded (more info [here](https://docs.bunkerweb.io/1.6.17/advanced/#custom-configurations)).
 
 ### Bad Behavior
 
-A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](https://docs.bunkerweb.io/latest/features/#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
+A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](https://docs.bunkerweb.io/1.6.17/features/#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
 
 ### Whitelisting
 
-If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](https://docs.bunkerweb.io/latest/features/#whitelist). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
+If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](https://docs.bunkerweb.io/1.6.17/features/#whitelist). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
 
 - Healthcheck / status bot
 - Callback like IPN or webhook
@@ -446,7 +462,7 @@ you can force a “change marker” update:
 In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
 
 !!! warning "2FA stopped working after recreating the container"
-    The keys that decrypt the TOTP secrets are stored in the UI container at `/var/lib/bunkerweb/.totp_encryption_keys.json`, which is `/data/lib` inside the image. Recreating the `bw-ui` container without a persistent volume on `/data` generates a new set of keys, so the secrets kept in the database can no longer be decrypted: the admin enrollment is dropped and the other accounts have to be reset with the SQL below. Mount a volume on `/data` (see the [Web UI documentation](https://docs.bunkerweb.io/latest/web-ui/)) so the keys survive, or provide your own `TOTP_ENCRYPTION_KEYS`.
+    The keys that decrypt the TOTP secrets are stored in the UI container at `/var/lib/bunkerweb/.totp_encryption_keys.json`, which is `/data/lib` inside the image. Recreating the `bw-ui` container without a persistent volume on `/data` generates a new set of keys, so the secrets kept in the database can no longer be decrypted: the admin enrollment is dropped and the other accounts have to be reset with the SQL below. Mount a volume on `/data` (see the [Web UI documentation](https://docs.bunkerweb.io/1.6.17/web-ui/)) so the keys survive, or provide your own `TOTP_ENCRYPTION_KEYS`.
 
 ### Access database
 

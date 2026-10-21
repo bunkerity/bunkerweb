@@ -1,0 +1,1 @@
+{"version": "1.6.17", "plugin": "Pro", "pro": false, "url": "https://docs.bunkerweb.io/1.6.17/features/#pro", "settings": [{"name": "PRO_LICENSE_KEY", "default": "", "context": "global", "multiple": false, "description": "**Pro License Key:** Your BunkerWeb Pro license key for authentication."}]}

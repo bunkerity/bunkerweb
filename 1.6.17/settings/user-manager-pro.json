@@ -1,0 +1,1 @@
+{"version": "1.6.17", "plugin": "User Manager", "pro": true, "url": "https://docs.bunkerweb.io/1.6.17/features/#user-manager-pro", "settings": [{"name": "USERS_REQUIRE_2FA", "default": "no", "context": "global", "multiple": false, "description": "Require two-factor authentication for all users"}]}

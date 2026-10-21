@@ -169,6 +169,9 @@
 
     
     
+    
+    
+
   
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Fonctionnalités - Documentation BunkerWeb" />
@@ -2171,6 +2174,17 @@
     <span class="md-ellipsis">
       
         Comment l’utiliser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certificats-pour-adresses-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certificats pour adresses IP
       
     </span>
   </a>
@@ -4307,7 +4321,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>no</code></td>
 <td>multisite</td>
 <td>non</td>
-<td>Pass through ACME HTTP-01 challenge requests to the upstream server.</td>
+<td>Pass through only GET/HEAD requests for one token-shaped ACME HTTP-01 URI to the upstream. That request skips antibot, blacklist, request-rate limiting, Basic Auth, ModSecurity, and the ban check; NGINX connection limits (limit_conn) still apply.</td>
 </tr>
 <tr>
 <td><code>ACME_DIRECTORY_URL</code></td>
@@ -5745,8 +5759,23 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td>non</td>
 <td>Portée du ban : site courant (<code>service</code>) ou global (<code>global</code>). Sur le serveur par défaut (<code>_</code>), les bans sont toujours globaux.</td>
 </tr>
+<tr>
+<td><code>BAD_BEHAVIOR_REPORT_MAX_EVENTS</code></td>
+<td><code>100</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Nombre maximal d’événements récents conservés dans les rapports comme preuves du ban, également limité par <code>BAD_BEHAVIOR_THRESHOLD</code>. Plage : de <code>1</code> à <code>10000</code>.</td>
+</tr>
+<tr>
+<td><code>BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE</code></td>
+<td><code>512</code></td>
+<td>multisite</td>
+<td>non</td>
+<td>Nombre maximal d’octets par URL ou méthode dans les preuves du rapport, marqueur <code>...</code> compris. Plage : de <code>4</code> à <code>65536</code>.</td>
+</tr>
 </tbody>
 </table>
+<p>Les preuves du ban conservent les événements correspondants les plus récents. Ces limites concernent uniquement les preuves copiées dans chaque rapport, sans modifier le bannissement ni <code>MAX_LRU_HISTORY</code>. La troncature ne coupe pas les caractères UTF-8. Augmenter une limite accroît le stockage des rapports. Le total des requêtes reste le compteur réel du ban, même si moins d’événements sont conservés.</p>
 <div class="admonition warning">
 <p class="admonition-title">Faux positifs</p>
 <p>Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.</p>
@@ -7164,7 +7193,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.16</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7181,7 +7210,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># L'adresse IP du service syslog</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.16</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Assurez-vous de définir le nom correct de l'instance</span>
@@ -7889,6 +7918,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>global</td>
 <td>non</td>
 <td><strong>Délai de reconnexion :</strong> Nombre max de secondes d'attente de disponibilité de la base au démarrage. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre sans suffixe est en secondes.</td>
+</tr>
+<tr>
+<td><code>DATABASE_CONNECT_TIMEOUT</code></td>
+<td><code>10s</code></td>
+<td>global</td>
+<td>non</td>
+<td><strong>Délai de connexion :</strong> Durée maximale d'attente à l'ouverture d'une connexion vers un serveur MySQL, MariaDB ou PostgreSQL. Il doit être supérieur à <code>0</code> : les pilotes ne peuvent pas s'en passer, et <code>0</code> revient à la valeur par défaut avec un avertissement. Un délai défini dans la query string de <code>DATABASE_URI</code> est prioritaire. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre seul est en secondes.</td>
+</tr>
+<tr>
+<td><code>DATABASE_READ_TIMEOUT</code></td>
+<td><code>5m</code></td>
+<td>global</td>
+<td>non</td>
+<td><strong>Délai de lecture :</strong> Durée maximale d'attente d'une réponse (ou de l'acceptation de données) d'un serveur MySQL ou MariaDB avant l'échec de l'appel, pour qu'un pair disparu ne bloque pas indéfiniment. PostgreSQL s'appuie sur les keepalives TCP. <code>0</code> le désactive. Un délai défini dans la query string de <code>DATABASE_URI</code> est prioritaire. Accepte un suffixe de durée (ms, s, m, h, d, w, M, y) ; un nombre seul est en secondes.</td>
 </tr>
 <tr>
 <td><code>DATABASE_REQUEST_RETRY_ATTEMPTS</code></td>
@@ -9720,9 +9763,9 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">Profils de certificat</p>
 <p>Let's Encrypt propose différents profils de certificat pour différents cas d'usage :</p>
 <ul>
-<li><strong>classic</strong> : Certificats à usage général avec une validité de 90 jours (par défaut)</li>
-<li><strong>tlsserver</strong> : Optimisé pour l'authentification de serveur TLS avec une validité de 90 jours et une charge utile plus petite</li>
-<li><strong>shortlived</strong> : Sécurité renforcée avec une validité de 7 jours pour les environnements automatisés</li>
+<li><strong>classic</strong> : Certificats à usage général avec une validité de 90 jours et jusqu'à 100 noms (par défaut)</li>
+<li><strong>tlsserver</strong> : Optimisé pour l'authentification de serveur TLS avec une validité de 45 jours, jusqu'à 25 noms et une charge utile plus petite</li>
+<li><strong>shortlived</strong> : Sécurité renforcée avec une validité de 160 heures pour jusqu'à 25 noms dans les environnements automatisés</li>
 <li><strong>custom</strong> : Si votre serveur ACME prend en charge un profil différent, définissez-le avec <code>LETS_ENCRYPT_CUSTOM_PROFILE</code>.</li>
 </ul>
 </div>
@@ -9730,6 +9773,40 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">Disponibilité des profils</p>
 <p>Notez que les profils <code>tlsserver</code> et <code>shortlived</code> peuvent ne pas être disponibles dans tous les environnements ou avec tous les clients ACME pour le moment. Le profil <code>classic</code> a la compatibilité la plus large et est recommandé pour la plupart des utilisateurs. Si un profil sélectionné n'est pas disponible, le système basculera automatiquement sur le profil <code>classic</code>.</p>
 </div>
+<h3 id="certificats-pour-adresses-ip">Certificats pour adresses IP<a class="headerlink" href="#certificats-pour-adresses-ip" title="Permanent link">&para;</a></h3>
+<p>Let's Encrypt peut émettre des certificats pour des adresses IP. Indiquez l'IP à côté de vos noms d'hôte dans <code>SERVER_NAME</code> et BunkerWeb demande un seul certificat qui les couvre tous. En mode mono-site (<code>MULTISITE=no</code>), les autres entrées de <code>SERVER_NAME</code> sont des alias de la première et figurent toutes dans le même certificat : un nom d'hôte et une adresse IP fonctionnent donc ensemble.</p>
+<div class="admonition info">
+<p class="admonition-title">Prérequis</p>
+<p>Une adresse IP n'est demandée que si toutes ces conditions sont remplies. Sinon elle est ignorée avec un avertissement et les autres noms sont tout de même émis :</p>
+<ul>
+<li><code>LETS_ENCRYPT_SERVER</code> vaut <code>letsencrypt</code></li>
+<li><code>LETS_ENCRYPT_CHALLENGE</code> vaut <code>http</code></li>
+<li><code>LETS_ENCRYPT_PROFILE</code> vaut <code>shortlived</code></li>
+<li>L'adresse est une adresse IPv4 publique (IPv6 n'est pas pris en charge)</li>
+<li>Le port 80 de cette adresse est joignable depuis Internet</li>
+</ul>
+</div>
+<p>Les certificats pour adresses IP durent 160 heures et sont renouvelés automatiquement par la tâche de renouvellement quotidienne.</p>
+<p>Un client qui se connecte par adresse IP n'envoie pas de SNI : BunkerWeb choisit donc le certificat d'après l'adresse sur laquelle le client s'est connecté :</p>
+<ol>
+<li>Si l'adresse locale correspond à un certificat d'IP, celui-ci est servi.</li>
+<li>Sinon, s'il n'existe qu'un seul certificat d'IP, celui-ci est servi.</li>
+<li>Sinon, le certificat par défaut est servi.</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Docker et NAT</p>
+<p>Derrière la publication de ports Docker ou un NAT, BunkerWeb voit une adresse locale privée qui ne correspond à aucune des IP publiques. Avec plusieurs certificats d'IP, il ne peut pas les distinguer et sert le certificat par défaut.</p>
+</div>
+<p>Avec <code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code> à <code>yes</code>, BunkerWeb refuse les clients qui se connectent par adresse IP : les certificats pour adresses IP ne sont alors jamais utilisés.</p>
+<p>Le certificat liste tous les noms du service : un client qui se connecte par IP voit donc aussi les noms d'hôte. Pour garder les noms d'hôte privés, placez l'adresse IP dans un service dédié dont le <code>SERVER_NAME</code> ne contient que l'adresse IP.</p>
+<p>Lorsque des noms (noms d'hôte ou adresses IP) sont ajoutés à un service qui possède déjà un certificat, BunkerWeb l'étend et conserve le certificat actuel si la validation d'un nouveau nom échoue. Retirer ou remplacer un nom réémet toujours le certificat depuis zéro. Plus tard, si une adresse IP cesse d'être validée (par exemple le port 80 devient inaccessible), le renouvellement de tout le certificat échoue, noms d'hôte compris. Dans ce cas, retirez l'adresse IP de <code>SERVER_NAME</code>.</p>
+<p>Seule une adresse IP réellement présente dans le certificat est servie aux clients sans SNI.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">AUTO_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">EMAIL_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">"admin@example.com"</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"www.example.com</span><span class="nv"> </span><span class="s">203.0.113.10"</span>
+<span class="nt">LETS_ENCRYPT_CHALLENGE</span><span class="p">:</span><span class="w"> </span><span class="s">"http"</span>
+<span class="nt">LETS_ENCRYPT_PROFILE</span><span class="p">:</span><span class="w"> </span><span class="s">"shortlived"</span>
+</code></pre></div>
 <h3 id="parametres-de-configuration_7">Paramètres de configuration<a class="headerlink" href="#parametres-de-configuration_7" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -9754,7 +9831,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Passer à travers Let's Encrypt :</strong> Mettre à <code>yes</code> pour passer les requêtes Let's Encrypt au serveur web. Utile si BunkerWeb est devant un autre reverse proxy gérant le SSL. Le chemin du défi ACME contourne alors toutes les autres vérifications.</td>
+<td><strong>Passer à travers Let's Encrypt :</strong> Mettre à <code>yes</code> pour passer les requêtes Let's Encrypt au serveur web. Utile si BunkerWeb est devant un autre reverse proxy gérant le SSL.</td>
 </tr>
 <tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
@@ -9873,7 +9950,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>classic</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Profil de certificat :</strong> Sélectionnez le profil à utiliser. Options : <code>classic</code> (général), <code>tlsserver</code> (optimisé TLS), ou <code>shortlived</code> (7 jours).</td>
+<td><strong>Profil de certificat :</strong> Sélectionnez le profil à utiliser. Options : <code>classic</code> (général, jusqu'à 100 noms), <code>tlsserver</code> (optimisé TLS, validité de 45 jours, jusqu'à 25 noms), ou <code>shortlived</code> (certificats de 160 heures, jusqu'à 25 noms).</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_CUSTOM_PROFILE</code></td>
@@ -10510,6 +10587,13 @@ TrustedMonitor/\d+\.\d+
 <td>global</td>
 <td>non</td>
 <td>Shared dict size (datastore for all healthchecks).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_ZONE_SIZE</code></td>
+<td><code>64k</code></td>
+<td>global</td>
+<td>non</td>
+<td>Shared memory zone size for upstreams with dynamic resolution (all resolved upstreams share one zone).</td>
 </tr>
 <tr>
 <td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
@@ -12730,7 +12814,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </div>
 <div class="admonition info">
 <p class="admonition-title">Multiples adresses</p>
-<p>Avec <code>REAL_IP_RECURSIVE</code>, si l’en‑tête contient plusieurs IPs, la première non listée comme proxy de confiance est retenue comme IP client.</p>
+<p>Avec <code>REAL_IP_RECURSIVE</code>, si l’en‑tête contient plusieurs IPs, la dernière (la plus à droite) non listée comme proxy de confiance est retenue comme IP client.</p>
 </div>
 <h3 id="exemples_11">Exemples<a class="headerlink" href="#exemples_11" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="36:7"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><input id="__tabbed_36_7" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Basique (derrière reverse proxy)</label><label for="__tabbed_36_2">Load balancer cloud</label><label for="__tabbed_36_3">PROXY Protocol</label><label for="__tabbed_36_4">Sources de proxys multiples avec URL</label><label for="__tabbed_36_5">Configuration CDN</label><label for="__tabbed_36_6">Derrière Cloudflare</label><label for="__tabbed_36_7">Derrière AWS CloudFront</label></div>
@@ -15853,6 +15937,8 @@ TrustedMonitor/\d+\.\d+
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
       
         <script src="../../assets/toc-dropdown.js"></script>
+      
+        <script src="../../assets/webmcp.js"></script>
       
     
   </body>

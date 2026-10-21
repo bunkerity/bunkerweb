@@ -1,0 +1,97 @@
+# BunkerWeb documentation
+
+> BunkerWeb is a next-generation, open-source Web Application Firewall (WAF). Based on NGINX under the hood, it protects web services to make them secure by default. It integrates seamlessly into existing environments (Linux, Docker, Swarm, Kubernetes) as a reverse proxy and is fully configurable via environment variables or an awesome web UI. Source: https://github.com/bunkerity/bunkerweb
+
+## Getting Started
+
+- [Introduction](https://docs.bunkerweb.io/1.6.17/index.md): Introduction and overview of BunkerWeb
+- [Concepts](https://docs.bunkerweb.io/1.6.17/concepts/index.md): Core concepts — multisite, settings contexts, security modes
+- [Quickstart guide](https://docs.bunkerweb.io/1.6.17/quickstart-guide/index.md): Quick start guide for first-time setup
+
+## Integration Guides
+
+- [Integrations](https://docs.bunkerweb.io/1.6.17/integrations/index.md): Docker, Kubernetes, Swarm, Linux, and Ansible setup
+
+## Configuration Reference
+
+- [Features](https://docs.bunkerweb.io/1.6.17/features/index.md): Complete settings reference — all plugins, all options
+
+## Settings lookup
+
+- [Settings index](https://docs.bunkerweb.io/1.6.17/settings/index.json): exact setting name → plugin file; then fetch settings/<plugin>.json for default, context, multiple and description
+- [Global settings](https://docs.bunkerweb.io/1.6.17/settings/global-settings.json)
+- [ACME](https://docs.bunkerweb.io/1.6.17/settings/acme-pro.json)
+- [Anti DDoS](https://docs.bunkerweb.io/1.6.17/settings/anti-ddos-pro.json)
+- [Antibot](https://docs.bunkerweb.io/1.6.17/settings/antibot.json)
+- [Auth basic](https://docs.bunkerweb.io/1.6.17/settings/auth-basic.json)
+- [Backup](https://docs.bunkerweb.io/1.6.17/settings/backup.json)
+- [Backup S3](https://docs.bunkerweb.io/1.6.17/settings/backup-s3-pro.json)
+- [Bad behavior](https://docs.bunkerweb.io/1.6.17/settings/bad-behavior.json)
+- [Blacklist](https://docs.bunkerweb.io/1.6.17/settings/blacklist.json)
+- [Brotli](https://docs.bunkerweb.io/1.6.17/settings/brotli.json)
+- [BunkerNet](https://docs.bunkerweb.io/1.6.17/settings/bunkernet.json)
+- [Cache](https://docs.bunkerweb.io/1.6.17/settings/cache-pro.json)
+- [Client cache](https://docs.bunkerweb.io/1.6.17/settings/client-cache.json)
+- [CORS](https://docs.bunkerweb.io/1.6.17/settings/cors.json)
+- [Country](https://docs.bunkerweb.io/1.6.17/settings/country.json)
+- [CrowdSec](https://docs.bunkerweb.io/1.6.17/settings/crowdsec.json)
+- [Custom Pages](https://docs.bunkerweb.io/1.6.17/settings/custom-pages-pro.json)
+- [Custom SSL certificate](https://docs.bunkerweb.io/1.6.17/settings/custom-ssl-certificate.json)
+- [Database](https://docs.bunkerweb.io/1.6.17/settings/database.json)
+- [DNSBL](https://docs.bunkerweb.io/1.6.17/settings/dnsbl.json)
+- [Errors](https://docs.bunkerweb.io/1.6.17/settings/errors.json)
+- [Greylist](https://docs.bunkerweb.io/1.6.17/settings/greylist.json)
+- [gRPC](https://docs.bunkerweb.io/1.6.17/settings/grpc.json)
+- [Gzip](https://docs.bunkerweb.io/1.6.17/settings/gzip.json)
+- [Headers](https://docs.bunkerweb.io/1.6.17/settings/headers.json)
+- [HTML injection](https://docs.bunkerweb.io/1.6.17/settings/html-injection.json)
+- [LDAP SSO](https://docs.bunkerweb.io/1.6.17/settings/ldap-sso-pro.json)
+- [Let's Encrypt](https://docs.bunkerweb.io/1.6.17/settings/lets-encrypt.json)
+- [Limit](https://docs.bunkerweb.io/1.6.17/settings/limit.json)
+- [Load Balancer](https://docs.bunkerweb.io/1.6.17/settings/load-balancer-pro.json)
+- [Maintenance](https://docs.bunkerweb.io/1.6.17/settings/maintenance-pro.json)
+- [Metrics](https://docs.bunkerweb.io/1.6.17/settings/metrics.json)
+- [Miscellaneous](https://docs.bunkerweb.io/1.6.17/settings/miscellaneous.json)
+- [ModSecurity](https://docs.bunkerweb.io/1.6.17/settings/modsecurity.json)
+- [Monitoring](https://docs.bunkerweb.io/1.6.17/settings/monitoring-pro.json)
+- [Mutual TLS](https://docs.bunkerweb.io/1.6.17/settings/mutual-tls.json)
+- [OpenAPI Validator](https://docs.bunkerweb.io/1.6.17/settings/openapi-validator-pro.json)
+- [OpenID Connect](https://docs.bunkerweb.io/1.6.17/settings/openid-connect-pro.json)
+- [PHP](https://docs.bunkerweb.io/1.6.17/settings/php.json)
+- [Pro](https://docs.bunkerweb.io/1.6.17/settings/pro.json)
+- [Prometheus exporter](https://docs.bunkerweb.io/1.6.17/settings/prometheus-exporter-pro.json)
+- [Real IP](https://docs.bunkerweb.io/1.6.17/settings/real-ip.json)
+- [Redirect](https://docs.bunkerweb.io/1.6.17/settings/redirect.json)
+- [Redis](https://docs.bunkerweb.io/1.6.17/settings/redis.json)
+- [Reporting](https://docs.bunkerweb.io/1.6.17/settings/reporting-pro.json)
+- [Reverse proxy](https://docs.bunkerweb.io/1.6.17/settings/reverse-proxy.json)
+- [Reverse scan](https://docs.bunkerweb.io/1.6.17/settings/reverse-scan.json)
+- [Robots.txt](https://docs.bunkerweb.io/1.6.17/settings/robotstxt.json)
+- [SAML](https://docs.bunkerweb.io/1.6.17/settings/saml-pro.json)
+- [Security.txt](https://docs.bunkerweb.io/1.6.17/settings/securitytxt.json)
+- [Self-signed certificate](https://docs.bunkerweb.io/1.6.17/settings/self-signed-certificate.json)
+- [Sessions](https://docs.bunkerweb.io/1.6.17/settings/sessions.json)
+- [SSL](https://docs.bunkerweb.io/1.6.17/settings/ssl.json)
+- [UI](https://docs.bunkerweb.io/1.6.17/settings/ui.json)
+- [UI Single Sign-On](https://docs.bunkerweb.io/1.6.17/settings/ui-single-sign-on-pro.json)
+- [User Manager](https://docs.bunkerweb.io/1.6.17/settings/user-manager-pro.json)
+- [Whitelist](https://docs.bunkerweb.io/1.6.17/settings/whitelist.json)
+- [Wildcard](https://docs.bunkerweb.io/1.6.17/settings/wildcard-pro.json)
+
+## Advanced Usage
+
+- [Advanced usages](https://docs.bunkerweb.io/1.6.17/advanced/index.md): Custom configs, headers, ModSecurity, PHP, streaming, and more
+
+## Web UI & API
+
+- [Web UI](https://docs.bunkerweb.io/1.6.17/web-ui/index.md): Web UI usage guide
+- [API](https://docs.bunkerweb.io/1.6.17/api/index.md): REST API documentation
+
+## Plugin System
+
+- [Plugins](https://docs.bunkerweb.io/1.6.17/plugins/index.md): Writing and using external plugins
+
+## Operations
+
+- [Upgrading](https://docs.bunkerweb.io/1.6.17/upgrading/index.md): Version migration and upgrade guides
+- [Troubleshooting](https://docs.bunkerweb.io/1.6.17/troubleshooting/index.md): Common issues and solutions

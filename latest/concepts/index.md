@@ -12,17 +12,17 @@ The first concept is the integration of BunkerWeb into the target environment. W
 
 The following integrations are officially supported:
 
-- [Docker](https://docs.bunkerweb.io/latest/integrations/#docker)
-- [Linux](https://docs.bunkerweb.io/latest/integrations/#linux)
-- [Docker autoconf](https://docs.bunkerweb.io/latest/integrations/#docker-autoconf)
-- [Kubernetes](https://docs.bunkerweb.io/latest/integrations/#kubernetes)
-- [Swarm](https://docs.bunkerweb.io/latest/integrations/#swarm)
+- [Docker](https://docs.bunkerweb.io/1.6.17/integrations/#docker)
+- [Linux](https://docs.bunkerweb.io/1.6.17/integrations/#linux)
+- [Docker autoconf](https://docs.bunkerweb.io/1.6.17/integrations/#docker-autoconf)
+- [Kubernetes](https://docs.bunkerweb.io/1.6.17/integrations/#kubernetes)
+- [Swarm](https://docs.bunkerweb.io/1.6.17/integrations/#swarm)
 
 If you think a new integration should be supported, do not hesitate to open a [new issue](https://github.com/bunkerity/bunkerweb/issues) on the GitHub repository.
 
 !!! info "Going further"
 
-    The technical details of all BunkerWeb integrations are available in the [integrations section](https://docs.bunkerweb.io/latest/integrations/) of the documentation.
+    The technical details of all BunkerWeb integrations are available in the [integrations section](https://docs.bunkerweb.io/1.6.17/integrations/) of the documentation.
 
 ## Settings
 
@@ -51,7 +51,7 @@ You can also use the search bar and directly specify a setting name:
 
 !!! info "Going further"
 
-    The complete list of available settings with descriptions and possible values is available in the [feature section](https://docs.bunkerweb.io/latest/features/) of the documentation.
+    The complete list of available settings with descriptions and possible values is available in the [feature section](https://docs.bunkerweb.io/1.6.17/features/) of the documentation.
 
 ## Multisite mode {#multisite-mode}
 
@@ -86,11 +86,11 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](https://docs.bunkerweb.io/latest/advanced/) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](https://docs.bunkerweb.io/1.6.17/advanced/) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples) directory of the repository.
 
 ## Custom configurations {#custom-configurations}
 
-To address unique challenges and cater to specific use cases, BunkerWeb offers the flexibility of custom configurations. While the provided settings and [external plugins](https://docs.bunkerweb.io/latest/plugins/) cover a wide range of scenarios, there may be situations that require additional customization.
+To address unique challenges and cater to specific use cases, BunkerWeb offers the flexibility of custom configurations. While the provided settings and [external plugins](https://docs.bunkerweb.io/1.6.17/plugins/) cover a wide range of scenarios, there may be situations that require additional customization.
 
 BunkerWeb is built on the renowned NGINX web server, which provides a powerful configuration system. This means you can leverage NGINX's configuration capabilities to meet your specific needs. Custom NGINX configurations can be included in various [contexts](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts) such as HTTP or server, allowing you to fine-tune the behavior of BunkerWeb according to your requirements. Whether you need to customize global settings or apply configurations to specific server blocks, BunkerWeb empowers you to optimize its behavior to align perfectly with your use case.
 
@@ -102,7 +102,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](https://docs.bunkerweb.io/latest/advanced/#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.16/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](https://docs.bunkerweb.io/1.6.17/advanced/#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.17/examples) directory of the repository.
 
 ## Database
 
