@@ -81,7 +81,11 @@ try:
         for _ in range(8):
             sleep(2)
             try:
-                metrics_resp = get(f"http://{api_host}:5000/metrics/requests", timeout=10)
+                metrics_resp = get(
+                    f"http://{api_host}:5000/metrics/requests",
+                    headers={"Host": "bwapi"},
+                    timeout=10,
+                )
                 if metrics_resp.status_code == 200:
                     metrics_json = metrics_resp.json()
                     requests_list = metrics_json.get("msg", {}).get("requests", [])
