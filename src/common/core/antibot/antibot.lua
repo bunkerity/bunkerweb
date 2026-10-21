@@ -116,6 +116,27 @@ local function is_safe_relative_path(p, antibot_uri)
 	if path == antibot_uri then
 		return nil
 	end
+	-- Compare the decoded, normalized path so aliases cannot redirect back to the challenge.
+	path = p:match("^[^?#]+")
+		:gsub("%%(%x%x)", function(hex)
+			return string.char(tonumber(hex, 16))
+		end)
+		:gsub("\\", "/")
+	local segments = {}
+	for segment in path:gmatch("[^/]+") do
+		if segment == ".." then
+			table.remove(segments)
+		elseif segment ~= "." then
+			table.insert(segments, segment)
+		end
+	end
+	local normalized = "/" .. table.concat(segments, "/")
+	if #segments > 0 and (path:sub(-1) == "/" or path:match("/%.%.?$")) then
+		normalized = normalized .. "/"
+	end
+	if normalized == antibot_uri then
+		return nil
+	end
 	return p
 end
 
@@ -1081,6 +1102,10 @@ function antibot:get_original_uri()
 		if not next_arg and self.ctx.bw.request_method == "POST" then
 			ngx.req.read_body()
 			next_arg = first_value((ngx.req.get_post_args(8) or {})["next"])
+			local session_uri = is_safe_relative_path(self.session_data.original_uri, antibot_uri)
+			if session_uri and next_arg and path_only(session_uri) == path_only(next_arg) then
+				next_arg = session_uri
+			end
 		end
 		return is_safe_relative_path(next_arg, antibot_uri) or "/"
 	end
