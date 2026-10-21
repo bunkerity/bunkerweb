@@ -110,6 +110,7 @@ local table_remove = table.remove
 -- when the branch first runs (the .luacheckrc whitelist hides bare global reads).
 local unpack = unpack
 
+local REPORT_MAX_URL_SIZE = 512
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 
 local function report_keys()
@@ -901,13 +902,22 @@ function metrics:log(bypass_checks)
 		if reason == "modsecurity-body" and ngx.var.request then
 			request_method = ngx.var.request:match("^(%S+)") or request_method
 		end
+		local url = self.ctx.bw.request_uri
+		if type(url) == "string" and #url > REPORT_MAX_URL_SIZE then
+			local cut = REPORT_MAX_URL_SIZE - 3
+			-- Keep valid UTF-8 intact when appending the truncation marker.
+			while cut > 0 and url:byte(cut + 1) >= 0x80 and url:byte(cut + 1) < 0xC0 do
+				cut = cut - 1
+			end
+			url = url:sub(1, cut) .. "..."
+		end
 		local request = {
 			id = self.ctx.bw.request_id,
 			date = self.ctx.bw.start_time or time(),
 			ip = self.ctx.bw.remote_addr,
 			country = country,
 			method = request_method,
-			url = self.ctx.bw.request_uri,
+			url = url,
 			status = ngx.status,
 			user_agent = self.ctx.bw.http_user_agent or "",
 			reason = reason,
