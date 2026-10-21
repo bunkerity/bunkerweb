@@ -38,14 +38,9 @@ FROM python:3.14-alpine@sha256:f6a589d43c42b9e7f7dc67a12d37132491f362859a5d75060
 RUN umask 027
 
 # Install bash and create autoconf user
-RUN apk add --no-cache bash tzdata mariadb-connector-c mariadb-client sqlite postgresql-client && \
+RUN apk add --no-cache "zlib>=1.3.2-r1" bash tzdata mariadb-connector-c mariadb-client sqlite postgresql-client && \
   addgroup -g 101 autoconf && \
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
-
-# Fix CVEs
-RUN apk add --no-cache "mariadb-client>=11.8.9-r0" "mariadb-common>=11.8.9-r0" # CVE-2026-47023 CVE-2026-60184 CVE-2026-60331 CVE-2026-60585 CVE-2026-60747 CVE-2026-61081
-RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
-RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
