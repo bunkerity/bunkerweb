@@ -8,7 +8,7 @@ acme==5.8.0 \
     --hash=sha256:44c4edb53acdd3fa8402cb29c78a6d1bd2005d777a4d2fcd12663bbc3c147b34 \
     --hash=sha256:637501767248156545d85c23b806381ac346c5eac759f8e35052af85b7bb3933
     # via certbot
-backports-zstd==1.8.0 ; python_version < "3.14" \
+backports-zstd==1.8.0 \
     --hash=sha256:029bca2385ebb4355135bdb8559792d2768ae19707705eea84e68c42a30a0276 \
     --hash=sha256:045e15ed3b3ebd8816edaa7d66f024becf050d9aec09605f549ce33cfda01098 \
     --hash=sha256:0600e166cb00739a26de74ee1696221a53a4d5dc1f96a0bdeb6b307c1626c15c \
@@ -718,9 +718,9 @@ josepy==2.2.0 \
     # via
     #   acme
     #   certbot
-libpass==1.9.3 \
-    --hash=sha256:3cbeb14d22086660e92c30d787ea981973d67394e81c8c870e1a83cfe1c84353 \
-    --hash=sha256:7830b9323d9ba96a841ad698a8dec1d43a2b0b7f1c855c76772e7972c1c6d959
+libpass==1.9.4 \
+    --hash=sha256:4ff9a5ebf51aad1e8164453bc29c4a06926cf175a9501d87205612ba247f3cbd \
+    --hash=sha256:a608621af2d7d64579957988fac287f230f88792c83a2d0f895afb05ee429489
     # via -r requirements.in
 markupsafe==3.0.4 \
     --hash=sha256:007e1ffd9bf65bb6ee96df7b258fc632a4868dd5566037986c64781f35a36e98 \
