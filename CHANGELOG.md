@@ -9,6 +9,7 @@
 - [BUGFIX] `db`: SQLAlchemy loggers follow `DATABASE_LOG_LEVEL` again, so the scheduler, API and UI no longer flood their logs with lazy-loading clauses at INFO.
 - [UI] `Web UI`: clarify applying changed global settings to all services and confirm service overrides before saving.
 - [DOCS] Pin llms.txt and llms-full.txt links to their docs version, publish per-plugin settings JSON and register read-only WebMCP tools on docs pages.
+- [DEPS] Updated LuaJIT version to v2.1-20261021
 
 ## v1.6.17~rc2 - 2026/10/16
 
