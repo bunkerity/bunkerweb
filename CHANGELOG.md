@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.6.18~rc1 - 2026/10/??
+
+- [BUGFIX] `antibot`: a failed challenge attempt keeps its destination, with its query when the session survives. Thanks to @Explotacionweb for the fix.
+- [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
+- [BUGFIX] `ui`: the dashboard blocking chart, country map and top IPs count blocked reports of any HTTP status and leave out detect-mode events. Thanks to @MageInt for the fix.
+
 ## v1.6.17 - 2026/10/21
 
 - [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `unbounded-element`.
