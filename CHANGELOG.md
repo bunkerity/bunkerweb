@@ -2,6 +2,7 @@
 
 ## v1.6.18~rc1 - 2026/10/??
 
+- [FEATURE] `installer`: the easy install script sends its downloads through `HTTP_PROXY`/`HTTPS_PROXY` and honours `NO_PROXY`. (Fixes #4040)
 - [BUGFIX] `antibot`: a failed challenge attempt keeps its destination, with its query when the session survives. Thanks to @Explotacionweb for the fix.
 - [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
 - [BUGFIX] `ui`: the dashboard blocking chart, country map and top IPs count blocked reports of any HTTP status and leave out detect-mode events. Thanks to @MageInt for the fix.

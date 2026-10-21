@@ -2044,6 +2044,20 @@ sudo ./install-bunkerweb.sh
 
     如果校验和验证失败，**请不要执行该脚本**——它可能不安全。
 
+#### 通过代理安装
+
+运行安装程序前，请导出 `HTTP_PROXY` 和 `HTTPS_PROXY`（或 `http_proxy` 和 `https_proxy`），以通过正向代理进行下载、仓库配置、签名密钥获取以及软件包管理器请求。可选的 `NO_PROXY`（或 `no_proxy`）列出绕过代理的主机。两种形式都设置时，小写变量的值优先。提升权限时请保留这些变量，例如：
+
+```bash
+export HTTP_PROXY=http://proxy.example.com:3128
+export HTTPS_PROXY=http://proxy.example.com:3128
+sudo --preserve-env=HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy ./install-bunkerweb.sh
+```
+
+您的 sudo 策略必须允许保留这些变量。这些设置仅适用于安装程序；请在 `/etc/bunkerweb/variables.env` 中单独配置 BunkerWeb 运行时使用的代理设置。
+
+拉取 Docker 镜像还需要为 Docker 守护进程配置代理，例如通过 systemd 配置片段 `/etc/systemd/system/docker.service.d/http-proxy.conf`。
+
 #### 工作原理
 
 简易安装脚本是一个强大的工具，旨在简化在全新的 Linux 系统上设置 BunkerWeb 的过程。它会自动执行以下关键步骤：

@@ -2044,6 +2044,20 @@ sudo ./install-bunkerweb.sh
 
     Wenn die Überprüfung der Prüfsumme fehlschlägt, **führen Sie das Skript nicht aus** – es könnte unsicher sein.
 
+#### Hinter einem Proxy
+
+Exportieren Sie `HTTP_PROXY` und `HTTPS_PROXY` (oder `http_proxy` und `https_proxy`), bevor Sie das Installationsskript ausführen, um Downloads, die Repository-Einrichtung, das Abrufen von Signaturschlüsseln und Anfragen des Paketmanagers über Ihren Forward-Proxy zu leiten. Optional gibt `NO_PROXY` (oder `no_proxy`) Hosts an, die den Proxy umgehen. Sind beide Schreibweisen gesetzt, haben die kleingeschriebenen Werte Vorrang. Behalten Sie diese Variablen beim Erhöhen der Berechtigungen bei, zum Beispiel:
+
+```bash
+export HTTP_PROXY=http://proxy.example.com:3128
+export HTTPS_PROXY=http://proxy.example.com:3128
+sudo --preserve-env=HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy ./install-bunkerweb.sh
+```
+
+Ihre sudo-Richtlinie muss das Beibehalten dieser Variablen erlauben. Diese Einstellungen gelten für das Installationsskript; konfigurieren Sie die Proxy-Einstellungen für den laufenden Betrieb separat in `/etc/bunkerweb/variables.env`.
+
+Für Docker-Image-Pulls muss außerdem ein Proxy für den Docker-Daemon konfiguriert sein, zum Beispiel über das systemd-Drop-in `/etc/systemd/system/docker.service.d/http-proxy.conf`.
+
 #### Wie es funktioniert
 
 Das einfache Installationsskript ist ein leistungsstarkes Werkzeug, das entwickelt wurde, um die Einrichtung von BunkerWeb auf einem frischen Linux-System zu optimieren. Es automatisiert die folgenden wichtigen Schritte:
