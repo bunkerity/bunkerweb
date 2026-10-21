@@ -16,7 +16,7 @@ from typing import Any, List, Literal, Optional, Tuple, Union
 from urllib.parse import quote, unquote
 
 from API import API  # type: ignore
-from ApiCaller import ApiCaller  # type: ignore
+from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT  # type: ignore
 
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES
 
@@ -150,7 +150,11 @@ class Instance:
 
     def reload(self) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}")[0]
+            result = self.apiCaller.send_to_apis(
+                "POST",
+                f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
+                timeout=(5, MIN_RELOAD_TIMEOUT),
+            )[0]
         except BaseException as e:
             return f"Can't reload instance {self.hostname}: {e}"
 
