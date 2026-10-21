@@ -9,6 +9,7 @@
 - [BUGFIX] `badbehavior`: a ban's evidence is stored once and the requests rejected during it only reference it, so reports stay small; the Reports page loads the events on demand.
 - [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
 - [BUGFIX] `ui`: the dashboard blocking chart, country map and top IPs count blocked reports of any HTTP status and leave out detect-mode events. Thanks to @MageInt for the fix.
+- [BUGFIX] `ui`: saving global or service settings with a rejected value no longer resets the stored value to its default or reports success.
 
 ## v1.6.17 - 2026/10/21
 
