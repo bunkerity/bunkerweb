@@ -62,6 +62,8 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
     | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
     | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
 
+Lorsque `SECURITY_MODE` est `detect`, les limites de connexions sont évaluées et journalisées (`limiting connections, dry run`) mais pas appliquées.
+
 !!! info "Limitation de connexions vs de requêtes"
     - La **limitation de connexions** restreint le nombre de connexions simultanées qu'une seule adresse IP peut maintenir.
     - La **limitation de débit de requêtes** restreint le nombre de requêtes qu'une adresse IP peut effectuer dans une période de temps définie.

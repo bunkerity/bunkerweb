@@ -57,3 +57,9 @@ Das Errors-Plugin bietet eine anpassbare Verwaltung von HTTP-Fehlern, um das Ers
     ```yaml
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
+
+### Fehlerantworten von Upstream-APIs beibehalten
+
+Standardmäßig ersetzt BunkerWeb 400-Antworten des Upstreams durch seine eigene Fehlerseite, was JSON-API- oder OIDC-Clients stören kann. Um Upstream-Fehler für einen Dienst durchzureichen, entfernen Sie entweder den Code aus der Liste dieses Dienstes, zum Beispiel `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504` (behalten Sie die Codes, die weiterhin abgefangen werden sollen), oder setzen Sie `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no`, um jeden Upstream-Fehler durchzureichen. Fehler, die BunkerWeb selbst erzeugt (zum Beispiel eine WAF-Sperre), werden weiterhin von BunkerWeb behandelt.
+
+Um Upstream-Fehler nur für eine Location beizubehalten, legen Sie eine Datei mit dem Inhalt `proxy_intercept_errors off;` an und tragen Sie sie in der Einstellung `REVERSE_PROXY_INCLUDES` dieser Location ein (zum Beispiel `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`, mit demselben numerischen Suffix wie `REVERSE_PROXY_HOST` der Location). Die Datei muss in den BunkerWeb-Containern vorhanden sein. Die übrigen Locations des Dienstes fangen Fehler weiterhin ab.

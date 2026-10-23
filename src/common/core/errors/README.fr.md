@@ -57,3 +57,9 @@ Comment ça marche :
     ```yaml
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
+
+### Conserver les corps d'erreur des API en amont
+
+Par défaut, BunkerWeb remplace les réponses 400 du service en amont par sa propre page d'erreur, ce qui peut casser les clients d'API JSON ou OIDC. Pour laisser passer les erreurs du service en amont pour un seul service, retirez le code de la liste de ce service, par exemple `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504` (gardez les codes que vous souhaitez toujours intercepter), ou définissez `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no` pour laisser passer toutes les erreurs du service en amont. Les erreurs générées par BunkerWeb lui-même (par exemple un refus du WAF) restent gérées par BunkerWeb.
+
+Pour conserver les erreurs du service en amont sur un seul emplacement, ajoutez un fichier contenant `proxy_intercept_errors off;` et listez-le dans le paramètre `REVERSE_PROXY_INCLUDES` de cet emplacement (par exemple `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`, avec le même suffixe numérique que le `REVERSE_PROXY_HOST` de l'emplacement). Le fichier doit exister dans les conteneurs BunkerWeb. Les autres emplacements du service continuent d'intercepter les erreurs.

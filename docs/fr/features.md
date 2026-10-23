@@ -829,12 +829,12 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Backup :
 
 ### Paramètres de configuration
 
-| Paramètre          | Défaut                       | Contexte | Multiple | Description                                                                                                                     |
-| ------------------ | ---------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_BACKUP`       | `yes`                        | global   | non      | **Activer Backup :** Mettre à `yes` pour activer les sauvegardes automatiques.                                                  |
-| `BACKUP_SCHEDULE`  | `daily`                      | global   | non      | **Fréquence de sauvegarde :** Fréquence d'exécution des sauvegardes. Options : `daily`, `weekly` ou `monthly`.                  |
-| `BACKUP_ROTATION`  | `7`                          | global   | non      | **Rétention des sauvegardes :** Nombre de fichiers de sauvegarde à conserver. Les sauvegardes plus anciennes seront supprimées. |
-| `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global   | non      | **Emplacement des sauvegardes :** Répertoire dans lequel les fichiers de sauvegarde seront stockés.                             |
+| Paramètre          | Défaut                       | Contexte | Multiple | Description                                                                                                                        |
+| ------------------ | ---------------------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BACKUP`       | `yes`                        | global   | non      | **Activer Backup :** Mettre à `yes` pour activer les sauvegardes automatiques.                                                     |
+| `BACKUP_SCHEDULE`  | `daily`                      | global   | non      | **Fréquence de sauvegarde :** Fréquence d'exécution des sauvegardes. Options : `daily`, `weekly` ou `monthly`.                     |
+| `BACKUP_ROTATION`  | `7`                          | global   | non      | **Rétention des sauvegardes :** Nombre de fichiers de sauvegarde à conserver. Les sauvegardes plus anciennes seront supprimées.    |
+| `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global   | non      | **Emplacement des sauvegardes :** Répertoire dans lequel les fichiers de sauvegarde seront stockés.                                |
 
 ### Interface en ligne de commande
 
@@ -861,7 +861,7 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     Avant toute opération de restauration, le plugin Backup crée automatiquement une sauvegarde de l'état actuel de votre base de données dans un emplacement temporaire. Cela fournit une protection supplémentaire si vous devez annuler la restauration.
 
 !!! warning "Compatibilité des bases de données"
-    Le plugin Backup prend en charge les bases SQLite, MySQL/MariaDB et PostgreSQL. Les bases Oracle ne sont pas prises en charge actuellement pour les opérations de sauvegarde et de restauration.
+    Le plugin Backup prend en charge les bases SQLite, MySQL/MariaDB et PostgreSQL. Les bases Oracle ne sont pas prises en charge actuellement pour les opérations de sauvegarde et de restauration. Une restauration refuse une sauvegarde issue d'un autre moteur de base de données (MariaDB et MySQL comptent comme deux moteurs différents) avant de modifier quoi que ce soit.
 
 ### Exemples de configuration
 
@@ -2612,6 +2612,12 @@ Comment ça marche :
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
 
+### Conserver les corps d'erreur des API en amont
+
+Par défaut, BunkerWeb remplace les réponses 400 du service en amont par sa propre page d'erreur, ce qui peut casser les clients d'API JSON ou OIDC. Pour laisser passer les erreurs du service en amont pour un seul service, retirez le code de la liste de ce service, par exemple `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504` (gardez les codes que vous souhaitez toujours intercepter), ou définissez `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no` pour laisser passer toutes les erreurs du service en amont. Les erreurs générées par BunkerWeb lui-même (par exemple un refus du WAF) restent gérées par BunkerWeb.
+
+Pour conserver les erreurs du service en amont sur un seul emplacement, ajoutez un fichier contenant `proxy_intercept_errors off;` et listez-le dans le paramètre `REVERSE_PROXY_INCLUDES` de cet emplacement (par exemple `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`, avec le même suffixe numérique que le `REVERSE_PROXY_HOST` de l'emplacement). Le fichier doit exister dans les conteneurs BunkerWeb. Les autres emplacements du service continuent d'intercepter les erreurs.
+
 ## Greylist
 
 Prise en charge STREAM :warning:
@@ -2649,16 +2655,16 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 
 **Général**
 
-| Paramètre      | Défaut | Contexte  | Multiple | Description                                                     |
-| -------------- | ------ | --------- | -------- | --------------------------------------------------------------- |
+| Paramètre      | Défaut | Contexte  | Multiple | Description                                                   |
+| -------------- | ------ | --------- | -------- | ------------------------------------------------------------- |
 | `USE_GREYLIST` | `no`   | multisite | non      | **Activer Greylist :** Mettre à `yes` pour activer la greylist. |
 
 === "Adresse IP"
     **Ce que cela fait :** Place les visiteurs en greylist selon leur adresse IP ou leur réseau. Ces visiteurs obtiennent l'accès, mais restent soumis aux contrôles de sécurité.
 
-    | Paramètre          | Défaut | Contexte  | Multiple | Description                                                                                                                   |
-    | ------------------ | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_IP`      |        | multisite | non      | **Greylist IP :** Liste d'adresses IP ou de réseaux (notation CIDR) à placer en greylist, séparés par des espaces.            |
+    | Paramètre          | Défaut | Contexte  | Multiple | Description                                                                                      |
+    | ------------------ | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------ |
+    | `GREYLIST_IP`      |        | multisite | non      | **Greylist IP :** Liste d'adresses IP ou de réseaux (notation CIDR) à placer en greylist, séparés par des espaces. |
     | `GREYLIST_IP_URLS` |        | multisite | non      | **URL de greylist IP :** Liste d'URL contenant des adresses IP ou des réseaux à placer en greylist, séparées par des espaces. |
 
     !!! info "Formats des listes"
@@ -2667,11 +2673,11 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 === "DNS inverse"
     **Ce que cela fait :** Place les visiteurs en greylist selon leur nom de domaine inversé. Utile pour autoriser conditionnellement l'accès aux visiteurs de certaines organisations ou de certains réseaux.
 
-    | Paramètre              | Défaut | Contexte  | Multiple | Description                                                                                                                         |
-    | ---------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_RDNS`        |        | multisite | non      | **Greylist rDNS :** Liste de suffixes DNS inversés à placer en greylist, séparés par des espaces.                                   |
+    | Paramètre              | Défaut | Contexte  | Multiple | Description                                                                                      |
+    | ---------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------ |
+    | `GREYLIST_RDNS`        |        | multisite | non      | **Greylist rDNS :** Liste de suffixes DNS inversés à placer en greylist, séparés par des espaces. |
     | `GREYLIST_RDNS_GLOBAL` | `yes`  | multisite | non      | **rDNS global seulement :** Effectue les contrôles de greylist rDNS uniquement sur les adresses IP globales lorsque défini à `yes`. |
-    | `GREYLIST_RDNS_URLS`   |        | multisite | non      | **URL de greylist rDNS :** Liste d'URL contenant des suffixes DNS inversés à placer en greylist, séparées par des espaces.          |
+    | `GREYLIST_RDNS_URLS`   |        | multisite | non      | **URL de greylist rDNS :** Liste d'URL contenant des suffixes DNS inversés à placer en greylist, séparées par des espaces. |
 
     !!! info "DNS inverse confirmé par résolution directe (FCrDNS)"
         Les suffixes `GREYLIST_RDNS` sont confirmés par résolution directe : le nom d'hôte PTR correspondant est résolu à nouveau vers une IP et l'accès accordé par la greylist ne s'applique que lorsque cette IP correspond à l'IP du client. Un enregistrement PTR qui ne peut pas être confirmé par résolution directe est considéré comme une possible usurpation et l'accès n'est pas accordé. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe en greylist afin d'obtenir l'accès.
@@ -2679,25 +2685,25 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 === "ASN"
     **Ce que cela fait :** Place les visiteurs de fournisseurs réseau précis en greylist à l'aide des numéros de système autonome. Les ASN identifient le fournisseur ou l'organisation auquel appartient une IP.
 
-    | Paramètre           | Défaut | Contexte  | Multiple | Description                                                                                             |
-    | ------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_ASN`      |        | multisite | non      | **Greylist ASN :** Liste de numéros de système autonome à placer en greylist, séparés par des espaces.  |
+    | Paramètre           | Défaut | Contexte  | Multiple | Description                                                                               |
+    | ------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------- |
+    | `GREYLIST_ASN`      |        | multisite | non      | **Greylist ASN :** Liste de numéros de système autonome à placer en greylist, séparés par des espaces. |
     | `GREYLIST_ASN_URLS` |        | multisite | non      | **URL de greylist ASN :** Liste d'URL contenant des ASN à placer en greylist, séparées par des espaces. |
 
 === "User Agent"
     **Ce que cela fait :** Place les visiteurs en greylist selon le navigateur ou l'outil qu'ils déclarent utiliser. Cela permet un accès contrôlé pour des outils précis tout en conservant les contrôles de sécurité.
 
-    | Paramètre                  | Défaut | Contexte  | Multiple | Description                                                                                                      |
-    | -------------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+    | Paramètre                  | Défaut | Contexte  | Multiple | Description                                                                                       |
+    | -------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------- |
     | `GREYLIST_USER_AGENT`      |        | multisite | non      | **Greylist User-Agent :** Liste de motifs User-Agent (regex PCRE) à placer en greylist, séparés par des espaces. |
-    | `GREYLIST_USER_AGENT_URLS` |        | multisite | non      | **URL de greylist User-Agent :** Liste d'URL contenant des motifs User-Agent à placer en greylist.               |
+    | `GREYLIST_USER_AGENT_URLS` |        | multisite | non      | **URL de greylist User-Agent :** Liste d'URL contenant des motifs User-Agent à placer en greylist. |
 
 === "URI"
     **Ce que cela fait :** Place en greylist les requêtes vers des URL précises de votre site. Cela permet un accès conditionnel à certains endpoints tout en conservant les contrôles de sécurité.
 
-    | Paramètre           | Défaut | Contexte  | Multiple | Description                                                                                                      |
-    | ------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_URI`      |        | multisite | non      | **Greylist URI :** Liste de motifs d'URI (regex PCRE) à placer en greylist, séparés par des espaces.             |
+    | Paramètre           | Défaut | Contexte  | Multiple | Description                                                                           |
+    | ------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------- |
+    | `GREYLIST_URI`      |        | multisite | non      | **Greylist URI :** Liste de motifs d'URI (regex PCRE) à placer en greylist, séparés par des espaces. |
     | `GREYLIST_URI_URLS` |        | multisite | non      | **URL de greylist URI :** Liste d'URL contenant des motifs d'URI à placer en greylist, séparées par des espaces. |
 
     !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
@@ -2767,13 +2773,22 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 
 === "Accès API sélectif"
 
-    Configuration autorisant l'accès à des endpoints d'API précis :
+    Configuration qui laisse un réseau partenaire accéder à tout et tous les clients accéder à un seul endpoint public :
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # Réseau partenaire externe
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Les critères de la Greylist sont des alternatives : une requête passe la Greylist dès qu'un seul d'entre eux correspond. Ici, le réseau listé peut accéder à tous les chemins, et n'importe quel client peut accéder au chemin exact `/api/foo`. Les autres clients sont refusés sur les autres chemins. Les autres contrôles de sécurité activés s'appliquent toujours à chaque requête. Utilisez `^/api/foo(/|$)` pour une arborescence publique. La correspondance porte sur le chemin normalisé, sans la chaîne de requête. Il est impossible d'exprimer des listes d'IP différentes selon les chemins, ni d'exiger qu'une IP et un chemin correspondent en même temps.
+
+    | Client | Chemin | Résultat |
+    | --- | --- | --- |
+    | Dans `203.0.113.0/24` | `/api/foo` | Autorisé |
+    | Dans `203.0.113.0/24` | tout autre chemin | Autorisé |
+    | Hors de `203.0.113.0/24` | `/api/foo` | Autorisé |
+    | Hors de `203.0.113.0/24` | tout autre chemin | Refusé |
 
 ### Travailler avec des fichiers de listes locaux
 
@@ -3645,6 +3660,8 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
     | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
     | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
 
+Lorsque `SECURITY_MODE` est `detect`, les limites de connexions sont évaluées et journalisées (`limiting connections, dry run`) mais pas appliquées.
+
 !!! info "Limitation de connexions vs de requêtes"
     - La **limitation de connexions** restreint le nombre de connexions simultanées qu'une seule adresse IP peut maintenir.
     - La **limitation de débit de requêtes** restreint le nombre de requêtes qu'une adresse IP peut effectuer dans une période de temps définie.
@@ -3779,6 +3796,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`            | global   | oui      | Type of healthcheck (http or https).                                                                   |
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`             | global   | oui      | Verify SSL certificate in healthchecks.                                                                |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |                   | global   | oui      | Host header for healthchecks (useful for HTTPS).                                                       |
+| `LOADBALANCER_HEALTHCHECK_PORT`           |                   | global   | oui      | TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a \|- block scalar. |
 
 ## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5314,7 +5332,7 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 | ------------------------------ | ------------------ | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_REPORTING_SMTP`           | `no`               | global   | non      | Enable sending the report via email.                                                                                                                                                   |
 | `USE_REPORTING_WEBHOOK`        | `no`               | global   | non      | Enable sending the report via webhook.                                                                                                                                                 |
-| `REPORTING_SCHEDULE`           | `weekly`           | global   | non      | The frequency at which reports are sent.                                                                                                                                               |
+| `REPORTING_SCHEDULE`           | `weekly`           | global   | non      | The frequency at which reports are sent: daily, weekly or monthly (every four weeks).                                                                                                  |
 | `REPORTING_TOP_N`              | `3`                | global   | non      | Number of entries shown in 'Top' tables (IPs, AS, reasons, countries, URIs and offenders). Range: 1-50. Values are clamped at runtime; the upstream metric caps at rank 50 per server. |
 | `REPORTING_WEBHOOK_URLS`       |                    | global   | non      | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                                                                          |
 | `REPORTING_SMTP_EMAILS`        |                    | global   | non      | List of email addresses to receive the report in HTML format (separated by spaces).                                                                                                    |
@@ -5323,7 +5341,7 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 | `REPORTING_SMTP_FROM_EMAIL`    |                    | global   | non      | The email address used as the sender. Note that 2FA must be disabled for this email address.                                                                                           |
 | `REPORTING_SMTP_FROM_USER`     |                    | global   | non      | The user authentication value for sending via the from email address.                                                                                                                  |
 | `REPORTING_SMTP_FROM_PASSWORD` |                    | global   | non      | The password authentication value for sending via the from email address.                                                                                                              |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global   | non      | Determine whether or not to use a secure connection for SMTP.                                                                                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global   | non      | SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.      |
 | `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global   | non      | The subject line of the email.                                                                                                                                                         |
 
 ## Reverse proxy
@@ -5364,17 +5382,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
         - **Gestion des protocoles :** Prise en charge de HTTP, HTTPS, WebSockets, et d'autres protocoles
         - **Interception des erreurs :** Personnalisez les pages d'erreur pour une expérience utilisateur cohérente
 
-    | Paramètre                         | Défaut | Contexte  | Multiple | Description                                                                                                                                                                                                                                                                                                                                                                                                       |
-    | --------------------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`   | multisite | no       | **Activer le Reverse Proxy :** Mettre à `yes` pour activer la fonctionnalité de reverse proxy.                                                                                                                                                                                                                                                                                                                    |
-    | `REVERSE_PROXY_HOST`              |        | multisite | yes      | **Hôte Backend :** URL complète de la ressource proxifiée (proxy_pass).                                                                                                                                                                                                                                                                                                                                           |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | yes      | **URL d'emplacement :** Chemin qui sera proxifié vers le serveur backend. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière. Préfixez éventuellement par `~`, `~*`, `=` ou `^~` suivi d'un espace pour définir explicitement le modificateur d'emplacement nginx ; aucun espace, `;`, `{` ou `}` n'est autorisé ailleurs dans la valeur. |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | yes      | **Mise en tampon de la réponse :** Active ou désactive la mise en tampon des réponses de la ressource proxifiée.                                                                                                                                                                                                                                                                                                  |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | yes      | **Mise en tampon des requêtes :** Active ou désactive la mise en tampon des requêtes vers la ressource proxifiée.                                                                                                                                                                                                                                                                                                 |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | yes      | **Keep-Alive :** Active ou désactive les connexions keepalive avec la ressource proxifiée.                                                                                                                                                                                                                                                                                                                        |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | yes      | **Version HTTP :** Version du protocole HTTP utilisée pour communiquer avec l'amont (`1.0`, `1.1` ou `2`). Définissez à `2` pour activer le multiplexage HTTP/2 sur le lien amont. Les emplacements WebSocket sont fixés à 1.1 quoi qu'il arrive.                                                                                                                                                                 |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | no       | **Hôte personnalisé :** Remplace l'en-tête Host envoyé au serveur en amont.                                                                                                                                                                                                                                                                                                                                       |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | no       | **Intercepter les erreurs :** Intercepte et réécrit les réponses d'erreur du backend.                                                                                                                                                                                                                                                                                                                             |
+    | Paramètre                         | Défaut | Contexte  | Multiple | Description                                                                                                                                                                                                                                       |
+    | --------------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`   | multisite | no       | **Activer le Reverse Proxy :** Mettre à `yes` pour activer la fonctionnalité de reverse proxy.                                                                                                                                                    |
+    | `REVERSE_PROXY_HOST`              |        | multisite | yes      | **Hôte Backend :** URL complète de la ressource proxifiée (proxy_pass).                                                                                                                                                                           |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | yes      | **URL d'emplacement :** Chemin qui sera proxifié vers le serveur backend. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière. Préfixez éventuellement par `~`, `~*`, `=` ou `^~` suivi d'un espace pour définir explicitement le modificateur d'emplacement nginx ; aucun espace, `;`, `{` ou `}` n'est autorisé ailleurs dans la valeur.                                             |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | yes      | **Mise en tampon de la réponse :** Active ou désactive la mise en tampon des réponses de la ressource proxifiée.                                                                                                                                  |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | yes      | **Mise en tampon des requêtes :** Active ou désactive la mise en tampon des requêtes vers la ressource proxifiée.                                                                                                                                 |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | yes      | **Keep-Alive :** Active ou désactive les connexions keepalive avec la ressource proxifiée.                                                                                                                                                        |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | yes      | **Version HTTP :** Version du protocole HTTP utilisée pour communiquer avec l'amont (`1.0`, `1.1` ou `2`). Définissez à `2` pour activer le multiplexage HTTP/2 sur le lien amont. Les emplacements WebSocket sont fixés à 1.1 quoi qu'il arrive. |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | no       | **Hôte personnalisé :** Remplace l'en-tête Host envoyé au serveur en amont.                                                                                                                                                                       |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | no       | **Intercepter les erreurs :** Intercepte et réécrit les réponses d'erreur du backend. Voir [Conserver les corps d'erreur des API en amont](#errors). |
 
     BunkerWeb met le chemin ou l’expression régulière entre guillemets lors de la génération de l’emplacement NGINX, en préservant les guillemets littéraux, `#` et les barres obliques inverses des expressions régulières. Saisissez la valeur sans ajouter vous-même de guillemets NGINX. Les restrictions existantes sur les espaces, `;`, `{` et `}` restent applicables.
 

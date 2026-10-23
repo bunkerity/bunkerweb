@@ -879,7 +879,7 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
     Antes de cualquier operación de restauración, el complemento de copia de seguridad crea automáticamente una copia de seguridad del estado actual de su base de datos en una ubicación temporal. Esto proporciona una protección adicional en caso de que necesite revertir la operación de restauración.
 
 !!! warning "Compatibilidad de la base de datos"
-    El complemento de copia de seguridad es compatible con las bases de datos SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos de Oracle no son compatibles actualmente para las operaciones de copia de seguridad y restauración.
+    El complemento de copia de seguridad es compatible con las bases de datos SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos de Oracle no son compatibles actualmente para las operaciones de copia de seguridad y restauración. La restauración rechaza una copia de seguridad procedente de otro motor de base de datos (MariaDB y MySQL cuentan como motores distintos) antes de modificar nada.
 
 ### Configuraciones de ejemplo
 
@@ -2693,6 +2693,12 @@ Siga estos pasos para configurar y usar la función de Errores:
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
 
+### Conservar los cuerpos de error de las API de origen
+
+Por defecto, BunkerWeb sustituye las respuestas 400 del servidor de origen por su propia página de error, lo que puede romper los clientes de API JSON u OIDC. Para dejar pasar los errores del origen en un servicio, quite el código de la lista de ese servicio, por ejemplo `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504` (conserve los códigos que aún quiera interceptar), o defina `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no` para dejar pasar todos los errores del origen. Los errores generados por el propio BunkerWeb (por ejemplo, una denegación del WAF) siguen siendo gestionados por BunkerWeb.
+
+Para conservar los errores del origen solo en una ubicación, añada un archivo que contenga `proxy_intercept_errors off;` y enumérelo en el ajuste `REVERSE_PROXY_INCLUDES` de esa ubicación (por ejemplo `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`, con el mismo sufijo numérico que el `REVERSE_PROXY_HOST` de la ubicación). El archivo debe existir dentro de los contenedores de BunkerWeb. Las demás ubicaciones del servicio siguen interceptando los errores.
+
 ## Greylist
 
 Compatibilidad con STREAM :warning:
@@ -2847,13 +2853,22 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
 
 === "Acceso Selectivo a la API"
 
-    Una configuración que permite el acceso a puntos finales específicos de la API:
+    Una configuración que permite a una red asociada acceder a todo y a cualquier cliente acceder a un endpoint público:
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # Red del socio externo
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Los criterios de la Greylist son alternativas: una solicitud pasa la Greylist cuando cualquiera de ellos coincide. Aquí la red indicada puede acceder a todas las rutas y cualquier cliente puede acceder a la ruta exacta `/api/foo`. Los demás clientes son denegados en las demás rutas. Las demás comprobaciones de seguridad activadas se siguen aplicando a cada solicitud. Use `^/api/foo(/|$)` para un subárbol público. La coincidencia usa la ruta normalizada, sin la cadena de consulta. No se pueden expresar listas de IP distintas para rutas distintas, ni exigir que coincidan a la vez una IP y una ruta.
+
+    | Cliente | Ruta | Resultado |
+    | --- | --- | --- |
+    | En `203.0.113.0/24` | `/api/foo` | Pasa |
+    | En `203.0.113.0/24` | cualquier otra ruta | Pasa |
+    | Fuera de `203.0.113.0/24` | `/api/foo` | Pasa |
+    | Fuera de `203.0.113.0/24` | cualquier otra ruta | Denegado |
 
 ### Trabajar con archivos de listas locales
 
@@ -3745,6 +3760,8 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP.                                   |
     | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP.                       |
 
+Cuando `SECURITY_MODE` es `detect`, los límites de conexiones se evalúan y se registran (`limiting connections, dry run`) pero no se aplican.
+
 !!! info "Limitación de Conexiones vs. Solicitudes"
     - **La limitación de conexiones** restringe el número de conexiones simultáneas que una sola dirección IP puede mantener.
     - **La limitación de tasa de solicitudes** restringe el número de solicitudes que una dirección IP puede hacer dentro de un período de tiempo definido.
@@ -3879,6 +3896,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`               | global   | sí       | Type of healthcheck (http or https).                                                                   |
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`                | global   | sí       | Verify SSL certificate in healthchecks.                                                                |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |                      | global   | sí       | Host header for healthchecks (useful for HTTPS).                                                       |
+| `LOADBALANCER_HEALTHCHECK_PORT`           |                      | global   | sí       | TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a \|- block scalar. |
 
 ## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5455,7 +5473,7 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 | ------------------------------ | -------------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_REPORTING_SMTP`           | `no`                 | global   | no       | Enable sending the report via email.                                                                                                                                                   |
 | `USE_REPORTING_WEBHOOK`        | `no`                 | global   | no       | Enable sending the report via webhook.                                                                                                                                                 |
-| `REPORTING_SCHEDULE`           | `weekly`             | global   | no       | The frequency at which reports are sent.                                                                                                                                               |
+| `REPORTING_SCHEDULE`           | `weekly`             | global   | no       | The frequency at which reports are sent: daily, weekly or monthly (every four weeks).                                                                                                  |
 | `REPORTING_TOP_N`              | `3`                  | global   | no       | Number of entries shown in 'Top' tables (IPs, AS, reasons, countries, URIs and offenders). Range: 1-50. Values are clamped at runtime; the upstream metric caps at rank 50 per server. |
 | `REPORTING_WEBHOOK_URLS`       |                      | global   | no       | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                                                                          |
 | `REPORTING_SMTP_EMAILS`        |                      | global   | no       | List of email addresses to receive the report in HTML format (separated by spaces).                                                                                                    |
@@ -5464,7 +5482,7 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 | `REPORTING_SMTP_FROM_EMAIL`    |                      | global   | no       | The email address used as the sender. Note that 2FA must be disabled for this email address.                                                                                           |
 | `REPORTING_SMTP_FROM_USER`     |                      | global   | no       | The user authentication value for sending via the from email address.                                                                                                                  |
 | `REPORTING_SMTP_FROM_PASSWORD` |                      | global   | no       | The password authentication value for sending via the from email address.                                                                                                              |
-| `REPORTING_SMTP_SSL`           | `SSL`                | global   | no       | Determine whether or not to use a secure connection for SMTP.                                                                                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`                | global   | no       | SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.      |
 | `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report`   | global   | no       | The subject line of the email.                                                                                                                                                         |
 
 ## Reverse proxy
@@ -5505,17 +5523,17 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         - **Manejo de Protocolos:** Soporte para HTTP, HTTPS, WebSockets y otros protocolos
         - **Interceptación de Errores:** Personalice las páginas de error para una experiencia de usuario consistente
 
-| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                                |
-| --------------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                                                                                                                                                         |
-| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                                                                                                                                           |
-| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, antepón `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor. |
-| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                                                                                                                                            |
-| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                                                                                                                                                          |
-| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                                                                                                                                                       |
-| `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Establezca a `2` para multiplexación HTTP/2 en la conexión upstream. Las ubicaciones WebSocket están fijadas a 1.1 independientemente.                                                                                                                            |
-| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                                                                                                                                                                                                                             |
-| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                                                                                                                                                                                                                                         |
+| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                     |
+| --------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                              |
+| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                |
+| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, antepón `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor.                                                                              |
+| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                 |
+| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                               |
+| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                            |
+| `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Establezca a `2` para multiplexación HTTP/2 en la conexión upstream. Las ubicaciones WebSocket están fijadas a 1.1 independientemente. |
+| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                                                                                                  |
+| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend. Consulte [Conservar los cuerpos de error de las API de origen](#errors). |
 
     BunkerWeb entrecomilla la ruta o expresión regular al generar la ubicación de NGINX, conservando las comillas literales, `#` y las barras invertidas de la expresión regular. Introduzca el valor sin añadir comillas de NGINX. Se mantienen las restricciones sobre espacios en blanco, `;`, `{` y `}`.
 

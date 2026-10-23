@@ -89,7 +89,7 @@ from app.routes.instances import instances
 from app.routes.jobs import jobs
 from app.routes.login import login
 from app.routes.logout import logout, logout_page
-from app.routes.logs import logs
+from app.routes.logs import _list_log_files, logs
 from app.routes.plugins import plugins
 from app.routes.pro import pro
 from app.routes.profile import profile
@@ -1390,10 +1390,16 @@ def before_request():
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
             if not changes_ongoing and metadata["failover"]:
+                # Preselect error.log only when the Logs page lists it, otherwise the link would 404
+                logs_args = {}
+                with suppress(OSError):
+                    if "error.log" in _list_log_files()["main"]:
+                        logs_args["file"] = "error.log"
+                logs_url = url_for("logs.logs_page", **logs_args)
                 flash(
                     Markup(
-                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>"
-                    ),
+                        "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check <a href='{}' class='text-reset text-decoration-underline'>BunkerWeb's logs</a> for more information. The configuration fell back to the last working one.</p>"
+                    ).format(logs_url),
                     "error",
                     save=False,
                 )

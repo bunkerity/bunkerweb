@@ -885,7 +885,7 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     在任何恢复操作之前，备份插件会自动在临时位置创建您当前数据库状态的备份。如果您需要还原恢复操作，这提供了一个额外的保障。
 
 !!! warning "数据库兼容性"
-    备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。
+    备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。恢复操作会在修改任何内容之前拒绝来自其他数据库引擎的备份（MariaDB 和 MySQL 视为不同的引擎）。
 
 ### 示例配置
 
@@ -2703,6 +2703,12 @@ STREAM 支持 :x:
     INTERCEPTED_ERROR_CODES: "404 500"
     ```
 
+### 保留上游 API 的错误响应体
+
+默认情况下，BunkerWeb 会用自己的错误页面替换上游返回的 400 响应，这可能会破坏 JSON API 或 OIDC 客户端。要为某个服务放行上游错误，可以从该服务的列表中移除相应状态码，例如 `app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504`（保留您仍希望拦截的状态码），或者设置 `app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no` 以放行所有上游错误。由 BunkerWeb 自身生成的错误（例如 WAF 拒绝）仍由 BunkerWeb 处理。
+
+若只想在某个 location 中保留上游错误，请创建一个内容为 `proxy_intercept_errors off;` 的文件，并将其列入该 location 的 `REVERSE_PROXY_INCLUDES` 设置中（例如 `app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf`，数字后缀与该 location 的 `REVERSE_PROXY_HOST` 相同）。该文件必须存在于 BunkerWeb 容器内。该服务的其他 location 仍会拦截错误。
+
 ## Greylist
 
 STREAM 支持 :warning:
@@ -2797,10 +2803,10 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
 === "请求头"
     **功能说明：** 将携带指定请求头的请求列入灰名单，按名称匹配，并可选地用 PCRE 正则匹配其值。
 
-    | 设置                    | 默认值 | 上下文    | 多选 | 描述                                                                                    |
-    | ----------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------- |
-    | `GREYLIST_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求加入灰名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
-    | `GREYLIST_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。       |
+    | 设置                      | 默认值 | 上下文       | 多选  | 描述                                                        |
+    | ----------------------- | --- | --------- | --- | --------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求加入灰名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `GREYLIST_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
 
     !!! warning "请求头规则是共享密钥"
         任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
@@ -2857,13 +2863,22 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
 
 === "选择性 API 访问"
 
-    允许访问特定 API 端点的配置：
+    一种让合作伙伴网络访问所有路径、并让所有客户端访问某个公开端点的配置：
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # 外部合作伙伴网络
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Greylist 的各项条件是“或”的关系：只要其中任意一项匹配，请求即通过 Greylist。此处，所列网络可以访问所有路径，任何客户端都可以访问精确路径 `/api/foo`。其他客户端在其他路径上会被拒绝。其他已启用的安全检查仍然适用于每个请求。如需公开某个子路径树，请使用 `^/api/foo(/|$)`。匹配使用规范化后的路径，不包含查询字符串。该配置无法为不同路径设置不同的 IP 列表，也无法要求 IP 和路径同时匹配。
+
+    | 客户端 | 路径 | 结果 |
+    | --- | --- | --- |
+    | 在 `203.0.113.0/24` 内 | `/api/foo` | 通过 |
+    | 在 `203.0.113.0/24` 内 | 任何其他路径 | 通过 |
+    | 在 `203.0.113.0/24` 外 | `/api/foo` | 通过 |
+    | 在 `203.0.113.0/24` 外 | 任何其他路径 | 拒绝 |
 
 ### 使用本地列表文件
 
@@ -3755,6 +3770,8 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
     | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。         |
     | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。                |
 
+当 `SECURITY_MODE` 为 `detect` 时，连接限制会被评估并记录（`limiting connections, dry run`），但不会被强制执行。
+
 !!! info "连接限制与请求限制"
     - **连接限制** 限制单个 IP 地址可以维持的并发连接数。
     - **请求速率限制** 限制一个 IP 地址在定义的时间段内可以发出的请求数。
@@ -3889,6 +3906,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`        | global | 是     | Type of healthcheck (http or https).                                                                   |
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global | 是     | Verify SSL certificate in healthchecks.                                                                |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |               | global | 是     | Host header for healthchecks (useful for HTTPS).                                                       |
+| `LOADBALANCER_HEALTHCHECK_PORT`           |               | global | 是     | TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a \|- block scalar. |
 
 ## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5463,7 +5481,7 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 | ------------------------------ | ------------------ | ------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_REPORTING_SMTP`           | `no`               | global | 否     | Enable sending the report via email.                                                                                                                                                   |
 | `USE_REPORTING_WEBHOOK`        | `no`               | global | 否     | Enable sending the report via webhook.                                                                                                                                                 |
-| `REPORTING_SCHEDULE`           | `weekly`           | global | 否     | The frequency at which reports are sent.                                                                                                                                               |
+| `REPORTING_SCHEDULE`           | `weekly`           | global | 否     | The frequency at which reports are sent: daily, weekly or monthly (every four weeks).                                                                                                  |
 | `REPORTING_TOP_N`              | `3`                | global | 否     | Number of entries shown in 'Top' tables (IPs, AS, reasons, countries, URIs and offenders). Range: 1-50. Values are clamped at runtime; the upstream metric caps at rank 50 per server. |
 | `REPORTING_WEBHOOK_URLS`       |                    | global | 否     | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                                                                          |
 | `REPORTING_SMTP_EMAILS`        |                    | global | 否     | List of email addresses to receive the report in HTML format (separated by spaces).                                                                                                    |
@@ -5472,7 +5490,7 @@ Regular reporting of important data from BunkerWeb (global, attacks, bans, reque
 | `REPORTING_SMTP_FROM_EMAIL`    |                    | global | 否     | The email address used as the sender. Note that 2FA must be disabled for this email address.                                                                                           |
 | `REPORTING_SMTP_FROM_USER`     |                    | global | 否     | The user authentication value for sending via the from email address.                                                                                                                  |
 | `REPORTING_SMTP_FROM_PASSWORD` |                    | global | 否     | The password authentication value for sending via the from email address.                                                                                                              |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global | 否     | Determine whether or not to use a secure connection for SMTP.                                                                                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global | 否     | SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.      |
 | `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global | 否     | The subject line of the email.                                                                                                                                                         |
 
 ## Reverse proxy
@@ -5513,17 +5531,17 @@ STREAM 支持 :warning:
         - **协议处理：** 支持 HTTP、HTTPS、WebSockets 和其他协议
         - **错误拦截：** 自定义错误页面以获得一致的用户体验
 
-    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                                                                                                                        |
-    | --------------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                                                                                                                        |
-    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                                                                                                            |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。 |
-    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                                                                                                           |
-    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                                                                                                                       |
-    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                                                                                                             |
-    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。                                                                                          |
-    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                                                                                                         |
-    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。                                                                                                                                                                                           |
+    | 设置                              | 默认值 | 上下文    | 多选 | 描述                                                                                                                                               |
+    | --------------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                               |
+    | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                   |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。可选地在前面加上 `~`、`~*`、`=` 或 `^~` 并紧跟一个空格，以显式设置 nginx location 修饰符；值的其余部分不允许包含空格、`;`、`{` 或 `}`。                                                 |
+    | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                  |
+    | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                              |
+    | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
+    | `REVERSE_PROXY_HTTP_VERSION`      | `1.1`  | multisite | 是   | **HTTP 版本：** 用于与上游通信的 HTTP 协议版本（`1.0`、`1.1` 或 `2`）。设为 `2` 可在上游连接上启用 HTTP/2 多路复用。WebSocket 位置始终固定为 1.1。 |
+    | `REVERSE_PROXY_CUSTOM_HOST`       |        | multisite | 否   | **自定义主机：** 覆盖发送到上游服务器的 Host 标头。                                                                                                |
+    | `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`  | multisite | 否   | **拦截错误：** 是否拦截和重写来自后端的错误响应。 参见[保留上游 API 的错误响应体](#errors)。 |
 
     BunkerWeb 在生成 NGINX location 时会为路径或正则表达式加上引号，并保留其中的字面引号、`#` 和正则表达式反斜杠。输入设置值时不要自行添加 NGINX 引号。现有的空白字符、`;`、`{` 和 `}` 限制仍然适用。
 
@@ -5697,7 +5715,7 @@ STREAM 支持 :warning:
     | `REVERSE_PROXY_INCLUDES`          |        | multisite | 是   | **附加配置：** 在 location 块中包含额外的配置。                                                                                                       |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | 是   | **传递请求体：** 启用或禁用传递请求体。                                                                                                               |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | 是   | **ModSecurity（按 location）：** 设置为 `no` 可在此 location 中生成 `modsecurity off;`，从而在大文件上传端点上绕过 WAF 以避免 OOM（请参阅下方说明）。 |
-    | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |        | multisite | 是   | **最大请求体大小（按 location）：** 此 location 的最大请求体大小（`0` 表示不限制）。为空时使用服务的 `MAX_CLIENT_SIZE`。                              |
+    | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |        | multisite | 是   | **最大请求体大小（按 location）：** 此 location 的最大请求体大小（`0` 表示不限制）。为空时使用服务的 `MAX_CLIENT_SIZE`。                           |
 
     !!! warning "安全注意事项"
         包含自定义配置片段时请小心，因为如果配置不当，它们可能会覆盖 BunkerWeb 的安全设置或引入漏洞。

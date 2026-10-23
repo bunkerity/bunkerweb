@@ -1673,7 +1673,7 @@ services:
     Wenn ein Container von autoconf ignoriert werden soll, setzen Sie `DOCKER_IGNORE_LABELS` auf dem Controller. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Label-Schlüsseln an (zum Beispiel `bunkerweb.SERVER_NAME`) oder nur das Suffix (`SERVER_NAME`). Jeder Container oder jede benutzerdefinierte Konfigurationsquelle mit einem übereinstimmenden Label wird bei der Erkennung übersprungen, und das Label wird bei der Übersetzung der Einstellungen ignoriert.
 
 !!! info "KEEP_CONFIG_ON_RESTART"
-    Anders als die obigen Einstellungen wird `KEEP_CONFIG_ON_RESTART` direkt vom Entrypoint des `bunkerweb`-Containers aus dessen Prozessumgebung gelesen, nicht vom Scheduler oder der Datenbank, und muss daher am `bunkerweb`-Container selbst gesetzt werden. Auf `yes` setzen, um die zuvor generierte Konfiguration bei einem Container-Neustart beizubehalten, anstatt die Lade-Konfiguration zu rendern. Eine abgebrochene Installation der Konfiguration (Container beendet, Speichermangel) wird nie beibehalten: Der nächste Start rendert stattdessen die Lade-Konfiguration. Standard `no`.
+    Anders als die obigen Einstellungen wird `KEEP_CONFIG_ON_RESTART` direkt vom Entrypoint des `bunkerweb`-Containers aus dessen Prozessumgebung gelesen, nicht vom Scheduler oder der Datenbank, und muss daher am `bunkerweb`-Container selbst gesetzt werden. Auf `yes` setzen, um die zuvor generierte Konfiguration bei einem Container-Neustart beizubehalten, anstatt die Lade-Konfiguration zu rendern. Startet die beibehaltene Konfiguration nicht, greift die Instanz auf die Lade-Konfiguration zurück, bis der Scheduler die neueste Konfiguration überträgt. Eine abgebrochene Installation der Konfiguration (Container beendet, Speichermangel) wird nie beibehalten: Der nächste Start rendert stattdessen die Lade-Konfiguration. Standard `no`.
 
 ### Verwendung von Docker-Secrets
 
@@ -2511,7 +2511,7 @@ Der Entrypoint des `bunkerweb`-Dienstes liest außerdem direkt die folgende Vari
 
 | Einstellung              | Beschreibung                                                                                                                                                                                                              | Zulässige Werte | Standard |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------- |
-| `KEEP_CONFIG_ON_RESTART` | Behält beim Neustart des `bunkerweb`-Dienstes die zuvor generierte Konfiguration anstatt die Lade-Konfiguration zu rendern. Wird aus der Umgebung oder `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank. | `yes` oder `no` | `no`     |
+| `KEEP_CONFIG_ON_RESTART` | Behält beim Neustart des `bunkerweb`-Dienstes die zuvor generierte Konfiguration anstatt die Lade-Konfiguration zu rendern. Startet die beibehaltene Konfiguration nicht, greift die Instanz auf die Lade-Konfiguration zurück, bis der Scheduler die neueste Konfiguration überträgt. Wird aus der Umgebung oder `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank. | `yes` oder `no` | `no`     |
 
 ### Hochverfügbarkeit
 
