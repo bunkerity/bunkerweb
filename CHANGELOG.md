@@ -11,6 +11,7 @@
 - [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
 - [BUGFIX] `badbehavior`: a ban's evidence is stored once and the requests rejected during it only reference it, so reports stay small; the Reports page loads the events on demand.
 - [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried by the scheduler, instead of being reported as applied.
+- [BUGFIX] `core`: an instance whose kept configuration (`KEEP_CONFIG_ON_RESTART=yes`) fails to start falls back to the loading page instead of exiting.
 - [BUGFIX] `crowdsec`: an nginx reload in stream mode no longer leaves an orphaned decision set that fills the cache and stops new bans from being enforced.
 - [BUGFIX] `crowdsec`: stream mode checkpoints decisions to disk, so known bans stay enforced through Local API outages, reloads and container restarts (see the plugin README).
 - [BUGFIX] `db`: upgrades on MariaDB or MySQL no longer crash when the `method` columns are `VARCHAR` instead of `ENUM`. (Fixes #4095)

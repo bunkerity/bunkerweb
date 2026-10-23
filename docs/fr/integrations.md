@@ -1682,7 +1682,7 @@ services:
     Lorsqu'un conteneur doit être ignoré par autoconf, définissez `DOCKER_IGNORE_LABELS` sur le contrôleur. Fournissez une liste de clés d'étiquettes séparées par des espaces ou des virgules (par exemple `bunkerweb.SERVER_NAME`) ou simplement le suffixe (`SERVER_NAME`). Tout conteneur ou source de configuration personnalisée portant une étiquette correspondante est ignoré lors de la découverte, et l'étiquette est ignorée lors de la traduction des paramètres.
 
 !!! info "KEEP_CONFIG_ON_RESTART"
-    Contrairement aux paramètres ci-dessus, `KEEP_CONFIG_ON_RESTART` est lu directement par le point d'entrée du conteneur `bunkerweb` lui-même depuis son environnement de processus, pas depuis le Scheduler ni la base de données, et doit donc être défini sur le conteneur `bunkerweb` lui-même. Mettre à `yes` pour conserver la configuration générée précédemment lors d'un redémarrage du conteneur au lieu de générer la configuration de chargement. Une installation de configuration interrompue (conteneur tué, manque de mémoire) n'est jamais conservée : le démarrage suivant génère à la place la configuration de chargement. Défaut `no`.
+    Contrairement aux paramètres ci-dessus, `KEEP_CONFIG_ON_RESTART` est lu directement par le point d'entrée du conteneur `bunkerweb` lui-même depuis son environnement de processus, pas depuis le Scheduler ni la base de données, et doit donc être défini sur le conteneur `bunkerweb` lui-même. Mettre à `yes` pour conserver la configuration générée précédemment lors d'un redémarrage du conteneur au lieu de générer la configuration de chargement. Si la configuration conservée ne démarre pas, l'instance bascule sur la configuration de chargement jusqu'à ce que le Scheduler envoie la plus récente. Une installation de configuration interrompue (conteneur tué, manque de mémoire) n'est jamais conservée : le démarrage suivant génère à la place la configuration de chargement. Défaut `no`.
 
 ### Utilisation des secrets Docker
 
@@ -2515,7 +2515,7 @@ Le point d'entrée du service `bunkerweb` lit également directement la variable
 
 | Paramètre                | Description                                                                                                                                                                                                                                   | Valeurs acceptées | Défaut |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ------ |
-| `KEEP_CONFIG_ON_RESTART` | Conserve la configuration générée précédemment lors d'un redémarrage du service `bunkerweb` au lieu de générer la configuration de chargement. Lu depuis l'environnement ou `/etc/bunkerweb/variables.env`, jamais depuis la base de données. | `yes` ou `no`     | `no`   |
+| `KEEP_CONFIG_ON_RESTART` | Conserve la configuration générée précédemment lors d'un redémarrage du service `bunkerweb` au lieu de générer la configuration de chargement. Si la configuration conservée ne démarre pas, l'instance bascule sur la configuration de chargement jusqu'à ce que le Scheduler envoie la plus récente. Lu depuis l'environnement ou `/etc/bunkerweb/variables.env`, jamais depuis la base de données. | `yes` ou `no`     | `no`   |
 
 ### Haute disponibilité
 
