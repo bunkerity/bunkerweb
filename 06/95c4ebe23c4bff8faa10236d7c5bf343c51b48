@@ -1,0 +1,59 @@
+src/common/core/backup/README.fr.md
+  s_912601094037fd::t_f62fcde62c37de 55
+src/common/core/backup/README.md
+  s_912601094037fd::t_f62fcde62c37de 55
+docs/de/features.md
+  s_912601094037fd::t_b291f9b9e69162 873
+src/common/core/backup/README.de.md
+  s_912601094037fd::t_f62fcde62c37de 55
+src/common/core/backup/README.es.md
+  s_912601094037fd::t_f62fcde62c37de 55
+src/common/core/backup/README.zh.md
+  s_912601094037fd::t_f62fcde62c37de 55
+docs/features.md
+  s_912601094037fd::t_b291f9b9e69162 886
+src/common/core/backup/backup.py
+  s_83e727c1b13a92::t_58a87ad8b110d7 17,270-274
+  s_912601094037fd::t_f62fcde62c37de 16,254-269,275-278,285-290
+  s_88db3076fc1d11::t_a89d2480cf6036 291
+docs/es/features.md
+  s_912601094037fd::t_b291f9b9e69162 882
+docs/fr/features.md
+  s_912601094037fd::t_b291f9b9e69162 832-837,864
+docs/zh/features.md
+  s_912601094037fd::t_b291f9b9e69162 888
+CHANGELOG.md
+  s_88db3076fc1d11::t_baf8f119f3187e 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0695c4ebe23c4bff8faa10236d7c5bf343c51b48",
+  "prompts": {},
+  "sessions": {
+    "s_83e727c1b13a92": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "736d3205-246d-425a-a06b-7de4782662c2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_88db3076fc1d11": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16935-a197-70e3-85af-cce05042f30e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_912601094037fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7e62caf3-2f07-4b32-a4c2-968e1f6e8579",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
