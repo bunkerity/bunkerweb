@@ -32,7 +32,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 === "Quickstart (wizard)"
 
-    Use the published images and the [quickstart guide](https://docs.bunkerweb.io/latest/quickstart-guide/#__tabbed_1_3) layout to bring the stack up, then finish the setup via the wizard in your browser.
+    Use the published images and the [quickstart guide](https://docs.bunkerweb.io/testing/quickstart-guide/#__tabbed_1_3) layout to bring the stack up, then finish the setup via the wizard in your browser.
 
 === "Advanced (preseeded env)"
 
@@ -179,7 +179,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
 - Admin account: create via setup wizard or `ADMIN_USERNAME` / `ADMIN_PASSWORD`. Passwords must include lowercase, uppercase, digit, and special chars. `OVERRIDE_ADMIN_CREDS=yes` forces reseeding even if an account exists.
 - Password length limit: bcrypt only uses the first **72 bytes** of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, `ADMIN_PASSWORD` / `API_PASSWORD`). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).
-- Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database. The open source UI authorizes on read and write only, so `admin` and `writer` hold the same capabilities and `reader` is the only restricted role. Finer separation, including restricting who may manage users and security settings, comes with the PRO `user_manager` plugin, documented under [advanced usages](https://docs.bunkerweb.io/latest/advanced/#user-manager-pro).
+- Roles: `admin`, `writer`, and `reader` are created automatically; accounts live in the database. The open source UI authorizes on read and write only, so `admin` and `writer` hold the same capabilities and `reader` is the only restricted role. Finer separation, including restricting who may manage users and security settings, comes with the PRO `user_manager` plugin, documented under [advanced usages](https://docs.bunkerweb.io/testing/advanced/#user-manager-pro).
 - Secrets: `FLASK_SECRET` is stored at `/var/lib/bunkerweb/.flask_secret`; Biscuit keys live next to it and can be provided via `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
 - 2FA: TOTP secrets are stored in the database, encrypted with keys kept in `/var/lib/bunkerweb/.totp_encryption_keys.json`. The UI generates them on first start, so nothing is required as long as that file is persisted. Set `TOTP_ENCRYPTION_KEYS` (space-separated keys or a JSON map) to supply your own; each key must then be exactly **43 characters**, anything else is discarded with an `Invalid TOTP secret for key` warning and replaced by a random key. Generate one with:
 
@@ -197,7 +197,7 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
 
     Restarting a container is harmless. What loses the keys is losing the container filesystem: `docker compose down` then `up`, a recreation after an image or environment change, `docker rm`, or a new pod. Mounting a persistent volume on `/data` in the `bw-ui` container is enough, and every example on this page does it: the keys are generated on first start and kept in `/data/lib`, which leaves `TOTP_ENCRYPTION_KEYS` optional.
 
-    Set the variable yourself only when that volume cannot be persisted, or to control rotation. If you do, mind the length: a placeholder like `changeme` is **not** a valid key — keys are 43 characters, as produced by `passlib`'s `generate_secret()`. An invalid value is discarded and replaced by a random key, and unlike an unset variable it also stops the admin enrollment from being reset, so 2FA stays unusable until it is [cleared manually](https://docs.bunkerweb.io/latest/troubleshooting/#web-ui). Rotating is possible with a JSON map: keep the old keys next to the new one and existing enrollments stay valid.
+    Set the variable yourself only when that volume cannot be persisted, or to control rotation. If you do, mind the length: a placeholder like `changeme` is **not** a valid key — keys are 43 characters, as produced by `passlib`'s `generate_secret()`. An invalid value is discarded and replaced by a random key, and unlike an unset variable it also stops the admin enrollment from being reset, so 2FA stays unusable until it is [cleared manually](https://docs.bunkerweb.io/testing/troubleshooting/#web-ui). Rotating is possible with a JSON map: keep the old keys next to the new one and existing enrollments stay valid.
 
 !!! tip "Pre-hashed admin password"
     `ADMIN_PASSWORD` accepts a **bcrypt hash** (`$2a$`/`$2b$`/`$2y$`) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password), but a cost factor below `10` is **rejected**; `10`–`11` logs a warning (`12`+ recommended). Env create and `OVERRIDE_ADMIN_CREDS` only; the wizard and profile page still need plaintext.

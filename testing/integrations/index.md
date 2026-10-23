@@ -1409,7 +1409,7 @@ networks:
     name: bw-universe
 ```
 
-Details about authentication, permissions (ACL), rate limiting, TLS, and configuration options are available in the [API documentation](https://docs.bunkerweb.io/latest/api/).
+Details about authentication, permissions (ACL), rate limiting, TLS, and configuration options are available in the [API documentation](https://docs.bunkerweb.io/testing/api/).
 
 ### Accessing the Setup wizard
 
@@ -1418,18 +1418,18 @@ By default, the setup wizard is automagically launched when you run the AIO cont
 1. **Start the AIO container** as [above](#deployment), ensuring `SERVICE_UI=yes` (default).
 2. **Access the UI** via your main BunkerWeb endpoint, e.g. `https://your-domain`.
 
-> Follow the next steps in the [Quickstart guide](https://docs.bunkerweb.io/latest/quickstart-guide/#complete-the-setup-wizard) to set up the Web UI.
+> Follow the next steps in the [Quickstart guide](https://docs.bunkerweb.io/testing/quickstart-guide/#complete-the-setup-wizard) to set up the Web UI.
 
 ### Redis Integration {#redis-integration}
 
-The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](https://docs.bunkerweb.io/latest/advanced/#persistence-of-bans-and-reports). Keep in mind:
+The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](https://docs.bunkerweb.io/testing/advanced/#persistence-of-bans-and-reports). Keep in mind:
 
 - The embedded Redis service only starts when `USE_REDIS=yes` **and** `REDIS_HOST` is left at its default (`127.0.0.1`/`localhost`).
 - It listens on the container loopback interface, so it is available to processes inside the container but not from other containers or the host.
 - Override `REDIS_HOST` only when you have an external Redis/Valkey endpoint to connect to—doing so prevents the embedded instance from launching.
 - To disable Redis entirely, set `USE_REDIS=no`.
 - **Config precedence (important):** the embedded Redis is launched from `/var/lib/bunkerweb/redis-runtime.conf`, built at boot by copying `/etc/redis.conf` and appending env-driven defaults **only for directives the conf file is silent about**. A mounted custom `/etc/redis.conf` therefore always wins; the env vars below only fill the gaps.
-- **Memory tuning:** out-of-the-box defaults follow the [Redis Best Practices](https://docs.bunkerweb.io/latest/features/#redis-best-practices) — `maxmemory 256mb` and `maxmemory-policy volatile-lru`. Override via `REDIS_MAXMEMORY` and `REDIS_MAXMEMORY_POLICY` when the conf does not pin them.
+- **Memory tuning:** out-of-the-box defaults follow the [Redis Best Practices](https://docs.bunkerweb.io/testing/features/#redis-best-practices) — `maxmemory 256mb` and `maxmemory-policy volatile-lru`. Override via `REDIS_MAXMEMORY` and `REDIS_MAXMEMORY_POLICY` when the conf does not pin them.
 - **Persistence overrides:** `REDIS_APPENDONLY=yes|no` toggles AOF (default `yes`); RDB snapshots are configured with `REDIS_SAVE` plus optional `REDIS_SAVE_0`, `REDIS_SAVE_1`, … each providing one `save <seconds> <changes>` pair (e.g. `REDIS_SAVE_0="900 1"`, `REDIS_SAVE_1="300 10"`). Setting any of these env vars replaces the built-in `900 1 / 300 10 / 60 10000` default set; an empty value emits `save ""`, disabling RDB. Ignored when the conf already declares `save` itself.
 - **Authentication:** when `REDIS_PASSWORD` is set and the conf does not already define `requirepass`, the embedded Redis is launched with `requirepass` so the BunkerWeb client and server stay in sync. The embedded server only supports the default user — set `REDIS_USERNAME` only when pointing at an external Redis with ACLs.
 - Redis logs appear with the `[REDIS]` prefix in Docker logs and in `/var/log/bunkerweb/redis.log`.
@@ -1443,7 +1443,7 @@ Unlike the other Docker images, the All-In-One keeps `access.log`, `error.log` a
 - `copytruncate` empties the file in place instead of renaming it, so it keeps its inode. The log stream, the CrowdSec parser and the log viewer therefore follow it across a rotation without restarting, and ModSecurity keeps writing to the right file even though it never reopens its audit log.
 - To change the threshold or the number of generations, mount your own file over `/etc/logrotate.d/bunkerweb`. To disable rotation entirely and manage retention yourself, mount an empty file over that same path; mounting a volume at `/var/log/bunkerweb` only changes where the bytes live, it does not stop the container's own `logrotate` from still rotating them there.
 
-See [Log File Retention](https://docs.bunkerweb.io/latest/advanced/#log-file-retention) for how the other integrations handle this.
+See [Log File Retention](https://docs.bunkerweb.io/testing/advanced/#log-file-retention) for how the other integrations handle this.
 
 ### CrowdSec Integration {#crowdsec-integration}
 
@@ -1613,7 +1613,7 @@ docker run -d \
 ---
 
 !!! tip "More options"
-    For full coverage of all CrowdSec options (custom scenarios, logs, troubleshooting, and more), see the [BunkerWeb CrowdSec plugin docs](https://docs.bunkerweb.io/latest/features/#crowdsec) or visit the [official CrowdSec website](https://www.crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs).
+    For full coverage of all CrowdSec options (custom scenarios, logs, troubleshooting, and more), see the [BunkerWeb CrowdSec plugin docs](https://docs.bunkerweb.io/testing/features/#crowdsec) or visit the [official CrowdSec website](https://www.crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs).
 
 ## Docker
 
@@ -1643,7 +1643,7 @@ docker pull ghcr.io/bunkerity/bunkerweb:testing
 Key concepts for Docker integration include:
 
 - **Environment variables**: Configure BunkerWeb easily using environment variables. These variables allow you to customize various aspects of BunkerWeb's behaviour, such as network settings, security options, and other parameters.
-- **Scheduler container**: Manage configuration and execute jobs using a dedicated container called the [scheduler](https://docs.bunkerweb.io/latest/concepts/#scheduler).
+- **Scheduler container**: Manage configuration and execute jobs using a dedicated container called the [scheduler](https://docs.bunkerweb.io/testing/concepts/#scheduler).
 - **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage traffic, providing enhanced security and performance.
 
 !!! info "Database backend"
@@ -1667,7 +1667,7 @@ services:
 ```
 
 !!! info "Full list"
-    For the complete list of environment variables, see the [settings section](https://docs.bunkerweb.io/latest/features/) of the documentation.
+    For the complete list of environment variables, see the [settings section](https://docs.bunkerweb.io/testing/features/) of the documentation.
 
 !!! tip "Skipping labelled containers"
     When a container should be ignored by autoconf, set `DOCKER_IGNORE_LABELS` on the controller. Provide a space- or comma-separated list of label keys (for example `bunkerweb.SERVER_NAME`) or just the suffix (`SERVER_NAME`). Any container or custom-config source carrying a matching label is skipped during discovery, and the label is ignored when translating settings.
@@ -1701,7 +1701,7 @@ This ensures sensitive settings are kept out of the environment and logs.
 
 ### Scheduler
 
-The [scheduler](https://docs.bunkerweb.io/latest/concepts/#scheduler) runs in its own container, which is also available on Docker Hub:
+The [scheduler](https://docs.bunkerweb.io/testing/concepts/#scheduler) runs in its own container, which is also available on Docker Hub:
 
 ```shell
 docker pull bunkerity/bunkerweb-scheduler:testing
@@ -2038,6 +2038,20 @@ sudo ./install-bunkerweb.sh
     Download the checksum file and use a tool like `sha256sum` to confirm the script has not been altered or tampered with.
 
     If the checksum verification fails, **do not execute the script**—it may be unsafe.
+
+#### Behind a proxy
+
+Export `HTTP_PROXY` and `HTTPS_PROXY` (or `http_proxy` and `https_proxy`) before running the installer to route downloads, repository setup, signing-key fetches, and package-manager requests through your forward proxy. Optional `NO_PROXY` (or `no_proxy`) lists hosts that bypass it. Lowercase values take precedence when both forms are set. Preserve these variables when elevating privileges, for example:
+
+```bash
+export HTTP_PROXY=http://proxy.example.com:3128
+export HTTPS_PROXY=http://proxy.example.com:3128
+sudo --preserve-env=HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy ./install-bunkerweb.sh
+```
+
+Your sudo policy must permit preserving these variables. These settings apply to the installer; configure runtime proxy settings separately in `/etc/bunkerweb/variables.env`.
+
+Docker image pulls also require a proxy configured for the Docker daemon, for example through the systemd drop-in `/etc/systemd/system/docker.service.d/http-proxy.conf`.
 
 #### How It Works
 
@@ -2656,7 +2670,7 @@ This "*automagical*" process simplifies the management of BunkerWeb configuratio
 By adopting this approach, you can enjoy real-time reconfiguration of BunkerWeb without the hassle of container recreation, making it more efficient and user-friendly.
 
 !!! info "Multisite mode"
-    The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](https://docs.bunkerweb.io/latest/concepts/#multisite-mode) of the documentation for more information.
+    The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](https://docs.bunkerweb.io/testing/concepts/#multisite-mode) of the documentation for more information.
 
 !!! info "Database backend"
     Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations) of the repository for more information.
@@ -2964,7 +2978,7 @@ while the **autoconf and scheduler** are defined as **single replicated [Deploym
 Given the presence of multiple BunkerWeb instances,
 it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service.
 This service will be utilized by the instances to cache and share data among themselves.
-Further information about the Redis/Valkey settings can be found [here](https://docs.bunkerweb.io/latest/features/#redis).
+Further information about the Redis/Valkey settings can be found [here](https://docs.bunkerweb.io/testing/features/#redis).
 
 !!! info "Where Redis settings go (scheduler-driven config)"
     On Kubernetes the **scheduler** is the component that reads settings and generates the
@@ -4563,7 +4577,7 @@ Similar to the [Docker autoconf integration](#docker-autoconf), configuration fo
 
 For an optimal setup, it is recommended to schedule the **BunkerWeb service** as a ***global service*** on all nodes, while the **autoconf, scheduler, and Docker API proxy services** should be scheduled as ***single replicated services***. Please note that the Docker API proxy service needs to be scheduled on a manager node unless you configure it to use a remote API (which is not covered in the documentation).
 
-Since multiple instances of BunkerWeb are running, a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service must be created. These instances will utilize the Redis/Valkey service to cache and share data. Further details regarding the Redis/Valkey settings can be found [here](https://docs.bunkerweb.io/latest/features/#redis).
+Since multiple instances of BunkerWeb are running, a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service must be created. These instances will utilize the Redis/Valkey service to cache and share data. Further details regarding the Redis/Valkey settings can be found [here](https://docs.bunkerweb.io/testing/features/#redis).
 
 As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
 

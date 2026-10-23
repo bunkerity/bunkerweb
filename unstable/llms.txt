@@ -4,32 +4,94 @@
 
 ## Getting Started
 
-- [Introduction](https://docs.bunkerweb.io/latest/index.md): Introduction and overview of BunkerWeb
-- [Concepts](https://docs.bunkerweb.io/latest/concepts/index.md): Core concepts — multisite, settings contexts, security modes
-- [Quickstart guide](https://docs.bunkerweb.io/latest/quickstart-guide/index.md): Quick start guide for first-time setup
+- [Introduction](https://docs.bunkerweb.io/testing/index.md): Introduction and overview of BunkerWeb
+- [Concepts](https://docs.bunkerweb.io/testing/concepts/index.md): Core concepts — multisite, settings contexts, security modes
+- [Quickstart guide](https://docs.bunkerweb.io/testing/quickstart-guide/index.md): Quick start guide for first-time setup
 
 ## Integration Guides
 
-- [Integrations](https://docs.bunkerweb.io/latest/integrations/index.md): Docker, Kubernetes, Swarm, Linux, and Ansible setup
+- [Integrations](https://docs.bunkerweb.io/testing/integrations/index.md): Docker, Kubernetes, Swarm, Linux, and Ansible setup
 
 ## Configuration Reference
 
-- [Features](https://docs.bunkerweb.io/latest/features/index.md): Complete settings reference — all plugins, all options
+- [Features](https://docs.bunkerweb.io/testing/features/index.md): Complete settings reference — all plugins, all options
+
+## Settings lookup
+
+- [Settings index](https://docs.bunkerweb.io/testing/settings/index.json): exact setting name → plugin file; then fetch settings/<plugin>.json for default, context, multiple and description
+- [Global settings](https://docs.bunkerweb.io/testing/settings/global-settings.json)
+- [ACME](https://docs.bunkerweb.io/testing/settings/acme-pro.json)
+- [Anti DDoS](https://docs.bunkerweb.io/testing/settings/anti-ddos-pro.json)
+- [Antibot](https://docs.bunkerweb.io/testing/settings/antibot.json)
+- [Auth basic](https://docs.bunkerweb.io/testing/settings/auth-basic.json)
+- [Backup](https://docs.bunkerweb.io/testing/settings/backup.json)
+- [Backup S3](https://docs.bunkerweb.io/testing/settings/backup-s3-pro.json)
+- [Bad behavior](https://docs.bunkerweb.io/testing/settings/bad-behavior.json)
+- [Blacklist](https://docs.bunkerweb.io/testing/settings/blacklist.json)
+- [Brotli](https://docs.bunkerweb.io/testing/settings/brotli.json)
+- [BunkerNet](https://docs.bunkerweb.io/testing/settings/bunkernet.json)
+- [Cache](https://docs.bunkerweb.io/testing/settings/cache-pro.json)
+- [Client cache](https://docs.bunkerweb.io/testing/settings/client-cache.json)
+- [CORS](https://docs.bunkerweb.io/testing/settings/cors.json)
+- [Country](https://docs.bunkerweb.io/testing/settings/country.json)
+- [CrowdSec](https://docs.bunkerweb.io/testing/settings/crowdsec.json)
+- [Custom Pages](https://docs.bunkerweb.io/testing/settings/custom-pages-pro.json)
+- [Custom SSL certificate](https://docs.bunkerweb.io/testing/settings/custom-ssl-certificate.json)
+- [Database](https://docs.bunkerweb.io/testing/settings/database.json)
+- [DNSBL](https://docs.bunkerweb.io/testing/settings/dnsbl.json)
+- [Errors](https://docs.bunkerweb.io/testing/settings/errors.json)
+- [Greylist](https://docs.bunkerweb.io/testing/settings/greylist.json)
+- [gRPC](https://docs.bunkerweb.io/testing/settings/grpc.json)
+- [Gzip](https://docs.bunkerweb.io/testing/settings/gzip.json)
+- [Headers](https://docs.bunkerweb.io/testing/settings/headers.json)
+- [HTML injection](https://docs.bunkerweb.io/testing/settings/html-injection.json)
+- [LDAP SSO](https://docs.bunkerweb.io/testing/settings/ldap-sso-pro.json)
+- [Let's Encrypt](https://docs.bunkerweb.io/testing/settings/lets-encrypt.json)
+- [Limit](https://docs.bunkerweb.io/testing/settings/limit.json)
+- [Load Balancer](https://docs.bunkerweb.io/testing/settings/load-balancer-pro.json)
+- [Maintenance](https://docs.bunkerweb.io/testing/settings/maintenance-pro.json)
+- [Metrics](https://docs.bunkerweb.io/testing/settings/metrics.json)
+- [Miscellaneous](https://docs.bunkerweb.io/testing/settings/miscellaneous.json)
+- [ModSecurity](https://docs.bunkerweb.io/testing/settings/modsecurity.json)
+- [Monitoring](https://docs.bunkerweb.io/testing/settings/monitoring-pro.json)
+- [Mutual TLS](https://docs.bunkerweb.io/testing/settings/mutual-tls.json)
+- [OpenAPI Validator](https://docs.bunkerweb.io/testing/settings/openapi-validator-pro.json)
+- [OpenID Connect](https://docs.bunkerweb.io/testing/settings/openid-connect-pro.json)
+- [PHP](https://docs.bunkerweb.io/testing/settings/php.json)
+- [Pro](https://docs.bunkerweb.io/testing/settings/pro.json)
+- [Prometheus exporter](https://docs.bunkerweb.io/testing/settings/prometheus-exporter-pro.json)
+- [Real IP](https://docs.bunkerweb.io/testing/settings/real-ip.json)
+- [Redirect](https://docs.bunkerweb.io/testing/settings/redirect.json)
+- [Redis](https://docs.bunkerweb.io/testing/settings/redis.json)
+- [Reporting](https://docs.bunkerweb.io/testing/settings/reporting-pro.json)
+- [Reverse proxy](https://docs.bunkerweb.io/testing/settings/reverse-proxy.json)
+- [Reverse scan](https://docs.bunkerweb.io/testing/settings/reverse-scan.json)
+- [Robots.txt](https://docs.bunkerweb.io/testing/settings/robotstxt.json)
+- [SAML](https://docs.bunkerweb.io/testing/settings/saml-pro.json)
+- [Security.txt](https://docs.bunkerweb.io/testing/settings/securitytxt.json)
+- [Self-signed certificate](https://docs.bunkerweb.io/testing/settings/self-signed-certificate.json)
+- [Sessions](https://docs.bunkerweb.io/testing/settings/sessions.json)
+- [SSL](https://docs.bunkerweb.io/testing/settings/ssl.json)
+- [UI](https://docs.bunkerweb.io/testing/settings/ui.json)
+- [UI Single Sign-On](https://docs.bunkerweb.io/testing/settings/ui-single-sign-on-pro.json)
+- [User Manager](https://docs.bunkerweb.io/testing/settings/user-manager-pro.json)
+- [Whitelist](https://docs.bunkerweb.io/testing/settings/whitelist.json)
+- [Wildcard](https://docs.bunkerweb.io/testing/settings/wildcard-pro.json)
 
 ## Advanced Usage
 
-- [Advanced usages](https://docs.bunkerweb.io/latest/advanced/index.md): Custom configs, headers, ModSecurity, PHP, streaming, and more
+- [Advanced usages](https://docs.bunkerweb.io/testing/advanced/index.md): Custom configs, headers, ModSecurity, PHP, streaming, and more
 
 ## Web UI & API
 
-- [Web UI](https://docs.bunkerweb.io/latest/web-ui/index.md): Web UI usage guide
-- [API](https://docs.bunkerweb.io/latest/api/index.md): REST API documentation
+- [Web UI](https://docs.bunkerweb.io/testing/web-ui/index.md): Web UI usage guide
+- [API](https://docs.bunkerweb.io/testing/api/index.md): REST API documentation
 
 ## Plugin System
 
-- [Plugins](https://docs.bunkerweb.io/latest/plugins/index.md): Writing and using external plugins
+- [Plugins](https://docs.bunkerweb.io/testing/plugins/index.md): Writing and using external plugins
 
 ## Operations
 
-- [Upgrading](https://docs.bunkerweb.io/latest/upgrading/index.md): Version migration and upgrade guides
-- [Troubleshooting](https://docs.bunkerweb.io/latest/troubleshooting/index.md): Common issues and solutions
+- [Upgrading](https://docs.bunkerweb.io/testing/upgrading/index.md): Version migration and upgrade guides
+- [Troubleshooting](https://docs.bunkerweb.io/testing/troubleshooting/index.md): Common issues and solutions

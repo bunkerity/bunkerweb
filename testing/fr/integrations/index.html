@@ -169,6 +169,9 @@
 
     
     
+    
+    
+
   
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Intégrations - Documentation BunkerWeb" />
@@ -3918,13 +3921,21 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>Téléchargez le fichier de somme de contrôle et utilisez un outil comme <code>sha256sum</code> pour confirmer que le script n'a pas été modifié ou altéré.</p>
 <p>Si la vérification de la somme de contrôle échoue, <strong>n'exécutez pas le script</strong> — il pourrait être dangereux.</p>
 </div>
+<h4 id="derriere-un-proxy">Derrière un proxy<a class="headerlink" href="#derriere-un-proxy" title="Permanent link">&para;</a></h4>
+<p>Exportez <code>HTTP_PROXY</code> et <code>HTTPS_PROXY</code> (ou <code>http_proxy</code> et <code>https_proxy</code>) avant de lancer l’installateur pour faire passer les téléchargements, la configuration des dépôts, la récupération des clés de signature et les requêtes du gestionnaire de paquets par votre proxy de sortie. La variable facultative <code>NO_PROXY</code> (ou <code>no_proxy</code>) liste les hôtes qui contournent le proxy. Les valeurs en minuscules sont prioritaires lorsque les deux formes sont définies. Conservez ces variables lors de l’élévation des privilèges, par exemple :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">HTTP_PROXY</span><span class="o">=</span>http://proxy.example.com:3128
+<span class="nb">export</span><span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy.example.com:3128
+sudo<span class="w"> </span>--preserve-env<span class="o">=</span>HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy<span class="w"> </span>./install-bunkerweb.sh
+</code></pre></div>
+<p>Votre politique sudo doit autoriser la conservation de ces variables. Ces paramètres s’appliquent à l’installateur ; configurez séparément les paramètres de proxy utilisés par BunkerWeb dans <code>/etc/bunkerweb/variables.env</code>.</p>
+<p>Le téléchargement des images Docker nécessite également un proxy configuré pour le démon Docker, par exemple via le fichier de configuration complémentaire systemd <code>/etc/systemd/system/docker.service.d/http-proxy.conf</code>.</p>
 <h4 id="comment-ca-marche">Comment ça marche<a class="headerlink" href="#comment-ca-marche" title="Permanent link">&para;</a></h4>
 <p>Le script d'installation facile est un outil puissant conçu pour rationaliser l'installation de BunkerWeb sur un nouveau système Linux. Il automatise les étapes clés suivantes :</p>
 <ol>
 <li><strong>Analyse du système</strong>: détecte votre système d'exploitation et le compare à la liste des distributions prises en charge.</li>
 <li><strong>Personnalisation de l'installation</strong>: en mode interactif, il vous invite à choisir un type d'installation (Tout en un, Manager, Worker, etc.) et à décider d'activer ou non l'assistant de configuration Web.</li>
 <li><strong>Intégrations facultatives</strong>: propose d'installer et de configurer automatiquement le <a href="#crowdsec-integration-with-the-script">moteur de sécurité CrowdSec</a> ainsi que Redis/Valkey pour le cache et les sessions partagés.</li>
-<li><strong>Gestion des </strong>dépendances : Installe la version correcte de NGINX requise par BunkerWeb à partir de sources officielles et verrouille la version pour éviter les mises à niveau involontaires.</li>
+<li>**Gestion des **dépendances : Installe la version correcte de NGINX requise par BunkerWeb à partir de sources officielles et verrouille la version pour éviter les mises à niveau involontaires.</li>
 <li><strong>Installation de BunkerWeb</strong>: Ajoute le référentiel de paquets BunkerWeb, installe les paquets nécessaires et verrouille la version.</li>
 <li><strong>Configuration du service</strong> : Configure et active les <code>systemd</code> services correspondant au type d'installation que vous avez choisi.</li>
 <li><strong>Conseils post-installation</strong>: Fournit des étapes suivantes claires pour vous aider à démarrer avec votre nouvelle instance BunkerWeb.</li>
@@ -4483,7 +4494,7 @@ MY_SETTING_2=value2
 </div>
 <p>Une autre approche est disponible pour résoudre l'inconvénient de recréer le conteneur chaque fois qu'il y a une mise à jour. En utilisant une autre image appelée <strong>autoconf</strong>, vous pouvez automatiser la reconfiguration en temps réel de BunkerWeb sans avoir besoin de recréer des conteneurs.</p>
 <p>Pour tirer parti de cette fonctionnalité, au lieu de définir des variables d'environnement pour le conteneur BunkerWeb, vous pouvez ajouter des <strong>étiquettes</strong> à vos conteneurs d'application Web. L'image <strong>autoconf</strong> écoutera alors les événements Docker et gérera de manière transparente les mises à jour de configuration pour BunkerWeb.</p>
-<p>Ce processus «<em> automagique </em>» simplifie la gestion des configurations BunkerWeb. En ajoutant des étiquettes à vos conteneurs d'applications web, vous pouvez déléguer les tâches de reconfiguration à <strong>autoconf</strong> sans l'intervention manuelle de la recréation de conteneurs. Cela simplifie le processus de mise à jour et améliore la commodité.</p>
+<p>Ce processus «* automagique *» simplifie la gestion des configurations BunkerWeb. En ajoutant des étiquettes à vos conteneurs d'applications web, vous pouvez déléguer les tâches de reconfiguration à <strong>autoconf</strong> sans l'intervention manuelle de la recréation de conteneurs. Cela simplifie le processus de mise à jour et améliore la commodité.</p>
 <p>En adoptant cette approche, vous pouvez profiter d'une reconfiguration en temps réel de BunkerWeb sans avoir à vous soucier de la recréation de conteneurs, ce qui le rend plus efficace et plus convivial.</p>
 <div class="admonition info">
 <p class="admonition-title">Mode multisite</p>
@@ -4922,7 +4933,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"</span>
 </code></pre></div>
 <h3 id="namespaces">Espaces de noms<a class="headerlink" href="#namespaces" title="Permanent link">&para;</a></h3>
-<p>À partir de la version <code>1.6.0</code>, les piles Autoconf de BunkerWeb supportent désormais les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs «<em> clusters </em>» d'instances et de services BunkerWeb sur le même hôte Docker. Pour tirer parti des espaces de noms, il vous suffit de définir l' <code>NAMESPACE</code> étiquette sur vos services. Voici un exemple :</p>
+<p>À partir de la version <code>1.6.0</code>, les piles Autoconf de BunkerWeb supportent désormais les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs «* clusters *» d'instances et de services BunkerWeb sur le même hôte Docker. Pour tirer parti des espaces de noms, il vous suffit de définir l' <code>NAMESPACE</code> étiquette sur vos services. Voici un exemple :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span>
@@ -6564,7 +6575,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <p class="admonition-title">Docker autoconf</p>
 <p>L'intégration de Swarm est similaire à celle de Docker autoconf (mais avec des services au lieu de conteneurs). Veuillez d'abord lire la section sur l <a href="#docker-autoconf">'intégration de Docker autoconf</a> si nécessaire.</p>
 </div>
-<p>Pour permettre la configuration automatique des instances BunkerWeb, le ** service autoconf<strong> nécessite l'accès à l'API Docker. Ce service est à l'écoute des événements Docker Swarm, tels que la création ou la suppression de services, et configure de manière transparente les </strong>instances BunkerWeb** en temps réel sans aucun temps d'arrêt. Il surveille également d'autres objets Swarm, tels que <a href="https://docs.docker.com/engine/swarm/configs/">les configurations</a>, pour les configurations personnalisées.</p>
+<p>Pour permettre la configuration automatique des instances BunkerWeb, le ** service autoconf** nécessite l'accès à l'API Docker. Ce service est à l'écoute des événements Docker Swarm, tels que la création ou la suppression de services, et configure de manière transparente les <strong>instances BunkerWeb</strong> en temps réel sans aucun temps d'arrêt. Il surveille également d'autres objets Swarm, tels que <a href="https://docs.docker.com/engine/swarm/configs/">les configurations</a>, pour les configurations personnalisées.</p>
 <p>Semblable à l'<a href="#docker-autoconf">intégration Docker autoconf</a>, la configuration des services Web est définie à l'aide d'étiquettes qui commencent par le ** préfixe **bunkerweb.</p>
 <p>Pour une configuration optimale, il est recommandé de planifier le <strong>service BunkerWeb</strong> en tant que <strong><em>service global</em></strong> sur tous les nœuds, tandis que les <strong>services autoconf, scheduler et proxy Docker API</strong> doivent être planifiés en tant que <strong><em>services répliqués uniques</em></strong>. Veuillez noter que le service proxy de l'API Docker doit être planifié sur un nœud de gestionnaire, sauf si vous le configurez pour utiliser une API distante (ce qui n'est pas couvert dans la documentation).</p>
 <p>Étant donné que plusieurs instances de BunkerWeb sont en cours d'exécution, un magasin de données partagé implémenté en tant que <a href="https://redis.io/"> service Redis</a> ou <a href="https://valkey.io/">Valkey</a> doit être créé. Ces instances utiliseront le service Redis/Valkey pour mettre en cache et partager des données. Vous trouverez plus de détails sur les paramètres Redis/Valkey <a href="../features/#redis">ici</a>.</p>
@@ -6749,7 +6760,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>ingress<span class=
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
 <h3 id="namespaces_2">Espaces de noms<a class="headerlink" href="#namespaces_2" title="Permanent link">&para;</a></h3>
-<p>À partir de la version <code>1.6.0</code>, les piles Autoconf de BunkerWeb supportent désormais les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs «<em> clusters </em>» d'instances et de services BunkerWeb sur le même hôte Docker. Pour tirer parti des espaces de noms, il vous suffit de définir l' <code>NAMESPACE</code> étiquette sur vos services. Voici un exemple :</p>
+<p>À partir de la version <code>1.6.0</code>, les piles Autoconf de BunkerWeb supportent désormais les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs «* clusters *» d'instances et de services BunkerWeb sur le même hôte Docker. Pour tirer parti des espaces de noms, il vous suffit de définir l' <code>NAMESPACE</code> étiquette sur vos services. Voici un exemple :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywebapp:4.2</span>
@@ -7493,6 +7504,8 @@ docker<span class="w"> </span>image<span class="w"> </span>ls<span class="w"> </
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
       
         <script src="../../assets/toc-dropdown.js"></script>
+      
+        <script src="../../assets/webmcp.js"></script>
       
     
   </body>

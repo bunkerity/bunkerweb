@@ -35,7 +35,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Docker"
 
-    When using the [Docker integration](https://docs.bunkerweb.io/latest/integrations/#docker), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
+    When using the [Docker integration](https://docs.bunkerweb.io/testing/integrations/#docker), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     The first thing to do is to create the plugins folder :
 
@@ -103,7 +103,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](https://docs.bunkerweb.io/latest/integrations/#docker-autoconf), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
+    When using the [Docker autoconf integration](https://docs.bunkerweb.io/testing/integrations/#docker-autoconf), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     The first thing to do is to create the plugins folder :
 
@@ -139,11 +139,11 @@ The first step is to install the plugin by placing its files inside the correspo
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/testing/integrations/#swarm).**
 
-    When using the [Swarm integration](https://docs.bunkerweb.io/latest/integrations/#swarm), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
+    When using the [Swarm integration](https://docs.bunkerweb.io/testing/integrations/#swarm), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     !!! info "Swarm volume"
         Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on `/shared` across all nodes.
@@ -181,7 +181,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
+    When using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     The first thing to do is to declare a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) that will contain our plugins data :
 
@@ -246,7 +246,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Linux"
 
-    When using the [Linux integration](https://docs.bunkerweb.io/latest/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
+    When using the [Linux integration](https://docs.bunkerweb.io/testing/integrations/#linux), plugins must be written to the `/etc/bunkerweb/plugins` folder :
 
     ```shell
     git clone https://github.com/bunkerity/bunkerweb-plugins && \
@@ -279,7 +279,7 @@ plugin /
     plugin.json
 ```
 
-- **conf_name.conf** : Add [custom NGINX configurations](https://docs.bunkerweb.io/latest/advanced/#custom-configurations) (as Jinja2 templates).
+- **conf_name.conf** : Add [custom NGINX configurations](https://docs.bunkerweb.io/testing/advanced/#custom-configurations) (as Jinja2 templates).
 
 - **actions.py** : Script to execute on the Flask server. This script runs in a Flask context, giving you access to libraries and utilities like `jinja2` and `requests`.
 
@@ -294,7 +294,7 @@ plugin /
 
 - **bwcli folder** : Python (or executable) files that extend the `bwcli` CLI through custom commands.
 
-- **my-template.json** : Add [custom templates](https://docs.bunkerweb.io/latest/concepts/#templates) to override the default values of settings and apply custom configurations easily.
+- **my-template.json** : Add [custom templates](https://docs.bunkerweb.io/testing/concepts/#templates) to override the default values of settings and apply custom configurations easily.
 
 - **plugin.lua** : Code executed on NGINX using the [NGINX LUA module](https://github.com/openresty/lua-nginx-module).
 
@@ -396,7 +396,7 @@ The scheduler automatically exposes the declared commands once the plugin is ins
 
 ### Configurations
 
-You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](https://docs.bunkerweb.io/latest/advanced/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
+You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](https://docs.bunkerweb.io/testing/advanced/#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
@@ -413,7 +413,7 @@ location /setting {
 
 ### Templates
 
-Check the [templates documentation](https://docs.bunkerweb.io/latest/concepts/#templates) for more information.
+Check the [templates documentation](https://docs.bunkerweb.io/testing/concepts/#templates) for more information.
 
 ### LUA
 

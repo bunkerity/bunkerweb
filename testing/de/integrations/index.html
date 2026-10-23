@@ -169,6 +169,9 @@
 
     
     
+    
+    
+
   
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Integrationen - BunkerWeb Dokumentation" />
@@ -3873,6 +3876,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>Laden Sie die Prüfsummendatei herunter und verwenden Sie ein Werkzeug wie <code>sha256sum</code>, um zu bestätigen, dass das Skript nicht verändert oder manipuliert wurde.</p>
 <p>Wenn die Überprüfung der Prüfsumme fehlschlägt, <strong>führen Sie das Skript nicht aus</strong> – es könnte unsicher sein.</p>
 </div>
+<h4 id="hinter-einem-proxy">Hinter einem Proxy<a class="headerlink" href="#hinter-einem-proxy" title="Permanent link">&para;</a></h4>
+<p>Exportieren Sie <code>HTTP_PROXY</code> und <code>HTTPS_PROXY</code> (oder <code>http_proxy</code> und <code>https_proxy</code>), bevor Sie das Installationsskript ausführen, um Downloads, die Repository-Einrichtung, das Abrufen von Signaturschlüsseln und Anfragen des Paketmanagers über Ihren Forward-Proxy zu leiten. Optional gibt <code>NO_PROXY</code> (oder <code>no_proxy</code>) Hosts an, die den Proxy umgehen. Sind beide Schreibweisen gesetzt, haben die kleingeschriebenen Werte Vorrang. Behalten Sie diese Variablen beim Erhöhen der Berechtigungen bei, zum Beispiel:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">HTTP_PROXY</span><span class="o">=</span>http://proxy.example.com:3128
+<span class="nb">export</span><span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy.example.com:3128
+sudo<span class="w"> </span>--preserve-env<span class="o">=</span>HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy<span class="w"> </span>./install-bunkerweb.sh
+</code></pre></div>
+<p>Ihre sudo-Richtlinie muss das Beibehalten dieser Variablen erlauben. Diese Einstellungen gelten für das Installationsskript; konfigurieren Sie die Proxy-Einstellungen für den laufenden Betrieb separat in <code>/etc/bunkerweb/variables.env</code>.</p>
+<p>Für Docker-Image-Pulls muss außerdem ein Proxy für den Docker-Daemon konfiguriert sein, zum Beispiel über das systemd-Drop-in <code>/etc/systemd/system/docker.service.d/http-proxy.conf</code>.</p>
 <h4 id="wie-es-funktioniert">Wie es funktioniert<a class="headerlink" href="#wie-es-funktioniert" title="Permanent link">&para;</a></h4>
 <p>Das einfache Installationsskript ist ein leistungsstarkes Werkzeug, das entwickelt wurde, um die Einrichtung von BunkerWeb auf einem frischen Linux-System zu optimieren. Es automatisiert die folgenden wichtigen Schritte:</p>
 <ol>
@@ -7450,6 +7461,8 @@ docker<span class="w"> </span>image<span class="w"> </span>ls<span class="w"> </
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
       
         <script src="../../assets/toc-dropdown.js"></script>
+      
+        <script src="../../assets/webmcp.js"></script>
       
     
   </body>

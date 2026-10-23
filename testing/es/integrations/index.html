@@ -169,6 +169,9 @@
 
     
     
+    
+    
+
   
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Integraciones - Documentación de BunkerWeb" />
@@ -3910,6 +3913,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>Descarga el archivo de suma de verificación y utiliza una herramienta como <code>sha256sum</code> para confirmar que el script no ha sido alterado o manipulado.</p>
 <p>Si la verificación de la suma de verificación falla, <strong>no ejecutes el script</strong>—puede que no sea seguro.</p>
 </div>
+<h4 id="detras-de-un-proxy">Detrás de un proxy<a class="headerlink" href="#detras-de-un-proxy" title="Permanent link">&para;</a></h4>
+<p>Exporta <code>HTTP_PROXY</code> y <code>HTTPS_PROXY</code> (o <code>http_proxy</code> y <code>https_proxy</code>) antes de ejecutar el instalador para dirigir las descargas, la configuración de repositorios, la obtención de claves de firma y las solicitudes del gestor de paquetes a través de tu proxy de salida. La variable opcional <code>NO_PROXY</code> (o <code>no_proxy</code>) enumera los hosts que omiten el proxy. Los valores en minúsculas tienen prioridad cuando ambas formas están definidas. Conserva estas variables al elevar privilegios, por ejemplo:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">HTTP_PROXY</span><span class="o">=</span>http://proxy.example.com:3128
+<span class="nb">export</span><span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy.example.com:3128
+sudo<span class="w"> </span>--preserve-env<span class="o">=</span>HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy<span class="w"> </span>./install-bunkerweb.sh
+</code></pre></div>
+<p>Tu política de sudo debe permitir conservar estas variables. Estos ajustes se aplican al instalador; configura por separado los ajustes de proxy para la ejecución de BunkerWeb en <code>/etc/bunkerweb/variables.env</code>.</p>
+<p>La descarga de imágenes Docker también requiere un proxy configurado para el demonio de Docker, por ejemplo mediante el archivo de configuración adicional de systemd <code>/etc/systemd/system/docker.service.d/http-proxy.conf</code>.</p>
 <h4 id="como-funciona">Cómo funciona<a class="headerlink" href="#como-funciona" title="Permanent link">&para;</a></h4>
 <p>El script de instalación fácil es una herramienta poderosa diseñada para simplificar la configuración de BunkerWeb en un sistema Linux nuevo. Automatiza los siguientes pasos clave:</p>
 <ol>
@@ -7492,6 +7503,8 @@ docker<span class="w"> </span>image<span class="w"> </span>ls<span class="w"> </
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
       
         <script src="../../assets/toc-dropdown.js"></script>
+      
+        <script src="../../assets/webmcp.js"></script>
       
     
   </body>

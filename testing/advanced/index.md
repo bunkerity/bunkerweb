@@ -4,7 +4,7 @@ Many real-world use case examples are available in the [examples](https://github
 
 We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations) folder.
 
-This section only focuses on advanced usages and security tuning, see the [features section](https://docs.bunkerweb.io/latest/features/) of the documentation to see all the available settings.
+This section only focuses on advanced usages and security tuning, see the [features section](https://docs.bunkerweb.io/testing/features/) of the documentation to see all the available settings.
 
 !!! tip "Testing"
     To perform quick tests when multisite mode is enabled (and if you don't have the proper DNS entries set up for the domains) you can use curl with the HTTP Host header of your choice :
@@ -35,7 +35,7 @@ The following settings can be used :
 - `REAL_IP_FROM` : list of trusted IP/network address allowed to send us the "real IP"
 - `REAL_IP_HEADER` : the HTTP header containing the real IP or special value `proxy_protocol` when using PROXY protocol
 
-You will find more settings about real IP in the [features section](https://docs.bunkerweb.io/latest/features/#real-ip) of the documentation.
+You will find more settings about real IP in the [features section](https://docs.bunkerweb.io/testing/features/#real-ip) of the documentation.
 
 === "HTTP header"
 
@@ -168,9 +168,9 @@ You will find more settings about real IP in the [features section](https://docs
     === "Swarm"
 
         !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes) instead.
 
-            **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+            **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/testing/integrations/#swarm).**
 
         You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services:
 
@@ -342,9 +342,9 @@ You will find more settings about real IP in the [features section](https://docs
     === "Swarm"
 
         !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes) instead.
 
-            **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+            **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/testing/integrations/#swarm).**
 
         You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services.
 
@@ -1182,7 +1182,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
 
 ## Custom configurations {#custom-configurations}
 
-To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](https://docs.bunkerweb.io/latest/features/#custom-configurations).
+To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](https://docs.bunkerweb.io/testing/features/#custom-configurations).
 
 Here are the available types of custom configurations:
 
@@ -1196,7 +1196,7 @@ Here are the available types of custom configurations:
 - **stream**: Configurations at the Stream level of NGINX.
 - **server-stream**: Configurations at the Stream/Server level of NGINX.
 
-Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](https://docs.bunkerweb.io/latest/features/#multisite-mode) is enabled.
+Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](https://docs.bunkerweb.io/testing/features/#multisite-mode) is enabled.
 
 The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
 
@@ -1212,7 +1212,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "Linux"
 
-    When using the [Linux integration](https://docs.bunkerweb.io/latest/integrations/#linux), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
+    When using the [Linux integration](https://docs.bunkerweb.io/testing/integrations/#linux), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
 
     Here is an example for server-http/hello-world.conf :
 
@@ -1255,7 +1255,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "All-in-one"
 
-    When using the [All-in-one image](https://docs.bunkerweb.io/latest/integrations/#all-in-one-aio-image), you have two choices for adding custom configurations:
+    When using the [All-in-one image](https://docs.bunkerweb.io/testing/integrations/#all-in-one-aio-image), you have two choices for adding custom configurations:
 
     - Using specific settings `*_CUSTOM_CONF_*` as environment variables when running the container (recommended).
     - Writing `.conf` files to the `/data/configs/` directory within the volume mounted to `/data`.
@@ -1327,7 +1327,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "Docker"
 
-    When using the [Docker integration](https://docs.bunkerweb.io/latest/integrations/#docker), you have two choices for the addition of custom configurations :
+    When using the [Docker integration](https://docs.bunkerweb.io/testing/integrations/#docker), you have two choices for the addition of custom configurations :
 
     - Using specific settings `*_CUSTOM_CONF_*` as environment variables (recommended)
     - Writing .conf files to the volume mounted on /data of the scheduler
@@ -1396,7 +1396,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "Docker autoconf"
 
-    When using the [Docker autoconf integration](https://docs.bunkerweb.io/latest/integrations/#docker-autoconf), you have two choices for adding custom configurations :
+    When using the [Docker autoconf integration](https://docs.bunkerweb.io/testing/integrations/#docker-autoconf), you have two choices for adding custom configurations :
 
     - Using specific settings `*_CUSTOM_CONF_*` as labels (easiest)
     - Writing .conf files to the volume mounted on /data of the scheduler
@@ -1466,7 +1466,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes),
+    When using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes),
     custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
 
     You do not need to mount the ConfigMap inside a Pod (for example as an environment variable or volume).
@@ -1531,11 +1531,11 @@ Some integrations provide more convenient ways to apply configurations, such as 
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/testing/integrations/#swarm).**
 
-    When using the [Swarm integration](https://docs.bunkerweb.io/latest/integrations/#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
+    When using the [Swarm integration](https://docs.bunkerweb.io/testing/integrations/#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
 
     To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
 
@@ -1642,7 +1642,7 @@ REDIS_DATABASE=0
 - **`REDIS_PORT`**: Specify the port number for the Redis/Valkey server. Defaults to `6379`.
 - **`REDIS_DATABASE`**: Specify the Redis/Valkey database number to use. Defaults to `0`.
 
-If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](https://docs.bunkerweb.io/latest/features/#redis) for detailed guidance.
+If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](https://docs.bunkerweb.io/testing/features/#redis) for detailed guidance.
 
 ## Protect UDP/TCP applications
 
@@ -1652,7 +1652,7 @@ If you require more advanced settings, such as authentication, SSL/TLS support, 
 
 BunkerWeb offers the capability to function as a **generic UDP/TCP reverse proxy**, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX.
 
-It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [features](https://docs.bunkerweb.io/latest/features/) sections of the documentation.
+It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [features](https://docs.bunkerweb.io/testing/features/) sections of the documentation.
 
 Configuring a basic reverse proxy is quite similar to the HTTP setup, as it involves using the same settings: `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:9000`. Even when BunkerWeb is positioned behind a Load Balancer, the settings remain the same (with **PROXY protocol** being the supported option due to evident reasons).
 
@@ -1663,7 +1663,7 @@ On top of that, the following specific settings are used :
 - `LISTEN_STREAM_PORT_SSL=4343` : the listening "ssl/tls" port that BunkerWeb will listen on
 - `USE_UDP=no` : listen for and forward UDP packets instead of TCP
 
-For complete list of settings regarding `stream` mode, please refer to the [features](https://docs.bunkerweb.io/latest/features/) section of the documentation.
+For complete list of settings regarding `stream` mode, please refer to the [features](https://docs.bunkerweb.io/testing/features/) section of the documentation.
 
 !!! tip "multiple listening ports"
 
@@ -1788,7 +1788,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
 
 === "Docker autoconf"
 
-    Before running the [Docker autoconf integration](https://docs.bunkerweb.io/latest/integrations/#docker-autoconf) stack on your machine, you will need to edit the ports :
+    Before running the [Docker autoconf integration](https://docs.bunkerweb.io/testing/integrations/#docker-autoconf) stack on your machine, you will need to edit the ports :
 
     ```yaml
     services:
@@ -1843,7 +1843,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
 
         Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
-    Before running the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) stack on your machine, you will need to open the ports on your load balancer :
+    Before running the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes) stack on your machine, you will need to open the ports on your load balancer :
 
     ```yaml
     apiVersion: v1
@@ -2014,11 +2014,11 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/testing/integrations/#swarm).**
 
-    Before running the [Swarm integration](https://docs.bunkerweb.io/latest/integrations/#swarm) stack on your machine, you will need to edit the ports :
+    Before running the [Swarm integration](https://docs.bunkerweb.io/testing/integrations/#swarm) stack on your machine, you will need to edit the ports :
 
     ```yaml
     services:
@@ -2103,13 +2103,13 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "All-in-one"
 
-    When using the [All-in-one image](https://docs.bunkerweb.io/latest/integrations/#all-in-one-aio-image), to support PHP applications, you will need to :
+    When using the [All-in-one image](https://docs.bunkerweb.io/testing/integrations/#all-in-one-aio-image), to support PHP applications, you will need to :
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb.
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files.
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when running BunkerWeb.
 
-    If you enable the [multisite mode](https://docs.bunkerweb.io/latest/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](https://docs.bunkerweb.io/testing/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -2160,13 +2160,13 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Docker"
 
-    When using the [Docker integration](https://docs.bunkerweb.io/latest/integrations/#docker), to support PHP applications, you will need to :
+    When using the [Docker integration](https://docs.bunkerweb.io/testing/integrations/#docker), to support PHP applications, you will need to :
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM container for your application and mount the folder containing PHP files
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as environment variables when starting BunkerWeb
 
-    If you enable the [multisite mode](https://docs.bunkerweb.io/latest/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](https://docs.bunkerweb.io/testing/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -2266,15 +2266,15 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 === "Docker autoconf"
 
     !!! info "Multisite mode enabled"
-        The [Docker autoconf integration](https://docs.bunkerweb.io/latest/integrations/#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
+        The [Docker autoconf integration](https://docs.bunkerweb.io/testing/integrations/#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
 
-    When using the [Docker autoconf integration](https://docs.bunkerweb.io/latest/integrations/#docker-autoconf), to support PHP applications, you will need to :
+    When using the [Docker autoconf integration](https://docs.bunkerweb.io/testing/integrations/#docker-autoconf), to support PHP applications, you will need to :
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Docker autoconf implies using the [multisite mode](https://docs.bunkerweb.io/latest/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    Since the Docker autoconf implies using the [multisite mode](https://docs.bunkerweb.io/testing/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -2445,7 +2445,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
 === "Linux"
 
-    We will assume that you already have the [Linux integration](https://docs.bunkerweb.io/latest/integrations/#linux) stack running on your machine.
+    We will assume that you already have the [Linux integration](https://docs.bunkerweb.io/testing/integrations/#linux) stack running on your machine.
 
     By default, BunkerWeb will search for web files inside the `/var/www/html` folder. You can use it to store your PHP applications. Please note that you will need to configure your PHP-FPM service to get or set the user/group of the running processes and the UNIX socket file used to communicate with BunkerWeb.
 
@@ -2469,7 +2469,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl restart php-fpm
     ```
 
-    If you enable the [multisite mode](https://docs.bunkerweb.io/latest/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    If you enable the [multisite mode](https://docs.bunkerweb.io/testing/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     /var/www/html
@@ -2529,23 +2529,23 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/testing/integrations/#swarm).**
 
     !!! info "Multisite mode enabled"
-        The [Swarm integration](https://docs.bunkerweb.io/latest/integrations/#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
+        The [Swarm integration](https://docs.bunkerweb.io/testing/integrations/#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
 
     !!! info "Shared volume"
         Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances which is not covered in this documentation.
 
-    When using the [Swarm](https://docs.bunkerweb.io/latest/integrations/#swarm), to support PHP applications, you will need to :
+    When using the [Swarm](https://docs.bunkerweb.io/testing/integrations/#swarm), to support PHP applications, you will need to :
 
     - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
     - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
     - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
 
-    Since the Swarm integration implies using the [multisite mode](https://docs.bunkerweb.io/latest/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+    Since the Swarm integration implies using the [multisite mode](https://docs.bunkerweb.io/testing/features/#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
 
     ```
     www
@@ -2755,7 +2755,7 @@ These are standard NGINX logs, configured via **the `bunkerweb` service only**. 
 - `ERROR_LOG`: Destination for error logs (default: `/var/log/bunkerweb/error.log`). Accepts file path, `stderr`, `syslog:server=host[:port][,param=value]`, or shared buffer `memory:size`. See [NGINX error_log documentation](https://nginx.org/en/docs/ngx_core_module.html#error_log) for details.
 - `LOG_LEVEL`: Verbosity of error logs (default: `notice`).
 
-These settings accept standard NGINX values, including file paths, `stderr`, `syslog:server=...` (see [NGINX syslog documentation](https://nginx.org/en/docs/syslog.html)), or shared memory buffers. They support multiple destinations via numbered suffixes (see the [multiple settings convention](https://docs.bunkerweb.io/latest/features/#multiple-settings)). Other services (Scheduler, UI, Autoconf, etc.) rely solely on `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
+These settings accept standard NGINX values, including file paths, `stderr`, `syslog:server=...` (see [NGINX syslog documentation](https://nginx.org/en/docs/syslog.html)), or shared memory buffers. They support multiple destinations via numbered suffixes (see the [multiple settings convention](https://docs.bunkerweb.io/testing/features/#multiple-settings)). Other services (Scheduler, UI, Autoconf, etc.) rely solely on `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
 
 **Example with multiple access/error logs (bunkerweb only, numbered suffixes):**
 
@@ -2784,7 +2784,7 @@ Edit `/etc/logrotate.d/bunkerweb` to change the threshold, the number of generat
 
 Two directives there are load-bearing. `maxsize` is what keeps `daily` alive: the similar `size` is mutually exclusive with the interval directives, so it would rotate on size only. And adding `dateext` would name every archive after the date, which makes a second rotation on the same date fail with `destination ... already exists, skipping rotation`, leaving the live file unrotated until the date changes.
 
-The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, default `/var/log/bunkerweb/modsec_audit.log`); see the [ModSecurity settings](https://docs.bunkerweb.io/latest/features/#modsecurity). Pointing it outside `/var/log/bunkerweb` takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself. The setting only accepts a path under `/var/log/bunkerweb`, so it cannot point at `/data`: to keep the audit history across a container recreation, mount a volume on `/var/log/bunkerweb` itself, which persists the whole log set rather than the audit log alone.
+The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, default `/var/log/bunkerweb/modsec_audit.log`); see the [ModSecurity settings](https://docs.bunkerweb.io/testing/features/#modsecurity). Pointing it outside `/var/log/bunkerweb` takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself. The setting only accepts a path under `/var/log/bunkerweb`, so it cannot point at `/data`: to keep the audit history across a container recreation, mount a volume on `/var/log/bunkerweb` itself, which persists the whole log set rather than the audit log alone.
 
 With the default `MODSECURITY_SEC_AUDIT_LOG_PARTS` of `BCFH`, part `C` puts the request body in the audit log. Treat the file as sensitive before copying it anywhere.
 
@@ -3073,10 +3073,10 @@ These global settings will be inherited by all containers. However, any logging 
 
 ## Security tuning {#security-tuning}
 
-BunkerWeb offers many security features that you can configure with [features](https://docs.bunkerweb.io/latest/features/). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [features](https://docs.bunkerweb.io/testing/features/). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
 !!! tip "Other features"
-    This section only focuses on security tuning, see the [features](https://docs.bunkerweb.io/latest/features/) section of the documentation for other settings.
+    This section only focuses on security tuning, see the [features](https://docs.bunkerweb.io/testing/features/) section of the documentation for other settings.
 
 ## CrowdSec Console integration
 
@@ -3202,9 +3202,9 @@ The commonly used variables are:
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/latest/integrations/#kubernetes) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](https://docs.bunkerweb.io/testing/integrations/#kubernetes) instead.
 
-        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/latest/integrations/#swarm).**
+        **More information can be found in the [Swarm integration documentation](https://docs.bunkerweb.io/testing/integrations/#swarm).**
 
     Add the variables to the scheduler service:
 
@@ -3879,7 +3879,7 @@ The Load Balancer Plugin turns BunkerWeb into a traffic director with guardrails
 
 The Custom Pages plugin lets you replace BunkerWeb's built-in pages (error pages, default server page, and antibot challenge pages) with your own custom HTML or Lua templates. This allows you to maintain consistent branding across all user-facing pages served by BunkerWeb.
 
-For Maintenance behavior and customization, see the [Maintenance advanced guide](https://docs.bunkerweb.io/latest/advanced/#maintenance-pro).
+For Maintenance behavior and customization, see the [Maintenance advanced guide](https://docs.bunkerweb.io/testing/advanced/#maintenance-pro).
 
 ### Features
 
@@ -4955,7 +4955,7 @@ The plugin supports two authentication modes:
     - `LDAP_HOST=ldap.example.com`
 2. For enterprise search mode (recommended), also set:
     - `LDAP_BIND_DN=cn=readonly,dc=example,dc=com`
-    - `LDAP_BIND_PASSWORD=secret` (use [Docker secrets](https://docs.bunkerweb.io/latest/integrations/#docker) in production)
+    - `LDAP_BIND_PASSWORD=secret` (use [Docker secrets](https://docs.bunkerweb.io/testing/integrations/#docker) in production)
     - `LDAP_USER_SEARCH_BASE_DN=ou=people,dc=example,dc=com`
 3. For direct bind mode, adjust `LDAP_USER_DN_TEMPLATE` to match your directory structure.
 4. Optionally restrict access with `LDAP_AUTHZ_FILTER` (e.g. `(memberOf=cn=allowed,ou=groups,dc=example,dc=com)`).
@@ -5246,11 +5246,11 @@ External/PRO plugins not listed in `PLUGINS_ORDER_*` settings are appended alpha
 2. For wildcard certificates, switch to DNS-01 challenge:
     - `ACME_CHALLENGE=dns`
     - `ACME_DNS_PROVIDER=cloudflare`
-    - `ACME_DNS_CREDENTIAL_ITEM=cloudflare_api_token YOUR_TOKEN` (use [Docker secrets](https://docs.bunkerweb.io/latest/integrations/#docker) in production)
+    - `ACME_DNS_CREDENTIAL_ITEM=cloudflare_api_token YOUR_TOKEN` (use [Docker secrets](https://docs.bunkerweb.io/testing/integrations/#docker) in production)
     - `ACME_WILDCARD=yes`
 3. For CAs requiring External Account Binding:
     - `ACME_EAB_KID=your-key-id`
-    - `ACME_EAB_HMAC_KEY=your-base64-hmac-key` (use [Docker secrets](https://docs.bunkerweb.io/latest/integrations/#docker) in production)
+    - `ACME_EAB_HMAC_KEY=your-base64-hmac-key` (use [Docker secrets](https://docs.bunkerweb.io/testing/integrations/#docker) in production)
 4. For private CAs with self-signed root certificates:
     - `ACME_CA_CERT_PATH=/path/to/ca-root.pem`
     - `ACME_SSL_VERIFY=yes` (providing `ACME_CA_CERT_PATH` allows verification to succeed against private CAs without disabling SSL verify)

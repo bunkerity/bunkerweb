@@ -169,6 +169,9 @@
 
     
     
+    
+    
+
   
 <meta property="og:type" content="website" />
 <meta property="og:title" content="功能 - BunkerWeb 文档" />
@@ -2171,6 +2174,17 @@
     <span class="md-ellipsis">
       
         如何使用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ip_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IP 地址证书
       
     </span>
   </a>
@@ -4309,7 +4323,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>no</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>Pass through ACME HTTP-01 challenge requests to the upstream server.</td>
+<td>Pass through only GET/HEAD requests for one token-shaped ACME HTTP-01 URI to the upstream. That request skips antibot, blacklist, request-rate limiting, Basic Auth, ModSecurity, and the ban check; NGINX connection limits (limit_conn) still apply.</td>
 </tr>
 <tr>
 <td><code>ACME_DIRECTORY_URL</code></td>
@@ -5759,8 +5773,23 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td>否</td>
 <td><strong>封禁范围：</strong> 决定封禁是仅适用于当前服务 (<code>service</code>) 还是所有服务 (<code>global</code>)。命中默认服务器（<code>_</code>）时，封禁始终为全局。</td>
 </tr>
+<tr>
+<td><code>BAD_BEHAVIOR_REPORT_MAX_EVENTS</code></td>
+<td><code>100</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>报告中作为封禁依据保留的最近事件数量上限，同时受 <code>BAD_BEHAVIOR_THRESHOLD</code> 限制。 范围：<code>1</code> 至 <code>10000</code>。</td>
+</tr>
+<tr>
+<td><code>BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE</code></td>
+<td><code>512</code></td>
+<td>multisite</td>
+<td>否</td>
+<td>报告依据中每个 URL 或方法的最大字节数，包含 <code>...</code> 标记。范围：<code>4</code> 至 <code>65536</code>。</td>
+</tr>
 </tbody>
 </table>
+<p>封禁依据保留最新的匹配事件。这些限制仅影响复制到每份报告中的依据，不改变封禁逻辑或 <code>MAX_LRU_HISTORY</code>。截断时不会拆分 UTF-8 字符。提高任一限制都会增加报告的存储占用。即使保留的事件较少，请求总数仍显示实际封禁计数器的值。</p>
 <div class="admonition warning">
 <p class="admonition-title">误报</p>
 <p>在设置阈值和计数时间时要小心。将这些值设置得太低可能会无意中封禁在浏览您网站时遇到错误的合法用户。</p>
@@ -7127,7 +7156,11 @@ TrustedMonitor/\d+\.\d+
 <li><code>DELETE /crowdsec/{connection_id}/decisions/{decision_id}</code>：在 JSON 请求体中包含所选的 <code>scope</code>、<code>value</code> 和 <code>decision_type</code>。</li>
 </ul>
 <p>请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 <code>bans</code> 资源下获得独立的 <code>crowdsec_read</code> 或 <code>crowdsec_delete</code> 权限，权限范围为返回的连接 ID 或 <code>*</code>。普通的 <code>ban_delete</code> 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。</p>
-<p>运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 <code>/var/run/bunkerweb</code> 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。</p>
+<p>运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB (<code>CROWDSEC_METADATA_CACHE_SIZE=5m</code>) 缓存，不会逐出用于执行封禁的条目。流刷新使用 <code>/var/run/bunkerweb</code> 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。</p>
+<p>流模式最多保留两个快照槽位，仅在完整快照存储成功后切换。配置未变的 nginx 重载会保留当前快照并请求增量更新。快照缺失、决策配置改变、上次启动未完成，或距离上次成功同步超过 300 秒与 <code>CROWDSEC_UPDATE_FREQUENCY</code> 的 30 倍两者中的较大值时，会强制获取完整快照。每个缓存前缀每分钟最多记录一次同步错误，恢复后记录一次通知。决策缓存已满时，请增大 <code>CROWDSEC_CACHE_SIZE</code> 以容纳两个快照并重载 BunkerWeb。重载时调整决策内存区大小会创建空缓存并触发完整同步；仅调整元数据内存区大小会清空可选元数据。</p>
+<p>从早期版本原地升级时，旧版本的有效记录保留原始 TTL，因此即使新的关闭超时更短，正在退出的旧工作进程仍可继续执行这些决策。分配快照前会清理过时的代际记录。除两个快照槽位外，还应为这些旧记录预留缓存空间；分配失败时保留原有防护，并报告同步错误。请按以下数据确定决策缓存大小，这些数据使用合成的互不相同的 IPv4 目标和一小时 TTL 测得：稳定状态（两个快照槽位）下约为每条决策 1.1 KiB，升级期间旧记录仍有效时约为每条决策 1.4 KiB，二者均已向上取整以留有余量。例如，100,000 条决策在稳定状态下约需 <code>120m</code>，升级期间约需 <code>150m</code>。按这些数据，默认值 <code>100m</code> 在稳定状态下可容纳约 90,000 条决策，升级期间约 70,000 条。IPv6 或网段等其他目标类型可能占用更多，因此请按列表规模设置 <code>CROWDSEC_CACHE_SIZE</code>，最好在升级前完成。</p>
+<p>流请求被中断或失败后，下次轮询会强制获取完整快照。距离上次成功完整同步超过 3600 秒时，也会执行一次完整校准。初始化期间，本地 API 的直接查询结果按有效凭据和策略使用独立缓存。查询失败后，仅该策略暂停查询 <code>CROWDSEC_UPDATE_FREQUENCY</code>；故障期间未知 IP 会被放行。已知的封禁和验证码决策仍执行至各自到期。初始化查询结果和恢复的决策都不会覆盖更新的已发布快照。</p>
+<p>流模式将每个完整快照和有变更的增量保存至 <code>/var/lib/bunkerweb/crowdsec-state-*.json</code>，记录各决策的绝对到期时间，并在 <code>crowdsec-binding-*.json</code> 中保存服务关联。这些文件不受调度器缓存推送影响，可在缓存区调整大小、策略变更（包括 API URL 或密钥轮换）、nginx 重载，以及保留文件系统的同一容器重启后继续使用。新快照发布前，继续使用旧的已发布快照或恢复的检查点执行决策。初始化时恢复检查点。工作进程共享检查点版本；版本过期的工作进程会先通过定时器重新读取文件，再用于故障期间的回退。文件写入也仅在定时器中进行。若检查点无法读取或已损坏（包括工作进程启动时或更新被中断之后），回退检查会拒绝请求，直到其重新可读或成功同步将其重写。变更立即保存，但写入期间发生崩溃（包括断电）可能导致检查点丢失。属于其他配置的检查点会被忽略；两种情况都会记录限频错误。使用全新文件系统重新创建容器时，初始决策为空；若 LAPI 不可用，未知 IP 仍会被放行。</p>
 <h3 id="crowdsec_2">CrowdSec 封禁<a class="headerlink" href="#crowdsec_2" title="Permanent link">&para;</a></h3>
 <p>默认情况下，BunkerWeb 会针对每个请求查询 CrowdSec。将 <code>CROWDSEC_BAN_REFRESH</code> 设置为一个时长（例如 <code>5m</code>），即可把 CrowdSec 的拦截转换为 <strong>CrowdSec 封禁</strong>：一个短时的 BunkerWeb 封禁，只要 CrowdSec 决策仍然有效就会持续续期。该 IP 之后的请求会在封禁检查处被拦下，早于其他插件，也早于 CrowdSec 查询。该封禁会作为独立的一行显示在封禁页面中，并带有 <strong>调查 IP</strong> 操作。默认值 <code>0</code> 保持原有行为，不创建任何封禁。</p>
 <ul>
@@ -7360,6 +7393,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <h3 id="2-bunkerweb">第&nbsp;2&nbsp;步 – 配置 BunkerWeb 参数<a class="headerlink" href="#2-bunkerweb" title="Permanent link">&para;</a></h3>
 <p>应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 <code>USE_CROWDSEC</code>、<code>CROWDSEC_API</code> 和 <code>CROWDSEC_API_KEY</code>，并使用通过 <code>cscli bouncers add</code> 生成的有效密钥。</p>
+<p>连接设置为 <code>multisite</code>：无前缀的值适用于所有服务，带服务器名前缀的值仅覆盖该服务。<code>CROWDSEC_CACHE_SIZE</code> 和 <code>CROWDSEC_METADATA_CACHE_SIZE</code> 为 <code>global</code>，请勿添加服务器名前缀。</p>
 <table>
 <thead>
 <tr>
@@ -7419,6 +7453,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>multisite</td>
 <td>否</td>
 <td><strong>排除的位置：</strong> 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_CACHE_SIZE</code></td>
+<td><code>100m</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>决策缓存大小：</strong> 所有服务共享的内存；流模式需要两个快照。使用正整数兆字节（<code>m</code>/<code>M</code>），最小 <code>1m</code>。调整大小会清空缓存区；已知决策从磁盘恢复并执行至完成校准。未知 IP 查询 LAPI，故障时放行未知 IP。</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_METADATA_CACHE_SIZE</code></td>
+<td><code>5m</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>元数据缓存大小：</strong> 所有服务的可选报告元数据使用的独立共享内存。使用正整数兆字节（<code>m</code>/<code>M</code>），最小值为 <code>1m</code>；重载时调整大小会清空此内存区。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
@@ -7510,7 +7558,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">关于操作模式</p>
 <ul>
 <li><strong>实时模式</strong>会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。</li>
-<li><strong>流模式</strong>会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。</li>
+<li><strong>流模式</strong>先下载初始快照，再轮询新增和删除的决策以更新本地缓存，从而减少延迟，但应用新决策会略有延迟。</li>
 </ul>
 </div>
 <h4 id="_42">按服务的端点<a class="headerlink" href="#_42" title="Permanent link">&para;</a></h4>
@@ -7931,6 +7979,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>global</td>
 <td>否</td>
 <td><strong>重试超时：</strong> 启动时等待数据库可用的最大秒数。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。</td>
+</tr>
+<tr>
+<td><code>DATABASE_CONNECT_TIMEOUT</code></td>
+<td><code>10s</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>连接超时：</strong> 打开到 MySQL、MariaDB 或 PostgreSQL 服务器的连接时的最长等待时间。 必须大于 <code>0</code>：驱动程序不能没有该超时，<code>0</code> 会发出警告并回退到默认值。 <code>DATABASE_URI</code> 查询字符串中设置的超时优先。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。</td>
+</tr>
+<tr>
+<td><code>DATABASE_READ_TIMEOUT</code></td>
+<td><code>5m</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>读取超时：</strong> 等待 MySQL 或 MariaDB 服务器响应或接收数据的最长时间，超时后调用失败，避免对端消失导致永久阻塞。 PostgreSQL 改用 TCP keepalive。 <code>0</code> 表示禁用。 <code>DATABASE_URI</code> 查询字符串中设置的超时优先。 支持时间后缀（ms、s、m、h、d、w、M、y）；无后缀的数字单位为秒。</td>
 </tr>
 <tr>
 <td><code>DATABASE_REQUEST_RETRY_ATTEMPTS</code></td>
@@ -9778,9 +9840,9 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">证书配置文件</p>
 <p>Let's Encrypt 为不同的用例提供了不同的证书配置文件：</p>
 <ul>
-<li><strong>classic</strong>：通用证书，有效期为 90 天（默认）</li>
-<li><strong>tlsserver</strong>：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小</li>
-<li><strong>shortlived</strong>：增强安全性，有效期为 7 天，适用于自动化环境</li>
+<li><strong>classic</strong>：通用证书，有效期为 90 天，最多 100 个名称（默认）</li>
+<li><strong>tlsserver</strong>：针对 TLS 服务器身份验证进行了优化，有效期为 45 天，最多 25 个名称，有效负载更小</li>
+<li><strong>shortlived</strong>：增强安全性，有效期为 160 小时，最多 25 个名称，适用于自动化环境</li>
 <li><strong>custom</strong>：如果您的 ACME 服务器支持不同的配置文件，请使用 <code>LETS_ENCRYPT_CUSTOM_PROFILE</code> 进行设置。</li>
 </ul>
 </div>
@@ -9788,6 +9850,40 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">配置文件可用性</p>
 <p>请注意，<code>tlsserver</code> 和 <code>shortlived</code> 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。<code>classic</code> 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 <code>classic</code> 配置文件。</p>
 </div>
+<h3 id="ip_1">IP 地址证书<a class="headerlink" href="#ip_1" title="Permanent link">&para;</a></h3>
+<p>Let's Encrypt 可以为 IP 地址签发证书。在 <code>SERVER_NAME</code> 中把 IP 与主机名一起列出，BunkerWeb 会申请一张覆盖所有条目的证书。在单站点模式（<code>MULTISITE=no</code>）下，<code>SERVER_NAME</code> 的其余条目是第一个条目的别名，并且都包含在同一张证书中，因此主机名和 IP 地址可以一起使用。</p>
+<div class="admonition info">
+<p class="admonition-title">要求</p>
+<p>只有同时满足以下所有条件，才会申请 IP 地址的证书。否则该 IP 会被跳过并给出警告，其余名称仍会正常签发：</p>
+<ul>
+<li><code>LETS_ENCRYPT_SERVER</code> 为 <code>letsencrypt</code></li>
+<li><code>LETS_ENCRYPT_CHALLENGE</code> 为 <code>http</code></li>
+<li><code>LETS_ENCRYPT_PROFILE</code> 为 <code>shortlived</code></li>
+<li>该地址是公网 IPv4 地址（不支持 IPv6）</li>
+<li>该地址的 80 端口可从互联网访问</li>
+</ul>
+</div>
+<p>IP 地址证书的有效期为 160 小时，由每日续期任务自动续期。</p>
+<p>通过 IP 地址连接的客户端不会发送 SNI，因此 BunkerWeb 根据客户端所连接的地址选择证书：</p>
+<ol>
+<li>如果本地地址与某张 IP 证书匹配，则使用该证书。</li>
+<li>否则，如果只有一张 IP 证书，则使用该证书。</li>
+<li>否则使用默认证书。</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Docker 与 NAT</p>
+<p>在 Docker 端口映射或 NAT 之后，BunkerWeb 看到的是私有本地地址，与任何公网 IP 都不匹配。存在多张 IP 证书时，它无法区分它们，会使用默认证书。</p>
+</div>
+<p>将 <code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code> 设为 <code>yes</code> 后，BunkerWeb 会拒绝通过 IP 地址连接的客户端，因此 IP 地址证书永远不会被使用。</p>
+<p>证书会列出该服务的所有名称，因此通过 IP 连接的客户端也能看到主机名。若要保持主机名私密，请将 IP 地址放在单独的服务中，该服务的 <code>SERVER_NAME</code> 只包含 IP 地址。</p>
+<p>向已有证书的服务添加名称（主机名或 IP 地址）时，BunkerWeb 会扩展该证书，并在新名称验证失败时保留当前证书。移除或替换名称仍会从头重新签发证书。之后如果某个 IP 地址不再通过验证（例如 80 端口无法访问），整张证书（包括主机名）的续期都会失败。这种情况下，请从 <code>SERVER_NAME</code> 中移除该 IP 地址。</p>
+<p>只有确实包含在证书中的 IP 地址，才会提供给不带 SNI 的客户端。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">AUTO_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">EMAIL_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">"admin@example.com"</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"www.example.com</span><span class="nv"> </span><span class="s">203.0.113.10"</span>
+<span class="nt">LETS_ENCRYPT_CHALLENGE</span><span class="p">:</span><span class="w"> </span><span class="s">"http"</span>
+<span class="nt">LETS_ENCRYPT_PROFILE</span><span class="p">:</span><span class="w"> </span><span class="s">"shortlived"</span>
+</code></pre></div>
 <h3 id="_73">配置设置<a class="headerlink" href="#_73" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -9812,7 +9908,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>no</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>传递 Let's Encrypt 请求：</strong> 设置为 <code>yes</code> 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。 此时 ACME 验证路径会跳过所有其他检查。</td>
+<td><strong>传递 Let's Encrypt 请求：</strong> 设置为 <code>yes</code> 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。</td>
 </tr>
 <tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
@@ -9931,7 +10027,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>classic</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>证书配置文件：</strong> 选择要使用的证书配置文件。选项：<code>classic</code>（通用）、<code>tlsserver</code>（针对 TLS 服务器优化）或 <code>shortlived</code>（7 天证书）。</td>
+<td><strong>证书配置文件：</strong> 选择要使用的证书配置文件。选项：<code>classic</code>（通用，最多 100 个名称）、<code>tlsserver</code>（针对 TLS 服务器优化，有效期 45 天，最多 25 个名称）或 <code>shortlived</code>（160 小时证书，最多 25 个名称）。</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_CUSTOM_PROFILE</code></td>
@@ -10568,6 +10664,13 @@ TrustedMonitor/\d+\.\d+
 <td>global</td>
 <td>否</td>
 <td>Shared dict size (datastore for all healthchecks).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_ZONE_SIZE</code></td>
+<td><code>64k</code></td>
+<td>global</td>
+<td>否</td>
+<td>Shared memory zone size for upstreams with dynamic resolution (all resolved upstreams share one zone).</td>
 </tr>
 <tr>
 <td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
@@ -12797,7 +12900,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </div>
 <div class="admonition info">
 <p class="admonition-title">多个 IP 地址</p>
-<p>当 <code>REAL_IP_RECURSIVE</code> 启用并且标头包含多个 IP（例如，<code>X-Forwarded-For: client, proxy1, proxy2</code>）时，BunkerWeb 会将不在您受信任代理列表中的最左侧 IP 识别为客户端 IP。</p>
+<p>当 <code>REAL_IP_RECURSIVE</code> 启用并且标头包含多个 IP（例如，<code>X-Forwarded-For: client, proxy1, proxy2</code>）时，BunkerWeb 会将不在您受信任代理列表中的最右侧 IP 识别为客户端 IP。</p>
 </div>
 <h3 id="_101">配置示例<a class="headerlink" href="#_101" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="36:7"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><input id="__tabbed_36_7" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">基本配置</label><label for="__tabbed_36_2">云负载均衡器</label><label for="__tabbed_36_3">PROXY 协议</label><label for="__tabbed_36_4">带有 URL 的多个代理源</label><label for="__tabbed_36_5">CDN 配置</label><label for="__tabbed_36_6">位于 Cloudflare 后面</label><label for="__tabbed_36_7">位于 AWS CloudFront 后面</label></div>
@@ -15951,6 +16054,8 @@ TrustedMonitor/\d+\.\d+
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
       
         <script src="../../assets/toc-dropdown.js"></script>
+      
+        <script src="../../assets/webmcp.js"></script>
       
     
   </body>
