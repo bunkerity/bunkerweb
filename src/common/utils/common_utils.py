@@ -967,10 +967,20 @@ def get_redis_client(
             if logger:
                 logger.info(f"Connecting to Redis Sentinel cluster: {redis_sentinel_hosts}")
 
+            sentinel_kwargs = {
+                "ssl": redis_ssl,
+                "socket_timeout": redis_timeout / 1000,
+                "socket_connect_timeout": redis_timeout / 1000,
+                "socket_keepalive": True,
+            } | ssl_kwargs
+            if redis_sentinel_username:
+                sentinel_kwargs["username"] = redis_sentinel_username
+            if redis_sentinel_password:
+                sentinel_kwargs["password"] = redis_sentinel_password
+
             sentinel = Sentinel(
                 redis_sentinel_hosts,
-                username=redis_sentinel_username,
-                password=redis_sentinel_password,
+                sentinel_kwargs=sentinel_kwargs,
                 ssl=redis_ssl,
                 socket_timeout=redis_timeout / 1000,
                 socket_connect_timeout=redis_timeout / 1000,

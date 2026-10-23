@@ -14,6 +14,7 @@
 - [BUGFIX] `crowdsec`: stream mode checkpoints decisions to disk, so known bans stay enforced through Local API outages, reloads and container restarts (see the plugin README).
 - [BUGFIX] `db`: upgrades on MariaDB or MySQL no longer crash when the `method` columns are `VARCHAR` instead of `ENUM`. (Fixes #4095)
 - [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
+- [BUGFIX] `redis`: the Web UI and CLI send the Sentinel credentials and TLS settings to the Sentinel nodes. (Fixes #4093)
 - [BUGFIX] `scheduler`: startup stops when the database cannot be stamped for its migration, instead of running on an unmigrated database.
 - [BUGFIX] `scheduler`: job-triggered reloads wait while a configuration generation is being retried, so new plugins and custom configs never load against the previous configuration.
 - [BUGFIX] `ui`: the dashboard blocking chart, country map and top IPs count blocked reports of any HTTP status and leave out detect-mode events. Thanks to @MageInt for the fix.
