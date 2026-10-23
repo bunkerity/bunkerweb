@@ -1869,6 +1869,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#conservar-los-cuerpos-de-error-de-las-api-de-origen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conservar los cuerpos de error de las API de origen
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5555,7 +5566,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Compatibilidad de la base de datos</p>
-<p>El complemento de copia de seguridad es compatible con las bases de datos SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos de Oracle no son compatibles actualmente para las operaciones de copia de seguridad y restauración.</p>
+<p>El complemento de copia de seguridad es compatible con las bases de datos SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos de Oracle no son compatibles actualmente para las operaciones de copia de seguridad y restauración. La restauración rechaza una copia de seguridad procedente de otro motor de base de datos (MariaDB y MySQL cuentan como motores distintos) antes de modificar nada.</p>
 </div>
 <h3 id="configuraciones-de-ejemplo_3">Configuraciones de ejemplo<a class="headerlink" href="#configuraciones-de-ejemplo_3" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Copias de seguridad diarias con retención de 7 días</label><label for="__tabbed_6_2">Copias de seguridad semanales con retención extendida</label><label for="__tabbed_6_3">Copias de seguridad mensuales en una ubicación personalizada</label></div>
@@ -8281,6 +8292,9 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
+<h3 id="conservar-los-cuerpos-de-error-de-las-api-de-origen">Conservar los cuerpos de error de las API de origen<a class="headerlink" href="#conservar-los-cuerpos-de-error-de-las-api-de-origen" title="Permanent link">&para;</a></h3>
+<p>Por defecto, BunkerWeb sustituye las respuestas 400 del servidor de origen por su propia página de error, lo que puede romper los clientes de API JSON u OIDC. Para dejar pasar los errores del origen en un servicio, quite el código de la lista de ese servicio, por ejemplo <code>app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504</code> (conserve los códigos que aún quiera interceptar), o defina <code>app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no</code> para dejar pasar todos los errores del origen. Los errores generados por el propio BunkerWeb (por ejemplo, una denegación del WAF) siguen siendo gestionados por BunkerWeb.</p>
+<p>Para conservar los errores del origen solo en una ubicación, añada un archivo que contenga <code>proxy_intercept_errors off;</code> y enumérelo en el ajuste <code>REVERSE_PROXY_INCLUDES</code> de esa ubicación (por ejemplo <code>app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf</code>, con el mismo sufijo numérico que el <code>REVERSE_PROXY_HOST</code> de la ubicación). El archivo debe existir dentro de los contenedores de BunkerWeb. Las demás ubicaciones del servicio siguen interceptando los errores.</p>
 <h2 id="greylist">Greylist<a class="headerlink" href="#greylist" title="Permanent link">&para;</a></h2>
 <p>Compatibilidad con STREAM <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>El complemento de Lista Gris proporciona un enfoque de seguridad flexible que permite el acceso de los visitantes mientras se mantienen las características de seguridad esenciales.</p>
@@ -8586,11 +8600,43 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>Una configuración que permite el acceso a puntos finales específicos de la API:</p>
+<p>Una configuración que permite a una red asociada acceder a todo y a cualquier cliente acceder a un endpoint público:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_GREYLIST</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
-<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/v1/public/</span><span class="nv"> </span><span class="s">^/api/v1/status"</span>
-<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span><span class="w">  </span><span class="c1"># Red del socio externo</span>
+<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span>
+<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/foo$"</span>
 </code></pre></div>
+<p>Los criterios de la Greylist son alternativas: una solicitud pasa la Greylist cuando cualquiera de ellos coincide. Aquí la red indicada puede acceder a todas las rutas y cualquier cliente puede acceder a la ruta exacta <code>/api/foo</code>. Los demás clientes son denegados en las demás rutas. Las demás comprobaciones de seguridad activadas se siguen aplicando a cada solicitud. Use <code>^/api/foo(/|$)</code> para un subárbol público. La coincidencia usa la ruta normalizada, sin la cadena de consulta. No se pueden expresar listas de IP distintas para rutas distintas, ni exigir que coincidan a la vez una IP y una ruta.</p>
+<table>
+<thead>
+<tr>
+<th>Cliente</th>
+<th>Ruta</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>En <code>203.0.113.0/24</code></td>
+<td><code>/api/foo</code></td>
+<td>Pasa</td>
+</tr>
+<tr>
+<td>En <code>203.0.113.0/24</code></td>
+<td>cualquier otra ruta</td>
+<td>Pasa</td>
+</tr>
+<tr>
+<td>Fuera de <code>203.0.113.0/24</code></td>
+<td><code>/api/foo</code></td>
+<td>Pasa</td>
+</tr>
+<tr>
+<td>Fuera de <code>203.0.113.0/24</code></td>
+<td>cualquier otra ruta</td>
+<td>Denegado</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -10528,6 +10574,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<p>Cuando <code>SECURITY_MODE</code> es <code>detect</code>, los límites de conexiones se evalúan y se registran (<code>limiting connections, dry run</code>) pero no se aplican.</p>
 <div class="admonition info">
 <p class="admonition-title">Limitación de Conexiones vs. Solicitudes</p>
 <ul>
@@ -10779,6 +10826,13 @@ TrustedMonitor/\d+\.\d+
 <td>global</td>
 <td>sí</td>
 <td>Host header for healthchecks (useful for HTTPS).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_PORT</code></td>
+<td></td>
+<td>global</td>
+<td>sí</td>
+<td>TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a |- block scalar.</td>
 </tr>
 </tbody>
 </table>
@@ -13401,7 +13455,7 @@ cualquier ajuste sin una clave dedicada en el chart, use <code>scheduler.extraEn
 <td><code>weekly</code></td>
 <td>global</td>
 <td>no</td>
-<td>The frequency at which reports are sent.</td>
+<td>The frequency at which reports are sent: daily, weekly or monthly (every four weeks).</td>
 </tr>
 <tr>
 <td><code>REPORTING_TOP_N</code></td>
@@ -13464,7 +13518,7 @@ cualquier ajuste sin una clave dedicada en el chart, use <code>scheduler.extraEn
 <td><code>SSL</code></td>
 <td>global</td>
 <td>no</td>
-<td>Determine whether or not to use a secure connection for SMTP.</td>
+<td>SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
@@ -13585,7 +13639,7 @@ cualquier ajuste sin una clave dedicada en el chart, use <code>scheduler.extraEn
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Interceptar Errores:</strong> Si se deben interceptar y reescribir las respuestas de error del backend.</td>
+<td><strong>Interceptar Errores:</strong> Si se deben interceptar y reescribir las respuestas de error del backend. Consulte <a href="#errors">Conservar los cuerpos de error de las API de origen</a>.</td>
 </tr>
 </tbody>
 </table>

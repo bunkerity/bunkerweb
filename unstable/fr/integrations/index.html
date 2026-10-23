@@ -3452,7 +3452,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </div>
 <div class="admonition info">
 <p class="admonition-title">KEEP_CONFIG_ON_RESTART</p>
-<p>Contrairement aux paramètres ci-dessus, <code>KEEP_CONFIG_ON_RESTART</code> est lu directement par le point d'entrée du conteneur <code>bunkerweb</code> lui-même depuis son environnement de processus, pas depuis le Scheduler ni la base de données, et doit donc être défini sur le conteneur <code>bunkerweb</code> lui-même. Mettre à <code>yes</code> pour conserver la configuration générée précédemment lors d'un redémarrage du conteneur au lieu de générer la configuration de chargement. Une installation de configuration interrompue (conteneur tué, manque de mémoire) n'est jamais conservée : le démarrage suivant génère à la place la configuration de chargement. Défaut <code>no</code>.</p>
+<p>Contrairement aux paramètres ci-dessus, <code>KEEP_CONFIG_ON_RESTART</code> est lu directement par le point d'entrée du conteneur <code>bunkerweb</code> lui-même depuis son environnement de processus, pas depuis le Scheduler ni la base de données, et doit donc être défini sur le conteneur <code>bunkerweb</code> lui-même. Mettre à <code>yes</code> pour conserver la configuration générée précédemment lors d'un redémarrage du conteneur au lieu de générer la configuration de chargement. Si la configuration conservée ne démarre pas, l'instance bascule sur la configuration de chargement jusqu'à ce que le Scheduler envoie la plus récente. Une installation de configuration interrompue (conteneur tué, manque de mémoire) n'est jamais conservée : le démarrage suivant génère à la place la configuration de chargement. Défaut <code>no</code>.</p>
 </div>
 <h3 id="utilisation-des-secrets-docker">Utilisation des secrets Docker<a class="headerlink" href="#utilisation-des-secrets-docker" title="Permanent link">&para;</a></h3>
 <p>Au lieu de transmettre des paramètres sensibles via des variables d'environnement, vous pouvez les stocker en tant que secrets Docker. Pour chaque paramètre que vous souhaitez sécuriser, créez un secret Docker dont le nom correspond à la clé de paramètre (en majuscules). Les scripts d'entrée de BunkerWeb chargent automatiquement les secrets <code>/run/secrets</code> et les exportent en tant que variables d'environnement.</p>
@@ -4449,7 +4449,7 @@ MY_SETTING_2=value2
 <tbody>
 <tr>
 <td><code>KEEP_CONFIG_ON_RESTART</code></td>
-<td>Conserve la configuration générée précédemment lors d'un redémarrage du service <code>bunkerweb</code> au lieu de générer la configuration de chargement. Lu depuis l'environnement ou <code>/etc/bunkerweb/variables.env</code>, jamais depuis la base de données.</td>
+<td>Conserve la configuration générée précédemment lors d'un redémarrage du service <code>bunkerweb</code> au lieu de générer la configuration de chargement. Si la configuration conservée ne démarre pas, l'instance bascule sur la configuration de chargement jusqu'à ce que le Scheduler envoie la plus récente. Lu depuis l'environnement ou <code>/etc/bunkerweb/variables.env</code>, jamais depuis la base de données.</td>
 <td><code>yes</code> ou <code>no</code></td>
 <td><code>no</code></td>
 </tr>

@@ -3457,7 +3457,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </div>
 <div class="admonition info">
 <p class="admonition-title">KEEP_CONFIG_ON_RESTART</p>
-<p>Unlike the settings above, <code>KEEP_CONFIG_ON_RESTART</code> is read directly by the <code>bunkerweb</code> container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the <code>bunkerweb</code> container itself. Set to <code>yes</code> to keep the previously generated configuration across a container restart instead of rendering the loading configuration. With <code>yes</code>, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. A configuration install that was cut short (container kill, out of memory) is never kept: the next start renders the loading configuration instead. Default <code>no</code>.</p>
+<p>Unlike the settings above, <code>KEEP_CONFIG_ON_RESTART</code> is read directly by the <code>bunkerweb</code> container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the <code>bunkerweb</code> container itself. Set to <code>yes</code> to keep the previously generated configuration across a container restart instead of rendering the loading configuration. With <code>yes</code>, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. If the preserved configuration fails to start, the instance falls back to the loading configuration until the scheduler pushes the latest one. A configuration install that was cut short (container kill, out of memory) is never kept: the next start renders the loading configuration instead. Default <code>no</code>.</p>
 </div>
 <h3 id="using-docker-secrets">Using Docker secrets<a class="headerlink" href="#using-docker-secrets" title="Permanent link">&para;</a></h3>
 <p>Instead of passing sensitive settings via environment variables, you can store them as Docker secrets. For each setting you want to secure, create a Docker secret with the name matching the setting key (in uppercase). BunkerWeb's entrypoint scripts automatically load secrets from <code>/run/secrets</code> and export them as environment variables.</p>
@@ -4690,7 +4690,7 @@ MY_SETTING_2=value2
 <tbody>
 <tr>
 <td><code>KEEP_CONFIG_ON_RESTART</code></td>
-<td>Keep the previously generated configuration on restart of the <code>bunkerweb</code> service instead of rendering the loading configuration. With <code>yes</code>, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. Read from the environment or <code>/etc/bunkerweb/variables.env</code>, never from the database.</td>
+<td>Keep the previously generated configuration on restart of the <code>bunkerweb</code> service instead of rendering the loading configuration. With <code>yes</code>, the instance keeps enforcing its preserved configuration while it asks the scheduler for the latest one. If the preserved configuration fails to start, the instance falls back to the loading configuration until the scheduler pushes the latest one. Read from the environment or <code>/etc/bunkerweb/variables.env</code>, never from the database.</td>
 <td><code>yes</code> or <code>no</code></td>
 <td><code>no</code></td>
 </tr>

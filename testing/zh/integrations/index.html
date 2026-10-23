@@ -3441,7 +3441,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </div>
 <div class="admonition info">
 <p class="admonition-title">KEEP_CONFIG_ON_RESTART</p>
-<p>与上述设置不同，<code>KEEP_CONFIG_ON_RESTART</code> 由 <code>bunkerweb</code> 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 <code>bunkerweb</code> 容器本身上设置。设置为 <code>yes</code> 可在容器重启时保留之前生成的配置，而不是渲染加载配置。被中断的配置安装（容器被终止、内存不足）不会被保留：下次启动时会改为渲染加载配置。默认值为 <code>no</code>。</p>
+<p>与上述设置不同，<code>KEEP_CONFIG_ON_RESTART</code> 由 <code>bunkerweb</code> 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 <code>bunkerweb</code> 容器本身上设置。设置为 <code>yes</code> 可在容器重启时保留之前生成的配置，而不是渲染加载配置。如果保留的配置无法启动，实例会回退到加载配置，直到调度器推送最新配置。被中断的配置安装（容器被终止、内存不足）不会被保留：下次启动时会改为渲染加载配置。默认值为 <code>no</code>。</p>
 </div>
 <h3 id="docker-secrets">使用 Docker secrets<a class="headerlink" href="#docker-secrets" title="Permanent link">&para;</a></h3>
 <p>与其通过环境变量传递敏感设置，不如将它们存储为 Docker secrets。对于每个您想要保护的设置，创建一个名称与设置键（大写）匹配的 Docker secret。BunkerWeb 的入口点脚本会自动从 <code>/run/secrets</code> 加载 secrets 并将它们导出为环境变量。</p>
@@ -4444,7 +4444,7 @@ MY_SETTING_2=value2
 <tbody>
 <tr>
 <td><code>KEEP_CONFIG_ON_RESTART</code></td>
-<td>重启 <code>bunkerweb</code> 服务时保留之前生成的配置，而不是重新渲染加载配置。从环境变量或 <code>/etc/bunkerweb/variables.env</code> 读取，绝不从数据库读取。</td>
+<td>重启 <code>bunkerweb</code> 服务时保留之前生成的配置，而不是重新渲染加载配置。如果保留的配置无法启动，实例会回退到加载配置，直到调度器推送最新配置。从环境变量或 <code>/etc/bunkerweb/variables.env</code> 读取，绝不从数据库读取。</td>
 <td><code>yes</code> 或 <code>no</code></td>
 <td><code>no</code></td>
 </tr>

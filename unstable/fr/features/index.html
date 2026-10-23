@@ -1869,6 +1869,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#conserver-les-corps-derreur-des-api-en-amont" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conserver les corps d'erreur des API en amont
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5554,7 +5565,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Compatibilité des bases de données</p>
-<p>Le plugin Backup prend en charge les bases SQLite, MySQL/MariaDB et PostgreSQL. Les bases Oracle ne sont pas prises en charge actuellement pour les opérations de sauvegarde et de restauration.</p>
+<p>Le plugin Backup prend en charge les bases SQLite, MySQL/MariaDB et PostgreSQL. Les bases Oracle ne sont pas prises en charge actuellement pour les opérations de sauvegarde et de restauration. Une restauration refuse une sauvegarde issue d'un autre moteur de base de données (MariaDB et MySQL comptent comme deux moteurs différents) avant de modifier quoi que ce soit.</p>
 </div>
 <h3 id="exemples-de-configuration_2">Exemples de configuration<a class="headerlink" href="#exemples-de-configuration_2" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Sauvegardes quotidiennes avec rétention de 7 jours</label><label for="__tabbed_6_2">Sauvegardes hebdomadaires avec rétention étendue</label><label for="__tabbed_6_3">Sauvegardes mensuelles vers un emplacement personnalisé</label></div>
@@ -8247,6 +8258,9 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
+<h3 id="conserver-les-corps-derreur-des-api-en-amont">Conserver les corps d'erreur des API en amont<a class="headerlink" href="#conserver-les-corps-derreur-des-api-en-amont" title="Permanent link">&para;</a></h3>
+<p>Par défaut, BunkerWeb remplace les réponses 400 du service en amont par sa propre page d'erreur, ce qui peut casser les clients d'API JSON ou OIDC. Pour laisser passer les erreurs du service en amont pour un seul service, retirez le code de la liste de ce service, par exemple <code>app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504</code> (gardez les codes que vous souhaitez toujours intercepter), ou définissez <code>app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no</code> pour laisser passer toutes les erreurs du service en amont. Les erreurs générées par BunkerWeb lui-même (par exemple un refus du WAF) restent gérées par BunkerWeb.</p>
+<p>Pour conserver les erreurs du service en amont sur un seul emplacement, ajoutez un fichier contenant <code>proxy_intercept_errors off;</code> et listez-le dans le paramètre <code>REVERSE_PROXY_INCLUDES</code> de cet emplacement (par exemple <code>app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf</code>, avec le même suffixe numérique que le <code>REVERSE_PROXY_HOST</code> de l'emplacement). Le fichier doit exister dans les conteneurs BunkerWeb. Les autres emplacements du service continuent d'intercepter les erreurs.</p>
 <h2 id="greylist">Greylist<a class="headerlink" href="#greylist" title="Permanent link">&para;</a></h2>
 <p>Prise en charge STREAM <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Le plugin Greylist fournit une approche de sécurité flexible qui autorise l'accès des visiteurs tout en conservant les fonctionnalités de sécurité essentielles.</p>
@@ -8552,11 +8566,43 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>Configuration autorisant l'accès à des endpoints d'API précis :</p>
+<p>Configuration qui laisse un réseau partenaire accéder à tout et tous les clients accéder à un seul endpoint public :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_GREYLIST</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
-<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/v1/public/</span><span class="nv"> </span><span class="s">^/api/v1/status"</span>
-<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span><span class="w">  </span><span class="c1"># Réseau partenaire externe</span>
+<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span>
+<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/foo$"</span>
 </code></pre></div>
+<p>Les critères de la Greylist sont des alternatives : une requête passe la Greylist dès qu'un seul d'entre eux correspond. Ici, le réseau listé peut accéder à tous les chemins, et n'importe quel client peut accéder au chemin exact <code>/api/foo</code>. Les autres clients sont refusés sur les autres chemins. Les autres contrôles de sécurité activés s'appliquent toujours à chaque requête. Utilisez <code>^/api/foo(/|$)</code> pour une arborescence publique. La correspondance porte sur le chemin normalisé, sans la chaîne de requête. Il est impossible d'exprimer des listes d'IP différentes selon les chemins, ni d'exiger qu'une IP et un chemin correspondent en même temps.</p>
+<table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Chemin</th>
+<th>Résultat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dans <code>203.0.113.0/24</code></td>
+<td><code>/api/foo</code></td>
+<td>Autorisé</td>
+</tr>
+<tr>
+<td>Dans <code>203.0.113.0/24</code></td>
+<td>tout autre chemin</td>
+<td>Autorisé</td>
+</tr>
+<tr>
+<td>Hors de <code>203.0.113.0/24</code></td>
+<td><code>/api/foo</code></td>
+<td>Autorisé</td>
+</tr>
+<tr>
+<td>Hors de <code>203.0.113.0/24</code></td>
+<td>tout autre chemin</td>
+<td>Refusé</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -10488,6 +10534,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<p>Lorsque <code>SECURITY_MODE</code> est <code>detect</code>, les limites de connexions sont évaluées et journalisées (<code>limiting connections, dry run</code>) mais pas appliquées.</p>
 <div class="admonition info">
 <p class="admonition-title">Limitation de connexions vs de requêtes</p>
 <ul>
@@ -10739,6 +10786,13 @@ TrustedMonitor/\d+\.\d+
 <td>global</td>
 <td>oui</td>
 <td>Host header for healthchecks (useful for HTTPS).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_PORT</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a |- block scalar.</td>
 </tr>
 </tbody>
 </table>
@@ -13323,7 +13377,7 @@ compris Sentinel via <code>settings.redis.redisSentinelHosts</code> et <code>set
 <td><code>weekly</code></td>
 <td>global</td>
 <td>non</td>
-<td>The frequency at which reports are sent.</td>
+<td>The frequency at which reports are sent: daily, weekly or monthly (every four weeks).</td>
 </tr>
 <tr>
 <td><code>REPORTING_TOP_N</code></td>
@@ -13386,7 +13440,7 @@ compris Sentinel via <code>settings.redis.redisSentinelHosts</code> et <code>set
 <td><code>SSL</code></td>
 <td>global</td>
 <td>non</td>
-<td>Determine whether or not to use a secure connection for SMTP.</td>
+<td>SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
@@ -13504,7 +13558,7 @@ compris Sentinel via <code>settings.redis.redisSentinelHosts</code> et <code>set
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Intercepter les erreurs :</strong> Intercepte et réécrit les réponses d'erreur du backend.</td>
+<td><strong>Intercepter les erreurs :</strong> Intercepte et réécrit les réponses d'erreur du backend. Voir <a href="#errors">Conserver les corps d'erreur des API en amont</a>.</td>
 </tr>
 </tbody>
 </table>

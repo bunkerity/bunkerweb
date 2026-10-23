@@ -1869,6 +1869,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        保留上游 API 的错误响应体
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2358,7 +2369,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#api" class="md-nav__link">
+  <a href="#api_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         API 访问
@@ -5567,7 +5578,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition warning">
 <p class="admonition-title">数据库兼容性</p>
-<p>备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。</p>
+<p>备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。恢复操作会在修改任何内容之前拒绝来自其他数据库引擎的备份（MariaDB 和 MySQL 视为不同的引擎）。</p>
 </div>
 <h3 id="_15">示例配置<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">每日备份，保留 7 天</label><label for="__tabbed_6_2">每周备份，延长保留期</label><label for="__tabbed_6_3">每月备份到自定义位置</label></div>
@@ -8295,6 +8306,9 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
+<h3 id="api">保留上游 API 的错误响应体<a class="headerlink" href="#api" title="Permanent link">&para;</a></h3>
+<p>默认情况下，BunkerWeb 会用自己的错误页面替换上游返回的 400 响应，这可能会破坏 JSON API 或 OIDC 客户端。要为某个服务放行上游错误，可以从该服务的列表中移除相应状态码，例如 <code>app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504</code>（保留您仍希望拦截的状态码），或者设置 <code>app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no</code> 以放行所有上游错误。由 BunkerWeb 自身生成的错误（例如 WAF 拒绝）仍由 BunkerWeb 处理。</p>
+<p>若只想在某个 location 中保留上游错误，请创建一个内容为 <code>proxy_intercept_errors off;</code> 的文件，并将其列入该 location 的 <code>REVERSE_PROXY_INCLUDES</code> 设置中（例如 <code>app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf</code>，数字后缀与该 location 的 <code>REVERSE_PROXY_HOST</code> 相同）。该文件必须存在于 BunkerWeb 容器内。该服务的其他 location 仍会拦截错误。</p>
 <h2 id="greylist">Greylist<a class="headerlink" href="#greylist" title="Permanent link">&para;</a></h2>
 <p>STREAM 支持 <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>Greylist 插件提供了一种灵活的安全方法，允许访问者访问，同时仍然保持必要的安全功能。</p>
@@ -8600,11 +8614,43 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>允许访问特定 API 端点的配置：</p>
+<p>一种让合作伙伴网络访问所有路径、并让所有客户端访问某个公开端点的配置：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_GREYLIST</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
-<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/v1/public/</span><span class="nv"> </span><span class="s">^/api/v1/status"</span>
-<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span><span class="w">  </span><span class="c1"># 外部合作伙伴网络</span>
+<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span>
+<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/foo$"</span>
 </code></pre></div>
+<p>Greylist 的各项条件是“或”的关系：只要其中任意一项匹配，请求即通过 Greylist。此处，所列网络可以访问所有路径，任何客户端都可以访问精确路径 <code>/api/foo</code>。其他客户端在其他路径上会被拒绝。其他已启用的安全检查仍然适用于每个请求。如需公开某个子路径树，请使用 <code>^/api/foo(/|$)</code>。匹配使用规范化后的路径，不包含查询字符串。该配置无法为不同路径设置不同的 IP 列表，也无法要求 IP 和路径同时匹配。</p>
+<table>
+<thead>
+<tr>
+<th>客户端</th>
+<th>路径</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在 <code>203.0.113.0/24</code> 内</td>
+<td><code>/api/foo</code></td>
+<td>通过</td>
+</tr>
+<tr>
+<td>在 <code>203.0.113.0/24</code> 内</td>
+<td>任何其他路径</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>在 <code>203.0.113.0/24</code> 外</td>
+<td><code>/api/foo</code></td>
+<td>通过</td>
+</tr>
+<tr>
+<td>在 <code>203.0.113.0/24</code> 外</td>
+<td>任何其他路径</td>
+<td>拒绝</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -10546,6 +10592,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<p>当 <code>SECURITY_MODE</code> 为 <code>detect</code> 时，连接限制会被评估并记录（<code>limiting connections, dry run</code>），但不会被强制执行。</p>
 <div class="admonition info">
 <p class="admonition-title">连接限制与请求限制</p>
 <ul>
@@ -10798,6 +10845,13 @@ TrustedMonitor/\d+\.\d+
 <td>是</td>
 <td>Host header for healthchecks (useful for HTTPS).</td>
 </tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_PORT</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a |- block scalar.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="maintenance-pro">Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)<a class="headerlink" href="#maintenance-pro" title="Permanent link">&para;</a></h2>
@@ -10875,7 +10929,7 @@ TrustedMonitor/\d+\.\d+
 <p><strong>插件计数器</strong>：跟踪活动和事件的各种插件特定计数器。</p>
 </li>
 </ol>
-<h3 id="api">API 访问<a class="headerlink" href="#api" title="Permanent link">&para;</a></h3>
+<h3 id="api_1">API 访问<a class="headerlink" href="#api_1" title="Permanent link">&para;</a></h3>
 <p>指标数据可以通过 BunkerWeb 的内部 API 端点访问：</p>
 <ul>
 <li><strong>端点</strong>：<code>/metrics/{filter}</code></li>
@@ -13401,7 +13455,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>weekly</code></td>
 <td>global</td>
 <td>否</td>
-<td>The frequency at which reports are sent.</td>
+<td>The frequency at which reports are sent: daily, weekly or monthly (every four weeks).</td>
 </tr>
 <tr>
 <td><code>REPORTING_TOP_N</code></td>
@@ -13464,7 +13518,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>SSL</code></td>
 <td>global</td>
 <td>否</td>
-<td>Determine whether or not to use a secure connection for SMTP.</td>
+<td>SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
@@ -13582,7 +13636,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>否</td>
-<td><strong>拦截错误：</strong> 是否拦截和重写来自后端的错误响应。</td>
+<td><strong>拦截错误：</strong> 是否拦截和重写来自后端的错误响应。 参见<a href="#errors">保留上游 API 的错误响应体</a>。</td>
 </tr>
 </tbody>
 </table>
