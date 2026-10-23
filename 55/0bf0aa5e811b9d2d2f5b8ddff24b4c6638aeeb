@@ -1,0 +1,31 @@
+src/scheduler/Dockerfile
+  s_a6b3dc700675e5::t_8324e06ff55dc4 58-60
+CHANGELOG.md
+  s_a6b3dc700675e5::t_06c3d73a9fda96 6
+src/api/Dockerfile
+  s_a6b3dc700675e5::t_8324e06ff55dc4 46-48
+src/all-in-one/Dockerfile
+  s_a6b3dc700675e5::t_8324e06ff55dc4 176-178
+src/bw/Dockerfile
+  s_a6b3dc700675e5::t_8324e06ff55dc4 80-82
+src/autoconf/Dockerfile
+  s_a6b3dc700675e5::t_8324e06ff55dc4 45-47
+src/ui/Dockerfile
+  s_a6b3dc700675e5::t_8324e06ff55dc4 87-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "550bf0aa5e811b9d2d2f5b8ddff24b4c6638aeeb",
+  "prompts": {},
+  "sessions": {
+    "s_a6b3dc700675e5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "125a065e-10f4-4025-b16e-ea3c58777e8f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
