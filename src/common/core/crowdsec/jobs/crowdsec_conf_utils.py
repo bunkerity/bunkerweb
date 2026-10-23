@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Settings resolution for the per-service CrowdSec configuration.
 
-Every CROWDSEC_* setting is context=multisite, so each service resolves its own
+Connection settings handled here are context=multisite, so each service resolves its own
 value: the ``{service}_NAME`` key when it exists, the unprefixed key otherwise, and
 finally the plugin default. Only ``common_utils`` is imported so it can be unit tested
 with just ``src/common/utils`` on the path; callers pass ``os.getenv`` (never a ``from os import environ`` binding,
 which freezes on a start-time snapshot of the job environment).
+Global cache sizes are rendered separately by the nginx HTTP template.
 """
 
 from common_utils import parse_duration_int  # type: ignore

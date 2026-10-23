@@ -3,7 +3,9 @@ package.path = package.path .. ";./?.lua"
 local config = require "crowdsec.lib.config"
 local decision_cache = require "crowdsec.lib.decision_cache"
 local stream_lock = require "crowdsec.lib.stream_lock"
+local semaphore = require "ngx.semaphore"
 local cache_partition = require "crowdsec.cache_partition"
+local enforcement_state = require "crowdsec.enforcement_state"
 local iputils = require "crowdsec.lib.iputils"
 local http = require "resty.http"
 local cjson = require "cjson"
@@ -58,12 +60,37 @@ local function namespaced_cache(dict, prefix)
     end,
     delete = function(_, key) return dict:delete(prefix .. key) end,
     safe_set = function(_, key, value, exptime) return dict:safe_set(prefix .. key, value, exptime or 0) end,
+    add = function(_, key, value, exptime) return dict:add(prefix .. key, value, exptime or 0) end,
+    safe_add = function(_, key, value, exptime) return dict:safe_add(prefix .. key, value, exptime or 0) end,
     incr = function(_, key, value, initial) return dict:incr(prefix .. key, value, initial) end,
+    ttl = function(_, key) return dict:ttl(prefix .. key) end,
+    expire = function(_, key, ttl) return dict:expire(prefix .. key, ttl) end,
+    get_keys = function()
+      local keys = {}
+      for _, key in ipairs(dict:get_keys(0)) do
+        if key:sub(1, #prefix) == prefix then keys[#keys + 1] = key:sub(#prefix + 1) end
+      end
+      return keys
+    end,
   }
 end
 
+local function snapshot_ready()
+  local generation = runtime.cache:get("v3_generation")
+  return type(generation) == "string" and generation:sub(1, #runtime.fingerprint + 1) == runtime.fingerprint .. "|"
+end
+
+local function needs_startup()
+  local last = runtime.cache:get("last_successful_sync")
+  local full = runtime.cache:get("last_successful_full_sync")
+  return not snapshot_ready() or runtime.cache:get("stream_inflight") == true
+    or not full or ngx.time() - full > 3600
+    or not last or ngx.time() - last > math.max(300, 30 * runtime.conf["UPDATE_FREQUENCY"])
+end
+
 -- init function
-function csmod.init(configFile, userAgent, cachePrefix) -- BW local mod: cachePrefix
+-- BW local mod: shared prefix/policy and durable service bindings.
+function csmod.init(configFile, userAgent, cachePrefix, cacheFingerprint, configAliases)
   local conf, err = config.loadConfig(configFile)
   if conf == nil then
     return nil, err
@@ -79,6 +106,15 @@ function csmod.init(configFile, userAgent, cachePrefix) -- BW local mod: cachePr
     runtime.metadata = namespaced_cache(runtime.metadata, cachePrefix)
   end
   runtime.decisions = decision_cache.new(runtime.cache, runtime.metadata)
+  runtime.cache_prefix = cachePrefix or "(default)"
+  runtime.fingerprint = cacheFingerprint or cache_partition.fingerprint(conf)
+  local policy = cache_partition.fingerprint(conf)
+  -- Bootstrap live entries must never mutate either published stream slot.
+  runtime.bootstrap_cache = namespaced_cache(runtime.cache, "bootstrap_" .. policy .. "|")
+  runtime.bootstrap_decisions = decision_cache.new(runtime.bootstrap_cache,
+    runtime.metadata and namespaced_cache(runtime.metadata, "bootstrap_" .. policy .. "|"))
+  runtime.bootstrap_retry_after = nil
+  runtime.enforcement = enforcement_state.new(runtime.cache_prefix, configAliases or {configFile})
   runtime.stream_lock_path = "/var/run/bunkerweb/crowdsec-" .. cache_partition.hash(cachePrefix or conf.API_URL or "") .. ".lock"
   runtime.fallback = runtime.conf["FALLBACK_REMEDIATION"]
 
@@ -131,22 +167,12 @@ function csmod.init(configFile, userAgent, cachePrefix) -- BW local mod: cachePr
   end
 
 
-  -- if stream mode, add callback to stream_query and start timer
-  if runtime.conf["MODE"] == "stream" then
+  -- Shared decisions survive reloads; only a changed policy or stale sync needs a snapshot.
+  if needs_startup() then
     runtime.cache:incr("startup_request", 1, 0)
-    local succ, err, forcible = runtime.cache:set("startup", true)
+    local succ, err = runtime.cache:safe_set("startup", true)
     if not succ then
       ngx.log(ngx.ERR, "failed to add startup key in cache: "..err)
-    end
-    if forcible then
-      ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
-    end
-    local succ, err, forcible = runtime.cache:set("first_run", true)
-    if not succ then
-      ngx.log(ngx.ERR, "failed to add first_run key in cache: "..err)
-    end
-    if forcible then
-      ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
     end
   end
 
@@ -170,9 +196,9 @@ function csmod.validateCaptcha(captcha_res, remote_ip)
 end
 
 
-local function get_remediation_http_request(link)
+local function get_remediation_http_request(link, live)
   local httpc = http.new()
-  if runtime.conf['MODE'] == 'stream' then
+  if runtime.conf['MODE'] == 'stream' and not live then
     httpc:set_timeout(runtime.conf['STREAM_REQUEST_TIMEOUT'])
   else
     httpc:set_timeout(runtime.conf['REQUEST_TIMEOUT'])
@@ -250,11 +276,27 @@ local function item_to_string(item, scope)
 end
 
 local function sync_status(err)
+  -- Logging may evict optional metadata, never enforcement records.
+  local status = runtime.metadata or runtime.cache
   if err then
     runtime.cache:safe_set("last_sync_error", err)
+    if runtime.metadata then status:set("sync_failed", 1) else status:safe_set("sync_failed", 1) end
+    local logged, log_err
+    if runtime.metadata then logged, log_err = status:add("sync_error_logged", true, 60)
+    else logged, log_err = status:safe_add("sync_error_logged", true, 60) end
+    local fallback_log = log_err ~= "exists"
+      and (not runtime.last_error_log or ngx.time() - runtime.last_error_log >= 60)
+    if logged or fallback_log then
+      runtime.last_error_log = ngx.time()
+      local hint = err == "Local decision cache is full" and "; increase CROWDSEC_CACHE_SIZE" or ""
+      ngx.log(ngx.ERR, "CrowdSec sync failed [cache prefix ", runtime.cache_prefix, "]: ", err, hint)
+    end
   else
     runtime.cache:safe_set("last_successful_sync", ngx.time())
     runtime.cache:delete("last_sync_error")
+    if (status:get("sync_failed") or 0) > 0 and status:incr("sync_failed", -1) == 0 then
+      ngx.log(ngx.NOTICE, "CrowdSec sync recovered [cache prefix ", runtime.cache_prefix, "]")
+    end
   end
 end
 
@@ -267,13 +309,14 @@ local function decode_decisions(body, stream)
     if not body:match("^%s*{") then return nil end
     for _, name in ipairs({"new", "deleted"}) do
       local group = decisions[name]
-      if group ~= nil and group ~= cjson.null and (type(group) ~= "table" or getmetatable(group) ~= cjson.array_mt) then return nil end
+      if group == nil or group == cjson.null then
+        decisions[name] = decision_cache.array()
+      elseif type(group) ~= "table" or getmetatable(group) ~= cjson.array_mt then return nil end
     end
-    if decisions.new == nil and decisions.deleted == nil then return nil end
   elseif getmetatable(decisions) ~= cjson.array_mt then
     return nil
   end
-  local groups = stream and {decisions.new or cjson.null, decisions.deleted or cjson.null} or {decisions}
+  local groups = stream and {decisions.new, decisions.deleted} or {decisions}
   for i, group in ipairs(groups) do
     if group ~= cjson.null then
       for key, decision in pairs(group) do
@@ -291,15 +334,24 @@ local function decode_decisions(body, stream)
   return decisions
 end
 
-local function apply_decision(decision, deleted, key, max_ttl, generation)
+local function apply_decision(decision, deleted, key, max_ttl, generation, store, checkpoint)
   local scope = decision.scope:lower()
   if scope ~= "ip" and scope ~= "range" then return true end
   if runtime.conf["BOUNCING_ON_TYPE"] ~= "all" and runtime.conf["BOUNCING_ON_TYPE"] ~= decision.type then return true end
   local ttl = not deleted and decision_cache.duration(decision.duration) or nil
+  local expires = ttl and ngx.time() + ttl
   if max_ttl then ttl = math.min(ttl, max_ttl) end
   local remediation = decision.type
   if remediation ~= "ban" and remediation ~= "captcha" then remediation = runtime.fallback end
-  return runtime.decisions.update(key or item_to_string(decision.value, scope), decision, remediation, ttl, deleted, generation)
+  local target = key or item_to_string(decision.value, scope)
+  if checkpoint then
+    local entries = checkpoint[target] or {}
+    checkpoint[target] = entries
+    entries[decision_cache.identity(decision)] = not deleted and {expires, remediation} or nil
+  end
+  if store == false then return true end
+  return (store or runtime.decisions).update(
+    target, decision, remediation, ttl, deleted, generation)
 end
 
 local function stream_query(premature)
@@ -308,10 +360,19 @@ local function stream_query(premature)
   local scheduled = ngx.timer.at(runtime.conf["UPDATE_FREQUENCY"], stream_query)
   if not scheduled then sync_status("Failed to schedule Local API synchronization") end
   local locked, lock_err = stream_lock.run(runtime.stream_lock_path, function()
+    runtime.decisions.retire_legacy()
     local last = runtime.cache:get("last_refresh")
     if last and ngx.time() - last < runtime.conf["UPDATE_FREQUENCY"] then return end
     local startup_request = runtime.cache:get("startup_request")
-    local startup = runtime.cache:get("startup") == true or startup_request ~= runtime.cache:get("startup_completed")
+    local startup = needs_startup() or runtime.cache:get("startup") == true
+      or startup_request ~= runtime.cache:get("startup_completed")
+    -- No TTL: a killed worker releases flock but leaves proof of an uncertain cursor.
+    local marked = runtime.cache:safe_set("stream_inflight", true)
+    if not marked then
+      startup = true
+      -- Even if this worker dies, a markerless failed full must be retried.
+      runtime.cache:delete("last_successful_full_sync")
+    end
     runtime.cache:safe_set("last_refresh", ngx.time())
     local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions/stream?startup=" .. tostring(startup))
     if err or not res then
@@ -324,22 +385,50 @@ local function stream_query(premature)
         sync_status("Invalid Local API response")
       else
         local applied, generation = true, nil
+        local changed = startup or #decisions.new > 0 or #decisions.deleted > 0
+        local checkpoint = changed and runtime.enforcement.prepare(startup) or nil
+        if changed and not checkpoint then applied = false end
         if startup then
-          -- Publish a fresh snapshot only after all its enforcement records fit.
+          -- Retry in the inactive slot: attempt parity must never select the live snapshot.
+          local active = runtime.cache:get("v3_generation")
+          if type(active) ~= "string" then active = "0:A" end
+          local slot = active:sub(-1) == "A" and "B" or "A"
           generation = runtime.cache:incr("v2_generation_counter", 1, 0)
-          if not generation then applied = false end
+          if generation then
+            generation = runtime.fingerprint .. "|" .. generation .. ":" .. slot
+          else
+            applied = false
+          end
         end
         if applied then
           for _, group in ipairs({"deleted", "new"}) do
             if type(decisions[group]) == "table" then
               for _, decision in ipairs(decisions[group]) do
-                if not apply_decision(decision, group == "deleted", nil, nil, generation) then applied = false; break end
+                if not apply_decision(decision, group == "deleted", nil, nil, generation, nil, checkpoint) then
+                  applied = false; break
+                end
               end
             end
             if not applied then break end
           end
         end
-        if applied and generation then applied = runtime.cache:safe_set("v2_generation", generation) end
+        -- No throttle window: a restart immediately after a changed poll must retain it.
+        -- The checkpoint only restores bans after a restart, so a failed write must not hold back enforcement.
+        local checkpoint_failed
+        if applied and changed then
+          checkpoint_failed = not runtime.enforcement.save(checkpoint)
+        end
+        -- One value publishes policy, slot and generation together, after every record fits.
+        if applied and generation then
+          applied = runtime.cache:safe_set("v2_config", runtime.fingerprint)
+          if applied then applied = runtime.cache:safe_set("v3_generation", generation) end
+          if applied then
+            runtime.decisions.retire_legacy()
+          end
+        end
+        if applied and startup and marked then
+          applied = runtime.cache:safe_set("last_successful_full_sync", ngx.time())
+        end
         if applied then
           if startup then
             -- Record exactly the captured request. A concurrent reload increments
@@ -347,7 +436,15 @@ local function stream_query(premature)
             runtime.cache:safe_set("startup_completed", startup_request)
             if startup_request == runtime.cache:get("startup_request") then runtime.cache:safe_set("startup", false) end
           end
-          sync_status(nil)
+          -- Keep the allocated Boolean cell; later requests can mark it without allocating.
+          if marked then runtime.cache:safe_set("stream_inflight", false) end
+          if checkpoint_failed then
+            -- The next poll is a full one, which rebuilds the checkpoint instead of extending the stale one.
+            runtime.cache:safe_set("startup", true)
+            sync_status("Enforcement checkpoint write failed")
+          else
+            sync_status(nil)
+          end
         else
           runtime.cache:safe_set("startup", true)
           sync_status("Local decision cache is full")
@@ -358,34 +455,125 @@ local function stream_query(premature)
   if not locked and lock_err ~= "busy" then sync_status(lock_err) end
 end
 
-local function live_query(ip)
+-- Run fn while holding the stream poller's lock. The lock is non-blocking, so retry for up to two seconds.
+local function with_stream_lock(fn)
+  local deadline = ngx.now() + 2
+  while true do
+    local locked, err = stream_lock.run(runtime.stream_lock_path, fn)
+    if locked then return true end
+    if err ~= "busy" then return nil, err end
+    if ngx.now() >= deadline then return nil, "busy" end
+    ngx.sleep(0.05)
+  end
+end
+
+-- File I/O runs in a timer; request handlers wait through an OpenResty semaphore.
+local function in_stream_timer(fn)
+  local done = semaphore.new()
+  local locked, lock_err
+  local cancelled = false
+  local function is_cancelled() return cancelled end
+  local scheduled, err = ngx.timer.at(0, function(premature)
+    if not premature and not cancelled then
+      locked, lock_err = with_stream_lock(function()
+        if not cancelled then fn(is_cancelled) end
+      end)
+    end
+    done:post()
+  end)
+  if not scheduled then return nil, err end
+  local finished, wait_err = done:wait(5 + (runtime.conf["STREAM_REQUEST_TIMEOUT"] or 2000) / 1000)
+  if not finished then cancelled = true; return nil, wait_err end
+  return locked, lock_err
+end
+
+local function refresh_enforcement()
+  if not runtime.enforcement.changed() then return true end
+  local refreshed
+  local locked = in_stream_timer(function(cancelled)
+    if not cancelled() then refreshed = not runtime.enforcement.changed() or runtime.enforcement.refresh() end
+  end)
+  if not locked or not refreshed then sync_status("Enforcement checkpoint refresh failed") end
+  return locked and refreshed
+end
+
+-- One key per range that can cover the IP, widest netmask last: the keys allowIp reads
+local function covering_keys(key)
+  local key_type, _, address = key:match("^([^_]+)_([^_]+)_(.+)$")
+  local keys = {}
+  for _, mask in ipairs(iputils.netmasks_by_key_type[key_type]) do
+    if key_type == "ipv4" then
+      keys[#keys + 1] = key_type .. "_" .. mask .. "_" .. iputils.ipv4_band(address, mask)
+    else
+      keys[#keys + 1] = key_type .. "_" .. table.concat(mask, ":") .. "_" .. iputils.ipv6_band(address, mask)
+    end
+  end
+  return keys
+end
+
+local function live_query(ip, bootstrap)
   -- BunkerWeb local modification: a refresh_ip or an unban that lands while the request below is in flight
   -- moves this epoch, and the answer that returns afterwards must not reach the decision cache.
   local lease_epoch = banlease.lease_epoch(ip, false)
-  local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions?ip=" .. ip)
+  local function failed(message)
+    if bootstrap then
+      local retry_after = ngx.time() + runtime.conf["UPDATE_FREQUENCY"]
+      runtime.bootstrap_cache:safe_set("bootstrap_retry_after", retry_after)
+      runtime.bootstrap_retry_after = retry_after
+    end
+    sync_status(message)
+    return true, nil, message, nil, true
+  end
+  local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions?ip=" .. ip, true)
+  -- The full snapshot wins even when it was published during this live request.
+  if bootstrap and snapshot_ready() then return csmod.allowIp(ip) end
   if err or not res then
-    sync_status("Local API request failed")
-    return true, nil, "Local API request failed"
+    return failed("Local API request failed")
   end
   if res.status ~= 200 then
     err = "Local API returned HTTP " .. tostring(res.status)
-    sync_status(err)
-    return true, nil, err
+    return failed(err)
   end
   local decisions = decode_decisions(res.body, false)
   if not decisions then
-    sync_status("Invalid Local API response")
-    return true, nil, "Invalid Local API response"
+    return failed("Invalid Local API response")
   end
   if banlease.lease_epoch(ip, false) ~= lease_epoch then return true, nil, "invalidated" end
   local key = item_to_string(ip, "ip")
-  runtime.decisions.clear(key)
+  local cacheable, checkpoint_error = true, nil
+  if not bootstrap or #decisions > 0 then
+    local saved
+    local locked, lock_err = in_stream_timer(function(cancelled)
+      if cancelled() then return end
+      if (bootstrap and snapshot_ready()) or banlease.lease_epoch(ip, false) ~= lease_epoch then return end
+      local checkpoint = runtime.enforcement.prepare(false, true)
+      if not checkpoint then return end
+      if not bootstrap then
+        for _, target in ipairs(covering_keys(key)) do checkpoint[target] = nil end
+      end
+      for _, decision in ipairs(decisions) do
+        apply_decision(decision, false, nil, nil, nil, false, checkpoint)
+      end
+      saved = runtime.enforcement.save(checkpoint)
+    end)
+    if bootstrap and snapshot_ready() then return csmod.allowIp(ip) end
+    if banlease.lease_epoch(ip, false) ~= lease_epoch then return true, nil, "invalidated" end
+    cacheable = locked == true
+    if not locked or not saved then
+      checkpoint_error = lock_err or "Enforcement checkpoint write failed"
+      sync_status(checkpoint_error)
+    end
+  end
+  -- Live TTLs must not inherit a stream generation's long-lived records.
+  local cache, store = runtime.bootstrap_cache, runtime.bootstrap_decisions
+  if cacheable then store.clear(key) end
   local applied, remediation = true, nil
   local evidence = {source = "lapi", captured_at = ngx.time(), decisions = decision_cache.array(), metadata_available = true}
   for _, decision in ipairs(decisions) do
     local scope = decision.scope:lower()
     if (scope == "ip" or scope == "range") and (runtime.conf["BOUNCING_ON_TYPE"] == "all" or runtime.conf["BOUNCING_ON_TYPE"] == decision.type) then
-      if not apply_decision(decision, false, key, runtime.conf["CACHE_EXPIRATION"]) then applied = false end
+      local max_ttl = not bootstrap and runtime.conf["CACHE_EXPIRATION"] or nil
+      if cacheable and not apply_decision(decision, false, key, max_ttl, nil, store) then applied = false end
       local candidate = decision.type
       if candidate ~= "ban" and candidate ~= "captcha" then candidate = runtime.fallback end
       if not remediation or candidate == "ban" then remediation = candidate end
@@ -399,8 +587,12 @@ local function live_query(ip)
       evidence.matched_target = evidence.matched_target or decision.value
     end
   end
-  if not remediation then runtime.cache:safe_set("v2_allowed_" .. key, true, runtime.conf["CACHE_EXPIRATION"]) end
-  if applied then sync_status(nil) else sync_status("Local decision cache is full") end
+  if not bootstrap and checkpoint_error and not remediation then return failed(checkpoint_error) end
+  if cacheable and not remediation and runtime.conf["CACHE_EXPIRATION"] > 0 then
+    cache:safe_set("v2_allowed_" .. key, true, runtime.conf["CACHE_EXPIRATION"])
+  end
+  if not applied then sync_status("Local decision cache is full")
+  elseif not bootstrap and not checkpoint_error then sync_status(nil) end
   return remediation == nil, remediation, nil, evidence
 end
 
@@ -453,20 +645,6 @@ function csmod.SetupStream()
   end
 end
 
--- One key per range that can cover the IP, widest netmask last: the keys allowIp reads
-local function covering_keys(key)
-  local key_type, _, address = key:match("^([^_]+)_([^_]+)_(.+)$")
-  local keys = {}
-  for _, mask in ipairs(iputils.netmasks_by_key_type[key_type]) do
-    if key_type == "ipv4" then
-      keys[#keys + 1] = key_type .. "_" .. mask .. "_" .. iputils.ipv4_band(address, mask)
-    else
-      keys[#keys + 1] = key_type .. "_" .. table.concat(mask, ":") .. "_" .. iputils.ipv6_band(address, mask)
-    end
-  end
-  return keys
-end
-
 function csmod.allowIp(ip)
   if runtime.conf == nil then
     return true, nil, "Configuration is bad, cannot run properly"
@@ -483,8 +661,19 @@ function csmod.allowIp(ip)
     return true, nil, "Check failed '" .. ip .. "' has no valid IP address"
   end
   local selected, evidence
+  local live = runtime.conf["MODE"] == "live"
+  local bootstrap = runtime.conf["MODE"] == "stream" and not snapshot_ready()
+  -- A policy mismatch still has a published snapshot. Disk fallback is used only
+  -- without any published pointer, and never overrides a newer publication.
+  local published = type(runtime.cache:get("v3_generation")) == "string"
+  if not live and not published and not refresh_enforcement() then
+    return false, "ban"
+  end
+  local store = live and runtime.bootstrap_decisions or runtime.decisions
   for _, target in ipairs(covering_keys(key)) do
-    local remediation, matched = runtime.decisions.get(target)
+    local remediation, matched = store.get(target)
+    if not live and not published and not remediation then remediation, matched = runtime.enforcement.get(target) end
+    if bootstrap and not remediation then remediation, matched = runtime.bootstrap_decisions.get(target) end
     if remediation then
       if not selected or remediation == "ban" then selected = remediation end
       if not evidence then evidence = matched else
@@ -494,9 +683,32 @@ function csmod.allowIp(ip)
     end
   end
   if selected then return false, selected, nil, evidence end
-  if runtime.conf["MODE"] == "live" then
-    if runtime.cache:get("v2_allowed_" .. key) then return true end
-    return live_query(ip)
+  if live or bootstrap then
+    local cache = runtime.bootstrap_cache
+    if cache:get("v2_allowed_" .. key) then return true end
+    if live then
+      local query_failed = false
+      if not cache:get("live_retry_" .. key) then
+        local allowed, remediation, err, matched, failed = live_query(ip, false)
+        if not failed then return allowed, remediation, err, matched end
+        query_failed = true
+      end
+      -- Restored records protect outages, but never suppress normal live revalidation.
+      if not refresh_enforcement() then return false, "ban" end
+      for _, target in ipairs(covering_keys(key)) do
+        local remediation, matched
+        if not published then remediation, matched = runtime.decisions.get(target) end
+        if not remediation then remediation, matched = runtime.enforcement.get(target) end
+        if remediation and (not selected or remediation == "ban") then selected, evidence = remediation, matched end
+      end
+      if selected and query_failed and runtime.conf["CACHE_EXPIRATION"] > 0 then
+        cache:safe_set("live_retry_" .. key, true, runtime.conf["CACHE_EXPIRATION"])
+      end
+      return selected == nil, selected, nil, evidence
+    end
+    if bootstrap and ngx.time() < math.max(runtime.bootstrap_cache:get("bootstrap_retry_after") or 0,
+      runtime.bootstrap_retry_after or 0) then return true end
+    return live_query(ip, bootstrap)
   end
   return true, nil, nil
 end
@@ -611,8 +823,8 @@ function csmod.Allow(ip, challengePrefix)
     end
   end
 
-  local ok, remediation, err, evidence = csmod.allowIp(ip)
-  if err ~= nil then
+  local ok, remediation, err, evidence, reported = csmod.allowIp(ip)
+  if err ~= nil and not reported then
     ngx.log(ngx.ERR, "[Crowdsec] bouncer error: " .. err)
   end
 
@@ -743,18 +955,6 @@ function csmod.HasExcludedLocations()
   return type(locations) == "table" and #locations > 0
 end
 
--- Run fn while holding the stream poller's lock. The lock is non-blocking, so retry for up to two seconds.
-local function with_stream_lock(fn)
-  local deadline = ngx.now() + 2
-  while true do
-    local locked, err = stream_lock.run(runtime.stream_lock_path, fn)
-    if locked then return true end
-    if err ~= "busy" then return nil, err end
-    if ngx.now() >= deadline then return nil, "busy" end
-    ngx.sleep(0.05)
-  end
-end
-
 -- Read the decisions of one IP again from the Local API and replace this instance's cached entries for it,
 -- with the lifetime rules the live query and the stream poller apply. Used after a decision was removed.
 function csmod.RefreshIp(params)
@@ -765,12 +965,13 @@ function csmod.RefreshIp(params)
   banlease.bump_lease_epoch(ip)
   local live = runtime.conf["MODE"] == "live"
   local fetched, fetch_err, fetch_status
-  local function fetch()
+  local function fetch(cancelled)
     if runtime.conf["API_URL"] == "" then
       fetched = decision_cache.array()
       return
     end
     local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions?ip=" .. ip .. "&contains=true")
+    if cancelled() then return end
     if err or not res then
       fetch_err, fetch_status = "Local API request failed", 502
     elseif res.status ~= 200 then
@@ -780,6 +981,7 @@ function csmod.RefreshIp(params)
       if not fetched then fetch_err, fetch_status = "Invalid Local API response", 502 end
     end
     if not fetched then return end
+    local checkpoint = runtime.enforcement.prepare(false, true)
     -- Replace every entry that can cover this IP, then apply what the Local API reports now
     local keys, seen = {}, {}
     local function add(item)
@@ -787,15 +989,19 @@ function csmod.RefreshIp(params)
     end
     for _, target in ipairs(covering_keys(ip_key)) do add(target) end
     for _, decision in ipairs(fetched) do add(item_to_string(decision.value, decision.scope)) end
-    for _, item in ipairs(keys) do runtime.decisions.clear(item) end
+    for _, item in ipairs(keys) do
+      runtime.decisions.clear(item)
+      runtime.bootstrap_decisions.clear(item)
+      if checkpoint then checkpoint[item] = nil end
+    end
     for _, decision in ipairs(fetched) do
       local scope = decision.scope:lower()
       if (scope == "ip" or scope == "range") and (runtime.conf["BOUNCING_ON_TYPE"] == "all" or runtime.conf["BOUNCING_ON_TYPE"] == decision.type) then
         local applied
         if live then
-          applied = apply_decision(decision, false, ip_key, runtime.conf["CACHE_EXPIRATION"])
+          applied = apply_decision(decision, false, ip_key, runtime.conf["CACHE_EXPIRATION"], nil, runtime.bootstrap_decisions, checkpoint)
         else
-          applied = apply_decision(decision, false)
+          applied = apply_decision(decision, false, nil, nil, nil, nil, checkpoint)
         end
         if not applied then
           fetched, fetch_err, fetch_status = nil, "Local decision cache is full", 502
@@ -803,17 +1009,18 @@ function csmod.RefreshIp(params)
         end
       end
     end
-    runtime.cache:delete("v2_allowed_" .. ip_key)
-  end
-  if live then
-    fetch()
-  else
-    -- Taken before the request: a poll that finishes first can never write older state over this one
-    local locked, lock_err = with_stream_lock(fetch)
-    if not locked then
-      if lock_err == "busy" then return nil, "busy", 503 end
-      return nil, lock_err, 502
+    if checkpoint and not runtime.enforcement.save(checkpoint) then
+      fetched, fetch_err, fetch_status = nil, "Enforcement checkpoint write failed", 502
+      return
     end
+    runtime.cache:delete("v2_allowed_" .. ip_key)
+    runtime.bootstrap_cache:delete("v2_allowed_" .. ip_key)
+  end
+  -- Taken before the request: a poll that finishes first can never write older state over this one.
+  local locked, lock_err = in_stream_timer(fetch)
+  if not locked then
+    if lock_err == "busy" then return nil, "busy", 503 end
+    return nil, lock_err, 502
   end
   if not fetched then return nil, fetch_err, fetch_status end
   local remediation

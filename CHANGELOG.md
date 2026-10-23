@@ -4,11 +4,14 @@
 
 - [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
 - [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
+- [FEATURE] `crowdsec`: new global `CROWDSEC_CACHE_SIZE` (`100m`) and `CROWDSEC_METADATA_CACHE_SIZE` (`5m`) settings size the decision and metadata caches.
 - [FEATURE] `installer`: the easy install script sends its downloads through `HTTP_PROXY`/`HTTPS_PROXY` and honours `NO_PROXY`. (Fixes #4040)
 - [BUGFIX] `antibot`: a failed challenge attempt keeps its destination, with its query when the session survives. Thanks to @Explotacionweb for the fix.
 - [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
 - [BUGFIX] `badbehavior`: a ban's evidence is stored once and the requests rejected during it only reference it, so reports stay small; the Reports page loads the events on demand.
 - [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried by the scheduler, instead of being reported as applied.
+- [BUGFIX] `crowdsec`: an nginx reload in stream mode no longer leaves an orphaned decision set that fills the cache and stops new bans from being enforced.
+- [BUGFIX] `crowdsec`: stream mode checkpoints decisions to disk, so known bans stay enforced through Local API outages, reloads and container restarts (see the plugin README).
 - [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
 - [BUGFIX] `scheduler`: startup stops when the database cannot be stamped for its migration, instead of running on an unmigrated database.
 - [BUGFIX] `scheduler`: job-triggered reloads wait while a configuration generation is being retried, so new plugins and custom configs never load against the previous configuration.
