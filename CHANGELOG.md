@@ -4,6 +4,8 @@
 
 - [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
 - [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
+- [SECURITY] `ui`: the Support page's configuration export redacts `API_TOKEN`, private keys and credentials in header settings instead of exporting them in clear.
+- [FEATURE] `cli`: `bwcli support` exports a support bundle (version, configuration, plugins, jobs, logs) with secrets redacted and IPs and domains anonymized.
 - [FEATURE] `crowdsec`: new global `CROWDSEC_CACHE_SIZE` (`100m`) and `CROWDSEC_METADATA_CACHE_SIZE` (`5m`) settings size the decision and metadata caches.
 - [FEATURE] `installer`: the easy install script sends its downloads through `HTTP_PROXY`/`HTTPS_PROXY` and honours `NO_PROXY`. (Fixes #4040)
 - [FEATURE] `ui`: the NGINX failover banner links to the Logs page, with `error.log` selected when it is available. (Fixes #4028)

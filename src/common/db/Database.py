@@ -17,7 +17,7 @@ from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error a
 from sys import argv, path as sys_path
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -87,6 +87,10 @@ def set_sqlite_pragma(dbapi_connection, _):
 filterwarnings("ignore", category=SAWarning, message="DELETE statement on table .* expected to delete")
 
 T = TypeVar("T")
+
+
+class DatabaseInitError(Exception):
+    """Raised instead of exiting the process by Database(exit_on_error=False)"""
 
 
 # DATABASE_POOL_* env-var defaults. Exported so callers (e.g. JobScheduler.py) reuse the
@@ -214,9 +218,17 @@ class Database:
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
-        self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, external: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
+        self,
+        logger: Logger,
+        sqlalchemy_string: Optional[str] = None,
+        *,
+        external: bool = False,
+        pool: Optional[bool] = None,
+        log: bool = True,
+        exit_on_error: bool = True,
+        **kwargs,
     ) -> None:
-        """Initialize the database"""
+        """Initialize the database. A failure exits the process, or raises DatabaseInitError without retrying a connection error when exit_on_error is False."""
         self.logger = logger
         self.readonly = False
         self.last_connection_retry = None
@@ -255,6 +267,12 @@ class Database:
                 if log:
                     self.logger.warning("The database connection is set to read-only, the changes will not be saved")
 
+        def fail(message: str) -> NoReturn:
+            self.logger.error(message)
+            if not exit_on_error:
+                raise DatabaseInitError(message)
+            _exit(1)
+
         def validate_and_update_db_string(db_string: str) -> Tuple[str, Optional[Match]]:
             """Validate and update database connection string."""
             if not db_string:
@@ -262,8 +280,7 @@ class Database:
 
             match = self.DB_STRING_RX.search(db_string)
             if not match:
-                self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
-                _exit(1)
+                fail(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
 
             db_type = match.group("database")
             db_path = match.group("path")
@@ -291,8 +308,7 @@ class Database:
                 try:
                     url = make_url(db_string)
                 except ArgumentError:
-                    self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
-                    _exit(1)
+                    fail(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
                 if "+" not in url.drivername:
                     url = url.set(drivername=f"{url.drivername}+{recommended_driver}")
                     return url.render_as_string(hide_password=False), match
@@ -305,19 +321,15 @@ class Database:
 
         self.database_uri = "" if sqlalchemy_string == sqlalchemy_string_readonly else sqlalchemy_string
         self.database_uri_readonly = sqlalchemy_string_readonly
-        error = False
-
         match = main_match
         if self.database_uri_readonly and not self.database_uri and readonly_match:
             match = readonly_match
 
         if main_match and main_match.group("database") == "oracle":
-            self.logger.error("Oracle database is not supported yet")
-            _exit(1)
+            fail("Oracle database is not supported yet")
 
         if readonly_match and readonly_match.group("database") == "oracle":
-            self.logger.error("Oracle database is not supported yet")
-            _exit(1)
+            fail("Oracle database is not supported yet")
 
         # Pool size
         pool_size = getenv("DATABASE_POOL_SIZE", str(DEFAULT_POOL_SIZE))
@@ -404,20 +416,14 @@ class Database:
         try:
             self.sql_engine = self._create_engine(sqlalchemy_string)
         except ArgumentError:
-            self.logger.error(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
-            error = True
+            fail(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
         except SQLAlchemyError as e:
-            self.logger.error(f"Error when trying to create the engine: {mask_db_uri(str(e))}")
-            error = True
-        finally:
-            if error:
-                _exit(1)
+            fail(f"Error when trying to create the engine: {mask_db_uri(str(e))}")
 
         try:
             assert self.sql_engine is not None
         except AssertionError:
-            self.logger.error("The database engine is not initialized")
-            _exit(1)
+            fail("The database engine is not initialized")
 
         DATABASE_RETRY_TIMEOUT = getenv("DATABASE_RETRY_TIMEOUT", "60")
         try:
@@ -447,12 +453,12 @@ class Database:
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
-                if (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
+                # Without exit_on_error only a first read-only error is worth waiting for: the engine is switched to read-only below
+                give_up = not exit_on_error and (self.readonly or not any(error in str(e) for error in (*self.READONLY_ERROR, "Unknown table")))
+                waited = f" after {DATABASE_RETRY_TIMEOUT} seconds" if exit_on_error else ""
+                if give_up or (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
                     if not fallback and self.database_uri_readonly:
-                        self.logger.error(
-                            f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds. "
-                            "Falling back to read-only database connection"
-                        )
+                        self.logger.error(f"Can't connect to database {connection_target}{waited}. Falling back to read-only database connection")
                         self.sql_engine.dispose(close=True)
                         self.sql_engine = self._create_engine(self.database_uri_readonly)
                         self.readonly = True
@@ -460,8 +466,7 @@ class Database:
                         connection_target = mask_db_uri(self.database_uri_readonly)
                         reason_logged = False
                         continue
-                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {mask_db_uri(str(e))}")
-                    _exit(1)
+                    fail(f"Can't connect to database {connection_target}{waited}: {mask_db_uri(str(e))}")
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
                     if log:
@@ -480,7 +485,10 @@ class Database:
                     self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
-                self.logger.error(f"Error when trying to connect to the database: {mask_db_uri(str(e))}")
+                message = f"Error when trying to connect to the database: {mask_db_uri(str(e))}"
+                self.logger.error(message)
+                if not exit_on_error and isinstance(e, Exception):
+                    raise DatabaseInitError(message) from e
                 exit(1)
 
         if log:
