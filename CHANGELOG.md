@@ -19,6 +19,7 @@
 - [BUGFIX] `scheduler`: job-triggered reloads wait while a configuration generation is being retried, so new plugins and custom configs never load against the previous configuration.
 - [BUGFIX] `ui`: the dashboard blocking chart, country map and top IPs count blocked reports of any HTTP status and leave out detect-mode events. Thanks to @MageInt for the fix.
 - [BUGFIX] `ui`: saving global or service settings with a rejected value no longer resets the stored value to its default or reports success.
+- [BUGFIX] `ui`: the Logs page search box stays visible below the toolbar when the log is scrolled. (Fixes #4027)
 
 ## v1.6.17 - 2026/10/21
 

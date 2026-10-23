@@ -405,6 +405,48 @@ $(document).ready(function () {
     editor.focus();
   }
 
+  // ======================= Search box under the toolbar =======================
+  // Ace pins its search box to the editor's top, but the editor scrolls with the
+  // page, so the sticky toolbar ends up covering it. Ace appends the box to the
+  // scroller (overflow hidden), which rules out CSS sticky: shift it down by the
+  // part of the scroller the toolbar overlaps instead.
+  const stickyBar = document.querySelector(".sticky-card");
+  let searchBoxFrame = null;
+  let searchBoxObserver = null;
+  function placeSearchBox() {
+    searchBoxFrame = null;
+    const box = editor.searchBox && editor.searchBox.element;
+    if (!box || box.style.display === "none") return;
+    const scroller = editor.renderer.scroller.getBoundingClientRect();
+    const barBottom = stickyBar ? stickyBar.getBoundingClientRect().bottom : 0;
+    const maxShift = Math.max(0, scroller.height - box.offsetHeight);
+    const shift = Math.min(Math.max(0, barBottom - scroller.top), maxShift);
+    const next = shift ? `translateY(${shift}px)` : "";
+    if (box.style.transform !== next) box.style.transform = next;
+  }
+  function scheduleSearchBox() {
+    const box = editor.searchBox && editor.searchBox.element;
+    if (!searchBoxFrame && box && box.style.display !== "none")
+      searchBoxFrame = requestAnimationFrame(placeSearchBox);
+  }
+  // The box is created on the first find command. Ace toggles its inline
+  // `display` on show/hide: place it when shown, drop the shift when hidden.
+  editor.commands.on("afterExec", function () {
+    const box = editor.searchBox && editor.searchBox.element;
+    if (!box || searchBoxObserver) return;
+    searchBoxObserver = new MutationObserver(function () {
+      if (box.style.display === "none") box.style.transform = "";
+      else scheduleSearchBox();
+    });
+    searchBoxObserver.observe(box, {
+      attributes: true,
+      attributeFilter: ["style"],
+    });
+    scheduleSearchBox();
+  });
+  window.addEventListener("scroll", scheduleSearchBox, { passive: true });
+  window.addEventListener("resize", scheduleSearchBox, { passive: true });
+
   // ============================ Toolbar wiring ============================
   const searchBtn = document.getElementById("logs-search");
   if (searchBtn)
