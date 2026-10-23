@@ -4,27 +4,27 @@
 
 - [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
 - [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
-- [SECURITY] `ui`: the Support page's configuration export redacts `API_TOKEN`, private keys and credentials in header settings instead of exporting them in clear.
-- [FEATURE] `cli`: `bwcli support` exports a support bundle (version, configuration, plugins, jobs, logs) with secrets redacted and IPs and domains anonymized.
-- [FEATURE] `crowdsec`: new global `CROWDSEC_CACHE_SIZE` (`100m`) and `CROWDSEC_METADATA_CACHE_SIZE` (`5m`) settings size the decision and metadata caches.
+- [SECURITY] `ui`: the Support page export redacts `API_TOKEN`, private keys and header credentials instead of exporting them in clear.
+- [FEATURE] `cli`: `bwcli support` exports a support bundle with secrets redacted and IPs and domains anonymized.
+- [FEATURE] `crowdsec`: `CROWDSEC_CACHE_SIZE` (`100m`) and `CROWDSEC_METADATA_CACHE_SIZE` (`5m`) size the decision and metadata caches.
 - [FEATURE] `installer`: the easy install script sends its downloads through `HTTP_PROXY`/`HTTPS_PROXY` and honours `NO_PROXY`. (Fixes #4040)
 - [FEATURE] `ui`: the NGINX failover banner links to the Logs page, with `error.log` selected when it is available. (Fixes #4028)
-- [BUGFIX] `antibot`: a failed challenge attempt keeps its destination, with its query when the session survives. Thanks to @Explotacionweb for the fix.
+- [BUGFIX] `antibot`: a failed challenge keeps its destination, and its query when the session survives. Thanks to @Explotacionweb for the fix.
 - [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
 - [BUGFIX] `api`: the OpenAPI schema (`/openapi.json`) loads again instead of returning 500, and a config upload without `type` is rejected.
 - [BUGFIX] `backup`: a restore refuses a backup from another database engine, or a damaged one, before dropping tables.
-- [BUGFIX] `badbehavior`: a ban's evidence is stored once and the requests rejected during it only reference it, so reports stay small; the Reports page loads the events on demand.
-- [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried by the scheduler, instead of being reported as applied.
-- [BUGFIX] `core`: an instance whose kept configuration (`KEEP_CONFIG_ON_RESTART=yes`) fails to start falls back to the loading page instead of exiting.
-- [BUGFIX] `crowdsec`: an nginx reload in stream mode no longer leaves an orphaned decision set that fills the cache and stops new bans from being enforced.
-- [BUGFIX] `crowdsec`: stream mode checkpoints decisions to disk, so known bans stay enforced through Local API outages, reloads and container restarts (see the plugin README).
+- [BUGFIX] `badbehavior`: a ban stores its evidence once, so reports stay small; the Reports page loads the events on demand.
+- [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried, instead of as applied.
+- [BUGFIX] `core`: a kept configuration (`KEEP_CONFIG_ON_RESTART=yes`) that fails to start falls back to the loading page instead of exiting.
+- [BUGFIX] `crowdsec`: a reload in stream mode no longer leaves an orphaned decision set that fills the cache and stops new bans.
+- [BUGFIX] `crowdsec`: in stream mode, known bans stay enforced through Local API outages, reloads and restarts (see the plugin README).
 - [BUGFIX] `db`: upgrades on MariaDB or MySQL no longer crash when the `method` columns are `VARCHAR` instead of `ENUM`. (Fixes #4095)
 - [BUGFIX] `limit`: connection limits honour `SECURITY_MODE=detect`.
 - [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
 - [BUGFIX] `redis`: the Web UI and CLI send the Sentinel credentials and TLS settings to the Sentinel nodes. (Fixes #4093)
 - [BUGFIX] `scheduler`: startup stops when the database cannot be stamped for its migration, instead of running on an unmigrated database.
-- [BUGFIX] `scheduler`: job-triggered reloads wait while a configuration generation is being retried, so new plugins and custom configs never load against the previous configuration.
-- [BUGFIX] `ui`: the dashboard blocking chart, country map and top IPs count blocked reports of any HTTP status and leave out detect-mode events. Thanks to @MageInt for the fix.
+- [BUGFIX] `scheduler`: new plugins and custom configs no longer load against the previous configuration while a generation is retried.
+- [BUGFIX] `ui`: the dashboard's blocking chart, map and top IPs count blocks of any status and skip detect-mode events. Thanks to @MageInt for the fix.
 - [BUGFIX] `ui`: saving global or service settings with a rejected value no longer resets the stored value to its default or reports success.
 - [BUGFIX] `ui`: the Logs page search box stays visible below the toolbar when the log is scrolled. (Fixes #4027)
 - [BUGFIX] `ui`: table column preferences survive column changes between releases, and the Reports Date toggle is saved.
