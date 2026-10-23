@@ -156,7 +156,7 @@
       "name": "resty-redis-cluster v1.6.1",
       "url": "https://github.com/Kong/resty-redis-cluster.git",
       "commit": "09ab3295db2e42b144a3a8c67117a1c55c052409",
-      "post_install": "rm -r src/deps/src/resty-redis-cluster/t src/deps/src/resty-redis-cluster/.github src/deps/src/resty-redis-cluster/rockspec && patch --forward src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch || rm src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.orig src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.rej"
+      "post_install": "rm -rf src/deps/src/resty-redis-cluster/t src/deps/src/resty-redis-cluster/.github src/deps/src/resty-redis-cluster/rockspec && patch --forward src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua src/deps/misc/resty-redis-cluster.patch || rm src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.orig src/deps/src/resty-redis-cluster/lib/resty/rediscluster.lua.rej"
     },
     {
       "id": "lua-resty-session",
@@ -201,9 +201,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20261015",
+      "name": "LuaJIT v2.1-20261021",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "f6a9b2a6f0386bac736655703e90f1ef534bfbdc",
+      "commit": "12379eb4fd2e3718387b421048307b4771fef79b",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {

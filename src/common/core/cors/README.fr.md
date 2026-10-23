@@ -49,6 +49,8 @@ Voici des exemples de valeurs possibles pour `CORS_ALLOW_ORIGIN`, avec leur comp
 - **`^https://(www\.example1\.com|www\.example2\.com)$`** : autorise les requêtes depuis `https://www.example1.com` ou `https://www.example2.com`.
 - **`^https?://www\.example\.com$`** : autorise les requêtes depuis `http://www.example.com` et `https://www.example.com`.
 
+En mode regex, ancrez le motif avec `^` et `$` pour correspondre à l’origine entière ; la réponse reprend l’en-tête `Origin` de la requête dans `Access-Control-Allow-Origin`.
+
 === "Configuration basique"
 
     ```yaml

@@ -4,6 +4,9 @@ metadata:
   name: bw-lb
   annotations:
     service.beta.kubernetes.io/scw-loadbalancer-proxy-protocol-v2: "true"
+%{ if lb_zone != "" ~}
+    service.beta.kubernetes.io/scw-loadbalancer-zone: "${lb_zone}"
+%{ endif ~}
 spec:
   selector:
     app: bunkerweb

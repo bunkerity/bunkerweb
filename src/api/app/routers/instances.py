@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List
 
-from ApiCaller import ApiCaller  # type: ignore
+from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT  # type: ignore
 from common_utils import parse_host  # type: ignore
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller, get_api_for_hostname
@@ -33,7 +33,7 @@ def reload_config(test: bool = True, api_caller=Depends(get_instances_api_caller
         test: If True, validate configuration without applying it (default: True)
     """
     test_arg = "yes" if test else "no"
-    ok, _ = api_caller.send_to_apis("POST", f"/reload?test={test_arg}")
+    ok, _ = api_caller.send_to_apis("POST", f"/reload?test={test_arg}", timeout=(5, MIN_RELOAD_TIMEOUT))
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 
 
@@ -68,7 +68,7 @@ def reload_one(hostname: str, test: bool = True, api=Depends(get_api_for_hostnam
     """
     test_arg = "yes" if test else "no"
     # Through ApiCaller for its retry on a busy instance (503), as the broadcast reload does.
-    ok, _ = ApiCaller([api]).send_to_apis("POST", f"/reload?test={test_arg}")
+    ok, _ = ApiCaller([api]).send_to_apis("POST", f"/reload?test={test_arg}", timeout=(5, MIN_RELOAD_TIMEOUT))
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 
 

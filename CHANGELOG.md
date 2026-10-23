@@ -1,13 +1,30 @@
 # Changelog
 
+## v1.6.18~rc1 - 2026/10/??
+
+- [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
+- [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
+- [FEATURE] `installer`: the easy install script sends its downloads through `HTTP_PROXY`/`HTTPS_PROXY` and honours `NO_PROXY`. (Fixes #4040)
+- [BUGFIX] `antibot`: a failed challenge attempt keeps its destination, with its query when the session survives. Thanks to @Explotacionweb for the fix.
+- [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
+- [BUGFIX] `badbehavior`: a ban's evidence is stored once and the requests rejected during it only reference it, so reports stay small; the Reports page loads the events on demand.
+- [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried by the scheduler, instead of being reported as applied.
+- [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
+- [BUGFIX] `scheduler`: startup stops when the database cannot be stamped for its migration, instead of running on an unmigrated database.
+- [BUGFIX] `scheduler`: job-triggered reloads wait while a configuration generation is being retried, so new plugins and custom configs never load against the previous configuration.
+- [BUGFIX] `ui`: the dashboard blocking chart, country map and top IPs count blocked reports of any HTTP status and leave out detect-mode events. Thanks to @MageInt for the fix.
+- [BUGFIX] `ui`: saving global or service settings with a rejected value no longer resets the stored value to its default or reports success.
+
 ## v1.6.17 - 2026/10/21
 
 - [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `unbounded-element`.
 - [BUGFIX] `autoconf`: quiet Kubernetes watches reconnect without restarting the controller, while repeated short closures still fail health checks. (Fixes #4064)
 - [BUGFIX] `badbehavior`: a ban keeps only its newest events as evidence, at most `BAD_BEHAVIOR_REPORT_MAX_EVENTS` (default `100`, never more than the threshold), with URLs and methods cut at `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` (default `512` bytes), so the report written for every request rejected during the ban no longer fills Redis. The Reports page shows the real request count.
 - [BUGFIX] `core`: the local cache's IPC events expire after 5 minutes, and a worker that falls behind skips the events evicted from a full `CACHESTORE_IPC_MEMORY_SIZE` zone instead of waiting 0.3 s on each one (`could not poll ipc events: timeout`), then clears its local cache so it never serves a value whose invalidation it missed.
+- [BUGFIX] `db`: SQLAlchemy loggers follow `DATABASE_LOG_LEVEL` again, so the scheduler, API and UI no longer flood their logs with lazy-loading clauses at INFO.
 - [UI] `Web UI`: clarify applying changed global settings to all services and confirm service overrides before saving.
 - [DOCS] Pin llms.txt and llms-full.txt links to their docs version, publish per-plugin settings JSON and register read-only WebMCP tools on docs pages.
+- [DEPS] Updated LuaJIT version to v2.1-20261021
 
 ## v1.6.17~rc2 - 2026/10/16
 

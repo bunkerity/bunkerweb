@@ -114,7 +114,7 @@ if [ "$current_version" != "$installed_version" ]; then
 			fi
 
 			# Stamp the database with the determined revision
-			if python3 -m alembic stamp "$REVISION"; then
+			if python3 -m alembic stamp --purge "$REVISION"; then
 				# Run database migration
 				log "ENTRYPOINT" "ℹ️" "Running database migration..."
 				if ! python3 -m alembic upgrade head; then
@@ -124,9 +124,11 @@ if [ "$current_version" != "$installed_version" ]; then
 				log "ENTRYPOINT" "✅" "Database migration completed successfully"
 			else
 				log "ENTRYPOINT" "❌" "Failed to stamp database with revision: $REVISION, migration aborted"
+				exit 1
 			fi
 		else
 			log "ENTRYPOINT" "❌" "Failed to update version locations in configuration, migration aborted"
+			exit 1
 		fi
 	else
 		python3 -c "

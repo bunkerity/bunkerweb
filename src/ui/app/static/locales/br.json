@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Requisições suspeitas",
+    "bad_behavior_stored_events": "Eventos armazenados",
+    "bad_behavior_evidence_missing": "As evidências do banimento não estão mais disponíveis.",
     "crowdsec": {
       "source_lapi": "Decisão da API local",
       "source_appsec": "Inspeção AppSec",

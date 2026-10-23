@@ -2053,6 +2053,20 @@ sudo ./install-bunkerweb.sh
 
     Si la vérification de la somme de contrôle échoue, **n'exécutez pas le script** — il pourrait être dangereux.
 
+#### Derrière un proxy
+
+Exportez `HTTP_PROXY` et `HTTPS_PROXY` (ou `http_proxy` et `https_proxy`) avant de lancer l’installateur pour faire passer les téléchargements, la configuration des dépôts, la récupération des clés de signature et les requêtes du gestionnaire de paquets par votre proxy de sortie. La variable facultative `NO_PROXY` (ou `no_proxy`) liste les hôtes qui contournent le proxy. Les valeurs en minuscules sont prioritaires lorsque les deux formes sont définies. Conservez ces variables lors de l’élévation des privilèges, par exemple :
+
+```bash
+export HTTP_PROXY=http://proxy.example.com:3128
+export HTTPS_PROXY=http://proxy.example.com:3128
+sudo --preserve-env=HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy ./install-bunkerweb.sh
+```
+
+Votre politique sudo doit autoriser la conservation de ces variables. Ces paramètres s’appliquent à l’installateur ; configurez séparément les paramètres de proxy utilisés par BunkerWeb dans `/etc/bunkerweb/variables.env`.
+
+Le téléchargement des images Docker nécessite également un proxy configuré pour le démon Docker, par exemple via le fichier de configuration complémentaire systemd `/etc/systemd/system/docker.service.d/http-proxy.conf`.
+
 #### Comment ça marche
 
 Le script d'installation facile est un outil puissant conçu pour rationaliser l'installation de BunkerWeb sur un nouveau système Linux. Il automatise les étapes clés suivantes :

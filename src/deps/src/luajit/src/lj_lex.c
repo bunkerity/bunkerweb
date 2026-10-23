@@ -189,10 +189,8 @@ static void lex_longstring(LexState *ls, TValue *tv, int sep)
 }
 
 /* Parse a string. */
-static void lex_string(LexState *ls, TValue *tv)
+static void lex_string(LexState *ls, TValue *tv, LexChar delim)
 {
-  LexChar delim = ls->c;  /* Delimiter is '\'' or '"'. */
-  lex_savenext(ls);
   while (ls->c != delim) {
     switch (ls->c) {
     case LEX_EOF:
@@ -291,6 +289,57 @@ static void lex_string(LexState *ls, TValue *tv)
 	  lj_parse_keepstr(ls, ls->sb.b+1, sbuflen(&ls->sb)-2));
 }
 
+/* Parse line number directive.
+**
+** Limitations for the v3.0 backport to v2.1 due to bytecode compatibility:
+** - The prototype is assigned only the last used chunk name.
+** - The line numbers may not make sense with mixed chunk names.
+** - The first/last line of the prototype is adjusted to be the min/max line.
+** - Mistakes in the directive line itself are not correctly attributed.
+*/
+static int lex_linedir(LexState *ls)
+{
+  LexChar c = lex_next(ls);
+  uint32_t line;
+  while (c == ' ' || c == '\t')
+    c = lex_next(ls);
+  if (!(c >= '0' && c <= '9')) return 0;  /* Regular '#' token. */
+  line = (uint32_t)(c - '0');
+  while (1) {
+    c = lex_next(ls);
+    if (!(c >= '0' && c <= '9')) break;
+    if (line >= (LJ_MAX_LINE - 9) / 10)  /* Conservative limit for overflow. */
+      lj_lex_error(ls, 0, LJ_ERR_XLINEDIR);
+    line = line * 10u + (uint32_t)(c - '0');
+  }
+  while (c == ' ' || c == '\t')
+    c = lex_next(ls);
+  if (c == '"') {
+    BCLine curline = ls->linenumber;
+    TValue tv;
+    lex_savenext(ls);
+    if (!(ls->c == '=' || ls->c == '@' || ls->c == ' '))
+      lex_save(ls, '@');  /* Treat it like a file name. */
+    lex_string(ls, &tv, '"');
+    if (curline != ls->linenumber)  /* Reject \z with newline. */
+      lj_lex_error(ls, '"', LJ_ERR_XLINEDIR);
+    lj_buf_reset(&ls->sb);
+    ls->chunkname = strV(&tv);
+    setstrV(ls->L, restorestack(ls->L, ls->chunkslot), ls->chunkname);
+    c = ls->c;
+    while (c == ' ' || c == '\t')
+      c = lex_next(ls);
+  }
+  if (c == '\n' || c == '\r') {
+    lex_newline(ls);
+  } else if (c != LEX_EOF) {
+    /* The reported file/line is wrong, but we don't care. */
+    lj_lex_error(ls, c, LJ_ERR_XLINEDIR);
+  }
+  ls->linenumber = (BCLine)line;
+  return 1;
+}
+
 /* -- Main lexical scanner ------------------------------------------------ */
 
 /* Get next lexical token. */
@@ -318,6 +367,10 @@ static LexToken lex_scan(LexState *ls, TValue *tv)
     case '\n':
     case '\r':
       lex_newline(ls);
+      while (ls->c == '#') {
+	if (!lex_linedir(ls))
+	  return '#';
+      }
       continue;
     case ' ':
     case '\t':
@@ -397,9 +450,12 @@ static LexToken lex_scan(LexState *ls, TValue *tv)
       lex_next(ls);
       if (ls->c != '|') return '|'; else { lex_next(ls); return TK_or_; }
     case '"':
-    case '\'':
-      lex_string(ls, tv);
+    case '\'': {
+      LexChar delim = ls->c;
+      lex_savenext(ls);
+      lex_string(ls, tv, delim);
       return TK_string;
+    }
     case '.':
       if (lex_savenext(ls) == '.') {
 	lex_next(ls);
@@ -452,13 +508,20 @@ int lj_lex_setup(lua_State *L, LexState *ls)
     lex_next(ls);
     header = 1;
   }
-  if (ls->c == '#') {  /* Skip POSIX #! header line. */
-    do {
-      lex_next(ls);
-      if (ls->c == LEX_EOF) return 0;
-    } while (!lex_iseol(ls));
-    lex_newline(ls);
-    header = 1;
+  if (ls->c == '#') {
+    if (ls->p < ls->pe && ls->p[0] == '!') {
+      /* Skip POSIX #! header line (if buffered). */
+      do {
+	lex_next(ls);
+	if (ls->c == LEX_EOF) return 0;
+      } while (!lex_iseol(ls));
+      lex_newline(ls);
+      header = 1;
+    } else {  /* Parse it as a line number directive. */
+      ls->lastline = ls->linenumber = 0;
+      ls->p--;
+      ls->c = '\n';
+    }
   }
   if (ls->c == LUA_SIGNATURE[0]) {  /* Bytecode dump. */
     if (header) {

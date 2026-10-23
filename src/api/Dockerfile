@@ -39,14 +39,12 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add api user
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata && \
+RUN apk add --no-cache "zlib>=1.3.2-r1" bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata && \
   addgroup -g 101 api && \
   adduser -h /usr/share/bunkerweb/api -g api -s /sbin/nologin -G api -D -H -u 101 --disabled-password api
 
 # Fix CVEs
-RUN apk add --no-cache "mariadb-client>=11.8.9-r0" "mariadb-common>=11.8.9-r0" # CVE-2026-47023 CVE-2026-60184 CVE-2026-60331 CVE-2026-60585 CVE-2026-60747 CVE-2026-61081
-RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
-RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
+RUN apk add --no-cache "musl>=1.2.6-r3" "musl-utils>=1.2.6-r3" # CVE-2026-107891
 
 # Copy deps and app
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

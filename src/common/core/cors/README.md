@@ -51,6 +51,8 @@ Here are examples of possible values for the `CORS_ALLOW_ORIGIN` setting, along 
 - **`^https://(www\.example1\.com|www\.example2\.com)$`**: Allows requests from either `https://www.example1.com` or `https://www.example2.com`.
 - **`^https?://www\.example\.com$`**: Allows requests from both `https://www.example.com` and `http://www.example.com`.
 
+In regex mode, anchor the pattern with `^` and `$` to match the entire origin; the response reflects the request's `Origin` in `Access-Control-Allow-Origin`.
+
 === "Basic Configuration"
 
     A simple configuration allowing cross-origin requests from the same domain:

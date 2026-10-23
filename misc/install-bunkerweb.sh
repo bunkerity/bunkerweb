@@ -8,6 +8,15 @@ set -e
 # Skip debconf prompts; fatal under --quiet/CI. Ignored on dnf-based systems.
 export DEBIAN_FRONTEND=noninteractive
 
+# curl, wget and package tools need lowercase proxy variables; explicit lowercase values take precedence.
+_bw_xtrace_was_on=no
+case $- in *x*) _bw_xtrace_was_on=yes; set +x ;; esac
+export http_proxy="${http_proxy-${HTTP_PROXY:-}}"
+export https_proxy="${https_proxy-${HTTPS_PROXY:-}}"
+export no_proxy="${no_proxy-${NO_PROXY:-}}"
+if [ "$_bw_xtrace_was_on" = yes ]; then set -x; fi
+unset _bw_xtrace_was_on
+
 # Registry of 0600 secret tempfiles wiped on every exit path (DB option files, PGPASSFILE, etc.).
 declare -a _BW_SECRET_TMPFILES=()
 _bw_register_secret_tmpfile() {

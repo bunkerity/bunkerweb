@@ -102,7 +102,7 @@ jobs:
   # The integration suites never boot the all-in-one or the standalone API image.
   smoke-images:
     needs: [build-containers]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -147,6 +147,7 @@ jobs:
           - type: autoconf
             runs_on: "['self-hosted', 'bw-autoconf']"
           - type: k8s
+            # Host test dependencies need newer cffi before changing runner Python.
             runs_on: "['ubuntu-24.04']"
           - type: linux
             runs_on: "['self-hosted', 'bw-linux']"
@@ -180,7 +181,7 @@ jobs:
   # Push Docker images
   push-images:
     needs: [staging-tests, smoke-images]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       packages: write

@@ -61,7 +61,7 @@ from cache_restore import (  # type: ignore
 )
 from API import API  # type: ignore
 
-from ApiCaller import ApiCaller, folder_push_timeout  # type: ignore
+from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT, folder_push_timeout  # type: ignore
 
 APPLYING_CHANGES = Event()
 BACKING_UP_FAILOVER = Event()
@@ -149,6 +149,8 @@ try:
 except ValueError:
     LOGGER.error("RELOAD_MIN_TIMEOUT must be a duration like 30 or 30s, defaulting to 5")
     RELOAD_MIN_TIMEOUT = 5
+# Reloads now wait for the new workers' delayed readiness publication.
+RELOAD_MIN_TIMEOUT = max(MIN_RELOAD_TIMEOUT, RELOAD_MIN_TIMEOUT)
 
 try:
     SEND_FILES_MIN_TIMEOUT = parse_duration(getenv("SEND_FILES_MIN_TIMEOUT", "30"), "s")
@@ -1589,15 +1591,6 @@ if __name__ == "__main__":
 
             retry_delay = PENDING_RETRY_DELAY if pre_push_failed else None
             failover_message = ""
-            if generation_failed:
-                generation_failures += 1
-                retry_delay = generation_retry_delay(generation_failures)
-                failover_message = (
-                    f"The configuration could not be generated, the previous configuration is still in use. Retrying in {retry_delay}s "
-                    f"(failed attempt {generation_failures}), check the scheduler's logs for the cause.\n"
-                )
-            else:
-                generation_failures = 0
             try:
                 success = True
                 reachable = True
@@ -1631,10 +1624,18 @@ if __name__ == "__main__":
                         metadata = responses.get(db_instance["hostname"], {})
                         status = metadata.get("status", "down")
                         msg = str(metadata.get("msg", ""))
-                        config_check_failed = msg.startswith("config check failed")
+                        init_failed = status != "success" and msg.startswith("reload failed:")
+                        # ApiCaller returns the JSON body without the HTTP status; these are the reload API's 503 messages.
+                        reload_busy = status != "success" and (
+                            msg in ("a configuration generation is in progress", "a push swap is in progress") or msg.startswith("a reload is in progress (")
+                        )
+                        config_check_failed = msg.startswith("config check failed") or init_failed
+                        generation_failed = generation_failed or init_failed or reload_busy
 
                         if status == "success":
                             success = True
+                            if metadata.get("confirmed") is False:
+                                LOGGER.warning(f"Reload readiness is unconfirmed on {db_instance['hostname']}: {msg}")
                         else:
                             message = msg or "couldn't get message"
                             if "\n" in message:
@@ -1645,14 +1646,14 @@ if __name__ == "__main__":
 
                         ret = SCHEDULER.db.update_instance(
                             db_instance["hostname"],
-                            ("up" if status == "success" else ("failover" if config_check_failed else "down")),
+                            ("up" if status == "success" or reload_busy else ("failover" if config_check_failed else "down")),
                         )
                         if ret:
                             LOGGER.error(
                                 f"Couldn't update instance {db_instance['hostname']} status to {'up' if status == 'success' else 'down'} in the database: {ret}"
                             )
 
-                        if status == "success" or config_check_failed:
+                        if status == "success" or config_check_failed or reload_busy:
                             found = False
                             for api in SCHEDULER.apis:
                                 if api.endpoint == f"{_instance_endpoint(db_instance)}/":
@@ -1685,6 +1686,17 @@ if __name__ == "__main__":
             except BaseException as e:
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")
 
+            if generation_failed:
+                success = False
+                generation_failures += 1
+                retry_delay = generation_retry_delay(generation_failures)
+                failover_message = (
+                    f"The configuration could not be confirmed on every instance. Retrying in {retry_delay}s "
+                    f"(failed attempt {generation_failures}), check the scheduler's logs for the cause.\n"
+                ) + failover_message
+            else:
+                generation_failures = 0
+
             try:
                 SCHEDULER.db.set_metadata({"failover": not success, "failover_message": failover_message})
             except BaseException as e:
@@ -1692,7 +1704,7 @@ if __name__ == "__main__":
 
             try:
                 if generation_failed:
-                    LOGGER.error(f"The configuration was not applied, the previous one keeps serving. Retrying the generation in {retry_delay}s ...")
+                    LOGGER.error(f"The configuration was not confirmed, retrying the generation in {retry_delay}s ...")
                 elif not success and reachable:
                     LOGGER.error("Error while reloading bunkerweb, failing over to last working configuration ...")
                     if (
@@ -1818,6 +1830,7 @@ if __name__ == "__main__":
 
                     sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
+                    SCHEDULER.generation_pending = CONFIG_NEED_GENERATION
                     SCHEDULER.run_pending()
                     _gc_counter += 1
                     if _gc_counter >= 10:

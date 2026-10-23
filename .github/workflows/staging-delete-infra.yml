@@ -18,7 +18,7 @@ on:
 jobs:
   delete:
     if: ${{ always() }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       # Prepare
@@ -49,7 +49,7 @@ jobs:
           tar xf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      - uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
+      - uses: azure/setup-kubectl@bda439f5f36b99b262ebdcd3613869bddb064c8e # v5.2.0
         if: inputs.TYPE == 'k8s' && steps.tfstate.outcome == 'success'
         with:
           version: "v1.29.1"

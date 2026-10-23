@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "طلبات مشبوهة",
+    "bad_behavior_stored_events": "الأحداث المحفوظة",
+    "bad_behavior_evidence_missing": "لم تعد الأدلة المرتبطة بالحظر متاحة.",
     "crowdsec": {
       "source_lapi": "قرار واجهة API المحلية",
       "source_appsec": "فحص AppSec",

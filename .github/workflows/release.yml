@@ -20,7 +20,7 @@ jobs:
   # Derive the channel from the tag and refuse a tag that does not add up.
   # Everything else hangs off this job, so a bad tag costs seconds, not a build.
   prepare:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
       contents: write # draft releases are only visible to callers with push access; this job only reads
@@ -345,7 +345,7 @@ jobs:
   # Candidate registry tags are internal transport only. The manifest pins the
   # assembled indexes and every platform/package before any integration runs.
   candidates:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     needs: [prepare, build-containers, build-containers-arm, build-packages]
     permissions:
@@ -375,7 +375,7 @@ jobs:
           python3 .github/scripts/release_artifacts.py assemble --directory receipts
           sha256sum release-manifest.json > release-manifest.json.sha256
           echo "sha256=$(cut -d ' ' -f 1 release-manifest.json.sha256)" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-manifest
           path: release-manifest.json*
@@ -386,7 +386,7 @@ jobs:
   validate-candidates:
     if: ${{ always() }}
     needs: [prepare, plumber, codeql, candidates]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -405,7 +405,7 @@ jobs:
   # Required reviewers on the existing release environment approve only scanned
   # candidates. Every public image/package/GitHub/docs publication descends here.
   gate:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     environment: release
     needs: [prepare, validate-candidates]

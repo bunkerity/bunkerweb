@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "Suspicious requests",
+    "bad_behavior_stored_events": "Stored events",
+    "bad_behavior_evidence_missing": "Ban evidence is no longer available.",
     "crowdsec": {
       "source_lapi": "Local API decision",
       "source_appsec": "AppSec inspection",

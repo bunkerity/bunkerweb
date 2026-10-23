@@ -1223,6 +1223,9 @@
     }
   },
   "reports": {
+    "bad_behavior_total_requests": "সন্দেহজনক অনুরোধ",
+    "bad_behavior_stored_events": "সংরক্ষিত ইভেন্ট",
+    "bad_behavior_evidence_missing": "নিষেধাজ্ঞার প্রমাণ আর উপলব্ধ নেই।",
     "crowdsec": {
       "source_lapi": "স্থানীয় API সিদ্ধান্ত",
       "source_appsec": "AppSec পরীক্ষা",

@@ -30,7 +30,7 @@ from cache_restore import cache_tree  # type: ignore
 from common_utils import effective_cpu_count, parse_duration  # type: ignore
 from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
 from logger import getLogger  # type: ignore
-from ApiCaller import ApiCaller, folder_push_timeout  # type: ignore
+from ApiCaller import ApiCaller, MIN_RELOAD_TIMEOUT, folder_push_timeout  # type: ignore
 
 
 class JobScheduler(ApiCaller):
@@ -82,6 +82,7 @@ class JobScheduler(ApiCaller):
         self.__failed_jobs: List[str] = []
         self.__job_reload = False
         self.__job_regenerate = False
+        self.generation_pending = False
         # A push or reload failure must not re-render what generate_configs() already produced.
         self.__configs_generated = False
         self.__publish_retry_at: Optional[float] = None
@@ -264,7 +265,7 @@ class JobScheduler(ApiCaller):
         reload_success = self.send_to_apis(
             "POST",
             f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())),
+            timeout=max(MIN_RELOAD_TIMEOUT, int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())),
         )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")
@@ -504,6 +505,9 @@ class JobScheduler(ApiCaller):
 
     def __publish_pending(self) -> bool:
         """Only acknowledge a changed generation after every publication step succeeds."""
+        if self.generation_pending:
+            self.__logger.debug("Configuration generation is pending; holding job publication")
+            return False
         if self.__job_regenerate and not self.__configs_generated:
             # Before the API check: with no instance the flags are cleared below, and the
             # healthcheck only renders for an instance that answers "loading". One that stayed

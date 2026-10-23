@@ -51,6 +51,8 @@ CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地
 - **`^https://(www\.example1\.com|www\.example2\.com)$`**：允许来自 `https://www.example1.com` 或 `https://www.example2.com` 的请求。
 - **`^https?://www\.example\.com$`**：允许来自 `https://www.example.com` 和 `http://www.example.com` 的请求。
 
+在正则表达式模式下，请使用 `^` 和 `$` 锚定模式以匹配完整来源；响应会在 `Access-Control-Allow-Origin` 中返回请求的 `Origin` 值。
+
 === "基本配置"
 
     一个简单的配置，允许来自同一域的跨源请求：
