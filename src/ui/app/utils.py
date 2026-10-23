@@ -130,6 +130,7 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "8": True,
     },
     "reports": {
+        "2": True,
         "3": True,
         "4": True,
         "5": True,

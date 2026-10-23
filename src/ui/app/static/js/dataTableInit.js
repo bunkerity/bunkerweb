@@ -452,15 +452,33 @@ function initializeDataTable(config) {
     const defaultColsVisibility = JSON.parse(
       $columnsPreferenceDefaults.val().trim(),
     );
-    originalColumnsPreferences = JSON.parse($columnsPreference.val().trim());
+    // A saved mapping can name a column a release later removed, or miss one it added:
+    // the server answers 400 to unknown keys, so keep exactly the default keys.
+    const normalizeColumnsPreferences = (saved) => {
+      const source = saved && typeof saved === "object" ? saved : {};
+      return Object.fromEntries(
+        Object.entries(defaultColsVisibility).map(([key, value]) => [
+          key,
+          typeof source[key] === "boolean" ? source[key] : value,
+        ]),
+      );
+    };
+    originalColumnsPreferences = normalizeColumnsPreferences(
+      JSON.parse($columnsPreference.val().trim()),
+    );
 
     // Handle column visibility preferences
-    let columnVisibility = localStorage.getItem(`bw-${tableName}-columns`);
-    if (columnVisibility === null) {
-      columnVisibility = { ...originalColumnsPreferences };
-    } else {
-      columnVisibility = JSON.parse(columnVisibility);
+    let savedColumnVisibility = null;
+    try {
+      savedColumnVisibility = JSON.parse(
+        localStorage.getItem(`bw-${tableName}-columns`),
+      );
+    } catch (e) {
+      // Corrupt browser storage: fall back to the server preferences
     }
+    const columnVisibility = savedColumnVisibility
+      ? normalizeColumnsPreferences(savedColumnVisibility)
+      : { ...originalColumnsPreferences };
 
     // Without the second argument every call re-measures the whole table; the
     // adjust() at the end of this function does it once.
@@ -571,8 +589,9 @@ function initializeDataTable(config) {
     // Column visibility event
     dataTable.on("column-visibility.dt", function (e, settings, column, state) {
       if (
-        typeof columnVisibilityCondition === "function" &&
-        !columnVisibilityCondition(column)
+        (typeof columnVisibilityCondition === "function" &&
+          !columnVisibilityCondition(column)) ||
+        !(column in defaultColsVisibility)
       ) {
         return;
       }
