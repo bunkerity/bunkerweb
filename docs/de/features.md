@@ -2804,13 +2804,22 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
 
 === "Selektiver API-Zugriff"
 
-    Eine Konfiguration, die den Zugriff auf bestimmte API-Endpunkte erlaubt:
+    Eine Konfiguration, die einem Partnernetzwerk Zugriff auf alles gewährt und jedem Client Zugriff auf einen öffentlichen Endpunkt:
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # Externes Partnernetzwerk
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Die Greylist-Kriterien sind Alternativen: Eine Anfrage passiert die Greylist, sobald eines davon zutrifft. Hier darf das aufgeführte Netzwerk alle Pfade erreichen, und jeder Client darf den exakten Pfad `/api/foo` erreichen. Andere Clients werden auf anderen Pfaden abgewiesen. Andere aktivierte Sicherheitsprüfungen gelten weiterhin für jede Anfrage. Verwenden Sie `^/api/foo(/|$)` für einen öffentlichen Teilbaum. Der Abgleich verwendet den normalisierten Pfad ohne Query-String. Es lassen sich weder unterschiedliche IP-Listen für unterschiedliche Pfade ausdrücken noch verlangen, dass sowohl eine IP als auch ein Pfad zutreffen.
+
+    | Client | Pfad | Ergebnis |
+    | --- | --- | --- |
+    | In `203.0.113.0/24` | `/api/foo` | Zugelassen |
+    | In `203.0.113.0/24` | jeder andere Pfad | Zugelassen |
+    | Außerhalb von `203.0.113.0/24` | `/api/foo` | Zugelassen |
+    | Außerhalb von `203.0.113.0/24` | jeder andere Pfad | Abgewiesen |
 
 ### Arbeiten mit lokalen Listendateien
 

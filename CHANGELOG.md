@@ -27,6 +27,7 @@
 - [BUGFIX] `ui`: saving global or service settings with a rejected value no longer resets the stored value to its default or reports success.
 - [BUGFIX] `ui`: the Logs page search box stays visible below the toolbar when the log is scrolled. (Fixes #4027)
 - [BUGFIX] `ui`: table column preferences survive column changes between releases, and the Reports Date toggle is saved.
+- [DOCS] `greylist`: the criteria combine with OR, with an example.
 
 ## v1.6.17 - 2026/10/21
 

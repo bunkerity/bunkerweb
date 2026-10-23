@@ -2847,13 +2847,22 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
 
 === "Acceso Selectivo a la API"
 
-    Una configuración que permite el acceso a puntos finales específicos de la API:
+    Una configuración que permite a una red asociada acceder a todo y a cualquier cliente acceder a un endpoint público:
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # Red del socio externo
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Los criterios de la Greylist son alternativas: una solicitud pasa la Greylist cuando cualquiera de ellos coincide. Aquí la red indicada puede acceder a todas las rutas y cualquier cliente puede acceder a la ruta exacta `/api/foo`. Los demás clientes son denegados en las demás rutas. Las demás comprobaciones de seguridad activadas se siguen aplicando a cada solicitud. Use `^/api/foo(/|$)` para un subárbol público. La coincidencia usa la ruta normalizada, sin la cadena de consulta. No se pueden expresar listas de IP distintas para rutas distintas, ni exigir que coincidan a la vez una IP y una ruta.
+
+    | Cliente | Ruta | Resultado |
+    | --- | --- | --- |
+    | En `203.0.113.0/24` | `/api/foo` | Pasa |
+    | En `203.0.113.0/24` | cualquier otra ruta | Pasa |
+    | Fuera de `203.0.113.0/24` | `/api/foo` | Pasa |
+    | Fuera de `203.0.113.0/24` | cualquier otra ruta | Denegado |
 
 ### Trabajar con archivos de listas locales
 

@@ -2649,16 +2649,16 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 
 **Général**
 
-| Paramètre      | Défaut | Contexte  | Multiple | Description                                                     |
-| -------------- | ------ | --------- | -------- | --------------------------------------------------------------- |
+| Paramètre      | Défaut | Contexte  | Multiple | Description                                                   |
+| -------------- | ------ | --------- | -------- | ------------------------------------------------------------- |
 | `USE_GREYLIST` | `no`   | multisite | non      | **Activer Greylist :** Mettre à `yes` pour activer la greylist. |
 
 === "Adresse IP"
     **Ce que cela fait :** Place les visiteurs en greylist selon leur adresse IP ou leur réseau. Ces visiteurs obtiennent l'accès, mais restent soumis aux contrôles de sécurité.
 
-    | Paramètre          | Défaut | Contexte  | Multiple | Description                                                                                                                   |
-    | ------------------ | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_IP`      |        | multisite | non      | **Greylist IP :** Liste d'adresses IP ou de réseaux (notation CIDR) à placer en greylist, séparés par des espaces.            |
+    | Paramètre          | Défaut | Contexte  | Multiple | Description                                                                                      |
+    | ------------------ | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------ |
+    | `GREYLIST_IP`      |        | multisite | non      | **Greylist IP :** Liste d'adresses IP ou de réseaux (notation CIDR) à placer en greylist, séparés par des espaces. |
     | `GREYLIST_IP_URLS` |        | multisite | non      | **URL de greylist IP :** Liste d'URL contenant des adresses IP ou des réseaux à placer en greylist, séparées par des espaces. |
 
     !!! info "Formats des listes"
@@ -2667,11 +2667,11 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 === "DNS inverse"
     **Ce que cela fait :** Place les visiteurs en greylist selon leur nom de domaine inversé. Utile pour autoriser conditionnellement l'accès aux visiteurs de certaines organisations ou de certains réseaux.
 
-    | Paramètre              | Défaut | Contexte  | Multiple | Description                                                                                                                         |
-    | ---------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_RDNS`        |        | multisite | non      | **Greylist rDNS :** Liste de suffixes DNS inversés à placer en greylist, séparés par des espaces.                                   |
+    | Paramètre              | Défaut | Contexte  | Multiple | Description                                                                                      |
+    | ---------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------ |
+    | `GREYLIST_RDNS`        |        | multisite | non      | **Greylist rDNS :** Liste de suffixes DNS inversés à placer en greylist, séparés par des espaces. |
     | `GREYLIST_RDNS_GLOBAL` | `yes`  | multisite | non      | **rDNS global seulement :** Effectue les contrôles de greylist rDNS uniquement sur les adresses IP globales lorsque défini à `yes`. |
-    | `GREYLIST_RDNS_URLS`   |        | multisite | non      | **URL de greylist rDNS :** Liste d'URL contenant des suffixes DNS inversés à placer en greylist, séparées par des espaces.          |
+    | `GREYLIST_RDNS_URLS`   |        | multisite | non      | **URL de greylist rDNS :** Liste d'URL contenant des suffixes DNS inversés à placer en greylist, séparées par des espaces. |
 
     !!! info "DNS inverse confirmé par résolution directe (FCrDNS)"
         Les suffixes `GREYLIST_RDNS` sont confirmés par résolution directe : le nom d'hôte PTR correspondant est résolu à nouveau vers une IP et l'accès accordé par la greylist ne s'applique que lorsque cette IP correspond à l'IP du client. Un enregistrement PTR qui ne peut pas être confirmé par résolution directe est considéré comme une possible usurpation et l'accès n'est pas accordé. Cela empêche un attaquant qui contrôle son propre enregistrement PTR de le définir sur un suffixe en greylist afin d'obtenir l'accès.
@@ -2679,25 +2679,25 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 === "ASN"
     **Ce que cela fait :** Place les visiteurs de fournisseurs réseau précis en greylist à l'aide des numéros de système autonome. Les ASN identifient le fournisseur ou l'organisation auquel appartient une IP.
 
-    | Paramètre           | Défaut | Contexte  | Multiple | Description                                                                                             |
-    | ------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_ASN`      |        | multisite | non      | **Greylist ASN :** Liste de numéros de système autonome à placer en greylist, séparés par des espaces.  |
+    | Paramètre           | Défaut | Contexte  | Multiple | Description                                                                               |
+    | ------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------- |
+    | `GREYLIST_ASN`      |        | multisite | non      | **Greylist ASN :** Liste de numéros de système autonome à placer en greylist, séparés par des espaces. |
     | `GREYLIST_ASN_URLS` |        | multisite | non      | **URL de greylist ASN :** Liste d'URL contenant des ASN à placer en greylist, séparées par des espaces. |
 
 === "User Agent"
     **Ce que cela fait :** Place les visiteurs en greylist selon le navigateur ou l'outil qu'ils déclarent utiliser. Cela permet un accès contrôlé pour des outils précis tout en conservant les contrôles de sécurité.
 
-    | Paramètre                  | Défaut | Contexte  | Multiple | Description                                                                                                      |
-    | -------------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+    | Paramètre                  | Défaut | Contexte  | Multiple | Description                                                                                       |
+    | -------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------- |
     | `GREYLIST_USER_AGENT`      |        | multisite | non      | **Greylist User-Agent :** Liste de motifs User-Agent (regex PCRE) à placer en greylist, séparés par des espaces. |
-    | `GREYLIST_USER_AGENT_URLS` |        | multisite | non      | **URL de greylist User-Agent :** Liste d'URL contenant des motifs User-Agent à placer en greylist.               |
+    | `GREYLIST_USER_AGENT_URLS` |        | multisite | non      | **URL de greylist User-Agent :** Liste d'URL contenant des motifs User-Agent à placer en greylist. |
 
 === "URI"
     **Ce que cela fait :** Place en greylist les requêtes vers des URL précises de votre site. Cela permet un accès conditionnel à certains endpoints tout en conservant les contrôles de sécurité.
 
-    | Paramètre           | Défaut | Contexte  | Multiple | Description                                                                                                      |
-    | ------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_URI`      |        | multisite | non      | **Greylist URI :** Liste de motifs d'URI (regex PCRE) à placer en greylist, séparés par des espaces.             |
+    | Paramètre           | Défaut | Contexte  | Multiple | Description                                                                           |
+    | ------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------- |
+    | `GREYLIST_URI`      |        | multisite | non      | **Greylist URI :** Liste de motifs d'URI (regex PCRE) à placer en greylist, séparés par des espaces. |
     | `GREYLIST_URI_URLS` |        | multisite | non      | **URL de greylist URI :** Liste d'URL contenant des motifs d'URI à placer en greylist, séparées par des espaces. |
 
     !!! tip "Ancrez un motif de chemin pour couvrir tout ce qui est en dessous"
@@ -2767,13 +2767,22 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 
 === "Accès API sélectif"
 
-    Configuration autorisant l'accès à des endpoints d'API précis :
+    Configuration qui laisse un réseau partenaire accéder à tout et tous les clients accéder à un seul endpoint public :
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # Réseau partenaire externe
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Les critères de la Greylist sont des alternatives : une requête passe la Greylist dès qu'un seul d'entre eux correspond. Ici, le réseau listé peut accéder à tous les chemins, et n'importe quel client peut accéder au chemin exact `/api/foo`. Les autres clients sont refusés sur les autres chemins. Les autres contrôles de sécurité activés s'appliquent toujours à chaque requête. Utilisez `^/api/foo(/|$)` pour une arborescence publique. La correspondance porte sur le chemin normalisé, sans la chaîne de requête. Il est impossible d'exprimer des listes d'IP différentes selon les chemins, ni d'exiger qu'une IP et un chemin correspondent en même temps.
+
+    | Client | Chemin | Résultat |
+    | --- | --- | --- |
+    | Dans `203.0.113.0/24` | `/api/foo` | Autorisé |
+    | Dans `203.0.113.0/24` | tout autre chemin | Autorisé |
+    | Hors de `203.0.113.0/24` | `/api/foo` | Autorisé |
+    | Hors de `203.0.113.0/24` | tout autre chemin | Refusé |
 
 ### Travailler avec des fichiers de listes locaux
 

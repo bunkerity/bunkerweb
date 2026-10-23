@@ -149,13 +149,22 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
 
 === "Accès API sélectif"
 
-    Configuration autorisant l'accès à des endpoints d'API précis :
+    Configuration qui laisse un réseau partenaire accéder à tout et tous les clients accéder à un seul endpoint public :
 
     ```yaml
     USE_GREYLIST: "yes"
-    GREYLIST_URI: "^/api/v1/public/ ^/api/v1/status"
-    GREYLIST_IP: "203.0.113.0/24"  # Réseau partenaire externe
+    GREYLIST_IP: "203.0.113.0/24"
+    GREYLIST_URI: "^/api/foo$"
     ```
+
+    Les critères de la Greylist sont des alternatives : une requête passe la Greylist dès qu'un seul d'entre eux correspond. Ici, le réseau listé peut accéder à tous les chemins, et n'importe quel client peut accéder au chemin exact `/api/foo`. Les autres clients sont refusés sur les autres chemins. Les autres contrôles de sécurité activés s'appliquent toujours à chaque requête. Utilisez `^/api/foo(/|$)` pour une arborescence publique. La correspondance porte sur le chemin normalisé, sans la chaîne de requête. Il est impossible d'exprimer des listes d'IP différentes selon les chemins, ni d'exiger qu'une IP et un chemin correspondent en même temps.
+
+    | Client | Chemin | Résultat |
+    | --- | --- | --- |
+    | Dans `203.0.113.0/24` | `/api/foo` | Autorisé |
+    | Dans `203.0.113.0/24` | tout autre chemin | Autorisé |
+    | Hors de `203.0.113.0/24` | `/api/foo` | Autorisé |
+    | Hors de `203.0.113.0/24` | tout autre chemin | Refusé |
 
 ### Travailler avec des fichiers de listes locaux
 
