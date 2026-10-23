@@ -42,6 +42,9 @@ RUN apk add --no-cache "zlib>=1.3.2-r1" bash tzdata mariadb-connector-c mariadb-
   addgroup -g 101 autoconf && \
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
+# Fix CVEs
+RUN apk add --no-cache "musl>=1.2.6-r3" "musl-utils>=1.2.6-r3" # CVE-2026-107891
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 

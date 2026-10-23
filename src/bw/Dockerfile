@@ -77,6 +77,9 @@ RUN umask 027
 # Install runtime dependencies
 RUN apk add --no-cache "zlib>=1.3.2-r1" openssl pcre2 bash python3 yajl geoip libxml2 libgd curl tzdata brotli lmdb libfuzzy2
 
+# Fix CVEs
+RUN apk add --no-cache "musl>=1.2.6-r3" "musl-utils>=1.2.6-r3" # CVE-2026-107891
+
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 

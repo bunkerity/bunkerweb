@@ -173,6 +173,9 @@ RUN umask 027
 # Install runtime dependencies including supervisord
 RUN apk add --no-cache "zlib>=1.3.2-r1" bash coreutils curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2 logrotate
 
+# Fix CVEs
+RUN apk add --no-cache "musl>=1.2.6-r3" "musl-utils>=1.2.6-r3" # CVE-2026-107891
+
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
 # Install updated python requirements to fix CVEs
