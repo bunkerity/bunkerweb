@@ -885,7 +885,7 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     在任何恢复操作之前，备份插件会自动在临时位置创建您当前数据库状态的备份。如果您需要还原恢复操作，这提供了一个额外的保障。
 
 !!! warning "数据库兼容性"
-    备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。
+    备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。恢复操作会在修改任何内容之前拒绝来自其他数据库引擎的备份（MariaDB 和 MySQL 视为不同的引擎）。
 
 ### 示例配置
 
