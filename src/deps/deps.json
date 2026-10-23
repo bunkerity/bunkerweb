@@ -10,9 +10,9 @@
   "git_repository": [
     {
       "id": "brotli",
-      "name": "Brotli v1.2.0",
+      "name": "Brotli v1.2.1",
       "url": "https://github.com/google/brotli.git",
-      "commit": "028fb5a23661f123017c060daa546b55cf4bde29",
+      "commit": "db24a98aed38a16de78cc05ca15cdd8dc2a0d92d",
       "post_install": "rm -r src/deps/src/brotli/tests"
     },
     {
@@ -78,9 +78,9 @@
     },
     {
       "id": "lua-resty-dns",
-      "name": "lua-resty-dns v0.23",
+      "name": "lua-resty-dns v0.24",
       "url": "https://github.com/openresty/lua-resty-dns.git",
-      "commit": "273db4f348d4676f554c5319a902e7b836153192",
+      "commit": "b68eaecbf7997ac71c08ba56032b1f45438bd758",
       "post_install": "rm -r src/deps/src/lua-resty-dns/t"
     },
     {
