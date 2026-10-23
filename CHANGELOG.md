@@ -12,6 +12,7 @@
 - [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried by the scheduler, instead of being reported as applied.
 - [BUGFIX] `crowdsec`: an nginx reload in stream mode no longer leaves an orphaned decision set that fills the cache and stops new bans from being enforced.
 - [BUGFIX] `crowdsec`: stream mode checkpoints decisions to disk, so known bans stay enforced through Local API outages, reloads and container restarts (see the plugin README).
+- [BUGFIX] `db`: upgrades on MariaDB or MySQL no longer crash when the `method` columns are `VARCHAR` instead of `ENUM`. (Fixes #4095)
 - [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
 - [BUGFIX] `scheduler`: startup stops when the database cannot be stamped for its migration, instead of running on an unmigrated database.
 - [BUGFIX] `scheduler`: job-triggered reloads wait while a configuration generation is being retried, so new plugins and custom configs never load against the previous configuration.
