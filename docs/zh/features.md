@@ -3755,6 +3755,8 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
     | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。         |
     | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。                |
 
+当 `SECURITY_MODE` 为 `detect` 时，连接限制会被评估并记录（`limiting connections, dry run`），但不会被强制执行。
+
 !!! info "连接限制与请求限制"
     - **连接限制** 限制单个 IP 地址可以维持的并发连接数。
     - **请求速率限制** 限制一个 IP 地址在定义的时间段内可以发出的请求数。

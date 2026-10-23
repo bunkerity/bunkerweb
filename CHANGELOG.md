@@ -18,6 +18,7 @@
 - [BUGFIX] `crowdsec`: an nginx reload in stream mode no longer leaves an orphaned decision set that fills the cache and stops new bans from being enforced.
 - [BUGFIX] `crowdsec`: stream mode checkpoints decisions to disk, so known bans stay enforced through Local API outages, reloads and container restarts (see the plugin README).
 - [BUGFIX] `db`: upgrades on MariaDB or MySQL no longer crash when the `method` columns are `VARCHAR` instead of `ENUM`. (Fixes #4095)
+- [BUGFIX] `limit`: connection limits honour `SECURITY_MODE=detect`.
 - [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
 - [BUGFIX] `redis`: the Web UI and CLI send the Sentinel credentials and TLS settings to the Sentinel nodes. (Fixes #4093)
 - [BUGFIX] `scheduler`: startup stops when the database cannot be stamped for its migration, instead of running on an unmigrated database.

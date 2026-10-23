@@ -3761,6 +3761,8 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
     | `LIMIT_CONN_MAX_HTTP3`  | `100`   | multisite | no       | **HTTP/3 Streams:** Maximum number of concurrent HTTP/3 streams per IP address.             |
     | `LIMIT_CONN_MAX_STREAM` | `10`    | multisite | no       | **Stream Connections:** Maximum number of concurrent stream connections per IP address.     |
 
+When `SECURITY_MODE` is `detect`, connection limits are evaluated and logged (`limiting connections, dry run`) but not enforced.
+
 !!! info "Connection vs. Request Limiting"
     - **Connection limiting** restricts the number of simultaneous connections that a single IP address can maintain.
     - **Request rate limiting** restricts the number of requests an IP address can make within a defined period of time.
