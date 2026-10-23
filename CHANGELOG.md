@@ -11,6 +11,7 @@
 - [FEATURE] `ui`: the NGINX failover banner links to the Logs page, with `error.log` selected when it is available. (Fixes #4028)
 - [BUGFIX] `antibot`: a failed challenge attempt keeps its destination, with its query when the session survives. Thanks to @Explotacionweb for the fix.
 - [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
+- [BUGFIX] `api`: the OpenAPI schema (`/openapi.json`) loads again instead of returning 500, and a config upload without `type` is rejected.
 - [BUGFIX] `badbehavior`: a ban's evidence is stored once and the requests rejected during it only reference it, so reports stay small; the Reports page loads the events on demand.
 - [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried by the scheduler, instead of being reported as applied.
 - [BUGFIX] `core`: an instance whose kept configuration (`KEEP_CONFIG_ON_RESTART=yes`) fails to start falls back to the loading page instead of exiting.

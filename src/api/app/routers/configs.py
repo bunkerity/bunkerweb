@@ -97,9 +97,9 @@ def list_configs(
 
 @router.post("/upload", dependencies=[Depends(guard)])
 async def upload_configs(
+    type: Annotated[ConfigType, Form(description="Config type")],  # noqa: A002
     files: List[UploadFile] = File(..., description="One or more config files to create"),
     service: Optional[str] = Form(None, description='Service id; use "global" or leave empty for global'),
-    type: Annotated[ConfigType, Form(description="Config type")] = ...,  # noqa: A002
     is_draft: bool = Form(False, description="Mark uploaded custom configs as draft"),
 ) -> JSONResponse:
     """Create new custom configs from uploaded files (method="api").
@@ -304,6 +304,10 @@ async def update_config_upload(
 
     Optional form fields `new_service`, `new_type`, `new_name` allow moving/renaming.
     """
+    # FastAPI reads an omitted bool form field as False; here omitted must stay None (keep the current draft state)
+    if "new_is_draft" not in await request.form():
+        new_is_draft = None
+
     s_orig = None if service in (None, "", "global") else service
     ctype_orig = config_type  # Already normalized by Pydantic
     name_orig = name
