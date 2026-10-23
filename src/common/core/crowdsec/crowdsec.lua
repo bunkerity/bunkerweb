@@ -1,5 +1,6 @@
 local banlease = require("bunkerweb.banlease")
 local cache_partition = require("crowdsec.cache_partition")
+local load_config = require("crowdsec.lib.config").loadConfig
 local class = require("middleclass")
 local plugin = require("bunkerweb.plugin")
 local utils = require("bunkerweb.utils")
@@ -161,6 +162,8 @@ function crowdsec:init()
 	local failed = {}
 	local loaded = {}
 	local api_urls = {}
+	local configs = {}
+	local failed_fingerprints = {}
 	for _, scope in ipairs(scopes) do
 		local conf_file = CACHE_PATH .. (scope == GLOBAL_SCOPE and "" or (scope .. "/")) .. CONF_NAME
 		local content = read_file(conf_file)
@@ -174,7 +177,30 @@ function crowdsec:init()
 			local api_url = cache_partition.api_url(content)
 			insert(loaded, { scope = scope, file = conf_file, content = content, api_url = api_url })
 			insert(api_urls, api_url)
+			local conf = load_config(conf_file)
+			if conf then
+				insert(configs, conf)
+			else
+				failed_fingerprints[cache_partition.normalize(api_url)] = true
+				self.logger:log(
+					ERR,
+					"can't load CrowdSec configuration " .. conf_file .. "; using raw configuration fingerprint"
+				)
+			end
 		end
+	end
+	local fingerprints = cache_partition.fingerprints(configs)
+	-- A later bouncer load may succeed; every sibling must still receive one shared fingerprint.
+	for endpoint in pairs(failed_fingerprints) do
+		local hashes, seen = {}, {}
+		for _, entry in ipairs(loaded) do
+			if cache_partition.normalize(entry.api_url) == endpoint and not seen[entry.content] then
+				insert(hashes, cache_partition.hash(entry.content))
+				seen[entry.content] = true
+			end
+		end
+		sort(hashes)
+		fingerprints[endpoint] = cache_partition.hash("raw:" .. concat(hashes))
 	end
 
 	local prefixes, distinct_apis = cache_partition.prefixes(api_urls)
@@ -186,6 +212,12 @@ function crowdsec:init()
 
 	-- Services whose rendered configuration is byte-identical share one instance
 	local by_conf = {}
+	local aliases = {}
+	for _, entry in ipairs(loaded) do
+		local endpoint = cache_partition.normalize(entry.api_url)
+		aliases[endpoint] = aliases[endpoint] or {}
+		insert(aliases[endpoint], entry.file)
+	end
 	local resolved = {}
 	local challenges = {}
 	local instances = 0
@@ -198,7 +230,13 @@ function crowdsec:init()
 				insert(failed, entry.scope)
 				self.logger:log(ERR, "can't create bouncer for service " .. entry.scope .. " : " .. bouncer_err)
 			else
-				local ok, init_err = bouncer.init(entry.file, USER_AGENT, prefixes[entry.api_url])
+				local ok, init_err = bouncer.init(
+					entry.file,
+					USER_AGENT,
+					prefixes[entry.api_url],
+					fingerprints[cache_partition.normalize(entry.api_url)],
+					aliases[cache_partition.normalize(entry.api_url)]
+				)
 				if not ok then
 					insert(failed, entry.scope)
 					self.logger:log(
