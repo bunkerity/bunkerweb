@@ -30,6 +30,8 @@
 - [BUGFIX] `ui`: table column preferences survive column changes between releases, and the Reports Date toggle is saved.
 - [DOCS] `errors`: how to keep upstream API error bodies for one service or location.
 - [DOCS] `greylist`: the criteria combine with OR, with an example.
+- [DEPS] Updated Brotli to v1.2.1
+- [DEPS] Updated lua-resty-dns to v0.24
 
 ## v1.6.17 - 2026/10/21
 
