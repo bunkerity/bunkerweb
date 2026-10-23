@@ -6,6 +6,7 @@
 - [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
 - [FEATURE] `crowdsec`: new global `CROWDSEC_CACHE_SIZE` (`100m`) and `CROWDSEC_METADATA_CACHE_SIZE` (`5m`) settings size the decision and metadata caches.
 - [FEATURE] `installer`: the easy install script sends its downloads through `HTTP_PROXY`/`HTTPS_PROXY` and honours `NO_PROXY`. (Fixes #4040)
+- [FEATURE] `ui`: the NGINX failover banner links to the Logs page, with `error.log` selected when it is available. (Fixes #4028)
 - [BUGFIX] `antibot`: a failed challenge attempt keeps its destination, with its query when the session survives. Thanks to @Explotacionweb for the fix.
 - [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
 - [BUGFIX] `badbehavior`: a ban's evidence is stored once and the requests rejected during it only reference it, so reports stay small; the Reports page loads the events on demand.
