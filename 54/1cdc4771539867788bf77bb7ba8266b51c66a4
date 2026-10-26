@@ -1,0 +1,648 @@
+src/ui/app/templates/models/plugin_settings_body.html
+  s_dc1198d8fe4832::t_09822f1d7a9ecf 13-17,20
+src/ui/app/static/js/pages/profile.js
+  s_a20b84b00c7304::t_66edddc60ba28d 214-216,278
+  s_a20b84b00c7304::t_c7988d0a013d22 241-246
+  s_a20b84b00c7304::t_c0b0d653d9358b 86,88
+  s_a20b84b00c7304::t_2b3394380b62b7 112-113,155-156,158-159,162,181,194-197,199,203-213,217-227,234,236-240,248-264,268,272-277,279-280
+src/ui/app/static/js/components/plugin-settings-nav.js
+  s_d761f59c5d2b4d::t_819aebe096c31e 199-202
+  s_dc1198d8fe4832::t_e39f29383a7529 150-151,153-155,157-158
+  s_a20b84b00c7304::t_76f36d2add991d 35-36
+  s_dc1198d8fe4832::t_78b79816e8b499 1-34,37-48,51-78,81-94,101-137,141-149,152,159-190,196-198,203-210,214-226
+  s_a20b84b00c7304::t_fd9e24a9f23f47 49-50,79-80,95-100,138-140,156,191-195,211-213
+src/ui/app/static/js/pages/groups.js
+  s_7e8c88d6cdcc2d::t_dbac0eabf60392 6-10,93-244,247-252,332-334,337,340,347,353-357,528-533
+src/ui/app/templates/sidebar-notifications.html
+  s_c174ed6e38d764::t_e057e50ce444a9 5
+  s_c174ed6e38d764::t_36f77324a76024 2-4,6-11,15-26,29,35-66,69-78
+src/ui/app/templates/instances.html
+  s_475e027c6529d4::t_ccdbc59f54063d 160
+  s_dc1198d8fe4832::t_6ac0978a7cc2cf 193,216,277-278
+src/ui/app/templates/components/status.html
+  s_88db3076fc1d11::t_f46d70a52e6f4f 6-8
+  s_88db3076fc1d11::t_0ebf96f794bbd5 88-89
+src/ui/app/templates/config_edit.html
+  s_e56b37cb9c9ea3::t_6e40009d8729b0 179-180
+  s_5a44845c268cc3::t_ac6ec36644585a 2-4,6-10,36-38,40,42,44-45,56-57,63,100-101,118,126-127,132-133,136,142,144,148-149,152-154,156,158,166-168,174-178,181-183,185,194-195
+  s_e56b37cb9c9ea3::t_90dd0cda22ab8c 200
+src/ui/app/templates/menu.html
+  s_c174ed6e38d764::t_04927e9ef01c9b 76
+  s_c174ed6e38d764::t_dea48ba1edd029 87,145,149-152,154,158,174,178-179,182,302-312
+  s_c174ed6e38d764::t_35a0f8b0cce645 73,77,80
+  s_c174ed6e38d764::t_fa04513f1169d9 28,30,32-33,35,39-40,44-48,51-52,54
+  s_c174ed6e38d764::t_561bbc6ad8d00a 90,144
+  s_c174ed6e38d764::t_536cf25ec2f040 2-4,21-25,41-43,58-72,74-75,78-79,88-89,91-118,120-141,146-148,153,155-156,159-160,162-173,175-177,180-181,183-185,192-200,285,290,293-300,313
+  s_c174ed6e38d764::t_042bc0967c6b69 119,157,161
+  s_c174ed6e38d764::t_0ede29e7741e55 142-143
+src/ui/app/static/js/pages/logs-live.js
+  s_5a44845c268cc3::t_386a1a25a13a59 83-84
+  s_5a44845c268cc3::t_8a78310cd6f818 4-10,65-67,72-82,85-91
+src/ui/app/static/js/components/select.js
+  s_88db3076fc1d11::t_0ebf96f794bbd5 86,125-128
+src/ui/app/static/css/pages/workflow_shell.css
+  s_d761f59c5d2b4d::t_da8755f2cc3179 100-102
+  s_5a44845c268cc3::t_755805d64db718 1-99
+src/ui/app/static/css/pages/workflow_editor.css
+  s_5a44845c268cc3::t_a6ff2838029466 1687,1970,2303-2316
+  s_5a44845c268cc3::t_4ca7c4611c6c11 285-288,290,298,301,304,308,318,324-327,331,333-334,336,342,353,356-357,361-362,365,373,376,381,384,388,572,576,1038,1040-1041,1044-1045,1047,1051,1054,1062,1065,1095,1110,1114,1117-1118,1122,1125-1126,1252,1260,1264,1368,1679,1688,1693,1698,1701,1705,1709,1721,1724,1727,1809,1846,1871,1874-1875,1886,1895,1957,2217-2229,2234,2236,2244-2245,2249-2264,2267-2269,2275-2302,2317-2343
+  s_5a44845c268cc3::t_26ca3e9df85039 2270-2274
+  s_5a44845c268cc3::t_f1481074e1a659 1326-1330
+  s_5a44845c268cc3::t_ee4ade31c3a691 272,1046,1350,1358-1367,1866
+  s_069d6f94f53eac::t_b8e16f83dce496 240-241,243-248,250-251,254,258-259,269-271,273-274,277,283-284,289,291-297,299-300,302-303,305-307,309-317,319-323,328-330,332,335,337-341,343-352,354-355,358-360,363-364,366-372,374-375,377-380,382-383,385-387,389-392,432,570-571,573-575,577-578,1035-1037,1039,1042,1048-1050,1052-1053,1055-1061,1063-1064,1066-1067,1075,1077,1081-1085,1092-1094,1106-1109,1111-1113,1115-1116,1119-1121,1123-1124,1248-1251,1253,1257-1259,1261-1263,1521-1523,1526-1527,1554,1558,1569,1578,1659,1662,1675-1678,1680-1686,1689-1692,1694-1697,1699-1700,1702-1704,1706-1708,1710-1720,1722-1723,1725-1726,1764,1769-1771,1805,1810,1812-1814,1816-1822,1825,1829,1836,1843,1848,1853,1864-1865,1867-1868,1870,1872-1873,1876-1877,1879,1884-1885,1893,1902,1905,1907-1909,1954,1958-1960,1965-1967,2265-2266,2390
+src/ui/app/routes/bans.py
+  s_b63adb01ae2c85::t_7bd7a92aaeaaa0 362,364
+  s_a20b84b00c7304::t_428e3a4adc9243 338-339
+src/ui/app/static/js/pages/setup.js
+  s_a20b84b00c7304::t_66edddc60ba28d 452-454
+  s_a20b84b00c7304::t_c473e4e6e980c8 321-366,419-422,439-451,455,466-468,477-479,511,513,588-589,603-604,614-615,645,650-653,969-972,975-983,1092,1345
+src/ui/app/templates/models/compose_pane.html
+  s_7e8c88d6cdcc2d::t_9a2dacafbf421a 118,123-128
+  s_81d1a761236338::t_0dcb70ecc414f7 129-130
+src/ui/app/static/js/pages/web-cache.js
+  s_dc1198d8fe4832::t_931c6c7350ac76 1-34
+src/ui/app/routes/about.py
+  s_a20b84b00c7304::t_858161e6860a7a 41-48
+  s_d761f59c5d2b4d::t_974f6572432948 1-2,6-10,15-40,49-50,56-57,59-64
+src/ui/app/templates/global_settings.html
+  s_dc1198d8fe4832::t_d8f93d048ddd7a 2,8-20
+  s_dc1198d8fe4832::t_7b560cfe2d1750 21
+src/ui/app/routes/global_settings.py
+  s_dc1198d8fe4832::t_d4b13c4f510158 26,370-371,441
+src/ui/app/templates/profile.html
+  s_a20b84b00c7304::t_7cad51883dc4f8 2,23,28-34,36-38,40-41,43,46,52,54,67,440,452-484,515
+  s_a20b84b00c7304::t_c0b0d653d9358b 441-447,451,485-511,513-514
+src/ui/app/static/js/pages/reports.js
+  s_b63adb01ae2c85::t_378bf1f744ea91 310-312,473-483,486,491-492,494-495,498-502,507-510,534-537,643-644,718,721,725,729,1960-1967,2002
+  s_b63adb01ae2c85::t_0860f4f8f13608 1972
+  s_b63adb01ae2c85::t_1e37695b876142 309
+src/ui/app/static/js/pages/workflow_editor.js
+  s_5a44845c268cc3::t_ee4ade31c3a691 1519-1520,1523-1524,1527,2356-2368,4784,4792
+  s_5a44845c268cc3::t_3d109c3b3e24e7 169-172,1453,1464,1501,1513,2369,2372-2385,2390-2404,2406-2408,2410-2413,2417-2427,2429-2430,2433-2436,2439-2481,2490-2530,2534-2539,2543-2551,2555,2574,2793-2794,2825-2826,2885-2893,2950-2958,3160
+  s_5a44845c268cc3::t_3e0d5bc5d00756 440,449,453,463,477,484-485,492-493,500-501,1283,1334,1345,1356,1363,1377,1403,1408,1436,1451,1465,1481-1482,1496,1514,1529,2087-2111,2370,2976-3011,3014-3018,3845-3847,4419-4428,4529,4807,4818,4826
+  s_5a44845c268cc3::t_26ca3e9df85039 1385,1389,2386-2389,2431-2432,2482-2489,2531,2540,2552,4685-4687
+  s_5a44845c268cc3::t_0d5ac5d09c5de1 2414-2416,2428,2437-2438
+  s_5a44845c268cc3::t_e01227c1637cab 447,1370,1375,1382,1407,1418-1419,1427-1428,1444,1478,1493,4519-4520,4528,4558-4559,4600-4684,4688,4691,4699,4806,4825
+  s_5a44845c268cc3::t_f7c20ea988cd0b 2405,2409,2532-2533,2541-2542,2553-2554
+  s_5a44845c268cc3::t_691453f4ba206c 467,1042,1500,3364,3369,3372-3380,3390,3400,3402-3404,3407-3412
+  s_2797c405516fb9::t_ba74dd43b2bde3 160,423-439,441-446,448,450-452,454-462,464-466,468-476,478-483,486-491,494-499,502,1021-1041,1057-1058,1077-1079,1259-1271,1278-1282,1290,1328-1333,1335-1344,1346-1355,1357-1362,1364-1369,1371-1374,1376,1378-1381,1383-1384,1386-1388,1390-1402,1404-1406,1409-1417,1420-1426,1429-1435,1437-1443,1445-1450,1452,1454-1463,1466-1477,1479-1480,1483-1492,1494-1495,1497-1499,1502-1512,1515-1518,1521-1522,1525-1526,1528,1530,1603-1604,1607,1639,1657,1668-1676,1678,1682-1686,1688-1689,1946,1949-1956,1967,1971,1974-1976,1979-1981,2015,2022-2024,2027,2030,2371,3022,3157-3159,3161-3162,3164,3178-3179,3188,3192,3301,4501-4508,4511-4518,4521-4527,4530-4532,4549-4557,4760-4783,4785-4791,4793-4805,4808-4817,4819-4824,4827
+src/ui/app/templates/bans.html
+  s_b63adb01ae2c85::t_de1b3c45055401 20-22,53-67,101,430-432,437-439
+  s_b63adb01ae2c85::t_74466395332387 84-100,104,113-114
+src/ui/app/static/css/overrides/kit-fidelity.css
+  s_c174ed6e38d764::t_042bc0967c6b69 755-757,763,766-768,781-783,816,826-827,832,862,886
+  s_c174ed6e38d764::t_c3d2dc851d51e9 607,735
+  s_c174ed6e38d764::t_d1491b0ed2e933 498-506
+  s_c174ed6e38d764::t_14ed28ecf6276f 606,608-609,661
+  s_c174ed6e38d764::t_a2f75ce2a2d2ab 598-601,666-667,758-762,787-791,819-824,846-851,856-861,870-876,879-885,1262-1263,1269-1271,1275-1276,1280-1281,1283-1285
+  s_c174ed6e38d764::t_9404c2aa771335 410-497,507-597,602-605,610-660,662-665,668-734,736-754,764-765,769-780,784-786,792-815,817-818,825,828-831,833-845,852-855,863-869,877-878,887-1261,1264-1268,1272-1274,1277-1279,1282,1286-1303
+src/ui/app/static/js/components/settings-widgets.js
+  s_a20b84b00c7304::t_76f36d2add991d 1830-1951,1955-1956
+src/ui/app/routes/workflows.py
+  s_5a44845c268cc3::t_4c07698bba837f 103-109
+  s_475e027c6529d4::t_8c7c4bfcf9b6aa 250-262
+  s_5a44845c268cc3::t_7f079598d727ff 263-265
+src/ui/app/templates/redirects.html
+  s_7e8c88d6cdcc2d::t_86cc47bd18a16c 11-17,27-34,36-43,53-54,75-88,94-97,104-105,108-115,123-125,128,130-132,135-140,143,146,156,218-228
+  s_7e8c88d6cdcc2d::t_c0e91b59d43090 229
+src/ui/app/templates/plugin_page.html
+  s_0ff3748d74641a::t_4677faf65fdca4 46-51,53
+  s_0ff3748d74641a::t_4b0514ea1dc07b 3,45,52,54,56,63,65,70-71,232
+src/ui/app/static/js/pages/about.js
+  s_5a44845c268cc3::t_386a1a25a13a59 13-15
+  s_d761f59c5d2b4d::t_974f6572432948 1-12,16-27
+src/ui/app/templates/models/plugins_settings_raw.html
+  s_dc1198d8fe4832::t_7bb3115b9d35c7 18-19,28,85,108-128,140-159
+src/ui/app/templates/navbar.html
+  s_c174ed6e38d764::t_731396b1323ae5 178-179,181-186,191-205,207-208,210-230,232-278,280-290,293-294,296-298,300,305
+  s_c174ed6e38d764::t_1f16218773b047 13-37
+  s_c174ed6e38d764::t_00b77229b21d47 4-5
+  s_c174ed6e38d764::t_dea48ba1edd029 206
+src/ui/app/static/js/pages/certificates.js
+  s_5a44845c268cc3::t_7cd36ad421ca01 501,561
+  s_d761f59c5d2b4d::t_e0f7f1cf278b84 528,577,592
+  s_7e8c88d6cdcc2d::t_9a2dacafbf421a 101-102,319-500,502-527,529-560,562-576,578-591,593-689
+src/ui/app/templates/templates.html
+  s_7e8c88d6cdcc2d::t_aab7d6e60d49ea 218,224-226,317-328
+  s_b63adb01ae2c85::t_6cec693fa7d4d6 103,181-208
+  s_7e8c88d6cdcc2d::t_684468bf5ea963 11-16,65-68,96-102,104,116-120,125-130,142,168-169
+  s_5a44845c268cc3::t_6e30a0e663e011 209
+src/ui/app/static/js/pages/services.js
+  s_b63adb01ae2c85::t_44ddfbea8dd7f6 72,103-104,121,788-791
+src/ui/app/templates/home.html
+  s_a20b84b00c7304::t_9151bf5aa41647 44-46
+src/ui/app/templates/workflow_shell.html
+  s_5a44845c268cc3::t_62f7efbd8d66e1 1-48
+src/ui/app/routes/resource_groups.py
+  s_a20b84b00c7304::t_1e8e91c975c96b 7,23-42,46-64,123-126
+src/ui/app/templates/workflows.html
+  s_475e027c6529d4::t_9372a0225be56d 124-125,127
+  s_5a44845c268cc3::t_ddd8a3df7a64bb 10,14-16,32,112-113
+  s_475e027c6529d4::t_a78afd69c538ad 116
+  s_5a44845c268cc3::t_89de9fd8f6a4b9 143,265
+  s_475e027c6529d4::t_db4d682639339c 122,128
+  s_475e027c6529d4::t_ece64377dbca4d 12-13,17-18,41,46-53,63-64,66-67,70-71,75-76,85-86,92-93,115,117-121,123,126,129-130,250,263-264
+  s_e348b9e3da0ae1::t_bd09c6ae842c4b 33,95-96,98-106,211-227
+src/ui/app/static/css/overrides/components.css
+  s_88db3076fc1d11::t_24530e6a49fe19 247,279-283
+  s_88db3076fc1d11::t_763db24d8e3d64 231-246,248-269,276-278,284-530,533-545,547-595
+  s_88db3076fc1d11::t_2721436ff4636b 270-275,546
+  s_88db3076fc1d11::t_661dd02d56ea79 531-532
+src/ui/app/static/js/components/top-table.js
+  s_5a44845c268cc3::t_7cd36ad421ca01 18,98-99
+  s_b63adb01ae2c85::t_7daae0d215d211 1-17,19-97,100-142
+src/ui/app/templates/workflow_editor.html
+  s_5a44845c268cc3::t_4e9916d7314d56 45,73-75,83-164,193-196,202-203,301
+  s_5a44845c268cc3::t_eccaf2d0935d87 8,10-12,22-44,46-59,67-69
+  s_d761f59c5d2b4d::t_54f4a980e1db16 6,172-177
+src/ui/app/templates/about.html
+  s_0ff3748d74641a::t_44f8acbe0159bb 271
+  s_d761f59c5d2b4d::t_974f6572432948 7-11,266-270,272-325,328-332
+src/ui/app/templates/components/empty-state.html
+  s_88db3076fc1d11::t_763db24d8e3d64 92
+  s_88db3076fc1d11::t_0ebf96f794bbd5 96,103,105
+src/ui/app/static/js/components/compose-shelf.js
+  s_dc1198d8fe4832::t_308856d1c36818 124-130
+src/ui/app/templates/logs.html
+  s_5a44845c268cc3::t_8a78310cd6f818 14-16,277-280,282-304
+src/ui/app/static/js/pages/jobs.js
+  s_7e8c88d6cdcc2d::t_9a2dacafbf421a 185-205,280-284
+src/ui/app/static/css/pages/cache.css
+  s_dc1198d8fe4832::t_ffa79d05616516 14
+src/ui/app/static/js/pages/threatmap.js
+  s_5a44845c268cc3::t_386a1a25a13a59 451-453,624-627,633-636
+  s_d761f59c5d2b4d::t_40ee16df5c4413 294-301,404-408,411-415,429-430,435-436,438,440-450,454-459,516-526,538-539,541-542,544,550-551,554-560,562,565,567-568,570,574-586,609-610,612-623,628-632,637
+src/ui/app/static/js/pages/bans.js
+  s_b63adb01ae2c85::t_dba73e4a8cfa9d 747,768,776
+  s_d761f59c5d2b4d::t_e0f7f1cf278b84 1068-1074,1078
+  s_b63adb01ae2c85::t_818e3bc04fe793 924-1067,1075-1077,1079-1093
+  s_b63adb01ae2c85::t_0860f4f8f13608 1356,1359,1560
+  s_b63adb01ae2c85::t_1de4eca2e26537 14-19,627-630,669,737-745,750,758-759,761,763-767,769-771,896-899,1207-1210,1269,1271,1354-1355,1357-1358,1360,1365,1368,1375,1378-1379,1382,1388,1391-1392,1470,1472,1477,1545-1558
+  s_c8abfbb1754dd6::t_2e7e189ceec1aa 746,1094
+src/ui/app/templates/cache.html
+  s_5a44845c268cc3::t_a4f870a91d604e 19-21,48,51,54,58,127,129-130,134,139
+src/ui/app/routes/home.py
+  s_c174ed6e38d764::t_4614727b480326 7-8,13,22-44
+  s_c174ed6e38d764::t_020101258ecb89 45-46
+src/ui/app/static/css/pages/profile.css
+  s_a20b84b00c7304::t_fbf0d755ee5c91 22-146
+tests/unit/ui/test_untranslated_js_literals.py
+  s_88db3076fc1d11::t_21380fc81cee93 158
+src/ui/app/templates/plugins.html
+  s_0ff3748d74641a::t_1765c724a80bf4 10-25,47-64,66,69,72,74-85,148,151,154-159,162,164,225,229-244,266,269-273,283-287,289-292,295-299
+src/ui/app/templates/plugin_settings_page.html
+  s_dc1198d8fe4832::t_cda3b4383c4e0d 83-84,97,102
+  s_dc1198d8fe4832::t_7d598e93668c46 40-42,110
+  s_dc1198d8fe4832::t_0f8206da739d03 2-3,43-82,85-96,99-101,103-109,111-129,132,164-180,199-205
+src/ui/app/templates/support.html
+  s_d761f59c5d2b4d::t_974f6572432948 34-82
+src/ui/app/templates/components/file-upload.html
+  s_88db3076fc1d11::t_0ebf96f794bbd5 63,134,248
+src/ui/app/static/css/pages/home.css
+  s_d761f59c5d2b4d::t_858a1145148b9e 905
+  s_d761f59c5d2b4d::t_369b10eba79c74 925,929-937
+  s_a20b84b00c7304::t_9151bf5aa41647 879-904,906-924,926-928,938-967
+src/ui/app/static/css/pages/web-cache.css
+  s_dc1198d8fe4832::t_931c6c7350ac76 93-125
+src/ui/app/static/js/utils.js
+  s_c174ed6e38d764::t_91956473d23d46 964-982,988-1000,1003,1091,1146
+  s_c174ed6e38d764::t_ca37b5624e0f09 983-986
+  s_c174ed6e38d764::t_ef47f74a3930a4 625-649,651-657,659-668,670-702,704-733,737,739-762,786-793
+  s_8ffbf4a559663c::t_2e2f623c9b587d 987,1141-1145,1147
+src/ui/app/static/js/components/table-live.js
+  s_b63adb01ae2c85::t_cf866368a640b8 1-68
+src/ui/app/static/js/dataTableInit.js
+  s_5a44845c268cc3::t_58ea5ef2112a05 208
+  s_88db3076fc1d11::t_94adf5bc0f67fe 680,1017-1019,1146,1184
+  s_88db3076fc1d11::t_5159e542243c9c 1058-1062,1065,1070,1083,1097,1101,1103-1105,1110-1113,1116-1121,1159-1162,1166,1168,1170
+  s_88db3076fc1d11::t_03e3ac5a959f2c 360-361,837-838,886,888-907,912-927,932-935,944-962,966,969,972-990,993-1016,1020-1027,1031-1033,1038-1057,1063-1064,1066-1068,1071-1079,1081-1082,1095-1096,1098-1100,1102,1106-1107,1115,1122-1123,1132,1137-1145,1147-1148,1152-1156,1164-1165,1167,1169,1171-1183,1185-1186,1188
+  s_88db3076fc1d11::t_1985d41c914dd3 389,429-431,453-454
+  s_88db3076fc1d11::t_a4d2701e7d57c1 1089-1094
+  s_88db3076fc1d11::t_221dbfb66f7c8f 1069
+  s_88db3076fc1d11::t_d566a6c03471f0 839,887
+  s_88db3076fc1d11::t_661dd02d56ea79 356,358-359,432-452,598,841-852,854-855,860-865,879,883-885,908-911,928-931,936-943,963-965,967-968,970-971,991-992,1028-1030,1034-1037,1080,1084-1088,1108-1109,1114,1124-1131,1133-1136,1149-1151,1157-1158,1163,1187
+  s_88db3076fc1d11::t_2721436ff4636b 267,342-354,840,853,856-859,882
+  s_88db3076fc1d11::t_2889568d0efbec 227,229,269-271,332,334-341,394-395,411,416,580
+  s_c0c01ad528476f::t_f925b3910a2bed 130,172,355,357,596-597,643-645,866-878,880-881,1189
+src/ui/app/static/css/pages/certificates.css
+  s_b63adb01ae2c85::t_f951b8ed7c3691 6-16,83
+src/ui/app/templates/groups.html
+  s_7e8c88d6cdcc2d::t_dbac0eabf60392 36,153
+  s_7e8c88d6cdcc2d::t_cabaebf2593174 74,94-101
+  s_a20b84b00c7304::t_1e8e91c975c96b 48-49,52-62,68-70,75-80,82-84,89,93,102,105-107,109,114,116,119-127,130,152,154-176
+  s_7e8c88d6cdcc2d::t_68964346eaeafa 21-24,177
+src/ui/app/templates/setup.html
+  s_a20b84b00c7304::t_fdbeaa526dd12c 10-60,84-86,95-105,107-109,111-135,139-143,145,147,151-153,156-158,160-165,168-170,172-175,177,181-182,184-187,189-190,195,198-199,201,215-228,230-231,233,256,260-261,263-287,290-308,310-313,316-355,358-373,375-383,385-392,394-410,416-474,476-486,488-492,496-521,523-526,529-537,539-541,543-545,548-551,553-555,558-560,562-570,572-578,581-584,586-588,591-594,605,607-609,620-621,623,641,660-682,684-688,690,693,695-696,698-710,712,715,719-728,730-732,734-735,737,750-761,763,770,778,780-784,786-787,792,815-817,819-821
+  s_a20b84b00c7304::t_0575fa4ef5ba26 683
+  s_e56b37cb9c9ea3::t_74290dc7eb60d3 155
+  s_5a44845c268cc3::t_10444fa740b79a 154,166-167,694,697
+  s_a20b84b00c7304::t_e090e6dc926d97 87-94
+src/ui/app/templates/language-selector.html
+  s_c174ed6e38d764::t_08c3b4380e6d1c 2-6,11-12,14,17-19,21,23,25-35
+src/ui/app/static/js/pages/workflow_draft.js
+  s_5a44845c268cc3::t_f7c20ea988cd0b 114
+  s_5a44845c268cc3::t_90d9412a099189 305-309,317-334
+  s_5a44845c268cc3::t_26ca3e9df85039 240-243,285-288,310-316
+  s_5a44845c268cc3::t_7eeaaea51ad8a8 1-113,115-239,244-284,289-304,335
+src/ui/app/static/js/main.js
+  s_c174ed6e38d764::t_b72a6f1b68b684 227-244,250-253,255-328,330-336,344-370,375-426,433-437,442-450,457-533,535-549,560-562,566-584
+  s_c174ed6e38d764::t_0dfc57d3c38217 550-559
+  s_c174ed6e38d764::t_042bc0967c6b69 534
+  s_c174ed6e38d764::t_dea48ba1edd029 254,329,453-456
+  s_c174ed6e38d764::t_a2f75ce2a2d2ab 245-249,337-343,371-374,438-441,563-565
+  s_c174ed6e38d764::t_ff90f92557c87b 427-432
+  s_c174ed6e38d764::t_180455dd7eb17b 451-452
+src/ui/app/templates/components/select.html
+  s_88db3076fc1d11::t_0ebf96f794bbd5 178-181
+src/ui/app/static/js/pages/bans-stats.js
+  s_b63adb01ae2c85::t_903678e4cc49cd 9,17,29-36,38-60,66-67,69,79
+  s_b63adb01ae2c85::t_431fd078871be3 37,68
+src/ui/app/static/js/pages/config_edit.js
+  s_e56b37cb9c9ea3::t_37bbbd908b9559 6-12,14-16,21-33,35-40,43-47,51-54,57-58,159-168,171-174
+  s_fa86ab650bb74b::t_61e91919b8de4c 1-5,13,17-20,34,41-42,48-50,55-56,59-65,67,155-158,169-170,175-176,365-366,377
+  s_fa86ab650bb74b::t_3c85dcdbdd8e84 126,404
+src/ui/app/static/js/components/leave-guard.js
+  s_88db3076fc1d11::t_9592446135abad 1-6,10-24,33-39,45-47,57,67,76-77,81-93
+  s_88db3076fc1d11::t_5159e542243c9c 60
+  s_88db3076fc1d11::t_94adf5bc0f67fe 9
+  s_88db3076fc1d11::t_661dd02d56ea79 7-8,25-32,40-44,48-56,58-59,61-66,68-75,78-80
+src/ui/app/templates/certificates.html
+  s_b63adb01ae2c85::t_f951b8ed7c3691 583
+  s_a20b84b00c7304::t_f3d4cb41d3843f 275,280-284,305-309,327,330-336,356
+  s_b63adb01ae2c85::t_702c47ab2e3643 10-11,86,142-144,153-230,232-269,271-272
+src/ui/app/templates/upstreams.html
+  s_7e8c88d6cdcc2d::t_8bb7a275b4e063 11-17,26-28,31-32,35-36,39-40,43-44,53,64,109-117,137-156,159,162-173,180-181,184-192,198-200,202-205,207-212,216-221,224,227,237,248,277,315-349
+  s_7e8c88d6cdcc2d::t_706cc796c65799 350
+src/ui/app/templates/dashboard.html
+  s_c174ed6e38d764::t_0a2c12a8a78c9d 3,13,63
+src/ui/app/static/js/pages/reports-offenders.js
+  s_b63adb01ae2c85::t_fab704d7a9bd32 15,32-44,86-370,373-374,387-390,399-405
+src/ui/app/templates/models/plugin_setting_field.html
+  s_a20b84b00c7304::t_428e3a4adc9243 142-145
+  s_dc1198d8fe4832::t_8481ffe635fcb6 122-124
+src/ui/app/templates/configs.html
+  s_e56b37cb9c9ea3::t_22fbfa9e766d6f 190,192
+  s_fa86ab650bb74b::t_ab6ea7373b0984 10-12,27,32,34,38-41,59-60,62,147,152,155-156,160,165,183,208-224,231-242,244-245,253,371-373
+  s_e56b37cb9c9ea3::t_46e835b42da36d 42-58
+  s_e56b37cb9c9ea3::t_a9c70e402930dc 243
+src/ui/app/templates/components/value-chips.html
+  s_88db3076fc1d11::t_0ebf96f794bbd5 1-7,9-10,12-17
+  s_88db3076fc1d11::t_94adf5bc0f67fe 8,11
+src/ui/app/static/js/pages/reports-overview.js
+  s_b63adb01ae2c85::t_144725a75f141c 153-163
+src/ui/app/static/css/pages/logs.css
+  s_5a44845c268cc3::t_8a78310cd6f818 367-370
+src/ui/app/static/js/pages/plugins-grid.js
+  s_0ff3748d74641a::t_d39194affd3914 65-69,90-98,101-124,128-143,148
+src/ui/app/static/js/pages/home.js
+  s_b63adb01ae2c85::t_bf35024203e614 343
+  s_a20b84b00c7304::t_9151bf5aa41647 84-87,89-91,93-94,96,98-99,101,103-117,123,282-312,316-318,329-337,342,344-351,1053,1059-1069,1267,1273-1282
+  s_d761f59c5d2b4d::t_819a2bda70e91f 313-315,319-328
+  s_d761f59c5d2b4d::t_369b10eba79c74 338-341
+src/ui/app/templates/base.html
+  s_c174ed6e38d764::t_c1d6411fffec32 261-267
+  s_c174ed6e38d764::t_d9d55bbee551bb 29-30,39-53
+src/ui/app/static/css/pages/table-live.css
+  s_b63adb01ae2c85::t_cf866368a640b8 1-72
+src/ui/app/static/css/pages/threatmap.css
+  s_d761f59c5d2b4d::t_f0bc1875b7bd48 210,216-221,231,235,243,245,249-253,291-292
+src/ui/app/templates/login.html
+  s_a20b84b00c7304::t_e090e6dc926d97 14-21
+src/ui/app/static/js/pages/logs-classify.js
+  s_5a44845c268cc3::t_8a78310cd6f818 130-150
+src/ui/app/routes/configs.py
+  s_fa86ab650bb74b::t_35bf55b213f80d 302-303
+src/ui/app/templates/totp.html
+  s_a20b84b00c7304::t_e090e6dc926d97 17-24,48,50,57
+src/ui/app/static/js/pages/upstreams.js
+  s_7e8c88d6cdcc2d::t_10243631f3440a 171-311,323-337,353-355,359-361,367-369,371-377,379,383-384
+src/ui/app/static/css/pages/operate.css
+  s_d761f59c5d2b4d::t_974f6572432948 148-156,162
+  s_81d1a761236338::t_92960e8057363a 9-10,157-161
+  s_d761f59c5d2b4d::t_af3cc263145ce5 81-86,118,125,129
+  s_d761f59c5d2b4d::t_900c8b6ffcf028 1-8,11-80,87-117,119-124,126-128,130-147
+src/ui/app/templates/web_cache.html
+  s_d761f59c5d2b4d::t_1f719f71df0c26 176
+  s_d761f59c5d2b4d::t_f93ee64e5c3646 6,61,95,103-104,106-112,118,133,136,138,143,145,158-159,167-169,181,183,185,187,191-204,215-279
+  s_dc1198d8fe4832::t_931c6c7350ac76 105
+  s_d761f59c5d2b4d::t_7a24b1584c7c25 2,7,19-21,27,29-33,35-37,41,44,47,50,53-55
+  s_a20b84b00c7304::t_55e2bf1e9bdbd9 119,157
+src/ui/app/routes/services.py
+  s_a20b84b00c7304::t_76f36d2add991d 1185-1186
+  s_dc1198d8fe4832::t_70ed065dcd8950 1177-1184,1187-1196
+  s_dc1198d8fe4832::t_d4b13c4f510158 2454-2455,2545
+src/ui/app/static/css/pages/plugins.css
+  s_0ff3748d74641a::t_4b8ddfad858c3f 30-31,35-38,51-152
+src/ui/app/templates/threatmap.html
+  s_d761f59c5d2b4d::t_f0bc1875b7bd48 19-21,58-59,62,65,68,71,94-108
+src/ui/app/templates/service_settings.html
+  s_dc1198d8fe4832::t_c25709334dbd36 5-6,12-22
+  s_dc1198d8fe4832::t_6eb65b2f8e5269 7-11
+src/ui/app/static/css/pages/settings.css
+  s_dc1198d8fe4832::t_f4c9f2579010b9 244-295
+  s_dc1198d8fe4832::t_d7092d59c6bab1 442-449,455
+  s_dc1198d8fe4832::t_e714b050c912d4 238-239
+  s_dc1198d8fe4832::t_1d2008add8a364 54-132,135-202
+  s_dc1198d8fe4832::t_d8f93d048ddd7a 203-237,240-243
+  s_dc1198d8fe4832::t_e39f29383a7529 133-134
+  s_a20b84b00c7304::t_fd9e24a9f23f47 368-371,450-454
+  s_dc1198d8fe4832::t_f6b581250629cc 416-441
+  s_dc1198d8fe4832::t_c2ff2518c0b4a5 296-349
+  s_dc1198d8fe4832::t_8481ffe635fcb6 350-367,372-415
+src/ui/app/static/js/pages/workflows.js
+  s_a20b84b00c7304::t_1e8e91c975c96b 361,420,443-445,455-456,467-468
+  s_475e027c6529d4::t_25bc7817f22627 213,220
+  s_475e027c6529d4::t_48ba05e1b43239 10,263,269,278,328,331,424,436,441-442,446-454,457-462,464-466,469-473
+  s_5a44845c268cc3::t_53da7c9622e866 90-97,101,103
+  s_5a44845c268cc3::t_89de9fd8f6a4b9 50-89,102,104-130,135-137,139,345,431,439
+  s_475e027c6529d4::t_44c4808c78ac69 9,12-18,39,41,141-212,214-219,221-258,260-262,264,267-268,270-277,279-327,329-330,332-333,344,370,389,400,402,418,422
+  s_5a44845c268cc3::t_26ca3e9df85039 98-100
+  s_c0c01ad528476f::t_5eb2f4c54d7c74 265,334-337,340-343,349,353-360,362-369,371-388,390-399,401,403-417,419,421,425-430,433-435,437-438
+src/ui/app/static/js/pages/templates.js
+  s_7e8c88d6cdcc2d::t_aab7d6e60d49ea 76-170
+src/ui/app/templates/jobs.html
+  s_7e8c88d6cdcc2d::t_9a2dacafbf421a 22-24,46,52,58,168-173,181-182,185-187,189-191,193,196-198
+  s_d761f59c5d2b4d::t_762a8e6123af5d 199
+tests/unit/ui/test_plugins_marketplace.py
+  s_0ff3748d74641a::t_7726f58c4e9d15 174,192-193,206
+  s_0ff3748d74641a::t_dfbf8a172cbe30 246-251
+  s_0ff3748d74641a::t_25a7652a14ade4 244-245,252-269,275-276
+src/ui/app/static/js/components/typed-confirm.js
+  s_88db3076fc1d11::t_94adf5bc0f67fe 13,83
+  s_88db3076fc1d11::t_661dd02d56ea79 26-29,33-37,41-43,46-48,75,78-82
+  s_88db3076fc1d11::t_9592446135abad 1-12,14-25,30-32,38-40,44-45,49-74,76-77,84-88
+src/ui/app/static/js/pages/settings-raw.js
+  s_dc1198d8fe4832::t_c2ff2518c0b4a5 623-651,654-684,836-837
+  s_a20b84b00c7304::t_fd9e24a9f23f47 652-653
+src/ui/app/static/css/overrides/tokens.css
+  s_c174ed6e38d764::t_358f69219fcd65 85-124,126-138,140-150
+  s_c174ed6e38d764::t_2acac32d0a1c55 125,139
+src/ui/app/templates/reports.html
+  s_b63adb01ae2c85::t_378bf1f744ea91 125-126
+  s_b63adb01ae2c85::t_b02091401d06fc 44-46,122,180
+  s_b63adb01ae2c85::t_c337ac56fc5f07 181-182
+src/ui/app/static/js/pages/timings.js
+  s_5a44845c268cc3::t_386a1a25a13a59 1-127
+src/ui/app/static/js/components/ui-preferences.js
+  s_c174ed6e38d764::t_468e23bc827dd4 89-145,150-160
+  s_c174ed6e38d764::t_a2f75ce2a2d2ab 146-149
+src/ui/app/static/css/pages/login.css
+  s_a20b84b00c7304::t_66edddc60ba28d 1281-1282
+  s_a20b84b00c7304::t_0575fa4ef5ba26 680-682,1224
+  s_a20b84b00c7304::t_6e5a44acf85265 1410,1478-1488
+  s_a20b84b00c7304::t_e1d8957f3ebd79 667-679,683-1223,1225-1280,1283-1402
+  s_dc1198d8fe4832::t_ced83cac25eabe 1406
+  s_a20b84b00c7304::t_e090e6dc926d97 1411-1477
+  s_a20b84b00c7304::t_478308eecb103f 229,1403-1405,1407-1409
+src/ui/app/templates/timings.html
+  s_d761f59c5d2b4d::t_af3cc263145ce5 117-118
+  s_d761f59c5d2b4d::t_cf980a7186f470 52,128
+  s_d761f59c5d2b4d::t_854a6dd2b67086 37,40,43,46,131
+  s_d761f59c5d2b4d::t_900c8b6ffcf028 13
+  s_d761f59c5d2b4d::t_927092213007b4 11-12,14-15,17,19-24,50,53-97,99-105,107-116,119-127,129-130,132-147,159-163
+src/ui/app/static/js/pages/configs.js
+  s_e56b37cb9c9ea3::t_37bbbd908b9559 108-111,374-378,477-479,549-553,756-758,762-772,779-780,786-788,790-792,796-804,815-834,840-847,850-851,857-860,862-871,875-879,881-883,888-896,901-903,909-912,916-919,930-933,935-952,954-959,964-966
+  s_e56b37cb9c9ea3::t_c6d8ae717576cd 267,277,287,548,929
+  s_e56b37cb9c9ea3::t_f06339119d58f3 192,777-778,781,811-812,904,906,913-915,925-928,934,953,963
+  s_fa86ab650bb74b::t_37ede4f9741f60 20-21,107,373,480,754-755,759-761,773-776,782-785,789,793-795,805-810,813-814,835-839,848-849,852-856,861,872-874,880,884-887,897-900,905,907-908,920-924,961,968
+  s_e56b37cb9c9ea3::t_7b6947dbe4c18e 728,960,967
+  s_8ffbf4a559663c::t_f1e97a0f68ef05 554
+tests/unit/ui/test_ui_workflows_definition_proxy.py
+  s_5a44845c268cc3::t_c87605bf2cb2f3 14-30,64
+  s_5a44845c268cc3::t_3fe007dbe4706d 71
+  s_5a44845c268cc3::t_26ca3e9df85039 50
+  s_5a44845c268cc3::t_724e3b3b2cd6c9 1-13,31-49,51-63,65-70,72-75
+src/ui/app/static/css/pages/groups.css
+  s_7e8c88d6cdcc2d::t_4219cc2be5b068 69-180,184,187,191,194,198,202,205-206,211-212,216-218,220,226,229-230,233-234
+  s_0ff3748d74641a::t_1aedc7670a4edc 181-183,185-186,188-190,192-193,195-197,199-201,203-204,207-210,213-215,219,221-225,227-228,231-232
+src/ui/app/static/css/rtl/overrides.css
+  s_1644cdf340ae44::t_011f70963a673b 95-160,4415-4779,5586-6479,6563
+src/ui/app/static/css/rtl/pages/cache.css
+  s_1644cdf340ae44::t_fc3216bd1bdbc4 14,27
+src/ui/app/static/css/rtl/pages/groups.css
+  s_1644cdf340ae44::t_2f7384c10e576f 70-236
+src/ui/app/static/css/rtl/pages/home.css
+  s_1644cdf340ae44::t_318dece8cdc1c9 880-969
+src/ui/app/static/css/rtl/pages/login.css
+  s_1644cdf340ae44::t_7510694461be0b 229,668-1490
+src/ui/app/static/css/rtl/pages/logs.css
+  s_1644cdf340ae44::t_8d70f374a80925 367-370,409
+src/ui/app/static/css/rtl/pages/web-cache.css
+  s_1644cdf340ae44::t_270983b0825b5d 94-127
+src/ui/app/static/js/pages/instances.js
+  s_475e027c6529d4::t_88aca85dc77146 310,367
+src/ui/app/static/js/pages/redirects.js
+  s_7e8c88d6cdcc2d::t_191ad602223002 69-157,169-177,193-194,198-199,203-208,210,214
+src/ui/app/utils.py
+  s_8ffbf4a559663c::t_7e568d6d883861 119-122
+tests/unit/ui/test_configs_selection_scope.py
+  s_8ffbf4a559663c::t_7e06f2087a906a 1-87
+tests/unit/ui/test_groups_kind_i18n.py
+  s_ea610fb3b76874::t_04c2b0bfa1d6aa 116,118-119,121,123-126,149-162
+tests/unit/ui/test_overrides_css_split.py
+  s_1644cdf340ae44::t_3faae2d0d5eef5 28,30-31
+tests/unit/ui/test_row_actions.py
+  s_ea610fb3b76874::t_dd1616d6e60f16 16,18,20,186,194,330,333-342,350,353,356
+tests/unit/ui/test_service_options.py
+  s_913b5a841c5105::t_f56cdf2607ed2c 140-154
+tests/unit/ui/test_ui_components.py
+  s_913b5a841c5105::t_190e4eb1334756 702-706
+tests/unit/ui/test_ui_workflows_editor_visuals.py
+  s_8ffbf4a559663c::t_5c41d9a288a526 1-76
+tests/unit/ui/test_w3_fix2_regressions.py
+  s_c0c01ad528476f::t_b2a62f8902d97b 1-231
+tests/unit/ui/test_w3_fix_regressions.py
+  s_a70b47d04203ba::t_cc5c12dc4219d5 1-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "541cdc4771539867788bf77bb7ba8266b51c66a4",
+  "prompts": {},
+  "sessions": {
+    "s_069d6f94f53eac": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3762d5b3-c52f-4bdd-b37c-693d69046f89",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_0ff3748d74641a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15eb81b3-25da-4b9b-97ca-5c8968206946",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_1644cdf340ae44": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "702be6ae-7377-47f3-8abb-00c71c60dbd2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_2797c405516fb9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17800-a206-75d2-84c0-c976b91bf065",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_475e027c6529d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16963-b7c9-7d23-9353-dda51752774b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_5a44845c268cc3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "55f89819-9bcf-42cf-8cee-f8790e2111b6",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_7e8c88d6cdcc2d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "badd9b03-92ce-4c4c-abb6-1c48fe43302f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_81d1a761236338": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e51e1936-1462-4083-ad0d-9b5d48687f92",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_88db3076fc1d11": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16935-a197-70e3-85af-cce05042f30e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_8ffbf4a559663c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b91e220f-3232-4713-83cb-a70ce7dbcb8b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_913b5a841c5105": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17739-ee52-7e02-8fee-d6dacde4c124",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a20b84b00c7304": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "837457f6-964b-40a3-9ccb-c50d761b7cb5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a70b47d04203ba": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1773d-5258-7f72-9287-170442f0d8e8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_b63adb01ae2c85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e44f7ec-5ba9-4750-9288-ea19e99041d5",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c0c01ad528476f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a177c2-46c0-70e2-8011-98e64ee4107b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c174ed6e38d764": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "82134297-e4c1-4d86-896c-9ab544dcc185",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_c8abfbb1754dd6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a177c9-639e-70b2-8103-c983f13884ed",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_d761f59c5d2b4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5a38c71-d02c-48f9-aba6-69dd0e42ca00",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_dc1198d8fe4832": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a524ae0b-9a02-4eee-a3cc-4c16405775e3",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e348b9e3da0ae1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1779b-1d92-76c1-bf4f-69c9bf9a3b2e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_e56b37cb9c9ea3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6c75c1e-0162-4ea3-947d-2b135d38921c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_ea610fb3b76874": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "18daa4f2-2e8d-4e5f-a1fb-f741210081d2",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_fa86ab650bb74b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16963-b7d3-79a3-85dc-61e8a079a83e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
