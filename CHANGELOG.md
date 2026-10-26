@@ -4,6 +4,7 @@
 
 - [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
 - [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
+- [SECURITY] `docker`: update the Alpine `curl` and `libcurl` packages to 8.23.0-r0, fixing CVE-2026-92392 and 23 lower-severity curl CVEs.
 - [SECURITY] `ui`: the Support page export redacts `API_TOKEN`, private keys and header credentials instead of exporting them in clear.
 - [FEATURE] `cli`: `bwcli support` exports a support bundle with secrets redacted and IPs and domains anonymized.
 - [FEATURE] `crowdsec`: `CROWDSEC_CACHE_SIZE` (`100m`) and `CROWDSEC_METADATA_CACHE_SIZE` (`5m`) size the decision and metadata caches.

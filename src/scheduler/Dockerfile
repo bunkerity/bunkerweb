@@ -57,6 +57,7 @@ RUN apk add --no-cache "zlib>=1.3.2-r1" bash unzip curl libgcc libstdc++ libpq o
 
 # Fix CVEs
 RUN apk add --no-cache "musl>=1.2.6-r3" "musl-utils>=1.2.6-r3" # CVE-2026-107891
+RUN apk add --no-cache "curl>=8.23.0-r0" "libcurl>=8.23.0-r0" # CVE-2026-92392
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
