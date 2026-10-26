@@ -2413,13 +2413,10 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    !!! warning "Fedora 提供的是 NGINX 1.30.5"
-        Fedora 43 和 44 尚未提供 NGINX 1.30.6，因此 Fedora 的 BunkerWeb 软件包基于 NGINX 1.30.5 构建并依赖 `nginx-1.30.5`。请在 Fedora 上安装该版本；Fedora 发布 1.30.6 后，依赖将随之更新。
-
-    Fedora 已经提供了我们支持的 NGINX 1.30.5
+    Fedora 已经提供了我们支持的 NGINX 1.30.6
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.5
+    sudo dnf install -y --allowerasing nginx-1.30.6
     ```
 
     !!! example "禁用设置向导"

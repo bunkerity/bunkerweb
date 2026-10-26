@@ -2416,13 +2416,10 @@ Veuillez vous assurer que **NGINX 1.30.6 est installé avant d'installer BunkerW
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    !!! warning "Fedora fournit NGINX 1.30.5"
-        Fedora 43 et 44 ne fournissent pas encore NGINX 1.30.6 : les paquets BunkerWeb pour Fedora sont donc construits avec NGINX 1.30.5 et attendent `nginx-1.30.5`. Installez cette version sur Fedora ; l'épinglage passera à 1.30.6 dès que Fedora la publiera.
-
-    Fedora fournit déjà NGINX 1.30.5, que nous prenons en charge
+    Fedora fournit déjà NGINX 1.30.6, que nous prenons en charge
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.5
+    sudo dnf install -y --allowerasing nginx-1.30.6
     ```
 
     !!! example "Désactiver l'assistant d'installation"

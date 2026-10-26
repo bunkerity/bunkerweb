@@ -263,13 +263,6 @@
       "post_install": "rm -r src/deps/src/nginx/docs"
     },
     {
-      "id": "nginx-1.30.5",
-      "name": "Nginx v1.30.5",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "4556c714d1cfa587f92c7c0365c09209d42d148b",
-      "post_install": "rm -r src/deps/src/nginx-1.30.5/docs"
-    },
-    {
       "id": "nginx_cookie_flag_module",
       "name": "Nginx cookie flag module v1.1.0",
       "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
