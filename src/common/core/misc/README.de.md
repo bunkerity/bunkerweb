@@ -86,7 +86,7 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
     | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | nein     | **HTTP-Methoden:** Liste der erlaubten HTTP-Methoden, getrennt durch Pipe-Zeichen (` | `). Benutzerdefinierte Großbuchstaben-Methoden dürfen Unterstriche und Bindestriche enthalten. |
 
     !!! abstract "CORS und Preflight-Anfragen"
-        Wenn Ihre Anwendung [Cross-Origin Resource Sharing (CORS)](#cors) unterstützt, sollten Sie die `OPTIONS`-Methode in der `ALLOWED_METHODS`-Einstellung aufnehmen, um Preflight-Anfragen zu bearbeiten. Dies gewährleistet die ordnungsgemäße Funktionalität für Browser, die Cross-Origin-Anfragen stellen.
+        Wenn `USE_CORS` auf `yes` steht, erreichen CORS-Preflight-Anfragen (eine `OPTIONS`-Anfrage mit den Headern `Origin` und `Access-Control-Request-Method`) das [CORS](#cors)-Plugin, auch wenn `OPTIONS` nicht in `ALLOWED_METHODS` steht. Jede andere `OPTIONS`-Anfrage benötigt weiterhin `OPTIONS` in dieser Liste.
 
     !!! danger "Sicherheitsüberlegungen"
         - **Vermeiden Sie die Aktivierung von `TRACE` oder `CONNECT`:** Diese Methoden werden selten benötigt und können erhebliche Sicherheitsrisiken mit sich bringen, wie z. B. die Ermöglichung von Cross-Site-Tracing (XST) oder Tunneling-Angriffen.

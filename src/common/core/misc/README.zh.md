@@ -86,7 +86,7 @@
     | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no   | **HTTP 方法：** 允许的 HTTP 方法列表，用竖线字符分隔。自定义大写方法可以包含下划线和连字符。 |
 
     !!! abstract "CORS 和预检请求"
-        如果您的应用程序支持[跨源资源共享 (CORS)](#cors)，您应该在 `ALLOWED_METHODS` 设置中包含 `OPTIONS` 方法以处理预检请求。这确保了浏览器发出跨源请求时的正常功能。
+        当 `USE_CORS` 为 `yes` 时，CORS 预检请求（带有 `Origin` 和 `Access-Control-Request-Method` 标头的 `OPTIONS` 请求）即使 `OPTIONS` 不在 `ALLOWED_METHODS` 中，也会到达 [CORS](#cors) 插件。其他 `OPTIONS` 请求仍需要在此列表中包含 `OPTIONS`。
 
     !!! danger "安全注意事项"
         - **避免启用 `TRACE` 或 `CONNECT`：** 这些方法很少需要，并且可能引入重大的安全风险，例如启用跨站跟踪 (XST) 或隧道攻击。

@@ -86,7 +86,7 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. Custom uppercase methods may contain underscores and dashes. |
 
     !!! abstract "CORS and Pre-flight Requests"
-        If your application supports [Cross-Origin Resource Sharing (CORS)](#cors), you should include the `OPTIONS` method in the `ALLOWED_METHODS` setting to handle pre-flight requests. This ensures proper functionality for browsers making cross-origin requests.
+        When `USE_CORS` is `yes`, CORS pre-flight requests (an `OPTIONS` request carrying the `Origin` and `Access-Control-Request-Method` headers) reach the [CORS](#cors) plugin even if `OPTIONS` is not in `ALLOWED_METHODS`. Any other `OPTIONS` request still needs `OPTIONS` in this list.
 
     !!! danger "Security Considerations"
         - **Avoid enabling `TRACE` or `CONNECT`:** These methods are rarely needed and can introduce significant security risks, such as enabling Cross-Site Tracing (XST) or tunneling attacks.

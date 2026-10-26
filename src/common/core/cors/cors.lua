@@ -11,6 +11,26 @@ local get_deny_status = utils.get_deny_status
 local parse_duration = utils.parse_duration
 local tostring = tostring
 
+-- Origin that CORS_ALLOW_ORIGIN=self stands for
+local function get_self_origin(self)
+	if self.ctx.bw.https_configured == "yes" then
+		return "https://" .. self.ctx.bw.server_name
+	end
+	return "http://" .. self.ctx.bw.server_name
+end
+
+-- Same check for access() (deny) and header() (credentials)
+local function is_origin_allowed(self)
+	local allow_origin = self.variables["CORS_ALLOW_ORIGIN"]
+	if allow_origin == "*" then
+		return true
+	end
+	if allow_origin == "self" then
+		return self.ctx.bw.http_origin == get_self_origin(self)
+	end
+	return regex_match(self.ctx.bw.http_origin, allow_origin, nil, "CORS_ALLOW_ORIGIN") and true or false
+end
+
 function cors:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "cors", ctx)
@@ -22,7 +42,6 @@ function cors:initialize(ctx)
 	}
 	self.preflight_headers = {
 		["CORS_MAX_AGE"] = "Access-Control-Max-Age",
-		["CORS_ALLOW_CREDENTIALS"] = "Access-Control-Allow-Credentials",
 		["CORS_ALLOW_METHODS"] = "Access-Control-Allow-Methods",
 		["CORS_ALLOW_HEADERS"] = "Access-Control-Allow-Headers",
 	}
@@ -55,11 +74,7 @@ function cors:header()
 	if self.variables["CORS_ALLOW_ORIGIN"] == "*" then
 		ngx_header["Access-Control-Allow-Origin"] = "*"
 	elseif self.variables["CORS_ALLOW_ORIGIN"] == "self" then
-		if self.ctx.bw.https_configured == "yes" then
-			ngx_header["Access-Control-Allow-Origin"] = "https://" .. self.ctx.bw.server_name
-		else
-			ngx_header["Access-Control-Allow-Origin"] = "http://" .. self.ctx.bw.server_name
-		end
+		ngx_header["Access-Control-Allow-Origin"] = get_self_origin(self)
 	else
 		ngx_header["Access-Control-Allow-Origin"] = self.ctx.bw.http_origin
 	end
@@ -68,13 +83,15 @@ function cors:header()
 			ngx_header[header] = self.variables[variable]
 		end
 	end
+	-- Enforce origin restrictions on upstream credentials headers too
+	if ngx_header["Access-Control-Allow-Origin"] == "*" or not is_origin_allowed(self) then
+		ngx_header["Access-Control-Allow-Credentials"] = nil
+	elseif self.variables["CORS_ALLOW_CREDENTIALS"] == "yes" then
+		ngx_header["Access-Control-Allow-Credentials"] = "true"
+	end
 	if self.ctx.bw.request_method == "OPTIONS" then
 		for variable, header in pairs(self.preflight_headers) do
-			if variable == "CORS_ALLOW_CREDENTIALS" then
-				if self.variables["CORS_ALLOW_CREDENTIALS"] == "yes" then
-					ngx_header[header] = "true"
-				end
-			elseif self.variables[variable] ~= "" then
+			if self.variables[variable] ~= "" then
 				if variable == "CORS_MAX_AGE" then
 					local value = parse_duration(self.variables[variable], "s")
 					ngx_header[header] = value and tostring(value) or self.variables[variable]
@@ -96,29 +113,8 @@ function cors:access()
 		return self:ret(true, "service doesn't use CORS")
 	end
 
-	-- Set the allow origin
-	local allow_origin = self.variables["CORS_ALLOW_ORIGIN"]
-	if allow_origin == "self" then
-		if self.ctx.bw.https_configured == "yes" then
-			allow_origin = "https://" .. self.ctx.bw.server_name
-		else
-			allow_origin = "http://" .. self.ctx.bw.server_name
-		end
-	end
-
 	-- Deny as soon as possible if needed
-	if
-		self.ctx.bw.http_origin
-		and self.variables["CORS_DENY_REQUEST"] == "yes"
-		and allow_origin ~= "*"
-		and not (
-			(self.variables["CORS_ALLOW_ORIGIN"] == "self" and self.ctx.bw.http_origin == allow_origin)
-			or (
-				self.variables["CORS_ALLOW_ORIGIN"] ~= "self"
-				and regex_match(self.ctx.bw.http_origin, allow_origin, nil, "CORS_ALLOW_ORIGIN")
-			)
-		)
-	then
+	if self.ctx.bw.http_origin and self.variables["CORS_DENY_REQUEST"] == "yes" and not is_origin_allowed(self) then
 		self:set_metric("counters", "failed_cors", 1)
 		return self:ret(
 			true,
