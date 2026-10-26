@@ -489,6 +489,7 @@ ngx_http_headers_more_check_type(ngx_http_request_t *r, ngx_array_t *types)
     ngx_uint_t           i;
     ngx_str_t           *t;
     ngx_str_t            actual_type;
+    u_char              *p, *last;
 
     if (r->headers_in.content_type == NULL) {
         return 0;
@@ -503,13 +504,23 @@ ngx_http_headers_more_check_type(ngx_http_request_t *r, ngx_array_t *types)
        (int) actual_type.len,
        actual_type.data);
 
+    last = actual_type.data + actual_type.len;
     t = types->elts;
     for (i = 0; i < types->nelts; i++) {
         dd("...comparing with type [%.*s]", (int) t[i].len, t[i].data);
 
-        if (actual_type.len == t[i].len
-            && ngx_strncmp(actual_type.data, t[i].data, t[i].len) == 0)
+        if (actual_type.len < t[i].len
+            || ngx_strncasecmp(actual_type.data, t[i].data, t[i].len) != 0)
         {
+            continue;
+        }
+
+        p = actual_type.data + t[i].len;
+        while (p < last && (*p == ' ' || *p == '\t')) {
+            p++;
+        }
+
+        if (p == last || *p == ';') {
             return 1;
         }
     }

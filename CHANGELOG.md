@@ -4,6 +4,9 @@
 
 - [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
 - [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
+- [SECURITY] `docker`: update the Alpine `curl` and `libcurl` packages to 8.23.0-r0, fixing CVE-2026-92392 and 23 lower-severity curl CVEs.
+- [SECURITY] `linux`: the Fedora 43 and 44 packages require NGINX 1.30.6, fixing CVE-2026-15176, CVE-2026-93479, CVE-2026-95101, CVE-2026-97629 and CVE-2026-97205.
+- [SECURITY] `modsecurity`: update OWASP CRS v4 to 4.30.0, fixing GHSA-89h9-2j8h-9gp2, GHSA-qmx4-jfcv-fgww and GHSA-575j-qr6p-9763.
 - [SECURITY] `ui`: the Support page export redacts `API_TOKEN`, private keys and header credentials instead of exporting them in clear.
 - [FEATURE] `cli`: `bwcli support` exports a support bundle with secrets redacted and IPs and domains anonymized.
 - [FEATURE] `crowdsec`: `CROWDSEC_CACHE_SIZE` (`100m`) and `CROWDSEC_METADATA_CACHE_SIZE` (`5m`) size the decision and metadata caches.
@@ -32,6 +35,12 @@
 - [DOCS] `greylist`: the criteria combine with OR, with an example.
 - [DEPS] Updated Brotli to v1.2.1
 - [DEPS] Updated lua-resty-dns to v0.24
+- [DEPS] Updated headers-more-nginx-module to v0.41
+- [DEPS] Updated lua-cjson to v2.1.0.20
+- [DEPS] Updated lua-resty-redis to v0.34
+- [DEPS] Updated LuaJIT to v2.1-20261023
+- [DEPS] Updated DOMPurify to v3.4.17
+- [DEPS] Updated Go to v1.26.10 for the all-in-one CrowdSec build
 
 ## v1.6.17 - 2026/10/21
 

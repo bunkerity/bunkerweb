@@ -175,6 +175,7 @@ RUN apk add --no-cache "zlib>=1.3.2-r1" bash coreutils curl geoip grep libgcc li
 
 # Fix CVEs
 RUN apk add --no-cache "musl>=1.2.6-r3" "musl-utils>=1.2.6-r3" # CVE-2026-107891
+RUN apk add --no-cache "curl>=8.23.0-r0" "libcurl>=8.23.0-r0" # CVE-2026-92392
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

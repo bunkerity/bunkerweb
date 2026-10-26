@@ -1,10 +1,10 @@
 {
-  "version": "1.26.5",
+  "version": "1.26.10",
   "url": "https://go.dev/dl/go{VERSION}.linux-{PLATFORM}.tar.gz",
   "checksums": {
-    "386": "88c162b204e6eefcc32499453b492e80209f4a4c78c33092636901c540fb0d05",
-    "amd64": "5c2c3b16caefa1d968a94c1daca04a7ca301a496d9b086e17ad77bb81393f053",
-    "arm64": "fe4789e92b1f33358680864bbe8704289e7bb5fc207d80623c308935bd696d49",
-    "armv6l": "6dae9edab81c13bccf962dec15f1fd2ec26c14a6821b4d2c92dab4130c289d7a"
+    "386": "fa05f9c9d71d08da81ae34f1b6baf8aacb05374b9a6fb223e92f7b29afc81148",
+    "amd64": "ccfe7ae822d2c2f41f4fe7c956199967a4dac22d0ee0d2b2bfdb440aab3b20c5",
+    "arm64": "3f4227ce7b206a513e794f1393adb473a07b46e94d18bd15d1c684bbb7319797",
+    "armv6l": "7d89fd32259eb0ff647381e8c3465dc32ccfc7f71cb7b9bcd95604c3481f5109"
   }
 }

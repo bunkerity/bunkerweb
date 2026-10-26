@@ -223,14 +223,7 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-# Fedora 43 and 44 ship nginx from their own repos (1.30.5), one patch release behind the
-# source-built target (1.30.6). Dynamic modules must be compiled against the
-# matching nginx source tree or nginx refuses to load them, so select the 1.30.5 tree there.
-if { [ "$OS" = "fedora" ] && [ "$OS_VERSION" = "43" ]; } || { [ "$OS" = "fedora" ] && [ "$OS_VERSION" = "44" ]; } ; then
-	NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx-1.30.5"
-else
-	NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx"
-fi
+NGINX_SRC_DIR="/tmp/bunkerweb/deps/src/nginx"
 export CHANGE_DIR="$NGINX_SRC_DIR"
 do_and_check_cmd mv auto/configure ./
 echo '#!/bin/bash' > "${CHANGE_DIR}/configure-fix.sh"
