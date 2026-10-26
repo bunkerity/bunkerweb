@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.18~rc1 - 2026/10/??
+## v1.6.18~rc1 - 2026/10/26
 
 - [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
 - [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
