@@ -1,0 +1,21 @@
+src/ui/app/utils.py
+  s_912601094037fd::t_f62fcde62c37de 133
+src/ui/app/static/js/dataTableInit.js
+  s_912601094037fd::t_f62fcde62c37de 455-468,471-477,479-481,592-594
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8cdef9bdd0a68d7f18bf037a502addbb743e1296",
+  "prompts": {},
+  "sessions": {
+    "s_912601094037fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7e62caf3-2f07-4b32-a4c2-968e1f6e8579",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

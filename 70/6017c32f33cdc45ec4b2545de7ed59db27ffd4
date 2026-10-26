@@ -1,0 +1,25 @@
+src/bw/Dockerfile
+  s_793f33410174d8::t_83ac569f444254 82
+src/all-in-one/Dockerfile
+  s_793f33410174d8::t_83ac569f444254 178
+CHANGELOG.md
+  s_793f33410174d8::t_83ac569f444254 7
+src/scheduler/Dockerfile
+  s_793f33410174d8::t_83ac569f444254 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "706017c32f33cdc45ec4b2545de7ed59db27ffd4",
+  "prompts": {},
+  "sessions": {
+    "s_793f33410174d8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "635c8791-e1e6-4a9e-a223-19e43decd22d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

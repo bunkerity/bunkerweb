@@ -1,0 +1,65 @@
+.github/workflows/test-core-linux.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 19
+.github/workflows/plumber.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 11
+.github/workflows/push-packagecloud.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 46
+.github/workflows/staging-delete-infra.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 21
+.github/workflows/create-arm.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 32
+.github/workflows/doc-to-pdf.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 15
+.github/workflows/push-github.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 29
+.github/workflows/push-docker.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 35
+.github/workflows/scorecards-analysis.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 15
+.github/workflows/codeql.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 11
+.github/workflows/dev.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 182
+.github/workflows/staging.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 105,150,184
+.github/workflows/test-core.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 19
+.github/workflows/release.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 23,348,389,408
+.github/workflows/linux-build.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 44
+.github/workflows/staging-create-infra.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 20
+.github/workflows/container-build.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 54
+.github/workflows/dev-update-mmdb.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 13
+.github/workflows/rm-arm.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 23
+.github/workflows/push-doc.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 26
+.github/workflows/tests-ui.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 18
+.github/workflows/pullfrog.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 19
+.github/workflows/ui.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 68
+.github/workflows/tests-ui-linux.yml
+  s_ff20fc71fc9551::t_8ab8248dccda44 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "28a34923c635c11bdbcebef3d804a0315b1316d4",
+  "prompts": {},
+  "sessions": {
+    "s_ff20fc71fc9551": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "162362c5-42b6-46e1-83a0-29f8b51592ba",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

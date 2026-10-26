@@ -1,0 +1,30 @@
+src/common/utils/common_utils.py
+  s_3afa9a3aefcb5e::t_fb90c809c038d5 975
+  s_3afa9a3aefcb5e::t_c85ae76628522d 970-974,976-980,983
+CHANGELOG.md
+  s_a72b07b4a46bb1::t_0cac9ec2fdf4dc 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "079682aabedfc2ad7946d048cd3b5836584407d6",
+  "prompts": {},
+  "sessions": {
+    "s_3afa9a3aefcb5e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a167a6-9364-75b0-88d5-a0b0aec8aeb2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_a72b07b4a46bb1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a167af-cfff-7591-8390-0d4952f39ca3",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

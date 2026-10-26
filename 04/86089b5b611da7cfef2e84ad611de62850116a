@@ -1,0 +1,47 @@
+docs/integrations.md
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 2531,2534
+src/linux/Dockerfile-fedora-44
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 5,11
+src/linux/fpm-fedora-43
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 6
+docs/de/integrations.md
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 2416,2419
+src/linux/fpm-fedora-44
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 6
+CHANGELOG.md
+  s_175dfb7646d720::t_d2556b3cac811c 8
+docs/fr/integrations.md
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 2419,2422
+docs/zh/integrations.md
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 2416,2419
+src/deps/install.sh
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 226
+src/linux/Dockerfile-fedora-43
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 5,11
+docs/es/integrations.md
+  s_34c2b1ad1bd948::t_5c26f1e6885ff8 2417,2420
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0486089b5b611da7cfef2e84ad611de62850116a",
+  "prompts": {},
+  "sessions": {
+    "s_175dfb7646d720": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6287d9cf-9a0e-4d8a-a3c0-5a6e08f44cfe",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    },
+    "s_34c2b1ad1bd948": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2e248523-f412-44fe-bb00-708d2da21815",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}

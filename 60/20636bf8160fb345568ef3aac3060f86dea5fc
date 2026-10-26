@@ -1,0 +1,37 @@
+src/common/core/crowdsec/README.fr.md
+  s_b740f9c7150705::t_06fa89f52d24e4 80
+docs/zh/features.md
+  s_b740f9c7150705::t_06fa89f52d24e4 1908
+docs/es/features.md
+  s_b740f9c7150705::t_06fa89f52d24e4 1902
+docs/fr/features.md
+  s_b740f9c7150705::t_06fa89f52d24e4 1835
+src/common/core/crowdsec/README.md
+  s_b740f9c7150705::t_06fa89f52d24e4 80
+docs/de/features.md
+  s_b740f9c7150705::t_06fa89f52d24e4 1875
+src/common/core/crowdsec/README.es.md
+  s_b740f9c7150705::t_06fa89f52d24e4 80
+docs/features.md
+  s_b740f9c7150705::t_06fa89f52d24e4 1908
+src/common/core/crowdsec/README.zh.md
+  s_b740f9c7150705::t_06fa89f52d24e4 80
+src/common/core/crowdsec/README.de.md
+  s_b740f9c7150705::t_06fa89f52d24e4 80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6020636bf8160fb345568ef3aac3060f86dea5fc",
+  "prompts": {},
+  "sessions": {
+    "s_b740f9c7150705": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a167b9-d51d-7f61-b5b1-8bb196f74822",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "TheophileDiot <tdiot@bunkerity.com>"
+    }
+  }
+}
