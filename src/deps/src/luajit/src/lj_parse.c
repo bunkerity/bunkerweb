@@ -144,15 +144,15 @@ typedef struct FuncState {
   lua_State *L;			/* Lua state. */
   FuncScope *bl;		/* Current scope. */
   struct FuncState *prev;	/* Enclosing function. */
+  BCInsLine *bcbase;		/* Base of bytecode stack. */
+  BCPos bclim;			/* Limit of bytecode stack. */
   BCPos pc;			/* Next bytecode position. */
   BCPos lasttarget;		/* Bytecode position of last jump target. */
   BCPos jpc;			/* Pending jump list to next bytecode. */
   BCReg freereg;		/* First free register. */
   BCReg nactvar;		/* Number of active local variables. */
   BCReg nkn, nkgc;		/* Number of lua_Number/GCobj constants */
-  BCLine linedefined;		/* First line of the function definition. */
-  BCInsLine *bcbase;		/* Base of bytecode stack. */
-  BCPos bclim;			/* Limit of bytecode stack. */
+  BCLine minline, maxline;	/* Min/max line number. */
   MSize vbase;			/* Base of variable stack for this function. */
   uint8_t flags;		/* Prototype flags. */
   uint8_t numparams;		/* Number of parameters. */
@@ -202,10 +202,10 @@ LJ_NORET LJ_NOINLINE static void err_token(LexState *ls, LexToken tok)
 
 LJ_NORET static void err_limit(FuncState *fs, uint32_t limit, const char *what)
 {
-  if (fs->linedefined == 0)
+  if (fs->minline == 0)
     lj_lex_error(fs->ls, 0, LJ_ERR_XLIMM, limit, what);
   else
-    lj_lex_error(fs->ls, 0, LJ_ERR_XLIMF, fs->linedefined, limit, what);
+    lj_lex_error(fs->ls, 0, LJ_ERR_XLIMF, fs->minline, limit, what);
 }
 
 #define checklimit(fs, v, l, m)		if ((v) >= (l)) err_limit(fs, l, m)
@@ -430,6 +430,12 @@ static void expr_free(FuncState *fs, ExpDesc *e)
 
 /* -- Bytecode emitter ---------------------------------------------------- */
 
+static LJ_AINLINE void bcemit_update_line(FuncState *fs, BCLine line)
+{
+  fs->minline = line < fs->minline ? line : fs->minline;
+  fs->maxline = line > fs->maxline ? line : fs->maxline;
+}
+
 /* Emit bytecode instruction. */
 static BCPos bcemit_INS(FuncState *fs, BCIns ins)
 {
@@ -446,6 +452,7 @@ static BCPos bcemit_INS(FuncState *fs, BCIns ins)
   }
   fs->bcbase[pc].ins = ins;
   fs->bcbase[pc].line = ls->lastline;
+  bcemit_update_line(fs, ls->lastline);
   fs->pc = pc+1;
   return pc;
 }
@@ -1559,6 +1566,7 @@ static void fs_fixup_uv1(FuncState *fs, GCproto *pt, uint16_t *uv)
 /* Prepare lineinfo for prototype. */
 static size_t fs_prep_line(FuncState *fs, BCLine numline)
 {
+  lj_assertFS(numline >= 0, "prototype with bad line number range");
   return (fs->pc-1) << (numline < 256 ? 0 : numline < 65536 ? 1 : 2);
 }
 
@@ -1567,9 +1575,9 @@ static void fs_fixup_line(FuncState *fs, GCproto *pt,
 			  void *lineinfo, BCLine numline)
 {
   BCInsLine *base = fs->bcbase + 1;
-  BCLine first = fs->linedefined;
+  BCLine first = fs->minline;
   MSize i = 0, n = fs->pc-1;
-  pt->firstline = fs->linedefined;
+  pt->firstline = first;
   pt->numline = numline;
   setmref(pt->lineinfo, lineinfo);
   if (LJ_LIKELY(numline < 256)) {
@@ -1696,11 +1704,11 @@ static void fs_fixup_ret(FuncState *fs)
 }
 
 /* Finish a FuncState and return the new prototype. */
-static GCproto *fs_finish(LexState *ls, BCLine line)
+static GCproto *fs_finish(LexState *ls)
 {
   lua_State *L = ls->L;
   FuncState *fs = ls->fs;
-  BCLine numline = line - fs->linedefined;
+  BCLine numline = fs->maxline - fs->minline;
   size_t sizept, ofsk, ofsuv, ofsli, ofsdbg, ofsvar;
   GCproto *pt;
 
@@ -1985,7 +1993,7 @@ static void parse_return(LexState *ls, int eflags);
 static void proto_begin(FuncState *fs, BCLine line, BCReg nparams)
 {
   FuncState *pfs = fs->prev;
-  fs->linedefined = line;
+  fs->maxline = fs->minline = line;
   fs->numparams = (uint8_t)nparams;
   fs->bcbase = pfs->bcbase + pfs->pc;
   fs->bclim = pfs->bclim - pfs->pc;
@@ -1996,8 +2004,12 @@ static void proto_begin(FuncState *fs, BCLine line, BCReg nparams)
 static void proto_finish(LexState *ls, ExpDesc *e, ptrdiff_t oldbase)
 {
   MSize flags = (ls->fs->flags & (PROTO_FFI|PROTO_BITOP));
-  GCproto *pt = fs_finish(ls, (ls->lastline = ls->linenumber));
-  FuncState *pfs = ls->fs;
+  GCproto *pt;
+  FuncState *pfs;
+  ls->lastline = ls->linenumber;
+  bcemit_update_line(ls->fs, ls->lastline);
+  pt = fs_finish(ls);
+  pfs = ls->fs;
   pfs->bcbase = ls->bcstack + oldbase;  /* May have been reallocated. */
   pfs->bclim = (BCPos)(ls->sizebcstack - oldbase);
   /* Store new prototype in the constant array of the parent. */
@@ -2112,6 +2124,7 @@ static void parse_args(LexState *ls, ExpDesc *e)
   expr_init(e, VCALL, bcemit_INS(fs, ins));
   e->u.s.aux = base;
   fs->bcbase[fs->pc - 1].line = line;
+  bcemit_update_line(fs, line);
   fs->freereg = base+1;  /* Leave one result by default. */
 }
 
@@ -2638,6 +2651,7 @@ static void parse_func(LexState *ls, BCLine line)
   fs = ls->fs;
   bcemit_store(fs, &v, &b);
   fs->bcbase[fs->pc - 1].line = line;  /* Set line for the store. */
+  bcemit_update_line(fs, line);
 }
 
 /* -- Control transfer statements ----------------------------------------- */
@@ -2856,6 +2870,7 @@ static void parse_for_num(LexState *ls, GCstr *varname, BCLine line)
   /* Perform loop inversion. Loop control instructions are at the end. */
   loopend = bcemit_AJ(fs, BC_FORL, base, NO_JMP);
   fs->bcbase[loopend].line = line;  /* Fix line for control ins. */
+  bcemit_update_line(fs, line);
   jmp_patchins(fs, loopend, loop+1);
   jmp_patchins(fs, loop, fs->pc);
 }
@@ -2933,6 +2948,7 @@ static void parse_for_iter(LexState *ls, GCstr *indexname)
   loopend = bcemit_AJ(fs, BC_ITERL, base, NO_JMP);
   fs->bcbase[loopend-1].line = line;  /* Fix line for control ins. */
   fs->bcbase[loopend].line = line;
+  bcemit_update_line(fs, line);
   jmp_patchins(fs, loopend, loop+1);
 }
 
@@ -3092,12 +3108,13 @@ GCproto *lj_parse(LexState *ls)
 #else
   ls->chunkname = lj_str_newz(L, ls->chunkarg);
 #endif
+  ls->chunkslot = savestack(L, L->top);
   setstrV(L, L->top, ls->chunkname);  /* Anchor chunkname string. */
   incr_top(L);
   ls->level = 0;
   memset(ls->vhash, 0xff, sizeof(ls->vhash));
   fs_init(ls, &fs);
-  fs.linedefined = 0;
+  fs.maxline = fs.minline = 0;
   fs.numparams = 0;
   fs.bcbase = NULL;
   fs.bclim = 0;
@@ -3108,7 +3125,8 @@ GCproto *lj_parse(LexState *ls)
   parse_chunk(ls);
   if (ls->tok != TK_eof)
     err_token(ls, TK_eof);
-  pt = fs_finish(ls, ls->linenumber);
+  bcemit_update_line(&fs, ls->linenumber);
+  pt = fs_finish(ls);
   L->top--;  /* Drop chunkname. */
   lj_assertL(fs.prev == NULL && ls->fs == NULL, "mismatched frame nesting");
   lj_assertL(pt->sizeuv == 0, "toplevel proto has upvalues");

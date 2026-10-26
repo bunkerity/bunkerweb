@@ -3,32 +3,34 @@ from io import BytesIO
 from json import dumps
 from os import environ, getpid, sep
 from pathlib import Path
-from re import VERBOSE as re_X, compile as re_compile
 from zipfile import ZipFile
 from flask import Blueprint, abort, current_app, render_template, request, send_file
 from flask_login import current_user, login_required
-from sqlalchemy import text
 
 from common_utils import get_integration  # type: ignore
+from support_common import (  # type: ignore  # noqa: F401  (REDACTED, mask_uri and setting_names are re-exported)
+    REDACTED,
+    Anonymizer,
+    alembic_revision as db_alembic_revision,
+    build_environment,
+    mask_config as mask_settings,
+    mask_uri,
+    service_domains as config_service_domains,
+    setting_names,
+)
 
 from app.dependencies import BW_CONFIG, CORE_PLUGINS_PATH, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
-from app.support_bundle import RING_HANDLER, Anonymizer, build_environment, build_plugins_report, build_support_bundle
+from app.support_bundle import RING_HANDLER, build_plugins_report, build_support_bundle
 
 support = Blueprint("support", __name__)
 
 
 def service_domains() -> set:
-    config = BW_CONFIG.get_config(methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))
-    return {domain for key, value in config.items() if key == "SERVER_NAME" or key.endswith("_SERVER_NAME") for domain in value.split()}
+    return config_service_domains(BW_CONFIG.get_config(methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",)))
 
 
 def alembic_revision():
-    try:
-        with DB._db_session() as session:
-            row = session.execute(text("SELECT version_num FROM alembic_version")).first()
-        return row[0] if row else None
-    except Exception:
-        return None
+    return db_alembic_revision(DB)
 
 
 @support.route("/support")
@@ -65,66 +67,8 @@ def support_logs():
     return send_file(zip_buffer, mimetype="application/zip", as_attachment=True, download_name="logs.zip")
 
 
-REDACTED = "[REDACTED]"
-MULTIPLE_SUFFIX = re_compile(r"_\d+$")
-# Scheme and userinfo part of sqlalchemy.engine.url._parse_url, so the password span is the one SQLAlchemy parses
-URL_USERINFO = re_compile(
-    r"""
-    (?P<name>[\w\+]+)://
-    (?:
-        (?P<username>[^:/]*)
-        (?::(?P<password>[^@]*))?
-    @)
-    """,
-    re_X,
-)
-URI_SETTINGS = ("DATABASE_URI", "DATABASE_URI_READONLY")
-
-
-def setting_names(key: str, names) -> set:
-    """Return every known setting name a config key (``[service_]SETTING[_N]``) can stand for.
-
-    A service name can contain ``_``, so every ``_`` boundary is a candidate, on the raw key and on the key without its ``_N`` suffix.
-    The caller masks when any candidate is sensitive, so the result never depends on which candidate would be the "right" one.
-    """
-    found = set()
-    for base in {key, MULTIPLE_SUFFIX.sub("", key)}:
-        found.update(
-            candidate for candidate in (base, *(base[index + 1 :] for index, char in enumerate(base) if char == "_")) if candidate in names  # noqa: E203
-        )  # noqa: E203
-    return found
-
-
-def mask_uri(uri: str) -> str:
-    """Redact the password of a SQLAlchemy URL, keeping every other character as is."""
-    match = URL_USERINFO.match(uri)
-    if not match or not match["password"]:
-        return uri
-    # SQLAlchemy ends the password at the first "@", the host part may still hold some, so redact up to the last one before the path or query
-    authority_end = min((i for i in (uri.find("/", match.end()), uri.find("?", match.end())) if i >= 0), default=len(uri))
-    end = max(match.end(), uri.rfind("@", match.end() - 1, authority_end) + 1)
-    return f"{uri[: match.start('password')]}{REDACTED}{uri[end - 1 :]}"
-
-
 def mask_config(config: dict) -> dict:
-    """Redact the value and the default of every password setting and the password part of the database URIs."""
-    settings = BW_CONFIG.get_plugins_settings()
-    for key, data in config.items():
-        if not isinstance(data, dict):
-            continue
-
-        names = setting_names(key, settings)
-        is_password = any(settings[name].get("type") == "password" for name in names)
-        is_uri = any(name in URI_SETTINGS for name in names)
-        for field in ("value", "default"):
-            content = data.get(field)
-            if not content or not isinstance(content, str):
-                continue
-            if is_uri and not is_password:
-                data[field] = mask_uri(content)
-            elif is_password:
-                data[field] = REDACTED
-    return config
+    return mask_settings(config, BW_CONFIG.get_plugins_settings())
 
 
 @support.route("/support/config")

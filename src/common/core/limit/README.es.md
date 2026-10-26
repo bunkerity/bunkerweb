@@ -62,6 +62,8 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP.                                   |
     | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP.                       |
 
+Cuando `SECURITY_MODE` es `detect`, los límites de conexiones se evalúan y se registran (`limiting connections, dry run`) pero no se aplican.
+
 !!! info "Limitación de Conexiones vs. Solicitudes"
     - **La limitación de conexiones** restringe el número de conexiones simultáneas que una sola dirección IP puede mantener.
     - **La limitación de tasa de solicitudes** restringe el número de solicitudes que una dirección IP puede hacer dentro de un período de tiempo definido.

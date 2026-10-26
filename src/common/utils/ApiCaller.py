@@ -29,6 +29,7 @@ from logger import getLogger
 BUSY_STATUS = 503
 BUSY_ATTEMPTS = 3
 BUSY_RETRY_DELAY = 2
+MIN_RELOAD_TIMEOUT = 15
 
 
 def _accepts_write_timeout(api) -> bool:

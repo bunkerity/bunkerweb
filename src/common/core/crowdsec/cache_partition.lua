@@ -15,6 +15,7 @@ local cache_partition = {}
 
 local sha256 = require "resty.sha256"
 local to_hex = require("resty.string").to_hex
+local encode = require("cjson").encode
 
 -- The Local API a rendered configuration targets. Matched line by line, anchored, so
 -- APPSEC_URL is never mistaken for it. Returns "" when the configuration has none.
@@ -39,6 +40,36 @@ function cache_partition.hash(str)
 	local hash = assert(sha256:new())
 	assert(hash:update(str))
 	return to_hex(assert(hash:final()))
+end
+
+function cache_partition.fingerprint(conf)
+	return cache_partition.hash(encode({
+		cache_partition.normalize(conf.API_URL or ""),
+		cache_partition.hash(conf.API_KEY or ""),
+		conf.BOUNCING_ON_TYPE or "",
+		conf.FALLBACK_REMEDIATION or "",
+		conf.MODE or "",
+		conf.CACHE_EXPIRATION or "",
+	}))
+end
+
+-- One prefix can serve several private bouncers; their shared policy must not alternate on each pull.
+function cache_partition.fingerprints(configs)
+	local policies, fingerprints = {}, {}
+	for _, conf in ipairs(configs) do
+		local api = cache_partition.normalize(conf.API_URL or "")
+		policies[api] = policies[api] or {}
+		policies[api][cache_partition.fingerprint(conf)] = true
+	end
+	for api, policies_for_api in pairs(policies) do
+		local hashes = {}
+		for hash in pairs(policies_for_api) do
+			table.insert(hashes, hash)
+		end
+		table.sort(hashes)
+		fingerprints[api] = cache_partition.hash(table.concat(hashes))
+	end
+	return fingerprints
 end
 
 -- The cache key prefix for one Local API URL, independent of every other API

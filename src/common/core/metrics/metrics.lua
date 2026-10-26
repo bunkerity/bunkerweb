@@ -35,6 +35,8 @@ local synced_tables = {}
 local synced_counters = {}
 -- Values per RPUSH or EXISTS, well under LuaJIT's unpack() limit.
 local REDIS_BATCH = 500
+local BAN_EVIDENCE_RECOVERY_BATCH = 32
+local BAN_EVIDENCE_PENDING = "ban_evidence_pending"
 
 -- Redis keys carry the instance hostname next to the worker id, so instances sharing one Redis
 -- never write the same key. The UI keeps only what precedes the first ":" as the metric name.
@@ -62,8 +64,6 @@ local function metric_redis_key(key, wid)
 	return "metrics:" .. key .. ":" .. wid .. "@" .. get_instance_id()
 end
 
--- A worker-local latch cannot be evicted along with metric data.
-local restored_shm = false
 local prefilled_redis = false
 -- Stripping the TTL is a one-shot migration: in persist mode nothing re-adds one, since
 -- every writer uses bare SET/RPUSH/HINCRBY. Later cycles would be pure round trips.
@@ -110,6 +110,7 @@ local table_remove = table.remove
 -- when the branch first runs (the .luacheckrc whitelist hides bare global reads).
 local unpack = unpack
 
+local REPORT_MAX_URL_SIZE = 512
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 
 local function report_keys()
@@ -827,16 +828,52 @@ function metrics:init_workers()
 	if max_lru_history < 1 then
 		max_lru_history = DEFAULT_MAX_LRU_HISTORY
 	end
-	if max_lru_history == DEFAULT_MAX_LRU_HISTORY then
-		return self:ret(true, "metrics LRU using default size (MAX_LRU_HISTORY=" .. max_lru_history .. ")")
+	local message = "metrics LRU using default size (MAX_LRU_HISTORY=" .. max_lru_history .. ")"
+	if max_lru_history ~= DEFAULT_MAX_LRU_HISTORY then
+		local new_lru, err = lrucache.new(max_lru_history)
+		if new_lru then
+			lru = new_lru
+			message = "metrics LRU sized to " .. max_lru_history .. " slots"
+		else
+			self.logger:log(ERR, "failed to resize metrics LRU to " .. max_lru_history .. " slots : " .. err)
+			message = "kept default LRU size"
+		end
 	end
-	local new_lru, err = lrucache.new(max_lru_history)
-	if not new_lru then
-		self.logger:log(ERR, "failed to resize metrics LRU to " .. max_lru_history .. " slots : " .. err)
-		return self:ret(true, "kept default LRU size")
+	local wid = tostring(worker_id())
+	-- Restore SHM once, leaving counters/requests already touched by log() intact.
+	-- Do not evict live slots just to prefill a cache: later misses recover lazily.
+	local budget = lru:capacity() - #lru:get_keys()
+	for _, key in ipairs(self.metrics_datastore:keys()) do
+		if budget <= 0 then
+			break
+		end
+		if key:match("_" .. wid .. "$") then
+			local name = key:gsub("_" .. wid .. "$", "")
+			if name ~= "setup" and lru:get(name) == nil then
+				local value = self.metrics_datastore:get(key)
+				if value then
+					local ok, decoded = pcall(decode, value)
+					if ok then
+						value = decoded
+					end
+					if name:find("_counter_", 1, true) then
+						value = new_counter(self, name)
+					elseif name == "requests" and type(value) == "table" then
+						-- Redis may have accepted a report before the old worker died
+						-- without rewriting SHM. Every restored unsynced row is uncertain.
+						for _, request in ipairs(value) do
+							if type(request) == "table" and not request.synced then
+								request.redis_retry_json = request.redis_retry_json or encode(request)
+							end
+						end
+					end
+					lru:set(name, value)
+					budget = budget - 1
+				end
+			end
+		end
 	end
-	lru = new_lru
-	return self:ret(true, "metrics LRU sized to " .. max_lru_history .. " slots")
+	return self:ret(true, message)
 end
 
 -- Call Redis with one automatic reconnect attempt on connection error.
@@ -879,6 +916,58 @@ function metrics:redis_call(method, ...)
 	return res, call_err
 end
 
+local function sync_ban_evidence(self, ban_id, payload, ttl)
+	local key = report_keys()[1] .. ":ban_evidence:" .. ban_id
+	if ttl > 0 then
+		return self:redis_call("set", key, payload, "NX", "EX", math.ceil(ttl))
+	end
+	return self:redis_call("set", key, payload, "NX")
+end
+
+function metrics:store_ban_evidence(events, summary)
+	summary.ban_id = utils.rand(32) .. ":" .. tostring(worker_id()) .. "@" .. get_instance_id()
+	summary.event_count = #events
+	local evidence = { events = events }
+	for key, value in pairs(summary) do
+		evidence[key] = value
+	end
+	local payload = encode(evidence)
+	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s") or 2592000
+	local ban_time = tonumber(summary.ban_time) or 0
+	ttl = ttl > 0 and ban_time > 0 and ttl + ban_time or 0
+	local ok, err = self.metrics_datastore:set_with_retries("ban_evidence:" .. summary.ban_id .. ":data", payload, ttl)
+	local stored_locally = ok
+	if not ok then
+		self:log_throttled(ERR, "ban_evidence_local", "Can't save ban evidence locally: " .. (err or "unknown error"))
+	end
+	if self.use_redis then
+		ok, err = self.clusterstore:connect()
+		if ok then
+			ok, err = sync_ban_evidence(self, summary.ban_id, payload, ttl)
+		end
+		self.clusterstore:close()
+		if not ok then
+			self:log_throttled(
+				ERR,
+				"ban_evidence_redis",
+				"Can't save ban evidence in Redis: " .. (err or "unknown error")
+			)
+			if stored_locally then
+				local pending_ok, pending_err = self.metrics_datastore.dict:lpush(BAN_EVIDENCE_PENDING, summary.ban_id)
+				if not pending_ok then
+					self:log_throttled(
+						ERR,
+						"ban_evidence_pending",
+						"Can't queue ban evidence recovery: " .. (pending_err or "unknown error")
+					)
+				end
+			end
+		end
+	end
+	-- Evidence pressure must not prevent the security ban itself.
+	return summary
+end
+
 function metrics:log(bypass_checks)
 	-- Don't go further if metrics is not enabled
 	if not bypass_checks and self.variables["USE_METRICS"] == "no" then
@@ -901,13 +990,22 @@ function metrics:log(bypass_checks)
 		if reason == "modsecurity-body" and ngx.var.request then
 			request_method = ngx.var.request:match("^(%S+)") or request_method
 		end
+		local url = self.ctx.bw.request_uri
+		if type(url) == "string" and #url > REPORT_MAX_URL_SIZE then
+			local cut = REPORT_MAX_URL_SIZE - 3
+			-- Keep valid UTF-8 intact when appending the truncation marker.
+			while cut > 0 and url:byte(cut + 1) >= 0x80 and url:byte(cut + 1) < 0xC0 do
+				cut = cut - 1
+			end
+			url = url:sub(1, cut) .. "..."
+		end
 		local request = {
 			id = self.ctx.bw.request_id,
 			date = self.ctx.bw.start_time or time(),
 			ip = self.ctx.bw.remote_addr,
 			country = country,
 			method = request_method,
-			url = self.ctx.bw.request_uri,
+			url = url,
 			status = ngx.status,
 			user_agent = self.ctx.bw.http_user_agent or "",
 			reason = reason,
@@ -1004,43 +1102,6 @@ function metrics:timer()
 	local ret_err = "metrics updated"
 	local wid = tostring(worker_id())
 
-	-- Restore SHM once, leaving counters/requests already touched by log() intact.
-	-- Do not evict live slots just to prefill a cache: later misses recover lazily.
-	if not restored_shm then
-		local budget = lru:capacity() - #lru:get_keys()
-		for _, key in ipairs(self.metrics_datastore:keys()) do
-			if budget <= 0 then
-				break
-			end
-			if key:match("_" .. wid .. "$") then
-				local name = key:gsub("_" .. wid .. "$", "")
-				if name ~= "setup" and lru:get(name) == nil then
-					local value = self.metrics_datastore:get(key)
-					if value then
-						local ok, decoded = pcall(decode, value)
-						if ok then
-							value = decoded
-						end
-						if name:find("_counter_", 1, true) then
-							value = new_counter(self, name)
-						elseif name == "requests" and type(value) == "table" then
-							-- Redis may have accepted a report before the old worker died
-							-- without rewriting SHM. Every restored unsynced row is uncertain.
-							for _, request in ipairs(value) do
-								if type(request) == "table" and not request.synced then
-									request.redis_retry_json = request.redis_retry_json or encode(request)
-								end
-							end
-						end
-						lru:set(name, value)
-						budget = budget - 1
-					end
-				end
-			end
-		end
-		restored_shm = true
-	end
-
 	self.redis_ok = nil
 	local ttl = parse_duration(self.variables["METRICS_REDIS_TTL"], "s")
 	local redis_connected = false
@@ -1077,6 +1138,43 @@ function metrics:timer()
 			-- With a TTL, the per-tick EXPIRE replies already reveal lost keys.
 			if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" and not (ttl and ttl > 0) then
 				check_synced_keys(self, wid)
+			end
+		end
+	end
+
+	if worker_id() == 0 and self.redis_ok then
+		for _ = 1, BAN_EVIDENCE_RECOVERY_BATCH do
+			local ban_id, pop_err = self.metrics_datastore.dict:rpop(BAN_EVIDENCE_PENDING)
+			if not ban_id then
+				if pop_err then
+					self:log_throttled(ERR, "ban_evidence_queue", "Can't read ban evidence queue: " .. pop_err)
+				end
+				break
+			end
+			local key = "ban_evidence:" .. ban_id .. ":data"
+			local payload = self.metrics_datastore:get(key)
+			if payload then
+				local ok, remaining = self.metrics_datastore:ttl(key)
+				local sync_err = not ok and remaining or nil
+				if ok then
+					ok, sync_err = sync_ban_evidence(self, ban_id, payload, remaining)
+				end
+				if not ok then
+					self:log_throttled(
+						ERR,
+						"ban_evidence_recovery",
+						"Can't recover ban evidence: " .. (sync_err or "unknown error")
+					)
+					local pending_ok, pending_err = self.metrics_datastore.dict:rpush(BAN_EVIDENCE_PENDING, ban_id)
+					if not pending_ok then
+						self:log_throttled(
+							ERR,
+							"ban_evidence_pending",
+							"Can't requeue ban evidence recovery: " .. (pending_err or "unknown error")
+						)
+					end
+					break
+				end
 			end
 		end
 	end
@@ -1284,6 +1382,26 @@ function metrics:api()
 	-- Handle special /metrics/requests/query endpoint for optimized queries
 	if filter == "requests/query" then
 		return self:api_requests_query()
+	end
+	if filter:sub(1, 16) == "badbehavior/ban/" then
+		local ban_id = filter:sub(17)
+		if #ban_id > 256 or not ban_id:match("^[%w:%.@_~%-]+$") then
+			return self:ret(true, "invalid ban ID", ngx.HTTP_BAD_REQUEST)
+		end
+		local key = "ban_evidence:" .. ban_id .. ":data"
+		local payload = self.metrics_datastore:get(key)
+		local other = subsystem == "http" and shared.metrics_datastore_stream or shared.metrics_datastore
+		if not payload and other then
+			payload = datastore:new(other):get(key)
+		end
+		if not payload then
+			return self:ret(true, { ban_id = ban_id, evidence_missing = true }, HTTP_OK)
+		end
+		local ok, evidence = pcall(decode, payload)
+		if not ok then
+			return self:ret(true, "invalid ban evidence", HTTP_INTERNAL_SERVER_ERROR)
+		end
+		return self:ret(true, evidence, HTTP_OK)
 	end
 
 	-- Loop on keys

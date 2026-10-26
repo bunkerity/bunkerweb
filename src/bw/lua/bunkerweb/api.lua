@@ -307,14 +307,10 @@ end
 -- generations wait for it to clear; an orphan with a monotonic stamp is removed after five minutes.
 local RELOADING_PATH = "/var/tmp/bunkerweb/reloading"
 local GENERATING_PATH = "/var/tmp/bunkerweb/generating"
--- How long, from the start of the request, a reload waits for the previous reload or for a
--- generator before it answers 503. A normal reload clears its marker about five seconds after the
--- signal (the new workers do it from a timer they start with a five second delay). The callers
--- (scheduler, API, UI) read for max(RELOAD_MIN_TIMEOUT, 3 * services) seconds, five by default, and
--- retry a 503 twice, two seconds apart, but a read that times out is a failed reload that is not
--- retried. So the wait stays under that default: a reload that arrives while another one runs is
--- given up after four seconds, comes back two seconds later and finds the marker gone.
+-- Queue separately from readiness: workers publish it from a timer delayed by five seconds.
+-- Scheduler callers allow at least fifteen seconds for both waits and the configuration test.
 local RELOAD_WAIT = 4
+local RELOAD_READY_WAIT = 10
 local RELOAD_POLL = 0.1
 local RELOAD_MARKER_MAX_AGE = 300
 
@@ -564,9 +560,54 @@ local function reload_checked(test_arg)
 	return HTTP_OK, "success", "reload successful"
 end
 
--- The body returns the response triple instead of sending it, so the wrapper has one
+local function wait_reload(token, seconds, no_wait_reason)
+	local ready_key = "misc_ready_" .. token
+	-- The blocking configuration test does not refresh nginx's cached clock.
+	ngx.update_time()
+	local deadline = ngx.now() + seconds
+	while seconds > 0 do
+		if internalstore:get(ready_key) == "ok" then
+			return HTTP_OK, "success", "reload successful", true
+		end
+		if read_marker() ~= token then
+			-- A worker can publish readiness between the first read and the marker's removal.
+			if internalstore:get(ready_key) == "ok" then
+				return HTTP_OK, "success", "reload successful", true
+			end
+			return HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: initialization did not confirm readiness"
+		end
+		if ngx.now() >= deadline then
+			break
+		end
+		ngx.sleep(math.min(RELOAD_POLL, deadline - ngx.now()))
+	end
+	-- Keep the in-flight marker; normal completion or existing stale-marker recovery releases it.
+	local message = "reload signalled but readiness is unconfirmed: "
+		.. (no_wait_reason or "timed out waiting for new workers")
+	logger:log(ngx.WARN, message)
+	return HTTP_OK, "success", message, false
+end
+
+-- The body returns response values instead of sending them, so the wrapper has one
 -- place to release the swap lock whichever way the reload ends.
 local function reload_locked(test_arg)
+	local shutdown_timeout = get_variable("WORKER_SHUTDOWN_TIMEOUT", false)
+	if shutdown_timeout and match(shutdown_timeout, "^%d+$") then
+		shutdown_timeout = shutdown_timeout .. "s"
+	end
+	shutdown_timeout = utils.parse_duration(shutdown_timeout, "ms")
+	-- Zero disables forced shutdown; otherwise leave a second to send the response before it closes this request.
+	local ready_wait, no_wait_reason
+	if not shutdown_timeout then
+		ready_wait, no_wait_reason = 0, "invalid or unreadable WORKER_SHUTDOWN_TIMEOUT"
+	elseif shutdown_timeout == 0 then
+		ready_wait = RELOAD_READY_WAIT
+	else
+		ready_wait = math.max(0, math.min(RELOAD_READY_WAIT, shutdown_timeout / 1000 - 1))
+		if ready_wait == 0 then
+			no_wait_reason = "WORKER_SHUTDOWN_TIMEOUT leaves no time to confirm readiness"
+		end
+	end
 	local started, status, failure = begin_reload()
 	if not started then
 		-- begin_reload took back what it published; the values are then the HTTP status and the message
@@ -575,10 +616,15 @@ local function reload_locked(test_arg)
 	local ran, code, level, message = pcall(reload_checked, test_arg)
 	-- The marker stands for a reload that signalled nginx; the new workers remove it.
 	if not ran or level ~= "success" then
-		os.remove(RELOADING_PATH)
+		if read_marker() == started then
+			os.remove(RELOADING_PATH)
+		end
 	end
 	if not ran then
 		error(code, 0)
+	end
+	if level == "success" then
+		return wait_reload(started, ready_wait, no_wait_reason)
 	end
 	return code, level, message
 end
@@ -594,12 +640,14 @@ api.global.POST["^/reload"] = function(self)
 	end
 	-- pcall so an error inside the section still releases the lock: leaving it held costs every
 	-- later push and reload until it expires.
-	local ran, status, level, message = pcall(reload_locked, test_arg)
+	local ran, status, level, message, confirmed = pcall(reload_locked, test_arg)
 	lock:unlock()
 	if not ran then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: " .. tostring(status))
 	end
-	return self:response(status, level, message)
+	local http_status, response = self:response(status, level, message)
+	response.confirmed = confirmed
+	return http_status, response
 end
 
 api.global.POST["^/stop$"] = function(self)

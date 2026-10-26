@@ -108,7 +108,7 @@ static ngx_http_headers_more_set_header_t ngx_http_headers_more_set_handlers[]
 
 ngx_int_t
 ngx_http_headers_more_exec_cmd(ngx_http_request_t *r,
-    ngx_http_headers_more_cmd_t *cmd)
+    ngx_http_headers_more_cmd_t *cmd, ngx_str_t *initial_charset)
 {
     ngx_str_t                                   value;
     ngx_http_headers_more_header_val_t         *h;
@@ -138,6 +138,11 @@ ngx_http_headers_more_exec_cmd(ngx_http_request_t *r,
         if (value.len) {
             value.len--;  /* remove the trailing '\0' added by
                              ngx_http_headers_more_parse_header */
+        }
+
+        if (h[i].handler == ngx_http_set_content_type_header) {
+            /* Preserve the source charset used by the charset filter. */
+            r->headers_out.charset = *initial_charset;
         }
 
         if (h[i].handler(r, &h[i], &value) != NGX_OK) {
@@ -581,7 +586,7 @@ ngx_http_headers_more_check_type(ngx_http_request_t *r, ngx_array_t *types)
         dd("...comparing with type [%.*s]", (int) t[i].len, t[i].data);
 
         if (r->headers_out.content_type_len == t[i].len
-            && ngx_strncmp(r->headers_out.content_type.data,
+            && ngx_strncasecmp(r->headers_out.content_type.data,
                            t[i].data, t[i].len) == 0)
         {
             return 1;

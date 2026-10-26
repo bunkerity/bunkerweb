@@ -123,13 +123,13 @@ static MSize CALLBACK_OFS2SLOT(MSize ofs)
 /* Convert callback slot number to callback function pointer. */
 static void *callback_slot2ptr(CTState *cts, MSize slot)
 {
-  return (uint8_t *)cts->cb.mcode + CALLBACK_SLOT2OFS(slot);
+  return lj_ptr_sign((void *)((uint8_t *)cts->cb.mcode + CALLBACK_SLOT2OFS(slot)), 0);
 }
 
 /* Convert callback function pointer to slot number. */
 MSize lj_ccallback_ptr2slot(CTState *cts, void *p)
 {
-  uintptr_t ofs = (uintptr_t)((uint8_t *)p -(uint8_t *)cts->cb.mcode);
+  uintptr_t ofs = (uintptr_t)((uint8_t *)lj_ptr_strip(p) - (uint8_t *)cts->cb.mcode);
   if (ofs < CALLBACK_MCODE_SIZE) {
     MSize slot = CALLBACK_OFS2SLOT((MSize)ofs);
     if (CALLBACK_SLOT2OFS(slot) == (MSize)ofs)

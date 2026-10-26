@@ -51,7 +51,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 180
     steps:
       # Prepare
@@ -192,12 +192,13 @@ jobs:
           exit-code: "0"
         env:
           TRIVY_PLATFORM: ${{ inputs.ARCH }}
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
-          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+          # Priority list: Trivy falls back to the next repository on 429/5xx. Setting it overrides the defaults, so they are repeated here; ECR comes last (it was pinned alone in 2024 and now rate-limits the parallel image jobs).
+          TRIVY_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db:2
+          TRIVY_JAVA_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-java-db:1,ghcr.io/aquasecurity/trivy-java-db:1,public.ecr.aws/aquasecurity/trivy-java-db:1
       - name: Upload Trivy SARIF report
         if: ${{ always() && (inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false) }}
         continue-on-error: true # don't let a missing/partial SARIF mask the real scan error (the gate is the source of truth)
-        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
           sarif_file: trivy-results.sarif
           category: trivy-${{ inputs.IMAGE }}-${{ inputs.ARCH }}
@@ -220,8 +221,9 @@ jobs:
           exit-code: "1"
         env:
           TRIVY_PLATFORM: ${{ inputs.ARCH }}
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
-          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+          # Priority list: Trivy falls back to the next repository on 429/5xx. Setting it overrides the defaults, so they are repeated here; ECR comes last (it was pinned alone in 2024 and now rate-limits the parallel image jobs).
+          TRIVY_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db:2
+          TRIVY_JAVA_DB_REPOSITORY: mirror.gcr.io/aquasec/trivy-java-db:1,ghcr.io/aquasecurity/trivy-java-db:1,public.ecr.aws/aquasecurity/trivy-java-db:1
       # Publish the Trivy results to the GitHub Actions run summary
       - name: Trivy summary
         if: ${{ always() && (inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false) }}
@@ -243,7 +245,7 @@ jobs:
         run: python3 .github/scripts/release_artifacts.py record-image --image "$IMAGE" --platform "$PLATFORM" --digest "$DIGEST" --output "image-$IMAGE-$SUFFIX.json"
       - name: Upload candidate receipt
         if: inputs.CANDIDATE != ''
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: candidate-image-${{ inputs.IMAGE }}-${{ inputs.CACHE_SUFFIX }}
           overwrite: true

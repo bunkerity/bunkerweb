@@ -1,4 +1,4 @@
-FROM nginx:1.30.6-alpine-slim@sha256:3028fc1419f99b95c1c69f844bbaf49dc1b881750c51b497fc721ac4f02a14e6  AS builder
+FROM nginx:1.30.6-alpine-slim@sha256:d9322bba63c6cfc63dc9e86522fd4f95fd4d9020a02b5bced282bbf38b8c3960  AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -127,7 +127,7 @@ ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
-    apk add --no-cache "nodejs>=24.18.1-r0" "npm>=11.12.1-r0" parallel && \
+    apk add --no-cache nodejs npm parallel && \
     cd /tmp && \
     npm ci --ignore-scripts --engine-strict; \
     fi
@@ -165,26 +165,17 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.30.6-alpine-slim@sha256:3028fc1419f99b95c1c69f844bbaf49dc1b881750c51b497fc721ac4f02a14e6
+FROM nginx:1.30.6-alpine-slim@sha256:d9322bba63c6cfc63dc9e86522fd4f95fd4d9020a02b5bced282bbf38b8c3960
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
 # Install runtime dependencies including supervisord
-RUN apk add --no-cache bash coreutils curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2 logrotate
+RUN apk add --no-cache "zlib>=1.3.2-r1" bash coreutils curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2 logrotate
 
 # Fix CVEs
-RUN apk add --no-cache "python3>=3.14.8-r0" "pyc>=3.14.8-r0" # CVE-2026-15310 CVE-2026-15806 CVE-2026-17084 CVE-2026-19445 CVE-2026-19553 CVE-2026-19672 CVE-2026-82049
-RUN apk add --no-cache "libpq>=18.5-r0" "postgresql18-client>=18.5-r0" # CVE-2026-6464 CVE-2026-6469 CVE-2026-6470 CVE-2026-6471 CVE-2026-14662 CVE-2026-14663 CVE-2026-14664 CVE-2026-14666 CVE-2026-14668 CVE-2026-14669 CVE-2026-14670 CVE-2026-14671 CVE-2026-14672 CVE-2026-14673 CVE-2026-14676 CVE-2026-14677 CVE-2026-14678 CVE-2026-14679 CVE-2026-14680 CVE-2026-15741 CVE-2026-15742 CVE-2026-16238 CVE-2026-16239 CVE-2026-16241 CVE-2026-18024 CVE-2026-18408 CVE-2026-19385
-RUN apk add --no-cache "openssl>=3.5.8-r0" "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
-RUN apk add --no-cache "expat>=2.8.5-r0" "libexpat>=2.8.5-r0" # CVE-2026-66046 CVE-2026-76641 CVE-2026-76956 CVE-2026-76957 CVE-2026-93990
-RUN apk add --no-cache "curl>=8.22.0-r0" "libcurl>=8.22.0-r0" # CVE-2026-13608 CVE-2026-18924 CVE-2026-19931 CVE-2026-80229 CVE-2026-80230 CVE-2026-80231 CVE-2026-80255 CVE-2026-80256 CVE-2026-82208 CVE-2026-82209
-RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-76642 CVE-2026-78408 CVE-2026-78409 CVE-2026-78410
-RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
-RUN apk add --no-cache "nghttp2-libs>=1.70.0-r0" # CVE-2026-58055
-RUN apk add --no-cache "libpng>=1.6.59-r0" # CVE-2026-46675
-RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
-RUN apk add --no-cache "tiff>=4.7.2-r0" # CVE-2026-4775
+RUN apk add --no-cache "musl>=1.2.6-r3" "musl-utils>=1.2.6-r3" # CVE-2026-107891
+RUN apk add --no-cache "curl>=8.23.0-r0" "libcurl>=8.23.0-r0" # CVE-2026-92392
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -252,7 +243,7 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.17~rc2"
+LABEL version="1.6.18~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

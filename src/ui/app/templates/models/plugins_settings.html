@@ -51,9 +51,10 @@
                             aria-pressed="false"
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
-                            data-bs-original-title="When enabled, edited global settings also override service values that are not inherited from global settings.">
-                        <i class="bx bx-sm bx-toggle-left"></i>
-                        <span class="d-none d-lg-inline">&nbsp;<span>Override services</span></span>
+                            data-bs-original-title="Applies only the global settings changed in this save to all services, replacing values set by a service or its template."
+                            data-i18n="tooltip.apply_all_services">
+                        <i class="bx bx-sm bx-toggle-left" aria-hidden="true"></i>
+                        &nbsp;<span data-i18n="button.apply_all_services">Apply to all services</span>
                     </button>
                 </div>
             {% endif %}
@@ -93,9 +94,10 @@
                     aria-pressed="false"
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
-                    data-bs-original-title="Override non-global service settings when saving edited globals.">
-                <i class="bx bx-xs bx-toggle-left"></i>
-                &nbsp;<span>Override</span>
+                    data-bs-original-title="Applies only the global settings changed in this save to all services, replacing values set by a service or its template."
+                    data-i18n="tooltip.apply_all_services">
+                <i class="bx bx-xs bx-toggle-left" aria-hidden="true"></i>
+                &nbsp;<span data-i18n="button.apply_all_services">Apply to all services</span>
             </button>
         </div>
     {% endif %}

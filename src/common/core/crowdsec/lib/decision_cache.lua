@@ -39,30 +39,34 @@ end
 function M.new(cache, metadata)
   local store = {}
   local function target_key(key, generation)
-    return (generation or cache:get("v2_generation") or 0) .. "|" .. key
+    generation = generation or cache:get("v3_generation")
+    if type(generation) ~= "string" then generation = "0:A" end
+    return generation:sub(-1) .. "|" .. key, generation
   end
-  local function records(key)
+  local function records(key, generation, legacy)
     local raw = cache:get("v2_decisions_" .. key)
     if not raw then return {} end
     local ok, decoded = pcall(cjson.decode, raw)
     if not ok or type(decoded) ~= "table" then return {} end
+    if not legacy and (decoded.generation ~= generation or type(decoded.records) ~= "table") then return {} end
     local active = {}
-    for _, record in ipairs(decoded) do
+    for _, record in ipairs(legacy and decoded or decoded.records) do
       if record[2] > ngx.time() then active[#active + 1] = record end
     end
     return active
   end
-  local function save(key, active)
+  local function save(key, active, generation)
     if #active == 0 then cache:delete("v2_decisions_" .. key); return true end
     local expires = 0
     for _, record in ipairs(active) do expires = math.max(expires, record[2]) end
-    return cache:safe_set("v2_decisions_" .. key, cjson.encode(active), expires - ngx.time())
+    local value = cjson.encode({generation = generation, records = active})
+    return cache:safe_set("v2_decisions_" .. key, value, expires - ngx.time())
   end
   function store.update(key, decision, remediation, ttl, deleted, generation)
-    key = target_key(key, generation)
+    key, generation = target_key(key, generation)
     local id = M.identity(decision)
     if not id then return nil, "Invalid decision identity" end
-    local active = records(key)
+    local active = records(key, generation)
     for i = #active, 1, -1 do
       if active[i][1] == id then table.remove(active, i) end
     end
@@ -73,7 +77,9 @@ function M.new(cache, metadata)
       local expires = ngx.time() + ttl
       active[#active + 1] = {id, expires, remediation}
       if metadata then
-        local evidence = {expires_at = ngx.time() + M.duration(decision.duration), remediation = remediation}
+        local evidence = {
+          generation = generation, expires_at = ngx.time() + M.duration(decision.duration), remediation = remediation,
+        }
         for _, name in ipairs({"id", "origin", "scenario", "type", "scope", "value"}) do
           local value = decision[name]
           if type(value) == "string" then value = value:sub(1, 512) end
@@ -84,14 +90,24 @@ function M.new(cache, metadata)
         if not ok then metadata:delete(metadata_key) end
       end
     end
-    return save(key, active)
+    return save(key, active, generation)
   end
   function store.clear(key)
     cache:delete("v2_decisions_" .. target_key(key))
+    local legacy = cache:get("v2_generation")
+    if not cache:get("v3_generation") and type(legacy) == "number" then
+      cache:delete("v2_decisions_" .. legacy .. "|" .. key)
+    end
   end
   function store.get(key)
-    key = target_key(key)
-    local active = records(key)
+    local generation, legacy = cache:get("v3_generation"), false
+    if not generation and type(cache:get("v2_generation")) == "number" then
+      generation, legacy = cache:get("v2_generation"), true
+      key = generation .. "|" .. key
+    else
+      key, generation = target_key(key)
+    end
+    local active = records(key, generation, legacy)
     if #active == 0 then return nil end
     local remediation, evidence = active[1][3], {
       source = "lapi", captured_at = ngx.time(), decisions = M.array(), metadata_available = true,
@@ -101,7 +117,8 @@ function M.new(cache, metadata)
       local raw = metadata and metadata:get("v2_evidence_" .. key .. "|" .. record[1])
       local ok, decision = false, nil
       if raw then ok, decision = pcall(cjson.decode, raw) end
-      if ok and type(decision) == "table" then
+      if ok and type(decision) == "table" and (legacy or decision.generation == generation) then
+        decision.generation = nil
         decision.remediation = record[3]
         evidence.decisions[#evidence.decisions + 1] = decision
         evidence.matched_target = evidence.matched_target or decision.value
@@ -110,6 +127,22 @@ function M.new(cache, metadata)
       end
     end
     return remediation, evidence
+  end
+  local cleaned
+  -- Timer only: reclaim obsolete numeric generations before allocating the first snapshot.
+  function store.retire_legacy()
+    local generation = cache:get("v2_generation")
+    if type(generation) ~= "number" then return end
+    if cleaned == generation then return end
+    -- Old workers retain their own shutdown timeout, which the new cycle cannot infer.
+    -- Preserve active records' natural TTL; only obsolete generations are reclaimable.
+    for _, dict in ipairs({cache, metadata}) do
+      for _, key in ipairs(dict:get_keys(0)) do
+        local old = key:match("^v2_decisions_(%d+)|") or key:match("^v2_evidence_(%d+)|")
+        if old and tonumber(old) ~= generation then dict:delete(key) end
+      end
+    end
+    cleaned = generation
   end
   return store
 end

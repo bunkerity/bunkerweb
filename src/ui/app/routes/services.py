@@ -624,7 +624,8 @@ def services_service_page(service: str):
                 setting = _draft_setting_name(full_key)
                 if setting in draft_value_keys and setting not in variables:
                     invalid_draft_values.append(setting)
-            if invalid_draft_values:
+            # Rejected values must not reach the save, which treats missing keys as deletions.
+            if invalid_draft_values or validation_variables.keys() - variables.keys():
                 DATA.update({"RELOADING": False, "CONFIG_CHANGED": False})
                 return
 

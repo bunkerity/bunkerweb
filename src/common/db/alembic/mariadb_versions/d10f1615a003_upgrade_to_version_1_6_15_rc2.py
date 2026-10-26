@@ -4,6 +4,7 @@ Revision ID: d10f1615a003
 Revises: 581b304b1118
 """
 
+from sys import stderr
 from time import time
 from typing import Sequence, Union
 
@@ -29,6 +30,12 @@ def upgrade() -> None:
                 "default": "'manual'" if table in ("bw_plugins", "bw_ui_users") else None,
             }
         )
+        if not isinstance(column["type"], sa.Enum):
+            # "scheduler" is the longest supported method (9 characters).
+            if isinstance(column["type"], sa.String) and (column["type"].length is None or column["type"].length >= 9):
+                print(f"Warning: keeping {table}.method as {column['type']}; it already supports all method values", file=stderr)
+                continue
+            raise RuntimeError(f"Cannot upgrade {table}.method: unsupported type {column['type']}; expected ENUM or a string with capacity >= 9")
         if "api" not in column["type"].enums:
             op.alter_column(
                 table,

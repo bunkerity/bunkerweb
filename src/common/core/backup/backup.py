@@ -13,7 +13,8 @@ from sqlite3 import connect as sqlite_connect
 from sys import exit as sys_exit, path as sys_path
 from tempfile import TemporaryDirectory
 from typing import Literal
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
+from zlib import error as zlib_error
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -250,12 +251,43 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     return db, backup_file
 
 
+def check_backup_engine(backup_file: Path, database: str) -> str:
+    """Return why the archive cannot be restored into `database`, or an empty string when it can.
+
+    A dump is only valid for the engine that wrote it (backup-<engine>-<date>.zip holding backup-<engine>-<date>.sql),
+    and this must be known before the tables are dropped.
+    """
+    stem = backup_file.stem.split("-")
+    source = stem[1] if len(stem) > 2 and stem[0] == "backup" else ""
+    if source != database:
+        return f"it was taken from {source or 'an unknown'} database engine, not {database}"
+
+    sql_name = backup_file.with_suffix(".sql").name
+    try:
+        with ZipFile(backup_file, "r") as zipf:
+            if sql_name not in zipf.namelist():
+                return f"it does not contain {sql_name}"
+            # Reads every member: a damaged payload must be found before the tables are dropped
+            corrupted = zipf.testzip()
+            if corrupted:
+                return f"its member {corrupted} is corrupted"
+    except (BadZipFile, OSError, EOFError, zlib_error) as e:
+        return f"it cannot be read: {e}"
+    return ""
+
+
 def restore_database(backup_file: Path, db: Database = None) -> Database:
     """Restore the database from a backup."""
     db = db or Database(LOGGER)
-    Base.metadata.drop_all(db.sql_engine)
     database_url = make_url(db.database_uri)
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"] = database_url.drivername.split("+")[0]
+
+    refusal = check_backup_engine(backup_file, database)
+    if refusal:
+        LOGGER.error(f"Refusing to restore {backup_file}, {refusal}. The database was left untouched")
+        sys_exit(1)
+
+    Base.metadata.drop_all(db.sql_engine)
 
     if database == "sqlite":
         db_path = Path(database_url.database)

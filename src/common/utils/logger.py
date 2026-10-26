@@ -4,6 +4,7 @@ from logging import (
     ERROR,
     FileHandler,
     INFO,
+    NOTSET,
     WARNING,
     Logger,
     StreamHandler,
@@ -32,7 +33,8 @@ class BWLogger(Logger):
     """Custom logger class inheriting from the standard Logger."""
 
     def __init__(self, name, level=INFO):
-        super().__init__(name, level)
+        # SQLAlchemy loggers inherit DATABASE_LOG_LEVEL from the "sqlalchemy" logger, whatever their class names
+        super().__init__(name, NOTSET if name.startswith("sqlalchemy.") else level)
 
 
 # Set the custom logger class as the default
@@ -110,18 +112,9 @@ if not log_types or "stderr" in env_log_types:
 
 basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT, level=default_level, handlers=[handler["handler"] for handler in log_types.values()], force=True)
 
-# Set the default logging level for specific SQLAlchemy components
+# Set the default logging level for every SQLAlchemy logger (BWLogger leaves their children at NOTSET)
 database_default_level = _nameToLevel.get(getenv("DATABASE_LOG_LEVEL", "WARNING").upper(), WARNING)
-sqlalchemy_loggers = (
-    "sqlalchemy.orm.mapper.Mapper",
-    "sqlalchemy.orm.relationships.RelationshipProperty",
-    "sqlalchemy.orm.strategies.LazyLoader",
-    "sqlalchemy.pool.impl.QueuePool",
-    "sqlalchemy.pool.impl.SingletonThreadPool",
-    "sqlalchemy.engine.Engine",
-)
-for logger_name in sqlalchemy_loggers:
-    logging_getLogger(logger_name).setLevel(database_default_level)
+logging_getLogger("sqlalchemy").setLevel(database_default_level)
 
 # Customize log level names with emojis
 addLevelName(CRITICAL, "🚨")

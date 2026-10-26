@@ -1,5 +1,58 @@
 # Changelog
 
+## v1.6.18~rc1 - 2026/10/26
+
+- [SECURITY] `cors`: `CORS_ALLOW_ORIGIN=self` matches the `Origin` exactly, so look-alike origins are denied when `CORS_DENY_REQUEST=yes`.
+- [SECURITY] `docker`: update the Alpine `musl` and `musl-utils` packages to 1.2.6-r3, fixing CVE-2026-107891.
+- [SECURITY] `docker`: update the Alpine `curl` and `libcurl` packages to 8.23.0-r0, fixing CVE-2026-92392 and 23 lower-severity curl CVEs.
+- [SECURITY] `linux`: the Fedora 43 and 44 packages require NGINX 1.30.6, fixing CVE-2026-15176, CVE-2026-93479, CVE-2026-95101, CVE-2026-97629 and CVE-2026-97205.
+- [SECURITY] `modsecurity`: update OWASP CRS v4 to 4.30.0, fixing GHSA-89h9-2j8h-9gp2, GHSA-qmx4-jfcv-fgww and GHSA-575j-qr6p-9763.
+- [SECURITY] `ui`: the Support page export redacts `API_TOKEN`, private keys and header credentials instead of exporting them in clear.
+- [FEATURE] `cli`: `bwcli support` exports a support bundle with secrets redacted and IPs and domains anonymized.
+- [FEATURE] `crowdsec`: `CROWDSEC_CACHE_SIZE` (`100m`) and `CROWDSEC_METADATA_CACHE_SIZE` (`5m`) size the decision and metadata caches.
+- [FEATURE] `installer`: the easy install script sends its downloads through `HTTP_PROXY`/`HTTPS_PROXY` and honours `NO_PROXY`. (Fixes #4040)
+- [FEATURE] `ui`: the NGINX failover banner links to the Logs page, with `error.log` selected when it is available. (Fixes #4028)
+- [BUGFIX] `antibot`: a failed challenge keeps its destination, and its query when the session survives. Thanks to @Explotacionweb for the fix.
+- [BUGFIX] `antibot`: a destination that is an alias of the challenge URL is rejected, so it can no longer loop back to the challenge.
+- [BUGFIX] `api`: the OpenAPI schema (`/openapi.json`) loads again instead of returning 500, and a config upload without `type` is rejected.
+- [BUGFIX] `backup`: a restore refuses a backup from another database engine, or a damaged one, before dropping tables.
+- [BUGFIX] `badbehavior`: a ban stores its evidence once, so reports stay small; the Reports page loads the events on demand.
+- [BUGFIX] `core`: a reload whose initialization is rejected is reported as failed and retried, instead of as applied.
+- [BUGFIX] `core`: a kept configuration (`KEEP_CONFIG_ON_RESTART=yes`) that fails to start falls back to the loading page instead of exiting.
+- [BUGFIX] `crowdsec`: a reload in stream mode no longer leaves an orphaned decision set that fills the cache and stops new bans.
+- [BUGFIX] `crowdsec`: in stream mode, known bans stay enforced through Local API outages, reloads and restarts (see the plugin README).
+- [BUGFIX] `db`: upgrades on MariaDB or MySQL no longer crash when the `method` columns are `VARCHAR` instead of `ENUM`. (Fixes #4095)
+- [BUGFIX] `limit`: connection limits honour `SECURITY_MODE=detect`.
+- [BUGFIX] `metrics`: URLs stored in new reports are cut at 512 bytes.
+- [BUGFIX] `redis`: the Web UI and CLI send the Sentinel credentials and TLS settings to the Sentinel nodes. (Fixes #4093)
+- [BUGFIX] `scheduler`: startup stops when the database cannot be stamped for its migration, instead of running on an unmigrated database.
+- [BUGFIX] `scheduler`: new plugins and custom configs no longer load against the previous configuration while a generation is retried.
+- [BUGFIX] `ui`: the dashboard's blocking chart, map and top IPs count blocks of any status and skip detect-mode events. Thanks to @MageInt for the fix.
+- [BUGFIX] `ui`: saving global or service settings with a rejected value no longer resets the stored value to its default or reports success.
+- [BUGFIX] `ui`: the Logs page search box stays visible below the toolbar when the log is scrolled. (Fixes #4027)
+- [BUGFIX] `ui`: table column preferences survive column changes between releases, and the Reports Date toggle is saved.
+- [DOCS] `errors`: how to keep upstream API error bodies for one service or location.
+- [DOCS] `greylist`: the criteria combine with OR, with an example.
+- [DEPS] Updated Brotli to v1.2.1
+- [DEPS] Updated lua-resty-dns to v0.24
+- [DEPS] Updated headers-more-nginx-module to v0.41
+- [DEPS] Updated lua-cjson to v2.1.0.20
+- [DEPS] Updated lua-resty-redis to v0.34
+- [DEPS] Updated LuaJIT to v2.1-20261023
+- [DEPS] Updated DOMPurify to v3.4.17
+- [DEPS] Updated Go to v1.26.10 for the all-in-one CrowdSec build
+
+## v1.6.17 - 2026/10/21
+
+- [FEATURE] `headers`: the default `PERMISSIONS_POLICY` also denies `unbounded-element`.
+- [BUGFIX] `autoconf`: quiet Kubernetes watches reconnect without restarting the controller, while repeated short closures still fail health checks. (Fixes #4064)
+- [BUGFIX] `badbehavior`: a ban keeps only its newest events as evidence, at most `BAD_BEHAVIOR_REPORT_MAX_EVENTS` (default `100`, never more than the threshold), with URLs and methods cut at `BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE` (default `512` bytes), so the report written for every request rejected during the ban no longer fills Redis. The Reports page shows the real request count.
+- [BUGFIX] `core`: the local cache's IPC events expire after 5 minutes, and a worker that falls behind skips the events evicted from a full `CACHESTORE_IPC_MEMORY_SIZE` zone instead of waiting 0.3 s on each one (`could not poll ipc events: timeout`), then clears its local cache so it never serves a value whose invalidation it missed.
+- [BUGFIX] `db`: SQLAlchemy loggers follow `DATABASE_LOG_LEVEL` again, so the scheduler, API and UI no longer flood their logs with lazy-loading clauses at INFO.
+- [UI] `Web UI`: clarify applying changed global settings to all services and confirm service overrides before saving.
+- [DOCS] Pin llms.txt and llms-full.txt links to their docs version, publish per-plugin settings JSON and register read-only WebMCP tools on docs pages.
+- [DEPS] Updated LuaJIT version to v2.1-20261021
+
 ## v1.6.17~rc2 - 2026/10/16
 
 - [FEATURE] `db`: `DATABASE_CONNECT_TIMEOUT` (default `10s`) and `DATABASE_READ_TIMEOUT` (default `5m`) bound MySQL and MariaDB calls, and PostgreSQL gets the connect timeout and TCP keepalives but no query deadline, so a database that vanishes without a reset no longer blocks the scheduler, UI or API forever.

@@ -1,4 +1,4 @@
-FROM python:3.14-alpine@sha256:f6a589d43c42b9e7f7dc67a12d37132491f362859a5d750607710cc56da3bc72 AS builder
+FROM python:3.14-alpine@sha256:601e99e090cb08c2784a42395487709500bc39930307fe72f3f11a8f3c430762 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -47,7 +47,7 @@ ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ]; }; then \
-  apk add --no-cache "nodejs>=24.18.1-r0" "npm>=11.12.1-r0" parallel && \
+  apk add --no-cache nodejs npm parallel && \
   cd /tmp && \
   npm ci --ignore-scripts --engine-strict; \
   fi
@@ -68,7 +68,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.14-alpine@sha256:f6a589d43c42b9e7f7dc67a12d37132491f362859a5d750607710cc56da3bc72
+FROM python:3.14-alpine@sha256:601e99e090cb08c2784a42395487709500bc39930307fe72f3f11a8f3c430762
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -80,15 +80,12 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt
 
 # Install runtime dependencies and add ui user
-RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata libjpeg-turbo && \
+RUN apk add --no-cache "zlib>=1.3.2-r1" bash unzip mariadb-connector-c mariadb-client sqlite postgresql-client tzdata libjpeg-turbo && \
   addgroup -g 101 ui && \
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-RUN apk add --no-cache "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
-RUN apk add --no-cache "libuuid>=2.42.3-r1" # CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-76642 CVE-2026-78408 CVE-2026-78409 CVE-2026-78410
-RUN apk add --no-cache "pcre2>=10.49-r0" # CVE-2026-103111
-RUN apk add --no-cache "zlib>=1.3.2-r1" # CVE-2026-85091
+RUN apk add --no-cache "musl>=1.2.6-r3" "musl-utils>=1.2.6-r3" # CVE-2026-107891
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -110,7 +107,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.17~rc2"
+LABEL version="1.6.18~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

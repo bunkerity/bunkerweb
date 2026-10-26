@@ -62,6 +62,8 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
     | `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse.                                |
     | `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse.                      |
 
+Wenn `SECURITY_MODE` auf `detect` steht, werden die Verbindungsgrenzen ausgewertet und protokolliert (`limiting connections, dry run`), aber nicht durchgesetzt.
+
 !!! info "Verbindungs- vs. Anforderungsbegrenzung"
 
     - **Verbindungsbegrenzung** beschränkt die Anzahl der gleichzeitigen Verbindungen, die eine einzelne IP-Adresse aufrechterhalten kann.

@@ -88,6 +88,24 @@
       "type": "multivalue",
       "separator": ","
     },
+    "CROWDSEC_CACHE_SIZE": {
+      "context": "global",
+      "default": "100m",
+      "help": "Shared decision memory for all services, minimum 1m in whole megabytes (m/M). Stream mode needs two snapshots. After resize, reload or same-container restart, known bans/captchas restore from disk until expiry or reconciliation. Bootstrap lookups and backoff are per credentials/policy. Unknown IPs are allowed if LAPI is unavailable; a fresh container filesystem starts empty.",
+      "id": "crowdsec-cache-size",
+      "label": "CrowdSec decision cache size",
+      "regex": "^[1-9][0-9]*[mM]$",
+      "type": "text"
+    },
+    "CROWDSEC_METADATA_CACHE_SIZE": {
+      "context": "global",
+      "default": "5m",
+      "help": "Shared memory for optional CrowdSec report metadata across all services. Use a positive whole number of megabytes (m/M), minimum 1m. Metadata cannot evict decision records. Resizing on reload clears this optional metadata.",
+      "id": "crowdsec-metadata-cache-size",
+      "label": "CrowdSec metadata cache size",
+      "regex": "^[1-9][0-9]*[mM]$",
+      "type": "text"
+    },
     "CROWDSEC_CACHE_EXPIRATION": {
       "context": "multisite",
       "default": "1s",

@@ -16,6 +16,7 @@ on:
 
 jobs:
   tests:
+    # Host tests require Noble NGINX packages and browser dependencies.
     runs-on: ubuntu-24.04
     steps:
       # Prepare

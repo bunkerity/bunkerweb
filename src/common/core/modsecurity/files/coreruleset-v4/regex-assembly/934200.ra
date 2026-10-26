@@ -36,3 +36,23 @@
   ##!=>
   [^%]*?%>
 ##!<
+
+##! Velocity directives: #set($c=$x.class.forName(...)), #foreach($i in [$x.exec(...)])
+##! A `$` reference is required after the opening parenthesis so that ordinary
+##! text and C preprocessor lines such as `#if(defined(X))` do not match.
+##!> assemble
+  #\w+\s*\(\s*\$[^)]*?
+  ##!=>
+  {{exec-indicators}}
+  ##!=>
+  [^)]*?\)
+##!<
+
+##! FreeMarker directives: <#assign ex=("..."+"...")?new()>, <@ex("id")>
+##!> assemble
+  <[#@]\w+[^>]*?
+  ##!=>
+  {{exec-indicators}}
+  ##!=>
+  [^>]*?>
+##!<

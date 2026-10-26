@@ -27,7 +27,7 @@ Along those lines, OWASP CRS team may not issue security notifications for unsup
 
 > **Note for LTS users:** The v4.25.x LTS receives only security fixes, critical regression fixes, and critical false positive fixes. New rules and features are available exclusively on the current stable releases. See [BACKPORT_POLICY.md](BACKPORT_POLICY.md) for details on what is backported to the LTS branch.
 
-:warning: If you are on the **v3.3.x** branch, it will be completely unsupported by ** Q3 2026 **.
+:warning: The **v3.3.x** branch reached end of life in Q3 2026 and is no longer supported. Please upgrade to a supported release.
 
 ## GPG Signed Releases
 
