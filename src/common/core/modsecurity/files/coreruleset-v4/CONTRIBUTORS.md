@@ -78,6 +78,7 @@
 - [Tim Herren](https://github.com/nerrehmit)
 - [Victor Hora](https://github.com/victorhora)
 - [itsTheFae](https://github.com/itsTheFae)
+- [Hitarth Jain](https://github.com/Yeagerist0)
 - [jamuse](https://github.com/jamuse)
 - [jeremyjpj0916](https://github.com/jeremyjpj0916)
 - [jschleus](https://github.com/jschleus)
