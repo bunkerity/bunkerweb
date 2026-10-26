@@ -4248,7 +4248,12 @@ class Database:
                 records_to_delete = session.query(Jobs_runs.id).order_by(Jobs_runs.end_date.asc()).limit(rows_count - max_runs).all()
                 ids_to_delete = [record.id for record in records_to_delete]
                 if ids_to_delete:
-                    result = session.query(Jobs_runs).filter(Jobs_runs.id.in_(ids_to_delete)).delete(synchronize_session=False)
+                    # One DELETE per primary key, like _blob_drop: a ranged DELETE fails with 1020 under MariaDB snapshot
+                    # isolation when a job run is inserted between the SELECT above and this statement.
+                    table = Jobs_runs.__table__
+                    result = session.execute(
+                        table.delete().where(table.c.id == bindparam("delete_id")), [{"delete_id": record_id} for record_id in ids_to_delete]
+                    ).rowcount
 
                 try:
                     session.commit()
