@@ -169,6 +169,9 @@
 
     
     
+    
+    
+
   
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Plugins - Documentation BunkerWeb" />
@@ -1418,7 +1421,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc2</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1440,7 +1443,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1471,7 +1474,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1511,7 +1514,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc2</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1548,7 +1551,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">&para;</a></h3>
 <div class="admonition tip">
 <p class="admonition-title">Plugins existants</p>
-<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc2/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
+<p>Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins officiels</a> et des <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc1/src/common/core">plugins core</a> (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).</p>
 </div>
 <p>À quoi ressemble la structure d'un plugin :
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1578,7 +1581,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p><strong>template.html</strong> : Page de plugin personnalisée accessible via l'interface utilisateur.</p>
 </li>
 <li>
-<p><strong>Dossier Blueprints (dans l'interface utilisateur) </strong>:
+<p>**Dossier Blueprints (dans l'interface utilisateur) **:
   Ce dossier est utilisé pour remplacer les blueprints Flask existants ou en créer de nouveaux. À l'intérieur, vous pouvez inclure des fichiers de blueprint et un **** sous-dossier de modèles facultatif pour les modèles spécifiques aux blueprints.</p>
 </li>
 <li>
@@ -1983,7 +1986,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Plus d'exemples</p>
-<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.17-rc2/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
+<p>Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.18-rc1/src/bw/lua/bunkerweb">répertoire lua</a> du dépôt.</p>
 </div>
 <h3 id="emplois">Emplois<a class="headerlink" href="#emplois" title="Permanent link">&para;</a></h3>
 <p>BunkerWeb utilise un planificateur de tâches interne pour des tâches périodiques telles que le renouvellement des certificats avec certbot, le téléchargement de listes noires, le téléchargement de fichiers MMDB, ... Vous pouvez ajouter des tâches de votre choix en les plaçant dans un sous-dossier nommé <strong>tâches</strong> et en les répertoriant dans le  fichier de métadonnées <strong>plugin.json</strong>. N'oubliez pas d'ajouter les permissions d'exécution pour tout le monde afin d'éviter tout problème lorsqu'un utilisateur clone et installe votre plugin.</p>
@@ -2004,7 +2007,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p class="admonition-title">Modèle Jinja 2</p>
 <p>Le  fichier <strong>template.html</strong> est un modèle Jinja2, veuillez vous référer à la <a href="https://jinja.palletsprojects.com">documentation Jinja2</a> si nécessaire.</p>
 </div>
-<p>Nous pouvons mettre de côté le ** fichier actions.py<strong> et commencer à </strong>utiliser uniquement le modèle dans une situation GET**. Le modèle peut accéder au contexte de l'application et aux libs, ce qui vous permet d'utiliser les utilitaires Jinja, request ou flask.</p>
+<p>Nous pouvons mettre de côté le ** fichier actions.py** et commencer à <strong>utiliser uniquement le modèle dans une situation GET</strong>. Le modèle peut accéder au contexte de l'application et aux libs, ce qui vous permet d'utiliser les utilitaires Jinja, request ou flask.</p>
 <p>Par exemple, vous pouvez obtenir les arguments de requête dans votre modèle comme ceci :</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>request args : {{ request.args.get() }}.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
 </code></pre></div>
@@ -2015,7 +2018,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"csrf_token"</span> <span class="na">value</span><span class="o">=</span><span class="s">"{{ csrf_token() }}"</span> <span class="p">/&gt;</span>
 </code></pre></div></p>
 </div>
-<p>Vous pouvez alimenter votre page de plugin avec des scripts supplémentaires avec le ** fichier actions.py<strong> lors de l  'envoi d'un </strong>POST /plugins/&lt;<em>plugin_id</em>&gt;**.</p>
+<p>Vous pouvez alimenter votre page de plugin avec des scripts supplémentaires avec le ** fichier actions.py** lors de l  'envoi d'un <strong>POST /plugins/&lt;<em>plugin_id</em>&gt;</strong>.</p>
 <p>Vous avez deux fonctions par défaut dans <strong>actions.py</strong> :</p>
 <p><strong>pre_render fonction</strong></p>
 <p>Cela vous permet de récupérer les données lorsque vous <strong>OBTENEZ</strong> le modèle, et d'utiliser les données avec la variable pre_render disponible dans Jinja pour afficher le contenu de manière plus dynamique.</p>
@@ -2371,6 +2374,8 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
       
         <script src="../../assets/toc-dropdown.js"></script>
+      
+        <script src="../../assets/webmcp.js"></script>
       
     
   </body>

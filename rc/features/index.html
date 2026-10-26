@@ -169,6 +169,9 @@
 
     
     
+    
+    
+
   
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Features - BunkerWeb documentation" />
@@ -1866,6 +1869,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#keep-upstream-api-error-bodies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keep upstream API error bodies
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2171,6 +2185,17 @@
     <span class="md-ellipsis">
       
         How to Use
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ip-address-certificates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IP Address Certificates
       
     </span>
   </a>
@@ -4335,7 +4360,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Pass through ACME HTTP-01 challenge requests to the upstream server.</td>
+<td>Pass through only GET/HEAD requests for one token-shaped ACME HTTP-01 URI to the upstream. That request skips antibot, blacklist, request-rate limiting, Basic Auth, ModSecurity, and the ban check; NGINX connection limits (limit_conn) still apply.</td>
 </tr>
 <tr>
 <td><code>ACME_DIRECTORY_URL</code></td>
@@ -5579,7 +5604,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Database Compatibility</p>
-<p>The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations.</p>
+<p>The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations. A restore refuses a backup taken from a different database engine (MariaDB and MySQL count as different engines) before changing anything.</p>
 </div>
 <h3 id="example-configurations_3">Example Configurations<a class="headerlink" href="#example-configurations_3" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Daily Backups with 7-Day Retention</label><label for="__tabbed_6_2">Weekly Backups with Extended Retention</label><label for="__tabbed_6_3">Monthly Backups to Custom Location</label></div>
@@ -5785,8 +5810,23 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td>no</td>
 <td><strong>Ban Scope:</strong> Determines whether bans apply only to the current service (<code>service</code>) or to all services (<code>global</code>). Bans triggered on the default server (<code>_</code>) are always global.</td>
 </tr>
+<tr>
+<td><code>BAD_BEHAVIOR_REPORT_MAX_EVENTS</code></td>
+<td><code>100</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Maximum recent events kept as ban evidence in reports, also limited by <code>BAD_BEHAVIOR_THRESHOLD</code>. Range: <code>1</code> to <code>10000</code>.</td>
+</tr>
+<tr>
+<td><code>BAD_BEHAVIOR_REPORT_MAX_STRING_SIZE</code></td>
+<td><code>512</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Maximum bytes per URL or method in report evidence, including the <code>...</code> marker. Range: <code>4</code> to <code>65536</code>.</td>
+</tr>
 </tbody>
 </table>
+<p>Ban evidence keeps the newest matching events. These limits affect only the evidence copied into each report, not ban enforcement or <code>MAX_LRU_HISTORY</code>. UTF-8 strings are truncated without splitting a character. Raising either limit increases report storage use. The total request count remains the actual ban counter, even when fewer events are retained.</p>
 <div class="admonition warning">
 <p class="admonition-title">False Positives</p>
 <p>Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.</p>
@@ -7154,7 +7194,11 @@ TrustedMonitor/\d+\.\d+
 <li><code>DELETE /crowdsec/{connection_id}/decisions/{decision_id}</code>: include the selected <code>scope</code>, <code>value</code>, and <code>decision_type</code> in the JSON body.</li>
 </ul>
 <p>Use the returned connection ID verbatim. It includes instance identity, so identical localhost URLs on different instances remain separate. API administrators can use these operations. Delegated API users need the independent <code>crowdsec_read</code> or <code>crowdsec_delete</code> permission under the existing <code>bans</code> resource, either for a returned connection ID or <code>*</code>. An ordinary <code>ban_delete</code> grant does not authorize CrowdSec removal. No database migration is required.</p>
-<p>The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in <code>/var/run/bunkerweb</code>, held until the update is published and released automatically if the worker exits.</p>
+<p>The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB (<code>CROWDSEC_METADATA_CACHE_SIZE=5m</code>) cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in <code>/var/run/bunkerweb</code>, held until the update is published and released automatically if the worker exits.</p>
+<p>Stream mode retains at most two snapshot slots, switching only after a complete snapshot fits. An unchanged nginx reload keeps the current snapshot and requests deltas. A missing snapshot, changed decision configuration, incomplete startup, or last successful sync older than the greater of 300 seconds and 30 times <code>CROWDSEC_UPDATE_FREQUENCY</code> forces a full snapshot. Sync failures emit an error log at most once per minute per cache prefix, followed by a recovery notice. If the decision cache is full, increase <code>CROWDSEC_CACHE_SIZE</code> to hold two snapshots and reload BunkerWeb. Resizing the decision zone on reload creates an empty zone and triggers a full synchronization; resizing only the metadata zone clears optional metadata.</p>
+<p>During an in-place upgrade from an earlier version, active legacy records keep their original TTL so draining old workers can still enforce them, even if the new shutdown timeout is shorter. Obsolete generations are reclaimed before allocating a snapshot. Allow extra cache space for these active legacy records alongside the two snapshot slots; if allocation fails, the previous enforcement remains active and synchronization reports an error. Size the decision cache from these figures, measured with synthetic distinct IPv4 targets and one-hour TTLs: allow about 1.1 KiB per decision at steady state (two snapshot slots) and about 1.4 KiB per decision during an upgrade while legacy records are active, both rounded up for headroom. For example, 100,000 decisions need about <code>120m</code> at steady state and <code>150m</code> during an upgrade. At these figures, the default <code>100m</code> fits about 90,000 decisions at steady state and about 70,000 during an upgrade. Other target types, such as IPv6 or ranges, may use more, so set <code>CROWDSEC_CACHE_SIZE</code> for your list size, ideally before upgrading.</p>
+<p>An interrupted or unsuccessful stream request forces the next poll to fetch a full snapshot. A full reconciliation also runs after 3600 seconds since the last successful full sync. During bootstrap, direct Local API results use a separate cache per effective credentials and policy. If a lookup fails, only that policy backs off for <code>CROWDSEC_UPDATE_FREQUENCY</code>; unknown IPs are allowed during the outage. Known bans and captchas remain enforced until their own expiry. Neither bootstrap results nor restored records override a newer published snapshot.</p>
+<p>Stream mode checkpoints each complete snapshot and changed delta under <code>/var/lib/bunkerweb/crowdsec-state-*.json</code>, with absolute decision expiry and service bindings in <code>crowdsec-binding-*.json</code>. Checkpoints survive scheduler cache pushes, zone resizing, policy changes (including API URL/key rotation), nginx reloads, and restarts of the same container with its filesystem retained. Until reconciliation publishes a new snapshot, the old published snapshot or restored checkpoint remains the enforcement fallback. Restore runs during initialization. Workers share a checkpoint revision; an outdated worker rereads the checkpoint in a timer before using outage fallback. File writes also run only in timers. If a checkpoint cannot be read or is corrupt, including when a worker starts or after an interrupted update, fallback denies requests until it is readable again or a successful synchronization rewrites it. Checkpoints are written immediately, but a crash during a write can lose the checkpoint, including during a power loss. A checkpoint that belongs to another configuration is ignored; both cases are reported with rate-limited errors. Container re-creation with a fresh filesystem starts empty; unknown IPs remain allowed if LAPI is unavailable.</p>
 <h3 id="crowdsec-bans">CrowdSec bans<a class="headerlink" href="#crowdsec-bans" title="Permanent link">&para;</a></h3>
 <p>By default, BunkerWeb asks CrowdSec about every request. Set <code>CROWDSEC_BAN_REFRESH</code> to a duration, for example <code>5m</code>, to turn a CrowdSec block into a <strong>CrowdSec ban</strong>: a short BunkerWeb ban that is renewed while the CrowdSec decision lasts. Later requests from the IP are stopped at the ban check, before the other plugins and before the CrowdSec lookup. The ban appears on the Bans page as its own row, with the <strong>Investigate IP</strong> action. The default <code>0</code> keeps the previous behavior and creates no ban.</p>
 <ul>
@@ -7229,7 +7273,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.17-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.18-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
@@ -7246,7 +7290,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://10.20.30.254:514"</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.17-rc2</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.18-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -7388,7 +7432,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <h3 id="step-2-configure-bunkerweb-settings">Step&nbsp;2 – Configure BunkerWeb settings<a class="headerlink" href="#step-2-configure-bunkerweb-settings" title="Permanent link">&para;</a></h3>
 <p>Apply the following environment variables (or values via the scheduler UI/API) so the BunkerWeb instance can talk to the CrowdSec Local API. At a minimum you must set <code>USE_CROWDSEC</code>, <code>CROWDSEC_API</code>, and a valid <code>CROWDSEC_API_KEY</code> that you created with <code>cscli bouncers add</code>.</p>
-<p>Every setting is <code>multisite</code>, so a value set without a prefix applies to all services and a value prefixed with a server name overrides it for that service only.</p>
+<p>Connection settings are <code>multisite</code>: an unprefixed value applies to all services, and a server-name prefix overrides it for that service. <code>CROWDSEC_CACHE_SIZE</code> and <code>CROWDSEC_METADATA_CACHE_SIZE</code> are <code>global</code>; set them without a server-name prefix.</p>
 <table>
 <thead>
 <tr>
@@ -7448,6 +7492,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>multisite</td>
 <td>no</td>
 <td><strong>Excluded Locations:</strong> Comma-separated list of locations (URIs) to exclude from CrowdSec checks.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_CACHE_SIZE</code></td>
+<td><code>100m</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Decision cache size:</strong> Shared memory for all services; stream mode needs two snapshots. Positive whole megabytes (<code>m</code>/<code>M</code>), minimum <code>1m</code>. Resizing clears this zone; known decisions restore from disk until reconciliation. Unknown IPs query LAPI; an outage allows unknown IPs.</td>
+</tr>
+<tr>
+<td><code>CROWDSEC_METADATA_CACHE_SIZE</code></td>
+<td><code>5m</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Metadata cache size:</strong> Separate shared memory for optional report metadata across all services. Positive whole number of megabytes (<code>m</code>/<code>M</code>), minimum <code>1m</code>. Resizing on reload clears this metadata.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
@@ -7539,7 +7597,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">About Operation Modes</p>
 <ul>
 <li><strong>Live mode</strong> queries the CrowdSec API for each incoming request, providing real-time protection at the cost of higher latency.</li>
-<li><strong>Stream mode</strong> periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency with a slight delay in applying new decisions.</li>
+<li><strong>Stream mode</strong> downloads an initial snapshot, then polls for new and deleted decisions to keep its local cache current, reducing latency with a slight delay in applying new decisions.</li>
 </ul>
 </div>
 <h4 id="per-service-endpoints">Per-service endpoints<a class="headerlink" href="#per-service-endpoints" title="Permanent link">&para;</a></h4>
@@ -7963,6 +8021,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td><strong>Retry Timeout:</strong> The maximum number of seconds to wait for the database to be available on startup. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.</td>
 </tr>
 <tr>
+<td><code>DATABASE_CONNECT_TIMEOUT</code></td>
+<td><code>10s</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Connect Timeout:</strong> The maximum time to wait when opening a connection to a MySQL, MariaDB or PostgreSQL server. It must be greater than <code>0</code>: the drivers cannot run without one, and <code>0</code> falls back to the default with a warning. A timeout set in the <code>DATABASE_URI</code> query string takes precedence. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.</td>
+</tr>
+<tr>
+<td><code>DATABASE_READ_TIMEOUT</code></td>
+<td><code>5m</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Read Timeout:</strong> The maximum time to wait for a MySQL or MariaDB server to answer or accept data before the call fails, so a vanished peer cannot block forever. PostgreSQL relies on TCP keepalives instead. <code>0</code> disables it. A timeout set in the <code>DATABASE_URI</code> query string takes precedence. Accepts a time suffix (ms, s, m, h, d, w, M, y); a bare number is seconds.</td>
+</tr>
+<tr>
 <td><code>DATABASE_REQUEST_RETRY_ATTEMPTS</code></td>
 <td><code>2</code></td>
 <td>global</td>
@@ -8261,6 +8333,9 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
+<h3 id="keep-upstream-api-error-bodies">Keep upstream API error bodies<a class="headerlink" href="#keep-upstream-api-error-bodies" title="Permanent link">&para;</a></h3>
+<p>By default BunkerWeb replaces upstream 400 responses with its own error page, which can break JSON API or OIDC clients. To pass upstream errors through for one service, either remove the code from that service's list, for example <code>app.example.com_INTERCEPTED_ERROR_CODES=401 403 404 405 413 429 500 501 502 503 504</code> (keep the codes you still want), or set <code>app.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no</code> to pass every upstream error through. Errors generated by BunkerWeb itself (for example a WAF denial) are still handled by BunkerWeb.</p>
+<p>To keep upstream errors for one location only, add a file that contains <code>proxy_intercept_errors off;</code> and list it in that location's <code>REVERSE_PROXY_INCLUDES</code> setting (for example <code>app.example.com_REVERSE_PROXY_INCLUDES=/opt/keep-errors.conf</code>, using the same numeric suffix as the location's <code>REVERSE_PROXY_HOST</code>). The file must exist inside the BunkerWeb containers. Other locations of the service keep intercepting errors.</p>
 <h2 id="greylist">Greylist<a class="headerlink" href="#greylist" title="Permanent link">&para;</a></h2>
 <p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/26a0.svg" title=":warning:" /></p>
 <p>The Greylist plugin provides a flexible security approach that allows visitors access while still maintaining essential security features.</p>
@@ -8566,11 +8641,43 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>A configuration allowing access to specific API endpoints:</p>
+<p>A configuration that lets a partner network reach everything and lets every client reach one public endpoint:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_GREYLIST</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
-<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/v1/public/</span><span class="nv"> </span><span class="s">^/api/v1/status"</span>
-<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span><span class="w">  </span><span class="c1"># External partner network</span>
+<span class="nt">GREYLIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"203.0.113.0/24"</span>
+<span class="nt">GREYLIST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"^/api/foo$"</span>
 </code></pre></div>
+<p>Greylist criteria are alternatives: a request passes the Greylist when any one of them matches. Here the listed network may reach every path, and any client may reach the exact path <code>/api/foo</code>. Other clients are denied on other paths. Other enabled security checks still apply to every request. Use <code>^/api/foo(/|$)</code> for a public subtree. The match uses the normalized path, without the query string. This cannot express different IP lists for different paths, or require both an IP and a path to match.</p>
+<table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Path</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In <code>203.0.113.0/24</code></td>
+<td><code>/api/foo</code></td>
+<td>Passes</td>
+</tr>
+<tr>
+<td>In <code>203.0.113.0/24</code></td>
+<td>any other path</td>
+<td>Passes</td>
+</tr>
+<tr>
+<td>Outside <code>203.0.113.0/24</code></td>
+<td><code>/api/foo</code></td>
+<td>Passes</td>
+</tr>
+<tr>
+<td>Outside <code>203.0.113.0/24</code></td>
+<td>any other path</td>
+<td>Denied</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -9806,9 +9913,9 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">Certificate Profiles</p>
 <p>Let's Encrypt provides different certificate profiles for different use cases:</p>
 <ul>
-<li><strong>classic</strong>: General-purpose certificates with 90-day validity (default)</li>
-<li><strong>tlsserver</strong>: Optimized for TLS server authentication with 90-day validity and smaller payload</li>
-<li><strong>shortlived</strong>: Enhanced security with 7-day validity for automated environments</li>
+<li><strong>classic</strong>: General-purpose certificates with 90-day validity and up to 100 names (default)</li>
+<li><strong>tlsserver</strong>: Optimized for TLS server authentication with 45-day validity, up to 25 names, and smaller payload</li>
+<li><strong>shortlived</strong>: Enhanced security with 160-hour validity and up to 25 names for automated environments</li>
 <li><strong>custom</strong>: If your ACME server supports a different profile, set it using <code>LETS_ENCRYPT_CUSTOM_PROFILE</code>.</li>
 </ul>
 </div>
@@ -9816,6 +9923,40 @@ TrustedMonitor/\d+\.\d+
 <p class="admonition-title">Profile Availability</p>
 <p>Note that the <code>tlsserver</code> and <code>shortlived</code> profiles may not be available in all environments or with all ACME clients at this time. The <code>classic</code> profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the <code>classic</code> profile.</p>
 </div>
+<h3 id="ip-address-certificates">IP Address Certificates<a class="headerlink" href="#ip-address-certificates" title="Permanent link">&para;</a></h3>
+<p>Let's Encrypt can issue certificates for IP addresses. List the IP next to your hostnames in <code>SERVER_NAME</code> and BunkerWeb requests one certificate covering all of them. In single-site mode (<code>MULTISITE=no</code>) the other <code>SERVER_NAME</code> entries are aliases of the first one and all of them go into the same certificate, so a hostname and an IP address work together.</p>
+<div class="admonition info">
+<p class="admonition-title">Requirements</p>
+<p>An IP address is only requested when all of these are true, otherwise it is skipped with a warning and the other names are still issued:</p>
+<ul>
+<li><code>LETS_ENCRYPT_SERVER</code> is <code>letsencrypt</code></li>
+<li><code>LETS_ENCRYPT_CHALLENGE</code> is <code>http</code></li>
+<li><code>LETS_ENCRYPT_PROFILE</code> is <code>shortlived</code></li>
+<li>The address is a public IPv4 address (IPv6 is not supported)</li>
+<li>Port 80 on that address is reachable from the internet</li>
+</ul>
+</div>
+<p>Certificates for IP addresses last 160 hours and are renewed automatically by the daily renewal job.</p>
+<p>A client that connects by IP address sends no SNI, so BunkerWeb picks the certificate from the address the client connected to:</p>
+<ol>
+<li>If the local address matches an IP certificate, that one is served.</li>
+<li>Otherwise, if there is only one IP certificate, that one is served.</li>
+<li>Otherwise the default certificate is served.</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Docker and NAT</p>
+<p>Behind Docker port publishing or NAT, BunkerWeb sees a private local address that matches none of the public IPs. With several IP certificates it cannot tell them apart and serves the default certificate.</p>
+</div>
+<p>Setting <code>DISABLE_DEFAULT_SERVER_STRICT_SNI</code> to <code>yes</code> makes BunkerWeb refuse clients that connect by IP address, so certificates for IP addresses are never used.</p>
+<p>The certificate lists every name of the service, so a client connecting by IP address also sees the hostnames. To keep hostnames private, put the IP address in a dedicated service whose <code>SERVER_NAME</code> contains only the IP address.</p>
+<p>When names (hostnames or IP addresses) are added to a service that already has a certificate, BunkerWeb expands it and keeps the current certificate if the validation of a new name fails. Removing or swapping a name still reissues the certificate from scratch. Later, if an IP address stops validating (for example port 80 becomes unreachable), the renewal of the whole certificate fails, hostnames included. In that case, remove the IP address from <code>SERVER_NAME</code>.</p>
+<p>Only an IP address that is actually in the certificate is served to clients without SNI.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">AUTO_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">EMAIL_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">"admin@example.com"</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"www.example.com</span><span class="nv"> </span><span class="s">203.0.113.10"</span>
+<span class="nt">LETS_ENCRYPT_CHALLENGE</span><span class="p">:</span><span class="w"> </span><span class="s">"http"</span>
+<span class="nt">LETS_ENCRYPT_PROFILE</span><span class="p">:</span><span class="w"> </span><span class="s">"shortlived"</span>
+</code></pre></div>
 <h3 id="configuration-settings_18">Configuration Settings<a class="headerlink" href="#configuration-settings_18" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -9840,7 +9981,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Pass Through Let's Encrypt:</strong> Set to <code>yes</code> to pass through Let's Encrypt requests to the web server. This is useful when BunkerWeb is in front of another reverse proxy handling SSL. The ACME challenge path then skips every other check.</td>
+<td><strong>Pass Through Let's Encrypt:</strong> Set to <code>yes</code> to pass through Let's Encrypt requests to the web server. This is useful when BunkerWeb is in front of another reverse proxy handling SSL.</td>
 </tr>
 <tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
@@ -9959,7 +10100,7 @@ TrustedMonitor/\d+\.\d+
 <td><code>classic</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Certificate Profile:</strong> Select the certificate profile to use. Options: <code>classic</code> (general-purpose), <code>tlsserver</code> (optimized for TLS servers), or <code>shortlived</code> (7-day certificates).</td>
+<td><strong>Certificate Profile:</strong> Select the certificate profile to use. Options: <code>classic</code> (general-purpose, up to 100 names), <code>tlsserver</code> (optimized for TLS servers, 45-day validity, up to 25 names), or <code>shortlived</code> (160-hour certificates, up to 25 names).</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_CUSTOM_PROFILE</code></td>
@@ -10478,6 +10619,7 @@ TrustedMonitor/\d+\.\d+
 </div>
 </div>
 </div>
+<p>When <code>SECURITY_MODE</code> is <code>detect</code>, connection limits are evaluated and logged (<code>limiting connections, dry run</code>) but not enforced.</p>
 <div class="admonition info">
 <p class="admonition-title">Connection vs. Request Limiting</p>
 <ul>
@@ -10596,6 +10738,13 @@ TrustedMonitor/\d+\.\d+
 <td>global</td>
 <td>no</td>
 <td>Shared dict size (datastore for all healthchecks).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_ZONE_SIZE</code></td>
+<td><code>64k</code></td>
+<td>global</td>
+<td>no</td>
+<td>Shared memory zone size for upstreams with dynamic resolution (all resolved upstreams share one zone).</td>
 </tr>
 <tr>
 <td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
@@ -10722,6 +10871,13 @@ TrustedMonitor/\d+\.\d+
 <td>global</td>
 <td>yes</td>
 <td>Host header for healthchecks (useful for HTTPS).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_PORT</code></td>
+<td></td>
+<td>global</td>
+<td>yes</td>
+<td>TCP port probed on every peer of the group. 1-65535 as a plain decimal, with no sign, leading zero, spaces or trailing newline; an invalid value is ignored with a warning. Empty uses each peer's application port. In a Kubernetes ConfigMap quote the value ("8081") or use a |- block scalar.</td>
 </tr>
 </tbody>
 </table>
@@ -11635,7 +11791,7 @@ TrustedMonitor/\d+\.\d+
 <p>Select a CRS version to best match your security needs:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10">v3.3.10</a>.</li>
-<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0">v4.29.0</a> (<strong>default</strong>).</li>
+<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.30.0">v4.30.0</a> (<strong>default</strong>).</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Nightly Build Deprecated</p>
@@ -12832,7 +12988,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 </div>
 <div class="admonition info">
 <p class="admonition-title">Multiple IP Addresses</p>
-<p>When <code>REAL_IP_RECURSIVE</code> is enabled and a header contains multiple IPs (e.g., <code>X-Forwarded-For: client, proxy1, proxy2</code>), BunkerWeb will identify the leftmost IP not in your trusted proxy list as the client IP.</p>
+<p>When <code>REAL_IP_RECURSIVE</code> is enabled and a header contains multiple IPs (e.g., <code>X-Forwarded-For: client, proxy1, proxy2</code>), BunkerWeb will identify the rightmost IP not in your trusted proxy list as the client IP.</p>
 </div>
 <h3 id="example-configurations_27">Example Configurations<a class="headerlink" href="#example-configurations_27" title="Permanent link">&para;</a></h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="36:7"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><input id="__tabbed_36_7" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Basic Configuration</label><label for="__tabbed_36_2">Cloud Load Balancer</label><label for="__tabbed_36_3">PROXY Protocol</label><label for="__tabbed_36_4">Multiple Proxy Sources with URLs</label><label for="__tabbed_36_5">CDN Configuration</label><label for="__tabbed_36_6">Behind Cloudflare</label><label for="__tabbed_36_7">Behind AWS CloudFront</label></div>
@@ -13335,7 +13491,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td><code>weekly</code></td>
 <td>global</td>
 <td>no</td>
-<td>The frequency at which reports are sent.</td>
+<td>The frequency at which reports are sent: daily, weekly or monthly (every four weeks).</td>
 </tr>
 <tr>
 <td><code>REPORTING_TOP_N</code></td>
@@ -13398,7 +13554,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td><code>SSL</code></td>
 <td>global</td>
 <td>no</td>
-<td>Determine whether or not to use a secure connection for SMTP.</td>
+<td>SMTP connection security: no (plain SMTP), SSL (implicit TLS, usually port 465) or TLS (STARTTLS, usually port 587). Values are case-sensitive. Set REPORTING_SMTP_PORT to match.</td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_SUBJECT</code></td>
@@ -13516,7 +13672,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td><code>yes</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Intercept Errors:</strong> Whether to intercept and rewrite error responses from the backend.</td>
+<td><strong>Intercept Errors:</strong> Whether to intercept and rewrite error responses from the backend. See <a href="#errors">Keep upstream API error bodies</a>.</td>
 </tr>
 </tbody>
 </table>
@@ -15988,6 +16144,8 @@ TrustedMonitor/\d+\.\d+
         <script src="../assets/preserve-version-on-language-switch.js"></script>
       
         <script src="../assets/toc-dropdown.js"></script>
+      
+        <script src="../assets/webmcp.js"></script>
       
     
   </body>
