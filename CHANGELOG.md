@@ -39,6 +39,7 @@
 - [DEPS] Updated lua-cjson to v2.1.0.20
 - [DEPS] Updated lua-resty-redis to v0.34
 - [DEPS] Updated LuaJIT to v2.1-20261023
+- [DEPS] Updated DOMPurify to v3.4.17
 
 ## v1.6.17 - 2026/10/21
 
