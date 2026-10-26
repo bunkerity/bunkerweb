@@ -12,7 +12,26 @@
       "linkedin": "LinkedIn",
       "reddit": "Reddit"
     },
-    "version": "版本：{{version}}"
+    "version": "版本：{{version}}",
+    "releases": {
+      "title": "近期版本",
+      "view_all": "查看全部"
+    },
+    "environment": {
+      "title": "环境",
+      "copy": "复制诊断信息",
+      "copied": "已复制",
+      "help": "从 Web UI 主机和控制平面读取。不显示任何变量、许可证密钥或数据库地址。",
+      "scope_ui_host": "Web UI 主机",
+      "scope_control_plane": "控制平面",
+      "scope_instances": "实例",
+      "integration": "集成方式",
+      "platform": "平台",
+      "bunkerweb": "BunkerWeb",
+      "database": "数据库服务器",
+      "registered": "已注册",
+      "instances_up": "共 {{total}} 个，{{up}} 个运行中"
+    }
   },
   "accordion": {
     "body": {
@@ -123,6 +142,10 @@
         "expiring": "≤ 1 小时后失效",
         "expiring_caption": "自动轮换",
         "permanent": "永久封禁"
+      },
+      "reasons": {
+        "head_reason": "原因",
+        "meta": "{{count}} 条生效中的封禁"
       }
     },
     "flash": {
@@ -175,6 +198,30 @@
         "changed": "{{ip}}：封禁在请求期间被续期或替换，未移除任何内容。请再次解除封禁。",
         "partial": "{{ip}}：部分完成。请再次运行解除封禁以完成：{{details}}"
       }
+    },
+    "page": {
+      "clear_all": "全部清除",
+      "import": "导入"
+    },
+    "clear_all": {
+      "title": "清除所有封禁",
+      "message": "这将移除所有服务和实例上的全部封禁。CrowdSec 封禁须在其对应行中解除。",
+      "phrase": "全部清除",
+      "confirm": "清除所有封禁"
+    },
+    "import": {
+      "confirm_title": "导入封禁",
+      "confirm_button": "导入",
+      "empty": "文件中未找到有效封禁。应为每行一条封禁，格式为 IP[,scope[,duration[,reason]]]，或 JSON 列表。",
+      "too_many": "此文件包含超过 {{max}} 条封禁。请拆分后分批导入。",
+      "read_failed": "无法读取文件。",
+      "confirm_message": "此文件中找到的封禁：{{count}} 条。是否导入？",
+      "confirm_skipped": "已忽略无法读取的行：{{skipped}} 行。"
+    },
+    "live": {
+      "on": "自动刷新已开启，每 10 秒刷新一次。",
+      "off": "自动刷新已暂停。",
+      "updated": "封禁已更新：新增 {{added}} 条，过期 {{removed}} 条。"
     }
   },
   "breadcrumb": {
@@ -401,6 +448,39 @@
       "missing_configs_parameter_configs_delete": "/configs/delete 上缺少 configs 参数。",
       "missing_convert_parameter_configs_convert": "/configs/convert 上缺少 convert_to 参数。",
       "missing_configs_parameter_configs_convert": "/configs/convert 上缺少 configs 参数。"
+    },
+    "console": {
+      "title": "自定义配置",
+      "new": "新建配置",
+      "edit": "编辑配置",
+      "view": "查看配置",
+      "clone": "克隆配置",
+      "files": "文件",
+      "types": "配置类型",
+      "all_scopes": "所有范围",
+      "global_only": "仅全局",
+      "service_only": "仅服务",
+      "global_legend": "全局配置适用于每个服务。",
+      "service_legend": "服务配置仅适用于单个服务。",
+      "select_file": "选择文件以预览内容。",
+      "no_files": "没有符合这些筛选条件的配置。",
+      "full_view": "完整视图",
+      "restore_view": "恢复视图",
+      "download": "下载",
+      "lint": "语法检查",
+      "lint_help": "仅提供客户端提示。部署前请使用 nginx -t 验证，多行指令可能产生警告。",
+      "lint_clean": "客户端检查未发现问题。",
+      "lint_warnings": "客户端检查发现 {{count}} 条警告。请查看编辑器批注。",
+      "lint_skipped": "ModSecurity 和 CRS 配置不支持 NGINX 语法检查。",
+      "lint_semicolon": "指令末尾可能缺少分号。",
+      "lint_unexpected_brace": "出现意外的右花括号。",
+      "lint_brace": "左花括号未闭合。",
+      "lint_quote": "引号未闭合。",
+      "content": "配置内容（只读）",
+      "template_name_locked": "不允许重命名基于模板的自定义配置。",
+      "name_help": "使用字母、数字、连字符或下划线。写入磁盘时会添加 .conf 后缀。",
+      "editor_help": "编辑 NGINX 或 ModSecurity 内容。使用 Ctrl+S 或 Command+S 保存。",
+      "editor_title": "配置内容"
     }
   },
   "country": {
@@ -730,6 +810,11 @@
         "most_blocked": "被阻止最多的 IP",
         "title": "前 10 名被阻止的 IP"
       },
+      "legend": {
+        "item": "项目",
+        "count": "数量",
+        "share": "占比"
+      },
       "timeseries": {
         "series": "已拦截",
         "title": "一段时间内的已拦截请求（所选范围）"
@@ -845,6 +930,12 @@
         "page_other": "此页面上的所有 {{count}} 个模板均已选中。",
         "all_filtered": "选择所有 {{count}} 个匹配的模板",
         "all_done": "所有 {{count}} 个匹配的模板均已选中。"
+      },
+      "workflows": {
+        "page_one": "此页面上的 {{count}} 个工作流程已选中。",
+        "page_other": "此页面上的所有 {{count}} 个工作流程均已选中。",
+        "all_filtered": "选择所有 {{count}} 个匹配的工作流程",
+        "all_done": "所有 {{count}} 个匹配的工作流程均已选中。"
       }
     },
     "bulk_select_clear": "清除选择",
@@ -964,7 +1055,15 @@
     "zero_records_plugins": "未找到匹配的插件",
     "zero_records_reports": "未找到匹配的报告",
     "zero_records_services": "未找到匹配的服务",
-    "zero_records_templates": "未找到匹配的模板"
+    "zero_records_templates": "未找到匹配的模板",
+    "info_empty_workflows": "没有可用的工作流程",
+    "info_filtered_workflows": "（从 _MAX_ 个总工作流程中筛选）",
+    "info_workflows": "显示 {{total}} 个工作流程中的第 {{start}} 至 {{end}} 个",
+    "length_menu_workflows": "显示 _MENU_ 个工作流程",
+    "select_rows_workflows_0": "未选择工作流程",
+    "select_rows_workflows_1": "已选择 1 个工作流程",
+    "select_rows_workflows_plural": "已选择 %d 个工作流程",
+    "zero_records_workflows": "未找到匹配的工作流程"
   },
   "dev_log": {
     "copy_failed": "复制文本失败：",
@@ -1220,7 +1319,9 @@
     "history": {
       "end_date": "结束日期",
       "start_date": "开始日期",
-      "success": "成功"
+      "success": "成功",
+      "duration": "耗时",
+      "error": "错误"
     }
   },
   "jobs": {
@@ -1238,6 +1339,10 @@
       "no_jobs_selected": "未选择任何任务。",
       "error_fetching_jobs": "获取任务时出错：{{message}}",
       "missing_jobs_parameter_jobs_run": "/jobs/run 上缺少 jobs 参数。"
+    },
+    "card": {
+      "title": "计划任务",
+      "sub": "由调度器按各自的时间间隔运行，也可按需运行"
     }
   },
   "legend": {
@@ -1550,7 +1655,12 @@
     "upstreams": "上游",
     "workflows": "工作流程",
     "edition_pro": "Pro",
-    "crowdsec": "CrowdSec"
+    "crowdsec": "CrowdSec",
+    "profile": "个人资料",
+    "plugin_insights": "插件洞察",
+    "plugins_overview": "概览",
+    "filter_plugins": "筛选插件…",
+    "no_plugin_match": "没有匹配的插件"
   },
   "news": {
     "image_alt": "新闻图片",
@@ -1583,6 +1693,14 @@
         "no_content": "此插件不提供嵌入式页面。",
         "restricted_to_admins": "此插件自带页面，运行插件代码。只有管理员才能加载。",
         "dedicated_page_unavailable": "此插件在专属页面中管理，该页面尚未加载。请重启 Web UI 以访问。"
+      },
+      "empty": {
+        "metrics_title": "指标已关闭",
+        "restricted_title": "仅限管理员",
+        "no_page_title": "没有可显示的页面",
+        "no_content_title": "暂无内容可显示",
+        "global_settings": "全局设置",
+        "deactivated_heading": "此插件未在任何地方使用"
       }
     },
     "type": {
@@ -1665,7 +1783,10 @@
       "tab_all": "全部",
       "tab_community": "社区版",
       "tab_disabled": "已禁用",
-      "tab_enabled": "已启用"
+      "tab_enabled": "已启用",
+      "always_on_badge": "始终开启",
+      "always_on_tip": "BunkerWeb 必需的核心插件：可以配置，但不能禁用。",
+      "filter_label": "筛选插件"
     },
     "catalog": {
       "tab": "可用",
@@ -1696,6 +1817,15 @@
       "flash": {
         "version_unreadable": "无法读取 BunkerWeb 版本（{{current}}），因此无法检查 {{id}} 的兼容性；未安装任何内容"
       }
+    },
+    "tier": {
+      "core": "CORE 插件",
+      "pro": "PRO 插件",
+      "community": "社区插件"
+    },
+    "card": {
+      "configure": "配置 {{name}}",
+      "metrics": "{{name}} 指标"
     }
   },
   "pro": {
@@ -1819,7 +1949,9 @@
       "last_activity": "最后活动",
       "os": "操作系统",
       "title": "会话",
-      "wipe_help": "注销您帐户上的所有其他活动会话。 您将在这里保持登录状态。"
+      "wipe_help": "注销您帐户上的所有其他活动会话。 您将在这里保持登录状态。",
+      "recent_title": "最近会话",
+      "load_error": "加载数据出错。请重试。"
     },
     "subtitle": "管理您的帐户、安全和活动会话。",
     "tab": {
@@ -1870,7 +2002,8 @@
       "missing_current_password_parameter_profile_totp_3": "/profile/totp-enable 上缺少 current password 参数。",
       "missing_current_password_parameter_profile_totp_2": "/profile/totp-disable 上缺少 current password 参数。",
       "missing_current_password_parameter_profile_totp": "/profile/totp-refresh 上缺少 current password 参数。"
-    }
+    },
+    "title": "您的个人资料"
   },
   "range_picker": {
     "1h": "过去1小时",
@@ -1950,6 +2083,20 @@
       "source_appsec": "AppSec 检查",
       "source_failure_policy": "AppSec 故障策略",
       "technical_details": "技术详情"
+    },
+    "live": {
+      "on": "自动刷新已开启，每 10 秒刷新一次。",
+      "off": "自动刷新已暂停。",
+      "updated": "报告已更新：新增 {{added}} 条。"
+    },
+    "offenders": {
+      "confirm_title": "从报告中封禁",
+      "confirm_one": "{{ip}} 将在每个实例上被封禁 24 小时。",
+      "confirm_many": "{{count}} 个 IP 地址将在每个实例上被封禁 24 小时。",
+      "show": "显示",
+      "show_top": "违规最多的来源",
+      "show_latest": "最新违规来源",
+      "show_bottom": "违规最少的来源"
     }
   },
   "scope": {
@@ -2373,7 +2520,8 @@
         "lets_encrypt": "Let's Encrypt",
         "zerossl": "ZeroSSL",
         "real_ip": "真实 IP",
-        "reverse_proxy": "反向代理"
+        "reverse_proxy": "反向代理",
+        "server": "服务器"
       },
       "subtitle": "配置 Web UI 特定设置。",
       "title": "UI 设置"
@@ -2391,7 +2539,9 @@
       "pro_benefit_4_description": "优化您的 BunkerWeb 设置的专家建议。",
       "pro_benefit_4_title": "定制咨询",
       "subtitle": "解锁高级功能，充分利用 BunkerWeb。",
-      "title": "升级到 PRO"
+      "title": "升级到 PRO",
+      "activate_title": "激活许可证",
+      "activation_note": "完成设置后将激活许可证。"
     },
     "step4": {
       "label": {
@@ -2425,6 +2575,19 @@
       "admin_email_too_long_must_less": "管理员电子邮件过长。必须少于 256 个字符。",
       "admin_username_too_long_must_less": "管理员用户名过长。必须少于 256 个字符。",
       "missing_either_one_following_parameters": "缺少以下参数中的任意一个：{{value}}。"
+    },
+    "stepper_label": "设置步骤",
+    "complete": "完成设置",
+    "from_ui_host": "来自 UI_HOST 环境变量",
+    "accordion": {
+      "general": "常规",
+      "general_hint": "服务器 · Let's Encrypt",
+      "advanced": "高级",
+      "advanced_hint": "反向代理 · 真实 IP · 自定义证书"
+    },
+    "switch": {
+      "enabled": "已启用",
+      "disabled": "已禁用"
     }
   },
   "status": {
@@ -2522,10 +2685,32 @@
         "button": "下载诊断包",
         "help": "日志、插件版本、环境和近期错误。私有数据将被匿名化。",
         "title": "Web UI 诊断"
+      },
+      "docs": {
+        "title": "文档"
+      },
+      "community": {
+        "title": "社区"
       }
     },
     "subtitle": "下载调试日志，提取您的配置，并向 BunkerWeb 团队寻求帮助。",
-    "title": "支持"
+    "title": "支持",
+    "docs": {
+      "quickstart": "快速入门指南",
+      "web_ui": "Web UI 指南",
+      "troubleshooting": "故障排查",
+      "upgrading": "升级"
+    },
+    "community": {
+      "discord": "Discord",
+      "discord_help": "向社区和维护者提问。",
+      "github": "GitHub 问题",
+      "github_help": "错误报告与功能请求。",
+      "reddit": "Reddit",
+      "reddit_help": "讨论与公告。"
+    },
+    "attach_title": "待附加的诊断信息",
+    "attach_help": "用于支持请求的导出文件。需要写入权限，且会隐去机密信息。"
   },
   "tab": {
     "custom_certificate": "自定义证书",
@@ -2836,7 +3021,19 @@
       "refused": "模板未导入：{{reason}}",
       "too_large": "未导入模板：文件大于 1 MiB",
       "unreadable": "未导入模板：无法读取该文件"
-    }
+    },
+    "features_builtin": "内置功能",
+    "features_configs": "自定义配置",
+    "features_plugins": "插件",
+    "features_help": "此模板提供的功能。打开模板可查看或更改实际设置。",
+    "features_of": "显示 {{name}} 的功能",
+    "features_title": "模板功能",
+    "managed_by": "由 {{owner}} 管理：无法在此更改或删除。",
+    "more_actions": "{{name}} 的更多操作",
+    "no_match": "没有符合此搜索的模板。",
+    "open_template": "打开模板",
+    "read_only": "只读",
+    "search": "搜索模板..."
   },
   "theme": {
     "dark": "深色",
@@ -2872,7 +3069,15 @@
     "open_live": "实时视图",
     "updated": "更新于",
     "blocked_request": "被拦截的请求",
-    "blocked_requests": "被拦截的请求"
+    "blocked_requests": "被拦截的请求",
+    "attacks_24h": "最近 24 小时已拦截",
+    "rolling_window": "滚动时间窗口，约每 30 秒刷新一次",
+    "ticker_caption": "最近拦截的请求",
+    "col_time": "时间",
+    "col_ip": "IP 地址",
+    "col_reason": "原因",
+    "col_origin": "来源",
+    "col_target": "目标"
   },
   "toast": {
     "autoconf_disclaimer_bold": "如果服务被移除或重启，您的 UI 配置将会丢失。",
@@ -3344,7 +3549,19 @@
     "upload_invalid": "请选择有效的公有证书及其匹配的私钥。",
     "valid_days": "有效天数",
     "valid_from": "从",
-    "valid_to": "到"
+    "valid_to": "到",
+    "renew_due_short": "待续期",
+    "select_all": "选择所有证书",
+    "issuers_meta": "{{count}} 个证书",
+    "bulk": {
+      "renew": "续期自签名证书",
+      "download": "下载证书链",
+      "delete": "删除所选项",
+      "none_eligible": "所选证书均无法执行此操作。",
+      "confirm_renew": "待续期的自签名证书：{{count}} 个。是否继续？",
+      "confirm_delete": "待删除的证书：{{count}} 个。此操作无法撤销。是否继续？",
+      "skipped": "已跳过无法执行此操作的所选证书：{{skipped}} 个。"
+    }
   },
   "resource_groups": {
     "add_entry": "添加条目",
@@ -3426,7 +3643,33 @@
       "entry_invalid_value": "条目 {{index}} 的值无效",
       "entry_comment_too_long": "条目 {{index}} 的备注过长",
       "source_required": "源资源组为必填项"
-    }
+    },
+    "access": "访问权限",
+    "access_readonly": "只读",
+    "access_write": "写入",
+    "filter_values": "筛选值...",
+    "no_value_match": "没有符合此筛选条件的值。",
+    "origin": "来源",
+    "origin_plugin": "由 {{plugin}} 插件提供",
+    "origin_tip": {
+      "api": "通过 API 创建或同步。",
+      "autoconf": "由 autoconf 控制器创建。",
+      "download": "从远程来源下载。",
+      "manual": "手动创建或从配置文件创建。",
+      "scheduler": "由调度器创建。",
+      "ui": "通过 Web UI 创建。",
+      "wizard": "由设置向导创建，仍可编辑。"
+    },
+    "plugins_compatible": "兼容插件",
+    "plugins_compatible_help": "设置可接受此组中值类型的插件。实际引用列在“使用情况”下。",
+    "updated": "更新时间",
+    "values_compat": "兼容：{{plugins}}",
+    "values_copied": "已复制",
+    "values_title": "{{name}} 的值",
+    "view_values_of": "查看 {{name}} 的值",
+    "all_kinds": "全部",
+    "plugins_count": "{{count}} 个插件",
+    "plugins_count_plural": "{{count}} 个插件"
   },
   "validation": {
     "default_field_name": "此字段",
@@ -3492,7 +3735,27 @@
       "error_fetching_web_cache_status": "获取网页缓存状态时出错：{{message}}",
       "purged_for_url": "已清除 {{url}} 的网页缓存",
       "purged_all_entries": "已清除网页缓存（所有条目）"
-    }
+    },
+    "server_side_note": "仅限服务器端缓存。此页面管理存储在各 BunkerWeb 实例上的反向代理缓存。访客浏览器中已保存的响应不受影响。",
+    "counters_window": "自各实例重启以来",
+    "counters_window_help": "从各实例上次重启时开始计数，而非固定时间段内的计数。",
+    "status_desc": {
+      "hit": "直接从缓存提供",
+      "miss": "未缓存：从上游获取并存储",
+      "bypass": "此请求已跳过缓存",
+      "expired": "生存时间已过：从上游重新获取",
+      "stale": "上游故障，提供了过期内容",
+      "updating": "刷新过程中提供了过期内容",
+      "revalidated": "有条件地重新获取：上游表示内容仍然有效"
+    },
+    "no_requests_for": "以下状态没有请求：",
+    "no_counters": "此实例尚未计数任何缓存请求。",
+    "available_tip": "此实例上存在缓存目录。服务是否使用此目录可在“服务启用情况”中查看。",
+    "compact": "紧凑",
+    "invalidate": "使缓存失效",
+    "purge_a_url": "清除某个 URL 的缓存",
+    "danger_zone": "危险区域",
+    "purge_all_phrase": "全部清理"
   },
   "compose": {
     "always_on": "始终开启",
@@ -3574,7 +3837,26 @@
       "target_required": "重定向目标为必填项",
       "status_code_must_be_one_of": "状态码必须是 {{value}} 之一",
       "at_least_one_service_required": "至少需要一个服务"
-    }
+    },
+    "all_codes": "所有状态码",
+    "append_column": "追加 URI",
+    "card_subtitle": "路径重定向及其适用的服务",
+    "count": "{{count}} 个重定向",
+    "count_plural": "{{count}} 个重定向",
+    "detach_shared": "此重定向已共享。解除关联只会将其从该服务中移除，其他服务仍保留。",
+    "kpi_configured": "已配置的重定向",
+    "kpi_detached_caption": "关联到服务后生效",
+    "kpi_loaded_only": "在最先加载的 {{count}} 个中",
+    "kpi_permanent": "永久",
+    "kpi_permanent_caption": "301 或 308，由浏览器缓存",
+    "kpi_services": "已关联的服务",
+    "kpi_services_caption": "至少包含一个重定向的服务",
+    "no_match": "没有符合这些筛选条件的重定向。",
+    "services_copy": "{{name}}：{{from}} → {{to}}",
+    "services_count": "{{count}} 个服务",
+    "services_count_plural": "{{count}} 个服务",
+    "services_title": "使用此重定向的服务",
+    "to_url_help": "完整的 http:// 或 https:// URL。不支持相对目标地址。"
   },
   "upstreams": {
     "add_server": "添加服务器",
@@ -3652,7 +3934,34 @@
       "method_must_be_one_of": "方法必须是 {{value}} 之一",
       "keepalive_must_be_positive_whole_number": "keepalive 数量必须是正整数",
       "at_least_one_service_required": "至少需要一个服务"
-    }
+    },
+    "all_protocols": "所有协议",
+    "all_tls": "所有 TLS 设置",
+    "card_subtitle": "后端池及代理到这些池的服务",
+    "count": "{{count}} 个上游",
+    "count_plural": "{{count}} 个上游",
+    "detach_shared": "此上游已共享。解除关联只会将其从该服务和路径中移除，其他关联仍保留。",
+    "keepalive_off": "关闭",
+    "kpi_loaded_only": "在最先加载的 {{count}} 个中",
+    "kpi_not_attached": "{{count}} 个未关联",
+    "kpi_roles": "{{primary}} 个主用 · {{backup}} 个备用 · {{down}} 个停用（已配置）",
+    "kpi_services": "已关联的服务",
+    "kpi_services_caption": "代理到后端池的服务",
+    "kpi_tls": "到后端的 TLS",
+    "kpi_tls_caption": "已配置为通过 TLS 与服务器通信的池",
+    "members_copy": "{{name}}：{{count}} 台服务器",
+    "members_copy_plural": "{{name}}：{{count}} 台服务器",
+    "members_title": "此上游中的服务器",
+    "no_match": "没有符合这些筛选条件的上游。",
+    "servers_count": "{{count}} 台服务器",
+    "servers_count_plural": "{{count}} 台服务器",
+    "services_copy": "{{name}}：{{servers}}",
+    "services_count": "{{count}} 个服务",
+    "services_count_plural": "{{count}} 个服务",
+    "services_title": "使用此上游的服务",
+    "tls": "到后端的 TLS",
+    "tls_no": "明文",
+    "tls_yes": "TLS"
   },
   "workflows": {
     "act_block": "阻止",
@@ -3705,7 +4014,8 @@
       "moveRuleUp": "将规则 {{n}} 上移",
       "moveRuleDown": "将规则 {{n}} 下移",
       "moreActionsForRule": "规则 {{n}} 的更多操作",
-      "ruleCard": "规则 {{n}}/{{total}} — {{name}}"
+      "ruleCard": "规则 {{n}}/{{total}} — {{name}}",
+      "ruleTools": "规则 {{n}} 的操作"
     },
     "attach": "附加到服务",
     "attach_help": "规则仅在工作流程附加到的服务上执行。",
@@ -3789,7 +4099,9 @@
       "enable": "启用规则",
       "top": "最先运行",
       "moveTo": "移动到位置 {{n}}",
-      "staysAt": "保持在位置 {{n}}"
+      "staysAt": "保持在位置 {{n}}",
+      "header": "规则操作",
+      "order": "顺序"
     },
     "move": {
       "first": "最先运行",
@@ -3989,6 +4301,115 @@
       "name_required": "工作流名称为必填项",
       "service_list_not_read_reopen_page": "无法读取服务列表；请重新打开页面并重试"
     },
+    "port": {
+      "list_subtitle": "各工作流程的规则和关联服务",
+      "row_details": "工作流程详情",
+      "select_workflows": "选择工作流程",
+      "created": "创建时间",
+      "updated": "更新时间",
+      "total_rules": "共 {{count}} 条",
+      "active_rules": "{{count}} 条生效中",
+      "more": "{{name}} 的更多操作",
+      "export_scope": "表格导出包含筛选后的行和可见列。JSON 导出仅包含所选工作流程的规范定义，以 id 为键，不保证可重新导入。",
+      "export_definitions": "所选定义（JSON）",
+      "export_loading": "正在读取所选工作流程定义…",
+      "export_done": "所选定义已导出。不保证此文件可重新导入。",
+      "export_failed": "导出失败，未下载任何文件。",
+      "detach_before_delete": "删除此工作流程前，请先解除其与所有服务的关联。删除操作绝不会自动解除服务关联。",
+      "details": "详情",
+      "csv": "CSV",
+      "excel": "Excel",
+      "attachment": "关联状态",
+      "attachment_any": "全部",
+      "attachment_attached": "已关联",
+      "services_count": "服务：{{count}}",
+      "services_open": "显示与 {{name}} 关联的服务",
+      "services_title": "与 {{name}} 关联的服务",
+      "services_help": "解除关联只会从该服务移除此工作流程。工作流程及其规则会保留。",
+      "services_none": "此工作流程未与任何服务关联。"
+    },
+    "shell": {
+      "tabs_label": "工作流程视图",
+      "tab_overview": "概览",
+      "tab_config": "配置",
+      "tab_unsaved": "未保存",
+      "config_needs_workflow": "创建工作流程以打开其配置",
+      "view_label": "视图",
+      "pick_label": "工作流程",
+      "read_only": "只读",
+      "draft_title": "{{name}} 中有未保存的更改",
+      "draft_switch_message": "打开 {{target}} 会留下 {{name}} 中未保存的规则更改。一次只能打开一个草稿：请保存、放弃更改或留在此处。",
+      "draft_save": "保存并继续",
+      "draft_discard": "放弃更改",
+      "draft_save_failed": "无法保存工作流程，未放弃任何更改。",
+      "draft_restored": "已恢复此工作流程未保存的更改。保存以应用更改，或切换工作流程以放弃更改。",
+      "draft_stale": "此工作流程在您开始草稿后已在其他地方保存，因此已丢弃草稿。"
+    },
+    "toolbar": {
+      "display": "规则显示",
+      "filters": "筛选条件",
+      "view": "规则顺序视图",
+      "simplified": "简化",
+      "detailed": "详细",
+      "limit_height": "限制高度",
+      "full_height": "完整高度",
+      "expand_all": "全部展开",
+      "collapse_all": "全部折叠",
+      "actions": "工作流程操作",
+      "filter_rules": "筛选规则",
+      "filter_name": "名称",
+      "filter_name_placeholder": "按规则名称搜索…",
+      "filter_state": "状态",
+      "any_state": "任意状态",
+      "state_on": "已启用",
+      "state_off": "已禁用",
+      "filter_action": "操作",
+      "any_action": "任意操作",
+      "reset": "重置",
+      "back_to_top": "返回顶部",
+      "n_of_m": "{{total}} 条规则中的 {{shown}} 条",
+      "reorder_paused": "筛选条件隐藏规则时，暂停调整顺序。",
+      "no_match": "没有符合这些筛选条件的规则"
+    },
+    "inspector": {
+      "apply": "应用",
+      "cancel": "取消",
+      "cancel_title": "取消：将规则恢复为打开时的状态",
+      "apply_title": "应用：将这些编辑保留在草稿中，点击页面上的保存才会存储",
+      "cancelled": "已取消对规则 {{n}} 的编辑，规则已恢复为打开时的状态。"
+    },
+    "regex_help": "正则表达式有两项独立限制。写入时：关联到同一服务的工作流程最多可包含 50 个 regex 条件，超过此限制将拒绝保存或关联。运行时：每个实例最多编译 WORKFLOWS_REGEX_BUDGET 个不同的正则表达式（默认 512，由所有工作流程共享）。超出此预算的 regex 不会求值，而是返回 UNKNOWN，因此其规则无法匹配。",
+    "conseq": {
+      "stop": "停止执行链",
+      "skip": "从不执行"
+    },
+    "sum": {
+      "leaf": {
+        "ip": "IP",
+        "country": "国家",
+        "asn": "ASN",
+        "method": "方法"
+      },
+      "not": "不满足“{{what}}”",
+      "uri": "URI 的条件为“{{match}} {{value}}”",
+      "isOne": "{{label}} 为 {{value}}",
+      "isOneOf": "{{label}} 为 {{values}} 之一",
+      "challenge": "显示 {{provider}} 质询",
+      "block": "阻止请求",
+      "every": "收到任意请求",
+      "gate": "每个 IP 在 {{window}} 秒内的请求超过 {{count}} 次",
+      "crowdsec_source": "CrowdSec 来源",
+      "crowdsec_remediation": "CrowdSec 处置方式",
+      "group_ip": "IP 属于组 {{name}}",
+      "group_country": "国家属于组 {{name}}",
+      "group_asn": "ASN 属于组 {{name}}",
+      "redirect": "重定向至 {{url}}（{{code}}）",
+      "blockStatus": "以 {{code}} 阻止请求"
+    },
+    "act_settings_block": "阻止设置",
+    "act_settings_redirect": "重定向设置",
+    "act_settings_challenge": "质询设置",
+    "act_settings_generic": "操作设置",
     "reason": {
       "sentence_block": "安全工作流“{{workflow}}”：请求已阻止",
       "sentence_redirect": "安全工作流“{{workflow}}”：请求已重定向",
@@ -4140,7 +4561,17 @@
     "unreachable_help": "执行时间从实例本身读取，因此没有实例响应，或尚未有实例处理请求。",
     "flash": {
       "error_fetching_plugin_timings": "获取插件耗时时出错：{{message}}"
-    }
+    },
+    "phases_sub": "各插件在每个阶段花费的时间",
+    "toolbar": "耗时表格工具",
+    "columns": "列",
+    "export_csv": "导出 CSV",
+    "all_phases": "所有阶段",
+    "search_placeholder": "搜索插件或阶段…",
+    "caption": "各阶段的插件耗时，默认按总耗时排序",
+    "no_share": "无占比",
+    "no_match": "没有符合这些筛选条件的耗时记录",
+    "no_share_hint": "此阶段并非每个请求运行一次，因此没有占比。"
   },
   "whatsnew": {
     "missing_action": "在 GitHub 上打开变更日志",
@@ -4468,6 +4899,117 @@
       "couldn_t_connect_redis": "无法连接到 redis",
       "missing_form": "表单中缺少 {{key}}",
       "invalid_request": "无效请求"
+    }
+  },
+  "table_system": {
+    "filters": "筛选条件",
+    "advanced_filters": "高级筛选",
+    "active_filters": "筛选条件，{{count}} 项生效",
+    "filter": "筛选",
+    "any": "任意",
+    "visible_columns": "可见列",
+    "column_count": "共 {{total}} 列，显示 {{visible}} 列",
+    "show_all": "显示全部",
+    "multiple_actions": "所选项目的批量操作",
+    "upload_hint": "拖放或点击上传",
+    "confirm_title": "确认操作",
+    "confirm": "确认",
+    "type_phrase": "输入 {{phrase}} 以确认",
+    "leave_title": "不保存就离开？",
+    "leave_message": "未保存的更改将丢失。",
+    "leave": "不保存并离开",
+    "stay": "继续编辑"
+  },
+  "shell": {
+    "skip_to_content": "跳至主要内容",
+    "main_navigation": "主导航",
+    "star_us": "在 GitHub 上为 BunkerWeb 加星",
+    "search": {
+      "placeholder": "搜索页面、插件、服务…",
+      "label": "搜索页面、插件和服务",
+      "results": "搜索结果",
+      "kind_page": "页面",
+      "kind_plugin": "插件",
+      "kind_service": "服务",
+      "no_match": "没有与“{{query}}”匹配的结果",
+      "status_results": "结果：{{count}} 个",
+      "loading_services": "正在加载服务…"
+    },
+    "language": {
+      "title": "语言"
+    },
+    "theme": {
+      "title": "主题",
+      "system_hint": "跟随操作系统"
+    },
+    "contrast": {
+      "toggle": "高对比度"
+    },
+    "density": {
+      "toggle": "紧凑密度"
+    },
+    "account": {
+      "title": "账户",
+      "current": "账户：{{name}}"
+    },
+    "notifications": {
+      "title": "通知",
+      "unread_count": "未读：{{count}} 条",
+      "all_read": "已全部阅读",
+      "tab_unread": "未读",
+      "tab_all": "全部",
+      "filter_label": "筛选通知",
+      "mark_all_read": "全部标为已读",
+      "mark_read": "标为已读",
+      "unread_prefix": "未读：",
+      "group_today": "今天",
+      "group_yesterday": "昨天",
+      "group_earlier": "更早",
+      "none_unread": "没有未读通知。"
+    },
+    "top_navigation": "顶部栏"
+  },
+  "settings_page": {
+    "save_reload": "保存并重新加载",
+    "back_global": "返回全局设置",
+    "back_service": "返回服务",
+    "plugin": "插件",
+    "scope": "范围",
+    "scope_global": "全局设置",
+    "select_plugin_label": "选择插件",
+    "select_scope_label": "选择编辑其设置的范围",
+    "card_title": "设置",
+    "count": "{{count}} 项设置",
+    "count_filtered": "共 {{total}} 项设置，显示 {{shown}} 项",
+    "search": "搜索设置…",
+    "search_label": "搜索设置",
+    "no_match": "没有符合搜索条件的设置。",
+    "revert": "还原",
+    "revert_title": "还原更改",
+    "revert_message": "将此页面上所有未保存的编辑还原为各自上次保存的值。",
+    "revert_confirm": "全部还原",
+    "alert_service": "留空的设置将回退到全局默认值。更改仅适用于所选服务，并在保存并重新加载后生效。",
+    "alert_global": "更改适用于未覆盖这些设置的所有服务，并在保存并重新加载后生效。",
+    "groups_link": "管理资源组",
+    "groups_link_hint": "可重复使用的 IP、网络和国家/地区列表，此插件的设置可引用这些列表。",
+    "reload_alert_title": "更改将触发实例重新加载。",
+    "reload_alert_body": "保存后，调度器会将配置重新应用到您的实例。"
+  },
+  "raw_page": {
+    "tiles_label": "原始配置摘要",
+    "tile_settings": "设置",
+    "tile_plugins": "插件",
+    "tile_modified": "已修改",
+    "tile_problems": "问题",
+    "search": "搜索…",
+    "search_label": "搜索原始配置",
+    "search_prev": "上一个匹配项",
+    "search_next": "下一个匹配项"
+  },
+  "tables": {
+    "top": {
+      "share": "占比",
+      "detail": "详情"
     }
   },
   "main": {

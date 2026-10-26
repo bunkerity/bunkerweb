@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "Şununla Geliştirildi"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "Kopyalandı"
+
+msgid "about.environment.copy"
+msgstr "Tanılama bilgilerini kopyala"
+
+msgid "about.environment.database"
+msgstr "Veritabanı sunucusu"
+
+msgid "about.environment.help"
+msgstr "Web arayüzü sunucusundan ve kontrol düzleminden okunur. Değişken, lisans anahtarı veya veritabanı adresi gösterilmez."
+
+msgid "about.environment.instances_up"
+msgstr "%(total)s örnekten %(up)s tanesi çalışıyor"
+
+msgid "about.environment.integration"
+msgstr "Entegrasyon"
+
+msgid "about.environment.platform"
+msgstr "Platform"
+
+msgid "about.environment.registered"
+msgstr "Kayıtlı"
+
+msgid "about.environment.scope_control_plane"
+msgstr "Kontrol düzlemi"
+
+msgid "about.environment.scope_instances"
+msgstr "Örnekler"
+
+msgid "about.environment.scope_ui_host"
+msgstr "Web arayüzü sunucusu"
+
+msgid "about.environment.title"
+msgstr "Ortam"
+
 msgid "about.gnu_license"
 msgstr "GNU Affero Genel Kamu Lisansı v3.0"
 
 msgid "about.license_title"
 msgstr "Lisans"
+
+msgid "about.releases.title"
+msgstr "Son sürümler"
+
+msgid "about.releases.view_all"
+msgstr "Tümünü gör"
 
 msgid "about.social.discord"
 msgstr "Discord"
@@ -274,6 +319,18 @@ msgstr "Seçilen aralık"
 msgid "bans.chart.timeseries.title"
 msgstr "Aralık başına aktif yasaklamalar"
 
+msgid "bans.clear_all.confirm"
+msgstr "Tüm yasaklamaları temizle"
+
+msgid "bans.clear_all.message"
+msgstr "Her servis ve örnekteki tüm yasaklamaları kaldırır. CrowdSec yasaklaması kendi satırından kaldırılır."
+
+msgid "bans.clear_all.phrase"
+msgstr "tümünü temizle"
+
+msgid "bans.clear_all.title"
+msgstr "Tüm yasaklamaları temizle"
+
 msgid "bans.crowdsec.confirm"
 msgstr "Kararları sil ve yasağı kaldır"
 
@@ -394,11 +451,53 @@ msgstr "%(ip)s için yasak süresi güncellenemedi: %(error)s"
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s için yasak süresi başarıyla güncellendi."
 
+msgid "bans.import.confirm_button"
+msgstr "İçe aktar"
+
+msgid "bans.import.confirm_message"
+msgstr "Bu dosyada bulunan yasaklama sayısı: %(count)s. İçe aktarılsın mı?"
+
+msgid "bans.import.confirm_skipped"
+msgstr "Yok sayılan okunamayan satır sayısı: %(skipped)s."
+
+msgid "bans.import.confirm_title"
+msgstr "Yasaklamaları içe aktar"
+
+msgid "bans.import.empty"
+msgstr "Bu dosyada geçerli yasaklama bulunamadı. Her satırda bir yasaklama, IP[,scope[,duration[,reason]]], veya bir JSON listesi bekleniyor."
+
+msgid "bans.import.read_failed"
+msgstr "Dosya okunamadı."
+
+msgid "bans.import.too_many"
+msgstr "Bu dosyada %(max)s değerinden fazla yasaklama var. Dosyayı bölüp parçalar halinde içe aktarın."
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "CrowdSec kirası"
 
+msgid "bans.live.off"
+msgstr "Otomatik yenileme duraklatıldı."
+
+msgid "bans.live.on"
+msgstr "Otomatik yenileme açık, her 10 saniyede bir."
+
+msgid "bans.live.updated"
+msgstr "Yasaklamalar güncellendi: %(added)s yeni, %(removed)s süresi dolmuş."
+
+msgid "bans.page.clear_all"
+msgstr "Tümünü temizle"
+
+msgid "bans.page.import"
+msgstr "İçe aktar"
+
 msgid "bans.stats.card.by_reason"
 msgstr "Nedene göre yasaklar"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "Neden"
+
+msgid "bans.stats.reasons.meta"
+msgstr "%(count)s etkin yasaklama"
 
 msgid "bans.stats.tile.active"
 msgstr "Etkin yasaklar"
@@ -934,6 +1033,27 @@ msgstr "Sertifikayı görüntüle"
 msgid "certificates.browse_key"
 msgstr "Özel anahtarı görüntüle"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "Silinecek sertifika sayısı: %(count)s. Bu işlem geri alınamaz. Devam edilsin mi?"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "Yenilenecek kendinden imzalı sertifika sayısı: %(count)s. Devam edilsin mi?"
+
+msgid "certificates.bulk.delete"
+msgstr "Seçilenleri sil"
+
+msgid "certificates.bulk.download"
+msgstr "Zincirleri indir"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "Seçilen sertifikaların hiçbiri bu işleme uygun değil."
+
+msgid "certificates.bulk.renew"
+msgstr "Kendinden imzalı olanları yenile"
+
+msgid "certificates.bulk.skipped"
+msgstr "Bu işleme uygun olmadığı için atlanan seçili sertifika sayısı: %(skipped)s."
+
 msgid "certificates.common_name"
 msgstr "Ortak ad"
 
@@ -1117,6 +1237,9 @@ msgstr "Düzenleyen"
 msgid "certificates.issuers"
 msgstr "En çok kullanılan düzenleyenler"
 
+msgid "certificates.issuers_meta"
+msgstr "%(count)s sertifika"
+
 msgid "certificates.key_drop"
 msgstr "İlgili özel anahtarı buraya bırakın"
 
@@ -1180,6 +1303,9 @@ msgstr "Veritabanı salt okunurdur. Sertifikalar incelenebilir ve indirilebilir,
 msgid "certificates.renew_due"
 msgstr "Kontrol/yenileyin"
 
+msgid "certificates.renew_due_short"
+msgstr "Yenileme zamanı geldi"
+
 msgid "certificates.sans"
 msgstr "Konu alternatif adları"
 
@@ -1194,6 +1320,9 @@ msgstr "ACME yayınlamayı planlayın"
 
 msgid "certificates.search"
 msgstr "Ad, ortak ad, SAN, işveren veya parmak izi ile arayın…"
+
+msgid "certificates.select_all"
+msgstr "Tüm sertifikaları seç"
 
 msgid "certificates.serial"
 msgstr "Seri numarası"
@@ -1323,6 +1452,99 @@ msgstr "%(count)s tane daha göster"
 
 msgid "compose.unavailable"
 msgstr "Eklenti listesi yüklenemedi, bu nedenle bu sayfa güvenli bir şekilde düzenlenemez. API yanıtını bekleyin."
+
+msgid "configs.console.all_scopes"
+msgstr "Tüm kapsamlar"
+
+msgid "configs.console.clone"
+msgstr "Yapılandırmayı klonla"
+
+msgid "configs.console.content"
+msgstr "Yapılandırma içeriği (salt okunur)"
+
+msgid "configs.console.download"
+msgstr "İndir"
+
+msgid "configs.console.edit"
+msgstr "Yapılandırmayı düzenle"
+
+msgid "configs.console.editor_help"
+msgstr "NGINX veya ModSecurity içeriğini düzenleyin. Ctrl+S ya da Command+S ile kaydedin."
+
+msgid "configs.console.editor_title"
+msgstr "Yapılandırma içeriği"
+
+msgid "configs.console.files"
+msgstr "Dosyalar"
+
+msgid "configs.console.full_view"
+msgstr "Tam görünüm"
+
+msgid "configs.console.global_legend"
+msgstr "Küresel kapsam her servise uygulanır."
+
+msgid "configs.console.global_only"
+msgstr "Yalnızca küresel"
+
+msgid "configs.console.lint"
+msgstr "Sözdizimini denetle"
+
+msgid "configs.console.lint_brace"
+msgstr "Kapatılmamış açılış süslü parantezi."
+
+msgid "configs.console.lint_clean"
+msgstr "İstemci tarafı denetimlerinde sorun bulunamadı."
+
+msgid "configs.console.lint_help"
+msgstr "Yalnızca istemci tarafı ipuçlarıdır. Dağıtımdan önce nginx -t ile doğrulayın. Çok satırlı yönergeler uyarı üretebilir."
+
+msgid "configs.console.lint_quote"
+msgstr "Kapatılmamış tırnak işareti."
+
+msgid "configs.console.lint_semicolon"
+msgstr "Yönerge sonunda noktalı virgül eksik olabilir."
+
+msgid "configs.console.lint_skipped"
+msgstr "ModSecurity ve CRS yapılandırmaları için NGINX sözdizimi denetimi kullanılamıyor."
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "Beklenmeyen kapanış süslü parantezi."
+
+msgid "configs.console.lint_warnings"
+msgstr "İstemci tarafı denetimlerinde %(count)s uyarı bulundu. Düzenleyici notlarına bakın."
+
+msgid "configs.console.name_help"
+msgstr "Harf, rakam, tire veya alt çizgi kullanın. .conf son eki diskte eklenir."
+
+msgid "configs.console.new"
+msgstr "Yeni yapılandırma"
+
+msgid "configs.console.no_files"
+msgstr "Bu filtrelerle eşleşen yapılandırma yok."
+
+msgid "configs.console.restore_view"
+msgstr "Görünümü geri yükle"
+
+msgid "configs.console.select_file"
+msgstr "İçeriğini önizlemek için dosya seçin."
+
+msgid "configs.console.service_legend"
+msgstr "Servis kapsamı yalnızca bir servise uygulanır."
+
+msgid "configs.console.service_only"
+msgstr "Yalnızca servis"
+
+msgid "configs.console.template_name_locked"
+msgstr "Şablon tabanlı özel yapılandırmanın yeniden adlandırılmasına izin verilmez."
+
+msgid "configs.console.title"
+msgstr "Özel yapılandırmalar"
+
+msgid "configs.console.types"
+msgstr "Yapılandırma türü"
+
+msgid "configs.console.view"
+msgstr "Yapılandırmayı görüntüle"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "Seçilen tüm özel yapılandırmalar bulunamadı, UI/API özel yapılandırması değil veya zaten dönüştürüldü."
@@ -2764,6 +2986,15 @@ msgstr "Zaman"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "Zaman İçinde Engelleme Durumu"
 
+msgid "dashboard.chart.legend.count"
+msgstr "Sayı"
+
+msgid "dashboard.chart.legend.item"
+msgstr "Öğe"
+
+msgid "dashboard.chart.legend.share"
+msgstr "Pay"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Engellenen İstekler"
 
@@ -3007,6 +3238,18 @@ msgstr "Bu sayfadaki %(count)s şablon seçildi."
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "Bu sayfadaki tüm %(count)s şablon seçildi."
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "Eşleşen tüm %(count)s iş akışı seçildi."
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "Eşleşen %(count)s iş akışının tümünü seç"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "Bu sayfadaki %(count)s iş akışı seçildi."
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "Bu sayfadaki tüm %(count)s iş akışı seçildi."
+
 msgid "datatable.bulk_select_clear"
 msgstr "Seçimi temizle"
 
@@ -3049,6 +3292,9 @@ msgstr "Hiç Servis yok"
 msgid "datatable.info_empty_templates"
 msgstr "Kullanılabilir şablon yok"
 
+msgid "datatable.info_empty_workflows"
+msgstr "Hiç İş Akışı yok"
+
 msgid "datatable.info_filtered_bans"
 msgstr "(_MAX_ toplam Yasaklama içinden filtrelendi)"
 
@@ -3079,6 +3325,9 @@ msgstr "(_MAX_ toplam Servis içinden filtrelendi)"
 msgid "datatable.info_filtered_templates"
 msgstr "(_MAX_ toplam şablondan filtrelendi)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(_MAX_ toplam İş Akışı içinden filtrelendi)"
+
 msgid "datatable.info_instances"
 msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s Örnek"
 
@@ -3099,6 +3348,9 @@ msgstr "%(start)s–%(end)s arası gösteriliyor · toplam servis: %(total)s"
 
 msgid "datatable.info_templates"
 msgstr "%(total)s şablonun %(start)s ile %(end)s arası gösteriliyor"
+
+msgid "datatable.info_workflows"
+msgstr "%(start)s–%(end)s arası gösteriliyor · toplam iş akışı: %(total)s"
 
 msgid "datatable.length_all"
 msgstr "Tümü"
@@ -3132,6 +3384,9 @@ msgstr "_MENU_ Servis Göster"
 
 msgid "datatable.length_menu_templates"
 msgstr "_MENU_ şablon göster"
+
+msgid "datatable.length_menu_workflows"
+msgstr "_MENU_ İş Akışı Göster"
 
 msgid "datatable.paginate.first"
 msgstr "İlk"
@@ -3244,6 +3499,15 @@ msgstr "1 şablon seçildi"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d şablon seçildi"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "Hiç İş Akışı seçilmedi"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "1 İş Akışı seçildi"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "%d İş Akışı seçildi"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "%(count)s özel yapılandırma seçildi"
 
@@ -3318,6 +3582,9 @@ msgstr "Eşleşen Servis bulunamadı"
 
 msgid "datatable.zero_records_templates"
 msgstr "Eşleşen şablon bulunamadı"
+
+msgid "datatable.zero_records_workflows"
+msgstr "Eşleşen İş Akışı bulunamadı"
 
 msgid "dev_log.copy_failed"
 msgstr "Metin kopyalanamadı:"
@@ -4369,14 +4636,26 @@ msgstr "Bir Kez"
 msgid "interval.week"
 msgstr "Haftalık"
 
+msgid "job.history.duration"
+msgstr "Süre"
+
 msgid "job.history.end_date"
 msgstr "Bitiş Tarihi"
+
+msgid "job.history.error"
+msgstr "Hata"
 
 msgid "job.history.start_date"
 msgstr "Başlangıç Tarihi"
 
 msgid "job.history.success"
 msgstr "Başarılı"
+
+msgid "jobs.card.sub"
+msgstr "Zamanlayıcı tarafından kendi aralıklarında veya isteğe bağlı çalıştırılır"
+
+msgid "jobs.card.title"
+msgstr "Zamanlanmış işler"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "İşler alınırken hata oluştu: %(message)s"
@@ -5113,6 +5392,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "Ek sayfalar"
 
+msgid "navigation.filter_plugins"
+msgstr "Eklentileri filtrele…"
+
 msgid "navigation.global_settings"
 msgstr "Genel ayarlar"
 
@@ -5140,6 +5422,9 @@ msgstr "Mod seçimi"
 msgid "navigation.more"
 msgstr "Daha fazla..."
 
+msgid "navigation.no_plugin_match"
+msgstr "Eşleşen eklenti yok"
+
 msgid "navigation.operate"
 msgstr "İşlet"
 
@@ -5158,14 +5443,23 @@ msgstr "Eklenti Devre Dışı Bırakıldı"
 msgid "navigation.plugin_deactivated_global"
 msgstr "Eklenti Küresel Olarak Devre Dışı Bırakıldı"
 
+msgid "navigation.plugin_insights"
+msgstr "Eklenti bilgileri"
+
 msgid "navigation.plugins"
 msgstr "Eklentiler"
+
+msgid "navigation.plugins_overview"
+msgstr "Genel bakış"
 
 msgid "navigation.plugins_pages"
 msgstr "Eklenti sayfaları"
 
 msgid "navigation.pro"
 msgstr "Pro"
+
+msgid "navigation.profile"
+msgstr "Profil"
 
 msgid "navigation.redirects"
 msgstr "Yönlendirmeler"
@@ -5338,6 +5632,24 @@ msgstr "ÜCRETSİZ"
 msgid "plan.pro"
 msgstr "PRO"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "Bu eklenti hiçbir yerde kullanılmıyor"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "Küresel ayarlar"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "Metrikler kapalı"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "Henüz gösterilecek bir şey yok"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "Gösterilecek sayfa yok"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "Yalnızca yöneticiler"
+
 msgid "plugin.page.status.deactivated"
 msgstr "Eklenti devre dışı; bu nedenle bilgi mevcut değil."
 
@@ -5373,6 +5685,12 @@ msgstr "Pro"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.card.configure"
+msgstr "%(name)s eklentisini yapılandır"
+
+msgid "plugins.card.metrics"
+msgstr "%(name)s metrikleri"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "BunkerWeb sürümü (%(current)s) okunamadı, bu nedenle %(id)s uyumluluğu kontrol edilemiyor; hiçbir şey yüklenmedi"
@@ -5617,11 +5935,20 @@ msgstr "Etkin"
 msgid "plugins.marketplace.always_on"
 msgstr "Çekirdek / her zaman açık"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "Her zaman açık"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "BunkerWeb için gerekli çekirdek eklenti: yapılandırılabilir ancak devre dışı bırakılamaz."
+
 msgid "plugins.marketplace.disabled"
 msgstr "Devre dışı"
 
 msgid "plugins.marketplace.enabled"
 msgstr "Etkin"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "Eklentileri filtrele"
 
 msgid "plugins.marketplace.inactive"
 msgstr "Etkin değil"
@@ -5652,6 +5979,15 @@ msgstr "daha fazla değer"
 
 msgid "plugins.multivalue.show_less"
 msgstr "Daha az göster"
+
+msgid "plugins.tier.community"
+msgstr "Topluluk eklentisi"
+
+msgid "plugins.tier.core"
+msgstr "Çekirdek eklenti"
+
+msgid "plugins.tier.pro"
+msgstr "PRO eklentisi"
 
 msgid "pro.alert.overlapped_1"
 msgstr "Lisansınızın izin verdiğinden daha fazla aktif servise sahipsiniz!"
@@ -5998,8 +6334,14 @@ msgstr "IP Adresi"
 msgid "profile.session.last_activity"
 msgstr "Son Aktivite"
 
+msgid "profile.session.load_error"
+msgstr "Veriler yüklenirken hata oluştu. Lütfen tekrar deneyin."
+
 msgid "profile.session.os"
 msgstr "İşletim Sistemi"
+
+msgid "profile.session.recent_title"
+msgstr "Son oturumlar"
 
 msgid "profile.session.title"
 msgstr "Oturum"
@@ -6018,6 +6360,9 @@ msgstr "Güvenlik"
 
 msgid "profile.tab.sessions"
 msgstr "Oturumlar"
+
+msgid "profile.title"
+msgstr "Profiliniz"
 
 msgid "range_picker.1h"
 msgstr "Son saat"
@@ -6070,11 +6415,44 @@ msgstr "Mevcut %(setting)s ayarı geçerli değil."
 msgid "raw_drafts.setting_not_valid"
 msgstr "%(setting)s ayarı geçerli değil."
 
+msgid "raw_page.search"
+msgstr "Ara…"
+
+msgid "raw_page.search_label"
+msgstr "Ham yapılandırmada ara"
+
+msgid "raw_page.search_next"
+msgstr "Sonraki eşleşme"
+
+msgid "raw_page.search_prev"
+msgstr "Önceki eşleşme"
+
+msgid "raw_page.tile_modified"
+msgstr "Değiştirilen"
+
+msgid "raw_page.tile_plugins"
+msgstr "Eklentiler"
+
+msgid "raw_page.tile_problems"
+msgstr "Sorunlar"
+
+msgid "raw_page.tile_settings"
+msgstr "Ayarlar"
+
+msgid "raw_page.tiles_label"
+msgstr "Ham yapılandırma özeti"
+
 msgid "redirects.all"
 msgstr "Tümü"
 
+msgid "redirects.all_codes"
+msgstr "Tüm durum kodları"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "URI ekle"
 
 msgid "redirects.append_request_uri"
 msgstr "İstenen URI'yi hedefe ekle"
@@ -6084,6 +6462,9 @@ msgstr "Bağla"
 
 msgid "redirects.attach_copy"
 msgstr "%(name)s'i (%(from)s → %(to)s) bir veya daha fazla servise ekle."
+
+msgid "redirects.card_subtitle"
+msgstr "Yol yönlendirmeleri ve uygulandıkları servisler"
 
 msgid "redirects.code.301"
 msgstr "301 — Kalıcı olarak taşındı"
@@ -6100,6 +6481,11 @@ msgstr "307 — Geçici yönlendirme"
 msgid "redirects.code.308"
 msgstr "308 — Kalıcı yönlendirme"
 
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "%(count)s yönlendirme"
+
 msgid "redirects.create"
 msgstr "Yönlendirme oluştur"
 
@@ -6111,6 +6497,9 @@ msgstr "%(name)s yönlendirmesini sil?"
 
 msgid "redirects.delete_help"
 msgstr "Bir servise bağlı olan bir yönlendirme silinemez. Önce ayırın."
+
+msgid "redirects.detach_shared"
+msgstr "Bu yönlendirme paylaşılıyor. Ayırmak yalnızca bu servisten kaldırır. Diğer servislerde kalır."
 
 msgid "redirects.edit"
 msgstr "Yönlendirmeyi düzenle"
@@ -6193,8 +6582,32 @@ msgstr "Yönlendir:"
 msgid "redirects.from_path_help"
 msgstr "Bağlı servislerdeki kaynak yolu, örneğin /old."
 
+msgid "redirects.kpi_configured"
+msgstr "Yapılandırılmış yönlendirmeler"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "Etkili olması için servise bağlayın"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "Yüklenen ilk %(count)s öğe arasında"
+
+msgid "redirects.kpi_permanent"
+msgstr "Kalıcı"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 veya 308, tarayıcılar tarafından önbelleğe alınır"
+
+msgid "redirects.kpi_services"
+msgstr "Bağlı servisler"
+
+msgid "redirects.kpi_services_caption"
+msgstr "En az bir yönlendirmesi olan servisler"
+
 msgid "redirects.new"
 msgstr "Yeni yönlendirme"
+
+msgid "redirects.no_match"
+msgstr "Bu filtrelerle eşleşen yönlendirme yok."
 
 msgid "redirects.not_attached"
 msgstr "Bağlı değil"
@@ -6208,14 +6621,28 @@ msgstr "Yönlendirmeyi kaydet"
 msgid "redirects.search"
 msgstr "Ad, kaynak yolu veya hedefi arayın..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "%(count)s servis"
+
 msgid "redirects.services_help"
 msgstr "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Yönlendirme daha sonra bağlanabilir."
+
+msgid "redirects.services_title"
+msgstr "Bu yönlendirmeyi kullanan servisler"
 
 msgid "redirects.status_code"
 msgstr "Durum kodu"
 
 msgid "redirects.to_url"
 msgstr "Yönlendir"
+
+msgid "redirects.to_url_help"
+msgstr "Tam bir http:// veya https:// URL adresi. Göreli hedefler desteklenmez."
 
 msgid "redirects.truncated"
 msgstr "Sadece ilk 500 yönlendirme görüntülenir. Tam sonucu görmek için API ile listeyi daraltın."
@@ -6282,6 +6709,36 @@ msgstr "Yerel API kararı"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "Teknik ayrıntılar"
+
+msgid "reports.live.off"
+msgstr "Otomatik yenileme duraklatıldı."
+
+msgid "reports.live.on"
+msgstr "Otomatik yenileme açık, her 10 saniyede bir."
+
+msgid "reports.live.updated"
+msgstr "Raporlar güncellendi: %(added)s yeni."
+
+msgid "reports.offenders.confirm_many"
+msgstr "%(count)s IP adresi her örnekte 24 saat boyunca yasaklanacak."
+
+msgid "reports.offenders.confirm_one"
+msgstr "%(ip)s her örnekte 24 saat boyunca yasaklanacak."
+
+msgid "reports.offenders.confirm_title"
+msgstr "Raporlardan yasakla"
+
+msgid "reports.offenders.show"
+msgstr "Göster"
+
+msgid "reports.offenders.show_bottom"
+msgstr "En az ihlal edenler"
+
+msgid "reports.offenders.show_latest"
+msgstr "Son ihlal edenler"
+
+msgid "reports.offenders.show_top"
+msgstr "En sık ihlal edenler"
 
 msgid "reports.security_incident"
 msgstr "Güvenlik Olayı"
@@ -6382,6 +6839,15 @@ msgstr "İstek yolu"
 msgid "request_path.unordered"
 msgstr "%(phase)s aşamasında ilan edilmemiş bir konum; sıralı eklentilerden sonra çalışır."
 
+msgid "resource_groups.access"
+msgstr "Erişim"
+
+msgid "resource_groups.access_readonly"
+msgstr "Salt okunur"
+
+msgid "resource_groups.access_write"
+msgstr "Yazma"
+
 msgid "resource_groups.add_entry"
 msgstr "Ekle"
 
@@ -6396,6 +6862,9 @@ msgstr "Takma ad"
 
 msgid "resource_groups.alias_help"
 msgstr "Harfler, rakamlar, alt çizgiler ve tireler. Mevcut takma adlar yeniden adlandırılamaz."
+
+msgid "resource_groups.all_kinds"
+msgstr "Tümü"
 
 msgid "resource_groups.bulk_import"
 msgstr "Toplu import"
@@ -6441,6 +6910,9 @@ msgstr "Girdiler"
 
 msgid "resource_groups.expand_all"
 msgstr "Tümünü aç"
+
+msgid "resource_groups.filter_values"
+msgstr "Değerleri filtrele..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "Takma ad 1 ile 64 harf, rakam, alt çizgi veya tire içermelidir"
@@ -6571,6 +7043,47 @@ msgstr "Girdileri tek tek ekleyin veya aşağıdaki toplu içe aktarma aracını
 msgid "resource_groups.no_references"
 msgstr "Referans yok"
 
+msgid "resource_groups.no_value_match"
+msgstr "Bu filtreyle eşleşen değer yok."
+
+msgid "resource_groups.origin"
+msgstr "Kaynak"
+
+msgid "resource_groups.origin_plugin"
+msgstr "%(plugin)s eklentisiyle birlikte gelir"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "API üzerinden oluşturuldu veya eşitlendi."
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "autoconf denetleyicisi tarafından oluşturuldu."
+
+msgid "resource_groups.origin_tip.download"
+msgstr "Uzak kaynaktan indirildi."
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "Elle veya yapılandırma dosyasından oluşturuldu."
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "Zamanlayıcı tarafından oluşturuldu."
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "Web arayüzü üzerinden oluşturuldu."
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "Kurulum sihirbazı tarafından oluşturuldu. Düzenlenebilir durumda kalır."
+
+msgid "resource_groups.plugins_compatible"
+msgstr "Uyumlu eklentiler"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "Ayarları bu gruptaki değer türlerini kabul eden eklentiler. Gerçek başvurular Kullanım altında listelenir."
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "%(count)s eklenti"
+
 msgid "resource_groups.readonly"
 msgstr "Veritabanı salt okunurdur. Kaynak grupları incelenebilir ve dışa aktarılabilir, ancak değiştirilemez."
 
@@ -6597,6 +7110,9 @@ msgstr "IP'ler, ülkeler, ASN'ler, ters DNS adları, User-Agent değerleri ve UR
 msgid "resource_groups.template_configuration"
 msgstr "Şablon %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "Güncellendi"
+
 msgid "resource_groups.usage"
 msgstr "Kullanım"
 
@@ -6605,6 +7121,18 @@ msgstr "Değer"
 
 msgid "resource_groups.values"
 msgstr "Değerler"
+
+msgid "resource_groups.values_compat"
+msgstr "Uyumlu: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "Kopyalandı"
+
+msgid "resource_groups.values_title"
+msgstr "%(name)s değerleri"
+
+msgid "resource_groups.view_values_of"
+msgstr "%(name)s değerlerini görüntüle"
 
 msgid "scope.all_services"
 msgstr "Tüm Servisler"
@@ -7575,6 +8103,93 @@ msgstr "Bu eklenti için ayarların birden fazla örneğini burada yapılandıra
 msgid "settings.multiple.title"
 msgstr "Çoklu Ayarlar"
 
+msgid "settings_page.alert_global"
+msgstr "Değişiklikler bunları geçersiz kılmayan her servise uygulanır ve Kaydet ve yeniden yükle işleminden sonra geçerli olur."
+
+msgid "settings_page.alert_service"
+msgstr "Boş bırakılan ayarlar küresel varsayılanları kullanır. Değişiklikler yalnızca seçili servise uygulanır ve Kaydet ve yeniden yükle işleminden sonra geçerli olur."
+
+msgid "settings_page.back_global"
+msgstr "Küresel ayarlara dön"
+
+msgid "settings_page.back_service"
+msgstr "Servise dön"
+
+msgid "settings_page.card_title"
+msgstr "Ayarlar"
+
+msgid "settings_page.count"
+msgstr "%(count)s ayar"
+
+msgid "settings_page.count_filtered"
+msgstr "%(total)s ayardan %(shown)s tanesi"
+
+msgid "settings_page.groups_link"
+msgstr "Kaynak gruplarını yönet"
+
+msgid "settings_page.groups_link_hint"
+msgstr "Bu eklentinin ayarlarının başvurabileceği yeniden kullanılabilir IP, ağ ve ülke listeleri."
+
+msgid "settings_page.no_match"
+msgstr "Aramanızla eşleşen ayar yok."
+
+msgid "settings_page.plugin"
+msgstr "Eklenti"
+
+msgid "settings_page.reload_alert_body"
+msgstr "Kaydettiğinizde zamanlayıcı yapılandırmayı örneklerinize yeniden uygular."
+
+msgid "settings_page.reload_alert_title"
+msgstr "Değişiklikler örneğin yeniden yüklenmesini tetikler."
+
+msgid "settings_page.revert"
+msgstr "Geri al"
+
+msgid "settings_page.revert_confirm"
+msgstr "Tümünü geri al"
+
+msgid "settings_page.revert_message"
+msgstr "Bu sayfadaki kaydedilmemiş tüm düzenlemeleri son kaydedilen değerlerine döndürür."
+
+msgid "settings_page.revert_title"
+msgstr "Değişiklikleri geri al"
+
+msgid "settings_page.save_reload"
+msgstr "Kaydet ve yeniden yükle"
+
+msgid "settings_page.scope"
+msgstr "Kapsam"
+
+msgid "settings_page.scope_global"
+msgstr "Küresel ayarlar"
+
+msgid "settings_page.search"
+msgstr "Ayarlarda ara…"
+
+msgid "settings_page.search_label"
+msgstr "Ayarlarda ara"
+
+msgid "settings_page.select_plugin_label"
+msgstr "Eklenti seçin"
+
+msgid "settings_page.select_scope_label"
+msgstr "Ayarlarının nerede düzenleneceğini seçin"
+
+msgid "setup.accordion.advanced"
+msgstr "Gelişmiş"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "Ters Proxy · Gerçek IP · Özel Sertifika"
+
+msgid "setup.accordion.general"
+msgstr "Genel"
+
+msgid "setup.accordion.general_hint"
+msgstr "Sunucu · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "Kurulumu tamamla"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "Web arayüzü kurulurken hata oluştu. Tekrar deneyin."
 
@@ -7629,6 +8244,9 @@ msgstr "Parolalar eşleşmiyor."
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "Özel bir SSL sertifikası kullanırken hem sertifikayı hem de anahtarı ayarlamalısınız."
 
+msgid "setup.from_ui_host"
+msgstr "UI_HOST ortam değişkeninden"
+
 msgid "setup.status.admin_user_exists"
 msgstr "Bir yönetici kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin."
 
@@ -7674,6 +8292,9 @@ msgstr "Gerçek IP"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "Ters Proxy"
 
+msgid "setup.step2.section.server"
+msgstr "Sunucu"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7682,6 +8303,12 @@ msgstr "Web arayüzüne özel ayarları yapılandırın."
 
 msgid "setup.step2.title"
 msgstr "UI Ayarları"
+
+msgid "setup.step3.activate_title"
+msgstr "Lisans etkinleştir"
+
+msgid "setup.step3.activation_note"
+msgstr "Lisans, kurulumu tamamladığınızda etkinleştirilir."
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "PRO Avantajları"
@@ -7725,11 +8352,119 @@ msgstr "Kurulumu tamamlamadan önce ayarlarınızı gözden geçirin."
 msgid "setup.step4.title"
 msgstr "Genel Bakış"
 
+msgid "setup.stepper_label"
+msgstr "Kurulum adımları"
+
 msgid "setup.subtitle"
 msgstr "Kurulum sihirbazını tamamlamak için adımları izleyin."
 
+msgid "setup.switch.disabled"
+msgstr "Devre dışı"
+
+msgid "setup.switch.enabled"
+msgstr "Etkin"
+
 msgid "setup.title"
 msgstr "Kurulum Sihirbazı"
+
+msgid "shell.account.current"
+msgstr "Hesap: %(name)s"
+
+msgid "shell.account.title"
+msgstr "Hesap"
+
+msgid "shell.contrast.toggle"
+msgstr "Yüksek kontrast"
+
+msgid "shell.density.toggle"
+msgstr "Sıkışık yerleşim"
+
+msgid "shell.language.title"
+msgstr "Dil"
+
+msgid "shell.main_navigation"
+msgstr "Ana gezinme"
+
+msgid "shell.notifications.all_read"
+msgstr "Hepsi okundu"
+
+msgid "shell.notifications.filter_label"
+msgstr "Bildirimleri filtrele"
+
+msgid "shell.notifications.group_earlier"
+msgstr "Daha önce"
+
+msgid "shell.notifications.group_today"
+msgstr "Bugün"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "Dün"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "Tümünü okundu işaretle"
+
+msgid "shell.notifications.mark_read"
+msgstr "Okundu işaretle"
+
+msgid "shell.notifications.none_unread"
+msgstr "Okunmamış bildirim yok."
+
+msgid "shell.notifications.tab_all"
+msgstr "Tümü"
+
+msgid "shell.notifications.tab_unread"
+msgstr "Okunmamış"
+
+msgid "shell.notifications.title"
+msgstr "Bildirimler"
+
+msgid "shell.notifications.unread_count"
+msgstr "Okunmamış: %(count)s"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "Okunmamış:"
+
+msgid "shell.search.kind_page"
+msgstr "Sayfa"
+
+msgid "shell.search.kind_plugin"
+msgstr "Eklenti"
+
+msgid "shell.search.kind_service"
+msgstr "Servis"
+
+msgid "shell.search.label"
+msgstr "Sayfa, eklenti ve servis ara"
+
+msgid "shell.search.loading_services"
+msgstr "Servisler yükleniyor…"
+
+msgid "shell.search.no_match"
+msgstr "“%(query)s” için eşleşme yok"
+
+msgid "shell.search.placeholder"
+msgstr "Sayfa, eklenti, servis ara…"
+
+msgid "shell.search.results"
+msgstr "Arama sonuçları"
+
+msgid "shell.search.status_results"
+msgstr "Sonuç: %(count)s"
+
+msgid "shell.skip_to_content"
+msgstr "Ana içeriğe geç"
+
+msgid "shell.star_us"
+msgstr "GitHub'da BunkerWeb'e yıldız verin"
+
+msgid "shell.theme.system_hint"
+msgstr "işletim sisteminizi izler"
+
+msgid "shell.theme.title"
+msgstr "Tema"
+
+msgid "shell.top_navigation"
+msgstr "Üst çubuk"
 
 msgid "status.active"
 msgstr "Aktif"
@@ -7941,6 +8676,18 @@ msgstr "İleri"
 msgid "step.previous"
 msgstr "Geri"
 
+msgid "support.attach_help"
+msgstr "Destek isteği için dışa aktarımlar. Yazma izni gerektirir ve gizli bilgileri maskeler."
+
+msgid "support.attach_title"
+msgstr "Eklenecek tanılama bilgileri"
+
+msgid "support.card.community.title"
+msgstr "Topluluk"
+
+msgid "support.card.docs.title"
+msgstr "Belgeler"
+
 msgid "support.card.download_logs.help"
 msgstr "Tüm özel veriler anonimleştirilecektir."
 
@@ -7964,6 +8711,36 @@ msgstr "Günlükler, eklenti sürümleri, ortam ve son hatalar. Özel veriler an
 
 msgid "support.card.ui_bundle.title"
 msgstr "Web UI Tanılaması"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "Topluluğa ve proje bakımcılarına sorun."
+
+msgid "support.community.github"
+msgstr "GitHub sorunları"
+
+msgid "support.community.github_help"
+msgstr "Hata bildirimleri ve özellik istekleri."
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "Tartışmalar ve duyurular."
+
+msgid "support.docs.quickstart"
+msgstr "Hızlı başlangıç kılavuzu"
+
+msgid "support.docs.troubleshooting"
+msgstr "Sorun giderme"
+
+msgid "support.docs.upgrading"
+msgstr "Yükseltme"
+
+msgid "support.docs.web_ui"
+msgstr "Web arayüzü kılavuzu"
 
 msgid "support.subtitle"
 msgstr "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın."
@@ -8132,6 +8909,63 @@ msgstr "Değer"
 
 msgid "table.header.version"
 msgstr "Versiyon"
+
+msgid "table_system.active_filters"
+msgstr "Filtreler, %(count)s etkin"
+
+msgid "table_system.advanced_filters"
+msgstr "Gelişmiş filtreler"
+
+msgid "table_system.any"
+msgstr "Herhangi biri"
+
+msgid "table_system.column_count"
+msgstr "%(total)s sütundan %(visible)s tanesi"
+
+msgid "table_system.confirm"
+msgstr "Onayla"
+
+msgid "table_system.confirm_title"
+msgstr "İşlemi onayla"
+
+msgid "table_system.filter"
+msgstr "Filtre"
+
+msgid "table_system.filters"
+msgstr "Filtreler"
+
+msgid "table_system.leave"
+msgstr "Kaydetmeden çık"
+
+msgid "table_system.leave_message"
+msgstr "Kaydedilmemiş değişiklikleriniz kaybolacak."
+
+msgid "table_system.leave_title"
+msgstr "Kaydetmeden çıkılsın mı?"
+
+msgid "table_system.multiple_actions"
+msgstr "Seçili öğeler için birden çok işlem"
+
+msgid "table_system.show_all"
+msgstr "Tümünü göster"
+
+msgid "table_system.stay"
+msgstr "Düzenlemeye devam et"
+
+msgid "table_system.type_phrase"
+msgstr "Onaylamak için %(phrase)s yazın"
+
+msgid "table_system.upload_hint"
+msgstr "Yüklemek için sürükleyip bırakın veya tıklayın"
+
+msgid "table_system.visible_columns"
+msgstr "Görünür sütunlar"
+
+msgid "tables.top.detail"
+msgstr "Ayrıntı"
+
+msgid "tables.top.share"
+msgstr "Pay"
 
 msgid "template.editor.button_add_config"
 msgstr "Yapılandırma ekle"
@@ -8721,6 +9555,24 @@ msgstr "Topluluk Şablonunu Güncelle"
 msgid "templates.catalog.update_up_to_date"
 msgstr "%(template)s şablonu zaten katalogla eşleşiyor"
 
+msgid "templates.features_builtin"
+msgstr "Yerleşik özellikler"
+
+msgid "templates.features_configs"
+msgstr "Özel yapılandırmalar"
+
+msgid "templates.features_help"
+msgstr "Bu şablonun sundukları. Gerçek ayarları görmek veya değiştirmek için şablonu açın."
+
+msgid "templates.features_of"
+msgstr "%(name)s özelliklerini göster"
+
+msgid "templates.features_plugins"
+msgstr "Eklentiler"
+
+msgid "templates.features_title"
+msgstr "Şablon özellikleri"
+
 msgid "templates.flash.catalog_updated"
 msgstr "%(template)s şablonu katalogdan güncellendi."
 
@@ -8796,6 +9648,12 @@ msgstr "Şablon içe aktarılmadı: dosya 1 MiB'den büyük"
 msgid "templates.import.unreadable"
 msgstr "Şablon içe aktarılmadı: dosya okunamadı"
 
+msgid "templates.managed_by"
+msgstr "%(owner)s tarafından yönetiliyor: burada değiştirilemez veya silinemez."
+
+msgid "templates.more_actions"
+msgstr "%(name)s için diğer işlemler"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8810,6 +9668,18 @@ msgstr "Orta güvenlik"
 
 msgid "templates.name.ui"
 msgstr "Web arayüzü"
+
+msgid "templates.no_match"
+msgstr "Bu aramayla eşleşen şablon yok."
+
+msgid "templates.open_template"
+msgstr "Şablonu aç"
+
+msgid "templates.read_only"
+msgstr "Salt okunur"
+
+msgid "templates.search"
+msgstr "Şablonlarda ara..."
 
 msgid "templates.subtitle"
 msgstr "Hizmetleriniz için yeniden kullanılabilir yapılandırma şablonları — ayarları, adımları ve özel yapılandırmaları bir araya getirin, ardından oluşturun, kopyalayın veya silin."
@@ -8835,6 +9705,9 @@ msgstr "Açık"
 msgid "theme.system"
 msgstr "Sistem"
 
+msgid "threatmap.attacks_24h"
+msgstr "Son 24 saatte engellenenler"
+
 msgid "threatmap.attacks_today"
 msgstr "Bugünkü saldırılar"
 
@@ -8843,6 +9716,21 @@ msgstr "engellenen istek"
 
 msgid "threatmap.blocked_requests"
 msgstr "engellenen istekler"
+
+msgid "threatmap.col_ip"
+msgstr "IP adresi"
+
+msgid "threatmap.col_origin"
+msgstr "Kaynak"
+
+msgid "threatmap.col_reason"
+msgstr "Neden"
+
+msgid "threatmap.col_target"
+msgstr "Hedef"
+
+msgid "threatmap.col_time"
+msgstr "Zaman"
 
 msgid "threatmap.countries"
 msgstr "Kaynak ülkeler"
@@ -8889,6 +9777,9 @@ msgstr "konum belirlenemedi"
 msgid "threatmap.open_live"
 msgstr "Canlı görünüm"
 
+msgid "threatmap.rolling_window"
+msgstr "Kayan pencere, yaklaşık her 30 saniyede yenilenir"
+
 msgid "threatmap.show_less"
 msgstr "Yalnızca %(count)s göster"
 
@@ -8900,6 +9791,9 @@ msgstr "Bu veriler artık güncellenmiyor. Metrik servisi yanıt vermiyor."
 
 msgid "threatmap.subtitle"
 msgstr "Örneklerinizin son 24 saatte engellediği trafiğin nereden geldiği."
+
+msgid "threatmap.ticker_caption"
+msgstr "En son engellenen istekler"
 
 msgid "threatmap.ticker_title"
 msgstr "Canlı olaylar"
@@ -8922,14 +9816,26 @@ msgstr "Başlıca hedefler"
 msgid "threatmap.updated"
 msgstr "Güncellendi"
 
+msgid "timings.all_phases"
+msgstr "Tüm aşamalar"
+
 msgid "timings.calls"
 msgstr "Çağrılar"
+
+msgid "timings.caption"
+msgstr "Aşamaya göre eklenti süreleri, varsayılan olarak toplam süreye göre sıralanır"
+
+msgid "timings.columns"
+msgstr "Sütunlar"
 
 msgid "timings.disabled_help"
 msgstr "Her eklentinin süresini ölçmek için METRICS_COLLECT_TIMINGS değerini yes yapın. İsteğin toplam süresi her durumda toplanır."
 
 msgid "timings.disabled_title"
 msgstr "Eklenti süreleri kapalı"
+
+msgid "timings.export_csv"
+msgstr "CSV dışa aktar"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "Eklenti zamanlamaları alınırken hata oluştu: %(message)s"
@@ -8946,6 +9852,15 @@ msgstr "Ortalama"
 msgid "timings.mean_request"
 msgstr "Ortalama istek"
 
+msgid "timings.no_match"
+msgstr "Bu filtrelerle eşleşen süre yok"
+
+msgid "timings.no_share"
+msgstr "Pay yok"
+
+msgid "timings.no_share_hint"
+msgstr "Bu aşama istek başına bir kez çalışmadığı için payı yoktur."
+
 msgid "timings.partial"
 msgstr "Bazı örnekler yanıt vermedi. Aşağıdaki rakamlar yanıt verenleri kapsar."
 
@@ -8954,6 +9869,9 @@ msgstr "Aşama"
 
 msgid "timings.phases"
 msgstr "Eklenti aşamaları"
+
+msgid "timings.phases_sub"
+msgstr "Her eklentinin her aşamada harcadığı süre"
 
 msgid "timings.plugin"
 msgstr "Eklenti"
@@ -8964,6 +9882,9 @@ msgstr "Raporlayan örnekler"
 msgid "timings.requests_measured"
 msgstr "Ölçülen istekler"
 
+msgid "timings.search_placeholder"
+msgstr "Eklenti veya aşama ara…"
+
 msgid "timings.share"
 msgstr "Pay"
 
@@ -8972,6 +9893,9 @@ msgstr "Pay, eklentinin toplam süresinin toplam istek süresine oranıdır. İs
 
 msgid "timings.subtitle"
 msgstr "Her eklentinin her istek aşamasında harcadığı süre, tüm örneklerden canlı okunup birleştirilir."
+
+msgid "timings.toolbar"
+msgstr "Süre tablosu araçları"
 
 msgid "timings.total"
 msgstr "Toplam"
@@ -9873,6 +10797,12 @@ msgstr "Sunucu ekle"
 msgid "upstreams.all"
 msgstr "Tümü"
 
+msgid "upstreams.all_protocols"
+msgstr "Tüm protokoller"
+
+msgid "upstreams.all_tls"
+msgstr "Tüm TLS ayarları"
+
 msgid "upstreams.attach"
 msgstr "Bağla"
 
@@ -9891,6 +10821,14 @@ msgstr "En az bağlantılar"
 msgid "upstreams.balancing.round_robin"
 msgstr "Döngü (varsayılan)"
 
+msgid "upstreams.card_subtitle"
+msgstr "Arka uç havuzları ve bunlara proxy üzerinden bağlanan servisler"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "%(count)s upstream sunucusu"
+
 msgid "upstreams.create"
 msgstr "Üst akış oluştur"
 
@@ -9902,6 +10840,9 @@ msgstr "%(name)s üst akışını sil?"
 
 msgid "upstreams.delete_help"
 msgstr "Bir hizmete hala bağlı olan bir üst akış silinemez. Önce ayırın."
+
+msgid "upstreams.detach_shared"
+msgstr "Bu upstream sunucusu paylaşılıyor. Ayırmak yalnızca bu servis ve yoldan kaldırır. Diğer bağlantılarda kalır."
 
 msgid "upstreams.edit"
 msgstr "Üst akışı düzenle"
@@ -9993,11 +10934,43 @@ msgstr "Keepalive"
 msgid "upstreams.keepalive_help"
 msgstr "Her işçi başına tutulan boş bağlantılar. Sadece HTTP ve gRPC; devre dışı bırakmak için boş bırakın."
 
+msgid "upstreams.keepalive_off"
+msgstr "Kapalı"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "Yüklenen ilk %(count)s öğe arasında"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "%(count)s bağlı değil"
+
+msgid "upstreams.kpi_roles"
+msgstr "%(primary)s birincil · %(backup)s yedek · %(down)s kapalı (yapılandırılan)"
+
+msgid "upstreams.kpi_services"
+msgstr "Bağlı servisler"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "Havuza proxy üzerinden bağlanan servisler"
+
+msgid "upstreams.kpi_tls"
+msgstr "Arka uca TLS"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "Sunucularıyla TLS üzerinden iletişim kuracak şekilde yapılandırılan havuzlar"
+
 msgid "upstreams.match_path"
 msgstr "Ters yönlendirme yolu"
 
 msgid "upstreams.match_path_help"
 msgstr "Seçilen hizmetlerin bu havuzdan yönlendirdiği yer. Bir akış havuzu için, tüm hizmet kullanılır."
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: %(count)s sunucu"
+
+msgid "upstreams.members_title"
+msgstr "Bu upstream içindeki sunucular"
 
 msgid "upstreams.method"
 msgstr "Yük dengeleme"
@@ -10007,6 +10980,9 @@ msgstr "Sadece harfler, rakamlar, tireler ve alt çizgiler. Noktalar reddedildi�
 
 msgid "upstreams.new"
 msgstr "Yeni upstream"
+
+msgid "upstreams.no_match"
+msgstr "Bu filtrelerle eşleşen upstream sunucusu yok."
 
 msgid "upstreams.not_attached"
 msgstr "Bağlanmamış"
@@ -10062,11 +11038,36 @@ msgstr "Ağırlık"
 msgid "upstreams.servers"
 msgstr "Sunucular"
 
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "%(count)s sunucu"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "%(count)s servis"
+
 msgid "upstreams.services_help"
 msgstr "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Upstream daha sonra bağlanabilir."
 
 msgid "upstreams.services_hidden"
 msgstr "Gizlenen hizmet sayısı: %(count)s. %(protocol)s upstream yalnızca eşleşen bir hizmete bağlanabilir."
+
+msgid "upstreams.services_title"
+msgstr "Bu upstream sunucusunu kullanan servisler"
+
+msgid "upstreams.tls"
+msgstr "Arka uca TLS"
+
+msgid "upstreams.tls_no"
+msgstr "Şifresiz"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "Yalnızca ilk 500 upstream gösteriliyor. Tam sonuç için API üzerinden listeyi daraltın."
@@ -10146,11 +11147,26 @@ msgstr "ZeroSSL için e-posta veya ZeroSSL API anahtarından biri gereklidir."
 msgid "web_cache.available"
 msgstr "Mevcut"
 
+msgid "web_cache.available_tip"
+msgstr "Bu örnekte önbellek dizini var. Bir servisin bunu kullanıp kullanmadığı Servis etkinleştirme altında gösterilir."
+
 msgid "web_cache.cache_state"
 msgstr "Durum"
 
 msgid "web_cache.cached_files"
 msgstr "Önbelleğe alınmış dosyalar"
+
+msgid "web_cache.compact"
+msgstr "Sıkışık"
+
+msgid "web_cache.counters_window"
+msgstr "Her örneğin yeniden başlatılmasından itibaren"
+
+msgid "web_cache.counters_window_help"
+msgstr "Sabit bir dönem yerine her örneğin son yeniden başlatılmasından itibaren sayarlar."
+
+msgid "web_cache.danger_zone"
+msgstr "Tehlikeli bölge"
 
 msgid "web_cache.deployment"
 msgstr "Dağıtım"
@@ -10203,11 +11219,20 @@ msgstr "İsabet oranı"
 msgid "web_cache.instance"
 msgstr "Örnek"
 
+msgid "web_cache.invalidate"
+msgstr "Geçersiz kıl"
+
 msgid "web_cache.metrics"
 msgstr "Toplu önbellek isabeti / kaçırması dağılımı"
 
 msgid "web_cache.metrics_scope"
 msgstr "Ölçümler, tüm önbelleğe alınmış hizmetler üzerinden örnek başına toplanır."
+
+msgid "web_cache.no_counters"
+msgstr "Bu örnek henüz önbellekli istek saymadı."
+
+msgid "web_cache.no_requests_for"
+msgstr "Şunun için istek yok:"
 
 msgid "web_cache.not_reporting"
 msgstr "Raporlanmıyor"
@@ -10218,6 +11243,9 @@ msgstr "Yol"
 msgid "web_cache.purge"
 msgstr "Önbelleğe alınmış yanıtları temizle"
 
+msgid "web_cache.purge_a_url"
+msgstr "URL önbelleğini temizle"
+
 msgid "web_cache.purge_all"
 msgstr "Tümünü temizle"
 
@@ -10226,6 +11254,9 @@ msgstr "Bu işlem, erişilebilen tüm örneklerdeki tüm hizmetlerin önbelleğe
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "Tamamen önbelleği temizle?"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "hepsini temizle"
 
 msgid "web_cache.purge_help"
 msgstr "Erişilebilir örneklerdeki işlemler hemen çalıştırılır. Erişilemeyen örnekler atlanır ve herhangi bir işlem kuyruğa alınmaz."
@@ -10248,6 +11279,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "Raporlayan örnekler"
 
+msgid "web_cache.server_side_note"
+msgstr "Yalnızca sunucu tarafı önbelleği. Bu sayfa her BunkerWeb örneğinde saklanan ters proxy önbelleğini yönetir. Ziyaretçilerin tarayıcılarında önceden kaydedilmiş yanıtlar etkilenmez."
+
 msgid "web_cache.service"
 msgstr "Servis"
 
@@ -10256,6 +11290,27 @@ msgstr "Hizmetin etkinleştirilmesi"
 
 msgid "web_cache.status"
 msgstr "Örnek depolama"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "Bu istek için önbelleğe alma atlandı"
+
+msgid "web_cache.status_desc.expired"
+msgstr "Yaşam süresi doldu: upstream sunucusundan yeniden alındı"
+
+msgid "web_cache.status_desc.hit"
+msgstr "Doğrudan önbellekten sunuldu"
+
+msgid "web_cache.status_desc.miss"
+msgstr "Önbellekte yok: upstream sunucusundan alındı ve saklandı"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "Koşullu yeniden alma: upstream sunucusu yanıtın hâlâ geçerli olduğunu bildirdi"
+
+msgid "web_cache.status_desc.stale"
+msgstr "Upstream sunucusu hata verdiği için eski yanıt sunuldu"
+
+msgid "web_cache.status_desc.updating"
+msgstr "Yenileme sürerken eski yanıt sunuldu"
 
 msgid "web_cache.subtitle"
 msgstr "Ters proxy önbelleği durumu, toplu olarak isabet oran metrikleri ve anında temizleme kontrolleri."
@@ -10298,6 +11353,18 @@ msgstr "Antibot sağlayıcısı"
 
 msgid "workflows.act_redirect"
 msgstr "Yönlendir"
+
+msgid "workflows.act_settings_block"
+msgstr "Engelleme ayarları"
+
+msgid "workflows.act_settings_challenge"
+msgstr "Doğrulama ayarları"
+
+msgid "workflows.act_settings_generic"
+msgstr "İşlem ayarları"
+
+msgid "workflows.act_settings_redirect"
+msgstr "Yönlendirme ayarları"
 
 msgid "workflows.act_status"
 msgstr "Reddetme durumu"
@@ -10425,6 +11492,9 @@ msgstr "Bu kuraldaki doğrulama sorunu sayısı: %(count)s"
 msgid "workflows.aria.ruleName"
 msgstr "%(n)s numaralı kuralın adı"
 
+msgid "workflows.aria.ruleTools"
+msgstr "%(n)s numaralı kuralın işlemleri"
+
 msgid "workflows.aria.terminalAction"
 msgstr "Sonlandırıcı eylem"
 
@@ -10541,6 +11611,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "Bu kural silinsin mi? Altındaki tüm kurallar bir konum yukarı taşınır."
+
+msgid "workflows.conseq.skip"
+msgstr "Hiç çalışmaz"
+
+msgid "workflows.conseq.stop"
+msgstr "Zinciri durdurur"
 
 msgid "workflows.copySuffix"
 msgstr " (kopya)"
@@ -10689,6 +11765,21 @@ msgstr "eşleşme eşiği"
 msgid "workflows.gate.help"
 msgstr "Her istemci IP'si için ayrı sayılır. Eşiğin altında bu kural eşleşmez ve değerlendirme sonraki kuralla devam eder; tek başına hiçbir zaman hız sınırlaması yapmaz."
 
+msgid "workflows.inspector.apply"
+msgstr "Uygula"
+
+msgid "workflows.inspector.apply_title"
+msgstr "Uygula: düzenlemeleri taslakta tutar. Kalıcı kayıt için sayfadaki Kaydet düğmesini kullanın"
+
+msgid "workflows.inspector.cancel"
+msgstr "İptal"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "İptal: kuralı açıldığı andaki haline geri yükler"
+
+msgid "workflows.inspector.cancelled"
+msgstr "%(n)s numaralı kuralın düzenlemeleri iptal edildi. Kural açıldığı andaki haline döndü."
+
 msgid "workflows.legend.fall"
 msgstr "Eşleşme yoksa sonraki kurala geçilir"
 
@@ -10725,8 +11816,14 @@ msgstr "Altına çoğalt"
 msgid "workflows.menu.enable"
 msgstr "Kuralı etkinleştir"
 
+msgid "workflows.menu.header"
+msgstr "Kural işlemleri"
+
 msgid "workflows.menu.moveTo"
 msgstr "%(n)s. konuma taşı"
+
+msgid "workflows.menu.order"
+msgstr "Sıra"
 
 msgid "workflows.menu.staysAt"
 msgstr "%(n)s. konumda kalır"
@@ -10758,6 +11855,81 @@ msgstr "Henüz doğrulanmadı"
 msgid "workflows.order_help"
 msgstr "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir hız eşiğine sahip bir kural, eşik aşıldığında yalnızca bir kez eşleşir, bu nedenle daha düşük bir kural, eşiğinin altında trafiği yakalayabilir."
 
+msgid "workflows.port.active_rules"
+msgstr "%(count)s etkin"
+
+msgid "workflows.port.attachment"
+msgstr "Bağlantı"
+
+msgid "workflows.port.attachment_any"
+msgstr "Tümü"
+
+msgid "workflows.port.attachment_attached"
+msgstr "Bağlı"
+
+msgid "workflows.port.created"
+msgstr "Oluşturuldu"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "Bu iş akışını silmeden önce tüm servislerden ayırın. Silme işlemi servisleri asla otomatik olarak ayırmaz."
+
+msgid "workflows.port.details"
+msgstr "Ayrıntılar"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "Seçili tanımlar (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "Seçili tanımlar dışa aktarıldı. Bu dosyanın yeniden içe aktarılabileceğine dair garanti yoktur."
+
+msgid "workflows.port.export_failed"
+msgstr "Dışa aktarma başarısız. Dosya indirilmedi."
+
+msgid "workflows.port.export_loading"
+msgstr "Seçili iş akışı tanımları okunuyor…"
+
+msgid "workflows.port.export_scope"
+msgstr "Tablo dışa aktarımları filtrelenen satırları ve görünür sütunları içerir. JSON dışa aktarımları yalnızca seçili kanonik iş akışı tanımlarını, id anahtarlarıyla içerir. Yeniden içe aktarma garantisi yoktur."
+
+msgid "workflows.port.list_subtitle"
+msgstr "Her iş akışı için kurallar ve bağlı servisler"
+
+msgid "workflows.port.more"
+msgstr "%(name)s için diğer işlemler"
+
+msgid "workflows.port.row_details"
+msgstr "İş akışı ayrıntıları"
+
+msgid "workflows.port.select_workflows"
+msgstr "İş akışlarını seç"
+
+msgid "workflows.port.services_count"
+msgstr "Servisler: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "Ayırma işlemi bu iş akışını yalnızca ilgili servisten kaldırır. İş akışı ve kuralları korunur."
+
+msgid "workflows.port.services_none"
+msgstr "Bu iş akışı hiçbir servise bağlı değil."
+
+msgid "workflows.port.services_open"
+msgstr "%(name)s iş akışına bağlı servisleri göster"
+
+msgid "workflows.port.services_title"
+msgstr "%(name)s iş akışına bağlı servisler"
+
+msgid "workflows.port.total_rules"
+msgstr "Toplam %(count)s"
+
+msgid "workflows.port.updated"
+msgstr "Güncellendi"
+
 msgid "workflows.readonly"
 msgstr "Veritabanı salt okunurdur. İş akışları incelenebilir, ancak değiştirilemez."
 
@@ -10772,6 +11944,9 @@ msgstr "“%(workflow)s” güvenlik iş akışı: “%(action)s” eylemi"
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "“%(workflow)s” güvenlik iş akışı: istek yönlendirildi"
+
+msgid "workflows.regex_help"
+msgstr "İki ayrı regex sınırı uygulanır. Yazarken: bir servise bağlı iş akışları toplamda en fazla 50 regex koşulu içerebilir. Bunu aşan kaydetme veya bağlama reddedilir. Çalışırken: her örnek en fazla WORKFLOWS_REGEX_BUDGET farklı düzenli ifade derler (varsayılan 512, tüm iş akışları arasında ortak). Bu bütçeyi aşan regex değerlendirilmez ve UNKNOWN döndürür, dolayısıyla kuralı eşleşemez."
 
 msgid "workflows.rule.disabled"
 msgstr "Devre dışı"
@@ -10883,6 +12058,108 @@ msgstr "Liste görünümü. Kurallar üstten alta çalışır; ilk eşleşen kaz
 
 msgid "workflows.search"
 msgstr "Ad veya açıklama arayın..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "Yapılandırmasını açmak için iş akışı oluşturun"
+
+msgid "workflows.shell.draft_discard"
+msgstr "Değişiklikleri at"
+
+msgid "workflows.shell.draft_restored"
+msgstr "Bu iş akışındaki kaydedilmemiş değişiklikler geri yüklendi. Uygulamak için kaydedin veya atmak için iş akışını değiştirin."
+
+msgid "workflows.shell.draft_save"
+msgstr "Kaydet ve devam et"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "İş akışı kaydedilemedi. Hiçbir değişiklik atılmadı."
+
+msgid "workflows.shell.draft_stale"
+msgstr "Bu iş akışı taslağınız başlatıldıktan sonra başka bir yerde kaydedildiği için taslak atıldı."
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "%(target)s açılırsa %(name)s içindeki kural değişiklikleri kaydedilmeden kalır. Aynı anda yalnızca bir taslak açık olabilir: kaydedin, değişiklikleri atın veya burada kalın."
+
+msgid "workflows.shell.draft_title"
+msgstr "%(name)s içindeki kaydedilmemiş değişiklikler"
+
+msgid "workflows.shell.pick_label"
+msgstr "İş akışı"
+
+msgid "workflows.shell.read_only"
+msgstr "Salt okunur"
+
+msgid "workflows.shell.tab_config"
+msgstr "Yapılandırma"
+
+msgid "workflows.shell.tab_overview"
+msgstr "Genel bakış"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "Kaydedilmedi"
+
+msgid "workflows.shell.tabs_label"
+msgstr "İş akışları görünümü"
+
+msgid "workflows.shell.view_label"
+msgstr "Görünüm"
+
+msgid "workflows.sum.block"
+msgstr "isteği engelle"
+
+msgid "workflows.sum.blockStatus"
+msgstr "isteği %(code)s koduyla engelle"
+
+msgid "workflows.sum.challenge"
+msgstr "%(provider)s doğrulamasını göster"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "CrowdSec iyileştirmesi"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "CrowdSec kaynağı"
+
+msgid "workflows.sum.every"
+msgstr "herhangi bir istek gelirse"
+
+msgid "workflows.sum.gate"
+msgstr "IP başına %(window)s saniyede %(count)s istek aşılırsa"
+
+msgid "workflows.sum.group_asn"
+msgstr "ASN, %(name)s grubundaysa"
+
+msgid "workflows.sum.group_country"
+msgstr "ülke, %(name)s grubundaysa"
+
+msgid "workflows.sum.group_ip"
+msgstr "IP, %(name)s grubundaysa"
+
+msgid "workflows.sum.isOne"
+msgstr "%(label)s değeri %(value)s ise"
+
+msgid "workflows.sum.isOneOf"
+msgstr "%(label)s değeri %(values)s değerlerinden biriyse"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "ülke"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "yöntem"
+
+msgid "workflows.sum.not"
+msgstr "«%(what)s» koşulu sağlanmıyorsa"
+
+msgid "workflows.sum.redirect"
+msgstr "%(url)s adresine yönlendir (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "URI eşleşmesi «%(match)s %(value)s» ise"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11054,6 +12331,78 @@ msgstr "İstekler"
 
 msgid "workflows.threshold_window"
 msgstr "saniye içinde"
+
+msgid "workflows.toolbar.actions"
+msgstr "İş akışı işlemleri"
+
+msgid "workflows.toolbar.any_action"
+msgstr "Herhangi bir işlem"
+
+msgid "workflows.toolbar.any_state"
+msgstr "Herhangi bir durum"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "Başa dön"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "Tümünü daralt"
+
+msgid "workflows.toolbar.detailed"
+msgstr "Ayrıntılı"
+
+msgid "workflows.toolbar.display"
+msgstr "Kural görünümü"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "Tümünü genişlet"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "İşlem"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "Ad"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "Kural adına göre ara…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "Kuralları filtrele"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "Durum"
+
+msgid "workflows.toolbar.filters"
+msgstr "Filtreler"
+
+msgid "workflows.toolbar.full_height"
+msgstr "Tam yükseklik"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "Yüksekliği sınırla"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "%(total)s kuraldan %(shown)s tanesi"
+
+msgid "workflows.toolbar.no_match"
+msgstr "Bu filtrelerle eşleşen kural yok"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "Filtre kuralları gizlerken yeniden sıralama duraklatılır."
+
+msgid "workflows.toolbar.reset"
+msgstr "Sıfırla"
+
+msgid "workflows.toolbar.simplified"
+msgstr "Basitleştirilmiş"
+
+msgid "workflows.toolbar.state_off"
+msgstr "Devre dışı"
+
+msgid "workflows.toolbar.state_on"
+msgstr "Etkin"
+
+msgid "workflows.toolbar.view"
+msgstr "Kural sırası görünümü"
 
 msgid "workflows.tree.addCondition"
 msgstr "Koşul"

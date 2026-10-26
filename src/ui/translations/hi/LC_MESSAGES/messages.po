@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "निर्मित"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "कॉपी किया गया"
+
+msgid "about.environment.copy"
+msgstr "निदान जानकारी कॉपी करें"
+
+msgid "about.environment.database"
+msgstr "डेटाबेस सर्वर"
+
+msgid "about.environment.help"
+msgstr "Web UI होस्ट और कंट्रोल प्लेन से पढ़ी गई जानकारी। कोई चर, लाइसेंस कुंजी या डेटाबेस पता नहीं दिखाया जाता।"
+
+msgid "about.environment.instances_up"
+msgstr "%(total)s में से %(up)s चालू"
+
+msgid "about.environment.integration"
+msgstr "एकीकरण"
+
+msgid "about.environment.platform"
+msgstr "प्लेटफ़ॉर्म"
+
+msgid "about.environment.registered"
+msgstr "पंजीकृत"
+
+msgid "about.environment.scope_control_plane"
+msgstr "कंट्रोल प्लेन"
+
+msgid "about.environment.scope_instances"
+msgstr "इंस्टेंस"
+
+msgid "about.environment.scope_ui_host"
+msgstr "Web UI होस्ट"
+
+msgid "about.environment.title"
+msgstr "परिवेश"
+
 msgid "about.gnu_license"
 msgstr "GNU Affero सामान्य सार्वजनिक लाइसेंस v3.0"
 
 msgid "about.license_title"
 msgstr "लाइसेंस"
+
+msgid "about.releases.title"
+msgstr "हाल के रिलीज़"
+
+msgid "about.releases.view_all"
+msgstr "सभी देखें"
 
 msgid "about.social.discord"
 msgstr "डिस्कॉर्ड"
@@ -274,6 +319,18 @@ msgstr "चयनित सीमा"
 msgid "bans.chart.timeseries.title"
 msgstr "प्रति इंटरवल सक्रिय प्रतिबंध"
 
+msgid "bans.clear_all.confirm"
+msgstr "सभी प्रतिबंध साफ़ करें"
+
+msgid "bans.clear_all.message"
+msgstr "इससे हर सेवा और इंस्टेंस के सभी प्रतिबंध हट जाते हैं। CrowdSec प्रतिबंध उसकी अपनी पंक्ति से हटाया जाता है।"
+
+msgid "bans.clear_all.phrase"
+msgstr "सभी साफ़ करें"
+
+msgid "bans.clear_all.title"
+msgstr "सभी प्रतिबंध साफ़ करें"
+
 msgid "bans.crowdsec.confirm"
 msgstr "निर्णय हटाएँ और प्रतिबंध हटाएँ"
 
@@ -394,11 +451,53 @@ msgstr "%(ip)s के लिए प्रतिबंध अवधि अपड�
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s के लिए प्रतिबंध अवधि सफलतापूर्वक अपडेट की गई।"
 
+msgid "bans.import.confirm_button"
+msgstr "आयात करें"
+
+msgid "bans.import.confirm_message"
+msgstr "इस फ़ाइल में मिले प्रतिबंध: %(count)s। इन्हें आयात करें?"
+
+msgid "bans.import.confirm_skipped"
+msgstr "न पढ़ी जा सकने वाली पंक्तियां अनदेखी की गईं: %(skipped)s।"
+
+msgid "bans.import.confirm_title"
+msgstr "प्रतिबंध आयात करें"
+
+msgid "bans.import.empty"
+msgstr "इस फ़ाइल में कोई मान्य प्रतिबंध नहीं मिला। प्रति पंक्ति एक प्रतिबंध IP[,scope[,duration[,reason]]] प्रारूप में, या JSON सूची अपेक्षित है।"
+
+msgid "bans.import.read_failed"
+msgstr "फ़ाइल पढ़ी नहीं जा सकी।"
+
+msgid "bans.import.too_many"
+msgstr "इस फ़ाइल में %(max)s से अधिक प्रतिबंध हैं। इसे विभाजित करके भागों में आयात करें।"
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "CrowdSec लीज़"
 
+msgid "bans.live.off"
+msgstr "स्वतः रीफ़्रेश रुका हुआ है।"
+
+msgid "bans.live.on"
+msgstr "स्वतः रीफ़्रेश चालू है, हर 10 सेकंड में।"
+
+msgid "bans.live.updated"
+msgstr "प्रतिबंध अपडेट हुए: %(added)s नए, %(removed)s समाप्त।"
+
+msgid "bans.page.clear_all"
+msgstr "सभी साफ़ करें"
+
+msgid "bans.page.import"
+msgstr "आयात करें"
+
 msgid "bans.stats.card.by_reason"
 msgstr "कारण के अनुसार प्रतिबंध"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "कारण"
+
+msgid "bans.stats.reasons.meta"
+msgstr "%(count)s सक्रिय प्रतिबंध"
 
 msgid "bans.stats.tile.active"
 msgstr "सक्रिय प्रतिबंध"
@@ -934,6 +1033,27 @@ msgstr "प्रमाणपत्र ब्राउज़ करें"
 msgid "certificates.browse_key"
 msgstr "निजी कुंजी ब्राउज़ करें"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "हटाने के लिए प्रमाणपत्र: %(count)s। इसे वापस नहीं किया जा सकता। जारी रखें?"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "नवीनीकृत करने के लिए स्व-हस्ताक्षरित प्रमाणपत्र: %(count)s। जारी रखें?"
+
+msgid "certificates.bulk.delete"
+msgstr "चयनित हटाएं"
+
+msgid "certificates.bulk.download"
+msgstr "प्रमाणपत्र शृंखलाएं डाउनलोड करें"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "चयनित प्रमाणपत्रों में से कोई यह कार्रवाई नहीं कर सकता।"
+
+msgid "certificates.bulk.renew"
+msgstr "स्व-हस्ताक्षरित प्रमाणपत्र नवीनीकृत करें"
+
+msgid "certificates.bulk.skipped"
+msgstr "यह कार्रवाई न कर सकने वाले चयनित प्रमाणपत्र छोड़े गए: %(skipped)s।"
+
 msgid "certificates.common_name"
 msgstr "सामान्य नाम"
 
@@ -1117,6 +1237,9 @@ msgstr "जारीकर्ता"
 msgid "certificates.issuers"
 msgstr "शीर्ष जारीकर्ता"
 
+msgid "certificates.issuers_meta"
+msgstr "%(count)s प्रमाणपत्र"
+
 msgid "certificates.key_drop"
 msgstr "यहां मिलान करने वाला निजी कुंजी डालें"
 
@@ -1180,6 +1303,9 @@ msgstr "डेटाबेस केवल पढ़ने के लिए ह�
 msgid "certificates.renew_due"
 msgstr "चेक/नवीनीकृत करें"
 
+msgid "certificates.renew_due_short"
+msgstr "नवीनीकरण बाकी"
+
 msgid "certificates.sans"
 msgstr "विषय वैकल्पिक नाम"
 
@@ -1194,6 +1320,9 @@ msgstr "ACME जारी करने का कार्यक्रम नि
 
 msgid "certificates.search"
 msgstr "नाम, सामान्य नाम, SAN, जारीकर्ता, या फिंगरप्रिंट खोजें…"
+
+msgid "certificates.select_all"
+msgstr "सभी प्रमाणपत्र चुनें"
 
 msgid "certificates.serial"
 msgstr "श्रृंखला संख्या"
@@ -1323,6 +1452,99 @@ msgstr "%(count)s को अधिक दिखाएँ"
 
 msgid "compose.unavailable"
 msgstr "प्लगइन की सूची लोड नहीं हो पाई, इसलिए इस पृष्ठ को सुरक्षित रूप से संपादित नहीं किया जा सकता। API के उत्तर मिलने पर पुनः लोड करें।"
+
+msgid "configs.console.all_scopes"
+msgstr "सभी दायरे"
+
+msgid "configs.console.clone"
+msgstr "कॉन्फ़िगरेशन क्लोन करें"
+
+msgid "configs.console.content"
+msgstr "कॉन्फ़िगरेशन सामग्री (केवल पढ़ने के लिए)"
+
+msgid "configs.console.download"
+msgstr "डाउनलोड करें"
+
+msgid "configs.console.edit"
+msgstr "कॉन्फ़िगरेशन संपादित करें"
+
+msgid "configs.console.editor_help"
+msgstr "NGINX या ModSecurity सामग्री संपादित करें। Ctrl+S या Command+S से सहेजें।"
+
+msgid "configs.console.editor_title"
+msgstr "कॉन्फ़िगरेशन सामग्री"
+
+msgid "configs.console.files"
+msgstr "फ़ाइलें"
+
+msgid "configs.console.full_view"
+msgstr "पूर्ण दृश्य"
+
+msgid "configs.console.global_legend"
+msgstr "ग्लोबल कॉन्फ़िगरेशन हर सेवा पर लागू होता है।"
+
+msgid "configs.console.global_only"
+msgstr "केवल ग्लोबल"
+
+msgid "configs.console.lint"
+msgstr "सिंटैक्स जांच"
+
+msgid "configs.console.lint_brace"
+msgstr "खुला ब्रेस बंद नहीं है।"
+
+msgid "configs.console.lint_clean"
+msgstr "क्लाइंट-साइड जांच में कोई समस्या नहीं मिली।"
+
+msgid "configs.console.lint_help"
+msgstr "केवल क्लाइंट-साइड संकेत। डिप्लॉय करने से पहले nginx -t से जांचें, कई पंक्तियों वाले निर्देश चेतावनियां दे सकते हैं।"
+
+msgid "configs.console.lint_quote"
+msgstr "उद्धरण चिह्न बंद नहीं है।"
+
+msgid "configs.console.lint_semicolon"
+msgstr "निर्देश के अंत में सेमीकोलन छूटा हो सकता है।"
+
+msgid "configs.console.lint_skipped"
+msgstr "ModSecurity और CRS कॉन्फ़िगरेशन के लिए NGINX सिंटैक्स जांच उपलब्ध नहीं है।"
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "अनपेक्षित बंद करने वाला ब्रेस।"
+
+msgid "configs.console.lint_warnings"
+msgstr "क्लाइंट-साइड जांच में %(count)s चेतावनियां मिलीं। संपादक की टिप्पणियां देखें।"
+
+msgid "configs.console.name_help"
+msgstr "अक्षर, अंक, डैश या अंडरस्कोर इस्तेमाल करें। डिस्क पर .conf प्रत्यय जोड़ा जाता है।"
+
+msgid "configs.console.new"
+msgstr "नया कॉन्फ़िगरेशन"
+
+msgid "configs.console.no_files"
+msgstr "इन फ़िल्टर से कोई कॉन्फ़िगरेशन मेल नहीं खाता।"
+
+msgid "configs.console.restore_view"
+msgstr "दृश्य बहाल करें"
+
+msgid "configs.console.select_file"
+msgstr "सामग्री का पूर्वावलोकन करने के लिए फ़ाइल चुनें।"
+
+msgid "configs.console.service_legend"
+msgstr "सेवा कॉन्फ़िगरेशन केवल एक सेवा पर लागू होता है।"
+
+msgid "configs.console.service_only"
+msgstr "केवल सेवा"
+
+msgid "configs.console.template_name_locked"
+msgstr "टेम्पलेट-आधारित कस्टम कॉन्फ़िगरेशन का नाम बदलने की अनुमति नहीं है।"
+
+msgid "configs.console.title"
+msgstr "कस्टम कॉन्फ़िगरेशन"
+
+msgid "configs.console.types"
+msgstr "कॉन्फ़िगरेशन प्रकार"
+
+msgid "configs.console.view"
+msgstr "कॉन्फ़िगरेशन देखें"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "सभी चयनित कस्टम कॉन्फ़िगरेशन नहीं मिल सके, UI/API कस्टम कॉन्फ़िगरेशन नहीं हैं, या पहले ही परिवर्तित हो चुके हैं।"
@@ -2764,6 +2986,15 @@ msgstr "समय"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "समय के साथ अवरुद्ध स्थिति"
 
+msgid "dashboard.chart.legend.count"
+msgstr "संख्या"
+
+msgid "dashboard.chart.legend.item"
+msgstr "आइटम"
+
+msgid "dashboard.chart.legend.share"
+msgstr "अनुपात"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "अवरुद्ध अनुरोध"
 
@@ -3007,6 +3238,18 @@ msgstr "इस पेज पर %(count)s टेम्पलेट चयनि�
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "इस पेज पर सभी %(count)s टेम्पलेट्स चयनित हैं।"
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "मिलान करने वाले सभी %(count)s कार्यप्रवाह चयनित हैं।"
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "मिलान करने वाले सभी %(count)s कार्यप्रवाह चुनें"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "इस पेज पर %(count)s कार्यप्रवाह चयनित है।"
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "इस पेज पर सभी %(count)s कार्यप्रवाह चयनित हैं।"
+
 msgid "datatable.bulk_select_clear"
 msgstr "चयन साफ़ करें"
 
@@ -3049,6 +3292,9 @@ msgstr "कोई सेवा उपलब्ध नहीं है"
 msgid "datatable.info_empty_templates"
 msgstr "कोई टेम्प्लेट उपलब्ध नहीं है"
 
+msgid "datatable.info_empty_workflows"
+msgstr "कोई कार्यप्रवाह उपलब्ध नहीं"
+
 msgid "datatable.info_filtered_bans"
 msgstr "(कुल _MAX_ प्रतिबंधों में से फ़िल्टर किया गया)"
 
@@ -3079,6 +3325,9 @@ msgstr "(कुल _MAX_ सेवाओं में से फ़िल्ट�
 msgid "datatable.info_filtered_templates"
 msgstr "(_MAX_ कुल टेम्प्लेट से फ़िल्टर किया गया)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(कुल _MAX_ कार्यप्रवाहों में से फ़िल्टर किया गया)"
+
 msgid "datatable.info_instances"
 msgstr "दिखा रहा है %(start)s से %(end)s तक %(total)s इंस्टेंस में से"
 
@@ -3099,6 +3348,9 @@ msgstr "दिखा रहा है %(start)s से %(end)s तक %(total)s 
 
 msgid "datatable.info_templates"
 msgstr "%(total)s टेम्प्लेट में से %(start)s से %(end)s दिखा रहा है"
+
+msgid "datatable.info_workflows"
+msgstr "कुल %(total)s कार्यप्रवाहों में से %(start)s से %(end)s तक दिखाए जा रहे हैं"
 
 msgid "datatable.length_all"
 msgstr "सभी"
@@ -3132,6 +3384,9 @@ msgstr "दिखाएं _MENU_ सेवाएं"
 
 msgid "datatable.length_menu_templates"
 msgstr "_MENU_ टेम्प्लेट प्रदर्शित करें"
+
+msgid "datatable.length_menu_workflows"
+msgstr "_MENU_ कार्यप्रवाह दिखाएं"
 
 msgid "datatable.paginate.first"
 msgstr "पहला"
@@ -3244,6 +3499,15 @@ msgstr "1 टेम्प्लेट चयनित"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d टेम्प्लेट चयनित"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "कोई कार्यप्रवाह चयनित नहीं"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "1 कार्यप्रवाह चयनित"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "%d कार्यप्रवाह चयनित"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "%(count)s कस्टम कॉन्फ़िगरेशन चयनित"
 
@@ -3318,6 +3582,9 @@ msgstr "कोई मेल खाने वाली सेवा नहीं 
 
 msgid "datatable.zero_records_templates"
 msgstr "कोई मेल खाते टेम्प्लेट नहीं मिले"
+
+msgid "datatable.zero_records_workflows"
+msgstr "कोई मिलान करने वाला कार्यप्रवाह नहीं मिला"
 
 msgid "dev_log.copy_failed"
 msgstr "पाठ कॉपी करने में विफल:"
@@ -4369,14 +4636,26 @@ msgstr "एक बार"
 msgid "interval.week"
 msgstr "साप्ताहिक"
 
+msgid "job.history.duration"
+msgstr "अवधि"
+
 msgid "job.history.end_date"
 msgstr "अंतिम तिथि"
+
+msgid "job.history.error"
+msgstr "त्रुटि"
 
 msgid "job.history.start_date"
 msgstr "प्रारंभ तिथि"
 
 msgid "job.history.success"
 msgstr "सफलता"
+
+msgid "jobs.card.sub"
+msgstr "शेड्यूलर द्वारा अपने-अपने अंतराल पर या मांग पर चलाए जाते हैं"
+
+msgid "jobs.card.title"
+msgstr "अनुसूचित कार्य"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "कार्य प्राप्त करने में त्रुटि: %(message)s"
@@ -5119,6 +5398,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "अतिरिक्त पृष्ठ"
 
+msgid "navigation.filter_plugins"
+msgstr "प्लगइन्स फ़िल्टर करें…"
+
 msgid "navigation.global_settings"
 msgstr "ग्लोबल सेटिंग्स"
 
@@ -5146,6 +5428,9 @@ msgstr "मोड चयन"
 msgid "navigation.more"
 msgstr "और..."
 
+msgid "navigation.no_plugin_match"
+msgstr "कोई प्लगइन मेल नहीं खाता"
+
 msgid "navigation.operate"
 msgstr "संचालित करें"
 
@@ -5164,14 +5449,23 @@ msgstr "प्लगइन निष्क्रिय किया गया"
 msgid "navigation.plugin_deactivated_global"
 msgstr "प्लगइन वैश्विक रूप से निष्क्रिय किया गया"
 
+msgid "navigation.plugin_insights"
+msgstr "प्लगइन विश्लेषण"
+
 msgid "navigation.plugins"
 msgstr "प्लगइन्स"
+
+msgid "navigation.plugins_overview"
+msgstr "अवलोकन"
 
 msgid "navigation.plugins_pages"
 msgstr "प्लगइन पृष्ठ"
 
 msgid "navigation.pro"
 msgstr "प्रो"
+
+msgid "navigation.profile"
+msgstr "प्रोफ़ाइल"
 
 msgid "navigation.redirects"
 msgstr "रीडायरेक्ट्स"
@@ -5344,6 +5638,24 @@ msgstr "मुफ़्त"
 msgid "plan.pro"
 msgstr "प्रो"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "यह प्लगइन कहीं इस्तेमाल नहीं हो रहा है"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "ग्लोबल सेटिंग्स"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "मेट्रिक्स बंद हैं"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "अभी दिखाने के लिए कुछ नहीं"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "दिखाने के लिए कोई पेज नहीं"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "केवल प्रशासकों के लिए"
+
 msgid "plugin.page.status.deactivated"
 msgstr "प्लगइन निष्क्रिय है; इसलिए, कोई जानकारी उपलब्ध नहीं है।"
 
@@ -5379,6 +5691,12 @@ msgstr "प्रो"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.card.configure"
+msgstr "%(name)s कॉन्फ़िगर करें"
+
+msgid "plugins.card.metrics"
+msgstr "%(name)s मेट्रिक्स"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "BunkerWeb का संस्करण (%(current)s) नहीं पढ़ा जा सका, इसलिए %(id)s की संगतता जाँची नहीं जा सकी; कुछ भी इंस्टॉल नहीं हुआ"
@@ -5623,11 +5941,20 @@ msgstr "सक्रिय"
 msgid "plugins.marketplace.always_on"
 msgstr "मूल / हमेशा चालू"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "हमेशा चालू"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "BunkerWeb के लिए आवश्यक कोर प्लगइन: इसे कॉन्फ़िगर किया जा सकता है, लेकिन अक्षम नहीं किया जा सकता।"
+
 msgid "plugins.marketplace.disabled"
 msgstr "अक्षम"
 
 msgid "plugins.marketplace.enabled"
 msgstr "सक्षम"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "प्लगइन्स फ़िल्टर करें"
 
 msgid "plugins.marketplace.inactive"
 msgstr "निष्क्रिय"
@@ -5658,6 +5985,15 @@ msgstr "अधिक मूल्य"
 
 msgid "plugins.multivalue.show_less"
 msgstr "कम दिखाएँ"
+
+msgid "plugins.tier.community"
+msgstr "समुदाय प्लगइन"
+
+msgid "plugins.tier.core"
+msgstr "CORE प्लगइन"
+
+msgid "plugins.tier.pro"
+msgstr "PRO प्लगइन"
 
 msgid "pro.alert.overlapped_1"
 msgstr "आपके पास लाइसेंस द्वारा अनुमत से अधिक सक्रिय सेवाएं हैं!"
@@ -6004,8 +6340,14 @@ msgstr "आईपी पता"
 msgid "profile.session.last_activity"
 msgstr "अंतिम गतिविधि"
 
+msgid "profile.session.load_error"
+msgstr "डेटा लोड करने में त्रुटि। कृपया फिर से प्रयास करें।"
+
 msgid "profile.session.os"
 msgstr "ऑपरेटिंग सिस्टम"
+
+msgid "profile.session.recent_title"
+msgstr "हाल के सत्र"
 
 msgid "profile.session.title"
 msgstr "सत्र"
@@ -6024,6 +6366,9 @@ msgstr "सुरक्षा"
 
 msgid "profile.tab.sessions"
 msgstr "सत्र"
+
+msgid "profile.title"
+msgstr "आपकी प्रोफ़ाइल"
 
 msgid "range_picker.1h"
 msgstr "पिछले घंटे"
@@ -6076,11 +6421,44 @@ msgstr "मौजूदा सेटिंग %(setting)s मान्य नह
 msgid "raw_drafts.setting_not_valid"
 msgstr "सेटिंग %(setting)s मान्य नहीं है।"
 
+msgid "raw_page.search"
+msgstr "खोजें…"
+
+msgid "raw_page.search_label"
+msgstr "रॉ कॉन्फ़िगरेशन खोजें"
+
+msgid "raw_page.search_next"
+msgstr "अगला मिलान"
+
+msgid "raw_page.search_prev"
+msgstr "पिछला मिलान"
+
+msgid "raw_page.tile_modified"
+msgstr "संशोधित"
+
+msgid "raw_page.tile_plugins"
+msgstr "प्लगइन्स"
+
+msgid "raw_page.tile_problems"
+msgstr "समस्याएं"
+
+msgid "raw_page.tile_settings"
+msgstr "सेटिंग्स"
+
+msgid "raw_page.tiles_label"
+msgstr "रॉ कॉन्फ़िगरेशन सारांश"
+
 msgid "redirects.all"
 msgstr "सभी"
 
+msgid "redirects.all_codes"
+msgstr "सभी स्थिति कोड"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "URI जोड़ें"
 
 msgid "redirects.append_request_uri"
 msgstr "लक्ष्य में अनुरोधित URI जोड़ें"
@@ -6090,6 +6468,9 @@ msgstr "संलग्न करें"
 
 msgid "redirects.attach_copy"
 msgstr "%(name)s (%(from)s → %(to)s) को एक या अधिक सेवाओं से जोड़ें।"
+
+msgid "redirects.card_subtitle"
+msgstr "पथ रीडायरेक्ट्स और वे सेवाएं जिन पर ये लागू होते हैं"
 
 msgid "redirects.code.301"
 msgstr "301 — स्थायी रूप से स्थानांतरित"
@@ -6106,6 +6487,12 @@ msgstr "307 — अस्थायी पुनर्निर्देशन"
 msgid "redirects.code.308"
 msgstr "308 — स्थायी पुनर्निर्देशन"
 
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "%(count)s रीडायरेक्ट"
+msgstr[1] "%(count)s रीडायरेक्ट्स"
+
 msgid "redirects.create"
 msgstr "पुनर्निर्देशन बनाएँ"
 
@@ -6117,6 +6504,9 @@ msgstr "क्या %(name)s पुनर्निर्देशन को ह
 
 msgid "redirects.delete_help"
 msgstr "एक सेवा से जुड़ा पुनर्निर्देशन हटाया नहीं जा सकता। पहले इसे अलग करें।"
+
+msgid "redirects.detach_shared"
+msgstr "यह रीडायरेक्ट साझा है। अलग करने से यह केवल उस सेवा से हटता है, दूसरी सेवाएं इसे रखती हैं।"
 
 msgid "redirects.edit"
 msgstr "पुनर्निर्देशन संपादित करें"
@@ -6199,8 +6589,32 @@ msgstr "से"
 msgid "redirects.from_path_help"
 msgstr "जोड़ी गई सेवाओं पर स्रोत पथ, उदाहरण के लिए /old."
 
+msgid "redirects.kpi_configured"
+msgstr "कॉन्फ़िगर किए गए रीडायरेक्ट्स"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "प्रभावी होने के लिए सेवा से जोड़ें"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "पहले लोड किए गए %(count)s में से"
+
+msgid "redirects.kpi_permanent"
+msgstr "स्थायी"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 या 308, ब्राउज़र में कैश किए जाते हैं"
+
+msgid "redirects.kpi_services"
+msgstr "जुड़ी सेवाएं"
+
+msgid "redirects.kpi_services_caption"
+msgstr "कम से कम एक रीडायरेक्ट वाली सेवाएं"
+
 msgid "redirects.new"
 msgstr "नया पुनर्निर्देशन"
+
+msgid "redirects.no_match"
+msgstr "इन फ़िल्टर से कोई रीडायरेक्ट मेल नहीं खाता।"
 
 msgid "redirects.not_attached"
 msgstr "जोड़ा नहीं गया"
@@ -6214,14 +6628,29 @@ msgstr "पुनर्निर्देशन सहेजें"
 msgid "redirects.search"
 msgstr "नाम, स्रोत पथ, या लक्ष्य खोजें..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "%(count)s सेवा"
+msgstr[1] "%(count)s सेवाएं"
+
 msgid "redirects.services_help"
 msgstr "Ctrl या Command का उपयोग करके कई सेवाओं का चयन करें। बाद में रीडायरेक्ट संलग्न किया जा सकता है।"
+
+msgid "redirects.services_title"
+msgstr "यह रीडायरेक्ट इस्तेमाल करने वाली सेवाएं"
 
 msgid "redirects.status_code"
 msgstr "स्थिति कोड"
 
 msgid "redirects.to_url"
 msgstr "रीडायरेक्ट करें"
+
+msgid "redirects.to_url_help"
+msgstr "पूरा http:// या https:// URL। सापेक्ष लक्ष्य समर्थित नहीं हैं।"
 
 msgid "redirects.truncated"
 msgstr "केवल पहले 500 रीडायरेक्ट प्रदर्शित किए जाते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।"
@@ -6288,6 +6717,36 @@ msgstr "स्थानीय API निर्णय"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "तकनीकी विवरण"
+
+msgid "reports.live.off"
+msgstr "स्वतः रीफ़्रेश रुका हुआ है।"
+
+msgid "reports.live.on"
+msgstr "स्वतः रीफ़्रेश चालू है, हर 10 सेकंड में।"
+
+msgid "reports.live.updated"
+msgstr "रिपोर्ट अपडेट हुईं: %(added)s नई।"
+
+msgid "reports.offenders.confirm_many"
+msgstr "%(count)s IP पते हर इंस्टेंस पर 24 घंटे के लिए प्रतिबंधित होंगे।"
+
+msgid "reports.offenders.confirm_one"
+msgstr "%(ip)s हर इंस्टेंस पर 24 घंटे के लिए प्रतिबंधित होगा।"
+
+msgid "reports.offenders.confirm_title"
+msgstr "रिपोर्ट से प्रतिबंधित करें"
+
+msgid "reports.offenders.show"
+msgstr "दिखाएं"
+
+msgid "reports.offenders.show_bottom"
+msgstr "सबसे कम उल्लंघन करने वाले"
+
+msgid "reports.offenders.show_latest"
+msgstr "नवीनतम उल्लंघनकर्ता"
+
+msgid "reports.offenders.show_top"
+msgstr "सबसे अधिक उल्लंघन करने वाले"
 
 msgid "reports.security_incident"
 msgstr "सुरक्षा घटना"
@@ -6388,6 +6847,15 @@ msgstr "अनुरोध पथ"
 msgid "request_path.unordered"
 msgstr "%(phase)s चरण में कोई घोषित स्थिति नहीं; यह क्रमबद्ध प्लगइन्स के बाद चलता है, वर्णानुक्रम में।"
 
+msgid "resource_groups.access"
+msgstr "पहुंच"
+
+msgid "resource_groups.access_readonly"
+msgstr "केवल पढ़ने के लिए"
+
+msgid "resource_groups.access_write"
+msgstr "लिखना"
+
 msgid "resource_groups.add_entry"
 msgstr "प्रविष्टि जोड़ें"
 
@@ -6402,6 +6870,9 @@ msgstr "अल्फाबेट"
 
 msgid "resource_groups.alias_help"
 msgstr "अक्षर, अंक, अंडरस्कोर और डैश। मौजूदा अल्फ़ाबेट को नाम बदला नहीं जा सकता।"
+
+msgid "resource_groups.all_kinds"
+msgstr "सभी"
 
 msgid "resource_groups.bulk_import"
 msgstr "बल्क आयात"
@@ -6447,6 +6918,9 @@ msgstr "प्रविष्टियाँ"
 
 msgid "resource_groups.expand_all"
 msgstr "सभी को विस्तारित करें"
+
+msgid "resource_groups.filter_values"
+msgstr "मान फ़िल्टर करें..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "उपनाम में 1 से 64 अक्षर, अंक, अंडरस्कोर, या हाइफ़न होने चाहिए"
@@ -6580,6 +7054,48 @@ msgstr "व्यक्तिगत रूप से प्रविष्टि
 msgid "resource_groups.no_references"
 msgstr "कोई संदर्भ नहीं"
 
+msgid "resource_groups.no_value_match"
+msgstr "इस फ़िल्टर से कोई मान मेल नहीं खाता।"
+
+msgid "resource_groups.origin"
+msgstr "स्रोत"
+
+msgid "resource_groups.origin_plugin"
+msgstr "%(plugin)s प्लगइन के साथ उपलब्ध"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "API के माध्यम से बनाया या सिंक किया गया।"
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "autoconf नियंत्रक द्वारा बनाया गया।"
+
+msgid "resource_groups.origin_tip.download"
+msgstr "दूरस्थ स्रोत से डाउनलोड किया गया।"
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "हाथ से या कॉन्फ़िगरेशन फ़ाइल से बनाया गया।"
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "शेड्यूलर द्वारा बनाया गया।"
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "वेब UI के माध्यम से बनाया गया।"
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "सेटअप विज़ार्ड द्वारा बनाया गया, इसे अभी भी संपादित किया जा सकता है।"
+
+msgid "resource_groups.plugins_compatible"
+msgstr "संगत प्लगइन्स"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "वे प्लगइन्स जिनकी सेटिंग्स इस समूह के मानों के प्रकार स्वीकार करती हैं। वास्तविक संदर्भ उपयोग के अंतर्गत दिए गए हैं।"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "%(count)s प्लगइन"
+msgstr[1] "%(count)s प्लगइन्स"
+
 msgid "resource_groups.readonly"
 msgstr "डेटाबेस केवल पढ़ने के लिए है। संसाधन समूहों की जाँच और निर्यात किया जा सकता है, लेकिन उन्हें बदला नहीं जा सकता।"
 
@@ -6607,6 +7123,9 @@ msgstr "IP, देशों, ASNs, रिवर्स DNS नामों, उ�
 msgid "resource_groups.template_configuration"
 msgstr "टेम्पलेट %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "अपडेट किया गया"
+
 msgid "resource_groups.usage"
 msgstr "उपयोग"
 
@@ -6615,6 +7134,18 @@ msgstr "मान"
 
 msgid "resource_groups.values"
 msgstr "मान"
+
+msgid "resource_groups.values_compat"
+msgstr "इनके साथ संगत: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "कॉपी किया गया"
+
+msgid "resource_groups.values_title"
+msgstr "%(name)s के मान"
+
+msgid "resource_groups.view_values_of"
+msgstr "%(name)s के मान देखें"
 
 msgid "scope.all_services"
 msgstr "सभी सेवाएं"
@@ -7585,6 +8116,93 @@ msgstr "इस प्लगइन के लिए यहां कई सेट
 msgid "settings.multiple.title"
 msgstr "एकाधिक सेटिंग्स"
 
+msgid "settings_page.alert_global"
+msgstr "बदलाव उन सभी सेवाओं पर लागू होते हैं जो इन्हें ओवरराइड नहीं करतीं और सहेजने और पुनः लोड करने के बाद प्रभावी होते हैं।"
+
+msgid "settings_page.alert_service"
+msgstr "खाली छोड़ी गई सेटिंग्स ग्लोबल डिफ़ॉल्ट मान इस्तेमाल करती हैं। बदलाव केवल चयनित सेवा पर लागू होते हैं और सहेजने और पुनः लोड करने के बाद प्रभावी होते हैं।"
+
+msgid "settings_page.back_global"
+msgstr "ग्लोबल सेटिंग्स पर वापस जाएं"
+
+msgid "settings_page.back_service"
+msgstr "सेवा पर वापस जाएं"
+
+msgid "settings_page.card_title"
+msgstr "सेटिंग्स"
+
+msgid "settings_page.count"
+msgstr "%(count)s सेटिंग्स"
+
+msgid "settings_page.count_filtered"
+msgstr "%(total)s सेटिंग्स में से %(shown)s"
+
+msgid "settings_page.groups_link"
+msgstr "संसाधन समूह प्रबंधित करें"
+
+msgid "settings_page.groups_link_hint"
+msgstr "IP पतों, नेटवर्क और देशों की पुनः इस्तेमाल योग्य सूचियां, जिनका संदर्भ इस प्लगइन की सेटिंग्स दे सकती हैं।"
+
+msgid "settings_page.no_match"
+msgstr "आपकी खोज से कोई सेटिंग मेल नहीं खाती।"
+
+msgid "settings_page.plugin"
+msgstr "प्लगइन"
+
+msgid "settings_page.reload_alert_body"
+msgstr "सहेजते ही शेड्यूलर आपके इंस्टेंस पर कॉन्फ़िगरेशन फिर लागू करता है।"
+
+msgid "settings_page.reload_alert_title"
+msgstr "बदलाव इंस्टेंस पुनः लोड करवाते हैं।"
+
+msgid "settings_page.revert"
+msgstr "पूर्ववत करें"
+
+msgid "settings_page.revert_confirm"
+msgstr "सभी पूर्ववत करें"
+
+msgid "settings_page.revert_message"
+msgstr "यह इस पेज का हर बिना सहेजा संपादन उसके पिछले सहेजे गए मान पर लौटा देता है।"
+
+msgid "settings_page.revert_title"
+msgstr "बदलाव पूर्ववत करें"
+
+msgid "settings_page.save_reload"
+msgstr "सहेजें और पुनः लोड करें"
+
+msgid "settings_page.scope"
+msgstr "दायरा"
+
+msgid "settings_page.scope_global"
+msgstr "ग्लोबल सेटिंग्स"
+
+msgid "settings_page.search"
+msgstr "सेटिंग्स खोजें…"
+
+msgid "settings_page.search_label"
+msgstr "सेटिंग्स खोजें"
+
+msgid "settings_page.select_plugin_label"
+msgstr "प्लगइन चुनें"
+
+msgid "settings_page.select_scope_label"
+msgstr "इसकी सेटिंग्स संपादित करने का दायरा चुनें"
+
+msgid "setup.accordion.advanced"
+msgstr "उन्नत"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "रिवर्स प्रॉक्सी · वास्तविक IP · कस्टम प्रमाणपत्र"
+
+msgid "setup.accordion.general"
+msgstr "सामान्य"
+
+msgid "setup.accordion.general_hint"
+msgstr "सर्वर · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "सेटअप पूरा करें"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "वेब UI सेट करते समय त्रुटि हुई। कृपया फिर से प्रयास करें।"
 
@@ -7639,6 +8257,9 @@ msgstr "पासवर्ड मेल नहीं खाते।"
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "कस्टम SSL प्रमाणपत्र का उपयोग करते समय, आपको प्रमाणपत्र और कुंजी दोनों सेट करने होंगे।"
 
+msgid "setup.from_ui_host"
+msgstr "UI_HOST परिवेश चर से"
+
 msgid "setup.status.admin_user_exists"
 msgstr "एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।"
 
@@ -7684,6 +8305,9 @@ msgstr "वास्तविक आईपी"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "रिवर्स प्रॉक्सी"
 
+msgid "setup.step2.section.server"
+msgstr "सर्वर"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7692,6 +8316,12 @@ msgstr "वेब UI विशिष्ट सेटिंग्स कॉन्
 
 msgid "setup.step2.title"
 msgstr "UI सेटिंग्स"
+
+msgid "setup.step3.activate_title"
+msgstr "लाइसेंस सक्रिय करें"
+
+msgid "setup.step3.activation_note"
+msgstr "सेटअप पूरा करने पर लाइसेंस सक्रिय हो जाता है।"
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "प्रो लाभ"
@@ -7735,11 +8365,119 @@ msgstr "सेटअप पूरा करने से पहले अपन�
 msgid "setup.step4.title"
 msgstr "अवलोकन"
 
+msgid "setup.stepper_label"
+msgstr "सेटअप चरण"
+
 msgid "setup.subtitle"
 msgstr "सेटअप विज़ार्ड पूरा करने के लिए चरणों का पालन करें।"
 
+msgid "setup.switch.disabled"
+msgstr "अक्षम"
+
+msgid "setup.switch.enabled"
+msgstr "सक्षम"
+
 msgid "setup.title"
 msgstr "सेटअप विज़ार्ड"
+
+msgid "shell.account.current"
+msgstr "खाता: %(name)s"
+
+msgid "shell.account.title"
+msgstr "खाता"
+
+msgid "shell.contrast.toggle"
+msgstr "उच्च कंट्रास्ट"
+
+msgid "shell.density.toggle"
+msgstr "सघन लेआउट"
+
+msgid "shell.language.title"
+msgstr "भाषा"
+
+msgid "shell.main_navigation"
+msgstr "मुख्य नेविगेशन"
+
+msgid "shell.notifications.all_read"
+msgstr "सभी पढ़ ली गईं"
+
+msgid "shell.notifications.filter_label"
+msgstr "सूचनाएं फ़िल्टर करें"
+
+msgid "shell.notifications.group_earlier"
+msgstr "पहले"
+
+msgid "shell.notifications.group_today"
+msgstr "आज"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "बीता कल"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "सभी को पढ़ा हुआ चिह्नित करें"
+
+msgid "shell.notifications.mark_read"
+msgstr "पढ़ा हुआ चिह्नित करें"
+
+msgid "shell.notifications.none_unread"
+msgstr "कोई अपठित सूचना नहीं।"
+
+msgid "shell.notifications.tab_all"
+msgstr "सभी"
+
+msgid "shell.notifications.tab_unread"
+msgstr "अपठित"
+
+msgid "shell.notifications.title"
+msgstr "सूचनाएं"
+
+msgid "shell.notifications.unread_count"
+msgstr "अपठित: %(count)s"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "अपठित:"
+
+msgid "shell.search.kind_page"
+msgstr "पेज"
+
+msgid "shell.search.kind_plugin"
+msgstr "प्लगइन"
+
+msgid "shell.search.kind_service"
+msgstr "सेवा"
+
+msgid "shell.search.label"
+msgstr "पेज, प्लगइन्स और सेवाएं खोजें"
+
+msgid "shell.search.loading_services"
+msgstr "सेवाएं लोड हो रही हैं…"
+
+msgid "shell.search.no_match"
+msgstr "“%(query)s” के लिए कोई मिलान नहीं"
+
+msgid "shell.search.placeholder"
+msgstr "पेज, प्लगइन्स, सेवाएं खोजें…"
+
+msgid "shell.search.results"
+msgstr "खोज परिणाम"
+
+msgid "shell.search.status_results"
+msgstr "परिणाम: %(count)s"
+
+msgid "shell.skip_to_content"
+msgstr "मुख्य सामग्री पर जाएं"
+
+msgid "shell.star_us"
+msgstr "GitHub पर BunkerWeb को स्टार दें"
+
+msgid "shell.theme.system_hint"
+msgstr "आपके ऑपरेटिंग सिस्टम के अनुसार"
+
+msgid "shell.theme.title"
+msgstr "थीम"
+
+msgid "shell.top_navigation"
+msgstr "शीर्ष पट्टी"
 
 msgid "status.active"
 msgstr "सक्रिय"
@@ -7951,6 +8689,18 @@ msgstr "अगला"
 msgid "step.previous"
 msgstr "पिछला"
 
+msgid "support.attach_help"
+msgstr "सहायता अनुरोध के लिए निर्यात। इनमें लेखन अनुमति आवश्यक है और गोपनीय जानकारी छिपाई जाती है।"
+
+msgid "support.attach_title"
+msgstr "संलग्न करने के लिए निदान जानकारी"
+
+msgid "support.card.community.title"
+msgstr "समुदाय"
+
+msgid "support.card.docs.title"
+msgstr "दस्तावेज़ीकरण"
+
 msgid "support.card.download_logs.help"
 msgstr "सभी निजी डेटा को अज्ञात कर दिया जाएगा।"
 
@@ -7974,6 +8724,36 @@ msgstr "लॉग, प्लगइन संस्करण, परिवेश 
 
 msgid "support.card.ui_bundle.title"
 msgstr "वेब UI डायग्नोस्टिक्स"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "समुदाय और रखरखावकर्ताओं से पूछें।"
+
+msgid "support.community.github"
+msgstr "GitHub मुद्दे"
+
+msgid "support.community.github_help"
+msgstr "बग रिपोर्ट और सुविधा अनुरोध।"
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "चर्चाएं और घोषणाएं।"
+
+msgid "support.docs.quickstart"
+msgstr "त्वरित प्रारंभ मार्गदर्शिका"
+
+msgid "support.docs.troubleshooting"
+msgstr "समस्या निवारण"
+
+msgid "support.docs.upgrading"
+msgstr "अपग्रेड करना"
+
+msgid "support.docs.web_ui"
+msgstr "Web UI मार्गदर्शिका"
 
 msgid "support.subtitle"
 msgstr "डीबग लॉग डाउनलोड करें, अपने कॉन्फ़िगरेशन निकालें, और BunkerWeb टीम से सहायता प्राप्त करें।"
@@ -8142,6 +8922,63 @@ msgstr "मूल्य"
 
 msgid "table.header.version"
 msgstr "संस्करण"
+
+msgid "table_system.active_filters"
+msgstr "फ़िल्टर, %(count)s सक्रिय"
+
+msgid "table_system.advanced_filters"
+msgstr "उन्नत फ़िल्टर"
+
+msgid "table_system.any"
+msgstr "कोई भी"
+
+msgid "table_system.column_count"
+msgstr "%(total)s में से %(visible)s"
+
+msgid "table_system.confirm"
+msgstr "पुष्टि करें"
+
+msgid "table_system.confirm_title"
+msgstr "कार्रवाई की पुष्टि करें"
+
+msgid "table_system.filter"
+msgstr "फ़िल्टर"
+
+msgid "table_system.filters"
+msgstr "फ़िल्टर"
+
+msgid "table_system.leave"
+msgstr "बिना सहेजे छोड़ें"
+
+msgid "table_system.leave_message"
+msgstr "आपके बिना सहेजे बदलाव खो जाएंगे।"
+
+msgid "table_system.leave_title"
+msgstr "बिना सहेजे छोड़ें?"
+
+msgid "table_system.multiple_actions"
+msgstr "चयनित आइटम के लिए कई कार्रवाइयां"
+
+msgid "table_system.show_all"
+msgstr "सभी दिखाएं"
+
+msgid "table_system.stay"
+msgstr "संपादन जारी रखें"
+
+msgid "table_system.type_phrase"
+msgstr "पुष्टि के लिए %(phrase)s टाइप करें"
+
+msgid "table_system.upload_hint"
+msgstr "अपलोड करने के लिए खींचकर छोड़ें या क्लिक करें"
+
+msgid "table_system.visible_columns"
+msgstr "दिखाई देने वाले कॉलम"
+
+msgid "tables.top.detail"
+msgstr "विवरण"
+
+msgid "tables.top.share"
+msgstr "अनुपात"
 
 msgid "template.editor.button_add_config"
 msgstr "कॉन्फ़िगरेशन जोड़ें"
@@ -8731,6 +9568,24 @@ msgstr "एक सामुदायिक टेम्पलेट अपडे
 msgid "templates.catalog.update_up_to_date"
 msgstr "टेम्पलेट %(template)s पहले से ही कैटलॉग से मेल खाता है"
 
+msgid "templates.features_builtin"
+msgstr "अंतर्निहित सुविधाएं"
+
+msgid "templates.features_configs"
+msgstr "कस्टम कॉन्फ़िगरेशन"
+
+msgid "templates.features_help"
+msgstr "इस टेम्पलेट से मिलने वाली सुविधाएं। वास्तविक सेटिंग्स देखने या बदलने के लिए टेम्पलेट खोलें।"
+
+msgid "templates.features_of"
+msgstr "%(name)s की सुविधाएं दिखाएं"
+
+msgid "templates.features_plugins"
+msgstr "प्लगइन्स"
+
+msgid "templates.features_title"
+msgstr "टेम्पलेट सुविधाएं"
+
 msgid "templates.flash.catalog_updated"
 msgstr "टेम्पलेट %(template)s कैटलॉग से अपडेट कर दिया गया।"
 
@@ -8806,6 +9661,12 @@ msgstr "टेम्पलेट आयात नहीं हुआ: फ़ा�
 msgid "templates.import.unreadable"
 msgstr "टेम्पलेट आयात नहीं हुआ: फ़ाइल पढ़ी नहीं जा सकी"
 
+msgid "templates.managed_by"
+msgstr "%(owner)s द्वारा प्रबंधित: इसे यहां बदला या हटाया नहीं जा सकता।"
+
+msgid "templates.more_actions"
+msgstr "%(name)s के लिए और कार्रवाइयां"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8820,6 +9681,18 @@ msgstr "मध्यम सुरक्षा"
 
 msgid "templates.name.ui"
 msgstr "वेब UI"
+
+msgid "templates.no_match"
+msgstr "इस खोज से कोई टेम्पलेट मेल नहीं खाता।"
+
+msgid "templates.open_template"
+msgstr "टेम्पलेट खोलें"
+
+msgid "templates.read_only"
+msgstr "केवल पढ़ने के लिए"
+
+msgid "templates.search"
+msgstr "टेम्पलेट्स खोजें..."
 
 msgid "templates.subtitle"
 msgstr "अपनी सेवाओं के लिए पुन: प्रयोज्य कॉन्फ़िगरेशन टेम्पलेट — सेटिंग्स, चरणों और कस्टम कॉन्फ़िगरेशन को एक साथ समूहित करें, फिर उन्हें बनाएं, क्लोन करें, या हटाएं।"
@@ -8845,6 +9718,9 @@ msgstr "लाइट"
 msgid "theme.system"
 msgstr "सिस्टम"
 
+msgid "threatmap.attacks_24h"
+msgstr "पिछले 24 घंटों में अवरुद्ध"
+
 msgid "threatmap.attacks_today"
 msgstr "आज के हमले"
 
@@ -8853,6 +9729,21 @@ msgstr "अवरुद्ध अनुरोध"
 
 msgid "threatmap.blocked_requests"
 msgstr "अवरुद्ध अनुरोध"
+
+msgid "threatmap.col_ip"
+msgstr "IP पता"
+
+msgid "threatmap.col_origin"
+msgstr "स्रोत"
+
+msgid "threatmap.col_reason"
+msgstr "कारण"
+
+msgid "threatmap.col_target"
+msgstr "लक्ष्य"
+
+msgid "threatmap.col_time"
+msgstr "समय"
 
 msgid "threatmap.countries"
 msgstr "मूल देश"
@@ -8899,6 +9790,9 @@ msgstr "स्थान अज्ञात"
 msgid "threatmap.open_live"
 msgstr "लाइव दृश्य"
 
+msgid "threatmap.rolling_window"
+msgstr "गतिशील समयावधि, लगभग हर 30 सेकंड में रीफ़्रेश"
+
 msgid "threatmap.show_less"
 msgstr "केवल शीर्ष %(count)s दिखाएँ"
 
@@ -8910,6 +9804,9 @@ msgstr "ये आँकड़े अपडेट होना बंद हो 
 
 msgid "threatmap.subtitle"
 msgstr "पिछले 24 घंटों में आपके इंस्टेंस ने जो ट्रैफ़िक ब्लॉक किया, वह कहाँ से आया।"
+
+msgid "threatmap.ticker_caption"
+msgstr "हाल ही में अवरुद्ध अनुरोध"
 
 msgid "threatmap.ticker_title"
 msgstr "लाइव घटनाएँ"
@@ -8932,14 +9829,26 @@ msgstr "प्रमुख लक्ष्य"
 msgid "threatmap.updated"
 msgstr "अपडेट किया गया"
 
+msgid "timings.all_phases"
+msgstr "सभी चरण"
+
 msgid "timings.calls"
 msgstr "कॉल"
+
+msgid "timings.caption"
+msgstr "प्रति चरण प्लगइन समय, डिफ़ॉल्ट रूप से कुल समय के अनुसार क्रमबद्ध"
+
+msgid "timings.columns"
+msgstr "कॉलम"
 
 msgid "timings.disabled_help"
 msgstr "हर प्लगइन का समय मापने के लिए METRICS_COLLECT_TIMINGS को yes पर सेट करें। पूरे अनुरोध की अवधि हर स्थिति में एकत्र होती है।"
 
 msgid "timings.disabled_title"
 msgstr "प्लगइन समय बंद है"
+
+msgid "timings.export_csv"
+msgstr "CSV निर्यात करें"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "प्लगइन टाइमिंग प्राप्त करने में त्रुटि: %(message)s"
@@ -8956,6 +9865,15 @@ msgstr "औसत"
 msgid "timings.mean_request"
 msgstr "औसत अनुरोध"
 
+msgid "timings.no_match"
+msgstr "इन फ़िल्टर से कोई समय रिकॉर्ड मेल नहीं खाता"
+
+msgid "timings.no_share"
+msgstr "अनुपात नहीं"
+
+msgid "timings.no_share_hint"
+msgstr "यह चरण हर अनुरोध पर एक बार नहीं चलता, इसलिए इसका अनुपात नहीं है।"
+
 msgid "timings.partial"
 msgstr "कुछ इंस्टेंस ने उत्तर नहीं दिया। नीचे के आँकड़े उत्तर देने वालों के हैं।"
 
@@ -8964,6 +9882,9 @@ msgstr "चरण"
 
 msgid "timings.phases"
 msgstr "प्लगइन चरण"
+
+msgid "timings.phases_sub"
+msgstr "हर चरण में हर प्लगइन द्वारा लिया गया समय"
 
 msgid "timings.plugin"
 msgstr "प्लगइन"
@@ -8974,6 +9895,9 @@ msgstr "रिपोर्ट करने वाले इंस्टेंस
 msgid "timings.requests_measured"
 msgstr "मापे गए अनुरोध"
 
+msgid "timings.search_placeholder"
+msgstr "प्लगइन या चरण खोजें…"
+
 msgid "timings.share"
 msgstr "हिस्सा"
 
@@ -8982,6 +9906,9 @@ msgstr "हिस्सा कुल अनुरोध समय के मु�
 
 msgid "timings.subtitle"
 msgstr "हर अनुरोध चरण में प्रत्येक प्लगइन का समय, सभी इंस्टेंस से सीधे पढ़कर एकत्र किया जाता है।"
+
+msgid "timings.toolbar"
+msgstr "समय तालिका के उपकरण"
 
 msgid "timings.total"
 msgstr "कुल"
@@ -9883,6 +10810,12 @@ msgstr "सर्वर जोड़ें"
 msgid "upstreams.all"
 msgstr "सभी"
 
+msgid "upstreams.all_protocols"
+msgstr "सभी प्रोटोकॉल"
+
+msgid "upstreams.all_tls"
+msgstr "सभी TLS सेटिंग्स"
+
 msgid "upstreams.attach"
 msgstr "संलग्न करें"
 
@@ -9901,6 +10834,15 @@ msgstr "सबसे कम कनेक्शन"
 msgid "upstreams.balancing.round_robin"
 msgstr "राउंड रॉबिन (डिफ़ॉल्ट)"
 
+msgid "upstreams.card_subtitle"
+msgstr "बैकएंड पूल और उन तक प्रॉक्सी करने वाली सेवाएं"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "%(count)s अपस्ट्रीम"
+msgstr[1] "%(count)s अपस्ट्रीम"
+
 msgid "upstreams.create"
 msgstr "अपस्ट्रीम बनाएं"
 
@@ -9912,6 +10854,9 @@ msgstr "क्या %(name)s अपस्ट्रीम को हटाएं
 
 msgid "upstreams.delete_help"
 msgstr "एक अपस्ट्रीम जो किसी सेवा से जुड़ा हुआ है, उसे हटाया नहीं जा सकता। पहले इसे अलग करें।"
+
+msgid "upstreams.detach_shared"
+msgstr "यह अपस्ट्रीम साझा है। अलग करने से यह केवल उस सेवा और पथ से हटता है, दूसरे जुड़ाव इसे रखते हैं।"
 
 msgid "upstreams.edit"
 msgstr "अपस्ट्रीम संपादित करें"
@@ -10003,11 +10948,44 @@ msgstr "Keepalive"
 msgid "upstreams.keepalive_help"
 msgstr "प्रत्येक वर्कर के लिए बनाए रखे गए निष्क्रिय कनेक्शन। केवल HTTP और gRPC; अक्षम करने के लिए खाली छोड़ दें।"
 
+msgid "upstreams.keepalive_off"
+msgstr "बंद"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "पहले लोड किए गए %(count)s में से"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "%(count)s नहीं जुड़े हैं"
+
+msgid "upstreams.kpi_roles"
+msgstr "%(primary)s प्राथमिक · %(backup)s बैकअप · %(down)s बंद (कॉन्फ़िगर किए गए)"
+
+msgid "upstreams.kpi_services"
+msgstr "जुड़ी सेवाएं"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "पूल तक प्रॉक्सी करने वाली सेवाएं"
+
+msgid "upstreams.kpi_tls"
+msgstr "बैकएंड तक TLS"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "अपने सर्वरों से TLS पर संवाद करने के लिए कॉन्फ़िगर किए गए पूल"
+
 msgid "upstreams.match_path"
 msgstr "रिवर्स प्रॉक्सी पथ"
 
 msgid "upstreams.match_path_help"
 msgstr "वह स्थान जहाँ चुनी गई सेवाएँ इस पूल को प्रॉक्सी करती हैं। स्ट्रीम पूल के लिए इसे अनदेखा किया जाता है, क्योंकि वह पूरी सेवा संभालता है।"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: %(count)s सर्वर"
+msgstr[1] "%(name)s: %(count)s सर्वर"
+
+msgid "upstreams.members_title"
+msgstr "इस अपस्ट्रीम में सर्वर"
 
 msgid "upstreams.method"
 msgstr "लोड बैलेंसिंग"
@@ -10017,6 +10995,9 @@ msgstr "केवल अक्षर, संख्याएँ, हाइफ़�
 
 msgid "upstreams.new"
 msgstr "नया अपस्ट्रीम"
+
+msgid "upstreams.no_match"
+msgstr "इन फ़िल्टर से कोई अपस्ट्रीम मेल नहीं खाता।"
 
 msgid "upstreams.not_attached"
 msgstr "जोड़ा नहीं गया"
@@ -10072,11 +11053,38 @@ msgstr "वजन"
 msgid "upstreams.servers"
 msgstr "सर्वर"
 
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "%(count)s सर्वर"
+msgstr[1] "%(count)s सर्वर"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 2 form(s) for hi, singular in slot 0
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "%(count)s सेवा"
+msgstr[1] "%(count)s सेवाएं"
+
 msgid "upstreams.services_help"
 msgstr "Ctrl या Command का उपयोग करके कई सेवाओं का चयन करें। एक अपस्ट्रीम बाद में संलग्न किया जा सकता है।"
 
 msgid "upstreams.services_hidden"
 msgstr "छिपी हुई सेवाएँ: %(count)s। %(protocol)s अपस्ट्रीम केवल मिलान वाली सेवा से संलग्न किया जा सकता है।"
+
+msgid "upstreams.services_title"
+msgstr "यह अपस्ट्रीम इस्तेमाल करने वाली सेवाएं"
+
+msgid "upstreams.tls"
+msgstr "बैकएंड तक TLS"
+
+msgid "upstreams.tls_no"
+msgstr "बिना एन्क्रिप्शन"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "केवल पहले 500 अपस्ट्रीम प्रदर्शित होते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।"
@@ -10156,11 +11164,26 @@ msgstr "ZeroSSL के लिए ईमेल या ZeroSSL API कुंजी
 msgid "web_cache.available"
 msgstr "उपलब्ध"
 
+msgid "web_cache.available_tip"
+msgstr "इस इंस्टेंस पर कैश डायरेक्टरी मौजूद है। कोई सेवा इसे इस्तेमाल करती है या नहीं, यह सेवा सक्षमता के अंतर्गत दिखाया जाता है।"
+
 msgid "web_cache.cache_state"
 msgstr "स्थिति"
 
 msgid "web_cache.cached_files"
 msgstr "कैश किए गए फ़ाइलें"
+
+msgid "web_cache.compact"
+msgstr "संक्षिप्त"
+
+msgid "web_cache.counters_window"
+msgstr "हर इंस्टेंस के पुनः शुरू होने से अब तक"
+
+msgid "web_cache.counters_window_help"
+msgstr "ये हर इंस्टेंस के पिछली बार पुनः शुरू होने से गिनते हैं, किसी निश्चित अवधि के लिए नहीं।"
+
+msgid "web_cache.danger_zone"
+msgstr "खतरनाक क्षेत्र"
 
 msgid "web_cache.deployment"
 msgstr "तैनाती"
@@ -10213,11 +11236,20 @@ msgstr "हिट दर"
 msgid "web_cache.instance"
 msgstr "इंस्टेंस"
 
+msgid "web_cache.invalidate"
+msgstr "अमान्य करें"
+
 msgid "web_cache.metrics"
 msgstr "समग्र हिट / मिस वितरण"
 
 msgid "web_cache.metrics_scope"
 msgstr "काउंटर सभी कैश-सक्षम सेवाओं के लिए प्रत्येक इंस्टेंस के अनुसार एकत्रित किए जाते हैं।"
+
+msgid "web_cache.no_counters"
+msgstr "इस इंस्टेंस ने अभी तक कोई कैश किया गया अनुरोध नहीं गिना है।"
+
+msgid "web_cache.no_requests_for"
+msgstr "इनके लिए कोई अनुरोध नहीं:"
 
 msgid "web_cache.not_reporting"
 msgstr "रिपोर्टिंग नहीं हो रही"
@@ -10228,6 +11260,9 @@ msgstr "पथ"
 msgid "web_cache.purge"
 msgstr "कैश किए गए प्रतिक्रियाओं को साफ़ करें"
 
+msgid "web_cache.purge_a_url"
+msgstr "किसी URL का कैश साफ़ करें"
+
 msgid "web_cache.purge_all"
 msgstr "सब साफ़ करें"
 
@@ -10236,6 +11271,9 @@ msgstr "यह हर सेवा के लिए हर पहुंच य�
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "पूरे कैश को साफ़ करें?"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "सब मिटाएं"
 
 msgid "web_cache.purge_help"
 msgstr "पहुंच योग्य इंस्टेंस पर तुरंत कार्रवाई चलाएं। अनुपलब्ध इंस्टेंस को छोड़ दिया जाता है और कोई कार्रवाई क्यू में नहीं जोड़ी जाती।"
@@ -10258,6 +11296,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "रिपोर्ट करने वाले इंस्टेंस"
 
+msgid "web_cache.server_side_note"
+msgstr "केवल सर्वर-साइड कैश। यह पेज हर BunkerWeb इंस्टेंस पर संग्रहीत रिवर्स-प्रॉक्सी कैश प्रबंधित करता है। आगंतुकों के ब्राउज़र में पहले से सहेजी गई प्रतिक्रियाएं प्रभावित नहीं होतीं।"
+
 msgid "web_cache.service"
 msgstr "सेवा"
 
@@ -10266,6 +11307,27 @@ msgstr "सेवा को सक्षम करना"
 
 msgid "web_cache.status"
 msgstr "इंस्टेंस स्टोरेज"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "इस अनुरोध के लिए कैशिंग छोड़ी गई"
+
+msgid "web_cache.status_desc.expired"
+msgstr "जीवनकाल समाप्त: अपस्ट्रीम से फिर लाया गया"
+
+msgid "web_cache.status_desc.hit"
+msgstr "सीधे कैश से दिया गया"
+
+msgid "web_cache.status_desc.miss"
+msgstr "कैश में नहीं था: अपस्ट्रीम से लाकर संग्रहीत किया गया"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "सशर्त पुनः प्राप्ति: अपस्ट्रीम ने बताया कि यह अभी भी मान्य है"
+
+msgid "web_cache.status_desc.stale"
+msgstr "अपस्ट्रीम की विफलता के कारण सामग्री का पुराना संस्करण दिया गया"
+
+msgid "web_cache.status_desc.updating"
+msgstr "रीफ़्रेश जारी रहने के दौरान सामग्री का पुराना संस्करण दिया गया"
 
 msgid "web_cache.subtitle"
 msgstr "रिवर्स-प्रॉक्सी कैश स्थिति, एकत्रित हिट-दर मेट्रिक्स और तत्काल साफ़ करने के नियंत्रण।"
@@ -10308,6 +11370,18 @@ msgstr "एंटीबॉट प्रदाता"
 
 msgid "workflows.act_redirect"
 msgstr "रीडायरेक्ट करें"
+
+msgid "workflows.act_settings_block"
+msgstr "ब्लॉक सेटिंग्स"
+
+msgid "workflows.act_settings_challenge"
+msgstr "चुनौती सेटिंग्स"
+
+msgid "workflows.act_settings_generic"
+msgstr "कार्रवाई सेटिंग्स"
+
+msgid "workflows.act_settings_redirect"
+msgstr "रीडायरेक्ट सेटिंग्स"
 
 msgid "workflows.act_status"
 msgstr "अस्वीकार स्थिति"
@@ -10435,6 +11509,9 @@ msgstr "%(count)s नियम में सत्यापन समस्य�
 msgid "workflows.aria.ruleName"
 msgstr "नियम %(n)s का नाम"
 
+msgid "workflows.aria.ruleTools"
+msgstr "नियम %(n)s की कार्रवाइयां"
+
 msgid "workflows.aria.terminalAction"
 msgstr "अंतिम कार्रवाई"
 
@@ -10551,6 +11628,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "यह नियम हटाएँ? इसके नीचे के सभी नियम एक स्थान ऊपर चले जाएँगे।"
+
+msgid "workflows.conseq.skip"
+msgstr "कभी नहीं चलता"
+
+msgid "workflows.conseq.stop"
+msgstr "श्रृंखला रोकता है"
 
 msgid "workflows.copySuffix"
 msgstr " (प्रतिलिपि)"
@@ -10699,6 +11782,21 @@ msgstr "मिलान द्वार"
 msgid "workflows.gate.help"
 msgstr "हर क्लाइंट IP के लिए अलग गणना होती है। सीमा से नीचे नियम बिल्कुल मेल नहीं खाता और मूल्यांकन अगले नियम पर जाता है; यह अपने आप दर सीमित नहीं करता।"
 
+msgid "workflows.inspector.apply"
+msgstr "लागू करें"
+
+msgid "workflows.inspector.apply_title"
+msgstr "लागू करें: ये संपादन ड्राफ्ट में रखें, इन्हें संग्रहीत करने के लिए पेज का सहेजें बटन इस्तेमाल करें"
+
+msgid "workflows.inspector.cancel"
+msgstr "रद्द करें"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "रद्द करें: नियम को खोलते समय की स्थिति में बहाल करें"
+
+msgid "workflows.inspector.cancelled"
+msgstr "नियम %(n)s के संपादन रद्द हुए, नियम खोलते समय की स्थिति में वापस आ गया है।"
+
 msgid "workflows.legend.fall"
 msgstr "मेल न होने पर अगला नियम"
 
@@ -10735,8 +11833,14 @@ msgstr "नीचे प्रतिलिपि बनाएँ"
 msgid "workflows.menu.enable"
 msgstr "नियम सक्षम करें"
 
+msgid "workflows.menu.header"
+msgstr "नियम की कार्रवाइयां"
+
 msgid "workflows.menu.moveTo"
 msgstr "स्थिति %(n)s पर ले जाएँ"
+
+msgid "workflows.menu.order"
+msgstr "क्रम"
 
 msgid "workflows.menu.staysAt"
 msgstr "स्थिति %(n)s पर रहता है"
@@ -10768,6 +11872,81 @@ msgstr "अभी सत्यापित नहीं"
 msgid "workflows.order_help"
 msgstr "नियमों का मूल्यांकन क्रम में किया जाता है और पहला जो मेल खाता है, वह जीत जाता है। एक दर सीमा वाले नियम केवल तभी मेल खाते हैं जब सीमा पार हो जाती है, इसलिए एक निचला नियम नीचे की ट्रैफ़िक को पकड़ सकता है।"
 
+msgid "workflows.port.active_rules"
+msgstr "%(count)s सक्रिय"
+
+msgid "workflows.port.attachment"
+msgstr "जुड़ाव"
+
+msgid "workflows.port.attachment_any"
+msgstr "कोई भी"
+
+msgid "workflows.port.attachment_attached"
+msgstr "जुड़ा हुआ"
+
+msgid "workflows.port.created"
+msgstr "बनाया गया"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "हटाने से पहले इस कार्यप्रवाह को हर सेवा से अलग करें। हटाने से सेवाएं कभी स्वतः अलग नहीं होतीं।"
+
+msgid "workflows.port.details"
+msgstr "विवरण"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "चयनित परिभाषाएं (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "चयनित परिभाषाएं निर्यात की गईं। इस फ़ाइल के दोबारा आयात की कोई गारंटी नहीं है।"
+
+msgid "workflows.port.export_failed"
+msgstr "निर्यात विफल, कोई फ़ाइल डाउनलोड नहीं हुई।"
+
+msgid "workflows.port.export_loading"
+msgstr "चयनित कार्यप्रवाह परिभाषाएं पढ़ी जा रही हैं…"
+
+msgid "workflows.port.export_scope"
+msgstr "तालिका निर्यात में फ़िल्टर की गई पंक्तियां और दिखाई देने वाले कॉलम शामिल हैं। JSON निर्यात में केवल चयनित कार्यप्रवाहों की मानक परिभाषाएं id की कुंजी से शामिल हैं, दोबारा आयात की कोई गारंटी नहीं है।"
+
+msgid "workflows.port.list_subtitle"
+msgstr "हर कार्यप्रवाह के नियम और जुड़ी सेवाएं"
+
+msgid "workflows.port.more"
+msgstr "%(name)s के लिए और कार्रवाइयां"
+
+msgid "workflows.port.row_details"
+msgstr "कार्यप्रवाह विवरण"
+
+msgid "workflows.port.select_workflows"
+msgstr "कार्यप्रवाह चुनें"
+
+msgid "workflows.port.services_count"
+msgstr "सेवाएं: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "अलग करने से यह कार्यप्रवाह केवल उस सेवा से हटता है। कार्यप्रवाह और उसके नियम बने रहते हैं।"
+
+msgid "workflows.port.services_none"
+msgstr "यह कार्यप्रवाह किसी सेवा से जुड़ा नहीं है।"
+
+msgid "workflows.port.services_open"
+msgstr "%(name)s से जुड़ी सेवाएं दिखाएं"
+
+msgid "workflows.port.services_title"
+msgstr "%(name)s से जुड़ी सेवाएं"
+
+msgid "workflows.port.total_rules"
+msgstr "कुल %(count)s"
+
+msgid "workflows.port.updated"
+msgstr "अपडेट किया गया"
+
 msgid "workflows.readonly"
 msgstr "डेटाबेस केवल पढ़ने के लिए है। वर्कफ़्लो देखे जा सकते हैं लेकिन नहीं बदले जा सकते।"
 
@@ -10782,6 +11961,9 @@ msgstr "सुरक्षा वर्कफ़्लो “%(workflow)s”: �
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "सुरक्षा वर्कफ़्लो “%(workflow)s”: अनुरोध रीडायरेक्ट किया गया"
+
+msgid "workflows.regex_help"
+msgstr "regex की दो अलग सीमाएं लागू होती हैं। लिखते समय: एक सेवा से जुड़े कार्यप्रवाहों में कुल अधिकतम 50 regex शर्तें हो सकती हैं, इससे अधिक सहेजना या जोड़ना अस्वीकार होता है। चलते समय: हर इंस्टेंस अधिकतम WORKFLOWS_REGEX_BUDGET अलग रेगुलर एक्सप्रेशन संकलित करता है (डिफ़ॉल्ट 512, सभी कार्यप्रवाहों के बीच साझा)। इस सीमा से आगे regex का मूल्यांकन नहीं होता और वह UNKNOWN लौटाता है, इसलिए उसका नियम मेल नहीं खा सकता।"
 
 msgid "workflows.rule.disabled"
 msgstr "अक्षम"
@@ -10893,6 +12075,108 @@ msgstr "सूची दृश्य। नियम ऊपर से नीच�
 
 msgid "workflows.search"
 msgstr "नाम या विवरण खोजें..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "कॉन्फ़िगरेशन खोलने के लिए कार्यप्रवाह बनाएं"
+
+msgid "workflows.shell.draft_discard"
+msgstr "बदलाव छोड़ें"
+
+msgid "workflows.shell.draft_restored"
+msgstr "इस कार्यप्रवाह के बिना सहेजे बदलाव बहाल किए गए। लागू करने के लिए सहेजें, या छोड़ने के लिए कार्यप्रवाह बदलें।"
+
+msgid "workflows.shell.draft_save"
+msgstr "सहेजें और जारी रखें"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "कार्यप्रवाह सहेजा नहीं जा सका, कुछ भी छोड़ा नहीं गया।"
+
+msgid "workflows.shell.draft_stale"
+msgstr "आपका ड्राफ्ट शुरू होने के बाद यह कार्यप्रवाह कहीं और सहेजा गया, इसलिए ड्राफ्ट छोड़ दिया गया।"
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "%(target)s खोलने से %(name)s में नियमों के बदलाव बिना सहेजे रह जाएंगे। एक समय में केवल एक ड्राफ्ट खुल सकता है: इसे सहेजें, बदलाव छोड़ें, या यहीं रहें।"
+
+msgid "workflows.shell.draft_title"
+msgstr "%(name)s में बिना सहेजे बदलाव"
+
+msgid "workflows.shell.pick_label"
+msgstr "कार्यप्रवाह"
+
+msgid "workflows.shell.read_only"
+msgstr "केवल पढ़ने के लिए"
+
+msgid "workflows.shell.tab_config"
+msgstr "कॉन्फ़िगरेशन"
+
+msgid "workflows.shell.tab_overview"
+msgstr "अवलोकन"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "सहेजा नहीं गया"
+
+msgid "workflows.shell.tabs_label"
+msgstr "कार्यप्रवाह दृश्य"
+
+msgid "workflows.shell.view_label"
+msgstr "दृश्य"
+
+msgid "workflows.sum.block"
+msgstr "अनुरोध ब्लॉक करें"
+
+msgid "workflows.sum.blockStatus"
+msgstr "%(code)s के साथ अनुरोध ब्लॉक करें"
+
+msgid "workflows.sum.challenge"
+msgstr "%(provider)s की चुनौती दिखाएं"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "CrowdSec उपचार"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "CrowdSec स्रोत"
+
+msgid "workflows.sum.every"
+msgstr "कोई भी अनुरोध आता है"
+
+msgid "workflows.sum.gate"
+msgstr "प्रति IP हर %(window)s सेकंड में %(count)s से अधिक अनुरोध आते हैं"
+
+msgid "workflows.sum.group_asn"
+msgstr "ASN %(name)s समूह में है"
+
+msgid "workflows.sum.group_country"
+msgstr "देश %(name)s समूह में है"
+
+msgid "workflows.sum.group_ip"
+msgstr "IP %(name)s समूह में है"
+
+msgid "workflows.sum.isOne"
+msgstr "%(label)s %(value)s है"
+
+msgid "workflows.sum.isOneOf"
+msgstr "%(label)s %(values)s में से एक है"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "देश"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "विधि"
+
+msgid "workflows.sum.not"
+msgstr "«%(what)s» शर्त पूरी नहीं होती"
+
+msgid "workflows.sum.redirect"
+msgstr "%(url)s पर रीडायरेक्ट करें (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "URI %(value)s %(match)s"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11064,6 +12348,78 @@ msgstr "अनुरोध"
 
 msgid "workflows.threshold_window"
 msgstr "प्रति (सेकंड)"
+
+msgid "workflows.toolbar.actions"
+msgstr "कार्यप्रवाह कार्रवाइयां"
+
+msgid "workflows.toolbar.any_action"
+msgstr "कोई भी कार्रवाई"
+
+msgid "workflows.toolbar.any_state"
+msgstr "कोई भी स्थिति"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "ऊपर वापस जाएं"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "सभी संकुचित करें"
+
+msgid "workflows.toolbar.detailed"
+msgstr "विस्तृत"
+
+msgid "workflows.toolbar.display"
+msgstr "नियम प्रदर्शन"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "सभी विस्तृत करें"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "कार्रवाई"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "नाम"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "नियम के नाम से खोजें…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "नियम फ़िल्टर करें"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "स्थिति"
+
+msgid "workflows.toolbar.filters"
+msgstr "फ़िल्टर"
+
+msgid "workflows.toolbar.full_height"
+msgstr "पूरी ऊंचाई"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "ऊंचाई सीमित करें"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "%(total)s नियमों में से %(shown)s"
+
+msgid "workflows.toolbar.no_match"
+msgstr "इन फ़िल्टर से कोई नियम मेल नहीं खाता"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "जब कोई फ़िल्टर नियम छिपाता है तब क्रम बदलना रुका रहता है।"
+
+msgid "workflows.toolbar.reset"
+msgstr "रीसेट करें"
+
+msgid "workflows.toolbar.simplified"
+msgstr "सरल"
+
+msgid "workflows.toolbar.state_off"
+msgstr "अक्षम"
+
+msgid "workflows.toolbar.state_on"
+msgstr "सक्षम"
+
+msgid "workflows.toolbar.view"
+msgstr "नियम क्रम दृश्य"
 
 msgid "workflows.tree.addCondition"
 msgstr "शर्त"

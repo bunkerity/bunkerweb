@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "تم البناء باستخدام"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "تم النسخ"
+
+msgid "about.environment.copy"
+msgstr "نسخ بيانات التشخيص"
+
+msgid "about.environment.database"
+msgstr "خادم قاعدة البيانات"
+
+msgid "about.environment.help"
+msgstr "تُقرأ من مضيف واجهة الويب ومستوى التحكم. لا تُعرض أي متغيرات أو مفاتيح ترخيص أو عناوين قواعد بيانات."
+
+msgid "about.environment.instances_up"
+msgstr "%(up)s قيد التشغيل من أصل %(total)s"
+
+msgid "about.environment.integration"
+msgstr "التكامل"
+
+msgid "about.environment.platform"
+msgstr "المنصة"
+
+msgid "about.environment.registered"
+msgstr "مسجّل"
+
+msgid "about.environment.scope_control_plane"
+msgstr "مستوى التحكم"
+
+msgid "about.environment.scope_instances"
+msgstr "المثيلات"
+
+msgid "about.environment.scope_ui_host"
+msgstr "مضيف واجهة الويب"
+
+msgid "about.environment.title"
+msgstr "البيئة"
+
 msgid "about.gnu_license"
 msgstr "GNU Affero General Public License v3.0"
 
 msgid "about.license_title"
 msgstr "الترخيص"
+
+msgid "about.releases.title"
+msgstr "الإصدارات الأخيرة"
+
+msgid "about.releases.view_all"
+msgstr "عرض الكل"
 
 msgid "about.social.discord"
 msgstr "ديسكورد"
@@ -274,6 +319,18 @@ msgstr "النطاق المحدد"
 msgid "bans.chart.timeseries.title"
 msgstr "الحظورات النشطة لكل فترة"
 
+msgid "bans.clear_all.confirm"
+msgstr "مسح جميع عمليات الحظر"
+
+msgid "bans.clear_all.message"
+msgstr "يُزيل هذا كل عمليات الحظر من جميع الخدمات والمثيلات. يُرفع حظر CrowdSec من الصف الخاص به."
+
+msgid "bans.clear_all.phrase"
+msgstr "مسح الكل"
+
+msgid "bans.clear_all.title"
+msgstr "مسح جميع عمليات الحظر"
+
 msgid "bans.crowdsec.confirm"
 msgstr "حذف القرارات وإلغاء الحظر"
 
@@ -394,11 +451,53 @@ msgstr "تعذر تحديث مدة الحظر لـ %(ip)s: %(error)s"
 msgid "bans.flash.update_duration_success"
 msgstr "تم تحديث مدة الحظر لـ %(ip)s بنجاح."
 
+msgid "bans.import.confirm_button"
+msgstr "استيراد"
+
+msgid "bans.import.confirm_message"
+msgstr "عمليات الحظر الموجودة في هذا الملف: %(count)s. هل تريد استيرادها؟"
+
+msgid "bans.import.confirm_skipped"
+msgstr "الأسطر غير المقروءة التي تم تجاهلها: %(skipped)s."
+
+msgid "bans.import.confirm_title"
+msgstr "استيراد عمليات الحظر"
+
+msgid "bans.import.empty"
+msgstr "لم يُعثر على حظر صالح في هذا الملف. المتوقع حظر واحد في كل سطر بصيغة IP[,scope[,duration[,reason]]]، أو قائمة JSON."
+
+msgid "bans.import.read_failed"
+msgstr "تعذّرت قراءة الملف."
+
+msgid "bans.import.too_many"
+msgstr "يحتوي هذا الملف على أكثر من %(max)s عملية حظر. قسّمه واستورده على أجزاء."
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "إيجار CrowdSec"
 
+msgid "bans.live.off"
+msgstr "التحديث التلقائي متوقف مؤقتًا."
+
+msgid "bans.live.on"
+msgstr "التحديث التلقائي مفعّل، كل 10 ثوانٍ."
+
+msgid "bans.live.updated"
+msgstr "تم تحديث الحظر: %(added)s جديدة، و%(removed)s منتهية الصلاحية."
+
+msgid "bans.page.clear_all"
+msgstr "مسح الكل"
+
+msgid "bans.page.import"
+msgstr "استيراد"
+
 msgid "bans.stats.card.by_reason"
 msgstr "عمليات الحظر حسب السبب"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "السبب"
+
+msgid "bans.stats.reasons.meta"
+msgstr "%(count)s عمليات حظر نشطة"
 
 msgid "bans.stats.tile.active"
 msgstr "عمليات الحظر النشطة"
@@ -934,6 +1033,27 @@ msgstr "تصفح الشهادة"
 msgid "certificates.browse_key"
 msgstr "تصفح المفتاح الخاص"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "الشهادات المراد حذفها: %(count)s. لا يمكن التراجع عن ذلك. هل تريد المتابعة؟"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "الشهادات الموقّعة ذاتيًا المراد تجديدها: %(count)s. هل تريد المتابعة؟"
+
+msgid "certificates.bulk.delete"
+msgstr "حذف المحدد"
+
+msgid "certificates.bulk.download"
+msgstr "تنزيل سلاسل الشهادات"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "لا يمكن لأي من الشهادات المحددة تنفيذ هذا الإجراء."
+
+msgid "certificates.bulk.renew"
+msgstr "تجديد الموقّعة ذاتيًا"
+
+msgid "certificates.bulk.skipped"
+msgstr "الشهادات المحددة التي لا يمكنها تنفيذ هذا الإجراء وتم تخطيها: %(skipped)s."
+
 msgid "certificates.common_name"
 msgstr "اسم شائع"
 
@@ -1117,6 +1237,9 @@ msgstr "الجهة المصدرة"
 msgid "certificates.issuers"
 msgstr "الجهات المصدرة الرائدة"
 
+msgid "certificates.issuers_meta"
+msgstr "%(count)s شهادات"
+
 msgid "certificates.key_drop"
 msgstr "ضع المفتاح الخاص المطابق هنا"
 
@@ -1180,6 +1303,9 @@ msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص ال�
 msgid "certificates.renew_due"
 msgstr "تحقق/جدد"
 
+msgid "certificates.renew_due_short"
+msgstr "حان التجديد"
+
 msgid "certificates.sans"
 msgstr "أسماء بديلة للموضوع"
 
@@ -1194,6 +1320,9 @@ msgstr "جدولة إصدار ACME"
 
 msgid "certificates.search"
 msgstr "ابحث عن الاسم، الاسم الشائع، SAN، جهة الإصدار، أو البصمة…"
+
+msgid "certificates.select_all"
+msgstr "تحديد جميع الشهادات"
 
 msgid "certificates.serial"
 msgstr "رقم التسلسل"
@@ -1323,6 +1452,99 @@ msgstr "عرض المزيد من %(count)s"
 
 msgid "compose.unavailable"
 msgstr "لا يمكن تحميل قائمة الإضافات، لذلك لا يمكن تحرير هذه الصفحة بأمان. أعد التحميل بعد تلقي رد من API."
+
+msgid "configs.console.all_scopes"
+msgstr "جميع النطاقات"
+
+msgid "configs.console.clone"
+msgstr "استنساخ التكوين"
+
+msgid "configs.console.content"
+msgstr "محتوى التكوين (للقراءة فقط)"
+
+msgid "configs.console.download"
+msgstr "تنزيل"
+
+msgid "configs.console.edit"
+msgstr "تعديل التكوين"
+
+msgid "configs.console.editor_help"
+msgstr "عدّل محتوى NGINX أو ModSecurity. احفظ باستخدام Ctrl+S أو Command+S."
+
+msgid "configs.console.editor_title"
+msgstr "محتوى التكوين"
+
+msgid "configs.console.files"
+msgstr "الملفات"
+
+msgid "configs.console.full_view"
+msgstr "عرض كامل"
+
+msgid "configs.console.global_legend"
+msgstr "ينطبق العام على كل خدمة."
+
+msgid "configs.console.global_only"
+msgstr "العام فقط"
+
+msgid "configs.console.lint"
+msgstr "فحص الصياغة"
+
+msgid "configs.console.lint_brace"
+msgstr "قوس فتح معقوف غير مغلق."
+
+msgid "configs.console.lint_clean"
+msgstr "لم تعثر فحوص جهة العميل على مشكلات."
+
+msgid "configs.console.lint_help"
+msgstr "تلميحات من جهة العميل فقط. تحقّق باستخدام nginx -t قبل النشر؛ قد تُنتج التوجيهات متعددة الأسطر تحذيرات."
+
+msgid "configs.console.lint_quote"
+msgstr "علامة اقتباس غير مغلقة."
+
+msgid "configs.console.lint_semicolon"
+msgstr "قد تكون هناك فاصلة منقوطة مفقودة في نهاية التوجيه."
+
+msgid "configs.console.lint_skipped"
+msgstr "فحص صياغة NGINX غير متاح لتكوينات ModSecurity وCRS."
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "قوس إغلاق معقوف غير متوقع."
+
+msgid "configs.console.lint_warnings"
+msgstr "عثرت فحوص جهة العميل على %(count)s تحذيرات. راجع تعليقات المحرر."
+
+msgid "configs.console.name_help"
+msgstr "استخدم الأحرف أو الأرقام أو الشرطات أو الشرطات السفلية. تُضاف اللاحقة .conf على القرص."
+
+msgid "configs.console.new"
+msgstr "تكوين جديد"
+
+msgid "configs.console.no_files"
+msgstr "لا يوجد تكوين يطابق عوامل التصفية هذه."
+
+msgid "configs.console.restore_view"
+msgstr "استعادة العرض"
+
+msgid "configs.console.select_file"
+msgstr "اختر ملفًا لمعاينة محتواه."
+
+msgid "configs.console.service_legend"
+msgstr "تنطبق الخدمة على خدمة واحدة فقط."
+
+msgid "configs.console.service_only"
+msgstr "الخدمة فقط"
+
+msgid "configs.console.template_name_locked"
+msgstr "لا يُسمح بإعادة تسمية تكوين مخصص مستند إلى قالب."
+
+msgid "configs.console.title"
+msgstr "التكوينات المخصصة"
+
+msgid "configs.console.types"
+msgstr "نوع التكوين"
+
+msgid "configs.console.view"
+msgstr "عرض التكوين"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "جميع التكوينات المخصصة المحددة غير موجودة أو ليست تكوينات UI/API أو تم تحويلها بالفعل."
@@ -2764,6 +2986,15 @@ msgstr "الوقت"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "حالة الحظر مع مرور الوقت"
 
+msgid "dashboard.chart.legend.count"
+msgstr "العدد"
+
+msgid "dashboard.chart.legend.item"
+msgstr "العنصر"
+
+msgid "dashboard.chart.legend.share"
+msgstr "النسبة"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "الطلبات المحظورة"
 
@@ -3007,6 +3238,18 @@ msgstr "تم تحديد %(count)s قالب في هذه الصفحة."
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "تم تحديد جميع %(count)s قوالب في هذه الصفحة."
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "تم تحديد جميع مسارات العمل المطابقة البالغ عددها %(count)s."
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "تحديد جميع مسارات العمل المطابقة البالغ عددها %(count)s"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "تم تحديد %(count)s مسار عمل في هذه الصفحة."
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "تم تحديد جميع مسارات العمل البالغ عددها %(count)s في هذه الصفحة."
+
 msgid "datatable.bulk_select_clear"
 msgstr "مسح التحديد"
 
@@ -3049,6 +3292,9 @@ msgstr "لا يوجد خدمات متاحة"
 msgid "datatable.info_empty_templates"
 msgstr "لا توجد قوالب متاحة"
 
+msgid "datatable.info_empty_workflows"
+msgstr "لا توجد مسارات عمل متاحة"
+
 msgid "datatable.info_filtered_bans"
 msgstr "(تمت التصفية من إجمالي _MAX_ حظر)"
 
@@ -3079,6 +3325,9 @@ msgstr "(تمت التصفية من إجمالي _MAX_ خدمات)"
 msgid "datatable.info_filtered_templates"
 msgstr "(تمت التصفية من إجمالي _MAX_ قالب)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(تمت التصفية من إجمالي _MAX_ مسارات عمل)"
+
 msgid "datatable.info_instances"
 msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s مثيلات"
 
@@ -3099,6 +3348,9 @@ msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s خدمات"
 
 msgid "datatable.info_templates"
 msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s قوالب"
+
+msgid "datatable.info_workflows"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s مسارات عمل"
 
 msgid "datatable.length_all"
 msgstr "الكل"
@@ -3132,6 +3384,9 @@ msgstr "عرض _MENU_ خدمات"
 
 msgid "datatable.length_menu_templates"
 msgstr "عرض _MENU_ قوالب"
+
+msgid "datatable.length_menu_workflows"
+msgstr "عرض _MENU_ مسارات عمل"
 
 msgid "datatable.paginate.first"
 msgstr "الأول"
@@ -3244,6 +3499,15 @@ msgstr "تم تحديد 1 قالب"
 msgid "datatable.select_rows_templates_plural"
 msgstr "تم تحديد %d قوالب"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "لم يتم تحديد أي مسارات عمل"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "تم تحديد 1 مسار عمل"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "تم تحديد %d مسارات عمل"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "تم تحديد %(count)s تكوين مخصص"
 
@@ -3318,6 +3582,9 @@ msgstr "لم يتم العثور على خدمات مطابقة"
 
 msgid "datatable.zero_records_templates"
 msgstr "لم يتم العثور على قوالب مطابقة"
+
+msgid "datatable.zero_records_workflows"
+msgstr "لم يتم العثور على مسارات عمل مطابقة"
 
 msgid "dev_log.copy_failed"
 msgstr "فشل نسخ النص:"
@@ -4369,14 +4636,26 @@ msgstr "مرة واحدة"
 msgid "interval.week"
 msgstr "أسبوعيًا"
 
+msgid "job.history.duration"
+msgstr "المدة"
+
 msgid "job.history.end_date"
 msgstr "تاريخ الانتهاء"
+
+msgid "job.history.error"
+msgstr "الخطأ"
 
 msgid "job.history.start_date"
 msgstr "تاريخ البدء"
 
 msgid "job.history.success"
 msgstr "نجاح"
+
+msgid "jobs.card.sub"
+msgstr "يشغّلها المجدول وفق فاصلها الزمني الخاص أو عند الطلب"
+
+msgid "jobs.card.title"
+msgstr "المهام المجدولة"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "خطأ في جلب المهام: %(message)s"
@@ -5143,6 +5422,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "صفحات إضافية"
 
+msgid "navigation.filter_plugins"
+msgstr "تصفية الإضافات…"
+
 msgid "navigation.global_settings"
 msgstr "الإعدادات العامة"
 
@@ -5170,6 +5452,9 @@ msgstr "اختيار الوضع"
 msgid "navigation.more"
 msgstr "المزيد..."
 
+msgid "navigation.no_plugin_match"
+msgstr "لا توجد إضافة مطابقة"
+
 msgid "navigation.operate"
 msgstr "التشغيل"
 
@@ -5188,14 +5473,23 @@ msgstr "تم تعطيل الإضافة"
 msgid "navigation.plugin_deactivated_global"
 msgstr "تم تعطيل الإضافة عالميًا"
 
+msgid "navigation.plugin_insights"
+msgstr "إحصاءات الإضافات"
+
 msgid "navigation.plugins"
 msgstr "الإضافات"
+
+msgid "navigation.plugins_overview"
+msgstr "نظرة عامة"
 
 msgid "navigation.plugins_pages"
 msgstr "صفحات الإضافات"
 
 msgid "navigation.pro"
 msgstr "Pro"
+
+msgid "navigation.profile"
+msgstr "الملف الشخصي"
 
 msgid "navigation.redirects"
 msgstr "إعادة التوجيه"
@@ -5368,6 +5662,24 @@ msgstr "مجاني"
 msgid "plan.pro"
 msgstr "PRO"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "هذه الإضافة غير مستخدمة في أي مكان"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "الإعدادات العامة"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "المقاييس معطّلة"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "لا يوجد ما يُعرض بعد"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "لا توجد صفحة لعرضها"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "للمسؤولين فقط"
+
 msgid "plugin.page.status.deactivated"
 msgstr "الإضافة معطلة؛ لذلك، لا تتوفر معلومات."
 
@@ -5403,6 +5715,12 @@ msgstr "Pro"
 
 msgid "plugin.type.ui"
 msgstr "واجهة المستخدم"
+
+msgid "plugins.card.configure"
+msgstr "تكوين %(name)s"
+
+msgid "plugins.card.metrics"
+msgstr "مقاييس %(name)s"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "تعذّرت قراءة إصدار BunkerWeb ‏(%(current)s)، لذا لا يمكن التحقق من توافق %(id)s؛ لم يُثبَّت شيء"
@@ -5647,11 +5965,20 @@ msgstr "نشط"
 msgid "plugins.marketplace.always_on"
 msgstr "أساسي / يعمل دائمًا"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "مفعّلة دائمًا"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "إضافة أساسية يتطلبها BunkerWeb: يمكن تكوينها ولكن لا يمكن تعطيلها."
+
 msgid "plugins.marketplace.disabled"
 msgstr "معطل"
 
 msgid "plugins.marketplace.enabled"
 msgstr "مُمكّن"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "تصفية الإضافات"
 
 msgid "plugins.marketplace.inactive"
 msgstr "غير نشط"
@@ -5682,6 +6009,15 @@ msgstr "قيم أخرى"
 
 msgid "plugins.multivalue.show_less"
 msgstr "إظهار أقل"
+
+msgid "plugins.tier.community"
+msgstr "إضافة مجتمعية"
+
+msgid "plugins.tier.core"
+msgstr "إضافة CORE"
+
+msgid "plugins.tier.pro"
+msgstr "إضافة PRO"
 
 msgid "pro.alert.overlapped_1"
 msgstr "لديك خدمات نشطة أكثر مما يسمح به ترخيصك!"
@@ -6028,8 +6364,14 @@ msgstr "عنوان IP"
 msgid "profile.session.last_activity"
 msgstr "آخر نشاط"
 
+msgid "profile.session.load_error"
+msgstr "خطأ في تحميل البيانات. يُرجى المحاولة مجددًا."
+
 msgid "profile.session.os"
 msgstr "نظام التشغيل"
+
+msgid "profile.session.recent_title"
+msgstr "الجلسات الأخيرة"
 
 msgid "profile.session.title"
 msgstr "الجلسة"
@@ -6048,6 +6390,9 @@ msgstr "الأمان"
 
 msgid "profile.tab.sessions"
 msgstr "الجلسات"
+
+msgid "profile.title"
+msgstr "ملفك الشخصي"
 
 msgid "range_picker.1h"
 msgstr "الساعة الماضية"
@@ -6100,11 +6445,44 @@ msgstr "الإعداد الحالي %(setting)s غير صالح."
 msgid "raw_drafts.setting_not_valid"
 msgstr "الإعداد %(setting)s غير صالح."
 
+msgid "raw_page.search"
+msgstr "بحث…"
+
+msgid "raw_page.search_label"
+msgstr "البحث في التكوين الخام"
+
+msgid "raw_page.search_next"
+msgstr "التطابق التالي"
+
+msgid "raw_page.search_prev"
+msgstr "التطابق السابق"
+
+msgid "raw_page.tile_modified"
+msgstr "معدّل"
+
+msgid "raw_page.tile_plugins"
+msgstr "الإضافات"
+
+msgid "raw_page.tile_problems"
+msgstr "المشكلات"
+
+msgid "raw_page.tile_settings"
+msgstr "الإعدادات"
+
+msgid "raw_page.tiles_label"
+msgstr "ملخص التكوين الخام"
+
 msgid "redirects.all"
 msgstr "الكل"
 
+msgid "redirects.all_codes"
+msgstr "جميع رموز الحالة"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "إلحاق URI"
 
 msgid "redirects.append_request_uri"
 msgstr "إضافة URI المطلوب إلى الهدف"
@@ -6114,6 +6492,9 @@ msgstr "ربط"
 
 msgid "redirects.attach_copy"
 msgstr "إرفاق %(name)s (%(from)s → %(to)s) إلى خدمة واحدة أو أكثر."
+
+msgid "redirects.card_subtitle"
+msgstr "عمليات إعادة توجيه المسارات والخدمات التي تنطبق عليها"
 
 msgid "redirects.code.301"
 msgstr "301 — تم نقل بشكل دائم"
@@ -6130,6 +6511,16 @@ msgstr "307 — إعادة توجيه مؤقتة"
 msgid "redirects.code.308"
 msgstr "308 — إعادة توجيه دائمة"
 
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "%(count)s عمليات إعادة توجيه"
+msgstr[1] "%(count)s إعادة توجيه"
+msgstr[2] "%(count)s عمليات إعادة توجيه"
+msgstr[3] "%(count)s عمليات إعادة توجيه"
+msgstr[4] "%(count)s عمليات إعادة توجيه"
+msgstr[5] "%(count)s عمليات إعادة توجيه"
+
 msgid "redirects.create"
 msgstr "إنشاء إعادة توجيه"
 
@@ -6141,6 +6532,9 @@ msgstr "حذف إعادة التوجيه %(name)s؟"
 
 msgid "redirects.delete_help"
 msgstr "لا يمكن حذف إعادة التوجيه المرتبطة بخدمة إذا كانت مرتبطة. قم بإزالتها أولاً."
+
+msgid "redirects.detach_shared"
+msgstr "إعادة التوجيه هذه مشتركة. يؤدي فصلها إلى إزالتها من تلك الخدمة فقط؛ وتحتفظ بها الخدمات الأخرى."
 
 msgid "redirects.edit"
 msgstr "تحرير إعادة التوجيه"
@@ -6223,8 +6617,32 @@ msgstr "إعادة التوجيه من"
 msgid "redirects.from_path_help"
 msgstr "مسار المصدر في الخدمات المرتبطة، على سبيل المثال /old."
 
+msgid "redirects.kpi_configured"
+msgstr "عمليات إعادة التوجيه المكوّنة"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "اربطها بخدمة لتدخل حيز التنفيذ"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "من بين أول %(count)s تم تحميلها"
+
+msgid "redirects.kpi_permanent"
+msgstr "دائمة"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 أو 308، تخزّنها المتصفحات مؤقتًا"
+
+msgid "redirects.kpi_services"
+msgstr "الخدمات المرتبطة"
+
+msgid "redirects.kpi_services_caption"
+msgstr "خدمات ذات إعادة توجيه واحدة على الأقل"
+
 msgid "redirects.new"
 msgstr "إعادة توجيه جديدة"
+
+msgid "redirects.no_match"
+msgstr "لا توجد إعادة توجيه تطابق عوامل التصفية هذه."
 
 msgid "redirects.not_attached"
 msgstr "غير مرتبطة"
@@ -6238,14 +6656,33 @@ msgstr "حفظ إعادة التوجيه"
 msgid "redirects.search"
 msgstr "ابحث عن الاسم أو مسار المصدر أو الهدف..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "%(count)s خدمات"
+msgstr[1] "%(count)s خدمة"
+msgstr[2] "%(count)s خدمات"
+msgstr[3] "%(count)s خدمات"
+msgstr[4] "%(count)s خدمات"
+msgstr[5] "%(count)s خدمات"
+
 msgid "redirects.services_help"
 msgstr "استخدم Ctrl أو Command لتحديد خدمات متعددة. يمكن إضافة إعادة التوجيه لاحقًا."
+
+msgid "redirects.services_title"
+msgstr "الخدمات التي تستخدم إعادة التوجيه هذه"
 
 msgid "redirects.status_code"
 msgstr "رمز الحالة"
 
 msgid "redirects.to_url"
 msgstr "إعادة التوجيه إلى"
+
+msgid "redirects.to_url_help"
+msgstr "عنوان URL كامل يبدأ بـ http:// أو https://. الأهداف النسبية غير مدعومة."
 
 msgid "redirects.truncated"
 msgstr "يتم عرض أول 500 إعادة توجيه فقط. ضيق القائمة باستخدام API للحصول على النتيجة الكاملة."
@@ -6312,6 +6749,36 @@ msgstr "قرار واجهة API المحلية"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "التفاصيل التقنية"
+
+msgid "reports.live.off"
+msgstr "التحديث التلقائي متوقف مؤقتًا."
+
+msgid "reports.live.on"
+msgstr "التحديث التلقائي مفعّل، كل 10 ثوانٍ."
+
+msgid "reports.live.updated"
+msgstr "تم تحديث التقارير: %(added)s جديدة."
+
+msgid "reports.offenders.confirm_many"
+msgstr "سيُحظر %(count)s من عناوين IP على كل مثيل لمدة 24 ساعة."
+
+msgid "reports.offenders.confirm_one"
+msgstr "سيُحظر %(ip)s على كل مثيل لمدة 24 ساعة."
+
+msgid "reports.offenders.confirm_title"
+msgstr "الحظر من التقارير"
+
+msgid "reports.offenders.show"
+msgstr "عرض"
+
+msgid "reports.offenders.show_bottom"
+msgstr "الأقل مخالفة"
+
+msgid "reports.offenders.show_latest"
+msgstr "أحدث المخالفين"
+
+msgid "reports.offenders.show_top"
+msgstr "الأكثر مخالفة"
 
 msgid "reports.security_incident"
 msgstr "حادث أمني"
@@ -6412,6 +6879,15 @@ msgstr "مسار الطلب"
 msgid "request_path.unordered"
 msgstr "لا يوجد موقع مُعلن في المرحلة %(phase)s؛ يتم تشغيله بعد الإضافات بترتيب أبجدي."
 
+msgid "resource_groups.access"
+msgstr "الوصول"
+
+msgid "resource_groups.access_readonly"
+msgstr "للقراءة فقط"
+
+msgid "resource_groups.access_write"
+msgstr "الكتابة"
+
 msgid "resource_groups.add_entry"
 msgstr "إضافة إدخال"
 
@@ -6426,6 +6902,9 @@ msgstr "اسم مستعار"
 
 msgid "resource_groups.alias_help"
 msgstr "الأحرف، والأرقام، وعلامات الشرطة السفلية، وعلامات الشرطة. لا يمكن إعادة تسمية الأسماء المستعارة الموجودة."
+
+msgid "resource_groups.all_kinds"
+msgstr "الكل"
 
 msgid "resource_groups.bulk_import"
 msgstr "استيراد بالجملة"
@@ -6471,6 +6950,9 @@ msgstr "إدخالات"
 
 msgid "resource_groups.expand_all"
 msgstr "توسيع الكل"
+
+msgid "resource_groups.filter_values"
+msgstr "تصفية القيم..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "يجب أن يحتوي الاسم المستعار على 1 إلى 64 حرفًا أو رقمًا أو شرطة سفلية أو شرطة"
@@ -6616,6 +7098,52 @@ msgstr "أضف الإدخالات بشكل فردي أو استخدم المست
 msgid "resource_groups.no_references"
 msgstr "لا توجد مراجع"
 
+msgid "resource_groups.no_value_match"
+msgstr "لا توجد قيمة تطابق عامل التصفية هذا."
+
+msgid "resource_groups.origin"
+msgstr "المصدر"
+
+msgid "resource_groups.origin_plugin"
+msgstr "مرفق مع الإضافة %(plugin)s"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "تم إنشاؤه أو مزامنته عبر API."
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "تم إنشاؤه بواسطة متحكم autoconf."
+
+msgid "resource_groups.origin_tip.download"
+msgstr "تم تنزيله من مصدر بعيد."
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "تم إنشاؤه يدويًا أو من ملف تكوين."
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "تم إنشاؤه بواسطة المجدول."
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "تم إنشاؤه عبر واجهة الويب."
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "تم إنشاؤه بواسطة معالج الإعداد؛ ويظل قابلًا للتعديل."
+
+msgid "resource_groups.plugins_compatible"
+msgstr "الإضافات المتوافقة"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "إضافات تقبل إعداداتها أنواع القيم في هذه المجموعة. تُدرج المراجع الفعلية ضمن الاستخدام."
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "%(count)s إضافات"
+msgstr[1] "%(count)s إضافة"
+msgstr[2] "%(count)s إضافات"
+msgstr[3] "%(count)s إضافات"
+msgstr[4] "%(count)s إضافات"
+msgstr[5] "%(count)s إضافات"
+
 msgid "resource_groups.readonly"
 msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص ومصدر مجموعات الموارد، ولكن لا يمكن تعديلها."
 
@@ -6647,6 +7175,9 @@ msgstr "أسماء مستعارة منسقة قابلة لإعادة الاست�
 msgid "resource_groups.template_configuration"
 msgstr "القالب %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "تاريخ التحديث"
+
 msgid "resource_groups.usage"
 msgstr "الاستخدام"
 
@@ -6655,6 +7186,18 @@ msgstr "القيمة"
 
 msgid "resource_groups.values"
 msgstr "القيم"
+
+msgid "resource_groups.values_compat"
+msgstr "متوافق مع: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "تم النسخ"
+
+msgid "resource_groups.values_title"
+msgstr "قيم %(name)s"
+
+msgid "resource_groups.view_values_of"
+msgstr "عرض قيم %(name)s"
 
 msgid "scope.all_services"
 msgstr "جميع الخدمات"
@@ -7625,6 +8168,93 @@ msgstr "قم بتكوين مثيلات متعددة من الإعدادات له
 msgid "settings.multiple.title"
 msgstr "إعدادات متعددة"
 
+msgid "settings_page.alert_global"
+msgstr "تنطبق التغييرات على كل خدمة لا تتجاوزها بإعداداتها الخاصة، وتدخل حيز التنفيذ بعد الحفظ وإعادة التحميل."
+
+msgid "settings_page.alert_service"
+msgstr "الإعدادات التي تُترك فارغة تعود إلى القيم الافتراضية العامة. تنطبق التغييرات على الخدمة المحددة فقط وتدخل حيز التنفيذ بعد الحفظ وإعادة التحميل."
+
+msgid "settings_page.back_global"
+msgstr "العودة إلى الإعدادات العامة"
+
+msgid "settings_page.back_service"
+msgstr "العودة إلى الخدمة"
+
+msgid "settings_page.card_title"
+msgstr "الإعدادات"
+
+msgid "settings_page.count"
+msgstr "%(count)s إعدادات"
+
+msgid "settings_page.count_filtered"
+msgstr "%(shown)s من أصل %(total)s إعدادات"
+
+msgid "settings_page.groups_link"
+msgstr "إدارة مجموعات الموارد"
+
+msgid "settings_page.groups_link_hint"
+msgstr "قوائم قابلة لإعادة الاستخدام لعناوين IP والشبكات والبلدان يمكن لإعدادات هذه الإضافة الرجوع إليها."
+
+msgid "settings_page.no_match"
+msgstr "لا يوجد إعداد يطابق بحثك."
+
+msgid "settings_page.plugin"
+msgstr "الإضافة"
+
+msgid "settings_page.reload_alert_body"
+msgstr "يُعيد المجدول تطبيق التكوين على مثيلاتك بمجرد الحفظ."
+
+msgid "settings_page.reload_alert_title"
+msgstr "تؤدي التغييرات إلى إعادة تحميل المثيلات."
+
+msgid "settings_page.revert"
+msgstr "تراجع"
+
+msgid "settings_page.revert_confirm"
+msgstr "التراجع عن الكل"
+
+msgid "settings_page.revert_message"
+msgstr "يُعيد هذا كل تعديل غير محفوظ في هذه الصفحة إلى آخر قيمة محفوظة له."
+
+msgid "settings_page.revert_title"
+msgstr "التراجع عن التغييرات"
+
+msgid "settings_page.save_reload"
+msgstr "حفظ وإعادة تحميل"
+
+msgid "settings_page.scope"
+msgstr "النطاق"
+
+msgid "settings_page.scope_global"
+msgstr "الإعدادات العامة"
+
+msgid "settings_page.search"
+msgstr "البحث في الإعدادات…"
+
+msgid "settings_page.search_label"
+msgstr "البحث في الإعدادات"
+
+msgid "settings_page.select_plugin_label"
+msgstr "اختر إضافة"
+
+msgid "settings_page.select_scope_label"
+msgstr "اختر مكان تعديل إعداداتها"
+
+msgid "setup.accordion.advanced"
+msgstr "متقدم"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "الوكيل العكسي · عنوان IP الحقيقي · شهادة مخصصة"
+
+msgid "setup.accordion.general"
+msgstr "عام"
+
+msgid "setup.accordion.general_hint"
+msgstr "الخادم · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "إكمال الإعداد"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "حدث خطأ أثناء إعداد واجهة الويب. حاول مرة أخرى."
 
@@ -7679,6 +8309,9 @@ msgstr "كلمتا المرور غير متطابقتين."
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "عند استخدام شهادة SSL مخصصة، يجب تعيين كل من الشهادة والمفتاح."
 
+msgid "setup.from_ui_host"
+msgstr "من متغير البيئة UI_HOST"
+
 msgid "setup.status.admin_user_exists"
 msgstr "يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية."
 
@@ -7724,6 +8357,9 @@ msgstr "IP الحقيقي"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "وكيل عكسي"
 
+msgid "setup.step2.section.server"
+msgstr "الخادم"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7732,6 +8368,12 @@ msgstr "قم بتكوين الإعدادات الخاصة بواجهة المس�
 
 msgid "setup.step2.title"
 msgstr "إعدادات واجهة المستخدم"
+
+msgid "setup.step3.activate_title"
+msgstr "تفعيل ترخيص"
+
+msgid "setup.step3.activation_note"
+msgstr "يُفعّل الترخيص عند إكمال الإعداد."
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "مزايا PRO"
@@ -7775,11 +8417,119 @@ msgstr "راجع إعداداتك قبل إكمال الإعداد."
 msgid "setup.step4.title"
 msgstr "نظرة عامة"
 
+msgid "setup.stepper_label"
+msgstr "خطوات الإعداد"
+
 msgid "setup.subtitle"
 msgstr "اتبع الخطوات لإكمال معالج الإعداد."
 
+msgid "setup.switch.disabled"
+msgstr "معطّل"
+
+msgid "setup.switch.enabled"
+msgstr "مفعّل"
+
 msgid "setup.title"
 msgstr "معالج الإعداد"
+
+msgid "shell.account.current"
+msgstr "الحساب: %(name)s"
+
+msgid "shell.account.title"
+msgstr "الحساب"
+
+msgid "shell.contrast.toggle"
+msgstr "تباين عالٍ"
+
+msgid "shell.density.toggle"
+msgstr "كثافة مضغوطة"
+
+msgid "shell.language.title"
+msgstr "اللغة"
+
+msgid "shell.main_navigation"
+msgstr "التنقل الرئيسي"
+
+msgid "shell.notifications.all_read"
+msgstr "تمت قراءة الجميع"
+
+msgid "shell.notifications.filter_label"
+msgstr "تصفية الإشعارات"
+
+msgid "shell.notifications.group_earlier"
+msgstr "سابقًا"
+
+msgid "shell.notifications.group_today"
+msgstr "اليوم"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "أمس"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "وضع علامة مقروء على الكل"
+
+msgid "shell.notifications.mark_read"
+msgstr "وضع علامة مقروء"
+
+msgid "shell.notifications.none_unread"
+msgstr "لا توجد إشعارات غير مقروءة."
+
+msgid "shell.notifications.tab_all"
+msgstr "الكل"
+
+msgid "shell.notifications.tab_unread"
+msgstr "غير المقروءة"
+
+msgid "shell.notifications.title"
+msgstr "الإشعارات"
+
+msgid "shell.notifications.unread_count"
+msgstr "غير المقروءة: %(count)s"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "غير مقروء:"
+
+msgid "shell.search.kind_page"
+msgstr "صفحة"
+
+msgid "shell.search.kind_plugin"
+msgstr "إضافة"
+
+msgid "shell.search.kind_service"
+msgstr "خدمة"
+
+msgid "shell.search.label"
+msgstr "البحث في الصفحات والإضافات والخدمات"
+
+msgid "shell.search.loading_services"
+msgstr "جارٍ تحميل الخدمات…"
+
+msgid "shell.search.no_match"
+msgstr "لا توجد نتائج لـ «%(query)s»"
+
+msgid "shell.search.placeholder"
+msgstr "البحث في الصفحات والإضافات والخدمات…"
+
+msgid "shell.search.results"
+msgstr "نتائج البحث"
+
+msgid "shell.search.status_results"
+msgstr "النتائج: %(count)s"
+
+msgid "shell.skip_to_content"
+msgstr "تجاوز إلى المحتوى الرئيسي"
+
+msgid "shell.star_us"
+msgstr "امنح BunkerWeb نجمة على GitHub"
+
+msgid "shell.theme.system_hint"
+msgstr "يتبع نظام التشغيل لديك"
+
+msgid "shell.theme.title"
+msgstr "المظهر"
+
+msgid "shell.top_navigation"
+msgstr "الشريط العلوي"
 
 msgid "status.active"
 msgstr "نشط"
@@ -7991,6 +8741,18 @@ msgstr "التالي"
 msgid "step.previous"
 msgstr "السابق"
 
+msgid "support.attach_help"
+msgstr "ملفات تصدير لطلب دعم. تتطلب إذن الكتابة وتُخفي الأسرار."
+
+msgid "support.attach_title"
+msgstr "بيانات التشخيص المطلوب إرفاقها"
+
+msgid "support.card.community.title"
+msgstr "المجتمع"
+
+msgid "support.card.docs.title"
+msgstr "التوثيق"
+
 msgid "support.card.download_logs.help"
 msgstr "سيتم إخفاء هوية جميع البيانات الخاصة."
 
@@ -8014,6 +8776,36 @@ msgstr "السجلات وإصدارات الإضافات والبيئة والأ
 
 msgid "support.card.ui_bundle.title"
 msgstr "تشخيصات واجهة الويب"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "اسأل المجتمع والمشرفين على المشروع."
+
+msgid "support.community.github"
+msgstr "مشكلات GitHub"
+
+msgid "support.community.github_help"
+msgstr "تقارير الأخطاء وطلبات الميزات."
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "المناقشات والإعلانات."
+
+msgid "support.docs.quickstart"
+msgstr "دليل البدء السريع"
+
+msgid "support.docs.troubleshooting"
+msgstr "استكشاف الأخطاء وإصلاحها"
+
+msgid "support.docs.upgrading"
+msgstr "الترقية"
+
+msgid "support.docs.web_ui"
+msgstr "دليل واجهة الويب"
 
 msgid "support.subtitle"
 msgstr "تنزيل سجلات التصحيح، واستخراج تكوينك، والحصول على المساعدة من فريق BunkerWeb."
@@ -8182,6 +8974,63 @@ msgstr "القيمة"
 
 msgid "table.header.version"
 msgstr "الإصدار"
+
+msgid "table_system.active_filters"
+msgstr "عوامل التصفية، %(count)s نشطة"
+
+msgid "table_system.advanced_filters"
+msgstr "عوامل تصفية متقدمة"
+
+msgid "table_system.any"
+msgstr "أيّ"
+
+msgid "table_system.column_count"
+msgstr "%(visible)s من أصل %(total)s"
+
+msgid "table_system.confirm"
+msgstr "تأكيد"
+
+msgid "table_system.confirm_title"
+msgstr "تأكيد الإجراء"
+
+msgid "table_system.filter"
+msgstr "تصفية"
+
+msgid "table_system.filters"
+msgstr "عوامل التصفية"
+
+msgid "table_system.leave"
+msgstr "المغادرة دون حفظ"
+
+msgid "table_system.leave_message"
+msgstr "ستُفقد تغييراتك غير المحفوظة."
+
+msgid "table_system.leave_title"
+msgstr "المغادرة دون حفظ؟"
+
+msgid "table_system.multiple_actions"
+msgstr "إجراءات متعددة للعناصر المحددة"
+
+msgid "table_system.show_all"
+msgstr "عرض الكل"
+
+msgid "table_system.stay"
+msgstr "متابعة التعديل"
+
+msgid "table_system.type_phrase"
+msgstr "اكتب %(phrase)s للتأكيد"
+
+msgid "table_system.upload_hint"
+msgstr "اسحب وأفلت أو انقر للرفع"
+
+msgid "table_system.visible_columns"
+msgstr "الأعمدة المرئية"
+
+msgid "tables.top.detail"
+msgstr "التفصيل"
+
+msgid "tables.top.share"
+msgstr "النسبة"
 
 msgid "template.editor.button_add_config"
 msgstr "إضافة تكوين"
@@ -8771,6 +9620,24 @@ msgstr "تحديث قالب مجتمعي"
 msgid "templates.catalog.update_up_to_date"
 msgstr "القالب %(template)s مطابق للكتالوج بالفعل"
 
+msgid "templates.features_builtin"
+msgstr "الميزات المدمجة"
+
+msgid "templates.features_configs"
+msgstr "التكوينات المخصصة"
+
+msgid "templates.features_help"
+msgstr "ما يقدّمه هذا القالب. افتح القالب لعرض الإعدادات الفعلية أو تغييرها."
+
+msgid "templates.features_of"
+msgstr "عرض ميزات %(name)s"
+
+msgid "templates.features_plugins"
+msgstr "الإضافات"
+
+msgid "templates.features_title"
+msgstr "ميزات القالب"
+
 msgid "templates.flash.catalog_updated"
 msgstr "حُدِّث القالب %(template)s من الكتالوج."
 
@@ -8846,6 +9713,12 @@ msgstr "لم يتم استيراد القالب: حجم الملف أكبر من
 msgid "templates.import.unreadable"
 msgstr "لم يتم استيراد القالب: تعذرت قراءة الملف"
 
+msgid "templates.managed_by"
+msgstr "يديره %(owner)s: لا يمكن تغييره أو حذفه هنا."
+
+msgid "templates.more_actions"
+msgstr "إجراءات إضافية لـ %(name)s"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8860,6 +9733,18 @@ msgstr "أمان متوسط"
 
 msgid "templates.name.ui"
 msgstr "واجهة الويب"
+
+msgid "templates.no_match"
+msgstr "لا يوجد قالب يطابق هذا البحث."
+
+msgid "templates.open_template"
+msgstr "فتح القالب"
+
+msgid "templates.read_only"
+msgstr "للقراءة فقط"
+
+msgid "templates.search"
+msgstr "البحث في القوالب..."
 
 msgid "templates.subtitle"
 msgstr "قوالب تكوين قابلة لإعادة الاستخدام لخدماتك — تجميع الإعدادات، والخطوات، والتكوينات المخصصة، ثم إنشاءها أو نسخها أو حذفها."
@@ -8885,6 +9770,9 @@ msgstr "فاتح"
 msgid "theme.system"
 msgstr "النظام"
 
+msgid "threatmap.attacks_24h"
+msgstr "المحظور خلال آخر 24 ساعة"
+
 msgid "threatmap.attacks_today"
 msgstr "هجمات اليوم"
 
@@ -8893,6 +9781,21 @@ msgstr "طلب محظور"
 
 msgid "threatmap.blocked_requests"
 msgstr "طلبات محظورة"
+
+msgid "threatmap.col_ip"
+msgstr "عنوان IP"
+
+msgid "threatmap.col_origin"
+msgstr "المصدر"
+
+msgid "threatmap.col_reason"
+msgstr "السبب"
+
+msgid "threatmap.col_target"
+msgstr "الهدف"
+
+msgid "threatmap.col_time"
+msgstr "الوقت"
 
 msgid "threatmap.countries"
 msgstr "بلدان المصدر"
@@ -8939,6 +9842,9 @@ msgstr "غير محدَّد الموقع"
 msgid "threatmap.open_live"
 msgstr "عرض مباشر"
 
+msgid "threatmap.rolling_window"
+msgstr "نافذة زمنية متحركة، تُحدّث كل 30 ثانية تقريبًا"
+
 msgid "threatmap.show_less"
 msgstr "عرض أفضل %(count)s فقط"
 
@@ -8950,6 +9856,9 @@ msgstr "توقّفت هذه الأرقام عن التحديث. خدمة الم�
 
 msgid "threatmap.subtitle"
 msgstr "من أين جاءت حركة المرور التي حظرتها مثيلاتك خلال آخر 24 ساعة."
+
+msgid "threatmap.ticker_caption"
+msgstr "أحدث الطلبات المحظورة"
 
 msgid "threatmap.ticker_title"
 msgstr "أحداث مباشرة"
@@ -8972,14 +9881,26 @@ msgstr "أبرز الأهداف"
 msgid "threatmap.updated"
 msgstr "آخر تحديث"
 
+msgid "timings.all_phases"
+msgstr "جميع المراحل"
+
 msgid "timings.calls"
 msgstr "الاستدعاءات"
+
+msgid "timings.caption"
+msgstr "توقيتات الإضافات لكل مرحلة، مرتّبة افتراضيًا حسب الوقت الإجمالي"
+
+msgid "timings.columns"
+msgstr "الأعمدة"
 
 msgid "timings.disabled_help"
 msgstr "اضبط METRICS_COLLECT_TIMINGS على yes لقياس مدة كل إضافة. تُجمع مدة الطلب كاملة في كل الأحوال."
 
 msgid "timings.disabled_title"
 msgstr "توقيتات الإضافات معطلة"
+
+msgid "timings.export_csv"
+msgstr "تصدير CSV"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "خطأ في جلب توقيتات الإضافة: %(message)s"
@@ -8996,6 +9917,15 @@ msgstr "المتوسط"
 msgid "timings.mean_request"
 msgstr "متوسط الطلب"
 
+msgid "timings.no_match"
+msgstr "لا يوجد توقيت يطابق عوامل التصفية هذه"
+
+msgid "timings.no_share"
+msgstr "بلا نسبة"
+
+msgid "timings.no_share_hint"
+msgstr "لا تُشغّل هذه المرحلة مرة واحدة لكل طلب، لذا ليس لها نسبة."
+
 msgid "timings.partial"
 msgstr "لم تستجب بعض المثيلات. تشمل الأرقام أدناه المثيلات التي استجابت."
 
@@ -9004,6 +9934,9 @@ msgstr "المرحلة"
 
 msgid "timings.phases"
 msgstr "مراحل الإضافات"
+
+msgid "timings.phases_sub"
+msgstr "الوقت الذي تستغرقه كل إضافة في كل مرحلة"
 
 msgid "timings.plugin"
 msgstr "الإضافة"
@@ -9014,6 +9947,9 @@ msgstr "المثيلات التي ترسل التقارير"
 msgid "timings.requests_measured"
 msgstr "الطلبات المقيسة"
 
+msgid "timings.search_placeholder"
+msgstr "البحث عن إضافة أو مرحلة…"
+
 msgid "timings.share"
 msgstr "الحصة"
 
@@ -9022,6 +9958,9 @@ msgstr "الحصة هي إجمالي وقت الإضافة من إجمالي و�
 
 msgid "timings.subtitle"
 msgstr "المدة التي تستغرقها كل إضافة في كل مرحلة من الطلب، وتُقرأ مباشرة من كل مثيل ثم تُدمج."
+
+msgid "timings.toolbar"
+msgstr "أدوات جدول التوقيتات"
 
 msgid "timings.total"
 msgstr "الإجمالي"
@@ -9923,6 +10862,12 @@ msgstr "أضف الخادم"
 msgid "upstreams.all"
 msgstr "الكل"
 
+msgid "upstreams.all_protocols"
+msgstr "جميع البروتوكولات"
+
+msgid "upstreams.all_tls"
+msgstr "جميع إعدادات TLS"
+
 msgid "upstreams.attach"
 msgstr "ربط"
 
@@ -9941,6 +10886,19 @@ msgstr "أقل عدد من الاتصالات"
 msgid "upstreams.balancing.round_robin"
 msgstr "دورة (افتراضي)"
 
+msgid "upstreams.card_subtitle"
+msgstr "تجمعات الخوادم الخلفية والخدمات التي تتصل بها عبر الوكيل"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "%(count)s مجموعات خوادم خلفية"
+msgstr[1] "%(count)s مجموعة خوادم خلفية"
+msgstr[2] "%(count)s مجموعات خوادم خلفية"
+msgstr[3] "%(count)s مجموعات خوادم خلفية"
+msgstr[4] "%(count)s مجموعات خوادم خلفية"
+msgstr[5] "%(count)s مجموعات خوادم خلفية"
+
 msgid "upstreams.create"
 msgstr "إنشاء واجهة خلفية"
 
@@ -9952,6 +10910,9 @@ msgstr "حذف الواجهة الخلفية %(name)s؟"
 
 msgid "upstreams.delete_help"
 msgstr "لا يمكن حذف الواجهة الخلفية المرتبطة بخدمة إذا كانت لا تزال مرتبطة. قم بفصلها أولاً."
+
+msgid "upstreams.detach_shared"
+msgstr "مجموعة الخوادم الخلفية هذه مشتركة. يؤدي فصلها إلى إزالتها من تلك الخدمة والمسار فقط؛ وتحتفظ بها الارتباطات الأخرى."
 
 msgid "upstreams.edit"
 msgstr "تحرير الواجهة الخلفية"
@@ -10043,11 +11004,48 @@ msgstr "الحفاظ على الاتصال"
 msgid "upstreams.keepalive_help"
 msgstr "الاتصالات الخاملة لكل عامل. HTTP و gRPC فقط؛ اتركها فارغة لتعطيلها."
 
+msgid "upstreams.keepalive_off"
+msgstr "معطّل"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "من بين أول %(count)s تم تحميلها"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "%(count)s غير مرتبطة"
+
+msgid "upstreams.kpi_roles"
+msgstr "%(primary)s أساسي · %(backup)s احتياطي · %(down)s متوقف (حسب التكوين)"
+
+msgid "upstreams.kpi_services"
+msgstr "الخدمات المرتبطة"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "خدمات تتصل بتجمع عبر الوكيل"
+
+msgid "upstreams.kpi_tls"
+msgstr "TLS إلى الخوادم الخلفية"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "تجمعات مكوّنة للتواصل مع خوادمها عبر TLS"
+
 msgid "upstreams.match_path"
 msgstr "مسار الوكيل العكسي"
 
 msgid "upstreams.match_path_help"
 msgstr "الموقع الذي تقوم به الخدمات المحددة بالوكيل إلى هذه المجموعة. يتم تجاهله لمجموعة التدفق، والتي تأخذ الخدمة بأكملها."
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: %(count)s خوادم"
+msgstr[1] "%(name)s: %(count)s خادم"
+msgstr[2] "%(name)s: %(count)s خوادم"
+msgstr[3] "%(name)s: %(count)s خوادم"
+msgstr[4] "%(name)s: %(count)s خوادم"
+msgstr[5] "%(name)s: %(count)s خوادم"
+
+msgid "upstreams.members_title"
+msgstr "الخوادم في هذا التجمع الخلفي"
 
 msgid "upstreams.method"
 msgstr "توزيع التحميل"
@@ -10057,6 +11055,9 @@ msgstr "يسمح فقط بالأحرف، الأرقام، الشرطات، وع�
 
 msgid "upstreams.new"
 msgstr "مجموعة جديدة"
+
+msgid "upstreams.no_match"
+msgstr "لا توجد مجموعة خوادم خلفية تطابق عوامل التصفية هذه."
 
 msgid "upstreams.not_attached"
 msgstr "غير متصل"
@@ -10112,11 +11113,46 @@ msgstr "الوزن"
 msgid "upstreams.servers"
 msgstr "الخوادم"
 
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "%(count)s خوادم"
+msgstr[1] "%(count)s خادم"
+msgstr[2] "%(count)s خوادم"
+msgstr[3] "%(count)s خوادم"
+msgstr[4] "%(count)s خوادم"
+msgstr[5] "%(count)s خوادم"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "%(count)s خدمات"
+msgstr[1] "%(count)s خدمة"
+msgstr[2] "%(count)s خدمات"
+msgstr[3] "%(count)s خدمات"
+msgstr[4] "%(count)s خدمات"
+msgstr[5] "%(count)s خدمات"
+
 msgid "upstreams.services_help"
 msgstr "استخدم Ctrl أو Command لتحديد خدمات متعددة. يمكن توصيل الموجه لاحقًا."
 
 msgid "upstreams.services_hidden"
 msgstr "%(count)s من الخدمات مخفية: لا يمكن ربط مجموعة %(protocol)s إلا بخدمة مطابقة."
+
+msgid "upstreams.services_title"
+msgstr "الخدمات التي تستخدم مجموعة الخوادم الخلفية هذه"
+
+msgid "upstreams.tls"
+msgstr "TLS إلى الخوادم الخلفية"
+
+msgid "upstreams.tls_no"
+msgstr "غير مشفّر"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "تُعرض أول 500 مجموعة خوادم خلفية فقط. ضيّق القائمة عبر API للحصول على النتيجة الكاملة."
@@ -10196,11 +11232,26 @@ msgstr "يتطلب ZeroSSL إما بريدًا إلكترونيًا أو مفت�
 msgid "web_cache.available"
 msgstr "متاح"
 
+msgid "web_cache.available_tip"
+msgstr "مجلد الذاكرة المؤقتة موجود على هذا المثيل. يظهر ما إذا كانت الخدمة تستخدمه ضمن تفعيل الخدمة."
+
 msgid "web_cache.cache_state"
 msgstr "الحالة"
 
 msgid "web_cache.cached_files"
 msgstr "ملفات مخزنة مؤقتًا"
+
+msgid "web_cache.compact"
+msgstr "مضغوط"
+
+msgid "web_cache.counters_window"
+msgstr "منذ إعادة تشغيل كل مثيل"
+
+msgid "web_cache.counters_window_help"
+msgstr "تُحصي منذ آخر إعادة تشغيل لكل مثيل، لا خلال فترة ثابتة."
+
+msgid "web_cache.danger_zone"
+msgstr "منطقة الخطر"
 
 msgid "web_cache.deployment"
 msgstr "النشر"
@@ -10253,11 +11304,20 @@ msgstr "معدل النجاح"
 msgid "web_cache.instance"
 msgstr "مثيل"
 
+msgid "web_cache.invalidate"
+msgstr "إبطال الصلاحية"
+
 msgid "web_cache.metrics"
 msgstr "التوزيع الإجمالي للإصابات / الإخفاقات"
 
 msgid "web_cache.metrics_scope"
 msgstr "يتم تجميع العدادات لكل مثيل عبر جميع الخدمات التي تم تمكين التخزين المؤقت لها."
+
+msgid "web_cache.no_counters"
+msgstr "لم يسجّل هذا المثيل أي طلب مخزّن مؤقتًا بعد."
+
+msgid "web_cache.no_requests_for"
+msgstr "لا توجد طلبات لـ:"
 
 msgid "web_cache.not_reporting"
 msgstr "غير مُبلغ"
@@ -10268,6 +11328,9 @@ msgstr "المسار"
 msgid "web_cache.purge"
 msgstr "مسح الاستجابات المخزنة مؤقتًا"
 
+msgid "web_cache.purge_a_url"
+msgstr "مسح عنوان URL"
+
 msgid "web_cache.purge_all"
 msgstr "مسح الكل"
 
@@ -10276,6 +11339,9 @@ msgstr "هذا يحذف كل استجابة مخزنة لكل خدمة على ك
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "مسح ذاكرة التخزين المؤقت بالكامل؟"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "مسح الجميع"
 
 msgid "web_cache.purge_help"
 msgstr "تنفيذ الإجراءات على الفور على المثيلات القابلة للوصول. يتم تخطي المثيلات غير القابلة للوصول ولا يتم جدولة أي إجراء."
@@ -10298,6 +11364,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "المثيلات التي ترسل التقارير"
 
+msgid "web_cache.server_side_note"
+msgstr "الذاكرة المؤقتة من جهة الخادم فقط. تدير هذه الصفحة ذاكرة الوكيل العكسي المؤقتة المخزّنة على كل مثيل BunkerWeb. لا تتأثر الاستجابات المحفوظة بالفعل في متصفحات الزوار."
+
 msgid "web_cache.service"
 msgstr "الخدمة"
 
@@ -10306,6 +11375,27 @@ msgstr "تمكين الخدمة"
 
 msgid "web_cache.status"
 msgstr "تخزين المثيل"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "تم تجاوز التخزين المؤقت لهذا الطلب"
+
+msgid "web_cache.status_desc.expired"
+msgstr "انتهت مدة الصلاحية: أُعيد الجلب من الخادم الخلفي"
+
+msgid "web_cache.status_desc.hit"
+msgstr "قُدّم مباشرة من الذاكرة المؤقتة"
+
+msgid "web_cache.status_desc.miss"
+msgstr "غير مخزّن مؤقتًا: جُلب من الخادم الخلفي وخُزّن"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "إعادة جلب مشروطة: أفاد الخادم الخلفي بأنه لا يزال صالحًا"
+
+msgid "web_cache.status_desc.stale"
+msgstr "قُدّم محتوى قديم لتعطّل الخادم الخلفي"
+
+msgid "web_cache.status_desc.updating"
+msgstr "قُدّم محتوى قديم أثناء إجراء التحديث"
 
 msgid "web_cache.subtitle"
 msgstr "حالة ذاكرة التخزين المؤقت لـ Reverse-proxy، مقاييس معدل الضربة الإجمالية والتحكم في المسح الفوري."
@@ -10348,6 +11438,18 @@ msgstr "موفر مكافحة الروبوتات"
 
 msgid "workflows.act_redirect"
 msgstr "إعادة توجيه"
+
+msgid "workflows.act_settings_block"
+msgstr "إعدادات الحظر"
+
+msgid "workflows.act_settings_challenge"
+msgstr "إعدادات اختبار التحقق"
+
+msgid "workflows.act_settings_generic"
+msgstr "إعدادات الإجراء"
+
+msgid "workflows.act_settings_redirect"
+msgstr "إعدادات إعادة التوجيه"
 
 msgid "workflows.act_status"
 msgstr "حالة الرفض"
@@ -10475,6 +11577,9 @@ msgstr "مشاكل التحقق من القاعدة %(count)s"
 msgid "workflows.aria.ruleName"
 msgstr "اسم القاعدة %(n)s"
 
+msgid "workflows.aria.ruleTools"
+msgstr "إجراءات القاعدة %(n)s"
+
 msgid "workflows.aria.terminalAction"
 msgstr "الإجراء النهائي"
 
@@ -10591,6 +11696,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "هل تريد حذف هذه القاعدة؟ ستتحرك كل القواعد أسفلها موضعًا واحدًا إلى أعلى."
+
+msgid "workflows.conseq.skip"
+msgstr "لا يُنفّذ أبدًا"
+
+msgid "workflows.conseq.stop"
+msgstr "يوقف السلسلة"
 
 msgid "workflows.copySuffix"
 msgstr " (نسخة)"
@@ -10739,6 +11850,21 @@ msgstr "بوابة المطابقة"
 msgid "workflows.gate.help"
 msgstr "يُحسب لكل عنوان IP عميل. تحت الحد لا تتطابق القاعدة إطلاقًا، ويستمر التقييم إلى القاعدة التالية؛ وهي لا تفرض حدًا للمعدل بمفردها."
 
+msgid "workflows.inspector.apply"
+msgstr "تطبيق"
+
+msgid "workflows.inspector.apply_title"
+msgstr "تطبيق: الاحتفاظ بهذه التعديلات في المسودة؛ زر الحفظ في الصفحة هو ما يخزّنها"
+
+msgid "workflows.inspector.cancel"
+msgstr "إلغاء"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "إلغاء: استعادة القاعدة كما كانت عند فتحها"
+
+msgid "workflows.inspector.cancelled"
+msgstr "أُلغيت تعديلات القاعدة %(n)s؛ عادت القاعدة كما كانت عند فتحها."
+
 msgid "workflows.legend.fall"
 msgstr "عدم التطابق ينتقل إلى القاعدة التالية"
 
@@ -10775,8 +11901,14 @@ msgstr "تكرار أسفلها"
 msgid "workflows.menu.enable"
 msgstr "تمكين القاعدة"
 
+msgid "workflows.menu.header"
+msgstr "إجراءات القاعدة"
+
 msgid "workflows.menu.moveTo"
 msgstr "النقل إلى الموضع %(n)s"
+
+msgid "workflows.menu.order"
+msgstr "الترتيب"
 
 msgid "workflows.menu.staysAt"
 msgstr "يبقى في الموضع %(n)s"
@@ -10808,6 +11940,81 @@ msgstr "لم يتم التحقق بعد"
 msgid "workflows.order_help"
 msgstr "يتم تقييم القواعد بالترتيب، والقاعدة الأولى التي تتطابق تفوز. القاعدة التي تحتوي على قيمة عتبة تطابق مرة واحدة فقط بعد تجاوز العتبة، لذا يمكن للقاعدة الأقل أن تلتقط حركة المرور تحتها."
 
+msgid "workflows.port.active_rules"
+msgstr "%(count)s نشطة"
+
+msgid "workflows.port.attachment"
+msgstr "الارتباط"
+
+msgid "workflows.port.attachment_any"
+msgstr "الكل"
+
+msgid "workflows.port.attachment_attached"
+msgstr "مرتبط"
+
+msgid "workflows.port.created"
+msgstr "تاريخ الإنشاء"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "افصل مسار العمل هذا عن كل خدمة قبل حذفه. لا يفصل الحذف الخدمات تلقائيًا مطلقًا."
+
+msgid "workflows.port.details"
+msgstr "التفاصيل"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "التعريفات المحددة (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "تم تصدير التعريفات المحددة. لا يضمن هذا الملف إعادة الاستيراد."
+
+msgid "workflows.port.export_failed"
+msgstr "فشل التصدير؛ لم يتم تنزيل أي ملف."
+
+msgid "workflows.port.export_loading"
+msgstr "جارٍ قراءة تعريفات مسارات العمل المحددة…"
+
+msgid "workflows.port.export_scope"
+msgstr "يتضمن تصدير الجدول الصفوف المصفّاة والأعمدة المرئية. يتضمن تصدير JSON التعريفات الأصلية لمسارات العمل المحددة فقط، مفهرسة حسب المعرّف؛ لا ضمان لإعادة الاستيراد."
+
+msgid "workflows.port.list_subtitle"
+msgstr "القواعد والخدمات المرتبطة بكل مسار عمل"
+
+msgid "workflows.port.more"
+msgstr "إجراءات إضافية لـ %(name)s"
+
+msgid "workflows.port.row_details"
+msgstr "تفاصيل مسار العمل"
+
+msgid "workflows.port.select_workflows"
+msgstr "تحديد مسارات العمل"
+
+msgid "workflows.port.services_count"
+msgstr "الخدمات: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "يؤدي الفصل إلى إزالة مسار العمل هذا من تلك الخدمة فقط. يبقى مسار العمل وقواعده دون تغيير."
+
+msgid "workflows.port.services_none"
+msgstr "مسار العمل هذا غير مرتبط بأي خدمة."
+
+msgid "workflows.port.services_open"
+msgstr "عرض الخدمات المرتبطة بـ %(name)s"
+
+msgid "workflows.port.services_title"
+msgstr "الخدمات المرتبطة بـ %(name)s"
+
+msgid "workflows.port.total_rules"
+msgstr "%(count)s إجمالًا"
+
+msgid "workflows.port.updated"
+msgstr "تاريخ التحديث"
+
 msgid "workflows.readonly"
 msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص سير العمل، ولكن لا يمكن تعديلها."
 
@@ -10822,6 +12029,9 @@ msgstr "سير عمل الأمان «%(workflow)s»: الإجراء «%(action)s
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "سير عمل الأمان «%(workflow)s»: تمت إعادة توجيه الطلب"
+
+msgid "workflows.regex_help"
+msgstr "يُطبّق حدّان منفصلان للتعبيرات النمطية. عند الكتابة: يمكن لمسارات العمل المرتبطة بخدمة واحدة أن تحتوي على 50 شرط regex كحد أقصى إجمالًا، ويُرفض الحفظ أو الربط عند تجاوز ذلك. عند التشغيل: يُجمّع كل مثيل حتى WORKFLOWS_REGEX_BUDGET من التعبيرات النمطية المختلفة (512 افتراضيًا، مشتركة بين جميع مسارات العمل)؛ لا يُقيّم أي regex يتجاوز هذه الميزانية ويُرجع UNKNOWN، فلا يمكن لقاعدته أن تطابق."
 
 msgid "workflows.rule.disabled"
 msgstr "معطلة"
@@ -10933,6 +12143,108 @@ msgstr "عرض القائمة. تُنفذ القواعد من الأعلى إل�
 
 msgid "workflows.search"
 msgstr "ابحث عن الاسم أو الوصف..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "أنشئ مسار عمل لفتح تكوينه"
+
+msgid "workflows.shell.draft_discard"
+msgstr "تجاهل التغييرات"
+
+msgid "workflows.shell.draft_restored"
+msgstr "تمت استعادة التغييرات غير المحفوظة لمسار العمل هذا. احفظ لتطبيقها، أو بدّل مسار العمل لتجاهلها."
+
+msgid "workflows.shell.draft_save"
+msgstr "حفظ ومتابعة"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "تعذّر حفظ مسار العمل؛ لم يتم تجاهل أي شيء."
+
+msgid "workflows.shell.draft_stale"
+msgstr "حُفظ مسار العمل هذا في مكان آخر بعد بدء مسودتك، لذا تم تجاهل المسودة."
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "سيترك فتح %(target)s تغييرات غير محفوظة على القواعد في %(name)s. لا يمكن فتح سوى مسودة واحدة في كل مرة: احفظها أو تجاهلها أو ابقَ هنا."
+
+msgid "workflows.shell.draft_title"
+msgstr "تغييرات غير محفوظة في %(name)s"
+
+msgid "workflows.shell.pick_label"
+msgstr "مسار العمل"
+
+msgid "workflows.shell.read_only"
+msgstr "للقراءة فقط"
+
+msgid "workflows.shell.tab_config"
+msgstr "التكوين"
+
+msgid "workflows.shell.tab_overview"
+msgstr "نظرة عامة"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "غير محفوظ"
+
+msgid "workflows.shell.tabs_label"
+msgstr "عرض مسارات العمل"
+
+msgid "workflows.shell.view_label"
+msgstr "العرض"
+
+msgid "workflows.sum.block"
+msgstr "احظر الطلب"
+
+msgid "workflows.sum.blockStatus"
+msgstr "احظر الطلب بالرمز %(code)s"
+
+msgid "workflows.sum.challenge"
+msgstr "اعرض اختبار التحقق من %(provider)s"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "معالجة CrowdSec"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "مصدر CrowdSec"
+
+msgid "workflows.sum.every"
+msgstr "ورد أي طلب"
+
+msgid "workflows.sum.gate"
+msgstr "تجاوز عدد الطلبات %(count)s خلال %(window)s ثانية لكل IP"
+
+msgid "workflows.sum.group_asn"
+msgstr "كان ASN ضمن المجموعة %(name)s"
+
+msgid "workflows.sum.group_country"
+msgstr "كان البلد ضمن المجموعة %(name)s"
+
+msgid "workflows.sum.group_ip"
+msgstr "كان IP ضمن المجموعة %(name)s"
+
+msgid "workflows.sum.isOne"
+msgstr "كانت قيمة %(label)s هي %(value)s"
+
+msgid "workflows.sum.isOneOf"
+msgstr "كانت قيمة %(label)s واحدة من %(values)s"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "البلد"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "الطريقة"
+
+msgid "workflows.sum.not"
+msgstr "لم يتحقق الشرط «%(what)s»"
+
+msgid "workflows.sum.redirect"
+msgstr "أعد التوجيه إلى %(url)s (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "كان URI %(match)s %(value)s"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11104,6 +12416,78 @@ msgstr "طلبات"
 
 msgid "workflows.threshold_window"
 msgstr "لكل (ثانية)"
+
+msgid "workflows.toolbar.actions"
+msgstr "إجراءات مسار العمل"
+
+msgid "workflows.toolbar.any_action"
+msgstr "أي إجراء"
+
+msgid "workflows.toolbar.any_state"
+msgstr "أي حالة"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "العودة إلى الأعلى"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "طي الكل"
+
+msgid "workflows.toolbar.detailed"
+msgstr "مفصّل"
+
+msgid "workflows.toolbar.display"
+msgstr "عرض القواعد"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "توسيع الكل"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "الإجراء"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "الاسم"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "البحث باسم القاعدة…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "تصفية القواعد"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "الحالة"
+
+msgid "workflows.toolbar.filters"
+msgstr "عوامل التصفية"
+
+msgid "workflows.toolbar.full_height"
+msgstr "الارتفاع الكامل"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "تقييد الارتفاع"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "%(shown)s من أصل %(total)s قواعد"
+
+msgid "workflows.toolbar.no_match"
+msgstr "لا توجد قاعدة تطابق عوامل التصفية هذه"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "تتوقف إعادة الترتيب مؤقتًا ما دام عامل تصفية يُخفي قواعد."
+
+msgid "workflows.toolbar.reset"
+msgstr "إعادة تعيين"
+
+msgid "workflows.toolbar.simplified"
+msgstr "مبسّط"
+
+msgid "workflows.toolbar.state_off"
+msgstr "معطّلة"
+
+msgid "workflows.toolbar.state_on"
+msgstr "مفعّلة"
+
+msgid "workflows.toolbar.view"
+msgstr "عرض ترتيب القواعد"
 
 msgid "workflows.tree.addCondition"
 msgstr "شرط"

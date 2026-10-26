@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "Ginawa Gamit ang"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "Nakopya"
+
+msgid "about.environment.copy"
+msgstr "Kopyahin ang diagnostics"
+
+msgid "about.environment.database"
+msgstr "Server ng database"
+
+msgid "about.environment.help"
+msgstr "Binabasa mula sa host ng Web UI at antas ng kontrol. Walang ipinapakitang variable, license key o address ng database."
+
+msgid "about.environment.instances_up"
+msgstr "%(up)s ang gumagana sa %(total)s"
+
+msgid "about.environment.integration"
+msgstr "Integrasyon"
+
+msgid "about.environment.platform"
+msgstr "Plataporma"
+
+msgid "about.environment.registered"
+msgstr "Nakarehistro"
+
+msgid "about.environment.scope_control_plane"
+msgstr "Antas ng kontrol"
+
+msgid "about.environment.scope_instances"
+msgstr "Mga Instance"
+
+msgid "about.environment.scope_ui_host"
+msgstr "Host ng Web UI"
+
+msgid "about.environment.title"
+msgstr "Kapaligiran"
+
 msgid "about.gnu_license"
 msgstr "GNU Affero General Public License v3.0"
 
 msgid "about.license_title"
 msgstr "Lisensya"
+
+msgid "about.releases.title"
+msgstr "Mga pinakabagong release"
+
+msgid "about.releases.view_all"
+msgstr "Tingnan lahat"
 
 msgid "about.social.discord"
 msgstr "Discord"
@@ -274,6 +319,18 @@ msgstr "Napiling saklaw"
 msgid "bans.chart.timeseries.title"
 msgstr "Mga aktibong ban kada interval"
 
+msgid "bans.clear_all.confirm"
+msgstr "Alisin ang lahat ng ban"
+
+msgid "bans.clear_all.message"
+msgstr "Aalisin nito ang bawat ban sa lahat ng serbisyo at instance. Ang ban ng CrowdSec ay inaalis mula sa sarili nitong hilera."
+
+msgid "bans.clear_all.phrase"
+msgstr "alisin lahat"
+
+msgid "bans.clear_all.title"
+msgstr "Alisin ang lahat ng ban"
+
 msgid "bans.crowdsec.confirm"
 msgstr "Burahin ang mga desisyon at alisin ang ban"
 
@@ -394,11 +451,53 @@ msgstr "Nabigong i-update ang tagal ng ban para sa %(ip)s: %(error)s"
 msgid "bans.flash.update_duration_success"
 msgstr "Matagumpay na na-update ang tagal ng ban para sa %(ip)s."
 
+msgid "bans.import.confirm_button"
+msgstr "Mag-import"
+
+msgid "bans.import.confirm_message"
+msgstr "Mga ban na nakita sa file na ito: %(count)s. I-import ang mga ito?"
+
+msgid "bans.import.confirm_skipped"
+msgstr "Mga hindi mabasang linyang nilaktawan: %(skipped)s."
+
+msgid "bans.import.confirm_title"
+msgstr "Mag-import ng mga ban"
+
+msgid "bans.import.empty"
+msgstr "Walang valid na ban sa file na ito. Inaasahan ang isang ban bawat linya, IP[,scope[,duration[,reason]]], o listahang JSON."
+
+msgid "bans.import.read_failed"
+msgstr "Hindi mabasa ang file."
+
+msgid "bans.import.too_many"
+msgstr "Higit sa %(max)s ban ang laman ng file na ito. Hatiin ito at mag-import nang paisa-isang bahagi."
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "CrowdSec lease"
 
+msgid "bans.live.off"
+msgstr "Naka-pause ang awtomatikong pag-refresh."
+
+msgid "bans.live.on"
+msgstr "Naka-on ang awtomatikong pag-refresh, bawat 10 segundo."
+
+msgid "bans.live.updated"
+msgstr "Na-update ang mga ban: %(added)s bago, %(removed)s nag-expire."
+
+msgid "bans.page.clear_all"
+msgstr "Alisin lahat"
+
+msgid "bans.page.import"
+msgstr "Mag-import"
+
 msgid "bans.stats.card.by_reason"
 msgstr "Mga ban ayon sa dahilan"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "Dahilan"
+
+msgid "bans.stats.reasons.meta"
+msgstr "%(count)s aktibong ban"
 
 msgid "bans.stats.tile.active"
 msgstr "Mga aktibong ban"
@@ -934,6 +1033,27 @@ msgstr "I-browse ang sertipiko"
 msgid "certificates.browse_key"
 msgstr "I-browse ang pribadong key"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "Mga sertipikong tatanggalin: %(count)s. Hindi ito mababawi. Magpatuloy?"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "Mga self-signed na sertipikong ire-renew: %(count)s. Magpatuloy?"
+
+msgid "certificates.bulk.delete"
+msgstr "Tanggalin ang napili"
+
+msgid "certificates.bulk.download"
+msgstr "I-download ang mga chain"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "Wala sa mga napiling sertipiko ang puwedeng gamitan ng aksiyong ito."
+
+msgid "certificates.bulk.renew"
+msgstr "I-renew ang mga self-signed"
+
+msgid "certificates.bulk.skipped"
+msgstr "Mga napiling sertipikong nilaktawan dahil hindi puwedeng gamitan ng aksiyong ito: %(skipped)s."
+
 msgid "certificates.common_name"
 msgstr "Karaniwang pangalan"
 
@@ -1117,6 +1237,9 @@ msgstr "Tagapaglabas"
 msgid "certificates.issuers"
 msgstr "Mga nangungunang tagapaglabas"
 
+msgid "certificates.issuers_meta"
+msgstr "%(count)s sertipiko"
+
 msgid "certificates.key_drop"
 msgstr "Ilagay dito ang katugmang pribadong susi"
 
@@ -1180,6 +1303,9 @@ msgstr "Ang database ay read-only. Maaaring suriin at i-download ang mga sertipi
 msgid "certificates.renew_due"
 msgstr "Suriin at i-renew ang mga dapat nang i-renew"
 
+msgid "certificates.renew_due_short"
+msgstr "Kailangan nang i-renew"
+
 msgid "certificates.sans"
 msgstr "Mga pangalan ng alternatibong paksa"
 
@@ -1194,6 +1320,9 @@ msgstr "Mag-iskedyul ng ACME issuance"
 
 msgid "certificates.search"
 msgstr "Maghanap sa pamamagitan ng pangalan, common name, SAN, issuer, o fingerprint…"
+
+msgid "certificates.select_all"
+msgstr "Piliin ang lahat ng sertipiko"
 
 msgid "certificates.serial"
 msgstr "Numero ng serye"
@@ -1323,6 +1452,99 @@ msgstr "Ipakita ang higit pang %(count)s"
 
 msgid "compose.unavailable"
 msgstr "Hindi ma-load ang listahan ng plugin, kaya hindi ligtas na mabago ang pahinang ito. I-reload kapag sumagot ang API."
+
+msgid "configs.console.all_scopes"
+msgstr "Lahat ng saklaw"
+
+msgid "configs.console.clone"
+msgstr "I-clone ang config"
+
+msgid "configs.console.content"
+msgstr "Nilalaman ng config (basa lamang)"
+
+msgid "configs.console.download"
+msgstr "I-download"
+
+msgid "configs.console.edit"
+msgstr "I-edit ang config"
+
+msgid "configs.console.editor_help"
+msgstr "I-edit ang nilalaman ng NGINX o ModSecurity. I-save gamit ang Ctrl+S o Command+S."
+
+msgid "configs.console.editor_title"
+msgstr "Nilalaman ng configuration"
+
+msgid "configs.console.files"
+msgstr "Mga file"
+
+msgid "configs.console.full_view"
+msgstr "Buong view"
+
+msgid "configs.console.global_legend"
+msgstr "Ang pangkalahatang saklaw ay para sa lahat ng serbisyo."
+
+msgid "configs.console.global_only"
+msgstr "Pangkalahatan lamang"
+
+msgid "configs.console.lint"
+msgstr "Suriin ang sintaks"
+
+msgid "configs.console.lint_brace"
+msgstr "Hindi naisara ang pambukas na brace."
+
+msgid "configs.console.lint_clean"
+msgstr "Walang nakitang problema sa mga pagsusuri sa panig ng client."
+
+msgid "configs.console.lint_help"
+msgstr "Mga pahiwatig sa panig ng client lamang. I-validate gamit ang nginx -t bago i-deploy. Maaaring maglabas ng babala ang mga direktibang maraming linya."
+
+msgid "configs.console.lint_quote"
+msgstr "Hindi naisara ang panipi."
+
+msgid "configs.console.lint_semicolon"
+msgstr "Maaaring kulang ng tuldok-kuwit sa dulo ng direktiba."
+
+msgid "configs.console.lint_skipped"
+msgstr "Hindi available ang pagsusuri ng sintaks ng NGINX para sa mga config ng ModSecurity at CRS."
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "Hindi inaasahang pansarang brace."
+
+msgid "configs.console.lint_warnings"
+msgstr "May %(count)s babalang nakita sa mga pagsusuri sa panig ng client. Tingnan ang mga anotasyon sa editor."
+
+msgid "configs.console.name_help"
+msgstr "Gumamit ng mga titik, digit, gitling o underscore. Idinaragdag ang hulaping .conf sa disk."
+
+msgid "configs.console.new"
+msgstr "Bagong config"
+
+msgid "configs.console.no_files"
+msgstr "Walang config na tumutugma sa mga filter na ito."
+
+msgid "configs.console.restore_view"
+msgstr "Ibalik ang view"
+
+msgid "configs.console.select_file"
+msgstr "Pumili ng file para masilip ang nilalaman nito."
+
+msgid "configs.console.service_legend"
+msgstr "Ang saklaw na serbisyo ay para sa isang serbisyo lamang."
+
+msgid "configs.console.service_only"
+msgstr "Serbisyo lamang"
+
+msgid "configs.console.template_name_locked"
+msgstr "Hindi pinapayagang palitan ang pangalan ng custom config na batay sa template."
+
+msgid "configs.console.title"
+msgstr "Mga custom config"
+
+msgid "configs.console.types"
+msgstr "Uri ng config"
+
+msgid "configs.console.view"
+msgstr "Tingnan ang config"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "Lahat ng napiling custom config ay hindi nahanap, hindi UI/API custom config, o na-convert na."
@@ -2764,6 +2986,15 @@ msgstr "Oras"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "Katayuan ng Pag-block sa Paglipas ng Panahon"
 
+msgid "dashboard.chart.legend.count"
+msgstr "Bilang"
+
+msgid "dashboard.chart.legend.item"
+msgstr "Aytem"
+
+msgid "dashboard.chart.legend.share"
+msgstr "Bahagi"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Mga Na-block na Kahilingan"
 
@@ -3007,6 +3238,18 @@ msgstr "%(count)s template sa pahinang ito ay napili."
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "Lahat ng %(count)s na mga template sa pahinang ito ay napili."
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "Lahat ng %(count)s na katugmang mga daloy ng trabaho ay napili na."
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang mga daloy ng trabaho"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "%(count)s daloy ng trabaho sa pahinang ito ay napili."
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "Lahat ng %(count)s na mga daloy ng trabaho sa pahinang ito ay napili."
+
 msgid "datatable.bulk_select_clear"
 msgstr "Alisin ang pagpili"
 
@@ -3049,6 +3292,9 @@ msgstr "Walang available na Mga Serbisyo"
 msgid "datatable.info_empty_templates"
 msgstr "Walang available na Mga Template"
 
+msgid "datatable.info_empty_workflows"
+msgstr "Walang available na Mga Daloy ng Trabaho"
+
 msgid "datatable.info_filtered_bans"
 msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Ban)"
 
@@ -3079,6 +3325,9 @@ msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Serbisyo)"
 msgid "datatable.info_filtered_templates"
 msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Template)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Daloy ng Trabaho)"
+
 msgid "datatable.info_instances"
 msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Instance"
 
@@ -3099,6 +3348,9 @@ msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Serbisyo"
 
 msgid "datatable.info_templates"
 msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Template"
+
+msgid "datatable.info_workflows"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Daloy ng Trabaho"
 
 msgid "datatable.length_all"
 msgstr "Lahat"
@@ -3132,6 +3384,9 @@ msgstr "Ipakita ang _MENU_ na Mga Serbisyo"
 
 msgid "datatable.length_menu_templates"
 msgstr "Ipakita ang _MENU_ na Mga Template"
+
+msgid "datatable.length_menu_workflows"
+msgstr "Ipakita ang _MENU_ na Mga Daloy ng Trabaho"
 
 msgid "datatable.paginate.first"
 msgstr "Una"
@@ -3244,6 +3499,15 @@ msgstr "Napili ang 1 Template"
 msgid "datatable.select_rows_templates_plural"
 msgstr "Napili ang %d na Mga Template"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "Walang napiling Mga Daloy ng Trabaho"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "Napili ang 1 Daloy ng Trabaho"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "Napili ang %d na Mga Daloy ng Trabaho"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "%(count)s custom config ang napili"
 
@@ -3318,6 +3582,9 @@ msgstr "Walang nahanap na katugmang Mga Serbisyo"
 
 msgid "datatable.zero_records_templates"
 msgstr "Walang nahanap na katugmang Mga Template"
+
+msgid "datatable.zero_records_workflows"
+msgstr "Walang nahanap na katugmang Mga Daloy ng Trabaho"
 
 msgid "dev_log.copy_failed"
 msgstr "Nabigo ang pagkopya ng teksto:"
@@ -4369,14 +4636,26 @@ msgstr "Isang beses"
 msgid "interval.week"
 msgstr "Lingguhang"
 
+msgid "job.history.duration"
+msgstr "Tagal"
+
 msgid "job.history.end_date"
 msgstr "Petsa ng Pagtatapos"
+
+msgid "job.history.error"
+msgstr "Kamalian"
 
 msgid "job.history.start_date"
 msgstr "Petsa ng Simula"
 
 msgid "job.history.success"
 msgstr "Matagumpay"
+
+msgid "jobs.card.sub"
+msgstr "Pinapatakbo ng scheduler sa kani-kanilang agwat, o kapag hiniling"
+
+msgid "jobs.card.title"
+msgstr "Mga nakaiskedyul na gawain"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "Error habang kinukuha ang mga job: %(message)s"
@@ -5119,6 +5398,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "Mga karagdagang pahina"
 
+msgid "navigation.filter_plugins"
+msgstr "I-filter ang mga plugin…"
+
 msgid "navigation.global_settings"
 msgstr "Mga pangkalahatang setting"
 
@@ -5146,6 +5428,9 @@ msgstr "Pagpili ng Mode"
 msgid "navigation.more"
 msgstr "Higit pa..."
 
+msgid "navigation.no_plugin_match"
+msgstr "Walang katugmang plugin"
+
 msgid "navigation.operate"
 msgstr "Pamahalaan"
 
@@ -5164,14 +5449,23 @@ msgstr "Na-deactivate ang Plugin"
 msgid "navigation.plugin_deactivated_global"
 msgstr "Na-deactivate ang plugin sa buong system"
 
+msgid "navigation.plugin_insights"
+msgstr "Mga detalye ng plugin"
+
 msgid "navigation.plugins"
 msgstr "Mga Plugin"
+
+msgid "navigation.plugins_overview"
+msgstr "Pangkalahatang-ideya"
 
 msgid "navigation.plugins_pages"
 msgstr "Mga Pahina ng Plugin"
 
 msgid "navigation.pro"
 msgstr "Pro"
+
+msgid "navigation.profile"
+msgstr "Profayl"
 
 msgid "navigation.redirects"
 msgstr "Mga pag-redirect"
@@ -5344,6 +5638,24 @@ msgstr "LIBRE"
 msgid "plan.pro"
 msgstr "PRO"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "Hindi ginagamit saanman ang plugin na ito"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "Mga pangkalahatang setting"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "Naka-off ang mga sukatan"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "Wala pang maipapakita"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "Walang pahinang maipapakita"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "Para sa mga administrator lamang"
+
 msgid "plugin.page.status.deactivated"
 msgstr "Ang plugin ay hindi aktibo; kaya naman, walang available na impormasyon."
 
@@ -5379,6 +5691,12 @@ msgstr "Pro"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.card.configure"
+msgstr "I-configure ang %(name)s"
+
+msgid "plugins.card.metrics"
+msgstr "Mga sukatan ng %(name)s"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "Hindi nabasa ang bersyon ng BunkerWeb (%(current)s), kaya hindi masusuri ang compatibility ng %(id)s; walang na-install"
@@ -5623,11 +5941,20 @@ msgstr "Aktibo"
 msgid "plugins.marketplace.always_on"
 msgstr "Core / laging naka-on"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "Laging naka-on"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "Pangunahing plugin na kailangan ng BunkerWeb: maaari itong i-configure ngunit hindi i-disable."
+
 msgid "plugins.marketplace.disabled"
 msgstr "Naka-disable"
 
 msgid "plugins.marketplace.enabled"
 msgstr "Naka-enable"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "I-filter ang mga plugin"
 
 msgid "plugins.marketplace.inactive"
 msgstr "Hindi aktibo"
@@ -5658,6 +5985,15 @@ msgstr "mas maraming halaga"
 
 msgid "plugins.multivalue.show_less"
 msgstr "Ipakita ang mas kaunti"
+
+msgid "plugins.tier.community"
+msgstr "Plugin ng komunidad"
+
+msgid "plugins.tier.core"
+msgstr "Pangunahing plugin"
+
+msgid "plugins.tier.pro"
+msgstr "PRO plugin"
 
 msgid "pro.alert.overlapped_1"
 msgstr "Mayroon kang higit pang aktibong serbisyo kaysa sa pinapayagan ng iyong lisensya!"
@@ -6004,8 +6340,14 @@ msgstr "IP address"
 msgid "profile.session.last_activity"
 msgstr "Huling Aktibidad"
 
+msgid "profile.session.load_error"
+msgstr "Nagka-error sa pag-load ng data. Pakisubukang muli."
+
 msgid "profile.session.os"
 msgstr "Operating system"
+
+msgid "profile.session.recent_title"
+msgstr "Mga kamakailang sesyon"
 
 msgid "profile.session.title"
 msgstr "Sesyon"
@@ -6024,6 +6366,9 @@ msgstr "Seguridad"
 
 msgid "profile.tab.sessions"
 msgstr "Mga Session"
+
+msgid "profile.title"
+msgstr "Iyong profayl"
 
 msgid "range_picker.1h"
 msgstr "Huling oras"
@@ -6076,11 +6421,44 @@ msgstr "Hindi wasto ang kasalukuyang setting na %(setting)s."
 msgid "raw_drafts.setting_not_valid"
 msgstr "Hindi wasto ang setting na %(setting)s."
 
+msgid "raw_page.search"
+msgstr "Maghanap…"
+
+msgid "raw_page.search_label"
+msgstr "Maghanap sa raw configuration"
+
+msgid "raw_page.search_next"
+msgstr "Susunod na tugma"
+
+msgid "raw_page.search_prev"
+msgstr "Nakaraang tugma"
+
+msgid "raw_page.tile_modified"
+msgstr "Binago"
+
+msgid "raw_page.tile_plugins"
+msgstr "Mga Plugin"
+
+msgid "raw_page.tile_problems"
+msgstr "Mga problema"
+
+msgid "raw_page.tile_settings"
+msgstr "Mga Setting"
+
+msgid "raw_page.tiles_label"
+msgstr "Buod ng raw configuration"
+
 msgid "redirects.all"
 msgstr "Lahat"
 
+msgid "redirects.all_codes"
+msgstr "Lahat ng status code"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "Idagdag ang URI"
 
 msgid "redirects.append_request_uri"
 msgstr "Idagdag ang hinihinging URI sa target"
@@ -6090,6 +6468,9 @@ msgstr "Ikabit"
 
 msgid "redirects.attach_copy"
 msgstr "Ikabit ang %(name)s (%(from)s → %(to)s) sa isa o higit pang serbisyo."
+
+msgid "redirects.card_subtitle"
+msgstr "Mga pag-redirect ng path at mga serbisyong pinaggagamitan ng mga ito"
 
 msgid "redirects.code.301"
 msgstr "301 — Permanently Moved"
@@ -6106,6 +6487,12 @@ msgstr "307 — Temporary Redirect"
 msgid "redirects.code.308"
 msgstr "308 — Permanent Redirect"
 
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "%(count)s pag-redirect"
+msgstr[1] "%(count)s mga pag-redirect"
+
 msgid "redirects.create"
 msgstr "Gumawa ng redirect"
 
@@ -6117,6 +6504,9 @@ msgstr "Burahin ang redirect %(name)s?"
 
 msgid "redirects.delete_help"
 msgstr "Hindi maaaring burahin ang redirect na nakakabit sa isang serbisyo. Tanggalin muna ito."
+
+msgid "redirects.detach_shared"
+msgstr "Pinagsasaluhan ang pag-redirect na ito. Ang pag-detach ay nag-aalis lamang nito sa serbisyong iyon. Mananatili ito sa ibang mga serbisyo."
 
 msgid "redirects.edit"
 msgstr "I-edit ang redirect"
@@ -6199,8 +6589,32 @@ msgstr "Redirect mula sa"
 msgid "redirects.from_path_help"
 msgstr "Landas ng pinagmulan sa mga nakakabit na serbisyo, halimbawa /old."
 
+msgid "redirects.kpi_configured"
+msgstr "Mga naka-configure na pag-redirect"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "Ikabit sa serbisyo para magkabisa"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "Kabilang sa unang %(count)s na na-load"
+
+msgid "redirects.kpi_permanent"
+msgstr "Permanente"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 o 308, naka-cache sa mga browser"
+
+msgid "redirects.kpi_services"
+msgstr "Mga nakakabit na serbisyo"
+
+msgid "redirects.kpi_services_caption"
+msgstr "Mga serbisyong may kahit isang pag-redirect"
+
 msgid "redirects.new"
 msgstr "Bagong redirect"
+
+msgid "redirects.no_match"
+msgstr "Walang pag-redirect na tumutugma sa mga filter na ito."
 
 msgid "redirects.not_attached"
 msgstr "Hindi nakakabit"
@@ -6214,14 +6628,29 @@ msgstr "I-save ang redirect"
 msgid "redirects.search"
 msgstr "Maghanap ng pangalan, landas ng pinagmulan, o target..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "%(count)s serbisyo"
+msgstr[1] "%(count)s mga serbisyo"
+
 msgid "redirects.services_help"
 msgstr "Gamitin ang Ctrl o Command upang piliin ang maraming serbisyo. Maaaring idikit ang isang redirect sa ibang pagkakataon."
+
+msgid "redirects.services_title"
+msgstr "Mga serbisyong gumagamit ng pag-redirect na ito"
 
 msgid "redirects.status_code"
 msgstr "Kode ng estado"
 
 msgid "redirects.to_url"
 msgstr "I-redirect sa"
+
+msgid "redirects.to_url_help"
+msgstr "Buong http:// o https:// URL. Hindi sinusuportahan ang mga relatibong target."
 
 msgid "redirects.truncated"
 msgstr "Ang unang 500 redirects lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
@@ -6288,6 +6717,36 @@ msgstr "Desisyon ng Local API"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "Mga teknikal na detalye"
+
+msgid "reports.live.off"
+msgstr "Naka-pause ang awtomatikong pag-refresh."
+
+msgid "reports.live.on"
+msgstr "Naka-on ang awtomatikong pag-refresh, bawat 10 segundo."
+
+msgid "reports.live.updated"
+msgstr "Na-update ang mga ulat: %(added)s bago."
+
+msgid "reports.offenders.confirm_many"
+msgstr "Iba-ban ang %(count)s IP address sa bawat instance sa loob ng 24 na oras."
+
+msgid "reports.offenders.confirm_one"
+msgstr "Iba-ban ang %(ip)s sa bawat instance sa loob ng 24 na oras."
+
+msgid "reports.offenders.confirm_title"
+msgstr "Mag-ban mula sa mga ulat"
+
+msgid "reports.offenders.show"
+msgstr "Ipakita"
+
+msgid "reports.offenders.show_bottom"
+msgstr "Pinakakaunting paglabag"
+
+msgid "reports.offenders.show_latest"
+msgstr "Pinakabagong lumabag"
+
+msgid "reports.offenders.show_top"
+msgstr "Pinakamaraming paglabag"
 
 msgid "reports.security_incident"
 msgstr "Insidente ng Seguridad"
@@ -6388,6 +6847,15 @@ msgstr "Landas ng kahilingan"
 msgid "request_path.unordered"
 msgstr "Walang nakatalagang posisyon sa phase na %(phase)s; tumatakbo ito pagkatapos ng mga nakaayos na plugin, ayon sa alpabeto."
 
+msgid "resource_groups.access"
+msgstr "Pag-access"
+
+msgid "resource_groups.access_readonly"
+msgstr "Basa lamang"
+
+msgid "resource_groups.access_write"
+msgstr "Pagsulat"
+
 msgid "resource_groups.add_entry"
 msgstr "Magdagdag ng entry"
 
@@ -6402,6 +6870,9 @@ msgstr "Alias"
 
 msgid "resource_groups.alias_help"
 msgstr "Mga letra, numero, underscore, at dash. Hindi maaaring palitan ang mga umiiral na alias."
+
+msgid "resource_groups.all_kinds"
+msgstr "Lahat"
 
 msgid "resource_groups.bulk_import"
 msgstr "Maramihang import"
@@ -6447,6 +6918,9 @@ msgstr "Mga entry"
 
 msgid "resource_groups.expand_all"
 msgstr "I-expand lahat"
+
+msgid "resource_groups.filter_values"
+msgstr "I-filter ang mga halaga..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "Ang alias ay dapat maglaman ng 1 hanggang 64 na letra, numero, underscore, o dash"
@@ -6580,6 +7054,48 @@ msgstr "Magdagdag ng mga entry nang isa-isa o gumamit ng bulk importer sa ibaba.
 msgid "resource_groups.no_references"
 msgstr "Walang sanggunian"
 
+msgid "resource_groups.no_value_match"
+msgstr "Walang halagang tumutugma sa filter na ito."
+
+msgid "resource_groups.origin"
+msgstr "Pinagmulan"
+
+msgid "resource_groups.origin_plugin"
+msgstr "Kasama sa plugin na %(plugin)s"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "Nilikha o na-sync sa pamamagitan ng API."
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "Nilikha ng autoconf controller."
+
+msgid "resource_groups.origin_tip.download"
+msgstr "Na-download mula sa malayuang pinagmulan."
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "Manwal na nilikha o mula sa configuration file."
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "Nilikha ng scheduler."
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "Nilikha sa pamamagitan ng web UI."
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "Nilikha ng setup wizard. Maaari pa rin itong i-edit."
+
+msgid "resource_groups.plugins_compatible"
+msgstr "Mga tugmang plugin"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "Mga plugin na tumatanggap sa kanilang mga setting ng mga uri ng halaga sa grupong ito. Nakalista ang mga aktuwal na sanggunian sa Paggamit."
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "%(count)s plugin"
+msgstr[1] "%(count)s mga plugin"
+
 msgid "resource_groups.readonly"
 msgstr "Ang database ay read-only. Maaaring suriin at i-export ang mga grupo ng mapagkukunan, ngunit hindi mababago."
 
@@ -6607,6 +7123,9 @@ msgstr "Mga reusable na alias na may uri para sa IP, bansa, ASNs, reverse DNS na
 msgid "resource_groups.template_configuration"
 msgstr "Template %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "Na-update"
+
 msgid "resource_groups.usage"
 msgstr "Paggamit"
 
@@ -6615,6 +7134,18 @@ msgstr "Halaga"
 
 msgid "resource_groups.values"
 msgstr "Mga halaga"
+
+msgid "resource_groups.values_compat"
+msgstr "Tugma sa: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "Nakopya"
+
+msgid "resource_groups.values_title"
+msgstr "Mga halaga ng %(name)s"
+
+msgid "resource_groups.view_values_of"
+msgstr "Tingnan ang mga halaga ng %(name)s"
 
 msgid "scope.all_services"
 msgstr "Lahat ng Serbisyo"
@@ -7585,6 +8116,93 @@ msgstr "I-configure ang maraming instance ng mga setting para sa plugin na ito d
 msgid "settings.multiple.title"
 msgstr "Maramihang Mga Setting"
 
+msgid "settings_page.alert_global"
+msgstr "Ang mga pagbabago ay para sa bawat serbisyong hindi nag-o-override sa mga ito at magkakabisa pagkatapos ng I-save at i-reload."
+
+msgid "settings_page.alert_service"
+msgstr "Ang mga setting na iniwang walang laman ay gumagamit ng mga pangkalahatang default. Ang mga pagbabago ay para lamang sa napiling serbisyo at magkakabisa pagkatapos ng I-save at i-reload."
+
+msgid "settings_page.back_global"
+msgstr "Bumalik sa mga pangkalahatang setting"
+
+msgid "settings_page.back_service"
+msgstr "Bumalik sa serbisyo"
+
+msgid "settings_page.card_title"
+msgstr "Mga Setting"
+
+msgid "settings_page.count"
+msgstr "%(count)s setting"
+
+msgid "settings_page.count_filtered"
+msgstr "%(shown)s sa %(total)s na setting"
+
+msgid "settings_page.groups_link"
+msgstr "Pamahalaan ang mga grupo ng mapagkukunan"
+
+msgid "settings_page.groups_link_hint"
+msgstr "Mga listahan ng IP, network at bansa na magagamit muli at maaaring sanggunian ng mga setting ng plugin na ito."
+
+msgid "settings_page.no_match"
+msgstr "Walang setting na tumutugma sa iyong paghahanap."
+
+msgid "settings_page.plugin"
+msgstr "Plugin"
+
+msgid "settings_page.reload_alert_body"
+msgstr "Muling ilalapat ng scheduler ang configuration sa iyong mga instance kapag nag-save ka."
+
+msgid "settings_page.reload_alert_title"
+msgstr "Magti-trigger ang mga pagbabago ng pag-reload ng instance."
+
+msgid "settings_page.revert"
+msgstr "Ibalik"
+
+msgid "settings_page.revert_confirm"
+msgstr "Ibalik lahat"
+
+msgid "settings_page.revert_message"
+msgstr "Ibinabalik nito ang lahat ng hindi nai-save na edit sa pahinang ito sa huling nai-save na halaga."
+
+msgid "settings_page.revert_title"
+msgstr "Ibalik ang mga pagbabago"
+
+msgid "settings_page.save_reload"
+msgstr "I-save at i-reload"
+
+msgid "settings_page.scope"
+msgstr "Saklaw"
+
+msgid "settings_page.scope_global"
+msgstr "Mga pangkalahatang setting"
+
+msgid "settings_page.search"
+msgstr "Maghanap ng mga setting…"
+
+msgid "settings_page.search_label"
+msgstr "Maghanap ng mga setting"
+
+msgid "settings_page.select_plugin_label"
+msgstr "Pumili ng plugin"
+
+msgid "settings_page.select_scope_label"
+msgstr "Piliin kung saan ie-edit ang mga setting nito"
+
+msgid "setup.accordion.advanced"
+msgstr "Mas advanced"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "Reverse Proxy · Tunay na IP · Custom na Sertipiko"
+
+msgid "setup.accordion.general"
+msgstr "Pangkalahatan"
+
+msgid "setup.accordion.general_hint"
+msgstr "Server · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "Tapusin ang setup"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "Nagkaroon ng error habang sine-set up ang web UI. Subukan muli."
 
@@ -7639,6 +8257,9 @@ msgstr "Hindi tugma ang mga password."
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "Kapag gumagamit ng custom SSL certificate, kailangan mong itakda ang parehong certificate at key."
 
+msgid "setup.from_ui_host"
+msgstr "Mula sa environment variable na UI_HOST"
+
 msgid "setup.status.admin_user_exists"
 msgstr "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang."
 
@@ -7684,6 +8305,9 @@ msgstr "Tunay na IP"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "Reverse Proxy"
 
+msgid "setup.step2.section.server"
+msgstr "Server"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7692,6 +8316,12 @@ msgstr "I-configure ang mga setting na tukoy sa Web UI."
 
 msgid "setup.step2.title"
 msgstr "Mga Setting ng UI"
+
+msgid "setup.step3.activate_title"
+msgstr "Mag-activate ng lisensya"
+
+msgid "setup.step3.activation_note"
+msgstr "Ia-activate ang lisensya kapag natapos mo ang setup."
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "Mga Benepisyo ng PRO"
@@ -7735,11 +8365,119 @@ msgstr "Suriin ang iyong mga setting bago kumpletuhin ang setup."
 msgid "setup.step4.title"
 msgstr "Pangkalahatang-tanaw"
 
+msgid "setup.stepper_label"
+msgstr "Mga hakbang sa setup"
+
 msgid "setup.subtitle"
 msgstr "Sundin ang mga hakbang upang makumpleto ang setup wizard."
 
+msgid "setup.switch.disabled"
+msgstr "Hindi pinagana"
+
+msgid "setup.switch.enabled"
+msgstr "Pinagana"
+
 msgid "setup.title"
 msgstr "Setup wizard"
+
+msgid "shell.account.current"
+msgstr "Account: %(name)s"
+
+msgid "shell.account.title"
+msgstr "Account"
+
+msgid "shell.contrast.toggle"
+msgstr "Mataas na contrast"
+
+msgid "shell.density.toggle"
+msgstr "Siksik na ayos"
+
+msgid "shell.language.title"
+msgstr "Wika"
+
+msgid "shell.main_navigation"
+msgstr "Pangunahing nabigasyon"
+
+msgid "shell.notifications.all_read"
+msgstr "Nabasa na lahat"
+
+msgid "shell.notifications.filter_label"
+msgstr "I-filter ang mga abiso"
+
+msgid "shell.notifications.group_earlier"
+msgstr "Mas maaga"
+
+msgid "shell.notifications.group_today"
+msgstr "Ngayon"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "Kahapon"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "Markahang nabasa na lahat"
+
+msgid "shell.notifications.mark_read"
+msgstr "Markahang nabasa na"
+
+msgid "shell.notifications.none_unread"
+msgstr "Walang hindi pa nababasang abiso."
+
+msgid "shell.notifications.tab_all"
+msgstr "Lahat"
+
+msgid "shell.notifications.tab_unread"
+msgstr "Hindi pa nababasa"
+
+msgid "shell.notifications.title"
+msgstr "Mga Abiso"
+
+msgid "shell.notifications.unread_count"
+msgstr "Hindi pa nababasa: %(count)s"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "Hindi pa nababasa:"
+
+msgid "shell.search.kind_page"
+msgstr "Pahina"
+
+msgid "shell.search.kind_plugin"
+msgstr "Plugin"
+
+msgid "shell.search.kind_service"
+msgstr "Serbisyo"
+
+msgid "shell.search.label"
+msgstr "Maghanap ng mga pahina, plugin at serbisyo"
+
+msgid "shell.search.loading_services"
+msgstr "Nilo-load ang mga serbisyo…"
+
+msgid "shell.search.no_match"
+msgstr "Walang tugma para sa “%(query)s”"
+
+msgid "shell.search.placeholder"
+msgstr "Maghanap ng pahina, plugin, serbisyo…"
+
+msgid "shell.search.results"
+msgstr "Mga resulta ng paghahanap"
+
+msgid "shell.search.status_results"
+msgstr "Mga resulta: %(count)s"
+
+msgid "shell.skip_to_content"
+msgstr "Lumaktaw sa pangunahing nilalaman"
+
+msgid "shell.star_us"
+msgstr "Bigyan ng star ang BunkerWeb sa GitHub"
+
+msgid "shell.theme.system_hint"
+msgstr "sumusunod sa iyong OS"
+
+msgid "shell.theme.title"
+msgstr "Tema"
+
+msgid "shell.top_navigation"
+msgstr "Bar sa itaas"
 
 msgid "status.active"
 msgstr "Aktibo"
@@ -7951,6 +8689,18 @@ msgstr "Susunod"
 msgid "step.previous"
 msgstr "Nakaraan"
 
+msgid "support.attach_help"
+msgstr "Mga export para sa kahilingan sa suporta. Kailangan ang pahintulot sa pagsulat at itinatago ng mga ito ang mga lihim na datos."
+
+msgid "support.attach_title"
+msgstr "Diagnostics na ilalakip"
+
+msgid "support.card.community.title"
+msgstr "Komunidad"
+
+msgid "support.card.docs.title"
+msgstr "Dokumentasyon"
+
 msgid "support.card.download_logs.help"
 msgstr "Lahat ng pribadong data ay iano-anonymize."
 
@@ -7974,6 +8724,36 @@ msgstr "Mga log, bersyon ng plugin, environment, at kamakailang error. Ina-anony
 
 msgid "support.card.ui_bundle.title"
 msgstr "Diagnostics ng Web UI"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "Magtanong sa komunidad at mga tagapagpanatili."
+
+msgid "support.community.github"
+msgstr "Mga isyu sa GitHub"
+
+msgid "support.community.github_help"
+msgstr "Mga ulat ng bug at kahilingan sa tampok."
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "Mga talakayan at anunsyo."
+
+msgid "support.docs.quickstart"
+msgstr "Gabay sa mabilis na pagsisimula"
+
+msgid "support.docs.troubleshooting"
+msgstr "Paglutas ng problema"
+
+msgid "support.docs.upgrading"
+msgstr "Pag-upgrade"
+
+msgid "support.docs.web_ui"
+msgstr "Gabay sa Web UI"
 
 msgid "support.subtitle"
 msgstr "I-download ang mga log ng debug, i-extract ang iyong configuration, at humingi ng tulong sa team ng BunkerWeb."
@@ -8142,6 +8922,63 @@ msgstr "Halaga"
 
 msgid "table.header.version"
 msgstr "Bersyon"
+
+msgid "table_system.active_filters"
+msgstr "Mga filter, %(count)s aktibo"
+
+msgid "table_system.advanced_filters"
+msgstr "Mga advanced na filter"
+
+msgid "table_system.any"
+msgstr "Anuman"
+
+msgid "table_system.column_count"
+msgstr "%(visible)s sa %(total)s"
+
+msgid "table_system.confirm"
+msgstr "Kumpirmahin"
+
+msgid "table_system.confirm_title"
+msgstr "Kumpirmahin ang aksiyon"
+
+msgid "table_system.filter"
+msgstr "I-filter"
+
+msgid "table_system.filters"
+msgstr "Mga filter"
+
+msgid "table_system.leave"
+msgstr "Umalis nang hindi nagse-save"
+
+msgid "table_system.leave_message"
+msgstr "Mawawala ang iyong mga hindi nai-save na pagbabago."
+
+msgid "table_system.leave_title"
+msgstr "Umalis nang hindi nagse-save?"
+
+msgid "table_system.multiple_actions"
+msgstr "Maramihang aksiyon para sa mga napiling aytem"
+
+msgid "table_system.show_all"
+msgstr "Ipakita lahat"
+
+msgid "table_system.stay"
+msgstr "Magpatuloy sa pag-edit"
+
+msgid "table_system.type_phrase"
+msgstr "I-type ang %(phrase)s para kumpirmahin"
+
+msgid "table_system.upload_hint"
+msgstr "I-drag at i-drop o mag-click para mag-upload"
+
+msgid "table_system.visible_columns"
+msgstr "Mga nakikitang column"
+
+msgid "tables.top.detail"
+msgstr "Detalye"
+
+msgid "tables.top.share"
+msgstr "Bahagi"
 
 msgid "template.editor.button_add_config"
 msgstr "Magdagdag ng config"
@@ -8731,6 +9568,24 @@ msgstr "I-update ang Community Template"
 msgid "templates.catalog.update_up_to_date"
 msgstr "Tumutugma na ang template na %(template)s sa catalogue"
 
+msgid "templates.features_builtin"
+msgstr "Mga built-in na tampok"
+
+msgid "templates.features_configs"
+msgstr "Mga custom config"
+
+msgid "templates.features_help"
+msgstr "Mga ibinibigay ng template na ito. Buksan ang template para makita o baguhin ang aktuwal na mga setting."
+
+msgid "templates.features_of"
+msgstr "Ipakita ang mga tampok ng %(name)s"
+
+msgid "templates.features_plugins"
+msgstr "Mga Plugin"
+
+msgid "templates.features_title"
+msgstr "Mga tampok ng template"
+
 msgid "templates.flash.catalog_updated"
 msgstr "Na-update ang template na %(template)s mula sa catalogue."
 
@@ -8806,6 +9661,12 @@ msgstr "Hindi na-import ang template: mas malaki sa 1 MiB ang file"
 msgid "templates.import.unreadable"
 msgstr "Hindi na-import ang template: hindi mabasa ang file"
 
+msgid "templates.managed_by"
+msgstr "Pinamamahalaan ng %(owner)s: hindi ito mababago o matatanggal dito."
+
+msgid "templates.more_actions"
+msgstr "Higit pang aksiyon para sa %(name)s"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8820,6 +9681,18 @@ msgstr "Katamtamang seguridad"
 
 msgid "templates.name.ui"
 msgstr "Web UI"
+
+msgid "templates.no_match"
+msgstr "Walang template na tumutugma sa paghahanap na ito."
+
+msgid "templates.open_template"
+msgstr "Buksan ang template"
+
+msgid "templates.read_only"
+msgstr "Basa lamang"
+
+msgid "templates.search"
+msgstr "Maghanap ng mga template..."
 
 msgid "templates.subtitle"
 msgstr "Mga reusable na template ng configuration para sa iyong mga serbisyo — i-bundle ang mga setting, hakbang, at custom na configuration, pagkatapos ay lumikha, kopyahin, o tanggalin ang mga ito."
@@ -8845,6 +9718,9 @@ msgstr "Maliwanag"
 msgid "theme.system"
 msgstr "Sistema"
 
+msgid "threatmap.attacks_24h"
+msgstr "Na-block, nakaraang 24 na oras"
+
 msgid "threatmap.attacks_today"
 msgstr "Mga pag-atake ngayong araw"
 
@@ -8853,6 +9729,21 @@ msgstr "na-block na request"
 
 msgid "threatmap.blocked_requests"
 msgstr "mga na-block na request"
+
+msgid "threatmap.col_ip"
+msgstr "IP address"
+
+msgid "threatmap.col_origin"
+msgstr "Pinagmulan"
+
+msgid "threatmap.col_reason"
+msgstr "Dahilan"
+
+msgid "threatmap.col_target"
+msgstr "Target"
+
+msgid "threatmap.col_time"
+msgstr "Oras"
 
 msgid "threatmap.countries"
 msgstr "Mga bansang pinagmulan"
@@ -8899,6 +9790,9 @@ msgstr "walang lokasyon"
 msgid "threatmap.open_live"
 msgstr "Live na view"
 
+msgid "threatmap.rolling_window"
+msgstr "Gumagalaw na saklaw ng oras, nire-refresh kada humigit-kumulang 30 segundo"
+
 msgid "threatmap.show_less"
 msgstr "Ipakita ang nangungunang %(count)s"
 
@@ -8910,6 +9804,9 @@ msgstr "Tumigil na sa pag-update ang mga bilang na ito. Hindi tumutugon ang metr
 
 msgid "threatmap.subtitle"
 msgstr "Kung saan nanggaling ang trapikong hinarang ng iyong mga instance sa nakaraang 24 na oras."
+
+msgid "threatmap.ticker_caption"
+msgstr "Mga pinakahuling na-block na kahilingan"
 
 msgid "threatmap.ticker_title"
 msgstr "Mga live na kaganapan"
@@ -8932,14 +9829,26 @@ msgstr "Pangunahing target"
 msgid "threatmap.updated"
 msgstr "Na-update"
 
+msgid "timings.all_phases"
+msgstr "Lahat ng yugto"
+
 msgid "timings.calls"
 msgstr "Mga tawag"
+
+msgid "timings.caption"
+msgstr "Mga oras ng plugin bawat yugto, nakaayos ayon sa kabuuang oras bilang default"
+
+msgid "timings.columns"
+msgstr "Mga column"
 
 msgid "timings.disabled_help"
 msgstr "Itakda ang METRICS_COLLECT_TIMINGS sa yes para sukatin ang tagal ng bawat plugin. Kinokolekta pa rin ang buong tagal ng request."
 
 msgid "timings.disabled_title"
 msgstr "Naka-off ang pagsukat ng oras ng plugin"
+
+msgid "timings.export_csv"
+msgstr "I-export sa CSV"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "Error habang kinukuha ang mga plugin timing: %(message)s"
@@ -8956,6 +9865,15 @@ msgstr "Karaniwan"
 msgid "timings.mean_request"
 msgstr "Karaniwang request"
 
+msgid "timings.no_match"
+msgstr "Walang oras na tumutugma sa mga filter na ito"
+
+msgid "timings.no_share"
+msgstr "Walang bahagi"
+
+msgid "timings.no_share_hint"
+msgstr "Hindi tumatakbo nang isang beses bawat kahilingan ang yugtong ito, kaya wala itong bahagi."
+
 msgid "timings.partial"
 msgstr "Hindi sumagot ang ilang instance. Ang mga bilang sa ibaba ay para sa mga sumagot."
 
@@ -8964,6 +9882,9 @@ msgstr "Yugto"
 
 msgid "timings.phases"
 msgstr "Mga yugto ng plugin"
+
+msgid "timings.phases_sub"
+msgstr "Oras na ginugol ng bawat plugin sa bawat yugto"
 
 msgid "timings.plugin"
 msgstr "Plugin"
@@ -8974,6 +9895,9 @@ msgstr "Mga instance na nag-uulat"
 msgid "timings.requests_measured"
 msgstr "Mga request na sinukat"
 
+msgid "timings.search_placeholder"
+msgstr "Maghanap ng plugin o yugto…"
+
 msgid "timings.share"
 msgstr "Bahagi"
 
@@ -8982,6 +9906,9 @@ msgstr "Ang bahagi ay kabuuang oras ng plugin kumpara sa kabuuang oras ng reques
 
 msgid "timings.subtitle"
 msgstr "Tagal ng bawat plugin sa bawat yugto ng request, binabasa nang live mula sa lahat ng instance at pinagsasama."
+
+msgid "timings.toolbar"
+msgstr "Mga tool ng talahanayan ng oras"
 
 msgid "timings.total"
 msgstr "Kabuuan"
@@ -9883,6 +10810,12 @@ msgstr "Magdagdag ng server"
 msgid "upstreams.all"
 msgstr "Lahat"
 
+msgid "upstreams.all_protocols"
+msgstr "Lahat ng protocol"
+
+msgid "upstreams.all_tls"
+msgstr "Lahat ng setting ng TLS"
+
 msgid "upstreams.attach"
 msgstr "Ikabit"
 
@@ -9901,6 +10834,15 @@ msgstr "Pinakamababang koneksyon"
 msgid "upstreams.balancing.round_robin"
 msgstr "Round robin (default)"
 
+msgid "upstreams.card_subtitle"
+msgstr "Mga backend pool at mga serbisyong nagpapasa ng kahilingan sa mga ito sa pamamagitan ng proxy"
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "%(count)s upstream"
+msgstr[1] "%(count)s mga upstream"
+
 msgid "upstreams.create"
 msgstr "Lumikha ng upstream"
 
@@ -9912,6 +10854,9 @@ msgstr "Burahin ang upstream na %(name)s?"
 
 msgid "upstreams.delete_help"
 msgstr "Hindi maaaring burahin ang upstream na nakakabit sa isang serbisyo. Kailangan munang tanggalin ito."
+
+msgid "upstreams.detach_shared"
+msgstr "Pinagsasaluhan ang upstream na ito. Ang pag-detach ay nag-aalis lamang nito sa serbisyong iyon at path. Mananatili ito sa ibang mga pagkakabit."
 
 msgid "upstreams.edit"
 msgstr "I-edit ang upstream"
@@ -10003,11 +10948,44 @@ msgstr "Panatilihin ang koneksyon"
 msgid "upstreams.keepalive_help"
 msgstr "Bilang ng mga koneksyon na pinapanatili ng bawat worker. Tanging HTTP at gRPC; iwanan itong walang laman upang hindi paganahin."
 
+msgid "upstreams.keepalive_off"
+msgstr "Naka-off"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "Kabilang sa unang %(count)s na na-load"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "%(count)s hindi nakakabit"
+
+msgid "upstreams.kpi_roles"
+msgstr "%(primary)s pangunahin · %(backup)s reserba · %(down)s hindi aktibo (naka-configure)"
+
+msgid "upstreams.kpi_services"
+msgstr "Mga nakakabit na serbisyo"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "Mga serbisyong nagpapasa sa pool gamit ang proxy"
+
+msgid "upstreams.kpi_tls"
+msgstr "TLS papunta sa backend"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "Mga pool na naka-configure na makipag-ugnayan sa mga server nito gamit ang TLS"
+
 msgid "upstreams.match_path"
 msgstr "Path ng reverse proxy"
 
 msgid "upstreams.match_path_help"
 msgstr "Ang lokasyon kung saan ipinapasa ng mga napiling serbisyo ang trapiko sa pool na ito. Hindi ginagamit para sa isang stream pool, na kumukuha ng buong serbisyo."
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: %(count)s server"
+msgstr[1] "%(name)s: %(count)s mga server"
+
+msgid "upstreams.members_title"
+msgstr "Mga server sa upstream na ito"
 
 msgid "upstreams.method"
 msgstr "Pagbalanse ng trapiko"
@@ -10017,6 +10995,9 @@ msgstr "Mga letra, numero, hyphen at underscore lamang. Hindi pinapayagan ang mg
 
 msgid "upstreams.new"
 msgstr "Bagong upstream"
+
+msgid "upstreams.no_match"
+msgstr "Walang upstream na tumutugma sa mga filter na ito."
 
 msgid "upstreams.not_attached"
 msgstr "Hindi nakakabit"
@@ -10072,11 +11053,38 @@ msgstr "Bigat"
 msgid "upstreams.servers"
 msgstr "Mga Server"
 
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "%(count)s server"
+msgstr[1] "%(count)s mga server"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 2 form(s) for fil_PH, singular in slot 0
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "%(count)s serbisyo"
+msgstr[1] "%(count)s mga serbisyo"
+
 msgid "upstreams.services_help"
 msgstr "Gumamit ng Ctrl o Command upang piliin ang maraming serbisyo. Maaaring ikabit ang isang upstream sa ibang pagkakataon."
 
 msgid "upstreams.services_hidden"
 msgstr "Ang serbisyo na %(count)s ay nakatago: ang isang upstream na %(protocol)s ay maaari lamang ikabit sa isang tugmang serbisyo."
+
+msgid "upstreams.services_title"
+msgstr "Mga serbisyong gumagamit ng upstream na ito"
+
+msgid "upstreams.tls"
+msgstr "TLS papunta sa backend"
+
+msgid "upstreams.tls_no"
+msgstr "Walang encryption"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "Ang unang 500 upstream lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
@@ -10156,11 +11164,26 @@ msgstr "Nangangailangan ang ZeroSSL ng email o ZeroSSL API key."
 msgid "web_cache.available"
 msgstr "Magagamit"
 
+msgid "web_cache.available_tip"
+msgstr "May direktoryo ng cache sa instance na ito. Ipinapakita sa Pagpapagana sa serbisyo kung ginagamit ito ng isang serbisyo."
+
 msgid "web_cache.cache_state"
 msgstr "Estado"
 
 msgid "web_cache.cached_files"
 msgstr "Mga naka-cache na file"
+
+msgid "web_cache.compact"
+msgstr "Siksik"
+
+msgid "web_cache.counters_window"
+msgstr "Mula nang i-restart ang bawat instance"
+
+msgid "web_cache.counters_window_help"
+msgstr "Nagbibilang ang mga ito mula sa huling pag-restart ng bawat instance, hindi sa isang nakapirming panahon."
+
+msgid "web_cache.danger_zone"
+msgstr "Mapanganib na bahagi"
 
 msgid "web_cache.deployment"
 msgstr "Pag-deploy"
@@ -10213,11 +11236,20 @@ msgstr "Rate ng pag-hit"
 msgid "web_cache.instance"
 msgstr "Instansya"
 
+msgid "web_cache.invalidate"
+msgstr "Pawalang-bisa"
+
 msgid "web_cache.metrics"
 msgstr "Pinagsamang distribusyon ng hit / miss"
 
 msgid "web_cache.metrics_scope"
 msgstr "Ang mga counter ay pinagsama-sama sa bawat instance sa lahat ng mga serbisyo na may naka-enable na cache."
+
+msgid "web_cache.no_counters"
+msgstr "Wala pang nabilang na naka-cache na kahilingan ang instance na ito."
+
+msgid "web_cache.no_requests_for"
+msgstr "Walang kahilingan para sa:"
 
 msgid "web_cache.not_reporting"
 msgstr "Hindi nag-uulat"
@@ -10228,6 +11260,9 @@ msgstr "Landas"
 msgid "web_cache.purge"
 msgstr "Tanggalin ang mga naka-cache na tugon"
 
+msgid "web_cache.purge_a_url"
+msgstr "Linisin ang URL"
+
 msgid "web_cache.purge_all"
 msgstr "Tanggalin ang lahat"
 
@@ -10236,6 +11271,9 @@ msgstr "Ito ay nagtatanggal ng lahat ng naka-cache na tugon para sa bawat serbis
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "Tanggalin ang buong cache?"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "linisin lahat"
 
 msgid "web_cache.purge_help"
 msgstr "Ang mga purge action ay agad na tumatakbo sa mga naa-access na instance. Nilalaktawan ang mga hindi naa-access na instance at walang aksyong inilalagay sa queue."
@@ -10258,6 +11296,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "Mga instance na nag-uulat"
 
+msgid "web_cache.server_side_note"
+msgstr "Cache sa panig ng server lamang. Pinamamahalaan ng pahinang ito ang reverse-proxy cache na nakaimbak sa bawat BunkerWeb instance. Hindi naaapektuhan ang mga tugong naka-save na sa mga browser ng bisita."
+
 msgid "web_cache.service"
 msgstr "Serbisyo"
 
@@ -10266,6 +11307,27 @@ msgstr "Pag-enable ng serbisyo"
 
 msgid "web_cache.status"
 msgstr "Imbakan ng instance"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "Nilaktawan ang pag-cache para sa kahilingang ito"
+
+msgid "web_cache.status_desc.expired"
+msgstr "Lumipas na ang bisa: muling kinuha mula sa upstream"
+
+msgid "web_cache.status_desc.hit"
+msgstr "Direktang inihatid mula sa cache"
+
+msgid "web_cache.status_desc.miss"
+msgstr "Wala sa cache: kinuha mula sa upstream at inimbak"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "Kondisyonal na muling pagkuha: sinabi ng upstream na valid pa ito"
+
+msgid "web_cache.status_desc.stale"
+msgstr "Lumang tugon ang inihatid dahil pumapalya ang upstream"
+
+msgid "web_cache.status_desc.updating"
+msgstr "Lumang tugon ang inihatid habang isinasagawa ang pag-refresh"
 
 msgid "web_cache.subtitle"
 msgstr "Status ng cache ng reverse-proxy, aggregate na mga sukatan ng hit-rate at agarang kontrol sa pagtanggal."
@@ -10308,6 +11370,18 @@ msgstr "Tagapagbigay ng antibot"
 
 msgid "workflows.act_redirect"
 msgstr "I-redirect"
+
+msgid "workflows.act_settings_block"
+msgstr "Mga setting ng pag-block"
+
+msgid "workflows.act_settings_challenge"
+msgstr "Mga setting ng hamon"
+
+msgid "workflows.act_settings_generic"
+msgstr "Mga setting ng aksiyon"
+
+msgid "workflows.act_settings_redirect"
+msgstr "Mga setting ng pag-redirect"
 
 msgid "workflows.act_status"
 msgstr "Katayuan ng pagtanggi"
@@ -10435,6 +11509,9 @@ msgstr "Mga problema sa pagpapatunay ng %(count)s sa patakarang ito"
 msgid "workflows.aria.ruleName"
 msgstr "Pangalan ng patakaran %(n)s"
 
+msgid "workflows.aria.ruleTools"
+msgstr "Mga aksiyon para sa patakaran %(n)s"
+
 msgid "workflows.aria.terminalAction"
 msgstr "Pangwakas na aksyon"
 
@@ -10551,6 +11628,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "Burahin ang patakarang ito? Aakyat nang isang puwesto ang lahat ng nasa ibaba nito."
+
+msgid "workflows.conseq.skip"
+msgstr "Hindi kailanman tumatakbo"
+
+msgid "workflows.conseq.stop"
+msgstr "Pinatitigil ang kadena"
 
 msgid "workflows.copySuffix"
 msgstr " (kopya)"
@@ -10699,6 +11782,21 @@ msgstr "tarangkahan ng pagtugma"
 msgid "workflows.gate.help"
 msgstr "Binibilang sa bawat client IP. Sa ibaba ng threshold, hindi talaga tutugma ang patakaran at magpapatuloy ang pagsusuri sa susunod — hindi ito naglilimita ng rate nang mag-isa."
 
+msgid "workflows.inspector.apply"
+msgstr "Ilapat"
+
+msgid "workflows.inspector.apply_title"
+msgstr "Ilapat: panatilihin ang mga edit na ito sa burador. Ang I-save sa pahina ang permanenteng nagtatala ng mga ito"
+
+msgid "workflows.inspector.cancel"
+msgstr "Kanselahin"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "Kanselahin: ibalik ang panuntunan sa kalagayan nito noong binuksan"
+
+msgid "workflows.inspector.cancelled"
+msgstr "Kinansela ang mga edit sa panuntunang %(n)s. Naibalik ang panuntunan sa kalagayan nito noong binuksan."
+
 msgid "workflows.legend.fall"
 msgstr "Kapag walang tugma, pumunta sa susunod na patakaran"
 
@@ -10735,8 +11833,14 @@ msgstr "Kopyahin sa ibaba"
 msgid "workflows.menu.enable"
 msgstr "I-enable ang patakaran"
 
+msgid "workflows.menu.header"
+msgstr "Mga aksiyon sa patakaran"
+
 msgid "workflows.menu.moveTo"
 msgstr "Ilipat sa posisyon %(n)s"
+
+msgid "workflows.menu.order"
+msgstr "Pagkakasunod-sunod"
 
 msgid "workflows.menu.staysAt"
 msgstr "Nananatili sa posisyon %(n)s"
@@ -10768,6 +11872,81 @@ msgstr "Hindi pa na-validate"
 msgid "workflows.order_help"
 msgstr "Ang mga panuntunan ay sinusuri sa pagkakasunod-sunod at ang unang na tumugma ay mananalo. Ang isang panuntunan na may threshold ng rate ay tumutugma lamang kapag ang threshold ay lumampas, kaya ang isang mas mababang panuntunan ay maaaring mahuli ang trapiko sa ibaba nito."
 
+msgid "workflows.port.active_rules"
+msgstr "%(count)s aktibo"
+
+msgid "workflows.port.attachment"
+msgstr "Pagkakabit"
+
+msgid "workflows.port.attachment_any"
+msgstr "Anuman"
+
+msgid "workflows.port.attachment_attached"
+msgstr "Nakakabit"
+
+msgid "workflows.port.created"
+msgstr "Nilikha"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "I-detach ang daloy ng trabahong ito mula sa lahat ng serbisyo bago ito tanggalin. Hindi kailanman awtomatikong dini-detach ang mga serbisyo sa pagtanggal."
+
+msgid "workflows.port.details"
+msgstr "Mga detalye"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "Mga napiling depinisyon (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "Na-export ang mga napiling depinisyon. Walang garantiya ng muling pag-import para sa file na ito."
+
+msgid "workflows.port.export_failed"
+msgstr "Nabigo ang pag-export. Walang na-download na file."
+
+msgid "workflows.port.export_loading"
+msgstr "Binabasa ang mga napiling depinisyon ng daloy ng trabaho…"
+
+msgid "workflows.port.export_scope"
+msgstr "Kasama sa mga export ng talahanayan ang mga na-filter na hilera at nakikitang column. Ang mga JSON export ay naglalaman lamang ng mga napiling kanonikal na depinisyon ng daloy ng trabaho, na may id bilang key. Walang garantiya ng muling pag-import."
+
+msgid "workflows.port.list_subtitle"
+msgstr "Mga panuntunan at nakakabit na serbisyo para sa bawat daloy ng trabaho"
+
+msgid "workflows.port.more"
+msgstr "Higit pang aksiyon para sa %(name)s"
+
+msgid "workflows.port.row_details"
+msgstr "Mga detalye ng daloy ng trabaho"
+
+msgid "workflows.port.select_workflows"
+msgstr "Pumili ng mga daloy ng trabaho"
+
+msgid "workflows.port.services_count"
+msgstr "Mga serbisyo: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "Kapag nag-detach, aalisin lang ang daloy ng trabahong ito sa serbisyong iyon. Mananatili ang daloy ng trabaho at ang mga patakaran nito."
+
+msgid "workflows.port.services_none"
+msgstr "Hindi nakakabit sa anumang serbisyo ang daloy ng trabahong ito."
+
+msgid "workflows.port.services_open"
+msgstr "Ipakita ang mga serbisyong nakakabit sa %(name)s"
+
+msgid "workflows.port.services_title"
+msgstr "Mga serbisyong nakakabit sa %(name)s"
+
+msgid "workflows.port.total_rules"
+msgstr "%(count)s sa kabuuan"
+
+msgid "workflows.port.updated"
+msgstr "Na-update"
+
 msgid "workflows.readonly"
 msgstr "Ang database ay hindi mababago. Maaaring suriin ang mga daloy ng trabaho ngunit hindi mababago."
 
@@ -10782,6 +11961,9 @@ msgstr "Security workflow na “%(workflow)s”: aksyon na “%(action)s”"
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "Security workflow na “%(workflow)s”: na-redirect ang request"
+
+msgid "workflows.regex_help"
+msgstr "May dalawang magkahiwalay na limitasyon sa regex. Sa pagsulat: ang mga daloy ng trabahong nakakabit sa isang serbisyo ay maaaring magkaroon ng kabuuang hanggang 50 kondisyon ng regex. Tinatanggihan ang pag-save o pagkakabit na lalampas dito. Sa pagpapatakbo: ang bawat instance ay nagko-compile ng hanggang WORKFLOWS_REGEX_BUDGET na magkakaibang regular expression (default 512, pinagsasaluhan ng lahat ng daloy ng trabaho). Ang regex na lampas sa badyet ay hindi sinusuri at nagbabalik ng UNKNOWN, kaya hindi maaaring tumugma ang panuntunan nito."
 
 msgid "workflows.rule.disabled"
 msgstr "Naka-disable"
@@ -10893,6 +12075,108 @@ msgstr "Listahan. Ang mga patakaran ay tumatakbo mula itaas pababa; ang unang pa
 
 msgid "workflows.search"
 msgstr "Maghanap ng pangalan o paglalarawan..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "Gumawa ng daloy ng trabaho para mabuksan ang configuration nito"
+
+msgid "workflows.shell.draft_discard"
+msgstr "Itapon ang mga pagbabago"
+
+msgid "workflows.shell.draft_restored"
+msgstr "Naibalik ang mga hindi nai-save na pagbabago sa daloy ng trabahong ito. I-save para ilapat ang mga ito, o lumipat ng daloy ng trabaho para itapon ang mga ito."
+
+msgid "workflows.shell.draft_save"
+msgstr "I-save at magpatuloy"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "Hindi ma-save ang daloy ng trabaho. Walang itinapong pagbabago."
+
+msgid "workflows.shell.draft_stale"
+msgstr "Na-save ang daloy ng trabahong ito sa ibang lugar matapos simulan ang iyong burador, kaya itinapon ang burador."
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "Kapag binuksan ang %(target)s, maiiwan ang mga hindi nai-save na pagbabago ng panuntunan sa %(name)s. Isang burador lamang ang maaaring bukas sa bawat pagkakataon: i-save ito, itapon ito, o manatili rito."
+
+msgid "workflows.shell.draft_title"
+msgstr "Mga hindi nai-save na pagbabago sa %(name)s"
+
+msgid "workflows.shell.pick_label"
+msgstr "Daloy ng trabaho"
+
+msgid "workflows.shell.read_only"
+msgstr "Basa lamang"
+
+msgid "workflows.shell.tab_config"
+msgstr "Kumpigurasyon"
+
+msgid "workflows.shell.tab_overview"
+msgstr "Pangkalahatang-ideya"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "Hindi pa nai-save"
+
+msgid "workflows.shell.tabs_label"
+msgstr "View ng mga daloy ng trabaho"
+
+msgid "workflows.shell.view_label"
+msgstr "Tingnan"
+
+msgid "workflows.sum.block"
+msgstr "i-block ang request"
+
+msgid "workflows.sum.blockStatus"
+msgstr "i-block ang request gamit ang %(code)s"
+
+msgid "workflows.sum.challenge"
+msgstr "ipakita ang hamon ng %(provider)s"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "ang remediyasyon ng CrowdSec"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "ang source ng CrowdSec"
+
+msgid "workflows.sum.every"
+msgstr "may anumang request"
+
+msgid "workflows.sum.gate"
+msgstr "higit sa %(count)s request bawat %(window)s segundo bawat IP"
+
+msgid "workflows.sum.group_asn"
+msgstr "ang ASN ay nasa grupong %(name)s"
+
+msgid "workflows.sum.group_country"
+msgstr "ang bansa ay nasa grupong %(name)s"
+
+msgid "workflows.sum.group_ip"
+msgstr "ang IP ay nasa grupong %(name)s"
+
+msgid "workflows.sum.isOne"
+msgstr "%(label)s ay %(value)s"
+
+msgid "workflows.sum.isOneOf"
+msgstr "%(label)s ay isa sa %(values)s"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ang ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "ang bansa"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "ang IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "ang paraan"
+
+msgid "workflows.sum.not"
+msgstr "hindi natutugunan ang kondisyong «%(what)s»"
+
+msgid "workflows.sum.redirect"
+msgstr "i-redirect sa %(url)s (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "ang kondisyon ng URI ay «%(match)s %(value)s»"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11064,6 +12348,78 @@ msgstr "Mga kahilingan"
 
 msgid "workflows.threshold_window"
 msgstr "Sa (segundo)"
+
+msgid "workflows.toolbar.actions"
+msgstr "Mga aksiyon sa daloy ng trabaho"
+
+msgid "workflows.toolbar.any_action"
+msgstr "Anumang aksiyon"
+
+msgid "workflows.toolbar.any_state"
+msgstr "Anumang estado"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "Bumalik sa itaas"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "Paliitin lahat"
+
+msgid "workflows.toolbar.detailed"
+msgstr "Detalyado"
+
+msgid "workflows.toolbar.display"
+msgstr "Pagpapakita ng panuntunan"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "Palawakin lahat"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "Aksiyon"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "Pangalan"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "Maghanap ayon sa pangalan ng panuntunan…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "I-filter ang mga panuntunan"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "Estado"
+
+msgid "workflows.toolbar.filters"
+msgstr "Mga filter"
+
+msgid "workflows.toolbar.full_height"
+msgstr "Buong taas"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "Limitahan ang taas"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "%(shown)s sa %(total)s na panuntunan"
+
+msgid "workflows.toolbar.no_match"
+msgstr "Walang panuntunang tumutugma sa mga filter na ito"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "Naka-pause ang pag-aayos ng pagkakasunod habang may mga panuntunang nakatago ng filter."
+
+msgid "workflows.toolbar.reset"
+msgstr "I-reset"
+
+msgid "workflows.toolbar.simplified"
+msgstr "Pinasimple"
+
+msgid "workflows.toolbar.state_off"
+msgstr "Hindi pinagana"
+
+msgid "workflows.toolbar.state_on"
+msgstr "Pinagana"
+
+msgid "workflows.toolbar.view"
+msgstr "View ng pagkakasunod ng panuntunan"
 
 msgid "workflows.tree.addCondition"
 msgstr "Kondisyon"

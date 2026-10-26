@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "Dibuat Dengan"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "Disalin"
+
+msgid "about.environment.copy"
+msgstr "Salin diagnostik"
+
+msgid "about.environment.database"
+msgstr "Server basis data"
+
+msgid "about.environment.help"
+msgstr "Dibaca dari host UI Web dan bidang kontrol. Variabel, kunci lisensi, dan alamat basis data tidak ditampilkan."
+
+msgid "about.environment.instances_up"
+msgstr "%(up)s aktif dari %(total)s"
+
+msgid "about.environment.integration"
+msgstr "Integrasi"
+
+msgid "about.environment.platform"
+msgstr "Platform"
+
+msgid "about.environment.registered"
+msgstr "Terdaftar"
+
+msgid "about.environment.scope_control_plane"
+msgstr "Bidang kontrol"
+
+msgid "about.environment.scope_instances"
+msgstr "Instans"
+
+msgid "about.environment.scope_ui_host"
+msgstr "Host UI Web"
+
+msgid "about.environment.title"
+msgstr "Lingkungan"
+
 msgid "about.gnu_license"
 msgstr "GNU Affero General Public License v3.0"
 
 msgid "about.license_title"
 msgstr "Lisensi"
+
+msgid "about.releases.title"
+msgstr "Rilis terbaru"
+
+msgid "about.releases.view_all"
+msgstr "Lihat semua"
 
 msgid "about.social.discord"
 msgstr "Discord"
@@ -274,6 +319,18 @@ msgstr "Rentang yang dipilih"
 msgid "bans.chart.timeseries.title"
 msgstr "Larangan aktif per interval"
 
+msgid "bans.clear_all.confirm"
+msgstr "Hapus semua larangan"
+
+msgid "bans.clear_all.message"
+msgstr "Menghapus setiap larangan di semua layanan dan instans. Larangan CrowdSec dicabut dari barisnya sendiri."
+
+msgid "bans.clear_all.phrase"
+msgstr "hapus semua"
+
+msgid "bans.clear_all.title"
+msgstr "Hapus semua larangan"
+
 msgid "bans.crowdsec.confirm"
 msgstr "Hapus keputusan dan batalkan blokir"
 
@@ -394,11 +451,53 @@ msgstr "Gagal memperbarui durasi blokir untuk %(ip)s: %(error)s"
 msgid "bans.flash.update_duration_success"
 msgstr "Durasi blokir untuk %(ip)s berhasil diperbarui."
 
+msgid "bans.import.confirm_button"
+msgstr "Impor"
+
+msgid "bans.import.confirm_message"
+msgstr "Larangan yang ditemukan dalam file ini: %(count)s. Impor semuanya?"
+
+msgid "bans.import.confirm_skipped"
+msgstr "Baris tidak terbaca yang diabaikan: %(skipped)s."
+
+msgid "bans.import.confirm_title"
+msgstr "Impor larangan"
+
+msgid "bans.import.empty"
+msgstr "Tidak ada larangan valid dalam file ini. Format yang diharapkan adalah satu larangan per baris, IP[,scope[,duration[,reason]]], atau daftar JSON."
+
+msgid "bans.import.read_failed"
+msgstr "File tidak dapat dibaca."
+
+msgid "bans.import.too_many"
+msgstr "File ini berisi lebih dari %(max)s larangan. Pisahkan dan impor dalam beberapa bagian."
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "Lease CrowdSec"
 
+msgid "bans.live.off"
+msgstr "Penyegaran otomatis dijeda."
+
+msgid "bans.live.on"
+msgstr "Penyegaran otomatis aktif, setiap 10 detik."
+
+msgid "bans.live.updated"
+msgstr "Larangan diperbarui: %(added)s baru, %(removed)s kedaluwarsa."
+
+msgid "bans.page.clear_all"
+msgstr "Hapus semua"
+
+msgid "bans.page.import"
+msgstr "Impor"
+
 msgid "bans.stats.card.by_reason"
 msgstr "Larangan berdasarkan alasan"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "Alasan"
+
+msgid "bans.stats.reasons.meta"
+msgstr "%(count)s larangan aktif"
 
 msgid "bans.stats.tile.active"
 msgstr "Larangan aktif"
@@ -934,6 +1033,27 @@ msgstr "Jelajahi sertifikat"
 msgid "certificates.browse_key"
 msgstr "Jelajahi kunci privat"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "Sertifikat yang akan dihapus: %(count)s. Tindakan ini tidak dapat dibatalkan. Lanjutkan?"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "Sertifikat bertanda tangan sendiri yang akan diperpanjang: %(count)s. Lanjutkan?"
+
+msgid "certificates.bulk.delete"
+msgstr "Hapus yang dipilih"
+
+msgid "certificates.bulk.download"
+msgstr "Unduh rantai sertifikat"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "Tidak ada sertifikat terpilih yang mendukung tindakan ini."
+
+msgid "certificates.bulk.renew"
+msgstr "Perpanjang yang ditandatangani sendiri"
+
+msgid "certificates.bulk.skipped"
+msgstr "Sertifikat terpilih yang tidak mendukung tindakan ini dan dilewati: %(skipped)s."
+
 msgid "certificates.common_name"
 msgstr "Nama umum"
 
@@ -1117,6 +1237,9 @@ msgstr "Penerbit"
 msgid "certificates.issuers"
 msgstr "Penerbit teratas"
 
+msgid "certificates.issuers_meta"
+msgstr "%(count)s sertifikat"
+
 msgid "certificates.key_drop"
 msgstr "Letakkan kunci privat yang sesuai di sini"
 
@@ -1180,6 +1303,9 @@ msgstr "Basis data bersifat baca-saja. Sertifikat dapat diperiksa dan diunduh, t
 msgid "certificates.renew_due"
 msgstr "Periksa/perbarui yang jatuh tempo"
 
+msgid "certificates.renew_due_short"
+msgstr "Perlu diperpanjang"
+
 msgid "certificates.sans"
 msgstr "Nama alternatif subjek"
 
@@ -1194,6 +1320,9 @@ msgstr "Jadwalkan penerbitan ACME"
 
 msgid "certificates.search"
 msgstr "Cari nama, nama umum, SAN, penerbit, atau sidik jari…"
+
+msgid "certificates.select_all"
+msgstr "Pilih semua sertifikat"
 
 msgid "certificates.serial"
 msgstr "Nomor seri"
@@ -1323,6 +1452,99 @@ msgstr "Tampilkan %(count)s lagi"
 
 msgid "compose.unavailable"
 msgstr "Daftar plugin tidak dapat dimuat, jadi halaman ini tidak dapat diedit dengan aman. Muat ulang setelah API merespons."
+
+msgid "configs.console.all_scopes"
+msgstr "Semua cakupan"
+
+msgid "configs.console.clone"
+msgstr "Klon konfigurasi"
+
+msgid "configs.console.content"
+msgstr "Isi konfigurasi (hanya baca)"
+
+msgid "configs.console.download"
+msgstr "Unduh"
+
+msgid "configs.console.edit"
+msgstr "Edit konfigurasi"
+
+msgid "configs.console.editor_help"
+msgstr "Edit isi NGINX atau ModSecurity. Simpan dengan Ctrl+S atau Command+S."
+
+msgid "configs.console.editor_title"
+msgstr "Isi konfigurasi"
+
+msgid "configs.console.files"
+msgstr "File"
+
+msgid "configs.console.full_view"
+msgstr "Tampilan penuh"
+
+msgid "configs.console.global_legend"
+msgstr "Cakupan global berlaku untuk setiap layanan."
+
+msgid "configs.console.global_only"
+msgstr "Hanya global"
+
+msgid "configs.console.lint"
+msgstr "Periksa sintaks"
+
+msgid "configs.console.lint_brace"
+msgstr "Kurung kurawal pembuka belum ditutup."
+
+msgid "configs.console.lint_clean"
+msgstr "Pemeriksaan sisi klien tidak menemukan masalah."
+
+msgid "configs.console.lint_help"
+msgstr "Hanya petunjuk sisi klien. Validasi dengan nginx -t sebelum menerapkan. Direktif multibaris dapat menghasilkan peringatan."
+
+msgid "configs.console.lint_quote"
+msgstr "Tanda kutip belum ditutup."
+
+msgid "configs.console.lint_semicolon"
+msgstr "Mungkin ada titik koma yang hilang di akhir direktif."
+
+msgid "configs.console.lint_skipped"
+msgstr "Pemeriksaan sintaks NGINX tidak tersedia untuk konfigurasi ModSecurity dan CRS."
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "Kurung kurawal penutup tidak terduga."
+
+msgid "configs.console.lint_warnings"
+msgstr "Pemeriksaan sisi klien menemukan %(count)s peringatan. Lihat anotasi editor."
+
+msgid "configs.console.name_help"
+msgstr "Gunakan huruf, angka, tanda hubung, atau garis bawah. Akhiran .conf ditambahkan pada disk."
+
+msgid "configs.console.new"
+msgstr "Konfigurasi baru"
+
+msgid "configs.console.no_files"
+msgstr "Tidak ada konfigurasi yang cocok dengan filter ini."
+
+msgid "configs.console.restore_view"
+msgstr "Pulihkan tampilan"
+
+msgid "configs.console.select_file"
+msgstr "Pilih file untuk melihat pratinjau isinya."
+
+msgid "configs.console.service_legend"
+msgstr "Cakupan layanan hanya berlaku untuk satu layanan."
+
+msgid "configs.console.service_only"
+msgstr "Hanya layanan"
+
+msgid "configs.console.template_name_locked"
+msgstr "Konfigurasi kustom berbasis templat tidak boleh diganti namanya."
+
+msgid "configs.console.title"
+msgstr "Konfigurasi kustom"
+
+msgid "configs.console.types"
+msgstr "Jenis konfigurasi"
+
+msgid "configs.console.view"
+msgstr "Lihat konfigurasi"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "Semua konfigurasi kustom yang dipilih tidak dapat ditemukan, bukan konfigurasi kustom UI/API, atau sudah dikonversi."
@@ -2764,6 +2986,15 @@ msgstr "Waktu"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "Status Pemblokiran dari Waktu ke Waktu"
 
+msgid "dashboard.chart.legend.count"
+msgstr "Jumlah"
+
+msgid "dashboard.chart.legend.item"
+msgstr "Item"
+
+msgid "dashboard.chart.legend.share"
+msgstr "Proporsi"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Permintaan yang Diblokir"
 
@@ -3007,6 +3238,18 @@ msgstr "%(count)s template di halaman ini dipilih."
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "Semua %(count)s template di halaman ini dipilih."
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "Semua %(count)s alur kerja yang cocok dipilih."
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "Pilih semua %(count)s alur kerja yang cocok"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "%(count)s alur kerja di halaman ini dipilih."
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "Semua %(count)s alur kerja di halaman ini dipilih."
+
 msgid "datatable.bulk_select_clear"
 msgstr "Hapus pilihan"
 
@@ -3049,6 +3292,9 @@ msgstr "Tidak ada Layanan tersedia"
 msgid "datatable.info_empty_templates"
 msgstr "Tidak ada Template tersedia"
 
+msgid "datatable.info_empty_workflows"
+msgstr "Tidak ada Alur Kerja tersedia"
+
 msgid "datatable.info_filtered_bans"
 msgstr "(difilter dari _MAX_ total Larangan)"
 
@@ -3079,6 +3325,9 @@ msgstr "(difilter dari _MAX_ total Layanan)"
 msgid "datatable.info_filtered_templates"
 msgstr "(difilter dari _MAX_ total Template)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(difilter dari _MAX_ total Alur Kerja)"
+
 msgid "datatable.info_instances"
 msgstr "Menampilkan %(start)s hingga %(end)s dari %(total)s Instans"
 
@@ -3099,6 +3348,9 @@ msgstr "Menampilkan %(start)s hingga %(end)s dari %(total)s Layanan"
 
 msgid "datatable.info_templates"
 msgstr "Menampilkan %(start)s hingga %(end)s dari %(total)s Template"
+
+msgid "datatable.info_workflows"
+msgstr "Menampilkan %(start)s hingga %(end)s dari %(total)s Alur Kerja"
 
 msgid "datatable.length_all"
 msgstr "Semua"
@@ -3132,6 +3384,9 @@ msgstr "Tampilkan _MENU_ Layanan"
 
 msgid "datatable.length_menu_templates"
 msgstr "Tampilkan _MENU_ Template"
+
+msgid "datatable.length_menu_workflows"
+msgstr "Tampilkan _MENU_ Alur Kerja"
 
 msgid "datatable.paginate.first"
 msgstr "Pertama"
@@ -3244,6 +3499,15 @@ msgstr "1 Template dipilih"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d Template dipilih"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "Tidak ada Alur Kerja dipilih"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "1 Alur Kerja dipilih"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "%d Alur Kerja dipilih"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "%(count)s konfigurasi kustom dipilih"
 
@@ -3318,6 +3582,9 @@ msgstr "Tidak ditemukan Layanan yang cocok"
 
 msgid "datatable.zero_records_templates"
 msgstr "Tidak ditemukan Template yang cocok"
+
+msgid "datatable.zero_records_workflows"
+msgstr "Tidak ditemukan Alur Kerja yang cocok"
 
 msgid "dev_log.copy_failed"
 msgstr "Gagal menyalin teks:"
@@ -4369,14 +4636,26 @@ msgstr "Sekali"
 msgid "interval.week"
 msgstr "Mingguan"
 
+msgid "job.history.duration"
+msgstr "Durasi"
+
 msgid "job.history.end_date"
 msgstr "Tanggal Akhir"
+
+msgid "job.history.error"
+msgstr "Kesalahan"
 
 msgid "job.history.start_date"
 msgstr "Tanggal Mulai"
 
 msgid "job.history.success"
 msgstr "Berhasil"
+
+msgid "jobs.card.sub"
+msgstr "Dijalankan oleh penjadwal sesuai interval masing-masing atau sesuai permintaan"
+
+msgid "jobs.card.title"
+msgstr "Pekerjaan terjadwal"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "Kesalahan saat mengambil job: %(message)s"
@@ -5119,6 +5398,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "Halaman Tambahan"
 
+msgid "navigation.filter_plugins"
+msgstr "Filter plugin…"
+
 msgid "navigation.global_settings"
 msgstr "Pengaturan Global"
 
@@ -5146,6 +5428,9 @@ msgstr "Pilihan Mode"
 msgid "navigation.more"
 msgstr "Lainnya..."
 
+msgid "navigation.no_plugin_match"
+msgstr "Tidak ada plugin yang cocok"
+
 msgid "navigation.operate"
 msgstr "Operasikan"
 
@@ -5164,14 +5449,23 @@ msgstr "Plugin Dinonaktifkan"
 msgid "navigation.plugin_deactivated_global"
 msgstr "Plugin Dinonaktifkan Secara Global"
 
+msgid "navigation.plugin_insights"
+msgstr "Wawasan plugin"
+
 msgid "navigation.plugins"
 msgstr "Plugin"
+
+msgid "navigation.plugins_overview"
+msgstr "Ikhtisar"
 
 msgid "navigation.plugins_pages"
 msgstr "Halaman Plugin"
 
 msgid "navigation.pro"
 msgstr "Pro"
+
+msgid "navigation.profile"
+msgstr "Profil"
 
 msgid "navigation.redirects"
 msgstr "Pengalihan"
@@ -5344,6 +5638,24 @@ msgstr "GRATIS"
 msgid "plan.pro"
 msgstr "PRO"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "Plugin ini tidak digunakan di mana pun"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "Pengaturan global"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "Metrik dinonaktifkan"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "Belum ada yang dapat ditampilkan"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "Tidak ada halaman untuk ditampilkan"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "Hanya administrator"
+
 msgid "plugin.page.status.deactivated"
 msgstr "Plugin dinonaktifkan; oleh karena itu, tidak ada informasi yang tersedia."
 
@@ -5379,6 +5691,12 @@ msgstr "Pro"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.card.configure"
+msgstr "Konfigurasi %(name)s"
+
+msgid "plugins.card.metrics"
+msgstr "Metrik %(name)s"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "Tidak dapat membaca versi BunkerWeb (%(current)s), sehingga kompatibilitas %(id)s tidak dapat diperiksa; tidak ada yang diinstal"
@@ -5623,11 +5941,20 @@ msgstr "Aktif"
 msgid "plugins.marketplace.always_on"
 msgstr "Inti / selalu aktif"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "Selalu aktif"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "Plugin inti yang diperlukan oleh BunkerWeb: dapat dikonfigurasi, tetapi tidak dapat dinonaktifkan."
+
 msgid "plugins.marketplace.disabled"
 msgstr "Dinonaktifkan"
 
 msgid "plugins.marketplace.enabled"
 msgstr "Diaktifkan"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "Filter plugin"
 
 msgid "plugins.marketplace.inactive"
 msgstr "Tidak aktif"
@@ -5658,6 +5985,15 @@ msgstr "nilai lagi"
 
 msgid "plugins.multivalue.show_less"
 msgstr "Tampilkan lebih sedikit"
+
+msgid "plugins.tier.community"
+msgstr "Plugin komunitas"
+
+msgid "plugins.tier.core"
+msgstr "Plugin inti"
+
+msgid "plugins.tier.pro"
+msgstr "Plugin PRO"
 
 msgid "pro.alert.overlapped_1"
 msgstr "Anda memiliki lebih banyak layanan aktif dari yang diizinkan lisensi Anda!"
@@ -6004,8 +6340,14 @@ msgstr "Alamat IP"
 msgid "profile.session.last_activity"
 msgstr "Aktivitas Terakhir"
 
+msgid "profile.session.load_error"
+msgstr "Gagal memuat data. Silakan coba lagi."
+
 msgid "profile.session.os"
 msgstr "Sistem Operasi"
+
+msgid "profile.session.recent_title"
+msgstr "Sesi terbaru"
 
 msgid "profile.session.title"
 msgstr "Sesi"
@@ -6024,6 +6366,9 @@ msgstr "Keamanan"
 
 msgid "profile.tab.sessions"
 msgstr "Sesi"
+
+msgid "profile.title"
+msgstr "Profil Anda"
 
 msgid "range_picker.1h"
 msgstr "Satu jam terakhir"
@@ -6076,11 +6421,44 @@ msgstr "Pengaturan aktif %(setting)s tidak valid."
 msgid "raw_drafts.setting_not_valid"
 msgstr "Pengaturan %(setting)s tidak valid."
 
+msgid "raw_page.search"
+msgstr "Cari…"
+
+msgid "raw_page.search_label"
+msgstr "Cari konfigurasi mentah"
+
+msgid "raw_page.search_next"
+msgstr "Kecocokan berikutnya"
+
+msgid "raw_page.search_prev"
+msgstr "Kecocokan sebelumnya"
+
+msgid "raw_page.tile_modified"
+msgstr "Diubah"
+
+msgid "raw_page.tile_plugins"
+msgstr "Plugin"
+
+msgid "raw_page.tile_problems"
+msgstr "Masalah"
+
+msgid "raw_page.tile_settings"
+msgstr "Pengaturan"
+
+msgid "raw_page.tiles_label"
+msgstr "Ringkasan konfigurasi mentah"
+
 msgid "redirects.all"
 msgstr "Semua"
 
+msgid "redirects.all_codes"
+msgstr "Semua kode status"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "Tambahkan URI"
 
 msgid "redirects.append_request_uri"
 msgstr "Tambahkan URI yang diminta ke target"
@@ -6090,6 +6468,9 @@ msgstr "Lampirkan"
 
 msgid "redirects.attach_copy"
 msgstr "Lampirkan %(name)s (%(from)s → %(to)s) ke satu atau beberapa layanan."
+
+msgid "redirects.card_subtitle"
+msgstr "Pengalihan jalur dan layanan tempat pengalihan diterapkan"
 
 msgid "redirects.code.301"
 msgstr "301 — Dipindahkan secara permanen"
@@ -6106,6 +6487,12 @@ msgstr "307 — Pengalihan sementara"
 msgid "redirects.code.308"
 msgstr "308 — Pengalihan permanen"
 
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "%(count)s pengalihan"
+msgstr[1] "%(count)s pengalihan"
+
 msgid "redirects.create"
 msgstr "Buat pengalihan"
 
@@ -6117,6 +6504,9 @@ msgstr "Hapus pengalihan %(name)s?"
 
 msgid "redirects.delete_help"
 msgstr "Pengalihan yang masih terlampir ke layanan tidak dapat dihapus. Lepaskan terlebih dahulu."
+
+msgid "redirects.detach_shared"
+msgstr "Pengalihan ini digunakan bersama. Melepaskannya hanya menghapusnya dari layanan tersebut. Layanan lain tetap memilikinya."
 
 msgid "redirects.edit"
 msgstr "Edit pengalihan"
@@ -6199,8 +6589,32 @@ msgstr "Alihkan dari"
 msgid "redirects.from_path_help"
 msgstr "Jalur sumber pada layanan yang terlampir, misalnya /old."
 
+msgid "redirects.kpi_configured"
+msgstr "Pengalihan terkonfigurasi"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "Lampirkan ke layanan agar berlaku"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "Di antara %(count)s pertama yang dimuat"
+
+msgid "redirects.kpi_permanent"
+msgstr "Permanen"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 atau 308, disimpan dalam cache browser"
+
+msgid "redirects.kpi_services"
+msgstr "Layanan terlampir"
+
+msgid "redirects.kpi_services_caption"
+msgstr "Layanan dengan setidaknya satu pengalihan"
+
 msgid "redirects.new"
 msgstr "Pengalihan baru"
+
+msgid "redirects.no_match"
+msgstr "Tidak ada pengalihan yang cocok dengan filter ini."
 
 msgid "redirects.not_attached"
 msgstr "Tidak terlampir"
@@ -6214,14 +6628,29 @@ msgstr "Simpan pengalihan"
 msgid "redirects.search"
 msgstr "Cari nama, jalur sumber, atau target..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "%(count)s layanan"
+msgstr[1] "%(count)s layanan"
+
 msgid "redirects.services_help"
 msgstr "Gunakan Ctrl atau Command untuk memilih beberapa layanan. Pengalihan dapat dilampirkan nanti."
+
+msgid "redirects.services_title"
+msgstr "Layanan yang menggunakan pengalihan ini"
 
 msgid "redirects.status_code"
 msgstr "Kode status"
 
 msgid "redirects.to_url"
 msgstr "Alihkan ke"
+
+msgid "redirects.to_url_help"
+msgstr "URL http:// atau https:// lengkap. Target relatif tidak didukung."
 
 msgid "redirects.truncated"
 msgstr "Hanya 500 pengalihan pertama yang ditampilkan. Persempit daftar melalui API untuk hasil lengkap."
@@ -6288,6 +6717,36 @@ msgstr "Keputusan API lokal"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "Detail teknis"
+
+msgid "reports.live.off"
+msgstr "Penyegaran otomatis dijeda."
+
+msgid "reports.live.on"
+msgstr "Penyegaran otomatis aktif, setiap 10 detik."
+
+msgid "reports.live.updated"
+msgstr "Laporan diperbarui: %(added)s baru."
+
+msgid "reports.offenders.confirm_many"
+msgstr "%(count)s alamat IP akan dilarang di setiap instans selama 24 jam."
+
+msgid "reports.offenders.confirm_one"
+msgstr "%(ip)s akan dilarang di setiap instans selama 24 jam."
+
+msgid "reports.offenders.confirm_title"
+msgstr "Larang dari laporan"
+
+msgid "reports.offenders.show"
+msgstr "Tampilkan"
+
+msgid "reports.offenders.show_bottom"
+msgstr "Pelanggar paling sedikit"
+
+msgid "reports.offenders.show_latest"
+msgstr "Pelanggar terbaru"
+
+msgid "reports.offenders.show_top"
+msgstr "Pelanggar terbanyak"
 
 msgid "reports.security_incident"
 msgstr "Insiden Keamanan"
@@ -6388,6 +6847,15 @@ msgstr "Jalur permintaan"
 msgid "request_path.unordered"
 msgstr "Tidak ada posisi yang dinyatakan pada fase %(phase)s; berjalan setelah plugin yang berurutan, secara alfabetis."
 
+msgid "resource_groups.access"
+msgstr "Akses"
+
+msgid "resource_groups.access_readonly"
+msgstr "Hanya baca"
+
+msgid "resource_groups.access_write"
+msgstr "Tulis"
+
 msgid "resource_groups.add_entry"
 msgstr "Tambah entri"
 
@@ -6402,6 +6870,9 @@ msgstr "Alias"
 
 msgid "resource_groups.alias_help"
 msgstr "Huruf, angka, garis bawah, dan tanda hubung. Alias yang sudah ada tidak dapat diganti nama."
+
+msgid "resource_groups.all_kinds"
+msgstr "Semua"
 
 msgid "resource_groups.bulk_import"
 msgstr "Impor massal"
@@ -6447,6 +6918,9 @@ msgstr "Entri"
 
 msgid "resource_groups.expand_all"
 msgstr "Perluas semua"
+
+msgid "resource_groups.filter_values"
+msgstr "Filter nilai..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "Alias harus berisi 1 hingga 64 huruf, angka, garis bawah, atau tanda hubung"
@@ -6580,6 +7054,48 @@ msgstr "Tambahkan entri satu per satu atau gunakan pengimpor massal di bawah."
 msgid "resource_groups.no_references"
 msgstr "Tidak ada referensi"
 
+msgid "resource_groups.no_value_match"
+msgstr "Tidak ada nilai yang cocok dengan filter ini."
+
+msgid "resource_groups.origin"
+msgstr "Asal"
+
+msgid "resource_groups.origin_plugin"
+msgstr "Disertakan oleh plugin %(plugin)s"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "Dibuat atau disinkronkan melalui API."
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "Dibuat oleh pengontrol autoconf."
+
+msgid "resource_groups.origin_tip.download"
+msgstr "Diunduh dari sumber jarak jauh."
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "Dibuat secara manual atau dari file konfigurasi."
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "Dibuat oleh penjadwal."
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "Dibuat melalui UI web."
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "Dibuat oleh panduan penyiapan dan tetap dapat diedit."
+
+msgid "resource_groups.plugins_compatible"
+msgstr "Plugin yang kompatibel"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "Plugin yang pengaturannya menerima jenis nilai dalam grup ini. Referensi sebenarnya tercantum di bagian Penggunaan."
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "%(count)s plugin"
+msgstr[1] "%(count)s plugin"
+
 msgid "resource_groups.readonly"
 msgstr "Basis data bersifat baca-saja. Grup sumber daya dapat diperiksa dan diekspor, tetapi tidak dapat diubah."
 
@@ -6607,6 +7123,9 @@ msgstr "Alias bertipe yang dapat digunakan kembali untuk IP, negara, ASN, nama r
 msgid "resource_groups.template_configuration"
 msgstr "Templat %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "Diperbarui"
+
 msgid "resource_groups.usage"
 msgstr "Penggunaan"
 
@@ -6615,6 +7134,18 @@ msgstr "Nilai"
 
 msgid "resource_groups.values"
 msgstr "Nilai"
+
+msgid "resource_groups.values_compat"
+msgstr "Kompatibel dengan: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "Disalin"
+
+msgid "resource_groups.values_title"
+msgstr "Nilai %(name)s"
+
+msgid "resource_groups.view_values_of"
+msgstr "Lihat nilai %(name)s"
 
 msgid "scope.all_services"
 msgstr "Semua Layanan"
@@ -7585,6 +8116,93 @@ msgstr "Konfigurasi beberapa instans pengaturan untuk plugin ini di sini."
 msgid "settings.multiple.title"
 msgstr "Pengaturan Berganda"
 
+msgid "settings_page.alert_global"
+msgstr "Perubahan berlaku untuk setiap layanan yang tidak menimpanya dan diterapkan setelah Simpan dan muat ulang."
+
+msgid "settings_page.alert_service"
+msgstr "Pengaturan yang dibiarkan kosong menggunakan nilai default global. Perubahan hanya berlaku untuk layanan terpilih dan diterapkan setelah Simpan dan muat ulang."
+
+msgid "settings_page.back_global"
+msgstr "Kembali ke pengaturan global"
+
+msgid "settings_page.back_service"
+msgstr "Kembali ke layanan"
+
+msgid "settings_page.card_title"
+msgstr "Pengaturan"
+
+msgid "settings_page.count"
+msgstr "%(count)s pengaturan"
+
+msgid "settings_page.count_filtered"
+msgstr "%(shown)s dari %(total)s pengaturan"
+
+msgid "settings_page.groups_link"
+msgstr "Kelola grup sumber daya"
+
+msgid "settings_page.groups_link_hint"
+msgstr "Daftar IP, jaringan, dan negara yang dapat digunakan kembali dan dirujuk oleh pengaturan plugin ini."
+
+msgid "settings_page.no_match"
+msgstr "Tidak ada pengaturan yang cocok dengan pencarian Anda."
+
+msgid "settings_page.plugin"
+msgstr "Plugin"
+
+msgid "settings_page.reload_alert_body"
+msgstr "Penjadwal menerapkan ulang konfigurasi ke instans Anda setelah Anda menyimpan."
+
+msgid "settings_page.reload_alert_title"
+msgstr "Perubahan memicu pemuatan ulang instans."
+
+msgid "settings_page.revert"
+msgstr "Kembalikan"
+
+msgid "settings_page.revert_confirm"
+msgstr "Kembalikan semua"
+
+msgid "settings_page.revert_message"
+msgstr "Mengembalikan semua edit yang belum disimpan di halaman ini ke nilai terakhir yang disimpan."
+
+msgid "settings_page.revert_title"
+msgstr "Kembalikan perubahan"
+
+msgid "settings_page.save_reload"
+msgstr "Simpan dan muat ulang"
+
+msgid "settings_page.scope"
+msgstr "Cakupan"
+
+msgid "settings_page.scope_global"
+msgstr "Pengaturan global"
+
+msgid "settings_page.search"
+msgstr "Cari pengaturan…"
+
+msgid "settings_page.search_label"
+msgstr "Cari pengaturan"
+
+msgid "settings_page.select_plugin_label"
+msgstr "Pilih plugin"
+
+msgid "settings_page.select_scope_label"
+msgstr "Pilih tempat untuk mengedit pengaturannya"
+
+msgid "setup.accordion.advanced"
+msgstr "Lanjutan"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "Proksi Balik · IP Asli · Sertifikat Kustom"
+
+msgid "setup.accordion.general"
+msgstr "Umum"
+
+msgid "setup.accordion.general_hint"
+msgstr "Server · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "Selesaikan penyiapan"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "Kesalahan saat menyiapkan web UI. Silakan coba lagi."
 
@@ -7639,6 +8257,9 @@ msgstr "Kata sandi tidak cocok."
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "Saat menggunakan sertifikat SSL kustom, Anda harus mengatur sertifikat dan kunci."
 
+msgid "setup.from_ui_host"
+msgstr "Dari variabel lingkungan UI_HOST"
+
 msgid "setup.status.admin_user_exists"
 msgstr "Pengguna admin sudah ada. Silakan lanjutkan ke langkah berikutnya."
 
@@ -7684,6 +8305,9 @@ msgstr "IP Nyata"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "Reverse Proxy"
 
+msgid "setup.step2.section.server"
+msgstr "Server"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7692,6 +8316,12 @@ msgstr "Konfigurasi pengaturan spesifik UI Web."
 
 msgid "setup.step2.title"
 msgstr "Pengaturan UI"
+
+msgid "setup.step3.activate_title"
+msgstr "Aktifkan lisensi"
+
+msgid "setup.step3.activation_note"
+msgstr "Lisensi diaktifkan setelah penyiapan selesai."
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "Manfaat PRO"
@@ -7735,11 +8365,119 @@ msgstr "Tinjau pengaturan Anda sebelum menyelesaikan pengaturan."
 msgid "setup.step4.title"
 msgstr "Ringkasan"
 
+msgid "setup.stepper_label"
+msgstr "Langkah penyiapan"
+
 msgid "setup.subtitle"
 msgstr "Ikuti langkah-langkah untuk menyelesaikan wizard pengaturan."
 
+msgid "setup.switch.disabled"
+msgstr "Dinonaktifkan"
+
+msgid "setup.switch.enabled"
+msgstr "Diaktifkan"
+
 msgid "setup.title"
 msgstr "Wizard Pengaturan"
+
+msgid "shell.account.current"
+msgstr "Akun: %(name)s"
+
+msgid "shell.account.title"
+msgstr "Akun"
+
+msgid "shell.contrast.toggle"
+msgstr "Kontras tinggi"
+
+msgid "shell.density.toggle"
+msgstr "Kepadatan ringkas"
+
+msgid "shell.language.title"
+msgstr "Bahasa"
+
+msgid "shell.main_navigation"
+msgstr "Navigasi utama"
+
+msgid "shell.notifications.all_read"
+msgstr "Semua sudah dibaca"
+
+msgid "shell.notifications.filter_label"
+msgstr "Filter notifikasi"
+
+msgid "shell.notifications.group_earlier"
+msgstr "Sebelumnya"
+
+msgid "shell.notifications.group_today"
+msgstr "Hari ini"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "Kemarin"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "Tandai semua sudah dibaca"
+
+msgid "shell.notifications.mark_read"
+msgstr "Tandai sudah dibaca"
+
+msgid "shell.notifications.none_unread"
+msgstr "Tidak ada notifikasi yang belum dibaca."
+
+msgid "shell.notifications.tab_all"
+msgstr "Semua"
+
+msgid "shell.notifications.tab_unread"
+msgstr "Belum dibaca"
+
+msgid "shell.notifications.title"
+msgstr "Notifikasi"
+
+msgid "shell.notifications.unread_count"
+msgstr "Belum dibaca: %(count)s"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "Belum dibaca:"
+
+msgid "shell.search.kind_page"
+msgstr "Halaman"
+
+msgid "shell.search.kind_plugin"
+msgstr "Plugin"
+
+msgid "shell.search.kind_service"
+msgstr "Layanan"
+
+msgid "shell.search.label"
+msgstr "Cari halaman, plugin, dan layanan"
+
+msgid "shell.search.loading_services"
+msgstr "Memuat layanan…"
+
+msgid "shell.search.no_match"
+msgstr "Tidak ada kecocokan untuk “%(query)s”"
+
+msgid "shell.search.placeholder"
+msgstr "Cari halaman, plugin, layanan…"
+
+msgid "shell.search.results"
+msgstr "Hasil pencarian"
+
+msgid "shell.search.status_results"
+msgstr "Hasil: %(count)s"
+
+msgid "shell.skip_to_content"
+msgstr "Lewati ke konten utama"
+
+msgid "shell.star_us"
+msgstr "Beri bintang BunkerWeb di GitHub"
+
+msgid "shell.theme.system_hint"
+msgstr "mengikuti OS Anda"
+
+msgid "shell.theme.title"
+msgstr "Tema"
+
+msgid "shell.top_navigation"
+msgstr "Bilah atas"
 
 msgid "status.active"
 msgstr "Aktif"
@@ -7951,6 +8689,18 @@ msgstr "Berikutnya"
 msgid "step.previous"
 msgstr "Sebelumnya"
 
+msgid "support.attach_help"
+msgstr "Ekspor untuk permintaan dukungan. Memerlukan izin tulis dan menyamarkan rahasia."
+
+msgid "support.attach_title"
+msgstr "Diagnostik untuk dilampirkan"
+
+msgid "support.card.community.title"
+msgstr "Komunitas"
+
+msgid "support.card.docs.title"
+msgstr "Dokumentasi"
+
 msgid "support.card.download_logs.help"
 msgstr "Semua data pribadi akan dianonimkan."
 
@@ -7974,6 +8724,36 @@ msgstr "Log, versi plugin, lingkungan, dan error terbaru. Data pribadi akan dian
 
 msgid "support.card.ui_bundle.title"
 msgstr "Diagnostik Web UI"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "Tanyakan kepada komunitas dan pengelola."
+
+msgid "support.community.github"
+msgstr "Isu GitHub"
+
+msgid "support.community.github_help"
+msgstr "Laporan bug dan permintaan fitur."
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "Diskusi dan pengumuman."
+
+msgid "support.docs.quickstart"
+msgstr "Panduan mulai cepat"
+
+msgid "support.docs.troubleshooting"
+msgstr "Pemecahan masalah"
+
+msgid "support.docs.upgrading"
+msgstr "Peningkatan versi"
+
+msgid "support.docs.web_ui"
+msgstr "Panduan UI Web"
 
 msgid "support.subtitle"
 msgstr "Unduh log debug, ekstrak konfigurasi Anda, dan dapatkan bantuan dari tim BunkerWeb."
@@ -8142,6 +8922,63 @@ msgstr "Nilai"
 
 msgid "table.header.version"
 msgstr "Versi"
+
+msgid "table_system.active_filters"
+msgstr "Filter, %(count)s aktif"
+
+msgid "table_system.advanced_filters"
+msgstr "Filter lanjutan"
+
+msgid "table_system.any"
+msgstr "Apa pun"
+
+msgid "table_system.column_count"
+msgstr "%(visible)s dari %(total)s"
+
+msgid "table_system.confirm"
+msgstr "Konfirmasi"
+
+msgid "table_system.confirm_title"
+msgstr "Konfirmasi tindakan"
+
+msgid "table_system.filter"
+msgstr "Filter"
+
+msgid "table_system.filters"
+msgstr "Filter"
+
+msgid "table_system.leave"
+msgstr "Keluar tanpa menyimpan"
+
+msgid "table_system.leave_message"
+msgstr "Perubahan Anda yang belum disimpan akan hilang."
+
+msgid "table_system.leave_title"
+msgstr "Keluar tanpa menyimpan?"
+
+msgid "table_system.multiple_actions"
+msgstr "Beberapa tindakan untuk item yang dipilih"
+
+msgid "table_system.show_all"
+msgstr "Tampilkan semua"
+
+msgid "table_system.stay"
+msgstr "Lanjutkan mengedit"
+
+msgid "table_system.type_phrase"
+msgstr "Ketik %(phrase)s untuk mengonfirmasi"
+
+msgid "table_system.upload_hint"
+msgstr "Seret dan lepas atau klik untuk mengunggah"
+
+msgid "table_system.visible_columns"
+msgstr "Kolom yang terlihat"
+
+msgid "tables.top.detail"
+msgstr "Rincian"
+
+msgid "tables.top.share"
+msgstr "Proporsi"
 
 msgid "template.editor.button_add_config"
 msgstr "Tambahkan konfigurasi"
@@ -8731,6 +9568,24 @@ msgstr "Perbarui Template Komunitas"
 msgid "templates.catalog.update_up_to_date"
 msgstr "Template %(template)s sudah sesuai dengan katalog"
 
+msgid "templates.features_builtin"
+msgstr "Fitur bawaan"
+
+msgid "templates.features_configs"
+msgstr "Konfigurasi kustom"
+
+msgid "templates.features_help"
+msgstr "Fitur yang disediakan templat ini. Buka templat untuk melihat atau mengubah pengaturan sebenarnya."
+
+msgid "templates.features_of"
+msgstr "Tampilkan fitur %(name)s"
+
+msgid "templates.features_plugins"
+msgstr "Plugin"
+
+msgid "templates.features_title"
+msgstr "Fitur templat"
+
 msgid "templates.flash.catalog_updated"
 msgstr "Template %(template)s diperbarui dari katalog."
 
@@ -8806,6 +9661,12 @@ msgstr "Template tidak diimpor: file lebih besar dari 1 MiB"
 msgid "templates.import.unreadable"
 msgstr "Template tidak diimpor: file tidak dapat dibaca"
 
+msgid "templates.managed_by"
+msgstr "Dikelola oleh %(owner)s: tidak dapat diubah atau dihapus di sini."
+
+msgid "templates.more_actions"
+msgstr "Tindakan lain untuk %(name)s"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8820,6 +9681,18 @@ msgstr "Keamanan sedang"
 
 msgid "templates.name.ui"
 msgstr "UI Web"
+
+msgid "templates.no_match"
+msgstr "Tidak ada templat yang cocok dengan pencarian ini."
+
+msgid "templates.open_template"
+msgstr "Buka templat"
+
+msgid "templates.read_only"
+msgstr "Hanya baca"
+
+msgid "templates.search"
+msgstr "Cari templat..."
 
 msgid "templates.subtitle"
 msgstr "Templat konfigurasi yang dapat digunakan kembali untuk layanan Anda — kelompokkan pengaturan, langkah, dan konfigurasi kustom, lalu buat, klon, atau hapus."
@@ -8845,6 +9718,9 @@ msgstr "Terang"
 msgid "theme.system"
 msgstr "Sistem"
 
+msgid "threatmap.attacks_24h"
+msgstr "Diblokir, 24 jam terakhir"
+
 msgid "threatmap.attacks_today"
 msgstr "Serangan hari ini"
 
@@ -8853,6 +9729,21 @@ msgstr "permintaan diblokir"
 
 msgid "threatmap.blocked_requests"
 msgstr "permintaan diblokir"
+
+msgid "threatmap.col_ip"
+msgstr "Alamat IP"
+
+msgid "threatmap.col_origin"
+msgstr "Asal"
+
+msgid "threatmap.col_reason"
+msgstr "Alasan"
+
+msgid "threatmap.col_target"
+msgstr "Target"
+
+msgid "threatmap.col_time"
+msgstr "Waktu"
 
 msgid "threatmap.countries"
 msgstr "Negara asal"
@@ -8899,6 +9790,9 @@ msgstr "tidak terlokalkan"
 msgid "threatmap.open_live"
 msgstr "Tampilan langsung"
 
+msgid "threatmap.rolling_window"
+msgstr "Jendela bergulir, diperbarui sekitar setiap 30 detik"
+
 msgid "threatmap.show_less"
 msgstr "Tampilkan %(count)s teratas"
 
@@ -8910,6 +9804,9 @@ msgstr "Angka ini berhenti diperbarui. Layanan metrik tidak merespons."
 
 msgid "threatmap.subtitle"
 msgstr "Dari mana lalu lintas yang diblokir instans Anda dalam 24 jam terakhir berasal."
+
+msgid "threatmap.ticker_caption"
+msgstr "Permintaan terbaru yang diblokir"
 
 msgid "threatmap.ticker_title"
 msgstr "Kejadian langsung"
@@ -8932,14 +9829,26 @@ msgstr "Target teratas"
 msgid "threatmap.updated"
 msgstr "Diperbarui"
 
+msgid "timings.all_phases"
+msgstr "Semua fase"
+
 msgid "timings.calls"
 msgstr "Panggilan"
+
+msgid "timings.caption"
+msgstr "Waktu plugin per fase, secara default diurutkan berdasarkan total waktu"
+
+msgid "timings.columns"
+msgstr "Kolom"
 
 msgid "timings.disabled_help"
 msgstr "Atur METRICS_COLLECT_TIMINGS ke yes untuk mengukur berapa lama setiap plugin membutuhkan waktu. Durasi seluruh permintaan tetap dikumpulkan bagaimanapun juga."
 
 msgid "timings.disabled_title"
 msgstr "Waktu plugin dinonaktifkan"
+
+msgid "timings.export_csv"
+msgstr "Ekspor CSV"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "Kesalahan saat mengambil waktu plugin: %(message)s"
@@ -8956,6 +9865,15 @@ msgstr "Rata-rata"
 msgid "timings.mean_request"
 msgstr "Permintaan rata-rata"
 
+msgid "timings.no_match"
+msgstr "Tidak ada waktu yang cocok dengan filter ini"
+
+msgid "timings.no_share"
+msgstr "Tanpa proporsi"
+
+msgid "timings.no_share_hint"
+msgstr "Fase ini tidak berjalan sekali per permintaan, sehingga tidak memiliki proporsi."
+
 msgid "timings.partial"
 msgstr "Beberapa instans tidak merespons. Angka di bawah mencakup yang merespons."
 
@@ -8964,6 +9882,9 @@ msgstr "Fase"
 
 msgid "timings.phases"
 msgstr "Fase plugin"
+
+msgid "timings.phases_sub"
+msgstr "Waktu yang dihabiskan setiap plugin di setiap fase"
 
 msgid "timings.plugin"
 msgstr "Plugin"
@@ -8974,6 +9895,9 @@ msgstr "Instans yang melapor"
 msgid "timings.requests_measured"
 msgstr "Permintaan yang diukur"
 
+msgid "timings.search_placeholder"
+msgstr "Cari plugin atau fase…"
+
 msgid "timings.share"
 msgstr "Porsi"
 
@@ -8982,6 +9906,9 @@ msgstr "Porsi adalah total waktu plugin dibandingkan total waktu permintaan. Fas
 
 msgid "timings.subtitle"
 msgstr "Berapa lama setiap plugin membutuhkan waktu di setiap fase permintaan, dibaca langsung dari setiap instans dan digabungkan."
+
+msgid "timings.toolbar"
+msgstr "Alat tabel waktu"
 
 msgid "timings.total"
 msgstr "Total"
@@ -9883,6 +10810,12 @@ msgstr "Tambah server"
 msgid "upstreams.all"
 msgstr "Semua"
 
+msgid "upstreams.all_protocols"
+msgstr "Semua protokol"
+
+msgid "upstreams.all_tls"
+msgstr "Semua pengaturan TLS"
+
 msgid "upstreams.attach"
 msgstr "Lampirkan"
 
@@ -9901,6 +10834,15 @@ msgstr "Koneksi paling sedikit"
 msgid "upstreams.balancing.round_robin"
 msgstr "Round robin (default)"
 
+msgid "upstreams.card_subtitle"
+msgstr "Kumpulan backend dan layanan yang meneruskan permintaan kepadanya melalui proksi"
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "%(count)s upstream"
+msgstr[1] "%(count)s upstream"
+
 msgid "upstreams.create"
 msgstr "Buat upstream"
 
@@ -9912,6 +10854,9 @@ msgstr "Hapus upstream %(name)s?"
 
 msgid "upstreams.delete_help"
 msgstr "Upstream yang masih terlampir ke layanan tidak dapat dihapus. Lepaskan terlebih dahulu."
+
+msgid "upstreams.detach_shared"
+msgstr "Upstream ini digunakan bersama. Melepaskannya hanya menghapusnya dari layanan dan jalur tersebut. Lampiran lain tetap memilikinya."
 
 msgid "upstreams.edit"
 msgstr "Ubah upstream"
@@ -10003,11 +10948,44 @@ msgstr "Keepalive"
 msgid "upstreams.keepalive_help"
 msgstr "Koneksi idle yang disimpan per worker. Hanya HTTP dan gRPC; biarkan kosong untuk menonaktifkan."
 
+msgid "upstreams.keepalive_off"
+msgstr "Nonaktif"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "Di antara %(count)s pertama yang dimuat"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "%(count)s belum dilampirkan"
+
+msgid "upstreams.kpi_roles"
+msgstr "%(primary)s utama · %(backup)s cadangan · %(down)s nonaktif (terkonfigurasi)"
+
+msgid "upstreams.kpi_services"
+msgstr "Layanan terlampir"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "Layanan yang meneruskan permintaan ke kumpulan melalui proksi"
+
+msgid "upstreams.kpi_tls"
+msgstr "TLS ke backend"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "Kumpulan yang dikonfigurasi untuk berkomunikasi dengan servernya melalui TLS"
+
 msgid "upstreams.match_path"
 msgstr "Jalur reverse proxy"
 
 msgid "upstreams.match_path_help"
 msgstr "Lokasi yang layanan terpilih proxy ke kumpulan ini. Diabaikan untuk kumpulan stream, yang mengambil seluruh layanan."
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: %(count)s server"
+msgstr[1] "%(name)s: %(count)s server"
+
+msgid "upstreams.members_title"
+msgstr "Server dalam upstream ini"
 
 msgid "upstreams.method"
 msgstr "Penyeimbangan beban"
@@ -10017,6 +10995,9 @@ msgstr "Hanya huruf, angka, tanda hubung, dan garis bawah. Titik ditolak agar na
 
 msgid "upstreams.new"
 msgstr "Upstream baru"
+
+msgid "upstreams.no_match"
+msgstr "Tidak ada upstream yang cocok dengan filter ini."
 
 msgid "upstreams.not_attached"
 msgstr "Tidak terlampir"
@@ -10072,11 +11053,38 @@ msgstr "Bobot"
 msgid "upstreams.servers"
 msgstr "Server"
 
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "%(count)s server"
+msgstr[1] "%(count)s server"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 2 form(s) for id, singular in slot 0
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "%(count)s layanan"
+msgstr[1] "%(count)s layanan"
+
 msgid "upstreams.services_help"
 msgstr "Gunakan Ctrl atau Command untuk memilih beberapa layanan. Upstream dapat dilampirkan nanti."
 
 msgid "upstreams.services_hidden"
 msgstr "Layanan tersembunyi: %(count)s. Upstream %(protocol)s hanya dapat dilampirkan ke layanan yang cocok."
+
+msgid "upstreams.services_title"
+msgstr "Layanan yang menggunakan upstream ini"
+
+msgid "upstreams.tls"
+msgstr "TLS ke backend"
+
+msgid "upstreams.tls_no"
+msgstr "Tanpa enkripsi"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "Hanya 500 upstream pertama yang ditampilkan. Persempit daftar melalui API untuk hasil lengkap."
@@ -10156,11 +11164,26 @@ msgstr "ZeroSSL memerlukan email atau kunci API ZeroSSL."
 msgid "web_cache.available"
 msgstr "Tersedia"
 
+msgid "web_cache.available_tip"
+msgstr "Direktori cache ada di instans ini. Apakah layanan menggunakannya ditampilkan di bagian Pengaktifan layanan."
+
 msgid "web_cache.cache_state"
 msgstr "Status"
 
 msgid "web_cache.cached_files"
 msgstr "File yang di-cache"
+
+msgid "web_cache.compact"
+msgstr "Ringkas"
+
+msgid "web_cache.counters_window"
+msgstr "Sejak setiap instans dimulai ulang"
+
+msgid "web_cache.counters_window_help"
+msgstr "Penghitung menghitung sejak setiap instans terakhir dimulai ulang, bukan selama periode tetap."
+
+msgid "web_cache.danger_zone"
+msgstr "Zona berbahaya"
 
 msgid "web_cache.deployment"
 msgstr "Penerapan"
@@ -10213,11 +11236,20 @@ msgstr "Tingkat hit"
 msgid "web_cache.instance"
 msgstr "Instans"
 
+msgid "web_cache.invalidate"
+msgstr "Batalkan validitas"
+
 msgid "web_cache.metrics"
 msgstr "Distribusi hit / miss agregat"
 
 msgid "web_cache.metrics_scope"
 msgstr "Penghitung diagregasi per instans di semua layanan yang mengaktifkan cache."
+
+msgid "web_cache.no_counters"
+msgstr "Instans ini belum menghitung permintaan yang menggunakan cache."
+
+msgid "web_cache.no_requests_for"
+msgstr "Tidak ada permintaan untuk:"
 
 msgid "web_cache.not_reporting"
 msgstr "Tidak melapor"
@@ -10228,6 +11260,9 @@ msgstr "Jalur"
 msgid "web_cache.purge"
 msgstr "Bersihkan respons yang di-cache"
 
+msgid "web_cache.purge_a_url"
+msgstr "Bersihkan URL"
+
 msgid "web_cache.purge_all"
 msgstr "Bersihkan semua"
 
@@ -10236,6 +11271,9 @@ msgstr "Ini menghapus setiap respons yang di-cache untuk setiap layanan pada set
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "Bersihkan seluruh cache?"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "bersihkan semua"
 
 msgid "web_cache.purge_help"
 msgstr "Aksi pembersihan berjalan segera pada instans yang dapat dijangkau. Instans yang tidak dapat dijangkau dilewati dan tidak ada aksi yang diantrekan."
@@ -10258,6 +11296,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "Instans yang melapor"
 
+msgid "web_cache.server_side_note"
+msgstr "Hanya cache sisi server. Halaman ini mengelola cache proksi balik yang disimpan di setiap instans BunkerWeb. Respons yang sudah disimpan di browser pengunjung tidak terpengaruh."
+
 msgid "web_cache.service"
 msgstr "Layanan"
 
@@ -10266,6 +11307,27 @@ msgstr "Pengaktifan layanan"
 
 msgid "web_cache.status"
 msgstr "Penyimpanan instans"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "Penyimpanan cache dilewati untuk permintaan ini"
+
+msgid "web_cache.status_desc.expired"
+msgstr "Masa berlaku habis: diambil ulang dari upstream"
+
+msgid "web_cache.status_desc.hit"
+msgstr "Disajikan langsung dari cache"
+
+msgid "web_cache.status_desc.miss"
+msgstr "Tidak di-cache: diambil dari upstream dan disimpan"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "Pengambilan ulang bersyarat: upstream menyatakan respons masih valid"
+
+msgid "web_cache.status_desc.stale"
+msgstr "Respons usang disajikan karena upstream gagal"
+
+msgid "web_cache.status_desc.updating"
+msgstr "Respons usang disajikan saat penyegaran berlangsung"
 
 msgid "web_cache.subtitle"
 msgstr "Status cache reverse-proxy, metrik tingkat hit agregat, dan kontrol pembersihan langsung."
@@ -10308,6 +11370,18 @@ msgstr "Penyedia antibot"
 
 msgid "workflows.act_redirect"
 msgstr "Alihkan"
+
+msgid "workflows.act_settings_block"
+msgstr "Pengaturan pemblokiran"
+
+msgid "workflows.act_settings_challenge"
+msgstr "Pengaturan tantangan"
+
+msgid "workflows.act_settings_generic"
+msgstr "Pengaturan tindakan"
+
+msgid "workflows.act_settings_redirect"
+msgstr "Pengaturan pengalihan"
 
 msgid "workflows.act_status"
 msgstr "Status tolak"
@@ -10435,6 +11509,9 @@ msgstr "%(count)s masalah validasi pada aturan ini"
 msgid "workflows.aria.ruleName"
 msgstr "Nama aturan %(n)s"
 
+msgid "workflows.aria.ruleTools"
+msgstr "Tindakan untuk aturan %(n)s"
+
 msgid "workflows.aria.terminalAction"
 msgstr "Aksi terminal"
 
@@ -10551,6 +11628,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "Hapus aturan ini? Semua yang di bawahnya naik satu posisi."
+
+msgid "workflows.conseq.skip"
+msgstr "Tidak pernah dijalankan"
+
+msgid "workflows.conseq.stop"
+msgstr "Menghentikan rantai"
 
 msgid "workflows.copySuffix"
 msgstr " (salinan)"
@@ -10699,6 +11782,21 @@ msgstr "gerbang kecocokan"
 msgid "workflows.gate.help"
 msgstr "Dihitung per IP klien. Di bawah ambang batas aturan ini sama sekali tidak cocok dan evaluasi berlanjut ke aturan berikutnya — aturan ini tidak pernah membatasi laju dengan sendirinya."
 
+msgid "workflows.inspector.apply"
+msgstr "Terapkan"
+
+msgid "workflows.inspector.apply_title"
+msgstr "Terapkan: pertahankan edit ini dalam draf. Tombol Simpan di halaman akan menyimpannya secara permanen"
+
+msgid "workflows.inspector.cancel"
+msgstr "Batal"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "Batal: pulihkan aturan seperti saat dibuka"
+
+msgid "workflows.inspector.cancelled"
+msgstr "Edit pada aturan %(n)s dibatalkan. Aturan kembali seperti saat dibuka."
+
 msgid "workflows.legend.fall"
 msgstr "Tidak cocok jatuh ke aturan berikutnya"
 
@@ -10735,8 +11833,14 @@ msgstr "Duplikat di bawah"
 msgid "workflows.menu.enable"
 msgstr "Aktifkan aturan"
 
+msgid "workflows.menu.header"
+msgstr "Tindakan aturan"
+
 msgid "workflows.menu.moveTo"
 msgstr "Pindahkan ke posisi %(n)s"
+
+msgid "workflows.menu.order"
+msgstr "Urutan"
 
 msgid "workflows.menu.staysAt"
 msgstr "Tetap pada posisi %(n)s"
@@ -10768,6 +11872,81 @@ msgstr "Belum divalidasi"
 msgid "workflows.order_help"
 msgstr "Aturan dievaluasi secara berurutan dan yang pertama cocok menang. Aturan dengan ambang laju hanya cocok setelah ambang batas terlampaui, sehingga aturan di bawahnya dapat menangkap lalu lintas di bawahnya."
 
+msgid "workflows.port.active_rules"
+msgstr "%(count)s aktif"
+
+msgid "workflows.port.attachment"
+msgstr "Keterlampiran"
+
+msgid "workflows.port.attachment_any"
+msgstr "Semua"
+
+msgid "workflows.port.attachment_attached"
+msgstr "Terlampir"
+
+msgid "workflows.port.created"
+msgstr "Dibuat"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "Lepaskan alur kerja ini dari semua layanan sebelum menghapusnya. Penghapusan tidak pernah melepaskan layanan secara otomatis."
+
+msgid "workflows.port.details"
+msgstr "Detail"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "Definisi terpilih (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "Definisi terpilih diekspor. File ini tidak memiliki jaminan impor ulang."
+
+msgid "workflows.port.export_failed"
+msgstr "Ekspor gagal. Tidak ada file yang diunduh."
+
+msgid "workflows.port.export_loading"
+msgstr "Membaca definisi alur kerja yang dipilih…"
+
+msgid "workflows.port.export_scope"
+msgstr "Ekspor tabel mencakup baris yang difilter dan kolom yang terlihat. Ekspor JSON hanya mencakup definisi alur kerja kanonis yang dipilih, dengan id sebagai kunci. Tidak ada jaminan impor ulang."
+
+msgid "workflows.port.list_subtitle"
+msgstr "Aturan dan layanan terlampir untuk setiap alur kerja"
+
+msgid "workflows.port.more"
+msgstr "Tindakan lain untuk %(name)s"
+
+msgid "workflows.port.row_details"
+msgstr "Detail alur kerja"
+
+msgid "workflows.port.select_workflows"
+msgstr "Pilih alur kerja"
+
+msgid "workflows.port.services_count"
+msgstr "Layanan: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "Pelepasan hanya menghapus alur kerja ini dari layanan tersebut. Alur kerja dan aturannya tetap ada."
+
+msgid "workflows.port.services_none"
+msgstr "Alur kerja ini tidak dilampirkan ke layanan mana pun."
+
+msgid "workflows.port.services_open"
+msgstr "Tampilkan layanan yang dilampirkan ke %(name)s"
+
+msgid "workflows.port.services_title"
+msgstr "Layanan yang dilampirkan ke %(name)s"
+
+msgid "workflows.port.total_rules"
+msgstr "Total %(count)s"
+
+msgid "workflows.port.updated"
+msgstr "Diperbarui"
+
 msgid "workflows.readonly"
 msgstr "Basis data bersifat baca-saja. Alur kerja dapat diperiksa tetapi tidak dapat diubah."
 
@@ -10782,6 +11961,9 @@ msgstr "Alur kerja keamanan “%(workflow)s”: aksi “%(action)s”"
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "Alur kerja keamanan “%(workflow)s”: permintaan dialihkan"
+
+msgid "workflows.regex_help"
+msgstr "Dua batas regex yang terpisah berlaku. Saat menulis: alur kerja yang dilampirkan ke satu layanan dapat berisi total maksimal 50 kondisi regex. Penyimpanan atau pelampiran yang melampaui batas ditolak. Saat berjalan: setiap instans mengompilasi maksimal WORKFLOWS_REGEX_BUDGET ekspresi reguler yang berbeda (default 512, dibagi oleh semua alur kerja). Regex yang melampaui anggaran ini tidak dievaluasi dan mengembalikan UNKNOWN, sehingga aturannya tidak dapat cocok."
 
 msgid "workflows.rule.disabled"
 msgstr "Dinonaktifkan"
@@ -10893,6 +12075,108 @@ msgstr "Tampilan daftar. Aturan berjalan atas ke bawah; kecocokan pertama menang
 
 msgid "workflows.search"
 msgstr "Cari nama atau deskripsi..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "Buat alur kerja untuk membuka konfigurasinya"
+
+msgid "workflows.shell.draft_discard"
+msgstr "Buang perubahan"
+
+msgid "workflows.shell.draft_restored"
+msgstr "Perubahan alur kerja yang belum disimpan telah dipulihkan. Simpan untuk menerapkannya, atau beralih alur kerja untuk membuangnya."
+
+msgid "workflows.shell.draft_save"
+msgstr "Simpan dan lanjutkan"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "Alur kerja tidak dapat disimpan. Tidak ada perubahan yang dibuang."
+
+msgid "workflows.shell.draft_stale"
+msgstr "Alur kerja ini disimpan di tempat lain setelah draf Anda dimulai, sehingga draf dibuang."
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "Membuka %(target)s akan meninggalkan perubahan aturan yang belum disimpan di %(name)s. Hanya satu draf yang dapat dibuka sekaligus: simpan, buang, atau tetap di sini."
+
+msgid "workflows.shell.draft_title"
+msgstr "Perubahan yang belum disimpan di %(name)s"
+
+msgid "workflows.shell.pick_label"
+msgstr "Alur kerja"
+
+msgid "workflows.shell.read_only"
+msgstr "Hanya baca"
+
+msgid "workflows.shell.tab_config"
+msgstr "Konfigurasi"
+
+msgid "workflows.shell.tab_overview"
+msgstr "Ikhtisar"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "Belum disimpan"
+
+msgid "workflows.shell.tabs_label"
+msgstr "Tampilan alur kerja"
+
+msgid "workflows.shell.view_label"
+msgstr "Tampilan"
+
+msgid "workflows.sum.block"
+msgstr "blokir permintaan"
+
+msgid "workflows.sum.blockStatus"
+msgstr "blokir permintaan dengan %(code)s"
+
+msgid "workflows.sum.challenge"
+msgstr "tampilkan tantangan %(provider)s"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "remediasi CrowdSec"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "sumber CrowdSec"
+
+msgid "workflows.sum.every"
+msgstr "ada permintaan apa pun"
+
+msgid "workflows.sum.gate"
+msgstr "melebihi %(count)s permintaan per %(window)s detik per IP"
+
+msgid "workflows.sum.group_asn"
+msgstr "ASN ada di grup %(name)s"
+
+msgid "workflows.sum.group_country"
+msgstr "negara ada di grup %(name)s"
+
+msgid "workflows.sum.group_ip"
+msgstr "IP ada di grup %(name)s"
+
+msgid "workflows.sum.isOne"
+msgstr "%(label)s adalah %(value)s"
+
+msgid "workflows.sum.isOneOf"
+msgstr "%(label)s adalah salah satu dari %(values)s"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "negara"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "metode"
+
+msgid "workflows.sum.not"
+msgstr "kondisi «%(what)s» tidak terpenuhi"
+
+msgid "workflows.sum.redirect"
+msgstr "alihkan ke %(url)s (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "URI %(match)s %(value)s"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11064,6 +12348,78 @@ msgstr "Permintaan"
 
 msgid "workflows.threshold_window"
 msgstr "Per (detik)"
+
+msgid "workflows.toolbar.actions"
+msgstr "Tindakan alur kerja"
+
+msgid "workflows.toolbar.any_action"
+msgstr "Tindakan apa pun"
+
+msgid "workflows.toolbar.any_state"
+msgstr "Status apa pun"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "Kembali ke atas"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "Ciutkan semua"
+
+msgid "workflows.toolbar.detailed"
+msgstr "Terperinci"
+
+msgid "workflows.toolbar.display"
+msgstr "Tampilan aturan"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "Perluas semua"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "Tindakan"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "Nama"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "Cari berdasarkan nama aturan…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "Filter aturan"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "Status"
+
+msgid "workflows.toolbar.filters"
+msgstr "Filter"
+
+msgid "workflows.toolbar.full_height"
+msgstr "Tinggi penuh"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "Batasi tinggi"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "%(shown)s dari %(total)s aturan"
+
+msgid "workflows.toolbar.no_match"
+msgstr "Tidak ada aturan yang cocok dengan filter ini"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "Pengurutan ulang dijeda saat filter menyembunyikan aturan."
+
+msgid "workflows.toolbar.reset"
+msgstr "Atur ulang"
+
+msgid "workflows.toolbar.simplified"
+msgstr "Sederhana"
+
+msgid "workflows.toolbar.state_off"
+msgstr "Dinonaktifkan"
+
+msgid "workflows.toolbar.state_on"
+msgstr "Diaktifkan"
+
+msgid "workflows.toolbar.view"
+msgstr "Tampilan urutan aturan"
 
 msgid "workflows.tree.addCondition"
 msgstr "Kondisi"

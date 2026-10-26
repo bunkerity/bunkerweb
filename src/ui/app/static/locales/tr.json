@@ -12,7 +12,26 @@
     "socials": "Sosyal Medya",
     "tagline": "Güçlü Koruma, Basitlik",
     "title": "BunkerWeb hakkında",
-    "version": "Versiyon: {{version}}"
+    "version": "Versiyon: {{version}}",
+    "releases": {
+      "title": "Son sürümler",
+      "view_all": "Tümünü gör"
+    },
+    "environment": {
+      "title": "Ortam",
+      "copy": "Tanılama bilgilerini kopyala",
+      "copied": "Kopyalandı",
+      "help": "Web arayüzü sunucusundan ve kontrol düzleminden okunur. Değişken, lisans anahtarı veya veritabanı adresi gösterilmez.",
+      "scope_ui_host": "Web arayüzü sunucusu",
+      "scope_control_plane": "Kontrol düzlemi",
+      "scope_instances": "Örnekler",
+      "integration": "Entegrasyon",
+      "platform": "Platform",
+      "bunkerweb": "BunkerWeb",
+      "database": "Veritabanı sunucusu",
+      "registered": "Kayıtlı",
+      "instances_up": "{{total}} örnekten {{up}} tanesi çalışıyor"
+    }
   },
   "accordion": {
     "body": {
@@ -123,6 +142,10 @@
         "expiring": "≤ 1 saatte sona eren",
         "expiring_caption": "Otomatik dönüşümlü",
         "permanent": "Kalıcı yasaklar"
+      },
+      "reasons": {
+        "head_reason": "Neden",
+        "meta": "{{count}} etkin yasaklama"
       }
     },
     "flash": {
@@ -175,6 +198,30 @@
         "changed": "{{ip}}: yasak istek sırasında yenilendi veya değiştirildi, hiçbir şey kaldırılmadı. Yasağı yeniden kaldırın.",
         "partial": "{{ip}}: kısmen tamamlandı. Bitirmek için yasak kaldırmayı yeniden çalıştırın: {{details}}"
       }
+    },
+    "page": {
+      "clear_all": "Tümünü temizle",
+      "import": "İçe aktar"
+    },
+    "clear_all": {
+      "title": "Tüm yasaklamaları temizle",
+      "message": "Her servis ve örnekteki tüm yasaklamaları kaldırır. CrowdSec yasaklaması kendi satırından kaldırılır.",
+      "phrase": "tümünü temizle",
+      "confirm": "Tüm yasaklamaları temizle"
+    },
+    "import": {
+      "confirm_title": "Yasaklamaları içe aktar",
+      "confirm_button": "İçe aktar",
+      "empty": "Bu dosyada geçerli yasaklama bulunamadı. Her satırda bir yasaklama, IP[,scope[,duration[,reason]]], veya bir JSON listesi bekleniyor.",
+      "too_many": "Bu dosyada {{max}} değerinden fazla yasaklama var. Dosyayı bölüp parçalar halinde içe aktarın.",
+      "read_failed": "Dosya okunamadı.",
+      "confirm_message": "Bu dosyada bulunan yasaklama sayısı: {{count}}. İçe aktarılsın mı?",
+      "confirm_skipped": "Yok sayılan okunamayan satır sayısı: {{skipped}}."
+    },
+    "live": {
+      "on": "Otomatik yenileme açık, her 10 saniyede bir.",
+      "off": "Otomatik yenileme duraklatıldı.",
+      "updated": "Yasaklamalar güncellendi: {{added}} yeni, {{removed}} süresi dolmuş."
     }
   },
   "breadcrumb": {
@@ -425,6 +472,39 @@
       "missing_configs_parameter_configs_delete": "/configs/delete üzerinde configs parametresi eksik.",
       "missing_convert_parameter_configs_convert": "/configs/convert üzerinde convert_to parametresi eksik.",
       "missing_configs_parameter_configs_convert": "/configs/convert üzerinde configs parametresi eksik."
+    },
+    "console": {
+      "title": "Özel yapılandırmalar",
+      "new": "Yeni yapılandırma",
+      "edit": "Yapılandırmayı düzenle",
+      "view": "Yapılandırmayı görüntüle",
+      "clone": "Yapılandırmayı klonla",
+      "files": "Dosyalar",
+      "types": "Yapılandırma türü",
+      "all_scopes": "Tüm kapsamlar",
+      "global_only": "Yalnızca küresel",
+      "service_only": "Yalnızca servis",
+      "global_legend": "Küresel kapsam her servise uygulanır.",
+      "service_legend": "Servis kapsamı yalnızca bir servise uygulanır.",
+      "select_file": "İçeriğini önizlemek için dosya seçin.",
+      "no_files": "Bu filtrelerle eşleşen yapılandırma yok.",
+      "full_view": "Tam görünüm",
+      "restore_view": "Görünümü geri yükle",
+      "download": "İndir",
+      "lint": "Sözdizimini denetle",
+      "lint_help": "Yalnızca istemci tarafı ipuçlarıdır. Dağıtımdan önce nginx -t ile doğrulayın. Çok satırlı yönergeler uyarı üretebilir.",
+      "lint_clean": "İstemci tarafı denetimlerinde sorun bulunamadı.",
+      "lint_warnings": "İstemci tarafı denetimlerinde {{count}} uyarı bulundu. Düzenleyici notlarına bakın.",
+      "lint_skipped": "ModSecurity ve CRS yapılandırmaları için NGINX sözdizimi denetimi kullanılamıyor.",
+      "lint_semicolon": "Yönerge sonunda noktalı virgül eksik olabilir.",
+      "lint_unexpected_brace": "Beklenmeyen kapanış süslü parantezi.",
+      "lint_brace": "Kapatılmamış açılış süslü parantezi.",
+      "lint_quote": "Kapatılmamış tırnak işareti.",
+      "content": "Yapılandırma içeriği (salt okunur)",
+      "template_name_locked": "Şablon tabanlı özel yapılandırmanın yeniden adlandırılmasına izin verilmez.",
+      "name_help": "Harf, rakam, tire veya alt çizgi kullanın. .conf son eki diskte eklenir.",
+      "editor_help": "NGINX veya ModSecurity içeriğini düzenleyin. Ctrl+S ya da Command+S ile kaydedin.",
+      "editor_title": "Yapılandırma içeriği"
     }
   },
   "country": {
@@ -764,6 +844,11 @@
       "top_blocked_ips": {
         "most_blocked": "En Çok Engellenen IP",
         "title": "En Çok Engellenen 10 IP"
+      },
+      "legend": {
+        "item": "Öğe",
+        "count": "Sayı",
+        "share": "Pay"
       }
     },
     "map": {
@@ -869,6 +954,12 @@
         "page_other": "Bu sayfadaki tüm {{count}} şablon seçildi.",
         "all_filtered": "Eşleşen {{count}} şablon öğesinin tümünü seç",
         "all_done": "Eşleşen tüm {{count}} şablon seçildi."
+      },
+      "workflows": {
+        "page_one": "Bu sayfadaki {{count}} iş akışı seçildi.",
+        "page_other": "Bu sayfadaki tüm {{count}} iş akışı seçildi.",
+        "all_filtered": "Eşleşen {{count}} iş akışının tümünü seç",
+        "all_done": "Eşleşen tüm {{count}} iş akışı seçildi."
       }
     },
     "bulk_select_clear": "Seçimi temizle",
@@ -988,7 +1079,15 @@
     "zero_records_plugins": "Eşleşen Eklenti bulunamadı",
     "zero_records_reports": "Eşleşen Rapor bulunamadı",
     "zero_records_services": "Eşleşen Servis bulunamadı",
-    "zero_records_templates": "Eşleşen şablon bulunamadı"
+    "zero_records_templates": "Eşleşen şablon bulunamadı",
+    "info_empty_workflows": "Hiç İş Akışı yok",
+    "info_filtered_workflows": "(_MAX_ toplam İş Akışı içinden filtrelendi)",
+    "info_workflows": "{{start}}–{{end}} arası gösteriliyor · toplam iş akışı: {{total}}",
+    "length_menu_workflows": "_MENU_ İş Akışı Göster",
+    "select_rows_workflows_0": "Hiç İş Akışı seçilmedi",
+    "select_rows_workflows_1": "1 İş Akışı seçildi",
+    "select_rows_workflows_plural": "%d İş Akışı seçildi",
+    "zero_records_workflows": "Eşleşen İş Akışı bulunamadı"
   },
   "dev_log": {
     "copy_failed": "Metin kopyalanamadı:",
@@ -1244,7 +1343,9 @@
     "history": {
       "end_date": "Bitiş Tarihi",
       "start_date": "Başlangıç Tarihi",
-      "success": "Başarılı"
+      "success": "Başarılı",
+      "duration": "Süre",
+      "error": "Hata"
     }
   },
   "jobs": {
@@ -1262,6 +1363,10 @@
       "no_jobs_selected": "Hiç iş seçilmedi.",
       "error_fetching_jobs": "İşler alınırken hata oluştu: {{message}}",
       "missing_jobs_parameter_jobs_run": "/jobs/run üzerinde jobs parametresi eksik."
+    },
+    "card": {
+      "title": "Zamanlanmış işler",
+      "sub": "Zamanlayıcı tarafından kendi aralıklarında veya isteğe bağlı çalıştırılır"
     }
   },
   "legend": {
@@ -1574,7 +1679,12 @@
     "system": "Sistem",
     "edition_community": "Topluluk",
     "edition_pro": "Pro",
-    "crowdsec": "CrowdSec"
+    "crowdsec": "CrowdSec",
+    "profile": "Profil",
+    "plugin_insights": "Eklenti bilgileri",
+    "plugins_overview": "Genel bakış",
+    "filter_plugins": "Eklentileri filtrele…",
+    "no_plugin_match": "Eşleşen eklenti yok"
   },
   "news": {
     "image_alt": "Haber görseli",
@@ -1650,6 +1760,14 @@
         "no_content": "Bu eklenti gömülü bir sayfa sunmaz.",
         "restricted_to_admins": "Bu eklenti kendi sayfasını içerir, bu da eklenti kodunu çalıştırır. Sadece yöneticiler yükleyebilir.",
         "dedicated_page_unavailable": "Bu eklenti, henüz yüklenmemiş özel bir sayfada yönetilir. Erişmek için web arayüzünü yeniden başlatın."
+      },
+      "empty": {
+        "metrics_title": "Metrikler kapalı",
+        "restricted_title": "Yalnızca yöneticiler",
+        "no_page_title": "Gösterilecek sayfa yok",
+        "no_content_title": "Henüz gösterilecek bir şey yok",
+        "global_settings": "Küresel ayarlar",
+        "deactivated_heading": "Bu eklenti hiçbir yerde kullanılmıyor"
       }
     },
     "type": {
@@ -1727,7 +1845,10 @@
       "tab_all": "Tümü",
       "tab_community": "Topluluk",
       "tab_disabled": "Devre dışı",
-      "tab_enabled": "Etkin"
+      "tab_enabled": "Etkin",
+      "always_on_badge": "Her zaman açık",
+      "always_on_tip": "BunkerWeb için gerekli çekirdek eklenti: yapılandırılabilir ancak devre dışı bırakılamaz.",
+      "filter_label": "Eklentileri filtrele"
     },
     "multivalue": {
       "more_value": "daha fazla değer",
@@ -1763,6 +1884,15 @@
       "flash": {
         "version_unreadable": "BunkerWeb sürümü ({{current}}) okunamadı, bu nedenle {{id}} uyumluluğu kontrol edilemiyor; hiçbir şey yüklenmedi"
       }
+    },
+    "tier": {
+      "core": "Çekirdek eklenti",
+      "pro": "PRO eklentisi",
+      "community": "Topluluk eklentisi"
+    },
+    "card": {
+      "configure": "{{name}} eklentisini yapılandır",
+      "metrics": "{{name}} metrikleri"
     }
   },
   "pro": {
@@ -1886,7 +2016,9 @@
       "last_activity": "Son Aktivite",
       "os": "İşletim Sistemi",
       "title": "Oturum",
-      "wipe_help": "Hesabınızdaki her diğer aktif oturumu kapatın. Burada oturum açmış olacaksınız."
+      "wipe_help": "Hesabınızdaki her diğer aktif oturumu kapatın. Burada oturum açmış olacaksınız.",
+      "recent_title": "Son oturumlar",
+      "load_error": "Veriler yüklenirken hata oluştu. Lütfen tekrar deneyin."
     },
     "subtitle": "Hesabınızı, güvenliği ve aktif oturumları yönetin.",
     "tab": {
@@ -1937,7 +2069,8 @@
       "missing_current_password_parameter_profile_totp_3": "/profile/totp-enable üzerinde current password parametresi eksik.",
       "missing_current_password_parameter_profile_totp_2": "/profile/totp-disable üzerinde current password parametresi eksik.",
       "missing_current_password_parameter_profile_totp": "/profile/totp-refresh üzerinde current password parametresi eksik."
-    }
+    },
+    "title": "Profiliniz"
   },
   "range_picker": {
     "1h": "Son saat",
@@ -2077,7 +2210,19 @@
     "upload_invalid": "Geçerli bir açık sertifika ve eşleşen özel anahtar seçin.",
     "valid_days": "Gün cinsinden geçerlilik süresi",
     "valid_from": "Şu tarihten itibaren geçerli",
-    "valid_to": "Şu tarihe kadar geçerli"
+    "valid_to": "Şu tarihe kadar geçerli",
+    "renew_due_short": "Yenileme zamanı geldi",
+    "select_all": "Tüm sertifikaları seç",
+    "issuers_meta": "{{count}} sertifika",
+    "bulk": {
+      "renew": "Kendinden imzalı olanları yenile",
+      "download": "Zincirleri indir",
+      "delete": "Seçilenleri sil",
+      "none_eligible": "Seçilen sertifikaların hiçbiri bu işleme uygun değil.",
+      "confirm_renew": "Yenilenecek kendinden imzalı sertifika sayısı: {{count}}. Devam edilsin mi?",
+      "confirm_delete": "Silinecek sertifika sayısı: {{count}}. Bu işlem geri alınamaz. Devam edilsin mi?",
+      "skipped": "Bu işleme uygun olmadığı için atlanan seçili sertifika sayısı: {{skipped}}."
+    }
   },
   "crowdsec": {
     "reason": {
@@ -2661,6 +2806,20 @@
       "source_appsec": "AppSec denetimi",
       "source_failure_policy": "AppSec hata politikası",
       "technical_details": "Teknik ayrıntılar"
+    },
+    "live": {
+      "on": "Otomatik yenileme açık, her 10 saniyede bir.",
+      "off": "Otomatik yenileme duraklatıldı.",
+      "updated": "Raporlar güncellendi: {{added}} yeni."
+    },
+    "offenders": {
+      "confirm_title": "Raporlardan yasakla",
+      "confirm_one": "{{ip}} her örnekte 24 saat boyunca yasaklanacak.",
+      "confirm_many": "{{count}} IP adresi her örnekte 24 saat boyunca yasaklanacak.",
+      "show": "Göster",
+      "show_top": "En sık ihlal edenler",
+      "show_latest": "Son ihlal edenler",
+      "show_bottom": "En az ihlal edenler"
     }
   },
   "scope": {
@@ -3084,7 +3243,8 @@
         "lets_encrypt": "Let's Encrypt",
         "zerossl": "ZeroSSL",
         "real_ip": "Gerçek IP",
-        "reverse_proxy": "Ters Proxy"
+        "reverse_proxy": "Ters Proxy",
+        "server": "Sunucu"
       },
       "subtitle": "Web arayüzüne özel ayarları yapılandırın.",
       "title": "UI Ayarları"
@@ -3102,7 +3262,9 @@
       "pro_benefit_4_description": "BunkerWeb kurulumunuzu optimize etmek için uzman tavsiyesi.",
       "pro_benefit_4_title": "Özel danışmanlık",
       "subtitle": "Gelişmiş özelliklerin kilidini açın ve BunkerWeb'den en iyi şekilde yararlanın.",
-      "title": "PRO'ya Yükselt"
+      "title": "PRO'ya Yükselt",
+      "activate_title": "Lisans etkinleştir",
+      "activation_note": "Lisans, kurulumu tamamladığınızda etkinleştirilir."
     },
     "step4": {
       "label": {
@@ -3136,6 +3298,19 @@
       "admin_email_too_long_must_less": "Yönetici e-postası çok uzun. 256 karakterden az olmalıdır.",
       "admin_username_too_long_must_less": "Yönetici kullanıcı adı çok uzun. 256 karakterden az olmalıdır.",
       "missing_either_one_following_parameters": "Aşağıdaki parametrelerden biri eksik: {{value}}."
+    },
+    "stepper_label": "Kurulum adımları",
+    "complete": "Kurulumu tamamla",
+    "from_ui_host": "UI_HOST ortam değişkeninden",
+    "accordion": {
+      "general": "Genel",
+      "general_hint": "Sunucu · Let's Encrypt",
+      "advanced": "Gelişmiş",
+      "advanced_hint": "Ters Proxy · Gerçek IP · Özel Sertifika"
+    },
+    "switch": {
+      "enabled": "Etkin",
+      "disabled": "Devre dışı"
     }
   },
   "status": {
@@ -3233,10 +3408,32 @@
         "button": "Paketi İndir",
         "help": "Günlükler, eklenti sürümleri, ortam ve son hatalar. Özel veriler anonimleştirilir.",
         "title": "Web UI Tanılaması"
+      },
+      "docs": {
+        "title": "Belgeler"
+      },
+      "community": {
+        "title": "Topluluk"
       }
     },
     "subtitle": "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın.",
-    "title": "Destek"
+    "title": "Destek",
+    "docs": {
+      "quickstart": "Hızlı başlangıç kılavuzu",
+      "web_ui": "Web arayüzü kılavuzu",
+      "troubleshooting": "Sorun giderme",
+      "upgrading": "Yükseltme"
+    },
+    "community": {
+      "discord": "Discord",
+      "discord_help": "Topluluğa ve proje bakımcılarına sorun.",
+      "github": "GitHub sorunları",
+      "github_help": "Hata bildirimleri ve özellik istekleri.",
+      "reddit": "Reddit",
+      "reddit_help": "Tartışmalar ve duyurular."
+    },
+    "attach_title": "Eklenecek tanılama bilgileri",
+    "attach_help": "Destek isteği için dışa aktarımlar. Yazma izni gerektirir ve gizli bilgileri maskeler."
   },
   "tab": {
     "custom_certificate": "Özel Sertifika",
@@ -3547,7 +3744,19 @@
       "refused": "Şablon içe aktarılmadı: {{reason}}",
       "too_large": "Şablon içe aktarılmadı: dosya 1 MiB'den büyük",
       "unreadable": "Şablon içe aktarılmadı: dosya okunamadı"
-    }
+    },
+    "features_builtin": "Yerleşik özellikler",
+    "features_configs": "Özel yapılandırmalar",
+    "features_plugins": "Eklentiler",
+    "features_help": "Bu şablonun sundukları. Gerçek ayarları görmek veya değiştirmek için şablonu açın.",
+    "features_of": "{{name}} özelliklerini göster",
+    "features_title": "Şablon özellikleri",
+    "managed_by": "{{owner}} tarafından yönetiliyor: burada değiştirilemez veya silinemez.",
+    "more_actions": "{{name}} için diğer işlemler",
+    "no_match": "Bu aramayla eşleşen şablon yok.",
+    "open_template": "Şablonu aç",
+    "read_only": "Salt okunur",
+    "search": "Şablonlarda ara..."
   },
   "theme": {
     "dark": "Koyu",
@@ -3583,7 +3792,15 @@
     "open_live": "Canlı görünüm",
     "updated": "Güncellendi",
     "blocked_request": "engellenen istek",
-    "blocked_requests": "engellenen istekler"
+    "blocked_requests": "engellenen istekler",
+    "attacks_24h": "Son 24 saatte engellenenler",
+    "rolling_window": "Kayan pencere, yaklaşık her 30 saniyede yenilenir",
+    "ticker_caption": "En son engellenen istekler",
+    "col_time": "Zaman",
+    "col_ip": "IP adresi",
+    "col_reason": "Neden",
+    "col_origin": "Kaynak",
+    "col_target": "Hedef"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Servis kaldırılır veya yeniden başlatılırsa, UI yapılandırmanız kaybolacaktır.",
@@ -3981,7 +4198,26 @@
       "target_required": "Yönlendirme hedefi gereklidir",
       "status_code_must_be_one_of": "Durum kodu şunlardan biri olmalıdır: {{value}}",
       "at_least_one_service_required": "En az bir servis gereklidir"
-    }
+    },
+    "all_codes": "Tüm durum kodları",
+    "append_column": "URI ekle",
+    "card_subtitle": "Yol yönlendirmeleri ve uygulandıkları servisler",
+    "count": "{{count}} yönlendirme",
+    "count_plural": "{{count}} yönlendirme",
+    "detach_shared": "Bu yönlendirme paylaşılıyor. Ayırmak yalnızca bu servisten kaldırır. Diğer servislerde kalır.",
+    "kpi_configured": "Yapılandırılmış yönlendirmeler",
+    "kpi_detached_caption": "Etkili olması için servise bağlayın",
+    "kpi_loaded_only": "Yüklenen ilk {{count}} öğe arasında",
+    "kpi_permanent": "Kalıcı",
+    "kpi_permanent_caption": "301 veya 308, tarayıcılar tarafından önbelleğe alınır",
+    "kpi_services": "Bağlı servisler",
+    "kpi_services_caption": "En az bir yönlendirmesi olan servisler",
+    "no_match": "Bu filtrelerle eşleşen yönlendirme yok.",
+    "services_copy": "{{name}}: {{from}} → {{to}}",
+    "services_count": "{{count}} servis",
+    "services_count_plural": "{{count}} servis",
+    "services_title": "Bu yönlendirmeyi kullanan servisler",
+    "to_url_help": "Tam bir http:// veya https:// URL adresi. Göreli hedefler desteklenmez."
   },
   "upstreams": {
     "add_server": "Sunucu ekle",
@@ -4059,7 +4295,34 @@
       "method_must_be_one_of": "Yöntem şunlardan biri olmalıdır: {{value}}",
       "keepalive_must_be_positive_whole_number": "Keepalive sayısı pozitif bir tam sayı olmalıdır",
       "at_least_one_service_required": "En az bir servis gereklidir"
-    }
+    },
+    "all_protocols": "Tüm protokoller",
+    "all_tls": "Tüm TLS ayarları",
+    "card_subtitle": "Arka uç havuzları ve bunlara proxy üzerinden bağlanan servisler",
+    "count": "{{count}} upstream sunucusu",
+    "count_plural": "{{count}} upstream sunucusu",
+    "detach_shared": "Bu upstream sunucusu paylaşılıyor. Ayırmak yalnızca bu servis ve yoldan kaldırır. Diğer bağlantılarda kalır.",
+    "keepalive_off": "Kapalı",
+    "kpi_loaded_only": "Yüklenen ilk {{count}} öğe arasında",
+    "kpi_not_attached": "{{count}} bağlı değil",
+    "kpi_roles": "{{primary}} birincil · {{backup}} yedek · {{down}} kapalı (yapılandırılan)",
+    "kpi_services": "Bağlı servisler",
+    "kpi_services_caption": "Havuza proxy üzerinden bağlanan servisler",
+    "kpi_tls": "Arka uca TLS",
+    "kpi_tls_caption": "Sunucularıyla TLS üzerinden iletişim kuracak şekilde yapılandırılan havuzlar",
+    "members_copy": "{{name}}: {{count}} sunucu",
+    "members_copy_plural": "{{name}}: {{count}} sunucu",
+    "members_title": "Bu upstream içindeki sunucular",
+    "no_match": "Bu filtrelerle eşleşen upstream sunucusu yok.",
+    "servers_count": "{{count}} sunucu",
+    "servers_count_plural": "{{count}} sunucu",
+    "services_copy": "{{name}}: {{servers}}",
+    "services_count": "{{count}} servis",
+    "services_count_plural": "{{count}} servis",
+    "services_title": "Bu upstream sunucusunu kullanan servisler",
+    "tls": "Arka uca TLS",
+    "tls_no": "Şifresiz",
+    "tls_yes": "TLS"
   },
   "workflows": {
     "act_block": "Engelle",
@@ -4112,7 +4375,8 @@
       "moveRuleUp": "{{n}} kuralını yukarı taşı",
       "moveRuleDown": "{{n}} kuralını aşağı taşı",
       "moreActionsForRule": "{{n}} kuralı için daha fazla eylem",
-      "ruleCard": "Kural {{n}} / {{total}} — {{name}}"
+      "ruleCard": "Kural {{n}} / {{total}} — {{name}}",
+      "ruleTools": "{{n}} numaralı kuralın işlemleri"
     },
     "attach": "Hizmetlere ekle",
     "attach_help": "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır.",
@@ -4196,7 +4460,9 @@
       "enable": "Kuralı etkinleştir",
       "top": "İlk çalıştır",
       "moveTo": "{{n}}. konuma taşı",
-      "staysAt": "{{n}}. konumda kalır"
+      "staysAt": "{{n}}. konumda kalır",
+      "header": "Kural işlemleri",
+      "order": "Sıra"
     },
     "move": {
       "first": "İlk çalıştır",
@@ -4401,7 +4667,116 @@
       "too_many_services": "Bir iş akışı {{value}} servisten fazlasına eklenemez",
       "name_required": "İş akışı adı gereklidir",
       "service_list_not_read_reopen_page": "Servis listesi okunamadı; sayfayı yeniden açın ve tekrar deneyin"
-    }
+    },
+    "port": {
+      "list_subtitle": "Her iş akışı için kurallar ve bağlı servisler",
+      "row_details": "İş akışı ayrıntıları",
+      "select_workflows": "İş akışlarını seç",
+      "created": "Oluşturuldu",
+      "updated": "Güncellendi",
+      "total_rules": "Toplam {{count}}",
+      "active_rules": "{{count}} etkin",
+      "more": "{{name}} için diğer işlemler",
+      "export_scope": "Tablo dışa aktarımları filtrelenen satırları ve görünür sütunları içerir. JSON dışa aktarımları yalnızca seçili kanonik iş akışı tanımlarını, id anahtarlarıyla içerir. Yeniden içe aktarma garantisi yoktur.",
+      "export_definitions": "Seçili tanımlar (JSON)",
+      "export_loading": "Seçili iş akışı tanımları okunuyor…",
+      "export_done": "Seçili tanımlar dışa aktarıldı. Bu dosyanın yeniden içe aktarılabileceğine dair garanti yoktur.",
+      "export_failed": "Dışa aktarma başarısız. Dosya indirilmedi.",
+      "detach_before_delete": "Bu iş akışını silmeden önce tüm servislerden ayırın. Silme işlemi servisleri asla otomatik olarak ayırmaz.",
+      "details": "Ayrıntılar",
+      "csv": "CSV",
+      "excel": "Excel",
+      "attachment": "Bağlantı",
+      "attachment_any": "Tümü",
+      "attachment_attached": "Bağlı",
+      "services_count": "Servisler: {{count}}",
+      "services_open": "{{name}} iş akışına bağlı servisleri göster",
+      "services_title": "{{name}} iş akışına bağlı servisler",
+      "services_help": "Ayırma işlemi bu iş akışını yalnızca ilgili servisten kaldırır. İş akışı ve kuralları korunur.",
+      "services_none": "Bu iş akışı hiçbir servise bağlı değil."
+    },
+    "shell": {
+      "tabs_label": "İş akışları görünümü",
+      "tab_overview": "Genel bakış",
+      "tab_config": "Yapılandırma",
+      "tab_unsaved": "Kaydedilmedi",
+      "config_needs_workflow": "Yapılandırmasını açmak için iş akışı oluşturun",
+      "view_label": "Görünüm",
+      "pick_label": "İş akışı",
+      "read_only": "Salt okunur",
+      "draft_title": "{{name}} içindeki kaydedilmemiş değişiklikler",
+      "draft_switch_message": "{{target}} açılırsa {{name}} içindeki kural değişiklikleri kaydedilmeden kalır. Aynı anda yalnızca bir taslak açık olabilir: kaydedin, değişiklikleri atın veya burada kalın.",
+      "draft_save": "Kaydet ve devam et",
+      "draft_discard": "Değişiklikleri at",
+      "draft_save_failed": "İş akışı kaydedilemedi. Hiçbir değişiklik atılmadı.",
+      "draft_restored": "Bu iş akışındaki kaydedilmemiş değişiklikler geri yüklendi. Uygulamak için kaydedin veya atmak için iş akışını değiştirin.",
+      "draft_stale": "Bu iş akışı taslağınız başlatıldıktan sonra başka bir yerde kaydedildiği için taslak atıldı."
+    },
+    "toolbar": {
+      "display": "Kural görünümü",
+      "filters": "Filtreler",
+      "view": "Kural sırası görünümü",
+      "simplified": "Basitleştirilmiş",
+      "detailed": "Ayrıntılı",
+      "limit_height": "Yüksekliği sınırla",
+      "full_height": "Tam yükseklik",
+      "expand_all": "Tümünü genişlet",
+      "collapse_all": "Tümünü daralt",
+      "actions": "İş akışı işlemleri",
+      "filter_rules": "Kuralları filtrele",
+      "filter_name": "Ad",
+      "filter_name_placeholder": "Kural adına göre ara…",
+      "filter_state": "Durum",
+      "any_state": "Herhangi bir durum",
+      "state_on": "Etkin",
+      "state_off": "Devre dışı",
+      "filter_action": "İşlem",
+      "any_action": "Herhangi bir işlem",
+      "reset": "Sıfırla",
+      "back_to_top": "Başa dön",
+      "n_of_m": "{{total}} kuraldan {{shown}} tanesi",
+      "reorder_paused": "Filtre kuralları gizlerken yeniden sıralama duraklatılır.",
+      "no_match": "Bu filtrelerle eşleşen kural yok"
+    },
+    "inspector": {
+      "apply": "Uygula",
+      "cancel": "İptal",
+      "cancel_title": "İptal: kuralı açıldığı andaki haline geri yükler",
+      "apply_title": "Uygula: düzenlemeleri taslakta tutar. Kalıcı kayıt için sayfadaki Kaydet düğmesini kullanın",
+      "cancelled": "{{n}} numaralı kuralın düzenlemeleri iptal edildi. Kural açıldığı andaki haline döndü."
+    },
+    "regex_help": "İki ayrı regex sınırı uygulanır. Yazarken: bir servise bağlı iş akışları toplamda en fazla 50 regex koşulu içerebilir. Bunu aşan kaydetme veya bağlama reddedilir. Çalışırken: her örnek en fazla WORKFLOWS_REGEX_BUDGET farklı düzenli ifade derler (varsayılan 512, tüm iş akışları arasında ortak). Bu bütçeyi aşan regex değerlendirilmez ve UNKNOWN döndürür, dolayısıyla kuralı eşleşemez.",
+    "conseq": {
+      "stop": "Zinciri durdurur",
+      "skip": "Hiç çalışmaz"
+    },
+    "sum": {
+      "leaf": {
+        "ip": "IP",
+        "country": "ülke",
+        "asn": "ASN",
+        "method": "yöntem"
+      },
+      "not": "«{{what}}» koşulu sağlanmıyorsa",
+      "uri": "URI eşleşmesi «{{match}} {{value}}» ise",
+      "isOne": "{{label}} değeri {{value}} ise",
+      "isOneOf": "{{label}} değeri {{values}} değerlerinden biriyse",
+      "challenge": "{{provider}} doğrulamasını göster",
+      "block": "isteği engelle",
+      "every": "herhangi bir istek gelirse",
+      "gate": "IP başına {{window}} saniyede {{count}} istek aşılırsa",
+      "crowdsec_source": "CrowdSec kaynağı",
+      "crowdsec_remediation": "CrowdSec iyileştirmesi",
+      "group_ip": "IP, {{name}} grubundaysa",
+      "group_country": "ülke, {{name}} grubundaysa",
+      "group_asn": "ASN, {{name}} grubundaysa",
+      "redirect": "{{url}} adresine yönlendir ({{code}})",
+      "blockStatus": "isteği {{code}} koduyla engelle"
+    },
+    "act_settings_block": "Engelleme ayarları",
+    "act_settings_redirect": "Yönlendirme ayarları",
+    "act_settings_challenge": "Doğrulama ayarları",
+    "act_settings_generic": "İşlem ayarları"
   },
   "request_path": {
     "client": "İstemci",
@@ -4495,7 +4870,33 @@
       "entry_invalid_value": "Giriş {{index}} geçersiz bir değere sahip",
       "entry_comment_too_long": "Giriş {{index}} çok uzun bir yoruma sahip",
       "source_required": "Kaynak kaynak grubu gereklidir"
-    }
+    },
+    "access": "Erişim",
+    "access_readonly": "Salt okunur",
+    "access_write": "Yazma",
+    "filter_values": "Değerleri filtrele...",
+    "no_value_match": "Bu filtreyle eşleşen değer yok.",
+    "origin": "Kaynak",
+    "origin_plugin": "{{plugin}} eklentisiyle birlikte gelir",
+    "origin_tip": {
+      "api": "API üzerinden oluşturuldu veya eşitlendi.",
+      "autoconf": "autoconf denetleyicisi tarafından oluşturuldu.",
+      "download": "Uzak kaynaktan indirildi.",
+      "manual": "Elle veya yapılandırma dosyasından oluşturuldu.",
+      "scheduler": "Zamanlayıcı tarafından oluşturuldu.",
+      "ui": "Web arayüzü üzerinden oluşturuldu.",
+      "wizard": "Kurulum sihirbazı tarafından oluşturuldu. Düzenlenebilir durumda kalır."
+    },
+    "plugins_compatible": "Uyumlu eklentiler",
+    "plugins_compatible_help": "Ayarları bu gruptaki değer türlerini kabul eden eklentiler. Gerçek başvurular Kullanım altında listelenir.",
+    "updated": "Güncellendi",
+    "values_compat": "Uyumlu: {{plugins}}",
+    "values_copied": "Kopyalandı",
+    "values_title": "{{name}} değerleri",
+    "view_values_of": "{{name}} değerlerini görüntüle",
+    "all_kinds": "Tümü",
+    "plugins_count": "{{count}} eklenti",
+    "plugins_count_plural": "{{count}} eklenti"
   },
   "validation": {
     "default_field_name": "Bu alan",
@@ -4561,7 +4962,27 @@
       "error_fetching_web_cache_status": "Web önbellek durumu alınırken hata oluştu: {{message}}",
       "purged_for_url": "{{url}} için web önbelleği temizlendi",
       "purged_all_entries": "Web önbelleği temizlendi (tüm girişler)"
-    }
+    },
+    "server_side_note": "Yalnızca sunucu tarafı önbelleği. Bu sayfa her BunkerWeb örneğinde saklanan ters proxy önbelleğini yönetir. Ziyaretçilerin tarayıcılarında önceden kaydedilmiş yanıtlar etkilenmez.",
+    "counters_window": "Her örneğin yeniden başlatılmasından itibaren",
+    "counters_window_help": "Sabit bir dönem yerine her örneğin son yeniden başlatılmasından itibaren sayarlar.",
+    "status_desc": {
+      "hit": "Doğrudan önbellekten sunuldu",
+      "miss": "Önbellekte yok: upstream sunucusundan alındı ve saklandı",
+      "bypass": "Bu istek için önbelleğe alma atlandı",
+      "expired": "Yaşam süresi doldu: upstream sunucusundan yeniden alındı",
+      "stale": "Upstream sunucusu hata verdiği için eski yanıt sunuldu",
+      "updating": "Yenileme sürerken eski yanıt sunuldu",
+      "revalidated": "Koşullu yeniden alma: upstream sunucusu yanıtın hâlâ geçerli olduğunu bildirdi"
+    },
+    "no_requests_for": "Şunun için istek yok:",
+    "no_counters": "Bu örnek henüz önbellekli istek saymadı.",
+    "available_tip": "Bu örnekte önbellek dizini var. Bir servisin bunu kullanıp kullanmadığı Servis etkinleştirme altında gösterilir.",
+    "compact": "Sıkışık",
+    "invalidate": "Geçersiz kıl",
+    "purge_a_url": "URL önbelleğini temizle",
+    "danger_zone": "Tehlikeli bölge",
+    "purge_all_phrase": "hepsini temizle"
   },
   "service": {
     "default_server": {
@@ -4652,7 +5073,17 @@
     "unreachable_help": "Süreler örneklerin kendisinden okunur; dolayısıyla hiçbiri yanıt vermedi — ya da henüz hiçbiri bir istek sunmadı.",
     "flash": {
       "error_fetching_plugin_timings": "Eklenti zamanlamaları alınırken hata oluştu: {{message}}"
-    }
+    },
+    "phases_sub": "Her eklentinin her aşamada harcadığı süre",
+    "toolbar": "Süre tablosu araçları",
+    "columns": "Sütunlar",
+    "export_csv": "CSV dışa aktar",
+    "all_phases": "Tüm aşamalar",
+    "search_placeholder": "Eklenti veya aşama ara…",
+    "caption": "Aşamaya göre eklenti süreleri, varsayılan olarak toplam süreye göre sıralanır",
+    "no_share": "Pay yok",
+    "no_match": "Bu filtrelerle eşleşen süre yok",
+    "no_share_hint": "Bu aşama istek başına bir kez çalışmadığı için payı yoktur."
   },
   "whatsnew": {
     "missing_action": "Değişiklik günlüğünü GitHub'da aç",
@@ -4669,6 +5100,117 @@
       "couldn_t_connect_redis": "Redis'e bağlanılamadı",
       "missing_form": "Formda {{key}} eksik",
       "invalid_request": "Geçersiz istek"
+    }
+  },
+  "table_system": {
+    "filters": "Filtreler",
+    "advanced_filters": "Gelişmiş filtreler",
+    "active_filters": "Filtreler, {{count}} etkin",
+    "filter": "Filtre",
+    "any": "Herhangi biri",
+    "visible_columns": "Görünür sütunlar",
+    "column_count": "{{total}} sütundan {{visible}} tanesi",
+    "show_all": "Tümünü göster",
+    "multiple_actions": "Seçili öğeler için birden çok işlem",
+    "upload_hint": "Yüklemek için sürükleyip bırakın veya tıklayın",
+    "confirm_title": "İşlemi onayla",
+    "confirm": "Onayla",
+    "type_phrase": "Onaylamak için {{phrase}} yazın",
+    "leave_title": "Kaydetmeden çıkılsın mı?",
+    "leave_message": "Kaydedilmemiş değişiklikleriniz kaybolacak.",
+    "leave": "Kaydetmeden çık",
+    "stay": "Düzenlemeye devam et"
+  },
+  "shell": {
+    "skip_to_content": "Ana içeriğe geç",
+    "main_navigation": "Ana gezinme",
+    "star_us": "GitHub'da BunkerWeb'e yıldız verin",
+    "search": {
+      "placeholder": "Sayfa, eklenti, servis ara…",
+      "label": "Sayfa, eklenti ve servis ara",
+      "results": "Arama sonuçları",
+      "kind_page": "Sayfa",
+      "kind_plugin": "Eklenti",
+      "kind_service": "Servis",
+      "no_match": "“{{query}}” için eşleşme yok",
+      "status_results": "Sonuç: {{count}}",
+      "loading_services": "Servisler yükleniyor…"
+    },
+    "language": {
+      "title": "Dil"
+    },
+    "theme": {
+      "title": "Tema",
+      "system_hint": "işletim sisteminizi izler"
+    },
+    "contrast": {
+      "toggle": "Yüksek kontrast"
+    },
+    "density": {
+      "toggle": "Sıkışık yerleşim"
+    },
+    "account": {
+      "title": "Hesap",
+      "current": "Hesap: {{name}}"
+    },
+    "notifications": {
+      "title": "Bildirimler",
+      "unread_count": "Okunmamış: {{count}}",
+      "all_read": "Hepsi okundu",
+      "tab_unread": "Okunmamış",
+      "tab_all": "Tümü",
+      "filter_label": "Bildirimleri filtrele",
+      "mark_all_read": "Tümünü okundu işaretle",
+      "mark_read": "Okundu işaretle",
+      "unread_prefix": "Okunmamış:",
+      "group_today": "Bugün",
+      "group_yesterday": "Dün",
+      "group_earlier": "Daha önce",
+      "none_unread": "Okunmamış bildirim yok."
+    },
+    "top_navigation": "Üst çubuk"
+  },
+  "settings_page": {
+    "save_reload": "Kaydet ve yeniden yükle",
+    "back_global": "Küresel ayarlara dön",
+    "back_service": "Servise dön",
+    "plugin": "Eklenti",
+    "scope": "Kapsam",
+    "scope_global": "Küresel ayarlar",
+    "select_plugin_label": "Eklenti seçin",
+    "select_scope_label": "Ayarlarının nerede düzenleneceğini seçin",
+    "card_title": "Ayarlar",
+    "count": "{{count}} ayar",
+    "count_filtered": "{{total}} ayardan {{shown}} tanesi",
+    "search": "Ayarlarda ara…",
+    "search_label": "Ayarlarda ara",
+    "no_match": "Aramanızla eşleşen ayar yok.",
+    "revert": "Geri al",
+    "revert_title": "Değişiklikleri geri al",
+    "revert_message": "Bu sayfadaki kaydedilmemiş tüm düzenlemeleri son kaydedilen değerlerine döndürür.",
+    "revert_confirm": "Tümünü geri al",
+    "alert_service": "Boş bırakılan ayarlar küresel varsayılanları kullanır. Değişiklikler yalnızca seçili servise uygulanır ve Kaydet ve yeniden yükle işleminden sonra geçerli olur.",
+    "alert_global": "Değişiklikler bunları geçersiz kılmayan her servise uygulanır ve Kaydet ve yeniden yükle işleminden sonra geçerli olur.",
+    "groups_link": "Kaynak gruplarını yönet",
+    "groups_link_hint": "Bu eklentinin ayarlarının başvurabileceği yeniden kullanılabilir IP, ağ ve ülke listeleri.",
+    "reload_alert_title": "Değişiklikler örneğin yeniden yüklenmesini tetikler.",
+    "reload_alert_body": "Kaydettiğinizde zamanlayıcı yapılandırmayı örneklerinize yeniden uygular."
+  },
+  "raw_page": {
+    "tiles_label": "Ham yapılandırma özeti",
+    "tile_settings": "Ayarlar",
+    "tile_plugins": "Eklentiler",
+    "tile_modified": "Değiştirilen",
+    "tile_problems": "Sorunlar",
+    "search": "Ara…",
+    "search_label": "Ham yapılandırmada ara",
+    "search_prev": "Önceki eşleşme",
+    "search_next": "Sonraki eşleşme"
+  },
+  "tables": {
+    "top": {
+      "share": "Pay",
+      "detail": "Ayrıntı"
     }
   }
 }

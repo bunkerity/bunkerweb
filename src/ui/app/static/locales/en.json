@@ -12,7 +12,26 @@
     "socials": "Socials",
     "tagline": "Powerful Protection, Simplified.",
     "title": "About BunkerWeb",
-    "version": "Version: {{version}}"
+    "version": "Version: {{version}}",
+    "releases": {
+      "title": "Recent releases",
+      "view_all": "View all"
+    },
+    "environment": {
+      "title": "Environment",
+      "copy": "Copy diagnostics",
+      "copied": "Copied",
+      "help": "Read from the Web UI host and the control plane. No variable, license key or database address is shown.",
+      "scope_ui_host": "Web UI host",
+      "scope_control_plane": "Control plane",
+      "scope_instances": "Instances",
+      "integration": "Integration",
+      "platform": "Platform",
+      "bunkerweb": "BunkerWeb",
+      "database": "Database server",
+      "registered": "Registered",
+      "instances_up": "{{up}} up of {{total}}"
+    }
   },
   "accordion": {
     "body": {
@@ -123,6 +142,10 @@
         "expiring": "Expiring ≤ 1 h",
         "expiring_caption": "Auto-rotating",
         "permanent": "Permanent bans"
+      },
+      "reasons": {
+        "head_reason": "Reason",
+        "meta": "{{count}} active bans"
       }
     },
     "flash": {
@@ -175,6 +198,30 @@
         "changed": "{{ip}}: the ban was renewed or replaced while the request ran, nothing was removed. Unban it again.",
         "partial": "{{ip}}: partly done. Run the unban again to finish: {{details}}"
       }
+    },
+    "page": {
+      "clear_all": "Clear all",
+      "import": "Import"
+    },
+    "clear_all": {
+      "title": "Clear all bans",
+      "message": "This removes every ban, on every service and instance. A CrowdSec ban is unbanned from its own row.",
+      "phrase": "clear all",
+      "confirm": "Clear all bans"
+    },
+    "import": {
+      "confirm_title": "Import bans",
+      "confirm_button": "Import",
+      "empty": "No valid ban found in this file. Expected one ban per line, IP[,scope[,duration[,reason]]], or a JSON list.",
+      "too_many": "This file holds more than {{max}} bans. Split it and import it in parts.",
+      "read_failed": "The file could not be read.",
+      "confirm_message": "Bans found in this file: {{count}}. Import them?",
+      "confirm_skipped": "Unreadable lines ignored: {{skipped}}."
+    },
+    "live": {
+      "on": "Auto-refresh on, every 10 seconds.",
+      "off": "Auto-refresh paused.",
+      "updated": "Bans updated: {{added}} new, {{removed}} expired."
     }
   },
   "breadcrumb": {
@@ -425,6 +472,39 @@
       "missing_configs_parameter_configs_delete": "Missing configs parameter on /configs/delete.",
       "missing_convert_parameter_configs_convert": "Missing convert_to parameter on /configs/convert.",
       "missing_configs_parameter_configs_convert": "Missing configs parameter on /configs/convert."
+    },
+    "console": {
+      "title": "Custom configs",
+      "new": "New config",
+      "edit": "Edit config",
+      "view": "View config",
+      "clone": "Clone config",
+      "files": "Files",
+      "types": "Config type",
+      "all_scopes": "All scopes",
+      "global_only": "Global only",
+      "service_only": "Service only",
+      "global_legend": "Global applies to every service.",
+      "service_legend": "Service applies to one service only.",
+      "select_file": "Select a file to preview its content.",
+      "no_files": "No config matches these filters.",
+      "full_view": "Full view",
+      "restore_view": "Restore view",
+      "download": "Download",
+      "lint": "Lint",
+      "lint_help": "Client-side hints only. Validate with nginx -t before deploying; multiline directives may produce warnings.",
+      "lint_clean": "No issues found by the client-side checks.",
+      "lint_warnings": "Client-side checks found {{count}} warnings. See editor annotations.",
+      "lint_skipped": "NGINX lint is unavailable for ModSecurity and CRS configs.",
+      "lint_semicolon": "Possible missing semicolon at end of directive.",
+      "lint_unexpected_brace": "Unexpected closing brace.",
+      "lint_brace": "Unclosed opening brace.",
+      "lint_quote": "Unclosed quote.",
+      "content": "Config content (read-only)",
+      "template_name_locked": "Renaming a template-based custom config is not allowed.",
+      "name_help": "Use letters, digits, dashes or underscores. The .conf suffix is added on disk.",
+      "editor_help": "Edit NGINX or ModSecurity content. Save with Ctrl+S or Command+S.",
+      "editor_title": "Configuration content"
     }
   },
   "country": {
@@ -764,6 +844,11 @@
       "top_blocked_ips": {
         "most_blocked": "Most Blocked IP",
         "title": "Top 10 Blocked IPs"
+      },
+      "legend": {
+        "item": "Item",
+        "count": "Count",
+        "share": "Share"
       }
     },
     "map": {
@@ -869,6 +954,12 @@
         "page_other": "All {{count}} templates on this page are selected.",
         "all_filtered": "Select all {{count}} matching templates",
         "all_done": "All {{count}} matching templates are selected."
+      },
+      "workflows": {
+        "page_one": "{{count}} workflow on this page is selected.",
+        "page_other": "All {{count}} workflows on this page are selected.",
+        "all_filtered": "Select all {{count}} matching workflows",
+        "all_done": "All {{count}} matching workflows are selected."
       }
     },
     "bulk_select_clear": "Clear selection",
@@ -988,7 +1079,15 @@
     "zero_records_plugins": "No matching Plugins found",
     "zero_records_reports": "No matching Reports found",
     "zero_records_services": "No matching Services found",
-    "zero_records_templates": "No matching Templates found"
+    "zero_records_templates": "No matching Templates found",
+    "info_empty_workflows": "No Workflows available",
+    "info_filtered_workflows": "(filtered from _MAX_ total Workflows)",
+    "info_workflows": "Showing {{start}} to {{end}} of {{total}} Workflows",
+    "length_menu_workflows": "Display _MENU_ Workflows",
+    "select_rows_workflows_0": "No Workflows selected",
+    "select_rows_workflows_1": "Selected 1 Workflow",
+    "select_rows_workflows_plural": "Selected %d Workflows",
+    "zero_records_workflows": "No matching Workflows found"
   },
   "dev_log": {
     "copy_failed": "Failed to copy text:",
@@ -1244,7 +1343,9 @@
     "history": {
       "end_date": "End Date",
       "start_date": "Start Date",
-      "success": "Success"
+      "success": "Success",
+      "duration": "Duration",
+      "error": "Error"
     }
   },
   "jobs": {
@@ -1262,6 +1363,10 @@
       "no_jobs_selected": "No jobs selected.",
       "error_fetching_jobs": "Error fetching jobs: {{message}}",
       "missing_jobs_parameter_jobs_run": "Missing jobs parameter on /jobs/run."
+    },
+    "card": {
+      "title": "Scheduled jobs",
+      "sub": "Run by the scheduler on their own interval, or on demand"
     }
   },
   "legend": {
@@ -1574,7 +1679,12 @@
     "system": "System",
     "edition_community": "Community",
     "edition_pro": "Pro",
-    "crowdsec": "CrowdSec"
+    "crowdsec": "CrowdSec",
+    "profile": "Profile",
+    "plugin_insights": "Plugin insights",
+    "plugins_overview": "Overview",
+    "filter_plugins": "Filter plugins…",
+    "no_plugin_match": "No plugin matches"
   },
   "news": {
     "image_alt": "News image",
@@ -1650,6 +1760,14 @@
         "no_content": "This plugin does not provide an embedded page.",
         "restricted_to_admins": "This plugin ships its own page, which runs plugin code. Only administrators can load it.",
         "dedicated_page_unavailable": "This plugin is managed on a dedicated page that isn't loaded yet. Restart the web UI to access it."
+      },
+      "empty": {
+        "metrics_title": "Metrics are off",
+        "restricted_title": "Administrators only",
+        "no_page_title": "No page to show",
+        "no_content_title": "Nothing to show yet",
+        "global_settings": "Global settings",
+        "deactivated_heading": "This plugin isn't used anywhere"
       }
     },
     "type": {
@@ -1727,7 +1845,10 @@
       "tab_all": "All",
       "tab_community": "Community",
       "tab_disabled": "Disabled",
-      "tab_enabled": "Enabled"
+      "tab_enabled": "Enabled",
+      "always_on_badge": "Always on",
+      "always_on_tip": "Core plugin required by BunkerWeb: it can be configured but not disabled.",
+      "filter_label": "Filter plugins"
     },
     "multivalue": {
       "more_value": "more value",
@@ -1763,6 +1884,15 @@
       "flash": {
         "version_unreadable": "Couldn't read the BunkerWeb version ({{current}}), so the compatibility of {{id}} cannot be checked; nothing was installed"
       }
+    },
+    "tier": {
+      "core": "CORE plugin",
+      "pro": "PRO plugin",
+      "community": "Community plugin"
+    },
+    "card": {
+      "configure": "Configure {{name}}",
+      "metrics": "{{name}} metrics"
     }
   },
   "pro": {
@@ -1886,7 +2016,9 @@
       "last_activity": "Last Activity",
       "os": "Operating System",
       "title": "Session",
-      "wipe_help": "End every other active session on your account. You'll stay signed in here."
+      "wipe_help": "End every other active session on your account. You'll stay signed in here.",
+      "recent_title": "Recent sessions",
+      "load_error": "Error loading data. Please try again."
     },
     "subtitle": "Manage your account, security and active sessions.",
     "tab": {
@@ -1937,7 +2069,8 @@
       "missing_current_password_parameter_profile_totp_3": "Missing current password parameter on /profile/totp-enable.",
       "missing_current_password_parameter_profile_totp_2": "Missing current password parameter on /profile/totp-disable.",
       "missing_current_password_parameter_profile_totp": "Missing current password parameter on /profile/totp-refresh."
-    }
+    },
+    "title": "Your profile"
   },
   "range_picker": {
     "1h": "Last hour",
@@ -2077,7 +2210,19 @@
     "upload_invalid": "Choose a valid public certificate and its matching private key.",
     "valid_days": "Validity in days",
     "valid_from": "Valid from",
-    "valid_to": "Valid until"
+    "valid_to": "Valid until",
+    "renew_due_short": "Renew due",
+    "select_all": "Select all certificates",
+    "issuers_meta": "{{count}} certificates",
+    "bulk": {
+      "renew": "Renew self-signed",
+      "download": "Download chains",
+      "delete": "Delete selected",
+      "none_eligible": "None of the selected certificates can take this action.",
+      "confirm_renew": "Self-signed certificates to renew: {{count}}. Continue?",
+      "confirm_delete": "Certificates to delete: {{count}}. This cannot be undone. Continue?",
+      "skipped": "Selected certificates that cannot take this action, skipped: {{skipped}}."
+    }
   },
   "crowdsec": {
     "reason": {
@@ -2661,6 +2806,20 @@
       "source_appsec": "AppSec inspection",
       "source_failure_policy": "AppSec failure policy",
       "technical_details": "Technical details"
+    },
+    "live": {
+      "on": "Auto-refresh on, every 10 seconds.",
+      "off": "Auto-refresh paused.",
+      "updated": "Reports updated: {{added}} new."
+    },
+    "offenders": {
+      "confirm_title": "Ban from the reports",
+      "confirm_one": "{{ip}} will be banned on every instance for 24 hours.",
+      "confirm_many": "{{count}} IP addresses will be banned on every instance for 24 hours.",
+      "show": "Show",
+      "show_top": "Top offenders",
+      "show_latest": "Latest offenders",
+      "show_bottom": "Bottom offenders"
     }
   },
   "scope": {
@@ -3084,7 +3243,8 @@
         "lets_encrypt": "Let's Encrypt",
         "zerossl": "ZeroSSL",
         "real_ip": "Real IP",
-        "reverse_proxy": "Reverse Proxy"
+        "reverse_proxy": "Reverse Proxy",
+        "server": "Server"
       },
       "subtitle": "Configure Web UI specific settings.",
       "title": "UI Settings"
@@ -3102,7 +3262,9 @@
       "pro_benefit_4_description": "Expert advice to optimize your BunkerWeb setup.",
       "pro_benefit_4_title": "Custom consulting",
       "subtitle": "Unlock advanced features and get the most out of BunkerWeb.",
-      "title": "Upgrade to PRO"
+      "title": "Upgrade to PRO",
+      "activate_title": "Activate a license",
+      "activation_note": "The license is activated when you complete the setup."
     },
     "step4": {
       "label": {
@@ -3136,6 +3298,19 @@
       "admin_email_too_long_must_less": "The admin email is too long. It must be less than 256 characters.",
       "admin_username_too_long_must_less": "The admin username is too long. It must be less than 256 characters.",
       "missing_either_one_following_parameters": "Missing either one of the following parameters: {{value}}."
+    },
+    "stepper_label": "Setup steps",
+    "complete": "Complete setup",
+    "from_ui_host": "From the UI_HOST environment variable",
+    "accordion": {
+      "general": "General",
+      "general_hint": "Server · Let's Encrypt",
+      "advanced": "Advanced",
+      "advanced_hint": "Reverse Proxy · Real IP · Custom Certificate"
+    },
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
     }
   },
   "status": {
@@ -3233,10 +3408,32 @@
         "button": "Download Bundle",
         "help": "Logs, plugin versions, environment and recent errors. Private data is anonymized.",
         "title": "Web UI Diagnostics"
+      },
+      "docs": {
+        "title": "Documentation"
+      },
+      "community": {
+        "title": "Community"
       }
     },
     "subtitle": "Download debug logs, extract your configuration, and get help from the BunkerWeb team.",
-    "title": "Support"
+    "title": "Support",
+    "docs": {
+      "quickstart": "Quickstart guide",
+      "web_ui": "Web UI guide",
+      "troubleshooting": "Troubleshooting",
+      "upgrading": "Upgrading"
+    },
+    "community": {
+      "discord": "Discord",
+      "discord_help": "Ask the community and the maintainers.",
+      "github": "GitHub issues",
+      "github_help": "Bug reports and feature requests.",
+      "reddit": "Reddit",
+      "reddit_help": "Discussions and announcements."
+    },
+    "attach_title": "Diagnostics to attach",
+    "attach_help": "Exports for a support request. They need the write permission and redact secrets."
   },
   "tab": {
     "custom_certificate": "Custom Certificate",
@@ -3547,7 +3744,19 @@
       "refused": "The template was not imported: {{reason}}",
       "too_large": "The template was not imported: the file is larger than 1 MiB",
       "unreadable": "The template was not imported: the file could not be read"
-    }
+    },
+    "features_builtin": "Built-in features",
+    "features_configs": "Custom configs",
+    "features_plugins": "Plugins",
+    "features_help": "What this template brings. Open the template to see or change the actual settings.",
+    "features_of": "Show the features of {{name}}",
+    "features_title": "Template features",
+    "managed_by": "Managed by {{owner}}: it cannot be changed or deleted here.",
+    "more_actions": "More actions for {{name}}",
+    "no_match": "No template matches this search.",
+    "open_template": "Open template",
+    "read_only": "Read-only",
+    "search": "Search templates..."
   },
   "theme": {
     "dark": "Dark",
@@ -3583,7 +3792,15 @@
     "open_live": "Live view",
     "updated": "Updated",
     "blocked_request": "blocked request",
-    "blocked_requests": "blocked requests"
+    "blocked_requests": "blocked requests",
+    "attacks_24h": "Blocked, last 24 hours",
+    "rolling_window": "Rolling window, refreshed about every 30 s",
+    "ticker_caption": "Most recent blocked requests",
+    "col_time": "Time",
+    "col_ip": "IP address",
+    "col_reason": "Reason",
+    "col_origin": "Origin",
+    "col_target": "Target"
   },
   "toast": {
     "autoconf_disclaimer_bold": "If the service is removed or restarted, your UI configuration will be lost.",
@@ -3981,7 +4198,26 @@
       "target_required": "The redirect target is required",
       "status_code_must_be_one_of": "The status code must be one of {{value}}",
       "at_least_one_service_required": "At least one service is required"
-    }
+    },
+    "all_codes": "All status codes",
+    "append_column": "Append URI",
+    "card_subtitle": "Path redirects and the services they apply to",
+    "count": "{{count}} redirect",
+    "count_plural": "{{count}} redirects",
+    "detach_shared": "This redirect is shared. Detaching it removes it from that service only; the other services keep it.",
+    "kpi_configured": "Configured redirects",
+    "kpi_detached_caption": "Attach to a service to take effect",
+    "kpi_loaded_only": "Among the first {{count}} loaded",
+    "kpi_permanent": "Permanent",
+    "kpi_permanent_caption": "301 or 308, cached by browsers",
+    "kpi_services": "Attached services",
+    "kpi_services_caption": "Services with at least one redirect",
+    "no_match": "No redirect matches these filters.",
+    "services_copy": "{{name}}: {{from}} → {{to}}",
+    "services_count": "{{count}} service",
+    "services_count_plural": "{{count}} services",
+    "services_title": "Services using this redirect",
+    "to_url_help": "A full http:// or https:// URL. Relative targets are not supported."
   },
   "upstreams": {
     "add_server": "Add server",
@@ -4059,7 +4295,34 @@
       "method_must_be_one_of": "The method must be one of {{value}}",
       "keepalive_must_be_positive_whole_number": "The keepalive count must be a positive whole number",
       "at_least_one_service_required": "At least one service is required"
-    }
+    },
+    "all_protocols": "All protocols",
+    "all_tls": "All TLS settings",
+    "card_subtitle": "Backend pools and the services that proxy to them",
+    "count": "{{count}} upstream",
+    "count_plural": "{{count}} upstreams",
+    "detach_shared": "This upstream is shared. Detaching it removes it from that service and path only; the other attachments keep it.",
+    "keepalive_off": "Off",
+    "kpi_loaded_only": "Among the first {{count}} loaded",
+    "kpi_not_attached": "{{count}} not attached",
+    "kpi_roles": "{{primary}} primary · {{backup}} backup · {{down}} down (configured)",
+    "kpi_services": "Attached services",
+    "kpi_services_caption": "Services proxying to a pool",
+    "kpi_tls": "TLS to backend",
+    "kpi_tls_caption": "Pools configured to talk TLS to their servers",
+    "members_copy": "{{name}}: {{count}} server",
+    "members_copy_plural": "{{name}}: {{count}} servers",
+    "members_title": "Servers in this upstream",
+    "no_match": "No upstream matches these filters.",
+    "servers_count": "{{count}} server",
+    "servers_count_plural": "{{count}} servers",
+    "services_copy": "{{name}}: {{servers}}",
+    "services_count": "{{count}} service",
+    "services_count_plural": "{{count}} services",
+    "services_title": "Services using this upstream",
+    "tls": "TLS to backend",
+    "tls_no": "Plain",
+    "tls_yes": "TLS"
   },
   "workflows": {
     "act_block": "Block",
@@ -4112,7 +4375,8 @@
       "moveRuleUp": "Move rule {{n}} up",
       "moveRuleDown": "Move rule {{n}} down",
       "moreActionsForRule": "More actions for rule {{n}}",
-      "ruleCard": "Rule {{n}} of {{total}} — {{name}}"
+      "ruleCard": "Rule {{n}} of {{total}} — {{name}}",
+      "ruleTools": "Actions for rule {{n}}"
     },
     "attach": "Attach to services",
     "attach_help": "Rules are only enforced on the services a workflow is attached to.",
@@ -4196,7 +4460,9 @@
       "enable": "Enable rule",
       "top": "Run first",
       "moveTo": "Move to position {{n}}",
-      "staysAt": "Stays at position {{n}}"
+      "staysAt": "Stays at position {{n}}",
+      "header": "Rule actions",
+      "order": "Order"
     },
     "move": {
       "first": "Run first",
@@ -4401,7 +4667,116 @@
       "too_many_services": "A workflow cannot be attached to more than {{value}} services",
       "name_required": "The workflow name is required",
       "service_list_not_read_reopen_page": "The service list could not be read; reopen the page and try again"
-    }
+    },
+    "port": {
+      "list_subtitle": "Rules and attached services for every workflow",
+      "row_details": "Workflow details",
+      "select_workflows": "Select workflows",
+      "created": "Created",
+      "updated": "Updated",
+      "total_rules": "{{count}} total",
+      "active_rules": "{{count}} active",
+      "more": "More actions for {{name}}",
+      "export_scope": "Table exports include filtered rows and visible columns. JSON exports include only selected canonical workflow definitions, keyed by id; no re-import contract.",
+      "export_definitions": "Selected definitions (JSON)",
+      "export_loading": "Reading selected workflow definitions…",
+      "export_done": "Selected definitions exported. This file has no re-import contract.",
+      "export_failed": "Export failed; no file downloaded.",
+      "detach_before_delete": "Detach this workflow from every service before deleting it. Deletion never detaches services automatically.",
+      "details": "Details",
+      "csv": "CSV",
+      "excel": "Excel",
+      "attachment": "Attachment",
+      "attachment_any": "Any",
+      "attachment_attached": "Attached",
+      "services_count": "Services: {{count}}",
+      "services_open": "Show the services attached to {{name}}",
+      "services_title": "Services attached to {{name}}",
+      "services_help": "Detaching removes this workflow from that service only. The workflow and its rules stay.",
+      "services_none": "This workflow is not attached to any service."
+    },
+    "shell": {
+      "tabs_label": "Workflows view",
+      "tab_overview": "Overview",
+      "tab_config": "Configuration",
+      "tab_unsaved": "Unsaved",
+      "config_needs_workflow": "Create a workflow to open its configuration",
+      "view_label": "View",
+      "pick_label": "Workflow",
+      "read_only": "Read-only",
+      "draft_title": "Unsaved changes in {{name}}",
+      "draft_switch_message": "Opening {{target}} would leave unsaved rule changes in {{name}}. Only one draft can be open at a time: save it, discard it, or stay.",
+      "draft_save": "Save and continue",
+      "draft_discard": "Discard changes",
+      "draft_save_failed": "Could not save the workflow; nothing was discarded.",
+      "draft_restored": "Unsaved changes to this workflow were restored. Save to apply them, or switch workflow to discard them.",
+      "draft_stale": "This workflow was saved elsewhere after your draft was started, so the draft was discarded."
+    },
+    "toolbar": {
+      "display": "Rule display",
+      "filters": "Filters",
+      "view": "Rule order view",
+      "simplified": "Simplified",
+      "detailed": "Detailed",
+      "limit_height": "Limit height",
+      "full_height": "Full height",
+      "expand_all": "Expand all",
+      "collapse_all": "Collapse all",
+      "actions": "Workflow actions",
+      "filter_rules": "Filter rules",
+      "filter_name": "Name",
+      "filter_name_placeholder": "Search by rule name…",
+      "filter_state": "State",
+      "any_state": "Any state",
+      "state_on": "Enabled",
+      "state_off": "Disabled",
+      "filter_action": "Action",
+      "any_action": "Any action",
+      "reset": "Reset",
+      "back_to_top": "Back to top",
+      "n_of_m": "{{shown}} of {{total}} rules",
+      "reorder_paused": "Reordering is paused while a filter hides rules.",
+      "no_match": "No rule matches these filters"
+    },
+    "inspector": {
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "cancel_title": "Cancel — restore the rule as it was when opened",
+      "apply_title": "Apply — keep these edits in the draft; the page Save is what stores them",
+      "cancelled": "Edits to rule {{n}} were cancelled; the rule is back as it was when opened."
+    },
+    "regex_help": "Two separate regex limits apply. Writing: the workflows attached to one service may hold at most 50 regex conditions in total, and a save or attach past that is refused. Running: each instance compiles at most WORKFLOWS_REGEX_BUDGET distinct regular expressions (default 512, shared by every workflow); a regex past that budget is not evaluated and answers UNKNOWN, so its rule cannot match.",
+    "conseq": {
+      "stop": "Stops the chain",
+      "skip": "Never runs"
+    },
+    "sum": {
+      "leaf": {
+        "ip": "IP",
+        "country": "country",
+        "asn": "ASN",
+        "method": "method"
+      },
+      "not": "not {{what}}",
+      "uri": "URI {{match}} {{value}}",
+      "isOne": "{{label}} is {{value}}",
+      "isOneOf": "{{label}} is one of {{values}}",
+      "challenge": "show the {{provider}} challenge",
+      "block": "block it",
+      "every": "every request",
+      "gate": "over {{count}} requests per {{window}}s per IP",
+      "crowdsec_source": "CrowdSec source",
+      "crowdsec_remediation": "CrowdSec remediation",
+      "group_ip": "IP is in group {{name}}",
+      "group_country": "country is in group {{name}}",
+      "group_asn": "ASN is in group {{name}}",
+      "redirect": "redirect to {{url}} ({{code}})",
+      "blockStatus": "block it with {{code}}"
+    },
+    "act_settings_block": "Block settings",
+    "act_settings_redirect": "Redirect settings",
+    "act_settings_challenge": "Challenge settings",
+    "act_settings_generic": "Action settings"
   },
   "request_path": {
     "client": "Client",
@@ -4495,7 +4870,33 @@
       "entry_invalid_value": "Entry {{index}} has an invalid value",
       "entry_comment_too_long": "Entry {{index}} has a comment that is too long",
       "source_required": "The source resource group is required"
-    }
+    },
+    "access": "Access",
+    "access_readonly": "Read-only",
+    "access_write": "Write",
+    "filter_values": "Filter values...",
+    "no_value_match": "No value matches this filter.",
+    "origin": "Origin",
+    "origin_plugin": "Shipped by the {{plugin}} plugin",
+    "origin_tip": {
+      "api": "Created or synced through the API.",
+      "autoconf": "Created by the autoconf controller.",
+      "download": "Downloaded from a remote source.",
+      "manual": "Created by hand or from a configuration file.",
+      "scheduler": "Created by the scheduler.",
+      "ui": "Created through the web UI.",
+      "wizard": "Created by the setup wizard; it stays editable."
+    },
+    "plugins_compatible": "Compatible plugins",
+    "plugins_compatible_help": "Plugins whose settings accept the kinds of values in this group. Actual references are listed under Usage.",
+    "updated": "Updated",
+    "values_compat": "Compatible with: {{plugins}}",
+    "values_copied": "Copied",
+    "values_title": "Values of {{name}}",
+    "view_values_of": "View values of {{name}}",
+    "all_kinds": "All",
+    "plugins_count": "{{count}} plugin",
+    "plugins_count_plural": "{{count}} plugins"
   },
   "validation": {
     "default_field_name": "This field",
@@ -4561,7 +4962,27 @@
       "error_fetching_web_cache_status": "Error fetching web cache status: {{message}}",
       "purged_for_url": "Web cache purged for {{url}}",
       "purged_all_entries": "Web cache purged (all entries)"
-    }
+    },
+    "server_side_note": "Server-side cache only. This page manages the reverse-proxy cache stored on each BunkerWeb instance. Responses already saved in visitors' browsers are not affected.",
+    "counters_window": "Since each instance restarted",
+    "counters_window_help": "They count since each instance last restarted, not over a fixed period.",
+    "status_desc": {
+      "hit": "Served directly from the cache",
+      "miss": "Not cached: fetched from the upstream and stored",
+      "bypass": "Caching skipped for this request",
+      "expired": "Time to live elapsed: refetched from the upstream",
+      "stale": "Served stale because the upstream was failing",
+      "updating": "Served stale while a refresh was in flight",
+      "revalidated": "Conditional refetch: the upstream said it is still valid"
+    },
+    "no_requests_for": "No requests for:",
+    "no_counters": "This instance has not counted a cached request yet.",
+    "available_tip": "The cache directory exists on this instance. Whether a service uses it is shown under Service enablement.",
+    "compact": "Compact",
+    "invalidate": "Invalidate",
+    "purge_a_url": "Purge a URL",
+    "danger_zone": "Danger zone",
+    "purge_all_phrase": "purge all"
   },
   "service": {
     "default_server": {
@@ -4652,7 +5073,18 @@
     "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet.",
     "flash": {
       "error_fetching_plugin_timings": "Error fetching plugin timings: {{message}}"
-    }
+    },
+    "phases_sub": "Time spent by each plugin in each phase",
+    "toolbar": "Timings table tools",
+    "columns": "Columns",
+    "export_csv": "Export CSV",
+    "all_phases": "All phases",
+    "search_placeholder": "Search plugin or phase…",
+    "caption": "Plugin timings per phase, sorted by total time by default",
+    "no_share": "No share",
+    "no_match": "No timing matches these filters",
+    "phase_label": {},
+    "no_share_hint": "This phase does not run once per request, so it has no share."
   },
   "whatsnew": {
     "missing_action": "Open the changelog on GitHub",
@@ -4669,6 +5101,117 @@
       "couldn_t_connect_redis": "Couldn't connect to redis",
       "missing_form": "Missing {{key}} in form",
       "invalid_request": "Invalid request"
+    }
+  },
+  "table_system": {
+    "filters": "Filters",
+    "advanced_filters": "Advanced filters",
+    "active_filters": "Filters, {{count}} active",
+    "filter": "Filter",
+    "any": "Any",
+    "visible_columns": "Visible columns",
+    "column_count": "{{visible}} of {{total}}",
+    "show_all": "Show all",
+    "multiple_actions": "Multiple actions for selected items",
+    "upload_hint": "Drag & drop or click to upload",
+    "confirm_title": "Confirm action",
+    "confirm": "Confirm",
+    "type_phrase": "Type {{phrase}} to confirm",
+    "leave_title": "Leave without saving?",
+    "leave_message": "Your unsaved changes will be lost.",
+    "leave": "Leave without saving",
+    "stay": "Keep editing"
+  },
+  "shell": {
+    "skip_to_content": "Skip to main content",
+    "main_navigation": "Main navigation",
+    "star_us": "Star BunkerWeb on GitHub",
+    "search": {
+      "placeholder": "Search pages, plugins, services…",
+      "label": "Search pages, plugins and services",
+      "results": "Search results",
+      "kind_page": "Page",
+      "kind_plugin": "Plugin",
+      "kind_service": "Service",
+      "no_match": "No match for “{{query}}”",
+      "status_results": "Results: {{count}}",
+      "loading_services": "Loading services…"
+    },
+    "language": {
+      "title": "Language"
+    },
+    "theme": {
+      "title": "Theme",
+      "system_hint": "follows your OS"
+    },
+    "contrast": {
+      "toggle": "High contrast"
+    },
+    "density": {
+      "toggle": "Compact density"
+    },
+    "account": {
+      "title": "Account",
+      "current": "Account: {{name}}"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "unread_count": "Unread: {{count}}",
+      "all_read": "All caught up",
+      "tab_unread": "Unread",
+      "tab_all": "All",
+      "filter_label": "Filter notifications",
+      "mark_all_read": "Mark all as read",
+      "mark_read": "Mark as read",
+      "unread_prefix": "Unread:",
+      "group_today": "Today",
+      "group_yesterday": "Yesterday",
+      "group_earlier": "Earlier",
+      "none_unread": "No unread notifications."
+    },
+    "top_navigation": "Top bar"
+  },
+  "settings_page": {
+    "save_reload": "Save & reload",
+    "back_global": "Back to global settings",
+    "back_service": "Back to service",
+    "plugin": "Plugin",
+    "scope": "Scope",
+    "scope_global": "Global settings",
+    "select_plugin_label": "Choose a plugin",
+    "select_scope_label": "Choose where to edit its settings",
+    "card_title": "Settings",
+    "count": "{{count}} settings",
+    "count_filtered": "{{shown}} of {{total}} settings",
+    "search": "Search settings…",
+    "search_label": "Search settings",
+    "no_match": "No setting matches your search.",
+    "revert": "Revert",
+    "revert_title": "Revert changes",
+    "revert_message": "This reverts every unsaved edit on this page to its last saved value.",
+    "revert_confirm": "Revert all",
+    "alert_service": "Settings left empty fall back to the global defaults. Changes apply to the selected service only and take effect after Save & reload.",
+    "alert_global": "Changes apply to every service that does not override them and take effect after Save & reload.",
+    "groups_link": "Manage resource groups",
+    "groups_link_hint": "Reusable lists of IPs, networks and countries that this plugin's settings can reference.",
+    "reload_alert_title": "Changes trigger an instance reload.",
+    "reload_alert_body": "The scheduler reapplies the configuration to your instances once you save."
+  },
+  "raw_page": {
+    "tiles_label": "Raw configuration summary",
+    "tile_settings": "Settings",
+    "tile_plugins": "Plugins",
+    "tile_modified": "Modified",
+    "tile_problems": "Problems",
+    "search": "Search…",
+    "search_label": "Search the raw configuration",
+    "search_prev": "Previous match",
+    "search_next": "Next match"
+  },
+  "tables": {
+    "top": {
+      "share": "Share",
+      "detail": "Detail"
     }
   }
 }

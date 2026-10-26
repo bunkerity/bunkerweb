@@ -12,7 +12,26 @@
     "socials": "Redes Sociais",
     "tagline": "Proteção Poderosa, Simplificada",
     "title": "Sobre o BunkerWeb",
-    "version": "Versão: {{version}}"
+    "version": "Versão: {{version}}",
+    "releases": {
+      "title": "Versões recentes",
+      "view_all": "Ver todas"
+    },
+    "environment": {
+      "title": "Ambiente",
+      "copy": "Copiar diagnósticos",
+      "copied": "Copiado",
+      "help": "Informações lidas do host da interface web e do plano de controle. Nenhuma variável, chave de licença ou endereço de banco de dados é exibido.",
+      "scope_ui_host": "Host da interface web",
+      "scope_control_plane": "Plano de controle",
+      "scope_instances": "Instâncias",
+      "integration": "Integração",
+      "platform": "Plataforma",
+      "bunkerweb": "BunkerWeb",
+      "database": "Servidor de banco de dados",
+      "registered": "Registrado",
+      "instances_up": "{{up}} ativas de {{total}}"
+    }
   },
   "accordion": {
     "body": {
@@ -123,6 +142,10 @@
         "expiring": "Expiram em ≤ 1 h",
         "expiring_caption": "Rotação automática",
         "permanent": "Banimentos permanentes"
+      },
+      "reasons": {
+        "head_reason": "Motivo",
+        "meta": "{{count}} bloqueios ativos"
       }
     },
     "flash": {
@@ -175,6 +198,30 @@
         "changed": "{{ip}}: o banimento foi renovado ou substituído durante a requisição, nada foi removido. Desbana-o novamente.",
         "partial": "{{ip}}: feito parcialmente. Execute o desbanimento novamente para concluir: {{details}}"
       }
+    },
+    "page": {
+      "clear_all": "Limpar todos",
+      "import": "Importar"
+    },
+    "clear_all": {
+      "title": "Limpar todos os bloqueios",
+      "message": "Esta ação remove todos os bloqueios de todos os serviços e instâncias. Os bloqueios do CrowdSec são removidos pela própria linha.",
+      "phrase": "limpar todos",
+      "confirm": "Limpar todos os bloqueios"
+    },
+    "import": {
+      "confirm_title": "Importar bloqueios",
+      "confirm_button": "Importar",
+      "empty": "Nenhum bloqueio válido foi encontrado neste arquivo. O formato esperado é um bloqueio por linha, IP[,scope[,duration[,reason]]], ou uma lista JSON.",
+      "too_many": "Este arquivo contém mais de {{max}} bloqueios. Divida-o e importe-o por partes.",
+      "read_failed": "Não foi possível ler o arquivo.",
+      "confirm_message": "Bloqueios encontrados neste arquivo: {{count}}. Importar?",
+      "confirm_skipped": "Linhas ilegíveis ignoradas: {{skipped}}."
+    },
+    "live": {
+      "on": "Atualização automática ativa, a cada 10 segundos.",
+      "off": "Atualização automática pausada.",
+      "updated": "Bloqueios atualizados: {{added}} novos, {{removed}} expirados."
     }
   },
   "breadcrumb": {
@@ -425,6 +472,39 @@
       "missing_configs_parameter_configs_delete": "Parâmetro configs ausente em /configs/delete.",
       "missing_convert_parameter_configs_convert": "Parâmetro convert_to ausente em /configs/convert.",
       "missing_configs_parameter_configs_convert": "Parâmetro configs ausente em /configs/convert."
+    },
+    "console": {
+      "title": "Configurações personalizadas",
+      "new": "Nova configuração",
+      "edit": "Editar configuração",
+      "view": "Ver configuração",
+      "clone": "Clonar configuração",
+      "files": "Arquivos",
+      "types": "Tipo de configuração",
+      "all_scopes": "Todos os escopos",
+      "global_only": "Somente global",
+      "service_only": "Somente serviço",
+      "global_legend": "Global se aplica a todos os serviços.",
+      "service_legend": "Serviço se aplica a um único serviço.",
+      "select_file": "Selecione um arquivo para visualizar seu conteúdo.",
+      "no_files": "Nenhuma configuração corresponde a estes filtros.",
+      "full_view": "Visualização completa",
+      "restore_view": "Restaurar visualização",
+      "download": "Baixar",
+      "lint": "Verificar sintaxe",
+      "lint_help": "Somente sugestões do lado do cliente. Valide com nginx -t antes de implantar. Diretivas de várias linhas podem gerar avisos.",
+      "lint_clean": "As verificações do lado do cliente não encontraram problemas.",
+      "lint_warnings": "As verificações do lado do cliente encontraram {{count}} avisos. Consulte as anotações do editor.",
+      "lint_skipped": "A verificação de sintaxe NGINX não está disponível para configurações ModSecurity e CRS.",
+      "lint_semicolon": "Possível ponto e vírgula ausente no final da diretiva.",
+      "lint_unexpected_brace": "Chave de fechamento inesperada.",
+      "lint_brace": "Chave de abertura não fechada.",
+      "lint_quote": "Aspas não fechadas.",
+      "content": "Conteúdo da configuração (somente leitura)",
+      "template_name_locked": "Não é permitido renomear uma configuração personalizada baseada em um modelo.",
+      "name_help": "Use letras, dígitos, hífens ou sublinhados. O sufixo .conf é adicionado no disco.",
+      "editor_help": "Edite o conteúdo NGINX ou ModSecurity. Salve com Ctrl+S ou Command+S.",
+      "editor_title": "Conteúdo da configuração"
     }
   },
   "country": {
@@ -764,6 +844,11 @@
       "top_blocked_ips": {
         "most_blocked": "IP mais bloqueado",
         "title": "Top 10 IPs Bloqueados"
+      },
+      "legend": {
+        "item": "Item",
+        "count": "Contagem",
+        "share": "Proporção"
       }
     },
     "map": {
@@ -869,6 +954,12 @@
         "page_other": "Todos os {{count}} modelos nesta página estão selecionados.",
         "all_filtered": "Selecionar todos os {{count}} modelos correspondentes",
         "all_done": "Todos os {{count}} modelos correspondentes estão selecionados."
+      },
+      "workflows": {
+        "page_one": "{{count}} fluxo de trabalho nesta página está selecionado.",
+        "page_other": "Todos os {{count}} fluxos de trabalho nesta página estão selecionados.",
+        "all_filtered": "Selecionar todos os {{count}} fluxos de trabalho correspondentes",
+        "all_done": "Todos os {{count}} fluxos de trabalho correspondentes estão selecionados."
       }
     },
     "bulk_select_clear": "Limpar seleção",
@@ -988,7 +1079,15 @@
     "zero_records_plugins": "Nenhum Plugin correspondente encontrado",
     "zero_records_reports": "Nenhum Relatório correspondente encontrado",
     "zero_records_services": "Nenhum Serviço correspondente encontrado",
-    "zero_records_templates": "Nenhum Modelo correspondente encontrado"
+    "zero_records_templates": "Nenhum Modelo correspondente encontrado",
+    "info_empty_workflows": "Nenhum Fluxo de trabalho disponível",
+    "info_filtered_workflows": "(filtrado de _MAX_ Fluxos de trabalho totais)",
+    "info_workflows": "Mostrando de {{start}} a {{end}} de {{total}} Fluxos de trabalho",
+    "length_menu_workflows": "Mostrar _MENU_ Fluxos de trabalho",
+    "select_rows_workflows_0": "Nenhum Fluxo de trabalho selecionado",
+    "select_rows_workflows_1": "1 Fluxo de trabalho selecionado",
+    "select_rows_workflows_plural": "%d Fluxos de trabalho selecionados",
+    "zero_records_workflows": "Nenhum Fluxo de trabalho correspondente encontrado"
   },
   "dev_log": {
     "copy_failed": "Falha ao copiar texto:",
@@ -1244,7 +1343,9 @@
     "history": {
       "end_date": "Data Final",
       "start_date": "Data de Início",
-      "success": "Sucesso"
+      "success": "Sucesso",
+      "duration": "Duração",
+      "error": "Erro"
     }
   },
   "jobs": {
@@ -1262,6 +1363,10 @@
       "no_jobs_selected": "Nenhuma tarefa selecionada.",
       "error_fetching_jobs": "Erro ao buscar as tarefas: {{message}}",
       "missing_jobs_parameter_jobs_run": "Parâmetro jobs ausente em /jobs/run."
+    },
+    "card": {
+      "title": "Tarefas agendadas",
+      "sub": "Executadas pelo agendador em seu próprio intervalo ou sob demanda"
     }
   },
   "legend": {
@@ -1574,7 +1679,12 @@
     "system": "Sistema",
     "edition_community": "Comunidade",
     "edition_pro": "Pro",
-    "crowdsec": "CrowdSec"
+    "crowdsec": "CrowdSec",
+    "profile": "Perfil",
+    "plugin_insights": "Estatísticas dos plugins",
+    "plugins_overview": "Visão geral",
+    "filter_plugins": "Filtrar plugins…",
+    "no_plugin_match": "Nenhum plugin correspondente"
   },
   "news": {
     "image_alt": "Imagem da notícia",
@@ -1650,6 +1760,14 @@
         "no_content": "Este plugin não fornece uma página incorporada.",
         "restricted_to_admins": "Este plugin possui sua própria página, que executa o código do plugin. Apenas administradores podem carregá-lo.",
         "dedicated_page_unavailable": "Este plugin é gerenciado em uma página dedicada que ainda não foi carregada. Reinicie a interface web para acessá-la."
+      },
+      "empty": {
+        "metrics_title": "As métricas estão desativadas",
+        "restricted_title": "Somente administradores",
+        "no_page_title": "Nenhuma página para mostrar",
+        "no_content_title": "Ainda não há nada para mostrar",
+        "global_settings": "Configurações globais",
+        "deactivated_heading": "Este plugin não é usado em nenhum lugar"
       }
     },
     "type": {
@@ -1727,7 +1845,10 @@
       "tab_all": "Todos",
       "tab_community": "Comunidade",
       "tab_disabled": "Desativado",
-      "tab_enabled": "Ativado"
+      "tab_enabled": "Ativado",
+      "always_on_badge": "Sempre ativo",
+      "always_on_tip": "Plugin de base exigido pelo BunkerWeb: pode ser configurado, mas não desativado.",
+      "filter_label": "Filtrar plugins"
     },
     "multivalue": {
       "more_value": "mais valor",
@@ -1763,6 +1884,15 @@
       "flash": {
         "version_unreadable": "Não foi possível ler a versão do BunkerWeb ({{current}}), portanto a compatibilidade de {{id}} não pode ser verificada; nada foi instalado"
       }
+    },
+    "tier": {
+      "core": "Plugin CORE",
+      "pro": "Plugin PRO",
+      "community": "Plugin da comunidade"
+    },
+    "card": {
+      "configure": "Configurar {{name}}",
+      "metrics": "Métricas de {{name}}"
     }
   },
   "pro": {
@@ -1886,7 +2016,9 @@
       "last_activity": "Última Atividade",
       "os": "Sistema Operacional",
       "title": "Sessão",
-      "wipe_help": "Encerrar todas as outras sessões ativas na sua conta. Você permanecerá logado aqui."
+      "wipe_help": "Encerrar todas as outras sessões ativas na sua conta. Você permanecerá logado aqui.",
+      "recent_title": "Sessões recentes",
+      "load_error": "Erro ao carregar os dados. Tente novamente."
     },
     "subtitle": "Gerenciar sua conta, segurança e sessões ativas.",
     "tab": {
@@ -1937,7 +2069,8 @@
       "missing_current_password_parameter_profile_totp_3": "Parâmetro current password ausente em /profile/totp-enable.",
       "missing_current_password_parameter_profile_totp_2": "Parâmetro current password ausente em /profile/totp-disable.",
       "missing_current_password_parameter_profile_totp": "Parâmetro current password ausente em /profile/totp-refresh."
-    }
+    },
+    "title": "Seu perfil"
   },
   "range_picker": {
     "1h": "Última hora",
@@ -2017,6 +2150,20 @@
       "source_appsec": "Inspeção do AppSec",
       "source_failure_policy": "Política de falha do AppSec",
       "technical_details": "Detalhes técnicos"
+    },
+    "live": {
+      "on": "Atualização automática ativa, a cada 10 segundos.",
+      "off": "Atualização automática pausada.",
+      "updated": "Relatórios atualizados: {{added}} novos."
+    },
+    "offenders": {
+      "confirm_title": "Bloquear pelos relatórios",
+      "confirm_one": "{{ip}} será bloqueado em todas as instâncias por 24 horas.",
+      "confirm_many": "{{count}} endereços IP serão bloqueados em todas as instâncias por 24 horas.",
+      "show": "Mostrar",
+      "show_top": "Infratores mais frequentes",
+      "show_latest": "Infratores mais recentes",
+      "show_bottom": "Infratores menos frequentes"
     }
   },
   "scope": {
@@ -2440,7 +2587,8 @@
         "lets_encrypt": "Let's Encrypt",
         "zerossl": "ZeroSSL",
         "real_ip": "IP Real",
-        "reverse_proxy": "Proxy Reverso"
+        "reverse_proxy": "Proxy Reverso",
+        "server": "Servidor"
       },
       "subtitle": "Configure as configurações específicas da interface web.",
       "title": "Configurações da UI"
@@ -2458,7 +2606,9 @@
       "pro_benefit_4_description": "Aconselhamento especializado para otimizar sua configuração do BunkerWeb.",
       "pro_benefit_4_title": "Consultoria personalizada",
       "subtitle": "Desbloqueie recursos avançados e aproveite ao máximo o BunkerWeb.",
-      "title": "Atualizar para PRO"
+      "title": "Atualizar para PRO",
+      "activate_title": "Ativar uma licença",
+      "activation_note": "A licença é ativada quando você conclui a configuração."
     },
     "step4": {
       "label": {
@@ -2492,6 +2642,19 @@
       "admin_email_too_long_must_less": "O e-mail do administrador é muito longo. Deve ter menos de 256 caracteres.",
       "admin_username_too_long_must_less": "O nome de usuário administrador é muito longo. Deve ter menos de 256 caracteres.",
       "missing_either_one_following_parameters": "Está faltando um dos seguintes parâmetros: {{value}}."
+    },
+    "stepper_label": "Etapas de configuração",
+    "complete": "Concluir configuração",
+    "from_ui_host": "Da variável de ambiente UI_HOST",
+    "accordion": {
+      "general": "Geral",
+      "general_hint": "Servidor · Let's Encrypt",
+      "advanced": "Avançado",
+      "advanced_hint": "Proxy reverso · IP real · Certificado personalizado"
+    },
+    "switch": {
+      "enabled": "Ativado",
+      "disabled": "Desativado"
     }
   },
   "status": {
@@ -2589,10 +2752,32 @@
         "button": "Baixar pacote",
         "help": "Logs, versões dos plugins, ambiente e erros recentes. Os dados privados são anonimizados.",
         "title": "Diagnóstico da Web UI"
+      },
+      "docs": {
+        "title": "Documentação"
+      },
+      "community": {
+        "title": "Comunidade"
       }
     },
     "subtitle": "Baixe os logs de depuração, extraia sua configuração e obtenha ajuda da equipe do BunkerWeb.",
-    "title": "Suporte"
+    "title": "Suporte",
+    "docs": {
+      "quickstart": "Guia de início rápido",
+      "web_ui": "Guia da interface web",
+      "troubleshooting": "Solução de problemas",
+      "upgrading": "Atualização"
+    },
+    "community": {
+      "discord": "Discord",
+      "discord_help": "Pergunte à comunidade e aos mantenedores.",
+      "github": "Issues do GitHub",
+      "github_help": "Relatórios de erros e solicitações de funcionalidades.",
+      "reddit": "Reddit",
+      "reddit_help": "Discussões e anúncios."
+    },
+    "attach_title": "Diagnósticos para anexar",
+    "attach_help": "Exportações para uma solicitação de suporte. Exigem permissão de escrita e ocultam segredos."
   },
   "tab": {
     "custom_certificate": "Certificado Personalizado",
@@ -2903,7 +3088,19 @@
       "refused": "O modelo não foi importado: {{reason}}",
       "too_large": "O modelo não foi importado: o arquivo é maior do que 1 MiB",
       "unreadable": "O modelo não foi importado: não foi possível ler o arquivo"
-    }
+    },
+    "features_builtin": "Funcionalidades integradas",
+    "features_configs": "Configurações personalizadas",
+    "features_plugins": "Plugins",
+    "features_help": "O que este modelo oferece. Abra o modelo para ver ou alterar as configurações reais.",
+    "features_of": "Mostrar as funcionalidades de {{name}}",
+    "features_title": "Funcionalidades do modelo",
+    "managed_by": "Gerenciado por {{owner}}: não pode ser alterado nem excluído aqui.",
+    "more_actions": "Mais ações para {{name}}",
+    "no_match": "Nenhum modelo corresponde a esta pesquisa.",
+    "open_template": "Abrir modelo",
+    "read_only": "Somente leitura",
+    "search": "Pesquisar modelos..."
   },
   "theme": {
     "dark": "Escuro",
@@ -2939,7 +3136,15 @@
     "open_live": "Visualização ao vivo",
     "updated": "Atualizado",
     "blocked_request": "solicitação bloqueada",
-    "blocked_requests": "solicitações bloqueadas"
+    "blocked_requests": "solicitações bloqueadas",
+    "attacks_24h": "Bloqueados nas últimas 24 horas",
+    "rolling_window": "Janela deslizante, atualizada aproximadamente a cada 30 s",
+    "ticker_caption": "Requisições bloqueadas mais recentes",
+    "col_time": "Hora",
+    "col_ip": "Endereço IP",
+    "col_reason": "Motivo",
+    "col_origin": "Origem",
+    "col_target": "Destino"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Se o serviço for removido ou reiniciado, sua configuração da UI será perdida.",
@@ -3411,7 +3616,19 @@
     "upload_invalid": "Escolha um certificado público válido e sua chave privada correspondente.",
     "valid_days": "Validade em dias",
     "valid_from": "Válido a partir de",
-    "valid_to": "Válido até"
+    "valid_to": "Válido até",
+    "renew_due_short": "Renovar pendentes",
+    "select_all": "Selecionar todos os certificados",
+    "issuers_meta": "{{count}} certificados",
+    "bulk": {
+      "renew": "Renovar autoassinados",
+      "download": "Baixar cadeias",
+      "delete": "Excluir selecionados",
+      "none_eligible": "Nenhum dos certificados selecionados permite esta ação.",
+      "confirm_renew": "Certificados autoassinados a renovar: {{count}}. Continuar?",
+      "confirm_delete": "Certificados a excluir: {{count}}. Esta ação não pode ser desfeita. Continuar?",
+      "skipped": "Certificados selecionados que não permitem esta ação, ignorados: {{skipped}}."
+    }
   },
   "redirects": {
     "all": "Todos",
@@ -3469,7 +3686,26 @@
       "target_required": "O destino do redirecionamento é obrigatório",
       "status_code_must_be_one_of": "O código de status deve ser um dos seguintes: {{value}}",
       "at_least_one_service_required": "É necessário pelo menos um serviço"
-    }
+    },
+    "all_codes": "Todos os códigos de status",
+    "append_column": "Adicionar URI",
+    "card_subtitle": "Redirecionamentos de caminhos e serviços aos quais se aplicam",
+    "count": "{{count}} redirecionamento",
+    "count_plural": "{{count}} redirecionamentos",
+    "detach_shared": "Este redirecionamento é compartilhado. Desassociá-lo remove apenas sua associação com este serviço. Os outros serviços o mantêm.",
+    "kpi_configured": "Redirecionamentos configurados",
+    "kpi_detached_caption": "Associe a um serviço para produzir efeito",
+    "kpi_loaded_only": "Entre os primeiros {{count}} carregados",
+    "kpi_permanent": "Permanentes",
+    "kpi_permanent_caption": "301 ou 308, armazenados em cache pelos navegadores",
+    "kpi_services": "Serviços associados",
+    "kpi_services_caption": "Serviços com pelo menos um redirecionamento",
+    "no_match": "Nenhum redirecionamento corresponde a estes filtros.",
+    "services_copy": "{{name}}: {{from}} → {{to}}",
+    "services_count": "{{count}} serviço",
+    "services_count_plural": "{{count}} serviços",
+    "services_title": "Serviços que usam este redirecionamento",
+    "to_url_help": "Uma URL http:// ou https:// completa. Destinos relativos não são suportados."
   },
   "upstreams": {
     "add_server": "Adicionar servidor",
@@ -3547,7 +3783,34 @@
       "method_must_be_one_of": "O método deve ser um dos seguintes: {{value}}",
       "keepalive_must_be_positive_whole_number": "O número de keepalive deve ser um número inteiro positivo",
       "at_least_one_service_required": "É necessário pelo menos um serviço"
-    }
+    },
+    "all_protocols": "Todos os protocolos",
+    "all_tls": "Todas as configurações TLS",
+    "card_subtitle": "Grupos de servidores de backend e serviços que encaminham requisições a eles por proxy",
+    "count": "{{count}} servidor upstream",
+    "count_plural": "{{count}} servidores upstream",
+    "detach_shared": "Este servidor upstream é compartilhado. Desassociá-lo remove apenas sua associação com este serviço e caminho. As outras associações o mantêm.",
+    "keepalive_off": "Desativado",
+    "kpi_loaded_only": "Entre os primeiros {{count}} carregados",
+    "kpi_not_attached": "{{count}} não associados",
+    "kpi_roles": "{{primary}} principais · {{backup}} de reserva · {{down}} inativos (configurados)",
+    "kpi_services": "Serviços associados",
+    "kpi_services_caption": "Serviços que encaminham requisições para um grupo por proxy",
+    "kpi_tls": "TLS para o backend",
+    "kpi_tls_caption": "Grupos configurados para se comunicar por TLS com seus servidores",
+    "members_copy": "{{name}}: {{count}} servidor",
+    "members_copy_plural": "{{name}}: {{count}} servidores",
+    "members_title": "Servidores neste servidor upstream",
+    "no_match": "Nenhum servidor upstream corresponde a estes filtros.",
+    "servers_count": "{{count}} servidor",
+    "servers_count_plural": "{{count}} servidores",
+    "services_copy": "{{name}}: {{servers}}",
+    "services_count": "{{count}} serviço",
+    "services_count_plural": "{{count}} serviços",
+    "services_title": "Serviços que usam este servidor upstream",
+    "tls": "TLS para o backend",
+    "tls_no": "Sem criptografia",
+    "tls_yes": "TLS"
   },
   "workflows": {
     "act_block": "Bloquear",
@@ -3600,7 +3863,8 @@
       "moveRuleUp": "Mover a regra {{n}} para cima",
       "moveRuleDown": "Mover a regra {{n}} para baixo",
       "moreActionsForRule": "Mais ações para a regra {{n}}",
-      "ruleCard": "Regra {{n}} de {{total}} — {{name}}"
+      "ruleCard": "Regra {{n}} de {{total}} — {{name}}",
+      "ruleTools": "Ações da regra {{n}}"
     },
     "attach": "Anexar a serviços",
     "attach_help": "As regras são aplicadas apenas aos serviços aos quais o fluxo de trabalho está anexado.",
@@ -3684,7 +3948,9 @@
       "enable": "Ativar regra",
       "top": "Executar primeiro",
       "moveTo": "Mover para a posição {{n}}",
-      "staysAt": "Permanece na posição {{n}}"
+      "staysAt": "Permanece na posição {{n}}",
+      "header": "Ações da regra",
+      "order": "Ordem"
     },
     "move": {
       "first": "Executar primeiro",
@@ -3889,7 +4155,116 @@
       "too_many_services": "Um fluxo de trabalho não pode ser associado a mais de {{value}} serviços",
       "name_required": "O nome do fluxo de trabalho é obrigatório",
       "service_list_not_read_reopen_page": "Não foi possível ler a lista de serviços; reabra a página e tente novamente"
-    }
+    },
+    "port": {
+      "list_subtitle": "Regras e serviços associados a cada fluxo de trabalho",
+      "row_details": "Detalhes do fluxo de trabalho",
+      "select_workflows": "Selecionar fluxos de trabalho",
+      "created": "Criado",
+      "updated": "Atualizado",
+      "total_rules": "{{count}} no total",
+      "active_rules": "{{count}} ativas",
+      "more": "Mais ações para {{name}}",
+      "export_scope": "As exportações da tabela incluem as linhas filtradas e as colunas visíveis. As exportações JSON incluem apenas as definições canônicas dos fluxos de trabalho selecionados, indexadas por id. Não há garantia de reimportação.",
+      "export_definitions": "Definições selecionadas (JSON)",
+      "export_loading": "Lendo as definições dos fluxos de trabalho selecionados…",
+      "export_done": "Definições selecionadas exportadas. Este arquivo não tem garantia de reimportação.",
+      "export_failed": "A exportação falhou. Nenhum arquivo foi baixado.",
+      "detach_before_delete": "Desassocie este fluxo de trabalho de todos os serviços antes de excluí-lo. A exclusão nunca desassocia os serviços automaticamente.",
+      "details": "Detalhes",
+      "csv": "CSV",
+      "excel": "Excel",
+      "attachment": "Associação",
+      "attachment_any": "Qualquer",
+      "attachment_attached": "Associado",
+      "services_count": "Serviços: {{count}}",
+      "services_open": "Mostrar os serviços associados a {{name}}",
+      "services_title": "Serviços associados a {{name}}",
+      "services_help": "A desassociação remove este fluxo de trabalho apenas daquele serviço. O fluxo de trabalho e suas regras permanecem.",
+      "services_none": "Este fluxo de trabalho não está associado a nenhum serviço."
+    },
+    "shell": {
+      "tabs_label": "Visualização de fluxos de trabalho",
+      "tab_overview": "Visão geral",
+      "tab_config": "Configuração",
+      "tab_unsaved": "Não salvo",
+      "config_needs_workflow": "Crie um fluxo de trabalho para abrir sua configuração",
+      "view_label": "Visualização",
+      "pick_label": "Fluxo de trabalho",
+      "read_only": "Somente leitura",
+      "draft_title": "Alterações não salvas em {{name}}",
+      "draft_switch_message": "Abrir {{target}} deixaria alterações de regras não salvas em {{name}}. Apenas um rascunho pode estar aberto por vez: salve-o, descarte-o ou permaneça aqui.",
+      "draft_save": "Salvar e continuar",
+      "draft_discard": "Descartar alterações",
+      "draft_save_failed": "Não foi possível salvar o fluxo de trabalho. Nada foi descartado.",
+      "draft_restored": "As alterações não salvas deste fluxo de trabalho foram restauradas. Salve para aplicá-las ou mude de fluxo de trabalho para descartá-las.",
+      "draft_stale": "Este fluxo de trabalho foi salvo em outro lugar após o início do seu rascunho, por isso o rascunho foi descartado."
+    },
+    "toolbar": {
+      "display": "Exibição das regras",
+      "filters": "Filtros",
+      "view": "Visualização da ordem das regras",
+      "simplified": "Simplificada",
+      "detailed": "Detalhada",
+      "limit_height": "Limitar altura",
+      "full_height": "Altura completa",
+      "expand_all": "Expandir tudo",
+      "collapse_all": "Recolher tudo",
+      "actions": "Ações do fluxo de trabalho",
+      "filter_rules": "Filtrar regras",
+      "filter_name": "Nome",
+      "filter_name_placeholder": "Pesquisar pelo nome da regra…",
+      "filter_state": "Estado",
+      "any_state": "Qualquer estado",
+      "state_on": "Ativada",
+      "state_off": "Desativada",
+      "filter_action": "Ação",
+      "any_action": "Qualquer ação",
+      "reset": "Redefinir",
+      "back_to_top": "Voltar ao topo",
+      "n_of_m": "{{shown}} de {{total}} regras",
+      "reorder_paused": "A reordenação está pausada enquanto um filtro oculta regras.",
+      "no_match": "Nenhuma regra corresponde a estes filtros"
+    },
+    "inspector": {
+      "apply": "Aplicar",
+      "cancel": "Cancelar",
+      "cancel_title": "Cancelar: restaurar a regra ao estado em que estava quando foi aberta",
+      "apply_title": "Aplicar: manter estas alterações no rascunho. O botão Salvar da página é o que as armazena",
+      "cancelled": "As alterações na regra {{n}} foram canceladas. A regra voltou ao estado em que estava quando foi aberta."
+    },
+    "regex_help": "São aplicados dois limites distintos de regex. Na escrita: os fluxos de trabalho associados a um serviço podem conter no máximo 50 condições regex no total. Qualquer salvamento ou associação que ultrapasse esse limite é recusado. Na execução: cada instância compila no máximo WORKFLOWS_REGEX_BUDGET expressões regulares distintas (512 por padrão, compartilhadas por todos os fluxos de trabalho). Uma regex que ultrapasse esse limite não é avaliada e retorna UNKNOWN, por isso sua regra não pode corresponder.",
+    "conseq": {
+      "stop": "Interrompe a cadeia",
+      "skip": "Nunca é executada"
+    },
+    "sum": {
+      "leaf": {
+        "ip": "o IP",
+        "country": "o país",
+        "asn": "o ASN",
+        "method": "o método"
+      },
+      "not": "a condição «{{what}}» não for satisfeita",
+      "uri": "o URI atender à condição «{{match}} {{value}}»",
+      "isOne": "{{label}} for {{value}}",
+      "isOneOf": "{{label}} for um dos valores {{values}}",
+      "challenge": "mostrar o desafio de {{provider}}",
+      "block": "bloquear a solicitação",
+      "every": "houver qualquer solicitação",
+      "gate": "houver mais de {{count}} solicitações a cada {{window}}s por IP",
+      "crowdsec_source": "a origem do CrowdSec",
+      "crowdsec_remediation": "a remediação do CrowdSec",
+      "group_ip": "o IP estiver no grupo {{name}}",
+      "group_country": "o país estiver no grupo {{name}}",
+      "group_asn": "o ASN estiver no grupo {{name}}",
+      "redirect": "redirecionar para {{url}} ({{code}})",
+      "blockStatus": "bloquear a solicitação com {{code}}"
+    },
+    "act_settings_block": "Configurações de bloqueio",
+    "act_settings_redirect": "Configurações de redirecionamento",
+    "act_settings_challenge": "Configurações de desafio",
+    "act_settings_generic": "Configurações da ação"
   },
   "request_path": {
     "client": "Cliente",
@@ -3983,7 +4358,33 @@
       "entry_invalid_value": "A entrada {{index}} tem um valor inválido",
       "entry_comment_too_long": "A entrada {{index}} tem um comentário muito longo",
       "source_required": "O grupo de recursos de origem é obrigatório"
-    }
+    },
+    "access": "Acesso",
+    "access_readonly": "Somente leitura",
+    "access_write": "Escrita",
+    "filter_values": "Filtrar valores...",
+    "no_value_match": "Nenhum valor corresponde a este filtro.",
+    "origin": "Origem",
+    "origin_plugin": "Fornecido pelo plugin {{plugin}}",
+    "origin_tip": {
+      "api": "Criado ou sincronizado pela API.",
+      "autoconf": "Criado pelo controlador autoconf.",
+      "download": "Baixado de uma fonte remota.",
+      "manual": "Criado manualmente ou a partir de um arquivo de configuração.",
+      "scheduler": "Criado pelo agendador.",
+      "ui": "Criado pela interface web.",
+      "wizard": "Criado pelo assistente de configuração. Continua editável."
+    },
+    "plugins_compatible": "Plugins compatíveis",
+    "plugins_compatible_help": "Plugins cujas configurações aceitam os tipos de valores deste grupo. As referências reais estão listadas em Uso.",
+    "updated": "Atualizado",
+    "values_compat": "Compatível com: {{plugins}}",
+    "values_copied": "Copiado",
+    "values_title": "Valores de {{name}}",
+    "view_values_of": "Ver valores de {{name}}",
+    "all_kinds": "Todos",
+    "plugins_count": "{{count}} plugin",
+    "plugins_count_plural": "{{count}} plugins"
   },
   "validation": {
     "default_field_name": "Este campo",
@@ -4049,7 +4450,27 @@
       "error_fetching_web_cache_status": "Erro ao buscar o status do cache web: {{message}}",
       "purged_for_url": "Cache web limpo para {{url}}",
       "purged_all_entries": "Cache web limpo (todas as entradas)"
-    }
+    },
+    "server_side_note": "Somente cache do lado do servidor. Esta página gerencia o cache do proxy reverso armazenado em cada instância BunkerWeb. As respostas já salvas nos navegadores dos visitantes não são afetadas.",
+    "counters_window": "Desde a reinicialização de cada instância",
+    "counters_window_help": "Os contadores começam na última reinicialização de cada instância, não em um período fixo.",
+    "status_desc": {
+      "hit": "Servida diretamente do cache",
+      "miss": "Não estava no cache: obtida do servidor upstream e armazenada",
+      "bypass": "Armazenamento em cache ignorado para esta requisição",
+      "expired": "Tempo de vida esgotado: obtida novamente do servidor upstream",
+      "stale": "Servida uma versão desatualizada porque o servidor upstream estava falhando",
+      "updating": "Servida uma versão desatualizada enquanto uma atualização estava em andamento",
+      "revalidated": "Nova consulta condicional: o servidor upstream indicou que continua válida"
+    },
+    "no_requests_for": "Sem requisições para:",
+    "no_counters": "Esta instância ainda não contabilizou nenhuma requisição em cache.",
+    "available_tip": "O diretório de cache existe nesta instância. O uso por um serviço é indicado em Ativação por serviço.",
+    "compact": "Compacto",
+    "invalidate": "Invalidar",
+    "purge_a_url": "Purgar uma URL",
+    "danger_zone": "Zona de perigo",
+    "purge_all_phrase": "purgar tudo"
   },
   "service": {
     "default_server": {
@@ -4140,7 +4561,17 @@
     "unreachable_help": "Os tempos são lidos das próprias instâncias, então nenhuma respondeu — ou nenhuma atendeu uma requisição ainda.",
     "flash": {
       "error_fetching_plugin_timings": "Erro ao buscar os tempos de execução dos plugins: {{message}}"
-    }
+    },
+    "phases_sub": "Tempo gasto por cada plugin em cada fase",
+    "toolbar": "Ferramentas da tabela de tempos de execução",
+    "columns": "Colunas",
+    "export_csv": "Exportar CSV",
+    "all_phases": "Todas as fases",
+    "search_placeholder": "Pesquisar plugin ou fase…",
+    "caption": "Tempos de execução dos plugins por fase, ordenados por tempo total por padrão",
+    "no_share": "Sem proporção",
+    "no_match": "Nenhum tempo de execução corresponde a estes filtros",
+    "no_share_hint": "Esta fase não é executada uma vez por requisição, por isso não tem proporção."
   },
   "whatsnew": {
     "missing_action": "Abrir o changelog no GitHub",
@@ -4639,6 +5070,117 @@
       "couldn_t_connect_redis": "Não foi possível conectar ao Redis",
       "missing_form": "{{key}} ausente no formulário",
       "invalid_request": "Requisição inválida"
+    }
+  },
+  "table_system": {
+    "filters": "Filtros",
+    "advanced_filters": "Filtros avançados",
+    "active_filters": "Filtros, {{count}} ativos",
+    "filter": "Filtrar",
+    "any": "Qualquer",
+    "visible_columns": "Colunas visíveis",
+    "column_count": "{{visible}} de {{total}}",
+    "show_all": "Mostrar tudo",
+    "multiple_actions": "Várias ações para os itens selecionados",
+    "upload_hint": "Arraste e solte ou clique para enviar",
+    "confirm_title": "Confirmar ação",
+    "confirm": "Confirmar",
+    "type_phrase": "Digite {{phrase}} para confirmar",
+    "leave_title": "Sair sem salvar?",
+    "leave_message": "Suas alterações não salvas serão perdidas.",
+    "leave": "Sair sem salvar",
+    "stay": "Continuar editando"
+  },
+  "shell": {
+    "skip_to_content": "Pular para o conteúdo principal",
+    "main_navigation": "Navegação principal",
+    "star_us": "Dê uma estrela ao BunkerWeb no GitHub",
+    "search": {
+      "placeholder": "Pesquisar páginas, plugins, serviços…",
+      "label": "Pesquisar páginas, plugins e serviços",
+      "results": "Resultados da pesquisa",
+      "kind_page": "Página",
+      "kind_plugin": "Plugin",
+      "kind_service": "Serviço",
+      "no_match": "Nenhum resultado para “{{query}}”",
+      "status_results": "Resultados: {{count}}",
+      "loading_services": "Carregando serviços…"
+    },
+    "language": {
+      "title": "Idioma"
+    },
+    "theme": {
+      "title": "Tema",
+      "system_hint": "segue seu sistema operacional"
+    },
+    "contrast": {
+      "toggle": "Alto contraste"
+    },
+    "density": {
+      "toggle": "Densidade compacta"
+    },
+    "account": {
+      "title": "Conta",
+      "current": "Conta: {{name}}"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "unread_count": "Não lidas: {{count}}",
+      "all_read": "Tudo em dia",
+      "tab_unread": "Não lidas",
+      "tab_all": "Todas",
+      "filter_label": "Filtrar notificações",
+      "mark_all_read": "Marcar todas como lidas",
+      "mark_read": "Marcar como lida",
+      "unread_prefix": "Não lida:",
+      "group_today": "Hoje",
+      "group_yesterday": "Ontem",
+      "group_earlier": "Anteriores",
+      "none_unread": "Nenhuma notificação não lida."
+    },
+    "top_navigation": "Barra superior"
+  },
+  "settings_page": {
+    "save_reload": "Salvar e recarregar",
+    "back_global": "Voltar às configurações globais",
+    "back_service": "Voltar ao serviço",
+    "plugin": "Plugin",
+    "scope": "Escopo",
+    "scope_global": "Configurações globais",
+    "select_plugin_label": "Escolher um plugin",
+    "select_scope_label": "Escolher onde editar suas configurações",
+    "card_title": "Configurações",
+    "count": "{{count}} configurações",
+    "count_filtered": "{{shown}} de {{total}} configurações",
+    "search": "Pesquisar configurações…",
+    "search_label": "Pesquisar configurações",
+    "no_match": "Nenhuma configuração corresponde à sua pesquisa.",
+    "revert": "Reverter",
+    "revert_title": "Reverter alterações",
+    "revert_message": "Reverte todas as alterações não salvas nesta página para o último valor salvo.",
+    "revert_confirm": "Reverter tudo",
+    "alert_service": "As configurações deixadas vazias usam os valores globais padrão. As alterações se aplicam somente ao serviço selecionado e entram em vigor após Salvar e recarregar.",
+    "alert_global": "As alterações se aplicam a todos os serviços que não as substituam e entram em vigor após Salvar e recarregar.",
+    "groups_link": "Gerenciar grupos de recursos",
+    "groups_link_hint": "Listas reutilizáveis de IPs, redes e países que as configurações deste plugin podem referenciar.",
+    "reload_alert_title": "As alterações acionam um recarregamento das instâncias.",
+    "reload_alert_body": "O agendador reaplica a configuração às suas instâncias assim que você salva."
+  },
+  "raw_page": {
+    "tiles_label": "Resumo da configuração bruta",
+    "tile_settings": "Configurações",
+    "tile_plugins": "Plugins",
+    "tile_modified": "Modificadas",
+    "tile_problems": "Problemas",
+    "search": "Pesquisar…",
+    "search_label": "Pesquisar na configuração bruta",
+    "search_prev": "Correspondência anterior",
+    "search_next": "Próxima correspondência"
+  },
+  "tables": {
+    "top": {
+      "share": "Proporção",
+      "detail": "Detalhe"
     }
   },
   "main": {

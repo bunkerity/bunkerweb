@@ -12,7 +12,26 @@
     "socials": "Media Sosial",
     "tagline": "Perlindungan Kuat, Tersederhanakan",
     "title": "Tentang BunkerWeb",
-    "version": "Versi: {{version}}"
+    "version": "Versi: {{version}}",
+    "releases": {
+      "title": "Rilis terbaru",
+      "view_all": "Lihat semua"
+    },
+    "environment": {
+      "title": "Lingkungan",
+      "copy": "Salin diagnostik",
+      "copied": "Disalin",
+      "help": "Dibaca dari host UI Web dan bidang kontrol. Variabel, kunci lisensi, dan alamat basis data tidak ditampilkan.",
+      "scope_ui_host": "Host UI Web",
+      "scope_control_plane": "Bidang kontrol",
+      "scope_instances": "Instans",
+      "integration": "Integrasi",
+      "platform": "Platform",
+      "bunkerweb": "BunkerWeb",
+      "database": "Server basis data",
+      "registered": "Terdaftar",
+      "instances_up": "{{up}} aktif dari {{total}}"
+    }
   },
   "accordion": {
     "body": {
@@ -123,6 +142,10 @@
         "expiring": "Berakhir ≤ 1 j",
         "expiring_caption": "Rotasi otomatis",
         "permanent": "Larangan permanen"
+      },
+      "reasons": {
+        "head_reason": "Alasan",
+        "meta": "{{count}} larangan aktif"
       }
     },
     "flash": {
@@ -175,6 +198,30 @@
         "changed": "{{ip}}: blokir diperbarui atau diganti saat permintaan berjalan, tidak ada yang dihapus. Batalkan blokirnya lagi.",
         "partial": "{{ip}}: sebagian selesai. Jalankan lagi pembatalan blokir untuk menyelesaikan: {{details}}"
       }
+    },
+    "page": {
+      "clear_all": "Hapus semua",
+      "import": "Impor"
+    },
+    "clear_all": {
+      "title": "Hapus semua larangan",
+      "message": "Menghapus setiap larangan di semua layanan dan instans. Larangan CrowdSec dicabut dari barisnya sendiri.",
+      "phrase": "hapus semua",
+      "confirm": "Hapus semua larangan"
+    },
+    "import": {
+      "confirm_title": "Impor larangan",
+      "confirm_button": "Impor",
+      "empty": "Tidak ada larangan valid dalam file ini. Format yang diharapkan adalah satu larangan per baris, IP[,scope[,duration[,reason]]], atau daftar JSON.",
+      "too_many": "File ini berisi lebih dari {{max}} larangan. Pisahkan dan impor dalam beberapa bagian.",
+      "read_failed": "File tidak dapat dibaca.",
+      "confirm_message": "Larangan yang ditemukan dalam file ini: {{count}}. Impor semuanya?",
+      "confirm_skipped": "Baris tidak terbaca yang diabaikan: {{skipped}}."
+    },
+    "live": {
+      "on": "Penyegaran otomatis aktif, setiap 10 detik.",
+      "off": "Penyegaran otomatis dijeda.",
+      "updated": "Larangan diperbarui: {{added}} baru, {{removed}} kedaluwarsa."
     }
   },
   "breadcrumb": {
@@ -425,6 +472,39 @@
       "missing_configs_parameter_configs_delete": "Parameter configs tidak ada pada /configs/delete.",
       "missing_convert_parameter_configs_convert": "Parameter convert_to tidak ada pada /configs/convert.",
       "missing_configs_parameter_configs_convert": "Parameter configs tidak ada pada /configs/convert."
+    },
+    "console": {
+      "title": "Konfigurasi kustom",
+      "new": "Konfigurasi baru",
+      "edit": "Edit konfigurasi",
+      "view": "Lihat konfigurasi",
+      "clone": "Klon konfigurasi",
+      "files": "File",
+      "types": "Jenis konfigurasi",
+      "all_scopes": "Semua cakupan",
+      "global_only": "Hanya global",
+      "service_only": "Hanya layanan",
+      "global_legend": "Cakupan global berlaku untuk setiap layanan.",
+      "service_legend": "Cakupan layanan hanya berlaku untuk satu layanan.",
+      "select_file": "Pilih file untuk melihat pratinjau isinya.",
+      "no_files": "Tidak ada konfigurasi yang cocok dengan filter ini.",
+      "full_view": "Tampilan penuh",
+      "restore_view": "Pulihkan tampilan",
+      "download": "Unduh",
+      "lint": "Periksa sintaks",
+      "lint_help": "Hanya petunjuk sisi klien. Validasi dengan nginx -t sebelum menerapkan. Direktif multibaris dapat menghasilkan peringatan.",
+      "lint_clean": "Pemeriksaan sisi klien tidak menemukan masalah.",
+      "lint_warnings": "Pemeriksaan sisi klien menemukan {{count}} peringatan. Lihat anotasi editor.",
+      "lint_skipped": "Pemeriksaan sintaks NGINX tidak tersedia untuk konfigurasi ModSecurity dan CRS.",
+      "lint_semicolon": "Mungkin ada titik koma yang hilang di akhir direktif.",
+      "lint_unexpected_brace": "Kurung kurawal penutup tidak terduga.",
+      "lint_brace": "Kurung kurawal pembuka belum ditutup.",
+      "lint_quote": "Tanda kutip belum ditutup.",
+      "content": "Isi konfigurasi (hanya baca)",
+      "template_name_locked": "Konfigurasi kustom berbasis templat tidak boleh diganti namanya.",
+      "name_help": "Gunakan huruf, angka, tanda hubung, atau garis bawah. Akhiran .conf ditambahkan pada disk.",
+      "editor_help": "Edit isi NGINX atau ModSecurity. Simpan dengan Ctrl+S atau Command+S.",
+      "editor_title": "Isi konfigurasi"
     }
   },
   "country": {
@@ -764,6 +844,11 @@
       "top_blocked_ips": {
         "most_blocked": "IP Paling Sering Diblokir",
         "title": "10 IP Teratas yang Diblokir"
+      },
+      "legend": {
+        "item": "Item",
+        "count": "Jumlah",
+        "share": "Proporsi"
       }
     },
     "map": {
@@ -869,6 +954,12 @@
         "page_other": "Semua {{count}} template di halaman ini dipilih.",
         "all_filtered": "Pilih semua {{count}} template yang cocok",
         "all_done": "Semua {{count}} template yang cocok dipilih."
+      },
+      "workflows": {
+        "page_one": "{{count}} alur kerja di halaman ini dipilih.",
+        "page_other": "Semua {{count}} alur kerja di halaman ini dipilih.",
+        "all_filtered": "Pilih semua {{count}} alur kerja yang cocok",
+        "all_done": "Semua {{count}} alur kerja yang cocok dipilih."
       }
     },
     "bulk_select_clear": "Hapus pilihan",
@@ -988,7 +1079,15 @@
     "zero_records_plugins": "Tidak ditemukan Plugin yang cocok",
     "zero_records_reports": "Tidak ditemukan Laporan yang cocok",
     "zero_records_services": "Tidak ditemukan Layanan yang cocok",
-    "zero_records_templates": "Tidak ditemukan Template yang cocok"
+    "zero_records_templates": "Tidak ditemukan Template yang cocok",
+    "info_empty_workflows": "Tidak ada Alur Kerja tersedia",
+    "info_filtered_workflows": "(difilter dari _MAX_ total Alur Kerja)",
+    "info_workflows": "Menampilkan {{start}} hingga {{end}} dari {{total}} Alur Kerja",
+    "length_menu_workflows": "Tampilkan _MENU_ Alur Kerja",
+    "select_rows_workflows_0": "Tidak ada Alur Kerja dipilih",
+    "select_rows_workflows_1": "1 Alur Kerja dipilih",
+    "select_rows_workflows_plural": "%d Alur Kerja dipilih",
+    "zero_records_workflows": "Tidak ditemukan Alur Kerja yang cocok"
   },
   "dev_log": {
     "copy_failed": "Gagal menyalin teks:",
@@ -1244,7 +1343,9 @@
     "history": {
       "end_date": "Tanggal Akhir",
       "start_date": "Tanggal Mulai",
-      "success": "Berhasil"
+      "success": "Berhasil",
+      "duration": "Durasi",
+      "error": "Kesalahan"
     }
   },
   "jobs": {
@@ -1262,6 +1363,10 @@
       "no_jobs_selected": "Tidak ada job dipilih.",
       "error_fetching_jobs": "Kesalahan saat mengambil job: {{message}}",
       "missing_jobs_parameter_jobs_run": "Parameter jobs tidak ada pada /jobs/run."
+    },
+    "card": {
+      "title": "Pekerjaan terjadwal",
+      "sub": "Dijalankan oleh penjadwal sesuai interval masing-masing atau sesuai permintaan"
     }
   },
   "legend": {
@@ -1574,7 +1679,12 @@
     "system": "Sistem",
     "edition_community": "Komunitas",
     "edition_pro": "Pro",
-    "crowdsec": "CrowdSec"
+    "crowdsec": "CrowdSec",
+    "profile": "Profil",
+    "plugin_insights": "Wawasan plugin",
+    "plugins_overview": "Ikhtisar",
+    "filter_plugins": "Filter plugin…",
+    "no_plugin_match": "Tidak ada plugin yang cocok"
   },
   "news": {
     "image_alt": "Gambar berita",
@@ -1650,6 +1760,14 @@
         "no_content": "Plugin ini tidak menyediakan halaman yang disematkan.",
         "restricted_to_admins": "Plugin ini menyediakan halamannya sendiri, yang menjalankan kode plugin. Hanya administrator yang dapat memuatnya.",
         "dedicated_page_unavailable": "Plugin ini dikelola di halaman khusus yang belum dimuat. Mulai ulang UI web untuk mengaksesnya."
+      },
+      "empty": {
+        "metrics_title": "Metrik dinonaktifkan",
+        "restricted_title": "Hanya administrator",
+        "no_page_title": "Tidak ada halaman untuk ditampilkan",
+        "no_content_title": "Belum ada yang dapat ditampilkan",
+        "global_settings": "Pengaturan global",
+        "deactivated_heading": "Plugin ini tidak digunakan di mana pun"
       }
     },
     "type": {
@@ -1727,7 +1845,10 @@
       "tab_all": "Semua",
       "tab_community": "Komunitas",
       "tab_disabled": "Dinonaktifkan",
-      "tab_enabled": "Diaktifkan"
+      "tab_enabled": "Diaktifkan",
+      "always_on_badge": "Selalu aktif",
+      "always_on_tip": "Plugin inti yang diperlukan oleh BunkerWeb: dapat dikonfigurasi, tetapi tidak dapat dinonaktifkan.",
+      "filter_label": "Filter plugin"
     },
     "multivalue": {
       "more_value": "nilai lagi",
@@ -1763,6 +1884,15 @@
       "flash": {
         "version_unreadable": "Tidak dapat membaca versi BunkerWeb ({{current}}), sehingga kompatibilitas {{id}} tidak dapat diperiksa; tidak ada yang diinstal"
       }
+    },
+    "tier": {
+      "core": "Plugin inti",
+      "pro": "Plugin PRO",
+      "community": "Plugin komunitas"
+    },
+    "card": {
+      "configure": "Konfigurasi {{name}}",
+      "metrics": "Metrik {{name}}"
     }
   },
   "pro": {
@@ -1886,7 +2016,9 @@
       "last_activity": "Aktivitas Terakhir",
       "os": "Sistem Operasi",
       "title": "Sesi",
-      "wipe_help": "Akhiri setiap sesi aktif lain di akun Anda. Anda akan tetap masuk di sini."
+      "wipe_help": "Akhiri setiap sesi aktif lain di akun Anda. Anda akan tetap masuk di sini.",
+      "recent_title": "Sesi terbaru",
+      "load_error": "Gagal memuat data. Silakan coba lagi."
     },
     "subtitle": "Kelola akun, keamanan, dan sesi aktif Anda.",
     "tab": {
@@ -1937,7 +2069,8 @@
       "missing_current_password_parameter_profile_totp_3": "Parameter current password tidak ada pada /profile/totp-enable.",
       "missing_current_password_parameter_profile_totp_2": "Parameter current password tidak ada pada /profile/totp-disable.",
       "missing_current_password_parameter_profile_totp": "Parameter current password tidak ada pada /profile/totp-refresh."
-    }
+    },
+    "title": "Profil Anda"
   },
   "range_picker": {
     "1h": "Satu jam terakhir",
@@ -2077,7 +2210,19 @@
     "upload_invalid": "Pilih sertifikat publik yang valid dan kunci privat yang sesuai.",
     "valid_days": "Masa berlaku dalam hari",
     "valid_from": "Berlaku sejak",
-    "valid_to": "Berlaku hingga"
+    "valid_to": "Berlaku hingga",
+    "renew_due_short": "Perlu diperpanjang",
+    "select_all": "Pilih semua sertifikat",
+    "issuers_meta": "{{count}} sertifikat",
+    "bulk": {
+      "renew": "Perpanjang yang ditandatangani sendiri",
+      "download": "Unduh rantai sertifikat",
+      "delete": "Hapus yang dipilih",
+      "none_eligible": "Tidak ada sertifikat terpilih yang mendukung tindakan ini.",
+      "confirm_renew": "Sertifikat bertanda tangan sendiri yang akan diperpanjang: {{count}}. Lanjutkan?",
+      "confirm_delete": "Sertifikat yang akan dihapus: {{count}}. Tindakan ini tidak dapat dibatalkan. Lanjutkan?",
+      "skipped": "Sertifikat terpilih yang tidak mendukung tindakan ini dan dilewati: {{skipped}}."
+    }
   },
   "crowdsec": {
     "reason": {
@@ -2661,6 +2806,20 @@
       "source_appsec": "Inspeksi AppSec",
       "source_failure_policy": "Kebijakan kegagalan AppSec",
       "technical_details": "Detail teknis"
+    },
+    "live": {
+      "on": "Penyegaran otomatis aktif, setiap 10 detik.",
+      "off": "Penyegaran otomatis dijeda.",
+      "updated": "Laporan diperbarui: {{added}} baru."
+    },
+    "offenders": {
+      "confirm_title": "Larang dari laporan",
+      "confirm_one": "{{ip}} akan dilarang di setiap instans selama 24 jam.",
+      "confirm_many": "{{count}} alamat IP akan dilarang di setiap instans selama 24 jam.",
+      "show": "Tampilkan",
+      "show_top": "Pelanggar terbanyak",
+      "show_latest": "Pelanggar terbaru",
+      "show_bottom": "Pelanggar paling sedikit"
     }
   },
   "scope": {
@@ -3084,7 +3243,8 @@
         "lets_encrypt": "Let's Encrypt",
         "zerossl": "ZeroSSL",
         "real_ip": "IP Nyata",
-        "reverse_proxy": "Reverse Proxy"
+        "reverse_proxy": "Reverse Proxy",
+        "server": "Server"
       },
       "subtitle": "Konfigurasi pengaturan spesifik UI Web.",
       "title": "Pengaturan UI"
@@ -3102,7 +3262,9 @@
       "pro_benefit_4_description": "Saran ahli untuk mengoptimalkan pengaturan BunkerWeb Anda.",
       "pro_benefit_4_title": "Konsultasi kustom",
       "subtitle": "Buka fitur lanjutan dan dapatkan manfaat maksimal dari BunkerWeb.",
-      "title": "Upgrade ke PRO"
+      "title": "Upgrade ke PRO",
+      "activate_title": "Aktifkan lisensi",
+      "activation_note": "Lisensi diaktifkan setelah penyiapan selesai."
     },
     "step4": {
       "label": {
@@ -3136,6 +3298,19 @@
       "admin_email_too_long_must_less": "Email admin terlalu panjang. Harus kurang dari 256 karakter.",
       "admin_username_too_long_must_less": "Nama pengguna admin terlalu panjang. Harus kurang dari 256 karakter.",
       "missing_either_one_following_parameters": "Salah satu dari parameter berikut tidak ada: {{value}}."
+    },
+    "stepper_label": "Langkah penyiapan",
+    "complete": "Selesaikan penyiapan",
+    "from_ui_host": "Dari variabel lingkungan UI_HOST",
+    "accordion": {
+      "general": "Umum",
+      "general_hint": "Server · Let's Encrypt",
+      "advanced": "Lanjutan",
+      "advanced_hint": "Proksi Balik · IP Asli · Sertifikat Kustom"
+    },
+    "switch": {
+      "enabled": "Diaktifkan",
+      "disabled": "Dinonaktifkan"
     }
   },
   "status": {
@@ -3233,10 +3408,32 @@
         "button": "Unduh Paket",
         "help": "Log, versi plugin, lingkungan, dan error terbaru. Data pribadi akan dianonimkan.",
         "title": "Diagnostik Web UI"
+      },
+      "docs": {
+        "title": "Dokumentasi"
+      },
+      "community": {
+        "title": "Komunitas"
       }
     },
     "subtitle": "Unduh log debug, ekstrak konfigurasi Anda, dan dapatkan bantuan dari tim BunkerWeb.",
-    "title": "Dukungan"
+    "title": "Dukungan",
+    "docs": {
+      "quickstart": "Panduan mulai cepat",
+      "web_ui": "Panduan UI Web",
+      "troubleshooting": "Pemecahan masalah",
+      "upgrading": "Peningkatan versi"
+    },
+    "community": {
+      "discord": "Discord",
+      "discord_help": "Tanyakan kepada komunitas dan pengelola.",
+      "github": "Isu GitHub",
+      "github_help": "Laporan bug dan permintaan fitur.",
+      "reddit": "Reddit",
+      "reddit_help": "Diskusi dan pengumuman."
+    },
+    "attach_title": "Diagnostik untuk dilampirkan",
+    "attach_help": "Ekspor untuk permintaan dukungan. Memerlukan izin tulis dan menyamarkan rahasia."
   },
   "tab": {
     "custom_certificate": "Sertifikat Kustom",
@@ -3547,7 +3744,19 @@
       "refused": "Template tidak diimpor: {{reason}}",
       "too_large": "Template tidak diimpor: file lebih besar dari 1 MiB",
       "unreadable": "Template tidak diimpor: file tidak dapat dibaca"
-    }
+    },
+    "features_builtin": "Fitur bawaan",
+    "features_configs": "Konfigurasi kustom",
+    "features_plugins": "Plugin",
+    "features_help": "Fitur yang disediakan templat ini. Buka templat untuk melihat atau mengubah pengaturan sebenarnya.",
+    "features_of": "Tampilkan fitur {{name}}",
+    "features_title": "Fitur templat",
+    "managed_by": "Dikelola oleh {{owner}}: tidak dapat diubah atau dihapus di sini.",
+    "more_actions": "Tindakan lain untuk {{name}}",
+    "no_match": "Tidak ada templat yang cocok dengan pencarian ini.",
+    "open_template": "Buka templat",
+    "read_only": "Hanya baca",
+    "search": "Cari templat..."
   },
   "theme": {
     "dark": "Gelap",
@@ -3583,7 +3792,15 @@
     "open_live": "Tampilan langsung",
     "updated": "Diperbarui",
     "blocked_request": "permintaan diblokir",
-    "blocked_requests": "permintaan diblokir"
+    "blocked_requests": "permintaan diblokir",
+    "attacks_24h": "Diblokir, 24 jam terakhir",
+    "rolling_window": "Jendela bergulir, diperbarui sekitar setiap 30 detik",
+    "ticker_caption": "Permintaan terbaru yang diblokir",
+    "col_time": "Waktu",
+    "col_ip": "Alamat IP",
+    "col_reason": "Alasan",
+    "col_origin": "Asal",
+    "col_target": "Target"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Jika layanan dihapus atau dimulai ulang, konfigurasi UI Anda akan hilang.",
@@ -3981,7 +4198,26 @@
       "target_required": "Target pengalihan diperlukan",
       "status_code_must_be_one_of": "Kode status harus salah satu dari {{value}}",
       "at_least_one_service_required": "Setidaknya satu layanan diperlukan"
-    }
+    },
+    "all_codes": "Semua kode status",
+    "append_column": "Tambahkan URI",
+    "card_subtitle": "Pengalihan jalur dan layanan tempat pengalihan diterapkan",
+    "count": "{{count}} pengalihan",
+    "count_plural": "{{count}} pengalihan",
+    "detach_shared": "Pengalihan ini digunakan bersama. Melepaskannya hanya menghapusnya dari layanan tersebut. Layanan lain tetap memilikinya.",
+    "kpi_configured": "Pengalihan terkonfigurasi",
+    "kpi_detached_caption": "Lampirkan ke layanan agar berlaku",
+    "kpi_loaded_only": "Di antara {{count}} pertama yang dimuat",
+    "kpi_permanent": "Permanen",
+    "kpi_permanent_caption": "301 atau 308, disimpan dalam cache browser",
+    "kpi_services": "Layanan terlampir",
+    "kpi_services_caption": "Layanan dengan setidaknya satu pengalihan",
+    "no_match": "Tidak ada pengalihan yang cocok dengan filter ini.",
+    "services_copy": "{{name}}: {{from}} → {{to}}",
+    "services_count": "{{count}} layanan",
+    "services_count_plural": "{{count}} layanan",
+    "services_title": "Layanan yang menggunakan pengalihan ini",
+    "to_url_help": "URL http:// atau https:// lengkap. Target relatif tidak didukung."
   },
   "upstreams": {
     "add_server": "Tambah server",
@@ -4059,7 +4295,34 @@
       "method_must_be_one_of": "Metode harus salah satu dari {{value}}",
       "keepalive_must_be_positive_whole_number": "Jumlah keepalive harus berupa bilangan bulat positif",
       "at_least_one_service_required": "Setidaknya satu layanan diperlukan"
-    }
+    },
+    "all_protocols": "Semua protokol",
+    "all_tls": "Semua pengaturan TLS",
+    "card_subtitle": "Kumpulan backend dan layanan yang meneruskan permintaan kepadanya melalui proksi",
+    "count": "{{count}} upstream",
+    "count_plural": "{{count}} upstream",
+    "detach_shared": "Upstream ini digunakan bersama. Melepaskannya hanya menghapusnya dari layanan dan jalur tersebut. Lampiran lain tetap memilikinya.",
+    "keepalive_off": "Nonaktif",
+    "kpi_loaded_only": "Di antara {{count}} pertama yang dimuat",
+    "kpi_not_attached": "{{count}} belum dilampirkan",
+    "kpi_roles": "{{primary}} utama · {{backup}} cadangan · {{down}} nonaktif (terkonfigurasi)",
+    "kpi_services": "Layanan terlampir",
+    "kpi_services_caption": "Layanan yang meneruskan permintaan ke kumpulan melalui proksi",
+    "kpi_tls": "TLS ke backend",
+    "kpi_tls_caption": "Kumpulan yang dikonfigurasi untuk berkomunikasi dengan servernya melalui TLS",
+    "members_copy": "{{name}}: {{count}} server",
+    "members_copy_plural": "{{name}}: {{count}} server",
+    "members_title": "Server dalam upstream ini",
+    "no_match": "Tidak ada upstream yang cocok dengan filter ini.",
+    "servers_count": "{{count}} server",
+    "servers_count_plural": "{{count}} server",
+    "services_copy": "{{name}}: {{servers}}",
+    "services_count": "{{count}} layanan",
+    "services_count_plural": "{{count}} layanan",
+    "services_title": "Layanan yang menggunakan upstream ini",
+    "tls": "TLS ke backend",
+    "tls_no": "Tanpa enkripsi",
+    "tls_yes": "TLS"
   },
   "workflows": {
     "act_block": "Blokir",
@@ -4112,7 +4375,8 @@
       "moveRuleUp": "Pindahkan aturan {{n}} ke atas",
       "moveRuleDown": "Pindahkan aturan {{n}} ke bawah",
       "moreActionsForRule": "Tindakan lainnya untuk aturan {{n}}",
-      "ruleCard": "Aturan {{n}} dari {{total}} — {{name}}"
+      "ruleCard": "Aturan {{n}} dari {{total}} — {{name}}",
+      "ruleTools": "Tindakan untuk aturan {{n}}"
     },
     "attach": "Lampirkan ke layanan",
     "attach_help": "Aturan hanya diberlakukan pada layanan tempat sebuah alur kerja dilampirkan.",
@@ -4196,7 +4460,9 @@
       "enable": "Aktifkan aturan",
       "top": "Jalankan pertama",
       "moveTo": "Pindahkan ke posisi {{n}}",
-      "staysAt": "Tetap pada posisi {{n}}"
+      "staysAt": "Tetap pada posisi {{n}}",
+      "header": "Tindakan aturan",
+      "order": "Urutan"
     },
     "move": {
       "first": "Jalankan pertama",
@@ -4401,7 +4667,116 @@
       "too_many_services": "Alur kerja tidak dapat dilampirkan ke lebih dari {{value}} layanan",
       "name_required": "Nama alur kerja diperlukan",
       "service_list_not_read_reopen_page": "Daftar layanan tidak dapat dibaca; buka kembali halaman dan coba lagi"
-    }
+    },
+    "port": {
+      "list_subtitle": "Aturan dan layanan terlampir untuk setiap alur kerja",
+      "row_details": "Detail alur kerja",
+      "select_workflows": "Pilih alur kerja",
+      "created": "Dibuat",
+      "updated": "Diperbarui",
+      "total_rules": "Total {{count}}",
+      "active_rules": "{{count}} aktif",
+      "more": "Tindakan lain untuk {{name}}",
+      "export_scope": "Ekspor tabel mencakup baris yang difilter dan kolom yang terlihat. Ekspor JSON hanya mencakup definisi alur kerja kanonis yang dipilih, dengan id sebagai kunci. Tidak ada jaminan impor ulang.",
+      "export_definitions": "Definisi terpilih (JSON)",
+      "export_loading": "Membaca definisi alur kerja yang dipilih…",
+      "export_done": "Definisi terpilih diekspor. File ini tidak memiliki jaminan impor ulang.",
+      "export_failed": "Ekspor gagal. Tidak ada file yang diunduh.",
+      "detach_before_delete": "Lepaskan alur kerja ini dari semua layanan sebelum menghapusnya. Penghapusan tidak pernah melepaskan layanan secara otomatis.",
+      "details": "Detail",
+      "csv": "CSV",
+      "excel": "Excel",
+      "attachment": "Keterlampiran",
+      "attachment_any": "Semua",
+      "attachment_attached": "Terlampir",
+      "services_count": "Layanan: {{count}}",
+      "services_open": "Tampilkan layanan yang dilampirkan ke {{name}}",
+      "services_title": "Layanan yang dilampirkan ke {{name}}",
+      "services_help": "Pelepasan hanya menghapus alur kerja ini dari layanan tersebut. Alur kerja dan aturannya tetap ada.",
+      "services_none": "Alur kerja ini tidak dilampirkan ke layanan mana pun."
+    },
+    "shell": {
+      "tabs_label": "Tampilan alur kerja",
+      "tab_overview": "Ikhtisar",
+      "tab_config": "Konfigurasi",
+      "tab_unsaved": "Belum disimpan",
+      "config_needs_workflow": "Buat alur kerja untuk membuka konfigurasinya",
+      "view_label": "Tampilan",
+      "pick_label": "Alur kerja",
+      "read_only": "Hanya baca",
+      "draft_title": "Perubahan yang belum disimpan di {{name}}",
+      "draft_switch_message": "Membuka {{target}} akan meninggalkan perubahan aturan yang belum disimpan di {{name}}. Hanya satu draf yang dapat dibuka sekaligus: simpan, buang, atau tetap di sini.",
+      "draft_save": "Simpan dan lanjutkan",
+      "draft_discard": "Buang perubahan",
+      "draft_save_failed": "Alur kerja tidak dapat disimpan. Tidak ada perubahan yang dibuang.",
+      "draft_restored": "Perubahan alur kerja yang belum disimpan telah dipulihkan. Simpan untuk menerapkannya, atau beralih alur kerja untuk membuangnya.",
+      "draft_stale": "Alur kerja ini disimpan di tempat lain setelah draf Anda dimulai, sehingga draf dibuang."
+    },
+    "toolbar": {
+      "display": "Tampilan aturan",
+      "filters": "Filter",
+      "view": "Tampilan urutan aturan",
+      "simplified": "Sederhana",
+      "detailed": "Terperinci",
+      "limit_height": "Batasi tinggi",
+      "full_height": "Tinggi penuh",
+      "expand_all": "Perluas semua",
+      "collapse_all": "Ciutkan semua",
+      "actions": "Tindakan alur kerja",
+      "filter_rules": "Filter aturan",
+      "filter_name": "Nama",
+      "filter_name_placeholder": "Cari berdasarkan nama aturan…",
+      "filter_state": "Status",
+      "any_state": "Status apa pun",
+      "state_on": "Diaktifkan",
+      "state_off": "Dinonaktifkan",
+      "filter_action": "Tindakan",
+      "any_action": "Tindakan apa pun",
+      "reset": "Atur ulang",
+      "back_to_top": "Kembali ke atas",
+      "n_of_m": "{{shown}} dari {{total}} aturan",
+      "reorder_paused": "Pengurutan ulang dijeda saat filter menyembunyikan aturan.",
+      "no_match": "Tidak ada aturan yang cocok dengan filter ini"
+    },
+    "inspector": {
+      "apply": "Terapkan",
+      "cancel": "Batal",
+      "cancel_title": "Batal: pulihkan aturan seperti saat dibuka",
+      "apply_title": "Terapkan: pertahankan edit ini dalam draf. Tombol Simpan di halaman akan menyimpannya secara permanen",
+      "cancelled": "Edit pada aturan {{n}} dibatalkan. Aturan kembali seperti saat dibuka."
+    },
+    "regex_help": "Dua batas regex yang terpisah berlaku. Saat menulis: alur kerja yang dilampirkan ke satu layanan dapat berisi total maksimal 50 kondisi regex. Penyimpanan atau pelampiran yang melampaui batas ditolak. Saat berjalan: setiap instans mengompilasi maksimal WORKFLOWS_REGEX_BUDGET ekspresi reguler yang berbeda (default 512, dibagi oleh semua alur kerja). Regex yang melampaui anggaran ini tidak dievaluasi dan mengembalikan UNKNOWN, sehingga aturannya tidak dapat cocok.",
+    "conseq": {
+      "stop": "Menghentikan rantai",
+      "skip": "Tidak pernah dijalankan"
+    },
+    "sum": {
+      "leaf": {
+        "ip": "IP",
+        "country": "negara",
+        "asn": "ASN",
+        "method": "metode"
+      },
+      "not": "kondisi «{{what}}» tidak terpenuhi",
+      "uri": "URI {{match}} {{value}}",
+      "isOne": "{{label}} adalah {{value}}",
+      "isOneOf": "{{label}} adalah salah satu dari {{values}}",
+      "challenge": "tampilkan tantangan {{provider}}",
+      "block": "blokir permintaan",
+      "every": "ada permintaan apa pun",
+      "gate": "melebihi {{count}} permintaan per {{window}} detik per IP",
+      "crowdsec_source": "sumber CrowdSec",
+      "crowdsec_remediation": "remediasi CrowdSec",
+      "group_ip": "IP ada di grup {{name}}",
+      "group_country": "negara ada di grup {{name}}",
+      "group_asn": "ASN ada di grup {{name}}",
+      "redirect": "alihkan ke {{url}} ({{code}})",
+      "blockStatus": "blokir permintaan dengan {{code}}"
+    },
+    "act_settings_block": "Pengaturan pemblokiran",
+    "act_settings_redirect": "Pengaturan pengalihan",
+    "act_settings_challenge": "Pengaturan tantangan",
+    "act_settings_generic": "Pengaturan tindakan"
   },
   "request_path": {
     "client": "Klien",
@@ -4495,7 +4870,33 @@
       "entry_invalid_value": "Entri {{index}} memiliki nilai yang tidak valid",
       "entry_comment_too_long": "Entri {{index}} memiliki komentar yang terlalu panjang",
       "source_required": "Grup sumber daya sumber diperlukan"
-    }
+    },
+    "access": "Akses",
+    "access_readonly": "Hanya baca",
+    "access_write": "Tulis",
+    "filter_values": "Filter nilai...",
+    "no_value_match": "Tidak ada nilai yang cocok dengan filter ini.",
+    "origin": "Asal",
+    "origin_plugin": "Disertakan oleh plugin {{plugin}}",
+    "origin_tip": {
+      "api": "Dibuat atau disinkronkan melalui API.",
+      "autoconf": "Dibuat oleh pengontrol autoconf.",
+      "download": "Diunduh dari sumber jarak jauh.",
+      "manual": "Dibuat secara manual atau dari file konfigurasi.",
+      "scheduler": "Dibuat oleh penjadwal.",
+      "ui": "Dibuat melalui UI web.",
+      "wizard": "Dibuat oleh panduan penyiapan dan tetap dapat diedit."
+    },
+    "plugins_compatible": "Plugin yang kompatibel",
+    "plugins_compatible_help": "Plugin yang pengaturannya menerima jenis nilai dalam grup ini. Referensi sebenarnya tercantum di bagian Penggunaan.",
+    "updated": "Diperbarui",
+    "values_compat": "Kompatibel dengan: {{plugins}}",
+    "values_copied": "Disalin",
+    "values_title": "Nilai {{name}}",
+    "view_values_of": "Lihat nilai {{name}}",
+    "all_kinds": "Semua",
+    "plugins_count": "{{count}} plugin",
+    "plugins_count_plural": "{{count}} plugin"
   },
   "validation": {
     "default_field_name": "Bidang ini",
@@ -4561,7 +4962,27 @@
       "error_fetching_web_cache_status": "Kesalahan saat mengambil status web cache: {{message}}",
       "purged_for_url": "Cache web dibersihkan untuk {{url}}",
       "purged_all_entries": "Cache web dibersihkan (semua entri)"
-    }
+    },
+    "server_side_note": "Hanya cache sisi server. Halaman ini mengelola cache proksi balik yang disimpan di setiap instans BunkerWeb. Respons yang sudah disimpan di browser pengunjung tidak terpengaruh.",
+    "counters_window": "Sejak setiap instans dimulai ulang",
+    "counters_window_help": "Penghitung menghitung sejak setiap instans terakhir dimulai ulang, bukan selama periode tetap.",
+    "status_desc": {
+      "hit": "Disajikan langsung dari cache",
+      "miss": "Tidak di-cache: diambil dari upstream dan disimpan",
+      "bypass": "Penyimpanan cache dilewati untuk permintaan ini",
+      "expired": "Masa berlaku habis: diambil ulang dari upstream",
+      "stale": "Respons usang disajikan karena upstream gagal",
+      "updating": "Respons usang disajikan saat penyegaran berlangsung",
+      "revalidated": "Pengambilan ulang bersyarat: upstream menyatakan respons masih valid"
+    },
+    "no_requests_for": "Tidak ada permintaan untuk:",
+    "no_counters": "Instans ini belum menghitung permintaan yang menggunakan cache.",
+    "available_tip": "Direktori cache ada di instans ini. Apakah layanan menggunakannya ditampilkan di bagian Pengaktifan layanan.",
+    "compact": "Ringkas",
+    "invalidate": "Batalkan validitas",
+    "purge_a_url": "Bersihkan URL",
+    "danger_zone": "Zona berbahaya",
+    "purge_all_phrase": "bersihkan semua"
   },
   "service": {
     "default_server": {
@@ -4652,7 +5073,17 @@
     "unreachable_help": "Waktu dibaca dari instans itu sendiri, jadi tidak ada yang merespons — atau belum ada yang melayani permintaan.",
     "flash": {
       "error_fetching_plugin_timings": "Kesalahan saat mengambil waktu plugin: {{message}}"
-    }
+    },
+    "phases_sub": "Waktu yang dihabiskan setiap plugin di setiap fase",
+    "toolbar": "Alat tabel waktu",
+    "columns": "Kolom",
+    "export_csv": "Ekspor CSV",
+    "all_phases": "Semua fase",
+    "search_placeholder": "Cari plugin atau fase…",
+    "caption": "Waktu plugin per fase, secara default diurutkan berdasarkan total waktu",
+    "no_share": "Tanpa proporsi",
+    "no_match": "Tidak ada waktu yang cocok dengan filter ini",
+    "no_share_hint": "Fase ini tidak berjalan sekali per permintaan, sehingga tidak memiliki proporsi."
   },
   "whatsnew": {
     "missing_action": "Buka changelog di GitHub",
@@ -4669,6 +5100,117 @@
       "couldn_t_connect_redis": "Tidak dapat terhubung ke redis",
       "missing_form": "{{key}} tidak ada dalam formulir",
       "invalid_request": "Permintaan tidak valid"
+    }
+  },
+  "table_system": {
+    "filters": "Filter",
+    "advanced_filters": "Filter lanjutan",
+    "active_filters": "Filter, {{count}} aktif",
+    "filter": "Filter",
+    "any": "Apa pun",
+    "visible_columns": "Kolom yang terlihat",
+    "column_count": "{{visible}} dari {{total}}",
+    "show_all": "Tampilkan semua",
+    "multiple_actions": "Beberapa tindakan untuk item yang dipilih",
+    "upload_hint": "Seret dan lepas atau klik untuk mengunggah",
+    "confirm_title": "Konfirmasi tindakan",
+    "confirm": "Konfirmasi",
+    "type_phrase": "Ketik {{phrase}} untuk mengonfirmasi",
+    "leave_title": "Keluar tanpa menyimpan?",
+    "leave_message": "Perubahan Anda yang belum disimpan akan hilang.",
+    "leave": "Keluar tanpa menyimpan",
+    "stay": "Lanjutkan mengedit"
+  },
+  "shell": {
+    "skip_to_content": "Lewati ke konten utama",
+    "main_navigation": "Navigasi utama",
+    "star_us": "Beri bintang BunkerWeb di GitHub",
+    "search": {
+      "placeholder": "Cari halaman, plugin, layanan…",
+      "label": "Cari halaman, plugin, dan layanan",
+      "results": "Hasil pencarian",
+      "kind_page": "Halaman",
+      "kind_plugin": "Plugin",
+      "kind_service": "Layanan",
+      "no_match": "Tidak ada kecocokan untuk “{{query}}”",
+      "status_results": "Hasil: {{count}}",
+      "loading_services": "Memuat layanan…"
+    },
+    "language": {
+      "title": "Bahasa"
+    },
+    "theme": {
+      "title": "Tema",
+      "system_hint": "mengikuti OS Anda"
+    },
+    "contrast": {
+      "toggle": "Kontras tinggi"
+    },
+    "density": {
+      "toggle": "Kepadatan ringkas"
+    },
+    "account": {
+      "title": "Akun",
+      "current": "Akun: {{name}}"
+    },
+    "notifications": {
+      "title": "Notifikasi",
+      "unread_count": "Belum dibaca: {{count}}",
+      "all_read": "Semua sudah dibaca",
+      "tab_unread": "Belum dibaca",
+      "tab_all": "Semua",
+      "filter_label": "Filter notifikasi",
+      "mark_all_read": "Tandai semua sudah dibaca",
+      "mark_read": "Tandai sudah dibaca",
+      "unread_prefix": "Belum dibaca:",
+      "group_today": "Hari ini",
+      "group_yesterday": "Kemarin",
+      "group_earlier": "Sebelumnya",
+      "none_unread": "Tidak ada notifikasi yang belum dibaca."
+    },
+    "top_navigation": "Bilah atas"
+  },
+  "settings_page": {
+    "save_reload": "Simpan dan muat ulang",
+    "back_global": "Kembali ke pengaturan global",
+    "back_service": "Kembali ke layanan",
+    "plugin": "Plugin",
+    "scope": "Cakupan",
+    "scope_global": "Pengaturan global",
+    "select_plugin_label": "Pilih plugin",
+    "select_scope_label": "Pilih tempat untuk mengedit pengaturannya",
+    "card_title": "Pengaturan",
+    "count": "{{count}} pengaturan",
+    "count_filtered": "{{shown}} dari {{total}} pengaturan",
+    "search": "Cari pengaturan…",
+    "search_label": "Cari pengaturan",
+    "no_match": "Tidak ada pengaturan yang cocok dengan pencarian Anda.",
+    "revert": "Kembalikan",
+    "revert_title": "Kembalikan perubahan",
+    "revert_message": "Mengembalikan semua edit yang belum disimpan di halaman ini ke nilai terakhir yang disimpan.",
+    "revert_confirm": "Kembalikan semua",
+    "alert_service": "Pengaturan yang dibiarkan kosong menggunakan nilai default global. Perubahan hanya berlaku untuk layanan terpilih dan diterapkan setelah Simpan dan muat ulang.",
+    "alert_global": "Perubahan berlaku untuk setiap layanan yang tidak menimpanya dan diterapkan setelah Simpan dan muat ulang.",
+    "groups_link": "Kelola grup sumber daya",
+    "groups_link_hint": "Daftar IP, jaringan, dan negara yang dapat digunakan kembali dan dirujuk oleh pengaturan plugin ini.",
+    "reload_alert_title": "Perubahan memicu pemuatan ulang instans.",
+    "reload_alert_body": "Penjadwal menerapkan ulang konfigurasi ke instans Anda setelah Anda menyimpan."
+  },
+  "raw_page": {
+    "tiles_label": "Ringkasan konfigurasi mentah",
+    "tile_settings": "Pengaturan",
+    "tile_plugins": "Plugin",
+    "tile_modified": "Diubah",
+    "tile_problems": "Masalah",
+    "search": "Cari…",
+    "search_label": "Cari konfigurasi mentah",
+    "search_prev": "Kecocokan sebelumnya",
+    "search_next": "Kecocokan berikutnya"
+  },
+  "tables": {
+    "top": {
+      "share": "Proporsi",
+      "detail": "Rincian"
     }
   }
 }

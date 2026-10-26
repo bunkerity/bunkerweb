@@ -12,7 +12,26 @@
       "linkedin": "لينكد إن",
       "reddit": "ريديت"
     },
-    "version": "الإصدار: {{version}}"
+    "version": "الإصدار: {{version}}",
+    "releases": {
+      "title": "الإصدارات الأخيرة",
+      "view_all": "عرض الكل"
+    },
+    "environment": {
+      "title": "البيئة",
+      "copy": "نسخ بيانات التشخيص",
+      "copied": "تم النسخ",
+      "help": "تُقرأ من مضيف واجهة الويب ومستوى التحكم. لا تُعرض أي متغيرات أو مفاتيح ترخيص أو عناوين قواعد بيانات.",
+      "scope_ui_host": "مضيف واجهة الويب",
+      "scope_control_plane": "مستوى التحكم",
+      "scope_instances": "المثيلات",
+      "integration": "التكامل",
+      "platform": "المنصة",
+      "bunkerweb": "BunkerWeb",
+      "database": "خادم قاعدة البيانات",
+      "registered": "مسجّل",
+      "instances_up": "{{up}} قيد التشغيل من أصل {{total}}"
+    }
   },
   "accordion": {
     "body": {
@@ -123,6 +142,10 @@
         "expiring": "تنتهي خلال ≤ 1 ساعة",
         "expiring_caption": "تدوير تلقائي",
         "permanent": "عمليات الحظر الدائمة"
+      },
+      "reasons": {
+        "head_reason": "السبب",
+        "meta": "{{count}} عمليات حظر نشطة"
       }
     },
     "flash": {
@@ -175,6 +198,30 @@
         "changed": "{{ip}}: جُدّد الحظر أو استُبدل أثناء تنفيذ الطلب ولم تتم إزالة أي شيء. ألغِ حظره مرة أخرى.",
         "partial": "{{ip}}: اكتمل جزئيًا. شغّل إلغاء الحظر مرة أخرى لإكماله: {{details}}"
       }
+    },
+    "page": {
+      "clear_all": "مسح الكل",
+      "import": "استيراد"
+    },
+    "clear_all": {
+      "title": "مسح جميع عمليات الحظر",
+      "message": "يُزيل هذا كل عمليات الحظر من جميع الخدمات والمثيلات. يُرفع حظر CrowdSec من الصف الخاص به.",
+      "phrase": "مسح الكل",
+      "confirm": "مسح جميع عمليات الحظر"
+    },
+    "import": {
+      "confirm_title": "استيراد عمليات الحظر",
+      "confirm_button": "استيراد",
+      "empty": "لم يُعثر على حظر صالح في هذا الملف. المتوقع حظر واحد في كل سطر بصيغة IP[,scope[,duration[,reason]]]، أو قائمة JSON.",
+      "too_many": "يحتوي هذا الملف على أكثر من {{max}} عملية حظر. قسّمه واستورده على أجزاء.",
+      "read_failed": "تعذّرت قراءة الملف.",
+      "confirm_message": "عمليات الحظر الموجودة في هذا الملف: {{count}}. هل تريد استيرادها؟",
+      "confirm_skipped": "الأسطر غير المقروءة التي تم تجاهلها: {{skipped}}."
+    },
+    "live": {
+      "on": "التحديث التلقائي مفعّل، كل 10 ثوانٍ.",
+      "off": "التحديث التلقائي متوقف مؤقتًا.",
+      "updated": "تم تحديث الحظر: {{added}} جديدة، و{{removed}} منتهية الصلاحية."
     }
   },
   "breadcrumb": {
@@ -401,6 +448,39 @@
       "missing_configs_parameter_configs_delete": "معامل التكوينات مفقود في /configs/delete.",
       "missing_convert_parameter_configs_convert": "معامل convert_to مفقود في /configs/convert.",
       "missing_configs_parameter_configs_convert": "معامل التكوينات مفقود في /configs/convert."
+    },
+    "console": {
+      "title": "التكوينات المخصصة",
+      "new": "تكوين جديد",
+      "edit": "تعديل التكوين",
+      "view": "عرض التكوين",
+      "clone": "استنساخ التكوين",
+      "files": "الملفات",
+      "types": "نوع التكوين",
+      "all_scopes": "جميع النطاقات",
+      "global_only": "العام فقط",
+      "service_only": "الخدمة فقط",
+      "global_legend": "ينطبق العام على كل خدمة.",
+      "service_legend": "تنطبق الخدمة على خدمة واحدة فقط.",
+      "select_file": "اختر ملفًا لمعاينة محتواه.",
+      "no_files": "لا يوجد تكوين يطابق عوامل التصفية هذه.",
+      "full_view": "عرض كامل",
+      "restore_view": "استعادة العرض",
+      "download": "تنزيل",
+      "lint": "فحص الصياغة",
+      "lint_help": "تلميحات من جهة العميل فقط. تحقّق باستخدام nginx -t قبل النشر؛ قد تُنتج التوجيهات متعددة الأسطر تحذيرات.",
+      "lint_clean": "لم تعثر فحوص جهة العميل على مشكلات.",
+      "lint_warnings": "عثرت فحوص جهة العميل على {{count}} تحذيرات. راجع تعليقات المحرر.",
+      "lint_skipped": "فحص صياغة NGINX غير متاح لتكوينات ModSecurity وCRS.",
+      "lint_semicolon": "قد تكون هناك فاصلة منقوطة مفقودة في نهاية التوجيه.",
+      "lint_unexpected_brace": "قوس إغلاق معقوف غير متوقع.",
+      "lint_brace": "قوس فتح معقوف غير مغلق.",
+      "lint_quote": "علامة اقتباس غير مغلقة.",
+      "content": "محتوى التكوين (للقراءة فقط)",
+      "template_name_locked": "لا يُسمح بإعادة تسمية تكوين مخصص مستند إلى قالب.",
+      "name_help": "استخدم الأحرف أو الأرقام أو الشرطات أو الشرطات السفلية. تُضاف اللاحقة .conf على القرص.",
+      "editor_help": "عدّل محتوى NGINX أو ModSecurity. احفظ باستخدام Ctrl+S أو Command+S.",
+      "editor_title": "محتوى التكوين"
     }
   },
   "country": {
@@ -730,6 +810,11 @@
         "most_blocked": "IP الأكثر حظرًا",
         "title": "أعلى 10 IP محظورة"
       },
+      "legend": {
+        "item": "العنصر",
+        "count": "العدد",
+        "share": "النسبة"
+      },
       "timeseries": {
         "series": "محظورة",
         "title": "الطلبات المحظورة بمرور الوقت (النطاق المحدد)"
@@ -845,6 +930,12 @@
         "page_other": "تم تحديد جميع {{count}} قوالب في هذه الصفحة.",
         "all_filtered": "تحديد جميع {{count}} قوالب المطابقة",
         "all_done": "تم تحديد جميع {{count}} قوالب المطابقة."
+      },
+      "workflows": {
+        "page_one": "تم تحديد {{count}} مسار عمل في هذه الصفحة.",
+        "page_other": "تم تحديد جميع مسارات العمل البالغ عددها {{count}} في هذه الصفحة.",
+        "all_filtered": "تحديد جميع مسارات العمل المطابقة البالغ عددها {{count}}",
+        "all_done": "تم تحديد جميع مسارات العمل المطابقة البالغ عددها {{count}}."
       }
     },
     "bulk_select_clear": "مسح التحديد",
@@ -964,7 +1055,15 @@
     "zero_records_plugins": "لم يتم العثور على إضافات مطابقة",
     "zero_records_reports": "لم يتم العثور على تقارير مطابقة",
     "zero_records_services": "لم يتم العثور على خدمات مطابقة",
-    "zero_records_templates": "لم يتم العثور على قوالب مطابقة"
+    "zero_records_templates": "لم يتم العثور على قوالب مطابقة",
+    "info_empty_workflows": "لا توجد مسارات عمل متاحة",
+    "info_filtered_workflows": "(تمت التصفية من إجمالي _MAX_ مسارات عمل)",
+    "info_workflows": "عرض {{start}} إلى {{end}} من أصل {{total}} مسارات عمل",
+    "length_menu_workflows": "عرض _MENU_ مسارات عمل",
+    "select_rows_workflows_0": "لم يتم تحديد أي مسارات عمل",
+    "select_rows_workflows_1": "تم تحديد 1 مسار عمل",
+    "select_rows_workflows_plural": "تم تحديد %d مسارات عمل",
+    "zero_records_workflows": "لم يتم العثور على مسارات عمل مطابقة"
   },
   "dev_log": {
     "copy_failed": "فشل نسخ النص:",
@@ -1220,7 +1319,9 @@
     "history": {
       "end_date": "تاريخ الانتهاء",
       "start_date": "تاريخ البدء",
-      "success": "نجاح"
+      "success": "نجاح",
+      "duration": "المدة",
+      "error": "الخطأ"
     }
   },
   "jobs": {
@@ -1238,6 +1339,10 @@
       "no_jobs_selected": "لم يتم تحديد أي مهام.",
       "error_fetching_jobs": "خطأ في جلب المهام: {{message}}",
       "missing_jobs_parameter_jobs_run": "معامل المهام مفقود في /jobs/run."
+    },
+    "card": {
+      "title": "المهام المجدولة",
+      "sub": "يشغّلها المجدول وفق فاصلها الزمني الخاص أو عند الطلب"
     }
   },
   "legend": {
@@ -1550,7 +1655,12 @@
     "upstreams": "الخوادم الخلفية",
     "workflows": "مسارات العمل",
     "edition_pro": "Pro",
-    "crowdsec": "CrowdSec"
+    "crowdsec": "CrowdSec",
+    "profile": "الملف الشخصي",
+    "plugin_insights": "إحصاءات الإضافات",
+    "plugins_overview": "نظرة عامة",
+    "filter_plugins": "تصفية الإضافات…",
+    "no_plugin_match": "لا توجد إضافة مطابقة"
   },
   "news": {
     "image_alt": "صورة الخبر",
@@ -1583,6 +1693,14 @@
         "no_content": "لا توفر هذه الإضافة صفحة مضمّنة.",
         "restricted_to_admins": "هذه الإضافة تحتوي على صفحة خاصة بها، والتي تعمل تعليمات الإضافة. يمكن فقط للمسؤولين تحميلها.",
         "dedicated_page_unavailable": "تتم إدارة هذه الإضافة في صفحة مخصصة لم يتم تحميلها بعد. أعد تشغيل واجهة الويب للوصول إليها."
+      },
+      "empty": {
+        "metrics_title": "المقاييس معطّلة",
+        "restricted_title": "للمسؤولين فقط",
+        "no_page_title": "لا توجد صفحة لعرضها",
+        "no_content_title": "لا يوجد ما يُعرض بعد",
+        "global_settings": "الإعدادات العامة",
+        "deactivated_heading": "هذه الإضافة غير مستخدمة في أي مكان"
       }
     },
     "type": {
@@ -1665,7 +1783,10 @@
       "tab_all": "الكل",
       "tab_community": "المجتمع",
       "tab_disabled": "معطل",
-      "tab_enabled": "مُمكّن"
+      "tab_enabled": "مُمكّن",
+      "always_on_badge": "مفعّلة دائمًا",
+      "always_on_tip": "إضافة أساسية يتطلبها BunkerWeb: يمكن تكوينها ولكن لا يمكن تعطيلها.",
+      "filter_label": "تصفية الإضافات"
     },
     "catalog": {
       "tab": "متاح",
@@ -1696,6 +1817,15 @@
       "flash": {
         "version_unreadable": "تعذّرت قراءة إصدار BunkerWeb ‏({{current}})، لذا لا يمكن التحقق من توافق {{id}}؛ لم يُثبَّت شيء"
       }
+    },
+    "tier": {
+      "core": "إضافة CORE",
+      "pro": "إضافة PRO",
+      "community": "إضافة مجتمعية"
+    },
+    "card": {
+      "configure": "تكوين {{name}}",
+      "metrics": "مقاييس {{name}}"
     }
   },
   "pro": {
@@ -1819,7 +1949,9 @@
       "last_activity": "آخر نشاط",
       "os": "نظام التشغيل",
       "title": "الجلسة",
-      "wipe_help": "إنهاء كل جلسة نشطة أخرى في حسابك. ستبقى مسجلاً هنا."
+      "wipe_help": "إنهاء كل جلسة نشطة أخرى في حسابك. ستبقى مسجلاً هنا.",
+      "recent_title": "الجلسات الأخيرة",
+      "load_error": "خطأ في تحميل البيانات. يُرجى المحاولة مجددًا."
     },
     "subtitle": "إدارة حسابك، والأمان، والجلسات النشطة.",
     "tab": {
@@ -1870,7 +2002,8 @@
       "missing_current_password_parameter_profile_totp_3": "معامل كلمة المرور الحالية مفقود في /profile/totp-enable.",
       "missing_current_password_parameter_profile_totp_2": "معامل كلمة المرور الحالية مفقود في /profile/totp-disable.",
       "missing_current_password_parameter_profile_totp": "معامل كلمة المرور الحالية مفقود في /profile/totp-refresh."
-    }
+    },
+    "title": "ملفك الشخصي"
   },
   "range_picker": {
     "1h": "الساعة الماضية",
@@ -1950,6 +2083,20 @@
       "source_appsec": "فحص AppSec",
       "source_failure_policy": "سياسة الفشل في AppSec",
       "technical_details": "التفاصيل التقنية"
+    },
+    "live": {
+      "on": "التحديث التلقائي مفعّل، كل 10 ثوانٍ.",
+      "off": "التحديث التلقائي متوقف مؤقتًا.",
+      "updated": "تم تحديث التقارير: {{added}} جديدة."
+    },
+    "offenders": {
+      "confirm_title": "الحظر من التقارير",
+      "confirm_one": "سيُحظر {{ip}} على كل مثيل لمدة 24 ساعة.",
+      "confirm_many": "سيُحظر {{count}} من عناوين IP على كل مثيل لمدة 24 ساعة.",
+      "show": "عرض",
+      "show_top": "الأكثر مخالفة",
+      "show_latest": "أحدث المخالفين",
+      "show_bottom": "الأقل مخالفة"
     }
   },
   "scope": {
@@ -2373,7 +2520,8 @@
         "lets_encrypt": "Let's Encrypt",
         "zerossl": "ZeroSSL",
         "real_ip": "IP الحقيقي",
-        "reverse_proxy": "وكيل عكسي"
+        "reverse_proxy": "وكيل عكسي",
+        "server": "الخادم"
       },
       "subtitle": "قم بتكوين الإعدادات الخاصة بواجهة المستخدم على الويب.",
       "title": "إعدادات واجهة المستخدم"
@@ -2391,7 +2539,9 @@
       "pro_benefit_4_description": "نصائح من الخبراء لتحسين إعداد BunkerWeb الخاص بك.",
       "pro_benefit_4_title": "استشارات مخصصة",
       "subtitle": "افتح الميزات المتقدمة واحصل على أقصى استفادة من BunkerWeb.",
-      "title": "الترقية إلى PRO"
+      "title": "الترقية إلى PRO",
+      "activate_title": "تفعيل ترخيص",
+      "activation_note": "يُفعّل الترخيص عند إكمال الإعداد."
     },
     "step4": {
       "label": {
@@ -2425,6 +2575,19 @@
       "admin_email_too_long_must_less": "البريد الإلكتروني للمسؤول طويل جدًا. يجب أن يكون أقل من 256 حرفًا.",
       "admin_username_too_long_must_less": "اسم مستخدم المسؤول طويل جدًا. يجب أن يكون أقل من 256 حرفًا.",
       "missing_either_one_following_parameters": "معامل واحد على الأقل من التالية مفقود: {{value}}."
+    },
+    "stepper_label": "خطوات الإعداد",
+    "complete": "إكمال الإعداد",
+    "from_ui_host": "من متغير البيئة UI_HOST",
+    "accordion": {
+      "general": "عام",
+      "general_hint": "الخادم · Let's Encrypt",
+      "advanced": "متقدم",
+      "advanced_hint": "الوكيل العكسي · عنوان IP الحقيقي · شهادة مخصصة"
+    },
+    "switch": {
+      "enabled": "مفعّل",
+      "disabled": "معطّل"
     }
   },
   "status": {
@@ -2522,10 +2685,32 @@
         "button": "تنزيل الحزمة",
         "help": "السجلات وإصدارات الإضافات والبيئة والأخطاء الأخيرة. يتم إخفاء هوية البيانات الخاصة.",
         "title": "تشخيصات واجهة الويب"
+      },
+      "docs": {
+        "title": "التوثيق"
+      },
+      "community": {
+        "title": "المجتمع"
       }
     },
     "subtitle": "تنزيل سجلات التصحيح، واستخراج تكوينك، والحصول على المساعدة من فريق BunkerWeb.",
-    "title": "الدعم"
+    "title": "الدعم",
+    "docs": {
+      "quickstart": "دليل البدء السريع",
+      "web_ui": "دليل واجهة الويب",
+      "troubleshooting": "استكشاف الأخطاء وإصلاحها",
+      "upgrading": "الترقية"
+    },
+    "community": {
+      "discord": "Discord",
+      "discord_help": "اسأل المجتمع والمشرفين على المشروع.",
+      "github": "مشكلات GitHub",
+      "github_help": "تقارير الأخطاء وطلبات الميزات.",
+      "reddit": "Reddit",
+      "reddit_help": "المناقشات والإعلانات."
+    },
+    "attach_title": "بيانات التشخيص المطلوب إرفاقها",
+    "attach_help": "ملفات تصدير لطلب دعم. تتطلب إذن الكتابة وتُخفي الأسرار."
   },
   "tab": {
     "custom_certificate": "شهادة مخصصة",
@@ -2836,7 +3021,19 @@
       "refused": "لم يُستورد القالب: {{reason}}",
       "too_large": "لم يتم استيراد القالب: حجم الملف أكبر من 1 ميغابايت",
       "unreadable": "لم يتم استيراد القالب: تعذرت قراءة الملف"
-    }
+    },
+    "features_builtin": "الميزات المدمجة",
+    "features_configs": "التكوينات المخصصة",
+    "features_plugins": "الإضافات",
+    "features_help": "ما يقدّمه هذا القالب. افتح القالب لعرض الإعدادات الفعلية أو تغييرها.",
+    "features_of": "عرض ميزات {{name}}",
+    "features_title": "ميزات القالب",
+    "managed_by": "يديره {{owner}}: لا يمكن تغييره أو حذفه هنا.",
+    "more_actions": "إجراءات إضافية لـ {{name}}",
+    "no_match": "لا يوجد قالب يطابق هذا البحث.",
+    "open_template": "فتح القالب",
+    "read_only": "للقراءة فقط",
+    "search": "البحث في القوالب..."
   },
   "theme": {
     "dark": "داكن",
@@ -2872,7 +3069,15 @@
     "open_live": "عرض مباشر",
     "updated": "آخر تحديث",
     "blocked_request": "طلب محظور",
-    "blocked_requests": "طلبات محظورة"
+    "blocked_requests": "طلبات محظورة",
+    "attacks_24h": "المحظور خلال آخر 24 ساعة",
+    "rolling_window": "نافذة زمنية متحركة، تُحدّث كل 30 ثانية تقريبًا",
+    "ticker_caption": "أحدث الطلبات المحظورة",
+    "col_time": "الوقت",
+    "col_ip": "عنوان IP",
+    "col_reason": "السبب",
+    "col_origin": "المصدر",
+    "col_target": "الهدف"
   },
   "toast": {
     "autoconf_disclaimer_bold": "إذا تم إزالة الخدمة أو إعادة تشغيلها، فسيتم فقد تكوين واجهة المستخدم الخاص بك.",
@@ -3344,7 +3549,19 @@
     "upload_invalid": "اختر شهادة عامة صالحة ومفتاحها الخاص المطابق.",
     "valid_days": "مدة الصلاحية (بالأيام)",
     "valid_from": "تبدأ الصلاحية من",
-    "valid_to": "تنتهي الصلاحية في"
+    "valid_to": "تنتهي الصلاحية في",
+    "renew_due_short": "حان التجديد",
+    "select_all": "تحديد جميع الشهادات",
+    "issuers_meta": "{{count}} شهادات",
+    "bulk": {
+      "renew": "تجديد الموقّعة ذاتيًا",
+      "download": "تنزيل سلاسل الشهادات",
+      "delete": "حذف المحدد",
+      "none_eligible": "لا يمكن لأي من الشهادات المحددة تنفيذ هذا الإجراء.",
+      "confirm_renew": "الشهادات الموقّعة ذاتيًا المراد تجديدها: {{count}}. هل تريد المتابعة؟",
+      "confirm_delete": "الشهادات المراد حذفها: {{count}}. لا يمكن التراجع عن ذلك. هل تريد المتابعة؟",
+      "skipped": "الشهادات المحددة التي لا يمكنها تنفيذ هذا الإجراء وتم تخطيها: {{skipped}}."
+    }
   },
   "resource_groups": {
     "add_entry": "إضافة إدخال",
@@ -3426,7 +3643,33 @@
       "entry_invalid_value": "الإدخال {{index}} يحتوي على قيمة غير صالحة",
       "entry_comment_too_long": "الإدخال {{index}} يحتوي على تعليق طويل جدًا",
       "source_required": "مجموعة الموارد المصدر مطلوبة"
-    }
+    },
+    "access": "الوصول",
+    "access_readonly": "للقراءة فقط",
+    "access_write": "الكتابة",
+    "filter_values": "تصفية القيم...",
+    "no_value_match": "لا توجد قيمة تطابق عامل التصفية هذا.",
+    "origin": "المصدر",
+    "origin_plugin": "مرفق مع الإضافة {{plugin}}",
+    "origin_tip": {
+      "api": "تم إنشاؤه أو مزامنته عبر API.",
+      "autoconf": "تم إنشاؤه بواسطة متحكم autoconf.",
+      "download": "تم تنزيله من مصدر بعيد.",
+      "manual": "تم إنشاؤه يدويًا أو من ملف تكوين.",
+      "scheduler": "تم إنشاؤه بواسطة المجدول.",
+      "ui": "تم إنشاؤه عبر واجهة الويب.",
+      "wizard": "تم إنشاؤه بواسطة معالج الإعداد؛ ويظل قابلًا للتعديل."
+    },
+    "plugins_compatible": "الإضافات المتوافقة",
+    "plugins_compatible_help": "إضافات تقبل إعداداتها أنواع القيم في هذه المجموعة. تُدرج المراجع الفعلية ضمن الاستخدام.",
+    "updated": "تاريخ التحديث",
+    "values_compat": "متوافق مع: {{plugins}}",
+    "values_copied": "تم النسخ",
+    "values_title": "قيم {{name}}",
+    "view_values_of": "عرض قيم {{name}}",
+    "all_kinds": "الكل",
+    "plugins_count": "{{count}} إضافة",
+    "plugins_count_plural": "{{count}} إضافات"
   },
   "validation": {
     "default_field_name": "هذا الحقل",
@@ -3492,7 +3735,27 @@
       "error_fetching_web_cache_status": "خطأ في جلب حالة ذاكرة التخزين المؤقت للويب: {{message}}",
       "purged_for_url": "تم تفريغ ذاكرة التخزين المؤقت للويب لـ {{url}}",
       "purged_all_entries": "تم تفريغ ذاكرة التخزين المؤقت للويب (جميع الإدخالات)"
-    }
+    },
+    "server_side_note": "الذاكرة المؤقتة من جهة الخادم فقط. تدير هذه الصفحة ذاكرة الوكيل العكسي المؤقتة المخزّنة على كل مثيل BunkerWeb. لا تتأثر الاستجابات المحفوظة بالفعل في متصفحات الزوار.",
+    "counters_window": "منذ إعادة تشغيل كل مثيل",
+    "counters_window_help": "تُحصي منذ آخر إعادة تشغيل لكل مثيل، لا خلال فترة ثابتة.",
+    "status_desc": {
+      "hit": "قُدّم مباشرة من الذاكرة المؤقتة",
+      "miss": "غير مخزّن مؤقتًا: جُلب من الخادم الخلفي وخُزّن",
+      "bypass": "تم تجاوز التخزين المؤقت لهذا الطلب",
+      "expired": "انتهت مدة الصلاحية: أُعيد الجلب من الخادم الخلفي",
+      "stale": "قُدّم محتوى قديم لتعطّل الخادم الخلفي",
+      "updating": "قُدّم محتوى قديم أثناء إجراء التحديث",
+      "revalidated": "إعادة جلب مشروطة: أفاد الخادم الخلفي بأنه لا يزال صالحًا"
+    },
+    "no_requests_for": "لا توجد طلبات لـ:",
+    "no_counters": "لم يسجّل هذا المثيل أي طلب مخزّن مؤقتًا بعد.",
+    "available_tip": "مجلد الذاكرة المؤقتة موجود على هذا المثيل. يظهر ما إذا كانت الخدمة تستخدمه ضمن تفعيل الخدمة.",
+    "compact": "مضغوط",
+    "invalidate": "إبطال الصلاحية",
+    "purge_a_url": "مسح عنوان URL",
+    "danger_zone": "منطقة الخطر",
+    "purge_all_phrase": "مسح الجميع"
   },
   "compose": {
     "always_on": "دائمًا",
@@ -3574,7 +3837,26 @@
       "target_required": "هدف إعادة التوجيه مطلوب",
       "status_code_must_be_one_of": "يجب أن يكون رمز الحالة أحد {{value}}",
       "at_least_one_service_required": "مطلوب خدمة واحدة على الأقل"
-    }
+    },
+    "all_codes": "جميع رموز الحالة",
+    "append_column": "إلحاق URI",
+    "card_subtitle": "عمليات إعادة توجيه المسارات والخدمات التي تنطبق عليها",
+    "count": "{{count}} إعادة توجيه",
+    "count_plural": "{{count}} عمليات إعادة توجيه",
+    "detach_shared": "إعادة التوجيه هذه مشتركة. يؤدي فصلها إلى إزالتها من تلك الخدمة فقط؛ وتحتفظ بها الخدمات الأخرى.",
+    "kpi_configured": "عمليات إعادة التوجيه المكوّنة",
+    "kpi_detached_caption": "اربطها بخدمة لتدخل حيز التنفيذ",
+    "kpi_loaded_only": "من بين أول {{count}} تم تحميلها",
+    "kpi_permanent": "دائمة",
+    "kpi_permanent_caption": "301 أو 308، تخزّنها المتصفحات مؤقتًا",
+    "kpi_services": "الخدمات المرتبطة",
+    "kpi_services_caption": "خدمات ذات إعادة توجيه واحدة على الأقل",
+    "no_match": "لا توجد إعادة توجيه تطابق عوامل التصفية هذه.",
+    "services_copy": "{{name}}: {{from}} → {{to}}",
+    "services_count": "{{count}} خدمة",
+    "services_count_plural": "{{count}} خدمات",
+    "services_title": "الخدمات التي تستخدم إعادة التوجيه هذه",
+    "to_url_help": "عنوان URL كامل يبدأ بـ http:// أو https://. الأهداف النسبية غير مدعومة."
   },
   "upstreams": {
     "add_server": "أضف الخادم",
@@ -3652,7 +3934,34 @@
       "method_must_be_one_of": "يجب أن تكون الطريقة إحدى {{value}}",
       "keepalive_must_be_positive_whole_number": "يجب أن يكون عدد keepalive رقمًا صحيحًا موجبًا",
       "at_least_one_service_required": "مطلوب خدمة واحدة على الأقل"
-    }
+    },
+    "all_protocols": "جميع البروتوكولات",
+    "all_tls": "جميع إعدادات TLS",
+    "card_subtitle": "تجمعات الخوادم الخلفية والخدمات التي تتصل بها عبر الوكيل",
+    "count": "{{count}} مجموعة خوادم خلفية",
+    "count_plural": "{{count}} مجموعات خوادم خلفية",
+    "detach_shared": "مجموعة الخوادم الخلفية هذه مشتركة. يؤدي فصلها إلى إزالتها من تلك الخدمة والمسار فقط؛ وتحتفظ بها الارتباطات الأخرى.",
+    "keepalive_off": "معطّل",
+    "kpi_loaded_only": "من بين أول {{count}} تم تحميلها",
+    "kpi_not_attached": "{{count}} غير مرتبطة",
+    "kpi_roles": "{{primary}} أساسي · {{backup}} احتياطي · {{down}} متوقف (حسب التكوين)",
+    "kpi_services": "الخدمات المرتبطة",
+    "kpi_services_caption": "خدمات تتصل بتجمع عبر الوكيل",
+    "kpi_tls": "TLS إلى الخوادم الخلفية",
+    "kpi_tls_caption": "تجمعات مكوّنة للتواصل مع خوادمها عبر TLS",
+    "members_copy": "{{name}}: {{count}} خادم",
+    "members_copy_plural": "{{name}}: {{count}} خوادم",
+    "members_title": "الخوادم في هذا التجمع الخلفي",
+    "no_match": "لا توجد مجموعة خوادم خلفية تطابق عوامل التصفية هذه.",
+    "servers_count": "{{count}} خادم",
+    "servers_count_plural": "{{count}} خوادم",
+    "services_copy": "{{name}}: {{servers}}",
+    "services_count": "{{count}} خدمة",
+    "services_count_plural": "{{count}} خدمات",
+    "services_title": "الخدمات التي تستخدم مجموعة الخوادم الخلفية هذه",
+    "tls": "TLS إلى الخوادم الخلفية",
+    "tls_no": "غير مشفّر",
+    "tls_yes": "TLS"
   },
   "workflows": {
     "act_block": "حظر",
@@ -3705,7 +4014,8 @@
       "moveRuleUp": "نقل القاعدة {{n}} لأعلى",
       "moveRuleDown": "نقل القاعدة {{n}} لأسفل",
       "moreActionsForRule": "إجراءات إضافية للقاعدة {{n}}",
-      "ruleCard": "القاعدة {{n}} من {{total}} — {{name}}"
+      "ruleCard": "القاعدة {{n}} من {{total}} — {{name}}",
+      "ruleTools": "إجراءات القاعدة {{n}}"
     },
     "attach": "إرفاق بالخدمات",
     "attach_help": "يتم تطبيق القواعد فقط على الخدمات التي تم إرفاق سير العمل بها.",
@@ -3789,7 +4099,9 @@
       "enable": "تمكين القاعدة",
       "top": "تشغيل أولًا",
       "moveTo": "النقل إلى الموضع {{n}}",
-      "staysAt": "يبقى في الموضع {{n}}"
+      "staysAt": "يبقى في الموضع {{n}}",
+      "header": "إجراءات القاعدة",
+      "order": "الترتيب"
     },
     "move": {
       "first": "تشغيل أولًا",
@@ -3989,6 +4301,115 @@
       "name_required": "اسم سير العمل مطلوب",
       "service_list_not_read_reopen_page": "تعذّرت قراءة قائمة الخدمات؛ أعد فتح الصفحة وحاول مرة أخرى"
     },
+    "port": {
+      "list_subtitle": "القواعد والخدمات المرتبطة بكل مسار عمل",
+      "row_details": "تفاصيل مسار العمل",
+      "select_workflows": "تحديد مسارات العمل",
+      "created": "تاريخ الإنشاء",
+      "updated": "تاريخ التحديث",
+      "total_rules": "{{count}} إجمالًا",
+      "active_rules": "{{count}} نشطة",
+      "more": "إجراءات إضافية لـ {{name}}",
+      "export_scope": "يتضمن تصدير الجدول الصفوف المصفّاة والأعمدة المرئية. يتضمن تصدير JSON التعريفات الأصلية لمسارات العمل المحددة فقط، مفهرسة حسب المعرّف؛ لا ضمان لإعادة الاستيراد.",
+      "export_definitions": "التعريفات المحددة (JSON)",
+      "export_loading": "جارٍ قراءة تعريفات مسارات العمل المحددة…",
+      "export_done": "تم تصدير التعريفات المحددة. لا يضمن هذا الملف إعادة الاستيراد.",
+      "export_failed": "فشل التصدير؛ لم يتم تنزيل أي ملف.",
+      "detach_before_delete": "افصل مسار العمل هذا عن كل خدمة قبل حذفه. لا يفصل الحذف الخدمات تلقائيًا مطلقًا.",
+      "details": "التفاصيل",
+      "csv": "CSV",
+      "excel": "Excel",
+      "attachment": "الارتباط",
+      "attachment_any": "الكل",
+      "attachment_attached": "مرتبط",
+      "services_count": "الخدمات: {{count}}",
+      "services_open": "عرض الخدمات المرتبطة بـ {{name}}",
+      "services_title": "الخدمات المرتبطة بـ {{name}}",
+      "services_help": "يؤدي الفصل إلى إزالة مسار العمل هذا من تلك الخدمة فقط. يبقى مسار العمل وقواعده دون تغيير.",
+      "services_none": "مسار العمل هذا غير مرتبط بأي خدمة."
+    },
+    "shell": {
+      "tabs_label": "عرض مسارات العمل",
+      "tab_overview": "نظرة عامة",
+      "tab_config": "التكوين",
+      "tab_unsaved": "غير محفوظ",
+      "config_needs_workflow": "أنشئ مسار عمل لفتح تكوينه",
+      "view_label": "العرض",
+      "pick_label": "مسار العمل",
+      "read_only": "للقراءة فقط",
+      "draft_title": "تغييرات غير محفوظة في {{name}}",
+      "draft_switch_message": "سيترك فتح {{target}} تغييرات غير محفوظة على القواعد في {{name}}. لا يمكن فتح سوى مسودة واحدة في كل مرة: احفظها أو تجاهلها أو ابقَ هنا.",
+      "draft_save": "حفظ ومتابعة",
+      "draft_discard": "تجاهل التغييرات",
+      "draft_save_failed": "تعذّر حفظ مسار العمل؛ لم يتم تجاهل أي شيء.",
+      "draft_restored": "تمت استعادة التغييرات غير المحفوظة لمسار العمل هذا. احفظ لتطبيقها، أو بدّل مسار العمل لتجاهلها.",
+      "draft_stale": "حُفظ مسار العمل هذا في مكان آخر بعد بدء مسودتك، لذا تم تجاهل المسودة."
+    },
+    "toolbar": {
+      "display": "عرض القواعد",
+      "filters": "عوامل التصفية",
+      "view": "عرض ترتيب القواعد",
+      "simplified": "مبسّط",
+      "detailed": "مفصّل",
+      "limit_height": "تقييد الارتفاع",
+      "full_height": "الارتفاع الكامل",
+      "expand_all": "توسيع الكل",
+      "collapse_all": "طي الكل",
+      "actions": "إجراءات مسار العمل",
+      "filter_rules": "تصفية القواعد",
+      "filter_name": "الاسم",
+      "filter_name_placeholder": "البحث باسم القاعدة…",
+      "filter_state": "الحالة",
+      "any_state": "أي حالة",
+      "state_on": "مفعّلة",
+      "state_off": "معطّلة",
+      "filter_action": "الإجراء",
+      "any_action": "أي إجراء",
+      "reset": "إعادة تعيين",
+      "back_to_top": "العودة إلى الأعلى",
+      "n_of_m": "{{shown}} من أصل {{total}} قواعد",
+      "reorder_paused": "تتوقف إعادة الترتيب مؤقتًا ما دام عامل تصفية يُخفي قواعد.",
+      "no_match": "لا توجد قاعدة تطابق عوامل التصفية هذه"
+    },
+    "inspector": {
+      "apply": "تطبيق",
+      "cancel": "إلغاء",
+      "cancel_title": "إلغاء: استعادة القاعدة كما كانت عند فتحها",
+      "apply_title": "تطبيق: الاحتفاظ بهذه التعديلات في المسودة؛ زر الحفظ في الصفحة هو ما يخزّنها",
+      "cancelled": "أُلغيت تعديلات القاعدة {{n}}؛ عادت القاعدة كما كانت عند فتحها."
+    },
+    "regex_help": "يُطبّق حدّان منفصلان للتعبيرات النمطية. عند الكتابة: يمكن لمسارات العمل المرتبطة بخدمة واحدة أن تحتوي على 50 شرط regex كحد أقصى إجمالًا، ويُرفض الحفظ أو الربط عند تجاوز ذلك. عند التشغيل: يُجمّع كل مثيل حتى WORKFLOWS_REGEX_BUDGET من التعبيرات النمطية المختلفة (512 افتراضيًا، مشتركة بين جميع مسارات العمل)؛ لا يُقيّم أي regex يتجاوز هذه الميزانية ويُرجع UNKNOWN، فلا يمكن لقاعدته أن تطابق.",
+    "conseq": {
+      "stop": "يوقف السلسلة",
+      "skip": "لا يُنفّذ أبدًا"
+    },
+    "sum": {
+      "leaf": {
+        "ip": "IP",
+        "country": "البلد",
+        "asn": "ASN",
+        "method": "الطريقة"
+      },
+      "not": "لم يتحقق الشرط «{{what}}»",
+      "uri": "كان URI {{match}} {{value}}",
+      "isOne": "كانت قيمة {{label}} هي {{value}}",
+      "isOneOf": "كانت قيمة {{label}} واحدة من {{values}}",
+      "challenge": "اعرض اختبار التحقق من {{provider}}",
+      "block": "احظر الطلب",
+      "every": "ورد أي طلب",
+      "gate": "تجاوز عدد الطلبات {{count}} خلال {{window}} ثانية لكل IP",
+      "crowdsec_source": "مصدر CrowdSec",
+      "crowdsec_remediation": "معالجة CrowdSec",
+      "group_ip": "كان IP ضمن المجموعة {{name}}",
+      "group_country": "كان البلد ضمن المجموعة {{name}}",
+      "group_asn": "كان ASN ضمن المجموعة {{name}}",
+      "redirect": "أعد التوجيه إلى {{url}} ({{code}})",
+      "blockStatus": "احظر الطلب بالرمز {{code}}"
+    },
+    "act_settings_block": "إعدادات الحظر",
+    "act_settings_redirect": "إعدادات إعادة التوجيه",
+    "act_settings_challenge": "إعدادات اختبار التحقق",
+    "act_settings_generic": "إعدادات الإجراء",
     "reason": {
       "sentence_block": "سير عمل الأمان «{{workflow}}»: طلب محظور",
       "sentence_redirect": "سير عمل الأمان «{{workflow}}»: تمت إعادة توجيه الطلب",
@@ -4140,7 +4561,17 @@
     "unreachable_help": "تُقرأ التوقيتات من المثيلات نفسها، لذلك لم يستجب أي منها — أو لم يعالج أي منها طلبًا بعد.",
     "flash": {
       "error_fetching_plugin_timings": "خطأ في جلب توقيتات الإضافة: {{message}}"
-    }
+    },
+    "phases_sub": "الوقت الذي تستغرقه كل إضافة في كل مرحلة",
+    "toolbar": "أدوات جدول التوقيتات",
+    "columns": "الأعمدة",
+    "export_csv": "تصدير CSV",
+    "all_phases": "جميع المراحل",
+    "search_placeholder": "البحث عن إضافة أو مرحلة…",
+    "caption": "توقيتات الإضافات لكل مرحلة، مرتّبة افتراضيًا حسب الوقت الإجمالي",
+    "no_share": "بلا نسبة",
+    "no_match": "لا يوجد توقيت يطابق عوامل التصفية هذه",
+    "no_share_hint": "لا تُشغّل هذه المرحلة مرة واحدة لكل طلب، لذا ليس لها نسبة."
   },
   "whatsnew": {
     "missing_action": "افتح سجل التغييرات على GitHub",
@@ -4468,6 +4899,117 @@
       "couldn_t_connect_redis": "تعذّر الاتصال بـ redis",
       "missing_form": "{{key}} مفقود في النموذج",
       "invalid_request": "طلب غير صالح"
+    }
+  },
+  "table_system": {
+    "filters": "عوامل التصفية",
+    "advanced_filters": "عوامل تصفية متقدمة",
+    "active_filters": "عوامل التصفية، {{count}} نشطة",
+    "filter": "تصفية",
+    "any": "أيّ",
+    "visible_columns": "الأعمدة المرئية",
+    "column_count": "{{visible}} من أصل {{total}}",
+    "show_all": "عرض الكل",
+    "multiple_actions": "إجراءات متعددة للعناصر المحددة",
+    "upload_hint": "اسحب وأفلت أو انقر للرفع",
+    "confirm_title": "تأكيد الإجراء",
+    "confirm": "تأكيد",
+    "type_phrase": "اكتب {{phrase}} للتأكيد",
+    "leave_title": "المغادرة دون حفظ؟",
+    "leave_message": "ستُفقد تغييراتك غير المحفوظة.",
+    "leave": "المغادرة دون حفظ",
+    "stay": "متابعة التعديل"
+  },
+  "shell": {
+    "skip_to_content": "تجاوز إلى المحتوى الرئيسي",
+    "main_navigation": "التنقل الرئيسي",
+    "star_us": "امنح BunkerWeb نجمة على GitHub",
+    "search": {
+      "placeholder": "البحث في الصفحات والإضافات والخدمات…",
+      "label": "البحث في الصفحات والإضافات والخدمات",
+      "results": "نتائج البحث",
+      "kind_page": "صفحة",
+      "kind_plugin": "إضافة",
+      "kind_service": "خدمة",
+      "no_match": "لا توجد نتائج لـ «{{query}}»",
+      "status_results": "النتائج: {{count}}",
+      "loading_services": "جارٍ تحميل الخدمات…"
+    },
+    "language": {
+      "title": "اللغة"
+    },
+    "theme": {
+      "title": "المظهر",
+      "system_hint": "يتبع نظام التشغيل لديك"
+    },
+    "contrast": {
+      "toggle": "تباين عالٍ"
+    },
+    "density": {
+      "toggle": "كثافة مضغوطة"
+    },
+    "account": {
+      "title": "الحساب",
+      "current": "الحساب: {{name}}"
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "unread_count": "غير المقروءة: {{count}}",
+      "all_read": "تمت قراءة الجميع",
+      "tab_unread": "غير المقروءة",
+      "tab_all": "الكل",
+      "filter_label": "تصفية الإشعارات",
+      "mark_all_read": "وضع علامة مقروء على الكل",
+      "mark_read": "وضع علامة مقروء",
+      "unread_prefix": "غير مقروء:",
+      "group_today": "اليوم",
+      "group_yesterday": "أمس",
+      "group_earlier": "سابقًا",
+      "none_unread": "لا توجد إشعارات غير مقروءة."
+    },
+    "top_navigation": "الشريط العلوي"
+  },
+  "settings_page": {
+    "save_reload": "حفظ وإعادة تحميل",
+    "back_global": "العودة إلى الإعدادات العامة",
+    "back_service": "العودة إلى الخدمة",
+    "plugin": "الإضافة",
+    "scope": "النطاق",
+    "scope_global": "الإعدادات العامة",
+    "select_plugin_label": "اختر إضافة",
+    "select_scope_label": "اختر مكان تعديل إعداداتها",
+    "card_title": "الإعدادات",
+    "count": "{{count}} إعدادات",
+    "count_filtered": "{{shown}} من أصل {{total}} إعدادات",
+    "search": "البحث في الإعدادات…",
+    "search_label": "البحث في الإعدادات",
+    "no_match": "لا يوجد إعداد يطابق بحثك.",
+    "revert": "تراجع",
+    "revert_title": "التراجع عن التغييرات",
+    "revert_message": "يُعيد هذا كل تعديل غير محفوظ في هذه الصفحة إلى آخر قيمة محفوظة له.",
+    "revert_confirm": "التراجع عن الكل",
+    "alert_service": "الإعدادات التي تُترك فارغة تعود إلى القيم الافتراضية العامة. تنطبق التغييرات على الخدمة المحددة فقط وتدخل حيز التنفيذ بعد الحفظ وإعادة التحميل.",
+    "alert_global": "تنطبق التغييرات على كل خدمة لا تتجاوزها بإعداداتها الخاصة، وتدخل حيز التنفيذ بعد الحفظ وإعادة التحميل.",
+    "groups_link": "إدارة مجموعات الموارد",
+    "groups_link_hint": "قوائم قابلة لإعادة الاستخدام لعناوين IP والشبكات والبلدان يمكن لإعدادات هذه الإضافة الرجوع إليها.",
+    "reload_alert_title": "تؤدي التغييرات إلى إعادة تحميل المثيلات.",
+    "reload_alert_body": "يُعيد المجدول تطبيق التكوين على مثيلاتك بمجرد الحفظ."
+  },
+  "raw_page": {
+    "tiles_label": "ملخص التكوين الخام",
+    "tile_settings": "الإعدادات",
+    "tile_plugins": "الإضافات",
+    "tile_modified": "معدّل",
+    "tile_problems": "المشكلات",
+    "search": "بحث…",
+    "search_label": "البحث في التكوين الخام",
+    "search_prev": "التطابق السابق",
+    "search_next": "التطابق التالي"
+  },
+  "tables": {
+    "top": {
+      "share": "النسبة",
+      "detail": "التفصيل"
     }
   },
   "main": {

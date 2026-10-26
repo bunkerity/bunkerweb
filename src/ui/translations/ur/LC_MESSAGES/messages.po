@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "اس کے ساتھ بنایا گیا"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "کاپی ہو گیا"
+
+msgid "about.environment.copy"
+msgstr "تشخیصی معلومات کاپی کریں"
+
+msgid "about.environment.database"
+msgstr "ڈیٹابیس سرور"
+
+msgid "about.environment.help"
+msgstr "ویب UI ہوسٹ اور کنٹرول پلین سے پڑھا گیا۔ کوئی متغیر، لائسنس کلید یا ڈیٹابیس کا پتہ نہیں دکھایا جاتا۔"
+
+msgid "about.environment.instances_up"
+msgstr "%(total)s میں سے %(up)s چل رہے ہیں"
+
+msgid "about.environment.integration"
+msgstr "انضمام"
+
+msgid "about.environment.platform"
+msgstr "پلیٹ فارم"
+
+msgid "about.environment.registered"
+msgstr "رجسٹرڈ"
+
+msgid "about.environment.scope_control_plane"
+msgstr "کنٹرول پلین"
+
+msgid "about.environment.scope_instances"
+msgstr "انسٹینسز"
+
+msgid "about.environment.scope_ui_host"
+msgstr "ویب UI ہوسٹ"
+
+msgid "about.environment.title"
+msgstr "ماحول"
+
 msgid "about.gnu_license"
 msgstr "GNU Affero جنرل پبلک لائسنس v3.0"
 
 msgid "about.license_title"
 msgstr "لائسنس"
+
+msgid "about.releases.title"
+msgstr "حالیہ ریلیزز"
+
+msgid "about.releases.view_all"
+msgstr "سب دیکھیں"
 
 msgid "about.social.discord"
 msgstr "ڈسکارڈ"
@@ -274,6 +319,18 @@ msgstr "منتخب حد"
 msgid "bans.chart.timeseries.title"
 msgstr "ہر وقفے میں فعال پابندیاں"
 
+msgid "bans.clear_all.confirm"
+msgstr "تمام پابندیاں صاف کریں"
+
+msgid "bans.clear_all.message"
+msgstr "اس سے ہر سروس اور انسٹینس کی تمام پابندیاں ہٹ جاتی ہیں۔ CrowdSec کی پابندی اس کی اپنی قطار سے ہٹائی جاتی ہے۔"
+
+msgid "bans.clear_all.phrase"
+msgstr "سب صاف کریں"
+
+msgid "bans.clear_all.title"
+msgstr "تمام پابندیاں صاف کریں"
+
 msgid "bans.crowdsec.confirm"
 msgstr "فیصلے حذف کریں اور پابندی ہٹائیں"
 
@@ -394,11 +451,53 @@ msgstr "%(ip)s کے لیے پابندی کی مدت اپ ڈیٹ کرنے میں 
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s کے لیے پابندی کی مدت کامیابی سے اپ ڈیٹ ہو گئی۔"
 
+msgid "bans.import.confirm_button"
+msgstr "درآمد کریں"
+
+msgid "bans.import.confirm_message"
+msgstr "اس فائل میں ملنے والی پابندیاں: %(count)s۔ انہیں درآمد کریں؟"
+
+msgid "bans.import.confirm_skipped"
+msgstr "ناقابلِ مطالعہ سطریں نظر انداز کی گئیں: %(skipped)s۔"
+
+msgid "bans.import.confirm_title"
+msgstr "پابندیاں درآمد کریں"
+
+msgid "bans.import.empty"
+msgstr "اس فائل میں کوئی درست پابندی نہیں ملی۔ ہر سطر میں ایک پابندی، IP[,scope[,duration[,reason]]] کی شکل میں، یا JSON فہرست درکار ہے۔"
+
+msgid "bans.import.read_failed"
+msgstr "فائل پڑھی نہیں جا سکی۔"
+
+msgid "bans.import.too_many"
+msgstr "اس فائل میں %(max)s سے زیادہ پابندیاں ہیں۔ اسے تقسیم کر کے حصوں میں درآمد کریں۔"
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "CrowdSec لیز"
 
+msgid "bans.live.off"
+msgstr "خودکار ریفریش موقوف ہے۔"
+
+msgid "bans.live.on"
+msgstr "خودکار ریفریش فعال ہے، ہر 10 سیکنڈ بعد۔"
+
+msgid "bans.live.updated"
+msgstr "پابندیاں تازہ ہو گئیں: %(added)s نئی، %(removed)s کی مدت ختم۔"
+
+msgid "bans.page.clear_all"
+msgstr "سب صاف کریں"
+
+msgid "bans.page.import"
+msgstr "درآمد کریں"
+
 msgid "bans.stats.card.by_reason"
 msgstr "وجہ کے لحاظ سے پابندیاں"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "وجہ"
+
+msgid "bans.stats.reasons.meta"
+msgstr "%(count)s فعال پابندیاں"
 
 msgid "bans.stats.tile.active"
 msgstr "فعال پابندیاں"
@@ -934,6 +1033,27 @@ msgstr "سرٹیفکیٹ کا جائزہ لیں"
 msgid "certificates.browse_key"
 msgstr "پرائیویٹ کی کو جائزہ لیں"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "حذف کرنے کے لیے سرٹیفکیٹس: %(count)s۔ یہ واپس نہیں ہو سکتا۔ جاری رکھیں؟"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "تجدید کے لیے خود دستخط شدہ سرٹیفکیٹس: %(count)s۔ جاری رکھیں؟"
+
+msgid "certificates.bulk.delete"
+msgstr "منتخب کردہ حذف کریں"
+
+msgid "certificates.bulk.download"
+msgstr "سرٹیفکیٹ چینز ڈاؤن لوڈ کریں"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "منتخب سرٹیفکیٹس میں سے کوئی یہ کارروائی نہیں کر سکتا۔"
+
+msgid "certificates.bulk.renew"
+msgstr "خود دستخط شدہ سرٹیفکیٹس کی تجدید کریں"
+
+msgid "certificates.bulk.skipped"
+msgstr "یہ کارروائی نہ کر سکنے والے منتخب سرٹیفکیٹس چھوڑ دیے گئے: %(skipped)s۔"
+
 msgid "certificates.common_name"
 msgstr "اسم"
 
@@ -1117,6 +1237,9 @@ msgstr "ایسسر"
 msgid "certificates.issuers"
 msgstr "اہم ایسسر"
 
+msgid "certificates.issuers_meta"
+msgstr "%(count)s سرٹیفکیٹس"
+
 msgid "certificates.key_drop"
 msgstr "متوازی پرائیویٹ کی یہاں ڈالیں"
 
@@ -1180,6 +1303,9 @@ msgstr "ڈیٹا بیس readonly ہے۔ سرٹیفکیٹ کا جائزہ لیا 
 msgid "certificates.renew_due"
 msgstr "چیک/رینو ڈیو"
 
+msgid "certificates.renew_due_short"
+msgstr "تجدید درکار"
+
 msgid "certificates.sans"
 msgstr "موضوع کے متبادل نام"
 
@@ -1194,6 +1320,9 @@ msgstr "ACME جاری کرنے کا شیڈول ترتیب کریں"
 
 msgid "certificates.search"
 msgstr "نام، مشترکہ نام، SAN، ایسسر، یا اثر کی تلاش کریں…"
+
+msgid "certificates.select_all"
+msgstr "تمام سرٹیفکیٹس منتخب کریں"
 
 msgid "certificates.serial"
 msgstr "سلسل نمبر"
@@ -1323,6 +1452,99 @@ msgstr "%(count)s کو مزید دکھائیں"
 
 msgid "compose.unavailable"
 msgstr "پلگ ان کی فہرست لوڈ نہیں ہو سکی، اس لیے یہ صفحہ محفوظ طریقے سے ترمیم نہیں کیا جا سکتا۔ API کے جواب ملنے کے بعد اسے دوبارہ لوڈ کریں۔"
+
+msgid "configs.console.all_scopes"
+msgstr "تمام دائرہ ہائے کار"
+
+msgid "configs.console.clone"
+msgstr "کنفیگریشن کی نقل بنائیں"
+
+msgid "configs.console.content"
+msgstr "کنفیگریشن کا مواد (صرف پڑھنے کے لیے)"
+
+msgid "configs.console.download"
+msgstr "ڈاؤن لوڈ کریں"
+
+msgid "configs.console.edit"
+msgstr "کنفیگریشن میں ترمیم کریں"
+
+msgid "configs.console.editor_help"
+msgstr "NGINX یا ModSecurity کے مواد میں ترمیم کریں۔ Ctrl+S یا Command+S سے محفوظ کریں۔"
+
+msgid "configs.console.editor_title"
+msgstr "کنفیگریشن کا مواد"
+
+msgid "configs.console.files"
+msgstr "فائلیں"
+
+msgid "configs.console.full_view"
+msgstr "مکمل منظر"
+
+msgid "configs.console.global_legend"
+msgstr "عالمی کنفیگریشن ہر سروس پر لاگو ہوتی ہے۔"
+
+msgid "configs.console.global_only"
+msgstr "صرف عالمی"
+
+msgid "configs.console.lint"
+msgstr "نحوی جانچ"
+
+msgid "configs.console.lint_brace"
+msgstr "افتتاحی بریس بند نہیں ہوا۔"
+
+msgid "configs.console.lint_clean"
+msgstr "کلائنٹ کی طرف کی جانچ میں کوئی مسئلہ نہیں ملا۔"
+
+msgid "configs.console.lint_help"
+msgstr "صرف کلائنٹ کی طرف سے اشارے۔ تعیناتی سے پہلے nginx -t سے تصدیق کریں، متعدد سطروں والی ہدایات انتباہات پیدا کر سکتی ہیں۔"
+
+msgid "configs.console.lint_quote"
+msgstr "اقتباس کی علامت بند نہیں ہوئی۔"
+
+msgid "configs.console.lint_semicolon"
+msgstr "ہدایت کے آخر میں سیمی کولن غائب ہو سکتا ہے۔"
+
+msgid "configs.console.lint_skipped"
+msgstr "ModSecurity اور CRS کنفیگریشنز کے لیے NGINX نحوی جانچ دستیاب نہیں۔"
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "غیر متوقع اختتامی بریس۔"
+
+msgid "configs.console.lint_warnings"
+msgstr "کلائنٹ کی طرف کی جانچ میں %(count)s انتباہات ملے۔ ایڈیٹر کے تبصرے دیکھیں۔"
+
+msgid "configs.console.name_help"
+msgstr "حروف، اعداد، ڈیش یا انڈراسکور استعمال کریں۔ ڈسک پر .conf لاحقہ شامل ہوتا ہے۔"
+
+msgid "configs.console.new"
+msgstr "نئی کنفیگریشن"
+
+msgid "configs.console.no_files"
+msgstr "ان فلٹرز سے کوئی کنفیگریشن میل نہیں کھاتی۔"
+
+msgid "configs.console.restore_view"
+msgstr "منظر بحال کریں"
+
+msgid "configs.console.select_file"
+msgstr "مواد کا پیش نظارہ دیکھنے کے لیے فائل منتخب کریں۔"
+
+msgid "configs.console.service_legend"
+msgstr "سروس کنفیگریشن صرف ایک سروس پر لاگو ہوتی ہے۔"
+
+msgid "configs.console.service_only"
+msgstr "صرف سروس"
+
+msgid "configs.console.template_name_locked"
+msgstr "ٹیمپلیٹ پر مبنی حسبِ ضرورت کنفیگریشن کا نام بدلنے کی اجازت نہیں۔"
+
+msgid "configs.console.title"
+msgstr "حسبِ ضرورت کنفیگریشنز"
+
+msgid "configs.console.types"
+msgstr "کنفیگریشن کی قسم"
+
+msgid "configs.console.view"
+msgstr "کنفیگریشن دیکھیں"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "تمام منتخب کردہ حسب ضرورت کنفیگریشنز نہیں مل سکیں، UI/API کنفیگریشنز نہیں ہیں، یا پہلے ہی تبدیل ہو چکی ہیں۔"
@@ -2764,6 +2986,15 @@ msgstr "وقت"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "وقت کے ساتھ بلاکنگ کی حالت"
 
+msgid "dashboard.chart.legend.count"
+msgstr "تعداد"
+
+msgid "dashboard.chart.legend.item"
+msgstr "آئٹم"
+
+msgid "dashboard.chart.legend.share"
+msgstr "تناسب"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "روکی گئی درخواستیں"
 
@@ -3007,6 +3238,18 @@ msgstr "اس صفحے پر %(count)s ٹیمپلیٹ منتخب ہے۔"
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "اس صفحے پر موجود تمام %(count)s ٹیمپلیٹس منتخب ہو چکے ہیں۔"
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "مماثل تمام %(count)s ورک فلوز منتخب ہو چکے ہیں۔"
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "مماثل تمام %(count)s ورک فلوز منتخب کریں"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "اس صفحے پر %(count)s ورک فلو منتخب ہے۔"
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "اس صفحے پر موجود تمام %(count)s ورک فلوز منتخب ہو چکے ہیں۔"
+
 msgid "datatable.bulk_select_clear"
 msgstr "انتخاب صاف کریں"
 
@@ -3049,6 +3292,9 @@ msgstr "کوئی سروس دستیاب نہیں"
 msgid "datatable.info_empty_templates"
 msgstr "کوئی ٹیمپلیٹس دستیاب نہیں ہیں"
 
+msgid "datatable.info_empty_workflows"
+msgstr "کوئی ورک فلو دستیاب نہیں"
+
 msgid "datatable.info_filtered_bans"
 msgstr "(کل _MAX_ پابندیوں سے فلٹر کیا گیا)"
 
@@ -3079,6 +3325,9 @@ msgstr "(کل _MAX_ خدمات سے فلٹر کیا گیا)"
 msgid "datatable.info_filtered_templates"
 msgstr "(_MAX_ کل ٹیمپلیٹس سے فلٹر کیا گیا)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(کل _MAX_ ورک فلوز سے فلٹر کیا گیا)"
+
 msgid "datatable.info_instances"
 msgstr "%(total)s انسٹینسز میں سے %(start)s سے %(end)s دکھا رہا ہے"
 
@@ -3099,6 +3348,9 @@ msgstr "%(total)s خدمات میں سے %(start)s سے %(end)s دکھا رہا 
 
 msgid "datatable.info_templates"
 msgstr "%(total)s ٹیمپلیٹس میں سے %(start)s تا %(end)s دکھا رہا ہے"
+
+msgid "datatable.info_workflows"
+msgstr "%(total)s ورک فلوز میں سے %(start)s سے %(end)s دکھا رہا ہے"
 
 msgid "datatable.length_all"
 msgstr "سب"
@@ -3132,6 +3384,9 @@ msgstr "دکھائیں _MENU_ خدمات"
 
 msgid "datatable.length_menu_templates"
 msgstr "_MENU_ ٹیمپلیٹس دکھائیں"
+
+msgid "datatable.length_menu_workflows"
+msgstr "دکھائیں _MENU_ ورک فلوز"
 
 msgid "datatable.paginate.first"
 msgstr "پہلا"
@@ -3244,6 +3499,15 @@ msgstr "1 ٹیمپلیٹ منتخب کیا گیا"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d ٹیمپلیٹس منتخب کیے گئے"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "کوئی ورک فلو منتخب نہیں کیا گیا"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "۱ ورک فلو منتخب کیا گیا"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "%d ورک فلوز منتخب کیے گئے"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "%(count)s کسٹم کنفیگریشن منتخب"
 
@@ -3318,6 +3582,9 @@ msgstr "کوئی مماثل سروس نہیں ملی"
 
 msgid "datatable.zero_records_templates"
 msgstr "کوئی مماثل ٹیمپلیٹس نہیں ملے"
+
+msgid "datatable.zero_records_workflows"
+msgstr "کوئی مماثل ورک فلو نہیں ملا"
 
 msgid "dev_log.copy_failed"
 msgstr "متن کاپی کرنے میں ناکام:"
@@ -4369,14 +4636,26 @@ msgstr "ایک بار"
 msgid "interval.week"
 msgstr "ہفتہ وار"
 
+msgid "job.history.duration"
+msgstr "دورانیہ"
+
 msgid "job.history.end_date"
 msgstr "اختتامی تاریخ"
+
+msgid "job.history.error"
+msgstr "خرابی"
 
 msgid "job.history.start_date"
 msgstr "شروعاتی تاریخ"
 
 msgid "job.history.success"
 msgstr "کامیاب"
+
+msgid "jobs.card.sub"
+msgstr "شیڈولر انہیں ان کے اپنے وقفے سے یا حسبِ طلب چلاتا ہے"
+
+msgid "jobs.card.title"
+msgstr "شیڈول شدہ ٹاسکس"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "جابز حاصل کرنے میں خرابی: %(message)s"
@@ -5119,6 +5398,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "اضافی صفحات"
 
+msgid "navigation.filter_plugins"
+msgstr "پلگ انز فلٹر کریں…"
+
 msgid "navigation.global_settings"
 msgstr "عالمی سیٹنگز"
 
@@ -5146,6 +5428,9 @@ msgstr "موڈ کا انتخاب"
 msgid "navigation.more"
 msgstr "مزید..."
 
+msgid "navigation.no_plugin_match"
+msgstr "کوئی پلگ ان میل نہیں کھاتا"
+
 msgid "navigation.operate"
 msgstr "چلائیں"
 
@@ -5164,14 +5449,23 @@ msgstr "پلگ ان غیر فعال ہو گیا"
 msgid "navigation.plugin_deactivated_global"
 msgstr "پلگ ان عالمی طور پر غیر فعال ہو گیا"
 
+msgid "navigation.plugin_insights"
+msgstr "پلگ انز کی بصیرتیں"
+
 msgid "navigation.plugins"
 msgstr "پلگ انز"
+
+msgid "navigation.plugins_overview"
+msgstr "جائزہ"
 
 msgid "navigation.plugins_pages"
 msgstr "پلگ ان صفحات"
 
 msgid "navigation.pro"
 msgstr "پرو"
+
+msgid "navigation.profile"
+msgstr "پروفائل"
 
 msgid "navigation.redirects"
 msgstr "ری ڈائریکٹس"
@@ -5344,6 +5638,24 @@ msgstr "مفت"
 msgid "plan.pro"
 msgstr "پرو"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "یہ پلگ ان کہیں استعمال نہیں ہو رہا"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "عالمی سیٹنگز"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "میٹرکس بند ہیں"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "ابھی دکھانے کے لیے کچھ نہیں"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "دکھانے کے لیے کوئی صفحہ نہیں"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "صرف منتظمین کے لیے"
+
 msgid "plugin.page.status.deactivated"
 msgstr "پلگ ان غیر فعال ہے؛ لہذا، کوئی معلومات دستیاب نہیں ہے۔"
 
@@ -5379,6 +5691,12 @@ msgstr "پرو"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.card.configure"
+msgstr "%(name)s کو ترتیب دیں"
+
+msgid "plugins.card.metrics"
+msgstr "%(name)s کے میٹرکس"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "BunkerWeb کا ورژن (%(current)s) نہیں پڑھا جا سکا، اس لیے %(id)s کی مطابقت جانچی نہیں جا سکی؛ کچھ بھی انسٹال نہیں ہوا"
@@ -5623,11 +5941,20 @@ msgstr "فعال"
 msgid "plugins.marketplace.always_on"
 msgstr "بنیادی / ہمیشہ فعال"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "ہمیشہ فعال"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "BunkerWeb کے لیے درکار بنیادی پلگ ان: اسے ترتیب دیا جا سکتا ہے مگر غیر فعال نہیں کیا جا سکتا۔"
+
 msgid "plugins.marketplace.disabled"
 msgstr "غیر فعال"
 
 msgid "plugins.marketplace.enabled"
 msgstr "فعال"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "پلگ انز فلٹر کریں"
 
 msgid "plugins.marketplace.inactive"
 msgstr "فعال نہیں"
@@ -5658,6 +5985,15 @@ msgstr "مزید"
 
 msgid "plugins.multivalue.show_less"
 msgstr "کم دکھائیں"
+
+msgid "plugins.tier.community"
+msgstr "کمیونٹی پلگ ان"
+
+msgid "plugins.tier.core"
+msgstr "CORE پلگ ان"
+
+msgid "plugins.tier.pro"
+msgstr "PRO پلگ ان"
 
 msgid "pro.alert.overlapped_1"
 msgstr "آپ کے پاس لائسنس کی اجازت سے زیادہ فعال خدمات ہیں!"
@@ -6004,8 +6340,14 @@ msgstr "IP ایڈریس"
 msgid "profile.session.last_activity"
 msgstr "آخری سرگرمی"
 
+msgid "profile.session.load_error"
+msgstr "ڈیٹا لوڈ کرنے میں خرابی۔ براہِ کرم دوبارہ کوشش کریں۔"
+
 msgid "profile.session.os"
 msgstr "آپریٹنگ سسٹم"
+
+msgid "profile.session.recent_title"
+msgstr "حالیہ سیشنز"
 
 msgid "profile.session.title"
 msgstr "سیشن"
@@ -6024,6 +6366,9 @@ msgstr "سیکیورٹی"
 
 msgid "profile.tab.sessions"
 msgstr "سیشنز"
+
+msgid "profile.title"
+msgstr "آپ کی پروفائل"
 
 msgid "range_picker.1h"
 msgstr "پچھلا گھنٹہ"
@@ -6076,11 +6421,44 @@ msgstr "موجودہ سیٹنگ %(setting)s درست نہیں ہے۔"
 msgid "raw_drafts.setting_not_valid"
 msgstr "سیٹنگ %(setting)s درست نہیں ہے۔"
 
+msgid "raw_page.search"
+msgstr "تلاش کریں…"
+
+msgid "raw_page.search_label"
+msgstr "خام کنفیگریشن میں تلاش کریں"
+
+msgid "raw_page.search_next"
+msgstr "اگلی مماثلت"
+
+msgid "raw_page.search_prev"
+msgstr "پچھلی مماثلت"
+
+msgid "raw_page.tile_modified"
+msgstr "ترمیم شدہ"
+
+msgid "raw_page.tile_plugins"
+msgstr "پلگ انز"
+
+msgid "raw_page.tile_problems"
+msgstr "مسائل"
+
+msgid "raw_page.tile_settings"
+msgstr "سیٹنگز"
+
+msgid "raw_page.tiles_label"
+msgstr "خام کنفیگریشن کا خلاصہ"
+
 msgid "redirects.all"
 msgstr "سب"
 
+msgid "redirects.all_codes"
+msgstr "تمام اسٹیٹس کوڈز"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "URI شامل کریں"
 
 msgid "redirects.append_request_uri"
 msgstr "درخواست کردہ URI کو ٹارگٹ میں شامل کریں"
@@ -6090,6 +6468,9 @@ msgstr "منسلک کریں"
 
 msgid "redirects.attach_copy"
 msgstr "%(name)s (%(from)s → %(to)s) کو ایک یا زیادہ سروسز سے جڑیں۔"
+
+msgid "redirects.card_subtitle"
+msgstr "راستوں کے ری ڈائریکٹس اور وہ خدمات جن پر یہ لاگو ہوتے ہیں"
 
 msgid "redirects.code.301"
 msgstr "301 — مستقل طور پر منتقل"
@@ -6106,6 +6487,12 @@ msgstr "307 — عارضی ری ڈائریکٹ"
 msgid "redirects.code.308"
 msgstr "308 — مستقل ری ڈائریکٹ"
 
+#. plural pair; 2 form(s) for ur, singular in slot 0
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "%(count)s ری ڈائریکٹ"
+msgstr[1] "%(count)s ری ڈائریکٹس"
+
 msgid "redirects.create"
 msgstr "ری ڈائریکٹ بنائیں"
 
@@ -6117,6 +6504,9 @@ msgstr "کیا %(name)s ری ڈائریکٹ حذف کرنا ہے؟"
 
 msgid "redirects.delete_help"
 msgstr "ایک ری ڈائریکٹ جو کسی سروس سے منسلک ہے اسے حذف نہیں کیا جا سکتا۔ اسے پہلے الگ کریں۔"
+
+msgid "redirects.detach_shared"
+msgstr "یہ ری ڈائریکٹ مشترک ہے۔ الگ کرنے سے یہ صرف اس سروس سے ہٹتا ہے، دوسری خدمات اسے برقرار رکھتی ہیں۔"
 
 msgid "redirects.edit"
 msgstr "ری ڈائریکٹ ایڈٹ کریں"
@@ -6199,8 +6589,32 @@ msgstr "سے ری ڈائریکٹ کریں"
 msgid "redirects.from_path_help"
 msgstr "منسلک سروسز پر ماخذ پاتھ، مثلاً /old۔"
 
+msgid "redirects.kpi_configured"
+msgstr "ترتیب دیے گئے ری ڈائریکٹس"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "مؤثر ہونے کے لیے کسی سروس سے منسلک کریں"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "پہلے لوڈ کیے گئے %(count)s میں سے"
+
+msgid "redirects.kpi_permanent"
+msgstr "مستقل"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 یا 308، براؤزرز میں کیش ہوتا ہے"
+
+msgid "redirects.kpi_services"
+msgstr "منسلک خدمات"
+
+msgid "redirects.kpi_services_caption"
+msgstr "کم از کم ایک ری ڈائریکٹ والی خدمات"
+
 msgid "redirects.new"
 msgstr "نیا ری ڈائریکٹ"
+
+msgid "redirects.no_match"
+msgstr "ان فلٹرز سے کوئی ری ڈائریکٹ میل نہیں کھاتا۔"
 
 msgid "redirects.not_attached"
 msgstr "منسلک نہیں"
@@ -6214,14 +6628,29 @@ msgstr "ری ڈائریکٹ محفوظ کریں"
 msgid "redirects.search"
 msgstr "نام، ماخذ پاتھ یا ہدف تلاش کریں..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 2 form(s) for ur, singular in slot 0
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "%(count)s سروس"
+msgstr[1] "%(count)s خدمات"
+
 msgid "redirects.services_help"
 msgstr "متعدد سروسز منتخب کرنے کے لیے Ctrl یا Command استعمال کریں۔ ری ڈائریکٹ بعد میں بھی منسلک کیا جا سکتا ہے۔"
+
+msgid "redirects.services_title"
+msgstr "یہ ری ڈائریکٹ استعمال کرنے والی خدمات"
 
 msgid "redirects.status_code"
 msgstr "اسٹٹس کوڈ"
 
 msgid "redirects.to_url"
 msgstr "ری ڈائریکٹ کریں"
+
+msgid "redirects.to_url_help"
+msgstr "مکمل http:// یا https:// URL۔ نسبتی اہداف معاونت یافتہ نہیں ہیں۔"
 
 msgid "redirects.truncated"
 msgstr "فہرست کو API کے ذریعے محدود کریں تاکہ صرف پہلے 500 ری ڈائریکٹس دکھائی جائیں۔"
@@ -6288,6 +6717,36 @@ msgstr "مقامی API کا فیصلہ"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "تکنیکی تفصیلات"
+
+msgid "reports.live.off"
+msgstr "خودکار ریفریش موقوف ہے۔"
+
+msgid "reports.live.on"
+msgstr "خودکار ریفریش فعال ہے، ہر 10 سیکنڈ بعد۔"
+
+msgid "reports.live.updated"
+msgstr "رپورٹس تازہ ہو گئیں: %(added)s نئی۔"
+
+msgid "reports.offenders.confirm_many"
+msgstr "%(count)s IP پتوں پر ہر انسٹینس میں 24 گھنٹے کی پابندی لگے گی۔"
+
+msgid "reports.offenders.confirm_one"
+msgstr "%(ip)s پر ہر انسٹینس میں 24 گھنٹے کی پابندی لگے گی۔"
+
+msgid "reports.offenders.confirm_title"
+msgstr "رپورٹس سے پابندی لگائیں"
+
+msgid "reports.offenders.show"
+msgstr "دکھائیں"
+
+msgid "reports.offenders.show_bottom"
+msgstr "سب سے کم خلاف ورزی کرنے والے"
+
+msgid "reports.offenders.show_latest"
+msgstr "تازہ ترین خلاف ورزی کرنے والے"
+
+msgid "reports.offenders.show_top"
+msgstr "سب سے زیادہ خلاف ورزی کرنے والے"
 
 msgid "reports.security_incident"
 msgstr "سیکیورٹی واقعہ"
@@ -6388,6 +6847,15 @@ msgstr "درخواست کا راستہ"
 msgid "request_path.unordered"
 msgstr "%(phase)s فیس میں کوئی واضح مقام نہیں ہے؛ یہ ترتیب کے پلگ ان کے بعد چلتا ہے۔"
 
+msgid "resource_groups.access"
+msgstr "رسائی"
+
+msgid "resource_groups.access_readonly"
+msgstr "صرف پڑھنے کے لیے"
+
+msgid "resource_groups.access_write"
+msgstr "لکھنا"
+
 msgid "resource_groups.add_entry"
 msgstr "انٹری شامل کریں"
 
@@ -6402,6 +6870,9 @@ msgstr "آلیاس"
 
 msgid "resource_groups.alias_help"
 msgstr "صرف حروف، اعداد، انڈر اسکور اور ڈیش۔ موجودہ عرفی ناموں کا نام تبدیل نہیں کیا جا سکتا۔"
+
+msgid "resource_groups.all_kinds"
+msgstr "سب"
 
 msgid "resource_groups.bulk_import"
 msgstr "بڑے پیمانے پر درآمد کریں"
@@ -6447,6 +6918,9 @@ msgstr "انٹری"
 
 msgid "resource_groups.expand_all"
 msgstr "سب"
+
+msgid "resource_groups.filter_values"
+msgstr "قدریں فلٹر کریں..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "آلیاس میں 1 سے 64 حروف، ہندسے، انڈر سکورز، یا ہائفنز ہونے چاہئیں"
@@ -6580,6 +7054,48 @@ msgstr "ایک ایک طور پر ایئرنٹس شامل کریں یا نیچے
 msgid "resource_groups.no_references"
 msgstr "کوئی رجفرینس نہیں"
 
+msgid "resource_groups.no_value_match"
+msgstr "اس فلٹر سے کوئی قدر میل نہیں کھاتی۔"
+
+msgid "resource_groups.origin"
+msgstr "ماخذ"
+
+msgid "resource_groups.origin_plugin"
+msgstr "%(plugin)s پلگ ان کے ساتھ فراہم کردہ"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "API کے ذریعے بنایا یا ہم آہنگ کیا گیا۔"
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "autoconf کنٹرولر نے بنایا۔"
+
+msgid "resource_groups.origin_tip.download"
+msgstr "دور دراز ماخذ سے ڈاؤن لوڈ کیا گیا۔"
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "دستی طور پر یا کنفیگریشن فائل سے بنایا گیا۔"
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "شیڈولر نے بنایا۔"
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "ویب UI کے ذریعے بنایا گیا۔"
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "سیٹ اپ وزرڈ نے بنایا، اس میں ترمیم کی جا سکتی ہے۔"
+
+msgid "resource_groups.plugins_compatible"
+msgstr "مطابقت رکھنے والے پلگ انز"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "وہ پلگ انز جن کی سیٹنگز اس گروپ کی قدروں کی اقسام قبول کرتی ہیں۔ اصل حوالے استعمال کے تحت درج ہیں۔"
+
+#. plural pair; 2 form(s) for ur, singular in slot 0
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "%(count)s پلگ ان"
+msgstr[1] "%(count)s پلگ انز"
+
 msgid "resource_groups.readonly"
 msgstr "ڈیٹا بیسreadonly ہے۔ ریسورس گروپز کو چیک اور ایکسپورٹ کیا جا سکتا ہے، لیکن انہیں تبدیل نہیں کیا جا سکتا۔"
 
@@ -6607,6 +7123,9 @@ msgstr "آئی پی، ممالک، ASNs، ریورس DNS نام، یوزر ای�
 msgid "resource_groups.template_configuration"
 msgstr "ٹیمپلیٹ %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "تازہ کردہ"
+
 msgid "resource_groups.usage"
 msgstr "استعمال"
 
@@ -6615,6 +7134,18 @@ msgstr "قدر"
 
 msgid "resource_groups.values"
 msgstr "قدریں"
+
+msgid "resource_groups.values_compat"
+msgstr "مطابقت رکھتا ہے: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "کاپی ہو گیا"
+
+msgid "resource_groups.values_title"
+msgstr "%(name)s کی قدریں"
+
+msgid "resource_groups.view_values_of"
+msgstr "%(name)s کی قدریں دیکھیں"
 
 msgid "scope.all_services"
 msgstr "تمام خدمات"
@@ -7585,6 +8116,93 @@ msgstr "اس پلگ ان کے لیے یہاں متعدد سیٹنگز انسٹی
 msgid "settings.multiple.title"
 msgstr "متعدد سیٹنگز"
 
+msgid "settings_page.alert_global"
+msgstr "تبدیلیاں ہر اس سروس پر لاگو ہوتی ہیں جو انہیں اووررائیڈ نہیں کرتی اور محفوظ کرنے اور دوبارہ لوڈ کرنے کے بعد مؤثر ہوتی ہیں۔"
+
+msgid "settings_page.alert_service"
+msgstr "خالی چھوڑی گئی سیٹنگز عالمی طے شدہ قدریں استعمال کرتی ہیں۔ تبدیلیاں صرف منتخب سروس پر لاگو ہوتی ہیں اور محفوظ کرنے اور دوبارہ لوڈ کرنے کے بعد مؤثر ہوتی ہیں۔"
+
+msgid "settings_page.back_global"
+msgstr "عالمی سیٹنگز پر واپس جائیں"
+
+msgid "settings_page.back_service"
+msgstr "سروس پر واپس جائیں"
+
+msgid "settings_page.card_title"
+msgstr "سیٹنگز"
+
+msgid "settings_page.count"
+msgstr "%(count)s سیٹنگز"
+
+msgid "settings_page.count_filtered"
+msgstr "%(total)s سیٹنگز میں سے %(shown)s"
+
+msgid "settings_page.groups_link"
+msgstr "رسورس گروپس سنبھالیں"
+
+msgid "settings_page.groups_link_hint"
+msgstr "IP پتوں، نیٹ ورکس اور ممالک کی دوبارہ قابلِ استعمال فہرستیں جن کا حوالہ اس پلگ ان کی سیٹنگز دے سکتی ہیں۔"
+
+msgid "settings_page.no_match"
+msgstr "آپ کی تلاش سے کوئی سیٹنگ میل نہیں کھاتی۔"
+
+msgid "settings_page.plugin"
+msgstr "پلگ ان"
+
+msgid "settings_page.reload_alert_body"
+msgstr "محفوظ کرتے ہی شیڈولر آپ کے انسٹینسز پر کنفیگریشن دوبارہ لاگو کرتا ہے۔"
+
+msgid "settings_page.reload_alert_title"
+msgstr "تبدیلیاں انسٹینس کے دوبارہ لوڈ کا سبب بنتی ہیں۔"
+
+msgid "settings_page.revert"
+msgstr "واپس کریں"
+
+msgid "settings_page.revert_confirm"
+msgstr "سب واپس کریں"
+
+msgid "settings_page.revert_message"
+msgstr "یہ اس صفحے کی ہر غیر محفوظ شدہ ترمیم کو اس کی آخری محفوظ شدہ قدر پر واپس لاتا ہے۔"
+
+msgid "settings_page.revert_title"
+msgstr "تبدیلیاں واپس کریں"
+
+msgid "settings_page.save_reload"
+msgstr "محفوظ کریں اور دوبارہ لوڈ کریں"
+
+msgid "settings_page.scope"
+msgstr "دائرہ کار"
+
+msgid "settings_page.scope_global"
+msgstr "عالمی سیٹنگز"
+
+msgid "settings_page.search"
+msgstr "سیٹنگز تلاش کریں…"
+
+msgid "settings_page.search_label"
+msgstr "سیٹنگز تلاش کریں"
+
+msgid "settings_page.select_plugin_label"
+msgstr "پلگ ان منتخب کریں"
+
+msgid "settings_page.select_scope_label"
+msgstr "اس کی سیٹنگز میں ترمیم کا دائرہ منتخب کریں"
+
+msgid "setup.accordion.advanced"
+msgstr "اعلیٰ"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "ریورس پراکسی · حقیقی IP · حسبِ ضرورت سرٹیفکیٹ"
+
+msgid "setup.accordion.general"
+msgstr "عمومی"
+
+msgid "setup.accordion.general_hint"
+msgstr "سرور · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "سیٹ اپ مکمل کریں"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "ویب UI سیٹ اپ کرتے وقت خرابی ہوئی۔ دوبارہ کوشش کریں۔"
 
@@ -7639,6 +8257,9 @@ msgstr "پاس ورڈز میل نہیں کھاتے۔"
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "حسب ضرورت SSL سرٹیفکیٹ استعمال کرتے وقت، آپ کو سرٹیفکیٹ اور کلید دونوں سیٹ کرنا ہوں گی۔"
 
+msgid "setup.from_ui_host"
+msgstr "UI_HOST ماحولیاتی متغیر سے"
+
 msgid "setup.status.admin_user_exists"
 msgstr "ایک ایڈمن صارف پہلے سے موجود ہے۔ براہ کرم اگلے مرحلے پر جائیں۔"
 
@@ -7684,6 +8305,9 @@ msgstr "اصل IP"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "ریورس پراکسی"
 
+msgid "setup.step2.section.server"
+msgstr "سرور"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7692,6 +8316,12 @@ msgstr "ویب UI مخصوص سیٹنگز کنفیگر کریں۔"
 
 msgid "setup.step2.title"
 msgstr "UI سیٹنگز"
+
+msgid "setup.step3.activate_title"
+msgstr "لائسنس فعال کریں"
+
+msgid "setup.step3.activation_note"
+msgstr "سیٹ اپ مکمل ہونے پر لائسنس فعال ہو جاتا ہے۔"
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "PRO کے فوائد"
@@ -7735,11 +8365,119 @@ msgstr "سیٹ اپ مکمل کرنے سے پہلے اپنی سیٹنگز کا �
 msgid "setup.step4.title"
 msgstr "جائزہ"
 
+msgid "setup.stepper_label"
+msgstr "سیٹ اپ کے مراحل"
+
 msgid "setup.subtitle"
 msgstr "سیٹ اپ وزرڈ مکمل کرنے کے لیے مراحل پر عمل کریں۔"
 
+msgid "setup.switch.disabled"
+msgstr "غیر فعال"
+
+msgid "setup.switch.enabled"
+msgstr "فعال"
+
 msgid "setup.title"
 msgstr "سیٹ اپ وزرڈ"
+
+msgid "shell.account.current"
+msgstr "اکاؤنٹ: %(name)s"
+
+msgid "shell.account.title"
+msgstr "اکاؤنٹ"
+
+msgid "shell.contrast.toggle"
+msgstr "زیادہ تضاد"
+
+msgid "shell.density.toggle"
+msgstr "کم جگہ والا منظر"
+
+msgid "shell.language.title"
+msgstr "زبان"
+
+msgid "shell.main_navigation"
+msgstr "مرکزی نیویگیشن"
+
+msgid "shell.notifications.all_read"
+msgstr "سب پڑھ لیا گیا"
+
+msgid "shell.notifications.filter_label"
+msgstr "اطلاعات فلٹر کریں"
+
+msgid "shell.notifications.group_earlier"
+msgstr "پہلے"
+
+msgid "shell.notifications.group_today"
+msgstr "آج"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "گزشتہ روز"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "سب کو پڑھا ہوا نشان زد کریں"
+
+msgid "shell.notifications.mark_read"
+msgstr "پڑھا ہوا نشان زد کریں"
+
+msgid "shell.notifications.none_unread"
+msgstr "کوئی غیر پڑھی ہوئی اطلاع نہیں۔"
+
+msgid "shell.notifications.tab_all"
+msgstr "سب"
+
+msgid "shell.notifications.tab_unread"
+msgstr "غیر پڑھی ہوئی"
+
+msgid "shell.notifications.title"
+msgstr "اطلاعات"
+
+msgid "shell.notifications.unread_count"
+msgstr "غیر پڑھی ہوئی: %(count)s"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "غیر پڑھی ہوئی:"
+
+msgid "shell.search.kind_page"
+msgstr "صفحہ"
+
+msgid "shell.search.kind_plugin"
+msgstr "پلگ ان"
+
+msgid "shell.search.kind_service"
+msgstr "سروس"
+
+msgid "shell.search.label"
+msgstr "صفحات، پلگ انز اور خدمات تلاش کریں"
+
+msgid "shell.search.loading_services"
+msgstr "خدمات لوڈ ہو رہی ہیں…"
+
+msgid "shell.search.no_match"
+msgstr "“%(query)s” کے لیے کوئی مماثلت نہیں"
+
+msgid "shell.search.placeholder"
+msgstr "صفحات، پلگ انز، خدمات تلاش کریں…"
+
+msgid "shell.search.results"
+msgstr "تلاش کے نتائج"
+
+msgid "shell.search.status_results"
+msgstr "نتائج: %(count)s"
+
+msgid "shell.skip_to_content"
+msgstr "مرکزی مواد پر جائیں"
+
+msgid "shell.star_us"
+msgstr "GitHub پر BunkerWeb کو اسٹار دیں"
+
+msgid "shell.theme.system_hint"
+msgstr "آپ کے آپریٹنگ سسٹم کے مطابق"
+
+msgid "shell.theme.title"
+msgstr "تھیم"
+
+msgid "shell.top_navigation"
+msgstr "اوپری بار"
 
 msgid "status.active"
 msgstr "فعال"
@@ -7951,6 +8689,18 @@ msgstr "اگلا"
 msgid "step.previous"
 msgstr "پچھلا"
 
+msgid "support.attach_help"
+msgstr "معاونت کی درخواست کے لیے برآمدات۔ ان کے لیے لکھنے کی اجازت درکار ہے اور یہ خفیہ معلومات چھپاتی ہیں۔"
+
+msgid "support.attach_title"
+msgstr "منسلک کرنے کے لیے تشخیصی معلومات"
+
+msgid "support.card.community.title"
+msgstr "کمیونٹی"
+
+msgid "support.card.docs.title"
+msgstr "دستاویزات"
+
 msgid "support.card.download_logs.help"
 msgstr "تمام نجی ڈیٹا کو گمنام کر دیا جائے گا۔"
 
@@ -7974,6 +8724,36 @@ msgstr "لاگز، پلگ ان ورژنز، ماحول اور حالیہ خرا�
 
 msgid "support.card.ui_bundle.title"
 msgstr "ویب UI تشخیص"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "کمیونٹی اور منتظمین سے پوچھیں۔"
+
+msgid "support.community.github"
+msgstr "GitHub مسائل"
+
+msgid "support.community.github_help"
+msgstr "خرابیوں کی رپورٹس اور خصوصیات کی درخواستیں۔"
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "گفتگو اور اعلانات۔"
+
+msgid "support.docs.quickstart"
+msgstr "فوری آغاز کی رہنما"
+
+msgid "support.docs.troubleshooting"
+msgstr "خرابیوں کا ازالہ"
+
+msgid "support.docs.upgrading"
+msgstr "اپ گریڈ کرنا"
+
+msgid "support.docs.web_ui"
+msgstr "ویب UI کی رہنما"
 
 msgid "support.subtitle"
 msgstr "ڈیبگ لاگ ڈاؤن لوڈ کریں، اپنے کنفیگریشن کو استخراج کریں، اور BunkerWeb ٹیم سے مدد حاصل کریں۔"
@@ -8142,6 +8922,63 @@ msgstr "قدر"
 
 msgid "table.header.version"
 msgstr "ورژن"
+
+msgid "table_system.active_filters"
+msgstr "فلٹرز، %(count)s فعال"
+
+msgid "table_system.advanced_filters"
+msgstr "اعلیٰ فلٹرز"
+
+msgid "table_system.any"
+msgstr "کوئی بھی"
+
+msgid "table_system.column_count"
+msgstr "%(total)s میں سے %(visible)s"
+
+msgid "table_system.confirm"
+msgstr "تصدیق کریں"
+
+msgid "table_system.confirm_title"
+msgstr "کارروائی کی تصدیق کریں"
+
+msgid "table_system.filter"
+msgstr "فلٹر"
+
+msgid "table_system.filters"
+msgstr "فلٹرز"
+
+msgid "table_system.leave"
+msgstr "محفوظ کیے بغیر چھوڑ دیں"
+
+msgid "table_system.leave_message"
+msgstr "آپ کی غیر محفوظ شدہ تبدیلیاں ضائع ہو جائیں گی۔"
+
+msgid "table_system.leave_title"
+msgstr "محفوظ کیے بغیر چھوڑ دیں؟"
+
+msgid "table_system.multiple_actions"
+msgstr "منتخب آئٹمز کے لیے متعدد کارروائیاں"
+
+msgid "table_system.show_all"
+msgstr "سب دکھائیں"
+
+msgid "table_system.stay"
+msgstr "ترمیم جاری رکھیں"
+
+msgid "table_system.type_phrase"
+msgstr "تصدیق کے لیے %(phrase)s لکھیں"
+
+msgid "table_system.upload_hint"
+msgstr "اپ لوڈ کرنے کے لیے گھسیٹ کر چھوڑیں یا کلک کریں"
+
+msgid "table_system.visible_columns"
+msgstr "نظر آنے والے کالم"
+
+msgid "tables.top.detail"
+msgstr "تفصیل"
+
+msgid "tables.top.share"
+msgstr "تناسب"
 
 msgid "template.editor.button_add_config"
 msgstr "کنفیگریشن شامل کریں"
@@ -8731,6 +9568,24 @@ msgstr "کمیونٹی ٹیمپلیٹ اپ ڈیٹ کریں"
 msgid "templates.catalog.update_up_to_date"
 msgstr "ٹیمپلیٹ %(template)s پہلے ہی کیٹلاگ سے مطابقت رکھتا ہے"
 
+msgid "templates.features_builtin"
+msgstr "بلٹ اِن خصوصیات"
+
+msgid "templates.features_configs"
+msgstr "حسبِ ضرورت کنفیگریشنز"
+
+msgid "templates.features_help"
+msgstr "یہ ٹیمپلیٹ کیا فراہم کرتا ہے۔ اصل سیٹنگز دیکھنے یا بدلنے کے لیے ٹیمپلیٹ کھولیں۔"
+
+msgid "templates.features_of"
+msgstr "%(name)s کی خصوصیات دکھائیں"
+
+msgid "templates.features_plugins"
+msgstr "پلگ انز"
+
+msgid "templates.features_title"
+msgstr "ٹیمپلیٹ کی خصوصیات"
+
 msgid "templates.flash.catalog_updated"
 msgstr "ٹیمپلیٹ %(template)s کیٹلاگ سے اپ ڈیٹ کر دیا گیا۔"
 
@@ -8806,6 +9661,12 @@ msgstr "ٹیمپلیٹ درآمد نہیں ہوا: فائل 1 MiB سے بڑی ہ
 msgid "templates.import.unreadable"
 msgstr "ٹیمپلیٹ درآمد نہیں ہوا: فائل پڑھی نہیں جا سکی"
 
+msgid "templates.managed_by"
+msgstr "%(owner)s کے زیرِ انتظام: یہاں اسے بدلا یا حذف نہیں کیا جا سکتا۔"
+
+msgid "templates.more_actions"
+msgstr "%(name)s کے لیے مزید کارروائیاں"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8820,6 +9681,18 @@ msgstr "درمیانی سکیورٹی"
 
 msgid "templates.name.ui"
 msgstr "ویب UI"
+
+msgid "templates.no_match"
+msgstr "اس تلاش سے کوئی ٹیمپلیٹ میل نہیں کھاتا۔"
+
+msgid "templates.open_template"
+msgstr "ٹیمپلیٹ کھولیں"
+
+msgid "templates.read_only"
+msgstr "صرف پڑھنے کے لیے"
+
+msgid "templates.search"
+msgstr "ٹیمپلیٹس تلاش کریں..."
 
 msgid "templates.subtitle"
 msgstr "اپنے سروسز کے لیے قابل استعمال کنفیگریشن ٹیمپلیٹس - سیٹنگز، اقدامات اور کسٹم کنفیگیشن کو ایک ساتھ پیک کریں، پھر انہیں بنائیں، کلون کریں، یا حذف کریں۔"
@@ -8845,6 +9718,9 @@ msgstr "روشن"
 msgid "theme.system"
 msgstr "سسٹم"
 
+msgid "threatmap.attacks_24h"
+msgstr "گزشتہ 24 گھنٹوں میں مسدود"
+
 msgid "threatmap.attacks_today"
 msgstr "آج کے حملے"
 
@@ -8853,6 +9729,21 @@ msgstr "بلاک شدہ درخواست"
 
 msgid "threatmap.blocked_requests"
 msgstr "بلاک شدہ درخواستیں"
+
+msgid "threatmap.col_ip"
+msgstr "IP پتہ"
+
+msgid "threatmap.col_origin"
+msgstr "ماخذ"
+
+msgid "threatmap.col_reason"
+msgstr "وجہ"
+
+msgid "threatmap.col_target"
+msgstr "ہدف"
+
+msgid "threatmap.col_time"
+msgstr "وقت"
 
 msgid "threatmap.countries"
 msgstr "ماخذ ممالک"
@@ -8899,6 +9790,9 @@ msgstr "مقام نامعلوم"
 msgid "threatmap.open_live"
 msgstr "براہِ راست منظر"
 
+msgid "threatmap.rolling_window"
+msgstr "متحرک زمانی دورانیہ، تقریباً ہر 30 سیکنڈ بعد تازہ ہوتا ہے"
+
 msgid "threatmap.show_less"
 msgstr "صرف اوپر کے %(count)s دکھائیں"
 
@@ -8910,6 +9804,9 @@ msgstr "یہ اعداد اپ ڈیٹ ہونا بند ہو گئے ہیں۔ میٹ�
 
 msgid "threatmap.subtitle"
 msgstr "پچھلے 24 گھنٹوں میں آپ کے انسٹینسز نے جو ٹریفک بلاک کی، وہ کہاں سے آئی۔"
+
+msgid "threatmap.ticker_caption"
+msgstr "حالیہ ترین مسدود درخواستیں"
 
 msgid "threatmap.ticker_title"
 msgstr "براہِ راست واقعات"
@@ -8932,14 +9829,26 @@ msgstr "نمایاں اہداف"
 msgid "threatmap.updated"
 msgstr "اپ ڈیٹ شدہ"
 
+msgid "timings.all_phases"
+msgstr "تمام مراحل"
+
 msgid "timings.calls"
 msgstr "کالز"
+
+msgid "timings.caption"
+msgstr "ہر مرحلے کے پلگ ان اوقات، طے شدہ طور پر کل وقت کے لحاظ سے مرتب"
+
+msgid "timings.columns"
+msgstr "کالم"
 
 msgid "timings.disabled_help"
 msgstr "ہر پلگ ان کا وقت ناپنے کے لیے METRICS_COLLECT_TIMINGS کو yes پر سیٹ کریں۔ پوری درخواست کا دورانیہ ہر حال میں جمع ہوتا ہے۔"
 
 msgid "timings.disabled_title"
 msgstr "پلگ ان کے اوقات بند ہیں"
+
+msgid "timings.export_csv"
+msgstr "CSV برآمد کریں"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "پلگ ان ٹائمنگز حاصل کرنے میں خرابی: %(message)s"
@@ -8956,6 +9865,15 @@ msgstr "اوسط"
 msgid "timings.mean_request"
 msgstr "اوسط درخواست"
 
+msgid "timings.no_match"
+msgstr "ان فلٹرز سے کوئی وقت میل نہیں کھاتا"
+
+msgid "timings.no_share"
+msgstr "کوئی تناسب نہیں"
+
+msgid "timings.no_share_hint"
+msgstr "یہ مرحلہ ہر درخواست پر ایک بار نہیں چلتا، اس لیے اس کا تناسب نہیں۔"
+
 msgid "timings.partial"
 msgstr "کچھ انسٹینسز نے جواب نہیں دیا۔ نیچے کے اعداد جواب دینے والوں کے ہیں۔"
 
@@ -8964,6 +9882,9 @@ msgstr "مرحلہ"
 
 msgid "timings.phases"
 msgstr "پلگ ان مراحل"
+
+msgid "timings.phases_sub"
+msgstr "ہر مرحلے میں ہر پلگ ان کا صرف کردہ وقت"
 
 msgid "timings.plugin"
 msgstr "پلگ ان"
@@ -8974,6 +9895,9 @@ msgstr "رپورٹ کرنے والے انسٹینسز"
 msgid "timings.requests_measured"
 msgstr "ناپی گئی درخواستیں"
 
+msgid "timings.search_placeholder"
+msgstr "پلگ ان یا مرحلہ تلاش کریں…"
+
 msgid "timings.share"
 msgstr "حصہ"
 
@@ -8982,6 +9906,9 @@ msgstr "حصہ کل درخواست کے وقت کے مقابلے میں پلگ �
 
 msgid "timings.subtitle"
 msgstr "ہر درخواست کے ہر مرحلے میں ہر پلگ ان کا وقت، تمام انسٹینسز سے براہ راست پڑھ کر یکجا کیا جاتا ہے۔"
+
+msgid "timings.toolbar"
+msgstr "اوقات کے جدول کے اوزار"
 
 msgid "timings.total"
 msgstr "کل"
@@ -9883,6 +10810,12 @@ msgstr "سرور شامل کریں"
 msgid "upstreams.all"
 msgstr "سب"
 
+msgid "upstreams.all_protocols"
+msgstr "تمام پروٹوکولز"
+
+msgid "upstreams.all_tls"
+msgstr "تمام TLS سیٹنگز"
+
 msgid "upstreams.attach"
 msgstr "منسلک کریں"
 
@@ -9901,6 +10834,15 @@ msgstr "کم سے کم کنکشن"
 msgid "upstreams.balancing.round_robin"
 msgstr "روائن روبن (دیفالٹ)"
 
+msgid "upstreams.card_subtitle"
+msgstr "بیک اینڈ پولز اور ان تک پراکسی کرنے والی خدمات"
+
+#. plural pair; 2 form(s) for ur, singular in slot 0
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "%(count)s اپ اسٹریم"
+msgstr[1] "%(count)s اپ اسٹریمز"
+
 msgid "upstreams.create"
 msgstr "اوپر اسٹریم بنائیں"
 
@@ -9912,6 +10854,9 @@ msgstr "%(name)s اوپر اسٹریم کو حذف کریں؟"
 
 msgid "upstreams.delete_help"
 msgstr "ایک اوپر اسٹریم جو کسی سرور سے منسلک ہے اسے حذف نہیں کیا جا سکتا۔ اسے پہلے الگ کریں۔"
+
+msgid "upstreams.detach_shared"
+msgstr "یہ اپ اسٹریم مشترک ہے۔ الگ کرنے سے یہ صرف اس سروس اور راستے سے ہٹتا ہے، دوسرے منسلکات اسے برقرار رکھتے ہیں۔"
 
 msgid "upstreams.edit"
 msgstr "اوپر اسٹریم کو ایڈٹ کریں"
@@ -10003,11 +10948,44 @@ msgstr "کیپ لائیو"
 msgid "upstreams.keepalive_help"
 msgstr "ایک کارکن کے مطابق بیک کنکشنز۔ HTTP اور gRPC صرف؛ اسے خالی چھوڑیں تاکہ اسے غیر فعال کیا جا سکے۔"
 
+msgid "upstreams.keepalive_off"
+msgstr "بند"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "پہلے لوڈ کیے گئے %(count)s میں سے"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "%(count)s غیر منسلک"
+
+msgid "upstreams.kpi_roles"
+msgstr "%(primary)s بنیادی · %(backup)s بیک اپ · %(down)s بند (ترتیب کے مطابق)"
+
+msgid "upstreams.kpi_services"
+msgstr "منسلک خدمات"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "کسی پول تک پراکسی کرنے والی خدمات"
+
+msgid "upstreams.kpi_tls"
+msgstr "بیک اینڈ تک TLS"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "اپنے سرورز سے TLS پر بات کرنے کے لیے ترتیب دیے گئے پولز"
+
 msgid "upstreams.match_path"
 msgstr "ریورس پراکسی پاتھ"
 
 msgid "upstreams.match_path_help"
 msgstr "وہ مقام جہاں منتخب سروسز اس پول کی طرف پراکسی کرتی ہیں۔ اسٹریم پول کے لیے اسے نظر انداز کیا جاتا ہے، کیونکہ وہ پوری سروس سنبھالتا ہے۔"
+
+#. plural pair; 2 form(s) for ur, singular in slot 0
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: %(count)s سرور"
+msgstr[1] "%(name)s: %(count)s سرورز"
+
+msgid "upstreams.members_title"
+msgstr "اس اپ اسٹریم کے سرورز"
 
 msgid "upstreams.method"
 msgstr "لوڈ بیلنسنگ"
@@ -10017,6 +10995,9 @@ msgstr "فہرستیں، اعداد، ہچ، اور تحت کی علامتیں �
 
 msgid "upstreams.new"
 msgstr "نیا آپ اسٹریم"
+
+msgid "upstreams.no_match"
+msgstr "ان فلٹرز سے کوئی اپ اسٹریم میل نہیں کھاتا۔"
 
 msgid "upstreams.not_attached"
 msgstr "منسلک نہیں"
@@ -10072,11 +11053,38 @@ msgstr "وزن"
 msgid "upstreams.servers"
 msgstr "سرور"
 
+#. plural pair; 2 form(s) for ur, singular in slot 0
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "%(count)s سرور"
+msgstr[1] "%(count)s سرورز"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 2 form(s) for ur, singular in slot 0
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "%(count)s سروس"
+msgstr[1] "%(count)s خدمات"
+
 msgid "upstreams.services_help"
 msgstr "زیادہ سے زیادہ سروسز کا انتخاب کرنے کے لیے Ctrl یا Command استعمال کریں۔ ایک آپ اسٹریم کو بعد میں منسلک کیا جا سکتا ہے۔"
 
 msgid "upstreams.services_hidden"
 msgstr "%(count)s سروسز مخفی ہیں: %(protocol)s اپ اسٹریم صرف مماثل سروس سے منسلک ہو سکتا ہے۔"
+
+msgid "upstreams.services_title"
+msgstr "یہ اپ اسٹریم استعمال کرنے والی خدمات"
+
+msgid "upstreams.tls"
+msgstr "بیک اینڈ تک TLS"
+
+msgid "upstreams.tls_no"
+msgstr "غیر مرموز"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "فقط پہلے 500 آپ اسٹریم دکھائے جاتے ہیں۔ مکمل نتائج کے لیے API کے ذریعے فہرست کو محدود کریں۔"
@@ -10156,11 +11164,26 @@ msgstr "ZeroSSL کے لیے ای میل یا ZeroSSL API کلید میں سے ا
 msgid "web_cache.available"
 msgstr "موجود"
 
+msgid "web_cache.available_tip"
+msgstr "اس انسٹینس پر کیشے ڈائریکٹری موجود ہے۔ کوئی سروس اسے استعمال کرتی ہے یا نہیں، یہ سروس کی فعالیت کے تحت دکھایا جاتا ہے۔"
+
 msgid "web_cache.cache_state"
 msgstr "حالت"
 
 msgid "web_cache.cached_files"
 msgstr "کاشڈ فائلیں"
+
+msgid "web_cache.compact"
+msgstr "مختصر"
+
+msgid "web_cache.counters_window"
+msgstr "ہر انسٹینس کے دوبارہ شروع ہونے سے اب تک"
+
+msgid "web_cache.counters_window_help"
+msgstr "یہ ہر انسٹینس کے آخری بار دوبارہ شروع ہونے سے گنتے ہیں، کسی مقررہ مدت کے لیے نہیں۔"
+
+msgid "web_cache.danger_zone"
+msgstr "خطرے کا علاقہ"
 
 msgid "web_cache.deployment"
 msgstr "ڈپلائیمنٹ"
@@ -10213,11 +11236,20 @@ msgstr "ہٹ ریٹ"
 msgid "web_cache.instance"
 msgstr "انسٹینس"
 
+msgid "web_cache.invalidate"
+msgstr "غیر مؤثر کریں"
+
 msgid "web_cache.metrics"
 msgstr "ہٹ / میس ڈسٹربیشن کا مجموعہ"
 
 msgid "web_cache.metrics_scope"
 msgstr "کاؤنٹرز تمام کیش ایبلڈ سروسز میں انسٹینس کے مطابق جمع ہیں۔"
+
+msgid "web_cache.no_counters"
+msgstr "اس انسٹینس نے ابھی کوئی کیش شدہ درخواست شمار نہیں کی۔"
+
+msgid "web_cache.no_requests_for"
+msgstr "ان کے لیے کوئی درخواست نہیں:"
 
 msgid "web_cache.not_reporting"
 msgstr "رپورٹ نہیں کر رہا"
@@ -10228,6 +11260,9 @@ msgstr "پاتھ"
 msgid "web_cache.purge"
 msgstr "کاشڈ رسپانسز کو پاک کریں"
 
+msgid "web_cache.purge_a_url"
+msgstr "ایک URL کا کیشے صاف کریں"
+
 msgid "web_cache.purge_all"
 msgstr "سب صاف کریں"
 
@@ -10236,6 +11271,9 @@ msgstr "یہ ہر قابل رسائی انسٹیانس پر ہر سروس کے �
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "کل کیش کو صاف کرنا؟"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "سب مٹا دیں"
 
 msgid "web_cache.purge_help"
 msgstr "صاف کرنے کی کارروائیاں قابلِ رسائی انسٹینسز پر فوراً چلتی ہیں۔ ناقابلِ رسائی انسٹینسز کو چھوڑ دیا جاتا ہے اور کوئی کارروائی قطار میں شامل نہیں ہوتی۔"
@@ -10258,6 +11296,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "رپورٹ کرنے والے انسٹینسز"
 
+msgid "web_cache.server_side_note"
+msgstr "صرف سرور کی طرف کا کیشے۔ یہ صفحہ ہر BunkerWeb انسٹینس پر محفوظ ریورس پراکسی کیشے سنبھالتا ہے۔ زائرین کے براؤزرز میں پہلے سے محفوظ جوابات متاثر نہیں ہوتے۔"
+
 msgid "web_cache.service"
 msgstr "سروس"
 
@@ -10266,6 +11307,27 @@ msgstr "سرویس کی فعال کاری"
 
 msgid "web_cache.status"
 msgstr "انسٹنس سٹوریج"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "اس درخواست کے لیے کیشنگ چھوڑ دی گئی"
+
+msgid "web_cache.status_desc.expired"
+msgstr "مدتِ حیات ختم: اپ اسٹریم سے دوبارہ لیا گیا"
+
+msgid "web_cache.status_desc.hit"
+msgstr "براہِ راست کیشے سے فراہم کیا گیا"
+
+msgid "web_cache.status_desc.miss"
+msgstr "کیش نہیں تھا: اپ اسٹریم سے لے کر محفوظ کیا گیا"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "مشروط دوبارہ حصول: اپ اسٹریم نے کہا کہ یہ اب بھی درست ہے"
+
+msgid "web_cache.status_desc.stale"
+msgstr "اپ اسٹریم کی خرابی کے باعث پرانا مواد فراہم کیا گیا"
+
+msgid "web_cache.status_desc.updating"
+msgstr "ریفریش جاری ہونے کے دوران پرانا مواد فراہم کیا گیا"
 
 msgid "web_cache.subtitle"
 msgstr "ریورس-پروکسی کیش کی حالت، مجموعی ہٹ ریٹ میٹرکس اور فوری صاف کرنے کے کنٹرول۔"
@@ -10308,6 +11370,18 @@ msgstr "اینٹی بوٹ فراہم کنندہ"
 
 msgid "workflows.act_redirect"
 msgstr "ری ڈائریکٹ کریں"
+
+msgid "workflows.act_settings_block"
+msgstr "بلاک کی سیٹنگز"
+
+msgid "workflows.act_settings_challenge"
+msgstr "چیلنج کی سیٹنگز"
+
+msgid "workflows.act_settings_generic"
+msgstr "کارروائی کی سیٹنگز"
+
+msgid "workflows.act_settings_redirect"
+msgstr "ری ڈائریکٹ کی سیٹنگز"
 
 msgid "workflows.act_status"
 msgstr "انکار اسٹیٹس"
@@ -10435,6 +11509,9 @@ msgstr "%(count)s قانون میں مسائل"
 msgid "workflows.aria.ruleName"
 msgstr "اصول %(n)s کا نام"
 
+msgid "workflows.aria.ruleTools"
+msgstr "اصول %(n)s کی کارروائیاں"
+
 msgid "workflows.aria.terminalAction"
 msgstr "اختتامی کارروائی"
 
@@ -10551,6 +11628,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "یہ اصول حذف کریں؟ اس کے نیچے موجود سب اصول ایک درجہ اوپر آ جائیں گے۔"
+
+msgid "workflows.conseq.skip"
+msgstr "کبھی نہیں چلتا"
+
+msgid "workflows.conseq.stop"
+msgstr "سلسلہ روکتا ہے"
 
 msgid "workflows.copySuffix"
 msgstr " (نقل)"
@@ -10699,6 +11782,21 @@ msgstr "مماثلت گیٹ"
 msgid "workflows.gate.help"
 msgstr "ہر کلائنٹ IP کے لیے الگ شمار ہوتا ہے۔ حد سے نیچے یہ اصول بالکل مماثل نہیں ہوتا اور جانچ اگلے اصول تک جاتی ہے؛ یہ خود شرح محدود نہیں کرتا۔"
 
+msgid "workflows.inspector.apply"
+msgstr "لاگو کریں"
+
+msgid "workflows.inspector.apply_title"
+msgstr "لاگو کریں: یہ ترامیم ڈرافٹ میں رکھیں، انہیں ذخیرہ کرنے کے لیے صفحے کا محفوظ کریں بٹن استعمال کریں"
+
+msgid "workflows.inspector.cancel"
+msgstr "منسوخ کریں"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "منسوخ کریں: قاعدہ کھولتے وقت کی حالت میں بحال کریں"
+
+msgid "workflows.inspector.cancelled"
+msgstr "قاعدہ %(n)s کی ترامیم منسوخ ہو گئیں، قاعدہ کھولتے وقت کی حالت میں واپس آ گیا ہے۔"
+
 msgid "workflows.legend.fall"
 msgstr "مماثلت نہ ہو تو اگلا اصول"
 
@@ -10735,8 +11833,14 @@ msgstr "نیچے نقل بنائیں"
 msgid "workflows.menu.enable"
 msgstr "اصول فعال کریں"
 
+msgid "workflows.menu.header"
+msgstr "اصول کی کارروائیاں"
+
 msgid "workflows.menu.moveTo"
 msgstr "مقام %(n)s پر منتقل کریں"
+
+msgid "workflows.menu.order"
+msgstr "ترتیب"
 
 msgid "workflows.menu.staysAt"
 msgstr "مقام %(n)s پر رہتا ہے"
@@ -10768,6 +11872,81 @@ msgstr "ابھی توثیق نہیں ہوئی"
 msgid "workflows.order_help"
 msgstr "اصولوں کی ترتیب سے جانچ ہوتی ہے اور پہلا مماثل اصول کامیاب ہوتا ہے۔ شرح کی حد والا اصول صرف حد پار ہونے پر مماثل ہوتا ہے، اس لیے نیچے کا اصول حد سے کم ٹریفک کو پکڑ سکتا ہے۔"
 
+msgid "workflows.port.active_rules"
+msgstr "%(count)s فعال"
+
+msgid "workflows.port.attachment"
+msgstr "وابستگی"
+
+msgid "workflows.port.attachment_any"
+msgstr "کوئی بھی"
+
+msgid "workflows.port.attachment_attached"
+msgstr "منسلک"
+
+msgid "workflows.port.created"
+msgstr "تخلیق شدہ"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "حذف کرنے سے پہلے اس ورک فلو کو ہر سروس سے الگ کریں۔ حذف کرنے سے خدمات خودکار طور پر کبھی الگ نہیں ہوتیں۔"
+
+msgid "workflows.port.details"
+msgstr "تفصیلات"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "منتخب تعریفیں (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "منتخب تعریفیں برآمد ہو گئیں۔ اس فائل کی دوبارہ درآمد کی ضمانت نہیں۔"
+
+msgid "workflows.port.export_failed"
+msgstr "برآمد ناکام، کوئی فائل ڈاؤن لوڈ نہیں ہوئی۔"
+
+msgid "workflows.port.export_loading"
+msgstr "منتخب ورک فلوز کی تعریفیں پڑھی جا رہی ہیں…"
+
+msgid "workflows.port.export_scope"
+msgstr "ٹیبل کی برآمد میں فلٹر شدہ قطاریں اور نظر آنے والے کالم شامل ہیں۔ JSON برآمد میں صرف منتخب ورک فلوز کی معیاری تعریفیں id کی کلید کے تحت شامل ہیں، دوبارہ درآمد کی ضمانت نہیں۔"
+
+msgid "workflows.port.list_subtitle"
+msgstr "ہر ورک فلو کے قواعد اور منسلک خدمات"
+
+msgid "workflows.port.more"
+msgstr "%(name)s کے لیے مزید کارروائیاں"
+
+msgid "workflows.port.row_details"
+msgstr "ورک فلو کی تفصیلات"
+
+msgid "workflows.port.select_workflows"
+msgstr "ورک فلوز منتخب کریں"
+
+msgid "workflows.port.services_count"
+msgstr "خدمات: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "الگ کرنے سے یہ ورک فلو صرف اس خدمت سے ہٹتا ہے۔ ورک فلو اور اس کے اصول برقرار رہتے ہیں۔"
+
+msgid "workflows.port.services_none"
+msgstr "یہ ورک فلو کسی بھی خدمت سے منسلک نہیں ہے۔"
+
+msgid "workflows.port.services_open"
+msgstr "%(name)s سے منسلک خدمات دکھائیں"
+
+msgid "workflows.port.services_title"
+msgstr "%(name)s سے منسلک خدمات"
+
+msgid "workflows.port.total_rules"
+msgstr "کل %(count)s"
+
+msgid "workflows.port.updated"
+msgstr "تازہ کردہ"
+
 msgid "workflows.readonly"
 msgstr "ڈیٹا بیسreadonly ہے۔ ورک فلو کا جائزہ لیا جا سکتا ہے لیکن تبدیل نہیں کیا جا سکتا۔"
 
@@ -10782,6 +11961,9 @@ msgstr "سیکیورٹی ورک فلو “%(workflow)s”: ایکشن “%(actio
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "سیکیورٹی ورک فلو “%(workflow)s”: درخواست ری ڈائریکٹ کر دی گئی"
+
+msgid "workflows.regex_help"
+msgstr "regex کی دو الگ حدود لاگو ہیں۔ لکھتے وقت: ایک سروس سے منسلک ورک فلوز میں مجموعی طور پر زیادہ سے زیادہ 50 regex شرائط ہو سکتی ہیں، اس سے زیادہ محفوظ یا منسلک کرنا مسترد ہوتا ہے۔ چلتے وقت: ہر انسٹینس زیادہ سے زیادہ WORKFLOWS_REGEX_BUDGET مختلف ریگولر ایکسپریشنز کمپائل کرتا ہے (طے شدہ 512، تمام ورک فلوز میں مشترک)۔ اس حد سے آگے regex کی جانچ نہیں ہوتی اور وہ UNKNOWN لوٹاتا ہے، اس لیے اس کا قاعدہ میل نہیں کھا سکتا۔"
 
 msgid "workflows.rule.disabled"
 msgstr "غیر فعال"
@@ -10893,6 +12075,108 @@ msgstr "لیسٹ نظر۔ قوانین اوپر سے نیچے چلتے ہیں؛ 
 
 msgid "workflows.search"
 msgstr "نام یا وضاحت کی تلاش کریں..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "کنفیگریشن کھولنے کے لیے ورک فلو بنائیں"
+
+msgid "workflows.shell.draft_discard"
+msgstr "تبدیلیاں رد کریں"
+
+msgid "workflows.shell.draft_restored"
+msgstr "اس ورک فلو کی غیر محفوظ شدہ تبدیلیاں بحال ہو گئیں۔ لاگو کرنے کے لیے محفوظ کریں، یا رد کرنے کے لیے ورک فلو بدلیں۔"
+
+msgid "workflows.shell.draft_save"
+msgstr "محفوظ کر کے جاری رکھیں"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "ورک فلو محفوظ نہیں ہو سکا، کچھ بھی رد نہیں ہوا۔"
+
+msgid "workflows.shell.draft_stale"
+msgstr "آپ کا ڈرافٹ شروع ہونے کے بعد یہ ورک فلو کہیں اور محفوظ ہوا، اس لیے ڈرافٹ رد کر دیا گیا۔"
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "%(target)s کھولنے سے %(name)s کے قواعد کی غیر محفوظ شدہ تبدیلیاں رہ جائیں گی۔ ایک وقت میں صرف ایک ڈرافٹ کھل سکتا ہے: اسے محفوظ کریں، رد کریں، یا یہیں رہیں۔"
+
+msgid "workflows.shell.draft_title"
+msgstr "%(name)s میں غیر محفوظ شدہ تبدیلیاں"
+
+msgid "workflows.shell.pick_label"
+msgstr "ورک فلو"
+
+msgid "workflows.shell.read_only"
+msgstr "صرف پڑھنے کے لیے"
+
+msgid "workflows.shell.tab_config"
+msgstr "کنفیگریشن"
+
+msgid "workflows.shell.tab_overview"
+msgstr "جائزہ"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "غیر محفوظ شدہ"
+
+msgid "workflows.shell.tabs_label"
+msgstr "ورک فلوز کا منظر"
+
+msgid "workflows.shell.view_label"
+msgstr "منظر"
+
+msgid "workflows.sum.block"
+msgstr "درخواست بلاک کریں"
+
+msgid "workflows.sum.blockStatus"
+msgstr "%(code)s کوڈ کے ساتھ درخواست بلاک کریں"
+
+msgid "workflows.sum.challenge"
+msgstr "%(provider)s کا چیلنج دکھائیں"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "CrowdSec تدارک"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "CrowdSec ماخذ"
+
+msgid "workflows.sum.every"
+msgstr "کوئی بھی درخواست آئے"
+
+msgid "workflows.sum.gate"
+msgstr "فی IP ہر %(window)s سیکنڈ میں %(count)s سے زیادہ درخواستیں آئیں"
+
+msgid "workflows.sum.group_asn"
+msgstr "ASN گروپ %(name)s میں ہو"
+
+msgid "workflows.sum.group_country"
+msgstr "ملک گروپ %(name)s میں ہو"
+
+msgid "workflows.sum.group_ip"
+msgstr "IP گروپ %(name)s میں ہو"
+
+msgid "workflows.sum.isOne"
+msgstr "%(label)s کی قدر %(value)s ہو"
+
+msgid "workflows.sum.isOneOf"
+msgstr "%(label)s کی قدر %(values)s میں سے ایک ہو"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "ملک"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "طریقہ"
+
+msgid "workflows.sum.not"
+msgstr "«%(what)s» شرط پوری نہ ہو"
+
+msgid "workflows.sum.redirect"
+msgstr "%(url)s پر ری ڈائریکٹ کریں (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "URI %(value)s %(match)s"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11064,6 +12348,78 @@ msgstr "درخواستیں"
 
 msgid "workflows.threshold_window"
 msgstr "سیکنڈ"
+
+msgid "workflows.toolbar.actions"
+msgstr "ورک فلو کی کارروائیاں"
+
+msgid "workflows.toolbar.any_action"
+msgstr "کوئی بھی کارروائی"
+
+msgid "workflows.toolbar.any_state"
+msgstr "کوئی بھی حالت"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "اوپر واپس جائیں"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "سب سمیٹیں"
+
+msgid "workflows.toolbar.detailed"
+msgstr "تفصیلی"
+
+msgid "workflows.toolbar.display"
+msgstr "قواعد کی نمائش"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "سب پھیلائیں"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "کارروائی"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "نام"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "قاعدے کے نام سے تلاش کریں…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "قواعد فلٹر کریں"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "حالت"
+
+msgid "workflows.toolbar.filters"
+msgstr "فلٹرز"
+
+msgid "workflows.toolbar.full_height"
+msgstr "مکمل اونچائی"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "اونچائی محدود کریں"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "%(total)s قواعد میں سے %(shown)s"
+
+msgid "workflows.toolbar.no_match"
+msgstr "ان فلٹرز سے کوئی قاعدہ میل نہیں کھاتا"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "جب فلٹر قواعد چھپاتا ہے تو ترتیب بدلنا موقوف رہتا ہے۔"
+
+msgid "workflows.toolbar.reset"
+msgstr "ری سیٹ کریں"
+
+msgid "workflows.toolbar.simplified"
+msgstr "سادہ"
+
+msgid "workflows.toolbar.state_off"
+msgstr "غیر فعال"
+
+msgid "workflows.toolbar.state_on"
+msgstr "فعال"
+
+msgid "workflows.toolbar.view"
+msgstr "قواعد کی ترتیب کا منظر"
 
 msgid "workflows.tree.addCondition"
 msgstr "شرط"

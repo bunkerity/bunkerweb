@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "제작 도구"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "복사됨"
+
+msgid "about.environment.copy"
+msgstr "진단 정보 복사"
+
+msgid "about.environment.database"
+msgstr "데이터베이스 서버"
+
+msgid "about.environment.help"
+msgstr "웹 UI 호스트와 제어 영역에서 읽은 정보입니다. 변수, 라이선스 키 또는 데이터베이스 주소는 표시하지 않습니다."
+
+msgid "about.environment.instances_up"
+msgstr "전체 %(total)s개 중 %(up)s개 실행 중"
+
+msgid "about.environment.integration"
+msgstr "통합"
+
+msgid "about.environment.platform"
+msgstr "플랫폼"
+
+msgid "about.environment.registered"
+msgstr "등록됨"
+
+msgid "about.environment.scope_control_plane"
+msgstr "제어 영역"
+
+msgid "about.environment.scope_instances"
+msgstr "인스턴스"
+
+msgid "about.environment.scope_ui_host"
+msgstr "웹 UI 호스트"
+
+msgid "about.environment.title"
+msgstr "환경"
+
 msgid "about.gnu_license"
 msgstr "GNU Affero 일반 공중 사용 허가서 v3.0"
 
 msgid "about.license_title"
 msgstr "라이선스"
+
+msgid "about.releases.title"
+msgstr "최근 릴리스"
+
+msgid "about.releases.view_all"
+msgstr "모두 보기"
 
 msgid "about.social.discord"
 msgstr "디스코드"
@@ -274,6 +319,18 @@ msgstr "선택한 기간"
 msgid "bans.chart.timeseries.title"
 msgstr "구간별 활성 차단"
 
+msgid "bans.clear_all.confirm"
+msgstr "모든 차단 해제"
+
+msgid "bans.clear_all.message"
+msgstr "모든 서비스와 인스턴스의 차단을 모두 제거합니다. CrowdSec 차단은 해당 행에서 해제해야 합니다."
+
+msgid "bans.clear_all.phrase"
+msgstr "모두 해제"
+
+msgid "bans.clear_all.title"
+msgstr "모든 차단 해제"
+
 msgid "bans.crowdsec.confirm"
 msgstr "결정 삭제 및 차단 해제"
 
@@ -394,11 +451,53 @@ msgstr "%(ip)s의 차단 기간 업데이트에 실패했습니다: %(error)s"
 msgid "bans.flash.update_duration_success"
 msgstr "%(ip)s의 차단 기간을 업데이트했습니다."
 
+msgid "bans.import.confirm_button"
+msgstr "가져오기"
+
+msgid "bans.import.confirm_message"
+msgstr "이 파일에서 찾은 차단: %(count)s개. 가져오시겠습니까?"
+
+msgid "bans.import.confirm_skipped"
+msgstr "읽을 수 없어 무시한 줄: %(skipped)s개."
+
+msgid "bans.import.confirm_title"
+msgstr "차단 가져오기"
+
+msgid "bans.import.empty"
+msgstr "이 파일에서 유효한 차단을 찾을 수 없습니다. 한 줄에 차단 하나를 IP[,scope[,duration[,reason]]] 형식으로 입력하거나 JSON 목록을 사용하세요."
+
+msgid "bans.import.read_failed"
+msgstr "파일을 읽을 수 없습니다."
+
+msgid "bans.import.too_many"
+msgstr "이 파일에는 %(max)s개를 초과하는 차단이 있습니다. 파일을 나누어 가져오세요."
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "CrowdSec 임대"
 
+msgid "bans.live.off"
+msgstr "자동 새로고침이 일시 중지되었습니다."
+
+msgid "bans.live.on"
+msgstr "자동 새로고침 켜짐, 10초마다 갱신합니다."
+
+msgid "bans.live.updated"
+msgstr "차단 갱신: 신규 %(added)s개, 만료 %(removed)s개."
+
+msgid "bans.page.clear_all"
+msgstr "모두 해제"
+
+msgid "bans.page.import"
+msgstr "가져오기"
+
 msgid "bans.stats.card.by_reason"
 msgstr "사유별 차단"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "사유"
+
+msgid "bans.stats.reasons.meta"
+msgstr "활성 차단 %(count)s개"
 
 msgid "bans.stats.tile.active"
 msgstr "활성 차단"
@@ -934,6 +1033,27 @@ msgstr "인증서 보기"
 msgid "certificates.browse_key"
 msgstr "개인 키 보기"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "삭제할 인증서: %(count)s개. 이 작업은 취소할 수 없습니다. 계속하시겠습니까?"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "갱신할 자체 서명 인증서: %(count)s개. 계속하시겠습니까?"
+
+msgid "certificates.bulk.delete"
+msgstr "선택 항목 삭제"
+
+msgid "certificates.bulk.download"
+msgstr "체인 다운로드"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "선택한 인증서 중 이 작업을 수행할 수 있는 인증서가 없습니다."
+
+msgid "certificates.bulk.renew"
+msgstr "자체 서명 인증서 갱신"
+
+msgid "certificates.bulk.skipped"
+msgstr "이 작업을 수행할 수 없어 건너뛴 선택 인증서: %(skipped)s개."
+
 msgid "certificates.common_name"
 msgstr "공통 이름"
 
@@ -1117,6 +1237,9 @@ msgstr "발급 기관"
 msgid "certificates.issuers"
 msgstr "주요 발급 기관"
 
+msgid "certificates.issuers_meta"
+msgstr "인증서 %(count)s개"
+
 msgid "certificates.key_drop"
 msgstr "해당하는 개인 키를 여기에 드롭합니다"
 
@@ -1180,6 +1303,9 @@ msgstr "데이터베이스는 읽기 전용입니다. 인증서를 검사하고 
 msgid "certificates.renew_due"
 msgstr "검토/갱신 예정"
 
+msgid "certificates.renew_due_short"
+msgstr "갱신 필요"
+
 msgid "certificates.sans"
 msgstr "주체 대체 이름"
 
@@ -1194,6 +1320,9 @@ msgstr "ACME 발급 예약"
 
 msgid "certificates.search"
 msgstr "이름, 일반 이름, SAN, 발급 기관 또는 지문을 검색하세요…"
+
+msgid "certificates.select_all"
+msgstr "모든 인증서 선택"
 
 msgid "certificates.serial"
 msgstr "시리얼 번호"
@@ -1323,6 +1452,99 @@ msgstr "%(count)s 더 보기"
 
 msgid "compose.unavailable"
 msgstr "플러그인 목록을 로드할 수 없으므로 이 페이지를 안전하게 수정할 수 없습니다. API에 답변하면 다시 로드하세요."
+
+msgid "configs.console.all_scopes"
+msgstr "모든 범위"
+
+msgid "configs.console.clone"
+msgstr "설정 복제"
+
+msgid "configs.console.content"
+msgstr "설정 내용 (읽기 전용)"
+
+msgid "configs.console.download"
+msgstr "다운로드"
+
+msgid "configs.console.edit"
+msgstr "설정 편집"
+
+msgid "configs.console.editor_help"
+msgstr "NGINX 또는 ModSecurity 내용을 편집하세요. Ctrl+S 또는 Command+S로 저장합니다."
+
+msgid "configs.console.editor_title"
+msgstr "설정 내용"
+
+msgid "configs.console.files"
+msgstr "파일"
+
+msgid "configs.console.full_view"
+msgstr "전체 보기"
+
+msgid "configs.console.global_legend"
+msgstr "전역 설정은 모든 서비스에 적용됩니다."
+
+msgid "configs.console.global_only"
+msgstr "전역만"
+
+msgid "configs.console.lint"
+msgstr "구문 검사"
+
+msgid "configs.console.lint_brace"
+msgstr "여는 중괄호가 닫히지 않았습니다."
+
+msgid "configs.console.lint_clean"
+msgstr "클라이언트 측 검사에서 문제가 발견되지 않았습니다."
+
+msgid "configs.console.lint_help"
+msgstr "클라이언트 측 힌트만 제공합니다. 배포 전에 nginx -t로 검증하세요. 여러 줄로 된 지시문은 경고를 발생시킬 수 있습니다."
+
+msgid "configs.console.lint_quote"
+msgstr "따옴표가 닫히지 않았습니다."
+
+msgid "configs.console.lint_semicolon"
+msgstr "지시문 끝에 세미콜론이 누락되었을 수 있습니다."
+
+msgid "configs.console.lint_skipped"
+msgstr "ModSecurity 및 CRS 설정에서는 NGINX 구문 검사를 사용할 수 없습니다."
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "예기치 않은 닫는 중괄호입니다."
+
+msgid "configs.console.lint_warnings"
+msgstr "클라이언트 측 검사에서 경고 %(count)s개를 발견했습니다. 편집기 주석을 확인하세요."
+
+msgid "configs.console.name_help"
+msgstr "문자, 숫자, 하이픈 또는 밑줄을 사용하세요. 디스크에 저장할 때 .conf 접미사가 추가됩니다."
+
+msgid "configs.console.new"
+msgstr "새 설정"
+
+msgid "configs.console.no_files"
+msgstr "이 필터와 일치하는 설정이 없습니다."
+
+msgid "configs.console.restore_view"
+msgstr "보기 복원"
+
+msgid "configs.console.select_file"
+msgstr "내용을 미리 보려면 파일을 선택하세요."
+
+msgid "configs.console.service_legend"
+msgstr "서비스 설정은 하나의 서비스에만 적용됩니다."
+
+msgid "configs.console.service_only"
+msgstr "서비스만"
+
+msgid "configs.console.template_name_locked"
+msgstr "템플릿 기반 사용자 정의 설정의 이름은 변경할 수 없습니다."
+
+msgid "configs.console.title"
+msgstr "사용자 정의 설정"
+
+msgid "configs.console.types"
+msgstr "설정 유형"
+
+msgid "configs.console.view"
+msgstr "설정 보기"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "선택한 모든 사용자 지정 설정을 찾을 수 없거나, UI/API 사용자 지정 설정이 아니거나, 이미 변환되었습니다."
@@ -2764,6 +2986,15 @@ msgstr "시간"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "시간별 차단 현황"
 
+msgid "dashboard.chart.legend.count"
+msgstr "개수"
+
+msgid "dashboard.chart.legend.item"
+msgstr "항목"
+
+msgid "dashboard.chart.legend.share"
+msgstr "비율"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "차단된 요청"
 
@@ -3007,6 +3238,18 @@ msgstr "이 페이지의 템플릿 %(count)s개가 선택되었습니다."
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "이 페이지의 템플릿 %(count)s개가 모두 선택되었습니다."
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "일치하는 워크플로우 %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "일치하는 워크플로우 %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "이 페이지의 워크플로우 %(count)s개가 선택되었습니다."
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "이 페이지의 워크플로우 %(count)s개가 모두 선택되었습니다."
+
 msgid "datatable.bulk_select_clear"
 msgstr "선택 지우기"
 
@@ -3049,6 +3292,9 @@ msgstr "서비스가 없습니다."
 msgid "datatable.info_empty_templates"
 msgstr "템플릿이 없습니다."
 
+msgid "datatable.info_empty_workflows"
+msgstr "워크플로우가 없습니다."
+
 msgid "datatable.info_filtered_bans"
 msgstr "(전체 _MAX_개의 차단 항목에서 필터링됨)"
 
@@ -3079,6 +3325,9 @@ msgstr "(전체 _MAX_개의 서비스에서 필터링됨)"
 msgid "datatable.info_filtered_templates"
 msgstr "(전체 _MAX_개의 템플릿에서 필터링됨)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(전체 _MAX_개의 워크플로우에서 필터링됨)"
+
 msgid "datatable.info_instances"
 msgstr "%(total)s개의 인스턴스 중 %(start)s~%(end)s 표시 중"
 
@@ -3099,6 +3348,9 @@ msgstr "%(total)s개의 서비스 중 %(start)s~%(end)s 표시 중"
 
 msgid "datatable.info_templates"
 msgstr "%(total)s개의 템플릿 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_workflows"
+msgstr "%(total)s개의 워크플로우 중 %(start)s~%(end)s 표시 중"
 
 msgid "datatable.length_all"
 msgstr "전체"
@@ -3132,6 +3384,9 @@ msgstr "_MENU_개씩 보기 (서비스)"
 
 msgid "datatable.length_menu_templates"
 msgstr "_MENU_개씩 보기 (템플릿)"
+
+msgid "datatable.length_menu_workflows"
+msgstr "_MENU_개씩 보기 (워크플로우)"
 
 msgid "datatable.paginate.first"
 msgstr "처음"
@@ -3244,6 +3499,15 @@ msgstr "1개의 템플릿 선택됨"
 msgid "datatable.select_rows_templates_plural"
 msgstr "%d개의 템플릿 선택됨"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "선택된 워크플로우 없음"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "1개의 워크플로우 선택됨"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "%d개의 워크플로우 선택됨"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "사용자 정의 설정 %(count)s개 선택됨"
 
@@ -3318,6 +3582,9 @@ msgstr "일치하는 서비스가 없습니다."
 
 msgid "datatable.zero_records_templates"
 msgstr "일치하는 템플릿이 없습니다."
+
+msgid "datatable.zero_records_workflows"
+msgstr "일치하는 워크플로우가 없습니다."
 
 msgid "dev_log.copy_failed"
 msgstr "텍스트 복사 실패:"
@@ -4369,14 +4636,26 @@ msgstr "한 번"
 msgid "interval.week"
 msgstr "매주"
 
+msgid "job.history.duration"
+msgstr "소요 시간"
+
 msgid "job.history.end_date"
 msgstr "종료일"
+
+msgid "job.history.error"
+msgstr "오류"
 
 msgid "job.history.start_date"
 msgstr "시작일"
 
 msgid "job.history.success"
 msgstr "성공"
+
+msgid "jobs.card.sub"
+msgstr "스케줄러가 각 작업의 주기에 따라 실행하거나 요청 시 실행합니다"
+
+msgid "jobs.card.title"
+msgstr "예약된 작업"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "작업을 가져오는 중 오류 발생: %(message)s"
@@ -5113,6 +5392,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "추가 페이지"
 
+msgid "navigation.filter_plugins"
+msgstr "플러그인 필터링…"
+
 msgid "navigation.global_settings"
 msgstr "전역 설정"
 
@@ -5140,6 +5422,9 @@ msgstr "모드 선택"
 msgid "navigation.more"
 msgstr "더 보기..."
 
+msgid "navigation.no_plugin_match"
+msgstr "일치하는 플러그인 없음"
+
 msgid "navigation.operate"
 msgstr "운영"
 
@@ -5158,14 +5443,23 @@ msgstr "플러그인 비활성화됨"
 msgid "navigation.plugin_deactivated_global"
 msgstr "플러그인 전역 비활성화됨"
 
+msgid "navigation.plugin_insights"
+msgstr "플러그인 정보"
+
 msgid "navigation.plugins"
 msgstr "플러그인"
+
+msgid "navigation.plugins_overview"
+msgstr "개요"
 
 msgid "navigation.plugins_pages"
 msgstr "플러그인 페이지"
 
 msgid "navigation.pro"
 msgstr "Pro"
+
+msgid "navigation.profile"
+msgstr "프로필"
 
 msgid "navigation.redirects"
 msgstr "리디렉션"
@@ -5338,6 +5632,24 @@ msgstr "무료"
 msgid "plan.pro"
 msgstr "PRO"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "이 플러그인은 어디에서도 사용되지 않습니다"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "전역 세팅"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "메트릭이 꺼져 있습니다"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "아직 표시할 내용이 없습니다"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "표시할 페이지가 없습니다"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "관리자 전용"
+
 msgid "plugin.page.status.deactivated"
 msgstr "플러그인이 비활성화되어 정보를 표시할 수 없습니다."
 
@@ -5373,6 +5685,12 @@ msgstr "Pro"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.card.configure"
+msgstr "%(name)s 설정"
+
+msgid "plugins.card.metrics"
+msgstr "%(name)s 메트릭"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "BunkerWeb 버전(%(current)s)을 읽을 수 없어 %(id)s의 호환성을 확인할 수 없습니다. 아무것도 설치되지 않았습니다"
@@ -5617,11 +5935,20 @@ msgstr "활성"
 msgid "plugins.marketplace.always_on"
 msgstr "핵심 / 항상 켜짐"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "항상 켜짐"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "BunkerWeb에 필요한 핵심 플러그인입니다. 설정은 가능하지만 비활성화할 수는 없습니다."
+
 msgid "plugins.marketplace.disabled"
 msgstr "비활성화됨"
 
 msgid "plugins.marketplace.enabled"
 msgstr "활성화됨"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "플러그인 필터링"
 
 msgid "plugins.marketplace.inactive"
 msgstr "비활성"
@@ -5652,6 +5979,15 @@ msgstr "더 많은 값"
 
 msgid "plugins.multivalue.show_less"
 msgstr "덜 표시"
+
+msgid "plugins.tier.community"
+msgstr "커뮤니티 플러그인"
+
+msgid "plugins.tier.core"
+msgstr "핵심 플러그인"
+
+msgid "plugins.tier.pro"
+msgstr "PRO 플러그인"
 
 msgid "pro.alert.overlapped_1"
 msgstr "라이선스에서 허용하는 것보다 많은 서비스가 활성화되어 있습니다!"
@@ -5998,8 +6334,14 @@ msgstr "IP 주소"
 msgid "profile.session.last_activity"
 msgstr "마지막 활동"
 
+msgid "profile.session.load_error"
+msgstr "데이터를 불러오는 중 오류가 발생했습니다. 다시 시도하세요."
+
 msgid "profile.session.os"
 msgstr "운영 체제"
+
+msgid "profile.session.recent_title"
+msgstr "최근 세션"
 
 msgid "profile.session.title"
 msgstr "세션"
@@ -6018,6 +6360,9 @@ msgstr "보안"
 
 msgid "profile.tab.sessions"
 msgstr "세션"
+
+msgid "profile.title"
+msgstr "내 프로필"
 
 msgid "range_picker.1h"
 msgstr "지난 1시간"
@@ -6070,11 +6415,44 @@ msgstr "현재 설정 %(setting)s이(가) 올바르지 않습니다."
 msgid "raw_drafts.setting_not_valid"
 msgstr "%(setting)s 설정이 올바르지 않습니다."
 
+msgid "raw_page.search"
+msgstr "검색…"
+
+msgid "raw_page.search_label"
+msgstr "원시 구성 검색"
+
+msgid "raw_page.search_next"
+msgstr "다음 일치 항목"
+
+msgid "raw_page.search_prev"
+msgstr "이전 일치 항목"
+
+msgid "raw_page.tile_modified"
+msgstr "수정됨"
+
+msgid "raw_page.tile_plugins"
+msgstr "플러그인"
+
+msgid "raw_page.tile_problems"
+msgstr "문제"
+
+msgid "raw_page.tile_settings"
+msgstr "세팅"
+
+msgid "raw_page.tiles_label"
+msgstr "원시 구성 요약"
+
 msgid "redirects.all"
 msgstr "전체"
 
+msgid "redirects.all_codes"
+msgstr "모든 상태 코드"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "URI 추가"
 
 msgid "redirects.append_request_uri"
 msgstr "요청된 URI을 대상에 추가"
@@ -6084,6 +6462,9 @@ msgstr "연결"
 
 msgid "redirects.attach_copy"
 msgstr "%(name)s (%(from)s → %(to)s)을 하나 이상의 서비스에 첨부"
+
+msgid "redirects.card_subtitle"
+msgstr "경로 리디렉션과 적용 대상 서비스"
 
 msgid "redirects.code.301"
 msgstr "301 — 영구 리디렉션"
@@ -6100,6 +6481,11 @@ msgstr "307 — 일시적인 리디렉션"
 msgid "redirects.code.308"
 msgstr "308 — 영구적인 리디렉션"
 
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "리디렉션 %(count)s개"
+
 msgid "redirects.create"
 msgstr "리디렉션 생성"
 
@@ -6111,6 +6497,9 @@ msgstr "%(name)s 리디렉션을 삭제하시겠습니까?"
 
 msgid "redirects.delete_help"
 msgstr "서비스에 첨부된 리디렉션은 삭제할 수 없습니다. 먼저 분리하십시오."
+
+msgid "redirects.detach_shared"
+msgstr "이 리디렉션은 공유됩니다. 연결을 해제하면 해당 서비스에서만 제거됩니다. 다른 서비스에서는 유지됩니다."
 
 msgid "redirects.edit"
 msgstr "리디렉션 편집"
@@ -6193,8 +6582,32 @@ msgstr "~에서 리디렉션"
 msgid "redirects.from_path_help"
 msgstr "첨부된 서비스의 소스 경로, 예: /old."
 
+msgid "redirects.kpi_configured"
+msgstr "설정된 리디렉션"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "적용하려면 서비스에 연결하세요"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "처음 불러온 %(count)s개 중"
+
+msgid "redirects.kpi_permanent"
+msgstr "영구"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 또는 308, 브라우저에 캐시됨"
+
+msgid "redirects.kpi_services"
+msgstr "연결된 서비스"
+
+msgid "redirects.kpi_services_caption"
+msgstr "리디렉션이 하나 이상 있는 서비스"
+
 msgid "redirects.new"
 msgstr "새 리디렉션"
+
+msgid "redirects.no_match"
+msgstr "이 필터와 일치하는 리디렉션이 없습니다."
 
 msgid "redirects.not_attached"
 msgstr "첨부되지 않음"
@@ -6208,14 +6621,28 @@ msgstr "리디렉션 저장"
 msgid "redirects.search"
 msgstr "이름, 소스 경로 또는 대상 검색..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "서비스 %(count)s개"
+
 msgid "redirects.services_help"
 msgstr "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 나중에 리디렉션을 추가할 수 있습니다."
+
+msgid "redirects.services_title"
+msgstr "이 리디렉션을 사용하는 서비스"
 
 msgid "redirects.status_code"
 msgstr "상태 코드"
 
 msgid "redirects.to_url"
 msgstr "리디렉션 대상"
+
+msgid "redirects.to_url_help"
+msgstr "완전한 http:// 또는 https:// URL을 입력하세요. 상대 경로 대상은 지원하지 않습니다."
 
 msgid "redirects.truncated"
 msgstr "첫 500개의 리디렉션만 표시됩니다. 전체 결과를 위해 API를 사용하여 목록을 좁힙니다."
@@ -6282,6 +6709,36 @@ msgstr "로컬 API 결정"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "기술 세부 정보"
+
+msgid "reports.live.off"
+msgstr "자동 새로고침이 일시 중지되었습니다."
+
+msgid "reports.live.on"
+msgstr "자동 새로고침 켜짐, 10초마다 갱신합니다."
+
+msgid "reports.live.updated"
+msgstr "보고서 갱신: 신규 %(added)s개."
+
+msgid "reports.offenders.confirm_many"
+msgstr "IP 주소 %(count)s개가 모든 인스턴스에서 24시간 동안 차단됩니다."
+
+msgid "reports.offenders.confirm_one"
+msgstr "%(ip)s 주소가 모든 인스턴스에서 24시간 동안 차단됩니다."
+
+msgid "reports.offenders.confirm_title"
+msgstr "보고서에서 차단"
+
+msgid "reports.offenders.show"
+msgstr "표시"
+
+msgid "reports.offenders.show_bottom"
+msgstr "최소 위반자"
+
+msgid "reports.offenders.show_latest"
+msgstr "최근 위반자"
+
+msgid "reports.offenders.show_top"
+msgstr "최다 위반자"
 
 msgid "reports.security_incident"
 msgstr "보안 사고"
@@ -6382,6 +6839,15 @@ msgstr "요청 경로"
 msgid "request_path.unordered"
 msgstr "%(phase)s 단계에서 위치가 지정되지 않았습니다. 정렬된 플러그인 다음에 알파벳순으로 실행됩니다."
 
+msgid "resource_groups.access"
+msgstr "접근 권한"
+
+msgid "resource_groups.access_readonly"
+msgstr "읽기 전용"
+
+msgid "resource_groups.access_write"
+msgstr "쓰기"
+
 msgid "resource_groups.add_entry"
 msgstr "항목 추가"
 
@@ -6396,6 +6862,9 @@ msgstr "별칭"
 
 msgid "resource_groups.alias_help"
 msgstr "문자, 숫자, 밑줄, 하이픈. 기존 별칭은 이름을 변경할 수 없습니다."
+
+msgid "resource_groups.all_kinds"
+msgstr "모두"
 
 msgid "resource_groups.bulk_import"
 msgstr "대량 가져오기"
@@ -6441,6 +6910,9 @@ msgstr "항목"
 
 msgid "resource_groups.expand_all"
 msgstr "모두 펼치기"
+
+msgid "resource_groups.filter_values"
+msgstr "값 필터링..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "별칭은 1~64자의 문자, 숫자, 밑줄 또는 하이픈으로 구성되어야 합니다"
@@ -6571,6 +7043,47 @@ msgstr "개별적으로 항목을 추가하거나 아래 대량 가져오기 기
 msgid "resource_groups.no_references"
 msgstr "참조 없음"
 
+msgid "resource_groups.no_value_match"
+msgstr "이 필터와 일치하는 값이 없습니다."
+
+msgid "resource_groups.origin"
+msgstr "출처"
+
+msgid "resource_groups.origin_plugin"
+msgstr "%(plugin)s 플러그인에서 제공"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "API를 통해 생성되거나 동기화되었습니다."
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "autoconf 컨트롤러가 생성했습니다."
+
+msgid "resource_groups.origin_tip.download"
+msgstr "원격 소스에서 다운로드했습니다."
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "수동으로 또는 설정 파일에서 생성되었습니다."
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "스케줄러가 생성했습니다."
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "웹 UI를 통해 생성되었습니다."
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "설치 마법사가 생성했습니다. 계속 편집할 수 있습니다."
+
+msgid "resource_groups.plugins_compatible"
+msgstr "호환 플러그인"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "세팅에서 이 그룹의 값 유형을 허용하는 플러그인입니다. 실제 참조는 사용 현황에 표시됩니다."
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "플러그인 %(count)s개"
+
 msgid "resource_groups.readonly"
 msgstr "데이터베이스는 읽기 전용입니다. 리소스 그룹은 검사하고 내보낼 수 있지만 변경할 수 없습니다."
 
@@ -6597,6 +7110,9 @@ msgstr "IP, 국가, ASNs, 역 DNS 이름, 사용자 에이전트 및 URI에 대�
 msgid "resource_groups.template_configuration"
 msgstr "템플릿 %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "업데이트됨"
+
 msgid "resource_groups.usage"
 msgstr "사용 현황"
 
@@ -6605,6 +7121,18 @@ msgstr "값"
 
 msgid "resource_groups.values"
 msgstr "값"
+
+msgid "resource_groups.values_compat"
+msgstr "호환 대상: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "복사됨"
+
+msgid "resource_groups.values_title"
+msgstr "%(name)s의 값"
+
+msgid "resource_groups.view_values_of"
+msgstr "%(name)s의 값 보기"
 
 msgid "scope.all_services"
 msgstr "모든 서비스"
@@ -7575,6 +8103,93 @@ msgstr "이 플러그인에 대한 여러 설정 인스턴스를 여기에서 �
 msgid "settings.multiple.title"
 msgstr "다중 설정"
 
+msgid "settings_page.alert_global"
+msgstr "변경 사항을 별도로 재정의하지 않는 모든 서비스에 적용되며 저장 및 다시 로드 후에 적용됩니다."
+
+msgid "settings_page.alert_service"
+msgstr "비워 둔 세팅은 전역 기본값을 사용합니다. 변경 사항은 선택한 서비스에만 적용되며 저장 및 다시 로드 후에 적용됩니다."
+
+msgid "settings_page.back_global"
+msgstr "전역 세팅으로 돌아가기"
+
+msgid "settings_page.back_service"
+msgstr "서비스로 돌아가기"
+
+msgid "settings_page.card_title"
+msgstr "세팅"
+
+msgid "settings_page.count"
+msgstr "세팅 %(count)s개"
+
+msgid "settings_page.count_filtered"
+msgstr "세팅 %(total)s개 중 %(shown)s개"
+
+msgid "settings_page.groups_link"
+msgstr "리소스 그룹 관리"
+
+msgid "settings_page.groups_link_hint"
+msgstr "이 플러그인의 세팅에서 참조할 수 있는 재사용 가능한 IP, 네트워크 및 국가 목록입니다."
+
+msgid "settings_page.no_match"
+msgstr "검색과 일치하는 세팅이 없습니다."
+
+msgid "settings_page.plugin"
+msgstr "플러그인"
+
+msgid "settings_page.reload_alert_body"
+msgstr "저장하면 스케줄러가 인스턴스에 구성을 다시 적용합니다."
+
+msgid "settings_page.reload_alert_title"
+msgstr "변경하면 인스턴스가 다시 로드됩니다."
+
+msgid "settings_page.revert"
+msgstr "되돌리기"
+
+msgid "settings_page.revert_confirm"
+msgstr "모두 되돌리기"
+
+msgid "settings_page.revert_message"
+msgstr "이 페이지에서 저장하지 않은 모든 편집 내용을 마지막으로 저장된 값으로 되돌립니다."
+
+msgid "settings_page.revert_title"
+msgstr "변경 사항 되돌리기"
+
+msgid "settings_page.save_reload"
+msgstr "저장 및 다시 로드"
+
+msgid "settings_page.scope"
+msgstr "범위"
+
+msgid "settings_page.scope_global"
+msgstr "전역 세팅"
+
+msgid "settings_page.search"
+msgstr "세팅 검색…"
+
+msgid "settings_page.search_label"
+msgstr "세팅 검색"
+
+msgid "settings_page.select_plugin_label"
+msgstr "플러그인 선택"
+
+msgid "settings_page.select_scope_label"
+msgstr "세팅을 편집할 범위 선택"
+
+msgid "setup.accordion.advanced"
+msgstr "고급"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "리버스 프록시 · 실제 IP · 사용자 정의 인증서"
+
+msgid "setup.accordion.general"
+msgstr "일반"
+
+msgid "setup.accordion.general_hint"
+msgstr "서버 · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "설치 완료"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "Web UI를 설정하는 중 오류가 발생했습니다. 다시 시도해 주세요."
 
@@ -7629,6 +8244,9 @@ msgstr "비밀번호가 일치하지 않습니다."
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "사용자 지정 SSL 인증서를 사용할 때는 인증서와 키를 모두 설정해야 합니다."
 
+msgid "setup.from_ui_host"
+msgstr "UI_HOST 환경 변수에서 가져옴"
+
 msgid "setup.status.admin_user_exists"
 msgstr "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요."
 
@@ -7674,6 +8292,9 @@ msgstr "실제 IP"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "리버스 프록시"
 
+msgid "setup.step2.section.server"
+msgstr "서버"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7682,6 +8303,12 @@ msgstr "Web UI 전용 설정을 구성합니다."
 
 msgid "setup.step2.title"
 msgstr "UI 설정"
+
+msgid "setup.step3.activate_title"
+msgstr "라이선스 활성화"
+
+msgid "setup.step3.activation_note"
+msgstr "설치를 완료하면 라이선스가 활성화됩니다."
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "PRO 혜택"
@@ -7725,11 +8352,119 @@ msgstr "설정을 완료하기 전에 검토해 주세요."
 msgid "setup.step4.title"
 msgstr "개요"
 
+msgid "setup.stepper_label"
+msgstr "설치 단계"
+
 msgid "setup.subtitle"
 msgstr "설정 마법사의 단계에 따라 설정을 완료하세요."
 
+msgid "setup.switch.disabled"
+msgstr "비활성화됨"
+
+msgid "setup.switch.enabled"
+msgstr "활성화됨"
+
 msgid "setup.title"
 msgstr "설정 마법사"
+
+msgid "shell.account.current"
+msgstr "계정: %(name)s"
+
+msgid "shell.account.title"
+msgstr "계정"
+
+msgid "shell.contrast.toggle"
+msgstr "고대비"
+
+msgid "shell.density.toggle"
+msgstr "조밀한 배치"
+
+msgid "shell.language.title"
+msgstr "언어"
+
+msgid "shell.main_navigation"
+msgstr "기본 탐색"
+
+msgid "shell.notifications.all_read"
+msgstr "모두 읽었습니다"
+
+msgid "shell.notifications.filter_label"
+msgstr "알림 필터링"
+
+msgid "shell.notifications.group_earlier"
+msgstr "이전"
+
+msgid "shell.notifications.group_today"
+msgstr "오늘"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "어제"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "모두 읽음으로 표시"
+
+msgid "shell.notifications.mark_read"
+msgstr "읽음으로 표시"
+
+msgid "shell.notifications.none_unread"
+msgstr "읽지 않은 알림이 없습니다."
+
+msgid "shell.notifications.tab_all"
+msgstr "모두"
+
+msgid "shell.notifications.tab_unread"
+msgstr "읽지 않음"
+
+msgid "shell.notifications.title"
+msgstr "알림"
+
+msgid "shell.notifications.unread_count"
+msgstr "읽지 않음: %(count)s개"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "읽지 않음:"
+
+msgid "shell.search.kind_page"
+msgstr "페이지"
+
+msgid "shell.search.kind_plugin"
+msgstr "플러그인"
+
+msgid "shell.search.kind_service"
+msgstr "서비스"
+
+msgid "shell.search.label"
+msgstr "페이지, 플러그인 및 서비스 검색"
+
+msgid "shell.search.loading_services"
+msgstr "서비스를 불러오는 중…"
+
+msgid "shell.search.no_match"
+msgstr "“%(query)s”에 대한 결과 없음"
+
+msgid "shell.search.placeholder"
+msgstr "페이지, 플러그인, 서비스 검색…"
+
+msgid "shell.search.results"
+msgstr "검색 결과"
+
+msgid "shell.search.status_results"
+msgstr "결과: %(count)s개"
+
+msgid "shell.skip_to_content"
+msgstr "본문으로 바로 가기"
+
+msgid "shell.star_us"
+msgstr "GitHub에서 BunkerWeb에 별 주기"
+
+msgid "shell.theme.system_hint"
+msgstr "운영 체제 설정 따름"
+
+msgid "shell.theme.title"
+msgstr "테마"
+
+msgid "shell.top_navigation"
+msgstr "상단 바"
 
 msgid "status.active"
 msgstr "활성"
@@ -7941,6 +8676,18 @@ msgstr "다음"
 msgid "step.previous"
 msgstr "이전"
 
+msgid "support.attach_help"
+msgstr "지원 요청에 첨부할 내보내기 파일입니다. 쓰기 권한이 필요하며 비밀 정보는 가려집니다."
+
+msgid "support.attach_title"
+msgstr "첨부할 진단 정보"
+
+msgid "support.card.community.title"
+msgstr "커뮤니티"
+
+msgid "support.card.docs.title"
+msgstr "문서"
+
 msgid "support.card.download_logs.help"
 msgstr "모든 개인 데이터는 익명화 처리됩니다."
 
@@ -7964,6 +8711,36 @@ msgstr "로그, 플러그인 버전, 환경 및 최근 오류. 개인 정보는 
 
 msgid "support.card.ui_bundle.title"
 msgstr "웹 UI 진단"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "커뮤니티와 유지 관리자에게 질문하세요."
+
+msgid "support.community.github"
+msgstr "GitHub 이슈"
+
+msgid "support.community.github_help"
+msgstr "버그 보고 및 기능 요청."
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "토론 및 공지."
+
+msgid "support.docs.quickstart"
+msgstr "빠른 시작 가이드"
+
+msgid "support.docs.troubleshooting"
+msgstr "문제 해결"
+
+msgid "support.docs.upgrading"
+msgstr "업그레이드"
+
+msgid "support.docs.web_ui"
+msgstr "웹 UI 가이드"
 
 msgid "support.subtitle"
 msgstr "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요."
@@ -8132,6 +8909,63 @@ msgstr "값"
 
 msgid "table.header.version"
 msgstr "버전"
+
+msgid "table_system.active_filters"
+msgstr "필터, %(count)s개 활성"
+
+msgid "table_system.advanced_filters"
+msgstr "고급 필터"
+
+msgid "table_system.any"
+msgstr "모두"
+
+msgid "table_system.column_count"
+msgstr "%(total)s개 중 %(visible)s개"
+
+msgid "table_system.confirm"
+msgstr "확인"
+
+msgid "table_system.confirm_title"
+msgstr "작업 확인"
+
+msgid "table_system.filter"
+msgstr "필터"
+
+msgid "table_system.filters"
+msgstr "필터"
+
+msgid "table_system.leave"
+msgstr "저장하지 않고 나가기"
+
+msgid "table_system.leave_message"
+msgstr "저장하지 않은 변경 사항이 사라집니다."
+
+msgid "table_system.leave_title"
+msgstr "저장하지 않고 나가시겠습니까?"
+
+msgid "table_system.multiple_actions"
+msgstr "선택한 항목에 대한 여러 작업"
+
+msgid "table_system.show_all"
+msgstr "모두 표시"
+
+msgid "table_system.stay"
+msgstr "계속 편집"
+
+msgid "table_system.type_phrase"
+msgstr "확인하려면 %(phrase)s 입력"
+
+msgid "table_system.upload_hint"
+msgstr "끌어다 놓거나 클릭하여 업로드"
+
+msgid "table_system.visible_columns"
+msgstr "표시할 열"
+
+msgid "tables.top.detail"
+msgstr "상세"
+
+msgid "tables.top.share"
+msgstr "비율"
 
 msgid "template.editor.button_add_config"
 msgstr "설정 추가"
@@ -8721,6 +9555,24 @@ msgstr "커뮤니티 템플릿 업데이트"
 msgid "templates.catalog.update_up_to_date"
 msgstr "템플릿 %(template)s은(는) 이미 카탈로그와 일치합니다"
 
+msgid "templates.features_builtin"
+msgstr "기본 제공 기능"
+
+msgid "templates.features_configs"
+msgstr "사용자 정의 설정"
+
+msgid "templates.features_help"
+msgstr "이 템플릿이 제공하는 기능입니다. 실제 세팅을 보거나 변경하려면 템플릿을 여세요."
+
+msgid "templates.features_of"
+msgstr "%(name)s 기능 표시"
+
+msgid "templates.features_plugins"
+msgstr "플러그인"
+
+msgid "templates.features_title"
+msgstr "템플릿 기능"
+
 msgid "templates.flash.catalog_updated"
 msgstr "템플릿 %(template)s이(가) 카탈로그에서 업데이트되었습니다."
 
@@ -8796,6 +9648,12 @@ msgstr "템플릿을 가져오지 못했습니다: 파일이 1 MiB보다 큽니�
 msgid "templates.import.unreadable"
 msgstr "템플릿을 가져오지 못했습니다: 파일을 읽을 수 없습니다"
 
+msgid "templates.managed_by"
+msgstr "%(owner)s에서 관리합니다. 여기서는 변경하거나 삭제할 수 없습니다."
+
+msgid "templates.more_actions"
+msgstr "%(name)s 추가 작업"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8810,6 +9668,18 @@ msgstr "중간 보안"
 
 msgid "templates.name.ui"
 msgstr "웹 UI"
+
+msgid "templates.no_match"
+msgstr "검색과 일치하는 템플릿이 없습니다."
+
+msgid "templates.open_template"
+msgstr "템플릿 열기"
+
+msgid "templates.read_only"
+msgstr "읽기 전용"
+
+msgid "templates.search"
+msgstr "템플릿 검색..."
 
 msgid "templates.subtitle"
 msgstr "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다."
@@ -8835,6 +9705,9 @@ msgstr "밝게"
 msgid "theme.system"
 msgstr "시스템"
 
+msgid "threatmap.attacks_24h"
+msgstr "최근 24시간 차단 수"
+
 msgid "threatmap.attacks_today"
 msgstr "오늘의 공격"
 
@@ -8843,6 +9716,21 @@ msgstr "차단된 요청"
 
 msgid "threatmap.blocked_requests"
 msgstr "차단된 요청"
+
+msgid "threatmap.col_ip"
+msgstr "IP 주소"
+
+msgid "threatmap.col_origin"
+msgstr "출처"
+
+msgid "threatmap.col_reason"
+msgstr "사유"
+
+msgid "threatmap.col_target"
+msgstr "대상"
+
+msgid "threatmap.col_time"
+msgstr "시간"
 
 msgid "threatmap.countries"
 msgstr "출처 국가"
@@ -8889,6 +9777,9 @@ msgstr "위치 불명"
 msgid "threatmap.open_live"
 msgstr "실시간 보기"
 
+msgid "threatmap.rolling_window"
+msgstr "이동 시간 창, 약 30초마다 갱신"
+
 msgid "threatmap.show_less"
 msgstr "상위 %(count)s개만 보기"
 
@@ -8900,6 +9791,9 @@ msgstr "이 수치는 더 이상 갱신되지 않습니다. 메트릭 서비스�
 
 msgid "threatmap.subtitle"
 msgstr "지난 24시간 동안 인스턴스가 차단한 트래픽의 출처입니다."
+
+msgid "threatmap.ticker_caption"
+msgstr "최근 차단된 요청"
 
 msgid "threatmap.ticker_title"
 msgstr "실시간 이벤트"
@@ -8922,14 +9816,26 @@ msgstr "주요 대상"
 msgid "threatmap.updated"
 msgstr "업데이트됨"
 
+msgid "timings.all_phases"
+msgstr "모든 단계"
+
 msgid "timings.calls"
 msgstr "호출 수"
+
+msgid "timings.caption"
+msgstr "단계별 플러그인 소요 시간, 기본적으로 총 시간순 정렬"
+
+msgid "timings.columns"
+msgstr "열"
 
 msgid "timings.disabled_help"
 msgstr "각 플러그인의 시간을 측정하려면 METRICS_COLLECT_TIMINGS를 yes로 설정하세요. 전체 요청 시간은 어느 경우든 수집됩니다."
 
 msgid "timings.disabled_title"
 msgstr "플러그인 시간 측정이 꺼져 있음"
+
+msgid "timings.export_csv"
+msgstr "CSV 내보내기"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "플러그인 타이밍을 가져오는 중 오류 발생: %(message)s"
@@ -8946,6 +9852,15 @@ msgstr "평균"
 msgid "timings.mean_request"
 msgstr "평균 요청 시간"
 
+msgid "timings.no_match"
+msgstr "이 필터와 일치하는 시간 데이터가 없습니다"
+
+msgid "timings.no_share"
+msgstr "비율 없음"
+
+msgid "timings.no_share_hint"
+msgstr "이 단계는 요청마다 한 번씩 실행되지 않으므로 비율이 없습니다."
+
 msgid "timings.partial"
 msgstr "일부 인스턴스가 응답하지 않았습니다. 아래 수치는 응답한 인스턴스만 포함합니다."
 
@@ -8954,6 +9869,9 @@ msgstr "단계"
 
 msgid "timings.phases"
 msgstr "플러그인 단계"
+
+msgid "timings.phases_sub"
+msgstr "각 플러그인이 각 단계에서 소요한 시간"
 
 msgid "timings.plugin"
 msgstr "플러그인"
@@ -8964,6 +9882,9 @@ msgstr "보고 중인 인스턴스"
 msgid "timings.requests_measured"
 msgstr "측정된 요청 수"
 
+msgid "timings.search_placeholder"
+msgstr "플러그인 또는 단계 검색…"
+
 msgid "timings.share"
 msgstr "비율"
 
@@ -8972,6 +9893,9 @@ msgstr "비율은 전체 요청 시간에서 플러그인의 총 시간이 차�
 
 msgid "timings.subtitle"
 msgstr "각 요청 단계에서 플러그인별 소요 시간을 모든 인스턴스에서 실시간으로 읽어 통합합니다."
+
+msgid "timings.toolbar"
+msgstr "시간 테이블 도구"
 
 msgid "timings.total"
 msgstr "합계"
@@ -9873,6 +10797,12 @@ msgstr "서버 추가"
 msgid "upstreams.all"
 msgstr "전체"
 
+msgid "upstreams.all_protocols"
+msgstr "모든 프로토콜"
+
+msgid "upstreams.all_tls"
+msgstr "모든 TLS 세팅"
+
 msgid "upstreams.attach"
 msgstr "연결"
 
@@ -9891,6 +10821,14 @@ msgstr "최소 연결"
 msgid "upstreams.balancing.round_robin"
 msgstr "순환 (기본값)"
 
+msgid "upstreams.card_subtitle"
+msgstr "백엔드 풀과 해당 풀로 프록시하는 서비스"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "업스트림 %(count)s개"
+
 msgid "upstreams.create"
 msgstr "업스트림 생성"
 
@@ -9902,6 +10840,9 @@ msgstr "%(name)s 업스트림 삭제?"
 
 msgid "upstreams.delete_help"
 msgstr "서비스에 연결된 업스트림은 삭제할 수 없습니다. 먼저 분리하십시오."
+
+msgid "upstreams.detach_shared"
+msgstr "이 업스트림은 공유됩니다. 연결을 해제하면 해당 서비스와 경로에서만 제거됩니다. 다른 연결에서는 유지됩니다."
 
 msgid "upstreams.edit"
 msgstr "업스트림 편집"
@@ -9993,11 +10934,43 @@ msgstr "지속 연결"
 msgid "upstreams.keepalive_help"
 msgstr "각 워커당 유지되는 유휴 연결 수. HTTP 및 gRPC만 적용 가능; 비활성화하려면 비워둡니다."
 
+msgid "upstreams.keepalive_off"
+msgstr "꺼짐"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "처음 불러온 %(count)s개 중"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "미연결 %(count)s개"
+
+msgid "upstreams.kpi_roles"
+msgstr "기본 %(primary)s개 · 예비 %(backup)s개 · 중지 %(down)s개 (설정 기준)"
+
+msgid "upstreams.kpi_services"
+msgstr "연결된 서비스"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "풀로 프록시하는 서비스"
+
+msgid "upstreams.kpi_tls"
+msgstr "백엔드 TLS"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "서버와 TLS로 통신하도록 설정된 풀"
+
 msgid "upstreams.match_path"
 msgstr "역방향 프록시 경로"
 
 msgid "upstreams.match_path_help"
 msgstr "선택된 서비스가 이 풀로 프록시하는 위치. 스트림 풀의 경우 전체 서비스를 사용합니다."
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: 서버 %(count)s개"
+
+msgid "upstreams.members_title"
+msgstr "이 업스트림의 서버"
 
 msgid "upstreams.method"
 msgstr "로드 밸런싱"
@@ -10007,6 +10980,9 @@ msgstr "알파벳, 숫자, 하이픈, 밑줄만 사용 가능. 점은 사용 불
 
 msgid "upstreams.new"
 msgstr "새로운 업스트림"
+
+msgid "upstreams.no_match"
+msgstr "이 필터와 일치하는 업스트림이 없습니다."
 
 msgid "upstreams.not_attached"
 msgstr "연결되지 않음"
@@ -10062,11 +11038,36 @@ msgstr "가중치"
 msgid "upstreams.servers"
 msgstr "서버"
 
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "서버 %(count)s개"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "서비스 %(count)s개"
+
 msgid "upstreams.services_help"
 msgstr "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 업스트림은 나중에 연결할 수 있습니다."
 
 msgid "upstreams.services_hidden"
 msgstr "%(count)s개 서비스 숨김: %(protocol)s 업스트림은 프로토콜이 일치하는 서비스에만 연결할 수 있습니다."
+
+msgid "upstreams.services_title"
+msgstr "이 업스트림을 사용하는 서비스"
+
+msgid "upstreams.tls"
+msgstr "백엔드 TLS"
+
+msgid "upstreams.tls_no"
+msgstr "암호화 없음"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "첫 500개의 업스트림만 표시됩니다. 완전한 결과를 얻기 위해 API을 사용하여 목록을 좁힙니다."
@@ -10146,11 +11147,26 @@ msgstr "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다."
 msgid "web_cache.available"
 msgstr "사용 가능"
 
+msgid "web_cache.available_tip"
+msgstr "이 인스턴스에 캐시 디렉터리가 있습니다. 서비스에서 사용하는지는 서비스 활성화 항목에 표시됩니다."
+
 msgid "web_cache.cache_state"
 msgstr "상태"
 
 msgid "web_cache.cached_files"
 msgstr "캐시된 파일"
+
+msgid "web_cache.compact"
+msgstr "간략히"
+
+msgid "web_cache.counters_window"
+msgstr "각 인스턴스가 재시작된 이후"
+
+msgid "web_cache.counters_window_help"
+msgstr "고정된 기간이 아니라 각 인스턴스가 마지막으로 재시작된 이후부터 집계합니다."
+
+msgid "web_cache.danger_zone"
+msgstr "위험 영역"
 
 msgid "web_cache.deployment"
 msgstr "배포"
@@ -10203,11 +11219,20 @@ msgstr "적중률"
 msgid "web_cache.instance"
 msgstr "인스턴스"
 
+msgid "web_cache.invalidate"
+msgstr "무효화"
+
 msgid "web_cache.metrics"
 msgstr "전체 적중/미적중 분포"
 
 msgid "web_cache.metrics_scope"
 msgstr "모든 캐시 활성화된 서비스에 걸쳐 인스턴스별로 카운터가 집계됩니다."
+
+msgid "web_cache.no_counters"
+msgstr "이 인스턴스에서는 아직 캐시 요청이 집계되지 않았습니다."
+
+msgid "web_cache.no_requests_for"
+msgstr "요청 없음:"
 
 msgid "web_cache.not_reporting"
 msgstr "보고되지 않음"
@@ -10218,6 +11243,9 @@ msgstr "경로"
 msgid "web_cache.purge"
 msgstr "캐시된 응답 지우기"
 
+msgid "web_cache.purge_a_url"
+msgstr "URL 캐시 삭제"
+
 msgid "web_cache.purge_all"
 msgstr "모두 지우기"
 
@@ -10226,6 +11254,9 @@ msgstr "이 기능은 모든 서비스의 모든 연결 가능한 인스턴스�
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "전체 캐시 삭제?"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "모두 삭제"
 
 msgid "web_cache.purge_help"
 msgstr "연결 가능한 인스턴스의 캐시를 즉시 삭제합니다. 연결할 수 없는 인스턴스는 건너뛰며 삭제 작업을 큐에 넣지 않습니다."
@@ -10248,6 +11279,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "보고 중인 인스턴스"
 
+msgid "web_cache.server_side_note"
+msgstr "서버 측 캐시만 관리합니다. 이 페이지는 각 BunkerWeb 인스턴스에 저장된 리버스 프록시 캐시를 관리합니다. 방문자의 브라우저에 이미 저장된 응답에는 영향을 주지 않습니다."
+
 msgid "web_cache.service"
 msgstr "서비스"
 
@@ -10256,6 +11290,27 @@ msgstr "서비스 활성화 현황"
 
 msgid "web_cache.status"
 msgstr "인스턴스별 저장 공간"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "이 요청은 캐싱을 건너뜀"
+
+msgid "web_cache.status_desc.expired"
+msgstr "유효 기간 만료: 업스트림에서 다시 가져옴"
+
+msgid "web_cache.status_desc.hit"
+msgstr "캐시에서 직접 제공됨"
+
+msgid "web_cache.status_desc.miss"
+msgstr "캐시에 없음: 업스트림에서 가져와 저장함"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "조건부 재요청: 업스트림에서 여전히 유효하다고 응답함"
+
+msgid "web_cache.status_desc.stale"
+msgstr "업스트림 오류로 오래된 응답을 제공함"
+
+msgid "web_cache.status_desc.updating"
+msgstr "갱신하는 동안 오래된 응답을 제공함"
 
 msgid "web_cache.subtitle"
 msgstr "역방향 프록시 캐시 상태, 집계된 히트율 메트릭 및 즉시 삭제 제어."
@@ -10298,6 +11353,18 @@ msgstr "안티봇 제공자"
 
 msgid "workflows.act_redirect"
 msgstr "리디렉션"
+
+msgid "workflows.act_settings_block"
+msgstr "차단 세팅"
+
+msgid "workflows.act_settings_challenge"
+msgstr "챌린지 세팅"
+
+msgid "workflows.act_settings_generic"
+msgstr "작업 세팅"
+
+msgid "workflows.act_settings_redirect"
+msgstr "리디렉션 세팅"
 
 msgid "workflows.act_status"
 msgstr "거부 상태 코드"
@@ -10425,6 +11492,9 @@ msgstr "이 규칙에 유효성 검사 문제 %(count)s개"
 msgid "workflows.aria.ruleName"
 msgstr "규칙 %(n)s 이름"
 
+msgid "workflows.aria.ruleTools"
+msgstr "규칙 %(n)s의 작업"
+
 msgid "workflows.aria.terminalAction"
 msgstr "종료 작업"
 
@@ -10541,6 +11611,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "이 규칙을 삭제하시겠습니까? 아래의 모든 규칙이 한 칸씩 위로 이동합니다."
+
+msgid "workflows.conseq.skip"
+msgstr "실행되지 않음"
+
+msgid "workflows.conseq.stop"
+msgstr "체인 중지"
 
 msgid "workflows.copySuffix"
 msgstr " (사본)"
@@ -10689,6 +11765,21 @@ msgstr "일치 게이트"
 msgid "workflows.gate.help"
 msgstr "클라이언트 IP별로 계산합니다. 임계값 미만에서는 이 규칙이 전혀 일치하지 않고 평가가 다음 규칙으로 이어집니다. 이 규칙 자체는 요청률을 제한하지 않습니다."
 
+msgid "workflows.inspector.apply"
+msgstr "적용"
+
+msgid "workflows.inspector.apply_title"
+msgstr "적용: 편집 내용을 초안에 유지합니다. 실제로 저장하려면 페이지의 저장 버튼을 누르세요"
+
+msgid "workflows.inspector.cancel"
+msgstr "취소"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "취소: 규칙을 열었을 때의 상태로 복원합니다"
+
+msgid "workflows.inspector.cancelled"
+msgstr "규칙 %(n)s의 편집을 취소했습니다. 규칙이 열었을 때의 상태로 돌아갔습니다."
+
 msgid "workflows.legend.fall"
 msgstr "일치하지 않으면 다음 규칙으로 이동"
 
@@ -10725,8 +11816,14 @@ msgstr "아래에 복제"
 msgid "workflows.menu.enable"
 msgstr "규칙 활성화"
 
+msgid "workflows.menu.header"
+msgstr "규칙 작업"
+
 msgid "workflows.menu.moveTo"
 msgstr "%(n)s번 위치로 이동"
+
+msgid "workflows.menu.order"
+msgstr "순서"
 
 msgid "workflows.menu.staysAt"
 msgstr "%(n)s번 위치 유지"
@@ -10758,6 +11855,81 @@ msgstr "아직 검증되지 않음"
 msgid "workflows.order_help"
 msgstr "규칙은 순서대로 평가되며 처음 일치한 규칙이 적용됩니다. 요청률 임계값이 있는 규칙은 임계값을 초과한 뒤에만 일치하므로, 아래쪽 규칙이 임계값 미만의 트래픽을 처리할 수 있습니다."
 
+msgid "workflows.port.active_rules"
+msgstr "활성 %(count)s개"
+
+msgid "workflows.port.attachment"
+msgstr "연결"
+
+msgid "workflows.port.attachment_any"
+msgstr "전체"
+
+msgid "workflows.port.attachment_attached"
+msgstr "연결됨"
+
+msgid "workflows.port.created"
+msgstr "생성됨"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "삭제하기 전에 이 워크플로우를 모든 서비스에서 연결 해제하세요. 삭제 시 서비스 연결이 자동으로 해제되지는 않습니다."
+
+msgid "workflows.port.details"
+msgstr "상세 정보"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "선택한 정의 (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "선택한 정의를 내보냈습니다. 이 파일을 다시 가져올 수 있다는 보장은 없습니다."
+
+msgid "workflows.port.export_failed"
+msgstr "내보내기에 실패했습니다. 다운로드한 파일이 없습니다."
+
+msgid "workflows.port.export_loading"
+msgstr "선택한 워크플로우 정의를 읽는 중…"
+
+msgid "workflows.port.export_scope"
+msgstr "테이블 내보내기에는 필터링된 행과 표시된 열이 포함됩니다. JSON 내보내기에는 선택한 정규 워크플로우 정의만 id를 키로 하여 포함됩니다. 다시 가져올 수 있다는 보장은 없습니다."
+
+msgid "workflows.port.list_subtitle"
+msgstr "각 워크플로우의 규칙과 연결된 서비스"
+
+msgid "workflows.port.more"
+msgstr "%(name)s 추가 작업"
+
+msgid "workflows.port.row_details"
+msgstr "워크플로우 상세 정보"
+
+msgid "workflows.port.select_workflows"
+msgstr "워크플로우 선택"
+
+msgid "workflows.port.services_count"
+msgstr "서비스: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "연결 해제 시 해당 서비스에서만 이 워크플로우가 제거됩니다. 워크플로우와 해당 규칙은 유지됩니다."
+
+msgid "workflows.port.services_none"
+msgstr "이 워크플로우는 어떤 서비스에도 연결되어 있지 않습니다."
+
+msgid "workflows.port.services_open"
+msgstr "%(name)s에 연결된 서비스 표시"
+
+msgid "workflows.port.services_title"
+msgstr "%(name)s에 연결된 서비스"
+
+msgid "workflows.port.total_rules"
+msgstr "총 %(count)s개"
+
+msgid "workflows.port.updated"
+msgstr "업데이트됨"
+
 msgid "workflows.readonly"
 msgstr "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다."
 
@@ -10772,6 +11944,9 @@ msgstr "보안 워크플로우 “%(workflow)s”: 동작 “%(action)s”"
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "보안 워크플로우 “%(workflow)s”: 요청이 리디렉션되었습니다"
+
+msgid "workflows.regex_help"
+msgstr "정규식에는 두 가지 별도 제한이 적용됩니다. 작성 시: 하나의 서비스에 연결된 워크플로우에는 정규식 조건을 합계 최대 50개까지 둘 수 있습니다. 이 수를 초과하는 저장이나 연결은 거부됩니다. 실행 시: 각 인스턴스는 서로 다른 정규식을 최대 WORKFLOWS_REGEX_BUDGET개까지 컴파일합니다 (기본값 512, 모든 워크플로우가 공유). 이 한도를 초과한 정규식은 평가하지 않고 UNKNOWN을 반환하므로 해당 규칙은 일치할 수 없습니다."
 
 msgid "workflows.rule.disabled"
 msgstr "비활성화됨"
@@ -10883,6 +12058,108 @@ msgstr "목록 뷰. 규칙은 위에서 아래로 실행되며, 첫 번째로 �
 
 msgid "workflows.search"
 msgstr "이름 또는 설명을 검색하세요..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "구성을 열려면 워크플로우를 생성하세요"
+
+msgid "workflows.shell.draft_discard"
+msgstr "변경 사항 버리기"
+
+msgid "workflows.shell.draft_restored"
+msgstr "이 워크플로우의 저장되지 않은 변경 사항이 복원되었습니다. 적용하려면 저장하고, 버리려면 다른 워크플로우로 전환하세요."
+
+msgid "workflows.shell.draft_save"
+msgstr "저장 후 계속"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "워크플로우를 저장할 수 없습니다. 버려진 변경 사항은 없습니다."
+
+msgid "workflows.shell.draft_stale"
+msgstr "초안을 시작한 후 이 워크플로우가 다른 곳에서 저장되어 초안을 버렸습니다."
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "%(target)s을 열면 %(name)s의 규칙 변경 사항이 저장되지 않은 상태로 남습니다. 한 번에 하나의 초안만 열 수 있습니다. 저장하거나, 변경 사항을 버리거나, 현재 화면에 머무르세요."
+
+msgid "workflows.shell.draft_title"
+msgstr "%(name)s의 저장되지 않은 변경 사항"
+
+msgid "workflows.shell.pick_label"
+msgstr "워크플로우"
+
+msgid "workflows.shell.read_only"
+msgstr "읽기 전용"
+
+msgid "workflows.shell.tab_config"
+msgstr "구성"
+
+msgid "workflows.shell.tab_overview"
+msgstr "개요"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "저장되지 않음"
+
+msgid "workflows.shell.tabs_label"
+msgstr "워크플로우 보기"
+
+msgid "workflows.shell.view_label"
+msgstr "보기"
+
+msgid "workflows.sum.block"
+msgstr "요청 차단"
+
+msgid "workflows.sum.blockStatus"
+msgstr "%(code)s 코드로 요청 차단"
+
+msgid "workflows.sum.challenge"
+msgstr "%(provider)s 챌린지 표시"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "CrowdSec 처리 방식"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "CrowdSec 소스"
+
+msgid "workflows.sum.every"
+msgstr "모든 요청"
+
+msgid "workflows.sum.gate"
+msgstr "IP당 %(window)s초 동안 요청 %(count)s개 초과"
+
+msgid "workflows.sum.group_asn"
+msgstr "ASN이 %(name)s 그룹에 속하는 경우"
+
+msgid "workflows.sum.group_country"
+msgstr "국가가 %(name)s 그룹에 속하는 경우"
+
+msgid "workflows.sum.group_ip"
+msgstr "IP가 %(name)s 그룹에 속하는 경우"
+
+msgid "workflows.sum.isOne"
+msgstr "%(label)s 값이 %(value)s인 경우"
+
+msgid "workflows.sum.isOneOf"
+msgstr "%(label)s 값이 %(values)s 중 하나인 경우"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "국가"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "메서드"
+
+msgid "workflows.sum.not"
+msgstr "‘%(what)s’ 조건이 충족되지 않는 경우"
+
+msgid "workflows.sum.redirect"
+msgstr "%(url)s로 리디렉션 (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "URI 조건: %(match)s %(value)s"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11054,6 +12331,78 @@ msgstr "요청"
 
 msgid "workflows.threshold_window"
 msgstr "(초)"
+
+msgid "workflows.toolbar.actions"
+msgstr "워크플로우 작업"
+
+msgid "workflows.toolbar.any_action"
+msgstr "모든 동작"
+
+msgid "workflows.toolbar.any_state"
+msgstr "모든 상태"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "맨 위로"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "모두 접기"
+
+msgid "workflows.toolbar.detailed"
+msgstr "자세히"
+
+msgid "workflows.toolbar.display"
+msgstr "규칙 표시"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "모두 펼치기"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "동작"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "이름"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "규칙 이름으로 검색…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "규칙 필터링"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "상태"
+
+msgid "workflows.toolbar.filters"
+msgstr "필터"
+
+msgid "workflows.toolbar.full_height"
+msgstr "전체 높이"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "높이 제한"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "규칙 %(total)s개 중 %(shown)s개"
+
+msgid "workflows.toolbar.no_match"
+msgstr "이 필터와 일치하는 규칙이 없습니다"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "필터로 규칙이 숨겨진 동안에는 순서 변경이 일시 중지됩니다."
+
+msgid "workflows.toolbar.reset"
+msgstr "초기화"
+
+msgid "workflows.toolbar.simplified"
+msgstr "간략히"
+
+msgid "workflows.toolbar.state_off"
+msgstr "비활성화됨"
+
+msgid "workflows.toolbar.state_on"
+msgstr "활성화됨"
+
+msgid "workflows.toolbar.view"
+msgstr "규칙 순서 보기"
 
 msgid "workflows.tree.addCondition"
 msgstr "조건"

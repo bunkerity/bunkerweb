@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "Zbudowane z"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "Skopiowano"
+
+msgid "about.environment.copy"
+msgstr "Kopiuj dane diagnostyczne"
+
+msgid "about.environment.database"
+msgstr "Serwer bazy danych"
+
+msgid "about.environment.help"
+msgstr "Dane z hosta interfejsu WWW i warstwy sterowania. Żadne zmienne, klucze licencyjne ani adresy baz danych nie są wyświetlane."
+
+msgid "about.environment.instances_up"
+msgstr "Działa %(up)s z %(total)s"
+
+msgid "about.environment.integration"
+msgstr "Integracja"
+
+msgid "about.environment.platform"
+msgstr "Platforma"
+
+msgid "about.environment.registered"
+msgstr "Zarejestrowane"
+
+msgid "about.environment.scope_control_plane"
+msgstr "Warstwa sterowania"
+
+msgid "about.environment.scope_instances"
+msgstr "Instancje"
+
+msgid "about.environment.scope_ui_host"
+msgstr "Host interfejsu WWW"
+
+msgid "about.environment.title"
+msgstr "Środowisko"
+
 msgid "about.gnu_license"
 msgstr "Powszechna Licencja Publiczna GNU Affero w wersji 3.0"
 
 msgid "about.license_title"
 msgstr "Licencja"
+
+msgid "about.releases.title"
+msgstr "Najnowsze wydania"
+
+msgid "about.releases.view_all"
+msgstr "Zobacz wszystkie"
 
 msgid "about.social.discord"
 msgstr "Discord"
@@ -274,6 +319,18 @@ msgstr "Wybrany zakres"
 msgid "bans.chart.timeseries.title"
 msgstr "Aktywne blokady w danym przedziale"
 
+msgid "bans.clear_all.confirm"
+msgstr "Wyczyść wszystkie blokady"
+
+msgid "bans.clear_all.message"
+msgstr "Usuwa wszystkie blokady we wszystkich usługach i instancjach. Blokadę CrowdSec usuwa się z jej własnego wiersza."
+
+msgid "bans.clear_all.phrase"
+msgstr "wyczyść wszystko"
+
+msgid "bans.clear_all.title"
+msgstr "Wyczyść wszystkie blokady"
+
 msgid "bans.crowdsec.confirm"
 msgstr "Usuń decyzje i odbanuj"
 
@@ -394,11 +451,53 @@ msgstr "Nie udało się zaktualizować czasu blokady dla %(ip)s: %(error)s"
 msgid "bans.flash.update_duration_success"
 msgstr "Pomyślnie zaktualizowano czas blokady dla %(ip)s."
 
+msgid "bans.import.confirm_button"
+msgstr "Importuj"
+
+msgid "bans.import.confirm_message"
+msgstr "Blokady znalezione w pliku: %(count)s. Zaimportować?"
+
+msgid "bans.import.confirm_skipped"
+msgstr "Pominięte nieczytelne wiersze: %(skipped)s."
+
+msgid "bans.import.confirm_title"
+msgstr "Importuj blokady"
+
+msgid "bans.import.empty"
+msgstr "Nie znaleziono prawidłowej blokady w tym pliku. Oczekiwano jednej blokady na wiersz, IP[,scope[,duration[,reason]]], lub listy JSON."
+
+msgid "bans.import.read_failed"
+msgstr "Nie udało się odczytać pliku."
+
+msgid "bans.import.too_many"
+msgstr "Ten plik zawiera więcej niż %(max)s blokad. Podziel go i importuj częściami."
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "Dzierżawa CrowdSec"
 
+msgid "bans.live.off"
+msgstr "Automatyczne odświeżanie wstrzymane."
+
+msgid "bans.live.on"
+msgstr "Automatyczne odświeżanie włączone, co 10 sekund."
+
+msgid "bans.live.updated"
+msgstr "Zaktualizowano blokady: nowe: %(added)s, wygasłe: %(removed)s."
+
+msgid "bans.page.clear_all"
+msgstr "Wyczyść wszystkie"
+
+msgid "bans.page.import"
+msgstr "Importuj"
+
 msgid "bans.stats.card.by_reason"
 msgstr "Blokady według przyczyny"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "Powód"
+
+msgid "bans.stats.reasons.meta"
+msgstr "Aktywne blokady: %(count)s"
 
 msgid "bans.stats.tile.active"
 msgstr "Aktywne blokady"
@@ -934,6 +1033,27 @@ msgstr "Przeglądaj certyfikat"
 msgid "certificates.browse_key"
 msgstr "Przeglądaj klucz prywatny"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "Certyfikaty do usunięcia: %(count)s. Tej operacji nie można cofnąć. Kontynuować?"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "Samopodpisane certyfikaty do odnowienia: %(count)s. Kontynuować?"
+
+msgid "certificates.bulk.delete"
+msgstr "Usuń zaznaczone"
+
+msgid "certificates.bulk.download"
+msgstr "Pobierz łańcuchy"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "Żaden z zaznaczonych certyfikatów nie obsługuje tej operacji."
+
+msgid "certificates.bulk.renew"
+msgstr "Odnów samopodpisane"
+
+msgid "certificates.bulk.skipped"
+msgstr "Pominięto zaznaczone certyfikaty nieobsługujące tej operacji: %(skipped)s."
+
 msgid "certificates.common_name"
 msgstr "Nazwa domeny"
 
@@ -1117,6 +1237,9 @@ msgstr "Emitent"
 msgid "certificates.issuers"
 msgstr "Najpopularniejsi emitenci"
 
+msgid "certificates.issuers_meta"
+msgstr "Certyfikaty: %(count)s"
+
 msgid "certificates.key_drop"
 msgstr "Wklej dopasowany klucz prywatny tutaj"
 
@@ -1180,6 +1303,9 @@ msgstr "Baza danych jest tylko do odczytu. Certyfikaty można przeglądać i pob
 msgid "certificates.renew_due"
 msgstr "Sprawdź/odnow"
 
+msgid "certificates.renew_due_short"
+msgstr "Do odnowienia"
+
 msgid "certificates.sans"
 msgstr "Nazwy alternatywne"
 
@@ -1194,6 +1320,9 @@ msgstr "Zaplanuj wydanie ACME"
 
 msgid "certificates.search"
 msgstr "Wyszukaj po nazwie, nazwie dziedziny, SAN, emitencie lub śladzie…"
+
+msgid "certificates.select_all"
+msgstr "Zaznacz wszystkie certyfikaty"
 
 msgid "certificates.serial"
 msgstr "Numer seryjny"
@@ -1323,6 +1452,99 @@ msgstr "Pokaż więcej %(count)s"
 
 msgid "compose.unavailable"
 msgstr "Lista wtyczek nie mogła zostać załadowana, więc ta strona nie może być bezpiecznie edytowana. Ponów ładowanie po odpowiedzi API."
+
+msgid "configs.console.all_scopes"
+msgstr "Wszystkie zakresy"
+
+msgid "configs.console.clone"
+msgstr "Klonuj konfigurację"
+
+msgid "configs.console.content"
+msgstr "Zawartość konfiguracji (tylko do odczytu)"
+
+msgid "configs.console.download"
+msgstr "Pobierz"
+
+msgid "configs.console.edit"
+msgstr "Edytuj konfigurację"
+
+msgid "configs.console.editor_help"
+msgstr "Edytuj zawartość NGINX lub ModSecurity. Zapisz skrótem Ctrl+S lub Command+S."
+
+msgid "configs.console.editor_title"
+msgstr "Zawartość konfiguracji"
+
+msgid "configs.console.files"
+msgstr "Pliki"
+
+msgid "configs.console.full_view"
+msgstr "Pełny widok"
+
+msgid "configs.console.global_legend"
+msgstr "Globalne dotyczą wszystkich usług."
+
+msgid "configs.console.global_only"
+msgstr "Tylko globalne"
+
+msgid "configs.console.lint"
+msgstr "Sprawdź składnię"
+
+msgid "configs.console.lint_brace"
+msgstr "Niezamknięty otwierający nawias klamrowy."
+
+msgid "configs.console.lint_clean"
+msgstr "Kontrole po stronie klienta nie wykryły problemów."
+
+msgid "configs.console.lint_help"
+msgstr "Tylko wskazówki po stronie klienta. Przed wdrożeniem sprawdź konfigurację poleceniem nginx -t. Dyrektywy wielowierszowe mogą powodować ostrzeżenia."
+
+msgid "configs.console.lint_quote"
+msgstr "Niezamknięty cudzysłów."
+
+msgid "configs.console.lint_semicolon"
+msgstr "Możliwy brak średnika na końcu dyrektywy."
+
+msgid "configs.console.lint_skipped"
+msgstr "Sprawdzanie składni NGINX jest niedostępne dla konfiguracji ModSecurity i CRS."
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "Nieoczekiwany zamykający nawias klamrowy."
+
+msgid "configs.console.lint_warnings"
+msgstr "Kontrole po stronie klienta wykryły ostrzeżenia: %(count)s. Zobacz adnotacje edytora."
+
+msgid "configs.console.name_help"
+msgstr "Używaj liter, cyfr, myślników lub podkreśleń. Sufiks .conf jest dodawany na dysku."
+
+msgid "configs.console.new"
+msgstr "Nowa konfiguracja"
+
+msgid "configs.console.no_files"
+msgstr "Żadna konfiguracja nie pasuje do tych filtrów."
+
+msgid "configs.console.restore_view"
+msgstr "Przywróć widok"
+
+msgid "configs.console.select_file"
+msgstr "Wybierz plik, aby wyświetlić jego zawartość."
+
+msgid "configs.console.service_legend"
+msgstr "Konfiguracja usługi dotyczy tylko jednej usługi."
+
+msgid "configs.console.service_only"
+msgstr "Tylko dla usługi"
+
+msgid "configs.console.template_name_locked"
+msgstr "Nie można zmienić nazwy konfiguracji niestandardowej opartej na szablonie."
+
+msgid "configs.console.title"
+msgstr "Konfiguracje niestandardowe"
+
+msgid "configs.console.types"
+msgstr "Typ konfiguracji"
+
+msgid "configs.console.view"
+msgstr "Wyświetl konfigurację"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "Wszystkich wybranych konfiguracji niestandardowych nie znaleziono, nie są one konfiguracjami UI/API lub zostały już przekonwertowane."
@@ -2764,6 +2986,15 @@ msgstr "Czas"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "Stan blokowania według czasu"
 
+msgid "dashboard.chart.legend.count"
+msgstr "Liczba"
+
+msgid "dashboard.chart.legend.item"
+msgstr "Element"
+
+msgid "dashboard.chart.legend.share"
+msgstr "Udział"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Zablokowane żądania"
 
@@ -3007,6 +3238,18 @@ msgstr "Zaznaczono %(count)s szablon na tej stronie."
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "Zaznaczono wszystkie szablony na tej stronie (%(count)s)."
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "Zaznaczono wszystkie pasujące przepływy pracy (%(count)s)."
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "Zaznacz wszystkie pasujące przepływy pracy (%(count)s)"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "Zaznaczono %(count)s przepływ pracy na tej stronie."
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "Zaznaczono wszystkie przepływy pracy na tej stronie (%(count)s)."
+
 msgid "datatable.bulk_select_clear"
 msgstr "Wyczyść zaznaczenie"
 
@@ -3049,6 +3292,9 @@ msgstr "Brak dostępnych usług"
 msgid "datatable.info_empty_templates"
 msgstr "Brak dostępnych szablonów"
 
+msgid "datatable.info_empty_workflows"
+msgstr "Brak dostępnych przepływów pracy"
+
 msgid "datatable.info_filtered_bans"
 msgstr "(filtrowane z _MAX_ całkowitej liczby blokad)"
 
@@ -3079,6 +3325,9 @@ msgstr "(filtrowane z _MAX_ całkowitej liczby usług)"
 msgid "datatable.info_filtered_templates"
 msgstr "(filtrowane z _MAX_ całkowitej liczby szablonów)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(filtrowane z _MAX_ całkowitej liczby przepływów pracy)"
+
 msgid "datatable.info_instances"
 msgstr "Wyświetlanie %(start)s do %(end)s z %(total)s Instancji"
 
@@ -3099,6 +3348,9 @@ msgstr "Wyświetlane pozycje: %(start)s–%(end)s · usługi łącznie: %(total)
 
 msgid "datatable.info_templates"
 msgstr "Wyświetlanie %(start)s do %(end)s z %(total)s Szablonów"
+
+msgid "datatable.info_workflows"
+msgstr "Wyświetlane pozycje: %(start)s–%(end)s · przepływy pracy łącznie: %(total)s"
 
 msgid "datatable.length_all"
 msgstr "Wszystkie"
@@ -3132,6 +3384,9 @@ msgstr "Wyświetl _MENU_ Usługi"
 
 msgid "datatable.length_menu_templates"
 msgstr "Wyświetl _MENU_ Szablony"
+
+msgid "datatable.length_menu_workflows"
+msgstr "Wyświetl _MENU_ przepływów pracy"
 
 msgid "datatable.paginate.first"
 msgstr "Pierwszy"
@@ -3244,6 +3499,15 @@ msgstr "Wybrano 1 szablon"
 msgid "datatable.select_rows_templates_plural"
 msgstr "Wybrano %d szablony"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "Nie wybrano żadnych przepływów pracy"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "Wybrano 1 przepływ pracy"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "Wybrane przepływy pracy: %d"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "Wybrano %(count)s konfigurację niestandardową"
 
@@ -3318,6 +3582,9 @@ msgstr "Nie znaleziono pasujących usług"
 
 msgid "datatable.zero_records_templates"
 msgstr "Nie znaleziono pasujących szablonów."
+
+msgid "datatable.zero_records_workflows"
+msgstr "Nie znaleziono pasujących przepływów pracy"
 
 msgid "dev_log.copy_failed"
 msgstr "Nie udało się skopiować tekstu:"
@@ -4369,14 +4636,26 @@ msgstr "Jednorazowo"
 msgid "interval.week"
 msgstr "Co tydzień"
 
+msgid "job.history.duration"
+msgstr "Czas trwania"
+
 msgid "job.history.end_date"
 msgstr "Data zakończenia"
+
+msgid "job.history.error"
+msgstr "Błąd"
 
 msgid "job.history.start_date"
 msgstr "Data rozpoczęcia"
 
 msgid "job.history.success"
 msgstr "Sukces"
+
+msgid "jobs.card.sub"
+msgstr "Uruchamiane przez harmonogram w określonych odstępach lub na żądanie"
+
+msgid "jobs.card.title"
+msgstr "Zaplanowane zadania"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "Błąd podczas pobierania zadań: %(message)s"
@@ -5125,6 +5404,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "Dodatkowe strony"
 
+msgid "navigation.filter_plugins"
+msgstr "Filtruj wtyczki…"
+
 msgid "navigation.global_settings"
 msgstr "Ustawienia globalne"
 
@@ -5152,6 +5434,9 @@ msgstr "Wybór trybu"
 msgid "navigation.more"
 msgstr "Więcej..."
 
+msgid "navigation.no_plugin_match"
+msgstr "Brak pasujących wtyczek"
+
 msgid "navigation.operate"
 msgstr "Obsługuj"
 
@@ -5170,14 +5455,23 @@ msgstr "Wtyczka wyłączona"
 msgid "navigation.plugin_deactivated_global"
 msgstr "Wtyczka wyłączona globalnie"
 
+msgid "navigation.plugin_insights"
+msgstr "Dane wtyczek"
+
 msgid "navigation.plugins"
 msgstr "Wtyczki"
+
+msgid "navigation.plugins_overview"
+msgstr "Przegląd"
 
 msgid "navigation.plugins_pages"
 msgstr "Strony wtyczek"
 
 msgid "navigation.pro"
 msgstr "Pro"
+
+msgid "navigation.profile"
+msgstr "Profil"
 
 msgid "navigation.redirects"
 msgstr "Przekierowania"
@@ -5350,6 +5644,24 @@ msgstr "DARMOWY"
 msgid "plan.pro"
 msgstr "PRO"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "Ta wtyczka nie jest nigdzie używana"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "Ustawienia globalne"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "Metryki są wyłączone"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "Na razie brak zawartości"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "Brak strony do wyświetlenia"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "Tylko dla administratorów"
+
 msgid "plugin.page.status.deactivated"
 msgstr "Wtyczka jest wyłączona, dlatego nie są dostępne żadne informacje."
 
@@ -5385,6 +5697,12 @@ msgstr "Pro"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.card.configure"
+msgstr "Skonfiguruj %(name)s"
+
+msgid "plugins.card.metrics"
+msgstr "Metryki %(name)s"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "Nie udało się odczytać wersji BunkerWeb (%(current)s), więc zgodność %(id)s nie może zostać sprawdzona; nic nie zostało zainstalowane"
@@ -5629,11 +5947,20 @@ msgstr "Aktywne"
 msgid "plugins.marketplace.always_on"
 msgstr "Rdzeń / zawsze włączone"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "Zawsze włączona"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "Wtyczka podstawowa wymagana przez BunkerWeb: można ją skonfigurować, ale nie wyłączyć."
+
 msgid "plugins.marketplace.disabled"
 msgstr "Wyłączone"
 
 msgid "plugins.marketplace.enabled"
 msgstr "Włączone"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "Filtruj wtyczki"
 
 msgid "plugins.marketplace.inactive"
 msgstr "Nieaktywne"
@@ -5664,6 +5991,15 @@ msgstr "więcej wartości"
 
 msgid "plugins.multivalue.show_less"
 msgstr "Pokaż mniej"
+
+msgid "plugins.tier.community"
+msgstr "Wtyczka społeczności"
+
+msgid "plugins.tier.core"
+msgstr "Wtyczka podstawowa"
+
+msgid "plugins.tier.pro"
+msgstr "Wtyczka PRO"
 
 msgid "pro.alert.overlapped_1"
 msgstr "Masz więcej aktywnych usług niż pozwala na to Twoja licencja!"
@@ -6010,8 +6346,14 @@ msgstr "Adres IP"
 msgid "profile.session.last_activity"
 msgstr "Ostatnia aktywność"
 
+msgid "profile.session.load_error"
+msgstr "Błąd ładowania danych. Spróbuj ponownie."
+
 msgid "profile.session.os"
 msgstr "System operacyjny"
+
+msgid "profile.session.recent_title"
+msgstr "Ostatnie sesje"
 
 msgid "profile.session.title"
 msgstr "Sesja"
@@ -6030,6 +6372,9 @@ msgstr "Bezpieczeństwo"
 
 msgid "profile.tab.sessions"
 msgstr "Sesje"
+
+msgid "profile.title"
+msgstr "Twój profil"
 
 msgid "range_picker.1h"
 msgstr "Ostatnia godzina"
@@ -6082,11 +6427,44 @@ msgstr "Aktywne ustawienie %(setting)s jest nieprawidłowe."
 msgid "raw_drafts.setting_not_valid"
 msgstr "Ustawienie %(setting)s jest nieprawidłowe."
 
+msgid "raw_page.search"
+msgstr "Szukaj…"
+
+msgid "raw_page.search_label"
+msgstr "Szukaj w surowej konfiguracji"
+
+msgid "raw_page.search_next"
+msgstr "Następne dopasowanie"
+
+msgid "raw_page.search_prev"
+msgstr "Poprzednie dopasowanie"
+
+msgid "raw_page.tile_modified"
+msgstr "Zmodyfikowane"
+
+msgid "raw_page.tile_plugins"
+msgstr "Wtyczki"
+
+msgid "raw_page.tile_problems"
+msgstr "Problemy"
+
+msgid "raw_page.tile_settings"
+msgstr "Ustawienia"
+
+msgid "raw_page.tiles_label"
+msgstr "Podsumowanie surowej konfiguracji"
+
 msgid "redirects.all"
 msgstr "Wszystkie"
 
+msgid "redirects.all_codes"
+msgstr "Wszystkie kody statusu"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "Dołącz URI"
 
 msgid "redirects.append_request_uri"
 msgstr "Dodaj żądany URI do celu"
@@ -6096,6 +6474,9 @@ msgstr "Dołącz"
 
 msgid "redirects.attach_copy"
 msgstr "Dołącz %(name)s (%(from)s → %(to)s) do jednej lub więcej usług."
+
+msgid "redirects.card_subtitle"
+msgstr "Przekierowania ścieżek i usługi, których dotyczą"
 
 msgid "redirects.code.301"
 msgstr "301 — Przesunięto na stałe"
@@ -6112,6 +6493,13 @@ msgstr "307 — Tymczasowe przekierowanie"
 msgid "redirects.code.308"
 msgstr "308 — Stałe przekierowanie"
 
+#. plural pair; 3 form(s) for pl, singular in slot 0
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "%(count)s przekierowanie"
+msgstr[1] "Przekierowania: %(count)s"
+msgstr[2] "Przekierowania: %(count)s"
+
 msgid "redirects.create"
 msgstr "Utwórz przekierowanie"
 
@@ -6123,6 +6511,9 @@ msgstr "Czy chcesz usunąć przekierowanie %(name)s?"
 
 msgid "redirects.delete_help"
 msgstr "Przekierowanie, które jest nadal dołączone do usługi, nie można usunąć. Najpierw je odłącz."
+
+msgid "redirects.detach_shared"
+msgstr "To przekierowanie jest współdzielone. Odłączenie usuwa je tylko z tej usługi. Pozostałe usługi je zachowują."
 
 msgid "redirects.edit"
 msgstr "Edytuj przekierowanie"
@@ -6205,8 +6596,32 @@ msgstr "Przekieruj z"
 msgid "redirects.from_path_help"
 msgstr "Ścieżka źródłowa w dołączonych usługach, np. /old."
 
+msgid "redirects.kpi_configured"
+msgstr "Skonfigurowane przekierowania"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "Dołącz do usługi, aby zaczęło działać"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "Wśród pierwszych %(count)s załadowanych"
+
+msgid "redirects.kpi_permanent"
+msgstr "Stałe"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 lub 308, zapisywane w pamięci podręcznej przeglądarek"
+
+msgid "redirects.kpi_services"
+msgstr "Dołączone usługi"
+
+msgid "redirects.kpi_services_caption"
+msgstr "Usługi z co najmniej jednym przekierowaniem"
+
 msgid "redirects.new"
 msgstr "Nowe przekierowanie"
+
+msgid "redirects.no_match"
+msgstr "Żadne przekierowanie nie pasuje do tych filtrów."
 
 msgid "redirects.not_attached"
 msgstr "Nie dołączone"
@@ -6220,14 +6635,30 @@ msgstr "Zapisz przekierowanie"
 msgid "redirects.search"
 msgstr "Wyszukaj nazwę, ścieżkę źródła lub docelową..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 3 form(s) for pl, singular in slot 0
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "%(count)s usługa"
+msgstr[1] "Usługi: %(count)s"
+msgstr[2] "Usługi: %(count)s"
+
 msgid "redirects.services_help"
 msgstr "Użyj Ctrl lub Command, aby wybrać wiele usług. Można dodać przekierowanie później."
+
+msgid "redirects.services_title"
+msgstr "Usługi korzystające z tego przekierowania"
 
 msgid "redirects.status_code"
 msgstr "Kod statusu"
 
 msgid "redirects.to_url"
 msgstr "Przekieruj do"
+
+msgid "redirects.to_url_help"
+msgstr "Pełny adres URL http:// lub https://. Cele względne nie są obsługiwane."
 
 msgid "redirects.truncated"
 msgstr "Wyświetlane są tylko pierwsze 500 przekierowań. Wyszczególnij listę za pomocą API, aby uzyskać pełne wyniki."
@@ -6294,6 +6725,36 @@ msgstr "Decyzja lokalnego API"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "Szczegóły techniczne"
+
+msgid "reports.live.off"
+msgstr "Automatyczne odświeżanie wstrzymane."
+
+msgid "reports.live.on"
+msgstr "Automatyczne odświeżanie włączone, co 10 sekund."
+
+msgid "reports.live.updated"
+msgstr "Zaktualizowano raporty: nowe: %(added)s."
+
+msgid "reports.offenders.confirm_many"
+msgstr "Adresy IP zostaną zablokowane we wszystkich instancjach na 24 godziny. Liczba adresów: %(count)s."
+
+msgid "reports.offenders.confirm_one"
+msgstr "Adres %(ip)s zostanie zablokowany we wszystkich instancjach na 24 godziny."
+
+msgid "reports.offenders.confirm_title"
+msgstr "Zablokuj z raportów"
+
+msgid "reports.offenders.show"
+msgstr "Pokaż"
+
+msgid "reports.offenders.show_bottom"
+msgstr "Najrzadsi sprawcy"
+
+msgid "reports.offenders.show_latest"
+msgstr "Ostatni sprawcy"
+
+msgid "reports.offenders.show_top"
+msgstr "Najczęstsi sprawcy"
 
 msgid "reports.security_incident"
 msgstr "Incydent bezpieczeństwa"
@@ -6394,6 +6855,15 @@ msgstr "Ścieżka żądania"
 msgid "request_path.unordered"
 msgstr "Brak zadeklarowanej pozycji w fazie %(phase)s; działa po wtyczkach, w kolejności alfabetycznej."
 
+msgid "resource_groups.access"
+msgstr "Dostęp"
+
+msgid "resource_groups.access_readonly"
+msgstr "Tylko do odczytu"
+
+msgid "resource_groups.access_write"
+msgstr "Zapis"
+
 msgid "resource_groups.add_entry"
 msgstr "Dodaj wpis"
 
@@ -6408,6 +6878,9 @@ msgstr "Alias"
 
 msgid "resource_groups.alias_help"
 msgstr "Litery, cyfry, podkreślenia i łączniki. Nie można zmieniać nazw istniejących aliasów."
+
+msgid "resource_groups.all_kinds"
+msgstr "Wszystkie"
 
 msgid "resource_groups.bulk_import"
 msgstr "Import masowy"
@@ -6453,6 +6926,9 @@ msgstr "Wpisy"
 
 msgid "resource_groups.expand_all"
 msgstr "Rozwiń wszystko"
+
+msgid "resource_groups.filter_values"
+msgstr "Filtruj wartości..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "Alias musi zawierać od 1 do 64 liter, cyfr, podkreśleń lub myślników"
@@ -6589,6 +7065,49 @@ msgstr "Dodaj wpisy pojedynczo lub użyj narzędzia do importu masowego poniżej
 msgid "resource_groups.no_references"
 msgstr "Brak referencji"
 
+msgid "resource_groups.no_value_match"
+msgstr "Żadna wartość nie pasuje do tego filtra."
+
+msgid "resource_groups.origin"
+msgstr "Pochodzenie"
+
+msgid "resource_groups.origin_plugin"
+msgstr "Dostarczone przez wtyczkę %(plugin)s"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "Utworzono lub zsynchronizowano przez API."
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "Utworzono przez kontroler autoconf."
+
+msgid "resource_groups.origin_tip.download"
+msgstr "Pobrano ze zdalnego źródła."
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "Utworzono ręcznie lub z pliku konfiguracyjnego."
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "Utworzono przez harmonogram."
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "Utworzono przez interfejs WWW."
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "Utworzono przez kreator konfiguracji. Nadal można edytować."
+
+msgid "resource_groups.plugins_compatible"
+msgstr "Zgodne wtyczki"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "Wtyczki, których ustawienia akceptują typy wartości z tej grupy. Rzeczywiste odwołania znajdują się w sekcji Użycie."
+
+#. plural pair; 3 form(s) for pl, singular in slot 0
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "%(count)s wtyczka"
+msgstr[1] "Wtyczki: %(count)s"
+msgstr[2] "Wtyczki: %(count)s"
+
 msgid "resource_groups.readonly"
 msgstr "Baza danych jest tylko do odczytu. Grupy zasobów można przeglądać i eksportować, ale nie można ich modyfikować."
 
@@ -6617,6 +7136,9 @@ msgstr "Wielokrotnego użytku aliasy typowane dla adresów IP, krajów, ASN, naz
 msgid "resource_groups.template_configuration"
 msgstr "Szablon %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "Zaktualizowano"
+
 msgid "resource_groups.usage"
 msgstr "Użycie"
 
@@ -6625,6 +7147,18 @@ msgstr "Wartość"
 
 msgid "resource_groups.values"
 msgstr "Wartości"
+
+msgid "resource_groups.values_compat"
+msgstr "Zgodne z: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "Skopiowano"
+
+msgid "resource_groups.values_title"
+msgstr "Wartości %(name)s"
+
+msgid "resource_groups.view_values_of"
+msgstr "Wyświetl wartości %(name)s"
 
 msgid "scope.all_services"
 msgstr "Wszystkie usługi"
@@ -7595,6 +8129,93 @@ msgstr "Skonfiguruj tutaj wiele instancji ustawień dla tej wtyczki."
 msgid "settings.multiple.title"
 msgstr "Wiele ustawień"
 
+msgid "settings_page.alert_global"
+msgstr "Zmiany dotyczą każdej usługi, która ich nie nadpisuje, i zaczną obowiązywać po wybraniu Zapisz i przeładuj."
+
+msgid "settings_page.alert_service"
+msgstr "Puste ustawienia korzystają z globalnych wartości domyślnych. Zmiany dotyczą tylko wybranej usługi i zaczną obowiązywać po wybraniu Zapisz i przeładuj."
+
+msgid "settings_page.back_global"
+msgstr "Powrót do ustawień globalnych"
+
+msgid "settings_page.back_service"
+msgstr "Powrót do usługi"
+
+msgid "settings_page.card_title"
+msgstr "Ustawienia"
+
+msgid "settings_page.count"
+msgstr "Ustawienia: %(count)s"
+
+msgid "settings_page.count_filtered"
+msgstr "Ustawienia: %(shown)s z %(total)s"
+
+msgid "settings_page.groups_link"
+msgstr "Zarządzaj grupami zasobów"
+
+msgid "settings_page.groups_link_hint"
+msgstr "Wielokrotnego użytku listy adresów IP, sieci i krajów, do których mogą odwoływać się ustawienia tej wtyczki."
+
+msgid "settings_page.no_match"
+msgstr "Żadne ustawienie nie pasuje do wyszukiwania."
+
+msgid "settings_page.plugin"
+msgstr "Wtyczka"
+
+msgid "settings_page.reload_alert_body"
+msgstr "Po zapisaniu harmonogram ponownie zastosuje konfigurację do instancji."
+
+msgid "settings_page.reload_alert_title"
+msgstr "Zmiany powodują przeładowanie instancji."
+
+msgid "settings_page.revert"
+msgstr "Cofnij"
+
+msgid "settings_page.revert_confirm"
+msgstr "Cofnij wszystkie"
+
+msgid "settings_page.revert_message"
+msgstr "Przywraca wszystkie niezapisane zmiany na tej stronie do ostatnio zapisanych wartości."
+
+msgid "settings_page.revert_title"
+msgstr "Cofnij zmiany"
+
+msgid "settings_page.save_reload"
+msgstr "Zapisz i przeładuj"
+
+msgid "settings_page.scope"
+msgstr "Zakres"
+
+msgid "settings_page.scope_global"
+msgstr "Ustawienia globalne"
+
+msgid "settings_page.search"
+msgstr "Szukaj ustawień…"
+
+msgid "settings_page.search_label"
+msgstr "Szukaj ustawień"
+
+msgid "settings_page.select_plugin_label"
+msgstr "Wybierz wtyczkę"
+
+msgid "settings_page.select_scope_label"
+msgstr "Wybierz, gdzie edytować jej ustawienia"
+
+msgid "setup.accordion.advanced"
+msgstr "Zaawansowane"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "Odwrotne proxy · Rzeczywisty IP · Certyfikat niestandardowy"
+
+msgid "setup.accordion.general"
+msgstr "Ogólne"
+
+msgid "setup.accordion.general_hint"
+msgstr "Serwer · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "Zakończ konfigurację"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "Błąd podczas konfigurowania interfejsu WWW. Spróbuj ponownie."
 
@@ -7649,6 +8270,9 @@ msgstr "Hasła nie są zgodne."
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "Podczas korzystania z niestandardowego certyfikatu SSL musisz ustawić zarówno certyfikat, jak i klucz."
 
+msgid "setup.from_ui_host"
+msgstr "Ze zmiennej środowiskowej UI_HOST"
+
 msgid "setup.status.admin_user_exists"
 msgstr "Użytkownik administracyjny już istnieje. Przejdź do następnego kroku."
 
@@ -7694,6 +8318,9 @@ msgstr "Prawdziwy adres IP"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "Odwrotny serwer proxy"
 
+msgid "setup.step2.section.server"
+msgstr "Serwer"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7702,6 +8329,12 @@ msgstr "Skonfiguruj ustawienia specyficzne dla interfejsu użytkownika aplikacji
 
 msgid "setup.step2.title"
 msgstr "Ustawienia interfejsu użytkownika"
+
+msgid "setup.step3.activate_title"
+msgstr "Aktywuj licencję"
+
+msgid "setup.step3.activation_note"
+msgstr "Licencja zostanie aktywowana po zakończeniu konfiguracji."
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "Zalety PRO"
@@ -7745,11 +8378,119 @@ msgstr "Przed zakończeniem konfiguracji sprawdź swoje ustawienia."
 msgid "setup.step4.title"
 msgstr "Przegląd"
 
+msgid "setup.stepper_label"
+msgstr "Kroki konfiguracji"
+
 msgid "setup.subtitle"
 msgstr "Wykonaj poniższe czynności, aby zakończyć pracę kreatora konfiguracji."
 
+msgid "setup.switch.disabled"
+msgstr "Wyłączone"
+
+msgid "setup.switch.enabled"
+msgstr "Włączone"
+
 msgid "setup.title"
 msgstr "Kreator konfiguracji"
+
+msgid "shell.account.current"
+msgstr "Konto: %(name)s"
+
+msgid "shell.account.title"
+msgstr "Konto"
+
+msgid "shell.contrast.toggle"
+msgstr "Wysoki kontrast"
+
+msgid "shell.density.toggle"
+msgstr "Układ kompaktowy"
+
+msgid "shell.language.title"
+msgstr "Język"
+
+msgid "shell.main_navigation"
+msgstr "Nawigacja główna"
+
+msgid "shell.notifications.all_read"
+msgstr "Wszystko przeczytane"
+
+msgid "shell.notifications.filter_label"
+msgstr "Filtruj powiadomienia"
+
+msgid "shell.notifications.group_earlier"
+msgstr "Wcześniej"
+
+msgid "shell.notifications.group_today"
+msgstr "Dzisiaj"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "Wczoraj"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "Oznacz wszystkie jako przeczytane"
+
+msgid "shell.notifications.mark_read"
+msgstr "Oznacz jako przeczytane"
+
+msgid "shell.notifications.none_unread"
+msgstr "Brak nieprzeczytanych powiadomień."
+
+msgid "shell.notifications.tab_all"
+msgstr "Wszystkie"
+
+msgid "shell.notifications.tab_unread"
+msgstr "Nieprzeczytane"
+
+msgid "shell.notifications.title"
+msgstr "Powiadomienia"
+
+msgid "shell.notifications.unread_count"
+msgstr "Nieprzeczytane: %(count)s"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "Nieprzeczytane:"
+
+msgid "shell.search.kind_page"
+msgstr "Strona"
+
+msgid "shell.search.kind_plugin"
+msgstr "Wtyczka"
+
+msgid "shell.search.kind_service"
+msgstr "Usługa"
+
+msgid "shell.search.label"
+msgstr "Szukaj stron, wtyczek i usług"
+
+msgid "shell.search.loading_services"
+msgstr "Ładowanie usług…"
+
+msgid "shell.search.no_match"
+msgstr "Brak wyników dla „%(query)s”"
+
+msgid "shell.search.placeholder"
+msgstr "Szukaj stron, wtyczek, usług…"
+
+msgid "shell.search.results"
+msgstr "Wyniki wyszukiwania"
+
+msgid "shell.search.status_results"
+msgstr "Wyniki: %(count)s"
+
+msgid "shell.skip_to_content"
+msgstr "Przejdź do treści głównej"
+
+msgid "shell.star_us"
+msgstr "Dodaj gwiazdkę BunkerWeb na GitHub"
+
+msgid "shell.theme.system_hint"
+msgstr "zgodny z systemem operacyjnym"
+
+msgid "shell.theme.title"
+msgstr "Motyw"
+
+msgid "shell.top_navigation"
+msgstr "Górny pasek"
 
 msgid "status.active"
 msgstr "Aktywne"
@@ -7961,6 +8702,18 @@ msgstr "Dalej"
 msgid "step.previous"
 msgstr "Poprzedni"
 
+msgid "support.attach_help"
+msgstr "Eksporty do zgłoszenia pomocy. Wymagają uprawnienia zapisu i ukrywają dane poufne."
+
+msgid "support.attach_title"
+msgstr "Dane diagnostyczne do załączenia"
+
+msgid "support.card.community.title"
+msgstr "Społeczność"
+
+msgid "support.card.docs.title"
+msgstr "Dokumentacja"
+
 msgid "support.card.download_logs.help"
 msgstr "Wszystkie dane prywatne zostaną zanonimizowane."
 
@@ -7984,6 +8737,36 @@ msgstr "Logi, wersje wtyczek, środowisko i ostatnie błędy. Dane prywatne są 
 
 msgid "support.card.ui_bundle.title"
 msgstr "Diagnostyka Web UI"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "Zapytaj społeczność i opiekunów projektu."
+
+msgid "support.community.github"
+msgstr "Zgłoszenia GitHub"
+
+msgid "support.community.github_help"
+msgstr "Zgłoszenia błędów i propozycje funkcji."
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "Dyskusje i ogłoszenia."
+
+msgid "support.docs.quickstart"
+msgstr "Przewodnik szybkiego startu"
+
+msgid "support.docs.troubleshooting"
+msgstr "Rozwiązywanie problemów"
+
+msgid "support.docs.upgrading"
+msgstr "Aktualizacja"
+
+msgid "support.docs.web_ui"
+msgstr "Przewodnik interfejsu WWW"
 
 msgid "support.subtitle"
 msgstr "Pobierz pliki dziennika debugowania, wyodrębnij swoją konfigurację i skontaktuj się z zespołem BunkerWeb."
@@ -8152,6 +8935,63 @@ msgstr "Wartość"
 
 msgid "table.header.version"
 msgstr "Wersja"
+
+msgid "table_system.active_filters"
+msgstr "Filtry, aktywne: %(count)s"
+
+msgid "table_system.advanced_filters"
+msgstr "Filtry zaawansowane"
+
+msgid "table_system.any"
+msgstr "Dowolne"
+
+msgid "table_system.column_count"
+msgstr "%(visible)s z %(total)s"
+
+msgid "table_system.confirm"
+msgstr "Potwierdź"
+
+msgid "table_system.confirm_title"
+msgstr "Potwierdź działanie"
+
+msgid "table_system.filter"
+msgstr "Filtr"
+
+msgid "table_system.filters"
+msgstr "Filtry"
+
+msgid "table_system.leave"
+msgstr "Opuść bez zapisywania"
+
+msgid "table_system.leave_message"
+msgstr "Niezapisane zmiany zostaną utracone."
+
+msgid "table_system.leave_title"
+msgstr "Opuścić bez zapisywania?"
+
+msgid "table_system.multiple_actions"
+msgstr "Wiele działań dla zaznaczonych elementów"
+
+msgid "table_system.show_all"
+msgstr "Pokaż wszystkie"
+
+msgid "table_system.stay"
+msgstr "Kontynuuj edycję"
+
+msgid "table_system.type_phrase"
+msgstr "Wpisz %(phrase)s, aby potwierdzić"
+
+msgid "table_system.upload_hint"
+msgstr "Przeciągnij i upuść lub kliknij, aby przesłać"
+
+msgid "table_system.visible_columns"
+msgstr "Widoczne kolumny"
+
+msgid "tables.top.detail"
+msgstr "Szczegół"
+
+msgid "tables.top.share"
+msgstr "Udział"
 
 msgid "template.editor.button_add_config"
 msgstr "Dodaj konfigurację"
@@ -8741,6 +9581,24 @@ msgstr "Aktualizuj szablon społeczności"
 msgid "templates.catalog.update_up_to_date"
 msgstr "Szablon %(template)s jest już zgodny z katalogiem"
 
+msgid "templates.features_builtin"
+msgstr "Wbudowane funkcje"
+
+msgid "templates.features_configs"
+msgstr "Konfiguracje niestandardowe"
+
+msgid "templates.features_help"
+msgstr "Co zapewnia ten szablon. Otwórz szablon, aby zobaczyć lub zmienić jego ustawienia."
+
+msgid "templates.features_of"
+msgstr "Pokaż funkcje %(name)s"
+
+msgid "templates.features_plugins"
+msgstr "Wtyczki"
+
+msgid "templates.features_title"
+msgstr "Funkcje szablonu"
+
 msgid "templates.flash.catalog_updated"
 msgstr "Szablon %(template)s zaktualizowany z katalogu."
 
@@ -8816,6 +9674,12 @@ msgstr "Szablon nie został zaimportowany: plik jest większy niż 1 MiB"
 msgid "templates.import.unreadable"
 msgstr "Szablon nie został zaimportowany: nie udało się odczytać pliku"
 
+msgid "templates.managed_by"
+msgstr "Zarządzane przez %(owner)s: nie można tutaj zmienić ani usunąć."
+
+msgid "templates.more_actions"
+msgstr "Więcej działań dla %(name)s"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8830,6 +9694,18 @@ msgstr "Średnie bezpieczeństwo"
 
 msgid "templates.name.ui"
 msgstr "Interfejs WWW"
+
+msgid "templates.no_match"
+msgstr "Żaden szablon nie pasuje do wyszukiwania."
+
+msgid "templates.open_template"
+msgstr "Otwórz szablon"
+
+msgid "templates.read_only"
+msgstr "Tylko do odczytu"
+
+msgid "templates.search"
+msgstr "Szukaj szablonów..."
 
 msgid "templates.subtitle"
 msgstr "Ponowne użycie szablonów konfiguracji dla swoich usług — grupowanie ustawień, kroków i niestandardowych konfiguracji, a następnie twórz, kopiuj lub usuwaj je."
@@ -8855,6 +9731,9 @@ msgstr "Jasny"
 msgid "theme.system"
 msgstr "System"
 
+msgid "threatmap.attacks_24h"
+msgstr "Zablokowane, ostatnie 24 godziny"
+
 msgid "threatmap.attacks_today"
 msgstr "Ataki dzisiaj"
 
@@ -8863,6 +9742,21 @@ msgstr "zablokowane żądanie"
 
 msgid "threatmap.blocked_requests"
 msgstr "zablokowane żądania"
+
+msgid "threatmap.col_ip"
+msgstr "Adres IP"
+
+msgid "threatmap.col_origin"
+msgstr "Pochodzenie"
+
+msgid "threatmap.col_reason"
+msgstr "Powód"
+
+msgid "threatmap.col_target"
+msgstr "Cel"
+
+msgid "threatmap.col_time"
+msgstr "Czas"
 
 msgid "threatmap.countries"
 msgstr "Kraje pochodzenia"
@@ -8909,6 +9803,9 @@ msgstr "brak lokalizacji"
 msgid "threatmap.open_live"
 msgstr "Widok na żywo"
 
+msgid "threatmap.rolling_window"
+msgstr "Ruchome okno, odświeżane co około 30 s"
+
 msgid "threatmap.show_less"
 msgstr "Pokaż tylko %(count)s"
 
@@ -8920,6 +9817,9 @@ msgstr "Te dane przestały się aktualizować. Usługa metryk nie odpowiada."
 
 msgid "threatmap.subtitle"
 msgstr "Skąd pochodził ruch zablokowany przez Twoje instancje w ciągu ostatnich 24 godzin."
+
+msgid "threatmap.ticker_caption"
+msgstr "Ostatnio zablokowane żądania"
 
 msgid "threatmap.ticker_title"
 msgstr "Zdarzenia na żywo"
@@ -8942,14 +9842,26 @@ msgstr "Główne cele"
 msgid "threatmap.updated"
 msgstr "Zaktualizowano"
 
+msgid "timings.all_phases"
+msgstr "Wszystkie fazy"
+
 msgid "timings.calls"
 msgstr "Wywołania"
+
+msgid "timings.caption"
+msgstr "Czasy wtyczek w poszczególnych fazach, domyślnie sortowane według łącznego czasu"
+
+msgid "timings.columns"
+msgstr "Kolumny"
 
 msgid "timings.disabled_help"
 msgstr "Ustaw METRICS_COLLECT_TIMINGS na yes, aby mierzyć czas działania każdej wtyczki. Całkowity czas żądania jest zbierany niezależnie od tego."
 
 msgid "timings.disabled_title"
 msgstr "Pomiar czasu wtyczek jest wyłączony"
+
+msgid "timings.export_csv"
+msgstr "Eksportuj CSV"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "Błąd podczas pobierania czasów wtyczek: %(message)s"
@@ -8966,6 +9878,15 @@ msgstr "Średnia"
 msgid "timings.mean_request"
 msgstr "Średnie żądanie"
 
+msgid "timings.no_match"
+msgstr "Żaden pomiar czasu nie pasuje do tych filtrów"
+
+msgid "timings.no_share"
+msgstr "Brak udziału"
+
+msgid "timings.no_share_hint"
+msgstr "Ta faza nie jest wykonywana raz na żądanie, więc nie ma udziału."
+
 msgid "timings.partial"
 msgstr "Niektóre instancje nie odpowiedziały. Poniższe dane obejmują te, które odpowiedziały."
 
@@ -8974,6 +9895,9 @@ msgstr "Faza"
 
 msgid "timings.phases"
 msgstr "Fazy wtyczek"
+
+msgid "timings.phases_sub"
+msgstr "Czas każdej wtyczki w każdej fazie"
 
 msgid "timings.plugin"
 msgstr "Wtyczka"
@@ -8984,6 +9908,9 @@ msgstr "Raportujące instancje"
 msgid "timings.requests_measured"
 msgstr "Zmierzone żądania"
 
+msgid "timings.search_placeholder"
+msgstr "Szukaj wtyczki lub fazy…"
+
 msgid "timings.share"
 msgstr "Udział"
 
@@ -8992,6 +9919,9 @@ msgstr "Udział to łączny czas wtyczki względem całkowitego czasu żądania.
 
 msgid "timings.subtitle"
 msgstr "Czas działania każdej wtyczki w poszczególnych fazach żądania, odczytywany na żywo ze wszystkich instancji i scalany."
+
+msgid "timings.toolbar"
+msgstr "Narzędzia tabeli czasów"
 
 msgid "timings.total"
 msgstr "Łącznie"
@@ -9893,6 +10823,12 @@ msgstr "Dodaj serwer"
 msgid "upstreams.all"
 msgstr "Wszystkie"
 
+msgid "upstreams.all_protocols"
+msgstr "Wszystkie protokoły"
+
+msgid "upstreams.all_tls"
+msgstr "Wszystkie ustawienia TLS"
+
 msgid "upstreams.attach"
 msgstr "Dołącz"
 
@@ -9911,6 +10847,16 @@ msgstr "Najmniej połączeń"
 msgid "upstreams.balancing.round_robin"
 msgstr "Rotacja (domyślna)"
 
+msgid "upstreams.card_subtitle"
+msgstr "Pule serwerów zaplecza i usługi przekazujące do nich ruch"
+
+#. plural pair; 3 form(s) for pl, singular in slot 0
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "%(count)s serwer upstream"
+msgstr[1] "Serwery upstream: %(count)s"
+msgstr[2] "Serwery upstream: %(count)s"
+
 msgid "upstreams.create"
 msgstr "Utwórz upstream"
 
@@ -9922,6 +10868,9 @@ msgstr "Czy chcesz usunąć upstream %(name)s?"
 
 msgid "upstreams.delete_help"
 msgstr "Nie można usunąć upstreamu nadal przypisanego do usługi. Najpierw go odłącz."
+
+msgid "upstreams.detach_shared"
+msgstr "Ten serwer upstream jest współdzielony. Odłączenie usuwa go tylko z tej usługi i ścieżki. Pozostałe powiązania go zachowują."
 
 msgid "upstreams.edit"
 msgstr "Edytuj upstream"
@@ -10013,11 +10962,45 @@ msgstr "Utrzymuj połączenie"
 msgid "upstreams.keepalive_help"
 msgstr "Liczba utrzymywanych połączeń na pracownika. Tylko HTTP i gRPC; pozostaw puste, aby wyłączyć."
 
+msgid "upstreams.keepalive_off"
+msgstr "Wyłączone"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "Wśród pierwszych %(count)s załadowanych"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "Nie dołączono: %(count)s"
+
+msgid "upstreams.kpi_roles"
+msgstr "Główne: %(primary)s · zapasowe: %(backup)s · wyłączone: %(down)s (konfiguracja)"
+
+msgid "upstreams.kpi_services"
+msgstr "Dołączone usługi"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "Usługi przekazujące ruch do puli"
+
+msgid "upstreams.kpi_tls"
+msgstr "TLS do serwerów zaplecza"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "Pule skonfigurowane do komunikacji TLS ze swoimi serwerami"
+
 msgid "upstreams.match_path"
 msgstr "Ścieżka odwrotnego proxy"
 
 msgid "upstreams.match_path_help"
 msgstr "Lokalizacja, do której usługi proxy są przekierowywane. Pomijane dla pul strumieniowego, która obejmuje całą usługę."
+
+#. plural pair; 3 form(s) for pl, singular in slot 0
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: %(count)s serwer"
+msgstr[1] "%(name)s: serwery: %(count)s"
+msgstr[2] "%(name)s: serwery: %(count)s"
+
+msgid "upstreams.members_title"
+msgstr "Serwery w tym upstreamie"
 
 msgid "upstreams.method"
 msgstr "Rozkład obciążenia"
@@ -10027,6 +11010,9 @@ msgstr "Tylko litery, cyfry, myślniki i podkreślenia. Kropki są niedozwolone,
 
 msgid "upstreams.new"
 msgstr "Nowy upstream"
+
+msgid "upstreams.no_match"
+msgstr "Żaden serwer upstream nie pasuje do tych filtrów."
 
 msgid "upstreams.not_attached"
 msgstr "Nie podłączony"
@@ -10082,11 +11068,40 @@ msgstr "Waga"
 msgid "upstreams.servers"
 msgstr "Serwery"
 
+#. plural pair; 3 form(s) for pl, singular in slot 0
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "%(count)s serwer"
+msgstr[1] "Serwery: %(count)s"
+msgstr[2] "Serwery: %(count)s"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 3 form(s) for pl, singular in slot 0
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "%(count)s usługa"
+msgstr[1] "Usługi: %(count)s"
+msgstr[2] "Usługi: %(count)s"
+
 msgid "upstreams.services_help"
 msgstr "Użyj Ctrl lub Command, aby wybrać wiele usług. Upstream można podłączyć później."
 
 msgid "upstreams.services_hidden"
 msgstr "Ukryte usługi: %(count)s. Upstream %(protocol)s może być przypisany tylko do usługi odpowiedniego typu."
+
+msgid "upstreams.services_title"
+msgstr "Usługi korzystające z tego serwera upstream"
+
+msgid "upstreams.tls"
+msgstr "TLS do serwerów zaplecza"
+
+msgid "upstreams.tls_no"
+msgstr "Bez szyfrowania"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "Wyświetlanych jest tylko pierwszych 500 upstreamów. Zawęź listę za pomocą API, aby uzyskać pełny wynik."
@@ -10166,11 +11181,26 @@ msgstr "ZeroSSL wymaga adresu e-mail lub klucza API ZeroSSL."
 msgid "web_cache.available"
 msgstr "Dostępne"
 
+msgid "web_cache.available_tip"
+msgstr "Katalog pamięci podręcznej istnieje w tej instancji. Informacja o używaniu go przez usługę znajduje się w sekcji Włączenie dla usług."
+
 msgid "web_cache.cache_state"
 msgstr "Stan"
 
 msgid "web_cache.cached_files"
 msgstr "Pliki w pamięci podręcznej"
+
+msgid "web_cache.compact"
+msgstr "Kompaktowy"
+
+msgid "web_cache.counters_window"
+msgstr "Od ponownego uruchomienia każdej instancji"
+
+msgid "web_cache.counters_window_help"
+msgstr "Liczniki liczą od ostatniego ponownego uruchomienia każdej instancji, a nie w stałym okresie."
+
+msgid "web_cache.danger_zone"
+msgstr "Strefa niebezpieczna"
 
 msgid "web_cache.deployment"
 msgstr "Wdrożenie"
@@ -10223,11 +11253,20 @@ msgstr "Wskaźnik trafień"
 msgid "web_cache.instance"
 msgstr "Instancja"
 
+msgid "web_cache.invalidate"
+msgstr "Unieważnij"
+
 msgid "web_cache.metrics"
 msgstr "Zbiorczy rozkład trafień i chybień"
 
 msgid "web_cache.metrics_scope"
 msgstr "Liczniki są agregowane dla każdej instancji w przypadku wszystkich usług z włączoną pamięcią podręczną."
+
+msgid "web_cache.no_counters"
+msgstr "Ta instancja nie zliczyła jeszcze żadnego żądania z pamięcią podręczną."
+
+msgid "web_cache.no_requests_for"
+msgstr "Brak żądań dla:"
 
 msgid "web_cache.not_reporting"
 msgstr "Nie raportowane"
@@ -10238,6 +11277,9 @@ msgstr "Ścieżka"
 msgid "web_cache.purge"
 msgstr "Wyczyść odpowiedzi w pamięci podręcznej"
 
+msgid "web_cache.purge_a_url"
+msgstr "Wyczyść URL"
+
 msgid "web_cache.purge_all"
 msgstr "Wyczyść wszystko"
 
@@ -10246,6 +11288,9 @@ msgstr "Usuwa wszystkie zapisane odpowiedzi dla każdego serwisu na każdej dost
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "Czy chcesz wyczyścić całą pamięć podręczną?"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "usuń wszystko"
 
 msgid "web_cache.purge_help"
 msgstr "Operacje czyszczenia są wykonywane natychmiast na dostępnych instancjach. Niedostępne instancje są pomijane i żadna operacja nie jest kolejkowana."
@@ -10268,6 +11313,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "Raportujące instancje"
 
+msgid "web_cache.server_side_note"
+msgstr "Tylko pamięć podręczna po stronie serwera. Ta strona zarządza pamięcią podręczną odwrotnego proxy przechowywaną w każdej instancji BunkerWeb. Odpowiedzi zapisane już w przeglądarkach odwiedzających pozostają bez zmian."
+
 msgid "web_cache.service"
 msgstr "Usługa"
 
@@ -10276,6 +11324,27 @@ msgstr "Włączenie serwisu"
 
 msgid "web_cache.status"
 msgstr "Przechowywanie danych instancji"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "Pominięto zapisywanie w pamięci podręcznej dla tego żądania"
+
+msgid "web_cache.status_desc.expired"
+msgstr "Upłynął czas ważności: pobrano ponownie z serwera upstream"
+
+msgid "web_cache.status_desc.hit"
+msgstr "Obsłużono bezpośrednio z pamięci podręcznej"
+
+msgid "web_cache.status_desc.miss"
+msgstr "Brak w pamięci podręcznej: pobrano z serwera upstream i zapisano"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "Pobranie warunkowe: serwer upstream potwierdził, że odpowiedź jest nadal ważna"
+
+msgid "web_cache.status_desc.stale"
+msgstr "Zwrócono nieaktualną odpowiedź z powodu awarii serwera upstream"
+
+msgid "web_cache.status_desc.updating"
+msgstr "Zwrócono nieaktualną odpowiedź podczas odświeżania"
 
 msgid "web_cache.subtitle"
 msgstr "Status pamięci podręcznej reverse-proxy, agregowane metryki trafień i natychmiastowe kontrole czyszczenia."
@@ -10318,6 +11387,18 @@ msgstr "Dostawca Antibot"
 
 msgid "workflows.act_redirect"
 msgstr "Przekieruj"
+
+msgid "workflows.act_settings_block"
+msgstr "Ustawienia blokowania"
+
+msgid "workflows.act_settings_challenge"
+msgstr "Ustawienia wyzwania"
+
+msgid "workflows.act_settings_generic"
+msgstr "Ustawienia działania"
+
+msgid "workflows.act_settings_redirect"
+msgstr "Ustawienia przekierowania"
 
 msgid "workflows.act_status"
 msgstr "Kod odmowy"
@@ -10445,6 +11526,9 @@ msgstr "Liczba problemów z walidacją w tej regule: %(count)s"
 msgid "workflows.aria.ruleName"
 msgstr "Nazwa reguły %(n)s"
 
+msgid "workflows.aria.ruleTools"
+msgstr "Działania dla reguły %(n)s"
+
 msgid "workflows.aria.terminalAction"
 msgstr "Akcja końcowa"
 
@@ -10561,6 +11645,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "Usunąć tę regułę? Wszystkie reguły poniżej przesuną się o jedną pozycję w górę."
+
+msgid "workflows.conseq.skip"
+msgstr "Nigdy się nie wykonuje"
+
+msgid "workflows.conseq.stop"
+msgstr "Zatrzymuje łańcuch"
 
 msgid "workflows.copySuffix"
 msgstr " (kopia)"
@@ -10709,6 +11799,21 @@ msgstr "próg dopasowania"
 msgid "workflows.gate.help"
 msgstr "Liczone osobno dla każdego IP klienta. Poniżej progu reguła nie pasuje i ocena przechodzi do następnej; sama nigdy nie ogranicza częstotliwości."
 
+msgid "workflows.inspector.apply"
+msgstr "Zastosuj"
+
+msgid "workflows.inspector.apply_title"
+msgstr "Zastosuj: zachowaj te zmiany w szkicu. Dopiero przycisk Zapisz na stronie zapisuje je na stałe"
+
+msgid "workflows.inspector.cancel"
+msgstr "Anuluj"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "Anuluj: przywróć regułę do stanu z chwili otwarcia"
+
+msgid "workflows.inspector.cancelled"
+msgstr "Anulowano zmiany reguły %(n)s. Przywrócono stan z chwili otwarcia."
+
 msgid "workflows.legend.fall"
 msgstr "Brak dopasowania prowadzi do następnej reguły"
 
@@ -10745,8 +11850,14 @@ msgstr "Duplikuj poniżej"
 msgid "workflows.menu.enable"
 msgstr "Włącz regułę"
 
+msgid "workflows.menu.header"
+msgstr "Działania reguły"
+
 msgid "workflows.menu.moveTo"
 msgstr "Przenieś na pozycję %(n)s"
+
+msgid "workflows.menu.order"
+msgstr "Kolejność"
 
 msgid "workflows.menu.staysAt"
 msgstr "Pozostaje na pozycji %(n)s"
@@ -10778,6 +11889,81 @@ msgstr "Jeszcze nie zweryfikowano"
 msgid "workflows.order_help"
 msgstr "Reguły są oceniane w kolejności i pierwsza, która pasuje, wygrywa. Reguła z progiem nie pasuje, dopóki próg nie zostanie przekroczony, więc niższa reguła może przechwycić ruch poniżej niej."
 
+msgid "workflows.port.active_rules"
+msgstr "Aktywne: %(count)s"
+
+msgid "workflows.port.attachment"
+msgstr "Dołączenie"
+
+msgid "workflows.port.attachment_any"
+msgstr "Dowolne"
+
+msgid "workflows.port.attachment_attached"
+msgstr "Dołączony"
+
+msgid "workflows.port.created"
+msgstr "Utworzono"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "Przed usunięciem odłącz ten przepływ pracy od wszystkich usług. Usunięcie nigdy nie odłącza usług automatycznie."
+
+msgid "workflows.port.details"
+msgstr "Szczegóły"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "Wybrane definicje (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "Wyeksportowano wybrane definicje. Ponowny import tego pliku nie jest gwarantowany."
+
+msgid "workflows.port.export_failed"
+msgstr "Eksport nie powiódł się. Nie pobrano pliku."
+
+msgid "workflows.port.export_loading"
+msgstr "Odczytywanie wybranych definicji przepływów pracy…"
+
+msgid "workflows.port.export_scope"
+msgstr "Eksporty tabeli obejmują przefiltrowane wiersze i widoczne kolumny. Eksporty JSON obejmują tylko wybrane kanoniczne definicje przepływów pracy, z identyfikatorami jako kluczami. Ponowny import nie jest gwarantowany."
+
+msgid "workflows.port.list_subtitle"
+msgstr "Reguły i dołączone usługi dla każdego przepływu pracy"
+
+msgid "workflows.port.more"
+msgstr "Więcej działań dla %(name)s"
+
+msgid "workflows.port.row_details"
+msgstr "Szczegóły przepływu pracy"
+
+msgid "workflows.port.select_workflows"
+msgstr "Zaznacz przepływy pracy"
+
+msgid "workflows.port.services_count"
+msgstr "Usługi: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "Odłączenie usuwa ten przepływ pracy tylko z danej usługi. Przepływ pracy i jego reguły pozostają."
+
+msgid "workflows.port.services_none"
+msgstr "Ten przepływ pracy nie jest dołączony do żadnej usługi."
+
+msgid "workflows.port.services_open"
+msgstr "Pokaż usługi dołączone do %(name)s"
+
+msgid "workflows.port.services_title"
+msgstr "Usługi dołączone do %(name)s"
+
+msgid "workflows.port.total_rules"
+msgstr "Łącznie: %(count)s"
+
+msgid "workflows.port.updated"
+msgstr "Zaktualizowano"
+
 msgid "workflows.readonly"
 msgstr "Baza danych jest tylko do odczytu. Przepływy pracy można przeglądać, ale nie można ich modyfikować."
 
@@ -10792,6 +11978,9 @@ msgstr "Przepływ pracy zabezpieczeń „%(workflow)s”: akcja „%(action)s”
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "Przepływ pracy zabezpieczeń „%(workflow)s”: żądanie przekierowane"
+
+msgid "workflows.regex_help"
+msgstr "Obowiązują dwa odrębne limity regex. Zapis: przepływy pracy dołączone do jednej usługi mogą łącznie zawierać najwyżej 50 warunków regex. Zapis lub dołączenie przekraczające ten limit są odrzucane. Wykonanie: każda instancja kompiluje najwyżej WORKFLOWS_REGEX_BUDGET różnych wyrażeń regularnych (domyślnie 512, wspólne dla wszystkich przepływów pracy). Wyrażenie regex ponad ten limit nie jest sprawdzane i zwraca UNKNOWN, więc jego reguła nie może zostać dopasowana."
 
 msgid "workflows.rule.disabled"
 msgstr "Wyłączona"
@@ -10903,6 +12092,108 @@ msgstr "Widok w formie listy. Reguły działają od góry do dołu; pierwsza dop
 
 msgid "workflows.search"
 msgstr "Wyszukaj nazwę lub opis..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "Utwórz przepływ pracy, aby otworzyć jego konfigurację"
+
+msgid "workflows.shell.draft_discard"
+msgstr "Odrzuć zmiany"
+
+msgid "workflows.shell.draft_restored"
+msgstr "Przywrócono niezapisane zmiany tego przepływu pracy. Zapisz je, aby zastosować, lub zmień przepływ pracy, aby je odrzucić."
+
+msgid "workflows.shell.draft_save"
+msgstr "Zapisz i kontynuuj"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "Nie udało się zapisać przepływu pracy. Niczego nie odrzucono."
+
+msgid "workflows.shell.draft_stale"
+msgstr "Ten przepływ pracy zapisano w innym miejscu po rozpoczęciu szkicu, więc szkic został odrzucony."
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "Otwarcie %(target)s pozostawiłoby niezapisane zmiany reguł w %(name)s. Jednocześnie można otworzyć tylko jeden szkic: zapisz go, odrzuć lub pozostań tutaj."
+
+msgid "workflows.shell.draft_title"
+msgstr "Niezapisane zmiany w %(name)s"
+
+msgid "workflows.shell.pick_label"
+msgstr "Przepływ pracy"
+
+msgid "workflows.shell.read_only"
+msgstr "Tylko do odczytu"
+
+msgid "workflows.shell.tab_config"
+msgstr "Konfiguracja"
+
+msgid "workflows.shell.tab_overview"
+msgstr "Przegląd"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "Niezapisane"
+
+msgid "workflows.shell.tabs_label"
+msgstr "Widok przepływów pracy"
+
+msgid "workflows.shell.view_label"
+msgstr "Widok"
+
+msgid "workflows.sum.block"
+msgstr "zablokuj żądanie"
+
+msgid "workflows.sum.blockStatus"
+msgstr "zablokuj żądanie kodem %(code)s"
+
+msgid "workflows.sum.challenge"
+msgstr "pokaż wyzwanie %(provider)s"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "sposób naprawy CrowdSec"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "źródło CrowdSec"
+
+msgid "workflows.sum.every"
+msgstr "nadejdzie dowolne żądanie"
+
+msgid "workflows.sum.gate"
+msgstr "liczba żądań przekroczy %(count)s w ciągu %(window)ss na IP"
+
+msgid "workflows.sum.group_asn"
+msgstr "ASN należy do grupy %(name)s"
+
+msgid "workflows.sum.group_country"
+msgstr "kraj należy do grupy %(name)s"
+
+msgid "workflows.sum.group_ip"
+msgstr "IP należy do grupy %(name)s"
+
+msgid "workflows.sum.isOne"
+msgstr "%(label)s ma wartość %(value)s"
+
+msgid "workflows.sum.isOneOf"
+msgstr "%(label)s ma jedną z wartości %(values)s"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "kraj"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "metoda"
+
+msgid "workflows.sum.not"
+msgstr "warunek „%(what)s” nie jest spełniony"
+
+msgid "workflows.sum.redirect"
+msgstr "przekieruj do %(url)s (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "URI %(match)s %(value)s"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11074,6 +12365,78 @@ msgstr "Żądania"
 
 msgid "workflows.threshold_window"
 msgstr "sekund"
+
+msgid "workflows.toolbar.actions"
+msgstr "Działania przepływu pracy"
+
+msgid "workflows.toolbar.any_action"
+msgstr "Dowolne działanie"
+
+msgid "workflows.toolbar.any_state"
+msgstr "Dowolny stan"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "Powrót na górę"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "Zwiń wszystkie"
+
+msgid "workflows.toolbar.detailed"
+msgstr "Szczegółowy"
+
+msgid "workflows.toolbar.display"
+msgstr "Wyświetlanie reguł"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "Rozwiń wszystkie"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "Działanie"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "Nazwa"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "Szukaj według nazwy reguły…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "Filtruj reguły"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "Stan"
+
+msgid "workflows.toolbar.filters"
+msgstr "Filtry"
+
+msgid "workflows.toolbar.full_height"
+msgstr "Pełna wysokość"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "Ogranicz wysokość"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "Reguły: %(shown)s z %(total)s"
+
+msgid "workflows.toolbar.no_match"
+msgstr "Żadna reguła nie pasuje do tych filtrów"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "Zmiana kolejności jest wstrzymana, gdy filtr ukrywa reguły."
+
+msgid "workflows.toolbar.reset"
+msgstr "Resetuj"
+
+msgid "workflows.toolbar.simplified"
+msgstr "Uproszczony"
+
+msgid "workflows.toolbar.state_off"
+msgstr "Wyłączone"
+
+msgid "workflows.toolbar.state_on"
+msgstr "Włączone"
+
+msgid "workflows.toolbar.view"
+msgstr "Widok kolejności reguł"
 
 msgid "workflows.tree.addCondition"
 msgstr "Warunek"

@@ -19,11 +19,56 @@ msgstr ""
 msgid "about.build_with"
 msgstr "Создано с помощью"
 
+msgid "about.environment.bunkerweb"
+msgstr "BunkerWeb"
+
+msgid "about.environment.copied"
+msgstr "Скопировано"
+
+msgid "about.environment.copy"
+msgstr "Копировать диагностику"
+
+msgid "about.environment.database"
+msgstr "Сервер базы данных"
+
+msgid "about.environment.help"
+msgstr "Данные с хоста веб-интерфейса и уровня управления. Переменные, лицензионные ключи и адреса баз данных не отображаются."
+
+msgid "about.environment.instances_up"
+msgstr "Работает %(up)s из %(total)s"
+
+msgid "about.environment.integration"
+msgstr "Интеграция"
+
+msgid "about.environment.platform"
+msgstr "Платформа"
+
+msgid "about.environment.registered"
+msgstr "Зарегистрировано"
+
+msgid "about.environment.scope_control_plane"
+msgstr "Уровень управления"
+
+msgid "about.environment.scope_instances"
+msgstr "Экземпляры"
+
+msgid "about.environment.scope_ui_host"
+msgstr "Хост веб-интерфейса"
+
+msgid "about.environment.title"
+msgstr "Окружение"
+
 msgid "about.gnu_license"
 msgstr "Стандартная общественная лицензия GNU Affero версии 3.0"
 
 msgid "about.license_title"
 msgstr "Лицензия"
+
+msgid "about.releases.title"
+msgstr "Последние выпуски"
+
+msgid "about.releases.view_all"
+msgstr "Посмотреть все"
 
 msgid "about.social.discord"
 msgstr "Discord"
@@ -274,6 +319,18 @@ msgstr "Выбранный диапазон"
 msgid "bans.chart.timeseries.title"
 msgstr "Активные блокировки по интервалам"
 
+msgid "bans.clear_all.confirm"
+msgstr "Снять все баны"
+
+msgid "bans.clear_all.message"
+msgstr "Удаляет все баны на всех сервисах и экземплярах. Бан CrowdSec снимается в его собственной строке."
+
+msgid "bans.clear_all.phrase"
+msgstr "очистить все"
+
+msgid "bans.clear_all.title"
+msgstr "Снять все баны"
+
 msgid "bans.crowdsec.confirm"
 msgstr "Удалить решения и разбанить"
 
@@ -394,11 +451,53 @@ msgstr "Не удалось обновить срок блокировки дл�
 msgid "bans.flash.update_duration_success"
 msgstr "Срок блокировки для %(ip)s успешно обновлён."
 
+msgid "bans.import.confirm_button"
+msgstr "Импортировать"
+
+msgid "bans.import.confirm_message"
+msgstr "В файле найдено банов: %(count)s. Импортировать?"
+
+msgid "bans.import.confirm_skipped"
+msgstr "Нечитаемых строк пропущено: %(skipped)s."
+
+msgid "bans.import.confirm_title"
+msgstr "Импорт банов"
+
+msgid "bans.import.empty"
+msgstr "В файле не найдено допустимых банов. Ожидается один бан на строку, IP[,scope[,duration[,reason]]], или список JSON."
+
+msgid "bans.import.read_failed"
+msgstr "Не удалось прочитать файл."
+
+msgid "bans.import.too_many"
+msgstr "В этом файле больше %(max)s банов. Разделите его и импортируйте по частям."
+
 msgid "bans.kind.crowdsec_lease"
 msgstr "Аренда CrowdSec"
 
+msgid "bans.live.off"
+msgstr "Автообновление приостановлено."
+
+msgid "bans.live.on"
+msgstr "Автообновление включено, каждые 10 секунд."
+
+msgid "bans.live.updated"
+msgstr "Баны обновлены: новых %(added)s, истекших %(removed)s."
+
+msgid "bans.page.clear_all"
+msgstr "Очистить все"
+
+msgid "bans.page.import"
+msgstr "Импорт"
+
 msgid "bans.stats.card.by_reason"
 msgstr "Блокировки по причине"
+
+msgid "bans.stats.reasons.head_reason"
+msgstr "Причина"
+
+msgid "bans.stats.reasons.meta"
+msgstr "Активных банов: %(count)s"
 
 msgid "bans.stats.tile.active"
 msgstr "Активные блокировки"
@@ -934,6 +1033,27 @@ msgstr "Просмотреть сертификат"
 msgid "certificates.browse_key"
 msgstr "Просмотреть приватный ключ"
 
+msgid "certificates.bulk.confirm_delete"
+msgstr "Сертификатов к удалению: %(count)s. Это действие нельзя отменить. Продолжить?"
+
+msgid "certificates.bulk.confirm_renew"
+msgstr "Самоподписанных сертификатов к продлению: %(count)s. Продолжить?"
+
+msgid "certificates.bulk.delete"
+msgstr "Удалить выбранные"
+
+msgid "certificates.bulk.download"
+msgstr "Скачать цепочки"
+
+msgid "certificates.bulk.none_eligible"
+msgstr "Ни один из выбранных сертификатов не поддерживает это действие."
+
+msgid "certificates.bulk.renew"
+msgstr "Продлить самоподписанные"
+
+msgid "certificates.bulk.skipped"
+msgstr "Выбранных сертификатов, не поддерживающих это действие, пропущено: %(skipped)s."
+
 msgid "certificates.common_name"
 msgstr "Общее имя"
 
@@ -1117,6 +1237,9 @@ msgstr "Эмитент"
 msgid "certificates.issuers"
 msgstr "Топ эмитент"
 
+msgid "certificates.issuers_meta"
+msgstr "Сертификатов: %(count)s"
+
 msgid "certificates.key_drop"
 msgstr "Загрузите соответствующий приватный ключ здесь"
 
@@ -1180,6 +1303,9 @@ msgstr "База данных только для чтения. Сертифик
 msgid "certificates.renew_due"
 msgstr "Проверить/обновить срок действия"
 
+msgid "certificates.renew_due_short"
+msgstr "Пора продлить"
+
 msgid "certificates.sans"
 msgstr "Альтернативные имена субъекта"
 
@@ -1194,6 +1320,9 @@ msgstr "Запланировать выдачу ACME"
 
 msgid "certificates.search"
 msgstr "Поиск по имени, общему имени, SAN, эмитенту или отпечатку…"
+
+msgid "certificates.select_all"
+msgstr "Выбрать все сертификаты"
 
 msgid "certificates.serial"
 msgstr "Серийный номер"
@@ -1323,6 +1452,99 @@ msgstr "Показать ещё (%(count)s)"
 
 msgid "compose.unavailable"
 msgstr "Список плагинов не удалось загрузить, поэтому эту страницу нельзя безопасно редактировать. Обновите после ответа API."
+
+msgid "configs.console.all_scopes"
+msgstr "Все области"
+
+msgid "configs.console.clone"
+msgstr "Клонировать конфигурацию"
+
+msgid "configs.console.content"
+msgstr "Содержимое конфигурации (только чтение)"
+
+msgid "configs.console.download"
+msgstr "Скачать"
+
+msgid "configs.console.edit"
+msgstr "Изменить конфигурацию"
+
+msgid "configs.console.editor_help"
+msgstr "Редактируйте содержимое NGINX или ModSecurity. Сохранение: Ctrl+S или Command+S."
+
+msgid "configs.console.editor_title"
+msgstr "Содержимое конфигурации"
+
+msgid "configs.console.files"
+msgstr "Файлы"
+
+msgid "configs.console.full_view"
+msgstr "Полный вид"
+
+msgid "configs.console.global_legend"
+msgstr "Глобальная конфигурация применяется ко всем сервисам."
+
+msgid "configs.console.global_only"
+msgstr "Только глобальные"
+
+msgid "configs.console.lint"
+msgstr "Проверить синтаксис"
+
+msgid "configs.console.lint_brace"
+msgstr "Незакрытая открывающая фигурная скобка."
+
+msgid "configs.console.lint_clean"
+msgstr "Клиентские проверки не выявили проблем."
+
+msgid "configs.console.lint_help"
+msgstr "Только клиентские подсказки. Перед развертыванием проверьте конфигурацию командой nginx -t. Многострочные директивы могут вызывать предупреждения."
+
+msgid "configs.console.lint_quote"
+msgstr "Незакрытая кавычка."
+
+msgid "configs.console.lint_semicolon"
+msgstr "Возможно, в конце директивы отсутствует точка с запятой."
+
+msgid "configs.console.lint_skipped"
+msgstr "Проверка синтаксиса NGINX недоступна для конфигураций ModSecurity и CRS."
+
+msgid "configs.console.lint_unexpected_brace"
+msgstr "Неожиданная закрывающая фигурная скобка."
+
+msgid "configs.console.lint_warnings"
+msgstr "Клиентские проверки выявили предупреждения: %(count)s. См. пометки редактора."
+
+msgid "configs.console.name_help"
+msgstr "Используйте буквы, цифры, дефисы или подчеркивания. Суффикс .conf добавляется на диске."
+
+msgid "configs.console.new"
+msgstr "Новая конфигурация"
+
+msgid "configs.console.no_files"
+msgstr "Нет конфигураций, соответствующих этим фильтрам."
+
+msgid "configs.console.restore_view"
+msgstr "Восстановить вид"
+
+msgid "configs.console.select_file"
+msgstr "Выберите файл для просмотра содержимого."
+
+msgid "configs.console.service_legend"
+msgstr "Конфигурация сервиса применяется только к одному сервису."
+
+msgid "configs.console.service_only"
+msgstr "Только для сервиса"
+
+msgid "configs.console.template_name_locked"
+msgstr "Нельзя переименовать пользовательскую конфигурацию на основе шаблона."
+
+msgid "configs.console.title"
+msgstr "Пользовательские конфигурации"
+
+msgid "configs.console.types"
+msgstr "Тип конфигурации"
+
+msgid "configs.console.view"
+msgstr "Просмотреть конфигурацию"
 
 msgid "configs.flash.all_selected_custom_configs_could_not"
 msgstr "Все выбранные пользовательские конфигурации не найдены, не являются конфигурациями UI/API или уже преобразованы."
@@ -2764,6 +2986,15 @@ msgstr "Время"
 msgid "dashboard.chart.blocking_status.title"
 msgstr "Статус блокировки по времени"
 
+msgid "dashboard.chart.legend.count"
+msgstr "Количество"
+
+msgid "dashboard.chart.legend.item"
+msgstr "Элемент"
+
+msgid "dashboard.chart.legend.share"
+msgstr "Доля"
+
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Заблокированные запросы"
 
@@ -3007,6 +3238,18 @@ msgstr "На этой странице выбран %(count)s шаблон."
 msgid "datatable.bulk_select.templates.page_other"
 msgstr "На этой странице выбраны все шаблоны: %(count)s."
 
+msgid "datatable.bulk_select.workflows.all_done"
+msgstr "Выбраны все совпадающие рабочие процессы: %(count)s."
+
+msgid "datatable.bulk_select.workflows.all_filtered"
+msgstr "Выбрать все совпадающие рабочие процессы: %(count)s"
+
+msgid "datatable.bulk_select.workflows.page_one"
+msgstr "На этой странице выбран %(count)s рабочий процесс."
+
+msgid "datatable.bulk_select.workflows.page_other"
+msgstr "На этой странице выбраны все рабочие процессы: %(count)s."
+
 msgid "datatable.bulk_select_clear"
 msgstr "Очистить выбор"
 
@@ -3049,6 +3292,9 @@ msgstr "Сервисы отсутствуют"
 msgid "datatable.info_empty_templates"
 msgstr "Нет доступных шаблонов"
 
+msgid "datatable.info_empty_workflows"
+msgstr "Рабочие процессы отсутствуют"
+
 msgid "datatable.info_filtered_bans"
 msgstr "(отфильтровано из _MAX_ всего банов)"
 
@@ -3079,6 +3325,9 @@ msgstr "(отфильтровано из _MAX_ всего сервисов)"
 msgid "datatable.info_filtered_templates"
 msgstr "(отфильтровано из _MAX_ шаблонов)"
 
+msgid "datatable.info_filtered_workflows"
+msgstr "(отфильтровано из _MAX_ всего рабочих процессов)"
+
 msgid "datatable.info_instances"
 msgstr "Показано с %(start)s по %(end)s из %(total)s экземпляров"
 
@@ -3099,6 +3348,9 @@ msgstr "Показано с %(start)s по %(end)s из %(total)s сервисо
 
 msgid "datatable.info_templates"
 msgstr "Показано от %(start)s до %(end)s из %(total)s шаблонов"
+
+msgid "datatable.info_workflows"
+msgstr "Показано с %(start)s по %(end)s из %(total)s рабочих процессов"
 
 msgid "datatable.length_all"
 msgstr "Все"
@@ -3132,6 +3384,9 @@ msgstr "Показывать _MENU_ сервисов"
 
 msgid "datatable.length_menu_templates"
 msgstr "Показать _MENU_ шаблонов"
+
+msgid "datatable.length_menu_workflows"
+msgstr "Показывать _MENU_ рабочих процессов"
 
 msgid "datatable.paginate.first"
 msgstr "Первая"
@@ -3244,6 +3499,15 @@ msgstr "Выбран 1 шаблон"
 msgid "datatable.select_rows_templates_plural"
 msgstr "Выбрано %d шаблонов"
 
+msgid "datatable.select_rows_workflows_0"
+msgstr "Рабочие процессы не выбраны"
+
+msgid "datatable.select_rows_workflows_1"
+msgstr "Выбран 1 рабочий процесс"
+
+msgid "datatable.select_rows_workflows_plural"
+msgstr "Выбрано %d рабочих процессов"
+
 msgid "datatable.selected_list.configs.count_one"
 msgstr "Выбрана %(count)s пользовательская конфигурация"
 
@@ -3318,6 +3582,9 @@ msgstr "Совпадающих сервисов не найдено"
 
 msgid "datatable.zero_records_templates"
 msgstr "Совпадающих шаблонов не найдено"
+
+msgid "datatable.zero_records_workflows"
+msgstr "Совпадающих рабочих процессов не найдено"
 
 msgid "dev_log.copy_failed"
 msgstr "Не удалось скопировать текст:"
@@ -4369,14 +4636,26 @@ msgstr "Один раз"
 msgid "interval.week"
 msgstr "Еженедельно"
 
+msgid "job.history.duration"
+msgstr "Длительность"
+
 msgid "job.history.end_date"
 msgstr "Дата окончания"
+
+msgid "job.history.error"
+msgstr "Ошибка"
 
 msgid "job.history.start_date"
 msgstr "Дата начала"
 
 msgid "job.history.success"
 msgstr "Успех"
+
+msgid "jobs.card.sub"
+msgstr "Запускаются планировщиком с заданным для каждой задачи интервалом или по запросу"
+
+msgid "jobs.card.title"
+msgstr "Запланированные задачи"
 
 msgid "jobs.flash.error_fetching_jobs"
 msgstr "Ошибка при получении задач: %(message)s"
@@ -5125,6 +5404,9 @@ msgstr "Pro"
 msgid "navigation.extra_pages"
 msgstr "Дополнительные страницы"
 
+msgid "navigation.filter_plugins"
+msgstr "Фильтр плагинов…"
+
 msgid "navigation.global_settings"
 msgstr "Глобальные настройки"
 
@@ -5152,6 +5434,9 @@ msgstr "Выбор режима"
 msgid "navigation.more"
 msgstr "Ещё..."
 
+msgid "navigation.no_plugin_match"
+msgstr "Нет подходящих плагинов"
+
 msgid "navigation.operate"
 msgstr "Управление"
 
@@ -5170,14 +5455,23 @@ msgstr "Плагин деактивирован"
 msgid "navigation.plugin_deactivated_global"
 msgstr "Плагин деактивирован глобально"
 
+msgid "navigation.plugin_insights"
+msgstr "Данные плагинов"
+
 msgid "navigation.plugins"
 msgstr "Плагины"
+
+msgid "navigation.plugins_overview"
+msgstr "Обзор"
 
 msgid "navigation.plugins_pages"
 msgstr "Страницы плагинов"
 
 msgid "navigation.pro"
 msgstr "Pro"
+
+msgid "navigation.profile"
+msgstr "Профиль"
 
 msgid "navigation.redirects"
 msgstr "Перенаправления"
@@ -5350,6 +5644,24 @@ msgstr "БЕСПЛАТНО"
 msgid "plan.pro"
 msgstr "PRO"
 
+msgid "plugin.page.empty.deactivated_heading"
+msgstr "Этот плагин нигде не используется"
+
+msgid "plugin.page.empty.global_settings"
+msgstr "Глобальные настройки"
+
+msgid "plugin.page.empty.metrics_title"
+msgstr "Метрики отключены"
+
+msgid "plugin.page.empty.no_content_title"
+msgstr "Пока нечего показывать"
+
+msgid "plugin.page.empty.no_page_title"
+msgstr "Нет страницы для отображения"
+
+msgid "plugin.page.empty.restricted_title"
+msgstr "Только для администраторов"
+
 msgid "plugin.page.status.deactivated"
 msgstr "Плагин деактивирован; следовательно, информация недоступна."
 
@@ -5385,6 +5697,12 @@ msgstr "Pro"
 
 msgid "plugin.type.ui"
 msgstr "UI"
+
+msgid "plugins.card.configure"
+msgstr "Настроить %(name)s"
+
+msgid "plugins.card.metrics"
+msgstr "Метрики %(name)s"
 
 msgid "plugins.catalog.flash.version_unreadable"
 msgstr "Не удалось прочитать версию BunkerWeb (%(current)s), поэтому совместимость %(id)s невозможно проверить; ничего не было установлено"
@@ -5629,11 +5947,20 @@ msgstr "Активно"
 msgid "plugins.marketplace.always_on"
 msgstr "Ядро / всегда включено"
 
+msgid "plugins.marketplace.always_on_badge"
+msgstr "Всегда включен"
+
+msgid "plugins.marketplace.always_on_tip"
+msgstr "Основной плагин, необходимый BunkerWeb: его можно настроить, но нельзя отключить."
+
 msgid "plugins.marketplace.disabled"
 msgstr "Отключено"
 
 msgid "plugins.marketplace.enabled"
 msgstr "Включено"
+
+msgid "plugins.marketplace.filter_label"
+msgstr "Фильтр плагинов"
 
 msgid "plugins.marketplace.inactive"
 msgstr "Неактивно"
@@ -5664,6 +5991,15 @@ msgstr "еще значения"
 
 msgid "plugins.multivalue.show_less"
 msgstr "Показать меньше"
+
+msgid "plugins.tier.community"
+msgstr "Плагин сообщества"
+
+msgid "plugins.tier.core"
+msgstr "Основной плагин"
+
+msgid "plugins.tier.pro"
+msgstr "Плагин PRO"
 
 msgid "pro.alert.overlapped_1"
 msgstr "У вас больше активных сервисов, чем позволяет ваша лицензия!"
@@ -6010,8 +6346,14 @@ msgstr "IP-адрес"
 msgid "profile.session.last_activity"
 msgstr "Последняя активность"
 
+msgid "profile.session.load_error"
+msgstr "Ошибка загрузки данных. Попробуйте еще раз."
+
 msgid "profile.session.os"
 msgstr "Операционная система"
+
+msgid "profile.session.recent_title"
+msgstr "Недавние сеансы"
 
 msgid "profile.session.title"
 msgstr "Сессия"
@@ -6030,6 +6372,9 @@ msgstr "Безопасность"
 
 msgid "profile.tab.sessions"
 msgstr "Сессии"
+
+msgid "profile.title"
+msgstr "Ваш профиль"
 
 msgid "range_picker.1h"
 msgstr "Последняя час"
@@ -6082,11 +6427,44 @@ msgstr "Активная настройка %(setting)s недопустима."
 msgid "raw_drafts.setting_not_valid"
 msgstr "Настройка %(setting)s недопустима."
 
+msgid "raw_page.search"
+msgstr "Поиск…"
+
+msgid "raw_page.search_label"
+msgstr "Поиск в исходной конфигурации"
+
+msgid "raw_page.search_next"
+msgstr "Следующее совпадение"
+
+msgid "raw_page.search_prev"
+msgstr "Предыдущее совпадение"
+
+msgid "raw_page.tile_modified"
+msgstr "Изменено"
+
+msgid "raw_page.tile_plugins"
+msgstr "Плагины"
+
+msgid "raw_page.tile_problems"
+msgstr "Проблемы"
+
+msgid "raw_page.tile_settings"
+msgstr "Настройки"
+
+msgid "raw_page.tiles_label"
+msgstr "Сводка исходной конфигурации"
+
 msgid "redirects.all"
 msgstr "Все"
 
+msgid "redirects.all_codes"
+msgstr "Все коды состояния"
+
 msgid "redirects.append_badge"
 msgstr "+ URI"
+
+msgid "redirects.append_column"
+msgstr "Добавлять URI"
 
 msgid "redirects.append_request_uri"
 msgstr "Добавить запрошенный URI в целевое"
@@ -6096,6 +6474,9 @@ msgstr "Прикрепить"
 
 msgid "redirects.attach_copy"
 msgstr "Прикрепить %(name)s (%(from)s → %(to)s) к одному или нескольким сервисам."
+
+msgid "redirects.card_subtitle"
+msgstr "Перенаправления путей и сервисы, к которым они применяются"
 
 msgid "redirects.code.301"
 msgstr "301 — Перенаправление навсегда"
@@ -6112,6 +6493,13 @@ msgstr "307 — Временное перенаправление"
 msgid "redirects.code.308"
 msgstr "308 — Постоянное перенаправление"
 
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "redirects.count"
+msgid_plural "redirects.count_plural"
+msgstr[0] "%(count)s перенаправление"
+msgstr[1] "Перенаправлений: %(count)s"
+msgstr[2] "Перенаправлений: %(count)s"
+
 msgid "redirects.create"
 msgstr "Создать перенаправление"
 
@@ -6123,6 +6511,9 @@ msgstr "Удалить перенаправление %(name)s?"
 
 msgid "redirects.delete_help"
 msgstr "Перенаправление, прикрепленное к сервису, нельзя удалить. Сначала открепите его."
+
+msgid "redirects.detach_shared"
+msgstr "Это перенаправление общее. Отсоединение удаляет его только из этого сервиса. В остальных сервисах оно сохраняется."
 
 msgid "redirects.edit"
 msgstr "Редактировать перенаправление"
@@ -6205,8 +6596,32 @@ msgstr "Перенаправить от"
 msgid "redirects.from_path_help"
 msgstr "Исходный путь на прикрепленных сервисах, например /old."
 
+msgid "redirects.kpi_configured"
+msgstr "Настроенные перенаправления"
+
+msgid "redirects.kpi_detached_caption"
+msgstr "Подключите к сервису, чтобы применить"
+
+msgid "redirects.kpi_loaded_only"
+msgstr "Среди первых %(count)s загруженных"
+
+msgid "redirects.kpi_permanent"
+msgstr "Постоянные"
+
+msgid "redirects.kpi_permanent_caption"
+msgstr "301 или 308, кэшируются браузерами"
+
+msgid "redirects.kpi_services"
+msgstr "Подключенные сервисы"
+
+msgid "redirects.kpi_services_caption"
+msgstr "Сервисы хотя бы с одним перенаправлением"
+
 msgid "redirects.new"
 msgstr "Новое перенаправление"
+
+msgid "redirects.no_match"
+msgstr "Нет перенаправлений, соответствующих этим фильтрам."
 
 msgid "redirects.not_attached"
 msgstr "Не прикреплено"
@@ -6220,14 +6635,30 @@ msgstr "Сохранить перенаправление"
 msgid "redirects.search"
 msgstr "Поиск по имени, пути источника или целевому адресу..."
 
+msgid "redirects.services_copy"
+msgstr "%(name)s: %(from)s → %(to)s"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "redirects.services_count"
+msgid_plural "redirects.services_count_plural"
+msgstr[0] "%(count)s сервис"
+msgstr[1] "Сервисов: %(count)s"
+msgstr[2] "Сервисов: %(count)s"
+
 msgid "redirects.services_help"
 msgstr "Используйте Ctrl или Command для выбора нескольких сервисов. Перенаправление можно добавить позже."
+
+msgid "redirects.services_title"
+msgstr "Сервисы, использующие это перенаправление"
 
 msgid "redirects.status_code"
 msgstr "Код статуса"
 
 msgid "redirects.to_url"
 msgstr "Перенаправить на"
+
+msgid "redirects.to_url_help"
+msgstr "Полный URL с http:// или https://. Относительные адреса назначения не поддерживаются."
 
 msgid "redirects.truncated"
 msgstr "Отображаются только первые 500 перенаправлений. Уточните список с помощью API для получения полного результата."
@@ -6294,6 +6725,36 @@ msgstr "Решение локального API"
 
 msgid "reports.crowdsec.technical_details"
 msgstr "Технические сведения"
+
+msgid "reports.live.off"
+msgstr "Автообновление приостановлено."
+
+msgid "reports.live.on"
+msgstr "Автообновление включено, каждые 10 секунд."
+
+msgid "reports.live.updated"
+msgstr "Отчеты обновлены: новых %(added)s."
+
+msgid "reports.offenders.confirm_many"
+msgstr "IP-адресов будет забанено на всех экземплярах на 24 часа: %(count)s."
+
+msgid "reports.offenders.confirm_one"
+msgstr "Адрес %(ip)s будет забанен на всех экземплярах на 24 часа."
+
+msgid "reports.offenders.confirm_title"
+msgstr "Забанить из отчетов"
+
+msgid "reports.offenders.show"
+msgstr "Показать"
+
+msgid "reports.offenders.show_bottom"
+msgstr "Самые редкие нарушители"
+
+msgid "reports.offenders.show_latest"
+msgstr "Последние нарушители"
+
+msgid "reports.offenders.show_top"
+msgstr "Самые частые нарушители"
 
 msgid "reports.security_incident"
 msgstr "Инцидент безопасности"
@@ -6394,6 +6855,15 @@ msgstr "Путь запроса"
 msgid "request_path.unordered"
 msgstr "Не указана позиция в фазе %(phase)s; он выполняется после упорядоченных плагинов, в алфавитном порядке."
 
+msgid "resource_groups.access"
+msgstr "Доступ"
+
+msgid "resource_groups.access_readonly"
+msgstr "Только чтение"
+
+msgid "resource_groups.access_write"
+msgstr "Запись"
+
 msgid "resource_groups.add_entry"
 msgstr "Добавить запись"
 
@@ -6408,6 +6878,9 @@ msgstr "Псевдоним"
 
 msgid "resource_groups.alias_help"
 msgstr "Буквы, цифры, подчеркивания и дефисы. Существующие псевдонимы нельзя переименовать."
+
+msgid "resource_groups.all_kinds"
+msgstr "Все"
 
 msgid "resource_groups.bulk_import"
 msgstr "Массовая загрузка"
@@ -6453,6 +6926,9 @@ msgstr "Записи"
 
 msgid "resource_groups.expand_all"
 msgstr "Развернуть все"
+
+msgid "resource_groups.filter_values"
+msgstr "Фильтр значений..."
 
 msgid "resource_groups.flash.alias_invalid_chars"
 msgstr "Псевдоним должен содержать от 1 до 64 букв, цифр, подчёркиваний или дефисов"
@@ -6589,6 +7065,49 @@ msgstr "Добавьте записи по отдельности или исп�
 msgid "resource_groups.no_references"
 msgstr "Нет ссылок"
 
+msgid "resource_groups.no_value_match"
+msgstr "Нет значений, соответствующих этому фильтру."
+
+msgid "resource_groups.origin"
+msgstr "Источник"
+
+msgid "resource_groups.origin_plugin"
+msgstr "Поставляется плагином %(plugin)s"
+
+msgid "resource_groups.origin_tip.api"
+msgstr "Создано или синхронизировано через API."
+
+msgid "resource_groups.origin_tip.autoconf"
+msgstr "Создано контроллером autoconf."
+
+msgid "resource_groups.origin_tip.download"
+msgstr "Загружено из удаленного источника."
+
+msgid "resource_groups.origin_tip.manual"
+msgstr "Создано вручную или из файла конфигурации."
+
+msgid "resource_groups.origin_tip.scheduler"
+msgstr "Создано планировщиком."
+
+msgid "resource_groups.origin_tip.ui"
+msgstr "Создано через веб-интерфейс."
+
+msgid "resource_groups.origin_tip.wizard"
+msgstr "Создано мастером настройки. Редактирование по-прежнему доступно."
+
+msgid "resource_groups.plugins_compatible"
+msgstr "Совместимые плагины"
+
+msgid "resource_groups.plugins_compatible_help"
+msgstr "Плагины, настройки которых принимают типы значений этой группы. Фактические ссылки перечислены в разделе Использование."
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "resource_groups.plugins_count"
+msgid_plural "resource_groups.plugins_count_plural"
+msgstr[0] "%(count)s плагин"
+msgstr[1] "Плагинов: %(count)s"
+msgstr[2] "Плагинов: %(count)s"
+
 msgid "resource_groups.readonly"
 msgstr "База данных только для чтения. Группы ресурсов можно просматривать и экспортировать, но не изменять."
 
@@ -6617,6 +7136,9 @@ msgstr "Переиспользуемые типизированные псевд
 msgid "resource_groups.template_configuration"
 msgstr "Шаблон %(template)s"
 
+msgid "resource_groups.updated"
+msgstr "Обновлено"
+
 msgid "resource_groups.usage"
 msgstr "Использование"
 
@@ -6625,6 +7147,18 @@ msgstr "Значение"
 
 msgid "resource_groups.values"
 msgstr "Значения"
+
+msgid "resource_groups.values_compat"
+msgstr "Совместимо с: %(plugins)s"
+
+msgid "resource_groups.values_copied"
+msgstr "Скопировано"
+
+msgid "resource_groups.values_title"
+msgstr "Значения %(name)s"
+
+msgid "resource_groups.view_values_of"
+msgstr "Просмотреть значения %(name)s"
 
 msgid "scope.all_services"
 msgstr "Все сервисы"
@@ -7595,6 +8129,93 @@ msgstr "Настройте здесь несколько экземпляров 
 msgid "settings.multiple.title"
 msgstr "Множественные настройки"
 
+msgid "settings_page.alert_global"
+msgstr "Изменения касаются всех сервисов, которые их не переопределяют, и вступают в силу после нажатия Сохранить и перезагрузить."
+
+msgid "settings_page.alert_service"
+msgstr "Пустые настройки используют глобальные значения по умолчанию. Изменения касаются только выбранного сервиса и вступают в силу после нажатия Сохранить и перезагрузить."
+
+msgid "settings_page.back_global"
+msgstr "Назад к глобальным настройкам"
+
+msgid "settings_page.back_service"
+msgstr "Назад к сервису"
+
+msgid "settings_page.card_title"
+msgstr "Настройки"
+
+msgid "settings_page.count"
+msgstr "Настроек: %(count)s"
+
+msgid "settings_page.count_filtered"
+msgstr "Настроек: %(shown)s из %(total)s"
+
+msgid "settings_page.groups_link"
+msgstr "Управление группами ресурсов"
+
+msgid "settings_page.groups_link_hint"
+msgstr "Повторно используемые списки IP-адресов, сетей и стран, на которые могут ссылаться настройки этого плагина."
+
+msgid "settings_page.no_match"
+msgstr "Нет настроек, соответствующих вашему поиску."
+
+msgid "settings_page.plugin"
+msgstr "Плагин"
+
+msgid "settings_page.reload_alert_body"
+msgstr "После сохранения планировщик повторно применит конфигурацию к вашим экземплярам."
+
+msgid "settings_page.reload_alert_title"
+msgstr "Изменения вызывают перезагрузку конфигурации экземпляров."
+
+msgid "settings_page.revert"
+msgstr "Отменить"
+
+msgid "settings_page.revert_confirm"
+msgstr "Отменить все"
+
+msgid "settings_page.revert_message"
+msgstr "Возвращает все несохраненные изменения на этой странице к последним сохраненным значениям."
+
+msgid "settings_page.revert_title"
+msgstr "Отменить изменения"
+
+msgid "settings_page.save_reload"
+msgstr "Сохранить и перезагрузить"
+
+msgid "settings_page.scope"
+msgstr "Область"
+
+msgid "settings_page.scope_global"
+msgstr "Глобальные настройки"
+
+msgid "settings_page.search"
+msgstr "Поиск настроек…"
+
+msgid "settings_page.search_label"
+msgstr "Поиск настроек"
+
+msgid "settings_page.select_plugin_label"
+msgstr "Выберите плагин"
+
+msgid "settings_page.select_scope_label"
+msgstr "Выберите, где редактировать его настройки"
+
+msgid "setup.accordion.advanced"
+msgstr "Дополнительные"
+
+msgid "setup.accordion.advanced_hint"
+msgstr "Обратный прокси · Реальный IP · Пользовательский сертификат"
+
+msgid "setup.accordion.general"
+msgstr "Общие"
+
+msgid "setup.accordion.general_hint"
+msgstr "Сервер · Let's Encrypt"
+
+msgid "setup.complete"
+msgstr "Завершить настройку"
+
 msgid "setup.error.web_ui_setup_failed"
 msgstr "Ошибка при настройке веб-интерфейса. Повторите попытку."
 
@@ -7649,6 +8270,9 @@ msgstr "Пароли не совпадают."
 msgid "setup.flash.when_using_custom_ssl_certificate_must"
 msgstr "При использовании пользовательского SSL-сертификата необходимо указать как сертификат, так и ключ."
 
+msgid "setup.from_ui_host"
+msgstr "Из переменной окружения UI_HOST"
+
 msgid "setup.status.admin_user_exists"
 msgstr "Пользователь администратора уже существует. Пожалуйста, перейдите к следующему шагу."
 
@@ -7694,6 +8318,9 @@ msgstr "Реальный IP"
 msgid "setup.step2.section.reverse_proxy"
 msgstr "Обратный прокси"
 
+msgid "setup.step2.section.server"
+msgstr "Сервер"
+
 msgid "setup.step2.section.zerossl"
 msgstr "ZeroSSL"
 
@@ -7702,6 +8329,12 @@ msgstr "Настройте специфические параметры веб-
 
 msgid "setup.step2.title"
 msgstr "Настройки UI"
+
+msgid "setup.step3.activate_title"
+msgstr "Активировать лицензию"
+
+msgid "setup.step3.activation_note"
+msgstr "Лицензия будет активирована после завершения настройки."
 
 msgid "setup.step3.label.pro_benefits"
 msgstr "Преимущества PRO"
@@ -7745,11 +8378,119 @@ msgstr "Проверьте свои настройки перед заверше
 msgid "setup.step4.title"
 msgstr "Обзор"
 
+msgid "setup.stepper_label"
+msgstr "Этапы настройки"
+
 msgid "setup.subtitle"
 msgstr "Следуйте шагам для завершения мастера установки."
 
+msgid "setup.switch.disabled"
+msgstr "Отключено"
+
+msgid "setup.switch.enabled"
+msgstr "Включено"
+
 msgid "setup.title"
 msgstr "Мастер установки"
+
+msgid "shell.account.current"
+msgstr "Учетная запись: %(name)s"
+
+msgid "shell.account.title"
+msgstr "Учетная запись"
+
+msgid "shell.contrast.toggle"
+msgstr "Высокая контрастность"
+
+msgid "shell.density.toggle"
+msgstr "Компактное отображение"
+
+msgid "shell.language.title"
+msgstr "Язык"
+
+msgid "shell.main_navigation"
+msgstr "Основная навигация"
+
+msgid "shell.notifications.all_read"
+msgstr "Все прочитано"
+
+msgid "shell.notifications.filter_label"
+msgstr "Фильтр уведомлений"
+
+msgid "shell.notifications.group_earlier"
+msgstr "Ранее"
+
+msgid "shell.notifications.group_today"
+msgstr "Сегодня"
+
+msgid "shell.notifications.group_yesterday"
+msgstr "Вчера"
+
+msgid "shell.notifications.mark_all_read"
+msgstr "Отметить все как прочитанные"
+
+msgid "shell.notifications.mark_read"
+msgstr "Отметить как прочитанное"
+
+msgid "shell.notifications.none_unread"
+msgstr "Нет непрочитанных уведомлений."
+
+msgid "shell.notifications.tab_all"
+msgstr "Все"
+
+msgid "shell.notifications.tab_unread"
+msgstr "Непрочитанные"
+
+msgid "shell.notifications.title"
+msgstr "Уведомления"
+
+msgid "shell.notifications.unread_count"
+msgstr "Непрочитанных: %(count)s"
+
+msgid "shell.notifications.unread_prefix"
+msgstr "Не прочитано:"
+
+msgid "shell.search.kind_page"
+msgstr "Страница"
+
+msgid "shell.search.kind_plugin"
+msgstr "Плагин"
+
+msgid "shell.search.kind_service"
+msgstr "Сервис"
+
+msgid "shell.search.label"
+msgstr "Поиск страниц, плагинов и сервисов"
+
+msgid "shell.search.loading_services"
+msgstr "Загрузка сервисов…"
+
+msgid "shell.search.no_match"
+msgstr "Нет совпадений для «%(query)s»"
+
+msgid "shell.search.placeholder"
+msgstr "Поиск страниц, плагинов, сервисов…"
+
+msgid "shell.search.results"
+msgstr "Результаты поиска"
+
+msgid "shell.search.status_results"
+msgstr "Результатов: %(count)s"
+
+msgid "shell.skip_to_content"
+msgstr "Перейти к основному содержимому"
+
+msgid "shell.star_us"
+msgstr "Поставить звезду BunkerWeb на GitHub"
+
+msgid "shell.theme.system_hint"
+msgstr "как в вашей ОС"
+
+msgid "shell.theme.title"
+msgstr "Тема"
+
+msgid "shell.top_navigation"
+msgstr "Верхняя панель"
 
 msgid "status.active"
 msgstr "Активный"
@@ -7961,6 +8702,18 @@ msgstr "Далее"
 msgid "step.previous"
 msgstr "Назад"
 
+msgid "support.attach_help"
+msgstr "Экспорты для обращения в поддержку. Требуют права на запись и скрывают секретные данные."
+
+msgid "support.attach_title"
+msgstr "Диагностика для вложения"
+
+msgid "support.card.community.title"
+msgstr "Сообщество"
+
+msgid "support.card.docs.title"
+msgstr "Документация"
+
 msgid "support.card.download_logs.help"
 msgstr "Все личные данные будут анонимизированы."
 
@@ -7984,6 +8737,36 @@ msgstr "Журналы, версии плагинов, окружение и н�
 
 msgid "support.card.ui_bundle.title"
 msgstr "Диагностика Web UI"
+
+msgid "support.community.discord"
+msgstr "Discord"
+
+msgid "support.community.discord_help"
+msgstr "Обратитесь к сообществу и сопровождающим проекта."
+
+msgid "support.community.github"
+msgstr "Обращения на GitHub"
+
+msgid "support.community.github_help"
+msgstr "Сообщения об ошибках и запросы функций."
+
+msgid "support.community.reddit"
+msgstr "Reddit"
+
+msgid "support.community.reddit_help"
+msgstr "Обсуждения и объявления."
+
+msgid "support.docs.quickstart"
+msgstr "Краткое руководство"
+
+msgid "support.docs.troubleshooting"
+msgstr "Устранение неполадок"
+
+msgid "support.docs.upgrading"
+msgstr "Обновление"
+
+msgid "support.docs.web_ui"
+msgstr "Руководство по веб-интерфейсу"
 
 msgid "support.subtitle"
 msgstr "Скачать логи отладки, извлечь конфигурацию и получить помощь от команды BunkerWeb."
@@ -8152,6 +8935,63 @@ msgstr "Значение"
 
 msgid "table.header.version"
 msgstr "Версия"
+
+msgid "table_system.active_filters"
+msgstr "Фильтры, активных: %(count)s"
+
+msgid "table_system.advanced_filters"
+msgstr "Расширенные фильтры"
+
+msgid "table_system.any"
+msgstr "Любые"
+
+msgid "table_system.column_count"
+msgstr "%(visible)s из %(total)s"
+
+msgid "table_system.confirm"
+msgstr "Подтвердить"
+
+msgid "table_system.confirm_title"
+msgstr "Подтвердите действие"
+
+msgid "table_system.filter"
+msgstr "Фильтр"
+
+msgid "table_system.filters"
+msgstr "Фильтры"
+
+msgid "table_system.leave"
+msgstr "Выйти без сохранения"
+
+msgid "table_system.leave_message"
+msgstr "Несохраненные изменения будут потеряны."
+
+msgid "table_system.leave_title"
+msgstr "Выйти без сохранения?"
+
+msgid "table_system.multiple_actions"
+msgstr "Несколько действий для выбранных элементов"
+
+msgid "table_system.show_all"
+msgstr "Показать все"
+
+msgid "table_system.stay"
+msgstr "Продолжить редактирование"
+
+msgid "table_system.type_phrase"
+msgstr "Введите %(phrase)s для подтверждения"
+
+msgid "table_system.upload_hint"
+msgstr "Перетащите или нажмите для загрузки"
+
+msgid "table_system.visible_columns"
+msgstr "Видимые столбцы"
+
+msgid "tables.top.detail"
+msgstr "Подробности"
+
+msgid "tables.top.share"
+msgstr "Доля"
 
 msgid "template.editor.button_add_config"
 msgstr "Добавить конфигурацию"
@@ -8741,6 +9581,24 @@ msgstr "Обновление шаблона сообщества"
 msgid "templates.catalog.update_up_to_date"
 msgstr "Шаблон %(template)s уже соответствует каталогу"
 
+msgid "templates.features_builtin"
+msgstr "Встроенные функции"
+
+msgid "templates.features_configs"
+msgstr "Пользовательские конфигурации"
+
+msgid "templates.features_help"
+msgstr "Что предоставляет этот шаблон. Откройте шаблон, чтобы просмотреть или изменить его настройки."
+
+msgid "templates.features_of"
+msgstr "Показать функции %(name)s"
+
+msgid "templates.features_plugins"
+msgstr "Плагины"
+
+msgid "templates.features_title"
+msgstr "Функции шаблона"
+
 msgid "templates.flash.catalog_updated"
 msgstr "Шаблон %(template)s обновлён из каталога."
 
@@ -8816,6 +9674,12 @@ msgstr "Шаблон не был импортирован: размер файл
 msgid "templates.import.unreadable"
 msgstr "Шаблон не был импортирован: не удалось прочитать файл"
 
+msgid "templates.managed_by"
+msgstr "Управляется %(owner)s: изменить или удалить здесь нельзя."
+
+msgid "templates.more_actions"
+msgstr "Другие действия для %(name)s"
+
 msgid "templates.name.api"
 msgstr "API"
 
@@ -8830,6 +9694,18 @@ msgstr "Средняя безопасность"
 
 msgid "templates.name.ui"
 msgstr "Веб-интерфейс"
+
+msgid "templates.no_match"
+msgstr "Нет шаблонов, соответствующих поиску."
+
+msgid "templates.open_template"
+msgstr "Открыть шаблон"
+
+msgid "templates.read_only"
+msgstr "Только чтение"
+
+msgid "templates.search"
+msgstr "Поиск шаблонов..."
 
 msgid "templates.subtitle"
 msgstr "Переиспользуемые шаблоны конфигурации для ваших сервисов — объедините настройки, шаги и пользовательские конфигурации, затем создайте, клонируйте или удалите их."
@@ -8855,6 +9731,9 @@ msgstr "Светлая"
 msgid "theme.system"
 msgstr "Системная"
 
+msgid "threatmap.attacks_24h"
+msgstr "Заблокировано за последние 24 часа"
+
 msgid "threatmap.attacks_today"
 msgstr "Атак сегодня"
 
@@ -8863,6 +9742,21 @@ msgstr "заблокированный запрос"
 
 msgid "threatmap.blocked_requests"
 msgstr "заблокированные запросы"
+
+msgid "threatmap.col_ip"
+msgstr "IP-адрес"
+
+msgid "threatmap.col_origin"
+msgstr "Источник"
+
+msgid "threatmap.col_reason"
+msgstr "Причина"
+
+msgid "threatmap.col_target"
+msgstr "Цель"
+
+msgid "threatmap.col_time"
+msgstr "Время"
 
 msgid "threatmap.countries"
 msgstr "Страны происхождения"
@@ -8909,6 +9803,9 @@ msgstr "не определено"
 msgid "threatmap.open_live"
 msgstr "Прямой эфир"
 
+msgid "threatmap.rolling_window"
+msgstr "Скользящее окно, обновление примерно каждые 30 с"
+
 msgid "threatmap.show_less"
 msgstr "Показать только %(count)s"
 
@@ -8920,6 +9817,9 @@ msgstr "Эти данные перестали обновляться. Служ�
 
 msgid "threatmap.subtitle"
 msgstr "Откуда пришёл трафик, заблокированный вашими экземплярами за последние 24 часа."
+
+msgid "threatmap.ticker_caption"
+msgstr "Последние заблокированные запросы"
 
 msgid "threatmap.ticker_title"
 msgstr "События в реальном времени"
@@ -8942,14 +9842,26 @@ msgstr "Основные цели"
 msgid "threatmap.updated"
 msgstr "Обновлено"
 
+msgid "timings.all_phases"
+msgstr "Все фазы"
+
 msgid "timings.calls"
 msgstr "Вызовы"
+
+msgid "timings.caption"
+msgstr "Время плагинов по фазам, по умолчанию отсортировано по общему времени"
+
+msgid "timings.columns"
+msgstr "Столбцы"
 
 msgid "timings.disabled_help"
 msgstr "Установите METRICS_COLLECT_TIMINGS в yes, чтобы измерять время каждого плагина. Полная длительность запроса собирается в любом случае."
 
 msgid "timings.disabled_title"
 msgstr "Измерение времени плагинов отключено"
+
+msgid "timings.export_csv"
+msgstr "Экспорт CSV"
 
 msgid "timings.flash.error_fetching_plugin_timings"
 msgstr "Ошибка при получении времени выполнения плагинов: %(message)s"
@@ -8966,6 +9878,15 @@ msgstr "Среднее"
 msgid "timings.mean_request"
 msgstr "Средний запрос"
 
+msgid "timings.no_match"
+msgstr "Нет замеров, соответствующих этим фильтрам"
+
+msgid "timings.no_share"
+msgstr "Нет доли"
+
+msgid "timings.no_share_hint"
+msgstr "Эта фаза не выполняется один раз на запрос, поэтому у нее нет доли."
+
 msgid "timings.partial"
 msgstr "Некоторые экземпляры не ответили. Ниже учтены только ответившие."
 
@@ -8974,6 +9895,9 @@ msgstr "Фаза"
 
 msgid "timings.phases"
 msgstr "Фазы плагинов"
+
+msgid "timings.phases_sub"
+msgstr "Время, затраченное каждым плагином в каждой фазе"
 
 msgid "timings.plugin"
 msgstr "Плагин"
@@ -8984,6 +9908,9 @@ msgstr "Отчитавшиеся экземпляры"
 msgid "timings.requests_measured"
 msgstr "Измеренные запросы"
 
+msgid "timings.search_placeholder"
+msgstr "Поиск плагина или фазы…"
+
 msgid "timings.share"
 msgstr "Доля"
 
@@ -8992,6 +9919,9 @@ msgstr "Доля — это общее время плагина относит�
 
 msgid "timings.subtitle"
 msgstr "Время работы каждого плагина на каждой фазе запроса, полученное в реальном времени со всех экземпляров и объединённое."
+
+msgid "timings.toolbar"
+msgstr "Инструменты таблицы времени"
 
 msgid "timings.total"
 msgstr "Всего"
@@ -9893,6 +10823,12 @@ msgstr "Добавить сервер"
 msgid "upstreams.all"
 msgstr "Все"
 
+msgid "upstreams.all_protocols"
+msgstr "Все протоколы"
+
+msgid "upstreams.all_tls"
+msgstr "Все настройки TLS"
+
 msgid "upstreams.attach"
 msgstr "Прикрепить"
 
@@ -9911,6 +10847,16 @@ msgstr "Наименьшее количество соединений"
 msgid "upstreams.balancing.round_robin"
 msgstr "Круговое распределение (по умолчанию)"
 
+msgid "upstreams.card_subtitle"
+msgstr "Пулы серверов и сервисы, проксирующие к ним запросы"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "upstreams.count"
+msgid_plural "upstreams.count_plural"
+msgstr[0] "%(count)s апстрим"
+msgstr[1] "Апстримов: %(count)s"
+msgstr[2] "Апстримов: %(count)s"
+
 msgid "upstreams.create"
 msgstr "Создать upstream"
 
@@ -9922,6 +10868,9 @@ msgstr "Удалить upstream %(name)s?"
 
 msgid "upstreams.delete_help"
 msgstr "Upstream, прикрепленный к сервису, нельзя удалить. Сначала отсоедините его."
+
+msgid "upstreams.detach_shared"
+msgstr "Этот апстрим общий. Отсоединение удаляет его только из этого сервиса и пути. Остальные подключения сохраняются."
 
 msgid "upstreams.edit"
 msgstr "Редактировать upstream"
@@ -10013,11 +10962,45 @@ msgstr "Поддержание соединения"
 msgid "upstreams.keepalive_help"
 msgstr "Число бездействующих соединений, сохраняемых каждым рабочим процессом. Только для HTTP и gRPC; оставьте поле пустым, чтобы отключить."
 
+msgid "upstreams.keepalive_off"
+msgstr "Отключено"
+
+msgid "upstreams.kpi_loaded_only"
+msgstr "Среди первых %(count)s загруженных"
+
+msgid "upstreams.kpi_not_attached"
+msgstr "Не подключено: %(count)s"
+
+msgid "upstreams.kpi_roles"
+msgstr "Основных: %(primary)s · резервных: %(backup)s · отключенных: %(down)s (в конфигурации)"
+
+msgid "upstreams.kpi_services"
+msgstr "Подключенные сервисы"
+
+msgid "upstreams.kpi_services_caption"
+msgstr "Сервисы, проксирующие запросы к пулу"
+
+msgid "upstreams.kpi_tls"
+msgstr "TLS к бэкенду"
+
+msgid "upstreams.kpi_tls_caption"
+msgstr "Пулы, настроенные на связь со своими серверами по TLS"
+
 msgid "upstreams.match_path"
 msgstr "Путь обратного прокси"
 
 msgid "upstreams.match_path_help"
 msgstr "Место, куда обращаются выбранные сервисы для доступа к этому пулу. Игнорируется для пула потоков, который использует весь сервис."
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "upstreams.members_copy"
+msgid_plural "upstreams.members_copy_plural"
+msgstr[0] "%(name)s: %(count)s сервер"
+msgstr[1] "%(name)s: серверов %(count)s"
+msgstr[2] "%(name)s: серверов %(count)s"
+
+msgid "upstreams.members_title"
+msgstr "Серверы этого апстрима"
 
 msgid "upstreams.method"
 msgstr "Балансировка нагрузки"
@@ -10027,6 +11010,9 @@ msgstr "Только буквы, цифры, дефисы и подчеркив�
 
 msgid "upstreams.new"
 msgstr "Новый upstream"
+
+msgid "upstreams.no_match"
+msgstr "Нет апстримов, соответствующих этим фильтрам."
 
 msgid "upstreams.not_attached"
 msgstr "Не привязан"
@@ -10082,11 +11068,40 @@ msgstr "Вес"
 msgid "upstreams.servers"
 msgstr "Серверы"
 
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "upstreams.servers_count"
+msgid_plural "upstreams.servers_count_plural"
+msgstr[0] "%(count)s сервер"
+msgstr[1] "Серверов: %(count)s"
+msgstr[2] "Серверов: %(count)s"
+
+msgid "upstreams.services_copy"
+msgstr "%(name)s: %(servers)s"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "upstreams.services_count"
+msgid_plural "upstreams.services_count_plural"
+msgstr[0] "%(count)s сервис"
+msgstr[1] "Сервисов: %(count)s"
+msgstr[2] "Сервисов: %(count)s"
+
 msgid "upstreams.services_help"
 msgstr "Используйте Ctrl или Command для выбора нескольких сервисов. Upstream можно привязать позже."
 
 msgid "upstreams.services_hidden"
 msgstr "Скрыто сервисов: %(count)s. Апстрим %(protocol)s можно привязать только к сервису соответствующего типа."
+
+msgid "upstreams.services_title"
+msgstr "Сервисы, использующие этот апстрим"
+
+msgid "upstreams.tls"
+msgstr "TLS к бэкенду"
+
+msgid "upstreams.tls_no"
+msgstr "Без шифрования"
+
+msgid "upstreams.tls_yes"
+msgstr "TLS"
 
 msgid "upstreams.truncated"
 msgstr "Отображаются только первые 500 апстримов. Чтобы получить полный результат, сузьте список через API."
@@ -10166,11 +11181,26 @@ msgstr "ZeroSSL требует либо email, либо API-ключ ZeroSSL."
 msgid "web_cache.available"
 msgstr "Доступно"
 
+msgid "web_cache.available_tip"
+msgstr "Каталог кэша существует на этом экземпляре. Используется ли он сервисом, показано в разделе Включение для сервисов."
+
 msgid "web_cache.cache_state"
 msgstr "Состояние"
 
 msgid "web_cache.cached_files"
 msgstr "Кэшированные файлы"
+
+msgid "web_cache.compact"
+msgstr "Компактный вид"
+
+msgid "web_cache.counters_window"
+msgstr "С момента перезапуска каждого экземпляра"
+
+msgid "web_cache.counters_window_help"
+msgstr "Счетчики считают с момента последнего перезапуска каждого экземпляра, а не за фиксированный период."
+
+msgid "web_cache.danger_zone"
+msgstr "Опасная зона"
 
 msgid "web_cache.deployment"
 msgstr "Развертывание"
@@ -10223,11 +11253,20 @@ msgstr "Процент попадания"
 msgid "web_cache.instance"
 msgstr "Инстанс"
 
+msgid "web_cache.invalidate"
+msgstr "Сделать недействительным"
+
 msgid "web_cache.metrics"
 msgstr "Агрегированное распределение попаданий/промахов"
 
 msgid "web_cache.metrics_scope"
 msgstr "Счетчики агрегируются по инстансу для всех служб с включенным кэшированием."
+
+msgid "web_cache.no_counters"
+msgstr "Этот экземпляр еще не зарегистрировал ни одного запроса с кэшированием."
+
+msgid "web_cache.no_requests_for"
+msgstr "Нет запросов для:"
 
 msgid "web_cache.not_reporting"
 msgstr "Не отображается"
@@ -10238,6 +11277,9 @@ msgstr "Путь"
 msgid "web_cache.purge"
 msgstr "Очистить кэшированные ответы"
 
+msgid "web_cache.purge_a_url"
+msgstr "Очистить URL"
+
 msgid "web_cache.purge_all"
 msgstr "Очистить все"
 
@@ -10246,6 +11288,9 @@ msgstr "Это удаляет все кэшированные ответы дл�
 
 msgid "web_cache.purge_all_confirm_title"
 msgstr "Очистить весь кэш?"
+
+msgid "web_cache.purge_all_phrase"
+msgstr "удалить все"
 
 msgid "web_cache.purge_help"
 msgstr "Действия очистки выполняются немедленно на доступных экземплярах. Недоступные экземпляры пропускаются, и никаких действий не планируется."
@@ -10268,6 +11313,9 @@ msgstr "https://www.example.com/asset.js"
 msgid "web_cache.reporting_instances"
 msgstr "Отчитавшиеся экземпляры"
 
+msgid "web_cache.server_side_note"
+msgstr "Только серверный кэш. Эта страница управляет кэшем обратного прокси на каждом экземпляре BunkerWeb. Ответы, уже сохраненные в браузерах посетителей, не затрагиваются."
+
 msgid "web_cache.service"
 msgstr "Сервис"
 
@@ -10276,6 +11324,27 @@ msgstr "Включение сервиса"
 
 msgid "web_cache.status"
 msgstr "Хранилище экземпляра"
+
+msgid "web_cache.status_desc.bypass"
+msgstr "Кэширование пропущено для этого запроса"
+
+msgid "web_cache.status_desc.expired"
+msgstr "Срок действия истек: повторно получено от апстрима"
+
+msgid "web_cache.status_desc.hit"
+msgstr "Ответ выдан непосредственно из кэша"
+
+msgid "web_cache.status_desc.miss"
+msgstr "Нет в кэше: получено от апстрима и сохранено"
+
+msgid "web_cache.status_desc.revalidated"
+msgstr "Условный повторный запрос: апстрим подтвердил актуальность ответа"
+
+msgid "web_cache.status_desc.stale"
+msgstr "Выдан устаревший ответ из-за сбоя апстрима"
+
+msgid "web_cache.status_desc.updating"
+msgstr "Выдан устаревший ответ, пока шло обновление"
 
 msgid "web_cache.subtitle"
 msgstr "Статус кэша обратного прокси, агрегированные метрики частоты попадания и немедленные средства очистки."
@@ -10318,6 +11387,18 @@ msgstr "Поставщик антибот-проверки"
 
 msgid "workflows.act_redirect"
 msgstr "Перенаправить"
+
+msgid "workflows.act_settings_block"
+msgstr "Настройки блокировки"
+
+msgid "workflows.act_settings_challenge"
+msgstr "Настройки проверки"
+
+msgid "workflows.act_settings_generic"
+msgstr "Настройки действия"
+
+msgid "workflows.act_settings_redirect"
+msgstr "Настройки перенаправления"
 
 msgid "workflows.act_status"
 msgstr "Код отказа"
@@ -10445,6 +11526,9 @@ msgstr "Проблем валидации в этом правиле: %(count)s"
 msgid "workflows.aria.ruleName"
 msgstr "Название правила %(n)s"
 
+msgid "workflows.aria.ruleTools"
+msgstr "Действия для правила %(n)s"
+
 msgid "workflows.aria.terminalAction"
 msgstr "Завершающее действие"
 
@@ -10561,6 +11645,12 @@ msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "Удалить это правило? Все правила ниже поднимутся на одну позицию."
+
+msgid "workflows.conseq.skip"
+msgstr "Никогда не выполняется"
+
+msgid "workflows.conseq.stop"
+msgstr "Останавливает цепочку"
 
 msgid "workflows.copySuffix"
 msgstr " (копия)"
@@ -10709,6 +11799,21 @@ msgstr "порог совпадения"
 msgid "workflows.gate.help"
 msgstr "Счёт ведётся отдельно для каждого IP клиента. Ниже порога правило вообще не срабатывает, и проверка переходит к следующему правилу; само по себе оно не ограничивает частоту."
 
+msgid "workflows.inspector.apply"
+msgstr "Применить"
+
+msgid "workflows.inspector.apply_title"
+msgstr "Применить: оставить изменения в черновике. Они сохраняются только кнопкой Сохранить на странице"
+
+msgid "workflows.inspector.cancel"
+msgstr "Отмена"
+
+msgid "workflows.inspector.cancel_title"
+msgstr "Отмена: восстановить правило в состоянии на момент открытия"
+
+msgid "workflows.inspector.cancelled"
+msgstr "Изменения правила %(n)s отменены. Правило восстановлено в состоянии на момент открытия."
+
 msgid "workflows.legend.fall"
 msgstr "При несовпадении переход к следующему правилу"
 
@@ -10745,8 +11850,14 @@ msgstr "Создать копию ниже"
 msgid "workflows.menu.enable"
 msgstr "Включить правило"
 
+msgid "workflows.menu.header"
+msgstr "Действия с правилом"
+
 msgid "workflows.menu.moveTo"
 msgstr "Переместить на позицию %(n)s"
+
+msgid "workflows.menu.order"
+msgstr "Порядок"
 
 msgid "workflows.menu.staysAt"
 msgstr "Остаётся на позиции %(n)s"
@@ -10778,6 +11889,81 @@ msgstr "Ещё не проверено"
 msgid "workflows.order_help"
 msgstr "Правила оцениваются в порядке, и первое, которое совпадает, выигрывает. Правило с порогом скорости срабатывает только после превышения порога, поэтому более низкое правило может перехватывать трафик ниже него."
 
+msgid "workflows.port.active_rules"
+msgstr "Активных: %(count)s"
+
+msgid "workflows.port.attachment"
+msgstr "Подключение"
+
+msgid "workflows.port.attachment_any"
+msgstr "Любое"
+
+msgid "workflows.port.attachment_attached"
+msgstr "Подключён"
+
+msgid "workflows.port.created"
+msgstr "Создано"
+
+msgid "workflows.port.csv"
+msgstr "CSV"
+
+msgid "workflows.port.detach_before_delete"
+msgstr "Перед удалением отсоедините этот рабочий процесс от всех сервисов. При удалении сервисы никогда не отсоединяются автоматически."
+
+msgid "workflows.port.details"
+msgstr "Сведения"
+
+msgid "workflows.port.excel"
+msgstr "Excel"
+
+msgid "workflows.port.export_definitions"
+msgstr "Выбранные определения (JSON)"
+
+msgid "workflows.port.export_done"
+msgstr "Выбранные определения экспортированы. Возможность повторного импорта этого файла не гарантируется."
+
+msgid "workflows.port.export_failed"
+msgstr "Экспорт не удался. Файл не скачан."
+
+msgid "workflows.port.export_loading"
+msgstr "Чтение выбранных определений рабочих процессов…"
+
+msgid "workflows.port.export_scope"
+msgstr "Экспорт таблицы включает отфильтрованные строки и видимые столбцы. Экспорт JSON включает только выбранные канонические определения рабочих процессов с id в качестве ключей. Возможность повторного импорта не гарантируется."
+
+msgid "workflows.port.list_subtitle"
+msgstr "Правила и подключенные сервисы каждого рабочего процесса"
+
+msgid "workflows.port.more"
+msgstr "Другие действия для %(name)s"
+
+msgid "workflows.port.row_details"
+msgstr "Сведения о рабочем процессе"
+
+msgid "workflows.port.select_workflows"
+msgstr "Выбрать рабочие процессы"
+
+msgid "workflows.port.services_count"
+msgstr "Сервисы: %(count)s"
+
+msgid "workflows.port.services_help"
+msgstr "Отключение удаляет этот рабочий процесс только из данного сервиса. Сам рабочий процесс и его правила сохраняются."
+
+msgid "workflows.port.services_none"
+msgstr "Этот рабочий процесс не подключён ни к одному сервису."
+
+msgid "workflows.port.services_open"
+msgstr "Показать сервисы, подключённые к %(name)s"
+
+msgid "workflows.port.services_title"
+msgstr "Сервисы, подключённые к %(name)s"
+
+msgid "workflows.port.total_rules"
+msgstr "Всего: %(count)s"
+
+msgid "workflows.port.updated"
+msgstr "Обновлено"
+
 msgid "workflows.readonly"
 msgstr "База данных только для чтения. Рабочие процессы можно просматривать, но не изменять."
 
@@ -10792,6 +11978,9 @@ msgstr "Рабочий процесс безопасности «%(workflow)s»:
 
 msgid "workflows.reason.sentence_redirect"
 msgstr "Рабочий процесс безопасности «%(workflow)s»: запрос перенаправлен"
+
+msgid "workflows.regex_help"
+msgstr "Действуют два отдельных ограничения regex. При записи: рабочие процессы, подключенные к одному сервису, могут содержать суммарно не более 50 условий regex. Сохранение или подключение сверх лимита отклоняется. При выполнении: каждый экземпляр компилирует не более WORKFLOWS_REGEX_BUDGET разных регулярных выражений (по умолчанию 512, общих для всех рабочих процессов). Выражение сверх этого лимита не проверяется и возвращает UNKNOWN, поэтому его правило не может совпасть."
 
 msgid "workflows.rule.disabled"
 msgstr "Отключено"
@@ -10903,6 +12092,108 @@ msgstr "Вид списка. Правила выполняются сверху 
 
 msgid "workflows.search"
 msgstr "Поиск по имени или описанию..."
+
+msgid "workflows.shell.config_needs_workflow"
+msgstr "Создайте рабочий процесс, чтобы открыть его конфигурацию"
+
+msgid "workflows.shell.draft_discard"
+msgstr "Отменить изменения"
+
+msgid "workflows.shell.draft_restored"
+msgstr "Несохраненные изменения этого рабочего процесса восстановлены. Сохраните их для применения или переключите рабочий процесс, чтобы их отбросить."
+
+msgid "workflows.shell.draft_save"
+msgstr "Сохранить и продолжить"
+
+msgid "workflows.shell.draft_save_failed"
+msgstr "Не удалось сохранить рабочий процесс. Ничего не было отброшено."
+
+msgid "workflows.shell.draft_stale"
+msgstr "После создания черновика этот рабочий процесс был сохранен в другом месте, поэтому черновик отброшен."
+
+msgid "workflows.shell.draft_switch_message"
+msgstr "При открытии %(target)s в %(name)s останутся несохраненные изменения правил. Можно открыть только один черновик: сохраните его, отмените изменения или останьтесь здесь."
+
+msgid "workflows.shell.draft_title"
+msgstr "Несохраненные изменения в %(name)s"
+
+msgid "workflows.shell.pick_label"
+msgstr "Рабочий процесс"
+
+msgid "workflows.shell.read_only"
+msgstr "Только чтение"
+
+msgid "workflows.shell.tab_config"
+msgstr "Конфигурация"
+
+msgid "workflows.shell.tab_overview"
+msgstr "Обзор"
+
+msgid "workflows.shell.tab_unsaved"
+msgstr "Не сохранено"
+
+msgid "workflows.shell.tabs_label"
+msgstr "Представление рабочих процессов"
+
+msgid "workflows.shell.view_label"
+msgstr "Вид"
+
+msgid "workflows.sum.block"
+msgstr "заблокировать запрос"
+
+msgid "workflows.sum.blockStatus"
+msgstr "заблокировать запрос с кодом %(code)s"
+
+msgid "workflows.sum.challenge"
+msgstr "показать проверку %(provider)s"
+
+msgid "workflows.sum.crowdsec_remediation"
+msgstr "устранение CrowdSec"
+
+msgid "workflows.sum.crowdsec_source"
+msgstr "источник CrowdSec"
+
+msgid "workflows.sum.every"
+msgstr "поступает любой запрос"
+
+msgid "workflows.sum.gate"
+msgstr "число запросов с одного IP превышает %(count)s за %(window)sс"
+
+msgid "workflows.sum.group_asn"
+msgstr "ASN входит в группу %(name)s"
+
+msgid "workflows.sum.group_country"
+msgstr "страна входит в группу %(name)s"
+
+msgid "workflows.sum.group_ip"
+msgstr "IP входит в группу %(name)s"
+
+msgid "workflows.sum.isOne"
+msgstr "%(label)s имеет значение %(value)s"
+
+msgid "workflows.sum.isOneOf"
+msgstr "%(label)s имеет одно из значений %(values)s"
+
+msgid "workflows.sum.leaf.asn"
+msgstr "ASN"
+
+msgid "workflows.sum.leaf.country"
+msgstr "страна"
+
+msgid "workflows.sum.leaf.ip"
+msgstr "IP"
+
+msgid "workflows.sum.leaf.method"
+msgstr "метод"
+
+msgid "workflows.sum.not"
+msgstr "условие «%(what)s» не выполнено"
+
+msgid "workflows.sum.redirect"
+msgstr "перенаправить на %(url)s (%(code)s)"
+
+msgid "workflows.sum.uri"
+msgstr "URI %(match)s %(value)s"
 
 msgid "workflows.test.asn"
 msgstr "ASN"
@@ -11074,6 +12365,78 @@ msgstr "Запросы"
 
 msgid "workflows.threshold_window"
 msgstr "секунд"
+
+msgid "workflows.toolbar.actions"
+msgstr "Действия рабочего процесса"
+
+msgid "workflows.toolbar.any_action"
+msgstr "Любое действие"
+
+msgid "workflows.toolbar.any_state"
+msgstr "Любое состояние"
+
+msgid "workflows.toolbar.back_to_top"
+msgstr "Наверх"
+
+msgid "workflows.toolbar.collapse_all"
+msgstr "Свернуть все"
+
+msgid "workflows.toolbar.detailed"
+msgstr "Подробный"
+
+msgid "workflows.toolbar.display"
+msgstr "Отображение правил"
+
+msgid "workflows.toolbar.expand_all"
+msgstr "Развернуть все"
+
+msgid "workflows.toolbar.filter_action"
+msgstr "Действие"
+
+msgid "workflows.toolbar.filter_name"
+msgstr "Название"
+
+msgid "workflows.toolbar.filter_name_placeholder"
+msgstr "Поиск по названию правила…"
+
+msgid "workflows.toolbar.filter_rules"
+msgstr "Фильтр правил"
+
+msgid "workflows.toolbar.filter_state"
+msgstr "Состояние"
+
+msgid "workflows.toolbar.filters"
+msgstr "Фильтры"
+
+msgid "workflows.toolbar.full_height"
+msgstr "Полная высота"
+
+msgid "workflows.toolbar.limit_height"
+msgstr "Ограничить высоту"
+
+msgid "workflows.toolbar.n_of_m"
+msgstr "Правил: %(shown)s из %(total)s"
+
+msgid "workflows.toolbar.no_match"
+msgstr "Нет правил, соответствующих этим фильтрам"
+
+msgid "workflows.toolbar.reorder_paused"
+msgstr "Изменение порядка приостановлено, пока фильтр скрывает правила."
+
+msgid "workflows.toolbar.reset"
+msgstr "Сбросить"
+
+msgid "workflows.toolbar.simplified"
+msgstr "Упрощенный"
+
+msgid "workflows.toolbar.state_off"
+msgstr "Отключено"
+
+msgid "workflows.toolbar.state_on"
+msgstr "Включено"
+
+msgid "workflows.toolbar.view"
+msgstr "Вид порядка правил"
 
 msgid "workflows.tree.addCondition"
 msgstr "Условие"

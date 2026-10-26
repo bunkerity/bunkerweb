@@ -159,10 +159,17 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
         ("modal.body.confirm_templates_deletion_alert", "modal.body.confirm_templates_deletion_alert_plural"),
         ("modal.body.delete_confirmation_alert", "modal.body.delete_confirmation_alert_plural"),
         ("modal.body.unban_confirmation_alert", "modal.body.unban_confirmation_alert_plural"),
+        ("redirects.count", "redirects.count_plural"),
+        ("redirects.services_count", "redirects.services_count_plural"),
         ("resource_groups.meta_kinds", "resource_groups.meta_kinds_plural"),
         ("resource_groups.meta_usages", "resource_groups.meta_usages_plural"),
         ("resource_groups.meta_values", "resource_groups.meta_values_plural"),
+        ("resource_groups.plugins_count", "resource_groups.plugins_count_plural"),
         ("resource_groups.reference_count", "resource_groups.reference_count_plural"),
+        ("upstreams.count", "upstreams.count_plural"),
+        ("upstreams.members_copy", "upstreams.members_copy_plural"),
+        ("upstreams.servers_count", "upstreams.servers_count_plural"),
+        ("upstreams.services_count", "upstreams.services_count_plural"),
     }
     # A deliberate tripwire, not a fact about gettext: the number only moves when someone adds or
     # removes keys, and it forces them to look at what they added. Was 2433, then 2471 (the 32
@@ -205,7 +212,13 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # 3,703 adds the 14 `bans.kind.*`, `bans.crowdsec.*` and `bans.flash.unban_crowdsec_*` keys of the
     # CrowdSec lease unban on the bans page (W25-X1F).
     # 3,704 adds `setup.flash.hostname_empty`, the setup wizard's blank-hostname refusal (W26-U1).
-    assert len(_catalog("en")) == len(english) - len(pairs) == 3704
+    # 4,113 adds the 416 keys of the 2026-10-23 design port (shell, components, page lanes, workflows
+    # editor) and folds 7 new plural pairs (`redirects.count`, `redirects.services_count`, `upstreams.count`,
+    # `upstreams.servers_count`, `upstreams.services_count`, `upstreams.members_copy`,
+    # `resource_groups.plugins_count`): 4,130 JSON leaves minus 17 pairs. 4,149 adds the 36 workflows
+    # editor keys of the port's part 3 (rule menu, consequence badges, whole-sentence rule summaries,
+    # action settings titles, the overview attachment filter and services dialog).
+    assert len(_catalog("en")) == len(english) - len(pairs) == 4149
 
 
 @pytest.mark.parametrize("code", CODES)

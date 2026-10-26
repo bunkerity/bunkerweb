@@ -12,7 +12,26 @@
     "socials": "소셜 미디어",
     "tagline": "단순함 속에 담긴 강력한 보안",
     "title": "BunkerWeb 정보",
-    "version": "버전: {{version}}"
+    "version": "버전: {{version}}",
+    "releases": {
+      "title": "최근 릴리스",
+      "view_all": "모두 보기"
+    },
+    "environment": {
+      "title": "환경",
+      "copy": "진단 정보 복사",
+      "copied": "복사됨",
+      "help": "웹 UI 호스트와 제어 영역에서 읽은 정보입니다. 변수, 라이선스 키 또는 데이터베이스 주소는 표시하지 않습니다.",
+      "scope_ui_host": "웹 UI 호스트",
+      "scope_control_plane": "제어 영역",
+      "scope_instances": "인스턴스",
+      "integration": "통합",
+      "platform": "플랫폼",
+      "bunkerweb": "BunkerWeb",
+      "database": "데이터베이스 서버",
+      "registered": "등록됨",
+      "instances_up": "전체 {{total}}개 중 {{up}}개 실행 중"
+    }
   },
   "accordion": {
     "body": {
@@ -123,6 +142,10 @@
         "expiring": "≤ 1시간 후 만료",
         "expiring_caption": "자동 순환",
         "permanent": "영구 차단"
+      },
+      "reasons": {
+        "head_reason": "사유",
+        "meta": "활성 차단 {{count}}개"
       }
     },
     "flash": {
@@ -175,6 +198,30 @@
         "changed": "{{ip}}: 요청 중에 차단이 갱신되거나 교체되어 아무것도 제거되지 않았습니다. 다시 차단 해제하세요.",
         "partial": "{{ip}}: 일부만 완료되었습니다. 차단 해제를 다시 실행해 마무리하세요: {{details}}"
       }
+    },
+    "page": {
+      "clear_all": "모두 해제",
+      "import": "가져오기"
+    },
+    "clear_all": {
+      "title": "모든 차단 해제",
+      "message": "모든 서비스와 인스턴스의 차단을 모두 제거합니다. CrowdSec 차단은 해당 행에서 해제해야 합니다.",
+      "phrase": "모두 해제",
+      "confirm": "모든 차단 해제"
+    },
+    "import": {
+      "confirm_title": "차단 가져오기",
+      "confirm_button": "가져오기",
+      "empty": "이 파일에서 유효한 차단을 찾을 수 없습니다. 한 줄에 차단 하나를 IP[,scope[,duration[,reason]]] 형식으로 입력하거나 JSON 목록을 사용하세요.",
+      "too_many": "이 파일에는 {{max}}개를 초과하는 차단이 있습니다. 파일을 나누어 가져오세요.",
+      "read_failed": "파일을 읽을 수 없습니다.",
+      "confirm_message": "이 파일에서 찾은 차단: {{count}}개. 가져오시겠습니까?",
+      "confirm_skipped": "읽을 수 없어 무시한 줄: {{skipped}}개."
+    },
+    "live": {
+      "on": "자동 새로고침 켜짐, 10초마다 갱신합니다.",
+      "off": "자동 새로고침이 일시 중지되었습니다.",
+      "updated": "차단 갱신: 신규 {{added}}개, 만료 {{removed}}개."
     }
   },
   "breadcrumb": {
@@ -425,6 +472,39 @@
       "missing_configs_parameter_configs_delete": "/configs/delete의 configs 매개변수가 없습니다.",
       "missing_convert_parameter_configs_convert": "/configs/convert의 convert_to 매개변수가 없습니다.",
       "missing_configs_parameter_configs_convert": "/configs/convert의 configs 매개변수가 없습니다."
+    },
+    "console": {
+      "title": "사용자 정의 설정",
+      "new": "새 설정",
+      "edit": "설정 편집",
+      "view": "설정 보기",
+      "clone": "설정 복제",
+      "files": "파일",
+      "types": "설정 유형",
+      "all_scopes": "모든 범위",
+      "global_only": "전역만",
+      "service_only": "서비스만",
+      "global_legend": "전역 설정은 모든 서비스에 적용됩니다.",
+      "service_legend": "서비스 설정은 하나의 서비스에만 적용됩니다.",
+      "select_file": "내용을 미리 보려면 파일을 선택하세요.",
+      "no_files": "이 필터와 일치하는 설정이 없습니다.",
+      "full_view": "전체 보기",
+      "restore_view": "보기 복원",
+      "download": "다운로드",
+      "lint": "구문 검사",
+      "lint_help": "클라이언트 측 힌트만 제공합니다. 배포 전에 nginx -t로 검증하세요. 여러 줄로 된 지시문은 경고를 발생시킬 수 있습니다.",
+      "lint_clean": "클라이언트 측 검사에서 문제가 발견되지 않았습니다.",
+      "lint_warnings": "클라이언트 측 검사에서 경고 {{count}}개를 발견했습니다. 편집기 주석을 확인하세요.",
+      "lint_skipped": "ModSecurity 및 CRS 설정에서는 NGINX 구문 검사를 사용할 수 없습니다.",
+      "lint_semicolon": "지시문 끝에 세미콜론이 누락되었을 수 있습니다.",
+      "lint_unexpected_brace": "예기치 않은 닫는 중괄호입니다.",
+      "lint_brace": "여는 중괄호가 닫히지 않았습니다.",
+      "lint_quote": "따옴표가 닫히지 않았습니다.",
+      "content": "설정 내용 (읽기 전용)",
+      "template_name_locked": "템플릿 기반 사용자 정의 설정의 이름은 변경할 수 없습니다.",
+      "name_help": "문자, 숫자, 하이픈 또는 밑줄을 사용하세요. 디스크에 저장할 때 .conf 접미사가 추가됩니다.",
+      "editor_help": "NGINX 또는 ModSecurity 내용을 편집하세요. Ctrl+S 또는 Command+S로 저장합니다.",
+      "editor_title": "설정 내용"
     }
   },
   "country": {
@@ -764,6 +844,11 @@
       "top_blocked_ips": {
         "most_blocked": "최다 차단 IP",
         "title": "최다 차단 IP Top 10"
+      },
+      "legend": {
+        "item": "항목",
+        "count": "개수",
+        "share": "비율"
       }
     },
     "map": {
@@ -869,6 +954,12 @@
         "page_other": "이 페이지의 템플릿 {{count}}개가 모두 선택되었습니다.",
         "all_filtered": "일치하는 템플릿 {{count}}개 모두 선택",
         "all_done": "일치하는 템플릿 {{count}}개가 모두 선택되었습니다."
+      },
+      "workflows": {
+        "page_one": "이 페이지의 워크플로우 {{count}}개가 선택되었습니다.",
+        "page_other": "이 페이지의 워크플로우 {{count}}개가 모두 선택되었습니다.",
+        "all_filtered": "일치하는 워크플로우 {{count}}개 모두 선택",
+        "all_done": "일치하는 워크플로우 {{count}}개가 모두 선택되었습니다."
       }
     },
     "bulk_select_clear": "선택 지우기",
@@ -988,7 +1079,15 @@
     "zero_records_plugins": "일치하는 플러그인이 없습니다.",
     "zero_records_reports": "일치하는 보고서가 없습니다.",
     "zero_records_services": "일치하는 서비스가 없습니다.",
-    "zero_records_templates": "일치하는 템플릿이 없습니다."
+    "zero_records_templates": "일치하는 템플릿이 없습니다.",
+    "info_empty_workflows": "워크플로우가 없습니다.",
+    "info_filtered_workflows": "(전체 _MAX_개의 워크플로우에서 필터링됨)",
+    "info_workflows": "{{total}}개의 워크플로우 중 {{start}}~{{end}} 표시 중",
+    "length_menu_workflows": "_MENU_개씩 보기 (워크플로우)",
+    "select_rows_workflows_0": "선택된 워크플로우 없음",
+    "select_rows_workflows_1": "1개의 워크플로우 선택됨",
+    "select_rows_workflows_plural": "%d개의 워크플로우 선택됨",
+    "zero_records_workflows": "일치하는 워크플로우가 없습니다."
   },
   "dev_log": {
     "copy_failed": "텍스트 복사 실패:",
@@ -1244,7 +1343,9 @@
     "history": {
       "end_date": "종료일",
       "start_date": "시작일",
-      "success": "성공"
+      "success": "성공",
+      "duration": "소요 시간",
+      "error": "오류"
     }
   },
   "jobs": {
@@ -1262,6 +1363,10 @@
       "no_jobs_selected": "선택된 작업이 없습니다.",
       "error_fetching_jobs": "작업을 가져오는 중 오류 발생: {{message}}",
       "missing_jobs_parameter_jobs_run": "/jobs/run의 jobs 매개변수가 없습니다."
+    },
+    "card": {
+      "title": "예약된 작업",
+      "sub": "스케줄러가 각 작업의 주기에 따라 실행하거나 요청 시 실행합니다"
     }
   },
   "legend": {
@@ -1574,7 +1679,12 @@
     "system": "시스템",
     "edition_community": "커뮤니티",
     "edition_pro": "Pro",
-    "crowdsec": "CrowdSec"
+    "crowdsec": "CrowdSec",
+    "profile": "프로필",
+    "plugin_insights": "플러그인 정보",
+    "plugins_overview": "개요",
+    "filter_plugins": "플러그인 필터링…",
+    "no_plugin_match": "일치하는 플러그인 없음"
   },
   "news": {
     "image_alt": "소식 이미지",
@@ -1650,6 +1760,14 @@
         "no_content": "이 플러그인은 내장 페이지를 제공하지 않습니다.",
         "restricted_to_admins": "이 플러그인은 자체 페이지를 제공하며, 플러그인 코드를 실행합니다. 관리자만 로드할 수 있습니다.",
         "dedicated_page_unavailable": "이 플러그인은 아직 로드되지 않은 전용 페이지에서 관리됩니다. 접근하려면 웹 UI를 다시 시작하세요."
+      },
+      "empty": {
+        "metrics_title": "메트릭이 꺼져 있습니다",
+        "restricted_title": "관리자 전용",
+        "no_page_title": "표시할 페이지가 없습니다",
+        "no_content_title": "아직 표시할 내용이 없습니다",
+        "global_settings": "전역 세팅",
+        "deactivated_heading": "이 플러그인은 어디에서도 사용되지 않습니다"
       }
     },
     "type": {
@@ -1727,7 +1845,10 @@
       "tab_all": "전체",
       "tab_community": "커뮤니티",
       "tab_disabled": "비활성화됨",
-      "tab_enabled": "활성화됨"
+      "tab_enabled": "활성화됨",
+      "always_on_badge": "항상 켜짐",
+      "always_on_tip": "BunkerWeb에 필요한 핵심 플러그인입니다. 설정은 가능하지만 비활성화할 수는 없습니다.",
+      "filter_label": "플러그인 필터링"
     },
     "multivalue": {
       "more_value": "더 보기",
@@ -1763,6 +1884,15 @@
       "flash": {
         "version_unreadable": "BunkerWeb 버전({{current}})을 읽을 수 없어 {{id}}의 호환성을 확인할 수 없습니다. 아무것도 설치되지 않았습니다"
       }
+    },
+    "tier": {
+      "core": "핵심 플러그인",
+      "pro": "PRO 플러그인",
+      "community": "커뮤니티 플러그인"
+    },
+    "card": {
+      "configure": "{{name}} 설정",
+      "metrics": "{{name}} 메트릭"
     }
   },
   "pro": {
@@ -1886,7 +2016,9 @@
       "last_activity": "마지막 활동",
       "os": "운영 체제",
       "title": "세션",
-      "wipe_help": "계정의 모든 활성 세션을 종료합니다. 여기에서 계속 로그인됩니다."
+      "wipe_help": "계정의 모든 활성 세션을 종료합니다. 여기에서 계속 로그인됩니다.",
+      "recent_title": "최근 세션",
+      "load_error": "데이터를 불러오는 중 오류가 발생했습니다. 다시 시도하세요."
     },
     "subtitle": "계정, 보안 및 활성 세션을 관리합니다.",
     "tab": {
@@ -1937,7 +2069,8 @@
       "missing_current_password_parameter_profile_totp_3": "/profile/totp-enable의 current password 매개변수가 없습니다.",
       "missing_current_password_parameter_profile_totp_2": "/profile/totp-disable의 current password 매개변수가 없습니다.",
       "missing_current_password_parameter_profile_totp": "/profile/totp-refresh의 current password 매개변수가 없습니다."
-    }
+    },
+    "title": "내 프로필"
   },
   "range_picker": {
     "1h": "지난 1시간",
@@ -2077,7 +2210,19 @@
     "upload_invalid": "유효한 공개 인증서와 해당되는 개인 키를 선택합니다.",
     "valid_days": "일 수",
     "valid_from": "유효 시작일",
-    "valid_to": "유효 종료일"
+    "valid_to": "유효 종료일",
+    "renew_due_short": "갱신 필요",
+    "select_all": "모든 인증서 선택",
+    "issuers_meta": "인증서 {{count}}개",
+    "bulk": {
+      "renew": "자체 서명 인증서 갱신",
+      "download": "체인 다운로드",
+      "delete": "선택 항목 삭제",
+      "none_eligible": "선택한 인증서 중 이 작업을 수행할 수 있는 인증서가 없습니다.",
+      "confirm_renew": "갱신할 자체 서명 인증서: {{count}}개. 계속하시겠습니까?",
+      "confirm_delete": "삭제할 인증서: {{count}}개. 이 작업은 취소할 수 없습니다. 계속하시겠습니까?",
+      "skipped": "이 작업을 수행할 수 없어 건너뛴 선택 인증서: {{skipped}}개."
+    }
   },
   "crowdsec": {
     "reason": {
@@ -2661,6 +2806,20 @@
       "source_appsec": "AppSec 검사",
       "source_failure_policy": "AppSec 실패 정책",
       "technical_details": "기술 세부 정보"
+    },
+    "live": {
+      "on": "자동 새로고침 켜짐, 10초마다 갱신합니다.",
+      "off": "자동 새로고침이 일시 중지되었습니다.",
+      "updated": "보고서 갱신: 신규 {{added}}개."
+    },
+    "offenders": {
+      "confirm_title": "보고서에서 차단",
+      "confirm_one": "{{ip}} 주소가 모든 인스턴스에서 24시간 동안 차단됩니다.",
+      "confirm_many": "IP 주소 {{count}}개가 모든 인스턴스에서 24시간 동안 차단됩니다.",
+      "show": "표시",
+      "show_top": "최다 위반자",
+      "show_latest": "최근 위반자",
+      "show_bottom": "최소 위반자"
     }
   },
   "scope": {
@@ -3084,7 +3243,8 @@
         "lets_encrypt": "Let's Encrypt",
         "zerossl": "ZeroSSL",
         "real_ip": "실제 IP",
-        "reverse_proxy": "리버스 프록시"
+        "reverse_proxy": "리버스 프록시",
+        "server": "서버"
       },
       "subtitle": "Web UI 전용 설정을 구성합니다.",
       "title": "UI 설정"
@@ -3102,7 +3262,9 @@
       "pro_benefit_4_description": "BunkerWeb 설정을 최적화하기 위한 전문가의 조언을 받으세요.",
       "pro_benefit_4_title": "맞춤형 컨설팅",
       "subtitle": "고급 기능을 잠금 해제하고 BunkerWeb을 최대한 활용해 보세요.",
-      "title": "PRO로 업그레이드"
+      "title": "PRO로 업그레이드",
+      "activate_title": "라이선스 활성화",
+      "activation_note": "설치를 완료하면 라이선스가 활성화됩니다."
     },
     "step4": {
       "label": {
@@ -3136,6 +3298,19 @@
       "admin_email_too_long_must_less": "관리자 이메일이 너무 깁니다. 256자 미만이어야 합니다.",
       "admin_username_too_long_must_less": "관리자 사용자 이름이 너무 깁니다. 256자 미만이어야 합니다.",
       "missing_either_one_following_parameters": "다음 매개변수 중 하나가 없습니다: {{value}}."
+    },
+    "stepper_label": "설치 단계",
+    "complete": "설치 완료",
+    "from_ui_host": "UI_HOST 환경 변수에서 가져옴",
+    "accordion": {
+      "general": "일반",
+      "general_hint": "서버 · Let's Encrypt",
+      "advanced": "고급",
+      "advanced_hint": "리버스 프록시 · 실제 IP · 사용자 정의 인증서"
+    },
+    "switch": {
+      "enabled": "활성화됨",
+      "disabled": "비활성화됨"
     }
   },
   "status": {
@@ -3233,10 +3408,32 @@
         "button": "번들 다운로드",
         "help": "로그, 플러그인 버전, 환경 및 최근 오류. 개인 정보는 익명 처리됩니다.",
         "title": "웹 UI 진단"
+      },
+      "docs": {
+        "title": "문서"
+      },
+      "community": {
+        "title": "커뮤니티"
       }
     },
     "subtitle": "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요.",
-    "title": "지원"
+    "title": "지원",
+    "docs": {
+      "quickstart": "빠른 시작 가이드",
+      "web_ui": "웹 UI 가이드",
+      "troubleshooting": "문제 해결",
+      "upgrading": "업그레이드"
+    },
+    "community": {
+      "discord": "Discord",
+      "discord_help": "커뮤니티와 유지 관리자에게 질문하세요.",
+      "github": "GitHub 이슈",
+      "github_help": "버그 보고 및 기능 요청.",
+      "reddit": "Reddit",
+      "reddit_help": "토론 및 공지."
+    },
+    "attach_title": "첨부할 진단 정보",
+    "attach_help": "지원 요청에 첨부할 내보내기 파일입니다. 쓰기 권한이 필요하며 비밀 정보는 가려집니다."
   },
   "tab": {
     "custom_certificate": "사용자 정의 인증서",
@@ -3547,7 +3744,19 @@
       "refused": "템플릿을 가져오지 못했습니다: {{reason}}",
       "too_large": "템플릿을 가져오지 못했습니다: 파일이 1 MiB보다 큽니다",
       "unreadable": "템플릿을 가져오지 못했습니다: 파일을 읽을 수 없습니다"
-    }
+    },
+    "features_builtin": "기본 제공 기능",
+    "features_configs": "사용자 정의 설정",
+    "features_plugins": "플러그인",
+    "features_help": "이 템플릿이 제공하는 기능입니다. 실제 세팅을 보거나 변경하려면 템플릿을 여세요.",
+    "features_of": "{{name}} 기능 표시",
+    "features_title": "템플릿 기능",
+    "managed_by": "{{owner}}에서 관리합니다. 여기서는 변경하거나 삭제할 수 없습니다.",
+    "more_actions": "{{name}} 추가 작업",
+    "no_match": "검색과 일치하는 템플릿이 없습니다.",
+    "open_template": "템플릿 열기",
+    "read_only": "읽기 전용",
+    "search": "템플릿 검색..."
   },
   "theme": {
     "dark": "어둡게",
@@ -3583,7 +3792,15 @@
     "open_live": "실시간 보기",
     "updated": "업데이트됨",
     "blocked_request": "차단된 요청",
-    "blocked_requests": "차단된 요청"
+    "blocked_requests": "차단된 요청",
+    "attacks_24h": "최근 24시간 차단 수",
+    "rolling_window": "이동 시간 창, 약 30초마다 갱신",
+    "ticker_caption": "최근 차단된 요청",
+    "col_time": "시간",
+    "col_ip": "IP 주소",
+    "col_reason": "사유",
+    "col_origin": "출처",
+    "col_target": "대상"
   },
   "toast": {
     "autoconf_disclaimer_bold": "서비스가 제거되거나 재시작되면 UI 구성 내용이 손실됩니다.",
@@ -3981,7 +4198,26 @@
       "target_required": "리디렉션 대상은 필수입니다",
       "status_code_must_be_one_of": "상태 코드는 {{value}} 중 하나여야 합니다",
       "at_least_one_service_required": "최소 하나의 서비스가 필요합니다"
-    }
+    },
+    "all_codes": "모든 상태 코드",
+    "append_column": "URI 추가",
+    "card_subtitle": "경로 리디렉션과 적용 대상 서비스",
+    "count": "리디렉션 {{count}}개",
+    "count_plural": "리디렉션 {{count}}개",
+    "detach_shared": "이 리디렉션은 공유됩니다. 연결을 해제하면 해당 서비스에서만 제거됩니다. 다른 서비스에서는 유지됩니다.",
+    "kpi_configured": "설정된 리디렉션",
+    "kpi_detached_caption": "적용하려면 서비스에 연결하세요",
+    "kpi_loaded_only": "처음 불러온 {{count}}개 중",
+    "kpi_permanent": "영구",
+    "kpi_permanent_caption": "301 또는 308, 브라우저에 캐시됨",
+    "kpi_services": "연결된 서비스",
+    "kpi_services_caption": "리디렉션이 하나 이상 있는 서비스",
+    "no_match": "이 필터와 일치하는 리디렉션이 없습니다.",
+    "services_copy": "{{name}}: {{from}} → {{to}}",
+    "services_count": "서비스 {{count}}개",
+    "services_count_plural": "서비스 {{count}}개",
+    "services_title": "이 리디렉션을 사용하는 서비스",
+    "to_url_help": "완전한 http:// 또는 https:// URL을 입력하세요. 상대 경로 대상은 지원하지 않습니다."
   },
   "upstreams": {
     "add_server": "서버 추가",
@@ -4059,7 +4295,34 @@
       "method_must_be_one_of": "메서드는 {{value}} 중 하나여야 합니다",
       "keepalive_must_be_positive_whole_number": "keepalive 수는 양의 정수여야 합니다",
       "at_least_one_service_required": "최소 하나의 서비스가 필요합니다"
-    }
+    },
+    "all_protocols": "모든 프로토콜",
+    "all_tls": "모든 TLS 세팅",
+    "card_subtitle": "백엔드 풀과 해당 풀로 프록시하는 서비스",
+    "count": "업스트림 {{count}}개",
+    "count_plural": "업스트림 {{count}}개",
+    "detach_shared": "이 업스트림은 공유됩니다. 연결을 해제하면 해당 서비스와 경로에서만 제거됩니다. 다른 연결에서는 유지됩니다.",
+    "keepalive_off": "꺼짐",
+    "kpi_loaded_only": "처음 불러온 {{count}}개 중",
+    "kpi_not_attached": "미연결 {{count}}개",
+    "kpi_roles": "기본 {{primary}}개 · 예비 {{backup}}개 · 중지 {{down}}개 (설정 기준)",
+    "kpi_services": "연결된 서비스",
+    "kpi_services_caption": "풀로 프록시하는 서비스",
+    "kpi_tls": "백엔드 TLS",
+    "kpi_tls_caption": "서버와 TLS로 통신하도록 설정된 풀",
+    "members_copy": "{{name}}: 서버 {{count}}개",
+    "members_copy_plural": "{{name}}: 서버 {{count}}개",
+    "members_title": "이 업스트림의 서버",
+    "no_match": "이 필터와 일치하는 업스트림이 없습니다.",
+    "servers_count": "서버 {{count}}개",
+    "servers_count_plural": "서버 {{count}}개",
+    "services_copy": "{{name}}: {{servers}}",
+    "services_count": "서비스 {{count}}개",
+    "services_count_plural": "서비스 {{count}}개",
+    "services_title": "이 업스트림을 사용하는 서비스",
+    "tls": "백엔드 TLS",
+    "tls_no": "암호화 없음",
+    "tls_yes": "TLS"
   },
   "workflows": {
     "act_block": "차단",
@@ -4112,7 +4375,8 @@
       "moveRuleUp": "규칙 {{n}} 위로 이동",
       "moveRuleDown": "규칙 {{n}} 아래로 이동",
       "moreActionsForRule": "규칙 {{n}}에 대한 추가 작업",
-      "ruleCard": "규칙 {{n}}/{{total}} — {{name}}"
+      "ruleCard": "규칙 {{n}}/{{total}} — {{name}}",
+      "ruleTools": "규칙 {{n}}의 작업"
     },
     "attach": "서비스에 연결",
     "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
@@ -4196,7 +4460,9 @@
       "enable": "규칙 활성화",
       "top": "첫 번째로 실행",
       "moveTo": "{{n}}번 위치로 이동",
-      "staysAt": "{{n}}번 위치 유지"
+      "staysAt": "{{n}}번 위치 유지",
+      "header": "규칙 작업",
+      "order": "순서"
     },
     "move": {
       "first": "첫 번째로 실행",
@@ -4401,7 +4667,116 @@
       "too_many_services": "워크플로우는 {{value}}개를 초과하는 서비스에 연결할 수 없습니다",
       "name_required": "워크플로우 이름은 필수입니다",
       "service_list_not_read_reopen_page": "서비스 목록을 읽을 수 없습니다. 페이지를 다시 열고 다시 시도하세요"
-    }
+    },
+    "port": {
+      "list_subtitle": "각 워크플로우의 규칙과 연결된 서비스",
+      "row_details": "워크플로우 상세 정보",
+      "select_workflows": "워크플로우 선택",
+      "created": "생성됨",
+      "updated": "업데이트됨",
+      "total_rules": "총 {{count}}개",
+      "active_rules": "활성 {{count}}개",
+      "more": "{{name}} 추가 작업",
+      "export_scope": "테이블 내보내기에는 필터링된 행과 표시된 열이 포함됩니다. JSON 내보내기에는 선택한 정규 워크플로우 정의만 id를 키로 하여 포함됩니다. 다시 가져올 수 있다는 보장은 없습니다.",
+      "export_definitions": "선택한 정의 (JSON)",
+      "export_loading": "선택한 워크플로우 정의를 읽는 중…",
+      "export_done": "선택한 정의를 내보냈습니다. 이 파일을 다시 가져올 수 있다는 보장은 없습니다.",
+      "export_failed": "내보내기에 실패했습니다. 다운로드한 파일이 없습니다.",
+      "detach_before_delete": "삭제하기 전에 이 워크플로우를 모든 서비스에서 연결 해제하세요. 삭제 시 서비스 연결이 자동으로 해제되지는 않습니다.",
+      "details": "상세 정보",
+      "csv": "CSV",
+      "excel": "Excel",
+      "attachment": "연결",
+      "attachment_any": "전체",
+      "attachment_attached": "연결됨",
+      "services_count": "서비스: {{count}}",
+      "services_open": "{{name}}에 연결된 서비스 표시",
+      "services_title": "{{name}}에 연결된 서비스",
+      "services_help": "연결 해제 시 해당 서비스에서만 이 워크플로우가 제거됩니다. 워크플로우와 해당 규칙은 유지됩니다.",
+      "services_none": "이 워크플로우는 어떤 서비스에도 연결되어 있지 않습니다."
+    },
+    "shell": {
+      "tabs_label": "워크플로우 보기",
+      "tab_overview": "개요",
+      "tab_config": "구성",
+      "tab_unsaved": "저장되지 않음",
+      "config_needs_workflow": "구성을 열려면 워크플로우를 생성하세요",
+      "view_label": "보기",
+      "pick_label": "워크플로우",
+      "read_only": "읽기 전용",
+      "draft_title": "{{name}}의 저장되지 않은 변경 사항",
+      "draft_switch_message": "{{target}}을 열면 {{name}}의 규칙 변경 사항이 저장되지 않은 상태로 남습니다. 한 번에 하나의 초안만 열 수 있습니다. 저장하거나, 변경 사항을 버리거나, 현재 화면에 머무르세요.",
+      "draft_save": "저장 후 계속",
+      "draft_discard": "변경 사항 버리기",
+      "draft_save_failed": "워크플로우를 저장할 수 없습니다. 버려진 변경 사항은 없습니다.",
+      "draft_restored": "이 워크플로우의 저장되지 않은 변경 사항이 복원되었습니다. 적용하려면 저장하고, 버리려면 다른 워크플로우로 전환하세요.",
+      "draft_stale": "초안을 시작한 후 이 워크플로우가 다른 곳에서 저장되어 초안을 버렸습니다."
+    },
+    "toolbar": {
+      "display": "규칙 표시",
+      "filters": "필터",
+      "view": "규칙 순서 보기",
+      "simplified": "간략히",
+      "detailed": "자세히",
+      "limit_height": "높이 제한",
+      "full_height": "전체 높이",
+      "expand_all": "모두 펼치기",
+      "collapse_all": "모두 접기",
+      "actions": "워크플로우 작업",
+      "filter_rules": "규칙 필터링",
+      "filter_name": "이름",
+      "filter_name_placeholder": "규칙 이름으로 검색…",
+      "filter_state": "상태",
+      "any_state": "모든 상태",
+      "state_on": "활성화됨",
+      "state_off": "비활성화됨",
+      "filter_action": "동작",
+      "any_action": "모든 동작",
+      "reset": "초기화",
+      "back_to_top": "맨 위로",
+      "n_of_m": "규칙 {{total}}개 중 {{shown}}개",
+      "reorder_paused": "필터로 규칙이 숨겨진 동안에는 순서 변경이 일시 중지됩니다.",
+      "no_match": "이 필터와 일치하는 규칙이 없습니다"
+    },
+    "inspector": {
+      "apply": "적용",
+      "cancel": "취소",
+      "cancel_title": "취소: 규칙을 열었을 때의 상태로 복원합니다",
+      "apply_title": "적용: 편집 내용을 초안에 유지합니다. 실제로 저장하려면 페이지의 저장 버튼을 누르세요",
+      "cancelled": "규칙 {{n}}의 편집을 취소했습니다. 규칙이 열었을 때의 상태로 돌아갔습니다."
+    },
+    "regex_help": "정규식에는 두 가지 별도 제한이 적용됩니다. 작성 시: 하나의 서비스에 연결된 워크플로우에는 정규식 조건을 합계 최대 50개까지 둘 수 있습니다. 이 수를 초과하는 저장이나 연결은 거부됩니다. 실행 시: 각 인스턴스는 서로 다른 정규식을 최대 WORKFLOWS_REGEX_BUDGET개까지 컴파일합니다 (기본값 512, 모든 워크플로우가 공유). 이 한도를 초과한 정규식은 평가하지 않고 UNKNOWN을 반환하므로 해당 규칙은 일치할 수 없습니다.",
+    "conseq": {
+      "stop": "체인 중지",
+      "skip": "실행되지 않음"
+    },
+    "sum": {
+      "leaf": {
+        "ip": "IP",
+        "country": "국가",
+        "asn": "ASN",
+        "method": "메서드"
+      },
+      "not": "‘{{what}}’ 조건이 충족되지 않는 경우",
+      "uri": "URI 조건: {{match}} {{value}}",
+      "isOne": "{{label}} 값이 {{value}}인 경우",
+      "isOneOf": "{{label}} 값이 {{values}} 중 하나인 경우",
+      "challenge": "{{provider}} 챌린지 표시",
+      "block": "요청 차단",
+      "every": "모든 요청",
+      "gate": "IP당 {{window}}초 동안 요청 {{count}}개 초과",
+      "crowdsec_source": "CrowdSec 소스",
+      "crowdsec_remediation": "CrowdSec 처리 방식",
+      "group_ip": "IP가 {{name}} 그룹에 속하는 경우",
+      "group_country": "국가가 {{name}} 그룹에 속하는 경우",
+      "group_asn": "ASN이 {{name}} 그룹에 속하는 경우",
+      "redirect": "{{url}}로 리디렉션 ({{code}})",
+      "blockStatus": "{{code}} 코드로 요청 차단"
+    },
+    "act_settings_block": "차단 세팅",
+    "act_settings_redirect": "리디렉션 세팅",
+    "act_settings_challenge": "챌린지 세팅",
+    "act_settings_generic": "작업 세팅"
   },
   "request_path": {
     "client": "클라이언트",
@@ -4495,7 +4870,33 @@
       "entry_invalid_value": "항목 {{index}}의 값이 잘못되었습니다",
       "entry_comment_too_long": "항목 {{index}}의 주석이 너무 깁니다",
       "source_required": "원본 리소스 그룹은 필수입니다"
-    }
+    },
+    "access": "접근 권한",
+    "access_readonly": "읽기 전용",
+    "access_write": "쓰기",
+    "filter_values": "값 필터링...",
+    "no_value_match": "이 필터와 일치하는 값이 없습니다.",
+    "origin": "출처",
+    "origin_plugin": "{{plugin}} 플러그인에서 제공",
+    "origin_tip": {
+      "api": "API를 통해 생성되거나 동기화되었습니다.",
+      "autoconf": "autoconf 컨트롤러가 생성했습니다.",
+      "download": "원격 소스에서 다운로드했습니다.",
+      "manual": "수동으로 또는 설정 파일에서 생성되었습니다.",
+      "scheduler": "스케줄러가 생성했습니다.",
+      "ui": "웹 UI를 통해 생성되었습니다.",
+      "wizard": "설치 마법사가 생성했습니다. 계속 편집할 수 있습니다."
+    },
+    "plugins_compatible": "호환 플러그인",
+    "plugins_compatible_help": "세팅에서 이 그룹의 값 유형을 허용하는 플러그인입니다. 실제 참조는 사용 현황에 표시됩니다.",
+    "updated": "업데이트됨",
+    "values_compat": "호환 대상: {{plugins}}",
+    "values_copied": "복사됨",
+    "values_title": "{{name}}의 값",
+    "view_values_of": "{{name}}의 값 보기",
+    "all_kinds": "모두",
+    "plugins_count": "플러그인 {{count}}개",
+    "plugins_count_plural": "플러그인 {{count}}개"
   },
   "validation": {
     "default_field_name": "이 필드",
@@ -4561,7 +4962,27 @@
       "error_fetching_web_cache_status": "웹 캐시 상태를 가져오는 중 오류 발생: {{message}}",
       "purged_for_url": "{{url}}에 대한 웹 캐시를 제거했습니다",
       "purged_all_entries": "웹 캐시를 제거했습니다 (모든 항목)"
-    }
+    },
+    "server_side_note": "서버 측 캐시만 관리합니다. 이 페이지는 각 BunkerWeb 인스턴스에 저장된 리버스 프록시 캐시를 관리합니다. 방문자의 브라우저에 이미 저장된 응답에는 영향을 주지 않습니다.",
+    "counters_window": "각 인스턴스가 재시작된 이후",
+    "counters_window_help": "고정된 기간이 아니라 각 인스턴스가 마지막으로 재시작된 이후부터 집계합니다.",
+    "status_desc": {
+      "hit": "캐시에서 직접 제공됨",
+      "miss": "캐시에 없음: 업스트림에서 가져와 저장함",
+      "bypass": "이 요청은 캐싱을 건너뜀",
+      "expired": "유효 기간 만료: 업스트림에서 다시 가져옴",
+      "stale": "업스트림 오류로 오래된 응답을 제공함",
+      "updating": "갱신하는 동안 오래된 응답을 제공함",
+      "revalidated": "조건부 재요청: 업스트림에서 여전히 유효하다고 응답함"
+    },
+    "no_requests_for": "요청 없음:",
+    "no_counters": "이 인스턴스에서는 아직 캐시 요청이 집계되지 않았습니다.",
+    "available_tip": "이 인스턴스에 캐시 디렉터리가 있습니다. 서비스에서 사용하는지는 서비스 활성화 항목에 표시됩니다.",
+    "compact": "간략히",
+    "invalidate": "무효화",
+    "purge_a_url": "URL 캐시 삭제",
+    "danger_zone": "위험 영역",
+    "purge_all_phrase": "모두 삭제"
   },
   "service": {
     "default_server": {
@@ -4652,7 +5073,17 @@
     "unreachable_help": "처리 시간은 인스턴스 자체에서 읽으므로 응답한 인스턴스가 없거나 아직 요청을 처리한 인스턴스가 없습니다.",
     "flash": {
       "error_fetching_plugin_timings": "플러그인 타이밍을 가져오는 중 오류 발생: {{message}}"
-    }
+    },
+    "phases_sub": "각 플러그인이 각 단계에서 소요한 시간",
+    "toolbar": "시간 테이블 도구",
+    "columns": "열",
+    "export_csv": "CSV 내보내기",
+    "all_phases": "모든 단계",
+    "search_placeholder": "플러그인 또는 단계 검색…",
+    "caption": "단계별 플러그인 소요 시간, 기본적으로 총 시간순 정렬",
+    "no_share": "비율 없음",
+    "no_match": "이 필터와 일치하는 시간 데이터가 없습니다",
+    "no_share_hint": "이 단계는 요청마다 한 번씩 실행되지 않으므로 비율이 없습니다."
   },
   "whatsnew": {
     "missing_action": "GitHub에서 변경 로그 열기",
@@ -4669,6 +5100,117 @@
       "couldn_t_connect_redis": "redis에 연결하지 못했습니다",
       "missing_form": "양식에 {{key}}이(가) 없습니다",
       "invalid_request": "잘못된 요청입니다"
+    }
+  },
+  "table_system": {
+    "filters": "필터",
+    "advanced_filters": "고급 필터",
+    "active_filters": "필터, {{count}}개 활성",
+    "filter": "필터",
+    "any": "모두",
+    "visible_columns": "표시할 열",
+    "column_count": "{{total}}개 중 {{visible}}개",
+    "show_all": "모두 표시",
+    "multiple_actions": "선택한 항목에 대한 여러 작업",
+    "upload_hint": "끌어다 놓거나 클릭하여 업로드",
+    "confirm_title": "작업 확인",
+    "confirm": "확인",
+    "type_phrase": "확인하려면 {{phrase}} 입력",
+    "leave_title": "저장하지 않고 나가시겠습니까?",
+    "leave_message": "저장하지 않은 변경 사항이 사라집니다.",
+    "leave": "저장하지 않고 나가기",
+    "stay": "계속 편집"
+  },
+  "shell": {
+    "skip_to_content": "본문으로 바로 가기",
+    "main_navigation": "기본 탐색",
+    "star_us": "GitHub에서 BunkerWeb에 별 주기",
+    "search": {
+      "placeholder": "페이지, 플러그인, 서비스 검색…",
+      "label": "페이지, 플러그인 및 서비스 검색",
+      "results": "검색 결과",
+      "kind_page": "페이지",
+      "kind_plugin": "플러그인",
+      "kind_service": "서비스",
+      "no_match": "“{{query}}”에 대한 결과 없음",
+      "status_results": "결과: {{count}}개",
+      "loading_services": "서비스를 불러오는 중…"
+    },
+    "language": {
+      "title": "언어"
+    },
+    "theme": {
+      "title": "테마",
+      "system_hint": "운영 체제 설정 따름"
+    },
+    "contrast": {
+      "toggle": "고대비"
+    },
+    "density": {
+      "toggle": "조밀한 배치"
+    },
+    "account": {
+      "title": "계정",
+      "current": "계정: {{name}}"
+    },
+    "notifications": {
+      "title": "알림",
+      "unread_count": "읽지 않음: {{count}}개",
+      "all_read": "모두 읽었습니다",
+      "tab_unread": "읽지 않음",
+      "tab_all": "모두",
+      "filter_label": "알림 필터링",
+      "mark_all_read": "모두 읽음으로 표시",
+      "mark_read": "읽음으로 표시",
+      "unread_prefix": "읽지 않음:",
+      "group_today": "오늘",
+      "group_yesterday": "어제",
+      "group_earlier": "이전",
+      "none_unread": "읽지 않은 알림이 없습니다."
+    },
+    "top_navigation": "상단 바"
+  },
+  "settings_page": {
+    "save_reload": "저장 및 다시 로드",
+    "back_global": "전역 세팅으로 돌아가기",
+    "back_service": "서비스로 돌아가기",
+    "plugin": "플러그인",
+    "scope": "범위",
+    "scope_global": "전역 세팅",
+    "select_plugin_label": "플러그인 선택",
+    "select_scope_label": "세팅을 편집할 범위 선택",
+    "card_title": "세팅",
+    "count": "세팅 {{count}}개",
+    "count_filtered": "세팅 {{total}}개 중 {{shown}}개",
+    "search": "세팅 검색…",
+    "search_label": "세팅 검색",
+    "no_match": "검색과 일치하는 세팅이 없습니다.",
+    "revert": "되돌리기",
+    "revert_title": "변경 사항 되돌리기",
+    "revert_message": "이 페이지에서 저장하지 않은 모든 편집 내용을 마지막으로 저장된 값으로 되돌립니다.",
+    "revert_confirm": "모두 되돌리기",
+    "alert_service": "비워 둔 세팅은 전역 기본값을 사용합니다. 변경 사항은 선택한 서비스에만 적용되며 저장 및 다시 로드 후에 적용됩니다.",
+    "alert_global": "변경 사항을 별도로 재정의하지 않는 모든 서비스에 적용되며 저장 및 다시 로드 후에 적용됩니다.",
+    "groups_link": "리소스 그룹 관리",
+    "groups_link_hint": "이 플러그인의 세팅에서 참조할 수 있는 재사용 가능한 IP, 네트워크 및 국가 목록입니다.",
+    "reload_alert_title": "변경하면 인스턴스가 다시 로드됩니다.",
+    "reload_alert_body": "저장하면 스케줄러가 인스턴스에 구성을 다시 적용합니다."
+  },
+  "raw_page": {
+    "tiles_label": "원시 구성 요약",
+    "tile_settings": "세팅",
+    "tile_plugins": "플러그인",
+    "tile_modified": "수정됨",
+    "tile_problems": "문제",
+    "search": "검색…",
+    "search_label": "원시 구성 검색",
+    "search_prev": "이전 일치 항목",
+    "search_next": "다음 일치 항목"
+  },
+  "tables": {
+    "top": {
+      "share": "비율",
+      "detail": "상세"
     }
   }
 }
